@@ -32,7 +32,7 @@ import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
@@ -121,7 +121,7 @@ public class StatsExporter {
 		try {
 			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 
-			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
+			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
 			List<NucleusBorderSegment> segs = pc.getSegments(BorderTag.ORIENTATION_POINT);
 			for(NucleusBorderSegment segment : segs){
 				String s = segment.getName();
@@ -146,7 +146,7 @@ public class StatsExporter {
 		
 		try {
 
-			Profile normalisedMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50);
+			Profile normalisedMedian = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50);
 			Profile interpolatedMedian = normalisedMedian.interpolate( (int)collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS));
 
 			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());

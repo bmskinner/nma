@@ -50,7 +50,7 @@ import components.generic.Equation;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
@@ -152,12 +152,12 @@ public class NucleusDatasetCreator {
 
             CellCollection collection = list.get(i).getCollection();
             
-            Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50);
+            Profile profile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50);
             Profile xpoints = profile.getPositions(100);
             double[][] data = { xpoints.asArray(), profile.asArray() };
             ds.addSeries("Profile_"+i, data);
             
-            List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(BorderTag.ORIENTATION_POINT);
+            List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegments(BorderTag.ORIENTATION_POINT);
             List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
             
             // add only the segment of interest
@@ -221,7 +221,7 @@ public class NucleusDatasetCreator {
 		for (int i=0; i < list.size(); i++) {
 			CellCollection collection = list.get(i).getCollection();
 
-			Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50);
+			Profile profile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50);
 			Profile xpoints = profile.getPositions((int) collection.getMedianArrayLength());
 			
 			double offset = 0;
@@ -233,7 +233,7 @@ public class NucleusDatasetCreator {
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
 			
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(BorderTag.ORIENTATION_POINT);
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegments(BorderTag.ORIENTATION_POINT);
 			List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
 			
 			// add only the segment of interest
@@ -271,7 +271,7 @@ public class NucleusDatasetCreator {
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(point, 50);
+		Profile profile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(point, 50);
 		Profile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);
@@ -311,7 +311,7 @@ public class NucleusDatasetCreator {
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(point, Constants.MEDIAN);
+		Profile profile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(point, Constants.MEDIAN);
 		Profile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);
@@ -328,7 +328,7 @@ public class NucleusDatasetCreator {
 		// rendering order will be first on top
 		
 		// add the segments
-		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
 //		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
 		if(normalised){
 			addSegmentsFromProfile(segments, profile, ds, 100, 0);
@@ -355,7 +355,7 @@ public class NucleusDatasetCreator {
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(point, 50);
+		Profile profile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(point, 50);
 		Profile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);
@@ -372,7 +372,7 @@ public class NucleusDatasetCreator {
 		// rendering order will be first on top
 		
 		// add the segments
-		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
 //		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
 		if(normalised){
 			addSegmentsFromProfile(segments, profile, ds, 100, 0);
@@ -381,8 +381,8 @@ public class NucleusDatasetCreator {
 		}
 
 		// make the IQR
-		Profile profile25 = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(point, 25);
-		Profile profile75 = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(point, 75);
+		Profile profile25 = collection.getProfileCollection(ProfileType.REGULAR).getProfile(point, 25);
+		Profile profile75 = collection.getProfileCollection(ProfileType.REGULAR).getProfile(point, 75);
 		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
 		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
@@ -440,7 +440,7 @@ public class NucleusDatasetCreator {
 		for(int i=0; i<list.size(); i++){ //AnalysisDataset dataset : list){
 			AnalysisDataset dataset = list.get(i);
 			CellCollection collection = dataset.getCollection();
-			Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(borderTag, 50);
+			Profile profile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(borderTag, 50);
 			Profile xpoints = null;
 			
 			if(normalised){	
@@ -475,7 +475,7 @@ public class NucleusDatasetCreator {
 		int i=0;
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
-			Profile profile = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getProfile(borderTag, 50);
+			Profile profile = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(borderTag, 50);
 			Profile xpoints = profile.getPositions(100);
 
 			double[][] data = { xpoints.asArray(), profile.asArray() };
@@ -554,7 +554,7 @@ public class NucleusDatasetCreator {
 			AnalysisDataset dataset = list.get(i);
 			CellCollection collection = dataset.getCollection();
 			
-			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(ProfileCollectionType.REGULAR), 
+			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(ProfileType.REGULAR), 
 										borderTag,
 										i,
 										length,
@@ -581,7 +581,7 @@ public class NucleusDatasetCreator {
 			
 			CellCollection collection = dataset.getCollection();
 			
-			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(ProfileCollectionType.FRANKEN), 
+			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(ProfileType.FRANKEN), 
 					borderTag,
 					i,
 					100,
@@ -602,7 +602,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createIQRVariabilityDataset(List<AnalysisDataset> list, BorderTag borderTag, ProfileCollectionType type) throws Exception{
+	public static XYDataset createIQRVariabilityDataset(List<AnalysisDataset> list, BorderTag borderTag, ProfileType type) throws Exception{
 
 		
 		if(list.size()==1){
@@ -643,19 +643,19 @@ public class NucleusDatasetCreator {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 //		String pointType = collection.getOrientationPoint();
-		Profile profile = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getProfile(point, Constants.MEDIAN);
+		Profile profile = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(point, Constants.MEDIAN);
 		Profile xpoints = profile.getPositions(100);
 		
 		// rendering order will be first on top
 		
 		// add the segments (these are the same as in the regular profile collection)
 //		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
-		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
 		addSegmentsFromProfile(segments, profile, ds, 100, 0);
 
 		// make the IQR
-		Profile profile25 = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getProfile(point, Constants.LOWER_QUARTILE);
-		Profile profile75 = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getProfile(point, Constants.UPPER_QUARTILE);
+		Profile profile25 = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(point, Constants.LOWER_QUARTILE);
+		Profile profile75 = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(point, Constants.UPPER_QUARTILE);
 		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
 		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
@@ -663,7 +663,7 @@ public class NucleusDatasetCreator {
 
 		// add the individual nuclei
 		int profileCount = 0;
-		for(Profile angles : collection.getProfileCollection(ProfileCollectionType.FRANKEN).getNucleusProfiles(point)){
+		for(Profile angles : collection.getProfileCollection(ProfileType.FRANKEN).getNucleusProfiles(point)){
 
 			
 			double[] xArray = xpoints.asArray();
@@ -868,7 +868,7 @@ public class NucleusDatasetCreator {
 
 			CellCollection collection = datasets.get(i).getCollection();
 
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT).getOrderedSegments();
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT).getOrderedSegments();
 //			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(BorderTag.ORIENTATION_POINT);
 			
 			for(NucleusBorderSegment medianSeg : segments){
@@ -951,8 +951,8 @@ public class NucleusDatasetCreator {
 		BorderTag pointType = BorderTag.REFERENCE_POINT;
 		
 		// get the quartile profiles, beginning from the orientation point
-		Profile q25 = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType, Constants.LOWER_QUARTILE).interpolate(n.getLength());
-		Profile q75 = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType, Constants.UPPER_QUARTILE).interpolate(n.getLength());
+		Profile q25 = collection.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.LOWER_QUARTILE).interpolate(n.getLength());
+		Profile q75 = collection.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.UPPER_QUARTILE).interpolate(n.getLength());
 		
 		// get the limits  for the plot  	
 		double scale = getScaleForIQRRange(n);
@@ -1344,7 +1344,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createModalityProbabililtyDataset(Double xposition, AnalysisDataset dataset, ProfileCollectionType type) throws Exception {
+	public static XYDataset createModalityProbabililtyDataset(Double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -1405,7 +1405,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createModalityValuesDataset(Double xposition, AnalysisDataset dataset, ProfileCollectionType type) throws Exception {
+	public static XYDataset createModalityValuesDataset(Double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
@@ -1429,7 +1429,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static KernelEstimator createProfileProbabililtyKernel(Double xposition, AnalysisDataset dataset, ProfileCollectionType type) throws Exception {
+	public static KernelEstimator createProfileProbabililtyKernel(Double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
 		CellCollection collection = dataset.getCollection();
 		KernelEstimator est = new KernelEstimator(0.001);
 		double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(xposition);

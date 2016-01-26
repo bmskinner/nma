@@ -30,6 +30,7 @@ import java.io.File;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
 import components.generic.Profile;
+import components.generic.ProfileType;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalCollection;
@@ -71,35 +72,7 @@ public class PigSpermNucleus
     
     public Nucleus duplicate(){
 		try {
-			PigSpermNucleus duplicate = new PigSpermNucleus();
-
-			duplicate.setID(this.getID());
-			duplicate.setPosition(this.getPosition());
-
-			duplicate.setSourceFile(this.getSourceFile());
-			duplicate.setOutputFolder(this.getOutputFolderName());
-
-			duplicate.setNucleusNumber(this.getNucleusNumber());
-			duplicate.setNucleusFolder(this.getNucleusFolder());
-
-			duplicate.setPerimeter(this.getPerimeter());
-			duplicate.setFeret(this.getFeret());
-			duplicate.setArea(this.getArea());
-
-			duplicate.setCentreOfMass(this.getCentreOfMass());
-
-			duplicate.setSignals( new SignalCollection(this.getSignalCollection()));
-
-			duplicate.setDistanceProfile(this.getDistanceProfile());
-			duplicate.setAngleProfile(this.getAngleProfile());
-
-			duplicate.setBorderTags(this.getBorderTags());
-			duplicate.setBorderList(this.getBorderList());
-
-			duplicate.setAngleProfileWindowSize(this.getAngleProfileWindowSize());
-			duplicate.setSingleDistanceProfile(this.getSingleDistanceProfile());
-
-			duplicate.setScale(this.getScale());
+			PigSpermNucleus duplicate = new PigSpermNucleus(this);
 			return duplicate;
 		} catch (Exception e) {
 			return null;
@@ -143,16 +116,6 @@ public class PigSpermNucleus
       setBorderTag(BorderTag.INTERSECTION_POINT, headIndex);
     }
     
-  	@Override
-	public String getReferencePoint(){
-		return NucleusType.PIG_SPERM.getPoint(BorderTag.REFERENCE_POINT);
-	}
-  	
-  	@Override
-	public String getOrientationPoint(){
-		return NucleusType.PIG_SPERM.getPoint(BorderTag.ORIENTATION_POINT);
-	}
-
     /*
       -----------------------
       Methods for detecting the head and tail
@@ -173,7 +136,10 @@ public class PigSpermNucleus
       // between them lies the tail. Find the two lowest minima,
       // and get the point between them
 
-      BooleanProfile minima = this.getAngleProfile().getLocalMinima(5);
+      
+      Profile angleProfile = this.getProfile(ProfileType.REGULAR);
+      
+      BooleanProfile minima = angleProfile.getLocalMinima(5);
 
       // sort minima by interior angle
       int lowestMinima = 0;
@@ -181,7 +147,7 @@ public class PigSpermNucleus
 
       for(int i=0; i<minima.size();i++){
         if(minima.get(i)==true){
-          if (this.getAngle(i)<this.getAngle(lowestMinima)){
+          if (angleProfile.get(i)<angleProfile.get(lowestMinima)){
             secondLowestMinima = lowestMinima;
             lowestMinima = i;
           }
@@ -189,8 +155,8 @@ public class PigSpermNucleus
       }
       for(int i=0; i<minima.size();i++){
         if(minima.get(i)==true){
-          if (this.getAngle(i)<this.getAngle(secondLowestMinima) && 
-              this.getAngle(i)>this.getAngle(lowestMinima)){
+          if (angleProfile.get(i)<angleProfile.get(secondLowestMinima) && 
+        		  angleProfile.get(i)>angleProfile.get(lowestMinima)){
             secondLowestMinima = i;
           }
         }
@@ -213,7 +179,7 @@ public class PigSpermNucleus
     public int findTailByMaxima() throws Exception{
       // the tail is the ?only local maximum with an interior angle above the 180 line
 
-     int tailPoint = this.getAngleProfile().getIndexOfMax();
+     int tailPoint = this.getProfile(ProfileType.REGULAR).getIndexOfMax();
 
      //  Profile maxima = this.getAngleProfile().getLocalMaxima(5);
      //  int tailPoint = (int)maxima.get(0);
@@ -237,19 +203,20 @@ public class PigSpermNucleus
     * The narrowest diameter through the CoM is orthogonal to 
     * the tail. Of the two orthogonal border points, the point with
     * the highest angle is the tail.
+     * @throws Exception 
     * @see Profile
     */
-    public NucleusBorderPoint findTailByNarrowestPoint(){
+    public NucleusBorderPoint findTailByNarrowestPoint() throws Exception{
 
       NucleusBorderPoint narrowPoint = this.getNarrowestDiameterPoint();
       this.orthPoint1  = this.findOrthogonalBorderPoint(narrowPoint);
       NucleusBorderPoint orthPoint2  = this.findOppositeBorder(orthPoint1);
 
       // NucleusBorderPoint[] array = { orthPoint1, orthPoint2 };
-
+      Profile angleProfile = this.getProfile(ProfileType.REGULAR);
       // the tail should be a maximum, hence have a high angle
-      NucleusBorderPoint tailPoint  = getAngle(this.getIndex(orthPoint1)) >
-                                      getAngle(this.getIndex(orthPoint2))
+      NucleusBorderPoint tailPoint  = angleProfile.get(this.getIndex(orthPoint1)) >
+      									angleProfile.get(this.getIndex(orthPoint2))
                                     ? orthPoint1
                                     : orthPoint2;
       return tailPoint;

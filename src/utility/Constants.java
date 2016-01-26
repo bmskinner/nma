@@ -26,8 +26,8 @@ public class Constants {
 	 * guaranteed between revision or major version increments.
 	 */
 	public static final int VERSION_MAJOR     = 1;
-	public static final int VERSION_MINOR     = 11;
-	public static final int VERSION_REVISION  = 6;
+	public static final int VERSION_MINOR     = 12;
+	public static final int VERSION_REVISION  = 0;
 	
 	// nmd = Nuclear Morphology Dataset
 	public static final String SAVE_FILE_EXTENSION = ".nmd";

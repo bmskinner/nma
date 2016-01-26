@@ -24,7 +24,7 @@ import analysis.AnalysisDataset;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import components.generic.BorderTag;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 
 public class ProfileChartOptions extends ChartOptions {
 	
@@ -32,14 +32,14 @@ public class ProfileChartOptions extends ChartOptions {
 	ProfileAlignment alignment;
 	BorderTag tag;
 	boolean showMarkers;
-	ProfileCollectionType type;
+	ProfileType type;
 	
 	public ProfileChartOptions(List<AnalysisDataset> list, 
 			boolean normalised, 
 			ProfileAlignment alignment, 
 			BorderTag tag, 
 			boolean showMarkers, 
-			ProfileCollectionType type) {
+			ProfileType type) {
 		
 		super(list);
 		this.normalised = normalised;
@@ -65,7 +65,7 @@ public class ProfileChartOptions extends ChartOptions {
 		return showMarkers;
 	}
 
-	public ProfileCollectionType getType() {
+	public ProfileType getType() {
 		return type;
 	}
 	

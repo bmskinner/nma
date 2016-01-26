@@ -20,12 +20,14 @@ package components.nuclear;
 
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
+import stats.SignalStatistic;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import components.AbstractCellularComponent;
 import components.CellularComponent;
 import components.generic.XYPoint;
 
@@ -35,19 +37,11 @@ import components.generic.XYPoint;
   -----------------------
   Contains the variables for storing a signal within the nucleus
 */  
-public class NuclearSignal implements Serializable {
+public class NuclearSignal extends AbstractCellularComponent implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private double area;
-	private double perimeter;
-	private double feret;
-	private double angleFromReferencePoint;
-	private double distanceFromCentreOfMass; // the absolute measured distance from the signal CoM to the nuclear CoM
-	private double fractionalDistanceFromCoM; // the distance to the centre of mass as a fraction of the distance from the CoM to the closest border
 
-	private XYPoint centreOfMass;
 	private int closestNuclearBorderPoint;
-	private String origin; // can store the image and nucleus the signal was found in
 
 	private List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // replace ROI
 
@@ -57,11 +51,16 @@ public class NuclearSignal implements Serializable {
 		for(int i=0; i<polygon.npoints; i++){
 			borderList.add(new NucleusBorderPoint( polygon.xpoints[i], polygon.ypoints[i]));
 		}
-		this.area = area;
-		this.perimeter = perimeter;
-		this.feret = feret;
-		this.centreOfMass = centreOfMass;
-		this.origin = origin;
+		
+		this.setStatistic(SignalStatistic.AREA, area);
+		this.setStatistic(SignalStatistic.MAX_FERET, feret);
+		this.setStatistic(SignalStatistic.PERIMETER, perimeter);
+		
+		/*
+	    Assuming the signal were a perfect circle of area equal
+	    to the measured area, get the radius for that circle
+		 */
+		this.setStatistic(SignalStatistic.RADIUS,  Math.sqrt(area/Math.PI));
 	}
 
 	/**
@@ -69,16 +68,10 @@ public class NuclearSignal implements Serializable {
 	 * @param n
 	 */
 	public NuclearSignal(NuclearSignal n){
+		super(n);
 		this.borderList = n.getBorder();
-		this.area = n.getArea();
-		this.perimeter = n.getPerimeter();
-		this.feret = n.getFeret();
-		this.centreOfMass = new XYPoint(n.getCentreOfMass());
-		this.distanceFromCentreOfMass = n.getDistanceFromCoM();
-		this.fractionalDistanceFromCoM = n.getFractionalDistanceFromCoM();
-		this.angleFromReferencePoint = n.getAngle();
 		this.closestNuclearBorderPoint = n.getClosestBorderPoint();
-		this.origin = n.getOrigin();
+
 	}
 
 	/*
@@ -127,71 +120,12 @@ public class NuclearSignal implements Serializable {
 		this.borderList.get(index).setY(newY);
 	}
 
-	public double getArea(){
-		return this.area;
-	}
 
-	public double getPerimeter(){
-		return this.perimeter;
-	}
-
-	public double getFeret(){
-		return this.feret;
-	}
-
-	public double getAngle(){
-		return this.angleFromReferencePoint;
-	}
-
-	public double getDistanceFromCoM(){
-		return this.distanceFromCentreOfMass;
-	}
-
-	public double getFractionalDistanceFromCoM(){
-		return this.fractionalDistanceFromCoM;
-	}
-
-	public XYPoint getCentreOfMass(){
-		return new XYPoint(this.centreOfMass);
-	}
 
 	public int getClosestBorderPoint(){
 		return this.closestNuclearBorderPoint;
 	}
 
-	public String getOrigin(){
-		return this.origin;
-	}
-	
-	public File getSourceImage(){
-		return new File(this.origin);
-	}
-
-	/*
-    Assuming the signal were a perfect circle of area equal
-    to the measured area, get the radius for that circle
-	 */
-	public double getRadius(){
-		// r = sqrt(a/pi)
-		return Math.sqrt(this.area/Math.PI);
-	}
-
-	/*
-    -----------------------
-    Setters for externally calculated values
-    -----------------------
-	 */
-	public void setAngle(double d){
-		this.angleFromReferencePoint = d;
-	}
-
-	public void setDistanceFromCoM(double d){
-		this.distanceFromCentreOfMass = d;
-	}
-
-	public void setFractionalDistanceFromCoM(double d){
-		this.fractionalDistanceFromCoM = d;
-	}
 
 	public void setClosestBorderPoint(int p){
 		this.closestNuclearBorderPoint = p;

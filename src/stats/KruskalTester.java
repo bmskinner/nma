@@ -30,14 +30,14 @@ import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
 public class KruskalTester {
 	
-	public static Profile testCollectionGetPValues(AnalysisDataset one, AnalysisDataset two, BorderTag tag, ProfileCollectionType type){
+	public static Profile testCollectionGetPValues(AnalysisDataset one, AnalysisDataset two, BorderTag tag, ProfileType type){
 		
 		Profile resultProfile = null;
 		int sampleNumber = 200;
@@ -107,7 +107,7 @@ public class KruskalTester {
 			 * 
 			 * Create a new ProfileCollection based on the segments from dataset one
 			 */
-			ProfileCollection pc = one.getCollection().getProfileCollection(ProfileCollectionType.REGULAR);
+			ProfileCollection pc = one.getCollection().getProfileCollection(ProfileType.REGULAR);
 			List<NucleusBorderSegment> segments = pc.getSegments(tag);
 			ProfileCollection frankenCollection = new ProfileCollection();
 			for(BorderTag key : pc.getOffsetKeys()){
@@ -142,12 +142,12 @@ public class KruskalTester {
 			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
 			
 			// Put the new collection into the duplicate dataset
-			copyOfTwo.getCollection().setProfileCollection(ProfileCollectionType.FRANKEN, frankenCollection);
+			copyOfTwo.getCollection().setProfileCollection(ProfileType.FRANKEN, frankenCollection);
 			/*
 			 * This returns to the Kruskal test above, but using the franken profiles 
 			 */
 			
-			resultProfile = testCollectionGetPValues(one, copyOfTwo, tag, ProfileCollectionType.FRANKEN);		
+			resultProfile = testCollectionGetPValues(one, copyOfTwo, tag, ProfileType.FRANKEN);		
 			
 		} catch (Exception e) {
 			programLogger.log(Level.SEVERE, "Error in franken profiling", e);

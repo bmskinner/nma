@@ -29,7 +29,7 @@ import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
 import components.generic.Profile;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 
 /**
  * The purpose is to test the difference at a particular point of a
@@ -47,7 +47,7 @@ public class DipTester {
 	 * @param tag the border tag to offset from
 	 * @return a boolean profile of results
 	 */
-	public static Profile testCollectionGetPValues(CellCollection collection, BorderTag tag, ProfileCollectionType type){
+	public static Profile testCollectionGetPValues(CellCollection collection, BorderTag tag, ProfileType type){
 		Profile resultProfile = null;
 		
 		double[] pvals = null;
@@ -96,7 +96,7 @@ public class DipTester {
 	 * @return
 	 * @throws Exception
 	 */
-	public static double getPValueForPositon(CellCollection collection, double xPosition, ProfileCollectionType type) throws Exception {
+	public static double getPValueForPositon(CellCollection collection, double xPosition, ProfileType type) throws Exception {
 		
 		double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(xPosition);
 		return getDipTestPValue(values);
@@ -112,7 +112,7 @@ public class DipTester {
 	 * @param significance the p-value threshold
 	 * @return a boolean profile of results
 	 */
-	public static BooleanProfile testCollectionIsUniModal(CellCollection collection, BorderTag tag, double significance, ProfileCollectionType type){
+	public static BooleanProfile testCollectionIsUniModal(CellCollection collection, BorderTag tag, double significance, ProfileType type){
 		
 		BooleanProfile resultProfile = null;
 		boolean[] modes = null;

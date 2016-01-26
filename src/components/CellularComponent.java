@@ -22,10 +22,18 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.util.UUID;
 
+import components.generic.MeasurementScale;
+import components.generic.XYPoint;
+import stats.PlottableStatistic;
+
 /**
  * These methods are provided through the AbstractCellularComponent,
  * from which all other components should be derived
  * @author bms41
+ *
+ */
+/**
+ * @author ben
  *
  */
 public interface CellularComponent {
@@ -47,11 +55,12 @@ public interface CellularComponent {
 	public static final int WIDTH 	= 2;
 	public static final int HEIGHT 	= 3;
 	
+	public static final String IMAGE_PREFIX = "export.";
+	
 	
 	public double[] getPosition();
 	
-	public double getArea();
-	
+		
 	public boolean equals(CellularComponent c);
 	
 	/**
@@ -66,7 +75,30 @@ public interface CellularComponent {
 
 	public void setChannel(int channel);
 	
-	public double getPerimeter();
+	/**
+	 * Get the value of the given statistic for this nucleus.
+	 * Note that NucleusStatistic.VARIABILILTY returns zero, 
+	 * as this must be calculated at the collection level
+	 * @param stat the statistic to fetch
+	 * @param scale the units to return values in
+	 * @return the value or zero if stat.equals(NucleusStatistic.VARIABILILTY)==true
+	 * @throws Exception 
+	 */
+	public double getStatistic(PlottableStatistic stat, MeasurementScale scale) throws Exception;
+	
+	
+	/**
+	 * Get the statistic at the default scale (MeasurementScale.PIXELS)
+	 * @param stat
+	 * @return
+	 * @throws Exception
+	 */
+	public double getStatistic(PlottableStatistic stat) throws Exception;
+	
+	public void setStatistic(PlottableStatistic stat, double d);
+	
+	public PlottableStatistic[] getStatistics();
+	
 	
 	public Rectangle getBounds();
 	
@@ -93,12 +125,6 @@ public interface CellularComponent {
 	public void setPosition(double[] position);
 
 
-	public void setArea(double area);
-
-
-	public void setPerimeter(double perimeter);
-
-
 	public void setBoundingRectangle(Rectangle boundingRectangle);
 
 
@@ -106,6 +132,18 @@ public interface CellularComponent {
 	
 	public void setSourceFolder(File sourceFolder);
 	
+	public double getScale();
+	
+	public void setScale(double scale);
+	
+	/**
+	 * Get the position of the centre of mass of the nucleus
+	 * @return
+	 */
+	public XYPoint getCentreOfMass();
+
+
+	public void setCentreOfMass(XYPoint centreOfMass);
 
 
 }

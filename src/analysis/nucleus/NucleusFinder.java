@@ -22,6 +22,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
+import stats.NucleusStatistic;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -233,9 +234,11 @@ public class NucleusFinder {
 			  Nucleus currentNucleus = createNucleus(nucleus, path, nucleusNumber, originalPosition, analysisOptions.getNucleusType());
 			  		
 			  currentNucleus.setCentreOfMass(new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase)); // need to offset
-			  currentNucleus.setArea(values.get("Area")); 
-			  currentNucleus.setFeret(values.get("Feret"));
-			  currentNucleus.setPerimeter(values.get("Perim"));
+			  
+			  currentNucleus.setStatistic(NucleusStatistic.AREA, values.get("Area"));
+			  currentNucleus.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
+			  currentNucleus.setStatistic(NucleusStatistic.PERIMETER, values.get("Perim"));
+			  
 			  currentNucleus.setScale(analysisOptions.getScale());
 		
 			  currentNucleus.setOutputFolder(outputFolderName);

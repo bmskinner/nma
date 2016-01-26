@@ -36,12 +36,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import stats.NucleusStatistic;
+import stats.SignalStatistic;
 import utility.Utils;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
 import components.generic.Equation;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
+import components.generic.ProfileType;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
@@ -85,48 +87,19 @@ extends SpermNucleus
 	@Override
 	public Nucleus duplicate(){
 		try {
-			RodentSpermNucleus duplicate = new RodentSpermNucleus();
-
-			duplicate.setID(this.getID());
-			duplicate.setPosition(this.getPosition());
-
-			duplicate.setSourceFile(this.getSourceFile());
-			duplicate.setOutputFolder(this.getOutputFolderName());
-
-			duplicate.setNucleusNumber(this.getNucleusNumber());
-			duplicate.setNucleusFolder(this.getNucleusFolder());
-
-			duplicate.setPerimeter(this.getPerimeter());
-			duplicate.setFeret(this.getFeret());
-			duplicate.setArea(this.getArea());
-
-			duplicate.setCentreOfMass(this.getCentreOfMass());
-
-			duplicate.setSignals( new SignalCollection(this.getSignalCollection()));
-
-			duplicate.setDistanceProfile(this.getDistanceProfile());
-			duplicate.setAngleProfile(this.getAngleProfile());
-
-			duplicate.setBorderTags(this.getBorderTags());
-			duplicate.setBorderList(this.getBorderList());
-
-			duplicate.setAngleProfileWindowSize(this.getAngleProfileWindowSize());
-			duplicate.setSingleDistanceProfile(this.getSingleDistanceProfile());
-
-			duplicate.setScale(this.getScale());
-			
+			RodentSpermNucleus duplicate = new RodentSpermNucleus(this);			
 			duplicate.setHookRoi(this.getHookRoi());
 			duplicate.setHumpRoi(this.getHumpRoi());
-
 			return duplicate;
+			
 		} catch (Exception e) {
 			return null;
 		}
 	}
 	
 	@Override
-	public double getStatistic(NucleusStatistic stat, MeasurementScale scale) throws Exception{
-		double result = super.getStatistic(stat, scale);
+	protected double calculateStatistic(NucleusStatistic stat) throws Exception{
+		double result = super.calculateStatistic(stat);
 		
 		switch(stat){
 			
@@ -140,9 +113,6 @@ extends SpermNucleus
 				return result;
 		
 		}
-		
-		result = stat.convert(result, this.getScale(), scale);
-
 		return result;
 		
 	}
@@ -274,17 +244,6 @@ extends SpermNucleus
 		this.humpRoi = list;
 	}
 	
-  	@Override
-	public String getReferencePoint(){
-		return NucleusType.RODENT_SPERM.getPoint(BorderTag.REFERENCE_POINT);
-	}
-  	
-  	@Override
-	public String getOrientationPoint(){
-  		return NucleusType.RODENT_SPERM.getPoint(BorderTag.ORIENTATION_POINT);
-
-	}
-
 	/*
     Identify key points: tip, estimated tail position
 	 */
@@ -292,7 +251,7 @@ extends SpermNucleus
 	public void findPointsAroundBorder() throws Exception{
 
 		// find tip - use the least angle method
-		int tipIndex = this.getAngleProfile().getIndexOfMin();
+		int tipIndex = this.getProfile(ProfileType.REGULAR).getIndexOfMin();
 		setBorderTag(BorderTag.REFERENCE_POINT, tipIndex);
 
 		// decide if the profile is right or left handed; flip if needed
@@ -405,7 +364,7 @@ extends SpermNucleus
 		int frontPoints = 0;
 		int rearPoints = 0;
 
-		Profile profile = this.getAngleProfile(BorderTag.REFERENCE_POINT);
+		Profile profile = this.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
 
 		int midPoint = (int) (this.getLength()/2) ;
 		for(int i=0; i<this.getLength();i++){ // integrate points over 180
@@ -443,7 +402,7 @@ extends SpermNucleus
     // distance are both far from each other and far from the centre, and are a more robust estimate
     // of the true ends of the signal
     double tipToCoMDistance = this.getBorderTag(BorderTag.REFERENCE_POINT).getLengthTo(this.getCentreOfMass());
-    BooleanProfile array = this.getAngleProfile().getLocalMinima(5);
+    BooleanProfile array = this.getProfile(ProfileType.REGULAR).getLocalMinima(5);
 
     double maxDistance = 0;
     NucleusBorderPoint tail = this.getBorderTag(BorderTag.REFERENCE_POINT); // start at tip, move round
@@ -472,13 +431,13 @@ extends SpermNucleus
       Draw a line orthogonal, and pick the intersecting border points
       The border furthest from the tip is the tail
   */
-  public NucleusBorderPoint findTailByNarrowestWidthMethod(){
+  public NucleusBorderPoint findTailByNarrowestWidthMethod() throws Exception{
 
     // Find the narrowest point around the CoM
     // For a position in teh roi, draw a line through the CoM to the intersection point
     // Measure the length; if < min length..., store equation and border(s)
 
-    double minDistance = this.getFeret();
+    double minDistance = this.getStatistic(NucleusStatistic.MAX_FERET);
     NucleusBorderPoint reference = this.getBorderTag(BorderTag.REFERENCE_POINT);
 
     for(int i=0;i<this.getLength();i++){
@@ -525,7 +484,7 @@ extends SpermNucleus
     we need to get an intersection point of the line through the 
     tail and centre of mass with the opposite border of the nucleus.
   */
-  private int findIntersectionPointForNuclearSplit(){
+  private int findIntersectionPointForNuclearSplit() throws Exception{
     // test if each point from the tail intersects the splitting line
     // determine the coordinates of the point intersected as int
     // for each xvalue of each point in array, get the line y value
@@ -542,7 +501,7 @@ extends SpermNucleus
         double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getBorderTag(BorderTag.ORIENTATION_POINT));
 
         double deltaY = Math.abs(y - yOnLine);
-        if(deltaY < minDeltaY && distanceToTail > this.getFeret()/2){ // exclude points too close to the tail
+        if(deltaY < minDeltaY && distanceToTail > this.getStatistic(NucleusStatistic.MAX_FERET)/2){ // exclude points too close to the tail
           minDeltaY = deltaY;
           minDeltaYIndex = i;
         }
@@ -550,7 +509,7 @@ extends SpermNucleus
     return minDeltaYIndex;
   }
 
-  public void splitNucleusToHeadAndHump(){
+  public void splitNucleusToHeadAndHump() throws Exception{
 	  
 
     int intersectionPointIndex = findIntersectionPointForNuclearSplit();
@@ -632,7 +591,7 @@ extends SpermNucleus
 					   * Angle begins from the orientation point 
 					   */
 
-					  double angle = n.getAngle();
+					  double angle = n.getStatistic(SignalStatistic.ANGLE);
 
 					  try{
 						  // This com is offset, not original
@@ -649,7 +608,7 @@ extends SpermNucleus
 						  // IJ.log(this.getNameAndNumber()+": Error detected: falling back on default angle: "+e.getMessage());
 					  } finally {
 
-						  n.setAngle(angle);
+						  n.setStatistic(SignalStatistic.ANGLE, angle);
 
 					  }
 				  }

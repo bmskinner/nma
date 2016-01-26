@@ -30,7 +30,7 @@ import components.generic.BooleanProfile;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NucleusBorderSegment;
@@ -175,7 +175,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 		BorderTag referencePoint   = BorderTag.REFERENCE_POINT;
 
 		// use the same array length as the source collection to avoid segment slippage
-		int profileLength = sourceCollection.getProfileCollection(ProfileCollectionType.REGULAR)
+		int profileLength = sourceCollection.getProfileCollection(ProfileType.REGULAR)
 				.getProfile(referencePoint, 50) // Median of profile collection 
 				.size(); 
 
@@ -183,7 +183,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 		// TODO: if the target collection is not new, ie we are copying onto
 		// an existing segmenation pattern, then this profile collection will have
 		// offsets
-		ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
+		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
 
 		// Create an aggregate from the nuclei in the collection. 
 		// A new median profile must necessarily result.
@@ -196,7 +196,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 		// rather than a child, then the offsets will be completely wrong. In that
 		// instance, we should probably keep the existing offset positions for head
 		// and tail
-		ProfileCollection sc = sourceCollection.getProfileCollection(ProfileCollectionType.REGULAR);
+		ProfileCollection sc = sourceCollection.getProfileCollection(ProfileType.REGULAR);
 
 		for(BorderTag offsetKey : sc.getOffsetKeys()){
 			int offset = sc.getOffset(offsetKey);
@@ -235,7 +235,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 		BorderTag pointType = BorderTag.REFERENCE_POINT;
 
 		// get the empty profile collection from the new CellCollection
-		ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
+		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
 		int previousLength = pc.length();
 
 		// make an aggregate from the nuclei. A new median profile must necessarily result.
@@ -286,7 +286,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 		frankenCollection.addSegments(pointType, segments);
 		
 		// attach the frankencollection to the cellcollection
-		collection.setProfileCollection(ProfileCollectionType.FRANKEN, frankenCollection);
+		collection.setProfileCollection(ProfileType.FRANKEN, frankenCollection);
 
 
 
@@ -320,7 +320,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 			reviseSegments(collection, pointType);		
 	
 			// update the aggregate in case any borders have changed
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).createProfileAggregate(collection);
+			collection.getProfileCollection(ProfileType.REGULAR).createProfileAggregate(collection);
 						
 			// At this point, the franken collection still contains tip/head values only
 			
@@ -334,7 +334,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 	 */
 	private void createSegments(CellCollection collection) throws Exception {
 
-		ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
+		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
 
 		// the reference point is always index 0, so the segments will match
 		// the profile
@@ -383,7 +383,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 		try{
 			log(Level.FINER, "Assigning segments to nuclei...");
 
-			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
+			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
 
 			// find the corresponding point in each Nucleus
 			SegmentedProfile median = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);
@@ -461,7 +461,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 	private void reviseSegments(CellCollection collection, BorderTag pointType) throws Exception {
 		log(Level.FINER, "Refining segment assignments...");
 
-			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
+			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
 //			fileLogger.log(Level.FINE, "Median profile");
 //			fileLogger.log(Level.FINE, pc.toString());
 			List<NucleusBorderSegment> segments = pc.getSegments(pointType);
@@ -532,7 +532,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 			log(Level.FINER, "FrankenProfile generated: angle at index 0 for "+BorderTag.REFERENCE_POINT+" is "+firstPoint);
 			
 			// attach the frankencollection to the cellcollection
-			collection.setProfileCollection(ProfileCollectionType.FRANKEN, frankenCollection);
+			collection.setProfileCollection(ProfileType.FRANKEN, frankenCollection);
 			log(Level.FINER, "Segment assignments refined");
 	}
 	

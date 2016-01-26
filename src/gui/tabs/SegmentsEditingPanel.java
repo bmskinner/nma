@@ -58,7 +58,7 @@ import charting.charts.MorphologyChartFactory;
 import charting.charts.ProfileChartOptions;
 import components.CellCollection;
 import components.generic.BorderTag;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NucleusBorderSegment;
@@ -200,7 +200,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		private boolean testSegmentsMergeable(NucleusBorderSegment seg1, NucleusBorderSegment seg2) throws Exception{
 			CellCollection collection = activeDataset().getCollection();
 			
-			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR)
 					.getSegmentedProfile(BorderTag.ORIENTATION_POINT);
 			
 			
@@ -213,9 +213,9 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				 * Find the position of the border tag in the median profile
 				 * 
 				 */
-				int offsetForOp = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(BorderTag.ORIENTATION_POINT);
+				int offsetForOp = collection.getProfileCollection(ProfileType.REGULAR).getOffset(BorderTag.ORIENTATION_POINT);
 				
-				int offset = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(tag);
+				int offset = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
 				
 				// this should be zero for the orientation point and  totalLength+difference for the reference point
 				int difference = offset - offsetForOp;
@@ -237,7 +237,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 //			List<NucleusBorderSegment> list =collection.getProfileCollection(ProfileCollectionType.REGULAR)
 //					.getSegmentedProfile(BorderTag.REFERENCE_POINT).getOrderedSegments();
 			
-			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 			
 //			NucleusBorderSegment seg1 = NucleusBorderSegment.getSegment(list, segName1);
@@ -253,7 +253,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				medianProfile.mergeSegments(seg1, seg2);
 
 				// put the new segment pattern back with the appropriate offset
-				collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
+				collection.getProfileCollection(ProfileType.REGULAR).addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
 
 				/*
 				 * With the median profile segments merged, also merge the segments
@@ -289,7 +289,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		private void unmergeSegments(String segName) throws Exception {
 			CellCollection collection = activeDataset().getCollection();
 			
-			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
+			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
 			
 			// Get the segments to merge
 			NucleusBorderSegment seg = medianProfile.getSegment(segName);
@@ -298,7 +298,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			medianProfile.unmergeSegment(seg);
 			
 			// put the new segment pattern back with the appropriate offset
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( BorderTag.ORIENTATION_POINT,  medianProfile.getSegments());
+			collection.getProfileCollection(ProfileType.REGULAR).addSegments( BorderTag.ORIENTATION_POINT,  medianProfile.getSegments());
 
 			/*
 			 * With the median profile segments unmerged, also unmerge the segments
@@ -337,7 +337,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 			CellCollection collection = activeDataset().getCollection();
 			
-			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
+			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
 			
 			// Get the segments to merge
 			NucleusBorderSegment seg = medianProfile.getSegment(segName);
@@ -361,7 +361,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 						medianProfile.splitSegment(seg, index);
 
 						// put the new segment pattern back with the appropriate offset
-						collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( BorderTag.ORIENTATION_POINT,  medianProfile.getSegments());
+						collection.getProfileCollection(ProfileType.REGULAR).addSegments( BorderTag.ORIENTATION_POINT,  medianProfile.getSegments());
 
 						/*
 						 * With the median profile segments unmerged, also split the segments
@@ -420,7 +420,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 
 						} else {
 							
-							ProfileChartOptions options = new ProfileChartOptions(getDatasets(), true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileCollectionType.REGULAR);
+							ProfileChartOptions options = new ProfileChartOptions(getDatasets(), true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileType.REGULAR);
 
 							// Set the button configuration
 							configureButtons(options);
@@ -435,7 +435,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 								}
 
 								profile = activeDataset().getCollection()
-										.getProfileCollection(ProfileCollectionType.REGULAR)
+										.getProfileCollection(ProfileType.REGULAR)
 										.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 								
 								chartPanel.setChart(chart, profile, true);
@@ -468,7 +468,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				
 				setButtonsEnabled(true);
 				CellCollection collection = options.firstDataset().getCollection();
-				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR)
 						.getSegmentedProfile(BorderTag.ORIENTATION_POINT);
 				
 				// Don't allow merging below 2 segments (causes errors)
@@ -519,7 +519,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 					
 					String segName = activeDataset()
 							.getCollection()
-							.getProfileCollection(ProfileCollectionType.REGULAR)
+							.getProfileCollection(ProfileType.REGULAR)
 							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 							.getSegmentContaining(segMidpointIndex)
 							.getName();
@@ -570,7 +570,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 			SegmentedProfile oldProfile = activeDataset()
 					.getCollection()
-					.getProfileCollection(ProfileCollectionType.REGULAR)
+					.getProfileCollection(ProfileType.REGULAR)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 			
 			programLogger.log(Level.FINEST, "Old profile: "+oldProfile.toString());
@@ -593,7 +593,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				
 				activeDataset()
 				.getCollection()
-				.getProfileCollection(ProfileCollectionType.REGULAR)
+				.getProfileCollection(ProfileType.REGULAR)
 				.addSegments(BorderTag.REFERENCE_POINT, oldProfile.getSegments());
 				
 				programLogger.log(Level.FINEST, "Segments added, refresh the charts");
@@ -612,7 +612,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			try {
 				CellCollection collection = activeDataset().getCollection();
 				SegmentedProfile medianProfile = collection
-						.getProfileCollection(ProfileCollectionType.REGULAR)
+						.getProfileCollection(ProfileType.REGULAR)
 						.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 				
 //				List<NucleusBorderSegment> list =collection.getProfileCollection(ProfileCollectionType.REGULAR)

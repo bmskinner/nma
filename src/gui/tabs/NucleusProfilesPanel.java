@@ -71,7 +71,7 @@ import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
 import components.generic.Profile;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 
 public class NucleusProfilesPanel extends DetailPanel {
 
@@ -221,7 +221,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 
 					this.setEnabled(true);
 
-					ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
+					ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 
 					DecimalFormat df = new DecimalFormat("#0.00");
 					DefaultListModel<String> model = new DefaultListModel<String>();
@@ -260,7 +260,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 
 		public void updateModalityProfileChart(List<AnalysisDataset> list){
 			
-			ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
+			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 			ProfileChartOptions options = new ProfileChartOptions(list, 
 					true, 
 					ProfileAlignment.LEFT, 
@@ -279,7 +279,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 		
 		public void updateChart(double xvalue){
 			
-			ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
+			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 			
 			JFreeChart chart = null;
 			try {
@@ -451,7 +451,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 		 */	
 		private void updateProfiles(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag tag, boolean showMarkers){
 			
-			ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
+			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 			
 			try {
 				if(list.size()==1){
@@ -611,7 +611,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			BorderTag tag = borderTagOptionsPanel.getSelected();
 			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
 			
-			ProfileChartOptions options = new ProfileChartOptions(list, normalised, alignment, tag, showMarkers, ProfileCollectionType.REGULAR);
+			ProfileChartOptions options = new ProfileChartOptions(list, normalised, alignment, tag, showMarkers, ProfileType.REGULAR);
 			
 			updateProfiles(options);
 		}
@@ -676,7 +676,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			BorderTag tag = borderTagOptionsPanel.getSelected();
 			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
 			
-			ProfileChartOptions options = new ProfileChartOptions(list, normalised, alignment, tag, showMarkers, ProfileCollectionType.FRANKEN);
+			ProfileChartOptions options = new ProfileChartOptions(list, normalised, alignment, tag, showMarkers, ProfileType.FRANKEN);
 			
 			
 			updateProfiles(options);

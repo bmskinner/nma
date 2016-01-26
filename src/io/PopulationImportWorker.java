@@ -25,7 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import components.generic.BorderTag;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
@@ -77,7 +77,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 				if(dataset.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
 					
 					if(! dataset.getCollection()
-							.getProfileCollection(ProfileCollectionType.REGULAR)
+							.getProfileCollection(ProfileType.REGULAR)
 							.hasBorderTag(BorderTag.TOP_VERTICAL)  ){
 						
 						programLogger.log(Level.FINE, "TOP_ and BOTTOM_VERTICAL not assigned; calculating");

@@ -29,6 +29,7 @@ package components;
 
 import ij.IJ;
 import stats.NucleusStatistic;
+import stats.SignalStatistic;
 import stats.Stats;
 
 import java.io.File;
@@ -48,14 +49,12 @@ import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
-import components.nuclei.RoundNucleus;
-import gui.components.ColourSelecter.ColourSwatch;
 
 /**
  * @author bms41
@@ -75,7 +74,7 @@ public class CellCollection implements Serializable {
 	private NucleusType nucleusType; // the type of nuclei this collection contains
 		
 	//this holds the mapping of tail indexes etc in the median profile arrays
-	protected Map<ProfileCollectionType, ProfileCollection> profileCollections = new HashMap<ProfileCollectionType, ProfileCollection>();
+	protected Map<ProfileType, ProfileCollection> profileCollections = new HashMap<ProfileType, ProfileCollection>();
 		
 	private ConsensusNucleus consensusNucleus; 	// the refolded consensus nucleus
 	
@@ -99,7 +98,7 @@ public class CellCollection implements Serializable {
 		this.name = outputFolder == null ? type : type+" - "+outputFolder;
 		this.guid = java.util.UUID.randomUUID();
 		this.nucleusType = nucleusType;
-		profileCollections.put(ProfileCollectionType.REGULAR, new ProfileCollection());
+		profileCollections.put(ProfileType.REGULAR, new ProfileCollection());
 	}
   
   /**
@@ -254,7 +253,7 @@ public class CellCollection implements Serializable {
    * @param type
    * @return
    */
-  public ProfileCollection getProfileCollection(ProfileCollectionType type){
+  public ProfileCollection getProfileCollection(ProfileType type){
 	  if(this.profileCollections.containsKey(type)){
 		  return this.profileCollections.get(type);
 	  } else {
@@ -262,7 +261,7 @@ public class CellCollection implements Serializable {
 	  }
   }
 
-  public void setProfileCollection(ProfileCollectionType type, ProfileCollection p){
+  public void setProfileCollection(ProfileType type, ProfileCollection p){
 	  this.profileCollections.put(type, p);
   }
   
@@ -336,8 +335,9 @@ public class CellCollection implements Serializable {
    * Get the path lengths of the nuclei in this collection as
    * an array
    * @return
+ * @throws Exception 
    */
-  public double[] getPathLengths(){
+  public double[] getPathLengths() throws Exception{
 
 	  List<Double> list = new ArrayList<Double>();
 	  for(Cell cell : getCells() ){ 
@@ -377,7 +377,7 @@ public class CellCollection implements Serializable {
 	  List<String> list = new ArrayList<String>();
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  list.add(  n.getPath());
+		  list.add(  n.getSourceFile().getAbsolutePath());
 	  }
 	  return list.toArray(new String[0]);
   }
@@ -397,7 +397,7 @@ public class CellCollection implements Serializable {
 	  List<String> list = new ArrayList<String>();
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  list.add(  n.getPath());
+		  list.add(  n.getSourceFile().getAbsolutePath());
 	  }
 	  return list.toArray(new String[0]);
   }
@@ -624,104 +624,103 @@ public class CellCollection implements Serializable {
 	  return result;
   }
   
-  // allow for refiltering of nuclei based on nuclear parameters after looking at the rest of the data
-//  public double getMedianNuclearArea() throws Exception{
-//    double[] areas = this.getStatistics(NucleusStatistic.AREA, MeasurementScale.PIXELS);
-//    double median = Stats.quartile(areas, 50);
-//    return median;
-//  }
-//
-//  public double getMedianNuclearPerimeter() throws Exception{
-//    double[] p = this.getStatistics(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
-//    double median = Stats.quartile(p, 50);
-//    return median;
-//  }
-
-  public double getMedianPathLength(){
+  public double getMedianPathLength() throws Exception{
     double[] p = this.getPathLengths();
-    double median = Stats.quartile(p, 50);
+    double median = Stats.quartile(p, Constants.MEDIAN);
     return median;
   }
 
   public double getMedianArrayLength(){
     double[] p = this.getArrayLengths();
-    double median = Stats.quartile(p, 50);
+    double median = Stats.quartile(p, Constants.MEDIAN);
     return median;
   }
-
-//  public double getMedianFeretLength() throws Exception{
-//    double[] p = this.getStatistics(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
-//    double median = Stats.quartile(p, 50);
-//    return median;
-//  }
 
   public double getMaxProfileLength(){
 	  return Stats.max(this.getArrayLengths());
   }
   
   /**
-   * Get the median area of the signals in the given channel
+   * Get the median of the signal statistic in the given channel
    * @param channel
-   * @return the median area
+   * @return the median
+ * @throws Exception 
    */
-  public double getMedianSignalArea(int channel){
+  public double getMedianSignalStatistic(SignalStatistic stat, int channel) throws Exception{
 	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
 	  List<Double> a = new ArrayList<Double>(0);
 	  for(Cell c : cells){
 		  Nucleus n = c.getNucleus();
-		  a.addAll(n.getSignalCollection().getAreas(channel));
+		  a.addAll(n.getSignalCollection().getStatistics(stat, channel));
 
 	  }
-	  return Stats.quartile(a.toArray(new Double[0]), 50);
+	  return Stats.quartile(a.toArray(new Double[0]), Constants.MEDIAN);
   }
   
-  /**
-   * Get the median angle of the signals in the given channel
-   * @param channel
-   * @return the median angle
-   */
-  public double getMedianSignalAngle(int channel){
-	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
-	  List<Double> a = new ArrayList<Double>(0);
-	  for(Cell c : cells){
-		  Nucleus n = c.getNucleus();
-		  a.addAll(n.getSignalCollection().getAngles(channel));
-
-	  }
-	  return Stats.quartile(a.toArray(new Double[0]), 50);
-  }
-  
-  /**
-   * Get the median feret of the signals in the given channel
-   * @param channel
-   * @return the median feret
-   */
-  public double getMedianSignalFeret(int channel){
-	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
-	  List<Double> a = new ArrayList<Double>(0);
-	  for(Cell c : cells){
-		  Nucleus n = c.getNucleus();
-		  a.addAll(n.getSignalCollection().getFerets(channel));
-
-	  }
-	  return Stats.quartile(a.toArray(new Double[0]), 50);
-  }
-  
-  /**
-   * Get the median fractional distance from the nucleus CoM of the signals in the given channel
-   * @param channel
-   * @return the median distance
-   */
-  public double getMedianSignalDistance(int channel){
-	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
-	  List<Double> a = new ArrayList<Double>(0);
-	  for(Cell c : cells){
-		  Nucleus n = c.getNucleus();
-		  a.addAll(n.getSignalCollection().getDistances(channel));
-
-	  }
-	  return Stats.quartile(a.toArray(new Double[0]), 50);
-  }
+//  /**
+//   * Get the median area of the signals in the given channel
+//   * @param channel
+//   * @return the median area
+// * @throws Exception 
+//   */
+//  public double getMedianSignalArea(int channel) throws Exception{
+//	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
+//	  List<Double> a = new ArrayList<Double>(0);
+//	  for(Cell c : cells){
+//		  Nucleus n = c.getNucleus();
+//		  a.addAll(n.getSignalCollection().getStatistics(SignalStatistic.AREA, channel));
+//
+//	  }
+//	  return Stats.quartile(a.toArray(new Double[0]), 50);
+//  }
+//  
+//  /**
+//   * Get the median angle of the signals in the given channel
+//   * @param channel
+//   * @return the median angle
+//   */
+//  public double getMedianSignalAngle(int channel){
+//	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
+//	  List<Double> a = new ArrayList<Double>(0);
+//	  for(Cell c : cells){
+//		  Nucleus n = c.getNucleus();
+//		  a.addAll(n.getSignalCollection().getAngles(channel));
+//
+//	  }
+//	  return Stats.quartile(a.toArray(new Double[0]), 50);
+//  }
+//  
+//  /**
+//   * Get the median feret of the signals in the given channel
+//   * @param channel
+//   * @return the median feret
+//   */
+//  public double getMedianSignalFeret(int channel){
+//	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
+//	  List<Double> a = new ArrayList<Double>(0);
+//	  for(Cell c : cells){
+//		  Nucleus n = c.getNucleus();
+//		  a.addAll(n.getSignalCollection().getFerets(channel));
+//
+//	  }
+//	  return Stats.quartile(a.toArray(new Double[0]), 50);
+//  }
+//  
+//  /**
+//   * Get the median fractional distance from the nucleus CoM of the signals in the given channel
+//   * @param channel
+//   * @return the median distance
+//   */
+//  public double getMedianSignalDistance(int channel){
+//	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
+//	  List<Double> a = new ArrayList<Double>(0);
+//	  for(Cell c : cells){
+//		  Nucleus n = c.getNucleus();
+//		  a.addAll(n.getSignalCollection().getDistances(channel));
+//
+//	  }
+//	  return Stats.quartile(a.toArray(new Double[0]), 50);
+//  }
 
   /** 
    * Return the nuclei with or without signals in the given group.
@@ -761,7 +760,7 @@ public class CellCollection implements Serializable {
   public List<String> getSegmentNames() throws Exception {
 
 	  List<String> result = new ArrayList<String>(0);
-	  ProfileCollection pc = this.getProfileCollection(ProfileCollectionType.REGULAR);
+	  ProfileCollection pc = this.getProfileCollection(ProfileType.REGULAR);
 	  List<NucleusBorderSegment> segs = pc.getSegments(BorderTag.ORIENTATION_POINT);
 	  for(NucleusBorderSegment segment : segs){
 		  result.add(segment.getName());
@@ -776,9 +775,10 @@ public class CellCollection implements Serializable {
    */
   public double[] getDifferencesToMedianFromPoint(BorderTag pointType) throws Exception {
 	  List<Double> list = new ArrayList<Double>();
-	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType, Constants.MEDIAN);
+	  Profile medianProfile = this.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.MEDIAN);
 	  for(Nucleus n : this.getNuclei()){
-		  list.add(n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile));
+		  Profile angleProfile = n.getProfile(ProfileType.REGULAR);
+		  list.add(angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile));
 	  }
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
@@ -793,12 +793,13 @@ public class CellCollection implements Serializable {
   public double[] getNormalisedDifferencesToMedianFromPoint(BorderTag pointType) throws Exception {
 	  List<Double> list = new ArrayList<Double>();
 
-	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType, Constants.MEDIAN);
+	  Profile medianProfile = this.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.MEDIAN);
 
 	  for(Nucleus n : this.getNuclei()){
 		  
-		  double diff = n.getAngleProfile(pointType).absoluteSquareDifference(medianProfile);		
-		  diff /= n.getPerimeter(); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+		  Profile angleProfile = n.getProfile(ProfileType.REGULAR, pointType);
+		  double diff = angleProfile.absoluteSquareDifference(medianProfile);		
+		  diff /= n.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 		  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 		  
 //		  double var = (rootDiff / n.getPerimeter()  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
@@ -850,12 +851,13 @@ public class CellCollection implements Serializable {
    */
   public Nucleus getNucleusMostSimilarToMedian(BorderTag pointType) throws Exception {
 
-	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType, 50); // the profile we compare the nucleus to
+	  Profile medianProfile = this.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, 50); // the profile we compare the nucleus to
 	  Nucleus n = this.getNuclei().get(0); // default to the first nucleus
 
 	  double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
 	  for(Nucleus p : this.getNuclei()){
-		  double nDifference = p.getAngleProfile(pointType).absoluteSquareDifference(medianProfile);
+		  Profile angleProfile = p.getProfile(ProfileType.REGULAR, pointType);
+		  double nDifference = angleProfile.absoluteSquareDifference(medianProfile);
 		  if(nDifference<difference){
 			  difference = nDifference;
 			  n = p;
@@ -888,10 +890,11 @@ public class CellCollection implements Serializable {
    */
   public double calculateVariabililtyOfNucleusProfile(Nucleus n) throws Exception {
 	  BorderTag pointType = BorderTag.REFERENCE_POINT;
-	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType,50);
-	  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);										 
+	  Profile medianProfile = this.getProfileCollection(ProfileType.REGULAR).getProfile(pointType,50);
+	  Profile angleProfile = n.getProfile(ProfileType.REGULAR, pointType);
+	  double diff = angleProfile.absoluteSquareDifference(medianProfile);										 
 	  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
-	  double var = (rootDiff / n.getPerimeter()  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+	  double var = (rootDiff / n.getStatistic(NucleusStatistic.PERIMETER)  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 	  return var;
   }
   
@@ -963,7 +966,7 @@ public class CellCollection implements Serializable {
 	  List<Double> list = new ArrayList<Double>();
 
 	  for(Nucleus n : this.getNuclei()){
-		  NucleusBorderSegment segment = n.getAngleProfile(BorderTag.REFERENCE_POINT).getSegment(segName);
+		  NucleusBorderSegment segment = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getSegment(segName);
 		  double perimeterLength = 0;
 		  if(segment!=null){
 			  int indexLength = segment.length();

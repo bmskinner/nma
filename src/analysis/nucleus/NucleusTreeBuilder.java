@@ -49,7 +49,7 @@ import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.nuclei.Nucleus;
 
 
@@ -254,9 +254,9 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		try{
 
 			log(Level.FINER, "Building instances");
-			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.FRANKEN);
+			ProfileCollection pc = collection.getProfileCollection(ProfileType.FRANKEN);
 
-			Profile pvals = DipTester.testCollectionGetPValues(collection, BorderTag.REFERENCE_POINT, ProfileCollectionType.FRANKEN);
+			Profile pvals = DipTester.testCollectionGetPValues(collection, BorderTag.REFERENCE_POINT, ProfileType.FRANKEN);
 			Profile medianProfile = pc.getProfile(BorderTag.REFERENCE_POINT, 50);
 			Profile indexes = pvals.getSortedIndexes();
 			
@@ -365,7 +365,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		
 		if(options.isIncludeProfile()){ // An attribute for each angle in the median profile
 			log(Level.FINEST, "Including profile");
-			profileAttributeCount = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50).size();
+			profileAttributeCount = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50).size();
 			profileAttributeCount /= windowSize;
 			attributeCount += profileAttributeCount;
 		}
@@ -430,7 +430,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	 */
 	private Instances makeProfileInstances(CellCollection collection)throws Exception {
 		
-		int profileSize = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50).size();
+		int profileSize = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50).size();
 		int windowSize = collection.getNuclei().get(0).getAngleProfileWindowSize(); // use the first window size found for now
 		
 		

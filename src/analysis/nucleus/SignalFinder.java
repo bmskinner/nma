@@ -42,6 +42,7 @@ import ij.measure.Measurements;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
+import stats.NucleusStatistic;
 import utility.Constants;
 import utility.StatsMap;
 import utility.Utils;
@@ -73,8 +74,9 @@ public class SignalFinder {
 	 * @param sourceFile the file the image came from
 	 * @param stack the imagestack
 	 * @param n the nucleus
+	 * @throws Exception 
 	 */
-	public ArrayList<NuclearSignal> detectSignal(File sourceFile, ImageStack stack, Nucleus n){
+	public ArrayList<NuclearSignal> detectSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 		
 		options.setThreshold(minThreshold); // reset to default;
 		
@@ -120,8 +122,9 @@ public class SignalFinder {
 	 * @param sourceFile the file the image came from
 	 * @param stack the imagestack
 	 * @param n the nucleus
+	 * @throws Exception 
 	 */
-	private ArrayList<NuclearSignal> detectForwardThresholdSignal(File sourceFile, ImageStack stack, Nucleus n){
+	private ArrayList<NuclearSignal> detectForwardThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 //		SignalCollection signalCollection = n.getSignalCollection();
 		
 		// choose the right stack number for the channel
@@ -129,7 +132,7 @@ public class SignalFinder {
 		
 		// create a new detector
 		Detector detector = new Detector();
-		detector.setMaxSize(n.getArea() * options.getMaxFraction());
+		detector.setMaxSize(n.getStatistic(NucleusStatistic.AREA) * options.getMaxFraction());
 		detector.setMinSize(options.getMinSize());
 		detector.setMinCirc(options.getMinCirc());
 		detector.setMaxCirc(options.getMaxCirc());
@@ -164,6 +167,7 @@ public class SignalFinder {
 				// only keep the signal if it is within the nucleus
 				if(Utils.createPolygon(n).contains(	(float) s.getCentreOfMass().getX(), 
 													(float) s.getCentreOfMass().getY())){
+					s.setSourceFile(sourceFile);
 					signals.add(s);
 				}
 				
@@ -185,8 +189,9 @@ public class SignalFinder {
 	 * @param sourceFile the file the image came from
 	 * @param stack the imagestack
 	 * @param n the nucleus
+	 * @throws Exception 
 	 */
-	private ArrayList<NuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n){
+	private ArrayList<NuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 		
 //		SignalCollection signalCollection = n.getSignalCollection();
 		programLogger.log(Level.INFO, "Beginning reverse detection for nucleus");
@@ -226,7 +231,7 @@ public class SignalFinder {
 //		}
 		
 		// find the threshold from the bins
-		int area = (int) ( n.getArea() * options.getMaxFraction());
+		int area = (int) ( n.getStatistic(NucleusStatistic.AREA) * options.getMaxFraction());
 		int total = 0;
 		int threshold = 0; // the value to threshold at
 		
@@ -256,8 +261,9 @@ public class SignalFinder {
 	 * channel within the bounding box of the nucleus. The histogram shows a drop
 	 * at the point where background transitions to real signal. We detect this drop, 
 	 * and set it as the appropriate forward threshold for the nucleus.  
+	 * @throws Exception 
 	 */
-	private ArrayList<NuclearSignal> detectHistogramThresholdSignal(File sourceFile, ImageStack stack, Nucleus n){
+	private ArrayList<NuclearSignal> detectHistogramThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 		programLogger.log(Level.FINE, "Beginning histogram detection for nucleus");
 
 		// choose the right stack number for the channel

@@ -10,7 +10,7 @@ import components.generic.BooleanProfile;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.NucleusBorderSegment;
@@ -75,7 +75,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			CellCollection collection = getDataset().getCollection();
 			
 			// A cell collection starts with an empty Regular ProfileCollection
-			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
+			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
 
 			// default is to make profile aggregate from reference point
 			pc.createProfileAggregate(collection);
@@ -135,9 +135,9 @@ public class DatasetProfiler extends AnalysisWorker {
 
 			// can't use regular tail detector, because it's based on NucleusBorderPoints
 			// get minima in curve, then find the lowest minima / minima furthest from both ends
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, 0);
+			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, 0);
 
-			Profile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50);
+			Profile medianProfile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50);
 
 			BooleanProfile minima = medianProfile.smooth(2).getLocalMinima(5); // window size 5
 
@@ -159,7 +159,7 @@ public class DatasetProfiler extends AnalysisWorker {
 				}
 			}
 
-			collection.getProfileCollection(ProfileCollectionType.REGULAR)
+			collection.getProfileCollection(ProfileType.REGULAR)
 			.addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
 
 		}
@@ -172,7 +172,7 @@ public class DatasetProfiler extends AnalysisWorker {
 		 */
 		public static void assignTopAndBottomVerticalInMouse(CellCollection collection) throws Exception{
 			 
-			Profile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50);
+			Profile medianProfile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50);
 
 			/*
 		     * Call to a StraightPointFinder that will find the straight part of the nucleus
@@ -180,9 +180,9 @@ public class DatasetProfiler extends AnalysisWorker {
 		     */
 		    int[] verticalPoints = medianProfile.getConsistentRegionBounds(180, 2, 10);
 		    if(verticalPoints[0]!=-1 && verticalPoints[1]!=-1){
-		    	collection.getProfileCollection(ProfileCollectionType.REGULAR)
+		    	collection.getProfileCollection(ProfileType.REGULAR)
 		    		.addOffset(BorderTag.TOP_VERTICAL, verticalPoints[0]);
-		    	collection.getProfileCollection(ProfileCollectionType.REGULAR)
+		    	collection.getProfileCollection(ProfileType.REGULAR)
 		    	.addOffset(BorderTag.BOTTOM_VERTICAL, verticalPoints[1]);
 		    } else {
 		    	log(Level.WARNING, "Dataset "+collection.getName()+": Unable to assign vertical positions in median profile");
@@ -194,12 +194,12 @@ public class DatasetProfiler extends AnalysisWorker {
 			
 			// define the current zero offset at the reference point
 			// It does not matter, it just gives an offset key for the ProfileCollection
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, 0);
+			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, 0);
 			
 			// get the profile
 			// This is starting from an arbitrary point?
 			// Starting from the head in test data, so the reference point is correct
-			Profile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50);
+			Profile medianProfile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50);
 //			medianProfile.print();
 
 			// find local maxima in the median profile over 180
@@ -241,8 +241,8 @@ public class DatasetProfiler extends AnalysisWorker {
 
 			// add this index to be the orientation point
 			log(Level.FINEST, "Setting tail to index: "+tailIndex);
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, tailIndex);
+			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
+			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, tailIndex);
 			/*
 			 * Looks like reference point needs to be 0. Check the process aligning the profiles - they must be settling on 
 			 * the RP 
@@ -251,7 +251,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			
 			
 			// set the reference point half way around from the tail
-			double length = (double) collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length();		
+			double length = (double) collection.getProfileCollection(ProfileType.REGULAR).getAggregate().length();		
 			int offset =  (int) Math.ceil(length / 2d); // ceil to ensure offsets are correct
 			
 			// now we have the tail point located, update the reference point to be opposite
@@ -259,22 +259,22 @@ public class DatasetProfiler extends AnalysisWorker {
 //			fileLogger.log(Level.FINE, collection.getProfileCollection(ProfileCollectionType.REGULAR).toString());
 			
 //			 adjust the index to the offset
-			int headIndex  = Utils.wrapIndex( tailIndex - offset, collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length());
+			int headIndex  = Utils.wrapIndex( tailIndex - offset, collection.getProfileCollection(ProfileType.REGULAR).getAggregate().length());
 //			fileLogger.log(Level.FINE, "Setting head to index: "+headIndex);
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.INTERSECTION_POINT, headIndex);
+			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.INTERSECTION_POINT, headIndex);
 		}
 		
 
 		private static void findTailInRoundMedian(CellCollection collection) throws Exception {
 			
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, 0);
-			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
+			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, 0);
+			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
 
 			Profile medianProfile = pc.getProfile(BorderTag.REFERENCE_POINT, 50);
 
 			int tailIndex = (int) Math.floor(medianProfile.size()/2);
 						
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
+			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
 		}
 
 		/**
@@ -305,19 +305,19 @@ public class DatasetProfiler extends AnalysisWorker {
 		
 		private static void calculateOffsetsInRoundNuclei(CellCollection collection) throws Exception {
 
-			Profile medianToCompare = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN); // returns a median profile with head at 0
+			Profile medianToCompare = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN); // returns a median profile with head at 0
 
 			for(Nucleus n : collection.getNuclei()){
 
 				// returns the positive offset index of this profile which best matches the median profile
-				int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+				int newHeadIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(medianToCompare);
 				n.setBorderTag(BorderTag.REFERENCE_POINT, newHeadIndex);
 
 				// check if flipping the profile will help
 
-				double differenceToMedian1 = n.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
+				double differenceToMedian1 = n.getProfile(ProfileType.REGULAR,BorderTag.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
 				n.reverse();
-				double differenceToMedian2 = n.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
+				double differenceToMedian2 = n.getProfile(ProfileType.REGULAR,BorderTag.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
 
 				if(differenceToMedian1<differenceToMedian2){
 					n.reverse(); // put it back if no better
@@ -333,7 +333,7 @@ public class DatasetProfiler extends AnalysisWorker {
 		private static void calculateOffsetsInRodentSpermNuclei(CellCollection collection) throws Exception {
 
 			// Get the median profile starting from the orientation point
-			Profile median = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.MEDIAN); // returns a median profile
+			Profile median = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.MEDIAN); // returns a median profile
 
 			// go through each nucleus
 			for(Nucleus n : collection.getNuclei()){
@@ -342,7 +342,7 @@ public class DatasetProfiler extends AnalysisWorker {
 				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
 
 				// get the offset for the best fit to the median profile
-				int newTailIndex = nucleus.getAngleProfile().getSlidingWindowOffset(median);
+				int newTailIndex = nucleus.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
 
 				// add the offset of the tail to the nucleus
 				nucleus.setBorderTag(BorderTag.ORIENTATION_POINT, newTailIndex);
@@ -402,10 +402,10 @@ public class DatasetProfiler extends AnalysisWorker {
 				Profile verticalTopMedian;
 				Profile verticalBottomMedian;
 				try{
-					verticalTopMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+					verticalTopMedian = collection.getProfileCollection(ProfileType.REGULAR)
 							.getProfile(BorderTag.TOP_VERTICAL, Constants.MEDIAN); 
 
-					verticalBottomMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+					verticalBottomMedian = collection.getProfileCollection(ProfileType.REGULAR)
 							.getProfile(BorderTag.BOTTOM_VERTICAL, Constants.MEDIAN); 
 
 
@@ -419,8 +419,8 @@ public class DatasetProfiler extends AnalysisWorker {
 					RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
 
 
-					int newIndexOne = nucleus.getAngleProfile().getSlidingWindowOffset(verticalTopMedian);
-					int newIndexTwo = nucleus.getAngleProfile().getSlidingWindowOffset(verticalBottomMedian);
+					int newIndexOne = nucleus.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(verticalTopMedian);
+					int newIndexTwo = nucleus.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(verticalBottomMedian);
 
 					XYPoint p0 = nucleus.getBorderPoint(newIndexOne);
 					XYPoint p1 = nucleus.getBorderPoint(newIndexTwo);
@@ -447,13 +447,13 @@ public class DatasetProfiler extends AnalysisWorker {
 		private static void calculateOffsetsInPigSpermNuclei(CellCollection collection) throws Exception {
 
 			// get the median profile zeroed on the orientation point
-			Profile medianToCompare = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50); 
+			Profile medianToCompare = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50); 
 
 			for(Nucleus nucleus : collection.getNuclei()){
 				PigSpermNucleus n = (PigSpermNucleus) nucleus;
 
 				// returns the positive offset index of this profile which best matches the median profile
-				int tailIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+				int tailIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(medianToCompare);
 
 				n.setBorderTag(BorderTag.ORIENTATION_POINT, tailIndex);
 

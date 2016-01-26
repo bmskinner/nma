@@ -85,7 +85,7 @@ import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.ProfileCollection;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
@@ -166,26 +166,26 @@ public class MorphologyChartFactory {
 
 			XYPlot plot = chart.getXYPlot();
 
-			for (BorderTag tag : collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffsetKeys()){
+			for (BorderTag tag : collection.getProfileCollection(ProfileType.REGULAR).getOffsetKeys()){
 				Color colour = Color.BLACK;
 
 				// get the index of the tag
-				int index = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(tag);
+				int index = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
 
 				// get the offset from to the current draw point
-				int offset = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(options.getTag());
+				int offset = collection.getProfileCollection(ProfileType.REGULAR).getOffset(options.getTag());
 
 				// adjust the index to the offset
-				index = Utils.wrapIndex( index - offset, collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length());
+				index = Utils.wrapIndex( index - offset, collection.getProfileCollection(ProfileType.REGULAR).getAggregate().length());
 
 				double indexToDraw = index; // convert to a double to allow normalised positioning
 
 				if(options.isNormalised()){ // set to the proportion of the point along the profile
-					indexToDraw =  (( indexToDraw / collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length() ) * 100);
+					indexToDraw =  (( indexToDraw / collection.getProfileCollection(ProfileType.REGULAR).getAggregate().length() ) * 100);
 				}
 				if(options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()){
 					int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
-					int amountToAdd = maxX - collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length();
+					int amountToAdd = maxX - collection.getProfileCollection(ProfileType.REGULAR).getAggregate().length();
 					indexToDraw += amountToAdd;
 
 				}
@@ -272,7 +272,7 @@ public class MorphologyChartFactory {
 		if(options.isSingleDataset()){
 			
 			for(NucleusBorderSegment seg :  options.firstDataset().getCollection()
-					.getProfileCollection(ProfileCollectionType.REGULAR)
+					.getProfileCollection(ProfileType.REGULAR)
 					.getSegmentedProfile(options.getTag())
 					.getOrderedSegments()){
 
@@ -310,7 +310,7 @@ public class MorphologyChartFactory {
 		CellCollection collection = dataset.getCollection();
 		XYDataset ds = NucleusDatasetCreator.createFrankenSegmentDataset(dataset.getCollection(), normalised, alignment, borderTag);
 
-		ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.FRANKEN);
+		ProfileCollection pc = collection.getProfileCollection(ProfileType.FRANKEN);
 		
 		int length = 100 ; // default if normalised - for a franken collection, it makes no difference
 
@@ -450,12 +450,12 @@ public class MorphologyChartFactory {
 		
 		List<XYSeriesCollection> iqrProfiles = null;
 		XYDataset medianProfiles			 = null;
-		if(options.getType().equals(ProfileCollectionType.REGULAR)){
+		if(options.getType().equals(ProfileType.REGULAR)){
 			iqrProfiles     = NucleusDatasetCreator.createMultiProfileIQRDataset( options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());				
 			medianProfiles	= NucleusDatasetCreator.createMultiProfileDataset(	  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());
 		}
 		
-		if(options.getType().equals(ProfileCollectionType.FRANKEN)){
+		if(options.getType().equals(ProfileType.FRANKEN)){
 			iqrProfiles     = NucleusDatasetCreator.createMultiProfileIQRFrankenDataset(  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());				
 			medianProfiles	= NucleusDatasetCreator.createMultiProfileFrankenDataset(	  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());
 		}
@@ -551,7 +551,7 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, int xLength, BorderTag tag, ProfileCollectionType type) throws Exception {
+	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, int xLength, BorderTag tag, ProfileType type) throws Exception {
 		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list, tag, type);
 		CellCollection n = list.get(0).getCollection();
 		ColourSwatch swatch = list.get(0).getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : list.get(0).getSwatch();
@@ -568,7 +568,7 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	public static JFreeChart makeMultiVariabilityChart(List<AnalysisDataset> list, int xLength, BorderTag tag, ProfileCollectionType type) throws Exception {
+	public static JFreeChart makeMultiVariabilityChart(List<AnalysisDataset> list, int xLength, BorderTag tag, ProfileType type) throws Exception {
 		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list, tag, type);
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
@@ -914,7 +914,7 @@ public class MorphologyChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JFreeChart createModalityChart(Double position, List<AnalysisDataset> list, ProfileCollectionType type) throws Exception {
+	public static JFreeChart createModalityChart(Double position, List<AnalysisDataset> list, ProfileType type) throws Exception {
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
@@ -1013,7 +1013,7 @@ public class MorphologyChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JFreeChart createQQChart(Double position, List<AnalysisDataset> list, ProfileCollectionType type) throws Exception {
+	public static JFreeChart createQQChart(Double position, List<AnalysisDataset> list, ProfileType type) throws Exception {
 
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,

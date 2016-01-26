@@ -37,7 +37,7 @@ import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.Equation;
 import components.generic.Profile;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.NucleusBorderPoint;
@@ -109,9 +109,9 @@ public class CurveRefolder extends AnalysisWorker {
 		log(Level.FINEST, "Refolding nucleus of class: "+collection.getNucleusType().toString());
 		log(Level.FINEST, "Subject: "+refoldNucleus.getSourceFileName()+"-"+refoldNucleus.getNucleusNumber());
 
-		Profile targetProfile 	= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.MEDIAN);
-		Profile q25 			= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.LOWER_QUARTILE);
-		Profile q75 			= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.UPPER_QUARTILE);
+		Profile targetProfile 	= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.MEDIAN);
+		Profile q25 			= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.LOWER_QUARTILE);
+		Profile q75 			= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.UPPER_QUARTILE);
 
 		if(targetProfile==null){
 			throw new Exception("Null reference to target profile");

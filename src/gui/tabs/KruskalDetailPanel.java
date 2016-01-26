@@ -33,7 +33,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import components.generic.BorderTag;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.ProfileChartOptions;
 
@@ -88,7 +88,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 				ProfileAlignment.LEFT,
 				BorderTag.REFERENCE_POINT,
 				true, // show markers
-				ProfileCollectionType.REGULAR);
+				ProfileType.REGULAR);
 		
 		options.setLogger(programLogger);
 

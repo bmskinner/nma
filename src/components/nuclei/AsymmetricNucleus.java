@@ -68,39 +68,9 @@ private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorde
   public Nucleus duplicate(){
 	  try {
 
-		  AsymmetricNucleus duplicate = new AsymmetricNucleus();
-
-		  duplicate.setID(this.getID());
-		  duplicate.setPosition(this.getPosition());
-
-		  duplicate.setSourceFile(this.getSourceFile());
-		  duplicate.setOutputFolder(this.getOutputFolderName());
-
-		  duplicate.setNucleusNumber(this.getNucleusNumber());
-		  duplicate.setNucleusFolder(this.getNucleusFolder());
-
-		  duplicate.setPerimeter(this.getPerimeter());
-		  duplicate.setFeret(this.getFeret());
-		  duplicate.setArea(this.getArea());
-
-		  duplicate.setCentreOfMass(this.getCentreOfMass());
-
-		  duplicate.setSignals( new SignalCollection(this.getSignalCollection()));
-
-		  duplicate.setDistanceProfile(this.getDistanceProfile());
-		  duplicate.setAngleProfile(this.getAngleProfile());
-
-		  duplicate.setBorderTags(this.getBorderTags());
-		  duplicate.setBorderList(this.getBorderList());
-
-		  duplicate.setAngleProfileWindowSize(this.getAngleProfileWindowSize());
-		  duplicate.setSingleDistanceProfile(this.getSingleDistanceProfile());
-
-		  duplicate.setScale(this.getScale());
-
+		  AsymmetricNucleus duplicate = new AsymmetricNucleus(this);
 		  return duplicate;
-		  
-//		  return new AsymmetricNucleus(this);
+
 	  } catch (Exception e) {
 		  return null;
 	  }
@@ -112,16 +82,6 @@ private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorde
     -----------------------
   */
   
-  	@Override
-	public String getReferencePoint(){
-		return NucleusType.ASYMMETRIC.getPoint(BorderTag.REFERENCE_POINT);
-	}
-  	
-  	@Override
-	public String getOrientationPoint(){
-		return NucleusType.ASYMMETRIC.getPoint(BorderTag.ORIENTATION_POINT);
-	}
-
   public List<NucleusBorderPoint> getEstimatedTailPoints(){
     return this.tailEstimatePoints;
   }

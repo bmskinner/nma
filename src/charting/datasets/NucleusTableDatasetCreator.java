@@ -41,7 +41,7 @@ import components.CellCollection;
 import components.ClusterGroup;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import ij.IJ;
@@ -73,12 +73,12 @@ public class NucleusTableDatasetCreator {
 			BorderTag point = BorderTag.REFERENCE_POINT;
 
 			// get mapping from ordered segments to segment names
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
 
 			Map<String, String> map = new HashMap<String, String>();
 			for(NucleusBorderSegment seg : segments){
 				
-				NucleusBorderSegment realSeg = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
+				NucleusBorderSegment realSeg = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
 				map.put(seg.getName(), realSeg.getName());
 			}
 			
@@ -154,7 +154,7 @@ public class NucleusTableDatasetCreator {
 			// assumes all datasets have the same number of segments
 			List<NucleusBorderSegment> segments = list.get(0)
 					.getCollection()
-					.getProfileCollection(ProfileCollectionType.REGULAR)
+					.getProfileCollection(ProfileType.REGULAR)
 					.getSegmentedProfile(point)
 					.getOrderedSegments();
 			
@@ -163,7 +163,7 @@ public class NucleusTableDatasetCreator {
 				
 				NucleusBorderSegment realSeg = list.get(0)
 						.getCollection()
-						.getProfileCollection(ProfileCollectionType.REGULAR)
+						.getProfileCollection(ProfileType.REGULAR)
 						.getSegmentedProfile(point)
 						.getSegment(seg);
 				map.put(seg.getName(), realSeg.getName());
@@ -195,7 +195,7 @@ public class NucleusTableDatasetCreator {
 //				List<NucleusBorderSegment> segs = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
 				
 				List<NucleusBorderSegment> segs = collection
-						.getProfileCollection(ProfileCollectionType.REGULAR)
+						.getProfileCollection(ProfileType.REGULAR)
 						.getSegmentedProfile(point)
 						.getOrderedSegments();
 				
@@ -733,12 +733,12 @@ public class NucleusTableDatasetCreator {
 		for(AnalysisDataset dataset : list){
 			
 			// get mapping from ordered segments to segment names
-			List<NucleusBorderSegment> segments1 = dataset.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+			List<NucleusBorderSegment> segments1 = dataset.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
 
 			Map<String, String> map1 = new HashMap<String, String>();
 			for(NucleusBorderSegment seg : segments1){
 				
-				NucleusBorderSegment realSeg = dataset.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
+				NucleusBorderSegment realSeg = dataset.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
 				map1.put(seg.getName(), realSeg.getName());
 			}
 
@@ -749,12 +749,12 @@ public class NucleusTableDatasetCreator {
 			for(AnalysisDataset dataset2 : list){
 				
 				// get mapping from ordered segments to segment names
-				List<NucleusBorderSegment> segments2 = dataset2.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+				List<NucleusBorderSegment> segments2 = dataset2.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
 
 				Map<String, String> map2 = new HashMap<String, String>();
 				for(NucleusBorderSegment seg : segments2){
 					
-					NucleusBorderSegment realSeg = dataset2.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
+					NucleusBorderSegment realSeg = dataset2.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
 					map2.put(seg.getName(), realSeg.getName());
 				}
 
@@ -838,12 +838,12 @@ public class NucleusTableDatasetCreator {
 		for(AnalysisDataset dataset : list){
 			
 			// get mapping from ordered segments to segment names
-			List<NucleusBorderSegment> segments1 = dataset.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+			List<NucleusBorderSegment> segments1 = dataset.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
 
 			Map<String, String> map1 = new HashMap<String, String>();
 			for(NucleusBorderSegment seg : segments1){
 				
-				NucleusBorderSegment realSeg = dataset.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
+				NucleusBorderSegment realSeg = dataset.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
 				map1.put(seg.getName(), realSeg.getName());
 			}
 			
@@ -856,12 +856,12 @@ public class NucleusTableDatasetCreator {
 			for(AnalysisDataset dataset2 : list){
 				
 				// get mapping from ordered segments to segment names
-				List<NucleusBorderSegment> segments2 = dataset2.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+				List<NucleusBorderSegment> segments2 = dataset2.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
 
 				Map<String, String> map2 = new HashMap<String, String>();
 				for(NucleusBorderSegment seg : segments2){
 					
-					NucleusBorderSegment realSeg = dataset2.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
+					NucleusBorderSegment realSeg = dataset2.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
 					map2.put(seg.getName(), realSeg.getName());
 				}
 

@@ -24,19 +24,19 @@ import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 
 @SuppressWarnings("serial")
 public class ProfileCollectionTypeSettingsPanel extends EnumeratedOptionsPanel {
 	
-	private Map<ProfileCollectionType, JRadioButton> map  = new  HashMap<ProfileCollectionType, JRadioButton>();
+	private Map<ProfileType, JRadioButton> map  = new  HashMap<ProfileType, JRadioButton>();
 	
 	public ProfileCollectionTypeSettingsPanel(){
 		
 		super();
 		final ButtonGroup group = new ButtonGroup();
 		
-		for(ProfileCollectionType type : ProfileCollectionType.values()){
+		for(ProfileType type : ProfileType.values()){
 			JRadioButton button = new JRadioButton(type.toString());
 			button.setActionCommand(type.toString());
 			button.addActionListener(this);
@@ -45,13 +45,13 @@ public class ProfileCollectionTypeSettingsPanel extends EnumeratedOptionsPanel {
 			map.put(type, button);
 		}
 		// Set the default
-		map.get(ProfileCollectionType.FRANKEN).setSelected(true);
+		map.get(ProfileType.FRANKEN).setSelected(true);
 		
 	}
 	
 	public void setEnabled(boolean b){
 
-		for(ProfileCollectionType type : ProfileCollectionType.values()){
+		for(ProfileType type : ProfileType.values()){
 			map.get(type).setEnabled(b);
 		}
 	}
@@ -60,8 +60,8 @@ public class ProfileCollectionTypeSettingsPanel extends EnumeratedOptionsPanel {
 	 * Get the selected profile type, or null
 	 * @return
 	 */
-	public ProfileCollectionType getSelected(){
-		for(ProfileCollectionType type : ProfileCollectionType.values()){
+	public ProfileType getSelected(){
+		for(ProfileType type : ProfileType.values()){
 			JRadioButton button = map.get(type);
 			if(button.isSelected()){
 				return type;

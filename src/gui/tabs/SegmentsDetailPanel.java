@@ -75,7 +75,7 @@ import charting.datasets.NucleusTableDatasetCreator;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 
 public class SegmentsDetailPanel extends DetailPanel {
@@ -296,7 +296,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 					
 				} else {
 					
-					ProfileChartOptions options = new ProfileChartOptions(list, true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileCollectionType.REGULAR);
+					ProfileChartOptions options = new ProfileChartOptions(list, true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileType.REGULAR);
 					
 					if(getChartCache().hasChart(options)){
 						chart = getChartCache().getChart(options);
@@ -311,7 +311,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 					
 					if(isSingleDataset()){
 						profile = activeDataset().getCollection()
-								.getProfileCollection(ProfileCollectionType.REGULAR)
+								.getProfileCollection(ProfileType.REGULAR)
 								.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 					}
 				} 
@@ -391,7 +391,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 					if(checkSegmentCountsMatch(list)){ // make a boxplot for each segment
 						
 						CellCollection collection = list.get(0).getCollection();
-						int segmentCount = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+						int segmentCount = collection.getProfileCollection(ProfileType.REGULAR)
 								.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
 								.getSegmentCount();
 
@@ -455,7 +455,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		// check that the datasets have the same number of segments
 		for( AnalysisDataset dataset  : list){
 			CellCollection collection = dataset.getCollection();
-			int count = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+			int count = collection.getProfileCollection(ProfileType.REGULAR)
 				.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
 				.getSegmentCount();
 			
@@ -515,7 +515,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 						options.setLogger(programLogger);
 
 						CellCollection collection = activeDataset().getCollection();
-						int segmentCount = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+						int segmentCount = collection.getProfileCollection(ProfileType.REGULAR)
 								.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
 								.getSegmentCount();
 
@@ -688,7 +688,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 									int segmentCount = activeDataset()
 											.getCollection()
-											.getProfileCollection(ProfileCollectionType.REGULAR)
+											.getProfileCollection(ProfileType.REGULAR)
 											.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
 											.getSegmentCount();
 
@@ -780,7 +780,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 									int segmentCount = activeDataset()
 											.getCollection()
-											.getProfileCollection(ProfileCollectionType.REGULAR)
+											.getProfileCollection(ProfileType.REGULAR)
 											.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
 											.getSegmentCount();
 

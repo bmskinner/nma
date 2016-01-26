@@ -29,7 +29,7 @@ import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
-import components.generic.ProfileCollectionType;
+import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
@@ -52,12 +52,6 @@ public interface Nucleus extends CellularComponent {
 
 	public void findPointsAroundBorder() throws Exception;
 	public void intitialiseNucleus(int angleProfileWindowSize) throws Exception;
-
-	/**
-	 * Get the absolute path to the image containing the nucleus
-	 * @return
-	 */
-	public String getPath();
 	
 	/**
 	 * @return a copy of the data in this nucleus or null on Exception
@@ -133,15 +127,6 @@ public interface Nucleus extends CellularComponent {
 
 	public String getPathAndNumber();
 
-	/**
-	 * Get the position of the centre of mass of the nucleus
-	 * @return
-	 */
-	public XYPoint getCentreOfMass();
-	
-	public String getOrientationPoint();
-	
-	public String getReferencePoint();
 	
 	/**
 	 * Get the cached bounding rectangle for the nucleus. If not present,
@@ -178,17 +163,6 @@ public interface Nucleus extends CellularComponent {
 	 */
 	public NucleusBorderPoint getPoint(int i);
 
-
-	/**
-	 * Get the value of the given statistic for this nucleus.
-	 * Note that NucleusStatistic.VARIABILILTY returns zero, 
-	 * as this must be calculated at the collection level
-	 * @param stat the statistic to fetch
-	 * @param scale the units to return values in
-	 * @return the value or zero if stat.equals(NucleusStatistic.VARIABILILTY)==true
-	 * @throws Exception 
-	 */
-	public double getStatistic(NucleusStatistic stat, MeasurementScale scale) throws Exception;
 	
 	/**
 	 * Get the area of the nucleus in pixels
@@ -200,36 +174,33 @@ public interface Nucleus extends CellularComponent {
 	 * Get the maximum caliper diameter across the nucleus in pixels
 	 * @return
 	 */
-	public double getFeret();
-	
-	/**
-	 * Calculate the circularity using the formula:
-	 * circularity = 4pi(area/perimeter^2)
-	 * @return the circularity
-	 */
-	public double getCircularity();
-	
-	
-	/**
-	 * Get the feret divided by the narrowest diameter through the centre of mass
-	 * @return
-	 */
-	public double getAspectRatio();
+//	public double getFeret();
+//	
+//	/**
+//	 * Calculate the circularity using the formula:
+//	 * circularity = 4pi(area/perimeter^2)
+//	 * @return the circularity
+//	 */
+//	public double getCircularity();
+//	
+//	
+//	/**
+//	 * Get the feret divided by the narrowest diameter through the centre of mass
+//	 * @return
+//	 */
+//	public double getAspectRatio();
 	
 
 	/**
 	 * Get the narrowest diameter through the centre of mass in pixels
 	 * @return
+	 * @throws Exception 
 	 */
-	public double getNarrowestDiameter();
+	public double getNarrowestDiameter() throws Exception;
 
-	public double getPathLength();
+	public double getPathLength() throws Exception;
 
-	/**
-	 * Get the perimeter of the nucleus in pixels
-	 * @return
-	 */
-//	public double getPerimeter();
+
 
 	/**
 	 * Get a copy of the angle profile. The first index of the profile
@@ -239,7 +210,7 @@ public interface Nucleus extends CellularComponent {
 	 * @return
 	 * @throws Exception 
 	 */
-	public SegmentedProfile getAngleProfile() throws Exception;
+	public SegmentedProfile getProfile(ProfileType type) throws Exception;
 	
 	/**
 	 * Get a copy of the angle profile offset to start at the given point
@@ -247,7 +218,7 @@ public interface Nucleus extends CellularComponent {
 	 * @return a copy of the segmented profile
 	 * @throws Exception 
 	 */
-	public SegmentedProfile getAngleProfile(BorderTag tag) throws Exception;
+	public SegmentedProfile getProfile(ProfileType type, BorderTag tag) throws Exception;
 
 	
 	/**
@@ -255,7 +226,7 @@ public interface Nucleus extends CellularComponent {
 	 * @param profile
 	 * @throws Exception 
 	 */
-	public void setAngleProfile(SegmentedProfile profile) throws Exception;
+//	public void setAngleProfile(SegmentedProfile profile) throws Exception;
 	
 	/**
 	 * Update the angle profile to the given segmented profile. The profile being used is offset
@@ -264,7 +235,7 @@ public interface Nucleus extends CellularComponent {
 	 * @param pointType the border tag the profile begins from
 	 * @throws Exception
 	 */
-	public void setAngleProfile(SegmentedProfile p, BorderTag tag) throws Exception;
+//	public void setAngleProfile(SegmentedProfile p, BorderTag tag) throws Exception;
 	
 	
 
@@ -278,7 +249,7 @@ public interface Nucleus extends CellularComponent {
 	 * Fetch the distance profile through the centre of mass
 	 * @return
 	 */
-	public Profile getDistanceProfile();
+//	public Profile getDistanceProfile();
 
 	/**
 	 * Get the length of the angle profile in index units
@@ -291,13 +262,13 @@ public interface Nucleus extends CellularComponent {
 	 * Get the length of a pixel in micrometres
 	 * @return
 	 */
-	public double getScale();
+//	public double getScale();
 	
 	
 	/**
 	 * Set the length of a pixel in micrometres
 	 */
-	public void setScale(double scale);
+//	public void setScale(double scale);
 	
 	public NucleusBorderPoint getBorderPoint(int i);
 
@@ -343,7 +314,7 @@ public interface Nucleus extends CellularComponent {
 	 */
 	public boolean containsOriginalPoint(XYPoint p);
 	
-	public void calculateFractionalSignalDistancesFromCoM();
+	public void calculateFractionalSignalDistancesFromCoM() throws Exception;
 	public void calculateSignalDistancesFromCoM();
 
 	/*
@@ -354,7 +325,7 @@ public interface Nucleus extends CellularComponent {
 	
 	public void setOutputFolder(String f);
 
-	public void setCentreOfMass(XYPoint d);
+//	public void setCentreOfMass(XYPoint d);
 
 	public void setBorderList(List<NucleusBorderPoint> list);
 
@@ -398,9 +369,9 @@ public interface Nucleus extends CellularComponent {
 
 //	public void calculatePathLength();
 
-	public void setArea(double d);
-	public void setFeret(double d);
-	public void setPerimeter(double d);
+//	public void setArea(double d);
+//	public void setFeret(double d);
+//	public void setPerimeter(double d);
 
 	/*
     -----------------------
@@ -435,8 +406,9 @@ public interface Nucleus extends CellularComponent {
 	 *  Find the point with the narrowest diameter through the CoM
 	 *  using the distance profile
 	 * @return
+	 * @throws Exception 
 	 */
-	public NucleusBorderPoint getNarrowestDiameterPoint();
+	public NucleusBorderPoint getNarrowestDiameterPoint() throws Exception;
 
 	/**
 	 * Flip the nucleus on the x-axis (horizontally) about the given point
@@ -471,7 +443,7 @@ public interface Nucleus extends CellularComponent {
 	
 	public void exportSignalDistanceMatrix();
 
-	public Profile getSingleDistanceProfile();
+//	public Profile getSingleDistanceProfile();
 	
 	
 	/**
@@ -480,7 +452,7 @@ public interface Nucleus extends CellularComponent {
 	 * @return
 	 * @throws Exception 
 	 */
-	public SegmentedProfile getProfile(ProfileCollectionType type) throws Exception;
+//	public SegmentedProfile getProfile(ProfileCollectionType type) throws Exception;
 	
 	
 	/**
@@ -488,12 +460,19 @@ public interface Nucleus extends CellularComponent {
 	 * @param type
 	 * @param profile
 	 */
-	public void setProfile(ProfileCollectionType type, SegmentedProfile profile);
+	public void setProfile(ProfileType type, SegmentedProfile profile);
 	
+	
+	/**
+	 * Test if the given type of profile is available
+	 * @param type
+	 * @return
+	 */
+	public boolean hasProfile(ProfileType type);
 
 	public String dumpInfo(int type);
 
-	public double getAngle(int index);
+//	public double getAngle(int index);
 
 	
 	/**
@@ -503,7 +482,7 @@ public interface Nucleus extends CellularComponent {
 	 */
 	public int getIndex(NucleusBorderPoint p);
 
-	public double getDistance(int index);
+//	public double getDistance(int index);
 
 	/**
 	 * Update the border point at the given index to the 
