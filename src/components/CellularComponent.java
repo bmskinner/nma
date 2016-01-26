@@ -41,12 +41,17 @@ public interface CellularComponent {
 	public static final int WIDTH 	= 2;
 	public static final int HEIGHT 	= 3;
 	
+	
 	public double[] getPosition();
 	
 	public double getArea();
 	
 	public boolean equals(CellularComponent c);
 	
+	/**
+	 * Get the image file the component was found in
+	 * @return
+	 */
 	public File getSourceFile();
 	
 	public void setSourceFile(File sourceFile);
@@ -59,10 +64,24 @@ public interface CellularComponent {
 	
 	public Rectangle getBounds();
 	
+	/**
+	 * Get the folder of the image the component was found in
+	 * @return
+	 */
 	public File getSourceFolder();
 
+	/**
+	 * Get the name of the image the component was found in
+	 * @return
+	 */
 	public String getSourceFileName();
-
+	
+	/**
+	 * Set the position of the component in the original
+	 * image. See getPosition() for values to use.
+	 * @param d
+	 * @see getPosition()
+	 */
 	public void setPosition(double[] position);
 
 

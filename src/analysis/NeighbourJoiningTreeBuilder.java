@@ -49,7 +49,7 @@ public class NeighbourJoiningTreeBuilder extends AnalysisWorker {
 		
 		Collection<Taxon> result = new HashSet<Taxon>(); 
 		for(Nucleus n: getDataset().getCollection().getNuclei()){
-			result.add(Taxon.getTaxon(n.getSourceDirectoryName()+"-"+n.getNameAndNumber()));
+			result.add(Taxon.getTaxon(n.getSourceFolder().getAbsolutePath()+"-"+n.getNameAndNumber()));
 		}
 		return result;
 	}

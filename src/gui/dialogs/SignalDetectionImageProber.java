@@ -118,7 +118,7 @@ public class SignalDetectionImageProber extends ImageProber {
 
 			for(Nucleus n : dataset.getCollection().getNuclei()){
 //				programLogger.log(Level.FINEST, "Testing nucleus "+n.getImageName()+" against "+imageName);
-				if(n.getImageName().equals(imageName)){
+				if(n.getSourceFileName().equals(imageName)){
 //					programLogger.log(Level.FINEST, "  Nucleus is in image; finding signals");
 					List<NuclearSignal> list = finder.detectSignal(imageFile, stack, n);
 					programLogger.log(Level.FINEST, "  Detected "+list.size()+" signals");

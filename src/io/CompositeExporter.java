@@ -120,7 +120,7 @@ public class CompositeExporter {
 					totalWidth+=(int)(boxWidth);
 
 					finalProcessor.insert(newProcessor, newX, newY);
-					TextRoi label = new TextRoi(newX, newY, n.getImageName()+"-"+n.getNucleusNumber());
+					TextRoi label = new TextRoi(newX, newY, n.getSourceFileName()+"-"+n.getNucleusNumber());
 					Overlay overlay = new Overlay(label);
 					finalProcessor.drawOverlay(overlay);  
 				} catch(Exception e){

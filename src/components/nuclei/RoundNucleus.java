@@ -401,14 +401,33 @@ public class RoundNucleus
 	public File getSourceFile(){
 		return new File(this.sourceFile.getAbsolutePath());
 	}
+	
+	public File getSourceFolder(){
+		return this.sourceFile.getParentFile();
+	}
+	
+	public void setSourceFolder(File f){
+		//TODO
+		return;
+	}
 
 	public File getNucleusFolder(){
 		return new File(this.nucleusFolder.getAbsolutePath());
 	}
-
-	public String getImageName(){
-		return new String(this.sourceFile.getName());
+	
+	public int getChannel(){
+		//TODO
+		return 2;
 	}
+	
+	public void setChannel(int channel){
+		//TODO
+		return;
+	}
+
+//	public String getImageName(){
+//		return new String(this.sourceFile.getName());
+//	}
 
 	public String getAnnotatedImagePath(){
 		String outPath = this.nucleusFolder.getAbsolutePath()+
@@ -432,7 +451,7 @@ public class RoundNucleus
 		String outPath = this.nucleusFolder.getAbsolutePath()+
 											File.separator+
 											Constants.IMAGE_PREFIX+
-											this.getImageName()+"-"+
+											this.getSourceFileName()+"-"+
 											this.getNucleusNumber()+
 											".enlarged.tiff";
 		return outPath;
@@ -442,15 +461,31 @@ public class RoundNucleus
 //		String extension = "";
 		String trimmed = "";
 
-		int i = this.getImageName().lastIndexOf('.');
+		int i = this.getSourceFileName().lastIndexOf('.');
 		if (i > 0) {
-				trimmed   = this.getImageName().substring(0,i);
+				trimmed   = this.getSourceFileName().substring(0,i);
 		}
 		return trimmed;
 	}
 
 	public String getOutputFolderName(){
 		return this.outputFolder;
+	}
+	
+	public String getSourceFileName(){
+		return this.sourceFile.getName();
+	}
+	
+	public void setSourceFileName(String s){
+		return;
+	}
+	
+	public void setBoundingRectangle(Rectangle r){
+		return;
+	}
+	
+	public Rectangle getBounds(){
+		return this.boundingRectangles.get(BorderTag.REFERENCE_POINT);
 	}
 
 	public File getOutputFolder(){
@@ -483,7 +518,7 @@ public class RoundNucleus
 	}
 	
 	public String getNameAndNumber(){
-		return this.getImageName()+"-"+this.getNucleusNumber();
+		return this.getSourceFileName()+"-"+this.getNucleusNumber();
 	}
 
 	public String getPathAndNumber(){
@@ -823,7 +858,7 @@ public class RoundNucleus
 	}
 
 
-	protected void setSourceFile(File d){
+	public void setSourceFile(File d){
 		this.sourceFile = d;
 	}
 	

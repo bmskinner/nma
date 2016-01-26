@@ -407,7 +407,7 @@ public class NucleusDatasetCreator {
 			}
 			double[][] ndata = { x.asArray(), angles.asArray() };
 			try{
-			ds.addSeries("Nucleus_"+n.getImageName()+"-"+n.getNucleusNumber(), ndata);
+			ds.addSeries("Nucleus_"+n.getSourceFileName()+"-"+n.getNucleusNumber(), ndata);
 			} catch(Exception e){
 				IJ.log("Error forming data series:"+e.getMessage());
 				IJ.log("Angles:"+angles.size());
@@ -705,7 +705,7 @@ public class NucleusDatasetCreator {
 		addSegmentsFromProfile(segments, profile, ds, nucleus.getLength(), 0);
 		
 		double[][] ndata = { xpoints.asArray(), profile.asArray() };
-		ds.addSeries("Nucleus_"+nucleus.getImageName()+"-"+nucleus.getNucleusNumber(), ndata);
+		ds.addSeries("Nucleus_"+nucleus.getSourceFileName()+"-"+nucleus.getNucleusNumber(), ndata);
 		
 		return ds;
 	}

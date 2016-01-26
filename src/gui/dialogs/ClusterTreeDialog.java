@@ -402,7 +402,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 //			return false;
 			// otherwise look for the folder and name
 			
-			nucleusName = nucleus.getSourceDirectoryName()+"-"+nucleus.getNameAndNumber();
+			nucleusName = nucleus.getSourceFolder().getAbsolutePath()+"-"+nucleus.getNameAndNumber();
 //			programLogger.log(Level.FINEST, "\t\tTesting "+nucleusName);
 			if(name.equals(nucleusName)){
 				return true;

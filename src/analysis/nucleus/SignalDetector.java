@@ -112,11 +112,11 @@ public class SignalDetector extends AnalysisWorker {
 				options.setThreshold(originalMinThreshold);
 
 				Nucleus n = c.getNucleus();
-				log(Level.FINER, "Looking for signals associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber());
+				log(Level.FINER, "Looking for signals associated with nucleus "+n.getSourceFileName()+"-"+n.getNucleusNumber());
 				
 				// get the image in the folder with the same name as the
 				// nucleus source image
-				File imageFile = new File(folder + File.separator + n.getImageName());
+				File imageFile = new File(folder + File.separator + n.getSourceFileName());
 				log(Level.FINER, "Source file: "+imageFile.getAbsolutePath());
 
 				try{

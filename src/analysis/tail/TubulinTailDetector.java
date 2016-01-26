@@ -111,11 +111,11 @@ public class TubulinTailDetector extends AnalysisWorker {
 			for(Cell c : getDataset().getCollection().getCells()){
 
 				Nucleus n = c.getNucleus();
-				fileLogger.log(Level.INFO, "Looking for tails associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber());
+				fileLogger.log(Level.INFO, "Looking for tails associated with nucleus "+n.getSourceFileName()+"-"+n.getNucleusNumber());
 				
 				// get the image in the folder with the same name as the
 				// nucleus source image
-				File imageFile = new File(folder + File.separator + n.getImageName());
+				File imageFile = new File(folder + File.separator + n.getSourceFileName());
 				fileLogger.log(Level.FINE, "Tail in: "+imageFile.getAbsolutePath());
 //				SpermTail tail = null;
 				

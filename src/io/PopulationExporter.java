@@ -151,12 +151,12 @@ public class PopulationExporter extends AnalysisWorker {
 				File imagePath = new File(n.getEnlargedImagePath());
 
 				// trim the name back to image name and number
-				String imageName = n.getImageName();
+				String imageName = n.getSourceFileName();
 				if(imageName.endsWith(".tiff")){
 					imageName = imageName.replace(".tiff", "");
 				}
 				
-				File newPath = new File(exportFolder+File.separator+n.getImageName()+"-"+n.getNucleusNumber()+".tiff");
+				File newPath = new File(exportFolder+File.separator+n.getSourceFileName()+"-"+n.getNucleusNumber()+".tiff");
 
 				if(imagePath.exists()){		
 					

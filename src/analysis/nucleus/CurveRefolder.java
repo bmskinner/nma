@@ -107,7 +107,7 @@ public class CurveRefolder extends AnalysisWorker {
 		refoldNucleus = new ConsensusNucleus(n, collection.getNucleusType());
 
 		log(Level.FINEST, "Refolding nucleus of class: "+collection.getNucleusType().toString());
-		log(Level.FINEST, "Subject: "+refoldNucleus.getImageName()+"-"+refoldNucleus.getNucleusNumber());
+		log(Level.FINEST, "Subject: "+refoldNucleus.getSourceFileName()+"-"+refoldNucleus.getNucleusNumber());
 
 		Profile targetProfile 	= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.MEDIAN);
 		Profile q25 			= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.LOWER_QUARTILE);

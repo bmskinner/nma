@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
@@ -35,7 +36,7 @@ import components.nuclear.NucleusBorderPoint;
 import components.nuclear.SignalCollection;
 import stats.NucleusStatistic;
 
-public interface Nucleus {
+public interface Nucleus extends CellularComponent {
 
 	// index values for selecting original positions
 	// indices in  the originalPositions array
@@ -52,7 +53,7 @@ public interface Nucleus {
 	public void findPointsAroundBorder() throws Exception;
 	public void intitialiseNucleus(int angleProfileWindowSize) throws Exception;
 
-	public UUID getID();
+//	public UUID getID();
 
 	/**
 	 * Get the absolute path to the image containing the nucleus
@@ -74,7 +75,7 @@ public interface Nucleus {
 	 * 3 - HEIGHT of the bounding box
 	 * @return
 	 */
-	public double[] getPosition();
+//	public double[] getPosition();
 
 	/**
 	 * Set the position of the nucleus in the original
@@ -82,13 +83,13 @@ public interface Nucleus {
 	 * @param d
 	 * @see getPosition()
 	 */
-	public void setPosition(double[] d);
+//	public void setPosition(double[] d);
 
 	/**
 	 * Get the absolute path of the original image
 	 * @return
 	 */
-	public File getSourceFile();
+//	public File getSourceFile();
 
 	/**
 	 * Get the absolute path to the folder containing
@@ -102,7 +103,7 @@ public interface Nucleus {
 	 * Get the name of the image the nucleus was found in
 	 * @return
 	 */
-	public String getImageName();
+//	public String getImageName();
 	
 	
 	/**
@@ -154,7 +155,7 @@ public interface Nucleus {
 	 * the nucleus is found
 	 * @return
 	 */
-	public String getDirectory();
+//	public String getDirectory();
 	
 	/**
 	 * Get the name of the directory in which the image containing
@@ -162,7 +163,7 @@ public interface Nucleus {
 	 * will return ImageFolder
 	 * @return
 	 */
-	public String getSourceDirectoryName();
+//	public String getSourceDirectoryName();
 
 	/**
 	 * Get the absolute path to the image containing the nucleus
@@ -241,7 +242,7 @@ public interface Nucleus {
 	 * Get the area of the nucleus in pixels
 	 * @return
 	 */
-	public double getArea();
+//	public double getArea();
 	
 	/**
 	 * Get the maximum caliper diameter across the nucleus in pixels
@@ -276,7 +277,7 @@ public interface Nucleus {
 	 * Get the perimeter of the nucleus in pixels
 	 * @return
 	 */
-	public double getPerimeter();
+//	public double getPerimeter();
 
 	/**
 	 * Get a copy of the angle profile. The first index of the profile
