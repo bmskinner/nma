@@ -30,6 +30,7 @@ import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.NuclearSignalOptions;
 import analysis.nucleus.SignalFinder;
+import components.CellularComponent;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 import gui.ImageType;
@@ -159,7 +160,7 @@ public class SignalDetectionImageProber extends ImageProber {
 			ip.setColor(Color.BLUE);
 			FloatPolygon npolygon = Utils.createPolygon(n.getBorderList());
 			PolygonRoi nroi = new PolygonRoi(npolygon, PolygonRoi.POLYGON);
-			nroi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+			nroi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
 			ip.draw(nroi);
 			
 			
@@ -175,8 +176,8 @@ public class SignalDetectionImageProber extends ImageProber {
 				PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 				
 				// Offset the roi to the nucleus bouding box
-				double x = positions[Nucleus.X_BASE]+s.getCentreOfMass().getX() - ( roi.getBounds().getWidth() /2);
-				double y = positions[Nucleus.Y_BASE]+s.getCentreOfMass().getY()- ( roi.getBounds().getHeight() /2);
+				double x = positions[CellularComponent.X_BASE]+s.getCentreOfMass().getX() - ( roi.getBounds().getWidth() /2);
+				double y = positions[CellularComponent.Y_BASE]+s.getCentreOfMass().getY()- ( roi.getBounds().getHeight() /2);
 				
 				roi.setLocation( x,y );
 				ip.draw(roi);

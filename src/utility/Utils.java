@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import components.CellularComponent;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclei.Nucleus;
 
@@ -267,8 +268,8 @@ public class Utils {
 
 			 for(int i=0;i<list.size();i++){
 				 NucleusBorderPoint p = list.get(i);
-				 xpoints[i] = (float) p.getX() + (float) originalPosition[Nucleus.X_BASE];
-				 ypoints[i] = (float) p.getY() + (float) originalPosition[Nucleus.Y_BASE];
+				 xpoints[i] = (float) p.getX() + (float) originalPosition[CellularComponent.X_BASE];
+				 ypoints[i] = (float) p.getY() + (float) originalPosition[CellularComponent.Y_BASE];
 			 }
 			 
 			// Ensure the polygon is closed

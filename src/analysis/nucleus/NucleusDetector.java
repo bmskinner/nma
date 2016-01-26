@@ -61,6 +61,7 @@ import analysis.AnalysisOptions;
 import analysis.AnalysisWorker;
 import components.Cell;
 import components.CellCollection;
+import components.CellularComponent;
 import components.nuclei.Nucleus;
 
 public class NucleusDetector extends AnalysisWorker {
@@ -390,7 +391,7 @@ public class NucleusDetector extends AnalysisWorker {
 						  PolygonRoi nucleus 	 = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 						  
 						  double[] position = n.getPosition();
-						  nucleus.setLocation(position[Nucleus.X_BASE],position[Nucleus.Y_BASE]); // translate the roi to the image coordinates
+						  nucleus.setLocation(position[CellularComponent.X_BASE],position[CellularComponent.Y_BASE]); // translate the roi to the image coordinates
 						  
 						  ImageStack smallRegion = NucleusFinder.getRoiAsStack(nucleus, imageStack);
 						  Roi largeRoi 			 = RoiEnlarger.enlarge(nucleus, 20);

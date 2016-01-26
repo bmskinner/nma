@@ -44,6 +44,7 @@ import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import components.Cell;
 import components.CellCollection;
+import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.Equation;
 import components.generic.MeasurementScale;
@@ -1284,8 +1285,8 @@ public class NucleusDatasetCreator {
 
 					int i =0;
 					for(XYPoint p : signal.getBorder()){
-						xpoints[i] = p.getX() - nucleus.getPosition()[Nucleus.X_BASE];
-						ypoints[i] = p.getY() - nucleus.getPosition()[Nucleus.Y_BASE];
+						xpoints[i] = p.getX() - nucleus.getPosition()[CellularComponent.X_BASE];
+						ypoints[i] = p.getY() - nucleus.getPosition()[CellularComponent.Y_BASE];
 						i++;
 					}
 					double[][] data = { xpoints, ypoints };

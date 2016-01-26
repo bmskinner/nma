@@ -39,10 +39,10 @@ public interface Nucleus {
 
 	// index values for selecting original positions
 	// indices in  the originalPositions array
-	public static final int X_BASE = 0;
-	public static final int Y_BASE = 1;
-	public static final int WIDTH = 2;
-	public static final int HEIGHT = 3;
+//	public static final int X_BASE = 0;
+//	public static final int Y_BASE = 1;
+//	public static final int WIDTH = 2;
+//	public static final int HEIGHT = 3;
 	
 	// for debugging - use in calling dumpInfo()
 	public static final int ALL_POINTS = 0;

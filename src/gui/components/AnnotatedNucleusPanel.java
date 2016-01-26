@@ -41,6 +41,7 @@ import javax.swing.border.EmptyBorder;
 import charting.charts.MorphologyChartFactory;
 import utility.Utils;
 import components.Cell;
+import components.CellularComponent;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
@@ -146,7 +147,7 @@ public class AnnotatedNucleusPanel extends JPanel {
 				
 				PolygonRoi segRoi = new PolygonRoi(x, y, PolygonRoi.POLYLINE);
 				
-				segRoi.setLocation(segRoi.getBounds().getMinX()+positions[Nucleus.X_BASE], segRoi.getBounds().getMinY()+positions[Nucleus.Y_BASE]);
+				segRoi.setLocation(segRoi.getBounds().getMinX()+positions[CellularComponent.X_BASE], segRoi.getBounds().getMinY()+positions[CellularComponent.Y_BASE]);
 				
 				ip.draw(segRoi);
 
@@ -156,7 +157,7 @@ public class AnnotatedNucleusPanel extends JPanel {
 			ip.setColor(Color.ORANGE);
 			FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
 			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-			roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+			roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
 			ip.draw(roi);
 		}
 
@@ -172,10 +173,10 @@ public class AnnotatedNucleusPanel extends JPanel {
 				
 		// Choose a clip for the image (an enlargement of the original nucleus ROI
 		double[] positions = cell.getNucleus().getPosition();
-		int wideW = (int) (positions[Nucleus.WIDTH]+20);
-		int wideH = (int) (positions[Nucleus.HEIGHT]+20);
-		int wideX = (int) (positions[Nucleus.X_BASE]-10);
-		int wideY = (int) (positions[Nucleus.Y_BASE]-10);
+		int wideW = (int) (positions[CellularComponent.WIDTH]+20);
+		int wideH = (int) (positions[CellularComponent.HEIGHT]+20);
+		int wideX = (int) (positions[CellularComponent.X_BASE]-10);
+		int wideY = (int) (positions[CellularComponent.Y_BASE]-10);
 
 		wideX = wideX<0 ? 0 : wideX;
 		wideY = wideY<0 ? 0 : wideY;

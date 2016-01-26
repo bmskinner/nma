@@ -46,6 +46,7 @@ import org.jfree.ui.Layer;
 import stats.NucleusStatistic;
 import utility.Constants;
 import components.Cell;
+import components.CellularComponent;
 import components.generic.MeasurementScale;
 import components.nuclei.Nucleus;
 
@@ -105,10 +106,10 @@ public class CellBackgroundChartPanel extends ChartPanel {
 
 				double[] positions = cell.getNucleus().getPosition();
 				int padding = 10;
-				int wideW = (int) (positions[Nucleus.WIDTH]+(padding*2));
-				int wideH = (int) (positions[Nucleus.HEIGHT]+(padding*2));
-				int wideX = (int) (positions[Nucleus.X_BASE]-padding);
-				int wideY = (int) (positions[Nucleus.Y_BASE]-padding);
+				int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
+				int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
+				int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
+				int wideY = (int) (positions[CellularComponent.Y_BASE]-padding);
 
 				wideX = wideX<0 ? 0 : wideX;
 				wideY = wideY<0 ? 0 : wideY;

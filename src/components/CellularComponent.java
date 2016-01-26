@@ -18,6 +18,7 @@
  *******************************************************************************/
 package components;
 
+import java.awt.Rectangle;
 import java.io.File;
 import java.util.UUID;
 
@@ -47,5 +48,37 @@ public interface CellularComponent {
 	public boolean equals(CellularComponent c);
 	
 	public File getSourceFile();
+	
+	public void setSourceFile(File sourceFile);
+		
+	public int getChannel();
+
+	public void setChannel(int channel);
+	
+	public double getPerimeter();
+	
+	public Rectangle getBounds();
+	
+	public File getSourceFolder();
+
+	public String getSourceFileName();
+
+	public void setPosition(double[] position);
+
+
+	public void setArea(double area);
+
+
+	public void setPerimeter(double perimeter);
+
+
+	public void setBoundingRectangle(Rectangle boundingRectangle);
+
+
+	public void setSourceFileName(String name);
+	
+	public void setSourceFolder(File sourceFolder);
+	
+
 
 }

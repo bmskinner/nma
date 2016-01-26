@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 
 import analysis.Detector;
 import analysis.AnalysisOptions.NuclearSignalOptions;
+import components.CellularComponent;
 import components.generic.BooleanProfile;
 import components.generic.Profile;
 import components.generic.XYPoint;
@@ -156,8 +157,8 @@ public class SignalFinder {
 						values.get("Area"), 
 						values.get("Feret"), 
 						values.get("Perim"), 
-						new XYPoint(values.get("XM")-n.getPosition()[Nucleus.X_BASE], 
-									values.get("YM")-n.getPosition()[Nucleus.Y_BASE]),
+						new XYPoint(values.get("XM")-n.getPosition()[CellularComponent.X_BASE], 
+									values.get("YM")-n.getPosition()[CellularComponent.Y_BASE]),
 						sourceFile.getAbsolutePath());
 
 				// only keep the signal if it is within the nucleus
@@ -264,10 +265,10 @@ public class SignalFinder {
 		
 		ImageProcessor ip = stack.getProcessor(stackNumber);
 		double[] positions = n.getPosition();
-		Rectangle boundingBox = new Rectangle( (int) positions[Nucleus.X_BASE],
-				(int) positions[Nucleus.Y_BASE],
-				(int) positions[Nucleus.WIDTH],
-				(int) positions[Nucleus.HEIGHT]);
+		Rectangle boundingBox = new Rectangle( (int) positions[CellularComponent.X_BASE],
+				(int) positions[CellularComponent.Y_BASE],
+				(int) positions[CellularComponent.WIDTH],
+				(int) positions[CellularComponent.HEIGHT]);
 		
 		ip.setRoi(boundingBox);
 		ImageStatistics statistics = ImageStatistics.getStatistics(ip, Measurements.AREA, new Calibration());

@@ -44,6 +44,7 @@ import utility.Utils;
 import analysis.AnalysisDataset;
 import components.Cell;
 import components.CellCollection;
+import components.CellularComponent;
 import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
@@ -133,7 +134,7 @@ public class FishRemappingDialog extends ImageProber {
 
 					FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
 					PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-					roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+					roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
 
 					if(roi.contains(originalX, originalY)){
 //						getProgramLogger().log(Level.FINER, "Nucleus clicked");
@@ -279,7 +280,7 @@ public class FishRemappingDialog extends ImageProber {
 		ip.setLineWidth(NUCLEUS_OUTLINE_WIDTH);
 		FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
 		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-		roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+		roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
 		ip.draw(roi);
 	}
 

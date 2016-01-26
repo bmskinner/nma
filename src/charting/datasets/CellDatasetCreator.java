@@ -30,6 +30,7 @@ import javax.swing.table.TableModel;
 
 import utility.Utils;
 import components.Cell;
+import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.BorderTag.BorderTagType;
@@ -133,8 +134,8 @@ public class CellDatasetCreator {
 					
 					fieldNames.add("Signal CoM");
 					
-					int comX = s.getCentreOfMass().getXAsInt()+ (int) n.getPosition()[Nucleus.X_BASE];
-					int comY = s.getCentreOfMass().getYAsInt()+ (int) n.getPosition()[Nucleus.Y_BASE];
+					int comX = s.getCentreOfMass().getXAsInt()+ (int) n.getPosition()[CellularComponent.X_BASE];
+					int comY = s.getCentreOfMass().getYAsInt()+ (int) n.getPosition()[CellularComponent.Y_BASE];
 					rowData.add(comX+", "+comY);
 					
 					fieldNames.add("Signal angle");

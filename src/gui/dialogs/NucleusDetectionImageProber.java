@@ -29,6 +29,7 @@ import analysis.ImageFilterer;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.nucleus.NucleusFinder;
 import components.Cell;
+import components.CellularComponent;
 import components.nuclei.Nucleus;
 import gui.ImageType;
 import ij.ImageStack;
@@ -254,7 +255,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 		double[] positions = n.getPosition();
 		FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
 		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-		roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+		roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
 		ip.setLineWidth(2);
 		ip.draw(roi);
 	}

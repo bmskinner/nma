@@ -130,6 +130,10 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		this.sourceFolder = sourceFolder;
 	}
 	
+	public void setSourceFile(File sourceFile){
+		setSourceFolder(  sourceFile.getParentFile());
+		setSourceFileName(sourceFile.getName()      );
+	}
 	
 
 

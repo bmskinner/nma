@@ -81,6 +81,7 @@ import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.TailDatasetCreator;
 import components.Cell;
 import components.CellCollection;
+import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.ProfileCollection;
@@ -876,10 +877,10 @@ public class MorphologyChartFactory {
 			double[] positions = cell.getNucleus().getPosition();
 			
 			int padding = 0;
-			int wideW = (int) (positions[Nucleus.WIDTH]+(padding*2));
-			int wideH = (int) (positions[Nucleus.HEIGHT]+(padding*2));
-			int wideX = (int) (positions[Nucleus.X_BASE]-padding);
-			int wideY = (int) (positions[Nucleus.Y_BASE]-padding);
+			int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
+			int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
+			int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
+			int wideY = (int) (positions[CellularComponent.Y_BASE]-padding);
 
 			wideX = wideX<0 ? 0 : wideX;
 			wideY = wideY<0 ? 0 : wideY;
