@@ -37,38 +37,28 @@ import components.generic.XYPoint;
  * @author bms41
  *
  */
-public class SpermTail  implements Serializable, CellularComponent, Flagellum {
-	
-	// indices in  the originalPositions array
-		public static final int X_BASE 	= 0;
-		public static final int Y_BASE 	= 1;
-		public static final int WIDTH 	= 2;
-		public static final int HEIGHT 	= 3;
-		
+public class SpermTail extends AbstractCellularComponent implements Serializable, Flagellum {
+			
 		private static final long serialVersionUID = 1L;
-		
-		protected UUID uuid;
-		
-		protected File sourceFile;    // the image from which the tail came
-		protected int sourceChannel; // the channel in the source image
-		
+
 		protected double length; // the length of the skeleton
-		protected double[] orignalPosition; // the xbase, ybase, width and height of the original bounding rectangle
 		
-		protected XYPoint nucleusIntersection;
+		protected XYPoint nucleusIntersection; // the position where the tail intersects the nucleus
 		
 		protected List<XYPoint> skeletonPoints = new ArrayList<XYPoint>(0); 
 		protected List<XYPoint> borderPoints   = new ArrayList<XYPoint>(0); 
 		
 		public SpermTail(File source, int channel, Roi skeleton, Roi border){
-			this.uuid = java.util.UUID.randomUUID();
-			this.sourceFile = source;
-			this.sourceChannel = channel;
+			super();
+
+			this.setSourceFolder(source.getParentFile());
+			this.setSourceFileName(source.getName());
+			this.setChannel(channel);
 			
-			this.orignalPosition = new double[] { border.getPolygon().getBounds().getMinX(),
+			this.setPosition( new double[] { border.getPolygon().getBounds().getMinX(),
 					 border.getPolygon().getBounds().getMinY(),
 					 border.getPolygon().getBounds().getWidth(),
-					 border.getPolygon().getBounds().getHeight()};
+					 border.getPolygon().getBounds().getHeight()});
 			
 			
 			FloatPolygon skeletonPolygon = skeleton.getInterpolatedPolygon(1, true);
@@ -85,23 +75,14 @@ public class SpermTail  implements Serializable, CellularComponent, Flagellum {
 			
 		}
 		
-		public SpermTail(SpermTail t){
-			this.uuid = java.util.UUID.randomUUID();
-			this.sourceFile = t.getSourceFile();
-			this.sourceChannel = t.getSourceChannel();
-			
-			this.orignalPosition = t.getPosition();
-			
+		public SpermTail(final SpermTail t){
+			super(t);			
 			this.borderPoints = t.getBorder();
 			this.skeletonPoints = t.getSkeleton();
 									
 			this.length = t.getLength();
 		}
-		
-		public UUID getID(){
-			return this.uuid;
-		}
-		
+				
 		public List<XYPoint> getSkeleton(){
 			return this.skeletonPoints;
 		}
@@ -113,7 +94,7 @@ public class SpermTail  implements Serializable, CellularComponent, Flagellum {
 		public List<XYPoint> getOffsetSkeleton(){
 			List<XYPoint> result = new ArrayList<XYPoint>(0);
 			for(XYPoint p : skeletonPoints){
-				result.add(new XYPoint( p.getX() - orignalPosition[X_BASE], p.getY() - orignalPosition[Y_BASE]));
+				result.add(new XYPoint( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
 			}
 			return result;
 		}
@@ -126,7 +107,7 @@ public class SpermTail  implements Serializable, CellularComponent, Flagellum {
 		public List<XYPoint> getOffsetBorder(){
 			List<XYPoint> result = new ArrayList<XYPoint>(0);
 			for(XYPoint p : borderPoints){
-				result.add(new XYPoint( p.getX() - orignalPosition[X_BASE], p.getY() - orignalPosition[Y_BASE]));
+				result.add(new XYPoint( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
 			}
 			return result;
 		}
@@ -135,23 +116,6 @@ public class SpermTail  implements Serializable, CellularComponent, Flagellum {
 			return this.length;
 		}
 		
-		public File getSourceFile(){
-			return this.sourceFile;
-		}
-		
-		public int getSourceChannel(){
-			return this.sourceChannel;
-		}
-		
-		public double[] getPosition(){
-			return this.orignalPosition;
-		}
-
-		@Override
-		public double getArea() {
-			// TODO Auto-generated method stub
-			return 0;
-		}
 
 		@Override
 		public boolean equals(CellularComponent c) {

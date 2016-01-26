@@ -63,7 +63,8 @@ public class NucleusBorderPoint
 	 * @param p
 	 */
 	public NucleusBorderPoint( NucleusBorderPoint p){
-		super(p.getX(), p.getY());
+//		super(p.getX(), p.getY());
+		super(p);
 	}
 	
 	/**

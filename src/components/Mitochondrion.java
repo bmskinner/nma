@@ -23,12 +23,11 @@ public class Mitochondrion extends AbstractCellularComponent {
 	private static final long serialVersionUID = 1L;
 	
 	public Mitochondrion(){
-		this.id = java.util.UUID.randomUUID();
+		super();
 	}
 	
-	public Mitochondrion(Mitochondrion m){
-		this.id = m.getID();
-		this.position = m.getPosition();
+	public Mitochondrion(final Mitochondrion m){
+		super(m);
 	} 
 
 }

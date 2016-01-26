@@ -8,11 +8,12 @@ import java.util.UUID;
 public class AbstractCellularComponent implements CellularComponent, Serializable {
 
 	private static final long serialVersionUID = 1L;
-	protected UUID id;
+	protected final UUID id;
 	
 	/**
 	 * The original position in the source image of the component.
 	 */
+
 	protected double[] position;
 	
 	protected double area;
@@ -37,6 +38,8 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	 */
 	private String sourceFileName;
 	
+	private int channel; // the RGB channel in which the signal was seen
+	
 	public AbstractCellularComponent(){
 		this.id = java.util.UUID.randomUUID();
 	}
@@ -54,6 +57,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		this.boundingRectangle = a.getBounds();
 		this.sourceFolder = a.getSourceFolder();
 		this.sourceFileName = a.getSourceFileName();
+		this.channel = a.getChannel();
 	}
 	
 	public UUID getID() {
@@ -98,12 +102,6 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		return this.sourceFileName;
 	}
 
-
-	public void setId(UUID id) {
-		this.id = id;
-	}
-
-
 	public void setPosition(double[] position) {
 		this.position = position;
 	}
@@ -124,8 +122,24 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	}
 
 
+	public void setSourceFileName(String name) {
+		this.sourceFileName = name;
+	}
+	
 	public void setSourceFolder(File sourceFolder) {
 		this.sourceFolder = sourceFolder;
+	}
+	
+	
+
+
+	public int getChannel() {
+		return channel;
+	}
+
+
+	public void setChannel(int channel) {
+		this.channel = channel;
 	}
 
 

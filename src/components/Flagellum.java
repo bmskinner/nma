@@ -18,8 +18,6 @@
  *******************************************************************************/
 package components;
 
-
-import java.io.File;
 import java.util.List;
 
 import components.generic.XYPoint;
@@ -47,12 +45,6 @@ public interface Flagellum {
 	public List<XYPoint> getOffsetBorder();
 	
 	public double getLength();
-	
-	public File getSourceFile();
-	
-	public int getSourceChannel();
-	
-	public double[] getPosition();
 
 
 }

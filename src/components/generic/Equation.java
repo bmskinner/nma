@@ -1,7 +1,5 @@
 package components.generic;
 
-import ij.IJ;
-
 /*******************************************************************************
  *  	Copyright (C) 2015 Ben Skinner
  *   
@@ -29,8 +27,8 @@ import ij.IJ;
 
 public class Equation{
 
-	double m;
-	double c;
+	final double m;
+	final double c;
 
 	/**
 	*	Constructor using gradient and intercept. 
@@ -39,7 +37,7 @@ public class Equation{
 	* @param c the y-intercept of the line
 	* @return An Equation describing the line
 	*/
-	public Equation(double m, double c){
+	public Equation(final double m, final double c){
 		if(Double.valueOf(m)==null || Double.valueOf(c)==null){
 			throw new IllegalArgumentException("m or c is null");
 		}

@@ -124,7 +124,7 @@ private double x;
   * @param a the point to measure to
   * @return the distance between the points
   */
-  public double getLengthTo(XYPoint a){
+  public double getLengthTo(final XYPoint a){
 
     // a2 = b2 + c2
     double dx = Math.abs(this.getX() - a.getX());
@@ -142,7 +142,7 @@ private double x;
   * @param a the point to test against
   * @return boolean whether they overlap as integers
   */
-  public boolean overlaps(XYPoint a){
+  public boolean overlaps(final XYPoint a){
     if( this.getXAsInt() == a.getXAsInt() && this.getYAsInt() == a.getYAsInt()){
       return true;
     } else {
@@ -159,13 +159,43 @@ private double x;
   public String toString(){
     return this.getXAsInt()+","+this.getYAsInt();
   }
+  
+  
 
-  public boolean equals(XYPoint p) {
-	  if(this.getX()==p.getX()  && this.getY()==p.getY()){
-		  return true;
-	  } else {
-		  return false;
-	  }
+  @Override
+  public int hashCode() {
+	  final int prime = 31;
+	  int result = 1;
+	  long temp;
+	  temp = Double.doubleToLongBits(x);
+	  result = prime * result + (int) (temp ^ (temp >>> 32));
+	  temp = Double.doubleToLongBits(y);
+	  result = prime * result + (int) (temp ^ (temp >>> 32));
+	  return result;
   }
+
+  @Override
+  public boolean equals(Object obj) {
+	  if (this == obj)
+		  return true;
+	  if (obj == null)
+		  return false;
+	  if (getClass() != obj.getClass())
+		  return false;
+	  XYPoint other = (XYPoint) obj;
+	  if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
+		  return false;
+	  if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
+		  return false;
+	  return true;
+  }
+
+//public boolean equals(final XYPoint p) {
+//	  if(this.getX()==p.getX()  && this.getY()==p.getY()){
+//		  return true;
+//	  } else {
+//		  return false;
+//	  }
+//  }
 
 }

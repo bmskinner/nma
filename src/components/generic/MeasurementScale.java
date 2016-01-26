@@ -25,9 +25,9 @@ public enum MeasurementScale {
 	PIXELS ("Pixels"),
 	MICRONS ("Microns");
 	
-	private String name;
+	final private String name;
 	
-	MeasurementScale(String name){
+	MeasurementScale(final String name){
 		this.name = name;
 	}
 	

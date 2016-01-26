@@ -28,13 +28,13 @@ import utility.Utils;
  */
 public class BooleanProfile {
 	
-	protected boolean[] array;
+	final protected boolean[] array;
 	
 	/**
 	 * Constructor based on an array of values.
 	 * @param values the array to use
 	 */
-	public BooleanProfile(boolean[] values){
+	public BooleanProfile(final boolean[] values){
 
 		this.array = new boolean[values.length];
 		for(int i=0; i<this.array.length; i++){
@@ -47,7 +47,7 @@ public class BooleanProfile {
 	 * of the existing Profile
 	 * @param p the profile to copy
 	 */
-	public BooleanProfile(BooleanProfile p){
+	public BooleanProfile(final BooleanProfile p){
 		
 		this.array = new boolean[p.size()];
 		for(int i=0; i<this.array.length; i++){

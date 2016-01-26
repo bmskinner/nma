@@ -56,7 +56,7 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 
 	protected JScrollPane scrollPane; // hold the main panel
 	
-	public HistogramsTabPanel(Logger programLogger){
+	public HistogramsTabPanel(final Logger programLogger){
 		super(programLogger);
 
 		this.setLayout(new BorderLayout());
@@ -90,6 +90,7 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 	}
 	
 	public void setEnabled(boolean b){
+		super.setEnabled(b);
 		useDensityPanel.setEnabled(b);
 		measurementUnitSettingsPanel.setEnabled(b);
 	}

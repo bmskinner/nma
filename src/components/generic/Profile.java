@@ -48,7 +48,8 @@ public class Profile implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	protected double[] array;
+	
+	protected final double[] array;
 	private static final int ARRAY_BEFORE = -1;
 	private static final int ARRAY_AFTER = 1;
 
@@ -58,7 +59,7 @@ public class Profile implements Serializable {
 	 * Constructor for a new Profile, based on an array of values.
 	 * @param values the array to use
 	 */
-	public Profile(double[] values){
+	public Profile(final double[] values){
 
 		this.array = new double[values.length];
 		for(int i=0; i<this.array.length; i++){
@@ -71,7 +72,7 @@ public class Profile implements Serializable {
 	 * of the existing Profile
 	 * @param p the profile to copy
 	 */
-	public Profile(Profile p){
+	public Profile(final Profile p){
 
 		this.array = new double[p.size()];
 		for(int i=0; i<this.array.length; i++){
@@ -95,23 +96,47 @@ public class Profile implements Serializable {
 	 * @param test the profile to test
 	 * @return
 	 */
-	public boolean equals(Profile test){
-		if(test==null){
+//	public boolean equals(Profile test){
+//		if(test==null){
+//			return false;
+//		}
+//		if(test.size()!=this.size()){
+//			return false;
+//		}
+//		
+//		for(int i=0;i<this.size();i++){
+//			if(this.get(i)!=test.get(i)){
+//				return false;
+//			}
+//		}
+//		return true;
+//	}
+	
+	
+
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(array);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
 			return false;
-		}
-		if(test.size()!=this.size()){
+		if (getClass() != obj.getClass())
 			return false;
-		}
-		
-		for(int i=0;i<this.size();i++){
-			if(this.get(i)!=test.get(i)){
-				return false;
-			}
-		}
+		Profile other = (Profile) obj;
+		if (!Arrays.equals(array, other.array))
+			return false;
 		return true;
 	}
 
-	
 	/**
 	 * Get the value at the given index
 	 * @param index the index

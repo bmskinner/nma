@@ -35,7 +35,7 @@ import utility.Constants;
 @SuppressWarnings("serial")
 public class ExportableTable extends JTable {
 	
-	private TablePopupMenu popup;
+	final private TablePopupMenu popup;
 	
 	public ExportableTable(){
 		super();
@@ -51,18 +51,17 @@ public class ExportableTable extends JTable {
 	
 	private class TablePopupMenu extends JPopupMenu {
 		
-		private ExportableTable table;
+		final private ExportableTable table;
 
-		private static final long serialVersionUID = 1L;
-		JMenuItem exportMenuItem = new JMenuItem( new AbstractAction("Export"){
-			private static final long serialVersionUID = 1L;
+		final private JMenuItem exportMenuItem = new JMenuItem( new AbstractAction("Export"){
+
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				export();	
 			}
 		});
 		
-		public TablePopupMenu(ExportableTable table) {
+		public TablePopupMenu(final ExportableTable table) {
 			
 			super("Popup");
 			this.table = table;

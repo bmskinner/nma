@@ -30,9 +30,9 @@ public enum BorderTag {
 	BOTTOM_VERTICAL		("Bottom vertical point", BorderTagType.EXTENDED);
 	
 	private final String name;
-	private BorderTag.BorderTagType type;
+	private final BorderTag.BorderTagType type;
 	
-	BorderTag(String name, BorderTag.BorderTagType type){
+	BorderTag(final String name, final BorderTag.BorderTagType type){
 		this.name = name;
 		this.type = type;
 	}
@@ -46,7 +46,7 @@ public enum BorderTag {
 	}
 		
 	
-	public static BorderTag[] values(BorderTag.BorderTagType type){
+	public static BorderTag[] values(final BorderTag.BorderTagType type){
 		
 		List<BorderTag> list = new ArrayList<BorderTag>();
 		for(BorderTag tag : BorderTag.values()){
