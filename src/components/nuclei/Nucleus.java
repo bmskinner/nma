@@ -29,6 +29,7 @@ import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
+import components.generic.ProfileCollectionType;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
@@ -471,6 +472,24 @@ public interface Nucleus extends CellularComponent {
 	public void exportSignalDistanceMatrix();
 
 	public Profile getSingleDistanceProfile();
+	
+	
+	/**
+	 * Get a copy of the profile associated with the given type, or null
+	 * @param type
+	 * @return
+	 * @throws Exception 
+	 */
+	public SegmentedProfile getProfile(ProfileCollectionType type) throws Exception;
+	
+	
+	/**
+	 * Set the profile for the given type
+	 * @param type
+	 * @param profile
+	 */
+	public void setProfile(ProfileCollectionType type, SegmentedProfile profile);
+	
 
 	public String dumpInfo(int type);
 

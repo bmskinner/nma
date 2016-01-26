@@ -52,6 +52,7 @@ import components.generic.BorderTag;
 import components.generic.Equation;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
+import components.generic.ProfileCollectionType;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
@@ -100,6 +101,11 @@ public class RoundNucleus
 	protected SegmentedProfile angleProfile = null; // 
 	protected Profile distanceProfile; // holds distances through CoM to opposite border
 	protected Profile singleDistanceProfile; // holds distances from CoM, not through CoM
+	
+	//TODO : make this work with an internal store for frankenprofiles etc
+	protected Map<ProfileCollectionType, SegmentedProfile> profileMap = new HashMap<ProfileCollectionType, SegmentedProfile>();
+	
+	
 	protected List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // eventually to replace angleProfile
 	protected List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
 	protected Map<BorderTag, Integer> borderTags  = new HashMap<BorderTag, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
@@ -368,13 +374,16 @@ public class RoundNucleus
 		}
 
 
-		// calculate angle profile
+		// calculate profiles
 		this.setAngleProfile(this.calculateAngleProfile(angleProfileWindowSize));
 		this.setAngleProfileWindowSize(angleProfileWindowSize);
+		this.setProfile(ProfileCollectionType.REGULAR, this.getAngleProfile());
 
 		// calc distances around nucleus through CoM
 		this.calculateDistanceProfile();
+		this.setProfile(ProfileCollectionType.DISTANCE, new SegmentedProfile(this.distanceProfile));
 		this.calculateSingleDistanceProfile();
+		this.setProfile(ProfileCollectionType.SINGLE_DISTANCE, new SegmentedProfile(this.singleDistanceProfile));
 
 		this.calculateSignalDistancesFromCoM();
 		this.calculateFractionalSignalDistancesFromCoM();
@@ -1670,9 +1679,31 @@ public class RoundNucleus
 		
 	}
 	
+
+	public SegmentedProfile getProfile(ProfileCollectionType type) throws Exception {
+		return new SegmentedProfile(this.profileMap.get(type));
+	}
+	
+	
+	public void setProfile(ProfileCollectionType type, SegmentedProfile profile){
+		this.profileMap.put(type, profile);
+	}
+	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
 	    this.boundingRectangles = new HashMap<BorderTag, Rectangle>();
+	    
+	    //TODO: this must change when the map is implemented for real
+	    this.profileMap = new HashMap<ProfileCollectionType, SegmentedProfile>();
+	    
+	    profileMap.put(ProfileCollectionType.REGULAR, this.angleProfile);
+	    try {
+			profileMap.put(ProfileCollectionType.DISTANCE, new SegmentedProfile(this.distanceProfile, angleProfile.getSegments()));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    
 	}
 
 	@Override

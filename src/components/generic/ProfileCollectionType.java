@@ -19,8 +19,10 @@
 package components.generic;
 
 public enum ProfileCollectionType { 
-	  REGULAR ("Regular profile"), 
-	  FRANKEN ("Franken profile");
+	  REGULAR ("Angle profile"), 
+	  FRANKEN ("Franken profile"),
+	  DISTANCE("Distance profile"),
+	  SINGLE_DISTANCE("Single distance profile");
 	  
 	  private String name;
 	  	  
