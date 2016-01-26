@@ -36,14 +36,13 @@ import components.nuclear.NucleusBorderPoint;
 import components.nuclear.SignalCollection;
 import stats.NucleusStatistic;
 
+/**
+ * A Nucleus is the interface to all the possible types of nuclei that will be
+ * used. 
+ * @author bms41
+ *
+ */
 public interface Nucleus extends CellularComponent {
-
-	// index values for selecting original positions
-	// indices in  the originalPositions array
-//	public static final int X_BASE = 0;
-//	public static final int Y_BASE = 1;
-//	public static final int WIDTH = 2;
-//	public static final int HEIGHT = 3;
 	
 	// for debugging - use in calling dumpInfo()
 	public static final int ALL_POINTS = 0;
@@ -52,8 +51,6 @@ public interface Nucleus extends CellularComponent {
 
 	public void findPointsAroundBorder() throws Exception;
 	public void intitialiseNucleus(int angleProfileWindowSize) throws Exception;
-
-//	public UUID getID();
 
 	/**
 	 * Get the absolute path to the image containing the nucleus
@@ -67,43 +64,12 @@ public interface Nucleus extends CellularComponent {
 	public Nucleus duplicate();
 
 	/**
-	 * Get the position of the nucleus in the 
-	 * original image. The indexes in the double are
-	 * 0 - X_BASE of the bounding box
-	 * 1 - Y_BASE of the bounding box
-	 * 2 - WIDTH of the bounding box
-	 * 3 - HEIGHT of the bounding box
-	 * @return
-	 */
-//	public double[] getPosition();
-
-	/**
-	 * Set the position of the nucleus in the original
-	 * image. See getPosition() for values to use.
-	 * @param d
-	 * @see getPosition()
-	 */
-//	public void setPosition(double[] d);
-
-	/**
-	 * Get the absolute path of the original image
-	 * @return
-	 */
-//	public File getSourceFile();
-
-	/**
 	 * Get the absolute path to the folder containing
 	 * the details of this nucleus. It will have the
 	 * format /SourceDir/ImageName/
 	 * @return
 	 */
 	public File getNucleusFolder();
-
-	/**
-	 * Get the name of the image the nucleus was found in
-	 * @return
-	 */
-//	public String getImageName();
 	
 	
 	/**
@@ -149,21 +115,6 @@ public interface Nucleus extends CellularComponent {
 	 * @return
 	 */
 	public File getOutputFolder();
-
-	/**
-	 * Get the directory in which the image containing
-	 * the nucleus is found
-	 * @return
-	 */
-//	public String getDirectory();
-	
-	/**
-	 * Get the name of the directory in which the image containing
-	 * the nucleus is found. e.g. C:\Folder\ImageFolder\1.tiff
-	 * will return ImageFolder
-	 * @return
-	 */
-//	public String getSourceDirectoryName();
 
 	/**
 	 * Get the absolute path to the image containing the nucleus

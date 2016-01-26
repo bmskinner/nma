@@ -22,6 +22,12 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.util.UUID;
 
+/**
+ * These methods are provided through the AbstractCellularComponent,
+ * from which all other components should be derived
+ * @author bms41
+ *
+ */
 public interface CellularComponent {
 		
 	public UUID getID();
@@ -65,7 +71,9 @@ public interface CellularComponent {
 	public Rectangle getBounds();
 	
 	/**
-	 * Get the folder of the image the component was found in
+	 * Get the folder of the image the component was found in.
+	 *  e.g. C:\Folder\ImageFolder\1.tiff
+	 * will return ImageFolder
 	 * @return
 	 */
 	public File getSourceFolder();

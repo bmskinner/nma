@@ -28,7 +28,7 @@ import components.generic.XYPoint;
  * @author bms41
  *
  */
-public interface Flagellum {
+public interface Flagellum extends CellularComponent {
 			
 	
 	public List<XYPoint> getSkeleton();
