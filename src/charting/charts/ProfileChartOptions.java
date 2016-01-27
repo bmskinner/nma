@@ -32,7 +32,7 @@ public class ProfileChartOptions extends ChartOptions {
 	ProfileAlignment alignment;
 	BorderTag tag;
 	boolean showMarkers;
-	ProfileType type;
+	ProfileType type = ProfileType.REGULAR;
 	
 	public ProfileChartOptions(List<AnalysisDataset> list, 
 			boolean normalised, 

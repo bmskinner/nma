@@ -60,6 +60,7 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -496,10 +497,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	 * Show the profile for the nuclei in the given cell
 	 *
 	 */
-	protected class ProfilePanel extends JPanel implements SignalChangeListener {
+	protected class ProfilePanel extends JPanel implements SignalChangeListener, ActionListener {
 		
 		private static final long serialVersionUID = 1L;
 		private DraggableOverlayChartPanel profileChartPanel; // holds the chart with the cell
+		private JComboBox<ProfileType> profileTypeBox = new JComboBox<ProfileType>(ProfileType.values());
 		
 		protected ProfilePanel(){
 
@@ -511,11 +513,18 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			profileChartPanel.addSignalChangeListener(this);
 			this.add(profileChartPanel, BorderLayout.CENTER);
 			
+			JPanel header = new JPanel(new FlowLayout());
+			header.add(profileTypeBox);
+			profileTypeBox.addActionListener(this);
+			this.add(header, BorderLayout.NORTH);
+			
 		}
 		
 		protected void update(Cell cell){
 
 			try{
+				
+				ProfileType type = (ProfileType) profileTypeBox.getSelectedItem();
 
 				if(cell==null){
 					JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
@@ -525,12 +534,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 					Nucleus nucleus = cell.getNucleus();
 
-					XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus);
-					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(ds, nucleus, activeDataset().getSwatch());
+					XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus, type);
+					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(ds, nucleus, activeDataset().getSwatch(), type);
 
 					profileChartPanel.setChart(chart, nucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT), false);
 					
-//					nucleus.getAngleProfile(BorderTag.REFERENCE_POINT).fastFourierTransform();
 				}
 
 			} catch(Exception e){
@@ -571,6 +579,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 			}
 			
+			
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			update(activeCell);
 			
 		}
 

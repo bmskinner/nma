@@ -19,18 +19,24 @@
 package components.generic;
 
 public enum ProfileType { 
-	  REGULAR ("Angle profile"), 
-	  FRANKEN ("Franken profile"),
-	  DISTANCE("Distance profile"),
-	  SINGLE_DISTANCE("Single distance profile");
+	  REGULAR ("Angle profile", "Angle"), 
+	  FRANKEN ("Franken profile", "Angle"),
+	  DISTANCE("Distance profile", "Distance across CoM"),
+	  SINGLE_DISTANCE("Single distance profile", "Distance from CoM");
 	  
 	  private String name;
+	  private String label;
 	  	  
-	  ProfileType(String name){
+	  ProfileType(String name, String label){
 		  this.name = name;
+		  this.label = label;
 	  }
 	  
 	  public String toString(){
 		  return this.name;
+	  }
+	  
+	  public String getLabel(){
+		  return this.label;
 	  }
   }

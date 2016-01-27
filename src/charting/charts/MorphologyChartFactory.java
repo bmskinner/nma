@@ -114,23 +114,8 @@ public class MorphologyChartFactory {
 	 * @param n
 	 * @return
 	 */
-	public static JFreeChart makeIndividualNucleusProfileChart(XYDataset ds, Nucleus n, ColourSwatch swatch){
-		JFreeChart chart = makeProfileChart(ds, n.getBorderLength(), swatch);
-
-//		XYPlot plot = chart.getXYPlot();
-
-//		for(BorderTag tag : n.getBorderTags().keySet()){
-//			Color colour = Color.BLACK;
-//			int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
-//
-//			if(tag.equals(BorderTag.ORIENTATION_POINT)){
-//				colour = Color.BLUE;
-//			}
-//			if(tag.equals(BorderTag.REFERENCE_POINT)){
-//				colour = Color.ORANGE;
-//			}
-//			plot.addDomainMarker(new ValueMarker(index, colour, ChartComponents.MARKER_STROKE));	
-//		}
+	public static JFreeChart makeIndividualNucleusProfileChart(XYDataset ds, Nucleus n, ColourSwatch swatch, ProfileType type){
+		JFreeChart chart = makeProfileChart(ds, n.getBorderLength(), swatch, type);
 		return chart;
 	}
 		
@@ -160,7 +145,7 @@ public class MorphologyChartFactory {
 			}
 
 			ColourSwatch swatch = dataset.getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : dataset.getSwatch();
-			chart = makeProfileChart(ds, length, swatch);
+			chart = makeProfileChart(ds, length, swatch, options.getType());
 
 			// mark the reference and orientation points
 
@@ -202,7 +187,7 @@ public class MorphologyChartFactory {
 
 			}
 		} else {
-			chart = makeProfileChart(null, 100, ColourSwatch.REGULAR_SWATCH);
+			chart = makeProfileChart(null, 100, ColourSwatch.REGULAR_SWATCH, options.getType());
 		}
 		return chart;
 	}
@@ -315,7 +300,7 @@ public class MorphologyChartFactory {
 		int length = 100 ; // default if normalised - for a franken collection, it makes no difference
 
 		ColourSwatch swatch = dataset.getSwatch();// == null ? ColourSwatch.REGULAR_SWATCH : dataset.getSwatch();
-		JFreeChart chart = makeProfileChart(ds, length, swatch);
+		JFreeChart chart = makeProfileChart(ds, length, swatch, ProfileType.FRANKEN);
 		
 		// mark the reference andorientation points
 		
@@ -364,10 +349,12 @@ public class MorphologyChartFactory {
 	 * @param ds the profile dataset
 	 * @return a chart
 	 */
-	public static JFreeChart makeProfileChart(XYDataset ds, int xLength, ColourSwatch swatch){
+	public static JFreeChart makeProfileChart(XYDataset ds, int xLength, ColourSwatch swatch, ProfileType type){
+		
+		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
-						"Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
+						"Position", type.getLabel(), ds, PlotOrientation.VERTICAL, true, true,
 						false);
 		try {
 
@@ -378,11 +365,14 @@ public class MorphologyChartFactory {
 			plot.getDomainAxis().setRange(0,xLength);
 
 			// always set the y range to 360 degrees
-			plot.getRangeAxis().setRange(0,360);
+			if(type.equals(ProfileType.REGULAR) || type.equals(ProfileType.FRANKEN)){
+				plot.getRangeAxis().setRange(0,360);
+				// the 180 degree line
+				plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
+			}
 			plot.setBackgroundPaint(Color.WHITE);
 
-			// the 180 degree line
-			plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
+			
 
 			int seriesCount = plot.getSeriesCount();
 
@@ -555,7 +545,7 @@ public class MorphologyChartFactory {
 		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list, tag, type);
 		CellCollection n = list.get(0).getCollection();
 		ColourSwatch swatch = list.get(0).getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : list.get(0).getSwatch();
-		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, xLength, swatch);
+		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, xLength, swatch, type);
 		XYPlot plot = chart.getXYPlot();
 		plot.getRangeAxis().setLabel("IQR");
 		plot.getRangeAxis().setAutoRange(true);

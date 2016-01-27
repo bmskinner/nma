@@ -689,23 +689,31 @@ public class NucleusDatasetCreator {
 	}
 	
 	/**
-	 * Create a segmented dataset for an individual nucleus.
+	 * Create a segmented dataset for an individual nucleus. Segments are added for
+	 * all types except frankenprofiles, since the frankenprofile boundaries will not match
 	 * @param nucleus the nucleus to draw
+	 * @param type the profile type to draw.
 	 * @return
 	 * @throws Exception 
 	 */
-	public static XYDataset createSegmentedProfileDataset(Nucleus nucleus) throws Exception{
+	public static XYDataset createSegmentedProfileDataset(Nucleus nucleus, ProfileType type) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-		SegmentedProfile profile = nucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
-		Profile xpoints = profile.getPositions(nucleus.getBorderLength());
+		SegmentedProfile profile;
+		Profile xpoints;
 		
-		// rendering order will be first on top
-		
-		// add the segments
-		List<NucleusBorderSegment> segments = profile.getOrderedSegments();
-		addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0);
-		
+		if(type.equals(ProfileType.FRANKEN)){
+			profile = nucleus.getProfile(type);
+			xpoints = profile.getPositions(profile.size());
+		} else {
+			profile = nucleus.getProfile(type, BorderTag.REFERENCE_POINT);
+			xpoints = profile.getPositions(nucleus.getBorderLength());
+			
+			// add the segments
+			List<NucleusBorderSegment> segments = nucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments();
+			addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0);
+		}
+
 		double[][] ndata = { xpoints.asArray(), profile.asArray() };
 		ds.addSeries("Nucleus_"+nucleus.getSourceFileName()+"-"+nucleus.getNucleusNumber(), ndata);
 		
