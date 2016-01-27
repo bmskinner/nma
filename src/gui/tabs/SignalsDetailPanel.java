@@ -67,6 +67,7 @@ import analysis.AnalysisDataset;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.HistogramChartFactory;
 import charting.charts.HistogramChartOptions;
+import charting.charts.SignalHistogramChartOptions;
 import charting.datasets.NuclearSignalDatasetCreator;
 import components.CellCollection;
 import components.generic.MeasurementScale;
@@ -242,7 +243,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 				Dimension preferredSize = new Dimension(400, 150);
 				for(SignalStatistic stat : SignalStatistic.values()){
 
-					HistogramChartOptions options = new HistogramChartOptions(null, stat, scale, false);
+					SignalHistogramChartOptions options = new SignalHistogramChartOptions(null, stat, scale, false, 0);
 					SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createSignalStatisticHistogram(options), stat.toString());
 					panel.setPreferredSize(preferredSize);
 					panel.addSignalChangeListener(this);
@@ -269,11 +270,15 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			boolean useDensity = HistogramPanel.this.useDensityPanel.isSelected();
 
 			try{
+
+				
+				int signalGroup = 1; //TODO - get the number  of signal groups in the selected datasets, and iterate 
+				
 				for(SignalStatistic stat : SignalStatistic.values()){
 					SelectableChartPanel panel = HistogramPanel.this.chartPanels.get(stat.toString());
 
 					JFreeChart chart = null;
-					HistogramChartOptions options = new HistogramChartOptions(getDatasets(), stat, scale, useDensity);
+					SignalHistogramChartOptions options = new SignalHistogramChartOptions(getDatasets(), stat, scale, useDensity, signalGroup);
 					options.setLogger(programLogger);
 
 					if(this.getChartCache().hasChart(options)){
@@ -285,7 +290,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 
 						if(useDensity){
 							//TODO - make the density chart
-							chart = HistogramChartFactory.createSignalStatisticHistogram(options);
+							chart = HistogramChartFactory.createSignalDensityStatsChart(options);
 							HistogramPanel.this.getChartCache().addChart(options, chart);
 
 						} else {

@@ -139,7 +139,7 @@ public class CellDatasetCreator {
 						if(stat.isDimensionless()){
 							rowData.add(df.format(pixel) );
 						} else {
-							double micron = n.getStatistic(stat, MeasurementScale.MICRONS);
+							double micron = s.getStatistic(stat, MeasurementScale.MICRONS);
 							rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
 						}
 					}

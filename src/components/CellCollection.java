@@ -638,7 +638,7 @@ public class CellCollection implements Serializable {
   }
 	  
 
-  private double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception{
+  public double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception{
 
 	  List<Cell> cells = getCellsWithNuclearSignals(signalGroup, true);
 	  List<Double> a = new ArrayList<Double>(0);

@@ -18,6 +18,7 @@
  *******************************************************************************/
 package charting.datasets;
 
+import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
@@ -28,7 +29,12 @@ import java.util.logging.Level;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
@@ -36,9 +42,14 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import charting.ChartComponents;
 import charting.TableOptions;
+import charting.charts.HistogramChartOptions;
+import stats.NucleusStatistic;
 import stats.SignalStatistic;
+import stats.Stats;
 import utility.Utils;
+import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions.NuclearSignalOptions;
 import analysis.nucleus.CurveRefolder;
@@ -48,6 +59,7 @@ import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
 import components.nuclei.Nucleus;
+import gui.components.ColourSelecter;
 
 public class NuclearSignalDatasetCreator {
 
@@ -198,31 +210,129 @@ public class NuclearSignalDatasetCreator {
 	 * @return a histogram of angles
 	 * @throws Exception 
 	 */
-	public static HistogramDataset createSignaStatisticHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception{
+	public static HistogramDataset createSignaStatisticHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception{
 		HistogramDataset ds = new HistogramDataset();
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
-			
-			for(int signalGroup : collection.getSignalGroups()){
-				
-				if(dataset.isSignalGroupVisible(signalGroup)){
 
-					if(collection.hasSignals(signalGroup)){
+			if(dataset.isSignalGroupVisible(signalGroup)){
 
-						List<Double> angles = new ArrayList<Double>(0);
+				if(collection.hasSignals(signalGroup)){
 
-						for(Nucleus n : collection.getNuclei()){
-							angles.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
-						}
-						double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
-						ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
+					List<Double> angles = new ArrayList<Double>(0);
+
+					for(Nucleus n : collection.getNuclei()){
+						angles.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
 					}
+					double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
+					ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
 				}
 			}
+			
 			
 		}
 		return ds;
 	}
+	
+	
+	/**
+	 * Make an XY dataset corresponding to the probability density of a given nuclear statistic
+	 * @param list the datasets to draw
+	 * @param stat the statistic to measure
+	 * @return a charting dataset
+	 * @throws Exception
+	 */
+	public static DefaultXYDataset createSignalDensityHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception {
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		int[] minMaxRange = calculateMinAndMaxRange(list, stat, scale, signalGroup);
+
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+			
+			String groupLabel = stat.toString();
+			double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
+			KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values, 0.001);
+	
+			double min = Stats.min(values);
+			double max = Stats.max(values);
+
+			int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
+			
+			int roundLog = log-1 == 0 ? log-2 : log-1;
+			double roundAbs = Math.pow(10, roundLog);
+			
+			int binLog = log-2;
+			double stepSize = Math.pow(10, binLog);
+			
+//			IJ.log("   roundLog: "+roundLog);
+//			IJ.log("   round to nearest: "+roundAbs);
+			
+			// use int truncation to round to nearest 100 above max
+			int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
+			maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
+			int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
+			minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
+			minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
+	
+			
+			List<Double> xValues = new ArrayList<Double>();
+			List<Double> yValues = new ArrayList<Double>();
+			
+			for(double i=minMaxRange[0]; i<=minMaxRange[1]; i+=stepSize){
+				xValues.add(i);
+				yValues.add(est.getProbability(i));
+			}
+	
+			double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
+					Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
+			
+			
+			ds.addSeries(groupLabel+"_"+collection.getName(), data);
+		}
+
+		return ds;
+	}
+	
+	/**
+	 * Calculate the minimum and maximum ranges in a list of datasets
+	 * for the given stat type
+	 * @param list the datasets
+	 * @param stat the statistic to use
+	 * @return an array with the min and max of the range
+	 * @throws Exception
+	 */
+	private static int[] calculateMinAndMaxRange(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception {
+		
+		int[] result = new int[2];
+		result[0] = Integer.MAX_VALUE; // holds min
+		result[1] = 0; // holds max
+
+		for(AnalysisDataset dataset : list){
+			
+			double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
+			
+			NuclearHistogramDatasetCreator.updateMinMaxRange(result, values);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Given a dataset and a stats parameter, get the values for that stat
+	 * @param dataset the Analysis Dataset
+	 * @param stat the statistic to fetch
+	 * @param scale the scale to display at
+	 * @return the array of values
+	 * @throws Exception
+	 */
+	public static double[] findSignalDatasetValues(AnalysisDataset dataset, SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception {
+		
+		CellCollection collection = dataset.getCollection();			
+		double[] values = collection.getSignalStatistics(stat, scale, signalGroup); 			
+		return values;
+	}
+	
 	
 	/**
 	 * Create a histogram of signal distances from the nuclear centre of mass for

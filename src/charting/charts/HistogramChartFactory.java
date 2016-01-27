@@ -103,12 +103,12 @@ public class HistogramChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createSignalStatisticHistogram(HistogramChartOptions options) throws Exception{
+	public static JFreeChart createSignalStatisticHistogram(SignalHistogramChartOptions options) throws Exception{
 		
 		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
 		HistogramDataset ds = options.hasDatasets() 
-							? NuclearSignalDatasetCreator.createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
+							? NuclearSignalDatasetCreator.createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale(), options.getSignalGroup())
 							: null;
 				
 		JFreeChart chart = createHistogram(ds, stat.label(options.getScale()), "Count");
@@ -118,6 +118,71 @@ public class HistogramChartFactory {
 				plot.getDomainAxis().setRange(0,360);
 			}
 			setSeriesPropertiesForSignalHistogram(chart, options.firstDataset());	
+		}
+		return chart;
+	}
+	
+	/**
+	 * Create a density line chart with nuclear statistics. It is used to replace the histograms
+	 * when the 'Use density' box is ticked in the Nuclear chart histogram panel
+	 * @param ds the histogram dataset
+	 * @param list the analysis datasets used to create the histogrom
+	 * @param xLabel the x axis label
+	 * @return
+	 * @throws Exception 
+	 */
+	public static JFreeChart createSignalDensityStatsChart(SignalHistogramChartOptions options) throws Exception{
+	
+		DefaultXYDataset ds = null;
+		
+		if (options.hasDatasets()){
+			
+			SignalStatistic stat = (SignalStatistic) options.getStat();
+			ds = NuclearSignalDatasetCreator.createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale(), options.getSignalGroup());
+		}
+
+		String xLabel = options.getStat().label(options.getScale());
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,
+				                false);
+		
+		XYPlot plot = chart.getXYPlot();
+		
+		plot.setBackgroundPaint(Color.WHITE);
+		
+		if(ds!=null && options.hasDatasets()){
+						
+			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
+			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
+			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());	
+			
+			
+			for (int j = 0; j < ds.getSeriesCount(); j++) {
+
+				plot.getRenderer().setSeriesVisibleInLegend(j, false);
+				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+
+				String seriesKey = (String) ds.getSeriesKey(j);
+				String seriesName = seriesKey.replaceFirst(options.getStat().toString()+"_", "");
+
+				Color colour = ColourSelecter.getSegmentColor(j);
+				for(AnalysisDataset dataset : options.getDatasets()){
+
+					if(seriesName.equals(dataset.getName())){
+
+						colour = dataset.hasDatasetColour()
+								? dataset.getDatasetColour()
+								: colour;
+
+
+						plot.getRenderer().setSeriesPaint(j, colour);
+
+					}
+				}
+
+			}
+
 		}
 		return chart;
 	}

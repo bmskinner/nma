@@ -209,7 +209,7 @@ public class NuclearHistogramDatasetCreator {
 	 * @param values the new values
 	 * @return
 	 */
-	private static int[] updateMinMaxRange(int[] range, double[] values){
+	public static int[] updateMinMaxRange(int[] range, double[] values){
 		
 		double min = Stats.min(values);
 		double max = Stats.max(values);
