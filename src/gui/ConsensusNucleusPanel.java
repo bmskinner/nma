@@ -48,7 +48,7 @@ import charting.charts.ConsensusNucleusChartFactory;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.XYPoint;
-import components.nuclear.NucleusBorderPoint;
+import components.nuclear.BorderPoint;
 import components.nuclei.ConsensusNucleus;
 
 public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeListener {
@@ -265,7 +265,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				if(activeDataset().getCollection().hasConsensusNucleus()){
-					NucleusBorderPoint orientationPoint = activeDataset().getCollection().getConsensusNucleus().getBorderTag(BorderTag.ORIENTATION_POINT);
+					BorderPoint orientationPoint = activeDataset().getCollection().getConsensusNucleus().getBorderTag(BorderTag.ORIENTATION_POINT);
 					activeDataset().getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
 					
 					update(activeDatasetToList());
@@ -415,7 +415,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 
 			if(activeDataset().getCollection().hasConsensusNucleus()){
 
-				NucleusBorderPoint orientationPoint = activeDataset()
+				BorderPoint orientationPoint = activeDataset()
 						.getCollection()
 						.getConsensusNucleus()
 						.getBorderTag(BorderTag.ORIENTATION_POINT);

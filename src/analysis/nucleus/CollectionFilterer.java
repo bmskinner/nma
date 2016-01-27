@@ -103,7 +103,7 @@ public class CollectionFilterer {
 	        n.updateFailureCode(FAILURE_THRESHOLD);
 	        pathlength++;
 	      }
-	      if(n.getLength() > medianArrayLength * maxDifferenceFromMedian || n.getLength() < medianArrayLength / maxDifferenceFromMedian ){
+	      if(n.getBorderLength() > medianArrayLength * maxDifferenceFromMedian || n.getBorderLength() < medianArrayLength / maxDifferenceFromMedian ){
 	        n.updateFailureCode(FAILURE_ARRAY);
 	         arraylength++;
 	      }

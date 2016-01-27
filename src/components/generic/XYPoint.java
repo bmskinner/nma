@@ -28,7 +28,7 @@ package components.generic;
 
 import java.io.Serializable;
 
-import components.nuclear.NucleusBorderPoint;
+import components.nuclear.BorderPoint;
 
 public class XYPoint  implements Serializable{
   /**

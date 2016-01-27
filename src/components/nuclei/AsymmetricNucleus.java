@@ -38,7 +38,7 @@ import java.util.List;
 
 import components.generic.BorderTag;
 import components.generic.XYPoint;
-import components.nuclear.NucleusBorderPoint;
+import components.nuclear.BorderPoint;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalCollection;
 
@@ -50,7 +50,7 @@ public class AsymmetricNucleus
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
+private List<BorderPoint> tailEstimatePoints = new ArrayList<BorderPoint>(0); // holds the points considered to be sperm tails before filtering
 
   public AsymmetricNucleus(Nucleus n) throws Exception{
     super(n);
@@ -82,7 +82,7 @@ private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorde
     -----------------------
   */
   
-  public List<NucleusBorderPoint> getEstimatedTailPoints(){
+  public List<BorderPoint> getEstimatedTailPoints(){
     return this.tailEstimatePoints;
   }
 
@@ -92,7 +92,7 @@ private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorde
     -----------------------
   */
 
-  protected void addTailEstimatePosition(NucleusBorderPoint p){
+  protected void addTailEstimatePosition(BorderPoint p){
     this.tailEstimatePoints.add(p);
   }
 

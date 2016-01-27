@@ -103,7 +103,7 @@ public class CellDatasetCreator {
 			if(type!=null){
 				for(BorderTag tag : BorderTag.values(BorderTagType.CORE)){
 					fieldNames.add(type.getPoint(tag));
-					int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
+					int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
 					rowData.add(index);
 				}
 			} else {

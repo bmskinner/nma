@@ -433,7 +433,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 			// create a segment at these points
 			// ensure that the segment meets length requirements
-			NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex, n.getLength());
+			NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex, n.getBorderLength());
 			if(prevSeg != null){
 				seg.setPrevSegment(prevSeg);
 				prevSeg.setNextSegment(seg);

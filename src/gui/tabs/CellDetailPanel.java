@@ -92,7 +92,7 @@ import charting.datasets.NucleusDatasetCreator;
 import components.Cell;
 import components.generic.BorderTag;
 import components.generic.SegmentedProfile;
-import components.nuclear.NucleusBorderPoint;
+import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
@@ -667,7 +667,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 										
 					overlay.clearShapes();
 
-					for(NucleusBorderPoint p : cell.getNucleus().getBorderList()){
+					for(BorderPoint p : cell.getNucleus().getBorderList()){
 						Shape s = new Ellipse2D.Double(p.getX(), p.getY(), 1d, 1d);
 						ShapeOverlayObject ov = new ShapeOverlayObject(s);
 						ov.setVisible(drawPointOverlay);
@@ -766,10 +766,10 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 //			String pointType = rowName;
 			
 			
-			int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
+			int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
 			
 			SpinnerNumberModel sModel 
-				= new SpinnerNumberModel(index, 0, n.getLength(), 1);
+				= new SpinnerNumberModel(index, 0, n.getBorderLength(), 1);
 			JSpinner spinner = new JSpinner(sModel);
 			
 			int option = JOptionPane.showOptionDialog(null, 
@@ -787,7 +787,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				int existingIndex = n.getBorderIndex(tag);
 				
 				// adjust to the actual point index
-				int pointIndex = Utils.wrapIndex(chosenIndex + n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
+				int pointIndex = Utils.wrapIndex(chosenIndex + n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
 				
 				// find the amount the index is changing by
 				int difference = pointIndex - existingIndex;
@@ -812,7 +812,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				if(tag.equals(BorderTag.ORIENTATION_POINT)){
 					if(n.hasBorderTag(BorderTag.INTERSECTION_POINT)){
 						// only rodent sperm use the intersection point, which is equivalent to the head.
-						NucleusBorderPoint newPoint = n.findOppositeBorder(n.getPoint(BorderTag.ORIENTATION_POINT));
+						BorderPoint newPoint = n.findOppositeBorder(n.getPoint(BorderTag.ORIENTATION_POINT));
 						n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getIndex(newPoint));
 					}
 				}

@@ -40,7 +40,7 @@ import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
-import components.nuclear.NucleusBorderPoint;
+import components.nuclear.BorderPoint;
 import components.nuclear.NucleusType;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
@@ -269,7 +269,7 @@ public class CurveRefolder extends AnalysisWorker {
 		boolean skip = false;
 
 //		int i=offset;
-		for (int i = offset; i<refoldNucleus.getLength(); i++){
+		for (int i = offset; i<refoldNucleus.getBorderLength(); i++){
 //		for(NucleusBorderPoint p : refoldNucleus.getBorderList() ){
 			
 			if(skip){
@@ -278,12 +278,12 @@ public class CurveRefolder extends AnalysisWorker {
 			}
 			skip = !skip;
 			
-			int prevIndex = Utils.wrapIndex(i-1, refoldNucleus.getLength());
-			int nextIndex = Utils.wrapIndex(i+1, refoldNucleus.getLength());
+			int prevIndex = Utils.wrapIndex(i-1, refoldNucleus.getBorderLength());
+			int nextIndex = Utils.wrapIndex(i+1, refoldNucleus.getBorderLength());
 						
-			NucleusBorderPoint thisPoint = refoldNucleus.getBorderPoint(i);
-			NucleusBorderPoint prevPoint = refoldNucleus.getBorderPoint(prevIndex);
-			NucleusBorderPoint nextPoint = refoldNucleus.getBorderPoint(nextIndex);
+			BorderPoint thisPoint = refoldNucleus.getBorderPoint(i);
+			BorderPoint prevPoint = refoldNucleus.getBorderPoint(prevIndex);
+			BorderPoint nextPoint = refoldNucleus.getBorderPoint(nextIndex);
 
 			/* get the point o,  half way between the previous point p and next point n:
 			 * 
@@ -340,7 +340,7 @@ public class CurveRefolder extends AnalysisWorker {
 		double minDistance = medianDistanceBetweenPoints * 0.5;
 		double maxDistance = medianDistanceBetweenPoints * 1.2;
 
-		for(int i=0; i<refoldNucleus.getLength(); i++){
+		for(int i=0; i<refoldNucleus.getBorderLength(); i++){
 			
 			// make all changes to a fresh nucleus before buggering up the real one
 			RoundNucleus testNucleus = new RoundNucleus( (RoundNucleus)refoldNucleus);
@@ -348,7 +348,7 @@ public class CurveRefolder extends AnalysisWorker {
 			double score = testNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
 
 			// Get a copy of the point at this index
-			NucleusBorderPoint p = testNucleus.getPoint(i);
+			BorderPoint p = testNucleus.getPoint(i);
 
 			// Save the old position
 			double oldX = p.getX();
@@ -402,8 +402,8 @@ public class CurveRefolder extends AnalysisWorker {
 	 * @return
 	 */
 	private boolean checkPositionIsOK(XYPoint point,  Nucleus n, int index, double min, double max){
-		double distanceToPrev = point.getLengthTo( n.getPoint( Utils.wrapIndex(index-1, n.getLength()) ) );
-		double distanceToNext = point.getLengthTo( n.getPoint( Utils.wrapIndex(index+1, n.getLength()) ) );
+		double distanceToPrev = point.getLengthTo( n.getPoint( Utils.wrapIndex(index-1, n.getBorderLength()) ) );
+		double distanceToNext = point.getLengthTo( n.getPoint( Utils.wrapIndex(index+1, n.getBorderLength()) ) );
 
 		boolean ok = true;
 		if(	distanceToNext > max ){
@@ -438,7 +438,7 @@ public class CurveRefolder extends AnalysisWorker {
 		double bestDiff = 180;
 		double bestDistance = 180;
 
-		for(int i=0;i<n.getLength();i++){
+		for(int i=0;i<n.getBorderLength();i++){
 			XYPoint p = n.getBorderPoint(i);
 			double distance = p.getLengthTo(n.getCentreOfMass());
 			double pAngle = RoundNucleus.findAngleBetweenXYPoints( p, n.getCentreOfMass(), new XYPoint(0,-10));

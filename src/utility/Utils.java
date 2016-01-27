@@ -35,7 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import components.CellularComponent;
-import components.nuclear.NucleusBorderPoint;
+import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
 
  /**
@@ -237,12 +237,12 @@ public class Utils {
 	 * @param list the list of border points
 	 * @return
 	 */
-	public static FloatPolygon createPolygon(List<NucleusBorderPoint> list){
+	public static FloatPolygon createPolygon(List<BorderPoint> list){
 		 float[] xpoints = new float[list.size()+1];
 		 float[] ypoints = new float[list.size()+1];
 
 		 for(int i=0;i<list.size();i++){
-			 NucleusBorderPoint p = list.get(i);
+			 BorderPoint p = list.get(i);
 			 xpoints[i] = (float) p.getX();
 			 ypoints[i] = (float) p.getY();
 		 }
@@ -262,12 +262,12 @@ public class Utils {
 		 * @see Nucleus.getPosition
 		 * @return
 		 */
-		public static FloatPolygon createOriginalPolygon(List<NucleusBorderPoint> list, double[] originalPosition){
+		public static FloatPolygon createOriginalPolygon(List<BorderPoint> list, double[] originalPosition){
 			 float[] xpoints = new float[list.size()+1];
 			 float[] ypoints = new float[list.size()+1];
 
 			 for(int i=0;i<list.size();i++){
-				 NucleusBorderPoint p = list.get(i);
+				 BorderPoint p = list.get(i);
 				 xpoints[i] = (float) p.getX() + (float) originalPosition[CellularComponent.X_BASE];
 				 ypoints[i] = (float) p.getY() + (float) originalPosition[CellularComponent.Y_BASE];
 			 }

@@ -54,7 +54,7 @@ import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
-import components.nuclear.NucleusBorderPoint;
+import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
@@ -198,7 +198,7 @@ public class NucleusDatasetCreator {
 		double length = 100;
 
 		for(Nucleus n : collection.getNuclei()){
-			length = n.getLength() > length ? n.getLength() : length;
+			length = n.getBorderLength() > length ? n.getBorderLength() : length;
 		}
 
 		return length;
@@ -399,9 +399,9 @@ public class NucleusDatasetCreator {
 				x = xpoints;
 			} else {
 				angles = n.getAngleProfile(point);
-				x = angles.getPositions(n.getLength());
+				x = angles.getPositions(n.getBorderLength());
 				if(alignment.equals(ProfileAlignment.RIGHT)){
-					double differenceToMaxLength = maxLength - n.getLength();
+					double differenceToMaxLength = maxLength - n.getBorderLength();
 					x = x.add(differenceToMaxLength);
 				}
 			}
@@ -696,13 +696,13 @@ public class NucleusDatasetCreator {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		SegmentedProfile profile = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT);
-		Profile xpoints = profile.getPositions(nucleus.getLength());
+		Profile xpoints = profile.getPositions(nucleus.getBorderLength());
 		
 		// rendering order will be first on top
 		
 		// add the segments
 		List<NucleusBorderSegment> segments = profile.getOrderedSegments();
-		addSegmentsFromProfile(segments, profile, ds, nucleus.getLength(), 0);
+		addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0);
 		
 		double[][] ndata = { xpoints.asArray(), profile.asArray() };
 		ds.addSeries("Nucleus_"+nucleus.getSourceFileName()+"-"+nucleus.getNucleusNumber(), ndata);
@@ -904,17 +904,17 @@ public class NucleusDatasetCreator {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Nucleus n = dataset.getCollection().getConsensusNucleus();
 		
-		double[] xpoints = new double[n.getLength()+1];
-		double[] ypoints = new double[n.getLength()+1];
+		double[] xpoints = new double[n.getBorderLength()+1];
+		double[] ypoints = new double[n.getBorderLength()+1];
 		
-		for(int i=0; i<n.getLength();i++){
-			NucleusBorderPoint p = n.getBorderPoint(i);
+		for(int i=0; i<n.getBorderLength();i++){
+			BorderPoint p = n.getBorderPoint(i);
 			xpoints[i] = p.getX();
 			ypoints[i] = p.getY();
 		}
 		// complete the line
-		xpoints[n.getLength()] = xpoints[0];
-		ypoints[n.getLength()] = ypoints[0];
+		xpoints[n.getBorderLength()] = xpoints[0];
+		ypoints[n.getBorderLength()] = ypoints[0];
 		
 		double[][] data = { xpoints, ypoints };
 		ds.addSeries("Outline", data);
@@ -951,8 +951,8 @@ public class NucleusDatasetCreator {
 		BorderTag pointType = BorderTag.REFERENCE_POINT;
 		
 		// get the quartile profiles, beginning from the orientation point
-		Profile q25 = collection.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.LOWER_QUARTILE).interpolate(n.getLength());
-		Profile q75 = collection.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.UPPER_QUARTILE).interpolate(n.getLength());
+		Profile q25 = collection.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.LOWER_QUARTILE).interpolate(n.getBorderLength());
+		Profile q75 = collection.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.UPPER_QUARTILE).interpolate(n.getBorderLength());
 		
 		// get the limits  for the plot  	
 		double scale = getScaleForIQRRange(n);
@@ -1005,9 +1005,9 @@ public class NucleusDatasetCreator {
 					
 					// get the corresponding border index. The segments are zeroed at the tail point
 					// so the correct border point needs to be offset
-					int borderIndex = Utils.wrapIndex(seg.getStartIndex()+j+pointIndex, n.getLength());
+					int borderIndex = Utils.wrapIndex(seg.getStartIndex()+j+pointIndex, n.getBorderLength());
 					
-					NucleusBorderPoint p = n.getBorderPoint(borderIndex); // get the border points in the segment
+					BorderPoint p = n.getBorderPoint(borderIndex); // get the border points in the segment
 					xpoints[j] = p.getX();
 					ypoints[j] = p.getY();
 				}
@@ -1052,16 +1052,16 @@ public class NucleusDatasetCreator {
 			// pointType index is given within this
 			// We need to add the index of the pointType to the values within the segment
 			int segmentIndex = segment.getStartIndex() + i;
-			int index = Utils.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getLength());
+			int index = Utils.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getBorderLength());
 			
 			// get the border point at this index
-			NucleusBorderPoint p = n.getBorderPoint(index); // get the border points in the segment
+			BorderPoint p = n.getBorderPoint(index); // get the border points in the segment
 			
 //			IJ.log("Selecting border index: "+index+" from "+segment.getName()+" index "+segmentIndex);
 
 			// Find points three indexes ahead and behind to make a triangle from
-			int prevIndex = Utils.wrapIndex(index-3, n.getLength());
-			int nextIndex = Utils.wrapIndex(index+3, n.getLength());
+			int prevIndex = Utils.wrapIndex(index-3, n.getBorderLength());
+			int nextIndex = Utils.wrapIndex(index+3, n.getBorderLength());
 
 
 			
@@ -1074,8 +1074,8 @@ public class NucleusDatasetCreator {
 			
 			// Select the index from the scaledRange corresponding to the position in the segment
 			// The scaledRange is aligned to the segment already
-			XYPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(Utils.wrapIndex(segmentIndex, n.getLength() )   )    )    );
-			XYPoint bPoint = perp.getPointOnLine(p, scaledRange.get(Utils.wrapIndex(segmentIndex, n.getLength() )));
+			XYPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(Utils.wrapIndex(segmentIndex, n.getBorderLength() )   )    )    );
+			XYPoint bPoint = perp.getPointOnLine(p, scaledRange.get(Utils.wrapIndex(segmentIndex, n.getBorderLength() )));
 
 			// determine which of the points is inside the nucleus and which is outside
 			
@@ -1141,8 +1141,8 @@ public class NucleusDatasetCreator {
 					
 					
 					for(int j=0; j<=seg.length();j++){
-						int k = Utils.wrapIndex(seg.getStartIndex()+j, nucleus.getLength());
-						NucleusBorderPoint p = nucleus.getBorderPoint(k); // get the border points in the segment
+						int k = Utils.wrapIndex(seg.getStartIndex()+j, nucleus.getBorderLength());
+						BorderPoint p = nucleus.getBorderPoint(k); // get the border points in the segment
 //						nucleus.getB
 						xpoints[j] = p.getX();
 						ypoints[j] = p.getY();
@@ -1249,7 +1249,7 @@ public class NucleusDatasetCreator {
 
 		Nucleus nucleus = cell.getNucleus();// draw the index points on the nucleus border
 		for(BorderTag tag : nucleus.getBorderTags().keySet()){
-			NucleusBorderPoint tagPoint = nucleus.getPoint(tag);
+			BorderPoint tagPoint = nucleus.getPoint(tag);
 			double[] xpoints = { tagPoint.getX(), nucleus.getCentreOfMass().getX() };
 			double[] ypoints = { tagPoint.getY(), nucleus.getCentreOfMass().getY() };
 			double[][] data = { xpoints, ypoints };
@@ -1317,12 +1317,12 @@ public class NucleusDatasetCreator {
 			if(collection.hasConsensusNucleus()){
 				Nucleus n = collection.getConsensusNucleus();
 
-				double[] xpoints = new double[n.getLength()];
-				double[] ypoints = new double[n.getLength()];
+				double[] xpoints = new double[n.getBorderLength()];
+				double[] ypoints = new double[n.getBorderLength()];
 
 				int j =0;
 
-				for(NucleusBorderPoint p : n.getBorderList()){
+				for(BorderPoint p : n.getBorderList()){
 					xpoints[j] = p.getX();
 					ypoints[j] = p.getY();
 					j++;

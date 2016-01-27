@@ -20,10 +20,13 @@ package components;
 
 import java.awt.Rectangle;
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 
+import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
+import components.nuclear.BorderPoint;
 import stats.PlottableStatistic;
 
 /**
@@ -144,6 +147,133 @@ public interface CellularComponent {
 
 
 	public void setCentreOfMass(XYPoint centreOfMass);
+	
+	/*
+	 * 
+	 * BORDER POINTS
+	 * 
+	 */
 
+	
+	/**
+	 * Get a copy of the border point at the given index
+	 * @param i
+	 * @return
+	 */
+	public BorderPoint getBorderPoint(int i);
+	
+	/**
+	 * Get the index of the given point in the border list
+	 * @param p
+	 * @return
+	 */
+	public int getBorderIndex(BorderPoint p);
 
+//	public double getDistance(int index);
+
+	/**
+	 * Update the border point at the given index to the 
+	 * given x y coordinates
+	 * @param i
+	 * @param x
+	 * @param y
+	 */
+	public void updateBorderPoint(int i, double x, double y);
+	
+	/**
+	 * Update the border point at the given index to the 
+	 * given x y coordinates
+	 * @param i the index
+	 * @param p the new postion
+	 */
+	public void updateBorderPoint(int i, XYPoint p);
+	
+	/**
+	 * Get the length of the angle profile in index units
+	 * @return
+	 */
+	public int getBorderLength();
+	
+	/**
+	 * Get a copy of the component border points in the border list
+	 * @return
+	 */
+	public List<BorderPoint> getBorderList();
+	
+	/**
+	 * Set the border points in the object border
+	 * @param list
+	 */
+	public void setBorderList(List<BorderPoint> list);
+	
+	/**
+	 * Get a copy of the nucleus border points in the border list
+	 * offset to their original coordinates in the source image
+	 * @return
+	 */
+	public List<BorderPoint> getOriginalBorderList();
+
+	
+	/**
+	 * Test if the given point is within the offset nucleus
+	 * @param p
+	 * @return
+	 */
+	public boolean containsPoint(XYPoint p);
+	
+	/**
+	 * Test if the given point is within the original nucleus
+	 * @param p
+	 * @return
+	 */
+	public boolean containsOriginalPoint(XYPoint p);
+	
+	
+	/**
+	 * Get the maximum x value from the positions of border points
+	 * @return
+	 */
+	public double getMaxX();
+
+	/**
+	 * Get the minimum x value from the positions of border points
+	 * @return
+	 */
+	public double getMinX();
+
+	/**
+	 * Get the maximum y value from the positions of border points
+	 * @return
+	 */
+	public double getMaxY();
+
+	/**
+	 * Get the minimum y value from the positions of border points
+	 * @return
+	 */
+	public double getMinY();
+	
+	/**
+	 * Flip the nucleus on the x-axis (horizontally) about the given point
+	 * @param p the point with the x coordinate to flip on
+	 */
+	public void flipXAroundPoint(XYPoint p);
+
+	public double getMedianDistanceBetweenPoints();
+	
+	/**
+	 * Translate the XY coordinates of each border point so that
+	 * the nuclear centre of mass is at the given point
+	 * @param point the new centre of mass
+	 */
+	public void moveCentreOfMass(XYPoint point);
+	
+	/**
+	 * Translate the XY coordinates of each border point so that
+	 * the nuclear centre of mass is at the given point
+	 * @param point the new centre of mass
+	 */
+	public void offset(double xOffset, double yOffset);
+		
+	
 }

@@ -43,13 +43,13 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 
 	private int closestNuclearBorderPoint;
 
-	private List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // replace ROI
+	private List<BorderPoint> borderList = new ArrayList<BorderPoint>(0); // replace ROI
 
 	public NuclearSignal(Roi roi, double area, double feret, double perimeter, XYPoint centreOfMass, String origin){
 
 		FloatPolygon polygon = roi.getInterpolatedPolygon(1,true);
 		for(int i=0; i<polygon.npoints; i++){
-			borderList.add(new NucleusBorderPoint( polygon.xpoints[i], polygon.ypoints[i]));
+			borderList.add(new BorderPoint( polygon.xpoints[i], polygon.ypoints[i]));
 		}
 		
 		this.setStatistic(SignalStatistic.AREA, area);
@@ -84,10 +84,10 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 	 * Get a copy of the border points defining this signal
 	 * @return
 	 */
-	public List<NucleusBorderPoint> getBorder(){
-		List<NucleusBorderPoint> result = new ArrayList<NucleusBorderPoint>();
-		for(NucleusBorderPoint p : borderList){
-			result.add(new NucleusBorderPoint(p));
+	public List<BorderPoint> getBorder(){
+		List<BorderPoint> result = new ArrayList<BorderPoint>();
+		for(BorderPoint p : borderList){
+			result.add(new BorderPoint(p));
 		}
 		return result;
 	}
@@ -105,8 +105,8 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 	 * @param index
 	 * @return
 	 */
-	public NucleusBorderPoint getBorderPoint(int index){
-		return new NucleusBorderPoint(borderList.get(index));
+	public BorderPoint getBorderPoint(int index){
+		return new BorderPoint(borderList.get(index));
 	}
 	
 	/**

@@ -38,7 +38,7 @@ import analysis.AnalysisDataset;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.nuclear.NuclearSignal;
-import components.nuclear.NucleusBorderPoint;
+import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.SignalCollection;
 import components.nuclei.Nucleus;
@@ -143,8 +143,8 @@ public class NucleusAnnotator {
 
 		ip.setLineWidth(1);
 		ip.setColor(Color.MAGENTA);
-		NucleusBorderPoint narrow1 = n.getNarrowestDiameterPoint();
-		NucleusBorderPoint narrow2 = n.findOppositeBorder(narrow1);
+		BorderPoint narrow1 = n.getNarrowestDiameterPoint();
+		BorderPoint narrow2 = n.findOppositeBorder(narrow1);
 		ip.drawLine(narrow1.getXAsInt(), narrow1.getYAsInt(), narrow2.getXAsInt(), narrow2.getYAsInt());
 
 	}
@@ -162,8 +162,8 @@ public class NucleusAnnotator {
 					float[] xpoints = new float[seg.length()+1];
 					float[] ypoints = new float[seg.length()+1];
 					for(int j=0; j<=seg.length();j++){
-						int k = Utils.wrapIndex(seg.getStartIndex()+j, n.getLength());
-						NucleusBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
+						int k = Utils.wrapIndex(seg.getStartIndex()+j, n.getBorderLength());
+						BorderPoint p = n.getBorderPoint(k); // get the border points in the segment
 						xpoints[j] = (float) p.getX();
 						ypoints[j] = (float) p.getY();
 					}

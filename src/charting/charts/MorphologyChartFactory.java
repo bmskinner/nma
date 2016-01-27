@@ -86,7 +86,7 @@ import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
-import components.nuclear.NucleusBorderPoint;
+import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
@@ -115,7 +115,7 @@ public class MorphologyChartFactory {
 	 * @return
 	 */
 	public static JFreeChart makeIndividualNucleusProfileChart(XYDataset ds, Nucleus n, ColourSwatch swatch){
-		JFreeChart chart = makeProfileChart(ds, n.getLength(), swatch);
+		JFreeChart chart = makeProfileChart(ds, n.getBorderLength(), swatch);
 
 //		XYPlot plot = chart.getXYPlot();
 
@@ -695,7 +695,7 @@ public class MorphologyChartFactory {
 			if(verticalNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && verticalNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
 
 				// Rotate vertical
-				NucleusBorderPoint[] points = verticalNucleus.getBorderPointsForVerticalAlignment();
+				BorderPoint[] points = verticalNucleus.getBorderPointsForVerticalAlignment();
 				verticalNucleus.alignPointsOnVertical(points[0], points[1] );
 			} else {
 				// If the verticals are not present, use the orientation point
@@ -786,7 +786,7 @@ public class MorphologyChartFactory {
 					 * Add a line between the top and bottom vertical points
 					 */
 					if(cell.getNucleus().hasBorderTag(BorderTag.TOP_VERTICAL) && cell.getNucleus().hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
-						NucleusBorderPoint[] verticals = cell.getNucleus().getBorderPointsForVerticalAlignment();
+						BorderPoint[] verticals = cell.getNucleus().getBorderPointsForVerticalAlignment();
 						plot.addAnnotation(new XYLineAnnotation(verticals[0].getX(),
 								verticals[0].getY(),
 								verticals[1].getX(),

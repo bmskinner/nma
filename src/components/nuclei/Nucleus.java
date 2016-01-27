@@ -33,7 +33,7 @@ import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
-import components.nuclear.NucleusBorderPoint;
+import components.nuclear.BorderPoint;
 import components.nuclear.SignalCollection;
 import stats.NucleusStatistic;
 
@@ -146,49 +146,7 @@ public interface Nucleus extends CellularComponent {
 	 * point within the region covered by the line. 
 	 * @return
 	 */
-	public NucleusBorderPoint[] getBorderPointsForVerticalAlignment();
-	
-	/**
-	 * Get a copy of the border point mapped to the given tag
-	 * @param tag
-	 * @return
-	 */
-	public NucleusBorderPoint getPoint(BorderTag tag); 
-
-	
-	/**
-	 * Get a copy of the border point at the given index
-	 * @param i
-	 * @return
-	 */
-	public NucleusBorderPoint getPoint(int i);
-
-	
-	/**
-	 * Get the area of the nucleus in pixels
-	 * @return
-	 */
-//	public double getArea();
-	
-	/**
-	 * Get the maximum caliper diameter across the nucleus in pixels
-	 * @return
-	 */
-//	public double getFeret();
-//	
-//	/**
-//	 * Calculate the circularity using the formula:
-//	 * circularity = 4pi(area/perimeter^2)
-//	 * @return the circularity
-//	 */
-//	public double getCircularity();
-//	
-//	
-//	/**
-//	 * Get the feret divided by the narrowest diameter through the centre of mass
-//	 * @return
-//	 */
-//	public double getAspectRatio();
+	public BorderPoint[] getBorderPointsForVerticalAlignment();
 	
 
 	/**
@@ -221,56 +179,12 @@ public interface Nucleus extends CellularComponent {
 	public SegmentedProfile getProfile(ProfileType type, BorderTag tag) throws Exception;
 
 	
-	/**
-	 * Update the angle profile to the given segmented profile
-	 * @param profile
-	 * @throws Exception 
-	 */
-//	public void setAngleProfile(SegmentedProfile profile) throws Exception;
-	
-	/**
-	 * Update the angle profile to the given segmented profile. The profile being used is offset
-	 * to start at the given point type, and so the offset is removed before the profile is assigned
-	 * @param p the profile
-	 * @param pointType the border tag the profile begins from
-	 * @throws Exception
-	 */
-//	public void setAngleProfile(SegmentedProfile p, BorderTag tag) throws Exception;
-	
-	
 
 	/**
 	 * Get the size of the angle profile window in pixels
 	 * @return
 	 */
 	public int getAngleProfileWindowSize();
-
-	/**
-	 * Fetch the distance profile through the centre of mass
-	 * @return
-	 */
-//	public Profile getDistanceProfile();
-
-	/**
-	 * Get the length of the angle profile in index units
-	 * @return
-	 */
-	public int getLength();
-	
-	
-	/**
-	 * Get the length of a pixel in micrometres
-	 * @return
-	 */
-//	public double getScale();
-	
-	
-	/**
-	 * Set the length of a pixel in micrometres
-	 */
-//	public void setScale(double scale);
-	
-	public NucleusBorderPoint getBorderPoint(int i);
 
 
 	/**
@@ -285,34 +199,6 @@ public interface Nucleus extends CellularComponent {
 	 * @return
 	 */
 	public boolean hasSignal();
-
-	/**
-	 * Get a copy of the nucleus border points in the border list
-	 * @return
-	 */
-	public List<NucleusBorderPoint> getBorderList();
-	
-	/**
-	 * Get a copy of the nucleus border points in the border list
-	 * offset to their original coordinates in the source image
-	 * @return
-	 */
-	public List<NucleusBorderPoint> getOriginalBorderList();
-
-	
-	/**
-	 * Test if the given point is within the offset nucleus
-	 * @param p
-	 * @return
-	 */
-	public boolean containsPoint(XYPoint p);
-	
-	/**
-	 * Test if the given point is within the original nucleus
-	 * @param p
-	 * @return
-	 */
-	public boolean containsOriginalPoint(XYPoint p);
 	
 	public void calculateFractionalSignalDistancesFromCoM() throws Exception;
 	public void calculateSignalDistancesFromCoM();
@@ -325,61 +211,6 @@ public interface Nucleus extends CellularComponent {
 	
 	public void setOutputFolder(String f);
 
-//	public void setCentreOfMass(XYPoint d);
-
-	public void setBorderList(List<NucleusBorderPoint> list);
-
-	/*
-    -----------------------
-    Get aggregate values
-    -----------------------
-	 */
-	
-	/**
-	 * Get the maximum x value from the positions of border points
-	 * @return
-	 */
-	public double getMaxX();
-
-	/**
-	 * Get the minimum x value from the positions of border points
-	 * @return
-	 */
-	public double getMinX();
-
-	/**
-	 * Get the maximum y value from the positions of border points
-	 * @return
-	 */
-	public double getMaxY();
-
-	/**
-	 * Get the minimum y value from the positions of border points
-	 * @return
-	 */
-	public double getMinY();
-
-	/*
-    -----------------------
-    Set miscellaneous features
-    -----------------------
-	 */
-
-//	public void setPathLength(double d);
-
-//	public void calculatePathLength();
-
-//	public void setArea(double d);
-//	public void setFeret(double d);
-//	public void setPerimeter(double d);
-
-	/*
-    -----------------------
-    Process signals
-    -----------------------
-	 */
-
-
 	/*
     -----------------------
     Determine positions of points
@@ -390,17 +221,17 @@ public interface Nucleus extends CellularComponent {
     For two NucleusBorderPoints in a Nucleus, find the point that lies halfway between them
     Used for obtaining a consensus between potential tail positions
 	 */
-	public int getPositionBetween(NucleusBorderPoint pointA, NucleusBorderPoint pointB);
+	public int getPositionBetween(BorderPoint pointA, BorderPoint pointB);
 
 	// For a position in the roi, draw a line through the CoM and get the intersection point
-	public NucleusBorderPoint findOppositeBorder(NucleusBorderPoint p);
+	public BorderPoint findOppositeBorder(BorderPoint p);
 
 	/*
     From the point given, create a line to the CoM. Measure angles from all 
     other points. Pick the point closest to 90 degrees. Can then get opposite
     point. Defaults to input point if unable to find point.
 	 */
-	public NucleusBorderPoint findOrthogonalBorderPoint(NucleusBorderPoint a);
+	public BorderPoint findOrthogonalBorderPoint(BorderPoint a);
 
 	/**
 	 *  Find the point with the narrowest diameter through the CoM
@@ -408,15 +239,8 @@ public interface Nucleus extends CellularComponent {
 	 * @return
 	 * @throws Exception 
 	 */
-	public NucleusBorderPoint getNarrowestDiameterPoint() throws Exception;
+	public BorderPoint getNarrowestDiameterPoint() throws Exception;
 
-	/**
-	 * Flip the nucleus on the x-axis (horizontally) about the given point
-	 * @param p the point with the x coordinate to flip on
-	 */
-	public void flipXAroundPoint(XYPoint p);
-
-	public double getMedianDistanceBetweenPoints();
 
 	/*
     -----------------------
@@ -439,7 +263,7 @@ public interface Nucleus extends CellularComponent {
 	 * @param p the border point to orient from (the zero angle)
 	 * @throws Exception
 	 */
-	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p) throws Exception;
+	public void calculateSignalAnglesFromPoint(BorderPoint p) throws Exception;
 	
 	public void exportSignalDistanceMatrix();
 
@@ -472,36 +296,6 @@ public interface Nucleus extends CellularComponent {
 
 	public String dumpInfo(int type);
 
-//	public double getAngle(int index);
-
-	
-	/**
-	 * Get the index of the given point in the border list
-	 * @param p
-	 * @return
-	 */
-	public int getIndex(NucleusBorderPoint p);
-
-//	public double getDistance(int index);
-
-	/**
-	 * Update the border point at the given index to the 
-	 * given x y coordinates
-	 * @param i
-	 * @param x
-	 * @param y
-	 */
-	public void updatePoint(int i, double x, double y);
-	
-	/**
-	 * Update the border point at the given index to the 
-	 * given x y coordinates
-	 * @param i the index
-	 * @param p the new postion
-	 */
-	public void updatePoint(int i, XYPoint p);
-
-
 	/**
 	 * Get the index of the border point with the given tag.
 	 * If the point does not exist, returns -1
@@ -532,7 +326,7 @@ public interface Nucleus extends CellularComponent {
 	 * @param tag
 	 * @return
 	 */
-	public NucleusBorderPoint getBorderTag(BorderTag tag);
+	public BorderPoint getBorderTag(BorderTag tag);
 	
 	/**
 	 * Check if the nucleus has the given border tag
@@ -642,6 +436,13 @@ public interface Nucleus extends CellularComponent {
 	public Map<BorderTag, Integer> getBorderTags();
 	
 	/**
+	 * Get a copy of the border point mapped to the given tag
+	 * @param tag
+	 * @return
+	 */
+	public BorderPoint getBorderPoint(BorderTag tag); 
+	
+	/**
 	 * Get the border index of a tag in the border list, 
 	 * removing offset to a reference tag
 	 * @param reference the border tag with index zero
@@ -704,32 +505,18 @@ public interface Nucleus extends CellularComponent {
 	 * @param topPoint the point to have the higher Y value
 	 * @param bottomPoint the point to have the lower Y value
 	 */
-	public void alignPointsOnVertical(NucleusBorderPoint topPoint, NucleusBorderPoint bottomPoint);
+	public void alignPointsOnVertical(BorderPoint topPoint, BorderPoint bottomPoint);
 	
 	/**
 	 * Rotate the nucleus so that the given point is directly 
 	 * below the centre of mass
 	 * @param bottomPoint
 	 */
-	public void rotatePointToBottom(NucleusBorderPoint bottomPoint);
+	public void rotatePointToBottom(BorderPoint bottomPoint);
 	
 	/**
 	 * Rotate the nucleus by the given amount around the centre of mass
 	 * @param angle
 	 */
 	public void rotate(double angle);
-	
-	/**
-	 * Translate the XY coordinates of each border point so that
-	 * the nuclear centre of mass is at the given point
-	 * @param point the new centre of mass
-	 */
-	public void moveCentreOfMass(XYPoint point);
-	
-	/**
-	 * Translate the XY coordinates of each border point so that
-	 * the nuclear centre of mass is at the given point
-	 * @param point the new centre of mass
-	 */
-	public void offset(double xOffset, double yOffset);
 }

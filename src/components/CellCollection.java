@@ -357,7 +357,7 @@ public class CellCollection implements Serializable {
 	  List<Double> list = new ArrayList<Double>();
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  list.add(  (double) n.getLength());
+		  list.add(  (double) n.getBorderLength());
 	  }
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
@@ -838,7 +838,7 @@ public class CellCollection implements Serializable {
   public double[] getPointToPointDistances(BorderTag pointTypeA, BorderTag pointTypeB){
 	  List<Double> list = new ArrayList<Double>();
 	  for(Nucleus n : this.getNuclei()){
-		  list.add(n.getPoint(pointTypeA).getLengthTo(n.getPoint(pointTypeB)));
+		  list.add(n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB)));
 	  }
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }

@@ -46,7 +46,7 @@ import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
-import components.nuclear.NucleusBorderPoint;
+import components.nuclear.BorderPoint;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalCollection;
 import components.nuclei.Nucleus;
@@ -59,8 +59,8 @@ extends SpermNucleus
 	private static final long serialVersionUID = 1L;
 	
 
-	private List<NucleusBorderPoint> hookRoi;
-	private List<NucleusBorderPoint> humpRoi;
+	private List<BorderPoint> hookRoi;
+	private List<BorderPoint> humpRoi;
 	
 	private transient double hookLength = 0;
 	private transient double bodyWidth = 0;
@@ -159,7 +159,7 @@ extends SpermNucleus
 
 			double vertX = testNucleus.getBorderTag(BorderTag.TOP_VERTICAL).getX();
 //			IJ.log("Initial vertX:" +vertX);
-			NucleusBorderPoint[] points = getBorderPointsForVerticalAlignment();
+			BorderPoint[] points = getBorderPointsForVerticalAlignment();
 			// Rotate vertical
 //			IJ.log(testNucleus.dumpInfo(Nucleus.BORDER_TAGS));
 			testNucleus.alignPointsOnVertical(points[0], points[1] );
@@ -216,10 +216,10 @@ extends SpermNucleus
 	 * Get a copy of the points in the hook roi
 	 * @return
 	 */
-	public List<NucleusBorderPoint> getHookRoi(){
-		List<NucleusBorderPoint> result = new ArrayList<NucleusBorderPoint>(0);
-		for(NucleusBorderPoint n : hookRoi){
-			result.add(new NucleusBorderPoint(n));
+	public List<BorderPoint> getHookRoi(){
+		List<BorderPoint> result = new ArrayList<BorderPoint>(0);
+		for(BorderPoint n : hookRoi){
+			result.add(new BorderPoint(n));
 		}
 		return result;
 	}
@@ -228,19 +228,19 @@ extends SpermNucleus
 	 * Get a copy of the points in the hook roi
 	 * @return
 	 */
-	public List<NucleusBorderPoint> getHumpRoi(){
-		List<NucleusBorderPoint> result = new ArrayList<NucleusBorderPoint>(0);
-		for(NucleusBorderPoint n : humpRoi){
-			result.add(new NucleusBorderPoint(n));
+	public List<BorderPoint> getHumpRoi(){
+		List<BorderPoint> result = new ArrayList<BorderPoint>(0);
+		for(BorderPoint n : humpRoi){
+			result.add(new BorderPoint(n));
 		}
 		return result;
 	}
 	
-	protected void setHookRoi(List<NucleusBorderPoint> list){
+	protected void setHookRoi(List<BorderPoint> list){
 		this.hookRoi = list;
 	}
 	
-	protected void setHumpRoi(List<NucleusBorderPoint> list){
+	protected void setHumpRoi(List<BorderPoint> list){
 		this.humpRoi = list;
 	}
 	
@@ -269,7 +269,7 @@ extends SpermNucleus
                 This is the corner furthest from the tip.
                 Can be confused as to which side of the sperm head is chosen
 		 */  
-		NucleusBorderPoint spermTail2 = findTailPointFromMinima();
+		BorderPoint spermTail2 = findTailPointFromMinima();
 		this.addTailEstimatePosition(spermTail2);
 		// addBorderTag("spermTail2", this.getIndex(spermTail2));
 
@@ -287,7 +287,7 @@ extends SpermNucleus
                 Draw a line orthogonal, and pick the intersecting border points
                 The border furthest from the tip is the tail
     */  
-    NucleusBorderPoint spermTail1 = this.findTailByNarrowestWidthMethod();
+    BorderPoint spermTail1 = this.findTailByNarrowestWidthMethod();
     this.addTailEstimatePosition(spermTail1);
     // addBorderTag("spermTail1", this.getIndex(spermTail1));
 
@@ -297,7 +297,7 @@ extends SpermNucleus
       take a position between them on roi
     */
     int consensusTailIndex = this.getPositionBetween(spermTail2, spermTail1);
-    NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
+    BorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
     // consensusTailIndex = this.getPositionBetween(consensusTail, spermTail1);
 
     // this.setInitialConsensusTail(consensusTail);
@@ -366,8 +366,8 @@ extends SpermNucleus
 
 		Profile profile = this.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
 
-		int midPoint = (int) (this.getLength()/2) ;
-		for(int i=0; i<this.getLength();i++){ // integrate points over 180
+		int midPoint = (int) (this.getBorderLength()/2) ;
+		for(int i=0; i<this.getBorderLength();i++){ // integrate points over 180
 
 			if(i<midPoint){
 				frontPoints += profile.get(i);
@@ -394,7 +394,7 @@ extends SpermNucleus
     Detect the tail based on a list of local minima in an NucleusBorderPoint array.
     The putative tail is the point furthest from the sum of the distances from the CoM and the tip
   */
-  public NucleusBorderPoint findTailPointFromMinima() throws Exception{
+  public BorderPoint findTailPointFromMinima() throws Exception{
   
     // we cannot be sure that the greatest distance between two points will be the endpoints
     // because the hook may begin to curve back on itself. We supplement this basic distance with
@@ -405,7 +405,7 @@ extends SpermNucleus
     BooleanProfile array = this.getProfile(ProfileType.REGULAR).getLocalMinima(5);
 
     double maxDistance = 0;
-    NucleusBorderPoint tail = this.getBorderTag(BorderTag.REFERENCE_POINT); // start at tip, move round
+    BorderPoint tail = this.getBorderTag(BorderTag.REFERENCE_POINT); // start at tip, move round
 
     for(int i=0; i<array.size();i++){
       if(array.get(i)==true){
@@ -431,19 +431,19 @@ extends SpermNucleus
       Draw a line orthogonal, and pick the intersecting border points
       The border furthest from the tip is the tail
   */
-  public NucleusBorderPoint findTailByNarrowestWidthMethod() throws Exception{
+  public BorderPoint findTailByNarrowestWidthMethod() throws Exception{
 
     // Find the narrowest point around the CoM
     // For a position in teh roi, draw a line through the CoM to the intersection point
     // Measure the length; if < min length..., store equation and border(s)
 
     double minDistance = this.getStatistic(NucleusStatistic.MAX_FERET);
-    NucleusBorderPoint reference = this.getBorderTag(BorderTag.REFERENCE_POINT);
+    BorderPoint reference = this.getBorderTag(BorderTag.REFERENCE_POINT);
 
-    for(int i=0;i<this.getLength();i++){
+    for(int i=0;i<this.getBorderLength();i++){
 
-      NucleusBorderPoint p = this.getPoint(i);
-      NucleusBorderPoint opp = this.findOppositeBorder(p);
+      BorderPoint p = this.getPoint(i);
+      BorderPoint opp = this.findOppositeBorder(p);
       double distance = p.getLengthTo(opp);
 
       if(distance<minDistance){
@@ -458,10 +458,10 @@ extends SpermNucleus
     // if close to 90, and the distance to the tip > CoM-tip, keep the point
     // return the best point
     double difference = 90;
-    NucleusBorderPoint tail = new NucleusBorderPoint(0,0);
-    for(int i=0;i<this.getLength();i++){
+    BorderPoint tail = new BorderPoint(0,0);
+    for(int i=0;i<this.getBorderLength();i++){
 
-      NucleusBorderPoint p = this.getBorderPoint(i);
+      BorderPoint p = this.getBorderPoint(i);
       double angle = findAngleBetweenXYPoints(reference, this.getCentreOfMass(), p);
       if(  Math.abs(90-angle)<difference && 
           p.getLengthTo(this.getBorderTag(BorderTag.REFERENCE_POINT)) > this.getCentreOfMass().getLengthTo( this.getBorderTag(BorderTag.REFERENCE_POINT) ) ){
@@ -493,7 +493,7 @@ extends SpermNucleus
     double minDeltaY = 100;
     int minDeltaYIndex = 0;
 
-    for(int i = 0; i<this.getLength();i++){
+    for(int i = 0; i<this.getBorderLength();i++){
         double x = this.getBorderPoint(i).getX();
         double y = this.getBorderPoint(i).getY();
         double yOnLine = lineEquation.getY(x);
@@ -517,15 +517,15 @@ extends SpermNucleus
     this.setBorderTag(BorderTag.INTERSECTION_POINT, intersectionPointIndex );
 
     // get an array of points from tip to tail
-    List<NucleusBorderPoint> roi1 = new ArrayList<NucleusBorderPoint>(0);
-    List<NucleusBorderPoint> roi2 = new ArrayList<NucleusBorderPoint>(0);
+    List<BorderPoint> roi1 = new ArrayList<BorderPoint>(0);
+    List<BorderPoint> roi2 = new ArrayList<BorderPoint>(0);
     boolean changeRoi = false;
 
-    for(int i = 0; i<this.getLength();i++){
+    for(int i = 0; i<this.getBorderLength();i++){
 
-      int currentIndex = Utils.wrapIndex(this.getBorderIndex(BorderTag.ORIENTATION_POINT)+i, this.getLength()); // start at the tail, and go around the array
+      int currentIndex = Utils.wrapIndex(this.getBorderIndex(BorderTag.ORIENTATION_POINT)+i, this.getBorderLength()); // start at the tail, and go around the array
       
-      NucleusBorderPoint p = getPoint(currentIndex);
+      BorderPoint p = getPoint(currentIndex);
 
       if(currentIndex != intersectionPointIndex && !changeRoi){   // starting at the tip, assign points to roi1
         roi1.add(p);
@@ -551,7 +551,7 @@ extends SpermNucleus
     this.humpRoi = roi1;
 
     //    check if we need to swap
-    for(NucleusBorderPoint point : roi1){
+    for(BorderPoint point : roi1){
     	if(point.overlaps(this.getBorderTag(BorderTag.REFERENCE_POINT))){
     		this.hookRoi = roi1;
         	this.humpRoi = roi2;
@@ -569,7 +569,7 @@ extends SpermNucleus
 
   // needs to override AsymmetricNucleus version because hook/hump
   @Override
-  public void calculateSignalAnglesFromPoint(NucleusBorderPoint p) throws Exception {
+  public void calculateSignalAnglesFromPoint(BorderPoint p) throws Exception {
 
 
 	  super.calculateSignalAnglesFromPoint(p);
@@ -622,7 +622,7 @@ extends SpermNucleus
 				
 		if(angle!=0){
 
-			for(NucleusBorderPoint p : hookRoi){
+			for(BorderPoint p : hookRoi){
 //				XYPoint p = this.getBorderPoint(i);
 
 
@@ -655,7 +655,7 @@ extends SpermNucleus
 				p.setY(newY);
 			}
 			
-			for(NucleusBorderPoint p : humpRoi){
+			for(BorderPoint p : humpRoi){
 //				XYPoint p = this.getBorderPoint(i);
 
 
@@ -698,13 +698,13 @@ extends SpermNucleus
 	  
 	  result += "  Hook roi:\n";
 	  for(int i=0; i<hookRoi.size(); i++){
-		  NucleusBorderPoint p = hookRoi.get(i);
+		  BorderPoint p = hookRoi.get(i);
 		  result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\n";
 	  }
 	  
 	  result += "  Hump roi:\n";
 	  for(int i=0; i<humpRoi.size(); i++){
-		  NucleusBorderPoint p = humpRoi.get(i);
+		  BorderPoint p = humpRoi.get(i);
 		  result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\n";
 	  }
 	  
