@@ -1,3 +1,21 @@
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 package analysis.nucleus;
 
 import java.util.logging.Level;
@@ -11,10 +29,7 @@ import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
-import components.nuclear.NucleusBorderSegment;
-import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.PigSpermNucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
@@ -78,7 +93,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
 
 			// default is to make profile aggregate from reference point
-			pc.createProfileAggregate(collection);
+			pc.createProfileAggregate(collection, ProfileType.REGULAR);
 			publish(1);
 
 			// use the median profile of this aggregate to find the orientation point ("tail")
@@ -91,7 +106,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			while(score < prevScore){
 
 				// rebuild the aggregate - needed if the orientation point index has changed in any nuclei
-				pc.createProfileAggregate(collection);
+				pc.createProfileAggregate(collection, ProfileType.REGULAR);
 
 				// carry out the orientation point detection in the median again
 				TailFinder.findTailIndexInMedianCurve(collection);

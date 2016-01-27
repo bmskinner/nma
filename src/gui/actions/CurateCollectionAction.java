@@ -70,7 +70,7 @@ public class CurateCollectionAction extends ProgressableAction {
 	
 	private void analyseNewCollection(CellCollection collection){
 		if(collection.hasCells()){
-			programLogger.log(Level.INFO, "Extracted "+collection.size()+" cells");
+			programLogger.log(Level.INFO, "Extracted "+collection.cellCount()+" cells");
 			final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 			dataset.addChildCollection(collection);
 

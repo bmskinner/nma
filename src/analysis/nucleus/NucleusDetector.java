@@ -242,7 +242,7 @@ public class NucleusDetector extends AnalysisWorker {
 	  Set<File> keys = collectionGroup.keySet();
 	  for (File key : keys) {
 		  CellCollection collection = collectionGroup.get(key);
-		  if(collection.size()==0){
+		  if(collection.cellCount()==0){
 			  fileLogger.log(Level.FINE, "Removing collection "+key.toString());
 			  toRemove.add(key);
 		  }    

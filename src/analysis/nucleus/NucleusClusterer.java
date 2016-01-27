@@ -193,7 +193,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 				clusterMap.put(i, clusterCollection);
 			}
 
-			int i = collection.size();
+			int i = collection.cellCount();
 			for(Instance inst : cellToInstanceMap.keySet()){
 				
 				try{

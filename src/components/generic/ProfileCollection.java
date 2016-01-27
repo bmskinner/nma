@@ -38,12 +38,15 @@ public class ProfileCollection implements Serializable {
 	
 	private ProfileAggregate 	aggregate = null;
 	
-	private Map<BorderTag, Integer> offsets 		= new HashMap<BorderTag, Integer>();
+	private Map<BorderTag, Integer>    offsets  = new HashMap<BorderTag, Integer>();
 	private List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
-	private List<Profile> nucleusProfileList    = new ArrayList<Profile>();
-	
-	
+
+
+	/**
+	 * Create an empty profile collection
+	 */
 	public ProfileCollection(){
+		
 	}
 			
 	/**
@@ -251,27 +254,7 @@ public class ProfileCollection implements Serializable {
 		
 		return result;
 	}
-	
-	/**
-	 * Get the nucleus profiles offset to the requested key. 
-	 * This will not be as accurate as a nucleus by nucleus approach, 
-	 * in which the keys are linked directly to indexes. Use only when no choice
-	 * i.e for frankenprofiles. With frankenprofiles, the profiles are mapped to
-	 * the median already, so the offsets should match up
-	 * @param s the key to offset to 
-	 * @return a list of profiles offset to the given key
-	 */
-	public List<Profile> getNucleusProfiles(BorderTag tag) throws Exception {
-		if(tag==null){
-			throw new IllegalArgumentException("The requested profile list key is null: "+tag);
-		}
-		List<Profile> result = new ArrayList<Profile>();
-		for(Profile p : nucleusProfileList){
-			result.add(new Profile(p.offset(this.getOffset(tag))));
-		}
-		return result;
-	}
-		
+			
 	/**
 	 * Add an offset for the given point type. The offset is used
 	 * to fetch profiles the begin at the point of interest.
@@ -337,34 +320,28 @@ public class ProfileCollection implements Serializable {
 
 		this.segments = result;
 	}
-		
+			
 	/**
-	 * Add individual nucleus profiles to teh collection.
-	 * This allows frankenmedian creation
-	 * @param profiles the list of profiles
-	 */
-	public void addNucleusProfiles(List<Profile> profiles){
-		if(profiles==null || profiles.isEmpty()){
-			throw new IllegalArgumentException("String or segment list is null or empty");
-		}
-		nucleusProfileList = profiles;
-	}
-	
-	/**
-	 * Create the profile aggregate from the given collection, with a set length.
+	 * Create the profile aggregate from the given collection, with a set length, and
+	 * containing the given type of nucleus profile
 	 * By default, the profiles are zeroed on the reference point
 	 * @param collection the Cellcollection
 	 * @param length the length of the aggregate
 	 * @throws Exception 
 	 */
-	public void createProfileAggregate(CellCollection collection, int length) throws Exception{
+	public void createProfileAggregate(CellCollection collection, ProfileType type, int length) throws Exception{
 		if(length<0){
 			throw new IllegalArgumentException("Requested length is negative");
 		}
 
 		aggregate = new ProfileAggregate(length);
 		for(Nucleus n : collection.getNuclei()){
-			aggregate.addValues(n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)); //n.getAngleProfile(BorderTag.REFERENCE_POINT));
+			
+			if(type.equals(ProfileType.FRANKEN)){
+				aggregate.addValues(n.getProfile(type)); // franken profiles are not offset, they have a different length
+			} else {
+				aggregate.addValues(n.getProfile(type, BorderTag.REFERENCE_POINT)); //n.getAngleProfile(BorderTag.REFERENCE_POINT));
+			}
 		}
 	}
 	
@@ -375,29 +352,12 @@ public class ProfileCollection implements Serializable {
 	 * @param collection the Cellcollection
 	 * @throws Exception 
 	 */
-	public void createProfileAggregate(CellCollection collection) throws Exception{
+	public void createProfileAggregate(CellCollection collection, ProfileType type) throws Exception{
 		
-		createProfileAggregate(collection, (int)collection.getMedianArrayLength());
+		createProfileAggregate(collection, type, (int)collection.getMedianArrayLength());
 
 	}
-	
-	/**
-	 * This allows the generation of a frankenMedian from stored FrankenProfiles.
-	 * Rather than using the real nucleus profile data, it calls the list of 
-	 * recombined profiles previously generated. the profiles should also all start
-	 * from the reference point.
-	 */
-	public void createProfileAggregateFromInternalProfiles(int length){
-		if(this.nucleusProfileList==null || this.nucleusProfileList.isEmpty()){
-			throw new IllegalArgumentException("The internal profile list is empty");
-		}
-		aggregate = new ProfileAggregate(length);
-		for(Profile profile : nucleusProfileList){
-			aggregate.addValues(profile);
-		}
 		
-	}
-	
 	
 	/**
 	 * Get the points associated with offsets currently present

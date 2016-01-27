@@ -81,7 +81,7 @@ public class ManualCellCurator extends LoadingIconDialog {
 	
 	private void updateCell(Cell cell){
 		try {
-			int totalCells = dataset.getCollection().size();
+			int totalCells = dataset.getCollection().cellCount();
 			int cellNumber = cellIndex+1;
 			this.setTitle(cell.getNucleus().getNameAndNumber()+": Cell "+cellNumber+" of "+totalCells);
 			panel.updateCell(cell);
@@ -101,7 +101,7 @@ public class ManualCellCurator extends LoadingIconDialog {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				
-				if(cellIndex==dataset.getCollection().size()-1){
+				if(cellIndex==dataset.getCollection().cellCount()-1){
 					// last cell
 					idsToKeep.add(dataset.getCollection().getCells().get(cellIndex).getId());
 					setVisible(false);
@@ -118,7 +118,7 @@ public class ManualCellCurator extends LoadingIconDialog {
 		rejectButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				if(cellIndex==dataset.getCollection().size()-1){
+				if(cellIndex==dataset.getCollection().cellCount()-1){
 					// last cell
 					setVisible(false);
 				} else {

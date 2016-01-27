@@ -249,7 +249,7 @@ public class NuclearHistogramDatasetCreator {
 				
 					
 				int count=0;
-				double[] lengths = new double[collection.size()];
+				double[] lengths = new double[collection.cellCount()];
 				for(Nucleus n : collection.getNuclei()){
 //					NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
 					NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
@@ -323,7 +323,7 @@ public class NuclearHistogramDatasetCreator {
 			CellCollection collection = dataset.getCollection();
 			
 			int count=0;
-			double[] lengths = new double[collection.size()];
+			double[] lengths = new double[collection.cellCount()];
 			for(Nucleus n : collection.getNuclei()){
 //				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
 				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
@@ -349,7 +349,7 @@ public class NuclearHistogramDatasetCreator {
 			CellCollection collection = dataset.getCollection();
 			
 			int count=0;
-			double[] lengths = new double[collection.size()];
+			double[] lengths = new double[collection.cellCount()];
 			for(Nucleus n : collection.getNuclei()){
 //				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
 				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(

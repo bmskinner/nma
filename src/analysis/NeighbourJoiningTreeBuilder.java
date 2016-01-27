@@ -22,7 +22,7 @@ public class NeighbourJoiningTreeBuilder extends AnalysisWorker {
 
 	public NeighbourJoiningTreeBuilder(AnalysisDataset dataset, Logger programLogger) {
 		super(dataset, programLogger);
-		this.setProgressTotal(dataset.getCollection().size());
+		this.setProgressTotal(dataset.getCollection().cellCount());
 		
 	}
 

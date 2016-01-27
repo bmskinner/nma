@@ -329,7 +329,7 @@ public class NucleusDatasetCreator {
 		
 		// add the segments
 		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
-//		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
+
 		if(normalised){
 			addSegmentsFromProfile(segments, profile, ds, 100, 0);
 		} else {
@@ -663,9 +663,11 @@ public class NucleusDatasetCreator {
 
 		// add the individual nuclei
 		int profileCount = 0;
-		for(Profile angles : collection.getProfileCollection(ProfileType.FRANKEN).getNucleusProfiles(point)){
+		
+		for(Nucleus n : collection.getNuclei()){
+//		for(Profile angles : collection.getProfileCollection(ProfileType.FRANKEN).getNucleusProfiles(point)){
 
-			
+			Profile angles = n.getProfile(ProfileType.FRANKEN); // do not offset, the offsets for a nucleus do not match a frankenprofile
 			double[] xArray = xpoints.asArray();
 			double[] yArray = angles.asArray();
 			

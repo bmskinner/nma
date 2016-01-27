@@ -732,13 +732,14 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	 * @throws Exception 
 	 */
 	public static void linkSegments(List<NucleusBorderSegment> list) throws Exception{
-		if(list==null || list.isEmpty()){
-			throw new IllegalArgumentException("List of segments is null or empty");
+		if(list==null || list.isEmpty()|| list.size()==1){
+			throw new IllegalArgumentException("List of segments is null, empty or one");
 		}
 				
 		NucleusBorderSegment prevSeg = null;
 		
-		
+//		IJ.log("Linking list:");
+//		IJ.log(NucleusBorderSegment.toString(list));
 
 		int position = 0;
 		for(NucleusBorderSegment segment : list){
@@ -752,13 +753,15 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 			prevSeg = segment;
 			position++;
 		}
+		
 		NucleusBorderSegment firstSegment = list.get(0);
 		NucleusBorderSegment lastSegment = list.get(list.size()-1);
 				
 		/*
 		 * Ensure the end of the final segment is the same index as the start of the first segment.
 		 */
-//		boolean ok = lastSegment.update(lastSegment.getStartIndex(), firstSegment.getStartIndex());
+		
+//		IJ.log("First segment to become: "+lastSegment.getEndIndex()+" - "+firstSegment.getEndIndex());
 		boolean ok = firstSegment.update(lastSegment.getEndIndex(), firstSegment.getEndIndex());
 		if(!ok){
 			throw new Exception("Error fitting final segment: "+firstSegment.getLastFailReason());
@@ -785,11 +788,21 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	public static List<NucleusBorderSegment> nudge(List<NucleusBorderSegment> list, int value) throws Exception{
 		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
 		
+//		IJ.log("Nudging list:");
+//		IJ.log(NucleusBorderSegment.toString(list));
+		
 		for(NucleusBorderSegment segment : list){
 			
-			NucleusBorderSegment newSeg = new NucleusBorderSegment(Utils.wrapIndex(segment.getStartIndex()+value, segment.getTotalLength()), 
-					Utils.wrapIndex(segment.getEndIndex()+value, segment.getTotalLength()), 
-					segment.getTotalLength() );
+			NucleusBorderSegment newSeg = new NucleusBorderSegment(
+					
+					Utils.wrapIndex(segment.getStartIndex()+value,
+									segment.getTotalLength()), 
+									
+					Utils.wrapIndex(segment.getEndIndex()+value,
+									segment.getTotalLength()), 
+					
+					segment.getTotalLength() 
+			);
 			
 			newSeg.setName(segment.getName());
 			newSeg.setPosition(segment.getPosition());
@@ -798,7 +811,6 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 			// adjust merge sources also and read
 			if(segment.hasMergeSources()){
 				
-//				IJ.log("Nudging merge sources for "+segment.getName());
 //				
 				List<NucleusBorderSegment> adjustedMergeSources = nudgeUnlinked(segment.getMergeSources(), value);
 				for(NucleusBorderSegment newMergeSource : adjustedMergeSources){

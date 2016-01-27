@@ -494,7 +494,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 		if(clusterCollection.hasCells()){
 			colourTreeNodesByCluster(clusterCollection);
 			clusterList.add(clusterCollection);
-			programLogger.log(Level.INFO, "Extracted "+clusterCollection.size()+" cells");
+			programLogger.log(Level.INFO, "Extracted "+clusterCollection.cellCount()+" cells");
 		} else {
 			programLogger.log(Level.WARNING, "No cells found. Check taxon labels are correct");
 		}

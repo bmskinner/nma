@@ -125,21 +125,23 @@ public class KruskalTester {
 			DatasetSegmenter segmenter = new DatasetSegmenter(one, MorphologyAnalysisMode.NEW, programLogger);
 			DatasetSegmenter.SegmentFitter fitter = segmenter.new SegmentFitter(medianProfile);
 			
-			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
+//			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
 
 			for(Nucleus n : copyOfTwo.getCollection().getNuclei()){ 
 				fitter.fit(n, pc);
 
 				// recombine the segments at the lengths of the median profile segments
 				Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
-				frankenProfiles.add(recombinedProfile);
+				n.setProfile(ProfileType.FRANKEN, new SegmentedProfile(recombinedProfile));
+//				frankenProfiles.add(recombinedProfile);
 			}
 
+			frankenCollection.createProfileAggregate(copyOfTwo.getCollection(), ProfileType.FRANKEN);
 			// add all the nucleus frankenprofiles to the frankencollection
-			frankenCollection.addNucleusProfiles(frankenProfiles);
+//			frankenCollection.addNucleusProfiles(frankenProfiles);
 
 			// update the profile aggregate
-			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
+//			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
 			
 			// Put the new collection into the duplicate dataset
 			copyOfTwo.getCollection().setProfileCollection(ProfileType.FRANKEN, frankenCollection);

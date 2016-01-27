@@ -261,6 +261,7 @@ public interface Nucleus extends CellularComponent {
 	/**
 	 * Get a copy of the angle profile offset to start at the given point
 	 * @param pointType the point to start at
+	 * @param tag the tag to offset the profile to
 	 * @return a copy of the segmented profile
 	 * @throws Exception 
 	 */

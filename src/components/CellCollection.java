@@ -183,7 +183,7 @@ public class CellCollection implements Serializable {
 //	  statsCache.recalculate(this);
   }
   
-  public int size(){
+  public int cellCount(){
 	  return mappedCollection.size();
   }
     
@@ -411,7 +411,7 @@ public class CellCollection implements Serializable {
   }
 
   public double[][] getPositions(){
-	  double[][] s = new double[size()][4];
+	  double[][] s = new double[cellCount()][4];
 	  int i = 0;
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
@@ -422,7 +422,7 @@ public class CellCollection implements Serializable {
   }
 
   public int getNucleusCount(){
-    return this.size();
+    return this.cellCount();
   }
   
   

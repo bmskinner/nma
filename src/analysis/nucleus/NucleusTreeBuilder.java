@@ -66,7 +66,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		super(dataset, programLogger);
 		this.options = options;
 		this.collection = dataset.getCollection();
-		this.setProgressTotal(dataset.getCollection().size() * 2);
+		this.setProgressTotal(dataset.getCollection().cellCount() * 2);
 		
 		log(Level.FINEST, "Total set to "+this.getProgressTotal());
 	}
