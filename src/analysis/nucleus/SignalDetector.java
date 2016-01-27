@@ -82,9 +82,6 @@ public class SignalDetector extends AnalysisWorker {
 	public SignalDetector(AnalysisDataset d, File folder, int channel, NuclearSignalOptions options, int group, String channelName, Logger programLogger){
 		super(d, programLogger);
 		this.options	 = options;
-//		fileLogger		 = Logger.getLogger(SignalDetector.class.getName());
-//		fileLogger.addHandler(d.getLogHandler());
-//		fileLogger.setLevel(Level.ALL);
 		
 		this.folder		 = folder;
 		this.channel	 = channel;

@@ -178,7 +178,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 		// use the same array length as the source collection to avoid segment slippage
 		int profileLength = sourceCollection.getProfileCollection(ProfileType.REGULAR)
-				.getProfile(referencePoint, 50) // Median of profile collection 
+				.getProfile(referencePoint, Constants.MEDIAN) // Median of profile collection 
 				.size(); 
 
 		// get the empty profile collection from the new CellCollection
@@ -280,7 +280,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 		fitter = null;
 
 		// add all the nucleus frankenprofiles to the frankencollection
-		frankenCollection.createProfileAggregate(collection, ProfileType.FRANKEN);
+		frankenCollection.createProfileAggregate(collection, ProfileType.FRANKEN, (int)pc.getAggregate().length());
 
 		// update the profile aggregate
 //		frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
@@ -534,7 +534,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 			 * stored frankenprofiles from each nucleus in the collection
 			 */
 			try {
-			frankenCollection.createProfileAggregate(collection, ProfileType.FRANKEN);
+			frankenCollection.createProfileAggregate(collection, ProfileType.FRANKEN, (int)pc.getAggregate().length());
 			} catch(Exception e){
 				logError("Error creating profile aggregate", e);
 				throw new Exception("Error creating profile aggregate");

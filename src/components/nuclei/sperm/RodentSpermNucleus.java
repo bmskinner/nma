@@ -510,11 +510,13 @@ extends SpermNucleus
   }
 
   public void splitNucleusToHeadAndHump() throws Exception{
-	  
 
-    int intersectionPointIndex = findIntersectionPointForNuclearSplit();
-    // this.intersectionPoint = this.getBorderPoint( intersectionPointIndex );
-    this.setBorderTag(BorderTag.INTERSECTION_POINT, intersectionPointIndex );
+	  if(!this.hasBorderTag(BorderTag.INTERSECTION_POINT)){
+		  int index = findIntersectionPointForNuclearSplit();
+		  this.setBorderTag(BorderTag.INTERSECTION_POINT, index );
+	  } 
+ 
+	int intersectionPointIndex = this.getBorderIndex(BorderTag.INTERSECTION_POINT);
 
     // get an array of points from tip to tail
     List<BorderPoint> roi1 = new ArrayList<BorderPoint>(0);
@@ -523,19 +525,29 @@ extends SpermNucleus
 
     for(int i = 0; i<this.getBorderLength();i++){
 
-      int currentIndex = Utils.wrapIndex(this.getBorderIndex(BorderTag.ORIENTATION_POINT)+i, this.getBorderLength()); // start at the tail, and go around the array
+    	// start at the tail, and go around the array
+      int currentIndex = Utils.wrapIndex(this.getBorderIndex(BorderTag.ORIENTATION_POINT)+i, this.getBorderLength());
       
       BorderPoint p = getBorderPoint(currentIndex);
 
-      if(currentIndex != intersectionPointIndex && !changeRoi){   // starting at the tip, assign points to roi1
+      // starting at the tail, assign points to roi1
+      // Continue to do so unless changeRoi is true
+      if(currentIndex != intersectionPointIndex && !changeRoi){   
         roi1.add(p);
+        continue;
       }
-      if(currentIndex==intersectionPointIndex && !changeRoi){ // until we hit the intersection point. Then, close the polygon of roi1 back to the tip. Switch to roi2
+      
+      // Change roi is not yet called, but we have reached the intersection point
+      // Close the polygon of roi1 back to the tail. Switch to roi2
+      if(currentIndex==intersectionPointIndex && !changeRoi){
         roi1.add(p);
         roi1.add(this.getBorderTag(BorderTag.ORIENTATION_POINT));
         roi2.add(this.getBorderTag(BorderTag.INTERSECTION_POINT));
         changeRoi = true;
       }
+      
+      // It's not the intersection point, or the tail, and changeRoi is true
+      // The point belongs to roi2 
       if(currentIndex != intersectionPointIndex && currentIndex != this.getBorderIndex(BorderTag.ORIENTATION_POINT) && changeRoi){   // continue with roi2, adjusting the index numbering as needed
         roi2.add(p);
       }

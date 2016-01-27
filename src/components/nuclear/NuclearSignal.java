@@ -55,6 +55,8 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 	    to the measured area, get the radius for that circle
 		 */
 		this.setStatistic(SignalStatistic.RADIUS,  Math.sqrt(area/Math.PI));
+		
+		this.setCentreOfMass(centreOfMass);
 	}
 
 	/**
