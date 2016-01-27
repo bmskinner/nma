@@ -47,7 +47,6 @@ public class CurateCollectionAction extends ProgressableAction {
 			CellCollection clusterCollection = new CellCollection(template.getFolder(), 
 					template.getOutputFolderName(), 
 					template.getName()+"_Curated", 
-					template.getDebugFile(), 
 					template.getNucleusType());
 
 			clusterCollection.setName(template.getName()+"_Curated");

@@ -729,7 +729,7 @@ public class NucleusDatasetCreator {
 	 */
 	public static BoxAndWhiskerCategoryDataset createBoxplotDataset(BoxplotChartOptions options) throws Exception{
 		List<AnalysisDataset> datasets = options.getDatasets();
-		NucleusStatistic stat = options.getStat();
+		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 		MeasurementScale scale = options.getScale();
 		OutlierFreeBoxAndWhiskerCategoryDataset ds = new OutlierFreeBoxAndWhiskerCategoryDataset();
 
@@ -742,7 +742,7 @@ public class NucleusDatasetCreator {
 			for (double d : stats) {
 				list.add(new Double(d));
 			}
-			ds.add(list, c.getType()+"_"+i, stat.toString());
+			ds.add(list, c.getName()+"_"+i, stat.toString());
 		}
 
 		return ds;

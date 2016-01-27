@@ -18,13 +18,16 @@
  *******************************************************************************/
 package utility;
 
+import java.io.Serializable;
+
 /**
  * Hold version information, and parsing methods
  * @author bms41
  *
  */
-public class Version {
+public class Version implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private final int major;
 	private final int minor;
 	private final int revision;

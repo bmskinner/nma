@@ -66,7 +66,7 @@ public class PopulationSplitWindow {
 		
 		List<String> items = new ArrayList<String>(0);
 		for(CellCollection collection : this.collections){
-			items.add(collection.getType());
+			items.add(collection.getName());
 		}
 		
 		String[] list = items.toArray(new String[0]);
@@ -76,7 +76,7 @@ public class PopulationSplitWindow {
 	    
 	    String collectionType = gd.getNextChoice();
 	    for(CellCollection collection : this.collections){
-			if(collection.getType().equals(collectionType)){
+			if(collection.getName().equals(collectionType)){
 				return collection;
 			}
 		}

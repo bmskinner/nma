@@ -119,7 +119,7 @@ public class ShellAnalysis extends AnalysisWorker {
 			for(int channel : counters.keySet()){
 				if(collection.hasSignals(channel)){
 					ShellCounter channelCounter = counters.get(channel);
-					channelCounter.export(new File(collection.getLogFileName( "log.shells."+channel  )));
+//					channelCounter.export(new File(collection.getLogFileName( "log.shells."+channel  )));
 					getDataset().addShellResult(channel, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
 				}
 			}
@@ -190,7 +190,7 @@ public class ShellAnalysis extends AnalysisWorker {
 			for(int channel : counters.keySet()){
 				if(collection.hasSignals(channel)){
 					ShellCounter channelCounter = counters.get(channel);
-					channelCounter.export(new File(collection.getLogFileName( "log.shells."+channel  )));
+//					channelCounter.export(new File(collection.getLogFileName( "log.shells."+channel  )));
 					dataset.addShellResult(channel, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
 				}
 			}

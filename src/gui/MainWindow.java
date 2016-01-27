@@ -391,7 +391,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		btnPostanalysisMapping.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-//				fishMapping();
+
 				new FishRemappingAction(populationsPanel.getSelectedDatasets(), MainWindow.this);
 			}
 		});

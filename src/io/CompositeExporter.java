@@ -127,7 +127,7 @@ public class CompositeExporter {
 					logger.log(Level.SEVERE, "Error adding image to composite", e);
 				}     
 			}
-			IJ.saveAsTiff(finalImage, collection.getFolder()+File.separator+collection.getOutputFolderName()+File.separator+"composite"+"."+collection.getType()+".tiff");
+			IJ.saveAsTiff(finalImage, collection.getFolder()+File.separator+collection.getOutputFolderName()+File.separator+"composite"+"."+collection.getName()+".tiff");
 		} catch(Exception e){
 			logger.log(Level.SEVERE, "Error creating composite image", e);
 			return false;

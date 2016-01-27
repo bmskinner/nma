@@ -86,14 +86,14 @@ public class StatsExporter {
 //		nuclearStats.addColumn("NORM_TAIL_INDEX",            collection.getBorderIndex(BorderTag.ORIENTATION_POINT));
 		nuclearStats.addColumn("DIFFERENCE_TO_MEDIAN",       collection.getDifferencesToMedianFromPoint(BorderTag.ORIENTATION_POINT));
 		nuclearStats.addColumn("PATH",                       collection.getNucleusImagePaths());
-		nuclearStats.export(filename+"."+collection.getType());
+		nuclearStats.export(filename+"."+collection.getName());
 	}
 
 	public static void exportImagePaths(CellCollection collection, String filename){
 		TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 		logger.addColumn("PATH",     collection.getCleanNucleusPaths());
 //		logger.addColumn("POSITION", collection.getPositions());
-		logger.export(filename+"."+collection.getType());
+		logger.export(filename+"."+collection.getName());
 	}
 	
 //	public static void exportAngleProfiles(CellCollection collection){
@@ -135,7 +135,7 @@ public class StatsExporter {
 			}
 
 
-			logger.export(filename+"."+collection.getType());
+			logger.export(filename+"."+collection.getName());
 
 		} catch (Exception e){
 			logger.log(Level.SEVERE, "Error in segment stats export", e);
@@ -152,7 +152,7 @@ public class StatsExporter {
 			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 			logger.addColumn("X_POSITION",   interpolatedMedian.getPositions(interpolatedMedian.size()).asArray());
 			logger.addColumn("ANGLE_MEDIAN", interpolatedMedian.asArray());
-			logger.export(filename+"."+collection.getType());
+			logger.export(filename+"."+collection.getName());
 		}catch (Exception e){
 			logger.log(Level.SEVERE, "Error in median stats export", e);
 		}

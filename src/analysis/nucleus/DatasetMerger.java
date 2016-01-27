@@ -169,7 +169,6 @@ public class DatasetMerger extends AnalysisWorker {
 				CellCollection newCollection = new CellCollection(newDatasetFolder, 
 						null, 
 						newDatasetName, 
-						mergeDebugFile,
 						templateCollection.getNucleusType()
 						);
 

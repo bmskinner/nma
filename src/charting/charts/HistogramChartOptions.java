@@ -23,12 +23,13 @@ import java.util.List;
 import analysis.AnalysisDataset;
 import components.generic.MeasurementScale;
 import stats.NucleusStatistic;
+import stats.PlottableStatistic;
 
 public class HistogramChartOptions extends BoxplotChartOptions {
 
 	protected boolean useDensity;
 	
-	public HistogramChartOptions(List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale, boolean useDensity) {
+	public HistogramChartOptions(List<AnalysisDataset> list, PlottableStatistic stat, MeasurementScale scale, boolean useDensity) {
 		super(list, stat, scale);
 		this.useDensity = useDensity;
 	}

@@ -94,7 +94,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
 		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
 
-		programLogger.log(Level.INFO, "Sub-population: "+collection.getType()+" : "+collection.getNucleusCount()+" nuclei");
+		programLogger.log(Level.INFO, "Sub-population: "+collection.getNucleusCount()+" nuclei");
 
 		dataset.addChildDataset(subDataset);
 	}
@@ -120,7 +120,6 @@ public class AddNuclearSignalAction extends ProgressableAction {
 				CellCollection listCollection = new CellCollection(r.getFolder(), 
 						r.getOutputFolderName(), 
 						"SignalGroup_"+signalGroup+"_with_signals", 
-						r.getDebugFile(), 
 						r.getNucleusType());
 
 				for(Cell c : list){
@@ -138,7 +137,6 @@ public class AddNuclearSignalAction extends ProgressableAction {
 					CellCollection notListCollection = new CellCollection(r.getFolder(), 
 							r.getOutputFolderName(), 
 							"SignalGroup_"+signalGroup+"_without_signals", 
-							r.getDebugFile(), 
 							r.getNucleusType());
 
 					for(Cell c : notList){

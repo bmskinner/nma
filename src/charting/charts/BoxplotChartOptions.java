@@ -23,19 +23,20 @@ import java.util.List;
 import analysis.AnalysisDataset;
 import components.generic.MeasurementScale;
 import stats.NucleusStatistic;
+import stats.PlottableStatistic;
 
 public class BoxplotChartOptions extends ChartOptions {
 
-	protected NucleusStatistic stat;
+	protected PlottableStatistic stat;
 	protected MeasurementScale scale;
 
-	public BoxplotChartOptions(List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale){
+	public BoxplotChartOptions(List<AnalysisDataset> list, PlottableStatistic stat, MeasurementScale scale){
 		super(list);
 		this.stat = stat;
 		this.scale = scale;
 	}
 	
-	public NucleusStatistic getStat(){
+	public PlottableStatistic getStat(){
 		return this.stat;
 	}
 	

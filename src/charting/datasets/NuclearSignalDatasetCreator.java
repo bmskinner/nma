@@ -43,6 +43,7 @@ import analysis.AnalysisDataset;
 import analysis.AnalysisOptions.NuclearSignalOptions;
 import analysis.nucleus.CurveRefolder;
 import components.CellCollection;
+import components.generic.MeasurementScale;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
@@ -165,7 +166,39 @@ public class NuclearSignalDatasetCreator {
 	 * @return a histogram of angles
 	 * @throws Exception 
 	 */
-	public static HistogramDataset createSignalAngleHistogramDataset(List<AnalysisDataset> list) throws Exception{
+//	public static HistogramDataset createSignalAngleHistogramDataset(List<AnalysisDataset> list) throws Exception{
+//		HistogramDataset ds = new HistogramDataset();
+//		for(AnalysisDataset dataset : list){
+//			CellCollection collection = dataset.getCollection();
+//			
+//			for(int signalGroup : collection.getSignalGroups()){
+//				
+//				if(dataset.isSignalGroupVisible(signalGroup)){
+//
+//					if(collection.hasSignals(signalGroup)){
+//
+//						List<Double> angles = new ArrayList<Double>(0);
+//
+//						for(Nucleus n : collection.getNuclei()){
+//							angles.addAll(n.getSignalCollection().getStatistics(SignalStatistic.ANGLE, signalGroup));
+//						}
+//						double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
+//						ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
+//					}
+//				}
+//			}
+//			
+//		}
+//		return ds;
+//	}
+	
+	/**
+	 * Create a histogram dataset covering the signal angles for the given analysis datasets
+	 * @param list the list of datasets
+	 * @return a histogram of angles
+	 * @throws Exception 
+	 */
+	public static HistogramDataset createSignaStatisticHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception{
 		HistogramDataset ds = new HistogramDataset();
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
@@ -179,7 +212,7 @@ public class NuclearSignalDatasetCreator {
 						List<Double> angles = new ArrayList<Double>(0);
 
 						for(Nucleus n : collection.getNuclei()){
-							angles.addAll(n.getSignalCollection().getStatistics(SignalStatistic.ANGLE, signalGroup));
+							angles.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
 						}
 						double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
 						ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
@@ -198,31 +231,31 @@ public class NuclearSignalDatasetCreator {
 	 * @return a histogram of distances
 	 * @throws Exception 
 	 */
-	public static HistogramDataset createSignalDistanceHistogramDataset(List<AnalysisDataset> list) throws Exception{
-		HistogramDataset ds = new HistogramDataset();
-		for(AnalysisDataset dataset : list){
-			CellCollection collection = dataset.getCollection();
-
-			for(int signalGroup : collection.getSignalGroups()){
-				
-				if(dataset.isSignalGroupVisible(signalGroup)){
-
-					if(collection.hasSignals(signalGroup)){
-
-						List<Double> angles = new ArrayList<Double>(0);
-
-						for(Nucleus n : collection.getNuclei()){
-							angles.addAll(n.getSignalCollection().getStatistics(SignalStatistic.FRACT_DISTANCE_FROM_COM, signalGroup));
-						}
-						double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
-						ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
-					}
-				}
-			}
-
-		}
-		return ds;
-	}
+//	public static HistogramDataset createSignalDistanceHistogramDataset(List<AnalysisDataset> list) throws Exception{
+//		HistogramDataset ds = new HistogramDataset();
+//		for(AnalysisDataset dataset : list){
+//			CellCollection collection = dataset.getCollection();
+//
+//			for(int signalGroup : collection.getSignalGroups()){
+//				
+//				if(dataset.isSignalGroupVisible(signalGroup)){
+//
+//					if(collection.hasSignals(signalGroup)){
+//
+//						List<Double> angles = new ArrayList<Double>(0);
+//
+//						for(Nucleus n : collection.getNuclei()){
+//							angles.addAll(n.getSignalCollection().getStatistics(SignalStatistic.FRACT_DISTANCE_FROM_COM, signalGroup));
+//						}
+//						double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
+//						ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
+//					}
+//				}
+//			}
+//
+//		}
+//		return ds;
+//	}
 	
 	/**
 	 * Get the XY coordinates of a given signal centre of mass on a nuclear outline
@@ -356,7 +389,9 @@ public class NuclearSignalDatasetCreator {
 					fieldNames.add("Signals per nucleus");
 					
 					for(SignalStatistic stat : SignalStatistic.values()){
-						fieldNames.add(stat.toString());
+						
+						fieldNames.add(stat.label(MeasurementScale.PIXELS)  );
+
 					}
 				}
 				
@@ -385,7 +420,14 @@ public class NuclearSignalDatasetCreator {
 							rowData.add(df.format(signalPerNucleus));
 							
 							for(SignalStatistic stat : SignalStatistic.values()){
-								rowData.add(df.format(collection.getMedianSignalStatistic(stat, signalGroup)));
+								double pixel = collection.getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
+
+								if(stat.isDimensionless()){
+									rowData.add(df.format(pixel) );
+								} else {
+									double micron = collection.getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
+									rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
+								}
 							}
 							
 						} else {

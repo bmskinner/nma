@@ -186,7 +186,6 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 				CellCollection clusterCollection = new CellCollection(collection.getFolder(), 
 						collection.getOutputFolderName(), 
 						collection.getName()+"_Cluster_"+i, 
-						collection.getDebugFile(), 
 						collection.getNucleusType());
 				
 				clusterCollection.setName(collection.getName()+"_Cluster_"+i);

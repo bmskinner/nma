@@ -27,7 +27,6 @@
 
 package components;
 
-import ij.IJ;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import stats.SignalStatistic;
@@ -66,13 +65,14 @@ public class CellCollection implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	// TODO: this needs reworking
+	private final UUID 	uuid;			// the collection id
 	
 	private File 	    folder; 		// the source of the nuclei
 	private String     	outputFolder;	// the location to save out data
-	private File 	    debugFile;		// the location of the debug file 
+//	private File 	    debugFile;		// the location of the debug file /
 	private String 	    collectionType; // for annotating image names
 	private String 	    name;			// the name of the collection
-	private final UUID 	guid;			// the collection id
+	
 	
 	private NucleusType nucleusType; // the type of nuclei this collection contains
 	
@@ -95,17 +95,16 @@ public class CellCollection implements Serializable {
 	 * @param folder the folder of images
 	 * @param outputFolder a name for the outputs (usually the analysis date). Can be null
 	 * @param type the type of collection (e.g. analysable)
-	 * @param debugFile the location of the log file 
 	 * @param nucleusClass the class of nucleus to be held
 	 */
-	public CellCollection(File folder, String outputFolder, String type, File debugFile, NucleusType nucleusType){
-		this.folder = folder;
+	public CellCollection(File folder, String outputFolder, String name, NucleusType nucleusType){
+		
+		this.uuid         = java.util.UUID.randomUUID();
+		this.folder       = folder;
 		this.outputFolder = outputFolder;
-		this.debugFile = debugFile;
-		this.collectionType = type;
-		this.name = outputFolder == null ? type : type+" - "+outputFolder;
-		this.guid = java.util.UUID.randomUUID();
-		this.nucleusType = nucleusType;
+		this.name         = name == null ? folder.getName() : name;// if name is null, use the image folder name
+		this.nucleusType  = nucleusType;
+		
 		profileCollections.put(ProfileType.REGULAR, new ProfileCollection());
 	}
   
@@ -119,7 +118,6 @@ public class CellCollection implements Serializable {
 	  this(template.getCollection().getFolder(), 
 			  template.getCollection().getOutputFolderName(), 
 			  name, 
-			  template.getCollection().getDebugFile(),
 			  template.getCollection().getNucleusType()
 			  );
   }
@@ -133,7 +131,6 @@ public class CellCollection implements Serializable {
 	  this(template.getFolder(), 
 			  template.getOutputFolderName(), 
 			  name, 
-			  template.getDebugFile(),
 			  template.getNucleusType()
 			  );
   }
@@ -154,7 +151,7 @@ public class CellCollection implements Serializable {
   }
   
   public UUID getID(){
-	  return this.guid;
+	  return this.uuid;
   }
   
   /**
@@ -291,33 +288,10 @@ public class CellCollection implements Serializable {
 	  }
 	  return result;
   }
-  
-  
 
-  public File getDebugFile(){
-    return this.debugFile;
-  }
-  
-  /**
-   * Allow the collection to update the debug file location
-   * @param f the new file
-   */
-  public void setDebugFile(File f){
-	  try {
-		  if(!f.exists()){
-			  f.createNewFile();
-		  }
-		  if(f.canWrite()){
-			  this.debugFile = f;
-		  }
-	  } catch (IOException e) {
-		  IJ.log("Unable to update debug file location");
-	  }
-  }
-
-  public String getType(){
-    return this.collectionType;
-  }
+//  public String getType(){
+//    return this.collectionType;
+//  }
   
   /**
    * Get the distinct source image file list for all nuclei in the collection 
@@ -645,20 +619,35 @@ public class CellCollection implements Serializable {
   
     
   /**
-   * Get the median of the signal statistic in the given channel
-   * @param channel
+   * Get the median of the signal statistic in the given signal group
+   * @param  signalGroup
    * @return the median
  * @throws Exception 
    */
-  public double getMedianSignalStatistic(SignalStatistic stat, int channel) throws Exception{
-	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
+  public double getMedianSignalStatistic(SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception{
+	  
+//	  if(this.statsCache.hasStatistic(stat, scale)){
+//		  return(this.statsCache.getStatistic(stat, scale));
+//	  } else {
+		  
+		  double[] values = this.getSignalStatistics(stat, scale, signalGroup);
+		  double median =  Stats.quartile(values, Constants.MEDIAN);
+//		  statsCache.setStatistic(stat, scale, median);
+		  return median;
+//	  }
+  }
+	  
+
+  private double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception{
+
+	  List<Cell> cells = getCellsWithNuclearSignals(signalGroup, true);
 	  List<Double> a = new ArrayList<Double>(0);
 	  for(Cell c : cells){
 		  Nucleus n = c.getNucleus();
-		  a.addAll(n.getSignalCollection().getStatistics(stat, channel));
+		  a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
 
 	  }
-	  return Stats.quartile(a.toArray(new Double[0]), Constants.MEDIAN);
+	  return Utils.getdoubleFromDouble(a.toArray(new Double[0]));
   }
   
   /** 
@@ -805,20 +794,6 @@ public class CellCollection implements Serializable {
 	  return n;
   }
 
-
-  /**
-   * Get the name of the log file for this collection
-   * @param filename
-   * @return
-   */
-  public String getLogFileName(String filename){
-	  String file = this.getFolder()+File.separator+this.getOutputFolderName()+File.separator+filename+"."+getType()+".txt";
-	  File f = new File(file);
-	  if(f.exists()){
-		  f.delete();
-	  }
-	  return file;
-  }
   
   /**
    * Get the perimeter normalised veriabililty of a nucleus angle profile compared to the

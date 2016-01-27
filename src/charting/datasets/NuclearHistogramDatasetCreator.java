@@ -63,7 +63,9 @@ public class NuclearHistogramDatasetCreator {
 				if(options.hasLogger()){
 					options.getLogger().log(Level.FINEST, "  Stat: "+options.getStat().toString()+"; Scale: "+options.getScale().toString());
 				}
-				double[] values = findDatasetValues(dataset, options.getStat(), options.getScale()); 
+				
+				NucleusStatistic stat = (NucleusStatistic) options.getStat();
+				double[] values = findDatasetValues(dataset, stat, options.getScale()); 
 
 				String groupLabel = options.getStat().toString();
 

@@ -65,7 +65,10 @@ public class NewAnalysisAction extends ProgressableAction {
 				analysisFolder.mkdir();
 			}
 //			
-			File logFile = new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+options.getFolder().getName()+".log");
+			File logFile = new File(options.getFolder().getAbsolutePath()
+					+ File.separator
+					+ outputFolderName
+					+ File.separator+options.getFolder().getName()+".log");
 
 			mw.setStatus("New analysis in progress");
 			

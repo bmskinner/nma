@@ -130,20 +130,37 @@ public class CellDatasetCreator {
 				
 				for(NuclearSignal s : n.getSignals(signalGroup)){
 					
-					fieldNames.add("Signal area");
-					rowData.add(s.getStatistic(SignalStatistic.AREA)
-							+" ("
-							+ df.format(Utils.micronArea(s.getStatistic(SignalStatistic.AREA), n.getScale()))
-							+" microns)");
+					for(SignalStatistic stat : SignalStatistic.values()){
+						
+						fieldNames.add(stat.label(MeasurementScale.PIXELS)  );
+
+						double pixel = s.getStatistic(stat, MeasurementScale.PIXELS);
+						
+						if(stat.isDimensionless()){
+							rowData.add(df.format(pixel) );
+						} else {
+							double micron = n.getStatistic(stat, MeasurementScale.MICRONS);
+							rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
+						}
+					}
 					
 					fieldNames.add("Signal CoM");
+					rowData.add(s.getCentreOfMass().toString());
 					
-					int comX = s.getCentreOfMass().getXAsInt()+ (int) n.getPosition()[CellularComponent.X_BASE];
-					int comY = s.getCentreOfMass().getYAsInt()+ (int) n.getPosition()[CellularComponent.Y_BASE];
-					rowData.add(comX+", "+comY);
-					
-					fieldNames.add("Signal angle");
-					rowData.add(s.getStatistic(SignalStatistic.ANGLE));
+//					fieldNames.add("Signal area");
+//					rowData.add(s.getStatistic(SignalStatistic.AREA)
+//							+" ("
+//							+ df.format(Utils.micronArea(s.getStatistic(SignalStatistic.AREA), n.getScale()))
+//							+" microns)");
+//					
+//					fieldNames.add("Signal CoM");
+//					
+//					int comX = s.getCentreOfMass().getXAsInt()+ (int) n.getPosition()[CellularComponent.X_BASE];
+//					int comY = s.getCentreOfMass().getYAsInt()+ (int) n.getPosition()[CellularComponent.Y_BASE];
+//					rowData.add(comX+", "+comY);
+//					
+//					fieldNames.add("Signal angle");
+//					rowData.add(s.getStatistic(SignalStatistic.ANGLE));
 				}			
 				
 			}

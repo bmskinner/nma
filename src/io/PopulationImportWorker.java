@@ -68,7 +68,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 						+File.separator
 						+file.getName().replace(Constants.SAVE_FILE_EXTENSION, Constants.LOG_FILE_EXTENSION));
 				
-				dataset.getCollection().setDebugFile(logFile);
+				dataset.setDebugFile(logFile);
 				programLogger.log(Level.FINE, "Updated log file location");
 				
 				
@@ -88,10 +88,10 @@ public class PopulationImportWorker extends AnalysisWorker {
 						}
 						
 					}
-					Version version = Version.parseString(dataset.getVersion());
+					Version version = dataset.getVersion();
 					
 					// This is when bugs were fixed for hook hump assignment
-					Version testVersion = new Version(1, 11, 6);
+					Version testVersion = new Version(1, 12, 1); //TODO: change this when fixed
 					
 					/*
 					 * Correct hook-hump for older versions
@@ -161,24 +161,22 @@ public class PopulationImportWorker extends AnalysisWorker {
 	 * @param version
 	 * @return a pass or fail
 	 */
-	public boolean checkVersion(String version){
+	public boolean checkVersion(Version version){
 		boolean ok = true;
 		
 		if(version==null){ // allow for debugging, but warn
 			programLogger.log(Level.WARNING, "No version info found: functions may not work as expected");
 			return true;
 		}
-		
-		Version v = Version.parseString(version);
-		
+				
 //		String[] parts = version.split("\\.");
 		
 		// major version MUST be the same
-		if(v.getMajor()!=Constants.VERSION_MAJOR){
+		if(version.getMajor()!=Constants.VERSION_MAJOR){
 			ok = false;
 		}
 		// dataset revision should be equal or greater to program
-		if(v.getMinor()<Constants.VERSION_MINOR){
+		if(version.getMinor()<Constants.VERSION_MINOR){
 			programLogger.log(Level.WARNING, "Dataset was created with an older version of the program");
 			programLogger.log(Level.WARNING, "Some functionality may not work as expected");
 		}

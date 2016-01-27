@@ -19,6 +19,7 @@
 package charting.charts;
 
 import gui.components.ColourSelecter;
+import stats.NucleusStatistic;
 import stats.SegmentStatistic;
 
 import java.awt.Color;
@@ -58,8 +59,8 @@ public class BoxplotChartFactory {
 		if(options.getDatasets()!=null){
 			 ds = NucleusDatasetCreator.createBoxplotDataset(options);
 		}
-		
-		String yLabel = options.getScale().yLabel(options.getStat());
+		NucleusStatistic stat = (NucleusStatistic) options.getStat();
+		String yLabel = options.getScale().yLabel(stat);
 
 		JFreeChart 	boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, yLabel, ds, false); 
 		formatBoxplotChart(boxplotChart, options.getDatasets());

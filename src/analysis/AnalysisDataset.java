@@ -45,6 +45,7 @@ import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
 import logging.LogPanelFormatter;
 import utility.Constants;
+import utility.Version;
 import components.Cell;
 import components.CellCollection;
 import components.ClusterGroup;
@@ -77,42 +78,30 @@ public class AnalysisDataset implements Serializable {
 	
 	private Color datasetColour = null; // use for colouring the dataset in comparison with other datasets
 	
-//	private List<UUID> clusterResults = new ArrayList<UUID>(0); // hold the ids of clusters
 	private List<ClusterGroup> clusterGroups = new ArrayList<ClusterGroup>(0); // hold groups of cluster results
 	
 	//The ids of datasets merged to create this dataset. The IDs must be present in
 	// otherCollections
 	private List<UUID> mergeSources	  = new ArrayList<UUID>(0);
-	private String newickTree = null; // No longer used - see ClusterGroup.setTree() instead
 	
 	private File debugFile;
-	private transient DebugFileHandler fileHandler;// = new DebugFileHandler(debugFile); // No longer used - handler is created new on get()
-	
-	private String version;
+
+	private Version version;
 	
 	private transient ColourSwatch swatch = ColourSwatch.REGULAR_SWATCH;
 		
-	private boolean isRoot;	
-	
-	/*
-	 * Store rendered charts in a cache, to avoid slowdowns when reselecting datasets
-	 */
-
-//	private transient Map<ChartCache, JFreeChart> chartCache = new HashMap<ChartCache, JFreeChart>(1);
-	
+	private boolean isRoot;	// is this a root dataset
+		
 	/**
 	 * Create a dataset from a cell collection. The save file is
 	 * set as the output folder of the collection
 	 * @param collection
 	 */
 	public AnalysisDataset(CellCollection collection){
-		this.thisCollection = collection;
-		this.savePath = new File(collection.getOutputFolder()
+		this(collection, new File(collection.getOutputFolder()
 				+File.separator
-				+collection.getType()
-				+Constants.SAVE_FILE_EXTENSION); // nmd Nuclear Morphology Dataset
-		this.isRoot = false;
-		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_MINOR+"."+Constants.VERSION_REVISION;
+				+collection.getName()
+				+Constants.SAVE_FILE_EXTENSION));
 	}
 	
 	/**
@@ -122,9 +111,13 @@ public class AnalysisDataset implements Serializable {
 	 */
 	public AnalysisDataset(CellCollection collection, File saveFile){
 		this.thisCollection = collection;
-		this.savePath = saveFile;
-		this.isRoot = false;
-		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_MINOR+"."+Constants.VERSION_REVISION;
+		this.savePath       = saveFile;
+		
+		this.debugFile      = new File(saveFile.getParent()
+				                        + File.separator
+				                        + saveFile.getName().replace(Constants.SAVE_FILE_EXTENSION, Constants.LOG_FILE_EXTENSION));
+		this.isRoot         = false;
+		this.version        = new Version(Constants.VERSION_MAJOR,Constants.VERSION_MINOR,Constants.VERSION_REVISION);
 	}
 	
 	
@@ -162,7 +155,7 @@ public class AnalysisDataset implements Serializable {
 	 * Get the software version used to create the dataset
 	 * @return
 	 */
-	public String getVersion(){
+	public Version getVersion(){
 		return this.version;
 	}
 	
@@ -290,7 +283,24 @@ public class AnalysisDataset implements Serializable {
 	 * @see CellCollection
 	 */
 	public File getDebugFile(){
-		return this.thisCollection.getDebugFile();
+		return this.debugFile;
+	}
+	
+	/**
+	 * Allow the collection to update the debug file location
+	 * @param f the new file
+	 */
+	public void setDebugFile(File f){
+		try {
+			if(!f.exists()){
+				f.createNewFile();
+			}
+			if(f.canWrite()){
+				this.debugFile = f;
+			}
+		} catch (IOException e) {
+			IJ.log("Unable to update debug file location");
+		}
 	}
 	
 	/**

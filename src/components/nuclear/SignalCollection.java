@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import components.generic.MeasurementScale;
 import components.generic.XYPoint;
 
 /**
@@ -509,11 +510,11 @@ public class SignalCollection implements Serializable {
 	 * @return the areas
 	 * @throws Exception 
 	 */
-	public List<Double> getStatistics(SignalStatistic stat, int signalGroup) throws Exception{
+	public List<Double> getStatistics(SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception{
 		List<NuclearSignal> list = getSignals(signalGroup);
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<list.size();i++){
-			result.add(list.get(i).getStatistic(stat));
+			result.add(list.get(i).getStatistic(stat, scale));
 		}
 		return result;
 	}

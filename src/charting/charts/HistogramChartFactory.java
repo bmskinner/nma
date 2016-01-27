@@ -21,6 +21,7 @@ package charting.charts;
 import gui.components.ColourSelecter;
 import ij.IJ;
 import stats.NucleusStatistic;
+import stats.SignalStatistic;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -81,16 +82,41 @@ public class HistogramChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createSignalAngleHistogram(HistogramChartOptions options) throws Exception{
+//	public static JFreeChart createSignalAngleHistogram(HistogramChartOptions options) throws Exception{
+//		
+//		HistogramDataset ds = options.hasDatasets() 
+//							? NuclearSignalDatasetCreator.createSignalAngleHistogramDataset(options.getDatasets())
+//							: null;
+//				
+//		JFreeChart chart = createHistogram(ds, "Angle", "Count");
+//		if(ds!=null && options.hasDatasets()){
+//			XYPlot plot = chart.getXYPlot();
+//			plot.getDomainAxis().setRange(0,360);
+//			setSeriesPropertiesForSignalHistogram(chart, options.firstDataset());	
+//		}
+//		return chart;
+//	}
+	
+	/**
+	 * Create a signal angle histogram for a dataset
+	 * @param options the ChartOptions
+	 * @return
+	 * @throws Exception 
+	 */
+	public static JFreeChart createSignalStatisticHistogram(HistogramChartOptions options) throws Exception{
+		
+		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
 		HistogramDataset ds = options.hasDatasets() 
-							? NuclearSignalDatasetCreator.createSignalAngleHistogramDataset(options.getDatasets())
+							? NuclearSignalDatasetCreator.createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
 							: null;
 				
-		JFreeChart chart = createHistogram(ds, "Angle", "Count");
+		JFreeChart chart = createHistogram(ds, stat.label(options.getScale()), "Count");
 		if(ds!=null && options.hasDatasets()){
 			XYPlot plot = chart.getXYPlot();
-			plot.getDomainAxis().setRange(0,360);
+			if(stat.equals(SignalStatistic.ANGLE)){
+				plot.getDomainAxis().setRange(0,360);
+			}
 			setSeriesPropertiesForSignalHistogram(chart, options.firstDataset());	
 		}
 		return chart;
@@ -103,20 +129,20 @@ public class HistogramChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createSignalDistanceHistogram(HistogramChartOptions options) throws Exception{
-		
-		HistogramDataset ds = options.hasDatasets() 
-							? NuclearSignalDatasetCreator.createSignalDistanceHistogramDataset(options.getDatasets())
-							: null;
-		
-		JFreeChart chart = createHistogram(ds, "Distance", "Count");
-		if(ds!=null && options.hasDatasets()){
-			XYPlot plot = chart.getXYPlot();
-			plot.getDomainAxis().setRange(0,1);
-			setSeriesPropertiesForSignalHistogram(chart, options.firstDataset());
-		}
-		return chart;
-	}
+//	public static JFreeChart createSignalDistanceHistogram(HistogramChartOptions options) throws Exception{
+//		
+//		HistogramDataset ds = options.hasDatasets() 
+//							? NuclearSignalDatasetCreator.createSignalDistanceHistogramDataset(options.getDatasets())
+//							: null;
+//		
+//		JFreeChart chart = createHistogram(ds, "Distance", "Count");
+//		if(ds!=null && options.hasDatasets()){
+//			XYPlot plot = chart.getXYPlot();
+//			plot.getDomainAxis().setRange(0,1);
+//			setSeriesPropertiesForSignalHistogram(chart, options.firstDataset());
+//		}
+//		return chart;
+//	}
 	
 	private static void setSeriesPropertiesForSignalHistogram(JFreeChart chart, AnalysisDataset dataset){
 		
@@ -228,13 +254,13 @@ public class HistogramChartFactory {
 	 * @throws Exception 
 	 */
 	public static JFreeChart createNuclearDensityStatsChart(HistogramChartOptions options) throws Exception{
-		
-//	public static JFreeChart createNuclearDensityStatsChart(DefaultXYDataset ds, List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale){
-		
+	
 		DefaultXYDataset ds = null;
 		
 		if (options.hasDatasets()){
-			ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(options.getDatasets(), options.getStat(), options.getScale());
+			
+			NucleusStatistic stat = (NucleusStatistic) options.getStat();
+			ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(options.getDatasets(), stat, options.getScale());
 		}
 
 		String xLabel = options.getStat().label(options.getScale());

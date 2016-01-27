@@ -155,7 +155,7 @@ public class NucleusDetector extends AnalysisWorker {
 			AnalysisDataset dataset = new AnalysisDataset(r);
 			dataset.setAnalysisOptions(analysisOptions);
 			dataset.setRoot(true);
-			File debugFile = r.getDebugFile();
+			File debugFile = dataset.getDebugFile();
 
 			File folder = r.getFolder();
 			log(Level.INFO, "Analysing: "+folder.getName());
@@ -168,7 +168,6 @@ public class NucleusDetector extends AnalysisWorker {
 				CellCollection failedNuclei = new CellCollection(folder, 
 						r.getOutputFolderName(), 
 						"failed", 
-						debugFile, 
 						analysisOptions.getNucleusType());
 
 //				boolean ok;
@@ -197,12 +196,12 @@ public class NucleusDetector extends AnalysisWorker {
 
 			programLogger.log(Level.INFO, spacerString);
 			
-			programLogger.log(Level.INFO, "Population: "+r.getType());
+//			programLogger.log(Level.INFO, "Population: "+r.getType());
 			
 			programLogger.log(Level.INFO, "Population: "+r.getNucleusCount()+" nuclei");
 			programLogger.log(Level.INFO, spacerString);
 			
-			fileLogger.log(Level.INFO, "Population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
+			fileLogger.log(Level.INFO, "Population: "+r.getName()+" : "+r.getNucleusCount()+" nuclei");
 			
 
 			result.add(dataset);
@@ -356,7 +355,6 @@ public class NucleusDetector extends AnalysisWorker {
 	  CellCollection folderCollection = new CellCollection(folder, 
 			  outputFolder, 
 			  folder.getName(), 
-			  this.debugFile,
 			  analysisOptions.getNucleusType());
 	  
 	  this.collectionGroup.put(folder, folderCollection);

@@ -28,6 +28,8 @@ import components.CellCollection;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import ij.IJ;
+import stats.NucleusStatistic;
+import stats.PlottableStatistic;
 import utility.Constants;
 
 public class ProfileCollection implements Serializable {
@@ -36,10 +38,13 @@ public class ProfileCollection implements Serializable {
 	
 	private static final int ZERO_INDEX = 0;
 	
-	private ProfileAggregate 	aggregate = null;
+	private ProfileAggregate 	       aggregate = null;
 	
 	private Map<BorderTag, Integer>    offsets  = new HashMap<BorderTag, Integer>();
 	private List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
+	
+	
+	private ProfileCache profileCache           = new ProfileCache();
 
 
 	/**
@@ -105,9 +110,15 @@ public class ProfileCollection implements Serializable {
 		}
 		
 		if(this.hasBorderTag(tag)){
-
-			int indexOffset = offsets.get(tag);
-			return getAggregate().getQuartile(quartile).offset(indexOffset);
+			
+			if( ! profileCache.hasProfile(tag, quartile)){
+				
+				int indexOffset = offsets.get(tag);
+				profileCache.setProfile(tag, quartile, getAggregate().getQuartile(quartile).offset(indexOffset));
+				
+			}
+			
+			return profileCache.getProfile(tag, quartile);
 			
 		} else {
 			throw new IllegalArgumentException("The requested tag is not present: "+tag.toString());
@@ -266,6 +277,7 @@ public class ProfileCollection implements Serializable {
 			throw new IllegalArgumentException("String is null");
 		}
 		offsets.put(tag, offset);
+		profileCache.clear();
 	}
 	
 	/**
@@ -333,7 +345,7 @@ public class ProfileCollection implements Serializable {
 		if(length<0){
 			throw new IllegalArgumentException("Requested length is negative");
 		}
-
+		profileCache.clear();
 		aggregate = new ProfileAggregate(length);
 		for(Nucleus n : collection.getNuclei()){
 			
@@ -343,6 +355,7 @@ public class ProfileCollection implements Serializable {
 				aggregate.addValues(n.getProfile(type, BorderTag.REFERENCE_POINT)); //n.getAngleProfile(BorderTag.REFERENCE_POINT));
 			}
 		}
+		
 	}
 	
 	
@@ -408,9 +421,13 @@ public class ProfileCollection implements Serializable {
 	 */
 	public Profile getIQRProfile(BorderTag tag) throws Exception {
 		
-		int offset = getOffset(tag);
-		Profile q25 = getAggregate().getQuartile(Constants.LOWER_QUARTILE).offset(offset);
-		Profile q75 = getAggregate().getQuartile(Constants.UPPER_QUARTILE).offset(offset);
+//		int offset = getOffset(tag);
+		
+		Profile q25 = getProfile(tag, Constants.LOWER_QUARTILE);
+		Profile q75 = getProfile(tag, Constants.UPPER_QUARTILE);
+		
+//		Profile q25 = getAggregate().getQuartile(Constants.LOWER_QUARTILE).offset(offset);
+//		Profile q75 = getAggregate().getQuartile(Constants.UPPER_QUARTILE).offset(offset);
 		return q75.subtract(q25);
 	}
 	
@@ -460,5 +477,100 @@ public class ProfileCollection implements Serializable {
 //			IJ.log("    Variable index "+values.get(i));
 		}		
 		return result;
+	}
+	
+	private class ProfileCache implements Serializable {
+		
+		private static final long serialVersionUID = 1L;
+		
+		/**
+		 * Store the median profiles from the profile aggregate to save calculation time with large datasets
+		 */
+		private Map<BorderTag, Map<Double, Profile>> cache = new HashMap<BorderTag, Map<Double, Profile>>();
+		
+		public ProfileCache(){
+			
+		}
+		
+		  /**
+		   * Store the given statistic
+		   * @param stat
+		   * @param scale
+		   * @param d
+		   */
+		  public void setProfile(BorderTag tag, Double quartile, Profile profile){
+
+			  Map<Double, Profile> map;
+
+			  if(cache.containsKey(tag)){
+
+				  map = cache.get(tag);
+
+			  } else {
+
+				  map = new HashMap<Double, Profile>();
+				  cache.put(tag, map);
+
+			  }
+
+			  map.put(quartile, profile);
+
+		  }
+
+		  /**
+		   * Get the given profile from the cache, or null if not present
+		 * @param tag
+		 * @param quartile
+		 * @return
+		 */
+		  public Profile getProfile(BorderTag tag, Double quartile){
+
+			  if(this.hasProfile(tag, quartile)){
+
+				  return cache.get(tag).get(quartile);
+
+			  } else  {
+				  return null;
+
+			  }
+		  }
+
+		  /**
+		   * Check if the given profile is in the cache
+		 * @param tag
+		 * @param quartile
+		 * @return
+		 */
+		public boolean hasProfile(BorderTag tag, Double quartile){
+			  Map<Double, Profile> map;
+
+			  if(cache.containsKey(tag)){
+
+				  map = cache.get(tag);
+
+			  } else {
+
+				  return false;
+
+			  }
+
+			  if(map.containsKey(quartile)){
+
+				  return true;
+			  } else {
+				  return false;
+			  }
+
+		  }
+		  
+		  /**
+		   * Empty the cache - all values must be recalculated
+		   */
+		  public void clear(){
+			  cache = null;
+			  cache = new HashMap<BorderTag, Map<Double, Profile>>();
+
+		  }
+		 
 	}
 }

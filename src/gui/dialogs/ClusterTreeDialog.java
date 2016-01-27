@@ -462,7 +462,6 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 		CellCollection clusterCollection = new CellCollection(template.getFolder(), 
 				template.getOutputFolderName(), 
 				template.getName()+"_ManualCluster_"+clusterList.size(), 
-				template.getDebugFile(), 
 				template.getNucleusType());
 		
 		String newName = template.getName()+"_ManualCluster_"+clusterList.size();
