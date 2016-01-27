@@ -210,7 +210,7 @@ public class RunSegmentationAction extends ProgressableAction {
 				// call the finish
 				if( ! hasRemainingDatasetsToProcess()){
 
-					log(Level.FINEST, "Firing save root");
+					programLogger.log(Level.FINEST, "Firing save root");
 					fireInterfaceEvent(InterfaceMethod.SAVE_ROOT);
 					RunSegmentationAction.super.finished();
 					

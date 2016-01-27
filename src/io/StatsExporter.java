@@ -128,7 +128,7 @@ public class StatsExporter {
 
 				List<Integer> list = new ArrayList<Integer>(0);
 				for(Nucleus n : collection.getNuclei()){
-					NucleusBorderSegment seg = n.getAngleProfile().getSegment(s);
+					NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR).getSegment(s);
 					list.add(seg.length());
 				}
 				logger.addColumn(s, list.toArray(new Integer[0]));

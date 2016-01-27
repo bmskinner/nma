@@ -38,44 +38,38 @@ import components.nuclei.Nucleus;
 
 public class PopulationExporter extends AnalysisWorker {
 	
-	private File saveFile = null;
+	private File   saveFile = null;
 	private boolean useHDF5 = false;
 	
 	public PopulationExporter(AnalysisDataset dataset, File saveFile, Logger programLogger) {
 		super(dataset, programLogger);		
 		this.saveFile = saveFile;
-//		this.useHDF5 = useHDF5;
-		this.setProgressTotal(1);
 	}
-	
-	public PopulationExporter(AnalysisDataset dataset, Logger programLogger) {
-		super(dataset, programLogger);
-		CellCollection collection = dataset.getCollection();
-		this.saveFile = new File(collection.getOutputFolder()+File.separator+collection.getType()+Constants.SAVE_FILE_EXTENSION);
-		this.setProgressTotal(1);
-//		this.useHDF5 = useHDF5;
-//		this.setProgress(0);
 		
-	}
-	
 	@Override
-	protected Boolean doInBackground() throws Exception {
-//		publish(0);
+	protected Boolean doInBackground() {
 		
-		if(useHDF5){
-			saveAnalysisDatasetToHDF5(getDataset());
-			return true;
-		} else {
+		try{
+		
+			if(useHDF5){
+				saveAnalysisDatasetToHDF5(getDataset());
+				return true;
+			} 
 
 			if(saveAnalysisDataset(getDataset(), saveFile)){
-//				publish(1);
 				log(Level.FINEST, "Save was sucessful");
 				return true;
+				
 			} else{
 				log(Level.WARNING, "Save was unsucessful");
 				return false;
 			}
+		
+		} catch(Exception e){
+			logError("Unable to save dataset", e);
+			return false;
 		}
+		
 		
 	}
 	

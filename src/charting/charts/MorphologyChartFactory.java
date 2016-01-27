@@ -620,8 +620,9 @@ public class MorphologyChartFactory {
 	 * @param dataset the AnalysisDataset to use to draw the consensus nucleus
 	 * @param signalCoMs the dataset with the signal centre of masses
 	 * @return
+	 * @throws Exception 
 	 */
-	public static JFreeChart makeSignalCoMNucleusOutlineChart(AnalysisDataset dataset, XYDataset signalCoMs){
+	public static JFreeChart makeSignalCoMNucleusOutlineChart(AnalysisDataset dataset, XYDataset signalCoMs) throws Exception{
 		JFreeChart chart = ConsensusNucleusChartFactory.makeNucleusOutlineChart(dataset);
 
 		XYPlot plot = chart.getXYPlot();

@@ -462,7 +462,7 @@ extends SpermNucleus
     for(int i=0;i<this.getBorderLength();i++){
 
       BorderPoint p = this.getBorderPoint(i);
-      double angle = findAngleBetweenXYPoints(reference, this.getCentreOfMass(), p);
+      double angle = Utils.findAngleBetweenXYPoints(reference, this.getCentreOfMass(), p);
       if(  Math.abs(90-angle)<difference && 
           p.getLengthTo(this.getBorderTag(BorderTag.REFERENCE_POINT)) > this.getCentreOfMass().getLengthTo( this.getBorderTag(BorderTag.REFERENCE_POINT) ) ){
         difference = 90-angle;
@@ -638,7 +638,7 @@ extends SpermNucleus
 				 *      V P
 				 * 
 				 */
-				double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, 
+				double oldAngle = Utils.findAngleBetweenXYPoints( p, 
 						this.getCentreOfMass(), 
 						new XYPoint(this.getCentreOfMass().getX(),-10));
 
@@ -671,7 +671,7 @@ extends SpermNucleus
 				 *      V P
 				 * 
 				 */
-				double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, 
+				double oldAngle = Utils.findAngleBetweenXYPoints( p, 
 						this.getCentreOfMass(), 
 						new XYPoint(this.getCentreOfMass().getX(),-10));
 

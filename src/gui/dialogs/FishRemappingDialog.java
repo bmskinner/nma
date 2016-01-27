@@ -162,8 +162,9 @@ public class FishRemappingDialog extends ImageProber {
 	 * Get a list of CellCollections, containing the selected nuclei.
 	 * If no nuclei were selected, the list is empty
 	 * @return 
+	 * @throws Exception 
 	 */
-	public List<CellCollection> getSubCollections(){
+	public List<CellCollection> getSubCollections() throws Exception{
 		List<CellCollection> result = new ArrayList<CellCollection>(0);
 		
 		if(!selectedNucleiLeft.isEmpty()){

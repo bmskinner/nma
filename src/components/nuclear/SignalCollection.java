@@ -517,68 +517,7 @@ public class SignalCollection implements Serializable {
 		}
 		return result;
 	}
-	
-//	/**
-//	 * Get the areas of signals in a channel
-//	 * @param channel the signal channel
-//	 * @return the areas
-//	 */
-//	public List<Double> getAreas(int signalGroup){
-//		List<NuclearSignal> list = getSignals(signalGroup);
-//		List<Double> result = new ArrayList<Double>(0);
-//		for(int i=0;i<list.size();i++){
-//			result.add(list.get(i).getArea());
-//		}
-//		return result;
-//	}
-//	
-//	/**
-//	 * Get the angless of signals in a channel
-//	 * @param channel the signal channel
-//	 * @return the angles
-//	 */
-//	public List<Double> getAngles(int signalGroup){
-////		List<NuclearSignal> list = getSignals(signalGroup);
-//		List<Double> result = new ArrayList<Double>(0);
-//		
-//		for(NuclearSignal n : this.getSignals(signalGroup)){
-//			result.add(n.getAngle());
-//		}
-//		
-////		for(int i=0;i<list.size();i++){
-////			result.add(list.get(i).getAngle());
-////		}
-//		return result;
-//	}
-//	
-//	/**
-//	 * Get the maximum feret diameters of signals in a channel
-//	 * @param channel the signal channel
-//	 * @return the ferets
-//	 */
-//	public List<Double> getFerets(int signalGroup){
-//		List<NuclearSignal> list = getSignals(signalGroup);
-//		List<Double> result = new ArrayList<Double>(0);
-//		for(int i=0;i<list.size();i++){
-//			result.add(list.get(i).getFeret());
-//		}
-//		return result;
-//	}
-//	
-//	/**
-//	 * Get the fractional distances of the signal centre of mass from the nucleus centre of mass
-//	 * @param channel the signal channel
-//	 * @return the distances
-//	 */
-//	public List<Double> getDistances(int signalGroup){
-//		List<NuclearSignal> list = getSignals(signalGroup);
-//		List<Double> result = new ArrayList<Double>(0);
-//		for(int i=0;i<list.size();i++){
-//			result.add(list.get(i).getFractionalDistanceFromCoM());
-//		}
-//		return result;
-//	}
-	
+		
 	public String toString(){
 		String s = "";
 		s += "Signal groups: "+this.numberOfSignalGroups()+"\n";

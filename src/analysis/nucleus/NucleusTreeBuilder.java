@@ -312,42 +312,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		}
 		return instances;
 	}
-	
-	private double[][] makeSimilarityMatrix(CellCollection collection) throws Exception{
 		
-		if(collection.hasNucleusSimilarityMatrix()){
-			log(Level.FINER, "Found existing matrix");
-			publish(collection.size());
-			return collection.getNucleusSimilarityMatrix();
-		} else {
-			log(Level.FINER, "Creating similarity matrix");
-			double[][] matrix = new double[collection.size()][collection.size()];
-
-			List<Nucleus> nuclei = collection.getNuclei();
-			int i = 0;
-			for(Nucleus n1 : nuclei){
-
-				int j = 0;
-				for(Nucleus n2 : nuclei){
-					
-					/*
-					 * TODO: We can cut this in half by flipping the matrix
-					 */
-
-					double score = n1.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
-							.absoluteSquareDifference(n2.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT));
-										
-					matrix[i][j] = score;
-
-					j++;
-				}
-				publish(i++);
-			}
-			collection.setNucleusSimilarityMatrix(matrix);
-			return matrix;
-		}
-	}
-	
 	/**
 	 * Make a taxon name with quoting, suitable for use in a Newick tree.
 	 * Uses the full nucleus original file path, so will work in merged datsets.
@@ -384,15 +349,10 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		
 		FastVector attributes = new FastVector(attributeCount);
 		
-		
-//		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+3 : basicAttributeCount+2;
-//		int attributeToAdd = 0;
-		
 		if(options.isIncludeProfile()){
 			for(int i=0; i<profileAttributeCount; i++){
 				Attribute a = new Attribute("att_"+i); 
 				attributes.addElement(a);
-//				attributeToAdd++;
 			}
 		}
 		
@@ -409,18 +369,6 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 			attributes.addElement(name);
 		}
 		
-		
-//		Attribute area = new Attribute("area"); 
-//		Attribute aspect = new Attribute("aspect"); 
-//		Attribute name = new Attribute("name", (FastVector) null); 
-//		
-//		
-//		attributes.addElement(area);
-//		attributes.addElement(aspect);
-//		
-//		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-//			attributes.addElement(name);
-//		}
 		return attributes;
 	}
 	
@@ -451,23 +399,6 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				// Interpolate the profile to the median length
 				Profile p = n1.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).interpolate(profileSize);
 				
-//				for(int attNumber=0; attNumber<profilePointsToCount; attNumber++){
-//
-//					Attribute att = (Attribute) attributes.elementAt(attNumber);
-//					inst.setValue(att, p.get(attNumber*windowSize));
-//					
-//				}
-//				int attNumber = profilePointsToCount;
-//				Attribute att = (Attribute) attributes.elementAt(attNumber++);
-//				inst.setValue(att, n1.getArea());
-//				att = (Attribute) attributes.elementAt(attNumber++);
-//				inst.setValue(att, n1.getAspectRatio());
-//				
-//				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-//					String uniqueName = makeUniqueName(n1);
-//					att = (Attribute) attributes.elementAt(attNumber++);
-//					inst.setValue(att, uniqueName);
-//				}
 				int attNumber=0;
 				if(options.isIncludeProfile()){
 					for(attNumber=0; attNumber<profilePointsToCount; attNumber++){
@@ -508,72 +439,72 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	 * @param collection
 	 * @return
 	 */
-	private Instances makeMatrixInstances(CellCollection collection){
-		
-		int basicAttributeCount = collection.size()/10;
-		
-		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+3 : basicAttributeCount+2;
-
-		log(Level.FINE, "Building instance matrix");
-		
-		FastVector attributes = new FastVector(attributeCount);
-		for(int i=0; i<basicAttributeCount; i+=1){
-			Attribute a = new Attribute("att_"+i); 
-			attributes.addElement(a);
-		}
-		
-		Attribute area = new Attribute("area"); 
-		Attribute aspect = new Attribute("aspect"); 
-		Attribute name = new Attribute("name", (FastVector) null); 
-		
-		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-			attributes.addElement(name);
-		}
-		attributes.addElement(area);
-		attributes.addElement(aspect);
-		
-		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
-		
-
-		try{
-			double[][] matrix = makeSimilarityMatrix(collection);
-			
-			int i=0;
-			for(Cell c : collection.getCells()){
-				Nucleus n1 = c.getNucleus();
-				Instance inst = new SparseInstance(attributeCount);
-
-				
-				int attNumber = 0;
-				for(int j=0; j<collection.size(); j+=10){
-//				for(Nucleus n2 : collection.getNuclei()){
-//					Nucleus n2 = collection.getNuclei().get(j);
-//					Attribute att = (Attribute) attributes.elementAt(j);
-					Attribute att = (Attribute) attributes.elementAt(attNumber);
-					double score = matrix[i][j];
-//					
-					score /= n1.getStatistic(NucleusStatistic.PERIMETER);
-					inst.setValue(att, score);
-					attNumber++;
-				}
-				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-					String uniqueName = makeUniqueName(n1);
-					inst.setValue(name, uniqueName);
-				}
-				
-				inst.setValue(area, n1.getStatistic(NucleusStatistic.AREA));
-				inst.setValue(aspect, n1.getStatistic(NucleusStatistic.ASPECT));
-				
-				instances.add(inst);
-				cellToInstanceMap.put(inst, c.getId());
-				publish(i++);
-			}
-
-		} catch(Exception e){
-			logError("Error making instances", e);
-		}
-		return instances;
-	}
+//	private Instances makeMatrixInstances(CellCollection collection){
+//		
+//		int basicAttributeCount = collection.size()/10;
+//		
+//		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+3 : basicAttributeCount+2;
+//
+//		log(Level.FINE, "Building instance matrix");
+//		
+//		FastVector attributes = new FastVector(attributeCount);
+//		for(int i=0; i<basicAttributeCount; i+=1){
+//			Attribute a = new Attribute("att_"+i); 
+//			attributes.addElement(a);
+//		}
+//		
+//		Attribute area = new Attribute("area"); 
+//		Attribute aspect = new Attribute("aspect"); 
+//		Attribute name = new Attribute("name", (FastVector) null); 
+//		
+//		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+//			attributes.addElement(name);
+//		}
+//		attributes.addElement(area);
+//		attributes.addElement(aspect);
+//		
+//		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
+//		
+//
+//		try{
+//			double[][] matrix = makeSimilarityMatrix(collection);
+//			
+//			int i=0;
+//			for(Cell c : collection.getCells()){
+//				Nucleus n1 = c.getNucleus();
+//				Instance inst = new SparseInstance(attributeCount);
+//
+//				
+//				int attNumber = 0;
+//				for(int j=0; j<collection.size(); j+=10){
+////				for(Nucleus n2 : collection.getNuclei()){
+////					Nucleus n2 = collection.getNuclei().get(j);
+////					Attribute att = (Attribute) attributes.elementAt(j);
+//					Attribute att = (Attribute) attributes.elementAt(attNumber);
+//					double score = matrix[i][j];
+////					
+//					score /= n1.getStatistic(NucleusStatistic.PERIMETER);
+//					inst.setValue(att, score);
+//					attNumber++;
+//				}
+//				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+//					String uniqueName = makeUniqueName(n1);
+//					inst.setValue(name, uniqueName);
+//				}
+//				
+//				inst.setValue(area, n1.getStatistic(NucleusStatistic.AREA));
+//				inst.setValue(aspect, n1.getStatistic(NucleusStatistic.ASPECT));
+//				
+//				instances.add(inst);
+//				cellToInstanceMap.put(inst, c.getId());
+//				publish(i++);
+//			}
+//
+//		} catch(Exception e){
+//			logError("Error making instances", e);
+//		}
+//		return instances;
+//	}
 
 }
 

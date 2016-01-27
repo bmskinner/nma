@@ -456,7 +456,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 		return result;
 	}
 	
-	private void extractSelectedNodesToCluster(){
+	private void extractSelectedNodesToCluster() throws Exception{
 		CellCollection template = dataset.getCollection();
 		
 		CellCollection clusterCollection = new CellCollection(template.getFolder(), 
@@ -505,7 +505,11 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 		
 		if(e.getActionCommand().equals("Extract")){
 			
-			extractSelectedNodesToCluster();
+			try {
+				extractSelectedNodesToCluster();
+			} catch (Exception e1) {
+				programLogger.log(Level.SEVERE, "Error extracting cells", e);
+			}
 			
 
 		}

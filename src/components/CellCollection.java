@@ -29,6 +29,7 @@ package components;
 
 import ij.IJ;
 import stats.NucleusStatistic;
+import stats.PlottableStatistic;
 import stats.SignalStatistic;
 import stats.Stats;
 
@@ -72,6 +73,12 @@ public class CellCollection implements Serializable {
 	private UUID 	guid;			// the collection id
 	
 	private NucleusType nucleusType; // the type of nuclei this collection contains
+	
+	
+	/**
+	 * Cache statistics from the cells in the collection. This should be updated if a cell is added or lost 
+	 */
+	private StatsCache statsCache = new StatsCache();
 		
 	//this holds the mapping of tail indexes etc in the median profile arrays
 	protected Map<ProfileType, ProfileCollection> profileCollections = new HashMap<ProfileType, ProfileCollection>();
@@ -80,7 +87,6 @@ public class CellCollection implements Serializable {
 	
 	private Map<UUID, Cell> mappedCollection  = new HashMap<UUID, Cell>();	// store all the nuclei analysed
 	
-	private transient double[][] nucleusSimilarityMatrix = null;
 
 	/**
 	 * Constructor.
@@ -162,17 +168,19 @@ public class CellCollection implements Serializable {
 	  return  result;
   }
 
-  public void addCell(Cell r){
+  public void addCell(Cell r) throws Exception{
 	  if(mappedCollection.containsKey(r.getId())){
-		  // do nothing
+
 		  return;
 	  } else {
 		  this.mappedCollection.put(r.getId(), r);
+//		  statsCache.recalculate(this);
 	  }
   }
-  
-  public void removeCell(Cell c){
+
+  public void removeCell(Cell c) throws Exception{
 	  this.mappedCollection.remove(c.getId());
+//	  statsCache.recalculate(this);
   }
   
   public int size(){
@@ -640,6 +648,7 @@ public class CellCollection implements Serializable {
 	  return Stats.max(this.getArrayLengths());
   }
   
+    
   /**
    * Get the median of the signal statistic in the given channel
    * @param channel
@@ -657,71 +666,6 @@ public class CellCollection implements Serializable {
 	  return Stats.quartile(a.toArray(new Double[0]), Constants.MEDIAN);
   }
   
-//  /**
-//   * Get the median area of the signals in the given channel
-//   * @param channel
-//   * @return the median area
-// * @throws Exception 
-//   */
-//  public double getMedianSignalArea(int channel) throws Exception{
-//	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
-//	  List<Double> a = new ArrayList<Double>(0);
-//	  for(Cell c : cells){
-//		  Nucleus n = c.getNucleus();
-//		  a.addAll(n.getSignalCollection().getStatistics(SignalStatistic.AREA, channel));
-//
-//	  }
-//	  return Stats.quartile(a.toArray(new Double[0]), 50);
-//  }
-//  
-//  /**
-//   * Get the median angle of the signals in the given channel
-//   * @param channel
-//   * @return the median angle
-//   */
-//  public double getMedianSignalAngle(int channel){
-//	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
-//	  List<Double> a = new ArrayList<Double>(0);
-//	  for(Cell c : cells){
-//		  Nucleus n = c.getNucleus();
-//		  a.addAll(n.getSignalCollection().getAngles(channel));
-//
-//	  }
-//	  return Stats.quartile(a.toArray(new Double[0]), 50);
-//  }
-//  
-//  /**
-//   * Get the median feret of the signals in the given channel
-//   * @param channel
-//   * @return the median feret
-//   */
-//  public double getMedianSignalFeret(int channel){
-//	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
-//	  List<Double> a = new ArrayList<Double>(0);
-//	  for(Cell c : cells){
-//		  Nucleus n = c.getNucleus();
-//		  a.addAll(n.getSignalCollection().getFerets(channel));
-//
-//	  }
-//	  return Stats.quartile(a.toArray(new Double[0]), 50);
-//  }
-//  
-//  /**
-//   * Get the median fractional distance from the nucleus CoM of the signals in the given channel
-//   * @param channel
-//   * @return the median distance
-//   */
-//  public double getMedianSignalDistance(int channel){
-//	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
-//	  List<Double> a = new ArrayList<Double>(0);
-//	  for(Cell c : cells){
-//		  Nucleus n = c.getNucleus();
-//		  a.addAll(n.getSignalCollection().getDistances(channel));
-//
-//	  }
-//	  return Stats.quartile(a.toArray(new Double[0]), 50);
-//  }
-
   /** 
    * Return the nuclei with or without signals in the given group.
    * @param signalGroup the group number 
@@ -906,8 +850,18 @@ public class CellCollection implements Serializable {
    * @throws Exception
    */
   public double getMedianStatistic(NucleusStatistic stat, MeasurementScale scale)  throws Exception {
-	  double[] values = this.getNuclearStatistics(stat, scale);
-	  return Stats.quartile(values, Constants.MEDIAN);
+	  
+	  if(this.statsCache.hasStatistic(stat, scale)){
+		  return(this.statsCache.getStatistic(stat, scale));
+	  } else {
+		  
+		  double[] values = this.getNuclearStatistics(stat, scale);
+		  double median =  Stats.quartile(values, Constants.MEDIAN);
+		  statsCache.setStatistic(stat, scale, median);
+		  return median;
+	  }
+	  
+	  
   }
   
   /**
@@ -1011,42 +965,7 @@ public class CellCollection implements Serializable {
 	  }
 	  return subCollection;
   }
-  
-  /**
-   * Get the saved similarity matrix. If the matrix is of a different
-   * size to teh collection (e.g. a cell has been added or removed)
-   * returns null
-   * @return
-   */
-  public double[][] getNucleusSimilarityMatrix(){
-	  if(this.nucleusSimilarityMatrix.length==this.size()){
-		  return this.nucleusSimilarityMatrix;
-	  } else {
-		  return null;
-	  }
-
-  }
-
-  /**
-   * Set the similarity matrix as a transient variable
-   * @param nucleusSimilarityMatrix
-   */
-  public void setNucleusSimilarityMatrix(double[][] nucleusSimilarityMatrix){
-	  this.nucleusSimilarityMatrix = nucleusSimilarityMatrix;
-  }
-  
-  /**
-   * Check if the similarity matrix is available
-   * @return
-   */
-  public boolean hasNucleusSimilarityMatrix(){
-	  if(this.nucleusSimilarityMatrix==null  || this.nucleusSimilarityMatrix.length!=this.size()){
-		  return false;
-	  } else {
-		  return true;
-	  }
-  }
-  
+    
   public boolean updateSourceFolder(File newFolder) throws Exception{
 		File oldFile = this.getFolder();
 		boolean ok = false;
@@ -1091,7 +1010,106 @@ public class CellCollection implements Serializable {
   
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
-	    this.nucleusSimilarityMatrix = null;
 	}
+  
+  /**
+   * Store plottable statistics for the collection
+   * @author bms41
+   *
+   */
+  private class StatsCache implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	private Map<PlottableStatistic, Map<MeasurementScale, Double>> cache = new HashMap<PlottableStatistic,  Map<MeasurementScale, Double>>();
+
+	  public StatsCache(){
+
+	  }
+
+	  /**
+	   * Store the given statistic
+	   * @param stat
+	   * @param scale
+	   * @param d
+	   */
+	  public void setStatistic(PlottableStatistic stat, MeasurementScale scale, double d){
+
+		  Map<MeasurementScale, Double> map;
+
+		  if(cache.containsKey(stat)){
+
+			  map = cache.get(stat);
+
+		  } else {
+
+			  map = new HashMap<MeasurementScale, Double>();
+			  cache.put(stat, map);
+
+		  }
+
+		  map.put(scale, d);
+
+	  }
+
+	  public double getStatistic(PlottableStatistic stat, MeasurementScale scale){
+
+		  if(this.hasStatistic(stat, scale)){
+
+			  return cache.get(stat).get(scale);
+
+
+		  } else  {
+			  return 0;
+
+		  }
+	  }
+
+	  public boolean hasStatistic(PlottableStatistic stat, MeasurementScale scale){
+		  Map<MeasurementScale, Double> map;
+
+		  if(cache.containsKey(stat)){
+
+			  map = cache.get(stat);
+
+		  } else {
+
+			  return false;
+
+		  }
+
+		  if(map.containsKey(scale)){
+
+			  return true;
+		  } else {
+			  return false;
+		  }
+
+	  }
+	  
+	  /**
+	   * Empty the cache - all values must be recalculated
+	   */
+	  public void clear(){
+		  cache = null;
+		  cache = new HashMap<PlottableStatistic,  Map<MeasurementScale, Double>>();
+
+	  }
+	  
+	  /**
+	   * Recalculate the values in the cache based on the given collection
+	   * @param collection
+	   * @throws Exception
+	   */
+	  public void recalculate(CellCollection collection) throws Exception{
+		  this.clear();
+		  for(NucleusStatistic stat  : NucleusStatistic.values()){
+
+			  for(MeasurementScale scale : MeasurementScale.values()){
+				  // This will automatically refill the cache
+				  collection.getMedianStatistic(stat, scale);
+			  }
+		  }
+	  }
+  }
 
 }

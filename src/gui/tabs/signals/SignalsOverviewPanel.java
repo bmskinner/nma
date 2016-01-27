@@ -372,8 +372,9 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	/**
 	 * Update the signal stats with the given datasets
 	 * @param list the datasets
+	 * @throws Exception 
 	 */
-	private void updateSignalStatsPanel(){
+	private void updateSignalStatsPanel() throws Exception{
 		
 		TableModel model = NuclearSignalDatasetCreator.createSignalStatsTable(null);
 		

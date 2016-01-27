@@ -28,6 +28,8 @@
  package utility;
 
  import ij.IJ;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
 import java.util.ArrayList;
@@ -35,6 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import components.CellularComponent;
+import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
 
@@ -299,6 +302,20 @@ public class Utils {
 		return createOriginalPolygon(n.getOriginalBorderList(), n.getPosition());
 
 	 }
+	
+	/*
+	Given three XYPoints, measure the angle a-b-c
+		a   c
+		 \ /
+			b
+	 */
+	public static double findAngleBetweenXYPoints(XYPoint a, XYPoint b, XYPoint c){
+
+		float[] xpoints = { (float) a.getX(), (float) b.getX(), (float) c.getX()};
+		float[] ypoints = { (float) a.getY(), (float) b.getY(), (float) c.getY()};
+		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
+		return roi.getAngle();
+	}
 	
 	
 	/**

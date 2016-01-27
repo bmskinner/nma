@@ -132,8 +132,9 @@ public class AnalysisDataset implements Serializable {
 	 * Make a copy of the cells in this dataset. Does not yet include
 	 * child datasets, clusters or signal groups
 	 * @return
+	 * @throws Exception 
 	 */
-	public AnalysisDataset duplicate(){
+	public AnalysisDataset duplicate() throws Exception{
 		AnalysisDataset result = new AnalysisDataset(this.getCollection());
 		for(Cell c : this.getCollection().getCells()){
 			result.getCollection().addCell(new Cell(c));

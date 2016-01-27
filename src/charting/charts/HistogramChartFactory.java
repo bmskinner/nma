@@ -79,8 +79,9 @@ public class HistogramChartFactory {
 	 * Create a signal angle histogram for a dataset
 	 * @param options the ChartOptions
 	 * @return
+	 * @throws Exception 
 	 */
-	public static JFreeChart createSignalAngleHistogram(HistogramChartOptions options){
+	public static JFreeChart createSignalAngleHistogram(HistogramChartOptions options) throws Exception{
 		
 		HistogramDataset ds = options.hasDatasets() 
 							? NuclearSignalDatasetCreator.createSignalAngleHistogramDataset(options.getDatasets())
@@ -100,8 +101,9 @@ public class HistogramChartFactory {
 	 * @param ds the histogram dataset
 	 * @param dataset the analysis dataset
 	 * @return
+	 * @throws Exception 
 	 */
-	public static JFreeChart createSignalDistanceHistogram(HistogramChartOptions options){
+	public static JFreeChart createSignalDistanceHistogram(HistogramChartOptions options) throws Exception{
 		
 		HistogramDataset ds = options.hasDatasets() 
 							? NuclearSignalDatasetCreator.createSignalDistanceHistogramDataset(options.getDatasets())

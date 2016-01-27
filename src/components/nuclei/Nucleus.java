@@ -158,26 +158,6 @@ public interface Nucleus extends CellularComponent {
 
 	public double getPathLength() throws Exception;
 
-
-
-	/**
-	 * Get a copy of the angle profile. The first index of the profile
-	 * is the first border point in the border list. That is, there is no
-	 * consistency to the order of values across multiple nuclei. If consistency
-	 * is needed, specify a pointType
-	 * @return
-	 * @throws Exception 
-	 */
-	public SegmentedProfile getProfile(ProfileType type) throws Exception;
-	
-	/**
-	 * Get a copy of the angle profile offset to start at the given point
-	 * @param pointType the point to start at
-	 * @return a copy of the segmented profile
-	 * @throws Exception 
-	 */
-	public SegmentedProfile getProfile(ProfileType type, BorderTag tag) throws Exception;
-
 	
 
 	/**
@@ -267,32 +247,39 @@ public interface Nucleus extends CellularComponent {
 	
 	public void exportSignalDistanceMatrix();
 
-//	public Profile getSingleDistanceProfile();
-	
 	
 	/**
-	 * Get a copy of the profile associated with the given type, or null
-	 * @param type
+	 * Get a copy of the angle profile. The first index of the profile
+	 * is the first border point in the border list. That is, there is no
+	 * consistency to the order of values across multiple nuclei. If consistency
+	 * is needed, specify a pointType
 	 * @return
 	 * @throws Exception 
 	 */
-//	public SegmentedProfile getProfile(ProfileCollectionType type) throws Exception;
-	
+	public SegmentedProfile getProfile(ProfileType type) throws Exception;
 	
 	/**
-	 * Set the profile for the given type
-	 * @param type
-	 * @param profile
+	 * Get a copy of the angle profile offset to start at the given point
+	 * @param pointType the point to start at
+	 * @return a copy of the segmented profile
+	 * @throws Exception 
 	 */
-//	public void setProfile(ProfileType type, SegmentedProfile profile);
+	public SegmentedProfile getProfile(ProfileType type, BorderTag tag) throws Exception;
 	
+		
 	/**
-	 * Set the profile for the given type
+	 * Set the profile for the given type, offsetting to a border tag
 	 * @param type
 	 * @param profile
 	 */
 	public void setProfile(ProfileType type, BorderTag tag, SegmentedProfile profile) throws Exception;
 	
+	/**
+	 * Set the profile for the given type
+	 * @param type
+	 * @param profile
+	 */
+	public void setProfile(ProfileType regular, SegmentedProfile nucleusProfile);
 	
 	/**
 	 * Test if the given type of profile is available
@@ -300,6 +287,7 @@ public interface Nucleus extends CellularComponent {
 	 * @return
 	 */
 	public boolean hasProfile(ProfileType type);
+	
 
 	public String dumpInfo(int type);
 

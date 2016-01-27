@@ -91,7 +91,7 @@ public class RandomSampler extends AnalysisWorker {
 		
 	}
 	
-	private List<CellCollection> makeRandomSampledCollection(int firstSize, int secondSize){
+	private List<CellCollection> makeRandomSampledCollection(int firstSize, int secondSize) throws Exception{
 		List<CellCollection> result = new ArrayList<CellCollection>();
 		
 		CellCollection first  = new CellCollection( this.getDataset(), "first");

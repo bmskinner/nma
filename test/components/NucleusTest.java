@@ -26,6 +26,7 @@ import java.io.File;
 
 import org.junit.Test;
 
+import stats.NucleusStatistic;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
@@ -48,9 +49,9 @@ public class NucleusTest {
 		Nucleus n = new RodentSpermNucleus(roi, nucleusImage, nucleusNumber , position);
 
 		n.setCentreOfMass(new XYPoint(74, 46));
-		n.setArea(4827.00); 
-		n.setFeret(134.27);
-		n.setPerimeter(347.02);
+		n.setStatistic(NucleusStatistic.AREA,     4827.00);
+		n.setStatistic(NucleusStatistic.MAX_FERET, 134.27);
+		n.setStatistic(NucleusStatistic.PERIMETER, 347.02);
 		n.setOutputFolder(null);
 
 		try {
@@ -63,7 +64,7 @@ public class NucleusTest {
 	}
 
 	@Test
-	public void testMinDiameter() {
+	public void testMinDiameter() throws Exception {
 		Nucleus n = createTestRodentSpermNucleus();
 		double expected = 53.14;
 		double epsilon = 0; // the amount of difference permitted
@@ -71,11 +72,11 @@ public class NucleusTest {
 	}
 	
 	@Test
-	public void testFeret() {
+	public void testFeret() throws Exception {
 		Nucleus n = createTestRodentSpermNucleus();
 		double expected = 134.27;
 		double epsilon = 0.01; // the amount of difference permitted
-		assertEquals("Values should be identical", expected, n.getFeret(), epsilon);
+		assertEquals("Values should be identical", expected, n.getStatistic(NucleusStatistic.MAX_FERET), epsilon);
 	}
 	
 	@Test

@@ -843,11 +843,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			break;
 			
 		case SAVE_ROOT:
-			Thread thr = new Thread(){
-				public void run(){
+//			Thread thr = new Thread(){
+//				public void run(){
+				
 					saveRootDatasets();
-				}};
-				thr.start();
+//				}};
+//				thr.start();
 			break;
 			
 		case UPDATE_PANELS:

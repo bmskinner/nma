@@ -23,6 +23,7 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ExportableTable;
 import gui.tabs.signals.SignalsOverviewPanel;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -53,6 +54,7 @@ import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.category.StatisticalBarRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
+
 import utility.Constants;
 import analysis.AnalysisDataset;
 import charting.charts.BoxplotChartFactory;
@@ -586,7 +588,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	private ChartPanel 	angleChartPanel; 		// 
     	private ChartPanel 	distanceChartPanel; 	// 
   	    	
-    	protected HistogramPanel(){
+    	protected HistogramPanel() throws Exception{
     		
     		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     		HistogramChartOptions options = new HistogramChartOptions(null, null, null, false);
@@ -610,14 +612,14 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     		}
     	}
     	
-    	private void updateSignalAngleHistogram(List<AnalysisDataset> list){
+    	private void updateSignalAngleHistogram(List<AnalysisDataset> list) throws Exception{
     		
     		HistogramChartOptions options = new HistogramChartOptions(list, null, null, false);
     		JFreeChart chart = HistogramChartFactory.createSignalAngleHistogram(options);
     		angleChartPanel.setChart(chart);
     	}
 
-    	private void updateSignalDistanceHistogram(List<AnalysisDataset> list){
+    	private void updateSignalDistanceHistogram(List<AnalysisDataset> list) throws Exception{
     		HistogramChartOptions options = new HistogramChartOptions(list, null, null, false);
     		JFreeChart chart = HistogramChartFactory.createSignalDistanceHistogram(options);
 //    		try {

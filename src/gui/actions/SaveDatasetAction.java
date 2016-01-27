@@ -85,7 +85,6 @@ public class SaveDatasetAction extends ProgressableAction {
 			worker = new PopulationExporter(dataset, saveFile, programLogger);
 			worker.addPropertyChangeListener(this);
 			worker.execute();	
-			log(Level.FINE, "Save dataset action created");
 		} else {
 			this.finished();
 		}
@@ -97,11 +96,11 @@ public class SaveDatasetAction extends ProgressableAction {
 	@Override
 	public void finished(){
 		// Do not use super.finished(), or it will trigger another save action
-		log(Level.FINE, "Save complete");
+		log(Level.FINE, "Save action complete");
 		cancel();		
 		this.removeInterfaceEventListener(mw);
 		this.removeDatasetEventListener(mw);
-		log(Level.FINE, "Removing latch");
+		log(Level.FINE, "Removing save latch");
 		this.countdownLatch();
 		
 	}

@@ -36,6 +36,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import utility.Utils;
 import components.generic.BorderTag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
@@ -105,7 +106,7 @@ private List<BorderPoint> tailEstimatePoints = new ArrayList<BorderPoint>(0); //
   public double findRotationAngle(){
     XYPoint end = new XYPoint(this.getPoint(BorderTag.ORIENTATION_POINT).getXAsInt(),this.getPoint(BorderTag.ORIENTATION_POINT).getYAsInt()-50);
 
-    double angle = findAngleBetweenXYPoints(end, this.getPoint(BorderTag.ORIENTATION_POINT), this.getCentreOfMass());
+    double angle = Utils.findAngleBetweenXYPoints(end, this.getPoint(BorderTag.ORIENTATION_POINT), this.getCentreOfMass());
 
     if(this.getCentreOfMass().getX() < this.getPoint(BorderTag.ORIENTATION_POINT).getX()){
       return angle;

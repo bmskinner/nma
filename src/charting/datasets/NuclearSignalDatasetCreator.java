@@ -37,6 +37,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import charting.TableOptions;
+import stats.SignalStatistic;
 import utility.Utils;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions.NuclearSignalOptions;
@@ -162,8 +163,9 @@ public class NuclearSignalDatasetCreator {
 	 * Create a histogram dataset covering the signal angles for the given analysis datasets
 	 * @param list the list of datasets
 	 * @return a histogram of angles
+	 * @throws Exception 
 	 */
-	public static HistogramDataset createSignalAngleHistogramDataset(List<AnalysisDataset> list){
+	public static HistogramDataset createSignalAngleHistogramDataset(List<AnalysisDataset> list) throws Exception{
 		HistogramDataset ds = new HistogramDataset();
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
@@ -177,7 +179,7 @@ public class NuclearSignalDatasetCreator {
 						List<Double> angles = new ArrayList<Double>(0);
 
 						for(Nucleus n : collection.getNuclei()){
-							angles.addAll(n.getSignalCollection().getAngles(signalGroup));
+							angles.addAll(n.getSignalCollection().getStatistics(SignalStatistic.ANGLE, signalGroup));
 						}
 						double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
 						ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
@@ -194,8 +196,9 @@ public class NuclearSignalDatasetCreator {
 	 * the given list of datasets
 	 * @param list the list of datasets
 	 * @return a histogram of distances
+	 * @throws Exception 
 	 */
-	public static HistogramDataset createSignalDistanceHistogramDataset(List<AnalysisDataset> list){
+	public static HistogramDataset createSignalDistanceHistogramDataset(List<AnalysisDataset> list) throws Exception{
 		HistogramDataset ds = new HistogramDataset();
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
@@ -209,7 +212,7 @@ public class NuclearSignalDatasetCreator {
 						List<Double> angles = new ArrayList<Double>(0);
 
 						for(Nucleus n : collection.getNuclei()){
-							angles.addAll(n.getSignalCollection().getDistances(signalGroup));
+							angles.addAll(n.getSignalCollection().getStatistics(SignalStatistic.FRACT_DISTANCE_FROM_COM, signalGroup));
 						}
 						double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
 						ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
@@ -226,11 +229,13 @@ public class NuclearSignalDatasetCreator {
 	 * @param n the signal to plos
 	 * @param outline the outline to draw the signal on
 	 * @return the point of the signal centre of mass
+	 * @throws Exception 
 	 */
-	public static XYPoint getXYCoordinatesForSignal(NuclearSignal n, Nucleus outline){
-		double angle = n.getAngle();
+	public static XYPoint getXYCoordinatesForSignal(NuclearSignal n, Nucleus outline) throws Exception{
 
-		double fractionalDistance = n.getFractionalDistanceFromCoM();
+		double angle = n.getStatistic(SignalStatistic.ANGLE);
+
+		double fractionalDistance = n.getStatistic(SignalStatistic.FRACT_DISTANCE_FROM_COM);
 
 		// determine the total distance to the border at this angle
 		double distanceToBorder = CurveRefolder.getDistanceFromAngle(angle, outline);
@@ -248,8 +253,9 @@ public class NuclearSignalDatasetCreator {
 	 * Create a chart dataset for the centres of mass of signals in the dataset
 	 * @param dataset the dataset
 	 * @return
+	 * @throws Exception 
 	 */
-	public static XYDataset createSignalCoMDataset(AnalysisDataset dataset){
+	public static XYDataset createSignalCoMDataset(AnalysisDataset dataset) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		CellCollection collection = dataset.getCollection();
 
@@ -280,7 +286,7 @@ public class NuclearSignalDatasetCreator {
 		return ds;
 	}
 	
-	public static List<Shape> createSignalRadiusDataset(AnalysisDataset dataset, int signalGroup){
+	public static List<Shape> createSignalRadiusDataset(AnalysisDataset dataset, int signalGroup) throws Exception{
 
 		CellCollection collection = dataset.getCollection();
 		List<Shape> result = new ArrayList<Shape>(0);
@@ -292,9 +298,10 @@ public class NuclearSignalDatasetCreator {
 					XYPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
 
 					// ellipses are drawn starting from x y at upper left. Provide an offset from the centre
-					double offset = n.getRadius(); 
+					double offset = n.getStatistic(SignalStatistic.RADIUS);
+					
 
-					result.add(new Ellipse2D.Double(p.getX()-offset, p.getY()-offset, n.getRadius()*2, n.getRadius()*2));
+					result.add(new Ellipse2D.Double(p.getX()-offset, p.getY()-offset, offset*2, offset*2));
 				}
 
 			}
@@ -307,8 +314,9 @@ public class NuclearSignalDatasetCreator {
 	 * covers size, number of signals
 	 * @param list the AnalysisDatasets to include
 	 * @return a table model
+	 * @throws Exception 
 	 */
-	public static TableModel createSignalStatsTable(TableOptions options){
+	public static TableModel createSignalStatsTable(TableOptions options) throws Exception{
 
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -346,10 +354,10 @@ public class NuclearSignalDatasetCreator {
 					fieldNames.add("Source");
 					fieldNames.add("Signals");
 					fieldNames.add("Signals per nucleus");
-					fieldNames.add("Median area");
-					fieldNames.add("Median angle");
-					fieldNames.add("Median feret");
-					fieldNames.add("Median distance from CoM");
+					
+					for(SignalStatistic stat : SignalStatistic.values()){
+						fieldNames.add(stat.toString());
+					}
 				}
 				
 				int numberOfRowsPerSignalGroup = fieldNames.size()/(maxSignalGroup+1);
@@ -375,10 +383,11 @@ public class NuclearSignalDatasetCreator {
 							rowData.add(collection.getSignalCount(signalGroup));
 							double signalPerNucleus = (double) collection.getSignalCount(signalGroup)/  (double) collection.getCellsWithNuclearSignals(signalGroup, true).size();
 							rowData.add(df.format(signalPerNucleus));
-							rowData.add(df.format(collection.getMedianSignalArea(signalGroup)));
-							rowData.add(df.format(collection.getMedianSignalAngle(signalGroup)));
-							rowData.add(df.format(collection.getMedianSignalFeret(signalGroup)));
-							rowData.add(df.format(collection.getMedianSignalDistance(signalGroup)));
+							
+							for(SignalStatistic stat : SignalStatistic.values()){
+								rowData.add(df.format(collection.getMedianSignalStatistic(stat, signalGroup)));
+							}
+							
 						} else {
 							
 							for(int i = 0; i<numberOfRowsPerSignalGroup;i++){
@@ -407,8 +416,9 @@ public class NuclearSignalDatasetCreator {
 	 * Create a boxplot dataset for signal areas
 	 * @param dataset the AnalysisDataset to get signal info from
 	 * @return a boxplot dataset
+	 * @throws Exception 
 	 */
-	public static BoxAndWhiskerCategoryDataset createSignalAreaBoxplotDataset(AnalysisDataset dataset) {
+	public static BoxAndWhiskerCategoryDataset createSignalAreaBoxplotDataset(AnalysisDataset dataset) throws Exception {
 
 		OutlierFreeBoxAndWhiskerCategoryDataset result = new OutlierFreeBoxAndWhiskerCategoryDataset();
 
@@ -419,7 +429,7 @@ public class NuclearSignalDatasetCreator {
 			List<Double> list = new ArrayList<Double>();
 			for(NuclearSignal s : c.getSignals(signalGroup)){
 				
-				list.add(s.getArea());
+				list.add(s.getStatistic(SignalStatistic.AREA));
 			}
 			result.add(list, "Group_"+signalGroup, "Area");
 		}

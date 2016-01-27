@@ -116,6 +116,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		this.channel           = a.getChannel();
 		this.scale 			   = a.getScale();
 		this.borderList        = a.getBorderList();
+		this.centreOfMass      = new XYPoint(a.getCentreOfMass());
 	}
 	
 	public UUID getID() {

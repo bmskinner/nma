@@ -30,7 +30,7 @@ public class NeighbourJoiningTreeBuilder extends AnalysisWorker {
 	protected Boolean doInBackground() throws Exception {
 
 		try{
-			this.tree = makeTree();
+//			this.tree = makeTree();
 			return true;
 		} catch(Exception e){
 			logError("Error in neighbour joining", e);
@@ -62,83 +62,83 @@ public class NeighbourJoiningTreeBuilder extends AnalysisWorker {
 	 * @return
 	 * @throws Exception
 	 */
-	private double[][] makeSimilarityMatrix(CellCollection collection) throws Exception{
-		
-		if(collection.hasNucleusSimilarityMatrix()){
-			log(Level.FINER, "Found existing matrix");
-			publish(collection.size());
-			return collection.getNucleusSimilarityMatrix();
-		} else {
-			log(Level.FINER, "Creating similarity matrix");
-			double[][] matrix = new double[collection.size()][collection.size()];
-
-			List<Nucleus> nuclei = collection.getNuclei();
-			int i = 0;
-			for(Nucleus n1 : nuclei){
-
-				int j = 0;
-				for(Nucleus n2 : nuclei){
-					
-					/*
-					 * TODO: We can cut this in half by flipping the matrix
-					 *    0  1  2  3  4 j
-					 *  0          b  a  
-					 *  1          d  c
-					 *  2 
-					 *  3 b d
-					 *  4 a c
-					 *  i
-					 *  
-					 *  length = 5
-					 *  for(i=0; i<length; i++{
-					 *  
-					 *  	for(j=length-1; j>=length/2 j--{
-					 *  		matrix[i][j]= n
-					 *  		matrix[j][i]= n
-					 *  	}
-					 *  	
-					 *  }
-					 */
-//					for (i = 0;i < size; ++i) {
-//						for (j = 0; j < i; ++j) {
-//							result = do_operation(i,j);
-//							matrix[i][j] = result;
-//							matrix[j][i] = result ;
-//						}
-//					}
-					
-
-					double score = n1.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
-							.absoluteSquareDifference(n2.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT));
-										
-					matrix[i][j] = score;
-
-					j++;
-				}
-				publish(i++);
-			}
-			collection.setNucleusSimilarityMatrix(matrix);
-			return matrix;
-		}
-	}
+//	private double[][] makeSimilarityMatrix(CellCollection collection) throws Exception{
+//		
+//		if(collection.hasNucleusSimilarityMatrix()){
+//			log(Level.FINER, "Found existing matrix");
+//			publish(collection.size());
+//			return collection.getNucleusSimilarityMatrix();
+//		} else {
+//			log(Level.FINER, "Creating similarity matrix");
+//			double[][] matrix = new double[collection.size()][collection.size()];
+//
+//			List<Nucleus> nuclei = collection.getNuclei();
+//			int i = 0;
+//			for(Nucleus n1 : nuclei){
+//
+//				int j = 0;
+//				for(Nucleus n2 : nuclei){
+//					
+//					/*
+//					 * TODO: We can cut this in half by flipping the matrix
+//					 *    0  1  2  3  4 j
+//					 *  0          b  a  
+//					 *  1          d  c
+//					 *  2 
+//					 *  3 b d
+//					 *  4 a c
+//					 *  i
+//					 *  
+//					 *  length = 5
+//					 *  for(i=0; i<length; i++{
+//					 *  
+//					 *  	for(j=length-1; j>=length/2 j--{
+//					 *  		matrix[i][j]= n
+//					 *  		matrix[j][i]= n
+//					 *  	}
+//					 *  	
+//					 *  }
+//					 */
+////					for (i = 0;i < size; ++i) {
+////						for (j = 0; j < i; ++j) {
+////							result = do_operation(i,j);
+////							matrix[i][j] = result;
+////							matrix[j][i] = result ;
+////						}
+////					}
+//					
+//
+//					double score = n1.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
+//							.absoluteSquareDifference(n2.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT));
+//										
+//					matrix[i][j] = score;
+//
+//					j++;
+//				}
+//				publish(i++);
+//			}
+//			collection.setNucleusSimilarityMatrix(matrix);
+//			return matrix;
+//		}
+//	}
 	
-	private Tree makeTree() throws Exception {
-		log(Level.FINER, "Making taxa");
-		Collection<Taxon> taxa = createTaxa();
-		
-		log(Level.FINER, "Making distances");
-		double[][] distances = makeSimilarityMatrix(getDataset().getCollection());
-		
-		log(Level.FINER, "Making distance matrix");
-		DistanceMatrix matrix = new BasicDistanceMatrix(taxa, distances);
-
-		this.fireCooldown();
-		log(Level.FINER, "Making builder");
-		NeighborJoiningTreeBuilder builder = new NeighborJoiningTreeBuilder(matrix);
-		
-		log(Level.FINER, "Building tree");
-		return builder.build();
-		
-	}
+//	private Tree makeTree() throws Exception {
+//		log(Level.FINER, "Making taxa");
+//		Collection<Taxon> taxa = createTaxa();
+//		
+//		log(Level.FINER, "Making distances");
+////		double[][] distances = makeSimilarityMatrix(getDataset().getCollection());
+//		
+//		log(Level.FINER, "Making distance matrix");
+////		DistanceMatrix matrix = new BasicDistanceMatrix(taxa, distances);
+//
+//		this.fireCooldown();
+//		log(Level.FINER, "Making builder");
+////		NeighborJoiningTreeBuilder builder = new NeighborJoiningTreeBuilder(matrix);
+//		
+//		log(Level.FINER, "Building tree");
+//		return builder.build();
+//		
+//	}
 
 }

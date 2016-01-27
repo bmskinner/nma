@@ -113,8 +113,9 @@ public class DatasetArithmeticAction extends ProgressableAction {
 	 * @param one
 	 * @param two
 	 * @return
+	 * @throws Exception 
 	 */
-	private CellCollection datasetsAND(AnalysisDataset one, AnalysisDataset two){
+	private CellCollection datasetsAND(AnalysisDataset one, AnalysisDataset two) throws Exception{
 
 		CellCollection newCollection = new CellCollection(one, "AND operation");
 		
@@ -133,8 +134,9 @@ public class DatasetArithmeticAction extends ProgressableAction {
 	 * @param one
 	 * @param two
 	 * @return
+	 * @throws Exception 
 	 */
-	private CellCollection datasetsNOT(AnalysisDataset one, AnalysisDataset two){
+	private CellCollection datasetsNOT(AnalysisDataset one, AnalysisDataset two) throws Exception{
 
 		CellCollection newCollection = new CellCollection(one, "NOT operation");
 		
@@ -153,8 +155,9 @@ public class DatasetArithmeticAction extends ProgressableAction {
 	 * @param one
 	 * @param two
 	 * @return
+	 * @throws Exception 
 	 */
-	private CellCollection datasetsXOR(AnalysisDataset one, AnalysisDataset two){
+	private CellCollection datasetsXOR(AnalysisDataset one, AnalysisDataset two) throws Exception{
 
 		CellCollection newCollection = new CellCollection(one, "XOR operation");
 		

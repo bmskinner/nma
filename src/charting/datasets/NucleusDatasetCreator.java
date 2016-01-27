@@ -395,10 +395,10 @@ public class NucleusDatasetCreator {
 			if(normalised){
 				
 				int length = xpoints.size();
-				angles = n.getAngleProfile(point).interpolate(length);
+				angles = n.getProfile(ProfileType.REGULAR, point).interpolate(length);
 				x = xpoints;
 			} else {
-				angles = n.getAngleProfile(point);
+				angles = n.getProfile(ProfileType.REGULAR, point);
 				x = angles.getPositions(n.getBorderLength());
 				if(alignment.equals(ProfileAlignment.RIGHT)){
 					double differenceToMaxLength = maxLength - n.getBorderLength();
@@ -695,7 +695,7 @@ public class NucleusDatasetCreator {
 	public static XYDataset createSegmentedProfileDataset(Nucleus nucleus) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-		SegmentedProfile profile = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT);
+		SegmentedProfile profile = nucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
 		Profile xpoints = profile.getPositions(nucleus.getBorderLength());
 		
 		// rendering order will be first on top
@@ -783,7 +783,7 @@ public class NucleusDatasetCreator {
 //				List<NucleusBorderSegment> segs = n.getAngleProfile(BorderTag.REFERENCE_POINT).getOrderedSegments();
 
 //				NucleusBorderSegment seg2 = n.getAngleProfile().getSegment(segName);
-				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(n.getAngleProfile(BorderTag.REFERENCE_POINT).getOrderedSegments(), segName);
+				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), segName);
 				
 				/*
 				 * Testing code to validate segment ordering is correct
@@ -837,7 +837,7 @@ public class NucleusDatasetCreator {
 			List<Double> list = new ArrayList<Double>(0);
 
 			for(Nucleus n : collection.getNuclei()){
-				SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
+				SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
 //				NucleusBorderSegment seg = profile.getSegment(segName);
 				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(profile.getOrderedSegments(), segName);
 				
@@ -878,7 +878,7 @@ public class NucleusDatasetCreator {
 				List<Integer> list = new ArrayList<Integer>(0);
 				
 				for(Nucleus n : collection.getNuclei()){
-					NucleusBorderSegment seg = n.getAngleProfile().getSegment(medianSeg.getName());
+					NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR).getSegment(medianSeg.getName());
 					
 					int differenceToMedian = 0;
 					// if seg is null, catch before we throw an error
@@ -965,7 +965,7 @@ public class NucleusDatasetCreator {
 
 		
 		// Get the angle profile, starting from the tail point
-		SegmentedProfile angleProfile = n.getAngleProfile(pointType);
+		SegmentedProfile angleProfile = n.getProfile(ProfileType.REGULAR, pointType);
 		
 		// At this point, the angle profile and the iqr profile should be in sync
 		// The following set of checks confirms this.
@@ -1068,7 +1068,7 @@ public class NucleusDatasetCreator {
 			// decide the angle at which to place the iqr points
 			// make a line between points 3 ahead and behind. 
 			// get the orthogonal line, running through the XYPoint
-			Equation eq = new Equation(n.getPoint( prevIndex  ), n.getPoint( nextIndex  ));
+			Equation eq = new Equation(n.getBorderPoint( prevIndex  ), n.getBorderPoint( nextIndex  ));
 			// move the line to the index point, and find the orthogonal line
 			Equation perp = eq.translate(p).getPerpendicular(p);
 			
@@ -1117,7 +1117,7 @@ public class NucleusDatasetCreator {
 			 * With the ability to merge segments, we cannot be sure that an iterator
 			 * based on numbers will work
 			 */
-			List<NucleusBorderSegment> segmentList = nucleus.getAngleProfile().getSegments();
+			List<NucleusBorderSegment> segmentList = nucleus.getProfile(ProfileType.REGULAR).getSegments();
 //			SegmentedProfile profile = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT);
 
 			
@@ -1249,7 +1249,7 @@ public class NucleusDatasetCreator {
 
 		Nucleus nucleus = cell.getNucleus();// draw the index points on the nucleus border
 		for(BorderTag tag : nucleus.getBorderTags().keySet()){
-			BorderPoint tagPoint = nucleus.getPoint(tag);
+			BorderPoint tagPoint = nucleus.getBorderPoint(tag);
 			double[] xpoints = { tagPoint.getX(), nucleus.getCentreOfMass().getX() };
 			double[] ypoints = { tagPoint.getY(), nucleus.getCentreOfMass().getY() };
 			double[][] data = { xpoints, ypoints };
@@ -1280,11 +1280,11 @@ public class NucleusDatasetCreator {
 
 				for(NuclearSignal signal : nucleus.getSignals(signalGroup)){
 
-					double[] xpoints = new double[signal.getBorder().size()];
-					double[] ypoints = new double[signal.getBorder().size()];
+					double[] xpoints = new double[signal.getBorderLength()];
+					double[] ypoints = new double[signal.getBorderLength()];
 
 					int i =0;
-					for(XYPoint p : signal.getBorder()){
+					for(XYPoint p : signal.getBorderList()){
 						xpoints[i] = p.getX() - nucleus.getPosition()[CellularComponent.X_BASE];
 						ypoints[i] = p.getY() - nucleus.getPosition()[CellularComponent.Y_BASE];
 						i++;

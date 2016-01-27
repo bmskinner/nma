@@ -261,11 +261,11 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				 */
 				for(Nucleus n : collection.getNuclei()){
 
-					SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
+					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
 					NucleusBorderSegment nSeg1 = profile.getSegment(segName1);
 					NucleusBorderSegment nSeg2 = profile.getSegment(segName2);
 					profile.mergeSegments(nSeg1, nSeg2);
-					n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
+					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
 				}
 
 				/*
@@ -273,11 +273,11 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				 */
 				if(collection.hasConsensusNucleus()){
 					ConsensusNucleus n = collection.getConsensusNucleus();
-					SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
+					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
 					NucleusBorderSegment nSeg1 = profile.getSegment(segName1);
 					NucleusBorderSegment nSeg2 = profile.getSegment(segName2);
 					profile.mergeSegments(nSeg1, nSeg2);
-					n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
+					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
 				}
 				
 				fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
@@ -306,10 +306,10 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			 */
 			for(Nucleus n : collection.getNuclei()){
 
-				SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
+				SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT);
 				NucleusBorderSegment nSeg = profile.getSegment(segName);
 				profile.unmergeSegment(nSeg);
-				n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+				n.setProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT, profile);
 			}
 			
 			/*
@@ -317,10 +317,10 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			 */
 			if(collection.hasConsensusNucleus()){
 				ConsensusNucleus n = collection.getConsensusNucleus();
-				SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
+				SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT);
 				NucleusBorderSegment nSeg1 = profile.getSegment(segName);
 				profile.unmergeSegment(nSeg1);
-				n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+				n.setProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT, profile);
 			}
 			fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
 		}
@@ -369,12 +369,13 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 						 */
 						for(Nucleus n : collection.getNuclei()){
 
-							SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
+							
+							SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT);
 							NucleusBorderSegment nSeg = profile.getSegment(segName);
 
 							int targetIndex = nSeg.getProportionalIndex(proportion);
 							profile.splitSegment(nSeg, targetIndex);
-							n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+							n.setProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT, profile);
 						}
 
 						/*
@@ -382,11 +383,11 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 						 */
 						if(collection.hasConsensusNucleus()){
 							ConsensusNucleus n = collection.getConsensusNucleus();
-							SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
+							SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT);
 							NucleusBorderSegment nSeg1 = profile.getSegment(segName);
 							int targetIndex = nSeg1.getProportionalIndex(proportion);
 							profile.splitSegment(nSeg1, targetIndex);
-							n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+							n.setProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT, profile);
 						}
 						fireInterfaceEvent(InterfaceMethod.UPDATE_COMPLETE);
 						fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());

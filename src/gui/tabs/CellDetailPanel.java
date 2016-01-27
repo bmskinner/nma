@@ -356,7 +356,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							
 							// delete the cell
 							Cell cell = activeDataset().getCollection().getCell(cellID);
-							activeDataset().getCollection().removeCell(cell);
+							try {
+								activeDataset().getCollection().removeCell(cell);
+							} catch (Exception e2) {
+								programLogger.log(Level.SEVERE, "Error removing cell from collection", e);
+							}
 							node.removeFromParent();
 							DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
 							model.reload();

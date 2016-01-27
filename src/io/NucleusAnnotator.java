@@ -37,6 +37,7 @@ import utility.Utils;
 import analysis.AnalysisDataset;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.ProfileType;
 import components.nuclear.NuclearSignal;
 import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
@@ -114,8 +115,8 @@ public class NucleusAnnotator {
 		
 		ip.setColor(Color.CYAN);
 		ip.setLineWidth(3);
-		ip.drawDot( n.getPoint(BorderTag.ORIENTATION_POINT).getXAsInt(), 
-				n.getPoint(BorderTag.ORIENTATION_POINT).getYAsInt());
+		ip.drawDot( n.getBorderPoint(BorderTag.ORIENTATION_POINT).getXAsInt(), 
+				n.getBorderPoint(BorderTag.ORIENTATION_POINT).getYAsInt());
 	}
 
 	private static void annotateHead(ImagePlus image, Nucleus n){
@@ -123,8 +124,8 @@ public class NucleusAnnotator {
 		
 		ip.setColor(Color.YELLOW);
 		ip.setLineWidth(3);
-		ip.drawDot( n.getPoint(BorderTag.REFERENCE_POINT).getXAsInt(), 
-				n.getPoint(BorderTag.REFERENCE_POINT).getYAsInt());
+		ip.drawDot( n.getBorderPoint(BorderTag.REFERENCE_POINT).getXAsInt(), 
+				n.getBorderPoint(BorderTag.REFERENCE_POINT).getYAsInt());
 	}
 	
 	private static void annotateCoM(ImagePlus image, Nucleus n){
@@ -137,7 +138,7 @@ public class NucleusAnnotator {
 	}
 
 	// The narrowest part of the nucleus
-	private static void annotateMinFeret(ImagePlus image, Nucleus n){
+	private static void annotateMinFeret(ImagePlus image, Nucleus n) throws Exception{
 		ImageProcessor ip = image.getProcessor();
 
 
@@ -154,10 +155,10 @@ public class NucleusAnnotator {
 
 		try{
 
-			if(n.getAngleProfile().getSegments().size()>0){ // only draw if there are segments
-				for(int i=0;i<n.getAngleProfile().getSegments().size();i++){
+			if(n.getProfile(ProfileType.REGULAR).getSegments().size()>0){ // only draw if there are segments
+				for(int i=0;i<n.getProfile(ProfileType.REGULAR).getSegments().size();i++){
 
-					NucleusBorderSegment seg = n.getAngleProfile().getSegment("Seg_"+i);
+					NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR).getSegment("Seg_"+i);
 
 					float[] xpoints = new float[seg.length()+1];
 					float[] ypoints = new float[seg.length()+1];
@@ -207,7 +208,7 @@ public class NucleusAnnotator {
 					ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
 					ip.setLineWidth(1);
 					
-					FloatPolygon p = Utils.createPolygon(s.getBorder());
+					FloatPolygon p = Utils.createPolygon(s.getBorderList());
 					PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 					ip.draw(roi);
 				}

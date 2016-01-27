@@ -34,6 +34,7 @@ import analysis.AnalysisDataset;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
+import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import stats.NucleusStatistic;
@@ -252,7 +253,7 @@ public class NuclearHistogramDatasetCreator {
 				for(Nucleus n : collection.getNuclei()){
 //					NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
 					NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
-							n.getAngleProfile(BorderTag.REFERENCE_POINT).getOrderedSegments(), segName
+							n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), segName
 						);
 					
 
@@ -326,7 +327,7 @@ public class NuclearHistogramDatasetCreator {
 			for(Nucleus n : collection.getNuclei()){
 //				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
 				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
-						n.getAngleProfile(BorderTag.REFERENCE_POINT).getOrderedSegments(), segName
+						n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), segName
 					);
 
 				int indexLength = seg.length();
@@ -352,7 +353,7 @@ public class NuclearHistogramDatasetCreator {
 			for(Nucleus n : collection.getNuclei()){
 //				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
 				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
-						n.getAngleProfile(BorderTag.REFERENCE_POINT).getOrderedSegments(), segName
+						n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), segName
 					);
 				
 				int indexLength = seg.length();

@@ -20,6 +20,7 @@ package charting.datasets;
 
 import ij.IJ;
 import stats.NucleusStatistic;
+import stats.SignalStatistic;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -130,7 +131,10 @@ public class CellDatasetCreator {
 				for(NuclearSignal s : n.getSignals(signalGroup)){
 					
 					fieldNames.add("Signal area");
-					rowData.add(s.getArea()+" ("+ df.format(Utils.micronArea(s.getArea(), n.getScale()))+" microns)");
+					rowData.add(s.getStatistic(SignalStatistic.AREA)
+							+" ("
+							+ df.format(Utils.micronArea(s.getStatistic(SignalStatistic.AREA), n.getScale()))
+							+" microns)");
 					
 					fieldNames.add("Signal CoM");
 					
@@ -139,7 +143,7 @@ public class CellDatasetCreator {
 					rowData.add(comX+", "+comY);
 					
 					fieldNames.add("Signal angle");
-					rowData.add(s.getAngle());
+					rowData.add(s.getStatistic(SignalStatistic.ANGLE));
 				}			
 				
 			}

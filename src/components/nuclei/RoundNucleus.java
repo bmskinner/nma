@@ -80,11 +80,9 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	protected Map<ProfileType, SegmentedProfile> profileMap = new HashMap<ProfileType, SegmentedProfile>();
 	
-	
-	
 	protected List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
-	protected Map<BorderTag, Integer> borderTags     = new HashMap<BorderTag, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
-	protected Map<String, Integer> segmentTags       = new HashMap<String, Integer>(0);
+	protected Map<BorderTag, Integer>    borderTags  = new HashMap<BorderTag, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
+	protected Map<String, Integer>       segmentTags = new HashMap<String, Integer>(0);
 
 
 	protected File nucleusFolder; // the folder to store nucleus information e.g. /Testing/2015-11-24_10:00:00/1/
@@ -279,10 +277,10 @@ public class RoundNucleus extends AbstractCellularComponent
 	@Override
 	protected double calculateStatistic(PlottableStatistic stat) throws Exception{
 		
-		if(stat.getClass().isInstance(NucleusStatistic.class)){
+		if(stat.getClass().isAssignableFrom(NucleusStatistic.class)){
 			return calculateStatistic( (NucleusStatistic) stat);
 		} else {
-			throw new IllegalArgumentException("Statistic type inappropriate for nucleus");
+			throw new IllegalArgumentException("Statistic type inappropriate for nucleus: "+stat.getClass().getName());
 		}
 		
 	}
@@ -319,7 +317,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			result = this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getWidth();
 			break;
 		case OP_RP_ANGLE:
-			result = RoundNucleus.findAngleBetweenXYPoints(this.getBorderTag(BorderTag.REFERENCE_POINT), this.getCentreOfMass(), this.getBorderTag(BorderTag.ORIENTATION_POINT));
+			result = Utils.findAngleBetweenXYPoints(this.getBorderTag(BorderTag.REFERENCE_POINT), this.getCentreOfMass(), this.getBorderTag(BorderTag.ORIENTATION_POINT));
 			break;
 		default:
 			break;
@@ -829,7 +827,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		double minAngle = 180;
 
 		for(int i = 0; i<this.getBorderLength();i++){
-			double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), this.getBorderPoint(i));
+			double angle = Utils.findAngleBetweenXYPoints(p, this.getCentreOfMass(), this.getBorderPoint(i));
 			if(Math.abs(180 - angle) < minAngle){
 				minDeltaYIndex = i;
 				minAngle = 180 - angle;
@@ -851,7 +849,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		for(int i=0;i<this.getBorderLength();i++){
 
 			BorderPoint p = this.getBorderPoint(i);
-			double angle = RoundNucleus.findAngleBetweenXYPoints(a, this.getCentreOfMass(), p); 
+			double angle = Utils.findAngleBetweenXYPoints(a, this.getCentreOfMass(), p); 
 			if(Math.abs(90-angle)< Math.abs(90-bestAngle)){
 				bestAngle = angle;
 				orthgonalPoint = p;
@@ -860,19 +858,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		return orthgonalPoint;
 	}
 	
-	/*
-		Given three XYPoints, measure the angle a-b-c
-			a   c
-			 \ /
-				b
-	*/
-	public static double findAngleBetweenXYPoints(XYPoint a, XYPoint b, XYPoint c){
-
-		float[] xpoints = { (float) a.getX(), (float) b.getX(), (float) c.getX()};
-		float[] ypoints = { (float) a.getY(), (float) b.getY(), (float) c.getY()};
-		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
-	 return roi.getAngle();
-	}
 
 	// find the point with the narrowest diameter through the CoM
 	// Uses the distance profile
@@ -900,7 +885,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		if(this.hasBorderTag(BorderTag.TOP_VERTICAL) && this.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
 //			IJ.log("Calculating rotation angle via TopVertical");
 			XYPoint end = new XYPoint(this.getBorderTag(BorderTag.BOTTOM_VERTICAL).getXAsInt(),this.getBorderTag(BorderTag.BOTTOM_VERTICAL).getYAsInt()-50);
-			angle = findAngleBetweenXYPoints(end, this.getBorderTag(BorderTag.BOTTOM_VERTICAL), this.getBorderTag(BorderTag.TOP_VERTICAL));
+			angle = Utils.findAngleBetweenXYPoints(end, this.getBorderTag(BorderTag.BOTTOM_VERTICAL), this.getBorderTag(BorderTag.TOP_VERTICAL));
 
 			
 		} else {
@@ -908,7 +893,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			// Make a point directly below the orientation point
 			XYPoint end = new XYPoint(this.getBorderTag(BorderTag.ORIENTATION_POINT).getXAsInt(),this.getBorderTag(BorderTag.ORIENTATION_POINT).getYAsInt()-50);
 
-		    angle = findAngleBetweenXYPoints(end, this.getBorderTag(BorderTag.ORIENTATION_POINT), this.getCentreOfMass());
+		    angle = Utils.findAngleBetweenXYPoints(end, this.getBorderTag(BorderTag.ORIENTATION_POINT), this.getCentreOfMass());
 
 		}
 		
@@ -931,7 +916,7 @@ public class RoundNucleus extends AbstractCellularComponent
 
 				for(NuclearSignal s : signals){
 
-					double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), s.getCentreOfMass());
+					double angle = Utils.findAngleBetweenXYPoints(p, this.getCentreOfMass(), s.getCentreOfMass());
 					s.setStatistic(SignalStatistic.ANGLE, angle);
 
 				}
@@ -1165,7 +1150,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			BorderPoint pointAfter  = this.getBorderPoint(indexAfter);
 			BorderPoint point       = this.getBorderPoint(i);
 
-			double angle = RoundNucleus.findAngleBetweenXYPoints(pointBefore, point, pointAfter);
+			double angle = Utils.findAngleBetweenXYPoints(pointBefore, point, pointAfter);
 
 			// find the halfway point between the first and last points.
 				// is this within the roi?
@@ -1282,7 +1267,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	private XYPoint getPositionAfterRotation(BorderPoint point, double angle){
 		
 		// get the angle from the tail to the vertical axis
-		double tailAngle = findAngleBetweenXYPoints( point, 
+		double tailAngle = Utils.findAngleBetweenXYPoints( point, 
 				this.getCentreOfMass(), 
 				new XYPoint(this.getCentreOfMass().getX(),-10));
 		if(point.getX()<this.getCentreOfMass().getX()){
@@ -1375,7 +1360,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		 *       B
 		 * 
 		 */
-		double angleToBeat = findAngleBetweenXYPoints( topPoint, 
+		double angleToBeat = Utils.findAngleBetweenXYPoints( topPoint, 
 				bottomPoint, 
 				new XYPoint(bottomPoint.getX(),topPoint.getY()));
 		
@@ -1388,7 +1373,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			// angles for the rotations where the top has moved to the bottom 
 			if(newTop.getY() > newBottom.getY()){
 				
-				double newAngle = findAngleBetweenXYPoints( newTop, 
+				double newAngle = Utils.findAngleBetweenXYPoints( newTop, 
 						newBottom, 
 						new XYPoint(newBottom.getX(),newTop.getY()));
 				
@@ -1414,7 +1399,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			XYPoint newTop 		= getPositionAfterRotation(topPoint, angle);
 			XYPoint newBottom 	= getPositionAfterRotation(bottomPoint, angle);
 	
-			double newAngle = findAngleBetweenXYPoints( newTop, 
+			double newAngle = Utils.findAngleBetweenXYPoints( newTop, 
 					newBottom, 
 					new XYPoint(newBottom.getX(),newTop.getY()));
 
@@ -1457,7 +1442,7 @@ public class RoundNucleus extends AbstractCellularComponent
 				 *      V P
 				 * 
 				 */
-				double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, 
+				double oldAngle = Utils.findAngleBetweenXYPoints( p, 
 						this.getCentreOfMass(), 
 						new XYPoint(this.getCentreOfMass().getX(),-10));
 
