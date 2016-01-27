@@ -26,13 +26,8 @@
 */  
 package components.nuclei;
 
-import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
-import stats.NucleusStatistic;
-import stats.PlottableStatistic;
-import stats.SignalStatistic;
-import stats.Stats;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -43,8 +38,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import stats.NucleusStatistic;
+import stats.PlottableStatistic;
+import stats.SignalStatistic;
+import stats.Stats;
 import utility.Constants;
 import utility.Utils;
+
 import components.AbstractCellularComponent;
 import components.CellularComponent;
 import components.generic.BorderTag;
@@ -54,8 +55,8 @@ import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
-import components.nuclear.NuclearSignal;
 import components.nuclear.BorderPoint;
+import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalCollection;

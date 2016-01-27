@@ -65,12 +65,14 @@ public class CellCollection implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private File 	folder; 		// the source of the nuclei
-	private String 	outputFolder;	// the location to save out data
-	private File 	debugFile;		// the location of the debug file 
-	private String 	collectionType; // for annotating image names
-	private String 	name;			// the name of the collection
-	private UUID 	guid;			// the collection id
+	// TODO: this needs reworking
+	
+	private File 	    folder; 		// the source of the nuclei
+	private String     	outputFolder;	// the location to save out data
+	private File 	    debugFile;		// the location of the debug file 
+	private String 	    collectionType; // for annotating image names
+	private String 	    name;			// the name of the collection
+	private final UUID 	guid;			// the collection id
 	
 	private NucleusType nucleusType; // the type of nuclei this collection contains
 	
@@ -174,13 +176,11 @@ public class CellCollection implements Serializable {
 		  return;
 	  } else {
 		  this.mappedCollection.put(r.getId(), r);
-//		  statsCache.recalculate(this);
 	  }
   }
 
   public void removeCell(Cell c) throws Exception{
 	  this.mappedCollection.remove(c.getId());
-//	  statsCache.recalculate(this);
   }
   
   public int cellCount(){
@@ -250,12 +250,7 @@ public class CellCollection implements Serializable {
 	  
 	  return this.nucleusType.getPoint(tag);
   }
-  
-//  public String getReferencePoint(){
-//	  	  
-//	  return this.getPoint(BorderTag.REFERENCE_POINT);
-//  }
-  
+    
   /**
    * Get the profile collection of the given type
    * @param type
