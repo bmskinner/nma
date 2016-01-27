@@ -208,7 +208,7 @@ public class ShellCreator {
 	*/
 	public double[] findShell(NuclearSignal signal, int channel, ImageStack signalImage) throws Exception{
 
-		FloatPolygon polygon = Utils.createPolygon(signal.getBorder());
+		FloatPolygon polygon = Utils.createPolygon(signal.getBorderList());
 		Roi signalRoi = new PolygonRoi(polygon, Roi.POLYGON);
 		
 		// Get a list of all the points within the ROI

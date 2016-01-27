@@ -275,9 +275,9 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				Instance inst = new SparseInstance(attributeCount);
 
 				// Set instance's values for the attributes
-				inst.setValue(area, n.getArea());
-				inst.setValue(circularity, n.getCircularity());
-				inst.setValue(aspect, n.getAspectRatio());
+				inst.setValue(area, n.getStatistic(NucleusStatistic.AREA));
+				inst.setValue(circularity, n.getStatistic(NucleusStatistic.CIRCULARITY));
+				inst.setValue(aspect, n.getStatistic(NucleusStatistic.ASPECT));
 				//				stringList.add(n.getNameAndNumber());
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
 					String uniqueName =  makeUniqueName(n);
@@ -288,7 +288,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 
 				if(options.isIncludeModality()){
 
-					Profile p = n.getAngleProfile(BorderTag.REFERENCE_POINT);
+					Profile p = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
 					Profile interpolated = p.interpolate(medianProfile.size());
 
 					for(int index=0; index<modalityIndexes.size(); index++){
@@ -334,7 +334,8 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 					 * TODO: We can cut this in half by flipping the matrix
 					 */
 
-					double score = n1.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(n2.getAngleProfile(BorderTag.REFERENCE_POINT));
+					double score = n1.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
+							.absoluteSquareDifference(n2.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT));
 										
 					matrix[i][j] = score;
 
@@ -448,7 +449,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				Instance inst = new SparseInstance(attributes.size());
 
 				// Interpolate the profile to the median length
-				Profile p = n1.getAngleProfile(BorderTag.REFERENCE_POINT).interpolate(profileSize);
+				Profile p = n1.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).interpolate(profileSize);
 				
 //				for(int attNumber=0; attNumber<profilePointsToCount; attNumber++){
 //
@@ -551,7 +552,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 					Attribute att = (Attribute) attributes.elementAt(attNumber);
 					double score = matrix[i][j];
 //					
-					score /= n1.getPerimeter();
+					score /= n1.getStatistic(NucleusStatistic.PERIMETER);
 					inst.setValue(att, score);
 					attNumber++;
 				}
@@ -560,8 +561,8 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 					inst.setValue(name, uniqueName);
 				}
 				
-				inst.setValue(area, n1.getArea());
-				inst.setValue(aspect, n1.getAspectRatio());
+				inst.setValue(area, n1.getStatistic(NucleusStatistic.AREA));
+				inst.setValue(aspect, n1.getStatistic(NucleusStatistic.ASPECT));
 				
 				instances.add(inst);
 				cellToInstanceMap.put(inst, c.getId());

@@ -185,7 +185,7 @@ public class CurveRefolder extends AnalysisWorker {
 		}
 
 		try{
-			double score = refoldNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
+			double score = refoldNucleus.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
 			
 //			fileLogger.log(Level.INFO, "Refolding curve: initial score: "+(int)score);
 			log(Level.FINE, "Refolding curve: initial score: "+(int)score);
@@ -313,7 +313,7 @@ public class CurveRefolder extends AnalysisWorker {
 
 			if(ok){
 				// update the new position
-				refoldNucleus.updatePoint(i, replacementPoint.getX(), replacementPoint.getY());
+				refoldNucleus.updateBorderPoint(i, replacementPoint.getX(), replacementPoint.getY());
 			}
 		}
 	}
@@ -329,7 +329,7 @@ public class CurveRefolder extends AnalysisWorker {
 	*/
 	private double iterateOverNucleus() throws Exception {
 
-		SegmentedProfile refoldProfile = refoldNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT);
+		SegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT);
 
 		// Get the difference between the candidate nucleus profile and the median profile
 		double similarityScore = refoldProfile.absoluteSquareDifference(targetCurve);
@@ -345,10 +345,10 @@ public class CurveRefolder extends AnalysisWorker {
 			// make all changes to a fresh nucleus before buggering up the real one
 			RoundNucleus testNucleus = new RoundNucleus( (RoundNucleus)refoldNucleus);
 
-			double score = testNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
+			double score = testNucleus.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
 
 			// Get a copy of the point at this index
-			BorderPoint p = testNucleus.getPoint(i);
+			BorderPoint p = testNucleus.getBorderPoint(i);
 
 			// Save the old position
 			double oldX = p.getX();
@@ -371,18 +371,18 @@ public class CurveRefolder extends AnalysisWorker {
 			if(	ok ){
 				
 				// Update the test nucleus
-				testNucleus.updatePoint(i, newPoint);
+				testNucleus.updateBorderPoint(i, newPoint);
 
 				// Measure the new profile & compare
-				testNucleus.setAngleProfile(testNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize()));
+				testNucleus.setProfile(ProfileType.REGULAR, testNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize()));
 
 				// Get the new score
-				score = testNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
+				score = testNucleus.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
 
 				// Apply the change if better fit
 				if(score < similarityScore) {
-					refoldNucleus.updatePoint(i, newPoint);
-					testNucleus.setAngleProfile(refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize()));
+					refoldNucleus.updateBorderPoint(i, newPoint);
+					testNucleus.setProfile(ProfileType.REGULAR, refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize()));
 					similarityScore = score;
 				}
 			}
@@ -402,8 +402,8 @@ public class CurveRefolder extends AnalysisWorker {
 	 * @return
 	 */
 	private boolean checkPositionIsOK(XYPoint point,  Nucleus n, int index, double min, double max){
-		double distanceToPrev = point.getLengthTo( n.getPoint( Utils.wrapIndex(index-1, n.getBorderLength()) ) );
-		double distanceToNext = point.getLengthTo( n.getPoint( Utils.wrapIndex(index+1, n.getBorderLength()) ) );
+		double distanceToPrev = point.getLengthTo( n.getBorderPoint( Utils.wrapIndex(index-1, n.getBorderLength()) ) );
+		double distanceToNext = point.getLengthTo( n.getBorderPoint( Utils.wrapIndex(index+1, n.getBorderLength()) ) );
 
 		boolean ok = true;
 		if(	distanceToNext > max ){

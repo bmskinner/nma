@@ -42,6 +42,7 @@ import charting.charts.MorphologyChartFactory;
 import utility.Utils;
 import components.Cell;
 import components.CellularComponent;
+import components.generic.ProfileType;
 import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
@@ -124,7 +125,7 @@ public class AnnotatedNucleusPanel extends JPanel {
 
 		
 		// annotate the image processor with the nucleus outline
-		List<NucleusBorderSegment> segmentList = n.getAngleProfile().getSegments();
+		List<NucleusBorderSegment> segmentList = n.getProfile(ProfileType.REGULAR).getSegments();
 		
 		ip.setLineWidth(2);
 		if(!segmentList.isEmpty()){ // only draw if there are segments

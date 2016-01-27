@@ -91,11 +91,11 @@ public class CollectionFilterer {
 
 	      Nucleus n = c.getNucleus();
 	      
-	      if(n.getArea() > maxArea || n.getArea() < minArea ){
+	      if(n.getStatistic(NucleusStatistic.AREA) > maxArea || n.getStatistic(NucleusStatistic.AREA) < minArea ){
 	        n.updateFailureCode(FAILURE_AREA);
 	        area++;
 	      }
-	      if(n.getPerimeter() > maxPerim || n.getPerimeter() < minPerim ){
+	      if(n.getStatistic(NucleusStatistic.PERIMETER) > maxPerim || n.getStatistic(NucleusStatistic.PERIMETER) < minPerim ){
 	        n.updateFailureCode(FAILURE_PERIM);
 	        perim++;
 	      }
@@ -108,7 +108,7 @@ public class CollectionFilterer {
 	         arraylength++;
 	      }
 
-	      if(n.getFeret() < minFeret){
+	      if(n.getStatistic(NucleusStatistic.MAX_FERET) < minFeret){
 	        n.updateFailureCode(FAILURE_FERET);
 	        feretlength++;
 	      }

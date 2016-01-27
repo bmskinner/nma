@@ -139,7 +139,7 @@ public class SignalDetector extends AnalysisWorker {
 						
 						if(n.hasBorderTag(BorderTag.ORIENTATION_POINT)){
 							log(Level.FINEST, "Calculating angle from orientation point");
-							n.calculateSignalAnglesFromPoint(n.getPoint(BorderTag.ORIENTATION_POINT));
+							n.calculateSignalAnglesFromPoint(n.getBorderPoint(BorderTag.ORIENTATION_POINT));
 						} else {
 							log(Level.FINEST, "No orientation point in nucleus");
 						}

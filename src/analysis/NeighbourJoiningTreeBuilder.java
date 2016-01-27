@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.ProfileType;
 import components.nuclei.Nucleus;
 import jebl.evolution.distances.BasicDistanceMatrix;
 import jebl.evolution.distances.DistanceMatrix;
@@ -107,7 +108,8 @@ public class NeighbourJoiningTreeBuilder extends AnalysisWorker {
 //					}
 					
 
-					double score = n1.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(n2.getAngleProfile(BorderTag.REFERENCE_POINT));
+					double score = n1.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
+							.absoluteSquareDifference(n2.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT));
 										
 					matrix[i][j] = score;
 

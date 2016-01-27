@@ -284,7 +284,14 @@ public interface Nucleus extends CellularComponent {
 	 * @param type
 	 * @param profile
 	 */
-	public void setProfile(ProfileType type, SegmentedProfile profile);
+//	public void setProfile(ProfileType type, SegmentedProfile profile);
+	
+	/**
+	 * Set the profile for the given type
+	 * @param type
+	 * @param profile
+	 */
+	public void setProfile(ProfileType type, BorderTag tag, SegmentedProfile profile) throws Exception;
 	
 	
 	/**

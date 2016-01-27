@@ -42,15 +42,9 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 	private static final long serialVersionUID = 1L;
 
 	private int closestNuclearBorderPoint;
-
-	private List<BorderPoint> borderList = new ArrayList<BorderPoint>(0); // replace ROI
-
+	
 	public NuclearSignal(Roi roi, double area, double feret, double perimeter, XYPoint centreOfMass, String origin){
-
-		FloatPolygon polygon = roi.getInterpolatedPolygon(1,true);
-		for(int i=0; i<polygon.npoints; i++){
-			borderList.add(new BorderPoint( polygon.xpoints[i], polygon.ypoints[i]));
-		}
+		super(roi);
 		
 		this.setStatistic(SignalStatistic.AREA, area);
 		this.setStatistic(SignalStatistic.MAX_FERET, feret);
@@ -69,58 +63,10 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 	 */
 	public NuclearSignal(NuclearSignal n){
 		super(n);
-		this.borderList = n.getBorder();
+
 		this.closestNuclearBorderPoint = n.getClosestBorderPoint();
 
-	}
-
-	/*
-    -----------------------
-    Getters for basic values within nucleus
-    -----------------------
-	 */
-
-	/**
-	 * Get a copy of the border points defining this signal
-	 * @return
-	 */
-	public List<BorderPoint> getBorder(){
-		List<BorderPoint> result = new ArrayList<BorderPoint>();
-		for(BorderPoint p : borderList){
-			result.add(new BorderPoint(p));
-		}
-		return result;
-	}
-	
-	/**
-	 * Get the number of border points
-	 * @return
-	 */
-	public int getBorderSize(){
-		return this.borderList.size();
-	}
-	
-	/**
-	 * Get a copy of the border point at the given index
-	 * @param index
-	 * @return
-	 */
-	public BorderPoint getBorderPoint(int index){
-		return new BorderPoint(borderList.get(index));
-	}
-	
-	/**
-	 * Update the border point at the given index to a new position
-	 * @param index
-	 * @param newX
-	 * @param newY
-	 */
-	public void updateBorderPoint(int index, double newX, double newY){
-		this.borderList.get(index).setX(newX);
-		this.borderList.get(index).setY(newY);
-	}
-
-
+	}	
 
 	public int getClosestBorderPoint(){
 		return this.closestNuclearBorderPoint;

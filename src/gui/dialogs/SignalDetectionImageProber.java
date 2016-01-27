@@ -40,6 +40,8 @@ import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import io.ImageExporter;
 import io.ImageImporter;
+import stats.NucleusStatistic;
+import stats.SignalStatistic;
 import utility.Utils;
 
 
@@ -146,7 +148,7 @@ public class SignalDetectionImageProber extends ImageProber {
 			}
 		}
 	
-	protected void drawSignals(Map<Nucleus, List<NuclearSignal>> map, ImageProcessor ip){
+	protected void drawSignals(Map<Nucleus, List<NuclearSignal>> map, ImageProcessor ip) throws Exception{
 		if(map==null){
 			throw new IllegalArgumentException("Input cell is null");
 		}
@@ -172,7 +174,7 @@ public class SignalDetectionImageProber extends ImageProber {
 					ip.setColor(Color.RED);
 				}
 
-				FloatPolygon polygon = Utils.createPolygon(s.getBorder());
+				FloatPolygon polygon = Utils.createPolygon(s.getBorderList());
 				PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 				
 				// Offset the roi to the nucleus bouding box
@@ -185,15 +187,15 @@ public class SignalDetectionImageProber extends ImageProber {
 		}
 	}
 	
-	private boolean checkSignal(NuclearSignal s, Nucleus n){
+	private boolean checkSignal(NuclearSignal s, Nucleus n) throws Exception{
 		boolean result = true;
 		
-		if(s.getArea() < testOptions.getMinSize()){
+		if(s.getStatistic(SignalStatistic.AREA) < testOptions.getMinSize()){
 			
 			result = false;
 		}
 		
-		if(s.getArea() > (testOptions.getMaxFraction() * n.getArea() )   ){
+		if(s.getStatistic(SignalStatistic.AREA) > (testOptions.getMaxFraction() * n.getStatistic(NucleusStatistic.AREA) )   ){
 			
 			result = false;
 		}		

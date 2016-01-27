@@ -407,7 +407,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 	private void assignSegmentsToNucleus(Nucleus n, SegmentedProfile median) throws Exception {
 			
 		// remove any existing segments in the nucleus
-		SegmentedProfile nucleusProfile = n.getAngleProfile();
+		SegmentedProfile nucleusProfile = n.getProfile(ProfileType.REGULAR);
 		nucleusProfile.clearSegments();
 
 		List<NucleusBorderSegment> nucleusSegments = new ArrayList<NucleusBorderSegment>();
@@ -428,8 +428,8 @@ public class DatasetSegmenter extends AnalysisWorker {
 			Profile endOffsetMedian 	= median.offset(endIndexInMedian);
 
 			// find the index at the point of the best fit
-			int startIndex 	= n.getAngleProfile().getSlidingWindowOffset(startOffsetMedian);
-			int endIndex 	= n.getAngleProfile().getSlidingWindowOffset(endOffsetMedian);
+			int startIndex 	= n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(startOffsetMedian);
+			int endIndex 	= n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(endOffsetMedian);
 
 			// create a segment at these points
 			// ensure that the segment meets length requirements
@@ -447,7 +447,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 		NucleusBorderSegment.linkSegments(nucleusSegments);
 		nucleusProfile.setSegments(nucleusSegments);
-		n.setAngleProfile(nucleusProfile);
+		n.setProfile(ProfileType.REGULAR, nucleusProfile);
 
 		
 	}
@@ -600,7 +600,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 			}
 			
 			try {
-				if(n.getAngleProfile().getSegments()==null || n.getAngleProfile().getSegments().isEmpty()){
+				if(n.getProfile(ProfileType.REGULAR).getSegments()==null || n.getProfile(ProfileType.REGULAR).getSegments().isEmpty()){
 					log(Level.SEVERE, "Nucleus has no segments");
 					throw new IllegalArgumentException("Nucleus has no segments");
 				}
@@ -614,8 +614,8 @@ public class DatasetSegmenter extends AnalysisWorker {
 			try{
 				
 				// get the best fit of segments to the median
-				SegmentedProfile newProfile = this.runFitter(n.getAngleProfile());
-				n.setAngleProfile(newProfile);
+				SegmentedProfile newProfile = this.runFitter(n.getProfile(ProfileType.REGULAR));
+				n.setProfile(ProfileType.REGULAR, newProfile);
 				
 				// modify tail and head/tip point to nearest segment end
 				remapBorderPoints(n, pc);
@@ -647,7 +647,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 			//		Profile frankenProfile = null;
 			SegmentedProfile frankenProfile = null;
 			try {
-				if(n.getAngleProfile().hasSegments()){
+				if(n.getProfile(ProfileType.REGULAR).hasSegments()){
 
 					/*
 					 * Generate a segmented profile from the angle profile of the point type.
@@ -655,7 +655,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 					 * begins with seg 0 at the border tag.
 					 */
 					
-					SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile(tag));
+					SegmentedProfile nucleusProfile = new SegmentedProfile(n.getProfile(ProfileType.REGULAR, tag));
 					
 //					NucleusBorderSegment firstSegment = n.getAngleProfile(tag).getOrderedSegments().get(0);
 //					nucleusProfile = nucleusProfile.moveSegmentToPositionZero(firstSegment);
@@ -724,7 +724,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 							
 				if(seg!=null){
 					// Get the same segment in the nucleus, and move the tag to the segment start point
-					NucleusBorderSegment nSeg = n.getAngleProfile().getSegment(seg.getName());
+					NucleusBorderSegment nSeg = n.getProfile(ProfileType.REGULAR).getSegment(seg.getName());
 					n.setBorderTag(tag, nSeg.getStartIndex());
 					log(Level.FINE, "Remapped border point '"+tag+"' to "+nSeg.getStartIndex());
 				} else {

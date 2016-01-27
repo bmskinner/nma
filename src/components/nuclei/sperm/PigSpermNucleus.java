@@ -105,13 +105,13 @@ public class PigSpermNucleus
       // consensusTailIndex = this.getPositionBetween(consensusTail, tailPoint1);
       // consensusTail = this.getBorderPoint(consensusTailIndex);
 
-      int consensusTailIndex = this.getIndex(tailPoint2);
+      int consensusTailIndex = this.getBorderIndex(tailPoint2);
       BorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
 
       setBorderTag(BorderTag.ORIENTATION_POINT, consensusTailIndex);
 
       // The estimated reference point is opposite the tail
-      int headIndex = getIndex(this.findOppositeBorder(consensusTail));
+      int headIndex = getBorderIndex(this.findOppositeBorder(consensusTail));
       setBorderTag(BorderTag.REFERENCE_POINT, consensusTailIndex);
       setBorderTag(BorderTag.INTERSECTION_POINT, headIndex);
     }
@@ -215,8 +215,8 @@ public class PigSpermNucleus
       // NucleusBorderPoint[] array = { orthPoint1, orthPoint2 };
       Profile angleProfile = this.getProfile(ProfileType.REGULAR);
       // the tail should be a maximum, hence have a high angle
-      BorderPoint tailPoint  = angleProfile.get(this.getIndex(orthPoint1)) >
-      									angleProfile.get(this.getIndex(orthPoint2))
+      BorderPoint tailPoint  = angleProfile.get(this.getBorderIndex(orthPoint1)) >
+      									angleProfile.get(this.getBorderIndex(orthPoint2))
                                     ? orthPoint1
                                     : orthPoint2;
       return tailPoint;

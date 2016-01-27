@@ -91,6 +91,7 @@ import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import components.Cell;
 import components.generic.BorderTag;
+import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
@@ -233,7 +234,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 						
 		if(profile.update(seg, newStart, newEnd)){
-			n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
+			n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
 			
 			/* Check the border tags - if they overlap the old index
 			 * replace them. 
@@ -251,7 +252,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				
 				// Update intersection point if needed
 				if(tagToUpdate.equals(BorderTag.ORIENTATION_POINT)){
-					n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getIndex(n.findOppositeBorder(n.getBorderTag(BorderTag.ORIENTATION_POINT))));
+					n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getBorderIndex(n.findOppositeBorder(n.getBorderTag(BorderTag.ORIENTATION_POINT))));
 				}
 				
 			} else {
@@ -523,7 +524,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus);
 					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(ds, nucleus, activeDataset().getSwatch());
 
-					profileChartPanel.setChart(chart, nucleus.getAngleProfile(BorderTag.REFERENCE_POINT), false);
+					profileChartPanel.setChart(chart, nucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT), false);
 					
 //					nucleus.getAngleProfile(BorderTag.REFERENCE_POINT).fastFourierTransform();
 				}
@@ -548,7 +549,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					int indexValue = Integer.valueOf(index);
 
 					Nucleus n = activeCell.getNucleus();
-					SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
+					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
 					
 					/*
 					 * The numbering of segments is adjusted for profile charts, so we can't rely on 
@@ -795,12 +796,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				// TODO: update segment boundaries 
 				try {
 					
-					SegmentedProfile profile = n.getAngleProfile(tag);
+					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, tag);
 					NucleusBorderSegment seg = profile.getSegment("Seg_0");
 					// this updates the correct direction, but the wrong end of the segment
 					seg.lengthenStart(-difference);
 					
-					n.setAngleProfile(profile, tag);
+					n.setProfile(ProfileType.REGULAR, tag, profile);
 					
 				} catch(Exception e1){
 					programLogger.log(Level.SEVERE, "Error updating cell profile", e1);
@@ -812,8 +813,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				if(tag.equals(BorderTag.ORIENTATION_POINT)){
 					if(n.hasBorderTag(BorderTag.INTERSECTION_POINT)){
 						// only rodent sperm use the intersection point, which is equivalent to the head.
-						BorderPoint newPoint = n.findOppositeBorder(n.getPoint(BorderTag.ORIENTATION_POINT));
-						n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getIndex(newPoint));
+						BorderPoint newPoint = n.findOppositeBorder(n.getBorderPoint(BorderTag.ORIENTATION_POINT));
+						n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getBorderIndex(newPoint));
 					}
 				}
 				

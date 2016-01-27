@@ -324,7 +324,7 @@ public class DatasetProfiler extends AnalysisWorker {
 				}
 
 				// also update the tail position
-				int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
+				int tailIndex = n.getBorderIndex(n.findOppositeBorder( n.getBorderPoint(newHeadIndex) ));
 				n.setBorderTag(BorderTag.ORIENTATION_POINT, tailIndex);
 			}
 		}
@@ -350,7 +350,7 @@ public class DatasetProfiler extends AnalysisWorker {
 
 				// also update the head position (same as round reference point)
 				// - the point opposite the tail through the CoM
-				int headIndex = nucleus.getIndex(nucleus.findOppositeBorder( nucleus.getPoint(newTailIndex) ));
+				int headIndex = nucleus.getBorderIndex(nucleus.findOppositeBorder( nucleus.getBorderPoint(newTailIndex) ));
 				nucleus.setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
 				nucleus.splitNucleusToHeadAndHump();
 
@@ -459,7 +459,7 @@ public class DatasetProfiler extends AnalysisWorker {
 
 
 				// also update the head position
-				int headIndex = n.getIndex(n.findOppositeBorder( n.getPoint(tailIndex) ));
+				int headIndex = n.getBorderIndex(n.findOppositeBorder( n.getBorderPoint(tailIndex) ));
 				n.setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
 			}
 

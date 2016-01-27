@@ -38,6 +38,7 @@ import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import io.ImageExporter;
 import io.ImageImporter;
+import stats.NucleusStatistic;
 import utility.Constants;
 import utility.Utils;
 
@@ -264,26 +265,27 @@ public class NucleusDetectionImageProber extends ImageProber {
 	 * Check the given nucleus size and circ parameters against options
 	 * @param n the nucleus to check
 	 * @return boolean ok
+	 * @throws Exception 
 	 */
-	private boolean checkNucleus(Nucleus n){
+	private boolean checkNucleus(Nucleus n) throws Exception{
 		boolean result = true;
 		
-		if(n.getArea() < options.getMinNucleusSize()){
+		if(n.getStatistic(NucleusStatistic.AREA) < options.getMinNucleusSize()){
 			
 			result = false;
 		}
 		
-		if(n.getArea() > options.getMaxNucleusSize()){
+		if(n.getStatistic(NucleusStatistic.AREA) > options.getMaxNucleusSize()){
 			
 			result = false;
 		}
 		
-		if(n.getCircularity() < options.getMinNucleusCirc()){
+		if(n.getStatistic(NucleusStatistic.CIRCULARITY) < options.getMinNucleusCirc()){
 			
 			result = false;
 		}
 		
-		if(n.getCircularity() > options.getMaxNucleusCirc()){
+		if(n.getStatistic(NucleusStatistic.CIRCULARITY) > options.getMaxNucleusCirc()){
 			
 			result = false;
 		}

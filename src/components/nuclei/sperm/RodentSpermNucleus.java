@@ -306,7 +306,7 @@ extends SpermNucleus
 
     setBorderTag(BorderTag.ORIENTATION_POINT, consensusTailIndex);
 
-    setBorderTag(BorderTag.INTERSECTION_POINT, this.getIndex(this.findOppositeBorder(consensusTail)));
+    setBorderTag(BorderTag.INTERSECTION_POINT, this.getBorderIndex(this.findOppositeBorder(consensusTail)));
   }
 
 	/**
@@ -410,14 +410,14 @@ extends SpermNucleus
     for(int i=0; i<array.size();i++){
       if(array.get(i)==true){
             
-        double distanceAcrossCoM = tipToCoMDistance + this.getCentreOfMass().getLengthTo(getPoint(i));
-        double distanceBetweenEnds = this.getBorderTag(BorderTag.REFERENCE_POINT).getLengthTo(getPoint(i));
+        double distanceAcrossCoM = tipToCoMDistance + this.getCentreOfMass().getLengthTo(getBorderPoint(i));
+        double distanceBetweenEnds = this.getBorderTag(BorderTag.REFERENCE_POINT).getLengthTo(getBorderPoint(i));
         
         double totalDistance = distanceAcrossCoM + distanceBetweenEnds;
 
         if(totalDistance > maxDistance){
           maxDistance = totalDistance;
-          tail = getPoint(i);
+          tail = getBorderPoint(i);
         }
       }
     }
@@ -442,7 +442,7 @@ extends SpermNucleus
 
     for(int i=0;i<this.getBorderLength();i++){
 
-      BorderPoint p = this.getPoint(i);
+      BorderPoint p = this.getBorderPoint(i);
       BorderPoint opp = this.findOppositeBorder(p);
       double distance = p.getLengthTo(opp);
 
@@ -525,7 +525,7 @@ extends SpermNucleus
 
       int currentIndex = Utils.wrapIndex(this.getBorderIndex(BorderTag.ORIENTATION_POINT)+i, this.getBorderLength()); // start at the tail, and go around the array
       
-      BorderPoint p = getPoint(currentIndex);
+      BorderPoint p = getBorderPoint(currentIndex);
 
       if(currentIndex != intersectionPointIndex && !changeRoi){   // starting at the tip, assign points to roi1
         roi1.add(p);
