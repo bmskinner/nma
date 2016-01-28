@@ -120,6 +120,30 @@ public class DatasetProfiler extends AnalysisWorker {
 				score = compareProfilesToMedian(collection, pointType);
 				log(Level.FINE, "Reticulating splines: score: "+(int)score);
 			}
+			
+			
+			// Make the distance profile
+			log(Level.FINE, "Creating distance profile collection");
+			ProfileCollection distance = new ProfileCollection();
+			distance.createProfileAggregate(collection, ProfileType.DISTANCE);
+			
+			for(BorderTag tag : pc.getOffsetKeys()){
+				distance.addOffset(tag, pc.getOffset(tag));
+			}
+			
+			collection.setProfileCollection(ProfileType.DISTANCE, distance);
+			
+			// Make the single distance profile
+			log(Level.FINE, "Creating single distance profile collection");
+			ProfileCollection single = new ProfileCollection();
+			single.createProfileAggregate(collection, ProfileType.SINGLE_DISTANCE);
+			
+			for(BorderTag tag : pc.getOffsetKeys()){
+				single.addOffset(tag, pc.getOffset(tag));
+			}
+			
+			collection.setProfileCollection(ProfileType.SINGLE_DISTANCE, single);
+			
 			publish(3);
 			log(Level.FINE,  "Finished profiling collection; median generated");
 

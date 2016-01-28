@@ -290,6 +290,13 @@ public class DatasetSegmenter extends AnalysisWorker {
 		log(Level.FINER, "Copying profile collection segments to frankenCollection");
 		frankenCollection.addSegments(pointType, segments);
 		
+		// copy the segments from the profile collection to other profiles
+		log(Level.FINER, "Copying profile collection segments to distance profile");
+		collection.getProfileCollection(ProfileType.DISTANCE).addSegments(pointType, segments);
+		
+		log(Level.FINER, "Copying profile collection segments to single distance profile");
+		collection.getProfileCollection(ProfileType.SINGLE_DISTANCE).addSegments(pointType, segments);
+		
 		// attach the frankencollection to the cellcollection
 		collection.setProfileCollection(ProfileType.FRANKEN, frankenCollection);
 
@@ -558,6 +565,13 @@ public class DatasetSegmenter extends AnalysisWorker {
 			// attach the frankencollection to the cellcollection
 			collection.setProfileCollection(ProfileType.FRANKEN, frankenCollection);
 			log(Level.FINER, "Segment assignments refined");
+			
+			// copy the segments from the profile collection to other profiles
+			log(Level.FINER, "Copying profile collection segments to distance profile");
+			collection.getProfileCollection(ProfileType.DISTANCE).addSegments(pointType, segments);
+			
+			log(Level.FINER, "Copying profile collection segments to single distance profile");
+			collection.getProfileCollection(ProfileType.SINGLE_DISTANCE).addSegments(pointType, segments);
 	}
 	
 	public class SegmentFitter {
