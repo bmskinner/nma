@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +46,6 @@ import stats.SignalStatistic;
 import stats.Stats;
 import utility.Constants;
 import utility.Utils;
-
 import components.AbstractCellularComponent;
 import components.CellularComponent;
 import components.generic.BorderTag;
@@ -68,7 +68,6 @@ import components.nuclear.SignalCollection;
  */
 public class RoundNucleus extends AbstractCellularComponent
 	implements Nucleus, Serializable {
-
 
 	private static final long serialVersionUID = 1L;
 		
@@ -123,7 +122,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		for(ProfileType type : ProfileType.values()){
 			if(n.hasProfile(type)){
-				this.setProfile(type, n.getProfile(type));
+				this.profileMap.put(type, n.getProfile(type));
 			}
 		}
 
@@ -170,16 +169,26 @@ public class RoundNucleus extends AbstractCellularComponent
 		// calculate profiles
 
 		this.setAngleProfileWindowSize(angleProfileWindowSize);
-		this.setProfile(ProfileType.REGULAR, this.calculateAngleProfile(angleProfileWindowSize));
-
-		// calc distances around nucleus through CoM
-		this.calculateDistanceProfile();
-		this.setProfile(ProfileType.DISTANCE, this.calculateDistanceProfile());
-		this.calculateSingleDistanceProfile();
-		this.setProfile(ProfileType.SINGLE_DISTANCE, this.calculateSingleDistanceProfile());
+		
+		calculateProfiles();
+		
 
 		this.calculateSignalDistancesFromCoM();
 		this.calculateFractionalSignalDistancesFromCoM();
+	}
+	
+	public void calculateProfiles() throws Exception{
+		
+		/*
+		 * All these calculations operate on the same border point order
+		 */
+		
+		this.profileMap.put(ProfileType.REGULAR, this.calculateAngleProfile(angleProfileWindowSize));
+
+		// calc distances around nucleus through CoM
+		this.profileMap.put(ProfileType.DISTANCE, this.calculateDistanceProfile());
+
+		this.profileMap.put(ProfileType.SINGLE_DISTANCE, this.calculateSingleDistanceProfile());
 	}
 
 	/*
@@ -986,6 +995,23 @@ public class RoundNucleus extends AbstractCellularComponent
 		return profile;
 	}
 	
+	/**
+	 * Update the profile of the given type. Since only franken profiles are 
+	 * not calculated internally, the other profiles just replace the segment list.
+	 * @param type
+	 * @param profile
+	 * @throws Exception
+	 */
+	public void setProfile(ProfileType type, SegmentedProfile profile) throws Exception{
+		
+		if(type.equals(ProfileType.FRANKEN)){
+			this.profileMap.put(type, profile);
+		} else {
+			this.profileMap.get(type).setSegments(profile.getSegments());
+		}
+//		
+	}
+	
 	
 	/**
 	 * 
@@ -1105,31 +1131,38 @@ public class RoundNucleus extends AbstractCellularComponent
 	private SegmentedProfile calculateDistanceProfile() throws Exception {
 
 		double[] profile = new double[this.getBorderLength()];
+			
+		int index = 0;
+		Iterator<BorderPoint> it = this.getBorderList().iterator();
+		while(it.hasNext()){
 
-		for(int i = 0; i<this.getBorderLength();i++){
+			BorderPoint point = it.next();
+			BorderPoint opp = findOppositeBorder(point);
 
-				BorderPoint p   = this.getBorderPoint(i);
-				BorderPoint opp = findOppositeBorder(p);
-
-				profile[i] = p.getLengthTo(opp); 
-
+			profile[index++] = point.getLengthTo(opp); 
+			
 		}
+
 		return new SegmentedProfile(profile);
 	}
 
 	private SegmentedProfile calculateSingleDistanceProfile() throws Exception{
 
 		double[] profile = new double[this.getBorderLength()];
+		
+		int index = 0;
+		Iterator<BorderPoint> it = this.getBorderList().iterator();
+		while(it.hasNext()){
 
-		for(int i = 0; i<this.getBorderLength();i++){
-
-				BorderPoint p   = this.getBorderPoint(i);
-				profile[i] = p.getLengthTo(this.getCentreOfMass()); 
+			BorderPoint point = it.next();
+			profile[index++] = point.getLengthTo(this.getCentreOfMass()); 
+			
 		}
+
 		return new SegmentedProfile(profile);
 	}
 
-	public SegmentedProfile calculateAngleProfile(int angleProfileWindowSize) throws Exception{
+	private SegmentedProfile calculateAngleProfile(int angleProfileWindowSize) throws Exception{
 
 		List<NucleusBorderSegment> segments = null;
 		
@@ -1142,14 +1175,15 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		double[] angles = new double[this.getBorderLength()];
 
-		for(int i=0; i<this.getBorderLength();i++){
+//		for(int i=0; i<this.getBorderLength();i++){
+		
+		int index = 0;
+		Iterator<BorderPoint> it = this.getBorderList().iterator();
+		while(it.hasNext()){
 
-			int indexBefore = Utils.wrapIndex(i - angleProfileWindowSize, this.getBorderLength());
-			int indexAfter  = Utils.wrapIndex(i + angleProfileWindowSize, this.getBorderLength());
-
-			BorderPoint pointBefore = this.getBorderPoint(indexBefore);
-			BorderPoint pointAfter  = this.getBorderPoint(indexAfter);
-			BorderPoint point       = this.getBorderPoint(i);
+			BorderPoint point = it.next();
+			BorderPoint pointBefore = point.prevPoint(angleProfileWindowSize);
+			BorderPoint pointAfter  = point.nextPoint(angleProfileWindowSize);
 
 			double angle = Utils.findAngleBetweenXYPoints(pointBefore, point, pointAfter);
 
@@ -1164,10 +1198,11 @@ public class RoundNucleus extends AbstractCellularComponent
 			FloatPolygon polygon = Utils.createPolygon(this);
 			
 			if(polygon.contains( (float) midX, (float) midY)){
-				angles[i] = angle;
+				angles[index] = angle;
 			} else {
-				angles[i] = 360-angle;
+				angles[index] = 360-angle;
 			}
+			index++;
 		}
 		SegmentedProfile newProfile = new SegmentedProfile(angles);
 		if(segments!=null){
@@ -1235,9 +1270,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	
-	public void setProfile(ProfileType type, SegmentedProfile profile){
-		this.profileMap.put(type, profile);
-	}
+
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();

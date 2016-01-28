@@ -279,8 +279,9 @@ public interface Nucleus extends CellularComponent {
 	 * Set the profile for the given type
 	 * @param type
 	 * @param profile
+	 * @throws Exception 
 	 */
-	public void setProfile(ProfileType regular, SegmentedProfile nucleusProfile);
+	public void setProfile(ProfileType regular, SegmentedProfile nucleusProfile) throws Exception;
 	
 	/**
 	 * Test if the given type of profile is available
@@ -373,7 +374,8 @@ public interface Nucleus extends CellularComponent {
 	 * @param angleProfileWindowSize the window size
 	 * @throws Exception 
 	 */
-	public SegmentedProfile calculateAngleProfile(int angleProfileWindowSize) throws Exception;
+//	public SegmentedProfile calculateAngleProfile(int angleProfileWindowSize) throws Exception;
+	public void calculateProfiles() throws Exception;
 	
 	
 	/**

@@ -286,9 +286,33 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 
 	public List<BorderPoint> getBorderList(){
 		List<BorderPoint> result = new ArrayList<BorderPoint>(0);
+
 		for(BorderPoint n : borderList){
-			result.add(new BorderPoint(n));
+			
+			BorderPoint point = new BorderPoint(n);			
+			result.add(point);
 		}
+		
+		// Link points
+				
+		for(int i=0; i<result.size(); i++){
+			BorderPoint point = result.get(i);
+			
+			if(i>0 && i<result.size()-1){
+				point.setNextPoint(result.get(i+1));
+				point.setPrevPoint(result.get(i-1));
+			}
+		}
+		
+		// Set first and last
+		BorderPoint first = result.get(0);
+		first.setNextPoint(result.get(1));
+		first.setPrevPoint(result.get(result.size()-1));
+		
+		BorderPoint last = result.get(result.size()-1);
+		last.setNextPoint(result.get(0));
+		last.setPrevPoint(result.get(result.size()-2));
+		
 		return result;
 	}
 	

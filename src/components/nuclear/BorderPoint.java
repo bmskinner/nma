@@ -88,8 +88,29 @@ public class BorderPoint
 		return this.nextPoint;
 	}
 	
+	/**
+	 * Get the point n points ahead
+	 * @param points
+	 * @return
+	 */
+	public BorderPoint nextPoint(int points){
+		if(points==1)
+			return this.nextPoint;
+		else {
+			return nextPoint.nextPoint(--points);
+		}
+	}
+	
 	public BorderPoint prevPoint(){
 		return this.prevPoint;
+	}
+	
+	public BorderPoint prevPoint(int points){
+		if(points==1)
+			return this.prevPoint;
+		else {
+			return prevPoint.prevPoint(--points);
+		}
 	}
 	
 	public boolean hasNextPoint(){
