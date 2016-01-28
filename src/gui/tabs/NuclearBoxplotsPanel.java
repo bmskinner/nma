@@ -87,32 +87,57 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		this.add(tabPane, BorderLayout.CENTER);
 	}
 	
+//	@Override
+//	protected void updateDetail(){
+//		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
+//				try {
+//
+//					boxplotPanel.update(getDatasets());
+//					programLogger.log(Level.FINEST, "Updated nuclear boxplots panel");
+//					
+//					histogramsPanel.update(getDatasets());
+//					programLogger.log(Level.FINEST, "Updated nuclear histograms panel");
+//					
+//					wilcoxonPanel.update(getDatasets());
+//					programLogger.log(Level.FINEST, "Updating Wilcoxon panel");
+//					
+//					nucleusMagnitudePanel.update(getDatasets());
+//					programLogger.log(Level.FINEST, "Updating magnitude panel");
+//					
+//				} catch (Exception e) {
+//					programLogger.log(Level.SEVERE, "Error updating nuclear charts", e);
+//					NuclearBoxplotsPanel.this.update( (List<AnalysisDataset>) null);
+//				} finally {
+//					setUpdating(false);
+//				}
+//			}
+//		});
+//	}
+	
 	@Override
-	protected void updateDetail(){
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				try {
-
-					boxplotPanel.update(getDatasets());
-					programLogger.log(Level.FINEST, "Updated nuclear boxplots panel");
-					
-					histogramsPanel.update(getDatasets());
-					programLogger.log(Level.FINEST, "Updated nuclear histograms panel");
-					
-					wilcoxonPanel.update(getDatasets());
-					programLogger.log(Level.FINEST, "Updating Wilcoxon panel");
-					
-					nucleusMagnitudePanel.update(getDatasets());
-					programLogger.log(Level.FINEST, "Updating magnitude panel");
-					
-				} catch (Exception e) {
-					programLogger.log(Level.SEVERE, "Error updating nuclear charts", e);
-					NuclearBoxplotsPanel.this.update( (List<AnalysisDataset>) null);
-				} finally {
-					setUpdating(false);
-				}
-			}
-		});
+	protected void updateSingle() throws Exception {
+		boxplotPanel.update(getDatasets());
+		programLogger.log(Level.FINEST, "Updated nuclear boxplots panel");
+		
+		histogramsPanel.update(getDatasets());
+		programLogger.log(Level.FINEST, "Updated nuclear histograms panel");
+		
+		wilcoxonPanel.update(getDatasets());
+		programLogger.log(Level.FINEST, "Updating Wilcoxon panel");
+		
+		nucleusMagnitudePanel.update(getDatasets());
+		programLogger.log(Level.FINEST, "Updating magnitude panel");
+	}
+	
+	@Override
+	protected void updateMultiple() throws Exception {
+		updateSingle();
+	}
+	
+	@Override
+	protected void updateNull() throws Exception {
+		updateSingle();
 	}
 	
 	protected class BoxplotsPanel extends JPanel implements ActionListener {
@@ -238,59 +263,106 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			}
 
 		}
-
-		@Override
-		public void updateDetail() {
-			
-			
-			if(hasDatasets()){
-				this.setEnabled(true);
-			} else {
-				this.setEnabled(false);
-			}
-
+		
+		protected void updateSingle() throws Exception {
+			updateMultiple();
+		}
+		
+		protected void updateMultiple() throws Exception {
 			MeasurementScale scale  = HistogramsPanel.this.measurementUnitSettingsPanel.getSelected();
 			boolean useDensity = HistogramsPanel.this.useDensityPanel.isSelected();
 
-			try{
-				for(NucleusStatistic stat : NucleusStatistic.values()){
-					SelectableChartPanel panel = HistogramsPanel.this.chartPanels.get(stat.toString());
 
-					JFreeChart chart = null;
-					HistogramChartOptions options = new HistogramChartOptions(getDatasets(), stat, scale, useDensity);
-					options.setLogger(programLogger);
+			for(NucleusStatistic stat : NucleusStatistic.values()){
+				SelectableChartPanel panel = HistogramsPanel.this.chartPanels.get(stat.toString());
 
-					if(this.getChartCache().hasChart(options)){
-						programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());
-						chart = HistogramsPanel.this.getChartCache().getChart(options);
+				JFreeChart chart = null;
+				HistogramChartOptions options = new HistogramChartOptions(getDatasets(), stat, scale, useDensity);
+				options.setLogger(programLogger);
 
-					} else { // No cache
+				if(this.getChartCache().hasChart(options)){
+					programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());
+					chart = HistogramsPanel.this.getChartCache().getChart(options);
+
+				} else { // No cache
 
 
-						if(useDensity){
-							chart = HistogramChartFactory.createNuclearDensityStatsChart(options);
-							HistogramsPanel.this.getChartCache().addChart(options, chart);
+					if(useDensity){
+						chart = HistogramChartFactory.createNuclearDensityStatsChart(options);
+						HistogramsPanel.this.getChartCache().addChart(options, chart);
 
-						} else {
-							chart = HistogramChartFactory.createNuclearStatsHistogram(options);
-							HistogramsPanel.this.getChartCache().addChart(options, chart);
+					} else {
+						chart = HistogramChartFactory.createNuclearStatsHistogram(options);
+						HistogramsPanel.this.getChartCache().addChart(options, chart);
 
-						}
-						programLogger.log(Level.FINEST, "Added cached histogram chart: "+stat);
 					}
-
-					XYPlot plot = (XYPlot) chart.getPlot();
-					plot.setDomainPannable(true);
-					plot.setRangePannable(true);
-
-					panel.setChart(chart);
+					programLogger.log(Level.FINEST, "Added cached histogram chart: "+stat);
 				}
-			} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Error updating histogram panel", e);
-			} finally {
-				HistogramsPanel.this.setUpdating(false);
+
+				XYPlot plot = (XYPlot) chart.getPlot();
+				plot.setDomainPannable(true);
+				plot.setRangePannable(true);
+
+				panel.setChart(chart);
 			}
 		}
+		
+		protected void updateNull() throws Exception {
+			this.setEnabled(false);
+		}
+
+//		@Override
+//		public void updateDetail() {
+//			
+//			
+//			if(hasDatasets()){
+//				this.setEnabled(true);
+//			} else {
+//				this.setEnabled(false);
+//			}
+//
+//			MeasurementScale scale  = HistogramsPanel.this.measurementUnitSettingsPanel.getSelected();
+//			boolean useDensity = HistogramsPanel.this.useDensityPanel.isSelected();
+//
+//			try{
+//				for(NucleusStatistic stat : NucleusStatistic.values()){
+//					SelectableChartPanel panel = HistogramsPanel.this.chartPanels.get(stat.toString());
+//
+//					JFreeChart chart = null;
+//					HistogramChartOptions options = new HistogramChartOptions(getDatasets(), stat, scale, useDensity);
+//					options.setLogger(programLogger);
+//
+//					if(this.getChartCache().hasChart(options)){
+//						programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());
+//						chart = HistogramsPanel.this.getChartCache().getChart(options);
+//
+//					} else { // No cache
+//
+//
+//						if(useDensity){
+//							chart = HistogramChartFactory.createNuclearDensityStatsChart(options);
+//							HistogramsPanel.this.getChartCache().addChart(options, chart);
+//
+//						} else {
+//							chart = HistogramChartFactory.createNuclearStatsHistogram(options);
+//							HistogramsPanel.this.getChartCache().addChart(options, chart);
+//
+//						}
+//						programLogger.log(Level.FINEST, "Added cached histogram chart: "+stat);
+//					}
+//
+//					XYPlot plot = (XYPlot) chart.getPlot();
+//					plot.setDomainPannable(true);
+//					plot.setRangePannable(true);
+//
+//					panel.setChart(chart);
+//				}
+//			} catch(Exception e){
+//				programLogger.log(Level.SEVERE, "Error updating histogram panel", e);
+//			} finally {
+//				HistogramsPanel.this.setUpdating(false);
+//			}
+//		}
 				
 		private void detectModes(JFreeChart chart, List<AnalysisDataset> list, int stat){
 			

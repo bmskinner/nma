@@ -103,45 +103,77 @@ public class KruskalDetailPanel  extends DetailPanel {
 		chartPanel.setChart(chart);
 
 	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a single dataset is selected
+	 */
+	protected void updateSingle() throws Exception {
+		updateNull();
+	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a multiple datasets are selected
+	 */
+	protected void updateMultiple() throws Exception {
+		if(getDatasets().size()==2){ // Only create a chart if exactly two datasets are selected
+			updateChartPanel();
+			
+		} else {
+			updateNull();
+
+		}
+		programLogger.log(Level.FINEST, "Updated Kruskal panel");
+	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a no datasets are selected
+	 */
+	protected void updateNull() throws Exception {
+		JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
+		chartPanel.setChart(chart);
+	}
 		
 	/**
 	 * Update the panel with data from the given datasets
 	 * @throws Exception 
 	 */
-	@Override
-	public void updateDetail() {
-		programLogger.log(Level.FINE, "Updating Kruskal panel");
-
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				try{
-					
-					// Only create a chart if datasets are available
-					if(!getDatasets().isEmpty() && getDatasets()!=null){
-
-						// Only create a chart if exactly two datasets are selected
-						if(getDatasets().size()==2){
-							updateChartPanel();
-							
-						} else {
-							// null chart
-							JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
-							chartPanel.setChart(chart);
-
-						}
-						programLogger.log(Level.FINEST, "Updated Kruskal panel");
-					} else {
-						// null chart
-						JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
-						chartPanel.setChart(chart);
-					}
-				} catch (Exception e) {
-					programLogger.log(Level.SEVERE, "Error making Kruskal panel", e);
-				} finally {
-					setUpdating(false);
-				}
-			}});
-	} 
+//	@Override
+//	public void updateDetail() {
+//		programLogger.log(Level.FINE, "Updating Kruskal panel");
+//
+//		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
+//				try{
+//					
+//					// Only create a chart if datasets are available
+//					if(!getDatasets().isEmpty() && getDatasets()!=null){
+//
+//						// Only create a chart if exactly two datasets are selected
+//						if(getDatasets().size()==2){
+//							updateChartPanel();
+//							
+//						} else {
+//							// null chart
+//							JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
+//							chartPanel.setChart(chart);
+//
+//						}
+//						programLogger.log(Level.FINEST, "Updated Kruskal panel");
+//					} else {
+//						// null chart
+//						JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
+//						chartPanel.setChart(chart);
+//					}
+//				} catch (Exception e) {
+//					programLogger.log(Level.SEVERE, "Error making Kruskal panel", e);
+//				} finally {
+//					setUpdating(false);
+//				}
+//			}});
+//	} 
 	
 
 }

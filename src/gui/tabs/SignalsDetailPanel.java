@@ -101,6 +101,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			signalsTabPane.addTab("Overview", overviewPanel);
 
 			histogramPanel = new HistogramPanel(programLogger);
+			this.addSubPanel(histogramPanel);
 			signalsTabPane.addTab("Signal histograms", histogramPanel);
 
 			shellsPanel = new ShellsPanel();
@@ -118,49 +119,77 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			programLogger.log(Level.SEVERE, "Error making signal panel", e);
 		}
 	}
-
 	
-//	private static void resizePreview(ChartPanel innerPanel, JPanel container) {
-//        int w = container.getWidth();
-//        int h = container.getHeight();
-//        int size =  Math.min(w, h);
-//        innerPanel.setPreferredSize(new Dimension(size, size));
-//        container.revalidate();
-//    }
-
-	@Override
-	public void updateDetail(){
-
-		programLogger.log(Level.FINE, "Updating signals detail panel");
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				
-				try{
-					shellsPanel.update(getDatasets());
-					programLogger.log(Level.FINEST, "Updated shells panel");
-					
-					overviewPanel.update(getDatasets());
-					programLogger.log(Level.FINEST, "Updated signals overview panel");
-					
-					histogramPanel.update(getDatasets());
-					programLogger.log(Level.FINEST, "Updated signals histogram panel");
-					
-					analysisPanel.update(getDatasets());
-					programLogger.log(Level.FINEST, "Updated signals analysis panel");
-					
-					boxplotPanel.update(getDatasets());
-					programLogger.log(Level.FINEST, "Updated signals boxplot panel");
-					
-				} catch(Exception e){
-					programLogger.log(Level.SEVERE, "Error updating signals detail panel" ,e);
-					SignalsDetailPanel.this.update( (List<AnalysisDataset>) null);
-				} finally {
-					setUpdating(false);
-				}
-			
-		}});
-
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a single dataset is selected
+	 */
+	protected void updateSingle() throws Exception {
+		updateMultiple();
 	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a multiple datasets are selected
+	 */
+	protected void updateMultiple() throws Exception {
+		shellsPanel.update(getDatasets());
+		programLogger.log(Level.FINEST, "Updated shells panel");
+		
+		overviewPanel.update(getDatasets());
+		programLogger.log(Level.FINEST, "Updated signals overview panel");
+		
+		histogramPanel.update(getDatasets());
+		programLogger.log(Level.FINEST, "Updated signals histogram panel");
+		
+		analysisPanel.update(getDatasets());
+		programLogger.log(Level.FINEST, "Updated signals analysis panel");
+		
+		boxplotPanel.update(getDatasets());
+		programLogger.log(Level.FINEST, "Updated signals boxplot panel");
+	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a no datasets are selected
+	 */
+	protected void updateNull() throws Exception {
+		updateMultiple();
+	}
+
+//	@Override
+//	public void updateDetail(){
+//
+//		programLogger.log(Level.FINE, "Updating signals detail panel");
+//		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
+//				
+//				try{
+//					shellsPanel.update(getDatasets());
+//					programLogger.log(Level.FINEST, "Updated shells panel");
+//					
+//					overviewPanel.update(getDatasets());
+//					programLogger.log(Level.FINEST, "Updated signals overview panel");
+//					
+//					histogramPanel.update(getDatasets());
+//					programLogger.log(Level.FINEST, "Updated signals histogram panel");
+//					
+//					analysisPanel.update(getDatasets());
+//					programLogger.log(Level.FINEST, "Updated signals analysis panel");
+//					
+//					boxplotPanel.update(getDatasets());
+//					programLogger.log(Level.FINEST, "Updated signals boxplot panel");
+//					
+//				} catch(Exception e){
+//					programLogger.log(Level.SEVERE, "Error updating signals detail panel" ,e);
+//					SignalsDetailPanel.this.update( (List<AnalysisDataset>) null);
+//				} finally {
+//					setUpdating(false);
+//				}
+//			
+//		}});
+//
+//	}
 
 	/**
 	 * Get a series or dataset index for colour selection when drawing charts. The index
@@ -184,40 +213,6 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 		
 	}
 	
-//	/**
-//	 * Allows for cell background to be coloured based on poition in a list. Used to colour
-//	 * the signal stats list
-//	 *
-//	 */
-//	private class StatsTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
-//
-//		private static final long serialVersionUID = 1L;
-//
-//		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-//
-//			// default cell colour is white
-//			Color colour = Color.WHITE;
-//
-//			// get the value in the first column of the row below
-//			if(row<table.getModel().getRowCount()-1){
-//				String nextRowHeader = table.getModel().getValueAt(row+1, 0).toString();
-//
-//				if(nextRowHeader.equals("Signal group")){
-//					// we want to colour this cell preemptively
-//					// get the signal group from the table
-//					String groupString = table.getModel().getValueAt(row+1, 1).toString();
-//					colour = activeDataset().getSignalGroupColour(Integer.valueOf(groupString));
-////					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
-//				}
-//			}
-//			//Cells are by default rendered as a JLabel.
-//			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-//			l.setBackground(colour);
-//
-//			//Return the JLabel which renders the cell.
-//			return l;
-//		}
-//	}
 	
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
@@ -313,36 +308,8 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 				HistogramPanel.this.setUpdating(false);
 			}
     	
-//    		try {
-//    			updateSignalAngleHistogram(list);
-//    			updateSignalDistanceHistogram(list);
-//    		} catch (Exception e) {
-//    			programLogger.log(Level.SEVERE, "Error updating signal histograms", e);
-//    		}
     	}
     	
-//    	private void updateSignalAngleHistogram(List<AnalysisDataset> list) throws Exception{
-//    		
-//    		HistogramChartOptions options = new HistogramChartOptions(list, null, null, false);
-//    		JFreeChart chart = HistogramChartFactory.createSignalAngleHistogram(options);
-//    		angleChartPanel.setChart(chart);
-//    	}
-//
-//    	private void updateSignalDistanceHistogram(List<AnalysisDataset> list) throws Exception{
-//    		HistogramChartOptions options = new HistogramChartOptions(list, null, null, false);
-//    		JFreeChart chart = HistogramChartFactory.createSignalDistanceHistogram(options);
-////    		try {
-////    			HistogramDataset ds = NuclearSignalDatasetCreator.createSignalDistanceHistogramDataset(list);
-////
-////    			if(ds.getSeriesCount()>0){
-////    				chart = HistogramChartFactory.createSignalDistanceHistogram(ds, activeDataset());
-////    			}
-////
-////    		} catch (Exception e) {
-////    			programLogger.log(Level.SEVERE, "Error updating distance histograms", e);
-////    		}
-//    		distanceChartPanel.setChart(chart);
-//    	}
     }
 
     protected class AnalysisPanel extends JPanel{

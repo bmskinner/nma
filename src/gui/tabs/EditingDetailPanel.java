@@ -76,33 +76,65 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 		
 	}
 	
-	@Override
-	public void updateDetail(){
-
-		programLogger.log(Level.FINE, "Updating editing detail panel");
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				
-				try{
-						
-					cellDetailPanel.setEnabled(true);
-					segmentsEditingPanel.setEnabled(true);
-
-					cellDetailPanel.update(getDatasets()); 
-					programLogger.log(Level.FINEST, "Updated segments boxplot panel");
-
-					segmentsEditingPanel.update(getDatasets()); 
-					programLogger.log(Level.FINEST, "Updated segments histogram panel");
-
-				} catch(Exception e){
-					EditingDetailPanel.this.update( (List<AnalysisDataset> ) null);
-					
-				} finally {
-					setUpdating(false);
-				}
-			}
-		});
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a single dataset is selected
+	 */
+	protected void updateSingle() throws Exception {
+		updateMultiple();
 	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a multiple datasets are selected
+	 */
+	protected void updateMultiple() throws Exception {
+		cellDetailPanel.setEnabled(true);
+		segmentsEditingPanel.setEnabled(true);
+
+		cellDetailPanel.update(getDatasets()); 
+		programLogger.log(Level.FINEST, "Updated segments boxplot panel");
+
+		segmentsEditingPanel.update(getDatasets()); 
+		programLogger.log(Level.FINEST, "Updated segments histogram panel");
+	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a no datasets are selected
+	 */
+	protected void updateNull() throws Exception {
+		updateMultiple();
+	}
+	
+//	@Override
+//	public void updateDetail(){
+//
+//		programLogger.log(Level.FINE, "Updating editing detail panel");
+//		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
+//				
+//				try{
+//						
+//					cellDetailPanel.setEnabled(true);
+//					segmentsEditingPanel.setEnabled(true);
+//
+//					cellDetailPanel.update(getDatasets()); 
+//					programLogger.log(Level.FINEST, "Updated segments boxplot panel");
+//
+//					segmentsEditingPanel.update(getDatasets()); 
+//					programLogger.log(Level.FINEST, "Updated segments histogram panel");
+//
+//				} catch(Exception e){
+//					EditingDetailPanel.this.update( (List<AnalysisDataset> ) null);
+//					
+//				} finally {
+//					setUpdating(false);
+//				}
+//			}
+//		});
+//	}
 
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {

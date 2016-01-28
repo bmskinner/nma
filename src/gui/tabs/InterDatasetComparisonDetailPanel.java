@@ -66,30 +66,61 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 		this.add(tabPanel, BorderLayout.CENTER);
 	}
 	
-	@Override
-	protected void updateDetail(){
-
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				try {
-
-					vennPanel.update(getDatasets());
-					programLogger.log(Level.FINEST, "Updating Venn panel");
-					
-					pairwiseVennPanel.update(getDatasets());
-					programLogger.log(Level.FINEST, "Updating pairwise Venn panel");
-					
-					kruskalPanel.update(getDatasets());
-					programLogger.log(Level.FINEST, "Updating Kruskal panel");
-
-				} catch  (Exception e){
-					InterDatasetComparisonDetailPanel.this.update( (List<AnalysisDataset>) null);
-					programLogger.log(Level.SEVERE, "Error updating inter-dataset panels", e);
-
-				} finally {
-					setUpdating(false);
-				}
-			}});
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a single dataset is selected
+	 */
+	protected void updateSingle() throws Exception {
+		updateMultiple();
 	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a multiple datasets are selected
+	 */
+	protected void updateMultiple() throws Exception {
+		vennPanel.update(getDatasets());
+		programLogger.log(Level.FINEST, "Updating Venn panel");
+		
+		pairwiseVennPanel.update(getDatasets());
+		programLogger.log(Level.FINEST, "Updating pairwise Venn panel");
+		
+		kruskalPanel.update(getDatasets());
+		programLogger.log(Level.FINEST, "Updating Kruskal panel");
+	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a no datasets are selected
+	 */
+	protected void updateNull() throws Exception {
+		updateMultiple();
+	}
+	
+//	@Override
+//	protected void updateDetail(){
+//
+//		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
+//				try {
+//
+//					vennPanel.update(getDatasets());
+//					programLogger.log(Level.FINEST, "Updating Venn panel");
+//					
+//					pairwiseVennPanel.update(getDatasets());
+//					programLogger.log(Level.FINEST, "Updating pairwise Venn panel");
+//					
+//					kruskalPanel.update(getDatasets());
+//					programLogger.log(Level.FINEST, "Updating Kruskal panel");
+//
+//				} catch  (Exception e){
+//					InterDatasetComparisonDetailPanel.this.update( (List<AnalysisDataset>) null);
+//					programLogger.log(Level.SEVERE, "Error updating inter-dataset panels", e);
+//
+//				} finally {
+//					setUpdating(false);
+//				}
+//			}});
+//	}
 
 }

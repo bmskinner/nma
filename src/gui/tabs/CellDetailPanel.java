@@ -29,6 +29,7 @@ import gui.components.DraggableOverlayChartPanel;
 import gui.components.ExportableTable;
 import gui.components.ShapeOverlay;
 import gui.components.ShapeOverlayObject;
+import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.components.panels.RotationSelectionSettingsPanel;
 import gui.dialogs.CellImageDialog;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
@@ -178,10 +179,27 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		return centrePanel;
 	}
 	
-	@Override
-	public void updateDetail(){
-		updateList(getDatasets());
-		setUpdating(false);
+//	@Override
+//	public void updateDetail(){
+//		updateList(getDatasets());
+//		setUpdating(false);
+//	}
+	
+	protected void updateSingle() throws Exception {
+		cellsListPanel.updateDataset( activeDataset()  );
+		programLogger.log(Level.FINEST, "Updated cell list panel");
+		updateCell(activeCell);
+		programLogger.log(Level.FINEST, "Updated active cell panel");
+	}
+	
+	protected void updateMultiple() throws Exception {
+		updateNull();
+	}
+	
+	protected void updateNull() throws Exception {
+		cellsListPanel.updateDataset(null);
+		programLogger.log(Level.FINEST, "Updated cell list panel");
+		updateCell(null);
 	}
 	
 	/**
@@ -189,27 +207,27 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	 * will only be displayed if the list contains one dataset.
 	 * @param list the datsets
 	 */
-	public void updateList(final List<AnalysisDataset> list){
-//		programLogger.log(Level.FINE, "Updating cell detail panel");
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-								
-				if(isSingleDataset()){
-					
-					cellsListPanel.updateDataset( activeDataset()  );
-					programLogger.log(Level.FINEST, "Updated cell list panel");
-					updateCell(activeCell);
-					programLogger.log(Level.FINEST, "Updated active cell panel");
-				} else {
-					
-					cellsListPanel.updateDataset(null);
-					programLogger.log(Level.FINEST, "Updated cell list panel");
-					updateCell(null);
-					
-				}
-			
-		}});
-	}
+//	public void updateList(final List<AnalysisDataset> list){
+////		programLogger.log(Level.FINE, "Updating cell detail panel");
+//		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
+//								
+//				if(isSingleDataset()){
+//					
+//					cellsListPanel.updateDataset( activeDataset()  );
+//					programLogger.log(Level.FINEST, "Updated cell list panel");
+//					updateCell(activeCell);
+//					programLogger.log(Level.FINEST, "Updated active cell panel");
+//				} else {
+//					
+//					cellsListPanel.updateDataset(null);
+//					programLogger.log(Level.FINEST, "Updated cell list panel");
+//					updateCell(null);
+//					
+//				}
+//			
+//		}});
+//	}
 	
 	
 	/**
@@ -377,7 +395,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 								programLogger.log(Level.SEVERE, "Error deleting cell", e1);
 							}
 							
-							CellDetailPanel.this.updateList(list);
+							try {
+								CellDetailPanel.this.updateSingle();
+							} catch (Exception e1) {
+								programLogger.log(Level.SEVERE, "Error updating cell", e1);
+							}
 							CellDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
 							CellDetailPanel.this.fireSignalChangeEvent("UpdatePopulationPanel");
 							CellDetailPanel.this.fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);

@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 
 import charting.Cache;
@@ -211,8 +212,55 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 * This method must be overridden by the extending class
 	 * to perform the actual update 
 	 */
-	protected void updateDetail(){
+	private void updateDetail(){
 		
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				try {
+					if(hasDatasets()){
+						
+						if(isSingleDataset()){
+							updateSingle();
+						} else {
+							updateMultiple();
+						}
+						
+					} else {
+						updateNull();
+					}
+					
+				} catch (Exception e) {
+					programLogger.log(Level.SEVERE, "Error updating panel", e);
+					update( (List<AnalysisDataset>) null);
+				} finally {
+					setUpdating(false);
+				}
+			}
+		});
+	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a single dataset is selected
+	 */
+	protected void updateSingle() throws Exception {
+		
+	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a multiple datasets are selected
+	 */
+	protected void updateMultiple() throws Exception {
+		
+	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a no datasets are selected
+	 */
+	protected void updateNull() throws Exception {
+
 	}
 		
 	/**
