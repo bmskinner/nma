@@ -338,6 +338,7 @@ public class ProfileCollection implements Serializable {
 	 * containing the given type of nucleus profile
 	 * By default, the profiles are zeroed on the reference point
 	 * @param collection the Cellcollection
+	 * @param type the profile type to fetch from the nuclei
 	 * @param length the length of the aggregate
 	 * @throws Exception 
 	 */
@@ -349,10 +350,17 @@ public class ProfileCollection implements Serializable {
 		aggregate = new ProfileAggregate(length);
 		for(Nucleus n : collection.getNuclei()){
 			
-			if(type.equals(ProfileType.FRANKEN)){
-				aggregate.addValues(n.getProfile(type)); // franken profiles are not offset, they have a different length
-			} else {
-				aggregate.addValues(n.getProfile(type, BorderTag.REFERENCE_POINT)); //n.getAngleProfile(BorderTag.REFERENCE_POINT));
+			
+			// Franken profiles have a different length
+			
+			switch(type){
+				case FRANKEN:
+					aggregate.addValues(n.getProfile(type));
+					break;
+				default:
+					aggregate.addValues(n.getProfile(type, BorderTag.REFERENCE_POINT)); 
+					break;
+			
 			}
 		}
 		

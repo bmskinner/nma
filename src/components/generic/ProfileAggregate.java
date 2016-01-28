@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import components.nuclear.NucleusBorderSegment;
+import utility.Constants;
 import utility.ProfileException;
 import utility.Utils;
 
@@ -149,20 +151,20 @@ public class ProfileAggregate implements Serializable {
 	 * Get the number of values within each bin as a profile
 	 * @return
 	 */
-	public Profile getNumberOfPoints(){
-		double[] result = new double[length];
-
-		for(int i=0;i<length;i++){
-			double x = xPositions[i];
-			result[i] = aggregate.containsKey(x) ? aggregate.get(x).size() : 0;
-		}
-		return new Profile(result);
-	}
+//	public Profile getNumberOfPoints(){
+//		double[] result = new double[length];
+//
+//		for(int i=0;i<length;i++){
+//			double x = xPositions[i];
+//			result[i] = aggregate.containsKey(x) ? aggregate.get(x).size() : 0;
+//		}
+//		return new Profile(result);
+//	}
 	
 	public Profile getMedian(){
 		Profile result = new Profile(new double[0]);
 		try{
-			result = calculateQuartile(50);
+			result = calculateQuartile(Constants.MEDIAN);
 		} catch(ProfileException e){
 			// if the profile >200, scale down to 200. Otherwise, reduce stepwise until we get a profile
 			int newLength = this.length <= 200 ? this.length-5 : 200;
@@ -345,5 +347,28 @@ public class ProfileAggregate implements Serializable {
 		return result;
 	}
 
+	public String toString(){
+		StringBuilder builder = new StringBuilder();
+		
+		builder.append("Profile aggregate with "+aggregate.size()+" bins of size "+getBinSize()+"\n");
+		
+		
+		try {
+			builder.append("First bin at "+xPositions[0]+":\n");
+			for(double d : getValuesAtPosition(xPositions[0])){
+				builder.append("\t"+d+"\n");
+			}
+			
+			builder.append("Last bin at "+xPositions[aggregate.size()-1]+":\n");
+			for(double d : getValuesAtPosition(xPositions[aggregate.size()-1])){
+				builder.append("\t"+d+"\n");
+			}
+			
+		} catch (Exception e) {
+			builder.append("Could not display bins\n");
+		}		
+	
+		return builder.toString();
+	}
 	
 }
