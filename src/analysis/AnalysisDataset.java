@@ -54,7 +54,8 @@ import components.nuclear.ShellResult;
 
 /**
  * This holds a CellCollection, the analyses that have been run on it
- * and the relationships it holds with other CellCollection
+ * and the relationships it holds with other CellCollections. It also provides
+ * colour and UI options
  *
  */
 public class AnalysisDataset implements Serializable {
@@ -70,11 +71,11 @@ public class AnalysisDataset implements Serializable {
 	private File savePath; // the file to save the analysis to
 	
 	private AnalysisOptions analysisOptions;
-	private Map<Integer, ShellResult> shellResults 		= new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
 	
-	private Map<Integer, String>	signalGroupsAdded		= new HashMap<Integer, String>(0);	// store the names of the groups added
-	private Map<Integer, Boolean> 	signalGroupsVisible 	= new HashMap<Integer, Boolean>(0); // is the given signal group shown in plots
-	private Map<Integer, Color> 	signalGroupColours 		= new HashMap<Integer, Color>(0); // allow saving of colour choices
+	private Map<Integer, ShellResult> shellResults 		  = new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
+	private Map<Integer, String>      signalGroupsAdded	  = new HashMap<Integer, String>(0);	// store the names of the groups added
+	private Map<Integer, Boolean>     signalGroupsVisible = new HashMap<Integer, Boolean>(0); // is the given signal group shown in plots
+	private Map<Integer, Color> 	  signalGroupColours  = new HashMap<Integer, Color>(0); // allow saving of colour choices
 	
 	private Color datasetColour = null; // use for colouring the dataset in comparison with other datasets
 	
@@ -86,7 +87,7 @@ public class AnalysisDataset implements Serializable {
 	
 	private File debugFile;
 
-	private Version version;
+	private final Version version;
 	
 	private transient ColourSwatch swatch = ColourSwatch.REGULAR_SWATCH;
 		
