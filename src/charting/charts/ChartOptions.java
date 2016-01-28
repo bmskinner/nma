@@ -55,6 +55,15 @@ public abstract class ChartOptions {
 		this.programLogger = l;
 	}
 	
+	public String toString(){
+		StringBuilder builder = new StringBuilder();
+		builder.append("Chart options:\n");
+		builder.append("\tDatasets: "+list.size()+"\n");
+		builder.append("\tSwatch: "+swatch.toString()+"\n");
+		return builder.toString();
+
+	}
+	
 	public void setLogger(Logger l){
 		this.programLogger = l;
 	}

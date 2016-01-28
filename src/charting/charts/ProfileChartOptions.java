@@ -69,6 +69,19 @@ public class ProfileChartOptions extends ChartOptions {
 		return type;
 	}
 	
+	public String toString(){
+		StringBuilder builder = new StringBuilder();
+		builder.append(super.toString());
+
+		builder.append("\tNormalised: "+normalised+"\n");
+		builder.append("\tAlignment : "+alignment+"\n");
+		builder.append("\tTag       : "+tag+"\n");
+		builder.append("\tMarkers   : "+showMarkers+"\n");
+		builder.append("\tType      : "+type+"\n");
+
+		return builder.toString();
+	}
+	
 	@Override
 	public boolean equals(Object obj){
 				

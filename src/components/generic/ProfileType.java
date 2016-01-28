@@ -18,18 +18,22 @@
  *******************************************************************************/
 package components.generic;
 
+import stats.StatisticDimension;
+
 public enum ProfileType { 
-	  REGULAR ("Angle profile", "Angle"), 
-	  FRANKEN ("Franken profile", "Angle"),
-	  DISTANCE("Distance profile", "Distance across CoM"),
-	  SINGLE_DISTANCE("Single distance profile", "Distance from CoM");
+	  REGULAR (       "Angle profile"          , "Angle"              , StatisticDimension.ANGLE), 
+	  FRANKEN (       "Franken profile"        , "Angle"              , StatisticDimension.ANGLE),
+	  DISTANCE(       "Distance profile"       , "Distance across CoM", StatisticDimension.LENGTH),
+	  SINGLE_DISTANCE("Single distance profile", "Distance from CoM"  , StatisticDimension.LENGTH);
 	  
 	  private String name;
 	  private String label;
+	  private StatisticDimension dimension;
 	  	  
-	  ProfileType(String name, String label){
+	  ProfileType(String name, String label, StatisticDimension dimension){
 		  this.name = name;
 		  this.label = label;
+		  this.dimension = dimension;
 	  }
 	  
 	  public String toString(){
@@ -38,5 +42,9 @@ public enum ProfileType {
 	  
 	  public String getLabel(){
 		  return this.label;
+	  }
+	  
+	  public StatisticDimension getDimension(){
+		  return this.dimension;
 	  }
   }

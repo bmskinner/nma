@@ -305,7 +305,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 			Dimension minimumChartSize = new Dimension(50, 100);
 			Dimension preferredChartSize = new Dimension(400, 300);
 			
-			JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart();
+			JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
 //			chartPanel = new DraggableOverlayChartPanel(profileChart, null);
 			chartPanel= MorphologyChartFactory.makeProfileChartPanel(profileChart);
 			
@@ -326,7 +326,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 				SegmentedProfile profile = null;
 				if(! hasDatasets()){
 					
-					chart = MorphologyChartFactory.makeEmptyProfileChart();
+					chart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
 					
 					
 				} else {
@@ -354,7 +354,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 				chartPanel.setChart(chart);
 			} catch (Exception e) {
 				programLogger.log(Level.SEVERE, "Error in plotting segment profile", e);
-				chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
+				chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
 			} 
 		}
 		

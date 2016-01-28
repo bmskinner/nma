@@ -528,7 +528,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 			this.setLayout(new BorderLayout());
 			
-			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();	
+			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);	
 			
 			profileChartPanel = new DraggableOverlayChartPanel(chart, null, false); 
 			profileChartPanel.addSignalChangeListener(this);
@@ -548,7 +548,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				ProfileType type = profileOptions.getSelected();
 
 				if(cell==null){
-					JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
+					JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(type);
 					profileChartPanel.setChart(chart);
 					profileOptions.setEnabled(false);
 
@@ -566,7 +566,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 			} catch(Exception e){
 				programLogger.log(Level.SEVERE, "Error updating cell panel", e);
-				JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
+				JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
 				profileChartPanel.setChart(chart);
 				profileOptions.setEnabled(false);
 			}

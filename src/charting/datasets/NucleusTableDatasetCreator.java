@@ -149,7 +149,7 @@ public class NucleusTableDatasetCreator {
 
 		} else {
 			
-			BorderTag point = BorderTag.ORIENTATION_POINT;
+			BorderTag point = BorderTag.REFERENCE_POINT;//.ORIENTATION_POINT;
 			
 			// assumes all datasets have the same number of segments
 			List<NucleusBorderSegment> segments = list.get(0)

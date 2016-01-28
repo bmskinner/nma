@@ -149,7 +149,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			Dimension minimumChartSize = new Dimension(50, 100);
 			Dimension preferredChartSize = new Dimension(400, 300);
 			
-			JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart();
+			JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
 			chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
 			
 			chartPanel.setMinimumSize(minimumChartSize);
@@ -447,7 +447,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		
 		@Override
 		protected void updateNull() throws Exception {			
-			chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
+			chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
 			setButtonsEnabled(false);
 		}
 		

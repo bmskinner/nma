@@ -48,32 +48,24 @@ import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.LogAxis;
-import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.StandardTickUnitSource;
-import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DatasetUtilities;
-import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.Align;
 
-import utility.Constants;
+import stats.StatisticDimension;
 import utility.Utils;
-import weka.core.logging.Logger;
 import analysis.AnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
@@ -83,7 +75,6 @@ import components.Cell;
 import components.CellCollection;
 import components.CellularComponent;
 import components.generic.BorderTag;
-import components.generic.MeasurementScale;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.nuclear.BorderPoint;
@@ -97,13 +88,16 @@ public class MorphologyChartFactory {
 	 * Create an empty chart to display when no datasets are selected
 	 * @return a chart
 	 */
-	public static JFreeChart makeEmptyProfileChart(){
+	public static JFreeChart makeEmptyProfileChart(ProfileType type){
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
-				"Position", "Angle", null);
+				"Position", type.getLabel(), null);
 		
 		XYPlot plot = chart.getXYPlot();
 		plot.getDomainAxis().setRange(0,100);
-		plot.getRangeAxis().setRange(0,360);
+		
+		if(type.getDimension().equals(StatisticDimension.ANGLE)){
+			plot.getRangeAxis().setRange(0,360);
+		}
 		plot.setBackgroundPaint(Color.WHITE);
 		return chart;
 	}
@@ -160,7 +154,6 @@ public class MorphologyChartFactory {
 			XYPlot plot = chart.getXYPlot();
 
 			for (BorderTag tag : collection.getProfileCollection(options.getType()).getOffsetKeys()){
-				Color colour = Color.BLACK;
 
 				// get the index of the tag
 				int index = collection.getProfileCollection(options.getType()).getOffset(tag);
@@ -184,13 +177,9 @@ public class MorphologyChartFactory {
 				}
 
 				if(options.isShowMarkers()){
-					if(tag.equals(BorderTag.ORIENTATION_POINT)){
-						colour = Color.BLUE;
-					}
-					if(tag.equals(BorderTag.REFERENCE_POINT)){
-						colour = Color.ORANGE;
-					}
-					plot.addDomainMarker(new ValueMarker(indexToDraw, colour, ChartComponents.MARKER_STROKE));	
+					
+					addMarkerToXYPlot(plot, tag, indexToDraw);
+					
 				}
 
 			}
@@ -198,6 +187,23 @@ public class MorphologyChartFactory {
 			chart = makeProfileChart(null, 100, ColourSwatch.REGULAR_SWATCH, options.getType());
 		}
 		return chart;
+	}
+	
+	/**
+	 * Draw domain markers for the given border tag at the given position
+	 * @param plot
+	 * @param tag
+	 * @param value
+	 */
+	private static void addMarkerToXYPlot(XYPlot plot, BorderTag tag, double value){
+		Color colour = Color.BLACK;
+		if(tag.equals(BorderTag.ORIENTATION_POINT)){
+			colour = Color.BLUE;
+		}
+		if(tag.equals(BorderTag.REFERENCE_POINT)){
+			colour = Color.ORANGE;
+		}
+		plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));	
 	}
 	
 	/**
@@ -230,8 +236,7 @@ public class MorphologyChartFactory {
 		
 		int datasetIndex = 0;
 		for(AnalysisDataset dataset : options.getDatasets()){
-			CellCollection collection = dataset.getCollection();
-			String point = collection.getPoint(options.getTag());
+
 			XYDataset ds = NucleusDatasetCreator.createSegmentedMedianProfileDataset(dataset, options.isNormalised(), options.getAlignment(), options.getTag());
 
 			plot.setDataset(datasetIndex, ds);
@@ -280,16 +285,7 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
-	
-//	public static JFreeChart makeFrankenProfileChart(ProfileChartOptions options) throws Exception {
-//		return makeFrankenProfileChart(
-//				options.getDatasets().get(0),
-//				options.isNormalised(),
-//				options.getAlignment(),
-//				options.getTag(),
-//				options.isShowMarkers());
-//	}
-	
+		
 	/**
 	 * Create a segmented profile chart from a given XYDataset. Set the series 
 	 * colours for each component. Draw lines on the offset indexes
@@ -316,7 +312,6 @@ public class MorphologyChartFactory {
 		XYPlot plot = chart.getXYPlot();
 
 		for (BorderTag tag : pc.getOffsetKeys()){
-			Color colour = Color.BLACK;
 			
 			// get the index of the tag
 			int index = pc.getOffset(tag);
@@ -338,15 +333,11 @@ public class MorphologyChartFactory {
 				indexToDraw += amountToAdd;
 				
 			}
-
+			
 			if(options.isShowMarkers()){
-				if(tag.equals(BorderTag.ORIENTATION_POINT)){
-					colour = Color.BLUE;
-				}
-				if(tag.equals(BorderTag.REFERENCE_POINT)){
-					colour = Color.ORANGE;
-				}
-				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, ChartComponents.MARKER_STROKE));	
+				
+				addMarkerToXYPlot(plot, tag, indexToDraw);
+
 			}
 			
 		}
@@ -918,13 +909,17 @@ public class MorphologyChartFactory {
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
-						"Angle", "Probability", null, PlotOrientation.VERTICAL, true, true,
+						type.getLabel(), "Probability", null, PlotOrientation.VERTICAL, true, true,
 						false);
 		
 		XYPlot plot = chart.getXYPlot();
 		
 		plot.setBackgroundPaint(Color.WHITE);
-		plot.getDomainAxis().setRange(0, 360);
+		
+		if(type.getDimension().equals(StatisticDimension.ANGLE)){
+			plot.getDomainAxis().setRange(0, 360);
+		}
+		
 
 		plot.addDomainMarker(new ValueMarker(180, Color.BLACK, ChartComponents.MARKER_STROKE));
 		

@@ -44,7 +44,7 @@ public class ProfileCollection implements Serializable {
 	private List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
 	
 	
-	private ProfileCache profileCache           = new ProfileCache();
+	private final ProfileCache profileCache           = new ProfileCache();
 
 
 	/**
@@ -110,15 +110,21 @@ public class ProfileCollection implements Serializable {
 		}
 		
 		if(this.hasBorderTag(tag)){
-			
+
 			if( ! profileCache.hasProfile(tag, quartile)){
 				
-				int indexOffset = offsets.get(tag);
-				profileCache.setProfile(tag, quartile, getAggregate().getQuartile(quartile).offset(indexOffset));
+				IJ.log("Profile "+tag+" - "+quartile+" not present in cache");
 				
+				int indexOffset = offsets.get(tag);
+				Profile profile = getAggregate().getQuartile(quartile).offset(indexOffset);
+				profileCache.setProfile(tag, quartile, profile );
+				
+			} else {
+				IJ.log("Profile "+tag+" - "+quartile+" present in cache");
 			}
-			
-			return profileCache.getProfile(tag, quartile);
+			Profile profile = profileCache.getProfile(tag, quartile);
+			IJ.log("Median: getting profile "+tag+" from cache: start "+profile.get(0));
+			return profile;
 			
 		} else {
 			throw new IllegalArgumentException("The requested tag is not present: "+tag.toString());
@@ -348,6 +354,7 @@ public class ProfileCollection implements Serializable {
 		}
 		profileCache.clear();
 		aggregate = new ProfileAggregate(length);
+		IJ.log("Making new aggregate: "+type);
 		for(Nucleus n : collection.getNuclei()){
 			
 			
@@ -522,6 +529,7 @@ public class ProfileCollection implements Serializable {
 			  }
 
 			  map.put(quartile, profile);
+			  IJ.log("Added "+tag+" - "+quartile+" to profile cache");
 
 		  }
 
@@ -534,10 +542,11 @@ public class ProfileCollection implements Serializable {
 		  public Profile getProfile(BorderTag tag, Double quartile){
 
 			  if(this.hasProfile(tag, quartile)){
-
+				  IJ.log("Found "+tag+" - "+quartile+" in profile cache");
 				  return cache.get(tag).get(quartile);
 
 			  } else  {
+				  
 				  return null;
 
 			  }
@@ -575,6 +584,7 @@ public class ProfileCollection implements Serializable {
 		   * Empty the cache - all values must be recalculated
 		   */
 		  public void clear(){
+			  IJ.log("Clearing cache");
 			  cache = null;
 			  cache = new HashMap<BorderTag, Map<Double, Profile>>();
 

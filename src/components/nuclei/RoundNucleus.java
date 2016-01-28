@@ -26,6 +26,7 @@
 */  
 package components.nuclei;
 
+import ij.IJ;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
@@ -973,7 +974,17 @@ public class RoundNucleus extends AbstractCellularComponent
 		-----------------------
 	*/
 
-
+	public SegmentedProfile getProfile(ProfileType type) throws Exception {
+		return new SegmentedProfile(this.profileMap.get(type));
+	}
+	
+	public boolean hasProfile(ProfileType type){
+		if(this.profileMap.containsKey(type)){
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see no.nuclei.Nucleus#getAngleProfile(java.lang.String)
@@ -992,6 +1003,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			
 		}
 
+		IJ.log("Nucleus "+this.getNameAndNumber()+" : "+type +" : "+tag+" : "+profile.get(0));
 		return profile;
 	}
 	
@@ -1257,17 +1269,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 
-	public SegmentedProfile getProfile(ProfileType type) throws Exception {
-		return new SegmentedProfile(this.profileMap.get(type));
-	}
-	
-	public boolean hasProfile(ProfileType type){
-		if(this.profileMap.containsKey(type)){
-			return true;
-		} else {
-			return false;
-		}
-	}
+
 	
 	
 
