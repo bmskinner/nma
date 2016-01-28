@@ -129,12 +129,25 @@ public class MorphologyChartFactory {
 	 */
 	public static JFreeChart makeSingleProfileChart(ProfileChartOptions options) throws Exception {
 		
+		XYDataset ds = null;
+		AnalysisDataset dataset = options.firstDataset();
+		CellCollection collection = dataset.getCollection();
 		JFreeChart chart = null;
+		
+//		if(options.getType().equals(ProfileType.FRANKEN)){
+//			return makeFrankenProfileChart(options);
+//		}
+		
+		
 		if(options.hasDatasets()){
-			AnalysisDataset dataset = options.firstDataset();
-			CellCollection collection = dataset.getCollection();
-			XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, options.isNormalised(), options.getAlignment(), options.getTag());
 
+			if(options.getType().equals(ProfileType.FRANKEN)){
+				ds = NucleusDatasetCreator.createFrankenSegmentDataset(options);
+
+			} else {
+				ds = NucleusDatasetCreator.createSegmentedProfileDataset(options);
+			}
+			
 
 			int length = 100 ; // default if normalised
 
@@ -273,14 +286,14 @@ public class MorphologyChartFactory {
 	}
 	
 	
-	public static JFreeChart makeFrankenProfileChart(ProfileChartOptions options) throws Exception {
-		return makeFrankenProfileChart(
-				options.getDatasets().get(0),
-				options.isNormalised(),
-				options.getAlignment(),
-				options.getTag(),
-				options.isShowMarkers());
-	}
+//	public static JFreeChart makeFrankenProfileChart(ProfileChartOptions options) throws Exception {
+//		return makeFrankenProfileChart(
+//				options.getDatasets().get(0),
+//				options.isNormalised(),
+//				options.getAlignment(),
+//				options.getTag(),
+//				options.isShowMarkers());
+//	}
 	
 	/**
 	 * Create a segmented profile chart from a given XYDataset. Set the series 
@@ -290,10 +303,11 @@ public class MorphologyChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	public static JFreeChart makeFrankenProfileChart(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, boolean showMarkers) throws Exception {
+	public static JFreeChart makeFrankenProfileChart(ProfileChartOptions options) throws Exception {
 		
+		AnalysisDataset dataset = options.firstDataset();
 		CellCollection collection = dataset.getCollection();
-		XYDataset ds = NucleusDatasetCreator.createFrankenSegmentDataset(dataset.getCollection(), normalised, alignment, borderTag);
+		XYDataset ds = NucleusDatasetCreator.createFrankenSegmentDataset(options);
 
 		ProfileCollection pc = collection.getProfileCollection(ProfileType.FRANKEN);
 		
@@ -313,7 +327,7 @@ public class MorphologyChartFactory {
 			int index = pc.getOffset(tag);
 			
 			// get the offset from to the current draw point
-			int offset = pc.getOffset(borderTag);
+			int offset = pc.getOffset(options.getTag());
 			
 			// adjust the index to the offset
 			index = Utils.wrapIndex( index - offset, pc.getAggregate().length());
@@ -323,14 +337,14 @@ public class MorphologyChartFactory {
 //			if(normalised){ // set to the proportion of the point along the profile
 				indexToDraw =  (( indexToDraw / pc.getAggregate().length() ) * 100);
 //			}
-			if(alignment.equals(ProfileAlignment.RIGHT) && !normalised){
+			if(options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()){
 				int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
 				int amountToAdd = maxX - pc.getAggregate().length();
 				indexToDraw += amountToAdd;
 				
 			}
 
-			if(showMarkers){
+			if(options.isShowMarkers()){
 				if(tag.equals(BorderTag.ORIENTATION_POINT)){
 					colour = Color.BLUE;
 				}
@@ -437,17 +451,17 @@ public class MorphologyChartFactory {
 	 * @return a chart
 	 */
 	public static JFreeChart makeMultiProfileChart(ProfileChartOptions options)  throws Exception{
-		
+				
 		List<XYSeriesCollection> iqrProfiles = null;
 		XYDataset medianProfiles			 = null;
-		if(options.getType().equals(ProfileType.REGULAR)){
-			iqrProfiles     = NucleusDatasetCreator.createMultiProfileIQRDataset( options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());				
-			medianProfiles	= NucleusDatasetCreator.createMultiProfileDataset(	  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());
-		}
-		
+				
 		if(options.getType().equals(ProfileType.FRANKEN)){
 			iqrProfiles     = NucleusDatasetCreator.createMultiProfileIQRFrankenDataset(  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());				
 			medianProfiles	= NucleusDatasetCreator.createMultiProfileFrankenDataset(	  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());
+		} else {
+			iqrProfiles     = NucleusDatasetCreator.createMultiProfileIQRDataset( options );				
+			medianProfiles	= NucleusDatasetCreator.createMultiProfileDataset(	  options );
+		
 		}
 		
 		
