@@ -62,6 +62,7 @@ import analysis.AnalysisWorker;
 import components.Cell;
 import components.CellCollection;
 import components.CellularComponent;
+import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
 public class NucleusDetector extends AnalysisWorker {
@@ -149,62 +150,70 @@ public class NucleusDetector extends AnalysisWorker {
 
 		List<AnalysisDataset> result = new ArrayList<AnalysisDataset>();
 
-		for(CellCollection r : folderCollection){
+		for(CellCollection collection : folderCollection){
 			
 
-			AnalysisDataset dataset = new AnalysisDataset(r);
+			AnalysisDataset dataset = new AnalysisDataset(collection);
 			dataset.setAnalysisOptions(analysisOptions);
 			dataset.setRoot(true);
-			File debugFile = dataset.getDebugFile();
+//			File debugFile = dataset.getDebugFile();
 
-			File folder = r.getFolder();
+			File folder = collection.getFolder();
 			log(Level.INFO, "Analysing: "+folder.getName());
-
-			LinkedHashMap<String, Integer> nucleusCounts = new LinkedHashMap<String, Integer>();
 
 			try{
 
-				nucleusCounts.put("input", r.getNucleusCount());
 				CellCollection failedNuclei = new CellCollection(folder, 
-						r.getOutputFolderName(), 
-						"failed", 
-						analysisOptions.getNucleusType());
+						collection.getOutputFolderName(), 
+						collection.getName()+" - failed", 
+						NucleusType.ROUND);
 
-//				boolean ok;
+
 				log(Level.INFO, "Filtering collection...");
-				boolean ok = CollectionFilterer.run(r, failedNuclei, fileLogger); // put fails into failedNuclei, remove from r
+				boolean ok = CollectionFilterer.run(collection, failedNuclei, fileLogger); // put fails into failedNuclei, remove from r
 				if(ok){
 					log(Level.INFO, "Filtered OK");
 				} else {
 					log(Level.INFO, "Filtering error");
 				}
+				
+				/*
+				 * Keep the failed nuclei - they can be manually assessed later
+				 */
 
-				if(failedNuclei.getNucleusCount()>0){
-					log(Level.INFO, "Exporting failed nuclei...");
-					ok = CompositeExporter.run(failedNuclei, fileLogger);
-					if(ok){
-						log(Level.INFO, "Export OK");
-					} else {
-						log(Level.INFO, "Export error");
-					}
-					nucleusCounts.put("failed", failedNuclei.getNucleusCount());
-				}
+				AnalysisDataset failed = new AnalysisDataset(failedNuclei);
+				AnalysisOptions failedOptions = new AnalysisOptions(analysisOptions);
+				failedOptions.setNucleusType(NucleusType.ROUND);
+				failed.setAnalysisOptions(failedOptions);
+				failed.setRoot(true);
+
+				
+//				if(failedNuclei.getNucleusCount()>0){
+//					log(Level.INFO, "Exporting failed nuclei...");
+//					ok = CompositeExporter.run(failedNuclei, fileLogger);
+//					if(ok){
+//						log(Level.INFO, "Export OK");
+//					} else {
+//						log(Level.INFO, "Export error");
+//					}
+//					nucleusCounts.put("failed", failedNuclei.getNucleusCount());
+//				}
+				programLogger.log(Level.INFO, spacerString);
+				
+				programLogger.log(Level.INFO, "Population: "+collection.getName());
+				programLogger.log(Level.INFO, "Passed: "+collection.getNucleusCount()+" nuclei");
+				programLogger.log(Level.INFO, "Failed: "+failed.getCollection().getNucleusCount()+" nuclei");
+				
+				programLogger.log(Level.INFO, spacerString);
+				
+				result.add(dataset);
+				result.add(failed);
 				
 			} catch(Exception e){
 				log(Level.WARNING, "Cannot create collection: "+e.getMessage());
 			}
 
-			programLogger.log(Level.INFO, spacerString);
-			
-//			programLogger.log(Level.INFO, "Population: "+r.getType());
-			
-			programLogger.log(Level.INFO, "Population: "+r.getNucleusCount()+" nuclei");
-			programLogger.log(Level.INFO, spacerString);
-			
-			fileLogger.log(Level.INFO, "Population: "+r.getName()+" : "+r.getNucleusCount()+" nuclei");
-			
-
-			result.add(dataset);
+//			
 
 		}
 		return result;

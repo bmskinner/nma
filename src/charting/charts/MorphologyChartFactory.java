@@ -80,6 +80,7 @@ import components.generic.ProfileType;
 import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
+import components.nuclei.sperm.RodentSpermNucleus;
 
 public class MorphologyChartFactory {
 	
@@ -701,17 +702,21 @@ public class MorphologyChartFactory {
 		/*
 		 * Get the nucleus dataset
 		 */
+		
 		XYDataset nucleus = NucleusDatasetCreator.createNucleusOutline(cell, true);
 		hash.put(hash.size(), "Nucleus"); // add to the first free entry
 		datasetHash.put(datasetHash.size(), nucleus);
-		
+
 
 		/*
 		 * If the cell has a rodent sperm nucleus, get the hook and hump rois
 		 */
-		XYDataset hookHump = NucleusDatasetCreator.createNucleusHookHumpOutline(cell);
-		hash.put(hash.size(), "HookHump"); // add to the first free entry
-		datasetHash.put(datasetHash.size(), hookHump);
+		if(cell.getNucleus().getClass()==RodentSpermNucleus.class){
+			XYDataset hookHump = NucleusDatasetCreator.createNucleusHookHumpOutline(cell);
+			hash.put(hash.size(), "HookHump"); // add to the first free entry
+			datasetHash.put(datasetHash.size(), hookHump);
+		}
+		
 		
 		// get the index tags
 		XYDataset tags = NucleusDatasetCreator.createNucleusIndexTags(cell);

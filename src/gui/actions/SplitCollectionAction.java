@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.actions;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
@@ -76,7 +77,8 @@ public class SplitCollectionAction extends ProgressableAction {
 
         					int flag = 0;
         					AnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
-        					new RunSegmentationAction(newDataset, dataset, flag, mw);
+        					final CountDownLatch latch = new CountDownLatch(1);
+        					new RunSegmentationAction(newDataset, dataset, flag, mw, latch);
         				}
         			} else {
         				programLogger.log(Level.FINE,"User cancelled split");

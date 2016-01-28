@@ -628,8 +628,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						if(selectedValue!=null){
 
 							AnalysisDataset source = populationsPanel.getDataset(selectedValue);
-
-							new RunSegmentationAction(selectedDataset, source, null, MainWindow.this);
+							final CountDownLatch latch = new CountDownLatch(1);
+							new RunSegmentationAction(selectedDataset, source, null, MainWindow.this, latch);
 						}
 					} catch(Exception e1){
 						programLogger.log(Level.SEVERE, "Error applying morphology", e1);

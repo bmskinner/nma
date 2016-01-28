@@ -40,6 +40,7 @@ public class RunSegmentationAction extends ProgressableAction {
 	private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
 	
 	private AnalysisDataset source 			= null;
+	private CountDownLatch latch;
 	
 	/**
 	 * Carry out a segmentation on a dataset
@@ -47,9 +48,10 @@ public class RunSegmentationAction extends ProgressableAction {
 	 * @param mode the type of morphology analysis to carry out
 	 * @param downFlag the next analyses to perform
 	 */
-	public RunSegmentationAction(AnalysisDataset dataset, MorphologyAnalysisMode mode, int downFlag, MainWindow mw){
+	public RunSegmentationAction(AnalysisDataset dataset, MorphologyAnalysisMode mode, int downFlag, MainWindow mw, CountDownLatch latch){
 		super(dataset, "Segmentation analysis", mw, downFlag);
 		this.mode = mode;
+		this.latch = latch;
 		programLogger.log(Level.FINE, "Creating segmentation analysis");
 		runNewAnalysis();
 	}
@@ -62,9 +64,9 @@ public class RunSegmentationAction extends ProgressableAction {
 	}
 	
 	
-	public RunSegmentationAction(AnalysisDataset dataset, AnalysisDataset source, Integer downFlag, MainWindow mw){
+	public RunSegmentationAction(AnalysisDataset dataset, AnalysisDataset source, Integer downFlag, MainWindow mw, CountDownLatch latch){
 		super(dataset, "Copying morphology to "+dataset.getName(), mw);
-
+		this.latch = latch;
 		this.mode = MorphologyAnalysisMode.COPY;
 		this.source = source;
 		
@@ -212,7 +214,9 @@ public class RunSegmentationAction extends ProgressableAction {
 
 					programLogger.log(Level.FINEST, "Firing save root");
 					fireInterfaceEvent(InterfaceMethod.SAVE_ROOT);
+					latch.countDown();
 					RunSegmentationAction.super.finished();
+					
 					
 					
 				} else {

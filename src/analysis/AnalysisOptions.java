@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import components.nuclear.NucleusType;
 
@@ -39,41 +40,78 @@ public class AnalysisOptions implements Serializable {
 	
 	private Map<String, NuclearSignalOptions> signalDetection = new HashMap<String, NuclearSignalOptions>(0);
 		
-	private boolean normaliseContrast; 
+	private boolean normaliseContrast = false; 
 
-	private int angleProfileWindowSize;
+	private int angleProfileWindowSize = 15;
 	
-	private double scale; // hold the length of a pixel in metres
+	private double scale = 1; // hold the length of a pixel in metres
 
-	private NucleusType nucleusType;
+	private NucleusType nucleusType = null;
 
 
 	/**
 	 * Should a reanalysis be performed?
 	 */
-	private boolean performReanalysis;
+	private boolean performReanalysis = false;
 
 	/**
 	 * Should images for a reanalysis be aligned
 	 * beyond the offsets provided?
 	 */
-	private boolean realignMode;
+	private boolean realignMode = false;
 
-	private boolean refoldNucleus;
+	private boolean refoldNucleus = false;
 
-	private File folder;
-	private File mappingFile;
+	private File folder = null;
+	private File mappingFile = null;
 
-	private String refoldMode;
+	private String refoldMode = null;
 
-	private int xoffset;
-	private int yoffset;
+	private int xoffset = 0;
+	private int yoffset = 0;
 
 	public AnalysisOptions(){
 		
 		this.addCannyOptions("nucleus");
 		this.addCannyOptions("tail");
 		this.addNuclearSignalOptions("default");
+	}
+	
+	
+	
+	/**
+	 * Duplicate the data in the template options
+	 * @param template
+	 */
+	public AnalysisOptions(AnalysisOptions template){
+		nucleusThreshold = template.getNucleusThreshold();
+		minNucleusSize   = template.getMinNucleusSize();
+		maxNucleusSize   = template.getMaxNucleusSize();
+		minNucleusCirc   = template.getMinNucleusCirc();
+		maxNucleusCirc   = template.getMaxNucleusCirc();
+		
+		edgeDetection    = new HashMap<String, CannyOptions>(0);
+		for(String s : template.getCannyOptionTypes()){
+			edgeDetection.put(s, template.getCannyOptions(s));
+		}
+
+		signalDetection = new HashMap<String, NuclearSignalOptions>(0);
+		for(String s : template.getNuclearSignalOptionTypes()){
+			signalDetection.put(s, template.getNuclearSignalOptions(s));
+		}
+		
+		normaliseContrast      = template.isNormaliseContrast(); 
+		angleProfileWindowSize = template.getAngleProfileWindowSize();
+		scale                  = template.getScale(); 
+		nucleusType            = template.getNucleusType();
+		performReanalysis      = template.isReanalysis() ;
+		realignMode            = template.realignImages();
+		refoldNucleus          = template.refoldNucleus();
+		folder                 = template.getFolder();
+		mappingFile            = template.getMappingFile();
+		refoldMode             = template.getRefoldMode();
+		xoffset                = template.getXOffset();
+		yoffset                = template.getYOffset();
 	}
 
 
@@ -249,6 +287,10 @@ public class AnalysisOptions implements Serializable {
 		edgeDetection.put(type, new CannyOptions()); 
 	}
 	
+	public Set<String> getCannyOptionTypes(){
+		return edgeDetection.keySet();
+	}
+	
 	/**
 	 * Check if the given type name is already present
 	 * @param type the name to check
@@ -260,6 +302,10 @@ public class AnalysisOptions implements Serializable {
 		} else {
 			return false;
 		}
+	}
+	
+	public Set<String> getNuclearSignalOptionTypes(){
+		return signalDetection.keySet();
 	}
 	
 	/**

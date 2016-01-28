@@ -92,8 +92,14 @@ public class RunProfilingAction extends ProgressableAction {
 
 				if(  (downFlag & MainWindow.ASSIGN_SEGMENTS) == MainWindow.ASSIGN_SEGMENTS){
 					
-					new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, mw);
-					
+					final CountDownLatch latch = new CountDownLatch(1);
+					new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, mw, latch);
+					try {
+						latch.await();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 
 
@@ -111,12 +117,12 @@ public class RunProfilingAction extends ProgressableAction {
 					// otherwise analyse the next item in the list
 					cancel(); // remove progress bar
 
-					SwingUtilities.invokeLater(new Runnable(){
-						public void run(){
+//					SwingUtilities.invokeLater(new Runnable(){
+//						public void run(){
 
 								new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, mw);
 							
-						}});
+//						}});
 
 				}			
 			}

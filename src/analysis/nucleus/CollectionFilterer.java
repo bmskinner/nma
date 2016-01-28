@@ -26,6 +26,7 @@ import components.Cell;
 import components.CellCollection;
 import components.generic.MeasurementScale;
 import components.nuclei.Nucleus;
+import components.nuclei.RoundNucleus;
 
 public class CollectionFilterer {
 
@@ -84,6 +85,8 @@ public class CollectionFilterer {
 	    int pathlength = 0;
 	    int arraylength = 0;
 	    int feretlength = 0;
+	    
+	    CellCollection newFailCollection = new CellCollection(collection, "failed");
 
 	    logger.log(Level.FINE, "Prefiltered values found");
 
@@ -112,16 +115,24 @@ public class CollectionFilterer {
 	        n.updateFailureCode(FAILURE_FERET);
 	        feretlength++;
 	      }
-	      
+
 	      if(n.getFailureCode() > 0){
-	        failCollection.addCell(c);
+	    	  RoundNucleus faiNucleus = new RoundNucleus(n);
+	    	  Cell failCell = new Cell();
+	    	  failCell.setNucleus(faiNucleus);
+	    	  newFailCollection.addCell(c);
+	      
+	    	  failCollection.addCell(failCell);
+
 	      }
 	    }
 
-	    for( Cell f : failCollection.getCells()){ // should be safer than the i-- above
+	    for( Cell f : newFailCollection.getCells()){
 	    	collection.removeCell(f);
 	    }
-	      
+	    
+	    newFailCollection = null; // clean up temp collection
+
 
 	    medianArea = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
 	    medianPerimeter = collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
@@ -144,12 +155,12 @@ public class CollectionFilterer {
 	    
 	  }
 	
-	private static void exportFilterStats(CellCollection collection) throws Exception{
-
-		double medianArea = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
-	    double medianPerimeter = collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
-	    double medianPathLength = collection.getMedianPathLength();
-	    double medianArrayLength = collection.getMedianArrayLength();
-	    double medianFeretLength = collection.getMedianStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);	    
-	  }
+//	private static void exportFilterStats(CellCollection collection) throws Exception{
+//
+//		double medianArea = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
+//	    double medianPerimeter = collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
+//	    double medianPathLength = collection.getMedianPathLength();
+//	    double medianArrayLength = collection.getMedianArrayLength();
+//	    double medianFeretLength = collection.getMedianStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);	    
+//	  }
 }

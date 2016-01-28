@@ -1236,7 +1236,7 @@ public class NucleusDatasetCreator {
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-		if(cell.getNucleus().getClass().isAssignableFrom(RodentSpermNucleus.class)){
+		if(cell.getNucleus().getClass()==RodentSpermNucleus.class){
 			
 			RodentSpermNucleus nucleus = (RodentSpermNucleus) cell.getNucleus();
 //			double[] position = nucleus.getPosition();
