@@ -499,9 +499,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	 */
 	protected class ProfilePanel extends JPanel implements SignalChangeListener, ActionListener {
 		
-		private static final long serialVersionUID = 1L;
 		private DraggableOverlayChartPanel profileChartPanel; // holds the chart with the cell
-		private JComboBox<ProfileType> profileTypeBox = new JComboBox<ProfileType>(ProfileType.values());
+		private ProfileTypeOptionsPanel profileOptions  = new ProfileTypeOptionsPanel();
 		
 		protected ProfilePanel(){
 
@@ -514,8 +513,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			this.add(profileChartPanel, BorderLayout.CENTER);
 			
 			JPanel header = new JPanel(new FlowLayout());
-			header.add(profileTypeBox);
-			profileTypeBox.addActionListener(this);
+			header.add(profileOptions);
+			profileOptions.addActionListener(this);
 			this.add(header, BorderLayout.NORTH);
 			
 		}
@@ -524,7 +523,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 			try{
 				
-				ProfileType type = (ProfileType) profileTypeBox.getSelectedItem();
+				ProfileType type = profileOptions.getSelected();
 
 				if(cell==null){
 					JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
