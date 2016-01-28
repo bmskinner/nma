@@ -61,7 +61,7 @@ import org.jfree.ui.RectangleEdge;
  *
  */
 @SuppressWarnings("serial")
-public class SelectableChartPanel extends ChartPanel implements SignalChangeListener, ChartMouseListener {
+public class SelectableChartPanel extends ExportableChartPanel implements SignalChangeListener, ChartMouseListener {
 	
 	private String name = null;
 	MouseMarker mouseMarker = null;

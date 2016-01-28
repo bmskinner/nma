@@ -21,6 +21,7 @@ package charting.charts;
 import gui.RotationMode;
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
+import gui.components.ExportableChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.IJ;
 import ij.ImageStack;
@@ -584,8 +585,8 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
-	public static ChartPanel makeProfileChartPanel(JFreeChart chart){
-		ChartPanel panel = new ChartPanel(chart){
+	public static ExportableChartPanel makeProfileChartPanel(JFreeChart chart){
+		ExportableChartPanel panel = new ExportableChartPanel(chart){
 			@Override
 			public void restoreAutoBounds() {
 				XYPlot plot = (XYPlot) this.getChart().getPlot();

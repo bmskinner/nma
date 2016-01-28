@@ -1,5 +1,6 @@
 package gui.tabs.profiles;
 
+import gui.components.ExportableChartPanel;
 import gui.components.panels.BorderTagOptionsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel;
 import gui.components.panels.ProfileMarkersOptionsPanel;
@@ -28,7 +29,7 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 		Dimension preferredChartSize = new Dimension(400, 300);
 
 		protected JPanel buttonPanel = new JPanel(new FlowLayout());
-		protected ChartPanel chartPanel;
+		protected ExportableChartPanel chartPanel;
 		
 		protected BorderTagOptionsPanel borderTagOptionsPanel = new BorderTagOptionsPanel();
 		protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();

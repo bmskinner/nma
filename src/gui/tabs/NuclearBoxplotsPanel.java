@@ -21,6 +21,7 @@ package gui.tabs;
 import gui.DatasetEvent.DatasetMethod;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
+import gui.components.ExportableChartPanel;
 import gui.components.HistogramsTabPanel;
 import gui.components.SelectableChartPanel;
 import gui.components.panels.MeasurementUnitSettingsPanel;
@@ -146,7 +147,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		
 		private JPanel 		mainPanel; // hold the charts
 		private JScrollPane scrollPane; // hold the main panel
-		private Map<NucleusStatistic, ChartPanel> chartPanels = new HashMap<NucleusStatistic, ChartPanel>();
+		private Map<NucleusStatistic, ExportableChartPanel> chartPanels = new HashMap<NucleusStatistic, ExportableChartPanel>();
 		private MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
 
 		public BoxplotsPanel() {
@@ -168,7 +169,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 					programLogger.log(Level.SEVERE, "Error creating boxplots panel", e);
 				}
 				
-				ChartPanel panel = new ChartPanel(chart);
+				ExportableChartPanel panel = new ExportableChartPanel(chart);
 				panel.setPreferredSize(preferredSize);
 				chartPanels.put(stat, panel);
 				mainPanel.add(panel);
@@ -203,7 +204,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 				for(NucleusStatistic stat : NucleusStatistic.values()){
 
-					ChartPanel panel = chartPanels.get(stat);
+					ExportableChartPanel panel = chartPanels.get(stat);
 
 					JFreeChart chart = null;
 					BoxplotChartOptions options = new BoxplotChartOptions(list, stat, scale);
