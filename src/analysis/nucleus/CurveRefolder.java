@@ -372,9 +372,11 @@ public class CurveRefolder extends AnalysisWorker {
 				
 				// Update the test nucleus
 				testNucleus.updateBorderPoint(i, newPoint);
+				
+				testNucleus.calculateProfiles();
 
 				// Measure the new profile & compare
-				testNucleus.setProfile(ProfileType.REGULAR, testNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize()));
+//				testNucleus.setProfile(ProfileType.REGULAR, testNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize()));
 
 				// Get the new score
 				score = testNucleus.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
@@ -382,7 +384,9 @@ public class CurveRefolder extends AnalysisWorker {
 				// Apply the change if better fit
 				if(score < similarityScore) {
 					refoldNucleus.updateBorderPoint(i, newPoint);
-					testNucleus.setProfile(ProfileType.REGULAR, refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize()));
+					refoldNucleus.calculateProfiles();
+
+					testNucleus.setProfile(ProfileType.REGULAR, refoldNucleus.getProfile(ProfileType.REGULAR));
 					similarityScore = score;
 				}
 			}

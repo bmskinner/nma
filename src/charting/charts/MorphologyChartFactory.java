@@ -133,12 +133,7 @@ public class MorphologyChartFactory {
 		AnalysisDataset dataset = options.firstDataset();
 		CellCollection collection = dataset.getCollection();
 		JFreeChart chart = null;
-		
-//		if(options.getType().equals(ProfileType.FRANKEN)){
-//			return makeFrankenProfileChart(options);
-//		}
-		
-		
+				
 		if(options.hasDatasets()){
 
 			if(options.getType().equals(ProfileType.FRANKEN)){
@@ -164,26 +159,26 @@ public class MorphologyChartFactory {
 
 			XYPlot plot = chart.getXYPlot();
 
-			for (BorderTag tag : collection.getProfileCollection(ProfileType.REGULAR).getOffsetKeys()){
+			for (BorderTag tag : collection.getProfileCollection(options.getType()).getOffsetKeys()){
 				Color colour = Color.BLACK;
 
 				// get the index of the tag
-				int index = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
+				int index = collection.getProfileCollection(options.getType()).getOffset(tag);
 
 				// get the offset from to the current draw point
-				int offset = collection.getProfileCollection(ProfileType.REGULAR).getOffset(options.getTag());
+				int offset = collection.getProfileCollection(options.getType()).getOffset(options.getTag());
 
 				// adjust the index to the offset
-				index = Utils.wrapIndex( index - offset, collection.getProfileCollection(ProfileType.REGULAR).getAggregate().length());
+				index = Utils.wrapIndex( index - offset, collection.getProfileCollection(options.getType()).getAggregate().length());
 
 				double indexToDraw = index; // convert to a double to allow normalised positioning
 
 				if(options.isNormalised()){ // set to the proportion of the point along the profile
-					indexToDraw =  (( indexToDraw / collection.getProfileCollection(ProfileType.REGULAR).getAggregate().length() ) * 100);
+					indexToDraw =  (( indexToDraw / collection.getProfileCollection(options.getType()).getAggregate().length() ) * 100);
 				}
 				if(options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()){
 					int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
-					int amountToAdd = maxX - collection.getProfileCollection(ProfileType.REGULAR).getAggregate().length();
+					int amountToAdd = maxX - collection.getProfileCollection(options.getType()).getAggregate().length();
 					indexToDraw += amountToAdd;
 
 				}

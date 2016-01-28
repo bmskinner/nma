@@ -94,6 +94,8 @@ public class DatasetProfiler extends AnalysisWorker {
 
 			// default is to make profile aggregate from reference point
 			pc.createProfileAggregate(collection, ProfileType.REGULAR);
+			log(Level.INFO, "Angle aggregate first:");
+			log(Level.INFO, pc.getAggregate().toString());
 			publish(1);
 
 			// use the median profile of this aggregate to find the orientation point ("tail")
@@ -121,16 +123,40 @@ public class DatasetProfiler extends AnalysisWorker {
 				log(Level.FINE, "Reticulating splines: score: "+(int)score);
 			}
 			
+			/*
+			 * Update the distance profiles using the offsets from the
+			 * angle profile
+			 * 
+			 */
+			
+			log(Level.INFO, "Angle aggregate final:");
+			log(Level.INFO, pc.getAggregate().toString());
 			
 			// Make the distance profile
 			log(Level.FINE, "Creating distance profile collection");
 			ProfileCollection distance = new ProfileCollection();
-			distance.createProfileAggregate(collection, ProfileType.DISTANCE);
 			
+			/*
+			 * TODO: this causes problems when the offset for the regular profile
+			 * will not match the offsets for these profiles
+			 * 
+			 * Using the offsets from the angle profilecollection causes the median
+			 * to be offset by ~+60 perimeter units in Testing
+			 * 
+			 * Testing of the ProfileAggregate just created shows that the incoming
+			 * nuclear profiles are offset to the wrong position as they are added.
+			 */
+			distance.createProfileAggregate(collection, ProfileType.DISTANCE);
+			log(Level.INFO, "Distance aggregate:");
+			log(Level.INFO, distance.getAggregate().toString());
+			
+			
+			log(Level.INFO, "Angle: "+pc.printKeys());
 			for(BorderTag tag : pc.getOffsetKeys()){
 				distance.addOffset(tag, pc.getOffset(tag));
 			}
 			
+			log(Level.INFO, "Distance: "+distance.printKeys());
 			collection.setProfileCollection(ProfileType.DISTANCE, distance);
 			
 			// Make the single distance profile

@@ -180,40 +180,49 @@ public class DatasetSegmenter extends AnalysisWorker {
 		int profileLength = sourceCollection.getProfileCollection(ProfileType.REGULAR)
 				.getProfile(referencePoint, Constants.MEDIAN) // Median of profile collection 
 				.size(); 
+		
+		
+		// Update the profiles for each of the normal profile types.
+		for(ProfileType type : ProfileType.values()){
+			
+			if(type.equals(ProfileType.FRANKEN)){
+				continue;
+			}
+			
+			// get the empty profile collection from the new CellCollection
+			// TODO: if the target collection is not new, ie we are copying onto
+			// an existing segmenation pattern, then this profile collection will have
+			// offsets
+			ProfileCollection pc = collection.getProfileCollection(type);
 
-		// get the empty profile collection from the new CellCollection
-		// TODO: if the target collection is not new, ie we are copying onto
-		// an existing segmenation pattern, then this profile collection will have
-		// offsets
-		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+			// Create an aggregate from the nuclei in the collection. 
+			// A new median profile must necessarily result.
+			// By default, the aggregates are created from the reference point
+			pc.createProfileAggregate(collection, type, profileLength);
 
-		// Create an aggregate from the nuclei in the collection. 
-		// A new median profile must necessarily result.
-		// By default, the aggregates are created from the reference point
-		pc.createProfileAggregate(collection, ProfileType.REGULAR, profileLength);
+			// copy the offset keys from the source collection
+			//TODO:
+			// If this is applied to a collection from an entirely difference source,
+			// rather than a child, then the offsets will be completely wrong. In that
+			// instance, we should probably keep the existing offset positions for head
+			// and tail
+			ProfileCollection sc = sourceCollection.getProfileCollection(type);
 
-		// copy the offset keys from the source collection
-		//TODO:
-		// If this is applied to a collection from an entirely difference source,
-		// rather than a child, then the offsets will be completely wrong. In that
-		// instance, we should probably keep the existing offset positions for head
-		// and tail
-		ProfileCollection sc = sourceCollection.getProfileCollection(ProfileType.REGULAR);
+			for(BorderTag offsetKey : sc.getOffsetKeys()){
+				int offset = sc.getOffset(offsetKey);
+				pc.addOffset(offsetKey, offset);
+				log(Level.FINER, "Setting "+offsetKey+" to "+offset);
+			}
 
-		for(BorderTag offsetKey : sc.getOffsetKeys()){
-			int offset = sc.getOffset(offsetKey);
-			pc.addOffset(offsetKey, offset);
-			log(Level.FINER, "Setting "+offsetKey+" to "+offset);
+
+			// What happens when the array length is greater in the source collection? 
+			// Segments are added that no longer have an index
+			// We need to scale the segments to the array length of the new collection
+			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
+			
 		}
 
-
-		// What happens when the array length is greater in the source collection? 
-		// Segments are added that no longer have an index
-		// We need to scale the segments to the array length of the new collection
-		pc.addSegments(referencePoint, sc.getSegments(referencePoint));
-
-
-		// At this point the collection has only a regular profile collection.
+		// At this point the collection has only a regular profile collections.
 		// No Frankenprofile has been copied.
 
 		reviseSegments(collection, referencePoint);	
@@ -588,7 +597,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 		 */
 		static final double PENALTY_GROW   = 20;
 		
-		private 	SegmentedProfile medianProfile; // the profile to align against
+		private final SegmentedProfile medianProfile; // the profile to align against
 		
 		private boolean optimise = false; // a flag to enable test optimisations.
 		
@@ -605,21 +614,15 @@ public class DatasetSegmenter extends AnalysisWorker {
 		 * Construct with a median profile containing segments. The originals will not be modified
 		 * @param medianProfile the profile
 		 * @param logFile the file for logging status
+		 * @throws Exception 
 		 */
-		public SegmentFitter(SegmentedProfile medianProfile){
+		public SegmentFitter(final SegmentedProfile medianProfile) throws Exception{
 			if(medianProfile==null){
 				log(Level.SEVERE, "Segmented profile is null");
 				throw new IllegalArgumentException("Median profile is null");
 			}
 
-			this.medianProfile = null;
-			try {
-				this.medianProfile  = new SegmentedProfile(medianProfile);
-			} catch (Exception e) {
-				logError("Error initialising fitter", e);
-			}
-			
-			
+			this.medianProfile  = new SegmentedProfile(medianProfile);
 		}
 		
 		/**
@@ -629,7 +632,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 		 * @param n the nucleus to fit to the current median profile
 		 * @param pc the ProfileCollection from the CellCollection the nucleus belongs to
 		 */
-		public void fit(Nucleus n, ProfileCollection pc){
+		public void fit(final Nucleus n, final ProfileCollection pc){
 			
 			// Input checks
 			if(n==null){
@@ -653,6 +656,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 				
 				// get the best fit of segments to the median
 				SegmentedProfile newProfile = this.runFitter(n.getProfile(ProfileType.REGULAR));
+
 				n.setProfile(ProfileType.REGULAR, newProfile);
 				
 				// modify tail and head/tip point to nearest segment end
