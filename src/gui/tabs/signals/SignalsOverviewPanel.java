@@ -507,4 +507,24 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		}
 		
 	}
+
+	@Override
+	protected void updateSingle() throws Exception {
+		updateMultiple();
+		
+	}
+
+	@Override
+	protected void updateMultiple() throws Exception {
+		updateCheckboxPanel();
+		updateSignalConsensusChart();
+		updateSignalStatsPanel();
+		
+	}
+
+	@Override
+	protected void updateNull() throws Exception {
+		updateMultiple();
+		
+	}
 }

@@ -50,7 +50,7 @@ public enum MeasurementScale {
 			result = "Square "+name;
 			break;
 		case ASPECT: 
-			result = "Aspect ratio (feret / min diameter)";
+			result = "Aspect ratio (bounding height / bounding width)";
 			break;
 		case CIRCULARITY: 
 			result = "Circularity";

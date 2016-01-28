@@ -25,6 +25,7 @@ import gui.components.ExportableTable;
 import gui.components.HistogramsTabPanel;
 import gui.components.SelectableChartPanel;
 import gui.tabs.NuclearBoxplotsPanel.HistogramsPanel;
+import gui.tabs.signals.SignalsHistogramPanel;
 import gui.tabs.signals.SignalsOverviewPanel;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
@@ -78,7 +79,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	private static final long serialVersionUID = 1L;
 		
 	private SignalsOverviewPanel	overviewPanel; 	//container for chart and stats table
-	private HistogramPanel 	histogramPanel;
+	private SignalsHistogramPanel 	histogramPanel;
 	private AnalysisPanel	analysisPanel;
 	private BoxplotPanel	boxplotPanel;
 	private ShellsPanel		shellsPanel;
@@ -100,7 +101,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			this.addSubPanel(overviewPanel);
 			signalsTabPane.addTab("Overview", overviewPanel);
 
-			histogramPanel = new HistogramPanel(programLogger);
+			histogramPanel = new SignalsHistogramPanel(programLogger);
 			this.addSubPanel(histogramPanel);
 			signalsTabPane.addTab("Signal histograms", histogramPanel);
 
@@ -157,40 +158,6 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 		updateMultiple();
 	}
 
-//	@Override
-//	public void updateDetail(){
-//
-//		programLogger.log(Level.FINE, "Updating signals detail panel");
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-//				
-//				try{
-//					shellsPanel.update(getDatasets());
-//					programLogger.log(Level.FINEST, "Updated shells panel");
-//					
-//					overviewPanel.update(getDatasets());
-//					programLogger.log(Level.FINEST, "Updated signals overview panel");
-//					
-//					histogramPanel.update(getDatasets());
-//					programLogger.log(Level.FINEST, "Updated signals histogram panel");
-//					
-//					analysisPanel.update(getDatasets());
-//					programLogger.log(Level.FINEST, "Updated signals analysis panel");
-//					
-//					boxplotPanel.update(getDatasets());
-//					programLogger.log(Level.FINEST, "Updated signals boxplot panel");
-//					
-//				} catch(Exception e){
-//					programLogger.log(Level.SEVERE, "Error updating signals detail panel" ,e);
-//					SignalsDetailPanel.this.update( (List<AnalysisDataset>) null);
-//				} finally {
-//					setUpdating(false);
-//				}
-//			
-//		}});
-//
-//	}
-
 	/**
 	 * Get a series or dataset index for colour selection when drawing charts. The index
 	 * is set in the DatasetCreator as part of the label. The format is Name_index_other
@@ -226,91 +193,6 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 		}
 	}
         
-    @SuppressWarnings("serial")
-	protected class HistogramPanel extends HistogramsTabPanel {
-        	  	    	
-    	protected HistogramPanel(Logger programLogger) throws Exception{
-    		super(programLogger);
-    		
-    		try {
-
-				MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
-				Dimension preferredSize = new Dimension(400, 150);
-				for(SignalStatistic stat : SignalStatistic.values()){
-
-					SignalHistogramChartOptions options = new SignalHistogramChartOptions(null, stat, scale, false, 0);
-					SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createSignalStatisticHistogram(options), stat.toString());
-					panel.setPreferredSize(preferredSize);
-					panel.addSignalChangeListener(this);
-					HistogramPanel.this.chartPanels.put(stat.toString(), panel);
-					HistogramPanel.this.mainPanel.add(panel);
-
-				}
-
-			} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Error creating histogram panel", e);
-			}
-    		
-    	}
-    	
-    	protected void updateDetail(){
-    		
-    		if(hasDatasets()){
-				this.setEnabled(true);
-			} else {
-				this.setEnabled(false);
-			}
-    		
-    		MeasurementScale scale  = HistogramPanel.this.measurementUnitSettingsPanel.getSelected();
-			boolean useDensity = HistogramPanel.this.useDensityPanel.isSelected();
-
-			try{
-
-				
-				int signalGroup = 1; //TODO - get the number  of signal groups in the selected datasets, and iterate 
-				
-				for(SignalStatistic stat : SignalStatistic.values()){
-					SelectableChartPanel panel = HistogramPanel.this.chartPanels.get(stat.toString());
-
-					JFreeChart chart = null;
-					SignalHistogramChartOptions options = new SignalHistogramChartOptions(getDatasets(), stat, scale, useDensity, signalGroup);
-					options.setLogger(programLogger);
-
-					if(this.getChartCache().hasChart(options)){
-						programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());
-						chart = HistogramPanel.this.getChartCache().getChart(options);
-
-					} else { // No cache
-
-
-						if(useDensity){
-							//TODO - make the density chart
-							chart = HistogramChartFactory.createSignalDensityStatsChart(options);
-							HistogramPanel.this.getChartCache().addChart(options, chart);
-
-						} else {
-							chart = HistogramChartFactory.createSignalStatisticHistogram(options);
-							HistogramPanel.this.getChartCache().addChart(options, chart);
-
-						}
-						programLogger.log(Level.FINEST, "Added cached histogram chart: "+stat);
-					}
-
-					XYPlot plot = (XYPlot) chart.getPlot();
-					plot.setDomainPannable(true);
-					plot.setRangePannable(true);
-
-					panel.setChart(chart);
-				}
-			} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Error updating histogram panel", e);
-			} finally {
-				HistogramPanel.this.setUpdating(false);
-			}
-    	
-    	}
-    	
-    }
 
     protected class AnalysisPanel extends JPanel{
 

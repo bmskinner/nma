@@ -122,28 +122,43 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			constraints.fill = GridBagConstraints.BOTH;
 			constraints.gridx = 0;
 			constraints.gridy = 0;
-			constraints.gridheight = 1;
+			constraints.gridheight = 2;
 			constraints.gridwidth = 1;
-			constraints.weightx = 0.3;
-			constraints.weighty = 1;
+			constraints.weightx = 0.5;
+			constraints.weighty = 0.6;
 			constraints.anchor = GridBagConstraints.CENTER;
 
 			cellsListPanel = new CellsListPanel();
 			cellsListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 			this.add(cellsListPanel, constraints);
+			
+			constraints.gridx = 0;
+			constraints.gridy = 2;
+			constraints.gridheight = 2;
+			constraints.gridwidth = 1;
+			constraints.weightx = 0.5;
+			constraints.weighty = 0.4;
+			signalListPanel = new SignalListPanel();
+			signalListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+			this.add(signalListPanel, constraints);
 
 			// make the chart for each nucleus
 			JPanel centrePanel = createCentrePanel();
 
 			constraints.gridx = 1;
+			constraints.gridy = 0;
 			constraints.gridwidth = 2;
-			constraints.weightx = 1;
+			constraints.gridheight = 4;
+			constraints.weightx = 0.9;
+			constraints.weighty = 1;
 			this.add(centrePanel, constraints);
 
 
 			outlinePanel = new OutlinePanel();
 			outlinePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 			constraints.gridx = 3;
+			constraints.gridy = 0;
+			constraints.weightx = 0.7;
 			this.add(outlinePanel, constraints);
 
 
@@ -170,10 +185,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 		profilePanel = new ProfilePanel();
 		centrePanel.add(profilePanel);
-		
-		signalListPanel = new SignalListPanel();
-		centrePanel.add(signalListPanel);
-		
+
 		Dimension minSize = new Dimension(200, 300);
 		centrePanel.setMinimumSize(minSize);
 		return centrePanel;
@@ -740,7 +752,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	
 	protected class CellStatsPanel extends JPanel {
 		
-		private static final long serialVersionUID = 1L;
 		private ExportableTable table; // individual cell stats
 		
 		private JScrollPane scrollPane;

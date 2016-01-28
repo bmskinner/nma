@@ -85,9 +85,6 @@ import components.generic.ProfileType;
 
 @SuppressWarnings("serial")
 public class NucleusProfilesPanel extends DetailPanel {
-
-//	ProfileDisplayPanel 	profileDisplayPanel; // hold regular profiles
-//	ProfileDisplayPanel 	frankenDisplayPanel; // hold franken profiles
 	
 	private Map<ProfileType, ProfileDisplayPanel> profilePanels = new HashMap<ProfileType, ProfileDisplayPanel>();
 	
@@ -105,19 +102,14 @@ public class NucleusProfilesPanel extends DetailPanel {
 			this.addSubPanel(panel);
 			profilesTabPanel.addTab(type.toString(), null, panel, null);
 		}
-//		profileDisplayPanel = new ProfileDisplayPanel(programLogger, ProfileType.REGULAR);
-//		frankenDisplayPanel = new ProfileDisplayPanel(programLogger, ProfileType.FRANKEN);
 		
-//		this.addSubPanel(profileDisplayPanel);
-//		this.addSubPanel(frankenDisplayPanel);
+		/*
+		 * Create the other profile panels
+		 */
 		
 		modalityDisplayPanel  = new ModalityDisplayPanel();		
 		variabilityChartPanel = new VariabililtyDisplayPanel();
-		//---------------
-		// Add to the tabbed panel
-		//---------------
-//		profilesTabPanel.addTab("Profile", null, profileDisplayPanel, null);
-//		profilesTabPanel.addTab("FrankenProfile", null, frankenDisplayPanel, null);
+		
 		profilesTabPanel.addTab("Variability", null, variabilityChartPanel, null);
 		profilesTabPanel.addTab("Modality", null, modalityDisplayPanel, null);
 		this.add(profilesTabPanel, BorderLayout.CENTER);
@@ -129,10 +121,6 @@ public class NucleusProfilesPanel extends DetailPanel {
 		updateMultiple();
 	}
 	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a multiple datasets are selected
-	 */
 	@Override
 	protected void updateMultiple() throws Exception {
 		
@@ -140,11 +128,6 @@ public class NucleusProfilesPanel extends DetailPanel {
 			profilePanels.get(type).update(getDatasets());
 			programLogger.log(Level.FINEST, "Updated "+type.toString()+" profile panel");
 		}
-//		profileDisplayPanel.update(getDatasets());
-//		programLogger.log(Level.FINEST, "Updated nuclear profiles panel");
-//		
-//		frankenDisplayPanel.update(getDatasets());
-//		programLogger.log(Level.FINEST, "Updated franken profiles panel");
 		
 		variabilityChartPanel.update(getDatasets());
 		programLogger.log(Level.FINEST, "Updated variabililty panel");
@@ -153,10 +136,6 @@ public class NucleusProfilesPanel extends DetailPanel {
 		programLogger.log(Level.FINEST, "Updated modality panel");
 	}
 	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a no datasets are selected
-	 */
 	@Override
 	protected void updateNull() throws Exception {
 		updateMultiple();
@@ -550,213 +529,4 @@ public class NucleusProfilesPanel extends DetailPanel {
 			
 		}
 	}
-	
-//	@SuppressWarnings("serial")
-//	private abstract class ProfileDisplayPanel extends JPanel implements ActionListener {
-//		
-//		Dimension minimumChartSize = new Dimension(50, 100);
-//		Dimension preferredChartSize = new Dimension(400, 300);
-//
-//		protected JPanel buttonPanel = new JPanel(new FlowLayout());
-//		protected ChartPanel chartPanel;
-//		
-//		protected BorderTagOptionsPanel borderTagOptionsPanel = new BorderTagOptionsPanel();
-//		protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
-//		protected ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
-//		
-//		public ProfileDisplayPanel(){
-//			this.setLayout(new BorderLayout());
-//			JFreeChart rawChart = MorphologyChartFactory.makeEmptyProfileChart();
-//			chartPanel = MorphologyChartFactory.makeProfileChartPanel(rawChart);
-//			
-//			chartPanel.setMinimumDrawWidth( 0 );
-//			chartPanel.setMinimumDrawHeight( 0 );
-//			this.setMinimumSize(minimumChartSize);
-//			this.setPreferredSize(preferredChartSize);
-//			this.add(chartPanel, BorderLayout.CENTER);
-//					
-//			// add the alignments panel to the tab
-//			
-//			buttonPanel.add(profileAlignmentOptionsPanel);
-//			profileAlignmentOptionsPanel.addActionListener(this);
-//			profileAlignmentOptionsPanel.setEnabled(false);
-//			
-//			buttonPanel.add(borderTagOptionsPanel);
-//			borderTagOptionsPanel.addActionListener(this);
-//			borderTagOptionsPanel.setEnabled(false);
-//			
-//			buttonPanel.add(profileMarkersOptionsPanel);
-//			profileMarkersOptionsPanel.addActionListener(this);
-//			profileMarkersOptionsPanel.setEnabled(false);
-//						
-//			this.add(buttonPanel, BorderLayout.NORTH);
-//		}
-//		
-//		public void setEnabled(boolean b){
-//			profileAlignmentOptionsPanel.setEnabled(b);
-//			borderTagOptionsPanel.setEnabled(b);
-//			profileMarkersOptionsPanel.setEnabled(b);
-//		}
-//		
-//		public void update(List<AnalysisDataset> list){
-//			
-//			if(hasDatasets()){
-//				
-//				this.setEnabled(true);
-//
-//				if( ! isSingleDataset()){
-//					
-//					// Don't allow marker selection for multiple datasets
-//					profileMarkersOptionsPanel.setEnabled(false);
-//				}
-//
-//			} else {
-//				this.setEnabled(false);				
-//			}
-//		}
-//
-//		@Override
-//		public void actionPerformed(ActionEvent e) {
-//			
-//			update(getDatasets());
-//		}
-//	}
-	
-//	@SuppressWarnings("serial")
-//	private class RegularProfileDisplayPanel extends ProfileDisplayPanel {
-//		
-//		public RegularProfileDisplayPanel(){
-//			super();
-//		}
-//		
-//		public void update(List<AnalysisDataset> list){
-//			super.update(list);
-//			
-//			boolean normalised = profileAlignmentOptionsPanel.isNormalised();
-//			ProfileAlignment alignment = profileAlignmentOptionsPanel.getSelected();
-//			
-//			if(normalised){
-//				alignment = ProfileAlignment.LEFT;
-//			}
-//			
-//			BorderTag tag = borderTagOptionsPanel.getSelected();
-//			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
-//			
-//			ProfileChartOptions options = new ProfileChartOptions(list, normalised, alignment, tag, showMarkers, ProfileType.REGULAR);
-//			
-//			updateProfiles(options);
-//		}
-//		
-//		/**
-//		 * Update the profile panel with data from the given datasets
-//		 * @param list the datasets
-//		 * @param normalised flag for raw or normalised lengths
-//		 * @param rightAlign flag for left or right alignment (no effect if normalised is true)
-//		 */	
-//		private void updateProfiles(ProfileChartOptions options){
-//			try {	
-//				JFreeChart chart = null;
-//
-//				// Check for a cached chart
-//				if(getChartCache().hasChart(options)){
-//					
-//					programLogger.log(Level.FINEST, "Using cached profile chart");
-//					chart = getChartCache().getChart(options);
-//
-//				} else { // No cache
-//
-//					if(getDatasets().size()==1){
-//
-//						// full segment colouring
-//						chart = MorphologyChartFactory.makeSingleProfileChart( options );
-//						chartPanel.setChart(chart);
-//
-//					} else {
-//
-//						chart = MorphologyChartFactory.makeMultiProfileChart( options );
-//
-//						
-//					}
-//					getChartCache().addChart(options, chart);
-//					programLogger.log(Level.FINEST, "Added cached profile chart");
-//				}
-//				chartPanel.setChart(chart);
-//				
-//			} catch (Exception e) {
-//				programLogger.log(Level.SEVERE, "Error in plotting profile", e);			
-//			} 
-//		}
-//		
-//		
-//	}
-	
-//	@SuppressWarnings("serial")
-//	private class FrankenProfileDisplayPanel extends ProfileDisplayPanel {
-//		
-//		public FrankenProfileDisplayPanel(){
-//			super();
-//			profileAlignmentOptionsPanel.setEnabled(false);
-//		}
-//		
-//		public void update(List<AnalysisDataset> list){
-//			super.update(list);
-//			profileAlignmentOptionsPanel.setEnabled(false);
-//			
-//			boolean normalised = true;
-//			ProfileAlignment alignment = ProfileAlignment.LEFT;
-//			BorderTag tag = borderTagOptionsPanel.getSelected();
-//			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
-//			
-//			ProfileChartOptions options = new ProfileChartOptions(list, normalised, alignment, tag, showMarkers, ProfileType.FRANKEN);
-//			
-//			
-//			updateProfiles(options);
-//		}
-//		
-//		/**
-//		 * Update the profile panel with data from the given datasets
-//		 * @param list the datasets
-//		 * @param normalised flag for raw or normalised lengths
-//		 * @param rightAlign flag for left or right alignment (no effect if normalised is true)
-//		 */	
-//		private void updateProfiles(ProfileChartOptions options){
-//					
-//			try {
-//				JFreeChart chart = null;
-//			
-//				
-//				if(getChartCache().hasChart(options)){
-//
-//					programLogger.log(Level.FINEST, "Using cached frankenprofile chart");
-//					chart = getChartCache().getChart(options);
-//
-//				} else { // No cache
-//
-//
-//					if(getDatasets().size()==1){
-//
-//						chart = MorphologyChartFactory.makeFrankenProfileChart(options);
-//
-//					} else {
-//
-//						chart = MorphologyChartFactory.makeMultiProfileChart(options);
-//					}
-//					getChartCache().addChart(options, chart);
-//					programLogger.log(Level.FINEST, "Added cached frankenprofile chart");
-//				}
-//				chartPanel.setChart(chart);
-//
-//			} catch (Exception e) {
-////				log("Error in plotting frankenprofile: "+e.getMessage());
-////				for(AnalysisDataset d : list){
-////					log(d.getName());
-////					ProfileCollection f = d.getCollection().getProfileCollection(ProfileCollectionType.FRANKEN);
-////					log(f.printKeys());
-////				}
-//				programLogger.log(Level.SEVERE, "Error in plotting frankenprofile", e);
-//			} 
-//		}
-//
-//	}
-
 }

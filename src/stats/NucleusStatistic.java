@@ -60,6 +60,7 @@ public enum NucleusStatistic implements PlottableStatistic {
 	  public String toString(){
 		  return this.name;
 	  }
+
 	  
 	  /**
 	   * Get the types of nucleus for which the statistic applies

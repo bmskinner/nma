@@ -782,74 +782,76 @@ public class SegmentsDetailPanel extends DetailPanel {
 			super(logger);
 		}
 
-		public void updateDetail() {
-			programLogger.log(Level.FINE, "Updating segment Wilcoxon panel");
+		@Override
+		protected void updateSingle() throws Exception {
+			tablePanel = createTablePanel();
+			scrollPane.setColumnHeaderView(null);
+			tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
+			scrollPane.setViewportView(tablePanel);;
+			tablePanel.repaint();
+			
+		}
 
-			SwingUtilities.invokeLater(new Runnable(){
-				public void run(){
-					try{
-						tablePanel = createTablePanel();
-						scrollPane.setColumnHeaderView(null);
-						if(hasDatasets()){
-							
-							if(!isSingleDataset()){
+		@Override
+		protected void updateMultiple() throws Exception {
+			tablePanel = createTablePanel();
+			scrollPane.setColumnHeaderView(null);
+			
+			if(checkSegmentCountsMatch(getDatasets())){
 
-								if(checkSegmentCountsMatch(getDatasets())){
+				int segmentCount = activeDataset()
+						.getCollection()
+						.getProfileCollection(ProfileType.REGULAR)
+						.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+						.getSegmentCount();
 
-									int segmentCount = activeDataset()
-											.getCollection()
-											.getProfileCollection(ProfileType.REGULAR)
-											.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
-											.getSegmentCount();
+				for(SegmentStatistic stat : SegmentStatistic.values()){
 
-									for(SegmentStatistic stat : SegmentStatistic.values()){
+					// Get each segment as a boxplot
+					for( int i=0; i<segmentCount; i++){
+						String segName = "Seg_"+i;
 
-										// Get each segment as a boxplot
-										for( int i=0; i<segmentCount; i++){
-											String segName = "Seg_"+i;
+						TableModel model;
 
-											TableModel model;
-
-											TableOptions options = new SegmentStatsTableOptions(getDatasets(), stat, segName);
-											if(getTableCache().hasTable(options)){
-												programLogger.log(Level.FINEST, "Fetched cached Wilcoxon table: "+stat);
-												model = getTableCache().getTable(options);
-											} else {
-												model = NucleusTableDatasetCreator.createWilcoxonSegmentStatTable(getDatasets(), stat, segName);
-												programLogger.log(Level.FINEST, "Added cached Wilcoxon table: "+stat);
-												getTableCache().addTable(options, model);
-											}
-
-											
-											ExportableTable table = new ExportableTable(model);
-											setRenderer(table, new WilcoxonTableCellRenderer());
-											addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
-											scrollPane.setColumnHeaderView(table.getTableHeader());
-										}
-
-									}
-									tablePanel.revalidate();
-
-								} else {
-									tablePanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
-								} 
-							} else {
-								tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
-							}
+						TableOptions options = new SegmentStatsTableOptions(getDatasets(), stat, segName);
+						if(getTableCache().hasTable(options)){
+							programLogger.log(Level.FINEST, "Fetched cached Wilcoxon table: "+stat);
+							model = getTableCache().getTable(options);
 						} else {
-							tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
-							
+							model = NucleusTableDatasetCreator.createWilcoxonSegmentStatTable(getDatasets(), stat, segName);
+							programLogger.log(Level.FINEST, "Added cached Wilcoxon table: "+stat);
+							getTableCache().addTable(options, model);
 						}
-						programLogger.log(Level.FINEST, "Updated Wilcoxon panel");
-					} catch (Exception e) {
-						programLogger.log(Level.SEVERE, "Error making Wilcoxon table", e);
-						tablePanel = createTablePanel();
-					} finally {
-						scrollPane.setViewportView(tablePanel);;
-						tablePanel.repaint();
-						setUpdating(false);
+
+						
+						ExportableTable table = new ExportableTable(model);
+						setRenderer(table, new WilcoxonTableCellRenderer());
+						addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
+						scrollPane.setColumnHeaderView(table.getTableHeader());
 					}
-				}});
+
+				}
+				tablePanel.revalidate();
+
+			} else {
+				tablePanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
+			} 
+			
+			
+			
+			scrollPane.setViewportView(tablePanel);;
+			tablePanel.repaint();
+			
+		}
+
+		@Override
+		protected void updateNull() throws Exception {
+			tablePanel = createTablePanel();
+			scrollPane.setColumnHeaderView(null);
+			tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
+			scrollPane.setViewportView(tablePanel);;
+			tablePanel.repaint();
+			
 		}
 				
 	}
@@ -874,74 +876,74 @@ public class SegmentsDetailPanel extends DetailPanel {
 			return infoPanel;
 		}
 
-		public void updateDetail() {
-			programLogger.log(Level.FINE, "Updating segment Wilcoxon panel");
+		@Override
+		protected void updateSingle() throws Exception {
+			tablePanel = createTablePanel();
+			scrollPane.setColumnHeaderView(null);
+			tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
+			scrollPane.setViewportView(tablePanel);;
+			tablePanel.repaint();
+			
+		}
 
-			SwingUtilities.invokeLater(new Runnable(){
-				public void run(){
-					try{
-						tablePanel = createTablePanel();
-						scrollPane.setColumnHeaderView(null);
-						if(hasDatasets()){
-							
-							if(!isSingleDataset()){
+		@Override
+		protected void updateMultiple() throws Exception {
+			tablePanel = createTablePanel();
+			scrollPane.setColumnHeaderView(null);
+			
+			if(checkSegmentCountsMatch(getDatasets())){
 
-								if(checkSegmentCountsMatch(getDatasets())){
+				int segmentCount = activeDataset()
+						.getCollection()
+						.getProfileCollection(ProfileType.REGULAR)
+						.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
+						.getSegmentCount();
 
-									int segmentCount = activeDataset()
-											.getCollection()
-											.getProfileCollection(ProfileType.REGULAR)
-											.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
-											.getSegmentCount();
+				for(SegmentStatistic stat : SegmentStatistic.values()){
 
-									for(SegmentStatistic stat : SegmentStatistic.values()){
+					// Get each segment as a boxplot
+					for( int i=0; i<segmentCount; i++){
+						String segName = "Seg_"+i;
 
-										// Get each segment as a boxplot
-										for( int i=0; i<segmentCount; i++){
-											String segName = "Seg_"+i;
+						TableModel model;
 
-											TableModel model;
-
-											TableOptions options = new SegmentStatsTableOptions(getDatasets(), stat, segName);
-											if(getTableCache().hasTable(options)){
-												programLogger.log(Level.FINEST, "Fetched cached magnitude table: "+stat);
-												model = getTableCache().getTable(options);
-											} else {
-												model = NucleusTableDatasetCreator.createMagnitudeSegmentStatTable(getDatasets(), stat, segName);
-												programLogger.log(Level.FINEST, "Added cached magnitude table: "+stat);
-												getTableCache().addTable(options, model);
-											}
-
-											
-											ExportableTable table = new ExportableTable(model);
-											setRenderer(table, new PairwiseTableCellRenderer());
-											addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
-											scrollPane.setColumnHeaderView(table.getTableHeader());
-										}
-
-									}
-									tablePanel.revalidate();
-
-								} else {
-									tablePanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
-								} 
-							} else {
-								tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
-							}
+						TableOptions options = new SegmentStatsTableOptions(getDatasets(), stat, segName);
+						if(getTableCache().hasTable(options)){
+							programLogger.log(Level.FINEST, "Fetched cached magnitude table: "+stat);
+							model = getTableCache().getTable(options);
 						} else {
-							tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
-							
+							model = NucleusTableDatasetCreator.createMagnitudeSegmentStatTable(getDatasets(), stat, segName);
+							programLogger.log(Level.FINEST, "Added cached magnitude table: "+stat);
+							getTableCache().addTable(options, model);
 						}
-						programLogger.log(Level.FINEST, "Updated segment magnitude panel");
-					} catch (Exception e) {
-						programLogger.log(Level.SEVERE, "Error making segment magnitude table", e);
-						tablePanel = createTablePanel();
-					} finally {
-						scrollPane.setViewportView(tablePanel);;
-						tablePanel.repaint();
-						setUpdating(false);
+
+						
+						ExportableTable table = new ExportableTable(model);
+						setRenderer(table, new PairwiseTableCellRenderer());
+						addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
+						scrollPane.setColumnHeaderView(table.getTableHeader());
 					}
-				}});
+
+				}
+				tablePanel.revalidate();
+
+			} else {
+				tablePanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
+			} 
+			
+			scrollPane.setViewportView(tablePanel);;
+			tablePanel.repaint();
+			
+		}
+
+		@Override
+		protected void updateNull() throws Exception {
+			tablePanel = createTablePanel();
+			scrollPane.setColumnHeaderView(null);
+			tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
+			scrollPane.setViewportView(tablePanel);;
+			tablePanel.repaint();
+			
 		}
 				
 	}

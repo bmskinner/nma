@@ -70,21 +70,26 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 		this.add(clusterPanel);
 
 	}
-		
-	public void updateDetail(){
-		programLogger.log(Level.FINE, "Updating cluster panel");
-
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				
-				clusterPanel.update(getDatasets());		
-				programLogger.log(Level.FINEST, "Updated cluster panel");
-				setUpdating(false);
-			}
-		});
+	
+	@Override
+	protected void updateSingle() throws Exception {
+		updateMultiple();
 		
 	}
+
+	@Override
+	protected void updateMultiple() throws Exception {
+		clusterPanel.update(getDatasets());		
+		programLogger.log(Level.FINEST, "Updated cluster panel");
 		
+	}
+
+	@Override
+	protected void updateNull() throws Exception {
+		updateMultiple();
+		
+	}
+				
 	private class ClustersPanel extends JPanel implements MouseListener {
 		
 		private JButton 	clusterButton	= new JButton("Cluster population");
@@ -95,9 +100,6 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 		private JPanel		statusPanel		= new JPanel(new BorderLayout());
 		
 		private JPanel		showTreeButtonPanel;
-		
-//		private TreePane viewer = new TreePane();
-
 		
 		private JPanel tablesPanel;
 		private ExportableTable clusterDetailsTable; 

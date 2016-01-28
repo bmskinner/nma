@@ -68,35 +68,26 @@ public class AnalysisDetailPanel extends DetailPanel {
 
 	}
 	
-	/**
-	 * Trigger an update of the panel with the given list of datasets
-	 * to display
-	 * @param list
-	 */
-	
-	public void updateDetail(){
-		programLogger.log(Level.FINE, "Updating analysis panel");
-		
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				
-				try{
-					
-					updateAnalysisParametersPanel();
-					programLogger.log(Level.FINEST, "Updated analysis parameter panel");
-					updateStatsPanel();
-					programLogger.log(Level.FINEST, "Updated analysis stats panel");
-				}  catch  (Exception e){
-					programLogger.log(Level.SEVERE, "Error updating analysis panels", e);
-
-				} finally {
-					
-					setUpdating(false);
-					programLogger.log(Level.FINE, "Updated analysis panels");
-				}
-		}});
+	@Override
+	protected void updateSingle() throws Exception {
+		updateMultiple() ;
 	}
+	
+
+	@Override
+	protected void updateMultiple() throws Exception {
+		updateAnalysisParametersPanel();
+		programLogger.log(Level.FINEST, "Updated analysis parameter panel");
 		
+		updateStatsPanel();
+		programLogger.log(Level.FINEST, "Updated analysis stats panel");
+	}
+	
+	@Override
+	protected void updateNull() throws Exception {
+		updateMultiple() ;
+	}
+			
 	
 	/**
 	 * Update the analysis panel with data from the given datasets
