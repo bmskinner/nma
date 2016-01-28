@@ -66,62 +66,97 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		
 	}
 	
-	/**
-	 * Update the venn panel with data from the given datasets
-	 * @param getDatasets() the datasets
-	 */
 	@Override
-	public void updateDetail(){
-		
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				try{
-					updatePairwiseVennTable();
-				} catch(Exception e){
-					
-					TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
-					pairwiseVennTable.setModel(model);
-					programLogger.log(Level.WARNING, "Error updating pairwise venn table");
-				} finally {
-					setUpdating(false);
-				}
-				
-			}});
+	protected void updateSingle() throws Exception {
+		updateNull();
 	}
+	
 
-	private void updatePairwiseVennTable(){
+	@Override
+	protected void updateMultiple() throws Exception {
 		programLogger.log(Level.FINE, "Updating pairwise venn table");
 
 
 		// format the numbers and make into a tablemodel
 		TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
 
-		if(!getDatasets().isEmpty() && getDatasets()!=null){
-
-			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.PAIRWISE_VENN);
-			if(getTableCache().hasTable(options)){
-				model = getTableCache().getTable(options);
-			} else {
-				model = NucleusTableDatasetCreator.createPairwiseVennTable(getDatasets());
-				getTableCache().addTable(options, model);
-			}
-
+		TableOptions options = new DefaultTableOptions(getDatasets(), TableType.PAIRWISE_VENN);
+		if(getTableCache().hasTable(options)){
+			model = getTableCache().getTable(options);
+		} else {
+			model = NucleusTableDatasetCreator.createPairwiseVennTable(getDatasets());
+			getTableCache().addTable(options, model);
 		}
+
+		
 		pairwiseVennTable.setModel(model);
 		setRenderer(pairwiseVennTable, new PairwiseVennTableCellRenderer());
 		
-//		int columns = pairwiseVennTable.getColumnModel().getColumnCount();
-//		
-//
-//		if(columns>1){
-//			for(int i=1;i<columns;i++){
-//				pairwiseVennTable.getColumnModel().getColumn(i).setCellRenderer(new PairwiseVennTableCellRenderer());
-//			}
-//		}
-
 		programLogger.log(Level.FINEST, "Updated pairwise venn panel");
-
 	}
+	
+	@Override
+	protected void updateNull() throws Exception {
+		TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
+		pairwiseVennTable.setModel(model);
+	}
+	
+	/**
+	 * Update the venn panel with data from the given datasets
+	 * @param getDatasets() the datasets
+	 */
+//	@Override
+//	public void updateDetail(){
+//		
+//		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
+//				try{
+//					updatePairwiseVennTable();
+//				} catch(Exception e){
+//					
+//					TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
+//					pairwiseVennTable.setModel(model);
+//					programLogger.log(Level.WARNING, "Error updating pairwise venn table");
+//				} finally {
+//					setUpdating(false);
+//				}
+//				
+//			}});
+//	}
+
+//	private void updatePairwiseVennTable(){
+//		programLogger.log(Level.FINE, "Updating pairwise venn table");
+//
+//
+//		// format the numbers and make into a tablemodel
+//		TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
+//
+//		if(!getDatasets().isEmpty() && getDatasets()!=null){
+//
+//			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.PAIRWISE_VENN);
+//			if(getTableCache().hasTable(options)){
+//				model = getTableCache().getTable(options);
+//			} else {
+//				model = NucleusTableDatasetCreator.createPairwiseVennTable(getDatasets());
+//				getTableCache().addTable(options, model);
+//			}
+//
+//		}
+//		pairwiseVennTable.setModel(model);
+//		setRenderer(pairwiseVennTable, new PairwiseVennTableCellRenderer());
+//		
+////		int columns = pairwiseVennTable.getColumnModel().getColumnCount();
+////		
+////
+////		if(columns>1){
+////			for(int i=1;i<columns;i++){
+////				pairwiseVennTable.getColumnModel().getColumn(i).setCellRenderer(new PairwiseVennTableCellRenderer());
+////			}
+////		}
+//
+//		programLogger.log(Level.FINEST, "Updated pairwise venn panel");
+//
+//	}
 	
 	/**
 	 * Colour table cell background to show pairwise comparisons. All cells are white, apart

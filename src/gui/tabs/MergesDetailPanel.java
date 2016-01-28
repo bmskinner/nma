@@ -35,6 +35,9 @@ import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
+import org.jfree.chart.JFreeChart;
+
+import charting.charts.MorphologyChartFactory;
 import analysis.AnalysisDataset;
 
 @SuppressWarnings("serial")
@@ -84,53 +87,51 @@ public class MergesDetailPanel extends DetailPanel {
 		this.add(getSourceButton, BorderLayout.SOUTH);
 	}
 	
-	@Override
-	public void updateDetail(){
-		
-		SwingUtilities.invokeLater( new Runnable(){
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a single dataset is selected
+	 */
+	protected void updateSingle() throws Exception {
+		if(activeDataset().hasMergeSources()){
 
-			public void run(){
-				try {
-					programLogger.log(Level.FINEST, "Updating merges panel");
-					getSourceButton.setVisible(false);
-					if(getDatasets().size()==1){
+			DefaultTableModel model = new DefaultTableModel();
 
-						if(activeDataset().hasMergeSources()){
+			Vector<Object> names 	= new Vector<Object>();
+			Vector<Object> nuclei 	= new Vector<Object>();
 
-							DefaultTableModel model = new DefaultTableModel();
+			for( UUID id : activeDataset().getMergeSources()){
+				AnalysisDataset mergeSource = activeDataset().getMergeSource(id);
+				names.add(mergeSource.getName());
+				nuclei.add(mergeSource.getCollection().getNucleusCount());
+			}
+			model.addColumn("Merge source", names);
+			model.addColumn("Nuclei", nuclei);
 
-							Vector<Object> names 	= new Vector<Object>();
-							Vector<Object> nuclei 	= new Vector<Object>();
+			mergeSources.setModel(model);
+			getSourceButton.setVisible(true);
 
-							for( UUID id : activeDataset().getMergeSources()){
-								AnalysisDataset mergeSource = activeDataset().getMergeSource(id);
-								names.add(mergeSource.getName());
-								nuclei.add(mergeSource.getCollection().getNucleusCount());
-							}
-							model.addColumn("Merge source", names);
-							model.addColumn("Nuclei", nuclei);
-
-							mergeSources.setModel(model);
-							getSourceButton.setVisible(true);
-
-						} else {
-							try{
-								mergeSources.setModel(makeBlankTable());
-							} catch (Exception e){
-								programLogger.log(Level.SEVERE, "Error updating merges panel", e);
-							}
-						}
-					} else { // more than one dataset selected
-						mergeSources.setModel(makeBlankTable());
-					}
-					programLogger.log(Level.FINEST, "Updated merges panel");
-				} catch (Exception e){
-					programLogger.log(Level.SEVERE, "Error updating merges panel", e);
-				} finally {
-					setUpdating(false);
-				}
-			}} );
+		} else {
+			updateNull();
+		}
 	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a multiple datasets are selected
+	 */
+	protected void updateMultiple() throws Exception {
+		updateNull();
+	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a no datasets are selected
+	 */
+	protected void updateNull() throws Exception {
+		getSourceButton.setVisible(false);
+		mergeSources.setModel(makeBlankTable());
+	}
+	
 	
 	private DefaultTableModel makeBlankTable(){
 		DefaultTableModel model = new DefaultTableModel();

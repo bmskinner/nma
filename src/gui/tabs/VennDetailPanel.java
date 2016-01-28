@@ -32,11 +32,20 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
+import org.jfree.chart.JFreeChart;
+
+import components.generic.BorderTag;
+import components.generic.ProfileType;
+import components.generic.SegmentedProfile;
+
 import charting.DefaultTableOptions;
 import charting.DefaultTableOptions.TableType;
 import charting.TableOptions;
+import charting.charts.MorphologyChartFactory;
+import charting.charts.ProfileChartOptions;
 import charting.datasets.NucleusTableDatasetCreator;
 import gui.components.ExportableTable;
+import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 public class VennDetailPanel extends DetailPanel {
 
@@ -67,43 +76,81 @@ public class VennDetailPanel extends DetailPanel {
 		
 	}
 	
-	/**
-	 * Update the venn panel with data from the given datasets
-	 * @param getDatasets() the datasets
-	 */
 	@Override
-	public void updateDetail(){
-		
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				updateVennTable();
-				setUpdating(false);
-			}});
+	protected void updateSingle() throws Exception {
+		updateNull();
 	}
+	
 
-	private void updateVennTable(){
+	@Override
+	protected void updateMultiple() throws Exception {
 		programLogger.log(Level.FINE, "Updating venn panel");
 
 
-		// format the numbers and make into a tablemodel
-		TableModel model = NucleusTableDatasetCreator.createVennTable(null);
+		TableModel model = null;
 
-		if(hasDatasets()){
 
-			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.VENN);
-			if(getTableCache().hasTable(options)){
-				model = getTableCache().getTable(options);
-			} else {
-				model = NucleusTableDatasetCreator.createVennTable(getDatasets());
-				getTableCache().addTable(options, model);
-			}
 
+		TableOptions options = new DefaultTableOptions(getDatasets(), TableType.VENN);
+		if(getTableCache().hasTable(options)){
+			model = getTableCache().getTable(options);
+		} else {
+			model = NucleusTableDatasetCreator.createVennTable(getDatasets());
+			getTableCache().addTable(options, model);
 		}
+
+		
 		vennTable.setModel(model);
 		setRenderer(vennTable, new VennTableCellRenderer());
 
 		programLogger.log(Level.FINEST, "Updated venn panel");
+		
 	}
+	
+	@Override
+	protected void updateNull() throws Exception {			
+		TableModel model = NucleusTableDatasetCreator.createVennTable(null);
+		vennTable.setModel(model);
+		setRenderer(vennTable, new VennTableCellRenderer());
+	}
+	
+	/**
+	 * Update the venn panel with data from the given datasets
+	 * @param getDatasets() the datasets
+	 */
+//	@Override
+//	public void updateDetail(){
+//		
+//		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
+//				updateVennTable();
+//				setUpdating(false);
+//			}});
+//	}
+
+//	private void updateVennTable(){
+//		programLogger.log(Level.FINE, "Updating venn panel");
+//
+//
+//		// format the numbers and make into a tablemodel
+//		TableModel model = NucleusTableDatasetCreator.createVennTable(null);
+//
+//		if(hasDatasets()){
+//
+//			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.VENN);
+//			if(getTableCache().hasTable(options)){
+//				model = getTableCache().getTable(options);
+//			} else {
+//				model = NucleusTableDatasetCreator.createVennTable(getDatasets());
+//				getTableCache().addTable(options, model);
+//			}
+//
+//		}
+//		vennTable.setModel(model);
+//		setRenderer(vennTable, new VennTableCellRenderer());
+//
+//		programLogger.log(Level.FINEST, "Updated venn panel");
+//	}
 	
 	/**
 	 * Colour table cell backsground to show pairwise comparisons. All cells are white, apart

@@ -550,9 +550,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				if(cell==null){
 					JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
 					profileChartPanel.setChart(chart);
+					profileOptions.setEnabled(false);
 
 				} else {
 
+					profileOptions.setEnabled(true);
 					Nucleus nucleus = cell.getNucleus();
 
 					XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus, type);
@@ -566,6 +568,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				programLogger.log(Level.SEVERE, "Error updating cell panel", e);
 				JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
 				profileChartPanel.setChart(chart);
+				profileOptions.setEnabled(false);
 			}
 
 		}

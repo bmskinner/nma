@@ -27,7 +27,9 @@ import gui.SignalChangeListener;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.DraggableOverlayChartPanel;
+import gui.components.SelectableChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.tabs.SegmentsDetailPanel.SegmentHistogramsPanel;
 import ij.IJ;
 
 import java.awt.BorderLayout;
@@ -44,20 +46,26 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
+import charting.charts.HistogramChartFactory;
+import charting.charts.HistogramChartOptions;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.ProfileChartOptions;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.BorderTag.BorderTagType;
@@ -89,19 +97,23 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 	}
 	
 	@Override
-	public void updateDetail(){
-
-		programLogger.log(Level.FINE, "Updating segments editing panel");
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				
-				segmentProfilePanel.update(getDatasets());
-
-				setUpdating(false);
-			}
-		});
+	protected void updateSingle() throws Exception {
+		updateMultiple();
 	}
 	
+
+	@Override
+	protected void updateMultiple() throws Exception {
+		segmentProfilePanel.update(getDatasets());
+		
+		
+	}
+	
+	@Override
+	protected void updateNull() throws Exception {
+		updateMultiple();
+	}
+		
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		fireSignalChangeEvent(event);
@@ -403,61 +415,97 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			return result;
 		}
 		
+		@Override
+		protected void updateSingle() throws Exception {
+			JFreeChart chart = null;
+			SegmentedProfile profile = null;
+			ProfileChartOptions options = new ProfileChartOptions(getDatasets(), true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileType.REGULAR);
+
+			// Set the button configuration
+			configureButtons(options);
+						
+			if(getChartCache().hasChart(options)){
+				chart = getChartCache().getChart(options);
+			} else {
+				chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
+				getChartCache().addChart(options, chart);
+			}
+
+			profile = activeDataset().getCollection()
+					.getProfileCollection(ProfileType.REGULAR)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+			
+			chartPanel.setChart(chart, profile, true);
+		}
+		
+
+		@Override
+		protected void updateMultiple() throws Exception {
+			updateNull();
+			
+		}
 		
 		@Override
-		public void updateDetail(){
-
-			programLogger.log(Level.FINE, "Updating segments editing panel");
-			SwingUtilities.invokeLater(new Runnable(){
-				public void run(){
-					
-					try {
-						JFreeChart chart = null;
-						SegmentedProfile profile = null;
-						if(! hasDatasets()){
-
-							chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
-							setButtonsEnabled(false);
-
-						} else {
-							
-							ProfileChartOptions options = new ProfileChartOptions(getDatasets(), true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileType.REGULAR);
-
-							// Set the button configuration
-							configureButtons(options);
-
-							if(isSingleDataset()){
-								
-								if(getChartCache().hasChart(options)){
-									chart = getChartCache().getChart(options);
-								} else {
-									chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
-									getChartCache().addChart(options, chart);
-								}
-
-								profile = activeDataset().getCollection()
-										.getProfileCollection(ProfileType.REGULAR)
-										.getSegmentedProfile(BorderTag.REFERENCE_POINT);
-								
-								chartPanel.setChart(chart, profile, true);
-							} else {
-								// Multiple datasets
-								chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
-							}
-						} 
-
-						
-					} catch (Exception e) {
-						programLogger.log(Level.SEVERE, "Error plotting segment profile", e);
-						chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
-						setButtonsEnabled(false);
-					}  finally {
-						
-						setUpdating(false);
-					}
-				}
-			});
+		protected void updateNull() throws Exception {			
+			chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
+			setButtonsEnabled(false);
 		}
+		
+		
+//		@Override
+//		public void updateDetail(){
+//
+//			programLogger.log(Level.FINE, "Updating segments editing panel");
+//			SwingUtilities.invokeLater(new Runnable(){
+//				public void run(){
+//					
+//					try {
+//						JFreeChart chart = null;
+//						SegmentedProfile profile = null;
+//						if(! hasDatasets()){
+//
+//							chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
+//							setButtonsEnabled(false);
+//
+//						} else {
+//							
+//							ProfileChartOptions options = new ProfileChartOptions(getDatasets(), true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileType.REGULAR);
+//
+//							// Set the button configuration
+//							configureButtons(options);
+//
+//							if(isSingleDataset()){
+//								
+//								if(getChartCache().hasChart(options)){
+//									chart = getChartCache().getChart(options);
+//								} else {
+//									chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
+//									getChartCache().addChart(options, chart);
+//								}
+//
+//								profile = activeDataset().getCollection()
+//										.getProfileCollection(ProfileType.REGULAR)
+//										.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+//								
+//								chartPanel.setChart(chart, profile, true);
+//							} else {
+//								// Multiple datasets
+//								chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
+//							}
+//						} 
+//
+//						
+//					} catch (Exception e) {
+//						programLogger.log(Level.SEVERE, "Error plotting segment profile", e);
+//						chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
+//						setButtonsEnabled(false);
+//					}  finally {
+//						
+//						setUpdating(false);
+//					}
+//				}
+//			});
+//		}
 				
 		/**
 		 * Enable or disable buttons depending on datasets selected

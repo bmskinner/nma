@@ -25,11 +25,14 @@ import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
+import charting.DefaultTableOptions;
 import charting.NucleusStatsTableOptions;
 import charting.TableOptions;
+import charting.DefaultTableOptions.TableType;
 import charting.datasets.NucleusTableDatasetCreator;
 import gui.components.ExportableTable;
 import gui.components.WilcoxonTableCellRenderer;
+import gui.tabs.VennDetailPanel.VennTableCellRenderer;
 import stats.NucleusStatistic;
 
 @SuppressWarnings("serial")
@@ -38,6 +41,56 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	public WilcoxonDetailPanel(Logger programLogger) throws Exception {
 		super(programLogger);
 	}
+	
+	@Override
+	protected void updateSingle() throws Exception {
+		scrollPane.setColumnHeaderView(null);
+		tablePanel = createTablePanel();
+		tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
+		scrollPane.setViewportView(tablePanel);;
+		tablePanel.repaint();
+	}
+	
+
+	@Override
+	protected void updateMultiple() throws Exception {
+		scrollPane.setColumnHeaderView(null);
+		tablePanel = createTablePanel();
+		for(NucleusStatistic stat : NucleusStatistic.values()){
+
+			TableModel model;
+
+			TableOptions options = new NucleusStatsTableOptions(getDatasets(), stat);
+			if(getTableCache().hasTable(options)){
+				programLogger.log(Level.FINEST, "Fetched cached Wilcoxon table: "+stat);
+				model = getTableCache().getTable(options);
+			} else {
+				model = NucleusTableDatasetCreator.createWilcoxonNuclearStatTable(getDatasets(), stat);
+				programLogger.log(Level.FINEST, "Added cached Wilcoxon table: "+stat);
+			}
+
+
+			ExportableTable table = new ExportableTable(model);
+			setRenderer(table, new WilcoxonTableCellRenderer());
+			addWilconxonTable(tablePanel, table, stat.toString());
+			scrollPane.setColumnHeaderView(table.getTableHeader());
+
+
+		}
+		tablePanel.revalidate();
+		scrollPane.setViewportView(tablePanel);;
+		tablePanel.repaint();
+		
+	}
+	
+	@Override
+	protected void updateNull() throws Exception {		
+		scrollPane.setColumnHeaderView(null);
+		tablePanel = createTablePanel();
+		tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
+		scrollPane.setViewportView(tablePanel);;
+		tablePanel.repaint();
+	}
 
 		
 	/**
@@ -45,63 +98,63 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	 * @param list the datasets
 	 * @throws Exception 
 	 */
-	@Override
-	public void updateDetail() {
-		programLogger.log(Level.FINE, "Updating Wilcoxon panel");
-
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				
-				try{
-
-					scrollPane.setColumnHeaderView(null);
-					tablePanel = createTablePanel();
-					
-					if(hasDatasets()){
-						
-						if(!isSingleDataset()){
-
-							for(NucleusStatistic stat : NucleusStatistic.values()){
-
-								TableModel model;
-
-								TableOptions options = new NucleusStatsTableOptions(getDatasets(), stat);
-								if(getTableCache().hasTable(options)){
-									programLogger.log(Level.FINEST, "Fetched cached Wilcoxon table: "+stat);
-									model = getTableCache().getTable(options);
-								} else {
-									model = NucleusTableDatasetCreator.createWilcoxonNuclearStatTable(getDatasets(), stat);
-									programLogger.log(Level.FINEST, "Added cached Wilcoxon table: "+stat);
-								}
-
-
-								ExportableTable table = new ExportableTable(model);
-								setRenderer(table, new WilcoxonTableCellRenderer());
-								addWilconxonTable(tablePanel, table, stat.toString());
-								scrollPane.setColumnHeaderView(table.getTableHeader());
-
-
-							}
-							tablePanel.revalidate();
-
-							
-						} else {
-							tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
-						}
-					} else {
-						tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
-					}
-					programLogger.log(Level.FINEST, "Updated Wilcoxon panel");
-				} catch (Exception e) {
-					programLogger.log(Level.SEVERE, "Error making Wilcoxon table", e);
-					tablePanel = createTablePanel();
-				} finally {
-					scrollPane.setViewportView(tablePanel);;
-					tablePanel.repaint();
-					setUpdating(false);
-				}
-				
-			}});
-	}
+//	@Override
+//	public void updateDetail() {
+//		programLogger.log(Level.FINE, "Updating Wilcoxon panel");
+//
+//		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
+//				
+//				try{
+//
+//					scrollPane.setColumnHeaderView(nusll);
+//					tablePanel = createTablePanel();
+//					
+//					if(hasDatasets()){
+//						
+//						if(!isSingleDataset()){
+//
+//							for(NucleusStatistic stat : NucleusStatistic.values()){
+//
+//								TableModel model;
+//
+//								TableOptions options = new NucleusStatsTableOptions(getDatasets(), stat);
+//								if(getTableCache().hasTable(options)){
+//									programLogger.log(Level.FINEST, "Fetched cached Wilcoxon table: "+stat);
+//									model = getTableCache().getTable(options);
+//								} else {
+//									model = NucleusTableDatasetCreator.createWilcoxonNuclearStatTable(getDatasets(), stat);
+//									programLogger.log(Level.FINEST, "Added cached Wilcoxon table: "+stat);
+//								}
+//
+//
+//								ExportableTable table = new ExportableTable(model);
+//								setRenderer(table, new WilcoxonTableCellRenderer());
+//								addWilconxonTable(tablePanel, table, stat.toString());
+//								scrollPane.setColumnHeaderView(table.getTableHeader());
+//
+//
+//							}
+//							tablePanel.revalidate();
+//
+//							
+//						} else {
+//							tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
+//						}
+//					} else {
+//						tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
+//					}
+//					programLogger.log(Level.FINEST, "Updated Wilcoxon panel");
+//				} catch (Exception e) {
+//					programLogger.log(Level.SEVERE, "Error making Wilcoxon table", e);
+//					tablePanel = createTablePanel();
+//				} finally {
+//					scrollPane.setViewportView(tablePanel);;
+//					tablePanel.repaint();
+//					setUpdating(false);
+//				}
+//				
+//			}});
+//	}
 
 }

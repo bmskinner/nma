@@ -27,6 +27,8 @@ import gui.dialogs.RandomSamplingDialog;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.UUID;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,8 +40,10 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import analysis.AnalysisDataset;
 import analysis.RandomSampler;
 import analysis.nucleus.ShellAnalysis;
 import stats.NucleusStatistic;
@@ -96,73 +100,132 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 		infoPanel.add( buttonPanel );
 		return infoPanel;
 	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a single dataset is selected
+	 */
+	protected void updateSingle() throws Exception {
+		scrollPane.setColumnHeaderView(null);
+		tablePanel = createTablePanel();
+		randomSamplingButton.setEnabled(true);
+		tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
+		scrollPane.setViewportView(tablePanel);;
+		tablePanel.repaint();
+	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a multiple datasets are selected
+	 */
+	protected void updateMultiple() throws Exception {
+		scrollPane.setColumnHeaderView(null);
+		tablePanel = createTablePanel();
+		randomSamplingButton.setEnabled(false);
+
+		for(NucleusStatistic stat : NucleusStatistic.values()){
+
+			TableModel model;
+
+			TableOptions options = new NucleusStatsTableOptions(getDatasets(), stat);
+			if(getTableCache().hasTable(options)){
+				programLogger.log(Level.FINEST, "Fetched cached magnitude table: "+stat);
+				model = getTableCache().getTable(options);
+			} else {
+				model = NucleusTableDatasetCreator.createMagnitudeNuclearStatTable(getDatasets(), stat);
+				programLogger.log(Level.FINEST, "Added cached magnitude table: "+stat);
+			}
+
+
+			ExportableTable table = new ExportableTable(model);
+			setRenderer(table, new PairwiseTableCellRenderer());
+			addWilconxonTable(tablePanel, table, stat.toString());
+			scrollPane.setColumnHeaderView(table.getTableHeader());
+
+
+		}
+		tablePanel.revalidate();
+		scrollPane.setViewportView(tablePanel);;
+		tablePanel.repaint();
+	}
+	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update when a no datasets are selected
+	 */
+	protected void updateNull() throws Exception {
+		randomSamplingButton.setEnabled(false);
+		tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
+		scrollPane.setViewportView(tablePanel);;
+		tablePanel.repaint();
+	}
 		
 	/**
 	 * Update the magnitude panel with data from the given datasets
 	 * @param list the datasets
 	 * @throws Exception 
 	 */
-	@Override
-	public void updateDetail() {
-		programLogger.log(Level.FINE, "Updating nucleus magnitude panel");
-
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				
-				try{
-
-					scrollPane.setColumnHeaderView(null);
-					tablePanel = createTablePanel();
-					
-					if(hasDatasets()){
-						
-						if(!isSingleDataset()){
-							randomSamplingButton.setEnabled(false);
-
-							for(NucleusStatistic stat : NucleusStatistic.values()){
-
-								TableModel model;
-
-								TableOptions options = new NucleusStatsTableOptions(getDatasets(), stat);
-								if(getTableCache().hasTable(options)){
-									programLogger.log(Level.FINEST, "Fetched cached magnitude table: "+stat);
-									model = getTableCache().getTable(options);
-								} else {
-									model = NucleusTableDatasetCreator.createMagnitudeNuclearStatTable(getDatasets(), stat);
-									programLogger.log(Level.FINEST, "Added cached magnitude table: "+stat);
-								}
-
-
-								ExportableTable table = new ExportableTable(model);
-								setRenderer(table, new PairwiseTableCellRenderer());
-								addWilconxonTable(tablePanel, table, stat.toString());
-								scrollPane.setColumnHeaderView(table.getTableHeader());
-
-
-							}
-							tablePanel.revalidate();
-
-							
-						} else {
-							randomSamplingButton.setEnabled(true);
-							tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
-						}
-					} else {
-						randomSamplingButton.setEnabled(false);
-						tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
-					}
-					programLogger.log(Level.FINEST, "Updated magnitude panel");
-				} catch (Exception e) {
-					programLogger.log(Level.SEVERE, "Error making magnitude table", e);
-					tablePanel = createTablePanel();
-				} finally {
-					scrollPane.setViewportView(tablePanel);;
-					tablePanel.repaint();
-					setUpdating(false);
-				}
-				
-			}});
-	}
+//	@Override
+//	public void updateDetail() {
+//		programLogger.log(Level.FINE, "Updating nucleus magnitude panel");
+//
+//		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
+//				
+//				try{
+//
+//					scrollPane.setColumnHeaderView(null);
+//					tablePanel = createTablePanel();
+//					
+//					if(hasDatasets()){
+//						
+//						if(!isSingleDataset()){
+//							randomSamplingButton.setEnabled(false);
+//
+//							for(NucleusStatistic stat : NucleusStatistic.values()){
+//
+//								TableModel model;
+//
+//								TableOptions options = new NucleusStatsTableOptions(getDatasets(), stat);
+//								if(getTableCache().hasTable(options)){
+//									programLogger.log(Level.FINEST, "Fetched cached magnitude table: "+stat);
+//									model = getTableCache().getTable(options);
+//								} else {
+//									model = NucleusTableDatasetCreator.createMagnitudeNuclearStatTable(getDatasets(), stat);
+//									programLogger.log(Level.FINEST, "Added cached magnitude table: "+stat);
+//								}
+//
+//
+//								ExportableTable table = new ExportableTable(model);
+//								setRenderer(table, new PairwiseTableCellRenderer());
+//								addWilconxonTable(tablePanel, table, stat.toString());
+//								scrollPane.setColumnHeaderView(table.getTableHeader());
+//
+//
+//							}
+//							tablePanel.revalidate();
+//
+//							
+//						} else {
+//							randomSamplingButton.setEnabled(true);
+//							tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
+//						}
+//					} else {
+//						randomSamplingButton.setEnabled(false);
+//						tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
+//					}
+//					programLogger.log(Level.FINEST, "Updated magnitude panel");
+//				} catch (Exception e) {
+//					programLogger.log(Level.SEVERE, "Error making magnitude table", e);
+//					tablePanel = createTablePanel();
+//				} finally {
+//					scrollPane.setViewportView(tablePanel);;
+//					tablePanel.repaint();
+//					setUpdating(false);
+//				}
+//				
+//			}});
+//	}
 }
 	
 

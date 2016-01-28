@@ -20,6 +20,8 @@ package gui;
 
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.ConsensusNucleusChartPanel;
+import gui.components.ExportableTable;
+import gui.components.WilcoxonTableCellRenderer;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
@@ -35,16 +37,22 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import stats.NucleusStatistic;
 import analysis.AnalysisDataset;
+import charting.NucleusStatsTableOptions;
+import charting.TableOptions;
 import charting.charts.ConsensusNucleusChartFactory;
+import charting.datasets.NucleusTableDatasetCreator;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.XYPoint;
@@ -295,40 +303,58 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	}
 	
 	@Override
-	public void updateDetail(){
-		SwingUtilities.invokeLater( new Runnable(){
-
-			public void run(){
-				try {
-
-					programLogger.log(Level.FINEST, "Updating consensus panel");
-					if(!getDatasets().isEmpty()){
-
-						if(getDatasets().size()==1){
-							
-							updateSingleDataset();
-
-						}else {
-
-							updateMultipleDatasets();
-							
-						}
-
-					} else { // no datasets in the list
-
-						updateBlankChart();
-
-					}
-					programLogger.log(Level.FINEST, "Updated consensus panel");
-
-
-				} catch (Exception e){
-					programLogger.log(Level.SEVERE, "Error updating consensus panel", e);
-				} finally {
-					setUpdating(false);
-				}
-			}} );
+	protected void updateSingle() throws Exception {
+		updateSingleDataset();
+		programLogger.log(Level.FINEST, "Updated consensus panel");
 	}
+	
+
+	@Override
+	protected void updateMultiple() throws Exception {
+		updateMultipleDatasets();
+		programLogger.log(Level.FINEST, "Updated consensus panel");
+	}
+	
+	@Override
+	protected void updateNull() throws Exception {		
+		updateBlankChart();
+	}
+	
+//	@Override
+//	public void updateDetail(){
+//		SwingUtilities.invokeLater( new Runnable(){
+//
+//			public void run(){
+//				try {
+//
+//					programLogger.log(Level.FINEST, "Updating consensus panel");
+//					if(!getDatasets().isEmpty()){
+//
+//						if(getDatasets().size()==1){
+//							
+//							updateSingleDataset();
+//
+//						}else {
+//
+//							updateMultipleDatasets();
+//							
+//						}
+//
+//					} else { // no datasets in the list
+//
+//						updateBlankChart();
+//
+//					}
+//					programLogger.log(Level.FINEST, "Updated consensus panel");
+//
+//
+//				} catch (Exception e){
+//					programLogger.log(Level.SEVERE, "Error updating consensus panel", e);
+//				} finally {
+//					setUpdating(false);
+//				}
+//			}} );
+//	}
 	
 	private void updateSingleDataset() throws Exception {
 		runRefoldingButton.setVisible(false);
