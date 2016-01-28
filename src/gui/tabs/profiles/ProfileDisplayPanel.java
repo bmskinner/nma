@@ -20,6 +20,9 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 		public ProfileDisplayPanel(Logger logger, ProfileType type){
 			super(logger);
 			this.type = type;
+			
+			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(type);
+			chartPanel.setChart(chart);
 		}
 		
 		@Override
