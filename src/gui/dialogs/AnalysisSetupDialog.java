@@ -41,6 +41,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -105,6 +106,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	
 	private JSpinner scaleSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_SCALE,	0, 100, 0.001));
 
+	private JCheckBox keepFailedheckBox = new JCheckBox();
 
 	/**
 	 * Create the frame.
@@ -372,8 +374,8 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		panel.setBorder(BorderFactory.createTitledBorder("Detection settings"));
 		panel.setLayout(new GridBagLayout());
 
-		JLabel[] labels = new JLabel[6];
-		JSpinner[] fields = new JSpinner[6];
+		JLabel[] labels = new JLabel[7];
+		JComponent[] fields = new JComponent[7];
 
 		labels[0] = new JLabel("Min nucleus size");
 		labels[1] = new JLabel("Max nucleus size");
@@ -381,6 +383,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		labels[3] = new JLabel("Max nucleus circ");
 		labels[4] = new JLabel("Profile window");
 		labels[5] = new JLabel("Scale (microns/pixel)");
+		labels[6] = new JLabel("Keep filtered nuclei");
 
 
 		fields[0] = txtMinNuclearSize;
@@ -389,6 +392,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		fields[3] = maxNuclearCircSpinner;
 		fields[4] = txtProfileWindowSize;
 		fields[5] = scaleSpinner;
+		fields[6] = keepFailedheckBox;
 		
 		txtMinNuclearSize.addChangeListener(this);
 		txtMaxNuclearSize.addChangeListener(this);
@@ -396,6 +400,8 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		maxNuclearCircSpinner.addChangeListener(this);
 		txtProfileWindowSize.addChangeListener(this);
 		scaleSpinner.addChangeListener(this);
+		keepFailedheckBox.addActionListener(this);
+		keepFailedheckBox.setSelected(false);
 
 		addLabelTextRows(labels, fields, new GridBagLayout(), panel );
 
@@ -479,6 +485,10 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 			this.analysisOptions.getCannyOptions("nucleus").setUseCanny(true);
 			CardLayout cl = (CardLayout)(cardPanel.getLayout());
 		    cl.show(cardPanel, "CannyPanel");
+		}
+		
+		if(e.getSource()==keepFailedheckBox){
+			analysisOptions.setKeepFailedCollections(keepFailedheckBox.isSelected());
 		}
 		
 //		if(e.getActionCommand().equals("CannyAutoThreshold")){

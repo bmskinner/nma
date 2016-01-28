@@ -181,33 +181,35 @@ public class NucleusDetector extends AnalysisWorker {
 				 * Keep the failed nuclei - they can be manually assessed later
 				 */
 
-				AnalysisDataset failed = new AnalysisDataset(failedNuclei);
-				AnalysisOptions failedOptions = new AnalysisOptions(analysisOptions);
-				failedOptions.setNucleusType(NucleusType.ROUND);
-				failed.setAnalysisOptions(failedOptions);
-				failed.setRoot(true);
-
+				if(analysisOptions.isKeepFailedCollections()){
+					AnalysisDataset failed = new AnalysisDataset(failedNuclei);
+					AnalysisOptions failedOptions = new AnalysisOptions(analysisOptions);
+					failedOptions.setNucleusType(NucleusType.ROUND);
+					failed.setAnalysisOptions(failedOptions);
+					failed.setRoot(true);
+					result.add(failed);
+				} else {
 				
-//				if(failedNuclei.getNucleusCount()>0){
-//					log(Level.INFO, "Exporting failed nuclei...");
-//					ok = CompositeExporter.run(failedNuclei, fileLogger);
-//					if(ok){
-//						log(Level.INFO, "Export OK");
-//					} else {
-//						log(Level.INFO, "Export error");
-//					}
-//					nucleusCounts.put("failed", failedNuclei.getNucleusCount());
-//				}
+					if(failedNuclei.getNucleusCount()>0){
+						log(Level.INFO, "Exporting failed nuclei...");
+						ok = CompositeExporter.run(failedNuclei, fileLogger);
+						if(ok){
+							log(Level.INFO, "Export OK");
+						} else {
+							log(Level.INFO, "Export error");
+						}
+					}
+				}
 				programLogger.log(Level.INFO, spacerString);
 				
 				programLogger.log(Level.INFO, "Population: "+collection.getName());
 				programLogger.log(Level.INFO, "Passed: "+collection.getNucleusCount()+" nuclei");
-				programLogger.log(Level.INFO, "Failed: "+failed.getCollection().getNucleusCount()+" nuclei");
+				programLogger.log(Level.INFO, "Failed: "+failedNuclei.getNucleusCount()+" nuclei");
 				
 				programLogger.log(Level.INFO, spacerString);
 				
 				result.add(dataset);
-				result.add(failed);
+				
 				
 			} catch(Exception e){
 				log(Level.WARNING, "Cannot create collection: "+e.getMessage());

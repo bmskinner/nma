@@ -69,6 +69,8 @@ public class AnalysisOptions implements Serializable {
 
 	private int xoffset = 0;
 	private int yoffset = 0;
+	
+	private boolean keepFailedCollections = false;// allow failed collection to be retained for manual analysis
 
 	public AnalysisOptions(){
 		
@@ -112,6 +114,7 @@ public class AnalysisOptions implements Serializable {
 		refoldMode             = template.getRefoldMode();
 		xoffset                = template.getXOffset();
 		yoffset                = template.getYOffset();
+		keepFailedCollections  = template.isKeepFailedCollections();
 	}
 
 
@@ -335,14 +338,25 @@ public class AnalysisOptions implements Serializable {
 		}
 	}
 
-	
-	
-	
+	public boolean isKeepFailedCollections() {
+		return keepFailedCollections;
+	}
+
+	public void setKeepFailedCollections(boolean keepFailedCollections) {
+		this.keepFailedCollections = keepFailedCollections;
+	}
+
+
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + angleProfileWindowSize;
+		result = prime * result + ((edgeDetection == null) ? 0 : edgeDetection.hashCode());
+		result = prime * result + ((folder == null) ? 0 : folder.hashCode());
+		result = prime * result + (keepFailedCollections ? 1231 : 1237);
+		result = prime * result + ((mappingFile == null) ? 0 : mappingFile.hashCode());
 		long temp;
 		temp = Double.doubleToLongBits(maxNucleusCirc);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
@@ -354,13 +368,16 @@ public class AnalysisOptions implements Serializable {
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + (normaliseContrast ? 1231 : 1237);
 		result = prime * result + nucleusThreshold;
-		result = prime * result
-				+ ((nucleusType == null) ? 0 : nucleusType.hashCode());
+		result = prime * result + ((nucleusType == null) ? 0 : nucleusType.hashCode());
 		result = prime * result + (performReanalysis ? 1231 : 1237);
+		result = prime * result + (realignMode ? 1231 : 1237);
+		result = prime * result + ((refoldMode == null) ? 0 : refoldMode.hashCode());
+		result = prime * result + (refoldNucleus ? 1231 : 1237);
 		temp = Double.doubleToLongBits(scale);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result
-				+ ((signalDetection == null) ? 0 : signalDetection.hashCode());
+		result = prime * result + ((signalDetection == null) ? 0 : signalDetection.hashCode());
+		result = prime * result + xoffset;
+		result = prime * result + yoffset;
 		return result;
 	}
 
@@ -376,17 +393,30 @@ public class AnalysisOptions implements Serializable {
 		AnalysisOptions other = (AnalysisOptions) obj;
 		if (angleProfileWindowSize != other.angleProfileWindowSize)
 			return false;
-		if (Double.doubleToLongBits(maxNucleusCirc) != Double
-				.doubleToLongBits(other.maxNucleusCirc))
+		if (edgeDetection == null) {
+			if (other.edgeDetection != null)
+				return false;
+		} else if (!edgeDetection.equals(other.edgeDetection))
 			return false;
-		if (Double.doubleToLongBits(maxNucleusSize) != Double
-				.doubleToLongBits(other.maxNucleusSize))
+		if (folder == null) {
+			if (other.folder != null)
+				return false;
+		} else if (!folder.equals(other.folder))
 			return false;
-		if (Double.doubleToLongBits(minNucleusCirc) != Double
-				.doubleToLongBits(other.minNucleusCirc))
+		if (keepFailedCollections != other.keepFailedCollections)
 			return false;
-		if (Double.doubleToLongBits(minNucleusSize) != Double
-				.doubleToLongBits(other.minNucleusSize))
+		if (mappingFile == null) {
+			if (other.mappingFile != null)
+				return false;
+		} else if (!mappingFile.equals(other.mappingFile))
+			return false;
+		if (Double.doubleToLongBits(maxNucleusCirc) != Double.doubleToLongBits(other.maxNucleusCirc))
+			return false;
+		if (Double.doubleToLongBits(maxNucleusSize) != Double.doubleToLongBits(other.maxNucleusSize))
+			return false;
+		if (Double.doubleToLongBits(minNucleusCirc) != Double.doubleToLongBits(other.minNucleusCirc))
+			return false;
+		if (Double.doubleToLongBits(minNucleusSize) != Double.doubleToLongBits(other.minNucleusSize))
 			return false;
 		if (normaliseContrast != other.normaliseContrast)
 			return false;
@@ -396,61 +426,28 @@ public class AnalysisOptions implements Serializable {
 			return false;
 		if (performReanalysis != other.performReanalysis)
 			return false;
-		if (Double.doubleToLongBits(scale) != Double
-				.doubleToLongBits(other.scale))
+		if (realignMode != other.realignMode)
+			return false;
+		if (refoldMode == null) {
+			if (other.refoldMode != null)
+				return false;
+		} else if (!refoldMode.equals(other.refoldMode))
+			return false;
+		if (refoldNucleus != other.refoldNucleus)
+			return false;
+		if (Double.doubleToLongBits(scale) != Double.doubleToLongBits(other.scale))
 			return false;
 		if (signalDetection == null) {
 			if (other.signalDetection != null)
 				return false;
 		} else if (!signalDetection.equals(other.signalDetection))
 			return false;
+		if (xoffset != other.xoffset)
+			return false;
+		if (yoffset != other.yoffset)
+			return false;
 		return true;
 	}
-
-
-//	/**
-//	 * Test if another options has the same value as this.
-//	 * @param options
-//	 * @return
-//	 */
-//	public boolean equals(AnalysisOptions options){
-//
-//		if( nucleusThreshold!= options.getNucleusThreshold()){
-//			return false;
-//		}
-//		if( minNucleusSize!= options.getMinNucleusSize()){
-//			return false;
-//		}
-//		if( maxNucleusSize!= options.getMaxNucleusSize()){
-//			return false;
-//		}
-//		if( minNucleusCirc!= options.getMinNucleusCirc()){
-//			return false;
-//		}
-//		if( maxNucleusCirc!= options.getMaxNucleusCirc()){
-//			return false;
-//		}
-//		if( normaliseContrast!= options.isNormaliseContrast()){
-//			return false;
-//		}
-//		if( angleProfileWindowSize!= options.getAngleProfileWindowSize()){
-//			return false;
-//		}
-//		if( nucleusType!= options.getNucleusType()){
-//			return false;
-//		}
-//		if( performReanalysis!= options.isReanalysis()){
-//			return false;
-//		}
-//
-//		CannyOptions thisCanny = edgeDetection.get("nucleus");
-//
-//		if( !thisCanny.equals( options.getCannyOptions("nucleus"))){
-//			return false;
-//		}
-//		return true;
-//		
-//	}
 	
 	public class CannyOptions implements Serializable {
 
