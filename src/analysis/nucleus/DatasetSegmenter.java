@@ -189,6 +189,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 				continue;
 			}
 			
+			
 			// get the empty profile collection from the new CellCollection
 			// TODO: if the target collection is not new, ie we are copying onto
 			// an existing segmenation pattern, then this profile collection will have
@@ -367,9 +368,8 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 		log(Level.FINER, "Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
 
-		// Add the segments to the collection
-
-		
+		segmenter = null; // clean up
+				
 		
 		/* If there are round nuclei in the collection, and only two segments
 		 * were called, the orientation point may not have been
@@ -1108,27 +1108,60 @@ public class DatasetSegmenter extends AnalysisWorker {
 		 */
 		public static final int MIN_SEGMENT_SIZE = 10;
 		
+		private static final int SMOOTH_WINDOW	 = 2; // the window size for smoothing profiles
+		private static final int MAXIMA_WINDOW	 = 5; // the window size for calculating minima and maxima
+		private static final int DELTA_WINDOW	 = 2; // the window size for calculating deltas
+		private static final int ANGLE_THRESHOLD = 180; // a maximum must be above this, a minimum below it
 		
-		private static final int SMOOTH_WINDOW	= 2; // the window size for smoothing profiles
-		private static final int MAXIMA_WINDOW	= 5; // the window size for calculating minima and maxima
-		private static final int DELTA_WINDOW	= 2; // the window size for calculating deltas
-		private static final int ANGLE_THRESHOLD= 180; // a maximum must be above this, a minimum below it
+		private static final double MIN_RATE_OF_CHANGE = 0.02; // a potential inflection cannot vary by more than this
 		
 		
-		private Profile profile; // the profile to segment
-		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(0);
+		private final Profile profile; // the profile to segment
+		private final List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(0);
+		
+		private BooleanProfile inflectionPoints = null;
+		private Profile        deltaProfile     = null;
+		private double         minRateOfChange  = 1;
 			
 		/**
 		 * Constructed from a profile
 		 * @param p
 		 */
-		public ProfileSegmenter(Profile p){
+		public ProfileSegmenter(final Profile p){
 			if(p==null){
 				throw new IllegalArgumentException("Profile is null");
 			}
 			this.profile = p;
 
+			this.initialise();
+			
 			log(Level.FINE, "Created profile segmenter");
+		}
+		
+		private void initialise(){
+
+			/*
+			 * Find minima and maxima, to set the inflection points in the profile
+			 */
+			BooleanProfile maxima = this.profile.smooth(SMOOTH_WINDOW).getLocalMaxima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
+			BooleanProfile minima = this.profile.smooth(SMOOTH_WINDOW).getLocalMinima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
+			inflectionPoints = minima.or(maxima);
+			
+			/*
+			 * Find second derivative rates of change
+			 */
+			Profile deltas  = this.profile.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // minima and maxima should be near 0 
+			deltaProfile =       deltas.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // second differential
+			
+			/*
+			 * Find levels of variation within the complete profile
+			 */
+			double dMax = deltaProfile.getMax();
+			double dMin = deltaProfile.getMin();
+			double variationRange = Math.abs(dMax - dMin);
+			
+			minRateOfChange = variationRange * MIN_RATE_OF_CHANGE;
+			
 		}
 		
 		/**
@@ -1137,127 +1170,103 @@ public class DatasetSegmenter extends AnalysisWorker {
 		 * @return a list of segments
 		 */
 		public List<NucleusBorderSegment> segment(){
-			
-			log(Level.FINE, "Identifying maxima and minima");
-			log(Level.FINE, profile.toString());
-			BooleanProfile maxima = this.profile.smooth(SMOOTH_WINDOW).getLocalMaxima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
-			BooleanProfile minima = this.profile.smooth(SMOOTH_WINDOW).getLocalMinima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
-			
-			BooleanProfile breakpoint = minima.or(maxima);
-			
-			Profile deltas = this.profile.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // minima and maxima should be near 0 
-			Profile dDeltas = deltas.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // second differential
-			double dMax = dDeltas.getMax();
-			double dMin = dDeltas.getMin();
-			double variationRange = Math.abs(dMax - dMin);
-			double minRateOfChange = variationRange*0.02;
 
+			/*
+			 * Prepare segment start index
+			 */
 			int segmentStart = 0;
-			int segmentEnd = 0;
-			int segLength = 0;
-			int segCount = 0;
+
 					
 			try{
 				
 				/*
 				 * Iterate through the profile, looking for breakpoints
-				 * A new segment should always be called at the reference point, 
-				 * regardless of minima, since the segments in this region are 
-				 * used in frankenprofiling.
+				 * The reference point is at index 0, as defined by the 
+				 * calling method.
 				 * 
-				 * The reference point is at index 0: a segment should always be called at index 0
+				 *  Therefore, a segment should always be started at index 0
 				 */
 				for(int index=0; index<profile.size(); index++){
-					segmentEnd = index;
-					segLength++;
-
-					// when we get to the end of the profile, seglength must  be discounted, so we can wrap
-					// ditto for the beginning of the profile
-					if(index>profile.size()-MIN_SEGMENT_SIZE || index<MIN_SEGMENT_SIZE){
-						segLength = MIN_SEGMENT_SIZE;
-					}
-
-					// We want a minima or maxima, and the value must be distinct from its surroundings			
-					if( (   breakpoint.get(index)==true 
-							&& Math.abs(dDeltas.get(index)) > minRateOfChange
-							&& segLength >= MIN_SEGMENT_SIZE)
-							
-//							|| (index==splitIndex)
-							
-						){
+					
+					if(testSegmentEndFound(index, segmentStart)){
 						
 						// we've hit a new segment
-						NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
-						seg.setName("Seg_"+segCount);
+						NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, index, profile.size());
 
 						segments.add(seg);
 						
-						log(Level.FINE, "New segment found: "+seg.toString());
+						log(Level.FINE, "New segment found in profile: "+seg.toString());
 						
-//						if(index==splitIndex){
-//							logger.log(Level.FINE, "Segment split by index");
-//						}
-
-						segmentStart = index; // start the next segment at this position
-						segLength=0;
-						segCount++;
+						segmentStart = index; // Prepare for the next segment
 					}
+					
 				}
 				
 				/*
-				 * End of the profile; call a new segment boundary to avoid
-				 * linking across the reference point
-				 * 
-				 * If a boundary is already called at index 0 in the first segment,
-				 * do not create a new segment, as it would have 1 length
-				 * 
-				 * If a boundary is already called at the last index in the profile,
-				 *  do not add a terminal segment, and just allow merging
+				 * Now, there is a list of segments which covers most but not all of 
+				 * the profile. The final segment has not been defined: is is the current segment
+				 * start, but has not had an endpoint added. Since segment ends cannot be
+				 * called within MIN_SIZE of the profile end, there is enough space to make a segment
+				 * running from the current segment start back to index 0
 				 */
-				int firstSegmentEndIndex = segments.get(0).getEndIndex();
-				int lastSegmentEndIndex =  segments.get(segments.size()-1).getEndIndex();
-				int lastProfileIndex = profile.size()-1;
+				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, 0, profile.size());
+				segments.add(seg);
 				
-				log(Level.FINE, "First segment end: " + firstSegmentEndIndex + " of "+lastProfileIndex);
-				log(Level.FINE, "Final segment end: " + lastSegmentEndIndex  + " of "+lastProfileIndex);
 				
-                if(  (segments.get(0).getEndIndex()!=0) && segments.get(segments.size()-1).getEndIndex() != profile.size()-1 ) {
-
-				
-                	/*
-                	 * What happens in round nuclei, when the segmentation detects a boundary in the index
-                	 * dirctly before 0?
-                	 * 
-                	 * A new segment is attempted to be created with length 1, and of course fails.
-                	 * Catch the exception, and attempty to extend the final segment up to index 0
-                	 */
-
-                	try {
-					
-                		NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
-                		seg.setName("Seg_"+segCount);
-    					segments.add(seg);
-    					log(Level.FINE, "Terminal segment found: "+seg.toString());
-    					
-                	} catch(IllegalArgumentException e){
-                		
-                		log(Level.WARNING, "Error creating segment, likely it was too short");
-                		log(Level.WARNING, "Attempting to extend the final segment into a terminal segment");
-                		NucleusBorderSegment finalSegment = segments.get(segments.size()-1);
-                		finalSegment.update(finalSegment.getStartIndex(), 0);;
-                	}
-                	
-					
-					
-				} else {
-					// the first segment is not larger than the minimum size
-					// We need to merge the first and last segments
-					
-					log(Level.FINE, "Terminal segment not needed: first segment has index 0 or last has full index");
-					
-//					log(Level.FINE, " Updating the final segment to end at index zero");
-//					segments.get(segments.size()-1).update(segments.get(segments.size()-1).getStartIndex(), 0);
-				}
+//				/*
+//				 * End of the profile; call a new segment boundary to avoid
+//				 * linking across the reference point
+//				 * 
+//				 * If a boundary is already called at index 0 in the first segment,
+//				 * do not create a new segment, as it would have 1 length
+//				 * 
+//				 * If a boundary is already called at the last index in the profile,
+//				 *  do not add a terminal segment, and just allow merging
+//				 */
+//				int firstSegmentEndIndex = segments.get(0).getEndIndex();
+//				int lastSegmentEndIndex =  segments.get(segments.size()-1).getEndIndex();
+//				int lastProfileIndex = profile.size()-1;
+//				
+//				log(Level.FINE, "First segment end: " + firstSegmentEndIndex + " of "+lastProfileIndex);
+//				log(Level.FINE, "Final segment end: " + lastSegmentEndIndex  + " of "+lastProfileIndex);
+//				
+//                if(  (segments.get(0).getEndIndex()!=0) && segments.get(segments.size()-1).getEndIndex() != profile.size()-1 ) {
+//
+//				
+//                	/*
+//                	 * What happens in round nuclei, when the segmentation detects a boundary in the index
+//                	 * dirctly before 0?
+//                	 * 
+//                	 * A new segment is attempted to be created with length 1, and of course fails.
+//                	 * Catch the exception, and attempty to extend the final segment up to index 0
+//                	 */
+//
+//                	try {
+//					
+//                		NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
+//                		seg.setName("Seg_"+segCount);
+//    					segments.add(seg);
+//    					log(Level.FINE, "Terminal segment found: "+seg.toString());
+//    					
+//                	} catch(IllegalArgumentException e){
+//                		
+//                		log(Level.WARNING, "Error creating segment, likely it was too short");
+//                		log(Level.WARNING, "Attempting to extend the final segment into a terminal segment");
+//                		NucleusBorderSegment finalSegment = segments.get(segments.size()-1);
+//                		finalSegment.update(finalSegment.getStartIndex(), 0);;
+//                	}
+//                	
+//					
+//					
+//				} else {
+//					// the first segment is not larger than the minimum size
+//					// We need to merge the first and last segments
+//					
+//					log(Level.FINE, "Terminal segment not needed: first segment has index 0 or last has full index");
+//					
+////					log(Level.FINE, " Updating the final segment to end at index zero");
+////					segments.get(segments.size()-1).update(segments.get(segments.size()-1).getStartIndex(), 0);
+//				}
 				
 				NucleusBorderSegment.linkSegments(segments);
 				
@@ -1273,7 +1282,62 @@ public class DatasetSegmenter extends AnalysisWorker {
 			
 			return segments;
 		}
+		
 
+		/**
+		 * @param index the current index being tested
+		 * @param segmentStart the start of the current segment being built
+		 * @return
+		 */
+		private boolean testSegmentEndFound(int index, int segmentStart){
+
+			/*
+			 * The first segment must meet the length limit
+			 */
+			if(index < MIN_SEGMENT_SIZE ){
+				return false;
+			}
+			
+
+			/*
+			 * Segment must be long enough
+			 */
+			int potentialSegLength = index-segmentStart;
+			
+			if(potentialSegLength < MIN_SEGMENT_SIZE ){
+				return false;
+			}
+			
+			/*
+			 * Once the index has got close to the end of the profile, a new segmnet cannot be called,
+			 * even at a really nice infection point, because it would be too close to the 
+			 * reference point
+			 */
+			if( index >  profile.size() - MIN_SEGMENT_SIZE ){
+				return false;
+			}
+			
+			/*
+			 * All length and position checks are passed.
+			 * Now test for a good inflection point.
+			 * 
+			 * We want a minima or maxima, and the value
+			 * must be distinct from its surroundings.	
+			 */
+
+			if( (   inflectionPoints.get(index)==true 
+					&& Math.abs(deltaProfile.get(index)) > minRateOfChange
+					&& potentialSegLength >= MIN_SEGMENT_SIZE)){
+				
+				return true;
+
+			}
+			return false;
+		}
+
+		
+		
+		
 		/**
 		 * For debugging. Print the details of each segment found 
 		 */

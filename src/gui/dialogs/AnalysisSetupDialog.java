@@ -253,6 +253,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 					ImageProber p = new NucleusDetectionImageProber(analysisOptions, programLogger, analysisOptions.getFolder());
 					if(p.getOK()==false){
 					
+						// Do nothing, revise options
 						
 					} else {
 						
@@ -261,6 +262,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 					}
 					
 				} else {
+					// Cancelled
 					analysisOptions = null;
 					AnalysisSetupDialog.this.setVisible(false);
 				}

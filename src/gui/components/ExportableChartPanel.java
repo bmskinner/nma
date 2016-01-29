@@ -1,3 +1,21 @@
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 package gui.components;
 
 import java.awt.event.ActionEvent;
@@ -8,14 +26,10 @@ import java.text.DecimalFormat;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.table.TableModel;
-
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
@@ -23,7 +37,6 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import utility.Constants;
 import charting.datasets.OutlierFreeBoxAndWhiskerCategoryDataset;
-import ij.IJ;
 import ij.io.SaveDialog;
 
 
@@ -75,12 +88,15 @@ public class ExportableChartPanel extends ChartPanel {
 
 
 		} catch (ClassCastException e2){
-			IJ.log("Class cast error: "+e2.getMessage());
+			
+			StringBuilder builder = new StringBuilder();
+			builder.append("Class cast error: "+e2.getMessage()+System.getProperty("line.separator"));
+
 			for(StackTraceElement el : e2.getStackTrace()){
-				IJ.log(el.toString());
+				builder.append(el.toString()+System.getProperty("line.separator"));
 			}
+			result = builder.toString();
 		}
-		IJ.log(result);
 		return result;
 	}
 	
@@ -129,9 +145,8 @@ public class ExportableChartPanel extends ChartPanel {
 			try{
 				ds = (DefaultXYDataset) plot.getDataset(dataset);
 			} catch (ClassCastException e){
-				ds = (XYSeriesCollection) plot.getDataset(dataset); // try getting a collection
+				ds = (XYSeriesCollection) plot.getDataset(dataset); // try getting a collection instead
 			}
-//			DefaultXYDataset ds = (DefaultXYDataset) plot.getDataset(dataset);
 			
 			for(int series=0; series<ds.getSeriesCount();series++){
 
@@ -213,11 +228,11 @@ public class ExportableChartPanel extends ChartPanel {
 
 					double value = ds.getValue(row, column).doubleValue();
 					
-					builder.append("\tLower : "+ds.getMinRegularValue(row, column)+System.getProperty("line.separator"));
-					builder.append("\tQ1    : "+ds.getQ1Value(row, column)+System.getProperty("line.separator"));
-					builder.append("\tMedian: "+value+System.getProperty("line.separator"));
-					builder.append("\tQ3    : "+ds.getQ3Value(row, column)+System.getProperty("line.separator"));
-					builder.append("\tUpper : "+ds.getMaxRegularValue(row, column)+System.getProperty("line.separator"));
+					builder.append("\tLower : "+  df.format(  ds.getMinRegularValue(row, column)  )+System.getProperty("line.separator"));
+					builder.append("\tQ1    : "+  df.format(   ds.getQ1Value(row, column))+System.getProperty("line.separator"));
+					builder.append("\tMedian: "+  df.format(   value)+System.getProperty("line.separator"));
+					builder.append("\tQ3    : "+  df.format(   ds.getQ3Value(row, column))+System.getProperty("line.separator"));
+					builder.append("\tUpper : "+  df.format(   ds.getMaxRegularValue(row, column))+System.getProperty("line.separator"));
 					builder.append(System.getProperty("line.separator"));
 				}
 			}

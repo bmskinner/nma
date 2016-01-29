@@ -105,7 +105,10 @@ public class CellCollection implements Serializable {
 		this.name         = name == null ? folder.getName() : name;// if name is null, use the image folder name
 		this.nucleusType  = nucleusType;
 		
-		profileCollections.put(ProfileType.REGULAR, new ProfileCollection());
+		for(ProfileType type : ProfileType.values()){
+			profileCollections.put(type, new ProfileCollection());
+		}
+		
 	}
   
   /**
