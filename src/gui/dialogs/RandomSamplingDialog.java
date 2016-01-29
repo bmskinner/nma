@@ -54,12 +54,13 @@ import analysis.AnalysisDataset;
 import analysis.RandomSampler;
 import charting.charts.HistogramChartFactory;
 import gui.LoadingIconDialog;
+import gui.components.ExportableChartPanel;
 import stats.NucleusStatistic;
 
 @SuppressWarnings("serial")
 public class RandomSamplingDialog extends LoadingIconDialog implements ActionListener, ChangeListener, PropertyChangeListener  {
 	private AnalysisDataset dataset;
-	private ChartPanel chartPanel;
+	private ExportableChartPanel chartPanel;
 	
 	private JSpinner set1SizeSpinner;
 	private JSpinner set2SizeSpinner;
@@ -160,7 +161,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		
 		
 		try {
-			chartPanel = new ChartPanel(HistogramChartFactory.createRandomSampleHistogram(resultList));
+			chartPanel = new ExportableChartPanel(HistogramChartFactory.createRandomSampleHistogram(resultList));
 			this.add(chartPanel, BorderLayout.CENTER);
 		} catch (Exception e) {
 			programLogger.log(Level.SEVERE, "Error making chart", e);

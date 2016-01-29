@@ -31,6 +31,7 @@ import gui.components.ShapeOverlay;
 import gui.components.ShapeOverlayObject;
 import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.components.panels.RotationSelectionSettingsPanel;
+import gui.dialogs.AngleWindowSizeExplorer;
 import gui.dialogs.CellImageDialog;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
 
@@ -59,6 +60,7 @@ import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
@@ -536,6 +538,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		private DraggableOverlayChartPanel profileChartPanel; // holds the chart with the cell
 		private ProfileTypeOptionsPanel profileOptions  = new ProfileTypeOptionsPanel();
 		
+		private JButton windowSizeButton = new JButton("Window sizes");
+		
 		protected ProfilePanel(){
 
 			this.setLayout(new BorderLayout());
@@ -549,6 +553,10 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			JPanel header = new JPanel(new FlowLayout());
 			header.add(profileOptions);
 			profileOptions.addActionListener(this);
+			
+			windowSizeButton.addActionListener(this);
+			header.add(windowSizeButton);
+			
 			this.add(header, BorderLayout.NORTH);
 			
 		}
@@ -621,6 +629,10 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			update(activeCell);
+			
+			if(e.getSource()==windowSizeButton){
+				new AngleWindowSizeExplorer(activeDataset(), programLogger);
+			}
 			
 		}
 
