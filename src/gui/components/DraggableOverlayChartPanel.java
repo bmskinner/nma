@@ -48,7 +48,7 @@ import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
-public class DraggableOverlayChartPanel extends ChartPanel {
+public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	
 
 	private List<Object> listeners = new ArrayList<Object>();

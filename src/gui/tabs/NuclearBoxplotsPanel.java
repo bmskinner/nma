@@ -73,10 +73,12 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane(JTabbedPane.TOP);
 		
-		boxplotPanel = new BoxplotsPanel();
+		boxplotPanel = new BoxplotsPanel(programLogger);
+		this.addSubPanel(boxplotPanel);
 		tabPane.addTab("Boxplots", boxplotPanel);
 		
 		histogramsPanel = new HistogramsPanel(programLogger);
+		this.addSubPanel(histogramsPanel);
 		tabPane.addTab("Histograms", histogramsPanel);
 		
 		wilcoxonPanel 	= new WilcoxonDetailPanel(programLogger);
@@ -87,34 +89,6 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		
 		this.add(tabPane, BorderLayout.CENTER);
 	}
-	
-//	@Override
-//	protected void updateDetail(){
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-//				try {
-//
-//					boxplotPanel.update(getDatasets());
-//					programLogger.log(Level.FINEST, "Updated nuclear boxplots panel");
-//					
-//					histogramsPanel.update(getDatasets());
-//					programLogger.log(Level.FINEST, "Updated nuclear histograms panel");
-//					
-//					wilcoxonPanel.update(getDatasets());
-//					programLogger.log(Level.FINEST, "Updating Wilcoxon panel");
-//					
-//					nucleusMagnitudePanel.update(getDatasets());
-//					programLogger.log(Level.FINEST, "Updating magnitude panel");
-//					
-//				} catch (Exception e) {
-//					programLogger.log(Level.SEVERE, "Error updating nuclear charts", e);
-//					NuclearBoxplotsPanel.this.update( (List<AnalysisDataset>) null);
-//				} finally {
-//					setUpdating(false);
-//				}
-//			}
-//		});
-//	}
 	
 	@Override
 	protected void updateSingle() throws Exception {
@@ -141,22 +115,12 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		updateSingle();
 	}
 	
-	protected class BoxplotsPanel extends JPanel implements ActionListener {
+	@SuppressWarnings("serial")
+	protected class BoxplotsPanel extends BoxplotsTabPanel implements ActionListener {
 
-		private static final long serialVersionUID = 1L;
-		
-		private JPanel 		mainPanel; // hold the charts
-		private JScrollPane scrollPane; // hold the main panel
-		private Map<NucleusStatistic, ExportableChartPanel> chartPanels = new HashMap<NucleusStatistic, ExportableChartPanel>();
-		private MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
+		public BoxplotsPanel(Logger logger) {
+			super(logger);
 
-		public BoxplotsPanel() {
-			
-			this.setLayout(new BorderLayout());
-			
-			mainPanel = new JPanel();
-			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
-			
 			Dimension preferredSize = new Dimension(200, 300);
 			
 			for(NucleusStatistic stat : NucleusStatistic.values()){
@@ -171,7 +135,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				
 				ExportableChartPanel panel = new ExportableChartPanel(chart);
 				panel.setPreferredSize(preferredSize);
-				chartPanels.put(stat, panel);
+				chartPanels.put(stat.toString(), panel);
 				mainPanel.add(panel);
 				
 			}
@@ -185,55 +149,52 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			this.add(measurementUnitSettingsPanel, BorderLayout.NORTH);
 			
 		}
-		
-		/**
-		 * Update the boxplots with the selected options
-		 * @param list
-		 */
-		public void update(List<AnalysisDataset> list){
-
-			try {
-				
-				if(hasDatasets()){
-					measurementUnitSettingsPanel.setEnabled(true);
-				} else {
-					measurementUnitSettingsPanel.setEnabled(false);
-				}
-				
-				MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
-
-				for(NucleusStatistic stat : NucleusStatistic.values()){
-
-					ExportableChartPanel panel = chartPanels.get(stat);
-
-					JFreeChart chart = null;
-					BoxplotChartOptions options = new BoxplotChartOptions(list, stat, scale);
-					
-					if(getChartCache().hasChart(options)){
-						programLogger.log(Level.FINEST, "Using cached boxplot chart: "+stat.toString());
-						chart = getChartCache().getChart(options);
-
-					} else { // No cache
-
-						chart = BoxplotChartFactory.createNucleusStatisticBoxplot(options);
-						getChartCache().addChart(options, chart);
-						programLogger.log(Level.FINEST, "Added cached boxplot chart: "+stat.toString());
-					}
-
-					panel.setChart(chart);
-				}
-
-			} catch (Exception e) {
-				programLogger.log(Level.SEVERE, "Error updating boxplots", e);
-			}
-			
-		}
-						
+								
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			
 			update(getDatasets());
 			
+		}
+
+		@Override
+		protected void updateSingle() throws Exception {
+			updateMultiple();
+			
+		}
+
+		@Override
+		protected void updateMultiple() throws Exception {
+			measurementUnitSettingsPanel.setEnabled(true);
+			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
+
+			for(NucleusStatistic stat : NucleusStatistic.values()){
+
+				ExportableChartPanel panel = chartPanels.get(stat.toString());
+
+				JFreeChart chart = null;
+				BoxplotChartOptions options = new BoxplotChartOptions(getDatasets(), stat, scale);
+				
+				if(getChartCache().hasChart(options)){
+					programLogger.log(Level.FINEST, "Using cached boxplot chart: "+stat.toString());
+					chart = getChartCache().getChart(options);
+
+				} else { // No cache
+
+					chart = BoxplotChartFactory.createNucleusStatisticBoxplot(options);
+					getChartCache().addChart(options, chart);
+					programLogger.log(Level.FINEST, "Added cached boxplot chart: "+stat.toString());
+				}
+
+				panel.setChart(chart);
+			}
+			
+		}
+
+		@Override
+		protected void updateNull() throws Exception {
+			updateMultiple();
+			measurementUnitSettingsPanel.setEnabled(false);
 		}
 		
 	}

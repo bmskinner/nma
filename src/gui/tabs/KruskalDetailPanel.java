@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.components.ExportableChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import java.awt.BorderLayout;
@@ -40,7 +41,7 @@ import charting.charts.ProfileChartOptions;
 @SuppressWarnings("serial")
 public class KruskalDetailPanel  extends DetailPanel {
 	
-	private ChartPanel chartPanel;
+	private ExportableChartPanel chartPanel;
 
 	public KruskalDetailPanel(Logger programLogger ) throws Exception {
 		super(programLogger);
@@ -61,7 +62,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 	
 	private void createChartPanel(){
 		JFreeChart profileChart = MorphologyChartFactory.makeBlankProbabililtyChart();
-		chartPanel =  new ChartPanel(profileChart);
+		chartPanel =  new ExportableChartPanel(profileChart);
 	}
 	
 	private JPanel createHeaderPanel(){
@@ -134,46 +135,6 @@ public class KruskalDetailPanel  extends DetailPanel {
 	protected void updateNull() throws Exception {
 		JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
 		chartPanel.setChart(chart);
-	}
-		
-	/**
-	 * Update the panel with data from the given datasets
-	 * @throws Exception 
-	 */
-//	@Override
-//	public void updateDetail() {
-//		programLogger.log(Level.FINE, "Updating Kruskal panel");
-//
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-//				try{
-//					
-//					// Only create a chart if datasets are available
-//					if(!getDatasets().isEmpty() && getDatasets()!=null){
-//
-//						// Only create a chart if exactly two datasets are selected
-//						if(getDatasets().size()==2){
-//							updateChartPanel();
-//							
-//						} else {
-//							// null chart
-//							JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
-//							chartPanel.setChart(chart);
-//
-//						}
-//						programLogger.log(Level.FINEST, "Updated Kruskal panel");
-//					} else {
-//						// null chart
-//						JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
-//						chartPanel.setChart(chart);
-//					}
-//				} catch (Exception e) {
-//					programLogger.log(Level.SEVERE, "Error making Kruskal panel", e);
-//				} finally {
-//					setUpdating(false);
-//				}
-//			}});
-//	} 
-	
+	}	
 
 }
