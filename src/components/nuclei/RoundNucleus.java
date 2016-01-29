@@ -26,7 +26,7 @@
 */  
 package components.nuclei;
 
-import ij.IJ;
+
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
@@ -1003,7 +1003,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			
 		}
 
-		IJ.log("Nucleus "+this.getNameAndNumber()+" : "+type +" : "+tag+" : "+profile.get(0));
+//		IJ.log("Nucleus "+this.getNameAndNumber()+" : "+type +" : "+tag+" : "+profile.get(0));
 		return profile;
 	}
 	

@@ -27,9 +27,8 @@ import java.util.Map;
 import components.CellCollection;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
-import ij.IJ;
-import stats.NucleusStatistic;
-import stats.PlottableStatistic;
+//import ij.IJ;
+
 import utility.Constants;
 
 public class ProfileCollection implements Serializable {
@@ -113,17 +112,17 @@ public class ProfileCollection implements Serializable {
 
 			if( ! profileCache.hasProfile(tag, quartile)){
 				
-				IJ.log("Profile "+tag+" - "+quartile+" not present in cache");
+//				IJ.log("Profile "+tag+" - "+quartile+" not present in cache");
 				
 				int indexOffset = offsets.get(tag);
 				Profile profile = getAggregate().getQuartile(quartile).offset(indexOffset);
 				profileCache.setProfile(tag, quartile, profile );
 				
 			} else {
-				IJ.log("Profile "+tag+" - "+quartile+" present in cache");
+//				IJ.log("Profile "+tag+" - "+quartile+" present in cache");
 			}
 			Profile profile = profileCache.getProfile(tag, quartile);
-			IJ.log("Median: getting profile "+tag+" from cache: start "+profile.get(0));
+//			IJ.log("Median: getting profile "+tag+" from cache: start "+profile.get(0));
 			return profile;
 			
 		} else {
@@ -354,7 +353,7 @@ public class ProfileCollection implements Serializable {
 		}
 		profileCache.clear();
 		aggregate = new ProfileAggregate(length);
-		IJ.log("Making new aggregate: "+type);
+//		IJ.log("Making new aggregate: "+type);
 		for(Nucleus n : collection.getNuclei()){
 			
 			
@@ -529,7 +528,7 @@ public class ProfileCollection implements Serializable {
 			  }
 
 			  map.put(quartile, profile);
-			  IJ.log("Added "+tag+" - "+quartile+" to profile cache");
+//			  IJ.log("Added "+tag+" - "+quartile+" to profile cache");
 
 		  }
 
@@ -542,7 +541,7 @@ public class ProfileCollection implements Serializable {
 		  public Profile getProfile(BorderTag tag, Double quartile){
 
 			  if(this.hasProfile(tag, quartile)){
-				  IJ.log("Found "+tag+" - "+quartile+" in profile cache");
+//				  IJ.log("Found "+tag+" - "+quartile+" in profile cache");
 				  return cache.get(tag).get(quartile);
 
 			  } else  {
@@ -584,7 +583,7 @@ public class ProfileCollection implements Serializable {
 		   * Empty the cache - all values must be recalculated
 		   */
 		  public void clear(){
-			  IJ.log("Clearing cache");
+//			  IJ.log("Clearing cache");
 			  cache = null;
 			  cache = new HashMap<BorderTag, Map<Double, Profile>>();
 

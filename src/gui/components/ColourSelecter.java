@@ -40,15 +40,16 @@ public class ColourSelecter {
 	static {
 
 //		 Regular
-		segmentColourList.add(Color.RED);
+		segmentColourList.add(Color.BLUE);
 		segmentColourList.add(Color.ORANGE);
 		segmentColourList.add(Color.GREEN);
 		segmentColourList.add(Color.MAGENTA);
 		segmentColourList.add(Color.DARK_GRAY);
 		segmentColourList.add(Color.CYAN);
+		segmentColourList.add(Color.RED);
 		segmentColourList.add(Color.YELLOW);
 		segmentColourList.add(Color.PINK);
-		segmentColourList.add( new Color(0,153,0)); // 
+		segmentColourList.add( new Color(0,153,0)); // lime green
 		segmentColourList.add(new Color(135,206,235)); // sky blue
 				
 		// Colours for signals in nuclei
@@ -76,7 +77,7 @@ public class ColourSelecter {
 	public enum ColourSwatch {
 		REGULAR_SWATCH 	  ("Regular", 	segmentColourList), 
 		NO_SWATCH		  ("No colours"	, blackList),
-		ACCESSIBLE_SWATCH ("Colour blind", optimisedSwatchList);
+		ACCESSIBLE_SWATCH ("Acessible colours", optimisedSwatchList);
 		
 	    private final String asString;   
 	    private final List<Color> colours;

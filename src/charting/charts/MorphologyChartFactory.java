@@ -23,7 +23,7 @@ import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.ExportableChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import ij.IJ;
+//import ij.IJ;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 import io.ImageExporter;
@@ -109,8 +109,9 @@ public class MorphologyChartFactory {
 	 * @param ds
 	 * @param n
 	 * @return
+	 * @throws Exception 
 	 */
-	public static JFreeChart makeIndividualNucleusProfileChart(XYDataset ds, Nucleus n, ColourSwatch swatch, ProfileType type){
+	public static JFreeChart makeIndividualNucleusProfileChart(XYDataset ds, Nucleus n, ColourSwatch swatch, ProfileType type) throws Exception{
 		JFreeChart chart = makeProfileChart(ds, n.getBorderLength(), swatch, type);
 		return chart;
 	}
@@ -351,70 +352,65 @@ public class MorphologyChartFactory {
 	 * @param ds the profile dataset
 	 * @return a chart
 	 */
-	public static JFreeChart makeProfileChart(XYDataset ds, int xLength, ColourSwatch swatch, ProfileType type){
-		
-		
+	public static JFreeChart makeProfileChart(XYDataset ds, int xLength, ColourSwatch swatch, ProfileType type) throws Exception{
+
+
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 						"Position", type.getLabel(), ds, PlotOrientation.VERTICAL, true, true,
 						false);
-		try {
 
 
-			XYPlot plot = chart.getXYPlot();
 
-			// the default is to use an x range of 100, for a normalised chart
-			plot.getDomainAxis().setRange(0,xLength);
+		XYPlot plot = chart.getXYPlot();
 
-			// always set the y range to 360 degrees
-			if(type.equals(ProfileType.REGULAR) || type.equals(ProfileType.FRANKEN)){
-				plot.getRangeAxis().setRange(0,360);
-				// the 180 degree line
-				plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
-			}
-			plot.setBackgroundPaint(Color.WHITE);
+		// the default is to use an x range of 100, for a normalised chart
+		plot.getDomainAxis().setRange(0,xLength);
 
-			
-
-			int seriesCount = plot.getSeriesCount();
-
-			for (int i = 0; i < seriesCount; i++) {
-				plot.getRenderer().setSeriesVisibleInLegend(i, false);
-				String name = (String) ds.getSeriesKey(i);
-
-				// segments along the median profile
-				if(name.startsWith("Seg_")){
-					int colourIndex = getIndexFromLabel(name);
-					plot.getRenderer().setSeriesStroke(i, ChartComponents.SEGMENT_STROKE);
-					plot.getRenderer().setSeriesPaint(i, swatch.color(colourIndex));
-
-				} 
-
-				// entire nucleus profile
-				if(name.startsWith("Nucleus_")){
-					plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
-					plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-				} 
-
-				// quartile profiles
-				if(name.startsWith("Q")){
-					plot.getRenderer().setSeriesStroke(i, ChartComponents.QUARTILE_STROKE);
-					plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
-				} 
-
-				// simple profiles
-				if(name.startsWith("Profile_")){
-					plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
-					plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-				} 
-
-			}	
-		} catch (Exception e){
-			IJ.log("Error creating profile chart:"+e.getMessage() );
-			for(StackTraceElement e1 : e.getStackTrace()){
-				IJ.log(e1.toString());
-			}
+		// always set the y range to 360 degrees
+		if(type.equals(ProfileType.REGULAR) || type.equals(ProfileType.FRANKEN)){
+			plot.getRangeAxis().setRange(0,360);
+			// the 180 degree line
+			plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
 		}
+		plot.setBackgroundPaint(Color.WHITE);
+
+
+
+		int seriesCount = plot.getSeriesCount();
+
+		for (int i = 0; i < seriesCount; i++) {
+			plot.getRenderer().setSeriesVisibleInLegend(i, false);
+			String name = (String) ds.getSeriesKey(i);
+
+			// segments along the median profile
+			if(name.startsWith("Seg_")){
+				int colourIndex = getIndexFromLabel(name);
+				plot.getRenderer().setSeriesStroke(i, ChartComponents.SEGMENT_STROKE);
+				plot.getRenderer().setSeriesPaint(i, swatch.color(colourIndex));
+
+			} 
+
+			// entire nucleus profile
+			if(name.startsWith("Nucleus_")){
+				plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
+				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
+			} 
+
+			// quartile profiles
+			if(name.startsWith("Q")){
+				plot.getRenderer().setSeriesStroke(i, ChartComponents.QUARTILE_STROKE);
+				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
+			} 
+
+			// simple profiles
+			if(name.startsWith("Profile_")){
+				plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
+				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
+			} 
+
+		}	
+
 		return chart;
 	}
 	

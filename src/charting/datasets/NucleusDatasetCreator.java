@@ -19,7 +19,7 @@
 package charting.datasets;
 
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import ij.IJ;
+//import ij.IJ;
 import ij.process.FloatPolygon;
 import stats.DipTester;
 import stats.KruskalTester;
@@ -100,7 +100,8 @@ public class NucleusDatasetCreator {
 					continue; // move on to the next segment
 					
 				} else { // there is an error in the segment assignment; skip and warn
-					IJ.log("Profile skipping issue: "+seg.getName()+" : "+seg.getStartIndex()+" - "+seg.getEndIndex()+" in total of "+profile.size());
+//					// commented out - this should never be able to happen now
+//					IJ.log("Profile skipping issue: "+seg.getName()+" : "+seg.getStartIndex()+" - "+seg.getEndIndex()+" in total of "+profile.size());
 				}
 			} 
 			Profile subProfile = profile.getSubregion(seg);
@@ -346,7 +347,7 @@ public class NucleusDatasetCreator {
 	 * @throws Exception
 	 */
 	public static XYDataset createSegmentedProfileDataset(ProfileChartOptions options) throws Exception{
-		IJ.log(options.toString());
+//		IJ.log(options.toString());
 		return createSegmentedProfileDataset(options.firstDataset().getCollection(),
 				options.isNormalised(),
 				options.getAlignment(),
@@ -363,14 +364,14 @@ public class NucleusDatasetCreator {
 	 */
 	private static XYDataset createSegmentedProfileDataset(CellCollection collection, boolean normalised, ProfileAlignment alignment, BorderTag point, ProfileType type) throws Exception{
 		
-		IJ.log("Creating segmented profile dataset");
+//		IJ.log("Creating segmented profile dataset");
 		DefaultXYDataset ds = new DefaultXYDataset();
 				
 		int maxLength = (int) getMaximumNucleusProfileLength(collection);
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		IJ.log("Getting median profile dataset");
+//		IJ.log("Getting median profile dataset");
 		Profile profile = collection.getProfileCollection(type).getProfile(point, Constants.MEDIAN);
 		Profile xpoints = null;
 		if(normalised){
@@ -391,7 +392,7 @@ public class NucleusDatasetCreator {
 		List<NucleusBorderSegment> segments = collection.getProfileCollection(type).getSegmentedProfile(point).getOrderedSegments();
 //		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
 		
-		IJ.log("Adding segments from median angle profile");
+//		IJ.log("Adding segments from median angle profile");
 		if(normalised){
 			addSegmentsFromProfile(segments, profile, ds, 100, 0);
 		} else {
@@ -424,18 +425,9 @@ public class NucleusDatasetCreator {
 				}
 			}
 			double[][] ndata = { x.asArray(), angles.asArray() };
-			try{
+
 			ds.addSeries("Nucleus_"+n.getSourceFileName()+"-"+n.getNucleusNumber(), ndata);
-			} catch(Exception e){
-				IJ.log("Error forming data series:"+e.getMessage());
-				IJ.log("Angles:"+angles.size());
-				IJ.log("xpoints:"+xpoints.size());
-				IJ.log("x:"+x.size());
-				
-				for(StackTraceElement e1 : e.getStackTrace()){
-					IJ.log(e1.toString());
-				}
-			}
+			
 		}
 		return ds;
 	}

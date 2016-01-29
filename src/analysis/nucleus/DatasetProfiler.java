@@ -89,13 +89,25 @@ public class DatasetProfiler extends AnalysisWorker {
 			
 			CellCollection collection = getDataset().getCollection();
 			
-			// A cell collection starts with an empty Regular ProfileCollection
-			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
-
-			// default is to make profile aggregate from reference point
-			pc.createProfileAggregate(collection, ProfileType.REGULAR);
-			log(Level.INFO, "Angle aggregate first:");
-			log(Level.INFO, pc.getAggregate().toString());
+			
+			/*
+			 * Build a first set of profile aggregates
+			 * Default is to make profile aggregate from reference point
+			 */
+			for(ProfileType type : ProfileType.values()){
+				if(type.equals(ProfileType.FRANKEN)){
+					continue;
+				}
+				log(Level.FINE, "Creating initial profile aggregate: "+type);
+				ProfileCollection pc = collection.getProfileCollection(type);
+				pc.createProfileAggregate(collection, type);
+			}
+			
+			// Use the angle profiles to identify features
+			ProfileCollection angleCollection = collection.getProfileCollection(ProfileType.REGULAR);			
+			
+//			log(Level.INFO, "Angle aggregate first:");
+//			log(Level.INFO, angleCollection.getAggregate().toString());
 			publish(1);
 
 			// use the median profile of this aggregate to find the orientation point ("tail")
@@ -108,7 +120,16 @@ public class DatasetProfiler extends AnalysisWorker {
 			while(score < prevScore){
 
 				// rebuild the aggregate - needed if the orientation point index has changed in any nuclei
-				pc.createProfileAggregate(collection, ProfileType.REGULAR);
+//				angleCollection.createProfileAggregate(collection, ProfileType.REGULAR);
+				
+				for(ProfileType type : ProfileType.values()){
+					if(type.equals(ProfileType.FRANKEN)){
+						continue;
+					}
+					log(Level.FINE, "Rebuilding profile aggregate: "+type);
+					ProfileCollection pc = collection.getProfileCollection(type);
+					pc.createProfileAggregate(collection, type);
+				}
 
 				// carry out the orientation point detection in the median again
 				TailFinder.findTailIndexInMedianCurve(collection);
@@ -129,47 +150,18 @@ public class DatasetProfiler extends AnalysisWorker {
 			 * 
 			 */
 			
-			log(Level.INFO, "Angle aggregate final:");
-			log(Level.INFO, pc.getAggregate().toString());
-			
-			// Make the distance profile
-			log(Level.FINE, "Creating distance profile collection");
-			ProfileCollection distance = new ProfileCollection();
-			
-			/*
-			 * TODO: this causes problems when the offset for the regular profile
-			 * will not match the offsets for these profiles
-			 * 
-			 * Using the offsets from the angle profilecollection causes the median
-			 * to be offset by ~+60 perimeter units in Testing
-			 * 
-			 * Testing of the ProfileAggregate just created shows that the incoming
-			 * nuclear profiles are offset to the wrong position as they are added.
-			 */
-			distance.createProfileAggregate(collection, ProfileType.DISTANCE);
-			log(Level.INFO, "Distance aggregate:");
-			log(Level.INFO, distance.getAggregate().toString());
-			
-			
-			log(Level.INFO, "Angle: "+pc.printKeys());
-			for(BorderTag tag : pc.getOffsetKeys()){
-				distance.addOffset(tag, pc.getOffset(tag));
+			for(ProfileType type : ProfileType.values()){
+				if(type.equals(ProfileType.FRANKEN)){
+					continue;
+				}
+				log(Level.FINE, "Adding offsets for profile "+type);
+				ProfileCollection pc = collection.getProfileCollection(type);
+				for(BorderTag tag : angleCollection.getOffsetKeys()){
+					log(Level.FINE, "Added offset for "+tag);
+					pc.addOffset(tag, angleCollection.getOffset(tag));
+				}
 			}
-			
-			log(Level.INFO, "Distance: "+distance.printKeys());
-			collection.setProfileCollection(ProfileType.DISTANCE, distance);
-			
-			// Make the single distance profile
-			log(Level.FINE, "Creating single distance profile collection");
-			ProfileCollection single = new ProfileCollection();
-			single.createProfileAggregate(collection, ProfileType.SINGLE_DISTANCE);
-			
-			for(BorderTag tag : pc.getOffsetKeys()){
-				single.addOffset(tag, pc.getOffset(tag));
-			}
-			
-			collection.setProfileCollection(ProfileType.SINGLE_DISTANCE, single);
-			
+						
 			publish(3);
 			log(Level.FINE,  "Finished profiling collection; median generated");
 
