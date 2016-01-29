@@ -231,6 +231,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		}
 		
 		protected void updateMultiple() throws Exception {
+			this.setEnabled(true);
 			MeasurementScale scale  = HistogramsPanel.this.measurementUnitSettingsPanel.getSelected();
 			boolean useDensity = HistogramsPanel.this.useDensityPanel.isSelected();
 

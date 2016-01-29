@@ -214,6 +214,7 @@ public class RunSegmentationAction extends ProgressableAction {
 
 					programLogger.log(Level.FINEST, "Firing save root");
 					fireInterfaceEvent(InterfaceMethod.SAVE_ROOT);
+					fireInterfaceEvent(InterfaceMethod.UPDATE_POPULATIONS);
 					latch.countDown();
 					RunSegmentationAction.super.finished();
 					

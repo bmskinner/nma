@@ -26,6 +26,7 @@ import gui.components.panels.ProfileMarkersOptionsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.tabs.profiles.ProfileDisplayPanel;
 import stats.DipTester;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -50,10 +51,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -148,10 +151,12 @@ public class NucleusProfilesPanel extends DetailPanel {
 			this.add(buttonPanel, BorderLayout.NORTH);
 			
 			chartPanel = createPositionChartPanel();
+//			chartPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 			modalityProfileChartPanel = createModalityProfileChartPanel();
 			
 			mainPanel.add(chartPanel, BorderLayout.WEST);
 			mainPanel.add(modalityProfileChartPanel, BorderLayout.CENTER);
+//			mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 			
 			this.add(mainPanel, BorderLayout.CENTER);
 			
@@ -163,6 +168,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			}
 			pointList.setModel(model);
 			JScrollPane listPanel = new JScrollPane(pointList);
+//			listPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 			this.add(listPanel, BorderLayout.WEST);
 			pointList.addListSelectionListener(new ModalitySelectionListener());
 			pointList.setEnabled(false);
@@ -357,7 +363,6 @@ public class NucleusProfilesPanel extends DetailPanel {
 		}
 	}
 	
-	@SuppressWarnings("serial")
 	private class VariabililtyDisplayPanel extends JPanel implements ActionListener, ChangeListener {
 		
 //		
