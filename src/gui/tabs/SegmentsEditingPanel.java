@@ -29,6 +29,7 @@ import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.DraggableOverlayChartPanel;
 import gui.components.SelectableChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.dialogs.AngleWindowSizeExplorer;
 import gui.tabs.SegmentsDetailPanel.SegmentHistogramsPanel;
 import ij.IJ;
 
@@ -77,7 +78,7 @@ import components.nuclei.Nucleus;
 public class SegmentsEditingPanel extends DetailPanel implements SignalChangeListener, DatasetEventListener, InterfaceEventListener {
 	
 	private final SegmentProfilePanel		segmentProfilePanel;	// draw the segments on the median profile
-	
+		
 	public SegmentsEditingPanel(Logger programLogger) {
 		
 		super(programLogger);
@@ -98,12 +99,14 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 	
 	@Override
 	protected void updateSingle() throws Exception {
+//		windowSizeButton.setEnabled(true);
 		updateMultiple();
 	}
 	
 
 	@Override
 	protected void updateMultiple() throws Exception {
+//		windowSizeButton.setEnabled(false);
 		segmentProfilePanel.update(getDatasets());
 		
 		
@@ -142,6 +145,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		private JButton mergeButton;
 		private JButton unmergeButton;
 		private JButton splitButton;
+		private JButton windowSizeButton = new JButton("Window sizes");
 		
 		protected SegmentProfilePanel(Logger programLogger){
 			super(programLogger);
@@ -196,6 +200,10 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			splitButton.addActionListener(this);
 
 			panel.add(splitButton);
+
+			windowSizeButton.addActionListener(this);
+			panel.add(windowSizeButton);
+
 			
 			return panel;
 			
@@ -451,61 +459,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			setButtonsEnabled(false);
 		}
 		
-		
-//		@Override
-//		public void updateDetail(){
-//
-//			programLogger.log(Level.FINE, "Updating segments editing panel");
-//			SwingUtilities.invokeLater(new Runnable(){
-//				public void run(){
-//					
-//					try {
-//						JFreeChart chart = null;
-//						SegmentedProfile profile = null;
-//						if(! hasDatasets()){
-//
-//							chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
-//							setButtonsEnabled(false);
-//
-//						} else {
-//							
-//							ProfileChartOptions options = new ProfileChartOptions(getDatasets(), true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileType.REGULAR);
-//
-//							// Set the button configuration
-//							configureButtons(options);
-//
-//							if(isSingleDataset()){
-//								
-//								if(getChartCache().hasChart(options)){
-//									chart = getChartCache().getChart(options);
-//								} else {
-//									chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
-//									getChartCache().addChart(options, chart);
-//								}
-//
-//								profile = activeDataset().getCollection()
-//										.getProfileCollection(ProfileType.REGULAR)
-//										.getSegmentedProfile(BorderTag.REFERENCE_POINT);
-//								
-//								chartPanel.setChart(chart, profile, true);
-//							} else {
-//								// Multiple datasets
-//								chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
-//							}
-//						} 
-//
-//						
-//					} catch (Exception e) {
-//						programLogger.log(Level.SEVERE, "Error plotting segment profile", e);
-//						chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
-//						setButtonsEnabled(false);
-//					}  finally {
-//						
-//						setUpdating(false);
-//					}
-//				}
-//			});
-//		}
+
 				
 		/**
 		 * Enable or disable buttons depending on datasets selected
@@ -551,6 +505,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			unmergeButton.setEnabled(b);
 			mergeButton.setEnabled(b);
 			splitButton.setEnabled(b);
+			windowSizeButton.setEnabled(b);
 		}
 
 		@Override
@@ -658,6 +613,11 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			
+			if(e.getSource()==windowSizeButton){
+				new AngleWindowSizeExplorer(activeDataset(), programLogger);
+			}
+			
 			try {
 				CellCollection collection = activeDataset().getCollection();
 				SegmentedProfile medianProfile = collection
@@ -833,5 +793,6 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			}
 		}
 	}
+
 
 }

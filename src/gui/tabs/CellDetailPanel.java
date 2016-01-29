@@ -538,7 +538,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		private DraggableOverlayChartPanel profileChartPanel; // holds the chart with the cell
 		private ProfileTypeOptionsPanel profileOptions  = new ProfileTypeOptionsPanel();
 		
-		private JButton windowSizeButton = new JButton("Window sizes");
+//		private JButton windowSizeButton = new JButton("Window sizes");
 		
 		protected ProfilePanel(){
 
@@ -554,8 +554,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			header.add(profileOptions);
 			profileOptions.addActionListener(this);
 			
-			windowSizeButton.addActionListener(this);
-			header.add(windowSizeButton);
+//			windowSizeButton.addActionListener(this);
+//			header.add(windowSizeButton);
 			
 			this.add(header, BorderLayout.NORTH);
 			
@@ -630,9 +630,9 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		public void actionPerformed(ActionEvent e) {
 			update(activeCell);
 			
-			if(e.getSource()==windowSizeButton){
-				new AngleWindowSizeExplorer(activeDataset(), programLogger);
-			}
+//			if(e.getSource()==windowSizeButton){
+//				new AngleWindowSizeExplorer(activeDataset(), programLogger);
+//			}
 			
 		}
 

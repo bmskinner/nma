@@ -187,6 +187,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	
 	@Override
 	public void setEnabled(boolean b){
+		
+		for(Component c : this.getComponents()){
+			c.setEnabled(b);
+		}
+		
 		for(DetailPanel panel : this.subPanels){
 			panel.setEnabled(b);
 		}
@@ -238,7 +243,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 			}
 		});
 	}
-	
+		
 	/**
 	 * This method must be overridden by the extending class
 	 * to perform the actual update when a single dataset is selected

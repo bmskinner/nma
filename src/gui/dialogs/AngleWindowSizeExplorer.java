@@ -161,7 +161,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 	 */
 	private void setAnalysing(boolean b){
 		if(b){
-			runButton.setEnabled(false);
+			this.setEnabled(false);
 			for(Component c : this.getComponents()){
 				c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); //new Cursor(Cursor.WAIT_CURSOR));
 			}
@@ -169,12 +169,19 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			
 		} else {
-			runButton.setEnabled(true);
+			this.setEnabled(true);
 			for(Component c : this.getComponents()){
 				c.setCursor(Cursor.getDefaultCursor());
 			}
 			this.setCursor(Cursor.getDefaultCursor());
 		}
+	}
+	
+	public void setEnabled(boolean b){
+		runButton.setEnabled(b);
+		windowSizeMinSpinner.setEnabled(b);
+		windowSizeMaxSpinner.setEnabled(b);
+		stepSizeSpinner.setEnabled(b);
 	}
 	
 	private void runAnalysis() throws Exception {
