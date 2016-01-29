@@ -19,17 +19,13 @@
 package gui.tabs;
 
 import gui.components.ColourSelecter;
-import gui.components.ExportableTable;
-import gui.components.PairwiseTableCellRenderer;
+import gui.components.ExportableChartPanel;
 import gui.components.panels.BorderTagOptionsPanel;
-import gui.components.panels.ProfileAlignmentOptionsPanel;
 import gui.components.panels.ProfileCollectionTypeSettingsPanel;
 import gui.components.panels.ProfileMarkersOptionsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.tabs.profiles.ProfileDisplayPanel;
 import stats.DipTester;
-import stats.NucleusStatistic;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -54,15 +50,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.TableModel;
-
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.ValueMarker;
@@ -72,11 +64,8 @@ import org.jfree.ui.TextAnchor;
 
 import utility.Constants;
 import analysis.AnalysisDataset;
-import charting.NucleusStatsTableOptions;
-import charting.TableOptions;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.ProfileChartOptions;
-import charting.datasets.NucleusTableDatasetCreator;
 import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
@@ -145,8 +134,8 @@ public class NucleusProfilesPanel extends DetailPanel {
 		
 		private JPanel mainPanel = new JPanel(new BorderLayout());
 		private JList<String> pointList;
-		private ChartPanel chartPanel;
-		private ChartPanel modalityProfileChartPanel; // hold a chart showing p-values across the profile
+		private ExportableChartPanel chartPanel;
+		private ExportableChartPanel modalityProfileChartPanel; // hold a chart showing p-values across the profile
 		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
 		private JPanel buttonPanel = new JPanel(new FlowLayout());
 		
@@ -186,10 +175,10 @@ public class NucleusProfilesPanel extends DetailPanel {
 			pointList.setEnabled(b);
 		}
 		
-		private ChartPanel createPositionChartPanel(){
+		private ExportableChartPanel createPositionChartPanel(){
 			
 			JFreeChart chart = createPositionChart();
-			ChartPanel chartPanel = new ChartPanel(chart);
+			ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
 			chartPanel.setMinimumDrawWidth( 0 );
 			chartPanel.setMinimumDrawHeight( 0 );
 			return chartPanel;
@@ -205,10 +194,10 @@ public class NucleusProfilesPanel extends DetailPanel {
 			return chart;
 		}
 		
-		private ChartPanel createModalityProfileChartPanel(){
+		private ExportableChartPanel createModalityProfileChartPanel(){
 			
 			JFreeChart chart = createModalityProfileChart();
-			ChartPanel chartPanel = new ChartPanel(chart);
+			ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
 			chartPanel.setMinimumDrawWidth( 0 );
 			chartPanel.setMinimumDrawHeight( 0 );
 			return chartPanel;
@@ -373,7 +362,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 		
 //		
 		private JPanel buttonPanel = new JPanel(new FlowLayout());
-		protected ChartPanel chartPanel;
+		protected ExportableChartPanel chartPanel;
 		private JSpinner pvalueSpinner;
 //		
 		private BorderTagOptionsPanel borderTagOptionsPanel = new BorderTagOptionsPanel();
@@ -389,7 +378,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			XYPlot variabilityPlot = variablityChart.getXYPlot();
 			variabilityPlot.setBackgroundPaint(Color.WHITE);
 			variabilityPlot.getDomainAxis().setRange(0,100);
-			chartPanel = new ChartPanel(variablityChart);
+			chartPanel = new ExportableChartPanel(variablityChart);
 			chartPanel.setMinimumDrawWidth( 0 );
 			chartPanel.setMinimumDrawHeight( 0 );
 			this.add(chartPanel, BorderLayout.CENTER);
