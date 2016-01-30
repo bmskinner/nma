@@ -60,13 +60,20 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
+import analysis.nucleus.DatasetSegmenter;
+import analysis.nucleus.ShellAnalysis;
+import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
+import analysis.nucleus.DatasetSegmenter.SegmentFitter;
 import charting.charts.HistogramChartFactory;
 import charting.charts.HistogramChartOptions;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.ProfileChartOptions;
+import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
+import components.generic.Profile;
+import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.BorderTag.BorderTagType;
@@ -146,6 +153,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		private JButton unmergeButton;
 		private JButton splitButton;
 		private JButton windowSizeButton = new JButton("Window sizes");
+		private JButton updatewindowButton = new JButton("Set window size");
 		
 		protected SegmentProfilePanel(Logger programLogger){
 			super(programLogger);
@@ -203,7 +211,9 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 
 			windowSizeButton.addActionListener(this);
 			panel.add(windowSizeButton);
-
+			
+			updatewindowButton.addActionListener(this);
+			panel.add(updatewindowButton);
 			
 			return panel;
 			
@@ -506,6 +516,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			mergeButton.setEnabled(b);
 			splitButton.setEnabled(b);
 			windowSizeButton.setEnabled(b);
+			updatewindowButton.setEnabled(b);
 		}
 
 		@Override
@@ -611,12 +622,91 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 		}
 		
+		private void updateCollectionWindowSize() throws Exception{
+			int windowSizeMin = 1;
+			int windowSizeMax = (int) activeDataset().getCollection().getMedianArrayLength();
+			int windowSizeActual = activeDataset().getAnalysisOptions().getAngleProfileWindowSize();
+			
+			SpinnerNumberModel spinnerModel = new SpinnerNumberModel(windowSizeActual,
+					windowSizeMin,
+					windowSizeMax,
+					1);
+			JSpinner windowSizeSpinner = new JSpinner(spinnerModel);
+			
+			
+			int option = JOptionPane.showOptionDialog(null, 
+					windowSizeSpinner, 
+					"Select new window size", 
+					JOptionPane.OK_CANCEL_OPTION, 
+					JOptionPane.QUESTION_MESSAGE, null, null, null);
+			if (option == JOptionPane.CANCEL_OPTION) {
+				return;
+
+			} else if (option == JOptionPane.OK_OPTION)	{
+				this.setAnalysing(true);
+				int windowSize = (Integer) windowSizeSpinner.getModel().getValue();
+				setCollectionWindowSize(windowSize);
+				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+				this.setAnalysing(false);
+			}
+			
+		}
+		
+		private void setCollectionWindowSize(int windowSize) throws Exception{
+			
+			// Update cells
+			
+			for(Cell c : activeDataset().getCollection().getCells()){
+				c.getNucleus().setAngleProfileWindowSize(windowSize);
+			}
+
+			// recalc the aggregate
+			
+			ProfileCollection pc = activeDataset().getCollection().getProfileCollection(ProfileType.REGULAR);			
+			pc.createProfileAggregate(activeDataset().getCollection(), ProfileType.REGULAR);
+			
+
+			/*
+			 * TODO
+			 * Update the franken collection
+			 */
+			
+			
+			SegmentedProfile medianProfile = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);	
+			
+			// Does nothing, but needed to access segment fitter
+			DatasetSegmenter segmenter = new DatasetSegmenter(activeDataset(), MorphologyAnalysisMode.NEW, programLogger);
+			
+			// Make a fitter
+			DatasetSegmenter.SegmentFitter fitter = segmenter.new SegmentFitter(medianProfile);
+
+			for(Cell c : activeDataset().getCollection().getCells()){
+
+				// recombine the segments at the lengths of the median profile segments
+				Profile frankenProfile = fitter.recombine(c.getNucleus(), BorderTag.REFERENCE_POINT);
+
+				c.getNucleus().setProfile(ProfileType.FRANKEN, new SegmentedProfile(frankenProfile));
+
+			}
+			
+			activeDataset().getCollection()
+				.getProfileCollection(ProfileType.FRANKEN)
+				.createProfileAggregate(activeDataset().getCollection(), ProfileType.FRANKEN);
+
+			fitter = null; // clean up
+			
+			activeDataset().getAnalysisOptions().setAngleProfileWindowSize(windowSize);
+
+		}
+		
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			
 			if(e.getSource()==windowSizeButton){
 				new AngleWindowSizeExplorer(activeDataset(), programLogger);
 			}
+			
+			
 			
 			try {
 				CellCollection collection = activeDataset().getCollection();
@@ -650,9 +740,13 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 					
 				}
 				
+				if(e.getSource()==updatewindowButton){
+					updateCollectionWindowSize();
+				}
+				
 			} catch (Exception e1) {
 				
-				programLogger.log(Level.SEVERE, "Error altering segments", e1);
+				programLogger.log(Level.SEVERE, "Error in action", e1);
 			} finally {
 				SegmentsEditingPanel.this.setAnalysing(false);
 			}
