@@ -18,7 +18,6 @@
  *******************************************************************************/
 package gui.dialogs;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -33,8 +32,6 @@ import java.util.logging.Logger;
 import gui.LoadingIconDialog;
 import gui.components.ColourSelecter;
 import gui.components.ExportableChartPanel;
-import gui.tabs.DetailPanel;
-
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -209,8 +206,8 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 				Cell newCell = new Cell(c);
 				newCell.getNucleus().setAngleProfileWindowSize(i);
 				
-				// recalc the profiles
-				newCell.getNucleus().calculateProfiles();
+//				// recalc the profiles
+//				newCell.getNucleus().calculateProfiles();
 				
 				duplicateCollection.addCell(newCell);
 			}
@@ -281,6 +278,14 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		int r = (int) ( 255d * proportion);
 		int g = 20;
 		int b = (int) (255d -  (255d * proportion));
+		
+		/*
+		 * Validate ranges
+		 */	
+		r = r > 255 ? 255 : r < 0 ? 0 : r;
+		g = g > 255 ? 255 : g < 0 ? 0 : g;
+		b = b > 255 ? 255 : b < 0 ? 0 : b;
+		
 		
 		Color result = new Color(r, g, b);
 		return result;
