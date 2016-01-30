@@ -166,7 +166,13 @@ public interface Nucleus extends CellularComponent {
 	 */
 	public int getAngleProfileWindowSize();
 	
-	public void setAngleProfileWindowSize(int i);
+	/**
+	 * Set the angle profile window size, and recalculate the angle
+	 * profile
+	 * @param i
+	 * @throws Exception
+	 */
+	public void setAngleProfileWindowSize(int i) throws Exception;
 
 
 	/**

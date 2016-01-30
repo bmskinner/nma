@@ -151,10 +151,16 @@ public class RoundNucleus extends AbstractCellularComponent
 	*/
 	public void findPointsAroundBorder() throws Exception{
 
-		int tailIndex = this.getProfile(ProfileType.DISTANCE).getIndexOfMax();
-		BorderPoint tailPoint = this.getBorderPoint(tailIndex);
-		setBorderTag(BorderTag.ORIENTATION_POINT, tailIndex);
-    	setBorderTag(BorderTag.REFERENCE_POINT, this.getBorderIndex(this.findOppositeBorder(tailPoint)));
+		int index = this.getProfile(ProfileType.DISTANCE).getIndexOfMax();
+		
+		// Make the reference point at the widest axis
+		setBorderTag(BorderTag.REFERENCE_POINT, index);
+				
+//		BorderPoint tailPoint = this.getBorderPoint(tailIndex);
+		setBorderTag(BorderTag.ORIENTATION_POINT, index);
+		
+		
+//    	setBorderTag(BorderTag.REFERENCE_POINT, this.getBorderIndex(this.findOppositeBorder(tailPoint)));
 	}
 	
 
@@ -184,7 +190,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		 * All these calculations operate on the same border point order
 		 */
 		
-		this.profileMap.put(ProfileType.REGULAR, this.calculateAngleProfile(angleProfileWindowSize));
+		this.profileMap.put(ProfileType.REGULAR, this.calculateAngleProfile());
 
 		// calc distances around nucleus through CoM
 		this.profileMap.put(ProfileType.DISTANCE, this.calculateDistanceProfile());
@@ -595,8 +601,9 @@ public class RoundNucleus extends AbstractCellularComponent
 		this.failureCode = this.failureCode | i;
 	}
 
-	public void setAngleProfileWindowSize(int i){
+	public void setAngleProfileWindowSize(int i) throws Exception{
 		this.angleProfileWindowSize = i;
+		this.profileMap.put(ProfileType.REGULAR, this.calculateAngleProfile());
 	}
 
 		
@@ -1174,7 +1181,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		return new SegmentedProfile(profile);
 	}
 
-	private SegmentedProfile calculateAngleProfile(int angleProfileWindowSize) throws Exception{
+	private SegmentedProfile calculateAngleProfile() throws Exception{
 
 		List<NucleusBorderSegment> segments = null;
 		
