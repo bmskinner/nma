@@ -54,6 +54,8 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -332,9 +334,10 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		JPanel panelHeader = new JPanel();
 
 		JButton btnNewAnalysis = new JButton("New analysis");
-		btnNewAnalysis.addMouseListener(new MouseAdapter() {
+		btnNewAnalysis.addActionListener(new ActionListener() {
+			
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void actionPerformed(ActionEvent e) { 
 				
 				new NewAnalysisAction(MainWindow.this);
 
@@ -347,9 +350,10 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		//---------------
 
 		JButton btnLoadSavedDataset = new JButton("Load analysis dataset");
-		btnLoadSavedDataset.addMouseListener(new MouseAdapter() {
+		btnLoadSavedDataset.addActionListener(new ActionListener() {
+			
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void actionPerformed(ActionEvent e) { 
 //				
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
@@ -369,9 +373,10 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		//---------------
 
 		JButton btnSavePopulation = new JButton("Save all");
-		btnSavePopulation.addMouseListener(new MouseAdapter() {
+		btnSavePopulation.addActionListener(new ActionListener() {
+			
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void actionPerformed(ActionEvent e) { 
 				programLogger.log(Level.INFO, "Saving root populations...");
 				
 				Thread thr = new Thread(){
@@ -388,9 +393,10 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		//---------------
 
 		JButton btnPostanalysisMapping = new JButton("Post-FISH mapping");
-		btnPostanalysisMapping.addMouseListener(new MouseAdapter() {
+		btnPostanalysisMapping.addActionListener(new ActionListener() {
+			
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void actionPerformed(ActionEvent e) { 
 
 				new FishRemappingAction(populationsPanel.getSelectedDatasets(), MainWindow.this);
 			}
@@ -398,9 +404,10 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		panelHeader.add(btnPostanalysisMapping);
 				
 		JButton btnSetLogLevel = new JButton("Options");
-		btnSetLogLevel.addMouseListener(new MouseAdapter() {
+		btnSetLogLevel.addActionListener(new ActionListener() {
+			
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void actionPerformed(ActionEvent e) { 
 
 				MainOptionsDialog dialog = new MainOptionsDialog(MainWindow.this);
 				if(dialog.isReadyToRun()){

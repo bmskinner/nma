@@ -25,6 +25,8 @@ import gui.dialogs.MainOptionsDialog;
 import gui.dialogs.RandomSamplingDialog;
 
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.UUID;
@@ -82,9 +84,10 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 		 */
 		JPanel buttonPanel = new JPanel(new FlowLayout());
 		randomSamplingButton = new JButton("Random sampling");
-		randomSamplingButton.addMouseListener(new MouseAdapter() {
+		randomSamplingButton.addActionListener(new ActionListener() {
+			
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void actionPerformed(ActionEvent e) { 
 
 				new RandomSamplingDialog(activeDataset(), programLogger);
 			
