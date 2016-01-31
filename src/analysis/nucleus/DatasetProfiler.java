@@ -325,13 +325,15 @@ public class DatasetProfiler extends AnalysisWorker {
 		private static void findTailInRoundMedian(CellCollection collection) throws Exception {
 			
 			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, 0);
-			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
-
-			Profile medianProfile = pc.getProfile(BorderTag.REFERENCE_POINT, 50);
-
-			int tailIndex = (int) Math.floor(medianProfile.size()/2);
-						
-			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
+			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, 0);
+			
+//			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+//
+//			Profile medianProfile = pc.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+//
+//			int tailIndex = (int) Math.floor(medianProfile.size()/2);
+//						
+//			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
 		}
 
 		/**
@@ -380,9 +382,11 @@ public class DatasetProfiler extends AnalysisWorker {
 					n.reverse(); // put it back if no better
 				}
 
-				// also update the tail position
-				int tailIndex = n.getBorderIndex(n.findOppositeBorder( n.getBorderPoint(newHeadIndex) ));
-				n.setBorderTag(BorderTag.ORIENTATION_POINT, tailIndex);
+				// also update the orientation position
+				n.setBorderTag(BorderTag.ORIENTATION_POINT, n.getBorderIndex(BorderTag.REFERENCE_POINT));
+				
+//				int tailIndex = n.getBorderIndex(n.findOppositeBorder( n.getBorderPoint(newHeadIndex) ));
+//				n.setBorderTag(BorderTag.ORIENTATION_POINT, tailIndex);
 			}
 		}
 
