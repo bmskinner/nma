@@ -1554,4 +1554,29 @@ public class NucleusDatasetCreator {
 		return ds;
 	}
 	
+	/**
+	 * Create a Kruskal-Wallis comparison along the angle profiles for two analysis datasets
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
+	public static XYDataset createFrankenKruskalProfileDataset(ProfileChartOptions options) throws Exception {
+
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		AnalysisDataset setOne = options.getDatasets().get(0);
+		AnalysisDataset setTwo = options.getDatasets().get(1);
+	
+//		Profile pvalues = KruskalTester.testCollectionGetPValues(setOne, setTwo, options.getTag(), options.getType());
+		Profile pvalues = KruskalTester.testCollectionGetFrankenPValues(setOne, setTwo, options.getTag(), options.getLogger());
+		
+		double[] yvalues = pvalues.asArray();
+		double[] xvalues = pvalues.getPositions(100).asArray();
+		
+		double[][] data = { xvalues, yvalues };
+		ds.addSeries(setOne.getCollection().getName(), data);
+
+		return ds;
+	}
+	
 }

@@ -110,10 +110,10 @@ public class KruskalTester {
 			ProfileCollection pc = one.getCollection().getProfileCollection(ProfileType.REGULAR);
 			List<NucleusBorderSegment> segments = pc.getSegments(tag);
 			ProfileCollection frankenCollection = new ProfileCollection();
-			for(BorderTag key : pc.getOffsetKeys()){
-				frankenCollection.addOffset(key, pc.getOffset(key));
-			}
-			frankenCollection.addSegments(tag, segments);
+//			for(BorderTag key : pc.getOffsetKeys()){
+//				frankenCollection.addOffset(key, pc.getOffset(key));
+//			}
+//			frankenCollection.addSegments(tag, segments);
 
 			
 			
@@ -137,6 +137,11 @@ public class KruskalTester {
 			}
 
 			frankenCollection.createProfileAggregate(copyOfTwo.getCollection(), ProfileType.FRANKEN);
+			
+			for(BorderTag key : pc.getOffsetKeys()){
+				frankenCollection.addOffset(key, pc.getOffset(key));
+			}
+			frankenCollection.addSegments(tag, segments);
 			// add all the nucleus frankenprofiles to the frankencollection
 //			frankenCollection.addNucleusProfiles(frankenProfiles);
 

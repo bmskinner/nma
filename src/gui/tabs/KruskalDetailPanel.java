@@ -20,12 +20,18 @@ package gui.tabs;
 
 import gui.components.ExportableChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.dialogs.KruskalTestDialog;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -42,11 +48,21 @@ import charting.charts.ProfileChartOptions;
 public class KruskalDetailPanel  extends DetailPanel {
 	
 	private ExportableChartPanel chartPanel;
+	JButton frankenButton = new JButton("Compare frankenprofiles");
 
 	public KruskalDetailPanel(Logger programLogger ) throws Exception {
 		super(programLogger);
 		
 		createUI();
+		
+		setEnabled(false);
+	}
+	
+	@Override
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
+		frankenButton.setEnabled(b);
+		
 	}
 	
 	private void createUI(){
@@ -69,6 +85,27 @@ public class KruskalDetailPanel  extends DetailPanel {
 		JPanel panel = new JPanel(new FlowLayout());
 
 		panel.add(new JLabel("Kruskal-Wallis comparison of datasets (Bonferroni-corrected p-values)"));
+		
+		frankenButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) { 
+				
+				Thread thr = new Thread(){
+					public void run(){
+						
+						try {
+							new KruskalTestDialog(getDatasets().get(0), getDatasets().get(1), programLogger );
+						} catch (Exception e) {
+							programLogger.log(Level.SEVERE, "Error testing", e);
+						}
+					}
+				};
+				thr.start();
+			}
+			
+		});	
+		panel.add(frankenButton);
 
 		return panel;
 		
@@ -119,6 +156,15 @@ public class KruskalDetailPanel  extends DetailPanel {
 	 */
 	protected void updateMultiple() throws Exception {
 		if(getDatasets().size()==2){ // Only create a chart if exactly two datasets are selected
+			
+			// Only allow a franken normlisation if datasets have the same number of segments
+			if(checkSegmentCountsMatch(getDatasets())){
+				setEnabled(true);
+			} else {
+				setEnabled(false);
+			}
+			
+		
 			updateChartPanel();
 			
 		} else {
@@ -133,6 +179,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 	 * to perform the actual update when a no datasets are selected
 	 */
 	protected void updateNull() throws Exception {
+		setEnabled(false);
 		JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
 		chartPanel.setChart(chart);
 	}	

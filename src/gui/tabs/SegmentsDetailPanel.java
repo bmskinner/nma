@@ -467,36 +467,36 @@ public class SegmentsDetailPanel extends DetailPanel {
 		}
 	}
 	
-	/**
-	 * Given a list of datasets, count the segments in the median profile of each, 
-	 * and test if all datasets have the same number of segments.
-	 * @param list
-	 * @return
-	 * @throws Exception
-	 */
-	private boolean checkSegmentCountsMatch(List<AnalysisDataset> list) throws Exception{
-		int prevCount = 0;
-		
-		programLogger.log(Level.FINEST, "Counting segments in each dataset");
-		// check that the datasets have the same number of segments
-		for( AnalysisDataset dataset  : list){
-			CellCollection collection = dataset.getCollection();
-			int count = collection.getProfileCollection(ProfileType.REGULAR)
-				.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
-				.getSegmentCount();
-			
-			programLogger.log(Level.FINEST, "\t"+dataset.getName()+": "+count+" segments");
-			
-			if(prevCount > 0 ){
-				if(prevCount!=count){
-					programLogger.log(Level.FINEST, "Segment count does not match");
-					return false;
-				}
-			}
-			prevCount = count;
-		}
-		return true;
-	}
+//	/**
+//	 * Given a list of datasets, count the segments in the median profile of each, 
+//	 * and test if all datasets have the same number of segments.
+//	 * @param list
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	private boolean checkSegmentCountsMatch(List<AnalysisDataset> list) throws Exception{
+//		int prevCount = 0;
+//		
+//		programLogger.log(Level.FINEST, "Counting segments in each dataset");
+//		// check that the datasets have the same number of segments
+//		for( AnalysisDataset dataset  : list){
+//			CellCollection collection = dataset.getCollection();
+//			int count = collection.getProfileCollection(ProfileType.REGULAR)
+//				.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
+//				.getSegmentCount();
+//			
+//			programLogger.log(Level.FINEST, "\t"+dataset.getName()+": "+count+" segments");
+//			
+//			if(prevCount > 0 ){
+//				if(prevCount!=count){
+//					programLogger.log(Level.FINEST, "Segment count does not match");
+//					return false;
+//				}
+//			}
+//			prevCount = count;
+//		}
+//		return true;
+//	}
 	
 	@SuppressWarnings("serial")
 	protected class SegmentHistogramsPanel extends HistogramsTabPanel  {

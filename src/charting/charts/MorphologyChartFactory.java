@@ -1156,5 +1156,89 @@ public class MorphologyChartFactory {
 
 		return chart;
 	}
+	
+	/**
+	 * Create a Kruskal-Wallis probability chart comparing two datasets.
+	 * @param options the options to plot
+	 * @return
+	 * @throws Exception
+	 */
+	public static JFreeChart makeFrankenKruskalWallisChart(ProfileChartOptions options) throws Exception {
+		
+		XYDataset kruskalDataset = NucleusDatasetCreator.createFrankenKruskalProfileDataset(options);
+		
+		XYDataset firstProfileDataset = NucleusDatasetCreator.createNonsegmentedMedianProfileDataset(options.firstDataset(),
+				true,
+				options.getAlignment(),
+				options.getTag());
+		
+		XYDataset secondProfileDataset = NucleusDatasetCreator.createNonsegmentedMedianProfileDataset(options.getDatasets().get(1),
+				true,
+				options.getAlignment(),
+				options.getTag());
+		
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+						"Position", "Probability", null, PlotOrientation.VERTICAL, true, true,
+						false);
+		
+		XYPlot plot = chart.getXYPlot();
+		
+		plot.setBackgroundPaint(Color.WHITE);
+		plot.getDomainAxis().setRange(0, 100);
+		
+		LogAxis rangeAxis = new LogAxis("Probability");
+		rangeAxis.setBase(10);
+		DecimalFormat df=new DecimalFormat();
+		df.applyPattern("0.#E0");
+		rangeAxis.setNumberFormatOverride(df);
+		rangeAxis.setStandardTickUnits(new StandardTickUnitSource());
+
+		plot.setRangeAxis(rangeAxis);
+		
+		NumberAxis angleAxis = new NumberAxis("Angle");
+		angleAxis.setRange(0, 360);
+		
+		plot.setRangeAxis(0, rangeAxis);
+		plot.setRangeAxis(1, angleAxis);
+		
+		plot.setDataset(0, kruskalDataset);
+		plot.setDataset(1, firstProfileDataset);
+		plot.setDataset(2, secondProfileDataset);
+		
+		
+		XYItemRenderer logRenderer = new XYLineAndShapeRenderer(true, false);
+		logRenderer.setSeriesPaint(0, Color.BLACK);
+		logRenderer.setSeriesVisibleInLegend(0, false);
+		logRenderer.setSeriesStroke(0, ChartComponents.MARKER_STROKE);
+		
+		XYItemRenderer angleRendererOne = new XYLineAndShapeRenderer(true, false);
+		Color colorOne = options.getDatasets().get(0).getDatasetColour() == null 
+					? ColourSelecter.getSegmentColor(0) 
+					: options.getDatasets().get(0).getDatasetColour();
+		angleRendererOne.setSeriesPaint(0, colorOne);
+		angleRendererOne.setSeriesVisibleInLegend(0, false);
+		angleRendererOne.setSeriesStroke(0, ChartComponents.MARKER_STROKE);
+		
+		XYItemRenderer angleRendererTwo = new XYLineAndShapeRenderer(true, false);
+		Color colorTwo = options.getDatasets().get(1).getDatasetColour() == null 
+				? ColourSelecter.getSegmentColor(1) 
+				: options.getDatasets().get(1).getDatasetColour();
+		angleRendererTwo.setSeriesPaint(0, colorTwo);
+		angleRendererTwo.setSeriesVisibleInLegend(0, false);
+		angleRendererTwo.setSeriesStroke(0, ChartComponents.MARKER_STROKE);
+
+		
+		plot.setRenderer(0, logRenderer);
+		plot.setRenderer(1, angleRendererOne);
+		plot.setRenderer(2, angleRendererTwo);
+		
+		plot.mapDatasetToRangeAxis(0, 0);
+		plot.mapDatasetToRangeAxis(1, 1);
+		plot.mapDatasetToRangeAxis(2, 1);
+		
+
+		return chart;
+	}
 
 }
