@@ -566,14 +566,14 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 			if(result==0){ // OK
 				
-				// TODO: Update each nucleus profile
+				//  Update each nucleus profile
 				fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
 				
-			} else {
-				// Only run a panel update if the refresh was not called
-				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-				update(getDatasets());
 			}
+			
+			// Only run a panel update if the refresh was not called
+			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+			update(getDatasets());
 			
 			
 		}
@@ -596,6 +596,17 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 
 			int newStart = start ? index : seg.getStartIndex();
 			int newEnd = start ? seg.getEndIndex() : index;
+			
+			// TODO - if the segment is the orientation point boundary, update it
+			if(start){
+				if(seg.getStartIndex()==activeDataset()
+						.getCollection()
+						.getProfileCollection(ProfileType.REGULAR).getOffset(BorderTag.ORIENTATION_POINT)){
+					activeDataset()
+					.getCollection()
+					.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, index);
+				}
+			}
 
 			 // Move the appropriate segment endpoint
 			if(oldProfile.update(seg, newStart, newEnd)){
@@ -612,10 +623,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				.addSegments(BorderTag.REFERENCE_POINT, oldProfile.getSegments());
 				
 				programLogger.log(Level.FINEST, "Segments added, refresh the charts");
-				
-//				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-//				update(getDatasets());
-				
+								
 			} else {
 				programLogger.log(Level.WARNING, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
 			}
