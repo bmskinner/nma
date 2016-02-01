@@ -35,7 +35,7 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import charting.TableOptions;
+import charting.options.TableOptions;
 import stats.SignalStatistic;
 import stats.Stats;
 import utility.Utils;

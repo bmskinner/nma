@@ -25,11 +25,11 @@ import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
-import charting.DefaultTableOptions;
 import charting.NucleusStatsTableOptions;
-import charting.TableOptions;
-import charting.DefaultTableOptions.TableType;
 import charting.datasets.NucleusTableDatasetCreator;
+import charting.options.DefaultTableOptions;
+import charting.options.TableOptions;
+import charting.options.DefaultTableOptions.TableType;
 import gui.components.ExportableTable;
 import gui.components.WilcoxonTableCellRenderer;
 import gui.tabs.VennDetailPanel.VennTableCellRenderer;

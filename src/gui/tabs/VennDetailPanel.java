@@ -30,10 +30,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
-import charting.DefaultTableOptions;
-import charting.DefaultTableOptions.TableType;
-import charting.TableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
+import charting.options.DefaultTableOptions;
+import charting.options.TableOptions;
+import charting.options.DefaultTableOptions.TableType;
 import gui.components.ExportableTable;
 
 public class VennDetailPanel extends DetailPanel {

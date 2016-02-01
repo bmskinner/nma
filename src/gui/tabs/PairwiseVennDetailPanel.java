@@ -31,10 +31,10 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
-import charting.DefaultTableOptions;
-import charting.DefaultTableOptions.TableType;
-import charting.TableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
+import charting.options.DefaultTableOptions;
+import charting.options.TableOptions;
+import charting.options.DefaultTableOptions.TableType;
 import gui.components.ExportableTable;
 
 @SuppressWarnings("serial")

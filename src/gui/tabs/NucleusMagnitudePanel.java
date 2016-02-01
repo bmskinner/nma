@@ -50,8 +50,8 @@ import analysis.RandomSampler;
 import analysis.nucleus.ShellAnalysis;
 import stats.NucleusStatistic;
 import charting.NucleusStatsTableOptions;
-import charting.TableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
+import charting.options.TableOptions;
 
 @SuppressWarnings("serial")
 public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {

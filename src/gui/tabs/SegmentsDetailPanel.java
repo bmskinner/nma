@@ -58,13 +58,13 @@ import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
 import charting.SegmentStatsTableOptions;
-import charting.TableOptions;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.HistogramChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
+import charting.options.TableOptions;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;

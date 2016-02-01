@@ -20,6 +20,7 @@ package charting;
 
 import java.util.List;
 
+import charting.options.TableOptions;
 import analysis.AnalysisDataset;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;

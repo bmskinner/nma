@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import javax.swing.table.TableModel;
 
+import charting.options.TableOptions;
 import analysis.AnalysisDataset;
 
 

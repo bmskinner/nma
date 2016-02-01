@@ -50,11 +50,11 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
 import analysis.AnalysisDataset;
-import charting.DefaultTableOptions;
-import charting.DefaultTableOptions.TableType;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
+import charting.options.DefaultTableOptions;
+import charting.options.DefaultTableOptions.TableType;
 import components.CellCollection;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter;
