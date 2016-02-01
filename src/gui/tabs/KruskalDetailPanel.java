@@ -134,7 +134,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 		if(getChartCache().hasChart(options)){
 			chart = getChartCache().getChart(options);
 		} else {
-			chart = MorphologyChartFactory.makeKruskalWallisChart(options);
+			chart = MorphologyChartFactory.makeKruskalWallisChart(options, false);
 			getChartCache().addChart(options, chart);
 		}
 

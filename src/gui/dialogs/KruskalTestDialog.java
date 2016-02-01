@@ -156,7 +156,7 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 		
 		options.setLogger(programLogger);
 		
-		JFreeChart chart = MorphologyChartFactory.makeFrankenKruskalWallisChart(options);
+		JFreeChart chart = MorphologyChartFactory.makeKruskalWallisChart(options, true);
 		chartPanel.setChart(chart);
 
 		setAnalysing(false);
