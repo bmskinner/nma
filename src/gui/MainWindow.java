@@ -588,8 +588,16 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		}
 		
 		if(event.type().equals("SaveCollectionAction")){
-			CountDownLatch latch = new CountDownLatch(1);
-			new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
+			
+			try {
+				CountDownLatch latch = new CountDownLatch(1);
+				new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
+				latch.await();
+				programLogger.log(Level.FINE, "All dataset saved");
+			} catch (InterruptedException e) {
+				programLogger.log(Level.SEVERE, "Interruption to thread", e);
+			}
+
 		}
 		
 		
@@ -635,6 +643,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 							AnalysisDataset source = populationsPanel.getDataset(selectedValue);
 							final CountDownLatch latch = new CountDownLatch(1);
 							new RunSegmentationAction(selectedDataset, source, null, MainWindow.this, latch);
+							latch.await();
 						}
 					} catch(Exception e1){
 						programLogger.log(Level.SEVERE, "Error applying morphology", e1);

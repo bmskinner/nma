@@ -25,7 +25,6 @@
  */
 package analysis.nucleus;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,7 +44,6 @@ import components.nuclear.NucleusType;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
-import ij.IJ;
 
 
 public class CurveRefolder extends AnalysisWorker {
@@ -329,7 +327,7 @@ public class CurveRefolder extends AnalysisWorker {
 	*/
 	private double iterateOverNucleus() throws Exception {
 
-		SegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT);
+		SegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
 
 		// Get the difference between the candidate nucleus profile and the median profile
 		double similarityScore = refoldProfile.absoluteSquareDifference(targetCurve);
@@ -340,60 +338,81 @@ public class CurveRefolder extends AnalysisWorker {
 		double minDistance = medianDistanceBetweenPoints * 0.5;
 		double maxDistance = medianDistanceBetweenPoints * 1.2;
 
+		
+		// make all changes to a fresh nucleus before buggering up the real one
+		RoundNucleus testNucleus = new RoundNucleus( (RoundNucleus)refoldNucleus);
 		for(int i=0; i<refoldNucleus.getBorderLength(); i++){
-			
-			// make all changes to a fresh nucleus before buggering up the real one
-			RoundNucleus testNucleus = new RoundNucleus( (RoundNucleus)refoldNucleus);
-
-			double score = testNucleus.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
-
-			// Get a copy of the point at this index
-			BorderPoint p = testNucleus.getBorderPoint(i);
-
-			// Save the old position
-			double oldX = p.getX();
-			double oldY = p.getY();
-
-			// Make a random adjustment to the x and y positions. Move them more extensively when the score is high
-			double xDelta =  0.5 - Math.min( Math.random() * (similarityScore/1000), 1); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
-			double yDelta =  0.5 - Math.min( Math.random() * (similarityScore/1000), 1); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
-
-			// Apply the calculated deltas to the x and y positions
-			double newX = oldX + xDelta;
-			double newY = oldY + yDelta;
-
-			
-			// Check the new point is valid
-			XYPoint newPoint = new XYPoint(newX, newY);
-			
-			boolean ok = checkPositionIsOK(newPoint, testNucleus, i, minDistance, maxDistance);
-
-			if(	ok ){
-				
-				// Update the test nucleus
-				testNucleus.updateBorderPoint(i, newPoint);
-				
-				testNucleus.calculateProfiles();
-
-				// Measure the new profile & compare
-//				testNucleus.setProfile(ProfileType.REGULAR, testNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize()));
-
-				// Get the new score
-				score = testNucleus.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
-
-				// Apply the change if better fit
-				if(score < similarityScore) {
-					refoldNucleus.updateBorderPoint(i, newPoint);
-					refoldNucleus.calculateProfiles();
-
-					testNucleus.setProfile(ProfileType.REGULAR, refoldNucleus.getProfile(ProfileType.REGULAR));
-					similarityScore = score;
-				}
-			}
-			
-			testNucleus = null;
+			similarityScore = improveBorderPoint(i, minDistance, maxDistance, similarityScore, testNucleus);
 		}
+		testNucleus = null;
 		return similarityScore;
+		
+	}
+	
+	/**
+	 * Try a random modification to the given border point position, and measure the effect
+	 * on the similarity score to the median profile
+	 * @param index
+	 * @param minDistance
+	 * @param maxDistance
+	 * @param similarityScore
+	 * @return
+	 * @throws Exception
+	 */
+	private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore, Nucleus testNucleus) throws Exception{
+//		// make all changes to a fresh nucleus before buggering up the real one
+//		RoundNucleus testNucleus = new RoundNucleus( (RoundNucleus)refoldNucleus);
+
+		double score = testNucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
+
+		// Get a copy of the point at this index
+		BorderPoint p = testNucleus.getBorderPoint(index);
+
+		// Save the old position
+		double oldX = p.getX();
+		double oldY = p.getY();
+
+		// Make a random adjustment to the x and y positions. Move them more extensively when the score is high
+		double xDelta =  0.5 - Math.min( Math.random() * (similarityScore/1000), 1); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
+		double yDelta =  0.5 - Math.min( Math.random() * (similarityScore/1000), 1); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
+
+		// Apply the calculated deltas to the x and y positions
+		double newX = oldX + xDelta;
+		double newY = oldY + yDelta;
+
+
+		// Check the new point is valid
+		XYPoint newPoint = new XYPoint(newX, newY);
+
+		boolean ok = checkPositionIsOK(newPoint, testNucleus, index, minDistance, maxDistance);
+
+		if(	ok ){
+
+			// Update the test nucleus
+			testNucleus.updateBorderPoint(index, newPoint);
+
+
+			testNucleus.calculateProfiles();
+
+			// Measure the new profile & compare
+			//						testNucleus.setProfile(ProfileType.REGULAR, testNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize()));
+
+			// Get the new score
+			score = testNucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
+
+			// Apply the change if better fit
+			if(score < similarityScore) {
+				refoldNucleus.updateBorderPoint(index, newPoint);
+				refoldNucleus.calculateProfiles();
+
+				//							testNucleus.setProfile(ProfileType.REGULAR, refoldNucleus.getProfile(ProfileType.REGULAR));
+				similarityScore = score;
+			}
+		}
+
+//		testNucleus = null;
+		return similarityScore;
+		
 	}
 	
 	/**
