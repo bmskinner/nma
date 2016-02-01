@@ -34,7 +34,9 @@ import components.generic.ProfileType;
 import analysis.AnalysisDataset;
 
 /*
- * Hold options for drawing a chart
+ * Hold the drawing options for a chart. Can store options for profile
+ * charts, boxplots, histograms and signal charts. The appropriate options
+ * are retrieved on chart generation.
  */
 public class ChartOptions {
 	

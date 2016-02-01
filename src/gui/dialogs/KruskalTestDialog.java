@@ -150,8 +150,8 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 		list.add(dataset1);
 		list.add(dataset2);
 		
-		ChartOptionsBuilder builder = new ChartOptionsBuilder();
-		ChartOptions options = builder.setDatasets(list)
+		ChartOptions options = new ChartOptionsBuilder()
+			.setDatasets(list)
 			.setLogger(programLogger)
 			.setNormalised(true)
 			.setAlignment(ProfileAlignment.LEFT)
