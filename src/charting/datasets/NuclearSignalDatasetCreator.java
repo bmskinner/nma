@@ -35,6 +35,7 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import stats.SignalStatistic;
 import stats.Stats;
@@ -160,39 +161,7 @@ public class NuclearSignalDatasetCreator {
 		return model;	
 	}
 	
-	
-	/**
-	 * Create a histogram dataset covering the signal angles for the given analysis datasets
-	 * @param list the list of datasets
-	 * @return a histogram of angles
-	 * @throws Exception 
-	 */
-//	public static HistogramDataset createSignalAngleHistogramDataset(List<AnalysisDataset> list) throws Exception{
-//		HistogramDataset ds = new HistogramDataset();
-//		for(AnalysisDataset dataset : list){
-//			CellCollection collection = dataset.getCollection();
-//			
-//			for(int signalGroup : collection.getSignalGroups()){
-//				
-//				if(dataset.isSignalGroupVisible(signalGroup)){
-//
-//					if(collection.hasSignals(signalGroup)){
-//
-//						List<Double> angles = new ArrayList<Double>(0);
-//
-//						for(Nucleus n : collection.getNuclei()){
-//							angles.addAll(n.getSignalCollection().getStatistics(SignalStatistic.ANGLE, signalGroup));
-//						}
-//						double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
-//						ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
-//					}
-//				}
-//			}
-//			
-//		}
-//		return ds;
-//	}
-	
+		
 	/**
 	 * Create a histogram dataset covering the signal angles for the given analysis datasets
 	 * @param list the list of datasets
@@ -551,6 +520,31 @@ public class NuclearSignalDatasetCreator {
 			model.addColumn("No data loaded");
 		}
 		return model;	
+	}
+	
+	/**
+	 * Create a boxplot dataset for signal areas
+	 * @param dataset the AnalysisDataset to get signal info from
+	 * @return a boxplot dataset
+	 * @throws Exception 
+	 */
+	public static BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) throws Exception {
+
+		OutlierFreeBoxAndWhiskerCategoryDataset result = new OutlierFreeBoxAndWhiskerCategoryDataset();
+		SignalStatistic stat = (SignalStatistic) options.getStat();
+		
+		CellCollection c = options.firstDataset().getCollection();
+		
+		for(int signalGroup : c.getSignalGroups()){
+			
+			List<Double> list = new ArrayList<Double>();
+			for(NuclearSignal s : c.getSignals(signalGroup)){
+				
+				list.add(s.getStatistic(stat));
+			}
+			result.add(list, "Group_"+signalGroup, "Area");
+		}
+		return result;
 	}
 	
 	/**

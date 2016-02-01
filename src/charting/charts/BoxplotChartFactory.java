@@ -21,6 +21,7 @@ package charting.charts;
 import gui.components.ColourSelecter;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
+import stats.SignalStatistic;
 
 import java.awt.Color;
 import java.util.List;
@@ -29,14 +30,17 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.ValueMarker;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.HistogramDataset;
 
 import components.generic.MeasurementScale;
 import analysis.AnalysisDataset;
 import charting.ChartComponents;
+import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 
@@ -163,7 +167,15 @@ public class BoxplotChartFactory {
 		return boxplot;
 	}
 	
-	public static JFreeChart makeSignalAreaBoxplot(BoxAndWhiskerCategoryDataset ds, AnalysisDataset dataset){
+	/**
+	 * Create a signal boxplot with the given options
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
+	public static JFreeChart createSignalStatisticBoxplot(ChartOptions options) throws Exception{
+		
+		BoxAndWhiskerCategoryDataset ds = NuclearSignalDatasetCreator.createSignalStatisticBoxplotDataset(options);
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false);
 		formatBoxplot(boxplot);
 		
@@ -174,15 +186,15 @@ public class BoxplotChartFactory {
 			String name = (String) ds.getRowKey(series);
 			int seriesGroup = MorphologyChartFactory.getIndexFromLabel(name);
 
-			Color color = dataset.getSignalGroupColour(seriesGroup) == null 
+			Color color = options.firstDataset().getSignalGroupColour(seriesGroup) == null 
 					? ColourSelecter.getSegmentColor(series)
-							: dataset.getSignalGroupColour(seriesGroup);
+							: options.firstDataset().getSignalGroupColour(seriesGroup);
 
 					renderer.setSeriesPaint(series, color);
 		}		
 		return boxplot;
 	}
-	
+		
 	/**
 	 * Apply the default formatting to a boxplot with list
 	 * @param boxplot

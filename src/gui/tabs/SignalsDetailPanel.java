@@ -22,8 +22,10 @@ package gui.tabs;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ExportableTable;
+import gui.tabs.signals.SignalsBoxplotPanel;
 import gui.tabs.signals.SignalsHistogramPanel;
 import gui.tabs.signals.SignalsOverviewPanel;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -50,11 +52,8 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.category.StatisticalBarRenderer;
 import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-
 import utility.Constants;
 import analysis.AnalysisDataset;
-import charting.charts.BoxplotChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import components.CellCollection;
 import components.nuclear.ShellResult;
@@ -66,7 +65,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	private SignalsOverviewPanel	overviewPanel; 	//container for chart and stats table
 	private SignalsHistogramPanel 	histogramPanel;
 	private AnalysisPanel	analysisPanel;
-	private BoxplotPanel	boxplotPanel;
+	private SignalsBoxplotPanel	boxplotPanel;
 	private ShellsPanel		shellsPanel;
 
 	private JTabbedPane signalsTabPane;
@@ -85,6 +84,10 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			overviewPanel = new SignalsOverviewPanel(programLogger);
 			this.addSubPanel(overviewPanel);
 			signalsTabPane.addTab("Overview", overviewPanel);
+			
+			boxplotPanel = new SignalsBoxplotPanel(programLogger);
+			this.addSubPanel(boxplotPanel);
+			signalsTabPane.addTab("Boxplots", boxplotPanel);
 
 			histogramPanel = new SignalsHistogramPanel(programLogger);
 			this.addSubPanel(histogramPanel);
@@ -95,9 +98,6 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 
 			analysisPanel = new AnalysisPanel();
 			signalsTabPane.addTab("Detection settings", analysisPanel);
-
-			boxplotPanel = new BoxplotPanel();
-			signalsTabPane.addTab("Boxplots", boxplotPanel);
 
 			this.add(signalsTabPane, BorderLayout.CENTER);
 			
@@ -220,48 +220,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	}
 
     }
-    
-    protected class BoxplotPanel extends JPanel{
-
-    	private static final long serialVersionUID = 1L;
-
-    	private ChartPanel 	chartPanel;
-
-
-    	protected BoxplotPanel(){
-
-    		this.setLayout(new BorderLayout());
-    		
-    		JFreeChart areaBoxplot = BoxplotChartFactory.makeEmptyBoxplot();
-			chartPanel = new ChartPanel(areaBoxplot);
-			this.add(chartPanel);
-    	}
-    	
-    	/**
-    	 * Update the boxplot panel for areas with a list of NucleusCollections
-    	 * @param list
-    	 */
-    	protected void update(List<AnalysisDataset> list){
-    		
-    		try{
-    			
-    			JFreeChart boxplotChart;
-    			if(isSingleDataset()){
-
-    				BoxAndWhiskerCategoryDataset ds = NuclearSignalDatasetCreator.createSignalAreaBoxplotDataset(activeDataset());
-    				boxplotChart = BoxplotChartFactory.makeSignalAreaBoxplot(ds, activeDataset());
-    				
-    			} else {
-    				boxplotChart = BoxplotChartFactory.makeEmptyBoxplot();
-    			}
-    			chartPanel.setChart(boxplotChart);
-    		}	catch(Exception e){
-    			programLogger.log(Level.SEVERE, "Error updating boxplots", e);
-    		}
-    	}
-
-    }
-    
+        
     protected class ShellsPanel extends JPanel{
 
     	private static final long serialVersionUID = 1L;
