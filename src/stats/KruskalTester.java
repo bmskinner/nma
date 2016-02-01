@@ -110,11 +110,6 @@ public class KruskalTester {
 			ProfileCollection pc = one.getCollection().getProfileCollection(ProfileType.REGULAR);
 			List<NucleusBorderSegment> segments = pc.getSegments(tag);
 			ProfileCollection frankenCollection = new ProfileCollection();
-//			for(BorderTag key : pc.getOffsetKeys()){
-//				frankenCollection.addOffset(key, pc.getOffset(key));
-//			}
-//			frankenCollection.addSegments(tag, segments);
-
 			
 			
 			/*
@@ -133,23 +128,18 @@ public class KruskalTester {
 				// recombine the segments at the lengths of the median profile segments
 				Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
 				n.setProfile(ProfileType.FRANKEN, new SegmentedProfile(recombinedProfile));
-//				frankenProfiles.add(recombinedProfile);
 			}
 
-			frankenCollection.createProfileAggregate(copyOfTwo.getCollection(), ProfileType.FRANKEN);
+			frankenCollection.createProfileAggregate(copyOfTwo.getCollection(), ProfileType.FRANKEN, (int) one.getCollection().getMedianArrayLength());
 			
 			for(BorderTag key : pc.getOffsetKeys()){
 				frankenCollection.addOffset(key, pc.getOffset(key));
 			}
 			frankenCollection.addSegments(tag, segments);
-			// add all the nucleus frankenprofiles to the frankencollection
-//			frankenCollection.addNucleusProfiles(frankenProfiles);
 
-			// update the profile aggregate
-//			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
-			
 			// Put the new collection into the duplicate dataset
 			copyOfTwo.getCollection().setProfileCollection(ProfileType.FRANKEN, frankenCollection);
+			
 			/*
 			 * This returns to the Kruskal test above, but using the franken profiles 
 			 */
