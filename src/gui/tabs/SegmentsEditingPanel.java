@@ -27,15 +27,10 @@ import gui.SignalChangeListener;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.DraggableOverlayChartPanel;
-import gui.components.SelectableChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.dialogs.AngleWindowSizeExplorer;
-import gui.tabs.SegmentsDetailPanel.SegmentHistogramsPanel;
-import ij.IJ;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -47,31 +42,22 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
-
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
 import analysis.nucleus.DatasetSegmenter;
-import analysis.nucleus.ShellAnalysis;
 import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
-import analysis.nucleus.DatasetSegmenter.SegmentFitter;
-import charting.charts.HistogramChartFactory;
-import charting.charts.HistogramChartOptions;
 import charting.charts.MorphologyChartFactory;
-import charting.charts.ProfileChartOptions;
+import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTag;
-import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
@@ -437,8 +423,17 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		protected void updateSingle() throws Exception {
 			JFreeChart chart = null;
 			SegmentedProfile profile = null;
-			ProfileChartOptions options = new ProfileChartOptions(getDatasets(), true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileType.REGULAR);
-
+			
+			ChartOptionsBuilder builder = new ChartOptionsBuilder();
+			ChartOptions options = builder.setDatasets(getDatasets())
+				.setLogger(programLogger)
+				.setNormalised(true)
+				.setAlignment(ProfileAlignment.LEFT)
+				.setTag(BorderTag.REFERENCE_POINT)
+				.setShowMarkers(false)
+				.setProfileType( ProfileType.REGULAR)
+				.build();
+			
 			// Set the button configuration
 			configureButtons(options);
 						
@@ -476,7 +471,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		 * @param options
 		 * @throws Exception
 		 */
-		private void configureButtons(ProfileChartOptions options) throws Exception {
+		private void configureButtons(ChartOptions options) throws Exception {
 			if(options.isSingleDataset()){
 				
 				setButtonsEnabled(true);

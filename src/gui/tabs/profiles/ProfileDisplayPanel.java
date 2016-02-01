@@ -8,7 +8,8 @@ import java.util.logging.Logger;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
-import charting.charts.ProfileChartOptions;
+import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 
@@ -29,7 +30,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 		protected void updateSingle() throws Exception {
 			super.updateSingle();
 			
-			ProfileChartOptions options = makeOptions();
+			ChartOptions options = makeOptions();
 						
 			JFreeChart chart = null;
 
@@ -51,7 +52,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 		@Override
 		protected void updateMultiple() throws Exception {
 			super.updateMultiple();
-			ProfileChartOptions options = makeOptions();
+			ChartOptions options = makeOptions();
 			
 			JFreeChart chart = null;
 			
@@ -78,18 +79,21 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
 		}
 		
-		private ProfileChartOptions makeOptions(){
+		private ChartOptions makeOptions(){
+
 			boolean normalised         = profileAlignmentOptionsPanel.isNormalised();
 			ProfileAlignment alignment = normalised ?  ProfileAlignment.LEFT : profileAlignmentOptionsPanel.getSelected();
 			BorderTag tag              = borderTagOptionsPanel.getSelected();
 			boolean showMarkers        = profileMarkersOptionsPanel.showMarkers();
 			
-			ProfileChartOptions options = new ProfileChartOptions(getDatasets(), 
-					normalised, 
-					alignment, 
-					tag, 
-					showMarkers, 
-					type);
+			ChartOptionsBuilder builder = new ChartOptionsBuilder();
+			ChartOptions options = builder.setDatasets(getDatasets())
+				.setLogger(programLogger)
+				.setNormalised(normalised)
+				.setAlignment(alignment)
+				.setTag(tag)
+				.setShowMarkers(showMarkers)
+				.build();
 			return options;
 		}
 }

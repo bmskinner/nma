@@ -38,11 +38,14 @@ import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import org.jfree.chart.JFreeChart;
+
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import charting.charts.MorphologyChartFactory;
-import charting.charts.ProfileChartOptions;
+import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 import analysis.AnalysisDataset;
 
 @SuppressWarnings("serial")
@@ -147,15 +150,16 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 		list.add(dataset1);
 		list.add(dataset2);
 		
-		ProfileChartOptions options = new ProfileChartOptions(list, 
-				true, 
-				ProfileAlignment.LEFT, 
-				BorderTag.REFERENCE_POINT, 
-				false, 
-				ProfileType.FRANKEN);
-		
-		options.setLogger(programLogger);
-		
+		ChartOptionsBuilder builder = new ChartOptionsBuilder();
+		ChartOptions options = builder.setDatasets(list)
+			.setLogger(programLogger)
+			.setNormalised(true)
+			.setAlignment(ProfileAlignment.LEFT)
+			.setTag(BorderTag.REFERENCE_POINT)
+			.setShowMarkers(false)
+			.setProfileType(ProfileType.FRANKEN)
+			.build();
+				
 		JFreeChart chart = MorphologyChartFactory.makeKruskalWallisChart(options, true);
 		chartPanel.setChart(chart);
 

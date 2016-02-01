@@ -27,7 +27,7 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
-import charting.charts.HistogramChartOptions;
+import charting.options.ChartOptions;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
@@ -43,7 +43,7 @@ import stats.Stats;
 public class NuclearHistogramDatasetCreator {
 	
 	
-	public static HistogramDataset createNuclearStatsHistogramDataset(HistogramChartOptions options) throws Exception {
+	public static HistogramDataset createNuclearStatsHistogramDataset(ChartOptions options) throws Exception {
 		HistogramDataset ds = new HistogramDataset();
 		
 		if(options.hasLogger()){
@@ -232,7 +232,7 @@ public class NuclearHistogramDatasetCreator {
 		return range;
 	}
 	
-	public static HistogramDataset createSegmentLengthHistogramDataset(HistogramChartOptions options, String segName) throws Exception {
+	public static HistogramDataset createSegmentLengthHistogramDataset(ChartOptions options, String segName) throws Exception {
 		HistogramDataset ds = new HistogramDataset();
 		
 		if(options.hasLogger()){

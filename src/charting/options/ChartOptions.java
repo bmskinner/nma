@@ -16,24 +16,40 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package charting.charts;
+package charting.options;
 
 import gui.components.ColourSelecter.ColourSwatch;
+import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import stats.PlottableStatistic;
+
+import components.generic.BorderTag;
+import components.generic.MeasurementScale;
+import components.generic.ProfileType;
 
 import analysis.AnalysisDataset;
 
 /*
  * Hold options for drawing a chart
  */
-public abstract class ChartOptions {
+public class ChartOptions {
 	
-	protected List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-	protected ColourSwatch swatch;
-	protected Logger programLogger = null;
+	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+	private ColourSwatch swatch        = ColourSwatch.REGULAR_SWATCH;
+	private Logger programLogger       = null;
+	private boolean normalised         = false;
+	private ProfileAlignment alignment = ProfileAlignment.LEFT;
+	private BorderTag tag              = BorderTag.REFERENCE_POINT;
+	private boolean showMarkers        = false;
+	private ProfileType type           = ProfileType.REGULAR;
+	private int signalGroup            = 1;
+	private boolean useDensity         = false;
+	private PlottableStatistic stat    = null;
+	private MeasurementScale scale     = MeasurementScale.PIXELS;
 	
 	public ChartOptions(List<AnalysisDataset> list){
 		this.list = list;
@@ -64,6 +80,12 @@ public abstract class ChartOptions {
 
 	}
 	
+	
+	
+	public void setSwatch(ColourSwatch swatch) {
+		this.swatch = swatch;
+	}
+
 	public void setLogger(Logger l){
 		this.programLogger = l;
 	}
@@ -129,6 +151,80 @@ public abstract class ChartOptions {
 			return false;
 		}
 	}
+
+	public boolean isNormalised() {
+		return normalised;
+	}
+
+	public void setNormalised(boolean normalised) {
+		this.normalised = normalised;
+	}
+
+	public ProfileAlignment getAlignment() {
+		return alignment;
+	}
+
+	public void setAlignment(ProfileAlignment alignment) {
+		this.alignment = alignment;
+	}
+
+	public BorderTag getTag() {
+		return tag;
+	}
+
+	public void setTag(BorderTag tag) {
+		this.tag = tag;
+	}
+
+	public boolean isShowMarkers() {
+		return showMarkers;
+	}
+
+	public void setShowMarkers(boolean showMarkers) {
+		this.showMarkers = showMarkers;
+	}
+
+	public ProfileType getType() {
+		return type;
+	}
+
+	public void setType(ProfileType type) {
+		this.type = type;
+	}
+
+	public int getSignalGroup() {
+		return signalGroup;
+	}
+
+	public void setSignalGroup(int signalGroup) {
+		this.signalGroup = signalGroup;
+	}
+
+	public boolean isUseDensity() {
+		return useDensity;
+	}
+
+	public void setUseDensity(boolean useDensity) {
+		this.useDensity = useDensity;
+	}
+
+	public PlottableStatistic getStat() {
+		return stat;
+	}
+
+	public void setStat(PlottableStatistic stat) {
+		this.stat = stat;
+	}
+
+	public MeasurementScale getScale() {
+		return scale;
+	}
+
+	public void setScale(MeasurementScale scale) {
+		this.scale = scale;
+	}
+	
+	
 	
 	
 }

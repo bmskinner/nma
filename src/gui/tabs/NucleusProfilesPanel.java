@@ -68,7 +68,8 @@ import org.jfree.ui.TextAnchor;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
-import charting.charts.ProfileChartOptions;
+import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
@@ -266,13 +267,17 @@ public class NucleusProfilesPanel extends DetailPanel {
 		public void updateModalityProfileChart(List<AnalysisDataset> list){
 			
 			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
-			ProfileChartOptions options = new ProfileChartOptions(list, 
-					true, 
-					ProfileAlignment.LEFT, 
-					BorderTag.REFERENCE_POINT, 
-					false,
-					type);
 			
+			ChartOptionsBuilder builder = new ChartOptionsBuilder();
+			ChartOptions options = builder.setDatasets(getDatasets())
+				.setLogger(programLogger)
+				.setNormalised(true)
+				.setAlignment(ProfileAlignment.LEFT)
+				.setTag(BorderTag.REFERENCE_POINT)
+				.setShowMarkers(false)
+				.setProfileType(type)
+				.build();
+						
 			JFreeChart chart = null;
 			try {
 				chart = MorphologyChartFactory.createModalityProfileChart(options);

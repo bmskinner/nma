@@ -18,7 +18,6 @@
  *******************************************************************************/
 package charting.datasets;
 
-import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
@@ -29,23 +28,14 @@ import java.util.logging.Level;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import charting.ChartComponents;
 import charting.TableOptions;
-import charting.charts.HistogramChartOptions;
-import stats.NucleusStatistic;
 import stats.SignalStatistic;
 import stats.Stats;
 import utility.Utils;
@@ -59,7 +49,6 @@ import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
 import components.nuclei.Nucleus;
-import gui.components.ColourSelecter;
 
 public class NuclearSignalDatasetCreator {
 

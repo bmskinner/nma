@@ -42,7 +42,8 @@ import org.jfree.chart.JFreeChart;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import charting.charts.MorphologyChartFactory;
-import charting.charts.ProfileChartOptions;
+import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 
 @SuppressWarnings("serial")
 public class KruskalDetailPanel  extends DetailPanel {
@@ -120,16 +121,16 @@ public class KruskalDetailPanel  extends DetailPanel {
 
 		JFreeChart chart = null;
 
-
-		ProfileChartOptions options = new ProfileChartOptions(getDatasets(),
-				true, // normalised
-				ProfileAlignment.LEFT,
-				BorderTag.REFERENCE_POINT,
-				true, // show markers
-				ProfileType.REGULAR);
+		ChartOptionsBuilder builder = new ChartOptionsBuilder();
+		ChartOptions options = builder.setDatasets(getDatasets())
+			.setLogger(programLogger)
+			.setNormalised(true)
+			.setAlignment(ProfileAlignment.LEFT)
+			.setTag(BorderTag.REFERENCE_POINT)
+			.setShowMarkers(true)
+			.setProfileType(ProfileType.REGULAR)
+			.build();
 		
-		options.setLogger(programLogger);
-
 
 		if(getChartCache().hasChart(options)){
 			chart = getChartCache().getChart(options);

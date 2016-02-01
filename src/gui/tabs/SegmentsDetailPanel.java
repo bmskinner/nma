@@ -29,7 +29,6 @@ import gui.components.SelectableChartPanel;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.components.WilcoxonTableCellRenderer;
-import gui.tabs.PairwiseVennDetailPanel.PairwiseVennTableCellRenderer;
 import stats.SegmentStatistic;
 import utility.Constants;
 
@@ -42,40 +41,30 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
-import charting.DefaultTableOptions;
 import charting.SegmentStatsTableOptions;
 import charting.TableOptions;
-import charting.DefaultTableOptions.TableType;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.HistogramChartFactory;
-import charting.charts.HistogramChartOptions;
 import charting.charts.MorphologyChartFactory;
-import charting.charts.ProfileChartOptions;
 import charting.datasets.NucleusTableDatasetCreator;
+import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
@@ -332,7 +321,16 @@ public class SegmentsDetailPanel extends DetailPanel {
 					
 				} else {
 					
-					ProfileChartOptions options = new ProfileChartOptions(list, true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileType.REGULAR);
+					ChartOptionsBuilder builder = new ChartOptionsBuilder();
+					ChartOptions options = builder.setDatasets(getDatasets())
+						.setLogger(programLogger)
+						.setNormalised(true)
+						.setAlignment(ProfileAlignment.LEFT)
+						.setTag(BorderTag.REFERENCE_POINT)
+						.setShowMarkers(false)
+						.setProfileType( ProfileType.REGULAR)
+						.build();
+					
 					
 					if(getChartCache().hasChart(options)){
 						chart = getChartCache().getChart(options);
@@ -534,9 +532,13 @@ public class SegmentsDetailPanel extends DetailPanel {
 			// Check that all the datasets have the same number of segments
 			if(checkSegmentCountsMatch(getDatasets())){ // make a histogram for each segment
 				
-//				JFreeChart chart = null;
-				HistogramChartOptions options = new HistogramChartOptions(getDatasets(), null, scale, useDensity);
-				options.setLogger(programLogger);
+				ChartOptionsBuilder builder = new ChartOptionsBuilder();
+				ChartOptions options = builder.setDatasets(getDatasets())
+					.setLogger(programLogger)
+					.setStatistic(null)
+					.setScale(scale)
+					.setUseDensity(useDensity)
+					.build();
 
 				CellCollection collection = activeDataset().getCollection();
 				int segmentCount = collection.getProfileCollection(ProfileType.REGULAR)

@@ -36,8 +36,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import charting.charts.BoxplotChartOptions;
-import charting.charts.ProfileChartOptions;
+import charting.options.ChartOptions;
 import utility.Constants;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
@@ -346,7 +345,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createSegmentedProfileDataset(ProfileChartOptions options) throws Exception{
+	public static XYDataset createSegmentedProfileDataset(ChartOptions options) throws Exception{
 //		IJ.log(options.toString());
 		return createSegmentedProfileDataset(options.firstDataset().getCollection(),
 				options.isNormalised(),
@@ -433,7 +432,7 @@ public class NucleusDatasetCreator {
 	}
 	
 		
-	public static DefaultXYDataset createMultiProfileDataset(ProfileChartOptions options) throws Exception{
+	public static DefaultXYDataset createMultiProfileDataset(ChartOptions options) throws Exception{
 		return createMultiProfileDataset(options.getDatasets(),
 				options.isNormalised(),
 				options.getAlignment(),
@@ -554,7 +553,7 @@ public class NucleusDatasetCreator {
 	}
 	
 	
-	public static List<XYSeriesCollection> createMultiProfileIQRDataset(ProfileChartOptions options) throws Exception{
+	public static List<XYSeriesCollection> createMultiProfileIQRDataset(ChartOptions options) throws Exception{
 		return createMultiProfileIQRDataset(options.getDatasets(),
 				options.isNormalised(),
 				options.getAlignment(),
@@ -657,7 +656,7 @@ public class NucleusDatasetCreator {
 		
 	}
 	
-	public static XYDataset createFrankenSegmentDataset(ProfileChartOptions options) throws Exception{
+	public static XYDataset createFrankenSegmentDataset(ChartOptions options) throws Exception{
 		return createFrankenSegmentDataset(options.firstDataset().getCollection(),
 				options.isNormalised(),
 				options.getAlignment(),
@@ -762,7 +761,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static BoxAndWhiskerCategoryDataset createBoxplotDataset(BoxplotChartOptions options) throws Exception{
+	public static BoxAndWhiskerCategoryDataset createBoxplotDataset(ChartOptions options) throws Exception{
 		List<AnalysisDataset> datasets = options.getDatasets();
 		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 		MeasurementScale scale = options.getScale();
@@ -1422,7 +1421,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createModalityProfileDataset(ProfileChartOptions options) throws Exception {
+	public static XYDataset createModalityProfileDataset(ChartOptions options) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 	
@@ -1535,7 +1534,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createKruskalProfileDataset(ProfileChartOptions options) throws Exception {
+	public static XYDataset createKruskalProfileDataset(ChartOptions options) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
@@ -1560,7 +1559,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createFrankenKruskalProfileDataset(ProfileChartOptions options) throws Exception {
+	public static XYDataset createFrankenKruskalProfileDataset(ChartOptions options) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		

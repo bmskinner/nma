@@ -26,7 +26,7 @@ import java.util.UUID;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.charts.ChartOptions;
+import charting.options.ChartOptions;
 import analysis.AnalysisDataset;
 
 /*

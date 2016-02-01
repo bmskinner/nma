@@ -43,6 +43,7 @@ import org.jfree.data.xy.XYDataset;
 import charting.ChartComponents;
 import charting.datasets.NuclearHistogramDatasetCreator;
 import charting.datasets.NuclearSignalDatasetCreator;
+import charting.options.ChartOptions;
 import analysis.AnalysisDataset;
 import components.generic.MeasurementScale;
 
@@ -103,7 +104,7 @@ public class HistogramChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createSignalStatisticHistogram(SignalHistogramChartOptions options) throws Exception{
+	public static JFreeChart createSignalStatisticHistogram(ChartOptions options) throws Exception{
 		
 		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
@@ -131,7 +132,7 @@ public class HistogramChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createSignalDensityStatsChart(SignalHistogramChartOptions options) throws Exception{
+	public static JFreeChart createSignalDensityStatsChart(ChartOptions options) throws Exception{
 	
 		DefaultXYDataset ds = null;
 		
@@ -255,7 +256,7 @@ public class HistogramChartFactory {
 	 * @param xLabel the x axis label
 	 * @return
 	 */
-	public static JFreeChart createNuclearStatsHistogram(HistogramChartOptions options) throws Exception{
+	public static JFreeChart createNuclearStatsHistogram(ChartOptions options) throws Exception{
 
 		HistogramDataset ds = null;
 				
@@ -318,7 +319,7 @@ public class HistogramChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createNuclearDensityStatsChart(HistogramChartOptions options) throws Exception{
+	public static JFreeChart createNuclearDensityStatsChart(ChartOptions options) throws Exception{
 	
 		DefaultXYDataset ds = null;
 		
@@ -380,7 +381,7 @@ public class HistogramChartFactory {
 	 * @param segName the segment to plot
 	 * @return
 	 */
-	public static JFreeChart createSegmentLengthHistogram(HistogramChartOptions options, String segName) throws Exception{
+	public static JFreeChart createSegmentLengthHistogram(ChartOptions options, String segName) throws Exception{
 
 		HistogramDataset ds = null;
 				
@@ -440,7 +441,7 @@ public class HistogramChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createSegmentLengthDensityChart(HistogramChartOptions options, String segName) throws Exception{
+	public static JFreeChart createSegmentLengthDensityChart(ChartOptions options, String segName) throws Exception{
 		
 		DefaultXYDataset ds = null;
 		

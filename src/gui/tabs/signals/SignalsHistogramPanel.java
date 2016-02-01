@@ -12,7 +12,8 @@ import org.jfree.chart.plot.XYPlot;
 
 import stats.SignalStatistic;
 import charting.charts.HistogramChartFactory;
-import charting.charts.SignalHistogramChartOptions;
+import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 import components.generic.MeasurementScale;
 
 @SuppressWarnings("serial")
@@ -27,7 +28,15 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			Dimension preferredSize = new Dimension(400, 150);
 			for(SignalStatistic stat : SignalStatistic.values()){
 
-				SignalHistogramChartOptions options = new SignalHistogramChartOptions(null, stat, scale, false, 0);
+				ChartOptionsBuilder builder = new ChartOptionsBuilder();
+				ChartOptions options = builder.setDatasets(null)
+					.setLogger(programLogger)
+					.setStatistic(stat)
+					.setScale(scale)
+					.setUseDensity(false)
+					.setSignalGroup(0)
+					.build();
+				
 				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createSignalStatisticHistogram(options), stat.toString());
 				panel.setPreferredSize(preferredSize);
 				panel.addSignalChangeListener(this);
@@ -54,8 +63,16 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			SelectableChartPanel panel = chartPanels.get(stat.toString());
 
 			JFreeChart chart = null;
-			SignalHistogramChartOptions options = new SignalHistogramChartOptions(getDatasets(), stat, scale, useDensity, signalGroup);
-			options.setLogger(programLogger);
+			
+			ChartOptionsBuilder builder = new ChartOptionsBuilder();
+			ChartOptions options = builder.setDatasets(getDatasets())
+				.setLogger(programLogger)
+				.setStatistic(stat)
+				.setScale(scale)
+				.setUseDensity(useDensity)
+				.setSignalGroup(signalGroup)
+				.build();
+			
 
 			if(this.getChartCache().hasChart(options)){
 				programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());

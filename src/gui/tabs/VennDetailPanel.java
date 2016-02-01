@@ -21,7 +21,6 @@ package gui.tabs;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,23 +28,13 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
-
-import org.jfree.chart.JFreeChart;
-
-import components.generic.BorderTag;
-import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 
 import charting.DefaultTableOptions;
 import charting.DefaultTableOptions.TableType;
 import charting.TableOptions;
-import charting.charts.MorphologyChartFactory;
-import charting.charts.ProfileChartOptions;
 import charting.datasets.NucleusTableDatasetCreator;
 import gui.components.ExportableTable;
-import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 public class VennDetailPanel extends DetailPanel {
 

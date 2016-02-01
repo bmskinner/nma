@@ -22,18 +22,11 @@ package gui.tabs;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ExportableTable;
-import gui.components.HistogramsTabPanel;
-import gui.components.SelectableChartPanel;
-import gui.tabs.NuclearBoxplotsPanel.HistogramsPanel;
 import gui.tabs.signals.SignalsHistogramPanel;
 import gui.tabs.signals.SignalsOverviewPanel;
-import stats.NucleusStatistic;
-import stats.SignalStatistic;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -42,22 +35,18 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.category.StatisticalBarRenderer;
 import org.jfree.data.category.CategoryDataset;
@@ -66,12 +55,8 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import charting.charts.BoxplotChartFactory;
-import charting.charts.HistogramChartFactory;
-import charting.charts.HistogramChartOptions;
-import charting.charts.SignalHistogramChartOptions;
 import charting.datasets.NuclearSignalDatasetCreator;
 import components.CellCollection;
-import components.generic.MeasurementScale;
 import components.nuclear.ShellResult;
 
 public class SignalsDetailPanel extends DetailPanel implements ActionListener, SignalChangeListener {

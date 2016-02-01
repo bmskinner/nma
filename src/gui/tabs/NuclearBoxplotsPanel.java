@@ -24,7 +24,6 @@ import gui.SignalChangeListener;
 import gui.components.ExportableChartPanel;
 import gui.components.HistogramsTabPanel;
 import gui.components.SelectableChartPanel;
-import gui.components.panels.MeasurementUnitSettingsPanel;
 import stats.NucleusStatistic;
 
 import java.awt.BorderLayout;
@@ -33,27 +32,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
-
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 
 import analysis.AnalysisDataset;
 import charting.charts.BoxplotChartFactory;
-import charting.charts.BoxplotChartOptions;
 import charting.charts.HistogramChartFactory;
-import charting.charts.HistogramChartOptions;
+import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.generic.MeasurementScale;
 
@@ -125,7 +117,13 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			
 			for(NucleusStatistic stat : NucleusStatistic.values()){
 				
-				BoxplotChartOptions options = new BoxplotChartOptions(getDatasets(), stat, MeasurementScale.PIXELS);
+				ChartOptionsBuilder builder = new ChartOptionsBuilder();
+				ChartOptions options = builder.setDatasets(getDatasets())
+					.setLogger(programLogger)
+					.setStatistic(stat)
+					.setScale(MeasurementScale.PIXELS)
+					.build();
+
 				JFreeChart chart = null;
 				try {
 					chart = BoxplotChartFactory.createNucleusStatisticBoxplot(options);
@@ -173,8 +171,14 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				ExportableChartPanel panel = chartPanels.get(stat.toString());
 
 				JFreeChart chart = null;
-				BoxplotChartOptions options = new BoxplotChartOptions(getDatasets(), stat, scale);
 				
+				ChartOptionsBuilder builder = new ChartOptionsBuilder();
+				ChartOptions options = builder.setDatasets(getDatasets())
+					.setLogger(programLogger)
+					.setStatistic(stat)
+					.setScale(MeasurementScale.PIXELS)
+					.build();
+								
 				if(getChartCache().hasChart(options)){
 					programLogger.log(Level.FINEST, "Using cached boxplot chart: "+stat.toString());
 					chart = getChartCache().getChart(options);
@@ -210,8 +214,15 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
 				Dimension preferredSize = new Dimension(400, 150);
 				for(NucleusStatistic stat : NucleusStatistic.values()){
-
-					HistogramChartOptions options = new HistogramChartOptions(null, stat, scale, false);
+					
+					ChartOptionsBuilder builder = new ChartOptionsBuilder();
+					ChartOptions options = builder.setDatasets(null)
+						.setLogger(programLogger)
+						.setStatistic(stat)
+						.setScale(scale)
+						.setUseDensity(false)
+						.build();
+					
 					SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createNuclearStatsHistogram(options), stat.toString());
 					panel.setPreferredSize(preferredSize);
 					panel.addSignalChangeListener(this);
@@ -240,9 +251,16 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				SelectableChartPanel panel = HistogramsPanel.this.chartPanels.get(stat.toString());
 
 				JFreeChart chart = null;
-				HistogramChartOptions options = new HistogramChartOptions(getDatasets(), stat, scale, useDensity);
-				options.setLogger(programLogger);
-
+				
+				ChartOptionsBuilder builder = new ChartOptionsBuilder();
+				ChartOptions options = builder.setDatasets(getDatasets())
+					.setLogger(programLogger)
+					.setStatistic(stat)
+					.setScale(MeasurementScale.PIXELS)
+					.setUseDensity(useDensity)
+					.build();
+				
+				
 				if(this.getChartCache().hasChart(options)){
 					programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());
 					chart = HistogramsPanel.this.getChartCache().getChart(options);

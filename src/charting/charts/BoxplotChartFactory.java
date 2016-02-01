@@ -38,6 +38,7 @@ import components.generic.MeasurementScale;
 import analysis.AnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.NucleusDatasetCreator;
+import charting.options.ChartOptions;
 
 public class BoxplotChartFactory {
 	
@@ -53,7 +54,7 @@ public class BoxplotChartFactory {
 	}
 	
 	
-	public static JFreeChart createNucleusStatisticBoxplot(BoxplotChartOptions options) throws Exception{
+	public static JFreeChart createNucleusStatisticBoxplot(ChartOptions options) throws Exception{
 		
 		BoxAndWhiskerCategoryDataset ds = null;
 		if(options.getDatasets()!=null){

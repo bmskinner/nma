@@ -72,6 +72,7 @@ import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.TailDatasetCreator;
+import charting.options.ChartOptions;
 import components.Cell;
 import components.CellCollection;
 import components.CellularComponent;
@@ -124,7 +125,7 @@ public class MorphologyChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleProfileChart(ProfileChartOptions options) throws Exception {
+	public static JFreeChart makeSingleProfileChart(ChartOptions options) throws Exception {
 		
 		XYDataset ds = null;
 		AnalysisDataset dataset = options.firstDataset();
@@ -215,7 +216,7 @@ public class MorphologyChartFactory {
 	 * @param options
 	 * @throws Exception
 	 */	
-	public static JFreeChart makeMultiSegmentedProfileChart(ProfileChartOptions options) throws Exception {
+	public static JFreeChart makeMultiSegmentedProfileChart(ChartOptions options) throws Exception {
 		
 		
 		int length = 100;
@@ -297,7 +298,7 @@ public class MorphologyChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	public static JFreeChart makeFrankenProfileChart(ProfileChartOptions options) throws Exception {
+	public static JFreeChart makeFrankenProfileChart(ChartOptions options) throws Exception {
 		
 		AnalysisDataset dataset = options.firstDataset();
 		CellCollection collection = dataset.getCollection();
@@ -434,7 +435,7 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the x axis
 	 * @return a chart
 	 */
-	public static JFreeChart makeMultiProfileChart(ProfileChartOptions options)  throws Exception{
+	public static JFreeChart makeMultiProfileChart(ChartOptions options)  throws Exception{
 				
 		List<XYSeriesCollection> iqrProfiles = null;
 		XYDataset medianProfiles			 = null;
@@ -970,7 +971,7 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
-	public static JFreeChart createModalityProfileChart(ProfileChartOptions options) throws Exception {
+	public static JFreeChart createModalityProfileChart(ChartOptions options) throws Exception {
 		
 		XYDataset ds = NucleusDatasetCreator.createModalityProfileDataset(options);
 		
@@ -1079,7 +1080,7 @@ public class MorphologyChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JFreeChart makeKruskalWallisChart(ProfileChartOptions options, boolean frankenNormalise) throws Exception {
+	public static JFreeChart makeKruskalWallisChart(ChartOptions options, boolean frankenNormalise) throws Exception {
 		
 		XYDataset kruskalDataset = null;
 		
