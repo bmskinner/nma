@@ -82,11 +82,6 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	
 	protected AnalysisDataset dataset;
 	
-//	private JCheckBox useModalityCheckBox;
-//	private JSpinner modalityPointsSpinner;
-//	
-//	private JCheckBox useSimilarityMatrixCheckBox;
-	
 	protected JCheckBox includeProfilesCheckBox;
 	protected Map<NucleusStatistic, JCheckBox> statBoxMap = new HashMap<NucleusStatistic, JCheckBox>();
 	
@@ -148,8 +143,6 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		options.setClusterNumber(ClusteringSetupDialog.DEFAULT_MANUAL_CLUSTER_NUMBER);
 		options.setHierarchicalMethod(ClusteringSetupDialog.DEFAULT_HIERARCHICAL_METHOD);
 		options.setIterations(ClusteringSetupDialog.DEFAULT_EM_ITERATIONS);
-		options.setIncludeModality(ClusteringSetupDialog.DEFAULT_USE_MODALITY);
-		options.setModalityRegions(ClusteringSetupDialog.DEFAULT_MODALITY_REGIONS);
 		options.setUseSimilarityMatrix(ClusteringSetupDialog.DEFAULT_USE_SIMILARITY_MATRIX);
 		options.setIncludeProfile(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
 	}
@@ -269,46 +262,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			if(e.getSource()==includeProfilesCheckBox){
 				options.setIncludeProfile(includeProfilesCheckBox.isSelected());				
 			} 
-						
-//			if(e.getSource()==useModalityCheckBox){
-//				options.setIncludeModality(useModalityCheckBox.isSelected());
-//				if(useModalityCheckBox.isSelected()){
-//					modalityPointsSpinner.setEnabled(true);
-//				} else {
-//					modalityPointsSpinner.setEnabled(false);
-//				}
-//				
-//			} 
-//			
-//			if(e.getSource()==useSimilarityMatrixCheckBox){
-//				options.setUseSimilarityMatrix(useSimilarityMatrixCheckBox.isSelected());
-//				if(useSimilarityMatrixCheckBox.isSelected()){
-//					useModalityCheckBox.setEnabled(false);
-//					modalityPointsSpinner.setEnabled(false);
-//				} else {
-//					
-//					useModalityCheckBox.setEnabled(true);
-//					if(useModalityCheckBox.isSelected()){
-//						modalityPointsSpinner.setEnabled(true);
-//					} else {
-//						modalityPointsSpinner.setEnabled(false);
-//					}
-//				}
-//				
-//			} 
-			
-			
-			
-//			if(e.getSource()==modalityPointsSpinner){
-//				JSpinner j = (JSpinner) e.getSource();
-//				j.commitEdit();
-//				options.setModalityRegions(  (Integer) j.getValue());
-//			} 
-			
-			
-//		}catch (ParseException e1) {
-//			programLogger.log(Level.SEVERE, "Error in spinners for Clustering options", e);
-//		}	
+
 		
 	}
 }

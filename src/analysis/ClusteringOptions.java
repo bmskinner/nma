@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import stats.NucleusStatistic;
+import stats.PlottableStatistic;
 
 public class ClusteringOptions implements Serializable {
 
@@ -35,11 +37,8 @@ public class ClusteringOptions implements Serializable {
 	private boolean autoClusterNumber;
 	
 	
-	private Map<NucleusStatistic, Boolean> statMap = new HashMap<NucleusStatistic, Boolean>();
+	private Map<PlottableStatistic, Boolean> statMap = new HashMap<PlottableStatistic, Boolean>();
 	private boolean includeProfile; // should the nuclear profiles be a part of the clustering?
-	
-	private boolean includeModality;
-	private int modalityRegions;
 	
 	private transient boolean useSimilarityMatrix;
 	
@@ -55,13 +54,15 @@ public class ClusteringOptions implements Serializable {
     	}
 	}
 	
+	/**
+	 * Copy the options from an existing object
+	 * @param oldOptions
+	 */
 	public ClusteringOptions(ClusteringOptions oldOptions){
-		this.type = oldOptions.getType();
-		this.hierarchicalMethod = oldOptions.getHierarchicalMethod();
-		this.includeModality = oldOptions.isIncludeModality();
-		this.modalityRegions = oldOptions.getModalityRegions();
+		this.type                = oldOptions.getType();
+		this.hierarchicalMethod  = oldOptions.getHierarchicalMethod();
 		this.useSimilarityMatrix = oldOptions.isUseSimilarityMatrix();
-		this.includeProfile = oldOptions.isIncludeProfile();
+		this.includeProfile      = oldOptions.isIncludeProfile();
 		
 		for(NucleusStatistic stat : NucleusStatistic.values()){
     		statMap.put(stat, oldOptions.isIncludeStatistic(stat));
@@ -69,11 +70,28 @@ public class ClusteringOptions implements Serializable {
 	}
 		
 	
-	public boolean isIncludeStatistic(NucleusStatistic stat){
-		return this.statMap.get(stat);
+	/**
+	 * Check if the given statistic is to be included in the clustering
+	 * @param stat
+	 * @return
+	 */
+	public boolean isIncludeStatistic(PlottableStatistic stat){
+		if( this.statMap.containsKey(stat)){
+			return this.statMap.get(stat);
+		} else {
+			return false;
+		}
 	}
 	
-	public void setIncludeStatistic(NucleusStatistic stat, boolean b){
+	/**
+	 * Get all the statistics that are saved in this options object
+	 * @return
+	 */
+	public Set<PlottableStatistic> getSavedStatistics(){
+		return statMap.keySet();
+	}
+	
+	public void setIncludeStatistic(PlottableStatistic stat, boolean b){
 		this.statMap.put(stat, b);
 	}
 	
@@ -120,35 +138,6 @@ public class ClusteringOptions implements Serializable {
 		this.autoClusterNumber = autoClusterNumber;
 	}
 	
-	public boolean isIncludeModality() {
-		return includeModality;
-	}
-
-
-	/**
-	 * Should bimodal regions of the population profile be included
-	 * in clustering 
-	 * @param includeModality
-	 */
-	public void setIncludeModality(boolean includeModality) {
-		this.includeModality = includeModality;
-	}
-
-	public int getModalityRegions() {
-		return modalityRegions;
-	}
-
-
-	/**
-	 * Set the number of potentially bimodal
-	 * regions of the profile to include in the clustering
-	 * @param modalityRegions
-	 */
-	public void setModalityRegions(int modalityRegions) {
-		this.modalityRegions = modalityRegions;
-	}
-
-
 	/**
 	 * Set the number of hierarchical clusters to return.
 	 * Has no effect if clustering type is EM
@@ -225,10 +214,10 @@ public class ClusteringOptions implements Serializable {
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
-	    this.useSimilarityMatrix = false;
-	    this.includeProfile = false;
+//	    this.useSimilarityMatrix = false;
+//	    this.includeProfile = false;
 	    if(statMap==null){
-	    	statMap = new HashMap<NucleusStatistic, Boolean>();
+	    	statMap = new HashMap<PlottableStatistic, Boolean>();
 	    	for(NucleusStatistic stat : NucleusStatistic.values()){
 	    		statMap.put(stat, false);
 	    	}

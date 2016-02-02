@@ -319,43 +319,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	protected void updateNull() throws Exception {		
 		updateBlankChart();
 	}
-	
-//	@Override
-//	public void updateDetail(){
-//		SwingUtilities.invokeLater( new Runnable(){
-//
-//			public void run(){
-//				try {
-//
-//					programLogger.log(Level.FINEST, "Updating consensus panel");
-//					if(!getDatasets().isEmpty()){
-//
-//						if(getDatasets().size()==1){
-//							
-//							updateSingleDataset();
-//
-//						}else {
-//
-//							updateMultipleDatasets();
-//							
-//						}
-//
-//					} else { // no datasets in the list
-//
-//						updateBlankChart();
-//
-//					}
-//					programLogger.log(Level.FINEST, "Updated consensus panel");
-//
-//
-//				} catch (Exception e){
-//					programLogger.log(Level.SEVERE, "Error updating consensus panel", e);
-//				} finally {
-//					setUpdating(false);
-//				}
-//			}} );
-//	}
-	
+		
 	private void updateSingleDataset() throws Exception {
 		runRefoldingButton.setVisible(false);
 
@@ -371,6 +335,13 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			consensusChartPanel.setChart(consensusChart);
 			consensusChartPanel.restoreAutoBounds();
 		} else {
+			
+			if(collection.isRefolding()){
+				runRefoldingButton.setVisible(false);
+			} else {
+				runRefoldingButton.setVisible(true);
+			}
+			
 			runRefoldingButton.setVisible(true);
 			offsetsPanel.setVisible(false);
 			consensusChartPanel.setChart(consensusChart);

@@ -897,8 +897,6 @@ public class NucleusTableDatasetCreator {
 		columnList.add("Iterations");
 		columnList.add("Hierarchical method");
 		columnList.add("Target cluster number");
-		columnList.add("Include modality (deprecated)");
-		columnList.add("Modality points (deprecated)");
 		columnList.add("Include profile");
 
 		for(NucleusStatistic stat : NucleusStatistic.values()){
@@ -906,20 +904,7 @@ public class NucleusTableDatasetCreator {
 		}
 		
 		columnList.add("Tree");
-		
-//		Object[] columnData = {
-//				"Cluster group",
-//				"Clusters found",
-//				"Method", 
-//				"Iterations",
-//				"Hierarchical method",
-//				"Cluster number",
-//				"Include modality",
-//				"Modality points",
-//				"Include profile",
-//				"Include area",
-//				"Include aspect",
-//				"Tree"};
+
 		model.addColumn("", columnList.toArray());
 		
 		if(list==null){
@@ -956,8 +941,6 @@ public class NucleusTableDatasetCreator {
 					dataList.add(iterationString);
 					dataList.add(hierarchicalMethodString);
 					dataList.add(hierarchicalClusterString);
-					dataList.add(op.isIncludeModality());
-					dataList.add(op.getModalityRegions());
 					dataList.add(op.isIncludeProfile());
 					for(NucleusStatistic stat : NucleusStatistic.values()){
 						try{

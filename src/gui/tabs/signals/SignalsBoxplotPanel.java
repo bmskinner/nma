@@ -82,7 +82,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 		measurementUnitSettingsPanel.setEnabled(true);
 		MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
 
-		for(NucleusStatistic stat : NucleusStatistic.values()){
+		for(SignalStatistic stat : SignalStatistic.values()){
 
 			ExportableChartPanel panel = chartPanels.get(stat.toString());
 

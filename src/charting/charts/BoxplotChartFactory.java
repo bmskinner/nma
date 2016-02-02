@@ -175,7 +175,12 @@ public class BoxplotChartFactory {
 	 */
 	public static JFreeChart createSignalStatisticBoxplot(ChartOptions options) throws Exception{
 		
-		BoxAndWhiskerCategoryDataset ds = NuclearSignalDatasetCreator.createSignalStatisticBoxplotDataset(options);
+		BoxAndWhiskerCategoryDataset ds;
+		if(options.hasDatasets()){
+			ds = NuclearSignalDatasetCreator.createSignalStatisticBoxplotDataset(options);
+		} else {
+			return makeEmptyBoxplot();
+		}
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false);
 		formatBoxplot(boxplot);
 		

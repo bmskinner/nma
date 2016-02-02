@@ -34,16 +34,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jfree.chart.JFreeChart;
-
-import charting.ChartCache;
 import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
-import logging.LogPanelFormatter;
 import utility.Constants;
 import utility.Version;
 import components.Cell;

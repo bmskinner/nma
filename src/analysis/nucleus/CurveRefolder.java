@@ -92,7 +92,7 @@ public class CurveRefolder extends AnalysisWorker {
 		this.setProgressTotal(refoldMode.maxIterations());
 
 		collection = dataset.getCollection();
-		
+
 		log(Level.FINE, "Creating refolder");
 
 
@@ -128,6 +128,8 @@ public class CurveRefolder extends AnalysisWorker {
 		
 
 		try{ 
+			
+			collection.setRefolding(true);
 			// smooth the candidate nucleus to remove jagged edges
 			this.smoothCurve(0); // smooth with no offset
 			this.smoothCurve(1); // smooth with intercalated offset
@@ -166,6 +168,8 @@ public class CurveRefolder extends AnalysisWorker {
 		} catch(Exception e){
 			logError("Unable to refold nucleus", e);
 			return false;
+		} finally {
+			collection.setRefolding(false);
 		}
 		return true;
 	}

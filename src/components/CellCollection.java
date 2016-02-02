@@ -89,6 +89,7 @@ public class CellCollection implements Serializable {
 	
 	private Map<UUID, Cell> mappedCollection  = new HashMap<UUID, Cell>();	// store all the nuclei analysed
 	
+	private transient boolean isRefolding = false;
 
 	/**
 	 * Constructor.
@@ -967,6 +968,14 @@ public class CellCollection implements Serializable {
 		return ok;
 	}
   
+  public boolean isRefolding(){
+	  return this.isRefolding;
+  }
+  
+  public void setRefolding(boolean b){
+	  this.isRefolding = b;
+  }
+  
   /**
    * Test if the collection contains the given cell
    * @param c
@@ -983,6 +992,7 @@ public class CellCollection implements Serializable {
   
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
+	    isRefolding = false;
 	}
   
   /**
