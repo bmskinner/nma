@@ -277,65 +277,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 	
-		
-	/**
-	 * Create a segmented profile chart from a given XYDataset. Set the series 
-	 * colours for each component. Draw lines on the offset indexes
-	 * @param dataset the dataset the values come from
-	 * @param normalised should the scales be normalised
-	 * @param rightAligm should the chart be aligned to the right
-	 * @return a chart
-	 */
-	public static JFreeChart makeFrankenProfileChart(ChartOptions options) throws Exception {
-		
-		AnalysisDataset dataset = options.firstDataset();
-		CellCollection collection = dataset.getCollection();
-		XYDataset ds = NucleusDatasetCreator.createFrankenSegmentDataset(options);
-
-		ProfileCollection pc = collection.getProfileCollection(ProfileType.FRANKEN);
-		
-		int length = 100 ; // default if normalised - for a franken collection, it makes no difference
-
-		ColourSwatch swatch = dataset.getSwatch();// == null ? ColourSwatch.REGULAR_SWATCH : dataset.getSwatch();
-		JFreeChart chart = makeProfileChart(ds, length, swatch, ProfileType.FRANKEN);
-		
-		// mark the reference andorientation points
-		
-		XYPlot plot = chart.getXYPlot();
-
-		for (BorderTag tag : pc.getOffsetKeys()){
 			
-			// get the index of the tag
-			int index = pc.getOffset(tag);
-			
-			// get the offset from to the current draw point
-			int offset = pc.getOffset(options.getTag());
-			
-			// adjust the index to the offset
-			index = Utils.wrapIndex( index - offset, pc.getAggregate().length());
-			
-			double indexToDraw = index; // convert to a double to allow normalised positioning
-			
-//			if(normalised){ // set to the proportion of the point along the profile
-				indexToDraw =  (( indexToDraw / pc.getAggregate().length() ) * 100);
-//			}
-			if(options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()){
-				int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
-				int amountToAdd = maxX - pc.getAggregate().length();
-				indexToDraw += amountToAdd;
-				
-			}
-			
-			if(options.isShowMarkers()){
-				
-				addMarkerToXYPlot(plot, tag, indexToDraw);
-
-			}
-			
-		}
-		return chart;
-	}
-	
 	/**
 	 * Create a profile chart from a given XYDataset. Set the series 
 	 * colours for each component
