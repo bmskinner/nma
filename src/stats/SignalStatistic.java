@@ -5,13 +5,13 @@ import utility.Utils;
 
 public enum SignalStatistic implements PlottableStatistic {
 	
-	RADIUS("Radius", StatisticDimension.LENGTH),
-	AREA ("Area", StatisticDimension.AREA),
-	PERIMETER("Perimeter", StatisticDimension.LENGTH),
-	MAX_FERET("Max feret", StatisticDimension.LENGTH),
-	ANGLE("Angle", StatisticDimension.ANGLE),
-	DISTANCE_FROM_COM("Distance from CoM", StatisticDimension.LENGTH),
-	FRACT_DISTANCE_FROM_COM("Fractional distance from CoM", StatisticDimension.DIMENSIONLESS);
+	ANGLE                  ("Angle"                       , StatisticDimension.ANGLE),
+	AREA                   ("Area"                        , StatisticDimension.AREA),
+	PERIMETER              ("Perimeter"                   , StatisticDimension.LENGTH),
+	MAX_FERET              ("Max feret"                   , StatisticDimension.LENGTH),
+	DISTANCE_FROM_COM      ("Distance from CoM"           , StatisticDimension.LENGTH),
+	FRACT_DISTANCE_FROM_COM("Fractional distance from CoM", StatisticDimension.DIMENSIONLESS),
+	RADIUS                 ("Radius"                      , StatisticDimension.LENGTH);
 
 	
 	private String name;

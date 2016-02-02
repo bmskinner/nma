@@ -34,10 +34,14 @@ public interface PlottableStatistic {
 	 */
 	public String toString();
 
+	/**
+	 * Test if the statistic has units
+	 * @return
+	 */
 	public boolean isDimensionless();
 
 	/**
-	 * Get the dimension of the statistic (area, length, none)
+	 * Get the dimension of the statistic (area, length, angle, none)
 	 * @return
 	 */
 	public StatisticDimension getDimension();

@@ -58,6 +58,10 @@ public class BoxplotChartFactory {
 	
 	public static JFreeChart createStatisticBoxplot(ChartOptions options) throws Exception{
 		
+		if(!options.hasDatasets()){
+			return createEmptyBoxplot();
+		}
+		
 		PlottableStatistic stat = options.getStat();
 		
 		if(stat.getClass()==NucleusStatistic.class){
@@ -88,7 +92,8 @@ public class BoxplotChartFactory {
 		if(options.getDatasets()!=null){
 			 ds = NucleusDatasetCreator.createBoxplotDataset(options);
 		}
-		NucleusStatistic stat = (NucleusStatistic) options.getStat();
+
+		
 		String yLabel = options.getStat().label(options.getScale());
 
 		JFreeChart 	boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, yLabel, ds, false); 
@@ -105,9 +110,6 @@ public class BoxplotChartFactory {
 	 */
 	private static JFreeChart createSegmentBoxplot(ChartOptions options) throws Exception {
 
-		if(!options.hasDatasets()){
-			return createEmptyBoxplot();
-		}
 		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
 		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentStatDataset(options);
@@ -140,59 +142,7 @@ public class BoxplotChartFactory {
 			
 		return boxplot;
 	}
-	
-	/**
-	 * Create and format a boxplot based on a dataset
-	 * @param ds the dataset
-	 * @return
-	 */
-//	private static JFreeChart makeSegmentBoxplot(BoxAndWhiskerCategoryDataset ds, List<AnalysisDataset> list){
-//		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null,
-//				null, 
-//				"Index length difference\nto segment in median", ds, false);	
-//		
-//		
-//		if(ds==null || list==null){
-//			return makeEmptyBoxplot();
-//		}
-//		
-//		formatBoxplot(boxplot);
-//		CategoryPlot plot = boxplot.getCategoryPlot();
-//				
-//		if(list!=null && !list.isEmpty()){
-//						
-//			for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
-//			
-//				CategoryDataset dataset = plot.getDataset(datasetIndex);
-//				BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-//				
-//				for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
-//
-//					String segName = (String) dataset.getRowKey(series);
-//					int segIndex = MorphologyChartFactory.getIndexFromLabel(segName);
-//					
-//					Color color = list.get(0).getSwatch().color(segIndex);
-////					Color color = ColourSelecter.getOptimisedColor(segIndex);
-//					renderer.setSeriesPaint(series, color);
-////					renderer.setSeriesFillPaint(series, color);
-//					renderer.setSeriesOutlinePaint(series, Color.BLACK);
-//				}
-//				
-//				renderer.setMeanVisible(false);
-//				renderer.setItemMargin(0.08);
-//				renderer.setMaximumBarWidth(0.10);
-//				plot.setRenderer(datasetIndex, renderer);
-//			}
-//		}
-//		
-//		ValueMarker zeroMarker =
-//	              new ValueMarker(0.00, Color.black, ChartComponents.PROFILE_STROKE);
-//
-//	      plot.addRangeMarker(zeroMarker);
-//		
-//		return boxplot;
-//	}
-	
+		
 	/**
 	 * Create a signal boxplot with the given options
 	 * @param options
@@ -201,12 +151,8 @@ public class BoxplotChartFactory {
 	 */
 	private static JFreeChart createSignalStatisticBoxplot(ChartOptions options) throws Exception{
 		
-		BoxAndWhiskerCategoryDataset ds;
-		if(options.hasDatasets()){
-			ds = NuclearSignalDatasetCreator.createSignalStatisticBoxplotDataset(options);
-		} else {
-			return createEmptyBoxplot();
-		}
+		BoxAndWhiskerCategoryDataset ds = NuclearSignalDatasetCreator.createSignalStatisticBoxplotDataset(options);
+
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, 
 				null, 
 				options.getStat().label(options.getScale()), 
