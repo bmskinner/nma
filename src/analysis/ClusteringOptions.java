@@ -38,6 +38,10 @@ public class ClusteringOptions implements Serializable {
 	
 	
 	private Map<PlottableStatistic, Boolean> statMap = new HashMap<PlottableStatistic, Boolean>();
+	
+	
+	private Map<String, Boolean> segmentMap = new HashMap<String, Boolean>(); // which segments should be included
+	
 	private boolean includeProfile; // should the nuclear profiles be a part of the clustering?
 	
 	private transient boolean useSimilarityMatrix;
@@ -67,6 +71,31 @@ public class ClusteringOptions implements Serializable {
 		for(NucleusStatistic stat : NucleusStatistic.values()){
     		statMap.put(stat, oldOptions.isIncludeStatistic(stat));
     	}
+	}
+	
+	/**
+	 * Check if the given segment is to be included in the clustering
+	 * @param stat
+	 * @return
+	 */
+	public boolean isIncludeSegment(String segName){
+		if( this.segmentMap.containsKey(segName)){
+			return this.segmentMap.get(segName);
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Get all the segments that are saved in this options object
+	 * @return
+	 */
+	public Set<String> getSavedSegments(){
+		return segmentMap.keySet();
+	}
+	
+	public void setIncludeSegmnet(String segName, boolean b){
+		this.segmentMap.put(segName, b);
 	}
 		
 	
