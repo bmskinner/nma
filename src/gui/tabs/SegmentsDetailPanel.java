@@ -541,29 +541,28 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 			// Check that all the datasets have the same number of segments
 			if(checkSegmentCountsMatch(getDatasets())){ // make a histogram for each segment
-				
-				ChartOptionsBuilder builder = new ChartOptionsBuilder();
-				ChartOptions options = builder.setDatasets(getDatasets())
-					.setLogger(programLogger)
-					.setStatistic(null)
-					.setScale(scale)
-					.setUseDensity(useDensity)
-					.build();
 
 				CellCollection collection = activeDataset().getCollection();
 				int segmentCount = collection.getProfileCollection(ProfileType.REGULAR)
 						.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
 						.getSegmentCount();
+				
 
 				// Get each segment as a boxplot
 				for( int i=0; i<segmentCount; i++){
 					String segName = "Seg_"+i;
-					JFreeChart chart = null;
-					if(useDensity){
-						chart = HistogramChartFactory.createSegmentLengthDensityChart(options, segName);	
-					} else {
-						chart = HistogramChartFactory.createSegmentLengthHistogram(options, segName);
-					}
+					
+					ChartOptionsBuilder builder = new ChartOptionsBuilder();
+					ChartOptions options = builder.setDatasets(getDatasets())
+						.setLogger(programLogger)
+						.setStatistic(null)
+						.setScale(scale)
+						.setUseDensity(useDensity)
+						.setSegName(segName)
+						.build();
+					
+					JFreeChart chart = HistogramChartFactory.createStatisticHistogram(options);
+					
 					SelectableChartPanel chartPanel = new SelectableChartPanel(chart, segName);
 					chartPanel.setPreferredSize(preferredSize);
 					mainPanel.add(chartPanel);							

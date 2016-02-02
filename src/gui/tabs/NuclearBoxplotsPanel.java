@@ -223,7 +223,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 						.setUseDensity(false)
 						.build();
 					
-					SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createNuclearStatsHistogram(options), stat.toString());
+					SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createStatisticHistogram(options), stat.toString());
 					panel.setPreferredSize(preferredSize);
 					panel.addSignalChangeListener(this);
 					HistogramsPanel.this.chartPanels.put(stat.toString(), panel);
@@ -269,11 +269,11 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 
 					if(useDensity){
-						chart = HistogramChartFactory.createNuclearDensityStatsChart(options);
+						chart = HistogramChartFactory.createStatisticHistogram(options);
 						HistogramsPanel.this.getChartCache().addChart(options, chart);
 
 					} else {
-						chart = HistogramChartFactory.createNuclearStatsHistogram(options);
+						chart = HistogramChartFactory.createStatisticHistogram(options);
 						HistogramsPanel.this.getChartCache().addChart(options, chart);
 
 					}
@@ -292,58 +292,6 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			this.setEnabled(false);
 		}
 
-//		@Override
-//		public void updateDetail() {
-//			
-//			
-//			if(hasDatasets()){
-//				this.setEnabled(true);
-//			} else {
-//				this.setEnabled(false);
-//			}
-//
-//			MeasurementScale scale  = HistogramsPanel.this.measurementUnitSettingsPanel.getSelected();
-//			boolean useDensity = HistogramsPanel.this.useDensityPanel.isSelected();
-//
-//			try{
-//				for(NucleusStatistic stat : NucleusStatistic.values()){
-//					SelectableChartPanel panel = HistogramsPanel.this.chartPanels.get(stat.toString());
-//
-//					JFreeChart chart = null;
-//					HistogramChartOptions options = new HistogramChartOptions(getDatasets(), stat, scale, useDensity);
-//					options.setLogger(programLogger);
-//
-//					if(this.getChartCache().hasChart(options)){
-//						programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());
-//						chart = HistogramsPanel.this.getChartCache().getChart(options);
-//
-//					} else { // No cache
-//
-//
-//						if(useDensity){
-//							chart = HistogramChartFactory.createNuclearDensityStatsChart(options);
-//							HistogramsPanel.this.getChartCache().addChart(options, chart);
-//
-//						} else {
-//							chart = HistogramChartFactory.createNuclearStatsHistogram(options);
-//							HistogramsPanel.this.getChartCache().addChart(options, chart);
-//
-//						}
-//						programLogger.log(Level.FINEST, "Added cached histogram chart: "+stat);
-//					}
-//
-//					XYPlot plot = (XYPlot) chart.getPlot();
-//					plot.setDomainPannable(true);
-//					plot.setRangePannable(true);
-//
-//					panel.setChart(chart);
-//				}
-//			} catch(Exception e){
-//				programLogger.log(Level.SEVERE, "Error updating histogram panel", e);
-//			} finally {
-//				HistogramsPanel.this.setUpdating(false);
-//			}
-//		}
 				
 		private void detectModes(JFreeChart chart, List<AnalysisDataset> list, int stat){
 			

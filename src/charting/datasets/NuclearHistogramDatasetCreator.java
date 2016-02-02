@@ -232,7 +232,7 @@ public class NuclearHistogramDatasetCreator {
 		return range;
 	}
 	
-	public static HistogramDataset createSegmentLengthHistogramDataset(ChartOptions options, String segName) throws Exception {
+	public static HistogramDataset createSegmentLengthHistogramDataset(ChartOptions options) throws Exception {
 		HistogramDataset ds = new HistogramDataset();
 		
 		if(options.hasLogger()){
@@ -255,7 +255,7 @@ public class NuclearHistogramDatasetCreator {
 				for(Nucleus n : collection.getNuclei()){
 //					NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
 					NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
-							n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), segName
+							n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), options.getSegName()
 						);
 					
 
@@ -302,7 +302,7 @@ public class NuclearHistogramDatasetCreator {
 
 				int bins = 100;
 
-				ds.addSeries(segName+"_"+collection.getName(), lengths, bins, minRounded, maxRounded );
+				ds.addSeries(options.getSegName()+"_"+collection.getName(), lengths, bins, minRounded, maxRounded );
 			}
 		}
 		if(options.hasLogger()){
@@ -318,10 +318,10 @@ public class NuclearHistogramDatasetCreator {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static DefaultXYDataset createSegmentLengthDensityDataset(List<AnalysisDataset> list, String segName, MeasurementScale scale) throws Exception {
+	public static DefaultXYDataset createSegmentLengthDensityDataset(ChartOptions options) throws Exception {
 
 		int[] minMaxRange = {Integer.MAX_VALUE, 0}; // start with extremes, trim to fit data
-		for(AnalysisDataset dataset : list){
+		for(AnalysisDataset dataset : options.getDatasets()){
 			CellCollection collection = dataset.getCollection();
 			
 			int count=0;
@@ -329,12 +329,12 @@ public class NuclearHistogramDatasetCreator {
 			for(Nucleus n : collection.getNuclei()){
 //				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
 				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
-						n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), segName
+						n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), options.getSegName()
 					);
 
 				int indexLength = seg.length();
 				double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-				double length = n.getStatistic(NucleusStatistic.PERIMETER, scale) * proportionPerimeter;
+				double length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
 				lengths[count++] = length;
 			}
 			
@@ -347,7 +347,7 @@ public class NuclearHistogramDatasetCreator {
 		
 		
 
-		for(AnalysisDataset dataset : list){
+		for(AnalysisDataset dataset : options.getDatasets()){
 			CellCollection collection = dataset.getCollection();
 			
 			int count=0;
@@ -355,12 +355,12 @@ public class NuclearHistogramDatasetCreator {
 			for(Nucleus n : collection.getNuclei()){
 //				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
 				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
-						n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), segName
+						n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), options.getSegName()
 					);
 				
 				int indexLength = seg.length();
 				double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-				double length = n.getStatistic(NucleusStatistic.PERIMETER, scale) * proportionPerimeter;
+				double length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
 				lengths[count++] = length;
 			}
 			
@@ -400,7 +400,7 @@ public class NuclearHistogramDatasetCreator {
 					Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
 			
 			
-			ds.addSeries(segName+"_"+collection.getName(), data);
+			ds.addSeries(options.getSegName()+"_"+collection.getName(), data);
 		}
 
 		return ds;

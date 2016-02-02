@@ -21,6 +21,8 @@ package charting.charts;
 import gui.components.ColourSelecter;
 import ij.IJ;
 import stats.NucleusStatistic;
+import stats.PlottableStatistic;
+import stats.SegmentStatistic;
 import stats.SignalStatistic;
 
 import java.awt.BasicStroke;
@@ -49,7 +51,29 @@ import components.generic.MeasurementScale;
 
 
 public class HistogramChartFactory {
+
+	/**
+	 * Create a histogram from a histogram dataset and
+	 * apply basic formatting
+	 * @param ds the dataset to use
+	 * @param xLabel the label of the x axis
+	 * @param yLabel the label of the y axis
+	 * @return a chart
+	 */
+	public static JFreeChart createEmptyHistogram(){
 		
+		JFreeChart chart = ChartFactory.createHistogram(null, null, null, null, PlotOrientation.VERTICAL, true, true, true);
+		
+		
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.white);
+		XYBarRenderer rend = new XYBarRenderer();
+		rend.setBarPainter(new StandardXYBarPainter());
+		rend.setShadowVisible(false);
+		plot.setRenderer(rend);
+		return chart;
+	}
+	
 	/**
 	 * Create a histogram from a histogram dataset and
 	 * apply basic formatting
@@ -77,26 +101,73 @@ public class HistogramChartFactory {
 		return chart;
 	}
 	
+	public static JFreeChart createStatisticHistogram(ChartOptions options) throws Exception{
+		
+		if(!options.hasDatasets()){
+			return createEmptyHistogram();
+		}
+		
+		PlottableStatistic stat = options.getStat();
+		
+		if(stat.getClass()==NucleusStatistic.class){
+			return createNuclearStatsHistogram(options);
+		}
+		
+		if(stat.getClass()==SignalStatistic.class){
+			return createSignalStatisticHistogram(options);
+		}
+		
+		if(stat.getClass()==SegmentStatistic.class){
+			return createSegmentStatisticHistogram(options);
+		}
+		
+		return createEmptyHistogram();
+		
+	}
+	
 	/**
-	 * Create a signal angle histogram for a dataset
-	 * @param options the ChartOptions
+	 * Create a histogram from a list of values
+	 * @param list
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-//	public static JFreeChart createSignalAngleHistogram(HistogramChartOptions options) throws Exception{
-//		
-//		HistogramDataset ds = options.hasDatasets() 
-//							? NuclearSignalDatasetCreator.createSignalAngleHistogramDataset(options.getDatasets())
-//							: null;
-//				
-//		JFreeChart chart = createHistogram(ds, "Angle", "Count");
-//		if(ds!=null && options.hasDatasets()){
-//			XYPlot plot = chart.getXYPlot();
-//			plot.getDomainAxis().setRange(0,360);
-//			setSeriesPropertiesForSignalHistogram(chart, options.firstDataset());	
-//		}
-//		return chart;
-//	}
+	public static JFreeChart createRandomSampleHistogram(List<Double> list) throws Exception{
+		HistogramDataset ds = NuclearHistogramDatasetCreator.createHistogramDatasetFromList(list);
+		JFreeChart chart = createHistogram(ds, "Magnitude difference between populations", "Observed instances");
+		
+		return chart;
+	}
+	
+	
+	/**
+	 * Create a density chart from a list of values
+	 * @param list
+	 * @return
+	 * @throws Exception
+	 */
+	public static JFreeChart createRandomSampleDensity(List<Double> list) throws Exception{
+		XYDataset ds = NuclearHistogramDatasetCreator.createDensityDatasetFromList(list, 0.0001);
+		String xLabel = "Magnitude difference between populations";
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,
+				                false);
+		XYPlot plot = chart.getXYPlot();
+		for (int j = 0; j < ds.getSeriesCount(); j++) {
+			plot.getRenderer().setSeriesVisibleInLegend(j, false);
+		}
+		
+		plot.setBackgroundPaint(Color.WHITE);
+		return chart;
+	}
+		
+	
+	
+	/*
+	 * 
+	 * PRIVATE METHODS
+	 * 
+	 */
 	
 	/**
 	 * Create a signal angle histogram for a dataset
@@ -104,7 +175,11 @@ public class HistogramChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createSignalStatisticHistogram(ChartOptions options) throws Exception{
+	private static JFreeChart createSignalStatisticHistogram(ChartOptions options) throws Exception{
+		
+		if(options.isUseDensity()){
+			return createSignalDensityStatsChart(options);
+		}
 		
 		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
@@ -132,7 +207,7 @@ public class HistogramChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createSignalDensityStatsChart(ChartOptions options) throws Exception{
+	private static JFreeChart createSignalDensityStatsChart(ChartOptions options) throws Exception{
 	
 		DefaultXYDataset ds = null;
 		
@@ -188,27 +263,6 @@ public class HistogramChartFactory {
 		return chart;
 	}
 	
-	/**
-	 * Create a signal distance histogram
-	 * @param ds the histogram dataset
-	 * @param dataset the analysis dataset
-	 * @return
-	 * @throws Exception 
-	 */
-//	public static JFreeChart createSignalDistanceHistogram(HistogramChartOptions options) throws Exception{
-//		
-//		HistogramDataset ds = options.hasDatasets() 
-//							? NuclearSignalDatasetCreator.createSignalDistanceHistogramDataset(options.getDatasets())
-//							: null;
-//		
-//		JFreeChart chart = createHistogram(ds, "Distance", "Count");
-//		if(ds!=null && options.hasDatasets()){
-//			XYPlot plot = chart.getXYPlot();
-//			plot.getDomainAxis().setRange(0,1);
-//			setSeriesPropertiesForSignalHistogram(chart, options.firstDataset());
-//		}
-//		return chart;
-//	}
 	
 	private static void setSeriesPropertiesForSignalHistogram(JFreeChart chart, AnalysisDataset dataset){
 		
@@ -226,29 +280,7 @@ public class HistogramChartFactory {
 		}
 	}
 	
-	public static JFreeChart createRandomSampleHistogram(List<Double> list) throws Exception{
-		HistogramDataset ds = NuclearHistogramDatasetCreator.createHistogramDatasetFromList(list);
-		JFreeChart chart = createHistogram(ds, "Magnitude difference between populations", "Observed instances");
-		
-		return chart;
-	}
-	
-	public static JFreeChart createRandomSampleDensity(List<Double> list) throws Exception{
-		XYDataset ds = NuclearHistogramDatasetCreator.createDensityDatasetFromList(list, 0.0001);
-		String xLabel = "Magnitude difference between populations";
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,
-				                false);
-		XYPlot plot = chart.getXYPlot();
-		for (int j = 0; j < ds.getSeriesCount(); j++) {
-			plot.getRenderer().setSeriesVisibleInLegend(j, false);
-		}
-		
-		plot.setBackgroundPaint(Color.WHITE);
-		return chart;
-	}
-	
+
 	/**
 	 * Create a histogram with nuclear statistics
 	 * @param ds the histogram dataset
@@ -256,8 +288,12 @@ public class HistogramChartFactory {
 	 * @param xLabel the x axis label
 	 * @return
 	 */
-	public static JFreeChart createNuclearStatsHistogram(ChartOptions options) throws Exception{
+	private static JFreeChart createNuclearStatsHistogram(ChartOptions options) throws Exception{
 
+		if(options.isUseDensity()){
+			return createNuclearDensityStatsChart(options);
+		}
+		
 		HistogramDataset ds = null;
 				
 		if (options.hasDatasets()){
@@ -319,7 +355,7 @@ public class HistogramChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createNuclearDensityStatsChart(ChartOptions options) throws Exception{
+	private static JFreeChart createNuclearDensityStatsChart(ChartOptions options) throws Exception{
 	
 		DefaultXYDataset ds = null;
 		
@@ -381,19 +417,23 @@ public class HistogramChartFactory {
 	 * @param segName the segment to plot
 	 * @return
 	 */
-	public static JFreeChart createSegmentLengthHistogram(ChartOptions options, String segName) throws Exception{
+	private static JFreeChart createSegmentStatisticHistogram(ChartOptions options) throws Exception{
 
+		if(options.isUseDensity()){
+			return createSegmentLengthDensityChart(options);
+		}
+		
 		HistogramDataset ds = null;
 				
 		if (options.hasDatasets()){
-			ds = NuclearHistogramDatasetCreator.createSegmentLengthHistogramDataset(options, segName);
+			ds = NuclearHistogramDatasetCreator.createSegmentLengthHistogramDataset(options);
 		}
 		
 		if(options.hasLogger()){
-			options.getLogger().log(Level.FINER, "Creating histogram for "+segName);
+			options.getLogger().log(Level.FINER, "Creating histogram for "+options.getSegName());
 		}
 		
-		JFreeChart chart = createHistogram(ds, segName+" length ("+options.getScale()+")", "Nuclei" );
+		JFreeChart chart = createHistogram(ds, options.getSegName()+" length ("+options.getScale()+")", "Nuclei" );
 		
 		if(ds!=null && options.hasDatasets()){
 						
@@ -409,7 +449,7 @@ public class HistogramChartFactory {
 				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
 
 				String seriesKey = (String) ds.getSeriesKey(j);
-				String seriesName = seriesKey.replaceFirst(segName+"_", "");
+				String seriesName = seriesKey.replaceFirst(options.getSegName()+"_", "");
 				
 				for(AnalysisDataset dataset : options.getDatasets()){
 					
@@ -441,15 +481,15 @@ public class HistogramChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createSegmentLengthDensityChart(ChartOptions options, String segName) throws Exception{
+	private static JFreeChart createSegmentLengthDensityChart(ChartOptions options) throws Exception{
 		
 		DefaultXYDataset ds = null;
 		
 		if (options.hasDatasets()){
-			ds = NuclearHistogramDatasetCreator.createSegmentLengthDensityDataset(options.getDatasets(), segName, options.getScale());
+			ds = NuclearHistogramDatasetCreator.createSegmentLengthDensityDataset(options);
 		}
 
-		String xLabel = segName+" length ("+options.getScale()+")";
+		String xLabel = options.getSegName()+" length ("+options.getScale()+")";
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,
@@ -472,7 +512,7 @@ public class HistogramChartFactory {
 				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
 
 				String seriesKey = (String) ds.getSeriesKey(j);
-				String seriesName = seriesKey.replaceFirst(segName+"_", "");
+				String seriesName = seriesKey.replaceFirst(options.getSegName()+"_", "");
 
 				Color colour = ColourSelecter.getSegmentColor(j);
 				for(AnalysisDataset dataset : options.getDatasets()){

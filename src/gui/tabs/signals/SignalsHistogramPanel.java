@@ -37,7 +37,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 					.setSignalGroup(0)
 					.build();
 				
-				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createSignalStatisticHistogram(options), stat.toString());
+				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createStatisticHistogram(options), stat.toString());
 				panel.setPreferredSize(preferredSize);
 				panel.addSignalChangeListener(this);
 				chartPanels.put(stat.toString(), panel);
@@ -80,17 +80,10 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 
 			} else { // No cache
 
+				chart = HistogramChartFactory.createStatisticHistogram(options);
+				getChartCache().addChart(options, chart);
 
-				if(useDensity){
-					//TODO - make the density chart
-					chart = HistogramChartFactory.createSignalDensityStatsChart(options);
-					getChartCache().addChart(options, chart);
 
-				} else {
-					chart = HistogramChartFactory.createSignalStatisticHistogram(options);
-					getChartCache().addChart(options, chart);
-
-				}
 				programLogger.log(Level.FINEST, "Added cached histogram chart: "+stat);
 			}
 
