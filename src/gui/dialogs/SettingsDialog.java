@@ -441,124 +441,124 @@ public abstract class SettingsDialog extends JDialog {
 		
 	}
 	
-	/**
-	 * Create a panel with the standard signal detection options. Must have an
-	 * attached CannyOptions to store the settings
-	 */
-	public class NuclearSignalPanel extends JPanel implements ChangeListener, ActionListener{
-		
-		private static final long serialVersionUID = 1L;
-		
-		private NuclearSignalOptions options;
-				
-		private JComboBox<String> channelSelection;
-		private JTextField groupName;
-		
-		private JSpinner minSizeSpinner = new JSpinner(new SpinnerNumberModel(NuclearSignalOptions.DEFAULT_MIN_SIGNAL_SIZE,	1, 10000, 1));
-		private JSpinner maxFractSpinner = new JSpinner(new SpinnerNumberModel(NuclearSignalOptions.DEFAULT_MAX_SIGNAL_FRACTION, 0, 1, 0.05));
-		
-		private JSpinner thresholdSpinner = new JSpinner(new SpinnerNumberModel(NuclearSignalOptions.DEFAULT_SIGNAL_THRESHOLD,	0, 255, 1));
-		
-		private JSpinner minCircSpinner = new JSpinner(new SpinnerNumberModel(NuclearSignalOptions.DEFAULT_MIN_CIRC,	0, 1, 0.05));
-		private JSpinner maxCircSpinner = new JSpinner(new SpinnerNumberModel(NuclearSignalOptions.DEFAULT_MAX_CIRC,	0, 1, 0.05));
-		
-		public NuclearSignalPanel(NuclearSignalOptions options){
-			this.options = options;
-			createPanel();
-		}
-		
-		private void createPanel(){
-			
-			this.setLayout(new GridBagLayout());
-			
-			// add the canny settings
-			List<JLabel> labelList	 	= new ArrayList<JLabel>();
-			List<JComponent> fieldList  = new ArrayList<JComponent>();
-						
-			labelList.add(new JLabel("Channel"));
-			labelList.add(new JLabel("Signal threshold"));
-			labelList.add(new JLabel("Min signal size"));
-			labelList.add(new JLabel("Max signal fraction"));
-			labelList.add(new JLabel("Min signal circ"));
-			labelList.add(new JLabel("Max signal circ"));
-			labelList.add(new JLabel("Group name"));
-			
-			JLabel[] labels = labelList.toArray(new JLabel[0]);
-			
-			fieldList.add(channelSelection);
-			fieldList.add(thresholdSpinner);
-			fieldList.add(minSizeSpinner);
-			fieldList.add(maxFractSpinner);
-			fieldList.add(minCircSpinner);
-			fieldList.add(maxCircSpinner);
-			fieldList.add(groupName);
-			
-			JComponent[] fields = fieldList.toArray(new JComponent[0]);
-			
-			// add the change listeners
-			thresholdSpinner.addChangeListener(this);
-			minSizeSpinner.addChangeListener(this);
-			maxFractSpinner.addChangeListener(this);
-			minCircSpinner.addChangeListener(this);
-			maxCircSpinner.addChangeListener(this);
-						
-			addLabelTextRows(labels, fields, new GridBagLayout(), this );
-			
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void stateChanged(ChangeEvent e) {
-			try{
-
-				if(e.getSource()==thresholdSpinner){
-					JSpinner j = (JSpinner) e.getSource();
-					j.commitEdit();	
-				}
-
-
-				if(e.getSource()==minSizeSpinner){
-					JSpinner j = (JSpinner) e.getSource();
-					j.commitEdit();
-				}
-				
-				if(e.getSource()==maxFractSpinner){
-					JSpinner j = (JSpinner) e.getSource();
-					j.commitEdit();
-				}
-				
-				if(e.getSource()==minCircSpinner){
-					JSpinner j = (JSpinner) e.getSource();
-					j.commitEdit();
-					if((Double) j.getValue() > (Double) maxCircSpinner.getValue()   ){
-						j.setValue( maxCircSpinner.getValue() );
-					}
-				}
-				
-				if(e.getSource()==maxCircSpinner){
-					JSpinner j = (JSpinner) e.getSource();
-					j.commitEdit();
-					
-					if((Double) j.getValue()< (Double) minCircSpinner.getValue()  ){
-						j.setValue( minCircSpinner.getValue() );
-					}
-				}
-
-
-			} catch(Exception e1){
-				IJ.log("Error getting signal values: "+e1.getMessage());
-				for(StackTraceElement e2 : e1.getStackTrace()){
-					IJ.log(e2.toString());
-				}
-			}
-			
-		}
-		
-	}
+//	/**
+//	 * Create a panel with the standard signal detection options. Must have an
+//	 * attached CannyOptions to store the settings
+//	 */
+//	public class NuclearSignalPanel extends JPanel implements ChangeListener, ActionListener{
+//		
+//		private static final long serialVersionUID = 1L;
+//		
+//		private NuclearSignalOptions options;
+//				
+//		private JComboBox<String> channelSelection;
+//		private JTextField groupName;
+//		
+//		private JSpinner minSizeSpinner = new JSpinner(new SpinnerNumberModel(NuclearSignalOptions.DEFAULT_MIN_SIGNAL_SIZE,	1, 10000, 1));
+//		private JSpinner maxFractSpinner = new JSpinner(new SpinnerNumberModel(NuclearSignalOptions.DEFAULT_MAX_SIGNAL_FRACTION, 0, 1, 0.05));
+//		
+//		private JSpinner thresholdSpinner = new JSpinner(new SpinnerNumberModel(NuclearSignalOptions.DEFAULT_SIGNAL_THRESHOLD,	0, 255, 1));
+//		
+//		private JSpinner minCircSpinner = new JSpinner(new SpinnerNumberModel(NuclearSignalOptions.DEFAULT_MIN_CIRC,	0, 1, 0.05));
+//		private JSpinner maxCircSpinner = new JSpinner(new SpinnerNumberModel(NuclearSignalOptions.DEFAULT_MAX_CIRC,	0, 1, 0.05));
+//		
+//		public NuclearSignalPanel(NuclearSignalOptions options){
+//			this.options = options;
+//			createPanel();
+//		}
+//		
+//		private void createPanel(){
+//			
+//			this.setLayout(new GridBagLayout());
+//			
+//			// add the canny settings
+//			List<JLabel> labelList	 	= new ArrayList<JLabel>();
+//			List<JComponent> fieldList  = new ArrayList<JComponent>();
+//						
+//			labelList.add(new JLabel("Channel"));
+//			labelList.add(new JLabel("Signal threshold"));
+//			labelList.add(new JLabel("Min signal size"));
+//			labelList.add(new JLabel("Max signal fraction"));
+//			labelList.add(new JLabel("Min signal circ"));
+//			labelList.add(new JLabel("Max signal circ"));
+//			labelList.add(new JLabel("Group name"));
+//			
+//			JLabel[] labels = labelList.toArray(new JLabel[0]);
+//			
+//			fieldList.add(channelSelection);
+//			fieldList.add(thresholdSpinner);
+//			fieldList.add(minSizeSpinner);
+//			fieldList.add(maxFractSpinner);
+//			fieldList.add(minCircSpinner);
+//			fieldList.add(maxCircSpinner);
+//			fieldList.add(groupName);
+//			
+//			JComponent[] fields = fieldList.toArray(new JComponent[0]);
+//			
+//			// add the change listeners
+//			thresholdSpinner.addChangeListener(this);
+//			minSizeSpinner.addChangeListener(this);
+//			maxFractSpinner.addChangeListener(this);
+//			minCircSpinner.addChangeListener(this);
+//			maxCircSpinner.addChangeListener(this);
+//						
+//			addLabelTextRows(labels, fields, new GridBagLayout(), this );
+//			
+//		}
+//
+//		@Override
+//		public void actionPerformed(ActionEvent arg0) {
+//			// TODO Auto-generated method stub
+//			
+//		}
+//
+//		@Override
+//		public void stateChanged(ChangeEvent e) {
+//			try{
+//
+//				if(e.getSource()==thresholdSpinner){
+//					JSpinner j = (JSpinner) e.getSource();
+//					j.commitEdit();	
+//				}
+//
+//
+//				if(e.getSource()==minSizeSpinner){
+//					JSpinner j = (JSpinner) e.getSource();
+//					j.commitEdit();
+//				}
+//				
+//				if(e.getSource()==maxFractSpinner){
+//					JSpinner j = (JSpinner) e.getSource();
+//					j.commitEdit();
+//				}
+//				
+//				if(e.getSource()==minCircSpinner){
+//					JSpinner j = (JSpinner) e.getSource();
+//					j.commitEdit();
+//					if((Double) j.getValue() > (Double) maxCircSpinner.getValue()   ){
+//						j.setValue( maxCircSpinner.getValue() );
+//					}
+//				}
+//				
+//				if(e.getSource()==maxCircSpinner){
+//					JSpinner j = (JSpinner) e.getSource();
+//					j.commitEdit();
+//					
+//					if((Double) j.getValue()< (Double) minCircSpinner.getValue()  ){
+//						j.setValue( minCircSpinner.getValue() );
+//					}
+//				}
+//
+//
+//			} catch(Exception e1){
+//				IJ.log("Error getting signal values: "+e1.getMessage());
+//				for(StackTraceElement e2 : e1.getStackTrace()){
+//					IJ.log(e2.toString());
+//				}
+//			}
+//			
+//		}
+//		
+//	}
 
 }

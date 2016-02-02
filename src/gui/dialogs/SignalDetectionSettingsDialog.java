@@ -66,7 +66,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 	private AnalysisOptions options;
 	private AnalysisDataset dataset;
 	
-	private JComboBox<String> channelSelection;
+	private JComboBox<String> channelSelection = new JComboBox<String>(channelOptionStrings);
 	private JTextField groupName;
 	private String finalGroupName = null;
 	private int channel;
@@ -122,9 +122,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 	}
 	
 	private void makePanel(){
-		
-		channelSelection = new JComboBox<String>(channelOptionStrings);
-		
+				
 		groupName = new JTextField();
 		
 		JLabel[] labels = new JLabel[7];

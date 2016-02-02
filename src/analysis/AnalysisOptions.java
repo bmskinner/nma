@@ -71,6 +71,8 @@ public class AnalysisOptions implements Serializable {
 	private int yoffset = 0;
 	
 	private boolean keepFailedCollections = false;// allow failed collection to be retained for manual analysis
+	
+	private int channel = 0;
 
 	public AnalysisOptions(){
 		
@@ -115,6 +117,7 @@ public class AnalysisOptions implements Serializable {
 		xoffset                = template.getXOffset();
 		yoffset                = template.getYOffset();
 		keepFailedCollections  = template.isKeepFailedCollections();
+		channel                = template.getChannel();
 	}
 
 
@@ -159,6 +162,8 @@ public class AnalysisOptions implements Serializable {
 	public NucleusType getNucleusType(){
 		return this.nucleusType;
 	}
+	
+	
 
 	public String getRefoldMode(){
 		return this.refoldMode;
@@ -187,6 +192,18 @@ public class AnalysisOptions implements Serializable {
 	public double getScale() {
 		return scale;
 	}
+	
+
+	public int getChannel() {
+		return channel;
+	}
+
+
+
+	public void setChannel(int channel) {
+		this.channel = channel;
+	}
+
 
 
 	public void setScale(double scale) {

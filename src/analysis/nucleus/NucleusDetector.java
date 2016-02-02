@@ -369,6 +369,8 @@ public class NucleusDetector extends AnalysisWorker {
 			  analysisOptions.getNucleusType());
 	  
 	  this.collectionGroup.put(folder, folderCollection);
+	  
+	  NucleusFinder finder = new NucleusFinder(programLogger);
 
 	  for (File file : listOfFiles) {
 
@@ -383,7 +385,8 @@ public class NucleusDetector extends AnalysisWorker {
 				  makeFolder(folder);
 				  
 				  programLogger.log(Level.INFO, "File:  "+file.getName());
-				  List<Cell> cells = NucleusFinder.getCells(imageStack, analysisOptions, programLogger, file, outputFolder);
+				  List<Cell> cells = finder.getCells(imageStack, analysisOptions, file, outputFolder);
+//				  List<Cell> cells = NucleusFinder.getCells(imageStack, analysisOptions, programLogger, file, outputFolder);
 				  
 				  if(cells.isEmpty()){
 					  programLogger.log(Level.INFO, "  No nuclei detected in image");

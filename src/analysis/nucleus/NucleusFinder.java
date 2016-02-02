@@ -54,8 +54,11 @@ import components.nuclei.Nucleus;
  */
 public class NucleusFinder {
 	
-	private static Logger fileLogger;
-	private static Logger programLogger;
+	private Logger logger    = null;
+	
+	public NucleusFinder(final Logger logger){
+		this.logger = logger;
+	}
 	
 	/**
 	 * Get a list of cells found in this image
@@ -66,21 +69,20 @@ public class NucleusFinder {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, Logger programLogger, File sourceFile, String outputFolderName) throws Exception{
+	public List<Cell> getCells(ImageStack image, AnalysisOptions options, File sourceFile, String outputFolderName) throws Exception{
 //		NucleusFinder.programLogger = programLogger;
-		return getCells(image, options, programLogger, null, sourceFile, outputFolderName);
-
+//		return getCells(image, options, sourceFile, outputFolderName);
+		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
+		return result;
 //		NucleusFinder.fileLogger = null;
 //		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
 //		return result;
 	}
 	
-	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, Logger programLogger, Logger fileLogger, File sourceFile, String outputFolderName) throws Exception{
-		NucleusFinder.programLogger = programLogger;
-		NucleusFinder.fileLogger = fileLogger;
-		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
-		return result;
-	}
+//	public List<Cell> getCells(ImageStack image, AnalysisOptions options, Logger programLogger, Logger fileLogger, File sourceFile, String outputFolderName) throws Exception{
+//		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
+//		return result;
+//	}
 	
 	/**
 	 * Detects nuclei within the given image.
@@ -90,7 +92,7 @@ public class NucleusFinder {
 	 * @param closed should the detector get only closed polygons, or open lines
 	 * @return the Map linking an roi to its stats
 	 */
-	protected static List<Roi> getROIs(ImageStack image, AnalysisOptions analysisOptions, boolean closed){
+	protected List<Roi> getROIs(ImageStack image, AnalysisOptions analysisOptions, boolean closed){
 		Detector detector = new Detector();
 		detector.setMaxSize(analysisOptions.getMaxNucleusSize());
 		
@@ -99,15 +101,15 @@ public class NucleusFinder {
 		} else {
 			detector.setMinSize(0); // get line rois
 		}
-		detector.setMinCirc(analysisOptions.getMinNucleusCirc());
-		detector.setMaxCirc(analysisOptions.getMaxNucleusCirc());
+		detector.setMinCirc(  analysisOptions.getMinNucleusCirc());
+		detector.setMaxCirc(  analysisOptions.getMaxNucleusCirc());
 		detector.setThreshold(analysisOptions.getNucleusThreshold());
-		detector.setStackNumber(Constants.COUNTERSTAIN);
+		
+		detector.setStackNumber(Constants.rgbToStack(analysisOptions.getChannel()));
 		try{
 			detector.run(image);
 		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error in nucleus detection", e);
-			fileLogger.log(Level.SEVERE, "Error in nucleus detection", e);
+			logger.log(Level.SEVERE, "Error in nucleus detection", e);
 		}
 		return detector.getRoiList();
 	}
@@ -120,79 +122,85 @@ public class NucleusFinder {
   * @param path the full path of the image
  * @throws Exception 
   */
-	protected static List<Cell> processImage(ImageStack image, File path, AnalysisOptions analysisOptions, String outputFolderName) throws Exception{
+	protected List<Cell> processImage(ImageStack image, File path, AnalysisOptions analysisOptions, String outputFolderName) throws Exception{
 
 		if(analysisOptions==null){
 			throw new IllegalArgumentException("Analysis options are null");
 		}
 
-		if(fileLogger!=null){
-			fileLogger.log(Level.FINE, "File:  "+path.getName());
-		}
+
+		logger.log(Level.FINE, "File:  "+path.getName());
+		
 		List<Cell> result = new ArrayList<Cell>();
-				
-		CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
-		
-		// here before running the thresholding, do an edge detection, then pass on
-		ImageStack searchStack = null;
-		
-		if( nucleusCannyOptions.isUseCanny()) {
-			
-			// before passing to edge detection
-			// run a Kuwahara filter to enhance edges in the image
-			if(nucleusCannyOptions.isUseKuwahara()){
-				int kernel = nucleusCannyOptions.getKuwaharaKernel();
-				ImageProcessor ip = ImageFilterer.runKuwaharaFiltering(image, Constants.COUNTERSTAIN, kernel);
-				image.setProcessor(ip, Constants.COUNTERSTAIN);
-//				runKuwaharaFiltering(image, kernel);
-			}
-			
-			// flatten chromocentres
-			if(nucleusCannyOptions.isUseFlattenImage()){
-				int threshold = nucleusCannyOptions.getFlattenThreshold();
-				ImageProcessor ip = ImageFilterer.squashChromocentres(image, Constants.COUNTERSTAIN, threshold);
-				image.setProcessor(ip, Constants.COUNTERSTAIN);
-			}
-			searchStack = ImageFilterer.runEdgeDetector(image, Constants.COUNTERSTAIN, nucleusCannyOptions);
-		} else {
-			searchStack = image;
-		}
+						
+		ImageStack searchStack = preprocessImage(image, analysisOptions);
 
 		// get polygon rois of correct size
 		
 		List<Roi> roiList = getROIs(searchStack, analysisOptions, true);
 						
 		if(roiList.isEmpty()){
-			if(fileLogger!=null){
-				fileLogger.log(Level.FINE, "No usable nuclei in image");
-			} else {
-				programLogger.log(Level.FINE, "No usable nuclei in image");
-			}
+
+			logger.log(Level.FINE, "No usable nuclei in image");
 			
+			return result;
 		}
 
 		int nucleusNumber = 0;
 
 		for(Roi roi : roiList){
-			if(fileLogger!=null){
-				fileLogger.log(Level.FINE, "Acquiring nucleus "+nucleusNumber);
-			} else {
-				programLogger.log(Level.FINEST, "Acquiring nucleus "+nucleusNumber);
-			}
+
+			logger.log(Level.FINEST, "Acquiring nucleus "+nucleusNumber);
+			
 			
 			try{
 				Cell cell = makeCell(roi, image, nucleusNumber, path, analysisOptions, outputFolderName); // get the profile data back for the nucleus
 				result.add(cell);
 			} catch(Exception e){
-				if(fileLogger!=null){
-					fileLogger.log(Level.SEVERE, "Error acquiring nucleus", e);
-				} else {
-					programLogger.log(Level.SEVERE, "Error acquiring nucleus", e);
-				}
+
+				logger.log(Level.SEVERE, "Error acquiring nucleus", e);
+				
 			}
 			nucleusNumber++;
 		} 
 		return result;
+	}
+	
+	/**
+	 * Run the appropriate filters on the given image
+	 * @param image
+	 * @param analysisOptions
+	 * @return
+	 * @throws Exception
+	 */
+	private static ImageStack preprocessImage(ImageStack image, AnalysisOptions analysisOptions) throws Exception{
+		
+		CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
+
+		ImageStack searchStack = null;
+
+		if( nucleusCannyOptions.isUseCanny()) {
+
+			// before passing to edge detection
+			// run a Kuwahara filter to enhance edges in the image
+			if(nucleusCannyOptions.isUseKuwahara()){
+				int kernel = nucleusCannyOptions.getKuwaharaKernel();
+				ImageProcessor ip = ImageFilterer.runKuwaharaFiltering(image, Constants.rgbToStack(analysisOptions.getChannel())  , kernel);
+				image.setProcessor(ip, Constants.rgbToStack(analysisOptions.getChannel()));
+
+			}
+
+			// flatten chromocentres
+			if(nucleusCannyOptions.isUseFlattenImage()){
+				int threshold = nucleusCannyOptions.getFlattenThreshold();
+				ImageProcessor ip = ImageFilterer.squashChromocentres(image, Constants.rgbToStack(analysisOptions.getChannel()), threshold);
+				image.setProcessor(ip, Constants.rgbToStack(analysisOptions.getChannel()));
+			}
+			searchStack = ImageFilterer.runEdgeDetector(image, Constants.rgbToStack(analysisOptions.getChannel()), nucleusCannyOptions);
+		} else {
+			searchStack = image;
+		}
+		return searchStack;
 	}
 	
 
@@ -205,12 +213,12 @@ public class NucleusFinder {
 	  * @param nucleusNumber the count of the nuclei in the image
 	  * @param path the full path to the image
 	  */
-	private static Cell makeCell(Roi nucleus, ImageStack image, int nucleusNumber, File path, AnalysisOptions analysisOptions, String outputFolderName){
+	private Cell makeCell(Roi nucleus, ImageStack image, int nucleusNumber, File path, AnalysisOptions analysisOptions, String outputFolderName){
 
 		Cell result = null;
 		  // measure the area, density etc within the nucleus
 		  Detector detector = new Detector();
-		  detector.setStackNumber(Constants.COUNTERSTAIN);
+		  detector.setStackNumber(Constants.rgbToStack(analysisOptions.getChannel()));
 		  StatsMap values = detector.measure(nucleus, image);
 
 		  // save the position of the roi, for later use
@@ -250,11 +258,9 @@ public class NucleusFinder {
 			  result.setNucleus(currentNucleus);		  
 			  
 		  }catch(Exception e){
-			  if(fileLogger!=null){
-				  fileLogger.log(Level.SEVERE, " Error in nucleus assignment", e);
-			  } else {
-				  programLogger.log(Level.SEVERE, " Error in nucleus assignment", e);
-			  }
+	
+				  logger.log(Level.SEVERE, " Error in nucleus assignment", e);
+			  
 		  }
 		  return result;
 	  }
@@ -267,7 +273,7 @@ public class NucleusFinder {
 	 * @param originalPosition the bounding box position of the nucleus
 	 * @return a new nucleus of the appropriate class
 	 */
-	private static Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition, NucleusType nucleusType){
+	private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition, NucleusType nucleusType){
 
 		  Nucleus n = null;
 		  try {
@@ -290,11 +296,9 @@ public class NucleusFinder {
 					  originalPosition);
 			  
 		  } catch(Exception e){
-			  if(fileLogger!=null){
-				  fileLogger.log(Level.SEVERE, "Error creating nucleus", e);
-			  } else {
-				  programLogger.log(Level.SEVERE, "Error creating nucleus", e);
-			  }
+
+				  logger.log(Level.SEVERE, "Error creating nucleus", e);
+			  
 		  }
 		  return n;
 	  }

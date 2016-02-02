@@ -164,7 +164,13 @@ public class ImageFilterer {
 		canny.process();
 		BufferedImage edges = canny.getEdgesImage();
 		
-		result = new ByteProcessor(edges);
+		// convert to a TYPE_INT_GREY for use in a ByteProcessor
+		BufferedImage converted = new BufferedImage(edges.getWidth(), edges.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+		converted.getGraphics().drawImage(edges, 0, 0, null);
+		
+		result = new ByteProcessor(converted);
+		
+		converted = null;
 
 		return result;
 	}

@@ -24,6 +24,7 @@ import ij.io.OpenDialog;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -33,6 +34,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
@@ -51,6 +54,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import utility.Constants;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import components.nuclear.NucleusType;
@@ -71,6 +75,9 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	
 	private static final String DEFAULT_REFOLD_MODE = "Fast";
 	
+	private static final String DEFAULT_CHANNEL_NAME = "Blue";
+	private static final int    DEFAULT_CHANNEL      = 2;
+	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	
@@ -83,6 +90,8 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	private JRadioButton nucleusThresholdButton = new JRadioButton("Threshold");
 	private JRadioButton nucleusEdgeButton = new JRadioButton("Edge detection");
 	private ButtonGroup nucleusDetectionMethodGroup;
+	
+	private JComboBox<String> channelSelection = new JComboBox<String>(channelOptionStrings);
 	
 	// other detection parameters
 
@@ -189,6 +198,8 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 				
 		analysisOptions.setNucleusType(NucleusType.RODENT_SPERM);
 		
+		analysisOptions.setChannel(DEFAULT_CHANNEL);
+		
 		CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
 		
 		nucleusCannyOptions.setUseCanny(true);
@@ -226,12 +237,10 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
-		//		JLabel lblNucleusType = new JLabel("Nucleus type");
 		panel.add(new JLabel("Nucleus type"));
 
 		nucleusSelectionBox = new JComboBox<NucleusType>(NucleusType.values());
 		nucleusSelectionBox.setSelectedItem(NucleusType.RODENT_SPERM);
-//		nucleusSelectionBox.setSelectedIndex(1);
 		nucleusSelectionBox.setActionCommand("Nucleus type");
 		nucleusSelectionBox.addActionListener(this);
 		panel.add(nucleusSelectionBox);
@@ -263,8 +272,10 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 					
 				} else {
 					// Cancelled
-					analysisOptions = null;
-					AnalysisSetupDialog.this.setVisible(false);
+					
+					// Do nothing, revise options
+//					analysisOptions = null;
+//					AnalysisSetupDialog.this.setVisible(false);
 				}
 				
 			}
@@ -375,27 +386,30 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createTitledBorder("Detection settings"));
 		panel.setLayout(new GridBagLayout());
-
-		JLabel[] labels = new JLabel[7];
-		JComponent[] fields = new JComponent[7];
-
-		labels[0] = new JLabel("Min nucleus size");
-		labels[1] = new JLabel("Max nucleus size");
-		labels[2] = new JLabel("Min nucleus circ");
-		labels[3] = new JLabel("Max nucleus circ");
-		labels[4] = new JLabel("Profile window");
-		labels[5] = new JLabel("Scale (microns/pixel)");
-		labels[6] = new JLabel("Keep filtered nuclei");
-
-
-		fields[0] = txtMinNuclearSize;
-		fields[1] = txtMaxNuclearSize;
-		fields[2] = minNuclearCircSpinner;
-		fields[3] = maxNuclearCircSpinner;
-		fields[4] = txtProfileWindowSize;
-		fields[5] = scaleSpinner;
-		fields[6] = keepFailedheckBox;
 		
+		List<JLabel> labels = new ArrayList<JLabel>();
+		labels.add(new JLabel("Image channel"));
+		labels.add(new JLabel("Min nucleus size"));
+		labels.add(new JLabel("Max nucleus size"));
+		labels.add(new JLabel("Min nucleus circ"));
+		labels.add(new JLabel("Max nucleus circ"));
+		labels.add(new JLabel("Profile window"));
+		labels.add(new JLabel("Scale (microns/pixel)"));
+		labels.add(new JLabel("Keep filtered nuclei"));
+		
+		List<Component> fields = new ArrayList<Component>();
+		fields.add(channelSelection);
+		fields.add(txtMinNuclearSize);
+		fields.add(txtMaxNuclearSize);
+		fields.add(minNuclearCircSpinner);
+		fields.add(maxNuclearCircSpinner);
+		fields.add(txtProfileWindowSize);
+		fields.add(scaleSpinner);
+		fields.add(keepFailedheckBox);
+		
+		channelSelection.setSelectedItem(DEFAULT_CHANNEL_NAME);
+		
+		channelSelection.addActionListener(this);
 		txtMinNuclearSize.addChangeListener(this);
 		txtMaxNuclearSize.addChangeListener(this);
 		minNuclearCircSpinner.addChangeListener(this);
@@ -474,6 +488,15 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		if(e.getSource()==channelSelection){
+			this.analysisOptions.setChannel(channelSelection.getSelectedItem().equals("Red") 
+					? Constants.RGB_RED
+							: channelSelection.getSelectedItem().equals("Green") 
+							? Constants.RGB_GREEN
+									: Constants.RGB_BLUE);
+
+		}
 
 		if(e.getActionCommand().equals("NucleusDetectionThreshold")){
 			this.analysisOptions.getCannyOptions("nucleus").setUseCanny(false);
@@ -492,20 +515,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		if(e.getSource()==keepFailedheckBox){
 			analysisOptions.setKeepFailedCollections(keepFailedheckBox.isSelected());
 		}
-		
-//		if(e.getActionCommand().equals("CannyAutoThreshold")){
-//
-//			if(cannyAutoThresholdCheckBox.isSelected()){
-//				analysisOptions.getCannyOptions("nucleus").setCannyAutoThreshold(true);
-//				cannyLowThreshold.setEnabled(false);
-//				cannyHighThreshold.setEnabled(false);
-//			} else {
-//				analysisOptions.getCannyOptions("nucleus").setCannyAutoThreshold(false);
-//				cannyLowThreshold.setEnabled(true);
-//				cannyHighThreshold.setEnabled(true);
-//			}
-//		}
-		
+				
 		if(e.getActionCommand().equals("Nucleus type")){
 			NucleusType type = (NucleusType) nucleusSelectionBox.getSelectedItem();
 			this.analysisOptions.setNucleusType(type);
