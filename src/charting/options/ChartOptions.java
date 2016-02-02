@@ -52,6 +52,7 @@ public class ChartOptions {
 	private boolean useDensity         = false;
 	private PlottableStatistic stat    = null;
 	private MeasurementScale scale     = MeasurementScale.PIXELS;
+	private String segName             = "Seg_0";
 	
 	public ChartOptions(List<AnalysisDataset> list){
 		this.list = list;
@@ -103,8 +104,16 @@ public class ChartOptions {
 			return true;
 		}
 	}
+		
 	
-	
+	public String getSegName() {
+		return segName;
+	}
+
+	public void setSegName(String segName) {
+		this.segName = segName;
+	}
+
 	/**
 	 * Fetch all the datasets
 	 * @return

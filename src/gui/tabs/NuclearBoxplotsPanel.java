@@ -126,7 +126,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 				JFreeChart chart = null;
 				try {
-					chart = BoxplotChartFactory.createNucleusStatisticBoxplot(options);
+					chart = BoxplotChartFactory.createStatisticBoxplot(options);
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE, "Error creating boxplots panel", e);
 				}
@@ -185,7 +185,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 				} else { // No cache
 
-					chart = BoxplotChartFactory.createNucleusStatisticBoxplot(options);
+					chart = BoxplotChartFactory.createStatisticBoxplot(options);
 					getChartCache().addChart(options, chart);
 					programLogger.log(Level.FINEST, "Added cached boxplot chart: "+stat.toString());
 				}

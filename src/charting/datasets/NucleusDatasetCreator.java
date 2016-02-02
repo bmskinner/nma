@@ -791,12 +791,15 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static BoxAndWhiskerCategoryDataset createSegmentStatDataset(List<AnalysisDataset> collections, String segName, MeasurementScale scale, SegmentStatistic stat) throws Exception {
+	public static BoxAndWhiskerCategoryDataset createSegmentStatDataset(ChartOptions options) throws Exception {
+		
+		SegmentStatistic stat = (SegmentStatistic) options.getStat();
+		
 		switch(stat){
 		case DISPLACEMENT:
-			return createSegmentDisplacementDataset(collections, segName);
+			return createSegmentDisplacementDataset(options.getDatasets(), options.getSegName());
 		case LENGTH:
-			return createSegmentLengthDataset(collections, segName, scale);
+			return createSegmentLengthDataset(options.getDatasets(), options.getSegName(), options.getScale());
 		default:
 			return null;
 		}

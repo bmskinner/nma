@@ -35,38 +35,38 @@ public enum MeasurementScale {
 		return this.name;
 	}
 
-	/**
-	 * Get the appropriate chart y-label for the
-	 * given statistic 
-	 * @param stat
-	 * @return
-	 */
-	public String yLabel(NucleusStatistic stat){
-		String result = null;
-
-		switch(stat){
-
-		case AREA: 
-			result = "Square "+name;
-			break;
-		case ASPECT: 
-			result = "Aspect ratio (bounding height / width)";
-			break;
-		case CIRCULARITY: 
-			result = "Circularity";
-			break;
-		case VARIABILITY: 
-			result = "Degrees per perimeter unit";
-			break;
-		case OP_RP_ANGLE:
-			result = "Degrees";
-			break;
-		default:
-			result = name;
-			break;
-		}
-
-		return result;
-	}
+//	/**
+//	 * Get the appropriate chart y-label for the
+//	 * given statistic 
+//	 * @param stat
+//	 * @return
+//	 */
+//	public String yLabel(NucleusStatistic stat){
+//		String result = null;
+//
+//		switch(stat){
+//
+//		case AREA: 
+//			result = "Square "+name;
+//			break;
+//		case ASPECT: 
+//			result = "Aspect ratio (bounding height / width)";
+//			break;
+//		case CIRCULARITY: 
+//			result = "Circularity";
+//			break;
+//		case VARIABILITY: 
+//			result = "Degrees per perimeter unit";
+//			break;
+//		case OP_RP_ANGLE:
+//			result = "Degrees";
+//			break;
+//		default:
+//			result = name;
+//			break;
+//		}
+//
+//		return result;
+//	}
 
 }

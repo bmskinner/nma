@@ -542,7 +542,7 @@ public class NuclearSignalDatasetCreator {
 				
 				list.add(s.getStatistic(stat));
 			}
-			result.add(list, "Group_"+signalGroup, "Area");
+			result.add(list, "Group_"+signalGroup, stat.toString());
 		}
 		return result;
 	}

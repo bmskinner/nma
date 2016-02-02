@@ -382,7 +382,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 			super(logger);
 //			this.setLayout(new BorderLayout());
 			
-			JFreeChart boxplot = BoxplotChartFactory.makeEmptyBoxplot();
+			JFreeChart boxplot = BoxplotChartFactory.createEmptyBoxplot();
 			
 
 			ExportableChartPanel chartPanel = new ExportableChartPanel(boxplot);
@@ -425,11 +425,21 @@ public class SegmentsDetailPanel extends DetailPanel {
 				int segmentCount = collection.getProfileCollection(ProfileType.REGULAR)
 						.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
 						.getSegmentCount();
+				
 
 				// Get each segment as a boxplot
 				for( int i=0; i<segmentCount; i++){
 					String segName = "Seg_"+i;
-					JFreeChart boxplot = BoxplotChartFactory.makeSegmentBoxplot(segName, getDatasets(), scale, SegmentStatistic.LENGTH);
+					
+					ChartOptions options = new ChartOptionsBuilder()
+						.setDatasets(getDatasets())
+						.setLogger(programLogger)
+						.setStatistic(SegmentStatistic.LENGTH)
+						.setScale(scale)
+						.setSegName(segName)
+						.build();
+					
+					JFreeChart boxplot = BoxplotChartFactory.createStatisticBoxplot(options);
 					ExportableChartPanel chartPanel = new ExportableChartPanel(boxplot);
 					chartPanel.setPreferredSize(preferredSize);
 					chartPanels.put(segName, chartPanel);
@@ -457,7 +467,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 			// No datasets, show blank chart
 			measurementUnitSettingsPanel.setEnabled(false);
 
-			ChartPanel chartPanel = new ChartPanel(BoxplotChartFactory.makeEmptyBoxplot());
+			ChartPanel chartPanel = new ChartPanel(BoxplotChartFactory.createEmptyBoxplot());
 			mainPanel.add(chartPanel);
 			mainPanel.revalidate();
 			mainPanel.repaint();

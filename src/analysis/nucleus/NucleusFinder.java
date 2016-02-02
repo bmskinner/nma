@@ -230,10 +230,6 @@ public class NucleusFinder {
 		  double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
 
 		  try{
-		  	// Enlarge the ROI, so we can do nucleus detection on the resulting original images
-//			  ImageStack smallRegion = getRoiAsStack(nucleus, image);
-//			  Roi enlargedRoi = RoiEnlarger.enlarge(nucleus, 20);
-//			  ImageStack largeRegion = getRoiAsStack(enlargedRoi, image);
 		
 			  nucleus.setLocation(0,0); // translate the roi to the new image coordinates
 			  
@@ -242,7 +238,7 @@ public class NucleusFinder {
 			  		
 			  currentNucleus.setCentreOfMass(new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase)); // need to offset
 			  
-			  currentNucleus.setStatistic(NucleusStatistic.AREA, values.get("Area"));
+			  currentNucleus.setStatistic(NucleusStatistic.AREA,      values.get("Area"));
 			  currentNucleus.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
 			  currentNucleus.setStatistic(NucleusStatistic.PERIMETER, values.get("Perim"));
 			  

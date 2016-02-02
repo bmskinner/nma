@@ -44,7 +44,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
 			JFreeChart chart = null;
 			try {
-				chart = BoxplotChartFactory.createSignalStatisticBoxplot(options);
+				chart = BoxplotChartFactory.createStatisticBoxplot(options);
 			} catch (Exception e) {
 				programLogger.log(Level.SEVERE, "Error creating boxplots panel", e);
 			}
@@ -101,7 +101,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
 			} else { // No cache
 
-				chart = BoxplotChartFactory.createSignalStatisticBoxplot(options);
+				chart = BoxplotChartFactory.createStatisticBoxplot(options);
 				getChartCache().addChart(options, chart);
 				programLogger.log(Level.FINEST, "Added cached boxplot chart: "+stat.toString());
 			}

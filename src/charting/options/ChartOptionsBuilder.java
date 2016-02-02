@@ -51,6 +51,7 @@ public class ChartOptionsBuilder {
 	private boolean useDensity         = false;
 	private PlottableStatistic stat    = null;
 	private MeasurementScale scale     = MeasurementScale.PIXELS;
+	private String segName             = "Seg_0";
 	
 	public ChartOptionsBuilder(){
 		
@@ -83,6 +84,11 @@ public class ChartOptionsBuilder {
 	
 	public ChartOptionsBuilder setNormalised(boolean b){
 		this.normalised = b;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setSegName(String s){
+		this.segName = s;
 		return this;
 	}
 	
@@ -138,6 +144,7 @@ public class ChartOptionsBuilder {
 		result.setTag(tag);
 		result.setType(type);
 		result.setUseDensity(useDensity);
+		result.setSegName(segName);
 		return result;
 	}
 	
