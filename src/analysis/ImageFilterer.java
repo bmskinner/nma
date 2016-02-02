@@ -100,7 +100,7 @@ public class ImageFilterer {
 	 * @param closingRadius the radius of the circle
 	 * @return a new ByteProcessor containing the closed image
 	 */
-	public static ImageProcessor morphologyClose(ImageProcessor ip, int closingRadius) throws Exception {
+	public static ByteProcessor morphologyClose(ImageProcessor ip, int closingRadius) throws Exception {
 
 		ByteProcessor result = ip.convertToByteProcessor();
 
@@ -119,7 +119,7 @@ public class ImageFilterer {
 	
 	/**
 	 * Use Canny edge detection to produce an image with potential edges highlighted
-	 * for the detector
+	 * for the detector. Also performs morphology closing
 	 * @param image the stack to process
 	 * @return a stack with edges highlighted
 	 * @throws Exception 
@@ -127,33 +127,17 @@ public class ImageFilterer {
 	public static ImageStack runEdgeDetector(ImageStack image, int stackNumber, CannyOptions options) throws Exception{
 
 		ImageStack searchStack = null;
+		// Run the edge detection
+		
+		ByteProcessor searchImage = runEdgeDetector(image.getProcessor(stackNumber), options);
 
-		//			// calculation of auto threshold
-		if(options.isCannyAutoThreshold()){
-			autoDetectCannyThresholds(options, image, stackNumber);
-		}
-
-
-		CannyEdgeDetector canny = new CannyEdgeDetector();
-		canny.setSourceImage(image.getProcessor(stackNumber).getBufferedImage());
-		canny.setLowThreshold( options.getLowThreshold() );
-		canny.setHighThreshold( options.getHighThreshold());
-		canny.setGaussianKernelRadius(options.getKernelRadius());
-		canny.setGaussianKernelWidth(options.getKernelWidth());
-
-		canny.process();
-		BufferedImage edges = canny.getEdgesImage();
-		ImagePlus searchImage = new ImagePlus(null, edges);
-
-		ImageProcessor closed = ImageFilterer.morphologyClose( searchImage.getProcessor()  , options.getClosingObjectRadius()) ;
-		// add morphological closing
-		ByteProcessor bp = closed.convertToByteProcessor();
-
-		ImagePlus bi= new ImagePlus(null, bp);
-		searchStack = ImageImporter.convert(bi);
-
-		bi.close();
-		searchImage.close();
+		ByteProcessor closed = ImageFilterer.morphologyClose( searchImage  , options.getClosingObjectRadius()) ;
+		
+		searchStack = ImageStack.create(image.getWidth(), image.getHeight(), 0, 8);
+		searchStack.addSlice("closed", closed, 0);
+		
+		
+		searchImage=null;
 
 
 		return searchStack;
@@ -165,20 +149,23 @@ public class ImageFilterer {
 	 * @param options
 	 * @return
 	 */
-	public static ImageProcessor runEdgeDetector(ImageProcessor ip, CannyOptions options) throws Exception { 
-		ImageProcessor result = null;
+	public static ByteProcessor runEdgeDetector(ImageProcessor ip, CannyOptions options) throws Exception { 
+		ByteProcessor result = null;
 
-		CannyEdgeDetector canny = new CannyEdgeDetector();
+		
+//		// calculation of auto threshold
+		if(options.isCannyAutoThreshold()){
+			autoDetectCannyThresholds(options, ip);
+		}
+	
+		CannyEdgeDetector canny = new CannyEdgeDetector(options);
 		canny.setSourceImage(ip.duplicate().getBufferedImage());
-		canny.setLowThreshold( options.getLowThreshold() );
-		canny.setHighThreshold( options.getHighThreshold());
-		canny.setGaussianKernelRadius(options.getKernelRadius());
-		canny.setGaussianKernelWidth(options.getKernelWidth());
 
 		canny.process();
 		BufferedImage edges = canny.getEdgesImage();
-		ImagePlus searchImage = new ImagePlus(null, edges);
-		result = searchImage.getProcessor();
+		
+		result = new ByteProcessor(edges);
+
 		return result;
 	}
 	
@@ -187,19 +174,20 @@ public class ImageFilterer {
 	 * median image pixel intensity.
 	 * @param nucleusCannyOptions the options
 	 * @param image the image to analyse
+	 * @throws Exception 
 	 */
-	private static void autoDetectCannyThresholds(CannyOptions options, ImageStack image, int stackNumber){
+	private static void autoDetectCannyThresholds(CannyOptions options, ImageProcessor image) throws Exception{
 		// calculation of auto threshold
 
 		// find the median intensity of the image
-		double medianPixel = getMedianIntensity(image, stackNumber);
+		double medianPixel = getMedianIntensity(image);
 
 		// if the median is >128, this is probably an inverted image.
 		// invert it so the thresholds will work
 		if(medianPixel>128){
 			
-			image.getProcessor(Constants.COUNTERSTAIN).invert();
-			medianPixel = getMedianIntensity(image, stackNumber);
+			image.invert();
+			medianPixel = getMedianIntensity(image);
 		}
 
 		// set the thresholds either side of the median
@@ -220,24 +208,19 @@ public class ImageFilterer {
 	 * @param image the image to process
 	 * @return the median pixel intensity
 	 */
-	private static double getMedianIntensity(ImageStack image, int stackNumber){
-		ImageProcessor median = image.getProcessor(stackNumber);
-		double[] values = new double[ median.getWidth()*median.getHeight() ];
-		try {
-			int i=0;
-			for(int w = 0; w<median.getWidth();w++){
-				for(int h = 0; h<median.getHeight();h++){
-					values[i] = (double) median.get(w, h);
+	private static double getMedianIntensity(ImageProcessor image) throws Exception {
 
-					i++;
-				}
+		double[] values = new double[ image.getWidth()*image.getHeight() ];
+
+		int i=0;
+		for(int w = 0; w<image.getWidth();w++){
+			for(int h = 0; h<image.getHeight();h++){
+				values[i] = (double) image.get(w, h);
+
+				i++;
 			}
-		} catch (Exception e) {
-//			if(logger!=null){
-//				logger.error("Error getting median image intensity", e);
-//			}
-			
 		}
-		return Stats.quartile(values, 50);
+
+		return Stats.quartile(values, Constants.MEDIAN);
 	}
 }

@@ -3,6 +3,8 @@ package analysis;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
+import analysis.AnalysisOptions.CannyOptions;
+
 /**
  * <p><em>This software has been released into the public domain.
  * <strong>Please read the notes in this source file for additional information.
@@ -77,6 +79,16 @@ public class CannyEdgeDetector {
 		gaussianKernelWidth = 16;
 		contrastNormalized = false;
 	}
+	
+	public CannyEdgeDetector(CannyOptions options) {
+		this.setLowThreshold( options.getLowThreshold() );
+		this.setHighThreshold( options.getHighThreshold());
+		this.setGaussianKernelRadius(options.getKernelRadius());
+		this.setGaussianKernelWidth(options.getKernelWidth());
+		contrastNormalized = false;
+	} 
+	
+	
 
 	// accessors
 	

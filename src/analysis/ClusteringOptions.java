@@ -243,13 +243,15 @@ public class ClusteringOptions implements Serializable {
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
-//	    this.useSimilarityMatrix = false;
-//	    this.includeProfile = false;
 	    if(statMap==null){
 	    	statMap = new HashMap<PlottableStatistic, Boolean>();
 	    	for(NucleusStatistic stat : NucleusStatistic.values()){
 	    		statMap.put(stat, false);
 	    	}
+	    }
+	    
+	    if(segmentMap==null){
+	    	segmentMap = new HashMap<String, Boolean>();
 	    }
 	}
 	

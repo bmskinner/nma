@@ -152,7 +152,6 @@ public class NucleusFinder {
 				int threshold = nucleusCannyOptions.getFlattenThreshold();
 				ImageProcessor ip = ImageFilterer.squashChromocentres(image, Constants.COUNTERSTAIN, threshold);
 				image.setProcessor(ip, Constants.COUNTERSTAIN);
-//				squashChromocentres(image, threshold);
 			}
 			searchStack = ImageFilterer.runEdgeDetector(image, Constants.COUNTERSTAIN, nucleusCannyOptions);
 		} else {
