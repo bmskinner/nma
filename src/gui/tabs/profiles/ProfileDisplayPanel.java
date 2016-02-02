@@ -29,46 +29,14 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 		@Override
 		protected void updateSingle() throws Exception {
 			super.updateSingle();
-			
-			ChartOptions options = makeOptions();
-						
-			JFreeChart chart = null;
-
-			// Check for a cached chart
-			if( ! getChartCache().hasChart(options)){
-
-				// full segment colouring
-				chart = MorphologyChartFactory.makeSingleProfileChart( options );
-
-				getChartCache().addChart(options, chart);
-				programLogger.log(Level.FINEST, "Added cached profile chart");
-			}
-			
-			chart = getChartCache().getChart(options);
-			chartPanel.setChart(chart);
+			updateChart();
 			
 		}
 		
 		@Override
 		protected void updateMultiple() throws Exception {
 			super.updateMultiple();
-			ChartOptions options = makeOptions();
-			
-			JFreeChart chart = null;
-			
-			// Check for a cached chart
-			if( ! getChartCache().hasChart(options)){
-
-				// full segment colouring
-				chart = MorphologyChartFactory.makeMultiProfileChart( options );
-
-				getChartCache().addChart(options, chart);
-				programLogger.log(Level.FINEST, "Added cached profile chart");
-			}
-
-			chart = getChartCache().getChart(options);
-			chartPanel.setChart(chart);
-			
+			updateChart();
 		}
 		
 		@Override
@@ -79,6 +47,25 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
 		}
 		
+		private void updateChart() throws Exception{
+			ChartOptions options = makeOptions();
+			
+			JFreeChart chart = null;
+			
+			// Check for a cached chart
+			if( ! getChartCache().hasChart(options)){
+
+				chart = MorphologyChartFactory.createProfileChart( options );
+
+				getChartCache().addChart(options, chart);
+				programLogger.log(Level.FINEST, "Added cached profile chart");
+			}
+
+			chart = getChartCache().getChart(options);
+			chartPanel.setChart(chart);
+			
+		}
+		
 		private ChartOptions makeOptions(){
 
 			boolean normalised         = profileAlignmentOptionsPanel.isNormalised();
@@ -86,8 +73,8 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 			BorderTag tag              = borderTagOptionsPanel.getSelected();
 			boolean showMarkers        = profileMarkersOptionsPanel.showMarkers();
 			
-			ChartOptionsBuilder builder = new ChartOptionsBuilder();
-			ChartOptions options = builder.setDatasets(getDatasets())
+			ChartOptions options = new ChartOptionsBuilder()
+				.setDatasets(getDatasets())
 				.setLogger(programLogger)
 				.setNormalised(normalised)
 				.setAlignment(alignment)

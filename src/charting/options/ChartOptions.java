@@ -162,6 +162,14 @@ public class ChartOptions {
 			return false;
 		}
 	}
+	
+	public boolean isMultipleDatasets(){
+		if(list.size()>1){
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	public boolean isNormalised() {
 		return normalised;

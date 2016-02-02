@@ -378,7 +378,6 @@ public class NucleusProfilesPanel extends DetailPanel {
 		private BorderTagOptionsPanel borderTagOptionsPanel = new BorderTagOptionsPanel();
 		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
 		private ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
-//		protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
 		
 		public VariabililtyDisplayPanel(){
 			this.setLayout(new BorderLayout());
@@ -449,7 +448,19 @@ public class NucleusProfilesPanel extends DetailPanel {
 			
 			BorderTag tag = borderTagOptionsPanel.getSelected();
 			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
-			updateProfiles(list, true, ProfileAlignment.LEFT, tag, showMarkers);
+			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
+			
+			ChartOptions options =  new ChartOptionsBuilder()
+					.setDatasets(getDatasets())
+					.setLogger(programLogger)
+					.setNormalised(true)
+					.setAlignment(ProfileAlignment.LEFT)
+					.setTag(tag)
+					.setShowMarkers(showMarkers)
+					.setProfileType(type)
+					.build();
+			
+			updateProfiles(options);
 		}
 		
 		/**
@@ -458,22 +469,20 @@ public class NucleusProfilesPanel extends DetailPanel {
 		 * @param normalised flag for raw or normalised lengths
 		 * @param rightAlign flag for left or right alignment (no effect if normalised is true)
 		 */	
-		private void updateProfiles(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag tag, boolean showMarkers){
-			
-			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
-			
+		private void updateProfiles(ChartOptions options){
+
 			try {
-				if(list.size()==1){
-					JFreeChart chart = MorphologyChartFactory.makeSingleVariabilityChart(list, 100, tag, type);
+				if(options.isSingleDataset()){
+					JFreeChart chart = MorphologyChartFactory.makeVariabilityChart(options);
 					
 					
-					if(showMarkers){ // add the bimodal regions
-						CellCollection collection = list.get(0).getCollection();
+					if(options.isShowMarkers()){ // add the bimodal regions
+						CellCollection collection = options.firstDataset().getCollection();
 						
 						// dip test the profiles
 						
 						double significance = (Double) pvalueSpinner.getValue();
-						BooleanProfile modes  = DipTester.testCollectionIsUniModal(collection, tag, significance, type);
+						BooleanProfile modes  = DipTester.testCollectionIsUniModal(collection, options.getTag(), significance, options.getType());
 
 
 						// add any regions with bimodal distribution to the chart
@@ -498,7 +507,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 					
 					chartPanel.setChart(chart);
 				} else { // multiple nuclei
-					JFreeChart chart = MorphologyChartFactory.makeMultiVariabilityChart(list, 100, tag, type);
+					JFreeChart chart = MorphologyChartFactory.makeVariabilityChart(options);
 					chartPanel.setChart(chart);
 				}
 			} catch (Exception e) {

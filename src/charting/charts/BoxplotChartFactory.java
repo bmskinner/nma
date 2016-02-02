@@ -38,7 +38,7 @@ import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 
-public class BoxplotChartFactory {
+public class BoxplotChartFactory extends AbstractChartFactory {
 	
 	/**
 	 * Create an empty boxplot
@@ -166,7 +166,7 @@ public class BoxplotChartFactory {
 
 		for(int series=0;series<ds.getRowCount();series++){
 			String name = (String) ds.getRowKey(series);
-			int seriesGroup = MorphologyChartFactory.getIndexFromLabel(name);
+			int seriesGroup = getIndexFromLabel(name);
 
 			Color color = options.firstDataset().getSignalGroupColour(seriesGroup) == null 
 					? ColourSelecter.getSegmentColor(series)

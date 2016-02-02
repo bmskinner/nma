@@ -50,7 +50,7 @@ import analysis.AnalysisDataset;
 import components.generic.MeasurementScale;
 
 
-public class HistogramChartFactory {
+public class HistogramChartFactory extends AbstractChartFactory {
 
 	/**
 	 * Create a histogram from a histogram dataset and

@@ -17,6 +17,9 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.general.DatasetUtilities;
+import org.jfree.data.xy.XYDataset;
 
 import components.generic.ProfileType;
 
@@ -39,7 +42,9 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 			super(logger);
 			this.setLayout(new BorderLayout());
 			JFreeChart rawChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
-			chartPanel = MorphologyChartFactory.makeProfileChartPanel(rawChart);
+			chartPanel = makeProfileChartPanel(rawChart);
+			
+			
 			
 			chartPanel.setMinimumDrawWidth( 0 );
 			chartPanel.setMinimumDrawHeight( 0 );
@@ -62,6 +67,26 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 			profileMarkersOptionsPanel.setEnabled(false);
 						
 			this.add(buttonPanel, BorderLayout.NORTH);
+		}
+		
+		private ExportableChartPanel makeProfileChartPanel(JFreeChart chart){
+			ExportableChartPanel panel = new ExportableChartPanel(chart){
+				@Override
+				public void restoreAutoBounds() {
+					XYPlot plot = (XYPlot) this.getChart().getPlot();
+					
+					int length = 100;
+					for(int i = 0; i<plot.getDatasetCount();i++){
+						XYDataset dataset = plot.getDataset(i);
+						Number maximum = DatasetUtilities.findMaximumDomainValue(dataset);
+						length = maximum.intValue() > length ? maximum.intValue() : length;
+					}
+					plot.getRangeAxis().setRange(0, 360);
+					plot.getDomainAxis().setRange(0, length);				
+					return;
+				} 
+			};
+			return panel;
 		}
 		
 		public void setEnabled(boolean b){

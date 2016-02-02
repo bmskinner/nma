@@ -23,27 +23,16 @@ import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.ExportableChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-//import ij.IJ;
-import ij.ImageStack;
-import ij.process.ImageProcessor;
-import io.ImageExporter;
-import io.ImageImporter;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
-import java.io.File;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.ImageIcon;
-
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYShapeAnnotation;
@@ -63,8 +52,6 @@ import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.Align;
-
 import stats.StatisticDimension;
 import utility.Utils;
 import analysis.AnalysisDataset;
@@ -75,7 +62,6 @@ import charting.datasets.TailDatasetCreator;
 import charting.options.ChartOptions;
 import components.Cell;
 import components.CellCollection;
-import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
@@ -84,7 +70,7 @@ import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 
-public class MorphologyChartFactory {
+public class MorphologyChartFactory extends AbstractChartFactory {
 	
 	
 	/**
@@ -105,15 +91,33 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
+	
+	public static JFreeChart createProfileChart(ChartOptions options) throws Exception {
+		
+		if( ! options.hasDatasets()){
+			return makeEmptyProfileChart(options.getType());
+		}
+		
+		if(options.isSingleDataset()){
+			return makeSingleProfileChart(options);
+		}
+		
+		if(options.getDatasets().size()>1){
+			return makeMultiProfileChart(options);
+		}
+		return makeEmptyProfileChart(options.getType());
+	}
+	
 	/**
 	 * Make a profile chart for a single nucleus
-	 * @param ds
 	 * @param n
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart makeIndividualNucleusProfileChart(XYDataset ds, Nucleus n, ColourSwatch swatch, ProfileType type) throws Exception{
-		JFreeChart chart = makeProfileChart(ds, n.getBorderLength(), swatch, type);
+	public static JFreeChart makeIndividualNucleusProfileChart(Nucleus n, ChartOptions options) throws Exception{
+		
+		XYDataset  ds 	 = NucleusDatasetCreator.createSegmentedProfileDataset(n, options.getType());
+		JFreeChart chart = makeProfileChart(ds, n.getBorderLength(), options.getSwatch(), options.getType());
 		return chart;
 	}
 		
@@ -125,7 +129,7 @@ public class MorphologyChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleProfileChart(ChartOptions options) throws Exception {
+	private static JFreeChart makeSingleProfileChart(ChartOptions options) throws Exception {
 		
 		XYDataset ds = null;
 		AnalysisDataset dataset = options.firstDataset();
@@ -193,22 +197,6 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
-	/**
-	 * Draw domain markers for the given border tag at the given position
-	 * @param plot
-	 * @param tag
-	 * @param value
-	 */
-	private static void addMarkerToXYPlot(XYPlot plot, BorderTag tag, double value){
-		Color colour = Color.BLACK;
-		if(tag.equals(BorderTag.ORIENTATION_POINT)){
-			colour = Color.BLUE;
-		}
-		if(tag.equals(BorderTag.REFERENCE_POINT)){
-			colour = Color.ORANGE;
-		}
-		plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));	
-	}
 	
 	/**
 	 * Create a profile chart with the median line only, segmented. Can have multiple datasets shown.
@@ -262,7 +250,7 @@ public class MorphologyChartFactory {
 				if(name.startsWith("Seg_")){
 					int colourIndex = getIndexFromLabel(name);
 					renderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
-					ColourSwatch swatch = dataset.getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : dataset.getSwatch();
+					ColourSwatch swatch = dataset.getSwatch() == null ? options.getSwatch() : dataset.getSwatch();
 					renderer.setSeriesPaint(i, swatch.color(colourIndex));
 				} 
 			}	
@@ -347,13 +335,14 @@ public class MorphologyChartFactory {
 		}
 		return chart;
 	}
+	
 	/**
 	 * Create a profile chart from a given XYDataset. Set the series 
 	 * colours for each component
 	 * @param ds the profile dataset
 	 * @return a chart
 	 */
-	public static JFreeChart makeProfileChart(XYDataset ds, int xLength, ColourSwatch swatch, ProfileType type) throws Exception{
+	private static JFreeChart makeProfileChart(XYDataset ds, int xLength, ColourSwatch swatch, ProfileType type) throws Exception{
 
 
 		JFreeChart chart = 
@@ -415,16 +404,6 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
-	/**
-	 * Get a series or dataset index for colour selection when drawing charts. The index
-	 * is set in the DatasetCreator as part of the label. The format is Name_index_other
-	 * @param label the label to extract the index from 
-	 * @return the index found
-	 */
-	public static int getIndexFromLabel(String label){
-		String[] names = label.split("_");
-		return Integer.parseInt(names[1]);
-	}
 	
 	/**
 	 * Create a multi dataset profile chart. Shows medians and iqrs for each dataset, and
@@ -435,7 +414,7 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the x axis
 	 * @return a chart
 	 */
-	public static JFreeChart makeMultiProfileChart(ChartOptions options)  throws Exception{
+	private static JFreeChart makeMultiProfileChart(ChartOptions options)  throws Exception{
 				
 		List<XYSeriesCollection> iqrProfiles = null;
 		XYDataset medianProfiles			 = null;
@@ -533,6 +512,23 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
+	public static JFreeChart makeVariabilityChart(ChartOptions options) throws Exception {
+		
+		if( ! options.hasDatasets()){
+			return makeEmptyProfileChart(options.getType());
+		}
+		
+		if(options.isSingleDataset()){
+			return makeSingleVariabilityChart(options);
+		}
+		
+		if(options.isMultipleDatasets()){
+			return makeMultiVariabilityChart(options);
+		}
+		
+		return makeEmptyProfileChart(options.getType());
+	}
+	
 	/**
 	 * Create a variabillity chart showing the IQR for a single dataset. Segment colours
 	 * are applied. 
@@ -540,11 +536,14 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, int xLength, BorderTag tag, ProfileType type) throws Exception {
-		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list, tag, type);
-		CellCollection n = list.get(0).getCollection();
-		ColourSwatch swatch = list.get(0).getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : list.get(0).getSwatch();
-		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, xLength, swatch, type);
+	private static JFreeChart makeSingleVariabilityChart(ChartOptions options) throws Exception {
+		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(options);
+
+		ColourSwatch swatch = options.firstDataset().getSwatch() == null 
+				? ColourSwatch.REGULAR_SWATCH 
+						: options.firstDataset().getSwatch();
+		
+		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, 100, swatch, options.getType());
 		XYPlot plot = chart.getXYPlot();
 		plot.getRangeAxis().setLabel("IQR");
 		plot.getRangeAxis().setAutoRange(true);
@@ -557,15 +556,15 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	public static JFreeChart makeMultiVariabilityChart(List<AnalysisDataset> list, int xLength, BorderTag tag, ProfileType type) throws Exception {
-		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list, tag, type);
+	private static JFreeChart makeMultiVariabilityChart(ChartOptions options) throws Exception {
+		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(options);
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                "Position", "IQR", ds, PlotOrientation.VERTICAL, true, true,
 				                false);
 
 		XYPlot plot = chart.getXYPlot();
-		plot.getDomainAxis().setRange(0,xLength);
+		plot.getDomainAxis().setRange(0,100);
 		plot.getRangeAxis().setAutoRange(true);
 		plot.setBackgroundPaint(Color.WHITE);
 
@@ -573,34 +572,15 @@ public class MorphologyChartFactory {
 			plot.getRenderer().setSeriesVisibleInLegend(j, false);
 			plot.getRenderer().setSeriesStroke(j, ChartComponents.QUARTILE_STROKE);
 			int index = MorphologyChartFactory.getIndexFromLabel( (String) ds.getSeriesKey(j));
-			Color profileColour = list.get(index).getDatasetColour() == null 
+			Color profileColour = options.getDatasets().get(index).getDatasetColour() == null 
 					? ColourSelecter.getSegmentColor(index)
-					: list.get(index).getDatasetColour();
+					: options.getDatasets().get(index).getDatasetColour();
 			
 			plot.getRenderer().setSeriesPaint(j, profileColour);
 		}	
 		return chart;
 	}
 	
-	public static ExportableChartPanel makeProfileChartPanel(JFreeChart chart){
-		ExportableChartPanel panel = new ExportableChartPanel(chart){
-			@Override
-			public void restoreAutoBounds() {
-				XYPlot plot = (XYPlot) this.getChart().getPlot();
-				
-				int length = 100;
-				for(int i = 0; i<plot.getDatasetCount();i++){
-					XYDataset dataset = plot.getDataset(i);
-					Number maximum = DatasetUtilities.findMaximumDomainValue(dataset);
-					length = maximum.intValue() > length ? maximum.intValue() : length;
-				}
-				plot.getRangeAxis().setRange(0, 360);
-				plot.getDomainAxis().setRange(0, length);				
-				return;
-			} 
-		};
-		return panel;
-	}
 	
 	
 	/**
@@ -858,46 +838,46 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
-	private static void addCellImageToPlot(Cell cell, XYPlot plot){
-		if(cell.getNucleus().getSourceFile().exists()){
-			
-			File imageFile = cell.getNucleus().getSourceFile();
-			ImageStack imageStack = ImageImporter.importImage(imageFile);
-			
-			// Get the counterstain stack, make greyscale and invert
-			ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(imageStack).getProcessor();
-			openProcessor.invert();	
-			
-			double[] positions = cell.getNucleus().getPosition();
-			
-			int padding = 0;
-			int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
-			int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
-			int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
-			int wideY = (int) (positions[CellularComponent.Y_BASE]-padding);
-
-			wideX = wideX<0 ? 0 : wideX;
-			wideY = wideY<0 ? 0 : wideY;
-
-			openProcessor.setRoi(wideX, wideY, wideW, wideH);
-			openProcessor = openProcessor.crop();
-
-			plot.setDomainGridlinesVisible(false);
-			plot.setRangeGridlinesVisible(false);
-			
-			plot.getDomainAxis().setVisible(false);
-			plot.getRangeAxis().setVisible(false);
-			
-			plot.setOutlineVisible(false);
-			
-		
-//			IJ.log("Adding background image");
-			Image im = new ImageIcon(openProcessor.getBufferedImage()).getImage();
-			plot.setBackgroundPaint(null);
-			plot.setBackgroundImageAlignment(Align.FIT);
-			plot.setBackgroundImage(im);
-		}
-	}
+//	private static void addCellImageToPlot(Cell cell, XYPlot plot){
+//		if(cell.getNucleus().getSourceFile().exists()){
+//			
+//			File imageFile = cell.getNucleus().getSourceFile();
+//			ImageStack imageStack = ImageImporter.importImage(imageFile);
+//			
+//			// Get the counterstain stack, make greyscale and invert
+//			ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(imageStack).getProcessor();
+//			openProcessor.invert();	
+//			
+//			double[] positions = cell.getNucleus().getPosition();
+//			
+//			int padding = 0;
+//			int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
+//			int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
+//			int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
+//			int wideY = (int) (positions[CellularComponent.Y_BASE]-padding);
+//
+//			wideX = wideX<0 ? 0 : wideX;
+//			wideY = wideY<0 ? 0 : wideY;
+//
+//			openProcessor.setRoi(wideX, wideY, wideW, wideH);
+//			openProcessor = openProcessor.crop();
+//
+//			plot.setDomainGridlinesVisible(false);
+//			plot.setRangeGridlinesVisible(false);
+//			
+//			plot.getDomainAxis().setVisible(false);
+//			plot.getRangeAxis().setVisible(false);
+//			
+//			plot.setOutlineVisible(false);
+//			
+//		
+////			IJ.log("Adding background image");
+//			Image im = new ImageIcon(openProcessor.getBufferedImage()).getImage();
+//			plot.setBackgroundPaint(null);
+//			plot.setBackgroundImageAlignment(Align.FIT);
+//			plot.setBackgroundImage(im);
+//		}
+//	}
 	
 	/**
 	 * Create a chart showing the angle values at the given normalised profile position within the
@@ -1163,89 +1143,4 @@ public class MorphologyChartFactory {
 
 		return chart;
 	}
-	
-//	/**
-//	 * Create a Kruskal-Wallis probability chart comparing two datasets.
-//	 * @param options the options to plot
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	public static JFreeChart makeFrankenKruskalWallisChart(ProfileChartOptions options) throws Exception {
-//		
-//		XYDataset kruskalDataset = NucleusDatasetCreator.createFrankenKruskalProfileDataset(options);
-//		
-//		XYDataset firstProfileDataset = NucleusDatasetCreator.createNonsegmentedMedianProfileDataset(options.firstDataset(),
-//				true,
-//				options.getAlignment(),
-//				options.getTag());
-//		
-//		XYDataset secondProfileDataset = NucleusDatasetCreator.createNonsegmentedMedianProfileDataset(options.getDatasets().get(1),
-//				true,
-//				options.getAlignment(),
-//				options.getTag());
-//		
-//		JFreeChart chart = 
-//				ChartFactory.createXYLineChart(null,
-//						"Position", "Probability", null, PlotOrientation.VERTICAL, true, true,
-//						false);
-//		
-//		XYPlot plot = chart.getXYPlot();
-//		
-//		plot.setBackgroundPaint(Color.WHITE);
-//		plot.getDomainAxis().setRange(0, 100);
-//		
-//		LogAxis rangeAxis = new LogAxis("Probability");
-//		rangeAxis.setBase(10);
-//		DecimalFormat df=new DecimalFormat();
-//		df.applyPattern("0.#E0");
-//		rangeAxis.setNumberFormatOverride(df);
-//		rangeAxis.setStandardTickUnits(new StandardTickUnitSource());
-//
-//		plot.setRangeAxis(rangeAxis);
-//		
-//		NumberAxis angleAxis = new NumberAxis("Angle");
-//		angleAxis.setRange(0, 360);
-//		
-//		plot.setRangeAxis(0, rangeAxis);
-//		plot.setRangeAxis(1, angleAxis);
-//		
-//		plot.setDataset(0, kruskalDataset);
-//		plot.setDataset(1, firstProfileDataset);
-//		plot.setDataset(2, secondProfileDataset);
-//		
-//		
-//		XYItemRenderer logRenderer = new XYLineAndShapeRenderer(true, false);
-//		logRenderer.setSeriesPaint(0, Color.BLACK);
-//		logRenderer.setSeriesVisibleInLegend(0, false);
-//		logRenderer.setSeriesStroke(0, ChartComponents.MARKER_STROKE);
-//		
-//		XYItemRenderer angleRendererOne = new XYLineAndShapeRenderer(true, false);
-//		Color colorOne = options.getDatasets().get(0).getDatasetColour() == null 
-//					? ColourSelecter.getSegmentColor(0) 
-//					: options.getDatasets().get(0).getDatasetColour();
-//		angleRendererOne.setSeriesPaint(0, colorOne);
-//		angleRendererOne.setSeriesVisibleInLegend(0, false);
-//		angleRendererOne.setSeriesStroke(0, ChartComponents.MARKER_STROKE);
-//		
-//		XYItemRenderer angleRendererTwo = new XYLineAndShapeRenderer(true, false);
-//		Color colorTwo = options.getDatasets().get(1).getDatasetColour() == null 
-//				? ColourSelecter.getSegmentColor(1) 
-//				: options.getDatasets().get(1).getDatasetColour();
-//		angleRendererTwo.setSeriesPaint(0, colorTwo);
-//		angleRendererTwo.setSeriesVisibleInLegend(0, false);
-//		angleRendererTwo.setSeriesStroke(0, ChartComponents.MARKER_STROKE);
-//
-//		
-//		plot.setRenderer(0, logRenderer);
-//		plot.setRenderer(1, angleRendererOne);
-//		plot.setRenderer(2, angleRendererTwo);
-//		
-//		plot.mapDatasetToRangeAxis(0, 0);
-//		plot.mapDatasetToRangeAxis(1, 1);
-//		plot.mapDatasetToRangeAxis(2, 1);
-//		
-//
-//		return chart;
-//	}
-
 }

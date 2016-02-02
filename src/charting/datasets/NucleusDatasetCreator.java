@@ -628,24 +628,24 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createIQRVariabilityDataset(List<AnalysisDataset> list, BorderTag borderTag, ProfileType type) throws Exception{
+	public static XYDataset createIQRVariabilityDataset(ChartOptions options) throws Exception{
 
 		
-		if(list.size()==1){
-			CellCollection collection = list.get(0).getCollection();
+		if(options.isSingleDataset()){
+			CellCollection collection = options.firstDataset().getCollection();
 
-			Profile profile = collection.getProfileCollection(type).getIQRProfile(borderTag);
+			Profile profile = collection.getProfileCollection(options.getType()).getIQRProfile(options.getTag());
 
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(type).getSegmentedProfile(borderTag).getOrderedSegments();
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(options.getType()).getSegmentedProfile(options.getTag()).getOrderedSegments();
 			XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0);	
 			return ds;
 		} else {
 			int i = 0;
 			DefaultXYDataset ds = new DefaultXYDataset();
-			for(AnalysisDataset dataset : list){
+			for(AnalysisDataset dataset : options.getDatasets()){
 				CellCollection collection = dataset.getCollection();
 
-				Profile profile = collection.getProfileCollection(type).getIQRProfile(borderTag);
+				Profile profile = collection.getProfileCollection(options.getType()).getIQRProfile(options.getTag());
 				Profile xpoints = profile.getPositions(100);
 				double[][] data = { xpoints.asArray(), profile.asArray() };
 				ds.addSeries("Profile_"+i+"_"+collection.getName(), data);

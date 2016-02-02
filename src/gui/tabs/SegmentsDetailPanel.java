@@ -296,8 +296,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 			Dimension preferredChartSize = new Dimension(400, 300);
 			
 			JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
-//			chartPanel = new DraggableOverlayChartPanel(profileChart, null);
-			chartPanel= MorphologyChartFactory.makeProfileChartPanel(profileChart);
+
+			chartPanel = new ExportableChartPanel(profileChart);
 			
 			chartPanel.setMinimumSize(minimumChartSize);
 			chartPanel.setPreferredSize(preferredChartSize);

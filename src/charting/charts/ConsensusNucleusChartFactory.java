@@ -40,7 +40,7 @@ import components.CellCollection;
 /**
  * Methods to make charts with a consensus nucleus
  */
-public class ConsensusNucleusChartFactory {
+public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	
 	/**
 	 * Create an empty chart as a placeholder for nucleus outlines

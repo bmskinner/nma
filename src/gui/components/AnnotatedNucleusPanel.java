@@ -38,6 +38,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import charting.charts.AbstractChartFactory;
 import charting.charts.MorphologyChartFactory;
 import utility.Utils;
 import components.Cell;
@@ -143,7 +144,7 @@ public class AnnotatedNucleusPanel extends JPanel {
 					y[j] = (float) p.getY();
 				}
 				
-				int segIndex = MorphologyChartFactory.getIndexFromLabel (seg.getName());
+				int segIndex = AbstractChartFactory.getIndexFromLabel (seg.getName());
 				ip.setColor(ColourSelecter.getSegmentColor(segIndex));
 				
 				PolygonRoi segRoi = new PolygonRoi(x, y, PolygonRoi.POLYLINE);

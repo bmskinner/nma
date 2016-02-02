@@ -93,6 +93,8 @@ import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
+import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 import components.Cell;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
@@ -576,9 +578,13 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 					profileOptions.setEnabled(true);
 					Nucleus nucleus = cell.getNucleus();
+					
+					ChartOptions options = new ChartOptionsBuilder()
+							.setSwatch(activeDataset().getSwatch())
+							.setProfileType(type)
+							.build();
 
-					XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus, type);
-					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(ds, nucleus, activeDataset().getSwatch(), type);
+					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(nucleus, options);
 
 					profileChartPanel.setChart(chart, nucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT), false);
 					
