@@ -142,6 +142,10 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			overviewPanel.update(getDatasets());
 			histogramPanel.update(getDatasets());
 		}
+		
+		if(event.type().startsWith("RunShellAnalysis")){
+			fireSignalChangeEvent("RunShellAnalysis");
+		}
 	}
 
 }
