@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import analysis.ProfileManager;
 import components.Cell;
 import components.CellCollection;
 import components.CellularComponent;
@@ -61,7 +62,7 @@ public class CellRelocator extends AnalysisWorker {
 		
 		if( ! cells.isEmpty()){
 
-			CellCollection c = new CellCollection(getDataset(), "Subset");
+			CellCollection c = new CellCollection(getDataset(), inputFile.getName());
 			
 			for(Cell cell : cells){
 				c.addCell(cell);
@@ -70,20 +71,7 @@ public class CellRelocator extends AnalysisWorker {
 			/*
 			 * Copy profile offsets and make the median profile
 			 */
-			
-			ProfileCollection pc = getDataset().getCollection().getProfileCollection(ProfileType.REGULAR);
-			List<NucleusBorderSegment> segments = pc.getSegments(BorderTag.REFERENCE_POINT);
-			ProfileCollection newProfileCollection = new ProfileCollection();
-			newProfileCollection.createProfileAggregate(getDataset().getCollection(), 
-					ProfileType.REGULAR, 
-					(int) getDataset().getCollection().getMedianArrayLength());
-			
-			for(BorderTag key : pc.getOffsetKeys()){
-				newProfileCollection.addOffset(key, pc.getOffset(key));
-			}
-			newProfileCollection.addSegments(BorderTag.REFERENCE_POINT, segments);
-
-			c.setProfileCollection(ProfileType.REGULAR, newProfileCollection);
+			ProfileManager.copyCollectionOffsets(getDataset().getCollection(), c);
 			
 			
 			/*
