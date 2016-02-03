@@ -804,7 +804,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					// double click
 					if (e.getClickCount() == 2) {
 						
-						if(rowName.equals("Image")){
+						if(rowName.equals("Source image")){
 							showCellImage();
 						}
 						

@@ -56,7 +56,7 @@ public class ProfileManager {
 			 * A new median profile will result.
 			 * By default, the aggregates are created from the reference point
 			 */
-			newPC.createProfileAggregate(template, 
+			newPC.createProfileAggregate(destination, 
 					type, 
 					profileLength);
 			

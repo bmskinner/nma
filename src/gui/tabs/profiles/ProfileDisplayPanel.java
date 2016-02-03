@@ -80,6 +80,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 				.setAlignment(alignment)
 				.setTag(tag)
 				.setShowMarkers(showMarkers)
+				.setProfileType(type)
 				.build();
 			return options;
 		}
