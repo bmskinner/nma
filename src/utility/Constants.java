@@ -33,6 +33,7 @@ public class Constants {
 	public static final String SAVE_FILE_EXTENSION = ".nmd";
 	public static final String LOG_FILE_EXTENSION = ".log";
 	public static final String TAB_FILE_EXTENSION = ".txt";
+	public static final String LOC_FILE_EXTENSION = "cell"; // locations of cells (in a tsv format)
 	
 	
 

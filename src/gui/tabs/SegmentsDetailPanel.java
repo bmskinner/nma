@@ -552,10 +552,10 @@ public class SegmentsDetailPanel extends DetailPanel {
 				for( int i=0; i<segmentCount; i++){
 					String segName = "Seg_"+i;
 					
-					ChartOptionsBuilder builder = new ChartOptionsBuilder();
-					ChartOptions options = builder.setDatasets(getDatasets())
+					ChartOptions options = new ChartOptionsBuilder()
+						.setDatasets(getDatasets())
 						.setLogger(programLogger)
-						.setStatistic(null)
+						.setStatistic(SegmentStatistic.LENGTH)
 						.setScale(scale)
 						.setUseDensity(useDensity)
 						.setSegName(segName)

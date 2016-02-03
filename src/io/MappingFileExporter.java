@@ -1,9 +1,12 @@
 package io;
 
+import ij.IJ;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
+import utility.Constants;
 import analysis.AnalysisDataset;
 import components.Cell;
 import components.CellularComponent;
@@ -17,43 +20,85 @@ import components.generic.XYPoint;
  */
 public class MappingFileExporter {
 	
-	public static void exportCellLocations(AnalysisDataset d){
+	public static boolean exportCellLocations(AnalysisDataset d){
 		
-		File exportFile = new File(d.getCollection().getOutputFolder()+File.separator+d.getName()+".txt");
+		File exportFile = new File(d.getCollection().getOutputFolder()
+				+File.separator
+				+d.getName()
+				+"."
+				+Constants.LOC_FILE_EXTENSION);
 		
+//		IJ.log("Export to "+exportFile.getAbsolutePath());
+//		
 		if(exportFile.exists()){
 			exportFile.delete();
 		}
 		
+//		IJ.log("Making string");
+		
 		StringBuilder builder = new StringBuilder();
+		final String newline = System.getProperty("line.separator"); 
 		
 		for(Cell c : d.getCollection().getCells()){
+			
+//			IJ.log("Cell "+c.getNucleus().getNameAndNumber());
+			
 			double[] originalPosition = c.getNucleus().getPosition();
 
-			XYPoint p = c.getNucleus().getCentreOfMass();
+			XYPoint com = c.getNucleus().getCentreOfMass();
 			
-			double x = p.getX()+originalPosition[CellularComponent.X_BASE];
+			double x = com.getX()+originalPosition[CellularComponent.X_BASE];
+			double y = com.getY()+originalPosition[CellularComponent.Y_BASE];
 			
-			double y = p.getY()+originalPosition[CellularComponent.Y_BASE];
 			
-			builder.append(c.getNucleus().getSourceFile()+"\t"+x+"-"+y+System.lineSeparator());
+			IJ.log("   Found position: "+x+"-"+y);
+			
+			try{
+			
+				if(c.getNucleus().getSourceFile()!=null){
+					
+//					IJ.log("   Found nucleus source image: "+c.getNucleus().getSourceFile().getAbsolutePath());
+				
+					builder.append( c.getNucleus().getSourceFile().getAbsolutePath() );
+					builder.append( "\t" );
+					builder.append( x );
+					builder.append( "-" );
+					builder.append( y );
+					
+//					IJ.log("   Added all but newline");
+					
+					builder.append( newline );
+					
+
+//					IJ.log("   Appended position");
+				} else {
+//					IJ.log("   Cannot get nucleus image path");
+				}
+			} catch(Exception e){
+//				IJ.log("Cannot make line: "+e.getMessage());
+				return false;
+			}
 			
 		}
 		
-		export(builder.toString(), exportFile);
+//		IJ.log("Made string");
+		
+		try {
+			export(builder.toString(), exportFile);
+		} catch (FileNotFoundException e) {
+			return false;
+		}
+//		IJ.log("Exported");
+		return true;
 	}
 	
-	private static void export(String s, File f){
+	private static void export(String s, File f) throws FileNotFoundException{
 
 		PrintWriter out;
-		try {
-
-			out = new PrintWriter(f);
-			out.println(s);
-			out.close();
-		} catch (FileNotFoundException e) {
-
-		}
+		out = new PrintWriter(f);
+		out.print(s);
+		out.close();
+		
 	}
 
 }

@@ -8,6 +8,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.ProfileManager;
@@ -62,7 +63,8 @@ public class CellRelocator extends AnalysisWorker {
 		
 		if( ! cells.isEmpty()){
 
-			CellCollection c = new CellCollection(getDataset(), inputFile.getName());
+			String newName = inputFile.getName().replace("."+Constants.LOC_FILE_EXTENSION, "");
+			CellCollection c = new CellCollection(getDataset(), newName);
 			
 			for(Cell cell : cells){
 				c.addCell(cell);

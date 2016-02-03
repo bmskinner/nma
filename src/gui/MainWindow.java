@@ -623,7 +623,13 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		}
 		
 		if(event.type().equals("SaveCellLocations")){
-			MappingFileExporter.exportCellLocations(selectedDataset);
+			programLogger.log(Level.INFO, "Exporting cell locations...");
+			if(MappingFileExporter.exportCellLocations(selectedDataset)){
+				programLogger.log(Level.INFO, "Export complete");
+			} else {
+				programLogger.log(Level.INFO, "Export failed");
+			}
+			
 		}
 		
 		if(event.type().equals("RelocateCellsAction")){
