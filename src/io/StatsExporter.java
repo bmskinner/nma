@@ -91,7 +91,7 @@ public class StatsExporter {
 
 	public static void exportImagePaths(CellCollection collection, String filename){
 		TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
-		logger.addColumn("PATH",     collection.getCleanNucleusPaths());
+		logger.addColumn("PATH",     collection.getNucleusImagePaths());
 //		logger.addColumn("POSITION", collection.getPositions());
 		logger.export(filename+"."+collection.getName());
 	}

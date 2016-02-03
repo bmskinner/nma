@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -125,7 +126,11 @@ public class AnalysisDataset implements Serializable {
 	 */
 	public AnalysisDataset duplicate() throws Exception{
 		AnalysisDataset result = new AnalysisDataset(this.getCollection());
-		for(Cell c : this.getCollection().getCells()){
+		Iterator<Cell> it = this.getCollection().getCellIterator();
+		
+		while(it.hasNext()){
+			Cell c = it.next();
+
 			result.getCollection().addCell(new Cell(c));
 		}
 		

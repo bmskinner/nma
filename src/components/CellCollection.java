@@ -38,8 +38,11 @@ import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import utility.Constants;
@@ -69,8 +72,6 @@ public class CellCollection implements Serializable {
 	
 	private File 	    folder; 		// the source of the nuclei
 	private String     	outputFolder;	// the location to save out data
-//	private File 	    debugFile;		// the location of the debug file /
-	private String 	    collectionType; // for annotating image names
 	private String 	    name;			// the name of the collection
 	
 	
@@ -114,7 +115,7 @@ public class CellCollection implements Serializable {
   
   /**
    * Construct an empty collection from a template dataset
-   * @param template the dataset to base on for analysis options, folders
+   * @param template the dataset to base on for folders and type
    * @param name the collection name
    */
   public CellCollection(AnalysisDataset template, String name){
@@ -173,7 +174,6 @@ public class CellCollection implements Serializable {
 
   public void addCell(Cell r) throws Exception{
 	  if(mappedCollection.containsKey(r.getId())){
-
 		  return;
 	  } else {
 		  this.mappedCollection.put(r.getId(), r);
@@ -234,7 +234,10 @@ public class CellCollection implements Serializable {
    * @see Nucleus.getPathAndNumber()
    */
   public Cell getCell(String path){
-	  for(Cell c : this.getCells()){
+	  Iterator<Cell> it = this.getCellIterator();
+
+	  while(it.hasNext()){
+		  Cell c = it.next();
 		  Nucleus n = c.getNucleus();
 		  if(n.getPathAndNumber().equals(path)){
 			  return c;
@@ -301,13 +304,10 @@ public class CellCollection implements Serializable {
    * Get the distinct source image file list for all nuclei in the collection 
    * @return
    */
-  public List<File> getImageFiles(){
-	  List<File> result = new ArrayList<File>(0);
+  public Set<File> getImageFiles(){
+	  Set<File> result = new HashSet<File>(0);
 	  for(Nucleus n : this.getNuclei()){
-		  
-		  if(!result.contains( n.getSourceFile() )){
-			  result.add(n.getSourceFile());
-		  }
+		  result.add(n.getSourceFile());
 	  }
 	  return result;
   }
@@ -322,15 +322,11 @@ public class CellCollection implements Serializable {
 
 	  int count = this.getNucleusCount();
 	  double[] result = new double[count];
-			  
-//	  List<Double> list = new ArrayList<Double>();
 	  int i=0;
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
 		  result[i++] =  n.getPathLength();
-//		  list.add(n.getPathLength());
 	  }
-//	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
 	  return result;
   }
 
@@ -360,48 +356,38 @@ public class CellCollection implements Serializable {
 	  int count = this.getNucleusCount();
 	  double[] result = new double[count];
 	  
-//	  List<Double> list = new ArrayList<Double>();
-	  
 	  int i=0;
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-//		  list.add(  (double) n.getMedianDistanceBetweenPoints());
 		  result[i++] =  n.getMedianDistanceBetweenPoints();
 	  }
-//	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
 	  return result;
   }
   
   public String[] getNucleusImagePaths(){
 
-	  List<String> list = new ArrayList<String>();
+	  int count = this.getNucleusCount();
+	  String[] result = new String[count];
+	  int i =0;
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  list.add(  n.getSourceFile().getAbsolutePath());
+		  result[i++] = n.getSourceFile().getAbsolutePath();
 	  }
-	  return list.toArray(new String[0]);
+	  return result;
   }
   
   public String[] getNucleusPathsAndNumbers(){
 
-	  List<String> list = new ArrayList<String>();
+	  int count = this.getNucleusCount();
+	  String[] result = new String[count];
+	  int i =0;
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  list.add(  n.getPathAndNumber());
+		  result[i++] = n.getPathAndNumber();
 	  }
-	  return list.toArray(new String[0]);
+	  return result;
   }
   
-  public String[] getCleanNucleusPaths(){
-
-	  List<String> list = new ArrayList<String>();
-	  for(Cell cell : getCells() ){ 
-		  Nucleus n = cell.getNucleus();
-		  list.add(  n.getSourceFile().getAbsolutePath());
-	  }
-	  return list.toArray(new String[0]);
-  }
-
   public double[][] getPositions(){
 	  double[][] s = new double[cellCount()][4];
 	  int i = 0;
@@ -415,6 +401,10 @@ public class CellCollection implements Serializable {
 
   public int getNucleusCount(){
     return this.cellCount();
+  }
+  
+  public Iterator<Cell> getCellIterator(){
+	  return mappedCollection.values().iterator();
   }
   
   
