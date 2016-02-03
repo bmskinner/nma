@@ -43,6 +43,7 @@ import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions.NuclearSignalOptions;
+import analysis.SignalManager;
 import analysis.nucleus.CurveRefolder;
 import components.CellCollection;
 import components.generic.MeasurementScale;
@@ -109,9 +110,9 @@ public class NuclearSignalDatasetCreator {
 					CellCollection collection = dataset.getCollection();
 					
 					List<Object> rowData = new ArrayList<Object>(0);
-					rowData.add(collection.getSignalGroups().size());
+					rowData.add(SignalManager.getSignalGroups(collection).size());
 	
-					for(int signalGroup : collection.getSignalGroups()){
+					for(int signalGroup : SignalManager.getSignalGroups(collection)){
 						
 						NuclearSignalOptions ns = dataset.getAnalysisOptions()
 														.getNuclearSignalOptions(collection.getSignalGroupName(signalGroup));
@@ -362,7 +363,7 @@ public class NuclearSignalDatasetCreator {
 
 		if(collection.hasSignals()){
 
-			for(int group : collection.getSignalGroups()){
+			for(int group : SignalManager.getSignalGroups(collection)){
 
 				if(dataset.isSignalGroupVisible(group)){
 
@@ -474,7 +475,7 @@ public class NuclearSignalDatasetCreator {
 					CellCollection collection = dataset.getCollection();
 					
 					List<Object> rowData = new ArrayList<Object>(0);
-					rowData.add(collection.getSignalGroups().size());
+					rowData.add(SignalManager.getSignalGroups(collection).size());
 	
 					for(int signalGroup = 1; signalGroup<=maxSignalGroup; signalGroup++){// : collection.getSignalGroups()){
 						if(collection.hasSignals(signalGroup)){
@@ -484,7 +485,7 @@ public class NuclearSignalDatasetCreator {
 							rowData.add(collection.getSignalChannel(signalGroup));
 							rowData.add(collection.getSignalSourceFolder(signalGroup));
 							rowData.add(collection.getSignalCount(signalGroup));
-							double signalPerNucleus = (double) collection.getSignalCount(signalGroup)/  (double) collection.getCellsWithNuclearSignals(signalGroup, true).size();
+							double signalPerNucleus = (double) collection.getSignalCount(signalGroup)/  (double) SignalManager.getNumberOfCellsWithNuclearSignals(collection, signalGroup);
 							rowData.add(df.format(signalPerNucleus));
 							
 							for(SignalStatistic stat : SignalStatistic.values()){
@@ -535,7 +536,7 @@ public class NuclearSignalDatasetCreator {
 		
 		CellCollection c = options.firstDataset().getCollection();
 		
-		for(int signalGroup : c.getSignalGroups()){
+		for(int signalGroup : SignalManager.getSignalGroups(c)){
 			
 			List<Double> list = new ArrayList<Double>();
 			for(NuclearSignal s : c.getSignals(signalGroup)){
@@ -559,7 +560,7 @@ public class NuclearSignalDatasetCreator {
 
 		CellCollection c = dataset.getCollection();
 		
-		for(int signalGroup : c.getSignalGroups()){
+		for(int signalGroup : SignalManager.getSignalGroups(c)){
 			
 			List<Double> list = new ArrayList<Double>();
 			for(NuclearSignal s : c.getSignals(signalGroup)){
@@ -577,7 +578,7 @@ public class NuclearSignalDatasetCreator {
 			
 			CellCollection collection = dataset.getCollection();
 
-			for(int signalGroup : collection.getSignalGroups()){
+			for(int signalGroup : SignalManager.getSignalGroups(collection)){
 				
 				if(collection.hasSignals(signalGroup)){
 					ShellResult r = dataset.getShellResult(signalGroup);

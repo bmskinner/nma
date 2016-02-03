@@ -50,6 +50,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
 import analysis.AnalysisDataset;
+import analysis.SignalManager;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
@@ -246,7 +247,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		if(isSingleDataset()){
 			try {
 
-				for(int signalGroup : activeDataset().getCollection().getSignalGroups()){
+				for(int signalGroup : SignalManager.getSignalGroups(activeDataset().getCollection())){
 
 					boolean visible = activeDataset().isSignalGroupVisible(signalGroup);
 

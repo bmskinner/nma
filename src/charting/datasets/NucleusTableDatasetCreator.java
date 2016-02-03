@@ -36,6 +36,7 @@ import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.ClusteringOptions;
+import analysis.SignalManager;
 import analysis.ClusteringOptions.ClusteringMethod;
 import components.CellCollection;
 import components.ClusterGroup;
@@ -467,7 +468,7 @@ public class NucleusTableDatasetCreator {
 					datasetData.add(pf.format(diptest));					
 				}
 				
-				datasetData.add(collection.getSignalGroups().size());
+				datasetData.add(SignalManager.getSignalGroups(dataset.getCollection()).size());
 				datasetData.add(collection.getSignalCount());
 				datasetData.add(df.format(signalPerNucleus));
 				

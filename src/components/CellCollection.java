@@ -48,6 +48,7 @@ import java.util.UUID;
 import utility.Constants;
 import utility.Utils;
 import analysis.AnalysisDataset;
+import analysis.SignalManager;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
@@ -462,21 +463,21 @@ public class CellCollection implements Serializable {
 	  return result;
   }
   
-  /**
-   * Find the signal groups present within the nuclei of the collection
-   * @return the list of groups. Order is not guaranteed
-   */
-  public List<Integer> getSignalGroups(){
-	  List<Integer> result = new ArrayList<Integer>(0);
-	  for(Nucleus n : this.getNuclei()){
-		  for( int group : n.getSignalCollection().getSignalGroups()){
-			  if(!result.contains(group)){
-				  result.add(group);
-			  }
-		  }
-	  } // end nucleus iterations
-	  return result;
-  }
+//  /**
+//   * Find the signal groups present within the nuclei of the collection
+//   * @return the list of groups. Order is not guaranteed
+//   */
+//  public List<Integer> getSignalGroups(){
+//	  List<Integer> result = new ArrayList<Integer>(0);
+//	  for(Nucleus n : this.getNuclei()){
+//		  for( int group : n.getSignalCollection().getSignalGroups()){
+//			  if(!result.contains(group)){
+//				  result.add(group);
+//			  }
+//		  }
+//	  } // end nucleus iterations
+//	  return result;
+//  }
   
   public String getSignalGroupName(int signalGroup){
 	  String result = null;
@@ -538,7 +539,7 @@ public class CellCollection implements Serializable {
    */
   public int getSignalCount(){
 	  int count = 0;
-	  for(int signalGroup : this.getSignalGroups()){
+	  for(int signalGroup : SignalManager.getSignalGroups(this)){
 		  count+= this.getSignalCount(signalGroup);
 	  }
 	  return count;
@@ -563,7 +564,7 @@ public class CellCollection implements Serializable {
    * @return
    */
   public boolean hasSignals(){
-	  for(int i : this.getSignalGroups()){
+	  for(int i : SignalManager.getSignalGroups(this)){
 		  if(this.hasSignals(i)){
 			  return true;
 		  }
@@ -653,7 +654,7 @@ public class CellCollection implements Serializable {
 
   public double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception{
 
-	  List<Cell> cells = getCellsWithNuclearSignals(signalGroup, true);
+	  List<Cell> cells = SignalManager.getCellsWithNuclearSignals(this, signalGroup, true);
 	  List<Double> a = new ArrayList<Double>(0);
 	  for(Cell c : cells){
 		  Nucleus n = c.getNucleus();
@@ -663,31 +664,6 @@ public class CellCollection implements Serializable {
 	  return Utils.getdoubleFromDouble(a.toArray(new Double[0]));
   }
   
-  /** 
-   * Return the nuclei with or without signals in the given group.
-   * @param signalGroup the group number 
-   * @param withSignal
-   * @return a list of cells
-   */
-  public List<Cell> getCellsWithNuclearSignals(int signalGroup, boolean withSignal){
-	  List<Cell> result = new ArrayList<Cell>(0);
-
-	  for(Cell c : this.getCells()){
-		  Nucleus n = c.getNucleus();
-
-		  if(withSignal){
-			  if(n.hasSignal(signalGroup)){
-				  result.add(c);
-			  }
-		  } else {
-			  if(!n.hasSignal(Math.abs(signalGroup))){
-				  result.add(c);
-			  }
-		  }
-	  }
-	  return result;
-  }
-
   /*
     --------------------
     Profile methods

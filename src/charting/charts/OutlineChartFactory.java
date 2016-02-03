@@ -37,6 +37,7 @@ import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
+import analysis.SignalManager;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.TailDatasetCreator;
@@ -83,7 +84,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			}
 			plot.setRenderer(1, rend);
 
-			for(int signalGroup : dataset.getCollection().getSignalGroups()){
+			for(int signalGroup : SignalManager.getSignalGroups(dataset.getCollection())){
 				List<Shape> shapes = NuclearSignalDatasetCreator.createSignalRadiusDataset(dataset, signalGroup);
 
 				int signalCount = shapes.size();

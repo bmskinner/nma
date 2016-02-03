@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
+import analysis.SignalManager;
 import analysis.nucleus.SignalDetector;
 import components.Cell;
 import components.CellCollection;
@@ -114,7 +115,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		try{
 
 			
-			List<Cell> list = r.getCellsWithNuclearSignals(signalGroup, true);
+			List<Cell> list = SignalManager.getCellsWithNuclearSignals(r, signalGroup, true);
 			if(!list.isEmpty()){
 				programLogger.log(Level.INFO, "Signal group "+signalGroup+": found nuclei with signals");
 				CellCollection listCollection = new CellCollection(r.getFolder(), 
@@ -131,7 +132,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 				}
 				signalPopulations.add(listCollection);
 
-				List<Cell> notList = r.getCellsWithNuclearSignals(signalGroup, false);
+				List<Cell> notList = SignalManager.getCellsWithNuclearSignals(r, signalGroup, false);
 				if(!notList.isEmpty()){
 					programLogger.log(Level.INFO, "Signal group "+signalGroup+": found nuclei without signals");
 					CellCollection notListCollection = new CellCollection(r.getFolder(), 

@@ -35,6 +35,7 @@ import logging.DebugFileHandler;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import analysis.SignalManager;
 import components.CellCollection;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
@@ -68,7 +69,7 @@ public class ShellAnalysis extends AnalysisWorker {
 		try {
 			counters = new HashMap<Integer, ShellCounter>(0);
 
-			for(int signalGroup : collection.getSignalGroups()){
+			for(int signalGroup : SignalManager.getSignalGroups(collection)){
 				counters.put(signalGroup, new ShellCounter(shells, fileLogger));
 			}
 
@@ -153,7 +154,7 @@ public class ShellAnalysis extends AnalysisWorker {
 		try {
 			counters = new HashMap<Integer, ShellCounter>(0);
 
-			for(int channel : collection.getSignalGroups()){
+			for(int channel : SignalManager.getSignalGroups(collection)){
 				counters.put(channel, new ShellCounter(shells, fileLogger));
 			}
 
