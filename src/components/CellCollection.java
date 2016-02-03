@@ -320,12 +320,18 @@ public class CellCollection implements Serializable {
    */
   public double[] getPathLengths() throws Exception{
 
-	  List<Double> list = new ArrayList<Double>();
+	  int count = this.getNucleusCount();
+	  double[] result = new double[count];
+			  
+//	  List<Double> list = new ArrayList<Double>();
+	  int i=0;
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  list.add(n.getPathLength());
+		  result[i++] =  n.getPathLength();
+//		  list.add(n.getPathLength());
 	  }
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+//	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+	  return result;
   }
 
   /**
@@ -335,22 +341,35 @@ public class CellCollection implements Serializable {
    */
   public double[] getArrayLengths(){
 
-	  List<Double> list = new ArrayList<Double>();
+	  int count = this.getNucleusCount();
+	  double[] result = new double[count];
+			  
+//	  List<Double> list = new ArrayList<Double>();
+	  int i=0;
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  list.add(  (double) n.getBorderLength());
+//		  list.add(  (double) n.getBorderLength());
+		  result[i++] =  n.getBorderLength();
 	  }
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+//	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+	  return result;
   }
   
   public double[] getMedianDistanceBetweenPoints(){
 
-	  List<Double> list = new ArrayList<Double>();
+	  int count = this.getNucleusCount();
+	  double[] result = new double[count];
+	  
+//	  List<Double> list = new ArrayList<Double>();
+	  
+	  int i=0;
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  list.add(  (double) n.getMedianDistanceBetweenPoints());
+//		  list.add(  (double) n.getMedianDistanceBetweenPoints());
+		  result[i++] =  n.getMedianDistanceBetweenPoints();
 	  }
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+//	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+	  return result;
   }
   
   public String[] getNucleusImagePaths(){
@@ -706,13 +725,19 @@ public class CellCollection implements Serializable {
    * @return an array of differences
    */
   public double[] getDifferencesToMedianFromPoint(BorderTag pointType) throws Exception {
-	  List<Double> list = new ArrayList<Double>();
+	  
+	  int count = this.getNucleusCount();
+	  double[] result = new double[count];
+	  int i=0;
+//	  List<Double> list = new ArrayList<Double>();
 	  Profile medianProfile = this.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.MEDIAN);
 	  for(Nucleus n : this.getNuclei()){
 		  Profile angleProfile = n.getProfile(ProfileType.REGULAR);
-		  list.add(angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile));
+		  result[i++] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
+//		  list.add(angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile));
 	  }
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+//	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+	  return result;
   }
   
   /**
@@ -723,8 +748,10 @@ public class CellCollection implements Serializable {
    * @return an array of normalised differences
    */
   public double[] getNormalisedDifferencesToMedianFromPoint(BorderTag pointType) throws Exception {
-	  List<Double> list = new ArrayList<Double>();
-
+//	  List<Double> list = new ArrayList<Double>();
+	  int count = this.getNucleusCount();
+	  double[] result = new double[count];
+	  int i=0;
 	  Profile medianProfile = this.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.MEDIAN);
 
 	  for(Nucleus n : this.getNuclei()){
@@ -735,11 +762,12 @@ public class CellCollection implements Serializable {
 		  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 		  
 //		  double var = (rootDiff / n.getPerimeter()  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
-		  
-		  list.add(rootDiff);
+		  result[i++] = rootDiff;
+//		  list.add(rootDiff);
 	  }
 
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+//	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+	  return result;
   }
 
   public double compareProfilesToMedian(BorderTag pointType) throws Exception{
@@ -753,12 +781,18 @@ public class CellCollection implements Serializable {
 
 
   public int[] getPointIndexes(BorderTag pointType){
-	  List<Integer> list = new ArrayList<Integer>();
+//	  List<Integer> list = new ArrayList<Integer>();
 
+	  int count = this.getNucleusCount();
+	  int[] result = new int[count];
+	  int i=0;
+	  
 	  for(Nucleus n : this.getNuclei()){
-		  list.add(n.getBorderIndex(pointType));
+		  result[i++] = n.getBorderIndex(pointType);
+//		  list.add(n.getBorderIndex(pointType));
 	  }
-	  return Utils.getintFromInteger(list.toArray(new Integer[0]));
+	  return result;
+//	  return Utils.getintFromInteger(list.toArray(new Integer[0]));
   }
 
   /**
@@ -768,11 +802,16 @@ public class CellCollection implements Serializable {
    * @return
    */
   public double[] getPointToPointDistances(BorderTag pointTypeA, BorderTag pointTypeB){
-	  List<Double> list = new ArrayList<Double>();
+//	  List<Double> list = new ArrayList<Double>();
+	  int count = this.getNucleusCount();
+	  double[] result = new double[count];
+	  int i=0;
 	  for(Nucleus n : this.getNuclei()){
-		  list.add(n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB)));
+		  result[i++] = n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB));
+//		  list.add(n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB)));
 	  }
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+	  return result;
+//	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
 
   /**
@@ -871,14 +910,15 @@ public class CellCollection implements Serializable {
  * @throws Exception 
    */
   private double[] getStatistics(NucleusStatistic stat, MeasurementScale scale) throws Exception{
+	  int count = this.getNucleusCount();
+	  double[] result = new double[count];
+	  int i=0;
 
-	  List<Double> list = new ArrayList<Double>();
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  double value = n.getStatistic(stat, scale);
-		  list.add(value);
+		  result[i++] = n.getStatistic(stat, scale);
 	  }
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+	  return result;
 
   }
   
@@ -891,8 +931,11 @@ public class CellCollection implements Serializable {
    * @throws Exception
    */
   public double[] getSegmentLengths(String segName, MeasurementScale scale) throws Exception{
-	  List<Double> list = new ArrayList<Double>();
 
+	  int count = this.getNucleusCount();
+	  double[] result = new double[count];
+	  int i=0;
+	  
 	  for(Nucleus n : this.getNuclei()){
 		  NucleusBorderSegment segment = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getSegment(segName);
 		  double perimeterLength = 0;
@@ -901,9 +944,9 @@ public class CellCollection implements Serializable {
 			  double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
 			  perimeterLength = fractionOfPerimeter * n.getStatistic(NucleusStatistic.PERIMETER, scale);
 		  }
-		  list.add(perimeterLength);
+		  result[i++] = perimeterLength;
 	  }
-	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));
+	  return result;
   }
   
   /**
