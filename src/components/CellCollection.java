@@ -48,6 +48,7 @@ import java.util.UUID;
 import utility.Constants;
 import utility.Utils;
 import analysis.AnalysisDataset;
+import analysis.ProfileManager;
 import analysis.SignalManager;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
@@ -945,7 +946,10 @@ public class CellCollection implements Serializable {
 		  if(value>= lower && value<= upper){
 			  subCollection.addCell(new Cell(c));
 		  }
+		  
+		  
 	  }
+	  ProfileManager.copyCollectionOffsets(this, subCollection);
 	  return subCollection;
   }
     
