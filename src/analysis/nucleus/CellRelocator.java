@@ -128,14 +128,8 @@ public class CellRelocator extends AnalysisWorker {
 		List<Cell> cells = this.getDataset().getCollection().getCells(file);
 		
 		for(Cell c : cells){
-			
-			double[] originalPosition = c.getNucleus().getPosition();
-			XYPoint p = c.getNucleus().getCentreOfMass();
-			
-			XYPoint offset = new XYPoint(p.getX()+originalPosition[CellularComponent.X_BASE],
-					p.getY()+originalPosition[CellularComponent.Y_BASE]);
-			
-			if(offset.equals(com)){
+						
+			if(c.getNucleus().containsOriginalPoint(com)){
 				return new Cell(c);
 			}
 		}

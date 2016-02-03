@@ -49,6 +49,7 @@ import gui.tabs.NucleusProfilesPanel;
 import gui.tabs.SegmentsDetailPanel;
 import gui.tabs.SignalsDetailPanel;
 import ij.IJ;
+import io.MappingFileExporter;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -619,6 +620,10 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//TODO: Replace this with more robust action
 //			new ExportDatasetStatsAction();
 			programLogger.log(Level.WARNING, "Function disabled");
+		}
+		
+		if(event.type().equals("SaveCellLocations")){
+			MappingFileExporter.exportCellLocations(selectedDataset);
 		}
 		
 		if(event.type().equals("RelocateCellsAction")){

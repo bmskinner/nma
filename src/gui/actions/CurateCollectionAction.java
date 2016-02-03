@@ -37,7 +37,8 @@ public class CurateCollectionAction extends ProgressableAction {
 	public CurateCollectionAction(AnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Curating collection", mw);
 
-		try{
+		try{		
+			
 			ManualCellCurator curator = new ManualCellCurator(programLogger, dataset);
 
 			List<UUID> manualIDs = curator.getIDsToKeep();
