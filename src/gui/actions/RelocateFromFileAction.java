@@ -1,6 +1,7 @@
 package gui.actions;
 
 import java.io.File;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
 import javax.swing.JFileChooser;
@@ -13,9 +14,9 @@ import gui.InterfaceEvent.InterfaceMethod;
 
 public class RelocateFromFileAction extends ProgressableAction {
 
-	public RelocateFromFileAction(AnalysisDataset dataset, MainWindow mw) {
+	public RelocateFromFileAction(AnalysisDataset dataset, MainWindow mw, CountDownLatch latch) {
 		super(dataset, "Relocating cells", mw);
-		
+		this.setLatch(latch);
 		cooldown();
 		
 		/*
@@ -47,6 +48,7 @@ public class RelocateFromFileAction extends ProgressableAction {
 	public void finished(){
 		programLogger.log(Level.FINE, "Firing refresh of populations");
 		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+		this.countdownLatch();
 		super.finished();		
 	}
 	

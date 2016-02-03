@@ -36,7 +36,7 @@ public class MappingFileExporter {
 			
 			double y = p.getY()+originalPosition[CellularComponent.Y_BASE];
 			
-			builder.append(c.getNucleus().getOriginalImagePath()+"\t"+x+"-"+y+System.lineSeparator());
+			builder.append(c.getNucleus().getSourceFile()+"\t"+x+"-"+y+System.lineSeparator());
 			
 		}
 		

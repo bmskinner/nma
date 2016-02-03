@@ -33,6 +33,7 @@ public class CellRelocator extends AnalysisWorker {
 	public CellRelocator(final AnalysisDataset dataset, final Logger logger, final File file){
 		super(dataset, logger);
 		this.inputFile = file;
+		this.setProgressTotal(1);
 	}
 	
 	@Override
@@ -42,6 +43,8 @@ public class CellRelocator extends AnalysisWorker {
 		
 		try {
 			findCells();
+			log(Level.FINE, "Completed remapping");
+			publish(1);
 			result = true;
 		} catch (Exception e) {
 			logError("Error selecting cells", e);
@@ -53,10 +56,11 @@ public class CellRelocator extends AnalysisWorker {
 	private void findCells() throws Exception {
 		List<Cell> cells = parsePathList();
 		
+		log(Level.FINE, "Parsing complete");
+		log(Level.FINE, "Found "+cells.size()+" cells");
+		
 		if( ! cells.isEmpty()){
-			
-			log(Level.FINE, "Found "+cells.size()+" cells");
-			
+
 			CellCollection c = new CellCollection(getDataset(), "Subset");
 			
 			for(Cell cell : cells){
@@ -93,22 +97,21 @@ public class CellRelocator extends AnalysisWorker {
 		
 	}
 	
-	private List<Cell> parsePathList() throws IOException {
+	private List<Cell> parsePathList() throws Exception {
+		log(Level.FINE, "Input file: "+inputFile.toString());
 		
 		List<Cell> cells = new ArrayList<Cell>();
 		
 	    Scanner scanner =  new Scanner(inputFile);
-	    int i=0;
+
 	    while (scanner.hasNextLine()){
-	      if(i>0){ // ignore first line
 	    	  
 	        Cell cell = processLine(scanner.nextLine());
 	        if(cell!=null){
 	        	cells.add(cell);
 	        }
-	      }
-	      i++;
 	    }
+	    log(Level.FINE, "All cells found");
 	    scanner.close();
 	    return cells;
 	  }
@@ -116,13 +119,33 @@ public class CellRelocator extends AnalysisWorker {
 	private Cell processLine(String line){
 		log(Level.FINE, "Processing line: "+line);
 		
+		if(line.length()<5){
+			// not enough room for a path and number, skip
+			return null;
+		}
+		
 		// Line format is FilePath\tPosition as x-y
 		
 		// get file name
+		
 		File file = getFile(line);
+		if(! file.isFile() || ! file.exists()){
+			log(Level.FINE, "File does not exist or is malformed: "+file.toString());
+			return null;
+		}
+		
 		
 		// get position
-		XYPoint com = getPosition(line);
+		XYPoint com;
+		
+		try {
+			com = getPosition(line);
+		} catch (Exception e) {
+			log(Level.SEVERE, line);
+			log(Level.SEVERE, file.getAbsolutePath());
+			logError("Cannot get position", e);
+			return null;
+		}
 		
 		// find the nucleus
 		List<Cell> cells = this.getDataset().getCollection().getCells(file);
@@ -137,14 +160,14 @@ public class CellRelocator extends AnalysisWorker {
 		
 	}
 	
-	private File getFile(String line){
-		String[] array = line.split("\t");
+	private File getFile(String line) {
+		String[] array = line.split("\\t");
 		File f = new File(array[0]);
 		return f;
 	}
 	
-	private XYPoint getPosition(String line){
-		String[] array = line.split("\t");
+	private XYPoint getPosition(String line) throws Exception {
+		String[] array = line.split("\\t");
 		String position = array[1];
 		
 		String[] posArray = position.split("-");
