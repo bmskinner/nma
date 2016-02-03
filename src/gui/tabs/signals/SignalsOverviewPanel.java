@@ -52,6 +52,7 @@ import org.jfree.data.xy.XYDataset;
 import analysis.AnalysisDataset;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.OutlineChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.DefaultTableOptions;
 import charting.options.DefaultTableOptions.TableType;
@@ -429,7 +430,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 				if(collection.hasConsensusNucleus()){ // if a refold is available
 					
 					XYDataset signalCoMs = NuclearSignalDatasetCreator.createSignalCoMDataset(activeDataset());
-					JFreeChart chart = MorphologyChartFactory.makeSignalCoMNucleusOutlineChart(activeDataset(), signalCoMs);
+					JFreeChart chart = OutlineChartFactory.makeSignalCoMNucleusOutlineChart(activeDataset(), signalCoMs);
 					chartPanel.setChart(chart);
 					chartPanel.restoreAutoBounds();
 				} else { // no consensus to display

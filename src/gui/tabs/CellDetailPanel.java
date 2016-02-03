@@ -91,6 +91,7 @@ import utility.Utils;
 import analysis.AnalysisDataset;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.OutlineChartFactory;
 import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
@@ -722,7 +723,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					
 					rotationPanel.setEnabled(true);
 					
-					chart = MorphologyChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode, showHook);
+					chart = OutlineChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode, showHook);
 				}
 				
 				panel.clearShapeAnnotations();

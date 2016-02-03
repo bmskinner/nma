@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import analysis.ProfileManager;
 import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
@@ -224,67 +225,70 @@ public class DatasetSegmenter extends AnalysisWorker {
 	/**
 	 * When a population needs to be reanalysed do not offset nuclei or recalculate best fits;
 	 * just get the new median profile 
-	 * TODO: Make this use index proportion method for segment copying
 	 * @param collection the collection of nuclei
 	 * @param sourceCollection the collection with segments to copy
 	 */
 	public boolean reapplyProfiles(CellCollection collection, CellCollection sourceCollection) throws Exception {
 		
 		log(Level.FINE, "Applying existing segmentation profile to population...");
-
-		BorderTag referencePoint   = BorderTag.REFERENCE_POINT;
-
-		// use the same array length as the source collection to avoid segment slippage
-		int profileLength = sourceCollection.getProfileCollection(ProfileType.REGULAR)
-				.getProfile(referencePoint, Constants.MEDIAN) // Median of profile collection 
-				.size(); 
 		
 		
-		// Update the profiles for each of the normal profile types.
-		for(ProfileType type : ProfileType.values()){
-			
-			if(type.equals(ProfileType.FRANKEN)){
-				continue;
-			}
-			
-			
-			// get the empty profile collection from the new CellCollection
-			// TODO: if the target collection is not new, ie we are copying onto
-			// an existing segmenation pattern, then this profile collection will have
-			// offsets
-			ProfileCollection pc = collection.getProfileCollection(type);
+		ProfileManager.copyCollectionOffsets(sourceCollection, collection);
+		
 
-			// Create an aggregate from the nuclei in the collection. 
-			// A new median profile must necessarily result.
-			// By default, the aggregates are created from the reference point
-			pc.createProfileAggregate(collection, type, profileLength);
-
-			// copy the offset keys from the source collection
-			//TODO:
-			// If this is applied to a collection from an entirely difference source,
-			// rather than a child, then the offsets will be completely wrong. In that
-			// instance, we should probably keep the existing offset positions for head
-			// and tail
-			ProfileCollection sc = sourceCollection.getProfileCollection(type);
-
-			for(BorderTag offsetKey : sc.getOffsetKeys()){
-				int offset = sc.getOffset(offsetKey);
-				pc.addOffset(offsetKey, offset);
-				log(Level.FINER, "Setting "+offsetKey+" to "+offset);
-			}
-
-
-			// What happens when the array length is greater in the source collection? 
-			// Segments are added that no longer have an index
-			// We need to scale the segments to the array length of the new collection
-			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
-			
-		}
+//		BorderTag referencePoint   = BorderTag.REFERENCE_POINT;
+//
+//		// use the same array length as the source collection to avoid segment slippage
+//		int profileLength = sourceCollection.getProfileCollection(ProfileType.REGULAR)
+//				.getProfile(referencePoint, Constants.MEDIAN) // Median of profile collection 
+//				.size(); 
+//		
+//		
+//		// Update the profiles for each of the normal profile types.
+//		for(ProfileType type : ProfileType.values()){
+//			
+//			if(type.equals(ProfileType.FRANKEN)){
+//				continue;
+//			}
+//			
+//			
+//			// get the empty profile collection from the new CellCollection
+//			// TODO: if the target collection is not new, ie we are copying onto
+//			// an existing segmenation pattern, then this profile collection will have
+//			// offsets
+//			ProfileCollection pc = collection.getProfileCollection(type);
+//
+//			// Create an aggregate from the nuclei in the collection. 
+//			// A new median profile must necessarily result.
+//			// By default, the aggregates are created from the reference point
+//			pc.createProfileAggregate(collection, type, profileLength);
+//
+//			// copy the offset keys from the source collection
+//			//TODO:
+//			// If this is applied to a collection from an entirely difference source,
+//			// rather than a child, then the offsets will be completely wrong. In that
+//			// instance, we should probably keep the existing offset positions for head
+//			// and tail
+//			ProfileCollection sc = sourceCollection.getProfileCollection(type);
+//
+//			for(BorderTag offsetKey : sc.getOffsetKeys()){
+//				int offset = sc.getOffset(offsetKey);
+//				pc.addOffset(offsetKey, offset);
+//				log(Level.FINER, "Setting "+offsetKey+" to "+offset);
+//			}
+//
+//
+//			// What happens when the array length is greater in the source collection? 
+//			// Segments are added that no longer have an index
+//			// We need to scale the segments to the array length of the new collection
+//			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
+//			
+//		}
 
 		// At this point the collection has only a regular profile collections.
 		// No Frankenprofile has been copied.
 
-		reviseSegments(collection, referencePoint);	
+		reviseSegments(collection, BorderTag.REFERENCE_POINT);	
 
 
 		log(Level.FINE, "Re-profiling complete");
