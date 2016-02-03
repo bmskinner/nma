@@ -21,42 +21,19 @@ package gui.tabs;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import gui.components.ExportableTable;
+import gui.tabs.signals.SignalShellsPanel;
+import gui.tabs.signals.SignalsAnalysisPanel;
 import gui.tabs.signals.SignalsBoxplotPanel;
 import gui.tabs.signals.SignalsHistogramPanel;
 import gui.tabs.signals.SignalsOverviewPanel;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.renderer.category.StandardBarPainter;
-import org.jfree.chart.renderer.category.StatisticalBarRenderer;
-import org.jfree.data.category.CategoryDataset;
-import utility.Constants;
-import analysis.AnalysisDataset;
-import charting.datasets.NuclearSignalDatasetCreator;
-import components.CellCollection;
-import components.nuclear.ShellResult;
 
 public class SignalsDetailPanel extends DetailPanel implements ActionListener, SignalChangeListener {
 
@@ -64,9 +41,9 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 		
 	private SignalsOverviewPanel	overviewPanel; 	//container for chart and stats table
 	private SignalsHistogramPanel 	histogramPanel;
-	private AnalysisPanel	analysisPanel;
-	private SignalsBoxplotPanel	boxplotPanel;
-	private ShellsPanel		shellsPanel;
+	private SignalsAnalysisPanel	analysisPanel;
+	private SignalsBoxplotPanel	    boxplotPanel;
+	private SignalShellsPanel		shellsPanel;
 
 	private JTabbedPane signalsTabPane;
 
@@ -81,24 +58,24 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 
 			signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
 
-			overviewPanel = new SignalsOverviewPanel(programLogger);
-			this.addSubPanel(overviewPanel);
-			signalsTabPane.addTab("Overview", overviewPanel);
-			
-			boxplotPanel = new SignalsBoxplotPanel(programLogger);
-			this.addSubPanel(boxplotPanel);
-			signalsTabPane.addTab("Boxplots", boxplotPanel);
-
+			overviewPanel  = new SignalsOverviewPanel(programLogger);			
+			boxplotPanel   = new SignalsBoxplotPanel(programLogger);
 			histogramPanel = new SignalsHistogramPanel(programLogger);
-			this.addSubPanel(histogramPanel);
-			signalsTabPane.addTab("Signal histograms", histogramPanel);
-
-			shellsPanel = new ShellsPanel();
+			shellsPanel    = new SignalShellsPanel(programLogger);
+			analysisPanel  = new SignalsAnalysisPanel(programLogger);
+			
+			signalsTabPane.addTab("Overview", overviewPanel);
+			signalsTabPane.addTab("Boxplots", boxplotPanel);
+			signalsTabPane.addTab("Histograms", histogramPanel);
 			signalsTabPane.addTab("Shells", shellsPanel);
-
-			analysisPanel = new AnalysisPanel();
 			signalsTabPane.addTab("Detection settings", analysisPanel);
 
+			this.addSubPanel(overviewPanel);
+			this.addSubPanel(boxplotPanel);
+			this.addSubPanel(histogramPanel);
+			this.addSubPanel(shellsPanel);
+			this.addSubPanel(analysisPanel);
+			
 			this.add(signalsTabPane, BorderLayout.CENTER);
 			
 		} catch (Exception e){
@@ -177,170 +154,127 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			histogramPanel.update(getDatasets());
 		}
 	}
-        
-
-    protected class AnalysisPanel extends JPanel{
-
-    	private static final long serialVersionUID = 1L;
-
-    	private ExportableTable 		table;			// table for analysis parameters
-    	private JScrollPane scrollPane;
-
-
-    	protected AnalysisPanel(){
-
-    		this.setLayout(new BorderLayout());
-
-    		table  = new ExportableTable(new DefaultTableModel());
-    		table.setAutoCreateColumnsFromModel(false);
-    		table.setEnabled(false);
-    		scrollPane = new JScrollPane(table);
-    		this.add(scrollPane, BorderLayout.CENTER);
-    	}
-    	
-    	/**
-    	 * Update the signal analysis detection settings with the given datasets
-    	 * @param list the datasets
-    	 */
-    	protected void update(List<AnalysisDataset> list){
-    		try{
-    			TableModel model;
-    			if(hasDatasets()){
-
-    				model = NuclearSignalDatasetCreator.createSignalDetectionParametersTable(list);
-    			} else {
-    				model = NuclearSignalDatasetCreator.createSignalDetectionParametersTable(null);
-    			}
-
-    			table.setModel(model);
-    			table.createDefaultColumnsFromModel();
-    		} catch (Exception e){
-    			programLogger.log(Level.SEVERE, "Error updating signal analysis", e);
-    		}
-    	}
-
-    }
-        
-    protected class ShellsPanel extends JPanel{
-
-    	private static final long serialVersionUID = 1L;
-
-    	private ChartPanel 	chartPanel; 
-    	private JLabel 		statusLabel  = new JLabel();
-    	private JButton 	newAnalysis	 = new JButton("Run new shell analysis");
-
-    	protected ShellsPanel(){
-    		this.setLayout(new BorderLayout());
-    		JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
-    		shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
-    		shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
-    		chartPanel = new ChartPanel(shellsChart);
-    		this.add(chartPanel, BorderLayout.CENTER);
-    		
-    		this.add(statusLabel, BorderLayout.NORTH);
-    		statusLabel.setVisible(false);
-    		
-    		newAnalysis.addMouseListener(new MouseAdapter() {
-    			@Override
-    			public void mouseClicked(MouseEvent arg0) {
-    				fireSignalChangeEvent("RunShellAnalysis");
-    			}
-    		});
-    		newAnalysis.setVisible(false);
-    		this.add(newAnalysis, BorderLayout.SOUTH);
-
-
-    	}
-    	
-    	/**
-    	 * Update the shells panel with data from the given datasets
-    	 * @param list the datasets
-    	 */
-    	protected void update(List<AnalysisDataset> list){
-
-    		if(isSingleDataset()){ // single collection is easy
-    			
-//    			AnalysisDataset dataset = list.get(0);
-    			CellCollection collection = activeDataset().getCollection();
-
-    			if(activeDataset().hasShellResult()){ // only if there is something to display
-
-    				CategoryDataset ds = NuclearSignalDatasetCreator.createShellBarChartDataset(list);
-    				JFreeChart shellsChart = ChartFactory.createBarChart(null, "Outer <--- Shell ---> Interior", "Percent", ds);
-    				shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
-    				shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
-    				StatisticalBarRenderer rend = new StatisticalBarRenderer();
-    				rend.setBarPainter(new StandardBarPainter());
-    				rend.setShadowVisible(false);
-    				rend.setErrorIndicatorPaint(Color.black);
-    				rend.setErrorIndicatorStroke(new BasicStroke(2));
-    				shellsChart.getCategoryPlot().setRenderer(rend);
-
-    				for (int j = 0; j < ds.getRowCount(); j++) {
-    					rend.setSeriesVisibleInLegend(j, Boolean.FALSE);
-    					rend.setSeriesStroke(j, new BasicStroke(2));
-    					int index = getIndexFromLabel( (String) ds.getRowKey((j)));
-    					Color colour = activeDataset().getSignalGroupColour(index);
-    					rend.setSeriesPaint(j, colour);
-    				}	
-
-    				chartPanel.setChart(shellsChart);
-    				chartPanel.setVisible(true);
-    				
-    				statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
-    				String label = "";
-    				for(int i=1; i<=activeDataset().getHighestSignalGroup();i++){
-    					ShellResult r = activeDataset().getShellResult(i);
-    						label += "Group "+i+": p="+r.getChiSquare();
-    						String sig 	= r.getChiSquare() < Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL 
-    									? "Significantly different to random at 5% level"
-    									: "Not significantly different to random at 5% level";
-    						
-    						label += "; "+sig+"\n";
-    					
-    				}
-    				statusLabel.setText(label);
-    				statusLabel.setVisible(true);
-    				
-    				
-    				newAnalysis.setVisible(false);
-    				
-    			} else { // no shell analysis available
-
-    				if(collection.hasSignals()){
-    					// if signals, offer to run
-    					makeNoShellAnalysisAvailablePanel(true, collection, "No shell results available"); // allow option to run analysis
-    				} else {
-    					// otherwise don't show button
-    					makeNoShellAnalysisAvailablePanel(false, null, "No signals in population"); // container in tab if no shell chart
-    				}
-    			}
-    		} else {
-    			
-    			// Multiple populations. Do not display
-    			// container in tab if no shell chart
-    			makeNoShellAnalysisAvailablePanel(false, null, "Cannot display shell results for multiple populations");
-    		}
-    	}
-    	
-    	/**
-    	 * Create a panel to display when a shell analysis is not available
-    	 * @param showRunButton should there be an option to run a shell analysis on the dataset
-    	 * @param collection the nucleus collection from the dataset
-    	 * @param label the text to display on the panel
-    	 * @return a panel to put in the shell tab
-    	 */
-    	private void makeNoShellAnalysisAvailablePanel(boolean showRunButton, CellCollection collection, String label){
-    		chartPanel.setVisible(false);
-    		statusLabel.setText(label);
-    		statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-    		statusLabel.setVisible(true);
-
-    		newAnalysis.setVisible(showRunButton);
-
-    		this.revalidate();
-    		this.repaint();
-  
-    	}
-    }
+                
+//    protected class ShellsPanel extends JPanel{
+//
+//    	private static final long serialVersionUID = 1L;
+//
+//    	private ChartPanel 	chartPanel; 
+//    	private JLabel 		statusLabel  = new JLabel();
+//    	private JButton 	newAnalysis	 = new JButton("Run new shell analysis");
+//
+//    	protected ShellsPanel(){
+//    		this.setLayout(new BorderLayout());
+//    		JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
+//    		shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
+//    		shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
+//    		chartPanel = new ChartPanel(shellsChart);
+//    		this.add(chartPanel, BorderLayout.CENTER);
+//    		
+//    		this.add(statusLabel, BorderLayout.NORTH);
+//    		statusLabel.setVisible(false);
+//    		
+//    		newAnalysis.addMouseListener(new MouseAdapter() {
+//    			@Override
+//    			public void mouseClicked(MouseEvent arg0) {
+//    				fireSignalChangeEvent("RunShellAnalysis");
+//    			}
+//    		});
+//    		newAnalysis.setVisible(false);
+//    		this.add(newAnalysis, BorderLayout.SOUTH);
+//
+//
+//    	}
+//    	
+//    	/**
+//    	 * Update the shells panel with data from the given datasets
+//    	 * @param list the datasets
+//    	 */
+//    	protected void update(List<AnalysisDataset> list){
+//
+//    		if(isSingleDataset()){ // single collection is easy
+//    			
+////    			AnalysisDataset dataset = list.get(0);
+//    			CellCollection collection = activeDataset().getCollection();
+//
+//    			if(activeDataset().hasShellResult()){ // only if there is something to display
+//
+//    				CategoryDataset ds = NuclearSignalDatasetCreator.createShellBarChartDataset(list);
+//    				JFreeChart shellsChart = ChartFactory.createBarChart(null, "Outer <--- Shell ---> Interior", "Percent", ds);
+//    				shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
+//    				shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
+//    				StatisticalBarRenderer rend = new StatisticalBarRenderer();
+//    				rend.setBarPainter(new StandardBarPainter());
+//    				rend.setShadowVisible(false);
+//    				rend.setErrorIndicatorPaint(Color.black);
+//    				rend.setErrorIndicatorStroke(new BasicStroke(2));
+//    				shellsChart.getCategoryPlot().setRenderer(rend);
+//
+//    				for (int j = 0; j < ds.getRowCount(); j++) {
+//    					rend.setSeriesVisibleInLegend(j, Boolean.FALSE);
+//    					rend.setSeriesStroke(j, new BasicStroke(2));
+//    					int index = getIndexFromLabel( (String) ds.getRowKey((j)));
+//    					Color colour = activeDataset().getSignalGroupColour(index);
+//    					rend.setSeriesPaint(j, colour);
+//    				}	
+//
+//    				chartPanel.setChart(shellsChart);
+//    				chartPanel.setVisible(true);
+//    				
+//    				statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
+//    				String label = "";
+//    				for(int i=1; i<=activeDataset().getHighestSignalGroup();i++){
+//    					ShellResult r = activeDataset().getShellResult(i);
+//    						label += "Group "+i+": p="+r.getChiSquare();
+//    						String sig 	= r.getChiSquare() < Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL 
+//    									? "Significantly different to random at 5% level"
+//    									: "Not significantly different to random at 5% level";
+//    						
+//    						label += "; "+sig+"\n";
+//    					
+//    				}
+//    				statusLabel.setText(label);
+//    				statusLabel.setVisible(true);
+//    				
+//    				
+//    				newAnalysis.setVisible(false);
+//    				
+//    			} else { // no shell analysis available
+//
+//    				if(collection.hasSignals()){
+//    					// if signals, offer to run
+//    					makeNoShellAnalysisAvailablePanel(true, collection, "No shell results available"); // allow option to run analysis
+//    				} else {
+//    					// otherwise don't show button
+//    					makeNoShellAnalysisAvailablePanel(false, null, "No signals in population"); // container in tab if no shell chart
+//    				}
+//    			}
+//    		} else {
+//    			
+//    			// Multiple populations. Do not display
+//    			// container in tab if no shell chart
+//    			makeNoShellAnalysisAvailablePanel(false, null, "Cannot display shell results for multiple populations");
+//    		}
+//    	}
+//    	
+//    	/**
+//    	 * Create a panel to display when a shell analysis is not available
+//    	 * @param showRunButton should there be an option to run a shell analysis on the dataset
+//    	 * @param collection the nucleus collection from the dataset
+//    	 * @param label the text to display on the panel
+//    	 * @return a panel to put in the shell tab
+//    	 */
+//    	private void makeNoShellAnalysisAvailablePanel(boolean showRunButton, CellCollection collection, String label){
+//    		chartPanel.setVisible(false);
+//    		statusLabel.setText(label);
+//    		statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+//    		statusLabel.setVisible(true);
+//
+//    		newAnalysis.setVisible(showRunButton);
+//
+//    		this.revalidate();
+//    		this.repaint();
+//  
+//    	}
+//    }
 }
