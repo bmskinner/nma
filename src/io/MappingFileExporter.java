@@ -51,7 +51,7 @@ public class MappingFileExporter {
 			double y = com.getY()+originalPosition[CellularComponent.Y_BASE];
 			
 			
-			IJ.log("   Found position: "+x+"-"+y);
+//			IJ.log("   Found position: "+x+"-"+y);
 			
 			try{
 			

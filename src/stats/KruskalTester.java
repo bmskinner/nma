@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 
 import jdistlib.disttest.DistributionTest;
 import analysis.AnalysisDataset;
+import analysis.ProfileManager;
 import analysis.nucleus.DatasetSegmenter;
 import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
 import components.generic.BorderTag;
@@ -103,13 +104,18 @@ public class KruskalTester {
 			AnalysisDataset copyOfTwo = two.duplicate();
 			
 			/*
+			 * Ensure that the profile collections have the same lengths in each collection
+			 */
+			ProfileManager.copyCollectionOffsets(one.getCollection(), copyOfTwo.getCollection());
+			
+			/*
 			 * This is taken from MorphologyAnalysis.
 			 * 
 			 * Create a new ProfileCollection based on the segments from dataset one
 			 */
 			ProfileCollection pc = one.getCollection().getProfileCollection(ProfileType.REGULAR);
-			List<NucleusBorderSegment> segments = pc.getSegments(tag);
-			ProfileCollection frankenCollection = new ProfileCollection();
+//			List<NucleusBorderSegment> segments = pc.getSegments(tag);
+//			ProfileCollection frankenCollection = new ProfileCollection();
 			
 			
 			/*
@@ -120,8 +126,6 @@ public class KruskalTester {
 			DatasetSegmenter segmenter = new DatasetSegmenter(one, MorphologyAnalysisMode.NEW, programLogger);
 			DatasetSegmenter.SegmentFitter fitter = segmenter.new SegmentFitter(medianProfile);
 			
-//			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
-
 			for(Nucleus n : copyOfTwo.getCollection().getNuclei()){ 
 				fitter.fit(n, pc);
 
@@ -129,16 +133,17 @@ public class KruskalTester {
 				Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
 				n.setProfile(ProfileType.FRANKEN, new SegmentedProfile(recombinedProfile));
 			}
-
+			
+			ProfileCollection frankenCollection = copyOfTwo.getCollection().getProfileCollection(ProfileType.FRANKEN);
 			frankenCollection.createProfileAggregate(copyOfTwo.getCollection(), ProfileType.FRANKEN, (int) one.getCollection().getMedianArrayLength());
 			
-			for(BorderTag key : pc.getOffsetKeys()){
-				frankenCollection.addOffset(key, pc.getOffset(key));
-			}
-			frankenCollection.addSegments(tag, segments);
+//			for(BorderTag key : pc.getOffsetKeys()){
+//				frankenCollection.addOffset(key, pc.getOffset(key));
+//			}
+//			frankenCollection.addSegments(tag, segments);
 
 			// Put the new collection into the duplicate dataset
-			copyOfTwo.getCollection().setProfileCollection(ProfileType.FRANKEN, frankenCollection);
+//			copyOfTwo.getCollection().setProfileCollection(ProfileType.FRANKEN, frankenCollection);
 			
 			/*
 			 * This returns to the Kruskal test above, but using the franken profiles 

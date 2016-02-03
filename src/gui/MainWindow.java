@@ -635,10 +635,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		if(event.type().equals("RelocateCellsAction")){
 			
 			CountDownLatch latch = new CountDownLatch(1);
-			new RelocateFromFileAction(selectedDataset, MainWindow.this, latch);
-//				latch.await();
-//				programLogger.log(Level.FINE, "All dataset saved");
-			
+			new RelocateFromFileAction(selectedDataset, MainWindow.this, latch);			
 			
 		}
 		
