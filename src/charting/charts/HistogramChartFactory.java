@@ -271,11 +271,11 @@ public class HistogramChartFactory extends AbstractChartFactory {
 			int seriesCount = plot.getDataset().getSeriesCount();
 			for (int j = 0; j < seriesCount; j++) {
 				String name = (String) plot.getDataset().getSeriesKey(j);
-				int seriesGroup = MorphologyChartFactory.getIndexFromLabel(name);
+				int seriesGroup = getIndexFromLabel(name);
 				plot.getRenderer().setSeriesVisibleInLegend(j, false);
 				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
 				Color colour = dataset.getSignalGroupColour(seriesGroup);
-				plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
+				plot.getRenderer().setSeriesPaint(j, colour);
 			}	
 		}
 	}

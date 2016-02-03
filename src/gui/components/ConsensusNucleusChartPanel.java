@@ -36,7 +36,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 
-public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChangeListener{
+public class ConsensusNucleusChartPanel extends FixedAspectRatioChartPanel implements SignalChangeListener{
 
 	private static final long serialVersionUID = 1L;
 	public static final String SOURCE_COMPONENT = "ConsensusNucleusChartPanel"; 
@@ -111,81 +111,87 @@ public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChan
 //		plot.getDomainAxis().setRange(-maxRange, maxRange);				
 //	} 
 	
-	@Override
-	public void restoreAutoBounds() {
-		XYPlot plot = (XYPlot) this.getChart().getPlot();
-		
-		double chartWidth = this.getWidth();
-		double chartHeight = this.getHeight();
-		double aspectRatio = chartWidth / chartHeight;
-		
-		// start with impossible values
-		double xMin = chartWidth;
-		double yMin = chartHeight;
+//	@Override
+//	public void restoreAutoBounds() {
 //		
-		double xMax = 0;
-		double yMax = 0;
-		
-		
-		// get the max and min values of the chart
-		for(int i = 0; i<plot.getDatasetCount();i++){
-			XYDataset dataset = plot.getDataset(i);
-			
-			xMax = DatasetUtilities.findMaximumDomainValue(dataset).doubleValue() > xMax
-					? DatasetUtilities.findMaximumDomainValue(dataset).doubleValue()
-					: xMax;
-			
-			xMin = DatasetUtilities.findMinimumDomainValue(dataset).doubleValue() < xMin
-					? DatasetUtilities.findMinimumDomainValue(dataset).doubleValue()
-					: xMin;
-					
-			yMax = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue() > yMax
-					? DatasetUtilities.findMaximumRangeValue(dataset).doubleValue()
-					: yMax;
-			
-			yMin = DatasetUtilities.findMinimumRangeValue(dataset).doubleValue() < yMin
-					? DatasetUtilities.findMinimumRangeValue(dataset).doubleValue()
-					: yMin;
-		}
-		
-
-		// find the ranges they cover
-		double xRange = xMax - xMin;
-		double yRange = yMax - yMin;
-		
-//		double aspectRatio = xRange / yRange;
-
-		double newXRange = xRange;
-		double newYRange = yRange;
-
-		// test the aspect ratio
-//		IJ.log("Old range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
-		if( (xRange / yRange) > aspectRatio){
-			// width is not enough
-//			IJ.log("Too narrow: "+xRange+", "+yRange+":  aspect ratio "+aspectRatio);
-			newXRange = xRange * 1.1;
-			newYRange = newXRange / aspectRatio;
-		} else {
-			// height is not enough
-//			IJ.log("Too short: "+xRange+", "+yRange+":  aspect ratio "+aspectRatio);
-			newYRange = yRange * 1.1; // add some extra x space
-			newXRange = newYRange * aspectRatio; // get the new Y range
-		}
-		
-
-		// with the new ranges, find the best min and max values to use
-		double xDiff = (newXRange - xRange)/2;
-		double yDiff = (newYRange - yRange)/2;
-
-		xMin -= xDiff;
-		xMax += xDiff;
-		yMin -= yDiff;
-		yMax += yDiff;
-//		IJ.log("New range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
-
-		plot.getRangeAxis().setRange(yMin, yMax);
-		plot.getDomainAxis().setRange(xMin, xMax);				
-	} 
+//		XYPlot plot = (XYPlot) this.getChart().getPlot();
+//		
+//		double chartWidth = this.getWidth();
+//		double chartHeight = this.getHeight();
+//		double aspectRatio = chartWidth / chartHeight;
+//		
+//		// start with impossible values
+//		double xMin = chartWidth;
+//		double yMin = chartHeight;
+////		
+//		double xMax = 0;
+//		double yMax = 0;
+//		
+//		
+//		// get the max and min values of the chart
+//		for(int i = 0; i<plot.getDatasetCount();i++){
+//			XYDataset dataset = plot.getDataset(i);
+//			
+//			if(dataset==null){
+//				return;
+//			}
+//			
+//				xMax = DatasetUtilities.findMaximumDomainValue(dataset).doubleValue() > xMax
+//						? DatasetUtilities.findMaximumDomainValue(dataset).doubleValue()
+//						: xMax;
+//				
+//				xMin = DatasetUtilities.findMinimumDomainValue(dataset).doubleValue() < xMin
+//						? DatasetUtilities.findMinimumDomainValue(dataset).doubleValue()
+//						: xMin;
+//						
+//				yMax = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue() > yMax
+//						? DatasetUtilities.findMaximumRangeValue(dataset).doubleValue()
+//						: yMax;
+//				
+//				yMin = DatasetUtilities.findMinimumRangeValue(dataset).doubleValue() < yMin
+//						? DatasetUtilities.findMinimumRangeValue(dataset).doubleValue()
+//						: yMin;
+//			
+//		}
+//		
+//
+//		// find the ranges they cover
+//		double xRange = xMax - xMin;
+//		double yRange = yMax - yMin;
+//		
+////		double aspectRatio = xRange / yRange;
+//
+//		double newXRange = xRange;
+//		double newYRange = yRange;
+//
+//		// test the aspect ratio
+////		IJ.log("Old range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
+//		if( (xRange / yRange) > aspectRatio){
+//			// width is not enough
+////			IJ.log("Too narrow: "+xRange+", "+yRange+":  aspect ratio "+aspectRatio);
+//			newXRange = xRange * 1.1;
+//			newYRange = newXRange / aspectRatio;
+//		} else {
+//			// height is not enough
+////			IJ.log("Too short: "+xRange+", "+yRange+":  aspect ratio "+aspectRatio);
+//			newYRange = yRange * 1.1; // add some extra x space
+//			newXRange = newYRange * aspectRatio; // get the new Y range
+//		}
+//		
+//
+//		// with the new ranges, find the best min and max values to use
+//		double xDiff = (newXRange - xRange)/2;
+//		double yDiff = (newYRange - yRange)/2;
+//
+//		xMin -= xDiff;
+//		xMax += xDiff;
+//		yMin -= yDiff;
+//		yMax += yDiff;
+////		IJ.log("New range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
+//
+//		plot.getRangeAxis().setRange(yMin, yMax);
+//		plot.getDomainAxis().setRange(xMin, xMax);				
+//	} 
 	
 	@Override
 	//override the default zoom to keep aspect ratio

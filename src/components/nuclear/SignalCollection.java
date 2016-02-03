@@ -47,7 +47,7 @@ public class SignalCollection implements Serializable {
 	/**
 	 * Holds the signals
 	 */
-	private Map<Integer, ArrayList<NuclearSignal>> collection = new HashMap<Integer, ArrayList<NuclearSignal>>();
+	private Map<Integer, List<NuclearSignal>> collection = new HashMap<Integer, List<NuclearSignal>>();
 	
 	// the files that hold the image for the given channel
 	private Map<Integer, File> sourceFiles = new HashMap<Integer, File>(0);
@@ -99,7 +99,7 @@ public class SignalCollection implements Serializable {
 	 * @param sourceFile the file the signals originated from
 	 * @param sourceChannel the channel the signals originated from
 	 */
-	public void addSignalGroup(ArrayList<NuclearSignal> list, int signalGroup, File sourceFile, int sourceChannel){
+	public void addSignalGroup(List<NuclearSignal> list, int signalGroup, File sourceFile, int sourceChannel){
 		if(list==null || Integer.valueOf(sourceChannel)==null || sourceFile==null || Integer.valueOf(signalGroup)==null){
 			throw new IllegalArgumentException("Signal list or channel is null");
 		}

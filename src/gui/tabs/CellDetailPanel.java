@@ -23,7 +23,7 @@ import gui.InterfaceEvent.InterfaceMethod;
 import gui.RotationMode;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import gui.components.CellBackgroundChartPanel;
+import gui.components.FixedAspectRatioChartPanel;
 import gui.components.ColourSelecter;
 import gui.components.DraggableOverlayChartPanel;
 import gui.components.ExportableTable;
@@ -83,6 +83,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.xy.XYDataset;
 
@@ -97,10 +98,12 @@ import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.Cell;
+import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclear.BorderPoint;
+import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
@@ -253,10 +256,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	 */
 	private void updateCell(Cell cell){
 		
-		cellStatsPanel.update(cell);
-		outlinePanel.update(cell);
-		profilePanel.update(cell);
 		signalListPanel.update(cell);
+		cellStatsPanel.update(cell);
+		profilePanel.update(cell);
+		outlinePanel.update(cell);
+		
+		
 	}
 	
 	
@@ -650,10 +655,10 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		private RotationSelectionSettingsPanel rotationPanel;
 
 		private JCheckBox showHookHump = new JCheckBox("Show hook and hump ROIs");
-		private CellBackgroundChartPanel panel;
+		private FixedAspectRatioChartPanel panel;
 		
-		boolean drawPointOverlay = false; // debugging
-		private ShapeOverlay overlay = new ShapeOverlay();
+//		boolean drawPointOverlay = false; // debugging
+//		private ShapeOverlay overlay = new ShapeOverlay();
 		
 		protected OutlinePanel(){
 			
@@ -673,8 +678,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 			this.add(settingsPanel, BorderLayout.NORTH);
 			
-			panel = new CellBackgroundChartPanel(chart);
-			panel.addOverlay(overlay);
+			panel = new FixedAspectRatioChartPanel(chart);
+//			panel.addOverlay(overlay);
 			panel.addComponentListener(new ComponentAdapter() {
 				@Override
 				public void componentResized(ComponentEvent e) {
@@ -695,17 +700,18 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 		}
 		
-		public void drawCellBackgroundImage(File f, int channel){
-			panel.drawImageAsAnnotation(f, channel);
-		}
+//		public void drawCellBackgroundImage(File f, int channel){
+//			panel.drawImageAsAnnotation(f, channel);
+//		}
 				
 		protected void update(Cell cell){
 
 			RotationMode rotateMode = rotationPanel.getSelected();
 			boolean showHook = showHookHump.isSelected();
-			panel.setCell(cell);
 			
-			panel.removeOverlay(overlay);
+//			panel.setCell(cell);
+			
+//			panel.removeOverlay(overlay);
 			
 			try{
 				JFreeChart chart;
@@ -715,6 +721,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 				} else {
 					
+					CellularComponent component = signalListPanel.getActiveComponent();
+					
 					if(activeDataset().getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
 						showHookHump.setEnabled(true);
 					} else {
@@ -723,31 +731,32 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					
 					rotationPanel.setEnabled(true);
 					
-					chart = OutlineChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode, showHook);
+					chart = OutlineChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode, showHook, component);
 				}
 				
-				panel.clearShapeAnnotations();
 				panel.setChart(chart);
-				if(rotateMode.equals(RotationMode.ACTUAL)){
-					panel.drawNucleusImageAsAnnotation();
-				} else {
-					panel.clearShapeAnnotations();
-				}
+//				panel.clearShapeAnnotations();
+//				panel.setChart(chart);
+//				if(rotateMode.equals(RotationMode.ACTUAL)){
+//					panel.drawNucleusImageAsAnnotation();
+//				} else {
+//					panel.clearShapeAnnotations();
+//				}
 				
 				
 				
 				if(cell!=null){
 					panel.restoreAutoBounds();
 										
-					overlay.clearShapes();
-
-					for(BorderPoint p : cell.getNucleus().getBorderList()){
-						Shape s = new Ellipse2D.Double(p.getX(), p.getY(), 1d, 1d);
-						ShapeOverlayObject ov = new ShapeOverlayObject(s);
-						ov.setVisible(drawPointOverlay);
-						overlay.addShape(ov);
-					}
-					panel.addOverlay(overlay);
+//					overlay.clearShapes();
+//
+//					for(BorderPoint p : cell.getNucleus().getBorderList()){
+//						Shape s = new Ellipse2D.Double(p.getX(), p.getY(), 1d, 1d);
+//						ShapeOverlayObject ov = new ShapeOverlayObject(s);
+//						ov.setVisible(drawPointOverlay);
+//						overlay.addShape(ov);
+//					}
+//					panel.addOverlay(overlay);
 				}
 				
 			} catch(Exception e){
@@ -981,7 +990,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	protected class SignalListPanel extends JPanel implements ListSelectionListener {
 		
 		private static final long serialVersionUID = 1L;
-//		private ExportableTable table; // individual cell stats
+		
+		private CellularComponent activeComponent; 
 		
 		private JList<String> signalList;
 		private JScrollPane scrollPane;
@@ -1010,10 +1020,17 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 			this.add(scrollPane, BorderLayout.CENTER);
 		}
+		
+		public CellularComponent getActiveComponent(){
+			return this.activeComponent;
+		}
 						
 		protected void update(Cell cell){
 
 			if(cell!=null){
+				
+				activeComponent = activeCell.getNucleus();
+				
 				try {
 					DefaultListModel<String> model = new DefaultListModel<String>();
 					model.addElement("Nucleus");
@@ -1052,30 +1069,36 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				String signalGroupName = signalList.getModel().getElementAt(row);
 
 				if(signalGroupName.equals("Nucleus")){
-
-					File file =  activeCell.getNucleus().getSourceFile();
-					if(file.exists()){
-
-						outlinePanel.drawCellBackgroundImage(file, Constants.COUNTERSTAIN);
-
-					}
+					
+					activeComponent = activeCell.getNucleus();
+					
+//					File file =  activeCell.getNucleus().getSourceFile();
+//					if(file.exists()){
+//
+//						outlinePanel.drawCellBackgroundImage(file, Constants.COUNTERSTAIN);
+//
+//					}
 
 				} else {
 
 					int signalGroup = activeCell.getNucleus().getSignalCollection().getSignalGroup(signalGroupName);
-					File file = activeCell.getNucleus().getSignalCollection().getSourceFile(signalGroup);
-					int channel = activeCell.getNucleus().getSignalCollection().getSignalChannel(signalGroup);
-					int stack = Constants.rgbToStack(channel);
+//					File file       = activeCell.getNucleus().getSignalCollection().getSourceFile(signalGroup);
+//					int channel     = activeCell.getNucleus().getSignalCollection().getSignalChannel(signalGroup);
+//					int stack       = Constants.rgbToStack(channel);
 
-					if(file.exists()){
-
-						// find the channel of the signal
-						outlinePanel.drawCellBackgroundImage(file, stack);
-
-
+					for(NuclearSignal n : activeCell.getNucleus().getSignalCollection().getSignals(signalGroup)){
+						activeComponent = n;
 					}
+					
+//					if(file.exists()){
+//
+//						// find the channel of the signal
+//						outlinePanel.drawCellBackgroundImage(file, stack);
+//
+//
+//					}
 				}
-			
+				outlinePanel.update(activeCell);
 			}
 			
 		}

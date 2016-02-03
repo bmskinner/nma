@@ -18,6 +18,8 @@
  *******************************************************************************/
 package components;
 
+import ij.process.ImageProcessor;
+
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.List;
@@ -75,6 +77,14 @@ public interface CellularComponent {
 	public void setSourceFile(File sourceFile);
 		
 	public int getChannel();
+	
+	/**
+	 * Get the image from which the component was detected. Opens
+	 * the image via the ImageImporter, fetches the appropriate
+	 * channel and inverts it
+	 * @return
+	 */
+	public ImageProcessor getImage();
 
 	public void setChannel(int channel);
 	

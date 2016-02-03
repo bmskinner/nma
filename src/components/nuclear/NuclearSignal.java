@@ -43,7 +43,7 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 
 	private int closestNuclearBorderPoint;
 	
-	public NuclearSignal(Roi roi, double area, double feret, double perimeter, XYPoint centreOfMass, String origin){
+	public NuclearSignal(Roi roi, double area, double feret, double perimeter, XYPoint centreOfMass){
 		super(roi);
 		
 		this.setStatistic(SignalStatistic.AREA, area);

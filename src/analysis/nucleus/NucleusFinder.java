@@ -241,6 +241,7 @@ public class NucleusFinder {
 			  currentNucleus.setStatistic(NucleusStatistic.AREA,      values.get("Area"));
 			  currentNucleus.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
 			  currentNucleus.setStatistic(NucleusStatistic.PERIMETER, values.get("Perim"));
+			  currentNucleus.setChannel(analysisOptions.getChannel());
 			  
 			  currentNucleus.setScale(analysisOptions.getScale());
 		

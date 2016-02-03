@@ -14,8 +14,11 @@ import components.generic.MeasurementScale;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import ij.IJ;
+import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
+import io.ImageImporter;
 import stats.PlottableStatistic;
 import stats.Stats;
 import utility.Constants;
@@ -151,6 +154,23 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	
 	public String getSourceFileName(){
 		return this.sourceFileName;
+	}
+	
+	public ImageProcessor getImage(){
+
+		if(getSourceFile().exists()){
+			ImageStack imageStack = ImageImporter.importImage(getSourceFile());
+
+			// Get the stack, make greyscale and invert
+			int stack = Constants.rgbToStack(getChannel());
+
+			ImageProcessor ip = imageStack.getProcessor(stack);
+			ip.invert();	
+
+			return ip;
+		} else {
+			return null;
+		}
 	}
 
 	public void setPosition(double[] position) {

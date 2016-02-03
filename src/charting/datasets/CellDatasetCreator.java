@@ -66,8 +66,11 @@ public class CellDatasetCreator {
 			
 			Nucleus n = cell.getNucleus();
 			
-			fieldNames.add("Image");
+			fieldNames.add("Source image");
 			rowData.add(n.getPathAndNumber());
+			
+			fieldNames.add("Source channel");
+			rowData.add(n.getChannel());
 			
 			fieldNames.add("Scale (um/pixel)");
 			rowData.add(n.getScale());
@@ -107,8 +110,7 @@ public class CellDatasetCreator {
 					int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
 					rowData.add(index);
 				}
-			} else {
-			}
+			} 
 
 			// add info for signals
 			for(int signalGroup : n.getSignalGroups()){
@@ -124,6 +126,9 @@ public class CellDatasetCreator {
 				
 				fieldNames.add("Source image");
 				rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
+				
+				fieldNames.add("Source channel");
+				rowData.add(n.getSignalCollection().getSourceChannel(signalGroup));
 				
 				fieldNames.add("Number of signals");
 				rowData.add(n.getSignalCount(signalGroup));
@@ -147,20 +152,6 @@ public class CellDatasetCreator {
 					fieldNames.add("Signal CoM");
 					rowData.add(s.getCentreOfMass().toString());
 					
-//					fieldNames.add("Signal area");
-//					rowData.add(s.getStatistic(SignalStatistic.AREA)
-//							+" ("
-//							+ df.format(Utils.micronArea(s.getStatistic(SignalStatistic.AREA), n.getScale()))
-//							+" microns)");
-//					
-//					fieldNames.add("Signal CoM");
-//					
-//					int comX = s.getCentreOfMass().getXAsInt()+ (int) n.getPosition()[CellularComponent.X_BASE];
-//					int comY = s.getCentreOfMass().getYAsInt()+ (int) n.getPosition()[CellularComponent.Y_BASE];
-//					rowData.add(comX+", "+comY);
-//					
-//					fieldNames.add("Signal angle");
-//					rowData.add(s.getStatistic(SignalStatistic.ANGLE));
 				}			
 				
 			}

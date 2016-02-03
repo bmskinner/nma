@@ -76,7 +76,7 @@ public class SignalFinder {
 	 * @param n the nucleus
 	 * @throws Exception 
 	 */
-	public ArrayList<NuclearSignal> detectSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
+	public List<NuclearSignal> detectSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 		
 		options.setThreshold(minThreshold); // reset to default;
 		
@@ -124,7 +124,7 @@ public class SignalFinder {
 	 * @param n the nucleus
 	 * @throws Exception 
 	 */
-	private ArrayList<NuclearSignal> detectForwardThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
+	private List<NuclearSignal> detectForwardThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 //		SignalCollection signalCollection = n.getSignalCollection();
 		
 		// choose the right stack number for the channel
@@ -145,7 +145,7 @@ public class SignalFinder {
 		}
 		List<Roi> roiList = detector.getRoiList();
 
-		ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
+		List<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
 
 		if(!roiList.isEmpty()){
 			
@@ -161,14 +161,21 @@ public class SignalFinder {
 						values.get("Feret"), 
 						values.get("Perim"), 
 						new XYPoint(values.get("XM")-n.getPosition()[CellularComponent.X_BASE], 
-									values.get("YM")-n.getPosition()[CellularComponent.Y_BASE]),
-						sourceFile.getAbsolutePath());
+									values.get("YM")-n.getPosition()[CellularComponent.Y_BASE])
+						);
 
 				// only keep the signal if it is within the nucleus
-				if(Utils.createPolygon(n).contains(	(float) s.getCentreOfMass().getX(), 
-													(float) s.getCentreOfMass().getY())){
+				if(n.containsPoint(s.getCentreOfMass())){
 					s.setSourceFile(sourceFile);
+					s.setChannel(channel);
+					
+					double xbase     = r.getXBase();
+					double ybase     = r.getYBase();
+					Rectangle bounds = r.getBounds();
+					double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
+					s.setPosition(originalPosition);
 					signals.add(s);
+					
 				}
 				
 			}
@@ -177,6 +184,43 @@ public class SignalFinder {
 		}
 		return signals;
 	}
+	
+//	private List<NuclearSignal> findSignalsFromRois(List<Roi> roiList, Nucleus n){
+//		List<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
+//
+//		if(!roiList.isEmpty()){
+//			
+//			programLogger.log(Level.FINE, roiList.size()+" signals in stack "+stackNumber);
+//
+//			for( Roi r : roiList){
+//				
+//				StatsMap values = detector.measure(r, stack);
+//				
+//				// Offset the centre of mass of the signal to match the nucleus offset
+//				NuclearSignal s = new NuclearSignal( r, 
+//						values.get("Area"), 
+//						values.get("Feret"), 
+//						values.get("Perim"), 
+//						new XYPoint(values.get("XM")-n.getPosition()[CellularComponent.X_BASE], 
+//									values.get("YM")-n.getPosition()[CellularComponent.Y_BASE])
+//						);
+//
+//				// only keep the signal if it is within the nucleus
+//				if(n.containsPoint(s.getCentreOfMass())){
+//					s.setSourceFile(sourceFile);
+//					s.setChannel(channel);
+//					
+//					double xbase     = r.getXBase();
+//					double ybase     = r.getYBase();
+//					Rectangle bounds = r.getBounds();
+//					double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
+//					s.setPosition(originalPosition);
+//					signals.add(s);
+//				}
+//				
+//			}
+//			return signals;
+//	}
 	
 	/**
 	 * Detect a signal in a given stack by reverse thresholding
@@ -191,7 +235,7 @@ public class SignalFinder {
 	 * @param n the nucleus
 	 * @throws Exception 
 	 */
-	private ArrayList<NuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
+	private List<NuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 		
 //		SignalCollection signalCollection = n.getSignalCollection();
 		programLogger.log(Level.INFO, "Beginning reverse detection for nucleus");
@@ -263,7 +307,7 @@ public class SignalFinder {
 	 * and set it as the appropriate forward threshold for the nucleus.  
 	 * @throws Exception 
 	 */
-	private ArrayList<NuclearSignal> detectHistogramThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
+	private List<NuclearSignal> detectHistogramThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 		programLogger.log(Level.FINE, "Beginning histogram detection for nucleus");
 
 		// choose the right stack number for the channel

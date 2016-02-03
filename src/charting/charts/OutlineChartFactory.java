@@ -2,31 +2,40 @@ package charting.charts;
 
 import gui.RotationMode;
 import gui.components.ColourSelecter;
+import ij.ImageStack;
+import ij.process.ImageProcessor;
+import io.ImageImporter;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.ui.Layer;
 
+import utility.Constants;
 import components.Cell;
+import components.CellularComponent;
 import components.generic.BorderTag;
 import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
-
 import analysis.AnalysisDataset;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
@@ -42,7 +51,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart makeSignalCoMNucleusOutlineChart(AnalysisDataset dataset, XYDataset signalCoMs) throws Exception{
+	public static JFreeChart makeSignalCoMNucleusOutlineChart(AnalysisDataset dataset) throws Exception{
+		
+		if( ! dataset.getCollection().hasConsensusNucleus()){
+			return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+		}
+		
+		
+		XYDataset signalCoMs = NuclearSignalDatasetCreator.createSignalCoMDataset(dataset);
+		
 		JFreeChart chart = ConsensusNucleusChartFactory.makeNucleusOutlineChart(dataset);
 
 		XYPlot plot = chart.getXYPlot();
@@ -94,7 +111,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset, RotationMode rotateMode, boolean showhookHump) throws Exception{
+	public static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset, RotationMode rotateMode, boolean showhookHump, CellularComponent componentToHighlight) throws Exception{
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -103,6 +120,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.getRangeAxis().setInverted(true);
+		
+		if(cell==null){
+			return chart;
+		}
 
 		// make a hash to track the contents of each dataset produced
 		Map<Integer, String> hash = new HashMap<Integer, String>(0); 
@@ -282,11 +303,78 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			}
 			
 			// Add a background image to the plot
-//			addCellImageToPlot(cell, plot);
+			clearShapeAnnotations(plot);
+			
+			if(rotateMode.equals(RotationMode.ACTUAL)){
+				drawImageAsAnnotation(plot, cell, componentToHighlight);
+			}
 			
 
 		}
 		return chart;
+	}
+	
+	/**
+	 * Remove the XYShapeAnnotations from this image
+	 * This will leave all other annotation types.
+	 */
+	private static void clearShapeAnnotations(XYPlot plot){
+		for(  Object a : plot.getAnnotations()){
+			if(a.getClass()==XYShapeAnnotation.class){
+				plot.removeAnnotation( (XYAnnotation) a);
+			}
+		}
+	}
+	
+	/**
+	 * Draw the greyscale image from teh given channel on the plot
+	 * @param imageFile
+	 * @param channel
+	 */
+	private static void drawImageAsAnnotation(XYPlot plot, Cell cell, CellularComponent component){
+		
+		if(component==null){
+			return;
+		}
+
+		ImageProcessor openProcessor = component.getImage();
+
+		if(openProcessor==null){	
+			return;	
+		}
+		
+		double[] positions = cell.getNucleus().getPosition();
+
+		XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
+		
+		int padding = 10;
+		int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
+		int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
+		int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
+		int wideY = (int) (positions[CellularComponent.Y_BASE]-padding);
+
+		wideX = wideX<0 ? 0 : wideX;
+		wideY = wideY<0 ? 0 : wideY;
+
+		openProcessor.setRoi(wideX, wideY, wideW, wideH);
+		openProcessor = openProcessor.crop();
+
+		for(int x=0; x<openProcessor.getWidth(); x++){
+			for(int y=0; y<openProcessor.getHeight(); y++){
+
+				//				int pixel = im.getRGB(x, y);
+				int pixel = openProcessor.get(x, y);
+				Color col = new Color(pixel, pixel, pixel, 255);
+
+				// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
+				Rectangle2D r = new Rectangle2D.Double(x-padding-0.1, y-padding-0.1, 1.2, 1.2);
+				XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+
+				rend.addAnnotation(a, Layer.BACKGROUND);
+			}
+		}
+
+
 	}
 
 }

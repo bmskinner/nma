@@ -201,84 +201,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		// the chart is inside a chartPanel; the chartPanel is inside a JPanel
 		// this allows a checkbox panel to be added to the JPanel later
 		chartPanel = new ConsensusNucleusChartPanel(signalsChart);// {
-//			@Override
-//			public void restoreAutoBounds() {
-//				XYPlot plot = (XYPlot) this.getChart().getPlot();
-//				
-//				double chartWidth = this.getWidth();
-//				double chartHeight = this.getHeight();
-//				double aspectRatio = chartWidth / chartHeight;
-//				
-//				// start with impossible values
-//				double xMin = chartWidth;
-//				double yMin = chartHeight;
-////				
-//				double xMax = 0;
-//				double yMax = 0;
-//				
-//				// get the max and min values of the chart
-//				for(int i = 0; i<plot.getDatasetCount();i++){
-//					XYDataset dataset = plot.getDataset(i);
-//
-//					if(DatasetUtilities.findMaximumDomainValue(dataset)!=null){
-//
-//						xMax = DatasetUtilities.findMaximumDomainValue(dataset).doubleValue() > xMax
-//								? DatasetUtilities.findMaximumDomainValue(dataset).doubleValue()
-//										: xMax;
-//
-//						xMin = DatasetUtilities.findMinimumDomainValue(dataset).doubleValue() < xMin
-//								? DatasetUtilities.findMinimumDomainValue(dataset).doubleValue()
-//										: xMin;
-//
-//						yMax = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue() > yMax
-//								? DatasetUtilities.findMaximumRangeValue(dataset).doubleValue()
-//										: yMax;
-//
-//						yMin = DatasetUtilities.findMinimumRangeValue(dataset).doubleValue() < yMin
-//								? DatasetUtilities.findMinimumRangeValue(dataset).doubleValue()
-//										: yMin;
-//					}
-//				}
-//				
-//
-//				// find the ranges they cover
-//				double xRange = xMax - xMin;
-//				double yRange = yMax - yMin;
-//				
-////				double aspectRatio = xRange / yRange;
-//
-//				double newXRange = xRange;
-//				double newYRange = yRange;
-//
-//				// test the aspect ratio
-////				IJ.log("Old range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
-//				if( (xRange / yRange) > aspectRatio){
-//					// width is not enough
-////					IJ.log("Too narrow: "+xRange+", "+yRange+":  aspect ratio "+aspectRatio);
-//					newXRange = xRange * 1.1;
-//					newYRange = newXRange / aspectRatio;
-//				} else {
-//					// height is not enough
-////					IJ.log("Too short: "+xRange+", "+yRange+":  aspect ratio "+aspectRatio);
-//					newYRange = yRange * 1.1; // add some extra x space
-//					newXRange = newYRange * aspectRatio; // get the new Y range
-//				}
-//				
-//
-//				// with the new ranges, find the best min and max values to use
-//				double xDiff = (newXRange - xRange)/2;
-//				double yDiff = (newYRange - yRange)/2;
-//
-//				xMin -= xDiff;
-//				xMax += xDiff;
-//				yMin -= yDiff;
-//				yMax += yDiff;
-////				IJ.log("New range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
-//
-//				plot.getRangeAxis().setRange(yMin, yMax);
-//				plot.getDomainAxis().setRange(xMin, xMax);				
-//			} 
-//		};
 		panel.add(chartPanel, BorderLayout.CENTER);
 		
 		
@@ -422,30 +344,19 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	
 	private void updateSignalConsensusChart(){
 		try {
-
+			JFreeChart chart;
 			if(isSingleDataset()){
-								
-				CellCollection collection = activeDataset().getCollection();
 
-				if(collection.hasConsensusNucleus()){ // if a refold is available
-					
-					XYDataset signalCoMs = NuclearSignalDatasetCreator.createSignalCoMDataset(activeDataset());
-					JFreeChart chart = OutlineChartFactory.makeSignalCoMNucleusOutlineChart(activeDataset(), signalCoMs);
-					chartPanel.setChart(chart);
-					chartPanel.restoreAutoBounds();
-				} else { // no consensus to display
-							
-					JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-					chartPanel.setChart(chart);
-				}
-				
-			} else { // multiple populations
-				
-				JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-				chartPanel.setChart(chart);
-				
-//				consensusAndCheckboxPanel.setVisible(false);
+				chart = OutlineChartFactory.makeSignalCoMNucleusOutlineChart(activeDataset());
+
+			} else { 
+	
+				chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+
 			}
+			
+			chartPanel.setChart(chart);
+			chartPanel.restoreAutoBounds();
 		} catch(Exception e){
 			programLogger.log(Level.SEVERE, "Error updating signals", e);
 		}
