@@ -29,6 +29,7 @@ import gui.actions.DatasetArithmeticAction;
 import gui.actions.FishRemappingAction;
 import gui.actions.MergeCollectionAction;
 import gui.actions.RefoldNucleusAction;
+import gui.actions.RelocateFromFileAction;
 import gui.actions.ReplaceSourceImageDirectoryAction;
 import gui.actions.RunSegmentationAction;
 import gui.actions.NewAnalysisAction;
@@ -619,6 +620,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 //			new ExportDatasetStatsAction();
 			programLogger.log(Level.WARNING, "Function disabled");
 		}
+		
+		if(event.type().equals("RelocateCellsAction")){
+			new RelocateFromFileAction(selectedDataset, MainWindow.this);
+		}
+		
+		
 		
 		if(event.type().equals("ReapplySegmentProfileAction")){
 			

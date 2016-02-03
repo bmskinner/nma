@@ -79,6 +79,16 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		}
 	});
 	
+	@SuppressWarnings("serial")
+	JMenuItem relocateMenuItem = new JMenuItem( new AbstractAction("Relocate cells"){
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("RelocateCellsAction");				
+		}
+	});
+	
+	
+	
 	JMenuItem moveUpMenuItem = new JMenuItem( new AbstractAction("Move up"){
 		private static final long serialVersionUID = 1L;
 		@Override
@@ -160,6 +170,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		this.addSeparator();
 		this.add(saveMenuItem);
 		this.add(extractMenuItem);
+		this.add(relocateMenuItem);
 		this.add(exportStatsMenuItem);
 		this.addSeparator();
 		this.add(replaceFolderMenuItem);
@@ -177,6 +188,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		enableCurate();
 		enableSave();
 		enableExtract();
+		enableRelocateCells();
 		enableMenuUp();
 		enableMenuDown();
 		enableReplaceFolder();
@@ -195,6 +207,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		disableCurate();
 		disableSave();
 		disableExtract();
+		disableRelocateCells();
 		disableMenuUp();
 		disableMenuDown();
 		disableReplaceFolder();
@@ -283,6 +296,14 @@ public class PopulationListPopupMenu extends JPopupMenu {
 	
 	public void disableExportStats(){
 		exportStatsMenuItem.setEnabled(false);
+	}
+	
+	public void enableRelocateCells(){
+		relocateMenuItem.setEnabled(true);
+	}
+	
+	public void disableRelocateCells(){
+		relocateMenuItem.setEnabled(false);
 	}
 	
 	public void enableApplySegmentation(){
