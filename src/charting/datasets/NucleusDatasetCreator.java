@@ -1389,7 +1389,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createModalityProbabililtyDataset(Double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
+	public static XYDataset createModalityProbabililtyDataset(double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -1397,16 +1397,27 @@ public class NucleusDatasetCreator {
 		CellCollection collection = dataset.getCollection();
 		KernelEstimator est = createProfileProbabililtyKernel(xposition, dataset, type);
 		
-		List<Double> xValues = new ArrayList<Double>();
-		List<Double> yValues = new ArrayList<Double>();
+//		List<Double> xValues = new ArrayList<Double>();
+//		List<Double> yValues = new ArrayList<Double>();
+		
+		double[] xvalues = new double[3600];
+		double[] yvalues = new double[3600];
+		
+		double step = 0.1;
 
-		for(double i=0; i<=360; i+=0.1){
-			xValues.add(i);
-			yValues.add(est.getProbability(i));
+//		for(double i=0; i<=360; i+=0.1){
+		for(int i=0; i<xvalues.length; i++){
+			
+			double position = (double) i * step;
+			xvalues[i] = position;
+			yvalues[i] = est.getProbability(position);
+			
+//			xValues.add(i);
+//			yValues.add(est.getProbability(i));
 		}
-
-		double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
-				Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
+		double[][] data = { xvalues, yvalues };
+//		double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
+//				Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
 		
 		
 		ds.addSeries(collection.getName(), data);
@@ -1450,7 +1461,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createModalityValuesDataset(Double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
+	public static XYDataset createModalityValuesDataset(double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
@@ -1474,7 +1485,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static KernelEstimator createProfileProbabililtyKernel(Double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
+	public static KernelEstimator createProfileProbabililtyKernel(double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
 		CellCollection collection = dataset.getCollection();
 		KernelEstimator est = new KernelEstimator(0.001);
 		double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(xposition);

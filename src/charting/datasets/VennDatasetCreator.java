@@ -18,13 +18,9 @@
  *******************************************************************************/
 package charting.datasets;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
 import components.Cell;
-import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
 
 public class VennDatasetCreator {

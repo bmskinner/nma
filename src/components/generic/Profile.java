@@ -76,9 +76,14 @@ public class Profile implements Serializable {
 	public Profile(final Profile p){
 
 		this.array = new double[p.size()];
-		for(int i=0; i<this.array.length; i++){
-			array[i] = p.get(i);
+		
+		int i=0;
+		for(double d : p.array){
+			array[i++] = d;
 		}
+//		for(int i=0; i<this.array.length; i++){
+//			array[i] = p.get(i);
+//		}
 	}
 
 
@@ -91,31 +96,7 @@ public class Profile implements Serializable {
 		return array.length;
 	}
 	
-	/**
-	 * Test if the values in this profile are the same 
-	 * as in the test profile (and have the same position)
-	 * @param test the profile to test
-	 * @return
-	 */
-//	public boolean equals(Profile test){
-//		if(test==null){
-//			return false;
-//		}
-//		if(test.size()!=this.size()){
-//			return false;
-//		}
-//		
-//		for(int i=0;i<this.size();i++){
-//			if(this.get(i)!=test.get(i)){
-//				return false;
-//			}
-//		}
-//		return true;
-//	}
-	
-	
 
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -142,22 +123,15 @@ public class Profile implements Serializable {
 	 * Get the value at the given index
 	 * @param index the index
 	 * @return the value at the index
+	 * @throws Exception 
 	 */
-	public double get(int index){
-		double result = 0;
-
-		try {
-			if(index>=array.length){
-				throw new Exception("Requested value "+index+" is beyond profile end");
-			}
-			result = this.array[index];
-		} catch(Exception e){
-			IJ.log("Cannot get value from profile: "+e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
-			}
+	public double get(int index) {
+		
+		if(index<0 || index >= array.length){
+			throw new IllegalArgumentException("Requested value "+index+" is beyond profile end");
 		}
-		return result;
+		return array[index];
+
 	}
 
 	
@@ -984,7 +958,7 @@ public Profile calculateDeltas(int windowSize){
 	  double[] values = new double[this.size()];
 
 	  for (int i=0; i<array.length; i++) { 
-		  values[i] = Math.log(this.get(i)) / Math.log(base);
+		  values[i] = Math.log(array[i]) / Math.log(base);
 	  }
 	  return new Profile(values);
   }
@@ -998,7 +972,7 @@ public Profile calculateDeltas(int windowSize){
 	  double[] values = new double[this.size()];
 
 	  for (int i=0; i<array.length; i++) { 
-		  values[i] = Math.pow(this.get(i),exponent);
+		  values[i] = Math.pow(array[i],exponent);
 	  }
 	  return new Profile(values);
   }
@@ -1011,7 +985,7 @@ public Profile calculateDeltas(int windowSize){
 	  double[] values = new double[this.size()];
 
 	  for (int i=0; i<array.length; i++) { 
-		  values[i] = Math.abs(this.get(i));
+		  values[i] = Math.abs(array[i]);
 	  }
 	  return new Profile(values);
   }
@@ -1026,7 +1000,7 @@ public Profile calculateDeltas(int windowSize){
 
 	  double total = 0;
 	  for (int i=0; i<array.length; i++) { 
-		  total += this.get(i);
+		  total += array[i];
 		  values[i] = total;
 	  }
 	  return new Profile(values);
@@ -1160,7 +1134,7 @@ public Profile calculateDeltas(int windowSize){
 	  for(double sort :sorted ){
 		  
 		  for(int i=0; i<this.size(); i++){
-			  double value = this.get(i);
+			  double value = array[i];
 			  if(value==sort){
 				  ranks[i] = rank;
 				  break;
@@ -1250,9 +1224,12 @@ public Profile calculateDeltas(int windowSize){
   public void fastFourierTransform(){
 	  FastFourierTransformer f = new FastFourierTransformer(DftNormalization.STANDARD);
 	  
+//	  double[] listArray = new double[array.length];
 	  List<Double> list = new ArrayList<Double>();
+//	  int i=0;
 	  for(double d : array){
 		  list.add(d);
+//		  listArray[i++] = d;
 	  }
 	  list = padListWithZeros(list);
 	  	  
@@ -1276,17 +1253,27 @@ public Profile calculateDeltas(int windowSize){
 	  if(list==null || list.size()==0){
 		  throw new IllegalArgumentException("Profile list is null or empty");
 	  }
-	  Profile result = new Profile(new double[0]);
-	  List<Double> combinedList = new ArrayList<Double>(0);
-
+	  Profile result;
+//	  List<Double> combinedList = new ArrayList<Double>(0);
+	  int totalLength = 0;
 	  for(Profile p : list){
-		  double[] values = p.asArray();
-		  List<Double> valueList = Arrays.asList(Utils.getDoubleFromdouble(values));
-		  combinedList.addAll(valueList);
+		  totalLength += p.array.length;
+	  }
+	  
+	  double[] combinedArray = new double[totalLength];
+	  int i=0;
+	  for(Profile p : list){
+		  for(double d : p.array){
+			  combinedArray[i++] = d;
+		  }
+//		  double[] values = p.array;
+//		  List<Double> valueList = Arrays.asList(Utils.getDoubleFromdouble(values));
+//		  combinedList.addAll(valueList);
 	  }
 
-	  Double[] combinedArray = (Double[]) combinedList.toArray(new Double[0]);
-	  result = new Profile(Utils.getdoubleFromDouble(combinedArray));
+//	  Double[] combinedArray = (Double[]) combinedList.toArray(new Double[0]);
+	  result = new Profile(combinedArray);
+//	  result = new Profile(Utils.getdoubleFromDouble(combinedArray));
 	  return result;
   }
 }

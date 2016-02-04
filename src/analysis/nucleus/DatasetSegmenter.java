@@ -1302,8 +1302,9 @@ public class DatasetSegmenter extends AnalysisWorker {
 		 * @param index the current index being tested
 		 * @param segmentStart the start of the current segment being built
 		 * @return
+		 * @throws Exception 
 		 */
-		private boolean testSegmentEndFound(int index, int segmentStart){
+		private boolean testSegmentEndFound(int index, int segmentStart) throws Exception{
 
 			/*
 			 * The first segment must meet the length limit
