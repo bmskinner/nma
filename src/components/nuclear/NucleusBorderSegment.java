@@ -71,7 +71,15 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	
 	private UUID uuid; // allows keeping a consistent track of segment IDs with a profile
 
-	public NucleusBorderSegment(int startIndex, int endIndex, int total){
+	/**
+	 * Construct with an existing UUID. This allows nucleus segments to directly
+	 * track median profile segments
+	 * @param startIndex 
+	 * @param endIndex
+	 * @param total
+	 * @param id
+	 */
+	public NucleusBorderSegment(int startIndex, int endIndex, int total, UUID id){
 		
 		// ensure that the segment meets minimum length requirements
 		int testLength = 0;
@@ -91,20 +99,19 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		this.endIndex     = endIndex;
 		this.totalLength  = total;
 		this.mergeSources = new ArrayList<NucleusBorderSegment>();
-		this.uuid         = java.util.UUID.randomUUID();
+		this.uuid         = id;
 	}
 	
+	
 	/**
-	 * Construct with an existing UUID. This allows nucleus segments to directly
-	 * track median profile segments
-	 * @param startIndex 
+	 * Construct with a default random id
+	 * @param startIndex
 	 * @param endIndex
 	 * @param total
-	 * @param id
 	 */
-	public NucleusBorderSegment(int startIndex, int endIndex, int total, UUID id){
-		this( startIndex, endIndex, total);
-		this.uuid = id;
+	public NucleusBorderSegment(int startIndex, int endIndex, int total){
+		this( startIndex, endIndex, total, java.util.UUID.randomUUID());
+		
 	}
 
 	/**
@@ -115,7 +122,6 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		this.uuid         = n.getID();
 		this.startIndex   = n.getStartIndex();
 		this.endIndex 	  = n.getEndIndex();
-//		this.name 		  = n.getOldName();
 		this.totalLength  = n.getTotalLength();
 		this.nextSegment  = n.nextSegment();
 		this.prevSegment  = n.prevSegment();
@@ -176,6 +182,8 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	public int getEndIndex(){
 		return this.endIndex;
 	}
+	
+	
 	
 	/**
 	 * Get the index closest to the fraction
@@ -536,6 +544,11 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	 * @param end the new end index
 	 */
 	public boolean update(int startIndex, int endIndex){
+		
+		if(this.startPositionLocked){ // don't allow locked segments to update
+			this.lastFailReason = "Segment locked";
+			return false;
+		}
 		
 		this.lastFailReason = "No fail";
 //		 Check the incoming data

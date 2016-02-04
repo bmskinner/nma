@@ -234,21 +234,6 @@ public class SegmentedProfile extends Profile implements Serializable {
 		return NucleusBorderSegment.copy(result);
 	}
 	
-	/**
-	 * Get the segment assigned to be the first in the list
-	 * @return
-	 */
-//	public NucleusBorderSegment getFirstSegment(){
-//		if(this.firstSegment != null){
-//			return new NucleusBorderSegment(this.firstSegment);
-//		} else {
-//			return null;
-//		}
-//	}
-	
-//	public List<NucleusBorderSegment> getSegmentsFromFirst() throws Exception {
-//		return getSegmentsFrom(getFirstSegment());
-//	}
 	
 	/**
 	 * Get the segment with the given name. Returns null if no segment
@@ -356,6 +341,18 @@ public class SegmentedProfile extends Profile implements Serializable {
 		List<String> result = new ArrayList<String>();
 		for(NucleusBorderSegment seg : this.segments){
 			result.add(seg.getName());
+		}
+		return result;
+	}
+	
+	/**
+	 * Get the names of the segments in the profile
+	 * @return
+	 */
+	public List<UUID> getSegmentIDs(){
+		List<UUID> result = new ArrayList<UUID>();
+		for(NucleusBorderSegment seg : this.segments){
+			result.add(seg.getID());
 		}
 		return result;
 	}
@@ -485,13 +482,13 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @param amount the number of indexes to move
 	 * @return did the update succeed
 	 */
-	public boolean adjustSegmentStart(NucleusBorderSegment segment, int amount){
-		if(!this.contains(segment)){
+	public boolean adjustSegmentStart(UUID id, int amount){
+		if(!this.getSegmentIDs().contains(id)){
 			throw new IllegalArgumentException("Segment is not part of this profile");
 		}
 		
-		// get the segment within this profile, not a copy that looks the same
-		NucleusBorderSegment segmentToUpdate = this.getSegment(segment);
+		// get the segment within this profile, not a copy
+		NucleusBorderSegment segmentToUpdate = this.getSegment(id);
 		
 		int newValue = AbstractCellularComponent.wrapIndex( segmentToUpdate.getStartIndex()+amount, segmentToUpdate.getTotalLength());
 		return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
@@ -503,13 +500,14 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @param amount the number of indexes to move
 	 * @return did the update succeed
 	 */
-	public boolean adjustSegmentEnd(String name, int amount){
-		if(!this.getSegmentNames().contains(name)){
+	public boolean adjustSegmentEnd(UUID id, int amount){
+
+		if(!this.getSegmentIDs().contains(id)){
 			throw new IllegalArgumentException("Segment is not part of this profile");
 		}
 		
 		// get the segment within this profile, not a copy
-		NucleusBorderSegment segmentToUpdate = this.getSegment(name);
+		NucleusBorderSegment segmentToUpdate = this.getSegment(id);
 				
 		int newValue = AbstractCellularComponent.wrapIndex( segmentToUpdate.getEndIndex()+amount, segmentToUpdate.getTotalLength());
 		return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);

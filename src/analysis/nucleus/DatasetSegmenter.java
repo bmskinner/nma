@@ -20,6 +20,7 @@ package analysis.nucleus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -852,7 +853,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 		}
 			
 		/**
-		 * In progress version of fitter for 1.10.0
+		 * 
 		 * @param profile the profile to fit against the median profile
 		 * @return a profile with best-fit segmentation to the median
 		 * @throws Exception 
@@ -875,30 +876,32 @@ public class DatasetSegmenter extends AnalysisWorker {
 			SegmentedProfile tempProfile = new SegmentedProfile(profile);
 			
 			// fit each segment independently
-			for(String name : tempProfile.getSegmentNames()){
+			List<UUID> idList = medianProfile.getSegmentIDs();
+			
+			for(UUID id : idList){
+			
+//			for(String name : tempProfile.getSegmentNames()){
 				
 				// get the current segment
-				NucleusBorderSegment segment = tempProfile.getSegment(name);
+				NucleusBorderSegment segment = tempProfile.getSegment(id);
+//				NucleusBorderSegment segment = tempProfile.getSegment(name);
 				
-				// get the initial score for the segment and log it
+				if( ! segment.isStartPositionLocked()){ //only run the test if this segment is unlocked
+				
+					// get the initial score for the segment and log it
 					double score = compareSegmentationPatterns(medianProfile, tempProfile);
 					log(Level.FINE, segment.toString());
 					log(Level.FINE, "\tInitial score: "+score);
-				
-				// find the best length and offset change
-				// apply them to the profile
-				tempProfile = testLength(tempProfile, name);
-				
-				// copy the best fit profile to the result
-				result 	 = new SegmentedProfile(tempProfile);				
+
+					// find the best length and offset change
+					// apply them to the profile
+					tempProfile = testLength(tempProfile, id);
+
+					// copy the best fit profile to the result
+					result 	 = new SegmentedProfile(tempProfile);		
+				}
 			}
-			
-//			if(debug){
-//				for(String name : result.getSegmentNames()){
-//					fileLogger.log(Level.FINE, "Fitted segment: "+result.getSegment(name).toString());
-//				}
-//			}
-			
+		
 			
 			return result;
 		}
@@ -909,14 +912,14 @@ public class DatasetSegmenter extends AnalysisWorker {
 		 * @param segmnetNumber the segment to test
 		 * @return
 		 */
-		private SegmentedProfile testLength(SegmentedProfile profile, String name) throws Exception {
+		private SegmentedProfile testLength(SegmentedProfile profile, UUID id) throws Exception {
 			
 			// by default, return the same profile that came in
 			SegmentedProfile result = new SegmentedProfile(profile);
 					
 			
 			// the segment in the input profile to work on
-			NucleusBorderSegment segment = profile.getSegment(name);
+			NucleusBorderSegment segment = profile.getSegment(id);
 			
 			
 			// Get the initial score to beat
@@ -949,7 +952,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 //				if(debug){
 //					fileLogger.log(Level.FINE, "\tTesting length change "+changeWindow);
 //				}
-				testProfile = testChange(profile, name, changeWindow);
+				testProfile = testChange(profile, id, changeWindow);
 				double score = compareSegmentationPatterns(medianProfile, testProfile);
 				if(score < bestScore){
 					bestChangeWindow = changeWindow;
@@ -967,7 +970,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 //				if(debug){
 //					fileLogger.log(Level.FINE, "\tTesting length change "+changeValue);
 //				}
-				testProfile = testChange(profile, name, changeValue);
+				testProfile = testChange(profile, id, changeValue);
 				double score = compareSegmentationPatterns(medianProfile, testProfile);
 				if(score < bestScore){
 					result = testProfile;
@@ -977,20 +980,20 @@ public class DatasetSegmenter extends AnalysisWorker {
 			return result;
 		}
 			
-		private SegmentedProfile testChange(SegmentedProfile profile, String name, int changeValue) throws Exception {
+		private SegmentedProfile testChange(SegmentedProfile profile, UUID id, int changeValue) throws Exception {
 			
 			double bestScore = compareSegmentationPatterns(medianProfile, profile);
 			
 			// apply all changes to a fresh copy of the profile
 			SegmentedProfile result = new SegmentedProfile(profile);
 			SegmentedProfile testProfile = new SegmentedProfile(profile);
-			NucleusBorderSegment segment = profile.getSegment(name);
+			NucleusBorderSegment segment = profile.getSegment(id);
 //			if(debug){
 //				fileLogger.log(Level.FINE, "\tTesting length change "+changeValue);
 //			}
 			
 			// not permitted if it violates length constraint
-			if(testProfile.adjustSegmentEnd(name, changeValue)){
+			if(testProfile.adjustSegmentEnd(id, changeValue)){
 				
 				// testProfile should now contain updated segment endpoints
 				SegmentedProfile compareProfile = new SegmentedProfile(testProfile);
