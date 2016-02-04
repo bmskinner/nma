@@ -886,9 +886,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 			// we can't go beyond the end of the next segment anyway, so use that as the cutoff
 			// how far from current end to next segment end?
 			int maximumChange = segment.testLength(segment.getEndIndex(), segment.nextSegment().getEndIndex());	
-//			if(debug){
-//				fileLogger.log(Level.FINE, "\tMin change\t"+minimumChange+"\tMax change "+maximumChange );
-//			}
+
 			
 			/* Trying all possible lengths takes a long time. Try adjusting lengths in a window of 
 			 * <changeWindowSize>, and finding the window with the best fit. Then drop down to individual
@@ -901,9 +899,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 				// find the changeWindow with the best fit, 
 				// apply all changes to a fresh copy of the profile
 				SegmentedProfile testProfile = new SegmentedProfile(profile);
-//				if(debug){
-//					fileLogger.log(Level.FINE, "\tTesting length change "+changeWindow);
-//				}
+
 				testProfile = testChange(profile, id, changeWindow);
 				double score = compareSegmentationPatterns(medianProfile, testProfile);
 				if(score < bestScore){
@@ -911,17 +907,13 @@ public class DatasetSegmenter extends AnalysisWorker {
 				}
 			}
 			
-//			if(debug){
-//				fileLogger.log(Level.FINE, "\tBest fit window is length "+bestChangeWindow );
-//			}
+
 			
 			int halfWindow = changeWindowSize / 2;
 			// now we have the best window,  drop down to a changeValue
 			for(int changeValue = bestChangeWindow - halfWindow; changeValue < bestChangeWindow+halfWindow; changeValue++){
 				SegmentedProfile testProfile = new SegmentedProfile(profile);
-//				if(debug){
-//					fileLogger.log(Level.FINE, "\tTesting length change "+changeValue);
-//				}
+
 				testProfile = testChange(profile, id, changeValue);
 				double score = compareSegmentationPatterns(medianProfile, testProfile);
 				if(score < bestScore){
