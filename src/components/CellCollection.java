@@ -754,14 +754,14 @@ public class CellCollection implements Serializable {
    * @return a list of segment lengths
    * @throws Exception
    */
-  public double[] getSegmentLengths(String segName, MeasurementScale scale) throws Exception{
+  public double[] getSegmentLengths(UUID id, MeasurementScale scale) throws Exception{
 
 	  int count = this.getNucleusCount();
 	  double[] result = new double[count];
 	  int i=0;
 	  
 	  for(Nucleus n : this.getNuclei()){
-		  NucleusBorderSegment segment = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getSegment(segName);
+		  NucleusBorderSegment segment = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getSegment(id);
 		  double perimeterLength = 0;
 		  if(segment!=null){
 			  int indexLength = segment.length();

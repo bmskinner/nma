@@ -328,7 +328,9 @@ public class NucleusDatasetCreator {
 		// rendering order will be first on top
 		
 		// add the segments
-		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
+				.getSegmentedProfile(point)
+				.getOrderedSegments();
 
 		if(normalised){
 			addSegmentsFromProfile(segments, profile, ds, 100, 0);
@@ -388,8 +390,9 @@ public class NucleusDatasetCreator {
 		// rendering order will be first on top
 		
 		// add the segments
-		List<NucleusBorderSegment> segments = collection.getProfileCollection(type).getSegmentedProfile(point).getOrderedSegments();
-//		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
+		List<NucleusBorderSegment> segments = collection.getProfileCollection(type)
+				.getSegmentedProfile(point)
+				.getOrderedSegments();
 		
 //		IJ.log("Adding segments from median angle profile");
 		if(normalised){
@@ -636,7 +639,10 @@ public class NucleusDatasetCreator {
 
 			Profile profile = collection.getProfileCollection(options.getType()).getIQRProfile(options.getTag());
 
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(options.getType()).getSegmentedProfile(options.getTag()).getOrderedSegments();
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(options.getType())
+					.getSegmentedProfile(options.getTag())
+					.getOrderedSegments();
+			
 			XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0);	
 			return ds;
 		} else {
@@ -684,7 +690,9 @@ public class NucleusDatasetCreator {
 		
 		// add the segments (these are the same as in the regular profile collection)
 //		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
-		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
+				.getSegmentedProfile(point)
+				.getOrderedSegments();
 		addSegmentsFromProfile(segments, profile, ds, 100, 0);
 
 		// make the IQR
@@ -797,9 +805,9 @@ public class NucleusDatasetCreator {
 		
 		switch(stat){
 		case DISPLACEMENT:
-			return createSegmentDisplacementDataset(options.getDatasets(), options.getSegName());
+			return createSegmentDisplacementDataset(options.getDatasets(), options.getSegPosition());
 		case LENGTH:
-			return createSegmentLengthDataset(options.getDatasets(), options.getSegName(), options.getScale());
+			return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition(), options.getScale());
 		default:
 			return null;
 		}
@@ -812,43 +820,27 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, String segName, MeasurementScale scale) throws Exception {
+	public static BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, int segPosition, MeasurementScale scale) throws Exception {
 
 		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
 
 			CellCollection collection = collections.get(i).getCollection();
+			
+			NucleusBorderSegment medianSeg = collection
+					.getProfileCollection(ProfileType.REGULAR)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentAt(segPosition);
 
 
 			List<Double> list = new ArrayList<Double>(0);
 
 			for(Nucleus n : collection.getNuclei()){
 				
-				// Get the segment starting from the reference point with the given name
-//				NucleusBorderSegment seg = null;
-//				List<NucleusBorderSegment> segs = n.getAngleProfile(BorderTag.REFERENCE_POINT).getOrderedSegments();
+				NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
+						.getSegment(medianSeg.getID());			
 
-//				NucleusBorderSegment seg2 = n.getAngleProfile().getSegment(segName);
-				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), segName);
-				
-				/*
-				 * Testing code to validate segment ordering is correct
-				 */
-				
-//				IJ.log("Raw: "+seg2.toString());
-//				IJ.log("Ref: "+n.getAngleProfile(BorderTag.REFERENCE_POINT).getSegment(segName).toString());
-//				IJ.log("Ord: "+seg.toString());
-//				
-//				IJ.log("Raw profile:");
-//				IJ.log(n.getAngleProfile().toString());
-//				IJ.log("Ref profile:");
-//				IJ.log(n.getAngleProfile(BorderTag.REFERENCE_POINT).toString());
-//				IJ.log("Ordered Ref profile:");
-//				IJ.log(NucleusBorderSegment.toString(n.getAngleProfile(BorderTag.REFERENCE_POINT).getOrderedSegments()));
-//				
-				
-				
 				
 				double length = 0;
 				if(seg!=null){
@@ -860,7 +852,7 @@ public class NucleusDatasetCreator {
 				list.add(length);
 			}
 
-			dataset.add(list, segName+"_"+i, segName);
+			dataset.add(list, Constants.SEGMENT_PREFIX+segPosition+"_"+i, Constants.SEGMENT_PREFIX+segPosition);
 		}
 		return dataset;
 	}
@@ -872,27 +864,32 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static BoxAndWhiskerCategoryDataset createSegmentDisplacementDataset(List<AnalysisDataset> collections, String segName) throws Exception {
+	public static BoxAndWhiskerCategoryDataset createSegmentDisplacementDataset(List<AnalysisDataset> collections, int segPosition) throws Exception {
 
 		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
 
 			CellCollection collection = collections.get(i).getCollection();
+			
+			NucleusBorderSegment medianSeg = collection
+					.getProfileCollection(ProfileType.REGULAR)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentAt(segPosition);
 
 
 			List<Double> list = new ArrayList<Double>(0);
 
 			for(Nucleus n : collection.getNuclei()){
 				SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
-//				NucleusBorderSegment seg = profile.getSegment(segName);
-				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(profile.getOrderedSegments(), segName);
+				
+				NucleusBorderSegment seg = profile.getSegment(medianSeg.getID());
 				
 				double displacement = profile.getDisplacement(seg);
 				list.add(displacement);
 			}
 
-			dataset.add(list, segName+"_"+i, segName);
+			dataset.add(list, Constants.SEGMENT_PREFIX+segPosition+"_"+i, Constants.SEGMENT_PREFIX+segPosition);
 		}
 		return dataset;
 	}
@@ -1565,18 +1562,13 @@ public class NucleusDatasetCreator {
 	public static XYDataset createFrankenKruskalProfileDataset(ChartOptions options) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
-		
-		AnalysisDataset setOne = options.getDatasets().get(0);
-		AnalysisDataset setTwo = options.getDatasets().get(1);
-	
-//		Profile pvalues = KruskalTester.testCollectionGetPValues(setOne, setTwo, options.getTag(), options.getType());
-		Profile pvalues = KruskalTester.testCollectionGetFrankenPValues(setOne, setTwo, options.getTag(), options.getLogger());
+		Profile pvalues = KruskalTester.testCollectionGetFrankenPValues(options);
 		
 		double[] yvalues = pvalues.asArray();
 		double[] xvalues = pvalues.getPositions(100).asArray();
 		
 		double[][] data = { xvalues, yvalues };
-		ds.addSeries(setOne.getCollection().getName(), data);
+		ds.addSeries(options.firstDataset().getCollection().getName(), data);
 
 		return ds;
 	}

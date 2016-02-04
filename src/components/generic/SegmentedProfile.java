@@ -23,11 +23,9 @@ import ij.IJ;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
+import java.util.UUID;
 
 import utility.Utils;
 import components.nuclear.NucleusBorderSegment;
@@ -156,6 +154,30 @@ public class SegmentedProfile extends Profile implements Serializable {
 	}
 	
 	/**
+	 * Fetch the segment with the given id, or null if not present
+	 * @param id
+	 * @return
+	 */
+	public NucleusBorderSegment getSegment(UUID id){
+		for(NucleusBorderSegment seg : this.segments){
+			if(seg.getID().equals(id)){
+				return seg;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Fetch the segment list ordered to start from the segment with the given id
+	 * @param id
+	 * @return
+	 * @throws Exception
+	 */
+	public List<NucleusBorderSegment> getSegmentsFrom(UUID id) throws Exception {
+		return getSegmentsFrom(getSegment(id));
+	}
+	
+	/**
 	 * Get the segments in order from the given segment
 	 * @param firstSeg
 	 * @return
@@ -238,13 +260,12 @@ public class SegmentedProfile extends Profile implements Serializable {
 			throw new IllegalArgumentException("Requested segment name is null");
 		}
 		
-		NucleusBorderSegment result = null;
 		for(NucleusBorderSegment seg : this.segments){
 			if(seg.getName().equals(name)){
-				result = seg;
+				return seg;
 			}
 		}
-		return result;
+		return null;
 	}
 	
 	/**
@@ -640,8 +661,8 @@ public class SegmentedProfile extends Profile implements Serializable {
 			// invert the segment by swapping start and end
 			int newStart = (this.size()-1) - seg.getEndIndex();
 			int newEnd   = Utils.wrapIndex(newStart+seg.length(), this.size());
-			NucleusBorderSegment newSeg = new NucleusBorderSegment(newStart, newEnd, this.size());
-			newSeg.setName(seg.getName());
+			NucleusBorderSegment newSeg = new NucleusBorderSegment(newStart, newEnd, this.size(), seg.getID());
+//			newSeg.setName(seg.getName());
 			// since the order is reversed, add them to the top of the new list
 			segments.add(0,newSeg);
 		}
@@ -677,7 +698,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		int startIndex = firstSegment.getStartIndex();
 		int endIndex = secondSegment.getEndIndex();
 		NucleusBorderSegment mergedSegment = new NucleusBorderSegment(startIndex, endIndex, this.size());
-		mergedSegment.setName(firstSegment.getName());
+//		mergedSegment.setName(firstSegment.getName());
 		
 		mergedSegment.addMergeSource(firstSegment);
 		mergedSegment.addMergeSource(secondSegment);
@@ -802,16 +823,11 @@ public class SegmentedProfile extends Profile implements Serializable {
 		
 	}
 	
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 * Returns the segments in this profile as a string
-	 */
 	@Override
 	public String toString(){
 		StringBuilder builder = new StringBuilder();
-		for(String name : this.getSegmentNames()){
-			builder.append(this.getSegment(name).toString()+"\n");
+		for(NucleusBorderSegment seg : this.segments){
+			builder.append(seg.toString()+System.getProperty("line.separator"));
 		}
 		return builder.toString();
 	}

@@ -28,6 +28,7 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import charting.options.ChartOptions;
+import utility.Constants;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
@@ -42,27 +43,29 @@ import stats.Stats;
 
 public class NuclearHistogramDatasetCreator {
 	
+	public static final int MIN_ROUNDED = 0;
+	public static final int MAX_ROUNDED = 1;
+	public static final int STEP_SIZE   = 2;
 	
 	public static HistogramDataset createNuclearStatsHistogramDataset(ChartOptions options) throws Exception {
 		HistogramDataset ds = new HistogramDataset();
 		
-		if(options.hasLogger()){
-			options.getLogger().log(Level.FINEST, "Creating histogram dataset: "+options.getStat());
-		}
+			options.log(Level.FINEST, "Creating histogram dataset: "+options.getStat());
+
 		
 		if(options.hasDatasets()){
 
 			for(AnalysisDataset dataset : options.getDatasets()){
 
-				if(options.hasLogger()){
-					options.getLogger().log(Level.FINEST, "  Dataset: "+dataset.getName());
-				}
+				
+					options.log(Level.FINEST, "  Dataset: "+dataset.getName());
+				
 
 				CellCollection collection = dataset.getCollection();
 
-				if(options.hasLogger()){
-					options.getLogger().log(Level.FINEST, "  Stat: "+options.getStat().toString()+"; Scale: "+options.getScale().toString());
-				}
+				
+					options.log(Level.FINEST, "  Stat: "+options.getStat().toString()+"; Scale: "+options.getScale().toString());
+				
 				
 				NucleusStatistic stat = (NucleusStatistic) options.getStat();
 				double[] values = findDatasetValues(dataset, stat, options.getScale()); 
@@ -72,9 +75,7 @@ public class NuclearHistogramDatasetCreator {
 				double min = Stats.min(values);
 				double max = Stats.max(values);
 
-				if(options.hasLogger()){
-					options.getLogger().log(Level.FINEST, "  Min: "+min+"; max: "+max);
-				}
+				options.log(Level.FINEST, "  Min: "+min+"; max: "+max);
 
 				int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
 
@@ -88,18 +89,16 @@ public class NuclearHistogramDatasetCreator {
 				minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
 				minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
 
-				if(options.hasLogger()){
-					options.getLogger().log(Level.FINEST, "  Rounded min: "+minRounded+"; max: "+maxRounded);
-				}
+
+				options.log(Level.FINEST, "  Rounded min: "+minRounded+"; max: "+maxRounded);
+
 
 				int bins = 100;
 
 				ds.addSeries(groupLabel+"_"+collection.getName(), values, bins, minRounded, maxRounded );
 			}
 		}
-		if(options.hasLogger()){
-			options.getLogger().log(Level.FINEST, "Completed histogram dataset");
-		}
+		options.log(Level.FINEST, "Completed histogram dataset");
 		return ds;
 	}
 	
@@ -118,6 +117,35 @@ public class NuclearHistogramDatasetCreator {
 		return values;
 	}
 	
+	
+	private static double[] findMinAndMaxForHistogram(double[] values){
+		double min = Stats.min(values);
+		double max = Stats.max(values);
+
+		int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
+		
+		int roundLog = log-1 == 0 ? log-2 : log-1;
+		double roundAbs = Math.pow(10, roundLog);
+		
+		int binLog = log-2;
+		double stepSize = Math.pow(10, binLog);
+		
+//		IJ.log("   roundLog: "+roundLog);
+//		IJ.log("   round to nearest: "+roundAbs);
+		
+		// use int truncation to round to nearest 100 above max
+		int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
+		maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
+		int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
+		minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
+		minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
+
+		double[] result = new double[3];
+		result[0] = minRounded;
+		result[1] = maxRounded;
+		result[2] = stepSize;
+		return result;
+	}
 	
 	/**
 	 * Make an XY dataset corresponding to the probability density of a given nuclear statistic
@@ -138,32 +166,34 @@ public class NuclearHistogramDatasetCreator {
 			double[] values = findDatasetValues(dataset, stat, scale); 
 			KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values, 0.001);
 	
-			double min = Stats.min(values);
-			double max = Stats.max(values);
-
-			int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
 			
-			int roundLog = log-1 == 0 ? log-2 : log-1;
-			double roundAbs = Math.pow(10, roundLog);
-			
-			int binLog = log-2;
-			double stepSize = Math.pow(10, binLog);
-			
-//			IJ.log("   roundLog: "+roundLog);
-//			IJ.log("   round to nearest: "+roundAbs);
-			
-			// use int truncation to round to nearest 100 above max
-			int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
-			maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
-			int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
-			minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
-			minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
-	
+			double[] minMax = findMinAndMaxForHistogram(values);
+//			double min = Stats.min(values);
+//			double max = Stats.max(values);
+//
+//			int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
+//			
+//			int roundLog = log-1 == 0 ? log-2 : log-1;
+//			double roundAbs = Math.pow(10, roundLog);
+//			
+//			int binLog = log-2;
+//			double stepSize = Math.pow(10, binLog);
+//			
+////			IJ.log("   roundLog: "+roundLog);
+////			IJ.log("   round to nearest: "+roundAbs);
+//			
+//			// use int truncation to round to nearest 100 above max
+//			int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
+//			maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
+//			int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
+//			minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
+//			minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
+//	
 			
 			List<Double> xValues = new ArrayList<Double>();
 			List<Double> yValues = new ArrayList<Double>();
 			
-			for(double i=minMaxRange[0]; i<=minMaxRange[1]; i+=stepSize){
+			for(double i=minMaxRange[0]; i<=minMaxRange[1]; i+=minMax[STEP_SIZE]){
 				xValues.add(i);
 				yValues.add(est.getProbability(i));
 			}
@@ -235,79 +265,79 @@ public class NuclearHistogramDatasetCreator {
 	public static HistogramDataset createSegmentLengthHistogramDataset(ChartOptions options) throws Exception {
 		HistogramDataset ds = new HistogramDataset();
 		
-		if(options.hasLogger()){
-			options.getLogger().log(Level.FINEST, "Creating histogram dataset: "+options.getStat());
+
+		options.log(Level.FINEST, "Creating histogram dataset: "+options.getStat());
+
+		
+		if( ! options.hasDatasets() ){
+			return ds;
 		}
 		
-		if(options.hasDatasets()){
+		for(AnalysisDataset dataset : options.getDatasets()){
 
-			for(AnalysisDataset dataset : options.getDatasets()){
+			options.log(Level.FINEST, "  Dataset: "+dataset.getName());
 
-				if(options.hasLogger()){
-					options.getLogger().log(Level.FINEST, "  Dataset: "+dataset.getName());
+			CellCollection collection = dataset.getCollection();
+			
+			/*
+			 * Find the seg id for the median segment at the requested position
+			 */
+			NucleusBorderSegment medianSeg = collection
+					.getProfileCollection(ProfileType.REGULAR)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentAt(options.getSegPosition());
+
+			
+			/*
+			 * Use the segment id for this collection to fetch the individual nucleus segments
+			 */
+			int count=0;
+			double[] lengths = new double[collection.cellCount()];
+			for(Nucleus n : collection.getNuclei()){
+
+				NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
+						.getSegment(medianSeg.getID());
+
+
+				double length = 0;
+				if(seg!=null){
+					int indexLength = seg.length();
+					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+					length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
+
 				}
-
-				CellCollection collection = dataset.getCollection();
 				
-					
-				int count=0;
-				double[] lengths = new double[collection.cellCount()];
-				for(Nucleus n : collection.getNuclei()){
-//					NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
-					NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
-							n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), options.getSegName()
-						);
-					
-
-					double length = 0;
-					if(seg!=null){
-						int indexLength = seg.length();
-						double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-						length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
-						
-					}
-
-//					int indexLength = seg.length();
-//					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-//					double length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
-					lengths[count++] = length;
-				}
-					
-//				double[] values = findDatasetValues(dataset, options.getStat(), options.getScale()); 
-
-//				String groupLabel = options.getStat().toString();
-
-				double min = Stats.min(lengths);
-				double max = Stats.max(lengths);
-
-				if(options.hasLogger()){
-					options.getLogger().log(Level.FINEST, "  Min: "+min+"; max: "+max);
-				}
-
-				int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
-
-				int roundLog = log-1 == 0 ? log-2 : log-1;
-				double roundAbs = Math.pow(10, roundLog);
-
-				// use int truncation to round to nearest 100 above max
-				int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
-				maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
-				int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
-				minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
-				minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
-
-				if(options.hasLogger()){
-					options.getLogger().log(Level.FINEST, "  Rounded min: "+minRounded+"; max: "+maxRounded);
-				}
-
-				int bins = 100;
-
-				ds.addSeries(options.getSegName()+"_"+collection.getName(), lengths, bins, minRounded, maxRounded );
+				lengths[count++] = length;
 			}
+
+			double min = Stats.min(lengths);
+			double max = Stats.max(lengths);
+
+
+			options.log(Level.FINEST, "  Min: "+min+"; max: "+max);
+
+
+			int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
+
+			int roundLog = log-1 == 0 ? log-2 : log-1;
+			double roundAbs = Math.pow(10, roundLog);
+
+			// use int truncation to round to nearest 100 above max
+			int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
+			maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
+			int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
+			minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
+			minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
+
+				options.log(Level.FINEST, "  Rounded min: "+minRounded+"; max: "+maxRounded);
+
+
+			int bins = 100;
+
+			ds.addSeries(Constants.SEGMENT_PREFIX+options.getSegPosition()+"_"+collection.getName(), lengths, bins, minRounded, maxRounded );
 		}
-		if(options.hasLogger()){
-			options.getLogger().log(Level.FINEST, "Completed histogram dataset");
-		}
+
+		options.log(Level.FINEST, "Completed histogram dataset");
 		return ds;
 	}
 	
@@ -324,13 +354,24 @@ public class NuclearHistogramDatasetCreator {
 		for(AnalysisDataset dataset : options.getDatasets()){
 			CellCollection collection = dataset.getCollection();
 			
+			/*
+			 * Find the seg id for the median segment at the requested position
+			 */
+			NucleusBorderSegment medianSeg = collection
+					.getProfileCollection(ProfileType.REGULAR)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentAt(options.getSegPosition());
+
+			
+			/*
+			 * Use the segment id for this collection to fetch the individual nucleus segments
+			 */
 			int count=0;
 			double[] lengths = new double[collection.cellCount()];
 			for(Nucleus n : collection.getNuclei()){
-//				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
-				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
-						n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), options.getSegName()
-					);
+
+				NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
+						.getSegment(medianSeg.getID());
 
 				int indexLength = seg.length();
 				double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
@@ -349,14 +390,24 @@ public class NuclearHistogramDatasetCreator {
 
 		for(AnalysisDataset dataset : options.getDatasets()){
 			CellCollection collection = dataset.getCollection();
+			/*
+			 * Find the seg id for the median segment at the requested position
+			 */
+			NucleusBorderSegment medianSeg = collection
+					.getProfileCollection(ProfileType.REGULAR)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentAt(options.getSegPosition());
+
 			
+			/*
+			 * Use the segment id for this collection to fetch the individual nucleus segments
+			 */
 			int count=0;
 			double[] lengths = new double[collection.cellCount()];
 			for(Nucleus n : collection.getNuclei()){
-//				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
-				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
-						n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments(), options.getSegName()
-					);
+
+				NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
+						.getSegment(medianSeg.getID());
 				
 				int indexLength = seg.length();
 				double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
@@ -400,7 +451,7 @@ public class NuclearHistogramDatasetCreator {
 					Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
 			
 			
-			ds.addSeries(options.getSegName()+"_"+collection.getName(), data);
+			ds.addSeries(Constants.SEGMENT_PREFIX+options.getSegPosition()+"_"+collection.getName(), data);
 		}
 
 		return ds;

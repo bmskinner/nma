@@ -522,7 +522,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 				prevSeg.setNextSegment(seg);
 			}
 
-			seg.setName(segment.getName());
+//			seg.setName(segment.getName());
 			nucleusSegments.add(seg);
 
 			prevSeg = seg;
@@ -882,10 +882,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 				
 				// get the initial score for the segment and log it
 					double score = compareSegmentationPatterns(medianProfile, tempProfile);
-					log(Level.FINE, "Segment\t"+segment.getName()
-							+"\tLength "+segment.length()
-							+"\t"+segment.getStartIndex()
-							+"-"+segment.getEndIndex() );
+					log(Level.FINE, segment.toString());
 					log(Level.FINE, "\tInitial score: "+score);
 				
 				// find the best length and offset change

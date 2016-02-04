@@ -70,6 +70,7 @@ import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.nuclear.NucleusBorderSegment;
 
 public class SegmentsDetailPanel extends DetailPanel {
 
@@ -422,27 +423,26 @@ public class SegmentsDetailPanel extends DetailPanel {
 			if(checkSegmentCountsMatch(getDatasets())){ // make a boxplot for each segment
 				
 				CellCollection collection = activeDataset().getCollection();
-				int segmentCount = collection.getProfileCollection(ProfileType.REGULAR)
+				List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
 						.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
-						.getSegmentCount();
+						.getOrderedSegments();
 				
 
 				// Get each segment as a boxplot
-				for( int i=0; i<segmentCount; i++){
-					String segName = "Seg_"+i;
+				for(NucleusBorderSegment seg : segments){
 					
 					ChartOptions options = new ChartOptionsBuilder()
 						.setDatasets(getDatasets())
 						.setLogger(programLogger)
 						.setStatistic(SegmentStatistic.LENGTH)
 						.setScale(scale)
-						.setSegName(segName)
+						.setSegPosition(seg.getPosition())
 						.build();
 					
 					JFreeChart boxplot = BoxplotChartFactory.createStatisticBoxplot(options);
 					ExportableChartPanel chartPanel = new ExportableChartPanel(boxplot);
 					chartPanel.setPreferredSize(preferredSize);
-					chartPanels.put(segName, chartPanel);
+					chartPanels.put(seg.getName(), chartPanel);
 					mainPanel.add(chartPanel);							
 				}
 
@@ -543,14 +543,14 @@ public class SegmentsDetailPanel extends DetailPanel {
 			if(checkSegmentCountsMatch(getDatasets())){ // make a histogram for each segment
 
 				CellCollection collection = activeDataset().getCollection();
-				int segmentCount = collection.getProfileCollection(ProfileType.REGULAR)
+				
+				List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
 						.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
-						.getSegmentCount();
+						.getOrderedSegments();
 				
 
 				// Get each segment as a boxplot
-				for( int i=0; i<segmentCount; i++){
-					String segName = "Seg_"+i;
+				for(NucleusBorderSegment seg : segments){
 					
 					ChartOptions options = new ChartOptionsBuilder()
 						.setDatasets(getDatasets())
@@ -558,12 +558,12 @@ public class SegmentsDetailPanel extends DetailPanel {
 						.setStatistic(SegmentStatistic.LENGTH)
 						.setScale(scale)
 						.setUseDensity(useDensity)
-						.setSegName(segName)
+						.setSegPosition(seg.getPosition())
 						.build();
 					
 					JFreeChart chart = HistogramChartFactory.createStatisticHistogram(options);
 					
-					SelectableChartPanel chartPanel = new SelectableChartPanel(chart, segName);
+					SelectableChartPanel chartPanel = new SelectableChartPanel(chart, seg.getName());
 					chartPanel.setPreferredSize(preferredSize);
 					mainPanel.add(chartPanel);							
 				}
@@ -801,17 +801,19 @@ public class SegmentsDetailPanel extends DetailPanel {
 			
 			if(checkSegmentCountsMatch(getDatasets())){
 
-				int segmentCount = activeDataset()
+				List<NucleusBorderSegment> segments = activeDataset()
 						.getCollection()
 						.getProfileCollection(ProfileType.REGULAR)
 						.getSegmentedProfile(BorderTag.REFERENCE_POINT)
-						.getSegmentCount();
+						.getOrderedSegments();
+//						.getSegmentCount();
 
 				for(SegmentStatistic stat : SegmentStatistic.values()){
 
 					// Get each segment as a boxplot
-					for( int i=0; i<segmentCount; i++){
-						String segName = "Seg_"+i;
+					for(NucleusBorderSegment seg : segments){
+//					for( int i=0; i<segmentCount; i++){
+						String segName = seg.getName();
 
 						TableModel model;
 
@@ -820,7 +822,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 							programLogger.log(Level.FINEST, "Fetched cached Wilcoxon table: "+stat);
 							model = getTableCache().getTable(options);
 						} else {
-							model = NucleusTableDatasetCreator.createWilcoxonSegmentStatTable(getDatasets(), stat, segName);
+							model = NucleusTableDatasetCreator.createWilcoxonSegmentStatTable(getDatasets(), stat, seg.getPosition());
 							programLogger.log(Level.FINEST, "Added cached Wilcoxon table: "+stat);
 							getTableCache().addTable(options, model);
 						}
@@ -895,17 +897,17 @@ public class SegmentsDetailPanel extends DetailPanel {
 			
 			if(checkSegmentCountsMatch(getDatasets())){
 
-				int segmentCount = activeDataset()
+				List<NucleusBorderSegment> segments = activeDataset()
 						.getCollection()
 						.getProfileCollection(ProfileType.REGULAR)
-						.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
-						.getSegmentCount();
+						.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+						.getOrderedSegments();
 
 				for(SegmentStatistic stat : SegmentStatistic.values()){
 
 					// Get each segment as a boxplot
-					for( int i=0; i<segmentCount; i++){
-						String segName = "Seg_"+i;
+					for(NucleusBorderSegment seg : segments){
+						String segName = seg.getName();
 
 						TableModel model;
 
@@ -914,7 +916,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 							programLogger.log(Level.FINEST, "Fetched cached magnitude table: "+stat);
 							model = getTableCache().getTable(options);
 						} else {
-							model = NucleusTableDatasetCreator.createMagnitudeSegmentStatTable(getDatasets(), stat, segName);
+							model = NucleusTableDatasetCreator.createMagnitudeSegmentStatTable(getDatasets(), stat, seg.getPosition());
 							programLogger.log(Level.FINEST, "Added cached magnitude table: "+stat);
 							getTableCache().addTable(options, model);
 						}

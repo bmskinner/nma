@@ -74,14 +74,16 @@ public class NucleusTableDatasetCreator {
 			BorderTag point = BorderTag.REFERENCE_POINT;
 
 			// get mapping from ordered segments to segment names
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
+					.getSegmentedProfile(point)
+					.getOrderedSegments();
 
-			Map<String, String> map = new HashMap<String, String>();
-			for(NucleusBorderSegment seg : segments){
-				
-				NucleusBorderSegment realSeg = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
-				map.put(seg.getName(), realSeg.getName());
-			}
+//			Map<String, String> map = new HashMap<String, String>();
+//			for(NucleusBorderSegment seg : segments){
+//				
+//				NucleusBorderSegment realSeg = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
+//				map.put(seg.getName(), realSeg.getName());
+//			}
 			
 			// create the row names
 			fieldNames.add("Colour");
@@ -109,8 +111,9 @@ public class NucleusTableDatasetCreator {
 				rowData.add(segment.length());
 				rowData.add(segment.getStartIndex());
 				rowData.add(segment.getEndIndex());
-								
-				double[] meanLengths = collection.getSegmentLengths(map.get(segment.getName()), scale);
+							
+				double[] meanLengths = collection.getSegmentLengths(segment.getID(), scale);
+//				double[] meanLengths = collection.getSegmentLengths(map.get(segment.getName()), scale);
 				
 				double mean = Stats.mean( meanLengths);
 				double sem  = Stats.stderr(meanLengths);
@@ -159,16 +162,16 @@ public class NucleusTableDatasetCreator {
 					.getSegmentedProfile(point)
 					.getOrderedSegments();
 			
-			Map<String, String> map = new HashMap<String, String>();
-			for(NucleusBorderSegment seg : segments){
-				
-				NucleusBorderSegment realSeg = list.get(0)
-						.getCollection()
-						.getProfileCollection(ProfileType.REGULAR)
-						.getSegmentedProfile(point)
-						.getSegment(seg);
-				map.put(seg.getName(), realSeg.getName());
-			}
+//			Map<String, String> map = new HashMap<String, String>();
+//			for(NucleusBorderSegment seg : segments){
+//				
+//				NucleusBorderSegment realSeg = list.get(0)
+//						.getCollection()
+//						.getProfileCollection(ProfileType.REGULAR)
+//						.getSegmentedProfile(point)
+//						.getSegment(seg);
+//				map.put(seg.getName(), realSeg.getName());
+//			}
 //			List<NucleusBorderSegment> segments = list.get(0).getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
 			
 			fieldNames.add("Dataset");
@@ -205,7 +208,7 @@ public class NucleusTableDatasetCreator {
 
 				for(NucleusBorderSegment segment : segs) {
 					
-					double[] meanLengths = collection.getSegmentLengths(map.get(segment.getName()), scale);
+					double[] meanLengths = collection.getSegmentLengths(segment.getID(), scale);
 					double mean = Stats.mean(meanLengths); 
 
 					double ci = Stats.calculateConfidenceIntervalSize(meanLengths, 0.95);
@@ -720,52 +723,40 @@ public class NucleusTableDatasetCreator {
 	 * @param segName the segment to create the table for
 	 * @return a tablemodel for display
 	 */	
-	public static TableModel createWilcoxonSegmentStatTable(List<AnalysisDataset> list, SegmentStatistic stat, String segName) throws Exception {
+	public static TableModel createWilcoxonSegmentStatTable(List<AnalysisDataset> list, SegmentStatistic stat, int segPosition) throws Exception {
 		DefaultTableModel model = makeEmptyWilcoxonTable(list);
 		if(list==null){
 			return model;
 		}
 		
-		// check which reference point to use
-		BorderTag point = BorderTag.REFERENCE_POINT;
-
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
 		for(AnalysisDataset dataset : list){
 			
-			// get mapping from ordered segments to segment names
-			List<NucleusBorderSegment> segments1 = dataset.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
-
-			Map<String, String> map1 = new HashMap<String, String>();
-			for(NucleusBorderSegment seg : segments1){
-				
-				NucleusBorderSegment realSeg = dataset.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
-				map1.put(seg.getName(), realSeg.getName());
-			}
-
 			Object[] popData = new Object[list.size()];
+			
+			NucleusBorderSegment medianSeg1 = dataset.getCollection()
+					.getProfileCollection(ProfileType.REGULAR)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentAt(segPosition);
 
 			int i = 0;
 			boolean getPValue = false;
 			for(AnalysisDataset dataset2 : list){
 				
-				// get mapping from ordered segments to segment names
-				List<NucleusBorderSegment> segments2 = dataset2.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
-
-				Map<String, String> map2 = new HashMap<String, String>();
-				for(NucleusBorderSegment seg : segments2){
-					
-					NucleusBorderSegment realSeg = dataset2.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
-					map2.put(seg.getName(), realSeg.getName());
-				}
-
 				if(dataset2.getUUID().equals(dataset.getUUID())){
 					popData[i] = "";
 					getPValue = true;
 				} else {
+					
+					NucleusBorderSegment medianSeg2 = dataset2.getCollection()
+							.getProfileCollection(ProfileType.REGULAR)
+							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+							.getSegmentAt(segPosition);
+					
 					popData[i] = df.format( runWilcoxonTest( 
-							dataset.getCollection().getSegmentLengths(map1.get(segName), MeasurementScale.PIXELS),
-							dataset2.getCollection().getSegmentLengths(map1.get(segName), MeasurementScale.PIXELS),
+							 dataset.getCollection().getSegmentLengths(medianSeg1.getID(), MeasurementScale.PIXELS),
+							dataset2.getCollection().getSegmentLengths(medianSeg2.getID(), MeasurementScale.PIXELS),
 							getPValue) );
 				}
 				i++;
@@ -825,30 +816,23 @@ public class NucleusTableDatasetCreator {
 	 * @param segName the segment to create the table for
 	 * @return a tablemodel for display
 	 */	
-	public static TableModel createMagnitudeSegmentStatTable(List<AnalysisDataset> list, SegmentStatistic stat, String segName) throws Exception {
+	public static TableModel createMagnitudeSegmentStatTable(List<AnalysisDataset> list, SegmentStatistic stat, int segPosition) throws Exception {
 		DefaultTableModel model = makeEmptyWilcoxonTable(list);
 		if(list==null){
 			return model;
 		}
 		
-		// check which reference point to use
-		BorderTag point = BorderTag.REFERENCE_POINT;
-
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
 		for(AnalysisDataset dataset : list){
 			
-			// get mapping from ordered segments to segment names
-			List<NucleusBorderSegment> segments1 = dataset.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
-
-			Map<String, String> map1 = new HashMap<String, String>();
-			for(NucleusBorderSegment seg : segments1){
-				
-				NucleusBorderSegment realSeg = dataset.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
-				map1.put(seg.getName(), realSeg.getName());
-			}
-			
-			double value1 = Stats.quartile( dataset.getCollection().getSegmentLengths(map1.get(segName), MeasurementScale.PIXELS), Constants.MEDIAN);
+			NucleusBorderSegment medianSeg1 = dataset.getCollection()
+					.getProfileCollection(ProfileType.REGULAR)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentAt(segPosition);
+									
+			double value1 = Stats.quartile( dataset.getCollection()
+					.getSegmentLengths(medianSeg1.getID(), MeasurementScale.PIXELS), Constants.MEDIAN);
 
 			Object[] popData = new Object[list.size()];
 
@@ -856,21 +840,17 @@ public class NucleusTableDatasetCreator {
 
 			for(AnalysisDataset dataset2 : list){
 				
-				// get mapping from ordered segments to segment names
-				List<NucleusBorderSegment> segments2 = dataset2.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
-
-				Map<String, String> map2 = new HashMap<String, String>();
-				for(NucleusBorderSegment seg : segments2){
-					
-					NucleusBorderSegment realSeg = dataset2.getCollection().getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
-					map2.put(seg.getName(), realSeg.getName());
-				}
-
 				if(dataset2.getUUID().equals(dataset.getUUID())){
 					popData[i] = "";
 
 				} else {
-					double value2 = Stats.quartile( dataset2.getCollection().getSegmentLengths(map2.get(segName), MeasurementScale.PIXELS), Constants.MEDIAN);
+					
+					NucleusBorderSegment medianSeg2 = dataset2.getCollection()
+							.getProfileCollection(ProfileType.REGULAR)
+							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+							.getSegmentAt(segPosition);
+					
+					double value2 = Stats.quartile( dataset2.getCollection().getSegmentLengths(medianSeg2.getID(), MeasurementScale.PIXELS), Constants.MEDIAN);
 
 					double magnitude = value2 / value1;
 					popData[i] = df.format( magnitude );

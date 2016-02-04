@@ -23,14 +23,14 @@ import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import stats.PlottableStatistic;
-
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
-
 import analysis.AnalysisDataset;
 
 /*
@@ -52,7 +52,8 @@ public class ChartOptions {
 	private boolean useDensity         = false;
 	private PlottableStatistic stat    = null;
 	private MeasurementScale scale     = MeasurementScale.PIXELS;
-	private String segName             = "Seg_0";
+	private UUID segID                 = null; // the id of the segment (not consistent between datasets)
+	private int segPosition            = 0;    // the position of the segment in the profile (consistent between datasets)
 	
 	public ChartOptions(List<AnalysisDataset> list){
 		this.list = list;
@@ -83,7 +84,19 @@ public class ChartOptions {
 
 	}
 	
+	public void log(Level level, String message){
+		
+		if(this.hasLogger()){
+			this.getLogger().log(level, message);
+		}
+	}
 	
+	public void log(Level level, String message, Throwable e){
+
+		if(this.hasLogger()){
+			this.getLogger().log(level, message, e);
+		}
+	}
 	
 	public void setSwatch(ColourSwatch swatch) {
 		this.swatch = swatch;
@@ -97,7 +110,7 @@ public class ChartOptions {
 		return this.programLogger;
 	}
 	
-	public boolean hasLogger(){
+	private boolean hasLogger(){
 		if(this.programLogger==null){
 			return false;
 		} else {
@@ -106,12 +119,23 @@ public class ChartOptions {
 	}
 		
 	
-	public String getSegName() {
-		return segName;
+	public UUID getSegID() {
+		return segID;
 	}
 
-	public void setSegName(String segName) {
-		this.segName = segName;
+	public void setSegID(UUID segID) {
+		this.segID = segID;
+	}
+	
+	
+	
+
+	public int getSegPosition() {
+		return segPosition;
+	}
+
+	public void setSegPosition(int segPosition) {
+		this.segPosition = segPosition;
 	}
 
 	/**

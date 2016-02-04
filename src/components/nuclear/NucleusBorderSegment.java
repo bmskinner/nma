@@ -52,7 +52,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	
 	private int    startIndex;
 	private int    endIndex;
-	private String name      = null;
+//	private String name      = null;
 	
 	private int    totalLength; // the total length of the profile that this segment is a part of 
 	
@@ -113,7 +113,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		this.uuid         = n.getID();
 		this.startIndex   = n.getStartIndex();
 		this.endIndex 	  = n.getEndIndex();
-		this.name 		  = n.getOldName();
+//		this.name 		  = n.getOldName();
 		this.totalLength  = n.getTotalLength();
 		this.nextSegment  = n.nextSegment();
 		this.prevSegment  = n.prevSegment();
@@ -228,13 +228,13 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		return -1;
 	}
 	
-	public String getOldName(){
-//		if(this.name==null){
-//			IJ.log("Name is null on segment getName()");
-//			return null;
-//		}
-		return this.name;
-	}
+//	public String getOldName(){
+////		if(this.name==null){
+////			IJ.log("Name is null on segment getName()");
+////			return null;
+////		}
+//		return this.name;
+//	}
 	
 	/**
 	 * Get the name of the segment in the form "Seg_n"
@@ -719,9 +719,9 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		}
 	}
 
-	public void setName(String s){
-		this.name = s;
-	}
+//	public void setName(String s){
+//		this.name = s;
+//	}
 	
 	/**
 	 * Set the position in the segmented profile.
@@ -740,30 +740,33 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		return this.positionInProfile;
 	}
 	
+	/**
+	 * Write toString() onto the ImageJ log window 
+	 */
 	public void print(){
-		IJ.log("    Segment "
-				+this.getName()
-				+": "+this.startIndex+" - "+this.endIndex+" of "
-				+this.getTotalLength()
-				+"; prev: "+this.hasPrevSegment()
-				+"; next: "+this.hasNextSegment());
+		IJ.log(this.toString());
 	}
 	
 	public String toString(){
 		
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("Segment "
-				+this.getName()
-				+" ("+this.getPosition()+") "
-				+": "+this.startIndex+" - "+this.endIndex+" ("
-				+this.length()
-				+") of "
-				+(this.getTotalLength()-1)
-				+"; prev: "+this.hasPrevSegment()
-				+"; next: "+this.hasNextSegment());
+		builder.append("Segment ");
+		builder.append(this.getName());
+		builder.append(" | ");
+		builder.append(this.getID());
+		builder.append(" | ");
+		builder.append(this.getPosition());
+		builder.append(" | ");
+		builder.append(this.startIndex);
+		builder.append(" | ");
+		builder.append(this.endIndex);
+		builder.append(" | ");
+		builder.append(this.length());
+		builder.append(" | ");
+		builder.append(this.getTotalLength()-1);
 
-		  return builder.toString();
+		return builder.toString();
 	}
 	
 	/**
@@ -847,7 +850,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 					segment.getID()
 			);
 			
-			newSeg.setName(segment.getName());
+//			newSeg.setName(segment.getName());
 			newSeg.setPosition(segment.getPosition());
 			
 			
@@ -887,7 +890,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 					segment.getTotalLength(),
 					segment.getID());
 			
-			newSeg.setName(segment.getName());
+//			newSeg.setName(segment.getName());
 			
 			
 			// adjust merge sources also and readd

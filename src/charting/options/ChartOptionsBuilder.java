@@ -23,6 +23,7 @@ import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import stats.PlottableStatistic;
@@ -51,7 +52,8 @@ public class ChartOptionsBuilder {
 	private boolean useDensity         = false;
 	private PlottableStatistic stat    = null;
 	private MeasurementScale scale     = MeasurementScale.PIXELS;
-	private String segName             = "Seg_0";
+	private UUID segID                 = null;
+	private int segPosition            = 0;
 	
 	public ChartOptionsBuilder(){
 		
@@ -87,8 +89,13 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
-	public ChartOptionsBuilder setSegName(String s){
-		this.segName = s;
+	public ChartOptionsBuilder setSegID(UUID id){
+		this.segID = id;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setSegPosition(int segPosition) {
+		this.segPosition = segPosition;
 		return this;
 	}
 	
@@ -144,7 +151,8 @@ public class ChartOptionsBuilder {
 		result.setTag(tag);
 		result.setType(type);
 		result.setUseDensity(useDensity);
-		result.setSegName(segName);
+		result.setSegID(segID);
+		result.setSegPosition(segPosition);
 		return result;
 	}
 	

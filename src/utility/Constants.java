@@ -35,6 +35,9 @@ public class Constants {
 	public static final String TAB_FILE_EXTENSION = ".txt";
 	public static final String LOC_FILE_EXTENSION = "cell"; // locations of cells (in a tsv format)
 	
+	public static final String SEGMENT_PREFIX = "Seg_";
+	
+	
 	
 
 		// RGB colour channels

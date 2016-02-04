@@ -23,6 +23,7 @@ import java.awt.Color;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 
+import stats.Stats;
 import charting.ChartComponents;
 import components.generic.BorderTag;
 
@@ -55,4 +56,5 @@ public class AbstractChartFactory {
 		}
 		plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));	
 	}
+		
 }
