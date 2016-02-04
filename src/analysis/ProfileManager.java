@@ -279,7 +279,7 @@ public class ProfileManager {
 			 * Find the position of the border tag in the median profile
 			 * 
 			 */
-			int offsetForOp = collection.getProfileCollection(ProfileType.REGULAR).getOffset(BorderTag.ORIENTATION_POINT);
+			int offsetForOp = collection.getProfileCollection(ProfileType.REGULAR).getOffset(BorderTag.REFERENCE_POINT);
 			
 			int offset = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
 			
@@ -310,12 +310,15 @@ public class ProfileManager {
 		 */
 		if(medianProfile.hasSegment(seg1.getID())  && medianProfile.hasSegment(seg2.getID()) ){
 
+			// Give the new merged segment a new ID
 			UUID newID = java.util.UUID.randomUUID();
-			// merge the two segments in the median - this is only a copy of the profile collection
+			
+			// merge the two segments in the median
 			medianProfile.mergeSegments(seg1, seg2, newID);
 
 			// put the new segment pattern back with the appropriate offset
-			collection.getProfileCollection(ProfileType.REGULAR).addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
+			collection.getProfileCollection(ProfileType.REGULAR)
+				.addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
 
 			/*
 			 * With the median profile segments merged, also merge the segments
@@ -373,11 +376,14 @@ public class ProfileManager {
 
 				double proportion = seg.getIndexProportion(index);
 
-				// merge the two segments in the median - this is only a copy of the profile collection
-				medianProfile.splitSegment(seg, index);
+				UUID newID1 = java.util.UUID.randomUUID();
+				UUID newID2 = java.util.UUID.randomUUID();
+				// split the two segments in the median
+				medianProfile.splitSegment(seg, index, newID1, newID2);
 
 				// put the new segment pattern back with the appropriate offset
-				collection.getProfileCollection(ProfileType.REGULAR).addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
+				collection.getProfileCollection(ProfileType.REGULAR)
+					.addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
 
 				/*
 				 * With the median profile segments unmerged, also split the segments
@@ -390,7 +396,7 @@ public class ProfileManager {
 					NucleusBorderSegment nSeg = profile.getSegment(seg.getID());
 
 					int targetIndex = nSeg.getProportionalIndex(proportion);
-					profile.splitSegment(nSeg, targetIndex);
+					profile.splitSegment(nSeg, targetIndex, newID1, newID2);
 					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
 				}
 
@@ -402,7 +408,7 @@ public class ProfileManager {
 					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
 					NucleusBorderSegment nSeg1 = profile.getSegment(seg.getID());
 					int targetIndex = nSeg1.getProportionalIndex(proportion);
-					profile.splitSegment(nSeg1, targetIndex);
+					profile.splitSegment(nSeg1, targetIndex, newID1, newID2);
 					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
 				}
 

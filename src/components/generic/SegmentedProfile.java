@@ -404,7 +404,9 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @return
 	 */
 	public boolean contains(NucleusBorderSegment segment){
-		
+		if(segment==null){
+			return false;
+		}
 		boolean result = false;
 		for(NucleusBorderSegment seg : this.segments){
 			if(	seg.getStartIndex()==segment.getStartIndex()
@@ -783,12 +785,13 @@ public class SegmentedProfile extends Profile implements Serializable {
 	}
 	
 	/**
-	 * Split a segment at the given index into two new segments
+	 * Split a segment at the given index into two new segments. Splits the segmnets, 
+	 * adds the split as merge sources to the old segmnet, then unmerges
 	 * @param segment the segment to split
 	 * @param splitIndex the index to split at
 	 * @throws Exception
 	 */
-	public void splitSegment(NucleusBorderSegment segment, int splitIndex) throws Exception {
+	public void splitSegment(NucleusBorderSegment segment, int splitIndex, UUID id1, UUID id2) throws Exception {
 		// Check the segments belong to the profile
 		if(!this.contains(segment) ){
 			throw new IllegalArgumentException("Input segment is not part of this profile");
@@ -804,9 +807,11 @@ public class SegmentedProfile extends Profile implements Serializable {
 		
 		// Add the new segments to a list
 		List<NucleusBorderSegment> splitSegments = new ArrayList<NucleusBorderSegment>();
-		splitSegments.add(new NucleusBorderSegment(segment.getStartIndex(), splitIndex, segment.getTotalLength()));
-		splitSegments.add(new NucleusBorderSegment(splitIndex, segment.getEndIndex(), segment.getTotalLength()));
+		splitSegments.add(new NucleusBorderSegment(segment.getStartIndex(), splitIndex, segment.getTotalLength(), id1));
+		splitSegments.add(new NucleusBorderSegment(splitIndex, segment.getEndIndex(), segment.getTotalLength(), id2));
 		
+		segment.addMergeSource(splitSegments.get(0));
+		segment.addMergeSource(splitSegments.get(1));
 
 		int position = 0;
 		for(NucleusBorderSegment oldSegment : oldSegs){
@@ -814,11 +819,11 @@ public class SegmentedProfile extends Profile implements Serializable {
 			if(oldSegment.equals(segment)){
 				
 				// add each of the old segments
-				for(NucleusBorderSegment mergedSegment : splitSegments){
-					mergedSegment.setPosition(position);
-					newSegs.add(mergedSegment);
-					position++;
-				}
+//				for(NucleusBorderSegment mergedSegment : splitSegments){
+//					mergedSegment.setPosition(position);
+					newSegs.add(segment);
+//					position++;
+//				}
 				
 			} else {
 				
@@ -830,6 +835,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		}
 		NucleusBorderSegment.linkSegments(newSegs);
 		this.setSegments(newSegs);
+		this.unmergeSegment(segment);
 		
 	}
 	
