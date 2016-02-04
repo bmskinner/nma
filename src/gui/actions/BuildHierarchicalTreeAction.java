@@ -20,6 +20,8 @@ package gui.actions;
 
 import gui.DatasetEvent;
 import gui.DatasetEventListener;
+import gui.InterfaceEvent;
+import gui.InterfaceEventListener;
 import gui.MainWindow;
 import gui.DatasetEvent.DatasetMethod;
 import gui.dialogs.ClusterTreeDialog;
@@ -38,7 +40,7 @@ import analysis.ClusteringOptions.HierarchicalClusterMethod;
 import analysis.nucleus.NucleusTreeBuilder;
 import components.ClusterGroup;
 
-public class BuildHierarchicalTreeAction extends ProgressableAction implements DatasetEventListener {
+public class BuildHierarchicalTreeAction extends ProgressableAction implements DatasetEventListener, InterfaceEventListener {
 
 	public BuildHierarchicalTreeAction(AnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Building tree", mw);
@@ -70,18 +72,10 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 	@Override
 	public void finished() {
 
-//		Tree tree = (((NeighbourJoiningTreeBuilder) worker).getTree());
 		String newick = (((NucleusTreeBuilder) worker).getNewickTree());
-//		RootedTree rt = Utils.rootTreeAtCenter(tree);
-//		String newick = Utils.toNewick(rt);
 
 		ClusteringOptions options =  ((NucleusTreeBuilder) worker).getOptions();
-//		ClusteringOptions options = new ClusteringOptions(ClusteringMethod.HIERARCHICAL);
-//		options.setClusterNumber(1);
-//		options.setHierarchicalMethod(HierarchicalClusterMethod.NEIGHBOR_JOINING);
-//		options.setIncludeModality(false);
-//		options.setModalityRegions(2);
-//		options.setUseSimilarityMatrix(true);
+
 
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 
@@ -89,6 +83,7 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 		
 		ClusterTreeDialog clusterPanel = new ClusterTreeDialog(programLogger, dataset, group);
 		clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
+		clusterPanel.addInterfaceEventListener(this);
 
 		cleanup(); // do not cancel, we need the MainWindow listener to remain attached 
 
@@ -101,6 +96,13 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 		if(event.method().equals(DatasetMethod.COPY_MORPHOLOGY)){
 			fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, event.getDatasets(), event.secondaryDataset());
 		}
+		
+	}
+
+
+	@Override
+	public void interfaceEventReceived(InterfaceEvent event) {
+		fireInterfaceEvent(event.method());
 		
 	}
 

@@ -21,6 +21,9 @@ package gui.dialogs;
 import gui.DatasetEvent;
 import gui.DatasetEventListener;
 import gui.ImageType;
+import gui.InterfaceEvent;
+import gui.InterfaceEvent.InterfaceMethod;
+import gui.InterfaceEventListener;
 import gui.LoadingIconDialog;
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.ColourSelecter;
@@ -532,7 +535,8 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 
 			
 			if(!list.isEmpty()){
-				fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, list, dataset);
+//				fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, list, dataset);
+				fireInterfaceEvent(InterfaceMethod.UPDATE_POPULATIONS);
 				programLogger.log(Level.FINEST, "Fired dataset copy event to listeners");
 			} else {
 				programLogger.log(Level.WARNING, "No datasets to analyse");
@@ -705,6 +709,23 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 		while( iterator.hasNext() ) {
 			( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
 		}
+	}
+	
+	protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
+
+		InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());
+		Iterator<Object> iterator = datasetListeners.iterator();
+		while( iterator.hasNext() ) {
+			( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
+		}
+	}
+	
+	public synchronized void addInterfaceEventListener( InterfaceEventListener l ) {
+		datasetListeners.add( l );
+	}
+
+	public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
+		datasetListeners.remove( l );
 	}
 
 	public synchronized void addDatasetEventListener( DatasetEventListener l ) {
