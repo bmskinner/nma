@@ -993,7 +993,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 //			}
 			
 			// not permitted if it violates length constraint
-			if(testProfile.adjustSegmentEnd(id, changeValue)){
+			if(testProfile.adjustSegmentStart(id, changeValue)){
 				
 				// testProfile should now contain updated segment endpoints
 				SegmentedProfile compareProfile = new SegmentedProfile(testProfile);

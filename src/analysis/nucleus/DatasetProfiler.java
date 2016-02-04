@@ -128,8 +128,8 @@ public class DatasetProfiler extends AnalysisWorker {
 						continue;
 					}
 					log(Level.FINE, "Rebuilding profile aggregate: "+type);
-					ProfileCollection pc = collection.getProfileCollection(type);
-					pc.createProfileAggregate(collection, type);
+					collection.getProfileCollection(type)
+							.createProfileAggregate(collection, type);
 				}
 
 				// carry out the orientation point detection in the median again
