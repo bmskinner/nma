@@ -924,47 +924,39 @@ public class DatasetSegmenter extends AnalysisWorker {
 			return result;
 		}
 			
+		/**
+		 * Test the effect of moving the segment start boundary of the profile by a certain amount.
+		 * If the change is a better fit to the median profile than before, it is kept.
+		 * @param profile the profile to test
+		 * @param id the segment to alter
+		 * @param changeValue the amount to alter the segment by
+		 * @return the original profile, or a better fit to the median
+		 * @throws Exception
+		 */
 		private SegmentedProfile testChange(SegmentedProfile profile, UUID id, int changeValue) throws Exception {
 			
 			double bestScore = compareSegmentationPatterns(medianProfile, profile);
 			
 			// apply all changes to a fresh copy of the profile
-			SegmentedProfile result = new SegmentedProfile(profile);
 			SegmentedProfile testProfile = new SegmentedProfile(profile);
-			NucleusBorderSegment segment = profile.getSegment(id);
-//			if(debug){
-//				fileLogger.log(Level.FINE, "\tTesting length change "+changeValue);
-//			}
+			
 			
 			// not permitted if it violates length constraint
 			if(testProfile.adjustSegmentStart(id, changeValue)){
 				
-				// testProfile should now contain updated segment endpoints
-				SegmentedProfile compareProfile = new SegmentedProfile(testProfile);
+				SegmentedProfile result = testProfile;
 				
-////					 if this pattern has been seen, skip the rest of the test
-//				if(optimise){
-//					if(hasBeenTested(compareProfile)){
-//						if(debug){
-//							fileLogger.log("\tProfile has been tested");
-//						}
-//						continue;
-//					}
-//				}
-					
+				// testProfile should now contain updated segment endpoints
+//				SegmentedProfile compareProfile = new SegmentedProfile(testProfile);
+									
 				// anything that gets in here should be valid
 				try{
 					double score = compareSegmentationPatterns(medianProfile, testProfile);
-//					if(debug){
-//						fileLogger.log(Level.FINE, "\tLengthen "+changeValue+":\tScore:\t"+score);
-//					}
-					
+				
 					if(score < bestScore){
 						bestScore 	= score;
 						result = new SegmentedProfile(testProfile);
-//						if(debug){
-//							fileLogger.log(Level.FINE, "\tNew best score:\t"+score+"\tLengthen:\t"+changeValue);
-//						}
+
 					}
 				}catch(IllegalArgumentException e){
 					// throw a new edxception rather than trying a nudge a problem profile
@@ -974,6 +966,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 				
 				
 				// test if nudging the lengthened segment with will help
+				NucleusBorderSegment segment = profile.getSegment(id);
 				int nudge = testNudge(testProfile, segment.length());
 				testProfile.nudgeSegments(nudge);
 
@@ -981,24 +974,11 @@ public class DatasetSegmenter extends AnalysisWorker {
 				if(score < bestScore){
 					bestScore = score;
 					result = new SegmentedProfile(testProfile);
-//					if(debug){
-//						fileLogger.log(Level.FINE, "\tNew best score:\t"+score+"\tNudge:\t"+nudge);
-//					}
 				}
-				if(optimise){
-					testedProfiles.add(compareProfile);
-				}
-				
-										
-			} else {
-//				if(debug){
-//					fileLogger.log(Level.FINE, "\tLengthen "+changeValue
-//						+":\tInvalid length change:\t"
-//						+testProfile.getSegment(name).getLastFailReason()
-//						+"\t"+segment.toString());
-//				}
+			
+				return result;						
 			}
-			return result;
+			return profile;
 		}
 		
 		/**
@@ -1029,16 +1009,14 @@ public class DatasetSegmenter extends AnalysisWorker {
 			double bestScore 	= 0;
 			int bestNudge 		= 0;
 					
+			
+			SegmentedProfile newProfile = new SegmentedProfile(profile);
+			newProfile.nudgeSegments(-length);
+			
 			for( int nudge = -length; nudge<length; nudge++){
-				SegmentedProfile newProfile = new SegmentedProfile(profile);
-				newProfile.nudgeSegments(nudge);
-				
-				if(optimise){
-					if(hasBeenTested(newProfile)){
-						continue;
-					}
-				}
-				
+//				SegmentedProfile newProfile = new SegmentedProfile(profile);
+				newProfile.nudgeSegments(1); // keep the same profile
+								
 				try{
 					score = compareSegmentationPatterns(medianProfile, newProfile);
 //					fileLogger.log("\tNudge "+nudge+":\tScore:\t"+score, fileLogger.DEBUG);
@@ -1051,9 +1029,6 @@ public class DatasetSegmenter extends AnalysisWorker {
 				if(score < bestScore){
 					bestScore = score;
 					bestNudge = nudge;
-				}
-				if(optimise){
-					testedProfiles.add(newProfile);
 				}	
 			}
 			return bestNudge;
