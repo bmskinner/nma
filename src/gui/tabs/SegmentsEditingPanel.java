@@ -349,7 +349,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			.getProfileManager()
 			.setLockOnAllNucleusSegmentsExcept(id, true);
 			
-			
+			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 //			// Make a dialog - update the morphology of each nucleus?
 //			Object[] options = { "Update nuclei" , "Do not update", };
 //			int result = JOptionPane.showOptionDialog(null, "Update the nuclei to the new boundaries?", "Update nuclei",
