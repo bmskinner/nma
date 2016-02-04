@@ -84,7 +84,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			}
 			plot.setRenderer(1, rend);
 
-			for(int signalGroup : SignalManager.getSignalGroups(dataset.getCollection())){
+			for(int signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
 				List<Shape> shapes = NuclearSignalDatasetCreator.createSignalRadiusDataset(dataset, signalGroup);
 
 				int signalCount = shapes.size();

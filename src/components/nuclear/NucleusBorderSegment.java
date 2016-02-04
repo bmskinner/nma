@@ -34,24 +34,27 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import utility.Utils;
 
 public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 
+	private static final long serialVersionUID = 1L;
+	
 	// the smallest number of values in a segment
 	// Set to 3 (a start, midpoint and an end) so that the minimum length
 	// in the ProfileSegmenter can be interpolated downwards without
 	// causing errors when fitting segments to individual nuclei
-	public static final int MINIMUM_SEGMENT_LENGTH = 3; 
+	public static final int MINIMUM_SEGMENT_LENGTH       = 3; 
 	public static final int INTERPOLATION_MINIMUM_LENGTH = 2;
 	
-	private static final long serialVersionUID = 1L;
-	private int startIndex;
-	private int endIndex;
-	private String name = null;
 	
-	private int totalLength; // the total length of the profile that this segment is a part of 
+	private int    startIndex;
+	private int    endIndex;
+	private String name      = null;
+	
+	private int    totalLength; // the total length of the profile that this segment is a part of 
 	
 	private NucleusBorderSegment prevSegment = null; // track the previous segment in the profile
 	private NucleusBorderSegment nextSegment = null; // track the next segment in the profile
@@ -61,6 +64,10 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	private List<NucleusBorderSegment> mergeSources = new ArrayList<NucleusBorderSegment>();
 	
 	private int positionInProfile = 0; // for future refactor
+	
+	private boolean startPositionLocked = false; // allow the start index to be fixed
+	
+	private UUID uuid; // allows keeping a consistent track of segment IDs with a profile
 
 	public NucleusBorderSegment(int startIndex, int endIndex, int total){
 		
@@ -78,19 +85,38 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 						+ " from " + startIndex + " to " + endIndex
 						+ ": shorter than "+MINIMUM_SEGMENT_LENGTH);
 		}
-		this.startIndex = startIndex;
-		this.endIndex = endIndex;
-		this.totalLength = total;
+		this.startIndex   = startIndex;
+		this.endIndex     = endIndex;
+		this.totalLength  = total;
 		this.mergeSources = new ArrayList<NucleusBorderSegment>();
+		this.uuid         = java.util.UUID.randomUUID();
+	}
+	
+	/**
+	 * Construct with an existing UUID. This allows nucleus segments to directly
+	 * track median profile segments
+	 * @param startIndex 
+	 * @param endIndex
+	 * @param total
+	 * @param id
+	 */
+	public NucleusBorderSegment(int startIndex, int endIndex, int total, UUID id){
+		this( startIndex, endIndex, total);
+		this.uuid = id;
 	}
 
+	/**
+	 * Make a copy of the given segment, including the ID
+	 * @param n
+	 */
 	public NucleusBorderSegment(NucleusBorderSegment n){
-		this.startIndex  = n.getStartIndex();
-		this.endIndex 	 = n.getEndIndex();
-		this.name 		 = n.getOldName();
-		this.totalLength = n.getTotalLength();
-		this.nextSegment = n.nextSegment();
-		this.prevSegment = n.prevSegment();
+		this.uuid         = n.getID();
+		this.startIndex   = n.getStartIndex();
+		this.endIndex 	  = n.getEndIndex();
+		this.name 		  = n.getOldName();
+		this.totalLength  = n.getTotalLength();
+		this.nextSegment  = n.nextSegment();
+		this.prevSegment  = n.prevSegment();
 		this.mergeSources = n.getMergeSources();
 	}
 
@@ -99,6 +125,11 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		Getters
 		----------------
 	*/
+	
+	public UUID getID(){
+		return this.uuid;
+	}
+	
 	
 	/**
 	 * Get a copy of the merge source segments
@@ -264,6 +295,16 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		return result;	
 	}
 	
+	
+	
+	public boolean isStartPositionLocked() {
+		return startPositionLocked;
+	}
+
+	public void setStartPositionLocked(boolean startPositionLocked) {
+		this.startPositionLocked = startPositionLocked;
+	}
+
 	/**
 	 * get the total length of the profile that this segment is a part of 
 	 * @return
@@ -755,7 +796,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		}
 		
 		NucleusBorderSegment firstSegment = list.get(0);
-		NucleusBorderSegment lastSegment = list.get(list.size()-1);
+		NucleusBorderSegment lastSegment  = list.get(list.size()-1);
 				
 		/*
 		 * Ensure the end of the final segment is the same index as the start of the first segment.
@@ -801,7 +842,9 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 					Utils.wrapIndex(segment.getEndIndex()+value,
 									segment.getTotalLength()), 
 					
-					segment.getTotalLength() 
+					segment.getTotalLength() ,
+					
+					segment.getID()
 			);
 			
 			newSeg.setName(segment.getName());
@@ -841,7 +884,8 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 			
 			NucleusBorderSegment newSeg = new NucleusBorderSegment(Utils.wrapIndex(segment.getStartIndex()+value, segment.getTotalLength()), 
 					Utils.wrapIndex(segment.getEndIndex()+value, segment.getTotalLength()), 
-					segment.getTotalLength() );
+					segment.getTotalLength(),
+					segment.getID());
 			
 			newSeg.setName(segment.getName());
 			

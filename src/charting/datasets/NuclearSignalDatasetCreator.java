@@ -77,7 +77,7 @@ public class NuclearSignalDatasetCreator {
 			int maxChannels = 0;
 			for(AnalysisDataset dataset : list){
 				CellCollection collection = dataset.getCollection();
-				maxChannels = Math.max(collection.getHighestSignalGroup(), maxChannels);
+				maxChannels = Math.max(collection.getSignalManager().getHighestSignalGroup(), maxChannels);
 			}
 			if(maxChannels>0){
 			
@@ -110,12 +110,12 @@ public class NuclearSignalDatasetCreator {
 					CellCollection collection = dataset.getCollection();
 					
 					List<Object> rowData = new ArrayList<Object>(0);
-					rowData.add(SignalManager.getSignalGroups(collection).size());
+					rowData.add(collection.getSignalManager().getSignalGroups().size());
 	
-					for(int signalGroup : SignalManager.getSignalGroups(collection)){
+					for(int signalGroup : collection.getSignalManager().getSignalGroups()){
 						
 						NuclearSignalOptions ns = dataset.getAnalysisOptions()
-														.getNuclearSignalOptions(collection.getSignalGroupName(signalGroup));
+														.getNuclearSignalOptions(collection.getSignalManager().getSignalGroupName(signalGroup));
 						
 
 						if(ns==null){ // occurs when no signals are present?
@@ -140,9 +140,9 @@ public class NuclearSignalDatasetCreator {
 
 							rowData.add("");
 							rowData.add(signalGroup);
-							rowData.add(collection.getSignalGroupName(signalGroup));
-							rowData.add(collection.getSignalChannel(signalGroup));
-							rowData.add(collection.getSignalSourceFolder(signalGroup));
+							rowData.add(collection.getSignalManager().getSignalGroupName(signalGroup));
+							rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
+							rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
 							rowData.add(  signalThreshold );
 							rowData.add(ns.getMinSize());
 							rowData.add(df.format(ns.getMaxFraction()));
@@ -176,7 +176,7 @@ public class NuclearSignalDatasetCreator {
 
 			if(dataset.isSignalGroupVisible(signalGroup)){
 
-				if(collection.hasSignals(signalGroup)){
+				if(collection.getSignalManager().hasSignals(signalGroup)){
 
 					List<Double> angles = new ArrayList<Double>(0);
 
@@ -361,17 +361,17 @@ public class NuclearSignalDatasetCreator {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		CellCollection collection = dataset.getCollection();
 
-		if(collection.hasSignals()){
+		if(collection.getSignalManager().hasSignals()){
 
-			for(int group : SignalManager.getSignalGroups(collection)){
+			for(int group : collection.getSignalManager().getSignalGroups()){
 
 				if(dataset.isSignalGroupVisible(group)){
 
-					double[] xpoints = new double[collection.getSignals(group).size()];
-					double[] ypoints = new double[collection.getSignals(group).size()];
+					double[] xpoints = new double[collection.getSignalManager().getSignals(group).size()];
+					double[] ypoints = new double[collection.getSignalManager().getSignals(group).size()];
 
 					int signalCount = 0;
-					for(NuclearSignal n : collection.getSignals(group)){
+					for(NuclearSignal n : collection.getSignalManager().getSignals(group)){
 
 						XYPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
 
@@ -394,9 +394,9 @@ public class NuclearSignalDatasetCreator {
 		List<Shape> result = new ArrayList<Shape>(0);
 		
 		if(dataset.isSignalGroupVisible(signalGroup)){
-			if(collection.hasSignals(signalGroup)){
+			if(collection.getSignalManager().hasSignals(signalGroup)){
 
-				for(NuclearSignal n : collection.getSignals(signalGroup)){
+				for(NuclearSignal n : collection.getSignalManager().getSignals(signalGroup)){
 					XYPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
 
 					// ellipses are drawn starting from x y at upper left. Provide an offset from the centre
@@ -436,8 +436,8 @@ public class NuclearSignalDatasetCreator {
 			int maxSignalGroup = 0;
 			for(AnalysisDataset dataset : options.getDatasets()){
 				CellCollection collection = dataset.getCollection();
-				if(collection.hasSignals()){
-					maxSignalGroup = Math.max(collection.getHighestSignalGroup(), maxSignalGroup);
+				if(collection.getSignalManager().hasSignals()){
+					maxSignalGroup = Math.max(collection.getSignalManager().getHighestSignalGroup(), maxSignalGroup);
 				}
 			}
 			
@@ -475,17 +475,17 @@ public class NuclearSignalDatasetCreator {
 					CellCollection collection = dataset.getCollection();
 					
 					List<Object> rowData = new ArrayList<Object>(0);
-					rowData.add(SignalManager.getSignalGroups(collection).size());
+					rowData.add(collection.getSignalManager().getSignalGroups().size());
 	
 					for(int signalGroup = 1; signalGroup<=maxSignalGroup; signalGroup++){// : collection.getSignalGroups()){
-						if(collection.hasSignals(signalGroup)){
+						if(collection.getSignalManager().hasSignals(signalGroup)){
 							rowData.add("");
 							rowData.add(signalGroup);
-							rowData.add(collection.getSignalGroupName(signalGroup));
-							rowData.add(collection.getSignalChannel(signalGroup));
-							rowData.add(collection.getSignalSourceFolder(signalGroup));
-							rowData.add(collection.getSignalCount(signalGroup));
-							double signalPerNucleus = (double) collection.getSignalCount(signalGroup)/  (double) SignalManager.getNumberOfCellsWithNuclearSignals(collection, signalGroup);
+							rowData.add(collection.getSignalManager().getSignalGroupName(signalGroup));
+							rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
+							rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
+							rowData.add(collection.getSignalManager().getSignalCount(signalGroup));
+							double signalPerNucleus = (double) collection.getSignalManager().getSignalCount(signalGroup)/  (double) collection.getSignalManager().getNumberOfCellsWithNuclearSignals(signalGroup);
 							rowData.add(df.format(signalPerNucleus));
 							
 							for(SignalStatistic stat : SignalStatistic.values()){
@@ -536,10 +536,10 @@ public class NuclearSignalDatasetCreator {
 		
 		CellCollection c = options.firstDataset().getCollection();
 		
-		for(int signalGroup : SignalManager.getSignalGroups(c)){
+		for(int signalGroup : c.getSignalManager().getSignalGroups()){
 			
 			List<Double> list = new ArrayList<Double>();
-			for(NuclearSignal s : c.getSignals(signalGroup)){
+			for(NuclearSignal s : c.getSignalManager().getSignals(signalGroup)){
 				
 				list.add(s.getStatistic(stat));
 			}
@@ -560,10 +560,10 @@ public class NuclearSignalDatasetCreator {
 
 		CellCollection c = dataset.getCollection();
 		
-		for(int signalGroup : SignalManager.getSignalGroups(c)){
+		for(int signalGroup : c.getSignalManager().getSignalGroups()){
 			
 			List<Double> list = new ArrayList<Double>();
-			for(NuclearSignal s : c.getSignals(signalGroup)){
+			for(NuclearSignal s : c.getSignalManager().getSignals(signalGroup)){
 				
 				list.add(s.getStatistic(SignalStatistic.AREA));
 			}
@@ -578,9 +578,9 @@ public class NuclearSignalDatasetCreator {
 			
 			CellCollection collection = dataset.getCollection();
 
-			for(int signalGroup : SignalManager.getSignalGroups(collection)){
+			for(int signalGroup : collection.getSignalManager().getSignalGroups()){
 				
-				if(collection.hasSignals(signalGroup)){
+				if(collection.getSignalManager().hasSignals(signalGroup)){
 					ShellResult r = dataset.getShellResult(signalGroup);
 
 					for(int shell = 0; shell<r.getNumberOfShells();shell++){

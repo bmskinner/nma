@@ -452,7 +452,7 @@ public class NucleusTableDatasetCreator {
 				CellCollection collection = dataset.getCollection();
 
 				List<Object> datasetData = new ArrayList<Object>();			
-				double signalPerNucleus = (double) collection.getSignalCount()/  (double) collection.getNucleusCount();
+				double signalPerNucleus = (double) collection.getSignalManager().getSignalCount()/  (double) collection.getNucleusCount();
 
 				datasetData.add(collection.getNucleusCount());
 
@@ -468,8 +468,8 @@ public class NucleusTableDatasetCreator {
 					datasetData.add(pf.format(diptest));					
 				}
 				
-				datasetData.add(SignalManager.getSignalGroups(dataset.getCollection()).size());
-				datasetData.add(collection.getSignalCount());
+				datasetData.add(dataset.getCollection().getSignalManager().getSignalGroupCount());
+				datasetData.add(collection.getSignalManager().getSignalCount());
 				datasetData.add(df.format(signalPerNucleus));
 				
 				model.addColumn(collection.getName(), datasetData.toArray());

@@ -43,9 +43,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	
 	// the segments
 	protected List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
-	
-	private transient NucleusBorderSegment firstSegment = null;
-	
+		
 	/**
 	 * Construct using a regular profile and a list of border segments
 	 * @param p the profile
@@ -68,7 +66,6 @@ public class SegmentedProfile extends Profile implements Serializable {
 		NucleusBorderSegment.linkSegments(segments);
 
 		this.segments = segments;
-		this.firstSegment = segments.get(0);
 	}
 	
 	/**
@@ -101,7 +98,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		NucleusBorderSegment.linkSegments(segments);
 
 		this.segments = segments;
-		this.firstSegment = segments.get(0);
+//		this.firstSegment = segments.get(0);
 	}
 	
 	/**
@@ -218,17 +215,17 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * Get the segment assigned to be the first in the list
 	 * @return
 	 */
-	public NucleusBorderSegment getFirstSegment(){
-		if(this.firstSegment != null){
-			return new NucleusBorderSegment(this.firstSegment);
-		} else {
-			return null;
-		}
-	}
+//	public NucleusBorderSegment getFirstSegment(){
+//		if(this.firstSegment != null){
+//			return new NucleusBorderSegment(this.firstSegment);
+//		} else {
+//			return null;
+//		}
+//	}
 	
-	public List<NucleusBorderSegment> getSegmentsFromFirst() throws Exception {
-		return getSegmentsFrom(getFirstSegment());
-	}
+//	public List<NucleusBorderSegment> getSegmentsFromFirst() throws Exception {
+//		return getSegmentsFrom(getFirstSegment());
+//	}
 	
 	/**
 	 * Get the segment with the given name. Returns null if no segment
@@ -318,7 +315,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		}
 		
 		this.segments = NucleusBorderSegment.copy(segments);
-		this.firstSegment = new NucleusBorderSegment(segments.get(0));
+//		this.firstSegment = new NucleusBorderSegment(segments.get(0));
 	}
 	
 	/**
@@ -326,7 +323,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 */
 	public void clearSegments(){
 		this.segments = new ArrayList<NucleusBorderSegment>(0);
-		this.firstSegment = null;
+//		this.firstSegment = null;
 	}
 	
 	/**
@@ -821,6 +818,6 @@ public class SegmentedProfile extends Profile implements Serializable {
 	
 	  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		    in.defaultReadObject();
-		    this.firstSegment = segments.get(0);
+//		    this.firstSegment = segments.get(0);
 		}
 }

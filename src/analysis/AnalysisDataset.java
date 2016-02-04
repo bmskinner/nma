@@ -510,7 +510,7 @@ public class AnalysisDataset implements Serializable {
 	 * 
 	 */
 	public boolean hasShellResult(){
-		for(Integer channel : SignalManager.getSignalGroups(thisCollection)){
+		for(Integer channel : thisCollection.getSignalManager().getSignalGroups()){
 			if(this.shellResults.containsKey(channel)){
 				return true;
 			}

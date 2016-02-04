@@ -266,7 +266,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	
 	private static void setSeriesPropertiesForSignalHistogram(JFreeChart chart, AnalysisDataset dataset){
 		
-		if(dataset.getCollection().hasSignals()){
+		if(dataset.getCollection().getSignalManager().hasSignals()){
 			XYPlot plot = chart.getXYPlot();
 			int seriesCount = plot.getDataset().getSeriesCount();
 			for (int j = 0; j < seriesCount; j++) {

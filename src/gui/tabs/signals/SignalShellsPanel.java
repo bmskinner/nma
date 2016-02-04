@@ -145,7 +145,7 @@ public class SignalShellsPanel extends DetailPanel {
 
 	} else { // no shell analysis available
 
-		if(collection.hasSignals()){
+		if(collection.getSignalManager().hasSignals()){
 			// if signals, offer to run
 			makeNoShellAnalysisAvailablePanel(true, collection, "No shell results available"); // allow option to run analysis
 		} else {

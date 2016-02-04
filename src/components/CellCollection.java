@@ -464,156 +464,13 @@ public class CellCollection implements Serializable {
 	  return result;
   }
   
-//  /**
-//   * Find the signal groups present within the nuclei of the collection
-//   * @return the list of groups. Order is not guaranteed
-//   */
-//  public List<Integer> getSignalGroups(){
-//	  List<Integer> result = new ArrayList<Integer>(0);
-//	  for(Nucleus n : this.getNuclei()){
-//		  for( int group : n.getSignalCollection().getSignalGroups()){
-//			  if(!result.contains(group)){
-//				  result.add(group);
-//			  }
-//		  }
-//	  } // end nucleus iterations
-//	  return result;
-//  }
-  
-  public String getSignalGroupName(int signalGroup){
-	  String result = null;
-	  
-	  for(Nucleus n : this.getNuclei()){
-		  if(n.hasSignal(signalGroup)){
-			  result = n.getSignalCollection().getSignalGroupName(signalGroup);
-		  }
-	  }
-	  return result;
-  }
-  
-  public int getSignalChannel(int signalGroup){
-	  int result = 0;
-	  
-	  for(Nucleus n : this.getNuclei()){
-		  if(n.hasSignal(signalGroup)){
-			  result = n.getSignalCollection().getSignalChannel(signalGroup);
-		  }
-	  }
-	  return result;
-  }
-  
   /**
-   * Get the name of the folder containing the images for the given signal group
-   * @param signalGroup
+   * Create a SignalManager with responsibility for 
+   * aggregate nuclear signal methods.
    * @return
    */
-  public String getSignalSourceFolder(int signalGroup){
-	  String result = null;
-
-	  for(Nucleus n : this.getNuclei()){
-		  if(n.hasSignal(signalGroup)){
-			  File file = n.getSignalCollection().getSourceFile(signalGroup);
-			  result = file.getParentFile().getAbsolutePath();
-		  }
-	  }
-	  return result;
-  }
-  
-  /**
-   * Update the source image folder for the given signal group
-   * @param signalGroup
-   * @param f
-   */
-  public void updateSignalSourceFolder(int signalGroup, File f){
-	  for(Nucleus n : this.getNuclei()){
-		  if(n.hasSignal(signalGroup)){
-			  String fileName = n.getSignalCollection().getSourceFile(signalGroup).getName();
-			  File newFile = new File(f.getAbsolutePath()+File.separator+fileName);
-			  n.getSignalCollection().updateSourceFile(signalGroup, newFile);
-		  }
-	  }
-  }
-  
-  /**
-   * Find the total number of signals within all nuclei of the collection.
-   * @return the total
-   */
-  public int getSignalCount(){
-	  int count = 0;
-	  for(int signalGroup : SignalManager.getSignalGroups(this)){
-		  count+= this.getSignalCount(signalGroup);
-	  }
-	  return count;
-  }
-  
-  /**
-   * Get the number of signals in the given group
-   * @param signalGroup the group to search
-   * @return the count
-   */
-  public int getSignalCount(int signalGroup){
-	  int count = 0;
-	  for(Nucleus n : this.getNuclei()){
-		  count += n.getSignalCount(signalGroup);
-
-	  } // end nucleus iterations
-	  return count;
-  }
-
-  /**
-   * Test whether the current population has signals in any channel
-   * @return
-   */
-  public boolean hasSignals(){
-	  for(int i : SignalManager.getSignalGroups(this)){
-		  if(this.hasSignals(i)){
-			  return true;
-		  }
-	  }
-	  return false;
-  }
-
-  /**
-   * Test whether the current population has signals in the given group
-   * @return
-   */
-  public boolean hasSignals(int signalGroup){
-	  if(this.getSignalCount(signalGroup)>0){
-		  return true;
-	  } else{
-		  return false;
-	  }
-
-  }
-  
-  /**
-   * Check the signal groups for all nuclei in the colleciton, and
-   * return the highest signal group present, or 0 if no signal groups
-   * are present
- * @return the highest signal group
- */
-  public int getHighestSignalGroup(){
-	  int maxGroup = 0;
-	  for(Nucleus n : this.getNuclei()){
-		  for(int group : n.getSignalCollection().getSignalGroups()){
-			  maxGroup = group > maxGroup ? group : maxGroup;
-		  }
-	  }
-	  return maxGroup;
-  }
-
-  /**
-   * Get all the signals from all nuclei in the given channel
-   * @param channel the channel to search
-   * @return a list of signals
-   */
-  public List<NuclearSignal> getSignals(int channel){
-
-	  List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
-	  for(Nucleus n : this.getNuclei()){
-		  result.addAll(n.getSignals(channel));
-	  }
-	  return result;
+  public SignalManager getSignalManager(){
+	  return new SignalManager(this);
   }
   
   public double getMedianPathLength() throws Exception{
@@ -655,7 +512,7 @@ public class CellCollection implements Serializable {
 
   public double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception{
 
-	  List<Cell> cells = SignalManager.getCellsWithNuclearSignals(this, signalGroup, true);
+	  List<Cell> cells = this.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
 	  List<Double> a = new ArrayList<Double>(0);
 	  for(Cell c : cells){
 		  Nucleus n = c.getNucleus();

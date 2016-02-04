@@ -115,7 +115,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		try{
 
 			
-			List<Cell> list = SignalManager.getCellsWithNuclearSignals(r, signalGroup, true);
+			List<Cell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
 			if(!list.isEmpty()){
 				programLogger.log(Level.INFO, "Signal group "+signalGroup+": found nuclei with signals");
 				CellCollection listCollection = new CellCollection(r.getFolder(), 
@@ -132,7 +132,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 				}
 				signalPopulations.add(listCollection);
 
-				List<Cell> notList = SignalManager.getCellsWithNuclearSignals(r, signalGroup, false);
+				List<Cell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
 				if(!notList.isEmpty()){
 					programLogger.log(Level.INFO, "Signal group "+signalGroup+": found nuclei without signals");
 					CellCollection notListCollection = new CellCollection(r.getFolder(), 

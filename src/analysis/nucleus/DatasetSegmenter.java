@@ -516,7 +516,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 			// create a segment at these points
 			// ensure that the segment meets length requirements
-			NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex, n.getBorderLength());
+			NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex, n.getBorderLength(), segment.getID());
 			if(prevSeg != null){
 				seg.setPrevSegment(prevSeg);
 				prevSeg.setNextSegment(seg);
@@ -1128,10 +1128,10 @@ public class DatasetSegmenter extends AnalysisWorker {
 			}
 			
 			NucleusBorderSegment reference  = referenceProfile.getSegment(name);
-			NucleusBorderSegment test		= testProfile.getSegment(name);
+			NucleusBorderSegment test		=      testProfile.getSegment(name);
 
 			Profile refProfile  = referenceProfile.getSubregion(reference);
-			Profile subjProfile = testProfile.getSubregion(test);
+			Profile subjProfile =      testProfile.getSubregion(test);
 			
 			return refProfile.absoluteSquareDifference(subjProfile);
 		}

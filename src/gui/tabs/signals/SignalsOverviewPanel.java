@@ -159,7 +159,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 				return;
 			}
 
-			activeDataset().getCollection().updateSignalSourceFolder(signalGroup, folder);
+			activeDataset().getCollection().getSignalManager().updateSignalSourceFolder(signalGroup, folder);
 //			SignalsDetailPanel.this.update(getDatasets());
 			refreshTableCache();
 			programLogger.log(Level.FINEST, "Updated signal source for signal group "+signalGroup+" to "+folder.getAbsolutePath() );
@@ -247,11 +247,11 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		if(isSingleDataset()){
 			try {
 
-				for(int signalGroup : SignalManager.getSignalGroups(activeDataset().getCollection())){
+				for(int signalGroup : activeDataset().getCollection().getSignalManager().getSignalGroups()){
 
 					boolean visible = activeDataset().isSignalGroupVisible(signalGroup);
 
-					String name = activeDataset().getCollection().getSignalGroupName(signalGroup);
+					String name = activeDataset().getCollection().getSignalManager().getSignalGroupName(signalGroup);
 					// make a checkbox for each signal group in the dataset
 					JCheckBox box = new JCheckBox(name);
 

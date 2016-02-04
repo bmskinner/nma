@@ -59,7 +59,7 @@ public class ShellAnalysis extends AnalysisWorker {
 		
 		CellCollection collection = this.getDataset().getCollection();
 		
-		if(collection.getSignalCount()==0){
+		if( ! collection.getSignalManager().hasSignals()){
 			log(Level.FINE, "No signals in population");
 			return true; // only bother if there are signals
 		}
@@ -69,7 +69,7 @@ public class ShellAnalysis extends AnalysisWorker {
 		try {
 			counters = new HashMap<Integer, ShellCounter>(0);
 
-			for(int signalGroup : SignalManager.getSignalGroups(collection)){
+			for(int signalGroup : collection.getSignalManager().getSignalGroups()){
 				counters.put(signalGroup, new ShellCounter(shells, fileLogger));
 			}
 
@@ -86,7 +86,7 @@ public class ShellAnalysis extends AnalysisWorker {
 				shellAnalyser.exportImage();
 
 				for(int signalGroup : n.getSignalGroups()){
-					if(collection.hasSignals(signalGroup)){
+					if(collection.getSignalManager().hasSignals(signalGroup)){
 						List<NuclearSignal> signals = n.getSignals(signalGroup); 
 						
 						File imageFile = n.getSignalCollection().getSourceFile(signalGroup);
@@ -118,7 +118,7 @@ public class ShellAnalysis extends AnalysisWorker {
 
 			// get stats and export
 			for(int channel : counters.keySet()){
-				if(collection.hasSignals(channel)){
+				if(collection.getSignalManager().hasSignals(channel)){
 					ShellCounter channelCounter = counters.get(channel);
 //					channelCounter.export(new File(collection.getLogFileName( "log.shells."+channel  )));
 					getDataset().addShellResult(channel, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
@@ -144,7 +144,7 @@ public class ShellAnalysis extends AnalysisWorker {
 		
 //		logger = new Logger(collection.getDebugFile(), "ShellAnalysis");
 		
-		if(collection.getSignalCount()==0){
+		if(collection.getSignalManager().getSignalCount()==0){
 			log(Level.FINE, "No signals in population");
 			return true; // only bother if there are signals
 		}
@@ -154,7 +154,7 @@ public class ShellAnalysis extends AnalysisWorker {
 		try {
 			counters = new HashMap<Integer, ShellCounter>(0);
 
-			for(int channel : SignalManager.getSignalGroups(collection)){
+			for(int channel : collection.getSignalManager().getSignalGroups()){
 				counters.put(channel, new ShellCounter(shells, fileLogger));
 			}
 
@@ -167,7 +167,7 @@ public class ShellAnalysis extends AnalysisWorker {
 				shellAnalyser.exportImage();
 
 				for(int channel : n.getSignalGroups()){
-					if(collection.hasSignals(channel)){
+					if(collection.getSignalManager().hasSignals(channel)){
 						List<NuclearSignal> signalGroup = n.getSignals(channel); 
 						
 						File imageFile = n.getSignalCollection().getSourceFile(channel);
@@ -189,7 +189,7 @@ public class ShellAnalysis extends AnalysisWorker {
 
 			// get stats and export
 			for(int channel : counters.keySet()){
-				if(collection.hasSignals(channel)){
+				if(collection.getSignalManager().hasSignals(channel)){
 					ShellCounter channelCounter = counters.get(channel);
 //					channelCounter.export(new File(collection.getLogFileName( "log.shells."+channel  )));
 					dataset.addShellResult(channel, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
