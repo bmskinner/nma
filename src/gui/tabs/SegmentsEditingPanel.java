@@ -29,6 +29,7 @@ import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.DraggableOverlayChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.dialogs.AngleWindowSizeExplorer;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,6 +49,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
@@ -205,220 +208,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 			
 		}
-		
-		/**
-		 * Check that the given segment pair does not cross a core border tag
-		 * @param seg1
-		 * @param seg2
-		 * @return
-		 * @throws Exception
-		 */
-		private boolean testSegmentsMergeable(NucleusBorderSegment seg1, NucleusBorderSegment seg2) throws Exception{
-			CellCollection collection = activeDataset().getCollection();
-			
-			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR)
-					.getSegmentedProfile(BorderTag.ORIENTATION_POINT);
-			
-			
-			// check the boundaries of the segment - we do not want to merge across the BorderTags
-			boolean ok = true;
-//			BorderTag overlappingTag = null;
-			for(BorderTag tag : BorderTag.values(BorderTagType.CORE)){
-				
-				/*
-				 * Find the position of the border tag in the median profile
-				 * 
-				 */
-				int offsetForOp = collection.getProfileCollection(ProfileType.REGULAR).getOffset(BorderTag.ORIENTATION_POINT);
-				
-				int offset = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
-				
-				// this should be zero for the orientation point and  totalLength+difference for the reference point
-				int difference = offset - offsetForOp;
-
-				if(seg2.getStartIndex()==seg2.getTotalLength()+difference || seg2.getStartIndex()==difference){
-					ok=false;
-//					overlappingTag = tag;
-				}
-
-
-			}
-			return ok;
-		}
-		
-		private void mergeSegments(String segName1, String segName2) throws Exception {
-			
-			CellCollection collection = activeDataset().getCollection();
-			
-//			List<NucleusBorderSegment> list =collection.getProfileCollection(ProfileCollectionType.REGULAR)
-//					.getSegmentedProfile(BorderTag.REFERENCE_POINT).getOrderedSegments();
-			
-			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
-			
-//			NucleusBorderSegment seg1 = NucleusBorderSegment.getSegment(list, segName1);
-//			NucleusBorderSegment seg2 = NucleusBorderSegment.getSegment(list, segName2);
-			
-			// Get the segments to merge
-			NucleusBorderSegment seg1 = medianProfile.getSegment(segName1);
-			NucleusBorderSegment seg2 = medianProfile.getSegment(segName2);
 						
-			if(testSegmentsMergeable(seg1, seg2)){
-
-				// merge the two segments in the median - this is only a copy of the profile collection
-				medianProfile.mergeSegments(seg1, seg2);
-
-				// put the new segment pattern back with the appropriate offset
-				collection.getProfileCollection(ProfileType.REGULAR).addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
-
-				/*
-				 * With the median profile segments merged, also merge the segments
-				 * in the individual nuclei
-				 */
-				for(Nucleus n : collection.getNuclei()){
-
-					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
-					NucleusBorderSegment nSeg1 = profile.getSegment(segName1);
-					NucleusBorderSegment nSeg2 = profile.getSegment(segName2);
-					profile.mergeSegments(nSeg1, nSeg2);
-					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
-				}
-
-				/*
-				 * Update the consensus if present
-				 */
-				if(collection.hasConsensusNucleus()){
-					ConsensusNucleus n = collection.getConsensusNucleus();
-					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
-					NucleusBorderSegment nSeg1 = profile.getSegment(segName1);
-					NucleusBorderSegment nSeg2 = profile.getSegment(segName2);
-					profile.mergeSegments(nSeg1, nSeg2);
-					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
-				}
-				
-				fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
-			} else {
-				JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
-			}
-		}
-		
-		private void unmergeSegments(String segName) throws Exception {
-			CellCollection collection = activeDataset().getCollection();
-			
-			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
-			
-			// Get the segments to merge
-			NucleusBorderSegment seg = medianProfile.getSegment(segName);
-			
-			// merge the two segments in the median - this is only a copy of the profile collection
-			medianProfile.unmergeSegment(seg);
-			
-			// put the new segment pattern back with the appropriate offset
-			collection.getProfileCollection(ProfileType.REGULAR).addSegments( BorderTag.ORIENTATION_POINT,  medianProfile.getSegments());
-
-			/*
-			 * With the median profile segments unmerged, also unmerge the segments
-			 * in the individual nuclei
-			 */
-			for(Nucleus n : collection.getNuclei()){
-
-				SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT);
-				NucleusBorderSegment nSeg = profile.getSegment(segName);
-				profile.unmergeSegment(nSeg);
-				n.setProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT, profile);
-			}
-			
-			/*
-			 * Update the consensus if present
-			 */
-			if(collection.hasConsensusNucleus()){
-				ConsensusNucleus n = collection.getConsensusNucleus();
-				SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT);
-				NucleusBorderSegment nSeg1 = profile.getSegment(segName);
-				profile.unmergeSegment(nSeg1);
-				n.setProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT, profile);
-			}
-			fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
-		}
-		
-		/**
-		 * Split the given segment into two segmnets. The split is made at the midpoint
-		 * @param segName
-		 * @return
-		 * @throws Exception
-		 */
-		private boolean splitSegment(String segName) throws Exception {
-			
-			boolean result = false;
-			
-			CellCollection collection = activeDataset().getCollection();
-			
-			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
-			
-			// Get the segments to merge
-			NucleusBorderSegment seg = medianProfile.getSegment(segName);
-			
-			// Do not try to split segments that are a merge of other segments
-			if(seg.hasMergeSources()){
-				JOptionPane.showMessageDialog(this, "Cannot split this segment: it is a merge of two segments");
-				return false;
-			}
-							
-				try{
-
-					int index = seg.getMidpointIndex();
-//					int index = (Integer) spinner.getModel().getValue();
-					if(seg.contains(index)){
-
-						fireInterfaceEvent(InterfaceMethod.UPDATE_IN_PROGRESS);
-						double proportion = seg.getIndexProportion(index);
-
-						// merge the two segments in the median - this is only a copy of the profile collection
-						medianProfile.splitSegment(seg, index);
-
-						// put the new segment pattern back with the appropriate offset
-						collection.getProfileCollection(ProfileType.REGULAR).addSegments( BorderTag.ORIENTATION_POINT,  medianProfile.getSegments());
-
-						/*
-						 * With the median profile segments unmerged, also split the segments
-						 * in the individual nuclei. Requires proportional alignment
-						 */
-						for(Nucleus n : collection.getNuclei()){
-
-							
-							SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT);
-							NucleusBorderSegment nSeg = profile.getSegment(segName);
-
-							int targetIndex = nSeg.getProportionalIndex(proportion);
-							profile.splitSegment(nSeg, targetIndex);
-							n.setProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT, profile);
-						}
-
-						/*
-						 * Update the consensus if present
-						 */
-						if(collection.hasConsensusNucleus()){
-							ConsensusNucleus n = collection.getConsensusNucleus();
-							SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT);
-							NucleusBorderSegment nSeg1 = profile.getSegment(segName);
-							int targetIndex = nSeg1.getProportionalIndex(proportion);
-							profile.splitSegment(nSeg1, targetIndex);
-							n.setProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT, profile);
-						}
-						fireInterfaceEvent(InterfaceMethod.UPDATE_COMPLETE);
-						fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
-						result = true;
-					} else {
-						SegmentsEditingPanel.this.programLogger.log(Level.WARNING, "Unable to split segment: index not present");
-					}
-				} catch(Exception e){
-					SegmentsEditingPanel.this.programLogger.log(Level.SEVERE, "Error splitting segment", e);
-				}
-//			}
-			
-			return result;
-		}
-		
 		@Override
 		protected void updateSingle() throws Exception {
 			JFreeChart chart = null;
@@ -527,13 +317,13 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 					int segMidpointIndex = Integer.valueOf(array[1]);
 					int index = Integer.valueOf(array[2]);
 					
-					String segName = activeDataset()
+					UUID segID = activeDataset()
 							.getCollection()
 							.getProfileCollection(ProfileType.REGULAR)
 							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 							.getSegmentContaining(segMidpointIndex)
-							.getName();
-					updateSegmentStartIndex(segName, index);
+							.getID();
+					updateSegmentStartIndex(segID, index);
 
 				} catch(Exception e){
 					programLogger.log(Level.SEVERE, "Error updating segment", e);
@@ -545,86 +335,43 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 
 		}
 		
-		private void updateSegmentStartIndex(String segName, int index) throws Exception{
+		private void updateSegmentStartIndex(UUID id, int index) throws Exception{
 
 			// Update the median profile
-			updateMedianProfileSegmentIndex(true , segName, index); // DraggablePanel always uses seg start index
-			
-			
-			// Make a dialog - update the morphology of each nucleus?
-			Object[] options = { "Update nuclei" , "Do not update", };
-			int result = JOptionPane.showOptionDialog(null, "Update the nuclei to the new boundaries?", "Update nuclei",
+			activeDataset()
+				.getCollection()
+				.getProfileManager()
+				.updateMedianProfileSegmentIndex(true, id, index); // DraggablePanel always uses seg start index
 
-					JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-
-					null, options, options[0]);
+			// Lock all the segments except the one to change
+			activeDataset()
+			.getCollection()
+			.getProfileManager()
+			.setLockOnAllNucleusSegmentsExcept(id, true);
 			
-			if(result==0){ // OK
+			
+//			// Make a dialog - update the morphology of each nucleus?
+//			Object[] options = { "Update nuclei" , "Do not update", };
+//			int result = JOptionPane.showOptionDialog(null, "Update the nuclei to the new boundaries?", "Update nuclei",
+//
+//					JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+//
+//					null, options, options[0]);
+//			
+//			if(result==0){ // OK
 				
 				//  Update each nucleus profile
 				fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
 				
-			}
+//			}
 			
-			// Only run a panel update if the refresh was not called
-			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-			update(getDatasets());
+//			// Only run a panel update if the refresh was not called
+//			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+//			update(getDatasets());
 			
-			
-		}
-		
-		private void updateMedianProfileSegmentIndex(boolean start, String segName, int index) throws Exception {
-			
-			programLogger.log(Level.FINE, "Updating median profile segment: "+segName+" to index "+index);
-			// Get the median profile from the reference point
-			
-			SegmentedProfile oldProfile = activeDataset()
-					.getCollection()
-					.getProfileCollection(ProfileType.REGULAR)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
-			
-			programLogger.log(Level.FINEST, "Old profile: "+oldProfile.toString());
-			
-
-
-			NucleusBorderSegment seg = oldProfile.getSegment(segName);
-
-			int newStart = start ? index : seg.getStartIndex();
-			int newEnd = start ? seg.getEndIndex() : index;
-			
-			// TODO - if the segment is the orientation point boundary, update it
-			if(start){
-				if(seg.getStartIndex()==activeDataset()
-						.getCollection()
-						.getProfileCollection(ProfileType.REGULAR).getOffset(BorderTag.ORIENTATION_POINT)){
-					activeDataset()
-					.getCollection()
-					.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, index);
-				}
-			}
-
-			 // Move the appropriate segment endpoint
-			if(oldProfile.update(seg, newStart, newEnd)){
-				
-				programLogger.log(Level.FINEST, "Segment position update succeeded");
-				// Replace the old segments in the median
-				programLogger.log(Level.FINEST, "Updated profile: "+oldProfile.toString());
-
-				programLogger.log(Level.FINEST, "Adding segments to profile collection");
-				
-				activeDataset()
-				.getCollection()
-				.getProfileCollection(ProfileType.REGULAR)
-				.addSegments(BorderTag.REFERENCE_POINT, oldProfile.getSegments());
-				
-				programLogger.log(Level.FINEST, "Segments added, refresh the charts");
-								
-			} else {
-				programLogger.log(Level.WARNING, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
-			}
 			
 		}
-		
+				
 		private void updateCollectionWindowSize() throws Exception{
 			int windowSizeMin = 1;
 			int windowSizeMax = (int) activeDataset().getCollection().getMedianArrayLength();
@@ -667,13 +414,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 			ProfileCollection pc = activeDataset().getCollection().getProfileCollection(ProfileType.REGULAR);			
 			pc.createProfileAggregate(activeDataset().getCollection(), ProfileType.REGULAR);
-			
-
-			/*
-			 * TODO
-			 * Update the franken collection
-			 */
-			
+					
 			
 			SegmentedProfile medianProfile = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);	
 			
@@ -757,31 +498,17 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		
 		private void mergeAction(SegmentedProfile medianProfile) throws Exception{
 			
-			List<String> names = new ArrayList<String>();
-			
-			/*
-			 * The segment names on the chart do not match the name in the profile,
-			 * due to reordering to put seg_0 after the reference point
-			 * 
-			 * We need a way to convert back, after a choice is made
-			 */
-			
-			Map<String, String> map = new HashMap<String, String>();
-			for(NucleusBorderSegment seg : medianProfile.getOrderedSegments()){
-				
-				NucleusBorderSegment realSeg = medianProfile.getSegment(seg);
-				map.put(seg.getName(), realSeg.getName());
-			}
+			List<SegMergeItem> names = new ArrayList<SegMergeItem>();
 			
 			
 			// Put the names of the mergable segments into a list
 			for(NucleusBorderSegment seg : medianProfile.getOrderedSegments()){
-				String mergeName = seg.getName()+" - "+seg.nextSegment().getName();
-				names.add(mergeName);
+				SegMergeItem item = new SegMergeItem(seg, seg.nextSegment());
+				names.add(item);
 			}
-			String[] nameArray = names.toArray(new String[0]);
+			SegMergeItem[] nameArray = names.toArray(new SegMergeItem[0]);
 
-			String mergeOption = (String) JOptionPane.showInputDialog(null, 
+			SegMergeItem mergeOption = (SegMergeItem) JOptionPane.showInputDialog(null, 
 					"Choose segments to merge",
 					"Merge",
 					JOptionPane.QUESTION_MESSAGE, 
@@ -790,44 +517,65 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 					nameArray[0]);
 
 			if(mergeOption!=null){
-				// a choice was made
-				String[] segs = mergeOption.split(" - "); // split back up to seg names
-				
-				String realSeg1 = map.get(segs[0]);
-				String realSeg2 = map.get(segs[1]);
-				
-//				IJ.log("Converted seg "+segs[0]+" to "+realSeg1);
-//				IJ.log("Converted seg "+segs[1]+" to "+realSeg2);
-								
-				mergeSegments(realSeg1, realSeg2);
-				
-				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-				list.add(activeDataset());
-				SegmentsEditingPanel.this.update(list);
-				SegmentsEditingPanel.this.fireSignalChangeEvent("UpdatePanels");
+
+
+				if(activeDataset()
+						.getCollection()
+						.getProfileManager().testSegmentsMergeable(mergeOption.getOne(), mergeOption.getTwo())){
+					activeDataset()
+						.getCollection()
+						.getProfileManager()
+						.mergeSegments(mergeOption.getOne(), mergeOption.getTwo());
+					fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
+				} else {
+					JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
+				}
+
+			}
+		}
+		
+		private class SegMergeItem{
+			private NucleusBorderSegment one, two;
+			public SegMergeItem(NucleusBorderSegment one, NucleusBorderSegment two){
+				this.one = one;
+				this.two = two;
+			}
+			public String toString(){
+				return one.getName()+" - "+two.getName();
+			}
+			public NucleusBorderSegment getOne(){
+				return one;
+			}
+			public NucleusBorderSegment getTwo(){
+				return two;
+			}
+		}
+		
+		private class SegSplitItem{
+			private NucleusBorderSegment seg;
+			public SegSplitItem(NucleusBorderSegment seg){
+				this.seg = seg;
+			}
+			public String toString(){
+				return seg.getName();
+			}
+			public NucleusBorderSegment getSeg(){
+				return seg;
 			}
 		}
 		
 		private void splitAction(SegmentedProfile medianProfile) throws Exception{
 			
-			List<String> names = new ArrayList<String>();
-			// show a list of segments that can be split, and merge the selected option
-			
-			Map<String, String> map = new HashMap<String, String>();
-			for(NucleusBorderSegment seg : medianProfile.getOrderedSegments()){
-				
-				NucleusBorderSegment realSeg = medianProfile.getSegment(seg);
-				map.put(seg.getName(), realSeg.getName());
-			}
+			List<SegSplitItem> names = new ArrayList<SegSplitItem>();
 
 			// Put the names of the mergable segments into a list
 			for(NucleusBorderSegment seg : medianProfile.getSegments()){
-					names.add(seg.getName());						
+					names.add(new SegSplitItem(seg));						
 			}
 			
-			String[] nameArray = names.toArray(new String[0]);
+			SegSplitItem[] nameArray = names.toArray(new SegSplitItem[0]);
 
-			String option = (String) JOptionPane.showInputDialog(null, 
+			SegSplitItem option = (SegSplitItem) JOptionPane.showInputDialog(null, 
 					"Choose segment to split",
 					"Split",
 					JOptionPane.QUESTION_MESSAGE, 
@@ -836,39 +584,40 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 					nameArray[0]);
 
 			if(option!=null){
-				// a choice was made
-				
-				String realSeg = map.get(option);
 
-				if(splitSegment(realSeg)){
-					SegmentsEditingPanel.this.update(SegmentsEditingPanel.this.activeDatasetToList());
-					SegmentsEditingPanel.this.fireSignalChangeEvent("UpdatePanels");
+				NucleusBorderSegment seg = option.getSeg();
+
+				if(activeDataset()
+						.getCollection()
+						.getProfileManager()
+						.splitSegment(seg)){
+					fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
+//					SegmentsEditingPanel.this.update(SegmentsEditingPanel.this.activeDatasetToList());
+//					SegmentsEditingPanel.this.fireSignalChangeEvent("UpdatePanels");
 				}
 			}
 		}
 		
 		private void unmergeAction(SegmentedProfile medianProfile) throws Exception{
-			
-			List<String> names = new ArrayList<String>();
-			
-			Map<String, String> map = new HashMap<String, String>();
-			for(NucleusBorderSegment seg : medianProfile.getOrderedSegments()){
-				
-				NucleusBorderSegment realSeg = medianProfile.getSegment(seg);
-				map.put(seg.getName(), realSeg.getName());
+						
+			List<SegSplitItem> names = new ArrayList<SegSplitItem>();
+
+			// Put the names of the mergable segments into a list
+			for(NucleusBorderSegment seg : medianProfile.getSegments()){
+				if(seg.hasMergeSources()){
+					names.add(new SegSplitItem(seg));		
+				}	
+
 			}
+			
+			SegSplitItem[] nameArray = names.toArray(new SegSplitItem[0]);
 			
 			// show a list of segments that can be unmerged, and merge the selected option
 
 			// Put the names of the mergable segments into a list
-			for(NucleusBorderSegment seg : medianProfile.getOrderedSegments()){
-				if(seg.hasMergeSources()){
-					names.add(seg.getName());
-				}							
-			}
-			String[] nameArray = names.toArray(new String[0]);
 
-			String mergeOption = (String) JOptionPane.showInputDialog(null, 
+
+			SegSplitItem mergeOption = (SegSplitItem) JOptionPane.showInputDialog(null, 
 					"Choose segments to unmerge",
 					"Unmerge",
 					JOptionPane.QUESTION_MESSAGE, 
@@ -878,15 +627,13 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 
 			if(mergeOption!=null){
 				// a choice was made
-				
-				String realSeg = map.get(mergeOption);
 
-				unmergeSegments(realSeg);
+				activeDataset()
+				.getCollection()
+				.getProfileManager()
+				.unmergeSegments(mergeOption.getSeg());
 
-				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-				list.add(activeDataset());
-				SegmentsEditingPanel.this.update(list);
-				SegmentsEditingPanel.this.fireSignalChangeEvent("UpdatePanels");
+				fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
 			}
 		}
 	}

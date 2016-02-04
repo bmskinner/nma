@@ -73,7 +73,7 @@ public class CellRelocator extends AnalysisWorker {
 			/*
 			 * Copy profile offsets and make the median profile
 			 */
-			ProfileManager.copyCollectionOffsets(getDataset().getCollection(), c);
+			getDataset().getCollection().getProfileManager().copyCollectionOffsets(c);
 			
 			
 			/*

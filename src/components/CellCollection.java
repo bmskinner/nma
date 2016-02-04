@@ -473,6 +473,10 @@ public class CellCollection implements Serializable {
 	  return new SignalManager(this);
   }
   
+  public ProfileManager getProfileManager(){
+	  return new ProfileManager(this);
+  }
+  
   public double getMedianPathLength() throws Exception{
     double[] p = this.getPathLengths();
     double median = Stats.quartile(p, Constants.MEDIAN);
@@ -806,7 +810,7 @@ public class CellCollection implements Serializable {
 		  
 		  
 	  }
-	  ProfileManager.copyCollectionOffsets(this, subCollection);
+	  this.getProfileManager().copyCollectionOffsets(subCollection);
 	  return subCollection;
   }
     

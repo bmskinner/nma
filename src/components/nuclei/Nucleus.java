@@ -457,6 +457,12 @@ public interface Nucleus extends CellularComponent {
 	 */
 	public int getOffsetBorderIndex(BorderTag reference, int index);
 	
+	/**
+	 * Set the lock on this segment of all the profile types
+	 * @param lock
+	 * @param segID
+	 */
+	public void setSegmentStartLock(boolean lock, UUID segID);
 
 	/**
 	 * Reverse the angle profile of the nucleus. Also reverses the distance

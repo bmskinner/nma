@@ -86,7 +86,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 				
 				try {
 					programLogger.log(Level.FINE, "Copying profiles to cluster");
-					ProfileManager.copyCollectionOffsets(dataset.getCollection(), c);
+					dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE, "Error copying segments to cluster "+c.getName(), e);
 				}

@@ -105,7 +105,7 @@ public class KruskalTester {
 			/*
 			 * Ensure that the profile collections have the same lengths in each collection
 			 */
-			ProfileManager.copyCollectionOffsets(one.getCollection(), copyOfTwo.getCollection());
+			one.getCollection().getProfileManager().copyCollectionOffsets(copyOfTwo.getCollection());
 			
 			/*
 			 * This is taken from MorphologyAnalysis.

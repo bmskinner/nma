@@ -40,6 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
@@ -1145,6 +1146,20 @@ public class RoundNucleus extends AbstractCellularComponent
 			}
 		}
 		return null;
+	}
+	
+	
+
+	public void setSegmentStartLock(boolean lock, UUID segID){
+		if(segID==null){
+			throw new IllegalArgumentException("Requested seg id is null");
+		}
+		for(SegmentedProfile p : this.profileMap.values()){
+			
+			if(p.hasSegment(segID)){
+				p.getSegment(segID).setStartPositionLocked(lock);
+			}
+		}
 	}
 
 	private SegmentedProfile calculateDistanceProfile() throws Exception {

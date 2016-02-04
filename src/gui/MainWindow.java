@@ -731,7 +731,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			
 			if(event.method().equals(DatasetMethod.REFRESH_MORPHOLOGY)){
-				programLogger.log(Level.INFO, "Updating segmentation across nuclei");
+//				programLogger.log(Level.INFO, "Updating segmentation across nuclei");
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
 					

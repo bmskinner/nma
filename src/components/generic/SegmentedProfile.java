@@ -155,7 +155,8 @@ public class SegmentedProfile extends Profile implements Serializable {
 	}
 	
 	/**
-	 * Fetch the segment with the given id, or null if not present
+	 * Fetch the segment with the given id, or null if not present.
+	 * Fetches the actual segment, not a copy
 	 * @param id
 	 * @return
 	 */
@@ -166,6 +167,15 @@ public class SegmentedProfile extends Profile implements Serializable {
 			}
 		}
 		return null;
+	}
+	
+	public boolean hasSegment(UUID id){
+		for(NucleusBorderSegment seg : this.segments){
+			if(seg.getID().equals(id)){
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -675,9 +685,10 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * belong to the profile, and be adjacent
 	 * @param segment1
 	 * @param segment2
+	 * @param id the new id to give the segment
 	 * @return
 	 */
-	public void mergeSegments(NucleusBorderSegment segment1, NucleusBorderSegment segment2) throws Exception {
+	public void mergeSegments(NucleusBorderSegment segment1, NucleusBorderSegment segment2, UUID id) throws Exception {
 		
 		// Check the segments belong to the profile
 		if(!this.contains(segment1) || !this.contains(segment2)){
@@ -696,7 +707,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		// Create the new segment
 		int startIndex = firstSegment.getStartIndex();
 		int endIndex = secondSegment.getEndIndex();
-		NucleusBorderSegment mergedSegment = new NucleusBorderSegment(startIndex, endIndex, this.size());
+		NucleusBorderSegment mergedSegment = new NucleusBorderSegment(startIndex, endIndex, this.size(), id);
 //		mergedSegment.setName(firstSegment.getName());
 		
 		mergedSegment.addMergeSource(firstSegment);

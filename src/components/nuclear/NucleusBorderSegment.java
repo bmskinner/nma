@@ -126,6 +126,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		this.nextSegment  = n.nextSegment();
 		this.prevSegment  = n.prevSegment();
 		this.mergeSources = n.getMergeSources();
+		this.startPositionLocked = n.isStartPositionLocked();
 	}
 
 	/*
@@ -818,9 +819,13 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 				
 		/*
 		 * Ensure the end of the final segment is the same index as the start of the first segment.
+		 * 
+		 * Unlock the first segment while the update proceeds
 		 */
 		
-//		IJ.log("First segment to become: "+lastSegment.getEndIndex()+" - "+firstSegment.getEndIndex());
+		boolean lockState = firstSegment.isStartPositionLocked();
+		firstSegment.setStartPositionLocked(false);
+		
 		boolean ok = firstSegment.update(lastSegment.getEndIndex(), firstSegment.getEndIndex());
 		if(!ok){
 			throw new Exception("Error fitting final segment: "+firstSegment.getLastFailReason());
@@ -833,7 +838,11 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		// it to start at 0
 		if(firstSegment.getStartIndex()==firstSegment.getTotalLength()-1){
 			firstSegment.update(0, firstSegment.getEndIndex());
-		}		
+		}	
+		/*
+		 * Relock the segment if it was previously locked
+		 */
+		firstSegment.setStartPositionLocked(lockState);
 		
 	}
 	
