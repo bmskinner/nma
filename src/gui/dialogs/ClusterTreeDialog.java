@@ -524,6 +524,11 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 				if(c.hasCells()){
 
 					dataset.addChildCollection(c);
+					try {
+						dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
+					} catch (Exception e1) {
+						programLogger.log(Level.SEVERE, "Error applying segments", e);
+					}
 
 					AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
 					clusterDataset.setRoot(false);
