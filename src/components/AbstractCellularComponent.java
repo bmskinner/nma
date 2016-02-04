@@ -450,7 +450,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		double[] distances = new double[this.borderList.size()];
 		for(int i=0;i<this.borderList.size();i++){
 			BorderPoint p = this.getBorderPoint(i);
-			BorderPoint next = this.getBorderPoint( Utils.wrapIndex(i+1, this.borderList.size()));
+			BorderPoint next = this.getBorderPoint( wrapIndex(i+1, this.borderList.size()));
 			distances[i] = p.getLengthTo(next);
 		}
 		return Stats.quartile(distances, Constants.MEDIAN);
@@ -506,5 +506,51 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		// update the positions
 		this.moveCentreOfMass(newCentreOfMass);
 	}
+	
+	 /**
+	  * Wrap arrays. If an index falls of the end, it is returned to the start and vice versa
+	 * @param i the index
+	 * @param length the array length
+	 * @return the index within the array
+	 */
+	public static int wrapIndex(int i, int length){
+		 if(i<0){
+			 return length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
+		 }
+		 
+		 if(i<length){ // if not wrapping
+			 return i;
+		 }
+		 
+		 return i%length;
+
+		 
+		 
+		 
+//		 if(Math.floor(i / length)>0)
+//			 i = i - ( ((int)Math.floor(i / length) )*length);
+
+//		 if(i<0 || i>length){
+//			 IJ.log("Warning: array out of bounds: "+i);
+//		 }
+
+//		 return i;
+	 }
+	
+	 /**
+	  * Wrap arrays for doubles. If an index falls of the end, it is returned to the start and vice versa
+	 * @param i the index
+	 * @param length the array length
+	 * @return the index within the array
+	 */
+	public static double wrapIndex(double i, int length){
+		 if(i<0)
+			 i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
+		 
+		 if(Math.floor(i / length)>0) // if i is greater than array length 
+			 i = i - (  (      (int)Math.floor(i / length) )    * length  );
+
+		 return i;
+	 }
 	
 }

@@ -36,6 +36,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import components.AbstractCellularComponent;
+
 import utility.Utils;
 
 public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
@@ -338,7 +340,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	 * @param value the amount to shorten
 	 */
 	public boolean shortenStart(int value){
-		int newValue = Utils.wrapIndex(this.getStartIndex()+value, this.getTotalLength());
+		int newValue = AbstractCellularComponent.wrapIndex(this.getStartIndex()+value, this.getTotalLength());
 		return this.update(newValue, this.getEndIndex());
 	}
 	
@@ -349,7 +351,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	 * @param value the amount to shorten
 	 */
 	public boolean shortenEnd(int value){
-		int newValue = Utils.wrapIndex(this.getEndIndex()-value, this.getTotalLength());
+		int newValue = AbstractCellularComponent.wrapIndex(this.getEndIndex()-value, this.getTotalLength());
 		return this.update(this.getStartIndex(), newValue);
 
 	}
@@ -361,7 +363,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	 * @param value the amount to shorten
 	 */
 	public boolean lengthenStart(int value){
-		int newValue = Utils.wrapIndex( this.getStartIndex()-value, this.getTotalLength());
+		int newValue = AbstractCellularComponent.wrapIndex( this.getStartIndex()-value, this.getTotalLength());
 		return this.update(newValue, this.getEndIndex());
 	}
 	
@@ -372,7 +374,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	 * @param value the amount to shorten
 	 */
 	public boolean lengthenEnd(int value){
-		int newValue = Utils.wrapIndex( this.getEndIndex()+value, this.getTotalLength());
+		int newValue = AbstractCellularComponent.wrapIndex( this.getEndIndex()+value, this.getTotalLength());
 		return this.update(this.getStartIndex(), newValue);
 	}
 		
@@ -839,10 +841,10 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 			
 			NucleusBorderSegment newSeg = new NucleusBorderSegment(
 					
-					Utils.wrapIndex(segment.getStartIndex()+value,
+					AbstractCellularComponent.wrapIndex(segment.getStartIndex()+value,
 									segment.getTotalLength()), 
 									
-					Utils.wrapIndex(segment.getEndIndex()+value,
+					AbstractCellularComponent.wrapIndex(segment.getEndIndex()+value,
 									segment.getTotalLength()), 
 					
 					segment.getTotalLength() ,
@@ -885,8 +887,8 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		
 		for(NucleusBorderSegment segment : list){
 			
-			NucleusBorderSegment newSeg = new NucleusBorderSegment(Utils.wrapIndex(segment.getStartIndex()+value, segment.getTotalLength()), 
-					Utils.wrapIndex(segment.getEndIndex()+value, segment.getTotalLength()), 
+			NucleusBorderSegment newSeg = new NucleusBorderSegment(AbstractCellularComponent.wrapIndex(segment.getStartIndex()+value, segment.getTotalLength()), 
+					AbstractCellularComponent.wrapIndex(segment.getEndIndex()+value, segment.getTotalLength()), 
 					segment.getTotalLength(),
 					segment.getID());
 			
@@ -904,8 +906,8 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 				}
 				
 //				for(NucleusBorderSegment oldMergeSource : segment.getMergeSources()){
-//					NucleusBorderSegment newMergeSource = new NucleusBorderSegment(Utils.wrapIndex(oldMergeSource.getStartIndex()+value, oldMergeSource.getTotalLength()), 
-//							Utils.wrapIndex(oldMergeSource.getEndIndex()+value, oldMergeSource.getTotalLength()), 
+//					NucleusBorderSegment newMergeSource = new NucleusBorderSegment(AbstractCellularComponent.wrapIndex(oldMergeSource.getStartIndex()+value, oldMergeSource.getTotalLength()), 
+//							AbstractCellularComponent.wrapIndex(oldMergeSource.getEndIndex()+value, oldMergeSource.getTotalLength()), 
 //							oldMergeSource.getTotalLength() );
 //					
 //					newMergeSource.setName(oldMergeSource.getName());

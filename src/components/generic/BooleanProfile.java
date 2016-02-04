@@ -18,6 +18,8 @@
  *******************************************************************************/
 package components.generic;
 
+import components.AbstractCellularComponent;
+
 import ij.IJ;
 import utility.Utils;
 
@@ -116,7 +118,7 @@ public class BooleanProfile {
 	public BooleanProfile offset(int j) throws Exception{
 		boolean[] newArray = new boolean[this.size()];
 		for(int i=0;i<this.size();i++){
-			newArray[i] = this.array[ Utils.wrapIndex( i+j , this.size() ) ];
+			newArray[i] = this.array[ AbstractCellularComponent.wrapIndex( i+j , this.size() ) ];
 		}
 		return new BooleanProfile(newArray);
 	}

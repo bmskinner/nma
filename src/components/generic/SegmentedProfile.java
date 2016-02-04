@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.UUID;
 
 import utility.Utils;
+import components.AbstractCellularComponent;
 import components.nuclear.NucleusBorderSegment;
 
 /**
@@ -492,7 +493,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		// get the segment within this profile, not a copy that looks the same
 		NucleusBorderSegment segmentToUpdate = this.getSegment(segment);
 		
-		int newValue = Utils.wrapIndex( segmentToUpdate.getStartIndex()+amount, segmentToUpdate.getTotalLength());
+		int newValue = AbstractCellularComponent.wrapIndex( segmentToUpdate.getStartIndex()+amount, segmentToUpdate.getTotalLength());
 		return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
 	}
 	
@@ -510,7 +511,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		// get the segment within this profile, not a copy
 		NucleusBorderSegment segmentToUpdate = this.getSegment(name);
 				
-		int newValue = Utils.wrapIndex( segmentToUpdate.getEndIndex()+amount, segmentToUpdate.getTotalLength());
+		int newValue = AbstractCellularComponent.wrapIndex( segmentToUpdate.getEndIndex()+amount, segmentToUpdate.getTotalLength());
 		return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
 	}
 	
@@ -617,7 +618,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		// get the region within the segment as a new profile
 		// Exclude the last index of each segment to avoid duplication
 		// the first index is kept, because the first index is used for border tags
-		int lastIndex = Utils.wrapIndex( testSeg.getEndIndex()-1, testSeg.getTotalLength());
+		int lastIndex = AbstractCellularComponent.wrapIndex( testSeg.getEndIndex()-1, testSeg.getTotalLength());
 		
 		Profile testSegProfile = this.getSubregion(testSeg.getStartIndex(), lastIndex);
 
@@ -660,7 +661,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 			
 			// invert the segment by swapping start and end
 			int newStart = (this.size()-1) - seg.getEndIndex();
-			int newEnd   = Utils.wrapIndex(newStart+seg.length(), this.size());
+			int newEnd   = AbstractCellularComponent.wrapIndex(newStart+seg.length(), this.size());
 			NucleusBorderSegment newSeg = new NucleusBorderSegment(newStart, newEnd, this.size(), seg.getID());
 //			newSeg.setName(seg.getName());
 			// since the order is reversed, add them to the top of the new list

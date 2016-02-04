@@ -41,6 +41,7 @@ import javax.swing.border.EmptyBorder;
 import charting.charts.AbstractChartFactory;
 import charting.charts.MorphologyChartFactory;
 import utility.Utils;
+import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellularComponent;
 import components.generic.ProfileType;
@@ -138,7 +139,7 @@ public class AnnotatedNucleusPanel extends JPanel {
 				
 				
 				for(int j=0; j<=seg.length();j++){
-					int k = Utils.wrapIndex(seg.getStartIndex()+j, n.getBorderLength());
+					int k = AbstractCellularComponent.wrapIndex(seg.getStartIndex()+j, n.getBorderLength());
 					BorderPoint p = n.getBorderPoint(k); // get the border points in the segment
 					x[j] = (float) p.getX();
 					y[j] = (float) p.getY();

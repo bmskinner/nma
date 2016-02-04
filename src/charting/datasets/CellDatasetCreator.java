@@ -30,6 +30,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import utility.Utils;
+import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellularComponent;
 import components.generic.BorderTag;
@@ -107,7 +108,7 @@ public class CellDatasetCreator {
 			if(type!=null){
 				for(BorderTag tag : BorderTag.values(BorderTagType.CORE)){
 					fieldNames.add(type.getPoint(tag));
-					int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
+					int index = AbstractCellularComponent.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
 					rowData.add(index);
 				}
 			} 

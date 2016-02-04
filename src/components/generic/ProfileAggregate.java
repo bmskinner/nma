@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import components.AbstractCellularComponent;
 import components.nuclear.NucleusBorderSegment;
 import utility.Constants;
 import utility.ProfileException;
@@ -223,11 +224,11 @@ public class ProfileAggregate implements Serializable {
 		for(int i=0;i<array.length;i++){
 			if(array[i].isNaN()){
 				
-				int replacementIndex = Utils.wrapIndex(i+1, array.length);
+				int replacementIndex = AbstractCellularComponent.wrapIndex(i+1, array.length);
 				if(!array[replacementIndex].isNaN()){
 					array[i] = array[replacementIndex];
 				} else{
-					replacementIndex = Utils.wrapIndex(i-1, array.length);
+					replacementIndex = AbstractCellularComponent.wrapIndex(i-1, array.length);
 					if(!array[replacementIndex].isNaN()){
 						array[i] = array[replacementIndex];
 					} else {

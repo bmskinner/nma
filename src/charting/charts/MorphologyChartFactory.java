@@ -21,10 +21,12 @@ package charting.charts;
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.List;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
@@ -42,12 +44,14 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
+
 import stats.StatisticDimension;
 import utility.Utils;
 import analysis.AnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
+import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
@@ -154,7 +158,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				int offset = collection.getProfileCollection(options.getType()).getOffset(options.getTag());
 
 				// adjust the index to the offset
-				index = Utils.wrapIndex( index - offset, collection.getProfileCollection(options.getType()).getAggregate().length());
+				index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection(options.getType()).getAggregate().length());
 
 				double indexToDraw = index; // convert to a double to allow normalised positioning
 

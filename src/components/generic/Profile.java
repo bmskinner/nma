@@ -31,6 +31,7 @@ import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 
 import utility.Utils;
+import components.AbstractCellularComponent;
 import components.nuclear.NucleusBorderSegment;
 
 /**
@@ -391,7 +392,7 @@ public class Profile implements Serializable {
 	public Profile offset(int j) throws Exception{
 		double[] newArray = new double[this.size()];
 		for(int i=0;i<this.size();i++){
-			newArray[i] = this.array[ Utils.wrapIndex( i+j , this.size() ) ];
+			newArray[i] = this.array[ AbstractCellularComponent.wrapIndex( i+j , this.size() ) ];
 		}
 		return new Profile(newArray);
 	}
@@ -433,7 +434,7 @@ public class Profile implements Serializable {
 		for(int j=0;j<values.length;j++){
 
 			// If type was before, multiply by -1; if after, multiply by 1
-			int index = Utils.wrapIndex( position + ((j+1)*type)  , this.size() );
+			int index = AbstractCellularComponent.wrapIndex( position + ((j+1)*type)  , this.size() );
 			values[j] = array[index];
 		}
 		return values;
@@ -512,8 +513,8 @@ public class Profile implements Serializable {
 //	  System.out.println("Set indexes "+normIndex+": "+indexLower+"-"+indexHigher);
 
 	  // wrap the arrays
-	  indexLower  = Utils.wrapIndex(indexLower , this.size());
-	  indexHigher = Utils.wrapIndex(indexHigher, this.size());
+	  indexLower  = AbstractCellularComponent.wrapIndex(indexLower , this.size());
+	  indexHigher = AbstractCellularComponent.wrapIndex(indexHigher, this.size());
 //	  System.out.println("Wrapped indexes "+normIndex+": "+indexLower+"-"+indexHigher);
 
 	  // get the values at these indexes
@@ -533,7 +534,7 @@ public class Profile implements Serializable {
 
 	  // add the offset to the lower index
 	  double positionToFind = indexLower + offset;
-	  positionToFind = Utils.wrapIndex(positionToFind , this.size());
+	  positionToFind = AbstractCellularComponent.wrapIndex(positionToFind , this.size());
 //	  System.out.println("Position to find "+normIndex+": "+positionToFind);
 	  
 	  // calculate the value to be added to the lower index value
@@ -645,8 +646,8 @@ public class Profile implements Serializable {
       // go through each lookup position and get the appropriate angles
       for(int j=0;j<prevValues.length;j++){
 
-        int prev_i = Utils.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
-        int next_i = Utils.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
+        int prev_i = AbstractCellularComponent.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
+        int next_i = AbstractCellularComponent.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
 
         // fill the lookup array
         prevValues[j] = array[prev_i];
@@ -960,8 +961,8 @@ public Profile calculateDeltas(int windowSize){
 	
 		for (int i=0; i<array.length; i++) { // for each position in sperm
 	
-			int prev_i = Utils.wrapIndex( i-1  , this.size() ); // the index before
-			int next_i = Utils.wrapIndex( i+1  , this.size() ); // the index after
+			int prev_i = AbstractCellularComponent.wrapIndex( i-1  , this.size() ); // the index before
+			int next_i = AbstractCellularComponent.wrapIndex( i+1  , this.size() ); // the index after
 	
 	
 			double delta = 	array[i]	-  array[prev_i] +

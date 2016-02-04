@@ -190,21 +190,44 @@ public class NuclearHistogramDatasetCreator {
 //			minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
 //	
 			
+
 			List<Double> xValues = new ArrayList<Double>();
 			List<Double> yValues = new ArrayList<Double>();
-			
+
 			for(double i=minMaxRange[0]; i<=minMaxRange[1]; i+=minMax[STEP_SIZE]){
+
+
 				xValues.add(i);
 				yValues.add(est.getProbability(i));
+
 			}
-	
 			double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
 					Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
-			
-			
-			ds.addSeries(groupLabel+"_"+collection.getName(), data);
-		}
 
+
+			/*
+			 * TODO: test this works
+			 */
+			//			int numberOfPoints = (minMaxRange[1] - minMaxRange[0]) / (int) minMax[STEP_SIZE];
+			//			
+			//			double[] xvalues = new double[numberOfPoints];
+			//			double[] yvalues = new double[numberOfPoints];
+			//
+			//			for(int i=0; i<xvalues.length; i++){	
+			//				
+			//				double position = minMaxRange[0] + (minMax[STEP_SIZE] * i);
+			//				
+			//				xvalues[i] = position;
+			//				yvalues[i] = est.getProbability(position);
+			//
+			//			}
+			//			
+			//			double[][] data = { xvalues, yvalues };
+
+
+			ds.addSeries(groupLabel+"_"+collection.getName(), data);
+
+		}
 		return ds;
 	}
 		

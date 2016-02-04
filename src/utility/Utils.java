@@ -149,44 +149,44 @@ public class Utils {
 
 	 
 	 
-	 /**
-	  * Wrap arrays. If an index falls of the end, it is returned to the start and vice versa
-	 * @param i the index
-	 * @param length the array length
-	 * @return the index within the array
-	 */
-	public static int wrapIndex(int i, int length){
-		 if(i<0)
-			 i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
-		 if(Math.floor(i / length)>0)
-			 i = i - ( ((int)Math.floor(i / length) )*length);
-
-		 if(i<0 || i>length){
-			 IJ.log("Warning: array out of bounds: "+i);
-		 }
-
-		 return i;
-	 }
-	
-	 /**
-	  * Wrap arrays for doubles. If an index falls of the end, it is returned to the start and vice versa
-	 * @param i the index
-	 * @param length the array length
-	 * @return the index within the array
-	 */
-	public static double wrapIndex(double i, int length){
-		 if(i<0)
-			 i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
-		 
-		 if(Math.floor(i / length)>0) // if i is greater than array length 
-			 i = i - (  (      (int)Math.floor(i / length) )    * length  );
-
+//	 /**
+//	  * Wrap arrays. If an index falls of the end, it is returned to the start and vice versa
+//	 * @param i the index
+//	 * @param length the array length
+//	 * @return the index within the array
+//	 */
+//	public static int wrapIndex(int i, int length){
+//		 if(i<0)
+//			 i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
+//		 if(Math.floor(i / length)>0)
+//			 i = i - ( ((int)Math.floor(i / length) )*length);
+//
 //		 if(i<0 || i>length){
-//			 IJ.log("Warning: array out of bounds wrapping index: "+i);
+//			 IJ.log("Warning: array out of bounds: "+i);
 //		 }
-
-		 return i;
-	 }
+//
+//		 return i;
+//	 }
+	
+//	 /**
+//	  * Wrap arrays for doubles. If an index falls of the end, it is returned to the start and vice versa
+//	 * @param i the index
+//	 * @param length the array length
+//	 * @return the index within the array
+//	 */
+//	public static double wrapIndex(double i, int length){
+//		 if(i<0)
+//			 i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
+//		 
+//		 if(Math.floor(i / length)>0) // if i is greater than array length 
+//			 i = i - (  (      (int)Math.floor(i / length) )    * length  );
+//
+////		 if(i<0 || i>length){
+////			 IJ.log("Warning: array out of bounds wrapping index: "+i);
+////		 }
+//
+//		 return i;
+//	 }
 
 	
 	 /**
@@ -221,18 +221,8 @@ public class Utils {
 	  * @param n the nucleus
 	  * @return
 	  */
-	 public static FloatPolygon createPolygon(Nucleus n){
-//		 float[] xpoints = new float[n.getLength()];
-//		 float[] ypoints = new float[n.getLength()];
-//
-//		 for(int i=0;i<n.getLength();i++){
-//			 NucleusBorderPoint p = n.getBorderPoint(i);
-//			 xpoints[i] = (float) p.getX();
-//			 ypoints[i] = (float) p.getY();
-//		 }
-//
-//		 return new FloatPolygon(xpoints, ypoints, n.getLength());
-		 return createPolygon(n.getBorderList());
+	 public static FloatPolygon createPolygon(CellularComponent c){
+		 return createPolygon(c.getBorderList());
 	 }
 
 	 /**
@@ -257,30 +247,6 @@ public class Utils {
 		 return new FloatPolygon(xpoints, ypoints);
 	 }
 	
-	 /**
-		 * Turn a list of border points into a polygon. Offset the points to the original
-		 * position in a source image. Uses the Nucleus.originalPosition format
-		 * @param list the list of border points
-		 * @param originalPosition an array giving the original positions
-		 * @see Nucleus.getPosition
-		 * @return
-		 */
-		public static FloatPolygon createOriginalPolygon(List<BorderPoint> list, double[] originalPosition){
-			 float[] xpoints = new float[list.size()+1];
-			 float[] ypoints = new float[list.size()+1];
-
-			 for(int i=0;i<list.size();i++){
-				 BorderPoint p = list.get(i);
-				 xpoints[i] = (float) p.getX() + (float) originalPosition[CellularComponent.X_BASE];
-				 ypoints[i] = (float) p.getY() + (float) originalPosition[CellularComponent.Y_BASE];
-			 }
-			 
-			// Ensure the polygon is closed
-			 xpoints[list.size()] = (float) list.get(0).getX();
-			 ypoints[list.size()] = (float) list.get(0).getY();
-
-			 return new FloatPolygon(xpoints, ypoints);
-		 }
 	
 	/**
 	 * Turn the border points in a nucleus into a polygon, offset
@@ -288,20 +254,37 @@ public class Utils {
 	 * @param n the nucleus
 	 * @return a polygon
 	 */
-	public static FloatPolygon createOriginalPolygon(Nucleus n){
-//		 float[] xpoints = new float[n.getLength()];
-//		 float[] ypoints = new float[n.getLength()]; 
-//
-//		 for(int i=0;i<n.getLength();i++){
-//			 NucleusBorderPoint p = n.getBorderPoint(i);
-//			 xpoints[i] = (float) p.getX() + (float) n.getPosition()[Nucleus.X_BASE];
-//			 ypoints[i] = (float) p.getY() + (float) n.getPosition()[Nucleus.Y_BASE];
-//		 }
-//
-//		 return new FloatPolygon(xpoints, ypoints, n.getLength());
-		return createOriginalPolygon(n.getOriginalBorderList(), n.getPosition());
+	public static FloatPolygon createOriginalPolygon(CellularComponent c){
+		return createOriginalPolygon(c.getOriginalBorderList(), c.getPosition());
 
 	 }
+	
+	/**
+	 * Turn a list of border points into a polygon. Offset the points to the original
+	 * position in a source image. Uses the Nucleus.originalPosition format
+	 * @param list the list of border points
+	 * @param originalPosition an array giving the original positions
+	 * @see Nucleus.getPosition
+	 * @return
+	 */
+	public static FloatPolygon createOriginalPolygon(List<BorderPoint> list, double[] originalPosition){
+		float[] xpoints = new float[list.size()+1];
+		float[] ypoints = new float[list.size()+1];
+
+		for(int i=0;i<list.size();i++){
+			BorderPoint p = list.get(i);
+			xpoints[i] = (float) p.getX() + (float) originalPosition[CellularComponent.X_BASE];
+			ypoints[i] = (float) p.getY() + (float) originalPosition[CellularComponent.Y_BASE];
+		}
+
+		// Ensure the polygon is closed
+		xpoints[list.size()] = (float) list.get(0).getX();
+		ypoints[list.size()] = (float) list.get(0).getY();
+
+		return new FloatPolygon(xpoints, ypoints);
+	}
+	
+
 	
 	/*
 	Given three XYPoints, measure the angle a-b-c
@@ -333,23 +316,5 @@ public class Utils {
 	public static double micronArea(double pixels, double scale){
 		double microns = pixels * scale;
 		return microns;
-	}
-	
-	/**
-	  * Get the unique values from a double array
-	  * @param d the double array
-	  * @return a double array with unique values only
-	  */
-	 public static double[] getUnique(double[] d){
-//		 double[] results = new double[d.length];
-		 List<Double> results = new ArrayList<Double>();
-		 Arrays.sort(d);
-		 for(int i=1;i<d.length;i++){
-			 if(d[i]!=d[i-1]){
-				 results.add(d[i]);
-			 }
-		 }
-		 return Utils.getdoubleFromDouble(  results.toArray(new Double[0] ));
-	 }
-	
+	}	
  }

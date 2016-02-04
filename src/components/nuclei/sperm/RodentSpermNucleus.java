@@ -526,7 +526,7 @@ extends SpermNucleus
     for(int i = 0; i<this.getBorderLength();i++){
 
     	// start at the tail, and go around the array
-      int currentIndex = Utils.wrapIndex(this.getBorderIndex(BorderTag.ORIENTATION_POINT)+i, this.getBorderLength());
+      int currentIndex = wrapIndex(this.getBorderIndex(BorderTag.ORIENTATION_POINT)+i, this.getBorderLength());
       
       BorderPoint p = getBorderPoint(currentIndex);
 

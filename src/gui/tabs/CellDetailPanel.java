@@ -97,6 +97,7 @@ import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
+import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellularComponent;
 import components.generic.BorderTag;
@@ -848,7 +849,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 //			String pointType = rowName;
 			
 			
-			int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
+			int index = AbstractCellularComponent.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
 			
 			SpinnerNumberModel sModel 
 				= new SpinnerNumberModel(index, 0, n.getBorderLength(), 1);
@@ -869,7 +870,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				int existingIndex = n.getBorderIndex(tag);
 				
 				// adjust to the actual point index
-				int pointIndex = Utils.wrapIndex(chosenIndex + n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
+				int pointIndex = AbstractCellularComponent.wrapIndex(chosenIndex + n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
 				
 				// find the amount the index is changing by
 				int difference = pointIndex - existingIndex;

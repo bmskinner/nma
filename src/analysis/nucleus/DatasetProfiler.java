@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
@@ -316,7 +317,7 @@ public class DatasetProfiler extends AnalysisWorker {
 //			fileLogger.log(Level.FINE, collection.getProfileCollection(ProfileCollectionType.REGULAR).toString());
 			
 //			 adjust the index to the offset
-			int headIndex  = Utils.wrapIndex( tailIndex - offset, collection.getProfileCollection(ProfileType.REGULAR).getAggregate().length());
+			int headIndex  = AbstractCellularComponent.wrapIndex( tailIndex - offset, collection.getProfileCollection(ProfileType.REGULAR).getAggregate().length());
 //			fileLogger.log(Level.FINE, "Setting head to index: "+headIndex);
 			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.INTERSECTION_POINT, headIndex);
 		}

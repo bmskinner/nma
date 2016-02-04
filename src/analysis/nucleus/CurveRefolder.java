@@ -32,6 +32,7 @@ import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import utility.Constants;
 import utility.Utils;
+import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.Equation;
@@ -280,8 +281,8 @@ public class CurveRefolder extends AnalysisWorker {
 			}
 			skip = !skip;
 			
-			int prevIndex = Utils.wrapIndex(i-1, refoldNucleus.getBorderLength());
-			int nextIndex = Utils.wrapIndex(i+1, refoldNucleus.getBorderLength());
+			int prevIndex = AbstractCellularComponent.wrapIndex(i-1, refoldNucleus.getBorderLength());
+			int nextIndex = AbstractCellularComponent.wrapIndex(i+1, refoldNucleus.getBorderLength());
 						
 			BorderPoint thisPoint = refoldNucleus.getBorderPoint(i);
 			BorderPoint prevPoint = refoldNucleus.getBorderPoint(prevIndex);
@@ -429,8 +430,8 @@ public class CurveRefolder extends AnalysisWorker {
 	 * @return
 	 */
 	private boolean checkPositionIsOK(XYPoint point,  Nucleus n, int index, double min, double max){
-		double distanceToPrev = point.getLengthTo( n.getBorderPoint( Utils.wrapIndex(index-1, n.getBorderLength()) ) );
-		double distanceToNext = point.getLengthTo( n.getBorderPoint( Utils.wrapIndex(index+1, n.getBorderLength()) ) );
+		double distanceToPrev = point.getLengthTo( n.getBorderPoint( AbstractCellularComponent.wrapIndex(index-1, n.getBorderLength()) ) );
+		double distanceToNext = point.getLengthTo( n.getBorderPoint( AbstractCellularComponent.wrapIndex(index+1, n.getBorderLength()) ) );
 
 		boolean ok = true;
 		if(	distanceToNext > max ){

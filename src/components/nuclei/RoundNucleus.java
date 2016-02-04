@@ -829,10 +829,10 @@ public class RoundNucleus extends AbstractCellularComponent
 		int difference2 = this.getBorderLength() - difference1;
 
 		// get the midpoint
-		int mid1 = Utils.wrapIndex( (int)Math.floor( (difference1/2)+minIndex ),
+		int mid1 = AbstractCellularComponent.wrapIndex( (int)Math.floor( (difference1/2)+minIndex ),
 															this.getBorderLength() );
 
-		int mid2 = Utils.wrapIndex( (int)Math.floor( (difference2/2)+maxIndex ), 
+		int mid2 = AbstractCellularComponent.wrapIndex( (int)Math.floor( (difference2/2)+maxIndex ), 
 															this.getBorderLength() );
 
 		return difference1 < difference2 ? mid1 : mid2;
@@ -1126,7 +1126,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	public int getOffsetBorderIndex(BorderTag reference, int index){
 		if(this.getBorderIndex(reference)>-1){
-			int newIndex =  Utils.wrapIndex( index+this.getBorderIndex(reference) , this.getBorderLength() );
+			int newIndex =  AbstractCellularComponent.wrapIndex( index+this.getBorderIndex(reference) , this.getBorderLength() );
 			return newIndex;
 		}
 		return -1;

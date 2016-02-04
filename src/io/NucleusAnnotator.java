@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 import utility.Constants;
 import utility.Utils;
 import analysis.AnalysisDataset;
+import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
@@ -163,7 +164,7 @@ public class NucleusAnnotator {
 					float[] xpoints = new float[seg.length()+1];
 					float[] ypoints = new float[seg.length()+1];
 					for(int j=0; j<=seg.length();j++){
-						int k = Utils.wrapIndex(seg.getStartIndex()+j, n.getBorderLength());
+						int k = AbstractCellularComponent.wrapIndex(seg.getStartIndex()+j, n.getBorderLength());
 						BorderPoint p = n.getBorderPoint(k); // get the border points in the segment
 						xpoints[j] = (float) p.getX();
 						ypoints[j] = (float) p.getY();

@@ -41,6 +41,7 @@ import utility.Constants;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
+import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellCollection;
 import components.CellularComponent;
@@ -1049,7 +1050,7 @@ public class NucleusDatasetCreator {
 					
 					// get the corresponding border index. The segments are zeroed at the tail point
 					// so the correct border point needs to be offset
-					int borderIndex = Utils.wrapIndex(seg.getStartIndex()+j+pointIndex, n.getBorderLength());
+					int borderIndex = AbstractCellularComponent.wrapIndex(seg.getStartIndex()+j+pointIndex, n.getBorderLength());
 					
 					BorderPoint p = n.getBorderPoint(borderIndex); // get the border points in the segment
 					xpoints[j] = p.getX();
@@ -1096,7 +1097,7 @@ public class NucleusDatasetCreator {
 			// pointType index is given within this
 			// We need to add the index of the pointType to the values within the segment
 			int segmentIndex = segment.getStartIndex() + i;
-			int index = Utils.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getBorderLength());
+			int index = AbstractCellularComponent.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getBorderLength());
 			
 			// get the border point at this index
 			BorderPoint p = n.getBorderPoint(index); // get the border points in the segment
@@ -1104,8 +1105,8 @@ public class NucleusDatasetCreator {
 //			IJ.log("Selecting border index: "+index+" from "+segment.getName()+" index "+segmentIndex);
 
 			// Find points three indexes ahead and behind to make a triangle from
-			int prevIndex = Utils.wrapIndex(index-3, n.getBorderLength());
-			int nextIndex = Utils.wrapIndex(index+3, n.getBorderLength());
+			int prevIndex = AbstractCellularComponent.wrapIndex(index-3, n.getBorderLength());
+			int nextIndex = AbstractCellularComponent.wrapIndex(index+3, n.getBorderLength());
 
 
 			
@@ -1118,8 +1119,8 @@ public class NucleusDatasetCreator {
 			
 			// Select the index from the scaledRange corresponding to the position in the segment
 			// The scaledRange is aligned to the segment already
-			XYPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(Utils.wrapIndex(segmentIndex, n.getBorderLength() )   )    )    );
-			XYPoint bPoint = perp.getPointOnLine(p, scaledRange.get(Utils.wrapIndex(segmentIndex, n.getBorderLength() )));
+			XYPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(AbstractCellularComponent.wrapIndex(segmentIndex, n.getBorderLength() )   )    )    );
+			XYPoint bPoint = perp.getPointOnLine(p, scaledRange.get(AbstractCellularComponent.wrapIndex(segmentIndex, n.getBorderLength() )));
 
 			// determine which of the points is inside the nucleus and which is outside
 			
@@ -1185,7 +1186,7 @@ public class NucleusDatasetCreator {
 					
 					
 					for(int j=0; j<=seg.length();j++){
-						int k = Utils.wrapIndex(seg.getStartIndex()+j, nucleus.getBorderLength());
+						int k = AbstractCellularComponent.wrapIndex(seg.getStartIndex()+j, nucleus.getBorderLength());
 						BorderPoint p = nucleus.getBorderPoint(k); // get the border points in the segment
 //						nucleus.getB
 						xpoints[j] = p.getX();
