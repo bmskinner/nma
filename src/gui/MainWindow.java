@@ -756,8 +756,14 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			
 						
 			if(event.method().equals(DatasetMethod.CLUSTER)){
-				programLogger.log(Level.INFO, "Clustering dataset");
-				new ClusterAnalysisAction(event.firstDataset(), this);
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run(){
+					
+						programLogger.log(Level.INFO, "Clustering dataset");
+						new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
+					
+				}});
+				
 			}
 			
 			if(event.method().equals(DatasetMethod.BUILD_TREE)){

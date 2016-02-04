@@ -19,6 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.dialogs.ClusteringSetupDialog;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
+import analysis.ProfileManager;
 import analysis.nucleus.NucleusClusterer;
 import components.CellCollection;
 import components.ClusterGroup;
@@ -42,9 +44,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 
 		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
 
-			//	worker = new NucleusClusterer(  (Integer) options.get("type"), dataset.getCollection() );
 			worker = new NucleusClusterer( dataset , options , mw.getProgramLogger());
-			//	((NucleusClusterer) worker).setClusteringOptions(options);
 
 			worker.addPropertyChangeListener(this);
 			worker.execute();
@@ -83,6 +83,13 @@ public class ClusterAnalysisAction extends ProgressableAction {
 
 			if(c.hasCells()){
 				programLogger.log(Level.FINEST, "Cluster "+cluster+": "+c.getName());
+				
+				try {
+					programLogger.log(Level.FINE, "Copying profiles to cluster");
+					ProfileManager.copyCollectionOffsets(dataset.getCollection(), c);
+				} catch (Exception e) {
+					programLogger.log(Level.SEVERE, "Error copying segments to cluster "+c.getName(), e);
+				}
 				group.addDataset(c);
 				c.setName(group.getName()+"_"+c.getName());
 				programLogger.log(Level.FINEST, "Renamed cluster: "+c.getName());
@@ -98,11 +105,16 @@ public class ClusterAnalysisAction extends ProgressableAction {
 
 
 		}
+		programLogger.log(Level.FINE, "Profiles copied to all clusters");
 		dataset.addClusterGroup(group);
-		programLogger.log(Level.FINEST, "Running new morphology analysis on cluster group");
-		new RunSegmentationAction(list, dataset, MainWindow.ADD_POPULATION, mw);
-
-		cancel();
+//		programLogger.log(Level.FINEST, "Running new morphology analysis on cluster group");
+//		new RunSegmentationAction(list, dataset, MainWindow.ADD_POPULATION, mw);
+//		cancel();
+//		fireInterfaceEvent(InterfaceMethod.SAVE_ROOT);
+//		fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+//		fireInterfaceEvent(InterfaceMethod.UPDATE_POPULATIONS);
+		super.finished();
+		
 
 	}
 }

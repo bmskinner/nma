@@ -60,6 +60,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 	@Override
 	protected Boolean doInBackground() {
 		boolean ok = cluster(collection);
+		log(Level.FINE, "Returning "+ok);
 		return ok;
 	}
 	
@@ -167,6 +168,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 			logError("Error in assignments", e);
 			return false;
 		}
+		log(Level.FINE, "Clustering complete");
 		return true;
 	}
 	
@@ -183,10 +185,8 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 
 			for(int i=0;i<clusterer.numberOfClusters();i++ ){
 				log(Level.FINE, "Cluster "+i+": " +	collection.getName()+"_Cluster_"+i);
-				CellCollection clusterCollection = new CellCollection(collection.getFolder(), 
-						collection.getOutputFolderName(), 
-						collection.getName()+"_Cluster_"+i, 
-						collection.getNucleusType());
+				CellCollection clusterCollection = new CellCollection(collection, 
+						collection.getName()+"_Cluster_"+i);
 				
 				clusterCollection.setName(collection.getName()+"_Cluster_"+i);
 				clusterMap.put(i, clusterCollection);
@@ -196,9 +196,13 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 			for(Instance inst : cellToInstanceMap.keySet()){
 				
 				try{
+					
+					
 					UUID id = cellToInstanceMap.get(inst);
 
 					int clusterNumber = clusterer.clusterInstance(inst); // #pass each instance through the model
+					
+					log(Level.FINEST, "\tTesting instance "+i+": "+clusterNumber);
 					CellCollection cluster = clusterMap.get(clusterNumber);
 
 					// should never be null
@@ -207,17 +211,19 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 					} else {
 						log(Level.WARNING, "Error: cell with ID "+id+" is not found");
 					}
-					publish(i);
-					i++;
+					log(Level.FINEST, "\tInstance handled");
+					publish(i++);
 				} catch(Exception e){
 					logError("Error assigning instance to cluster", e);
 				}
 				 
 			}
+			log(Level.FINER, "Assignment of clusters complete");
 		} catch (Exception e) {
 			logError("Error clustering", e);			
 		}
 	}
+
 	
 
 
