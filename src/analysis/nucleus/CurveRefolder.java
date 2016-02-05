@@ -100,7 +100,7 @@ public class CurveRefolder extends AnalysisWorker {
 		// make an entirely new nucleus to play with
 		log(Level.FINEST, "Fetching best refold candiate");
 
-		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian(BorderTag.ORIENTATION_POINT);	
+		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian(BorderTag.REFERENCE_POINT);	
 		
 		log(Level.FINEST, "Creating consensus nucleus template");
 		refoldNucleus = new ConsensusNucleus(n, collection.getNucleusType());
@@ -108,9 +108,9 @@ public class CurveRefolder extends AnalysisWorker {
 		log(Level.FINEST, "Refolding nucleus of class: "+collection.getNucleusType().toString());
 		log(Level.FINEST, "Subject: "+refoldNucleus.getSourceFileName()+"-"+refoldNucleus.getNucleusNumber());
 
-		Profile targetProfile 	= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.MEDIAN);
-		Profile q25 			= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.LOWER_QUARTILE);
-		Profile q75 			= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.UPPER_QUARTILE);
+		Profile targetProfile 	= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+		Profile q25 			= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.LOWER_QUARTILE);
+		Profile q75 			= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.UPPER_QUARTILE);
 
 		if(targetProfile==null){
 			throw new Exception("Null reference to target profile");
@@ -188,7 +188,7 @@ public class CurveRefolder extends AnalysisWorker {
 		}
 
 		try{
-			double score = refoldNucleus.getProfile(ProfileType.REGULAR, BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
+			double score = refoldNucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
 			
 //			fileLogger.log(Level.INFO, "Refolding curve: initial score: "+(int)score);
 			log(Level.FINE, "Refolding curve: initial score: "+(int)score);
