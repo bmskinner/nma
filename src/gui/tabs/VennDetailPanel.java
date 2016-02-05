@@ -34,9 +34,9 @@ import org.jfree.chart.JFreeChart;
 
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
-import charting.options.DefaultTableOptions;
 import charting.options.TableOptions;
-import charting.options.DefaultTableOptions.TableType;
+import charting.options.TableOptionsBuilder;
+import charting.options.TableOptions.TableType;
 import gui.components.ExportableTable;
 
 public class VennDetailPanel extends DetailPanel {
@@ -53,18 +53,31 @@ public class VennDetailPanel extends DetailPanel {
 		this.setLayout(new BorderLayout());
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		
-		JPanel vennPanel = new JPanel(new BorderLayout());
-		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setViewportView(mainPanel);
-		
-		this.add(scrollPane, BorderLayout.CENTER);
-		
-		vennTable = new ExportableTable(NucleusTableDatasetCreator.createVennTable(null));
-		vennPanel.add(vennTable, BorderLayout.CENTER);
-		vennPanel.add(vennTable.getTableHeader(), BorderLayout.NORTH);
-		mainPanel.add(vennPanel);
-		vennTable.setEnabled(false);
+
+		try {
+			JPanel vennPanel = new JPanel(new BorderLayout());
+
+			JScrollPane scrollPane = new JScrollPane();
+			scrollPane.setViewportView(mainPanel);
+
+			this.add(scrollPane, BorderLayout.CENTER);
+
+			TableOptions options = new TableOptionsBuilder()
+			.setDatasets(null)
+			.setLogger(programLogger)
+			.setType(TableType.VENN)
+			.build();
+
+			TableModel model = getTable(options);
+
+			vennTable = new ExportableTable(model);
+			vennPanel.add(vennTable, BorderLayout.CENTER);
+			vennPanel.add(vennTable.getTableHeader(), BorderLayout.NORTH);
+			mainPanel.add(vennPanel);
+			vennTable.setEnabled(false);
+		} catch(Exception e){
+			programLogger.log(Level.SEVERE, "Error updating venn panel", e);
+		}
 		
 	}
 	
@@ -78,19 +91,15 @@ public class VennDetailPanel extends DetailPanel {
 	protected void updateMultiple() throws Exception {
 		programLogger.log(Level.FINE, "Updating venn panel");
 
+		TableOptions options = new TableOptionsBuilder()
+		.setDatasets(getDatasets())
+		.setLogger(programLogger)
+		.setType(TableType.VENN)
+		.build();
 
-		TableModel model = null;
 
 
-
-		TableOptions options = new DefaultTableOptions(getDatasets(), TableType.VENN);
-		if(getTableCache().hasTable(options)){
-			model = getTableCache().getTable(options);
-		} else {
-			model = NucleusTableDatasetCreator.createVennTable(getDatasets());
-			getTableCache().addTable(options, model);
-		}
-
+		TableModel model = getTable(options);
 		
 		vennTable.setModel(model);
 		setRenderer(vennTable, new VennTableCellRenderer());
@@ -105,50 +114,24 @@ public class VennDetailPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected void updateNull() throws Exception {			
-		TableModel model = NucleusTableDatasetCreator.createVennTable(null);
+	protected void updateNull() throws Exception {		
+		
+		TableOptions options = new TableOptionsBuilder()
+		.setDatasets(null)
+		.setLogger(programLogger)
+		.setType(TableType.VENN)
+		.build();
+		
+		TableModel model = getTable(options);
 		vennTable.setModel(model);
 		setRenderer(vennTable, new VennTableCellRenderer());
 	}
 	
-	/**
-	 * Update the venn panel with data from the given datasets
-	 * @param getDatasets() the datasets
-	 */
-//	@Override
-//	public void updateDetail(){
-//		
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-//				updateVennTable();
-//				setUpdating(false);
-//			}});
-//	}
-
-//	private void updateVennTable(){
-//		programLogger.log(Level.FINE, "Updating venn panel");
-//
-//
-//		// format the numbers and make into a tablemodel
-//		TableModel model = NucleusTableDatasetCreator.createVennTable(null);
-//
-//		if(hasDatasets()){
-//
-//			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.VENN);
-//			if(getTableCache().hasTable(options)){
-//				model = getTableCache().getTable(options);
-//			} else {
-//				model = NucleusTableDatasetCreator.createVennTable(getDatasets());
-//				getTableCache().addTable(options, model);
-//			}
-//
-//		}
-//		vennTable.setModel(model);
-//		setRenderer(vennTable, new VennTableCellRenderer());
-//
-//		programLogger.log(Level.FINEST, "Updated venn panel");
-//	}
-	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return NucleusTableDatasetCreator.createVennTable(options);
+	}
+		
 	/**
 	 * Colour table cell backsground to show pairwise comparisons. All cells are white, apart
 	 * from the diagonal, which is made light grey

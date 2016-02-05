@@ -56,8 +56,9 @@ import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.ChartOptions;
-import charting.options.DefaultTableOptions;
-import charting.options.DefaultTableOptions.TableType;
+import charting.options.TableOptions;
+import charting.options.TableOptions.TableType;
+import charting.options.TableOptionsBuilder;
 import components.CellCollection;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter;
@@ -273,26 +274,26 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		return panel;
 	}
 	
-	protected void updateDetail(){
-		
-		programLogger.log(Level.FINE, "Updating signals detail panel");
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
-				
-				try{
-					updateCheckboxPanel();
-					updateSignalConsensusChart();
-					updateSignalStatsPanel();
-
-				} catch(Exception e){
-					programLogger.log(Level.SEVERE, "Error updating signals overview panel" ,e);
-					update( (List<AnalysisDataset>) null);
-				} finally {
-					setUpdating(false);
-				}
-			
-		}});
-	}
+//	protected void updateDetail(){
+//		
+//		programLogger.log(Level.FINE, "Updating signals detail panel");
+//		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
+//				
+//				try{
+//					updateCheckboxPanel();
+//					updateSignalConsensusChart();
+//					updateSignalStatsPanel();
+//
+//				} catch(Exception e){
+//					programLogger.log(Level.SEVERE, "Error updating signals overview panel" ,e);
+//					update( (List<AnalysisDataset>) null);
+//				} finally {
+//					setUpdating(false);
+//				}
+//			
+//		}});
+//	}
 	
 	/**
 	 * Update the signal stats with the given datasets
@@ -301,18 +302,15 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	 */
 	private void updateSignalStatsPanel() throws Exception{
 		
-		TableModel model = NuclearSignalDatasetCreator.createSignalStatsTable(null);
+//		TableModel model = NuclearSignalDatasetCreator.createSignalStatsTable(null);
 		
-		DefaultTableOptions options = new DefaultTableOptions(getDatasets(), TableType.SIGNAL_STATS_TABLE, programLogger);
+		TableOptions options = new TableOptionsBuilder()
+			.setDatasets(getDatasets())
+			.setLogger(programLogger)
+			.setType(TableType.SIGNAL_STATS_TABLE)
+			.build();
 		
-		if(getTableCache().hasTable(options)){
-			model = getTableCache().getTable(options);
-			programLogger.log(Level.FINEST, "Fetched cached signal stats table");
-		} else {
-			model = NuclearSignalDatasetCreator.createSignalStatsTable(options); 
-			getTableCache().addTable(options, model);
-			programLogger.log(Level.FINEST, "Added cached signal stats table");
-		}
+		TableModel model = getTable(options);
 		statsTable.setModel(model);
 
 		// Add the signal group colours
@@ -445,5 +443,10 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return NuclearSignalDatasetCreator.createSignalStatsTable(options);
 	}
 }

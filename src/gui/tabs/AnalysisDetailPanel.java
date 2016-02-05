@@ -35,9 +35,9 @@ import org.jfree.chart.JFreeChart;
 
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
-import charting.options.DefaultTableOptions;
 import charting.options.TableOptions;
-import charting.options.DefaultTableOptions.TableType;
+import charting.options.TableOptions.TableType;
+import charting.options.TableOptionsBuilder;
 import gui.components.ExportableTable;
 
 /**
@@ -77,6 +77,11 @@ public class AnalysisDetailPanel extends DetailPanel {
 	}
 	
 	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return NucleusTableDatasetCreator.createAnalysisTable(options);
+	}
+	
+	@Override
 	protected void updateSingle() throws Exception {
 		updateMultiple() ;
 	}
@@ -100,25 +105,19 @@ public class AnalysisDetailPanel extends DetailPanel {
 	/**
 	 * Update the analysis panel with data from the given datasets
 	 * @param list the datasets
+	 * @throws Exception 
 	 */
-	private void updateAnalysisParametersPanel(){
-		
-		TableModel model = NucleusTableDatasetCreator.createAnalysisParametersTable(null);
-		if(this.hasDatasets()){
+	private void updateAnalysisParametersPanel() throws Exception{
 
-			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.ANALYSIS_PARAMETERS);
 
-			if(getTableCache().hasTable(options)){
-				model = getTableCache().getTable(options);
-				programLogger.log(Level.FINEST, "Fetched cached analysis parameters table");
-			} else {
-				model = NucleusTableDatasetCreator.createAnalysisParametersTable(getDatasets());
-				getTableCache().addTable(options, model);
-				programLogger.log(Level.FINEST, "Added cached analysis parameters table");
-			}
-		}
-		
-		
+		TableOptions options = new TableOptionsBuilder()
+		.setDatasets(getDatasets())
+		.setLogger(programLogger)
+		.setType(TableType.ANALYSIS_PARAMETERS)
+		.build();
+
+		TableModel model = getTable(options);
+
 		tableAnalysisParamters.setModel(model);
 		tableAnalysisParamters.createDefaultColumnsFromModel();
 		setRenderer(tableAnalysisParamters, new AnalysisTableCellRenderer());
@@ -132,22 +131,16 @@ public class AnalysisDetailPanel extends DetailPanel {
 	 */
 	private void updateStatsPanel(){
 		try{
-			TableModel model = NucleusTableDatasetCreator.createStatsTable(null);
 
-			if(hasDatasets()){
-				
-				TableOptions options = new DefaultTableOptions(getDatasets(), TableType.ANALYSIS_STATS);
+			TableOptions options = new TableOptionsBuilder()
+			.setDatasets(getDatasets())
+			.setLogger(programLogger)
+			.setType(TableType.ANALYSIS_STATS)
+			.build();
 
-				if(getTableCache().hasTable(options)){
-					model = getTableCache().getTable(options);
-					programLogger.log(Level.FINEST, "Fetched cached analysis stats table");
-				} else {
-					model = NucleusTableDatasetCreator.createStatsTable(getDatasets());
-					getTableCache().addTable(options, model);
-					programLogger.log(Level.FINEST, "Added cached analysis stats table");
-				}
-				
-			}
+			TableModel model = getTable(options);
+
+
 			tablePopulationStats.setModel(model);
 		} catch(Exception e){
 			programLogger.log(Level.SEVERE, "Error updating stats panel", e);
@@ -169,7 +162,16 @@ public class AnalysisDetailPanel extends DetailPanel {
 
 			scrollPane.setViewportView(panelGeneralStats);
 			scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
-			tablePopulationStats.setModel(NucleusTableDatasetCreator.createStatsTable(null));
+			
+			TableOptions options = new TableOptionsBuilder()
+			.setDatasets(null)
+			.setLogger(programLogger)
+			.setType(TableType.ANALYSIS_STATS)
+			.build();
+
+			TableModel model = getTable(options);
+			
+			tablePopulationStats.setModel(model);
 			
 		}catch(Exception e){
 			programLogger.log(Level.SEVERE, "Error creating stats panel", e);
@@ -177,21 +179,34 @@ public class AnalysisDetailPanel extends DetailPanel {
 		return scrollPane;
 	}
 	
-	private JScrollPane createAnalysisParametersPanel(){
-		
+	private JScrollPane createAnalysisParametersPanel() {
 		JScrollPane scrollPane = new JScrollPane();
-		JPanel panel = new JPanel();
 		
-		panel.setLayout(new BorderLayout(0, 0));
+		try {
+			TableOptions options = new TableOptionsBuilder()
+			.setDatasets(null)
+			.setLogger(programLogger)
+			.setType(TableType.ANALYSIS_PARAMETERS)
+			.build();
 
-		tableAnalysisParamters = new ExportableTable();
-		tableAnalysisParamters.setAutoCreateColumnsFromModel(false);
-		tableAnalysisParamters.setModel(NucleusTableDatasetCreator.createAnalysisParametersTable(null));
-		tableAnalysisParamters.setEnabled(false);
-		panel.add(tableAnalysisParamters, BorderLayout.CENTER);
+			TableModel model = getTable(options);
 
-		scrollPane.setViewportView(panel);
-		scrollPane.setColumnHeaderView(tableAnalysisParamters.getTableHeader());
+
+			JPanel panel = new JPanel();
+
+			panel.setLayout(new BorderLayout(0, 0));
+
+			tableAnalysisParamters = new ExportableTable();
+			tableAnalysisParamters.setAutoCreateColumnsFromModel(false);
+			tableAnalysisParamters.setModel(model);
+			tableAnalysisParamters.setEnabled(false);
+			panel.add(tableAnalysisParamters, BorderLayout.CENTER);
+
+			scrollPane.setViewportView(panel);
+			scrollPane.setColumnHeaderView(tableAnalysisParamters.getTableHeader());
+		}catch(Exception e){
+			programLogger.log(Level.SEVERE, "Error creating stats panel", e);
+		}
 		return scrollPane;
 	}
 	

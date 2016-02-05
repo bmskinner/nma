@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
@@ -45,8 +46,10 @@ import org.jfree.chart.plot.XYPlot;
 import analysis.AnalysisDataset;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.HistogramChartFactory;
+import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
+import charting.options.TableOptions;
 import components.CellCollection;
 import components.generic.MeasurementScale;
 
@@ -189,6 +192,8 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			updateMultiple();
 			measurementUnitSettingsPanel.setEnabled(false);
 		}
+		
+		
 		
 	}
 	
@@ -382,6 +387,11 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 	protected JFreeChart createPanelChartType(ChartOptions options)
 			throws Exception {
 		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 

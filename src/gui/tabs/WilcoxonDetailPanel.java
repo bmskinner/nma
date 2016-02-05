@@ -18,21 +18,16 @@
  *******************************************************************************/
 package gui.tabs;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
-import charting.NucleusStatsTableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
-import charting.options.DefaultTableOptions;
 import charting.options.TableOptions;
-import charting.options.DefaultTableOptions.TableType;
+import charting.options.TableOptionsBuilder;
 import gui.components.ExportableTable;
 import gui.components.WilcoxonTableCellRenderer;
-import gui.tabs.VennDetailPanel.VennTableCellRenderer;
 import stats.NucleusStatistic;
 
 @SuppressWarnings("serial")
@@ -58,18 +53,13 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 		tablePanel = createTablePanel();
 		for(NucleusStatistic stat : NucleusStatistic.values()){
 
-			TableModel model;
+			TableOptions options = new TableOptionsBuilder()
+			.setDatasets(getDatasets())
+			.setLogger(programLogger)
+			.setStat(stat)
+			.build();
 
-			TableOptions options = new NucleusStatsTableOptions(getDatasets(), stat);
-			if(getTableCache().hasTable(options)){
-				programLogger.log(Level.FINEST, "Fetched cached Wilcoxon table: "+stat);
-				model = getTableCache().getTable(options);
-			} else {
-				model = NucleusTableDatasetCreator.createWilcoxonNuclearStatTable(getDatasets(), stat);
-				programLogger.log(Level.FINEST, "Added cached Wilcoxon table: "+stat);
-			}
-
-
+			TableModel model = getTable(options);
 			ExportableTable table = new ExportableTable(model);
 			setRenderer(table, new WilcoxonTableCellRenderer());
 			addWilconxonTable(tablePanel, table, stat.toString());
@@ -91,70 +81,9 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 		scrollPane.setViewportView(tablePanel);;
 		tablePanel.repaint();
 	}
-
-		
-	/**
-	 * Update the wilcoxon panel with data from the given datasets
-	 * @param list the datasets
-	 * @throws Exception 
-	 */
-//	@Override
-//	public void updateDetail() {
-//		programLogger.log(Level.FINE, "Updating Wilcoxon panel");
-//
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-//				
-//				try{
-//
-//					scrollPane.setColumnHeaderView(nusll);
-//					tablePanel = createTablePanel();
-//					
-//					if(hasDatasets()){
-//						
-//						if(!isSingleDataset()){
-//
-//							for(NucleusStatistic stat : NucleusStatistic.values()){
-//
-//								TableModel model;
-//
-//								TableOptions options = new NucleusStatsTableOptions(getDatasets(), stat);
-//								if(getTableCache().hasTable(options)){
-//									programLogger.log(Level.FINEST, "Fetched cached Wilcoxon table: "+stat);
-//									model = getTableCache().getTable(options);
-//								} else {
-//									model = NucleusTableDatasetCreator.createWilcoxonNuclearStatTable(getDatasets(), stat);
-//									programLogger.log(Level.FINEST, "Added cached Wilcoxon table: "+stat);
-//								}
-//
-//
-//								ExportableTable table = new ExportableTable(model);
-//								setRenderer(table, new WilcoxonTableCellRenderer());
-//								addWilconxonTable(tablePanel, table, stat.toString());
-//								scrollPane.setColumnHeaderView(table.getTableHeader());
-//
-//
-//							}
-//							tablePanel.revalidate();
-//
-//							
-//						} else {
-//							tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
-//						}
-//					} else {
-//						tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
-//					}
-//					programLogger.log(Level.FINEST, "Updated Wilcoxon panel");
-//				} catch (Exception e) {
-//					programLogger.log(Level.SEVERE, "Error making Wilcoxon table", e);
-//					tablePanel = createTablePanel();
-//				} finally {
-//					scrollPane.setViewportView(tablePanel);;
-//					tablePanel.repaint();
-//					setUpdating(false);
-//				}
-//				
-//			}});
-//	}
-
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return NucleusTableDatasetCreator.createWilcoxonStatisticTable(options);
+	}
 }

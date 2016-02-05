@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Vector;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -32,6 +33,8 @@ import javax.swing.table.TableModel;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
+import charting.options.TableOptions;
+import charting.options.TableOptions.TableType;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
@@ -54,13 +57,72 @@ import utility.Constants;
 
 public class NucleusTableDatasetCreator {
 		
+	public static TableModel createMedianProfileStatisticTable(TableOptions options) throws Exception{
+		
+		if( ! options.hasDatasets()){
+			return createBlankTable();
+		}
+		
+		if(options.isSingleDataset()){
+			return createMedianProfileSegmentStatsTable(options.firstDataset(), options.getScale());
+		}
+		
+		if(options.isMultipleDatasets()){
+			return createMultiDatasetMedianProfileSegmentStatsTable(options);
+		}
+		
+		return createBlankTable();
+	}
+	
+	public static TableModel createBlankTable(){
+		DefaultTableModel model = new DefaultTableModel();
+		model.addColumn("No data loaded");
+		return model;
+	}
+	
+	public static TableModel createMergeSourcesTable(TableOptions options){
+		
+		if( ! options.hasDatasets()){
+			DefaultTableModel model = new DefaultTableModel();
+
+			Vector<Object> names 	= new Vector<Object>();
+			Vector<Object> nuclei 	= new Vector<Object>();
+
+			names.add("No merge sources");
+			nuclei.add("");
+
+
+			model.addColumn("Merge source", names);
+			model.addColumn("Nuclei", nuclei);
+			return model;
+		}
+		
+		if(options.firstDataset().hasMergeSources()){
+
+			DefaultTableModel model = new DefaultTableModel();
+
+			Vector<Object> names 	= new Vector<Object>();
+			Vector<Object> nuclei 	= new Vector<Object>();
+
+			for( UUID id : options.firstDataset().getMergeSources()){
+				AnalysisDataset mergeSource = options.firstDataset().getMergeSource(id);
+				names.add(mergeSource.getName());
+				nuclei.add(mergeSource.getCollection().getNucleusCount());
+			}
+			model.addColumn("Merge source", names);
+			model.addColumn("Nuclei", nuclei);
+			return model;
+		} 
+		return createBlankTable();
+	}
+	
 	/**
 	 * Create a table of segment stats for median profile of the given dataset.
 	 * @param dataset the AnalysisDataset to include
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public static TableModel createMedianProfileSegmentStatsTable(AnalysisDataset dataset, MeasurementScale scale) throws Exception {
+	private static TableModel createMedianProfileSegmentStatsTable(AnalysisDataset dataset, MeasurementScale scale) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -139,8 +201,11 @@ public class NucleusTableDatasetCreator {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public static TableModel createMultiDatasetMedianProfileSegmentStatsTable(List<AnalysisDataset> list, MeasurementScale scale) throws Exception {
+	private static TableModel createMultiDatasetMedianProfileSegmentStatsTable(TableOptions options) throws Exception {
 
+		List<AnalysisDataset> list = options.getDatasets();
+		MeasurementScale scale = options.getScale();
+		
 		DefaultTableModel model = new DefaultTableModel();
 		DecimalFormat df = new DecimalFormat("0.00");
 		df.setMinimumFractionDigits(2);
@@ -162,18 +227,7 @@ public class NucleusTableDatasetCreator {
 					.getSegmentedProfile(point)
 					.getOrderedSegments();
 			
-//			Map<String, String> map = new HashMap<String, String>();
-//			for(NucleusBorderSegment seg : segments){
-//				
-//				NucleusBorderSegment realSeg = list.get(0)
-//						.getCollection()
-//						.getProfileCollection(ProfileType.REGULAR)
-//						.getSegmentedProfile(point)
-//						.getSegment(seg);
-//				map.put(seg.getName(), realSeg.getName());
-//			}
-//			List<NucleusBorderSegment> segments = list.get(0).getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
-			
+
 			fieldNames.add("Dataset");
 			for(NucleusBorderSegment segment : segments) {
 				fieldNames.add(segment.getName());
@@ -222,12 +276,32 @@ public class NucleusTableDatasetCreator {
 	}
 	
 	/**
+	 * Create a table model of analysis parameters or stats from datasets.
+	 * If null parameter is passed, will create an empty table
+	 * @param collection
+	 * @return
+	 */
+	public static TableModel createAnalysisTable(TableOptions options) throws Exception{
+		
+		if(options.getType().equals(TableType.ANALYSIS_PARAMETERS)){
+			return createAnalysisParametersTable(options);
+		}
+		
+		if(options.getType().equals(TableType.ANALYSIS_STATS)){
+			return createStatsTable(options);
+		}
+		
+		return createBlankTable();
+	}
+	
+	
+	/**
 	 * Create a table model of analysis parameters from a nucleus collection.
 	 * If null parameter is passed, will create an empty table
 	 * @param collection
 	 * @return
 	 */
-	public static TableModel createAnalysisParametersTable(List<AnalysisDataset> list){
+	private static TableModel createAnalysisParametersTable(TableOptions options){
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -258,54 +332,58 @@ public class NucleusTableDatasetCreator {
 				"Version"};
 		model.addColumn("", columnData);
 		
-		if(list==null){
+		if( ! options.hasDatasets()){
 			model.addColumn("No data loaded");
-		} else {
+			return model;
+		} 
 
-			for(AnalysisDataset dataset : list){
-				
-				// only display if there are options available
-				// This may not be the case for a merged dataset or its children
-				if(dataset.hasAnalysisOptions()){ 
 
-					// Do not provide an options, so the existing dataset options is used
-					Object[] collectionData = formatAnalysisOptionsForTable(dataset, null);
+		List<AnalysisDataset> list = options.getDatasets();
 
-					model.addColumn(dataset.getCollection().getName(), collectionData);
-					
-				} else {
-					
-					Object[] collectionData =  new Object[columnData.length];
-					if(dataset.hasMergeSources()){
-						
-//						
-						if( testMergedDatasetOptionsAreSame(dataset)){
-							
-							// The options are the same in all merge sources
-							// Show the first options from the first source
-							
-							AnalysisOptions op = dataset.getAllMergeSources().get(0).getAnalysisOptions();
-							
-							// Provide an options to be used
-							collectionData = formatAnalysisOptionsForTable(dataset, op);
+		for(AnalysisDataset dataset : list){
 
-//							model.addColumn(dataset.getCollection().getName(), collectionData);
-							
-						} else {
-							// Merge sources have different options
-							Arrays.fill(collectionData, "N/A - merged");
-						
-						}
+			// only display if there are options available
+			// This may not be the case for a merged dataset or its children
+			if(dataset.hasAnalysisOptions()){ 
+
+				// Do not provide an options, so the existing dataset options is used
+				Object[] collectionData = formatAnalysisOptionsForTable(dataset, null);
+
+				model.addColumn(dataset.getCollection().getName(), collectionData);
+
+			} else {
+
+				Object[] collectionData =  new Object[columnData.length];
+				if(dataset.hasMergeSources()){
+
+					//						
+					if( testMergedDatasetOptionsAreSame(dataset)){
+
+						// The options are the same in all merge sources
+						// Show the first options from the first source
+
+						AnalysisOptions op = dataset.getAllMergeSources().get(0).getAnalysisOptions();
+
+						// Provide an options to be used
+						collectionData = formatAnalysisOptionsForTable(dataset, op);
+
+						//							model.addColumn(dataset.getCollection().getName(), collectionData);
 
 					} else {
-						// there are no options to use; fill blank
-						Arrays.fill(collectionData, "N/A");
+						// Merge sources have different options
+						Arrays.fill(collectionData, "N/A - merged");
+
 					}
-					
-					model.addColumn(dataset.getCollection().getName(), collectionData);
+
+				} else {
+					// there are no options to use; fill blank
+					Arrays.fill(collectionData, "N/A");
 				}
+
+				model.addColumn(dataset.getCollection().getName(), collectionData);
 			}
 		}
+		
 		return model;	
 	}
 	
@@ -426,9 +504,11 @@ public class NucleusTableDatasetCreator {
 	 * @param collection
 	 * @return
 	 */
-	public static TableModel createStatsTable(List<AnalysisDataset> list) throws Exception {
+	private static TableModel createStatsTable(TableOptions options) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
+		
+		List<AnalysisDataset> list = options.getDatasets();
 		
 		List<Object> columnData = new ArrayList<Object>();	
 		columnData.add("Nuclei");
@@ -481,15 +561,17 @@ public class NucleusTableDatasetCreator {
 		return model;	
 	}
 	
-	public static TableModel createVennTable(List<AnalysisDataset> list){
+	public static TableModel createVennTable(TableOptions options){
 		DefaultTableModel model = new DefaultTableModel();
-		
-		if(list==null){
+				
+		if( ! options.hasDatasets()){
 			Object[] columnData = {""};
 			model.addColumn("Population", columnData );
 			model.addColumn("", columnData );
 			return model;
 		}
+		
+		List<AnalysisDataset> list = options.getDatasets();
 		
 		// set rows
 		Object[] columnData = new Object[list.size()];
@@ -541,9 +623,13 @@ public class NucleusTableDatasetCreator {
 	 * @param list
 	 * @return
 	 */
-	public static TableModel createPairwiseVennTable(List<AnalysisDataset> list) {
-		DefaultTableModel model = new DefaultTableModel();
+	public static TableModel createPairwiseVennTable(TableOptions options) {
+				
+		if( ! options.hasDatasets()){
+			return createBlankTable();
+		}
 		
+		DefaultTableModel model = new DefaultTableModel();
 		
 		Object[] columnNames = new Object[] {
 				"Population 1",
@@ -557,11 +643,9 @@ public class NucleusTableDatasetCreator {
 				"Population 2"
 				};
 		model.setColumnIdentifiers(columnNames);
-		
-		if(list==null){
-			return model;
-		}
 			
+		
+		List<AnalysisDataset> list = options.getDatasets();
 		// Track the pairwase comparisons performed to avoid duplicates
 		Map<UUID, ArrayList<UUID>> existingMatches = new HashMap<UUID, ArrayList<UUID>>();
 
@@ -678,27 +762,55 @@ public class NucleusTableDatasetCreator {
 		return result;
 	}
 	
+	
+	/**
+	 * Carry out pairwise wilcoxon rank-sum test on the given stat of the given datasets
+	 * @param options the table options
+	 * @return a tablemodel for display
+	 */	
+	public static TableModel createWilcoxonStatisticTable(TableOptions options) throws Exception{
+		
+		if( ! options.hasDatasets()){
+			return makeEmptyWilcoxonTable(null);
+		}
+		
+		if(options.getStat().getClass()==NucleusStatistic.class){
+			return createWilcoxonNuclearStatTable(options);
+		}
+		
+		if(options.getStat().getClass()==SegmentStatistic.class){
+			return createWilcoxonSegmentStatTable(options);
+		}
+		
+		return makeEmptyWilcoxonTable(null);
+		
+	}
+	
 	/**
 	 * Carry out pairwise wilcoxon rank-sum test on the given stat of the given datasets
 	 * @param list the datasets to test
 	 * @param stat the statistic to measure
 	 * @return a tablemodel for display
 	 */	
-	public static TableModel createWilcoxonNuclearStatTable(List<AnalysisDataset> list, NucleusStatistic stat) throws Exception {
-		DefaultTableModel model = makeEmptyWilcoxonTable(list);
-		if(list==null){
-			return model;
+	private static TableModel createWilcoxonNuclearStatTable(TableOptions options) throws Exception {
+		
+		if( ! options.hasDatasets()){
+			return makeEmptyWilcoxonTable(null);
 		}
+		
+		DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
+		
+		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
-		for(AnalysisDataset dataset : list){
+		for(AnalysisDataset dataset : options.getDatasets()){
 
-			Object[] popData = new Object[list.size()];
+			Object[] popData = new Object[options.datasetCount()];
 
 			int i = 0;
 			boolean getPValue = false;
-			for(AnalysisDataset dataset2 : list){
+			for(AnalysisDataset dataset2 : options.getDatasets()){
 
 				if(dataset2.getUUID().equals(dataset.getUUID())){
 					popData[i] = "";
@@ -723,26 +835,29 @@ public class NucleusTableDatasetCreator {
 	 * @param segName the segment to create the table for
 	 * @return a tablemodel for display
 	 */	
-	public static TableModel createWilcoxonSegmentStatTable(List<AnalysisDataset> list, SegmentStatistic stat, int segPosition) throws Exception {
-		DefaultTableModel model = makeEmptyWilcoxonTable(list);
-		if(list==null){
-			return model;
+	private static TableModel createWilcoxonSegmentStatTable(TableOptions options) throws Exception {
+		if( ! options.hasDatasets()){
+			return makeEmptyWilcoxonTable(null);
 		}
+		
+		DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
+		
+		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
-		for(AnalysisDataset dataset : list){
+		for(AnalysisDataset dataset : options.getDatasets()){
 			
-			Object[] popData = new Object[list.size()];
+			Object[] popData = new Object[options.datasetCount()];
 			
 			NucleusBorderSegment medianSeg1 = dataset.getCollection()
 					.getProfileCollection(ProfileType.REGULAR)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
-					.getSegmentAt(segPosition);
+					.getSegmentAt(options.getSegPosition());
 
 			int i = 0;
 			boolean getPValue = false;
-			for(AnalysisDataset dataset2 : list){
+			for(AnalysisDataset dataset2 : options.getDatasets()){
 				
 				if(dataset2.getUUID().equals(dataset.getUUID())){
 					popData[i] = "";
@@ -752,7 +867,7 @@ public class NucleusTableDatasetCreator {
 					NucleusBorderSegment medianSeg2 = dataset2.getCollection()
 							.getProfileCollection(ProfileType.REGULAR)
 							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
-							.getSegmentAt(segPosition);
+							.getSegmentAt(options.getSegPosition());
 					
 					popData[i] = df.format( runWilcoxonTest( 
 							 dataset.getCollection().getSegmentLengths(medianSeg1.getID(), MeasurementScale.PIXELS),
@@ -766,6 +881,29 @@ public class NucleusTableDatasetCreator {
 		return model;
 	}
 
+	/**
+	 * Generate a table of magnitude difference between datasets
+	 * @param options the table options
+	 * @return a tablemodel for display
+	 */	
+	public static TableModel createMagnitudeStatisticTable(TableOptions options) throws Exception{
+		
+		if( ! options.hasDatasets()){
+			return makeEmptyWilcoxonTable(null);
+		}
+		
+		if(options.getStat().getClass()==NucleusStatistic.class){
+			return createMagnitudeNuclearStatTable(options);
+		}
+		
+		if(options.getStat().getClass()==SegmentStatistic.class){
+			return createMagnitudeSegmentStatTable(options);
+		}
+		
+		return makeEmptyWilcoxonTable(null);
+		
+	}
+	
 	
 	/**
 	 * Generate a table of magnitude difference between datasets
@@ -773,23 +911,26 @@ public class NucleusTableDatasetCreator {
 	 * @param stat the statistic to measure
 	 * @return a tablemodel for display
 	 */	
-	public static TableModel createMagnitudeNuclearStatTable(List<AnalysisDataset> list, NucleusStatistic stat) throws Exception {
-		DefaultTableModel model = makeEmptyWilcoxonTable(list);
-		if(list==null){
-			return model;
+	private static TableModel createMagnitudeNuclearStatTable(TableOptions options) throws Exception {
+		if( ! options.hasDatasets()){
+			return makeEmptyWilcoxonTable(null);
 		}
+		
+		DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
+		
+		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
-		for(AnalysisDataset dataset : list){
+		for(AnalysisDataset dataset : options.getDatasets()){
 
 			double value1 =  dataset.getCollection().getMedianStatistic(stat, MeasurementScale.PIXELS);
 			
-			Object[] popData = new Object[list.size()];
+			Object[] popData = new Object[options.datasetCount()];
 
 			int i = 0;
 
-			for(AnalysisDataset dataset2 : list){
+			for(AnalysisDataset dataset2 : options.getDatasets()){
 
 				if(dataset2.getUUID().equals(dataset.getUUID())){
 					
@@ -816,29 +957,32 @@ public class NucleusTableDatasetCreator {
 	 * @param segName the segment to create the table for
 	 * @return a tablemodel for display
 	 */	
-	public static TableModel createMagnitudeSegmentStatTable(List<AnalysisDataset> list, SegmentStatistic stat, int segPosition) throws Exception {
-		DefaultTableModel model = makeEmptyWilcoxonTable(list);
-		if(list==null){
-			return model;
+	private static TableModel createMagnitudeSegmentStatTable(TableOptions options) throws Exception {
+		if( ! options.hasDatasets()){
+			return makeEmptyWilcoxonTable(null);
 		}
+		
+		DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
+		
+		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
-		for(AnalysisDataset dataset : list){
+		for(AnalysisDataset dataset : options.getDatasets()){
 			
 			NucleusBorderSegment medianSeg1 = dataset.getCollection()
 					.getProfileCollection(ProfileType.REGULAR)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
-					.getSegmentAt(segPosition);
+					.getSegmentAt(options.getSegPosition());
 									
 			double value1 = Stats.quartile( dataset.getCollection()
 					.getSegmentLengths(medianSeg1.getID(), MeasurementScale.PIXELS), Constants.MEDIAN);
 
-			Object[] popData = new Object[list.size()];
+			Object[] popData = new Object[options.datasetCount()];
 
 			int i = 0;
 
-			for(AnalysisDataset dataset2 : list){
+			for(AnalysisDataset dataset2 : options.getDatasets()){
 				
 				if(dataset2.getUUID().equals(dataset.getUUID())){
 					popData[i] = "";
@@ -848,7 +992,7 @@ public class NucleusTableDatasetCreator {
 					NucleusBorderSegment medianSeg2 = dataset2.getCollection()
 							.getProfileCollection(ProfileType.REGULAR)
 							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
-							.getSegmentAt(segPosition);
+							.getSegmentAt(options.getSegPosition());
 					
 					double value2 = Stats.quartile( dataset2.getCollection().getSegmentLengths(medianSeg2.getID(), MeasurementScale.PIXELS), Constants.MEDIAN);
 

@@ -34,11 +34,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JTabbedPane;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
+import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
+import charting.options.TableOptions;
 
 public class SignalsDetailPanel extends DetailPanel implements ActionListener, SignalChangeListener {
 
@@ -127,6 +130,11 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 

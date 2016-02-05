@@ -35,9 +35,9 @@ import org.jfree.chart.JFreeChart;
 
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
-import charting.options.DefaultTableOptions;
 import charting.options.TableOptions;
-import charting.options.DefaultTableOptions.TableType;
+import charting.options.TableOptions.TableType;
+import charting.options.TableOptionsBuilder;
 import gui.components.ExportableTable;
 
 @SuppressWarnings("serial")
@@ -51,6 +51,8 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		super(programLogger);
 		this.setLayout(new BorderLayout());
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+		
+		try {
 				
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setViewportView(mainPanel);
@@ -60,12 +62,24 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		
 		JPanel pairwisePanel = new JPanel(new BorderLayout());
 		
-		pairwiseVennTable = new ExportableTable(NucleusTableDatasetCreator.createPairwiseVennTable(null));
-		
+		TableOptions options = new TableOptionsBuilder()
+		.setDatasets(null)
+		.setLogger(programLogger)
+		.setType(TableType.VENN)
+		.build();
+
+		TableModel model = getTable(options);
+
+		pairwiseVennTable = new ExportableTable(model);
+				
 		pairwisePanel.add(pairwiseVennTable, BorderLayout.CENTER);
 		pairwisePanel.add(pairwiseVennTable.getTableHeader(), BorderLayout.NORTH);
 		mainPanel.add(pairwisePanel);
 		pairwiseVennTable.setEnabled(false);
+		
+		} catch (Exception e){
+			programLogger.log(Level.SEVERE, "Error updating pairwise venn table", e);
+		}
 		
 	}
 	
@@ -81,17 +95,15 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 
 
 		// format the numbers and make into a tablemodel
-		TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
-
-		TableOptions options = new DefaultTableOptions(getDatasets(), TableType.PAIRWISE_VENN);
-		if(getTableCache().hasTable(options)){
-			model = getTableCache().getTable(options);
-		} else {
-			model = NucleusTableDatasetCreator.createPairwiseVennTable(getDatasets());
-			getTableCache().addTable(options, model);
-		}
-
 		
+		
+		TableOptions options = new TableOptionsBuilder()
+		.setDatasets(getDatasets())
+		.setLogger(programLogger)
+		.setType(TableType.PAIRWISE_VENN)
+		.build();
+
+		TableModel model = getTable(options);
 		pairwiseVennTable.setModel(model);
 		setRenderer(pairwiseVennTable, new PairwiseVennTableCellRenderer());
 		
@@ -100,13 +112,24 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	
 	@Override
 	protected void updateNull() throws Exception {
-		TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
+		TableOptions options = new TableOptionsBuilder()
+		.setDatasets(null)
+		.setLogger(programLogger)
+		.setType(TableType.PAIRWISE_VENN)
+		.build();
+
+		TableModel model = getTable(options);
 		pairwiseVennTable.setModel(model);
 	}
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return  NucleusTableDatasetCreator.createPairwiseVennTable(options);
 	}
 		
 	/**

@@ -34,11 +34,16 @@ import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
+import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
+import charting.options.TableOptions;
+import charting.options.TableOptionsBuilder;
+import charting.options.TableOptions.TableType;
 import analysis.AnalysisDataset;
 
 @SuppressWarnings("serial")
@@ -50,42 +55,56 @@ public class MergesDetailPanel extends DetailPanel {
 	public MergesDetailPanel(Logger programLogger){
 		super(programLogger);
 		this.setLayout(new BorderLayout());
-		mergeSources = new ExportableTable(makeBlankTable()){
-			@Override
-			public boolean isCellEditable(int rowIndex, int columnIndex) {
-			    return false;
-			}
-		};
-		mergeSources.setEnabled(true);
-		mergeSources.setCellSelectionEnabled(false);
-		mergeSources.setColumnSelectionAllowed(false);
-		mergeSources.setRowSelectionAllowed(true);
 		
-		this.add(mergeSources, BorderLayout.CENTER);
-		this.add(mergeSources.getTableHeader(), BorderLayout.NORTH);
 		
-		getSourceButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				
-				// get the dataset selected
-				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-				String name = (String) mergeSources.getModel().getValueAt(mergeSources.getSelectedRow(), 0);
-				
-				// get the dataset with the selected name
-				for( UUID id : activeDataset().getMergeSources()){
-					AnalysisDataset mergeSource = activeDataset().getMergeSource(id);
-					if(mergeSource.getName().equals(name)){
-						list.add(mergeSource);
-					}
-				}
-				fireDatasetEvent(DatasetMethod.EXTRACT_SOURCE, list);
-//				fireSignalChangeEvent("ExtractSource_"+name);
+		try {
+			TableOptions options = new TableOptionsBuilder()
+			.setDatasets(null)
+			.setLogger(programLogger)
+			.build();
 
-			}
-		});
-		getSourceButton.setVisible(false);
-		this.add(getSourceButton, BorderLayout.SOUTH);
+			TableModel model = getTable(options);
+
+
+			mergeSources = new ExportableTable(model){
+				@Override
+				public boolean isCellEditable(int rowIndex, int columnIndex) {
+					return false;
+				}
+			};
+			mergeSources.setEnabled(true);
+			mergeSources.setCellSelectionEnabled(false);
+			mergeSources.setColumnSelectionAllowed(false);
+			mergeSources.setRowSelectionAllowed(true);
+
+			this.add(mergeSources, BorderLayout.CENTER);
+			this.add(mergeSources.getTableHeader(), BorderLayout.NORTH);
+
+			getSourceButton.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+
+					// get the dataset selected
+					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+					String name = (String) mergeSources.getModel().getValueAt(mergeSources.getSelectedRow(), 0);
+
+					// get the dataset with the selected name
+					for( UUID id : activeDataset().getMergeSources()){
+						AnalysisDataset mergeSource = activeDataset().getMergeSource(id);
+						if(mergeSource.getName().equals(name)){
+							list.add(mergeSource);
+						}
+					}
+					fireDatasetEvent(DatasetMethod.EXTRACT_SOURCE, list);
+					//				fireSignalChangeEvent("ExtractSource_"+name);
+
+				}
+			});
+			getSourceButton.setVisible(false);
+			this.add(getSourceButton, BorderLayout.SOUTH);
+		} catch (Exception e){
+			programLogger.log(Level.SEVERE, "Error creating merge panel", e);
+		}
 	}
 	
 	/**
@@ -93,27 +112,17 @@ public class MergesDetailPanel extends DetailPanel {
 	 * to perform the actual update when a single dataset is selected
 	 */
 	protected void updateSingle() throws Exception {
-		if(activeDataset().hasMergeSources()){
 
-			DefaultTableModel model = new DefaultTableModel();
+		TableOptions options = new TableOptionsBuilder()
+		.setDatasets(getDatasets())
+		.setLogger(programLogger)
+		.build();
 
-			Vector<Object> names 	= new Vector<Object>();
-			Vector<Object> nuclei 	= new Vector<Object>();
+		TableModel model = getTable(options);
 
-			for( UUID id : activeDataset().getMergeSources()){
-				AnalysisDataset mergeSource = activeDataset().getMergeSource(id);
-				names.add(mergeSource.getName());
-				nuclei.add(mergeSource.getCollection().getNucleusCount());
-			}
-			model.addColumn("Merge source", names);
-			model.addColumn("Nuclei", nuclei);
+		mergeSources.setModel(model);
 
-			mergeSources.setModel(model);
-			getSourceButton.setVisible(true);
-
-		} else {
-			updateNull();
-		}
+		getSourceButton.setVisible(true);
 	}
 	
 	/**
@@ -130,7 +139,15 @@ public class MergesDetailPanel extends DetailPanel {
 	 */
 	protected void updateNull() throws Exception {
 		getSourceButton.setVisible(false);
-		mergeSources.setModel(makeBlankTable());
+		
+		TableOptions options = new TableOptionsBuilder()
+		.setDatasets(null)
+		.setLogger(programLogger)
+		.build();
+		
+		TableModel model = getTable(options);
+		
+		mergeSources.setModel(model);
 	}
 	
 	@Override
@@ -138,19 +155,24 @@ public class MergesDetailPanel extends DetailPanel {
 		return null;
 	}
 	
-	
-	private DefaultTableModel makeBlankTable(){
-		DefaultTableModel model = new DefaultTableModel();
-
-		Vector<Object> names 	= new Vector<Object>();
-		Vector<Object> nuclei 	= new Vector<Object>();
-
-		names.add("No merge sources");
-		nuclei.add("");
-
-
-		model.addColumn("Merge source", names);
-		model.addColumn("Nuclei", nuclei);
-		return model;
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return NucleusTableDatasetCreator.createMergeSourcesTable(options);
 	}
+	
+	
+//	private DefaultTableModel makeBlankTable(){
+//		DefaultTableModel model = new DefaultTableModel();
+//
+//		Vector<Object> names 	= new Vector<Object>();
+//		Vector<Object> nuclei 	= new Vector<Object>();
+//
+//		names.add("No merge sources");
+//		nuclei.add("");
+//
+//
+//		model.addColumn("Merge source", names);
+//		model.addColumn("Nuclei", nuclei);
+//		return model;
+//	}
 }

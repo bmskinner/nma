@@ -18,66 +18,46 @@
  *******************************************************************************/
 package charting.options;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import stats.PlottableStatistic;
 import analysis.AnalysisDataset;
 
 /*
- * Hold options for drawing a table
+ * Hold the drawing options for a table. 
+ * The appropriate options
+ * are retrieved on table generation.
  */
-public abstract class TableOptions {
-
-
-	protected List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-	protected Logger programLogger = null;
-
-	public TableOptions(List<AnalysisDataset> list){
-		this.list = list;
-	}
+public class TableOptions extends AbstractOptions {
 	
+	private TableType type = null;
+	
+	public TableOptions(List<AnalysisDataset> list) {
+		super(list);
+
+	}
+
 	public TableOptions(List<AnalysisDataset> list, Logger programLogger){
-		this(list);
-		this.programLogger = programLogger;
+		super(list, programLogger);
+
+	}
+	
+	public void setType(TableType type){
+		this.type = type;
 	}
 
-
-	public List<AnalysisDataset> getDatasets(){
-		return this.list;
-	}
 	
-	public boolean hasDatasets(){
-		if(list==null || list.isEmpty()){
-			return false;
-		} else{
-			return true;
-		}
-	}
-	
-	public void setLogger(Logger l){
-		this.programLogger = l;
-	}
-	
-	public Logger getLogger(){
-		return this.programLogger;
-	}
-	
-	public boolean hasLogger(){
-		if(this.programLogger==null){
-			return false;
-		} else {
-			return true;
-		}
-	}
-	
-	/**
-	 * Fetch the first dataset in the list
-	 * @return
-	 */
-	public AnalysisDataset firstDataset(){
-		return this.list.get(0);
+	public TableType getType(){
+		return this.type;
 	}
 
-
+	public enum TableType {
+		ANALYSIS_PARAMETERS,
+		ANALYSIS_STATS,
+		VENN, 
+		PAIRWISE_VENN,
+		WILCOXON,
+		SIGNAL_STATS_TABLE
+	}
 }

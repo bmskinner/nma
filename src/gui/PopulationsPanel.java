@@ -51,6 +51,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.TableModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -61,6 +62,7 @@ import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import utility.TreeOrderHashMap;
 import analysis.AnalysisDataset;
 import components.CellCollection;
@@ -1119,6 +1121,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 

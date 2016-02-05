@@ -39,11 +39,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.table.TableModel;
 import javax.swing.text.DefaultCaret;
 
 import org.jfree.chart.JFreeChart;
 
 import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import analysis.AnalysisDataset;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.tabs.DetailPanel;
@@ -236,6 +238,11 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 

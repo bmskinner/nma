@@ -79,6 +79,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
@@ -97,6 +98,7 @@ import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
+import charting.options.TableOptions;
 import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellularComponent;
@@ -225,6 +227,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 	

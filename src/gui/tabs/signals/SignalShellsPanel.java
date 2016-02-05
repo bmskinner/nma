@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -42,6 +43,7 @@ import utility.Constants;
 import charting.charts.AbstractChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import components.CellCollection;
 import components.nuclear.ShellResult;
 
@@ -174,6 +176,11 @@ public class SignalShellsPanel extends DetailPanel {
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 }

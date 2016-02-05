@@ -57,6 +57,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -69,8 +70,10 @@ import org.jfree.ui.TextAnchor;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
+import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
+import charting.options.TableOptions;
 import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
@@ -139,6 +142,11 @@ public class NucleusProfilesPanel extends DetailPanel {
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return NucleusTableDatasetCreator.createVennTable(options);
 	}
 	
 	private class ModalityDisplayPanel extends JPanel implements ActionListener {

@@ -35,6 +35,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -42,8 +43,10 @@ import org.jfree.chart.JFreeChart;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import charting.charts.MorphologyChartFactory;
+import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
+import charting.options.TableOptions;
 
 @SuppressWarnings("serial")
 public class KruskalDetailPanel  extends DetailPanel {
@@ -140,6 +143,11 @@ public class KruskalDetailPanel  extends DetailPanel {
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return MorphologyChartFactory.makeKruskalWallisChart(options, false);
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return null;
 	}
 	
 	/**

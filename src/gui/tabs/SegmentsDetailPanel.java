@@ -57,7 +57,6 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
-import charting.SegmentStatsTableOptions;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.HistogramChartFactory;
 import charting.charts.MorphologyChartFactory;
@@ -65,6 +64,8 @@ import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
+import charting.options.TableOptionsBuilder;
+import charting.options.TableOptions.TableType;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
@@ -553,7 +554,14 @@ public class SegmentsDetailPanel extends DetailPanel {
 			scrollPane = new JScrollPane();
 						
 			try {
-				TableModel model = NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, MeasurementScale.PIXELS);
+				
+				TableOptions options = new TableOptionsBuilder()
+				.setDatasets(null)
+				.setLogger(programLogger)
+				.setScale(MeasurementScale.PIXELS)
+				.build();
+				
+				TableModel model = NucleusTableDatasetCreator.createMedianProfileStatisticTable(options);
 				table = new ExportableTable(model);
 
 			} catch (Exception e) {
@@ -568,48 +576,42 @@ public class SegmentsDetailPanel extends DetailPanel {
 		}
 
 		protected void update(List<AnalysisDataset> list){
+			
+			
 
 			MeasurementScale scale = measurementUnitSettingsPanel.getSelected();
+			
+			TableOptions options = new TableOptionsBuilder()
+			.setDatasets(getDatasets())
+			.setLogger(programLogger)
+			.setScale(scale)
+			.build();
+			
+			
+			
 			try {
+				
+				TableModel model = NucleusTableDatasetCreator.createMedianProfileStatisticTable(options);
+				table.setModel(model);
 
 				if( ! hasDatasets()){
-					programLogger.log(Level.FINEST, "Dataset list is empty: making null table");
 					table.setToolTipText(null);
-					table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
 
 				} else {
 
-					if(isSingleDataset()){
-						programLogger.log(Level.FINEST, "Single dataset selected");
-						TableModel model = NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset(), scale);
-						table.setModel(model);
+					if(isSingleDataset()){						
 						table.setToolTipText(null);
 						setRenderer(table, new SegmentTableCellRenderer());
-//						Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
-//
-//						while(columns.hasMoreElements()){
-//							TableColumn column = columns.nextElement();
-//							column.setCellRenderer(new SegmentTableCellRenderer());
-//						}
-
 					} else {
 
 						if(checkSegmentCountsMatch(list)){
-							programLogger.log(Level.FINEST, "Multiple datasets selected");
-							TableModel model = NucleusTableDatasetCreator.createMultiDatasetMedianProfileSegmentStatsTable(list, scale);
-							table.setModel(model);
 							table.setToolTipText("Mean and range for 95% confidence interval");
 							setRenderer(table, new SegmentTableCellRenderer());
-//							Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
-//
-//							while(columns.hasMoreElements()){
-//								TableColumn column = columns.nextElement();
-//								column.setCellRenderer(new SegmentTableCellRenderer());
-//							}
+
 						} else {
 							programLogger.log(Level.FINEST, "Segment counts don't match");
 							table.setToolTipText(null);
-							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
+//							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
 						}
 					}
 
@@ -619,7 +621,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 				programLogger.log(Level.SEVERE, "Error updating segment stats panel", e);
 				programLogger.log(Level.FINEST, "Error detected: making null table");
 				try {
-					table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
+//					table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
 				} catch (Exception e1) {
 					programLogger.log(Level.SEVERE, "Error recovering from error in segment stats panel", e);
 				}
@@ -673,18 +675,17 @@ public class SegmentsDetailPanel extends DetailPanel {
 //					for( int i=0; i<segmentCount; i++){
 						String segName = seg.getName();
 
-						TableModel model;
+						
+						
+						TableOptions options = new TableOptionsBuilder()
+						.setDatasets(getDatasets())
+						.setLogger(programLogger)
+						.setStat(stat)
+						.setSegPosition(seg.getPosition())
+						.build();
 
-						TableOptions options = new SegmentStatsTableOptions(getDatasets(), stat, segName);
-						if(getTableCache().hasTable(options)){
-							programLogger.log(Level.FINEST, "Fetched cached Wilcoxon table: "+stat);
-							model = getTableCache().getTable(options);
-						} else {
-							model = NucleusTableDatasetCreator.createWilcoxonSegmentStatTable(getDatasets(), stat, seg.getPosition());
-							programLogger.log(Level.FINEST, "Added cached Wilcoxon table: "+stat);
-							getTableCache().addTable(options, model);
-						}
-
+						
+						TableModel model = getTable(options);
 						
 						ExportableTable table = new ExportableTable(model);
 						setRenderer(table, new WilcoxonTableCellRenderer());
@@ -714,6 +715,10 @@ public class SegmentsDetailPanel extends DetailPanel {
 			scrollPane.setViewportView(tablePanel);;
 			tablePanel.repaint();
 			
+		}
+		
+		protected TableModel createPanelTableType(TableOptions options) throws Exception{
+			return NucleusTableDatasetCreator.createWilcoxonStatisticTable(options);
 		}
 				
 	}
@@ -767,18 +772,16 @@ public class SegmentsDetailPanel extends DetailPanel {
 					for(NucleusBorderSegment seg : segments){
 						String segName = seg.getName();
 
-						TableModel model;
-
-						TableOptions options = new SegmentStatsTableOptions(getDatasets(), stat, segName);
-						if(getTableCache().hasTable(options)){
-							programLogger.log(Level.FINEST, "Fetched cached magnitude table: "+stat);
-							model = getTableCache().getTable(options);
-						} else {
-							model = NucleusTableDatasetCreator.createMagnitudeSegmentStatTable(getDatasets(), stat, seg.getPosition());
-							programLogger.log(Level.FINEST, "Added cached magnitude table: "+stat);
-							getTableCache().addTable(options, model);
-						}
-
+						
+						
+						TableOptions options = new TableOptionsBuilder()
+						.setDatasets(getDatasets())
+						.setLogger(programLogger)
+						.setStat(stat)
+						.setSegPosition(seg.getPosition())
+						.build();
+						
+						TableModel model = getTable(options);
 						
 						ExportableTable table = new ExportableTable(model);
 						setRenderer(table, new PairwiseTableCellRenderer());
@@ -807,13 +810,22 @@ public class SegmentsDetailPanel extends DetailPanel {
 			tablePanel.repaint();
 			
 		}
+		
+		protected TableModel createPanelTableType(TableOptions options) throws Exception{
+			return NucleusTableDatasetCreator.createMagnitudeStatisticTable(options);
+		}
 				
+	}
+	
+	
+
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
 	}
 
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options)
-			throws Exception {
-		// TODO Auto-generated method stub
+	protected TableModel createPanelTableType(TableOptions options)	throws Exception {
 		return null;
 	}
 }

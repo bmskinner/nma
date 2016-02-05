@@ -25,10 +25,12 @@ import java.util.logging.Logger;
 
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
 import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import analysis.AnalysisDataset;
 
 @SuppressWarnings("serial")
@@ -102,6 +104,11 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 	

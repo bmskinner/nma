@@ -37,12 +37,15 @@ import javax.swing.BoxLayout;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.BoxplotChartFactory;
 import charting.charts.HistogramChartFactory;
+import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
+import charting.options.TableOptions;
 
 /**
  * This class is extended for making a panel with multiple stats histograms
@@ -98,6 +101,11 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
 		return HistogramChartFactory.createStatisticHistogram(options);
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return null;
 	}
 	
 	public void setEnabled(boolean b){

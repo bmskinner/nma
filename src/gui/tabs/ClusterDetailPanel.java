@@ -58,6 +58,7 @@ import org.jfree.chart.JFreeChart;
 import analysis.AnalysisDataset;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import components.ClusterGroup;
 
 @SuppressWarnings("serial")
@@ -95,6 +96,11 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 				

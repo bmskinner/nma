@@ -43,6 +43,7 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
@@ -50,7 +51,9 @@ import charting.Cache;
 import charting.ChartCache;
 import charting.TableCache;
 import charting.charts.HistogramChartFactory;
+import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
@@ -310,17 +313,45 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	protected JFreeChart getChart(ChartOptions options) throws Exception{
 		JFreeChart chart;
 		if(getChartCache().hasChart(options)){
-			programLogger.log(Level.FINEST, "Using cached chart: "+options.getStat().toString());
+			programLogger.log(Level.FINEST, "Fetched cached chart");
 			chart = getChartCache().getChart(options);
 
 		} else { // No cache
 
 			chart = createPanelChartType(options);
 			getChartCache().addChart(options, chart);
-			programLogger.log(Level.FINEST, "Added cached chart: "+options.getStat().toString());
+			programLogger.log(Level.FINEST, "Added cached chart");
 		}
 		return chart;
 	}
+	
+	/**
+	 * Fetch the desired chart, either from the cache, or by creating it
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
+	protected TableModel getTable(TableOptions options) throws Exception{
+		
+		TableModel model;
+		if(getTableCache().hasTable(options)){
+			programLogger.log(Level.FINEST, "Fetched cached table");
+			model = getTableCache().getTable(options);
+		} else {
+			model = createPanelTableType(options);
+			programLogger.log(Level.FINEST, "Added cached table");
+			getTableCache().addTable(options, model);
+		}
+		return model;
+	}
+	
+	/**
+	 * This should be overridden to create the appropriate tables for caching
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
+	protected abstract TableModel createPanelTableType(TableOptions options) throws Exception;
 	
 	/**
 	 * This should be overridden to create the appropriate charts for caching

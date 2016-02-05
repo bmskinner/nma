@@ -33,6 +33,9 @@ import org.jfree.chart.JFreeChart;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.ChartOptions;
+import charting.options.TableOptions;
+import charting.options.TableOptionsBuilder;
+import charting.options.TableOptions.TableType;
 
 
 @SuppressWarnings("serial")
@@ -55,7 +58,13 @@ public class SignalsAnalysisPanel extends DetailPanel {
 
 	@Override
 	protected void updateSingle() throws Exception {
-		TableModel model = NuclearSignalDatasetCreator.createSignalDetectionParametersTable(getDatasets());
+		
+		TableOptions options = new TableOptionsBuilder()
+		.setDatasets(getDatasets())
+		.setLogger(programLogger)
+		.build();
+		
+		TableModel model = getTable(options);
 		table.setModel(model);
 		table.createDefaultColumnsFromModel();
 		
@@ -68,7 +77,13 @@ public class SignalsAnalysisPanel extends DetailPanel {
 
 	@Override
 	protected void updateNull() throws Exception {
-		TableModel model = NuclearSignalDatasetCreator.createSignalDetectionParametersTable(null);
+		
+		TableOptions options = new TableOptionsBuilder()
+		.setDatasets(null)
+		.setLogger(programLogger)
+		.build();
+		
+		TableModel model = getTable(options);
 		table.setModel(model);
 		table.createDefaultColumnsFromModel();
 		
@@ -77,6 +92,11 @@ public class SignalsAnalysisPanel extends DetailPanel {
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return NuclearSignalDatasetCreator.createSignalDetectionParametersTable(options);
 	}
 
 }

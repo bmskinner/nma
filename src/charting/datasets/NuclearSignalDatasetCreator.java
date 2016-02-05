@@ -60,8 +60,9 @@ public class NuclearSignalDatasetCreator {
 	 * @param list the AnalysisDatasets to include
 	 * @return a table model
 	 */
-	public static TableModel createSignalDetectionParametersTable(List<AnalysisDataset> list){
+	public static TableModel createSignalDetectionParametersTable(TableOptions options){
 
+		List<AnalysisDataset> list = options.getDatasets();
 		DefaultTableModel model = new DefaultTableModel();
 		
 		List<Object> fieldNames = new ArrayList<Object>(0);
@@ -441,9 +442,9 @@ public class NuclearSignalDatasetCreator {
 				}
 			}
 			
-			if(options.hasLogger()){
-				options.getLogger().log(Level.FINEST, "Selected collections have "+maxSignalGroup+" signal groups");
-			}
+
+			options.log(Level.FINEST, "Selected collections have "+maxSignalGroup+" signal groups");
+
 			if(maxSignalGroup>0){
 				// create the row names
 				fieldNames.add("Number of signal groups");
@@ -509,15 +510,14 @@ public class NuclearSignalDatasetCreator {
 					model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
 				}
 			} else {
-				if(options.hasLogger()){
-					options.getLogger().log(Level.FINEST, "No signal groups to show");
-				}
+
+				options.log(Level.FINEST, "No signal groups to show");
+
 				model.addColumn("No data loaded");
 			}
 		} else {
-			if(options.hasLogger()){
-				options.getLogger().log(Level.FINEST, "No datasets");
-			}
+
+			options.log(Level.FINEST, "No datasets");
 			model.addColumn("No data loaded");
 		}
 		return model;	

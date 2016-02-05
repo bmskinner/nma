@@ -20,8 +20,6 @@ package gui;
 
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.ConsensusNucleusChartPanel;
-import gui.components.ExportableTable;
-import gui.components.WilcoxonTableCellRenderer;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
@@ -37,21 +35,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import stats.NucleusStatistic;
 import analysis.AnalysisDataset;
-import charting.NucleusStatsTableOptions;
 import charting.charts.ConsensusNucleusChartFactory;
-import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import components.CellCollection;
@@ -323,6 +316,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 		

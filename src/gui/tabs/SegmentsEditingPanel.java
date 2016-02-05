@@ -49,6 +49,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
@@ -58,6 +59,7 @@ import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
+import charting.options.TableOptions;
 import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTag;
@@ -115,6 +117,11 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 		
@@ -219,8 +226,8 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 			SegmentedProfile profile = null;
 			
-			ChartOptionsBuilder builder = new ChartOptionsBuilder();
-			ChartOptions options = builder.setDatasets(getDatasets())
+			ChartOptions options = new ChartOptionsBuilder()
+				.setDatasets(getDatasets())
 				.setLogger(programLogger)
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
@@ -257,6 +264,11 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		@Override
 		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 			return MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
+		}
+		
+		@Override
+		protected TableModel createPanelTableType(TableOptions options) throws Exception{
+			return null;
 		}
 		
 

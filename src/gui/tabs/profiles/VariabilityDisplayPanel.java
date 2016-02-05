@@ -26,6 +26,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -40,6 +41,7 @@ import utility.Constants;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
+import charting.options.TableOptions;
 import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
@@ -224,5 +226,10 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return MorphologyChartFactory.makeVariabilityChart(options);
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return null;
 	}
 }

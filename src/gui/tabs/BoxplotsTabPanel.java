@@ -34,12 +34,14 @@ import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.BoxplotChartFactory;
 import charting.charts.HistogramChartFactory;
 import charting.options.ChartOptions;
+import charting.options.TableOptions;
 
 /**
  * This class is extended for making a panel with multiple stats histograms
@@ -89,6 +91,11 @@ import charting.options.ChartOptions;
 		@Override
 		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
 			return BoxplotChartFactory.createStatisticBoxplot(options);
+		}
+		
+		@Override
+		protected TableModel createPanelTableType(TableOptions options) throws Exception{
+			return null;
 		}
 
 		

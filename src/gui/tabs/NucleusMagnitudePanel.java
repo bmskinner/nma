@@ -18,40 +18,26 @@
  *******************************************************************************/
 package gui.tabs;
 
-import gui.MainWindow;
 import gui.components.ExportableTable;
 import gui.components.PairwiseTableCellRenderer;
-import gui.dialogs.MainOptionsDialog;
 import gui.dialogs.RandomSamplingDialog;
 
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.UUID;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import analysis.AnalysisDataset;
-import analysis.RandomSampler;
-import analysis.nucleus.ShellAnalysis;
 import stats.NucleusStatistic;
-import charting.NucleusStatsTableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.TableOptions;
+import charting.options.TableOptionsBuilder;
 
 @SuppressWarnings("serial")
 public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
@@ -128,17 +114,15 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 
 		for(NucleusStatistic stat : NucleusStatistic.values()){
 
-			TableModel model;
+			
+			
+			TableOptions options = new TableOptionsBuilder()
+			.setDatasets(getDatasets())
+			.setLogger(programLogger)
+			.setStat(stat)
+			.build();
 
-			TableOptions options = new NucleusStatsTableOptions(getDatasets(), stat);
-			if(getTableCache().hasTable(options)){
-				programLogger.log(Level.FINEST, "Fetched cached magnitude table: "+stat);
-				model = getTableCache().getTable(options);
-			} else {
-				model = NucleusTableDatasetCreator.createMagnitudeNuclearStatTable(getDatasets(), stat);
-				programLogger.log(Level.FINEST, "Added cached magnitude table: "+stat);
-			}
-
+			TableModel model = getTable(options);
 
 			ExportableTable table = new ExportableTable(model);
 			setRenderer(table, new PairwiseTableCellRenderer());
@@ -152,6 +136,11 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 		tablePanel.repaint();
 	}
 	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return NucleusTableDatasetCreator.createMagnitudeStatisticTable(options);
+	}
+	
 	/**
 	 * This method must be overridden by the extending class
 	 * to perform the actual update when a no datasets are selected
@@ -162,73 +151,6 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 		scrollPane.setViewportView(tablePanel);;
 		tablePanel.repaint();
 	}
-		
-	/**
-	 * Update the magnitude panel with data from the given datasets
-	 * @param list the datasets
-	 * @throws Exception 
-	 */
-//	@Override
-//	public void updateDetail() {
-//		programLogger.log(Level.FINE, "Updating nucleus magnitude panel");
-//
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-//				
-//				try{
-//
-//					scrollPane.setColumnHeaderView(null);
-//					tablePanel = createTablePanel();
-//					
-//					if(hasDatasets()){
-//						
-//						if(!isSingleDataset()){
-//							randomSamplingButton.setEnabled(false);
-//
-//							for(NucleusStatistic stat : NucleusStatistic.values()){
-//
-//								TableModel model;
-//
-//								TableOptions options = new NucleusStatsTableOptions(getDatasets(), stat);
-//								if(getTableCache().hasTable(options)){
-//									programLogger.log(Level.FINEST, "Fetched cached magnitude table: "+stat);
-//									model = getTableCache().getTable(options);
-//								} else {
-//									model = NucleusTableDatasetCreator.createMagnitudeNuclearStatTable(getDatasets(), stat);
-//									programLogger.log(Level.FINEST, "Added cached magnitude table: "+stat);
-//								}
-//
-//
-//								ExportableTable table = new ExportableTable(model);
-//								setRenderer(table, new PairwiseTableCellRenderer());
-//								addWilconxonTable(tablePanel, table, stat.toString());
-//								scrollPane.setColumnHeaderView(table.getTableHeader());
-//
-//
-//							}
-//							tablePanel.revalidate();
-//
-//							
-//						} else {
-//							randomSamplingButton.setEnabled(true);
-//							tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
-//						}
-//					} else {
-//						randomSamplingButton.setEnabled(false);
-//						tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
-//					}
-//					programLogger.log(Level.FINEST, "Updated magnitude panel");
-//				} catch (Exception e) {
-//					programLogger.log(Level.SEVERE, "Error making magnitude table", e);
-//					tablePanel = createTablePanel();
-//				} finally {
-//					scrollPane.setViewportView(tablePanel);;
-//					tablePanel.repaint();
-//					setUpdating(false);
-//				}
-//				
-//			}});
-//	}
 }
 	
 
