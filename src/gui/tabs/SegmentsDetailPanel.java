@@ -187,37 +187,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 	protected void updateNull() throws Exception {
 		updateMultiple() ;
 	}
-		
-//	@Override
-//	public void updateDetail(){
-////		this.list = list;
-//		programLogger.log(Level.FINE, "Updating segments detail panel");
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-//				
-//				segmentBoxplotsPanel.update(getDatasets()); // get segname from panel
-//				programLogger.log(Level.FINEST, "Updated segments boxplot panel");
-//
-//				segmentHistogramsPanel.update(getDatasets()); // get segname from panel
-//				programLogger.log(Level.FINEST, "Updated segments histogram panel");
-//
-//				segmentProfilePanel.update(getDatasets()); // get segname from panel
-//				programLogger.log(Level.FINEST, "Updated segments profile panel");
-//
-//				segmentStatsPanel.update(getDatasets());
-//				programLogger.log(Level.FINEST, "Updated segments stats panel");
-//				
-//				segmentWilcoxonPanel.update(getDatasets());
-//				programLogger.log(Level.FINEST, "Updated segments stats panel");
-//				
-//				segmentMagnitudePanel.update(getDatasets());
-//				programLogger.log(Level.FINEST, "Updated segments magnitude panel");
-//				
-//				setUpdating(false);
-//			}
-//		});
-//	}
-			
+					
 	/**
 	 * Allows for cell background to be coloured based on position in a list. Used to colour
 	 * the segment stats list
@@ -372,17 +342,12 @@ public class SegmentsDetailPanel extends DetailPanel {
 	
 	@SuppressWarnings("serial")
 	protected class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionListener {
-//		private ChartPanel chartPanel; // for displaying the legnth of a given segment
-//		private JTabbedPane tabPane = new JTabbedPane(JTabbedPane.TOP); // switch between chart types
-//		private JPanel 		mainPanel; // hold the charts
+
 		private Dimension preferredSize = new Dimension(200, 300);
-//		private JScrollPane scrollPane;
-//		private JPanel 		buttonPanel;
 				
 		protected SegmentBoxplotsPanel(Logger logger){
 			super(logger);
-//			this.setLayout(new BorderLayout());
-			
+
 			JFreeChart boxplot = BoxplotChartFactory.createEmptyBoxplot();
 			
 
@@ -439,8 +404,9 @@ public class SegmentsDetailPanel extends DetailPanel {
 						.setSegPosition(seg.getPosition())
 						.build();
 					
-					JFreeChart boxplot = BoxplotChartFactory.createStatisticBoxplot(options);
-					ExportableChartPanel chartPanel = new ExportableChartPanel(boxplot);
+					JFreeChart chart = getChart(options);
+					
+					ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
 					chartPanel.setPreferredSize(preferredSize);
 					chartPanels.put(seg.getName(), chartPanel);
 					mainPanel.add(chartPanel);							
@@ -475,36 +441,6 @@ public class SegmentsDetailPanel extends DetailPanel {
 		}
 	}
 	
-//	/**
-//	 * Given a list of datasets, count the segments in the median profile of each, 
-//	 * and test if all datasets have the same number of segments.
-//	 * @param list
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	private boolean checkSegmentCountsMatch(List<AnalysisDataset> list) throws Exception{
-//		int prevCount = 0;
-//		
-//		programLogger.log(Level.FINEST, "Counting segments in each dataset");
-//		// check that the datasets have the same number of segments
-//		for( AnalysisDataset dataset  : list){
-//			CellCollection collection = dataset.getCollection();
-//			int count = collection.getProfileCollection(ProfileType.REGULAR)
-//				.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
-//				.getSegmentCount();
-//			
-//			programLogger.log(Level.FINEST, "\t"+dataset.getName()+": "+count+" segments");
-//			
-//			if(prevCount > 0 ){
-//				if(prevCount!=count){
-//					programLogger.log(Level.FINEST, "Segment count does not match");
-//					return false;
-//				}
-//			}
-//			prevCount = count;
-//		}
-//		return true;
-//	}
 	
 	@SuppressWarnings("serial")
 	protected class SegmentHistogramsPanel extends HistogramsTabPanel  {
@@ -561,7 +497,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 						.setSegPosition(seg.getPosition())
 						.build();
 					
-					JFreeChart chart = HistogramChartFactory.createStatisticHistogram(options);
+					
+					JFreeChart chart = getChart(options);
 					
 					SelectableChartPanel chartPanel = new SelectableChartPanel(chart, seg.getName());
 					chartPanel.setPreferredSize(preferredSize);
@@ -599,85 +536,6 @@ public class SegmentsDetailPanel extends DetailPanel {
 			scrollPane.setViewportView(mainPanel);
 			this.setEnabled(false);
 		}
-
-//		@Override
-//		public void updateDetail() {
-//
-//			try{
-//				this.setEnabled(true);
-//				mainPanel = new JPanel();
-//				mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-//
-//				MeasurementScale scale = this.measurementUnitSettingsPanel.getSelected();
-//				boolean useDensity = this.useDensityPanel.isSelected();
-//
-//				/*
-//				 * Do not use the chart cache, because the charts are created new every time
-//				 */
-//				
-//				if(hasDatasets()){
-//
-//					programLogger.log(Level.FINEST, "Dataset list is not empty");
-//
-//					// Check that all the datasets have the same number of segments
-//					if(checkSegmentCountsMatch(getDatasets())){ // make a histogram for each segment
-//						
-////						JFreeChart chart = null;
-//						HistogramChartOptions options = new HistogramChartOptions(getDatasets(), null, scale, useDensity);
-//						options.setLogger(programLogger);
-//
-//						CellCollection collection = activeDataset().getCollection();
-//						int segmentCount = collection.getProfileCollection(ProfileType.REGULAR)
-//								.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
-//								.getSegmentCount();
-//
-//						// Get each segment as a boxplot
-//						for( int i=0; i<segmentCount; i++){
-//							String segName = "Seg_"+i;
-//							JFreeChart chart = null;
-//							if(useDensity){
-//								chart = HistogramChartFactory.createSegmentLengthDensityChart(options, segName);	
-//							} else {
-//								chart = HistogramChartFactory.createSegmentLengthHistogram(options, segName);
-//							}
-//							ChartPanel chartPanel = new ChartPanel(chart);
-//							chartPanel.setPreferredSize(preferredSize);
-//							mainPanel.add(chartPanel);							
-//						}
-//
-//
-//
-//					} else { // different number of segments, blank chart
-//						this.setEnabled(false);
-//						mainPanel.setLayout(new FlowLayout());
-//						mainPanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
-//						scrollPane.setViewportView(mainPanel);
-//					}
-//					mainPanel.revalidate();
-//					mainPanel.repaint();
-//					scrollPane.setViewportView(mainPanel);
-//				} else {
-//					JFreeChart chart = HistogramChartFactory.createHistogram(null, "Segment", "Length");		
-//					SelectableChartPanel panel = new SelectableChartPanel(chart, "null");
-//					panel.setPreferredSize(preferredSize);
-//					SegmentHistogramsPanel.this.chartPanels.put("null", panel);
-//					SegmentHistogramsPanel.this.mainPanel.add(panel);
-//					mainPanel.revalidate();
-//					mainPanel.repaint();
-//					scrollPane.setViewportView(mainPanel);
-//					this.setEnabled(false);
-//				}
-//
-//			} catch (Exception e){
-//				programLogger.log(Level.SEVERE, "Error updating segments boxplot", e);		
-//				mainPanel = new JPanel();
-//				mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-//				mainPanel.add(new JLabel("Unable to display segment boxplots", JLabel.CENTER));
-//			} finally {
-//				SegmentHistogramsPanel.this.setUpdating(false);
-//			}
-//		}
-		
 		
 	}
 	
@@ -950,5 +808,12 @@ public class SegmentsDetailPanel extends DetailPanel {
 			
 		}
 				
+	}
+
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options)
+			throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

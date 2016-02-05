@@ -21,6 +21,7 @@ package gui.tabs;
 import gui.components.ExportableChartPanel;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -33,6 +34,12 @@ import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+
+import org.jfree.chart.JFreeChart;
+
+import charting.charts.BoxplotChartFactory;
+import charting.charts.HistogramChartFactory;
+import charting.options.ChartOptions;
 
 /**
  * This class is extended for making a panel with multiple stats histograms
@@ -78,6 +85,12 @@ import javax.swing.JScrollPane;
 			}
 
 		}
+		
+		@Override
+		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
+			return BoxplotChartFactory.createStatisticBoxplot(options);
+		}
+
 		
 		public void setEnabled(boolean b){
 			super.setEnabled(b);

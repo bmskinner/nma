@@ -55,6 +55,7 @@ import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
+import charting.options.ChartOptions;
 import charting.options.DefaultTableOptions;
 import charting.options.DefaultTableOptions.TableType;
 import components.CellCollection;
@@ -439,5 +440,10 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	protected void updateNull() throws Exception {
 		updateMultiple();
 		
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
 	}
 }

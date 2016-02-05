@@ -38,6 +38,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import org.jfree.chart.JFreeChart;
+
+import charting.charts.BoxplotChartFactory;
+import charting.charts.HistogramChartFactory;
+import charting.options.ChartOptions;
+
 /**
  * This class is extended for making a panel with multiple stats histograms
  * arranged vertically
@@ -87,6 +93,11 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 			programLogger.log(Level.SEVERE, "Error creating panel", e);
 		}
 
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
+		return HistogramChartFactory.createStatisticHistogram(options);
 	}
 	
 	public void setEnabled(boolean b){

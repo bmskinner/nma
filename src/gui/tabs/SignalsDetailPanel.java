@@ -35,6 +35,11 @@ import java.util.logging.Logger;
 
 import javax.swing.JTabbedPane;
 
+import org.jfree.chart.JFreeChart;
+
+import charting.charts.MorphologyChartFactory;
+import charting.options.ChartOptions;
+
 public class SignalsDetailPanel extends DetailPanel implements ActionListener, SignalChangeListener {
 
 	private static final long serialVersionUID = 1L;
@@ -118,6 +123,11 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	 */
 	protected void updateNull() throws Exception {
 		updateMultiple();
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
 	}
 
 

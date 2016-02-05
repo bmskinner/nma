@@ -31,7 +31,10 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
+import org.jfree.chart.JFreeChart;
+
 import charting.datasets.NucleusTableDatasetCreator;
+import charting.options.ChartOptions;
 import charting.options.DefaultTableOptions;
 import charting.options.TableOptions;
 import charting.options.DefaultTableOptions.TableType;
@@ -66,6 +69,11 @@ public class AnalysisDetailPanel extends DetailPanel {
 		tabPane.addTab("Nucleus detection", parametersPanel);
 
 
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
 	}
 	
 	@Override

@@ -34,6 +34,9 @@ import java.util.logging.Logger;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import org.jfree.chart.JFreeChart;
+
+import charting.options.ChartOptions;
 import analysis.AnalysisDataset;
 
 @SuppressWarnings("serial")
@@ -108,34 +111,11 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 		updateMultiple();
 	}
 	
-//	@Override
-//	public void updateDetail(){
-//
-//		programLogger.log(Level.FINE, "Updating editing detail panel");
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-//				
-//				try{
-//						
-//					cellDetailPanel.setEnabled(true);
-//					segmentsEditingPanel.setEnabled(true);
-//
-//					cellDetailPanel.update(getDatasets()); 
-//					programLogger.log(Level.FINEST, "Updated segments boxplot panel");
-//
-//					segmentsEditingPanel.update(getDatasets()); 
-//					programLogger.log(Level.FINEST, "Updated segments histogram panel");
-//
-//				} catch(Exception e){
-//					EditingDetailPanel.this.update( (List<AnalysisDataset> ) null);
-//					
-//				} finally {
-//					setUpdating(false);
-//				}
-//			}
-//		});
-//	}
-
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
+	
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		

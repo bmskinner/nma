@@ -136,6 +136,11 @@ public class NucleusProfilesPanel extends DetailPanel {
 		updateMultiple();
 	}
 	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
+	
 	private class ModalityDisplayPanel extends JPanel implements ActionListener {
 		
 		private JPanel mainPanel = new JPanel(new BorderLayout());

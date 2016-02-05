@@ -112,6 +112,11 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 	protected void updateNull() throws Exception {
 		updateMultiple();
 	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
 		
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
@@ -211,7 +216,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 						
 		@Override
 		protected void updateSingle() throws Exception {
-			JFreeChart chart = null;
+			
 			SegmentedProfile profile = null;
 			
 			ChartOptionsBuilder builder = new ChartOptionsBuilder();
@@ -227,13 +232,8 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			// Set the button configuration
 			configureButtons(options);
 						
-			if(getChartCache().hasChart(options)){
-				chart = getChartCache().getChart(options);
-			} else {
-				chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
-				getChartCache().addChart(options, chart);
-			}
-
+			JFreeChart chart = getChart(options);
+			
 			profile = activeDataset().getCollection()
 					.getProfileCollection(ProfileType.REGULAR)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
@@ -252,6 +252,11 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		protected void updateNull() throws Exception {			
 			chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
 			setButtonsEnabled(false);
+		}
+		
+		@Override
+		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+			return MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
 		}
 		
 

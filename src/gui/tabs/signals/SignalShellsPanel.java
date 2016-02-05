@@ -41,6 +41,7 @@ import org.jfree.data.category.CategoryDataset;
 import utility.Constants;
 import charting.charts.AbstractChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
+import charting.options.ChartOptions;
 import components.CellCollection;
 import components.nuclear.ShellResult;
 
@@ -169,5 +170,10 @@ public class SignalShellsPanel extends DetailPanel {
 	protected void updateNull() throws Exception {
 		updateMultiple();
 		
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
 	}
 }

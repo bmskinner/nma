@@ -222,34 +222,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		programLogger.log(Level.FINEST, "Updated cell list panel");
 		updateCell(null);
 	}
-	
-	/**
-	 * Update the panel with a list of AnalysisDatasets. Data
-	 * will only be displayed if the list contains one dataset.
-	 * @param list the datsets
-	 */
-//	public void updateList(final List<AnalysisDataset> list){
-////		programLogger.log(Level.FINE, "Updating cell detail panel");
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-//								
-//				if(isSingleDataset()){
-//					
-//					cellsListPanel.updateDataset( activeDataset()  );
-//					programLogger.log(Level.FINEST, "Updated cell list panel");
-//					updateCell(activeCell);
-//					programLogger.log(Level.FINEST, "Updated active cell panel");
-//				} else {
-//					
-//					cellsListPanel.updateDataset(null);
-//					programLogger.log(Level.FINEST, "Updated cell list panel");
-//					updateCell(null);
-//					
-//				}
-//			
-//		}});
-//	}
-	
+		
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
 	
 	/**
 	 * Display data for the given cell

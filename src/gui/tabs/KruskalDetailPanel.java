@@ -119,10 +119,9 @@ public class KruskalDetailPanel  extends DetailPanel {
 	 */
 	private void updateChartPanel() throws Exception {
 
-		JFreeChart chart = null;
 
-		ChartOptionsBuilder builder = new ChartOptionsBuilder();
-		ChartOptions options = builder.setDatasets(getDatasets())
+		ChartOptions options = new ChartOptionsBuilder()
+			.setDatasets(getDatasets())
 			.setLogger(programLogger)
 			.setNormalised(true)
 			.setAlignment(ProfileAlignment.LEFT)
@@ -132,15 +131,15 @@ public class KruskalDetailPanel  extends DetailPanel {
 			.build();
 		
 
-		if(getChartCache().hasChart(options)){
-			chart = getChartCache().getChart(options);
-		} else {
-			chart = MorphologyChartFactory.makeKruskalWallisChart(options, false);
-			getChartCache().addChart(options, chart);
-		}
+		JFreeChart chart = getChart(options);
 
 		chartPanel.setChart(chart);
 
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return MorphologyChartFactory.makeKruskalWallisChart(options, false);
 	}
 	
 	/**

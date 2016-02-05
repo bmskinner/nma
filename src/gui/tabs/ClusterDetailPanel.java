@@ -53,8 +53,11 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
+import org.jfree.chart.JFreeChart;
+
 import analysis.AnalysisDataset;
 import charting.datasets.NucleusTableDatasetCreator;
+import charting.options.ChartOptions;
 import components.ClusterGroup;
 
 @SuppressWarnings("serial")
@@ -88,6 +91,11 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 	protected void updateNull() throws Exception {
 		updateMultiple();
 		
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
 	}
 				
 	private class ClustersPanel extends JPanel implements MouseListener {

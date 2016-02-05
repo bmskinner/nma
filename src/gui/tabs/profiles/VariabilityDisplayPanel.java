@@ -120,7 +120,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 
 		try {
 			if(options.isSingleDataset()){
-				JFreeChart chart = MorphologyChartFactory.makeVariabilityChart(options);
+				JFreeChart chart = getChart(options);
 
 
 				if(options.isShowMarkers()){ // add the bimodal regions
@@ -219,5 +219,10 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	protected void updateNull() throws Exception {
 		updateSingle();
 		this.setEnabled(false);
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return MorphologyChartFactory.makeVariabilityChart(options);
 	}
 }

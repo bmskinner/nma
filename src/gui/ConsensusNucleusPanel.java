@@ -52,6 +52,7 @@ import analysis.AnalysisDataset;
 import charting.NucleusStatsTableOptions;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.datasets.NucleusTableDatasetCreator;
+import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import components.CellCollection;
 import components.generic.BorderTag;
@@ -318,6 +319,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	@Override
 	protected void updateNull() throws Exception {		
 		updateBlankChart();
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
 	}
 		
 	private void updateSingleDataset() throws Exception {

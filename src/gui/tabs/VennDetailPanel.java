@@ -30,7 +30,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
+import org.jfree.chart.JFreeChart;
+
 import charting.datasets.NucleusTableDatasetCreator;
+import charting.options.ChartOptions;
 import charting.options.DefaultTableOptions;
 import charting.options.TableOptions;
 import charting.options.DefaultTableOptions.TableType;
@@ -94,6 +97,11 @@ public class VennDetailPanel extends DetailPanel {
 
 		programLogger.log(Level.FINEST, "Updated venn panel");
 		
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
 	}
 	
 	@Override

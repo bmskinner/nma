@@ -38,6 +38,7 @@ import javax.swing.table.DefaultTableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
+import charting.options.ChartOptions;
 import analysis.AnalysisDataset;
 
 @SuppressWarnings("serial")
@@ -130,6 +131,11 @@ public class MergesDetailPanel extends DetailPanel {
 	protected void updateNull() throws Exception {
 		getSourceButton.setVisible(false);
 		mergeSources.setModel(makeBlankTable());
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
 	}
 	
 	

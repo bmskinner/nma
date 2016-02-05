@@ -28,7 +28,11 @@ import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.jfree.chart.JFreeChart;
+
+import charting.charts.MorphologyChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
+import charting.options.ChartOptions;
 
 
 @SuppressWarnings("serial")
@@ -68,6 +72,11 @@ public class SignalsAnalysisPanel extends DetailPanel {
 		table.setModel(model);
 		table.createDefaultColumnsFromModel();
 		
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
 	}
 
 }

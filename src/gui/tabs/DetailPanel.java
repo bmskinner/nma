@@ -44,9 +44,13 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 
+import org.jfree.chart.JFreeChart;
+
 import charting.Cache;
 import charting.ChartCache;
 import charting.TableCache;
+import charting.charts.HistogramChartFactory;
+import charting.options.ChartOptions;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
@@ -296,6 +300,37 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 */
 	protected abstract void updateNull() throws Exception;
 		
+	
+	/**
+	 * Fetch the desired chart, either from the cache, or by creating it
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
+	protected JFreeChart getChart(ChartOptions options) throws Exception{
+		JFreeChart chart;
+		if(getChartCache().hasChart(options)){
+			programLogger.log(Level.FINEST, "Using cached chart: "+options.getStat().toString());
+			chart = getChartCache().getChart(options);
+
+		} else { // No cache
+
+			chart = createPanelChartType(options);
+			getChartCache().addChart(options, chart);
+			programLogger.log(Level.FINEST, "Added cached chart: "+options.getStat().toString());
+		}
+		return chart;
+	}
+	
+	/**
+	 * This should be overridden to create the appropriate charts for caching
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
+	protected abstract JFreeChart createPanelChartType(ChartOptions options) throws Exception;
+	
+	
 	/**
 	 * Remove all charts from the cache so they will be recalculated
 	 * @param list

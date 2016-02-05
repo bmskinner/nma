@@ -26,6 +26,9 @@ import java.util.logging.Logger;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import org.jfree.chart.JFreeChart;
+
+import charting.options.ChartOptions;
 import analysis.AnalysisDataset;
 
 @SuppressWarnings("serial")
@@ -97,30 +100,10 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 		updateMultiple();
 	}
 	
-//	@Override
-//	protected void updateDetail(){
-//
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-//				try {
-//
-//					vennPanel.update(getDatasets());
-//					programLogger.log(Level.FINEST, "Updating Venn panel");
-//					
-//					pairwiseVennPanel.update(getDatasets());
-//					programLogger.log(Level.FINEST, "Updating pairwise Venn panel");
-//					
-//					kruskalPanel.update(getDatasets());
-//					programLogger.log(Level.FINEST, "Updating Kruskal panel");
-//
-//				} catch  (Exception e){
-//					InterDatasetComparisonDetailPanel.this.update( (List<AnalysisDataset>) null);
-//					programLogger.log(Level.SEVERE, "Error updating inter-dataset panels", e);
-//
-//				} finally {
-//					setUpdating(false);
-//				}
-//			}});
-//	}
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
+	
 
 }

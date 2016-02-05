@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 
@@ -169,27 +170,15 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			for(NucleusStatistic stat : NucleusStatistic.values()){
 
 				ExportableChartPanel panel = chartPanels.get(stat.toString());
-
-				JFreeChart chart = null;
 				
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(getDatasets())
 					.setLogger(programLogger)
 					.setStatistic(stat)
-					.setScale(MeasurementScale.PIXELS)
+					.setScale(scale)
 					.build();
-								
-				if(getChartCache().hasChart(options)){
-					programLogger.log(Level.FINEST, "Using cached boxplot chart: "+stat.toString());
-					chart = getChartCache().getChart(options);
-
-				} else { // No cache
-
-					chart = BoxplotChartFactory.createStatisticBoxplot(options);
-					getChartCache().addChart(options, chart);
-					programLogger.log(Level.FINEST, "Added cached boxplot chart: "+stat.toString());
-				}
-
+				
+				JFreeChart chart = getChart(options);
 				panel.setChart(chart);
 			}
 			
@@ -223,7 +212,9 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 						.setUseDensity(false)
 						.build();
 					
-					SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createStatisticHistogram(options), stat.toString());
+					JFreeChart chart = getChart(options);
+					
+					SelectableChartPanel panel = new SelectableChartPanel(chart, stat.toString());
 					panel.setPreferredSize(preferredSize);
 					panel.addSignalChangeListener(this);
 					HistogramsPanel.this.chartPanels.put(stat.toString(), panel);
@@ -250,39 +241,37 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			for(NucleusStatistic stat : NucleusStatistic.values()){
 				SelectableChartPanel panel = HistogramsPanel.this.chartPanels.get(stat.toString());
 
-				JFreeChart chart = null;
-				
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(getDatasets())
 					.setLogger(programLogger)
 					.setStatistic(stat)
-					.setScale(MeasurementScale.PIXELS)
+					.setScale(scale)
 					.setUseDensity(useDensity)
 					.build();
 				
-				
-				if(this.getChartCache().hasChart(options)){
-					programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());
-					chart = HistogramsPanel.this.getChartCache().getChart(options);
+				JFreeChart chart = getChart(options);
+//				if(this.getChartCache().hasChart(options)){
+//					programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());
+//					chart = HistogramsPanel.this.getChartCache().getChart(options);
+//
+//				} else { // No cache
+//
+//
+//					if(useDensity){
+//						chart = HistogramChartFactory.createStatisticHistogram(options);
+//						HistogramsPanel.this.getChartCache().addChart(options, chart);
+//
+//					} else {
+//						chart = HistogramChartFactory.createStatisticHistogram(options);
+//						HistogramsPanel.this.getChartCache().addChart(options, chart);
+//
+//					}
+//					programLogger.log(Level.FINEST, "Added cached histogram chart: "+stat);
+//				}
 
-				} else { // No cache
-
-
-					if(useDensity){
-						chart = HistogramChartFactory.createStatisticHistogram(options);
-						HistogramsPanel.this.getChartCache().addChart(options, chart);
-
-					} else {
-						chart = HistogramChartFactory.createStatisticHistogram(options);
-						HistogramsPanel.this.getChartCache().addChart(options, chart);
-
-					}
-					programLogger.log(Level.FINEST, "Added cached histogram chart: "+stat);
-				}
-
-				XYPlot plot = (XYPlot) chart.getPlot();
-				plot.setDomainPannable(true);
-				plot.setRangePannable(true);
+//				XYPlot plot = (XYPlot) chart.getPlot();
+//				plot.setDomainPannable(true);
+//				plot.setRangePannable(true);
 
 				panel.setChart(chart);
 			}
@@ -387,6 +376,13 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				}
 			} 
 		}
+	}
+
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options)
+			throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

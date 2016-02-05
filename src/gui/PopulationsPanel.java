@@ -58,7 +58,9 @@ import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
+import org.jfree.chart.JFreeChart;
 
+import charting.options.ChartOptions;
 import utility.TreeOrderHashMap;
 import analysis.AnalysisDataset;
 import components.CellCollection;
@@ -1113,6 +1115,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	protected void updateNull() throws Exception {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
 	}
 
 }

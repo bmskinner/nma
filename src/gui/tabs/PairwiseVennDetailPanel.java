@@ -31,7 +31,10 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
+import org.jfree.chart.JFreeChart;
+
 import charting.datasets.NucleusTableDatasetCreator;
+import charting.options.ChartOptions;
 import charting.options.DefaultTableOptions;
 import charting.options.TableOptions;
 import charting.options.DefaultTableOptions.TableType;
@@ -101,63 +104,11 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		pairwiseVennTable.setModel(model);
 	}
 	
-	/**
-	 * Update the venn panel with data from the given datasets
-	 * @param getDatasets() the datasets
-	 */
-//	@Override
-//	public void updateDetail(){
-//		
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-//				try{
-//					updatePairwiseVennTable();
-//				} catch(Exception e){
-//					
-//					TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
-//					pairwiseVennTable.setModel(model);
-//					programLogger.log(Level.WARNING, "Error updating pairwise venn table");
-//				} finally {
-//					setUpdating(false);
-//				}
-//				
-//			}});
-//	}
-
-//	private void updatePairwiseVennTable(){
-//		programLogger.log(Level.FINE, "Updating pairwise venn table");
-//
-//
-//		// format the numbers and make into a tablemodel
-//		TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
-//
-//		if(!getDatasets().isEmpty() && getDatasets()!=null){
-//
-//			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.PAIRWISE_VENN);
-//			if(getTableCache().hasTable(options)){
-//				model = getTableCache().getTable(options);
-//			} else {
-//				model = NucleusTableDatasetCreator.createPairwiseVennTable(getDatasets());
-//				getTableCache().addTable(options, model);
-//			}
-//
-//		}
-//		pairwiseVennTable.setModel(model);
-//		setRenderer(pairwiseVennTable, new PairwiseVennTableCellRenderer());
-//		
-////		int columns = pairwiseVennTable.getColumnModel().getColumnCount();
-////		
-////
-////		if(columns>1){
-////			for(int i=1;i<columns;i++){
-////				pairwiseVennTable.getColumnModel().getColumn(i).setCellRenderer(new PairwiseVennTableCellRenderer());
-////			}
-////		}
-//
-//		programLogger.log(Level.FINEST, "Updated pairwise venn panel");
-//
-//	}
-	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		return null;
+	}
+		
 	/**
 	 * Colour table cell background to show pairwise comparisons. All cells are white, apart
 	 * from the diagonal, which is made light grey

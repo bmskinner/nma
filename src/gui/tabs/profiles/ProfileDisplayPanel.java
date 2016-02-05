@@ -47,21 +47,14 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
 		}
 		
+		@Override
+		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+			return MorphologyChartFactory.createProfileChart( options );
+		}
+		
 		private void updateChart() throws Exception{
 			ChartOptions options = makeOptions();
-			
-			JFreeChart chart = null;
-			
-			// Check for a cached chart
-			if( ! getChartCache().hasChart(options)){
-
-				chart = MorphologyChartFactory.createProfileChart( options );
-
-				getChartCache().addChart(options, chart);
-				programLogger.log(Level.FINEST, "Added cached profile chart");
-			}
-
-			chart = getChartCache().getChart(options);
+			JFreeChart   chart   = getChart(options);
 			chartPanel.setChart(chart);
 			
 		}
