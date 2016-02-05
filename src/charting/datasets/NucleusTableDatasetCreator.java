@@ -1028,6 +1028,7 @@ public class NucleusTableDatasetCreator {
 			columnList.add("Include "+stat.toString());
 		}
 		
+		columnList.add("Include segments");
 		columnList.add("Tree");
 
 		model.addColumn("", columnList.toArray());
@@ -1074,22 +1075,17 @@ public class NucleusTableDatasetCreator {
 							dataList.add("N/A");
 						}
 					}
+					
+					boolean seg = false;
+					for(UUID id : op.getSegments()){
+						if(op.isIncludeSegment(id)){
+							seg=true;
+						}
+					}
+					dataList.add(seg);
 					dataList.add(tree);
 					
-//					Object[] data = {
-//						g.getName(),
-//						g.size(),
-//						op.getType().toString(),
-//						iterationString,
-//						hierarchicalMethodString,
-//						hierarchicalClusterString,
-//						op.isIncludeModality(),
-//						op.getModalityRegions(),
-//						op.isIncludeProfile(),
-//						op.isIncludeStatistic(NucleusStatistic.AREA),
-//						op.isIncludeStatistic(NucleusStatistic.ASPECT),
-//						tree
-//					};
+//					
 					model.addColumn(dataset.getName(), dataList.toArray());
 				}
 			}

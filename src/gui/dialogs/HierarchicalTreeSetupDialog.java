@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import javax.swing.Box;
@@ -65,7 +66,10 @@ import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
+import components.generic.BorderTag;
 import components.generic.MeasurementScale;
+import components.generic.ProfileType;
+import components.nuclear.NucleusBorderSegment;
 
 public class HierarchicalTreeSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
 
@@ -85,9 +89,11 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	protected JCheckBox includeProfilesCheckBox;
 	protected Map<NucleusStatistic, JCheckBox> statBoxMap = new HashMap<NucleusStatistic, JCheckBox>();
 	
+	protected Map<UUID, JCheckBox> segmentBoxMap =  new HashMap<UUID, JCheckBox>();
+	
 	protected ClusteringOptions options;
 	
-	public HierarchicalTreeSetupDialog(MainWindow mw, AnalysisDataset dataset) {
+	public HierarchicalTreeSetupDialog(MainWindow mw, final AnalysisDataset dataset) {
 		
 		// modal dialog
 		super(mw.getProgramLogger(), mw, true);
@@ -106,7 +112,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	 * @param mw
 	 * @param title
 	 */
-	protected HierarchicalTreeSetupDialog(MainWindow mw, AnalysisDataset dataset, String title){
+	protected HierarchicalTreeSetupDialog(MainWindow mw, final AnalysisDataset dataset, final String title){
 		super(mw.getProgramLogger(), mw, true);
 		this.dataset = dataset;
 		this.setTitle(title);
@@ -177,7 +183,13 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		optionsPanel = new JPanel();
 		optionsPanel.setLayout(new BorderLayout());
 
-	    JPanel optionsPanel = createOptionsPanel();
+	    JPanel optionsPanel = null;
+		try {
+			optionsPanel = createOptionsPanel();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	   
 	    contentPanel.add(optionsPanel, BorderLayout.CENTER);
 		//---------------
@@ -189,23 +201,60 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	
 	private JPanel createOptionsPanel(){
 		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		
+		panel.add(createClusterMethodPanel());
+//		hierarchicalClusterMethodCheckBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
+//		hierarchicalClusterMethodCheckBox.setSelectedItem(ClusteringSetupDialog.DEFAULT_HIERARCHICAL_METHOD);
+//		hierarchicalClusterMethodCheckBox.addActionListener(this);
+		
+		
+//		List<JLabel> labels = new ArrayList<JLabel>();
+////		List<Component> fields = new ArrayList<Component>();
+//		
+//		JLabel clusterLabel = new JLabel("Cluster method");
+//		clusterLabel.setToolTipText(Labels.HIERARCHICAL_CLUSTER_METHOD);
+//		labels.add(clusterLabel);
+//		panel.add(hierarchicalClusterMethodCheckBox);
+		
+		try { 
+			panel.add(createIncludePanel());
+		} catch(Exception e){
+			
+		}
+		return panel;
+		
+	}
+	
+	private JPanel createClusterMethodPanel(){
+		JPanel panel = new JPanel();
 		GridBagLayout layout = new GridBagLayout();
 		panel.setLayout(layout);
 		
 		List<JLabel> labels = new ArrayList<JLabel>();
 		List<Component> fields = new ArrayList<Component>();
 		
-		
-
 		hierarchicalClusterMethodCheckBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
 		hierarchicalClusterMethodCheckBox.setSelectedItem(ClusteringSetupDialog.DEFAULT_HIERARCHICAL_METHOD);
 		hierarchicalClusterMethodCheckBox.addActionListener(this);
-		
 		
 		JLabel clusterLabel = new JLabel("Cluster method");
 		clusterLabel.setToolTipText(Labels.HIERARCHICAL_CLUSTER_METHOD);
 		labels.add(clusterLabel);
 		fields.add(hierarchicalClusterMethodCheckBox);
+		
+		this.addLabelTextRows(labels, fields, layout, panel);
+		return panel;
+	}
+	
+	protected JPanel createIncludePanel() throws Exception{
+		JPanel panel = new JPanel();
+		GridBagLayout layout = new GridBagLayout();
+		panel.setLayout(layout);
+		
+		List<JLabel> labels = new ArrayList<JLabel>();
+		List<Component> fields = new ArrayList<Component>();
+
 
 		includeProfilesCheckBox = new JCheckBox("");
 		includeProfilesCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
@@ -237,11 +286,36 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			statBoxMap.put(stat, box);
 		}
 		
+		for(NucleusBorderSegment s : dataset.getCollection()
+				.getProfileCollection(ProfileType.REGULAR)
+				.getSegments(BorderTag.REFERENCE_POINT)){
+			
+			
+			String pval = "";
+			try {
+				double[] stats = dataset.getCollection().getSegmentLengths(s.getID(), MeasurementScale.PIXELS);
+				double diptest 	= DipTester.getDipTestPValue(stats);
+				pval = pf.format(diptest);		
+			} catch (Exception e) {
+				programLogger.log(Level.SEVERE, "Error getting p-value", e);
+			}
+			
+			JCheckBox box = new JCheckBox("  p(uni) = "+pval);
+			box.setForeground(Color.DARK_GRAY);
+			box.setSelected(false);
+			box.addChangeListener(this);
+			JLabel label = new JLabel("Length of "+s.getName());
+			labels.add(label);
+			fields.add(box);
+			segmentBoxMap.put(s.getID(), box);
+		}
+		
+		
 		this.addLabelTextRows(labels, fields, layout, panel);
 		return panel;
 		
 	}
-
+	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		
@@ -262,6 +336,20 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			if(e.getSource()==includeProfilesCheckBox){
 				options.setIncludeProfile(includeProfilesCheckBox.isSelected());				
 			} 
+			
+			try{
+			
+			for(NucleusBorderSegment s : dataset.getCollection()
+					.getProfileCollection(ProfileType.REGULAR)
+					.getSegments(BorderTag.REFERENCE_POINT)){
+				
+				JCheckBox box = segmentBoxMap.get(s.getID());
+				
+				options.setIncludeSegment(s.getID(), box.isSelected());
+			}
+			} catch(Exception e1){
+				
+			}
 
 		
 	}

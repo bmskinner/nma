@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
@@ -36,11 +37,8 @@ public class ClusteringOptions implements Serializable {
 	private int iterations;
 	private boolean autoClusterNumber;
 	
-	
 	private Map<PlottableStatistic, Boolean> statMap = new HashMap<PlottableStatistic, Boolean>();
-	
-	
-	private Map<String, Boolean> segmentMap = new HashMap<String, Boolean>(); // which segments should be included
+	private Map<UUID, Boolean>            segmentMap = new HashMap<UUID, Boolean>(); // which segments should be included
 	
 	private boolean includeProfile; // should the nuclear profiles be a part of the clustering?
 	
@@ -71,6 +69,11 @@ public class ClusteringOptions implements Serializable {
 		for(NucleusStatistic stat : NucleusStatistic.values()){
     		statMap.put(stat, oldOptions.isIncludeStatistic(stat));
     	}
+		
+		for(UUID i : oldOptions.getSegments()){
+			segmentMap.put(i, oldOptions.isIncludeSegment(i));
+		}
+		
 	}
 	
 	/**
@@ -78,11 +81,19 @@ public class ClusteringOptions implements Serializable {
 	 * @param stat
 	 * @return
 	 */
-	public boolean isIncludeSegment(String segName){
-		if( this.segmentMap.containsKey(segName)){
-			return this.segmentMap.get(segName);
+	public boolean isIncludeSegment(UUID i){
+		if( this.segmentMap.containsKey(i)){
+			return this.segmentMap.get(i);
 		} else {
 			return false;
+		}
+	}
+	
+	public boolean useSegments(){
+		if(this.segmentMap.isEmpty()){
+			return false;
+		} else {
+			return true;
 		}
 	}
 	
@@ -90,12 +101,12 @@ public class ClusteringOptions implements Serializable {
 	 * Get all the segments that are saved in this options object
 	 * @return
 	 */
-	public Set<String> getSavedSegments(){
+	public Set<UUID> getSegments(){
 		return segmentMap.keySet();
 	}
 	
-	public void setIncludeSegmnet(String segName, boolean b){
-		this.segmentMap.put(segName, b);
+	public void setIncludeSegment(UUID id, boolean b){
+		this.segmentMap.put(id, b);
 	}
 		
 	
@@ -251,7 +262,7 @@ public class ClusteringOptions implements Serializable {
 	    }
 	    
 	    if(segmentMap==null){
-	    	segmentMap = new HashMap<String, Boolean>();
+	    	segmentMap = new HashMap<UUID, Boolean>();
 	    }
 	}
 	

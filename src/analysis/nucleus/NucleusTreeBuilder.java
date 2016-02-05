@@ -18,20 +18,16 @@
  *******************************************************************************/
 package analysis.nucleus;
 
-import stats.DipTester;
 import stats.NucleusStatistic;
+import stats.SegmentStatistic;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import utility.Constants;
-import utility.Utils;
-import weka.clusterers.Cobweb;
 import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
 import weka.core.EuclideanDistance;
@@ -48,7 +44,6 @@ import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
-import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.nuclei.Nucleus;
 
@@ -171,7 +166,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	private FastVector makeAttributes(CellCollection collection, int windowSize)throws Exception {
 		
 		
-		int attributeCount = 0;
+		int attributeCount        = 0;
 		int profileAttributeCount = 0;
 		
 		if(options.isIncludeProfile()){ // An attribute for each angle in the median profile
@@ -206,6 +201,14 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				Attribute a = new Attribute(stat.toString()); 
 				attributes.addElement(a);
 
+			}
+		}
+		
+		for(UUID segID : options.getSegments()){
+			if(options.isIncludeSegment(segID)){
+				log(Level.FINEST, "Including segment"+segID.toString());
+				Attribute a = new Attribute("att_"+segID.toString()); 
+				attributes.addElement(a);
 			}
 		}
 		
@@ -257,6 +260,14 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 						Attribute att = (Attribute) attributes.elementAt(attNumber++);
 						inst.setValue(att, n1.getStatistic(stat, MeasurementScale.MICRONS));
 
+					}
+				}
+				
+				for(UUID segID : options.getSegments()){
+					if(options.isIncludeSegment(segID)){
+						Attribute att = (Attribute) attributes.elementAt(attNumber++);
+						double length = n1.getProfile(ProfileType.REGULAR).getSegment(segID).length();
+						inst.setValue(att, length);
 					}
 				}
 				

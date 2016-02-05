@@ -213,7 +213,13 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 	    methodPanel.add(clusterHierarchicalButton);
 	    methodPanel.add(clusterEMButton);
 	    	    
-	    JPanel includePanel = createOptionsPanel();
+	    JPanel includePanel = null;
+		try {
+			includePanel = createIncludePanel();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	    optionsPanel.add(methodPanel, BorderLayout.NORTH);
 	    optionsPanel.add(cardPanel, BorderLayout.CENTER);
@@ -222,49 +228,49 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 	    
 	    contentPanel.add(optionsPanel, BorderLayout.CENTER);
 	}
-	
-	private JPanel createOptionsPanel(){
-		JPanel panel = new JPanel();
-		GridBagLayout layout = new GridBagLayout();
-		panel.setLayout(layout);
-		
-		List<JLabel> labels = new ArrayList<JLabel>();
-		List<Component> fields = new ArrayList<Component>();
-		
-
-		includeProfilesCheckBox = new JCheckBox("");
-		includeProfilesCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
-		includeProfilesCheckBox.addChangeListener(this);
-		JLabel profileLabel = new JLabel("Include profiles");
-		labels.add(profileLabel);
-		fields.add(includeProfilesCheckBox);
-		
-		DecimalFormat pf = new DecimalFormat("#0.000"); 
-		for(NucleusStatistic stat : NucleusStatistic.values()){
-			
-			String pval = "";
-			try {
-				double[] stats = dataset.getCollection().getNuclearStatistics(stat, MeasurementScale.PIXELS);
-				double diptest 	= DipTester.getDipTestPValue(stats);
-				pval = pf.format(diptest);		
-			} catch (Exception e) {
-				programLogger.log(Level.SEVERE, "Error getting p-value", e);
-			}
-			
-			JCheckBox box = new JCheckBox("  p(uni) = "+pval);
-			box.setForeground(Color.DARK_GRAY);
-			box.setSelected(false);
-			box.addChangeListener(this);
-			JLabel label = new JLabel(stat.toString());
-			labels.add(label);
-			fields.add(box);
-			statBoxMap.put(stat, box);
-		}
-		
-		this.addLabelTextRows(labels, fields, layout, panel);
-		return panel;
-		
-	}
+//	
+//	private JPanel createOptionsPanel(){
+//		JPanel panel = new JPanel();
+//		GridBagLayout layout = new GridBagLayout();
+//		panel.setLayout(layout);
+//		
+//		List<JLabel> labels = new ArrayList<JLabel>();
+//		List<Component> fields = new ArrayList<Component>();
+//		
+//
+//		includeProfilesCheckBox = new JCheckBox("");
+//		includeProfilesCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
+//		includeProfilesCheckBox.addChangeListener(this);
+//		JLabel profileLabel = new JLabel("Include profiles");
+//		labels.add(profileLabel);
+//		fields.add(includeProfilesCheckBox);
+//		
+//		DecimalFormat pf = new DecimalFormat("#0.000"); 
+//		for(NucleusStatistic stat : NucleusStatistic.values()){
+//			
+//			String pval = "";
+//			try {
+//				double[] stats = dataset.getCollection().getNuclearStatistics(stat, MeasurementScale.PIXELS);
+//				double diptest 	= DipTester.getDipTestPValue(stats);
+//				pval = pf.format(diptest);		
+//			} catch (Exception e) {
+//				programLogger.log(Level.SEVERE, "Error getting p-value", e);
+//			}
+//			
+//			JCheckBox box = new JCheckBox("  p(uni) = "+pval);
+//			box.setForeground(Color.DARK_GRAY);
+//			box.setSelected(false);
+//			box.addChangeListener(this);
+//			JLabel label = new JLabel(stat.toString());
+//			labels.add(label);
+//			fields.add(box);
+//			statBoxMap.put(stat, box);
+//		}
+//		
+//		this.addLabelTextRows(labels, fields, layout, panel);
+//		return panel;
+//		
+//	}
 
 
 	@Override
