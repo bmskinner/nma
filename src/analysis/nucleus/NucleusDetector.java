@@ -200,13 +200,13 @@ public class NucleusDetector extends AnalysisWorker {
 						}
 					}
 				}
-				programLogger.log(Level.INFO, spacerString);
+				log(Level.INFO, spacerString);
 				
-				programLogger.log(Level.INFO, "Population: "+collection.getName());
-				programLogger.log(Level.INFO, "Passed: "+collection.getNucleusCount()+" nuclei");
-				programLogger.log(Level.INFO, "Failed: "+failedNuclei.getNucleusCount()+" nuclei");
+				log(Level.INFO, "Population: "+collection.getName());
+				log(Level.INFO, "Passed: "+collection.getNucleusCount()+" nuclei");
+				log(Level.INFO, "Failed: "+failedNuclei.getNucleusCount()+" nuclei");
 				
-				programLogger.log(Level.INFO, spacerString);
+				log(Level.INFO, spacerString);
 				
 				result.add(dataset);
 				
@@ -243,29 +243,29 @@ public class NucleusDetector extends AnalysisWorker {
   public List<CellCollection> getNucleiCollections(){
 	  // remove any empty collections before returning
 
-	  fileLogger.log(Level.FINE, "Getting all collections");
+	  log(Level.FINE, "Getting all collections");
 
 	  List<File> toRemove = new ArrayList<File>(0);
 
-	  fileLogger.log(Level.FINE, "Testing nucleus counts");
+	  log(Level.FINE, "Testing nucleus counts");
 
 	  Set<File> keys = collectionGroup.keySet();
 	  for (File key : keys) {
 		  CellCollection collection = collectionGroup.get(key);
 		  if(collection.cellCount()==0){
-			  fileLogger.log(Level.FINE, "Removing collection "+key.toString());
+			  log(Level.FINE, "Removing collection "+key.toString());
 			  toRemove.add(key);
 		  }    
 	  }
 
-	  fileLogger.log(Level.FINE, "Got collections to remove");
+	  log(Level.FINE, "Got collections to remove");
 
 	  Iterator<File> iter = toRemove.iterator();
 	  while(iter.hasNext()){
 		  collectionGroup.remove(iter.next());
 	  }
 
-	  fileLogger.log(Level.FINE, "Removed collections");
+	  log(Level.FINE, "Removed collections");
 
 	  List<CellCollection> result = new ArrayList<CellCollection>();
 	  for(CellCollection c : collectionGroup.values()){
@@ -286,24 +286,25 @@ public class NucleusDetector extends AnalysisWorker {
   *  @return a true or false of whether the file passed checks
   */
   public static boolean checkFile(File file){
-    boolean ok = false;
-    if (file.isFile()) {
-
-      String fileName = file.getName();
-
-      for( String fileType : Constants.IMPORTABLE_FILE_TYPES){
-        if( fileName.endsWith(fileType) ){
-          ok = true;
-        }
-      }
-
-      for( String prefix : Constants.PREFIXES_TO_IGNORE){
-        if(fileName.startsWith(prefix)){
-          ok = false;
-        }
-      }
+    
+    if( ! file.isFile()){
+    	return false;
     }
-    return ok;
+    
+    String fileName = file.getName();
+    
+    for( String prefix : Constants.PREFIXES_TO_IGNORE){
+    	if(fileName.startsWith(prefix)){
+    		return false;
+    	}
+    }
+    
+    for( String fileType : Constants.IMPORTABLE_FILE_TYPES){
+    	if( fileName.endsWith(fileType) ){
+    		return true;
+    	}
+    }
+    return false;
   }
   
   /**
@@ -347,7 +348,7 @@ public class NucleusDetector extends AnalysisWorker {
       try{
         output.mkdir();
       } catch(Exception e) {
-    	  fileLogger.log(Level.SEVERE, "Failed to create directory", e);
+    	  logError("Failed to create directory", e);
       }
     }
     return output;
@@ -370,7 +371,7 @@ public class NucleusDetector extends AnalysisWorker {
 	  
 	  this.collectionGroup.put(folder, folderCollection);
 	  
-	  NucleusFinder finder = new NucleusFinder(programLogger);
+	  NucleusFinder finder = new NucleusFinder(programLogger, analysisOptions, outputFolder);
 
 	  for (File file : listOfFiles) {
 
@@ -384,42 +385,37 @@ public class NucleusDetector extends AnalysisWorker {
 				  // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
 				  makeFolder(folder);
 				  
-				  programLogger.log(Level.INFO, "File:  "+file.getName());
-				  List<Cell> cells = finder.getCells(imageStack, analysisOptions, file, outputFolder);
-//				  List<Cell> cells = NucleusFinder.getCells(imageStack, analysisOptions, programLogger, file, outputFolder);
+				  log(Level.INFO, "File:  "+file.getName());
+				  List<Cell> cells = finder.getCells(imageStack, file);
 				  
 				  if(cells.isEmpty()){
-					  programLogger.log(Level.INFO, "  No nuclei detected in image");
+					  log(Level.INFO, "  No nuclei detected in image");
 				  } else {
 					  int nucleusNumber = 0;
 					  for(Cell cell : cells){
 						  folderCollection.addCell(cell);
-						  programLogger.log(Level.INFO, "  Added nucleus "+nucleusNumber);
+						  log(Level.INFO, "  Added nucleus "+nucleusNumber);
 						  nucleusNumber++;
 						 
 						  // save out the image stacks rather than hold within the nucleus
 						  Nucleus n 			 = cell.getNucleus();
-						  FloatPolygon polygon 	 = Utils.createPolygon(n.getBorderList());
-						  PolygonRoi nucleus 	 = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+						  PolygonRoi nucleus 	 = new PolygonRoi(Utils.createPolygon(n), PolygonRoi.POLYGON);
 						  
 						  double[] position = n.getPosition();
 						  nucleus.setLocation(position[CellularComponent.X_BASE],position[CellularComponent.Y_BASE]); // translate the roi to the image coordinates
 						  
 						  ImageStack smallRegion = NucleusFinder.getRoiAsStack(nucleus, imageStack);
-						  Roi largeRoi 			 = RoiEnlarger.enlarge(nucleus, 20);
-						  ImageStack largeRegion = NucleusFinder.getRoiAsStack(largeRoi, imageStack);
+						  
 						  try{
-							  IJ.saveAsTiff(ImageExporter.convertToRGB(smallRegion), n.getOriginalImagePath());
-							  IJ.saveAsTiff(ImageExporter.convertToRGB(largeRegion), n.getEnlargedImagePath());
 							  IJ.saveAsTiff(ImageExporter.convertToRGB(smallRegion), n.getAnnotatedImagePath());
 						  } catch(Exception e){
-							  fileLogger.log(Level.SEVERE, "Error saving original, enlarged or annotated image", e);
+							  logError("Error saving original, enlarged or annotated image", e);
 						  }
 					  }
 				  }
 
 			  } catch (Exception e) { // end try
-				  fileLogger.log(Level.SEVERE, "Error in image processing: "+e.getMessage(), e);
+				  logError("Error in image processing: "+e.getMessage(), e);
 			  } // end catch
 			  
 			  publish(progress++); // must be global since this function recurses

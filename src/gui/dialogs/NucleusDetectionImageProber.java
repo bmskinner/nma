@@ -218,12 +218,9 @@ public class NucleusDetectionImageProber extends ImageProber {
 		
 		programLogger.log(Level.FINEST, "Finding cells");
 		
-		 NucleusFinder finder = new NucleusFinder(programLogger);
+		 NucleusFinder finder = new NucleusFinder(programLogger, options, null);
 		
-		List<Cell> cells = finder.getCells(imageStack, 
-				options, 
-				imageFile, 
-				null);
+		List<Cell> cells = finder.getCells(imageStack, imageFile);
 		
 		programLogger.log(Level.FINEST, "Resetting detetion parameters");
 		

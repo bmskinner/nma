@@ -155,17 +155,17 @@ public class RunSegmentationAction extends ProgressableAction {
 				}
 
 				// make a composite image of all nuclei in the collection
-				if(  (downFlag & MainWindow.EXPORT_COMPOSITE) == MainWindow.EXPORT_COMPOSITE){
-					if(dataset.getCollection().getNucleusCount()<CompositeExporter.MAX_COMPOSITABLE_NUCLEI){
-						programLogger.log(Level.INFO, "Exporting composite...");
-						boolean ok = CompositeExporter.run(dataset);
-						if(ok){
-							programLogger.log(Level.INFO, "Exporting composite OK");
-						} else {
-							programLogger.log(Level.INFO, "Exporting composite error");
-						}
-					}
-				}
+//				if(  (downFlag & MainWindow.EXPORT_COMPOSITE) == MainWindow.EXPORT_COMPOSITE){
+//					if(dataset.getCollection().getNucleusCount()<CompositeExporter.MAX_COMPOSITABLE_NUCLEI){
+//						programLogger.log(Level.INFO, "Exporting composite...");
+//						boolean ok = CompositeExporter.run(dataset);
+//						if(ok){
+//							programLogger.log(Level.INFO, "Exporting composite OK");
+//						} else {
+//							programLogger.log(Level.INFO, "Exporting composite error");
+//						}
+//					}
+//				}
 
 				/*
 				 * The refold action is a progressable action, so must not block

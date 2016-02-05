@@ -133,39 +133,39 @@ public class PopulationExporter extends AnalysisWorker {
 
 	}
 	
-	public static boolean extractNucleiToFolder(AnalysisDataset dataset, File exportFolder){
-
-		try{
-
-			log(Level.INFO, "Extracting nuclei to "+exportFolder.getAbsolutePath());
-
-			for(Nucleus n : dataset.getCollection().getNuclei()){
-
-				// get the path to the enlarged image
-				File imagePath = new File(n.getEnlargedImagePath());
-
-				// trim the name back to image name and number
-				String imageName = n.getSourceFileName();
-				if(imageName.endsWith(".tiff")){
-					imageName = imageName.replace(".tiff", "");
-				}
-				
-				File newPath = new File(exportFolder+File.separator+n.getSourceFileName()+"-"+n.getNucleusNumber()+".tiff");
-
-				if(imagePath.exists()){		
-					
-					copyFile(imagePath, newPath);
-
-				}
-			}
-
-		}catch(Exception e){
-			logError("Error extracting nuclei", e);
-			return false;
-		}
-		return true;
-
-	}
+//	public static boolean extractNucleiToFolder(AnalysisDataset dataset, File exportFolder){
+//
+//		try{
+//
+//			log(Level.INFO, "Extracting nuclei to "+exportFolder.getAbsolutePath());
+//
+//			for(Nucleus n : dataset.getCollection().getNuclei()){
+//
+//				// get the path to the enlarged image
+//				File imagePath = new File(n.getEnlargedImagePath());
+//
+//				// trim the name back to image name and number
+//				String imageName = n.getSourceFileName();
+//				if(imageName.endsWith(".tiff")){
+//					imageName = imageName.replace(".tiff", "");
+//				}
+//				
+//				File newPath = new File(exportFolder+File.separator+n.getSourceFileName()+"-"+n.getNucleusNumber()+".tiff");
+//
+//				if(imagePath.exists()){		
+//					
+//					copyFile(imagePath, newPath);
+//
+//				}
+//			}
+//
+//		}catch(Exception e){
+//			logError("Error extracting nuclei", e);
+//			return false;
+//		}
+//		return true;
+//
+//	}
 	
 	/**
 	 * Directly copy the source file to the destination file

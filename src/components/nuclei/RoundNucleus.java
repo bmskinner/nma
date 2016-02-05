@@ -221,27 +221,8 @@ public class RoundNucleus extends AbstractCellularComponent
 		return new String(outPath);
 	}
 
-	public String getOriginalImagePath(){
-		String outPath = this.nucleusFolder.getAbsolutePath()+
-											File.separator+
-											Constants.IMAGE_PREFIX+
-											this.getNucleusNumber()+
-											".original.tiff";
-		return new String(outPath);
-	}
-
-	public String getEnlargedImagePath(){
-		String outPath = this.nucleusFolder.getAbsolutePath()+
-											File.separator+
-											Constants.IMAGE_PREFIX+
-											this.getSourceFileName()+"-"+
-											this.getNucleusNumber()+
-											".enlarged.tiff";
-		return outPath;
-	}
-
 	public String getImageNameWithoutExtension(){
-//		String extension = "";
+
 		String trimmed = "";
 
 		int i = this.getSourceFileName().lastIndexOf('.');

@@ -83,20 +83,6 @@ public interface Nucleus extends CellularComponent {
 	public String getAnnotatedImagePath();
 
 	/**
-	 * Get the absolute path to use to save a copy of
-	 * the nucleus as a string
-	 * @return
-	 */
-	public String getOriginalImagePath();
-
-	/**
-	 * Get the absolute path to use to save an enlarged region
-	 * around the nucleus as a string
-	 * @return
-	 */
-	public String getEnlargedImagePath();
-
-	/**
 	 * Get the name of the image the nucleus was found in
 	 * without the file extension
 	 * @return
