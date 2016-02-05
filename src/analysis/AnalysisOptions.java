@@ -365,106 +365,106 @@ public class AnalysisOptions implements Serializable {
 
 
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + angleProfileWindowSize;
-		result = prime * result + ((edgeDetection == null) ? 0 : edgeDetection.hashCode());
-		result = prime * result + ((folder == null) ? 0 : folder.hashCode());
-		result = prime * result + (keepFailedCollections ? 1231 : 1237);
-		result = prime * result + ((mappingFile == null) ? 0 : mappingFile.hashCode());
-		long temp;
-		temp = Double.doubleToLongBits(maxNucleusCirc);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(maxNucleusSize);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(minNucleusCirc);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(minNucleusSize);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + (normaliseContrast ? 1231 : 1237);
-		result = prime * result + nucleusThreshold;
-		result = prime * result + ((nucleusType == null) ? 0 : nucleusType.hashCode());
-		result = prime * result + (performReanalysis ? 1231 : 1237);
-		result = prime * result + (realignMode ? 1231 : 1237);
-		result = prime * result + ((refoldMode == null) ? 0 : refoldMode.hashCode());
-		result = prime * result + (refoldNucleus ? 1231 : 1237);
-		temp = Double.doubleToLongBits(scale);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((signalDetection == null) ? 0 : signalDetection.hashCode());
-		result = prime * result + xoffset;
-		result = prime * result + yoffset;
-		return result;
-	}
-
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AnalysisOptions other = (AnalysisOptions) obj;
-		if (angleProfileWindowSize != other.angleProfileWindowSize)
-			return false;
-		if (edgeDetection == null) {
-			if (other.edgeDetection != null)
-				return false;
-		} else if (!edgeDetection.equals(other.edgeDetection))
-			return false;
-		if (folder == null) {
-			if (other.folder != null)
-				return false;
-		} else if (!folder.equals(other.folder))
-			return false;
-		if (keepFailedCollections != other.keepFailedCollections)
-			return false;
-		if (mappingFile == null) {
-			if (other.mappingFile != null)
-				return false;
-		} else if (!mappingFile.equals(other.mappingFile))
-			return false;
-		if (Double.doubleToLongBits(maxNucleusCirc) != Double.doubleToLongBits(other.maxNucleusCirc))
-			return false;
-		if (Double.doubleToLongBits(maxNucleusSize) != Double.doubleToLongBits(other.maxNucleusSize))
-			return false;
-		if (Double.doubleToLongBits(minNucleusCirc) != Double.doubleToLongBits(other.minNucleusCirc))
-			return false;
-		if (Double.doubleToLongBits(minNucleusSize) != Double.doubleToLongBits(other.minNucleusSize))
-			return false;
-		if (normaliseContrast != other.normaliseContrast)
-			return false;
-		if (nucleusThreshold != other.nucleusThreshold)
-			return false;
-		if (nucleusType != other.nucleusType)
-			return false;
-		if (performReanalysis != other.performReanalysis)
-			return false;
-		if (realignMode != other.realignMode)
-			return false;
-		if (refoldMode == null) {
-			if (other.refoldMode != null)
-				return false;
-		} else if (!refoldMode.equals(other.refoldMode))
-			return false;
-		if (refoldNucleus != other.refoldNucleus)
-			return false;
-		if (Double.doubleToLongBits(scale) != Double.doubleToLongBits(other.scale))
-			return false;
-		if (signalDetection == null) {
-			if (other.signalDetection != null)
-				return false;
-		} else if (!signalDetection.equals(other.signalDetection))
-			return false;
-		if (xoffset != other.xoffset)
-			return false;
-		if (yoffset != other.yoffset)
-			return false;
-		return true;
-	}
+//	@Override
+//	public int hashCode() {
+//		final int prime = 31;
+//		int result = 1;
+//		result = prime * result + angleProfileWindowSize;
+//		result = prime * result + ((edgeDetection == null) ? 0 : edgeDetection.hashCode());
+//		result = prime * result + ((folder == null) ? 0 : folder.hashCode());
+//		result = prime * result + (keepFailedCollections ? 1231 : 1237);
+//		result = prime * result + ((mappingFile == null) ? 0 : mappingFile.hashCode());
+//		long temp;
+//		temp = Double.doubleToLongBits(maxNucleusCirc);
+//		result = prime * result + (int) (temp ^ (temp >>> 32));
+//		temp = Double.doubleToLongBits(maxNucleusSize);
+//		result = prime * result + (int) (temp ^ (temp >>> 32));
+//		temp = Double.doubleToLongBits(minNucleusCirc);
+//		result = prime * result + (int) (temp ^ (temp >>> 32));
+//		temp = Double.doubleToLongBits(minNucleusSize);
+//		result = prime * result + (int) (temp ^ (temp >>> 32));
+//		result = prime * result + (normaliseContrast ? 1231 : 1237);
+//		result = prime * result + nucleusThreshold;
+//		result = prime * result + ((nucleusType == null) ? 0 : nucleusType.hashCode());
+//		result = prime * result + (performReanalysis ? 1231 : 1237);
+//		result = prime * result + (realignMode ? 1231 : 1237);
+//		result = prime * result + ((refoldMode == null) ? 0 : refoldMode.hashCode());
+//		result = prime * result + (refoldNucleus ? 1231 : 1237);
+//		temp = Double.doubleToLongBits(scale);
+//		result = prime * result + (int) (temp ^ (temp >>> 32));
+//		result = prime * result + ((signalDetection == null) ? 0 : signalDetection.hashCode());
+//		result = prime * result + xoffset;
+//		result = prime * result + yoffset;
+//		return result;
+//	}
+//
+//
+//	@Override
+//	public boolean equals(Object obj) {
+//		if (this == obj)
+//			return true;
+//		if (obj == null)
+//			return false;
+//		if (getClass() != obj.getClass())
+//			return false;
+//		AnalysisOptions other = (AnalysisOptions) obj;
+//		if (angleProfileWindowSize != other.angleProfileWindowSize)
+//			return false;
+//		if (edgeDetection == null) {
+//			if (other.edgeDetection != null)
+//				return false;
+//		} else if (!edgeDetection.equals(other.edgeDetection))
+//			return false;
+//		if (folder == null) {
+//			if (other.folder != null)
+//				return false;
+//		} else if (!folder.equals(other.folder))
+//			return false;
+//		if (keepFailedCollections != other.keepFailedCollections)
+//			return false;
+//		if (mappingFile == null) {
+//			if (other.mappingFile != null)
+//				return false;
+//		} else if (!mappingFile.equals(other.mappingFile))
+//			return false;
+//		if (Double.doubleToLongBits(maxNucleusCirc) != Double.doubleToLongBits(other.maxNucleusCirc))
+//			return false;
+//		if (Double.doubleToLongBits(maxNucleusSize) != Double.doubleToLongBits(other.maxNucleusSize))
+//			return false;
+//		if (Double.doubleToLongBits(minNucleusCirc) != Double.doubleToLongBits(other.minNucleusCirc))
+//			return false;
+//		if (Double.doubleToLongBits(minNucleusSize) != Double.doubleToLongBits(other.minNucleusSize))
+//			return false;
+//		if (normaliseContrast != other.normaliseContrast)
+//			return false;
+//		if (nucleusThreshold != other.nucleusThreshold)
+//			return false;
+//		if (nucleusType != other.nucleusType)
+//			return false;
+//		if (performReanalysis != other.performReanalysis)
+//			return false;
+//		if (realignMode != other.realignMode)
+//			return false;
+//		if (refoldMode == null) {
+//			if (other.refoldMode != null)
+//				return false;
+//		} else if (!refoldMode.equals(other.refoldMode))
+//			return false;
+//		if (refoldNucleus != other.refoldNucleus)
+//			return false;
+//		if (Double.doubleToLongBits(scale) != Double.doubleToLongBits(other.scale))
+//			return false;
+//		if (signalDetection == null) {
+//			if (other.signalDetection != null)
+//				return false;
+//		} else if (!signalDetection.equals(other.signalDetection))
+//			return false;
+//		if (xoffset != other.xoffset)
+//			return false;
+//		if (yoffset != other.yoffset)
+//			return false;
+//		return true;
+//	}
 	
 	public class CannyOptions implements Serializable {
 
@@ -686,11 +686,6 @@ public class AnalysisOptions implements Serializable {
 			 * check if they were filled, and override if needed.
 			 */
 			in.defaultReadObject();
-
-//			flattenChromocentres = false; 	// should the white threshold be lowered to hide internal structures?
-//			private transient int flattenThreshold; // if the white threhold is lower, this is the value
-//			private transient boolean useKuwahara;	// perform a Kuwahara filtering to enhance edge detection?
-//			private transient int kuwaharaKernel;		// the radius of the Kuwahara kernel - must be an odd number
 		    
 		}
 	}

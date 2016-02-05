@@ -19,6 +19,7 @@
 package gui.tabs;
 
 import gui.DatasetEvent.DatasetMethod;
+import gui.components.AnalysisTableCellRenderer;
 import gui.components.ExportableTable;
 
 import java.awt.BorderLayout;
@@ -32,6 +33,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -50,6 +53,9 @@ import analysis.AnalysisDataset;
 public class MergesDetailPanel extends DetailPanel {
 	
 	private ExportableTable		mergeSources;
+	
+	private ExportableTable sourceParametersTable;
+	
 	private JButton		getSourceButton = new JButton("Recover source");
 	
 	public MergesDetailPanel(Logger programLogger){
@@ -58,53 +64,109 @@ public class MergesDetailPanel extends DetailPanel {
 		
 		
 		try {
-			TableOptions options = new TableOptionsBuilder()
-			.setDatasets(null)
-			.setLogger(programLogger)
-			.build();
 
-			TableModel model = getTable(options);
-
-
-			mergeSources = new ExportableTable(model){
-				@Override
-				public boolean isCellEditable(int rowIndex, int columnIndex) {
-					return false;
-				}
-			};
-			mergeSources.setEnabled(true);
-			mergeSources.setCellSelectionEnabled(false);
-			mergeSources.setColumnSelectionAllowed(false);
-			mergeSources.setRowSelectionAllowed(true);
-
-			this.add(mergeSources, BorderLayout.CENTER);
-			this.add(mergeSources.getTableHeader(), BorderLayout.NORTH);
-
-			getSourceButton.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-
-					// get the dataset selected
-					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-					String name = (String) mergeSources.getModel().getValueAt(mergeSources.getSelectedRow(), 0);
-
-					// get the dataset with the selected name
-					for( UUID id : activeDataset().getMergeSources()){
-						AnalysisDataset mergeSource = activeDataset().getMergeSource(id);
-						if(mergeSource.getName().equals(name)){
-							list.add(mergeSource);
-						}
-					}
-					fireDatasetEvent(DatasetMethod.EXTRACT_SOURCE, list);
-					//				fireSignalChangeEvent("ExtractSource_"+name);
-
-				}
-			});
-			getSourceButton.setVisible(false);
-			this.add(getSourceButton, BorderLayout.SOUTH);
+			createUI();
+			
 		} catch (Exception e){
 			programLogger.log(Level.SEVERE, "Error creating merge panel", e);
 		}
+	}
+	
+	private void createUI() throws Exception{
+		JPanel headerPanel = createHeaderPanel();
+		
+		this.add(headerPanel, BorderLayout.NORTH);
+		
+		JPanel content = new JPanel(new BorderLayout());
+
+		JPanel parameters = createAnalysisParametersPanel();
+		
+		
+		JScrollPane paramScrollPane = new JScrollPane(parameters);
+		
+		
+		paramScrollPane.setColumnHeaderView(sourceParametersTable.getTableHeader());
+		
+		
+		content.add(paramScrollPane, BorderLayout.CENTER);
+		
+		this.add(content, BorderLayout.CENTER);
+		
+	}
+	
+	private JPanel createAnalysisParametersPanel() throws Exception{
+		JPanel panel = new JPanel(new BorderLayout());
+		
+		TableOptions options = new TableOptionsBuilder()
+		.setDatasets(null)
+		.setLogger(programLogger)
+		.setType(TableType.ANALYSIS_PARAMETERS)
+		.build();
+		
+		TableModel model = getTable(options);
+		
+		sourceParametersTable =  new ExportableTable(model);
+		panel.add(sourceParametersTable, BorderLayout.CENTER);
+		return panel;
+	}
+	
+	private JPanel createMergeSourcePanel() throws Exception{
+		JPanel panel = new JPanel(new BorderLayout());
+		TableOptions options = new TableOptionsBuilder()
+		.setDatasets(null)
+		.setType(TableType.MERGE_SOURCES)
+		.setLogger(programLogger)
+		.build();
+
+		TableModel model = getTable(options);
+
+
+		mergeSources = new ExportableTable(model){
+			@Override
+			public boolean isCellEditable(int rowIndex, int columnIndex) {
+				return false;
+			}
+		};
+		mergeSources.setEnabled(true);
+		mergeSources.setCellSelectionEnabled(false);
+		mergeSources.setColumnSelectionAllowed(false);
+		mergeSources.setRowSelectionAllowed(true);
+
+		panel.add(mergeSources, BorderLayout.CENTER);
+		return panel;
+	}
+	
+	private JPanel createHeaderPanel() throws Exception{
+		JPanel panel = new JPanel();
+		
+		JPanel merges     = createMergeSourcePanel();
+		JScrollPane mergeScrollPane = new JScrollPane(merges);
+		mergeScrollPane.setColumnHeaderView(mergeSources.getTableHeader());
+		panel.add(mergeScrollPane);
+		
+		getSourceButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+
+				// get the dataset selected
+				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+				String name = (String) mergeSources.getModel().getValueAt(mergeSources.getSelectedRow(), 0);
+
+				// get the dataset with the selected name
+				for( UUID id : activeDataset().getMergeSources()){
+					AnalysisDataset mergeSource = activeDataset().getMergeSource(id);
+					if(mergeSource.getName().equals(name)){
+						list.add(mergeSource);
+					}
+				}
+				fireDatasetEvent(DatasetMethod.EXTRACT_SOURCE, list);
+
+			}
+		});
+		getSourceButton.setVisible(false);
+		panel.add(getSourceButton);
+		return panel;
+		
 	}
 	
 	/**
@@ -116,6 +178,7 @@ public class MergesDetailPanel extends DetailPanel {
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(getDatasets())
 		.setLogger(programLogger)
+		.setType(TableType.MERGE_SOURCES)
 		.build();
 
 		TableModel model = getTable(options);
@@ -123,6 +186,19 @@ public class MergesDetailPanel extends DetailPanel {
 		mergeSources.setModel(model);
 
 		getSourceButton.setVisible(true);
+		
+		
+		TableOptions parameterOptions = new TableOptionsBuilder()
+		.setDatasets(activeDataset().getAllMergeSources())
+		.setLogger(programLogger)
+		.setType(TableType.ANALYSIS_PARAMETERS)
+		.build();
+		
+		TableModel parameterModel = getTable(parameterOptions);
+		
+		sourceParametersTable.setModel(parameterModel);
+		setRenderer(sourceParametersTable, new AnalysisTableCellRenderer());
+		
 	}
 	
 	/**
@@ -142,12 +218,23 @@ public class MergesDetailPanel extends DetailPanel {
 		
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(null)
+		.setType(TableType.MERGE_SOURCES)
 		.setLogger(programLogger)
 		.build();
 		
 		TableModel model = getTable(options);
 		
 		mergeSources.setModel(model);
+		
+		TableOptions parameterOptions = new TableOptionsBuilder()
+		.setDatasets(null)
+		.setLogger(programLogger)
+		.setType(TableType.ANALYSIS_PARAMETERS)
+		.build();
+		
+		TableModel parameterModel = getTable(parameterOptions);
+		
+		sourceParametersTable.setModel(parameterModel);
 	}
 	
 	@Override
@@ -157,7 +244,11 @@ public class MergesDetailPanel extends DetailPanel {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return NucleusTableDatasetCreator.createMergeSourcesTable(options);
+		if(options.getType().equals(TableType.MERGE_SOURCES)){
+			return NucleusTableDatasetCreator.createMergeSourcesTable(options);
+		} else {
+			return NucleusTableDatasetCreator.createAnalysisTable(options);
+		}
 	}
 	
 	

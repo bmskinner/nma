@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -333,6 +334,7 @@ public class NucleusTableDatasetCreator {
 		model.addColumn("", columnData);
 		
 		if( ! options.hasDatasets()){
+			options.log(Level.FINE, "No datasets in options, returning blank parameter table");
 			model.addColumn("No data loaded");
 			return model;
 		} 
@@ -344,20 +346,23 @@ public class NucleusTableDatasetCreator {
 
 			// only display if there are options available
 			// This may not be the case for a merged dataset or its children
-			if(dataset.hasAnalysisOptions()){ 
+			if( dataset.hasAnalysisOptions()){ 
 
-				// Do not provide an options, so the existing dataset options is used
+				// Do not provide an options as an argument here.
+				// This will cause the existing dataset options to be used
 				Object[] collectionData = formatAnalysisOptionsForTable(dataset, null);
 
 				model.addColumn(dataset.getCollection().getName(), collectionData);
 
 			} else {
-
+				options.log(Level.FINE, "No analysis options in dataset "+dataset.getName());
 				Object[] collectionData =  new Object[columnData.length];
 				if(dataset.hasMergeSources()){
 
-					//						
+					options.log(Level.FINE, "Dataset has merge sources");				
 					if( testMergedDatasetOptionsAreSame(dataset)){
+						
+						options.log(Level.FINE, "Merge source options are the same");
 
 						// The options are the same in all merge sources
 						// Show the first options from the first source
@@ -367,17 +372,16 @@ public class NucleusTableDatasetCreator {
 						// Provide an options to be used
 						collectionData = formatAnalysisOptionsForTable(dataset, op);
 
-						//							model.addColumn(dataset.getCollection().getName(), collectionData);
-
 					} else {
 						// Merge sources have different options
 						Arrays.fill(collectionData, "N/A - merged");
-
+						options.log(Level.FINE, "Merge source options are different");	
 					}
 
 				} else {
 					// there are no options to use; fill blank
 					Arrays.fill(collectionData, "N/A");
+					options.log(Level.FINE, "No merge sources, and no options");	
 				}
 
 				model.addColumn(dataset.getCollection().getName(), collectionData);
@@ -394,14 +398,12 @@ public class NucleusTableDatasetCreator {
 	 * @return the common options, or null if an options is different
 	 */
 	private static boolean testMergedDatasetOptionsAreSame(AnalysisDataset dataset){
-		
-//		AnalysisOptions result = null;
+
 		
 		List<AnalysisDataset> list = dataset.getAllMergeSources();
-//		IJ.log("Dataset has "+list.size()+" merge sources");
 		
 		boolean ok = true;
-//		AnalysisOptions test = list.get(0).getAnalysisOptions();
+
 		for(AnalysisDataset d1 : list){
 			
 			// If the dataset has merge sources, the options are null
@@ -416,11 +418,11 @@ public class NucleusTableDatasetCreator {
 						}
 					}
 				}
+			} else {
+				ok = testMergedDatasetOptionsAreSame(d1);
 			}
 
 		}
-		
-//		IJ.log("Sources have same options: "+ok);
 		
 		return ok;
 	}

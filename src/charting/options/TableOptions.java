@@ -58,6 +58,7 @@ public class TableOptions extends AbstractOptions {
 		VENN, 
 		PAIRWISE_VENN,
 		WILCOXON,
-		SIGNAL_STATS_TABLE
+		SIGNAL_STATS_TABLE,
+		MERGE_SOURCES
 	}
 }

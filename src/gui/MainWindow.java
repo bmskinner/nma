@@ -456,8 +456,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	 */
 	public void updatePanels(final List<AnalysisDataset> list){
 		programLogger.log(Level.FINE, "Updating tab panels");
-		Thread thr = new Thread() {
-			public void run() {
+//		Thread thr = new Thread() {
+//			public void run() {
 				try {
 					
 					for(DetailPanel panel : MainWindow.this.detailPanels){
@@ -469,9 +469,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE,"Error updating panels", e);
 				}
-			}
-		};
-		thr.start();
+//			}
+//		};
+//		thr.start();
 	}
 	
 	

@@ -23,22 +23,18 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.DatasetEventListener;
 import gui.InterfaceEvent;
 import gui.InterfaceEvent.InterfaceMethod;
-import gui.tabs.AnalysisDetailPanel.AnalysisTableCellRenderer;
 import gui.InterfaceEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -47,11 +43,8 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.Cache;
 import charting.ChartCache;
 import charting.TableCache;
-import charting.charts.HistogramChartFactory;
-import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import components.CellCollection;
