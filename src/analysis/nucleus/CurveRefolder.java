@@ -345,7 +345,7 @@ public class CurveRefolder extends AnalysisWorker {
 
 		
 		// make all changes to a fresh nucleus before buggering up the real one
-		RoundNucleus testNucleus = new RoundNucleus( (RoundNucleus)refoldNucleus);
+		ConsensusNucleus testNucleus = new ConsensusNucleus( refoldNucleus, NucleusType.ROUND);
 		for(int i=0; i<refoldNucleus.getBorderLength(); i++){
 			similarityScore = improveBorderPoint(i, minDistance, maxDistance, similarityScore, testNucleus);
 		}

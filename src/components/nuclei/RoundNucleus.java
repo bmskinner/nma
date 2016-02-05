@@ -1196,7 +1196,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		return new SegmentedProfile(profile);
 	}
 
-	private SegmentedProfile calculateAngleProfile() throws Exception{
+	protected SegmentedProfile calculateAngleProfile() throws Exception{
 
 		List<NucleusBorderSegment> segments = null;
 		

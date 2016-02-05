@@ -20,6 +20,7 @@ package components.nuclei;
 
 import java.io.Serializable;
 
+import components.generic.ProfileType;
 import components.nuclear.NucleusType;
 
 /**
@@ -35,12 +36,19 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	
 	public ConsensusNucleus(Nucleus n, NucleusType type) throws Exception{
 		
-		super(  (RoundNucleus) n);
+		super(n);
 		this.type = type;
 	}
 	
 	public NucleusType getType(){
 		return this.type;
+	}
+	
+	@Override
+	public void calculateProfiles() throws Exception{
+
+		this.profileMap.put(ProfileType.REGULAR, this.calculateAngleProfile());
+
 	}
 
 }
