@@ -226,7 +226,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 		
 		selectedClusterBox = new JComboBox<AnalysisDataset>();
 		selectedClusterBox.addItem(dataset);
-		for(AnalysisDataset d: dataset.getChildDatasets()){
+		for(AnalysisDataset d: dataset.getAllChildDatasets()){
 			selectedClusterBox.addItem(d);
 		}
 		selectedClusterBox.setSelectedIndex(-1);
