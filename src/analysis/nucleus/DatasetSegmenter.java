@@ -946,9 +946,8 @@ public class DatasetSegmenter extends AnalysisWorker {
 				
 				SegmentedProfile result = testProfile;
 				
-				// testProfile should now contain updated segment endpoints
-//				SegmentedProfile compareProfile = new SegmentedProfile(testProfile);
-									
+				
+													
 				// anything that gets in here should be valid
 				try{
 					double score = compareSegmentationPatterns(medianProfile, testProfile);
@@ -964,17 +963,23 @@ public class DatasetSegmenter extends AnalysisWorker {
 					throw new Exception("Error getting segmentation pattern: "+e.getMessage());
 				}
 				
-				
-				// test if nudging the lengthened segment with will help
-				NucleusBorderSegment segment = profile.getSegment(id);
-				int nudge = testNudge(testProfile, segment.length());
-				testProfile.nudgeSegments(nudge);
-
-				double score = compareSegmentationPatterns(medianProfile, testProfile);
-				if(score < bestScore){
-					bestScore = score;
-					result = new SegmentedProfile(testProfile);
-				}
+				/*
+				 * Nudging the entire segment list
+				 * This seems to have no effect on /Testing, so disabled
+				 * completely for speed improvement
+				 */
+//				{
+//					// test if nudging the lengthened segment with will help
+//					NucleusBorderSegment segment = profile.getSegment(id);
+//					int nudge = testNudge(testProfile, segment.length());
+//					testProfile.nudgeSegments(nudge);
+//	
+//					double score = compareSegmentationPatterns(medianProfile, testProfile);
+//					if(score < bestScore){
+//						bestScore = score;
+//						result = new SegmentedProfile(testProfile);
+//					}
+//				}
 			
 				return result;						
 			}
