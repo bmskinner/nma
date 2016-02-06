@@ -137,9 +137,10 @@ public class SignalFinder {
 		detector.setMinCirc(options.getMinCirc());
 		detector.setMaxCirc(options.getMaxCirc());
 		detector.setThreshold(options.getSignalThreshold());
-		detector.setStackNumber(stackNumber);
+
 		try{
-			detector.run(stack);
+			ImageProcessor ip = stack.getProcessor(stackNumber);
+			detector.run(ip);
 		} catch(Exception e){
 			programLogger.log(Level.SEVERE, "Error in signal detection", e);
 		}
@@ -152,8 +153,8 @@ public class SignalFinder {
 			programLogger.log(Level.FINE, roiList.size()+" signals in stack "+stackNumber);
 
 			for( Roi r : roiList){
-				
-				StatsMap values = detector.measure(r, stack);
+				ImageProcessor ip = stack.getProcessor(stackNumber);
+				StatsMap values = detector.measure(r, ip);
 				
 				// Offset the centre of mass of the signal to match the nucleus offset
 				NuclearSignal s = new NuclearSignal( r, 

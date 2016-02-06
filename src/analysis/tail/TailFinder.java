@@ -26,6 +26,7 @@ import ij.plugin.filter.Binary;
 import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
 import io.ImageImporter;
 
 import java.awt.Color;
@@ -745,9 +746,9 @@ public class TailFinder {
 		detector.setMinCirc(0);
 		detector.setMaxCirc(0.5);
 		detector.setThreshold(30);
-		detector.setStackNumber(channel);
 		try{
-			detector.run(image);
+			ImageProcessor ip = image.getProcessor(channel);
+			detector.run(ip);
 		} catch(Exception e){
 			programLogger.log(Level.SEVERE, "Error in tail detection", e);
 		}

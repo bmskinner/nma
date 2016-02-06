@@ -26,7 +26,6 @@
 package analysis;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.Roi;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
@@ -50,11 +49,8 @@ public class Detector{
   private double maxCirc;
 
   private int  threshold;
-  private int stackNumber;
 
   private Roi[] roiArray;
-
-//  private Map<Roi, StatsMap> roiMap = new HashMap<Roi, StatsMap>(0);
 
   public Detector(){
 
@@ -79,12 +75,8 @@ public class Detector{
   public void setThreshold(int i){
   	this.threshold = i;
   }
-
-  public void setStackNumber(int i){
-  	this.stackNumber = i;
-  }
   
-  public void run(ImageStack image){
+  public void run(ImageProcessor image){
 	  if(image==null){
 		  throw new IllegalArgumentException("No image to analyse");
 	  }
@@ -102,9 +94,6 @@ public class Detector{
 		  throw new IllegalArgumentException("Minimum circularity >= maximum circularity");
 	  }
 
-	  if(this.stackNumber==0 || this.stackNumber > image.getSize()){
-		  throw new IllegalArgumentException("Not a valid channel for this image");
-	  }
 	  findInImage(image);
   }
 
@@ -116,15 +105,14 @@ public class Detector{
   	return result;
   }
   
-  private void findInImage(ImageStack image){
+  private void findInImage(ImageProcessor image){
 
 	  // Note - the channels in an ImageStack are numbered from 1
-	  if(this.stackNumber==0 || this.stackNumber > image.getSize()){
-		  throw new IllegalArgumentException("Not a valid channel for this image in Detector.findInImage():"+this.stackNumber);
-	  }
-	  ImageProcessor searchProcessor = image.getProcessor(this.stackNumber).duplicate();
-	  
-//	  searchProcessor.smooth();
+//	  if(this.stackNumber==0 || this.stackNumber > image.getSize()){
+//		  throw new IllegalArgumentException("Not a valid channel for this image in Detector.findInImage():"+this.stackNumber);
+//	  }
+//	  ImageProcessor searchProcessor = image.getProcessor(this.stackNumber).duplicate();
+	  ImageProcessor searchProcessor = image.duplicate();
 	  searchProcessor.threshold(this.threshold);
 
 	  this.runAnalyser(searchProcessor);
@@ -139,13 +127,15 @@ public class Detector{
   }
 
   private void runAnalyser(ImageProcessor processor){
-	  ImagePlus image = new ImagePlus(null, processor);
+	  ImagePlus image    = new ImagePlus(null, processor);
 	  RoiManager manager = new RoiManager(true);
+	 
 	  // run the particle analyser
-	  ResultsTable rt = new ResultsTable();
+	  ResultsTable rt     = new ResultsTable();
 	  ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES | ParticleAnalyzer.INCLUDE_HOLES, 
 			  ParticleAnalyzer.FERET ,
 			  rt, this.minSize, this.maxSize, this.minCirc, this.maxCirc);
+	  
 	  try {
 		  ParticleAnalyzer.setRoiManager(manager);
 		  boolean success = pa.analyze(image);
@@ -167,17 +157,18 @@ public class Detector{
    * @param roi the region to measure
    * @return
    */
-  public StatsMap measure(Roi roi, ImageStack image ){
+  public StatsMap measure(Roi roi, ImageProcessor image ){
 	  if(image==null || roi==null){
 		  throw new IllegalArgumentException("Image or roi is null");
 	  }
-	  if(image.getProcessor(this.stackNumber)==null){
-		  throw new IllegalArgumentException("Not a valid channel for this image");
-	  }
-	  if(this.stackNumber==0 || this.stackNumber>image.getSize()){
-		  throw new IllegalArgumentException("Channel out of range for this image");
-	  }
-	  ImageProcessor searchProcessor = image.getProcessor(this.stackNumber).duplicate();
+//	  if(image.getProcessor(this.stackNumber)==null){
+//		  throw new IllegalArgumentException("Not a valid channel for this image");
+//	  }
+//	  if(this.stackNumber==0 || this.stackNumber>image.getSize()){
+//		  throw new IllegalArgumentException("Channel out of range for this image");
+//	  }
+//	  ImageProcessor searchProcessor = image.getProcessor(this.stackNumber).duplicate();
+	  ImageProcessor searchProcessor = image.duplicate();
 	  ImagePlus imp = new ImagePlus(null, searchProcessor);
 	  imp.setRoi(roi);
 	  ResultsTable rt = new ResultsTable();

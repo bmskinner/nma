@@ -54,16 +54,16 @@ import components.nuclei.Nucleus;
  */
 public class NucleusFinder {
 	
-	private Logger logger    = null;
+	private final Logger logger;
 	private final AnalysisOptions options;
-	private String outputFolderName;
-	private Detector detector;
+	private final String outputFolderName;
+	private final Detector detector;
 	
 	public NucleusFinder(final Logger logger, final AnalysisOptions options, final String outputFolderName){
 		if(options==null || logger==null){
 			throw new IllegalArgumentException("Options is null or logger is null");
 		}
-		this.logger = logger;
+		this.logger  = logger;
 		this.options = options;
 		this.outputFolderName = outputFolderName;
 		
@@ -72,8 +72,6 @@ public class NucleusFinder {
 		detector.setMinCirc(  options.getMinNucleusCirc());
 		detector.setMaxCirc(  options.getMaxNucleusCirc());
 		detector.setThreshold(options.getNucleusThreshold());
-		
-		detector.setStackNumber(Constants.rgbToStack(options.getChannel()));
 	}
 	
 	/**
@@ -108,7 +106,8 @@ public class NucleusFinder {
 		}
 
 		try{
-			detector.run(image);
+			ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
+			detector.run(ip);
 		} catch(Exception e){
 			logger.log(Level.SEVERE, "Error in nucleus detection", e);
 		}
@@ -215,7 +214,8 @@ public class NucleusFinder {
 		  // measure the area, density etc within the nucleus
 //		  Detector detector = new Detector();
 //		  detector.setStackNumber(Constants.rgbToStack(options.getChannel()));
-		  StatsMap values = detector.measure(nucleus, image);
+		ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
+		  StatsMap values = detector.measure(nucleus, ip);
 
 		  // save the position of the roi, for later use
 		  double xbase = nucleus.getXBase();

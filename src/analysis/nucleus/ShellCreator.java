@@ -141,10 +141,10 @@ public class ShellCreator {
 		ImageProcessor ip = searchImage.getProcessor();
 		
 		Detector detector = new Detector();
-		detector.setStackNumber(Constants.COUNTERSTAIN);
-		StatsMap values = detector.measure(nucleusRoi, nucleusStack);
+		
+		ImageProcessor nucleusIp = nucleusStack.getProcessor(Constants.COUNTERSTAIN);
+		StatsMap values = detector.measure(nucleusRoi, nucleusIp);
 
-//		ImageStatistics stats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
 		double initialArea = values.get("Area");
 		
 //		IJ.log("Nuclear area: "+initialArea);
@@ -180,7 +180,8 @@ public class ShellCreator {
 				ip.setRoi(shrinkingRoi); 
 //				ImageStatistics imgStats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
 //				area = imgStats.area;
-				StatsMap statsValues = detector.measure(shrinkingRoi, nucleusStack);
+				
+				StatsMap statsValues = detector.measure(shrinkingRoi, nucleusIp);
 				area =statsValues.get("Area");
 				
 //				shrinkingPolygon = newRoi.getFloatPolygon();
