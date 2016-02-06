@@ -145,7 +145,10 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
     	
     	log(Level.FINEST, "Worker completed task");
 
-        try {
+    	log(Level.FINEST, "Closing log file handlers");
+    	closeLogFileHandlers();
+
+    	 try {
             if(this.get()){
             	log(Level.FINEST, "Firing trigger for sucessful task");
                 firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
@@ -159,32 +162,18 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
         } catch (ExecutionException e) {
         	logError("Execution error in worker", e);
 
-       } finally{
-    	   
-    	   log(Level.FINEST, "Closing log file handlers");
-
-    	   if(activeDataset!=null){
-    		   
-    		   // if dataset is null, the fileLogger was set to be null
-    		   // and we don't want to close that
-    		   closeLogFileHandlers();
-    		   
-    	   } else {
-    		   // No dataset was given, so no intrinsic log file
-    		   // But if a separate log file was provided, we need to close it
-    		   if(logFile!=null){
-    			   closeLogFileHandlers();
-    		   }
-    	   }
        }
 
     } 
     
     private void closeLogFileHandlers(){
-    	for(Handler h : fileLogger.getHandlers()){
-			   h.close();
-			   fileLogger.removeHandler(h);
-		   }
+    	
+    	if(fileLogger!=null){
+    		for(Handler h : fileLogger.getHandlers()){
+    			h.close();
+    			fileLogger.removeHandler(h);
+    		}
+    	}
     }
 	
 

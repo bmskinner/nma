@@ -28,6 +28,14 @@ public class DebugFileFormatter extends Formatter {
 	
 	 @Override
 	    public String format(LogRecord record) {
+		 
+		 /*
+		  * The source method name is obscured by the log functions.
+		  * Get the stack trace and find the previous calling method.
+		  */
+//		 Thread.currentThread().getStackTrace();
+		 
+		 
 		 String date = calcDate(record.getMillis());
 		 String log = date 
 				 + "\t" 
