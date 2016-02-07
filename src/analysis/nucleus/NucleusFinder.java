@@ -152,6 +152,7 @@ public class NucleusFinder {
 			try{
 				Cell cell = makeCell(roi, image, nucleusNumber++, path); // get the profile data back for the nucleus
 				result.add(cell);
+				logger.log(Level.FINER, "Cell created");
 			} catch(Exception e){
 
 				logger.log(Level.SEVERE, "Error acquiring nucleus", e);
@@ -170,6 +171,7 @@ public class NucleusFinder {
 	 */
 	private ImageStack preprocessImage(ImageStack image) throws Exception{
 		
+		logger.log(Level.FINER, "Preprocessing image");
 		CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
 
 		ImageStack searchStack = null;
@@ -182,7 +184,7 @@ public class NucleusFinder {
 				int kernel = nucleusCannyOptions.getKuwaharaKernel();
 				ImageProcessor ip = ImageFilterer.runKuwaharaFiltering(image, Constants.rgbToStack(options.getChannel())  , kernel);
 				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
-
+				logger.log(Level.FINER, "Run Kuwahara");
 			}
 
 			// flatten chromocentres
@@ -190,8 +192,10 @@ public class NucleusFinder {
 				int threshold = nucleusCannyOptions.getFlattenThreshold();
 				ImageProcessor ip = ImageFilterer.squashChromocentres(image, Constants.rgbToStack(options.getChannel()), threshold);
 				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
+				logger.log(Level.FINER, "Run flattening");
 			}
 			searchStack = ImageFilterer.runEdgeDetector(image, Constants.rgbToStack(options.getChannel()), nucleusCannyOptions);
+			logger.log(Level.FINER, "Run edge detection");
 		} else {
 			searchStack = image;
 		}
