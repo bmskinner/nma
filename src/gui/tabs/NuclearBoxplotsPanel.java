@@ -19,6 +19,7 @@
 package gui.tabs;
 
 import gui.DatasetEvent.DatasetMethod;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ExportableChartPanel;
@@ -350,7 +351,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 				if(result==0){ // button at index 0 - continue
 					
-					List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
+//					List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
 
 					// create a new sub-collection with the given parameters for each dataset
 					for(AnalysisDataset dataset : getDatasets()){
@@ -369,7 +370,12 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 								programLogger.log(Level.INFO, "Filtered "+subCollection.getNucleusCount()+" nuclei");
 								dataset.addChildCollection(subCollection);
-								newList.add(  dataset.getChildDataset(subCollection.getID() ));
+								try {
+									dataset.getCollection().getProfileManager().copyCollectionOffsets(subCollection);
+								} catch (Exception e1) {
+									programLogger.log(Level.SEVERE, "Error applying segments", e1);
+								}
+//								newList.add(  dataset.getChildDataset(subCollection.getID() ));
 							}
 
 						} catch (Exception e) {
@@ -377,7 +383,8 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 							
 						}
 					}
-					NuclearBoxplotsPanel.this.fireDatasetEvent(DatasetMethod.NEW_MORPHOLOGY, newList);
+					NuclearBoxplotsPanel.this.fireInterfaceEvent(InterfaceMethod.UPDATE_POPULATIONS);
+//					NuclearBoxplotsPanel.this.fireDatasetEvent(DatasetMethod.NEW_MORPHOLOGY, newList);
 				}
 			} 
 		}
