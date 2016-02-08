@@ -38,7 +38,7 @@ public class DebugFileFormatter extends Formatter {
 		 String sourceMethod = record.getSourceMethodName();
 		 if(sourceMethod.equals("log")){
 			 StackTraceElement[] array = Thread.currentThread().getStackTrace();
-			 sourceMethod = array[1].getMethodName();
+			 sourceMethod = array[2].getMethodName();
 		 }
 		 
 		 String date = calcDate(record.getMillis());

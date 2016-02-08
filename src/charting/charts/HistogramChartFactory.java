@@ -184,7 +184,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
 		HistogramDataset ds = options.hasDatasets() 
-							? NuclearSignalDatasetCreator.createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale(), options.getSignalGroup())
+							? NuclearSignalDatasetCreator.createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
 							: null;
 				
 		JFreeChart chart = createHistogram(ds, stat.label(options.getScale()), "Count");
@@ -214,7 +214,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		if (options.hasDatasets()){
 			
 			SignalStatistic stat = (SignalStatistic) options.getStat();
-			ds = NuclearSignalDatasetCreator.createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale(), options.getSignalGroup());
+			ds = NuclearSignalDatasetCreator.createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale());
 		}
 
 		String xLabel = options.getStat().label(options.getScale());
@@ -231,9 +231,11 @@ public class HistogramChartFactory extends AbstractChartFactory {
 						
 			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
 			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
-			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());	
 			
-			
+			if(maxX.doubleValue()>minX.doubleValue()){ // stop if 0 and 0
+				plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());
+			}
+						
 			for (int j = 0; j < ds.getSeriesCount(); j++) {
 
 				plot.getRenderer().setSeriesVisibleInLegend(j, false);
@@ -246,10 +248,12 @@ public class HistogramChartFactory extends AbstractChartFactory {
 				for(AnalysisDataset dataset : options.getDatasets()){
 
 					if(seriesName.equals(dataset.getName())){
+						
+						colour = dataset.getSignalGroupColour( options.getSignalGroup());
 
-						colour = dataset.hasDatasetColour()
-								? dataset.getDatasetColour()
-								: colour;
+//						colour = dataset.hasDatasetColour()
+//								? dataset.getDatasetColour()
+//								: colour;
 
 
 						plot.getRenderer().setSeriesPaint(j, colour);
