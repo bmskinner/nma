@@ -21,8 +21,14 @@ package gui.tabs;
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.AnalysisTableCellRenderer;
 import gui.components.ExportableTable;
+import gui.dialogs.ClusterTreeDialog;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -32,7 +38,10 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -41,6 +50,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import components.ClusterGroup;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
@@ -56,13 +66,16 @@ public class MergesDetailPanel extends DetailPanel {
 	
 	private ExportableTable sourceParametersTable;
 	
-	private JButton		getSourceButton = new JButton("Recover source");
+//	private JButton		getSourceButton = new JButton("Recover source");
+	
+	private JPanel		getSourceButtonPanel;
+	
+	private JPanel mainPanel;
+
 	
 	public MergesDetailPanel(Logger programLogger){
 		super(programLogger);
-		this.setLayout(new BorderLayout());
-		
-		
+
 		try {
 
 			createUI();
@@ -73,25 +86,90 @@ public class MergesDetailPanel extends DetailPanel {
 	}
 	
 	private void createUI() throws Exception{
-		JPanel headerPanel = createHeaderPanel();
 		
+		this.setLayout(new BorderLayout());
+
+		JPanel headerPanel = createHeaderPanel();
 		this.add(headerPanel, BorderLayout.NORTH);
 		
-		JPanel content = new JPanel(new BorderLayout());
+		mainPanel = new JPanel();
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+		
+//		JPanel content = new JPanel(new BorderLayout());
 
 		JPanel parameters = createAnalysisParametersPanel();
-		
-		
 		JScrollPane paramScrollPane = new JScrollPane(parameters);
 		
 		
 		paramScrollPane.setColumnHeaderView(sourceParametersTable.getTableHeader());
 		
+		getSourceButtonPanel = createGetSourcePanel(null);
 		
-		content.add(paramScrollPane, BorderLayout.CENTER);
+		mainPanel.add(paramScrollPane);
+		mainPanel.add(getSourceButtonPanel);
 		
-		this.add(content, BorderLayout.CENTER);
+		this.add(mainPanel, BorderLayout.CENTER);
 		
+	}
+	
+	private JPanel createGetSourcePanel(List<JComponent> buttons){
+		JPanel panel = new JPanel();
+		
+		GridBagLayout gbl = new GridBagLayout();
+		panel.setLayout(gbl);
+		
+		GridBagConstraints c = new GridBagConstraints();
+		
+		c.anchor = GridBagConstraints.CENTER; // place the buttons in the middle of their grid
+		c.gridwidth = buttons==null ? 1 : buttons.size()+1; // one button per column, plus a blank
+		c.gridheight = 1;
+		c.fill = GridBagConstraints.NONE;      // don't resize the buttons
+		c.weightx = 1.0; 						// buttons have padding between them
+		
+		Dimension fillerSize = new Dimension(10, 5);
+		panel.add(new Box.Filler(fillerSize, fillerSize, fillerSize), c);
+		if(buttons!=null){
+			for(JComponent button : buttons){
+				panel.add(button, c);
+			}
+		}
+
+		return panel;
+	}
+	
+	private List<JComponent> createGetSourceButtons(){
+		 
+		if(!hasDatasets()){
+			return null;
+		}
+		
+		List<JComponent> result = new  ArrayList<JComponent>(); 
+		Dimension fillerSize = new Dimension(10, 5);
+
+
+		for(final UUID id : activeDataset().getMergeSources()){
+
+			final AnalysisDataset source = activeDataset().getMergeSource(id);
+			JButton button = new JButton("Recover source");
+			button.addActionListener( new ActionListener() {
+
+				public void actionPerformed(ActionEvent e) {
+					Thread thr = new Thread(){
+						public void run(){
+
+							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+							list.add(source);
+
+							fireDatasetEvent(DatasetMethod.EXTRACT_SOURCE, list);
+						}};
+						thr.start();
+				}
+			});    
+			result.add(button);
+
+		}
+		
+		return result;
 	}
 	
 	private JPanel createAnalysisParametersPanel() throws Exception{
@@ -110,63 +188,28 @@ public class MergesDetailPanel extends DetailPanel {
 		return panel;
 	}
 	
-	private JPanel createMergeSourcePanel() throws Exception{
-		JPanel panel = new JPanel(new BorderLayout());
-		TableOptions options = new TableOptionsBuilder()
-		.setDatasets(null)
-		.setType(TableType.MERGE_SOURCES)
-		.setLogger(programLogger)
-		.build();
-
-		TableModel model = getTable(options);
-
-
-		mergeSources = new ExportableTable(model){
-			@Override
-			public boolean isCellEditable(int rowIndex, int columnIndex) {
-				return false;
-			}
-		};
-		mergeSources.setEnabled(true);
-		mergeSources.setCellSelectionEnabled(false);
-		mergeSources.setColumnSelectionAllowed(false);
-		mergeSources.setRowSelectionAllowed(true);
-
-		panel.add(mergeSources, BorderLayout.CENTER);
-		return panel;
-	}
 	
 	private JPanel createHeaderPanel() throws Exception{
 		JPanel panel = new JPanel();
 		
-		JPanel merges     = createMergeSourcePanel();
-		JScrollPane mergeScrollPane = new JScrollPane(merges);
-		mergeScrollPane.setColumnHeaderView(mergeSources.getTableHeader());
-		panel.add(mergeScrollPane);
-		
-		getSourceButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-
-				// get the dataset selected
-				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-				String name = (String) mergeSources.getModel().getValueAt(mergeSources.getSelectedRow(), 0);
-
-				// get the dataset with the selected name
-				for( UUID id : activeDataset().getMergeSources()){
-					AnalysisDataset mergeSource = activeDataset().getMergeSource(id);
-					if(mergeSource.getName().equals(name)){
-						list.add(mergeSource);
-					}
-				}
-				fireDatasetEvent(DatasetMethod.EXTRACT_SOURCE, list);
-
-			}
-		});
-		getSourceButton.setVisible(false);
-		panel.add(getSourceButton);
 		return panel;
 		
+	}
+	
+	private void updateSourceButtonsPanel(){
+		
+		mainPanel.remove(getSourceButtonPanel);
+		
+		List<JComponent> buttons = createGetSourceButtons();
+		
+		
+		getSourceButtonPanel = createGetSourcePanel(buttons);
+
+		// add this new panel
+		mainPanel.add(getSourceButtonPanel);
+		mainPanel.revalidate();
+		mainPanel.repaint();
+		mainPanel.setVisible(true);
 	}
 	
 	/**
@@ -183,9 +226,9 @@ public class MergesDetailPanel extends DetailPanel {
 
 		TableModel model = getTable(options);
 
-		mergeSources.setModel(model);
+//		mergeSources.setModel(model);
 
-		getSourceButton.setVisible(true);
+		updateSourceButtonsPanel();
 		
 		
 		TableOptions parameterOptions = new TableOptionsBuilder()
@@ -214,7 +257,7 @@ public class MergesDetailPanel extends DetailPanel {
 	 * to perform the actual update when a no datasets are selected
 	 */
 	protected void updateNull() throws Exception {
-		getSourceButton.setVisible(false);
+		getSourceButtonPanel.setVisible(false);
 		
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(null)
@@ -224,7 +267,6 @@ public class MergesDetailPanel extends DetailPanel {
 		
 		TableModel model = getTable(options);
 		
-		mergeSources.setModel(model);
 		
 		TableOptions parameterOptions = new TableOptionsBuilder()
 		.setDatasets(null)
@@ -250,20 +292,4 @@ public class MergesDetailPanel extends DetailPanel {
 			return NucleusTableDatasetCreator.createAnalysisTable(options);
 		}
 	}
-	
-	
-//	private DefaultTableModel makeBlankTable(){
-//		DefaultTableModel model = new DefaultTableModel();
-//
-//		Vector<Object> names 	= new Vector<Object>();
-//		Vector<Object> nuclei 	= new Vector<Object>();
-//
-//		names.add("No merge sources");
-//		nuclei.add("");
-//
-//
-//		model.addColumn("Merge source", names);
-//		model.addColumn("Nuclei", nuclei);
-//		return model;
-//	}
 }
