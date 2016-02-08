@@ -115,11 +115,14 @@ public interface Nucleus extends CellularComponent {
 
 	public String getPathAndNumber();
 
-	
 	/**
 	 * Get the cached bounding rectangle for the nucleus. If not present,
-	 * the rectangle is calculated and stored
-	 * @param point the border point to place at the bottom
+	 * the rectangle is calculated and stored.
+	 * 
+	 * If the TopVertical and
+	 * BottomVertical points have been set, these will be used for vertical alignment. Otherwise,
+	 * the given point is moved to directly below the CoM
+	 * @param point the point to put at the bottom. Overridden if TOP_  and BOTTOM_ are set
 	 * @return
 	 * @throws Exception
 	 */

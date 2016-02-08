@@ -63,7 +63,6 @@ public class BorderPoint
 	 * @param p
 	 */
 	public BorderPoint( BorderPoint p){
-//		super(p.getX(), p.getY());
 		super(p);
 	}
 	

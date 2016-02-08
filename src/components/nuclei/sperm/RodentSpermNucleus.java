@@ -41,39 +41,24 @@ import utility.Utils;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
 import components.generic.Equation;
-import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.BorderPoint;
-import components.nuclear.NucleusType;
-import components.nuclear.SignalCollection;
 import components.nuclei.Nucleus;
-import components.nuclei.RoundNucleus;
 
-public class RodentSpermNucleus
-extends SpermNucleus
-{
+public class RodentSpermNucleus extends SpermNucleus {
 
 	private static final long serialVersionUID = 1L;
 	
-
-	private List<BorderPoint> hookRoi;
-	private List<BorderPoint> humpRoi;
-	
 	private transient double hookLength = 0;
-	private transient double bodyWidth = 0;
+	private transient double bodyWidth  = 0;
 
-	// Requires a sperm nucleus object to construct from
-	public RodentSpermNucleus(RoundNucleus n) throws Exception{
-		super(n);
-//		this.splitNucleusToHeadAndHump();
-	}
 	
 	public RodentSpermNucleus(Nucleus n) throws Exception{
 		super(n);
-//		this.splitNucleusToHeadAndHump();
+		this.splitNucleusToHeadAndHump();
 	}
 	
 	protected RodentSpermNucleus(){
@@ -88,8 +73,6 @@ extends SpermNucleus
 	public Nucleus duplicate(){
 		try {
 			RodentSpermNucleus duplicate = new RodentSpermNucleus(this);			
-			duplicate.setHookRoi(this.getHookRoi());
-			duplicate.setHumpRoi(this.getHumpRoi());
 			return duplicate;
 			
 		} catch (Exception e) {
@@ -123,83 +106,96 @@ extends SpermNucleus
 		
 			
 		// If the flat region moved, update the cached lengths 
-		if(tag.equals(BorderTag.TOP_VERTICAL) || tag.equals(BorderTag.BOTTOM_VERTICAL)){
-			try {
-				calculateHookOrBodyLength();
-			} catch (Exception e) {
+		if( this.hasBorderTag(BorderTag.TOP_VERTICAL) && this.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+
+			if(tag.equals(BorderTag.TOP_VERTICAL) || tag.equals(BorderTag.BOTTOM_VERTICAL)){
+				
+				// Clear cached stats
 				this.hookLength = 0;
-			    this.bodyWidth = 0;
+				this.bodyWidth  = 0;
+//				try {
+//					
+//					calculateHookOrBodyLength();
+//					
+//				} catch (Exception e) {
+//					this.hookLength = 0;
+//					this.bodyWidth  = 0;
+//				}
 			}
 		}
 		
 	}
 	
-	protected double getHookOrBodyLength(boolean useHook) throws Exception{
+	private double getHookOrBodyLength(boolean useHook) throws Exception{
+
+		if(hookLength==0 || bodyWidth==0){
+			calculateHookOrBodyLength();
+		}
+		
 		if(useHook){
-			if(hookLength==0){
-				calculateHookOrBodyLength();
-			}
 			return hookLength;
 		} else {
-			if(bodyWidth==0){
-				calculateHookOrBodyLength();
-			}
 			return bodyWidth;
 		}	
 	}
 	
-	protected void calculateHookOrBodyLength() throws Exception{
-
+	private void calculateHookOrBodyLength() throws Exception{
+			
 		// Copy the nucleus
-		
-		RodentSpermNucleus testNucleus = (RodentSpermNucleus) this.duplicate();
+		RodentSpermNucleus testNucleus = new RodentSpermNucleus( this); //.duplicate();
 
 		// Only proceed if the verticals have been set
-		if(testNucleus!=null && testNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && testNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+		if(testNucleus!=null && testNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) 
+				&& testNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
 
+			
+			/*
+			 * Get the X position of the top vertical
+			 */
 			double vertX = testNucleus.getBorderTag(BorderTag.TOP_VERTICAL).getX();
-//			IJ.log("Initial vertX:" +vertX);
+
+			/*
+			 * Rotate the nucleus to put vertical
+			 */
 			BorderPoint[] points = getBorderPointsForVerticalAlignment();
-			// Rotate vertical
-//			IJ.log(testNucleus.dumpInfo(Nucleus.BORDER_TAGS));
 			testNucleus.alignPointsOnVertical(points[0], points[1] );
 			
-			// Ensure that the rois are correctly assigned
-			testNucleus.splitNucleusToHeadAndHump();
-
 
 			
-			// Measure vertical to bounding hook side
-			// Measure vertical to bounding hump side
 			vertX = testNucleus.getBorderTag(BorderTag.TOP_VERTICAL).getX();
-//			IJ.log("Final vertX:" +vertX);
 
+
+			/*
+			 * Find the x values in the bounding box of the 
+			 * vertical nucleus. Using reference point here is ok, the method
+			 * is using the TOP and BOTTOM points internally.
+			 */
 			double maxBoundingX = testNucleus.getBoundingRectangle(BorderTag.REFERENCE_POINT).getMaxX();
 			double minBoundingX = testNucleus.getBoundingRectangle(BorderTag.REFERENCE_POINT).getMinX();
 
-			double distanceLeft = vertX - minBoundingX;
-			double distanceRight = maxBoundingX - vertX;
+			/*
+			 * Find the distance from the vertical X position to the min and max points of the 
+			 * bounding box. VertX must lie between these points.
+			 */
+			double distanceLower  = vertX - minBoundingX;
+			double distanceHigher = maxBoundingX - vertX;
 
+			/*
+			 * To determine if the point is hook or hump, take
+			 * the X position of the tip. This must lie on the
+			 * hook side of the vertX
+			 */
+			
 			double distanceHook = 0;
 			double distanceHump = 0;
-			/*
-			 * To determine if the point is hook or hump, take a value either
-			 * size of the CoM, and test if it is closer to the desired bounding
-			 * box value.
-			 * 
-			 * Since the nucleus is rotated, there should not be issues...
-			 */
-
-			XYPoint newLeftPoint = new XYPoint(testNucleus.getCentreOfMass().getX()-5, testNucleus.getCentreOfMass().getY());
-
-			if(testNucleus.isHookSide( newLeftPoint) ){
-
-				distanceHook = distanceLeft;
-				distanceHump = distanceRight;
-
+			double referenceX   = testNucleus.getBorderTag(BorderTag.REFERENCE_POINT).getX();
+			
+			if(referenceX < vertX){
+				distanceHook = distanceLower;
+				distanceHump = distanceHigher;
 			} else {
-				distanceHook = distanceRight;
-				distanceHump = distanceLeft;
+				distanceHook = distanceHigher;
+				distanceHump = distanceLower;
 			}
 			
 			this.hookLength = distanceHook;
@@ -216,34 +212,86 @@ extends SpermNucleus
 	 * Get a copy of the points in the hook roi
 	 * @return
 	 */
-	public List<BorderPoint> getHookRoi(){
+	public List<BorderPoint> getHookRoi(){	
+		
+		BorderPoint testPoint         = this.getBorderTag(BorderTag.REFERENCE_POINT);
+		BorderPoint referencePoint    = this.getBorderTag(BorderTag.REFERENCE_POINT);
+		BorderPoint interSectionPoint = this.getBorderTag(BorderTag.INTERSECTION_POINT);
+		BorderPoint orientationPoint  = this.getBorderTag(BorderTag.ORIENTATION_POINT);
+		
 		List<BorderPoint> result = new ArrayList<BorderPoint>(0);
-		for(BorderPoint n : hookRoi){
-			result.add(new BorderPoint(n));
+
+		
+		/*
+		 * Go from the reference point. We hit either the IP or
+		 * the OP depending on direction. On hitting one,
+		 * move to the other and continue until we're back at the RP
+		 */
+		
+//		boolean hasHitPoint = false;
+		int i=0;
+		BorderPoint continuePoint = null;
+		
+		while(testPoint.hasNextPoint()){
+			result.add(testPoint);
+			
+//			IJ.log("Test point :"+testPoint.toString());
+			if( testPoint.overlapsPerfectly(interSectionPoint) ){
+				continuePoint = orientationPoint;
+//				IJ.log("Hit IP :"+testPoint.toString());
+				break;
+			}
+			
+			if( testPoint.overlapsPerfectly(orientationPoint) ){
+				continuePoint = interSectionPoint;
+//				IJ.log("Hit OP :"+testPoint.toString());
+				break;
+			}
+			
+			testPoint = testPoint.nextPoint();
+			
+			/*
+			 * Only allow the loop to go around the nucleus once
+			 */
+			if( testPoint.overlapsPerfectly(referencePoint) ){
+//				IJ.log("Hit RP :"+testPoint.toString());
+				break;
+			}
+			
+			
+			i++;
+			if(i>1000){
+				IJ.log("Forced break");
+				break;
+			}
+		}
+		
+		if(continuePoint==null){
+			IJ.log("Error getting roi - IP and OP not found");
+			return result;
+		}
+		
+		/*
+		 * Continue until we're back at the RP
+		 */
+		while(continuePoint.hasNextPoint()){
+			result.add(continuePoint);
+//			IJ.log("Continue point :"+continuePoint.toString());
+			if( continuePoint.overlapsPerfectly(referencePoint.prevPoint()) ){
+				break;
+			}
+			
+			continuePoint = continuePoint.nextPoint();
+			i++;
+			if(i>2000){
+				IJ.log("Forced break for continue point");
+				break;
+			}
 		}
 		return result;
+		
 	}
-	
-	/**
-	 * Get a copy of the points in the hook roi
-	 * @return
-	 */
-	public List<BorderPoint> getHumpRoi(){
-		List<BorderPoint> result = new ArrayList<BorderPoint>(0);
-		for(BorderPoint n : humpRoi){
-			result.add(new BorderPoint(n));
-		}
-		return result;
-	}
-	
-	protected void setHookRoi(List<BorderPoint> list){
-		this.hookRoi = list;
-	}
-	
-	protected void setHumpRoi(List<BorderPoint> list){
-		this.humpRoi = list;
-	}
-	
+			
 	/*
     Identify key points: tip, estimated tail position
 	 */
@@ -309,6 +357,24 @@ extends SpermNucleus
     setBorderTag(BorderTag.INTERSECTION_POINT, this.getBorderIndex(this.findOppositeBorder(consensusTail)));
   }
 
+	
+	private FloatPolygon createRoiPolygon(List<BorderPoint> list){
+		float[] xpoints = new float[list.size()+1];
+		float[] ypoints = new float[list.size()+1];
+
+		for(int i=0;i<list.size();i++){
+			BorderPoint p = list.get(i);
+			xpoints[i] = (float) p.getX();
+			ypoints[i] = (float) p.getY();
+		}
+
+		// Ensure the polygon is closed
+		xpoints[list.size()] = (float) list.get(0).getX();
+		ypoints[list.size()] = (float) list.get(0).getY();
+
+		return new FloatPolygon(xpoints, ypoints);
+	}
+	
 	/**
 	 * Check if the given point is in the hook side of the nucleus
 	 * @param p
@@ -316,41 +382,25 @@ extends SpermNucleus
 	 */
 	public boolean isHookSide(XYPoint p){
 		if(containsPoint(p)){
-			
+
 			/*
-			 * Are border list and hook hump rois offset the same?
-			 * Yes.
-			 * Both are using the offset positions, not original positions
+			 * Find out which side has been captured. The hook side
+			 * has the reference point
 			 */
-						
-			FloatPolygon poly = Utils.createPolygon(hookRoi);
-//			IJ.log("Hook roi: "+ poly.getBounds().toString());
-			if(poly.contains( (float)p.getX(), (float)p.getY() ) ){
-//				IJ.log("Contains "+p.toString());
+
+			FloatPolygon poly = createRoiPolygon(getHookRoi());
+			
+			if(poly.contains((float)p.getX(), (float)p.getY() )){
 				return true;
+				
 			} else {
-//				IJ.log("Not contains "+p.toString());
 				return false;
 			}
+			
 		} else {
 			throw new IllegalArgumentException("Requested point is not in the nucleus: "+p.toString());
 		}
 	}
-
-
-	/**
-	 * Check if the given point is in the hump side of the nucleus
-	 * @param p
-	 * @return
-	 */
-	public boolean isHumpSide(XYPoint p){			
-		if(isHookSide(p)){
-			return false;
-		} else {
-			return true;
-		}
-		
-	}    
 
 	/**
 	 * Checks if the smoothed array nuclear shape profile has the 
@@ -515,62 +565,6 @@ extends SpermNucleus
 		  int index = findIntersectionPointForNuclearSplit();
 		  this.setBorderTag(BorderTag.INTERSECTION_POINT, index );
 	  } 
- 
-	int intersectionPointIndex = this.getBorderIndex(BorderTag.INTERSECTION_POINT);
-
-    // get an array of points from tip to tail
-    List<BorderPoint> roi1 = new ArrayList<BorderPoint>(0);
-    List<BorderPoint> roi2 = new ArrayList<BorderPoint>(0);
-    boolean changeRoi = false;
-
-    for(int i = 0; i<this.getBorderLength();i++){
-
-    	// start at the tail, and go around the array
-      int currentIndex = wrapIndex(this.getBorderIndex(BorderTag.ORIENTATION_POINT)+i, this.getBorderLength());
-      
-      BorderPoint p = getBorderPoint(currentIndex);
-
-      // starting at the tail, assign points to roi1
-      // Continue to do so unless changeRoi is true
-      if(currentIndex != intersectionPointIndex && !changeRoi){   
-        roi1.add(p);
-        continue;
-      }
-      
-      // Change roi is not yet called, but we have reached the intersection point
-      // Close the polygon of roi1 back to the tail. Switch to roi2
-      if(currentIndex==intersectionPointIndex && !changeRoi){
-        roi1.add(p);
-        roi1.add(this.getBorderTag(BorderTag.ORIENTATION_POINT));
-        roi2.add(this.getBorderTag(BorderTag.INTERSECTION_POINT));
-        changeRoi = true;
-      }
-      
-      // It's not the intersection point, or the tail, and changeRoi is true
-      // The point belongs to roi2 
-      if(currentIndex != intersectionPointIndex && currentIndex != this.getBorderIndex(BorderTag.ORIENTATION_POINT) && changeRoi){   // continue with roi2, adjusting the index numbering as needed
-        roi2.add(p);
-      }
-
-      if(currentIndex==this.getBorderIndex(BorderTag.ORIENTATION_POINT) && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
-        roi2.add(this.getBorderTag(BorderTag.INTERSECTION_POINT));
-      }
-
-    }
-
-    // default
-    this.hookRoi = roi2;
-    this.humpRoi = roi1;
-
-    //    check if we need to swap
-    for(BorderPoint point : roi1){
-    	if(point.overlaps(this.getBorderTag(BorderTag.REFERENCE_POINT))){
-    		this.hookRoi = roi1;
-        	this.humpRoi = roi2;
-        	break;
-    	}
-    }
-
   }
 
   /*
@@ -634,71 +628,71 @@ extends SpermNucleus
 				
 		if(angle!=0){
 
-			for(BorderPoint p : hookRoi){
-//				XYPoint p = this.getBorderPoint(i);
-
-
-				// get the distance from this point to the centre of mass
-				double distance = p.getLengthTo(this.getCentreOfMass());
-
-				// get the angle between the centre of mass (C), the point (P) and a
-				// point directly under the centre of mass (V)
-
-				/*
-				 *      C
-				 *      |\  
-				 *      V P
-				 * 
-				 */
-				double oldAngle = Utils.findAngleBetweenXYPoints( p, 
-						this.getCentreOfMass(), 
-						new XYPoint(this.getCentreOfMass().getX(),-10));
-
-
-				if(p.getX()<this.getCentreOfMass().getX()){
-					oldAngle = 360-oldAngle;
-				}
-
-				double newAngle = oldAngle + angle;
-				double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
-				double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
-
-				p.setX(newX);
-				p.setY(newY);
-			}
-			
-			for(BorderPoint p : humpRoi){
-//				XYPoint p = this.getBorderPoint(i);
-
-
-				// get the distance from this point to the centre of mass
-				double distance = p.getLengthTo(this.getCentreOfMass());
-
-				// get the angle between the centre of mass (C), the point (P) and a
-				// point directly under the centre of mass (V)
-
-				/*
-				 *      C
-				 *      |\  
-				 *      V P
-				 * 
-				 */
-				double oldAngle = Utils.findAngleBetweenXYPoints( p, 
-						this.getCentreOfMass(), 
-						new XYPoint(this.getCentreOfMass().getX(),-10));
-
-
-				if(p.getX()<this.getCentreOfMass().getX()){
-					oldAngle = 360-oldAngle;
-				}
-
-				double newAngle = oldAngle + angle;
-				double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
-				double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
-
-				p.setX(newX);
-				p.setY(newY);
-			}
+//			for(BorderPoint p : hookRoi){
+////				XYPoint p = this.getBorderPoint(i);
+//
+//
+//				// get the distance from this point to the centre of mass
+//				double distance = p.getLengthTo(this.getCentreOfMass());
+//
+//				// get the angle between the centre of mass (C), the point (P) and a
+//				// point directly under the centre of mass (V)
+//
+//				/*
+//				 *      C
+//				 *      |\  
+//				 *      V P
+//				 * 
+//				 */
+//				double oldAngle = Utils.findAngleBetweenXYPoints( p, 
+//						this.getCentreOfMass(), 
+//						new XYPoint(this.getCentreOfMass().getX(),-10));
+//
+//
+//				if(p.getX()<this.getCentreOfMass().getX()){
+//					oldAngle = 360-oldAngle;
+//				}
+//
+//				double newAngle = oldAngle + angle;
+//				double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
+//				double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
+//
+//				p.setX(newX);
+//				p.setY(newY);
+//			}
+//			
+//			for(BorderPoint p : humpRoi){
+////				XYPoint p = this.getBorderPoint(i);
+//
+//
+//				// get the distance from this point to the centre of mass
+//				double distance = p.getLengthTo(this.getCentreOfMass());
+//
+//				// get the angle between the centre of mass (C), the point (P) and a
+//				// point directly under the centre of mass (V)
+//
+//				/*
+//				 *      C
+//				 *      |\  
+//				 *      V P
+//				 * 
+//				 */
+//				double oldAngle = Utils.findAngleBetweenXYPoints( p, 
+//						this.getCentreOfMass(), 
+//						new XYPoint(this.getCentreOfMass().getX(),-10));
+//
+//
+//				if(p.getX()<this.getCentreOfMass().getX()){
+//					oldAngle = 360-oldAngle;
+//				}
+//
+//				double newAngle = oldAngle + angle;
+//				double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
+//				double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
+//
+//				p.setX(newX);
+//				p.setY(newY);
+//			}
 			super.rotate(angle);
 		}
 	}
@@ -708,17 +702,17 @@ extends SpermNucleus
   public String dumpInfo(int type){
 	  String result = super.dumpInfo(type);
 	  
-	  result += "  Hook roi:\n";
-	  for(int i=0; i<hookRoi.size(); i++){
-		  BorderPoint p = hookRoi.get(i);
-		  result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\n";
-	  }
-	  
-	  result += "  Hump roi:\n";
-	  for(int i=0; i<humpRoi.size(); i++){
-		  BorderPoint p = humpRoi.get(i);
-		  result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\n";
-	  }
+//	  result += "  Hook roi:\n";
+//	  for(int i=0; i<hookRoi.size(); i++){
+//		  BorderPoint p = hookRoi.get(i);
+//		  result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\n";
+//	  }
+//	  
+//	  result += "  Hump roi:\n";
+//	  for(int i=0; i<humpRoi.size(); i++){
+//		  BorderPoint p = humpRoi.get(i);
+//		  result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\n";
+//	  }
 	  
 	  return result;
 	  
@@ -726,15 +720,12 @@ extends SpermNucleus
   
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
-	    try {
-	    	
-	    	// calculate for new datasets
-			calculateHookOrBodyLength();
-						
-		} catch (Exception e) {
+//	    try {
+//						
+//		} catch (Exception e) {
 		    this.hookLength = 0;
 		    this.bodyWidth = 0;
-		}
+//		}
 
 	}
 }

@@ -3,6 +3,7 @@ package components;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +95,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		}
 		// link endpoints
 		borderList.get(borderList.size()-1).setNextPoint(borderList.get(0));
-		borderList.get(0).setNextPoint(borderList.get(borderList.size()-1));
+		borderList.get(0).setPrevPoint(borderList.get(borderList.size()-1));
 	}
 	
 	
@@ -281,7 +282,8 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 
 
 	public BorderPoint getBorderPoint(int i){
-		return new BorderPoint(this.borderList.get(i));
+		return this.borderList.get(i);
+//		return new BorderPoint(this.borderList.get(i));
 	}
 	
 	public int getBorderIndex(BorderPoint p){
@@ -356,7 +358,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 			}
 		}
 		list.get(list.size()-1).setNextPoint(list.get(0));
-		list.get(0).setNextPoint(list.get(list.size()-1));
+		list.get(0).setPrevPoint(list.get(list.size()-1));
 		this.borderList = list;
 	}
 	
@@ -509,49 +511,46 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	}
 	
 	/**
-	 * Turn a list of border points into a polygon. The points are at the original
+	 * Turn the list of border points into a polygon. The points are at the original
 	 * position in a source image.
 	 * @see Nucleus.getPosition
 	 * @return
 	 */
 	public FloatPolygon createOriginalPolygon(){
+
+		return createOffsetPolygon(  (float) position[CellularComponent.X_BASE],
+				                     (float) position[CellularComponent.Y_BASE]);
+	}
+
+	/**
+	 * Turn the list of border points into a closed polygon. 
+	 * @return
+	 */
+	public FloatPolygon createPolygon(){
+		return createOffsetPolygon(0, 0);
+	}
+
+	/**
+	 * Make an offset polygon from 
+	 * @return
+	 */
+	private FloatPolygon createOffsetPolygon(float xOffset, float yOffset){
 		float[] xpoints = new float[borderList.size()+1];
 		float[] ypoints = new float[borderList.size()+1];
 
 		for(int i=0;i<borderList.size();i++){
 			BorderPoint p = borderList.get(i);
-			xpoints[i] = (float) p.getX() + (float) position[CellularComponent.X_BASE];
-			ypoints[i] = (float) p.getY() + (float) position[CellularComponent.Y_BASE];
+			xpoints[i] = (float) p.getX() + xOffset;
+			ypoints[i] = (float) p.getY() + yOffset;
 		}
 
 		// Ensure the polygon is closed
-		xpoints[borderList.size()] = (float) borderList.get(0).getX() + (float) position[CellularComponent.X_BASE];
-		ypoints[borderList.size()] = (float) borderList.get(0).getY() + (float) position[CellularComponent.Y_BASE];
+		xpoints[borderList.size()] = (float) borderList.get(0).getX() + xOffset;
+		ypoints[borderList.size()] = (float) borderList.get(0).getY() + yOffset;
 
 		return new FloatPolygon(xpoints, ypoints);
 	}
 	
-	 /**
-	 * Turn a list of border points into a polygon. 
-	 * @param list the list of border points
-	 * @return
-	 */
-	public FloatPolygon createPolygon(){
-		 float[] xpoints = new float[borderList.size()+1];
-		 float[] ypoints = new float[borderList.size()+1];
-
-		 for(int i=0;i<borderList.size();i++){
-			 BorderPoint p = borderList.get(i);
-			 xpoints[i] = (float) p.getX();
-			 ypoints[i] = (float) p.getY();
-		 }
-		 
-		 // Ensure the polygon is closed
-		 xpoints[borderList.size()] = (float) borderList.get(0).getX();
-		 ypoints[borderList.size()] = (float) borderList.get(0).getY();
-
-		 return new FloatPolygon(xpoints, ypoints);
-	 }
 	
 	 /**
 	  * Wrap arrays. If an index falls of the end, it is returned to the start and vice versa
@@ -569,34 +568,38 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		 }
 		 
 		 return i%length;
-
-		 
-		 
-		 
-//		 if(Math.floor(i / length)>0)
-//			 i = i - ( ((int)Math.floor(i / length) )*length);
-
-//		 if(i<0 || i>length){
-//			 IJ.log("Warning: array out of bounds: "+i);
-//		 }
-
-//		 return i;
 	 }
 	
-	 /**
-	  * Wrap arrays for doubles. If an index falls of the end, it is returned to the start and vice versa
+	/**
+	 * Wrap arrays for doubles. This is used in interpolation. 
+	 * If an index falls of the end, it is returned to the start and vice versa
 	 * @param i the index
 	 * @param length the array length
 	 * @return the index within the array
 	 */
 	public static double wrapIndex(double i, int length){
-		 if(i<0)
-			 i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
+		 if(i<0){
+			 return length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
+		 }
 		 
-		 if(Math.floor(i / length)>0) // if i is greater than array length 
-			 i = i - (  (      (int)Math.floor(i / length) )    * length  );
-
-		 return i;
+		 if(i<length){ // if not wrapping
+			 return i;
+		 }
+		 
+		// i is greater than array length
+		 
+		 return i % length;
+		 
+//		 BigDecimal x = new BigDecimal( i );
+//		 BigDecimal bdVal = x.subtract( x.remainder( new BigDecimal( length ) ) );
+//		 
+//		 return bdVal.doubleValue();
+		 
+		 
+//		 if(Math.floor(i / length)>0) // if i is greater than array length 
+//			 i = i - (  (      (int)Math.floor(i / length) )    * length  );
+//
+//		 return i;
 	 }
 	
 }

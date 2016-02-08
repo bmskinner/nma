@@ -136,18 +136,33 @@ private double x;
   }
 
   /**
-  * Tests if the two points overlap with
-  * integer precision
-  *
-  * @param a the point to test against
-  * @return boolean whether they overlap as integers
-  */
+   * Tests if the two points overlap with
+   * integer precision
+   *
+   * @param a the point to test against
+   * @return boolean whether they overlap as integers
+   */
   public boolean overlaps(final XYPoint a){
-    if( this.getXAsInt() == a.getXAsInt() && this.getYAsInt() == a.getYAsInt()){
-      return true;
-    } else {
-      return false;
-    }
+	  if( this.getXAsInt() == a.getXAsInt() && this.getYAsInt() == a.getYAsInt()){
+		  return true;
+	  } else {
+		  return false;
+	  }
+  }
+  
+  /**
+   * Tests if the two points overlap with
+   * double precision
+   *
+   * @param a the point to test against
+   * @return boolean whether they overlap as doubles
+   */
+  public boolean overlapsPerfectly(final XYPoint a){
+	  if( this.getX() == a.getX() && this.getY() == a.getY()){
+		  return true;
+	  } else {
+		  return false;
+	  }
   }
 
   /**

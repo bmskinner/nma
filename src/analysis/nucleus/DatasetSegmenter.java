@@ -114,7 +114,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 			
 			// Ensure that all hook-hump assignments are correct, and
 			// top and bottom border points are set for rodent sperm
-			giveAFinalPolish();
+//			giveAFinalPolish();
 			
 		} catch(Exception e){
 			result = false;
@@ -125,38 +125,38 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 	}
     
-    private void giveAFinalPolish() throws Exception{
-    	
-    	if(this.getDataset().getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
-    		if(! getDataset().getCollection()
-    				.getProfileCollection(ProfileType.REGULAR)
-    				.hasBorderTag(BorderTag.TOP_VERTICAL)  ){
-
-    			log(Level.FINE, "TOP_ and BOTTOM_VERTICAL not assigned; calculating");
-    			calculateTopAndBottomVerticals(getDataset());
-    			log(Level.FINE, "Calculating TOP and BOTTOM for child datasets");
-    			for(AnalysisDataset child : getDataset().getAllChildDatasets()){
-    				calculateTopAndBottomVerticals(child);
-    			}
-
-    		}
-
-    		log(Level.FINE, "Updating dataset hook-hump split and signals");
-    		updateRodentSpermHookHumpSplits(this.getDataset());
-    		for(AnalysisDataset child : this.getDataset().getAllChildDatasets()){
-    			updateRodentSpermHookHumpSplits(child);
-    		}
-    	}
-    }
+//    private void giveAFinalPolish() throws Exception{
+//    	
+//    	if(this.getDataset().getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
+//    		if(! getDataset().getCollection()
+//    				.getProfileCollection(ProfileType.REGULAR)
+//    				.hasBorderTag(BorderTag.TOP_VERTICAL)  ){
+//
+//    			log(Level.FINE, "TOP_ and BOTTOM_VERTICAL not assigned; calculating");
+//    			calculateTopAndBottomVerticals(getDataset());
+//    			log(Level.FINE, "Calculating TOP and BOTTOM for child datasets");
+//    			for(AnalysisDataset child : getDataset().getAllChildDatasets()){
+//    				calculateTopAndBottomVerticals(child);
+//    			}
+//
+//    		}
+//
+//    		log(Level.FINE, "Updating dataset hook-hump split and signals");
+//    		updateRodentSpermHookHumpSplits(this.getDataset());
+//    		for(AnalysisDataset child : this.getDataset().getAllChildDatasets()){
+//    			updateRodentSpermHookHumpSplits(child);
+//    		}
+//    	}
+//    }
     
-	private void calculateTopAndBottomVerticals(AnalysisDataset dataset) throws Exception {
-		
-		log(Level.FINE, "Detecting flat region");
-		DatasetProfiler.TailFinder.assignTopAndBottomVerticalInMouse(dataset.getCollection());
-		
-		log(Level.FINE, "Assigning flat region to nuclei");
-		DatasetProfiler.Offsetter.assignFlatRegionToMouseNuclei(dataset.getCollection());
-	}
+//	private void calculateTopAndBottomVerticals(AnalysisDataset dataset) throws Exception {
+//		
+//		log(Level.FINE, "Detecting flat region");
+//		DatasetProfiler.TailFinder.assignTopAndBottomVerticalInMouse(dataset.getCollection());
+//		
+//		log(Level.FINE, "Assigning flat region to nuclei");
+//		DatasetProfiler.Offsetter.assignFlatRegionToMouseNuclei(dataset.getCollection());
+//	}
     
 	/**
 	 * Recalculate the hook-hunp split, and signal angle measurements for the 
@@ -164,21 +164,21 @@ public class DatasetSegmenter extends AnalysisWorker {
 	 * @param d
 	 * @throws Exception
 	 */
-	private void updateRodentSpermHookHumpSplits(AnalysisDataset d) throws Exception{
-		
-		if(d.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
-			for(Nucleus n : d.getCollection().getNuclei()){
-
-				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
-				// recalculate - old datasets have problems
-				nucleus.splitNucleusToHeadAndHump();
-
-				// recalculate signal angles - old datasets have problems
-				nucleus.calculateSignalAnglesFromPoint(nucleus.getPoint(BorderTag.ORIENTATION_POINT));
-			}
-		}
-		
-	}
+//	private void updateRodentSpermHookHumpSplits(AnalysisDataset d) throws Exception{
+//		
+//		if(d.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
+//			for(Nucleus n : d.getCollection().getNuclei()){
+//
+//				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
+//				// recalculate - old datasets have problems
+//				nucleus.splitNucleusToHeadAndHump();
+//
+//				// recalculate signal angles - old datasets have problems
+//				nucleus.calculateSignalAnglesFromPoint(nucleus.getPoint(BorderTag.ORIENTATION_POINT));
+//			}
+//		}
+//		
+//	}
     
     private boolean runNewAnalysis() throws Exception {
     	log(Level.FINE, "Beginning core morphology analysis");

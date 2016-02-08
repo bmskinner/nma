@@ -473,7 +473,6 @@ public class Profile implements Serializable {
 			  		? index1 - 1
 					: index1 + 1;
 	  
-//	  System.out.println("Index selection "+normIndex+": "+index1+" and "+index2);
 
 	  // Decide which of the two indexes is the higher, and which is the lower
 	  int indexLower 	= index1 < index2

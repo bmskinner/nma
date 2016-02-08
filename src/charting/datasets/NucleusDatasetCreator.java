@@ -1246,18 +1246,18 @@ public class NucleusDatasetCreator {
 			double[][] data = { xpoints, ypoints };
 			ds.addSeries("Hook", data);
 			
-			double[] xpoints2 = new double[nucleus.getHumpRoi().size()];
-			double[] ypoints2 = new double[nucleus.getHumpRoi().size()];
-
-			i =0;
-			for(XYPoint p : nucleus.getHumpRoi()){
-				xpoints2[i] = p.getX();
-				ypoints2[i] = p.getY();
-				i++;
-			}
-
-			double[][] data2 = { xpoints2, ypoints2 };
-			ds.addSeries("Hump", data2);
+//			double[] xpoints2 = new double[nucleus.getHumpRoi().size()];
+//			double[] ypoints2 = new double[nucleus.getHumpRoi().size()];
+//
+//			i =0;
+//			for(XYPoint p : nucleus.getHumpRoi()){
+//				xpoints2[i] = p.getX();
+//				ypoints2[i] = p.getY();
+//				i++;
+//			}
+//
+//			double[][] data2 = { xpoints2, ypoints2 };
+//			ds.addSeries("Hump", data2);
 			
 		} 
 		return ds;

@@ -396,7 +396,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * Find the bounding rectangle of the Nucleus. If the TopVertical and
 	 * BottomVertical points have been set, these will be used. Otherwise,
 	 * the given point is moved to directly below the CoM
-	 * @param point
+	 * @param point the point to put at the bottom. Overridden if TOP_  and BOTTOM_ are set
 	 * @return
 	 * @throws Exception
 	 */
@@ -1033,7 +1033,8 @@ public class RoundNucleus extends AbstractCellularComponent
 	public BorderPoint getBorderTag(BorderTag tag){
 		BorderPoint result = new BorderPoint(0,0);
 		if(this.getBorderIndex(tag)>-1){
-			result = new BorderPoint(this.getBorderPoint((this.getBorderIndex(tag))));
+			result = this.getBorderPoint((this.getBorderIndex(tag)));
+//			result = new BorderPoint(this.getBorderPoint((this.getBorderIndex(tag))));
 		} else {
 			return null;
 		}
