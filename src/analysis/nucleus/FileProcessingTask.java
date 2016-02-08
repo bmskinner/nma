@@ -1,0 +1,206 @@
+package analysis.nucleus;
+
+import java.io.File;
+import java.util.List;
+import java.util.concurrent.RecursiveAction;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import analysis.AnalysisOptions;
+import components.Cell;
+import components.CellCollection;
+import components.CellularComponent;
+import components.nuclei.Nucleus;
+import ij.IJ;
+import ij.ImageStack;
+import ij.gui.PolygonRoi;
+import io.ImageExporter;
+import io.ImageImporter;
+import utility.Constants;
+
+public class FileProcessingTask  extends RecursiveAction {
+	
+	private CellCollection collection;
+	private File[] files;
+	private static final int THRESHOLD = 10;
+	final int low, high;
+	NucleusFinder finder;
+	
+	String outputFolder;
+	Logger programLogger;
+	AnalysisOptions analysisOptions;
+	File folder;
+	
+	FileProcessingTask(File folder, File[] files, CellCollection collection, int low, int high, String outputFolder, Logger programLogger, AnalysisOptions analysisOptions) {
+		this.collection = collection;
+		this.files = files;
+		this.folder = folder;
+		this.low = low;
+		this.high = high;
+		this.outputFolder = outputFolder;
+		this.programLogger = programLogger;
+		this.analysisOptions = analysisOptions;
+		finder = new NucleusFinder(programLogger, analysisOptions, outputFolder);
+	}
+
+	FileProcessingTask(File folder, File[] files, CellCollection collection, String outputFolder, Logger programLogger, AnalysisOptions analysisOptions) {
+		this(folder, files, collection, 0, files.length, outputFolder, programLogger, analysisOptions);
+
+	}
+	
+	protected void compute() {
+	     if (high - low < THRESHOLD)
+	       analyseFiles(low, high);
+	     else {
+	       int mid = (low + high) >>> 1;
+	       invokeAll(new FileProcessingTask(folder, files, collection, low, mid, outputFolder, programLogger, analysisOptions),
+	                 new FileProcessingTask(folder, files, collection, mid, high, outputFolder, programLogger, analysisOptions));
+//	       merge(low, mid, high);
+	     }
+	   }
+	
+	void analyseFiles(int lo, int hi) {
+		
+		for(int i=low; i<high; i++){
+			analyseFile(files[i]);
+		}
+		
+	}
+	
+	
+	private void analyseFile(File file){
+		boolean ok = checkFile(file);
+
+		  if(ok){
+			  try {
+
+				  ImageStack imageStack = ImageImporter.importImage(file);
+
+				  // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
+				  makeFolder(folder);
+				  
+				  programLogger. log(Level.INFO, "File:  "+file.getName());
+				  List<Cell> cells = finder.getCells(imageStack, file);
+				  
+				  if(cells.isEmpty()){
+					  programLogger.log(Level.INFO, "  No nuclei detected in image");
+				  } else {
+					  int nucleusNumber = 0;
+					  for(Cell cell : cells){
+						  addAndProcessCell(cell, imageStack, nucleusNumber++);
+					  }
+				  }
+
+			  } catch (Exception e) { // end try
+//				  logError("Error in image processing: "+e.getMessage(), e);
+			  } // end catch
+			  
+//			  publish(progress++); // must be global since this function recurses
+		  } else { // if !ok
+			  if(file.isDirectory()){ // recurse over any sub folders
+//				  processFolder(file);
+			  } 
+		  } // end else if !ok
+	   }
+
+
+	private void addAndProcessCell(Cell cell, ImageStack imageStack, int nucleusNumber ) throws Exception{
+		collection.addCell(cell);
+//		  log(Level.INFO, "  Added nucleus "+nucleusNumber);
+
+		 
+		  // save out the image stacks rather than hold within the nucleus
+		  Nucleus n 			 = cell.getNucleus();
+		  PolygonRoi nucleus 	 = new PolygonRoi(n.createPolygon(), PolygonRoi.POLYGON);
+		  
+		  double[] position = n.getPosition();
+		  nucleus.setLocation(position[CellularComponent.X_BASE],position[CellularComponent.Y_BASE]); // translate the roi to the image coordinates
+		  
+		  ImageStack smallRegion = NucleusFinder.getRoiAsStack(nucleus, imageStack);
+		  
+		  try{
+			  IJ.saveAsTiff(ImageExporter.convertToRGB(smallRegion), n.getAnnotatedImagePath());
+		  } catch(Exception e){
+//			  logError("Error saving original, enlarged or annotated image", e);
+		  }
+	}
+
+	/**
+	 *  Checks that the given file is suitable for analysis.
+	 *  Is the file an image. Also check if it is in the 'banned list'.
+	 *  These are prefixes that are attached to exported images
+	 *  at later stages of analysis. This prevents exported images
+	 *  from previous runs being analysed.
+	 *
+	 *  @param file the File to check
+	 *  @return a true or false of whether the file passed checks
+	 */
+	public static boolean checkFile(File file){
+
+		if( ! file.isFile()){
+			return false;
+		}
+
+		String fileName = file.getName();
+
+		for( String prefix : Constants.PREFIXES_TO_IGNORE){
+			if(fileName.startsWith(prefix)){
+				return false;
+			}
+		}
+
+		for( String fileType : Constants.IMPORTABLE_FILE_TYPES){
+			if( fileName.endsWith(fileType) ){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	  /**
+	  * Create the output folder for the analysis if required
+	  *
+	  * @param folder the folder in which to create the analysis folder
+	  * @return a File containing the created folder
+	  */
+	  private File makeFolder(File folder){
+	    File output = new File(folder.getAbsolutePath()+File.separator+this.outputFolder);
+	    if(!output.exists()){
+	      try{
+	        output.mkdir();
+	      } catch(Exception e) {
+//	    	  logError("Failed to create directory", e);
+	      }
+	    }
+	    return output;
+	  }
+}
+
+//static class SortTask extends RecursiveAction {
+//	   final long[] array; final int lo, hi;
+//	   SortTask(long[] array, int lo, int hi) {
+//	     this.array = array; this.lo = lo; this.hi = hi;
+//	   }
+//	   SortTask(long[] array) { this(array, 0, array.length); }
+//	   protected void compute() {
+//	     if (hi - lo < THRESHOLD)
+//	       sortSequentially(lo, hi);
+//	     else {
+//	       int mid = (lo + hi) >>> 1;
+//	       invokeAll(new SortTask(array, lo, mid),
+//	                 new SortTask(array, mid, hi));
+//	       merge(lo, mid, hi);
+//	     }
+//	   }
+//	   // implementation details follow:
+//	   static final int THRESHOLD = 1000;
+//	   void sortSequentially(int lo, int hi) {
+//	     Arrays.sort(array, lo, hi);
+//	   }
+//	   void merge(int lo, int mid, int hi) {
+//	     long[] buf = Arrays.copyOfRange(array, lo, mid);
+//	     for (int i = 0, j = lo, k = mid; i < buf.length; j++)
+//	       array[j] = (k == hi || buf[i] < array[k]) ?
+//	         buf[i++] : array[k++];
+//	   }
+//	 }
