@@ -218,13 +218,13 @@ public class MergesDetailPanel extends DetailPanel {
 	 */
 	protected void updateSingle() throws Exception {
 
-		TableOptions options = new TableOptionsBuilder()
-		.setDatasets(getDatasets())
-		.setLogger(programLogger)
-		.setType(TableType.MERGE_SOURCES)
-		.build();
-
-		TableModel model = getTable(options);
+//		TableOptions options = new TableOptionsBuilder()
+//		.setDatasets(getDatasets())
+//		.setLogger(programLogger)
+//		.setType(TableType.MERGE_SOURCES)
+//		.build();
+//
+//		TableModel model = getTable(options);
 
 //		mergeSources.setModel(model);
 
@@ -259,13 +259,13 @@ public class MergesDetailPanel extends DetailPanel {
 	protected void updateNull() throws Exception {
 		getSourceButtonPanel.setVisible(false);
 		
-		TableOptions options = new TableOptionsBuilder()
-		.setDatasets(null)
-		.setType(TableType.MERGE_SOURCES)
-		.setLogger(programLogger)
-		.build();
-		
-		TableModel model = getTable(options);
+//		TableOptions options = new TableOptionsBuilder()
+//		.setDatasets(null)
+//		.setType(TableType.MERGE_SOURCES)
+//		.setLogger(programLogger)
+//		.build();
+//		
+//		TableModel model = getTable(options);
 		
 		
 		TableOptions parameterOptions = new TableOptionsBuilder()

@@ -19,6 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
+import gui.InterfaceEvent.InterfaceMethod;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
@@ -61,14 +62,12 @@ public class RefoldNucleusAction extends ProgressableAction {
 	
 	@Override
 	public void finished(){
-
+		this.cancel();
 		programLogger.log(Level.FINE, "Refolding finished, cleaning up");
-
-		dataset.getAnalysisOptions().setRefoldNucleus(true);
-		dataset.getAnalysisOptions().setRefoldMode("Fast");
-		
 		super.finished();
-		this.countdownLatch();
+//		this.countdownLatch();
+		
+		
 		
 	}
 

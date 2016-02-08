@@ -772,34 +772,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			
 			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
-				programLogger.log(Level.INFO, "Refolding consensus");
-				programLogger.log(Level.FINEST, "Refold consensus dataset method is EDT: "+SwingUtilities.isEventDispatchThread());
-				
-				Thread thr = new Thread(){
-
-					public void run(){
-						
-						/*
-						 * The refold action needs to be able to hold up a series
-						 * of following actions, when it is being used in a New Analysis.
-						 * The countdown latch does nothing here, but must be retained for
-						 * compatibility.
-						 */
-						
-						final CountDownLatch latch = new CountDownLatch(1);
-						programLogger.log(Level.FINEST, "Created latch: "+latch.getCount());
-						new RefoldNucleusAction(event.firstDataset(), MainWindow.this, latch);
-
-						programLogger.log(Level.FINEST, "Running refolding");
-						try {
-							latch.await();
-							programLogger.log(Level.FINEST, "Latch counted down: "+latch.getCount());
-						} catch (InterruptedException e) {
-							programLogger.log(Level.SEVERE, "Interruption to thread", e);
-						}
-					}
-				};
-				thr.start();
+				refoldConsensus(event.firstDataset());
 			}
 			
 			if(event.method().equals(DatasetMethod.SELECT_DATASETS)){
@@ -856,6 +829,43 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		
 	}
 	
+	private void refoldConsensus(final AnalysisDataset dataset){
+		programLogger.log(Level.INFO, "Refolding consensus");
+		programLogger.log(Level.FINEST, "Refold consensus dataset method is EDT: "+SwingUtilities.isEventDispatchThread());
+		
+		Thread thr = new Thread(){
+
+			public void run(){
+				
+				/*
+				 * The refold action needs to be able to hold up a series
+				 * of following actions, when it is being used in a New Analysis.
+				 * The countdown latch does nothing here, but must be retained for
+				 * compatibility.
+				 */
+				
+				final CountDownLatch latch = new CountDownLatch(1);
+				programLogger.log(Level.FINEST, "Created latch: "+latch.getCount());
+				new RefoldNucleusAction(dataset, MainWindow.this, latch);
+
+				programLogger.log(Level.FINEST, "Running refolding");
+				try {
+					latch.await();
+					dataset.getAnalysisOptions().setRefoldNucleus(true);
+					dataset.getAnalysisOptions().setRefoldMode("Fast");
+					
+					programLogger.log(Level.FINE, "Set refold status in options");
+					recacheCharts();
+					populationsPanel.selectDataset(dataset);
+					programLogger.log(Level.FINEST, "Latch counted down: "+latch.getCount());
+				} catch (InterruptedException e) {
+					programLogger.log(Level.SEVERE, "Interruption to thread", e);
+				}
+			}
+		};
+		thr.start();
+	}
+	
 	private void saveRootDatasets(){
 		for(AnalysisDataset root : populationsPanel.getRootDatasets()){
 			final CountDownLatch latch = new CountDownLatch(1);
@@ -868,6 +878,14 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 		}
 		programLogger.log(Level.INFO, "All root datasets saved");
+	}
+	
+	private void recacheCharts(){
+		for(DetailPanel panel : this.detailPanels){
+			panel.refreshChartCache();
+			panel.refreshTableCache();
+		}
+		this.updatePanels(populationsPanel.getSelectedDatasets());
 	}
 
 	
@@ -897,11 +915,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			break;
 			
 		case RECACHE_CHARTS:
-			for(DetailPanel panel : this.detailPanels){
-				panel.refreshChartCache();
-				panel.refreshTableCache();
-			}
-			this.updatePanels(populationsPanel.getSelectedDatasets());
+			recacheCharts();
 			break;
 		case LIST_DATASETS:
 			int i=0;
