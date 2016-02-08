@@ -18,6 +18,7 @@
  *******************************************************************************/
 package logging;
 
+
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.logging.Formatter;
@@ -30,11 +31,15 @@ public class DebugFileFormatter extends Formatter {
 	    public String format(LogRecord record) {
 		 
 		 /*
-		  * The source method name is obscured by the log functions.
+		  * The source method name can be obscured by the log functions.
 		  * Get the stack trace and find the previous calling method.
 		  */
-//		 Thread.currentThread().getStackTrace();
 		 
+		 String sourceMethod = record.getSourceMethodName();
+		 if(sourceMethod.equals("log")){
+			 StackTraceElement[] array = Thread.currentThread().getStackTrace();
+			 sourceMethod = array[1].getMethodName();
+		 }
 		 
 		 String date = calcDate(record.getMillis());
 		 String log = date 
@@ -43,7 +48,7 @@ public class DebugFileFormatter extends Formatter {
 				 + "\t" 
 				 + record.getLoggerName()
 				 + "\t"
-				 + record.getSourceMethodName()
+				 + sourceMethod
 				 + "\t"
 				 + record.getMessage()
 				 + "\r\n";
