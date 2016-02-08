@@ -19,18 +19,14 @@
 package charting.charts;
 
 import gui.components.ColourSelecter;
-import ij.IJ;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import stats.SegmentStatistic;
 import stats.SignalStatistic;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -47,7 +43,6 @@ import charting.datasets.NuclearHistogramDatasetCreator;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.ChartOptions;
 import analysis.AnalysisDataset;
-import components.generic.MeasurementScale;
 
 
 public class HistogramChartFactory extends AbstractChartFactory {
@@ -229,12 +224,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		
 		if(ds!=null && options.hasDatasets()){
 						
-			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
-			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
-			
-			if(maxX.doubleValue()>minX.doubleValue()){ // stop if 0 and 0
-				plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());
-			}
+			setDomainRange(plot, ds);
 						
 			for (int j = 0; j < ds.getSeriesCount(); j++) {
 
@@ -317,9 +307,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 						
 			XYPlot plot = chart.getXYPlot();
 			
-			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
-			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
-			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());	
+			setDomainRange(plot, ds);
 			
 			for (int j = 0; j < ds.getSeriesCount(); j++) {
 
@@ -381,9 +369,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		
 		if(ds!=null && options.hasDatasets()){
 						
-			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
-			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
-			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());	
+			setDomainRange(plot, ds);
 			
 			
 			for (int j = 0; j < ds.getSeriesCount(); j++) {
@@ -443,9 +429,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 						
 			XYPlot plot = chart.getXYPlot();
 			
-			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
-			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
-			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());	
+			setDomainRange(plot, ds);
 			
 			for (int j = 0; j < ds.getSeriesCount(); j++) {
 
@@ -505,9 +489,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		
 		if(ds!=null && options.hasDatasets()){
 						
-			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
-			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
-			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());	
+			setDomainRange(plot, ds);
 			
 			
 			for (int j = 0; j < ds.getSeriesCount(); j++) {
@@ -537,6 +519,20 @@ public class HistogramChartFactory extends AbstractChartFactory {
 
 		}
 		return chart;
+	}
+	
+	/**
+	 * Update the range of the plot domain axis to the min and max
+	 * values within the given dataset
+	 * @param plot
+	 * @param ds
+	 */
+	private static void setDomainRange(XYPlot plot, XYDataset ds){
+		Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
+		Number minX = DatasetUtilities.findMinimumDomainValue(ds);
+		if(maxX.doubleValue()>minX.doubleValue()){ // stop if 0 and 0
+			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());
+		}
 	}
 
 }
