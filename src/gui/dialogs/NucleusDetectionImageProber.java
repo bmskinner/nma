@@ -252,7 +252,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 		
 		
 		double[] positions = n.getPosition();
-		FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
+		FloatPolygon polygon = n.createPolygon();
 		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 		roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
 		ip.setLineWidth(2);

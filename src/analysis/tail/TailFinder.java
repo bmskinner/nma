@@ -452,7 +452,7 @@ public class TailFinder {
 		// ensure that the positions of the nucleus are corrected to
 		// match the original image
 		List<SpermTail> result = new ArrayList<SpermTail>(0);
-		FloatPolygon nucleusOutline = Utils.createOriginalPolygon(n);
+		FloatPolygon nucleusOutline = n.createOriginalPolygon();
 		
 		for(SpermTail tail : tails){
 			

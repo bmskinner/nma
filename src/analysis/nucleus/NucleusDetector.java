@@ -399,7 +399,7 @@ public class NucleusDetector extends AnalysisWorker {
 						 
 						  // save out the image stacks rather than hold within the nucleus
 						  Nucleus n 			 = cell.getNucleus();
-						  PolygonRoi nucleus 	 = new PolygonRoi(Utils.createPolygon(n), PolygonRoi.POLYGON);
+						  PolygonRoi nucleus 	 = new PolygonRoi(n.createPolygon(), PolygonRoi.POLYGON);
 						  
 						  double[] position = n.getPosition();
 						  nucleus.setLocation(position[CellularComponent.X_BASE],position[CellularComponent.Y_BASE]); // translate the roi to the image coordinates

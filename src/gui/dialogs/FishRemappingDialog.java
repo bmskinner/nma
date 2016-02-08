@@ -132,7 +132,7 @@ public class FishRemappingDialog extends ImageProber {
 					Nucleus n = c.getNucleus();
 					double[] positions = n.getPosition();
 
-					FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
+					FloatPolygon polygon = n.createPolygon();
 					PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 					roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
 
@@ -279,7 +279,7 @@ public class FishRemappingDialog extends ImageProber {
 		double[] positions = n.getPosition();
 		ip.setColor(chooseNucleusOutlineColor(c));
 		ip.setLineWidth(NUCLEUS_OUTLINE_WIDTH);
-		FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
+		FloatPolygon polygon = n.createPolygon();
 		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 		roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
 		ip.draw(roi);

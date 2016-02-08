@@ -13,6 +13,7 @@ import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
+import components.nuclei.Nucleus;
 import ij.IJ;
 import ij.ImageStack;
 import ij.gui.Roi;
@@ -365,7 +366,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	 * @return
 	 */
 	public boolean containsPoint(XYPoint p){
-		if(Utils.createPolygon(this.getBorderList()).contains( (float)p.getX(), (float)p.getY() ) ){
+		if(this.createPolygon().contains( (float)p.getX(), (float)p.getY() ) ){
 			return true;
 		} else { 
 			return false;
@@ -378,7 +379,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	 * @return
 	 */
 	public boolean containsOriginalPoint(XYPoint p){
-		if(Utils.createPolygon(this.getOriginalBorderList()).contains( (float)p.getX(), (float)p.getY() ) ){
+		if(this.createOriginalPolygon().contains( (float)p.getX(), (float)p.getY() ) ){
 			return true;
 		} else { 
 			return false;
@@ -506,6 +507,51 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		// update the positions
 		this.moveCentreOfMass(newCentreOfMass);
 	}
+	
+	/**
+	 * Turn a list of border points into a polygon. The points are at the original
+	 * position in a source image.
+	 * @see Nucleus.getPosition
+	 * @return
+	 */
+	public FloatPolygon createOriginalPolygon(){
+		float[] xpoints = new float[borderList.size()+1];
+		float[] ypoints = new float[borderList.size()+1];
+
+		for(int i=0;i<borderList.size();i++){
+			BorderPoint p = borderList.get(i);
+			xpoints[i] = (float) p.getX() + (float) position[CellularComponent.X_BASE];
+			ypoints[i] = (float) p.getY() + (float) position[CellularComponent.Y_BASE];
+		}
+
+		// Ensure the polygon is closed
+		xpoints[borderList.size()] = (float) borderList.get(0).getX() + (float) position[CellularComponent.X_BASE];
+		ypoints[borderList.size()] = (float) borderList.get(0).getY() + (float) position[CellularComponent.Y_BASE];
+
+		return new FloatPolygon(xpoints, ypoints);
+	}
+	
+	 /**
+	 * Turn a list of border points into a polygon. 
+	 * @param list the list of border points
+	 * @return
+	 */
+	public FloatPolygon createPolygon(){
+		 float[] xpoints = new float[borderList.size()+1];
+		 float[] ypoints = new float[borderList.size()+1];
+
+		 for(int i=0;i<borderList.size();i++){
+			 BorderPoint p = borderList.get(i);
+			 xpoints[i] = (float) p.getX();
+			 ypoints[i] = (float) p.getY();
+		 }
+		 
+		 // Ensure the polygon is closed
+		 xpoints[borderList.size()] = (float) borderList.get(0).getX();
+		 ypoints[borderList.size()] = (float) borderList.get(0).getY();
+
+		 return new FloatPolygon(xpoints, ypoints);
+	 }
 	
 	 /**
 	  * Wrap arrays. If an index falls of the end, it is returned to the start and vice versa

@@ -160,7 +160,7 @@ public class SignalDetectionImageProber extends ImageProber {
 			
 			// Draw the nucleus
 			ip.setColor(Color.BLUE);
-			FloatPolygon npolygon = Utils.createPolygon(n.getBorderList());
+			FloatPolygon npolygon = n.createPolygon();
 			PolygonRoi nroi = new PolygonRoi(npolygon, PolygonRoi.POLYGON);
 			nroi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
 			ip.draw(nroi);
@@ -174,7 +174,7 @@ public class SignalDetectionImageProber extends ImageProber {
 					ip.setColor(Color.RED);
 				}
 
-				FloatPolygon polygon = Utils.createPolygon(s.getBorderList());
+				FloatPolygon polygon = s.createPolygon();
 				PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 				
 				// Offset the roi to the nucleus bouding box

@@ -1124,7 +1124,7 @@ public class NucleusDatasetCreator {
 
 			// determine which of the points is inside the nucleus and which is outside
 			
-			FloatPolygon nucleusRoi = Utils.createPolygon(n);
+			FloatPolygon nucleusRoi = n.createPolygon();
 			XYPoint innerPoint = nucleusRoi.contains(  (float) aPoint.getX(), (float) aPoint.getY() ) ? aPoint : bPoint;
 			XYPoint outerPoint = nucleusRoi.contains(  (float) bPoint.getX(), (float) bPoint.getY() ) ? aPoint : bPoint;
 

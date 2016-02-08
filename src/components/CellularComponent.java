@@ -18,6 +18,7 @@
  *******************************************************************************/
 package components;
 
+import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
 import java.awt.Rectangle;
@@ -284,6 +285,15 @@ public interface CellularComponent {
 	 * @param point the new centre of mass
 	 */
 	public void offset(double xOffset, double yOffset);
+	
+	public FloatPolygon createOriginalPolygon();
+	
+	 /**
+	 * Turn a list of border points into a polygon. 
+	 * @param list the list of border points
+	 * @return
+	 */
+	public FloatPolygon createPolygon();
 		
 	
 }

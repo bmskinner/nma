@@ -414,7 +414,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 
 		
-		FloatPolygon pw = Utils.createPolygon(testw);
+		FloatPolygon pw = testw.createPolygon();
 		return pw.getBounds();
 	}
 	
@@ -1210,9 +1210,10 @@ public class RoundNucleus extends AbstractCellularComponent
 			double midY = (pointBefore.getY()+pointAfter.getY())/2;
 			
 			// create a polygon from the border list - we are not storing the polygon directly
-			FloatPolygon polygon = Utils.createPolygon(this);
+//			FloatPolygon polygon = this.createPolygon();
+			if(this.createPolygon().contains((float) midX, (float) midY)){
 			
-			if(polygon.contains( (float) midX, (float) midY)){
+//			if(polygon.contains( (float) midX, (float) midY)){
 				angles[index] = angle;
 			} else {
 				angles[index] = 360-angle;

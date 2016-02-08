@@ -98,7 +98,7 @@ public class CompositeExporter {
 					ImagePlus image = localOpener.openImage(path);
 					ImageProcessor ip = image.getProcessor();
 
-					FloatPolygon polygon = Utils.createPolygon(n);
+					FloatPolygon polygon = n.createPolygon();
 					PolygonRoi roi = new PolygonRoi(polygon, Roi.POLYGON);
 					ip.setRoi(roi);
 

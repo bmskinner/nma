@@ -118,7 +118,8 @@ public class SignalDetector extends AnalysisWorker {
 
 				try{
 					
-					ImageStack stack = ImageImporter.importImage(imageFile, (DebugFileHandler) getDataset().getLogHandler());
+					ImageStack stack = ImageImporter.importImage(imageFile);
+//					ImageStack stack = ImageImporter.importImage(imageFile, (DebugFileHandler) getDataset().getLogHandler());
 					
 					List<NuclearSignal> signals = finder.detectSignal(imageFile, stack, n);
 					
@@ -149,13 +150,11 @@ public class SignalDetector extends AnalysisWorker {
 					logError("Error detecting signal", e);
 				}
 				
-				progress++;
-				publish(progress);
+				publish(progress++);
 			}		
 			
 		} catch (Exception e){
 			logError("Error in signal detection", e);
-//			fileLogger.log(Level.SEVERE, "Error in signal detection", e);
 			return false;
 		}
 

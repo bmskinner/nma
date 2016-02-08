@@ -18,6 +18,8 @@
  *******************************************************************************/
 package components.nuclei;
 
+import ij.process.FloatPolygon;
+
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.List;
@@ -517,4 +519,5 @@ public interface Nucleus extends CellularComponent {
 	 * @param angle
 	 */
 	public void rotate(double angle);
+	
 }

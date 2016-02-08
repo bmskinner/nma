@@ -209,7 +209,7 @@ public class NucleusAnnotator {
 					ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
 					ip.setLineWidth(1);
 					
-					FloatPolygon p = Utils.createPolygon(s.getBorderList());
+					FloatPolygon p = s.createPolygon();
 					PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 					ip.draw(roi);
 				}

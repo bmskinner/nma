@@ -76,11 +76,10 @@ public class ShellCreator {
 	public ShellCreator(Nucleus n, Logger logger){
 
 		this.logger = logger;
-//		this.logger = new Logger(log, "ShellCreator");
 		this.nucleus = n;
 		
-		nucleusRoi = new PolygonRoi(Utils.createOriginalPolygon(n), Roi.POLYGON);
-		this.nucleusStack = ImageImporter.importImage(n.getSourceFile(), logger);
+		nucleusRoi = new PolygonRoi(n.createOriginalPolygon(), Roi.POLYGON);
+		this.nucleusStack = ImageImporter.importImage(n.getSourceFile());
 		
 	}
 
@@ -209,7 +208,7 @@ public class ShellCreator {
 	*/
 	public double[] findShell(NuclearSignal signal, int channel, ImageStack signalImage) throws Exception{
 
-		FloatPolygon polygon = Utils.createPolygon(signal.getBorderList());
+		FloatPolygon polygon = signal.createPolygon();
 		Roi signalRoi = new PolygonRoi(polygon, Roi.POLYGON);
 		
 		// Get a list of all the points within the ROI
@@ -470,11 +469,19 @@ public class ShellCreator {
 	* @return a double[] with the normalised signal density per shell, outer to inner
 	*/
 	private double[] normalise(double[] signals, double[] dapi){
-		if(new Double(signals[0]).isNaN()){
-			throw new IllegalArgumentException("Signal not a number within ShellAnalyser.normalise");
-		}
-		if(new Double(dapi[0]).isNaN()){
-			throw new IllegalArgumentException("DAPI not a number within ShellAnalyser.normalise");
+		
+		for(int i=0; i<shellCount; i++){
+		
+			if(new Double(signals[i]).isNaN()){
+				logger.log(Level.WARNING, "Signal is NaN: setting to zero");
+				signals[i] = 0;
+//				throw new IllegalArgumentException("Signal not a number within ShellAnalyser.normalise");
+			}
+			if(new Double(dapi[i]).isNaN()){
+				logger.log(Level.WARNING, "DAPI is NaN: setting to zero");
+				dapi[i] = 0;
+//				throw new IllegalArgumentException("DAPI not a number within ShellAnalyser.normalise");
+			}
 		}
 		
 		double[] norm = new double[shellCount];
@@ -482,7 +489,11 @@ public class ShellCreator {
 
 		// perform the dapi normalisation, and get the signal total
 		for(int i=0; i<shellCount; i++){
-			norm[i] = signals[i] / dapi[i];
+			if(dapi[i]==0){
+				norm[i]=0;
+			} else {
+				norm[i] = signals[i] / dapi[i];
+			}
 			total += norm[i];
 		}
 

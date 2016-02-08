@@ -158,7 +158,7 @@ public class AnnotatedNucleusPanel extends JPanel {
 		} else {
 
 			ip.setColor(Color.ORANGE);
-			FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
+			FloatPolygon polygon = n.createPolygon();
 			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 			roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
 			ip.draw(roi);

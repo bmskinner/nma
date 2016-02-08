@@ -221,31 +221,31 @@ public class Utils {
 	  * @param n the nucleus
 	  * @return
 	  */
-	 public static FloatPolygon createPolygon(CellularComponent c){
-		 return createPolygon(c.getBorderList());
-	 }
+//	 public static FloatPolygon createPolygon(CellularComponent c){
+//		 return createPolygon(c.getBorderList());
+//	 }
 
-	 /**
-	 * Turn a list of border points into a polygon. 
-	 * @param list the list of border points
-	 * @return
-	 */
-	public static FloatPolygon createPolygon(List<BorderPoint> list){
-		 float[] xpoints = new float[list.size()+1];
-		 float[] ypoints = new float[list.size()+1];
-
-		 for(int i=0;i<list.size();i++){
-			 BorderPoint p = list.get(i);
-			 xpoints[i] = (float) p.getX();
-			 ypoints[i] = (float) p.getY();
-		 }
-		 
-		 // Ensure the polygon is closed
-		 xpoints[list.size()] = (float) list.get(0).getX();
-		 ypoints[list.size()] = (float) list.get(0).getY();
-
-		 return new FloatPolygon(xpoints, ypoints);
-	 }
+//	 /**
+//	 * Turn a list of border points into a polygon. 
+//	 * @param list the list of border points
+//	 * @return
+//	 */
+//	public static FloatPolygon createPolygon(List<BorderPoint> list){
+//		 float[] xpoints = new float[list.size()+1];
+//		 float[] ypoints = new float[list.size()+1];
+//
+//		 for(int i=0;i<list.size();i++){
+//			 BorderPoint p = list.get(i);
+//			 xpoints[i] = (float) p.getX();
+//			 ypoints[i] = (float) p.getY();
+//		 }
+//		 
+//		 // Ensure the polygon is closed
+//		 xpoints[list.size()] = (float) list.get(0).getX();
+//		 ypoints[list.size()] = (float) list.get(0).getY();
+//
+//		 return new FloatPolygon(xpoints, ypoints);
+//	 }
 	
 	
 	/**
@@ -254,35 +254,35 @@ public class Utils {
 	 * @param n the nucleus
 	 * @return a polygon
 	 */
-	public static FloatPolygon createOriginalPolygon(CellularComponent c){
-		return createOriginalPolygon(c.getOriginalBorderList(), c.getPosition());
-
-	 }
+//	public static FloatPolygon createOriginalPolygon(CellularComponent c){
+//		return createOriginalPolygon(c.getOriginalBorderList(), c.getPosition());
+//
+//	 }
 	
-	/**
-	 * Turn a list of border points into a polygon. Offset the points to the original
-	 * position in a source image. Uses the Nucleus.originalPosition format
-	 * @param list the list of border points
-	 * @param originalPosition an array giving the original positions
-	 * @see Nucleus.getPosition
-	 * @return
-	 */
-	public static FloatPolygon createOriginalPolygon(List<BorderPoint> list, double[] originalPosition){
-		float[] xpoints = new float[list.size()+1];
-		float[] ypoints = new float[list.size()+1];
-
-		for(int i=0;i<list.size();i++){
-			BorderPoint p = list.get(i);
-			xpoints[i] = (float) p.getX() + (float) originalPosition[CellularComponent.X_BASE];
-			ypoints[i] = (float) p.getY() + (float) originalPosition[CellularComponent.Y_BASE];
-		}
-
-		// Ensure the polygon is closed
-		xpoints[list.size()] = (float) list.get(0).getX();
-		ypoints[list.size()] = (float) list.get(0).getY();
-
-		return new FloatPolygon(xpoints, ypoints);
-	}
+//	/**
+//	 * Turn a list of border points into a polygon. Offset the points to the original
+//	 * position in a source image. Uses the Nucleus.originalPosition format
+//	 * @param list the list of border points
+//	 * @param originalPosition an array giving the original positions
+//	 * @see Nucleus.getPosition
+//	 * @return
+//	 */
+//	public static FloatPolygon createOriginalPolygon(List<BorderPoint> list, double[] originalPosition){
+//		float[] xpoints = new float[list.size()+1];
+//		float[] ypoints = new float[list.size()+1];
+//
+//		for(int i=0;i<list.size();i++){
+//			BorderPoint p = list.get(i);
+//			xpoints[i] = (float) p.getX() + (float) originalPosition[CellularComponent.X_BASE];
+//			ypoints[i] = (float) p.getY() + (float) originalPosition[CellularComponent.Y_BASE];
+//		}
+//
+//		// Ensure the polygon is closed
+//		xpoints[list.size()] = (float) list.get(0).getX();
+//		ypoints[list.size()] = (float) list.get(0).getY();
+//
+//		return new FloatPolygon(xpoints, ypoints);
+//	}
 	
 
 	

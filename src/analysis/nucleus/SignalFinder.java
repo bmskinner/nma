@@ -244,7 +244,7 @@ public class SignalFinder {
 		int stackNumber = Constants.rgbToStack(channel);
 		
 		ImageProcessor ip = stack.getProcessor(stackNumber);
-		FloatPolygon polygon = Utils.createOriginalPolygon(n);
+		FloatPolygon polygon = n.createOriginalPolygon();
 		
 		// map brightness to count
 		Map<Integer, Integer> counts = new HashMap<Integer, Integer>(0);
