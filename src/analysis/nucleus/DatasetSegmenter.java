@@ -20,13 +20,11 @@ package analysis.nucleus;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
-import analysis.ProfileManager;
 import analysis.ProgressEvent;
 import analysis.ProgressListener;
 import components.CellCollection;
@@ -36,11 +34,9 @@ import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
-import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
-import components.nuclei.sperm.RodentSpermNucleus;
 import utility.Constants;
 
 /**
@@ -331,10 +327,11 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 
 		// find the corresponding point in each Nucleus
 		SegmentedProfile median = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+		
 		SegmentAssignmentTask task = new SegmentAssignmentTask(median, collection.getNuclei().toArray(new Nucleus[0]));
 		task.addProgressListener(this);
-		task.invoke();
-		
+//		task.invoke();
+		mainPool.invoke(task);
 		reviseSegments(collection, pointType);
 		
 		// Unlock all the segments
@@ -474,7 +471,8 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			
 			SegmentRecombiningTask task = new SegmentRecombiningTask(medianProfile, pc, collection.getNuclei().toArray(new Nucleus[0]));
 			task.addProgressListener(this);
-			task.invoke();
+//			task.invoke();
+			mainPool.invoke(task);
 
 			/*
 			 * Build a profile aggregate in the new frankencollection by taking the

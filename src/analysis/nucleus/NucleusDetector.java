@@ -27,6 +27,7 @@
 package analysis.nucleus;
 
 import io.CompositeExporter;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -81,7 +83,7 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 	  
 	  
 	  log(Level.INFO, "Calculating number of images to analyse");
-	  int totalImages = NucleusDetector.countSuitableImages(analysisOptions.getFolder());
+	  int totalImages = countSuitableImages(analysisOptions.getFolder());
 	  this.setProgressTotal(totalImages);
 	  log(Level.INFO, "Analysing "+totalImages+" images");
 	  
@@ -318,24 +320,6 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
   }
 
   /**
-  * Create the output folder for the analysis if required
-  *
-  * @param folder the folder in which to create the analysis folder
-  * @return a File containing the created folder
-  */
-  private File makeFolder(File folder){
-    File output = new File(folder.getAbsolutePath()+File.separator+this.outputFolder);
-    if(!output.exists()){
-      try{
-        output.mkdir();
-      } catch(Exception e) {
-    	  logError("Failed to create directory", e);
-      }
-    }
-    return output;
-  }
-  
-  /**
   * Go through the input folder. Check if each file is
   * suitable for analysis, and if so, call the analyser.
   *
@@ -344,6 +328,8 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
   protected void processFolder(File folder){
 
 	  File[] listOfFiles = folder.listFiles();
+	  
+	  
 	  
 	  CellCollection folderCollection = new CellCollection(folder, 
 			  outputFolder, 
@@ -355,62 +341,16 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 
 	  FileProcessingTask task = new FileProcessingTask(folder, listOfFiles, folderCollection, outputFolder, programLogger, analysisOptions);
 	  task.addProgressListener(this);
-	  task.invoke();
+	  mainPool.invoke(task);
+//	  task.invoke();
+	  
+	  for(File f : listOfFiles){
+		  if(f.isDirectory()){
+			  processFolder(f); // recurse over each folder
+		  }
+	  }
 
-//	  NucleusFinder finder = new NucleusFinder(programLogger, analysisOptions, outputFolder);
-//
-//	  for (File file : listOfFiles) {
-//
-//		  boolean ok = checkFile(file);
-//
-//		  if(ok){
-//			  try {
-//
-//				  ImageStack imageStack = ImageImporter.importImage(file, fileLogger);
-//
-//				  // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
-//				  makeFolder(folder);
-//				  
-//				  log(Level.INFO, "File:  "+file.getName());
-//				  List<Cell> cells = finder.getCells(imageStack, file);
-//				  
-//				  if(cells.isEmpty()){
-//					  log(Level.INFO, "  No nuclei detected in image");
-//				  } else {
-//					  int nucleusNumber = 0;
-//					  for(Cell cell : cells){
-//						  folderCollection.addCell(cell);
-//						  log(Level.INFO, "  Added nucleus "+nucleusNumber);
-//						  nucleusNumber++;
-//						 
-//						  // save out the image stacks rather than hold within the nucleus
-//						  Nucleus n 			 = cell.getNucleus();
-//						  PolygonRoi nucleus 	 = new PolygonRoi(n.createPolygon(), PolygonRoi.POLYGON);
-//						  
-//						  double[] position = n.getPosition();
-//						  nucleus.setLocation(position[CellularComponent.X_BASE],position[CellularComponent.Y_BASE]); // translate the roi to the image coordinates
-//						  
-//						  ImageStack smallRegion = NucleusFinder.getRoiAsStack(nucleus, imageStack);
-//						  
-//						  try{
-//							  IJ.saveAsTiff(ImageExporter.convertToRGB(smallRegion), n.getAnnotatedImagePath());
-//						  } catch(Exception e){
-//							  logError("Error saving original, enlarged or annotated image", e);
-//						  }
-//					  }
-//				  }
-//
-//			  } catch (Exception e) { // end try
-//				  logError("Error in image processing: "+e.getMessage(), e);
-//			  } // end catch
-//			  
-//			  publish(progress++); // must be global since this function recurses
-//		  } else { // if !ok
-//			  if(file.isDirectory()){ // recurse over any sub folders
-//				  processFolder(file);
-//			  } 
-//		  } // end else if !ok
-//	  } // end for (File)
+
   } // end function
 
   @Override

@@ -2,16 +2,12 @@ package analysis.nucleus;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.RecursiveAction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import analysis.AbstractProgressAction;
 import analysis.AnalysisOptions;
-import analysis.ProgressEvent;
-import analysis.ProgressListener;
 import components.Cell;
 import components.CellCollection;
 import components.CellularComponent;
@@ -72,7 +68,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 	       tasks.add(task1);
 	       tasks.add(task2);
 	       
-	       this.invokeAll(tasks);
+	       FileProcessingTask.invokeAll(tasks);
 	       
 	     }
 	   }
@@ -115,11 +111,12 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 			  
 			  fireProgressEvent();
 			  
-		  } else { // if !ok
-			  if(file.isDirectory()){ // recurse over any sub folders
-//				  processFolder(file);
-			  } 
-		  } // end else if !ok
+		  } 
+//		  else { // if !ok
+//			  if(file.isDirectory()){ // recurse over any sub folders
+////				  processFolder(file);
+//			  } 
+//		  } // end else if !ok
 	   }
 
 
