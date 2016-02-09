@@ -2,6 +2,8 @@ package analysis.nucleus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinTask;
+
 import analysis.AbstractProgressAction;
 import components.generic.Profile;
 import components.generic.ProfileType;
@@ -54,7 +56,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 	    		 tasks.add(task1);
 	    		 tasks.add(task2);
 
-	    		 this.invokeAll(tasks);
+	    		 ForkJoinTask.invokeAll(tasks);
 	    	 } catch (Exception e) {
 	    		 // TODO Auto-generated catch block
 	    		 e.printStackTrace();

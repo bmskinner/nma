@@ -48,6 +48,7 @@ import java.util.UUID;
 import utility.Constants;
 import utility.Utils;
 import analysis.AnalysisDataset;
+import analysis.NucleusStatisticFetchingTask;
 import analysis.ProfileManager;
 import analysis.SignalManager;
 import components.generic.BorderTag;
@@ -738,15 +739,10 @@ public class CellCollection implements Serializable {
  * @throws Exception 
    */
   private double[] getStatistics(NucleusStatistic stat, MeasurementScale scale) throws Exception{
-	  int count = this.getNucleusCount();
-	  double[] result = new double[count];
-	  int i=0;
-
-	  for(Cell cell : getCells() ){ 
-		  Nucleus n = cell.getNucleus();
-		  result[i++] = n.getStatistic(stat, scale);
-	  }
-	  return result;
+	  
+	  NucleusStatisticFetchingTask task = new NucleusStatisticFetchingTask(this.getNuclei().toArray(new Nucleus[0]), stat, scale);
+	  task.invoke();
+	  return task.get();
 
   }
   
