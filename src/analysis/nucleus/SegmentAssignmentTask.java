@@ -11,15 +11,16 @@ import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
 public class SegmentAssignmentTask  extends AbstractProgressAction  {
-	SegmentedProfile median;
+	
+	final SegmentedProfile median;
 	final int low, high;
 	final Nucleus[] nuclei;
 	private static final int THRESHOLD = 30;
 	
-	public SegmentAssignmentTask(SegmentedProfile medianProfile, Nucleus[] nuclei, int low, int high) throws Exception{
+	protected SegmentAssignmentTask(SegmentedProfile medianProfile, Nucleus[] nuclei, int low, int high) throws Exception{
 	
-		this.low = low;
-		this.high = high;
+		this.low    = low;
+		this.high   = high;
 		this.nuclei = nuclei;
 		this.median = medianProfile;
 	}
@@ -31,7 +32,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 	protected void compute() {
 	     if (high - low < THRESHOLD)
 			try {
-				processNuclei(low, high);
+				processNuclei();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -62,43 +63,21 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 	     }
 	}
 	
-private void processNuclei(int lo, int hi) throws Exception {
-		
+	/**
+	 * From the calculated median profile segments, assign segments to each nucleus
+	 * based on the best offset fit of the start and end indexes 
+	 */
+	private void processNuclei() throws Exception {
+
 		for(int i=low; i<high; i++){
 			assignSegmentsToNucleus(nuclei[i]);
 			fireProgressEvent();
 		}
-		
+
 	}
-	
+
 	/**
-	 * From the calculated median profile segments, assign segments to each nucleus
-	 * based on the best offset fit of the start and end indexes 
-	 * @param collection
-	 * @param pointType
-	 */
-//	private void assignSegments(CellCollection collection){
-//
-//		try{
-//			log(Level.FINER, "Assigning segments to nuclei...");
-//
-////			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
-////
-////			// find the corresponding point in each Nucleus
-////			SegmentedProfile median = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);
-//
-////			for(Nucleus n : collection.getNuclei()){
-////				assignSegmentsToNucleus(n, median);
-////				publish(progressCount++);
-////			}
-//			log(Level.FINER, "Segments assigned to nuclei");
-//		} catch(Exception e){
-//			logError("Error assigning segments", e);
-//		}
-//	}
-	
-	/**
-	 * Assign the given segments to the nucleus, finding the best match of the nucleus
+	 * Assign the median segments to the nucleus, finding the best match of the nucleus
 	 * profile to the median profile
 	 * @param n the nucleus to segment
 	 * @param median the segmented median profile
@@ -138,7 +117,6 @@ private void processNuclei(int lo, int hi) throws Exception {
 				prevSeg.setNextSegment(seg);
 			}
 
-//			seg.setName(segment.getName());
 			nucleusSegments.add(seg);
 
 			prevSeg = seg;
@@ -147,8 +125,6 @@ private void processNuclei(int lo, int hi) throws Exception {
 		NucleusBorderSegment.linkSegments(nucleusSegments);
 		nucleusProfile.setSegments(nucleusSegments);
 		n.setProfile(ProfileType.REGULAR, nucleusProfile);
-
-		
 	}
 
 
