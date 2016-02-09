@@ -54,6 +54,7 @@ public class ChartOptionsBuilder {
 	private MeasurementScale scale     = MeasurementScale.PIXELS;
 	private UUID segID                 = null;
 	private int segPosition            = 0;
+	private double modalityPosition    = 0;
 	
 	public ChartOptionsBuilder(){
 		
@@ -91,6 +92,11 @@ public class ChartOptionsBuilder {
 	
 	public ChartOptionsBuilder setSegID(UUID id){
 		this.segID = id;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setModalityPosition(double modalityPosition) {
+		this.modalityPosition = modalityPosition;
 		return this;
 	}
 	
@@ -153,6 +159,7 @@ public class ChartOptionsBuilder {
 		result.setUseDensity(useDensity);
 		result.setSegID(segID);
 		result.setSegPosition(segPosition);
+		result.setModalityPosition(modalityPosition);
 		return result;
 	}
 	

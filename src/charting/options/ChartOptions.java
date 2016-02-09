@@ -48,6 +48,7 @@ public class ChartOptions extends AbstractOptions {
 	private ProfileType type           = ProfileType.REGULAR;
 	private int signalGroup            = 1;
 	private boolean useDensity         = false;
+	private double modalityPosition    = 0;
 	
 	public ChartOptions(List<AnalysisDataset> list){
 		this(list, null);
@@ -94,6 +95,16 @@ public class ChartOptions extends AbstractOptions {
 	public void setAlignment(ProfileAlignment alignment) {
 		this.alignment = alignment;
 	}
+	
+	
+
+	public double getModalityPosition() {
+		return modalityPosition;
+	}
+
+	public void setModalityPosition(double modalityPosition) {
+		this.modalityPosition = modalityPosition;
+	}
 
 	public BorderTag getTag() {
 		return tag;
@@ -134,5 +145,57 @@ public class ChartOptions extends AbstractOptions {
 	public void setUseDensity(boolean useDensity) {
 		this.useDensity = useDensity;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((alignment == null) ? 0 : alignment.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(modalityPosition);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + (normalised ? 1231 : 1237);
+		result = prime * result + (showMarkers ? 1231 : 1237);
+		result = prime * result + signalGroup;
+		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
+		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + (useDensity ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ChartOptions other = (ChartOptions) obj;
+		if (alignment != other.alignment)
+			return false;
+		if (Double.doubleToLongBits(modalityPosition) != Double
+				.doubleToLongBits(other.modalityPosition))
+			return false;
+		if (normalised != other.normalised)
+			return false;
+		if (showMarkers != other.showMarkers)
+			return false;
+		if (signalGroup != other.signalGroup)
+			return false;
+		if (swatch != other.swatch)
+			return false;
+		if (tag != other.tag)
+			return false;
+		if (type != other.type)
+			return false;
+		if (useDensity != other.useDensity)
+			return false;
+		return true;
+	}
+	
+	
 	
 }

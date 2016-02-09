@@ -247,18 +247,12 @@ abstract class ProgressableAction implements PropertyChangeListener {
 
 		log(Level.FINEST, "Firing update populations");
 		fireInterfaceEvent(InterfaceMethod.UPDATE_POPULATIONS);
-				
-//		log(Level.FINEST, "Firing save root");
-//		fireInterfaceEvent(InterfaceMethod.SAVE_ROOT);
 		
-		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-		list.add(dataset);
-
 		log(Level.FINEST, "Firing update panels");
 		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 		
 		log(Level.FINEST, "Firing select datasets");
-		fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);
+		fireDatasetEvent(DatasetMethod.SELECT_DATASETS, dataset);
 		
 		log(Level.FINEST, "Firing recache charts");
 		fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
@@ -289,6 +283,13 @@ abstract class ProgressableAction implements PropertyChangeListener {
         }
     }	
 	
+	protected synchronized void fireDatasetEvent(DatasetMethod method, AnalysisDataset dataset) {
+
+		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		list.add(dataset);
+		fireDatasetEvent(method, list);
+	}
+
 	protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list) {
     	
         DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);

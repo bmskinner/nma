@@ -19,6 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
+import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.dialogs.ClusteringSetupDialog;
 
@@ -107,12 +108,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 		}
 		programLogger.log(Level.FINE, "Profiles copied to all clusters");
 		dataset.addClusterGroup(group);
-//		programLogger.log(Level.FINEST, "Running new morphology analysis on cluster group");
-//		new RunSegmentationAction(list, dataset, MainWindow.ADD_POPULATION, mw);
-//		cancel();
-//		fireInterfaceEvent(InterfaceMethod.SAVE_ROOT);
-//		fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-//		fireInterfaceEvent(InterfaceMethod.UPDATE_POPULATIONS);
+		fireDatasetEvent(DatasetMethod.SAVE, dataset);
 		super.finished();
 		
 

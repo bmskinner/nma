@@ -779,6 +779,10 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				this.populationsPanel.selectDataset(event.firstDataset());
 			}
 			
+			if(event.method().equals(DatasetMethod.SAVE)){
+				saveDataset(event.firstDataset());
+			}
+			
 			if(event.method().equals(DatasetMethod.EXTRACT_SOURCE)){
 				programLogger.log(Level.INFO, "Recovering source dataset");
 				for(AnalysisDataset d : list){
@@ -805,6 +809,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				
 				
 			}
+			
+			
 
 //			if(event.method().equals(DatasetMethod.SAVE_AS)){
 //				programLogger.log(Level.FINEST, "Dataset save as event heard");
@@ -878,6 +884,44 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 		}
 		programLogger.log(Level.INFO, "All root datasets saved");
+	}
+	
+	/**
+	 * Save the given dataset. If it is root, save directly.
+	 * If it is not root, find the root parent and save it.
+	 * @param d
+	 */
+	private void saveDataset(final AnalysisDataset d){
+		
+		if(d.isRoot()){
+			
+				final CountDownLatch latch = new CountDownLatch(1);
+				new SaveDatasetAction(d, MainWindow.this, latch, false);
+				try {
+					latch.await();
+				} catch (InterruptedException e) {
+					programLogger.log(Level.SEVERE, "Interruption to thread", e);
+				}
+			
+			programLogger.log(Level.INFO, "Root dataset saved");
+		} else {
+			
+			AnalysisDataset target = null; 
+			for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+			
+				for(AnalysisDataset child : root.getAllChildDatasets()){
+					if(child.getUUID().equals(d.getUUID())){
+						target = root;
+						break;
+					}
+				}
+				if(target!=null){
+					break;
+				}
+			}
+			saveDataset(target);
+			
+		}
 	}
 	
 	private void recacheCharts(){

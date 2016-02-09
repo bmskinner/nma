@@ -123,7 +123,7 @@ public class MergesDetailPanel extends DetailPanel {
 		/*
 		 * Add a blank box to cover the first column
 		 */
-		Dimension fillerSize = new Dimension(10, 5);
+		Dimension fillerSize = new Dimension(100, 5);
 		panel.add(new Box.Filler(fillerSize, fillerSize, fillerSize), c);
 		
 		/*

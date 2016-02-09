@@ -109,7 +109,7 @@ public class NewAnalysisAction extends ProgressableAction {
 					flag |= MainWindow.NUCLEUS_ANNOTATE;
 //					flag |= MainWindow.EXPORT_COMPOSITE;
 					flag |= MainWindow.ASSIGN_SEGMENTS;
-//					flag |= MainWindow.SAVE_DATASET;
+					flag |= MainWindow.SAVE_DATASET;
 					
 					if(datasets.get(0).getAnalysisOptions().refoldNucleus()){
 						flag |= MainWindow.CURVE_REFOLD;

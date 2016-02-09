@@ -44,8 +44,11 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.TextAnchor;
 
+import stats.DipTester;
 import stats.StatisticDimension;
+import utility.Constants;
 import utility.Utils;
 import analysis.AnalysisDataset;
 import charting.ChartComponents;
@@ -818,7 +821,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JFreeChart createModalityChart(Double position, List<AnalysisDataset> list, ProfileType type) throws Exception {
+	private static JFreeChart createModalityChart(Double position, List<AnalysisDataset> list, ProfileType type) throws Exception {
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
@@ -911,6 +914,49 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 		
+	public static JFreeChart createModalityPositionChart(ChartOptions options) throws Exception {
+
+		JFreeChart chart = MorphologyChartFactory.createModalityChart(options.getModalityPosition(), options.getDatasets(), options.getType());
+		XYPlot plot = chart.getXYPlot();
+
+		double yMax = 0;
+		DecimalFormat df = new DecimalFormat("#0.000");
+
+		for(int i = 0; i<plot.getDatasetCount(); i++){
+
+			// Ensure annotation is placed in the right y position
+			double y = DatasetUtilities.findMaximumRangeValue(plot.getDataset(i)).doubleValue();
+			yMax = y > yMax ? y : yMax;
+
+		}
+
+		int index = 0;
+		for(AnalysisDataset dataset : options.getDatasets()){
+
+			// Do the stats testing
+			double pvalue = DipTester.getPValueForPositon(dataset.getCollection(),
+					options.getModalityPosition(), 
+					options.getType()); 
+			
+			// Add the annotation
+			double yPos = yMax - ( index * (yMax / 20));
+			String statisticalTesting = "p(unimodal) = "+df.format(pvalue);
+			if(pvalue<Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
+				statisticalTesting = "* " + statisticalTesting;
+			}
+			XYTextAnnotation annotation = new XYTextAnnotation(statisticalTesting,355, yPos);
+
+			// Set the text colour
+			Color colour = dataset.getDatasetColour() == null 
+					? ColourSelecter.getSegmentColor(index)
+							: dataset.getDatasetColour();
+					annotation.setPaint(colour);
+					annotation.setTextAnchor(TextAnchor.TOP_RIGHT);
+					plot.addAnnotation(annotation);
+					index++;
+		}
+		return chart;
+	}
 	
 	
 	/**

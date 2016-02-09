@@ -77,5 +77,9 @@ public interface PlottableStatistic {
 	 * @return
 	 */
 	public PlottableStatistic[] getValues();
+	
+	public boolean equals(Object o);
+	
+	public int hashCode();
 }
 

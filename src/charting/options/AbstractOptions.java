@@ -7,7 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import components.generic.MeasurementScale;
-
 import stats.PlottableStatistic;
 import analysis.AnalysisDataset;
 
@@ -147,5 +146,48 @@ public abstract class AbstractOptions {
 
 	public void setScale(MeasurementScale scale) {
 		this.scale = scale;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((list == null) ? 0 : list.hashCode());
+		result = prime * result + ((scale == null) ? 0 : scale.hashCode());
+		result = prime * result + ((segID == null) ? 0 : segID.hashCode());
+		result = prime * result + segPosition;
+		result = prime * result + ((stat == null) ? 0 : stat.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AbstractOptions other = (AbstractOptions) obj;
+		if (list == null) {
+			if (other.list != null)
+				return false;
+		} else if (!list.equals(other.list))
+			return false;
+		if (scale != other.scale)
+			return false;
+		if (segID == null) {
+			if (other.segID != null)
+				return false;
+		} else if (!segID.equals(other.segID))
+			return false;
+		if (segPosition != other.segPosition)
+			return false;
+		if (stat == null) {
+			if (other.stat != null)
+				return false;
+		} else if (!stat.equals(other.stat))
+			return false;
+		return true;
 	}
 }
