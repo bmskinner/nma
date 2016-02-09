@@ -26,55 +26,36 @@
 */  
 package analysis.nucleus;
 
-import ij.IJ;
-import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.plugin.RoiEnlarger;
-import ij.process.FloatPolygon;
 import io.CompositeExporter;
-import io.ImageExporter;
-import io.ImageImporter;
-
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.SwingWorker;
-
-import logging.DebugFileFormatter;
-import logging.DebugFileHandler;
 import utility.Constants;
-//import utility.Logger;
-import utility.Utils;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisWorker;
-import components.Cell;
+import analysis.ProgressEvent;
+import analysis.ProgressListener;
 import components.CellCollection;
-import components.CellularComponent;
 import components.nuclear.NucleusType;
-import components.nuclei.Nucleus;
 
-public class NucleusDetector extends AnalysisWorker {
+public class NucleusDetector extends AnalysisWorker  implements ProgressListener {
   
   private static final String spacerString = "---------";
   
-  private int progress;
+  private int progress = 0;
 
   private File inputFolder;
   protected String outputFolder;
   protected File debugFile;
-
+  
   protected AnalysisOptions analysisOptions;
 
 //  protected MainWindow mw;
@@ -373,6 +354,7 @@ public class NucleusDetector extends AnalysisWorker {
 	  
 	  
 	  FileProcessingTask task = new FileProcessingTask(folder, listOfFiles, folderCollection, outputFolder, programLogger, analysisOptions);
+	 task.addProgressListener(this);
 	  task.invoke();
 	  
 //	  NucleusFinder finder = new NucleusFinder(programLogger, analysisOptions, outputFolder);
@@ -430,4 +412,12 @@ public class NucleusDetector extends AnalysisWorker {
 //		  } // end else if !ok
 //	  } // end for (File)
   } // end function
+
+  @Override
+  public void progressEventReceived(ProgressEvent event) {
+	  publish(++progress);
+
+  }
+  
+  
 }
