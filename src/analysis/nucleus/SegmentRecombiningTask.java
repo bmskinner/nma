@@ -26,7 +26,6 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 	
 	public SegmentRecombiningTask(SegmentedProfile medianProfile, ProfileCollection pc, Nucleus[] nuclei, int low, int high) throws Exception{
 		
-//		DatasetSegmenter segmenter = new DatasetSegmenter(null, MorphologyAnalysisMode.NEW, null);
 		fitter = new SegmentFitter(medianProfile);
 		this.low = low;
 		this.high = high;
