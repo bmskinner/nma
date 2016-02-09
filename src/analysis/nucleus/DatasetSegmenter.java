@@ -27,6 +27,8 @@ import java.util.logging.Logger;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.ProfileManager;
+import analysis.ProgressEvent;
+import analysis.ProgressListener;
 import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
@@ -46,7 +48,7 @@ import utility.Constants;
  * This segments median profiles, and applies the segments to
  * nuclei.
  */
-public class DatasetSegmenter extends AnalysisWorker {
+public class DatasetSegmenter extends AnalysisWorker implements ProgressListener {
 
     private CellCollection sourceCollection = null; // a collection to take segments from
 
@@ -536,30 +538,33 @@ public class DatasetSegmenter extends AnalysisWorker {
 			 * At this point, the median profile has the reference point at index 0
 			 */
 			
-			SegmentFitter fitter = new SegmentFitter(medianProfile);
-//			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
-
-			int count = 1;
-			for(Nucleus n : collection.getNuclei()){ 
-				log(Level.FINER, "Fitting nucleus "+n.getPathAndNumber()+" ("+count+" of "+collection.cellCount()+")");
-				fitter.fit(n, pc);
-
-				// recombine the segments at the lengths of the median profile segments
-				Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
-				try{
-					n.setProfile(ProfileType.FRANKEN, new SegmentedProfile(recombinedProfile));
-				} catch(Exception e){
-					log(Level.SEVERE, recombinedProfile.toString());
-					logError("Error setting nucleus profile", e);
-					throw new Exception("Error setting nucleus profile");
-				}
-				
-//				frankenProfiles.add(recombinedProfile);
-				count++;
-				publish(progressCount++); // publish the progress to gui
-			}
-
-			fitter = null; // clean up
+			SegmentRecombiningTask task = new SegmentRecombiningTask(medianProfile, pc, collection.getNuclei().toArray(new Nucleus[0]));
+			task.addProgressListener(this);
+			task.invoke();
+//			SegmentFitter fitter = new SegmentFitter(medianProfile);
+////			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
+//
+//			int count = 1;
+//			for(Nucleus n : collection.getNuclei()){ 
+//				log(Level.FINER, "Fitting nucleus "+n.getPathAndNumber()+" ("+count+" of "+collection.cellCount()+")");
+//				fitter.fit(n, pc);
+//
+//				// recombine the segments at the lengths of the median profile segments
+//				Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
+//				try{
+//					n.setProfile(ProfileType.FRANKEN, new SegmentedProfile(recombinedProfile));
+//				} catch(Exception e){
+//					log(Level.SEVERE, recombinedProfile.toString());
+//					logError("Error setting nucleus profile", e);
+//					throw new Exception("Error setting nucleus profile");
+//				}
+//				
+////				frankenProfiles.add(recombinedProfile);
+//				count++;
+//				publish(++progressCount); // publish the progress to gui
+//			}
+//
+//			fitter = null; // clean up
 			/*
 			 * Build a profile aggregate in the new frankencollection by taking the
 			 * stored frankenprofiles from each nucleus in the collection
@@ -1333,5 +1338,11 @@ public class DatasetSegmenter extends AnalysisWorker {
 				s.print();
 			}
 		}
+	}
+
+	@Override
+	public void progressEventReceived(ProgressEvent event) {
+		publish(++progressCount);
+		
 	}
 }
