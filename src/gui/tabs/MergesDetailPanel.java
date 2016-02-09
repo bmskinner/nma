@@ -21,20 +21,14 @@ package gui.tabs;
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.AnalysisTableCellRenderer;
 import gui.components.ExportableTable;
-import gui.dialogs.ClusterTreeDialog;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,14 +38,10 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import components.ClusterGroup;
-import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
@@ -61,14 +51,12 @@ import analysis.AnalysisDataset;
 
 @SuppressWarnings("serial")
 public class MergesDetailPanel extends DetailPanel {
-	
-	private ExportableTable		mergeSources;
-	
+		
 	private ExportableTable sourceParametersTable;
 	
-//	private JButton		getSourceButton = new JButton("Recover source");
-	
 	private JPanel		getSourceButtonPanel;
+	
+	private static final String RECOVER_BUTTON_TEXT = "Recover source";
 	
 	private JPanel mainPanel;
 
@@ -87,15 +75,21 @@ public class MergesDetailPanel extends DetailPanel {
 	
 	private void createUI() throws Exception{
 		
+		/*
+		 * The header is currently an empty panel
+		 */
 		this.setLayout(new BorderLayout());
-
 		JPanel headerPanel = createHeaderPanel();
 		this.add(headerPanel, BorderLayout.NORTH);
+		
+		/*
+		 * Make a vertical box panel to hold the table and recover
+		 * buttons
+		 */
 		
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		
-//		JPanel content = new JPanel(new BorderLayout());
 
 		JPanel parameters = createAnalysisParametersPanel();
 		JScrollPane paramScrollPane = new JScrollPane(parameters);
@@ -126,8 +120,15 @@ public class MergesDetailPanel extends DetailPanel {
 		c.fill = GridBagConstraints.NONE;      // don't resize the buttons
 		c.weightx = 1.0; 						// buttons have padding between them
 		
+		/*
+		 * Add a blank box to cover the first column
+		 */
 		Dimension fillerSize = new Dimension(10, 5);
 		panel.add(new Box.Filler(fillerSize, fillerSize, fillerSize), c);
+		
+		/*
+		 * Add the buttons
+		 */
 		if(buttons!=null){
 			for(JComponent button : buttons){
 				panel.add(button, c);
@@ -144,13 +145,10 @@ public class MergesDetailPanel extends DetailPanel {
 		}
 		
 		List<JComponent> result = new  ArrayList<JComponent>(); 
-		Dimension fillerSize = new Dimension(10, 5);
 
+		for(final AnalysisDataset source : activeDataset().getAllMergeSources()){
 
-		for(final UUID id : activeDataset().getMergeSources()){
-
-			final AnalysisDataset source = activeDataset().getMergeSource(id);
-			JButton button = new JButton("Recover source");
+			JButton button = new JButton(RECOVER_BUTTON_TEXT);
 			button.addActionListener( new ActionListener() {
 
 				public void actionPerformed(ActionEvent e) {
