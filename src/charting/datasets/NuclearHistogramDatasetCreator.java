@@ -39,6 +39,7 @@ import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import stats.NucleusStatistic;
+import stats.SegmentStatistic;
 import stats.Stats;
 
 public class NuclearHistogramDatasetCreator {
@@ -314,24 +315,29 @@ public class NuclearHistogramDatasetCreator {
 			/*
 			 * Use the segment id for this collection to fetch the individual nucleus segments
 			 */
-			int count=0;
-			double[] lengths = new double[collection.cellCount()];
-			for(Nucleus n : collection.getNuclei()){
-
-				NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
-						.getSegment(medianSeg.getID());
-
-
-				double length = 0;
-				if(seg!=null){
-					int indexLength = seg.length();
-					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-					length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
-
-				}
-				
-				lengths[count++] = length;
-			}
+//			int count=0;
+//			double[] lengths = new double[collection.cellCount()];
+			
+			double[] lengths = collection.getSegmentStatistics(SegmentStatistic.LENGTH, 
+					options.getScale(), 
+					medianSeg.getID());
+			
+//			for(Nucleus n : collection.getNuclei()){
+//
+//				NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
+//						.getSegment(medianSeg.getID());
+//
+//
+//				double length = 0;
+//				if(seg!=null){
+//					int indexLength = seg.length();
+//					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+//					length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
+//
+//				}
+//				
+//				lengths[count++] = length;
+//			}
 
 			double min = Stats.min(lengths);
 			double max = Stats.max(lengths);
