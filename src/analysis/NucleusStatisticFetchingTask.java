@@ -3,35 +3,20 @@ package analysis;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.RecursiveTask;
 
-import stats.NucleusStatistic;
+import stats.PlottableStatistic;
 import components.generic.MeasurementScale;
 import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
-public class NucleusStatisticFetchingTask extends RecursiveTask<double[]>{
-
+public class NucleusStatisticFetchingTask extends AbstractStatisticFetchingTask {
 	
-	final int low, high;
-	final Nucleus[] nuclei;
-	private static final int THRESHOLD = 30;
-	final NucleusStatistic stat;
-	final MeasurementScale scale;
-	
-	public NucleusStatisticFetchingTask(Nucleus[] nuclei, NucleusStatistic stat, MeasurementScale scale){
+	public NucleusStatisticFetchingTask(Nucleus[] nuclei, PlottableStatistic stat, MeasurementScale scale){
 		this(nuclei, stat, scale, 0,nuclei.length );
 	}
-	
-	
-	
-	protected NucleusStatisticFetchingTask(Nucleus[] nuclei, NucleusStatistic stat, MeasurementScale scale, int low, int high) {
-		this.low = low;
-		this.high = high;
-		this.nuclei = nuclei;
-		this.stat =stat;
-		this.scale = scale;
 
+	protected NucleusStatisticFetchingTask(Nucleus[] nuclei, PlottableStatistic stat, MeasurementScale scale, int low, int high) {
+		super(nuclei, stat, scale, low, high );
 	}
 	
 	@Override
@@ -76,16 +61,8 @@ public class NucleusStatisticFetchingTask extends RecursiveTask<double[]>{
 		 return result;
 	}
 	
-	public double[] concat(double[] a, double[] b) {
-		   int aLen = a.length;
-		   int bLen = b.length;
-		   double[] c= new double[aLen+bLen];
-		   System.arraycopy(a, 0, c, 0, aLen);
-		   System.arraycopy(b, 0, c, aLen, bLen);
-		   return c;
-		}
-	
-	  /**
+
+	/**
 	   * Get the stats of the nuclei in this collection as
 	   * an array
 	   * @return

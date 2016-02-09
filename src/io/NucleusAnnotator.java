@@ -48,51 +48,57 @@ import components.nuclei.Nucleus;
 public class NucleusAnnotator {
 	
 	private static Logger logger;
+	private ColourSwatch swatch;
 	
-	public static boolean run(AnalysisDataset dataset){
+	public NucleusAnnotator(ColourSwatch swatch){
+		this.swatch = swatch;
+	}
+	
+	public void run(AnalysisDataset dataset){
 
 		CellCollection collection = dataset.getCollection();
-		logger = Logger.getLogger(NucleusAnnotator.class.getName());
-		try {
-			logger.addHandler(dataset.getLogHandler());
-		} catch (SecurityException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-//		logger = new Logger(collection.getDebugFile(), "NucleusAnnotator");
-		try{
-			logger.log(Level.INFO, "Annotating images of nuclei...");
+//		logger = Logger.getLogger(NucleusAnnotator.class.getName());
+//		try {
+//			logger.addHandler(dataset.getLogHandler());
+//		} catch (SecurityException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+////		logger = new Logger(collection.getDebugFile(), "NucleusAnnotator");
+//		try{
+//			logger.log(Level.INFO, "Annotating images of nuclei...");
 			for(Nucleus n : collection.getNuclei()){
-				NucleusAnnotator.run(n, dataset.getSwatch());
+				annotateFeatures(n);
 			}
-			logger.log(Level.INFO, "Annotation complete");
-
-		}catch(Exception e){
-			logger.log(Level.SEVERE, "Error in annotation", e);
-			return false;
-		} finally {
-			for(Handler h : logger.getHandlers()){
-				h.close();
-				logger.removeHandler(h);
-			}
-		}
-		return true;
+//			logger.log(Level.INFO, "Annotation complete");
+//
+//		}catch(Exception e){
+//			logger.log(Level.SEVERE, "Error in annotation", e);
+//			return false;
+//		} finally {
+//			for(Handler h : logger.getHandlers()){
+//				h.close();
+//				logger.removeHandler(h);
+//			}
+//		}
+//		return true;
 	}
 
 
-	public static void run(Nucleus n, ColourSwatch swatch){
-		
-		// to add in here - division of functions based on class of nucleus
-		annotateFeatures(n, swatch);
-		
-	}
+//	public static void run(Nucleus n, ColourSwatch swatch){
+//		
+//		// to add in here - division of functions based on class of nucleus
+//		annotateFeatures(n, swatch);
+//		
+//	}
 	
-	private static void annotateFeatures(Nucleus n, ColourSwatch swatch){
+	public ImagePlus annotateFeatures(Nucleus n){
 
-		ImagePlus annotatedImage = new ImagePlus(n.getAnnotatedImagePath());
+		ImagePlus annotatedImage = new ImagePlus(null, n.getImage());
+//				new ImagePlus(n.getAnnotatedImagePath());
 		try{
 
 			annotateTail(annotatedImage, n);
@@ -103,12 +109,10 @@ public class NucleusAnnotator {
 			annotateSignals(annotatedImage, n);
 
 		}  catch(Exception e){
-			logger.log(Level.SEVERE, "Error annotating nucleus", e);
+//			logger.log(Level.SEVERE, "Error annotating nucleus", e);
 
-		} finally {
-			IJ.saveAsTiff(annotatedImage, n.getAnnotatedImagePath());
-		}
-
+		} 
+		return annotatedImage;
 	}
 
 	private static void annotateTail(ImagePlus image, Nucleus n){

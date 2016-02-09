@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,11 +53,11 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
   
   private int progress = 0;
 
-  private File inputFolder;
-  protected String outputFolder;
-  protected File debugFile;
+  private final File inputFolder;
+  protected final String outputFolder;
+  protected final File debugFile;
   
-  protected AnalysisOptions analysisOptions;
+  protected final AnalysisOptions analysisOptions;
 
 //  protected MainWindow mw;
   private Map<File, CellCollection> collectionGroup = new HashMap<File, CellCollection>();
@@ -79,15 +78,13 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 	  this.outputFolder 	= outputFolder;
 	  this.debugFile 		= debugFile;
 	  this.analysisOptions 	= options;
-	  
-	  
-	  
+  }
+  
+  private void getTotalImagesToAnalyse(){
 	  log(Level.INFO, "Calculating number of images to analyse");
 	  int totalImages = countSuitableImages(analysisOptions.getFolder());
 	  this.setProgressTotal(totalImages);
 	  log(Level.INFO, "Analysing "+totalImages+" images");
-	  
-	  this.progress = 0;
   }
 	
 	@Override
@@ -96,6 +93,9 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 		boolean result = false;
 		
 		try{
+			
+			getTotalImagesToAnalyse();
+			
 			log(Level.INFO, "Running nucleus detector");
 			processFolder(this.inputFolder);
 

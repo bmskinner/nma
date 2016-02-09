@@ -26,13 +26,11 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 	private File[] files;
 	private static final int THRESHOLD = 10;
 	final int low, high;
-	NucleusFinder finder;
-	
-	
-	String outputFolder;
-	Logger programLogger;
-	AnalysisOptions analysisOptions;
-	File folder;
+	final NucleusFinder finder;
+	final String outputFolder;
+	final Logger programLogger;
+	final AnalysisOptions analysisOptions;
+	final File folder;
 	
 	FileProcessingTask(File folder, File[] files, CellCollection collection, int low, int high, String outputFolder, Logger programLogger, AnalysisOptions analysisOptions) {
 		this.collection = collection;
@@ -153,6 +151,10 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 	 */
 	public static boolean checkFile(File file){
 
+		if(file==null){
+			return false;
+		}
+		
 		if( ! file.isFile()){
 			return false;
 		}

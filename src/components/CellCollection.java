@@ -29,6 +29,7 @@ package components;
 
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
+import stats.SegmentStatistic;
 import stats.SignalStatistic;
 import stats.Stats;
 
@@ -50,13 +51,13 @@ import utility.Utils;
 import analysis.AnalysisDataset;
 import analysis.NucleusStatisticFetchingTask;
 import analysis.ProfileManager;
+import analysis.SegmentStatisticFetchingTask;
 import analysis.SignalManager;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
-import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
 import components.nuclei.ConsensusNucleus;
@@ -502,16 +503,10 @@ public class CellCollection implements Serializable {
  * @throws Exception 
    */
   public double getMedianSignalStatistic(SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception{
-	  
-//	  if(this.statsCache.hasStatistic(stat, scale)){
-//		  return(this.statsCache.getStatistic(stat, scale));
-//	  } else {
-		  
+
 		  double[] values = this.getSignalStatistics(stat, scale, signalGroup);
 		  double median =  Stats.quartile(values, Constants.MEDIAN);
-//		  statsCache.setStatistic(stat, scale, median);
 		  return median;
-//	  }
   }
 	  
 
@@ -558,14 +553,12 @@ public class CellCollection implements Serializable {
 	  int count = this.getNucleusCount();
 	  double[] result = new double[count];
 	  int i=0;
-//	  List<Double> list = new ArrayList<Double>();
+
 	  Profile medianProfile = this.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.MEDIAN);
 	  for(Nucleus n : this.getNuclei()){
 		  Profile angleProfile = n.getProfile(ProfileType.REGULAR);
 		  result[i++] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
-//		  list.add(angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile));
 	  }
-//	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
 	  return result;
   }
   
@@ -589,13 +582,9 @@ public class CellCollection implements Serializable {
 		  double diff = angleProfile.absoluteSquareDifference(medianProfile);		
 		  diff /= n.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 		  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
-		  
-//		  double var = (rootDiff / n.getPerimeter()  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 		  result[i++] = rootDiff;
-//		  list.add(rootDiff);
-	  }
 
-//	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+	  }
 	  return result;
   }
 
@@ -684,6 +673,42 @@ public class CellCollection implements Serializable {
 	  return var;
   }
   
+ 
+  private double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, int signalGroup, UUID id)  throws Exception {
+	  
+	  if(stat.getClass()==NucleusStatistic.class){
+		  return getMedianNucleusStatistic((NucleusStatistic) stat, scale);
+	  }
+	  
+	  if(stat.getClass()==SignalStatistic.class){
+		  return getMedianSignalStatistic((SignalStatistic) stat, scale, signalGroup);
+	  }
+	  
+	  if(stat.getClass()==SegmentStatistic.class){
+		  return getMedianSegmentStatistic((SegmentStatistic) stat, scale, id);
+	  }
+	  
+	  
+	  return 0;
+	  
+  }
+  
+  private Nucleus[] getNucleusArray(){
+	 return this.getNuclei().toArray(new Nucleus[0]);
+  }
+  
+  public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale)  throws Exception {
+	  return getMedianStatistic(stat, scale, 0, null);
+  }
+  
+  public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, int signalGroup)  throws Exception {
+	  return getMedianStatistic(stat, scale, signalGroup, null);
+  }
+  
+  public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
+	  return getMedianStatistic(stat, scale, 0, id);
+  }
+  
   /**
    * Get the median value of the given statistic
    * @param stat
@@ -691,7 +716,7 @@ public class CellCollection implements Serializable {
    * @return
    * @throws Exception
    */
-  public double getMedianStatistic(NucleusStatistic stat, MeasurementScale scale)  throws Exception {
+  private double getMedianNucleusStatistic(NucleusStatistic stat, MeasurementScale scale)  throws Exception {
 	  
 	  if(this.statsCache.hasStatistic(stat, scale)){
 		  return(this.statsCache.getStatistic(stat, scale));
@@ -724,25 +749,29 @@ public class CellCollection implements Serializable {
 		  }
 	
 		  default: {
-			  result = this.getStatistics(stat, scale);
+			  NucleusStatisticFetchingTask task = new NucleusStatisticFetchingTask(getNucleusArray(),
+					  stat,
+					  scale);
+			  result = task.invoke();
 			  break;
 		  }
 
 	  }
 	  return result;
   }
-  
+
   /**
-   * Get the stats of the nuclei in this collection as
-   * an array
+   * Get the median value of the given statistic
+   * @param stat
+   * @param scale
    * @return
- * @throws Exception 
+   * @throws Exception
    */
-  private double[] getStatistics(NucleusStatistic stat, MeasurementScale scale) throws Exception{
-	  
-	  NucleusStatisticFetchingTask task = new NucleusStatisticFetchingTask(this.getNuclei().toArray(new Nucleus[0]), stat, scale);
-	  task.invoke();
-	  return task.get();
+  private double getMedianSegmentStatistic(SegmentStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
+ 
+	  double[] values = this.getSegmentStatistics(stat, scale, id);
+	  double median =  Stats.quartile(values, Constants.MEDIAN);
+	  return median;
 
   }
   
@@ -754,23 +783,13 @@ public class CellCollection implements Serializable {
    * @return a list of segment lengths
    * @throws Exception
    */
-  public double[] getSegmentLengths(UUID id, MeasurementScale scale) throws Exception{
+  public double[] getSegmentStatistics(SegmentStatistic stat, MeasurementScale scale, UUID id) throws Exception{
 
-	  int count = this.getNucleusCount();
-	  double[] result = new double[count];
-	  int i=0;
-	  
-	  for(Nucleus n : this.getNuclei()){
-		  NucleusBorderSegment segment = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getSegment(id);
-		  double perimeterLength = 0;
-		  if(segment!=null){
-			  int indexLength = segment.length();
-			  double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
-			  perimeterLength = fractionOfPerimeter * n.getStatistic(NucleusStatistic.PERIMETER, scale);
-		  }
-		  result[i++] = perimeterLength;
-	  }
-	  return result;
+	  SegmentStatisticFetchingTask task = new SegmentStatisticFetchingTask(getNucleusArray(),
+			  stat,
+			  scale, 
+			  id);
+	  return task.invoke();
   }
   
   /**
@@ -959,7 +978,7 @@ public class CellCollection implements Serializable {
 
 			  for(MeasurementScale scale : MeasurementScale.values()){
 				  // This will automatically refill the cache
-				  collection.getMedianStatistic(stat, scale);
+				  collection.getMedianNucleusStatistic(stat, scale);
 			  }
 		  }
 	  }

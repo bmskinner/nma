@@ -117,12 +117,7 @@ public class RunProfilingAction extends ProgressableAction {
 					// otherwise analyse the next item in the list
 					cancel(); // remove progress bar
 
-//					SwingUtilities.invokeLater(new Runnable(){
-//						public void run(){
-
-								new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, mw);
-							
-//						}});
+					new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, mw);
 
 				}			
 			}

@@ -175,9 +175,8 @@ public class NucleusTableDatasetCreator {
 				rowData.add(segment.getStartIndex());
 				rowData.add(segment.getEndIndex());
 							
-				double[] meanLengths = collection.getSegmentLengths(segment.getID(), scale);
-//				double[] meanLengths = collection.getSegmentLengths(map.get(segment.getName()), scale);
-				
+				double[] meanLengths = collection.getSegmentStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
+
 				double mean = Stats.mean( meanLengths);
 				double sem  = Stats.stderr(meanLengths);
 				double[] ci = Stats.calculateMeanConfidenceInterval(meanLengths, 0.95);
@@ -263,7 +262,8 @@ public class NucleusTableDatasetCreator {
 
 				for(NucleusBorderSegment segment : segs) {
 					
-					double[] meanLengths = collection.getSegmentLengths(segment.getID(), scale);
+					double[] meanLengths = collection.getSegmentStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
+
 					double mean = Stats.mean(meanLengths); 
 
 					double ci = Stats.calculateConfidenceIntervalSize(meanLengths, 0.95);
@@ -872,8 +872,10 @@ public class NucleusTableDatasetCreator {
 							.getSegmentAt(options.getSegPosition());
 					
 					popData[i] = df.format( runWilcoxonTest( 
-							 dataset.getCollection().getSegmentLengths(medianSeg1.getID(), MeasurementScale.PIXELS),
-							dataset2.getCollection().getSegmentLengths(medianSeg2.getID(), MeasurementScale.PIXELS),
+							dataset.getCollection().getSegmentStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, medianSeg1.getID()),
+
+							dataset2.getCollection().getSegmentStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, medianSeg2.getID()),
+							
 							getPValue) );
 				}
 				i++;
@@ -977,8 +979,10 @@ public class NucleusTableDatasetCreator {
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 									
+		
+			
 			double value1 = Stats.quartile( dataset.getCollection()
-					.getSegmentLengths(medianSeg1.getID(), MeasurementScale.PIXELS), Constants.MEDIAN);
+					.getSegmentStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, medianSeg1.getID()), Constants.MEDIAN);
 
 			Object[] popData = new Object[options.datasetCount()];
 
@@ -996,7 +1000,8 @@ public class NucleusTableDatasetCreator {
 							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 							.getSegmentAt(options.getSegPosition());
 					
-					double value2 = Stats.quartile( dataset2.getCollection().getSegmentLengths(medianSeg2.getID(), MeasurementScale.PIXELS), Constants.MEDIAN);
+					double value2 = Stats.quartile( dataset2.getCollection()
+							.getSegmentStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, medianSeg2.getID()), Constants.MEDIAN);
 
 					double magnitude = value2 / value1;
 					popData[i] = df.format( magnitude );
