@@ -25,6 +25,7 @@ import analysis.AnalysisDataset;
 import analysis.ProfileManager;
 import analysis.nucleus.DatasetSegmenter;
 import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
+import analysis.nucleus.SegmentFitter;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
@@ -122,8 +123,8 @@ public class KruskalTester {
 			 * in the segmenter
 			 */
 			SegmentedProfile medianProfile = pc.getSegmentedProfile(options.getTag());
-			DatasetSegmenter segmenter = new DatasetSegmenter(one, MorphologyAnalysisMode.NEW, options.getLogger());
-			DatasetSegmenter.SegmentFitter fitter = segmenter.new SegmentFitter(medianProfile);
+//			DatasetSegmenter segmenter = new DatasetSegmenter(one, MorphologyAnalysisMode.NEW, options.getLogger());
+			SegmentFitter fitter = new SegmentFitter(medianProfile);
 			
 			for(Nucleus n : copyOfTwo.getCollection().getNuclei()){ 
 				fitter.fit(n, pc);

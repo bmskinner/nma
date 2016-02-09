@@ -56,6 +56,7 @@ import org.jfree.chart.JFreeChart;
 import analysis.AnalysisDataset;
 import analysis.nucleus.DatasetSegmenter;
 import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
+import analysis.nucleus.SegmentFitter;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -436,10 +437,10 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			SegmentedProfile medianProfile = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);	
 			
 			// Does nothing, but needed to access segment fitter
-			DatasetSegmenter segmenter = new DatasetSegmenter(activeDataset(), MorphologyAnalysisMode.NEW, programLogger);
+//			DatasetSegmenter segmenter = new DatasetSegmenter(activeDataset(), MorphologyAnalysisMode.NEW, programLogger);
 			
 			// Make a fitter
-			DatasetSegmenter.SegmentFitter fitter = segmenter.new SegmentFitter(medianProfile);
+			SegmentFitter fitter = new SegmentFitter(medianProfile);
 
 			for(Cell c : activeDataset().getCollection().getCells()){
 

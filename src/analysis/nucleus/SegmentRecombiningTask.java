@@ -6,7 +6,7 @@ import java.util.logging.Level;
 
 import analysis.AbstractProgressAction;
 import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
-import analysis.nucleus.DatasetSegmenter.SegmentFitter;
+//import analysis.nucleus.DatasetSegmenter.SegmentFitter;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
@@ -26,8 +26,8 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 	
 	public SegmentRecombiningTask(SegmentedProfile medianProfile, ProfileCollection pc, Nucleus[] nuclei, int low, int high) throws Exception{
 		
-		DatasetSegmenter segmenter = new DatasetSegmenter(null, MorphologyAnalysisMode.NEW, null);
-		fitter = segmenter.new SegmentFitter(medianProfile);
+//		DatasetSegmenter segmenter = new DatasetSegmenter(null, MorphologyAnalysisMode.NEW, null);
+		fitter = new SegmentFitter(medianProfile);
 		this.low = low;
 		this.high = high;
 		this.nuclei = nuclei;

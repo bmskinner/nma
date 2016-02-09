@@ -1,23 +1,11 @@
 package analysis;
 
-import gui.DatasetEvent.DatasetMethod;
-import gui.InterfaceEvent.InterfaceMethod;
-import gui.tabs.SegmentsEditingPanel;
-
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
-
-import javax.swing.JOptionPane;
-
-import analysis.nucleus.DatasetSegmenter;
-import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
-import analysis.nucleus.DatasetSegmenter.SegmentFitter;
+//import analysis.nucleus.DatasetSegmenter.SegmentFitter;
 import utility.Constants;
-import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTag;
-import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
