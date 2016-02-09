@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,6 +34,8 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
 	protected int progressCount = 0;
 
 	private File logFile = null;
+	
+	protected static final ForkJoinPool mainPool = new ForkJoinPool();
     
     private final AnalysisDataset activeDataset;
     

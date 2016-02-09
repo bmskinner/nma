@@ -58,7 +58,7 @@ public class DatasetProfiler extends AnalysisWorker {
 
 				log(Level.FINE, "Profiling dataset");
 
-				this.setProgressTotal(3);
+//				this.setProgressTotal(3);
 
 				BorderTag pointType = BorderTag.REFERENCE_POINT;
 
@@ -109,11 +109,11 @@ public class DatasetProfiler extends AnalysisWorker {
 			
 //			log(Level.INFO, "Angle aggregate first:");
 //			log(Level.INFO, angleCollection.getAggregate().toString());
-			publish(1);
+//			publish(1);
 
 			// use the median profile of this aggregate to find the orientation point ("tail")
 			TailFinder.findTailIndexInMedianCurve(collection);
-			publish(2);
+//			publish(2);
 
 			// carry out iterative offsetting to refine the orientation point estimate
 			double score = compareProfilesToMedian(collection, pointType);
@@ -163,7 +163,7 @@ public class DatasetProfiler extends AnalysisWorker {
 				}
 			}
 						
-			publish(3);
+//			publish(3);
 			log(Level.FINE,  "Finished profiling collection; median generated");
 
 		} catch(Exception e){

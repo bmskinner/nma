@@ -26,56 +26,38 @@
 */  
 package analysis.nucleus;
 
-import ij.IJ;
-import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.plugin.RoiEnlarger;
-import ij.process.FloatPolygon;
 import io.CompositeExporter;
-import io.ImageExporter;
-import io.ImageImporter;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.SwingWorker;
-
-import logging.DebugFileFormatter;
-import logging.DebugFileHandler;
 import utility.Constants;
-//import utility.Logger;
-import utility.Utils;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisWorker;
-import components.Cell;
+import analysis.ProgressEvent;
+import analysis.ProgressListener;
 import components.CellCollection;
-import components.CellularComponent;
 import components.nuclear.NucleusType;
-import components.nuclei.Nucleus;
 
-public class NucleusDetector extends AnalysisWorker {
+public class NucleusDetector extends AnalysisWorker  implements ProgressListener {
   
   private static final String spacerString = "---------";
   
-  private int progress;
+  private int progress = 0;
 
-  private File inputFolder;
-  protected String outputFolder;
-  protected File debugFile;
-
-  protected AnalysisOptions analysisOptions;
+  private final File inputFolder;
+  protected final String outputFolder;
+  protected final File debugFile;
+  
+  protected final AnalysisOptions analysisOptions;
 
 //  protected MainWindow mw;
   private Map<File, CellCollection> collectionGroup = new HashMap<File, CellCollection>();
@@ -96,15 +78,13 @@ public class NucleusDetector extends AnalysisWorker {
 	  this.outputFolder 	= outputFolder;
 	  this.debugFile 		= debugFile;
 	  this.analysisOptions 	= options;
-	  
-	  
-	  
+  }
+  
+  private void getTotalImagesToAnalyse(){
 	  log(Level.INFO, "Calculating number of images to analyse");
-	  int totalImages = NucleusDetector.countSuitableImages(analysisOptions.getFolder());
+	  int totalImages = countSuitableImages(analysisOptions.getFolder());
 	  this.setProgressTotal(totalImages);
 	  log(Level.INFO, "Analysing "+totalImages+" images");
-	  
-	  this.progress = 0;
   }
 	
 	@Override
@@ -113,6 +93,9 @@ public class NucleusDetector extends AnalysisWorker {
 		boolean result = false;
 		
 		try{
+			
+			getTotalImagesToAnalyse();
+			
 			log(Level.INFO, "Running nucleus detector");
 			processFolder(this.inputFolder);
 
@@ -337,24 +320,6 @@ public class NucleusDetector extends AnalysisWorker {
   }
 
   /**
-  * Create the output folder for the analysis if required
-  *
-  * @param folder the folder in which to create the analysis folder
-  * @return a File containing the created folder
-  */
-  private File makeFolder(File folder){
-    File output = new File(folder.getAbsolutePath()+File.separator+this.outputFolder);
-    if(!output.exists()){
-      try{
-        output.mkdir();
-      } catch(Exception e) {
-    	  logError("Failed to create directory", e);
-      }
-    }
-    return output;
-  }
-  
-  /**
   * Go through the input folder. Check if each file is
   * suitable for analysis, and if so, call the analyser.
   *
@@ -364,66 +329,35 @@ public class NucleusDetector extends AnalysisWorker {
 
 	  File[] listOfFiles = folder.listFiles();
 	  
+	  
+	  
 	  CellCollection folderCollection = new CellCollection(folder, 
 			  outputFolder, 
 			  folder.getName(), 
 			  analysisOptions.getNucleusType());
 	  
 	  this.collectionGroup.put(folder, folderCollection);
+
+
+	  FileProcessingTask task = new FileProcessingTask(folder, listOfFiles, folderCollection, outputFolder, programLogger, analysisOptions);
+	  task.addProgressListener(this);
+	  mainPool.invoke(task);
+//	  task.invoke();
 	  
-	  NucleusFinder finder = new NucleusFinder(programLogger, analysisOptions, outputFolder);
+	  for(File f : listOfFiles){
+		  if(f.isDirectory()){
+			  processFolder(f); // recurse over each folder
+		  }
+	  }
 
-	  for (File file : listOfFiles) {
 
-		  boolean ok = checkFile(file);
-
-		  if(ok){
-			  try {
-
-				  ImageStack imageStack = ImageImporter.importImage(file, fileLogger);
-
-				  // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
-				  makeFolder(folder);
-				  
-				  log(Level.INFO, "File:  "+file.getName());
-				  List<Cell> cells = finder.getCells(imageStack, file);
-				  
-				  if(cells.isEmpty()){
-					  log(Level.INFO, "  No nuclei detected in image");
-				  } else {
-					  int nucleusNumber = 0;
-					  for(Cell cell : cells){
-						  folderCollection.addCell(cell);
-						  log(Level.INFO, "  Added nucleus "+nucleusNumber);
-						  nucleusNumber++;
-						 
-						  // save out the image stacks rather than hold within the nucleus
-						  Nucleus n 			 = cell.getNucleus();
-						  PolygonRoi nucleus 	 = new PolygonRoi(n.createPolygon(), PolygonRoi.POLYGON);
-						  
-						  double[] position = n.getPosition();
-						  nucleus.setLocation(position[CellularComponent.X_BASE],position[CellularComponent.Y_BASE]); // translate the roi to the image coordinates
-						  
-						  ImageStack smallRegion = NucleusFinder.getRoiAsStack(nucleus, imageStack);
-						  
-						  try{
-							  IJ.saveAsTiff(ImageExporter.convertToRGB(smallRegion), n.getAnnotatedImagePath());
-						  } catch(Exception e){
-							  logError("Error saving original, enlarged or annotated image", e);
-						  }
-					  }
-				  }
-
-			  } catch (Exception e) { // end try
-				  logError("Error in image processing: "+e.getMessage(), e);
-			  } // end catch
-			  
-			  publish(progress++); // must be global since this function recurses
-		  } else { // if !ok
-			  if(file.isDirectory()){ // recurse over any sub folders
-				  processFolder(file);
-			  } 
-		  } // end else if !ok
-	  } // end for (File)
   } // end function
+
+  @Override
+  public void progressEventReceived(ProgressEvent event) {
+	  publish(++progress);
+
+  }
+  
+  
 }

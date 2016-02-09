@@ -61,6 +61,7 @@ import javax.swing.event.ChangeListener;
 
 import stats.DipTester;
 import stats.NucleusStatistic;
+import stats.SegmentStatistic;
 import stats.Stats;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
@@ -293,7 +294,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			
 			String pval = "";
 			try {
-				double[] stats = dataset.getCollection().getSegmentLengths(s.getID(), MeasurementScale.PIXELS);
+				double[] stats = dataset.getCollection().getSegmentStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, s.getID());
 				double diptest 	= DipTester.getDipTestPValue(stats);
 				pval = pf.format(diptest);		
 			} catch (Exception e) {

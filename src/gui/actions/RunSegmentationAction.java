@@ -131,28 +131,32 @@ public class RunSegmentationAction extends ProgressableAction {
 
 			public void run(){
 
-				if(  (downFlag & MainWindow.STATS_EXPORT) == MainWindow.STATS_EXPORT){
+//				if(  (downFlag & MainWindow.STATS_EXPORT) == MainWindow.STATS_EXPORT){
+//
+//					programLogger.log(Level.INFO, "Exporting stats");
+//					boolean ok = StatsExporter.run(dataset);
+//					if(ok){
+//						programLogger.log(Level.INFO, "Exporting stats OK");
+//					} else {
+//						programLogger.log(Level.INFO, "Exporting stats error");
+//					}
+//				}
 
-					programLogger.log(Level.INFO, "Exporting stats");
-					boolean ok = StatsExporter.run(dataset);
-					if(ok){
-						programLogger.log(Level.INFO, "Exporting stats OK");
-					} else {
-						programLogger.log(Level.INFO, "Exporting stats error");
-					}
-				}
-
-				// annotate the nuclei in the population
-				if(  (downFlag & MainWindow.NUCLEUS_ANNOTATE) == MainWindow.NUCLEUS_ANNOTATE){
-
-					programLogger.log(Level.INFO, "Annotating nuclei...");
-					boolean ok = NucleusAnnotator.run(dataset);
-					if(ok){
-						programLogger.log(Level.INFO, "Annotating nuclei OK");
-					} else {
-						programLogger.log(Level.INFO, "Annotating nuclei error");
-					}
-				}
+//				// annotate the nuclei in the population
+//				if(  (downFlag & MainWindow.NUCLEUS_ANNOTATE) == MainWindow.NUCLEUS_ANNOTATE){
+//
+//					programLogger.log(Level.INFO, "Annotating nuclei...");
+//					
+//					NucleusAnnotator an = new NucleusAnnotator(dataset.getSwatch());
+//					an.run(dataset);
+//
+////					boolean ok = NucleusAnnotator.run(dataset);
+////					if(ok){
+////						programLogger.log(Level.INFO, "Annotating nuclei OK");
+////					} else {
+////						programLogger.log(Level.INFO, "Annotating nuclei error");
+////					}
+//				}
 
 				// make a composite image of all nuclei in the collection
 //				if(  (downFlag & MainWindow.EXPORT_COMPOSITE) == MainWindow.EXPORT_COMPOSITE){

@@ -1,8 +1,25 @@
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 package gui.tabs.profiles;
 
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.table.TableModel;
@@ -10,7 +27,6 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
-import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
@@ -28,6 +44,10 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 			
 			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(type);
 			chartPanel.setChart(chart);
+			
+			if(this.type==ProfileType.FRANKEN){
+				this.profileAlignmentOptionsPanel.setEnabled(false);
+			}
 		}
 		
 		@Override
@@ -64,8 +84,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 		private void updateChart() throws Exception{
 			ChartOptions options = makeOptions();
 			JFreeChart   chart   = getChart(options);
-			chartPanel.setChart(chart);
-			
+			chartPanel.setChart(chart);			
 		}
 		
 		private ChartOptions makeOptions(){

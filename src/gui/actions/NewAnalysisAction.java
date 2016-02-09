@@ -47,6 +47,7 @@ public class NewAnalysisAction extends ProgressableAction {
 	public NewAnalysisAction(MainWindow mw) {
 		super("Nucleus detection", mw);
 
+		this.cooldown();
 		log(Level.FINE, "Making analysis options");
 		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(programLogger);
 		

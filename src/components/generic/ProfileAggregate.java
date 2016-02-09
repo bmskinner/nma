@@ -188,7 +188,7 @@ public class ProfileAggregate implements Serializable {
 	}
 	
 	private Profile calculateQuartile(double quartile) throws ProfileException{
-		Double[] medians = new Double[this.length];
+		double[] medians = new double[this.length];
 		int missing = 0;
 
 		for(int i=0;i<this.length;i++){
@@ -196,8 +196,13 @@ public class ProfileAggregate implements Serializable {
 
 			try{
 				if(aggregate.containsKey(x)){
+					
 					Collection<Double> values = aggregate.get(x);
-					Double[] d = values.toArray(new Double[0]);
+					double[] d = new double[values.size()];
+					int j=0;
+					for(Double val : values){
+						d[j++] = val;
+					}
 
 					double median = Stats.quartile(d, quartile);
 
@@ -214,22 +219,26 @@ public class ProfileAggregate implements Serializable {
 		if(missing>(double)length/4){
 			throw new ProfileException("    Too many missing values ("+missing+") to calculate median profile");
 		}
-
-		Profile result = repairProfile(medians);
-		return result;
+		
+		if(missing==0){
+			return new Profile(medians);
+		} else {
+			return repairProfile(medians);
+		}
 	}
 	
-	private Profile repairProfile(Double[] array) throws ProfileException{
+	private Profile repairProfile(double[] array) throws ProfileException{
 		
 		for(int i=0;i<array.length;i++){
-			if(array[i].isNaN()){
+			
+			if(Double.isNaN(array[i])){
 				
 				int replacementIndex = AbstractCellularComponent.wrapIndex(i+1, array.length);
-				if(!array[replacementIndex].isNaN()){
+				if(!Double.isNaN(array[replacementIndex])){
 					array[i] = array[replacementIndex];
 				} else{
 					replacementIndex = AbstractCellularComponent.wrapIndex(i-1, array.length);
-					if(!array[replacementIndex].isNaN()){
+					if(!Double.isNaN(array[replacementIndex])){
 						array[i] = array[replacementIndex];
 					} else {
 						throw new ProfileException("Unable to repair median profile");
@@ -237,7 +246,7 @@ public class ProfileAggregate implements Serializable {
 				}	
 			}
 		}
-		return new Profile(Utils.getdoubleFromDouble(array));
+		return new Profile(array);
 	}
 	
 	// this is for low count profiles, to get some kind of median even if poor
