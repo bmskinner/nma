@@ -351,12 +351,12 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 			  analysisOptions.getNucleusType());
 	  
 	  this.collectionGroup.put(folder, folderCollection);
-	  
-	  
+
+
 	  FileProcessingTask task = new FileProcessingTask(folder, listOfFiles, folderCollection, outputFolder, programLogger, analysisOptions);
-	 task.addProgressListener(this);
+	  task.addProgressListener(this);
 	  task.invoke();
-	  
+
 //	  NucleusFinder finder = new NucleusFinder(programLogger, analysisOptions, outputFolder);
 //
 //	  for (File file : listOfFiles) {
