@@ -81,7 +81,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		// we have morphology analysis to carry out, so don't use the super finished
 		// use the same segmentation from the initial analysis
 		new RunSegmentationAction(list, dataset, null, mw);
-
+		fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 		cancel();
 	}
 

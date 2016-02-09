@@ -395,8 +395,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							list.add(activeDataset());
 							
 							try {
-								CellDetailPanel.this.fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
-								CellDetailPanel.this.fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, list);
+								fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
+								fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, list);
 
 							} catch (Exception e1) {
 								programLogger.log(Level.SEVERE, "Error deleting cell", e1);
@@ -407,9 +407,9 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							} catch (Exception e1) {
 								programLogger.log(Level.SEVERE, "Error updating cell", e1);
 							}
-							CellDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
-							CellDetailPanel.this.fireSignalChangeEvent("UpdatePopulationPanel");
-							CellDetailPanel.this.fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);
+							fireSignalChangeEvent("UpdatePanels");
+							fireSignalChangeEvent("UpdatePopulationPanel");
+							fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);
 
 						}
 						

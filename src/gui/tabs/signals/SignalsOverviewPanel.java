@@ -67,6 +67,7 @@ import gui.components.ExportableTable;
 import gui.tabs.DetailPanel;
 import gui.tabs.SignalsDetailPanel;
 import ij.io.DirectoryChooser;
+import stats.SignalStatistic;
 
 @SuppressWarnings("serial")
 public class SignalsOverviewPanel extends DetailPanel implements ActionListener {
@@ -110,7 +111,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 				
 				int signalGroupRow = 0;
 				int signalGroup = 0;
-				int rowsPerSignalGroup = 11;
+				int rowsPerSignalGroup = 7 + SignalStatistic.values().length;
 				if(row>0){
 					signalGroupRow = row - (row % rowsPerSignalGroup);
 					signalGroup = (Integer) table.getModel().getValueAt(signalGroupRow, column);

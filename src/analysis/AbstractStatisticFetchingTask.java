@@ -29,7 +29,7 @@ public abstract class AbstractStatisticFetchingTask extends RecursiveTask<double
 	
 	final int low, high;
 	final Nucleus[] nuclei;
-	public static final int THRESHOLD = 30;
+	public static final int THRESHOLD = 200;
 	final PlottableStatistic stat;
 	final MeasurementScale scale;
 	
