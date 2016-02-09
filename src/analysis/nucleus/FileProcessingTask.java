@@ -8,6 +8,7 @@ import java.util.concurrent.RecursiveAction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import analysis.AbstractProgressAction;
 import analysis.AnalysisOptions;
 import analysis.ProgressEvent;
 import analysis.ProgressListener;
@@ -23,14 +24,14 @@ import io.ImageImporter;
 import utility.Constants;
 
 @SuppressWarnings("serial")
-public class FileProcessingTask  extends RecursiveAction implements ProgressListener {
+public class FileProcessingTask  extends AbstractProgressAction  {
 	
 	private CellCollection collection;
 	private File[] files;
 	private static final int THRESHOLD = 10;
 	final int low, high;
 	NucleusFinder finder;
-	private final List<Object> listeners 			= new ArrayList<Object>();
+	
 	
 	String outputFolder;
 	Logger programLogger;
@@ -73,9 +74,6 @@ public class FileProcessingTask  extends RecursiveAction implements ProgressList
 	       
 	       this.invokeAll(tasks);
 	       
-//	       invokeAll(new FileProcessingTask(folder, files, collection, low, mid, outputFolder, programLogger, analysisOptions),
-//	                 new FileProcessingTask(folder, files, collection, mid, high, outputFolder, programLogger, analysisOptions));
-//	       merge(low, mid, high);
 	     }
 	   }
 	
@@ -116,7 +114,7 @@ public class FileProcessingTask  extends RecursiveAction implements ProgressList
 			  } // end catch
 			  
 			  fireProgressEvent();
-//			  publish(progress++); // must be global since this function recurses
+			  
 		  } else { // if !ok
 			  if(file.isDirectory()){ // recurse over any sub folders
 //				  processFolder(file);
@@ -195,28 +193,4 @@ public class FileProcessingTask  extends RecursiveAction implements ProgressList
 	    }
 	    return output;
 	  }
-	  
-	  public synchronized void addProgressListener( ProgressListener l ) {
-	        listeners.add( l );
-	    }
-	    
-	    public synchronized void removeProgressListener( ProgressListener l ) {
-	        listeners.remove( l );
-	    }
-	    
-	    protected synchronized void fireProgressEvent() {
-	    	
-	        ProgressEvent event = new ProgressEvent( this);
-	        Iterator<Object> iterator = listeners.iterator();
-	        while( iterator.hasNext() ) {
-	            ( (ProgressListener) iterator.next() ).progressEventReceived( event );
-	        }
-	    }
-	    
-	    @Override
-	    public void progressEventReceived(ProgressEvent event) {
-	    	// pass up the chain
-	    	fireProgressEvent();
-	    	
-	    }
 }
