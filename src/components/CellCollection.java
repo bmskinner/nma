@@ -104,8 +104,20 @@ public class CellCollection implements Serializable {
 	 * @param nucleusClass the class of nucleus to be held
 	 */
 	public CellCollection(File folder, String outputFolder, String name, NucleusType nucleusType){
+		this( folder,  outputFolder,  name,  nucleusType, java.util.UUID.randomUUID());		
+	}
+	
+	/**
+	 * Constructor with non-random id. Use only when copying an old collection. Can cause ID conflicts!
+	 * @param folder the folder of images
+	 * @param outputFolder a name for the outputs (usually the analysis date). Can be null
+	 * @param type the type of collection (e.g. analysable)
+	 * @param nucleusClass the class of nucleus to be held
+	 * @param id specify an id for the collection, rather than generating randomly.
+	 */
+	public CellCollection(File folder, String outputFolder, String name, NucleusType nucleusType, UUID id){
 		
-		this.uuid         = java.util.UUID.randomUUID();
+		this.uuid         = id;
 		this.folder       = folder;
 		this.outputFolder = outputFolder;
 		this.name         = name == null ? folder.getName() : name;// if name is null, use the image folder name
@@ -124,11 +136,7 @@ public class CellCollection implements Serializable {
    */
   public CellCollection(AnalysisDataset template, String name){
 
-	  this(template.getCollection().getFolder(), 
-			  template.getCollection().getOutputFolderName(), 
-			  name, 
-			  template.getCollection().getNucleusType()
-			  );
+	  this(template.getCollection(), name );
   }
   
   /**
@@ -143,7 +151,7 @@ public class CellCollection implements Serializable {
 			  template.getNucleusType()
 			  );
   }
-
+  
   /*
     -----------------------
     Define adders for all

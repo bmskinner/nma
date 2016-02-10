@@ -333,7 +333,16 @@ public class AnalysisDataset implements Serializable {
 	 * @return
 	 */
 	public AnalysisDataset getChildDataset(UUID id){
-		return this.childCollections.get(id);
+		if(this.hasChild(id)){
+			return this.childCollections.get(id);
+		} else {
+			for(AnalysisDataset child : this.getAllChildDatasets()){
+				if(child.getUUID().equals(id)){
+					return child;
+				}
+			}
+		}
+		return null;
 	}
 	
 	/**

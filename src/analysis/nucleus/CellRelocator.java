@@ -3,8 +3,12 @@ package analysis.nucleus;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,57 +60,126 @@ public class CellRelocator extends AnalysisWorker {
 	}
 	
 	private void findCells() throws Exception {
-		List<Cell> cells = parsePathList();
+		Set<UUID> newDatasets = parsePathList();
 		
 		log(Level.FINE, "Parsing complete");
-		log(Level.FINE, "Found "+cells.size()+" cells");
+		int newSize = newDatasets.size()-1;
+		log(Level.FINE, "Found "+newSize+" new datasets");
 		
-		if( ! cells.isEmpty()){
-
-			String newName = inputFile.getName().replace("."+Constants.LOC_FILE_EXTENSION, "");
-			CellCollection c = new CellCollection(getDataset(), newName);
+		if( newDatasets.size()>1){
 			
-			for(Cell cell : cells){
-				c.addCell(cell);
+			for(UUID id : newDatasets){
+				
+				if( ! id.equals(getDataset().getUUID())){
+					
+					getDataset().getCollection()
+						.getProfileManager()
+						.copyCollectionOffsets(getDataset().getChildDataset(id).getCollection());
+					
+				}
 			}
-			
+
 			/*
 			 * Copy profile offsets and make the median profile
 			 */
-			getDataset().getCollection().getProfileManager().copyCollectionOffsets(c);
+//			getDataset().getCollection().getProfileManager().copyCollectionOffsets(c);
 			
 			
 			/*
 			 * Add the new collection  to a dataset, and set as a child
 			 */
 			
-			AnalysisDataset d = new AnalysisDataset(c);
-			getDataset().addChildDataset(d);
+//			AnalysisDataset d = new AnalysisDataset(c);
+//			getDataset().addChildDataset(d);
 			
 		}
 		
 	}
 	
-	private List<Cell> parsePathList() throws Exception {
+	
+	
+	private Set<UUID> parsePathList() throws Exception {
 		log(Level.FINE, "Input file: "+inputFile.toString());
 		
-		List<Cell> cells = new ArrayList<Cell>();
+//		List<Cell> cells = new ArrayList<Cell>();
 		
 	    Scanner scanner =  new Scanner(inputFile);
+	    
+	    UUID   activeID   = null;
+	    String activeName = null;
+	    
+	    Map<UUID, AnalysisDataset> map = new HashMap<UUID, AnalysisDataset>();
+//	    map.put(getDataset().getUUID(), getDataset());
 
 	    while (scanner.hasNextLine()){
+	    	
+	    	/*
+	    	 * File format:
+	    	 * UUID	57320dbb-bcde-49e3-ba31-5b76329356fe
+			 * Name	Testing
+             * ChildOf	57320dbb-bcde-49e3-ba31-5b76329356fe
+             * J:\Protocols\Scripts and macros\Testing\s75.tiff	602.0585522824504-386.38060239306236
+	    	 */
+	    	
+	    	String line = scanner.nextLine();
+	    	if(line.startsWith("UUID")){
+	    		
+	    		/*
+	    		 * New dataset found
+	    		 */
+	    		activeID = UUID.fromString( line.split("\\t")[1] );
+	    		continue;
+	    	}
+	    	
+	    	if(line.startsWith("Name")){
+	    		/*
+	    		 * Name of new dataset
+	    		 */
+	    		
+	    		activeName =  line.split("\\t")[1];
+	    		CellCollection c = new CellCollection(getDataset().getCollection().getFolder(), 
+	    				getDataset().getCollection().getOutputFolderName(), 
+	    				  activeName, 
+	    				  getDataset().getCollection().getNucleusType(),
+	    				  activeID);
+	    		AnalysisDataset d = new AnalysisDataset(c);
+	    		d.setAnalysisOptions(getDataset().getAnalysisOptions());
+	    		map.put(activeID, d);
+	    		continue;
+	    	}
+	    	
+	    	if(line.startsWith("ChildOf")){
+	    		/*
+	    		 * Parent dataset
+	    		 */
+	    		UUID parentID = UUID.fromString( line.split("\\t")[1] );
+	    		
+	    		if(parentID.equals(activeID)){
+	    			getDataset().addChildDataset(map.get(activeID));
+	    		} else {
+	    			map.get(parentID).addChildDataset(map.get(activeID));
+	    		}
+	    		continue;
+	    	}
+	    	
+	    	/*
+    		 * No header line, must be a cell for the current dataset
+    		 */
 	    	  
-	        Cell cell = processLine(scanner.nextLine());
+	        Cell cell = getCellFromLine(line);
 	        if(cell!=null){
-	        	cells.add(cell);
+	        	map.get(activeID).getCollection().addCell(cell);
+//	        	cells.add(cell);
 	        }
 	    }
 	    log(Level.FINE, "All cells found");
 	    scanner.close();
-	    return cells;
+	    return map.keySet();
 	  }
 	
-	private Cell processLine(String line){
+	
+	
+	private Cell getCellFromLine(String line){
 		log(Level.FINE, "Processing line: "+line);
 		
 		if(line.length()<5){
@@ -137,17 +210,28 @@ public class CellRelocator extends AnalysisWorker {
 			return null;
 		}
 		
-		// find the nucleus
-		List<Cell> cells = this.getDataset().getCollection().getCells(file);
+		return copyCellFromRoot(file, com);
 		
+	}
+	
+	/**
+	 * Make a new cell based on the cell in the root dataset with
+	 * the given location in an image file
+	 * @param f
+	 * @param com
+	 * @return
+	 */
+	private Cell copyCellFromRoot(File f, XYPoint com){
+		// find the nucleus
+		List<Cell> cells = this.getDataset().getCollection().getCells(f);
+
 		for(Cell c : cells){
-						
+
 			if(c.getNucleus().containsOriginalPoint(com)){
 				return new Cell(c);
 			}
 		}
 		return null;
-		
 	}
 	
 	private File getFile(String line) {
