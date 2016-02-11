@@ -95,13 +95,11 @@ public class SaveDatasetAction extends ProgressableAction {
 	
 	@Override
 	public void finished(){
-		// Do not use super.finished(), or it will trigger another save action
+
 		log(Level.FINE, "Save action complete");
-		cancel();		
-		this.removeInterfaceEventListener(mw);
-		this.removeDatasetEventListener(mw);
 		log(Level.FINE, "Removing save latch");
 		this.countdownLatch();
+		super.finished();
 		
 	}
 

@@ -899,15 +899,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		for(AnalysisDataset child : dataset.getAllChildDatasets() ){
 			populationsPanel.addDataset(child);
 		}
-		//				programLogger.log(Level.FINEST, "Ordering recache");
-		//				recacheCharts(dataset);
+
 		programLogger.log(Level.FINEST, "Ordering update of populations panel");
 		final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		list.add(dataset);
 		populationsPanel.update(list);
 
-		//				programLogger.log(Level.FINEST, "Ordering selection of added dataset");
-		//				populationsPanel.selectDataset(dataset);
 
 	}
 	
@@ -995,6 +992,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				final CountDownLatch latch = new CountDownLatch(1);
 				new SaveDatasetAction(d, MainWindow.this, latch, false);
 				try {
+					programLogger.log(Level.FINEST, "Awaiting latch for save action");
 					latch.await();
 				} catch (InterruptedException e) {
 					programLogger.log(Level.SEVERE, "Interruption to thread", e);
@@ -1099,6 +1097,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		});
 	}
 
+	
 	
 	@Override
 	public void interfaceEventReceived(InterfaceEvent event) {

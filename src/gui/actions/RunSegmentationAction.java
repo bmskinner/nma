@@ -131,46 +131,6 @@ public class RunSegmentationAction extends ProgressableAction {
 
 			public void run(){
 
-//				if(  (downFlag & MainWindow.STATS_EXPORT) == MainWindow.STATS_EXPORT){
-//
-//					programLogger.log(Level.INFO, "Exporting stats");
-//					boolean ok = StatsExporter.run(dataset);
-//					if(ok){
-//						programLogger.log(Level.INFO, "Exporting stats OK");
-//					} else {
-//						programLogger.log(Level.INFO, "Exporting stats error");
-//					}
-//				}
-
-//				// annotate the nuclei in the population
-//				if(  (downFlag & MainWindow.NUCLEUS_ANNOTATE) == MainWindow.NUCLEUS_ANNOTATE){
-//
-//					programLogger.log(Level.INFO, "Annotating nuclei...");
-//					
-//					NucleusAnnotator an = new NucleusAnnotator(dataset.getSwatch());
-//					an.run(dataset);
-//
-////					boolean ok = NucleusAnnotator.run(dataset);
-////					if(ok){
-////						programLogger.log(Level.INFO, "Annotating nuclei OK");
-////					} else {
-////						programLogger.log(Level.INFO, "Annotating nuclei error");
-////					}
-//				}
-
-				// make a composite image of all nuclei in the collection
-//				if(  (downFlag & MainWindow.EXPORT_COMPOSITE) == MainWindow.EXPORT_COMPOSITE){
-//					if(dataset.getCollection().getNucleusCount()<CompositeExporter.MAX_COMPOSITABLE_NUCLEI){
-//						programLogger.log(Level.INFO, "Exporting composite...");
-//						boolean ok = CompositeExporter.run(dataset);
-//						if(ok){
-//							programLogger.log(Level.INFO, "Exporting composite OK");
-//						} else {
-//							programLogger.log(Level.INFO, "Exporting composite error");
-//						}
-//					}
-//				}
-
 				/*
 				 * The refold action is a progressable action, so must not block
 				 * the EDT. Also, the current action must wait for refolding to complete,
@@ -192,10 +152,14 @@ public class RunSegmentationAction extends ProgressableAction {
 					programLogger.log(Level.FINEST, "Resuming thread after refolding datast");
 				}
 
-				
+				/*
+				 * We should only need to recache charts if the dataset exists
+				 */
 
 				if(  (downFlag & MainWindow.ADD_POPULATION) == MainWindow.ADD_POPULATION){
 					fireDatasetEvent(DatasetMethod.ADD_DATASET, dataset);
+				} else {
+					fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, dataset);
 				}
 				
 				if(  (downFlag & MainWindow.SAVE_DATASET) == MainWindow.SAVE_DATASET){
@@ -203,16 +167,12 @@ public class RunSegmentationAction extends ProgressableAction {
 					fireDatasetEvent(DatasetMethod.SAVE, dataset);
 				}
 				
-//				fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, dataset);
+
 
 				// if no list was provided, or no more entries remain,
 				// call the finish
 				if( ! hasRemainingDatasetsToProcess()){
 					programLogger.log(Level.FINEST, "No more datasets remain to process");
-					programLogger.log(Level.FINEST, "Firing save dataset");
-					fireDatasetEvent(DatasetMethod.SAVE, dataset);
-					fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, dataset);
-//					fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 					latch.countDown();
 					RunSegmentationAction.super.finished();
 					
