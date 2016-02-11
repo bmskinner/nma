@@ -132,6 +132,7 @@ public class DatasetEvent extends EventObject {
 	
 	public enum DatasetMethod {
 		
+		PROFILING_ACTION    ("Profiling action"),
 		NEW_MORPHOLOGY 		("New morphology"),
 		COPY_MORPHOLOGY		("Copy morphology"),
 		REFRESH_MORPHOLOGY	("Refresh morphology"),

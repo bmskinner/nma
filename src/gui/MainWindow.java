@@ -31,6 +31,7 @@ import gui.actions.MergeCollectionAction;
 import gui.actions.RefoldNucleusAction;
 import gui.actions.RelocateFromFileAction;
 import gui.actions.ReplaceSourceImageDirectoryAction;
+import gui.actions.RunProfilingAction;
 import gui.actions.RunSegmentationAction;
 import gui.actions.NewAnalysisAction;
 import gui.actions.PopulationImportAction;
@@ -624,32 +625,32 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 //			new DatasetArithmeticAction(selectedDataset, populationsPanel.getAllDatasets(), MainWindow.this);
 		}
 		
-		if(event.type().equals("SaveCollectionAction")){
-			
-			executorService.execute(new Runnable() {
-				public void run() {
-					try {
-						CountDownLatch latch = new CountDownLatch(1);
-						new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
-						latch.await();
-						programLogger.log(Level.FINE, "All dataset saved");
-					} catch (InterruptedException e) {
-						programLogger.log(Level.SEVERE, "Interruption to thread", e);
-					}
-				}
-				
-			});
-			
-//			try {
-//				CountDownLatch latch = new CountDownLatch(1);
-//				new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
-//				latch.await();
-//				programLogger.log(Level.FINE, "All dataset saved");
-//			} catch (InterruptedException e) {
-//				programLogger.log(Level.SEVERE, "Interruption to thread", e);
-//			}
-
-		}
+//		if(event.type().equals("SaveCollectionAction")){
+//			
+//			executorService.execute(new Runnable() {
+//				public void run() {
+//					try {
+//						CountDownLatch latch = new CountDownLatch(1);
+//						new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
+//						latch.await();
+//						programLogger.log(Level.FINE, "All dataset saved");
+//					} catch (InterruptedException e) {
+//						programLogger.log(Level.SEVERE, "Interruption to thread", e);
+//					}
+//				}
+//				
+//			});
+//			
+////			try {
+////				CountDownLatch latch = new CountDownLatch(1);
+////				new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
+////				latch.await();
+////				programLogger.log(Level.FINE, "All dataset saved");
+////			} catch (InterruptedException e) {
+////				programLogger.log(Level.SEVERE, "Interruption to thread", e);
+////			}
+//
+//		}
 		
 		
 		
@@ -767,6 +768,30 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		programLogger.log(Level.FINEST, "Heard dataset event: "+event.method().toString());
 		final List<AnalysisDataset> list = event.getDatasets();
 		if(!list.isEmpty()){
+			
+			
+			
+			if(event.method().equals(DatasetMethod.PROFILING_ACTION)){
+				programLogger.log(Level.FINE, "Running new profiling and segmentation");
+				
+				
+				executorService.execute(new Runnable() {
+					public void run() {
+						int flag = 0; // set the downstream analyses to run
+						flag |= MainWindow.ADD_POPULATION;
+						flag |= MainWindow.STATS_EXPORT;
+						flag |= MainWindow.NUCLEUS_ANNOTATE;
+						flag |= MainWindow.ASSIGN_SEGMENTS;
+						
+						if(event.firstDataset().getAnalysisOptions().refoldNucleus()){
+							flag |= MainWindow.CURVE_REFOLD;
+						}
+						// begin a recursive morphology analysis
+						new RunProfilingAction(list, flag, MainWindow.this);
+					}
+					
+				});
+			}
 						
 			if(event.method().equals(DatasetMethod.NEW_MORPHOLOGY)){
 				programLogger.log(Level.INFO, "Running new morphology analysis");
@@ -778,29 +803,16 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					}
 					
 				});
-//				SwingUtilities.invokeLater(new Runnable(){
-//					public void run(){
-//					
-//						new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
-//
-//				}});
 			}
 			
 			if(event.method().equals(DatasetMethod.REFRESH_MORPHOLOGY)){
-//				programLogger.log(Level.INFO, "Updating segmentation across nuclei");
+				programLogger.log(Level.FINEST, "Updating segmentation across nuclei");
 				executorService.execute(new Runnable() {
 					public void run() {
 						new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
 					}
 					
 				});
-//				SwingUtilities.invokeLater(new Runnable(){
-//					public void run(){
-//					
-//						new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
-//					
-//				}});
-
 			}
 			
 			if(event.method().equals(DatasetMethod.COPY_MORPHOLOGY)){
@@ -813,13 +825,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					}
 					
 				});
-//				SwingUtilities.invokeLater(new Runnable(){
-//					public void run(){
-//					
-//						new RunSegmentationAction(event.getDatasets(), source, null, MainWindow.this);
-//					
-//				}});
-
 			}
 			
 						
@@ -831,15 +836,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
 					}
 					
-				});
-//				SwingUtilities.invokeLater(new Runnable(){
-//					public void run(){
-//					
-//						programLogger.log(Level.INFO, "Clustering dataset");
-//						new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
-//					
-//				}});
-				
+				});				
 			}
 			
 			if(event.method().equals(DatasetMethod.BUILD_TREE)){
@@ -850,14 +847,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					}
 					
 				});
-//				programLogger.log(Level.INFO, "Building a tree from dataset");
-//				new BuildHierarchicalTreeAction(event.firstDataset(), this);
 			}
 			
 			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
 				executorService.execute(new Runnable() {
 					public void run() {
-						programLogger.log(Level.INFO, "Building a tree from dataset");
+						programLogger.log(Level.INFO, "Refolding consensus nucleus");
 						refoldConsensus(event.firstDataset());
 					}
 					
@@ -891,13 +886,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					}
 					
 				});
-//				programLogger.log(Level.INFO, "Recovering source dataset");
-//				for(AnalysisDataset d : list){
-//					d.setRoot(true);
-//					populationsPanel.addDataset(d);
-//					populationsPanel.update();
-//				}
-
 			}
 			
 			if(event.method().equals(DatasetMethod.RECALCULATE_CACHE)){
@@ -922,28 +910,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				
 				
 			}
-			
-			
-
-//			if(event.method().equals(DatasetMethod.SAVE_AS)){
-//				programLogger.log(Level.FINEST, "Dataset save as event heard");
-//				final AnalysisDataset selectedDataset = event.firstDataset();
-//
-//				final CountDownLatch latch = new CountDownLatch(1);
-//
-//				Thread thr = new Thread(){
-//					public void run(){
-//
-//						new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
-//						try {
-//							latch.await();
-//						} catch (InterruptedException e) {
-//							programLogger.log(Level.SEVERE, "Interruption to thread", e);
-//						}
-//					}};
-//					thr.start();
-//			}
-
 		}
 		
 	}
@@ -1242,6 +1208,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 		}		
 	}	
+	
+	@Override
+	public void dispose(){
+		executorService.shutdownNow();
+		super.dispose();
+	}
 	
 //	@SuppressWarnings("serial")
 //	class GlassPane extends JPanel implements ItemListener {

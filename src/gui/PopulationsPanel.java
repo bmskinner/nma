@@ -1069,26 +1069,27 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		if(event.sourceName().equals(PopulationListPopupMenu.SOURCE_COMPONENT)){
 			
 			// pass on signals from the menu
-			fireSignalChangeEvent(event.type());
-			programLogger.log(Level.FINEST, "Firing signal change event: "+event.type());
 			
-//			if(event.type().equals("SaveCollectionAction")){
-//				programLogger.log(Level.FINEST, "Firing dataset save-as event");
-//				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-//				list.add(activeDataset());
-//				fireDatasetEvent(DatasetMethod.SAVE_AS, list);
-//			}
+			if(event.type().equals("SaveCollectionAction")){
+				
+				/*
+				 * Convert signal change event to dataset method if the
+				 * command is to save
+				 */
+				programLogger.log(Level.FINEST, "Firing dataset save-as event");
+				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+				list.add(activeDataset());
+				fireDatasetEvent(DatasetMethod.SAVE_AS, list);
+			} else {
+				/*
+				 * Otherwise pass the message on
+				 */
+				fireSignalChangeEvent(event.type());
+				programLogger.log(Level.FINEST, "Firing signal change event: "+event.type());
+			}
 			
 		}
-		
-		if(event.type().equals("SaveCollectionAction")){
-			programLogger.log(Level.FINEST, "Firing dataset save-as event");
-			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-			list.add(activeDataset());
-			fireDatasetEvent(DatasetMethod.SAVE_AS, list);
-		}
-		
-		
+
 		
 		// catch any signals that affect the datasets directly
 		if(event.type().equals("MoveDatasetDownAction")){

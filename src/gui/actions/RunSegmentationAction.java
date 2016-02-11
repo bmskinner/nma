@@ -229,6 +229,19 @@ public class RunSegmentationAction extends ProgressableAction {
 				} else {
 					// otherwise analyse the next item in the list
 					cancel(); // remove progress bar
+					
+//					if(mode.equals(MorphologyAnalysisMode.COPY)){
+//
+////						fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, getRemainingDatasetsToProcess(), source);
+//						
+//						new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag, mw);
+//						
+//					} else {
+//						
+//						new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag, mw);
+//					}
+					
+					
 
 					SwingUtilities.invokeLater(new Runnable(){
 						public void run(){
@@ -247,7 +260,6 @@ public class RunSegmentationAction extends ProgressableAction {
 			}
 		};
 		thr.start();
-
 	}
 
 }

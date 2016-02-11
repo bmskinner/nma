@@ -196,23 +196,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		
 		for(Component c : this.getComponents()){
 			c.setEnabled(true);
-		}
-//		enableMerge();
-//		enableDelete();
-//		enableSplit();
-//		enableCurate();
-//		enableSave();
-//		enableExtract();
-//		enableRelocateCells();
-//		enableMenuUp();
-//		enableMenuDown();
-//		enableReplaceFolder();
-//		enableExportStats();
-//		enableApplySegmentation();
-//		enableAddTailStain();
-//		this.enableAddNuclearSignal();
-//		this.enableRunShellAnalysis();
-		
+		}		
 	}
 	
 	public void disableAll(){
@@ -220,22 +204,6 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		for(Component c : this.getComponents()){
 			c.setEnabled(false);
 		}
-		
-//		disableMerge();
-//		disableDelete();
-//		disableSplit();
-//		disableCurate();
-//		disableSave();
-//		disableExtract();
-//		disableRelocateCells();
-//		disableMenuUp();
-//		disableMenuDown();
-//		disableReplaceFolder();
-//		disableExportStats();
-//		disableApplySegmentation();
-//		this.disableAddTailStain();
-//		this.disableAddNuclearSignal();
-//		this.disableRunShellAnalysis();
 	}
 	
 	public void enableMerge(){

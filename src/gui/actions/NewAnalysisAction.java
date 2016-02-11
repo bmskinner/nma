@@ -19,6 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
+import gui.DatasetEvent.DatasetMethod;
 import gui.dialogs.AnalysisSetupDialog;
 
 import java.io.File;
@@ -97,29 +98,8 @@ public class NewAnalysisAction extends ProgressableAction {
 			log(Level.INFO, "No datasets returned");
 			this.cancel();
 		} else {
-
-			// run next analysis on a new thread to avoid blocking the EDT
-			Thread thr = new Thread(){
-				
-				public void run(){
-					
-					int flag = 0; // set the downstream analyses to run
-					flag |= MainWindow.ADD_POPULATION;
-					flag |= MainWindow.STATS_EXPORT;
-					flag |= MainWindow.NUCLEUS_ANNOTATE;
-//					flag |= MainWindow.EXPORT_COMPOSITE;
-					flag |= MainWindow.ASSIGN_SEGMENTS;
-					flag |= MainWindow.SAVE_DATASET;
-					
-					if(datasets.get(0).getAnalysisOptions().refoldNucleus()){
-						flag |= MainWindow.CURVE_REFOLD;
-					}
-					// begin a recursive morphology analysis
-					new RunProfilingAction(datasets, flag, mw);
-				}
-				
-			};
-			thr.start();
+			
+			fireDatasetEvent(DatasetMethod.PROFILING_ACTION, datasets);
 
 			// do not call super finished, because there is no dataset for this action
 			// allow the morphology action to update the panels

@@ -97,8 +97,7 @@ public class RunProfilingAction extends ProgressableAction {
 					try {
 						latch.await();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						programLogger.log(Level.SEVERE, "Interruption in segmentation thread", e);
 					}
 				}
 
