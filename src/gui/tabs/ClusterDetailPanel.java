@@ -395,13 +395,13 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 
 	}
 
-	@Override
-	public void datasetEventReceived(DatasetEvent event) {
-
-		// Pass morphology on
-		if(event.method()==DatasetMethod.COPY_MORPHOLOGY){
-			fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, event.getDatasets(), event.secondaryDataset());
-		}
-		
-	}
+//	@Override
+//	public void datasetEventReceived(DatasetEvent event) {
+//
+//		// Pass morphology on
+////		if(event.method()==DatasetMethod.COPY_MORPHOLOGY){
+////			fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, event.getDatasets(), event.secondaryDataset());
+////		}
+//		
+//	}
 }

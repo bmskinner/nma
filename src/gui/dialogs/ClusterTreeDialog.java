@@ -541,8 +541,9 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 			
 			if(!list.isEmpty()){
 //				fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, list, dataset);
+				programLogger.log(Level.FINEST, "Firing panel update request");
 				fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-				programLogger.log(Level.FINEST, "Fired dataset copy event to listeners");
+//				programLogger.log(Level.FINEST, "Fired dataset copy event to listeners");
 			} else {
 				programLogger.log(Level.WARNING, "No datasets to analyse");
 			}
