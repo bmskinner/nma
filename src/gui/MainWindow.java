@@ -153,7 +153,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		try {
 			setTitle("Nuclear Morphology Analysis v"+getVersion().toString());
-			setBounds(100, 100, 1012, 604);
 			this.setLocationRelativeTo(null); // centre on screen
 			contentPane = new JPanel();
 			contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
