@@ -62,11 +62,11 @@ public class DatasetEvent extends EventObject {
 	 * Construct from an existing event. Use to pass messages on.
 	 * @param event
 	 */
-	public DatasetEvent(DatasetEvent event){
-		super(event.getSource());
-		this.method = event.method();
+	public DatasetEvent(Object source, DatasetEvent event){
+		super(source);
+		this.method     = event.method();
 		this.sourceName = event.sourceName();
-		this.list = event.getDatasets();
+		this.list       = event.getDatasets();
 		this.secondaryDataset = event.secondaryDataset();
 	}
 	
@@ -137,7 +137,8 @@ public class DatasetEvent extends EventObject {
 		COPY_MORPHOLOGY		("Copy morphology"),
 		REFRESH_MORPHOLOGY	("Refresh morphology"),
 		REFOLD_CONSENSUS	("Refold consensus"),
-		SELECT_DATASETS		("Select datasets"),
+		SELECT_DATASETS		("Select multiple datasets"),
+		SELECT_ONE_DATASET	("Select single dataset"),
 		EXTRACT_SOURCE		("Extract source"),
 		CLUSTER 			("Cluster"),
 		BUILD_TREE			("Build tree"),

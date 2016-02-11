@@ -189,6 +189,7 @@ abstract class ProgressableAction implements PropertyChangeListener {
 	 * Remove the progress bar and dataset and interface listeners 
 	 */
 	public void cancel(){
+		log(Level.FINEST, "Removing interface and dataset listeners");
 		removeProgressBar();
 		removeDatasetEventListener(mw);
 		removeInterfaceEventListener(mw);
@@ -243,20 +244,7 @@ abstract class ProgressableAction implements PropertyChangeListener {
 	 * The method run when the analysis has completed
 	 */
 	public void finished(){
-		removeProgressBar();
-
-		log(Level.FINEST, "Firing update populations");
-		fireInterfaceEvent(InterfaceMethod.UPDATE_POPULATIONS);
-		
-		log(Level.FINEST, "Firing update panels");
-		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-		
-		log(Level.FINEST, "Firing select datasets");
-		fireDatasetEvent(DatasetMethod.SELECT_DATASETS, dataset);
-		
-		log(Level.FINEST, "Firing recache charts");
-		fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-		
+		removeProgressBar();		
 		log(Level.FINEST, "Removing event listeners from action");
 		this.removeInterfaceEventListener(mw);
 		this.removeDatasetEventListener(mw);

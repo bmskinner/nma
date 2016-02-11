@@ -383,8 +383,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 							
 						}
 					}
-					NuclearBoxplotsPanel.this.fireInterfaceEvent(InterfaceMethod.UPDATE_POPULATIONS);
-//					NuclearBoxplotsPanel.this.fireDatasetEvent(DatasetMethod.NEW_MORPHOLOGY, newList);
+					fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 				}
 			} 
 		}

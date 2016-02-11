@@ -69,7 +69,7 @@ public class RunSegmentationAction extends ProgressableAction {
 		this.latch = latch;
 		this.mode = MorphologyAnalysisMode.COPY;
 		this.source = source;
-		
+		programLogger.log(Level.FINE, "Creating segmentation copying analysis");
 		runCopyAnalysis();
 	}
 	
@@ -82,7 +82,7 @@ public class RunSegmentationAction extends ProgressableAction {
 		super(list, "Segmentation analysis", mw);
 		this.mode = MorphologyAnalysisMode.COPY;
 		this.source = source;
-
+		programLogger.log(Level.FINE, "Creating segmentation copying analysis");
 		runCopyAnalysis();
 	}
 	
@@ -199,49 +199,29 @@ public class RunSegmentationAction extends ProgressableAction {
 				}
 				
 				if(  (downFlag & MainWindow.SAVE_DATASET) == MainWindow.SAVE_DATASET){
-//					final CountDownLatch latch = new CountDownLatch(1);
-//					programLogger.log(Level.FINEST, "Preparing to hold thread while saving datast");
-					
+					programLogger.log(Level.FINEST, "Preparing to fire save datast request");
 					fireDatasetEvent(DatasetMethod.SAVE, dataset);
-					
-//					new SaveDatasetAction(dataset, dataset.getSavePath(), mw, latch);
-//					try {
-//						latch.await();
-//					} catch (InterruptedException e) {
-//						programLogger.log(Level.SEVERE, "Interruption to thread", e);
-//					}
-//					programLogger.log(Level.FINEST, "Resuming thread after saving datast");
 				}
+				
+//				fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, dataset);
 
 				// if no list was provided, or no more entries remain,
 				// call the finish
 				if( ! hasRemainingDatasetsToProcess()){
-
+					programLogger.log(Level.FINEST, "No more datasets remain to process");
 					programLogger.log(Level.FINEST, "Firing save dataset");
 					fireDatasetEvent(DatasetMethod.SAVE, dataset);
-//					fireInterfaceEvent(InterfaceMethod.SAVE_ROOT);
-					fireInterfaceEvent(InterfaceMethod.UPDATE_POPULATIONS);
+					fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, dataset);
+//					fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 					latch.countDown();
 					RunSegmentationAction.super.finished();
 					
 					
 					
 				} else {
+					
 					// otherwise analyse the next item in the list
 					cancel(); // remove progress bar
-					
-//					if(mode.equals(MorphologyAnalysisMode.COPY)){
-//
-////						fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, getRemainingDatasetsToProcess(), source);
-//						
-//						new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag, mw);
-//						
-//					} else {
-//						
-//						new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag, mw);
-//					}
-					
-					
 
 					SwingUtilities.invokeLater(new Runnable(){
 						public void run(){

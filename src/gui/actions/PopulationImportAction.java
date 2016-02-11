@@ -28,6 +28,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import analysis.AnalysisDataset;
 import gui.DatasetEvent.DatasetMethod;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.MainWindow;
 import io.PopulationImportWorker;
 
@@ -90,7 +91,7 @@ public class PopulationImportAction extends ProgressableAction {
 
 	@Override
 	public void finished(){
-		
+//		setProgressBarVisible(false);
 		AnalysisDataset dataset = ((PopulationImportWorker) worker).getLoadedDataset();
 		programLogger.log(Level.FINE, "Opened dataset");
 
@@ -98,6 +99,14 @@ public class PopulationImportAction extends ProgressableAction {
 		list.add(dataset);
 		programLogger.log(Level.FINE, "Firing add signal");
 		fireDatasetEvent(DatasetMethod.ADD_DATASET, list);
+		
+		/*
+		 * Code after this point is never reached - check thread 16
+		 */
+//		
+//		fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
+		fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);
+//		this.cancel();
 		super.finished();		
 	}
 

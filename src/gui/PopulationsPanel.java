@@ -20,11 +20,9 @@ package gui;
 
 
 import gui.DatasetEvent.DatasetMethod;
-import gui.actions.SaveDatasetAction;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter;
 import gui.tabs.DetailPanel;
-import io.PopulationExporter;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -83,8 +81,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	private JXTreeTable treeTable;
 	private PopulationListPopupMenu populationPopup;
 	
-	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
-	private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
+	final private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
+	final private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
 	
 	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
 	
@@ -106,15 +104,22 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 	}
 	
-	public void update(List<AnalysisDataset> list){
+	
+	
+	public void update(final List<AnalysisDataset> list){
 		this.update();
+		programLogger.log(Level.FINEST, "Preparing to select datasets");
+		selectDatasets(list);
+//		if(list.size()==1){
+//			selectDataset(list.get(0));
+//		}
 	}
 	
 	/**
 	 *  Find the populations in memory, and display them in the population chooser. 
 	 *  Root populations are ordered according to position in the treeListOrder map.
 	 */
-	public void update(){
+	private void update(){
 		
 		int nameColWidth = treeTable.getColumnModel().getColumn(COLUMN_NAME).getWidth();
 		int colourColWidth = treeTable.getColumnModel().getColumn(COLUMN_COLOUR).getWidth();
@@ -303,7 +308,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 							fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
 						}
 
-						fireSignalChangeEvent("UpdatePanels");
+//						fireSignalChangeEvent("UpdatePanels");
+						fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 						
 					}
 				}
@@ -329,7 +335,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * Get the datasets currently selected
 	 * @return
 	 */
-	public List<AnalysisDataset> getSelectedDatasets(){
+	public synchronized List<AnalysisDataset> getSelectedDatasets(){
 
 		List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
 
@@ -483,7 +489,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		if(dataset.isRoot()){ // add to the list of datasets that can be ordered
 			treeOrderMap.put(dataset.getUUID(), treeOrderMap.size()); // add to the end of the list
 		}
-		update();
+//		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+//		list.add(dataset);
+//		update(list);
 	}
 	
 	/**
@@ -491,26 +499,44 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * @param dataset the dataset to select
 	 */
 	public void selectDataset(AnalysisDataset dataset){
-
 		if(dataset!=null){
-			TreeSelectionModel selectedRows = treeTable.getTreeSelectionModel();
+			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+			list.add(dataset);
+			selectDatasets(list);
+		}
+//		if(dataset!=null){
+//			TreeSelectionModel selectedRows = treeTable.getTreeSelectionModel();
+//			int index = getIndexOfDataset(dataset);
+//
+//			TreePath path = treeTable.getPathForRow(index);
+//			if(path!=null){
+//				selectedRows.setSelectionPath(path);
+//				
+//				ListSelectionModel selectionModel = 
+//						treeTable.getSelectionModel();
+//				selectionModel.setSelectionInterval(index, index);
+//			}
+//		}
+	}
+	
+	/**
+	 * Select the given datasets in the tree table
+	 * @param dataset the dataset to select
+	 */
+	public void selectDatasets(List<AnalysisDataset> list){
+		programLogger.log(Level.FINEST, "Selecting list of "+list.size()+" datasets");
+		for(AnalysisDataset dataset : list){
 			int index = getIndexOfDataset(dataset);
 
-			TreePath path = treeTable.getPathForRow(index);
-			if(path!=null){
-				selectedRows.setSelectionPath(path);
-				
-				ListSelectionModel selectionModel = 
-						treeTable.getSelectionModel();
-				selectionModel.setSelectionInterval(index, index);
-			}
-
-
-
-
+			ListSelectionModel selectionModel = 
+					treeTable.getSelectionModel();
+			
+			programLogger.log(Level.FINEST, "Adding index at "+index);
+			selectionModel.addSelectionInterval(index, index);
 
 		}
-		update();
+		
+//		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 	}
 	
 	public void selectDataset(UUID id){
@@ -623,11 +649,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 				list.add(dataset);
 				fireDatasetEvent(DatasetMethod.SAVE, list);
-//				PopulationExporter.saveAnalysisDataset(dataset);
-				update();
-				
-				selectDataset(dataset);
-				fireSignalChangeEvent("UpdatePanels");
+
+				update(list);
 			}
 		}
 	}
@@ -842,7 +865,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	class TreeSelectionHandler implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
 			
-//			List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
 			List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
 			
 			TreeSelectionModel lsm = (TreeSelectionModel)e.getSource();
@@ -882,7 +904,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						AnalysisDataset d = datasets.get(0);
 						setMenuForSingleDataset(d);
 					}
-					fireSignalChangeEvent("UpdatePanels");
+					programLogger.log(Level.FINEST, "Firing update panel event due to tree selection");
+					fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+//					fireSignalChangeEvent("UpdatePanels");
 				}
 			}
 		}

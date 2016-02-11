@@ -18,9 +18,7 @@
  *******************************************************************************/
 package gui.tabs;
 
-import gui.DatasetEvent;
 import gui.DatasetEventListener;
-import gui.InterfaceEvent;
 import gui.InterfaceEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
@@ -37,9 +35,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,9 +49,6 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import analysis.AnalysisDataset;
-import analysis.nucleus.DatasetSegmenter;
-import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
 import analysis.nucleus.SegmentFitter;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
@@ -68,10 +61,7 @@ import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
-import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclei.ConsensusNucleus;
-import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
 public class SegmentsEditingPanel extends DetailPanel implements SignalChangeListener, DatasetEventListener, InterfaceEventListener {
@@ -85,12 +75,6 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		this.setLayout(new BorderLayout());
 		segmentProfilePanel  = new SegmentProfilePanel(programLogger);
 		this.addSubPanel(segmentProfilePanel);
-		/*
-		 * Signals come from the segment panel to this container
-		 */
-		segmentProfilePanel.addSignalChangeListener(this);
-		segmentProfilePanel.addInterfaceEventListener(this);
-		segmentProfilePanel.addDatasetEventListener(this);
 		this.add(segmentProfilePanel, BorderLayout.CENTER);
 
 		
@@ -131,21 +115,25 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		fireSignalChangeEvent(event);
 	}
 	
-	@Override
-	public void interfaceEventReceived(InterfaceEvent event) {
-		fireInterfaceEvent(event);
-		
-		if(event.method().equals(InterfaceMethod.RECACHE_CHARTS)){
-			this.refreshChartCache();
-			this.refreshTableCache();
-		}
-		
-	}
+//	@Override
+//	public void interfaceEventReceived(InterfaceEvent event) {
+//		fireInterfaceEvent(event);
+//		
+//		if(event.method().equals(InterfaceMethod.RECACHE_CHARTS)){
+//			this.refreshChartCache();
+//			this.refreshTableCache();
+//		}
+//		
+//	}
 
-	@Override
-	public void datasetEventReceived(DatasetEvent event) {
-		fireDatasetEvent(event);
-	}
+//	@Override
+//	public void datasetEventReceived(DatasetEvent event) {
+//		
+//		// Pass messages up
+//		if(event.getSource().equals(segmentProfilePanel)){
+//			fireDatasetEvent(event);
+//		}
+//	}
 		
 	public class SegmentProfilePanel extends DetailPanel implements ActionListener, SignalChangeListener {
 		
@@ -324,8 +312,8 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 
 		@Override
 		public void signalChangeReceived(SignalChangeEvent event) {
-			if(event.type().contains("UpdateSegment")){
-
+			if(event.type().contains("UpdateSegment") && event.getSource().equals(chartPanel)){
+				programLogger.log(Level.FINEST, "Heard update segment request");
 				try{
 
 					
@@ -366,26 +354,11 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			.getCollection()
 			.getProfileManager()
 			.setLockOnAllNucleusSegmentsExcept(id, true);
-			
-			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-//			// Make a dialog - update the morphology of each nucleus?
-//			Object[] options = { "Update nuclei" , "Do not update", };
-//			int result = JOptionPane.showOptionDialog(null, "Update the nuclei to the new boundaries?", "Update nuclei",
-//
-//					JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-//
-//					null, options, options[0]);
-//			
-//			if(result==0){ // OK
-				
-				//  Update each nucleus profile
-				fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
-				
-//			}
-			
-//			// Only run a panel update if the refresh was not called
-//			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-//			update(getDatasets());
+							
+			//  Update each nucleus profile
+			programLogger.log(Level.FINEST, "Firing refresh morphology action");
+			fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
+
 			
 			
 		}

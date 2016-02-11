@@ -37,7 +37,7 @@ public class SignalChangeEvent extends EventObject {
 		this.sourceName = sourceName;
 	}
 	
-	public SignalChangeEvent( SignalChangeEvent event ) {
+	public SignalChangeEvent( Object source, SignalChangeEvent event ) {
 		super( event.getSource() );
 		this.message 	= event.type();
 		this.sourceName = event.sourceName();

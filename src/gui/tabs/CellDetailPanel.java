@@ -409,7 +409,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							}
 							fireSignalChangeEvent("UpdatePanels");
 							fireSignalChangeEvent("UpdatePopulationPanel");
-							fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);
+							fireDatasetEvent(DatasetMethod.SELECT_ONE_DATASET, list);
 
 						}
 						

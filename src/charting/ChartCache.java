@@ -73,7 +73,7 @@ public class ChartCache implements Cache {
 	 */
 	@Override
 	public void purge(){
-		chartMap = new HashMap<UUID, JFreeChart>();
+		chartMap   = new HashMap<UUID, JFreeChart>();
 		optionsMap = new HashMap<ChartOptions, UUID>();
 	}
 	

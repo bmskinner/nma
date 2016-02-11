@@ -69,7 +69,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		commandMap.put("unfuck", InterfaceMethod.RESEGMENT_SELECTED_DATASET);
 		commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
 		commandMap.put("clear", InterfaceMethod.CLEAR_LOG_WINDOW);
-		commandMap.put("refresh", InterfaceMethod.UPDATE_POPULATIONS);
+		commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
 		
 	}
 	

@@ -49,8 +49,8 @@ public class InterfaceEvent extends EventObject {
 		this.sourceName = sourceName;
 	}
 	
-	public InterfaceEvent( InterfaceEvent event ) {
-		super( event.getSource() );
+	public InterfaceEvent( Object source, InterfaceEvent event ) {
+		super( source );
 		this.method = event.method();
 		this.sourceName = event.sourceName();
 	}
@@ -74,7 +74,7 @@ public class InterfaceEvent extends EventObject {
 	
 	public enum InterfaceMethod {
 		
-		UPDATE_POPULATIONS 	("Update populations"),
+//		UPDATE_POPULATIONS 	("Update populations"),
 		UPDATE_PANELS		("Update panels"),
 		REFRESH_POPULATIONS ("Refresh population panel datasets"),
 		SAVE_ROOT			("Save root datasets"),

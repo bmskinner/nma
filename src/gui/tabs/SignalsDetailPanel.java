@@ -152,6 +152,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
+		super.signalChangeReceived(event);
 		if(event.type().equals("SignalColourUpdate")){
 			update(getDatasets());
 		}
@@ -159,10 +160,6 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 		if(event.type().startsWith("GroupVisble_")){
 			overviewPanel.update(getDatasets());
 			histogramPanel.update(getDatasets());
-		}
-		
-		if(event.type().startsWith("RunShellAnalysis")){
-			fireSignalChangeEvent("RunShellAnalysis");
 		}
 	}
 
