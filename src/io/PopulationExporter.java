@@ -94,7 +94,7 @@ public class PopulationExporter extends AnalysisWorker {
 				try{
 
 					output.writeObject(dataset);
-					log(Level.INFO, "Save complete");
+					log(Level.FINE, "Save complete");
 
 				} catch(IOException e){
 					logError("Unable to save dataset", e);
