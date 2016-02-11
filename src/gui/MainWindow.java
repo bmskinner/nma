@@ -585,37 +585,69 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		
 		
 		if(event.type().equals("RunShellAnalysis")){
-			programLogger.log(Level.FINER, "Shell analysis selected");
-			new ShellAnalysisAction(selectedDataset, this);
+			executorService.execute(new Runnable() {
+				public void run() {
+					programLogger.log(Level.FINER, "Shell analysis selected");
+					new ShellAnalysisAction(selectedDataset, MainWindow.this);
+				}
+				
+			});
+//			programLogger.log(Level.FINER, "Shell analysis selected");
+//			new ShellAnalysisAction(selectedDataset, this);
 		}
 
 		if(event.type().equals("MergeCollectionAction")){
-			
-			Thread thr = new Thread() {
+			executorService.execute(new Runnable() {
 				public void run() {
-
 					new MergeCollectionAction(populationsPanel.getSelectedDatasets(), MainWindow.this);
 				}
-			};
-
-			thr.start();
+				
+			});
+//			Thread thr = new Thread() {
+//				public void run() {
+//
+//					new MergeCollectionAction(populationsPanel.getSelectedDatasets(), MainWindow.this);
+//				}
+//			};
+//
+//			thr.start();
 			
 		}
 		
 		if(event.type().equals("DatasetArithmeticAction")){
-			new DatasetArithmeticAction(selectedDataset, populationsPanel.getAllDatasets(), MainWindow.this);
+			executorService.execute(new Runnable() {
+				public void run() {
+					new DatasetArithmeticAction(selectedDataset, populationsPanel.getAllDatasets(), MainWindow.this);
+				}
+				
+			});
+//			new DatasetArithmeticAction(selectedDataset, populationsPanel.getAllDatasets(), MainWindow.this);
 		}
 		
 		if(event.type().equals("SaveCollectionAction")){
 			
-			try {
-				CountDownLatch latch = new CountDownLatch(1);
-				new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
-				latch.await();
-				programLogger.log(Level.FINE, "All dataset saved");
-			} catch (InterruptedException e) {
-				programLogger.log(Level.SEVERE, "Interruption to thread", e);
-			}
+			executorService.execute(new Runnable() {
+				public void run() {
+					try {
+						CountDownLatch latch = new CountDownLatch(1);
+						new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
+						latch.await();
+						programLogger.log(Level.FINE, "All dataset saved");
+					} catch (InterruptedException e) {
+						programLogger.log(Level.SEVERE, "Interruption to thread", e);
+					}
+				}
+				
+			});
+			
+//			try {
+//				CountDownLatch latch = new CountDownLatch(1);
+//				new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
+//				latch.await();
+//				programLogger.log(Level.FINE, "All dataset saved");
+//			} catch (InterruptedException e) {
+//				programLogger.log(Level.SEVERE, "Interruption to thread", e);
+//			}
 
 		}
 		
@@ -848,12 +880,23 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			
 			if(event.method().equals(DatasetMethod.EXTRACT_SOURCE)){
-				programLogger.log(Level.INFO, "Recovering source dataset");
-				for(AnalysisDataset d : list){
-					d.setRoot(true);
-					populationsPanel.addDataset(d);
-					populationsPanel.update();
-				}
+				executorService.execute(new Runnable() {
+					public void run() {
+						programLogger.log(Level.INFO, "Recovering source dataset");
+						for(AnalysisDataset d : list){
+							d.setRoot(true);
+							populationsPanel.addDataset(d);
+							populationsPanel.update();
+						}
+					}
+					
+				});
+//				programLogger.log(Level.INFO, "Recovering source dataset");
+//				for(AnalysisDataset d : list){
+//					d.setRoot(true);
+//					populationsPanel.addDataset(d);
+//					populationsPanel.update();
+//				}
 
 			}
 			
@@ -973,17 +1016,33 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	}
 	
 	private void saveRootDatasets(){
-		for(AnalysisDataset root : populationsPanel.getRootDatasets()){
-			final CountDownLatch latch = new CountDownLatch(1);
+		executorService.execute(new Runnable() {
+			public void run() {
+				for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+					final CountDownLatch latch = new CountDownLatch(1);
 
-			new SaveDatasetAction(root, MainWindow.this, latch, false);
-			try {
-				latch.await();
-			} catch (InterruptedException e) {
-				programLogger.log(Level.SEVERE, "Interruption to thread", e);
+					new SaveDatasetAction(root, MainWindow.this, latch, false);
+					try {
+						latch.await();
+					} catch (InterruptedException e) {
+						programLogger.log(Level.SEVERE, "Interruption to thread", e);
+					}
+				}
+				programLogger.log(Level.INFO, "All root datasets saved");
 			}
-		}
-		programLogger.log(Level.INFO, "All root datasets saved");
+			
+		});
+//		for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+//			final CountDownLatch latch = new CountDownLatch(1);
+//
+//			new SaveDatasetAction(root, MainWindow.this, latch, false);
+//			try {
+//				latch.await();
+//			} catch (InterruptedException e) {
+//				programLogger.log(Level.SEVERE, "Interruption to thread", e);
+//			}
+//		}
+//		programLogger.log(Level.INFO, "All root datasets saved");
 	}
 	
 	/**
@@ -1069,46 +1128,87 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			break;
 		case RESEGMENT_SELECTED_DATASET:
+			
+			executorService.execute(new Runnable() {
+				public void run() {
+					
+					final int flag = CURVE_REFOLD; // ensure consensus is replaced
+					// Recalculate the head and hump positions for rodent sperm
+					if(populationsPanel.getSelectedDatasets().get(0).getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
 
-				final int flag = CURVE_REFOLD; // ensure consensus is replaced
-				SwingUtilities.invokeLater(new Runnable(){
-					public void run(){
-												
-						// Recalculate the head and hump positions for rodent sperm
-						if(populationsPanel.getSelectedDatasets().get(0).getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
+						try{
+							programLogger.log(Level.INFO, "Replacing nucleus roi patterns");
+							for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
 
-							try{
-								programLogger.log(Level.INFO, "Replacing nucleus roi patterns");
-								for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
+								RodentSpermNucleus r = (RodentSpermNucleus) n;  
 
-									RodentSpermNucleus r = (RodentSpermNucleus) n;  
+								r.splitNucleusToHeadAndHump();
+								try {
 
-									r.splitNucleusToHeadAndHump();
-									try {
-
-										r.calculateSignalAnglesFromPoint(r.getPoint(BorderTag.ORIENTATION_POINT));
-									} catch (Exception e) {
-										programLogger.log(Level.SEVERE, "Error restoring signal angles", e);
-									}
-
+									r.calculateSignalAnglesFromPoint(r.getPoint(BorderTag.ORIENTATION_POINT));
+								} catch (Exception e) {
+									programLogger.log(Level.SEVERE, "Error restoring signal angles", e);
 								}
 
-							}catch(Exception e){
-								programLogger.log(Level.SEVERE, "Error recalculating angles", e);
 							}
-						}
-						
-						programLogger.log(Level.INFO, "Regenerating charts");
-						for(DetailPanel panel : detailPanels){
-							panel.refreshChartCache();
-							panel.refreshTableCache();
-						}
-						
-						programLogger.log(Level.INFO, "Resegmenting datasets");
-						List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
-						new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
 
-				}});
+						}catch(Exception e){
+							programLogger.log(Level.SEVERE, "Error recalculating angles", e);
+						}
+					}
+					
+					programLogger.log(Level.INFO, "Regenerating charts");
+					for(DetailPanel panel : detailPanels){
+						panel.refreshChartCache();
+						panel.refreshTableCache();
+					}
+					
+					programLogger.log(Level.INFO, "Resegmenting datasets");
+					List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
+					new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
+				}
+				
+			});
+
+				final int flag = CURVE_REFOLD; // ensure consensus is replaced
+//				SwingUtilities.invokeLater(new Runnable(){
+//					public void run(){
+//												
+//						// Recalculate the head and hump positions for rodent sperm
+//						if(populationsPanel.getSelectedDatasets().get(0).getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
+//
+//							try{
+//								programLogger.log(Level.INFO, "Replacing nucleus roi patterns");
+//								for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
+//
+//									RodentSpermNucleus r = (RodentSpermNucleus) n;  
+//
+//									r.splitNucleusToHeadAndHump();
+//									try {
+//
+//										r.calculateSignalAnglesFromPoint(r.getPoint(BorderTag.ORIENTATION_POINT));
+//									} catch (Exception e) {
+//										programLogger.log(Level.SEVERE, "Error restoring signal angles", e);
+//									}
+//
+//								}
+//
+//							}catch(Exception e){
+//								programLogger.log(Level.SEVERE, "Error recalculating angles", e);
+//							}
+//						}
+//						
+//						programLogger.log(Level.INFO, "Regenerating charts");
+//						for(DetailPanel panel : detailPanels){
+//							panel.refreshChartCache();
+//							panel.refreshTableCache();
+//						}
+//						
+//						programLogger.log(Level.INFO, "Resegmenting datasets");
+//						List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
+//						new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
+//
+//				}});
 				break;
 				
 		case LIST_SELECTED_DATASETS:
