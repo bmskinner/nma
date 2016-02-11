@@ -24,7 +24,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 	
 	private CellCollection collection;
 	private File[] files;
-	private static final int THRESHOLD = 10;
+	private static final int THRESHOLD = 5; // number of images to handle per fork
 	final int low, high;
 	final NucleusFinder finder;
 	final String outputFolder;
