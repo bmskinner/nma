@@ -49,6 +49,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.TableModel;
@@ -498,7 +499,16 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			TreePath path = treeTable.getPathForRow(index);
 			if(path!=null){
 				selectedRows.setSelectionPath(path);
+				
+				ListSelectionModel selectionModel = 
+						treeTable.getSelectionModel();
+				selectionModel.setSelectionInterval(index, index);
 			}
+
+
+
+
+
 		}
 		update();
 	}

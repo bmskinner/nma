@@ -1170,7 +1170,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				
 			});
 
-				final int flag = CURVE_REFOLD; // ensure consensus is replaced
+//				final int flag = CURVE_REFOLD; // ensure consensus is replaced
 //				SwingUtilities.invokeLater(new Runnable(){
 //					public void run(){
 //												
