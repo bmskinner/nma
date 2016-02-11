@@ -65,7 +65,7 @@ public class RefoldNucleusAction extends ProgressableAction {
 		this.cancel();
 		programLogger.log(Level.FINE, "Refolding finished, cleaning up");
 		super.finished();
-//		this.countdownLatch();
+		this.countdownLatch();
 		
 		
 		

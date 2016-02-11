@@ -61,6 +61,10 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -126,7 +130,20 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	
 	private static final Logger programLogger =
 	        Logger.getLogger(MainWindow.class.getName()); // the program logger will report status and errors in the running of the program, not involving datasets 
-			
+	
+	/*
+	 * Handle threading
+	 */
+	
+	public static final int corePoolSize = 8;
+	public static final int maximumPoolSize = 16;
+	public static final int keepAliveTime = 5000;
+
+	ExecutorService executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
+			keepAliveTime, TimeUnit.MILLISECONDS,
+			new LinkedBlockingQueue<Runnable>());
+	
+	
 	/**
 	 * Create the frame.
 	 */
@@ -722,22 +739,35 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			if(event.method().equals(DatasetMethod.NEW_MORPHOLOGY)){
 				programLogger.log(Level.INFO, "Running new morphology analysis");
 				final int flag = ADD_POPULATION;
-				SwingUtilities.invokeLater(new Runnable(){
-					public void run(){
-					
+				
+				executorService.execute(new Runnable() {
+					public void run() {
 						new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
-
-				}});
+					}
+					
+				});
+//				SwingUtilities.invokeLater(new Runnable(){
+//					public void run(){
+//					
+//						new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
+//
+//				}});
 			}
 			
 			if(event.method().equals(DatasetMethod.REFRESH_MORPHOLOGY)){
 //				programLogger.log(Level.INFO, "Updating segmentation across nuclei");
-				SwingUtilities.invokeLater(new Runnable(){
-					public void run(){
-					
+				executorService.execute(new Runnable() {
+					public void run() {
 						new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
+					}
 					
-				}});
+				});
+//				SwingUtilities.invokeLater(new Runnable(){
+//					public void run(){
+//					
+//						new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
+//					
+//				}});
 
 			}
 			
@@ -745,38 +775,72 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				
 				final AnalysisDataset source = event.secondaryDataset();
 				
-				SwingUtilities.invokeLater(new Runnable(){
-					public void run(){
-					
+				executorService.execute(new Runnable() {
+					public void run() {
 						new RunSegmentationAction(event.getDatasets(), source, null, MainWindow.this);
+					}
 					
-				}});
+				});
+//				SwingUtilities.invokeLater(new Runnable(){
+//					public void run(){
+//					
+//						new RunSegmentationAction(event.getDatasets(), source, null, MainWindow.this);
+//					
+//				}});
 
 			}
 			
 						
 			if(event.method().equals(DatasetMethod.CLUSTER)){
-				SwingUtilities.invokeLater(new Runnable(){
-					public void run(){
-					
+				
+				executorService.execute(new Runnable() {
+					public void run() {
 						programLogger.log(Level.INFO, "Clustering dataset");
 						new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
+					}
 					
-				}});
+				});
+//				SwingUtilities.invokeLater(new Runnable(){
+//					public void run(){
+//					
+//						programLogger.log(Level.INFO, "Clustering dataset");
+//						new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
+//					
+//				}});
 				
 			}
 			
 			if(event.method().equals(DatasetMethod.BUILD_TREE)){
-				programLogger.log(Level.INFO, "Building a tree from dataset");
-				new BuildHierarchicalTreeAction(event.firstDataset(), this);
+				executorService.execute(new Runnable() {
+					public void run() {
+						programLogger.log(Level.INFO, "Building a tree from dataset");
+						new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
+					}
+					
+				});
+//				programLogger.log(Level.INFO, "Building a tree from dataset");
+//				new BuildHierarchicalTreeAction(event.firstDataset(), this);
 			}
 			
 			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
-				refoldConsensus(event.firstDataset());
+				executorService.execute(new Runnable() {
+					public void run() {
+						programLogger.log(Level.INFO, "Building a tree from dataset");
+						refoldConsensus(event.firstDataset());
+					}
+					
+				});
+				
 			}
 			
 			if(event.method().equals(DatasetMethod.SELECT_DATASETS)){
-				this.populationsPanel.selectDataset(event.firstDataset());
+				executorService.execute(new Runnable() {
+					public void run() {
+						populationsPanel.selectDataset(event.firstDataset());
+					}
+					
+				});
+				
 			}
 			
 			if(event.method().equals(DatasetMethod.SAVE)){
@@ -794,10 +858,16 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			
 			if(event.method().equals(DatasetMethod.RECALCULATE_CACHE)){
-				for(DetailPanel panel : detailPanels){
-					panel.refreshChartCache(list);
-				}
-				this.updatePanels(list);
+				executorService.execute(new Runnable() {
+					public void run() {
+						for(DetailPanel panel : detailPanels){
+							panel.refreshChartCache(list);
+						}
+						updatePanels(list);
+					}
+					
+				});
+				
 			}
 			
 			if(event.method().equals(DatasetMethod.ADD_DATASET)){
@@ -839,10 +909,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		programLogger.log(Level.INFO, "Refolding consensus");
 		programLogger.log(Level.FINEST, "Refold consensus dataset method is EDT: "+SwingUtilities.isEventDispatchThread());
 		
-		Thread thr = new Thread(){
-
-			public void run(){
-				
+		executorService.execute(new Runnable() {
+			public void run() {
 				/*
 				 * The refold action needs to be able to hold up a series
 				 * of following actions, when it is being used in a New Analysis.
@@ -868,8 +936,40 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					programLogger.log(Level.SEVERE, "Interruption to thread", e);
 				}
 			}
-		};
-		thr.start();
+			
+		});
+		
+//		Thread thr = new Thread(){
+//
+//			public void run(){
+//				
+//				/*
+//				 * The refold action needs to be able to hold up a series
+//				 * of following actions, when it is being used in a New Analysis.
+//				 * The countdown latch does nothing here, but must be retained for
+//				 * compatibility.
+//				 */
+//				
+//				final CountDownLatch latch = new CountDownLatch(1);
+//				programLogger.log(Level.FINEST, "Created latch: "+latch.getCount());
+//				new RefoldNucleusAction(dataset, MainWindow.this, latch);
+//
+//				programLogger.log(Level.FINEST, "Running refolding");
+//				try {
+//					latch.await();
+//					dataset.getAnalysisOptions().setRefoldNucleus(true);
+//					dataset.getAnalysisOptions().setRefoldMode("Fast");
+//					
+//					programLogger.log(Level.FINE, "Set refold status in options");
+//					recacheCharts();
+//					populationsPanel.selectDataset(dataset);
+//					programLogger.log(Level.FINEST, "Latch counted down: "+latch.getCount());
+//				} catch (InterruptedException e) {
+//					programLogger.log(Level.SEVERE, "Interruption to thread", e);
+//				}
+//			}
+//		};
+//		thr.start();
 	}
 	
 	private void saveRootDatasets(){
