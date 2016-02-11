@@ -115,15 +115,56 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 //		}
 	}
 	
+	private List<UUID> getCollapsedRows(){
+		List<UUID> collapsedRows = new ArrayList<UUID>();		
+		for (int row = 0; row < treeTable.getRowCount(); row++) {
+			if(!treeTable.isExpanded(row)){
+				String key = (String) treeTable.getModel().getValueAt(row, 0); // row i, column 0
+				if(!key.equals("No populations")){
+
+					// get uuid from populationNames, then population via uuid from analysisDatasets
+					AnalysisDataset d = analysisDatasets.get(populationNames.get(key));
+					collapsedRows.add(d.getUUID());
+				}
+			}
+		}
+		return collapsedRows;
+	}
+	
+	
+	private void setCollapsedRows(List<UUID> collapsedRows){
+		if(this.analysisDatasets.size()>0){
+			programLogger.log(Level.FINEST, "Expanding rows");
+			for (int row = 0; row < treeTable.getRowCount(); row++) {
+//				treeTable.expandRow(row);
+				String key = (String) treeTable.getModel().getValueAt(row, 0); // row i, column 0
+				if(!key.equals("No populations")){
+					// get uuid from populationNames, then population via uuid from analysisDatasets
+					UUID id = analysisDatasets.get(populationNames.get(key)).getUUID();
+					if(collapsedRows.contains(id)){
+						treeTable.collapseRow(row);	
+					} else {
+						treeTable.expandRow(row);
+					}
+				}
+			}
+		}
+	}
+	
 	/**
 	 *  Find the populations in memory, and display them in the population chooser. 
 	 *  Root populations are ordered according to position in the treeListOrder map.
 	 */
 	private void update(){
 		
-		int nameColWidth = treeTable.getColumnModel().getColumn(COLUMN_NAME).getWidth();
+		int nameColWidth   = treeTable.getColumnModel().getColumn(COLUMN_NAME).getWidth();
 		int colourColWidth = treeTable.getColumnModel().getColumn(COLUMN_COLOUR).getWidth();
-					
+
+		/*
+		 * Determine the ids of collapsed datasets, and store them
+		 */
+		List<UUID> collapsedRows = getCollapsedRows();		
+		
 		List<String> columns = new ArrayList<String>();
 		columns.add("Population");
 		columns.add("Nuclei");
@@ -148,12 +189,10 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 		treeTable.setTreeTableModel(treeTableModel);
 
-		if(this.analysisDatasets.size()>0){
-			programLogger.log(Level.FINEST, "Expanding rows");
-			for (int row = 0; row < treeTable.getRowCount(); row++) {
-				treeTable.expandRow(row);
-			}
-		}
+		/*
+		 * Collapse the same ids as saved earlier
+		 */
+		setCollapsedRows(collapsedRows);
 		
 		programLogger.log(Level.FINEST, "Restoring column widths");
 		treeTable.getColumnModel().getColumn(COLUMN_NAME).setWidth(nameColWidth);
@@ -181,7 +220,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				
 			}
 		}
-		
+		update();
 	}
 	
 	/**
@@ -1055,9 +1094,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		 * @author Alex Burdu Burdusel
 		 */
 		public void sortNode(int sortColumn, boolean sortAscending, boolean recursive) {
-			boolean mLastSortAscending = sortAscending;
-		    int mLastSortedColumn = sortColumn;
-		    boolean mLastSortRecursive = recursive;
+//			boolean mLastSortAscending = sortAscending;
+//		    int mLastSortedColumn = sortColumn;
+//		    boolean mLastSortRecursive = recursive;
 
 		    int childCount = this.getChildCount();
 		    TreeMap<Object, PopulationTreeTableNode> nodeData = new TreeMap(String.CASE_INSENSITIVE_ORDER);

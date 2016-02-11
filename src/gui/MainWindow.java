@@ -1117,13 +1117,11 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			break;
 			
 		case UPDATE_PANELS:
+//			populationsPanel.refreshDatasets();
+//			populationsPanel.update(populationsPanel.getSelectedDatasets()); // ensure all child datasets are included
 			this.updatePanels(populationsPanel.getSelectedDatasets());
 			break;
 			
-//		case UPDATE_POPULATIONS:
-//			updatePanels(populationsPanel.getAllDatasets());
-////			this.populationsPanel.update(populationsPanel.getAllDatasets());
-//			break;
 			
 		case RECACHE_CHARTS:
 			recacheCharts();
