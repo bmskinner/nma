@@ -29,6 +29,8 @@ import ij.IJ;
 
 public class DebugFileFormatter extends Formatter {
 	
+	private static final String NEWLINE = System.getProperty("line.separator");
+	
 	 @Override
 	    public String format(LogRecord record) {
 		 
@@ -41,10 +43,7 @@ public class DebugFileFormatter extends Formatter {
 		 if(sourceMethod.equals("log")){
 			 StackTraceElement[] array = Thread.currentThread().getStackTrace();
 			 sourceMethod = array[8].getMethodName();
-			 for(StackTraceElement e : array){
-//				 IJ.log(e.toString());
-			 }
-//			 IJ.log("");
+
 		 }
 		 
 		 String date = calcDate(record.getMillis());
@@ -57,7 +56,7 @@ public class DebugFileFormatter extends Formatter {
 				 + sourceMethod
 				 + "\t"
 				 + record.getMessage()
-				 + System.getProperty("line.separator");
+				 + NEWLINE;
 		 
 		 	if(record.getLevel()==Level.SEVERE){
 		 		
@@ -76,7 +75,7 @@ public class DebugFileFormatter extends Formatter {
 		 						+"STACK" 
 		 						+ "\t" 
 		 						+ el.toString() 
-		 						+ System.getProperty("line.separator");
+		 						+ NEWLINE;
 		 			}
 		 		}
 		 		

@@ -26,14 +26,18 @@ import java.util.logging.LogRecord;
 
 public class LogPanelFormatter extends Formatter {
 	
+	private static final String NEWLINE = System.getProperty("line.separator");
+	
+	
 	@Override
 	public String format(LogRecord record) {
+
 		String date = calcDate(record.getMillis());
 		String log = null;
 		if(record.getLevel()==Level.FINE || record.getLevel()==Level.FINER || record.getLevel()==Level.FINEST){
 			log = date + " " + formatFinest(record);
 		} else {
-			log = date + " " + record.getMessage() + "\r\n";
+			log = date + " " + record.getMessage() + NEWLINE;
 		}
 		
 
@@ -42,12 +46,12 @@ public class LogPanelFormatter extends Formatter {
 			if(record.getThrown()!=null){
 				Throwable t = record.getThrown();
 
-				log += t.getClass().getSimpleName() + ": " + t.getMessage() + "\r\n";
+				log += t.getClass().getSimpleName() + ": " + t.getMessage() + NEWLINE;
 
 				for(StackTraceElement el : t.getStackTrace()){
-					log += el.toString() + "\r\n";
+					log += el.toString() + NEWLINE;
 				}
-				log += "\r\n";
+				log += NEWLINE;
 			}
 
 		}
@@ -56,12 +60,22 @@ public class LogPanelFormatter extends Formatter {
 	}
 	
 	private String formatFinest(LogRecord record){
+		
+		String sourceMethod = record.getSourceMethodName();
+		 if(sourceMethod.equals("log")){
+			 StackTraceElement[] array = Thread.currentThread().getStackTrace();
+			 sourceMethod = array[8].getMethodName();
+			 
+		 }
+		 
 		String result = record.getMessage()
 				+ " | "
 				+ record.getSourceClassName()
 				+ " | "
+				+ sourceMethod
+				+ " | "
 				+ record.getThreadID()
-				+ "\r\n";
+				+ NEWLINE;
 		return result;
 	}
 	
