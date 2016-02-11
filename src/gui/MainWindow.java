@@ -1108,7 +1108,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		switch(method){
 		
 		case REFRESH_POPULATIONS:
-			this.populationsPanel.refreshDatasets();
+//			this.populationsPanel.refreshDatasets();
+			populationsPanel.update(populationsPanel.getSelectedDatasets()); // ensure all child datasets are included
 			break;
 			
 		case SAVE_ROOT:

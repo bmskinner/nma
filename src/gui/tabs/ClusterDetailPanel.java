@@ -201,6 +201,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 									public void run(){
 										ClusterTreeDialog clusterPanel = new ClusterTreeDialog(programLogger, d, g);
 										clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
+										clusterPanel.addInterfaceEventListener(ClusterDetailPanel.this);
 									}};
 									thr.start();
 							}

@@ -109,7 +109,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 		programLogger.log(Level.FINE, "Profiles copied to all clusters");
 		dataset.addClusterGroup(group);
 		fireDatasetEvent(DatasetMethod.SAVE, dataset);
-		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 		super.finished();
 		
 
