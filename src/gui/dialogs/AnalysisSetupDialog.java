@@ -44,7 +44,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -108,10 +107,10 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	private JComboBox<NucleusType> nucleusSelectionBox;
 
 	private JCheckBox refoldCheckBox;
-	private JRadioButton refoldFastButton = new JRadioButton("Fast");
-	private JRadioButton refoldIntensiveButton = new JRadioButton("Intensive");
-	private JRadioButton refoldBrutalButton = new JRadioButton("Brutal");
-	private ButtonGroup refoldModeGroup;
+//	private JRadioButton refoldFastButton = new JRadioButton("Fast");
+//	private JRadioButton refoldIntensiveButton = new JRadioButton("Intensive");
+//	private JRadioButton refoldBrutalButton = new JRadioButton("Brutal");
+//	private ButtonGroup refoldModeGroup;
 	
 	private JSpinner scaleSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_SCALE,	0, 100, 0.001));
 
@@ -438,25 +437,25 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 
 
 		//Create the radio buttons.
-		refoldFastButton.setSelected(true);
+//		refoldFastButton.setSelected(true);
 		
-		refoldFastButton.setActionCommand("Fast");
-		refoldIntensiveButton.setActionCommand("Intensive");
-		refoldBrutalButton.setActionCommand("Brutal");
-
-		//Group the radio buttons.
-		refoldModeGroup = new ButtonGroup();
-		refoldModeGroup.add(refoldFastButton);
-		refoldModeGroup.add(refoldIntensiveButton);
-		refoldModeGroup.add(refoldBrutalButton);
-		
-		panel.add(refoldFastButton);
-		panel.add(refoldIntensiveButton);
-		panel.add(refoldBrutalButton);
-		
-		refoldFastButton.setEnabled(false);
-		refoldIntensiveButton.setEnabled(false);
-		refoldBrutalButton.setEnabled(false);
+//		refoldFastButton.setActionCommand("Fast");
+//		refoldIntensiveButton.setActionCommand("Intensive");
+//		refoldBrutalButton.setActionCommand("Brutal");
+//
+//		//Group the radio buttons.
+//		refoldModeGroup = new ButtonGroup();
+//		refoldModeGroup.add(refoldFastButton);
+//		refoldModeGroup.add(refoldIntensiveButton);
+//		refoldModeGroup.add(refoldBrutalButton);
+//		
+//		panel.add(refoldFastButton);
+//		panel.add(refoldIntensiveButton);
+//		panel.add(refoldBrutalButton);
+//		
+//		refoldFastButton.setEnabled(false);
+//		refoldIntensiveButton.setEnabled(false);
+//		refoldBrutalButton.setEnabled(false);
 
 		return panel;
 	}
@@ -554,33 +553,34 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		if(e.getActionCommand().equals("Refold nucleus")){
 			if(refoldCheckBox.isSelected()){
 				// toggle radios on
-				refoldFastButton.setEnabled(true);
-				refoldIntensiveButton.setEnabled(true);
-				refoldBrutalButton.setEnabled(true);
+//				refoldFastButton.setEnabled(true);
+//				refoldIntensiveButton.setEnabled(true);
+//				refoldBrutalButton.setEnabled(true);
 				this.analysisOptions.setRefoldNucleus(true);
-				this.analysisOptions.setRefoldMode( refoldModeGroup.getSelection().getActionCommand()  );
+//				this.analysisOptions.setRefoldMode( refoldModeGroup.getSelection().getActionCommand()  );
+				this.analysisOptions.setRefoldMode( DEFAULT_REFOLD_MODE  );
 				
 			} else {
 				// toggle radios off
-				refoldFastButton.setEnabled(false);
-				refoldIntensiveButton.setEnabled(false);
-				refoldBrutalButton.setEnabled(false);
+//				refoldFastButton.setEnabled(false);
+//				refoldIntensiveButton.setEnabled(false);
+//				refoldBrutalButton.setEnabled(false);
 				this.analysisOptions.setRefoldNucleus(false);
 			}
 
 		}
 		
-		if(e.getActionCommand().equals("Fast")){
-			this.analysisOptions.setRefoldMode( "Fast"  );
-		}
-		
-		if(e.getActionCommand().equals("Intensive")){
-			this.analysisOptions.setRefoldMode( "Intensive"  );
-		}
-		
-		if(e.getActionCommand().equals("Brutal")){
-			this.analysisOptions.setRefoldMode( "Brutal"  );
-		}
+//		if(e.getActionCommand().equals("Fast")){
+//			this.analysisOptions.setRefoldMode( "Fast"  );
+//		}
+//		
+//		if(e.getActionCommand().equals("Intensive")){
+//			this.analysisOptions.setRefoldMode( "Intensive"  );
+//		}
+//		
+//		if(e.getActionCommand().equals("Brutal")){
+//			this.analysisOptions.setRefoldMode( "Brutal"  );
+//		}
 
 	}
 
