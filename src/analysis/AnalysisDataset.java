@@ -87,7 +87,7 @@ public class AnalysisDataset implements Serializable {
 	
 	private transient ColourSwatch swatch = ColourSwatch.REGULAR_SWATCH;
 		
-	private boolean isRoot;	// is this a root dataset
+	private boolean isRoot = false;	// is this a root dataset
 		
 	/**
 	 * Create a dataset from a cell collection. The save file is
@@ -691,7 +691,7 @@ public class AnalysisDataset implements Serializable {
 	 * @return
 	 */
 	public boolean isRoot(){
-		return  this.isRoot;
+		return this.isRoot;
 	}
 
 	/**

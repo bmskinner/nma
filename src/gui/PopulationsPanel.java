@@ -23,6 +23,7 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter;
 import gui.tabs.DetailPanel;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -31,9 +32,11 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -78,7 +81,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 	private final JPanel panelPopulations = new JPanel(); // holds list of active populations
 
-	private JXTreeTable treeTable;
+	final private JXTreeTable treeTable;
 	private PopulationListPopupMenu populationPopup;
 	
 	final private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
@@ -541,19 +544,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			list.add(dataset);
 			selectDatasets(list);
 		}
-//		if(dataset!=null){
-//			TreeSelectionModel selectedRows = treeTable.getTreeSelectionModel();
-//			int index = getIndexOfDataset(dataset);
-//
-//			TreePath path = treeTable.getPathForRow(index);
-//			if(path!=null){
-//				selectedRows.setSelectionPath(path);
-//				
-//				ListSelectionModel selectionModel = 
-//						treeTable.getSelectionModel();
-//				selectionModel.setSelectionInterval(index, index);
-//			}
-//		}
 	}
 	
 	/**
@@ -572,8 +562,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			selectionModel.addSelectionInterval(index, index);
 
 		}
-		
-//		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 	}
 	
 	public void selectDataset(UUID id){
@@ -681,8 +669,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				if(saveFile.exists()){
 					saveFile.delete();
 				}
-//				new SaveDatasetAction(dataset, "Saving dataset", "Error saving dataset", mw);
-//				
+
 				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 				list.add(dataset);
 				fireDatasetEvent(DatasetMethod.SAVE, list);
@@ -819,19 +806,67 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			if(populationNames.containsValue(id)){
 				populationNames.remove(d.getName());
 				programLogger.log(Level.FINEST, "Removed from populationNames");
-			}			
-
-			if(d.isRoot()){
+			}		
+			
+			programLogger.log(Level.FINEST, "Checking if dataset is root");
+//			if(d.isRoot()){
+			if(treeOrderMap.contains(id)){
 				programLogger.log(Level.FINEST, "Removing dataset from treeOrderMap");
 				treeOrderMap.remove(id);
+			} else {
+				programLogger.log(Level.FINEST, "Dataset is not root");
 			}
-			programLogger.log(Level.FINEST, "Deleted dataset "+d.getName());
+			programLogger.log(Level.FINEST, "Clearing dataset from memory");
+			d=null; // clear from memory
+			programLogger.log(Level.FINEST, "Deleted dataset");
 		} catch (Exception e){
 			programLogger.log(Level.SEVERE, "Error deleting dataset "+d.getName(), e);
 		}
 	}
 	
-	private void deleteDataset(){
+	/**
+	 * Recursively delete datasets. Remove all datasets with no children
+	 * from the list, then call this method again on all the remaining ids
+	 * @param ids
+	 */
+	private void deleteDatasetsInList(Set<UUID> ids){
+		
+		if(ids.isEmpty()){
+			return;
+		}
+		
+		Set<UUID> keepIds = new HashSet<UUID>();
+		programLogger.log(Level.FINEST, "Candidate delete list has "+ids.size()+" datasets");
+		Iterator<UUID> it = ids.iterator();
+		while(it.hasNext()){
+			UUID id = it.next();
+			AnalysisDataset d = getDataset(id);
+			
+			if( ! d.hasChildren()){
+				programLogger.log(Level.FINEST, "Preparing to delete dataset: "+d.getName());
+				deleteDataset(d);
+			} else {
+				programLogger.log(Level.FINEST, "Dataset "+d.getName()+" still has children");
+				keepIds.add(id);
+			}
+		}
+		
+		deleteDatasetsInList(keepIds);
+		
+//		for(UUID id : ids){
+//			if(analysisDatasets.containsKey(id)){
+//				AnalysisDataset d = getDataset(id);
+//				programLogger.log(Level.FINEST, "Preparing to delete dataset: "+d.getName());
+//				deleteDataset(d);
+//				programLogger.log(Level.FINEST, "Dataset removed: "+d.getName());
+//			} else {
+//				programLogger.log(Level.FINEST, "Dataset already removed");
+//			}
+//
+//		}
+	}
+	
+	private void deleteSelectedDatasets(){
 		final List<AnalysisDataset> datasets = getSelectedDatasets();
 
 		try {
@@ -843,41 +878,27 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 					if(!datasets.isEmpty()){
 						// make a list of the unique UUIDs selected
 
-						List<UUID> list = new ArrayList<UUID>();
+						Set<UUID> list = new HashSet<UUID>();
 						for(AnalysisDataset d : datasets){
 							programLogger.log(Level.FINEST, "Selected dataset for deletion: "+d.getName());
 
-							if(!list.contains(d.getUUID())){
-								list.add(UUID.fromString((d.getUUID().toString())));
-							}
+							list.add(d.getUUID());
 
 							// add all the children of a dataset
 							for(UUID childID : d.getAllChildUUIDs()){
 								programLogger.log(Level.FINEST, "Adding child dataset to deletion list: "+childID.toString());
-								if(!list.contains(childID)){
-									list.add(UUID.fromString((childID.toString())));
-								}
+								list.add(childID);
 							}
 						}
 
-						// go through the list, removing all the ids to be deleted
-						for(UUID id : list){
-							if(analysisDatasets.containsKey(id)){
-								AnalysisDataset d = getDataset(id);
-								programLogger.log(Level.FINEST, "Preparing to delete dataset: "+d.getName());
-								deleteDataset(d);
-								programLogger.log(Level.FINEST, "Dataset removed: "+d.getName());
-							} else {
-								programLogger.log(Level.FINEST, "Dataset already removed");
-							}
-
-						}
-
+						
+						deleteDatasetsInList(list);
 						refreshClusters();
 						programLogger.log(Level.FINEST, "Updating panels");
 						update();
 						programLogger.log(Level.FINEST, "Firing update panel event");
-						fireSignalChangeEvent("UpdatePanelsNull");
+//						fireSignalChangeEvent("UpdatePanelsNull");
+//						fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 						repaint();
 
 					} else {
@@ -885,14 +906,14 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 					}
 					programLogger.log(Level.FINEST, "Deletion complete");
 					
-
+					
 				}
 			};
 			thr.start();
-//			selectDataset((AnalysisDataset) null);
 		} catch (Exception e){
 			programLogger.log(Level.SEVERE, "Error deleting datasets", e);
 		}
+//		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 	}
 
 	/**
@@ -1167,7 +1188,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 		if(event.type().equals("DeleteCollectionAction")){
 			programLogger.log(Level.FINEST, "Deleting dataset action received");
-			deleteDataset();
+			deleteSelectedDatasets();
 		}
 		
 		

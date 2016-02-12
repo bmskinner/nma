@@ -25,6 +25,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+
+/**
+ * This stores a bi-directional hash, for tracking the position
+ * of datasets within the populations panel
+ * @author bms41
+ *
+ */
 public class TreeOrderHashMap {
 
 	private HashMap<UUID, Integer> forward = new HashMap<UUID, Integer>();;
@@ -60,6 +67,14 @@ public class TreeOrderHashMap {
 		for(int j = i; j<forward.size();j++){
 			this.put(get(j+1), j);
 		}
+	}
+	
+	public boolean contains(UUID id){
+		return forward.containsKey(id);
+	}
+	
+	public boolean contains(Integer i){
+		return reverse.containsKey(i);
 	}
 	
 	public int size(){
