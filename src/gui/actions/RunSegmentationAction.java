@@ -39,8 +39,8 @@ public class RunSegmentationAction extends ProgressableAction {
 	
 	private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
 	
-	private AnalysisDataset source 			= null;
-	private CountDownLatch latch;
+	private AnalysisDataset source = null;
+	private CountDownLatch latch   = null;
 	
 	/**
 	 * Carry out a segmentation on a dataset
@@ -158,23 +158,38 @@ public class RunSegmentationAction extends ProgressableAction {
 
 				if(  (downFlag & MainWindow.ADD_POPULATION) == MainWindow.ADD_POPULATION){
 					fireDatasetEvent(DatasetMethod.ADD_DATASET, dataset);
+					
+					
 				} else {
-					fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, dataset);
+					
+//					fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, dataset);
 				}
 				
-				if(  (downFlag & MainWindow.SAVE_DATASET) == MainWindow.SAVE_DATASET){
-					programLogger.log(Level.FINEST, "Preparing to fire save datast request");
-					fireDatasetEvent(DatasetMethod.SAVE, dataset);
-				}
+//				if(  (downFlag & MainWindow.SAVE_DATASET) == MainWindow.SAVE_DATASET){
+//					programLogger.log(Level.FINEST, "Preparing to fire save datast request");
+//					fireDatasetEvent(DatasetMethod.SAVE, dataset);
+//				}
 				
-
+				/*
+				 * Save the dataset, regardless of flags
+				 */
+				programLogger.log(Level.FINEST, "Firing save dataset request");
+				fireDatasetEvent(DatasetMethod.SAVE, dataset);
 
 				// if no list was provided, or no more entries remain,
 				// call the finish
 				if( ! hasRemainingDatasetsToProcess()){
 					programLogger.log(Level.FINEST, "No more datasets remain to process");
-					latch.countDown();
+					if(latch!=null){
+						latch.countDown();
+					}
+//					if(mode.equals(MorphologyAnalysisMode.REFRESH)){
+					programLogger.log(Level.FINEST, "Firing update panel interface event");
+					fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+//					}
 					RunSegmentationAction.super.finished();
+					
+					
 					
 					
 					

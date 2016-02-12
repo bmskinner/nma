@@ -81,7 +81,7 @@ public class ChartCache implements Cache {
 	 * @see charting.Cache#refresh()
 	 */
 	@Override
-	public void refresh(){
+	public void clear(){
 		this.purge();
 	}
 	
@@ -89,7 +89,7 @@ public class ChartCache implements Cache {
 	 * @see charting.Cache#refresh(java.util.List)
 	 */
 	@Override
-	public void refresh(List<AnalysisDataset> list){
+	public void clear(List<AnalysisDataset> list){
 		List<ChartOptions> toRemove = new ArrayList<ChartOptions>();
 		
 		// Find the options with the datasets

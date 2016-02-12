@@ -447,14 +447,24 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 				MainOptionsDialog dialog = new MainOptionsDialog(MainWindow.this);
 				if(dialog.isReadyToRun()){
-					programLogger.log(Level.FINEST, "Options closed, refreshing charts");
-					for(DetailPanel panel : MainWindow.this.detailPanels){
-						panel.refreshChartCache();
-						panel.refreshTableCache();
+
+					try {
+						/*
+						 * If the recache is not waited on, the update conflicts
+						 * with the updating status
+						 */
+						programLogger.log(Level.FINEST, "Options closed, clearing all caches");
+						
+						CountDownLatch l = new CountDownLatch(1);
+						clearChartCache(l);
+						l.await();
+						programLogger.log(Level.FINEST, "Options closed, updating charts");
+	                    updatePanels(populationsPanel.getSelectedDatasets());
+						
+					} catch (InterruptedException e1) {
+						programLogger.log(Level.SEVERE, "Interruption to recaching", e1);
 					}
 
-                    updatePanels(populationsPanel.getSelectedDatasets());
-                    
 				} else {
 					programLogger.log(Level.FINEST, "Options cancelled");
 				}
@@ -862,10 +872,21 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				});
 			}
 			
-			if(event.method().equals(DatasetMethod.RECALCULATE_CACHE)){
+			if(event.method().equals(DatasetMethod.REFRESH_CACHE)){
 				executorService.execute(new Runnable() {
 					public void run() {
 						recacheCharts(list);
+					}
+					
+				});
+				
+			}
+			
+			if(event.method().equals(DatasetMethod.CLEAR_CACHE)){
+				executorService.execute(new Runnable() {
+					public void run() {
+						clearChartCache(list);
+//						recacheCharts(list);
 					}
 					
 				});
@@ -987,36 +1008,42 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	 */	
 	private void saveDataset(final AnalysisDataset d){
 		
-		if(d.isRoot()){
-			
-				final CountDownLatch latch = new CountDownLatch(1);
-				new SaveDatasetAction(d, MainWindow.this, latch, false);
-				try {
-					programLogger.log(Level.FINEST, "Awaiting latch for save action");
-					latch.await();
-				} catch (InterruptedException e) {
-					programLogger.log(Level.SEVERE, "Interruption to thread", e);
-				}
-			
-			programLogger.log(Level.FINE, "Root dataset saved");
-		} else {
-			
-			AnalysisDataset target = null; 
-			for(AnalysisDataset root : populationsPanel.getRootDatasets()){
-			
-				for(AnalysisDataset child : root.getAllChildDatasets()){
-					if(child.getUUID().equals(d.getUUID())){
-						target = root;
-						break;
+		executorService.execute(new Runnable() {
+			public void run() {
+				if(d.isRoot()){
+
+					final CountDownLatch latch = new CountDownLatch(1);
+					new SaveDatasetAction(d, MainWindow.this, latch, false);
+					try {
+						programLogger.log(Level.FINEST, "Awaiting latch for save action");
+						latch.await();
+					} catch (InterruptedException e) {
+						programLogger.log(Level.SEVERE, "Interruption to thread", e);
+					}
+
+					programLogger.log(Level.FINE, "Root dataset saved");
+				} else {
+
+					AnalysisDataset target = null; 
+					for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+
+						for(AnalysisDataset child : root.getAllChildDatasets()){
+							if(child.getUUID().equals(d.getUUID())){
+								target = root;
+								break;
+							}
+						}
+						if(target!=null){
+							break;
+						}
+					}
+					if(target!=null){
+						saveDataset(target);
 					}
 				}
-				if(target!=null){
-					break;
-				}
 			}
-			saveDataset(target);
-			
-		}
+
+		});
 	}
 	
 	
@@ -1033,6 +1060,31 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				}
 			}
 		});
+	}
+	
+	private void clearChartCache(){
+		for(DetailPanel panel : detailPanels){
+			panel.clearChartCache();
+			panel.clearTableCache();
+		}	
+	}
+	
+	private void clearChartCache(final CountDownLatch latch){
+		
+		for(DetailPanel panel : detailPanels){
+			panel.clearChartCache();
+			panel.clearTableCache();
+		}
+		latch.countDown();
+		
+	}
+	
+	private void clearChartCache(final List<AnalysisDataset> list){
+		
+		for(DetailPanel panel : detailPanels){
+			panel.clearChartCache(list);
+			panel.clearTableCache(list);
+		}		
 	}
 	
 	private void recacheCharts(final AnalysisDataset dataset){

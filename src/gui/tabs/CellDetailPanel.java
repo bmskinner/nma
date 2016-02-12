@@ -395,7 +395,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							list.add(activeDataset());
 							
 							try {
-								fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
+								fireDatasetEvent(DatasetMethod.REFRESH_CACHE, list);
 								fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, list);
 
 							} catch (Exception e1) {

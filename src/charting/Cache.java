@@ -11,13 +11,16 @@ public interface Cache {
 	 */
 	void purge();
 
-	void refresh();
+	/*
+	 * Removes all stored entries from the cache
+	 */
+	void clear();
 
 	/**
 	 * Remove caches containing any of the given datasets.
 	 * These will be recalculated at next call
 	 * @param list
 	 */
-	void refresh(List<AnalysisDataset> list);
+	void clear(List<AnalysisDataset> list);
 
 }

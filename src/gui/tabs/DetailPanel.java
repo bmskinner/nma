@@ -359,15 +359,36 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	
 	
 	/**
-	 * Remove all charts from the cache so they will be recalculated
+	 * Remove all charts from the cache. Does not invoke an update 
+	 * @param list
+	 */
+	public void clearChartCache(){
+		programLogger.log(Level.FINEST, "Clearing chart cache");
+		this.getChartCache().clear();
+		for(DetailPanel panel : this.subPanels){
+			panel.clearChartCache();
+		}
+	}
+	
+	/**
+	 * Remove all charts from the cache. Does not invoke an update 
+	 * @param list
+	 */
+	public void clearChartCache(final List<AnalysisDataset> list){
+		programLogger.log(Level.FINEST, "Clearing chart cache for specific datasetss");
+		this.getChartCache().clear(list);
+		for(DetailPanel panel : this.subPanels){
+			panel.clearChartCache(list);
+		}
+	}
+	
+	/**
+	 * Remove all charts from the cache. Then call an update of the panel
 	 * @param list
 	 */
 	public void refreshChartCache(){
-		programLogger.log(Level.FINEST, "Refreshing chart cache");
-		this.getChartCache().refresh();
-		for(DetailPanel panel : this.subPanels){
-			panel.refreshChartCache();
-		}
+		clearChartCache();
+		programLogger.log(Level.FINEST, "Updating charts after clear");
 		this.update(getDatasets());
 	}
 	
@@ -379,10 +400,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 */
 	public void refreshChartCache(final List<AnalysisDataset> list){
 		programLogger.log(Level.FINEST, "Refreshing chart cache for specific datasets");
-		this.getChartCache().refresh(list);
-		for(DetailPanel panel : this.subPanels){
-			panel.refreshChartCache(list);
-		}
+		clearChartCache(list);
 		this.update(getDatasets());
 	}
 	
@@ -391,15 +409,37 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	}
 	
 	/**
-	 * Remove all charts from the cache so they will be recalculated
+	 * Remove all tables from the cache
+	 * @param list
+	 */
+	public void clearTableCache(){
+		programLogger.log(Level.FINEST, "Clearing table cache");
+		this.getTableCache().clear();
+		for(DetailPanel panel : this.subPanels){
+			panel.clearTableCache();
+		}
+	}
+	
+	/**
+	 * Remove all tables from the cache containing datasets in
+	 * the given list, so they will be recalculated
+	 * @param list
+	 */
+	public void clearTableCache(final List<AnalysisDataset> list){
+		programLogger.log(Level.FINEST, "Refreshing table cache for specific datasets");
+		this.getTableCache().clear(list);
+		for(DetailPanel panel : this.subPanels){
+			panel.refreshTableCache(list);
+		}
+	}
+	
+	/**
+	 * Remove all charts from the cache and trigger an update
 	 * @param list
 	 */
 	public void refreshTableCache(){
-		programLogger.log(Level.FINEST, "Refreshing table cache");
-		this.getTableCache().refresh();
-		for(DetailPanel panel : this.subPanels){
-			panel.refreshTableCache();
-		}
+		clearTableCache();
+		programLogger.log(Level.FINEST, "Updating charts after clear");
 		this.update(getDatasets());
 	}
 	
@@ -409,11 +449,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 * @param list
 	 */
 	public void refreshTableCache(final List<AnalysisDataset> list){
-		programLogger.log(Level.FINEST, "Refreshing table cache for specific datasets");
-		this.getTableCache().refresh(list);
-		for(DetailPanel panel : this.subPanels){
-			panel.refreshTableCache(list);
-		}
+		clearTableCache(list);
 		this.update(getDatasets());
 	}
 	

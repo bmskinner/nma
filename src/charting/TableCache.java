@@ -74,7 +74,7 @@ public class TableCache implements Cache {
 	/**
 	 * Remove all cached charts
 	 */
-	public void refresh(){
+	public void clear(){
 		this.purge();
 	}
 	
@@ -83,7 +83,7 @@ public class TableCache implements Cache {
 	 * These will be recalculated at next call
 	 * @param list
 	 */
-	public void refresh(List<AnalysisDataset> list){
+	public void clear(List<AnalysisDataset> list){
 		List<TableOptions> toRemove = new ArrayList<TableOptions>();
 		
 		// Find the options with the datasets

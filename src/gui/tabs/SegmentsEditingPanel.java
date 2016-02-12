@@ -114,27 +114,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 	public void signalChangeReceived(SignalChangeEvent event) {
 		fireSignalChangeEvent(event);
 	}
-	
-//	@Override
-//	public void interfaceEventReceived(InterfaceEvent event) {
-//		fireInterfaceEvent(event);
-//		
-//		if(event.method().equals(InterfaceMethod.RECACHE_CHARTS)){
-//			this.refreshChartCache();
-//			this.refreshTableCache();
-//		}
-//		
-//	}
-
-//	@Override
-//	public void datasetEventReceived(DatasetEvent event) {
-//		
-//		// Pass messages up
-//		if(event.getSource().equals(segmentProfilePanel)){
-//			fireDatasetEvent(event);
-//		}
-//	}
-		
+			
 	public class SegmentProfilePanel extends DetailPanel implements ActionListener, SignalChangeListener {
 		
 		private DraggableOverlayChartPanel chartPanel; // for displaying the legnth of a given segment
@@ -355,6 +335,12 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			.getProfileManager()
 			.setLockOnAllNucleusSegmentsExcept(id, true);
 							
+			/*
+			 * Invalidate the chart cache for the active dataset.
+			 * This will force the morphology refresh to create a new chart
+			 */
+			this.clearChartCache();
+			
 			//  Update each nucleus profile
 			programLogger.log(Level.FINEST, "Firing refresh morphology action");
 			fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
@@ -517,7 +503,10 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 						.getCollection()
 						.getProfileManager()
 						.mergeSegments(mergeOption.getOne(), mergeOption.getTwo());
-					fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
+					
+					programLogger.log(Level.FINEST, "Merged segments: "+mergeOption.toString());
+					programLogger.log(Level.FINEST, "Firing refresh cache request");
+					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 				} else {
 					JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
 				}
@@ -582,9 +571,10 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 						.getCollection()
 						.getProfileManager()
 						.splitSegment(seg)){
-					fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
-//					SegmentsEditingPanel.this.update(SegmentsEditingPanel.this.activeDatasetToList());
-//					SegmentsEditingPanel.this.fireSignalChangeEvent("UpdatePanels");
+					
+					programLogger.log(Level.FINEST, "Split segment "+option.toString());
+					programLogger.log(Level.FINEST, "Firing refresh cache request");
+					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 				}
 			}
 		}
@@ -623,8 +613,11 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				.getCollection()
 				.getProfileManager()
 				.unmergeSegments(mergeOption.getSeg());
+				
+				programLogger.log(Level.FINEST, "Unmerged segment "+mergeOption.toString());
 
-				fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
+				programLogger.log(Level.FINEST, "Firing refresh cache request");
+				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 			}
 		}
 	}

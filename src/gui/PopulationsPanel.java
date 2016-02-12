@@ -341,13 +341,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						if(newColor != null){
 							dataset.setDatasetColour(newColor);
 							
-							// Force the chart caches to clear
+							// Force the chart caches to clear, but don't trigger a panel update
 							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 							list.add(dataset);
-							fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
+							fireDatasetEvent(DatasetMethod.CLEAR_CACHE, list);
 						}
-
-//						fireSignalChangeEvent("UpdatePanels");
 						fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 						
 					}
