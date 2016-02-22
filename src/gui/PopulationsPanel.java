@@ -751,31 +751,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			programLogger.log(Level.FINEST, "Deleting dataset: "+d.getName());
 			UUID id = d.getUUID();
 
-			Map<UUID, String> map = new HashMap<UUID, String>();
-
-
-//			// select all children of the collection
-//			for(UUID u : d.getAllChildUUIDs()){
-//				String name = this.getDataset(u).getName();
-//
-//				programLogger.log(Level.FINEST, "  Removing child dataset: "+name);
-//
-//				if(analysisDatasets.containsKey(u) || populationNames.containsValue(u) ){
-//					map.put(u, name);
-//				}
-//			}
-
-//			// remove selected children
-//			for(UUID u : map.keySet()){
-//				String name = map.get(u);
-//				analysisDatasets.remove(u);
-//				programLogger.log(Level.FINEST, "  Removed child "+name+" from analysisDatasets");
-//
-//				populationNames.remove(name);
-//				programLogger.log(Level.FINEST, "  Removed child "+name+" from populationNames");
-//
-//			}
-
 
 			// remove the dataset from its parents
 			programLogger.log(Level.FINEST, "Removing dataset from its parents");
@@ -790,23 +765,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				}
 
 			}
-
-			// remove cluster groups
-//			programLogger.log(Level.FINEST, "Removing cluster groups");
-//			for(ClusterGroup g : d.getClusterGroups()){
-//				boolean clusterRemains = false;
-//
-//				for(UUID childID : g.getUUIDs()){
-//					if(d.hasChild(childID)){
-//						clusterRemains = true;
-//					}
-//				}
-//				if(!clusterRemains){
-//					programLogger.log(Level.FINEST, "  Removing cluster group "+g.getName());
-//					d.deleteClusterGroup(g);
-//				}
-//			}
-
 
 			programLogger.log(Level.FINEST, "Removing dataset from analysisDatasets");
 			if(analysisDatasets.containsKey(id)){
@@ -869,51 +827,35 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	private void deleteSelectedDatasets(){
 		final List<AnalysisDataset> datasets = getSelectedDatasets();
 
-		try {
+		if(!datasets.isEmpty()){
+			// make a list of the unique UUIDs selected
 
-			programLogger.log(Level.FINEST, "Deleting selected datasets");
-			Thread thr = new Thread(){
-				public void run(){
+			Set<UUID> list = new HashSet<UUID>();
+			for(AnalysisDataset d : datasets){
+				programLogger.log(Level.FINEST, "Selected dataset for deletion: "+d.getName());
 
-					if(!datasets.isEmpty()){
-						// make a list of the unique UUIDs selected
+				list.add(d.getUUID());
 
-						Set<UUID> list = new HashSet<UUID>();
-						for(AnalysisDataset d : datasets){
-							programLogger.log(Level.FINEST, "Selected dataset for deletion: "+d.getName());
-
-							list.add(d.getUUID());
-
-							// add all the children of a dataset
-							for(UUID childID : d.getAllChildUUIDs()){
-								programLogger.log(Level.FINEST, "Adding child dataset to deletion list: "+childID.toString());
-								list.add(childID);
-							}
-						}
-
-						
-						deleteDatasetsInList(list);
-						refreshClusters();
-						programLogger.log(Level.FINEST, "Updating panels");
-						update();
-						programLogger.log(Level.FINEST, "Firing update panel event");
-//						fireSignalChangeEvent("UpdatePanelsNull");
-						fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-//						repaint();
-
-					} else {
-						programLogger.log(Level.FINEST, "No datasets selected");
-					}
-					programLogger.log(Level.FINEST, "Deletion complete");
-					
-					
+				// add all the children of a dataset
+				for(UUID childID : d.getAllChildUUIDs()){
+					programLogger.log(Level.FINEST, "Adding child dataset to deletion list: "+childID.toString());
+					list.add(childID);
 				}
-			};
-			thr.start();
-		} catch (Exception e){
-			programLogger.log(Level.SEVERE, "Error deleting datasets", e);
+			}
+
+
+			deleteDatasetsInList(list);
+			refreshClusters();
+			programLogger.log(Level.FINEST, "Updating tree panel");
+			update();
+			programLogger.log(Level.FINEST, "Firing update panel event");
+			fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+
+		} else {
+			programLogger.log(Level.FINEST, "No datasets selected");
 		}
-//		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+		programLogger.log(Level.FINEST, "Deletion complete");
+
 	}
 
 	/**
