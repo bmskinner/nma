@@ -152,6 +152,13 @@ public class RunSegmentationAction extends ProgressableAction {
 					programLogger.log(Level.FINEST, "Resuming thread after refolding datast");
 				}
 
+				
+				/*
+				 * Save the dataset, regardless of flags
+				 */
+				programLogger.log(Level.FINEST, "Saving the dataset");
+				saveDataset(dataset);
+				
 				/*
 				 * We should only need to recache charts if the dataset exists
 				 */
@@ -173,8 +180,11 @@ public class RunSegmentationAction extends ProgressableAction {
 				/*
 				 * Save the dataset, regardless of flags
 				 */
-				programLogger.log(Level.FINEST, "Firing save dataset request");
-				fireDatasetEvent(DatasetMethod.SAVE, dataset);
+//				programLogger.log(Level.FINEST, "Saving the dataset");
+//				saveDataset(dataset);
+//				programLogger.log(Level.FINEST, "Firing save dataset request");
+				
+//				fireDatasetEvent(DatasetMethod.SAVE, dataset);
 
 				// if no list was provided, or no more entries remain,
 				// call the finish
@@ -184,8 +194,10 @@ public class RunSegmentationAction extends ProgressableAction {
 						latch.countDown();
 					}
 //					if(mode.equals(MorphologyAnalysisMode.REFRESH)){
-					programLogger.log(Level.FINEST, "Firing update panel interface event");
-					fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+					programLogger.log(Level.FINEST, "Firing select dataset event");
+					fireDatasetEvent(DatasetMethod.SELECT_ONE_DATASET, dataset);
+//					programLogger.log(Level.FINEST, "Firing update panel interface event");
+//					fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 //					}
 					RunSegmentationAction.super.finished();
 					
@@ -215,6 +227,47 @@ public class RunSegmentationAction extends ProgressableAction {
 			}
 		};
 		thr.start();
+	}
+	
+	/**
+	 * Save the given dataset. If it is root, save directly.
+	 * If it is not root, find the root parent and save it.
+	 * @param d
+	 */	
+	private void saveDataset(final AnalysisDataset d){
+		
+		if(d.isRoot()){
+
+			final CountDownLatch latch = new CountDownLatch(1);
+			new SaveDatasetAction(d, mw, latch, false);
+			try {
+				programLogger.log(Level.FINEST, "Awaiting latch for save action");
+				latch.await();
+			} catch (InterruptedException e) {
+				programLogger.log(Level.SEVERE, "Interruption to thread", e);
+			}
+
+			programLogger.log(Level.FINE, "Root dataset saved");
+		} else {
+
+			AnalysisDataset target = null; 
+			for(AnalysisDataset root : mw.getPopulationsPanel().getRootDatasets()){
+
+				for(AnalysisDataset child : root.getAllChildDatasets()){
+					if(child.getUUID().equals(d.getUUID())){
+						target = root;
+						break;
+					}
+				}
+				if(target!=null){
+					break;
+				}
+			}
+			if(target!=null){
+				saveDataset(target);
+			}
+		}
+
 	}
 
 }

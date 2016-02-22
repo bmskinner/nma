@@ -58,6 +58,7 @@ public class PopulationExporter extends AnalysisWorker {
 
 			if(saveAnalysisDataset(getDataset(), saveFile)){
 				log(Level.FINEST, "Save was sucessful");
+//				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());         
 				return true;
 				
 			} else{

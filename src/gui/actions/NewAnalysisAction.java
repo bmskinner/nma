@@ -96,15 +96,11 @@ public class NewAnalysisAction extends ProgressableAction {
 		
 		if(datasets.size()==0 || datasets==null){
 			log(Level.INFO, "No datasets returned");
-			this.cancel();
 		} else {
-			
 			fireDatasetEvent(DatasetMethod.PROFILING_ACTION, datasets);
-
-			// do not call super finished, because there is no dataset for this action
-			// allow the morphology action to update the panels
-			cancel();
+			
 		}
+		super.finished();
 	}
 	
 }

@@ -162,9 +162,10 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
             }
         } catch (InterruptedException e) {
         	logError("Interruption error in worker", e);
+        	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
         } catch (ExecutionException e) {
         	logError("Execution error in worker", e);
-
+        	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
        }
 
     } 
