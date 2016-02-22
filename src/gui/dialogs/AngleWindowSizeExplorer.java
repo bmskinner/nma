@@ -70,9 +70,15 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 	public AngleWindowSizeExplorer(final AnalysisDataset dataset, final Logger logger){
 		super(logger);
 		this.dataset = dataset;
-		createUI();
+		programLogger.log(Level.FINEST, "Creating angle window explorer UI");
+		try{
+			createUI();
+		} catch (Exception e){
+			programLogger.log(Level.SEVERE, "Error creating angle window explorer UI", e);
+		}
 		this.setModal(false);
 		this.pack();
+		programLogger.log(Level.FINEST, "Displaying angle window explorer");
 		this.setVisible(true);
 	}
 	
@@ -94,7 +100,11 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		
 		int windowSizeMin = 1;
 		int windowSizeMax = (int) dataset.getCollection().getMedianArrayLength();
-		int windowSizeActual = dataset.getAnalysisOptions().getAngleProfileWindowSize();
+		
+		int windowSizeActual = 15; // default if analysis options are not present - e.g. a merge
+		if(dataset.hasAnalysisOptions()){
+			windowSizeActual = dataset.getAnalysisOptions().getAngleProfileWindowSize();
+		}
 		
 		SpinnerNumberModel minSpinnerModel = new SpinnerNumberModel(windowSizeActual-2,
 				windowSizeMin,
