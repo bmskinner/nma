@@ -375,7 +375,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 * @param list
 	 */
 	public void clearChartCache(final List<AnalysisDataset> list){
-		programLogger.log(Level.FINEST, "Clearing chart cache for specific datasetss");
+		programLogger.log(Level.FINEST, "Clearing chart cache for specific datasets");
 		this.getChartCache().clear(list);
 		for(DetailPanel panel : this.subPanels){
 			panel.clearChartCache(list);
@@ -426,7 +426,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 * @param list
 	 */
 	public void clearTableCache(final List<AnalysisDataset> list){
-		programLogger.log(Level.FINEST, "Refreshing table cache for specific datasets");
+		programLogger.log(Level.FINEST, "Clearing table cache for specific datasets");
 		this.getTableCache().clear(list);
 		for(DetailPanel panel : this.subPanels){
 			panel.refreshTableCache(list);

@@ -41,6 +41,8 @@ import analysis.SignalManager;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.TailDatasetCreator;
+import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 
 public class OutlineChartFactory extends AbstractChartFactory {
 	
@@ -55,7 +57,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	public static JFreeChart makeSignalCoMNucleusOutlineChart(AnalysisDataset dataset) throws Exception{
 		
 		if( ! dataset.getCollection().hasConsensusNucleus()){
-			return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+			
+			ChartOptions options = new ChartOptionsBuilder()
+			.setDatasets(null)
+			.build();
+			return ConsensusNucleusChartFactory.makeConsensusChart(options);
 		}
 		
 		

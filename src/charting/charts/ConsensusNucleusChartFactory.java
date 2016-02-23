@@ -24,6 +24,7 @@ import gui.components.ColourSelecter.ColourSwatch;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -35,6 +36,7 @@ import org.jfree.data.xy.XYDataset;
 import analysis.AnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.NucleusDatasetCreator;
+import charting.options.ChartOptions;
 import components.CellCollection;
 
 /**
@@ -48,7 +50,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @return
 	 */
 	public static JFreeChart makeEmptyNucleusOutlineChart(){
-		return makeConsensusChart(null);
+		return makeConsensusChart( (XYDataset) null);
 	}
 	
 	/**
@@ -159,7 +161,11 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param dataset the dataset to draw
 	 * @return
 	 */
-	public static JFreeChart makeSegmentedConsensusChart(AnalysisDataset dataset) throws Exception {
+	private static JFreeChart makeSegmentedConsensusChart(AnalysisDataset dataset) throws Exception {
+		
+		if( ! dataset.getCollection().hasConsensusNucleus()){
+			return makeEmptyNucleusOutlineChart();
+		}
 		XYDataset ds = null;
 		
 		CellCollection collection = dataset.getCollection();
@@ -232,7 +238,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JFreeChart makeMultipleConsensusChart(List<AnalysisDataset> list) throws Exception {
+	private static JFreeChart makeMultipleConsensusChart(List<AnalysisDataset> list) throws Exception {
 		// multiple nuclei
 		XYDataset ds = NucleusDatasetCreator.createMultiNucleusOutline(list);
 		JFreeChart chart = makeConsensusChart(ds);
@@ -271,6 +277,45 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 		}
 		return chart;
+	}
+	
+	/**
+	 * Create the consensus chart for the given options.
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
+	public static JFreeChart makeConsensusChart(ChartOptions options) throws Exception {
+		
+		if(! options.hasDatasets()){
+			options.log(Level.FINEST, "No datasets: creating empty consensus chart");
+			return makeEmptyNucleusOutlineChart();
+		}
+		
+		if(options.isMultipleDatasets()){
+			
+			boolean oneHasConsensus = false;
+			for(AnalysisDataset d : options.getDatasets()){
+				if (d.getCollection().hasConsensusNucleus()){
+					oneHasConsensus= true;
+				}
+			}
+			
+			if(oneHasConsensus){
+				options.log(Level.FINEST, "Creating multiple consensus chart");
+				return makeMultipleConsensusChart(options.getDatasets());
+			} else {
+				options.log(Level.FINEST, "No dataset with consensus: creating empty consensus chart");
+				return makeEmptyNucleusOutlineChart();
+			}
+		}
+		
+		if(options.isSingleDataset()){
+			options.log(Level.FINEST, "Creating single consensus chart");
+			return makeSegmentedConsensusChart(options.firstDataset());
+		}
+		options.log(Level.FINEST, "Options failed to match: creating empty consensus chart");
+		return makeEmptyNucleusOutlineChart();
 	}
 
 }

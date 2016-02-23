@@ -46,6 +46,7 @@ import org.jfree.chart.JFreeChart;
 import analysis.AnalysisDataset;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import components.CellCollection;
 import components.generic.BorderTag;
@@ -77,19 +78,27 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		c.weightx = 1.0;  
 		c.weighty = 1.0; 
 		
-		JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+		try {
+			ChartOptions options = new ChartOptionsBuilder()
+				.setDatasets(null)
+				.setLogger(programLogger)
+				.build();
+			JFreeChart consensusChart = getChart(options);
+			consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
+			consensusChartPanel.addSignalChangeListener(this);
+		} catch (Exception e){
+			programLogger.log(Level.SEVERE, "Error creating blank consensus chart", e);
+		}
 		
-		consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
-		consensusChartPanel.addSignalChangeListener(this);
+		
+		
 		
 		runRefoldingButton = new JButton("Refold");
 
 		runRefoldingButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-				list.add(activeDataset());
-				fireDatasetEvent(DatasetMethod.REFOLD_CONSENSUS, list);
+				fireDatasetEvent(DatasetMethod.REFOLD_CONSENSUS, getDatasets());
 				runRefoldingButton.setVisible(false);
 			}
 		});
@@ -149,8 +158,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			public void mouseClicked(MouseEvent arg0) {
 				if(activeDataset().getCollection().hasConsensusNucleus()){
 					activeDataset().getCollection().getConsensusNucleus().offset(0, 1);;
-					
-					update(activeDatasetToList());
+					refreshChartCache(getDatasets());
+//					update(activeDatasetToList());
 				}
 			}
 		});
@@ -162,8 +171,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			public void mouseClicked(MouseEvent arg0) {
 				if(activeDataset().getCollection().hasConsensusNucleus()){
 					activeDataset().getCollection().getConsensusNucleus().offset(0, -1);;
-					
-					update(activeDatasetToList());
+					refreshChartCache(getDatasets());
+//					update(activeDatasetToList());
 				}
 			}
 		});
@@ -177,8 +186,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			public void mouseClicked(MouseEvent arg0) {
 				if(activeDataset().getCollection().hasConsensusNucleus()){
 					activeDataset().getCollection().getConsensusNucleus().offset(-1, 0);;
-					
-					update(activeDatasetToList());
+					refreshChartCache(getDatasets());
+//					update(activeDatasetToList());
 				}
 			}
 		});
@@ -192,8 +201,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			public void mouseClicked(MouseEvent arg0) {
 				if(activeDataset().getCollection().hasConsensusNucleus()){
 					activeDataset().getCollection().getConsensusNucleus().offset(1, 0);;
-					
-					update(activeDatasetToList());
+					refreshChartCache(getDatasets());
+//					update(activeDatasetToList());
 				}
 			}
 		});
@@ -211,8 +220,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 					XYPoint point = new XYPoint(x, y);
 					
 					activeDataset().getCollection().getConsensusNucleus().moveCentreOfMass(point);;
-					
-					update(activeDatasetToList());
+					refreshChartCache(getDatasets());
+//					update(activeDatasetToList());
 				}
 			}
 		});
@@ -239,8 +248,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			public void mouseClicked(MouseEvent arg0) {
 				if(activeDataset().getCollection().hasConsensusNucleus()){
 					activeDataset().getCollection().getConsensusNucleus().rotate(-89);
-					
-					update(activeDatasetToList());
+					refreshChartCache(getDatasets());
+//					update(activeDatasetToList());
 				}
 			}
 		});
@@ -253,8 +262,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			public void mouseClicked(MouseEvent arg0) {
 				if(activeDataset().getCollection().hasConsensusNucleus()){
 					activeDataset().getCollection().getConsensusNucleus().rotate(-91);
-					
-					update(activeDatasetToList());
+					refreshChartCache(getDatasets());
+//					update(activeDatasetToList());
 				}
 			}
 		});
@@ -269,8 +278,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 				if(activeDataset().getCollection().hasConsensusNucleus()){
 					BorderPoint orientationPoint = activeDataset().getCollection().getConsensusNucleus().getBorderTag(BorderTag.ORIENTATION_POINT);
 					activeDataset().getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
-					
-					update(activeDatasetToList());
+					refreshChartCache(getDatasets());
+//					update(activeDatasetToList());
 				}
 			}
 		});
@@ -316,7 +325,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return null;
+		return ConsensusNucleusChartFactory.makeConsensusChart(options);
 	}
 	
 	@Override
@@ -326,12 +335,19 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		
 	private void updateSingleDataset() throws Exception {
 		runRefoldingButton.setVisible(false);
+		
+		ChartOptions options = new ChartOptionsBuilder()
+			.setDatasets(getDatasets())
+			.setLogger(programLogger)
+			.build();
+		
+		JFreeChart consensusChart = getChart(options);
 
-		JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+//		JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 
 		CellCollection collection = activeDataset().getCollection();
 		if(collection.hasConsensusNucleus()){
-			consensusChart = ConsensusNucleusChartFactory.makeSegmentedConsensusChart(activeDataset());
+//			consensusChart = ConsensusNucleusChartFactory.makeSegmentedConsensusChart(activeDataset());
 
 			// hide the refold button
 			runRefoldingButton.setVisible(false);
@@ -353,29 +369,43 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	}
 	
 	private void updateMultipleDatasets() throws Exception{
-		boolean oneHasConsensus = false;
-		for(AnalysisDataset d : getDatasets()){
-			if (d.getCollection().hasConsensusNucleus()){
-				oneHasConsensus= true;
-			}
-		}
+//		boolean oneHasConsensus = false;
+//		for(AnalysisDataset d : getDatasets()){
+//			if (d.getCollection().hasConsensusNucleus()){
+//				oneHasConsensus= true;
+//			}
+//		}
 
-		if(oneHasConsensus){
-			JFreeChart chart = ConsensusNucleusChartFactory.makeMultipleConsensusChart(getDatasets());
+//		if(oneHasConsensus){
+			
+			ChartOptions options = new ChartOptionsBuilder()
+			.setDatasets(getDatasets())
+			.setLogger(programLogger)
+			.build();
+			
+			JFreeChart chart = getChart(options);
+		
+//			JFreeChart chart = ConsensusNucleusChartFactory.makeMultipleConsensusChart(getDatasets());
 			consensusChartPanel.setChart(chart);
 			consensusChartPanel.restoreAutoBounds();
-		} else {
-			JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-			consensusChartPanel.setChart(chart);
-		}
+//		} else {
+//			JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+//			consensusChartPanel.setChart(chart);
+//		}
 
 
 		runRefoldingButton.setVisible(false);
 		offsetsPanel.setVisible(false);
 	}
 	
-	private void updateBlankChart(){
-		JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+	private void updateBlankChart()  throws Exception {
+		
+		ChartOptions options = new ChartOptionsBuilder()
+		.setDatasets(null)
+		.setLogger(programLogger)
+		.build();
+		JFreeChart consensusChart = getChart(options);
+//		JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 		consensusChartPanel.setChart(consensusChart);
 		runRefoldingButton.setVisible(false);
 		offsetsPanel.setVisible(false);
@@ -517,6 +547,9 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		
 		// pass on log messages back to the main window
 		if(event.sourceName().equals(ConsensusNucleusChartPanel.SOURCE_COMPONENT)){
+			
+			this.clearChartCache(getDatasets());
+			
 			if(event.type().startsWith("Log_")){
 				fireSignalChangeEvent(event.type());
 			}
@@ -540,7 +573,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			if(event.type().equals("OffsetReset")){
 				resetConsensusNucleusOffset();
 			}
-
+			this.update(getDatasets());
+			
 		}
 		
 	}

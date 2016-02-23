@@ -960,13 +960,17 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					dataset.getAnalysisOptions().setRefoldMode("Fast");
 					
 					programLogger.log(Level.FINE, "Set refold status in options");
-					populationsPanel.selectDataset(dataset);
-//					recacheCharts();
-//					populationsPanel.selectDataset(dataset);
-					
 					final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 					list.add(dataset);
-					updatePanels(list);
+//					clearChartCache(list);
+					
+					
+					
+					
+					programLogger.log(Level.FINE, "Preparing to select refolded dataset");
+					populationsPanel.selectDataset(dataset);
+					programLogger.log(Level.FINE, "Clearing consensus chart cache for refolded dataset");
+					consensusNucleusPanel.refreshChartCache();
 					
 					programLogger.log(Level.FINEST, "Latch counted down: "+latch.getCount());
 				} catch (InterruptedException e) {
@@ -1082,6 +1086,11 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	
 	private void clearChartCache(final List<AnalysisDataset> list){
 		
+		if(list==null || list.isEmpty()){
+			programLogger.log(Level.WARNING, "A cache clear was requested for a specific list, which was null or empty");
+			clearChartCache();
+			return;
+		}
 		for(DetailPanel panel : detailPanels){
 			panel.clearChartCache(list);
 			panel.clearTableCache(list);
