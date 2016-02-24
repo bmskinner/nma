@@ -44,7 +44,7 @@ public class ConsensusNucleusChartPanel extends FixedAspectRatioChartPanel imple
 
 	public ConsensusNucleusChartPanel(JFreeChart chart) {
 		super(chart);
-		JPopupMenu popup = this.createPopupMenu(true, true, true, true);// new JPopupMenu();
+		JPopupMenu popup = this.getPopupMenu();
 		popup.addSeparator();
 		
 		JMenuItem alignItem = new JMenuItem("Align vertical");
