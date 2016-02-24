@@ -124,14 +124,16 @@ implements PlugIn
 		// report missing jars
 		for(int i=0; i<requiredFiles.length; i++){
 			if(oklist[i]==false){
-				IJ.log("Cannot find required plugin: "+requiredFiles[i]);
+				IJ.log("Cannot find a required plugin: "+requiredFiles[i]);
 				result = false;
 			}
 		}
 		
 		if(result==false){
-			IJ.log("Unable to launch Nuclear Morphology Analysis");
-			IJ.log("Check the wiki for download links for missing plugins:");
+			IJ.log("Unable to launch the Nuclear Morphology Analysis plugin for ImageJ");
+			IJ.log("This is because a required plugin is missing");
+			IJ.log("The names of the missing plugins are listed above");
+			IJ.log("Visit the project wiki for links to download missing plugins:");
 			IJ.log("https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Installation");
 			
 		}
