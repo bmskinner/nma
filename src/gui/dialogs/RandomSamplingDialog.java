@@ -170,6 +170,18 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		
 	}
 	
+	public void setEnabled(boolean b){
+		runButton.setEnabled(b);
+		showDensity.setEnabled(b);
+		magnitudeTestSpinner.setEnabled(b);
+
+		set1SizeSpinner.setEnabled(b);
+		set2SizeSpinner.setEnabled(b);
+		iterattionsSpinner.setEnabled(b);
+		statsBox.setEnabled(b);
+		runButton.setEnabled(b);
+	}
+	
 	private JPanel createFooter(){
 		JPanel panel = new JPanel(new FlowLayout());
 		
@@ -203,6 +215,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		
 		try {
 			setStatusLoading();
+			setEnabled(false);
 
 			sampler = new RandomSampler(dataset, programLogger, stat, iterations, firstCount, secondCount);
 			sampler.addPropertyChangeListener(this);
@@ -210,6 +223,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 
 		} catch (Exception e) {
 			programLogger.log(Level.SEVERE, "Error running sampling", e);
+			setEnabled(true);
 		}
 	}
 	
@@ -222,6 +236,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 			observedPctLabel.setText("Lower in "+  df.format(observedPct)  +"% of samples");
 			sampler = null;
 			progressBar.setValue(0);
+			setEnabled(true);
 
 			JFreeChart chart = null;
 			if(showDensity.isSelected()){
