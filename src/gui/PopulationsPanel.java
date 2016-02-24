@@ -357,6 +357,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 							dataset.setDatasetColour(newColor);
 							
 							// Force the chart caches to clear, but don't trigger a panel update
+							programLogger.log(Level.FINEST, "Firing clearing chart cache signals from population colour change");
 							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 							list.add(dataset);
 							fireDatasetEvent(DatasetMethod.CLEAR_CACHE, list);
@@ -569,6 +570,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 			ListSelectionModel selectionModel = 
 					treeTable.getSelectionModel();
+			
+			selectionModel.clearSelection(); // if the new selection is the same as the old, the charts will not recache
 			
 			programLogger.log(Level.FINEST, "Adding index at "+index);
 			selectionModel.addSelectionInterval(index, index);

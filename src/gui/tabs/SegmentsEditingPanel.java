@@ -339,7 +339,9 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			 * Invalidate the chart cache for the active dataset.
 			 * This will force the morphology refresh to create a new chart
 			 */
+			programLogger.log(Level.FINEST, "Clearing chart cache for editing panel");
 			this.clearChartCache();
+			
 			
 			//  Update each nucleus profile
 			programLogger.log(Level.FINEST, "Firing refresh morphology action");
