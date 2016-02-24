@@ -340,7 +340,8 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			 * This will force the morphology refresh to create a new chart
 			 */
 			programLogger.log(Level.FINEST, "Clearing chart cache for editing panel");
-			this.clearChartCache();
+			fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
+//			this.clearChartCache();
 			
 			
 			//  Update each nucleus profile
@@ -448,23 +449,26 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 //				List<String> names = new ArrayList<String>();
 				SegmentsEditingPanel.this.setAnalysing(true);
 				
+				
 				if(e.getSource().equals(mergeButton)){
-					
+					fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
 					mergeAction(medianProfile);
 					
 				}
 
 				if(e.getSource().equals(unmergeButton)){
-
+					fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
 					unmergeAction(medianProfile);
 				}
 				
 				if(e.getSource().equals(splitButton)){
+					fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
 					splitAction(medianProfile);
 					
 				}
 				
 				if(e.getSource()==updatewindowButton){
+					fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
 					updateCollectionWindowSize();
 				}
 				

@@ -97,9 +97,11 @@ public class ChartCache implements Cache {
 		// Find the options with the datasets
 		for(AnalysisDataset d : list){
 			for(ChartOptions op : this.chartMap.keySet()){
-				if(op.getDatasets().contains(d)){
-					toRemove.add(op);
-					op.log(Level.FINEST, "Need to remove options with dataset "+d.getName());
+				if(op.hasDatasets()){
+					if(op.getDatasets().contains(d)){
+						toRemove.add(op);
+						op.log(Level.FINEST, "Need to remove options with dataset "+d.getName());
+					}
 				}
 			}
 		}

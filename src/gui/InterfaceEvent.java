@@ -78,6 +78,7 @@ public class InterfaceEvent extends EventObject {
 		UPDATE_PANELS		("Update panels"),
 		REFRESH_POPULATIONS ("Refresh population panel datasets"),
 		SAVE_ROOT			("Save root datasets"),
+		CLEAR_CHART_CACHE   ("Clear the chart caches"),
 		RECACHE_CHARTS		("Recache charts"),
 		LIST_DATASETS		("List datasets"),
 		RESEGMENT_SELECTED_DATASET ("Resegment datasets"),
