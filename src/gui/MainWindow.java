@@ -948,6 +948,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				 * The countdown latch does nothing here, but must be retained for
 				 * compatibility.
 				 */
+				consensusNucleusPanel.clearChartCache();
 				
 				final CountDownLatch latch = new CountDownLatch(1);
 				programLogger.log(Level.FINEST, "Created latch: "+latch.getCount());
@@ -969,8 +970,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					
 					programLogger.log(Level.FINE, "Preparing to select refolded dataset");
 					populationsPanel.selectDataset(dataset);
-					programLogger.log(Level.FINE, "Clearing consensus chart cache for refolded dataset");
-					consensusNucleusPanel.refreshChartCache();
+//					programLogger.log(Level.FINE, "Clearing consensus chart cache for refolded dataset");
+//					consensusNucleusPanel.refreshChartCache();
 					
 					programLogger.log(Level.FINEST, "Latch counted down: "+latch.getCount());
 				} catch (InterruptedException e) {
