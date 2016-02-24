@@ -105,7 +105,7 @@ public class PopulationImportAction extends ProgressableAction {
 		 */
 //		
 //		fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
-		fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);
+//		fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);
 //		this.cancel();
 		super.finished();		
 	}

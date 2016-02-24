@@ -89,6 +89,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	
 	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
 	
+	final private TreeSelectionHandler treeListener = new TreeSelectionHandler();
+	
 	public PopulationsPanel(Logger programLogger) {
 		super(programLogger);
 		this.setLayout(new BorderLayout());
@@ -118,6 +120,10 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 //		}
 	}
 	
+	/**
+	 * Find the datasets which are collapsed in the tree
+	 * @return
+	 */
 	private List<UUID> getCollapsedRows(){
 		List<UUID> collapsedRows = new ArrayList<UUID>();		
 		for (int row = 0; row < treeTable.getRowCount(); row++) {
@@ -131,11 +137,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						UUID id = populationNames.get(key);
 						collapsedRows.add(id);
 					}
-					
-//					AnalysisDataset d = analysisDatasets.get(populationNames.get(key));
-//					if(d!=null){ // if a dataset has been deleted, this will be null
-//						collapsedRows.add(d.getUUID());
-//					}
 				}
 			}
 		}
@@ -144,6 +145,10 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	}
 	
 	
+	/**
+	 * Set the dataset rows with the given IDs to be collapsed
+	 * @param collapsedRows
+	 */
 	private void setCollapsedRows(List<UUID> collapsedRows){
 		if(this.analysisDatasets.size()>0){
 			programLogger.log(Level.FINEST, "Expanding rows");
@@ -371,7 +376,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 
 		TreeSelectionModel tableSelectionModel = table.getTreeSelectionModel();
-		tableSelectionModel.addTreeSelectionListener(new TreeSelectionHandler());
+		tableSelectionModel.addTreeSelectionListener(treeListener);
 		
 		return table;
 	}
@@ -571,10 +576,18 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			ListSelectionModel selectionModel = 
 					treeTable.getSelectionModel();
 			
+			TreeSelectionModel treeSelectionModel = treeTable.getTreeSelectionModel();
+			
+			programLogger.log(Level.FINEST, "Removing tree selection listener");
+			treeSelectionModel.removeTreeSelectionListener(treeListener); // if we don't remove the listener, the clearing will trigger an update
+			programLogger.log(Level.FINEST, "Clearing tree selection");
 			selectionModel.clearSelection(); // if the new selection is the same as the old, the charts will not recache
+			programLogger.log(Level.FINEST, "Restoring tree selection listener");
+			treeSelectionModel.addTreeSelectionListener(treeListener);
 			
 			programLogger.log(Level.FINEST, "Adding index at "+index);
 			selectionModel.addSelectionInterval(index, index);
+			
 
 		}
 	}

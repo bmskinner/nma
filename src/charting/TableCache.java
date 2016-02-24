@@ -20,12 +20,15 @@ package charting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.table.TableModel;
 
+import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
 
@@ -84,8 +87,7 @@ public class TableCache implements Cache {
 	 * @param list
 	 */
 	public void clear(List<AnalysisDataset> list){
-		List<TableOptions> toRemove = new ArrayList<TableOptions>();
-		
+		Set<TableOptions> toRemove = new HashSet<TableOptions>();
 		// Find the options with the datasets
 		for(AnalysisDataset d : list){
 			for(TableOptions op : this.optionsMap.keySet()){

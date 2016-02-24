@@ -59,13 +59,13 @@ public class NuclearHistogramDatasetCreator {
 			for(AnalysisDataset dataset : options.getDatasets()){
 
 				
-					options.log(Level.FINEST, "  Dataset: "+dataset.getName());
+//					options.log(Level.FINEST, "  Dataset: "+dataset.getName());
 				
 
 				CellCollection collection = dataset.getCollection();
 
 				
-					options.log(Level.FINEST, "  Stat: "+options.getStat().toString()+"; Scale: "+options.getScale().toString());
+//					options.log(Level.FINEST, "  Stat: "+options.getStat().toString()+"; Scale: "+options.getScale().toString());
 				
 				
 				NucleusStatistic stat = (NucleusStatistic) options.getStat();
@@ -76,7 +76,7 @@ public class NuclearHistogramDatasetCreator {
 				double min = Stats.min(values);
 				double max = Stats.max(values);
 
-				options.log(Level.FINEST, "  Min: "+min+"; max: "+max);
+//				options.log(Level.FINEST, "  Min: "+min+"; max: "+max);
 
 				int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
 
@@ -91,7 +91,7 @@ public class NuclearHistogramDatasetCreator {
 				minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
 
 
-				options.log(Level.FINEST, "  Rounded min: "+minRounded+"; max: "+maxRounded);
+//				options.log(Level.FINEST, "  Rounded min: "+minRounded+"; max: "+maxRounded);
 
 
 				int bins = 100;
@@ -99,7 +99,7 @@ public class NuclearHistogramDatasetCreator {
 				ds.addSeries(groupLabel+"_"+collection.getName(), values, bins, minRounded, maxRounded );
 			}
 		}
-		options.log(Level.FINEST, "Completed histogram dataset");
+//		options.log(Level.FINEST, "Completed histogram dataset");
 		return ds;
 	}
 	
@@ -299,7 +299,7 @@ public class NuclearHistogramDatasetCreator {
 		
 		for(AnalysisDataset dataset : options.getDatasets()){
 
-			options.log(Level.FINEST, "  Dataset: "+dataset.getName());
+//			options.log(Level.FINEST, "  Dataset: "+dataset.getName());
 
 			CellCollection collection = dataset.getCollection();
 			
@@ -324,7 +324,7 @@ public class NuclearHistogramDatasetCreator {
 			double max = Stats.max(lengths);
 
 
-			options.log(Level.FINEST, "  Min: "+min+"; max: "+max);
+//			options.log(Level.FINEST, "  Min: "+min+"; max: "+max);
 
 
 			int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
@@ -339,7 +339,7 @@ public class NuclearHistogramDatasetCreator {
 			minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
 			minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
 
-				options.log(Level.FINEST, "  Rounded min: "+minRounded+"; max: "+maxRounded);
+//				options.log(Level.FINEST, "  Rounded min: "+minRounded+"; max: "+maxRounded);
 
 
 			int bins = 100;

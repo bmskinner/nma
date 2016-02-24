@@ -33,6 +33,9 @@ public abstract class AbstractOptions {
 	}
 
 	protected void setDatasets(List<AnalysisDataset> list){
+		if(list==null){
+			return;
+		}
 		this.list = list;
 	}
 
