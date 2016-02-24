@@ -109,13 +109,13 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 				int row = table.rowAtPoint(e.getPoint());
 				int column = table.columnAtPoint(e.getPoint());
 				
-				int signalGroupRow = 0;
-				int signalGroup = 0;
-				int rowsPerSignalGroup = 7 + SignalStatistic.values().length;
-				if(row>0){
-					signalGroupRow = row - (row % rowsPerSignalGroup);
-					signalGroup = (Integer) table.getModel().getValueAt(signalGroupRow, column);
-				}
+//				int signalGroupRow = 0;
+//				int signalGroup = 0;
+//				int rowsPerSignalGroup = 7 + SignalStatistic.values().length;
+//				if(row>0){
+//					signalGroupRow = row - (row % rowsPerSignalGroup);
+//					signalGroup = (Integer) table.getModel().getValueAt(signalGroupRow, column);
+//				}
 				
 				// double click
 				if (e.getClickCount() == 2) {
@@ -123,10 +123,12 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 					String rowName = table.getModel().getValueAt(row, 0).toString();
 					String nextRowName = table.getModel().getValueAt(row+1, 0).toString();
 					if(nextRowName.equals("Signal group")){
+						int signalGroup = (int) table.getModel().getValueAt(row+1, 1);
 						updateSignalColour( signalGroup );
 					}
 					
 					if(rowName.equals("Source")){
+						int signalGroup = (int) table.getModel().getValueAt(row-3, 1);
 						updateSignalSource( signalGroup );
 					}
 						
