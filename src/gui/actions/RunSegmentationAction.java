@@ -66,6 +66,7 @@ public class RunSegmentationAction extends ProgressableAction {
 	
 	public RunSegmentationAction(AnalysisDataset dataset, AnalysisDataset source, Integer downFlag, MainWindow mw, CountDownLatch latch){
 		super(dataset, "Copying morphology to "+dataset.getName(), mw);
+		this.downFlag = downFlag;
 		this.latch = latch;
 		this.mode = MorphologyAnalysisMode.COPY;
 		this.source = source;
@@ -80,6 +81,7 @@ public class RunSegmentationAction extends ProgressableAction {
 	 */
 	public RunSegmentationAction(List<AnalysisDataset> list, AnalysisDataset source, Integer downFlag, MainWindow mw){
 		super(list, "Segmentation analysis", mw);
+		this.downFlag = downFlag;
 		this.mode = MorphologyAnalysisMode.COPY;
 		this.source = source;
 		programLogger.log(Level.FINE, "Creating segmentation copying analysis");
@@ -164,6 +166,7 @@ public class RunSegmentationAction extends ProgressableAction {
 				 */
 
 				if(  (downFlag & MainWindow.ADD_POPULATION) == MainWindow.ADD_POPULATION){
+					programLogger.log(Level.FINEST, "Firing add dataset signal");
 					fireDatasetEvent(DatasetMethod.ADD_DATASET, dataset);
 					
 					

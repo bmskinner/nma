@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.actions;
 
+import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.dialogs.SignalDetectionSettingsDialog;
 import gui.MainWindow;
@@ -80,8 +81,10 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		}
 		// we have morphology analysis to carry out, so don't use the super finished
 		// use the same segmentation from the initial analysis
-		new RunSegmentationAction(list, dataset, null, mw);
-		fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+		int flag = 0; // set the downstream analyses to run
+		flag |= MainWindow.ADD_POPULATION;
+		new RunSegmentationAction(list, dataset, flag, mw);
+//		fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 		cancel();
 	}
 
