@@ -373,6 +373,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				this.setAnalysing(true);
 				int windowSize = (Integer) windowSizeSpinner.getModel().getValue();
 				setCollectionWindowSize(windowSize);
+				this.refreshChartCache();
 				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 				this.setAnalysing(false);
 			}
@@ -505,7 +506,9 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 						.mergeSegments(mergeOption.getOne(), mergeOption.getTwo());
 					
 					programLogger.log(Level.FINEST, "Merged segments: "+mergeOption.toString());
-					programLogger.log(Level.FINEST, "Firing refresh cache request");
+					programLogger.log(Level.FINEST, "Refreshing chart cache for editing panel");
+					this.refreshChartCache();
+					programLogger.log(Level.FINEST, "Firing general refresh cache request for loaded datasets");
 					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 				} else {
 					JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
@@ -573,7 +576,9 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 						.splitSegment(seg)){
 					
 					programLogger.log(Level.FINEST, "Split segment "+option.toString());
-					programLogger.log(Level.FINEST, "Firing refresh cache request");
+					programLogger.log(Level.FINEST, "Refreshing chart cache for editing panel");
+					this.refreshChartCache();
+					programLogger.log(Level.FINEST, "Firing general refresh cache request for loaded datasets");
 					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 				}
 			}
@@ -616,7 +621,9 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				
 				programLogger.log(Level.FINEST, "Unmerged segment "+mergeOption.toString());
 
-				programLogger.log(Level.FINEST, "Firing refresh cache request");
+				programLogger.log(Level.FINEST, "Refreshing chart cache for editing panel");
+				this.refreshChartCache();
+				programLogger.log(Level.FINEST, "Firing general refresh cache request for loaded datasets");
 				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 			}
 		}
