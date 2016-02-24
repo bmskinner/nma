@@ -225,8 +225,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 */
 	private void updateDetail(){
 		
-		SwingUtilities.invokeLater(new Runnable(){
-			public void run(){
+//		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
 				try {
 					if(hasDatasets()){
 						
@@ -242,12 +242,12 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 					
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE, "Error updating panel", e);
-					update( (List<AnalysisDataset>) null);
+					update( (List<AnalysisDataset>) null); // don't use updateNull because it throws an exception
 				} finally {
 					setUpdating(false);
 				}
-			}
-		});
+//			}
+//		});
 	}
 	
 	/**
