@@ -112,46 +112,65 @@ public class NuclearSignalDatasetCreator {
 					
 					List<Object> rowData = new ArrayList<Object>(0);
 					rowData.add(collection.getSignalManager().getSignalGroups().size());
-	
-					for(int signalGroup : collection.getSignalManager().getSignalGroups()){
-						
-						NuclearSignalOptions ns = dataset.getAnalysisOptions()
-														.getNuclearSignalOptions(collection.getSignalManager().getSignalGroupName(signalGroup));
-						
-
-						if(ns==null){ // occurs when no signals are present?
-//							ns = dataset.getAnalysisOptions()
-//									.getNuclearSignalOptions("default");
-							for(int i=0; i<numberOfRowsPerSignalGroup;i++){
-								rowData.add("");
-							}
-							
-							
-						} else {
-							Object signalThreshold = ns.getMode()==NuclearSignalOptions.FORWARD
-									? ns.getSignalThreshold()
-									: "Variable";
-
-							Object signalMode = ns.getMode()==NuclearSignalOptions.FORWARD
-											? "Forward"
-											: ns.getMode()==NuclearSignalOptions.REVERSE
-													? "Reverse"
-													: "Adaptive";					
-
-
+					/*
+					 * If the dataset is a merge, then the analysis options will be null.
+					 * We could loop through the merge sources until finding the merge
+					 * with the signal options BUT there could be conflicts with 
+					 * signal groups when merging.
+					 * 
+					 * For now, do not display a table if the dataset has merge sources
+					 */
+					
+					if(dataset.hasMergeSources()){
+						for(int i=0;i<maxChannels;i++){
 							rowData.add("");
-							rowData.add(signalGroup);
-							rowData.add(collection.getSignalManager().getSignalGroupName(signalGroup));
-							rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
-							rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
-							rowData.add(  signalThreshold );
-							rowData.add(ns.getMinSize());
-							rowData.add(df.format(ns.getMaxFraction()));
-							rowData.add(df.format(ns.getMinCirc()));
-							rowData.add(df.format(ns.getMaxCirc()));
-							rowData.add(signalMode);
+							for(int j=0; j<10;j++){
+								rowData.add("N/A - merge");
+							}
 						}
+					} else {
+	
+						for(int signalGroup : collection.getSignalManager().getSignalGroups()){
+						
+						
 
+
+							NuclearSignalOptions ns = dataset.getAnalysisOptions()
+									.getNuclearSignalOptions(collection.getSignalManager().getSignalGroupName(signalGroup));
+
+
+							if(ns==null){ // occurs when no signals are present?
+								for(int i=0; i<numberOfRowsPerSignalGroup;i++){
+									rowData.add("");
+								}
+
+
+							} else {
+								Object signalThreshold = ns.getMode()==NuclearSignalOptions.FORWARD
+										? ns.getSignalThreshold()
+												: "Variable";
+
+										Object signalMode = ns.getMode()==NuclearSignalOptions.FORWARD
+												? "Forward"
+														: ns.getMode()==NuclearSignalOptions.REVERSE
+														? "Reverse"
+																: "Adaptive";					
+
+
+										rowData.add("");
+										rowData.add(signalGroup);
+										rowData.add(collection.getSignalManager().getSignalGroupName(signalGroup));
+										rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
+										rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
+										rowData.add(  signalThreshold );
+										rowData.add(ns.getMinSize());
+										rowData.add(df.format(ns.getMaxFraction()));
+										rowData.add(df.format(ns.getMinCirc()));
+										rowData.add(df.format(ns.getMaxCirc()));
+										rowData.add(signalMode);
+							}
+
+						}
 					}
 					model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
 				}
