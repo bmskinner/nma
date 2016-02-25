@@ -63,35 +63,23 @@ public class CellRelocator extends AnalysisWorker {
 		Set<UUID> newDatasets = parsePathList();
 		
 		log(Level.FINE, "Parsing complete");
-		int newSize = newDatasets.size()-1;
-		log(Level.FINE, "Found "+newSize+" new datasets");
+		int newSize = newDatasets.size();
+		log(Level.FINE, "Found "+newSize+" datasets in file");
 		
-		if( newDatasets.size()>1){
+		if( newDatasets.size()>0){
 			
 			for(UUID id : newDatasets){
 				
 				if( ! id.equals(getDataset().getUUID())){
-					
+					/*
+					 * Copy profile offsets and make the median profile
+					 */
 					getDataset().getCollection()
 						.getProfileManager()
 						.copyCollectionOffsets(getDataset().getChildDataset(id).getCollection());
 					
 				}
-			}
-
-			/*
-			 * Copy profile offsets and make the median profile
-			 */
-//			getDataset().getCollection().getProfileManager().copyCollectionOffsets(c);
-			
-			
-			/*
-			 * Add the new collection  to a dataset, and set as a child
-			 */
-			
-//			AnalysisDataset d = new AnalysisDataset(c);
-//			getDataset().addChildDataset(d);
-			
+			}			
 		}
 		
 	}
