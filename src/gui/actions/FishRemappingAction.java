@@ -43,6 +43,12 @@ public class FishRemappingAction extends ProgressableAction {
 				
 				final AnalysisDataset dataset = datasets.get(0);
 				
+				if(dataset.hasMergeSources()){
+					programLogger.log(Level.INFO, "Cannot remap merged datasets");
+					cancel();
+					return;
+				}
+				
 				FishRemappingDialog fishMapper = new FishRemappingDialog(mw, dataset, programLogger);
 
 				if(fishMapper.getOK()){
