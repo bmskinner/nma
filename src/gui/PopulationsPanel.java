@@ -845,17 +845,23 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 		if(!datasets.isEmpty()){
 			// make a list of the unique UUIDs selected
+			programLogger.log(Level.FINEST, "There are "+datasets.size()+" datasets selected");
 
 			Set<UUID> list = new HashSet<UUID>();
 			for(AnalysisDataset d : datasets){
 				programLogger.log(Level.FINEST, "Selected dataset for deletion: "+d.getName());
 
 				list.add(d.getUUID());
-
-				// add all the children of a dataset
-				for(UUID childID : d.getAllChildUUIDs()){
-					programLogger.log(Level.FINEST, "Adding child dataset to deletion list: "+childID.toString());
-					list.add(childID);
+				
+				if(d.hasChildren()){
+					programLogger.log(Level.FINEST, "Children found in: "+d.getName());
+					// add all the children of a dataset
+					for(UUID childID : d.getAllChildUUIDs()){
+						programLogger.log(Level.FINEST, "Adding child dataset to deletion list: "+childID.toString());
+						list.add(childID);
+					}
+				} else {
+					programLogger.log(Level.FINEST, "No children in: "+d.getName());
 				}
 			}
 

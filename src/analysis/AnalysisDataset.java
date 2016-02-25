@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -320,11 +321,19 @@ public class AnalysisDataset implements Serializable {
 	 */
 	public Set<UUID> getAllChildUUIDs(){
 		Set<UUID> idlist = this.getChildUUIDs();
+		Set<UUID> result = new HashSet<UUID>();
+		result.addAll(idlist);
+		
 		for(UUID id : idlist){
 			AnalysisDataset d = getChildDataset(id);
-			idlist.addAll(d.getAllChildUUIDs());
+//			Set<UUID> childIdList = d.getAllChildUUIDs();
+//			for(UUID childId : childIdList){
+//				result.add(id);
+//			}
+			
+			result.addAll(d.getAllChildUUIDs());
 		}
-		return idlist;
+		return result;
 	}
 	
 	/**
