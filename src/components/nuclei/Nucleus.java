@@ -171,13 +171,13 @@ public interface Nucleus extends CellularComponent {
 	 * @param channel the signal group
 	 * @return
 	 */
-	public boolean hasSignal(int signalGroup);
+//	public boolean hasSignal(UUID signalGroup);
 	
 	/**
 	 * Check if any of the signal groups in the nucleus have a signal
 	 * @return
 	 */
-	public boolean hasSignal();
+//	public boolean hasSignal();
 	
 	public void calculateFractionalSignalDistancesFromCoM() throws Exception;
 	public void calculateSignalDistancesFromCoM();
@@ -244,7 +244,7 @@ public interface Nucleus extends CellularComponent {
 	 */
 	public void calculateSignalAnglesFromPoint(BorderPoint p) throws Exception;
 	
-	public void exportSignalDistanceMatrix();
+//	public void exportSignalDistanceMatrix();
 
 	
 	/**
@@ -388,7 +388,7 @@ public interface Nucleus extends CellularComponent {
 	 * Get the number of signals in the nucleus
 	 * @return
 	 */
-	public int getSignalCount();
+//	public int getSignalCount();
 	
 	
 	/**
@@ -396,14 +396,14 @@ public interface Nucleus extends CellularComponent {
 	 * @param signalGroup
 	 * @return
 	 */
-	public int getSignalCount(int signalGroup);
+//	public int getSignalCount(int signalGroup);
 	
 	
 	/**
 	 * @param n the signal
 	 * @param signalGroup the signal group to add to
 	 */
-	public void addSignal(NuclearSignal n, int signalGroup);
+//	public void addSignal(NuclearSignal n, int signalGroup);
 	
 	
 	/**
@@ -411,19 +411,19 @@ public interface Nucleus extends CellularComponent {
 	 * @param signalGroup the group
 	 * @return a list of COPIES of the nuclear signals in the group
 	 */
-	public List<NuclearSignal> getSignals(int signalGroup);
+//	public List<NuclearSignal> getSignals(int signalGroup);
 	
 	/**
 	 * Get the signals in the nucleus by group as a list of lists
 	 * @return the list of lists
 	 */
-	public List<List<NuclearSignal>> getSignals();
+//	public List<List<NuclearSignal>> getSignals();
 	
 	/**
 	 * Get the signal groups in the current signal collection
 	 * @return the set of group ids
 	 */
-	public Set<Integer> getSignalGroups();
+//	public Set<Integer> getSignalGroups();
 	
 	/**
 	 * Get a copy of the mapping of border tags to index positions within 

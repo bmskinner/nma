@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,7 +46,7 @@ public class ShellAnalysis extends AnalysisWorker {
 	
 	private final int shells;
 	
-	private static Map<Integer, ShellCounter> counters = new HashMap<Integer, ShellCounter>(0);
+	private static Map<UUID, ShellCounter> counters = new HashMap<UUID, ShellCounter>(0);
 	
 	
 	public ShellAnalysis(AnalysisDataset dataset, int shells, Logger programLogger){
@@ -67,9 +68,9 @@ public class ShellAnalysis extends AnalysisWorker {
 		log(Level.INFO, "Performing shell analysis with "+shells+" shells...");
 		
 		try {
-			counters = new HashMap<Integer, ShellCounter>(0);
+			counters = new HashMap<UUID, ShellCounter>(0);
 
-			for(int signalGroup : collection.getSignalManager().getSignalGroups()){
+			for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
 				counters.put(signalGroup, new ShellCounter(shells, fileLogger));
 			}
 
@@ -85,9 +86,9 @@ public class ShellAnalysis extends AnalysisWorker {
 				shellAnalyser.createShells();
 				shellAnalyser.exportImage();
 
-				for(int signalGroup : n.getSignalGroups()){
+				for(UUID signalGroup : n.getSignalCollection().getSignalGroupIDs()){
 					if(collection.getSignalManager().hasSignals(signalGroup)){
-						List<NuclearSignal> signals = n.getSignals(signalGroup); 
+						List<NuclearSignal> signals = n.getSignalCollection().getSignals(signalGroup); 
 						
 						File imageFile = n.getSignalCollection().getSourceFile(signalGroup);
 //						ImageStack signalStack = ImageImporter.importImage(imageFile, (DebugFileHandler) getDataset().getLogHandler());
@@ -102,9 +103,9 @@ public class ShellAnalysis extends AnalysisWorker {
 						for(NuclearSignal s : signals){
 							try {
 //								IJ.log("   Getting signal");
-								int channel = n.getSignalCollection().getSourceChannel(signalGroup);
+//								int channel = n.getSignalCollection().getSourceChannel(signalGroup);
 								
-								double[] signalPerShell = shellAnalyser.findShell(s, channel, signalStack);
+								double[] signalPerShell = shellAnalyser.findShell(s, signalStack);
 								counter.addValues(signalPerShell);
 							} catch (Exception e) {
 								logError( "Error in signal in shell analysis", e);
@@ -118,11 +119,11 @@ public class ShellAnalysis extends AnalysisWorker {
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
 			// get stats and export
-			for(int channel : counters.keySet()){
-				if(collection.getSignalManager().hasSignals(channel)){
-					ShellCounter channelCounter = counters.get(channel);
+			for(UUID group : counters.keySet()){
+				if(collection.getSignalManager().hasSignals(group)){
+					ShellCounter channelCounter = counters.get(group);
 //					channelCounter.export(new File(collection.getLogFileName( "log.shells."+channel  )));
-					getDataset().addShellResult(channel, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
+					getDataset().addShellResult(group, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
 				}
 			}
 			
@@ -153,10 +154,10 @@ public class ShellAnalysis extends AnalysisWorker {
 		log(Level.FINE, "Performing shell analysis with "+shells+" shells...");
 		
 		try {
-			counters = new HashMap<Integer, ShellCounter>(0);
+			counters = new HashMap<UUID, ShellCounter>(0);
 
-			for(int channel : collection.getSignalManager().getSignalGroups()){
-				counters.put(channel, new ShellCounter(shells, fileLogger));
+			for(UUID group : collection.getSignalManager().getSignalGroups()){
+				counters.put(group, new ShellCounter(shells, fileLogger));
 			}
 
 			// make the shells and measure the values
@@ -167,18 +168,18 @@ public class ShellAnalysis extends AnalysisWorker {
 				shellAnalyser.createShells();
 				shellAnalyser.exportImage();
 
-				for(int channel : n.getSignalGroups()){
-					if(collection.getSignalManager().hasSignals(channel)){
-						List<NuclearSignal> signalGroup = n.getSignals(channel); 
+				for(UUID group : n.getSignalCollection().getSignalGroupIDs()){
+					if(collection.getSignalManager().hasSignals(group)){
+						List<NuclearSignal> signalGroup = n.getSignalCollection().getSignals(group); 
 						
-						File imageFile = n.getSignalCollection().getSourceFile(channel);
+						File imageFile = n.getSignalCollection().getSourceFile(group);
 						ImageStack signalStack = ImageImporter.importImage(imageFile, (DebugFileHandler) dataset.getLogHandler());
 
-						ShellCounter counter = counters.get(channel);
+						ShellCounter counter = counters.get(group);
 
 						for(NuclearSignal s : signalGroup){
 							try {
-								double[] signalPerShell = shellAnalyser.findShell(s, channel, signalStack);
+								double[] signalPerShell = shellAnalyser.findShell(s, signalStack);
 								counter.addValues(signalPerShell);
 							} catch (Exception e) {
 								fileLogger.log(Level.SEVERE, "Error in signal in shell analysis", e);			
@@ -189,11 +190,11 @@ public class ShellAnalysis extends AnalysisWorker {
 			}
 
 			// get stats and export
-			for(int channel : counters.keySet()){
-				if(collection.getSignalManager().hasSignals(channel)){
-					ShellCounter channelCounter = counters.get(channel);
+			for(UUID group : counters.keySet()){
+				if(collection.getSignalManager().hasSignals(group)){
+					ShellCounter channelCounter = counters.get(group);
 //					channelCounter.export(new File(collection.getLogFileName( "log.shells."+channel  )));
-					dataset.addShellResult(channel, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
+					dataset.addShellResult(group, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
 				}
 			}
 			

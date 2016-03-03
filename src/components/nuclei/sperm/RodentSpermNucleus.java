@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
@@ -580,12 +581,12 @@ public class RodentSpermNucleus extends SpermNucleus {
 
 	  super.calculateSignalAnglesFromPoint(p);
 
-	  if(this.hasSignal()){
+	  if(this.getSignalCollection().hasSignal()){
 		  
 //		  IJ.log(this.dumpInfo(BORDER_TAGS));
 
 		  // update signal angles with hook or hump side
-		  for( int i : signalCollection.getSignalGroups()){
+		  for( UUID i : signalCollection.getSignalGroupIDs()){
 
 			  if(signalCollection.hasSignal(i)){
 

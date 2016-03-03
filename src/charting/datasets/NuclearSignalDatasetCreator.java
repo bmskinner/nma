@@ -23,6 +23,7 @@ import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import javax.swing.table.DefaultTableModel;
@@ -78,7 +79,7 @@ public class NuclearSignalDatasetCreator {
 			int maxChannels = 0;
 			for(AnalysisDataset dataset : list){
 				CellCollection collection = dataset.getCollection();
-				maxChannels = Math.max(collection.getSignalManager().getHighestSignalGroup(), maxChannels);
+				maxChannels = Math.max(collection.getSignalManager().getSignalGroups().size(), maxChannels);
 			}
 			if(maxChannels>0){
 			
@@ -130,7 +131,7 @@ public class NuclearSignalDatasetCreator {
 						}
 					} else {
 	
-						for(int signalGroup : collection.getSignalManager().getSignalGroups()){
+						for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
 						
 						
 
@@ -194,7 +195,7 @@ public class NuclearSignalDatasetCreator {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			
-			for( int signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
+			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
 
 				if(dataset.isSignalGroupVisible(signalGroup)){
 	
@@ -231,7 +232,7 @@ public class NuclearSignalDatasetCreator {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			
-			for( int signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
+			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
 				
 				if(dataset.isSignalGroupVisible(signalGroup)){
 
@@ -297,7 +298,7 @@ public class NuclearSignalDatasetCreator {
 
 		for(AnalysisDataset dataset : list){
 			
-			for( int signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
+			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
 
 				double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
 
@@ -316,7 +317,7 @@ public class NuclearSignalDatasetCreator {
 	 * @return the array of values
 	 * @throws Exception
 	 */
-	public static double[] findSignalDatasetValues(AnalysisDataset dataset, SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception {
+	public static double[] findSignalDatasetValues(AnalysisDataset dataset, SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception {
 		
 		CellCollection collection = dataset.getCollection();			
 		double[] values = collection.getSignalStatistics(stat, scale, signalGroup); 			
@@ -362,7 +363,7 @@ public class NuclearSignalDatasetCreator {
 
 		if(collection.getSignalManager().hasSignals()){
 
-			for(int group : collection.getSignalManager().getSignalGroups()){
+			for(UUID group : collection.getSignalManager().getSignalGroups()){
 
 				if(dataset.isSignalGroupVisible(group)){
 
@@ -387,7 +388,7 @@ public class NuclearSignalDatasetCreator {
 		return ds;
 	}
 	
-	public static List<Shape> createSignalRadiusDataset(AnalysisDataset dataset, int signalGroup) throws Exception{
+	public static List<Shape> createSignalRadiusDataset(AnalysisDataset dataset, UUID signalGroup) throws Exception{
 
 		CellCollection collection = dataset.getCollection();
 		List<Shape> result = new ArrayList<Shape>(0);
@@ -420,25 +421,129 @@ public class NuclearSignalDatasetCreator {
 	public static TableModel createSignalStatsTable(TableOptions options) throws Exception{
 
 		DefaultTableModel model = new DefaultTableModel();
-		
-		List<Object> fieldNames = new ArrayList<Object>(0);
-		
+
+		// Empty table
 		if(options==null){
 			model.addColumn("No data loaded");
 			return model;
 		}
-				
-		// find the collection with the most signal groups
-		// this defines  the number of rows
+			
+		if(options.isSingleDataset()){
+			return createSingleDatasetSignalStatsTable(options);
+		}
+		
+		if(options.isMultipleDatasets()){
+			return createMultiDatasetSignalStatsTable(options);
+		}
+		
+		model.addColumn("No data loaded");
+		return model;
+	}
+	
+	private static TableModel createSingleDatasetSignalStatsTable(TableOptions options) throws Exception {
 
-		if(options.hasDatasets()){			
-			int maxSignalGroup = 0;
-			for(AnalysisDataset dataset : options.getDatasets()){
-				CellCollection collection = dataset.getCollection();
-				if(collection.getSignalManager().hasSignals()){
-					maxSignalGroup = Math.max(collection.getSignalManager().getHighestSignalGroup(), maxSignalGroup);
+		DefaultTableModel model = new DefaultTableModel();
+		
+		List<Object> fieldNames = new ArrayList<Object>(0);
+
+		AnalysisDataset dataset = options.firstDataset();
+		
+		int maxSignalGroup = 0;
+
+		CellCollection collection = dataset.getCollection();
+		if(collection.getSignalManager().hasSignals()){
+			maxSignalGroup = Math.max(collection.getSignalManager().getSignalGroups().size(), maxSignalGroup);
+		}
+		
+		options.log(Level.FINEST, "Selected collections have "+maxSignalGroup+" signal groups");
+
+		/*
+		 * Create the row names for the table
+		 */
+		if(maxSignalGroup>0){
+			// create the row names
+			fieldNames.add("Number of signal groups");
+
+			for(int i=0;i<maxSignalGroup;i++){
+				fieldNames.add("");
+				fieldNames.add("Signal group");
+				fieldNames.add("Group name");
+				fieldNames.add("Channel");
+				fieldNames.add("Source");
+				fieldNames.add("Signals");
+				fieldNames.add("Signals per nucleus");
+
+				for(SignalStatistic stat : SignalStatistic.values()){
+
+					fieldNames.add(stat.label(MeasurementScale.PIXELS)  );
+
 				}
 			}
+
+			int numberOfRowsPerSignalGroup = fieldNames.size()/(maxSignalGroup+1);
+			model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
+
+			// format the numbers and make into a tablemodel
+			DecimalFormat df = new DecimalFormat("#0.00"); 
+
+
+			List<Object> rowData = new ArrayList<Object>(0);
+			rowData.add(collection.getSignalManager().getSignalGroups().size());
+
+			for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){// : collection.getSignalGroups()){
+				if(collection.getSignalManager().hasSignals(signalGroup)){
+					rowData.add("");
+					rowData.add(signalGroup);
+					rowData.add(collection.getSignalManager().getSignalGroupName(signalGroup));
+					rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
+					rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
+					rowData.add(collection.getSignalManager().getSignalCount(signalGroup));
+					double signalPerNucleus = (double) collection.getSignalManager().getSignalCount(signalGroup)/  (double) collection.getSignalManager().getNumberOfCellsWithNuclearSignals(signalGroup);
+					rowData.add(df.format(signalPerNucleus));
+
+					for(SignalStatistic stat : SignalStatistic.values()){
+						double pixel = collection.getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
+
+						if(stat.isDimensionless()){
+							rowData.add(df.format(pixel) );
+						} else {
+							double micron = collection.getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
+							rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
+						}
+					}
+
+				} else {
+
+					for(int i = 0; i<numberOfRowsPerSignalGroup;i++){
+						rowData.add("");
+					}
+				}
+			}
+			model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
+
+		} else {
+
+			options.log(Level.FINEST, "No signal groups to show");
+
+			model.addColumn("No data loaded");
+		}
+		return model;	
+	}
+	
+	private static TableModel createMultiDatasetSignalStatsTable(TableOptions options) throws Exception {
+
+		DefaultTableModel model = new DefaultTableModel();
+		
+		List<Object> fieldNames = new ArrayList<Object>(0);
+
+		
+		int maxSignalGroup = 0;
+		for(AnalysisDataset dataset : options.getDatasets()){
+			CellCollection collection = dataset.getCollection();
+			if(collection.getSignalManager().hasSignals()){
+				maxSignalGroup = Math.max(collection.getSignalManager().getSignalGroups().size(), maxSignalGroup);
+			}
+		}
 			
 
 			options.log(Level.FINEST, "Selected collections have "+maxSignalGroup+" signal groups");
@@ -473,11 +578,13 @@ public class NuclearSignalDatasetCreator {
 				for(AnalysisDataset dataset : options.getDatasets()){
 					CellCollection collection = dataset.getCollection();
 					
+					int signalGroupCount = collection.getSignalManager().getSignalGroupCount();
+					
 					List<Object> rowData = new ArrayList<Object>(0);
-					rowData.add(collection.getSignalManager().getSignalGroups().size());
+					rowData.add(signalGroupCount);
 	
-					for(int signalGroup = 1; signalGroup<=maxSignalGroup; signalGroup++){// : collection.getSignalGroups()){
-						if(collection.getSignalManager().hasSignals(signalGroup)){
+					for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){// : collection.getSignalGroups()){
+//						if(collection.getSignalManager().hasSignals(signalGroup)){
 							rowData.add("");
 							rowData.add(signalGroup);
 							rowData.add(collection.getSignalManager().getSignalGroupName(signalGroup));
@@ -498,12 +605,25 @@ public class NuclearSignalDatasetCreator {
 								}
 							}
 							
-						} else {
-							
-							for(int i = 0; i<numberOfRowsPerSignalGroup;i++){
+//						} else {
+//							
+//							for(int i = 0; i<numberOfRowsPerSignalGroup;i++){
+//								rowData.add("");
+//							}
+//						}
+					}
+					
+					if(signalGroupCount < maxSignalGroup){
+						
+						// There will be empty rows in the table. Fill the blanks
+						for(int i = signalGroupCount+1; i<=maxSignalGroup;i++){
+							for(int j = 0; j<numberOfRowsPerSignalGroup;j++){
 								rowData.add("");
 							}
 						}
+//							rowData.add("");
+//						}
+						
 					}
 					model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
 				}
@@ -511,13 +631,8 @@ public class NuclearSignalDatasetCreator {
 
 				options.log(Level.FINEST, "No signal groups to show");
 
-				model.addColumn("No data loaded");
+				model.addColumn("No signal groups in datasets");
 			}
-		} else {
-
-			options.log(Level.FINEST, "No datasets");
-			model.addColumn("No data loaded");
-		}
 		return model;	
 	}
 	
@@ -534,7 +649,7 @@ public class NuclearSignalDatasetCreator {
 		
 		CellCollection c = options.firstDataset().getCollection();
 		
-		for(int signalGroup : c.getSignalManager().getSignalGroups()){
+		for(UUID signalGroup : c.getSignalManager().getSignalGroups()){
 			
 			List<Double> list = new ArrayList<Double>();
 			for(NuclearSignal s : c.getSignalManager().getSignals(signalGroup)){
@@ -558,7 +673,7 @@ public class NuclearSignalDatasetCreator {
 
 		CellCollection c = dataset.getCollection();
 		
-		for(int signalGroup : c.getSignalManager().getSignalGroups()){
+		for(UUID signalGroup : c.getSignalManager().getSignalGroups()){
 			
 			List<Double> list = new ArrayList<Double>();
 			for(NuclearSignal s : c.getSignalManager().getSignals(signalGroup)){
@@ -576,7 +691,7 @@ public class NuclearSignalDatasetCreator {
 			
 			CellCollection collection = dataset.getCollection();
 
-			for(int signalGroup : collection.getSignalManager().getSignalGroups()){
+			for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
 				
 				if(collection.getSignalManager().hasSignals(signalGroup)){
 					ShellResult r = dataset.getShellResult(signalGroup);

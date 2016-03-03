@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import components.Cell;
 import components.CellCollection;
@@ -49,18 +50,18 @@ public class SignalManager {
 	   * @param hasSignal
 	   * @return a list of cells
 	   */
-	  public List<Cell> getCellsWithNuclearSignals(int signalGroup, boolean hasSignal){
+	  public List<Cell> getCellsWithNuclearSignals(UUID signalGroup, boolean hasSignal){
 		  List<Cell> result = new ArrayList<Cell>(0);
 
 		  for(Cell c : collection.getCells()){
 			  Nucleus n = c.getNucleus();
 
 			  if(hasSignal){
-				  if(n.hasSignal(signalGroup)){
+				  if(n.getSignalCollection().hasSignal(signalGroup)){
 					  result.add(c);
 				  }
 			  } else {
-				  if(!n.hasSignal(Math.abs(signalGroup))){
+				  if(!n.getSignalCollection().hasSignal(signalGroup)){
 					  result.add(c);
 				  }
 			  }
@@ -68,7 +69,7 @@ public class SignalManager {
 		  return result;
 	  }
 	  
-	  public int getNumberOfCellsWithNuclearSignals(int signalGroup){
+	  public int getNumberOfCellsWithNuclearSignals(UUID signalGroup){
 		  return getCellsWithNuclearSignals(signalGroup, true).size();
 	  }
 	  
@@ -80,32 +81,34 @@ public class SignalManager {
 	   * Find the signal groups present within the nuclei of the collection
 	   * @return the list of groups. Order is not guaranteed
 	   */
-	  public Set<Integer> getSignalGroups(){
-		  Set<Integer> result = new HashSet<Integer>(0);
+	  public Set<UUID> getSignalGroups(){
+		  Set<UUID> result = new HashSet<UUID>(0);
 		  for(Nucleus n : collection.getNuclei()){
-			  for( int group : n.getSignalCollection().getSignalGroups()){
+			  for( UUID group : n.getSignalCollection().getSignalGroupIDs()){
+				  if(n.getSignalCollection().hasSignal(group)){ // signal groups can be copied over from split collections. Check signals exist
 					  result.add(group);
+				  }
 			  }
 		  }
 		  return result;
 	  }
 	  
-	  public String getSignalGroupName(int signalGroup){
+	  public String getSignalGroupName(UUID signalGroup){
 		  String result = null;
 		  
 		  for(Nucleus n : collection.getNuclei()){
-			  if(n.hasSignal(signalGroup)){
+			  if(n.getSignalCollection().hasSignal(signalGroup)){
 				  result = n.getSignalCollection().getSignalGroupName(signalGroup);
 			  }
 		  }
 		  return result;
 	  }
 	  
-	  public int getSignalChannel(int signalGroup){
+	  public int getSignalChannel(UUID signalGroup){
 		  int result = 0;
 		  
 		  for(Nucleus n : collection.getNuclei()){
-			  if(n.hasSignal(signalGroup)){
+			  if(n.getSignalCollection().hasSignal(signalGroup)){
 				  result = n.getSignalCollection().getSignalChannel(signalGroup);
 			  }
 		  }
@@ -117,11 +120,11 @@ public class SignalManager {
 	   * @param signalGroup
 	   * @return
 	   */
-	  public String getSignalSourceFolder(int signalGroup){
+	  public String getSignalSourceFolder(UUID signalGroup){
 		  String result = null;
 
 		  for(Nucleus n : collection.getNuclei()){
-			  if(n.hasSignal(signalGroup)){
+			  if(n.getSignalCollection().hasSignal(signalGroup)){
 				  File file = n.getSignalCollection().getSourceFile(signalGroup);
 				  result = file.getParentFile().getAbsolutePath();
 			  }
@@ -134,9 +137,9 @@ public class SignalManager {
 	   * @param signalGroup
 	   * @param f
 	   */
-	  public void updateSignalSourceFolder(int signalGroup, File f){
+	  public void updateSignalSourceFolder(UUID signalGroup, File f){
 		  for(Nucleus n : collection.getNuclei()){
-			  if(n.hasSignal(signalGroup)){
+			  if(n.getSignalCollection().hasSignal(signalGroup)){
 				  String fileName = n.getSignalCollection().getSourceFile(signalGroup).getName();
 				  File newFile = new File(f.getAbsolutePath()+File.separator+fileName);
 				  n.getSignalCollection().updateSourceFile(signalGroup, newFile);
@@ -150,7 +153,7 @@ public class SignalManager {
 	   */
 	  public int getSignalCount(){
 		  int count = 0;
-		  for(int signalGroup : getSignalGroups()){
+		  for(UUID signalGroup : getSignalGroups()){
 			  count+= this.getSignalCount(signalGroup);
 		  }
 		  return count;
@@ -161,10 +164,10 @@ public class SignalManager {
 	   * @param signalGroup the group to search
 	   * @return the count
 	   */
-	  public int getSignalCount(int signalGroup){
+	  public int getSignalCount(UUID signalGroup){
 		  int count = 0;
 		  for(Nucleus n : collection.getNuclei()){
-			  count += n.getSignalCount(signalGroup);
+			  count += n.getSignalCollection().numberOfSignals(signalGroup);
 
 		  } // end nucleus iterations
 		  return count;
@@ -175,7 +178,7 @@ public class SignalManager {
 	   * @return
 	   */
 	  public boolean hasSignals(){
-		  for(int i : getSignalGroups()){
+		  for(UUID i : getSignalGroups()){
 			  if(this.hasSignals(i)){
 				  return true;
 			  }
@@ -187,7 +190,7 @@ public class SignalManager {
 	   * Test whether the current population has signals in the given group
 	   * @return
 	   */
-	  public boolean hasSignals(int signalGroup){
+	  public boolean hasSignals(UUID signalGroup){
 		  if(this.getSignalCount(signalGroup)>0){
 			  return true;
 		  } else{
@@ -202,26 +205,26 @@ public class SignalManager {
 	   * are present
 	 * @return the highest signal group
 	 */
-	  public int getHighestSignalGroup(){
-		  int maxGroup = 0;
-		  for(Nucleus n : collection.getNuclei()){
-			  for(int group : n.getSignalCollection().getSignalGroups()){
-				  maxGroup = group > maxGroup ? group : maxGroup;
-			  }
-		  }
-		  return maxGroup;
-	  }
+//	  public int getHighestSignalGroup(){
+//		  int maxGroup = 0;
+//		  for(Nucleus n : collection.getNuclei()){
+//			  for(UUID group : n.getSignalCollection().getSignalGroupIDs()){
+//				  maxGroup = group > maxGroup ? group : maxGroup;
+//			  }
+//		  }
+//		  return maxGroup;
+//	  }
 
 	  /**
 	   * Get all the signals from all nuclei in the given channel
 	   * @param channel the channel to search
 	   * @return a list of signals
 	   */
-	  public List<NuclearSignal> getSignals(int channel){
+	  public List<NuclearSignal> getSignals(UUID signalGroup){
 
 		  List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
 		  for(Nucleus n : collection.getNuclei()){
-			  result.addAll(n.getSignals(channel));
+			  result.addAll(n.getSignalCollection().getSignals(signalGroup));
 		  }
 		  return result;
 	  }

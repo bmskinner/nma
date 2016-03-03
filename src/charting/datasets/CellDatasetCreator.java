@@ -25,6 +25,7 @@ import stats.SignalStatistic;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -114,13 +115,13 @@ public class CellDatasetCreator {
 			} 
 
 			// add info for signals
-			for(int signalGroup : n.getSignalGroups()){
+			for(UUID signalGroup : n.getSignalCollection().getSignalGroupIDs()){
 				
 				fieldNames.add("");
 				rowData.add("");
 				
 				fieldNames.add("Signal group");
-				rowData.add(signalGroup);
+				rowData.add(n.getSignalCollection().getSignalGroupNumber(signalGroup));
 				
 				fieldNames.add("Signal name");
 				rowData.add(n.getSignalCollection().getSignalGroupName(signalGroup));
@@ -132,9 +133,9 @@ public class CellDatasetCreator {
 				rowData.add(n.getSignalCollection().getSourceChannel(signalGroup));
 				
 				fieldNames.add("Number of signals");
-				rowData.add(n.getSignalCount(signalGroup));
+				rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
 				
-				for(NuclearSignal s : n.getSignals(signalGroup)){
+				for(NuclearSignal s : n.getSignalCollection().getSignals(signalGroup)){
 					
 					for(SignalStatistic stat : SignalStatistic.values()){
 						

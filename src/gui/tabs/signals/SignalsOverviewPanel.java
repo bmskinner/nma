@@ -29,6 +29,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -108,27 +109,20 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 				
 				int row = table.rowAtPoint(e.getPoint());
 				int column = table.columnAtPoint(e.getPoint());
-				
-//				int signalGroupRow = 0;
-//				int signalGroup = 0;
-//				int rowsPerSignalGroup = 7 + SignalStatistic.values().length;
-//				if(row>0){
-//					signalGroupRow = row - (row % rowsPerSignalGroup);
-//					signalGroup = (Integer) table.getModel().getValueAt(signalGroupRow, column);
-//				}
-				
+								
 				// double click
 				if (e.getClickCount() == 2) {
 
 					String rowName = table.getModel().getValueAt(row, 0).toString();
 					String nextRowName = table.getModel().getValueAt(row+1, 0).toString();
 					if(nextRowName.equals("Signal group")){
-						int signalGroup = (int) table.getModel().getValueAt(row+1, 1);
+						UUID signalGroup = getSignalGroupFromTable(table, row+1, column);
 						updateSignalColour( signalGroup );
 					}
 					
 					if(rowName.equals("Source")){
-						int signalGroup = (int) table.getModel().getValueAt(row-3, 1);
+						
+						UUID signalGroup = getSignalGroupFromTable(table, row-3, column);
 						updateSignalSource( signalGroup );
 					}
 						
@@ -141,7 +135,11 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		return scrollPane;
 	}
 	
-	private void updateSignalSource(int signalGroup){
+	private UUID getSignalGroupFromTable(JTable table, int row, int column){
+		return UUID.fromString( table.getModel().getValueAt(row, column).toString() );
+	}
+	
+	private void updateSignalSource(UUID signalGroup){
 		if(isSingleDataset()){
 			programLogger.log(Level.FINEST, "Updating signal source for signal group "+signalGroup);
 
@@ -175,9 +173,10 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	 * Update the colour of the clicked signal group
 	 * @param row the row selected (the colour bar, one above the group name)
 	 */
-	private void updateSignalColour(int signalGroup){
+	private void updateSignalColour(UUID signalGroup){
 		
-		Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
+		Color oldColour = Color.RED;
+//		Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
 		
 		Color newColor = JColorChooser.showDialog(
                  this,
@@ -252,7 +251,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		if(isSingleDataset()){
 			try {
 
-				for(int signalGroup : activeDataset().getCollection().getSignalManager().getSignalGroups()){
+				for(UUID signalGroup : activeDataset().getCollection().getSignalManager().getSignalGroups()){
 
 					boolean visible = activeDataset().isSignalGroupVisible(signalGroup);
 
@@ -386,8 +385,11 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 				if(nextRowHeader.equals("Signal group")){
 					// we want to colour this cell preemptively
 					// get the signal group from the table
-					String groupString = table.getModel().getValueAt(row+1, 1).toString();
-					colour = activeDataset().getSignalGroupColour(Integer.valueOf(groupString));
+					String groupString = table.getModel().getValueAt(row+1, column).toString();
+					
+					if( ! groupString.equals("")){
+						colour = activeDataset().getSignalGroupColour(UUID.fromString(groupString));
+					}
 //					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
 				}
 			}
@@ -400,22 +402,17 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		}
 	}
 	
-	/**
-	 * Get a series or dataset index for colour selection when drawing charts. The index
-	 * is set in the DatasetCreator as part of the label. The format is Name_index_other
-	 * @param label the label to extract the index from 
-	 * @return the index found
-	 */
-	private int getIndexFromLabel(String label){
+
+	private UUID getSignalGroupFromLabel(String label){
 		String[] names = label.split("_");
-		return Integer.parseInt(names[1]);
+		return UUID.fromString(names[1]);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().startsWith("GroupVisble_")){
 			
-			int signalGroup = this.getIndexFromLabel(e.getActionCommand());
+			UUID signalGroup = getSignalGroupFromLabel(e.getActionCommand());
 			JCheckBox box = (JCheckBox) e.getSource();
 			activeDataset().setSignalGroupVisible(signalGroup, box.isSelected());
 			fireSignalChangeEvent("GroupVisble_");

@@ -26,9 +26,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
@@ -47,18 +49,18 @@ public class SignalCollection implements Serializable {
 	/**
 	 * Holds the signals
 	 */
-	private Map<Integer, List<NuclearSignal>> collection = new HashMap<Integer, List<NuclearSignal>>();
+	private Map<UUID, List<NuclearSignal>> collection = new LinkedHashMap<UUID, List<NuclearSignal>>();
 	
 	// the files that hold the image for the given channel
-	private Map<Integer, File> sourceFiles = new HashMap<Integer, File>(0);
+	private Map<UUID, File> sourceFiles = new HashMap<UUID, File>(0);
 	
 	// the channel with the signal in the source image
-	private Map<Integer, Integer> sourceChannels = new HashMap<Integer, Integer>(0);
+	private Map<UUID, Integer> sourceChannels = new HashMap<UUID, Integer>(0);
 	
 	/**
 	 * Holds the names of the channels for presentation purposes
 	 */
-	private Map<Integer, String > names = new HashMap<Integer, String>();
+	private Map<UUID, String > names = new HashMap<UUID, String>();
 	
 	public SignalCollection(){
 		
@@ -73,7 +75,7 @@ public class SignalCollection implements Serializable {
 //		IJ.log("Duplicating signal collection");
 //		IJ.log(s.toString());
 		
-		for(int group : s.getSignalGroups() ){
+		for(UUID group : s.getSignalGroupIDs() ){
 //			IJ.log("  Group "+group);
 			String groupName = s.getSignalGroupName(group);
 			int channel = s.getSignalChannel(group);
@@ -95,18 +97,40 @@ public class SignalCollection implements Serializable {
 	/**
 	 * Add a list of nuclear signals to the collection
 	 * @param list the signals
-	 * @param signalGroup the group id
+	 * @param groupID the group id - this should be consistent across all nuclei in a dataset
 	 * @param sourceFile the file the signals originated from
 	 * @param sourceChannel the channel the signals originated from
 	 */
-	public void addSignalGroup(List<NuclearSignal> list, int signalGroup, File sourceFile, int sourceChannel){
-		if(list==null || Integer.valueOf(sourceChannel)==null || sourceFile==null || Integer.valueOf(signalGroup)==null){
+	public void addSignalGroup(List<NuclearSignal> list, UUID groupID, File sourceFile, int sourceChannel){
+		if(list==null || Integer.valueOf(sourceChannel)==null || sourceFile==null || groupID==null){
 			throw new IllegalArgumentException("Signal list or channel is null");
 		}
 		
-		collection.put(signalGroup, list);
-		sourceFiles.put(signalGroup, sourceFile);
-		sourceChannels.put(signalGroup, sourceChannel);
+//		UUID groupID = java.util.UUID.randomUUID();
+		
+		collection.put(    groupID, list);
+		sourceFiles.put(   groupID, sourceFile);
+		sourceChannels.put(groupID, sourceChannel);
+	}
+	
+	public Set<UUID> getSignalGroupIDs(){
+		return collection.keySet();
+	}
+	
+	/**
+	 * Get the group number of a signal group in the collection.
+	 * @param signalGroup
+	 * @return the group number, or zero if not present
+	 */
+	public int getSignalGroupNumber(UUID signalGroup){
+		int i=0;
+		for(UUID id : collection.keySet()){
+			i++;
+			if(collection.get(id).equals(signalGroup)){
+				return i;
+			}
+		}
+		return i;
 	}
 	
 	/**
@@ -114,7 +138,7 @@ public class SignalCollection implements Serializable {
 	 * @param n the signal
 	 * @param signalGroup the signal group
 	 */
-	public void addSignal(NuclearSignal n, int signalGroup){
+	public void addSignal(NuclearSignal n, UUID signalGroup){
 		checkSignalGroup(signalGroup);
 		collection.get(signalGroup).add(n);
 	}
@@ -124,7 +148,7 @@ public class SignalCollection implements Serializable {
 	 * @param list the signals
 	 * @param signalGroup the signal group
 	 */
-	public void addSignals(List<NuclearSignal> list, int signalGroup){
+	public void addSignals(List<NuclearSignal> list, UUID signalGroup){
 		if(list==null){
 			throw new IllegalArgumentException("Signal is null");
 		}
@@ -154,7 +178,7 @@ public class SignalCollection implements Serializable {
 	 */
 	public ArrayList<List<NuclearSignal>> getSignals(){
 		ArrayList<List<NuclearSignal>> result = new ArrayList<List<NuclearSignal>>(0);
-		for(int signalGroup : this.getSignalGroups()){
+		for(UUID signalGroup : this.getSignalGroupIDs()){
 			result.add(getSignals(signalGroup));
 		}
 		return result;
@@ -166,7 +190,7 @@ public class SignalCollection implements Serializable {
 	 * @param signalGroup the signal group
 	 * @return a list of signals
 	 */
-	public List<NuclearSignal> getSignals(int signalGroup){
+	public List<NuclearSignal> getSignals(UUID signalGroup){
 		checkSignalGroup(signalGroup);
 		if(this.hasSignal(signalGroup)){
 			return this.collection.get(signalGroup);
@@ -194,7 +218,7 @@ public class SignalCollection implements Serializable {
 	 * @param signalGroup the group id
 	 * @return the File with the signals
 	 */
-	public File getSourceFile(int signalGroup){
+	public File getSourceFile(UUID signalGroup){
 		return this.sourceFiles.get(signalGroup);
 	}
 	
@@ -203,7 +227,7 @@ public class SignalCollection implements Serializable {
 	 * @param signalGroup
 	 * @param f
 	 */
-	public void updateSourceFile(int signalGroup, File f){
+	public void updateSourceFile(UUID signalGroup, File f){
 		this.sourceFiles.put(signalGroup, f);
 	}
 	
@@ -212,7 +236,7 @@ public class SignalCollection implements Serializable {
 	 * @param signalGroup the group id
 	 * @return the RGB channel with the signals (0 if greyscale)
 	 */
-	public int getSourceChannel(int signalGroup){
+	public int getSourceChannel(UUID signalGroup){
 		return this.sourceChannels.get(signalGroup);
 	}
 	
@@ -221,8 +245,8 @@ public class SignalCollection implements Serializable {
 	 * @param channel the channel to name
 	 * @param name the new name
 	 */
-	public void setSignalGroupName(int signalGroup, String name){
-		if(Integer.valueOf(signalGroup)==null || name==null){
+	public void setSignalGroupName(UUID signalGroup, String name){
+		if(signalGroup==null || name==null){
 			throw new IllegalArgumentException("Channel or name is null");
 		}
 		names.put(signalGroup, name);
@@ -233,7 +257,7 @@ public class SignalCollection implements Serializable {
 	 * @param signalGroupName
 	 * @return
 	 */
-	public int getSignalGroup(String signalGroupName){
+	public UUID getSignalGroup(String signalGroupName){
 		if(signalGroupName==null){
 			throw new IllegalArgumentException("Signal group name is null");
 		}
@@ -241,16 +265,16 @@ public class SignalCollection implements Serializable {
 			throw new IllegalArgumentException("Signal group name is not present");
 		}
 		
-		for(int signalGroup : names.keySet()){
+		for(UUID signalGroup : names.keySet()){
 			if(names.get(signalGroup).equals(signalGroupName)){
 				return signalGroup;
 			}
 		}
-		return -1;
+		return null;
 	}
 	
-	public String getSignalGroupName(int signalGroup){
-		if(Integer.valueOf(signalGroup)==null){
+	public String getSignalGroupName(UUID signalGroup){
+		if(signalGroup==null){
 			throw new IllegalArgumentException("Channel is null");
 		}
 		if(!names.containsKey(signalGroup)){
@@ -266,8 +290,8 @@ public class SignalCollection implements Serializable {
 	 * @param signalGroup the group
 	 * @return the RGB channel (0 if greyscale)
 	 */
-	public int getSignalChannel(int signalGroup){
-		if(Integer.valueOf(signalGroup)==null){
+	public int getSignalChannel(UUID signalGroup){
+		if(signalGroup==null){
 			throw new IllegalArgumentException("Channel is null");
 		}
 		return this.sourceChannels.get(signalGroup);
@@ -285,9 +309,9 @@ public class SignalCollection implements Serializable {
 	 * Get the set of signal groups in this collection
 	 * @return the set of integer group numbers
 	 */
-	public Set<Integer> getSignalGroups(){
-		return names.keySet();
-	}
+//	public Set<Integer> getSignalGroups(){
+//		return names.keySet();
+//	}
 	
 	/**
 	 * Get the number of signal groups
@@ -303,7 +327,7 @@ public class SignalCollection implements Serializable {
 	 */
 	public int numberOfSignals(){
 		int count=0;
-		for(int group : collection.keySet()){
+		for(UUID group : collection.keySet()){
 			count += numberOfSignals(group);
 		}
 		return count;
@@ -314,8 +338,8 @@ public class SignalCollection implements Serializable {
 	 * @param signalGroup the group id
 	 * @return yes or no
 	 */
-	public boolean hasSignal(int signalGroup){
-		if(Integer.valueOf(signalGroup)==null){
+	public boolean hasSignal(UUID signalGroup){
+		if(signalGroup==null){
 			throw new IllegalArgumentException("Signal group is null");
 		}
 		if(!collection.containsKey(signalGroup)){
@@ -324,6 +348,19 @@ public class SignalCollection implements Serializable {
 		if(collection.get(signalGroup).isEmpty()){
 			return false;
 		} 
+		return true;
+	}
+	
+	/**
+	 * Check if the signal group contains signals in this collection
+	 * @param signalGroup the group id
+	 * @return yes or no
+	 */
+	public boolean hasSignal(){
+		
+		if(collection.isEmpty()){
+			return false;
+		}
 		return true;
 	}
 	
@@ -351,7 +388,7 @@ public class SignalCollection implements Serializable {
 	 * @param channel the channel
 	 * @return the count
 	 */
-	public int numberOfSignals(int signalGroup){
+	public int numberOfSignals(UUID signalGroup){
 		checkSignalGroup(signalGroup);
 		return collection.get(signalGroup).size();
 	}
@@ -482,8 +519,8 @@ public class SignalCollection implements Serializable {
 	 * Given the id of a signal group, make sure it is suitable to use
 	 * @param signalGroup the group to check
 	 */
-	private void checkSignalGroup(int signalGroup){
-		if(Integer.valueOf(signalGroup)==null){
+	private void checkSignalGroup(UUID signalGroup){
+		if(signalGroup==null){
 			throw new IllegalArgumentException("Group is null");
 		}
 	}
@@ -499,7 +536,7 @@ public class SignalCollection implements Serializable {
 	
 	// the print function bypasses all input checks to show everything present
 	public void print(){
-		for(int signalGroup : this.collection.keySet()){
+		for(UUID signalGroup : this.collection.keySet()){
 			IJ.log("    Signal group "+signalGroup+": "+this.collection.get(signalGroup).size());
 		}
 	}
@@ -510,7 +547,7 @@ public class SignalCollection implements Serializable {
 	 * @return the areas
 	 * @throws Exception 
 	 */
-	public List<Double> getStatistics(SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception{
+	public List<Double> getStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception{
 		List<NuclearSignal> list = getSignals(signalGroup);
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<list.size();i++){
@@ -522,7 +559,7 @@ public class SignalCollection implements Serializable {
 	public String toString(){
 		String s = "";
 		s += "Signal groups: "+this.numberOfSignalGroups()+"\n";
-		for(int group : collection.keySet()){
+		for(UUID group : collection.keySet()){
 			s += "  "+group+": "
 					+names.get(group)
 					+" : Channel "

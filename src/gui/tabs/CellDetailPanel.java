@@ -316,7 +316,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					// we want to colour this cell preemptively
 					// get the signal group from the table
 					String groupString = table.getModel().getValueAt(row+1, 1).toString();
-					colour = activeDataset().getSignalGroupColour(Integer.valueOf(groupString));
+					colour = activeDataset().getSignalGroupColour(UUID.fromString(groupString));
 //					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
 				}
 			}
@@ -897,14 +897,14 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		private void changeSignalGroupColour(int row){
 			// the group number is in the next row down
 			String groupString = table.getModel().getValueAt(row+1, 1).toString();
-			int signalGroup = Integer.valueOf(groupString);
+			UUID signalGroup = UUID.fromString(groupString);
 			
-			Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
+//			Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
 			
 			Color newColor = JColorChooser.showDialog(
                      CellDetailPanel.this,
                      "Choose signal Color",
-                     oldColour);
+                     Color.RED);
 			
 			if(newColor != null){
 				activeDataset().setSignalGroupColour(signalGroup, newColor);
@@ -1019,8 +1019,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				try {
 					DefaultListModel<String> model = new DefaultListModel<String>();
 					model.addElement("Nucleus");
-					for(int i : activeCell.getNucleus().getSignalGroups()){
-						if(activeCell.getNucleus().hasSignal(i)){
+					for(UUID i : activeCell.getNucleus().getSignalCollection().getSignalGroupIDs()){
+						if(activeCell.getNucleus().getSignalCollection().hasSignal(i)){
 							model.addElement(activeCell.getNucleus().getSignalCollection().getSignalGroupName(i));
 						}
 					}
@@ -1056,32 +1056,15 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				if(signalGroupName.equals("Nucleus")){
 					
 					activeComponent = activeCell.getNucleus();
-					
-//					File file =  activeCell.getNucleus().getSourceFile();
-//					if(file.exists()){
-//
-//						outlinePanel.drawCellBackgroundImage(file, Constants.COUNTERSTAIN);
-//
-//					}
 
 				} else {
 
-					int signalGroup = activeCell.getNucleus().getSignalCollection().getSignalGroup(signalGroupName);
-//					File file       = activeCell.getNucleus().getSignalCollection().getSourceFile(signalGroup);
-//					int channel     = activeCell.getNucleus().getSignalCollection().getSignalChannel(signalGroup);
-//					int stack       = Constants.rgbToStack(channel);
+					UUID signalGroup = activeCell.getNucleus().getSignalCollection().getSignalGroup(signalGroupName);
 
 					for(NuclearSignal n : activeCell.getNucleus().getSignalCollection().getSignals(signalGroup)){
 						activeComponent = n;
 					}
-					
-//					if(file.exists()){
-//
-//						// find the channel of the signal
-//						outlinePanel.drawCellBackgroundImage(file, stack);
-//
-//
-//					}
+
 				}
 				outlinePanel.update(activeCell);
 			}

@@ -25,6 +25,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -41,8 +42,10 @@ import org.jfree.data.category.CategoryDataset;
 
 import utility.Constants;
 import charting.charts.AbstractChartFactory;
+import charting.charts.NuclearSignalChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import components.CellCollection;
 import components.nuclear.ShellResult;
@@ -58,10 +61,11 @@ public class SignalShellsPanel extends DetailPanel {
 	public SignalShellsPanel(Logger logger){
 		super(logger);
 		this.setLayout(new BorderLayout());
-		JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
-		shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
-		shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
-		chartPanel = new ChartPanel(shellsChart);
+		
+		
+		createChartPanel();
+		
+		
 		this.add(chartPanel, BorderLayout.CENTER);
 
 		this.add(statusLabel, BorderLayout.NORTH);
@@ -77,6 +81,22 @@ public class SignalShellsPanel extends DetailPanel {
 		this.add(newAnalysis, BorderLayout.SOUTH);
 
 
+	}
+	
+	private void createChartPanel() {
+		ChartOptions options = new ChartOptionsBuilder()
+		.setDatasets(null)
+		.setLogger(programLogger)
+		.build();
+	
+		JFreeChart chart = null;
+		try {
+			chart = getChart(options);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		chartPanel = new ChartPanel(chart);
 	}
 
 	/**
@@ -106,38 +126,31 @@ public class SignalShellsPanel extends DetailPanel {
 
 	if(activeDataset().hasShellResult()){ // only if there is something to display
 
-		CategoryDataset ds = NuclearSignalDatasetCreator.createShellBarChartDataset(getDatasets());
-		JFreeChart shellsChart = ChartFactory.createBarChart(null, "Outer <--- Shell ---> Interior", "Percent", ds);
-		shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
-		shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
-		StatisticalBarRenderer rend = new StatisticalBarRenderer();
-		rend.setBarPainter(new StandardBarPainter());
-		rend.setShadowVisible(false);
-		rend.setErrorIndicatorPaint(Color.black);
-		rend.setErrorIndicatorStroke(new BasicStroke(2));
-		shellsChart.getCategoryPlot().setRenderer(rend);
+		
+		ChartOptions options = new ChartOptionsBuilder()
+			.setDatasets(getDatasets())
+			.setLogger(programLogger)
+			.build();
+		
+		JFreeChart chart = getChart(options);
 
-		for (int j = 0; j < ds.getRowCount(); j++) {
-			rend.setSeriesVisibleInLegend(j, Boolean.FALSE);
-			rend.setSeriesStroke(j, new BasicStroke(2));
-			int index = AbstractChartFactory.getIndexFromLabel( (String) ds.getRowKey((j)));
-			Color colour = activeDataset().getSignalGroupColour(index);
-			rend.setSeriesPaint(j, colour);
-		}	
 
-		chartPanel.setChart(shellsChart);
+		chartPanel.setChart(chart);
 		chartPanel.setVisible(true);
 
 		statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		String label = "";
-		for(int i=1; i<=activeDataset().getHighestSignalGroup();i++){
-			ShellResult r = activeDataset().getShellResult(i);
-			label += "Group "+i+": p="+r.getChiSquare();
+		
+		
+		for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
+			String groupName = collection.getSignalManager().getSignalGroupName(signalGroup);
+			ShellResult r = activeDataset().getShellResult(signalGroup);
+			label += groupName+": p="+r.getChiSquare();
 			String sig 	= r.getChiSquare() < Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL 
 					? "Significantly different to random at 5% level"
 							: "Not significantly different to random at 5% level";
 
-			label += "; "+sig+"\n";
+			label += "; "+sig+" \n";
 
 		}
 		statusLabel.setText(label);
@@ -176,7 +189,7 @@ public class SignalShellsPanel extends DetailPanel {
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return null;
+		return NuclearSignalChartFactory.createShellChart(options);
 	}
 	
 	@Override

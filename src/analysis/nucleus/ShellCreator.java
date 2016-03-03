@@ -40,6 +40,7 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -206,7 +207,7 @@ public class ShellCreator {
 	* @return an array of signal proportions in each shell
 	 * @throws Exception 
 	*/
-	public double[] findShell(NuclearSignal signal, int channel, ImageStack signalImage) throws Exception{
+	public double[] findShell(NuclearSignal signal, ImageStack signalImage) throws Exception{
 
 		FloatPolygon polygon = signal.createPolygon();
 		Roi signalRoi = new PolygonRoi(polygon, Roi.POLYGON);
@@ -223,6 +224,7 @@ public class ShellCreator {
 		
 		if(!signalPoints.isEmpty()){
 			// now test each point for which shell it is in
+			int channel = signal.getChannel();
 			double[] signalDensities = getSignalDensities(signalPoints, channel, signalImage);
 
 			// find the proportion of signal within each shell

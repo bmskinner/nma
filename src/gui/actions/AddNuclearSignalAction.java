@@ -25,6 +25,7 @@ import gui.MainWindow;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
@@ -35,7 +36,7 @@ import components.CellCollection;
 
 public class AddNuclearSignalAction extends ProgressableAction {
 	
-	private int signalGroup = 0;
+	private UUID signalGroup = null;
 	
 	public AddNuclearSignalAction(AnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Signal detection", mw);
@@ -83,6 +84,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		// use the same segmentation from the initial analysis
 		int flag = 0; // set the downstream analyses to run
 		flag |= MainWindow.ADD_POPULATION;
+		fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
 		new RunSegmentationAction(list, dataset, flag, mw);
 //		fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 		cancel();
@@ -111,7 +113,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 	 * @param signalGroup the signal group to split on
 	 * @return a list of new collections
 	 */
-	private List<CellCollection> dividePopulationBySignals(CellCollection r, int signalGroup){
+	private List<CellCollection> dividePopulationBySignals(CellCollection r, UUID signalGroup){
 
 		List<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
 		programLogger.log(Level.INFO, "Dividing population by signals...");
@@ -128,9 +130,9 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 				for(Cell c : list){
 					programLogger.log(Level.FINEST, "  Added cell: "+c.getNucleus().getNameAndNumber());
-					programLogger.log(Level.FINEST, "  Cell has: "+c.getNucleus().getSignalCount()+" signals");
+					programLogger.log(Level.FINEST, "  Cell has: "+c.getNucleus().getSignalCollection().numberOfSignals()+" signals");
 					Cell newCell = new Cell(c);
-					programLogger.log(Level.FINEST, "  New cell has: "+newCell.getNucleus().getSignalCount()+" signals");
+					programLogger.log(Level.FINEST, "  New cell has: "+newCell.getNucleus().getSignalCollection().numberOfSignals()+" signals");
 					listCollection.addCell( newCell );
 				}
 				signalPopulations.add(listCollection);

@@ -26,7 +26,9 @@ import stats.SignalStatistic;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -265,10 +267,11 @@ public class HistogramChartFactory extends AbstractChartFactory {
 			int seriesCount = plot.getDataset().getSeriesCount();
 			for (int j = 0; j < seriesCount; j++) {
 				String name = (String) plot.getDataset().getSeriesKey(j);
-				int seriesGroup = getIndexFromLabel(name);
+//				int seriesGroup = getIndexFromLabel(name);
+				UUID signalGroup = getSignalGroupFromLabel(name);
 				plot.getRenderer().setSeriesVisibleInLegend(j, false);
 				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
-				Color colour = dataset.getSignalGroupColour(seriesGroup);
+				Color colour = dataset.getSignalGroupColour(signalGroup);
 				plot.getRenderer().setSeriesPaint(j, colour);
 			}	
 		}

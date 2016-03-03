@@ -15,6 +15,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -81,7 +82,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				rend.setSeriesShape(series, circle);
 
 				String name = (String) signalCoMs.getSeriesKey(series);
-				int seriesGroup = getIndexFromLabel(name);
+//				int seriesGroup = getIndexFromLabel(name);
+				UUID seriesGroup = getSignalGroupFromLabel(name);
 				Color colour = dataset.getSignalGroupColour(seriesGroup);
 				rend.setSeriesPaint(series, colour);
 				rend.setBaseLinesVisible(false);
@@ -90,7 +92,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			}
 			plot.setRenderer(1, rend);
 
-			for(int signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
+			for(UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
 				List<Shape> shapes = NuclearSignalDatasetCreator.createSignalRadiusDataset(dataset, signalGroup);
 
 				int signalCount = shapes.size();
@@ -184,7 +186,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		// Only display the signal outlines if the rotation is ACTUAL;
 		// TODO: the RoundNucleus.rotate() is not working with signals 
 		if(rotateMode.equals(RotationMode.ACTUAL)){
-			if(cell.getNucleus().hasSignal()){
+			if(cell.getNucleus().getSignalCollection().hasSignal()){
 				List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.createSignalOutlines(cell, dataset);
 
 				for(XYDataset d : signalsDatasets){
@@ -193,7 +195,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					for (int i = 0; i < d.getSeriesCount(); i++) {
 						name = (String) d.getSeriesKey(i);	
 					}
-					int signalGroup = getIndexFromLabel(name);
+					UUID signalGroup = getSignalGroupFromLabel(name);
 					hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
 					datasetHash.put(datasetHash.size(), d);
 				}
@@ -286,8 +288,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				 * Nuclear signals
 				 */
 				if(hash.get(key).startsWith("SignalGroup_")){
-					int colourIndex = getIndexFromLabel(hash.get(key));
-					Color colour = dataset.getSignalGroupColour(colourIndex);
+//					int colourIndex = getIndexFromLabel(hash.get(key));
+					UUID seriesGroup = getSignalGroupFromLabel(hash.get(key));
+					Color colour = dataset.getSignalGroupColour(seriesGroup);
 					plot.getRenderer(key).setSeriesPaint(i, colour);
 				}
 

@@ -22,6 +22,7 @@ import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import components.generic.BorderTag;
@@ -41,7 +42,7 @@ public class ChartOptions extends AbstractOptions {
 	private BorderTag tag              = BorderTag.REFERENCE_POINT;
 	private boolean showMarkers        = false;
 	private ProfileType type           = ProfileType.REGULAR;
-	private int signalGroup            = 1;
+	private UUID signalGroup            = null;
 	private boolean useDensity         = false;
 	private double modalityPosition    = 0;
 	
@@ -125,11 +126,11 @@ public class ChartOptions extends AbstractOptions {
 		this.type = type;
 	}
 
-	public int getSignalGroup() {
+	public UUID getSignalGroup() {
 		return signalGroup;
 	}
 
-	public void setSignalGroup(int signalGroup) {
+	public void setSignalGroup(UUID signalGroup) {
 		this.signalGroup = signalGroup;
 	}
 
@@ -152,7 +153,7 @@ public class ChartOptions extends AbstractOptions {
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + (normalised ? 1231 : 1237);
 		result = prime * result + (showMarkers ? 1231 : 1237);
-		result = prime * result + signalGroup;
+		result = prime * result + ((signalGroup == null) ? 0 : signalGroup.hashCode());
 		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
 		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());

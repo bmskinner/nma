@@ -29,6 +29,7 @@ import stats.SegmentStatistic;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -1316,14 +1317,14 @@ public class NucleusDatasetCreator {
 		
 		Nucleus nucleus = cell.getNucleus();
 		
-		for(int signalGroup : nucleus.getSignalGroups()){
+		for(UUID signalGroup : nucleus.getSignalCollection().getSignalGroupIDs()){
 			
 			if(dataset.isSignalGroupVisible(signalGroup)){ // only add the groups that are set to visible
 
 				DefaultXYDataset groupDataset = new DefaultXYDataset();
 				int signalNumber = 0;
 
-				for(NuclearSignal signal : nucleus.getSignals(signalGroup)){
+				for(NuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)){
 
 					double[] xpoints = new double[signal.getBorderLength()];
 					double[] ypoints = new double[signal.getBorderLength()];

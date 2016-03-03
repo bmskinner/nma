@@ -510,7 +510,7 @@ public class CellCollection implements Serializable {
    * @return the median
  * @throws Exception 
    */
-  public double getMedianSignalStatistic(SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception{
+  public double getMedianSignalStatistic(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception{
 
 		  double[] values = this.getSignalStatistics(stat, scale, signalGroup);
 		  double median =  Stats.quartile(values, Constants.MEDIAN);
@@ -518,7 +518,7 @@ public class CellCollection implements Serializable {
   }
 	  
 
-  public double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, int signalGroup) throws Exception{
+  public double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception{
 
 	  List<Cell> cells = this.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
 	  List<Double> a = new ArrayList<Double>(0);
@@ -682,7 +682,7 @@ public class CellCollection implements Serializable {
   }
   
  
-  private double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, int signalGroup, UUID id)  throws Exception {
+  private double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
 	  
 	  if(stat.getClass()==NucleusStatistic.class){
 		  return getMedianNucleusStatistic((NucleusStatistic) stat, scale);
@@ -693,7 +693,7 @@ public class CellCollection implements Serializable {
 	  }
 	  
 	  if(stat.getClass()==SegmentStatistic.class){
-		  return getMedianSegmentStatistic((SegmentStatistic) stat, scale, id);
+		  return getMedianSegmentStatistic((SegmentStatistic) stat, scale, segId);
 	  }
 	  
 	  
@@ -706,16 +706,33 @@ public class CellCollection implements Serializable {
   }
   
   public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale)  throws Exception {
-	  return getMedianStatistic(stat, scale, 0, null);
+	  return getMedianStatistic(stat, scale, null, null);
   }
   
-  public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, int signalGroup)  throws Exception {
-	  return getMedianStatistic(stat, scale, signalGroup, null);
+  /**
+   * Get the median stat for a value with an ID
+ * @param stat
+ * @param scale
+ * @param id
+ * @return
+ * @throws Exception
+ */
+public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
+	  
+	  if(stat.getClass()==SignalStatistic.class){
+		  return getMedianStatistic(stat, scale, id, null);
+	  } 
+	  
+	  if(stat.getClass()==SegmentStatistic.class){
+		  return getMedianStatistic(stat, scale, null, id);
+	  }
+	  return 0;
+//	  return getMedianStatistic(stat, scale, signalGroup, null);
   }
   
-  public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
-	  return getMedianStatistic(stat, scale, 0, id);
-  }
+//  public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
+//	  return getMedianStatistic(stat, scale, null, id);
+//  }
   
   /**
    * Get the median value of the given statistic
