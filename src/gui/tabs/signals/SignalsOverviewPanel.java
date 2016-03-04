@@ -54,10 +54,12 @@ import analysis.AnalysisDataset;
 import analysis.SignalManager;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.NuclearSignalChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.SignalTableCell;
 import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import charting.options.TableOptions.TableType;
 import charting.options.TableOptionsBuilder;
@@ -275,36 +277,13 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		}
 		return panel;
 	}
-	
-//	protected void updateDetail(){
-//		
-//		programLogger.log(Level.FINE, "Updating signals detail panel");
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-//				
-//				try{
-//					updateCheckboxPanel();
-//					updateSignalConsensusChart();
-//					updateSignalStatsPanel();
-//
-//				} catch(Exception e){
-//					programLogger.log(Level.SEVERE, "Error updating signals overview panel" ,e);
-//					update( (List<AnalysisDataset>) null);
-//				} finally {
-//					setUpdating(false);
-//				}
-//			
-//		}});
-//	}
-	
+		
 	/**
 	 * Update the signal stats with the given datasets
 	 * @param list the datasets
 	 * @throws Exception 
 	 */
 	private void updateSignalStatsPanel() throws Exception{
-		
-//		TableModel model = NuclearSignalDatasetCreator.createSignalStatsTable(null);
 		
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
@@ -340,6 +319,10 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			consensusAndCheckboxPanel.revalidate();
 			consensusAndCheckboxPanel.repaint();
 			consensusAndCheckboxPanel.setVisible(true);
+		} else {
+			consensusAndCheckboxPanel.remove(checkboxPanel);
+			consensusAndCheckboxPanel.revalidate();
+			consensusAndCheckboxPanel.repaint();
 		}
 	}
 	
@@ -347,17 +330,17 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	private void updateSignalConsensusChart(){
 		try {
 			JFreeChart chart;
-			if(isSingleDataset()){
-
-				chart = OutlineChartFactory.makeSignalCoMNucleusOutlineChart(activeDataset());
-
-			} else { 
-	
-				chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-
-			}
 			
+			ChartOptions options = new ChartOptionsBuilder()
+				.setDatasets(getDatasets())
+				.setLogger(programLogger)
+				.build();
+
+
+			chart = getChart(options);
 			chartPanel.setChart(chart);
+			
+			
 			chartPanel.restoreAutoBounds();
 		} catch(Exception e){
 			programLogger.log(Level.SEVERE, "Error updating signals", e);
@@ -389,7 +372,9 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 					if( ! table.getModel().getValueAt(row+1, column).toString().equals("")){
 						SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row+1, column);
 
-						colour = activeDataset().getSignalGroupColour(cell.getID());
+						// The 0th column is labels, so subtract 1 to column index to map to dataset list
+						colour = getDatasets().get(column-1).getSignalGroupColour(cell.getID());
+//						colour = activeDataset().getSignalGroupColour(cell.getID());
 					}
 					
 					
@@ -444,7 +429,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return null;
+		return NuclearSignalChartFactory.makeSignalCoMNucleusOutlineChart(options);
 	}
 	
 	@Override
