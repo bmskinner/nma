@@ -150,8 +150,8 @@ public class NucleusDetectionImageProber extends ImageProber {
 				procMap.put(NucleusImageType.EDGE_DETECTION, edgesProcessor);
 				
 				ImageProcessor closedProcessor = ImageFilterer.morphologyClose(edgesProcessor, cannyOptions.getClosingObjectRadius());
-				ImageProcessor bridged = ImageFilterer.bridgePixelGaps( closedProcessor  , 3) ;
-				procMap.put(NucleusImageType.MORPHOLOGY_CLOSED, bridged);
+//				ImageProcessor bridged = ImageFilterer.bridgePixelGaps( closedProcessor  , 3) ;
+				procMap.put(NucleusImageType.MORPHOLOGY_CLOSED, closedProcessor);
 				
 				procMap.put(NucleusImageType.DETECTED_OBJECTS, openProcessor);
 				

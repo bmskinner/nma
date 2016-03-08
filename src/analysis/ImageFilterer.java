@@ -24,8 +24,12 @@ import analysis.AnalysisOptions.CannyOptions;
 import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
 import stats.Stats;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.measure.ResultsTable;
+import ij.plugin.filter.Binary;
+import ij.plugin.filter.ParticleAnalyzer;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import io.ImageExporter;
@@ -116,12 +120,13 @@ public class ImageFilterer {
 		int[][] array = result.getIntArray();
 		int[][] input = result.getIntArray();
 		
-		// threshold
+
 		for(int x = 0; x<ip.getWidth(); x++){
 			for( int y=0; y<ip.getHeight(); y++){
-				
-				
-				if(bridgePixel(getKernel(input, x, y, bridgeSize))){
+
+				int[][] kernel = getKernel(input, x, y);
+				if(bridgePixel(kernel)){
+					IJ.log( "Bridge "+x+"  "+y);
 					array[x][y] = 255;
 				}
 			}
@@ -132,43 +137,43 @@ public class ImageFilterer {
 	}
 	
 	/**
-	 * Fetch an image kernel from within an int image array
+	 * Fetch a 3x3 image kernel from within an int image array
 	 * @param array the input image
 	 * @param x the central x point
 	 * @param y the central y point
-	 * @param window the window size
 	 * @return
 	 */
-	private static int[][] getKernel(int[][] array, int x, int y, int window){
+	public static int[][] getKernel(int[][] array, int x, int y){
 		
 		/*
 		 * Create the kernel array, and zero it
 		 */
-		int[][] result = new int[window][window];
-		for(int w =0; w<window; w++){
+		int[][] result = new int[3][3];
+		for(int w =0; w<3; w++){
 			
-			for( int h=0; h<window; h++){
+			for( int h=0; h<3; h++){
 				
 				result[w][h]  = 0;
 			}
 		}
 		
+		/*
+		 * Fetch the pixel data
+		 */
 		
-		int half = window >> 1;
-		
-		int xR = 0;
-		for(int w = x-half; w<x+half; w++){
+		for(int w = x-1, xR=0; w<x+1; w++, xR++){
 			if(w<0 || w>=array.length){
-				continue;
+				continue; // ignore x values out of range
 			}
-			int yR = 0;
-			for( int h=y-half; h<y+half; h++){
+
+			for( int h=y-1, yR=0; h<y+1; h++, yR++){
 				if(h<0|| h>=array.length){
-					continue;
+					continue; // ignore y values out of range
 				}
-				result[xR++][yR++]  = array[w][h];
+				
+				result[xR][yR]  = array[w][h];
 			}
-			xR = 0;
+			
 		}
 		return result;
 	}
@@ -179,7 +184,7 @@ public class ImageFilterer {
 	 * @param array the 3x3 array of pixels
 	 * @return
 	 */
-	private static boolean bridgePixel(int[][] array){
+	public static boolean bridgePixel(int[][] array){
 		
 		/*
 		 * If the central pixel is filled, do nothing.
@@ -205,6 +210,7 @@ public class ImageFilterer {
 		}
 		
 		if(vStripe<3 && hStripe < 3){
+			IJ.log("    No stripe");
 			return false;
 		}
 				
@@ -242,9 +248,28 @@ public class ImageFilterer {
 		int elType = StructureElement.CIRCLE; //circle
 		
 		StructureElement se = new StructureElement(elType,  shift,  closingRadius, offset);
-		MorphoProcessor mp = new MorphoProcessor(se);
+		MorphoProcessor mp  = new MorphoProcessor(se);
 
-		mp.fclose(result);
+		/*
+		 * Better way of closing?
+		 * Dilate, fill, then erode
+		 */
+		mp.dilate(result);
+		
+		/*
+		 * Get the mask for filling
+		 */
+		ImagePlus imp = new ImagePlus(null, result);
+//		Binary bin = new Binary();
+//		bin.setup("Fill Holes", imp);
+		IJ.run(imp, "Fill Holes", null);
+//		bin.run(result);
+		mp.erode(result);
+		
+		/*
+		 * The original way of closing - run the fclose
+		 */
+//		mp.fclose(result);
 
 		return result;
 
@@ -264,15 +289,16 @@ public class ImageFilterer {
 		
 		ByteProcessor searchImage = runEdgeDetector(image.getProcessor(stackNumber), options);
 		
-		ByteProcessor bridged = ImageFilterer.bridgePixelGaps( closed  , 3) ;
-		
 		ByteProcessor closed = ImageFilterer.morphologyClose( searchImage  , options.getClosingObjectRadius()) ;
+				
+//		ByteProcessor bridged = ImageFilterer.bridgePixelGaps( closed  , 3) ;
 		
-		
+//		ImagePlus imagePlus = new ImagePlus("", bridged);
+//		imagePlus.show();
 		
 		
 		searchStack = ImageStack.create(image.getWidth(), image.getHeight(), 0, 8);
-		searchStack.addSlice("closed", bridged, 0);
+		searchStack.addSlice("closed", closed, 0);
 		
 		
 		searchImage=null;
