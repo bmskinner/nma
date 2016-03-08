@@ -261,10 +261,11 @@ public class ImageFilterer {
 		 */
 		ImagePlus imp = new ImagePlus(null, result);
 //		Binary bin = new Binary();
-//		bin.setup("Fill Holes", imp);
-		IJ.run(imp, "Fill Holes", null);
+
+		IJ.run(imp, "Make Binary", "");
+		IJ.run(imp, "Fill Holes", "");
 //		bin.run(result);
-		mp.erode(result);
+		mp.erode(imp.getProcessor());
 		
 		/*
 		 * The original way of closing - run the fclose
