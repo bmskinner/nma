@@ -95,6 +95,139 @@ public class ImageFilterer {
 	}
 	
 	/**
+	 * Bridges unconnected pixels, that is, sets 0-valued pixels to 1 
+	 * if they have two nonzero neighbors that are not connected. For example:
+
+		1  0  0           1  1  0 
+		1  0  1  becomes  1  1  1 
+		0  0  1           0  1  1
+
+	 * @param ip the image processor
+	 * @param bridgeSize the distance to search
+	 * @return
+	 */
+	public static ByteProcessor bridgePixelGaps(ImageProcessor ip, int bridgeSize){
+		
+		if(bridgeSize % 2 ==0 ){
+			throw new IllegalArgumentException("Kernel size must be odd");
+		}
+		ByteProcessor result = ip.convertToByteProcessor();
+
+		int[][] array = result.getIntArray();
+		int[][] input = result.getIntArray();
+		
+		// threshold
+		for(int x = 0; x<ip.getWidth(); x++){
+			for( int y=0; y<ip.getHeight(); y++){
+				
+				
+				if(bridgePixel(getKernel(input, x, y, bridgeSize))){
+					array[x][y] = 255;
+				}
+			}
+		}
+		
+		result.setIntArray(array);
+		return result;
+	}
+	
+	/**
+	 * Fetch an image kernel from within an int image array
+	 * @param array the input image
+	 * @param x the central x point
+	 * @param y the central y point
+	 * @param window the window size
+	 * @return
+	 */
+	private static int[][] getKernel(int[][] array, int x, int y, int window){
+		
+		/*
+		 * Create the kernel array, and zero it
+		 */
+		int[][] result = new int[window][window];
+		for(int w =0; w<window; w++){
+			
+			for( int h=0; h<window; h++){
+				
+				result[w][h]  = 0;
+			}
+		}
+		
+		
+		int half = window >> 1;
+		
+		int xR = 0;
+		for(int w = x-half; w<x+half; w++){
+			if(w<0 || w>=array.length){
+				continue;
+			}
+			int yR = 0;
+			for( int h=y-half; h<y+half; h++){
+				if(h<0|| h>=array.length){
+					continue;
+				}
+				result[xR++][yR++]  = array[w][h];
+			}
+			xR = 0;
+		}
+		return result;
+	}
+	
+	/**
+	 * Bridge a pixel kernel. If two or more pixels in the array are filled,
+	 * and not connected, return true
+	 * @param array the 3x3 array of pixels
+	 * @return
+	 */
+	private static boolean bridgePixel(int[][] array){
+		
+		/*
+		 * If the central pixel is filled, do nothing.
+		 */
+		if(array[1][1]==255){
+			return false;
+		}
+		
+		/*
+		 * If there is a vertical or horizontal stripe
+		 * of black pixels, they should be bridged
+		 */
+		
+		int vStripe = 0;
+		int hStripe = 0;
+		for( int v=0; v<3; v++){
+			if(array[1][v]==0){			
+				vStripe++;
+			}
+			if(array[v][1]==0){			
+				hStripe++;
+			}
+		}
+		
+		if(vStripe<3 && hStripe < 3){
+			return false;
+		}
+				
+		/*
+		 * Are two white pixels present?
+		 */
+		
+		int count = 0;
+		for(int x = 0; x<array.length; x++){
+			for( int y=0; y<array.length; y++){
+				if(array[x][y] == 255 ){
+					count++;
+				}
+				
+			}
+			if(count==2){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Close holes in the nuclear borders
 	 * @param ip the image processor. It must be convertible to a ByteProcessor
 	 * @param closingRadius the radius of the circle
@@ -130,11 +263,16 @@ public class ImageFilterer {
 		// Run the edge detection
 		
 		ByteProcessor searchImage = runEdgeDetector(image.getProcessor(stackNumber), options);
-
+		
+		ByteProcessor bridged = ImageFilterer.bridgePixelGaps( closed  , 3) ;
+		
 		ByteProcessor closed = ImageFilterer.morphologyClose( searchImage  , options.getClosingObjectRadius()) ;
 		
+		
+		
+		
 		searchStack = ImageStack.create(image.getWidth(), image.getHeight(), 0, 8);
-		searchStack.addSlice("closed", closed, 0);
+		searchStack.addSlice("closed", bridged, 0);
 		
 		
 		searchImage=null;

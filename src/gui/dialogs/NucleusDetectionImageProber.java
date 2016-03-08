@@ -34,6 +34,7 @@ import components.nuclei.Nucleus;
 import gui.ImageType;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
+import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import io.ImageExporter;
@@ -149,7 +150,8 @@ public class NucleusDetectionImageProber extends ImageProber {
 				procMap.put(NucleusImageType.EDGE_DETECTION, edgesProcessor);
 				
 				ImageProcessor closedProcessor = ImageFilterer.morphologyClose(edgesProcessor, cannyOptions.getClosingObjectRadius());
-				procMap.put(NucleusImageType.MORPHOLOGY_CLOSED, closedProcessor);
+				ImageProcessor bridged = ImageFilterer.bridgePixelGaps( closedProcessor  , 3) ;
+				procMap.put(NucleusImageType.MORPHOLOGY_CLOSED, bridged);
 				
 				procMap.put(NucleusImageType.DETECTED_OBJECTS, openProcessor);
 				
