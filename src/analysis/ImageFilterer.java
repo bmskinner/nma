@@ -126,8 +126,8 @@ public class ImageFilterer {
 
 				int[][] kernel = getKernel(input, x, y);
 				if(bridgePixel(kernel)){
-					IJ.log( "Bridge "+x+"  "+y);
-					array[x][y] = 255;
+//					IJ.log( "Bridge "+y+"  "+x);
+					array[y][x] = 255;
 				}
 			}
 		}
@@ -153,7 +153,7 @@ public class ImageFilterer {
 			
 			for( int h=0; h<3; h++){
 				
-				result[w][h]  = 0;
+				result[h][w]  = 0;
 			}
 		}
 		
@@ -161,17 +161,17 @@ public class ImageFilterer {
 		 * Fetch the pixel data
 		 */
 		
-		for(int w = x-1, xR=0; w<x+1; w++, xR++){
+		for(int w = x-1, xR=0; w<=x+1; w++, xR++){
 			if(w<0 || w>=array.length){
 				continue; // ignore x values out of range
 			}
 
-			for( int h=y-1, yR=0; h<y+1; h++, yR++){
+			for( int h=y-1, yR=0; h<=y+1; h++, yR++){
 				if(h<0|| h>=array.length){
 					continue; // ignore y values out of range
 				}
 				
-				result[xR][yR]  = array[w][h];
+				result[yR][xR]  = array[h][w];
 			}
 			
 		}
@@ -190,6 +190,7 @@ public class ImageFilterer {
 		 * If the central pixel is filled, do nothing.
 		 */
 		if(array[1][1]==255){
+//			System.out.println("Skip, filled");
 			return false;
 		}
 		
@@ -210,7 +211,7 @@ public class ImageFilterer {
 		}
 		
 		if(vStripe<3 && hStripe < 3){
-			IJ.log("    No stripe");
+//			System.out.println("No stripe");
 			return false;
 		}
 				
@@ -221,12 +222,12 @@ public class ImageFilterer {
 		int count = 0;
 		for(int x = 0; x<array.length; x++){
 			for( int y=0; y<array.length; y++){
-				if(array[x][y] == 255 ){
+				if(array[y][x] == 255 ){
 					count++;
 				}
 				
 			}
-			if(count==2){
+			if(count>=2){
 				return true;
 			}
 		}
