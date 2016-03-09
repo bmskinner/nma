@@ -193,12 +193,7 @@ public class ImageFiltererTest {
 
 		
 	}
-	
-	
-	public void getKernel(){
 		
-	}
-	
 	private void printPixelArray(ImageProcessor ip){
 		for(int x = 0; x<ip.getWidth(); x++){
 			

@@ -179,7 +179,7 @@ public class ImageFilterer {
 	}
 	
 	/**
-	 * Bridge a pixel kernel. If two or more pixels in the array are filled,
+	 * Should a pixel kernel be bridged? If two or more pixels in the array are filled,
 	 * and not connected, return true
 	 * @param array the 3x3 array of pixels
 	 * @return
@@ -244,32 +244,29 @@ public class ImageFilterer {
 
 		ByteProcessor result = ip.convertToByteProcessor();
 
-		int shift=1;
-		int[] offset = {0,0};
-		int elType = StructureElement.CIRCLE; //circle
+		int shift    = 1;
+		int[] offset = {0,0}; // no offsets to the structure element
+		int elType   = StructureElement.CIRCLE; //circle
 		
 		StructureElement se = new StructureElement(elType,  shift,  closingRadius, offset);
-		MorphoProcessor mp  = new MorphoProcessor(se);
+		MorphoProcessor  mp = new MorphoProcessor(se);
 
 		/*
-		 * Better way of closing?
+		 * Better way of closing.
 		 * Dilate, fill, then erode
 		 */
 		mp.dilate(result);
 		
-		/*
-		 * Get the mask for filling
-		 */
 		ImagePlus imp = new ImagePlus(null, result);
-//		Binary bin = new Binary();
 
 		IJ.run(imp, "Make Binary", "");
 		IJ.run(imp, "Fill Holes", "");
-//		bin.run(result);
+
 		mp.erode(imp.getProcessor());
 		
 		/*
 		 * The original way of closing - run the fclose
+		 * This is just a dilate then erode, which can miss small holes
 		 */
 //		mp.fclose(result);
 
