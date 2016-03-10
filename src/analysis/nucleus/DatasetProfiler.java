@@ -200,7 +200,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			BooleanProfile minima = medianProfile.smooth(2).getLocalMinima(5); // window size 5
 
 			double minAngle = 180;
-			int tailIndex = 0;
+			int tailIndex = medianProfile.size() >> 1; // set the default tail at the half way point from the tip. 
 
 			int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
 			int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
