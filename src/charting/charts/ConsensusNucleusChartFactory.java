@@ -54,6 +54,20 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	}
 	
 	/**
+	 * Test if any of the datasets have a consensus nucleus folded
+	 * @param AnalysisDataset
+	 * @return
+	 */
+	public static boolean hasConsensusNucleus(List<AnalysisDataset>  list){
+		for (AnalysisDataset dataset : list){
+			if(dataset.getCollection().hasConsensusNucleus()){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Craete a consensus chart from the given dataset. Gives an
 	 * empty chart if null.
 	 * @param ds
@@ -144,7 +158,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param list the datasets to test
 	 * @return
 	 */
-	private static double getconsensusChartRange(List<AnalysisDataset> list){
+	public static double getconsensusChartRange(List<AnalysisDataset> list){
 		
 		double max = 1;
 		for (AnalysisDataset dataset : list){

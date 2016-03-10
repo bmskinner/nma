@@ -1309,11 +1309,14 @@ public class RoundNucleus extends AbstractCellularComponent
 				// Rotate vertical
 				BorderPoint[] points = verticalNucleus.getBorderPointsForVerticalAlignment();
 				verticalNucleus.alignPointsOnVertical(points[0], points[1] );
+
 			} else {
 				
 				verticalNucleus.rotatePointToBottom(verticalNucleus.getBorderPoint(BorderTag.ORIENTATION_POINT));
-				
+
 			}
+			// Ensure all nuclei have overlapping centres of mass
+			verticalNucleus.moveCentreOfMass(new XYPoint(0,0));
 		}
 		return verticalNucleus;
 	}

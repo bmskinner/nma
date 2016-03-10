@@ -18,25 +18,32 @@
  *******************************************************************************/
 package charting.datasets;
 
-import ij.IJ;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
 
+import java.awt.Rectangle;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import utility.Utils;
+import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.XYDataset;
+
+import charting.options.ChartOptions;
+import analysis.AnalysisDataset;
 import components.AbstractCellularComponent;
 import components.Cell;
-import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.BorderTag.BorderTagType;
+import components.generic.ProfileType;
+import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
+import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
@@ -162,6 +169,174 @@ public class CellDatasetCreator {
 
 			}
 		return model;	
+	}
+	
+	
+	
+	/**
+	 * Create an XY dataset for the offset xy positions of the start positions of a segment 
+	 * @param options the chart options
+	 * @return a chart
+	 */
+	public static XYDataset createPositionFeatureDataset(ChartOptions options) throws Exception {
+
+		DefaultXYDataset ds = null;
+		List<XYPoint> offsetPoints = null;
+		if(options.isSingleDataset()){
+
+			offsetPoints = createAbsolutePositionFeatureList(options.firstDataset(), options.getSegID());
+			ds = new DefaultXYDataset();
+
+			double[] xPoints = new double[offsetPoints.size()];
+			double[] yPoints = new double[offsetPoints.size()];
+
+			for(int i=0; i<offsetPoints.size(); i++){
+
+				xPoints[i] = offsetPoints.get(i).getX();
+				yPoints[i] = offsetPoints.get(i).getY();
+
+			}
+
+			double[][] data = { xPoints, yPoints };
+
+			ds.addSeries("Segment_"+options.getSegID()+"_"+options.firstDataset().getName(), data);
+
+		}
+		
+		if(options.isMultipleDatasets()){
+			ds = new DefaultXYDataset();
+			
+			for(AnalysisDataset dataset :options.getDatasets()){
+				
+				/*
+				 * We need to convert the seg position into a seg id
+				 */
+				UUID segID = dataset.getCollection()
+						.getProfileCollection(ProfileType.REGULAR)
+						.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+						.getSegmentAt(  options.getSegPosition()   )
+						.getID();
+				
+				offsetPoints = createAbsolutePositionFeatureList(dataset, segID);
+
+				double[] xPoints = new double[offsetPoints.size()];
+				double[] yPoints = new double[offsetPoints.size()];
+
+				for(int i=0; i<offsetPoints.size(); i++){
+
+					xPoints[i] = offsetPoints.get(i).getX();
+					yPoints[i] = offsetPoints.get(i).getY();
+
+				}
+
+				double[][] data = { xPoints, yPoints };
+
+				ds.addSeries("Segment_"+segID+"_"+dataset.getName(), data);
+			}
+
+			
+		}
+
+		
+		return ds;
+	}
+	
+	public static List<XYPoint> createAbsolutePositionFeatureList(AnalysisDataset dataset, UUID segmentID) throws Exception{
+		
+		List<XYPoint> result = new ArrayList<XYPoint>();
+		
+		/*
+		 * Fetch the cells from the dataset, and rotate the nuclei appropriately
+		 */
+		for(Nucleus nucleus : dataset.getCollection().getNuclei()){
+			
+			// For these, only include the nuclei with explicit top and bottom tags
+			if(nucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && nucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+				
+				
+				Nucleus verticalNucleus = nucleus.getVerticallyRotatedNucleus();
+
+				// Get the segment start position XY coordinates
+				NucleusBorderSegment segment = verticalNucleus.getProfile(ProfileType.REGULAR)
+													.getSegment(segmentID);
+				
+				XYPoint point = verticalNucleus.getBorderPoint(segment.getStartIndex());
+				result.add(point);
+			}		
+		}	
+		return result;
+	}
+
+	
+	/**
+	 * Find the xy coordinates of the start point of the given segment in each nucleus,
+	 * after the nuclei have been rotated to vertical. The points are offset relative to 
+	 * the positions within the consensus nucleus
+	 * @param dataset
+	 * @param segment
+	 * @return
+	 * @throws Exception 
+	 */
+	public static List<XYPoint> createRelativePositionFeatureList(AnalysisDataset dataset, UUID segmentID) throws Exception{
+		
+		List<XYPoint> result = createAbsolutePositionFeatureList( dataset, segmentID);
+		
+		/*
+		 * Don't worry about changing things if there is not consensus nucleus
+		 */
+		if( ! dataset.getCollection().hasConsensusNucleus()){
+			return result;		
+		} 
+
+		
+		/*
+		 * Find the start point of the segment in the consensus nucleus
+		 */
+		Nucleus consensus = dataset.getCollection()
+				.getConsensusNucleus()
+				.getVerticallyRotatedNucleus();
+		
+		// Get the segment start position XY coordinates
+		NucleusBorderSegment segment = consensus.getProfile(ProfileType.REGULAR)
+											.getSegment(segmentID);
+		
+		XYPoint centrePoint = consensus.getBorderPoint(segment.getStartIndex());
+		
+		/*
+		 * The list of XYPoints are the absolute positions in cartesian space.
+		 * This should be corrected to offsets from the geometric centre of the cluster
+		 */
+		
+//		// Calculate the average x and y positions
+//		
+//		double sumX = 0;
+//		double sumY = 0;
+//		for(XYPoint p : result){
+//			
+//			sumX += p.getX();
+//			sumY += p.getY();
+//			
+//		}
+//		
+//		sumX /= result.size();
+//		sumY /= result.size();
+//		XYPoint centrePoint = new XYPoint(sumX,sumY);
+		
+		/*
+		 * Update the result positions to be offsets to the centre 
+		 */
+		
+		for(XYPoint p : result){
+
+			double offsetX = p.getX() - centrePoint.getX();
+			double offsetY = p.getY() - centrePoint.getY();
+			
+			p.setX(offsetX);
+			p.setY(offsetY);
+
+		}
+		
+		return result;
 	}
 
 }

@@ -481,6 +481,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		
 		if(vertX > verticalNucleus.getCentreOfMass().getX() ){
 			verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
+			verticalNucleus.moveCentreOfMass(new XYPoint(0,0));
 		}
 		
 		return verticalNucleus;

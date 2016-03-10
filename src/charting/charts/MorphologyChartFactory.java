@@ -36,6 +36,7 @@ import org.jfree.chart.axis.StandardTickUnitSource;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
@@ -52,6 +53,7 @@ import utility.Constants;
 import utility.Utils;
 import analysis.AnalysisDataset;
 import charting.ChartComponents;
+import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 import components.AbstractCellularComponent;
@@ -514,304 +516,140 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 	
-	
-	
-//	/**
-//	 * Create a nucleus outline chart with nuclear signals drawn as transparent
-//	 * circles
-//	 * @param dataset the AnalysisDataset to use to draw the consensus nucleus
-//	 * @param signalCoMs the dataset with the signal centre of masses
-//	 * @return
-//	 * @throws Exception 
-//	 */
-//	public static JFreeChart makeSignalCoMNucleusOutlineChart(AnalysisDataset dataset, XYDataset signalCoMs) throws Exception{
-//		JFreeChart chart = ConsensusNucleusChartFactory.makeNucleusOutlineChart(dataset);
-//
-//		XYPlot plot = chart.getXYPlot();
+	/**
+	 * Create a segment start XY position chart for a single analysis dataset
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
+//	private static JFreeChart makeSingleSegmentStartPositionChart(ChartOptions options) throws Exception {
 //		
-//		if(signalCoMs.getSeriesCount()>0){
-//			plot.setDataset(1, signalCoMs);
-//
-//			XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
-//			for(int series=0;series<signalCoMs.getSeriesCount();series++){
-//
-//				Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
-//				rend.setSeriesShape(series, circle);
-//
-//				String name = (String) signalCoMs.getSeriesKey(series);
-//				int seriesGroup = getIndexFromLabel(name);
-//				Color colour = dataset.getSignalGroupColour(seriesGroup);
-//				rend.setSeriesPaint(series, colour);
-//				rend.setBaseLinesVisible(false);
-//				rend.setBaseShapesVisible(true);
-//				rend.setBaseSeriesVisibleInLegend(false);
-//			}
-//			plot.setRenderer(1, rend);
-//
-//			for(int signalGroup : dataset.getCollection().getSignalGroups()){
-//				List<Shape> shapes = NuclearSignalDatasetCreator.createSignalRadiusDataset(dataset, signalGroup);
-//
-//				int signalCount = shapes.size();
-//
-//				int alpha = (int) Math.floor( 255 / ((double) signalCount) )+20;
-//				alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
-//
-//				Color colour = dataset.getSignalGroupColour(signalGroup);
-//
-//				for(Shape s : shapes){
-//					XYShapeAnnotation an = new XYShapeAnnotation( s, null,
-//							null, ColourSelecter.getTransparentColour(colour, true, alpha)); // layer transparent signals
-//					plot.addAnnotation(an);
-//				}
-//			}
-//		}
-//		return chart;
-//	}
-
-//	/**
-//	 * Get a chart contaning the details of the given cell from the given dataset
-//	 * @param cell the cell to draw
-//	 * @param dataset the dataset the cell came from
-//	 * @param rotateMode the orientation of the image
-//	 * @return
-//	 * @throws Exception 
-//	 */
-//	public static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset, RotationMode rotateMode, boolean showhookHump) throws Exception{
+//		XYDataset ds = CellDatasetCreator.createPositionFeatureDataset(options);
 //		JFreeChart chart = 
 //				ChartFactory.createXYLineChart(null,
-//						null, null, null, PlotOrientation.VERTICAL, true, true,
-//						false);
+//				                "X offset", "Y offset", ds, PlotOrientation.VERTICAL, true, true,
+//				                false);
 //
 //		XYPlot plot = chart.getXYPlot();
+//		
+//		if(ConsensusNucleusChartFactory.hasConsensusNucleus(options.getDatasets())){
+//			// Find the bounds of the consensus nuclei in the options
+//			double max = ConsensusNucleusChartFactory.getconsensusChartRange(options.getDatasets());
+//					
+//			plot.getDomainAxis().setRange(-max,max);
+//			plot.getRangeAxis().setRange(-max,max);
+//		} else {
+//			plot.getDomainAxis().setAutoRange(true);
+//			plot.getRangeAxis().setAutoRange(true);
+//		}
+//		
 //		plot.setBackgroundPaint(Color.WHITE);
-//		plot.getRangeAxis().setInverted(true);
-//
-//		// make a hash to track the contents of each dataset produced
-//		Map<Integer, String> hash = new HashMap<Integer, String>(0); 
-//		Map<Integer, XYDataset> datasetHash = new HashMap<Integer, XYDataset>(0); 
 //		
-//		if(rotateMode.equals(RotationMode.VERTICAL)){
-//			// duplicate the cell
-//			Cell newCell = new Cell();
-//			Nucleus verticalNucleus = cell.getNucleus().duplicate();
-//			newCell.setNucleus(verticalNucleus);
-//			if(verticalNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && verticalNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+//		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+//		plot.setRenderer( renderer);
+//		
+//			renderer.setSeriesVisibleInLegend(0, false);
+//			renderer.setSeriesStroke(0, ChartComponents.QUARTILE_STROKE);
 //
-//				// Rotate vertical
-//				BorderPoint[] points = verticalNucleus.getBorderPointsForVerticalAlignment();
-//				verticalNucleus.alignPointsOnVertical(points[0], points[1] );
-//			} else {
-//				// If the verticals are not present, use the orientation point
-//				verticalNucleus.rotatePointToBottom(verticalNucleus.getBorderTag(BorderTag.ORIENTATION_POINT));
-//			}
-//			cell = newCell;
+////			int index = MorphologyChartFactory.getIndexFromLabel( (String) ds.getSeriesKey(j));
+//			Color profileColour = options.getDatasets().get(0).getDatasetColour() == null 
+//					? ColourSelecter.getSegmentColor(0)
+//					: options.getDatasets().get(0).getDatasetColour();
 //			
-//			// Need to have top point at the top of the image
-//			plot.getRangeAxis().setInverted(false);
-//		}
-//
-//		/*
-//		 * Get the nucleus dataset
-//		 */
-//		
-//		XYDataset nucleus = NucleusDatasetCreator.createNucleusOutline(cell, true);
-//		hash.put(hash.size(), "Nucleus"); // add to the first free entry
-//		datasetHash.put(datasetHash.size(), nucleus);
-//
-//
-//		/*
-//		 * If the cell has a rodent sperm nucleus, get the hook and hump rois
-//		 */
-//		if(cell.getNucleus().getClass()==RodentSpermNucleus.class){
-//			XYDataset hookHump = NucleusDatasetCreator.createNucleusHookHumpOutline(cell);
-//			hash.put(hash.size(), "HookHump"); // add to the first free entry
-//			datasetHash.put(datasetHash.size(), hookHump);
-//		}
-//		
-//		
-//		// get the index tags
-//		XYDataset tags = NucleusDatasetCreator.createNucleusIndexTags(cell);
-//		hash.put(hash.size(), "Tags"); // add to the first free entry
-//		datasetHash.put(datasetHash.size(), tags);
-//		
-//		// get the signals datasets and add each group to the hash
-//		// Only display the signal outlines if the rotation is ACTUAL;
-//		// TODO: the RoundNucleus.rotate() is not working with signals 
-//		if(rotateMode.equals(RotationMode.ACTUAL)){
-//			if(cell.getNucleus().hasSignal()){
-//				List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.createSignalOutlines(cell, dataset);
-//
-//				for(XYDataset d : signalsDatasets){
-//
-//					String name = "default_0";
-//					for (int i = 0; i < d.getSeriesCount(); i++) {
-//						name = (String) d.getSeriesKey(i);	
-//					}
-//					int signalGroup = getIndexFromLabel(name);
-//					hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
-//					datasetHash.put(datasetHash.size(), d);
-//				}
-//			}
-//		}
-//
-//		// get tail datasets if present
-//		if(cell.hasTail()){
-//
-//			XYDataset tailBorder = TailDatasetCreator.createTailOutline(cell);
-//			hash.put(hash.size(), "TailBorder");
-//			datasetHash.put(datasetHash.size(), tailBorder);
-//			XYDataset skeleton = TailDatasetCreator.createTailSkeleton(cell);
-//			hash.put(hash.size(), "TailSkeleton");
-//			datasetHash.put(datasetHash.size(), skeleton);
-//		}
-//
-//		// set the rendering options for each dataset type
-//
-//		for(int key : hash.keySet()){
-//
-//			plot.setDataset(key, datasetHash.get(key));
-//			plot.setRenderer(key, new XYLineAndShapeRenderer(true, false));
-//
-//			int seriesCount = plot.getDataset(key).getSeriesCount();
-//			// go through each series in the dataset
-//			for(int i=0; i<seriesCount;i++){
-//
-//				// all datasets use the same stroke
-//				plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(2));
-//				plot.getRenderer(key).setSeriesVisibleInLegend(i, false);
-//
-//				/*
-//				 * Segmented nucleus outline
-//				 */
-//				if(hash.get(key).equals("Nucleus")){
-//					String name = (String) plot.getDataset(key).getSeriesKey(i);
-//					int colourIndex = getIndexFromLabel(name);
-//					
-//					plot.getRenderer().setSeriesPaint(i, dataset.getSwatch().color(colourIndex));
-//					
-//					/*
-//					 * Add a line between the top and bottom vertical points
-//					 */
-//					if(cell.getNucleus().hasBorderTag(BorderTag.TOP_VERTICAL) && cell.getNucleus().hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
-//						BorderPoint[] verticals = cell.getNucleus().getBorderPointsForVerticalAlignment();
-//						plot.addAnnotation(new XYLineAnnotation(verticals[0].getX(),
-//								verticals[0].getY(),
-//								verticals[1].getX(),
-//								verticals[1].getY()
-//								));
-//					}
-//
-//				}
-//				
-//				/*
-//				 * Hook and hump for rodent sperm
-//				 */
-//				if(hash.get(key).equals("HookHump")){
-//					
-//					if(showhookHump){
-//						String name = (String) plot.getDataset(key).getSeriesKey(i);
-//						// Colour the hook blue, the hump green
-//						Color color = name.equals("Hump") ? Color.GREEN : Color.BLUE;
-//						plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(5));
-//						plot.getRenderer(key).setSeriesPaint(i, color);
-//						plot.getRenderer(key).setSeriesVisibleInLegend(i, true);
-//					}
-//					
-//				}
-//				
-//				/*
-//				 * Border tags
-//				 */
-//				
-//				if(hash.get(key).equals("Tags")){
-//					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
-//					String name = plot.getDataset(key).getSeriesKey(i).toString().replace("Tag_", "");
-//					
-//					if(name.equals(BorderTag.ORIENTATION_POINT.toString())){
-//						plot.getRenderer(key).setSeriesPaint(i, Color.BLUE);
-//					}
-//					if(name.equals(BorderTag.REFERENCE_POINT.toString())){
-//						plot.getRenderer(key).setSeriesPaint(i, Color.ORANGE);
-//					}
-//						
-//				}
-//
-//				/*
-//				 * Nuclear signals
-//				 */
-//				if(hash.get(key).startsWith("SignalGroup_")){
-//					int colourIndex = getIndexFromLabel(hash.get(key));
-//					Color colour = dataset.getSignalGroupColour(colourIndex);
-//					plot.getRenderer(key).setSeriesPaint(i, colour);
-//				}
-//
-//				/*
-//				 * Sperm tail  / flagellum border
-//				 */
-//				if(hash.get(key).equals("TailBorder")){
-//
-//					plot.getRenderer(key).setSeriesPaint(i, Color.GREEN);
-//				}
-//
-//
-//				/*
-//				 * Sperm tail  / flagellum skeleton
-//				 */
-//				if(hash.get(key).equals("TailSkeleton")){
-//
-//					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
-//				}
-//			}
+//			renderer.setSeriesPaint(0, profileColour);
 //			
-//			// Add a background image to the plot
-////			addCellImageToPlot(cell, plot);
-//			
-//
-//		}
+//			renderer.setBaseShapesVisible(true);
+//			renderer.setBaseLinesVisible(false);
 //		return chart;
-//	}
-	
-//	private static void addCellImageToPlot(Cell cell, XYPlot plot){
-//		if(cell.getNucleus().getSourceFile().exists()){
-//			
-//			File imageFile = cell.getNucleus().getSourceFile();
-//			ImageStack imageStack = ImageImporter.importImage(imageFile);
-//			
-//			// Get the counterstain stack, make greyscale and invert
-//			ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(imageStack).getProcessor();
-//			openProcessor.invert();	
-//			
-//			double[] positions = cell.getNucleus().getPosition();
-//			
-//			int padding = 0;
-//			int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
-//			int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
-//			int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
-//			int wideY = (int) (positions[CellularComponent.Y_BASE]-padding);
-//
-//			wideX = wideX<0 ? 0 : wideX;
-//			wideY = wideY<0 ? 0 : wideY;
-//
-//			openProcessor.setRoi(wideX, wideY, wideW, wideH);
-//			openProcessor = openProcessor.crop();
-//
-//			plot.setDomainGridlinesVisible(false);
-//			plot.setRangeGridlinesVisible(false);
-//			
-//			plot.getDomainAxis().setVisible(false);
-//			plot.getRangeAxis().setVisible(false);
-//			
-//			plot.setOutlineVisible(false);
-//			
 //		
-////			IJ.log("Adding background image");
-//			Image im = new ImageIcon(openProcessor.getBufferedImage()).getImage();
-//			plot.setBackgroundPaint(null);
-//			plot.setBackgroundImageAlignment(Align.FIT);
-//			plot.setBackgroundImage(im);
-//		}
 //	}
 	
+	/**
+	 * Create a segment start XY position chart for multiple analysis datasets
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
+	private static JFreeChart makeMultiSegmentStartPositionChart(ChartOptions options) throws Exception {
+		
+		XYDataset ds = CellDatasetCreator.createPositionFeatureDataset(options);
+		
+		XYDataset nuclearOutlines = NucleusDatasetCreator.createMultiNucleusOutline(options.getDatasets());
+		
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+				                "X offset", "Y offset", ds, PlotOrientation.VERTICAL, true, true,
+				                false);
+		
+		
+
+		XYPlot plot = chart.getXYPlot();
+		
+		
+		/*
+		 * TODO: make this work smoothly - goal is to have the consensus outlines underneath 
+		 * the positions of segmetn starts
+		 */
+		plot.setDataset(0, nuclearOutlines);
+		plot.setDataset(1, ds);
+		
+		if(ConsensusNucleusChartFactory.hasConsensusNucleus(options.getDatasets())){
+			// Find the bounds of the consensus nuclei in the options
+			double max = ConsensusNucleusChartFactory.getconsensusChartRange(options.getDatasets());
+
+					
+			plot.getDomainAxis().setRange(-max,max);
+			plot.getRangeAxis().setRange(-max,max);
+		} else {
+			plot.getDomainAxis().setAutoRange(true);
+			plot.getRangeAxis().setAutoRange(true);
+		}
+		plot.setBackgroundPaint(Color.WHITE);
+		
+		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+		plot.setRenderer( renderer);
+		
+		for (int j = 0; j < ds.getSeriesCount(); j++) {
+			renderer.setSeriesVisibleInLegend(j, false);
+			renderer.setSeriesStroke(j, ChartComponents.QUARTILE_STROKE);
+
+			Color profileColour = options.getDatasets().get(j).getDatasetColour() == null 
+					? ColourSelecter.getSegmentColor(j)
+					: options.getDatasets().get(j).getDatasetColour();
+			
+			renderer.setSeriesPaint(j, profileColour);
+			
+			renderer.setBaseShapesVisible(true);
+			renderer.setBaseLinesVisible(false);
+		}
+		return chart;
+		
+	}
+	
+	
+	/**
+	 * Create a chart showing the distribution of xy points for a segment start
+	 * @param options the chart options. Should have a segID
+	 * @return a chart
+	 */
+	public static JFreeChart makeSegmentStartPositionChart(ChartOptions options) throws Exception {
+		
+		if( ! options.hasDatasets()){
+			return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+		}
+		
+		if(options.isSingleDataset()){
+			return makeMultiSegmentStartPositionChart(options);
+		}
+		
+		if(options.isMultipleDatasets()){
+			return makeMultiSegmentStartPositionChart(options);
+		}
+
+		return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+	}
+	
+		
 	/**
 	 * Create a chart showing the angle values at the given normalised profile position within the
 	 * AnalysisDataset. The chart holds two chart datasets: 0 is the probabililty density function.
