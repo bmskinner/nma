@@ -95,6 +95,8 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	private transient Map<BorderTag, Rectangle> boundingRectangles = new HashMap<BorderTag, Rectangle>(); // cache the bounding rectange to save time
 
+	protected transient Nucleus verticalNucleus = null; // cache the vertically rotated nucleus
+	
 	public RoundNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 		super(roi);
 		if(file==null || Integer.valueOf(number)==null || position==null){
@@ -1297,6 +1299,23 @@ public class RoundNucleus extends AbstractCellularComponent
 			return false;
 			
 		}
+	}
+	
+	public Nucleus getVerticallyRotatedNucleus(){
+		if(this.verticalNucleus==null){
+			verticalNucleus = this.duplicate();
+			
+			if(this.hasBorderTag(BorderTag.TOP_VERTICAL) && this.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+				// Rotate vertical
+				BorderPoint[] points = verticalNucleus.getBorderPointsForVerticalAlignment();
+				verticalNucleus.alignPointsOnVertical(points[0], points[1] );
+			} else {
+				
+				verticalNucleus.rotatePointToBottom(verticalNucleus.getBorderPoint(BorderTag.ORIENTATION_POINT));
+				
+			}
+		}
+		return verticalNucleus;
 	}
 	
 	/**

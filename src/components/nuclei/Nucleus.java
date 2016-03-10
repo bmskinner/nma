@@ -517,6 +517,15 @@ public interface Nucleus extends CellularComponent {
 	 */
 	public void rotatePointToBottom(BorderPoint bottomPoint);
 	
+	
+	/**
+	 * Fetch the vertically oriented copy of the nucleus. Calculate if 
+	 * needed. The vertical alignment with be by TOP_VERTICAL and BOTTOM_VERTICAL
+	 * if available, otherwise the ORIENTATION_POINT will be rotated below the CoM
+	 * @return
+	 */
+	public Nucleus getVerticallyRotatedNucleus();
+	
 	/**
 	 * Rotate the nucleus by the given amount around the centre of mass
 	 * @param angle

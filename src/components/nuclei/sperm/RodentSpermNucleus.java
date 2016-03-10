@@ -433,6 +433,58 @@ public class RodentSpermNucleus extends SpermNucleus {
 			return false;
 		}
 	}
+	
+	/*
+	 * Test if the nucleus, after rotating to vertical, has the hook to the left
+	 * or to the right
+	 */
+	public boolean isPointingLeft(){
+		
+		Nucleus testNucleus = this.getVerticallyRotatedNucleus();
+		
+
+		/*
+		 * Get the X position of the reference point
+		 */
+		double vertX = testNucleus.getBorderTag(BorderTag.REFERENCE_POINT).getX();
+
+		/*
+		 * If the reference point is left of the centre of mass, 
+		 * the nucleus is pointing left
+		 */
+		
+		if(vertX < testNucleus.getCentreOfMass().getX() ){
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
+	
+	@Override
+	public Nucleus getVerticallyRotatedNucleus(){
+		
+		/*
+		 * Ensure the nucleus is cached
+		 */
+		verticalNucleus = super.getVerticallyRotatedNucleus();
+		
+		/*
+		 * Get the X position of the reference point
+		 */
+		double vertX = verticalNucleus.getBorderTag(BorderTag.REFERENCE_POINT).getX();
+
+		/*
+		 * If the reference point is left of the centre of mass, 
+		 * the nucleus is pointing left. If not, flip thw nucleus
+		 */
+		
+		if(vertX > verticalNucleus.getCentreOfMass().getX() ){
+			verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
+		}
+		
+		return verticalNucleus;
+	}
 
   /*
     -----------------------
