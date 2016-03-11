@@ -251,7 +251,7 @@ public class CellDatasetCreator {
 		for(Nucleus nucleus : dataset.getCollection().getNuclei()){
 			
 			// For these, only include the nuclei with explicit top and bottom tags
-			if(nucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && nucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+//			if(nucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && nucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
 				
 				
 				Nucleus verticalNucleus = nucleus.getVerticallyRotatedNucleus();
@@ -262,7 +262,7 @@ public class CellDatasetCreator {
 				
 				XYPoint point = verticalNucleus.getBorderPoint(segment.getStartIndex());
 				result.add(point);
-			}		
+//			}		
 		}	
 		return result;
 	}

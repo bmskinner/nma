@@ -208,6 +208,21 @@ public class ProfileCollection implements Serializable {
 	}
 	
 	/**
+	 * Test if the collection contains a segment beginning at the given tag
+	 * @param tag
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean hasSegmentStartingWith(BorderTag tag) throws Exception {
+		
+		if(getSegmentStartingWith( tag) == null){
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	/**
 	 * Fetch the segment from the profile beginning at the given tag;
 	 * i.e. the segment with a start index of zero, when the profile is offset 
 	 * to the tag. 
@@ -230,6 +245,21 @@ public class ProfileCollection implements Serializable {
 	}
 	
 	/**
+	 * Test if the collection contains a segment beginning at the given tag
+	 * @param tag
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean hasSegmentEndingWith(BorderTag tag) throws Exception {
+		
+		if(getSegmentEndingWith( tag) == null){
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	/**
 	 * Fetch the segment from the profile beginning at the given tag;
 	 * i.e. the segment with a start index of zero, when the profile is offset 
 	 * to the tag. 
@@ -244,6 +274,27 @@ public class ProfileCollection implements Serializable {
 		for(NucleusBorderSegment seg : segments){
 
 			if(  seg.getEndIndex()==ZERO_INDEX ){
+				result = seg;
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Fetch the segment from the profile containing the given index.
+	 * The zero index is the reference point
+	 * @param index
+	 * @return a copy of the segment with the index inside, or null
+	 */
+	public NucleusBorderSegment getSegmentContaining(int index) throws Exception {
+		List<NucleusBorderSegment> segments = this.getSegments(BorderTag.REFERENCE_POINT);
+
+		NucleusBorderSegment result = null;
+		// get the name of the segment with the tag at the start
+		for(NucleusBorderSegment seg : segments){
+
+			if(  seg.contains(index) ){
 				result = seg;
 			}
 		}

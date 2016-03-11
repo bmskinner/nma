@@ -515,55 +515,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		}	
 		return chart;
 	}
-	
-	/**
-	 * Create a segment start XY position chart for a single analysis dataset
-	 * @param options
-	 * @return
-	 * @throws Exception
-	 */
-//	private static JFreeChart makeSingleSegmentStartPositionChart(ChartOptions options) throws Exception {
-//		
-//		XYDataset ds = CellDatasetCreator.createPositionFeatureDataset(options);
-//		JFreeChart chart = 
-//				ChartFactory.createXYLineChart(null,
-//				                "X offset", "Y offset", ds, PlotOrientation.VERTICAL, true, true,
-//				                false);
-//
-//		XYPlot plot = chart.getXYPlot();
-//		
-//		if(ConsensusNucleusChartFactory.hasConsensusNucleus(options.getDatasets())){
-//			// Find the bounds of the consensus nuclei in the options
-//			double max = ConsensusNucleusChartFactory.getconsensusChartRange(options.getDatasets());
-//					
-//			plot.getDomainAxis().setRange(-max,max);
-//			plot.getRangeAxis().setRange(-max,max);
-//		} else {
-//			plot.getDomainAxis().setAutoRange(true);
-//			plot.getRangeAxis().setAutoRange(true);
-//		}
-//		
-//		plot.setBackgroundPaint(Color.WHITE);
-//		
-//		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-//		plot.setRenderer( renderer);
-//		
-//			renderer.setSeriesVisibleInLegend(0, false);
-//			renderer.setSeriesStroke(0, ChartComponents.QUARTILE_STROKE);
-//
-////			int index = MorphologyChartFactory.getIndexFromLabel( (String) ds.getSeriesKey(j));
-//			Color profileColour = options.getDatasets().get(0).getDatasetColour() == null 
-//					? ColourSelecter.getSegmentColor(0)
-//					: options.getDatasets().get(0).getDatasetColour();
-//			
-//			renderer.setSeriesPaint(0, profileColour);
-//			
-//			renderer.setBaseShapesVisible(true);
-//			renderer.setBaseLinesVisible(false);
-//		return chart;
-//		
-//	}
-	
+		
 	/**
 	 * Create a segment start XY position chart for multiple analysis datasets
 	 * @param options
@@ -647,18 +599,9 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 */
 	public static JFreeChart makeSegmentStartPositionChart(ChartOptions options) throws Exception {
 		
-		if( ! options.hasDatasets()){
-			return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+		if(  options.hasDatasets()){
+			return  makeMultiSegmentStartPositionChart(options);
 		}
-		
-		if(options.isSingleDataset()){
-			return makeMultiSegmentStartPositionChart(options);
-		}
-		
-		if(options.isMultipleDatasets()){
-			return makeMultiSegmentStartPositionChart(options);
-		}
-
 		return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 	}
 	

@@ -337,20 +337,16 @@ public class ProfileManager {
 	}
 	
 	/**
-	 * Split the given segment into two segmnets. The split is made at the midpoint
+	 * Split the given segment into two segmnets. The split is made at the given index
 	 * @param segName
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean splitSegment(NucleusBorderSegment seg) throws Exception {
+	public boolean splitSegment(NucleusBorderSegment seg, int index)  throws Exception {
 		
-		boolean result = false;
-				
 		SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(BorderTag.REFERENCE_POINT);
 		
-		// Get the segments to merge
-//		NucleusBorderSegment seg = medianProfile.getSegment(segName);
-		
+
 		// Do not try to split segments that are a merge of other segments
 		if(seg.hasMergeSources()){
 			return false;
@@ -358,8 +354,6 @@ public class ProfileManager {
 						
 		try{
 
-			int index = seg.getMidpointIndex();
-			//				int index = (Integer) spinner.getModel().getValue();
 			if(seg.contains(index)){
 
 				double proportion = seg.getIndexProportion(index);
@@ -400,15 +394,90 @@ public class ProfileManager {
 					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
 				}
 
-				result = true;
+				return true;
 			} else {
 				return false;
 			}
 		} catch(Exception e){
 			return false;
 		}
+	}
+	
+	/**
+	 * Split the given segment into two segmnets. The split is made at the midpoint
+	 * @param segName
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean splitSegment(NucleusBorderSegment seg) throws Exception {
 		
-		return result;
+//		boolean result = false;
+				
+//		SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(BorderTag.REFERENCE_POINT);
+		
+		// Get the segments to merge
+//		NucleusBorderSegment seg = medianProfile.getSegment(segName);
+		
+		// Do not try to split segments that are a merge of other segments
+//		if(seg.hasMergeSources()){
+//			return false;
+//		}
+						
+//		try{
+
+			int index = seg.getMidpointIndex();
+			
+			return splitSegment(seg, index);
+//			//				int index = (Integer) spinner.getModel().getValue();
+//			if(seg.contains(index)){
+//
+//				double proportion = seg.getIndexProportion(index);
+//
+//				UUID newID1 = java.util.UUID.randomUUID();
+//				UUID newID2 = java.util.UUID.randomUUID();
+//				// split the two segments in the median
+//				medianProfile.splitSegment(seg, index, newID1, newID2);
+//
+//				// put the new segment pattern back with the appropriate offset
+//				collection.getProfileCollection(ProfileType.REGULAR)
+//					.addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
+//
+//				/*
+//				 * With the median profile segments unmerged, also split the segments
+//				 * in the individual nuclei. Requires proportional alignment
+//				 */
+//				for(Nucleus n : collection.getNuclei()){
+//
+//
+//					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
+//					NucleusBorderSegment nSeg = profile.getSegment(seg.getID());
+//
+//					int targetIndex = nSeg.getProportionalIndex(proportion);
+//					profile.splitSegment(nSeg, targetIndex, newID1, newID2);
+//					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
+//				}
+//
+//				/*
+//				 * Update the consensus if present
+//				 */
+//				if(collection.hasConsensusNucleus()){
+//					ConsensusNucleus n = collection.getConsensusNucleus();
+//					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
+//					NucleusBorderSegment nSeg1 = profile.getSegment(seg.getID());
+//					int targetIndex = nSeg1.getProportionalIndex(proportion);
+//					profile.splitSegment(nSeg1, targetIndex, newID1, newID2);
+//					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
+//				}
+//
+//				result = true;
+//			} else {
+//				return false;
+//			}
+//		} catch(Exception e){
+//			return false;
+//		}
+//		
+//		return result;
 	}
 	
 	public void unmergeSegments(NucleusBorderSegment seg) throws Exception {

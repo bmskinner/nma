@@ -20,6 +20,7 @@ package analysis.nucleus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -122,62 +123,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		return result;
 
 	}
-    
-//    private void giveAFinalPolish() throws Exception{
-//    	
-//    	if(this.getDataset().getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
-//    		if(! getDataset().getCollection()
-//    				.getProfileCollection(ProfileType.REGULAR)
-//    				.hasBorderTag(BorderTag.TOP_VERTICAL)  ){
-//
-//    			log(Level.FINE, "TOP_ and BOTTOM_VERTICAL not assigned; calculating");
-//    			calculateTopAndBottomVerticals(getDataset());
-//    			log(Level.FINE, "Calculating TOP and BOTTOM for child datasets");
-//    			for(AnalysisDataset child : getDataset().getAllChildDatasets()){
-//    				calculateTopAndBottomVerticals(child);
-//    			}
-//
-//    		}
-//
-//    		log(Level.FINE, "Updating dataset hook-hump split and signals");
-//    		updateRodentSpermHookHumpSplits(this.getDataset());
-//    		for(AnalysisDataset child : this.getDataset().getAllChildDatasets()){
-//    			updateRodentSpermHookHumpSplits(child);
-//    		}
-//    	}
-//    }
-    
-//	private void calculateTopAndBottomVerticals(AnalysisDataset dataset) throws Exception {
-//		
-//		log(Level.FINE, "Detecting flat region");
-//		DatasetProfiler.TailFinder.assignTopAndBottomVerticalInMouse(dataset.getCollection());
-//		
-//		log(Level.FINE, "Assigning flat region to nuclei");
-//		DatasetProfiler.Offsetter.assignFlatRegionToMouseNuclei(dataset.getCollection());
-//	}
-    
-	/**
-	 * Recalculate the hook-hunp split, and signal angle measurements for the 
-	 * given dataset of rodent sperm nuclei
-	 * @param d
-	 * @throws Exception
-	 */
-//	private void updateRodentSpermHookHumpSplits(AnalysisDataset d) throws Exception{
-//		
-//		if(d.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
-//			for(Nucleus n : d.getCollection().getNuclei()){
-//
-//				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
-//				// recalculate - old datasets have problems
-//				nucleus.splitNucleusToHeadAndHump();
-//
-//				// recalculate signal angles - old datasets have problems
-//				nucleus.calculateSignalAnglesFromPoint(nucleus.getPoint(BorderTag.ORIENTATION_POINT));
-//			}
-//		}
-//		
-//	}
-    
+        
     private boolean runNewAnalysis() throws Exception {
     	log(Level.FINE, "Beginning core morphology analysis");
 
@@ -397,14 +343,10 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		log(Level.FINER, "Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
 
 		segmenter = null; // clean up
-				
-		
-		/* If there are round nuclei in the collection, and only two segments
-		 * were called, the orientation point may not have been
-		 * associated with the segment breakpoint. 
-		 * Update the segment position to the OP
+
+		/*
+		 * TODO: Check if this is still relevant
 		 */
-		
 		if(collection.getNucleusType().equals(NucleusType.ROUND) && segments.size()==2){
 
 			log(Level.FINER, "Updating segment pattern to match orientation point in round nuclei");
@@ -418,6 +360,36 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		}
 		
 		pc.addSegments(BorderTag.REFERENCE_POINT, segments);
+		
+		
+		/* 
+		 * If only two segments were created, the orientation point 
+		 * may not be at a segment breakpoint. 
+		 * 
+		 * Split segments appropriately so that the OP is on a boundary.
+		 * 
+		 * There should not be a problem with segment lengths here, because
+		 * a highly segmentatble profile will have a detectable tail in the 
+		 * first place 
+		 */
+		
+		if( ! pc.hasSegmentStartingWith(BorderTag.ORIENTATION_POINT)){
+			log(Level.FINER, "The orientation point is not at a segment boundary");
+			int opIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
+			NucleusBorderSegment seg = pc.getSegmentContaining(opIndex);
+			
+			log(Level.FINEST, "Trying to split the segment at index "+opIndex);
+			
+			UUID newID1 = java.util.UUID.randomUUID();
+			UUID newID2 = java.util.UUID.randomUUID();
+
+			SegmentedProfile p = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+			p.splitSegment(seg, opIndex, newID1, newID2);
+			
+			segments = p.getOrderedSegments();
+			pc.addSegments(BorderTag.REFERENCE_POINT, segments);
+			
+		}
 		
 	}
 
@@ -629,63 +601,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 				 */
 				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, 0, profile.size());
 				segments.add(seg);
-				
-				
-//				/*
-//				 * End of the profile; call a new segment boundary to avoid
-//				 * linking across the reference point
-//				 * 
-//				 * If a boundary is already called at index 0 in the first segment,
-//				 * do not create a new segment, as it would have 1 length
-//				 * 
-//				 * If a boundary is already called at the last index in the profile,
-//				 *  do not add a terminal segment, and just allow merging
-//				 */
-//				int firstSegmentEndIndex = segments.get(0).getEndIndex();
-//				int lastSegmentEndIndex =  segments.get(segments.size()-1).getEndIndex();
-//				int lastProfileIndex = profile.size()-1;
-//				
-//				log(Level.FINE, "First segment end: " + firstSegmentEndIndex + " of "+lastProfileIndex);
-//				log(Level.FINE, "Final segment end: " + lastSegmentEndIndex  + " of "+lastProfileIndex);
-//				
-//                if(  (segments.get(0).getEndIndex()!=0) && segments.get(segments.size()-1).getEndIndex() != profile.size()-1 ) {
-//
-//				
-//                	/*
-//                	 * What happens in round nuclei, when the segmentation detects a boundary in the index
-//                	 * dirctly before 0?
-//                	 * 
-//                	 * A new segment is attempted to be created with length 1, and of course fails.
-//                	 * Catch the exception, and attempty to extend the final segment up to index 0
-//                	 */
-//
-//                	try {
-//					
-//                		NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
-//                		seg.setName("Seg_"+segCount);
-//    					segments.add(seg);
-//    					log(Level.FINE, "Terminal segment found: "+seg.toString());
-//    					
-//                	} catch(IllegalArgumentException e){
-//                		
-//                		log(Level.WARNING, "Error creating segment, likely it was too short");
-//                		log(Level.WARNING, "Attempting to extend the final segment into a terminal segment");
-//                		NucleusBorderSegment finalSegment = segments.get(segments.size()-1);
-//                		finalSegment.update(finalSegment.getStartIndex(), 0);;
-//                	}
-//                	
-//					
-//					
-//				} else {
-//					// the first segment is not larger than the minimum size
-//					// We need to merge the first and last segments
-//					
-//					log(Level.FINE, "Terminal segment not needed: first segment has index 0 or last has full index");
-//					
-////					log(Level.FINE, " Updating the final segment to end at index zero");
-////					segments.get(segments.size()-1).update(segments.get(segments.size()-1).getStartIndex(), 0);
-//				}
-				
+								
 				NucleusBorderSegment.linkSegments(segments);
 				
 				log(Level.FINE, "Segments linked");
