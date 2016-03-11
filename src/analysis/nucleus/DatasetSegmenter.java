@@ -118,6 +118,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		} catch(Exception e){
 			result = false;
 			logError("Error in segmentation analysis", e);
+			return false;
 		}
 
 		return result;
@@ -296,31 +297,32 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		log(Level.FINE, "Beginning segmentation...");
 	
 			
-			// generate segments in the median profile
-			log(Level.FINE, "Creating segments...");
-			createSegments(collection);
-			
-			// map the segments from the median directly onto the nuclei
-			log(Level.FINE, "Assigning segments...");
-			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+		// generate segments in the median profile
+		log(Level.FINE, "Creating segments...");
+		createSegments(collection);
 
-			// find the corresponding point in each Nucleus
-			SegmentedProfile median = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);
-//			assignSegments(collection);
-			SegmentAssignmentTask task = new SegmentAssignmentTask(median, collection.getNuclei().toArray(new Nucleus[0]));
-			task.addProgressListener(this);
-			task.invoke();
-			
-			// adjust the segments to better fit each nucleus
-			log(Level.FINE, "Revising segments...");
-			reviseSegments(collection, pointType);		
-	
-			// update the aggregate in case any borders have changed
-			collection.getProfileCollection(ProfileType.REGULAR).createProfileAggregate(collection, ProfileType.REGULAR);
-						
-			// At this point, the franken collection still contains tip/head values only
-			
-		
+		// map the segments from the median directly onto the nuclei
+		log(Level.FINE, "Assigning segments...");
+		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+
+		// find the corresponding point in each Nucleus
+		SegmentedProfile median = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+		//			assignSegments(collection);
+		SegmentAssignmentTask task = new SegmentAssignmentTask(median, collection.getNuclei().toArray(new Nucleus[0]));
+		task.addProgressListener(this);
+		task.invoke();
+
+		// adjust the segments to better fit each nucleus
+		log(Level.FINE, "Revising segments...");
+		try{
+			reviseSegments(collection, pointType);
+		} catch (Exception e){
+			logError("Error revising segments", e);
+		}
+		// update the aggregate in case any borders have changed
+		collection.getProfileCollection(ProfileType.REGULAR).createProfileAggregate(collection, ProfileType.REGULAR);
+
+
 		log(Level.FINE, "Segmentation complete");
 	}
 	
@@ -383,11 +385,24 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			UUID newID1 = java.util.UUID.randomUUID();
 			UUID newID2 = java.util.UUID.randomUUID();
 
+			/*
+			 * This causes an error when only one segment is present in the profile.
+			 * This is because the start and end points of the segment are the same
+			 */
 			SegmentedProfile p = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);
-			p.splitSegment(seg, opIndex, newID1, newID2);
 			
-			segments = p.getOrderedSegments();
-			pc.addSegments(BorderTag.REFERENCE_POINT, segments);
+			try{
+				p.splitSegment(seg, opIndex, newID1, newID2);
+
+				segments = p.getOrderedSegments();
+				pc.addSegments(BorderTag.REFERENCE_POINT, segments);
+			} catch (Exception e){
+				log(Level.SEVERE, "Profile:");
+				log(Level.SEVERE, p.toString());
+				log(Level.SEVERE, "Segment to split:");
+				log(Level.SEVERE, seg.toString());
+				throw e;
+			}
 			
 		}
 		
@@ -451,16 +466,15 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			 * stored frankenprofiles from each nucleus in the collection
 			 */
 			try {
-			frankenCollection.createProfileAggregate(collection, ProfileType.FRANKEN, (int)pc.getAggregate().length());
+				log(Level.FINEST, "Creating franken profile aggregate of length "+(int)pc.getAggregate().length());
+				frankenCollection.createProfileAggregate(collection, ProfileType.FRANKEN, (int)pc.getAggregate().length());
 			} catch(Exception e){
-				logError("Error creating profile aggregate", e);
-				throw new Exception("Error creating profile aggregate");
+				log(Level.SEVERE, "Error creating franken profile aggregate");
+				log(Level.SEVERE, "Attempting to continue without franken profiling");
+//				logError("Error creating franken profile aggregate", e);
+//				throw e;
+				return;
 			}
-			// add all the nucleus frankenprofiles to the frankencollection
-//			frankenCollection.addNucleusProfiles(frankenProfiles);
-
-			// update the profile aggregate
-//			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
 			
 			/*
 			 * At this point, the frankencollection is indexed on the reference point.

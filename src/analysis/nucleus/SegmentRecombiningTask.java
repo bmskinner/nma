@@ -1,5 +1,7 @@
 package analysis.nucleus;
 
+import ij.IJ;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,8 +45,7 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 			try {
 				processNuclei(low, high);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				onError(e);
 			}
 	     else {
 	    	 int mid = (low + high) >>> 1;
@@ -65,11 +66,17 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 
 	    		 this.invokeAll(tasks);
 	    	 } catch (Exception e) {
-	    		 // TODO Auto-generated catch block
-	    		 e.printStackTrace();
+	    		 onError(e);
 	    	 }
 
 	     }
+	}
+	
+	private void onError(Exception e){
+		IJ.log("Error in segment recombination");
+		 for(StackTraceElement e1 : e.getStackTrace()){
+			 IJ.log(e1.toString());
+		 }
 	}
 	
 	private void processNuclei(int lo, int hi) throws Exception {
@@ -81,26 +88,23 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 		
 	}
 	
-	private void processNucleus(Nucleus n) throws Exception{
-//		int count = 1;
-//		for(Nucleus n : collection.getNuclei()){ 
+	private void processNucleus(Nucleus n) throws Exception {
+
 //			log(Level.FINER, "Fitting nucleus "+n.getPathAndNumber()+" ("+count+" of "+collection.cellCount()+")");
 			fitter.fit(n, pc);
 
 			// recombine the segments at the lengths of the median profile segments
 			Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
-			try{
-				n.setProfile(ProfileType.FRANKEN, new SegmentedProfile(recombinedProfile));
-			} catch(Exception e){
-//				log(Level.SEVERE, recombinedProfile.toString());
-//				logError("Error setting nucleus profile", e);
-				throw new Exception("Error setting nucleus profile");
-			}
-			
-//			frankenProfiles.add(recombinedProfile);
-//			count++;
-//			publish(++progressCount); // publish the progress to gui
-//		}
+//			try{
+				SegmentedProfile segmented = new SegmentedProfile(recombinedProfile);
+				n.setProfile(ProfileType.FRANKEN, segmented);
+//			} catch(Exception e){
+//				
+////				log(Level.SEVERE, recombinedProfile.toString());
+////				logError("Error setting nucleus profile", e);
+//				throw new Exception("Error setting nucleus profile");
+//			}
+
 	}
 	
 

@@ -966,7 +966,11 @@ public class RoundNucleus extends AbstractCellularComponent
 	*/
 
 	public SegmentedProfile getProfile(ProfileType type) throws Exception {
-		return new SegmentedProfile(this.profileMap.get(type));
+		if(this.hasProfile(type)){
+			return new SegmentedProfile(this.profileMap.get(type));
+		} else {
+			throw new IllegalArgumentException("Profile type "+type+" is not found in this nucleus");
+		}
 	}
 	
 	public boolean hasProfile(ProfileType type){
@@ -1006,7 +1010,9 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * @throws Exception
 	 */
 	public void setProfile(ProfileType type, SegmentedProfile profile) throws Exception{
-		
+		if(profile==null){
+			throw new IllegalArgumentException("Error setting nucleus profile: type "+type+" is null");
+		}
 		if(type.equals(ProfileType.FRANKEN)){
 			this.profileMap.put(type, profile);
 		} else {

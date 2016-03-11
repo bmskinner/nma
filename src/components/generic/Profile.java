@@ -53,6 +53,7 @@ public class Profile implements Serializable {
 	protected final double[] array;
 	private static final int ARRAY_BEFORE = -1;
 	private static final int ARRAY_AFTER = 1;
+	protected static final int ZERO_INDEX = 0;
 
 
 	
@@ -74,6 +75,9 @@ public class Profile implements Serializable {
 	 * @param p the profile to copy
 	 */
 	public Profile(final Profile p){
+		if(p==null){
+			throw new IllegalArgumentException("Input profile is null in profile contructor");
+		}
 
 		this.array = new double[p.size()];
 		
@@ -97,13 +101,13 @@ public class Profile implements Serializable {
 	}
 	
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + Arrays.hashCode(array);
-		return result;
-	}
+//	@Override
+//	public int hashCode() {
+//		final int prime = 31;
+//		int result = 1;
+//		result = prime * result + Arrays.hashCode(array);
+//		return result;
+//	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -243,24 +247,19 @@ public class Profile implements Serializable {
 	 * @param profile2 the profile to compare
 	 * @return a new profile with the length of the longest input profile
 	 */
-	private Profile equaliseLengths(Profile profile1, Profile profile2){
-
-		try{
-			// profile 2 is smaller
-			// return profile 1 unchanged
-			if(profile2.size() < profile1.size() ){
-				return profile1;
-			} else {
-				// profile 1 is smaller; interpolate to profile 2 length
-				profile1 = profile1.interpolate(profile2.size());
-			}
-		} catch(Exception e){
-			IJ.log("Error interpolating profiles: "+e.getMessage());
-			IJ.log("Profile 1: ");
-			profile1.print();
-			IJ.log("Profile 2: ");
-			profile2.print();
+	private Profile equaliseLengths(Profile profile1, Profile profile2) throws Exception {
+		if(profile1==null || profile2==null){
+			throw new IllegalArgumentException("Input profile is null when equilising lengths");
 		}
+		// profile 2 is smaller
+		// return profile 1 unchanged
+		if(profile2.size() < profile1.size() ){
+			return profile1;
+		} else {
+			// profile 1 is smaller; interpolate to profile 2 length
+			profile1 = profile1.interpolate(profile2.size());
+		}
+
 		return profile1;
 	}
 
@@ -272,7 +271,7 @@ public class Profile implements Serializable {
 	 * @param testProfile the profile to compare to 
 	 * @return the sum-of-squares difference
 	 */
-	public double absoluteSquareDifference(Profile testProfile){
+	public double absoluteSquareDifference(Profile testProfile) throws Exception {
 
 		// the test profile needs to be matched to this profile
 		// whichever is smaller must be interpolated 
@@ -300,7 +299,7 @@ public class Profile implements Serializable {
 	 * @param testProfile the profile to compare
 	 * @return
 	 */
-	public double weightedSquareDifference(Profile testProfile){
+	public double weightedSquareDifference(Profile testProfile) throws Exception {
 		
 		if(testProfile==null){
 			throw new IllegalArgumentException("Test profile is null");

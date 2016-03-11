@@ -111,15 +111,16 @@ public class SegmentFitter {
 	 * @param n the nucleus to recombine
 	 * @param tag the BorderTag to start from
 	 * @return a profile
+	 * @throws Exception  
 	 */
-	public Profile recombine(Nucleus n, BorderTag tag){
+	public Profile recombine(Nucleus n, BorderTag tag) throws Exception {
 		if(n==null){
 //			log(Level.WARNING, "Recombined nucleus is null");
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
 
 		SegmentedProfile frankenProfile = null;
-		try {
+//		try {
 			if(n.getProfile(ProfileType.REGULAR).hasSegments()){
 
 				/*
@@ -147,9 +148,9 @@ public class SegmentFitter {
 //				log(Level.WARNING, "Nucleus has no segments");
 				throw new IllegalArgumentException("Nucleus has no segments");
 			}
-		} catch(Exception e){
-//			logError("Error recombining segments", e);
-		}
+//		} catch(Exception e){
+////			logError("Error recombining segments", e);
+//		}
 
 		
 		
@@ -461,8 +462,9 @@ public class SegmentFitter {
 	 * @param referenceProfile the profile to measure against
 	 * @param testProfile the profile to measure
 	 * @return the sum of square differences between the segments
+	 * @throws Exception 
 	 */
-	private double compareSegments(String name, SegmentedProfile referenceProfile, SegmentedProfile testProfile){
+	private double compareSegments(String name, SegmentedProfile referenceProfile, SegmentedProfile testProfile) throws Exception{
 		if(name == null){
 			throw new IllegalArgumentException("Segment name is null");
 		}
@@ -482,8 +484,9 @@ public class SegmentFitter {
 	 * @param reference
 	 * @param test
 	 * @return the score
+	 * @throws Exception 
 	 */
-	private double  compareSegmentationPatterns(SegmentedProfile referenceProfile, SegmentedProfile testProfile){
+	private double  compareSegmentationPatterns(SegmentedProfile referenceProfile, SegmentedProfile testProfile) throws Exception{
 		
 		if(referenceProfile.getSegmentCount()!=testProfile.getSegmentCount()){
 			throw new IllegalArgumentException("Lists are of different lengths");

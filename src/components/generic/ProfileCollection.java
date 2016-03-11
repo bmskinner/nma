@@ -393,7 +393,7 @@ public class ProfileCollection implements Serializable {
 	 * Create the profile aggregate from the given collection, with a set length, and
 	 * containing the given type of nucleus profile
 	 * By default, the profiles are zeroed on the reference point
-	 * @param collection the Cellcollection
+	 * @param collection the CellCollection
 	 * @param type the profile type to fetch from the nuclei
 	 * @param length the length of the aggregate
 	 * @throws Exception 
@@ -401,6 +401,9 @@ public class ProfileCollection implements Serializable {
 	public void createProfileAggregate(CellCollection collection, ProfileType type, int length) throws Exception{
 		if(length<0){
 			throw new IllegalArgumentException("Requested length is negative");
+		}
+		if(collection == null || type == null ){
+			throw new IllegalArgumentException("CellCollection or ProfileType is null");
 		}
 		profileCache.clear();
 		aggregate = new ProfileAggregate(length);

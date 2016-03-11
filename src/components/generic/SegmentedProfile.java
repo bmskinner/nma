@@ -52,7 +52,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		super(p);
 		
 		if(segments==null || segments.isEmpty()){
-			throw new IllegalArgumentException("Segment list is null or empty in profile contructor");
+			throw new IllegalArgumentException("Segment list is null or empty in segmented profile contructor");
 		}
 		if(p.size() != segments.get(0).getTotalLength() ){
 			throw new IllegalArgumentException("Segments total length ("
@@ -72,8 +72,8 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * and segments
 	 * @param profile the segmented profile to copy
 	 */
-	public SegmentedProfile(SegmentedProfile profile) throws Exception {
-		this(profile, NucleusBorderSegment.copy(profile.getSegments()));
+	public SegmentedProfile(final SegmentedProfile profile) throws Exception {
+		this(profile, profile.getSegments());
 	}
 	
 	/**
@@ -145,7 +145,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		NucleusBorderSegment first = null;
 		
 		for(NucleusBorderSegment seg : this.segments){
-			if(seg.getPosition()==0){
+			if(seg.getPosition()==ZERO_INDEX){
 				first = seg;
 			}
 		}
@@ -225,23 +225,31 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 */
 	public List<NucleusBorderSegment> getOrderedSegments() throws Exception {
 		
-		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
-		NucleusBorderSegment firstSeg = null;
+		NucleusBorderSegment firstSeg = null; // default to the first segment in the profile
 		
 		/*
 		 * Choose the first segment of the profile to be the segment
 		 * starting at the zero index
 		 */
-		for(NucleusBorderSegment seg : this.getSegments()){
+		for(NucleusBorderSegment seg : segments){
 			
-			if(seg.getStartIndex()==0){
+			if(seg.getStartIndex()==ZERO_INDEX){
 				firstSeg = seg;
 			}
 		}
 		
-		result = getSegmentsFrom(firstSeg);
+		if(firstSeg==null){
+			
+			/*
+			 * A small subset of nuclei from issue 96 do not produce segment boundaries
+			 */
+			IJ.log("Cannot get ordered segments");
+			IJ.log(this.toString());
+			firstSeg = this.getSegments().get(0); // default to the first segment in the profile
+		}
 		
-		return NucleusBorderSegment.copy(result);
+		return getSegmentsFrom(firstSeg);
+	
 	}
 	
 	

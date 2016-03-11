@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.UUID;
 
 import components.AbstractCellularComponent;
-
 import utility.Utils;
 
 public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
@@ -260,7 +259,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	public int getMidpointIndex(){
 		if(this.wraps()){
 			
-			int midLength = this.length()/2 ;
+			int midLength = this.length() >> 1 ;
 			if( midLength+startIndex < this.getTotalLength()){
 				return midLength+startIndex;
 			} else {
@@ -473,7 +472,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	 * @return
 	 */
 	public boolean wraps(int start, int end){
-		if(end<start){ // the segment wraps
+		if(end<=start){ // the segment wraps
 			return true;
 		} else{
 			return false;
@@ -792,7 +791,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	 * @throws Exception 
 	 */
 	public static void linkSegments(List<NucleusBorderSegment> list) throws Exception{
-		if(list==null || list.isEmpty()|| list.size()==1){
+		if(list==null || list.isEmpty() ){ // || list.size()==1
 			throw new IllegalArgumentException("List of segments is null, empty or one");
 		}
 				
@@ -814,35 +813,42 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 			position++;
 		}
 		
-		NucleusBorderSegment firstSegment = list.get(0);
-		NucleusBorderSegment lastSegment  = list.get(list.size()-1);
-				
-		/*
-		 * Ensure the end of the final segment is the same index as the start of the first segment.
-		 * 
-		 * Unlock the first segment while the update proceeds
-		 */
+		if(list.size()>1){
 		
-		boolean lockState = firstSegment.isStartPositionLocked();
-		firstSegment.setStartPositionLocked(false);
-		
-		boolean ok = firstSegment.update(lastSegment.getEndIndex(), firstSegment.getEndIndex());
-		if(!ok){
-			throw new Exception("Error fitting final segment: "+firstSegment.getLastFailReason());
-		}
+			NucleusBorderSegment firstSegment = list.get(0);
+			NucleusBorderSegment lastSegment  = list.get(list.size()-1);
 
-		lastSegment.setNextSegment(firstSegment); // ensure they match up at the end
-		firstSegment.setPrevSegment(lastSegment);
-		
-		// if the first segment is starting at the last index of the profile, correct
-		// it to start at 0
-		if(firstSegment.getStartIndex()==firstSegment.getTotalLength()-1){
-			firstSegment.update(0, firstSegment.getEndIndex());
-		}	
-		/*
-		 * Relock the segment if it was previously locked
-		 */
-		firstSegment.setStartPositionLocked(lockState);
+			/*
+			 * Ensure the end of the final segment is the same index as the start of the first segment.
+			 * 
+			 * Unlock the first segment while the update proceeds
+			 */
+
+			boolean lockState = firstSegment.isStartPositionLocked();
+			firstSegment.setStartPositionLocked(false);
+
+			boolean ok = firstSegment.update(lastSegment.getEndIndex(), firstSegment.getEndIndex());
+			if(!ok){
+				throw new Exception("Error fitting final segment: "+firstSegment.getLastFailReason());
+			}
+
+			lastSegment.setNextSegment(firstSegment); // ensure they match up at the end
+			firstSegment.setPrevSegment(lastSegment);
+
+			// if the first segment is starting at the last index of the profile, correct
+			// it to start at 0
+			if(firstSegment.getStartIndex()==firstSegment.getTotalLength()-1){
+				firstSegment.update(0, firstSegment.getEndIndex());
+			}	
+			/*
+			 * Relock the segment if it was previously locked
+			 */
+			firstSegment.setStartPositionLocked(lockState);
+		} else {
+			NucleusBorderSegment firstSegment = list.get(0);
+			firstSegment.setNextSegment(firstSegment);
+			firstSegment.setPrevSegment(firstSegment);
+		}
 		
 	}
 	
@@ -949,8 +955,11 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	 * @throws Exception 
 	 */
 	public static List<NucleusBorderSegment> copy(List<NucleusBorderSegment> list) throws Exception{
-		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
 		
+		if(list==null || list.isEmpty()){
+			throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
+		}
+		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
 		
 		for(NucleusBorderSegment segment : list){
 
@@ -958,8 +967,6 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		}
 		
 		linkSegments(result);
-
-		
 		return result;
 	}
 	
