@@ -1374,6 +1374,9 @@ public class NucleusDatasetCreator {
 				}
 				double[][] data = { xpoints, ypoints };
 				ds.addSeries("Nucleus_"+i+"_"+collection.getName(), data);
+			} else {
+				double[][] data = { {0}, {0} }; // make an empty series if no consensus
+				ds.addSeries("Nucleus_"+i+"_"+collection.getName(), data);
 			}
 			i++;
 

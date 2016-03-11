@@ -42,7 +42,6 @@ import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
@@ -60,17 +59,11 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 		// Not needed for a consensus panel
 		headerPanel.remove(measurementUnitSettingsPanel);
 
-
-		JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-
-		FixedAspectRatioChartPanel chartPanel = new FixedAspectRatioChartPanel(chart);
-		chartPanel.setPreferredSize(preferredSize);
-		chartPanels.put("null", chartPanel);
-
-		mainPanel.add(chartPanel);
-		
-		
-		
+		try {
+			this.updateNull();
+		} catch (Exception e) {
+			programLogger.log(Level.SEVERE, "Error creating segments posistion panel", e);
+		}		
 	}
 	
 	@Override
@@ -114,26 +107,27 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 			for(NucleusBorderSegment seg : segments){
 
 				ChartOptions options = new ChartOptionsBuilder()
-				.setDatasets(getDatasets())
-				.setLogger(programLogger)
-				.setSegPosition(seg.getPosition())
-				.setSegID(seg.getID())
-				.build();
+					.setDatasets(getDatasets())
+					.setLogger(programLogger)
+					.setSegPosition(seg.getPosition())
+					.setSegID(seg.getID())
+					.build();
 
 				JFreeChart chart = getChart(options);
 
 				FixedAspectRatioChartPanel chartPanel = new FixedAspectRatioChartPanel(chart);
 				chartPanel.setPreferredSize(preferredSize);
-//				chartPanel.restoreAutoBounds();
+	
 				chartPanels.put(seg.getName(), chartPanel);
-				mainPanel.add(chartPanel);							
+				mainPanel.add(chartPanel);			
+//				chartPanel.restoreAutoBounds();
 			}
 
 		} else { // different number of segments, blank chart
 			this.setEnabled(false);
 			mainPanel.setLayout(new FlowLayout());
 			mainPanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
-			scrollPane.setViewportView(mainPanel);
+//			scrollPane.setViewportView(mainPanel);
 		}
 
 		mainPanel.revalidate();

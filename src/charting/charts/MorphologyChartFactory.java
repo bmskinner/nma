@@ -572,7 +572,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 */
 	private static JFreeChart makeMultiSegmentStartPositionChart(ChartOptions options) throws Exception {
 		
-		XYDataset ds = CellDatasetCreator.createPositionFeatureDataset(options);
+		XYDataset positionDataset = CellDatasetCreator.createPositionFeatureDataset(options);
 		
 		XYDataset nuclearOutlines = NucleusDatasetCreator.createMultiNucleusOutline(options.getDatasets());
 		
@@ -584,28 +584,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 
 		XYPlot plot = chart.getXYPlot();
-		
-		
-		/*
-		 * TODO: make this work smoothly - goal is to have the consensus outlines underneath 
-		 * the positions of segmetn starts
-		 */
-		
-		plot.setDataset(1, ds);
-		
-		boolean hasConsensus = ConsensusNucleusChartFactory.hasConsensusNucleus(options.getDatasets());
-		if(hasConsensus){
-			// Find the bounds of the consensus nuclei in the options
-			double max = ConsensusNucleusChartFactory.getconsensusChartRange(options.getDatasets());
-			plot.setDataset(0, nuclearOutlines);
-					
-			plot.getDomainAxis().setRange(-max,max);
-			plot.getRangeAxis().setRange(-max,max);
-		} else {
-			plot.getDomainAxis().setAutoRange(true);
-			plot.getRangeAxis().setAutoRange(true);
-		}
-		plot.setBackgroundPaint(Color.WHITE);
+
+		plot.setDataset(0, positionDataset);
 		
 		/*
 		 * Points only for the segment positions
@@ -613,20 +593,37 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		XYLineAndShapeRenderer pointRenderer = new XYLineAndShapeRenderer();
 		pointRenderer.setBaseShapesVisible(true);
 		pointRenderer.setBaseLinesVisible(false);
-		plot.setRenderer(1, pointRenderer);
+		pointRenderer.setBaseStroke(ChartComponents.QUARTILE_STROKE);
+		pointRenderer.setBaseSeriesVisibleInLegend(false);
+		plot.setRenderer(0, pointRenderer);
 		
-		/*
-		 * Lines only for the consensus nuclei
-		 */
-		XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer();
-		lineRenderer.setBaseShapesVisible(false);
-		lineRenderer.setBaseLinesVisible(true);
-		plot.setRenderer(0, lineRenderer);
-		
-		
-		for (int j = 0; j < ds.getSeriesCount(); j++) {
-			pointRenderer.setSeriesVisibleInLegend(j, false);
-			pointRenderer.setSeriesStroke(j, ChartComponents.QUARTILE_STROKE);
+		boolean hasConsensus = ConsensusNucleusChartFactory.hasConsensusNucleus(options.getDatasets());
+		if(hasConsensus){
+			// Find the bounds of the consensus nuclei in the options
+			double max = ConsensusNucleusChartFactory.getconsensusChartRange(options.getDatasets());
+			plot.setDataset(1, nuclearOutlines);
+					
+			plot.getDomainAxis().setRange(-max,max);
+			plot.getRangeAxis().setRange(-max,max);
+			
+			
+			/*
+			 * Lines only for the consensus nuclei
+			 */
+			XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer();
+			lineRenderer.setBaseShapesVisible(false);
+			lineRenderer.setBaseLinesVisible(true);
+			lineRenderer.setBaseStroke(ChartComponents.QUARTILE_STROKE);
+			lineRenderer.setBaseSeriesVisibleInLegend(false);
+			plot.setRenderer(1, lineRenderer);
+			
+		} else {
+			plot.getDomainAxis().setAutoRange(true);
+			plot.getRangeAxis().setAutoRange(true);
+		}
+		plot.setBackgroundPaint(Color.WHITE);
+
+		for (int j = 0; j < positionDataset.getSeriesCount(); j++) {
 
 			Color profileColour = options.getDatasets().get(j).getDatasetColour() == null 
 					? ColourSelecter.getSegmentColor(j)
@@ -635,22 +632,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			pointRenderer.setSeriesPaint(j, profileColour);
 			
 			if(hasConsensus){
-			
-				lineRenderer.setSeriesVisibleInLegend(j, false);
-				String name = (String) nuclearOutlines.getSeriesKey(j);
-				lineRenderer.setSeriesStroke(j, ChartComponents.QUARTILE_STROKE);
-
-				int index = getIndexFromLabel(name);
-				AnalysisDataset d = options.getDatasets().get(index);
-
-				// in this context, segment colour refers to the entire
-				// dataset colour (they use the same pallates in ColourSelecter)
-				Color color = d.getDatasetColour() == null 
-						? ColourSelecter.getSegmentColor(j)
-								: d.getDatasetColour();
-
-						// get the group id from the name, and make colour
-						lineRenderer.setSeriesPaint(j, color);
+				plot.getRenderer(1).setSeriesPaint(j, profileColour);
 			}
 		}
 		return chart;

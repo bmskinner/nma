@@ -1,0 +1,126 @@
+/*******************************************************************************
+ *  	Copyright (C) 2015, 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details. Gluten-free. May contain 
+ *     traces of LDL asbestos. Avoid children using heavy machinery while under the
+ *     influence of alcohol.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
+package gui.tabs.segments;
+
+import gui.components.ExportableTable;
+import gui.components.WilcoxonTableCellRenderer;
+import gui.tabs.AbstractPairwiseDetailPanel;
+
+import java.util.List;
+import java.util.logging.Logger;
+
+import javax.swing.JLabel;
+import javax.swing.table.TableModel;
+
+import stats.SegmentStatistic;
+import charting.datasets.NucleusTableDatasetCreator;
+import charting.options.TableOptions;
+import charting.options.TableOptionsBuilder;
+
+import components.generic.BorderTag;
+import components.generic.ProfileType;
+import components.nuclear.NucleusBorderSegment;
+
+@SuppressWarnings("serial")
+public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
+					
+	public SegmentWilcoxonPanel(Logger logger){
+		super(logger);
+	}
+
+	@Override
+	protected void updateSingle() throws Exception {
+		tablePanel = createTablePanel();
+		scrollPane.setColumnHeaderView(null);
+		tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
+		scrollPane.setViewportView(tablePanel);;
+		tablePanel.repaint();
+		
+	}
+
+	@Override
+	protected void updateMultiple() throws Exception {
+		tablePanel = createTablePanel();
+		scrollPane.setColumnHeaderView(null);
+		
+		if(checkSegmentCountsMatch(getDatasets())){
+
+			List<NucleusBorderSegment> segments = activeDataset()
+					.getCollection()
+					.getProfileCollection(ProfileType.REGULAR)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getOrderedSegments();
+//					.getSegmentCount();
+
+			for(SegmentStatistic stat : SegmentStatistic.values()){
+
+				// Get each segment as a boxplot
+				for(NucleusBorderSegment seg : segments){
+//				for( int i=0; i<segmentCount; i++){
+					String segName = seg.getName();
+
+					
+					
+					TableOptions options = new TableOptionsBuilder()
+					.setDatasets(getDatasets())
+					.setLogger(programLogger)
+					.setStat(stat)
+					.setSegPosition(seg.getPosition())
+					.build();
+
+					
+					TableModel model = getTable(options);
+					
+					ExportableTable table = new ExportableTable(model);
+					setRenderer(table, new WilcoxonTableCellRenderer());
+					addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
+					scrollPane.setColumnHeaderView(table.getTableHeader());
+				}
+
+			}
+			tablePanel.revalidate();
+
+		} else {
+			tablePanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
+		} 
+		
+		
+		
+		scrollPane.setViewportView(tablePanel);;
+		tablePanel.repaint();
+		
+	}
+
+	@Override
+	protected void updateNull() throws Exception {
+		tablePanel = createTablePanel();
+		scrollPane.setColumnHeaderView(null);
+		tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
+		scrollPane.setViewportView(tablePanel);;
+		tablePanel.repaint();
+		
+	}
+	
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return NucleusTableDatasetCreator.createWilcoxonStatisticTable(options);
+	}
+			
+}

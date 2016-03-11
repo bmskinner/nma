@@ -965,7 +965,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					programLogger.log(Level.FINE, "Set refold status in options");
 					final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 					list.add(dataset);
-					segmentsDetailPanel.refreshChartCache(list);
+					segmentsDetailPanel.refreshChartCache(list); // segment positions charts need updating
 
 					programLogger.log(Level.FINE, "Preparing to select refolded dataset");
 					populationsPanel.selectDataset(dataset);
