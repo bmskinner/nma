@@ -960,14 +960,13 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					dataset.getAnalysisOptions().setRefoldNucleus(true);
 					dataset.getAnalysisOptions().setRefoldMode("Fast");
 					
+					
+					
 					programLogger.log(Level.FINE, "Set refold status in options");
 					final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 					list.add(dataset);
-//					clearChartCache(list);
-					
-					
-					
-					
+					segmentsDetailPanel.refreshChartCache(list);
+
 					programLogger.log(Level.FINE, "Preparing to select refolded dataset");
 					populationsPanel.selectDataset(dataset);
 //					programLogger.log(Level.FINE, "Clearing consensus chart cache for refolded dataset");

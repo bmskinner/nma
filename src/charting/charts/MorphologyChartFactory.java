@@ -578,7 +578,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
-				                "X offset", "Y offset", ds, PlotOrientation.VERTICAL, true, true,
+				                null, null, null, PlotOrientation.VERTICAL, true, true,
 				                false);
 		
 		
@@ -590,13 +590,14 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		 * TODO: make this work smoothly - goal is to have the consensus outlines underneath 
 		 * the positions of segmetn starts
 		 */
-		plot.setDataset(0, nuclearOutlines);
+		
 		plot.setDataset(1, ds);
 		
-		if(ConsensusNucleusChartFactory.hasConsensusNucleus(options.getDatasets())){
+		boolean hasConsensus = ConsensusNucleusChartFactory.hasConsensusNucleus(options.getDatasets());
+		if(hasConsensus){
 			// Find the bounds of the consensus nuclei in the options
 			double max = ConsensusNucleusChartFactory.getconsensusChartRange(options.getDatasets());
-
+			plot.setDataset(0, nuclearOutlines);
 					
 			plot.getDomainAxis().setRange(-max,max);
 			plot.getRangeAxis().setRange(-max,max);
@@ -606,21 +607,51 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		}
 		plot.setBackgroundPaint(Color.WHITE);
 		
-		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-		plot.setRenderer( renderer);
+		/*
+		 * Points only for the segment positions
+		 */
+		XYLineAndShapeRenderer pointRenderer = new XYLineAndShapeRenderer();
+		pointRenderer.setBaseShapesVisible(true);
+		pointRenderer.setBaseLinesVisible(false);
+		plot.setRenderer(1, pointRenderer);
+		
+		/*
+		 * Lines only for the consensus nuclei
+		 */
+		XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer();
+		lineRenderer.setBaseShapesVisible(false);
+		lineRenderer.setBaseLinesVisible(true);
+		plot.setRenderer(0, lineRenderer);
+		
 		
 		for (int j = 0; j < ds.getSeriesCount(); j++) {
-			renderer.setSeriesVisibleInLegend(j, false);
-			renderer.setSeriesStroke(j, ChartComponents.QUARTILE_STROKE);
+			pointRenderer.setSeriesVisibleInLegend(j, false);
+			pointRenderer.setSeriesStroke(j, ChartComponents.QUARTILE_STROKE);
 
 			Color profileColour = options.getDatasets().get(j).getDatasetColour() == null 
 					? ColourSelecter.getSegmentColor(j)
 					: options.getDatasets().get(j).getDatasetColour();
 			
-			renderer.setSeriesPaint(j, profileColour);
+			pointRenderer.setSeriesPaint(j, profileColour);
 			
-			renderer.setBaseShapesVisible(true);
-			renderer.setBaseLinesVisible(false);
+			if(hasConsensus){
+			
+				lineRenderer.setSeriesVisibleInLegend(j, false);
+				String name = (String) nuclearOutlines.getSeriesKey(j);
+				lineRenderer.setSeriesStroke(j, ChartComponents.QUARTILE_STROKE);
+
+				int index = getIndexFromLabel(name);
+				AnalysisDataset d = options.getDatasets().get(index);
+
+				// in this context, segment colour refers to the entire
+				// dataset colour (they use the same pallates in ColourSelecter)
+				Color color = d.getDatasetColour() == null 
+						? ColourSelecter.getSegmentColor(j)
+								: d.getDatasetColour();
+
+						// get the group id from the name, and make colour
+						lineRenderer.setSeriesPaint(j, color);
+			}
 		}
 		return chart;
 		

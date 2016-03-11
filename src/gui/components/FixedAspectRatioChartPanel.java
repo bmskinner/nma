@@ -18,14 +18,13 @@
  *******************************************************************************/
 package gui.components;
 
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 
 @SuppressWarnings("serial")
-public class FixedAspectRatioChartPanel extends ChartPanel {
+public class FixedAspectRatioChartPanel extends ExportableChartPanel {
 
 
 	public FixedAspectRatioChartPanel(JFreeChart chart){

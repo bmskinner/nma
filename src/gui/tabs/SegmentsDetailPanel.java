@@ -23,12 +23,14 @@ import gui.SignalChangeListener;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.ExportableChartPanel;
 import gui.components.ExportableTable;
+import gui.components.FixedAspectRatioChartPanel;
 import gui.components.HistogramsTabPanel;
 import gui.components.PairwiseTableCellRenderer;
 import gui.components.SelectableChartPanel;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.components.WilcoxonTableCellRenderer;
+import gui.tabs.segments.SegmentPositionsPanel;
 import stats.SegmentStatistic;
 import utility.Constants;
 
@@ -126,6 +128,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		
 		segmentPositionsPanel = new SegmentPositionsPanel(programLogger);
 		segmentPositionsPanel.setMinimumSize(minimumChartSize);
+		this.addSubPanel(segmentPositionsPanel);
 		tabPanel.addTab("Positions", segmentPositionsPanel);
 		
 		
@@ -828,150 +831,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 			return NucleusTableDatasetCreator.createMagnitudeStatisticTable(options);
 		}
 				
-	}
-	
-	@SuppressWarnings("serial")
-	protected class SegmentPositionsPanel extends BoxplotsTabPanel implements ActionListener {
-
-		private Dimension preferredSize = new Dimension(300, 300);
-				
-		protected SegmentPositionsPanel(Logger logger){
-			super(logger);
-
-			JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-
-			ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
-			chartPanel.setPreferredSize(preferredSize);
-			chartPanels.put("null", chartPanel);
-
-			mainPanel.add(chartPanel);
-
-			
-		}
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			update(getDatasets());
-			
-		}
-
-
-		@Override
-		protected void updateSingle() throws Exception {
-			mainPanel = new JPanel();
-			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
-
-//			MeasurementScale scale = measurementUnitSettingsPanel.getSelected();
-			measurementUnitSettingsPanel.setEnabled(true);
-
-			programLogger.log(Level.FINEST, "Dataset list is not empty");
-
-			CellCollection collection = activeDataset().getCollection();
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
-					.getOrderedSegments();
-
-
-			// Get each segment as a boxplot
-			for(NucleusBorderSegment seg : segments){
-
-				ChartOptions options = new ChartOptionsBuilder()
-				.setDatasets(getDatasets())
-				.setLogger(programLogger)
-				.setSegPosition(seg.getPosition())
-				.setSegID(seg.getID())
-				.build();
-
-				JFreeChart chart = getChart(options);
-
-				ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
-				chartPanel.setPreferredSize(preferredSize);
-				chartPanels.put(seg.getName(), chartPanel);
-				mainPanel.add(chartPanel);							
-			}
-
-
-
-			mainPanel.revalidate();
-			mainPanel.repaint();
-			scrollPane.setViewportView(mainPanel);
-
-		}
-		
-		@Override
-		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
-			return MorphologyChartFactory.makeSegmentStartPositionChart(options);
-		}
-		
-
-
-		@Override
-		protected void updateMultiple() throws Exception {
-			mainPanel = new JPanel();
-			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
-
-//			MeasurementScale scale = measurementUnitSettingsPanel.getSelected();
-			measurementUnitSettingsPanel.setEnabled(true);
-
-			programLogger.log(Level.FINEST, "Dataset list is not empty");
-			
-			// Check that all the datasets have the same number of segments
-			if(checkSegmentCountsMatch(getDatasets())){
-
-				CellCollection collection = activeDataset().getCollection();
-				List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
-						.getSegmentedProfile(BorderTag.REFERENCE_POINT)
-						.getOrderedSegments();
-
-
-				// Get each segment as a boxplot
-				for(NucleusBorderSegment seg : segments){
-
-					ChartOptions options = new ChartOptionsBuilder()
-					.setDatasets(getDatasets())
-					.setLogger(programLogger)
-					.setSegPosition(seg.getPosition())
-					.setSegID(seg.getID())
-					.build();
-
-					JFreeChart chart = getChart(options);
-
-					ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
-					chartPanel.setPreferredSize(preferredSize);
-					chartPanels.put(seg.getName(), chartPanel);
-					mainPanel.add(chartPanel);							
-				}
-
-			} else { // different number of segments, blank chart
-				this.setEnabled(false);
-				mainPanel.setLayout(new FlowLayout());
-				mainPanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
-				scrollPane.setViewportView(mainPanel);
-			}
-
-			mainPanel.revalidate();
-			mainPanel.repaint();
-			scrollPane.setViewportView(mainPanel);
-		}
-
-
-		@Override
-		protected void updateNull() throws Exception {
-			mainPanel = new JPanel();
-			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
-			
-			MeasurementScale scale = measurementUnitSettingsPanel.getSelected();
-			// No datasets, show blank chart
-			measurementUnitSettingsPanel.setEnabled(false);
-
-			ChartPanel chartPanel = new ChartPanel(ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart());
-			mainPanel.add(chartPanel);
-			mainPanel.revalidate();
-			mainPanel.repaint();
-			scrollPane.setViewportView(mainPanel);
-		}
-	}
-	
+	}	
 	
 
 	@Override
