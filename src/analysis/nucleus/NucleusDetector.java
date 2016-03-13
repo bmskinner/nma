@@ -339,7 +339,7 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 	  this.collectionGroup.put(folder, folderCollection);
 
 
-	  FileProcessingTask task = new FileProcessingTask(folder, listOfFiles, folderCollection, outputFolder, programLogger, analysisOptions);
+	  FileProcessingTask task = new FileProcessingTask(folder, listOfFiles, folderCollection, outputFolder, analysisOptions);
 	  task.addProgressListener(this);
 	  mainPool.invoke(task);
 //	  task.invoke();

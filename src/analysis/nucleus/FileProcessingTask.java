@@ -22,54 +22,58 @@ import utility.Constants;
 @SuppressWarnings("serial")
 public class FileProcessingTask  extends AbstractProgressAction  {
 	
-	private CellCollection collection;
+	private final CellCollection collection;
 	private File[] files;
 	private static final int THRESHOLD = 5; // number of images to handle per fork
 	final int low, high;
-	final NucleusFinder finder;
-	final String outputFolder;
-	final AnalysisOptions analysisOptions;
-	final File folder;
+	private final NucleusFinder finder;
+	private final String outputFolder;
+	private final AnalysisOptions analysisOptions;
+	private final File folder;
 	
-	FileProcessingTask(File folder, File[] files, CellCollection collection, int low, int high, String outputFolder, AnalysisOptions analysisOptions) {
-		this.collection = collection;
-		this.files = files;
-		this.folder = folder;
-		this.low = low;
-		this.high = high;
-		this.outputFolder = outputFolder;
+	private FileProcessingTask(File folder, File[] files, CellCollection collection, int low, int high, String outputFolder, AnalysisOptions analysisOptions) {
+		this.collection      = collection;
+		this.files           = files;
+		this.folder          = folder;
+		this.low             = low;
+		this.high            = high;
+		this.outputFolder    = outputFolder;
 		this.analysisOptions = analysisOptions;
-		finder = new NucleusFinder( analysisOptions, outputFolder);
+		this.finder          = new NucleusFinder( analysisOptions, outputFolder);
 	}
 
-	FileProcessingTask(File folder, File[] files, CellCollection collection, String outputFolder, Logger programLogger, AnalysisOptions analysisOptions) {
+	public FileProcessingTask(File folder, File[] files, CellCollection collection, String outputFolder, AnalysisOptions analysisOptions) {
 		this(folder, files, collection, 0, files.length, outputFolder, analysisOptions);
 
 	}
-	
+
 	protected void compute() {
-	     if (high - low < THRESHOLD)
-	       analyseFiles(low, high);
-	     else {
-	       int mid = (low + high) >>> 1;
-	       
-	       List<FileProcessingTask> tasks = new ArrayList<FileProcessingTask>();
-	       FileProcessingTask task1 = new FileProcessingTask(folder, files, collection, low, mid, outputFolder, analysisOptions);
-	       task1.addProgressListener(this);
-	       
-	       
-	       FileProcessingTask task2 = new FileProcessingTask(folder, files, collection, mid, high, outputFolder, analysisOptions);
-	       task2.addProgressListener(this);
-	       
-	       tasks.add(task1);
-	       tasks.add(task2);
-	       
-	       FileProcessingTask.invokeAll(tasks);
-	       
-	     }
-	   }
+		
+		if (high - low < THRESHOLD){
+			
+			analyseFiles();
+			
+		} else {
+			
+			int mid = (low + high) >>> 1;
+
+			List<FileProcessingTask> tasks = new ArrayList<FileProcessingTask>();
+
+			FileProcessingTask task1 = new FileProcessingTask(folder, files, collection, low, mid, outputFolder, analysisOptions);
+			FileProcessingTask task2 = new FileProcessingTask(folder, files, collection, mid, high, outputFolder, analysisOptions);
+
+			task1.addProgressListener(this);
+			task2.addProgressListener(this);
+
+			tasks.add(task1);
+			tasks.add(task2);
+
+			FileProcessingTask.invokeAll(tasks);
+
+		}
+	}
 	
-	void analyseFiles(int lo, int hi) {
+	void analyseFiles() {
 		
 		for(int i=low; i<high; i++){
 			analyseFile(files[i]);
@@ -89,11 +93,11 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 				  // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
 				  makeFolder(folder);
 				  
-				  programLogger. log(Level.INFO, "File:  "+file.getName());
+				  log(Level.INFO, "File:  "+file.getName());
 				  List<Cell> cells = finder.getCells(imageStack, file);
 				  
 				  if(cells.isEmpty()){
-					  programLogger.log(Level.INFO, "  No nuclei detected in image");
+					  log(Level.INFO, "  No nuclei detected in image");
 				  } else {
 					  int nucleusNumber = 0;
 					  for(Cell cell : cells){
@@ -101,24 +105,19 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 					  }
 				  }
 
-			  } catch (Exception e) { // end try
-//				  logError("Error in image processing: "+e.getMessage(), e);
-			  } // end catch
+			  } catch (Exception e) { 
+				  logError("Error in image processing: "+e.getMessage(), e);
+			  } 
 			  
 			  fireProgressEvent();
 			  
 		  } 
-//		  else { // if !ok
-//			  if(file.isDirectory()){ // recurse over any sub folders
-////				  processFolder(file);
-//			  } 
-//		  } // end else if !ok
 	   }
 
 
 	private void addAndProcessCell(Cell cell, ImageStack imageStack, int nucleusNumber ) throws Exception{
 		collection.addCell(cell);
-		programLogger.log(Level.INFO, "  Added nucleus "+nucleusNumber);
+		log(Level.INFO, "  Added nucleus "+nucleusNumber);
 
 		 
 		  // save out the image stacks rather than hold within the nucleus
@@ -185,7 +184,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 	      try{
 	        output.mkdir();
 	      } catch(Exception e) {
-//	    	  logError("Failed to create directory", e);
+	    	  logError("Failed to create directory", e);
 	      }
 	    }
 	    return output;

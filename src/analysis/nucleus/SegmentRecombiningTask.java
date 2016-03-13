@@ -16,23 +16,28 @@ import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclei.Nucleus;
 
+/**
+ * This class divdes segment fitting amongst the nuclei in a dataset
+ * @author ben
+ *
+ */
 @SuppressWarnings("serial")
 public class SegmentRecombiningTask extends AbstractProgressAction  {
 	
-	SegmentFitter fitter;
-	SegmentedProfile medianProfile;
-	final int low, high;
-	final Nucleus[] nuclei;
-	private static final int THRESHOLD = 30;
+	private final SegmentFitter fitter;
+	private final SegmentedProfile medianProfile;
+	private final int low, high;
+	private final Nucleus[] nuclei;
+	private static final int THRESHOLD = 30; // The number of nuclei to split the task on
 	private final ProfileCollection pc;
 	
-	public SegmentRecombiningTask(SegmentedProfile medianProfile, ProfileCollection pc, Nucleus[] nuclei, int low, int high) throws Exception{
+	private SegmentRecombiningTask(SegmentedProfile medianProfile, ProfileCollection pc, Nucleus[] nuclei, int low, int high) throws Exception{
 		
-		fitter = new SegmentFitter(medianProfile);
-		this.low = low;
-		this.high = high;
-		this.nuclei = nuclei;
-		this.pc = pc;
+		this.fitter        = new SegmentFitter(medianProfile);
+		this.low           = low;
+		this.high          = high;
+		this.nuclei        = nuclei;
+		this.pc            = pc;
 		this.medianProfile = medianProfile;
 	}
 	
@@ -41,45 +46,39 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 	}
 
 	protected void compute() {
-	     if (high - low < THRESHOLD)
+		if (high - low < THRESHOLD){
+			
 			try {
-				processNuclei(low, high);
+				processNuclei();
 			} catch (Exception e) {
-				onError(e);
+				logError("Error processing nuclei" , e);
 			}
-	     else {
-	    	 int mid = (low + high) >>> 1;
+			
+		} else {
+			int mid = (low + high) >>> 1;
 
-	    	 List<SegmentRecombiningTask> tasks = new ArrayList<SegmentRecombiningTask>();
-	    	 SegmentRecombiningTask task1;
-	    	 try {
-	    		 task1 = new SegmentRecombiningTask(medianProfile, pc, nuclei, low, mid);
+			List<SegmentRecombiningTask> tasks = new ArrayList<SegmentRecombiningTask>();
 
-	    		 task1.addProgressListener(this);
+			try {
+				SegmentRecombiningTask task1 = new SegmentRecombiningTask(medianProfile, pc, nuclei, low, mid);
+				SegmentRecombiningTask task2 = new SegmentRecombiningTask(medianProfile, pc, nuclei, mid, high);
+				
+				task1.addProgressListener(this);
+				task2.addProgressListener(this);
 
+				tasks.add(task1);
+				tasks.add(task2);
 
-	    		 SegmentRecombiningTask task2 = new SegmentRecombiningTask(medianProfile, pc, nuclei, mid, high);
-	    		 task2.addProgressListener(this);
+				SegmentRecombiningTask.invokeAll(tasks);
+				
+			} catch (Exception e) {
+				logError("Error dividing task" , e);
+			}
 
-	    		 tasks.add(task1);
-	    		 tasks.add(task2);
-
-	    		 this.invokeAll(tasks);
-	    	 } catch (Exception e) {
-	    		 onError(e);
-	    	 }
-
-	     }
+		}
 	}
-	
-	private void onError(Exception e){
-		IJ.log("Error in segment recombination");
-		 for(StackTraceElement e1 : e.getStackTrace()){
-			 IJ.log(e1.toString());
-		 }
-	}
-	
-	private void processNuclei(int lo, int hi) throws Exception {
+		
+	private void processNuclei() throws Exception {
 		
 		for(int i=low; i<high; i++){
 			processNucleus(nuclei[i]);
@@ -90,20 +89,13 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 	
 	private void processNucleus(Nucleus n) throws Exception {
 
-//			log(Level.FINER, "Fitting nucleus "+n.getPathAndNumber()+" ("+count+" of "+collection.cellCount()+")");
 			fitter.fit(n, pc);
 
 			// recombine the segments at the lengths of the median profile segments
 			Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
-//			try{
-				SegmentedProfile segmented = new SegmentedProfile(recombinedProfile);
-				n.setProfile(ProfileType.FRANKEN, segmented);
-//			} catch(Exception e){
-//				
-////				log(Level.SEVERE, recombinedProfile.toString());
-////				logError("Error setting nucleus profile", e);
-//				throw new Exception("Error setting nucleus profile");
-//			}
+
+			SegmentedProfile segmented = new SegmentedProfile(recombinedProfile);
+			n.setProfile(ProfileType.FRANKEN, segmented);
 
 	}
 	

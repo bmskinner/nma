@@ -375,7 +375,7 @@ public class SegmentFitter extends AbstractLoggable {
 					result = new SegmentedProfile(testProfile);
 
 				}
-			}catch(IllegalArgumentException e){
+			} catch(IllegalArgumentException e){
 				// throw a new edxception rather than trying a nudge a problem profile
 //				fileLogger.log(Level.SEVERE, e.getMessage());
 				throw new Exception("Error getting segmentation pattern: "+e.getMessage());

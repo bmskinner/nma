@@ -27,7 +27,7 @@ import components.nuclei.Nucleus;
 @SuppressWarnings("serial")
 public abstract class AbstractStatisticFetchingTask extends RecursiveTask<double[]>{
 	
-	final int low, high;
+	protected final int low, high;
 	final Nucleus[] nuclei;
 	public static final int THRESHOLD = 200;
 	final PlottableStatistic stat;
@@ -38,11 +38,11 @@ public abstract class AbstractStatisticFetchingTask extends RecursiveTask<double
 	}
 	
 	protected AbstractStatisticFetchingTask(Nucleus[] nuclei, PlottableStatistic stat, MeasurementScale scale, int low, int high) {
-		this.low = low;
-		this.high = high;
+		this.low    = low;
+		this.high   = high;
 		this.nuclei = nuclei;
-		this.stat =stat;
-		this.scale = scale;
+		this.stat   = stat;
+		this.scale  = scale;
 	}
 	
 	public double[] concat(double[] a, double[] b) {

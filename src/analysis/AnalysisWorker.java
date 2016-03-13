@@ -39,6 +39,11 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     
     private final AnalysisDataset activeDataset;
     
+    /**
+     * Default constructor using a dataset. If possible, a file logger will be added
+     * for the dataset's debug file
+     * @param dataset
+     */
     public AnalysisWorker(final AnalysisDataset dataset){
     	this.activeDataset = dataset;
 

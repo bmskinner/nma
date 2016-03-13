@@ -48,7 +48,7 @@ public class PopulationImportAction extends ProgressableAction {
 		
 		File file = selectFile();
 		if(file!=null){
-			worker = new PopulationImportWorker(programLogger, file);
+			worker = new PopulationImportWorker(file);
 			worker.addPropertyChangeListener(this);
 			
 			this.setProgressMessage("Opening file...");

@@ -29,56 +29,48 @@ import java.util.logging.Logger;
 public abstract class AbstractProgressAction extends RecursiveAction implements ProgressListener {
 
 	private final List<Object> listeners = new ArrayList<Object>();
-	protected final Logger programLogger =  Logger.getLogger("ProgramLogger");
+	private final Logger programLogger =  Logger.getLogger("ProgramLogger");
 	
-	 public synchronized void addProgressListener( ProgressListener l ) {
-	        listeners.add( l );
-	    }
-	    
-	    public synchronized void removeProgressListener( ProgressListener l ) {
-	        listeners.remove( l );
-	    }
-	    
-	    protected synchronized void fireProgressEvent() {
-	    	
-	        ProgressEvent event = new ProgressEvent( this);
-	        Iterator<Object> iterator = listeners.iterator();
-	        while( iterator.hasNext() ) {
-	            ( (ProgressListener) iterator.next() ).progressEventReceived( event );
-	        }
-	    }
-	    
-	    @Override
-	    public void progressEventReceived(ProgressEvent event) {
-	    	// pass up the chain
-	    	fireProgressEvent();
-	    	
-	    }
-	    
-	    /**
-	     * Log the given message to the program log window and to the dataset
-	     * debug file
-	     * @param level the log level
-	     * @param message the message to log
-	     */
-	    protected void log(Level level, String message){
-//	    	if(fileLogger!=null){
-//	    		fileLogger.log(level, message);
-//	    	}
-			programLogger.log(level, message);
-	    }
-	    
-	    /**
-	     * Log an error to the program log window and to the dataset
-	     * debug file. Logs with Level.SEVERE
-	     * @param message the error messsage
-	     * @param t the exception
-	     */
-	    protected void logError(String message, Throwable t){
-//	    	if(fileLogger!=null){
-//	    		fileLogger.log(Level.SEVERE, message, t);
-//	    	}
-			programLogger.log(Level.SEVERE, message, t);
-	    }
-	    
+	public synchronized void addProgressListener( ProgressListener l ) {
+		listeners.add( l );
+	}
+
+	public synchronized void removeProgressListener( ProgressListener l ) {
+		listeners.remove( l );
+	}
+
+	protected synchronized void fireProgressEvent() {
+
+		ProgressEvent event = new ProgressEvent( this);
+		Iterator<Object> iterator = listeners.iterator();
+		while( iterator.hasNext() ) {
+			( (ProgressListener) iterator.next() ).progressEventReceived( event );
+		}
+	}
+
+	@Override
+	public void progressEventReceived(ProgressEvent event) {
+		// pass up the chain
+		fireProgressEvent();
+
+	}
+
+	/**
+	 * Log the given message to the program log window
+	 * @param level the log level
+	 * @param message the message to log
+	 */
+	protected void log(Level level, String message){
+		programLogger.log(level, message);
+	}
+
+	/**
+	 * Log an error to the program log window. Logs with Level.SEVERE
+	 * @param message the error messsage
+	 * @param t the exception
+	 */
+	protected void logError(String message, Throwable t){
+		programLogger.log(Level.SEVERE, message, t);
+	}
+
 }

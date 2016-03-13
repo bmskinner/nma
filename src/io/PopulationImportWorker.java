@@ -19,11 +19,7 @@
 package io;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.nuclear.NucleusType;
@@ -41,7 +37,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 	private File file;
 	private AnalysisDataset dataset;
 	
-	public PopulationImportWorker(Logger programLogger, File f){
+	public PopulationImportWorker(final File f){
 		super(null);
 		this.file = f;
 		this.setProgressTotal(1);
