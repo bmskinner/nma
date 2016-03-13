@@ -32,6 +32,7 @@ import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.nucleus.DatasetProfiler;
+import analysis.nucleus.DatasetProfiler.TailFinder;
 import utility.Constants;
 import utility.Version;
 
@@ -147,7 +148,9 @@ public class PopulationImportWorker extends AnalysisWorker {
 	private void calculateTopAndBottomVerticals(AnalysisDataset dataset) throws Exception {
 		
 		programLogger.log(Level.FINE, "Detecting flat region");
-		DatasetProfiler.TailFinder.assignTopAndBottomVerticalInMouse(dataset.getCollection());
+		DatasetProfiler p = new DatasetProfiler(dataset);
+		TailFinder finder = p. new TailFinder(dataset.getCollection());
+		finder.assignTopAndBottomVerticalInMouse();
 		
 		programLogger.log(Level.FINE, "Assigning flat region to nuclei");
 		DatasetProfiler.Offsetter.assignFlatRegionToMouseNuclei(dataset.getCollection());

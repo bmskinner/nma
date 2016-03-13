@@ -80,7 +80,7 @@ public class PopulationExporter extends AnalysisWorker {
 	 * @param saveFile the file to save as
 	 * @return
 	 */
-	public static boolean saveAnalysisDataset(AnalysisDataset dataset, File saveFile){
+	public boolean saveAnalysisDataset(AnalysisDataset dataset, File saveFile){
 
 		try{
 			// Since we're creating a save format, go with nmd: Nuclear Morphology Dataset
@@ -123,7 +123,7 @@ public class PopulationExporter extends AnalysisWorker {
 	 * @param dataset the dataset
 	 * @return ok or not
 	 */
-	public static boolean saveAnalysisDataset(AnalysisDataset dataset){
+	public boolean saveAnalysisDataset(AnalysisDataset dataset){
 
 		File saveFile = dataset.getSavePath();
 		if(saveFile.exists()){

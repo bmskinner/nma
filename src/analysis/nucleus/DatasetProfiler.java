@@ -112,7 +112,8 @@ public class DatasetProfiler extends AnalysisWorker {
 //			publish(1);
 
 			// use the median profile of this aggregate to find the orientation point ("tail")
-			TailFinder.findTailIndexInMedianCurve(collection);
+			TailFinder finder = new TailFinder(collection);
+			finder.findTailIndexInMedianCurve();
 //			publish(2);
 
 			// carry out iterative offsetting to refine the orientation point estimate
@@ -133,7 +134,7 @@ public class DatasetProfiler extends AnalysisWorker {
 				}
 
 				// carry out the orientation point detection in the median again
-				TailFinder.findTailIndexInMedianCurve(collection);
+				finder.findTailIndexInMedianCurve();
 
 				// apply offsets to each nucleus in the collection
 				Offsetter.calculateOffsets(collection); 
@@ -187,9 +188,15 @@ public class DatasetProfiler extends AnalysisWorker {
 		return result;
 	}
 	
-	public static class TailFinder {
+	public class TailFinder {
+		
+		CellCollection collection;
+		
+		public TailFinder(CellCollection collection){
+			this.collection = collection;
+		}
 
-		private static void findTailInRodentSpermMedian(CellCollection collection) throws Exception {
+		private void findTailInRodentSpermMedian() throws Exception {
 
 			// can't use regular tail detector, because it's based on NucleusBorderPoints
 			// get minima in curve, then find the lowest minima / minima furthest from both ends
@@ -228,7 +235,7 @@ public class DatasetProfiler extends AnalysisWorker {
 		 * @param collection
 		 * @throws Exception
 		 */
-		public static void assignTopAndBottomVerticalInMouse(CellCollection collection) throws Exception{
+		public void assignTopAndBottomVerticalInMouse() throws Exception{
 			 
 			Profile medianProfile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50);
 
@@ -248,7 +255,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			
 		}
 
-		private static void findTailInPigSpermMedian(CellCollection collection) throws Exception {
+		private void findTailInPigSpermMedian() throws Exception {
 			
 			// define the current zero offset at the reference point
 			// It does not matter, it just gives an offset key for the ProfileCollection
@@ -323,7 +330,7 @@ public class DatasetProfiler extends AnalysisWorker {
 		}
 		
 
-		private static void findTailInRoundMedian(CellCollection collection) throws Exception {
+		private void findTailInRoundMedian() throws Exception {
 			
 			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, 0);
 			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, 0);
@@ -343,19 +350,19 @@ public class DatasetProfiler extends AnalysisWorker {
 		 *  diameter, and lowest angle
 		 * @param collection the nucleus collection
 		 */
-		public static void findTailIndexInMedianCurve(CellCollection collection) throws Exception {
+		public void findTailIndexInMedianCurve() throws Exception {
 
 			switch(collection.getNucleusType()){
 
 				case PIG_SPERM:
-					findTailInPigSpermMedian(collection);	
+					findTailInPigSpermMedian();	
 					break;
 				case RODENT_SPERM:
-					findTailInRodentSpermMedian(collection);
-					assignTopAndBottomVerticalInMouse(collection);
+					findTailInRodentSpermMedian();
+					assignTopAndBottomVerticalInMouse();
 					break;
 				default:
-					findTailInRoundMedian(collection);
+					findTailInRoundMedian();
 					break;
 			}
 		}

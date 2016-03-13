@@ -139,7 +139,7 @@ public class ShellAnalysis extends AnalysisWorker {
 	 * @param collection the collection of nuclei to analyse
 	 * @param shells the number of shells per nucleus
 	 */
-	public static boolean run(AnalysisDataset dataset, int shells){
+	public boolean run(AnalysisDataset dataset, int shells){
 		
 		CellCollection collection = dataset.getCollection();
 		

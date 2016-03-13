@@ -13,6 +13,7 @@ import javax.swing.SwingWorker;
 
 import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
+import logging.Loggable;
 import analysis.nucleus.NucleusDetector;
 import utility.Constants;
 
@@ -23,9 +24,8 @@ import utility.Constants;
  * @author bms41
  *
  */
-public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
+public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> implements Loggable {
 
-	
 	private int progressTotal; // the maximum value for the progress bar
 	
 	protected static final Logger programLogger =  Logger.getLogger("ProgramLogger"); // log to the program LogPanel
@@ -97,7 +97,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
      * @param level the log level
      * @param message the message to log
      */
-    protected static void log(Level level, String message){
+    public void log(Level level, String message){
     	if(fileLogger!=null){
     		fileLogger.log(level, message);
     	}
@@ -110,7 +110,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
      * @param message the error messsage
      * @param t the exception
      */
-    protected static void logError(String message, Throwable t){
+    public void logError(String message, Throwable t){
     	if(fileLogger!=null){
     		fileLogger.log(Level.SEVERE, message, t);
     	}
