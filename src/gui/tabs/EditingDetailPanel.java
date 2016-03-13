@@ -43,15 +43,15 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 	
 	
 	
-	public EditingDetailPanel(Logger programLogger){
+	public EditingDetailPanel(){
 		
-		super(programLogger);
+		super();
 		
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane();
 		this.add(tabPane, BorderLayout.CENTER);
 		
-		cellDetailPanel = new CellDetailPanel(programLogger);
+		cellDetailPanel = new CellDetailPanel();
 		this.addSubPanel(cellDetailPanel);
 		
 
@@ -63,7 +63,7 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 		 * Signals can be sent to the segment panel
 		 * Events come from the panel only
 		 */
-		segmentsEditingPanel = new SegmentsEditingPanel(programLogger);
+		segmentsEditingPanel = new SegmentsEditingPanel();
 		segmentsEditingPanel.addSignalChangeListener(this);
 		this.addSignalChangeListener(segmentsEditingPanel);
 		

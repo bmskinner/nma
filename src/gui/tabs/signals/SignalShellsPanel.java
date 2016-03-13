@@ -55,8 +55,8 @@ public class SignalShellsPanel extends DetailPanel {
 	private JLabel 		statusLabel  = new JLabel();
 	private JButton 	newAnalysis	 = new JButton("Run new shell analysis");
 
-	public SignalShellsPanel(Logger logger){
-		super(logger);
+	public SignalShellsPanel(){
+		super();
 		this.setLayout(new BorderLayout());
 		JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
 		shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);

@@ -65,8 +65,8 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 
 	protected JScrollPane scrollPane; // hold the main panel
 	
-	public HistogramsTabPanel(final Logger programLogger){
-		super(programLogger);
+	public HistogramsTabPanel(){
+		super();
 
 		this.setLayout(new BorderLayout());
 

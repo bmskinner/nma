@@ -40,8 +40,8 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 	private PairwiseVennDetailPanel pairwiseVennPanel;
 	private KruskalDetailPanel 	    kruskalPanel;
 
-	public InterDatasetComparisonDetailPanel(Logger programLogger) {
-		super(programLogger);
+	public InterDatasetComparisonDetailPanel() {
+		super();
 		
 		try {
 			
@@ -57,9 +57,9 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 		this.setLayout(new BorderLayout());
 		JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
-		vennPanel 		  = new VennDetailPanel(programLogger); 
-		pairwiseVennPanel = new PairwiseVennDetailPanel(programLogger);
-		kruskalPanel	  = new KruskalDetailPanel(programLogger);
+		vennPanel 		  = new VennDetailPanel(); 
+		pairwiseVennPanel = new PairwiseVennDetailPanel();
+		kruskalPanel	  = new KruskalDetailPanel();
 		
 
 		// Add to the tabbed panel

@@ -56,8 +56,8 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 		protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
 		protected ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 		
-		public AbstractProfileDisplayPanel(Logger logger){
-			super(logger);
+		public AbstractProfileDisplayPanel(){
+			super();
 			this.setLayout(new BorderLayout());
 			JFreeChart rawChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
 			chartPanel = makeProfileChartPanel(rawChart);

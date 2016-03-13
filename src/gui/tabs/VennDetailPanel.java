@@ -48,8 +48,8 @@ public class VennDetailPanel extends DetailPanel {
 	
 	private ExportableTable vennTable;
 
-	public VennDetailPanel(Logger programLogger) {
-		super(programLogger);
+	public VennDetailPanel() {
+		super();
 		this.setLayout(new BorderLayout());
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		

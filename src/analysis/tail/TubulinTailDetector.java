@@ -78,7 +78,7 @@ public class TubulinTailDetector extends AnalysisWorker {
 	
 	private static final int WHITE = 255;
 	
-	public TubulinTailDetector(AnalysisDataset dataset, File folder, int channel, Logger programLogger){
+	public TubulinTailDetector(AnalysisDataset dataset, File folder, int channel){
 		super(dataset);
 		this.folder = folder;
 		this.channel = channel;

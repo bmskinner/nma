@@ -61,8 +61,8 @@ public class MergesDetailPanel extends DetailPanel {
 	private JPanel mainPanel;
 
 	
-	public MergesDetailPanel(Logger programLogger){
-		super(programLogger);
+	public MergesDetailPanel(){
+		super();
 
 		try {
 

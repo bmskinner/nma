@@ -44,8 +44,8 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 	
 	private JButton randomSamplingButton;
 	
-	public NucleusMagnitudePanel(Logger programLogger) throws Exception {
-		super(programLogger);
+	public NucleusMagnitudePanel() throws Exception {
+		super();
 	}
 
 	

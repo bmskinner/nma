@@ -36,6 +36,7 @@ import javax.swing.border.EmptyBorder;
 import analysis.AnalysisDataset;
 import gui.MainWindow;
 
+@SuppressWarnings("serial")
 public class DatasetArithmeticSetupDialog extends SettingsDialog implements ActionListener{
 	
 	
@@ -62,7 +63,7 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 	}
 
 	public DatasetArithmeticSetupDialog(AnalysisDataset selected, List<AnalysisDataset> list, MainWindow mw) {
-		super(mw.getProgramLogger(), mw, true);
+		super( mw, true);
 
 		this.setTitle("Dataset arithmetic options");
 		setSize(450, 300);

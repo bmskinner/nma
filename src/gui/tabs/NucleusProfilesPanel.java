@@ -44,13 +44,13 @@ public class NucleusProfilesPanel extends DetailPanel {
 	VariabilityDisplayPanel	variabilityChartPanel;
 	ModalityDisplayPanel 		modalityDisplayPanel;
 	
-	public NucleusProfilesPanel(Logger programLogger) {
-		super(programLogger);
+	public NucleusProfilesPanel() {
+		super();
 		this.setLayout(new BorderLayout());
 		JTabbedPane profilesTabPanel = new JTabbedPane(JTabbedPane.TOP);
 		
 		for(ProfileType type : ProfileType.values()){
-			ProfileDisplayPanel panel = new ProfileDisplayPanel(programLogger, type);
+			ProfileDisplayPanel panel = new ProfileDisplayPanel(type);
 			profilePanels.put(type, panel);
 			this.addSubPanel(panel);
 			profilesTabPanel.addTab(type.toString(), null, panel, null);
@@ -60,8 +60,8 @@ public class NucleusProfilesPanel extends DetailPanel {
 		 * Create the other profile panels
 		 */
 		
-		modalityDisplayPanel  = new ModalityDisplayPanel(programLogger);		
-		variabilityChartPanel = new VariabilityDisplayPanel(programLogger);
+		modalityDisplayPanel  = new ModalityDisplayPanel();		
+		variabilityChartPanel = new VariabilityDisplayPanel();
 		this.addSubPanel(variabilityChartPanel);
 		
 		profilesTabPanel.addTab("Variability", null, variabilityChartPanel, null);

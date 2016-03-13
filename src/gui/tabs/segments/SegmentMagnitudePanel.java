@@ -44,8 +44,8 @@ import components.nuclear.NucleusBorderSegment;
 @SuppressWarnings("serial")
 public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel  {
 					
-	public SegmentMagnitudePanel(Logger logger){
-		super(logger);
+	public SegmentMagnitudePanel(){
+		super();
 	}
 	
 	/**

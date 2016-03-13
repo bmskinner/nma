@@ -66,8 +66,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			
 	private ClustersPanel clusterPanel;
 
-	public ClusterDetailPanel(Logger programLogger) {
-		super(programLogger);
+	public ClusterDetailPanel() {
+		super();
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
 		clusterPanel = new ClustersPanel();

@@ -64,8 +64,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	private JPanel offsetsPanel; // store controls for rotating and translating
 	private JPanel mainPanel;	
 	
-	public ConsensusNucleusPanel(Logger programLogger) {
-		super(programLogger);
+	public ConsensusNucleusPanel() {
+		super();
 		this.setLayout(new BorderLayout());
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());

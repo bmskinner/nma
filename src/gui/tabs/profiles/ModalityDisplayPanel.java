@@ -43,8 +43,8 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 		private ExportableChartPanel modalityProfileChartPanel; // hold a chart showing p-values across the profile
 		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
 		
-		public ModalityDisplayPanel(Logger logger){
-			super(logger);
+		public ModalityDisplayPanel(){
+			super();
 			 createUI();
 			
 		}

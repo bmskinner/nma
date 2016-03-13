@@ -94,10 +94,10 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	
 	protected ClusteringOptions options;
 	
-	public HierarchicalTreeSetupDialog(MainWindow mw, final AnalysisDataset dataset) {
+	public HierarchicalTreeSetupDialog(final MainWindow mw, final AnalysisDataset dataset) {
 		
 		// modal dialog
-		super(mw.getProgramLogger(), mw, true);
+		super( mw, true);
 		this.dataset = dataset;
 		this.setTitle("Tree building options");
 		setSize(450, 300);
@@ -113,8 +113,8 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	 * @param mw
 	 * @param title
 	 */
-	protected HierarchicalTreeSetupDialog(MainWindow mw, final AnalysisDataset dataset, final String title){
-		super(mw.getProgramLogger(), mw, true);
+	protected HierarchicalTreeSetupDialog(final MainWindow mw, final AnalysisDataset dataset, final String title){
+		super( mw, true);
 		this.dataset = dataset;
 		this.setTitle(title);
 		setSize(450, 300);

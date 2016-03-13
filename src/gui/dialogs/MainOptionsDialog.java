@@ -45,8 +45,8 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 	private JComboBox<Level> levelBox;
 	private JComboBox<ColourSwatch> colourBox;
 	
-	public MainOptionsDialog(MainWindow mw){
-		super(mw.getProgramLogger(), mw, true);
+	public MainOptionsDialog(final MainWindow mw){
+		super( mw, true);
 
 		this.mw = mw;
 		this.setLayout(new BorderLayout());
@@ -75,7 +75,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		JLabel logLabel = new JLabel("Logging level");
 		Level[] levelArray = { Level.INFO, Level.FINE, Level.FINEST };
 		levelBox = new JComboBox<Level>(levelArray);
-		levelBox.setSelectedItem(mw.getProgramLogger().getLevel());
+		levelBox.setSelectedItem(programLogger.getLevel());
 		levelBox.addActionListener(this);
 		
 		labels.add(logLabel);
@@ -98,8 +98,8 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 	public void actionPerformed(ActionEvent arg0) {
 		
 		Level level = (Level) levelBox.getSelectedItem();
-		if(!level.equals(mw.getProgramLogger().getLevel())){
-			mw.getProgramLogger().setLevel(level);
+		if(!level.equals(programLogger.getLevel())){
+			programLogger.setLevel(level);
 			programLogger.log(Level.INFO, "Set the logging level to "+level.toString());
 		}
 		

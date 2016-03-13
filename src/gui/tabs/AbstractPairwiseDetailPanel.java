@@ -41,8 +41,8 @@ public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
 	protected JPanel tablePanel;
 	protected JScrollPane scrollPane = new JScrollPane();
 				
-		public AbstractPairwiseDetailPanel(Logger logger){
-			super(logger);
+		public AbstractPairwiseDetailPanel(){
+			super();
 
 			this.setLayout(new BorderLayout());
 			

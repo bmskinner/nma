@@ -55,9 +55,9 @@ public class AnalysisDetailPanel extends DetailPanel {
 	private ExportableTable tableAnalysisParamters;
 	private JTabbedPane tabPane;
 
-	public AnalysisDetailPanel(Logger programLogger) {
+	public AnalysisDetailPanel() {
 		
-		super(programLogger);
+		super();
 		
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane();

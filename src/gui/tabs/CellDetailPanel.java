@@ -122,9 +122,9 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	protected CellStatsPanel 	cellStatsPanel;		// the stats table
 	protected SignalListPanel 	signalListPanel;	// choose which background image to display
 
-	public CellDetailPanel(Logger programLogger) {
+	public CellDetailPanel() {
 
-		super(programLogger);
+		super();
 
 		try{
 			this.setLayout(new GridBagLayout());

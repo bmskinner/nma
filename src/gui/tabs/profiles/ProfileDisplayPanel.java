@@ -38,8 +38,8 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 	
 	private ProfileType type;
 		
-		public ProfileDisplayPanel(Logger logger, ProfileType type){
-			super(logger);
+		public ProfileDisplayPanel(ProfileType type){
+			super();
 			this.type = type;
 			
 			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(type);

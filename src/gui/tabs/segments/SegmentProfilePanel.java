@@ -1,7 +1,5 @@
 package gui.tabs.segments;
 
-import java.util.logging.Logger;
-
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
@@ -12,8 +10,8 @@ import gui.tabs.profiles.ProfileDisplayPanel;
 @SuppressWarnings("serial")
 public class SegmentProfilePanel extends ProfileDisplayPanel {
 	
-	public SegmentProfilePanel(Logger logger){
-		super(logger, ProfileType.REGULAR);
+	public SegmentProfilePanel(){
+		super(ProfileType.REGULAR);
 		this.remove(buttonPanel); // customisation is not needed here
 	}
 	

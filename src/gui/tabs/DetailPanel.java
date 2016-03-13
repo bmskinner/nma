@@ -26,6 +26,7 @@ import gui.InterfaceEvent.InterfaceMethod;
 import gui.InterfaceEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
+import logging.Loggable;
 
 import java.awt.Component;
 import java.awt.Cursor;
@@ -60,7 +61,7 @@ import analysis.AnalysisDataset;
  *
  */
 @SuppressWarnings("serial")
-public abstract class DetailPanel extends JPanel implements TabPanel, SignalChangeListener, DatasetEventListener, InterfaceEventListener {
+public abstract class DetailPanel extends JPanel implements TabPanel, SignalChangeListener, DatasetEventListener, InterfaceEventListener, Loggable {
 	
 	private final List<Object> listeners 			= new ArrayList<Object>();
 	private final List<Object> datasetListeners 	= new ArrayList<Object>();
@@ -78,11 +79,30 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	
 	volatile private boolean isUpdating = false;
 	
-	protected final Logger programLogger;
+	protected static final Logger programLogger =  Logger.getLogger("ProgramLogger"); // log to the program LogPanel
 	
-	public DetailPanel( final Logger programLogger){
-		this.programLogger = programLogger;
+	public DetailPanel( ){
 	}
+	
+    /**
+     * Log the given message to the program log window and to the dataset
+     * debug file
+     * @param level the log level
+     * @param message the message to log
+     */
+    public void log(Level level, String message){
+		programLogger.log(level, message);
+    }
+    
+    /**
+     * Log an error to the program log window and to the dataset
+     * debug file. Logs with Level.SEVERE
+     * @param message the error messsage
+     * @param t the exception
+     */
+    public void logError(String message, Throwable t){
+		programLogger.log(Level.SEVERE, message, t);
+    }
 	
 	
 	/**

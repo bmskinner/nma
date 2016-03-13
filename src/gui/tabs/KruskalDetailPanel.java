@@ -54,8 +54,8 @@ public class KruskalDetailPanel  extends DetailPanel {
 	private ExportableChartPanel chartPanel;
 	JButton frankenButton = new JButton("Compare frankenprofiles");
 
-	public KruskalDetailPanel(Logger programLogger ) throws Exception {
-		super(programLogger);
+	public KruskalDetailPanel( ) throws Exception {
+		super();
 		
 		createUI();
 		

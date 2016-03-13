@@ -33,8 +33,8 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 
 	private Dimension preferredSize = new Dimension(200, 300);
 			
-	public SegmentBoxplotsPanel(Logger logger){
-		super(logger);
+	public SegmentBoxplotsPanel(){
+		super();
 
 		JFreeChart boxplot = BoxplotChartFactory.createEmptyBoxplot();
 		

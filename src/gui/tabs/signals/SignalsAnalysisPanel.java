@@ -45,8 +45,8 @@ public class SignalsAnalysisPanel extends DetailPanel {
 	private JScrollPane     scrollPane;
 
 
-	public SignalsAnalysisPanel(Logger logger){
-		super(logger);
+	public SignalsAnalysisPanel(){
+		super();
 		this.setLayout(new BorderLayout());
 
 		table  = new ExportableTable(new DefaultTableModel());

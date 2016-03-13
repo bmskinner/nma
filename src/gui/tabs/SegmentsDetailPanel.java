@@ -57,8 +57,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 	
 	private JTabbedPane 			tabPanel;
 	
-	public SegmentsDetailPanel(Logger programLogger) {
-		super(programLogger);
+	public SegmentsDetailPanel() {
+		super();
 		this.setLayout(new BorderLayout());
 		
 		tabPanel = new JTabbedPane(JTabbedPane.TOP);
@@ -67,33 +67,33 @@ public class SegmentsDetailPanel extends DetailPanel {
 		JPanel panel = new JPanel(new GridBagLayout());
 		
 		Dimension minimumChartSize = new Dimension(100, 100);
-		segmentProfilePanel  = new SegmentProfilePanel(programLogger);
+		segmentProfilePanel  = new SegmentProfilePanel();
 		this.addSubPanel(segmentProfilePanel);
 		segmentProfilePanel.setMinimumSize(minimumChartSize);
 		segmentProfilePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
-		segmentBoxplotsPanel = new SegmentBoxplotsPanel(programLogger);
+		segmentBoxplotsPanel = new SegmentBoxplotsPanel();
 		segmentBoxplotsPanel.setMinimumSize(minimumChartSize);
 		this.addSubPanel(segmentBoxplotsPanel);
 		tabPanel.addTab("Boxplots", segmentBoxplotsPanel);
 		
 		
-		segmentHistogramsPanel = new SegmentHistogramsPanel(programLogger);
+		segmentHistogramsPanel = new SegmentHistogramsPanel();
 		segmentHistogramsPanel.setMinimumSize(minimumChartSize);
 		this.addSubPanel(segmentHistogramsPanel);
 		tabPanel.addTab("Histograms", segmentHistogramsPanel);
 		
-		segmentWilcoxonPanel = new SegmentWilcoxonPanel(programLogger);
+		segmentWilcoxonPanel = new SegmentWilcoxonPanel();
 		segmentWilcoxonPanel.setMinimumSize(minimumChartSize);
 		this.addSubPanel(segmentWilcoxonPanel);
 		tabPanel.addTab("Stats", segmentWilcoxonPanel);
 		
-		segmentMagnitudePanel = new SegmentMagnitudePanel(programLogger);
+		segmentMagnitudePanel = new SegmentMagnitudePanel();
 		segmentMagnitudePanel.setMinimumSize(minimumChartSize);
 		this.addSubPanel(segmentMagnitudePanel);
 		tabPanel.addTab("Magnitude", segmentMagnitudePanel);
 		
-		segmentPositionsPanel = new SegmentPositionsPanel(programLogger);
+		segmentPositionsPanel = new SegmentPositionsPanel();
 		segmentPositionsPanel.setMinimumSize(minimumChartSize);
 		this.addSubPanel(segmentPositionsPanel);
 		tabPanel.addTab("Start positions", segmentPositionsPanel);
@@ -102,7 +102,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		
 		
 		
-		segmentStatsPanel = new SegmentStatsPanel(programLogger);
+		segmentStatsPanel = new SegmentStatsPanel();
 		this.addSubPanel(segmentStatsPanel);
 		segmentStatsPanel.setMinimumSize(minimumChartSize);
 		segmentStatsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));

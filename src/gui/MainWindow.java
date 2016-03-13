@@ -178,19 +178,19 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			// Create the consensus chart
 			//---------------
-			populationsPanel = new PopulationsPanel(programLogger);
+			populationsPanel = new PopulationsPanel();
 			populationsPanel.addSignalChangeListener(this);
 			populationsPanel.addDatasetEventListener(this);
 			populationsPanel.addInterfaceEventListener(this);
 			
-			consensusNucleusPanel = new ConsensusNucleusPanel(programLogger);
+			consensusNucleusPanel = new ConsensusNucleusPanel();
 			detailPanels.add(consensusNucleusPanel);
 
 			
 			//---------------
 			// Create the log panel
 			//---------------
-			logPanel = new LogPanel(programLogger);
+			logPanel = new LogPanel();
 			logPanel.addDatasetEventListener(this);
 			logPanel.addInterfaceEventListener(this);
 			TextAreaHandler textHandler = new TextAreaHandler(logPanel);
@@ -234,21 +234,21 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			// Create the profiles
 			//---------------
-			nucleusProfilesPanel = new NucleusProfilesPanel(programLogger);
+			nucleusProfilesPanel = new NucleusProfilesPanel();
 			detailPanels.add(nucleusProfilesPanel);
 			tabbedPane.addTab("Profiles", null, nucleusProfilesPanel, null);
 
 			//---------------
 			// Create the general stats page
 			//---------------
-			analysisDetailPanel = new AnalysisDetailPanel(programLogger);
+			analysisDetailPanel = new AnalysisDetailPanel();
 			detailPanels.add(analysisDetailPanel);
 			tabbedPane.addTab("Analysis info", analysisDetailPanel);
 
 			//---------------
 			// Create panel for split boxplots
 			//---------------
-			nuclearBoxplotsPanel  = new NuclearBoxplotsPanel(programLogger);
+			nuclearBoxplotsPanel  = new NuclearBoxplotsPanel();
 			detailPanels.add(nuclearBoxplotsPanel);
 			tabbedPane.addTab("Nuclear charts", nuclearBoxplotsPanel);
 				
@@ -256,7 +256,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			// Create the signals tab panel
 			//---------------
-			signalsDetailPanel  = new SignalsDetailPanel(programLogger);
+			signalsDetailPanel  = new SignalsDetailPanel();
 			detailPanels.add(signalsDetailPanel);
 			tabbedPane.addTab("Signals", signalsDetailPanel);
 			
@@ -264,21 +264,21 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			// Create the clusters panel
 			//---------------
-			clusterDetailPanel = new ClusterDetailPanel(programLogger);
+			clusterDetailPanel = new ClusterDetailPanel();
 			detailPanels.add(clusterDetailPanel);
 			tabbedPane.addTab("Clusters", clusterDetailPanel);
 			
 			//---------------
 			// Create the merges panel
 			//---------------
-			mergesDetailPanel = new MergesDetailPanel(programLogger);
+			mergesDetailPanel = new MergesDetailPanel();
 			detailPanels.add(mergesDetailPanel);
 			tabbedPane.addTab("Merges", mergesDetailPanel);
 
 			//---------------
 			// Create the segments boxplot panel
 			//---------------
-			segmentsDetailPanel = new SegmentsDetailPanel(programLogger);
+			segmentsDetailPanel = new SegmentsDetailPanel();
 			detailPanels.add(segmentsDetailPanel);
 			tabbedPane.addTab("Segments", null, segmentsDetailPanel, null);
 
@@ -286,12 +286,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			// Create the inter-dataset panel
 			//---------------
-			interdatasetDetailPanel = new InterDatasetComparisonDetailPanel(programLogger);
+			interdatasetDetailPanel = new InterDatasetComparisonDetailPanel();
 			detailPanels.add(interdatasetDetailPanel);
 			tabbedPane.addTab("Inter-dataset comparisons", null, interdatasetDetailPanel, null);
 			
 			
-			editingDetailPanel = new EditingDetailPanel(programLogger);
+			editingDetailPanel = new EditingDetailPanel();
 			detailPanels.add(editingDetailPanel);
 			tabbedPane.addTab("Editing", null, editingDetailPanel, null);
 			
@@ -328,9 +328,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		
 	}
 	
-	public Logger getProgramLogger(){
-		return MainWindow.programLogger;
-	}
+//	public Logger getProgramLogger(){
+//		return MainWindow.programLogger;
+//	}
 	
 	public ColourSwatch getColourSwatch(){
 		return activeSwatch;

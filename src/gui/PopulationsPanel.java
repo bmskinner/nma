@@ -91,8 +91,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	
 	final private TreeSelectionHandler treeListener = new TreeSelectionHandler();
 	
-	public PopulationsPanel(Logger programLogger) {
-		super(programLogger);
+	public PopulationsPanel() {
+		super();
 		this.setLayout(new BorderLayout());
 		
 		panelPopulations.setMinimumSize(new Dimension(100, 100));

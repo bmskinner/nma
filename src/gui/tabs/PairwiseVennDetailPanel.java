@@ -47,8 +47,8 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 
 	private ExportableTable pairwiseVennTable;
 
-	public PairwiseVennDetailPanel(Logger programLogger) {
-		super(programLogger);
+	public PairwiseVennDetailPanel() {
+		super();
 		this.setLayout(new BorderLayout());
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		

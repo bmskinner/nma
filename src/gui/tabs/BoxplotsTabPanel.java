@@ -60,8 +60,8 @@ import charting.options.TableOptions;
 
 		protected JScrollPane scrollPane; // hold the main panel
 		
-		public BoxplotsTabPanel(final Logger programLogger){
-			super(programLogger);
+		public BoxplotsTabPanel(){
+			super();
 
 			this.setLayout(new BorderLayout());
 

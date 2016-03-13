@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JProgressBar;
 
+import analysis.AbstractLoggable;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 
@@ -46,7 +47,7 @@ import analysis.AnalysisWorker;
  * is triggered as a SwingWorker. Subclassed for each action type.
  *
  */
-abstract class ProgressableAction implements PropertyChangeListener {
+abstract class ProgressableAction extends AbstractLoggable implements PropertyChangeListener {
 
 	protected AnalysisDataset dataset = null; // the dataset being worked on
 	private JProgressBar progressBar = null;
@@ -54,7 +55,6 @@ abstract class ProgressableAction implements PropertyChangeListener {
 	protected AnalysisWorker worker = null;
 	protected Integer downFlag = 0; // store flags to tell the action what to do after finishing
 	private LogPanel logPanel;
-	protected Logger programLogger;
 	protected MainWindow mw;
 	private CountDownLatch latch = null; // allow threads to wait for the analysis to complete
 	
@@ -76,7 +76,6 @@ abstract class ProgressableAction implements PropertyChangeListener {
 
 		this.mw 			= mw;
 		this.logPanel 		= mw.getLogPanel();
-		this.programLogger 	= mw.getProgramLogger();
 		
 		logPanel.addProgressBar(this.progressBar);
 		logPanel.revalidate();
@@ -97,7 +96,6 @@ abstract class ProgressableAction implements PropertyChangeListener {
 
 		this.mw 			= mw;
 		this.logPanel 		= mw.getLogPanel();
-		this.programLogger 	= mw.getProgramLogger();
 		
 		logPanel.addProgressBar(this.progressBar);
 		logPanel.revalidate();
@@ -144,11 +142,7 @@ abstract class ProgressableAction implements PropertyChangeListener {
 		this(dataset, barMessage, mw);
 		this.downFlag = flag;
 	}
-	
-	protected void log(Level level, String message){
-		programLogger.log(level, message);
-	}
-	
+		
 	protected void setLatch(CountDownLatch latch){
 		this.latch = latch;
 	}

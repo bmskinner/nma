@@ -53,8 +53,8 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 
 	private Dimension preferredSize = new Dimension(300, 300);
 			
-	public SegmentPositionsPanel(Logger logger){
-		super(logger);
+	public SegmentPositionsPanel(){
+		super();
 		
 		// Not needed for a consensus panel
 		headerPanel.remove(measurementUnitSettingsPanel);

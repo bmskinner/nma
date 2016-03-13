@@ -58,19 +58,19 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	/**
 	 * Create the panel.
 	 */
-	public SignalsDetailPanel(Logger programLogger) {
-		super(programLogger);
+	public SignalsDetailPanel() {
+		super();
 		try{
 
 			this.setLayout(new BorderLayout());
 
 			signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
 
-			overviewPanel  = new SignalsOverviewPanel(programLogger);			
-			boxplotPanel   = new SignalsBoxplotPanel(programLogger);
-			histogramPanel = new SignalsHistogramPanel(programLogger);
-			shellsPanel    = new SignalShellsPanel(programLogger);
-			analysisPanel  = new SignalsAnalysisPanel(programLogger);
+			overviewPanel  = new SignalsOverviewPanel();			
+			boxplotPanel   = new SignalsBoxplotPanel();
+			histogramPanel = new SignalsHistogramPanel();
+			shellsPanel    = new SignalShellsPanel();
+			analysisPanel  = new SignalsAnalysisPanel();
 			
 			signalsTabPane.addTab("Overview", overviewPanel);
 			signalsTabPane.addTab("Boxplots", boxplotPanel);

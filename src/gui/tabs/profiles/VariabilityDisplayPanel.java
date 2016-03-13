@@ -77,8 +77,8 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
 	private ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 
-	public VariabilityDisplayPanel(Logger logger){
-		super(logger);
+	public VariabilityDisplayPanel(){
+		super();
 		this.setLayout(new BorderLayout());
 
 		JFreeChart variablityChart = ChartFactory.createXYLineChart(null,

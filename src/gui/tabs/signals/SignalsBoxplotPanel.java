@@ -41,8 +41,8 @@ import charting.options.ChartOptionsBuilder;
 @SuppressWarnings("serial")
 public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
-	public SignalsBoxplotPanel(Logger logger){
-		super(logger);
+	public SignalsBoxplotPanel(){
+		super();
 		createUI();
 	}
 

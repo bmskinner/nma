@@ -42,8 +42,8 @@ import components.nuclear.NucleusBorderSegment;
 @SuppressWarnings("serial")
 public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 					
-	public SegmentWilcoxonPanel(Logger logger){
-		super(logger);
+	public SegmentWilcoxonPanel(){
+		super();
 	}
 
 	@Override

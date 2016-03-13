@@ -77,8 +77,8 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	
 //	private Logger programLogger;
 
-	public LogPanel(Logger programLogger) {
-		super(programLogger);
+	public LogPanel() {
+		super();
 		this.setLayout(new BorderLayout());
 		this.logPanel = createLogPanel();
 		this.add(logPanel, BorderLayout.CENTER);

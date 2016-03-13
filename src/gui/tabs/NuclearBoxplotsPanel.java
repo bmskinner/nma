@@ -65,23 +65,23 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 	
 	private JTabbedPane 	tabPane;
 
-	public NuclearBoxplotsPanel(Logger programLogger) throws Exception {
-		super(programLogger);
+	public NuclearBoxplotsPanel() throws Exception {
+		super();
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane(JTabbedPane.TOP);
 		
-		boxplotPanel = new BoxplotsPanel(programLogger);
+		boxplotPanel = new BoxplotsPanel();
 		this.addSubPanel(boxplotPanel);
 		tabPane.addTab("Boxplots", boxplotPanel);
 		
-		histogramsPanel = new HistogramsPanel(programLogger);
+		histogramsPanel = new HistogramsPanel();
 		this.addSubPanel(histogramsPanel);
 		tabPane.addTab("Histograms", histogramsPanel);
 		
-		wilcoxonPanel 	= new WilcoxonDetailPanel(programLogger);
+		wilcoxonPanel 	= new WilcoxonDetailPanel();
 		tabPane.addTab("Stats", null, wilcoxonPanel, null);
 		
-		nucleusMagnitudePanel 	= new NucleusMagnitudePanel(programLogger);
+		nucleusMagnitudePanel 	= new NucleusMagnitudePanel();
 		tabPane.addTab("Magnitude", null, nucleusMagnitudePanel, null);
 		
 		this.add(tabPane, BorderLayout.CENTER);
@@ -115,8 +115,8 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 	@SuppressWarnings("serial")
 	protected class BoxplotsPanel extends BoxplotsTabPanel implements ActionListener {
 
-		public BoxplotsPanel(Logger logger) {
-			super(logger);
+		public BoxplotsPanel() {
+			super();
 
 			Dimension preferredSize = new Dimension(200, 300);
 			
@@ -201,8 +201,8 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 	@SuppressWarnings("serial")
 	protected class HistogramsPanel extends HistogramsTabPanel implements SignalChangeListener {
 		
-		public HistogramsPanel(Logger programLogger){
-			super(programLogger);
+		public HistogramsPanel(){
+			super();
 
 			try {
 

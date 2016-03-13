@@ -54,8 +54,8 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 			
 	private JScrollPane scrollPane;
 			
-	public SegmentStatsPanel(Logger programLogger){
-		super(programLogger);
+	public SegmentStatsPanel(){
+		super();
 		
 		this.setLayout(new BorderLayout());
 		measurementUnitSettingsPanel.addActionListener(this);

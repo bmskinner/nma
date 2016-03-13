@@ -30,8 +30,8 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 	
 	private Dimension preferredSize = new Dimension(200, 100);
 	
-	public SegmentHistogramsPanel(Logger programLogger){
-		super(programLogger);
+	public SegmentHistogramsPanel(){
+		super();
 		
 		JFreeChart chart = HistogramChartFactory.createHistogram(null, "Segment", "Length");		
 		SelectableChartPanel panel = new SelectableChartPanel(chart, "null");

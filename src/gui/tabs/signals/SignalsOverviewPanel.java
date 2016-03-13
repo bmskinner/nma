@@ -78,8 +78,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	private JPanel		checkboxPanel;
 	
 	
-	public SignalsOverviewPanel(Logger programLogger){
-		super(programLogger);
+	public SignalsOverviewPanel(){
+		super();
 		
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 

@@ -37,8 +37,8 @@ import components.generic.MeasurementScale;
 @SuppressWarnings("serial")
 public class SignalsHistogramPanel extends HistogramsTabPanel {
     	  	    	
-	public SignalsHistogramPanel(Logger programLogger) throws Exception{
-		super(programLogger);
+	public SignalsHistogramPanel() throws Exception{
+		super();
 		
 		try {
 

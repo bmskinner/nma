@@ -68,12 +68,12 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 	
 	private final SegmentProfilePanel		segmentProfilePanel;	// draw the segments on the median profile
 		
-	public SegmentsEditingPanel(Logger programLogger) {
+	public SegmentsEditingPanel() {
 		
-		super(programLogger);
+		super();
 		
 		this.setLayout(new BorderLayout());
-		segmentProfilePanel  = new SegmentProfilePanel(programLogger);
+		segmentProfilePanel  = new SegmentProfilePanel();
 		this.addSubPanel(segmentProfilePanel);
 		this.add(segmentProfilePanel, BorderLayout.CENTER);
 
@@ -125,8 +125,8 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		private JButton windowSizeButton = new JButton("Window sizes");
 		private JButton updatewindowButton = new JButton("Set window size");
 		
-		protected SegmentProfilePanel(Logger programLogger){
-			super(programLogger);
+		protected SegmentProfilePanel(){
+			super();
 			this.setLayout(new BorderLayout());
 			Dimension minimumChartSize = new Dimension(50, 100);
 			Dimension preferredChartSize = new Dimension(400, 300);
