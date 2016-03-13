@@ -121,8 +121,8 @@ public abstract class ImageProber extends LoadingIconDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public ImageProber(AnalysisOptions options, Logger logger, ImageType type, File folder) {
-		super(logger);
+	public ImageProber(AnalysisOptions options, ImageType type, File folder) {
+		super();
 		if(options==null){
 			throw new IllegalArgumentException("Options is null");
 		} 
@@ -140,7 +140,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 			createGUI();
 
 		} catch(Exception e){
-			logger.log(Level.SEVERE, "Error creating prober", e);
+			logError( "Error creating prober", e);
 		}
 	}
 	

@@ -428,7 +428,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		public void actionPerformed(ActionEvent e) {
 			
 			if(e.getSource()==windowSizeButton){
-				new AngleWindowSizeExplorer(activeDataset(), programLogger);
+				new AngleWindowSizeExplorer(activeDataset());
 			}
 			
 			

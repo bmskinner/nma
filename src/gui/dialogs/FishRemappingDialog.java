@@ -81,9 +81,9 @@ public class FishRemappingDialog extends ImageProber {
 	/**
 	 * Create the dialog.
 	 */
-	public FishRemappingDialog(MainWindow mw, AnalysisDataset dataset, Logger programLogger) {
+	public FishRemappingDialog(MainWindow mw, AnalysisDataset dataset) {
 		
-		super(dataset.getAnalysisOptions(), programLogger, FishMappingImageType.ORIGINAL_IMAGE, dataset.getAnalysisOptions().getFolder());
+		super(dataset.getAnalysisOptions(), FishMappingImageType.ORIGINAL_IMAGE, dataset.getAnalysisOptions().getFolder());
 		
 		this.setTitle("FISH remapping");
 		

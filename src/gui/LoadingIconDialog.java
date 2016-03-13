@@ -20,17 +20,15 @@ package gui;
 
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Image;
-import java.awt.MediaTracker;
-import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+
+import logging.Loggable;
 
 /**
  * This is an abstract class containing a JLabel with an animated gif for a loading
@@ -39,7 +37,7 @@ import javax.swing.JLabel;
  *
  */
 @SuppressWarnings("serial")
-public abstract class LoadingIconDialog extends JDialog {
+public abstract class LoadingIconDialog extends JDialog implements Loggable {
 	
 	private static final String LOADING_GIF_NAME = "ajax-loader.gif";
 	private static final String BLANK_GIF_NAME   = "blank.gif";
@@ -47,10 +45,9 @@ public abstract class LoadingIconDialog extends JDialog {
 	private JLabel loadingLabel = new JLabel("");
 	private ImageIcon loadingGif = null; // the icon for the loading gif
 	private ImageIcon blankGif = null; // the icon for the blank gif
-	protected Logger programLogger;
+	protected static final Logger programLogger =  Logger.getLogger("ProgramLogger"); // log to the program LogPanel
 	
-	public LoadingIconDialog(Logger programLogger){
-		this.programLogger = programLogger;
+	public LoadingIconDialog(){
 		
 		// Load the gif (may be in a res folder depending on Eclipse version)
 //		String pathToGif   = "res/ajax-loader.gif";	
@@ -63,12 +60,32 @@ public abstract class LoadingIconDialog extends JDialog {
 			ok = loadResources(path);
 		}
 		if(!ok){
-			programLogger.log(Level.WARNING, "Resource loading failed (gif): "+path);
+			log(Level.WARNING, "Resource loading failed (gif): "+path);
 		}
 		
 		this.loadingLabel.setIcon(blankGif);
 
 	}
+	
+    /**
+     * Log the given message to the program log window and to the dataset
+     * debug file
+     * @param level the log level
+     * @param message the message to log
+     */
+    public void log(Level level, String message){
+		programLogger.log(level, message);
+    }
+    
+    /**
+     * Log an error to the program log window and to the dataset
+     * debug file. Logs with Level.SEVERE
+     * @param message the error messsage
+     * @param t the exception
+     */
+    public void logError(String message, Throwable t){
+		programLogger.log(Level.SEVERE, message, t);
+    }
 	
 	protected Logger getProgramLogger(){
 		return this.programLogger;

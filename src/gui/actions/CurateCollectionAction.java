@@ -39,7 +39,7 @@ public class CurateCollectionAction extends ProgressableAction {
 
 		try{		
 			
-			ManualCellCurator curator = new ManualCellCurator(programLogger, dataset);
+			ManualCellCurator curator = new ManualCellCurator( dataset);
 
 			List<UUID> manualIDs = curator.getIDsToKeep();
 

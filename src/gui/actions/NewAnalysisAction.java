@@ -50,7 +50,7 @@ public class NewAnalysisAction extends ProgressableAction {
 
 		this.cooldown();
 		log(Level.FINE, "Making analysis options");
-		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(programLogger);
+		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog();
 		
 		if( analysisSetup.getOptions()!=null){
 

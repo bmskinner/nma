@@ -891,7 +891,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		}
 		
 		private void showCellImage(){
-			new CellImageDialog(programLogger, activeCell);
+			new CellImageDialog( activeCell);
 		}
 		
 		private void changeSignalGroupColour(int row){

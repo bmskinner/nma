@@ -46,8 +46,8 @@ import utility.Utils;
 @SuppressWarnings("serial")
 public class NucleusDetectionImageProber extends ImageProber {
 	
-	public NucleusDetectionImageProber(AnalysisOptions options, Logger logger, File folder) {
-		super(options, logger, NucleusImageType.DETECTED_OBJECTS, folder);
+	public NucleusDetectionImageProber(AnalysisOptions options, File folder) {
+		super(options, NucleusImageType.DETECTED_OBJECTS, folder);
 		createFileList(folder);
 		this.setVisible(true);
 	}

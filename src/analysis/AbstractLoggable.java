@@ -3,7 +3,9 @@ package analysis;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class AbstractLoggable {
+import logging.Loggable;
+
+public class AbstractLoggable implements Loggable {
 	
 	protected static final Logger programLogger =  Logger.getLogger("ProgramLogger"); // log to the program LogPanel
 	protected static Logger fileLogger = null;
@@ -14,7 +16,7 @@ public class AbstractLoggable {
      * @param level the log level
      * @param message the message to log
      */
-    protected static void log(Level level, String message){
+    public void log(Level level, String message){
     	if(fileLogger!=null){
     		fileLogger.log(level, message);
     	}
@@ -27,7 +29,7 @@ public class AbstractLoggable {
      * @param message the error messsage
      * @param t the exception
      */
-    protected static void logError(String message, Throwable t){
+    public void logError(String message, Throwable t){
     	if(fileLogger!=null){
     		fileLogger.log(Level.SEVERE, message, t);
     	}

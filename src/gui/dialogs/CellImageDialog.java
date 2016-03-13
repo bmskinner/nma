@@ -38,11 +38,11 @@ public class CellImageDialog extends LoadingIconDialog {
 	
 	private AnnotatedNucleusPanel panel;
 
-	public CellImageDialog(Logger programLogger, Cell cell) {
-		super(programLogger);
+	public CellImageDialog(Cell cell) {
+		super();
 		
 		if(!cell.getNucleus().getSourceFile().exists()){
-			programLogger.log(Level.WARNING, "Cannot load image: source file not present");
+			log(Level.WARNING, "Cannot load image: source file not present");
 			this.dispose();
 		} else {
 
@@ -60,7 +60,7 @@ public class CellImageDialog extends LoadingIconDialog {
 			try{
 				panel.updateCell(cell);
 			} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Error making dialog", e);
+				logError("Error making dialog", e);
 			}
 			this.setModal(false);
 			this.pack();

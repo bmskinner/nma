@@ -75,7 +75,7 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) { 
 
-				new RandomSamplingDialog(activeDataset(), programLogger);
+				new RandomSamplingDialog(activeDataset());
 			
 			}
 		});		

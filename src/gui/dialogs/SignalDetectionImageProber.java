@@ -69,8 +69,8 @@ public class SignalDetectionImageProber extends ImageProber {
 		}
 	}
 	
-	public SignalDetectionImageProber(AnalysisOptions options, Logger logger, File folder, AnalysisDataset dataset, int channel, NuclearSignalOptions testOptions) {
-		super(options, logger, SignalImageType.DETECTED_OBJECTS, folder);
+	public SignalDetectionImageProber(AnalysisOptions options, File folder, AnalysisDataset dataset, int channel, NuclearSignalOptions testOptions) {
+		super(options, SignalImageType.DETECTED_OBJECTS, folder);
 		
 		
 		

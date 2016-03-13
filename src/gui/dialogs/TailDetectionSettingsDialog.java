@@ -18,16 +18,12 @@
  *******************************************************************************/
 package gui.dialogs;
 
-import gui.dialogs.SettingsDialog.CannyPanel;
-
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.logging.Logger;
-
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -54,8 +50,8 @@ public class TailDetectionSettingsDialog extends SettingsDialog implements Actio
 	/**
 	 * Create the dialog.
 	 */
-	public TailDetectionSettingsDialog(AnalysisOptions a, Logger logger) {
-		super(logger);
+	public TailDetectionSettingsDialog(final AnalysisOptions a) {
+		super();
 		setModal(true);
 		this.options = a;
 		createGUI();

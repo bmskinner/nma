@@ -58,8 +58,8 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 
 	private JButton  runButton;
 
-	public KruskalTestDialog(final AnalysisDataset dataset1, final AnalysisDataset dataset2, final Logger logger){
-		super(logger);
+	public KruskalTestDialog(final AnalysisDataset dataset1, final AnalysisDataset dataset2){
+		super();
 		this.dataset1 = dataset1;
 		this.dataset2 = dataset2;
 		createUI();

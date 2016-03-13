@@ -90,8 +90,8 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 	/**
 	 * Create the dialog.
 	 */
-	public SignalDetectionSettingsDialog(AnalysisDataset d, Logger programLogger) {
-		super(programLogger);
+	public SignalDetectionSettingsDialog(AnalysisDataset d) {
+		super();
 		this.dataset = d;
 		this.options = d.getAnalysisOptions();
 		setModal(true);
@@ -206,7 +206,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 						assignSettings(testOptions);
 
 						// Run the image prober TODO
-						ImageProber ip = new SignalDetectionImageProber(options, programLogger, folder, dataset, channel, testOptions);
+						ImageProber ip = new SignalDetectionImageProber(options, folder, dataset, channel, testOptions);
 						if(ip.getOK()){
 							// Image prober returns ok, validate signal group and assign
 							//						int channel = getChannel();

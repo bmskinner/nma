@@ -99,7 +99,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 					public void run(){
 						
 						try {
-							new KruskalTestDialog(getDatasets().get(0), getDatasets().get(1), programLogger );
+							new KruskalTestDialog(getDatasets().get(0), getDatasets().get(1) );
 						} catch (Exception e) {
 							programLogger.log(Level.SEVERE, "Error testing", e);
 						}

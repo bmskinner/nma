@@ -34,7 +34,7 @@ public class AddTailStainAction extends ProgressableAction {
 		super(dataset, "Tail detection", mw);
 		try{
 			
-			TailDetectionSettingsDialog analysisSetup = new TailDetectionSettingsDialog(dataset.getAnalysisOptions(), programLogger);
+			TailDetectionSettingsDialog analysisSetup = new TailDetectionSettingsDialog(dataset.getAnalysisOptions());
 			
 			final int channel = analysisSetup.getChannel();
 			

@@ -49,7 +49,7 @@ public class FishRemappingAction extends ProgressableAction {
 					return;
 				}
 				
-				FishRemappingDialog fishMapper = new FishRemappingDialog(mw, dataset, programLogger);
+				FishRemappingDialog fishMapper = new FishRemappingDialog(mw, dataset);
 
 				if(fishMapper.getOK()){
 					

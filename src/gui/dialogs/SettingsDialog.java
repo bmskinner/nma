@@ -19,6 +19,7 @@
 package gui.dialogs;
 
 import ij.IJ;
+import logging.Loggable;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -34,6 +35,7 @@ import java.awt.event.MouseEvent;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.Box;
@@ -56,12 +58,12 @@ import analysis.AnalysisOptions.NuclearSignalOptions;
 /**
  * Contains methods for laying out panels in settings dialog options
  */
-public abstract class SettingsDialog extends JDialog {
+public abstract class SettingsDialog extends JDialog implements Loggable {
 	
 	private static final long serialVersionUID = 1L;
 	protected boolean readyToRun = false;
 	
-	protected Logger programLogger;
+	protected static final Logger programLogger =  Logger.getLogger("ProgramLogger"); // log to the program LogPanel
 	
 	String[] channelOptionStrings = {"Greyscale", "Red", "Green", "Blue"};
 	
@@ -69,8 +71,7 @@ public abstract class SettingsDialog extends JDialog {
 	 * Constructor for generic dialogs not attached to a frame 
 	 * @param programLogger
 	 */
-	public SettingsDialog(Logger programLogger){
-		this.programLogger = programLogger;
+	public SettingsDialog(){
 		this.setLocationRelativeTo(null);
 	}
 	
@@ -82,9 +83,28 @@ public abstract class SettingsDialog extends JDialog {
 	 */
 	public SettingsDialog(Logger programLogger, Frame owner, boolean modal){
 		super(owner, modal);
-		this.programLogger = programLogger;
 		this.setLocationRelativeTo(null);
 	}
+	
+    /**
+     * Log the given message to the program log window and to the dataset
+     * debug file
+     * @param level the log level
+     * @param message the message to log
+     */
+    public void log(Level level, String message){
+		programLogger.log(level, message);
+    }
+    
+    /**
+     * Log an error to the program log window and to the dataset
+     * debug file. Logs with Level.SEVERE
+     * @param message the error messsage
+     * @param t the exception
+     */
+    public void logError(String message, Throwable t){
+		programLogger.log(Level.SEVERE, message, t);
+    }
 	
 	/**
 	 * Create the panel footer, with OK and Cancel option

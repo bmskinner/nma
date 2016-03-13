@@ -50,8 +50,8 @@ public class ManualCellCurator extends LoadingIconDialog {
 	private int cellIndex = 0;
 
 	
-	public ManualCellCurator(Logger programLogger, AnalysisDataset dataset){
-		super(programLogger);
+	public ManualCellCurator(AnalysisDataset dataset){
+		super();
 		
 		this.dataset = dataset;
 		this.setLocationRelativeTo(null);

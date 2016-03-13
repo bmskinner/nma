@@ -119,8 +119,8 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	/**
 	 * Create the frame.
 	 */
-	public AnalysisSetupDialog(Logger logger) {
-		super(logger);
+	public AnalysisSetupDialog() {
+		super();
 		setModal(true); // ensure nothing happens until this window is closed
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // disable the 'X'; we need to use the footer buttons 
 		setDefaultOptions();
@@ -133,8 +133,8 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	 * Create the dialog with an existing set of options
 	 * Allows settings to be reloaded.
 	 */
-	public AnalysisSetupDialog(AnalysisOptions options, Logger logger) {
-		super(logger);
+	public AnalysisSetupDialog(AnalysisOptions options) {
+		super();
 		setModal(true); // ensure nothing happens until this window is closed
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		analysisOptions = options;
@@ -258,7 +258,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 					
 					// probe the first image
 					// show the results of the current settings
-					ImageProber p = new NucleusDetectionImageProber(analysisOptions, programLogger, analysisOptions.getFolder());
+					ImageProber p = new NucleusDetectionImageProber(analysisOptions,  analysisOptions.getFolder());
 					if(p.getOK()==false){
 					
 						// Do nothing, revise options

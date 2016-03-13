@@ -113,43 +113,43 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 	
 	private boolean hasMergeSources; // cache this to speed comparisons
 	
-	public ClusterTreeDialog(final Logger programLogger, final AnalysisDataset dataset, final ClusterGroup group) {
-		super(programLogger);
+	public ClusterTreeDialog(final AnalysisDataset dataset, final ClusterGroup group) {
+		super();
 		this.dataset = dataset;
 		this.group = group;
 		this.hasMergeSources = dataset.hasMergeSources();
 		
 		try{
 
-			programLogger.log(Level.FINEST, "Building tree view");
+			log(Level.FINEST, "Building tree view");
 			this.setLayout(new BorderLayout());
 			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 			this.viewer = new DraggableTreeViewer();
-			programLogger.log(Level.FINEST, "Created draggable viewer");
+			log(Level.FINEST, "Created draggable viewer");
 			
 			viewer.getTreePane().addMouseListener(new MouseClusterSelectionAdapter());
-			programLogger.log(Level.FINEST, "Added listener");
+			log(Level.FINEST, "Added listener");
 
 
 			this.add(viewer, BorderLayout.CENTER);
-			programLogger.log(Level.FINEST, "Added viewer");
+			log(Level.FINEST, "Added viewer");
 
 			this.buttonPanel = createButtonPanel();
-			programLogger.log(Level.FINEST, "Made button panel");
+			log(Level.FINEST, "Made button panel");
 			this.add(buttonPanel, BorderLayout.NORTH);
 
-			programLogger.log(Level.FINEST, "Importing tree");
+			log(Level.FINEST, "Importing tree");
 			importTree();
-			programLogger.log(Level.FINEST, "Imported tree");
+			log(Level.FINEST, "Imported tree");
 
 			this.setModal(false);
 			this.setMinimumSize(new Dimension(500, 500));
 			this.pack();
 			this.setLocationRelativeTo(null);
-			programLogger.log(Level.FINEST, "Displaying dialog");
+			log(Level.FINEST, "Displaying dialog");
 			this.setVisible(true);
 		} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Error creating tree view", e);
+				logError( "Error creating tree view", e);
 				this.dispose();
 		}
 	}

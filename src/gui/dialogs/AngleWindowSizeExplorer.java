@@ -67,8 +67,8 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 	
 	private JButton  runButton;
 	
-	public AngleWindowSizeExplorer(final AnalysisDataset dataset, final Logger logger){
-		super(logger);
+	public AngleWindowSizeExplorer(final AnalysisDataset dataset){
+		super();
 		this.dataset = dataset;
 		programLogger.log(Level.FINEST, "Creating angle window explorer UI");
 		try{

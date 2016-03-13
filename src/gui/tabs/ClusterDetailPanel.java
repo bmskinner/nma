@@ -199,7 +199,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 							public void actionPerformed(ActionEvent e) {
 								Thread thr = new Thread(){
 									public void run(){
-										ClusterTreeDialog clusterPanel = new ClusterTreeDialog(programLogger, d, g);
+										ClusterTreeDialog clusterPanel = new ClusterTreeDialog( d, g);
 										clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
 										clusterPanel.addInterfaceEventListener(ClusterDetailPanel.this);
 									}};
@@ -361,7 +361,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 								group = g;
 							}
 						}
-						ClusterTreeDialog clusterPanel = new ClusterTreeDialog(programLogger, dataset, group);
+						ClusterTreeDialog clusterPanel = new ClusterTreeDialog( dataset, group);
 						clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
 					}
 				}

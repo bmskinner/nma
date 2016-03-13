@@ -77,8 +77,8 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 	
 	private List<Double> resultList = new ArrayList<Double>();
 	
-	public RandomSamplingDialog(final AnalysisDataset dataset, final Logger logger){
-		super(logger);
+	public RandomSamplingDialog(final AnalysisDataset dataset){
+		super();
 		this.dataset = dataset;
 		createUI();
 		this.setModal(false);

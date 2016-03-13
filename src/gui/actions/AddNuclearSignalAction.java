@@ -18,8 +18,6 @@
  *******************************************************************************/
 package gui.actions;
 
-import gui.DatasetEvent.DatasetMethod;
-import gui.InterfaceEvent.InterfaceMethod;
 import gui.dialogs.SignalDetectionSettingsDialog;
 import gui.MainWindow;
 
@@ -28,7 +26,6 @@ import java.util.List;
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
-import analysis.SignalManager;
 import analysis.nucleus.SignalDetector;
 import components.Cell;
 import components.CellCollection;
@@ -42,7 +39,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 		try{
 			// add dialog for non-default detection options
-			SignalDetectionSettingsDialog analysisSetup = new SignalDetectionSettingsDialog(dataset, programLogger);
+			SignalDetectionSettingsDialog analysisSetup = new SignalDetectionSettingsDialog(dataset);
 
 			if(analysisSetup.isReadyToRun()){
 
