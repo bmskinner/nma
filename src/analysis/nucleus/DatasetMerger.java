@@ -55,8 +55,8 @@ public class DatasetMerger extends AnalysisWorker {
 	 * @param function
 	 * @param saveFile the file to save the new dataset as
 	 */
-	public DatasetMerger(List<AnalysisDataset> datasets, String function, File saveFile, Logger programLogger){
-		super(datasets.get(0), programLogger);
+	public DatasetMerger(List<AnalysisDataset> datasets, String function, File saveFile){
+		super(datasets.get(0));
 		this.setProgressTotal(MAX_PROGRESS);
 		this.datasets = datasets;
 		this.function = function;

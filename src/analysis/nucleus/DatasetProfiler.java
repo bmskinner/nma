@@ -45,8 +45,8 @@ import utility.Utils;
  */
 public class DatasetProfiler extends AnalysisWorker {
 
-	public DatasetProfiler(AnalysisDataset dataset, Logger programLogger){
-		super(dataset, programLogger);
+	public DatasetProfiler(AnalysisDataset dataset){
+		super(dataset);
 	}
 	 
 	@Override

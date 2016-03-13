@@ -34,16 +34,15 @@ import java.util.logging.Logger;
 
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
-public class ShellCounter {
+import analysis.AbstractLoggable;
+
+public class ShellCounter extends AbstractLoggable {
 	
 	int numberOfShells;
 	Map<Integer, ArrayList<Double>> shellValues = new LinkedHashMap<Integer, ArrayList<Double>>(0); // store the values
-	
-	Logger logger;
-	
-	public ShellCounter(int numberOfShells, Logger logger){
 		
-		this.logger = logger;
+	public ShellCounter(int numberOfShells){
+		
 //		this.logger = new Logger(log, "ShellCounter");
 		
 		this.numberOfShells = numberOfShells;
@@ -173,7 +172,7 @@ public class ShellCounter {
 			ChiSquareTest test = new ChiSquareTest();
 			chi = test.chiSquare(expected, observed);
 			} catch(Exception e){
-				logger.log(Level.SEVERE, "Error getting chi square values", e);
+				logError( "Error getting chi square values", e);
 				this.print();
 		}
 		return chi;
@@ -198,7 +197,7 @@ public class ShellCounter {
 								: values.get(i);
 			}
 		} catch(Exception e){
-			logger.log(Level.SEVERE, "Error getting shell values", e);
+			logError( "Error getting shell values", e);
 			this.print();
 		}
 		return array;
@@ -257,9 +256,9 @@ public class ShellCounter {
 	    		List<Double> list = shellValues.get(j);
 	    		line += list.get(i)+"\t";
 	    	}
-	    	IJ.log(line);
+	    	log(Level.INFO, line);
 	    }
-		IJ.log("");
+		log(Level.INFO, "");
 	}
 	
 }

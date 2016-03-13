@@ -51,7 +51,7 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 
 		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
 
-			worker = new NucleusTreeBuilder( dataset , options , mw.getProgramLogger());
+			worker = new NucleusTreeBuilder( dataset , options);
 //			worker = new NeighbourJoiningTreeBuilder( dataset , mw.getProgramLogger());
 
 			worker.addPropertyChangeListener(this);

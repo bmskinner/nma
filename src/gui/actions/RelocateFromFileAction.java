@@ -31,7 +31,7 @@ public class RelocateFromFileAction extends ProgressableAction {
 			 * Make the worker
 			 */
 			
-			worker = new CellRelocator(dataset, programLogger, file);
+			worker = new CellRelocator(dataset, file);
 			worker.addPropertyChangeListener(this);
 			
 			this.setProgressMessage("Locating cells...");

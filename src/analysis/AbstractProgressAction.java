@@ -22,11 +22,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings("serial")
 public abstract class AbstractProgressAction extends RecursiveAction implements ProgressListener {
 
 	private final List<Object> listeners = new ArrayList<Object>();
+	protected final Logger programLogger =  Logger.getLogger("ProgramLogger");
 	
 	 public synchronized void addProgressListener( ProgressListener l ) {
 	        listeners.add( l );
@@ -50,6 +53,32 @@ public abstract class AbstractProgressAction extends RecursiveAction implements 
 	    	// pass up the chain
 	    	fireProgressEvent();
 	    	
+	    }
+	    
+	    /**
+	     * Log the given message to the program log window and to the dataset
+	     * debug file
+	     * @param level the log level
+	     * @param message the message to log
+	     */
+	    protected void log(Level level, String message){
+//	    	if(fileLogger!=null){
+//	    		fileLogger.log(level, message);
+//	    	}
+			programLogger.log(level, message);
+	    }
+	    
+	    /**
+	     * Log an error to the program log window and to the dataset
+	     * debug file. Logs with Level.SEVERE
+	     * @param message the error messsage
+	     * @param t the exception
+	     */
+	    protected void logError(String message, Throwable t){
+//	    	if(fileLogger!=null){
+//	    		fileLogger.log(Level.SEVERE, message, t);
+//	    	}
+			programLogger.log(Level.SEVERE, message, t);
 	    }
 	    
 }

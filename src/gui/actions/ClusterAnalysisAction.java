@@ -45,7 +45,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 
 		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
 
-			worker = new NucleusClusterer( dataset , options , mw.getProgramLogger());
+			worker = new NucleusClusterer( dataset , options );
 
 			worker.addPropertyChangeListener(this);
 			worker.execute();

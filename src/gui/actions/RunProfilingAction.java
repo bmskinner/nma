@@ -68,7 +68,7 @@ public class RunProfilingAction extends ProgressableAction {
 			this.setProgressMessage(message);
 			this.cooldown();
 
-			worker = new DatasetProfiler(this.dataset, programLogger);
+			worker = new DatasetProfiler(this.dataset);
 			worker.addPropertyChangeListener(this);
 			programLogger.log(Level.FINE, "Running morphology analysis");
 			worker.execute();

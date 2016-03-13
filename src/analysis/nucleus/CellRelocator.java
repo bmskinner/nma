@@ -36,8 +36,8 @@ public class CellRelocator extends AnalysisWorker {
 	
 	private File inputFile = null;
 	
-	public CellRelocator(final AnalysisDataset dataset, final Logger logger, final File file){
-		super(dataset, logger);
+	public CellRelocator(final AnalysisDataset dataset, final File file){
+		super(dataset);
 		this.inputFile = file;
 		this.setProgressTotal(1);
 	}

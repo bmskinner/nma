@@ -28,24 +28,22 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 	final int low, high;
 	final NucleusFinder finder;
 	final String outputFolder;
-	final Logger programLogger;
 	final AnalysisOptions analysisOptions;
 	final File folder;
 	
-	FileProcessingTask(File folder, File[] files, CellCollection collection, int low, int high, String outputFolder, Logger programLogger, AnalysisOptions analysisOptions) {
+	FileProcessingTask(File folder, File[] files, CellCollection collection, int low, int high, String outputFolder, AnalysisOptions analysisOptions) {
 		this.collection = collection;
 		this.files = files;
 		this.folder = folder;
 		this.low = low;
 		this.high = high;
 		this.outputFolder = outputFolder;
-		this.programLogger = programLogger;
 		this.analysisOptions = analysisOptions;
-		finder = new NucleusFinder(programLogger, analysisOptions, outputFolder);
+		finder = new NucleusFinder( analysisOptions, outputFolder);
 	}
 
 	FileProcessingTask(File folder, File[] files, CellCollection collection, String outputFolder, Logger programLogger, AnalysisOptions analysisOptions) {
-		this(folder, files, collection, 0, files.length, outputFolder, programLogger, analysisOptions);
+		this(folder, files, collection, 0, files.length, outputFolder, analysisOptions);
 
 	}
 	
@@ -56,11 +54,11 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 	       int mid = (low + high) >>> 1;
 	       
 	       List<FileProcessingTask> tasks = new ArrayList<FileProcessingTask>();
-	       FileProcessingTask task1 = new FileProcessingTask(folder, files, collection, low, mid, outputFolder, programLogger, analysisOptions);
+	       FileProcessingTask task1 = new FileProcessingTask(folder, files, collection, low, mid, outputFolder, analysisOptions);
 	       task1.addProgressListener(this);
 	       
 	       
-	       FileProcessingTask task2 = new FileProcessingTask(folder, files, collection, mid, high, outputFolder, programLogger, analysisOptions);
+	       FileProcessingTask task2 = new FileProcessingTask(folder, files, collection, mid, high, outputFolder, analysisOptions);
 	       task2.addProgressListener(this);
 	       
 	       tasks.add(task1);

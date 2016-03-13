@@ -46,8 +46,7 @@ public class RefoldNucleusAction extends ProgressableAction {
 
 			this.cooldown();
 			worker = new CurveRefolder(dataset, 
-					CurveRefoldingMode.FAST, 
-					programLogger);
+					CurveRefoldingMode.FAST);
 
 			worker.addPropertyChangeListener(this);
 			this.setProgressMessage("Refolding: "+dataset.getName());

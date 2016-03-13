@@ -111,7 +111,7 @@ public class SignalDetectionImageProber extends ImageProber {
 			testOptions.setMaxFraction(1d);
 			
 			// Create the finder
-			SignalFinder finder = new SignalFinder(testOptions, programLogger, channel);
+			SignalFinder finder = new SignalFinder(testOptions, channel);
 
 			Map<Nucleus, List<NuclearSignal>> map = new HashMap<Nucleus, List<NuclearSignal>>();
 

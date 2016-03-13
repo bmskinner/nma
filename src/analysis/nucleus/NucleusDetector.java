@@ -72,8 +72,8 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
    * @param debugFile the dataset log file
    * @param options the options to detect with
    */
-  public NucleusDetector(String outputFolder, Logger programLogger, File debugFile, AnalysisOptions options){
-	  super(null, programLogger, debugFile);
+  public NucleusDetector(String outputFolder, File debugFile, AnalysisOptions options){
+	  super(null, debugFile);
 	  this.inputFolder 		= options.getFolder();
 	  this.outputFolder 	= outputFolder;
 	  this.debugFile 		= debugFile;

@@ -87,8 +87,8 @@ public class CurveRefolder extends AnalysisWorker {
 	 * @param refoldMode
 	 * @throws Exception
 	 */
-	public CurveRefolder(AnalysisDataset dataset, CurveRefoldingMode refoldMode, Logger logger) throws Exception {
-		super(dataset, logger);
+	public CurveRefolder(AnalysisDataset dataset, CurveRefoldingMode refoldMode) throws Exception {
+		super(dataset);
 //		this.doneSignal = doneSignal;
 		this.setProgressTotal(refoldMode.maxIterations());
 

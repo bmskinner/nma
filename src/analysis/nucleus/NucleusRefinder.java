@@ -68,8 +68,8 @@ public class NucleusRefinder
   /*
     Constructors
   */
-  public NucleusRefinder(String outputFolder, File pathList, Logger programLogger, File debugFile, AnalysisOptions options){
-	  super( outputFolder, programLogger, debugFile, options);
+  public NucleusRefinder(String outputFolder, File pathList, File debugFile, AnalysisOptions options){
+	  super( outputFolder,  debugFile, options);
 	  this.pathList = pathList;
 	  this.fileLogger = Logger.getLogger(NucleusRefinder.class.getName());
 

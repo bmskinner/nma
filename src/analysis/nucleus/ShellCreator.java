@@ -46,21 +46,20 @@ import java.util.logging.Logger;
 import utility.Constants;
 import utility.StatsMap;
 import utility.Utils;
+import analysis.AbstractLoggable;
 import analysis.Detector;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 
-public class ShellCreator {
+public class ShellCreator extends AbstractLoggable {
 
 	int shellCount = 5;
 
 	ImageStack 	nucleusStack; 	// the stack to work on 
 	Roi 		nucleusRoi;		// the nuclear roi
 	Nucleus 	nucleus;		// the nucleus
-	
-	Logger logger;
 
 	double[] dapiDensities;
 	double[] signalProportions;
@@ -73,9 +72,8 @@ public class ShellCreator {
 	*
 	* @param nucleus the nucleus to analyse
 	*/
-	public ShellCreator(Nucleus n, Logger logger){
+	public ShellCreator(Nucleus n){
 
-		this.logger = logger;
 		this.nucleus = n;
 		
 		nucleusRoi = new PolygonRoi(n.createOriginalPolygon(), Roi.POLYGON);
@@ -135,7 +133,7 @@ public class ShellCreator {
 	*/
 	public void createShells(){
 
-		logger.log(Level.FINE, "Creating shells");
+		log(Level.FINE, "Creating shells");
 		ImagePlus searchImage = new ImagePlus(null, nucleusStack.getProcessor(Constants.COUNTERSTAIN).duplicate()); // blue channel
 		ImageProcessor ip = searchImage.getProcessor();
 		
@@ -232,7 +230,7 @@ public class ShellCreator {
 			result = normalise(this.signalProportions, this.dapiDensities);
 
 			if(new Double(result[0]).isNaN()){
-				logger.log(Level.SEVERE, "Result is not a number");
+				log(Level.SEVERE, "Result is not a number");
 				throw new Exception("Result is not a number");
 			}
 		} else {
@@ -307,8 +305,8 @@ public class ShellCreator {
 		
 		if(result.isEmpty()){
 //			IJ.log("    Roi has no pixels");
-			logger.log(Level.SEVERE, "No points found in roi");
-			logger.log(Level.FINE, "X base: "+minX
+			log(Level.SEVERE, "No points found in roi");
+			log(Level.FINE, "X base: "+minX
 					+"  Y base: "+minY
 					+"  X max: "+maxX
 					+"  Y max: "+maxY);
@@ -371,7 +369,7 @@ public class ShellCreator {
 //				IJ.log("    Density in shell "+i+": "+density);
 			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Error getting signal densities", e);
+			logError( "Error getting signal densities", e);
 			
 			// zero result
 			for(int i=0;i<shellCount;i++){
@@ -391,7 +389,7 @@ public class ShellCreator {
 	*/
 	private double[] getProportions(double[] counts){
 		if(new Double(counts[0]).isNaN()){
-			logger.log(Level.SEVERE, "Not a number within ShellAnalyser.getProportions");
+			log(Level.SEVERE, "Not a number within ShellAnalyser.getProportions");
 			throw new IllegalArgumentException("Not a number within ShellAnalyser.getProportions");
 		}
 		
@@ -404,7 +402,7 @@ public class ShellCreator {
 			}
 			
 			if(total==0){
-				logger.log(Level.FINE, "No pixels found when getting proportions");
+				log(Level.FINE, "No pixels found when getting proportions");
 			}
 
 			// subtract inner from outer shells
@@ -420,7 +418,7 @@ public class ShellCreator {
 //				IJ.log("    Proportion in shell "+i+": "+result[i]);
 			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Error getting signal proportions", e);
+			logError( "Error getting signal proportions", e);
 			
 			// zero result
 			for(int i=0;i<shellCount;i++){
@@ -473,12 +471,12 @@ public class ShellCreator {
 		for(int i=0; i<shellCount; i++){
 		
 			if(new Double(signals[i]).isNaN()){
-				logger.log(Level.WARNING, "Signal is NaN: setting to zero");
+				log(Level.WARNING, "Signal is NaN: setting to zero");
 				signals[i] = 0;
 //				throw new IllegalArgumentException("Signal not a number within ShellAnalyser.normalise");
 			}
 			if(new Double(dapi[i]).isNaN()){
-				logger.log(Level.WARNING, "DAPI is NaN: setting to zero");
+				log(Level.WARNING, "DAPI is NaN: setting to zero");
 				dapi[i] = 0;
 //				throw new IllegalArgumentException("DAPI not a number within ShellAnalyser.normalise");
 			}

@@ -28,7 +28,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
 	
 	private int progressTotal; // the maximum value for the progress bar
 	
-	protected static Logger programLogger; // log to the program LogPanel
+	protected static final Logger programLogger =  Logger.getLogger("ProgramLogger"); // log to the program LogPanel
 	protected static Logger fileLogger; // log to the active dataset log file
 	protected static final Level FILE_DEBUG_LEVEL = Level.ALL;
 	protected int progressCount = 0;
@@ -39,9 +39,9 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
     
     private final AnalysisDataset activeDataset;
     
-    public AnalysisWorker(final AnalysisDataset dataset, final Logger programLogger){
+    public AnalysisWorker(final AnalysisDataset dataset){
     	this.activeDataset = dataset;
-    	AnalysisWorker.programLogger = programLogger;
+
     	if(dataset!=null){
     		AnalysisWorker.fileLogger = Logger.getLogger(this.getClass().getName());
     		fileLogger.setLevel(FILE_DEBUG_LEVEL);
@@ -66,8 +66,8 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
      * @param programLogger
      * @param debugFile
      */
-    public AnalysisWorker(final AnalysisDataset dataset, final Logger programLogger, final File debugFile){
-    	this(dataset, programLogger);
+    public AnalysisWorker(final AnalysisDataset dataset, final File debugFile){
+    	this(dataset);
     	this.logFile = debugFile;
     	programLogger.log(Level.FINEST, "Creating log file handler");
 		DebugFileHandler handler = null;

@@ -134,7 +134,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	public static final int ASSIGN_SEGMENTS		 = 64;
 	
 	private static final Logger programLogger =
-	        Logger.getLogger(MainWindow.class.getName()); // the program logger will report status and errors in the running of the program, not involving datasets 
+	        Logger.getLogger("ProgramLogger"); // the program logger will report status and errors in the running of the program, not involving datasets 
 	
 	/*
 	 * Handle threading

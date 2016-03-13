@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import analysis.Detector;
+import analysis.AbstractLoggable;
 import analysis.AnalysisOptions.NuclearSignalOptions;
 import components.CellularComponent;
 import components.generic.BooleanProfile;
@@ -47,7 +48,7 @@ import utility.Constants;
 import utility.StatsMap;
 import utility.Utils;
 
-public class SignalFinder {
+public class SignalFinder extends AbstractLoggable {
 	
 	private NuclearSignalOptions options;
 	private Logger programLogger;
@@ -62,9 +63,8 @@ public class SignalFinder {
 	 * @param signalGroup the group
 	 * @param channelName the name of the group
 	 */
-	public SignalFinder(NuclearSignalOptions options, Logger programLogger, int channel){
+	public SignalFinder(NuclearSignalOptions options, int channel){
 		this.options = options;
-		this.programLogger = programLogger;
 		this.channel = channel;
 		this.minThreshold = options.getSignalThreshold();
 	}

@@ -79,8 +79,8 @@ public class SignalDetector extends AnalysisWorker {
 	 * @param options the analysis options
 	 * @param group the signal group to add signals to
 	 */
-	public SignalDetector(AnalysisDataset d, File folder, int channel, NuclearSignalOptions options, int group, String channelName, Logger programLogger){
-		super(d, programLogger);
+	public SignalDetector(AnalysisDataset d, File folder, int channel, NuclearSignalOptions options, int group, String channelName){
+		super(d);
 		this.options	 = options;
 		
 		this.folder		 = folder;
@@ -101,7 +101,7 @@ public class SignalDetector extends AnalysisWorker {
 			
 			int originalMinThreshold = options.getSignalThreshold();
 			
-			SignalFinder finder = new SignalFinder(options, fileLogger, channel);
+			SignalFinder finder = new SignalFinder(options, channel);
 			
 			for(Cell c : getDataset().getCollection().getCells()){
 				

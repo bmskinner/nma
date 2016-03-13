@@ -68,8 +68,8 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
      * @param mode
      * @param programLogger
      */
-    public DatasetSegmenter(AnalysisDataset dataset, MorphologyAnalysisMode mode, Logger programLogger){
-    	super(dataset, programLogger);
+    public DatasetSegmenter(AnalysisDataset dataset, MorphologyAnalysisMode mode){
+    	super(dataset);
     	this.mode = mode;
     }
     
@@ -79,8 +79,8 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
      * @param source
      * @param programLogger
      */
-    public DatasetSegmenter(AnalysisDataset dataset, CellCollection source, Logger programLogger){
-    	this(dataset, MorphologyAnalysisMode.COPY, programLogger);
+    public DatasetSegmenter(AnalysisDataset dataset, CellCollection source){
+    	this(dataset, MorphologyAnalysisMode.COPY);
     	this.sourceCollection = source;
     }
     

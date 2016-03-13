@@ -52,8 +52,8 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 //	private CellCollection collection;
 //	private ClusteringOptions options;
 		
-	public NucleusClusterer(AnalysisDataset dataset, ClusteringOptions options, Logger programLogger){
-		super(dataset, options, programLogger);		
+	public NucleusClusterer(AnalysisDataset dataset, ClusteringOptions options){
+		super(dataset, options);		
 		log(Level.FINEST, "Total set to "+this.getProgressTotal());
 	}
 	

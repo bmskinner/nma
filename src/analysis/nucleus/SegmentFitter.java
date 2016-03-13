@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import analysis.AbstractLoggable;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
@@ -14,7 +15,7 @@ import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
-public class SegmentFitter {
+public class SegmentFitter extends AbstractLoggable {
 
 	/**
 	 * The multiplier to add to best-fit scores when shrinking a segment below the 
@@ -93,16 +94,16 @@ public class SegmentFitter {
 			// modify tail and head/tip point to nearest segment end
 			remapBorderPoints(n, pc);
 			
-//			log(Level.FINE, "Fitted nucleus "+n.getPathAndNumber());
+			log(Level.FINE, "Fitted nucleus "+n.getPathAndNumber());
 			
 
 			long endTime = System.currentTimeMillis();
 			long time = endTime - startTime;
-//			log(Level.FINEST, "Fitting took "+time+" milliseconds");
+			log(Level.FINEST, "Fitting took "+time+" milliseconds");
 
 			
 		} catch(Exception e){
-//			logError("Error refitting segments", e);
+			logError("Error refitting segments", e);
 		}
 	}
 		
@@ -166,7 +167,7 @@ public class SegmentFitter {
 	private void remapBorderPoints(Nucleus n, ProfileCollection pc) throws Exception {
 		
 		if(pc==null){
-//			log(Level.WARNING, "No profile collection found, skipping remapping");
+			log(Level.WARNING, "No profile collection found, skipping remapping");
 			return; // this allows the unit tests to skip this section if a profile collection has not been created
 		}
 		
@@ -202,19 +203,19 @@ public class SegmentFitter {
 			} else {
 								
 				// A segment was not found with a start index at zero; segName is null
-//				log(Level.WARNING, "Border tag '"+tag+"' not found in median profile");
-//				log(Level.WARNING, "No segment with start index zero in median profile");
-//				log(Level.WARNING, "Median profile:");
-//				log(Level.WARNING, pc.toString());
-//				log(Level.WARNING, "Median segment list:");
-//				log(Level.WARNING, NucleusBorderSegment.toString(segments));
+				log(Level.WARNING, "Border tag '"+tag+"' not found in median profile");
+				log(Level.WARNING, "No segment with start index zero in median profile");
+				log(Level.WARNING, "Median profile:");
+				log(Level.WARNING, pc.toString());
+				log(Level.WARNING, "Median segment list:");
+				log(Level.WARNING, NucleusBorderSegment.toString(segments));
 				
 				// Check to see if the segments are reversed
 				seg = pc.getSegmentEndingWith(tag);
 				if(seg!=null){
-//					log(Level.WARNING, "Found segment "+seg.getName()+" ending with tag "+tag);
+					log(Level.WARNING, "Found segment "+seg.getName()+" ending with tag "+tag);
 				} else {
-//					log(Level.WARNING, "No segments end with tag "+tag);
+					log(Level.WARNING, "No segments end with tag "+tag);
 				}
 				
 			}

@@ -48,8 +48,8 @@ public class ShellAnalysis extends AnalysisWorker {
 	private static Map<Integer, ShellCounter> counters = new HashMap<Integer, ShellCounter>(0);
 	
 	
-	public ShellAnalysis(AnalysisDataset dataset, int shells, Logger programLogger){
-		super(dataset, programLogger);
+	public ShellAnalysis(AnalysisDataset dataset, int shells){
+		super(dataset);
 		this.shells = shells;
 		this.setProgressTotal(dataset.getCollection().getNucleusCount());
 	}
@@ -70,7 +70,7 @@ public class ShellAnalysis extends AnalysisWorker {
 			counters = new HashMap<Integer, ShellCounter>(0);
 
 			for(int signalGroup : collection.getSignalManager().getSignalGroups()){
-				counters.put(signalGroup, new ShellCounter(shells, fileLogger));
+				counters.put(signalGroup, new ShellCounter(shells));
 			}
 
 			// make the shells and measure the values
@@ -80,7 +80,7 @@ public class ShellAnalysis extends AnalysisWorker {
 
 //				IJ.log("Nucleus "+n.getPathAndNumber());
 				
-				ShellCreator shellAnalyser = new ShellCreator(n, fileLogger);
+				ShellCreator shellAnalyser = new ShellCreator(n);
 //				IJ.log("Making shells");
 				shellAnalyser.createShells();
 				shellAnalyser.exportImage();
@@ -156,14 +156,14 @@ public class ShellAnalysis extends AnalysisWorker {
 			counters = new HashMap<Integer, ShellCounter>(0);
 
 			for(int channel : collection.getSignalManager().getSignalGroups()){
-				counters.put(channel, new ShellCounter(shells, fileLogger));
+				counters.put(channel, new ShellCounter(shells));
 			}
 
 			// make the shells and measure the values
 			
 			for(Nucleus n : collection.getNuclei()){
 
-				ShellCreator shellAnalyser = new ShellCreator(n, fileLogger);
+				ShellCreator shellAnalyser = new ShellCreator(n);
 				shellAnalyser.createShells();
 				shellAnalyser.exportImage();
 

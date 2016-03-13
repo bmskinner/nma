@@ -57,8 +57,8 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	protected CellCollection collection;
 	protected ClusteringOptions options;
 		
-	public NucleusTreeBuilder(AnalysisDataset dataset, ClusteringOptions options, Logger programLogger){
-		super(dataset, programLogger);
+	public NucleusTreeBuilder(AnalysisDataset dataset, ClusteringOptions options){
+		super(dataset);
 		this.options = options;
 		this.collection = dataset.getCollection();
 		this.setProgressTotal(dataset.getCollection().cellCount() * 2);

@@ -89,7 +89,7 @@ public class RunSegmentationAction extends ProgressableAction {
 	}
 	
 	private void runCopyAnalysis(){
-		worker = new DatasetSegmenter(dataset, source.getCollection(), programLogger);
+		worker = new DatasetSegmenter(dataset, source.getCollection());
 		worker.addPropertyChangeListener(this);
 		worker.execute();
 	}
@@ -111,7 +111,7 @@ public class RunSegmentationAction extends ProgressableAction {
 			this.setProgressMessage(message);
 			this.cooldown();
 
-			worker = new DatasetSegmenter(this.dataset, mode, programLogger);
+			worker = new DatasetSegmenter(this.dataset, mode);
 			worker.addPropertyChangeListener(this);
 			programLogger.log(Level.FINE, "Running morphology analysis");
 			worker.execute();

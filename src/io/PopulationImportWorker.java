@@ -41,7 +41,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 	private AnalysisDataset dataset;
 	
 	public PopulationImportWorker(Logger programLogger, File f){
-		super(null, programLogger);
+		super(null);
 		this.file = f;
 		this.setProgressTotal(1);
 	}

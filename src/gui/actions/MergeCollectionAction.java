@@ -41,7 +41,7 @@ public class MergeCollectionAction extends ProgressableAction {
 		
 		if(fileName!=null && folderName!=null){
 			File saveFile = new File(folderName+File.separator+fileName);
-			worker = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE, saveFile, programLogger);
+			worker = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE, saveFile);
 			worker.addPropertyChangeListener(this);
 			worker.execute();	
 		} else {

@@ -20,8 +20,8 @@ public class NeighbourJoiningTreeBuilder extends AnalysisWorker {
 	
 	private Tree tree;
 
-	public NeighbourJoiningTreeBuilder(AnalysisDataset dataset, Logger programLogger) {
-		super(dataset, programLogger);
+	public NeighbourJoiningTreeBuilder(AnalysisDataset dataset) {
+		super(dataset);
 		this.setProgressTotal(dataset.getCollection().cellCount());
 		
 	}

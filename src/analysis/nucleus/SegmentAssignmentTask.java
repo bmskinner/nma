@@ -3,6 +3,7 @@ package analysis.nucleus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
+import java.util.logging.Logger;
 
 import analysis.AbstractProgressAction;
 import components.generic.Profile;
@@ -36,8 +37,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 			try {
 				processNuclei();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logError("Error processing nuclei", e);
 			}
 	     else {
 	    	 int mid = (low + high) >>> 1;
@@ -58,8 +58,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 
 	    		 ForkJoinTask.invokeAll(tasks);
 	    	 } catch (Exception e) {
-	    		 // TODO Auto-generated catch block
-	    		 e.printStackTrace();
+	    		 logError("Error processing nuclei", e);
 	    	 }
 
 	     }

@@ -37,6 +37,7 @@ import utility.Constants;
 
 
 import utility.StatsMap;
+import analysis.AbstractLoggable;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.Detector;
@@ -52,18 +53,17 @@ import components.nuclei.Nucleus;
  * filters on them 
  *
  */
-public class NucleusFinder {
+public class NucleusFinder extends AbstractLoggable {
 	
-	private final Logger logger;
 	private final AnalysisOptions options;
 	private final String outputFolderName;
 	private final Detector detector;
 	
-	public NucleusFinder(final Logger logger, final AnalysisOptions options, final String outputFolderName){
-		if(options==null || logger==null){
-			throw new IllegalArgumentException("Options is null or logger is null");
+	public NucleusFinder(final AnalysisOptions options, final String outputFolderName){
+		if(options==null){
+			throw new IllegalArgumentException("Options is null");
 		}
-		this.logger  = logger;
+
 		this.options = options;
 		this.outputFolderName = outputFolderName;
 		
@@ -97,7 +97,7 @@ public class NucleusFinder {
 	 * @return the Map linking an roi to its stats
 	 */
 	protected List<Roi> getROIs(ImageStack image, boolean closed){
-		logger.log(Level.FINER, "Running Detector");
+		log(Level.FINER, "Running Detector");
 
 		if(closed){
 			detector.setMinSize(options.getMinNucleusSize()); // get polygon rois
@@ -109,9 +109,9 @@ public class NucleusFinder {
 			ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
 			detector.run(ip);
 		} catch(Exception e){
-			logger.log(Level.SEVERE, "Error in nucleus detection", e);
+			logError( "Error in nucleus detection", e);
 		}
-		logger.log(Level.FINER, "Finished Detector");
+		log(Level.FINER, "Finished Detector");
 		return detector.getRoiList();
 	}
 
@@ -125,7 +125,7 @@ public class NucleusFinder {
   */
 	protected List<Cell> processImage(ImageStack image, File path) throws Exception{
 
-		logger.log(Level.FINE, "File:  "+path.getName());
+		log(Level.FINE, "File:  "+path.getName());
 		
 		List<Cell> result = new ArrayList<Cell>();
 						
@@ -137,7 +137,7 @@ public class NucleusFinder {
 						
 		if(roiList.isEmpty()){
 
-			logger.log(Level.FINE, "No usable nuclei in image");
+			log(Level.FINE, "No usable nuclei in image");
 			
 			return result;
 		}
@@ -146,16 +146,16 @@ public class NucleusFinder {
 
 		for(Roi roi : roiList){
 
-			logger.log(Level.FINEST, "Acquiring nucleus "+nucleusNumber);
+			log(Level.FINEST, "Acquiring nucleus "+nucleusNumber);
 			
 			
 			try{
 				Cell cell = makeCell(roi, image, nucleusNumber++, path); // get the profile data back for the nucleus
 				result.add(cell);
-				logger.log(Level.FINER, "Cell created");
+				log(Level.FINER, "Cell created");
 			} catch(Exception e){
 
-				logger.log(Level.SEVERE, "Error acquiring nucleus", e);
+				logError("Error acquiring nucleus", e);
 				
 			}
 		} 
@@ -171,7 +171,7 @@ public class NucleusFinder {
 	 */
 	private ImageStack preprocessImage(ImageStack image) throws Exception{
 		
-		logger.log(Level.FINER, "Preprocessing image");
+		log(Level.FINER, "Preprocessing image");
 		CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
 
 		ImageStack searchStack = null;
@@ -184,7 +184,7 @@ public class NucleusFinder {
 				int kernel = nucleusCannyOptions.getKuwaharaKernel();
 				ImageProcessor ip = ImageFilterer.runKuwaharaFiltering(image, Constants.rgbToStack(options.getChannel())  , kernel);
 				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
-				logger.log(Level.FINER, "Run Kuwahara");
+				log(Level.FINER, "Run Kuwahara");
 			}
 
 			// flatten chromocentres
@@ -192,10 +192,10 @@ public class NucleusFinder {
 				int threshold = nucleusCannyOptions.getFlattenThreshold();
 				ImageProcessor ip = ImageFilterer.squashChromocentres(image, Constants.rgbToStack(options.getChannel()), threshold);
 				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
-				logger.log(Level.FINER, "Run flattening");
+				log(Level.FINER, "Run flattening");
 			}
 			searchStack = ImageFilterer.runEdgeDetector(image, Constants.rgbToStack(options.getChannel()), nucleusCannyOptions);
-			logger.log(Level.FINER, "Run edge detection");
+			log(Level.FINER, "Run edge detection");
 		} else {
 			searchStack = image;
 		}
@@ -256,7 +256,7 @@ public class NucleusFinder {
 			  
 		  }catch(Exception e){
 	
-				  logger.log(Level.SEVERE, " Error in nucleus assignment", e);
+			  logError(" Error in nucleus assignment", e);
 			  
 		  }
 		  return result;
@@ -294,7 +294,7 @@ public class NucleusFinder {
 			  
 		  } catch(Exception e){
 
-				  logger.log(Level.SEVERE, "Error creating nucleus", e);
+			  logError( "Error creating nucleus", e);
 			  
 		  }
 		  return n;
