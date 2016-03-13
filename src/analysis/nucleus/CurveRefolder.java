@@ -203,10 +203,8 @@ public class CurveRefolder extends AnalysisWorker {
 				while(  i<mode.maxIterations()){ // iterate until converging
 					prevScore = score;
 					score = this.iterateOverNucleus();
-					i++;
-					publish(i);
+					publish(++i);
 					log(Level.FINE, "Iteration "+i+": "+(int)score);
-//					programLogger.log(Level.FINE, "Iteration "+i+": "+(int)score);
 				}
 //			}
 
