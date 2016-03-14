@@ -462,18 +462,21 @@ public class SegmentFitter extends AbstractLoggable {
 		
 		NucleusBorderSegment reference  = referenceProfile.getSegment(id);
 		NucleusBorderSegment test		=      testProfile.getSegment(id);
-
-
-		Profile refProfile  = referenceProfile.getSubregion(reference);
-		Profile subjProfile =      testProfile.getSubregion(test);
 		
 		double result = 0;
+		
 		try{
+			
+			Profile refProfile  = referenceProfile.getSubregion(reference);
+			Profile subjProfile =      testProfile.getSubregion(test);
+
 			result = refProfile.absoluteSquareDifference(subjProfile);
+			
 		} catch(Exception e){
 			logError("Error calculating absolute square difference between segments", e);
-			log(Level.SEVERE, "Reference: "+ reference.toString());
-			log(Level.SEVERE, "Test     : "+      test.toString());
+			log(Level.SEVERE, "Ref  seg: "+ reference.toString());
+			log(Level.SEVERE, "Test seg: "+      test.toString());
+			log(Level.SEVERE, "Test profile: "+  testProfile.toString());
 		}
 		return result;
 	}

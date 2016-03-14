@@ -3,6 +3,7 @@ package analysis.nucleus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import analysis.AbstractProgressAction;
@@ -124,6 +125,10 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 		}
 
 		NucleusBorderSegment.linkSegments(nucleusSegments);
+		
+		log(Level.FINEST, "Assigned segments to nucleus");
+		log(Level.FINEST, NucleusBorderSegment.toString(nucleusSegments));
+		
 		nucleusProfile.setSegments(nucleusSegments);
 		n.setProfile(ProfileType.REGULAR, nucleusProfile);
 	}
