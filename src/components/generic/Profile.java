@@ -63,6 +63,9 @@ public class Profile implements Serializable {
 	 */
 	public Profile(final double[] values){
 
+		if(values.length==0){
+			throw new IllegalArgumentException("Input array has zero length in profile constructor");
+		}
 		this.array = new double[values.length];
 		for(int i=0; i<this.array.length; i++){
 			array[i] = values[i];
@@ -76,7 +79,7 @@ public class Profile implements Serializable {
 	 */
 	public Profile(final Profile p){
 		if(p==null){
-			throw new IllegalArgumentException("Input profile is null in profile contructor");
+			throw new IllegalArgumentException("Input profile is null in profile constructor");
 		}
 
 		this.array = new double[p.size()];
@@ -273,6 +276,9 @@ public class Profile implements Serializable {
 	 */
 	public double absoluteSquareDifference(Profile testProfile) throws Exception {
 
+		if(testProfile==null){
+			throw new IllegalArgumentException("Test profile is null");
+		}
 		// the test profile needs to be matched to this profile
 		// whichever is smaller must be interpolated 
 		Profile profile1 = equaliseLengths(this.copy(), testProfile);
@@ -485,8 +491,8 @@ public class Profile implements Serializable {
 //	  System.out.println("Set indexes "+normIndex+": "+indexLower+"-"+indexHigher);
 
 	  // wrap the arrays
-	  indexLower  = AbstractCellularComponent.wrapIndex(indexLower , this.size());
-	  indexHigher = AbstractCellularComponent.wrapIndex(indexHigher, this.size());
+	  indexLower  = AbstractCellularComponent.wrapIndex(indexLower , array.length);
+	  indexHigher = AbstractCellularComponent.wrapIndex(indexHigher, array.length);
 //	  System.out.println("Wrapped indexes "+normIndex+": "+indexLower+"-"+indexHigher);
 
 	  // get the values at these indexes
@@ -506,7 +512,7 @@ public class Profile implements Serializable {
 
 	  // add the offset to the lower index
 	  double positionToFind = indexLower + offset;
-	  positionToFind = AbstractCellularComponent.wrapIndex(positionToFind , this.size());
+	  positionToFind = AbstractCellularComponent.wrapIndex(positionToFind , array.length);
 //	  System.out.println("Position to find "+normIndex+": "+positionToFind);
 	  
 	  // calculate the value to be added to the lower index value
@@ -832,40 +838,34 @@ public class Profile implements Serializable {
   }
 
   /**
-   * Fetch a sub-region of the profile
+   * Fetch a sub-region of the profile as a new profile
    * @param indexStart the index to begin
    * @param indexEnd the index to end
    * @return a Profile
    */
-  public Profile getSubregion(int indexStart, int indexEnd){
-	  try{
-		  if(indexStart <= indexEnd ){
-			  double[] result = Arrays.copyOfRange(array,indexStart, indexEnd);
-			  return new Profile(result);
-		  } else { // case when array wraps
-			  if(indexStart > indexEnd){
-				  double[] resultA = Arrays.copyOfRange(array,indexStart, this.size()-1);
-				  double[] resultB = Arrays.copyOfRange(array,0, indexEnd);
-				  double[] result = new double[resultA.length+resultB.length];
-				  int index = 0;
-				  for(double d : resultA){
-					  result[index] = d;
-					  index++;
-				  }
-				  for(double d : resultB){
-					  result[index] = d;
-					  index++;
-				  }
-				  return new Profile(result);
-			  } else{
-				  return null; // should never be reached
-			  }
-		  }
-	  } catch (Exception e){
-		  IJ.log("Error getting profile subregion: "+indexStart+" - "+indexEnd+" in size "+this.size());
-		  return null;
-	  }
+  public Profile getSubregion(int indexStart, int indexEnd) throws Exception {
 
+	  if(indexStart <= indexEnd ){
+		  
+		  double[] result = Arrays.copyOfRange(array,indexStart, indexEnd);
+		  return new Profile(result);
+		  
+	  } else { // case when array wraps
+
+		  double[] resultA = Arrays.copyOfRange(array,indexStart, this.size()-1);
+		  double[] resultB = Arrays.copyOfRange(array,0, indexEnd);
+		  double[] result = new double[resultA.length+resultB.length];
+		  int index = 0;
+		  for(double d : resultA){
+			  result[index] = d;
+			  index++;
+		  }
+		  for(double d : resultB){
+			  result[index] = d;
+			  index++;
+		  }
+		  return new Profile(result);
+	  }
   }
   
   /**
@@ -875,7 +875,7 @@ public class Profile implements Serializable {
    * @param segment the segment to find
    * @return a Profile
    */
-  public Profile getSubregion(NucleusBorderSegment segment){
+  public Profile getSubregion(NucleusBorderSegment segment) throws Exception {
 	  
 	  if(segment==null){
 		  throw new IllegalArgumentException("Segment is null");
@@ -884,7 +884,7 @@ public class Profile implements Serializable {
 	  if(segment.getTotalLength()!=this.size()){
 		  throw new IllegalArgumentException("Segment comes from a different length profile");
 	  }
-	  return this.getSubregion(segment.getStartIndex(), segment.getEndIndex());
+	  return getSubregion(segment.getStartIndex(), segment.getEndIndex());
   }
 
   /**

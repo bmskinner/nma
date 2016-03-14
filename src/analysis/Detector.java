@@ -36,11 +36,12 @@ import ij.process.ImageProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import utility.StatsMap;
 
 
-public class Detector{
+public class Detector extends AbstractLoggable {
 
   /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
   private double minSize;
@@ -140,10 +141,10 @@ public class Detector{
 		  ParticleAnalyzer.setRoiManager(manager);
 		  boolean success = pa.analyze(image);
 		  if(!success){
-			  IJ.log("  Unable to perform particle analysis");
+			  log(Level.FINEST, "Unable to perform particle analysis");
 		  }
 	  } catch(Exception e){
-		  IJ.log("  Error in particle analyser: "+e);
+		  logError("Error in particle analyser", e);
 	  } finally {
 		  image.close();
 	  }

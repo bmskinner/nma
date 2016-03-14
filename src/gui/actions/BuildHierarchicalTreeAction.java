@@ -92,7 +92,7 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 
 	@Override
 	public void datasetEventReceived(DatasetEvent event) {
-		programLogger.log(Level.FINEST, "BuildHierarchicalTreeAction heard dataset event");
+		log(Level.FINEST, "BuildHierarchicalTreeAction heard dataset event");
 		if(event.method().equals(DatasetMethod.COPY_MORPHOLOGY)){
 			fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, event.getDatasets(), event.secondaryDataset());
 		}

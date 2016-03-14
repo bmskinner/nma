@@ -225,7 +225,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			}
 
 			collection.getProfileCollection(ProfileType.REGULAR)
-			.addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
+				.addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
 
 		}
 		

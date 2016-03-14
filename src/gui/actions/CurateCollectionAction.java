@@ -62,7 +62,7 @@ public class CurateCollectionAction extends ProgressableAction {
 			analyseNewCollection(clusterCollection);
 
 		}catch(Exception e){
-			programLogger.log(Level.SEVERE,"Error curating collection", e);
+			logError("Error curating collection", e);
 		} finally {
 			cancel();
 		}
@@ -70,7 +70,7 @@ public class CurateCollectionAction extends ProgressableAction {
 	
 	private void analyseNewCollection(CellCollection collection){
 		if(collection.hasCells()){
-			programLogger.log(Level.INFO, "Extracted "+collection.cellCount()+" cells");
+			log(Level.INFO, "Extracted "+collection.cellCount()+" cells");
 			final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 			dataset.addChildCollection(collection);
 
@@ -118,7 +118,7 @@ public class CurateCollectionAction extends ProgressableAction {
 			new RunProfilingAction(list, flag, mw);
 
 		} else {
-			programLogger.log(Level.WARNING, "No cells found");
+			log(Level.WARNING, "No cells found");
 		}
 	}
 

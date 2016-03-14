@@ -52,10 +52,10 @@ public class PopulationImportAction extends ProgressableAction {
 			worker.addPropertyChangeListener(this);
 			
 			this.setProgressMessage("Opening file...");
-			programLogger.log(Level.FINE, "Opening dataset...");
+			log(Level.FINE, "Opening dataset...");
 			worker.execute();
 		} else {
-			programLogger.log(Level.FINE, "Open cancelled");
+			log(Level.FINE, "Open cancelled");
 			cancel();
 		}
 		
@@ -93,11 +93,11 @@ public class PopulationImportAction extends ProgressableAction {
 	public void finished(){
 //		setProgressBarVisible(false);
 		AnalysisDataset dataset = ((PopulationImportWorker) worker).getLoadedDataset();
-		programLogger.log(Level.FINE, "Opened dataset");
+		log(Level.FINE, "Opened dataset");
 
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
 		list.add(dataset);
-		programLogger.log(Level.FINE, "Firing add signal");
+		log(Level.FINE, "Firing add signal");
 		fireDatasetEvent(DatasetMethod.ADD_DATASET, list);
 		
 		/*

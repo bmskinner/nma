@@ -65,16 +65,16 @@ public class ClusterAnalysisAction extends ProgressableAction {
 	@Override
 	public void finished() {
 
-		programLogger.log(Level.INFO, "Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
+		log(Level.INFO, "Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
 
 		String tree = (((NucleusClusterer) worker).getNewickTree());
 
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		ClusteringOptions options =  ((NucleusClusterer) worker).getOptions();
 		//int clusterNumber = dataset.getClusterGroups().size();
-		programLogger.log(Level.FINEST, "Getting group number");
+		log(Level.FINEST, "Getting group number");
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-		programLogger.log(Level.FINEST, "Cluster group number chosen: "+clusterNumber);
+		log(Level.FINEST, "Cluster group number chosen: "+clusterNumber);
 
 		ClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, tree);
 
@@ -83,22 +83,22 @@ public class ClusterAnalysisAction extends ProgressableAction {
 			CellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
 
 			if(c.hasCells()){
-				programLogger.log(Level.FINEST, "Cluster "+cluster+": "+c.getName());
+				log(Level.FINEST, "Cluster "+cluster+": "+c.getName());
 				
 				try {
-					programLogger.log(Level.FINE, "Copying profiles to cluster");
+					log(Level.FINE, "Copying profiles to cluster");
 					dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
 				} catch (Exception e) {
-					programLogger.log(Level.SEVERE, "Error copying segments to cluster "+c.getName(), e);
+					logError("Error copying segments to cluster "+c.getName(), e);
 				}
 				group.addDataset(c);
 				c.setName(group.getName()+"_"+c.getName());
-				programLogger.log(Level.FINEST, "Renamed cluster: "+c.getName());
+				log(Level.FINEST, "Renamed cluster: "+c.getName());
 				dataset.addChildCollection(c);
 				
 				
 				// attach the clusters to their parent collection
-				programLogger.log(Level.INFO, "Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
+				log(Level.INFO, "Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
 				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
 				clusterDataset.setRoot(false);
 				list.add(clusterDataset);
@@ -106,7 +106,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 
 
 		}
-		programLogger.log(Level.FINE, "Profiles copied to all clusters");
+		log(Level.FINE, "Profiles copied to all clusters");
 		dataset.addClusterGroup(group);
 		fireDatasetEvent(DatasetMethod.SAVE, dataset);
 		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);

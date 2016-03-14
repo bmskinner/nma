@@ -218,7 +218,7 @@ abstract class ProgressableAction extends AbstractLoggable implements PropertyCh
 		}
 
 		if(evt.getPropertyName().equals("Finished")){
-			programLogger.log(Level.FINEST,"Worker signaled finished");
+			log(Level.FINEST,"Worker signaled finished");
 			finished();
 		}
 
@@ -228,7 +228,7 @@ abstract class ProgressableAction extends AbstractLoggable implements PropertyCh
 		}
 		
 		if(evt.getPropertyName().equals("Cooldown")){
-			programLogger.log(Level.FINEST,"Worker signaled cooldown");
+			log(Level.FINEST,"Worker signaled cooldown");
 			cooldown();
 		}
 		

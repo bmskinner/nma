@@ -19,7 +19,6 @@
 
 package components.generic;
 
-import ij.IJ;
 import stats.Stats;
 
 import java.io.Serializable;
@@ -31,9 +30,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
+import analysis.AbstractLoggable;
 import components.AbstractCellularComponent;
-import components.nuclear.NucleusBorderSegment;
 import utility.Constants;
 import utility.ProfileException;
 import utility.Utils;
@@ -46,7 +46,7 @@ import utility.Utils;
  * @author bms41
  *
  */
-public class ProfileAggregate implements Serializable {
+public class ProfileAggregate extends AbstractLoggable implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	private Map<Double, Collection<Double>> aggregate = new HashMap<Double, Collection<Double>>();
@@ -163,13 +163,13 @@ public class ProfileAggregate implements Serializable {
 //	}
 	
 	public Profile getMedian(){
-		Profile result = new Profile(new double[0]);
+		Profile result = null;
 		try{
 			result = calculateQuartile(Constants.MEDIAN);
 		} catch(ProfileException e){
 			// if the profile >200, scale down to 200. Otherwise, reduce stepwise until we get a profile
 			int newLength = this.length <= 200 ? this.length-5 : 200;
-			IJ.log("    "+e.getMessage()+": rescaling to "+newLength);
+			log(Level.FINEST, "Error in getting profile aggregate median: rescaling to "+newLength);
 			this.rescaleProfile(newLength);
 			result = this.getMedian(); // recurse through this function until we get a profile
 		}
@@ -177,12 +177,14 @@ public class ProfileAggregate implements Serializable {
 	}
 
 	public Profile getQuartile(double quartile){
-		Profile result = new Profile(new double[0]);
+		Profile result = null;
 		try{
+			
 			result = calculateQuartile(quartile);
+			
 		} catch(ProfileException e){
 			result = this.getMedian(); // median is the only method that rescales, so should have been called before this
-//			IJ.log("    Cannot find quartile; falling back on median");
+			log(Level.FINEST, "Cannot find quartile; falling back on median");
 		}
 		return result;
 	}
@@ -217,7 +219,7 @@ public class ProfileAggregate implements Serializable {
 			}
 		}
 		if(missing>(double)length/4){
-			throw new ProfileException("    Too many missing values ("+missing+") to calculate median profile");
+			throw new ProfileException("Too many missing values ("+missing+") to calculate median profile");
 		}
 		
 		if(missing==0){

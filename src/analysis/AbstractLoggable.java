@@ -7,8 +7,8 @@ import logging.Loggable;
 
 public class AbstractLoggable implements Loggable {
 	
-	protected static final Logger programLogger =  Logger.getLogger("ProgramLogger"); // log to the program LogPanel
-	protected static Logger fileLogger = null;
+//	protected transient static final Logger programLogger =  Logger.getLogger("ProgramLogger"); // log to the program LogPanel
+	protected transient static Logger fileLogger = null;
 	
     /**
      * Log the given message to the program log window and to the dataset
@@ -20,7 +20,8 @@ public class AbstractLoggable implements Loggable {
     	if(fileLogger!=null){
     		fileLogger.log(level, message);
     	}
-		programLogger.log(level, message);
+    	
+    	Logger.getLogger("ProgramLogger").log(level, message);
     }
     
     /**
@@ -33,7 +34,7 @@ public class AbstractLoggable implements Loggable {
     	if(fileLogger!=null){
     		fileLogger.log(Level.SEVERE, message, t);
     	}
-		programLogger.log(Level.SEVERE, message, t);
+    	Logger.getLogger("ProgramLogger").log(Level.SEVERE, message, t);
     }
 
 }

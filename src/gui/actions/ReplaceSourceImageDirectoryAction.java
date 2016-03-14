@@ -44,22 +44,24 @@ public class ReplaceSourceImageDirectoryAction extends ProgressableAction {
 
 					File newFolder = new File(folderName);
 
-					programLogger.log(Level.INFO, "Updating folder to "+folderName );
+					log(Level.INFO, "Updating folder to "+folderName );
+					
+					dataset.updateSourceImageDirectory(newFolder);
 
-					PopulationImporter.updateSourceImageDirectory(newFolder, dataset);
+//					PopulationImporter.updateSourceImageDirectory(newFolder, dataset);
 					finished();
 
 				} else {
-					programLogger.log(Level.INFO, "Update cancelled");
+					log(Level.INFO, "Update cancelled");
 					cancel();
 				}
 			}else {
-				programLogger.log(Level.WARNING, "Dataset is a merge; cancelling");
+				log(Level.WARNING, "Dataset is a merge; cancelling");
 				cancel();
 			}
 
 		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error in folder update: "+e.getMessage(), e);
+			logError("Error in folder update: "+e.getMessage(), e);
 		}
 
 

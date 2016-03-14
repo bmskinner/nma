@@ -20,6 +20,13 @@ package analysis;
 
 import java.util.EventObject;
 
+/**
+ * ProgressEvents are used to signal a JProgressBar should be incremented.
+ * They are used in RecursiveActions and ForkJoinTasks, where a direct signal
+ * to an encompassing ProgressableAction is not possible.
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class ProgressEvent extends EventObject {
 

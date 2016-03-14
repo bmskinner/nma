@@ -284,6 +284,8 @@ public class SegmentFitter extends AbstractLoggable {
 	 */
 	private SegmentedProfile testLength(SegmentedProfile profile, UUID id) throws Exception {
 		
+		
+		
 		// by default, return the same profile that came in
 		SegmentedProfile result = new SegmentedProfile(profile);
 				
@@ -353,54 +355,38 @@ public class SegmentFitter extends AbstractLoggable {
 	 */
 	private SegmentedProfile testChange(SegmentedProfile profile, UUID id, int changeValue) throws Exception {
 		
+		if(profile==null){
+			throw new IllegalArgumentException("Input profile is null for segment "+id.toString()+" change "+changeValue);
+		}
+
+
 		double bestScore = compareSegmentationPatterns(medianProfile, profile);
-		
+
 		// apply all changes to a fresh copy of the profile
 		SegmentedProfile testProfile = new SegmentedProfile(profile);
-		
-		
+
+
 		// not permitted if it violates length constraint
 		if(testProfile.adjustSegmentStart(id, changeValue)){
-			
-			SegmentedProfile result = testProfile;
-			
-			
-												
-			// anything that gets in here should be valid
-			try{
-				double score = compareSegmentationPatterns(medianProfile, testProfile);
-			
-				if(score < bestScore){
-					bestScore 	= score;
-					result = new SegmentedProfile(testProfile);
 
-				}
-			} catch(IllegalArgumentException e){
-				// throw a new edxception rather than trying a nudge a problem profile
-//				fileLogger.log(Level.SEVERE, e.getMessage());
-				throw new Exception("Error getting segmentation pattern: "+e.getMessage());
+			SegmentedProfile result = testProfile;
+
+
+
+			// anything that gets in here should be valid
+
+			double score = compareSegmentationPatterns(medianProfile, testProfile);
+
+			if(score < bestScore){
+				bestScore 	= score;
+				result = new SegmentedProfile(testProfile);
+
 			}
-			
-			/*
-			 * Nudging the entire segment list
-			 * This seems to have no effect on /Testing, so disabled
-			 * completely for speed improvement
-			 */
-//			{
-//				// test if nudging the lengthened segment with will help
-//				NucleusBorderSegment segment = profile.getSegment(id);
-//				int nudge = testNudge(testProfile, segment.length());
-//				testProfile.nudgeSegments(nudge);
-//
-//				double score = compareSegmentationPatterns(medianProfile, testProfile);
-//				if(score < bestScore){
-//					bestScore = score;
-//					result = new SegmentedProfile(testProfile);
-//				}
-//			}
-		
-			return result;						
+
+			return result;	
+
 		}
+
 		return profile;
 	}
 	
@@ -465,18 +451,31 @@ public class SegmentFitter extends AbstractLoggable {
 	 * @return the sum of square differences between the segments
 	 * @throws Exception 
 	 */
-	private double compareSegments(String name, SegmentedProfile referenceProfile, SegmentedProfile testProfile) throws Exception{
-		if(name == null){
-			throw new IllegalArgumentException("Segment name is null");
+	private double compareSegments(UUID id, SegmentedProfile referenceProfile, SegmentedProfile testProfile) throws Exception{
+		if(id == null){
+			throw new IllegalArgumentException("Segment id is null");
 		}
 		
-		NucleusBorderSegment reference  = referenceProfile.getSegment(name);
-		NucleusBorderSegment test		=      testProfile.getSegment(name);
+		if(referenceProfile == null || testProfile==null){
+			throw new IllegalArgumentException("Test or reference profile is null");
+		}
+		
+		NucleusBorderSegment reference  = referenceProfile.getSegment(id);
+		NucleusBorderSegment test		=      testProfile.getSegment(id);
+
 
 		Profile refProfile  = referenceProfile.getSubregion(reference);
 		Profile subjProfile =      testProfile.getSubregion(test);
 		
-		return refProfile.absoluteSquareDifference(subjProfile);
+		double result = 0;
+		try{
+			result = refProfile.absoluteSquareDifference(subjProfile);
+		} catch(Exception e){
+			logError("Error calculating absolute square difference between segments", e);
+			log(Level.SEVERE, "Reference: "+ reference.toString());
+			log(Level.SEVERE, "Test     : "+      test.toString());
+		}
+		return result;
 	}
 	
 	/**
@@ -489,14 +488,22 @@ public class SegmentFitter extends AbstractLoggable {
 	 */
 	private double  compareSegmentationPatterns(SegmentedProfile referenceProfile, SegmentedProfile testProfile) throws Exception{
 		
+		if(referenceProfile==null || testProfile==null){
+			throw new IllegalArgumentException("An input profile is null");
+		}
+		
 		if(referenceProfile.getSegmentCount()!=testProfile.getSegmentCount()){
-			throw new IllegalArgumentException("Lists are of different lengths");
+			throw new IllegalArgumentException("Segment counts are different for profiles");
 		}
 		
 		double result = 0;
-		for(String name : referenceProfile.getSegmentNames()){
-			result += compareSegments(name, referenceProfile, testProfile);
+
+		for(UUID id : referenceProfile.getSegmentIDs()){
+			result += compareSegments(id, referenceProfile, testProfile);
 		}
+//		for(String name : referenceProfile.getSegmentNames()){
+//			result += compareSegments(name, referenceProfile, testProfile);
+//		}
 		return result;
 	}
 }

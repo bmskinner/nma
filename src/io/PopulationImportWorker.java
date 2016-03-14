@@ -19,7 +19,13 @@
 package io;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.nuclear.NucleusType;
@@ -28,6 +34,7 @@ import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.nucleus.DatasetProfiler;
+import analysis.nucleus.NucleusDetector;
 import analysis.nucleus.DatasetProfiler.TailFinder;
 import utility.Constants;
 import utility.Version;
@@ -51,7 +58,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 	protected Boolean doInBackground() {
 		
 		try {
-			dataset = PopulationImporter.readDataset(file, programLogger);
+			dataset = readDataset(file);
 			
 			programLogger.log(Level.FINE, "Read dataset");
 			if(checkVersion( dataset.getVersion() )){
@@ -164,7 +171,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 		boolean ok = true;
 		
 		if(version==null){ // allow for debugging, but warn
-			programLogger.log(Level.WARNING, "No version info found: functions may not work as expected");
+			log(Level.WARNING, "No version info found: functions may not work as expected");
 			return true;
 		}
 				
@@ -176,12 +183,168 @@ public class PopulationImportWorker extends AnalysisWorker {
 		}
 		// dataset revision should be equal or greater to program
 		if(version.getMinor()<Constants.VERSION_MINOR){
-			programLogger.log(Level.WARNING, "Dataset was created with an older version of the program");
-			programLogger.log(Level.WARNING, "Some functionality may not work as expected");
+			log(Level.WARNING, "Dataset was created with an older version of the program");
+			log(Level.WARNING, "Some functionality may not work as expected");
 		}
 		return ok;
 	}
 	
+	private AnalysisDataset readDataset(File inputFile) throws Exception {
+
+		if(!inputFile.exists()){
+			throw new IllegalArgumentException("Requested file does not exist");
+		}
+
+		AnalysisDataset dataset = null;
+		FileInputStream fis     = null;
+		ObjectInputStream ois   = null;
+				
+		try {
+			fis = new FileInputStream(inputFile.getAbsolutePath());
+
+			ois = new ObjectInputStream(fis);
+			
+			dataset = (AnalysisDataset) ois.readObject();
+						
+			// Replace existing save file path with the path to the file that has been opened
+			
+			if(!dataset.getSavePath().equals(inputFile)){
+				updateSavePath(inputFile, dataset);
+			}
+			
+		} catch (FileNotFoundException e1) {
+			logError("File not found: "+inputFile.getAbsolutePath(), e1);
+		} catch (IOException e1) {
+			logError("File IO error: "+inputFile.getAbsolutePath(), e1);
+		} catch (ClassNotFoundException e1) {
+			logError("Class not found error: "+inputFile.getAbsolutePath(), e1);
+		} finally {
+			ois.close();
+			fis.close();
+		}
+		return dataset;
+	}
 	
+	/**
+	 * Check if the image folders are present in the correct relative directories
+	 * If so, update the CellCollection image paths
+	 * should be /ImageDir/AnalysisDir/dataset.nmd
+	 * @param inputFile the file being opened
+	 * @param dataset the dataset being opened
+	 */
+	private void updateSavePath(File inputFile, AnalysisDataset dataset) throws Exception {
+		
+		log(Level.FINE, "File path has changed: attempting to relocate images");
+
+		dataset.setSavePath(inputFile);
+		
+		if(!dataset.hasMergeSources()){
+
+			// This should be /ImageDir/DateTimeDir/
+			File expectedAnalysisDirectory = inputFile.getParentFile();
+
+			// This should be /ImageDir/
+			File expectedImageDirectory = expectedAnalysisDirectory.getParentFile();
+			
+			dataset.updateSourceImageDirectory(expectedImageDirectory);
+
+//			updateSourceImageDirectory(expectedImageDirectory, dataset);
+
+		}else {
+			log(Level.WARNING, "Dataset is a merge");
+			log(Level.WARNING, "Unable to find single source image directory");
+		}
+	}
+	
+//	/**
+//	 * Update the source image paths in the dataset and its children
+//	 * to use the given directory 
+//	 * @param expectedImageDirectory
+//	 * @param dataset
+//	 * @throws Exception
+//	 */
+//	private void updateSourceImageDirectory(File expectedImageDirectory, AnalysisDataset dataset) throws Exception{
+//		log(Level.FINE, "Searching "+expectedImageDirectory.getAbsolutePath());
+//
+//		if(expectedImageDirectory.exists()){
+//
+//			// Is the name of the expectedImageDirectory the same as the dataset image directory?
+//			if(checkName(expectedImageDirectory, dataset)){
+//				log(Level.FINE, "Dataset name matches new folder");
+//
+//				// Does expectedImageDirectory contain image files?
+//				if(checkHasImages(expectedImageDirectory)){
+//					log(Level.FINE, "Target folder contains at least one image");
+//
+//					log(Level.FINE, "Updating dataset image paths");
+//					boolean ok = dataset.getCollection().updateSourceFolder(expectedImageDirectory);
+//					if(!ok){
+//						log(Level.WARNING, "Error updating dataset image paths; update cancelled");
+//					}
+//
+//					log(Level.FINE, "Updating child dataset image paths");
+//					for(AnalysisDataset child : dataset.getAllChildDatasets()){
+//						ok = child.getCollection().updateSourceFolder(expectedImageDirectory);
+//						if(!ok){
+//							log(Level.SEVERE, "Error updating child dataset image paths; update cancelled");
+//						}
+//					}
+//
+//					log(Level.INFO, "Updated image paths to new folder location");
+//				} else {
+//					log(Level.WARNING, "Target folder contains no images; unable to update paths");
+//				}
+//			} else {
+//				log(Level.WARNING, "Dataset name does not match new folder; unable to update paths");
+//			}
+//
+//		} else {
+//			log(Level.WARNING, "Unable to locate image directory and/or analysis directory; unable to update paths");
+//		}
+//	}
+	
+//	/**
+//	 * Check that the new image directory has the same name as the old image directory.
+//	 * If the nmd has been copied to the wrong folder, don't update nuclei
+//	 * @param expectedImageDirectory
+//	 * @param dataset
+//	 * @return
+//	 */
+//	private boolean checkName(File expectedImageDirectory, AnalysisDataset dataset){
+//		if(dataset.getCollection().getFolder().getName().equals(expectedImageDirectory.getName())){
+//			return true;
+//		} else {
+//			return false;
+//		}
+//		
+//	}
+//	
+//	/**
+//	 * Check that the given directory contains >0 image files
+//	 * suitable for the morphology analysis
+//	 * @param expectedImageDirectory
+//	 * @return
+//	 */
+//	private boolean checkHasImages(File expectedImageDirectory){
+//
+//		File[] listOfFiles = expectedImageDirectory.listFiles();
+//
+//		int result = 0;
+//
+//		for (File file : listOfFiles) {
+//
+//			boolean ok = NucleusDetector.checkFile(file);
+//
+//			if(ok){
+//				result++;
+//			}
+//		} 
+//		
+//		if(result>0){
+//			return true;
+//		} else {
+//			return false;
+//		}
+//	}
 
 }

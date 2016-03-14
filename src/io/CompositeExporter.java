@@ -36,7 +36,6 @@ import java.util.logging.Logger;
 
 import analysis.AnalysisDataset;
 import stats.NucleusStatistic;
-import utility.Utils;
 import components.CellCollection;
 import components.generic.MeasurementScale;
 import components.nuclei.Nucleus;

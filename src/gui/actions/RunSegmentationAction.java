@@ -52,14 +52,14 @@ public class RunSegmentationAction extends ProgressableAction {
 		super(dataset, "Segmentation analysis", mw, downFlag);
 		this.mode = mode;
 		this.latch = latch;
-		programLogger.log(Level.FINE, "Creating segmentation analysis");
+		log(Level.FINE, "Creating segmentation analysis");
 		runNewAnalysis();
 	}
 	
 	public RunSegmentationAction(List<AnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag, MainWindow mw){
 		super(list, "Segmentation analysis", mw, downFlag);
 		this.mode = mode;
-		programLogger.log(Level.FINE, "Creating segmentation analysis");
+		log(Level.FINE, "Creating segmentation analysis");
 		runNewAnalysis();
 	}
 	
@@ -70,7 +70,7 @@ public class RunSegmentationAction extends ProgressableAction {
 		this.latch = latch;
 		this.mode = MorphologyAnalysisMode.COPY;
 		this.source = source;
-		programLogger.log(Level.FINE, "Creating segmentation copying analysis");
+		log(Level.FINE, "Creating segmentation copying analysis");
 		runCopyAnalysis();
 	}
 	
@@ -84,7 +84,7 @@ public class RunSegmentationAction extends ProgressableAction {
 		this.downFlag = downFlag;
 		this.mode = MorphologyAnalysisMode.COPY;
 		this.source = source;
-		programLogger.log(Level.FINE, "Creating segmentation copying analysis");
+		log(Level.FINE, "Creating segmentation copying analysis");
 		runCopyAnalysis();
 	}
 	
@@ -113,11 +113,11 @@ public class RunSegmentationAction extends ProgressableAction {
 
 			worker = new DatasetSegmenter(this.dataset, mode);
 			worker.addPropertyChangeListener(this);
-			programLogger.log(Level.FINE, "Running morphology analysis");
+			log(Level.FINE, "Running morphology analysis");
 			worker.execute();
 		} catch(Exception e){
 			this.cancel();
-			programLogger.log(Level.SEVERE, "Error in morphology analysis", e);
+			logError("Error in morphology analysis", e);
 		}
 	}
 	
@@ -143,22 +143,22 @@ public class RunSegmentationAction extends ProgressableAction {
 				 * until the refolding is complete.
 				 */
 				if(  (downFlag & MainWindow.CURVE_REFOLD) == MainWindow.CURVE_REFOLD){
-					programLogger.log(Level.FINEST, "Preparing to hold thread while refolding datast");
+					log(Level.FINEST, "Preparing to hold thread while refolding datast");
 					final CountDownLatch latch = new CountDownLatch(1);
 					new RefoldNucleusAction(dataset, mw, latch);
 					try {
 						latch.await();
 					} catch (InterruptedException e) {
-						programLogger.log(Level.SEVERE, "Interruption to thread", e);
+						logError("Interruption to thread", e);
 					}
-					programLogger.log(Level.FINEST, "Resuming thread after refolding datast");
+					log(Level.FINEST, "Resuming thread after refolding datast");
 				}
 
 				
 				/*
 				 * Save the dataset, regardless of flags
 				 */
-				programLogger.log(Level.FINEST, "Saving the dataset");
+				log(Level.FINEST, "Saving the dataset");
 				saveDataset(dataset);
 				
 				/*
@@ -166,7 +166,7 @@ public class RunSegmentationAction extends ProgressableAction {
 				 */
 
 				if(  (downFlag & MainWindow.ADD_POPULATION) == MainWindow.ADD_POPULATION){
-					programLogger.log(Level.FINEST, "Firing add dataset signal");
+					log(Level.FINEST, "Firing add dataset signal");
 					fireDatasetEvent(DatasetMethod.ADD_DATASET, dataset);
 					
 					
@@ -192,12 +192,12 @@ public class RunSegmentationAction extends ProgressableAction {
 				// if no list was provided, or no more entries remain,
 				// call the finish
 				if( ! hasRemainingDatasetsToProcess()){
-					programLogger.log(Level.FINEST, "No more datasets remain to process");
+					log(Level.FINEST, "No more datasets remain to process");
 					if(latch!=null){
 						latch.countDown();
 					}
 //					if(mode.equals(MorphologyAnalysisMode.REFRESH)){
-					programLogger.log(Level.FINEST, "Firing select dataset event");
+					log(Level.FINEST, "Firing select dataset event");
 					fireDatasetEvent(DatasetMethod.SELECT_ONE_DATASET, dataset);
 //					programLogger.log(Level.FINEST, "Firing update panel interface event");
 //					fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
@@ -244,13 +244,13 @@ public class RunSegmentationAction extends ProgressableAction {
 			final CountDownLatch latch = new CountDownLatch(1);
 			new SaveDatasetAction(d, mw, latch, false);
 			try {
-				programLogger.log(Level.FINEST, "Awaiting latch for save action");
+				log(Level.FINEST, "Awaiting latch for save action");
 				latch.await();
 			} catch (InterruptedException e) {
-				programLogger.log(Level.SEVERE, "Interruption to thread", e);
+				logError("Interruption to thread", e);
 			}
 
-			programLogger.log(Level.FINE, "Root dataset saved");
+			log(Level.FINE, "Root dataset saved");
 		} else {
 
 			AnalysisDataset target = null; 

@@ -34,20 +34,20 @@ public class RunProfilingAction extends ProgressableAction {
 	public RunProfilingAction(AnalysisDataset dataset, int downFlag, MainWindow mw){
 		super(dataset, "Segmentation analysis", mw, downFlag);
 
-		programLogger.log(Level.FINE, "Creating profiling analysis");
+		log(Level.FINE, "Creating profiling analysis");
 		runNewAnalysis();
 	}
 	
 	public RunProfilingAction(List<AnalysisDataset> list, int downFlag, MainWindow mw){
 		super(list, "Segmentation analysis", mw, downFlag);
-		programLogger.log(Level.FINE, "Creating profiling analysis");
+		log(Level.FINE, "Creating profiling analysis");
 		runNewAnalysis();
 	}
 	
 	public RunProfilingAction(AnalysisDataset dataset, int downFlag, MainWindow mw, CountDownLatch latch){
 		super(dataset, "Segmentation analysis", mw, downFlag);
 		this.setLatch(latch);
-		programLogger.log(Level.FINE, "Creating profiling analysis");
+		log(Level.FINE, "Creating profiling analysis");
 		runNewAnalysis();
 		
 	}
@@ -55,7 +55,7 @@ public class RunProfilingAction extends ProgressableAction {
 	public RunProfilingAction(List<AnalysisDataset> list, int downFlag, MainWindow mw, CountDownLatch latch){
 		super(list, "Segmentation analysis", mw, downFlag);
 		this.setLatch(latch);
-		programLogger.log(Level.FINE, "Creating profiling analysis");
+		log(Level.FINE, "Creating profiling analysis");
 		runNewAnalysis();
 		
 	}
@@ -70,11 +70,11 @@ public class RunProfilingAction extends ProgressableAction {
 
 			worker = new DatasetProfiler(this.dataset);
 			worker.addPropertyChangeListener(this);
-			programLogger.log(Level.FINE, "Running morphology analysis");
+			log(Level.FINE, "Running morphology analysis");
 			worker.execute();
 		} catch(Exception e){
 			this.cancel();
-			programLogger.log(Level.SEVERE, "Error in morphology analysis", e);
+			logError("Error in morphology analysis", e);
 		}
 	}
 	
@@ -97,7 +97,7 @@ public class RunProfilingAction extends ProgressableAction {
 					try {
 						latch.await();
 					} catch (InterruptedException e) {
-						programLogger.log(Level.SEVERE, "Interruption in segmentation thread", e);
+						logError("Interruption in segmentation thread", e);
 					}
 				}
 

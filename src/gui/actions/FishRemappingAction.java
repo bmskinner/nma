@@ -44,7 +44,7 @@ public class FishRemappingAction extends ProgressableAction {
 				final AnalysisDataset dataset = datasets.get(0);
 				
 				if(dataset.hasMergeSources()){
-					programLogger.log(Level.INFO, "Cannot remap merged datasets");
+					log(Level.INFO, "Cannot remap merged datasets");
 					cancel();
 					return;
 				}
@@ -53,7 +53,7 @@ public class FishRemappingAction extends ProgressableAction {
 
 				if(fishMapper.getOK()){
 					
-					programLogger.log(Level.INFO, "Fetching collections...");
+					log(Level.INFO, "Fetching collections...");
 					List<CellCollection> subs = fishMapper.getSubCollections();
 					
 					if(!subs.isEmpty()){
@@ -63,7 +63,7 @@ public class FishRemappingAction extends ProgressableAction {
 
 							if(sub.hasCells()){
 								
-								programLogger.log(Level.INFO, sub.getName()+": "+sub.getNucleusCount()+" cells");
+								log(Level.INFO, sub.getName()+": "+sub.getNucleusCount()+" cells");
 
 								dataset.addChildCollection(sub);
 
@@ -71,29 +71,29 @@ public class FishRemappingAction extends ProgressableAction {
 								newList.add(subDataset);
 							}
 						}
-						programLogger.log(Level.INFO, "Reapplying morphology...");
+						log(Level.INFO, "Reapplying morphology...");
 
 
 
 						new RunSegmentationAction(newList, dataset, MainWindow.ADD_POPULATION, mw);
 						finished();
 					}else {
-						programLogger.log(Level.INFO, "No collections returned");
+						log(Level.INFO, "No collections returned");
 						cancel();
 					}
 
 				} else {
-					programLogger.log(Level.INFO, "Remapping cancelled");
+					log(Level.INFO, "Remapping cancelled");
 					cancel();
 				}
 				
 			} else {
-				programLogger.log(Level.INFO, "Multiple datasets selected, cancelling");
+				log(Level.INFO, "Multiple datasets selected, cancelling");
 				cancel();
 			}
 
 		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error in FISH remapping: "+e.getMessage(), e);
+			logError("Error in FISH remapping: "+e.getMessage(), e);
 		}
 		
 

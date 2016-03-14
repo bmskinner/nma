@@ -41,7 +41,7 @@ public class PopulationExporter extends AnalysisWorker {
 	private File   saveFile = null;
 	private boolean useHDF5 = false;
 	
-	public PopulationExporter(AnalysisDataset dataset, File saveFile, Logger programLogger) {
+	public PopulationExporter(AnalysisDataset dataset, File saveFile) {
 		super(dataset);		
 		this.saveFile = saveFile;
 	}

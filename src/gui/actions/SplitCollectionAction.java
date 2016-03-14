@@ -37,7 +37,7 @@ public class SplitCollectionAction extends ProgressableAction {
         	try {
 
         		if(dataset.hasChildren()){
-        			programLogger.log(Level.INFO, "Splitting collection...");
+        			log(Level.INFO, "Splitting collection...");
 
         			AnalysisDataset[] names =  dataset.getAllChildDatasets().toArray(new AnalysisDataset[0]);
 
@@ -73,7 +73,7 @@ public class SplitCollectionAction extends ProgressableAction {
 
         				if(newCollection.getNucleusCount()>0){
 
-        					programLogger.log(Level.INFO,"Reapplying morphology...");
+        					log(Level.INFO,"Reapplying morphology...");
 
         					int flag = 0;
         					AnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
@@ -81,17 +81,17 @@ public class SplitCollectionAction extends ProgressableAction {
         					new RunSegmentationAction(newDataset, dataset, flag, mw, latch);
         				}
         			} else {
-        				programLogger.log(Level.FINE,"User cancelled split");
+        				log(Level.FINE,"User cancelled split");
         			}
 
         			
         		} else {
-        			programLogger.log(Level.INFO,"Cannot split; no children in dataset");
+        			log(Level.INFO,"Cannot split; no children in dataset");
         		}
 
 
 			} catch (Exception e1) {
-				programLogger.log(Level.SEVERE,"Error splitting collection", e1);
+				logError("Error splitting collection", e1);
 			} finally {
 				cancel();
 			}

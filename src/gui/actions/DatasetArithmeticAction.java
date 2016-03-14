@@ -38,7 +38,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 		super("Dataset arithmetic", mw);
 		this.cooldown();
 		try {
-			programLogger.log(Level.FINE, "Performing arithmetic...");
+			log(Level.FINE, "Performing arithmetic...");
 
 			/*
 			 * Make a dialog with a dropdown for dataset 1, operator, then  dropdown for dataset 2
@@ -53,7 +53,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 				DatasetArithmeticOperation operation = dialog.getOperation();
 
 				
-				programLogger.log(Level.INFO,"Performing "+operation+" on datasets");
+				log(Level.INFO,"Performing "+operation+" on datasets");
 				// prepare a new collection
 
 				CellCollection newCollection = null; 
@@ -82,8 +82,8 @@ public class DatasetArithmeticAction extends ProgressableAction {
 
 
 				if(newCollection !=null && newCollection.getNucleusCount()>0){
-					programLogger.log(Level.INFO,"Found "+newCollection.getNucleusCount()+" cells");
-					programLogger.log(Level.INFO,"Applying morphology...");
+					log(Level.INFO,"Found "+newCollection.getNucleusCount()+" cells");
+					log(Level.INFO,"Applying morphology...");
 					AnalysisDataset newDataset = new AnalysisDataset(newCollection);
 					newDataset.setRoot(true);
 					int flag = MainWindow.ADD_POPULATION;
@@ -92,16 +92,16 @@ public class DatasetArithmeticAction extends ProgressableAction {
 					new RunProfilingAction(newDataset, flag, mw);
 										
 				} else {
-					programLogger.log(Level.INFO,"No populations returned");
+					log(Level.INFO,"No populations returned");
 				}
 			} else {
-				programLogger.log(Level.FINE,"User cancelled operation");
+				log(Level.FINE,"User cancelled operation");
 			}
 
 
 
 		} catch (Exception e1) {
-			programLogger.log(Level.SEVERE,"Error in dataset arithmetic", e1);
+			logError("Error in dataset arithmetic", e1);
 		} finally {
 			cancel();
 		}

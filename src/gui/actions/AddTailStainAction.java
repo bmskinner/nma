@@ -63,7 +63,7 @@ public class AddTailStainAction extends ProgressableAction {
 			worker.execute();
 		} catch(Exception e){
 			this.cancel();
-			programLogger.log(Level.SEVERE, "Error in tail analysis", e);
+			logError("Error in tail analysis", e);
 
 		}
 	}

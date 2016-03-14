@@ -38,7 +38,6 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import charting.options.ChartOptions;
 import utility.Constants;
-import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import components.AbstractCellularComponent;
@@ -72,7 +71,7 @@ public class NucleusDatasetCreator {
 	 * @param binSize the size of the ProfileAggregate bins, to adjust the offset of the median
 	 * @return the updated dataset
 	 */
-	private static XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, Profile profile, DefaultXYDataset ds, int length, double offset){
+	private static XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, Profile profile, DefaultXYDataset ds, int length, double offset) throws Exception {
 		
 		Profile xpoints = profile.getPositions(length);
 		xpoints = xpoints.add(offset);

@@ -471,8 +471,6 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			} catch(Exception e){
 				log(Level.SEVERE, "Error creating franken profile aggregate");
 				log(Level.SEVERE, "Attempting to continue without franken profiling");
-//				logError("Error creating franken profile aggregate", e);
-//				throw e;
 				return;
 			}
 			

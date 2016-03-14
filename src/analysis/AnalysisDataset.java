@@ -36,9 +36,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import analysis.nucleus.NucleusDetector;
 import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
 import utility.Constants;
@@ -907,7 +910,100 @@ public class AnalysisDataset implements Serializable {
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		    in.defaultReadObject();
 		    this.swatch = ColourSwatch.REGULAR_SWATCH;
+	}
+	
+	/**
+	 * Update the source image paths in the dataset and its children
+	 * to use the given directory 
+	 * @param expectedImageDirectory
+	 * @param dataset
+	 * @throws Exception
+	 */
+	public void updateSourceImageDirectory(File expectedImageDirectory) throws Exception {
+		
+		Logger logger = Logger.getLogger("ProgramLogger");
+		logger.log(Level.FINE, "Searching "+expectedImageDirectory.getAbsolutePath());
+
+		if(expectedImageDirectory.exists()){
+
+			// Is the name of the expectedImageDirectory the same as the dataset image directory?
+			if(checkName(expectedImageDirectory, this)){
+				logger.log(Level.FINE, "Dataset name matches new folder");
+
+				// Does expectedImageDirectory contain image files?
+				if(checkHasImages(expectedImageDirectory)){
+					logger.log(Level.FINE, "Target folder contains at least one image");
+
+					logger.log(Level.FINE, "Updating dataset image paths");
+					boolean ok = this.getCollection().updateSourceFolder(expectedImageDirectory);
+					if(!ok){
+						logger.log(Level.WARNING, "Error updating dataset image paths; update cancelled");
+					}
+
+					logger.log(Level.FINE, "Updating child dataset image paths");
+					for(AnalysisDataset child : this.getAllChildDatasets()){
+						ok = child.getCollection().updateSourceFolder(expectedImageDirectory);
+						if(!ok){
+							logger.log(Level.SEVERE, "Error updating child dataset image paths; update cancelled");
+						}
+					}
+
+					logger.log(Level.INFO, "Updated image paths to new folder location");
+				} else {
+					logger.log(Level.WARNING, "Target folder contains no images; unable to update paths");
+				}
+			} else {
+				logger.log(Level.WARNING, "Dataset name does not match new folder; unable to update paths");
+			}
+
+		} else {
+			logger.log(Level.WARNING, "Unable to locate image directory and/or analysis directory; unable to update paths");
 		}
+	}
+	
+	/**
+	 * Check that the new image directory has the same name as the old image directory.
+	 * If the nmd has been copied to the wrong folder, don't update nuclei
+	 * @param expectedImageDirectory
+	 * @param dataset
+	 * @return
+	 */
+	private boolean checkName(File expectedImageDirectory, AnalysisDataset dataset){
+		if(dataset.getCollection().getFolder().getName().equals(expectedImageDirectory.getName())){
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
+	
+	/**
+	 * Check that the given directory contains >0 image files
+	 * suitable for the morphology analysis
+	 * @param expectedImageDirectory
+	 * @return
+	 */
+	private boolean checkHasImages(File expectedImageDirectory){
+
+		File[] listOfFiles = expectedImageDirectory.listFiles();
+
+		int result = 0;
+
+		for (File file : listOfFiles) {
+
+			boolean ok = NucleusDetector.checkFile(file);
+
+			if(ok){
+				result++;
+			}
+		} 
+		
+		if(result>0){
+			return true;
+		} else {
+			return false;
+		}
+	}
 	
 
 }

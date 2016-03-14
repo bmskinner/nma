@@ -35,10 +35,10 @@ public class RelocateFromFileAction extends ProgressableAction {
 			worker.addPropertyChangeListener(this);
 			
 			this.setProgressMessage("Locating cells...");
-			programLogger.log(Level.INFO, "Locating cells...");
+			log(Level.INFO, "Locating cells...");
 			worker.execute();
 		} else {
-			programLogger.log(Level.FINE, "Cancelled");
+			log(Level.FINE, "Cancelled");
 			cancel();
 		}
 		
@@ -47,10 +47,10 @@ public class RelocateFromFileAction extends ProgressableAction {
 	
 	@Override
 	public void finished(){
-		programLogger.log(Level.FINE, "Firing refresh of populations");
+		log(Level.FINE, "Firing refresh of populations");
 		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 		this.countdownLatch();
-		programLogger.log(Level.INFO, "Cells added as new child dataset");
+		log(Level.INFO, "Cells added as new child dataset");
 		super.finished();		
 	}
 	

@@ -48,7 +48,7 @@ public class SaveDatasetAction extends ProgressableAction {
 		log(Level.FINEST, "Save dataset action created by explicit file location");
 		
 		this.cooldown();
-		worker = new PopulationExporter(dataset, saveFile, programLogger);
+		worker = new PopulationExporter(dataset, saveFile);
 		worker.addPropertyChangeListener(this);
 		worker.execute();	
 	}	
@@ -82,7 +82,7 @@ public class SaveDatasetAction extends ProgressableAction {
 		
 		if(saveFile!=null){
 			log(Level.INFO, "Saving as "+saveFile.getAbsolutePath()+"...");
-			worker = new PopulationExporter(dataset, saveFile, programLogger);
+			worker = new PopulationExporter(dataset, saveFile);
 			worker.addPropertyChangeListener(this);
 			worker.execute();	
 		} else {

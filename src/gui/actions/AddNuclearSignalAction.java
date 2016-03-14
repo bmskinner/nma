@@ -60,7 +60,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 			
 		} catch (Exception e){
 			this.cancel();
-			programLogger.log(Level.SEVERE, "Error in signal analysis", e);
+			logError("Error in signal analysis", e);
 		}
 		
 	}	
@@ -95,7 +95,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
 		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
 
-		programLogger.log(Level.INFO, "Sub-population: "+collection.getNucleusCount()+" nuclei");
+		log(Level.INFO, "Sub-population: "+collection.getNucleusCount()+" nuclei");
 
 		dataset.addChildDataset(subDataset);
 	}
@@ -111,30 +111,30 @@ public class AddNuclearSignalAction extends ProgressableAction {
 	private List<CellCollection> dividePopulationBySignals(CellCollection r, int signalGroup){
 
 		List<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
-		programLogger.log(Level.INFO, "Dividing population by signals...");
+		log(Level.INFO, "Dividing population by signals...");
 		try{
 
 			
 			List<Cell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
 			if(!list.isEmpty()){
-				programLogger.log(Level.INFO, "Signal group "+signalGroup+": found nuclei with signals");
+				log(Level.INFO, "Signal group "+signalGroup+": found nuclei with signals");
 				CellCollection listCollection = new CellCollection(r.getFolder(), 
 						r.getOutputFolderName(), 
 						"SignalGroup_"+signalGroup+"_with_signals", 
 						r.getNucleusType());
 
 				for(Cell c : list){
-					programLogger.log(Level.FINEST, "  Added cell: "+c.getNucleus().getNameAndNumber());
-					programLogger.log(Level.FINEST, "  Cell has: "+c.getNucleus().getSignalCount()+" signals");
+					log(Level.FINEST, "  Added cell: "+c.getNucleus().getNameAndNumber());
+					log(Level.FINEST, "  Cell has: "+c.getNucleus().getSignalCount()+" signals");
 					Cell newCell = new Cell(c);
-					programLogger.log(Level.FINEST, "  New cell has: "+newCell.getNucleus().getSignalCount()+" signals");
+					log(Level.FINEST, "  New cell has: "+newCell.getNucleus().getSignalCount()+" signals");
 					listCollection.addCell( newCell );
 				}
 				signalPopulations.add(listCollection);
 
 				List<Cell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
 				if(!notList.isEmpty()){
-					programLogger.log(Level.INFO, "Signal group "+signalGroup+": found nuclei without signals");
+					log(Level.INFO, "Signal group "+signalGroup+": found nuclei without signals");
 					CellCollection notListCollection = new CellCollection(r.getFolder(), 
 							r.getOutputFolderName(), 
 							"SignalGroup_"+signalGroup+"_without_signals", 
@@ -149,7 +149,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 			}
 
 		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Cannot create collection", e);
+			logError("Cannot create collection", e);
 		}
 
 		return signalPopulations;
