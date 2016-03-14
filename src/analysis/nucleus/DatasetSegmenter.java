@@ -18,19 +18,15 @@
  *******************************************************************************/
 package analysis.nucleus;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.ProfileSegmenter;
 import analysis.ProgressEvent;
 import analysis.ProgressListener;
 import components.CellCollection;
-import components.generic.BooleanProfile;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
@@ -419,11 +415,11 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		log(Level.FINER, "Refining segment assignments...");
 
 			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
-//			fileLogger.log(Level.FINE, "Median profile");
-//			fileLogger.log(Level.FINE, pc.toString());
+			log(Level.FINE, "Median profile");
+			log(Level.FINE, pc.toString());
 			List<NucleusBorderSegment> segments = pc.getSegments(pointType);
-//			fileLogger.log(Level.FINE, "Fetched segments from profile collection");
-//			fileLogger.log(Level.FINE, NucleusBorderSegment.toString(segments));
+			log(Level.FINE, "Fetched segments from profile collection");
+			log(Level.FINE, NucleusBorderSegment.toString(segments));
 
 			// make a new profile collection to hold the frankendata
 			ProfileCollection frankenCollection = new ProfileCollection();

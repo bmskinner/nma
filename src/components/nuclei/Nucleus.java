@@ -532,4 +532,17 @@ public interface Nucleus extends CellularComponent {
 	 */
 	public void rotate(double angle);
 	
+	
+	/**
+	 * Store an internal record of loggable activity
+	 * @param message
+	 */
+	public void log(String message);
+	
+	/**
+	 * Fetch the current nucleus log
+	 * @return
+	 */
+	public String printLog();
+	
 }

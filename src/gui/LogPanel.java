@@ -70,6 +70,8 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
 		commandMap.put("clear", InterfaceMethod.CLEAR_LOG_WINDOW);
 		commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
+		commandMap.put("dump info", InterfaceMethod.DUMP_LOG_INFO);
+		
 		
 	}
 	

@@ -86,6 +86,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 	 */
 	private void assignSegmentsToNucleus(Nucleus n) throws Exception {
 			
+		n.log("Assigning segments");
 		// remove any existing segments in the nucleus
 		SegmentedProfile nucleusProfile = n.getProfile(ProfileType.REGULAR);
 		nucleusProfile.clearSegments();
@@ -126,11 +127,15 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 
 		NucleusBorderSegment.linkSegments(nucleusSegments);
 		
-		log(Level.FINEST, "Assigned segments to nucleus");
-		log(Level.FINEST, NucleusBorderSegment.toString(nucleusSegments));
-		
 		nucleusProfile.setSegments(nucleusSegments);
+
 		n.setProfile(ProfileType.REGULAR, nucleusProfile);
+		log(Level.FINEST, "Assigned segments to nucleus "+n.getNameAndNumber()+":");
+		log(Level.FINEST, nucleusProfile.toString());
+		
+		n.log("Assigned segments:");
+		n.log(nucleusProfile.toString());
+		
 	}
 
 

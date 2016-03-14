@@ -1,13 +1,10 @@
 package analysis.nucleus;
 
-import ij.IJ;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
 import analysis.AbstractProgressAction;
-import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
 //import analysis.nucleus.DatasetSegmenter.SegmentFitter;
 import components.generic.BorderTag;
 import components.generic.Profile;
@@ -81,22 +78,35 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 	private void processNuclei() throws Exception {
 		
 		for(int i=low; i<high; i++){
-			processNucleus(nuclei[i]);
+			try {
+				processNucleus(nuclei[i]);
+			} catch(Exception e){
+				// On error, dump the nucleus logs
+				log(Level.SEVERE, nuclei[i].printLog());
+				throw e;
+			}
 			fireProgressEvent();
 		}
 		
 	}
 	
 	private void processNucleus(Nucleus n) throws Exception {
+		log(Level.FINEST, "Recombining segments for nucleus "+n.getNameAndNumber());
+		n.log("Recombining segments");
+		fitter.fit(n, pc);
 
-			fitter.fit(n, pc);
+		// recombine the segments at the lengths of the median profile segments
 
-			// recombine the segments at the lengths of the median profile segments
-			Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
+		Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
 
-			SegmentedProfile segmented = new SegmentedProfile(recombinedProfile);
-			n.setProfile(ProfileType.FRANKEN, segmented);
-
+		SegmentedProfile segmented = new SegmentedProfile(recombinedProfile);
+		n.setProfile(ProfileType.FRANKEN, segmented);
+		
+		n.log("Recombined segments:");
+		n.log(segmented.toString());
+		
+		log(Level.FINEST, "Recombined segments for nucleus "+n.getNameAndNumber());
+		log(Level.FINEST, segmented.toString());
 	}
 	
 

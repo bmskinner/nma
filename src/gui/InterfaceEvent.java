@@ -85,7 +85,8 @@ public class InterfaceEvent extends EventObject {
 		LIST_SELECTED_DATASETS ("List selected datasets"),
 		CLEAR_LOG_WINDOW 	("Clear log window"),
 		UPDATE_IN_PROGRESS  ("Updating"),
-		UPDATE_COMPLETE     ("Update finished");
+		UPDATE_COMPLETE     ("Update finished"),
+		DUMP_LOG_INFO		("Dump logs for nuclei");
 		
 		private final String name;
 		

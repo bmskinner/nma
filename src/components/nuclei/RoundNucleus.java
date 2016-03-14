@@ -97,6 +97,9 @@ public class RoundNucleus extends AbstractCellularComponent
 
 	protected transient Nucleus verticalNucleus = null; // cache the vertically rotated nucleus
 	
+	
+	private transient StringBuffer log = new StringBuffer();
+	
 	public RoundNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 		super(roi);
 		if(file==null || Integer.valueOf(number)==null || position==null){
@@ -1289,7 +1292,8 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
-	    this.boundingRectangles = new HashMap<BorderTag, Rectangle>();	    
+	    this.boundingRectangles = new HashMap<BorderTag, Rectangle>();	  
+	    log = new StringBuffer();
 	}
 
 	@Override
@@ -1557,6 +1561,23 @@ public class RoundNucleus extends AbstractCellularComponent
 //				}
 //			}
 		}
+	}
+	
+	/**
+	 * Store an internal record of loggable activity
+	 * @param message
+	 */
+	public void log(String message){
+		log.append(message+System.getProperty("line.separator"));
+	}
+	
+	/**
+	 * Fetch the current nucleus log
+	 * @return
+	 */
+	public String printLog(){
+		
+		return this.getNameAndNumber()+"\n"+log.toString();
 	}
 	
 	

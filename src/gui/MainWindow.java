@@ -1226,6 +1226,16 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			break;
 			
+			
+		case DUMP_LOG_INFO:
+			for(AnalysisDataset d : populationsPanel.getSelectedDatasets()){
+				
+				for(Nucleus n : d.getCollection().getNuclei()){
+					programLogger.log(Level.INFO, n.printLog());
+				}
+			}
+			break;
+			
 		default:
 			break;
 

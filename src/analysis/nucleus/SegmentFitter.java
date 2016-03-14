@@ -59,52 +59,47 @@ public class SegmentFitter extends AbstractLoggable {
 	
 	/**
 	 * Run the segment fitter on the given nucleus. It will take the segments
-	 * loaded into the fitter upon cosntruction, and apply them to the nucleus
+	 * loaded into the fitter upon construction, and apply them to the nucleus
 	 * angle profile.
 	 * @param n the nucleus to fit to the current median profile
 	 * @param pc the ProfileCollection from the CellCollection the nucleus belongs to
 	 */
-	public void fit(final Nucleus n, final ProfileCollection pc){
+	public void fit(final Nucleus n, final ProfileCollection pc) throws Exception {
 		
 		// Input checks
 		if(n==null){
-//			log(Level.SEVERE, "Test nucleus is null");
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
 		
-		try {
-			if(n.getProfile(ProfileType.REGULAR).getSegments()==null || n.getProfile(ProfileType.REGULAR).getSegments().isEmpty()){
-//				log(Level.SEVERE, "Nucleus has no segments");
-				throw new IllegalArgumentException("Nucleus has no segments");
-			}
-		} catch (Exception e1) {
-//			logError("Error getting segments", e1);
+		if(        n.getProfile(ProfileType.REGULAR).getSegments()==null 
+				|| n.getProfile(ProfileType.REGULAR).getSegments().isEmpty()){
+			throw new IllegalArgumentException("Nucleus has no segments");
 		}
 		
-		long startTime = System.currentTimeMillis();
-//		 Begin fitting the segments to the median
+		
+	
+		
+		// Begin fitting the segments to the median
+		// get the best fit of segments to the median
+		SegmentedProfile newProfile = this.runFitter(n.getProfile(ProfileType.REGULAR));
+		
+		log(Level.FINEST, "Fitted profile against median for nucleus "+n.getNameAndNumber());
+		log(Level.FINEST, newProfile.toString());
+		
+		n.log("Fitted profile against median:");
+		n.log(newProfile.toString());
 
-		try{
-			
-			// get the best fit of segments to the median
-			SegmentedProfile newProfile = this.runFitter(n.getProfile(ProfileType.REGULAR));
+		n.setProfile(ProfileType.REGULAR, newProfile);
 
-			n.setProfile(ProfileType.REGULAR, newProfile);
-			
-			// modify tail and head/tip point to nearest segment end
-			remapBorderPoints(n, pc);
-			
-			log(Level.FINE, "Fitted nucleus "+n.getPathAndNumber());
-			
-
-			long endTime = System.currentTimeMillis();
-			long time = endTime - startTime;
-			log(Level.FINEST, "Fitting took "+time+" milliseconds");
-
-			
-		} catch(Exception e){
-			logError("Error refitting segments", e);
-		}
+		// modify tail and head/tip point to nearest segment end
+		remapBorderPoints(n, pc);
+		
+		log(Level.FINEST, "Remapped border points for nucleus "+n.getNameAndNumber());
+		log(Level.FINEST, n.getProfile(ProfileType.REGULAR).toString());
+		
+		n.log("Remapped border points:");
+		n.log(n.getProfile(ProfileType.REGULAR).toString());
+		
 	}
 		
 	/**
@@ -116,45 +111,38 @@ public class SegmentFitter extends AbstractLoggable {
 	 */
 	public Profile recombine(Nucleus n, BorderTag tag) throws Exception {
 		if(n==null){
-//			log(Level.WARNING, "Recombined nucleus is null");
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
-
-		SegmentedProfile frankenProfile = null;
-//		try {
-			if(n.getProfile(ProfileType.REGULAR).hasSegments()){
-
-				/*
-				 * Generate a segmented profile from the angle profile of the point type.
-				 * The zero index of the profile is the border tag. The segment list for the profile
-				 * begins with seg 0 at the border tag.
-				 */
-				
-				SegmentedProfile nucleusProfile = new SegmentedProfile(n.getProfile(ProfileType.REGULAR, tag));
-				
-				
-//				log(Level.FINEST, "    Segmentation beginning from "+tag);
-//				log(Level.FINEST, "    The border tag "+tag+" in this nucleus is at raw index "+n.getBorderIndex(tag));
-//				log(Level.FINEST, "    Angle at incoming segmented profile index 0 ("+tag+") is "+nucleusProfile.get(0));
-
-				// stretch or squeeze the segments to match the length of the median profile of the collection
-				//			frankenProfile = recombineSegments(n, nucleusProfile, tag);
-				frankenProfile = nucleusProfile.frankenNormaliseToProfile(medianProfile);
-				
-//				log(Level.FINEST, "Angle at median profile index 0 ("+tag+") is "+medianProfile.get(0));
-				
-//				log(Level.FINEST, "Angle at franken profile index 0 ("+tag+") is "+frankenProfile.get(0));
-				
-			} else {
-//				log(Level.WARNING, "Nucleus has no segments");
-				throw new IllegalArgumentException("Nucleus has no segments");
-			}
-//		} catch(Exception e){
-////			logError("Error recombining segments", e);
-//		}
-
 		
+		if( ! n.getProfile(ProfileType.REGULAR).hasSegments()){
+			throw new IllegalArgumentException("Test nucleus has no segments");
+		}
 		
+		n.log("Recombining profile");
+		n.log("Template profile:");
+		n.log(medianProfile.toString());
+
+		/*
+		 * Generate a segmented profile from the angle profile of the point type.
+		 * The zero index of the profile is the border tag. The segment list for the profile
+		 * begins with seg 0 at the border tag.
+		 */
+
+		SegmentedProfile nucleusProfile = new SegmentedProfile(n.getProfile(ProfileType.REGULAR, tag));
+		
+		n.log("Initial profile starting at "+tag+":");
+		n.log(nucleusProfile.toString());
+
+
+		//				log(Level.FINEST, "    Segmentation beginning from "+tag);
+		//				log(Level.FINEST, "    The border tag "+tag+" in this nucleus is at raw index "+n.getBorderIndex(tag));
+		//				log(Level.FINEST, "    Angle at incoming segmented profile index 0 ("+tag+") is "+nucleusProfile.get(0));
+
+		// stretch or squeeze the segments to match the length of the median profile of the collection
+		SegmentedProfile frankenProfile = nucleusProfile.frankenNormaliseToProfile(medianProfile);
+		n.log("Complete frankenprofile:");
+		n.log(frankenProfile.toString());
+
 		return frankenProfile;
 	}
 	
@@ -171,6 +159,7 @@ public class SegmentFitter extends AbstractLoggable {
 			return; // this allows the unit tests to skip this section if a profile collection has not been created
 		}
 		
+		n.log("Remapping border points");
 		/*
 		 * Not all the tags will be associated with endpoints;
 		 * e.g. the intersection point. The orientation and 
@@ -199,7 +188,8 @@ public class SegmentFitter extends AbstractLoggable {
 				// Get the same segment in the nucleus, and move the tag to the segment start point
 				NucleusBorderSegment nSeg = n.getProfile(ProfileType.REGULAR).getSegment(seg.getName());
 				n.setBorderTag(tag, nSeg.getStartIndex());
-//				log(Level.FINE, "Remapped border point '"+tag+"' to "+nSeg.getStartIndex());
+				log(Level.FINEST, "Remapped border point '"+tag+"' to "+nSeg.getStartIndex()+" in "+n.getNameAndNumber());
+				n.log("Remapped border point '"+tag+"' to "+nSeg.getStartIndex());
 			} else {
 								
 				// A segment was not found with a start index at zero; segName is null
@@ -209,11 +199,12 @@ public class SegmentFitter extends AbstractLoggable {
 				log(Level.WARNING, pc.toString());
 				log(Level.WARNING, "Median segment list:");
 				log(Level.WARNING, NucleusBorderSegment.toString(segments));
-				
+				n.log("Could not remapped border point '"+tag+"'");
 				// Check to see if the segments are reversed
 				seg = pc.getSegmentEndingWith(tag);
 				if(seg!=null){
 					log(Level.WARNING, "Found segment "+seg.getName()+" ending with tag "+tag);
+					
 				} else {
 					log(Level.WARNING, "No segments end with tag "+tag);
 				}
@@ -232,7 +223,7 @@ public class SegmentFitter extends AbstractLoggable {
 		// Input check
 		if(profile==null){
 //			log(Level.SEVERE, "Profile is null");
-			throw new IllegalArgumentException("Profile is null in runFitter()");
+			throw new IllegalArgumentException("Input profile is null");
 		}
 		
 		testedProfiles = new ArrayList<SegmentedProfile>();
@@ -249,20 +240,15 @@ public class SegmentFitter extends AbstractLoggable {
 		List<UUID> idList = medianProfile.getSegmentIDs();
 		
 		for(UUID id : idList){
-		
-//		for(String name : tempProfile.getSegmentNames()){
-			
+					
 			// get the current segment
 			NucleusBorderSegment segment = tempProfile.getSegment(id);
-//			NucleusBorderSegment segment = tempProfile.getSegment(name);
 			
 			if( ! segment.isStartPositionLocked()){ //only run the test if this segment is unlocked
 			
 				// get the initial score for the segment and log it
-				double score = compareSegmentationPatterns(medianProfile, tempProfile);
-//				log(Level.FINE, segment.toString());
-//				log(Level.FINE, "\tInitial score: "+score);
-
+//				double score = compareSegmentationPatterns(medianProfile, tempProfile);
+//
 				// find the best length and offset change
 				// apply them to the profile
 				tempProfile = testLength(tempProfile, id);
@@ -271,8 +257,7 @@ public class SegmentFitter extends AbstractLoggable {
 				result 	 = new SegmentedProfile(tempProfile);		
 			}
 		}
-	
-		
+
 		return result;
 	}
 	
