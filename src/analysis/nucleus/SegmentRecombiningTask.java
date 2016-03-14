@@ -95,11 +95,11 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 		n.log("Recombining segments");
 		fitter.fit(n, pc);
 
-		// recombine the segments at the lengths of the median profile segments
+		// recombine the segments to the lengths of the median profile segments
 
 		Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
 
-		SegmentedProfile segmented = new SegmentedProfile(recombinedProfile);
+		SegmentedProfile segmented = new SegmentedProfile(recombinedProfile, medianProfile.getOrderedSegments());
 		n.setProfile(ProfileType.FRANKEN, segmented);
 		
 		n.log("Recombined segments:");
