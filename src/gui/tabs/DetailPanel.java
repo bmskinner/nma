@@ -253,7 +253,8 @@ public abstract class DetailPanel
 					}
 					
 				} catch (Exception e) {
-					log(Level.SEVERE, "Error updating panel", e);
+					log(Level.SEVERE, "Error updating panel");
+					log(Level.FINE, "Error updating panel", e); // save detail for fine logging
 					update( (List<AnalysisDataset>) null); // don't use updateNull because it throws an exception
 				} finally {
 					setUpdating(false);
@@ -269,7 +270,7 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected boolean checkSegmentCountsMatch(List<AnalysisDataset> list) throws Exception{
+	protected boolean checkSegmentCountsMatch(final List<AnalysisDataset> list) throws Exception{
 		int prevCount = 0;
 		
 		log(Level.FINEST, "Counting segments in each dataset");
@@ -437,6 +438,7 @@ public abstract class DetailPanel
 		for(DetailPanel panel : this.subPanels){
 			panel.clearTableCache();
 		}
+		log(Level.FINEST, "Table cache cleared");
 	}
 	
 	/**
@@ -449,10 +451,10 @@ public abstract class DetailPanel
 		this.getTableCache().clear(list);
 		if(this.hasSubPanels()){
 			for(DetailPanel panel : this.subPanels){
-				panel.refreshTableCache(list);
+				panel.clearTableCache(list);
 			}
 		}
-		log(Level.FINEST, "Chart cache cleared");
+		log(Level.FINEST, "Table cache cleared for specific datasets");
 	}
 	
 	/**
