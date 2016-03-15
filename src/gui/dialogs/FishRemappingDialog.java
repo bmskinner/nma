@@ -201,7 +201,7 @@ public class FishRemappingDialog extends ImageProber {
 			String imageName = imageFile.getName();
 
 			log(Level.FINEST, "Converting image");
-			ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(stack).getProcessor();
+			ImageProcessor openProcessor = ImageExporter.getInstance().makeGreyRGBImage(stack).getProcessor();
 			openProcessor.invert();
 			procMap.put(FishMappingImageType.ORIGINAL_IMAGE, openProcessor);
 
@@ -209,7 +209,7 @@ public class FishRemappingDialog extends ImageProber {
 			File fishImageFile = new File(postFISHImageDirectory+File.separator+imageName);
 			ImageStack fishStack = ImageImporter.getInstance().importImage(fishImageFile);
 			
-			ImageProcessor fishProcessor = ImageExporter.convertToRGB(fishStack).getProcessor();
+			ImageProcessor fishProcessor = ImageExporter.getInstance().convertToRGB(fishStack).getProcessor();
 			
 			procMap.put(FishMappingImageType.FISH_IMAGE, fishProcessor);
 			

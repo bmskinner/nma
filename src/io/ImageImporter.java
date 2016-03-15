@@ -50,7 +50,7 @@ public class ImageImporter implements Loggable {
 		return imp;
 	}
 	
-	private static int[] imageTypesProcessed = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
+	private static final int[] IMAGE_TYPES_PROCESSED = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
 	
 	
 	/**
@@ -117,7 +117,7 @@ public class ImageImporter implements Loggable {
 
 		// check that we are able to handle this image type
 		boolean ok = false;
-		for(int i : imageTypesProcessed){
+		for(int i : IMAGE_TYPES_PROCESSED){
 			if(i==image.getType()){
 				ok = true;
 			}

@@ -98,7 +98,7 @@ public class SignalDetectionImageProber extends ImageProber {
 			String imageName = imageFile.getName();
 
 			log(Level.FINEST, "Converting image");
-			ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(stack).getProcessor();
+			ImageProcessor openProcessor = ImageExporter.getInstance().makeGreyRGBImage(stack).getProcessor();
 			openProcessor.invert();
 			procMap.put(SignalImageType.DETECTED_OBJECTS, openProcessor);
 

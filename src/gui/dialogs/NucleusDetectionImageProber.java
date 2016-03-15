@@ -110,7 +110,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 			
 			CannyOptions cannyOptions = options.getCannyOptions("nucleus");
 //			ImageProcessor openProcessor = ImageExporter.convertToRGB(imageStack).getProcessor();
-			ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(imageStack).getProcessor();
+			ImageProcessor openProcessor = ImageExporter.getInstance().makeGreyRGBImage(imageStack).getProcessor();
 			openProcessor.invert();
 						
 			if( cannyOptions.isUseCanny()) { //TODO: Turning off Canny causes error

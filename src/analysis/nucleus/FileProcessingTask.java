@@ -130,7 +130,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 		  ImageStack smallRegion = NucleusFinder.getRoiAsStack(nucleus, imageStack);
 		  
 		  try{
-			  IJ.saveAsTiff(ImageExporter.convertToRGB(smallRegion), n.getAnnotatedImagePath());
+			  IJ.saveAsTiff(ImageExporter.getInstance().convertToRGB(smallRegion), n.getAnnotatedImagePath());
 		  } catch(Exception e){
 //			  logError("Error saving original, enlarged or annotated image", e);
 		  }

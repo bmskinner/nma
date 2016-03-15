@@ -244,7 +244,7 @@ public class ShellCreator implements Loggable {
 	 * Draw the shells on the nucleus, and export the image to the Nucleus folder.
 	 */
 	public void exportImage(){
-	  ImagePlus shellImage = ImageExporter.convertToRGB(nucleusStack);
+	  ImagePlus shellImage = ImageExporter.getInstance().convertToRGB(nucleusStack);
       ImageProcessor ip = shellImage.getProcessor();
       List<Roi> shells = this.getShells();
       if(shells.size()>0){ // check we actually got shells out

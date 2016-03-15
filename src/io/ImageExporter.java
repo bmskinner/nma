@@ -18,6 +18,7 @@
  *******************************************************************************/
 package io;
 
+import logging.Loggable;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.RGBStackMerge;
@@ -30,7 +31,18 @@ import utility.Constants;
  * @author Ben Skinner
  *
  */
-public class ImageExporter {
+public class ImageExporter implements Loggable {
+	
+	private static ImageExporter instance = null;
+	
+	private ImageExporter(){}
+	
+	public static ImageExporter getInstance(){
+		if(instance==null){
+			instance = new ImageExporter();
+		}
+		return instance;
+	}
 	
 			
 	/**
@@ -38,7 +50,7 @@ public class ImageExporter {
 	 * @param stack the stack to convert
 	 * @return an image
 	 */
-	public static ImagePlus convertToRGB(ImageStack stack){
+	public ImagePlus convertToRGB(ImageStack stack){
 		
 		if(stack==null){
 			throw new IllegalArgumentException("Stack is null");
@@ -59,7 +71,7 @@ public class ImageExporter {
 	 * @param stack
 	 * @return
 	 */
-	public static ImageStack invertCounterstain(ImageStack stack){
+	public ImageStack invertCounterstain(ImageStack stack){
 		
 		if(stack==null){
 			throw new IllegalArgumentException("Stack is null");
@@ -73,7 +85,7 @@ public class ImageExporter {
 	 * @param stack
 	 * @return a new ImagePlus, or null if the stack was null
 	 */
-	public static ImagePlus makeGreyRGBImage(ImageStack stack){
+	public ImagePlus makeGreyRGBImage(ImageStack stack){
 		
 		if(stack!=null){
 			ImagePlus[] images = new ImagePlus[3];
@@ -94,7 +106,7 @@ public class ImageExporter {
 	 * @param stack
 	 * @return the image
 	 */
-	private static ImagePlus makeGreyScaleIamge(ImageStack stack){
+	private ImagePlus makeGreyScaleIamge(ImageStack stack){
 
 		byte[] blank = new byte[stack.getWidth() * stack.getHeight()];
 		//	      for( byte b : blank){
@@ -117,7 +129,7 @@ public class ImageExporter {
 	 * @param stack the stack
 	 * @return an RGB image
 	 */
-	private static ImagePlus mergeStack(ImageStack stack){
+	private ImagePlus mergeStack(ImageStack stack){
 
 		ImagePlus[] images = new ImagePlus[3];
 		images[Constants.RGB_RED]   = new ImagePlus("red", stack.getProcessor(Constants.FIRST_SIGNAL_CHANNEL));  
