@@ -164,7 +164,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 			chartPanel = new ExportableChartPanel(HistogramChartFactory.createRandomSampleHistogram(resultList));
 			this.add(chartPanel, BorderLayout.CENTER);
 		} catch (Exception e) {
-			programLogger.log(Level.SEVERE, "Error making chart", e);
+			log(Level.SEVERE, "Error making chart", e);
 		}
 		
 		
@@ -217,12 +217,12 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 			setStatusLoading();
 			setEnabled(false);
 
-			sampler = new RandomSampler(dataset, programLogger, stat, iterations, firstCount, secondCount);
+			sampler = new RandomSampler(dataset, stat, iterations, firstCount, secondCount);
 			sampler.addPropertyChangeListener(this);
 			sampler.execute();
 
 		} catch (Exception e) {
-			programLogger.log(Level.SEVERE, "Error running sampling", e);
+			log(Level.SEVERE, "Error running sampling", e);
 			setEnabled(true);
 		}
 	}
@@ -247,7 +247,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 			chartPanel.setChart(chart);
 			setStatusLoaded();
 		} catch (Exception e) {
-			programLogger.log(Level.SEVERE, "Error running sampling", e);
+			log(Level.SEVERE, "Error running sampling", e);
 		}
 	}
 
@@ -263,7 +263,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 				chart = HistogramChartFactory.createRandomSampleHistogram(resultList);
 			}
 		}catch (Exception e) {
-			programLogger.log(Level.SEVERE, "Error running sampling", e);
+			log(Level.SEVERE, "Error running sampling", e);
 		}
 		chartPanel.setChart(chart);
 
@@ -311,7 +311,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 			}
 			
 		} catch(Exception e1){
-			programLogger.log(Level.SEVERE, "Error in spinners", e1);
+			log(Level.SEVERE, "Error in spinners", e1);
 		}
 		
 	}
@@ -340,7 +340,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 	public void propertyChange(PropertyChangeEvent evt) {
 
 		int value = (Integer) evt.getNewValue(); // should be percent
-		programLogger.log(Level.FINEST,"Property change: "+value);
+		log(Level.FINEST,"Property change: "+value);
 		
 		if(value >=0 && value <=100){
 			
@@ -351,7 +351,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		}
 
 		if(evt.getPropertyName().equals("Finished")){
-			programLogger.log(Level.FINEST,"Worker signaled finished");
+			log(Level.FINEST,"Worker signaled finished");
 			finished();
 		}
 		

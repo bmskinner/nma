@@ -195,19 +195,19 @@ public class FishRemappingDialog extends ImageProber {
 			setStatusLoading();
 			this.setLoadingLabelText("Opening image "+index+": "+imageFile.getAbsolutePath()+"...");
 
-			ImageStack stack = ImageImporter.importImage(imageFile, programLogger);
+			ImageStack stack = ImageImporter.getInstance().importImage(imageFile);
 
 			// Import the image as a stack
 			String imageName = imageFile.getName();
 
-			programLogger.log(Level.FINEST, "Converting image");
+			log(Level.FINEST, "Converting image");
 			ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(stack).getProcessor();
 			openProcessor.invert();
 			procMap.put(FishMappingImageType.ORIGINAL_IMAGE, openProcessor);
 
 						
 			File fishImageFile = new File(postFISHImageDirectory+File.separator+imageName);
-			ImageStack fishStack = ImageImporter.importImage(fishImageFile, programLogger);
+			ImageStack fishStack = ImageImporter.getInstance().importImage(fishImageFile);
 			
 			ImageProcessor fishProcessor = ImageExporter.convertToRGB(fishStack).getProcessor();
 			
@@ -226,7 +226,7 @@ public class FishRemappingDialog extends ImageProber {
 			this.setStatusLoaded();
 
 		} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Error in signal probing", e);
+				log(Level.SEVERE, "Error in signal probing", e);
 			}
 		}
 	

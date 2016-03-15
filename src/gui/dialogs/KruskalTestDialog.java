@@ -99,7 +99,7 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 						try {
 							runAnalysis();
 						} catch (Exception e) {
-							programLogger.log(Level.SEVERE, "Error testing", e);
+							log(Level.SEVERE, "Error testing", e);
 						}
 					}
 				};
@@ -142,7 +142,7 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 	private void runAnalysis() throws Exception {
 
 		setAnalysing(true);
-		programLogger.log(Level.INFO, "Franken-normalising collections");
+		log(Level.INFO, "Franken-normalising collections");
 		// Clear the old chart
 		chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
 		
@@ -152,7 +152,6 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 		
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(list)
-			.setLogger(programLogger)
 			.setNormalised(true)
 			.setAlignment(ProfileAlignment.LEFT)
 			.setTag(BorderTag.REFERENCE_POINT)
@@ -164,7 +163,7 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 		chartPanel.setChart(chart);
 
 		setAnalysing(false);
-		programLogger.log(Level.INFO, "Comparison complete");
+		log(Level.INFO, "Comparison complete");
 	}
 }
 

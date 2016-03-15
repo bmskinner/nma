@@ -77,7 +77,7 @@ public class ShellCreator implements Loggable {
 		this.nucleus = n;
 		
 		nucleusRoi = new PolygonRoi(n.createOriginalPolygon(), Roi.POLYGON);
-		this.nucleusStack = ImageImporter.importImage(n.getSourceFile());
+		this.nucleusStack = ImageImporter.getInstance().importImage(n.getSourceFile());
 		
 	}
 

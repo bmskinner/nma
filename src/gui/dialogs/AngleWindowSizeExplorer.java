@@ -70,15 +70,15 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 	public AngleWindowSizeExplorer(final AnalysisDataset dataset){
 		super();
 		this.dataset = dataset;
-		programLogger.log(Level.FINEST, "Creating angle window explorer UI");
+		log(Level.FINEST, "Creating angle window explorer UI");
 		try{
 			createUI();
 		} catch (Exception e){
-			programLogger.log(Level.SEVERE, "Error creating angle window explorer UI", e);
+			log(Level.SEVERE, "Error creating angle window explorer UI", e);
 		}
 		this.setModal(false);
 		this.pack();
-		programLogger.log(Level.FINEST, "Displaying angle window explorer");
+		log(Level.FINEST, "Displaying angle window explorer");
 		this.setVisible(true);
 	}
 	
@@ -148,7 +148,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 						try {
 							runAnalysis();
 						} catch (Exception e) {
-							programLogger.log(Level.SEVERE, "Error testing", e);
+							log(Level.SEVERE, "Error testing", e);
 						}
 					}
 				};
@@ -201,12 +201,12 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		// Clear the old chart
 		chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
 		
-		programLogger.log(Level.INFO, "Testing "+windowSizeMin+" - "+windowSizeMax);
+		log(Level.INFO, "Testing "+windowSizeMin+" - "+windowSizeMax);
 		
 		for(int i=windowSizeMin; i<=windowSizeMax; i+=stepSize){
 			
 			// make a duplicate collection
-//			programLogger.log(Level.INFO, "\t"+i);
+//			log(Level.INFO, "\t"+i);
 			
 			CellCollection duplicateCollection = new CellCollection(dataset.getCollection(), "test");
 			
@@ -221,34 +221,34 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 				
 				duplicateCollection.addCell(newCell);
 			}
-//			programLogger.log(Level.INFO, "\tMade collection");
+//			log(Level.INFO, "\tMade collection");
 			// recalc the aggregate
 			
 			ProfileCollection pc = duplicateCollection.getProfileCollection(ProfileType.REGULAR);
 			
 			pc.createProfileAggregate(duplicateCollection, ProfileType.REGULAR);
 			
-//			programLogger.log(Level.INFO, "\tCalculated aggregate");
+//			log(Level.INFO, "\tCalculated aggregate");
 			
 			for(BorderTag tag : dataset.getCollection().getProfileCollection(ProfileType.REGULAR).getOffsetKeys()){
 				pc.addOffset(tag, dataset.getCollection().getProfileCollection(ProfileType.REGULAR).getOffset(tag));
 			}
 			
-//			programLogger.log(Level.INFO, "\tAdded offsets");
+//			log(Level.INFO, "\tAdded offsets");
 			
 			// get the profile median
 			
 			Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
 			
-//			programLogger.log(Level.INFO, "\tMade median");
+//			log(Level.INFO, "\tMade median");
 			// add to the chart
 			updateChart(median, i);
-//			programLogger.log(Level.INFO, "\tUpdated chart");
+//			log(Level.INFO, "\tUpdated chart");
 			
 			duplicateCollection = null;
 		}
 		setAnalysing(false);
-		programLogger.log(Level.INFO, "Profiling complete");
+		log(Level.INFO, "Profiling complete");
 	}
 	
 	private void updateChart(Profile profile, int windowSize){
@@ -337,7 +337,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 			}
 			
 		} catch (ParseException e1) {
-			programLogger.log(Level.SEVERE, "Error in spinners", e1);
+			log(Level.SEVERE, "Error in spinners", e1);
 		}
 		
 	}

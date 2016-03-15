@@ -159,7 +159,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 	 * and display it  
 	 */
 	private void importTree(){
-		programLogger.log(Level.FINE, "Reading tree");
+		log(Level.FINE, "Reading tree");
 		StringReader reader = new StringReader(group.getTree());
 
 		boolean readUnquotedLabels = true;
@@ -183,7 +183,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 			
 			
 			int numTaxa = topTree.getTaxa().size(); 
-			programLogger.log(Level.FINE, "Tree has "+numTaxa+" taxa");
+			log(Level.FINE, "Tree has "+numTaxa+" taxa");
 			
 			viewer.setTree( topTree );
 			
@@ -196,11 +196,11 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 			colourTreeNodesByClusterGroup(group);
 			
 		} catch (IOException e) {
-			programLogger.log(Level.SEVERE, "Error reading tree", e);
+			log(Level.SEVERE, "Error reading tree", e);
 		} catch (DuplicateTaxaException e){
-			programLogger.log(Level.WARNING, "Unable to display tree: duplicate taxon names");
+			log(Level.WARNING, "Unable to display tree: duplicate taxon names");
 		} catch (ImportException e) {
-			programLogger.log(Level.SEVERE, "Error in tree IO", e);
+			log(Level.SEVERE, "Error in tree IO", e);
 		}
 	}
 		
@@ -279,7 +279,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 
 		numberOfTimesColouringCalled++;
 		if(group!=null){
-			programLogger.log(Level.FINER, "Colouring nodes by cluster group: "+group.getName()+" iteration "+numberOfTimesColouringCalled);	
+			log(Level.FINER, "Colouring nodes by cluster group: "+group.getName()+" iteration "+numberOfTimesColouringCalled);	
 			
 			setStatusLoading();
 			Thread thr = new Thread(){
@@ -305,7 +305,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 							cluster = dataset.getMergeSource(id);
 						} else {
 							// If the cluster was not found, stop
-							programLogger.log(Level.WARNING, "Child dataset not found, cancelling");
+							log(Level.WARNING, "Child dataset not found, cancelling");
 							return;
 						}
 						
@@ -316,7 +316,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 						 }
 						
 						clusterNumber++;
-						programLogger.log(Level.FINER, "Node colours assigned");	
+						log(Level.FINER, "Node colours assigned");	
 		
 					}
 					RootedTree tree = viewer.getTreePane().getTree();
@@ -344,9 +344,9 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 				toAnalyse.add(UUID.fromString(cell.getId().toString()));
 			}
 		}
-		programLogger.log(Level.FINEST, "Built "+toAnalyse.size()+" cell list");	
+		log(Level.FINEST, "Built "+toAnalyse.size()+" cell list");	
 								
-		programLogger.log(Level.FINER, "Colouring dataset "+cluster.getName());				
+		log(Level.FINER, "Colouring dataset "+cluster.getName());				
 		
 		Color colour = clusterNumber == -1 ? Color.BLACK : ColourSelecter.getSegmentColor(clusterNumber);
 
@@ -358,14 +358,14 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 				String name = t.getName();
 				
 
-				programLogger.log(Level.FINEST, "Testing "+name+" against "+toAnalyse.size()+" cells");	
+				log(Level.FINEST, "Testing "+name+" against "+toAnalyse.size()+" cells");	
 				
 				
 				for (Iterator<UUID> iterator = toAnalyse.iterator(); iterator.hasNext();) {
 					UUID nid = iterator.next();
 					Nucleus nucleus = cluster.getCell(nid).getNucleus();
 					if(taxonNamesMatch(name, nucleus)){
-						programLogger.log(Level.FINEST, "Added colour for "+name);	
+						log(Level.FINEST, "Added colour for "+name);	
 						clusterMemberships.put(n, colour);
 						iterator.remove();
 						completedNuclei.add(nid);
@@ -394,9 +394,9 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 		*/
 		String nucleusName = nucleus.getSourceFile()+"-"+nucleus.getNameAndNumber();
 		
-//		programLogger.log(Level.FINEST, "\tTesting name: "+name);
+//		log(Level.FINEST, "\tTesting name: "+name);
 		
-//		programLogger.log(Level.FINEST, "\t\tTesting "+nucleusName);
+//		log(Level.FINEST, "\t\tTesting "+nucleusName);
 
 		// the ideal is full file path
 		if(name.equals(nucleusName)){ // 'C:\bla\image.tiff-image.tiff-1'
@@ -406,22 +406,22 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 			// otherwise look for the folder and name
 			
 			nucleusName = nucleus.getSourceFolder().getAbsolutePath()+"-"+nucleus.getNameAndNumber();
-//			programLogger.log(Level.FINEST, "\t\tTesting "+nucleusName);
+//			log(Level.FINEST, "\t\tTesting "+nucleusName);
 			if(name.equals(nucleusName)){
 				return true;
 			} else {
 //				// Can't get just names from merge sources
 				if(hasMergeSources){
-//					programLogger.log(Level.FINEST, "Cannot test further in a merge source");
+//					log(Level.FINEST, "Cannot test further in a merge source");
 					return false;
 				} else {
 					// otherwise look for just the name from an old dataset
 					nucleusName = nucleus.getNameAndNumber();
-//					programLogger.log(Level.FINEST, "\t\tTesting "+nucleusName);
+//					log(Level.FINEST, "\t\tTesting "+nucleusName);
 					if(name.equals(nucleusName)){
 						return true;
 					} else {
-//						programLogger.log(Level.FINEST, "Name not found");s
+//						log(Level.FINEST, "Name not found");s
 						return false;
 					}
 				}
@@ -496,9 +496,9 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 		if(clusterCollection.hasCells()){
 			colourTreeNodesByCluster(clusterCollection);
 			clusterList.add(clusterCollection);
-			programLogger.log(Level.INFO, "Extracted "+clusterCollection.cellCount()+" cells");
+			log(Level.INFO, "Extracted "+clusterCollection.cellCount()+" cells");
 		} else {
-			programLogger.log(Level.WARNING, "No cells found. Check taxon labels are correct");
+			log(Level.WARNING, "No cells found. Check taxon labels are correct");
 		}
 	}
 
@@ -510,7 +510,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 			try {
 				extractSelectedNodesToCluster();
 			} catch (Exception e1) {
-				programLogger.log(Level.SEVERE, "Error extracting cells", e);
+				log(Level.SEVERE, "Error extracting cells", e1);
 			}
 			
 
@@ -527,7 +527,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 					try {
 						dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
 					} catch (Exception e1) {
-						programLogger.log(Level.SEVERE, "Error applying segments", e);
+						log(Level.SEVERE, "Error applying segments", e1);
 					}
 
 					AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
@@ -541,12 +541,12 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 			
 			if(!list.isEmpty()){
 //				fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, list, dataset);
-				programLogger.log(Level.FINEST, "Firing population update request");
+				log(Level.FINEST, "Firing population update request");
 //				fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 				fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-//				programLogger.log(Level.FINEST, "Fired dataset copy event to listeners");
+//				log(Level.FINEST, "Fired dataset copy event to listeners");
 			} else {
-				programLogger.log(Level.WARNING, "No datasets to analyse");
+				log(Level.WARNING, "No datasets to analyse");
 			}
 			this.setVisible(false);
 			this.dispose();
@@ -564,14 +564,14 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 				list.add(dataset.getMergeSource(id));
 			}
 			
-//			programLogger.log(Level.INFO, "Detected "+list.size()+" merge sources");
+//			log(Level.INFO, "Detected "+list.size()+" merge sources");
 			
 			ClusterGroup mergeGroup = makeNewClusterGroup(list);
 		
 			
 			for(AnalysisDataset d : list){
 				mergeGroup.addDataset(d);
-//				programLogger.log(Level.INFO, "Added merge source with "+d.getCollection().size()+" nuclei");
+//				log(Level.INFO, "Added merge source with "+d.getCollection().size()+" nuclei");
 			}
 			
 			colourTreeNodesByClusterGroup(mergeGroup);
@@ -682,7 +682,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 
 					if (option == JOptionPane.CANCEL_OPTION) {
 						// Cancelled
-						programLogger.log(Level.INFO, "Adding as standard manual clusters");
+						log(Level.INFO, "Adding as standard manual clusters");
 					} else if (option == JOptionPane.OK_OPTION)	{
 						// Make the group
 
@@ -696,14 +696,14 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 
 					}
 				} else {
-					programLogger.log(Level.INFO, "Cannot make cluster group");
-					programLogger.log(Level.INFO, "Not all cells are assigned clusters");
-					programLogger.log(Level.INFO, "Adding as standard manual clusters");
+					log(Level.INFO, "Cannot make cluster group");
+					log(Level.INFO, "Not all cells are assigned clusters");
+					log(Level.INFO, "Adding as standard manual clusters");
 				}
 			} else {
-				programLogger.log(Level.INFO, "Cannot make cluster group");
-				programLogger.log(Level.INFO, "Cells present in more than one cluster");
-				programLogger.log(Level.INFO, "Adding as standard manual clusters");
+				log(Level.INFO, "Cannot make cluster group");
+				log(Level.INFO, "Cells present in more than one cluster");
+				log(Level.INFO, "Adding as standard manual clusters");
 			}
 			
 		}

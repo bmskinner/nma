@@ -181,14 +181,14 @@ public abstract class ImageProber extends LoadingIconDialog {
 
 					Thread thr = new Thread(){
 						public void run() {
-							programLogger.log(Level.FINEST, "Selecting next image");
+							log(Level.FINEST, "Selecting next image");
 							openImage = getNextImage();
 
 							try{
-								programLogger.log(Level.FINEST, "Opening image");
+								log(Level.FINEST, "Opening image");
 								importAndDisplayImage(openImage);
 							} catch(Exception e){
-								programLogger.log(Level.SEVERE, "Error opening image, skipping");
+								log(Level.SEVERE, "Error opening image, skipping");
 							}
 							
 						}
@@ -206,19 +206,19 @@ public abstract class ImageProber extends LoadingIconDialog {
 
 					Thread thr = new Thread(){
 						public void run() {
-							programLogger.log(Level.FINEST, "Selecting previous image");
+							log(Level.FINEST, "Selecting previous image");
 							openImage = getPrevImage();
 //							setStatusLoading();
 							try{
-								programLogger.log(Level.FINEST, "Opening image");
+								log(Level.FINEST, "Opening image");
 								importAndDisplayImage(openImage);
 							} catch(Exception e){
-								programLogger.log(Level.SEVERE, "Error opening image, skipping");
+								log(Level.SEVERE, "Error opening image, skipping");
 //								openImage = getNextImage();
 //								importAndDisplayImage(openImage);
 							}
 							
-//							programLogger.log(Level.FINEST, "Opening image");
+//							log(Level.FINEST, "Opening image");
 //							importAndDisplayImage(openImage);
 						}
 					};	
@@ -271,7 +271,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 			cols = 2;
 		}
 
-		programLogger.log(Level.FINEST, "Creating image panel size "+rows+" by "+cols);
+		log(Level.FINEST, "Creating image panel size "+rows+" by "+cols);
 		panel.setLayout(new GridLayout(rows, cols ));
 
 		for(final ImageType key : imageType.getValues()){
@@ -320,7 +320,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				ImageProber.this.ok = true;
-				programLogger.log(Level.FINEST, "Set ok to "+ok);
+				log(Level.FINEST, "Set ok to "+ok);
 				ImageProber.this.setVisible(false);
 
 			}
@@ -334,7 +334,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 			public void mouseClicked(MouseEvent arg0) {
 
 				ImageProber.this.ok = false;
-				programLogger.log(Level.FINEST, "Set ok to "+ok);
+				log(Level.FINEST, "Set ok to "+ok);
 				ImageProber.this.setVisible(false);
 
 			}
@@ -410,7 +410,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 	 */
 	protected void createFileList(final File folder){
 		
-		programLogger.log(Level.FINEST, "Generating file list");
+		log(Level.FINEST, "Generating file list");
 //		setStatusLoading();
 		
 		Thread thr = new Thread(){
@@ -423,7 +423,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 					openImage = probableFiles.get(index);
 					importAndDisplayImage(openImage);
 				} else {
-					programLogger.log(Level.WARNING, "No images found in folder");
+					log(Level.WARNING, "No images found in folder");
 					setStatusError();
 				}
 			}
@@ -526,7 +526,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 	 * @param imageFile
 	 */
 	protected void importAndDisplayImage(File imageFile){
-		programLogger.log(Level.FINEST, "Calling abstract class import method");
+		log(Level.FINEST, "Calling abstract class import method");
 	}
 	
 	protected void updateImageThumbnails(){
@@ -550,7 +550,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 	protected void testLog(){
 		double rnd = Math.random() * logTestMessages.length;
 		int index = (int) Math.floor(rnd);
-		programLogger.log(Level.INFO, logTestMessages[index]+"...");
+		log(Level.INFO, logTestMessages[index]+"...");
 	}
 	
 	/**
@@ -627,8 +627,8 @@ public abstract class ImageProber extends LoadingIconDialog {
 	 */
 	protected ImageIcon createViewableImage(ImageProcessor ip, boolean fullSize){
 		
-		programLogger.log(Level.FINEST, "Display has "+rows+" rows");
-		programLogger.log(Level.FINEST, "Display has "+cols+" columns");
+		log(Level.FINEST, "Display has "+rows+" rows");
+		log(Level.FINEST, "Display has "+cols+" columns");
 		
 		if(ip==null){
 			return new ImageIcon(); // blank image

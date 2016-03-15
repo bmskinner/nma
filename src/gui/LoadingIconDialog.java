@@ -45,7 +45,6 @@ public abstract class LoadingIconDialog extends JDialog implements Loggable {
 	private JLabel loadingLabel = new JLabel("");
 	private ImageIcon loadingGif = null; // the icon for the loading gif
 	private ImageIcon blankGif = null; // the icon for the blank gif
-	protected static final Logger programLogger =  Logger.getLogger("ProgramLogger"); // log to the program LogPanel
 	
 	public LoadingIconDialog(){
 		
@@ -66,30 +65,7 @@ public abstract class LoadingIconDialog extends JDialog implements Loggable {
 		this.loadingLabel.setIcon(blankGif);
 
 	}
-	
-    /**
-     * Log the given message to the program log window and to the dataset
-     * debug file
-     * @param level the log level
-     * @param message the message to log
-     */
-    public void log(Level level, String message){
-		programLogger.log(level, message);
-    }
-    
-    /**
-     * Log an error to the program log window and to the dataset
-     * debug file. Logs with Level.SEVERE
-     * @param message the error messsage
-     * @param t the exception
-     */
-    public void logError(String message, Throwable t){
-		programLogger.log(Level.SEVERE, message, t);
-    }
-	
-	protected Logger getProgramLogger(){
-		return this.programLogger;
-	}
+
 	
 	/**
 	 * Get the JLabel with the loading icon
@@ -136,7 +112,7 @@ public abstract class LoadingIconDialog extends JDialog implements Loggable {
 				loadingGif = loadURL(urlToGif);
 
 				if(loadingGif==null){
-					programLogger.log(Level.WARNING, "Unable to load gif");
+					log(Level.WARNING, "Unable to load gif");
 					ok = false;
 				} else {
 					ok = true;
@@ -152,7 +128,7 @@ public abstract class LoadingIconDialog extends JDialog implements Loggable {
 //				blankGif = new ImageIcon(urlToBlank);
 
 				if(blankGif==null){
-					programLogger.log(Level.WARNING, "Unable to load blank gif");
+					log(Level.WARNING, "Unable to load blank gif");
 					ok = false;
 				} else {
 					ok = true;
@@ -162,7 +138,7 @@ public abstract class LoadingIconDialog extends JDialog implements Loggable {
 			
 			
 		} catch (Exception e){
-			programLogger.log(Level.SEVERE, "Cannot load gif resource", e);
+			log(Level.SEVERE, "Cannot load gif resource", e);
 		}
 		return ok;
 	}
@@ -170,7 +146,7 @@ public abstract class LoadingIconDialog extends JDialog implements Loggable {
 	private ImageIcon loadURL(URL url){
     	ImageIcon icon = null;
     	if(url!=null){
-    		programLogger.log(Level.FINER, "URL found: "+url.toString());
+    		log(Level.FINER, "URL found: "+url.toString());
     		icon = new ImageIcon(url);
     		
     		String status = "";
@@ -187,7 +163,7 @@ public abstract class LoadingIconDialog extends JDialog implements Loggable {
     		
     		}
     		
-    		programLogger.log(Level.FINER, "Load status: "+status);
+    		log(Level.FINER, "Load status: "+status);
     		
 //    		if(icon.getImageLoadStatus()== MediaTracker.ERRORED){
 //    			programLogger.log(Level.WARNING, "Could not load icon from "+url.getPath());

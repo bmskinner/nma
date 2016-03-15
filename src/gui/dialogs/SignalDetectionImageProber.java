@@ -92,12 +92,12 @@ public class SignalDetectionImageProber extends ImageProber {
 			setStatusLoading();
 			this.setLoadingLabelText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
 
-			ImageStack stack = ImageImporter.importImage(imageFile, programLogger);
+			ImageStack stack = ImageImporter.getInstance().importImage(imageFile);
 
 			// Import the image as a stack
 			String imageName = imageFile.getName();
 
-			programLogger.log(Level.FINEST, "Converting image");
+			log(Level.FINEST, "Converting image");
 			ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(stack).getProcessor();
 			openProcessor.invert();
 			procMap.put(SignalImageType.DETECTED_OBJECTS, openProcessor);
@@ -116,14 +116,14 @@ public class SignalDetectionImageProber extends ImageProber {
 			Map<Nucleus, List<NuclearSignal>> map = new HashMap<Nucleus, List<NuclearSignal>>();
 
 			// Get the cells matching the desred imageFile, and find signals
-			programLogger.log(Level.FINEST, "Detecting signals in image");
+			log(Level.FINEST, "Detecting signals in image");
 
 			for(Nucleus n : dataset.getCollection().getNuclei()){
-//				programLogger.log(Level.FINEST, "Testing nucleus "+n.getImageName()+" against "+imageName);
+//				log(Level.FINEST, "Testing nucleus "+n.getImageName()+" against "+imageName);
 				if(n.getSourceFileName().equals(imageName)){
-//					programLogger.log(Level.FINEST, "  Nucleus is in image; finding signals");
+//					log(Level.FINEST, "  Nucleus is in image; finding signals");
 					List<NuclearSignal> list = finder.detectSignal(imageFile, stack, n);
-					programLogger.log(Level.FINEST, "  Detected "+list.size()+" signals");
+					log(Level.FINEST, "  Detected "+list.size()+" signals");
 					map.put(n, list);
 				}
 			}
@@ -133,7 +133,7 @@ public class SignalDetectionImageProber extends ImageProber {
 			testOptions.setMaxFraction(maxFract);
 			testOptions.setThreshold(threshold);
 
-			programLogger.log(Level.FINEST, "Drawing signals");
+			log(Level.FINEST, "Drawing signals");
 			// annotate detected signals onto the imagefile
 			drawSignals(map, openProcessor);
 
@@ -144,7 +144,7 @@ public class SignalDetectionImageProber extends ImageProber {
 //			headerLabel.setIcon(null);
 //			headerLabel.repaint();
 		} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Error in signal probing", e);
+				log(Level.SEVERE, "Error in signal probing", e);
 			}
 		}
 	

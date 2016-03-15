@@ -239,7 +239,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 						SignalDetectionSettingsDialog.this.setVisible(false);
 					}
 				} catch(Exception e){
-					programLogger.log(Level.SEVERE, "Error in signal detection", e);
+					log(Level.SEVERE, "Error in signal detection", e);
 				}
 
 			}

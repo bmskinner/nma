@@ -47,7 +47,7 @@ public class CellImageDialog extends LoadingIconDialog {
 		} else {
 
 
-			this.panel = new AnnotatedNucleusPanel(programLogger);
+			this.panel = new AnnotatedNucleusPanel();
 
 			this.setLayout(new BorderLayout());
 			this.add(panel, BorderLayout.CENTER);

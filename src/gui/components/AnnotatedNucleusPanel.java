@@ -38,6 +38,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import logging.Loggable;
 import charting.charts.AbstractChartFactory;
 import charting.charts.MorphologyChartFactory;
 import utility.Utils;
@@ -56,16 +57,13 @@ import components.nuclei.Nucleus;
  *
  */
 @SuppressWarnings("serial")
-public class AnnotatedNucleusPanel extends JPanel {
+public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 	
 	private Cell cell;
 	private JLabel imageLabel = new JLabel();
-	private Logger programLogger;
 	
-	public AnnotatedNucleusPanel(Logger programLogger){
+	public AnnotatedNucleusPanel(){
 
-		
-		this.programLogger = programLogger;
 		this.setLayout(new BorderLayout());
 		this.setBorder(new EmptyBorder(5, 5, 5, 5));
 		this.add(imageLabel, BorderLayout.CENTER);
@@ -84,7 +82,7 @@ public class AnnotatedNucleusPanel extends JPanel {
 	
 	private void importNucleusImage() throws Exception {
 		File imageFile = cell.getNucleus().getSourceFile();
-		ImageStack imageStack = ImageImporter.importImage(imageFile, programLogger);
+		ImageStack imageStack = ImageImporter.getInstance().importImage(imageFile);
 		
 		// Get the counterstain stack, make greyscale and invert
 		ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(imageStack).getProcessor();

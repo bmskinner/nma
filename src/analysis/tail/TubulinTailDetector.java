@@ -119,8 +119,7 @@ public class TubulinTailDetector extends AnalysisWorker {
 				fileLogger.log(Level.FINE, "Tail in: "+imageFile.getAbsolutePath());
 //				SpermTail tail = null;
 				
-				TailFinder finder = new TailFinder(getDataset().getAnalysisOptions().getCannyOptions("tail"),
-						fileLogger, 
+				TailFinder finder = new TailFinder(getDataset().getAnalysisOptions().getCannyOptions("tail"), 
 						channel);
 				
 				// attempt to detect the tails in the image

@@ -162,7 +162,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	public ImageProcessor getImage(){
 
 		if(getSourceFile().exists()){
-			ImageStack imageStack = ImageImporter.importImage(getSourceFile());
+			ImageStack imageStack = ImageImporter.getInstance().importImage(getSourceFile());
 
 			// Get the stack, make greyscale and invert
 			int stack = Constants.rgbToStack(getChannel());

@@ -27,6 +27,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -75,7 +76,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		JLabel logLabel = new JLabel("Logging level");
 		Level[] levelArray = { Level.INFO, Level.FINE, Level.FINEST };
 		levelBox = new JComboBox<Level>(levelArray);
-		levelBox.setSelectedItem(programLogger.getLevel());
+		levelBox.setSelectedItem(Logger.getLogger(PROGRAM_LOGGER).getLevel());
 		levelBox.addActionListener(this);
 		
 		labels.add(logLabel);
@@ -98,9 +99,9 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 	public void actionPerformed(ActionEvent arg0) {
 		
 		Level level = (Level) levelBox.getSelectedItem();
-		if(!level.equals(programLogger.getLevel())){
-			programLogger.setLevel(level);
-			programLogger.log(Level.INFO, "Set the logging level to "+level.toString());
+		if(!level.equals(Logger.getLogger(PROGRAM_LOGGER).getLevel())){
+			Logger.getLogger(PROGRAM_LOGGER).setLevel(level);
+			log(Level.INFO, "Set the logging level to "+level.toString());
 		}
 		
 		
@@ -112,7 +113,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 				d.setSwatch(swatch);
 			}
 			mw.setColourSwatch(swatch);
-			programLogger.log(Level.INFO, "Set the colour swatch level to "+swatch.toString());
+			log(Level.INFO, "Set the colour swatch level to "+swatch.toString());
 		}
 		
 		

@@ -36,32 +36,29 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import logging.Loggable;
 import skeleton_analysis.AnalyzeSkeleton_;
 import skeleton_analysis.Edge;
 import skeleton_analysis.Graph;
 import skeleton_analysis.SkeletonResult;
 import utility.Constants;
 import utility.Utils;
-
 import components.SpermTail;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
-
 import Skeletonize3D_.Skeletonize3D_;
 import analysis.AnalysisOptions;
 import analysis.Detector;
 import analysis.ImageFilterer;
 import analysis.AnalysisOptions.CannyOptions;
 
-public class TailFinder {
+public class TailFinder implements Loggable {
 	
 	private CannyOptions options;
-	private Logger programLogger;
 	private  int channel;
 	
 	
-	public TailFinder(CannyOptions options, Logger logger, int channel){
-		this.programLogger = logger;
+	public TailFinder(CannyOptions options,int channel){
 		this.options = options;
 		this.channel = channel;
 	}
@@ -80,14 +77,14 @@ public class TailFinder {
 		
 
 		List<SpermTail> tails = new ArrayList<SpermTail>(0);
-		programLogger.log(Level.INFO, "Running on image: "+tubulinFile.getAbsolutePath());
+		log(Level.INFO, "Running on image: "+tubulinFile.getAbsolutePath());
 		// import image with tubulin in  channel
 		ImageStack stack = null;
 		try{
-			stack = ImageImporter.importImage(tubulinFile, programLogger);
+			stack = ImageImporter.getInstance().importImage(tubulinFile);
 		} catch (Exception e){
 			
-			programLogger.log(Level.SEVERE, "Error importing image as stack", e);
+			log(Level.SEVERE, "Error importing image as stack", e);
 			return tails; // return the empty list
 		}
 		
@@ -103,7 +100,7 @@ public class TailFinder {
 			
 			// get objects found by edge detector
 			List<Roi> borderRois = getROIs(edges, true, 1);
-			programLogger.log(Level.INFO, "Found "+borderRois.size()+" potential tails in image");
+			log(Level.INFO, "Found "+borderRois.size()+" potential tails in image");
 			
 			// create the skeletons of the detected objects
 			ImageStack skeletonStack = skeletoniseStack(edges, borderRois);
@@ -121,7 +118,7 @@ public class TailFinder {
 //			List<Roi> usableSkeletons = filterSkeletons(skeletons, 1000);
 			
 			// print the roi details to the log
-			programLogger.log(Level.INFO, "Found "+skeletons.size()+" potential tails in image");
+			log(Level.INFO, "Found "+skeletons.size()+" potential tails in image");
 			
 			
 			// get the complete tails matching border to skeleton
@@ -133,7 +130,7 @@ public class TailFinder {
 			
 			
 		} else {
-			programLogger.log(Level.SEVERE, "Dimensions of image do not match");
+			log(Level.SEVERE, "Dimensions of image do not match");
 		}
 
 		return tails;
@@ -153,7 +150,7 @@ public class TailFinder {
 		ByteProcessor bp = (ByteProcessor) stack.getProcessor(1);
 		bp.setColor(Color.WHITE);
 		for(Roi r : objects){
-			programLogger.log(Level.FINE, "Filling roi");
+			log(Level.FINE, "Filling roi");
 			bp.fill(r);
 		}
 
@@ -190,7 +187,7 @@ public class TailFinder {
 		skelly.setup("", binaryImage);
 		skelly.run(skeletonisableProcessor);
 
-		programLogger.log(Level.FINE, "Skeletonized the image");
+		log(Level.FINE, "Skeletonized the image");
 
 		// make a new imageStack from the skeletonised images
 		ImageStack skeletonStack = ImageStack.create(binaryProcessor.getWidth(), binaryProcessor.getHeight(), 0, 8);
@@ -237,7 +234,7 @@ public class TailFinder {
 		Graph[] graphs = result.getGraph();
 		List<Graph> potentialTails = new ArrayList<Graph>(0);
 		
-		programLogger.log(Level.FINE, "Image has "+graphs.length+" graphs");
+		log(Level.FINE, "Image has "+graphs.length+" graphs");
 		
 		for (Graph g : graphs){
 						
@@ -248,9 +245,9 @@ public class TailFinder {
 		}
 		
 		for(Graph g : potentialTails){
-			programLogger.log(Level.FINE, "Potential tail graph found");
+			log(Level.FINE, "Potential tail graph found");
 			for(Edge e : g.getEdges()){
-				programLogger.log(Level.FINE, "\tEdge length: "+e.getLength());
+				log(Level.FINE, "\tEdge length: "+e.getLength());
 
 			}
 
@@ -354,7 +351,7 @@ public class TailFinder {
 	 */
 	private ImageStack pruneStack(ImageStack stack){
 		
-		programLogger.log(Level.INFO, "Pruning skeletons to new stack");
+		log(Level.INFO, "Pruning skeletons to new stack");
 		AnalyzeSkeleton_ an = new AnalyzeSkeleton_();
 		
 //		public SkeletonResult run(
@@ -460,7 +457,7 @@ public class TailFinder {
 			for(XYPoint p : skeleton){
 				if(nucleusOutline.contains( (float) p.getX(), (float) p.getY())){
 					result.add(tail);
-					programLogger.log(Level.FINE, "Found tail matching nucleus");
+					log(Level.FINE, "Found tail matching nucleus");
 				}
 			}
 		}
@@ -521,7 +518,7 @@ public class TailFinder {
 		
 		for(Roi skeleton : usableSkeletons){
 
-			programLogger.log(Level.FINE, "Assessing skeleton: Length : "+skeleton.getLength());
+			log(Level.FINE, "Assessing skeleton: Length : "+skeleton.getLength());
 			
 			//only process skeletons with lenght
 			if(skeleton.getLength()>0){
@@ -546,7 +543,7 @@ public class TailFinder {
 				if(tailBorder!=null){
 
 					tails.add( new SpermTail(tubulinFile, channel, skeleton, tailBorder)  );
-					programLogger.log(Level.FINE, "Found outline matching skeleton");
+					log(Level.FINE, "Found outline matching skeleton");
 				}
 			}
 		}
@@ -711,16 +708,16 @@ public class TailFinder {
 	private boolean checkDimensions(ImageStack stack, Nucleus n ){
 		
 		File baseFile = n.getSourceFile();
-		programLogger.log(Level.FINE, "Nucleus in "+baseFile.getAbsolutePath());
-		ImageStack baseStack = ImageImporter.importImage(baseFile, programLogger);
+		log(Level.FINE, "Nucleus in "+baseFile.getAbsolutePath());
+		ImageStack baseStack = ImageImporter.getInstance().importImage(baseFile);
 		
 		boolean ok = true;
 		if(stack.getHeight() != baseStack.getHeight()){
 			ok = false;
-			programLogger.log(Level.FINE, "Fail on height check");
+			log(Level.FINE, "Fail on height check");
 		}
 		if(stack.getWidth() != baseStack.getWidth()){
-			programLogger.log(Level.FINE, "Fail on width check");
+			log(Level.FINE, "Fail on width check");
 			ok = false;
 		}
 		return ok;
@@ -750,7 +747,7 @@ public class TailFinder {
 			ImageProcessor ip = image.getProcessor(channel);
 			detector.run(ip);
 		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error in tail detection", e);
+			log(Level.SEVERE, "Error in tail detection", e);
 		}
 		return detector.getRoiList();
 	}

@@ -70,7 +70,7 @@ public class ManualCellCurator extends LoadingIconDialog {
 	private void createUI(){
 		this.setLayout(new BorderLayout());
 		this.setSize(500,500);
-		this.panel = new AnnotatedNucleusPanel(programLogger);
+		this.panel = new AnnotatedNucleusPanel();
 		this.add(panel, BorderLayout.CENTER);
 		updateCell(dataset.getCollection().getCells().get(cellIndex));
 		
@@ -87,7 +87,7 @@ public class ManualCellCurator extends LoadingIconDialog {
 			panel.updateCell(cell);
 
 		} catch (Exception e) {
-			programLogger.log(Level.SEVERE, "Error updating cell", e);
+			log(Level.SEVERE, "Error updating cell", e);
 		}
 	}
 	
@@ -107,7 +107,7 @@ public class ManualCellCurator extends LoadingIconDialog {
 					setVisible(false);
 				} else {
 
-					programLogger.log(Level.FINEST, "Keeping cell");
+					log(Level.FINEST, "Keeping cell");
 					idsToKeep.add(dataset.getCollection().getCells().get(cellIndex++).getId());
 					updateCell(dataset.getCollection().getCells().get(cellIndex));
 				}
@@ -122,7 +122,7 @@ public class ManualCellCurator extends LoadingIconDialog {
 					// last cell
 					setVisible(false);
 				} else {
-					programLogger.log(Level.FINEST, "Rejecting cell");
+					log(Level.FINEST, "Rejecting cell");
 					updateCell(dataset.getCollection().getCells().get(++cellIndex));
 				}
 

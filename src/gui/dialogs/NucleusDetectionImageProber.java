@@ -93,8 +93,8 @@ public class NucleusDetectionImageProber extends ImageProber {
 			setStatusLoading();
 			this.setLoadingLabelText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
 			
-			ImageStack imageStack = ImageImporter.importImage(imageFile, programLogger);
-			programLogger.log(Level.FINEST, "Imported image as stack");
+			ImageStack imageStack = ImageImporter.getInstance().importImage(imageFile);
+			log(Level.FINEST, "Imported image as stack");
 			
 			/*
 			 * Insert steps to show each applied filter in the same order as from analysis
@@ -106,7 +106,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 			 * 
 			 * Make an icon from each
 			 */
-			programLogger.log(Level.FINEST, "Creating processed images");
+			log(Level.FINEST, "Creating processed images");
 			
 			CannyOptions cannyOptions = options.getCannyOptions("nucleus");
 //			ImageProcessor openProcessor = ImageExporter.convertToRGB(imageStack).getProcessor();
@@ -122,7 +122,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 				// run a Kuwahara filter to enhance edges in the image
 				//TODO: Turning off Kuwahara causes error
 				if(cannyOptions.isUseKuwahara()){
-					programLogger.log(Level.FINEST, "Applying Kuwahara filter");
+					log(Level.FINEST, "Applying Kuwahara filter");
 					ImageProcessor kuwaharaProcessor = ImageFilterer.runKuwaharaFiltering(imageStack, Constants.COUNTERSTAIN, cannyOptions.getKuwaharaKernel());
 					processedImage = kuwaharaProcessor.duplicate(); 
 					kuwaharaProcessor.invert();
@@ -134,7 +134,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 				}
 				
 				if(cannyOptions.isUseFlattenImage()){
-					programLogger.log(Level.FINEST, "Applying flattening filter");
+					log(Level.FINEST, "Applying flattening filter");
 					ImageProcessor flattenProcessor = ImageFilterer.squashChromocentres(processedImage, cannyOptions.getFlattenThreshold());
 					processedImage = flattenProcessor.duplicate();
 					flattenProcessor.invert();
@@ -145,7 +145,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 					iconMap.get(NucleusImageType.FLATTENED).setText(NucleusImageType.FLATTENED.toString()+" (disabled)");
 				}
 				
-				programLogger.log(Level.FINEST, "Detecting edges");
+				log(Level.FINEST, "Detecting edges");
 				ImageProcessor edgesProcessor = ImageFilterer.runEdgeDetector(processedImage, cannyOptions);
 				procMap.put(NucleusImageType.EDGE_DETECTION, edgesProcessor);
 				
@@ -165,7 +165,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 				}
 			}
 
-			programLogger.log(Level.FINEST, "Processed images created");
+			log(Level.FINEST, "Processed images created");
 						
 			/*
 			 * Store the size and circularity options, and set them to allow all
@@ -180,7 +180,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 				drawNucleus(cell, openProcessor);
 			}
 
-			programLogger.log(Level.FINE, "Displaying nuclei");
+			log(Level.FINE, "Displaying nuclei");
 			
 			// update the map of icons
 			updateImageThumbnails();
@@ -191,7 +191,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 //			headerLabel.repaint();
 
 		} catch (Exception e) { // end try
-			programLogger.log(Level.SEVERE, "Error in image processing", e);
+			log(Level.SEVERE, "Error in image processing", e);
 			setStatusError();
 		} // end catch
 	}
@@ -211,20 +211,20 @@ public class NucleusDetectionImageProber extends ImageProber {
 		double minCirc = options.getMinNucleusCirc();
 		double maxCirc = options.getMaxNucleusCirc();
 		
-		programLogger.log(Level.FINEST, "Widening detection parameters");
+		log(Level.FINEST, "Widening detection parameters");
 
 		options.setMinNucleusSize(50);
 		options.setMaxNucleusSize(imageStack.getWidth()*imageStack.getHeight());
 		options.setMinNucleusCirc(0);
 		options.setMaxNucleusCirc(1);
 		
-		programLogger.log(Level.FINEST, "Finding cells");
+		log(Level.FINEST, "Finding cells");
 		
 		 NucleusFinder finder = new NucleusFinder(options, null);
 		
 		List<Cell> cells = finder.getCells(imageStack, imageFile);
 		
-		programLogger.log(Level.FINEST, "Resetting detetion parameters");
+		log(Level.FINEST, "Resetting detetion parameters");
 		
 		options.setMinNucleusSize(minSize);
 		options.setMaxNucleusSize(maxSize);

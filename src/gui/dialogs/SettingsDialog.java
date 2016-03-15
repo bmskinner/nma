@@ -35,25 +35,18 @@ import java.awt.event.MouseEvent;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
-import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import analysis.AnalysisOptions.CannyOptions;
-import analysis.AnalysisOptions.NuclearSignalOptions;
 
 /**
  * Contains methods for laying out panels in settings dialog options
@@ -62,9 +55,7 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 	
 	private static final long serialVersionUID = 1L;
 	protected boolean readyToRun = false;
-	
-	protected static final Logger programLogger =  Logger.getLogger("ProgramLogger"); // log to the program LogPanel
-	
+		
 	String[] channelOptionStrings = {"Greyscale", "Red", "Green", "Blue"};
 	
 	/**
@@ -85,27 +76,7 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 		super(owner, modal);
 		this.setLocationRelativeTo(null);
 	}
-	
-    /**
-     * Log the given message to the program log window and to the dataset
-     * debug file
-     * @param level the log level
-     * @param message the message to log
-     */
-    public void log(Level level, String message){
-		programLogger.log(level, message);
-    }
-    
-    /**
-     * Log an error to the program log window and to the dataset
-     * debug file. Logs with Level.SEVERE
-     * @param message the error messsage
-     * @param t the exception
-     */
-    public void logError(String message, Throwable t){
-		programLogger.log(Level.SEVERE, message, t);
-    }
-	
+		
 	/**
 	 * Create the panel footer, with OK and Cancel option
 	 * buttons

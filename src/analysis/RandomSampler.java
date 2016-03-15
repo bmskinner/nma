@@ -28,7 +28,7 @@ public class RandomSampler extends AnalysisWorker {
 	private int first;
 	private int second;
 	
-	public RandomSampler(AnalysisDataset dataset, Logger logger, NucleusStatistic stat, int iterations, int first, int second){
+	public RandomSampler(AnalysisDataset dataset, NucleusStatistic stat, int iterations, int first, int second){
 		super(dataset);
 		this.stat = stat;
 		this.iterations = iterations;

@@ -95,7 +95,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 			createGUI();
 
 		} catch (Exception e) {
-			programLogger.log(Level.SEVERE, "Error making dialog", e);
+			log(Level.SEVERE, "Error making dialog", e);
 		}
 	}
 		
@@ -319,7 +319,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 			} 
 			
 		}catch (ParseException e1) {
-			programLogger.log(Level.SEVERE, "Error in spinners for Clustering options", e1);
+			log(Level.SEVERE, "Error in spinners for Clustering options", e1);
 		}	
 		
 	}

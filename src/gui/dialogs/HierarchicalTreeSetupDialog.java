@@ -130,7 +130,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			createGUI();
 
 		} catch (Exception e) {
-			programLogger.log(Level.SEVERE, "Error making dialog", e);
+			log(Level.SEVERE, "Error making dialog", e);
 		}
 	}
 	
@@ -274,7 +274,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 				double diptest 	= DipTester.getDipTestPValue(stats);
 				pval = pf.format(diptest);		
 			} catch (Exception e) {
-				programLogger.log(Level.SEVERE, "Error getting p-value", e);
+				log(Level.SEVERE, "Error getting p-value", e);
 			}
 
 			JCheckBox box = new JCheckBox("  p(uni) = "+pval);
@@ -298,7 +298,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 				double diptest 	= DipTester.getDipTestPValue(stats);
 				pval = pf.format(diptest);		
 			} catch (Exception e) {
-				programLogger.log(Level.SEVERE, "Error getting p-value", e);
+				log(Level.SEVERE, "Error getting p-value", e);
 			}
 			
 			JCheckBox box = new JCheckBox("  p(uni) = "+pval);
