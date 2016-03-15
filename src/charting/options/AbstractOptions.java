@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import logging.Loggable;
 import components.generic.MeasurementScale;
 import stats.PlottableStatistic;
 import analysis.AnalysisDataset;
@@ -14,10 +15,9 @@ import analysis.AnalysisDataset;
  * @author bms41
  *
  */
-public abstract class AbstractOptions {
+public abstract class AbstractOptions implements Loggable {
 	
 	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-	private Logger programLogger       = null;
 	private PlottableStatistic stat    = null;
 	private UUID segID                 = null; // the id of the segment (not consistent between datasets)
 	private int segPosition            = 0;    // the position of the segment in the profile (consistent between datasets)
@@ -29,7 +29,6 @@ public abstract class AbstractOptions {
 	
 	public AbstractOptions(List<AnalysisDataset> list, Logger programLogger){
 		this.list = list;
-		this.programLogger = programLogger;
 	}
 
 	protected void setDatasets(List<AnalysisDataset> list){
@@ -77,37 +76,6 @@ public abstract class AbstractOptions {
 			return true;
 		} else {
 			return false;
-		}
-	}
-	
-	
-	public void setLogger(Logger l){
-		this.programLogger = l;
-	}
-	
-	public void log(Level level, String message){
-		
-		if(this.hasLogger()){
-			this.getLogger().log(level, message);
-		}
-	}
-	
-	public void log(Level level, String message, Throwable e){
-
-		if(this.hasLogger()){
-			this.getLogger().log(level, message, e);
-		}
-	}
-	
-	public Logger getLogger(){
-		return this.programLogger;
-	}
-	
-	private boolean hasLogger(){
-		if(this.programLogger==null){
-			return false;
-		} else {
-			return true;
 		}
 	}
 	

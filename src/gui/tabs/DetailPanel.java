@@ -61,7 +61,9 @@ import analysis.AnalysisDataset;
  *
  */
 @SuppressWarnings("serial")
-public abstract class DetailPanel extends JPanel implements TabPanel, SignalChangeListener, DatasetEventListener, InterfaceEventListener, Loggable {
+public abstract class DetailPanel 
+	extends JPanel 
+	implements TabPanel, SignalChangeListener, DatasetEventListener, InterfaceEventListener, Loggable {
 	
 	private final List<Object> listeners 			= new ArrayList<Object>();
 	private final List<Object> datasetListeners 	= new ArrayList<Object>();
@@ -79,31 +81,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	
 	volatile private boolean isUpdating = false;
 	
-	protected static final Logger programLogger =  Logger.getLogger("ProgramLogger"); // log to the program LogPanel
-	
 	public DetailPanel( ){
 	}
-	
-    /**
-     * Log the given message to the program log window and to the dataset
-     * debug file
-     * @param level the log level
-     * @param message the message to log
-     */
-    public void log(Level level, String message){
-		programLogger.log(level, message);
-    }
-    
-    /**
-     * Log an error to the program log window and to the dataset
-     * debug file. Logs with Level.SEVERE
-     * @param message the error messsage
-     * @param t the exception
-     */
-    public void logError(String message, Throwable t){
-		programLogger.log(Level.SEVERE, message, t);
-    }
-	
+
 	
 	/**
 	 * Add another detail panel as a sub panel to this.
@@ -237,7 +217,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	public void update(final List<AnalysisDataset> list){
 		
 		if(this.isUpdating()){
-			programLogger.log(Level.FINEST, "Panel is already updating");
+			log(Level.FINEST, "Panel is already updating");
 		} else {
 			if(list!=null){
 				this.list = list;
@@ -258,7 +238,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 		
 //		SwingUtilities.invokeLater(new Runnable(){
 //			public void run(){
-		programLogger.log(Level.FINEST, "Updating detail panel");
+		log(Level.FINEST, "Updating detail panel");
 				try {
 					if(hasDatasets()){
 						
@@ -273,7 +253,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 					}
 					
 				} catch (Exception e) {
-					programLogger.log(Level.SEVERE, "Error updating panel", e);
+					log(Level.SEVERE, "Error updating panel", e);
 					update( (List<AnalysisDataset>) null); // don't use updateNull because it throws an exception
 				} finally {
 					setUpdating(false);
@@ -292,7 +272,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	protected boolean checkSegmentCountsMatch(List<AnalysisDataset> list) throws Exception{
 		int prevCount = 0;
 		
-		programLogger.log(Level.FINEST, "Counting segments in each dataset");
+		log(Level.FINEST, "Counting segments in each dataset");
 		// check that the datasets have the same number of segments
 		for( AnalysisDataset dataset  : list){
 			CellCollection collection = dataset.getCollection();
@@ -300,11 +280,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 				.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
 				.getSegmentCount();
 			
-			programLogger.log(Level.FINEST, "\t"+dataset.getName()+": "+count+" segments");
+			log(Level.FINEST, "\t"+dataset.getName()+": "+count+" segments");
 			
 			if(prevCount > 0 ){
 				if(prevCount!=count){
-					programLogger.log(Level.FINEST, "Segment count does not match");
+					log(Level.FINEST, "Segment count does not match");
 					return false;
 				}
 			}
@@ -341,14 +321,14 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	protected JFreeChart getChart(ChartOptions options) throws Exception{
 		JFreeChart chart;
 		if(getChartCache().hasChart(options)){
-			programLogger.log(Level.FINEST, "Fetched cached chart");
+			log(Level.FINEST, "Fetched cached chart");
 			chart = getChartCache().getChart(options);
 
 		} else { // No cache
 
 			chart = createPanelChartType(options);
 			getChartCache().addChart(options, chart);
-			programLogger.log(Level.FINEST, "Added cached chart");
+			log(Level.FINEST, "Added cached chart");
 		}
 		return chart;
 	}
@@ -363,11 +343,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 		
 		TableModel model;
 		if(getTableCache().hasTable(options)){
-			programLogger.log(Level.FINEST, "Fetched cached table");
+			log(Level.FINEST, "Fetched cached table");
 			model = getTableCache().getTable(options);
 		} else {
 			model = createPanelTableType(options);
-			programLogger.log(Level.FINEST, "Added cached table");
+			log(Level.FINEST, "Added cached table");
 			getTableCache().addTable(options, model);
 		}
 		return model;
@@ -395,12 +375,12 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 * @param list
 	 */
 	public void clearChartCache(){
-		programLogger.log(Level.FINEST, "Clearing chart cache");
+		log(Level.FINEST, "Clearing chart cache");
 		this.getChartCache().clear();
 		for(DetailPanel panel : this.subPanels){
 			panel.clearChartCache();
 		}
-		programLogger.log(Level.FINEST, "Chart cache cleared");
+		log(Level.FINEST, "Chart cache cleared");
 	}
 	
 	/**
@@ -408,16 +388,16 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 * @param list
 	 */
 	public void clearChartCache(final List<AnalysisDataset> list){
-		programLogger.log(Level.FINEST, "Clearing chart cache for specific datasets");
+		log(Level.FINEST, "Clearing chart cache for specific datasets");
 		this.getChartCache().clear(list);
-		programLogger.log(Level.FINEST, "Panel chart cache cleared");
+		log(Level.FINEST, "Panel chart cache cleared");
 		if(this.hasSubPanels()){
-			programLogger.log(Level.FINEST, "Clearing sub-panel chart caches");
+			log(Level.FINEST, "Clearing sub-panel chart caches");
 			for(DetailPanel panel : this.subPanels){
 				panel.clearChartCache(list);
 			}
 		}
-		programLogger.log(Level.FINEST, "Chart cache cleared");
+		log(Level.FINEST, "Chart cache cleared");
 	}
 	
 	/**
@@ -426,7 +406,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 */
 	public void refreshChartCache(){
 		clearChartCache();
-		programLogger.log(Level.FINEST, "Updating charts after clear");
+		log(Level.FINEST, "Updating charts after clear");
 		this.update(getDatasets());
 	}
 	
@@ -437,9 +417,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 * @param list
 	 */
 	public void refreshChartCache(final List<AnalysisDataset> list){
-		programLogger.log(Level.FINEST, "Refreshing chart cache for specific datasets");
+		log(Level.FINEST, "Refreshing chart cache for specific datasets");
 		clearChartCache(list);
-		programLogger.log(Level.FINEST, "Updating panel for specific datasets");
+		log(Level.FINEST, "Updating panel for specific datasets");
 		this.update(getDatasets());
 	}
 	
@@ -452,7 +432,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 * @param list
 	 */
 	public void clearTableCache(){
-		programLogger.log(Level.FINEST, "Clearing table cache");
+		log(Level.FINEST, "Clearing table cache");
 		this.getTableCache().clear();
 		for(DetailPanel panel : this.subPanels){
 			panel.clearTableCache();
@@ -465,14 +445,14 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 * @param list
 	 */
 	public void clearTableCache(final List<AnalysisDataset> list){
-		programLogger.log(Level.FINEST, "Clearing table cache for specific datasets");
+		log(Level.FINEST, "Clearing table cache for specific datasets");
 		this.getTableCache().clear(list);
 		if(this.hasSubPanels()){
 			for(DetailPanel panel : this.subPanels){
 				panel.refreshTableCache(list);
 			}
 		}
-		programLogger.log(Level.FINEST, "Chart cache cleared");
+		log(Level.FINEST, "Chart cache cleared");
 	}
 	
 	/**
@@ -481,7 +461,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 */
 	public void refreshTableCache(){
 		clearTableCache();
-		programLogger.log(Level.FINEST, "Updating charts after clear");
+		log(Level.FINEST, "Updating charts after clear");
 		this.update(getDatasets());
 	}
 	
@@ -604,7 +584,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     	// Pass messages upwards
     	for(DetailPanel panel : this.subPanels){
 			if(event.getSource().equals(panel)){
-				programLogger.log(Level.FINEST, "Passing interface event upwards");
+				log(Level.FINEST, "Passing interface event upwards");
 				fireInterfaceEvent(new InterfaceEvent(this, event));
 			}
 		}
@@ -615,7 +595,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     	// Pass messages upwards
     	for(DetailPanel panel : this.subPanels){
 			if(event.getSource().equals(panel)){
-				programLogger.log(Level.FINEST, "Passing dataset event upwards");
+				log(Level.FINEST, "Passing dataset event upwards");
 				fireDatasetEvent(new DatasetEvent(this, event));
 			}
 		}
@@ -625,7 +605,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     	// Pass messages upwards
     	for(DetailPanel panel : this.subPanels){
 			if(event.getSource().equals(panel)){
-				programLogger.log(Level.FINEST, "Passing signal change event upwards");
+				log(Level.FINEST, "Passing signal change event upwards");
 				fireSignalChangeEvent(new SignalChangeEvent(this, event));
 			}
 		}

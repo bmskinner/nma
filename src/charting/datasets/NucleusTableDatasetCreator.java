@@ -31,6 +31,8 @@ import java.util.logging.Level;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import logging.Loggable;
+
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
@@ -56,7 +58,7 @@ import stats.SegmentStatistic;
 import stats.Stats;
 import utility.Constants;
 
-public class NucleusTableDatasetCreator {
+public class NucleusTableDatasetCreator implements Loggable {
 		
 	public static TableModel createMedianProfileStatisticTable(TableOptions options) throws Exception{
 		

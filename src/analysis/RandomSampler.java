@@ -36,7 +36,7 @@ public class RandomSampler extends AnalysisWorker {
 		this.second = second;
 		
 		this.setProgressTotal(iterations);
-		programLogger.log(Level.FINE,"Created sampler for "+stat);
+		log(Level.FINE,"Created sampler for "+stat);
 	}
 	
 
@@ -44,7 +44,7 @@ public class RandomSampler extends AnalysisWorker {
 	protected Boolean doInBackground() throws Exception {
 		boolean result = false;
 		try {
-			programLogger.log(Level.FINE,"Running sampler");
+			log(Level.FINE,"Running sampler");
 			generateSamples();
 			result = true;
 			
@@ -61,12 +61,12 @@ public class RandomSampler extends AnalysisWorker {
 	public void generateSamples() throws Exception{
 		
 		// for each iteration
-		programLogger.log(Level.FINE,"Beginning sampling");
+		log(Level.FINE,"Beginning sampling");
 		for(int i=0; i<iterations; i++){
-			programLogger.log(Level.FINEST,"Sample "+i);
+			log(Level.FINEST,"Sample "+i);
 			// make a new collection randomly sampled to teh correct proportion
 			List<CellCollection> collections = makeRandomSampledCollection(first, second);
-			programLogger.log(Level.FINEST,"Made collection");
+			log(Level.FINEST,"Made collection");
 			// get the stat magnitude
 			double value1 =  collections.get(0).getMedianStatistic(stat, MeasurementScale.PIXELS);
 			double value2 =  collections.get(1).getMedianStatistic(stat, MeasurementScale.PIXELS);
@@ -75,7 +75,7 @@ public class RandomSampler extends AnalysisWorker {
 			double magnitude = value1 > value2 ? value2/value1 : value1/value2; 
 			
 //			double magnitude = value2 / value1;
-			programLogger.log(Level.FINEST, "Found value");
+			log(Level.FINEST, "Found value");
 			// add to a list
 			magnitudes.add(magnitude);
 			
@@ -96,20 +96,20 @@ public class RandomSampler extends AnalysisWorker {
 		
 		CellCollection first  = new CellCollection( this.getDataset(), "first");
 		CellCollection second = new CellCollection( this.getDataset(), "second");
-		programLogger.log(Level.FINEST,"Created new collections");
+		log(Level.FINEST,"Created new collections");
 		
 		List<Cell> cells = this.getDataset().getCollection().getCells();
 		Collections.shuffle(cells);
-		programLogger.log(Level.FINEST,"Shuffled cells");
+		log(Level.FINEST,"Shuffled cells");
 		
 		for(int i=0; i<firstSize; i++){
 			first.addCell(new Cell(cells.get(i)));
 		}
-		programLogger.log(Level.FINEST,"Added first set");
+		log(Level.FINEST,"Added first set");
 		for(int i=firstSize; i<firstSize+secondSize; i++){
 			second.addCell(new Cell(cells.get(i)));
 		}
-		programLogger.log(Level.FINEST,"Added second set");
+		log(Level.FINEST,"Added second set");
 		result.add(first);
 		result.add(second);
 		

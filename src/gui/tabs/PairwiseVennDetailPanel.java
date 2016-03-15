@@ -64,7 +64,6 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(null)
-		.setLogger(programLogger)
 		.setType(TableType.VENN)
 		.build();
 
@@ -78,7 +77,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		pairwiseVennTable.setEnabled(false);
 		
 		} catch (Exception e){
-			programLogger.log(Level.SEVERE, "Error updating pairwise venn table", e);
+			log(Level.SEVERE, "Error updating pairwise venn table", e);
 		}
 		
 	}
@@ -91,7 +90,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 
 	@Override
 	protected void updateMultiple() throws Exception {
-		programLogger.log(Level.FINE, "Updating pairwise venn table");
+		log(Level.FINE, "Updating pairwise venn table");
 
 
 		// format the numbers and make into a tablemodel
@@ -99,7 +98,6 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(getDatasets())
-		.setLogger(programLogger)
 		.setType(TableType.PAIRWISE_VENN)
 		.build();
 
@@ -107,14 +105,13 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		pairwiseVennTable.setModel(model);
 		setRenderer(pairwiseVennTable, new PairwiseVennTableCellRenderer());
 		
-		programLogger.log(Level.FINEST, "Updated pairwise venn panel");
+		log(Level.FINEST, "Updated pairwise venn panel");
 	}
 	
 	@Override
 	protected void updateNull() throws Exception {
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(null)
-		.setLogger(programLogger)
 		.setType(TableType.PAIRWISE_VENN)
 		.build();
 
@@ -156,7 +153,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		        	NumberFormat nf = NumberFormat.getInstance();
 		        	pct = nf.parse(cellContents).doubleValue();
 		        } catch (Exception e){
-		        	programLogger.log(Level.FINEST, "Error getting value: "+cellContents+" in column "+columnName, e);
+		        	log(Level.FINEST, "Error getting value: "+cellContents+" in column "+columnName, e);
 		        	pct = 0;
 		        }
 		        

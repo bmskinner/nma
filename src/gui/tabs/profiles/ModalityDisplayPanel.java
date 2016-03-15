@@ -13,7 +13,6 @@ import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -216,7 +215,6 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
-				.setLogger(programLogger)
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
 				.setTag(BorderTag.REFERENCE_POINT)
@@ -240,7 +238,6 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
-				.setLogger(programLogger)
 				.setNormalised(false)
 				.setAlignment(ProfileAlignment.RIGHT)
 				.setTag(BorderTag.REFERENCE_POINT)
@@ -278,7 +275,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 				xvalue=0; // wrap arrays
 			}
 			
-			programLogger.log(Level.FINEST, "Selecting profile position "+xvalue +" at index "+row);
+			log(Level.FINEST, "Selecting profile position "+xvalue +" at index "+row);
 			updatePositionChart(xvalue);
 		}
 		

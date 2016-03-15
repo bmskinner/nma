@@ -91,10 +91,10 @@ public class AnalysisDetailPanel extends DetailPanel {
 	@Override
 	protected void updateMultiple() throws Exception {
 		updateAnalysisParametersPanel();
-		programLogger.log(Level.FINEST, "Updated analysis parameter panel");
+		log(Level.FINEST, "Updated analysis parameter panel");
 		
 		updateStatsPanel();
-		programLogger.log(Level.FINEST, "Updated analysis stats panel");
+		log(Level.FINEST, "Updated analysis stats panel");
 	}
 	
 	@Override
@@ -113,7 +113,6 @@ public class AnalysisDetailPanel extends DetailPanel {
 
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(getDatasets())
-		.setLogger(programLogger)
 		.setType(TableType.ANALYSIS_PARAMETERS)
 		.build();
 
@@ -135,7 +134,6 @@ public class AnalysisDetailPanel extends DetailPanel {
 
 			TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setLogger(programLogger)
 			.setType(TableType.ANALYSIS_STATS)
 			.build();
 
@@ -144,7 +142,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 
 			tablePopulationStats.setModel(model);
 		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error updating stats panel", e);
+			log(Level.SEVERE, "Error updating stats panel", e);
 		}
 	}
 	
@@ -166,7 +164,6 @@ public class AnalysisDetailPanel extends DetailPanel {
 			
 			TableOptions options = new TableOptionsBuilder()
 			.setDatasets(null)
-			.setLogger(programLogger)
 			.setType(TableType.ANALYSIS_STATS)
 			.build();
 
@@ -175,7 +172,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 			tablePopulationStats.setModel(model);
 			
 		}catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error creating stats panel", e);
+			log(Level.SEVERE, "Error creating stats panel", e);
 		}
 		return scrollPane;
 	}
@@ -186,7 +183,6 @@ public class AnalysisDetailPanel extends DetailPanel {
 		try {
 			TableOptions options = new TableOptionsBuilder()
 			.setDatasets(null)
-			.setLogger(programLogger)
 			.setType(TableType.ANALYSIS_PARAMETERS)
 			.build();
 
@@ -206,7 +202,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 			scrollPane.setViewportView(panel);
 			scrollPane.setColumnHeaderView(tableAnalysisParamters.getTableHeader());
 		}catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error creating stats panel", e);
+			log(Level.SEVERE, "Error creating stats panel", e);
 		}
 		return scrollPane;
 	}

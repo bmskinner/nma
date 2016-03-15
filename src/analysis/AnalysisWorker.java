@@ -28,7 +28,6 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
 
 	private int progressTotal; // the maximum value for the progress bar
 	
-	protected static final Logger programLogger =  Logger.getLogger("ProgramLogger"); // log to the program LogPanel
 	protected static Logger fileLogger; // log to the active dataset log file
 	protected static final Level FILE_DEBUG_LEVEL = Level.ALL;
 	protected int progressCount = 0;
@@ -53,14 +52,14 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     		try {
     			fileLogger.addHandler(dataset.getLogHandler());
     		} catch(Exception e){
-    			programLogger.log(Level.SEVERE, "Error getting log file handler", e);
+    			log(Level.SEVERE, "Error getting log file handler", e);
     			fileLogger = null;
     		}
     	} else {
     		fileLogger = null;
     	}
 
-    	programLogger.log(Level.FINEST, "Created worker");
+    	log(Level.FINEST, "Created worker");
     	
     }
     
@@ -74,7 +73,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     public AnalysisWorker(final AnalysisDataset dataset, final File debugFile){
     	this(dataset);
     	this.logFile = debugFile;
-    	programLogger.log(Level.FINEST, "Creating log file handler");
+    	log(Level.FINEST, "Creating log file handler");
 		DebugFileHandler handler = null;
 		try {
 			
@@ -85,11 +84,11 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
 			fileLogger.setLevel(FILE_DEBUG_LEVEL);
 
 		} catch (SecurityException e1) {
-			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
+			log(Level.SEVERE, "Could not create the log file handler", e1);
 			fileLogger = null;
 			logFile = null;
 		} catch (IOException e1) {
-			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
+			log(Level.SEVERE, "Could not create the log file handler", e1);
 			fileLogger = null;
 			logFile = null;
 		}
@@ -106,7 +105,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     	if(fileLogger!=null){
     		fileLogger.log(level, message);
     	}
-		programLogger.log(level, message);
+		log(level, message);
     }
     
     /**
@@ -119,7 +118,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     	if(fileLogger!=null){
     		fileLogger.log(Level.SEVERE, message, t);
     	}
-		programLogger.log(Level.SEVERE, message, t);
+		log(Level.SEVERE, message, t);
     }
     
     protected void setProgressTotal(int i){

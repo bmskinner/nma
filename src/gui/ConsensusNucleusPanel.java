@@ -81,13 +81,12 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		try {
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(null)
-				.setLogger(programLogger)
 				.build();
 			JFreeChart consensusChart = getChart(options);
 			consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
 			consensusChartPanel.addSignalChangeListener(this);
 		} catch (Exception e){
-			programLogger.log(Level.SEVERE, "Error creating blank consensus chart", e);
+			log(Level.SEVERE, "Error creating blank consensus chart", e);
 		}
 		
 		
@@ -308,14 +307,14 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	@Override
 	protected void updateSingle() throws Exception {
 		updateSingleDataset();
-		programLogger.log(Level.FINEST, "Updated consensus panel");
+		log(Level.FINEST, "Updated consensus panel");
 	}
 	
 
 	@Override
 	protected void updateMultiple() throws Exception {
 		updateMultipleDatasets();
-		programLogger.log(Level.FINEST, "Updated consensus panel");
+		log(Level.FINEST, "Updated consensus panel");
 	}
 	
 	@Override
@@ -338,7 +337,6 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setLogger(programLogger)
 			.build();
 		
 		JFreeChart consensusChart = getChart(options);
@@ -369,29 +367,15 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	}
 	
 	private void updateMultipleDatasets() throws Exception{
-//		boolean oneHasConsensus = false;
-//		for(AnalysisDataset d : getDatasets()){
-//			if (d.getCollection().hasConsensusNucleus()){
-//				oneHasConsensus= true;
-//			}
-//		}
 
-//		if(oneHasConsensus){
-			
-			ChartOptions options = new ChartOptionsBuilder()
-			.setDatasets(getDatasets())
-			.setLogger(programLogger)
-			.build();
-			
-			JFreeChart chart = getChart(options);
-		
-//			JFreeChart chart = ConsensusNucleusChartFactory.makeMultipleConsensusChart(getDatasets());
-			consensusChartPanel.setChart(chart);
-			consensusChartPanel.restoreAutoBounds();
-//		} else {
-//			JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-//			consensusChartPanel.setChart(chart);
-//		}
+		ChartOptions options = new ChartOptionsBuilder()
+		.setDatasets(getDatasets())
+		.build();
+
+		JFreeChart chart = getChart(options);
+
+		consensusChartPanel.setChart(chart);
+		consensusChartPanel.restoreAutoBounds();
 
 
 		runRefoldingButton.setVisible(false);
@@ -402,7 +386,6 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		
 		ChartOptions options = new ChartOptionsBuilder()
 		.setDatasets(null)
-		.setLogger(programLogger)
 		.build();
 		JFreeChart consensusChart = getChart(options);
 //		JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
@@ -437,7 +420,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 				}
 			}
 		} else {
-			programLogger.log(Level.WARNING, "Cannot rotate: must have one dataset selected");
+			log(Level.WARNING, "Cannot rotate: must have one dataset selected");
 		}
 	}
 	
@@ -458,7 +441,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 				this.update(activeDatasetToList());
 			}
 		} else {
-			programLogger.log(Level.WARNING, "Cannot rotate: must have one dataset selected");
+			log(Level.WARNING, "Cannot rotate: must have one dataset selected");
 		}
 	}
 	
@@ -477,14 +460,14 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 					this.update(activeDatasetToList());
 					
 				} else {
-					programLogger.log(Level.WARNING, "Top and bottom vertical points are not available");
+					log(Level.WARNING, "Top and bottom vertical points are not available");
 				}
 				
 			} else {
-				programLogger.log(Level.WARNING, "No consensus nucleus available");
+				log(Level.WARNING, "No consensus nucleus available");
 			}
 		} else {
-			programLogger.log(Level.WARNING, "Cannot align: must have one dataset selected");
+			log(Level.WARNING, "Cannot align: must have one dataset selected");
 		}
 	}
 	
@@ -521,7 +504,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 
 			}
 		} else {
-			programLogger.log(Level.WARNING, "Cannot offset: must have one dataset selected");
+			log(Level.WARNING, "Cannot offset: must have one dataset selected");
 		}
 	}
 	
@@ -538,7 +521,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 				this.update(activeDatasetToList());
 			}
 		} else {
-			programLogger.log(Level.WARNING, "Cannot offset: must have one dataset selected");
+			log(Level.WARNING, "Cannot offset: must have one dataset selected");
 		}
 	}
 	

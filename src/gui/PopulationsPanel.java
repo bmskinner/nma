@@ -113,7 +113,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	
 	public void update(final List<AnalysisDataset> list){
 		this.update();
-		programLogger.log(Level.FINEST, "Preparing to select datasets");
+		log(Level.FINEST, "Preparing to select datasets");
 		selectDatasets(list);
 //		if(list.size()==1){
 //			selectDataset(list.get(0));
@@ -133,14 +133,14 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 					// get uuid from populationNames, then population via uuid from analysisDatasets
 					if(populationNames.containsKey(key)){
-						programLogger.log(Level.FINEST, "Key "+key+" found collapsed; saving id");
+						log(Level.FINEST, "Key "+key+" found collapsed; saving id");
 						UUID id = populationNames.get(key);
 						collapsedRows.add(id);
 					}
 				}
 			}
 		}
-		programLogger.log(Level.FINEST, "Got all collapsed IDs");
+		log(Level.FINEST, "Got all collapsed IDs");
 		return collapsedRows;
 	}
 	
@@ -151,7 +151,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 */
 	private void setCollapsedRows(List<UUID> collapsedRows){
 		if(this.analysisDatasets.size()>0){
-			programLogger.log(Level.FINEST, "Expanding rows");
+			log(Level.FINEST, "Expanding rows");
 			for (int row = 0; row < treeTable.getRowCount(); row++) {
 //				treeTable.expandRow(row);
 				String key = (String) treeTable.getModel().getValueAt(row, 0); // row i, column 0
@@ -180,23 +180,23 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		/*
 		 * Determine the ids of collapsed datasets, and store them
 		 */
-		programLogger.log(Level.FINEST, "Storing collapsed rows");
+		log(Level.FINEST, "Storing collapsed rows");
 		List<UUID> collapsedRows = getCollapsedRows();		
 		
-		programLogger.log(Level.FINEST, "Creating columns");
+		log(Level.FINEST, "Creating columns");
 		List<String> columns = new ArrayList<String>();
 		columns.add("Population");
 		columns.add("Nuclei");
 		columns.add("");
 
-		programLogger.log(Level.FINEST, "Creating tree table model");
+		log(Level.FINEST, "Creating tree table model");
 		DefaultTreeTableModel treeTableModel = new DefaultTreeTableModel();
 		PopulationTreeTableNode  root = new PopulationTreeTableNode (java.util.UUID.randomUUID());
 		treeTableModel.setRoot(root);
 		treeTableModel.setColumnIdentifiers(columns);
 				
 		if(this.analysisDatasets.size()>0){ // if there are datasets to display
-			programLogger.log(Level.FINEST, "Loaded: "+analysisDatasets.size()+" datasets");
+			log(Level.FINEST, "Loaded: "+analysisDatasets.size()+" datasets");
 			for(UUID id : treeOrderMap.getIDs()){
 												
 				AnalysisDataset rootDataset = analysisDatasets.get(id);
@@ -204,7 +204,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			}
 
 		} else {
-			programLogger.log(Level.FINEST, "No datasets loaded");
+			log(Level.FINEST, "No datasets loaded");
 		}
 		
 		treeTable.setTreeTableModel(treeTableModel);
@@ -214,10 +214,10 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		 */
 		setCollapsedRows(collapsedRows);
 		
-		programLogger.log(Level.FINEST, "Restoring column widths");
+		log(Level.FINEST, "Restoring column widths");
 		treeTable.getColumnModel().getColumn(COLUMN_NAME).setWidth(nameColWidth);
 		treeTable.getColumnModel().getColumn(COLUMN_COLOUR).setWidth(colourColWidth);
-		programLogger.log(Level.FINEST, "Update complete");
+		log(Level.FINEST, "Update complete");
 	}
 	
 	/**
@@ -249,22 +249,22 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 */
 	public void refreshClusters(){
 		try {
-		programLogger.log(Level.FINEST, "Refreshing clusters...");
+		log(Level.FINEST, "Refreshing clusters...");
 		if(this.analysisDatasets.size()>0){
 			for(UUID id : treeOrderMap.getIDs()){
 												
 				AnalysisDataset rootDataset = analysisDatasets.get(id);
-				programLogger.log(Level.FINEST, "  Root dataset "+rootDataset.getName());
+				log(Level.FINEST, "  Root dataset "+rootDataset.getName());
 				rootDataset.refreshClusterGroups();
 				for(AnalysisDataset child : rootDataset.getAllChildDatasets()){
-					programLogger.log(Level.FINEST, "    Child dataset "+child.getName());
+					log(Level.FINEST, "    Child dataset "+child.getName());
 					child.refreshClusterGroups();
 				}
 				
 			}
 		}
 		} catch (Exception e){
-			programLogger.log(Level.SEVERE, "Error refreshing clusters", e);
+			log(Level.SEVERE, "Error refreshing clusters", e);
 		}
 	}
 	
@@ -362,7 +362,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 							dataset.setDatasetColour(newColor);
 							
 							// Force the chart caches to clear, but don't trigger a panel update
-							programLogger.log(Level.FINEST, "Firing clearing chart cache signals from population colour change");
+							log(Level.FINEST, "Firing clearing chart cache signals from population colour change");
 							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 							list.add(dataset);
 							fireDatasetEvent(DatasetMethod.CLEAR_CACHE, list);
@@ -538,9 +538,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * @param dataset the dataset to add
 	 */
 	public void addDataset(AnalysisDataset dataset){
-		programLogger.log(Level.FINEST, "Checking dataset name is suitable");
+		log(Level.FINEST, "Checking dataset name is suitable");
 		dataset.setName(checkName(dataset.getName(), dataset.getUUID()));
-		programLogger.log(Level.FINEST, "Set name as "+dataset.getName());
+		log(Level.FINEST, "Set name as "+dataset.getName());
 		this.analysisDatasets.put(dataset.getUUID(), dataset);
 		this.populationNames.put(dataset.getName(), dataset.getUUID());
 		
@@ -569,7 +569,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * @param dataset the dataset to select
 	 */
 	public void selectDatasets(List<AnalysisDataset> list){
-		programLogger.log(Level.FINEST, "Selecting list of "+list.size()+" datasets");
+		log(Level.FINEST, "Selecting list of "+list.size()+" datasets");
 		for(AnalysisDataset dataset : list){
 			int index = getIndexOfDataset(dataset);
 
@@ -578,14 +578,14 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			
 			TreeSelectionModel treeSelectionModel = treeTable.getTreeSelectionModel();
 			
-			programLogger.log(Level.FINEST, "Removing tree selection listener");
+			log(Level.FINEST, "Removing tree selection listener");
 			treeSelectionModel.removeTreeSelectionListener(treeListener); // if we don't remove the listener, the clearing will trigger an update
-			programLogger.log(Level.FINEST, "Clearing tree selection");
+			log(Level.FINEST, "Clearing tree selection");
 			selectionModel.clearSelection(); // if the new selection is the same as the old, the charts will not recache
-			programLogger.log(Level.FINEST, "Restoring tree selection listener");
+			log(Level.FINEST, "Restoring tree selection listener");
 			treeSelectionModel.addTreeSelectionListener(treeListener);
 			
-			programLogger.log(Level.FINEST, "Adding index at "+index);
+			log(Level.FINEST, "Adding index at "+index);
 			selectionModel.addSelectionInterval(index, index);
 			
 
@@ -622,14 +622,14 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	private String checkName(String name, UUID id){
 
 		String result = name;
-		programLogger.log(Level.FINEST, "Testing name: "+name);
+		log(Level.FINEST, "Testing name: "+name);
 
 		if(this.populationNames.containsKey(name)){
 			
 			// Check that the dataset with the same name is not the dataset in question
 			if(!this.populationNames.get(name).equals(id)){
 
-				programLogger.log(Level.FINEST, "Found existing dataset with different UUID: "+name);
+				log(Level.FINEST, "Found existing dataset with different UUID: "+name);
 
 				Pattern pattern = Pattern.compile("_(\\d+)$");
 				Matcher matcher = pattern.matcher(name);
@@ -638,15 +638,15 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 				while (matcher.find()) {
 
-					programLogger.log(Level.FINEST, "Matched regex: "+matcher.toString());
-					programLogger.log(Level.FINEST, "Matched on "+matcher.group(1));
+					log(Level.FINEST, "Matched regex: "+matcher.toString());
+					log(Level.FINEST, "Matched on "+matcher.group(1));
 
 					digit = Integer.valueOf(matcher.group(1));
-					programLogger.log(Level.FINEST, "Found "+name+": changing to "+digit);
+					log(Level.FINEST, "Found "+name+": changing to "+digit);
 
 					if(digit>0){
 						digit++;
-						programLogger.log(Level.FINEST, "Found "+name+": changing to "+digit);
+						log(Level.FINEST, "Found "+name+": changing to "+digit);
 						name = matcher.replaceFirst("_"+digit);
 					}
 
@@ -654,15 +654,15 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 				if(digit == 0) {
 					name = name+"_1";
-					programLogger.log(Level.FINEST, "No matches - appending _1 to name");
+					log(Level.FINEST, "No matches - appending _1 to name");
 				}
-				programLogger.log(Level.FINEST, "Rechacking name");
+				log(Level.FINEST, "Rechacking name");
 				result = checkName(name, id);
 			} else {
-				programLogger.log(Level.FINEST, "No other datasets with name: "+name);
+				log(Level.FINEST, "No other datasets with name: "+name);
 			}
 		} else {
-			programLogger.log(Level.FINEST, "No matches to "+name+": returning");
+			log(Level.FINEST, "No matches to "+name+": returning");
 		}
 		return result;
 	}
@@ -684,13 +684,13 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		if(!newName.isEmpty() && newName!=null){
 		
 			if(this.populationNames.containsKey(newName)){
-				programLogger.log(Level.SEVERE, "Name exists, aborting");
+				log(Level.SEVERE, "Name exists, aborting");
 			} else {
 				String oldName = collection.getName();
 				collection.setName(newName);
 				this.populationNames.put(newName, collection.getID());
 				this.populationNames.remove(oldName);
-				programLogger.log(Level.INFO, "Collection renamed: "+newName);
+				log(Level.INFO, "Collection renamed: "+newName);
 				
 				
 				File saveFile = dataset.getSavePath();
@@ -764,49 +764,49 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 		try{
 
-			programLogger.log(Level.FINEST, "Deleting dataset: "+d.getName());
+			log(Level.FINEST, "Deleting dataset: "+d.getName());
 			UUID id = d.getUUID();
 
 
 			// remove the dataset from its parents
-			programLogger.log(Level.FINEST, "Removing dataset from its parents");
+			log(Level.FINEST, "Removing dataset from its parents");
 			for(UUID parentID : analysisDatasets.keySet()){
 				AnalysisDataset parent = analysisDatasets.get(parentID);
 
-				programLogger.log(Level.FINEST, "Parent dataset "+parent.getName());
+				log(Level.FINEST, "Parent dataset "+parent.getName());
 
 				if(parent.hasChild(id)){
-					programLogger.log(Level.FINEST, "    Parent contains dataset; deleting");
+					log(Level.FINEST, "    Parent contains dataset; deleting");
 					parent.deleteChild(id);
 				}
 
 			}
 
-			programLogger.log(Level.FINEST, "Removing dataset from analysisDatasets");
+			log(Level.FINEST, "Removing dataset from analysisDatasets");
 			if(analysisDatasets.containsKey(id)){
 				analysisDatasets.remove(id);
-				programLogger.log(Level.FINEST, "Removed from analysisDatasets");
+				log(Level.FINEST, "Removed from analysisDatasets");
 			}
 
-			programLogger.log(Level.FINEST, "Removing dataset from populationNames");
+			log(Level.FINEST, "Removing dataset from populationNames");
 			if(populationNames.containsValue(id)){
 				populationNames.remove(d.getName());
-				programLogger.log(Level.FINEST, "Removed from populationNames");
+				log(Level.FINEST, "Removed from populationNames");
 			}		
 			
-			programLogger.log(Level.FINEST, "Checking if dataset is root");
+			log(Level.FINEST, "Checking if dataset is root");
 //			if(d.isRoot()){
 			if(treeOrderMap.contains(id)){
-				programLogger.log(Level.FINEST, "Removing dataset from treeOrderMap");
+				log(Level.FINEST, "Removing dataset from treeOrderMap");
 				treeOrderMap.remove(id);
 			} else {
-				programLogger.log(Level.FINEST, "Dataset is not root");
+				log(Level.FINEST, "Dataset is not root");
 			}
-			programLogger.log(Level.FINEST, "Clearing dataset from memory");
+			log(Level.FINEST, "Clearing dataset from memory");
 			d=null; // clear from memory
-			programLogger.log(Level.FINEST, "Deleted dataset");
+			log(Level.FINEST, "Deleted dataset");
 		} catch (Exception e){
-			programLogger.log(Level.SEVERE, "Error deleting dataset "+d.getName(), e);
+			log(Level.SEVERE, "Error deleting dataset "+d.getName(), e);
 		}
 	}
 	
@@ -822,17 +822,17 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		}
 		
 		Set<UUID> keepIds = new HashSet<UUID>();
-		programLogger.log(Level.FINEST, "Candidate delete list has "+ids.size()+" datasets");
+		log(Level.FINEST, "Candidate delete list has "+ids.size()+" datasets");
 		Iterator<UUID> it = ids.iterator();
 		while(it.hasNext()){
 			UUID id = it.next();
 			AnalysisDataset d = getDataset(id);
 			
 			if( ! d.hasChildren()){
-				programLogger.log(Level.FINEST, "Preparing to delete dataset: "+d.getName());
+				log(Level.FINEST, "Preparing to delete dataset: "+d.getName());
 				deleteDataset(d);
 			} else {
-				programLogger.log(Level.FINEST, "Dataset "+d.getName()+" still has children");
+				log(Level.FINEST, "Dataset "+d.getName()+" still has children");
 				keepIds.add(id);
 			}
 		}
@@ -845,38 +845,38 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 		if(!datasets.isEmpty()){
 			// make a list of the unique UUIDs selected
-			programLogger.log(Level.FINEST, "There are "+datasets.size()+" datasets selected");
+			log(Level.FINEST, "There are "+datasets.size()+" datasets selected");
 
 			Set<UUID> list = new HashSet<UUID>();
 			for(AnalysisDataset d : datasets){
-				programLogger.log(Level.FINEST, "Selected dataset for deletion: "+d.getName());
+				log(Level.FINEST, "Selected dataset for deletion: "+d.getName());
 
 				list.add(d.getUUID());
 				
 				if(d.hasChildren()){
-					programLogger.log(Level.FINEST, "Children found in: "+d.getName());
+					log(Level.FINEST, "Children found in: "+d.getName());
 					// add all the children of a dataset
 					for(UUID childID : d.getAllChildUUIDs()){
-						programLogger.log(Level.FINEST, "Adding child dataset to deletion list: "+childID.toString());
+						log(Level.FINEST, "Adding child dataset to deletion list: "+childID.toString());
 						list.add(childID);
 					}
 				} else {
-					programLogger.log(Level.FINEST, "No children in: "+d.getName());
+					log(Level.FINEST, "No children in: "+d.getName());
 				}
 			}
 
 
 			deleteDatasetsInList(list);
 			refreshClusters();
-			programLogger.log(Level.FINEST, "Updating tree panel");
+			log(Level.FINEST, "Updating tree panel");
 			update();
-			programLogger.log(Level.FINEST, "Firing update panel event");
+			log(Level.FINEST, "Firing update panel event");
 			fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 
 		} else {
-			programLogger.log(Level.FINEST, "No datasets selected");
+			log(Level.FINEST, "No datasets selected");
 		}
-		programLogger.log(Level.FINEST, "Deletion complete");
+		log(Level.FINEST, "Deletion complete");
 
 	}
 
@@ -926,7 +926,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						AnalysisDataset d = datasets.get(0);
 						setMenuForSingleDataset(d);
 					}
-					programLogger.log(Level.FINEST, "Firing update panel event due to tree selection");
+					log(Level.FINEST, "Firing update panel event due to tree selection");
 					fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 //					fireSignalChangeEvent("UpdatePanels");
 				}
@@ -1122,7 +1122,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				 * Convert signal change event to dataset method if the
 				 * command is to save
 				 */
-				programLogger.log(Level.FINEST, "Firing dataset save-as event");
+				log(Level.FINEST, "Firing dataset save-as event");
 				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 				list.add(activeDataset());
 				fireDatasetEvent(DatasetMethod.SAVE_AS, list);
@@ -1131,7 +1131,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				 * Otherwise pass the message on
 				 */
 				fireSignalChangeEvent(event.type());
-				programLogger.log(Level.FINEST, "Firing signal change event: "+event.type());
+				log(Level.FINEST, "Firing signal change event: "+event.type());
 			}
 			
 		}
@@ -1151,7 +1151,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		}
 		
 		if(event.type().equals("DeleteCollectionAction")){
-			programLogger.log(Level.FINEST, "Deleting dataset action received");
+			log(Level.FINEST, "Deleting dataset action received");
 			deleteSelectedDatasets();
 		}
 		

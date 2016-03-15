@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
+import logging.Loggable;
+
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
@@ -45,7 +47,7 @@ import components.nuclear.NucleusBorderSegment;
  * @author bms41
  *
  */
-public class Profile extends AbstractLoggable implements Serializable {
+public class Profile implements Serializable, Loggable {
 
 	/**
 	 * 

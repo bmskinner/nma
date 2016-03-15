@@ -84,7 +84,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 	@Override
 	protected void updateMultiple() throws Exception {
 		clusterPanel.update(getDatasets());		
-		programLogger.log(Level.FINEST, "Updated cluster panel");
+		log(Level.FINEST, "Updated cluster panel");
 		
 	}
 

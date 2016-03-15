@@ -526,6 +526,13 @@ public interface Nucleus extends CellularComponent {
 	 */
 	public Nucleus getVerticallyRotatedNucleus();
 	
+	
+	/**
+	 * Invalidate the existing cached vertically rotated nucleus,
+	 * and recalculate.
+	 */
+	public void updateVerticallyRotatedNucleus();
+	
 	/**
 	 * Rotate the nucleus by the given amount around the centre of mass
 	 * @param angle

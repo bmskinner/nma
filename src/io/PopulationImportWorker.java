@@ -60,10 +60,10 @@ public class PopulationImportWorker extends AnalysisWorker {
 		try {
 			dataset = readDataset(file);
 			
-			programLogger.log(Level.FINE, "Read dataset");
+			log(Level.FINE, "Read dataset");
 			if(checkVersion( dataset.getVersion() )){
 
-				programLogger.log(Level.FINE, "Version check OK");
+				log(Level.FINE, "Version check OK");
 				dataset.setRoot(true);
 
 				
@@ -73,7 +73,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 						+file.getName().replace(Constants.SAVE_FILE_EXTENSION, Constants.LOG_FILE_EXTENSION));
 				
 				dataset.setDebugFile(logFile);
-				programLogger.log(Level.FINE, "Updated log file location");
+				log(Level.FINE, "Updated log file location");
 				
 				
 				// If rodent sperm, check if the TOP_VERTICAL and BOTTOM_VERTICAL 
@@ -84,9 +84,9 @@ public class PopulationImportWorker extends AnalysisWorker {
 							.getProfileCollection(ProfileType.REGULAR)
 							.hasBorderTag(BorderTag.TOP_VERTICAL)  ){
 						
-						programLogger.log(Level.FINE, "TOP_ and BOTTOM_VERTICAL not assigned; calculating");
+						log(Level.FINE, "TOP_ and BOTTOM_VERTICAL not assigned; calculating");
 						calculateTopAndBottomVerticals(dataset);
-						programLogger.log(Level.FINE, "Calculating TOP and BOTTOM for child datasets");
+						log(Level.FINE, "Calculating TOP and BOTTOM for child datasets");
 						for(AnalysisDataset child : dataset.getAllChildDatasets()){
 							calculateTopAndBottomVerticals(child);
 						}
@@ -115,7 +115,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 				return true;
 				
 			} else {
-				programLogger.log(Level.SEVERE, "Unable to open dataset version: "+ dataset.getVersion());
+				log(Level.SEVERE, "Unable to open dataset version: "+ dataset.getVersion());
 				return false;
 			}
 			
@@ -150,12 +150,12 @@ public class PopulationImportWorker extends AnalysisWorker {
 	
 	private void calculateTopAndBottomVerticals(AnalysisDataset dataset) throws Exception {
 		
-		programLogger.log(Level.FINE, "Detecting flat region");
+		log(Level.FINE, "Detecting flat region");
 		DatasetProfiler p = new DatasetProfiler(dataset);
 		TailFinder finder = p. new TailFinder(dataset.getCollection());
 		finder.assignTopAndBottomVerticalInMouse();
 		
-		programLogger.log(Level.FINE, "Assigning flat region to nuclei");
+		log(Level.FINE, "Assigning flat region to nuclei");
 		DatasetProfiler.Offsetter.assignFlatRegionToMouseNuclei(dataset.getCollection());
 	}
 	

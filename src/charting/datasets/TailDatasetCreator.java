@@ -18,6 +18,8 @@
  *******************************************************************************/
 package charting.datasets;
 
+import logging.Loggable;
+
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
@@ -25,7 +27,7 @@ import components.Cell;
 import components.Flagellum;
 import components.generic.XYPoint;
 
-public class TailDatasetCreator {
+public class TailDatasetCreator implements Loggable {
 	
 	/**
 	 * Get a dataset contining the outlines of all tails within the cell

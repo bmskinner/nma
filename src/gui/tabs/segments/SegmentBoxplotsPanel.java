@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -70,7 +69,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		MeasurementScale scale = measurementUnitSettingsPanel.getSelected();
 		measurementUnitSettingsPanel.setEnabled(true);
 		
-		programLogger.log(Level.FINEST, "Dataset list is not empty");
+		log(Level.FINEST, "Dataset list is not empty");
 
 		// Check that all the datasets have the same number of segments
 		if(checkSegmentCountsMatch(getDatasets())){ // make a boxplot for each segment
@@ -86,7 +85,6 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
-					.setLogger(programLogger)
 					.setStatistic(SegmentStatistic.LENGTH)
 					.setScale(scale)
 					.setSegPosition(seg.getPosition())

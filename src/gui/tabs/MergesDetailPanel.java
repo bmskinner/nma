@@ -69,7 +69,7 @@ public class MergesDetailPanel extends DetailPanel {
 			createUI();
 			
 		} catch (Exception e){
-			programLogger.log(Level.SEVERE, "Error creating merge panel", e);
+			log(Level.SEVERE, "Error creating merge panel", e);
 		}
 	}
 	
@@ -175,7 +175,6 @@ public class MergesDetailPanel extends DetailPanel {
 		
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(null)
-		.setLogger(programLogger)
 		.setType(TableType.ANALYSIS_PARAMETERS)
 		.build();
 		
@@ -231,7 +230,6 @@ public class MergesDetailPanel extends DetailPanel {
 		
 		TableOptions parameterOptions = new TableOptionsBuilder()
 		.setDatasets(activeDataset().getAllMergeSources())
-		.setLogger(programLogger)
 		.setType(TableType.ANALYSIS_PARAMETERS)
 		.build();
 		
@@ -268,7 +266,6 @@ public class MergesDetailPanel extends DetailPanel {
 		
 		TableOptions parameterOptions = new TableOptionsBuilder()
 		.setDatasets(null)
-		.setLogger(programLogger)
 		.setType(TableType.ANALYSIS_PARAMETERS)
 		.build();
 		

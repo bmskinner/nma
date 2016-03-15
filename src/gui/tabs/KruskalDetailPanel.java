@@ -101,7 +101,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 						try {
 							new KruskalTestDialog(getDatasets().get(0), getDatasets().get(1) );
 						} catch (Exception e) {
-							programLogger.log(Level.SEVERE, "Error testing", e);
+							log(Level.SEVERE, "Error testing", e);
 						}
 					}
 				};
@@ -125,7 +125,6 @@ public class KruskalDetailPanel  extends DetailPanel {
 
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setLogger(programLogger)
 			.setNormalised(true)
 			.setAlignment(ProfileAlignment.LEFT)
 			.setTag(BorderTag.REFERENCE_POINT)
@@ -179,7 +178,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 			updateNull();
 
 		}
-		programLogger.log(Level.FINEST, "Updated Kruskal panel");
+		log(Level.FINEST, "Updated Kruskal panel");
 	}
 	
 	/**

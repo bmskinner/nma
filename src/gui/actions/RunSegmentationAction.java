@@ -170,9 +170,14 @@ public class RunSegmentationAction extends ProgressableAction {
 					fireDatasetEvent(DatasetMethod.ADD_DATASET, dataset);
 					
 					
-				} else {
-					
-//					fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, dataset);
+				} 
+				
+				/*
+				 * When refreshing segmnetation, the orientaition point may have changed.
+				 * Update the vertical orientation nuclei for the dataset
+				 */
+				if(mode.equals(MorphologyAnalysisMode.REFRESH)){
+					dataset.getCollection().updateVerticalNuclei();
 				}
 				
 //				if(  (downFlag & MainWindow.SAVE_DATASET) == MainWindow.SAVE_DATASET){

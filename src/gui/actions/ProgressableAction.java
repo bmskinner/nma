@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JProgressBar;
 
+import logging.Loggable;
 import analysis.AbstractLoggable;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
@@ -47,7 +48,7 @@ import analysis.AnalysisWorker;
  * is triggered as a SwingWorker. Subclassed for each action type.
  *
  */
-abstract class ProgressableAction extends AbstractLoggable implements PropertyChangeListener {
+abstract class ProgressableAction implements PropertyChangeListener, Loggable {
 
 	protected AnalysisDataset dataset = null; // the dataset being worked on
 	private JProgressBar progressBar = null;

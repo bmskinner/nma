@@ -65,7 +65,6 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 			
 			TableOptions options = new TableOptionsBuilder()
 			.setDatasets(null)
-			.setLogger(programLogger)
 			.setScale(MeasurementScale.PIXELS)
 			.build();
 			
@@ -73,7 +72,7 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 			table = new ExportableTable(model);
 
 		} catch (Exception e) {
-			programLogger.log(Level.SEVERE, "Error in segment table", e);
+			log(Level.SEVERE, "Error in segment table", e);
 		}
 		table.setEnabled(false);
 					
@@ -103,7 +102,7 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 			setRenderer(table, new SegmentTableCellRenderer());
 
 		} else {
-			programLogger.log(Level.FINEST, "Segment counts don't match");
+			log(Level.FINEST, "Segment counts don't match");
 			table.setToolTipText(null);
 		}
 	}
@@ -125,7 +124,6 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 		
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setLogger(programLogger)
 			.setScale(scale)
 			.build();
 		return options;
@@ -167,13 +165,13 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 				try {
 					segment = Integer.valueOf(colName.replace("Seg_", ""));
 				} catch (Exception e){
-					programLogger.log(Level.FINEST, "Error getting segment name: "+colName);
+					log(Level.FINEST, "Error getting segment name: "+colName);
 					segment = 0;
 				}
 
 				ColourSwatch swatch = activeDataset().getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : activeDataset().getSwatch();
 				colour = swatch.color(segment);
-				programLogger.log(Level.FINEST, "SegmentTableCellRenderer for segment "+segment+" uses color "+colour);
+				log(Level.FINEST, "SegmentTableCellRenderer for segment "+segment+" uses color "+colour);
 
 			}
 
@@ -188,7 +186,7 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 					NumberFormat nf = NumberFormat.getInstance();
 					pval = nf.parse(cellContents).doubleValue();
 				} catch (Exception e){
-					programLogger.log(Level.FINEST, "Error getting value: "+cellContents+" in column "+colName, e);
+					log(Level.FINEST, "Error getting value: "+cellContents+" in column "+colName, e);
 					pval = 0;
 				}
 

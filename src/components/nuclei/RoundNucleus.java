@@ -1311,6 +1311,11 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 	}
 	
+	public void updateVerticallyRotatedNucleus(){
+		this.verticalNucleus = null;
+		this.getVerticallyRotatedNucleus();
+	}
+	
 	public Nucleus getVerticallyRotatedNucleus(){
 		if(this.verticalNucleus==null){
 			verticalNucleus = this.duplicate();

@@ -18,8 +18,6 @@
  *******************************************************************************/
 package gui.tabs;
 
-import java.util.logging.Logger;
-
 import javax.swing.JLabel;
 import javax.swing.table.TableModel;
 
@@ -55,7 +53,6 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 
 			TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setLogger(programLogger)
 			.setStat(stat)
 			.build();
 

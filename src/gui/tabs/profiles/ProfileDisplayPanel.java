@@ -20,8 +20,6 @@ package gui.tabs.profiles;
 
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
-import java.util.logging.Logger;
-
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
@@ -96,7 +94,6 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
-				.setLogger(programLogger)
 				.setNormalised(normalised)
 				.setAlignment(alignment)
 				.setTag(tag)

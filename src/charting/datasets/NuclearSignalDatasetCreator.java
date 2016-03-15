@@ -28,6 +28,8 @@ import java.util.logging.Level;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import logging.Loggable;
+
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
@@ -52,7 +54,7 @@ import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
 import components.nuclei.Nucleus;
 
-public class NuclearSignalDatasetCreator {
+public class NuclearSignalDatasetCreator implements Loggable {
 
 	/**
 	 * Create a table of signal stats for the given list of datasets. This table

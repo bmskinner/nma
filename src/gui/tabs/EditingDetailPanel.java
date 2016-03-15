@@ -91,10 +91,10 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 		segmentsEditingPanel.setEnabled(true);
 
 		cellDetailPanel.update(getDatasets()); 
-		programLogger.log(Level.FINEST, "Updated segments boxplot panel");
+		log(Level.FINEST, "Updated segments boxplot panel");
 
 		segmentsEditingPanel.update(getDatasets()); 
-		programLogger.log(Level.FINEST, "Updated segments histogram panel");
+		log(Level.FINEST, "Updated segments histogram panel");
 	}
 	
 	/**
@@ -118,7 +118,7 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
-		programLogger.log(Level.FINER, "Editing panel heard signal: "+event.type());
+		log(Level.FINER, "Editing panel heard signal: "+event.type());
 		
 		if(event.sourceName().equals("CellDetailPanel") || event.sourceName().equals("SegmentsEditingPanel")){
 			fireSignalChangeEvent(event.type());			

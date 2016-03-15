@@ -35,7 +35,6 @@ import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -178,7 +177,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 				chartPanel.setChart(chart);
 			}
 		} catch (Exception e) {
-			programLogger.log(Level.SEVERE, "Error in plotting variability chart", e);
+			log(Level.SEVERE, "Error in plotting variability chart", e);
 		}	
 	}
 
@@ -197,7 +196,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 			try {
 				j.commitEdit();
 			} catch (ParseException e) {
-				programLogger.log(Level.SEVERE, "Error setting p-value spinner", e);
+				log(Level.SEVERE, "Error setting p-value spinner", e);
 			}
 		}
 		update(getDatasets());
@@ -215,7 +214,6 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 
 			ChartOptions options =  new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setLogger(programLogger)
 			.setNormalised(true)
 			.setAlignment(ProfileAlignment.LEFT)
 			.setTag(tag)

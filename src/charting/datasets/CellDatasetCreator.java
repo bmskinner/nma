@@ -30,6 +30,8 @@ import java.util.UUID;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import logging.Loggable;
+
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
@@ -47,7 +49,7 @@ import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
-public class CellDatasetCreator {
+public class CellDatasetCreator implements Loggable {
 	
 	/**
 	 * Create a table of stats for the given cell.

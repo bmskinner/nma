@@ -90,16 +90,16 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 	@Override
 	protected void updateSingle() throws Exception {
 		boxplotPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updated nuclear boxplots panel");
+		log(Level.FINEST, "Updated nuclear boxplots panel");
 		
 		histogramsPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updated nuclear histograms panel");
+		log(Level.FINEST, "Updated nuclear histograms panel");
 		
 		wilcoxonPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updating Wilcoxon panel");
+		log(Level.FINEST, "Updating Wilcoxon panel");
 		
 		nucleusMagnitudePanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updating magnitude panel");
+		log(Level.FINEST, "Updating magnitude panel");
 	}
 	
 	@Override
@@ -124,7 +124,6 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(getDatasets())
-					.setLogger(programLogger)
 					.setStatistic(stat)
 					.setScale(MeasurementScale.PIXELS)
 					.build();
@@ -133,7 +132,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				try {
 					chart = BoxplotChartFactory.createStatisticBoxplot(options);
 				} catch (Exception e) {
-					programLogger.log(Level.SEVERE, "Error creating boxplots panel", e);
+					log(Level.SEVERE, "Error creating boxplots panel", e);
 				}
 				
 				ExportableChartPanel panel = new ExportableChartPanel(chart);
@@ -177,7 +176,6 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(getDatasets())
-					.setLogger(programLogger)
 					.setStatistic(stat)
 					.setScale(scale)
 					.build();
@@ -212,7 +210,6 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 					
 					ChartOptionsBuilder builder = new ChartOptionsBuilder();
 					ChartOptions options = builder.setDatasets(null)
-						.setLogger(programLogger)
 						.setStatistic(stat)
 						.setScale(scale)
 						.setUseDensity(false)
@@ -229,7 +226,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				}
 
 			} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Error creating histogram panel", e);
+				log(Level.SEVERE, "Error creating histogram panel", e);
 			}
 
 		}
@@ -249,7 +246,6 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(getDatasets())
-					.setLogger(programLogger)
 					.setStatistic(stat)
 					.setScale(scale)
 					.setUseDensity(useDensity)
@@ -257,7 +253,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				
 				JFreeChart chart = getChart(options);
 //				if(this.getChartCache().hasChart(options)){
-//					programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());
+//					log(Level.FINEST, "Using cached histogram: "+stat.toString());
 //					chart = HistogramsPanel.this.getChartCache().getChart(options);
 //
 //				} else { // No cache
@@ -272,7 +268,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 //						HistogramsPanel.this.getChartCache().addChart(options, chart);
 //
 //					}
-//					programLogger.log(Level.FINEST, "Added cached histogram chart: "+stat);
+//					log(Level.FINEST, "Added cached histogram chart: "+stat);
 //				}
 
 //				XYPlot plot = (XYPlot) chart.getPlot();
@@ -299,7 +295,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				try {
 //					
 				} catch (Exception e) {
-					programLogger.log(Level.SEVERE, "Unable to detect modes", e);
+					log(Level.SEVERE, "Unable to detect modes", e);
 				}
 				
 			}
@@ -358,7 +354,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 						CellCollection collection = dataset.getCollection();
 						try {
 							
-							programLogger.log(Level.INFO, "Filtering on "
+							log(Level.INFO, "Filtering on "
 									+stat.toString()
 									+": "
 									+df.format(lower)
@@ -368,18 +364,18 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 							if(subCollection.hasCells()){
 
-								programLogger.log(Level.INFO, "Filtered "+subCollection.getNucleusCount()+" nuclei");
+								log(Level.INFO, "Filtered "+subCollection.getNucleusCount()+" nuclei");
 								dataset.addChildCollection(subCollection);
 								try {
 									dataset.getCollection().getProfileManager().copyCollectionOffsets(subCollection);
 								} catch (Exception e1) {
-									programLogger.log(Level.SEVERE, "Error applying segments", e1);
+									log(Level.SEVERE, "Error applying segments", e1);
 								}
 //								newList.add(  dataset.getChildDataset(subCollection.getID() ));
 							}
 
 						} catch (Exception e) {
-							programLogger.log(Level.SEVERE, "Error filtering", e);
+							log(Level.SEVERE, "Error filtering", e);
 							
 						}
 					}

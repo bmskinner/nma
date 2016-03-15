@@ -25,13 +25,10 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.JScrollPane;
 
 import org.jfree.chart.JFreeChart;
 
-import stats.NucleusStatistic;
 import stats.SignalStatistic;
 import components.generic.MeasurementScale;
 import charting.charts.BoxplotChartFactory;
@@ -55,7 +52,6 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
 			ChartOptionsBuilder builder = new ChartOptionsBuilder();
 			ChartOptions options = builder.setDatasets(null)
-					.setLogger(programLogger)
 					.setStatistic(stat)
 					.setScale(MeasurementScale.PIXELS)
 					.build();
@@ -64,7 +60,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 			try {
 				chart = BoxplotChartFactory.createStatisticBoxplot(options);
 			} catch (Exception e) {
-				programLogger.log(Level.SEVERE, "Error creating boxplots panel", e);
+				log(Level.SEVERE, "Error creating boxplots panel", e);
 			}
 
 			ExportableChartPanel panel = new ExportableChartPanel(chart);
@@ -108,20 +104,19 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
 			ChartOptionsBuilder builder = new ChartOptionsBuilder();
 			ChartOptions options = builder.setDatasets(getDatasets())
-					.setLogger(programLogger)
 					.setStatistic(stat)
 					.setScale(scale)
 					.build();
 
 			if(getChartCache().hasChart(options)){
-				programLogger.log(Level.FINEST, "Using cached boxplot chart: "+stat.toString());
+				log(Level.FINEST, "Using cached boxplot chart: "+stat.toString());
 				chart = getChartCache().getChart(options);
 
 			} else { // No cache
 
 				chart = BoxplotChartFactory.createStatisticBoxplot(options);
 				getChartCache().addChart(options, chart);
-				programLogger.log(Level.FINEST, "Added cached boxplot chart: "+stat.toString());
+				log(Level.FINEST, "Added cached boxplot chart: "+stat.toString());
 			}
 
 			panel.setChart(chart);

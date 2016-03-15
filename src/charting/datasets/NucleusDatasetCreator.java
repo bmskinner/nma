@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import logging.Loggable;
+
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
@@ -59,7 +61,7 @@ import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 
-public class NucleusDatasetCreator {
+public class NucleusDatasetCreator implements Loggable {
 	
 	/**
 	 * Add individual segments from a profile to a dataset. Offset them to the given length

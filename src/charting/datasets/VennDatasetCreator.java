@@ -20,10 +20,12 @@ package charting.datasets;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import logging.Loggable;
 import components.Cell;
 import analysis.AnalysisDataset;
 
-public class VennDatasetCreator {
+public class VennDatasetCreator implements Loggable {
 	
 	public VennDatasetCreator(List<AnalysisDataset> list){
 

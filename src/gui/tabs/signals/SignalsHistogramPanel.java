@@ -23,7 +23,6 @@ import gui.components.SelectableChartPanel;
 
 import java.awt.Dimension;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
@@ -48,7 +47,6 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(null)
-					.setLogger(programLogger)
 					.setStatistic(stat)
 					.setScale(scale)
 					.setUseDensity(false)
@@ -64,7 +62,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			}
 
 		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error creating histogram panel", e);
+			log(Level.SEVERE, "Error creating histogram panel", e);
 		}
 		
 	}
@@ -84,7 +82,6 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			
 			ChartOptionsBuilder builder = new ChartOptionsBuilder();
 			ChartOptions options = builder.setDatasets(getDatasets())
-				.setLogger(programLogger)
 				.setStatistic(stat)
 				.setScale(scale)
 				.setUseDensity(useDensity)
@@ -93,7 +90,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			
 
 			if(this.getChartCache().hasChart(options)){
-				programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());
+				log(Level.FINEST, "Using cached histogram: "+stat.toString());
 				chart = getChartCache().getChart(options);
 
 			} else { // No cache
@@ -102,7 +99,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 				getChartCache().addChart(options, chart);
 
 
-				programLogger.log(Level.FINEST, "Added cached histogram chart: "+stat);
+				log(Level.FINEST, "Added cached histogram chart: "+stat);
 			}
 
 			XYPlot plot = (XYPlot) chart.getPlot();

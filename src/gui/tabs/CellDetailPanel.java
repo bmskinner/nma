@@ -175,7 +175,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 			this.validate();
 		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error creating cell detail panel", e);
+			log(Level.SEVERE, "Error creating cell detail panel", e);
 		}
 
 	}
@@ -210,9 +210,9 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	
 	protected void updateSingle() throws Exception {
 		cellsListPanel.updateDataset( activeDataset()  );
-		programLogger.log(Level.FINEST, "Updated cell list panel");
+		log(Level.FINEST, "Updated cell list panel");
 		updateCell(activeCell);
-		programLogger.log(Level.FINEST, "Updated active cell panel");
+		log(Level.FINEST, "Updated active cell panel");
 	}
 	
 	protected void updateMultiple() throws Exception {
@@ -221,7 +221,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	
 	protected void updateNull() throws Exception {
 		cellsListPanel.updateDataset(null);
-		programLogger.log(Level.FINEST, "Updated cell list panel");
+		log(Level.FINEST, "Updated cell list panel");
 		updateCell(null);
 	}
 		
@@ -266,14 +266,14 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			 * replace them. 
 			 */
 			int rawIndex = n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, index);
-			programLogger.log(Level.FINEST, "Testing border tags");
-			programLogger.log(Level.FINEST, "Updating to index "+index+" from reference point");
-			programLogger.log(Level.FINEST, "Raw old border point is index "+rawOldIndex);
-			programLogger.log(Level.FINEST, "Raw new border point is index "+rawIndex);
+			log(Level.FINEST, "Testing border tags");
+			log(Level.FINEST, "Updating to index "+index+" from reference point");
+			log(Level.FINEST, "Raw old border point is index "+rawOldIndex);
+			log(Level.FINEST, "Raw new border point is index "+rawIndex);
 			
 			if(n.hasBorderTag(rawOldIndex)){						
 				BorderTag tagToUpdate = n.getBorderTag(rawOldIndex);
-				programLogger.log(Level.FINE, "Updating tag "+tagToUpdate);
+				log(Level.FINE, "Updating tag "+tagToUpdate);
 				n.setBorderTag(tagToUpdate, rawIndex);	
 				
 				// Update intersection point if needed
@@ -282,14 +282,14 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				}
 				
 			} else {
-				programLogger.log(Level.FINEST, "No border tag at index "+rawOldIndex+" from reference point");
-//				programLogger.log(Level.FINEST, n.dumpInfo(Nucleus.ALL_POINTS));
+				log(Level.FINEST, "No border tag at index "+rawOldIndex+" from reference point");
+//				log(Level.FINEST, n.dumpInfo(Nucleus.ALL_POINTS));
 			}
 
 			updateCell(activeCell);
 			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 		} else {
-			programLogger.log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+			log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
 		}
 	}
 	
@@ -385,7 +385,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							try {
 								activeDataset().getCollection().removeCell(cell);
 							} catch (Exception e2) {
-								programLogger.log(Level.SEVERE, "Error removing cell from collection", e);
+								log(Level.SEVERE, "Error removing cell from collection", e2);
 							}
 							node.removeFromParent();
 							DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
@@ -399,13 +399,13 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 								fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, list);
 
 							} catch (Exception e1) {
-								programLogger.log(Level.SEVERE, "Error deleting cell", e1);
+								log(Level.SEVERE, "Error deleting cell", e1);
 							}
 							
 							try {
 								CellDetailPanel.this.updateSingle();
 							} catch (Exception e1) {
-								programLogger.log(Level.SEVERE, "Error updating cell", e1);
+								log(Level.SEVERE, "Error updating cell", e1);
 							}
 							fireSignalChangeEvent("UpdatePanels");
 							fireSignalChangeEvent("UpdatePopulationPanel");
@@ -582,7 +582,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				}
 
 			} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Error updating cell panel", e);
+				log(Level.SEVERE, "Error updating cell panel", e);
 				JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
 				profileChartPanel.setChart(chart);
 				profileOptions.setEnabled(false);
@@ -615,7 +615,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 					updateSegmentIndex(true, indexValue, seg, n, profile);
 				} catch(Exception e){
-					programLogger.log(Level.SEVERE, "Error updating segment", e);
+					log(Level.SEVERE, "Error updating segment", e);
 				}
 
 			}
@@ -745,7 +745,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				}
 				
 			} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Error updating outline chart", e);
+				log(Level.SEVERE, "Error updating outline chart", e);
 				JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 				panel.setChart(chart);
 				rotationPanel.setEnabled(false);
@@ -870,7 +870,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					n.setProfile(ProfileType.REGULAR, tag, profile);
 					
 				} catch(Exception e1){
-					programLogger.log(Level.SEVERE, "Error updating cell profile", e1);
+					log(Level.SEVERE, "Error updating cell profile", e1);
 				}
 				
 				// Update the border tag index
@@ -951,7 +951,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					}
 					updateCell(activeCell);
 				} else {
-					programLogger.log(Level.WARNING, "Cannot set a scale to zero");
+					log(Level.WARNING, "Cannot set a scale to zero");
 				}
 			}
 		}
@@ -967,7 +967,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					table.getColumnModel().getColumn(1).setCellRenderer(new StatsTableCellRenderer());
 				}
 			} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Error updating cell", e);
+				log(Level.SEVERE, "Error updating cell", e);
 			}
 		}
 	}
@@ -998,7 +998,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				signalList.setEnabled(false);
 				
 			} catch (Exception e) {
-				programLogger.log(Level.SEVERE, "Error in segment stats", e);
+				log(Level.SEVERE, "Error in segment stats", e);
 			}
 						
 			scrollPane.setViewportView(signalList);
@@ -1029,7 +1029,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					signalList.setEnabled(true);
 
 				} catch (Exception e) {
-					programLogger.log(Level.SEVERE, "Error updating signal list", e);
+					log(Level.SEVERE, "Error updating signal list", e);
 				}
 			} else {
 				try {
@@ -1038,7 +1038,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					signalList.setModel(model);
 					signalList.setEnabled(false);
 				} catch (Exception e) {
-					programLogger.log(Level.SEVERE, "Error updating signal list", e);
+					log(Level.SEVERE, "Error updating signal list", e);
 				}
 			}
 		}
@@ -1104,7 +1104,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				activeCell = activeDataset().getCollection().getCell(cellID);
 				updateCell(activeCell);
 			} catch (Exception e1){
-				programLogger.log(Level.SEVERE, "Error fetching cell", e1);
+				log(Level.SEVERE, "Error fetching cell", e1);
 			}
 		}
 		

@@ -197,7 +197,6 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
-				.setLogger(programLogger)
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
 				.setTag(BorderTag.REFERENCE_POINT)
@@ -293,7 +292,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		@Override
 		public void signalChangeReceived(SignalChangeEvent event) {
 			if(event.type().contains("UpdateSegment") && event.getSource().equals(chartPanel)){
-				programLogger.log(Level.FINEST, "Heard update segment request");
+				log(Level.FINEST, "Heard update segment request");
 				try{
 
 					
@@ -312,7 +311,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 					updateSegmentStartIndex(segID, index);
 
 				} catch(Exception e){
-					programLogger.log(Level.SEVERE, "Error updating segment", e);
+					log(Level.SEVERE, "Error updating segment", e);
 				} finally {
 					SegmentsEditingPanel.this.setAnalysing(false);
 				}
@@ -339,13 +338,13 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			 * Invalidate the chart cache for the active dataset.
 			 * This will force the morphology refresh to create a new chart
 			 */
-			programLogger.log(Level.FINEST, "Clearing chart cache for editing panel");
+			log(Level.FINEST, "Clearing chart cache for editing panel");
 			fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
 //			this.clearChartCache();
 			
 			
 			//  Update each nucleus profile
-			programLogger.log(Level.FINEST, "Firing refresh morphology action");
+			log(Level.FINEST, "Firing refresh morphology action");
 			fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
 
 			
@@ -474,7 +473,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				
 			} catch (Exception e1) {
 				
-				programLogger.log(Level.SEVERE, "Error in action", e1);
+				log(Level.SEVERE, "Error in action", e1);
 			} finally {
 				SegmentsEditingPanel.this.setAnalysing(false);
 			}
@@ -511,10 +510,10 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 						.getProfileManager()
 						.mergeSegments(mergeOption.getOne(), mergeOption.getTwo());
 					
-					programLogger.log(Level.FINEST, "Merged segments: "+mergeOption.toString());
-					programLogger.log(Level.FINEST, "Refreshing chart cache for editing panel");
+					log(Level.FINEST, "Merged segments: "+mergeOption.toString());
+					log(Level.FINEST, "Refreshing chart cache for editing panel");
 					this.refreshChartCache();
-					programLogger.log(Level.FINEST, "Firing general refresh cache request for loaded datasets");
+					log(Level.FINEST, "Firing general refresh cache request for loaded datasets");
 					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 				} else {
 					JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
@@ -581,10 +580,10 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 						.getProfileManager()
 						.splitSegment(seg)){
 					
-					programLogger.log(Level.FINEST, "Split segment "+option.toString());
-					programLogger.log(Level.FINEST, "Refreshing chart cache for editing panel");
+					log(Level.FINEST, "Split segment "+option.toString());
+					log(Level.FINEST, "Refreshing chart cache for editing panel");
 					this.refreshChartCache();
-					programLogger.log(Level.FINEST, "Firing general refresh cache request for loaded datasets");
+					log(Level.FINEST, "Firing general refresh cache request for loaded datasets");
 					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 				}
 			}
@@ -625,11 +624,11 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				.getProfileManager()
 				.unmergeSegments(mergeOption.getSeg());
 				
-				programLogger.log(Level.FINEST, "Unmerged segment "+mergeOption.toString());
+				log(Level.FINEST, "Unmerged segment "+mergeOption.toString());
 
-				programLogger.log(Level.FINEST, "Refreshing chart cache for editing panel");
+				log(Level.FINEST, "Refreshing chart cache for editing panel");
 				this.refreshChartCache();
-				programLogger.log(Level.FINEST, "Firing general refresh cache request for loaded datasets");
+				log(Level.FINEST, "Firing general refresh cache request for loaded datasets");
 				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 			}
 		}

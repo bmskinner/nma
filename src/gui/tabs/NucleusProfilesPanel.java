@@ -80,14 +80,14 @@ public class NucleusProfilesPanel extends DetailPanel {
 		
 		for(ProfileType type : profilePanels.keySet()){
 			profilePanels.get(type).update(getDatasets());
-			programLogger.log(Level.FINEST, "Updated "+type.toString()+" profile panel");
+			log(Level.FINEST, "Updated "+type.toString()+" profile panel");
 		}
 		
 		variabilityChartPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updated variabililty panel");
+		log(Level.FINEST, "Updated variabililty panel");
 		
 		modalityDisplayPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updated modality panel");
+		log(Level.FINEST, "Updated modality panel");
 	}
 	
 	@Override

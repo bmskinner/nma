@@ -836,7 +836,17 @@ public class CellCollection implements Serializable {
 	  this.getProfileManager().copyCollectionOffsets(subCollection);
 	  return subCollection;
   }
-    
+  
+  /**
+   * Invalidate the existing cached vertically rotated nuclei,
+	 and recalculate.
+   */
+  public void updateVerticalNuclei(){
+	  for(Nucleus n : this.getNuclei()){
+		  n.updateVerticallyRotatedNucleus();
+	  }
+  }
+
   public boolean updateSourceFolder(File newFolder) throws Exception{
 		File oldFile = this.getFolder();
 		boolean ok = false;

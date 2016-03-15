@@ -46,8 +46,7 @@ import java.util.logging.Logger;
 import analysis.AnalysisOptions;
 import components.generic.XYPoint;
 
-public class NucleusRefinder
-  extends analysis.nucleus.NucleusDetector
+public class NucleusRefinder  extends NucleusDetector
 {
 
   private File pathList; // the file of paths and coordinates
@@ -265,7 +264,7 @@ public class NucleusRefinder
 
 				  if(roi.getBounds().contains( xToFind, yToFind )){
 					  result = true;
-					  programLogger.log(Level.INFO, "  Acquiring nucleus at: "+xToFind+","+yToFind);
+					  log(Level.INFO, "  Acquiring nucleus at: "+xToFind+","+yToFind);
 				  }
 			  }
 

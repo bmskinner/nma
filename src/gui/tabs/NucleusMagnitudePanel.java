@@ -118,7 +118,6 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 			
 			TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setLogger(programLogger)
 			.setStat(stat)
 			.build();
 

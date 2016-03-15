@@ -48,7 +48,7 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 			createUI();
 			
 		} catch (Exception e) {
-			programLogger.log(Level.SEVERE, "Error creating inter-dataset panel", e);
+			log(Level.SEVERE, "Error creating inter-dataset panel", e);
 		}
 		
 	}
@@ -85,13 +85,13 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 	 */
 	protected void updateMultiple() throws Exception {
 		vennPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updating Venn panel");
+		log(Level.FINEST, "Updating Venn panel");
 		
 		pairwiseVennPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updating pairwise Venn panel");
+		log(Level.FINEST, "Updating pairwise Venn panel");
 		
 		kruskalPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updating Kruskal panel");
+		log(Level.FINEST, "Updating Kruskal panel");
 	}
 	
 	/**

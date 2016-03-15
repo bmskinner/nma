@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import logging.Loggable;
+
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
@@ -42,7 +44,7 @@ import stats.NucleusStatistic;
 import stats.SegmentStatistic;
 import stats.Stats;
 
-public class NuclearHistogramDatasetCreator {
+public class NuclearHistogramDatasetCreator implements Loggable {
 	
 	public static final int MIN_ROUNDED = 0;
 	public static final int MAX_ROUNDED = 1;

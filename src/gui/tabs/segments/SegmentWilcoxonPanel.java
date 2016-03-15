@@ -25,7 +25,6 @@ import gui.components.WilcoxonTableCellRenderer;
 import gui.tabs.AbstractPairwiseDetailPanel;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.table.TableModel;
@@ -81,7 +80,6 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 					
 					TableOptions options = new TableOptionsBuilder()
 					.setDatasets(getDatasets())
-					.setLogger(programLogger)
 					.setStat(stat)
 					.setSegPosition(seg.getPosition())
 					.build();

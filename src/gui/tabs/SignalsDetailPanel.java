@@ -87,7 +87,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			this.add(signalsTabPane, BorderLayout.CENTER);
 			
 		} catch (Exception e){
-			programLogger.log(Level.SEVERE, "Error making signal panel", e);
+			log(Level.SEVERE, "Error making signal panel", e);
 		}
 	}
 	
@@ -105,19 +105,19 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	 */
 	protected void updateMultiple() throws Exception {
 		shellsPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updated shells panel");
+		log(Level.FINEST, "Updated shells panel");
 		
 		overviewPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updated signals overview panel");
+		log(Level.FINEST, "Updated signals overview panel");
 		
 		histogramPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updated signals histogram panel");
+		log(Level.FINEST, "Updated signals histogram panel");
 		
 		analysisPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updated signals analysis panel");
+		log(Level.FINEST, "Updated signals analysis panel");
 		
 		boxplotPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updated signals boxplot panel");
+		log(Level.FINEST, "Updated signals boxplot panel");
 	}
 	
 	/**

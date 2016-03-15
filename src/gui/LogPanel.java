@@ -164,7 +164,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			programLogger.log(Level.FINEST, "Button pressed: "+e.getActionCommand());
+			log(Level.FINEST, "Button pressed: "+e.getActionCommand());
 			if(console.isVisible()){
 				console.setVisible(false);
 			} else {
@@ -184,11 +184,11 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-//		programLogger.log(Level.FINEST, "Log panel detected action: "+e.getActionCommand());
-//		programLogger.log(Level.FINEST, "Log panel detected action: "+e.getSource().toString());
+//		log(Level.FINEST, "Log panel detected action: "+e.getActionCommand());
+//		log(Level.FINEST, "Log panel detected action: "+e.getSource().toString());
 		if(e.getSource().equals(console)){
-//			programLogger.log(Level.FINEST, "Entering text at console");
-			programLogger.log(Level.INFO, console.getText());
+//			log(Level.FINEST, "Entering text at console");
+			log(Level.INFO, console.getText());
 			runCommand(console.getText());
 			console.setText("");
 		}
@@ -202,13 +202,13 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		} else {
 						
 			if(command.equals("help")){
-				programLogger.log(Level.INFO, "Available commands: ");
+				log(Level.INFO, "Available commands: ");
 				for(String key : commandMap.keySet()){
-					programLogger.log(Level.INFO, " "+key);
+					log(Level.INFO, " "+key);
 				}
 				
 			} else {
-				programLogger.log(Level.INFO, "Command not recognised");
+				log(Level.INFO, "Command not recognised");
 			}
 		}		
 	}

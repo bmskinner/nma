@@ -22,7 +22,6 @@ import gui.components.ExportableTable;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
-import java.util.logging.Logger;
 
 import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableModel;
@@ -30,12 +29,10 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.charts.MorphologyChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
-import charting.options.TableOptions.TableType;
 
 
 @SuppressWarnings("serial")
@@ -61,7 +58,6 @@ public class SignalsAnalysisPanel extends DetailPanel {
 		
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(getDatasets())
-		.setLogger(programLogger)
 		.build();
 		
 		TableModel model = getTable(options);
@@ -80,7 +76,6 @@ public class SignalsAnalysisPanel extends DetailPanel {
 		
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(null)
-		.setLogger(programLogger)
 		.build();
 		
 		TableModel model = getTable(options);

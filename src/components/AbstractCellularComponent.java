@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import logging.Loggable;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
@@ -26,7 +27,7 @@ import stats.Stats;
 import utility.Constants;
 import utility.Utils;
 
-public class AbstractCellularComponent implements CellularComponent, Serializable {
+public class AbstractCellularComponent implements CellularComponent, Serializable, Loggable {
 
 	private static final long serialVersionUID = 1L;
 	private final UUID id;

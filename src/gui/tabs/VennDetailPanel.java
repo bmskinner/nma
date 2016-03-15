@@ -64,7 +64,6 @@ public class VennDetailPanel extends DetailPanel {
 
 			TableOptions options = new TableOptionsBuilder()
 			.setDatasets(null)
-			.setLogger(programLogger)
 			.setType(TableType.VENN)
 			.build();
 
@@ -76,7 +75,7 @@ public class VennDetailPanel extends DetailPanel {
 			mainPanel.add(vennPanel);
 			vennTable.setEnabled(false);
 		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error updating venn panel", e);
+			log(Level.SEVERE, "Error updating venn panel", e);
 		}
 		
 	}
@@ -89,11 +88,10 @@ public class VennDetailPanel extends DetailPanel {
 
 	@Override
 	protected void updateMultiple() throws Exception {
-		programLogger.log(Level.FINE, "Updating venn panel");
+		log(Level.FINE, "Updating venn panel");
 
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(getDatasets())
-		.setLogger(programLogger)
 		.setType(TableType.VENN)
 		.build();
 
@@ -104,7 +102,7 @@ public class VennDetailPanel extends DetailPanel {
 		vennTable.setModel(model);
 		setRenderer(vennTable, new VennTableCellRenderer());
 
-		programLogger.log(Level.FINEST, "Updated venn panel");
+		log(Level.FINEST, "Updated venn panel");
 		
 	}
 	
@@ -118,7 +116,6 @@ public class VennDetailPanel extends DetailPanel {
 		
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(null)
-		.setLogger(programLogger)
 		.setType(TableType.VENN)
 		.build();
 		
@@ -159,7 +156,7 @@ public class VennDetailPanel extends DetailPanel {
 		        	pct = nf.parse(array2[1]).doubleValue();
 //		        	pct = Double.valueOf(array2[1]);
 		        } catch (Exception e){
-		        	programLogger.log(Level.FINEST, "Error getting value: "+cellContents+" in column "+columnName, e);
+		        	log(Level.FINEST, "Error getting value: "+cellContents+" in column "+columnName, e);
 		        	pct = 0;
 		        }
 		        		        

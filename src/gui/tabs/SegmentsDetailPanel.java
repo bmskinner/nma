@@ -147,25 +147,25 @@ public class SegmentsDetailPanel extends DetailPanel {
 	@Override
 	protected void updateMultiple() throws Exception {
 		segmentBoxplotsPanel.update(getDatasets()); // get segname from panel
-		programLogger.log(Level.FINEST, "Updated segments boxplot panel");
+		log(Level.FINEST, "Updated segments boxplot panel");
 
 		segmentHistogramsPanel.update(getDatasets()); // get segname from panel
-		programLogger.log(Level.FINEST, "Updated segments histogram panel");
+		log(Level.FINEST, "Updated segments histogram panel");
 
 		segmentProfilePanel.update(getDatasets()); // get segname from panel
-		programLogger.log(Level.FINEST, "Updated segments profile panel");
+		log(Level.FINEST, "Updated segments profile panel");
 
 		segmentStatsPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updated segments stats panel");
+		log(Level.FINEST, "Updated segments stats panel");
 		
 		segmentWilcoxonPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updated segments stats panel");
+		log(Level.FINEST, "Updated segments stats panel");
 		
 		segmentMagnitudePanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updated segments magnitude panel");
+		log(Level.FINEST, "Updated segments magnitude panel");
 		
 		segmentPositionsPanel.update(getDatasets());
-		programLogger.log(Level.FINEST, "Updated segments positions panel");
+		log(Level.FINEST, "Updated segments positions panel");
 	}
 	
 	@Override

@@ -83,7 +83,7 @@ import charting.options.TableOptions;
 				
 				this.setEnabled(false);
 			} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Error creating panel", e);
+				log(Level.SEVERE, "Error creating panel", e);
 			}
 
 		}
@@ -108,10 +108,10 @@ import charting.options.TableOptions;
 	     public void actionPerformed(ActionEvent e) {
 
 	         try {
-	        	 programLogger.log(Level.FINEST, "Updating abstract boxplot tab panel");
+	        	 log(Level.FINEST, "Updating abstract boxplot tab panel");
 	             this.update(getDatasets());
 	         } catch (Exception e1) {
-	         	programLogger.log(Level.SEVERE, "Error updating boxplot panel from action listener", e1);
+	         	log(Level.SEVERE, "Error updating boxplot panel from action listener", e1);
 	         }
 	         
 	         

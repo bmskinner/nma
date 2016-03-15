@@ -20,6 +20,8 @@ package charting.charts;
 
 import java.awt.Color;
 
+import logging.Loggable;
+
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 
@@ -27,7 +29,7 @@ import stats.Stats;
 import charting.ChartComponents;
 import components.generic.BorderTag;
 
-public class AbstractChartFactory {
+public class AbstractChartFactory implements Loggable {
 
 	/**
 	 * Get a series or dataset index for colour selection when drawing charts. The index

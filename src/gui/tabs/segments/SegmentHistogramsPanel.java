@@ -7,7 +7,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -56,7 +55,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 		MeasurementScale scale = this.measurementUnitSettingsPanel.getSelected();
 		boolean useDensity = this.useDensityPanel.isSelected();
 		
-		programLogger.log(Level.FINEST, "Dataset list is not empty");
+		log(Level.FINEST, "Dataset list is not empty");
 
 		// Check that all the datasets have the same number of segments
 		if(checkSegmentCountsMatch(getDatasets())){ // make a histogram for each segment
@@ -73,7 +72,6 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
-					.setLogger(programLogger)
 					.setStatistic(SegmentStatistic.LENGTH)
 					.setScale(scale)
 					.setUseDensity(useDensity)

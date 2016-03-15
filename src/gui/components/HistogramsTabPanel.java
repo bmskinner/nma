@@ -93,7 +93,7 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 			
 			this.setEnabled(false);
 		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error creating panel", e);
+			log(Level.SEVERE, "Error creating panel", e);
 		}
 
 	}
@@ -118,10 +118,10 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
      public void actionPerformed(ActionEvent e) {
 
          try {
-        	 programLogger.log(Level.FINEST, "Updating abstract histogram tab panel");
+        	 log(Level.FINEST, "Updating abstract histogram tab panel");
              this.update(getDatasets());
          } catch (Exception e1) {
-         	programLogger.log(Level.SEVERE, "Error updating histogram panel from action listener", e1);
+         	log(Level.SEVERE, "Error updating histogram panel from action listener", e1);
          }
          
          

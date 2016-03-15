@@ -28,10 +28,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
@@ -39,7 +36,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
@@ -47,27 +43,19 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.xy.XYDataset;
-
-import analysis.AnalysisDataset;
-import analysis.SignalManager;
 import charting.charts.ConsensusNucleusChartFactory;
-import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptions.TableType;
 import charting.options.TableOptionsBuilder;
-import components.CellCollection;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter;
 import gui.components.ConsensusNucleusChartPanel;
 import gui.components.ExportableTable;
 import gui.tabs.DetailPanel;
-import gui.tabs.SignalsDetailPanel;
 import ij.io.DirectoryChooser;
-import stats.SignalStatistic;
 
 @SuppressWarnings("serial")
 public class SignalsOverviewPanel extends DetailPanel implements ActionListener {
@@ -143,31 +131,31 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	
 	private void updateSignalSource(int signalGroup){
 		if(isSingleDataset()){
-			programLogger.log(Level.FINEST, "Updating signal source for signal group "+signalGroup);
+			log(Level.FINEST, "Updating signal source for signal group "+signalGroup);
 
 			DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
 			String folderName = openDialog.getDirectory();
 
 			if(folderName==null){
-				programLogger.log(Level.FINEST, "Folder name null");
+				log(Level.FINEST, "Folder name null");
 				return;
 			}
 
 			File folder =  new File(folderName);
 
 			if(!folder.isDirectory() ){
-				programLogger.log(Level.FINEST, "Folder is not directory");
+				log(Level.FINEST, "Folder is not directory");
 				return;
 			}
 			if(!folder.exists()){
-				programLogger.log(Level.FINEST, "Folder does not exist");
+				log(Level.FINEST, "Folder does not exist");
 				return;
 			}
 
 			activeDataset().getCollection().getSignalManager().updateSignalSourceFolder(signalGroup, folder);
 //			SignalsDetailPanel.this.update(getDatasets());
 			refreshTableCache();
-			programLogger.log(Level.FINEST, "Updated signal source for signal group "+signalGroup+" to "+folder.getAbsolutePath() );
+			log(Level.FINEST, "Updated signal source for signal group "+signalGroup+" to "+folder.getAbsolutePath() );
 		}
 	}
 	
@@ -271,7 +259,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 				}
 
 			} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Error creating signal checkboxes", e);
+				log(Level.SEVERE, "Error creating signal checkboxes", e);
 			}
 		}
 		return panel;
@@ -279,7 +267,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	
 //	protected void updateDetail(){
 //		
-//		programLogger.log(Level.FINE, "Updating signals detail panel");
+//		log(Level.FINE, "Updating signals detail panel");
 //		SwingUtilities.invokeLater(new Runnable(){
 //			public void run(){
 //				
@@ -289,7 +277,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 //					updateSignalStatsPanel();
 //
 //				} catch(Exception e){
-//					programLogger.log(Level.SEVERE, "Error updating signals overview panel" ,e);
+//					log(Level.SEVERE, "Error updating signals overview panel" ,e);
 //					update( (List<AnalysisDataset>) null);
 //				} finally {
 //					setUpdating(false);
@@ -309,7 +297,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setLogger(programLogger)
 			.setType(TableType.SIGNAL_STATS_TABLE)
 			.build();
 		
@@ -361,7 +348,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			chartPanel.setChart(chart);
 			chartPanel.restoreAutoBounds();
 		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error updating signals", e);
+			log(Level.SEVERE, "Error updating signals", e);
 		}
 	}
 	

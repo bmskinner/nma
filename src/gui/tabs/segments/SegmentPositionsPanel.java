@@ -62,7 +62,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 		try {
 			this.updateNull();
 		} catch (Exception e) {
-			programLogger.log(Level.SEVERE, "Error creating segments posistion panel", e);
+			log(Level.SEVERE, "Error creating segments posistion panel", e);
 		}		
 	}
 	
@@ -92,7 +92,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 
-		programLogger.log(Level.FINEST, "Dataset list is not empty");
+		log(Level.FINEST, "Dataset list is not empty");
 		
 		// Check that all the datasets have the same number of segments
 		if(checkSegmentCountsMatch(getDatasets())){
@@ -108,7 +108,6 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
-					.setLogger(programLogger)
 					.setSegPosition(seg.getPosition())
 					.setSegID(seg.getID())
 					.build();
