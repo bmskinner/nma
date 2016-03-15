@@ -31,14 +31,11 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import utility.Constants;
 //import utility.Logger;
 
 
 import utility.StatsMap;
-import analysis.AbstractLoggable;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.Detector;

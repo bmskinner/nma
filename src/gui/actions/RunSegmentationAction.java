@@ -132,6 +132,16 @@ public class RunSegmentationAction extends ProgressableAction {
 		Thread thr = new Thread(){
 
 			public void run(){
+				
+				/*
+				 * When refreshing segmnetation, the orientaition point may have changed.
+				 * Update the vertical orientation nuclei for the dataset. Also force the
+				 * consensus nucleus to be refolded at the next step
+				 */
+				if(mode.equals(MorphologyAnalysisMode.REFRESH)){
+					dataset.getCollection().updateVerticalNuclei();
+					downFlag |= MainWindow.CURVE_REFOLD;
+				}
 
 				/*
 				 * The refold action is a progressable action, so must not block
@@ -172,13 +182,7 @@ public class RunSegmentationAction extends ProgressableAction {
 					
 				} 
 				
-				/*
-				 * When refreshing segmnetation, the orientaition point may have changed.
-				 * Update the vertical orientation nuclei for the dataset
-				 */
-				if(mode.equals(MorphologyAnalysisMode.REFRESH)){
-					dataset.getCollection().updateVerticalNuclei();
-				}
+				
 				
 //				if(  (downFlag & MainWindow.SAVE_DATASET) == MainWindow.SAVE_DATASET){
 //					programLogger.log(Level.FINEST, "Preparing to fire save datast request");

@@ -33,7 +33,6 @@ import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 
-import analysis.AbstractLoggable;
 import utility.Utils;
 import components.AbstractCellularComponent;
 import components.nuclear.NucleusBorderSegment;

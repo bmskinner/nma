@@ -47,7 +47,6 @@ import java.util.logging.Logger;
 import utility.Constants;
 import utility.StatsMap;
 import utility.Utils;
-import analysis.AbstractLoggable;
 import analysis.Detector;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import analysis.AbstractLoggable;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;

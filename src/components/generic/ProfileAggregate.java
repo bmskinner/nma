@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
-import analysis.AbstractLoggable;
 import components.AbstractCellularComponent;
 import logging.Loggable;
 import utility.Constants;

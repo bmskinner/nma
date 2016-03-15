@@ -28,7 +28,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import analysis.Detector;
-import analysis.AbstractLoggable;
 import analysis.AnalysisOptions.NuclearSignalOptions;
 import components.CellularComponent;
 import components.generic.BooleanProfile;
@@ -43,12 +42,13 @@ import ij.measure.Measurements;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
+import logging.Loggable;
 import stats.NucleusStatistic;
 import utility.Constants;
 import utility.StatsMap;
 import utility.Utils;
 
-public class SignalFinder extends AbstractLoggable {
+public class SignalFinder implements Loggable {
 	
 	private NuclearSignalOptions options;
 	private Logger programLogger;

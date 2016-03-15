@@ -95,31 +95,33 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
 		log(Level.FINEST, "Created worker");
     }
     
-//    /**
-//     * Log the given message to the program log window and to the dataset
-//     * debug file
-//     * @param level the log level
-//     * @param message the message to log
-//     */
-//    public void log(Level level, String message){
-//    	if(fileLogger!=null){
-//    		fileLogger.log(level, message);
-//    	}
-//		log(level, message);
-//    }
-//    
-//    /**
-//     * Log an error to the program log window and to the dataset
-//     * debug file. Logs with Level.SEVERE
-//     * @param message the error messsage
-//     * @param t the exception
-//     */
-//    public void logError(String message, Throwable t){
-//    	if(fileLogger!=null){
-//    		fileLogger.log(Level.SEVERE, message, t);
-//    	}
-//		logError( message, t);
-//    }
+    /**
+     * Log the given message to the program log window and to the dataset
+     * debug file
+     * @param level the log level
+     * @param message the message to log
+     */
+    @Override
+    public void log(Level level, String message){
+    	if(fileLogger!=null){
+    		fileLogger.log(level, message);
+    	}
+		Loggable.super.log(level, message);
+    }
+    
+    /**
+     * Log an error to the program log window and to the dataset
+     * debug file. Logs with Level.SEVERE
+     * @param message the error messsage
+     * @param t the exception
+     */
+    @Override
+    public void logError(String message, Throwable t){
+    	if(fileLogger!=null){
+    		fileLogger.log(Level.SEVERE, message, t);
+    	}
+    	Loggable.super.logError( message, t);
+    }
     
     protected void setProgressTotal(int i){
     	this.progressTotal = i;

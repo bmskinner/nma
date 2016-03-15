@@ -34,12 +34,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.JProgressBar;
 
 import logging.Loggable;
-import analysis.AbstractLoggable;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 

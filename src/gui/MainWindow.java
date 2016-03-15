@@ -200,7 +200,6 @@ public class MainWindow
 			populationsPanel.addSignalChangeListener(this);
 			populationsPanel.addDatasetEventListener(this);
 			populationsPanel.addInterfaceEventListener(this);
-			log(Level.FINEST, "Created populations panel");
 			
 			consensusNucleusPanel = new ConsensusNucleusPanel();
 			detailPanels.add(consensusNucleusPanel);
