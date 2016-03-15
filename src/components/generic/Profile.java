@@ -24,12 +24,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 
+import analysis.AbstractLoggable;
 import utility.Utils;
 import components.AbstractCellularComponent;
 import components.nuclear.NucleusBorderSegment;
@@ -43,7 +45,7 @@ import components.nuclear.NucleusBorderSegment;
  * @author bms41
  *
  */
-public class Profile implements Serializable {
+public class Profile extends AbstractLoggable implements Serializable {
 
 	/**
 	 * 
@@ -845,14 +847,14 @@ public class Profile implements Serializable {
    */
   public Profile getSubregion(int indexStart, int indexEnd) throws Exception {
 
-	  if(indexStart <= indexEnd ){
+	  if(indexStart < indexEnd ){
 		  
 		  double[] result = Arrays.copyOfRange(array,indexStart, indexEnd);
 		  return new Profile(result);
 		  
 	  } else { // case when array wraps
 
-		  double[] resultA = Arrays.copyOfRange(array,indexStart, this.size()-1);
+		  double[] resultA = Arrays.copyOfRange(array,indexStart, array.length-1);
 		  double[] resultB = Arrays.copyOfRange(array,0, indexEnd);
 		  double[] result = new double[resultA.length+resultB.length];
 		  int index = 0;
@@ -863,6 +865,10 @@ public class Profile implements Serializable {
 		  for(double d : resultB){
 			  result[index] = d;
 			  index++;
+		  }
+		  
+		  if(result.length==0){
+			  log(Level.SEVERE, "Subregion length zero: "+indexStart+" - "+indexEnd);
 		  }
 		  return new Profile(result);
 	  }
