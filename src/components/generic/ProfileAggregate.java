@@ -34,6 +34,7 @@ import java.util.logging.Level;
 
 import analysis.AbstractLoggable;
 import components.AbstractCellularComponent;
+import logging.Loggable;
 import utility.Constants;
 import utility.ProfileException;
 import utility.Utils;
@@ -46,7 +47,7 @@ import utility.Utils;
  * @author bms41
  *
  */
-public class ProfileAggregate extends AbstractLoggable implements Serializable {
+public class ProfileAggregate implements Loggable, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	private Map<Double, Collection<Double>> aggregate = new HashMap<Double, Collection<Double>>();

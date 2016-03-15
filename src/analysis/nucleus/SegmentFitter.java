@@ -14,8 +14,9 @@ import components.generic.SegmentedProfile;
 import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
+import logging.Loggable;
 
-public class SegmentFitter extends AbstractLoggable {
+public class SegmentFitter implements Loggable {
 
 	/**
 	 * The multiplier to add to best-fit scores when shrinking a segment below the 

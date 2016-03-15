@@ -33,6 +33,7 @@ import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.frame.RoiManager;
 import ij.process.ImageProcessor;
+import logging.Loggable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,7 @@ import java.util.logging.Level;
 import utility.StatsMap;
 
 
-public class Detector extends AbstractLoggable {
+public class Detector implements Loggable {
 
   /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
   private double minSize;

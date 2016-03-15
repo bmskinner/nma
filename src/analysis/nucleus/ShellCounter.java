@@ -20,6 +20,7 @@
 package analysis.nucleus;
 
 import ij.IJ;
+import logging.Loggable;
 import stats.Stats;
 
 import java.io.File;
@@ -36,7 +37,7 @@ import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
 import analysis.AbstractLoggable;
 
-public class ShellCounter extends AbstractLoggable {
+public class ShellCounter implements Loggable {
 	
 	int numberOfShells;
 	Map<Integer, ArrayList<Double>> shellValues = new LinkedHashMap<Integer, ArrayList<Double>>(0); // store the values

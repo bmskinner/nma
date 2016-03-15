@@ -34,6 +34,7 @@ import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import io.ImageExporter;
 import io.ImageImporter;
+import logging.Loggable;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -53,7 +54,7 @@ import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 
-public class ShellCreator extends AbstractLoggable {
+public class ShellCreator implements Loggable {
 
 	int shellCount = 5;
 

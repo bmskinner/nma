@@ -22,6 +22,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
+import logging.Loggable;
 import stats.NucleusStatistic;
 
 import java.awt.Rectangle;
@@ -53,7 +54,7 @@ import components.nuclei.Nucleus;
  * filters on them 
  *
  */
-public class NucleusFinder extends AbstractLoggable {
+public class NucleusFinder implements Loggable {
 	
 	private final AnalysisOptions options;
 	private final String outputFolderName;

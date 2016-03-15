@@ -85,6 +85,7 @@ public class PopulationImportAction extends ProgressableAction {
 		if(file.isDirectory()){
 			return null;
 		}
+		log(Level.FINE, "Selected file: "+file.getAbsolutePath());
 		return file;
 	}
 		

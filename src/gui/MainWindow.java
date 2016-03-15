@@ -80,6 +80,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import logging.LogPanelFormatter;
+import logging.Loggable;
 import logging.TextAreaHandler;
 import utility.Constants;
 import utility.Version;
@@ -95,7 +96,9 @@ import components.nuclei.sperm.RodentSpermNucleus;
  *
  */
 @SuppressWarnings("serial")
-public class MainWindow extends JFrame implements SignalChangeListener, DatasetEventListener, InterfaceEventListener {
+public class MainWindow 
+	extends JFrame 
+	implements SignalChangeListener, DatasetEventListener, InterfaceEventListener, Loggable {
 				
 	private JPanel contentPane;
 
@@ -133,8 +136,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	public static final int SAVE_DATASET		 = 32;
 	public static final int ASSIGN_SEGMENTS		 = 64;
 	
+	/*
+	 * Keep a strong reference to the program logger so it can be accessed
+	 * by all other classes implementing the Loggable interface
+	 */
 	private static final Logger programLogger =
-	        Logger.getLogger("ProgramLogger"); // the program logger will report status and errors in the running of the program, not involving datasets 
+	        Logger.getLogger(Loggable.PROGRAM_LOGGER); // the program logger will report status and errors in the running of the program, not involving datasets 
 	
 	/*
 	 * Handle threading
@@ -176,18 +183,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			
 			
 			//---------------
-			// Create the consensus chart
-			//---------------
-			populationsPanel = new PopulationsPanel();
-			populationsPanel.addSignalChangeListener(this);
-			populationsPanel.addDatasetEventListener(this);
-			populationsPanel.addInterfaceEventListener(this);
-			
-			consensusNucleusPanel = new ConsensusNucleusPanel();
-			detailPanels.add(consensusNucleusPanel);
-
-			
-			//---------------
 			// Create the log panel
 			//---------------
 			logPanel = new LogPanel();
@@ -197,6 +192,19 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			textHandler.setFormatter(new LogPanelFormatter());
 			programLogger.addHandler(textHandler);
 			programLogger.setLevel(Level.INFO); // by default do not log everything 
+			
+			//---------------
+			// Create the consensus chart
+			//---------------
+			populationsPanel = new PopulationsPanel();
+			populationsPanel.addSignalChangeListener(this);
+			populationsPanel.addDatasetEventListener(this);
+			populationsPanel.addInterfaceEventListener(this);
+			log(Level.FINEST, "Created populations panel");
+			
+			consensusNucleusPanel = new ConsensusNucleusPanel();
+			detailPanels.add(consensusNucleusPanel);
+
 			
 			//---------------
 			// Create the split view
@@ -320,10 +328,11 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			checkUpdatingState();
 
 		} catch (Exception e) {
-			IJ.log("Error initialising Main: "+e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
-			}
+			logToImageJ("Error initialising Main", e);
+//			IJ.log("Error initialising Main: "+e.getMessage());
+//			for(StackTraceElement el : e.getStackTrace()){
+//				IJ.log(el.toString());
+//			}
 		}
 		
 	}

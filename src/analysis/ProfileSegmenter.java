@@ -7,12 +7,13 @@ import java.util.logging.Level;
 import components.generic.BooleanProfile;
 import components.generic.Profile;
 import components.nuclear.NucleusBorderSegment;
+import logging.Loggable;
 
 /**
  * Divide a profile into segments of interest based on
  * minima and maxima.
  */
-public class ProfileSegmenter extends AbstractLoggable {
+public class ProfileSegmenter implements Loggable {
 	
 	/**
 	 * The smallest number of points a segment can contain. 

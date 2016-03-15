@@ -3,6 +3,8 @@ package logging;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import ij.IJ;
+
 /**
  * This interface provides default methods for logging to 
  * the program log panel
@@ -10,6 +12,8 @@ import java.util.logging.Logger;
  *
  */
 public interface Loggable {
+	
+	public static final String PROGRAM_LOGGER = "ProgramLogger";
 
     /**
      * Log the given message to the program log window
@@ -17,7 +21,7 @@ public interface Loggable {
      * @param message the message to log
      */
 	default void log(Level level, String message){
-		Logger.getLogger("ProgramLogger").log(level, message);
+		Logger.getLogger(PROGRAM_LOGGER).log(level, message);
 	}
     
     /**
@@ -27,7 +31,7 @@ public interface Loggable {
      * @param t the exception
      */
 	default void logError(String message, Throwable t){
-		Logger.getLogger("ProgramLogger").log(Level.SEVERE, message, t);
+		Logger.getLogger(PROGRAM_LOGGER).log(Level.SEVERE, message, t);
 	}
 	
 	/**
@@ -37,6 +41,14 @@ public interface Loggable {
      * @param t the exception
      */
 	default void log(Level level, String message, Throwable t){
-		Logger.getLogger("ProgramLogger").log(level, message, t);
+		Logger.getLogger(PROGRAM_LOGGER).log(level, message, t);
+	}
+	
+	default void logToImageJ(String message, Throwable t){
+		IJ.log(message);
+		IJ.log(t.getMessage());
+		for(StackTraceElement el : t.getStackTrace()){
+			IJ.log(el.toString());
+		}
 	}
 }
