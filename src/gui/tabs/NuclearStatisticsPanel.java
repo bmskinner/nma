@@ -20,8 +20,10 @@ package gui.tabs;
 
 import gui.tabs.nuclear.NuclearBoxplotsPanel;
 import gui.tabs.nuclear.NuclearHistogramsPanel;
+import gui.tabs.nuclear.NuclearOverlaysPanel;
 import gui.tabs.nuclear.NucleusMagnitudePanel;
 import gui.tabs.nuclear.WilcoxonDetailPanel;
+
 import java.awt.BorderLayout;
 import java.util.logging.Level;
 
@@ -37,10 +39,11 @@ public class NuclearStatisticsPanel extends DetailPanel {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private NuclearBoxplotsPanel 	boxplotPanel;
+	private NuclearBoxplotsPanel   boxplotPanel;
 	private NuclearHistogramsPanel histogramsPanel;
-	private WilcoxonDetailPanel wilcoxonPanel;
-	private NucleusMagnitudePanel nucleusMagnitudePanel;
+	private WilcoxonDetailPanel    wilcoxonPanel;
+	private NucleusMagnitudePanel  nucleusMagnitudePanel;
+	private NuclearOverlaysPanel   nuclearOverlaysPanel;
 	
 	private JTabbedPane 	tabPane;
 
@@ -58,10 +61,17 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		tabPane.addTab("Histograms", histogramsPanel);
 		
 		wilcoxonPanel 	= new WilcoxonDetailPanel();
+		this.addSubPanel(wilcoxonPanel);
 		tabPane.addTab("Stats", null, wilcoxonPanel, null);
 		
 		nucleusMagnitudePanel 	= new NucleusMagnitudePanel();
+		this.addSubPanel(nucleusMagnitudePanel);
 		tabPane.addTab("Magnitude", null, nucleusMagnitudePanel, null);
+		
+		
+		nuclearOverlaysPanel 	= new NuclearOverlaysPanel();
+		this.addSubPanel(nuclearOverlaysPanel);
+		tabPane.addTab("Overlays", null, nuclearOverlaysPanel, null);
 		
 		this.add(tabPane, BorderLayout.CENTER);
 	}
@@ -79,6 +89,9 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		
 		nucleusMagnitudePanel.update(getDatasets());
 		log(Level.FINEST, "Updating magnitude panel");
+		
+		nuclearOverlaysPanel.update(getDatasets());
+		log(Level.FINEST, "Updating overlays panel");
 	}
 	
 	@Override

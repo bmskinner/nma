@@ -1153,9 +1153,19 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @throws Exception 
 	 */
 	public static XYDataset createNucleusOutline(Cell cell, boolean segmented) throws Exception{
+		return createNucleusOutline(cell.getNucleus(), segmented);
+	}
+	
+	/**
+	 * Get the outline for a specific nucleus in a dataset. Sets the position
+	 * to the original coordinates in the image 
+	 * @param cell
+	 * @param segmented add the segments?
+	 * @return
+	 * @throws Exception 
+	 */
+	public static XYDataset createNucleusOutline(Nucleus nucleus, boolean segmented) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
-
-		Nucleus nucleus = cell.getNucleus();
 
 		if(segmented){
 
@@ -1205,7 +1215,7 @@ public class NucleusDatasetCreator implements Loggable {
 			double[] ypoints = new double[nucleus.getOriginalBorderList().size()];
 
 			int i =0;
-			for(XYPoint p : nucleus.getOriginalBorderList()){
+			for(XYPoint p : nucleus.getBorderList()){
 				xpoints[i] = p.getX();
 				ypoints[i] = p.getY();
 				i++;

@@ -22,6 +22,7 @@ import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -33,11 +34,13 @@ import utility.Constants;
 import components.Cell;
 import components.CellularComponent;
 import components.generic.BorderTag;
+import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
 import analysis.SignalManager;
+import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.TailDatasetCreator;
@@ -382,6 +385,114 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		}
 
 
+	}
+	
+	
+	/**
+	 * Create a chart with the outlines of all the nuclei within a dataset.
+	 * The options should only contain a single dataset
+	 * @param options
+	 * @return
+	 * @throws Exception 
+	 */
+	public static JFreeChart createVerticalNucleiChart(ChartOptions options) throws Exception{
+		
+		if( ! options.hasDatasets()){
+			return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+		}
+		
+		if(options.isMultipleDatasets()){
+			return createMultipleDatasetVerticalNucleiChart(options);
+		}
+		
+		return createSingleDatasetVerticalNucleiChart(options);
+		
+	}
+	
+	/**
+	 * Create the chart with the outlines of all the nuclei within a single dataset.
+	 * @param options
+	 * @return
+	 * @throws Exception 
+	 */
+	private static JFreeChart createSingleDatasetVerticalNucleiChart(ChartOptions options) throws Exception{
+		
+		JFreeChart chart = ChartFactory.createXYLineChart(null,
+						null, null, null, PlotOrientation.VERTICAL, true, true,
+						false);
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		
+		plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
+		plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
+		
+		XYLineAndShapeRenderer r = new XYLineAndShapeRenderer(true, false);
+		r.setBaseSeriesVisibleInLegend(false);
+		r.setBaseStroke(ChartComponents.PROFILE_STROKE);
+		r.setSeriesPaint(0, Color.LIGHT_GRAY);
+
+		int i=0;
+		for(Nucleus n : options.firstDataset().getCollection().getNuclei()){
+			
+			Nucleus verticalNucleus = n.getVerticallyRotatedNucleus();
+			
+			XYDataset nucleusDataset = NucleusDatasetCreator.createNucleusOutline(verticalNucleus, false);
+			
+			plot.setDataset(i, nucleusDataset);
+			plot.setRenderer(i, r);
+
+			i++;
+			
+		}
+		return chart;
+	}
+	
+	/**
+	 * Create the chart with the outlines of all the nuclei within a single dataset.
+	 * @param options
+	 * @return
+	 * @throws Exception 
+	 */
+	private static JFreeChart createMultipleDatasetVerticalNucleiChart(ChartOptions options) throws Exception{
+		
+		JFreeChart chart = ChartFactory.createXYLineChart(null,
+						null, null, null, PlotOrientation.VERTICAL, true, true,
+						false);
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		
+		plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
+		plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
+
+		int i=0;
+		int datasetNumber = 0;
+		for(AnalysisDataset dataset : options.getDatasets()){
+			
+			Color colour = dataset.hasDatasetColour()
+					? dataset.getDatasetColour()
+					: ColourSelecter.getSegmentColor(datasetNumber++);
+			
+			XYLineAndShapeRenderer r = new XYLineAndShapeRenderer(true, false);
+			r.setBaseSeriesVisibleInLegend(false);
+			r.setBaseStroke(ChartComponents.PROFILE_STROKE);
+			r.setSeriesPaint(0, colour);
+
+			for(Nucleus n : dataset.getCollection().getNuclei()){
+
+				Nucleus verticalNucleus = n.getVerticallyRotatedNucleus();
+
+				XYDataset nucleusDataset = NucleusDatasetCreator.createNucleusOutline(verticalNucleus, false);
+
+				plot.setDataset(i, nucleusDataset);
+				plot.setRenderer(i, r);
+
+				i++;
+
+			}
+		}
+		return chart;
 	}
 
 }

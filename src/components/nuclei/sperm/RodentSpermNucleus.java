@@ -467,7 +467,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		/*
 		 * Ensure the nucleus is cached
 		 */
-		verticalNucleus = super.getVerticallyRotatedNucleus();
+		super.getVerticallyRotatedNucleus();
 		
 		/*
 		 * Get the X position of the reference point
