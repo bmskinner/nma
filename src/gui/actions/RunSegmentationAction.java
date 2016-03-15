@@ -134,13 +134,16 @@ public class RunSegmentationAction extends ProgressableAction {
 			public void run(){
 				
 				/*
-				 * When refreshing segmnetation, the orientaition point may have changed.
+				 * When refreshing segmentation, the orientation point may have changed.
 				 * Update the vertical orientation nuclei for the dataset. Also force the
-				 * consensus nucleus to be refolded at the next step
+				 * consensus nucleus to be refolded at the next step.
 				 */
 				if(mode.equals(MorphologyAnalysisMode.REFRESH)){
 					dataset.getCollection().updateVerticalNuclei();
-					downFlag |= MainWindow.CURVE_REFOLD;
+					
+					if(dataset.getCollection().hasConsensusNucleus()){
+						downFlag |= MainWindow.CURVE_REFOLD;
+					}
 				}
 
 				/*
