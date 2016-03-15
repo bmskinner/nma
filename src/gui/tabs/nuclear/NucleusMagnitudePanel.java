@@ -16,11 +16,12 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package gui.tabs;
+package gui.tabs.nuclear;
 
 import gui.components.ExportableTable;
 import gui.components.PairwiseTableCellRenderer;
 import gui.dialogs.RandomSamplingDialog;
+import gui.tabs.AbstractPairwiseDetailPanel;
 
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;

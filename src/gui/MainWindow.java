@@ -45,7 +45,7 @@ import gui.tabs.DetailPanel;
 import gui.tabs.EditingDetailPanel;
 import gui.tabs.InterDatasetComparisonDetailPanel;
 import gui.tabs.MergesDetailPanel;
-import gui.tabs.NuclearBoxplotsPanel;
+import gui.tabs.NuclearStatisticsPanel;
 import gui.tabs.NucleusProfilesPanel;
 import gui.tabs.SegmentsDetailPanel;
 import gui.tabs.SignalsDetailPanel;
@@ -113,7 +113,7 @@ public class MainWindow
 	private NucleusProfilesPanel 	nucleusProfilesPanel; 	// the angle profiles
 	private AnalysisDetailPanel		analysisDetailPanel;	// nucleus detection parameters and stats
 	private SignalsDetailPanel 		signalsDetailPanel;		// nuclear signals
-	private NuclearBoxplotsPanel 	nuclearBoxplotsPanel;	// nuclear stats - areas, perimeters etc
+	private NuclearStatisticsPanel 	nuclearBoxplotsPanel;	// nuclear stats - areas, perimeters etc
 	private SegmentsDetailPanel 	segmentsDetailPanel;	// segmented profiles
 	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
 	private MergesDetailPanel		mergesDetailPanel;		// merges between populations
@@ -255,7 +255,7 @@ public class MainWindow
 			//---------------
 			// Create panel for split boxplots
 			//---------------
-			nuclearBoxplotsPanel  = new NuclearBoxplotsPanel();
+			nuclearBoxplotsPanel  = new NuclearStatisticsPanel();
 			detailPanels.add(nuclearBoxplotsPanel);
 			tabbedPane.addTab("Nuclear charts", nuclearBoxplotsPanel);
 				

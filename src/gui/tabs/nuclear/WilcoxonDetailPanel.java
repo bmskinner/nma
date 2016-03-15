@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package gui.tabs;
+package gui.tabs.nuclear;
 
 import javax.swing.JLabel;
 import javax.swing.table.TableModel;
@@ -26,6 +26,7 @@ import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import gui.components.ExportableTable;
 import gui.components.WilcoxonTableCellRenderer;
+import gui.tabs.AbstractPairwiseDetailPanel;
 import stats.NucleusStatistic;
 
 @SuppressWarnings("serial")
