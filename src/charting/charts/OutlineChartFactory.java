@@ -39,6 +39,7 @@ import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
+import analysis.BooleanAligner;
 import analysis.SignalManager;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
@@ -431,11 +432,30 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		r.setBaseSeriesVisibleInLegend(false);
 		r.setBaseStroke(ChartComponents.PROFILE_STROKE);
 		r.setSeriesPaint(0, Color.LIGHT_GRAY);
+		
+		/*
+		 * Get a boolean mask for the consensus nucleus
+		 */
+		boolean[][] reference = null;
+		BooleanAligner aligner = null;
+		if(options.firstDataset().getCollection().hasConsensusNucleus()){
+			reference = options.firstDataset().getCollection().getConsensusNucleus().getBooleanMask(200, 200);
+			aligner = new BooleanAligner(reference);
+		}
 
 		int i=0;
 		for(Nucleus n : options.firstDataset().getCollection().getNuclei()){
 			
 			Nucleus verticalNucleus = n.getVerticallyRotatedNucleus();
+			
+			/*
+			 * Find the best offset for the CoM to fit the consensus nucleus if present
+			 */
+			if(reference != null){
+				boolean[][] test = verticalNucleus.getBooleanMask(200, 200);
+				int[] offsets = aligner.align(test);
+				verticalNucleus.moveCentreOfMass( new XYPoint(offsets[0], offsets[1]));
+			}
 			
 			XYDataset nucleusDataset = NucleusDatasetCreator.createNucleusOutline(verticalNucleus, false);
 			
