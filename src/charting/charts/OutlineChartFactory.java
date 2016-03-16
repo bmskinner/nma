@@ -500,6 +500,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					int[] offsets = aligner.align(test);
 					verticalNucleus.moveCentreOfMass( new XYPoint(offsets[1], offsets[0]));
 				}
+			} else {
+				verticalNucleus.moveCentreOfMass( new XYPoint(0, 0));
 			}
 			
 			XYDataset nucleusDataset = NucleusDatasetCreator.createNucleusOutline(verticalNucleus, false);
