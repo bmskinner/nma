@@ -75,6 +75,8 @@ import javax.swing.tree.TreeModel;
 
 import org.jfree.chart.JFreeChart;
 import analysis.AnalysisDataset;
+import analysis.nucleus.NucleusMeshBuilder;
+import analysis.nucleus.NucleusMeshBuilder.NucleusMesh;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
@@ -1089,12 +1091,27 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				
 				activeCell = activeDataset().getCollection().getCell(cellID);
 				updateCell(activeCell);
+				
+//				testMeshBuilder();
 			} catch (Exception e1){
 				log(Level.SEVERE, "Error fetching cell");
 				log(Level.FINE, "Error fetching cell", e1);
 			}
 		}
 		
+	}
+	
+	private void testMeshBuilder() throws Exception{
+		
+		if(activeDataset().getCollection().hasConsensusNucleus()){
+			NucleusMeshBuilder builder = new NucleusMeshBuilder();
+			
+			NucleusMesh template = builder.buildMesh(activeDataset().getCollection().getConsensusNucleus());
+			
+			NucleusMesh cellMesh = builder.buildMesh(activeCell.getNucleus().getVerticallyRotatedNucleus(), template);
+			
+			cellMesh.compare(template);
+		}
 	}
 
 }

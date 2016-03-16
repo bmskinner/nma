@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import utility.Utils;
 import components.AbstractCellularComponent;
@@ -241,10 +242,10 @@ public class SegmentedProfile extends Profile implements Serializable {
 		if(firstSeg==null){
 			
 			/*
-			 * A small subset of nuclei from issue 96 do not produce segment boundaries
+			 * A subset of nuclei do not produce segment boundaries
 			 */
-			IJ.log("Cannot get ordered segments");
-			IJ.log(this.toString());
+			log(Level.WARNING, "Cannot get ordered segments");
+//			log(Level.WARNING, this.toString());
 			firstSeg = this.getSegments().get(0); // default to the first segment in the profile
 		}
 		
