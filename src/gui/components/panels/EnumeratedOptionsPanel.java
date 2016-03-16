@@ -26,8 +26,10 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import logging.Loggable;
+
 @SuppressWarnings("serial")
-public abstract class EnumeratedOptionsPanel extends JPanel implements ActionListener {
+public abstract class EnumeratedOptionsPanel extends JPanel implements ActionListener, Loggable {
 
 	private List<ActionListener> listeners = new ArrayList<ActionListener>();
 	
