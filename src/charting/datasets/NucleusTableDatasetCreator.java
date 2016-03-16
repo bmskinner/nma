@@ -33,7 +33,6 @@ import javax.swing.table.TableModel;
 
 import logging.Loggable;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 import charting.options.TableOptions;
@@ -42,7 +41,6 @@ import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.ClusteringOptions;
-import analysis.SignalManager;
 import analysis.ClusteringOptions.ClusteringMethod;
 import components.CellCollection;
 import components.ClusterGroup;
@@ -51,7 +49,6 @@ import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
-import ij.IJ;
 import stats.DipTester;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;

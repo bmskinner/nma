@@ -20,7 +20,6 @@ package gui.dialogs;
 
 import gui.DatasetEvent;
 import gui.DatasetEventListener;
-import gui.ImageType;
 import gui.InterfaceEvent;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.InterfaceEventListener;
@@ -29,46 +28,32 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.components.ColourSelecter;
 import gui.components.DraggableTreeViewer;
 import gui.components.VariableNodePainter;
-import ij.IJ;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -78,7 +63,6 @@ import components.ClusterGroup;
 import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
-import analysis.ClusteringOptions.ClusteringMethod;
 import jebl.evolution.graphs.Node;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.io.ImportException.DuplicateTaxaException;
@@ -88,14 +72,11 @@ import jebl.evolution.trees.RootedTree;
 import jebl.evolution.trees.TransformedRootedTree;
 import jebl.evolution.trees.Tree;
 import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
-import jebl.gui.trees.treeviewer.treelayouts.RectilinearTreeLayout;
-import jebl.gui.trees.treeviewer.treelayouts.TreeLayout;
-import jebl.gui.trees.treeviewer.TreePane;
 import jebl.gui.trees.treeviewer.TreePaneSelector.SelectionMode;
 import jebl.gui.trees.treeviewer.TreeViewer.TreeLayoutType;
 
 @SuppressWarnings("serial")
-public class ClusterTreeDialog extends LoadingIconDialog implements ActionListener, ItemListener {
+public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener {
 
 	private JPanel buttonPanel;
 	private DraggableTreeViewer viewer;
@@ -208,19 +189,23 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 		JPanel panel = new JPanel(new FlowLayout());
 		
 		JButton extractButton = new JButton("Extract selected as cluster");
-		extractButton.addActionListener(this);
-		extractButton.setActionCommand("Extract");
+		extractButton.addActionListener( a -> {
+			try {
+				extractSelectedNodesToCluster();
+			} catch (Exception e) {
+				log(Level.SEVERE, "Error extracting cells");
+				log(Level.FINE, "Error extracting cells", e);
+			}
+		} );
 		panel.add(extractButton);
 		
 		JButton analyseButton = new JButton("Analyse new clusters");
-		analyseButton.addActionListener(this);
-		analyseButton.setActionCommand("Analyse");
+		analyseButton.addActionListener( a -> analyseClusters()  );
 		panel.add(analyseButton);
 		
 		if(dataset.hasMergeSources()){
 			JButton mergeSourceButton = new JButton("Show merge sources");
-			mergeSourceButton.addActionListener(this);
-			mergeSourceButton.setActionCommand("ShowMergeSources");
+			mergeSourceButton.addActionListener( a -> showMergeSources() );
 			panel.add(mergeSourceButton);
 		}
 		
@@ -501,84 +486,57 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 			log(Level.WARNING, "No cells found. Check taxon labels are correct");
 		}
 	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
+	
+	private void analyseClusters(){
+		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		
-		if(e.getActionCommand().equals("Extract")){
-			
-			try {
-				extractSelectedNodesToCluster();
-			} catch (Exception e1) {
-				log(Level.SEVERE, "Error extracting cells", e1);
-			}
-			
+		for(CellCollection c : clusterList){
+			if(c.hasCells()){
 
-		}
-		
-		if(e.getActionCommand().equals("Analyse")){
-			
-			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-			
-			for(CellCollection c : clusterList){
-				if(c.hasCells()){
-
-					dataset.addChildCollection(c);
-					try {
-						dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
-					} catch (Exception e1) {
-						log(Level.SEVERE, "Error applying segments", e1);
-					}
-
-					AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
-					clusterDataset.setRoot(false);
-					list.add(clusterDataset);
+				dataset.addChildCollection(c);
+				try {
+					dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
+				} catch (Exception e1) {
+					log(Level.SEVERE, "Error applying segments", e1);
 				}
-			}
-			
-			testClusterGroupable(list);
 
-			
-			if(!list.isEmpty()){
-//				fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, list, dataset);
-				log(Level.FINEST, "Firing population update request");
-//				fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-				fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-//				log(Level.FINEST, "Fired dataset copy event to listeners");
-			} else {
-				log(Level.WARNING, "No datasets to analyse");
+				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
+				clusterDataset.setRoot(false);
+				list.add(clusterDataset);
 			}
-			this.setVisible(false);
-			this.dispose();
 		}
 		
-		if(e.getActionCommand().equals("ShowMergeSources")){
-			
-			// Disable the selection dropdown boxes
-			setClusterGroupBoxNull();
-			setClusterBoxNull();
-			
-			
-			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-			for(UUID id : dataset.getMergeSources()){
-				list.add(dataset.getMergeSource(id));
-			}
-			
-//			log(Level.INFO, "Detected "+list.size()+" merge sources");
-			
-			ClusterGroup mergeGroup = makeNewClusterGroup(list);
-		
-			
-			for(AnalysisDataset d : list){
-				mergeGroup.addDataset(d);
-//				log(Level.INFO, "Added merge source with "+d.getCollection().size()+" nuclei");
-			}
-			
-			colourTreeNodesByClusterGroup(mergeGroup);
+		testClusterGroupable(list);
 
+		
+		if(!list.isEmpty()){
+			log(Level.FINEST, "Firing population update request");
+			fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+		} else {
+			log(Level.WARNING, "No datasets to analyse");
 		}
-		
+		this.setVisible(false);
+		this.dispose();
+	}
+	
+	private void showMergeSources(){
+		// Disable the selection dropdown boxes
+		setClusterGroupBoxNull();
+		setClusterBoxNull();
 
+
+		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		for(UUID id : dataset.getMergeSources()){
+			list.add(dataset.getMergeSource(id));
+		}
+
+		ClusterGroup mergeGroup = makeNewClusterGroup(list);
+
+		for(AnalysisDataset d : list){
+			mergeGroup.addDataset(d);
+		}
+
+		colourTreeNodesByClusterGroup(mergeGroup);
 	}
 	
 	/**
