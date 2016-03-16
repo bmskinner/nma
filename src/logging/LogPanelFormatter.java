@@ -28,55 +28,59 @@ public class LogPanelFormatter extends Formatter {
 	
 	private static final String NEWLINE = System.getProperty("line.separator");
 	
+	private static final String SEPARATOR = " | ";
+	
 	
 	@Override
 	public String format(LogRecord record) {
+		
+		StringBuffer buffer = new StringBuffer();
 
 		String date = calcDate(record.getMillis());
-		String log = null;
+
 		if(record.getLevel()==Level.FINE || record.getLevel()==Level.FINER || record.getLevel()==Level.FINEST){
-			log = date + " " + formatFinest(record);
+			
+			buffer.append(date + " " + formatFinest(record));
 		} else {
-			log = date + " " + record.getMessage() + NEWLINE;
+			buffer.append(date + " " + record.getMessage() + NEWLINE);
 		}
-		
 
-		if(record.getLevel()==Level.SEVERE){
+		if(record.getThrown()!=null){
+			Throwable t = record.getThrown();
 
-			if(record.getThrown()!=null){
-				Throwable t = record.getThrown();
+			buffer.append( t.getClass().getSimpleName() + ": " + t.getMessage() + NEWLINE  ) ;
 
-				log += t.getClass().getSimpleName() + ": " + t.getMessage() + NEWLINE;
-
-				for(StackTraceElement el : t.getStackTrace()){
-					log += el.toString() + NEWLINE;
-				}
-				log += NEWLINE;
+			for(StackTraceElement el : t.getStackTrace()){
+				buffer.append( el.toString() + NEWLINE );
 			}
-
+			buffer.append( NEWLINE );
 		}
 
-		return log;
+
+
+		return buffer.toString();
 	}
 	
 	private String formatFinest(LogRecord record){
 		
 		String sourceMethod = record.getSourceMethodName();
-		 if(sourceMethod.equals("log")){
-			 StackTraceElement[] array = Thread.currentThread().getStackTrace();
-			 sourceMethod = array[8].getMethodName();
-			 
-		 }
-		 
-		String result = record.getMessage()
-				+ " | "
-				+ record.getSourceClassName()
-				+ " | "
-				+ sourceMethod
-				+ " | "
-				+ record.getThreadID()
-				+ NEWLINE;
-		return result;
+		if(sourceMethod.equals("log")){
+			StackTraceElement[] array = Thread.currentThread().getStackTrace();
+			sourceMethod = array[8].getMethodName();
+		}
+
+		StringBuffer buffer = new StringBuffer();
+
+		buffer.append(record.getMessage());
+		buffer.append(SEPARATOR);
+		buffer.append(record.getSourceClassName());
+		buffer.append(SEPARATOR);
+		buffer.append(sourceMethod);
+		buffer.append(SEPARATOR);
+		buffer.append(record.getThreadID());
+		buffer.append(NEWLINE);
+
+		return buffer.toString();
 	}
 	
 	 

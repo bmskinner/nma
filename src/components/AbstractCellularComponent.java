@@ -603,4 +603,32 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 //		 return i;
 	 }
 	
+	/**
+	 * Create a boolean mask, in which 1 is within the nucleus and 0 is outside
+	 * the nucleus, for an image centred on the nuclear centre of mass, of the
+	 * given size
+	 * @param height
+	 * @param width
+	 * @return
+	 */
+	public boolean[][] getBooleanMask(int height, int width){
+		
+		int halfX = width >> 1;
+		int halfY = height >> 1;	
+			
+		boolean[][] result = new boolean[height][width];
+					
+		for(int x= -halfX, aX=0; aX<width; x++, aX++ ){
+
+			for(int y=-halfY, aY=0; aY<height; y++, aY++ ){
+
+				result[aY][aX] = this.containsPoint( new XYPoint(x, y) );
+
+			}
+			
+		}
+			
+		return result;
+	}
+	
 }

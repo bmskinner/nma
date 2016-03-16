@@ -551,15 +551,5 @@ public interface Nucleus extends CellularComponent {
 	 * @return
 	 */
 	public String printLog();
-	
-	/**
-	 * Create a boolean mask, in which 1 is within the nucleus and 0 is outside
-	 * the nucleus, for an image centred on the nuclear centre of mass, of the
-	 * given size
-	 * @param height
-	 * @param width
-	 * @return
-	 */
-	public boolean[][] getBooleanMask(int height, int width);
-	
+		
 }

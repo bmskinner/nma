@@ -255,6 +255,7 @@ public abstract class DetailPanel
 				} catch (Exception e) {
 					log(Level.SEVERE, "Error updating panel");
 					log(Level.FINE, "Error updating panel", e); // save detail for fine logging
+					setUpdating(false);
 					update( (List<AnalysisDataset>) null); // don't use updateNull because it throws an exception
 				} finally {
 					setUpdating(false);

@@ -12,6 +12,7 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import gui.components.FixedAspectRatioChartPanel;
+import gui.components.panels.ProbabilityDensityCheckboxPanel;
 import gui.tabs.DetailPanel;
 
 /**
@@ -24,11 +25,17 @@ import gui.tabs.DetailPanel;
 public class NuclearOverlaysPanel extends DetailPanel {
 	
 	private FixedAspectRatioChartPanel 	chartPanel; 		// hold the nuclei
+	private ProbabilityDensityCheckboxPanel checkBoxPanel; // use for aligning nuclei
 	
 	public NuclearOverlaysPanel(){
 		
 		this.setLayout(new BorderLayout());
-
+		
+		checkBoxPanel = new ProbabilityDensityCheckboxPanel();
+		checkBoxPanel.setText("Align nuclei");
+		checkBoxPanel.addActionListener( a ->  update(getDatasets())  );
+		this.add(checkBoxPanel, BorderLayout.NORTH);
+		
 		try {
 			
 			ChartOptions options = new ChartOptionsBuilder()
@@ -49,8 +56,11 @@ public class NuclearOverlaysPanel extends DetailPanel {
 
 	@Override
 	protected void updateSingle() throws Exception {
+		
+		boolean alignNuclei = checkBoxPanel.isSelected();
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
+			.setNormalised(alignNuclei)
 			.build();
 		
 		JFreeChart chart = getChart(options);

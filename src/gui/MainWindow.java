@@ -873,6 +873,7 @@ public class MainWindow
 					final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 					list.add(dataset);
 					segmentsDetailPanel.refreshChartCache(list); // segment positions charts need updating
+					nuclearBoxplotsPanel.refreshChartCache(list); // overlaid nuclei need updating
 
 					log(Level.FINE, "Preparing to select refolded dataset");
 					populationsPanel.selectDataset(dataset);

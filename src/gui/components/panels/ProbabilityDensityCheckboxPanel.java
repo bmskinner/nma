@@ -46,5 +46,9 @@ public class ProbabilityDensityCheckboxPanel extends EnumeratedOptionsPanel {
 
 		checkBox.setEnabled(b);
 	}
+	
+	public void setText(String s){
+		checkBox.setText(s);
+	}
 
 }

@@ -25,14 +25,16 @@ import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import ij.IJ;
 
 public class DebugFileFormatter extends Formatter {
 	
 	private static final String NEWLINE = System.getProperty("line.separator");
+	private static final String SEPARATOR = "\t";
 	
 	 @Override
 	    public String format(LogRecord record) {
+		 
+		 StringBuffer buffer = new StringBuffer();
 		 
 		 /*
 		  * The source method name can be obscured by the log functions.
@@ -47,40 +49,43 @@ public class DebugFileFormatter extends Formatter {
 		 }
 		 
 		 String date = calcDate(record.getMillis());
-		 String log = date 
-				 + "\t" 
-				 + record.getLevel() 
-				 + "\t" 
-				 + record.getLoggerName()
-				 + "\t"
-				 + sourceMethod
-				 + "\t"
-				 + record.getMessage()
-				 + NEWLINE;
 		 
+		 buffer.append(date);
+		 buffer.append(SEPARATOR);
+		 buffer.append(record.getLevel());
+		 buffer.append(SEPARATOR);
+		 buffer.append(record.getLoggerName());
+		 buffer.append(SEPARATOR);
+		 buffer.append(sourceMethod);
+		 buffer.append(SEPARATOR);
+		 buffer.append(record.getMessage());
+		 buffer.append(NEWLINE);
+		 		 
 		 	if(record.getLevel()==Level.SEVERE){
 		 		
 		 		if(record.getThrown()!=null){
 		 			Throwable t = record.getThrown();
-		 			log += date 
-	 						+ "\t" 
-	 						+"STACK" 
-	 						+ "\t"
-	 						+ t.getMessage() 
-	 						+ "\r\n";
+		 			
+		 			buffer.append(date);
+		 			buffer.append(SEPARATOR);
+		 			buffer.append("STACK");
+		 			buffer.append(SEPARATOR);
+		 			buffer.append(t.getMessage());
+		 			buffer.append(NEWLINE);
 		 			
 		 			for(StackTraceElement el : t.getStackTrace()){
-		 				log +=  date 
-		 						+ "\t" 
-		 						+"STACK" 
-		 						+ "\t" 
-		 						+ el.toString() 
-		 						+ NEWLINE;
+		 				
+		 				buffer.append(date);
+			 			buffer.append(SEPARATOR);
+			 			buffer.append("STACK");
+			 			buffer.append(SEPARATOR);
+			 			buffer.append(el.toString() );
+			 			buffer.append(NEWLINE);
 		 			}
 		 		}
 		 		
 		 	}
-		 	return log;
+		 	return buffer.toString();
 	    }
 	 
 	 private String calcDate(long millisecs) {

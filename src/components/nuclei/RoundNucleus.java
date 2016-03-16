@@ -1586,32 +1586,6 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	
-	/**
-	 * Create a boolean mask, in which 1 is within the nucleus and 0 is outside
-	 * the nucleus, for an image centred on the nuclear centre of mass, of the
-	 * given size
-	 * @param height
-	 * @param width
-	 * @return
-	 */
-	public boolean[][] getBooleanMask(int height, int width){
-		
-		int halfX = width >> 1;
-		int halfY = height >> 1;	
-			
-		boolean[][] result = new boolean[height][width];
-					
-		for(int x = -halfX; x<halfX; x++ ){
 
-			for(int y = -halfY; x<halfY; y++ ){
-
-				result[y][x] = this.containsPoint( new XYPoint(x, y) );
-
-			}
-			
-		}
-			
-		return result;
-	}
 	
 }

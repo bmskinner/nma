@@ -438,9 +438,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		 */
 		boolean[][] reference = null;
 		BooleanAligner aligner = null;
-		if(options.firstDataset().getCollection().hasConsensusNucleus()){
-			reference = options.firstDataset().getCollection().getConsensusNucleus().getBooleanMask(200, 200);
-			aligner = new BooleanAligner(reference);
+		
+		if(options.isNormalised()){
+			if(options.firstDataset().getCollection().hasConsensusNucleus()){
+				reference = options.firstDataset().getCollection().getConsensusNucleus().getBooleanMask(200, 200);
+				aligner = new BooleanAligner(reference);
+			}
 		}
 
 		int i=0;
@@ -451,10 +454,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			/*
 			 * Find the best offset for the CoM to fit the consensus nucleus if present
 			 */
-			if(reference != null){
-				boolean[][] test = verticalNucleus.getBooleanMask(200, 200);
-				int[] offsets = aligner.align(test);
-				verticalNucleus.moveCentreOfMass( new XYPoint(offsets[0], offsets[1]));
+			if(options.isNormalised()){
+				if(reference != null){
+					boolean[][] test = verticalNucleus.getBooleanMask(200, 200);
+					int[] offsets = aligner.align(test);
+					verticalNucleus.moveCentreOfMass( new XYPoint(offsets[1], offsets[0]));
+				}
 			}
 			
 			XYDataset nucleusDataset = NucleusDatasetCreator.createNucleusOutline(verticalNucleus, false);
