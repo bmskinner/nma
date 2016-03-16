@@ -188,7 +188,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 								log(Level.FINEST, "Opening image");
 								importAndDisplayImage(openImage);
 							} catch(Exception e){
-								log(Level.SEVERE, "Error opening image, skipping");
+								log(Level.SEVERE, "Error opening image");
 							}
 							
 						}
@@ -213,7 +213,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 								log(Level.FINEST, "Opening image");
 								importAndDisplayImage(openImage);
 							} catch(Exception e){
-								log(Level.SEVERE, "Error opening image, skipping");
+								log(Level.SEVERE, "Error opening image");
 //								openImage = getNextImage();
 //								importAndDisplayImage(openImage);
 							}
@@ -424,7 +424,13 @@ public abstract class ImageProber extends LoadingIconDialog {
 					importAndDisplayImage(openImage);
 				} else {
 					log(Level.WARNING, "No images found in folder");
-					setStatusError();
+					JOptionPane.showMessageDialog(ImageProber.this,  
+							"No images found in folder.", 
+							"Nope.",
+							JOptionPane.ERROR_MESSAGE);
+					
+					ImageProber.this.ok = false;
+					ImageProber.this.setVisible(false);
 				}
 			}
 		};	
