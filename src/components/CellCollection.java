@@ -100,7 +100,7 @@ public class CellCollection implements Serializable {
 	 * Constructor.
 	 * @param folder the folder of images
 	 * @param outputFolder a name for the outputs (usually the analysis date). Can be null
-	 * @param type the type of collection (e.g. analysable)
+	 * @param name the name of the collection
 	 * @param nucleusClass the class of nucleus to be held
 	 */
 	public CellCollection(File folder, String outputFolder, String name, NucleusType nucleusType){
@@ -111,7 +111,7 @@ public class CellCollection implements Serializable {
 	 * Constructor with non-random id. Use only when copying an old collection. Can cause ID conflicts!
 	 * @param folder the folder of images
 	 * @param outputFolder a name for the outputs (usually the analysis date). Can be null
-	 * @param type the type of collection (e.g. analysable)
+	 * @param name the name of the collection
 	 * @param nucleusClass the class of nucleus to be held
 	 * @param id specify an id for the collection, rather than generating randomly.
 	 */

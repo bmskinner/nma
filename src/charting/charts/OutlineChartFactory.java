@@ -23,6 +23,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYShapeAnnotation;
+import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
@@ -149,17 +150,18 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		if(rotateMode.equals(RotationMode.VERTICAL)){
 			// duplicate the cell
 			Cell newCell = new Cell();
-			Nucleus verticalNucleus = cell.getNucleus().duplicate();
+			Nucleus verticalNucleus = cell.getNucleus().getVerticallyRotatedNucleus();
+//			duplicate();
 			newCell.setNucleus(verticalNucleus);
-			if(verticalNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && verticalNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
-
-				// Rotate vertical
-				BorderPoint[] points = verticalNucleus.getBorderPointsForVerticalAlignment();
-				verticalNucleus.alignPointsOnVertical(points[0], points[1] );
-			} else {
-				// If the verticals are not present, use the orientation point
-				verticalNucleus.rotatePointToBottom(verticalNucleus.getBorderTag(BorderTag.ORIENTATION_POINT));
-			}
+//			if(verticalNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && verticalNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+//
+//				// Rotate vertical
+//				BorderPoint[] points = verticalNucleus.getBorderPointsForVerticalAlignment();
+//				verticalNucleus.alignPointsOnVertical(points[0], points[1] );
+//			} else {
+//				// If the verticals are not present, use the orientation point
+//				verticalNucleus.rotatePointToBottom(verticalNucleus.getBorderTag(BorderTag.ORIENTATION_POINT));
+//			}
 			cell = newCell;
 			
 			// Need to have top point at the top of the image
@@ -427,6 +429,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,
 						false);
+		
 
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
@@ -438,6 +441,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		r.setBaseSeriesVisibleInLegend(false);
 		r.setBaseStroke(ChartComponents.PROFILE_STROKE);
 		r.setSeriesPaint(0, Color.LIGHT_GRAY);
+		r.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
 		
 		/*
 		 * Get a boolean mask for the consensus nucleus
@@ -534,6 +538,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
 		plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
 
+		StandardXYToolTipGenerator tooltip = new StandardXYToolTipGenerator();
+		
 		int i=0;
 		int datasetNumber = 0;
 		for(AnalysisDataset dataset : options.getDatasets()){
@@ -546,6 +552,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			r.setBaseSeriesVisibleInLegend(false);
 			r.setBaseStroke(ChartComponents.PROFILE_STROKE);
 			r.setSeriesPaint(0, colour);
+			r.setBaseToolTipGenerator(tooltip);
 
 			for(Nucleus n : dataset.getCollection().getNuclei()){
 

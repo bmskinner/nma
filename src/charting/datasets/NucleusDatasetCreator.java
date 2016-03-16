@@ -1222,7 +1222,7 @@ public class NucleusDatasetCreator implements Loggable {
 			}
 
 			double[][] data = { xpoints, ypoints };
-			ds.addSeries("Nucleus Border", data);
+			ds.addSeries(nucleus.getNameAndNumber(), data);
 
 		}		
 		return ds;
