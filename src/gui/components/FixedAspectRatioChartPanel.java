@@ -18,7 +18,7 @@
  *******************************************************************************/
 package gui.components;
 
-import ij.IJ;
+import java.util.logging.Level;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
@@ -36,13 +36,14 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel {
 	@Override
 	public void restoreAutoBounds() {
 		
-//		IJ.log("Restoring auto bounds");
 		try {
 			XYPlot plot = (XYPlot) this.getChart().getPlot();
 
 			double chartWidth = this.getWidth();
 			double chartHeight = this.getHeight();
 			double aspectRatio = chartWidth / chartHeight;
+			
+			log(Level.FINEST, "Plot w: "+chartWidth+"; h: "+chartHeight+"; asp: "+aspectRatio);
 
 			// start with impossible values
 			double xMin = chartWidth;
@@ -51,13 +52,13 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel {
 			double xMax = 0;
 			double yMax = 0;
 
-//			IJ.log("Plot has "+plot.getDatasetCount()+" datasets");
+			log(Level.FINEST, "Plot has "+plot.getDatasetCount()+" datasets");
 			// get the max and min values of the chart
 			for(int i = 0; i<plot.getDatasetCount();i++){
 				XYDataset dataset = plot.getDataset(i);
 
 				if(dataset==null){
-//					IJ.log("Null dataset "+i);
+					log(Level.FINEST, "Null dataset "+i);
 					super.restoreAutoBounds();
 					return;
 				}
@@ -92,7 +93,7 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel {
 			double newYRange = yRange;
 
 			// test the aspect ratio
-			//		IJ.log("Old range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
+			log(Level.FINEST, "Old range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
 			if( (xRange / yRange) > aspectRatio){
 				// width is not enough
 				//			IJ.log("Too narrow: "+xRange+", "+yRange+":  aspect ratio "+aspectRatio);
@@ -114,16 +115,13 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel {
 			xMax += xDiff;
 			yMin -= yDiff;
 			yMax += yDiff;
-			//		IJ.log("New range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
+			log(Level.FINEST, "New range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
 
 			plot.getRangeAxis().setRange(yMin, yMax);
 			plot.getDomainAxis().setRange(xMin, xMax);
 //			IJ.log("Set min max range");
 		} catch (Exception e){
-			IJ.log("Error restoring auto bounds:");
-			for(StackTraceElement e1 : e.getStackTrace()){
-				IJ.log(e1.toString());
-			}
+			logError("Error restoring auto bounds", e);
 			super.restoreAutoBounds();
 		}
 	

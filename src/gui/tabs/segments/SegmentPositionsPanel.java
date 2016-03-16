@@ -74,7 +74,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
-			return MorphologyChartFactory.makeSegmentStartPositionChart(options);
+		return MorphologyChartFactory.makeSegmentStartPositionChart(options);
 	}
 
 
@@ -106,20 +106,24 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 			// Get each segment as a boxplot
 			for(NucleusBorderSegment seg : segments){
 
+				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.setSegPosition(seg.getPosition())
 					.setSegID(seg.getID())
 					.build();
+				
+				log(Level.FINEST, "Making segment start position chart for seg "+seg.getName());
 
 				JFreeChart chart = getChart(options);
 
 				FixedAspectRatioChartPanel chartPanel = new FixedAspectRatioChartPanel(chart);
+				
 				chartPanel.setPreferredSize(preferredSize);
-	
+				chartPanel.setSize(preferredSize);
 				chartPanels.put(seg.getName(), chartPanel);
 				mainPanel.add(chartPanel);			
-//				chartPanel.restoreAutoBounds();
+//				
 			}
 
 		} else { // different number of segments, blank chart
@@ -132,6 +136,14 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 		mainPanel.revalidate();
 		mainPanel.repaint();
 		scrollPane.setViewportView(mainPanel);
+		
+		/*
+		 * Ensure charts maintain aspect ratio
+		 */
+		for(ChartPanel panel : chartPanels.values()){
+			
+			panel.restoreAutoBounds();
+		}
 	}
 
 

@@ -38,6 +38,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import utility.Constants;
 import charting.datasets.OutlierFreeBoxAndWhiskerCategoryDataset;
 import ij.io.SaveDialog;
+import logging.Loggable;
 
 
 /**
@@ -47,7 +48,7 @@ import ij.io.SaveDialog;
  *
  */
 @SuppressWarnings("serial")
-public class ExportableChartPanel extends ChartPanel {
+public class ExportableChartPanel extends ChartPanel implements Loggable {
 	
 	public ExportableChartPanel(JFreeChart chart){
 		super(chart);
