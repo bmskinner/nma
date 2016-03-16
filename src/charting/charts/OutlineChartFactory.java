@@ -45,7 +45,10 @@ import analysis.AnalysisDataset;
 import analysis.BooleanAligner;
 import analysis.BooleanAlignmentTask;
 import analysis.SignalManager;
+import analysis.nucleus.NucleusMeshBuilder;
 import analysis.nucleus.SegmentRecombiningTask;
+import analysis.nucleus.NucleusMeshBuilder.NucleusMesh;
+import analysis.nucleus.NucleusMeshBuilder.NucleusMeshEdge;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
@@ -549,9 +552,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					: ColourSelecter.getSegmentColor(datasetNumber++);
 			
 			XYLineAndShapeRenderer r = new XYLineAndShapeRenderer(true, false);
-			r.setBaseSeriesVisibleInLegend(false);
-			r.setBaseStroke(ChartComponents.PROFILE_STROKE);
-			r.setSeriesPaint(0, colour);
+			
 			r.setBaseToolTipGenerator(tooltip);
 
 			for(Nucleus n : dataset.getCollection().getNuclei()){
@@ -567,6 +568,46 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 			}
 		}
+		return chart;
+	}
+	
+	/**
+	 * Create the chart with the outlines of all the nuclei within a single dataset.
+	 * @param options
+	 * @return
+	 * @throws Exception 
+	 */
+	public static JFreeChart createMeshChart(Nucleus n1, Nucleus n2) throws Exception{
+		
+		XYDataset higher = NucleusDatasetCreator.createNucleusMeshDataset(n1, n2, true);
+		XYDataset lower  = NucleusDatasetCreator.createNucleusMeshDataset(n1, n2, false);
+
+		JFreeChart chart = ChartFactory.createXYLineChart(null,
+				null, null, null, PlotOrientation.VERTICAL, true, true,
+				false);
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		
+		XYLineAndShapeRenderer highRenderer = new XYLineAndShapeRenderer(true, false);
+		highRenderer.setBaseSeriesVisibleInLegend(false);
+		highRenderer.setBaseStroke(ChartComponents.PROFILE_STROKE);
+		for(int series=0; series<higher.getSeriesCount(); series++){
+			highRenderer.setSeriesPaint(series, Color.RED);
+		}
+		
+		XYLineAndShapeRenderer lowRenderer = new XYLineAndShapeRenderer(true, false);
+		lowRenderer.setBaseSeriesVisibleInLegend(false);
+		lowRenderer.setBaseStroke(ChartComponents.PROFILE_STROKE);
+		for(int series=0; series<lower.getSeriesCount(); series++){
+			lowRenderer.setSeriesPaint(series, Color.BLUE);
+		}
+		plot.setDataset(0, higher);
+		plot.setDataset(1, lower);
+		
+		plot.setRenderer(0, highRenderer);
+		plot.setRenderer(1, lowRenderer);
+		
 		return chart;
 	}
 

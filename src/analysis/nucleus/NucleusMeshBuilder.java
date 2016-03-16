@@ -32,7 +32,7 @@ public class NucleusMeshBuilder implements Loggable {
 	 * point, then around the perimeter.
 	 */
 	public NucleusMesh buildMesh(Nucleus nucleus) throws Exception{
-		log(Level.INFO, "Creating mesh for "+nucleus.getNameAndNumber());
+		log(Level.FINEST, "Creating mesh for "+nucleus.getNameAndNumber());
 		NucleusMesh mesh = new NucleusMesh(nucleus);
 		
 		mesh.addVertex(new NucleusMeshVertex(0, nucleus.getCentreOfMass()));
@@ -46,17 +46,17 @@ public class NucleusMeshBuilder implements Loggable {
 			int divisions = seg.length() / DIVISION_LENGTH; // find the number of divisions to make
 			
 			mesh.setDivision(segNumber++, divisions);
-			log(Level.INFO, "Dividing segment into "+divisions+" parts");
+			log(Level.FINEST, "Dividing segment into "+divisions+" parts");
 			
 			double proportion = 1d / (double) divisions;
 			
 			for(double d=0; d<1; d+=proportion){
 				int index = seg.getProportionalIndex(d);
-				log(Level.INFO, "Fetching point at index "+index);
+				log(Level.FINEST, "Fetching point at index "+index);
 				mesh.addVertex(new NucleusMeshVertex(vertex++, nucleus.getBorderPoint(index)));
 			}
 		}
-		log(Level.INFO, "Created mesh");
+		log(Level.FINEST, "Created mesh");
 		return mesh;
 		
 	}
@@ -69,42 +69,42 @@ public class NucleusMeshBuilder implements Loggable {
 	 * @throws Exception
 	 */
 	public NucleusMesh buildMesh(Nucleus nucleus, NucleusMesh template) throws Exception{
-		log(Level.INFO, "Creating mesh for "+nucleus.getNameAndNumber()+" using template "+template.getNucleusName());
+		log(Level.FINEST, "Creating mesh for "+nucleus.getNameAndNumber()+" using template "+template.getNucleusName());
 		NucleusMesh mesh = new NucleusMesh(nucleus);
 		
-		log(Level.INFO, "Adding centre of mass");
+		log(Level.FINEST, "Adding centre of mass");
 		mesh.addVertex(new NucleusMeshVertex(0, nucleus.getCentreOfMass()));
 		
-		log(Level.INFO, "Getting ordered segments");
+		log(Level.FINEST, "Getting ordered segments");
 		List<NucleusBorderSegment> list = nucleus.getProfile(ProfileType.REGULAR).getOrderedSegments();
 		
-		log(Level.INFO, "Checking counts");
+		log(Level.FINEST, "Checking counts");
 		if(template.getSegmentCount()!=list.size()){
-			log(Level.INFO, "Segment counts not equal:"+template.getSegmentCount()+" and "+list.size());
+			log(Level.FINEST, "Segment counts not equal:"+template.getSegmentCount()+" and "+list.size());
 			throw new IllegalArgumentException("Segment counts are not equal");
 		}
-		log(Level.INFO, "Segment counts equal:"+template.getSegmentCount()+" and "+list.size());
+		log(Level.FINEST, "Segment counts equal:"+template.getSegmentCount()+" and "+list.size());
 		
 		int vertex = 1;
 		int segNumber = 0;
-		log(Level.INFO, "Iterating over segments");
+		log(Level.FINEST, "Iterating over segments");
 		for(NucleusBorderSegment seg : list){
 			
 			int divisions = template.getDivision(segNumber);
-			log(Level.INFO, "Seg "+segNumber+": "+divisions);
+			log(Level.FINEST, "Seg "+segNumber+": "+divisions);
 			segNumber++;
 			
-			log(Level.INFO, "Dividing segment into "+divisions+" parts");
+			log(Level.FINEST, "Dividing segment into "+divisions+" parts");
 			
 			double proportion = 1d / (double) divisions;
 			
 			for(double d=0; d<1; d+=proportion){
 				int index = seg.getProportionalIndex(d);
-				log(Level.INFO, "Fetching point at index "+index);
+				log(Level.FINEST, "Fetching point at index "+index);
 				mesh.addVertex(new NucleusMeshVertex(vertex++, nucleus.getBorderPoint(index)));
 			}
 		}
-		log(Level.INFO, "Created mesh");
+		log(Level.FINEST, "Created mesh");
 		return mesh;
 	}
 	
@@ -156,26 +156,63 @@ public class NucleusMeshBuilder implements Loggable {
 			return thisDistance / thatDistance;
 		}
 		
-		public void compare(NucleusMesh mesh){
-			log(Level.INFO, "Comparing meshes");
+		public List<NucleusMeshEdge> compare(NucleusMesh mesh){
 			
-			log(Level.INFO, "Comparing each to CoM");
+			List<NucleusMeshEdge> edges = new ArrayList<NucleusMeshEdge>();
+			log(Level.FINEST, "Comparing meshes");
+			
+			log(Level.FINEST, "Comparing each to CoM");
 			for(int i=1; i<vertices.size(); i++){
 				double ratio = compareDistance(0, i, mesh);
-				log(Level.INFO, "0 - "+i+": "+ratio);
+				edges.add( new NucleusMeshEdge(vertices.get(0), vertices.get(i), ratio) );
+				
+				log(Level.FINEST, "0 - "+i+": "+ratio);
 			}
 			
-			log(Level.INFO, "Comparing border pairs");
+			log(Level.FINEST, "Comparing border pairs");
 			for(int i=1, j=2; j<vertices.size(); i++, j++){
 				double ratio = compareDistance(i, j, mesh);
-				log(Level.INFO, i+" - "+j+": "+ratio);
+				edges.add( new NucleusMeshEdge(vertices.get(i), vertices.get(j), ratio) );
+				log(Level.FINEST, i+" - "+j+": "+ratio);
 			}
 			
 			double ratio = compareDistance(vertices.size()-1, 1, mesh);
-			log(Level.INFO, "e - "+1+": "+ratio);
+			edges.add(  new NucleusMeshEdge(vertices.get(vertices.size()-1), vertices.get(1), ratio) );
+			log(Level.FINEST, "e - "+1+": "+ratio);
 			
-			log(Level.INFO, "Comparion complete");
+			log(Level.FINEST, "Comparion complete");
 			
+			return edges;
+			
+		}
+		
+	}
+	
+	public class NucleusMeshEdge {
+		private NucleusMeshVertex v1;
+		private NucleusMeshVertex v2;
+		private double ratio;
+		
+		public NucleusMeshEdge(NucleusMeshVertex v1, NucleusMeshVertex v2, double ratio){
+			this.v1 = v1;
+			this.v2 = v2;
+			this.ratio = ratio;
+		}
+
+		public NucleusMeshVertex getV1() {
+			return v1;
+		}
+
+		public NucleusMeshVertex getV2() {
+			return v2;
+		}
+
+		public double getRatio() {
+			return ratio;
+		}
+		
+		public String toString(){
+			return v1.getNumber()+"-"+v2.getNumber();
 		}
 		
 	}

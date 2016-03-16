@@ -27,6 +27,7 @@ import gui.components.FixedAspectRatioChartPanel;
 import gui.components.ColourSelecter;
 import gui.components.DraggableOverlayChartPanel;
 import gui.components.ExportableTable;
+import gui.components.panels.GenericCheckboxPanel;
 import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.components.panels.RotationSelectionSettingsPanel;
 import gui.dialogs.CellImageDialog;
@@ -629,6 +630,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 		private JCheckBox showHookHump = new JCheckBox("Show hook and hump ROIs");
 		private FixedAspectRatioChartPanel panel;
+		private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus");
 		
 //		boolean drawPointOverlay = false; // debugging
 //		private ShapeOverlay overlay = new ShapeOverlay();
@@ -646,8 +648,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			rotationPanel.setEnabled(false);
 			rotationPanel.addActionListener(this);
 			
+			makeMeshPanel.addActionListener(this);
+			
 			settingsPanel.add(rotationPanel);
 			settingsPanel.add(createHookHumpPanel());
+			settingsPanel.add(makeMeshPanel);
 			
 			this.add(settingsPanel, BorderLayout.NORTH);
 			
@@ -701,10 +706,25 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					} else {
 						showHookHump.setEnabled(false);
 					}
-					
+
 					rotationPanel.setEnabled(true);
-					
-					chart = OutlineChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode, showHook, component);
+					makeMeshPanel.setEnabled(true);
+
+					if(makeMeshPanel.isSelected()){
+
+						if(activeDataset().getCollection().hasConsensusNucleus()){
+
+
+							chart = OutlineChartFactory.createMeshChart(cell.getNucleus().getVerticallyRotatedNucleus(), 
+									activeDataset().getCollection().getConsensusNucleus());
+
+						} else {
+							chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+
+						} 
+					} else {
+						chart = OutlineChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode, showHook, component);
+					}
 				}
 				
 				panel.setChart(chart);
@@ -1101,17 +1121,17 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 	}
 	
-	private void testMeshBuilder() throws Exception{
-		
-		if(activeDataset().getCollection().hasConsensusNucleus()){
-			NucleusMeshBuilder builder = new NucleusMeshBuilder();
-			
-			NucleusMesh template = builder.buildMesh(activeDataset().getCollection().getConsensusNucleus());
-			
-			NucleusMesh cellMesh = builder.buildMesh(activeCell.getNucleus().getVerticallyRotatedNucleus(), template);
-			
-			cellMesh.compare(template);
-		}
-	}
+//	private void testMeshBuilder() throws Exception{
+//		
+//		if(activeDataset().getCollection().hasConsensusNucleus()){
+//			NucleusMeshBuilder builder = new NucleusMeshBuilder();
+//			
+//			NucleusMesh template = builder.buildMesh(activeDataset().getCollection().getConsensusNucleus());
+//			
+//			NucleusMesh cellMesh = builder.buildMesh(activeCell.getNucleus().getVerticallyRotatedNucleus(), template);
+//			
+//			cellMesh.compare(template);
+//		}
+//	}
 
 }

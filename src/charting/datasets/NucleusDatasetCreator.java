@@ -29,6 +29,7 @@ import stats.SegmentStatistic;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import logging.Loggable;
 
@@ -42,6 +43,9 @@ import charting.options.ChartOptions;
 import utility.Constants;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
+import analysis.nucleus.NucleusMeshBuilder;
+import analysis.nucleus.NucleusMeshBuilder.NucleusMesh;
+import analysis.nucleus.NucleusMeshBuilder.NucleusMeshEdge;
 import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellCollection;
@@ -1596,6 +1600,48 @@ public class NucleusDatasetCreator implements Loggable {
 		double[][] data = { xvalues, yvalues };
 		ds.addSeries(options.firstDataset().getCollection().getName(), data);
 
+		return ds;
+	}
+	
+	public static XYDataset createNucleusMeshDataset(Nucleus n1, Nucleus n2, boolean higher) throws Exception {
+		NucleusMeshBuilder builder = new NucleusMeshBuilder();
+		
+		NucleusMesh n1Mesh = builder.buildMesh(n1);
+		NucleusMesh n2Mesh = builder.buildMesh(n2, n1Mesh);
+		
+		List<NucleusMeshEdge> edges = n1Mesh.compare(n2Mesh);
+		
+		List<NucleusMeshEdge> subset;
+		if(higher){
+			subset = edges.stream()
+					.filter( p -> p.getRatio() > 1 )
+					.collect(Collectors.toList());
+		} else {
+			subset = edges.stream()
+					.filter( p -> p.getRatio() <= 1 )
+					.collect(Collectors.toList());
+		}
+		
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		
+		
+		for(NucleusMeshEdge edge : subset){
+			
+			double[] yvalues = {
+					edge.getV1().getPosition().getY(),
+					edge.getV2().getPosition().getY()
+			};
+			
+			
+			double[] xvalues = {
+					edge.getV1().getPosition().getX(),
+					edge.getV2().getPosition().getX()
+			};
+
+			double[][] data = { xvalues, yvalues };
+			ds.addSeries(edge.toString(), data);
+		}
 		return ds;
 	}
 	
