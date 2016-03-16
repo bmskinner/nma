@@ -100,6 +100,17 @@ public interface CellularComponent {
 	 */
 	public double getStatistic(PlottableStatistic stat, MeasurementScale scale) throws Exception;
 	
+	/**
+	 * Get the value of the given statistic for this nucleus.
+	 * Note that NucleusStatistic.VARIABILILTY returns zero, 
+	 * as this must be calculated at the collection level. This converts exceptions
+	 * from getStatistic() into RuntimeExceptions, so the method can be used in streams
+	 * @param stat the statistic to fetch
+	 * @param scale the units to return values in
+	 * @return the value or zero if stat.equals(NucleusStatistic.VARIABILILTY)==true
+	 */
+	public double getSafeStatistic(PlottableStatistic stat, MeasurementScale scale);
+	
 	
 	/**
 	 * Get the statistic at the default scale (MeasurementScale.PIXELS)

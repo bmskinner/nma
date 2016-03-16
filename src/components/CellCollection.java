@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import utility.Constants;
 import utility.Utils;
@@ -814,25 +815,51 @@ public class CellCollection implements Serializable {
 	  DecimalFormat df = new DecimalFormat("#.##");
 	  CellCollection subCollection = new CellCollection(this, "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
 
+	  List<Cell> filteredCells;
+	  
+	  if(stat.equals(NucleusStatistic.VARIABILITY)){
+		  filteredCells = new ArrayList<Cell>();
+		  for(Cell c : this.getCells()){
+			  Nucleus n = c.getNucleus();
 
-	  for(Cell c : this.getCells()){
-		  Nucleus n = c.getNucleus();
+			  double value = this.calculateVariabililtyOfNucleusProfile(n);
 
-		  double value = n.getStatistic(stat, scale);
-
-
-		  // variability must be calculated from the collection, not the nucleus
-		  if(stat.equals(NucleusStatistic.VARIABILITY)){
-
-			  value = this.calculateVariabililtyOfNucleusProfile(n);
-		  }
-
-		  if(value>= lower && value<= upper){
-			  subCollection.addCell(new Cell(c));
+			  if(value>= lower && value<= upper){
+				  filteredCells.add(c);
+			  }  
 		  }
 		  
-		  
+	  } else {
+		  filteredCells = getCells()
+				    .parallelStream()
+				    .filter(p -> p.getNucleus().getSafeStatistic(stat, scale) >= lower)
+				    .filter(p -> p.getNucleus().getSafeStatistic(stat, scale) <= upper)
+				    .collect(Collectors.toList());
 	  }
+
+//	  for(Cell c : this.getCells()){
+//		  Nucleus n = c.getNucleus();
+//
+//		  double value = n.getStatistic(stat, scale);
+//
+//
+//		  // variability must be calculated from the collection, not the nucleus
+//		  if(stat.equals(NucleusStatistic.VARIABILITY)){
+//
+//			  value = this.calculateVariabililtyOfNucleusProfile(n);
+//		  }
+//
+//		  if(value>= lower && value<= upper){
+//			  subCollection.addCell(new Cell(c));
+//		  }
+//		  
+//		  
+//	  }
+	  
+	  for(Cell cell : filteredCells){
+		  subCollection.addCell(new Cell(cell));
+	  }
+	  
 	  this.getProfileManager().copyCollectionOffsets(subCollection);
 	  return subCollection;
   }

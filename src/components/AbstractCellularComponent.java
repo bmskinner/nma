@@ -236,6 +236,15 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		}
 	}
 	
+	@Override
+	public double getSafeStatistic(PlottableStatistic stat, MeasurementScale scale){
+		try {
+			return getStatistic(stat, scale);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	// For subclasses to override
 	protected double calculateStatistic(PlottableStatistic stat) throws Exception{
 		return 0;
