@@ -49,7 +49,6 @@ import gui.tabs.NuclearStatisticsPanel;
 import gui.tabs.NucleusProfilesPanel;
 import gui.tabs.SegmentsDetailPanel;
 import gui.tabs.SignalsDetailPanel;
-import ij.IJ;
 import io.MappingFileExporter;
 
 import java.awt.BorderLayout;
@@ -328,18 +327,10 @@ public class MainWindow
 
 		} catch (Exception e) {
 			logToImageJ("Error initialising Main", e);
-//			IJ.log("Error initialising Main: "+e.getMessage());
-//			for(StackTraceElement el : e.getStackTrace()){
-//				IJ.log(el.toString());
-//			}
 		}
 		
 	}
-	
-//	public Logger getProgramLogger(){
-//		return MainWindow.programLogger;
-//	}
-	
+		
 	public ColourSwatch getColourSwatch(){
 		return activeSwatch;
 	}
@@ -381,35 +372,14 @@ public class MainWindow
 		//---------------
 
 		JButton btnLoadSavedDataset = new JButton("Load analysis dataset");
-		btnLoadSavedDataset.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) { 
-				
-				Thread thr = new Thread(){
-					public void run(){
-						programLogger.log(Level.FINEST, "Creating import action");
-						new PopulationImportAction(MainWindow.this);
-					}};
-				thr.start();
-				
-//				executorService.execute(new Runnable() {
-//					public void run() {
-//						programLogger.log(Level.FINEST, "Creating import action");
-//						new PopulationImportAction(MainWindow.this);
-//					}
-//					
-//				});
-
-//				SwingUtilities.invokeLater(new Runnable(){
-//
-//					public void run() {
-//						new PopulationImportAction(MainWindow.this);
-//					}
-//
-//				});
+		
+		btnLoadSavedDataset.addActionListener(	
+			e -> {
+				log(Level.FINEST, "Creating import action");
+				new PopulationImportAction(MainWindow.this);
 			}
-		});
+		);
+			
 		panelHeader.add(btnLoadSavedDataset);
 
 		//---------------
@@ -417,19 +387,19 @@ public class MainWindow
 		//---------------
 
 		JButton btnSavePopulation = new JButton("Save all");
-		btnSavePopulation.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) { 
-				programLogger.log(Level.INFO, "Saving root populations...");
-				
-				Thread thr = new Thread(){
-					public void run(){
-						saveRootDatasets();
-					}};
-				thr.start();
-			}
-		});
+		btnSavePopulation.addActionListener(
+
+				e -> {
+					log(Level.INFO, "Saving root populations...");
+
+					Thread thr = new Thread(){
+						public void run(){
+							saveRootDatasets();
+						}};
+						thr.start();
+				}
+		);
+
 		panelHeader.add(btnSavePopulation);
 
 		//---------------
@@ -437,14 +407,9 @@ public class MainWindow
 		//---------------
 
 		JButton btnPostanalysisMapping = new JButton("Post-FISH mapping");
-		btnPostanalysisMapping.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) { 
-
-				new FishRemappingAction(populationsPanel.getSelectedDatasets(), MainWindow.this);
-			}
-		});
+		btnPostanalysisMapping.addActionListener(
+				e -> new FishRemappingAction(populationsPanel.getSelectedDatasets(), MainWindow.this)
+		);
 		panelHeader.add(btnPostanalysisMapping);
 				
 		JButton btnSetLogLevel = new JButton("Options");
@@ -461,20 +426,20 @@ public class MainWindow
 						 * If the recache is not waited on, the update conflicts
 						 * with the updating status
 						 */
-						programLogger.log(Level.FINEST, "Options closed, clearing all caches");
+						log(Level.FINEST, "Options closed, clearing all caches");
 						
 						CountDownLatch l = new CountDownLatch(1);
 						clearChartCache(l);
 						l.await();
-						programLogger.log(Level.FINEST, "Options closed, updating charts");
+						log(Level.FINEST, "Options closed, updating charts");
 	                    updatePanels(populationsPanel.getSelectedDatasets());
 						
 					} catch (InterruptedException e1) {
-						programLogger.log(Level.SEVERE, "Interruption to recaching", e1);
+						log(Level.SEVERE, "Interruption to recaching", e1);
 					}
 
 				} else {
-					programLogger.log(Level.FINEST, "Options cancelled");
+					log(Level.FINEST, "Options cancelled");
 				}
 			}
 		});		
@@ -510,9 +475,9 @@ public class MainWindow
 	 */
 	private void updatePanels(final List<AnalysisDataset> list){
 		if(list!=null){
-			programLogger.log(Level.FINE, "Updating tab panels for "+list.size()+" datasets");
+			log(Level.FINE, "Updating tab panels for "+list.size()+" datasets");
 		} else {
-			programLogger.log(Level.FINE, "Updating tab panels with null datasets");
+			log(Level.FINE, "Updating tab panels with null datasets");
 		}
 		
 		executorService.execute(new Runnable() {
@@ -523,10 +488,10 @@ public class MainWindow
 						panel.update(list);
 					}
 
-					programLogger.log(Level.FINE, "Updated tab panels");
+					log(Level.FINE, "Updated tab panels");
 
 				} catch (Exception e) {
-					programLogger.log(Level.SEVERE,"Error updating panels", e);
+					log(Level.SEVERE,"Error updating panels", e);
 				}
 			}
 			
@@ -575,7 +540,7 @@ public class MainWindow
 					}
 				} catch (InterruptedException e) {
 
-					programLogger.log(Level.SEVERE,"Error checking update state", e);
+					log(Level.SEVERE,"Error checking update state", e);
 
 				}
 			}
@@ -589,7 +554,7 @@ public class MainWindow
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
-		programLogger.log(Level.FINEST, "Heard signal change event: "+event.type());
+		log(Level.FINEST, "Heard signal change event: "+event.type());
 		
 		final AnalysisDataset selectedDataset = populationsPanel.getSelectedDatasets().isEmpty() 
 				? null 
@@ -599,12 +564,12 @@ public class MainWindow
 		if(event.type().equals("RunShellAnalysis")){
 			executorService.execute(new Runnable() {
 				public void run() {
-					programLogger.log(Level.FINER, "Shell analysis selected");
+					log(Level.FINER, "Shell analysis selected");
 					new ShellAnalysisAction(selectedDataset, MainWindow.this);
 				}
 				
 			});
-//			programLogger.log(Level.FINER, "Shell analysis selected");
+//			log(Level.FINER, "Shell analysis selected");
 //			new ShellAnalysisAction(selectedDataset, this);
 		}
 
@@ -647,15 +612,15 @@ public class MainWindow
 //		if(event.type().equals("ExportDatasetStatsAction")){
 //			//TODO: Replace this with more robust action
 ////			new ExportDatasetStatsAction();
-//			programLogger.log(Level.WARNING, "Function disabled");
+//			log(Level.WARNING, "Function disabled");
 //		}
 		
 		if(event.type().equals("SaveCellLocations")){
-			programLogger.log(Level.INFO, "Exporting cell locations...");
+			log(Level.INFO, "Exporting cell locations...");
 			if(MappingFileExporter.exportCellLocations(selectedDataset)){
-				programLogger.log(Level.INFO, "Export complete");
+				log(Level.INFO, "Export complete");
 			} else {
-				programLogger.log(Level.INFO, "Export failed");
+				log(Level.INFO, "Export failed");
 			}
 			
 		}
@@ -695,7 +660,7 @@ public class MainWindow
 							latch.await();
 						}
 					} catch(Exception e1){
-						programLogger.log(Level.SEVERE, "Error applying morphology", e1);
+						log(Level.SEVERE, "Error applying morphology", e1);
 					}
 				
 			}});
@@ -731,7 +696,7 @@ public class MainWindow
 		
 		if(event.type().startsWith("Log_")){
 			String s = event.type().replace("Log_", "");
-			programLogger.log(Level.INFO, s);
+			log(Level.INFO, s);
 		}
 		
 		if(event.type().startsWith("Status_")){
@@ -743,14 +708,14 @@ public class MainWindow
 
 	@Override
 	public void datasetEventReceived(final DatasetEvent event) {
-		programLogger.log(Level.FINEST, "Heard dataset event: "+event.method().toString());
+		log(Level.FINEST, "Heard dataset event: "+event.method().toString());
 		final List<AnalysisDataset> list = event.getDatasets();
 		if(!list.isEmpty()){
 			
 			
 			
 			if(event.method().equals(DatasetMethod.PROFILING_ACTION)){
-				programLogger.log(Level.FINE, "Running new profiling and segmentation");
+				log(Level.FINE, "Running new profiling and segmentation");
 				
 				
 				executorService.execute(new Runnable() {
@@ -772,7 +737,7 @@ public class MainWindow
 			}
 						
 			if(event.method().equals(DatasetMethod.NEW_MORPHOLOGY)){
-				programLogger.log(Level.INFO, "Running new morphology analysis");
+				log(Level.INFO, "Running new morphology analysis");
 				final int flag = ADD_POPULATION;
 				
 				executorService.execute(new Runnable() {
@@ -784,7 +749,7 @@ public class MainWindow
 			}
 			
 			if(event.method().equals(DatasetMethod.REFRESH_MORPHOLOGY)){
-				programLogger.log(Level.FINEST, "Updating segmentation across nuclei");
+				log(Level.FINEST, "Updating segmentation across nuclei");
 				executorService.execute(new Runnable() {
 					public void run() {
 						new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
@@ -810,7 +775,7 @@ public class MainWindow
 				
 				executorService.execute(new Runnable() {
 					public void run() {
-						programLogger.log(Level.INFO, "Clustering dataset");
+						log(Level.INFO, "Clustering dataset");
 						new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
 					}
 					
@@ -820,7 +785,7 @@ public class MainWindow
 			if(event.method().equals(DatasetMethod.BUILD_TREE)){
 				executorService.execute(new Runnable() {
 					public void run() {
-						programLogger.log(Level.INFO, "Building a tree from dataset");
+						log(Level.INFO, "Building a tree from dataset");
 						new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
 					}
 					
@@ -830,7 +795,7 @@ public class MainWindow
 			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
 				executorService.execute(new Runnable() {
 					public void run() {
-						programLogger.log(Level.INFO, "Refolding consensus nucleus");
+						log(Level.INFO, "Refolding consensus nucleus");
 						refoldConsensus(event.firstDataset());
 					}
 					
@@ -870,7 +835,7 @@ public class MainWindow
 			if(event.method().equals(DatasetMethod.EXTRACT_SOURCE)){
 				executorService.execute(new Runnable() {
 					public void run() {
-						programLogger.log(Level.INFO, "Recovering source dataset");
+						log(Level.INFO, "Recovering source dataset");
 						for(AnalysisDataset d : list){
 							d.setRoot(true);
 							populationsPanel.addDataset(d);
@@ -922,14 +887,14 @@ public class MainWindow
 	 */
 	private void addDataset(final AnalysisDataset dataset){
 
-		programLogger.log(Level.FINEST, "Adding dataset");
+		log(Level.FINEST, "Adding dataset");
 		dataset.setSwatch(activeSwatch);
 		populationsPanel.addDataset(dataset);
 		for(AnalysisDataset child : dataset.getAllChildDatasets() ){
 			populationsPanel.addDataset(child);
 		}
 
-		programLogger.log(Level.FINEST, "Ordering update of populations panel");
+		log(Level.FINEST, "Ordering update of populations panel");
 		final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		list.add(dataset);
 		populationsPanel.update(list);
@@ -945,8 +910,8 @@ public class MainWindow
 	 * @param dataset
 	 */
 	private void refoldConsensus(final AnalysisDataset dataset){
-		programLogger.log(Level.FINE, "Refolding consensus");
-		programLogger.log(Level.FINEST, "Refold consensus dataset method is EDT: "+SwingUtilities.isEventDispatchThread());
+		log(Level.FINE, "Refolding consensus");
+		log(Level.FINEST, "Refold consensus dataset method is EDT: "+SwingUtilities.isEventDispatchThread());
 		
 		executorService.execute(new Runnable() {
 			public void run() {
@@ -959,10 +924,10 @@ public class MainWindow
 				consensusNucleusPanel.clearChartCache();
 				
 				final CountDownLatch latch = new CountDownLatch(1);
-				programLogger.log(Level.FINEST, "Created latch: "+latch.getCount());
+				log(Level.FINEST, "Created latch: "+latch.getCount());
 				new RefoldNucleusAction(dataset, MainWindow.this, latch);
 
-				programLogger.log(Level.FINEST, "Running refolding");
+				log(Level.FINEST, "Running refolding");
 				try {
 					latch.await();
 					dataset.getAnalysisOptions().setRefoldNucleus(true);
@@ -970,19 +935,19 @@ public class MainWindow
 					
 					
 					
-					programLogger.log(Level.FINE, "Set refold status in options");
+					log(Level.FINE, "Set refold status in options");
 					final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 					list.add(dataset);
 					segmentsDetailPanel.refreshChartCache(list); // segment positions charts need updating
 
-					programLogger.log(Level.FINE, "Preparing to select refolded dataset");
+					log(Level.FINE, "Preparing to select refolded dataset");
 					populationsPanel.selectDataset(dataset);
-//					programLogger.log(Level.FINE, "Clearing consensus chart cache for refolded dataset");
+//					log(Level.FINE, "Clearing consensus chart cache for refolded dataset");
 //					consensusNucleusPanel.refreshChartCache();
 					
-					programLogger.log(Level.FINEST, "Latch counted down: "+latch.getCount());
+					log(Level.FINEST, "Latch counted down: "+latch.getCount());
 				} catch (InterruptedException e) {
-					programLogger.log(Level.SEVERE, "Interruption to thread", e);
+					log(Level.SEVERE, "Interruption to thread", e);
 				}
 			}
 			
@@ -1004,10 +969,10 @@ public class MainWindow
 					try {
 						latch.await();
 					} catch (InterruptedException e) {
-						programLogger.log(Level.SEVERE, "Interruption to thread", e);
+						log(Level.SEVERE, "Interruption to thread", e);
 					}
 				}
-				programLogger.log(Level.INFO, "All root datasets saved");
+				log(Level.INFO, "All root datasets saved");
 			}
 			
 		});
@@ -1028,13 +993,13 @@ public class MainWindow
 					final CountDownLatch latch = new CountDownLatch(1);
 					new SaveDatasetAction(d, MainWindow.this, latch, false);
 					try {
-						programLogger.log(Level.FINEST, "Awaiting latch for save action");
+						log(Level.FINEST, "Awaiting latch for save action");
 						latch.await();
 					} catch (InterruptedException e) {
-						programLogger.log(Level.SEVERE, "Interruption to thread", e);
+						log(Level.SEVERE, "Interruption to thread", e);
 					}
 
-					programLogger.log(Level.FINE, "Root dataset saved");
+					log(Level.FINE, "Root dataset saved");
 				} else {
 
 					AnalysisDataset target = null; 
@@ -1095,7 +1060,7 @@ public class MainWindow
 	private void clearChartCache(final List<AnalysisDataset> list){
 		
 		if(list==null || list.isEmpty()){
-			programLogger.log(Level.WARNING, "A cache clear was requested for a specific list, which was null or empty");
+			log(Level.WARNING, "A cache clear was requested for a specific list, which was null or empty");
 			clearChartCache();
 			return;
 		}
@@ -1133,7 +1098,7 @@ public class MainWindow
 				if(populationsPanel.getSelectedDatasets().get(0).getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
 
 					try{
-						programLogger.log(Level.INFO, "Replacing nucleus roi patterns");
+						log(Level.INFO, "Replacing nucleus roi patterns");
 						for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
 
 							RodentSpermNucleus r = (RodentSpermNucleus) n;  
@@ -1143,23 +1108,23 @@ public class MainWindow
 
 								r.calculateSignalAnglesFromPoint(r.getPoint(BorderTag.ORIENTATION_POINT));
 							} catch (Exception e) {
-								programLogger.log(Level.SEVERE, "Error restoring signal angles", e);
+								log(Level.SEVERE, "Error restoring signal angles", e);
 							}
 
 						}
 
 					}catch(Exception e){
-						programLogger.log(Level.SEVERE, "Error recalculating angles", e);
+						log(Level.SEVERE, "Error recalculating angles", e);
 					}
 				}
 				
-				programLogger.log(Level.INFO, "Regenerating charts");
+				log(Level.INFO, "Regenerating charts");
 				for(DetailPanel panel : detailPanels){
 					panel.refreshChartCache();
 					panel.refreshTableCache();
 				}
 				
-				programLogger.log(Level.INFO, "Resegmenting datasets");
+				log(Level.INFO, "Resegmenting datasets");
 				List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
 				new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
 			}
@@ -1173,7 +1138,7 @@ public class MainWindow
 	public void interfaceEventReceived(InterfaceEvent event) {
 		
 		InterfaceMethod method = event.method();
-		programLogger.log(Level.FINEST, "Heard interface event: "+event.method().toString());
+		log(Level.FINEST, "Heard interface event: "+event.method().toString());
 		
 		switch(method){
 		
@@ -1200,7 +1165,7 @@ public class MainWindow
 		case LIST_DATASETS:
 			int i=0;
 			for(AnalysisDataset d : populationsPanel.getAllDatasets()){
-				programLogger.log(Level.INFO, i+"\t"+d.getName());
+				log(Level.INFO, i+"\t"+d.getName());
 				i++;
 			}
 			break;
@@ -1211,7 +1176,7 @@ public class MainWindow
 		case LIST_SELECTED_DATASETS:
 			int count=0;
 			for(AnalysisDataset d : populationsPanel.getSelectedDatasets()){
-				programLogger.log(Level.INFO, count+"\t"+d.getName());
+				log(Level.INFO, count+"\t"+d.getName());
 				count++;
 			}
 			break;
@@ -1239,7 +1204,7 @@ public class MainWindow
 			for(AnalysisDataset d : populationsPanel.getSelectedDatasets()){
 				
 				for(Nucleus n : d.getCollection().getNuclei()){
-					programLogger.log(Level.INFO, n.printLog());
+					log(Level.INFO, n.printLog());
 				}
 			}
 			break;

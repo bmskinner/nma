@@ -101,6 +101,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 				runRefoldingButton.setVisible(false);
 			}
 		});
+		
+
 		runRefoldingButton.setVisible(false);
 		
 		consensusChartPanel.add(runRefoldingButton);
