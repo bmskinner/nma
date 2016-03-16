@@ -1,8 +1,11 @@
 package gui.tabs.nuclear;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.util.logging.Level;
 
+import javax.swing.JButton;
+import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
@@ -13,6 +16,7 @@ import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import gui.components.FixedAspectRatioChartPanel;
 import gui.components.panels.GenericCheckboxPanel;
+import gui.dialogs.ConsensusCompareDialog;
 import gui.tabs.DetailPanel;
 
 /**
@@ -26,15 +30,14 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	
 	private FixedAspectRatioChartPanel 	chartPanel; 		// hold the nuclei
 	private GenericCheckboxPanel checkBoxPanel; // use for aligning nuclei
+	private JButton compareConsensusButton;
 	
 	public NuclearOverlaysPanel(){
 		
 		this.setLayout(new BorderLayout());
 		
-		checkBoxPanel = new GenericCheckboxPanel("Align nuclei to consensus");
-		checkBoxPanel.addActionListener( a ->  update(getDatasets())  );
-		checkBoxPanel.setEnabled(false);
-		this.add(checkBoxPanel, BorderLayout.NORTH);
+		JPanel header = createHeader();
+		this.add(header, BorderLayout.NORTH);
 		
 		try {
 			
@@ -53,9 +56,26 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		}
 		
 	}
+	
+	private JPanel createHeader(){
+		JPanel panel = new JPanel(new FlowLayout());
+		
+		checkBoxPanel = new GenericCheckboxPanel("Align nuclei to consensus");
+		checkBoxPanel.addActionListener( a ->  update(getDatasets())  );
+		checkBoxPanel.setEnabled(false);
+		
+		compareConsensusButton = new JButton("Compare consensus");
+		compareConsensusButton.addActionListener( a -> new ConsensusCompareDialog(getDatasets())  );
+		compareConsensusButton.setEnabled(false);
+		
+		panel.add(checkBoxPanel);
+		panel.add(compareConsensusButton);
+		return panel;
+	}
 
 	@Override
 	protected void updateSingle() throws Exception {
+		compareConsensusButton.setEnabled(false);
 		
 		boolean hasConsensus = activeDataset().getCollection().hasConsensusNucleus();
 		checkBoxPanel.setEnabled(hasConsensus);
@@ -76,7 +96,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	@Override
 	protected void updateMultiple() throws Exception {
 		updateSingle();
-		
+		compareConsensusButton.setEnabled(true);
 	}
 
 	@Override

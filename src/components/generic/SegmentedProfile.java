@@ -244,7 +244,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 			/*
 			 * A subset of nuclei do not produce segment boundaries
 			 */
-			log(Level.WARNING, "Cannot get ordered segments");
+			log(Level.FINE, "Cannot get ordered segments");
 //			log(Level.WARNING, this.toString());
 			firstSeg = this.getSegments().get(0); // default to the first segment in the profile
 		}

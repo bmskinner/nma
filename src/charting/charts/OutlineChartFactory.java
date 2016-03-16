@@ -552,7 +552,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					: ColourSelecter.getSegmentColor(datasetNumber++);
 			
 			XYLineAndShapeRenderer r = new XYLineAndShapeRenderer(true, false);
-			
+			r.setBaseSeriesVisibleInLegend(false);
+			r.setBaseStroke(ChartComponents.PROFILE_STROKE);
+			r.setSeriesPaint(0, colour);			
 			r.setBaseToolTipGenerator(tooltip);
 
 			for(Nucleus n : dataset.getCollection().getNuclei()){

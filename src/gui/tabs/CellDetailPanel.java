@@ -628,9 +628,9 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 		private RotationSelectionSettingsPanel rotationPanel;
 
-		private JCheckBox showHookHump = new JCheckBox("Show hook and hump ROIs");
+		private JCheckBox showHookHump = new JCheckBox("Show hook ROI");
 		private FixedAspectRatioChartPanel panel;
-		private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus");
+		private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Warp to consensus");
 		
 //		boolean drawPointOverlay = false; // debugging
 //		private ShapeOverlay overlay = new ShapeOverlay();
@@ -696,6 +696,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				if(cell==null){
 					rotationPanel.setEnabled(false);
 					showHookHump.setEnabled(false);
+					makeMeshPanel.setEnabled(false);
 					chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 				} else {
 					
@@ -706,8 +707,10 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					} else {
 						showHookHump.setEnabled(false);
 					}
-
-					rotationPanel.setEnabled(true);
+					
+					rotationPanel.setEnabled( ! makeMeshPanel.isSelected() );
+					showHookHump.setEnabled(  ! makeMeshPanel.isSelected() );
+					
 					makeMeshPanel.setEnabled(true);
 
 					if(makeMeshPanel.isSelected()){
