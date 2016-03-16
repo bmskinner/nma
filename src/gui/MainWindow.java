@@ -56,8 +56,6 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -356,15 +354,9 @@ public class MainWindow
 		JPanel panelHeader = new JPanel();
 
 		JButton btnNewAnalysis = new JButton("New analysis");
-		btnNewAnalysis.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) { 
-				
-				new NewAnalysisAction(MainWindow.this);
-
-			}
-		});
+		btnNewAnalysis.addActionListener(
+				e ->new NewAnalysisAction(MainWindow.this)
+		);
 		panelHeader.add(btnNewAnalysis);
 
 		//---------------
@@ -413,36 +405,35 @@ public class MainWindow
 		panelHeader.add(btnPostanalysisMapping);
 				
 		JButton btnSetLogLevel = new JButton("Options");
-		btnSetLogLevel.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) { 
+		btnSetLogLevel.addActionListener(
+				
+				e -> { 
 
-				MainOptionsDialog dialog = new MainOptionsDialog(MainWindow.this);
-				if(dialog.isReadyToRun()){
-
-					try {
-						/*
-						 * If the recache is not waited on, the update conflicts
-						 * with the updating status
-						 */
-						log(Level.FINEST, "Options closed, clearing all caches");
-						
-						CountDownLatch l = new CountDownLatch(1);
-						clearChartCache(l);
-						l.await();
-						log(Level.FINEST, "Options closed, updating charts");
-	                    updatePanels(populationsPanel.getSelectedDatasets());
-						
-					} catch (InterruptedException e1) {
-						log(Level.SEVERE, "Interruption to recaching", e1);
+					MainOptionsDialog dialog = new MainOptionsDialog(MainWindow.this);
+					if(dialog.isReadyToRun()){
+	
+						try {
+							/*
+							 * If the recache is not waited on, the update conflicts
+							 * with the updating status
+							 */
+							log(Level.FINEST, "Options closed, clearing all caches");
+							
+							CountDownLatch l = new CountDownLatch(1);
+							clearChartCache(l);
+							l.await();
+							log(Level.FINEST, "Options closed, updating charts");
+		                    updatePanels(populationsPanel.getSelectedDatasets());
+							
+						} catch (InterruptedException e1) {
+							log(Level.SEVERE, "Interruption to recaching", e1);
+						}
+	
+					} else {
+						log(Level.FINEST, "Options cancelled");
 					}
-
-				} else {
-					log(Level.FINEST, "Options cancelled");
-				}
 			}
-		});		
+		);		
 		panelHeader.add(btnSetLogLevel);
 		return panelHeader;
 	}
@@ -480,22 +471,21 @@ public class MainWindow
 			log(Level.FINE, "Updating tab panels with null datasets");
 		}
 		
-		executorService.execute(new Runnable() {
-			public void run() {
-				try {
+		Runnable task = () -> {
+			try {
 
-					for(DetailPanel panel : MainWindow.this.detailPanels){
-						panel.update(list);
-					}
-
-					log(Level.FINE, "Updated tab panels");
-
-				} catch (Exception e) {
-					log(Level.SEVERE,"Error updating panels", e);
+				for(DetailPanel panel : MainWindow.this.detailPanels){
+					panel.update(list);
 				}
+
+				log(Level.FINE, "Updated tab panels");
+
+			} catch (Exception e) {
+				log(Level.SEVERE,"Error updating panels", e);
 			}
-			
-		});
+		};
+		
+		executorService.execute(task);
 	}
 	
 	
@@ -562,45 +552,30 @@ public class MainWindow
 		
 		
 		if(event.type().equals("RunShellAnalysis")){
-			executorService.execute(new Runnable() {
-				public void run() {
-					log(Level.FINER, "Shell analysis selected");
-					new ShellAnalysisAction(selectedDataset, MainWindow.this);
-				}
-				
-			});
-//			log(Level.FINER, "Shell analysis selected");
-//			new ShellAnalysisAction(selectedDataset, this);
+			Runnable task = () -> {
+				log(Level.FINER, "Shell analysis selected");
+				new ShellAnalysisAction(selectedDataset, MainWindow.this);
+			};
+			executorService.execute(task);
 		}
 
 		if(event.type().equals("MergeCollectionAction")){
-			executorService.execute(new Runnable() {
-				public void run() {
-					new MergeCollectionAction(populationsPanel.getSelectedDatasets(), MainWindow.this);
-				}
-				
-			});
 			
+			Runnable task = () -> { new MergeCollectionAction(populationsPanel.getSelectedDatasets(), MainWindow.this); }; 
+			executorService.execute(task);
 		}
 		
 		if(event.type().equals("DatasetArithmeticAction")){
-			executorService.execute(new Runnable() {
-				public void run() {
-					new DatasetArithmeticAction(selectedDataset, populationsPanel.getAllDatasets(), MainWindow.this);
-				}
-				
-			});
+			
+			Runnable task = () -> { new DatasetArithmeticAction(selectedDataset, populationsPanel.getAllDatasets(), MainWindow.this); }; 
+			executorService.execute(task);
 		}
 
 		
 		if(event.type().equals("CurateCollectionAction")){
 
-			executorService.execute(new Runnable() {
-				public void run() {
-					new CurateCollectionAction(selectedDataset, MainWindow.this);		
-				}
-				
-			});
+			Runnable task = () -> { new CurateCollectionAction(selectedDataset, MainWindow.this); }; 
+			executorService.execute(task);
 		}
 				
 
@@ -608,13 +583,7 @@ public class MainWindow
 		if(event.type().equals("ChangeNucleusFolderAction")){
 			new ReplaceSourceImageDirectoryAction(selectedDataset, MainWindow.this);
 		}
-		
-//		if(event.type().equals("ExportDatasetStatsAction")){
-//			//TODO: Replace this with more robust action
-////			new ExportDatasetStatsAction();
-//			log(Level.WARNING, "Function disabled");
-//		}
-		
+				
 		if(event.type().equals("SaveCellLocations")){
 			log(Level.INFO, "Exporting cell locations...");
 			if(MappingFileExporter.exportCellLocations(selectedDataset)){
@@ -636,34 +605,34 @@ public class MainWindow
 		
 		if(event.type().equals("ReapplySegmentProfileAction")){
 			
-			SwingUtilities.invokeLater(new Runnable(){
-				public void run(){
-				
-					try{
+			Runnable task = () -> {
+				try{
 
-						// get the names of other populations
-						List<String> nameList = populationsPanel.getPopulationNames();
-						nameList.remove(selectedDataset.getName());
-						
-						String[] names = nameList.toArray(new String[0]);
+					// get the names of other populations
+					List<String> nameList = populationsPanel.getPopulationNames();
+					nameList.remove(selectedDataset.getName());
+					
+					String[] names = nameList.toArray(new String[0]);
 
-						String selectedValue = (String) JOptionPane.showInputDialog(null,
-								"Choose population to take segments from", "Reapply segmentation",
-								JOptionPane.INFORMATION_MESSAGE, null,
-								names, names[0]);
+					String selectedValue = (String) JOptionPane.showInputDialog(null,
+							"Choose population to take segments from", "Reapply segmentation",
+							JOptionPane.INFORMATION_MESSAGE, null,
+							names, names[0]);
 
-						if(selectedValue!=null){
+					if(selectedValue!=null){
 
-							AnalysisDataset source = populationsPanel.getDataset(selectedValue);
-							final CountDownLatch latch = new CountDownLatch(1);
-							new RunSegmentationAction(selectedDataset, source, null, MainWindow.this, latch);
-							latch.await();
-						}
-					} catch(Exception e1){
-						log(Level.SEVERE, "Error applying morphology", e1);
+						AnalysisDataset source = populationsPanel.getDataset(selectedValue);
+						final CountDownLatch latch = new CountDownLatch(1);
+						new RunSegmentationAction(selectedDataset, source, null, MainWindow.this, latch);
+						latch.await();
 					}
-				
-			}});
+				} catch(Exception e1){
+					log(Level.SEVERE, "Error applying morphology", e1);
+				}
+
+			};
+			
+			SwingUtilities.invokeLater(task);
 		}
 		
 		if(event.type().equals("AddTailStainAction")){
@@ -717,164 +686,129 @@ public class MainWindow
 			if(event.method().equals(DatasetMethod.PROFILING_ACTION)){
 				log(Level.FINE, "Running new profiling and segmentation");
 				
-				
-				executorService.execute(new Runnable() {
-					public void run() {
-						int flag = 0; // set the downstream analyses to run
-						flag |= MainWindow.ADD_POPULATION;
-						flag |= MainWindow.STATS_EXPORT;
-						flag |= MainWindow.NUCLEUS_ANNOTATE;
-						flag |= MainWindow.ASSIGN_SEGMENTS;
-						
-						if(event.firstDataset().getAnalysisOptions().refoldNucleus()){
-							flag |= MainWindow.CURVE_REFOLD;
-						}
-						// begin a recursive morphology analysis
-						new RunProfilingAction(list, flag, MainWindow.this);
-					}
+				Runnable task = () -> { 
+					int flag = 0; // set the downstream analyses to run
+					flag |= MainWindow.ADD_POPULATION;
+					flag |= MainWindow.STATS_EXPORT;
+					flag |= MainWindow.NUCLEUS_ANNOTATE;
+					flag |= MainWindow.ASSIGN_SEGMENTS;
 					
-				});
+					if(event.firstDataset().getAnalysisOptions().refoldNucleus()){
+						flag |= MainWindow.CURVE_REFOLD;
+					}
+					// begin a recursive morphology analysis
+					new RunProfilingAction(list, flag, MainWindow.this);
+				
+				}; 
+				executorService.execute(task);
 			}
 						
 			if(event.method().equals(DatasetMethod.NEW_MORPHOLOGY)){
 				log(Level.INFO, "Running new morphology analysis");
 				final int flag = ADD_POPULATION;
 				
-				executorService.execute(new Runnable() {
-					public void run() {
-						new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
-					}
-					
-				});
+				Runnable task = () -> { 
+					new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
+				};
+				executorService.execute(task);
 			}
 			
 			if(event.method().equals(DatasetMethod.REFRESH_MORPHOLOGY)){
 				log(Level.FINEST, "Updating segmentation across nuclei");
-				executorService.execute(new Runnable() {
-					public void run() {
-						new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
-					}
-					
-				});
+				Runnable task = () -> { 
+					new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
+				};
+				executorService.execute(task);
 			}
 			
 			if(event.method().equals(DatasetMethod.COPY_MORPHOLOGY)){
 				
 				final AnalysisDataset source = event.secondaryDataset();
-				
-				executorService.execute(new Runnable() {
-					public void run() {
-						new RunSegmentationAction(event.getDatasets(), source, null, MainWindow.this);
-					}
-					
-				});
+				Runnable task = () -> { 
+					new RunSegmentationAction(event.getDatasets(), source, null, MainWindow.this);
+				};
+				executorService.execute(task);
 			}
 			
 						
 			if(event.method().equals(DatasetMethod.CLUSTER)){
 				
-				executorService.execute(new Runnable() {
-					public void run() {
-						log(Level.INFO, "Clustering dataset");
-						new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
-					}
-					
-				});				
+				Runnable task = () -> { 
+					log(Level.INFO, "Clustering dataset");
+					new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
+				};
+				executorService.execute(task);
+			
 			}
 			
 			if(event.method().equals(DatasetMethod.BUILD_TREE)){
-				executorService.execute(new Runnable() {
-					public void run() {
-						log(Level.INFO, "Building a tree from dataset");
-						new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
-					}
-					
-				});
+				Runnable task = () -> { 
+					log(Level.INFO, "Building a tree from dataset");
+					new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
+				};
+				executorService.execute(task);
 			}
 			
 			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
-				executorService.execute(new Runnable() {
-					public void run() {
-						log(Level.INFO, "Refolding consensus nucleus");
-						refoldConsensus(event.firstDataset());
-					}
-					
-				});
 				
+				Runnable task = () -> { 
+					log(Level.INFO, "Refolding consensus nucleus");
+					refoldConsensus(event.firstDataset());
+				};
+				executorService.execute(task);			
 			}
 			
 			if(event.method().equals(DatasetMethod.SELECT_DATASETS)){
-				executorService.execute(new Runnable() {
-					public void run() {
-						populationsPanel.selectDatasets(event.getDatasets());
-//						updatePanels(populationsPanel.getSelectedDatasets());
-					}
-				});
 				
+				Runnable task = () -> { 
+					populationsPanel.selectDatasets(event.getDatasets());
+				};
+				executorService.execute(task);						
 			}
 			
 			if(event.method().equals(DatasetMethod.SELECT_ONE_DATASET)){
-				executorService.execute(new Runnable() {
-					public void run() {
-						populationsPanel.selectDataset(event.firstDataset());
-//						updatePanels(populationsPanel.getSelectedDatasets());
-					}
-				});
 				
+				Runnable task = () -> { 
+					populationsPanel.selectDataset(event.firstDataset());
+				};
+				executorService.execute(task);					
 			}
 			
 			if(event.method().equals(DatasetMethod.SAVE)){
-				executorService.execute(new Runnable() {
-					public void run() {
-						saveDataset(event.firstDataset());
-					}
-				});
+				
+				Runnable task = () -> { saveDataset(event.firstDataset());};
+				executorService.execute(task);
 				
 			}
 			
 			if(event.method().equals(DatasetMethod.EXTRACT_SOURCE)){
-				executorService.execute(new Runnable() {
-					public void run() {
-						log(Level.INFO, "Recovering source dataset");
-						for(AnalysisDataset d : list){
-							d.setRoot(true);
-							populationsPanel.addDataset(d);
-						}
-						populationsPanel.update(list);
+				Runnable task = () -> { 
+					log(Level.INFO, "Recovering source dataset");
+					for(AnalysisDataset d : list){
+						d.setRoot(true);
+						populationsPanel.addDataset(d);
 					}
-				});
+					populationsPanel.update(list);
+				};
+				executorService.execute(task);			
 			}
 			
 			if(event.method().equals(DatasetMethod.REFRESH_CACHE)){
-				executorService.execute(new Runnable() {
-					public void run() {
-						recacheCharts(list);
-					}
-					
-				});
-				
+				Runnable task = () -> { recacheCharts(list);};
+				executorService.execute(task);				
 			}
 			
 			if(event.method().equals(DatasetMethod.CLEAR_CACHE)){
-				executorService.execute(new Runnable() {
-					public void run() {
-						clearChartCache(list);
-//						recacheCharts(list);
-					}
-					
-				});
+				
+				Runnable task = () -> { clearChartCache(list); };
+				executorService.execute(task);	
 				
 			}
 			
 			if(event.method().equals(DatasetMethod.ADD_DATASET)){
 				
-				executorService.execute(new Runnable() {
-					public void run() {
-						addDataset(event.firstDataset());
-					}
-					
-				});
-
+				Runnable task = () -> { addDataset(event.firstDataset()); };
+				executorService.execute(task);	
 			}
 		}
 		
@@ -1030,14 +964,13 @@ public class MainWindow
 	 */
 	private void recacheCharts(){
 		
-		executorService.execute(new Runnable() {
-			public void run() {
-				for(DetailPanel panel : detailPanels){
-					panel.refreshChartCache();
-					panel.refreshTableCache();
-				}
+		Runnable task = () -> {
+			for(DetailPanel panel : detailPanels){
+				panel.refreshChartCache();
+				panel.refreshTableCache();
 			}
-		});
+		};
+		executorService.execute(task);
 	}
 	
 	private void clearChartCache(){
@@ -1078,58 +1011,55 @@ public class MainWindow
 	
 	private void recacheCharts(final List<AnalysisDataset> list){
 		
-		executorService.execute(new Runnable() {
-			public void run() {
-				for(DetailPanel panel : detailPanels){
-					panel.refreshChartCache(list);
-					panel.refreshTableCache(list);
-				}
+		Runnable task = () -> {
+			for(DetailPanel panel : detailPanels){
+				panel.refreshChartCache(list);
+				panel.refreshTableCache(list);
 			}
-		});
+		};
+		executorService.execute(task);
 
 	}
 	
 	private void resegmentDatasets(){
-		executorService.execute(new Runnable() {
-			public void run() {
-				
-				final int flag = CURVE_REFOLD; // ensure consensus is replaced
-				// Recalculate the head and hump positions for rodent sperm
-				if(populationsPanel.getSelectedDatasets().get(0).getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
+		
+		Runnable task = () -> {
+			final int flag = CURVE_REFOLD; // ensure consensus is replaced
+			// Recalculate the head and hump positions for rodent sperm
+			if(populationsPanel.getSelectedDatasets().get(0).getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
 
-					try{
-						log(Level.INFO, "Replacing nucleus roi patterns");
-						for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
+				try{
+					log(Level.INFO, "Replacing nucleus roi patterns");
+					for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
 
-							RodentSpermNucleus r = (RodentSpermNucleus) n;  
+						RodentSpermNucleus r = (RodentSpermNucleus) n;  
 
-							r.splitNucleusToHeadAndHump();
-							try {
+						r.splitNucleusToHeadAndHump();
+						try {
 
-								r.calculateSignalAnglesFromPoint(r.getPoint(BorderTag.ORIENTATION_POINT));
-							} catch (Exception e) {
-								log(Level.SEVERE, "Error restoring signal angles", e);
-							}
-
+							r.calculateSignalAnglesFromPoint(r.getPoint(BorderTag.ORIENTATION_POINT));
+						} catch (Exception e) {
+							log(Level.SEVERE, "Error restoring signal angles", e);
 						}
 
-					}catch(Exception e){
-						log(Level.SEVERE, "Error recalculating angles", e);
 					}
+
+				}catch(Exception e){
+					log(Level.SEVERE, "Error recalculating angles", e);
 				}
-				
-				log(Level.INFO, "Regenerating charts");
-				for(DetailPanel panel : detailPanels){
-					panel.refreshChartCache();
-					panel.refreshTableCache();
-				}
-				
-				log(Level.INFO, "Resegmenting datasets");
-				List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
-				new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
 			}
 			
-		});
+			log(Level.INFO, "Regenerating charts");
+			for(DetailPanel panel : detailPanels){
+				panel.refreshChartCache();
+				panel.refreshTableCache();
+			}
+			
+			log(Level.INFO, "Resegmenting datasets");
+			List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
+			new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
+		};
+		executorService.execute(task);
 	}
 
 	
