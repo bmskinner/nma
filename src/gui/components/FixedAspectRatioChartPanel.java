@@ -38,6 +38,9 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel {
 		
 		try {
 			XYPlot plot = (XYPlot) this.getChart().getPlot();
+			if(plot.getDatasetCount()==0){
+				return;
+			}
 
 			double chartWidth = this.getWidth();
 			double chartHeight = this.getHeight();

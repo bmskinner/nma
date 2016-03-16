@@ -45,9 +45,12 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		this.add(chartPanelOne, BorderLayout.WEST);
 		this.add(chartPanelTwo, BorderLayout.EAST);
 		
+		
+		
 		this.setModal(false);
 		this.pack();
 		log(Level.FINEST, "Displaying consensus comparator");
+		runComparison();
 		this.setVisible(true);
 	}
 	
@@ -70,10 +73,8 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		
 		return panel;
 	}
-
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-
+	
+	private void runComparison(){
 		AnalysisDataset one = (AnalysisDataset) boxOne.getSelectedItem();
 		AnalysisDataset two = (AnalysisDataset) boxTwo.getSelectedItem();
 		
@@ -81,9 +82,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		JFreeChart chartTwo;
 		
 		if(one.getCollection().hasConsensusNucleus() && two.getCollection().hasConsensusNucleus()){
-			
-			
-			
+
 			try {
 				
 				Nucleus n1 = one.getCollection().getConsensusNucleus();
@@ -113,7 +112,12 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		
 		chartPanelOne.restoreAutoBounds();
 		chartPanelTwo.restoreAutoBounds();
-		
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		runComparison();
+
 	}
 
 }
