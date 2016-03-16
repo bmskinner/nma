@@ -21,18 +21,19 @@ package gui.components.panels;
 import javax.swing.JCheckBox;
 
 @SuppressWarnings("serial")
-public class ProbabilityDensityCheckboxPanel extends EnumeratedOptionsPanel {
+public class GenericCheckboxPanel extends EnumeratedOptionsPanel {
 
 	
-	private JCheckBox    checkBox 	= new JCheckBox("Probability density function");
+	private JCheckBox    checkBox 	= new JCheckBox();
 
-	public ProbabilityDensityCheckboxPanel(){
+	public GenericCheckboxPanel(String label){
 		super();
 
 
 		// checkbox to select raw or normalised profiles
 		checkBox.setSelected(false);
 		checkBox.addActionListener(this);
+		checkBox.setText(label);
 		this.add(checkBox);
 
 	}

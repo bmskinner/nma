@@ -19,7 +19,7 @@
 package gui.components;
 
 import gui.components.panels.MeasurementUnitSettingsPanel;
-import gui.components.panels.ProbabilityDensityCheckboxPanel;
+import gui.components.panels.GenericCheckboxPanel;
 import gui.tabs.DetailPanel;
 import stats.NucleusStatistic;
 
@@ -60,7 +60,7 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 
 	protected JPanel 		mainPanel; // hold the charts
 	protected JPanel		headerPanel; // hold buttons
-	protected ProbabilityDensityCheckboxPanel useDensityPanel = new ProbabilityDensityCheckboxPanel();
+	protected GenericCheckboxPanel useDensityPanel = new GenericCheckboxPanel("Probability density function");
 	protected MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
 
 	protected JScrollPane scrollPane; // hold the main panel

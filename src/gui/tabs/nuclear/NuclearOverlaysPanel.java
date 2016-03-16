@@ -12,7 +12,7 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import gui.components.FixedAspectRatioChartPanel;
-import gui.components.panels.ProbabilityDensityCheckboxPanel;
+import gui.components.panels.GenericCheckboxPanel;
 import gui.tabs.DetailPanel;
 
 /**
@@ -25,15 +25,15 @@ import gui.tabs.DetailPanel;
 public class NuclearOverlaysPanel extends DetailPanel {
 	
 	private FixedAspectRatioChartPanel 	chartPanel; 		// hold the nuclei
-	private ProbabilityDensityCheckboxPanel checkBoxPanel; // use for aligning nuclei
+	private GenericCheckboxPanel checkBoxPanel; // use for aligning nuclei
 	
 	public NuclearOverlaysPanel(){
 		
 		this.setLayout(new BorderLayout());
 		
-		checkBoxPanel = new ProbabilityDensityCheckboxPanel();
-		checkBoxPanel.setText("Align nuclei");
+		checkBoxPanel = new GenericCheckboxPanel("Align nuclei to consensus");
 		checkBoxPanel.addActionListener( a ->  update(getDatasets())  );
+		checkBoxPanel.setEnabled(false);
 		this.add(checkBoxPanel, BorderLayout.NORTH);
 		
 		try {
@@ -56,6 +56,9 @@ public class NuclearOverlaysPanel extends DetailPanel {
 
 	@Override
 	protected void updateSingle() throws Exception {
+		
+		boolean hasConsensus = activeDataset().getCollection().hasConsensusNucleus();
+		checkBoxPanel.setEnabled(hasConsensus);
 		
 		boolean alignNuclei = checkBoxPanel.isSelected();
 		ChartOptions options = new ChartOptionsBuilder()

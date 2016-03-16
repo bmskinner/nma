@@ -15,6 +15,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
+import java.util.logging.Level;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -40,7 +42,9 @@ import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
 import analysis.BooleanAligner;
+import analysis.BooleanAlignmentTask;
 import analysis.SignalManager;
+import analysis.nucleus.SegmentRecombiningTask;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
@@ -49,6 +53,8 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 
 public class OutlineChartFactory extends AbstractChartFactory {
+	
+	protected static final ForkJoinPool mainPool = new ForkJoinPool();
 	
 	/**
 	 * Create a nucleus outline chart with nuclear signals drawn as transparent
@@ -436,11 +442,27 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		/*
 		 * Get a boolean mask for the consensus nucleus
 		 */
+		
+//		if(options.isNormalised()){
+//			if(options.firstDataset().getCollection().hasConsensusNucleus()){
+//				log(Level.FINE, "Performing boolean alignment of nuclei");
+//				boolean[][] reference = options.firstDataset().getCollection().getConsensusNucleus().getBooleanMask(200, 200);
+////				BooleanAligner aligner = new BooleanAligner(reference);
+//				
+//				BooleanAlignmentTask task = new BooleanAlignmentTask(reference, 
+//						options.firstDataset().getCollection().getNuclei().toArray(new Nucleus[0]));
+////				task.addProgressListener(this);
+////				task.invoke();
+//				mainPool.invoke(task);
+//			}
+//		}
+		
 		boolean[][] reference = null;
 		BooleanAligner aligner = null;
 		
 		if(options.isNormalised()){
 			if(options.firstDataset().getCollection().hasConsensusNucleus()){
+
 				reference = options.firstDataset().getCollection().getConsensusNucleus().getBooleanMask(200, 200);
 				aligner = new BooleanAligner(reference);
 			}
