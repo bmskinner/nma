@@ -1603,7 +1603,7 @@ public class NucleusDatasetCreator implements Loggable {
 		return ds;
 	}
 	
-	public static XYDataset createNucleusMeshDataset(Nucleus n1, Nucleus n2, boolean higher) throws Exception {
+	public static NucleusMeshXYDataset createNucleusMeshDataset(Nucleus n1, Nucleus n2) throws Exception {
 		NucleusMeshBuilder builder = new NucleusMeshBuilder();
 		
 		NucleusMesh n1Mesh = builder.buildMesh(n1);
@@ -1611,22 +1611,22 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		List<NucleusMeshEdge> edges = n1Mesh.compare(n2Mesh);
 		
-		List<NucleusMeshEdge> subset;
-		if(higher){
-			subset = edges.stream()
-					.filter( p -> p.getRatio() > 1 )
-					.collect(Collectors.toList());
-		} else {
-			subset = edges.stream()
-					.filter( p -> p.getRatio() <= 1 )
-					.collect(Collectors.toList());
-		}
+//		List<NucleusMeshEdge> subset;
+//		if(higher){
+//			subset = edges.stream()
+//					.filter( p -> p.getRatio() > 1 )
+//					.collect(Collectors.toList());
+//		} else {
+//			subset = edges.stream()
+//					.filter( p -> p.getRatio() <= 1 )
+//					.collect(Collectors.toList());
+//		}
 		
-		DefaultXYDataset ds = new DefaultXYDataset();
+		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 		
 		
 		
-		for(NucleusMeshEdge edge : subset){
+		for(NucleusMeshEdge edge : edges){
 			
 			double[] yvalues = {
 					edge.getV1().getPosition().getY(),
@@ -1641,6 +1641,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 			double[][] data = { xvalues, yvalues };
 			ds.addSeries(edge.toString(), data);
+			ds.setRatio(edge.toString(), edge.getRatio());
 		}
 		return ds;
 	}

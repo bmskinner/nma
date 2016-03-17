@@ -29,6 +29,7 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
@@ -52,6 +53,7 @@ import analysis.nucleus.NucleusMeshBuilder.NucleusMeshEdge;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
+import charting.datasets.NucleusMeshXYDataset;
 import charting.datasets.TailDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -581,8 +583,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 */
 	public static JFreeChart createMeshChart(Nucleus n1, Nucleus n2) throws Exception{
 		
-		XYDataset higher = NucleusDatasetCreator.createNucleusMeshDataset(n1, n2, true);
-		XYDataset lower  = NucleusDatasetCreator.createNucleusMeshDataset(n1, n2, false);
+		NucleusMeshXYDataset dataset = NucleusDatasetCreator.createNucleusMeshDataset(n1, n2);
+//		NucleusMeshXYDataset lower  = NucleusDatasetCreator.createNucleusMeshDataset(n1, n2, false);
 
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -591,26 +593,56 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		
-		XYLineAndShapeRenderer highRenderer = new XYLineAndShapeRenderer(true, false);
-		highRenderer.setBaseSeriesVisibleInLegend(false);
-		highRenderer.setBaseStroke(ChartComponents.PROFILE_STROKE);
-		for(int series=0; series<higher.getSeriesCount(); series++){
-			highRenderer.setSeriesPaint(series, Color.RED);
+		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
+		renderer.setBaseSeriesVisibleInLegend(false);
+		renderer.setBaseStroke(ChartComponents.PROFILE_STROKE);
+		
+		double max = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue();
+		for(int series=0; series<dataset.getSeriesCount(); series++){
+			
+			double ratio = dataset.getRatio(dataset.getSeriesKey(series));
+			
+			
+			Color colour = getGradientColour(ratio, max);
+			
+			renderer.setSeriesPaint(series, colour);
 		}
 		
-		XYLineAndShapeRenderer lowRenderer = new XYLineAndShapeRenderer(true, false);
-		lowRenderer.setBaseSeriesVisibleInLegend(false);
-		lowRenderer.setBaseStroke(ChartComponents.PROFILE_STROKE);
-		for(int series=0; series<lower.getSeriesCount(); series++){
-			lowRenderer.setSeriesPaint(series, Color.BLUE);
-		}
-		plot.setDataset(0, higher);
-		plot.setDataset(1, lower);
+//		XYLineAndShapeRenderer lowRenderer = new XYLineAndShapeRenderer(true, false);
+//		lowRenderer.setBaseSeriesVisibleInLegend(false);
+//		lowRenderer.setBaseStroke(ChartComponents.PROFILE_STROKE);
+//		for(int series=0; series<lower.getSeriesCount(); series++){
+//			lowRenderer.setSeriesPaint(series, Color.BLUE);
+//		}
+		plot.setDataset(0, dataset);
+//		plot.setDataset(1, lower);
 		
-		plot.setRenderer(0, highRenderer);
-		plot.setRenderer(1, lowRenderer);
+		plot.setRenderer(0, renderer);
+//		plot.setRenderer(1, lowRenderer);
 		
 		return chart;
+	}
+	
+	private static Color getGradientColour(double ratio, double max){
+				
+		if(ratio < 1){
+			
+			ratio = ratio > 0.9 ? (ratio-0.9)*10 : 0;
+			
+			int r = 0;
+			int g = 0;
+			int b = (int) (255d - (255d * ratio));
+			return new Color(r, g, b);
+			
+		} else {
+			
+			ratio = ratio > 1.1 ? 1 : ratio - 1;
+			int r = (int) (255d * ratio);
+			int g = 0;
+			int b = 0;
+			return new Color(r, g, b);
+		}
+		
 	}
 
 }
