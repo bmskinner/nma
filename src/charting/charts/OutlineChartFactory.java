@@ -584,7 +584,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	public static JFreeChart createMeshChart(Nucleus n1, Nucleus n2) throws Exception{
 		
 		NucleusMeshXYDataset dataset = NucleusDatasetCreator.createNucleusMeshDataset(n1, n2);
-//		NucleusMeshXYDataset lower  = NucleusDatasetCreator.createNucleusMeshDataset(n1, n2, false);
 
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -601,25 +600,13 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		for(int series=0; series<dataset.getSeriesCount(); series++){
 			
 			double ratio = dataset.getRatio(dataset.getSeriesKey(series));
-			
-			
 			Color colour = getGradientColour(ratio, max);
 			
 			renderer.setSeriesPaint(series, colour);
 		}
 		
-//		XYLineAndShapeRenderer lowRenderer = new XYLineAndShapeRenderer(true, false);
-//		lowRenderer.setBaseSeriesVisibleInLegend(false);
-//		lowRenderer.setBaseStroke(ChartComponents.PROFILE_STROKE);
-//		for(int series=0; series<lower.getSeriesCount(); series++){
-//			lowRenderer.setSeriesPaint(series, Color.BLUE);
-//		}
 		plot.setDataset(0, dataset);
-//		plot.setDataset(1, lower);
-		
-		plot.setRenderer(0, renderer);
-//		plot.setRenderer(1, lowRenderer);
-		
+		plot.setRenderer(0, renderer);		
 		return chart;
 	}
 	

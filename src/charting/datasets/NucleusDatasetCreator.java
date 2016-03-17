@@ -1610,18 +1610,7 @@ public class NucleusDatasetCreator implements Loggable {
 		NucleusMesh n2Mesh = builder.buildMesh(n2, n1Mesh);
 		
 		List<NucleusMeshEdge> edges = n1Mesh.compare(n2Mesh);
-		
-//		List<NucleusMeshEdge> subset;
-//		if(higher){
-//			subset = edges.stream()
-//					.filter( p -> p.getRatio() > 1 )
-//					.collect(Collectors.toList());
-//		} else {
-//			subset = edges.stream()
-//					.filter( p -> p.getRatio() <= 1 )
-//					.collect(Collectors.toList());
-//		}
-		
+				
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 		
 		

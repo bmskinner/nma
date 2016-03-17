@@ -649,6 +649,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			rotationPanel.addActionListener(this);
 			
 			makeMeshPanel.addActionListener(this);
+			makeMeshPanel.setEnabled(false);
 			
 			settingsPanel.add(rotationPanel);
 			settingsPanel.add(createHookHumpPanel());

@@ -153,7 +153,7 @@ public class NucleusMeshBuilder implements Loggable {
 			double thisDistance = getDistance(vertex1, vertex2);
 			double thatDistance = mesh.getDistance(vertex1, vertex2);
 			
-			return thisDistance / thatDistance;
+			return thisDistance / thatDistance ;
 		}
 		
 		public List<NucleusMeshEdge> compare(NucleusMesh mesh){
