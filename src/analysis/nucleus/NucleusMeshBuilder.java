@@ -14,9 +14,13 @@ import logging.Loggable;
 
 public class NucleusMeshBuilder implements Loggable {
 	
-	private static final int DIVISION_LENGTH = 20;
+	public static final int DIVISION_LENGTH = 20;
 	
 	public NucleusMeshBuilder(){
+	}
+	
+	public NucleusMesh buildMesh(Nucleus nucleus) throws Exception{
+		return buildMesh(nucleus, DIVISION_LENGTH);
 	}
 	
 	/*
@@ -31,7 +35,7 @@ public class NucleusMeshBuilder implements Loggable {
 	 * Vertices should start at the CoM, then go to the reference
 	 * point, then around the perimeter.
 	 */
-	public NucleusMesh buildMesh(Nucleus nucleus) throws Exception{
+	public NucleusMesh buildMesh(Nucleus nucleus, int meshSize) throws Exception{
 		log(Level.FINEST, "Creating mesh for "+nucleus.getNameAndNumber());
 		NucleusMesh mesh = new NucleusMesh(nucleus);
 		
@@ -43,7 +47,7 @@ public class NucleusMeshBuilder implements Loggable {
 		int segNumber = 0;
 		for(NucleusBorderSegment seg : list){
 			
-			int divisions = seg.length() / DIVISION_LENGTH; // find the number of divisions to make
+			int divisions = seg.length() / meshSize; // find the number of divisions to make
 			
 			mesh.setDivision(segNumber++, divisions);
 			log(Level.FINEST, "Dividing segment into "+divisions+" parts");
@@ -58,7 +62,6 @@ public class NucleusMeshBuilder implements Loggable {
 		}
 		log(Level.FINEST, "Created mesh");
 		return mesh;
-		
 	}
 	
 	/**

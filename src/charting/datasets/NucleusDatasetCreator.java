@@ -1603,10 +1603,10 @@ public class NucleusDatasetCreator implements Loggable {
 		return ds;
 	}
 	
-	public static NucleusMeshXYDataset createNucleusMeshDataset(Nucleus n1, Nucleus n2) throws Exception {
+	public static NucleusMeshXYDataset createNucleusMeshDataset(Nucleus n1, Nucleus n2, int meshSize) throws Exception {
 		NucleusMeshBuilder builder = new NucleusMeshBuilder();
 		
-		NucleusMesh n1Mesh = builder.buildMesh(n1);
+		NucleusMesh n1Mesh = builder.buildMesh(n1, meshSize);
 		NucleusMesh n2Mesh = builder.buildMesh(n2, n1Mesh);
 		
 		List<NucleusMeshEdge> edges = n1Mesh.compare(n2Mesh);

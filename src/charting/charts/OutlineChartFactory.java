@@ -581,9 +581,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createMeshChart(Nucleus n1, Nucleus n2) throws Exception{
+	public static JFreeChart createMeshChart(Nucleus n1, Nucleus n2, double minRatio, double maxRatio, int meshSize) throws Exception{
 		
-		NucleusMeshXYDataset dataset = NucleusDatasetCreator.createNucleusMeshDataset(n1, n2);
+		NucleusMeshXYDataset dataset = NucleusDatasetCreator.createNucleusMeshDataset(n1, n2, meshSize);
 
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -594,13 +594,13 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
 		renderer.setBaseSeriesVisibleInLegend(false);
-		renderer.setBaseStroke(ChartComponents.PROFILE_STROKE);
+		renderer.setBaseStroke(ChartComponents.MARKER_STROKE);
 		
 		double max = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue();
 		for(int series=0; series<dataset.getSeriesCount(); series++){
 			
 			double ratio = dataset.getRatio(dataset.getSeriesKey(series));
-			Color colour = getGradientColour(ratio, max);
+			Color colour = getGradientColour(ratio, minRatio, maxRatio);
 			
 			renderer.setSeriesPaint(series, colour);
 		}
@@ -610,26 +610,41 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 	
-	private static Color getGradientColour(double ratio, double max){
-				
+	private static Color getGradientColour(double ratio, double minRatio, double maxRatio){
+			
+		int rValue = 0;
+		int bValue = 0;
+		// TODO- fix the ratio maths 
 		if(ratio < 1){
-			
-			ratio = ratio > 0.9 ? (ratio-0.9)*10 : 0;
-			
-			int r = 0;
-			int g = 0;
-			int b = (int) (255d - (255d * ratio));
-			return new Color(r, g, b);
-			
+
+			if(ratio<minRatio){
+				bValue = 255;
+			} else {
+				// ratio of ratio
+				
+				// differnce between 1 and minRatio
+				double range = 1d-minRatio;
+				double actual = ratio - minRatio;
+				double realRatio = actual / range;
+				bValue = (int) (255d - (255d * realRatio));
+			}
+
 		} else {
 			
-			ratio = ratio > 1.1 ? 1 : ratio - 1;
-			int r = (int) (255d * ratio);
-			int g = 0;
-			int b = 0;
-			return new Color(r, g, b);
+			if(ratio>maxRatio){
+				rValue = 255;
+			} else {
+				double range = maxRatio - 1d;
+				double actual = maxRatio - ratio;
+				double realRatio = actual / range;
+				rValue = (int) (255d * realRatio);
+			}
+
 		}
-		
+		int r = rValue;
+		int g = 0;
+		int b = bValue;
+		return new Color(r, g, b);
 	}
 
 }
