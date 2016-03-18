@@ -49,11 +49,14 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		this.add(header, BorderLayout.NORTH);
 		
 		JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+		
+		JPanel centrePanel = new JPanel(new FlowLayout());
 		chartPanelOne = new FixedAspectRatioChartPanel(chart);
 		chartPanelTwo = new FixedAspectRatioChartPanel(chart);
-		this.add(chartPanelOne, BorderLayout.WEST);
-		this.add(chartPanelTwo, BorderLayout.EAST);
+		centrePanel.add(chartPanelOne);
+		centrePanel.add(chartPanelTwo);
 		
+		this.add(centrePanel,BorderLayout.CENTER);
 		
 		
 		this.setModal(false);

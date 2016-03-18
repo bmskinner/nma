@@ -14,7 +14,7 @@ import logging.Loggable;
 
 public class NucleusMeshBuilder implements Loggable {
 	
-	public static final int DIVISION_LENGTH = 20;
+	public static final int DIVISION_LENGTH = 10;
 	
 	public NucleusMeshBuilder(){
 	}
