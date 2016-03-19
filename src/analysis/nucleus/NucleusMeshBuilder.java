@@ -1,11 +1,16 @@
 package analysis.nucleus;
 
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
+import components.generic.Equation;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
 import components.nuclear.NucleusBorderSegment;
@@ -46,7 +51,7 @@ public class NucleusMeshBuilder implements Loggable {
 		log(Level.FINEST, "Creating mesh for "+nucleus.getNameAndNumber());
 		NucleusMesh mesh = new NucleusMesh(nucleus);
 		
-		mesh.addVertex(nucleus.getCentreOfMass());
+		mesh.addVertex(nucleus.getCentreOfMass(), false);
 		
 		List<NucleusBorderSegment> list = nucleus.getProfile(ProfileType.REGULAR).getOrderedSegments();
 		
@@ -63,15 +68,15 @@ public class NucleusMeshBuilder implements Loggable {
 			for(double d=0; d<1; d+=proportion){
 				int index = seg.getProportionalIndex(d);
 				log(Level.FINEST, "Fetching point at index "+index);
-				mesh.addVertex(nucleus.getBorderPoint(index));
+				mesh.addVertex(nucleus.getBorderPoint(index), true);
 			}
 		}
-		
-		/*
-		 * Add a ring of vertices between the CoM and each border point
-		 */
-		
+				
 		createEdges(mesh);
+		
+//		mesh.subdivide();
+//		mesh.pruneOverlaps();
+		
 		
 		log(Level.FINEST, "Created mesh");
 		return mesh;
@@ -110,7 +115,7 @@ public class NucleusMeshBuilder implements Loggable {
 		NucleusMesh mesh = new NucleusMesh(nucleus);
 		
 		log(Level.FINEST, "Adding centre of mass");
-		mesh.addVertex(nucleus.getCentreOfMass());
+		mesh.addVertex(nucleus.getCentreOfMass(), false);
 		
 		log(Level.FINEST, "Getting ordered segments");
 		List<NucleusBorderSegment> list = nucleus.getProfile(ProfileType.REGULAR).getOrderedSegments();
@@ -137,11 +142,14 @@ public class NucleusMeshBuilder implements Loggable {
 			for(double d=0; d<1; d+=proportion){
 				int index = seg.getProportionalIndex(d);
 				log(Level.FINEST, "Fetching point at index "+index);
-				mesh.addVertex(nucleus.getBorderPoint(index));
+				mesh.addVertex(nucleus.getBorderPoint(index), true);
 			}
 		}
 		
+		
 		createEdges(mesh);
+//		mesh.subdivide();
+//		mesh.pruneOverlaps();
 		log(Level.FINEST, "Created mesh");
 		return mesh;
 	}
@@ -164,13 +172,34 @@ public class NucleusMeshBuilder implements Loggable {
 		}
 		
 		
+		/**
+		 * Private constructor, to return a compared mesh
+		 * @param mesh
+		 * @param edges
+		 */
+		private NucleusMesh(NucleusMesh mesh, List<NucleusMeshEdge> edges){
+			this.segmentDivisions = mesh.segmentDivisions;
+			this.vertices         = mesh.vertices;
+			this.edges            = edges;
+		}
+		
+		
 		public String getNucleusName() {
 			return nucleusName;
 		}
 
 		
-		public void addVertex(XYPoint p){
-			vertices.add( new NucleusMeshVertex(vertices.size(), p)  );
+		/**
+		 * Add the given point as a vertex to the mesh. Returns the number
+		 * of the added vertex
+		 * @param p
+		 * @param peripheral
+		 * @return
+		 */
+		public int addVertex(XYPoint p, boolean peripheral){
+			int newIndex = vertices.size();
+			vertices.add( new NucleusMeshVertex(newIndex, p, peripheral)  );
+			return newIndex;
 		}
 		
 		public void addEdge(NucleusMeshEdge e){
@@ -209,10 +238,10 @@ public class NucleusMeshBuilder implements Loggable {
 			return segmentDivisions.get(segment);
 		}
 				
-		public List<NucleusMeshEdge> compare(NucleusMesh mesh){
+		public NucleusMesh compare(NucleusMesh mesh){
 			
 			if(mesh.getEdgeCount() != this.getEdgeCount()){
-				throw new IllegalArgumentException("Meshes are not comparable");
+				throw new IllegalArgumentException("Meshes are not comparable: "+mesh.getEdgeCount()+" versus "+getEdgeCount());
 			}
 			
 			log(Level.FINEST, "Comparing meshes");
@@ -222,7 +251,103 @@ public class NucleusMeshBuilder implements Loggable {
 			for(int i=0; i<getEdgeCount(); i++){
 				edges.add( getEdge(i).compare(mesh.getEdge(i)) );
 			}
-			return edges;
+			return new NucleusMesh(this, edges);
+		}
+		
+		/**
+		 * Create new vertices at the midpoints of all edges that have
+		 * one or fewer peripheral vertices. Add new edges between them.
+		 */
+		public void subdivide(){
+			List<NucleusMeshEdge> toAdd = new ArrayList<NucleusMeshEdge>();
+			
+			for(final Iterator<NucleusMeshEdge> it = edges.iterator(); it.hasNext(); ){
+
+				NucleusMeshEdge e = it.next();
+				if( ! e.isPeripheral()){
+					int index = addVertex (e.getMidpoint(), false);
+					toAdd.add( new NucleusMeshEdge(e.getV1(), vertices.get(index), 1));
+					toAdd.add( new NucleusMeshEdge(e.getV2(), vertices.get(index), 1));
+					it.remove();
+
+				}
+			}
+			
+			for(NucleusMeshEdge e : toAdd){
+				addEdge(e); 
+			}
+		}
+		
+		public void makePairwiseEdges(){
+			List<NucleusMeshEdge> toAdd = new ArrayList<NucleusMeshEdge>();
+			
+			for(NucleusMeshVertex v1 : vertices){
+				
+				for(NucleusMeshVertex v2 : vertices){
+					if(v1.equals(v2)){
+						continue;
+					}
+					toAdd.add( new NucleusMeshEdge(v1, v2, 1));
+				}
+				
+			}
+			
+			for(NucleusMeshEdge e : toAdd){
+				addEdge(e); 
+			}
+			
+		}
+		
+		/**
+		 * Remove all edges that intersect another edge in the mesh.
+		 * Discards the longer edge of the two
+		 */
+		public void pruneOverlaps(){
+			Set<NucleusMeshEdge> toRemove = new HashSet<NucleusMeshEdge>();
+			for(NucleusMeshEdge e1 : edges){
+				
+				for(NucleusMeshEdge e2 : edges){
+					if(e1.equals(e2)){
+						continue;
+					}
+					
+					// TODO: account for the centre of mass
+					if(e1.crosses(e2)){
+						
+						// don't count edges already pruned
+						if(toRemove.contains(e1) || toRemove.contains(e2)){
+							continue;
+						}
+						
+						// Don't remove borders
+						if( e1.isPeripheral()  && e2.isPeripheral() ){
+							continue;
+						}
+						
+						// Remove the longer edge if neither are on the border
+						if( ! e1.isPeripheral()  && ! e2.isPeripheral()){
+
+							if(e1.isLongerThan(e2)){
+								toRemove.add(e1);
+							} else {
+								toRemove.add(e2);
+							}
+						} else {
+							// If one is peripheral, remove the other
+							if(  e1.isPeripheral()){
+								toRemove.add(e2);
+							} else if(e2.isPeripheral()) {
+								toRemove.add(e1);
+							}
+						}
+					}
+				}
+				
+			}
+			
+			for(NucleusMeshEdge e : toRemove){
+				edges.remove(e);
+			}
 		}
 		
 	}
@@ -254,6 +379,51 @@ public class NucleusMeshBuilder implements Loggable {
 			return Stats.calculateLog2Ratio(ratio);
 		}
 		
+		public double getLength(){
+			return v1.getLengthTo(v2);
+		}
+		
+		public XYPoint getMidpoint(){
+			Equation eq = new Equation(v1.getPosition(), v2.getPosition());
+			if(v1.getPosition().getX()<v2.getPosition().getX()){
+				return eq.getPointOnLine(v1.getPosition(), getLength()/2);
+			} else {
+				return eq.getPointOnLine(v1.getPosition(), -(getLength()/2));
+			}
+			
+		}
+		
+		/**
+		 * Test if both vertices lie on the periphery of the mesh
+		 * @return
+		 */
+		public boolean isPeripheral(){
+			return v1.isPeripheral() && v2.isPeripheral();
+		}
+		
+		public boolean isLongerThan(NucleusMeshEdge e){
+			return getLength() > e.getLength();
+		}
+		
+		public boolean crosses(NucleusMeshEdge e){
+			
+			Line2D line1 = new Line2D.Double(v1.getPosition().asPoint(), v2.getPosition().asPoint());
+			Line2D line2 = new Line2D.Double(e.v1.getPosition().asPoint(), e.v2.getPosition().asPoint());
+
+			if(line1.intersectsLine(line2)){
+				
+				// Ignore endpoints overlapping
+				if(    line1.getP1().equals(line2.getP1())  || line1.getP2().equals(line2.getP1())
+					|| line2.getP1().equals(line1.getP2())  || line2.getP2().equals(line1.getP2())){
+				
+					return false;
+				} else {
+					return true;
+				}
+			} 
+			return false;
+		}
+		
 		/**
 		 * Compare the length of this edge to the given edge, and return
 		 * a new edge with the ratio
@@ -263,7 +433,7 @@ public class NucleusMeshBuilder implements Loggable {
 		public NucleusMeshEdge compare(NucleusMeshEdge e){
 			
 			double thisDistance = v1.getLengthTo(v2);
-			double thatDistance = e.getV1().getLengthTo(e.getV2());
+			double thatDistance = e.v1.getLengthTo(e.v2);
 			
 			double ratio = thisDistance / thatDistance ;
 			return new NucleusMeshEdge(v1, v2, ratio);
@@ -280,10 +450,16 @@ public class NucleusMeshBuilder implements Loggable {
 		
 		private int number; // the number in the mesh - use to compare vertexes between nuclei
 		private XYPoint position; // the posiiton of the vertex
+		private boolean peripheral; // is the vertex on the border of the object
 		
-		public NucleusMeshVertex(int i, XYPoint p){
+		public NucleusMeshVertex(int i, XYPoint p, boolean peripheral){
 			this.number = i;
 			this.position = p;
+			this.peripheral = peripheral;
+		}
+		
+		public boolean isPeripheral() {
+			return peripheral;
 		}
 
 		public int getNumber() {
@@ -296,6 +472,10 @@ public class NucleusMeshBuilder implements Loggable {
 		
 		public double getLengthTo(NucleusMeshVertex v){
 			return position.getLengthTo(v.getPosition());
+		}
+		
+		public boolean overlaps(NucleusMeshVertex v){
+			return position.overlapsPerfectly(v.position);
 		}
 		
 		

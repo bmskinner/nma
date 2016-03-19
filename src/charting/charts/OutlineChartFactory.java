@@ -594,7 +594,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		
-		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
+		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, true);
 		renderer.setBaseSeriesVisibleInLegend(false);
 		renderer.setBaseStroke(ChartComponents.MARKER_STROKE);
 		

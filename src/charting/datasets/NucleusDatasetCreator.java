@@ -1624,13 +1624,15 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		NucleusMesh n2Mesh = builder.buildMesh(n2, n1Mesh);
 		
-		List<NucleusMeshEdge> edges = n1Mesh.compare(n2Mesh);
+		NucleusMesh result = n1Mesh.compare(n2Mesh);
+//		result.makePairwiseEdges();
+		result.pruneOverlaps();
 				
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 		
 		
 		
-		for(NucleusMeshEdge edge : edges){
+		for(NucleusMeshEdge edge : result.getEdges()){
 			
 			double[] yvalues = {
 					edge.getV1().getPosition().getY(),

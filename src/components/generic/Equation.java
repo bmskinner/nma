@@ -181,6 +181,13 @@ public class Equation{
 		return new XYPoint(x, y);
 	}
 	
+	public boolean intersects(Equation eq){
+		if(m == eq.m){ // they are parallel
+			return c==eq.c; 
+		}
+		return true;
+	}
+	
 	
 	/**
 	 * Find the smallest distance from a given point to the line

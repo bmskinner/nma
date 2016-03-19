@@ -26,6 +26,7 @@
 
 package components.generic;
 
+import java.awt.geom.Point2D;
 import java.io.Serializable;
 
 import components.nuclear.BorderPoint;
@@ -176,6 +177,9 @@ private double x;
   }
   
   
+  public Point2D asPoint(){
+	  return new Point2D.Double(x, y);
+  }
 
   @Override
   public int hashCode() {
