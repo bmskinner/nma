@@ -43,6 +43,7 @@ import charting.options.ChartOptions;
 import utility.Constants;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
+import analysis.BooleanAligner;
 import analysis.nucleus.NucleusMeshBuilder;
 import analysis.nucleus.NucleusMeshBuilder.NucleusMesh;
 import analysis.nucleus.NucleusMeshBuilder.NucleusMeshEdge;
@@ -1607,6 +1608,20 @@ public class NucleusDatasetCreator implements Loggable {
 		NucleusMeshBuilder builder = new NucleusMeshBuilder();
 		
 		NucleusMesh n1Mesh = builder.buildMesh(n1, meshSize);
+		
+		/*
+		 * Ensure input nuclei have a best fit alignment
+		 */
+		BooleanAligner aligner = new BooleanAligner(n1.getBooleanMask(200, 200));
+		int[] alignment = aligner.align(n2.getBooleanMask(200, 200));
+		
+		n2 = n2.duplicate();
+		n2.moveCentreOfMass( new XYPoint(alignment[1], alignment[0]));
+		
+		/*
+		 * Create the mesh
+		 */
+		
 		NucleusMesh n2Mesh = builder.buildMesh(n2, n1Mesh);
 		
 		List<NucleusMeshEdge> edges = n1Mesh.compare(n2Mesh);
@@ -1630,7 +1645,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 			double[][] data = { xvalues, yvalues };
 			ds.addSeries(edge.toString(), data);
-			ds.setRatio(edge.toString(), edge.getRatio());
+			ds.setRatio(edge.toString(), edge.getLog2Ratio());
 		}
 		return ds;
 	}

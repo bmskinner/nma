@@ -97,6 +97,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	protected void updateMultiple() throws Exception {
 		updateSingle();
 		compareConsensusButton.setEnabled(true);
+		checkBoxPanel.setEnabled(false);
 	}
 
 	@Override

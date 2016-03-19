@@ -36,6 +36,8 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import utility.Utils;
 
  public class Stats {
+	 
+	 public static final double LOG2 = Math.log(2);
 
  /*
     Calculate the <lowerPercent> quartile from a Double[] array
@@ -194,6 +196,10 @@ import utility.Utils;
 		  return Double.NaN;
 	  }
   }
+  
+  public static double calculateLog2Ratio(double d){
+		return Math.log(d)/LOG2;
+	}
 
  }
   

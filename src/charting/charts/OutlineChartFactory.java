@@ -2,9 +2,11 @@ package charting.charts;
 
 import gui.RotationMode;
 import gui.components.ColourSelecter;
+import ij.IJ;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 import io.ImageImporter;
+import stats.Stats;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -603,6 +605,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			Color colour = getGradientColour(ratio, minRatio, maxRatio);
 			
 			renderer.setSeriesPaint(series, colour);
+			renderer.setSeriesStroke(series, ChartComponents.MARKER_STROKE);
 		}
 		
 		plot.setDataset(0, dataset);
@@ -610,34 +613,48 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 	
+	/**
+	 * Log2 ratios are coming in, which must be converted to real ratios
+	 * @param ratio
+	 * @param minRatio
+	 * @param maxRatio
+	 * @return
+	 */
 	private static Color getGradientColour(double ratio, double minRatio, double maxRatio){
 			
+		double log2Min = Stats.calculateLog2Ratio(minRatio);
+		double log2Max = Stats.calculateLog2Ratio(maxRatio);
+		
 		int rValue = 0;
 		int bValue = 0;
-		// TODO- fix the ratio maths 
-		if(ratio < 1){
 
-			if(ratio<minRatio){
+		if(ratio <= 0){
+
+			if(ratio<log2Min){
 				bValue = 255;
 			} else {
 				// ratio of ratio
 				
-				// differnce between 1 and minRatio
-				double range = 1d-minRatio;
-				double actual = ratio - minRatio;
-				double realRatio = actual / range;
-				bValue = (int) (255d - (255d * realRatio));
+				// differnce between 0 and minRatio
+				double range = Math.abs(log2Min);
+				double actual = range - Math.abs(ratio);
+				
+				double realRatio = 1 - (actual / range);
+				bValue = (int) (255d * realRatio);
 			}
 
 		} else {
 			
-			if(ratio>maxRatio){
+			if(ratio>log2Max){
 				rValue = 255;
 			} else {
-				double range = maxRatio - 1d;
-				double actual = maxRatio - ratio;
-				double realRatio = actual / range;
-				rValue = (int) (255d * realRatio);
+				
+				// differnce between 0 and minRatio
+				double range = Math.abs(log2Max);
+				double actual = range - Math.abs(ratio);
+				
+				double realRatio =  1- (actual / range);
+				rValue = (int) (255d * realRatio);				
 			}
 
 		}

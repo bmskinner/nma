@@ -11,6 +11,7 @@ import components.generic.XYPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import logging.Loggable;
+import stats.Stats;
 
 public class NucleusMeshBuilder implements Loggable {
 	
@@ -19,6 +20,12 @@ public class NucleusMeshBuilder implements Loggable {
 	public NucleusMeshBuilder(){
 	}
 	
+	/**
+	 * Create a mesh for the given Nucleus, using the default mesh size
+	 * @param nucleus
+	 * @return
+	 * @throws Exception
+	 */
 	public NucleusMesh buildMesh(Nucleus nucleus) throws Exception{
 		return buildMesh(nucleus, DIVISION_LENGTH);
 	}
@@ -39,11 +46,10 @@ public class NucleusMeshBuilder implements Loggable {
 		log(Level.FINEST, "Creating mesh for "+nucleus.getNameAndNumber());
 		NucleusMesh mesh = new NucleusMesh(nucleus);
 		
-		mesh.addVertex(new NucleusMeshVertex(0, nucleus.getCentreOfMass()));
+		mesh.addVertex(nucleus.getCentreOfMass());
 		
 		List<NucleusBorderSegment> list = nucleus.getProfile(ProfileType.REGULAR).getOrderedSegments();
 		
-		int vertex = 1;
 		int segNumber = 0;
 		for(NucleusBorderSegment seg : list){
 			
@@ -57,11 +63,39 @@ public class NucleusMeshBuilder implements Loggable {
 			for(double d=0; d<1; d+=proportion){
 				int index = seg.getProportionalIndex(d);
 				log(Level.FINEST, "Fetching point at index "+index);
-				mesh.addVertex(new NucleusMeshVertex(vertex++, nucleus.getBorderPoint(index)));
+				mesh.addVertex(nucleus.getBorderPoint(index));
 			}
 		}
+		
+		/*
+		 * Add a ring of vertices between the CoM and each border point
+		 */
+		
+		createEdges(mesh);
+		
 		log(Level.FINEST, "Created mesh");
 		return mesh;
+	}
+	
+	private void createEdges(NucleusMesh mesh){
+
+		
+		log(Level.FINEST, "Linking edges to CoM");
+		for(int i=1; i<mesh.getVertexCount(); i++){
+			NucleusMeshEdge e = new NucleusMeshEdge(mesh.getVertex(0), mesh.getVertex(i), 1);
+			mesh.addEdge(e);
+		}
+		
+		log(Level.FINEST, "Linking border pairs");
+		for(int i=1, j=2; j<mesh.getVertexCount(); i++, j++){
+
+			mesh.addEdge( new NucleusMeshEdge(mesh.getVertex(i), mesh.getVertex(j), 1) );
+		}
+		
+		// Link the final perimeter point to the tip
+		mesh.addEdge(  new NucleusMeshEdge(mesh.getVertex(mesh.getVertexCount()-1), mesh.getVertex(1), 1) );
+		
+		log(Level.FINEST, "Created edges");
 	}
 	
 	/**
@@ -76,7 +110,7 @@ public class NucleusMeshBuilder implements Loggable {
 		NucleusMesh mesh = new NucleusMesh(nucleus);
 		
 		log(Level.FINEST, "Adding centre of mass");
-		mesh.addVertex(new NucleusMeshVertex(0, nucleus.getCentreOfMass()));
+		mesh.addVertex(nucleus.getCentreOfMass());
 		
 		log(Level.FINEST, "Getting ordered segments");
 		List<NucleusBorderSegment> list = nucleus.getProfile(ProfileType.REGULAR).getOrderedSegments();
@@ -88,7 +122,6 @@ public class NucleusMeshBuilder implements Loggable {
 		}
 		log(Level.FINEST, "Segment counts equal:"+template.getSegmentCount()+" and "+list.size());
 		
-		int vertex = 1;
 		int segNumber = 0;
 		log(Level.FINEST, "Iterating over segments");
 		for(NucleusBorderSegment seg : list){
@@ -104,17 +137,26 @@ public class NucleusMeshBuilder implements Loggable {
 			for(double d=0; d<1; d+=proportion){
 				int index = seg.getProportionalIndex(d);
 				log(Level.FINEST, "Fetching point at index "+index);
-				mesh.addVertex(new NucleusMeshVertex(vertex++, nucleus.getBorderPoint(index)));
+				mesh.addVertex(nucleus.getBorderPoint(index));
 			}
 		}
+		
+		createEdges(mesh);
 		log(Level.FINEST, "Created mesh");
 		return mesh;
 	}
 	
 	public class NucleusMesh {
 		
+		// Track the number of divisions for each segment to allow mapping between meshes
 		private Map<Integer, Integer> segmentDivisions = new HashMap<Integer, Integer>();
+		
+		// Store the vertices in the mesh
 		private List<NucleusMeshVertex> vertices = new ArrayList<NucleusMeshVertex>();
+		
+		// Not all vertices need to be linked - store edges for comparisons
+		private List<NucleusMeshEdge> edges     = new ArrayList<NucleusMeshEdge>();
+		
 		private String nucleusName;
 		
 		public NucleusMesh(Nucleus n){
@@ -126,8 +168,13 @@ public class NucleusMeshBuilder implements Loggable {
 			return nucleusName;
 		}
 
-		public void addVertex(NucleusMeshVertex v){
-			vertices.add(v);
+		
+		public void addVertex(XYPoint p){
+			vertices.add( new NucleusMeshVertex(vertices.size(), p)  );
+		}
+		
+		public void addEdge(NucleusMeshEdge e){
+			edges.add(e);
 		}
 		
 		public int getSegmentCount(){
@@ -138,6 +185,22 @@ public class NucleusMeshBuilder implements Loggable {
 			return vertices.size();
 		}
 		
+		public int getEdgeCount(){
+			return edges.size();
+		}
+		
+		public NucleusMeshVertex getVertex(int i){
+			return  vertices.get(i);
+		}
+		
+		public NucleusMeshEdge getEdge(int i){
+			return edges.get(i);
+		}
+		
+		public List<NucleusMeshEdge> getEdges(){
+			return edges;
+		}
+		
 		public void setDivision(int segment, int divisions){
 			segmentDivisions.put(segment, divisions);
 		}
@@ -145,48 +208,21 @@ public class NucleusMeshBuilder implements Loggable {
 		public int getDivision(int segment){
 			return segmentDivisions.get(segment);
 		}
-		
-		public double getDistance(int vertex1, int vertex2){
-			XYPoint point1 = vertices.get(vertex1).getPosition();
-			XYPoint point2 = vertices.get(vertex2).getPosition();
-			return point1.getLengthTo(point2);
-		}
-		
-		public double compareDistance(int vertex1, int vertex2, NucleusMesh mesh){
-			double thisDistance = getDistance(vertex1, vertex2);
-			double thatDistance = mesh.getDistance(vertex1, vertex2);
-			
-			return thisDistance / thatDistance ;
-		}
-		
+				
 		public List<NucleusMeshEdge> compare(NucleusMesh mesh){
 			
-			List<NucleusMeshEdge> edges = new ArrayList<NucleusMeshEdge>();
+			if(mesh.getEdgeCount() != this.getEdgeCount()){
+				throw new IllegalArgumentException("Meshes are not comparable");
+			}
+			
 			log(Level.FINEST, "Comparing meshes");
 			
-			log(Level.FINEST, "Comparing each to CoM");
-			for(int i=1; i<vertices.size(); i++){
-				double ratio = compareDistance(0, i, mesh);
-				edges.add( new NucleusMeshEdge(vertices.get(0), vertices.get(i), ratio) );
-				
-				log(Level.FINEST, "0 - "+i+": "+ratio);
+			List<NucleusMeshEdge> edges = new ArrayList<NucleusMeshEdge>();
+			
+			for(int i=0; i<getEdgeCount(); i++){
+				edges.add( getEdge(i).compare(mesh.getEdge(i)) );
 			}
-			
-			log(Level.FINEST, "Comparing border pairs");
-			for(int i=1, j=2; j<vertices.size(); i++, j++){
-				double ratio = compareDistance(i, j, mesh);
-				edges.add( new NucleusMeshEdge(vertices.get(i), vertices.get(j), ratio) );
-				log(Level.FINEST, i+" - "+j+": "+ratio);
-			}
-			
-			double ratio = compareDistance(vertices.size()-1, 1, mesh);
-			edges.add(  new NucleusMeshEdge(vertices.get(vertices.size()-1), vertices.get(1), ratio) );
-			log(Level.FINEST, "e - "+1+": "+ratio);
-			
-			log(Level.FINEST, "Comparion complete");
-			
 			return edges;
-			
 		}
 		
 	}
@@ -214,6 +250,26 @@ public class NucleusMeshBuilder implements Loggable {
 			return ratio;
 		}
 		
+		public double getLog2Ratio(){
+			return Stats.calculateLog2Ratio(ratio);
+		}
+		
+		/**
+		 * Compare the length of this edge to the given edge, and return
+		 * a new edge with the ratio
+		 * @param e
+		 * @return
+		 */
+		public NucleusMeshEdge compare(NucleusMeshEdge e){
+			
+			double thisDistance = v1.getLengthTo(v2);
+			double thatDistance = e.getV1().getLengthTo(e.getV2());
+			
+			double ratio = thisDistance / thatDistance ;
+			return new NucleusMeshEdge(v1, v2, ratio);
+			
+		}
+						
 		public String toString(){
 			return v1.getNumber()+"-"+v2.getNumber();
 		}
@@ -238,6 +294,9 @@ public class NucleusMeshBuilder implements Loggable {
 			return position;
 		}
 		
+		public double getLengthTo(NucleusMeshVertex v){
+			return position.getLengthTo(v.getPosition());
+		}
 		
 		
 	}
