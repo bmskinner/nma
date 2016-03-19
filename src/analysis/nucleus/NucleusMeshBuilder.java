@@ -74,7 +74,7 @@ public class NucleusMeshBuilder implements Loggable {
 				
 		createEdges(mesh);
 		
-//		mesh.subdivide();
+		mesh.subdivide();
 //		mesh.pruneOverlaps();
 		
 		
@@ -148,7 +148,7 @@ public class NucleusMeshBuilder implements Loggable {
 		
 		
 		createEdges(mesh);
-//		mesh.subdivide();
+		mesh.subdivide();
 //		mesh.pruneOverlaps();
 		log(Level.FINEST, "Created mesh");
 		return mesh;
@@ -287,6 +287,11 @@ public class NucleusMeshBuilder implements Loggable {
 					if(v1.equals(v2)){
 						continue;
 					}
+					
+					//Ignore borders
+					if(v1.isPeripheral() && v2.isPeripheral()){
+						continue;
+					}
 					toAdd.add( new NucleusMeshEdge(v1, v2, 1));
 				}
 				
@@ -298,11 +303,45 @@ public class NucleusMeshBuilder implements Loggable {
 			
 		}
 		
+		public void removeDuplicateEdges(){
+			Set<NucleusMeshEdge> toRemove = new HashSet<NucleusMeshEdge>();
+			log(Level.INFO, "Starting edges: "+edges.size());
+			for(NucleusMeshEdge e1 : edges){
+				
+				for(NucleusMeshEdge e2 : edges){
+					if(e1.equals(e2)){
+						continue;
+					}
+					
+					if(toRemove.contains(e1) || toRemove.contains(e2)){
+						continue;
+					}
+					
+					// TODO: This is enough to remove all edges to the CoM.Fix
+					if( (  e1.getV1().overlaps(e2.getV1()) ||
+					       e1.getV2().overlaps(e2.getV1())   ) &&
+					    (  e1.getV1().overlaps(e2.getV2()) ||
+					       e1.getV2().overlaps(e2.getV2()    ))){
+						toRemove.add(e1);
+					}
+				
+					
+				}
+				
+			}
+			log(Level.INFO, "Removing: "+toRemove.size());
+			for(NucleusMeshEdge e : toRemove){
+				edges.remove(e);
+			}
+			log(Level.INFO, "Remaining edges: "+edges.size());
+		}
+		
 		/**
 		 * Remove all edges that intersect another edge in the mesh.
 		 * Discards the longer edge of the two
 		 */
 		public void pruneOverlaps(){
+			log(Level.INFO, "Starting edges: "+edges.size());
 			Set<NucleusMeshEdge> toRemove = new HashSet<NucleusMeshEdge>();
 			for(NucleusMeshEdge e1 : edges){
 				
@@ -311,6 +350,7 @@ public class NucleusMeshBuilder implements Loggable {
 						continue;
 					}
 					
+										
 					// TODO: account for the centre of mass
 					if(e1.crosses(e2)){
 						
@@ -345,9 +385,11 @@ public class NucleusMeshBuilder implements Loggable {
 				
 			}
 			
+			log(Level.INFO, "Pruning: "+toRemove.size());
 			for(NucleusMeshEdge e : toRemove){
 				edges.remove(e);
 			}
+			log(Level.INFO, "Remaining edges: "+edges.size());
 		}
 		
 	}

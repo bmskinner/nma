@@ -1624,7 +1624,12 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		NucleusMesh n2Mesh = builder.buildMesh(n2, n1Mesh);
 		
+		n1Mesh.makePairwiseEdges();
+		n2Mesh.makePairwiseEdges();
+		
+		
 		NucleusMesh result = n1Mesh.compare(n2Mesh);
+		result.removeDuplicateEdges();
 //		result.makePairwiseEdges();
 		result.pruneOverlaps();
 				
