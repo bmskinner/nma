@@ -62,7 +62,6 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel {
 
 				if(dataset==null){
 					log(Level.FINEST, "Null dataset "+i);
-					super.restoreAutoBounds();
 					return;
 				}
 

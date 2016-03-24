@@ -759,7 +759,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				
 			} catch(Exception e){
 				log(Level.SEVERE, "Error updating outline chart", e);
-				JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+				JFreeChart chart = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
 				panel.setChart(chart);
 				rotationPanel.setEnabled(false);
 				showHookHump.setEnabled(false);

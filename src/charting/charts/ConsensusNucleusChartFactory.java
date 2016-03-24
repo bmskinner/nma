@@ -28,6 +28,7 @@ import java.util.logging.Level;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
@@ -51,6 +52,21 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 */
 	public static JFreeChart makeEmptyNucleusOutlineChart(){
 		return makeConsensusChart( (XYDataset) null);
+	}
+	
+	public static JFreeChart makeErrorNucleusOutlineChart(){
+		JFreeChart chart = makeConsensusChart( (XYDataset) null);
+
+		
+		for(int i=-100 ; i<=100; i+=20){
+			for(int j=-100 ; j<=100; j+=20){
+				XYTextAnnotation annotation = new XYTextAnnotation("Error creating chart", i, j);
+				annotation.setPaint(Color.BLACK);
+				((XYPlot) chart.getPlot()).addAnnotation(annotation);
+			}
+		}
+		
+		return chart;
 	}
 	
 	/**

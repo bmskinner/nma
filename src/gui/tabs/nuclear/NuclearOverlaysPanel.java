@@ -10,6 +10,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import analysis.AnalysisDataset;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -96,7 +97,18 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	@Override
 	protected void updateMultiple() throws Exception {
 		updateSingle();
-		compareConsensusButton.setEnabled(true);
+		
+		/*
+		 * Check if all selected datasets have a consensus
+		 */
+		boolean setConsensusButton = true;
+		for(AnalysisDataset d : getDatasets()){
+			if( ! d.getCollection().hasConsensusNucleus()){
+				setConsensusButton = false;
+			}
+		}
+		compareConsensusButton.setEnabled(setConsensusButton);
+		
 		checkBoxPanel.setEnabled(false);
 	}
 

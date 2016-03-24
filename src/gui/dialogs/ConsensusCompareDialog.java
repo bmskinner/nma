@@ -32,8 +32,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 	private List<AnalysisDataset> datasets;
 	private FixedAspectRatioChartPanel chartPanelOne;
 	private FixedAspectRatioChartPanel chartPanelTwo;
-	
-//	private JSpinner minRatioSpinner;
+
 	private JSpinner maxRatioSpinner;
 	private JSpinner meshSizeSpinner;
 	
@@ -87,21 +86,9 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		
 		panel.add(boxOne);
 		panel.add(boxTwo);
-		
-//		double minRatio = 0.9;
-		double maxRatio = 0.5;
-		
-		
 
-//		SpinnerNumberModel minRatioModel = new SpinnerNumberModel(minRatio,
-//				0,
-//				1,
-//				0.01);
-//		minRatioSpinner = new JSpinner(minRatioModel);
-//		minRatioSpinner.addChangeListener(this);
-//		minRatioSpinner.setToolTipText("Lower gradient limit");
-//		JSpinner.NumberEditor numberEditor = new JSpinner.NumberEditor(minRatioSpinner,"0.00");
-//		minRatioSpinner.setEditor(numberEditor);
+		double maxRatio = 0.5;
+
 		
 		SpinnerNumberModel maxRatioModel = new SpinnerNumberModel(maxRatio,
 				0,
@@ -123,8 +110,6 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		JSpinner.NumberEditor meshNumberEditor = new JSpinner.NumberEditor(meshSizeSpinner,"0.00");
 		meshSizeSpinner.setEditor(meshNumberEditor);
 		
-//		panel.add(new JLabel("Blue max"));
-//		panel.add(minRatioSpinner);
 		panel.add(new JLabel("Log2 ratio max"));
 		panel.add(maxRatioSpinner);
 		panel.add(new JLabel("Mesh distance"));
@@ -157,8 +142,9 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				
 			} catch (Exception e){
 				
-				chartOne = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-				chartTwo = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+				chartOne = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
+				chartTwo = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
+				logError("Error creating mesh chart", e);
 			}
 			
 			
