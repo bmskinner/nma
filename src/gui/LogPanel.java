@@ -44,6 +44,7 @@ import javax.swing.text.DefaultCaret;
 
 import org.jfree.chart.JFreeChart;
 
+import utility.Constants;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
@@ -200,16 +201,40 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		if(commandMap.containsKey(command)){
 			fireInterfaceEvent(commandMap.get(command));
 		} else {
-						
-			if(command.equals("help")){
-				log(Level.INFO, "Available commands: ");
-				for(String key : commandMap.keySet()){
-					log(Level.INFO, " "+key);
+			
+			switch(command){
+			
+				case "help": {
+					log(Level.INFO, "Available commands: ");
+					for(String key : commandMap.keySet()){
+						InterfaceMethod im = commandMap.get(key);
+						log(Level.INFO, " "+key+" - "+im.toString());
+					}
+					log(Level.INFO, " build - show the version info ");
+					break;
 				}
 				
-			} else {
-				log(Level.INFO, "Command not recognised");
+				case "build":{
+					log(Level.INFO, "This version built at:");
+					log(Level.INFO, Constants.BUILD);
+					break;
+				}
+				
+				default: {
+					log(Level.INFO, "Command not recognised");
+					break;
+				}
 			}
+						
+//			if(command.equals("help")){
+//				log(Level.INFO, "Available commands: ");
+//				for(String key : commandMap.keySet()){
+//					log(Level.INFO, " "+key);
+//				}
+//				
+//			} else {
+//				log(Level.INFO, "Command not recognised");
+//			}
 		}		
 	}
 

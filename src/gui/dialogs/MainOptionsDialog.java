@@ -34,6 +34,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import utility.Constants;
 import analysis.AnalysisDataset;
 import gui.MainWindow;
 import gui.components.ColourSelecter.ColourSwatch;
@@ -52,6 +53,9 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		this.mw = mw;
 		this.setLayout(new BorderLayout());
 		this.setTitle("Options");
+		
+		// The date and time the program was built
+//		this.add( new JLabel(Constants.BUILD), BorderLayout.NORTH);
 		
 		
 		this.add(createMainPanel(), BorderLayout.CENTER);

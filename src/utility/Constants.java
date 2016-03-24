@@ -18,6 +18,8 @@
  *******************************************************************************/
 package utility;
 
+import java.util.Calendar;
+
 public class Constants {
 	
 	/**
@@ -36,6 +38,9 @@ public class Constants {
 	public static final String LOC_FILE_EXTENSION = "cell"; // locations of cells (in a tsv format)
 	
 	public static final String SEGMENT_PREFIX = "Seg_";
+	
+	// The date and time that this was compiled
+	public static final String BUILD = Calendar.getInstance().getTime().toString();
 	
 	
 	
