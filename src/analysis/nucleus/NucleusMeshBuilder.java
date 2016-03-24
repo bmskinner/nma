@@ -2,6 +2,7 @@ package analysis.nucleus;
 
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,17 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import analysis.nucleus.NucleusMeshBuilder.NucleusMeshEdge;
 import components.generic.Equation;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
-import ij.process.FloatPolygon;
 import logging.Loggable;
 import stats.Stats;
 
@@ -27,7 +24,7 @@ public class NucleusMeshBuilder implements Loggable {
 	
 	public static final int DIVISION_LENGTH = 10;
 	
-	private Nucleus nucleus;
+//	private Nucleus nucleus;
 	
 	public NucleusMeshBuilder(){
 	}
@@ -58,7 +55,7 @@ public class NucleusMeshBuilder implements Loggable {
 		log(Level.FINEST, "Creating mesh for "+nucleus.getNameAndNumber());
 		NucleusMesh mesh = new NucleusMesh(nucleus);
 		
-		mesh.addVertex(nucleus.getCentreOfMass(), false);
+//		mesh.addVertex(nucleus.getCentreOfMass(), false);
 		
 		List<NucleusBorderSegment> list = nucleus.getProfile(ProfileType.REGULAR).getOrderedSegments();
 		
@@ -93,25 +90,25 @@ public class NucleusMeshBuilder implements Loggable {
 	private void createEdges(NucleusMesh mesh){
 
 		
-		log(Level.FINEST, "Linking edges to CoM");
-		for(int i=1; i<mesh.getVertexCount(); i++){
-			NucleusMeshEdge e = new NucleusMeshEdge(mesh.getVertex(0), mesh.getVertex(i), 1);
-			mesh.addEdge(e);
-			mesh.getVertex(0).addEdge(e);
-			mesh.getVertex(i).addEdge(e);
-		}
+//		log(Level.FINEST, "Linking edges to CoM");
+//		for(int i=1; i<mesh.getVertexCount(); i++){
+//			NucleusMeshEdge e = new NucleusMeshEdge(mesh.getVertex(0), mesh.getVertex(i), 1);
+//			mesh.addInternalEdge(e);
+//			mesh.getVertex(0).addEdge(e);
+//			mesh.getVertex(i).addEdge(e);
+//		}
 		
 		log(Level.FINEST, "Linking border pairs");
-		for(int i=1, j=2; j<mesh.getVertexCount(); i++, j++){
+		for(int i=0, j=1; j<mesh.getVertexCount(); i++, j++){
 			NucleusMeshEdge e = new NucleusMeshEdge(mesh.getVertex(i), mesh.getVertex(j), 1);
-			mesh.addEdge( e );
+			mesh.addPeripheralEdge( e );
 			mesh.getVertex(i).addEdge(e);
 			mesh.getVertex(j).addEdge(e);
 		}
 		
 		// Link the final perimeter point to the tip
-		NucleusMeshEdge e = new NucleusMeshEdge(mesh.getVertex(mesh.getVertexCount()-1), mesh.getVertex(1), 1);
-		mesh.addEdge(  e );
+		NucleusMeshEdge e = new NucleusMeshEdge(mesh.getVertex(mesh.getVertexCount()-1), mesh.getVertex(0), 1);
+		mesh.addPeripheralEdge(  e );
 		mesh.getVertex(mesh.getVertexCount()-1).addEdge(e);
 		mesh.getVertex(1).addEdge(e);
 		
@@ -129,8 +126,8 @@ public class NucleusMeshBuilder implements Loggable {
 		log(Level.FINEST, "Creating mesh for "+nucleus.getNameAndNumber()+" using template "+template.getNucleusName());
 		NucleusMesh mesh = new NucleusMesh(nucleus);
 		
-		log(Level.FINEST, "Adding centre of mass");
-		mesh.addVertex(nucleus.getCentreOfMass(), false);
+//		log(Level.FINEST, "Adding centre of mass");
+//		mesh.addVertex(nucleus.getCentreOfMass(), false);
 		
 		log(Level.FINEST, "Getting ordered segments");
 		List<NucleusBorderSegment> list = nucleus.getProfile(ProfileType.REGULAR).getOrderedSegments();
@@ -163,13 +160,20 @@ public class NucleusMeshBuilder implements Loggable {
 		
 		
 		createEdges(mesh);
-//		mesh.subdivide();
 		mesh.makeCentreVertices();
-//		mesh.pruneOverlaps();
+
 		log(Level.FINEST, "Created mesh");
 		return mesh;
 	}
 	
+	/**
+	 * @author bms41
+	 *
+	 */
+	/**
+	 * @author bms41
+	 *
+	 */
 	public class NucleusMesh {
 		
 		// Track the number of divisions for each segment to allow mapping between meshes
@@ -179,7 +183,10 @@ public class NucleusMeshBuilder implements Loggable {
 		private List<NucleusMeshVertex> vertices = new ArrayList<NucleusMeshVertex>();
 		
 		// Not all vertices need to be linked - store edges for comparisons
-		private List<NucleusMeshEdge> edges     = new ArrayList<NucleusMeshEdge>();
+		private List<NucleusMeshEdge> internalEdges     = new ArrayList<NucleusMeshEdge>();
+		
+		// Track the edges linking border vertices separately from internal edges
+		private List<NucleusMeshEdge> peripheralEdges  = new ArrayList<NucleusMeshEdge>();
 		
 		private Nucleus nucleus;
 		
@@ -196,10 +203,12 @@ public class NucleusMeshBuilder implements Loggable {
 		 * @param mesh
 		 * @param edges
 		 */
-		private NucleusMesh(NucleusMesh mesh, List<NucleusMeshEdge> edges){
+		private NucleusMesh(NucleusMesh mesh, List<NucleusMeshEdge> internal, List<NucleusMeshEdge> peripheral){
 			this.segmentDivisions = mesh.segmentDivisions;
 			this.vertices         = mesh.vertices;
-			this.edges            = edges;
+			this.internalEdges    = internal;
+			this.peripheralEdges  = peripheral;
+
 			this.nucleus          = mesh.nucleus;
 		}
 		
@@ -222,8 +231,12 @@ public class NucleusMeshBuilder implements Loggable {
 			return newIndex;
 		}
 		
-		public void addEdge(NucleusMeshEdge e){
-			edges.add(e);
+		public void addInternalEdge(NucleusMeshEdge e){
+			internalEdges.add(e);
+		}
+		
+		public void addPeripheralEdge(NucleusMeshEdge e){
+			peripheralEdges.add(e);
 		}
 		
 		public int getSegmentCount(){
@@ -235,20 +248,45 @@ public class NucleusMeshBuilder implements Loggable {
 		}
 		
 		public int getEdgeCount(){
-			return edges.size();
+			return internalEdges.size() + peripheralEdges.size();
+		}
+		
+		public int getInternalEdgeCount(){
+			return internalEdges.size();
+		}
+		
+		public int getPeripheralEdgeCount(){
+			return peripheralEdges.size();
 		}
 		
 		public NucleusMeshVertex getVertex(int i){
 			return  vertices.get(i);
 		}
 		
-		public NucleusMeshEdge getEdge(int i){
-			return edges.get(i);
+		public NucleusMeshEdge getInternalEdge(int i){
+			return internalEdges.get(i);
+		}
+		
+		public NucleusMeshEdge getPeripheralEdge(int i){
+			return peripheralEdges.get(i);
 		}
 		
 		public List<NucleusMeshEdge> getEdges(){
-			return edges;
+			List<NucleusMeshEdge> result = new ArrayList<NucleusMeshEdge>();
+			result.addAll(internalEdges);
+			result.addAll(peripheralEdges);
+			return result;
 		}
+
+		
+		public List<NucleusMeshEdge> getInternalEdges(){
+			return internalEdges;
+		}
+		
+		public List<NucleusMeshEdge> getPeripheralEdges(){
+			return peripheralEdges;
+		}	
+		
 		
 		public void setDivision(int segment, int divisions){
 			segmentDivisions.put(segment, divisions);
@@ -266,12 +304,18 @@ public class NucleusMeshBuilder implements Loggable {
 			
 			log(Level.FINEST, "Comparing meshes");
 			
-			List<NucleusMeshEdge> edges = new ArrayList<NucleusMeshEdge>();
+			List<NucleusMeshEdge> internalEdges   = new ArrayList<NucleusMeshEdge>();
+			List<NucleusMeshEdge> peripheralEdges = new ArrayList<NucleusMeshEdge>();
 			
-			for(int i=0; i<getEdgeCount(); i++){
-				edges.add( getEdge(i).compare(mesh.getEdge(i)) );
+			for(int i=0; i<getInternalEdgeCount(); i++){
+				internalEdges.add( getInternalEdge(i).compare(mesh.getInternalEdge(i)) );
 			}
-			return new NucleusMesh(this, edges);
+			
+			for(int i=0; i<getPeripheralEdgeCount(); i++){
+				peripheralEdges.add( getPeripheralEdge(i).compare(mesh.getPeripheralEdge(i)) );
+			}
+			
+			return new NucleusMesh(this, internalEdges, peripheralEdges);
 		}
 		
 		
@@ -292,7 +336,7 @@ public class NucleusMeshBuilder implements Loggable {
 				NucleusMeshVertex v2 = list.get(list.size()-i);
 				
 				NucleusMeshEdge test = new NucleusMeshEdge(v1, v2, 1);
-				addVertex (test.getMidpoint(), false);
+				this.addVertex (test.getMidpoint(), false);
 			}
 			
 		}
@@ -304,7 +348,7 @@ public class NucleusMeshBuilder implements Loggable {
 		public void subdivide(){
 			List<NucleusMeshEdge> toAdd = new ArrayList<NucleusMeshEdge>();
 			
-			for(final Iterator<NucleusMeshEdge> it = edges.iterator(); it.hasNext(); ){
+			for(final Iterator<NucleusMeshEdge> it = internalEdges.iterator(); it.hasNext(); ){
 
 				NucleusMeshEdge e = it.next();
 				if( ! e.isPeripheral()){
@@ -327,7 +371,7 @@ public class NucleusMeshBuilder implements Loggable {
 			}
 			
 			for(NucleusMeshEdge e : toAdd){
-				addEdge(e); 
+				addInternalEdge(e); 
 			}
 		}
 		
@@ -339,7 +383,7 @@ public class NucleusMeshBuilder implements Loggable {
 			for(NucleusMeshVertex v1 : vertices){
 				
 				for(NucleusMeshVertex v2 : vertices){
-					if(v1.equals(v2)){
+					if(v1.overlaps(v2)){
 						continue;
 					}
 					NucleusMeshEdge e = new NucleusMeshEdge(v1, v2, 1);
@@ -350,212 +394,156 @@ public class NucleusMeshBuilder implements Loggable {
 			}
 			
 			for(NucleusMeshEdge e : toAdd){
-				addEdge(e); 
+				addInternalEdge(e); 
 			}
+			
+			
 			
 		}
 		
 		/**
-		 * Remove edges that are direct duplicates (completely overlapping)
+		 * Remove edges that are direct duplicates (completely overlapping endpoints)
 		 */
-		public void removeDuplicateEdges(){
+		private void mergeDuplicateEdges(){
 			Set<NucleusMeshEdge> toRemove = new HashSet<NucleusMeshEdge>();
-			log(Level.INFO, "Starting edges: "+edges.size());
-			for(NucleusMeshEdge e1 : edges){
+			log(Level.FINEST, "Starting edges: "+internalEdges.size());
+			
+			for(NucleusMeshEdge e1 : internalEdges){
 				
-				for(NucleusMeshEdge e2 : edges){
-					if(e1.equals(e2)){
+				if(toRemove.contains(e1)){
+					continue; 
+				}
+				
+				for(NucleusMeshEdge e2 : internalEdges){
+					
+					if(e1==e2){  // ignore self self
 						continue;
 					}
 					
-					if(toRemove.contains(e1) || toRemove.contains(e2)){
-						continue;
+					if(toRemove.contains(e2)){
+						continue; // ignore existing matches
 					}
 					
-					// TODO: This is enough to remove all edges to the CoM.Fix
-					if( (  e1.getV1().overlaps(e2.getV1()) ||
-					       e1.getV2().overlaps(e2.getV1())   ) &&
-					    (  e1.getV1().overlaps(e2.getV2()) ||
-					       e1.getV2().overlaps(e2.getV2()    ))){
+					if(e1.overlaps(e2)){
+						// not the same object, but equivalent
+						// ensure vertices track the edge being kept
+												
+						
+						NucleusMeshVertex v1 = e1.getV1();
+						NucleusMeshVertex v2 = e1.getV2();
+						v1.addEdge(e2);
+						v2.addEdge(e2);
 						toRemove.add(e1);
+						
 					}
-				
+
 					
 				}
 				
 			}
-			log(Level.INFO, "Removing: "+toRemove.size());
-			for(NucleusMeshEdge e : toRemove){
-				edges.remove(e);
-			}
-			log(Level.INFO, "Remaining edges: "+edges.size());
+			log(Level.FINEST, "Merging edges: "+toRemove.size());
+			removeEdges(toRemove);
+			log(Level.FINEST, "Remaining edges: "+internalEdges.size());
+			
+			// Check that vertices don't have an edge twice following assignment
+			mergeDuplicateEdgesByVertex();
 		}
 		
 		
 		/**
-		 * Get the edges that may be removed. Exclude edges on the periphery
-		 * @return
+		 * Check if any vertices have a duplicated edge in inverted format.
+		 * If so, remove the duplicates. 
 		 */
-		private List<NucleusMeshEdge> getPotentialPrunableEdges(){
-			List<NucleusMeshEdge> result = new ArrayList<NucleusMeshEdge>();
+		private void mergeDuplicateEdgesByVertex(){
 			
-			for(NucleusMeshEdge e1 : edges){
+			Set<NucleusMeshEdge> toRemove = new HashSet<NucleusMeshEdge>();
+			
+			for(NucleusMeshVertex v : vertices){
 				
-				if( ! e1.isPeripheral()){
-					result.add(e1);
+				Set<NucleusMeshEdge> list = v.getEdges();
+				
+				for(NucleusMeshEdge e1 : list){
+					
+					if(toRemove.contains(e1)){
+						continue; 
+					}
+					
+					for(NucleusMeshEdge e2 : list){
+						
+						if(e1==e2){
+							continue;
+						}
+						
+						if(toRemove.contains(e2)){
+							continue; 
+						}
+						
+						if(e1.overlaps(e2)){
+							toRemove.add(e2);
+						}
+						
+					}
+					
 				}
 				
 			}
-			return result;
-			
+			log(Level.FINEST, "Merging edges at vertices: "+toRemove.size());
+			removeEdges(toRemove);
+			log(Level.FINEST, "Remaining edges: "+internalEdges.size());
 		}
 		
+				
 		/**
-		 * Remove edges from the list that span more than one eighth the bounding height of
+		 * Remove edges from the list that span more than one third the bounding height of
 		 * the mesh
 		 * @return
 		 */
-		private List<NucleusMeshEdge> getLongestEdges(List<NucleusMeshEdge> input){
-			log(Level.INFO, "Finding longest edges");
-			List<NucleusMeshEdge> result = new ArrayList<NucleusMeshEdge>();
-			double maxLength = 0;
-			for(NucleusMeshEdge e1 : input){	
-				maxLength = Math.max(e1.getLength(), maxLength);	
-			}
-			for(NucleusMeshEdge e1 : input){	
-				if(e1.getLength()>maxLength / 3 ){
-					result.add(e1);
-				}
-			}
-			log(Level.INFO, "Found "+result.size()+" long edges");
+		private List<NucleusMeshEdge> getLongestEdges(List<NucleusMeshEdge> input, double factor){
+			
+			double maxLength = input.stream()
+				.max( (e1, e2) -> Double.compare(e1.getLength(), e2.getLength()))
+				.get()
+				.getLength();
+			
+			
+			final double max = maxLength / factor;
+			
+			List<NucleusMeshEdge> result = input.stream()
+				.filter(e -> e.getLength() > max)
+				.collect(Collectors.toList());
+			
+			
 			return result;
 			
 		}
 		
-		/**
-		 * REmove any vertices that have been created outside the mesh boundary 
-		 */
-		public void removeExternalVertices(){
-			
-			
-//			FloatPolygon f = createPolygon();
-			
-			List<NucleusMeshVertex> toRemove = new ArrayList<NucleusMeshVertex>();
-			for(NucleusMeshVertex v : vertices){
-				
-				if( ! nucleus.containsPoint(v.getPosition())){
-//				if( ! f.contains(  (float) v.getPosition().getX(), (float) v.getPosition().getY())){
-					toRemove.add(v);
-				}
-			}
-			log(Level.INFO, "Removing "+toRemove.size()+" external vertices");
-			for(NucleusMeshVertex v : toRemove){
-				vertices.remove(v);
-				for(NucleusMeshEdge e : v.getEdges()){
-					edges.remove(e);
-				}
-			}
-			
+		private NucleusMeshEdge getLongestEdge(List<NucleusMeshEdge> input){
+			return input.stream()
+			.max( (e1, e2) -> Double.compare(e1.getLength(), e2.getLength()))
+			.get();
 		}
-		
-		/**
-		 * Remove edges whose midpoint lies outside the nucleus
-		 */
-		public void removeExternalEdges(){
-			List<NucleusMeshEdge> toRemove = new ArrayList<NucleusMeshEdge>();
-			for(NucleusMeshEdge e : edges){
 				
-				if( ! nucleus.containsPoint(e.getMidpoint())){
-					toRemove.add(e);
-				}
-			}
-			log(Level.INFO, "Removing "+toRemove.size()+" external edges");
+		private void removeEdges(Collection<NucleusMeshEdge> toRemove){
 			for(NucleusMeshEdge e : toRemove){
-				edges.remove(e);
+				internalEdges.remove(e);
+				peripheralEdges.remove(e);
 				e.getV1().removeEdge(e);
 				e.getV2().removeEdge(e);
 			}
 		}
 		
-		private NucleusMeshEdge getLongestEdge(List<NucleusMeshEdge> edges){
-			NucleusMeshEdge longestEdge = null;
-			for(NucleusMeshEdge e : edges){
-				if(longestEdge == null || e.getLength()>longestEdge.getLength()){
-					longestEdge=e;
-				}
-			}
-			return longestEdge;
-		}
-		
 		/**
-		 * Fetch the vertex in the mesh closest to the given vertex, that
-		 * does not have an edge to it already
-		 * @param v
-		 * @return
+		 * Remove internal edges whose midpoint lies outside the nucleus
 		 */
-		private NucleusMeshVertex getClosestVertex(NucleusMeshVertex v){
-			NucleusMeshVertex result = null;
+		private void removeExternalEdges(){
+			List<NucleusMeshEdge> toRemove = internalEdges.stream()
+					.filter( e -> ! nucleus.containsPoint(e.getMidpoint()))
+					.collect(Collectors.toList());
 			
-			double minLength = Double.MAX_VALUE;
-			
-			for(NucleusMeshVertex v1 : vertices){
-				if(v.hasEdgeTo(v1)){ // skip existing edges
-					continue;
-				}
-				
-				double length = v.getLengthTo(v1);
-				if(length < minLength){
-					minLength = length;
-					result = v1;
-				}
-			}
-			return result;
+			log(Level.FINEST, "Removing "+toRemove.size()+" external edges");
+			removeEdges(toRemove);
 		}
-		
-		private int buildEdgeForEachVertex(){
-			
-			/*
-			 * For each vertex, list the vertices by distance
-			 * Take the closest. If it has an edge, continue.
-			 * Else make an edge, unless that would cross an existing edge
-			 */
-			
-			int edgesAdded = 0;
-			
-			for(NucleusMeshVertex v : vertices){
 				
-				NucleusMeshVertex v1 = getClosestVertex(v);
-				NucleusMeshEdge test = new NucleusMeshEdge(v, v1, 1);
-				
-				boolean crosses = false;
-				for(NucleusMeshEdge e : edges){
-					if(e.crosses(test)){
-						crosses = true;
-						break;
-					}
-				}
-				
-				if(! crosses){
-					addEdge(test);
-					v1.addEdge(test);
-					v.addEdge(test);
-					edgesAdded++;
-				}
-			}
-			return edgesAdded;
-			
-		}
-		
-		public void buildEdges(){
-			log(Level.INFO, "Building edges");
-			int edgesAdded = 1;
-			while(edgesAdded>0){
-				
-				edgesAdded = buildEdgeForEachVertex();
-				log(Level.INFO, "Added "+ edgesAdded+" edges");
-			}
-			
-		}
 		
 		private List<NucleusMeshVertex> getPeripheralVertices(){
 			List<NucleusMeshVertex> result = vertices.stream()
@@ -564,13 +552,13 @@ public class NucleusMeshBuilder implements Loggable {
 			return result;
 		}
 		
-		private List<NucleusMeshEdge> getPeripheralEdges(){
-			List<NucleusMeshEdge> result = edges.stream()
-					.filter( e -> e.isPeripheral())
+		private List<NucleusMeshVertex> getInternalVertices(){
+			List<NucleusMeshVertex> result = vertices.stream()
+					.filter( e -> ! e.isPeripheral())
 					.collect(Collectors.toList());
 			return result;
 		}
-		
+				
 		private boolean testEdgeCrossesPeriphery(NucleusMeshEdge e){
 			
 			List<NucleusMeshEdge> preipheralEdges = getPeripheralEdges();
@@ -583,129 +571,211 @@ public class NucleusMeshBuilder implements Loggable {
 			return  false;
 		}
 		
+		
+		/**
+		 * Get any edges that link central non-adjacent vertices
+		 * @return
+		 */
+		private Set<NucleusMeshEdge> getNonAdjacentCentralVertexEdges(){
+			Set<NucleusMeshEdge> result = new HashSet<NucleusMeshEdge>();
+			
+			List<NucleusMeshVertex> list = getInternalVertices();
+			
+			for(int i=0; i<list.size(); i++){
+				
+				int prev = i==0 ? list.size()-1 : i-1;
+				int next = i==list.size()-1 ? 0 : i+1;
+				
+				NucleusMeshVertex p1 = list.get(prev);
+				NucleusMeshVertex v1 = list.get(i);
+				NucleusMeshVertex p2 = list.get(next);
+				
+				for(NucleusMeshEdge e : v1.getEdges()){
+					
+					// The edge is entirely within the central vertices
+					if( list.contains(e.getV1()) && list.contains(e.getV2())){
+
+						// the edge does not list to an adjacent vertex 
+						if( !e.containsVertex(p1) && !e.containsVertex(p2) ){
+							result.add(e);
+						}
+					}
+				}
+				
+			}
+			return result;
+		}
+		
+		private List<NucleusMeshEdge> getOverlappingInternalEdges(NucleusMeshEdge e1){
+				
+			List<NucleusMeshEdge> result = internalEdges.stream()
+				.filter( e -> e1.crosses(e))
+				.collect(Collectors.toList());
+			
+			return result;
+		}
 		/**
 		 * Remove all edges that intersect another edge in the mesh.
 		 * Discards the longer edge of the two
 		 */
 		public void pruneOverlaps(){
-			log(Level.INFO, "Pruning overlaps");
+
+			this.removeExternalEdges();
+			this.mergeDuplicateEdges();
 			
-			List<NucleusMeshEdge> prunableEdges = getPotentialPrunableEdges();
-			List<NucleusMeshEdge> longestEdges  = getLongestEdges(edges);
-			
-			for(NucleusMeshEdge e : longestEdges){
-				edges.remove(e);
-				prunableEdges.remove(e);
-				e.getV1().removeEdge(e);
-				e.getV2().removeEdge(e);
-			}
-			
-			log(Level.INFO, "Prunable edges: "+prunableEdges.size());
 			Set<NucleusMeshEdge> toRemove = new HashSet<NucleusMeshEdge>();
-						
-//			for(NucleusMeshEdge p : prunableEdges){
-//				if(testEdgeCrossesPeriphery(p)){
-//					toRemove.add(p);
-//				}
-//			}
-//			boolean removable = true;
-//			
-//			while(removable){
-//				NucleusMeshEdge longestEdge = getLongestEdge(prunableEdges);
-//				for(Iterator<NucleusMeshEdge> it = prunableEdges.iterator(); it.hasNext(); ){
-//					NucleusMeshEdge e = it.next();
-//					if(e.crosses(longestEdge)){
-//						prunableEdges.remove(longestEdge);
-//						toRemove.add(longestEdge);
-//						break;
-//					}
-//					removable = false;
-//				}
-//			}
-//			
-			for(NucleusMeshEdge e : toRemove){
-				edges.remove(e);
-				e.getV1().removeEdge(e);
-				e.getV2().removeEdge(e);
+
+			
+			log(Level.FINEST, "Pruning overlaps");
+			log(Level.FINEST, "Starting with "+vertices.size()+" vertices");
+			log(Level.FINEST, "Starting with "+internalEdges.size()+" edges");
+			
+			List<NucleusMeshEdge> longestEdges  = getLongestEdges(internalEdges, 3);
+			log(Level.FINEST, "Found "+longestEdges.size()+" long edges using factor "+3);
+
+			
+			/*
+			 * Add the longest edges
+			 */
+			toRemove.addAll(  
+					
+					internalEdges.stream()
+					.filter( e -> longestEdges.contains(e))
+					.collect(Collectors.toList())
+					
+				);
+			
+			
+			log(Level.FINEST, "Removing "+toRemove.size()+" edges combining length");
+			
+			/*
+			 * Add the edges that cross the peripheral edges
+			 */
+			toRemove.addAll(  
+					
+					internalEdges.stream()
+						.filter( e -> testEdgeCrossesPeriphery(e))
+						.collect(Collectors.toList())
+					
+				);
+			log(Level.FINEST, "Removing "+toRemove.size()+" edges combining periphery crossing");
+			
+			
+			/*
+			 * Add connections between peripheral vertices that are not peripheral edges
+			 */
+			
+			toRemove.addAll(  
+					
+					internalEdges.stream()
+						.filter( e -> e.getV1().isPeripheral() && e.getV2().isPeripheral())
+						.collect(Collectors.toList())
+					
+				);
+			log(Level.FINEST, "Removing "+toRemove.size()+" edges combining peripheral vertices");
+			
+			/*
+			 * Add connections between internal vertices (the centre line) that are not adjacent
+			 */
+			
+			log(Level.FINEST, "Removing "+toRemove.size()+" edges combining peripheral vertices");
+			
+			toRemove.addAll( getNonAdjacentCentralVertexEdges());
+			
+		
+			/*
+			 * Clear out the first set of removable edges
+			 */
+			removeEdges(toRemove);
+			log(Level.FINEST, "Remaining internal edges: "+internalEdges.size());
+			/*
+			 * Remove the longer of internal edges that cross another internal edge
+			 */
+			
+			log(Level.FINEST, "Removing crossing internal edges");
+			boolean result = true;
+			int totalRemoved = 0;
+			int counter = 0;
+			while(result && counter<50){
+				
+				/*
+				 * Go over each vertex, trying to remove an edge
+				 */
+//				logIJ(" ");
+//				logIJ("Loop iteration over "+vertices.size()+" vertices");
+				int removed = removeLoop();
+//				logIJ("Removed "+removed+" edges");
+				if(removed==0){
+					result=false;
+				}
+				totalRemoved+=removed;
+				counter++;
 			}
+			log(Level.FINEST, "Removed "+totalRemoved+" internal edges");
 			
-			
-			
-//			for(NucleusMeshEdge e1 : prunableEdges){
-//				
-//				for(NucleusMeshEdge e2 : prunableEdges){
-//					if(e1.equals(e2)){
-//						continue;
-//					}
-//					
-//									
-//					if(e1.crosses(e2)){
-//						
-//						// don't count edges already pruned
-//						if(toRemove.contains(e1) || toRemove.contains(e2)){
-//							continue;
-//						}
-//						
-//						
-//						// Remove the longer edge if neither are on the border
-//						if( ! e1.isPeripheral()  && ! e2.isPeripheral()){
-//
-//							if(e1.isLongerThan(e2)){
-//								toRemove.add(e1);
-//							} else {
-//								toRemove.add(e2);
-//							}
-//						} else {
-//							// If one is peripheral, remove the other
-//							if(  e1.isPeripheral()){
-//								toRemove.add(e2);
-//							} else if(e2.isPeripheral()) {
-//								toRemove.add(e1);
-//							}
-//						}
-//					}
-//				}
-//				
-//			}
-			
-//			log(Level.INFO, "Pruning: "+toRemove.size());
-//			for(NucleusMeshEdge e : toRemove){
-//				edges.remove(e);
-//			}
-			log(Level.INFO, "Remaining edges: "+edges.size());
+
+			log(Level.FINEST, "Remaining internal edges: "+internalEdges.size());
 		}
 		
-//		private boolean isInsideMesh(NucleusMeshVertex v){
-//			FloatPolygon f = createPolygon();
-//			return f.contains(  (float) v.getPosition().getX(), (float) v.getPosition().getY());
-//		}
+		private int removeLoop(){
+			
+			int result = 0;
+			
+			for(NucleusMeshVertex v : vertices){
+//				logIJ(" ");
+//				logIJ("Testing vertex "+v.toString()+" with "+v.getEdges().size()+" connected edges");
+				if(removeEdgeLoop(v)){
+					result++;
+				} 
+			}
+			return result;
+		}
 		
-		/**
-		 * Make an offset polygon from 
-		 * @return
-		 */
-//		private FloatPolygon createPolygon(){
-//			
-//			List<NucleusMeshVertex> peripheralVertices = vertices.stream()
-//					.filter( e -> e.isPeripheral() )
-//					.collect(Collectors.toList());
-//						
-//			float[] xpoints = new float[peripheralVertices.size()+1];
-//			float[] ypoints = new float[peripheralVertices.size()+1];
-//			
-//			for(int i=0;i<peripheralVertices.size();i++){
-//				NucleusMeshVertex p = peripheralVertices.get(i);
-//				xpoints[i] = (float) p.getPosition().getX();
-//				ypoints[i] = (float) p.getPosition().getY();
-//			}
-//
-//			// Ensure the polygon is closed
-//			xpoints[peripheralVertices.size()] = (float) peripheralVertices.get(0).getPosition().getX();
-//			ypoints[peripheralVertices.size()] = (float) peripheralVertices.get(0).getPosition().getY();
-//
-//			return new FloatPolygon(xpoints, ypoints);
-//		}
+		private boolean removeEdgeLoop(NucleusMeshVertex v){
+			Set<NucleusMeshEdge> edges = v.getEdges();
+
+			for(NucleusMeshEdge e1 : edges){
+//				logIJ("   Edge "+e1.toString());
+				if(removeLongestOverlappingEdge(e1)){
+//					logIJ("Able to remove edge overlapping "+e1.toString());
+					return true;
+				}
+			}
+			return false;
+		}
 		
+		private boolean removeLongestOverlappingEdge(NucleusMeshEdge e1){
+			Set<NucleusMeshEdge> toRemove = getRemovableEdges(e1);
+			if(toRemove.isEmpty()){
+				return false;
+			} else {
+				removeEdges(toRemove);
+				return true;
+			}
+		}
+		
+		private Set<NucleusMeshEdge> getRemovableEdges(NucleusMeshEdge e1){
+
+				
+//			logIJ("Testing edge "+e1.toString()+": "+e1.getLength());
+				Set<NucleusMeshEdge> toRemove = new HashSet<NucleusMeshEdge>();
+				
+				List<NucleusMeshEdge> overlaps = getOverlappingInternalEdges(e1);
+				if( ! overlaps.isEmpty()){
+					overlaps.add(e1); // include self for possible deletion
+					
+//					for(NucleusMeshEdge e : overlaps){
+//						logIJ(e.toString()+": "+e.getLength());
+//					}
+
+					NucleusMeshEdge longest = getLongestEdge(overlaps);
+					toRemove.add(longest);
+//					logIJ("Removing edge "+longest.toString()+": "+longest.getLength());
+				}
+				return toRemove;
+			
+		}
+				
 	}
 	
 	public class NucleusMeshEdge {
@@ -750,15 +820,48 @@ public class NucleusMeshBuilder implements Loggable {
 		}
 		
 		/**
-		 * Test if both vertices lie on the periphery of the mesh
+		 * Test if both vertices lie on the periphery of the mesh, and are adjacent
+		 * in the vertex list. TODO: end of list wrapping
 		 * @return
 		 */
 		public boolean isPeripheral(){
-			return v1.isPeripheral() && v2.isPeripheral();
+			
+			if(v1.isPeripheral() && v2.isPeripheral()){
+				if(  Math.abs(v1.getNumber() - v2.getNumber())==1 ){
+					return true;
+				}
+			}
+			return false;
 		}
 		
 		public boolean isLongerThan(NucleusMeshEdge e){
 			return getLength() > e.getLength();
+		}
+		
+		/**
+		 * Test if the edges share both endpoints
+		 * @param e
+		 * @return
+		 */
+		public boolean overlaps(NucleusMeshEdge e){
+						
+			if(v1.getPosition().overlaps(e.v1.getPosition()) && v2.getPosition().overlaps(e.v2.getPosition()) ){
+				return true;
+			}
+			
+			if(v2.getPosition().overlaps(e.v1.getPosition()) && v1.getPosition().overlaps(e.v2.getPosition())){
+				return true;
+			}
+			
+			if(v1.getPosition().overlaps(e.v2.getPosition()) && v2.getPosition().overlaps(e.v1.getPosition())){
+				return true;
+			}
+			
+			if(v2.getPosition().overlaps(e.v2.getPosition()) && v1.getPosition().overlaps(e.v2.getPosition())){
+				return true;
+			}
+			return false;
+			
 		}
 		
 		public boolean crosses(NucleusMeshEdge e){
@@ -768,16 +871,43 @@ public class NucleusMeshBuilder implements Loggable {
 
 			if(line1.intersectsLine(line2)){
 				
-				// Ignore endpoints overlapping
-				if(    line1.getP1().equals(line2.getP1())  || line1.getP2().equals(line2.getP1())
-					|| line2.getP1().equals(line1.getP2())  || line2.getP2().equals(line1.getP2())){
-				
+
+				if(sharesEndpoint(e)){
 					return false;
 				} else {
 					return true;
 				}
 			} 
 			return false;
+		}
+		
+		/**
+		 * Check if any of the endpoints of the edges are shared
+		 * @param e
+		 * @return
+		 */
+		public boolean sharesEndpoint(NucleusMeshEdge e){
+			if(v1.getPosition().overlaps(e.v1.getPosition())){
+				return true;
+			}
+			
+			if(v2.getPosition().overlaps(e.v1.getPosition())){
+				return true;
+			}
+			
+			if(v1.getPosition().overlaps(e.v2.getPosition())){
+				return true;
+			}
+			
+			if(v2.getPosition().overlaps(e.v2.getPosition())){
+				return true;
+			}
+			return false;
+			
+		}
+		
+		public boolean containsVertex(NucleusMeshVertex v){
+			return v1.overlaps(v)  || v2.overlaps(v);
 		}
 		
 		/**
@@ -788,8 +918,8 @@ public class NucleusMeshBuilder implements Loggable {
 		 */
 		public NucleusMeshEdge compare(NucleusMeshEdge e){
 			
-			double thisDistance = v1.getLengthTo(v2);
-			double thatDistance = e.v1.getLengthTo(e.v2);
+			double thisDistance = getLength();
+			double thatDistance = e.getLength();
 			
 			double ratio = thisDistance / thatDistance ;
 			return new NucleusMeshEdge(v1, v2, ratio);
@@ -797,8 +927,9 @@ public class NucleusMeshBuilder implements Loggable {
 		}
 						
 		public String toString(){
-			return v1.getNumber()+"-"+v2.getNumber();
+			return v1.toString()+" : "+v2.toString()+" : "+getLength();
 		}
+	
 		
 	}
 	
@@ -858,6 +989,9 @@ public class NucleusMeshBuilder implements Loggable {
 			return position.overlapsPerfectly(v.position);
 		}
 		
+		public String toString(){
+			return position.toString();
+		}
 		
 	}
 

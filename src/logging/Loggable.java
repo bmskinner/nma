@@ -51,4 +51,8 @@ public interface Loggable {
 			IJ.log(el.toString());
 		}
 	}
+	
+	default void logIJ(String message){
+		IJ.log(message);
+	}
 }

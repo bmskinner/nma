@@ -2,11 +2,13 @@ package gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.logging.Level;
 
+import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -31,7 +33,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 	private FixedAspectRatioChartPanel chartPanelOne;
 	private FixedAspectRatioChartPanel chartPanelTwo;
 	
-	private JSpinner minRatioSpinner;
+//	private JSpinner minRatioSpinner;
 	private JSpinner maxRatioSpinner;
 	private JSpinner meshSizeSpinner;
 	
@@ -42,7 +44,6 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		this.datasets = datasets;
 		
 		this.setTitle("Consensus nucleus comparator");
-		this.setLocationRelativeTo(null);
 		this.setLayout(new BorderLayout());
 		
 		JPanel header = createHeader();
@@ -50,7 +51,11 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		
 		JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 		
-		JPanel centrePanel = new JPanel(new FlowLayout());
+		
+		JPanel centrePanel = new JPanel();
+		BoxLayout layout = new BoxLayout(centrePanel, BoxLayout.X_AXIS);
+		centrePanel.setLayout(layout);
+		
 		chartPanelOne = new FixedAspectRatioChartPanel(chart);
 		chartPanelTwo = new FixedAspectRatioChartPanel(chart);
 		centrePanel.add(chartPanelOne);
@@ -83,28 +88,28 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		panel.add(boxOne);
 		panel.add(boxTwo);
 		
-		double minRatio = 0.9;
-		double maxRatio = 1.1;
+//		double minRatio = 0.9;
+		double maxRatio = 0.5;
 		
 		
 
-		SpinnerNumberModel minRatioModel = new SpinnerNumberModel(minRatio,
-				0,
-				1,
-				0.01);
-		minRatioSpinner = new JSpinner(minRatioModel);
-		minRatioSpinner.addChangeListener(this);
-		minRatioSpinner.setToolTipText("Lower gradient limit");
-		JSpinner.NumberEditor numberEditor = new JSpinner.NumberEditor(minRatioSpinner,"0.00");
-		minRatioSpinner.setEditor(numberEditor);
+//		SpinnerNumberModel minRatioModel = new SpinnerNumberModel(minRatio,
+//				0,
+//				1,
+//				0.01);
+//		minRatioSpinner = new JSpinner(minRatioModel);
+//		minRatioSpinner.addChangeListener(this);
+//		minRatioSpinner.setToolTipText("Lower gradient limit");
+//		JSpinner.NumberEditor numberEditor = new JSpinner.NumberEditor(minRatioSpinner,"0.00");
+//		minRatioSpinner.setEditor(numberEditor);
 		
 		SpinnerNumberModel maxRatioModel = new SpinnerNumberModel(maxRatio,
-				1,
-				100,
+				0,
+				10,
 				0.01);
 		maxRatioSpinner = new JSpinner(maxRatioModel);
 		maxRatioSpinner.addChangeListener(this);
-		maxRatioSpinner.setToolTipText("Upper gradient limit");
+		maxRatioSpinner.setToolTipText("Gradient colour log2 ratio limit");
 		JSpinner.NumberEditor maxNumberEditor = new JSpinner.NumberEditor(maxRatioSpinner,"0.00");
 		maxRatioSpinner.setEditor(maxNumberEditor);
 		
@@ -118,9 +123,9 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		JSpinner.NumberEditor meshNumberEditor = new JSpinner.NumberEditor(meshSizeSpinner,"0.00");
 		meshSizeSpinner.setEditor(meshNumberEditor);
 		
-		panel.add(new JLabel("Blue max"));
-		panel.add(minRatioSpinner);
-		panel.add(new JLabel("Red max"));
+//		panel.add(new JLabel("Blue max"));
+//		panel.add(minRatioSpinner);
+		panel.add(new JLabel("Log2 ratio max"));
 		panel.add(maxRatioSpinner);
 		panel.add(new JLabel("Mesh distance"));
 		panel.add(meshSizeSpinner);
@@ -132,8 +137,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		AnalysisDataset one = (AnalysisDataset) boxOne.getSelectedItem();
 		AnalysisDataset two = (AnalysisDataset) boxTwo.getSelectedItem();
 		
-		double minRatio = (double) minRatioSpinner.getValue();
-		double maxRatio = (double) maxRatioSpinner.getValue();
+		double logRatio = (double) maxRatioSpinner.getValue();
 		int    meshSize = (int)    meshSizeSpinner.getValue();
 		
 		
@@ -147,8 +151,8 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				Nucleus n1 = one.getCollection().getConsensusNucleus();
 				Nucleus n2 = two.getCollection().getConsensusNucleus();
 	
-				chartOne = OutlineChartFactory.createMeshChart(n1, n2, minRatio, maxRatio, meshSize);
-				chartTwo = OutlineChartFactory.createMeshChart(n2, n1, minRatio, maxRatio, meshSize);
+				chartOne = OutlineChartFactory.createMeshChart(n1, n2, logRatio, meshSize);
+				chartTwo = OutlineChartFactory.createMeshChart(n2, n1, logRatio, meshSize);
 	
 				
 			} catch (Exception e){

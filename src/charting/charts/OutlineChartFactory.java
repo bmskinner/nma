@@ -583,7 +583,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createMeshChart(Nucleus n1, Nucleus n2, double minRatio, double maxRatio, int meshSize) throws Exception{
+	public static JFreeChart createMeshChart(Nucleus n1, Nucleus n2, double log2Ratio, int meshSize) throws Exception{
 		
 		NucleusMeshXYDataset dataset = NucleusDatasetCreator.createNucleusMeshDataset(n1, n2, meshSize);
 
@@ -594,7 +594,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		
-		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, true);
+		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
 		renderer.setBaseSeriesVisibleInLegend(false);
 		renderer.setBaseStroke(ChartComponents.MARKER_STROKE);
 		
@@ -602,7 +602,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		for(int series=0; series<dataset.getSeriesCount(); series++){
 			
 			double ratio = dataset.getRatio(dataset.getSeriesKey(series));
-			Color colour = getGradientColour(ratio, minRatio, maxRatio);
+			Color colour = getGradientColour(ratio, log2Ratio);
 			
 			renderer.setSeriesPaint(series, colour);
 			renderer.setSeriesStroke(series, ChartComponents.MARKER_STROKE);
@@ -620,10 +620,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param maxRatio
 	 * @return
 	 */
-	private static Color getGradientColour(double ratio, double minRatio, double maxRatio){
+	private static Color getGradientColour(double ratio, double maxRatio){
 			
-		double log2Min = Stats.calculateLog2Ratio(minRatio);
-		double log2Max = Stats.calculateLog2Ratio(maxRatio);
+		double log2Min = -maxRatio;
+		double log2Max = maxRatio;
 		
 		int rValue = 0;
 		int bValue = 0;
