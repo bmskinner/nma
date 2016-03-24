@@ -51,6 +51,15 @@ implements PlugIn
 	public void run(String paramString)  {
 
 		try {
+			
+			if( ! IJ.isJava18() ){
+				IJ.log("Unable to open Nuclear Morphology Analysis");
+				IJ.log("Java version 8 is required");
+				IJ.log("Update ImageJ to a version bundled with Java 8");
+				IJ.log("This is the version called 'bundled with Java 1.8.0_xx' here:");
+				IJ.log("http://rsb.info.nih.gov/ij/download.html");
+				return;
+			}
 
 			if(checkPlugins()){
 
