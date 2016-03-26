@@ -498,7 +498,7 @@ public class NucleusMeshBuilder implements Loggable {
 		 */
 		private List<NucleusMeshEdge> getLongestEdges(List<NucleusMeshEdge> input, double factor){
 			
-			double maxLength = input.stream()
+			double maxLength = input.parallelStream()
 				.max( (e1, e2) -> Double.compare(e1.getLength(), e2.getLength()))
 				.get()
 				.getLength();
@@ -506,7 +506,7 @@ public class NucleusMeshBuilder implements Loggable {
 			
 			final double max = maxLength / factor;
 			
-			List<NucleusMeshEdge> result = input.stream()
+			List<NucleusMeshEdge> result = input.parallelStream()
 				.filter(e -> e.getLength() > max)
 				.collect(Collectors.toList());
 			
@@ -516,7 +516,7 @@ public class NucleusMeshBuilder implements Loggable {
 		}
 		
 		private NucleusMeshEdge getLongestEdge(List<NucleusMeshEdge> input){
-			return input.stream()
+			return input.parallelStream()
 			.max( (e1, e2) -> Double.compare(e1.getLength(), e2.getLength()))
 			.get();
 		}
@@ -534,7 +534,7 @@ public class NucleusMeshBuilder implements Loggable {
 		 * Remove internal edges whose midpoint lies outside the nucleus
 		 */
 		private void removeExternalEdges(){
-			List<NucleusMeshEdge> toRemove = internalEdges.stream()
+			List<NucleusMeshEdge> toRemove = internalEdges.parallelStream()
 					.filter( e -> ! nucleus.containsPoint(e.getMidpoint()))
 					.collect(Collectors.toList());
 			
@@ -544,14 +544,14 @@ public class NucleusMeshBuilder implements Loggable {
 				
 		
 		private List<NucleusMeshVertex> getPeripheralVertices(){
-			List<NucleusMeshVertex> result = vertices.stream()
+			List<NucleusMeshVertex> result = vertices.parallelStream()
 					.filter( e -> e.isPeripheral())
 					.collect(Collectors.toList());
 			return result;
 		}
 		
 		private List<NucleusMeshVertex> getInternalVertices(){
-			List<NucleusMeshVertex> result = vertices.stream()
+			List<NucleusMeshVertex> result = vertices.parallelStream()
 					.filter( e -> ! e.isPeripheral())
 					.collect(Collectors.toList());
 			return result;
@@ -561,7 +561,7 @@ public class NucleusMeshBuilder implements Loggable {
 			
 //			List<NucleusMeshEdge> preipheralEdges = getPeripheralEdges();
 			
-			return getPeripheralEdges().stream()
+			return getPeripheralEdges().parallelStream()
 				.anyMatch( p -> e.crosses(p));
 			
 //			for(NucleusMeshEdge p : preipheralEdges){
@@ -609,7 +609,7 @@ public class NucleusMeshBuilder implements Loggable {
 		
 		private List<NucleusMeshEdge> getOverlappingInternalEdges(NucleusMeshEdge e1){
 				
-			List<NucleusMeshEdge> result = internalEdges.stream()
+			List<NucleusMeshEdge> result = internalEdges.parallelStream()
 				.filter( e -> e1.crosses(e))
 				.collect(Collectors.toList());
 			
@@ -640,7 +640,7 @@ public class NucleusMeshBuilder implements Loggable {
 			 */
 			toRemove.addAll(  
 					
-					internalEdges.stream()
+					internalEdges.parallelStream()
 					.filter( e -> longestEdges.contains(e))
 					.collect(Collectors.toList())
 					
@@ -654,7 +654,7 @@ public class NucleusMeshBuilder implements Loggable {
 			 */
 			toRemove.addAll(  
 					
-					internalEdges.stream()
+					internalEdges.parallelStream()
 						.filter( e -> testEdgeCrossesPeriphery(e))
 						.collect(Collectors.toList())
 					
@@ -668,7 +668,7 @@ public class NucleusMeshBuilder implements Loggable {
 			
 			toRemove.addAll(  
 					
-					internalEdges.stream()
+					internalEdges.parallelStream()
 						.filter( e -> e.getV1().isPeripheral() && e.getV2().isPeripheral())
 						.collect(Collectors.toList())
 					
@@ -845,26 +845,7 @@ public class NucleusMeshBuilder implements Loggable {
 		 * @return
 		 */
 		public boolean overlaps(NucleusMeshEdge e){
-			
-			return this.containsVertex(e.v1) && this.containsVertex(e.v2);
-						
-//			if(v1.getPosition().overlaps(e.v1.getPosition()) && v2.getPosition().overlaps(e.v2.getPosition()) ){
-//				return true;
-//			}
-//			
-//			if(v2.getPosition().overlaps(e.v1.getPosition()) && v1.getPosition().overlaps(e.v2.getPosition())){
-//				return true;
-//			}
-//			
-//			if(v1.getPosition().overlaps(e.v2.getPosition()) && v2.getPosition().overlaps(e.v1.getPosition())){
-//				return true;
-//			}
-//			
-//			if(v2.getPosition().overlaps(e.v2.getPosition()) && v1.getPosition().overlaps(e.v2.getPosition())){
-//				return true;
-//			}
-//			return false;
-			
+			return this.containsVertex(e.v1) && this.containsVertex(e.v2);			
 		}
 		
 		public boolean crosses(NucleusMeshEdge e){
@@ -890,26 +871,7 @@ public class NucleusMeshBuilder implements Loggable {
 		 * @return
 		 */
 		public boolean sharesEndpoint(NucleusMeshEdge e){
-			
-			return this.containsVertex(e.v1) || this.containsVertex(e.v2);
-			
-//			if(v1.getPosition().overlaps(e.v1.getPosition())){
-//				return true;
-//			}
-//			
-//			if(v2.getPosition().overlaps(e.v1.getPosition())){
-//				return true;
-//			}
-//			
-//			if(v1.getPosition().overlaps(e.v2.getPosition())){
-//				return true;
-//			}
-//			
-//			if(v2.getPosition().overlaps(e.v2.getPosition())){
-//				return true;
-//			}
-//			return false;
-			
+			return this.containsVertex(e.v1) || this.containsVertex(e.v2);			
 		}
 		
 		public boolean containsVertex(NucleusMeshVertex v){
@@ -935,8 +897,7 @@ public class NucleusMeshBuilder implements Loggable {
 		public String toString(){
 			return v1.toString()+" : "+v2.toString()+" : "+getLength();
 		}
-	
-		
+
 	}
 	
 	public class NucleusMeshVertex {
