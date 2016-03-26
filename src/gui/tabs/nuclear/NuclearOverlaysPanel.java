@@ -114,8 +114,16 @@ public class NuclearOverlaysPanel extends DetailPanel {
 
 	@Override
 	protected void updateNull() throws Exception {
-		updateSingle();
+		compareConsensusButton.setEnabled(false);
+		checkBoxPanel.setEnabled(false);
 		
+		ChartOptions options = new ChartOptionsBuilder()
+			.setDatasets(getDatasets())
+			.setNormalised(false)
+			.build();
+		
+		JFreeChart chart = getChart(options);
+		chartPanel.setChart(chart);		
 	}
 
 	@Override

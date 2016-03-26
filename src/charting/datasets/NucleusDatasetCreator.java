@@ -1604,38 +1604,10 @@ public class NucleusDatasetCreator implements Loggable {
 		return ds;
 	}
 	
-	public static NucleusMeshXYDataset createNucleusMeshDataset(Nucleus n1, Nucleus n2, int meshSize) throws Exception {
-		NucleusMeshBuilder builder = new NucleusMeshBuilder();
-		
-		NucleusMesh n1Mesh = builder.buildMesh(n1, meshSize);
-		
-		/*
-		 * Ensure input nuclei have a best fit alignment
-		 */
-		BooleanAligner aligner = new BooleanAligner(n1.getBooleanMask(200, 200));
-		int[] alignment = aligner.align(n2.getBooleanMask(200, 200));
-		
-		n2 = n2.duplicate();
-		n2.moveCentreOfMass( new XYPoint(alignment[1], alignment[0]));
-		
-		/*
-		 * Create the mesh
-		 */
-		
-		NucleusMesh n2Mesh = builder.buildMesh(n2, n1Mesh);
-		
-		n1Mesh.makePairwiseEdges();
-		n2Mesh.makePairwiseEdges();
-		
-		
-		NucleusMesh result = n1Mesh.compare(n2Mesh);
-		result.pruneOverlaps();
-				
+	public static NucleusMeshXYDataset createNucleusMeshDataset(NucleusMesh mesh) throws Exception {
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 		
-		
-		
-		for(NucleusMeshEdge edge : result.getEdges()){
+		for(NucleusMeshEdge edge : mesh.getEdges()){
 			
 			double[] yvalues = {
 					edge.getV1().getPosition().getY(),
@@ -1653,6 +1625,36 @@ public class NucleusDatasetCreator implements Loggable {
 			ds.setRatio(edge.toString(), edge.getLog2Ratio());
 		}
 		return ds;
+	}
+	
+	public static NucleusMeshXYDataset createNucleusMeshDataset(Nucleus n1, Nucleus n2, int meshSize) throws Exception {
+		NucleusMeshBuilder builder = new NucleusMeshBuilder();
+		
+		NucleusMesh n1Mesh = builder.buildMesh(n1, meshSize);
+		
+		/*
+		 * Ensure input nuclei have a best fit alignment
+		 */
+		BooleanAligner aligner = new BooleanAligner(n1.getBooleanMask(200, 200));
+		int[] alignment = aligner.align(n2.getBooleanMask(200, 200));
+		
+		n2 = n2.duplicate();
+		n2.moveCentreOfMass( new XYPoint(alignment[BooleanAligner.Y], alignment[BooleanAligner.X]));
+		
+		/*
+		 * Create the mesh
+		 */
+		
+		NucleusMesh n2Mesh = builder.buildMesh(n2, n1Mesh);
+		
+		n1Mesh.makePairwiseEdges();
+		n2Mesh.makePairwiseEdges();
+		
+		
+		NucleusMesh result = n1Mesh.compare(n2Mesh);
+		result.pruneOverlaps();
+		
+		return createNucleusMeshDataset(result);
 	}
 	
 }

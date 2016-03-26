@@ -18,6 +18,8 @@
  *******************************************************************************/
 package gui.components;
 
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.logging.Level;
 
 import org.jfree.chart.JFreeChart;
@@ -26,7 +28,7 @@ import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 
 @SuppressWarnings("serial")
-public class FixedAspectRatioChartPanel extends ExportableChartPanel {
+public class FixedAspectRatioChartPanel extends ExportableChartPanel implements ComponentListener {
 
 
 	public FixedAspectRatioChartPanel(JFreeChart chart){
@@ -127,6 +129,30 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel {
 			super.restoreAutoBounds();
 		}
 	
+	}
+
+	@Override
+	public void componentHidden(ComponentEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentResized(ComponentEvent arg0) {
+		restoreAutoBounds();
+		
+	}
+
+	@Override
+	public void componentShown(ComponentEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	} 	
 }
 

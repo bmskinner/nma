@@ -5,6 +5,8 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -53,12 +55,41 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		
 		JPanel centrePanel = new JPanel();
 		BoxLayout layout = new BoxLayout(centrePanel, BoxLayout.X_AXIS);
+		
 		centrePanel.setLayout(layout);
 		
 		chartPanelOne = new FixedAspectRatioChartPanel(chart);
 		chartPanelTwo = new FixedAspectRatioChartPanel(chart);
 		centrePanel.add(chartPanelOne);
 		centrePanel.add(chartPanelTwo);
+		
+		centrePanel.addComponentListener( new ComponentListener(){
+			
+			@Override
+			public void componentResized(ComponentEvent arg0) {
+				chartPanelOne.restoreAutoBounds();
+				chartPanelTwo.restoreAutoBounds();
+				
+			}
+
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void componentMoved(ComponentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void componentShown(ComponentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
 		this.add(centrePanel,BorderLayout.CENTER);
 		

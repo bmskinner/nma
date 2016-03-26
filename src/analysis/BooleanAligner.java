@@ -7,6 +7,9 @@ import logging.Loggable;
 public class BooleanAligner implements Loggable {
 	
 	boolean[][] reference;
+	
+	public static final int X = 0;
+	public static final int Y = 1;
 
 //	private int xOffset = 0;
 //	private int yOffset = 0;

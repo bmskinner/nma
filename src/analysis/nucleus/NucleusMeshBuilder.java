@@ -79,10 +79,58 @@ public class NucleusMeshBuilder implements Loggable {
 		createEdges(mesh);
 		
 		mesh.makeCentreVertices();
-//		mesh.subdivide();
-//		mesh.pruneOverlaps();
+		
+		log(Level.FINEST, "Created mesh");
+		return mesh;
+	}
+	
+	/**
+	 * Build a mesh for the input nucleus, based on a template mesh
+	 * containing the divisions required for each segment
+	 * @param mesh
+	 * @return
+	 * @throws Exception
+	 */
+	public NucleusMesh buildMesh(Nucleus nucleus, NucleusMesh template) throws Exception{
+		log(Level.FINEST, "Creating mesh for "+nucleus.getNameAndNumber()+" using template "+template.getNucleusName());
+		NucleusMesh mesh = new NucleusMesh(nucleus);
+		
+//		log(Level.FINEST, "Adding centre of mass");
+//		mesh.addVertex(nucleus.getCentreOfMass(), false);
+		
+		log(Level.FINEST, "Getting ordered segments");
+		List<NucleusBorderSegment> list = nucleus.getProfile(ProfileType.REGULAR).getOrderedSegments();
+		
+		log(Level.FINEST, "Checking counts");
+		if(template.getSegmentCount()!=list.size()){
+			log(Level.FINEST, "Segment counts not equal:"+template.getSegmentCount()+" and "+list.size());
+			throw new IllegalArgumentException("Segment counts are not equal");
+		}
+		log(Level.FINEST, "Segment counts equal:"+template.getSegmentCount()+" and "+list.size());
+		
+		int segNumber = 0;
+		log(Level.FINEST, "Iterating over segments");
+		for(NucleusBorderSegment seg : list){
+						
+			int divisions = template.getDivision(segNumber);
+			log(Level.FINEST, "Seg "+segNumber+": "+divisions);
+			segNumber++;
+			
+			log(Level.FINEST, "Dividing segment into "+divisions+" parts");
+			
+			double proportion = 1d / (double) divisions;
+			
+			for(double d=0; d<1; d+=proportion){
+				int index = seg.getProportionalIndex(d);
+				log(Level.FINEST, "Fetching point at index "+index);
+				mesh.addVertex(nucleus.getBorderPoint(index), true);
+			}
+		}
 		
 		
+		createEdges(mesh);
+		mesh.makeCentreVertices();
+
 		log(Level.FINEST, "Created mesh");
 		return mesh;
 	}
@@ -115,56 +163,6 @@ public class NucleusMeshBuilder implements Loggable {
 		log(Level.FINEST, "Created edges");
 	}
 	
-	/**
-	 * Build a mesh for the input nucleus, based on a template mesh
-	 * containing the divisions required for each segment
-	 * @param mesh
-	 * @return
-	 * @throws Exception
-	 */
-	public NucleusMesh buildMesh(Nucleus nucleus, NucleusMesh template) throws Exception{
-		log(Level.FINEST, "Creating mesh for "+nucleus.getNameAndNumber()+" using template "+template.getNucleusName());
-		NucleusMesh mesh = new NucleusMesh(nucleus);
-		
-//		log(Level.FINEST, "Adding centre of mass");
-//		mesh.addVertex(nucleus.getCentreOfMass(), false);
-		
-		log(Level.FINEST, "Getting ordered segments");
-		List<NucleusBorderSegment> list = nucleus.getProfile(ProfileType.REGULAR).getOrderedSegments();
-		
-		log(Level.FINEST, "Checking counts");
-		if(template.getSegmentCount()!=list.size()){
-			log(Level.FINEST, "Segment counts not equal:"+template.getSegmentCount()+" and "+list.size());
-			throw new IllegalArgumentException("Segment counts are not equal");
-		}
-		log(Level.FINEST, "Segment counts equal:"+template.getSegmentCount()+" and "+list.size());
-		
-		int segNumber = 0;
-		log(Level.FINEST, "Iterating over segments");
-		for(NucleusBorderSegment seg : list){
-			
-			int divisions = template.getDivision(segNumber);
-			log(Level.FINEST, "Seg "+segNumber+": "+divisions);
-			segNumber++;
-			
-			log(Level.FINEST, "Dividing segment into "+divisions+" parts");
-			
-			double proportion = 1d / (double) divisions;
-			
-			for(double d=0; d<1; d+=proportion){
-				int index = seg.getProportionalIndex(d);
-				log(Level.FINEST, "Fetching point at index "+index);
-				mesh.addVertex(nucleus.getBorderPoint(index), true);
-			}
-		}
-		
-		
-		createEdges(mesh);
-		mesh.makeCentreVertices();
-
-		log(Level.FINEST, "Created mesh");
-		return mesh;
-	}
 	
 	/**
 	 * @author bms41
@@ -561,14 +559,17 @@ public class NucleusMeshBuilder implements Loggable {
 				
 		private boolean testEdgeCrossesPeriphery(NucleusMeshEdge e){
 			
-			List<NucleusMeshEdge> preipheralEdges = getPeripheralEdges();
+//			List<NucleusMeshEdge> preipheralEdges = getPeripheralEdges();
 			
-			for(NucleusMeshEdge p : preipheralEdges){
-				if(e.crosses(p)){
-					return true;
-				}
-			}
-			return  false;
+			return getPeripheralEdges().stream()
+				.anyMatch( p -> e.crosses(p));
+			
+//			for(NucleusMeshEdge p : preipheralEdges){
+//				if(e.crosses(p)){
+//					return true;
+//				}
+//			}
+//			return  false;
 		}
 		
 		
@@ -844,23 +845,25 @@ public class NucleusMeshBuilder implements Loggable {
 		 * @return
 		 */
 		public boolean overlaps(NucleusMeshEdge e){
+			
+			return this.containsVertex(e.v1) && this.containsVertex(e.v2);
 						
-			if(v1.getPosition().overlaps(e.v1.getPosition()) && v2.getPosition().overlaps(e.v2.getPosition()) ){
-				return true;
-			}
-			
-			if(v2.getPosition().overlaps(e.v1.getPosition()) && v1.getPosition().overlaps(e.v2.getPosition())){
-				return true;
-			}
-			
-			if(v1.getPosition().overlaps(e.v2.getPosition()) && v2.getPosition().overlaps(e.v1.getPosition())){
-				return true;
-			}
-			
-			if(v2.getPosition().overlaps(e.v2.getPosition()) && v1.getPosition().overlaps(e.v2.getPosition())){
-				return true;
-			}
-			return false;
+//			if(v1.getPosition().overlaps(e.v1.getPosition()) && v2.getPosition().overlaps(e.v2.getPosition()) ){
+//				return true;
+//			}
+//			
+//			if(v2.getPosition().overlaps(e.v1.getPosition()) && v1.getPosition().overlaps(e.v2.getPosition())){
+//				return true;
+//			}
+//			
+//			if(v1.getPosition().overlaps(e.v2.getPosition()) && v2.getPosition().overlaps(e.v1.getPosition())){
+//				return true;
+//			}
+//			
+//			if(v2.getPosition().overlaps(e.v2.getPosition()) && v1.getPosition().overlaps(e.v2.getPosition())){
+//				return true;
+//			}
+//			return false;
 			
 		}
 		
@@ -887,22 +890,25 @@ public class NucleusMeshBuilder implements Loggable {
 		 * @return
 		 */
 		public boolean sharesEndpoint(NucleusMeshEdge e){
-			if(v1.getPosition().overlaps(e.v1.getPosition())){
-				return true;
-			}
 			
-			if(v2.getPosition().overlaps(e.v1.getPosition())){
-				return true;
-			}
+			return this.containsVertex(e.v1) || this.containsVertex(e.v2);
 			
-			if(v1.getPosition().overlaps(e.v2.getPosition())){
-				return true;
-			}
-			
-			if(v2.getPosition().overlaps(e.v2.getPosition())){
-				return true;
-			}
-			return false;
+//			if(v1.getPosition().overlaps(e.v1.getPosition())){
+//				return true;
+//			}
+//			
+//			if(v2.getPosition().overlaps(e.v1.getPosition())){
+//				return true;
+//			}
+//			
+//			if(v1.getPosition().overlaps(e.v2.getPosition())){
+//				return true;
+//			}
+//			
+//			if(v2.getPosition().overlaps(e.v2.getPosition())){
+//				return true;
+//			}
+//			return false;
 			
 		}
 		
