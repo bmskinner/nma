@@ -2,7 +2,6 @@ package gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -22,12 +21,10 @@ import javax.swing.event.ChangeListener;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
-import analysis.BooleanAligner;
 import analysis.nucleus.NucleusMeshBuilder;
 import analysis.nucleus.NucleusMeshBuilder.NucleusMesh;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.OutlineChartFactory;
-import components.generic.XYPoint;
 import components.nuclei.Nucleus;
 import gui.LoadingIconDialog;
 import gui.components.ExportableChartPanel;
@@ -50,6 +47,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 	private JComboBox<AnalysisDataset> boxTwo;
 	
 	public ConsensusCompareDialog(List<AnalysisDataset> datasets){
+		super();
 		this.datasets = datasets;
 		
 		this.setTitle("Consensus nucleus comparator");

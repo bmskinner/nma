@@ -20,10 +20,9 @@ package gui;
 
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dialog;
 import java.net.URL;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -47,7 +46,7 @@ public abstract class LoadingIconDialog extends JDialog implements Loggable {
 	private ImageIcon blankGif = null; // the icon for the blank gif
 	
 	public LoadingIconDialog(){
-		
+		super( (Dialog) null ); // provides a taskbar icon
 		// Load the gif (may be in a res folder depending on Eclipse version)
 //		String pathToGif   = "res/ajax-loader.gif";	
 //		String pathToBlank = "res/blank.gif";	
