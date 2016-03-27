@@ -30,6 +30,11 @@ import gui.LoadingIconDialog;
 import gui.components.ExportableChartPanel;
 import gui.components.FixedAspectRatioChartPanel;
 
+/**
+ * A dialog window allowing comparisons between the consensus nuclei of multiple collections.
+ * @author ben
+ *
+ */
 @SuppressWarnings("serial")
 public class ConsensusCompareDialog extends LoadingIconDialog implements ActionListener, ChangeListener {
 	
@@ -173,7 +178,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		meshSizeSpinner = new JSpinner(meshSizeModel);
 		meshSizeSpinner.addChangeListener(this);
 		meshSizeSpinner.setToolTipText("Mesh size");
-		JSpinner.NumberEditor meshNumberEditor = new JSpinner.NumberEditor(meshSizeSpinner,"0.00");
+		JSpinner.NumberEditor meshNumberEditor = new JSpinner.NumberEditor(meshSizeSpinner,"0");
 		meshSizeSpinner.setEditor(meshNumberEditor);
 		
 		panel.add(new JLabel("Log2 ratio max"));
@@ -181,10 +186,14 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		panel.add(new JLabel("Mesh distance"));
 		panel.add(meshSizeSpinner);
 		
+		panel.add(getLoadingLabel());
+		
 		return panel;
 	}
 	
 	private void runComparison(){
+		
+		setLoading(true);
 		AnalysisDataset one = (AnalysisDataset) boxOne.getSelectedItem();
 		AnalysisDataset two = (AnalysisDataset) boxTwo.getSelectedItem();
 		
@@ -253,18 +262,20 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		histoOne.setChart(histoChartOne);
 		histoTwo.setChart(histoChartTwo);
 		
-		
+		setLoading(false);
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		runComparison();
+		Thread thr = new Thread(    ()-> {	runComparison(); }   );
+		thr.start();
 
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent arg0) {
-		runComparison();
+		Thread thr = new Thread(    ()-> {	runComparison(); }   );
+		thr.start();
 		
 	}
 

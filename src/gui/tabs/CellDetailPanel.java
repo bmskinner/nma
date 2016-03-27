@@ -722,6 +722,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 									.createComparisonMesh(cell.getNucleus().getVerticallyRotatedNucleus(), 
 											activeDataset().getCollection().getConsensusNucleus(),
 											NucleusMeshBuilder.DIVISION_LENGTH);
+							result.pruneOverlaps();
 							
 							chart = OutlineChartFactory.createMeshChart(result, 0.5);
 

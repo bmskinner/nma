@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import analysis.BooleanAligner;
-import analysis.nucleus.NucleusMeshBuilder.NucleusMesh;
 import components.generic.Equation;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
@@ -29,13 +28,21 @@ public class NucleusMeshBuilder implements Loggable {
 	public NucleusMeshBuilder(){
 	}
 	
+	/**
+	 * Create a mesh comparing the given nuclei
+	 * @param n1 the first nucleus. Used as the mesh template
+	 * @param n2 the comparison nucleus.
+	 * @param meshSize the distance between vertices
+	 * @return a mesh with the ratios between edge lengths
+	 * @throws Exception
+	 */
 	public NucleusMesh createComparisonMesh(Nucleus n1, Nucleus n2, int meshSize) throws Exception{
-//		NucleusMeshBuilder builder = new NucleusMeshBuilder();
 		
 		NucleusMesh n1Mesh = buildMesh(n1, meshSize);
 		
 		/*
 		 * Ensure input nuclei have a best fit alignment
+		 * TODO: determine size of mask
 		 */
 		BooleanAligner aligner = new BooleanAligner(n1.getBooleanMask(200, 200));
 		int[] alignment = aligner.align(n2.getBooleanMask(200, 200));

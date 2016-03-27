@@ -184,6 +184,14 @@ public abstract class LoadingIconDialog extends JDialog implements Loggable {
     	return icon;
     }
 	
+	protected void setLoading(boolean b){
+		if(b){
+			setStatusLoading();
+		} else {
+			setStatusLoaded();
+		}
+	}
+	
 	/**
 	 * Set the header label to loading
 	 * the loading gif
@@ -200,6 +208,7 @@ public abstract class LoadingIconDialog extends JDialog implements Loggable {
 
 		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		for(Component c : this.getComponents()){
+			c.setEnabled(false);
 			c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		}
 	}
@@ -217,6 +226,7 @@ public abstract class LoadingIconDialog extends JDialog implements Loggable {
 
 		this.setCursor(Cursor.getDefaultCursor());
 		for(Component c : this.getComponents()){
+			c.setEnabled(true);
 			c.setCursor(Cursor.getDefaultCursor());
 		}
 	}
