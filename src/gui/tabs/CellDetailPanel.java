@@ -718,10 +718,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 						if(activeDataset().getCollection().hasConsensusNucleus()){
 
-
-							chart = OutlineChartFactory.createMeshChart(cell.getNucleus().getVerticallyRotatedNucleus(), 
-									activeDataset().getCollection().getConsensusNucleus(),
-									0.5, NucleusMeshBuilder.DIVISION_LENGTH);
+							NucleusMesh result = new NucleusMeshBuilder()
+									.createComparisonMesh(cell.getNucleus().getVerticallyRotatedNucleus(), 
+											activeDataset().getCollection().getConsensusNucleus(),
+											NucleusMeshBuilder.DIVISION_LENGTH);
+							
+							chart = OutlineChartFactory.createMeshChart(result, 0.5);
 
 						} else {
 							chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();

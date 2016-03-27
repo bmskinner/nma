@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import analysis.BooleanAligner;
+import analysis.nucleus.NucleusMeshBuilder.NucleusMesh;
 import components.generic.Equation;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
@@ -23,10 +25,36 @@ import stats.Stats;
 public class NucleusMeshBuilder implements Loggable {
 	
 	public static final int DIVISION_LENGTH = 10;
-	
-//	private Nucleus nucleus;
-	
+		
 	public NucleusMeshBuilder(){
+	}
+	
+	public NucleusMesh createComparisonMesh(Nucleus n1, Nucleus n2, int meshSize) throws Exception{
+//		NucleusMeshBuilder builder = new NucleusMeshBuilder();
+		
+		NucleusMesh n1Mesh = buildMesh(n1, meshSize);
+		
+		/*
+		 * Ensure input nuclei have a best fit alignment
+		 */
+		BooleanAligner aligner = new BooleanAligner(n1.getBooleanMask(200, 200));
+		int[] alignment = aligner.align(n2.getBooleanMask(200, 200));
+		
+		n2 = n2.duplicate();
+		n2.moveCentreOfMass( new XYPoint(alignment[BooleanAligner.Y], alignment[BooleanAligner.X]));
+		
+		/*
+		 * Create the mesh
+		 */
+		
+		NucleusMesh n2Mesh = buildMesh(n2, n1Mesh);
+		
+		n1Mesh.makePairwiseEdges();
+		n2Mesh.makePairwiseEdges();
+		
+		
+		NucleusMesh result = n1Mesh.compare(n2Mesh);
+		return result;
 	}
 	
 	/**

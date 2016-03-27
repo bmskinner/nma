@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import logging.Loggable;
 
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
@@ -1604,6 +1605,13 @@ public class NucleusDatasetCreator implements Loggable {
 		return ds;
 	}
 	
+	/**
+	 * Create an XYDataset with the edges in a NucleusMesh comparison. Also stores the result
+	 * edge length ratios.
+	 * @param mesh
+	 * @return
+	 * @throws Exception
+	 */
 	public static NucleusMeshXYDataset createNucleusMeshDataset(NucleusMesh mesh) throws Exception {
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 		
@@ -1627,34 +1635,32 @@ public class NucleusDatasetCreator implements Loggable {
 		return ds;
 	}
 	
-	public static NucleusMeshXYDataset createNucleusMeshDataset(Nucleus n1, Nucleus n2, int meshSize) throws Exception {
-		NucleusMeshBuilder builder = new NucleusMeshBuilder();
+	
+	public static HistogramDataset createNucleusMeshHistogramDataset(NucleusMesh mesh)throws Exception {
+		HistogramDataset ds = new HistogramDataset();
 		
-		NucleusMesh n1Mesh = builder.buildMesh(n1, meshSize);
+		int bins = 100;
 		
-		/*
-		 * Ensure input nuclei have a best fit alignment
-		 */
-		BooleanAligner aligner = new BooleanAligner(n1.getBooleanMask(200, 200));
-		int[] alignment = aligner.align(n2.getBooleanMask(200, 200));
+		double max = mesh.getEdges().parallelStream()
+			.max( (e1, e2) -> Double.compare(e1.getLog2Ratio(), e2.getLog2Ratio()  ))
+			.get()
+			.getLog2Ratio();
 		
-		n2 = n2.duplicate();
-		n2.moveCentreOfMass( new XYPoint(alignment[BooleanAligner.Y], alignment[BooleanAligner.X]));
+		double min = mesh.getEdges().parallelStream()
+				.min( (e1, e2) -> Double.compare(e1.getLog2Ratio(), e2.getLog2Ratio()  ))
+				.get()
+				.getLog2Ratio();
 		
-		/*
-		 * Create the mesh
-		 */
+		double[] values = mesh.getEdges().parallelStream()
+				.mapToDouble(NucleusMeshEdge::getLog2Ratio)
+				.toArray();
+
+		ds.addSeries("mesh result", values, bins, min, max );
 		
-		NucleusMesh n2Mesh = builder.buildMesh(n2, n1Mesh);
-		
-		n1Mesh.makePairwiseEdges();
-		n2Mesh.makePairwiseEdges();
-		
-		
-		NucleusMesh result = n1Mesh.compare(n2Mesh);
-		result.pruneOverlaps();
-		
-		return createNucleusMeshDataset(result);
+		return ds;
 	}
+	
+	
+
 	
 }

@@ -6,6 +6,7 @@ import ij.IJ;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 import io.ImageImporter;
+import stats.SignalStatistic;
 import stats.Stats;
 
 import java.awt.BasicStroke;
@@ -32,6 +33,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.DatasetUtilities;
+import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
@@ -583,9 +585,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createMeshChart(Nucleus n1, Nucleus n2, double log2Ratio, int meshSize) throws Exception{
+	public static JFreeChart createMeshChart(NucleusMesh mesh, double log2Ratio) throws Exception{
 		
-		NucleusMeshXYDataset dataset = NucleusDatasetCreator.createNucleusMeshDataset(n1, n2, meshSize);
+		NucleusMeshXYDataset dataset = NucleusDatasetCreator.createNucleusMeshDataset(mesh);
 
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -662,6 +664,23 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		int g = 0;
 		int b = bValue;
 		return new Color(r, g, b);
+	}
+	
+	
+	/**
+	 * Create a histogram of log 2 ratios for a NucleusMesh
+	 * @param mesh the comparison mesh with length ratios
+	 * @return
+	 * @throws Exception 
+	 */
+	public static JFreeChart createMeshHistogram(NucleusMesh mesh) throws Exception{
+
+		HistogramDataset ds = NucleusDatasetCreator.createNucleusMeshHistogramDataset(mesh);
+		JFreeChart chart = HistogramChartFactory.createHistogram(ds, "Log2 ratio", "Number of edges");
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		plot.addDomainMarker(new ValueMarker(0, Color.BLACK, ChartComponents.PROFILE_STROKE));
+		return chart;
 	}
 
 }
