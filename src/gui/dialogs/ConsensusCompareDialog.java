@@ -42,8 +42,8 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 	private FixedAspectRatioChartPanel chartPanelOne;
 	private FixedAspectRatioChartPanel chartPanelTwo;
 	
-	private ExportableChartPanel histoOne;
-	private ExportableChartPanel histoTwo;
+	private FixedAspectRatioChartPanel histoOne;
+	private FixedAspectRatioChartPanel histoTwo;
 
 	private JSpinner maxRatioSpinner;
 	private JSpinner meshSizeSpinner;
@@ -120,8 +120,8 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		});
 		
 		
-		histoOne = new ExportableChartPanel(chart);
-		histoTwo = new ExportableChartPanel(chart);
+		histoOne = new FixedAspectRatioChartPanel(chart);
+		histoTwo = new FixedAspectRatioChartPanel(chart);
 		histoPanel.add(histoOne);
 		histoPanel.add(histoTwo);
 		
@@ -218,8 +218,12 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				NucleusMesh comparison1 = builder.createComparisonMesh(n1, n2, meshSize);
 				NucleusMesh comparison2 = builder.createComparisonMesh(n2, n1, meshSize);
 				
-				histoChartOne = OutlineChartFactory.createMeshHistogram(comparison1);
-				histoChartTwo = OutlineChartFactory.createMeshHistogram(comparison2);
+//				histoChartOne = OutlineChartFactory.createMeshHistogram(comparison1);
+//				histoChartTwo = OutlineChartFactory.createMeshHistogram(comparison2);
+				
+				histoChartOne = OutlineChartFactory.createMeshMidpointChart(comparison1, logRatio);
+				histoChartTwo = OutlineChartFactory.createMeshMidpointChart(comparison2, logRatio);
+				
 				
 				/*
 				 * Remove overlapping edges for a clean chart
@@ -261,6 +265,9 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		
 		histoOne.setChart(histoChartOne);
 		histoTwo.setChart(histoChartTwo);
+		
+		histoOne.restoreAutoBounds();
+		histoTwo.restoreAutoBounds();
 		
 		setLoading(false);
 	}

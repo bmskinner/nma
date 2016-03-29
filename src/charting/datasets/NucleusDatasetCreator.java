@@ -1635,6 +1635,33 @@ public class NucleusDatasetCreator implements Loggable {
 		return ds;
 	}
 	
+	/**
+	 * Create an XYDataset with the midpoints of edges in a NucleusMesh comparison. 
+	 * @param mesh
+	 * @return
+	 * @throws Exception
+	 */
+	public static NucleusMeshXYDataset createNucleusMeshMidpointDataset(NucleusMesh mesh) throws Exception {
+		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
+		
+		for(NucleusMeshEdge edge : mesh.getEdges()){
+			
+			double[] yvalues = {
+				edge.getMidpoint().getY(),
+			};
+			
+			
+			double[] xvalues = {
+				edge.getMidpoint().getX(),
+			};
+
+			double[][] data = { xvalues, yvalues };
+			ds.addSeries(edge.toString(), data);
+			ds.setRatio(edge.toString(), edge.getLog2Ratio());
+		}
+		return ds;
+	}
+	
 	
 	public static HistogramDataset createNucleusMeshHistogramDataset(NucleusMesh mesh)throws Exception {
 		HistogramDataset ds = new HistogramDataset();

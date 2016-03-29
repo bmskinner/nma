@@ -616,6 +616,44 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	}
 	
 	/**
+	 * Create the chart with the outlines of all the nuclei within a single dataset.
+	 * @param options
+	 * @return
+	 * @throws Exception 
+	 */
+	public static JFreeChart createMeshMidpointChart(NucleusMesh mesh, double log2Ratio) throws Exception{
+		
+		NucleusMeshXYDataset dataset = NucleusDatasetCreator.createNucleusMeshMidpointDataset(mesh);
+
+		JFreeChart chart = ChartFactory.createXYLineChart(null,
+				null, null, null, PlotOrientation.VERTICAL, true, true,
+				false);
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		
+		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(false, true);
+		renderer.setBaseSeriesVisibleInLegend(false);
+		renderer.setBaseStroke(ChartComponents.MARKER_STROKE);
+		
+//		Shape cross = ShapeUtilities.cre
+
+		for(int series=0; series<dataset.getSeriesCount(); series++){
+			
+			double ratio = dataset.getRatio(dataset.getSeriesKey(series));
+			Color colour = getGradientColour(ratio, log2Ratio);
+			
+			renderer.setSeriesPaint(series, colour);
+			renderer.setSeriesStroke(series, ChartComponents.MARKER_STROKE);
+//			renderer.setSeriesShape(arg0, arg1);
+		}
+		
+		plot.setDataset(0, dataset);
+		plot.setRenderer(0, renderer);		
+		return chart;
+	}
+	
+	/**
 	 * Log2 ratios are coming in, which must be converted to real ratios
 	 * @param ratio
 	 * @param minRatio
