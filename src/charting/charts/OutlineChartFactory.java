@@ -416,13 +416,16 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	public static JFreeChart createVerticalNucleiChart(ChartOptions options) throws Exception{
 		
 		if( ! options.hasDatasets()){
+			options.log(Level.FINEST, "No datasets - returning empty chart");
 			return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 		}
 		
 		if(options.isMultipleDatasets()){
+			options.log(Level.FINEST, "Multiple datasets - creating vertical nuclei chart");
 			return createMultipleDatasetVerticalNucleiChart(options);
 		}
 		
+		options.log(Level.FINEST, "Single dataset - creating vertical nuclei chart");
 		return createSingleDatasetVerticalNucleiChart(options);
 		
 	}
@@ -485,7 +488,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		int i=0;
 		
 		if(options.isNormalised()){
+			
 			if(hasConsensus){
+				
+				options.log(Level.FINEST, "Creating consensus nucleus dataset");
+				
 				Nucleus consensus = options.firstDataset().getCollection().getConsensusNucleus();
 				XYDataset consensusDataset = NucleusDatasetCreator.createNucleusOutline(consensus, false);
 				
@@ -500,13 +507,17 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			i++;
 		}
 		
+		options.log(Level.FINEST, "Creating charting datasets for vertically rotated nuclei");
+		
 		for(Nucleus n : options.firstDataset().getCollection().getNuclei()){
 			
+//			options.log(Level.FINEST, "Fetching vertically rotated nucleus: "+i);
 			Nucleus verticalNucleus = n.getVerticallyRotatedNucleus();
 			
 			/*
 			 * Find the best offset for the CoM to fit the consensus nucleus if present
 			 */
+//			options.log(Level.FINEST, "Setting CoM: Nucleus "+i);
 			if(options.isNormalised()){
 				if(hasConsensus){
 					boolean[][] test = verticalNucleus.getBooleanMask(200, 200);
@@ -517,15 +528,17 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				verticalNucleus.moveCentreOfMass( new XYPoint(0, 0));
 			}
 			
+//			options.log(Level.FINEST, "Creating outline: Nucleus "+i);
 			XYDataset nucleusDataset = NucleusDatasetCreator.createNucleusOutline(verticalNucleus, false);
 			
+//			options.log(Level.FINEST, "Setting dataset and renderer: Nucleus "+i);
 			plot.setDataset(i, nucleusDataset);
 			plot.setRenderer(i, r);
 
 			i++;
 			
 		}
-				
+		options.log(Level.FINEST, "Created vertical nuclei chart");
 		return chart;
 	}
 	

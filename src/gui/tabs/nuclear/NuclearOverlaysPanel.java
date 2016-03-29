@@ -76,6 +76,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 
 	@Override
 	protected void updateSingle() throws Exception {
+//		log(Level.INFO, "Updating overlays panel: single");
 		compareConsensusButton.setEnabled(false);
 		
 		boolean hasConsensus = activeDataset().getCollection().hasConsensusNucleus();
@@ -134,6 +135,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		log(Level.FINEST, "Creating nuclear overlay chart");
 		return OutlineChartFactory.createVerticalNucleiChart(options);
 	}
 	
