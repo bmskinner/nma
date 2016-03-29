@@ -38,25 +38,31 @@ public class LogPanelFormatter extends Formatter {
 
 		String date = calcDate(record.getMillis());
 
-		if(record.getLevel()==Level.FINE || record.getLevel()==Level.FINER || record.getLevel()==Level.FINEST){
+		buffer.append(date);
+		buffer.append(" ");
+		
+		if(record.getLevel() == Level.FINE || record.getLevel()==Level.FINER || record.getLevel()==Level.FINEST){
 			
-			buffer.append(date + " " + formatFinest(record));
+			buffer.append(formatFinest(record));
 		} else {
-			buffer.append(date + " " + record.getMessage() + NEWLINE);
+			buffer.append(record.getMessage());
 		}
 
 		if(record.getThrown()!=null){
 			Throwable t = record.getThrown();
 
-			buffer.append( t.getClass().getSimpleName() + ": " + t.getMessage() + NEWLINE  ) ;
+			buffer.append( t.getClass().getSimpleName());
+			buffer.append( ": ");
+			buffer.append(t.getMessage() );
+			buffer.append( NEWLINE );
 
 			for(StackTraceElement el : t.getStackTrace()){
-				buffer.append( el.toString() + NEWLINE );
+				buffer.append( el.toString() );
+				buffer.append( NEWLINE );
 			}
-			buffer.append( NEWLINE );
 		}
-
-
+		
+		buffer.append(NEWLINE);
 
 		return buffer.toString();
 	}
@@ -78,7 +84,7 @@ public class LogPanelFormatter extends Formatter {
 		buffer.append(sourceMethod);
 		buffer.append(SEPARATOR);
 		buffer.append(record.getThreadID());
-		buffer.append(NEWLINE);
+
 
 		return buffer.toString();
 	}

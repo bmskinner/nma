@@ -42,8 +42,11 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 	private FixedAspectRatioChartPanel chartPanelOne;
 	private FixedAspectRatioChartPanel chartPanelTwo;
 	
-	private FixedAspectRatioChartPanel histoOne;
-	private FixedAspectRatioChartPanel histoTwo;
+	private ExportableChartPanel histoOne;
+	private ExportableChartPanel histoTwo;
+	
+	private FixedAspectRatioChartPanel pointOne;
+	private FixedAspectRatioChartPanel pointTwo;
 
 	private JSpinner maxRatioSpinner;
 	private JSpinner meshSizeSpinner;
@@ -120,11 +123,45 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		});
 		
 		
-		histoOne = new FixedAspectRatioChartPanel(chart);
-		histoTwo = new FixedAspectRatioChartPanel(chart);
-		histoPanel.add(histoOne);
-		histoPanel.add(histoTwo);
+		histoOne = new ExportableChartPanel(chart);
+		histoTwo = new ExportableChartPanel(chart);
 		
+		pointOne = new FixedAspectRatioChartPanel(chart);
+		pointTwo = new FixedAspectRatioChartPanel(chart);
+		
+		histoPanel.add(histoOne);
+		histoPanel.add(pointOne);
+		
+		histoPanel.add(histoTwo);
+		histoPanel.add(pointTwo);
+		
+		histoPanel.addComponentListener( new ComponentListener(){
+			
+			@Override
+			public void componentResized(ComponentEvent arg0) {
+				pointOne.restoreAutoBounds();
+				pointTwo.restoreAutoBounds();
+				
+			}
+
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void componentMoved(ComponentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void componentShown(ComponentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
 		/*
 		 * Add the chart panels to the centre panel
@@ -205,6 +242,8 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		JFreeChart chartTwo;
 		JFreeChart histoChartOne;
 		JFreeChart histoChartTwo;
+		JFreeChart pointChartOne;
+		JFreeChart pointChartTwo;
 		
 		NucleusMeshBuilder builder = new NucleusMeshBuilder();
 		
@@ -218,11 +257,21 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				NucleusMesh comparison1 = builder.createComparisonMesh(n1, n2, meshSize);
 				NucleusMesh comparison2 = builder.createComparisonMesh(n2, n1, meshSize);
 				
-//				histoChartOne = OutlineChartFactory.createMeshHistogram(comparison1);
-//				histoChartTwo = OutlineChartFactory.createMeshHistogram(comparison2);
+				/*
+				 * Create log2 histograms for the entire pairwise mesh
+				 */
 				
-				histoChartOne = OutlineChartFactory.createMeshMidpointChart(comparison1, logRatio);
-				histoChartTwo = OutlineChartFactory.createMeshMidpointChart(comparison2, logRatio);
+				histoChartOne = OutlineChartFactory.createMeshHistogram(comparison1);
+				histoChartTwo = OutlineChartFactory.createMeshHistogram(comparison2);
+				
+				/*
+				 * Create point cloud for edges inside the mesh
+				 */
+				comparison1.removeExternalEdges();
+				comparison2.removeExternalEdges();
+				
+				pointChartOne = OutlineChartFactory.createMeshMidpointChart(comparison1, logRatio);
+				pointChartTwo = OutlineChartFactory.createMeshMidpointChart(comparison2, logRatio);
 				
 				
 				/*
@@ -242,6 +291,9 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				
 				histoChartOne = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
 				histoChartTwo = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
+				
+				pointChartOne = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
+				pointChartTwo = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
 				logError("Error creating mesh chart", e);
 			}
 			
@@ -255,6 +307,9 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 			histoChartOne = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 			histoChartTwo = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 			
+			pointChartOne = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+			pointChartTwo = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+			
 		}
 		
 		chartPanelOne.setChart(chartOne);
@@ -266,8 +321,13 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		histoOne.setChart(histoChartOne);
 		histoTwo.setChart(histoChartTwo);
 		
-		histoOne.restoreAutoBounds();
-		histoTwo.restoreAutoBounds();
+		pointOne.setChart(pointChartOne);
+		pointTwo.setChart(pointChartTwo);
+		
+		pointOne.restoreAutoBounds();
+		pointTwo.restoreAutoBounds();
+		
+		
 		
 		setLoading(false);
 	}

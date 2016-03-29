@@ -568,7 +568,7 @@ public class NucleusMeshBuilder implements Loggable {
 		/**
 		 * Remove internal edges whose midpoint lies outside the nucleus
 		 */
-		private void removeExternalEdges(){
+		public void removeExternalEdges(){
 			List<NucleusMeshEdge> toRemove = internalEdges.parallelStream()
 					.filter( e -> ! nucleus.containsPoint(e.getMidpoint()))
 					.collect(Collectors.toList());

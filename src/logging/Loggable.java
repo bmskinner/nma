@@ -1,5 +1,6 @@
 package logging;
 
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +22,16 @@ public interface Loggable {
      * @param message the message to log
      */
 	default void log(Level level, String message){
-		Logger.getLogger(PROGRAM_LOGGER).log(level, message);
+//		Logger l = Logger.getLogger();
+
+//
+//		for(Handler h : Logger.getLogger(PROGRAM_LOGGER).getHandlers()){
+//			l.addHandler(h);
+//			l.log(level, message);
+//			l.removeHandler(h);
+//		}
+//		Logger.getLogger(PROGRAM_LOGGER).log(level, message + ":"+  this.getClass().getName());
+		Logger.getLogger(PROGRAM_LOGGER).log(level, message );
 	}
     
     /**
