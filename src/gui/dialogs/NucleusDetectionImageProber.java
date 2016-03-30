@@ -147,16 +147,17 @@ public class NucleusDetectionImageProber extends ImageProber {
 				
 				log(Level.FINEST, "Detecting edges");
 				ImageProcessor edgesProcessor = ImageFilterer.runEdgeDetector(processedImage, cannyOptions);
-				procMap.put(NucleusImageType.EDGE_DETECTION, edgesProcessor);
+				ImageProcessor invertedEdges = edgesProcessor.duplicate();
+				invertedEdges.invert();
+				procMap.put(NucleusImageType.EDGE_DETECTION, invertedEdges);
 				
 				ImageProcessor closedProcessor = ImageFilterer.morphologyClose(edgesProcessor, cannyOptions.getClosingObjectRadius());
-//				ImageProcessor bridged = ImageFilterer.bridgePixelGaps( closedProcessor  , 3) ;
+//				ImageProcessor invertedClosed = closedProcessor.duplicate();
+//				invertedClosed.invert();
 				procMap.put(NucleusImageType.MORPHOLOGY_CLOSED, closedProcessor);
 				
 				procMap.put(NucleusImageType.DETECTED_OBJECTS, openProcessor);
 				
-				edgesProcessor.invert();
-				closedProcessor.invert();
 							
 			} else {
 				// Threshold option selected - do not run edge detection
