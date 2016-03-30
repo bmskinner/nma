@@ -51,7 +51,6 @@ import utility.Utils;
 public class SignalFinder implements Loggable {
 	
 	private NuclearSignalOptions options;
-	private Logger programLogger;
 	private  int channel;
 	private int minThreshold;
 	
@@ -81,20 +80,20 @@ public class SignalFinder implements Loggable {
 		options.setThreshold(minThreshold); // reset to default;
 		
 		if(options==null || options.getMode()==NuclearSignalOptions.FORWARD){
-			programLogger.log(Level.FINEST, "Running forward detection");
+			finest("Running forward detection");
 			return detectForwardThresholdSignal(sourceFile, stack, n);
 		}
 		
 		if(options.getMode()==NuclearSignalOptions.REVERSE){
-			programLogger.log(Level.FINEST, "Running reverse detection");
+			finest( "Running reverse detection");
 			return detectReverseThresholdSignal(sourceFile, stack, n);
 		}
 		
 		if(options.getMode()==NuclearSignalOptions.HISTOGRAM){
-			programLogger.log(Level.FINEST, "Running adaptive detection");
+			finest( "Running adaptive detection");
 			return detectHistogramThresholdSignal(sourceFile, stack, n);
 		}
-		programLogger.log(Level.FINEST, "No mode specified");
+		finest( "No mode specified");
 		return null;
 	}
 	
@@ -108,10 +107,10 @@ public class SignalFinder implements Loggable {
 		// only use the calculated threshold if it is larger than
 		// the given minimum
 		if(newThreshold > minThreshold){
-			programLogger.log(Level.FINE, "Threshold set at: "+newThreshold);
+			fine( "Threshold set at: "+newThreshold);
 			options.setThreshold(newThreshold);
 		} else {
-			programLogger.log(Level.FINE, "Threshold kept at minimum: "+minThreshold);
+			fine( "Threshold kept at minimum: "+minThreshold);
 			options.setThreshold(minThreshold);
 		}
 	}
@@ -142,7 +141,7 @@ public class SignalFinder implements Loggable {
 			ImageProcessor ip = stack.getProcessor(stackNumber);
 			detector.run(ip);
 		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error in signal detection", e);
+			error("Error in signal detection", e);
 		}
 		List<Roi> roiList = detector.getRoiList();
 
@@ -150,7 +149,7 @@ public class SignalFinder implements Loggable {
 
 		if(!roiList.isEmpty()){
 			
-			programLogger.log(Level.FINE, roiList.size()+" signals in stack "+stackNumber);
+			fine( roiList.size()+" signals in stack "+stackNumber);
 
 			for( Roi r : roiList){
 				ImageProcessor ip = stack.getProcessor(stackNumber);
@@ -181,7 +180,7 @@ public class SignalFinder implements Loggable {
 				
 			}
 		} else {
-			programLogger.log(Level.FINE, "No signal in stack "+stackNumber);
+			fine( "No signal in stack "+stackNumber);
 		}
 		return signals;
 	}
@@ -239,7 +238,7 @@ public class SignalFinder implements Loggable {
 	private List<NuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 		
 //		SignalCollection signalCollection = n.getSignalCollection();
-		programLogger.log(Level.INFO, "Beginning reverse detection for nucleus");
+		log( "Beginning reverse detection for nucleus");
 		// choose the right stack number for the channel
 		int stackNumber = Constants.rgbToStack(channel);
 		
@@ -309,7 +308,7 @@ public class SignalFinder implements Loggable {
 	 * @throws Exception 
 	 */
 	private List<NuclearSignal> detectHistogramThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
-		programLogger.log(Level.FINE, "Beginning histogram detection for nucleus");
+		fine( "Beginning histogram detection for nucleus");
 
 		// choose the right stack number for the channel
 		int stackNumber = Constants.rgbToStack(channel);
@@ -337,7 +336,7 @@ public class SignalFinder implements Loggable {
 		 * total range making it harder to carry out the range based minima
 		 * detection below
 		 */
-		programLogger.log(Level.FINEST, "Initial histo threshold: "+minThreshold);
+		finest( "Initial histo threshold: "+minThreshold);
 //		int trimValue = minThreshold;
 		Profile histogramProfile = new Profile(d);
 		Profile trimmedHisto = histogramProfile.getSubregion(minThreshold, 255);
