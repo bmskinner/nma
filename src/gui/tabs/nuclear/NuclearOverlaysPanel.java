@@ -2,6 +2,8 @@ package gui.tabs.nuclear;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
@@ -51,6 +53,35 @@ public class NuclearOverlaysPanel extends DetailPanel {
 			JFreeChart chart = getChart(options);
 			
 			chartPanel = new FixedAspectRatioChartPanel(chart);
+			
+			chartPanel.addComponentListener( new ComponentListener(){
+
+				@Override
+				public void componentHidden(ComponentEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void componentMoved(ComponentEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void componentResized(ComponentEvent e) {
+					chartPanel.restoreAutoBounds();
+					
+				}
+
+				@Override
+				public void componentShown(ComponentEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+			});
+			
 			this.add(chartPanel, BorderLayout.CENTER);
 			
 			makeCreateButton();
