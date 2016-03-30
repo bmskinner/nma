@@ -2,19 +2,13 @@ package charting.charts;
 
 import gui.RotationMode;
 import gui.components.ColourSelecter;
-import ij.IJ;
-import ij.ImageStack;
 import ij.process.ImageProcessor;
-import io.ImageImporter;
-import stats.SignalStatistic;
-import stats.Stats;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +31,8 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
+import org.jfree.util.ShapeUtilities;
 
-import utility.Constants;
 import components.Cell;
 import components.CellularComponent;
 import components.generic.BorderTag;
@@ -48,12 +42,7 @@ import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
 import analysis.BooleanAligner;
-import analysis.BooleanAlignmentTask;
-import analysis.SignalManager;
-import analysis.nucleus.NucleusMeshBuilder;
-import analysis.nucleus.SegmentRecombiningTask;
 import analysis.nucleus.NucleusMeshBuilder.NucleusMesh;
-import analysis.nucleus.NucleusMeshBuilder.NucleusMeshEdge;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
@@ -609,9 +598,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		
+		
+		
 		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
 		renderer.setBaseSeriesVisibleInLegend(false);
 		renderer.setBaseStroke(ChartComponents.MARKER_STROKE);
+		
 		
 		double max = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue();
 		for(int series=0; series<dataset.getSeriesCount(); series++){
@@ -645,11 +637,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		
+		StandardXYToolTipGenerator tooltip = new StandardXYToolTipGenerator();
 		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(false, true);
 		renderer.setBaseSeriesVisibleInLegend(false);
 		renderer.setBaseStroke(ChartComponents.MARKER_STROKE);
+		renderer.setBaseToolTipGenerator(tooltip);
 		
-//		Shape cross = ShapeUtilities.cre
 
 		for(int series=0; series<dataset.getSeriesCount(); series++){
 			
@@ -658,7 +651,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 			renderer.setSeriesPaint(series, colour);
 			renderer.setSeriesStroke(series, ChartComponents.MARKER_STROKE);
-//			renderer.setSeriesShape(arg0, arg1);
+			renderer.setSeriesShape(series, ShapeUtilities.createDiamond(2));
 		}
 		
 		plot.setDataset(0, dataset);

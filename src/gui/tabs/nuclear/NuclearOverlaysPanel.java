@@ -56,7 +56,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 			makeCreateButton();
 			
 		} catch (Exception e) {
-			log(Level.SEVERE, "Error creating overlays panel");
+			warn("Error creating overlays panel");
 			log(Level.FINE, "Error creating overlays panel", e);
 		}
 		
@@ -226,7 +226,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		log(Level.FINEST, "Creating nuclear overlay chart");
+		finest("Creating nuclear overlay chart");
 		return OutlineChartFactory.createVerticalNucleiChart(options);
 	}
 	

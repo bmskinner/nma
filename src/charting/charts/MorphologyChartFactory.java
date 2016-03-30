@@ -33,10 +33,10 @@ import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.StandardTickUnitSource;
+import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
@@ -50,7 +50,6 @@ import org.jfree.ui.TextAnchor;
 import stats.DipTester;
 import stats.StatisticDimension;
 import utility.Constants;
-import utility.Utils;
 import analysis.AnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.CellDatasetCreator;
@@ -85,6 +84,12 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	}
 	
 	
+	/**
+	 * Create a profile chart for the given options
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
 	public static JFreeChart createProfileChart(ChartOptions options) throws Exception {
 		
 		if( ! options.hasDatasets()){
@@ -299,8 +304,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
 		}
 		plot.setBackgroundPaint(Color.WHITE);
-
-
+		StandardXYToolTipGenerator tooltip = new StandardXYToolTipGenerator();
+		plot.getRenderer().setBaseToolTipGenerator(tooltip);
 
 		int seriesCount = plot.getSeriesCount();
 
@@ -547,11 +552,13 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		/*
 		 * Points only for the segment positions
 		 */
+		StandardXYToolTipGenerator tooltip = new StandardXYToolTipGenerator();
 		XYLineAndShapeRenderer pointRenderer = new XYLineAndShapeRenderer();
 		pointRenderer.setBaseShapesVisible(true);
 		pointRenderer.setBaseLinesVisible(false);
 		pointRenderer.setBaseStroke(ChartComponents.QUARTILE_STROKE);
 		pointRenderer.setBaseSeriesVisibleInLegend(false);
+		pointRenderer.setBaseToolTipGenerator(tooltip);
 		plot.setRenderer(0, pointRenderer);
 		
 		boolean hasConsensus = ConsensusNucleusChartFactory.hasConsensusNucleus(options.getDatasets());

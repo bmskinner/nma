@@ -677,14 +677,14 @@ public class MainWindow
 
 	@Override
 	public void datasetEventReceived(final DatasetEvent event) {
-		log(Level.FINEST, "Heard dataset event: "+event.method().toString());
+		finest("Heard dataset event: "+event.method().toString());
 		final List<AnalysisDataset> list = event.getDatasets();
 		if(!list.isEmpty()){
 			
 			
 			
 			if(event.method().equals(DatasetMethod.PROFILING_ACTION)){
-				log(Level.FINE, "Running new profiling and segmentation");
+				fine("Running new profiling and segmentation");
 				
 				Runnable task = () -> { 
 					int flag = 0; // set the downstream analyses to run
@@ -704,7 +704,7 @@ public class MainWindow
 			}
 						
 			if(event.method().equals(DatasetMethod.NEW_MORPHOLOGY)){
-				log(Level.INFO, "Running new morphology analysis");
+				log("Running new morphology analysis");
 				final int flag = ADD_POPULATION;
 				
 				Runnable task = () -> { 
@@ -714,7 +714,7 @@ public class MainWindow
 			}
 			
 			if(event.method().equals(DatasetMethod.REFRESH_MORPHOLOGY)){
-				log(Level.FINEST, "Updating segmentation across nuclei");
+				finest("Updating segmentation across nuclei");
 				Runnable task = () -> { 
 					new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
 				};
@@ -844,8 +844,8 @@ public class MainWindow
 	 * @param dataset
 	 */
 	private void refoldConsensus(final AnalysisDataset dataset){
-		log(Level.FINE, "Refolding consensus");
-		log(Level.FINEST, "Refold consensus dataset method is EDT: "+SwingUtilities.isEventDispatchThread());
+		fine("Refolding consensus");
+		finest("Refold consensus dataset method is EDT: "+SwingUtilities.isEventDispatchThread());
 		
 		executorService.execute(new Runnable() {
 			public void run() {
@@ -858,10 +858,10 @@ public class MainWindow
 				consensusNucleusPanel.clearChartCache();
 				
 				final CountDownLatch latch = new CountDownLatch(1);
-				log(Level.FINEST, "Created latch: "+latch.getCount());
+				finest("Created latch: "+latch.getCount());
 				new RefoldNucleusAction(dataset, MainWindow.this, latch);
 
-				log(Level.FINEST, "Running refolding");
+				finest("Running refolding");
 				try {
 					latch.await();
 					dataset.getAnalysisOptions().setRefoldNucleus(true);
@@ -869,20 +869,20 @@ public class MainWindow
 					
 					
 					
-					log(Level.FINE, "Set refold status in options");
+					fine("Set refold status in options");
 					final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 					list.add(dataset);
 					segmentsDetailPanel.refreshChartCache(list); // segment positions charts need updating
 					nuclearBoxplotsPanel.refreshChartCache(list); // overlaid nuclei need updating
 
-					log(Level.FINE, "Preparing to select refolded dataset");
+					fine("Preparing to select refolded dataset");
 					populationsPanel.selectDataset(dataset);
 //					log(Level.FINE, "Clearing consensus chart cache for refolded dataset");
 //					consensusNucleusPanel.refreshChartCache();
 					
-					log(Level.FINEST, "Latch counted down: "+latch.getCount());
+					fine("Latch counted down: "+latch.getCount());
 				} catch (InterruptedException e) {
-					log(Level.SEVERE, "Interruption to thread", e);
+					error("Interruption to thread", e);
 				}
 			}
 			
