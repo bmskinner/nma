@@ -32,6 +32,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	private FixedAspectRatioChartPanel 	chartPanel; 		// hold the nuclei
 	private GenericCheckboxPanel checkBoxPanel; // use for aligning nuclei
 	private JButton compareConsensusButton;
+	private JButton makeOverlayChartButton;
 	
 	public NuclearOverlaysPanel(){
 		
@@ -50,6 +51,8 @@ public class NuclearOverlaysPanel extends DetailPanel {
 			
 			chartPanel = new FixedAspectRatioChartPanel(chart);
 			this.add(chartPanel, BorderLayout.CENTER);
+			
+			makeCreateButton();
 			
 		} catch (Exception e) {
 			log(Level.SEVERE, "Error creating overlays panel");
@@ -73,30 +76,84 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		panel.add(compareConsensusButton);
 		return panel;
 	}
+	
+	private void makeCreateButton(){
+		makeOverlayChartButton = new JButton("Create chart");
+		makeOverlayChartButton.addActionListener( a -> createSafeChart(getChartOptions())  );
+		makeOverlayChartButton.setEnabled(true);
+		chartPanel.add(makeOverlayChartButton);
+		makeOverlayChartButton.setVisible(false);
+	}
+	
+	/**
+	 * Get the chart options object for the selected datasets and parameters
+	 * @return
+	 */
+	private ChartOptions getChartOptions(){
+		boolean alignNuclei = checkBoxPanel.isSelected();
+		
+		return new ChartOptionsBuilder()
+		.setDatasets(getDatasets())
+		.setNormalised(alignNuclei)
+		.build();
+	}
 
 	@Override
 	protected void updateSingle() throws Exception {
 //		log(Level.INFO, "Updating overlays panel: single");
 		compareConsensusButton.setEnabled(false);
+		makeOverlayChartButton.setVisible(false);
 		
 		boolean hasConsensus = activeDataset().getCollection().hasConsensusNucleus();
 		checkBoxPanel.setEnabled(hasConsensus);
 		
-		boolean alignNuclei = checkBoxPanel.isSelected();
-		ChartOptions options = new ChartOptionsBuilder()
-			.setDatasets(getDatasets())
-			.setNormalised(alignNuclei)
+		
+		ChartOptions options = getChartOptions();
+		
+		/*
+		 * Insert a button to generate the chart if not present
+		 */
+		if(this.chartCache.hasChart(options)){
+			
+			JFreeChart chart = getChart(options);
+			chartPanel.setChart(chart);
+			chartPanel.restoreAutoBounds();
+		} else {
+			
+			options = new ChartOptionsBuilder()
+			.setDatasets(null)
 			.build();
+			
+			JFreeChart chart = getChart(options);
+			chartPanel.setChart(chart);
+			makeOverlayChartButton.setVisible(true);
+		}
+
 		
-		JFreeChart chart = getChart(options);
-		chartPanel.setChart(chart);
-		
-		chartPanel.restoreAutoBounds();
-		
+	}
+	
+	/**
+	 * Create the overlay chart. Invoked by makeOverlayChartButton
+	 * @param options
+	 */
+	private void createSafeChart(ChartOptions options){
+		makeOverlayChartButton.setVisible(false);
+		setAnalysing(true);
+		log(Level.FINE, "Creating overlay chart on button click");
+		 try {
+			getChart(options);
+			update(getDatasets());
+		} catch (Exception e) {
+			logError("Error making chart", e);
+			update(getDatasets());
+		} finally{
+			setAnalysing(false);
+		}
 	}
 
 	@Override
 	protected void updateMultiple() throws Exception {
+		makeOverlayChartButton.setVisible(false);
 		updateSingle();
 		
 		/*
@@ -117,6 +174,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	protected void updateNull() throws Exception {
 		compareConsensusButton.setEnabled(false);
 		checkBoxPanel.setEnabled(false);
+		makeOverlayChartButton.setVisible(false);
 		
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
