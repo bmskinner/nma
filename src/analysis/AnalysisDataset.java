@@ -380,7 +380,7 @@ public class AnalysisDataset implements Serializable {
 		
 		List<AnalysisDataset>  result = new ArrayList<AnalysisDataset>();
 		
-		for(UUID id : getMergeSources()){
+		for(UUID id : getMergeSourceIDs()){
 			
 			AnalysisDataset source = this.getAssociatedDataset(id);
 			if(source.hasMergeSources()){
@@ -402,11 +402,25 @@ public class AnalysisDataset implements Serializable {
 	}
 	
 	/**
+	 * Get all datasets considered direct merge sources to this
+	 * dataset
+	 * @return
+	 */
+	public List<AnalysisDataset> getMergeSources(){
+		List<AnalysisDataset>  result = new ArrayList<AnalysisDataset>();
+		
+		for(UUID id : mergeSources){
+			result.add(this.getAssociatedDataset(id));	
+		}
+		return result;
+	}
+	
+	/**
 	 * Get the ids of all datasets considered merge sources to this
 	 * dataset
 	 * @return
 	 */
-	public List<UUID> getMergeSources(){
+	public List<UUID> getMergeSourceIDs(){
 		return this.mergeSources;
 	}
 	
@@ -420,7 +434,7 @@ public class AnalysisDataset implements Serializable {
 		
 		List<UUID> result = new ArrayList<UUID>();
 		
-		for(UUID id : this.getMergeSources()){
+		for(UUID id : this.getMergeSourceIDs()){
 			result.addAll(getMergeSource(id).getAllMergeSourceIDs());
 		}
 

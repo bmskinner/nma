@@ -25,9 +25,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import logging.Loggable;
 import components.nuclear.NucleusType;
 
-public class AnalysisOptions implements Serializable {
+public class AnalysisOptions implements Serializable, Loggable {
 
 	private static final long serialVersionUID = 1L;
 	private  int    nucleusThreshold;
@@ -365,107 +366,103 @@ public class AnalysisOptions implements Serializable {
 
 
 
-//	@Override
-//	public int hashCode() {
-//		final int prime = 31;
-//		int result = 1;
-//		result = prime * result + angleProfileWindowSize;
-//		result = prime * result + ((edgeDetection == null) ? 0 : edgeDetection.hashCode());
-//		result = prime * result + ((folder == null) ? 0 : folder.hashCode());
-//		result = prime * result + (keepFailedCollections ? 1231 : 1237);
-//		result = prime * result + ((mappingFile == null) ? 0 : mappingFile.hashCode());
-//		long temp;
-//		temp = Double.doubleToLongBits(maxNucleusCirc);
-//		result = prime * result + (int) (temp ^ (temp >>> 32));
-//		temp = Double.doubleToLongBits(maxNucleusSize);
-//		result = prime * result + (int) (temp ^ (temp >>> 32));
-//		temp = Double.doubleToLongBits(minNucleusCirc);
-//		result = prime * result + (int) (temp ^ (temp >>> 32));
-//		temp = Double.doubleToLongBits(minNucleusSize);
-//		result = prime * result + (int) (temp ^ (temp >>> 32));
-//		result = prime * result + (normaliseContrast ? 1231 : 1237);
-//		result = prime * result + nucleusThreshold;
-//		result = prime * result + ((nucleusType == null) ? 0 : nucleusType.hashCode());
-//		result = prime * result + (performReanalysis ? 1231 : 1237);
-//		result = prime * result + (realignMode ? 1231 : 1237);
-//		result = prime * result + ((refoldMode == null) ? 0 : refoldMode.hashCode());
-//		result = prime * result + (refoldNucleus ? 1231 : 1237);
-//		temp = Double.doubleToLongBits(scale);
-//		result = prime * result + (int) (temp ^ (temp >>> 32));
-//		result = prime * result + ((signalDetection == null) ? 0 : signalDetection.hashCode());
-//		result = prime * result + xoffset;
-//		result = prime * result + yoffset;
-//		return result;
-//	}
-//
-//
-//	@Override
-//	public boolean equals(Object obj) {
-//		if (this == obj)
-//			return true;
-//		if (obj == null)
-//			return false;
-//		if (getClass() != obj.getClass())
-//			return false;
-//		AnalysisOptions other = (AnalysisOptions) obj;
-//		if (angleProfileWindowSize != other.angleProfileWindowSize)
-//			return false;
-//		if (edgeDetection == null) {
-//			if (other.edgeDetection != null)
-//				return false;
-//		} else if (!edgeDetection.equals(other.edgeDetection))
-//			return false;
-//		if (folder == null) {
-//			if (other.folder != null)
-//				return false;
-//		} else if (!folder.equals(other.folder))
-//			return false;
-//		if (keepFailedCollections != other.keepFailedCollections)
-//			return false;
-//		if (mappingFile == null) {
-//			if (other.mappingFile != null)
-//				return false;
-//		} else if (!mappingFile.equals(other.mappingFile))
-//			return false;
-//		if (Double.doubleToLongBits(maxNucleusCirc) != Double.doubleToLongBits(other.maxNucleusCirc))
-//			return false;
-//		if (Double.doubleToLongBits(maxNucleusSize) != Double.doubleToLongBits(other.maxNucleusSize))
-//			return false;
-//		if (Double.doubleToLongBits(minNucleusCirc) != Double.doubleToLongBits(other.minNucleusCirc))
-//			return false;
-//		if (Double.doubleToLongBits(minNucleusSize) != Double.doubleToLongBits(other.minNucleusSize))
-//			return false;
-//		if (normaliseContrast != other.normaliseContrast)
-//			return false;
-//		if (nucleusThreshold != other.nucleusThreshold)
-//			return false;
-//		if (nucleusType != other.nucleusType)
-//			return false;
-//		if (performReanalysis != other.performReanalysis)
-//			return false;
-//		if (realignMode != other.realignMode)
-//			return false;
-//		if (refoldMode == null) {
-//			if (other.refoldMode != null)
-//				return false;
-//		} else if (!refoldMode.equals(other.refoldMode))
-//			return false;
-//		if (refoldNucleus != other.refoldNucleus)
-//			return false;
-//		if (Double.doubleToLongBits(scale) != Double.doubleToLongBits(other.scale))
-//			return false;
-//		if (signalDetection == null) {
-//			if (other.signalDetection != null)
-//				return false;
-//		} else if (!signalDetection.equals(other.signalDetection))
-//			return false;
-//		if (xoffset != other.xoffset)
-//			return false;
-//		if (yoffset != other.yoffset)
-//			return false;
-//		return true;
-//	}
 	
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + angleProfileWindowSize;
+		result = prime * result + channel;
+		result = prime * result
+				+ ((edgeDetection == null) ? 0 : edgeDetection.hashCode());
+		result = prime * result + ((folder == null) ? 0 : folder.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(maxNucleusCirc);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(maxNucleusSize);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(minNucleusCirc);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(minNucleusSize);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + (normaliseContrast ? 1231 : 1237);
+		result = prime * result + nucleusThreshold;
+		result = prime * result
+				+ ((nucleusType == null) ? 0 : nucleusType.hashCode());
+		result = prime * result + (performReanalysis ? 1231 : 1237);
+		result = prime * result + (realignMode ? 1231 : 1237);
+		temp = Double.doubleToLongBits(scale);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result
+				+ ((signalDetection == null) ? 0 : signalDetection.hashCode());
+		return result;
+	}
+
+
+
+	@Override
+	public boolean equals(Object obj) {
+//		finest("Testing equality");
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AnalysisOptions other = (AnalysisOptions) obj;
+		if (angleProfileWindowSize != other.angleProfileWindowSize)
+			return false;
+		if (channel != other.channel)
+			return false;
+//		finest("Testing edge detection parameters");
+		if (edgeDetection == null) {
+			if (other.edgeDetection != null)
+				return false;
+		} else if (!edgeDetection.equals(other.edgeDetection))
+			return false;
+		
+//		finest("Testing doubles");
+		if (Double.doubleToLongBits(maxNucleusCirc) != Double
+				.doubleToLongBits(other.maxNucleusCirc))
+			return false;
+		if (Double.doubleToLongBits(maxNucleusSize) != Double
+				.doubleToLongBits(other.maxNucleusSize))
+			return false;
+		if (Double.doubleToLongBits(minNucleusCirc) != Double
+				.doubleToLongBits(other.minNucleusCirc))
+			return false;
+		if (Double.doubleToLongBits(minNucleusSize) != Double
+				.doubleToLongBits(other.minNucleusSize))
+			return false;
+		
+//		finest("Testing contrast");
+		if (normaliseContrast != other.normaliseContrast)
+			return false;
+		if (nucleusThreshold != other.nucleusThreshold)
+			return false;
+		if (nucleusType != other.nucleusType)
+			return false;
+		if (performReanalysis != other.performReanalysis)
+			return false;
+		if (realignMode != other.realignMode)
+			return false;
+		if (Double.doubleToLongBits(scale) != Double
+				.doubleToLongBits(other.scale))
+			return false;
+//		finest("Testing signal detection");
+		if (signalDetection == null) {
+			if (other.signalDetection != null)
+				return false;
+		} else if (!signalDetection.equals(other.signalDetection))
+			return false;
+		return true;
+	}
+
+
+
+
+
 	public class CannyOptions implements Serializable {
 
 		private static final long serialVersionUID = 1L;
@@ -490,12 +487,6 @@ public class AnalysisOptions implements Serializable {
 		// values for Canny edge deteection
 		private boolean useCanny; 
 		private boolean cannyAutoThreshold;
-		
-		
-//		private transient boolean flattenChromocentres; 	// should the white threshold be lowered to hide internal structures?
-//		private transient int flattenThreshold; // if the white threhold is lower, this is the value
-//		private transient boolean useKuwahara;	// perform a Kuwahara filtering to enhance edge detection?
-//		private transient int kuwaharaKernel;		// the radius of the Kuwahara kernel - must be an odd number
 		
 		private boolean flattenChromocentres; 	// should the white threshold be lowered to hide internal structures?
 		private int flattenThreshold; // if the white threhold is lower, this is the value
@@ -619,7 +610,6 @@ public class AnalysisOptions implements Serializable {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + getOuterType().hashCode();
 			result = prime * result + (cannyAutoThreshold ? 1231 : 1237);
 			result = prime * result + closingObjectRadius;
 			result = prime * result + (flattenChromocentres ? 1231 : 1237);
@@ -643,8 +633,8 @@ public class AnalysisOptions implements Serializable {
 			if (getClass() != obj.getClass())
 				return false;
 			CannyOptions other = (CannyOptions) obj;
-			if (!getOuterType().equals(other.getOuterType()))
-				return false;
+//			if (!getOuterType().equals(other.getOuterType()))
+//				return false;
 			if (cannyAutoThreshold != other.cannyAutoThreshold)
 				return false;
 			if (closingObjectRadius != other.closingObjectRadius)
@@ -671,11 +661,6 @@ public class AnalysisOptions implements Serializable {
 			if (useKuwahara != other.useKuwahara)
 				return false;
 			return true;
-		}
-
-
-		private AnalysisOptions getOuterType() {
-			return AnalysisOptions.this;
 		}
 		
 		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -769,6 +754,53 @@ public class AnalysisOptions implements Serializable {
 		
 		public void setMode(int mode){
 			this.detectionMode = mode;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + detectionMode;
+			long temp;
+			temp = Double.doubleToLongBits(maxCirc);
+			result = prime * result + (int) (temp ^ (temp >>> 32));
+			temp = Double.doubleToLongBits(maxFraction);
+			result = prime * result + (int) (temp ^ (temp >>> 32));
+			temp = Double.doubleToLongBits(minCirc);
+			result = prime * result + (int) (temp ^ (temp >>> 32));
+			temp = Double.doubleToLongBits(minSize);
+			result = prime * result + (int) (temp ^ (temp >>> 32));
+			result = prime * result + threshold;
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			NuclearSignalOptions other = (NuclearSignalOptions) obj;
+
+			if (detectionMode != other.detectionMode)
+				return false;
+			if (Double.doubleToLongBits(maxCirc) != Double
+					.doubleToLongBits(other.maxCirc))
+				return false;
+			if (Double.doubleToLongBits(maxFraction) != Double
+					.doubleToLongBits(other.maxFraction))
+				return false;
+			if (Double.doubleToLongBits(minCirc) != Double
+					.doubleToLongBits(other.minCirc))
+				return false;
+			if (Double.doubleToLongBits(minSize) != Double
+					.doubleToLongBits(other.minSize))
+				return false;
+			if (threshold != other.threshold)
+				return false;
+			return true;
 		}
 
 	}

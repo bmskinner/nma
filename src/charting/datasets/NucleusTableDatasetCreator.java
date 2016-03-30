@@ -35,6 +35,7 @@ import logging.Loggable;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
+import charting.charts.BoxplotChartFactory;
 import charting.options.TableOptions;
 import charting.options.TableOptions.TableType;
 import analysis.AnalysisDataset;
@@ -56,8 +57,23 @@ import stats.Stats;
 import utility.Constants;
 
 public class NucleusTableDatasetCreator implements Loggable {
+	
+private static NucleusTableDatasetCreator instance = null;
+	
+	protected NucleusTableDatasetCreator(){}
+	
+	/**
+	 * Fetch an instance of the factory
+	 * @return
+	 */
+	public static NucleusTableDatasetCreator getInstance(){
+		if(instance==null){
+			instance = new NucleusTableDatasetCreator();
+		}
+		return instance;
+	}
 		
-	public static TableModel createMedianProfileStatisticTable(TableOptions options) throws Exception{
+	public TableModel createMedianProfileStatisticTable(TableOptions options) throws Exception{
 		
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -74,13 +90,13 @@ public class NucleusTableDatasetCreator implements Loggable {
 		return createBlankTable();
 	}
 	
-	public static TableModel createBlankTable(){
+	public TableModel createBlankTable(){
 		DefaultTableModel model = new DefaultTableModel();
 		model.addColumn("No data loaded");
 		return model;
 	}
 	
-	public static TableModel createMergeSourcesTable(TableOptions options){
+	public TableModel createMergeSourcesTable(TableOptions options){
 		
 		if( ! options.hasDatasets()){
 			DefaultTableModel model = new DefaultTableModel();
@@ -104,8 +120,8 @@ public class NucleusTableDatasetCreator implements Loggable {
 			Vector<Object> names 	= new Vector<Object>();
 			Vector<Object> nuclei 	= new Vector<Object>();
 
-			for( UUID id : options.firstDataset().getMergeSources()){
-				AnalysisDataset mergeSource = options.firstDataset().getMergeSource(id);
+			for( AnalysisDataset mergeSource : options.firstDataset().getMergeSources()){
+//				AnalysisDataset mergeSource = options.firstDataset().getMergeSource(id);
 				names.add(mergeSource.getName());
 				nuclei.add(mergeSource.getCollection().getNucleusCount());
 			}
@@ -122,7 +138,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	private static TableModel createMedianProfileSegmentStatsTable(AnalysisDataset dataset, MeasurementScale scale) throws Exception {
+	private TableModel createMedianProfileSegmentStatsTable(AnalysisDataset dataset, MeasurementScale scale) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -200,7 +216,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	private static TableModel createMultiDatasetMedianProfileSegmentStatsTable(TableOptions options) throws Exception {
+	private TableModel createMultiDatasetMedianProfileSegmentStatsTable(TableOptions options) throws Exception {
 
 		List<AnalysisDataset> list = options.getDatasets();
 		MeasurementScale scale = options.getScale();
@@ -281,7 +297,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param collection
 	 * @return
 	 */
-	public static TableModel createAnalysisTable(TableOptions options) throws Exception{
+	public TableModel createAnalysisTable(TableOptions options) throws Exception{
 		
 		if(options.getType().equals(TableType.ANALYSIS_PARAMETERS)){
 			return createAnalysisParametersTable(options);
@@ -301,7 +317,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param collection
 	 * @return
 	 */
-	private static TableModel createAnalysisParametersTable(TableOptions options){
+	private TableModel createAnalysisParametersTable(TableOptions options){
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -396,33 +412,63 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param dataset
 	 * @return the common options, or null if an options is different
 	 */
-	private static boolean testMergedDatasetOptionsAreSame(AnalysisDataset dataset){
-
-		
-		List<AnalysisDataset> list = dataset.getAllMergeSources();
+	private boolean testMergedDatasetOptionsAreSame(AnalysisDataset dataset){
+		finest( "Testing merged dataset options for "+dataset.getName() );
+		List<AnalysisDataset> list = dataset.getMergeSources();
 		
 		boolean ok = true;
 
 		for(AnalysisDataset d1 : list){
 			
-			// If the dataset has merge sources, the options are null
-			if(! d1.hasMergeSources()){
-			
-				for(AnalysisDataset d2 : list){
-
-					if(! d2.hasMergeSources()){
-
-						if( ! d1.getAnalysisOptions().equals(d2.getAnalysisOptions())){
-							ok = false;
-						}
-					}
-				}
-			} else {
+			finest( "Testing merge source "+d1.getName() );
+			/*
+			 * If the dataset has merge sources, the options are null
+			 * In this case, recursively go through the dataset's merge sources
+			 * until the root datasets are found with analysis options
+			 */
+			if( d1.hasMergeSources() ){
+				finest( d1.getName() +" has merge sources");
 				ok = testMergedDatasetOptionsAreSame(d1);
-			}
+				
+			} else {
+				
+				for(AnalysisDataset d2 : list){
+					finest( "Comparing to merge source "+d2.getName() );
+					if(d1==d2){
+						finest( "Skip self self comparison");
+						continue; // ignore self self comparisons
+					}
+					
+					// ignore d2 with a merge source - it will be covered in the d1 loop
+					if(d2.hasMergeSources()){
+						finest( "Ignoring d2 merge source with merge sources"+d2.getName() );
+						continue;
+					}
 
+					finest( "Checking equality of options in "+d1.getName()+" vs "+d2.getName() );
+					
+					AnalysisOptions a1 = d1.getAnalysisOptions();
+					AnalysisOptions a2 = d2.getAnalysisOptions();
+					
+					if(a1==null || a2==null){
+						finest( "Found null analysis options; comparison is false" );
+						ok = false;
+						continue;
+					}
+					
+					if( ! a1.equals(a2) ){
+						finest( "Found unequal options in "+d1.getName()+" vs "+d2.getName() );
+						ok = false;
+					} else {
+						finest( "Found equal options in "+d1.getName()+" vs "+d2.getName() );
+					}
+					finest( "Done comparing to merge source "+d2.getName() );
+				}
+				finest( "Done testing list against merge source "+d1.getName() );
+			}
+			finest( "Done testing merge source "+d1.getName() );
 		}
-		
+		finest( "Done testing merged dataset options for "+dataset.getName()+": "+ok );
 		return ok;
 	}
 	
@@ -431,7 +477,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param dataset
 	 * @return
 	 */
-	private static Object[] formatAnalysisOptionsForTable(AnalysisDataset dataset, AnalysisOptions options){
+	private Object[] formatAnalysisOptionsForTable(AnalysisDataset dataset, AnalysisOptions options){
 		options = options == null ? dataset.getAnalysisOptions() : options;
 		
 		DecimalFormat df = new DecimalFormat("#0.00"); 
@@ -443,15 +489,21 @@ public class NucleusTableDatasetCreator implements Loggable {
 
 		String date;
 		String time;
+		String folder;
+		String logFile;
 				
 		if(dataset.hasMergeSources()){
-			date = "N/A - merge";
-			time = "N/A - merge";
+			date    = "N/A - merge";
+			time    = "N/A - merge";
+			folder  = "N/A - merge";
+			logFile = "N/A - merge";
 			
 		} else {
 			String[] times = dataset.getCollection().getOutputFolderName().split("_");
 			date = times[0];
 			time = times[1];
+			folder = dataset.getCollection().getFolder().getAbsolutePath();
+			logFile = dataset.getDebugFile().getAbsolutePath();
 		}
 
 		CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
@@ -491,8 +543,8 @@ public class NucleusTableDatasetCreator implements Loggable {
 				dataset.hasShellResult(),
 				date,
 				time,
-				dataset.getCollection().getFolder(),
-				dataset.getDebugFile().getAbsolutePath(),
+				folder,
+				logFile,
 				options.getNucleusType().toString(),
 				dataset.getVersion().toString()
 				};
@@ -505,7 +557,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param collection
 	 * @return
 	 */
-	private static TableModel createStatsTable(TableOptions options) throws Exception {
+	private TableModel createStatsTable(TableOptions options) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -562,7 +614,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 		return model;	
 	}
 	
-	public static TableModel createVennTable(TableOptions options){
+	public TableModel createVennTable(TableOptions options){
 		DefaultTableModel model = new DefaultTableModel();
 				
 		if( ! options.hasDatasets()){
@@ -624,7 +676,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param list
 	 * @return
 	 */
-	public static TableModel createPairwiseVennTable(TableOptions options) {
+	public TableModel createPairwiseVennTable(TableOptions options) {
 				
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -721,7 +773,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param list
 	 * @return
 	 */
-	private static DefaultTableModel makeEmptyWilcoxonTable(List<AnalysisDataset> list){
+	private DefaultTableModel makeEmptyWilcoxonTable(List<AnalysisDataset> list){
 		DefaultTableModel model = new DefaultTableModel();
 
 		if(list==null){
@@ -749,7 +801,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param getPValue
 	 * @return
 	 */
-	private static double runWilcoxonTest(double[] dataset1, double[] dataset2, boolean getPValue){
+	private double runWilcoxonTest(double[] dataset1, double[] dataset2, boolean getPValue){
 
 		double result;
 		MannWhitneyUTest test = new MannWhitneyUTest();
@@ -769,7 +821,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param options the table options
 	 * @return a tablemodel for display
 	 */	
-	public static TableModel createWilcoxonStatisticTable(TableOptions options) throws Exception{
+	public TableModel createWilcoxonStatisticTable(TableOptions options) throws Exception{
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
@@ -793,7 +845,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param stat the statistic to measure
 	 * @return a tablemodel for display
 	 */	
-	private static TableModel createWilcoxonNuclearStatTable(TableOptions options) throws Exception {
+	private TableModel createWilcoxonNuclearStatTable(TableOptions options) throws Exception {
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
@@ -836,7 +888,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param segName the segment to create the table for
 	 * @return a tablemodel for display
 	 */	
-	private static TableModel createWilcoxonSegmentStatTable(TableOptions options) throws Exception {
+	private TableModel createWilcoxonSegmentStatTable(TableOptions options) throws Exception {
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
 		}
@@ -889,7 +941,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param options the table options
 	 * @return a tablemodel for display
 	 */	
-	public static TableModel createMagnitudeStatisticTable(TableOptions options) throws Exception{
+	public TableModel createMagnitudeStatisticTable(TableOptions options) throws Exception{
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
@@ -914,7 +966,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param stat the statistic to measure
 	 * @return a tablemodel for display
 	 */	
-	private static TableModel createMagnitudeNuclearStatTable(TableOptions options) throws Exception {
+	private TableModel createMagnitudeNuclearStatTable(TableOptions options) throws Exception {
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
 		}
@@ -960,7 +1012,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param segName the segment to create the table for
 	 * @return a tablemodel for display
 	 */	
-	private static TableModel createMagnitudeSegmentStatTable(TableOptions options) throws Exception {
+	private TableModel createMagnitudeSegmentStatTable(TableOptions options) throws Exception {
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
 		}
@@ -1018,7 +1070,7 @@ public class NucleusTableDatasetCreator implements Loggable {
 	 * @param list
 	 * @return
 	 */
-	public static TableModel createClusterOptionsTable(List<AnalysisDataset> list){
+	public TableModel createClusterOptionsTable(List<AnalysisDataset> list){
 		DefaultTableModel model = new DefaultTableModel();
 
 		List<Object> columnList = new ArrayList<Object>();

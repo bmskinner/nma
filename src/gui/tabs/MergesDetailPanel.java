@@ -282,9 +282,9 @@ public class MergesDetailPanel extends DetailPanel {
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		if(options.getType().equals(TableType.MERGE_SOURCES)){
-			return NucleusTableDatasetCreator.createMergeSourcesTable(options);
+			return NucleusTableDatasetCreator.getInstance().createMergeSourcesTable(options);
 		} else {
-			return NucleusTableDatasetCreator.createAnalysisTable(options);
+			return NucleusTableDatasetCreator.getInstance().createAnalysisTable(options);
 		}
 	}
 }

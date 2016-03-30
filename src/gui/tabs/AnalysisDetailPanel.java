@@ -79,7 +79,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return NucleusTableDatasetCreator.createAnalysisTable(options);
+		return NucleusTableDatasetCreator.getInstance().createAnalysisTable(options);
 	}
 	
 	@Override

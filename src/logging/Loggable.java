@@ -57,7 +57,7 @@ public interface Loggable {
 	}
 	
 	/**
-     * Log an error to the program log window with Level.FINE
+     * Log an error to the program log window with Level.FINER
      * @param message the error messsage
      * @param t the exception
      */
@@ -66,7 +66,7 @@ public interface Loggable {
 	}
 	
 	/**
-     * Log an error to the program log window with Level.FINE
+     * Log an error to the program log window with Level.FINEST
      * @param message the error messsage
      * @param t the exception
      */

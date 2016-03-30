@@ -118,7 +118,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 	}
 	
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return NucleusTableDatasetCreator.createWilcoxonStatisticTable(options);
+		return NucleusTableDatasetCreator.getInstance().createWilcoxonStatisticTable(options);
 	}
 			
 }

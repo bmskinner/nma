@@ -69,7 +69,7 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 			.setScale(MeasurementScale.PIXELS)
 			.build();
 			
-			TableModel model = NucleusTableDatasetCreator.createMedianProfileStatisticTable(options);
+			TableModel model = NucleusTableDatasetCreator.getInstance().createMedianProfileStatisticTable(options);
 			table = new ExportableTable(model);
 
 		} catch (Exception e) {
@@ -132,7 +132,7 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception {
-		return NucleusTableDatasetCreator.createMedianProfileStatisticTable(options);
+		return NucleusTableDatasetCreator.getInstance().createMedianProfileStatisticTable(options);
 	}
 
 	@Override

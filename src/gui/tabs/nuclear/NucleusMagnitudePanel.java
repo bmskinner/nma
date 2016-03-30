@@ -138,7 +138,7 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return NucleusTableDatasetCreator.createMagnitudeStatisticTable(options);
+		return NucleusTableDatasetCreator.getInstance().createMagnitudeStatisticTable(options);
 	}
 	
 	/**

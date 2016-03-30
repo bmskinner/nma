@@ -127,7 +127,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 					
 			
 			JPanel clusterDetailPanel = new JPanel(new BorderLayout());
-			TableModel optionsModel = NucleusTableDatasetCreator.createClusterOptionsTable(null);
+			TableModel optionsModel = NucleusTableDatasetCreator.getInstance().createClusterOptionsTable(null);
 			clusterDetailsTable = new ExportableTable(optionsModel){
 				@Override
 				public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -302,7 +302,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			setButtonsVisible(true);
 			setButtonsEnabled(true);
 			
-			TableModel optionsModel = NucleusTableDatasetCreator.createClusterOptionsTable(list);
+			TableModel optionsModel = NucleusTableDatasetCreator.getInstance().createClusterOptionsTable(list);
 			clusterDetailsTable.setModel(optionsModel);
 
 			updateTreeButtonsPanel();

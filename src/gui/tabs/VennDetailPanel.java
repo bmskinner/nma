@@ -126,7 +126,7 @@ public class VennDetailPanel extends DetailPanel {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return NucleusTableDatasetCreator.createVennTable(options);
+		return NucleusTableDatasetCreator.getInstance().createVennTable(options);
 	}
 		
 	/**

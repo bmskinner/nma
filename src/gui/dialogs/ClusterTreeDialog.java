@@ -526,7 +526,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-		for(UUID id : dataset.getMergeSources()){
+		for(UUID id : dataset.getMergeSourceIDs()){
 			list.add(dataset.getMergeSource(id));
 		}
 

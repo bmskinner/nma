@@ -126,7 +126,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return  NucleusTableDatasetCreator.createPairwiseVennTable(options);
+		return  NucleusTableDatasetCreator.getInstance().createPairwiseVennTable(options);
 	}
 		
 	/**
