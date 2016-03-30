@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
+import analysis.ProfileManager;
 import stats.SegmentStatistic;
 import charting.charts.BoxplotChartFactory;
 import charting.options.ChartOptions;
@@ -72,7 +73,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		log(Level.FINEST, "Dataset list is not empty");
 
 		// Check that all the datasets have the same number of segments
-		if(checkSegmentCountsMatch(getDatasets())){ // make a boxplot for each segment
+		if(ProfileManager.segmentCountsMatch(getDatasets())){ // make a boxplot for each segment
 			
 			CellCollection collection = activeDataset().getCollection();
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)

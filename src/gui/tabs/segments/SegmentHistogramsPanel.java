@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.JFreeChart;
 
+import analysis.ProfileManager;
 import stats.SegmentStatistic;
 import charting.charts.HistogramChartFactory;
 import charting.options.ChartOptions;
@@ -58,7 +59,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 		log(Level.FINEST, "Dataset list is not empty");
 
 		// Check that all the datasets have the same number of segments
-		if(checkSegmentCountsMatch(getDatasets())){ // make a histogram for each segment
+		if(ProfileManager.segmentCountsMatch(getDatasets())){ // make a histogram for each segment
 
 			CellCollection collection = activeDataset().getCollection();
 			

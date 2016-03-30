@@ -52,6 +52,7 @@ import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import analysis.AnalysisDataset;
+import analysis.ProfileManager;
 
 /**
  * The DetailPanels hold chart and table caches, and track other DetailPanels
@@ -263,38 +264,7 @@ public abstract class DetailPanel
 //			}
 //		});
 	}
-	
-	/**
-	 * Given a list of datasets, count the segments in the median profile of each, 
-	 * and test if all datasets have the same number of segments.
-	 * @param list
-	 * @return
-	 * @throws Exception
-	 */
-	protected boolean checkSegmentCountsMatch(final List<AnalysisDataset> list) throws Exception{
-		int prevCount = 0;
-		
-		log(Level.FINEST, "Counting segments in each dataset: "+ this.getClass().getName());
-		// check that the datasets have the same number of segments
-		for( AnalysisDataset dataset  : list){
-			CellCollection collection = dataset.getCollection();
-			int count = collection.getProfileCollection(ProfileType.REGULAR)
-				.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
-				.getSegmentCount();
 			
-			log(Level.FINEST, "\t"+dataset.getName()+": "+count+" segments: "+ this.getClass().getName());
-			
-			if(prevCount > 0 ){
-				if(prevCount!=count){
-					log(Level.FINEST, "Segment count does not match: "+ this.getClass().getName());
-					return false;
-				}
-			}
-			prevCount = count;
-		}
-		return true;
-	}
-		
 	/**
 	 * This method must be overridden by the extending class
 	 * to perform the actual update when a single dataset is selected

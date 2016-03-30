@@ -32,9 +32,8 @@ public class ProfileManager implements Loggable {
 		this.collection = collection;
 	}
 	
-	
 	/**
-	 * Test if the regular profiles of the given datasets have the same segment counts
+	 * Test if the regular median profiles of the given datasets have the same segment counts
 	 * @param list
 	 * @return
 	 */

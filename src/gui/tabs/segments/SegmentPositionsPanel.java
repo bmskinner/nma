@@ -27,6 +27,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,6 +40,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
+import analysis.ProfileManager;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
@@ -91,11 +94,40 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 	protected void updateMultiple() throws Exception {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+		
+		mainPanel.addComponentListener( new ComponentListener(){
+
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void componentMoved(ComponentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+				restoreAspectRatio();
+				
+			}
+
+			@Override
+			public void componentShown(ComponentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			
+		});
 
 		log(Level.FINEST, "Dataset list is not empty");
 		
 		// Check that all the datasets have the same number of segments
-		if(checkSegmentCountsMatch(getDatasets())){
+		if(ProfileManager.segmentCountsMatch(getDatasets())){
 
 			CellCollection collection = activeDataset().getCollection();
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
@@ -135,14 +167,19 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 
 		mainPanel.revalidate();
 		mainPanel.repaint();
+		
 		scrollPane.setViewportView(mainPanel);
 		
 		/*
 		 * Ensure charts maintain aspect ratio
 		 */
+		restoreAspectRatio();
+	}
+	
+	private void restoreAspectRatio(){
 		for(ChartPanel panel : chartPanels.values()){
 			
-			panel.restoreAutoBounds();
+			((FixedAspectRatioChartPanel) panel).restoreAutoBounds();
 		}
 	}
 

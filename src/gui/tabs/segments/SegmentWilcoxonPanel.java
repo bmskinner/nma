@@ -29,11 +29,11 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.table.TableModel;
 
+import analysis.ProfileManager;
 import stats.SegmentStatistic;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
-
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
@@ -60,7 +60,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 		tablePanel = createTablePanel();
 		scrollPane.setColumnHeaderView(null);
 		
-		if(checkSegmentCountsMatch(getDatasets())){
+		if(ProfileManager.segmentCountsMatch(getDatasets())){
 
 			List<NucleusBorderSegment> segments = activeDataset()
 					.getCollection()

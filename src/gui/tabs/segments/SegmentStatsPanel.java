@@ -39,6 +39,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import analysis.ProfileManager;
 import utility.Constants;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
@@ -97,7 +98,7 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 		
 		table.setModel(model);
 
-		if(checkSegmentCountsMatch(getDatasets())){
+		if(ProfileManager.segmentCountsMatch(getDatasets())){
 			table.setToolTipText("Mean and range for 95% confidence interval");
 			setRenderer(table, new SegmentTableCellRenderer());
 
