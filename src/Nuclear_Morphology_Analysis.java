@@ -26,8 +26,10 @@ import java.io.File;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import logging.Loggable;
+
 public class Nuclear_Morphology_Analysis
-implements PlugIn
+implements PlugIn, Loggable
 
 {
 	
@@ -71,20 +73,9 @@ implements PlugIn
 						try {
 							UIManager.setLookAndFeel(
 									UIManager.getSystemLookAndFeelClassName());
-						} catch (ClassNotFoundException e) {
+						} catch (Exception e) {
 
-
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (InstantiationException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IllegalAccessException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (UnsupportedLookAndFeelException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							logToImageJ("Error initialising", e);
 						}
 
 						MainWindow frame = new MainWindow();
@@ -94,7 +85,7 @@ implements PlugIn
 
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logToImageJ("Error initialising", e);
 		}
 	}
 	
