@@ -39,6 +39,60 @@ public interface Loggable {
 	}
 	
 	/**
+     * Log an error to the program log window with Level.SEVERE
+     * @param message the error messsage
+     * @param t the exception
+     */
+	default void error(String message, Throwable t){
+		Logger.getLogger(PROGRAM_LOGGER).log(Level.SEVERE, message, t);
+	}
+	
+	/**
+     * Log an error to the program log window with Level.FINE
+     * @param message the error messsage
+     * @param t the exception
+     */
+	default void fine(String message){
+		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINE, message);
+	}
+	
+	/**
+     * Log an error to the program log window with Level.FINE
+     * @param message the error messsage
+     * @param t the exception
+     */
+	default void finer(String message){
+		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINER, message);
+	}
+	
+	/**
+     * Log an error to the program log window with Level.FINE
+     * @param message the error messsage
+     * @param t the exception
+     */
+	default void finest(String message){
+		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINEST, message);
+	}
+	
+	/**
+     * Log an error to the program log window with Level.WARNING
+     * @param message the error messsage
+     * @param t the exception
+     */
+	default void warn(String message){
+		Logger.getLogger(PROGRAM_LOGGER).log(Level.WARNING, message);
+	}
+	
+	/**
+     * Log an error to the program log window with Level.INFO
+     * @param message the error messsage
+     * @param t the exception
+     */
+	default void log(String message){
+		Logger.getLogger(PROGRAM_LOGGER).log(Level.INFO, message);
+	}
+	
+	/**
      * Log an error to the program log window and to the dataset
      * debug file. Logs with Level.SEVERE
      * @param message the error messsage

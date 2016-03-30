@@ -528,6 +528,11 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		XYDataset nuclearOutlines = NucleusDatasetCreator.createMultiNucleusOutline(options.getDatasets());
 		
+		if(positionDataset == null || nuclearOutlines == null){
+			// a null dataset is returned if segment counts do not match
+			return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+		}
+		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                null, null, null, PlotOrientation.VERTICAL, true, true,

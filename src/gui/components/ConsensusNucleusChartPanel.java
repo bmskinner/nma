@@ -267,8 +267,8 @@ public class ConsensusNucleusChartPanel extends FixedAspectRatioChartPanel imple
         }
     }
     
-    private void log(String message){
-    	fireSignalChangeEvent("Log_"+message);
-    }
+//    private void log(String message){
+//    	fireSignalChangeEvent("Log_"+message);
+//    }
 
 }

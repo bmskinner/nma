@@ -663,10 +663,10 @@ public class MainWindow
 			this.populationsPanel.refreshDatasets();;
 		}
 		
-		if(event.type().startsWith("Log_")){
-			String s = event.type().replace("Log_", "");
-			log(Level.INFO, s);
-		}
+//		if(event.type().startsWith("Log_")){
+//			String s = event.type().replace("Log_", "");
+//			log(Level.INFO, s);
+//		}
 		
 		if(event.type().startsWith("Status_")){
 			String s = event.type().replace("Status_", "");

@@ -2,6 +2,9 @@ package analysis;
 
 import java.util.List;
 import java.util.UUID;
+
+
+import logging.Loggable;
 //import analysis.nucleus.DatasetSegmenter.SegmentFitter;
 import utility.Constants;
 import components.CellCollection;
@@ -21,12 +24,45 @@ import components.nuclei.Nucleus;
  * @author bms41
  *
  */
-public class ProfileManager {
+public class ProfileManager implements Loggable {
 	
 	private CellCollection collection;
 	
 	public ProfileManager(CellCollection collection){
 		this.collection = collection;
+	}
+	
+	
+	/**
+	 * Test if the regular profiles of the given datasets have the same segment counts
+	 * @param list
+	 * @return
+	 */
+	public static boolean segmentCountsMatch(List<AnalysisDataset> list){
+		
+		int segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
+		for(AnalysisDataset d : list){
+			if( d.getCollection().getProfileManager().getSegmentCount() != segCount){
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Get the number of segments in the regular profile of the collection. On error
+	 * return 0
+	 * @return
+	 */
+	public int getSegmentCount(){
+		ProfileCollection pc =    collection.getProfileCollection(ProfileType.REGULAR);
+		try {
+			return pc.getSegments(BorderTag.REFERENCE_POINT).size();
+		} catch (Exception e) {
+			error("Error getting segment count from collection "+collection.getName(), e);
+			return 0;
+		}
 	}
 
 	
@@ -332,6 +368,9 @@ public class ProfileManager {
 				profile.mergeSegments(nSeg1, nSeg2, newID);
 				n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
 			}
+			
+			// Ensure the vertical nuclei have the same segment pattern
+			collection.updateVerticalNuclei();
 
 		}
 	}
@@ -393,6 +432,9 @@ public class ProfileManager {
 					profile.splitSegment(nSeg1, targetIndex, newID1, newID2);
 					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
 				}
+				
+				// Ensure the vertical nuclei have the same segment pattern
+				collection.updateVerticalNuclei();
 
 				return true;
 			} else {
@@ -410,74 +452,9 @@ public class ProfileManager {
 	 * @throws Exception
 	 */
 	public boolean splitSegment(NucleusBorderSegment seg) throws Exception {
-		
-//		boolean result = false;
-				
-//		SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(BorderTag.REFERENCE_POINT);
-		
-		// Get the segments to merge
-//		NucleusBorderSegment seg = medianProfile.getSegment(segName);
-		
-		// Do not try to split segments that are a merge of other segments
-//		if(seg.hasMergeSources()){
-//			return false;
-//		}
-						
-//		try{
-
 			int index = seg.getMidpointIndex();
 			
 			return splitSegment(seg, index);
-//			//				int index = (Integer) spinner.getModel().getValue();
-//			if(seg.contains(index)){
-//
-//				double proportion = seg.getIndexProportion(index);
-//
-//				UUID newID1 = java.util.UUID.randomUUID();
-//				UUID newID2 = java.util.UUID.randomUUID();
-//				// split the two segments in the median
-//				medianProfile.splitSegment(seg, index, newID1, newID2);
-//
-//				// put the new segment pattern back with the appropriate offset
-//				collection.getProfileCollection(ProfileType.REGULAR)
-//					.addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
-//
-//				/*
-//				 * With the median profile segments unmerged, also split the segments
-//				 * in the individual nuclei. Requires proportional alignment
-//				 */
-//				for(Nucleus n : collection.getNuclei()){
-//
-//
-//					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
-//					NucleusBorderSegment nSeg = profile.getSegment(seg.getID());
-//
-//					int targetIndex = nSeg.getProportionalIndex(proportion);
-//					profile.splitSegment(nSeg, targetIndex, newID1, newID2);
-//					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
-//				}
-//
-//				/*
-//				 * Update the consensus if present
-//				 */
-//				if(collection.hasConsensusNucleus()){
-//					ConsensusNucleus n = collection.getConsensusNucleus();
-//					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
-//					NucleusBorderSegment nSeg1 = profile.getSegment(seg.getID());
-//					int targetIndex = nSeg1.getProportionalIndex(proportion);
-//					profile.splitSegment(nSeg1, targetIndex, newID1, newID2);
-//					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
-//				}
-//
-//				result = true;
-//			} else {
-//				return false;
-//			}
-//		} catch(Exception e){
-//			return false;
-//		}
-//		
-//		return result;
 	}
 	
 	public void unmergeSegments(NucleusBorderSegment seg) throws Exception {
@@ -515,6 +492,9 @@ public class ProfileManager {
 			profile.unmergeSegment(nSeg1);
 			n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
 		}
+		
+		// Ensure the vertical nuclei have the same segment pattern
+		collection.updateVerticalNuclei();
 	}
 	
 }

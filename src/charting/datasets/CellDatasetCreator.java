@@ -21,11 +21,11 @@ package charting.datasets;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
 
-import java.awt.Rectangle;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -37,6 +37,7 @@ import org.jfree.data.xy.XYDataset;
 
 import charting.options.ChartOptions;
 import analysis.AnalysisDataset;
+import analysis.ProfileManager;
 import components.AbstractCellularComponent;
 import components.Cell;
 import components.generic.BorderTag;
@@ -182,12 +183,77 @@ public class CellDatasetCreator implements Loggable {
 	 */
 	public static XYDataset createPositionFeatureDataset(ChartOptions options) throws Exception {
 
-		DefaultXYDataset ds = null;
-		List<XYPoint> offsetPoints = null;
+		XYDataset ds = null;
+		
 		if(options.isSingleDataset()){
+			
+			ds = createSinglePositionFeatureDataset(options);
 
-			offsetPoints = createAbsolutePositionFeatureList(options.firstDataset(), options.getSegID());
-			ds = new DefaultXYDataset();
+		}
+		
+		if(options.isMultipleDatasets()){
+			
+			if(ProfileManager.segmentCountsMatch(options.getDatasets())){
+			
+				ds = createMultiPositionFeatureDataset(options);
+			} else {
+				options.log(Level.WARNING, "Unable to create multiple chart: segment counts do not match");
+			}
+		}
+
+		
+		return ds;
+	}
+	
+	/**
+	 * Create an XYDataset of segment start positions for a single dataset
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
+	private static XYDataset createSinglePositionFeatureDataset(ChartOptions options) throws Exception{
+		
+		DefaultXYDataset ds = new DefaultXYDataset();
+		List<XYPoint> offsetPoints = createAbsolutePositionFeatureList(options.firstDataset(), options.getSegID());
+
+		double[] xPoints = new double[offsetPoints.size()];
+		double[] yPoints = new double[offsetPoints.size()];
+
+		for(int i=0; i<offsetPoints.size(); i++){
+
+			xPoints[i] = offsetPoints.get(i).getX();
+			yPoints[i] = offsetPoints.get(i).getY();
+
+		}
+
+		double[][] data = { xPoints, yPoints };
+
+		ds.addSeries("Segment_"+options.getSegID()+"_"+options.firstDataset().getName(), data);
+		return ds;
+	}
+	
+	/**
+	 * Create an XYDataset of segment start positions for multiple datasets
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
+	private static XYDataset createMultiPositionFeatureDataset(ChartOptions options) throws Exception{
+		
+		DefaultXYDataset ds = new DefaultXYDataset();
+
+		for(AnalysisDataset dataset :options.getDatasets()){
+			
+			/*
+			 * We need to convert the seg position into a seg id
+			 */
+			UUID segID = dataset.getCollection()
+					.getProfileCollection(ProfileType.REGULAR)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentAt(  options.getSegPosition()   )
+					.getID();
+			
+			List<XYPoint> offsetPoints = createAbsolutePositionFeatureList(dataset, segID);
 
 			double[] xPoints = new double[offsetPoints.size()];
 			double[] yPoints = new double[offsetPoints.size()];
@@ -201,49 +267,28 @@ public class CellDatasetCreator implements Loggable {
 
 			double[][] data = { xPoints, yPoints };
 
-			ds.addSeries("Segment_"+options.getSegID()+"_"+options.firstDataset().getName(), data);
-
+			ds.addSeries("Segment_"+segID+"_"+dataset.getName(), data);
 		}
-		
-		if(options.isMultipleDatasets()){
-			ds = new DefaultXYDataset();
-			
-			for(AnalysisDataset dataset :options.getDatasets()){
-				
-				/*
-				 * We need to convert the seg position into a seg id
-				 */
-				UUID segID = dataset.getCollection()
-						.getProfileCollection(ProfileType.REGULAR)
-						.getSegmentedProfile(BorderTag.REFERENCE_POINT)
-						.getSegmentAt(  options.getSegPosition()   )
-						.getID();
-				
-				offsetPoints = createAbsolutePositionFeatureList(dataset, segID);
-
-				double[] xPoints = new double[offsetPoints.size()];
-				double[] yPoints = new double[offsetPoints.size()];
-
-				for(int i=0; i<offsetPoints.size(); i++){
-
-					xPoints[i] = offsetPoints.get(i).getX();
-					yPoints[i] = offsetPoints.get(i).getY();
-
-				}
-
-				double[][] data = { xPoints, yPoints };
-
-				ds.addSeries("Segment_"+segID+"_"+dataset.getName(), data);
-			}
-
-			
-		}
-
 		
 		return ds;
 	}
 	
+	/**
+	 * Create a list of points corresponding to the start index of the segment with the given id  
+	 * @param dataset
+	 * @param segmentID
+	 * @return
+	 * @throws Exception
+	 */
 	public static List<XYPoint> createAbsolutePositionFeatureList(AnalysisDataset dataset, UUID segmentID) throws Exception{
+		
+		if(dataset==null){
+			throw new IllegalArgumentException("Dataset is null");
+		}
+		
+		if(segmentID==null){
+			throw new IllegalArgumentException("Segment id is null");
+		}
 		
 		List<XYPoint> result = new ArrayList<XYPoint>();
 		
