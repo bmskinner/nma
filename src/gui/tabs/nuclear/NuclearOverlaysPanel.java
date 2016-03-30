@@ -2,6 +2,7 @@ package gui.tabs.nuclear;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.logging.Level;
@@ -54,29 +55,11 @@ public class NuclearOverlaysPanel extends DetailPanel {
 			
 			chartPanel = new FixedAspectRatioChartPanel(chart);
 			
-			chartPanel.addComponentListener( new ComponentListener(){
-
-				@Override
-				public void componentHidden(ComponentEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
-
-				@Override
-				public void componentMoved(ComponentEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
+			chartPanel.addComponentListener( new ComponentAdapter(){
 
 				@Override
 				public void componentResized(ComponentEvent e) {
 					chartPanel.restoreAutoBounds();
-					
-				}
-
-				@Override
-				public void componentShown(ComponentEvent e) {
-					// TODO Auto-generated method stub
 					
 				}
 				

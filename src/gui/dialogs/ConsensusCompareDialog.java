@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.List;
@@ -94,30 +95,12 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		chartPanelTwo = new FixedAspectRatioChartPanel(chart);
 		meshPanel.add(chartPanelOne);
 		meshPanel.add(chartPanelTwo);
-		centrePanel.addComponentListener( new ComponentListener(){
+		centrePanel.addComponentListener( new ComponentAdapter(){
 			
 			@Override
 			public void componentResized(ComponentEvent arg0) {
 				chartPanelOne.restoreAutoBounds();
 				chartPanelTwo.restoreAutoBounds();
-				
-			}
-
-			@Override
-			public void componentHidden(ComponentEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void componentMoved(ComponentEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void componentShown(ComponentEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -135,7 +118,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		histoPanel.add(histoTwo);
 		histoPanel.add(pointTwo);
 		
-		histoPanel.addComponentListener( new ComponentListener(){
+		histoPanel.addComponentListener( new ComponentAdapter(){
 			
 			@Override
 			public void componentResized(ComponentEvent arg0) {
@@ -144,23 +127,6 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				
 			}
 
-			@Override
-			public void componentHidden(ComponentEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void componentMoved(ComponentEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void componentShown(ComponentEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
 		});
 		
 		/*
