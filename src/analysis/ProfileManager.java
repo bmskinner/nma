@@ -26,9 +26,9 @@ import components.nuclei.Nucleus;
  */
 public class ProfileManager implements Loggable {
 	
-	private CellCollection collection;
+	final private CellCollection collection;
 	
-	public ProfileManager(CellCollection collection){
+	public ProfileManager(final CellCollection collection){
 		this.collection = collection;
 	}
 	

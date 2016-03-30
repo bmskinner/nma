@@ -57,7 +57,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 
 				JFreeChart chart = null;
 				try {
-					chart = BoxplotChartFactory.createStatisticBoxplot(options);
+					chart = BoxplotChartFactory.getInstance().createStatisticBoxplot(options);
 				} catch (Exception e) {
 					log(Level.SEVERE, "Error creating boxplots panel", e);
 				}

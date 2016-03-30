@@ -85,7 +85,6 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 	private void createUI(){
 		this.setTitle("Angle window size explorer: "+dataset.getName());
 		this.setLayout(new BorderLayout());
-		this.setLocationRelativeTo(null);
 		
 		this.add(createSettingsPanel(), BorderLayout.NORTH);
 		

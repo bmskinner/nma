@@ -29,8 +29,10 @@ import stats.Stats;
 import charting.ChartComponents;
 import components.generic.BorderTag;
 
-public class AbstractChartFactory implements Loggable {
+public abstract class AbstractChartFactory implements Loggable {
 
+	
+	
 	/**
 	 * Get a series or dataset index for colour selection when drawing charts. The index
 	 * is set in the DatasetCreator as part of the label. The format is Name_index_other

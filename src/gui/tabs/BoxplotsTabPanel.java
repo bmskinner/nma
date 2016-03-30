@@ -90,7 +90,7 @@ import charting.options.TableOptions;
 		
 		@Override
 		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
-			return BoxplotChartFactory.createStatisticBoxplot(options);
+			return BoxplotChartFactory.getInstance().createStatisticBoxplot(options);
 		}
 		
 		@Override

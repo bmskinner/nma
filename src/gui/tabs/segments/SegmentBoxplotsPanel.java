@@ -35,7 +35,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 	public SegmentBoxplotsPanel(){
 		super();
 
-		JFreeChart boxplot = BoxplotChartFactory.createEmptyBoxplot();
+		JFreeChart boxplot = BoxplotChartFactory.getInstance().createEmptyBoxplot();
 		
 
 		ExportableChartPanel chartPanel = new ExportableChartPanel(boxplot);
@@ -119,7 +119,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		// No datasets, show blank chart
 		measurementUnitSettingsPanel.setEnabled(false);
 
-		ChartPanel chartPanel = new ChartPanel(BoxplotChartFactory.createEmptyBoxplot());
+		ChartPanel chartPanel = new ChartPanel(BoxplotChartFactory.getInstance().createEmptyBoxplot());
 		mainPanel.add(chartPanel);
 		mainPanel.revalidate();
 		mainPanel.repaint();

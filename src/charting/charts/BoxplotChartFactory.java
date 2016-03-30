@@ -23,6 +23,7 @@ import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import stats.SegmentStatistic;
 import stats.SignalStatistic;
+import io.ImageExporter;
 
 import java.awt.Color;
 import java.util.List;
@@ -33,18 +34,40 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+
 import analysis.AnalysisDataset;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 
+/**
+ * This factory creates boxplot charts. It uses a singleton pattern to allow the loggable
+ * interface to be used
+ * @author bms41
+ *
+ */
 public class BoxplotChartFactory extends AbstractChartFactory {
+
+	private static BoxplotChartFactory instance = null;
+	
+	protected BoxplotChartFactory(){}
+	
+	/**
+	 * Fetch an instance of the factory
+	 * @return
+	 */
+	public static BoxplotChartFactory getInstance(){
+		if(instance==null){
+			instance = new BoxplotChartFactory();
+		}
+		return instance;
+	}
 	
 	/**
 	 * Create an empty boxplot
 	 * @return
 	 */
-	public static JFreeChart createEmptyBoxplot(){
+	public JFreeChart createEmptyBoxplot(){
 		
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, 
 				null, 
@@ -56,13 +79,15 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 		return boxplot;
 	}
 	
-	public static JFreeChart createStatisticBoxplot(ChartOptions options) throws Exception{
+	public JFreeChart createStatisticBoxplot(ChartOptions options) throws Exception{
 		
 		if(!options.hasDatasets()){
 			return createEmptyBoxplot();
 		}
 		
 		PlottableStatistic stat = options.getStat();
+		
+		finest("Creating boxplot for "+stat);
 		
 		if(stat.getClass()==NucleusStatistic.class){
 			return createNucleusStatisticBoxplot(options);
@@ -86,7 +111,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * 
 	 */
 
-	private static JFreeChart createNucleusStatisticBoxplot(ChartOptions options) throws Exception{
+	private JFreeChart createNucleusStatisticBoxplot(ChartOptions options) throws Exception{
 		
 		BoxAndWhiskerCategoryDataset ds = null;
 		if(options.getDatasets()!=null){
@@ -108,7 +133,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * @param ds the dataset
 	 * @return
 	 */
-	private static JFreeChart createSegmentBoxplot(ChartOptions options) throws Exception {
+	private JFreeChart createSegmentBoxplot(ChartOptions options) throws Exception {
 
 		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
@@ -149,7 +174,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	private static JFreeChart createSignalStatisticBoxplot(ChartOptions options) throws Exception{
+	private JFreeChart createSignalStatisticBoxplot(ChartOptions options) throws Exception{
 		
 		BoxAndWhiskerCategoryDataset ds = NuclearSignalDatasetCreator.createSignalStatisticBoxplotDataset(options);
 
@@ -181,7 +206,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * Apply the default formatting to a boxplot with list
 	 * @param boxplot
 	 */
-	private static void formatBoxplotChart(JFreeChart boxplot, List<AnalysisDataset> list){
+	private void formatBoxplotChart(JFreeChart boxplot, List<AnalysisDataset> list){
 		formatBoxplot(boxplot);
 		CategoryPlot plot = boxplot.getCategoryPlot();
 		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
@@ -202,7 +227,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * Apply basic formatting to the charts, without any series added
 	 * @param boxplot
 	 */
-	private static void formatBoxplot(JFreeChart boxplot){
+	private void formatBoxplot(JFreeChart boxplot){
 		CategoryPlot plot = boxplot.getCategoryPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
