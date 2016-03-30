@@ -57,7 +57,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		}
 	});
 	
-	JMenuItem splitMenuItem = new JMenuItem( new AbstractAction("Boolean operation"){
+	JMenuItem booleanMenuItem = new JMenuItem( new AbstractAction("Boolean operation"){
 		private static final long serialVersionUID = 1L;
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
@@ -174,7 +174,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		this.addSeparator();
 		this.add(mergeMenuItem);
 		this.add(deleteMenuItem);
-		this.add(splitMenuItem);
+		this.add(booleanMenuItem);
 		this.add(curateMenuItem);
 		this.addSeparator();
 		this.add(saveMenuItem);
@@ -231,11 +231,11 @@ public class PopulationListPopupMenu extends JPopupMenu {
 	}
 	
 	public void enableSplit(){
-		splitMenuItem.setEnabled(true);
+		booleanMenuItem.setEnabled(true);
 	}
 	
 	public void disableSplit(){
-		splitMenuItem.setEnabled(false);
+		booleanMenuItem.setEnabled(false);
 	}
 	
 	public void enableSave(){
