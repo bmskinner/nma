@@ -264,28 +264,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		}
 		return panel;
 	}
-	
-//	protected void updateDetail(){
-//		
-//		log(Level.FINE, "Updating signals detail panel");
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-//				
-//				try{
-//					updateCheckboxPanel();
-//					updateSignalConsensusChart();
-//					updateSignalStatsPanel();
-//
-//				} catch(Exception e){
-//					log(Level.SEVERE, "Error updating signals overview panel" ,e);
-//					update( (List<AnalysisDataset>) null);
-//				} finally {
-//					setUpdating(false);
-//				}
-//			
-//		}});
-//	}
-	
+		
 	/**
 	 * Update the signal stats with the given datasets
 	 * @param list the datasets
@@ -301,6 +280,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			.build();
 		
 		TableModel model = getTable(options);
+
 		statsTable.setModel(model);
 
 		// Add the signal group colours
@@ -365,22 +345,29 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 
 			// default cell colour is white
 			Color colour = Color.WHITE;
+			
+			try {
 
-			// get the value in the first column of the row below
-			if(row<table.getModel().getRowCount()-1){
-				String nextRowHeader = table.getModel().getValueAt(row+1, 0).toString();
+				// get the value in the first column of the row below
+				if(row<table.getModel().getRowCount()-1){
+					String nextRowHeader = table.getModel().getValueAt(row+1, 0).toString();
 
-				if(nextRowHeader.equals("Signal group")){
-					// we want to colour this cell preemptively
-					// get the signal group from the table
-					String groupString = table.getModel().getValueAt(row+1, 1).toString();
-					colour = activeDataset().getSignalGroupColour(Integer.valueOf(groupString));
-//					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
+					if(nextRowHeader.equals("Signal group")){
+						// we want to colour this cell preemptively
+						// get the signal group from the table
+						String groupString = table.getModel().getValueAt(row+1, 1).toString();
+						colour = activeDataset().getSignalGroupColour(Integer.valueOf(groupString));
+						//					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
+					}
 				}
+			} catch (Exception e){
+				fine("Error setting table colour renderer");
+				colour = Color.WHITE;
 			}
 			//Cells are by default rendered as a JLabel.
 			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			l.setBackground(colour);
+			
 
 			//Return the JLabel which renders the cell.
 			return l;
@@ -418,9 +405,14 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 
 	@Override
 	protected void updateMultiple() throws Exception {
-		updateCheckboxPanel();
-		updateSignalConsensusChart();
-		updateSignalStatsPanel();
+		
+		try {
+			updateCheckboxPanel();
+			updateSignalConsensusChart();
+			updateSignalStatsPanel();
+		} catch (Exception e){
+			error("Error updating signal overview panel", e);
+		}
 		
 	}
 
