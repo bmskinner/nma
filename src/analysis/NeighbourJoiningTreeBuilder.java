@@ -2,19 +2,9 @@ package analysis;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import components.CellCollection;
-import components.generic.BorderTag;
-import components.generic.ProfileType;
-import components.nuclei.Nucleus;
-import jebl.evolution.distances.BasicDistanceMatrix;
-import jebl.evolution.distances.DistanceMatrix;
-import jebl.evolution.taxa.Taxon;
-import jebl.evolution.trees.NeighborJoiningTreeBuilder;
 import jebl.evolution.trees.Tree;
+import components.nuclei.Nucleus;
+import jebl.evolution.taxa.Taxon;
 
 public class NeighbourJoiningTreeBuilder extends AnalysisWorker {
 	

@@ -361,7 +361,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 					}
 				}
 			} catch (Exception e){
-				fine("Error setting table colour renderer");
+				fine("Error setting table colour renderer: "+e.getMessage());
 				colour = Color.WHITE;
 			}
 			//Cells are by default rendered as a JLabel.

@@ -94,7 +94,8 @@ implements PlugIn, Loggable
 		String pluginDirName = IJ.getDirectory("plugins");
 		File pluginDir = new File(pluginDirName);
 		
-		File jarDir = new File(pluginDirName+File.separator+"jars");
+		File oldJarDir = new File(pluginDirName+File.separator+"jars");
+		File jarDir = new File(pluginDirName+File.separator+"Nuclear_Morphology_Analysis");
 		
 		boolean[] oklist = new boolean[requiredFiles.length];
 		for(boolean ok : oklist){
@@ -119,6 +120,18 @@ implements PlugIn, Loggable
 				}
 				
 			}
+			
+			/*
+			 * Check the old folder for jars
+			 */
+			for(File file : oldJarDir.listFiles()){
+				
+				if(file.getName().startsWith(fileName)){
+					oklist[i] = true;
+				}
+				
+			}
+			
 		}
 		
 		// report missing jars
