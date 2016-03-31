@@ -34,7 +34,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import logging.Loggable;
 import skeleton_analysis.AnalyzeSkeleton_;
@@ -46,7 +45,7 @@ import utility.Utils;
 import components.SpermTail;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
-import Skeletonize3D_.Skeletonize3D_;
+//import Skeletonize3D_.Skeletonize3D_;
 import analysis.AnalysisOptions;
 import analysis.Detector;
 import analysis.ImageFilterer;
@@ -183,9 +182,9 @@ public class TailFinder implements Loggable {
 		skeletonisableImage.show();
 
 		// skeletonise the binary image
-		Skeletonize3D_ skelly = new Skeletonize3D_();
-		skelly.setup("", binaryImage);
-		skelly.run(skeletonisableProcessor);
+//		Skeletonize3D_ skelly = new Skeletonize3D_();
+//		skelly.setup("", binaryImage);
+//		skelly.run(skeletonisableProcessor);
 
 		log(Level.FINE, "Skeletonized the image");
 

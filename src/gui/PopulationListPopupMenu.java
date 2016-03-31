@@ -186,7 +186,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		this.add(replaceFolderMenuItem);
 		this.add(applySegmentationMenuItem);
 		this.addSeparator();
-		this.add(addTailStainMenuItem);
+//		this.add(addTailStainMenuItem); // do not enable until ready
 		this.add(addNuclearSignalMenuItem);
 		this.add(performShellAnalysisMenuItem);
     }

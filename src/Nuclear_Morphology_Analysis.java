@@ -42,8 +42,7 @@ implements PlugIn, Loggable
 			"swingx-all",
 			"weka",
 			"AnalyzeSkeleton",
-			"Gray_Morphology",
-			"Skeletonize3D"
+			"Gray_Morphology"
 	};
 	
 	

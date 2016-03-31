@@ -49,7 +49,7 @@ import skeleton_analysis.Graph;
 import skeleton_analysis.SkeletonResult;
 import utility.Constants;
 import utility.Utils;
-import Skeletonize3D_.Skeletonize3D_;
+//import Skeletonize3D_.Skeletonize3D_;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
