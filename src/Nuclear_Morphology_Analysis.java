@@ -22,6 +22,11 @@ import ij.IJ;
 import ij.plugin.PlugIn;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -33,7 +38,12 @@ implements PlugIn, Loggable
 
 {
 	
-	String[] requiredFiles = {
+	// Store which plugins have been found
+	private HashMap<String, Boolean>  requiredFiles = new HashMap<String, Boolean>();
+	
+	
+	// The plugins that are needed for the program to start
+	private String[] fileNames = { "commons-math3",
 			"commons-math3",
 			"jcommon",
 			"jdistlib",
@@ -45,9 +55,18 @@ implements PlugIn, Loggable
 			"Gray_Morphology"
 	};
 	
+	/**
+	 * Reset all found files to false
+	 */
+	private void clearFileList(){
+		for(String s : fileNames){
+			requiredFiles.put(s, false);
+		}
+	}
+	
 	
 	/* 
-    The first method to be run when the plugin starts.
+     * The first method run when the plugin starts.
 	 */
 	public void run(String paramString)  {
 
@@ -62,7 +81,7 @@ implements PlugIn, Loggable
 				return;
 			}
 
-			if(checkPlugins()){
+			if(checkPlugins()){ 
 
 				java.awt.EventQueue.invokeLater(new Runnable() {
 					public void run() {
@@ -82,75 +101,116 @@ implements PlugIn, Loggable
 					}
 				});
 
+			} else {
+
+				displayMissingPlugins();
+				IJ.log("Unable to launch the Nuclear Morphology Analysis plugin for ImageJ");
+				IJ.log("This is because a required plugin is missing");
+				IJ.log("The names of the missing plugins are listed above");
+				IJ.log("Visit the project wiki for links to download missing plugins:");
+				IJ.log("https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Installation");
+
 			}
 		} catch (Exception e) {
 			logToImageJ("Error initialising", e);
 		}
 	}
 	
-	private boolean checkPlugins(){
-		boolean result = true;
-		String pluginDirName = IJ.getDirectory("plugins");
-		File pluginDir = new File(pluginDirName);
-		
-		File oldJarDir = new File(pluginDirName+File.separator+"jars");
-		File jarDir = new File(pluginDirName+File.separator+"Nuclear_Morphology_Analysis");
-		
-		boolean[] oklist = new boolean[requiredFiles.length];
-		for(boolean ok : oklist){
-			ok = false;
+	/**
+	 * Check the given directory for files
+	 * @param dir
+	 */
+	private void checkDir(File dir){
+				
+		if(dir==null){
+			return;
 		}
+		
+		if(allPluginsFound()){ // Don't waste time if they have all been found so far
+			return;
+		}
+		
+		if( ! dir.exists()){
+			return;
+		}
+		if( ! dir.isDirectory()){
+			return;
+		}
+		
+		List<String> toCheck = Arrays.stream(fileNames)
+			.filter( s -> requiredFiles.get(s)==false )
+			.collect(Collectors.toList());
+				
 
-		// check the plugins directory and the plugins/jars directory
-		for(int i=0; i<requiredFiles.length; i++){
-			String fileName = requiredFiles[i];
-			for(File file : pluginDir.listFiles()){
+		for(File file : dir.listFiles()){
+			
+			if(file.isDirectory()){
+				continue;
+			}
 				
-				if(file.getName().startsWith(fileName)){
-					oklist[i] = true;
+			for(String s : toCheck){
+				
+				if(file.getName().startsWith(s)){
+					requiredFiles.put(s, true);
 				}
 				
 			}
-			
-			for(File file : jarDir.listFiles()){
-				
-				if(file.getName().startsWith(fileName)){
-					oklist[i] = true;
-				}
-				
-			}
-			
-			/*
-			 * Check the old folder for jars
-			 */
-			for(File file : oldJarDir.listFiles()){
-				
-				if(file.getName().startsWith(fileName)){
-					oklist[i] = true;
-				}
-				
-			}
-			
 		}
+	}
+	
+	/**
+	 * Check if all the plugins needed have been found yet
+	 * @return
+	 */
+	private boolean allPluginsFound(){
+		long count = Arrays.stream(fileNames)
+				.filter( s -> requiredFiles.get(s)==false )
+				.count();
 		
+		return count > 0;
+			
+	}
+	
+	private void displayMissingPlugins(){
 		// report missing jars
-		for(int i=0; i<requiredFiles.length; i++){
-			if(oklist[i]==false){
-				IJ.log("Cannot find a required plugin: "+requiredFiles[i]);
-				result = false;
+		for(String s : requiredFiles.keySet()){
+			if(requiredFiles.get(s)==false){
+				IJ.log("Cannot find a required plugin: "+s);
 			}
 		}
+	}
+	
+	/**
+	 * Look in the likely plugins folders for the required plugins.
+	 * @return
+	 */
+	private boolean checkPlugins(){
 		
-		if(result==false){
-			IJ.log("Unable to launch the Nuclear Morphology Analysis plugin for ImageJ");
-			IJ.log("This is because a required plugin is missing");
-			IJ.log("The names of the missing plugins are listed above");
-			IJ.log("Visit the project wiki for links to download missing plugins:");
-			IJ.log("https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Installation");
-			
-		}
+		clearFileList(); // set all files to false
 		
-		return result;
+		String pluginDirName = IJ.getDirectory("plugins");
+		
+		File pluginDir = new File(pluginDirName);
+		File oldJarDir = new File(pluginDirName+File.separator+"jars");
+		File jarDir    = new File(pluginDirName+File.separator+"Nuclear_Morphology_Analysis");
+		
+
+		// check the plugins directory directly
+		checkDir(pluginDir);
+		
+		
+		/*
+		 * Check the new jar dir for jars
+		 */
+		checkDir(jarDir);
+		
+		/*
+		 * Check the old folder for jars (optional storage in 1.12.0 and earlier)
+		 */
+		checkDir(oldJarDir);
+		
+				
+		return allPluginsFound();
 	}
 }
 
