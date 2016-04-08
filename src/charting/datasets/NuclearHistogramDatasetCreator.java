@@ -19,6 +19,7 @@
 package charting.datasets;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -73,8 +74,8 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 
 				String groupLabel = options.getStat().toString();
 
-				double min = Stats.min(values);
-				double max = Stats.max(values);
+				double min = Arrays.stream(values).min().orElse(0); //Stats.min(values);
+				double max = Arrays.stream(values).max().orElse(0); //Stats.max(values);
 
 //				options.log(Level.FINEST, "  Min: "+min+"; max: "+max);
 
@@ -120,8 +121,8 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 	
 	
 	private static double[] findMinAndMaxForHistogram(double[] values){
-		double min = Stats.min(values);
-		double max = Stats.max(values);
+		double min = Arrays.stream(values).min().orElse(0); //Stats.min(values);
+		double max = Arrays.stream(values).max().orElse(0); //Stats.max(values);
 
 		int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
 		
@@ -265,8 +266,8 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 	 */
 	public static int[] updateMinMaxRange(int[] range, double[] values){
 		
-		double min = Stats.min(values);
-		double max = Stats.max(values);
+		double min = Arrays.stream(values).min().orElse(0); //Stats.min(values);
+		double max = Arrays.stream(values).max().orElse(0); //Stats.max(values);
 					
 		int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
 					
@@ -320,8 +321,8 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 					options.getScale(), 
 					medianSeg.getID());
 			
-			double min = Stats.min(lengths);
-			double max = Stats.max(lengths);
+			double min = Arrays.stream(lengths).min().orElse(0); //Stats.min(values);
+			double max = Arrays.stream(lengths).max().orElse(0); //Stats.max(values);
 
 
 //			options.log(Level.FINEST, "  Min: "+min+"; max: "+max);
@@ -427,8 +428,8 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			
 			KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(  lengths , 0.001 );
 	
-			double min = Stats.min(lengths);
-			double max = Stats.max(lengths);
+			double min = Arrays.stream(lengths).min().orElse(0); //Stats.min(values);
+			double max = Arrays.stream(lengths).max().orElse(0); //Stats.max(values);
 
 			int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
 			

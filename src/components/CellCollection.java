@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -501,7 +502,8 @@ public class CellCollection implements Serializable {
   }
 
   public double getMaxProfileLength(){
-	  return Stats.max(this.getArrayLengths());
+//	  return Stats.max(this.getArrayLengths());
+	  return Arrays.stream(this.getArrayLengths()).max().orElse(0); //Stats.max(values);
   }
   
     
@@ -652,7 +654,7 @@ public class CellCollection implements Serializable {
 	  Profile medianProfile = this.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, 50); // the profile we compare the nucleus to
 	  Nucleus n = this.getNuclei().get(0); // default to the first nucleus
 
-	  double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
+	  double difference = Arrays.stream(getDifferencesToMedianFromPoint(pointType)).max().orElse(0);
 	  for(Nucleus p : this.getNuclei()){
 		  Profile angleProfile = p.getProfile(ProfileType.REGULAR, pointType);
 		  double nDifference = angleProfile.absoluteSquareDifference(medianProfile);

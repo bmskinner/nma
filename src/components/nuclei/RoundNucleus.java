@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -874,7 +875,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	public double getNarrowestDiameter() throws Exception{
-		return Stats.min(this.getProfile(ProfileType.DISTANCE).asArray());
+		return Arrays.stream(this.getProfile(ProfileType.DISTANCE).asArray()).min().orElse(0);
 	}
 
 

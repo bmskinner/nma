@@ -166,7 +166,8 @@ public class ModalityTest {
 	}
 	
 	private int getLargestBinCount(BinnedData bins){
-		return Stats.max(bins.toArray());
+		return Arrays.stream(bins.toArray()).max().orElse(0);
+//		return Stats.max(bins.toArray());
 	}
 	
 	

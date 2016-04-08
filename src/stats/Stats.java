@@ -32,12 +32,12 @@
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-
 import utility.Utils;
 
  public class Stats {
 	 
 	 public static final double LOG2 = Math.log(2);
+	 public static final String NULL_OR_EMPTY_ARRAY_ERROR = "The data array either is null or does not contain any data.";
 
  /*
     Calculate the <lowerPercent> quartile from a Double[] array
@@ -45,7 +45,7 @@ import utility.Utils;
   public static double quartile(double[] values, double lowerPercent) {
 
       if (values == null || values.length == 0) {
-          throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+          throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
       }
 
       if(values.length==1){
@@ -66,9 +66,14 @@ import utility.Utils;
 	return quartile(Utils.getdoubleFromDouble(values), lowerPercent);
   }
 
+  /**
+   * Calculate the mean of an array of values
+   * @param m
+   * @return
+   */
   public static double mean(double[] m) {
     if (m == null || m.length == 0) {
-        throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+        throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
     }
     
     if(m.length==1){
@@ -76,15 +81,20 @@ import utility.Utils;
     }
     
     double sum = 0;
-    for (int i = 0; i < m.length; i++) {
-        sum += m[i];
+    for(double d : m){
+    	sum += d;
     }
     return sum / m.length;
   }
   
+  /**
+   * Calculate the standard error of an array of values
+   * @param m
+   * @return
+   */
   public static double stderr(double[] m){
 	  if (m == null || m.length == 0) {
-	        throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+	        throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
 	  }
 	  
 	  if(m.length<2){
@@ -94,9 +104,14 @@ import utility.Utils;
 	  return stdev(m)/Math.sqrt(m.length);
   }
   
+  /**
+   * Calculate the standard deviation of an array of values
+   * @param m
+   * @return
+   */
   public static double stdev(double[] m){
 	  if (m == null || m.length == 0) {
-	        throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+	        throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
 	  }
 	  
 	  if(m.length<2){
@@ -105,47 +120,25 @@ import utility.Utils;
 	  return Math.sqrt(variance(m));
   }
   
+  /**
+   * Calculate the variance of an array of values
+   * @param m
+   * @return
+   */
   public static double variance(double[] m){
 	  if (m == null || m.length == 0) {
-	        throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+		  throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
 	  }
-	  
+
 	  if(m.length<2){
 		  return 0;
 	  }
-	  
-      double mean = mean(m);
-      double temp = 0;
-      for(double d : m)
-          temp += Math.pow(mean-d, 2);
-      return temp/m.length;
-  }
 
-  public static double min(double[] d){
-    double min = max(d);
-    for(int i=0;i<d.length;i++){
-      if( d[i]<min)
-        min = d[i];
-    }
-    return min;
-  }
-
-  public static double max(double[] d){
-	  double max = 0;
-	  for(int i=0;i<d.length;i++){
-		  if( d[i]>max)
-			  max = d[i];
-	  }
-	  return max;
-  }
-
-  public static int max(int[] d){
-	  int max = 0;
-	  for(int i=0;i<d.length;i++){
-		  if( d[i]>max)
-			  max = d[i];
-	  }
-	  return max;
+	  double mean = mean(m);
+	  double temp = 0;
+	  for(double d : m)
+		  temp += Math.pow(mean-d, 2);
+	  return temp/m.length;
   }
 
   /**

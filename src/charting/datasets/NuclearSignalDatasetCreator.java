@@ -22,6 +22,7 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -241,8 +242,8 @@ public class NuclearSignalDatasetCreator implements Loggable {
 					double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
 					KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values, 0.001);
 
-					double min = Stats.min(values);
-					double max = Stats.max(values);
+					double min = Arrays.stream(values).min().orElse(0); //Stats.min(values);
+					double max = Arrays.stream(values).max().orElse(0); //Stats.max(values);
 
 					int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
 
