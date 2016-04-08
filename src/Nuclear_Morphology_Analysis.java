@@ -83,8 +83,10 @@ implements PlugIn, Loggable
 		}
 	}
 	
-	
-	
+	/*
+	 * Check all dependencies are present, the
+	 * Java version is correct and load the main window
+	 */
 	public void load()  {
 
 		try {
@@ -138,6 +140,10 @@ implements PlugIn, Loggable
 		
 	}
 	
+	/**
+	 * Get the URL for the splash screen gif
+	 * @return
+	 */
 	private URL getSplashURL(){
 		
 		String path = "res/splash.gif";
@@ -152,6 +158,13 @@ implements PlugIn, Loggable
 		}
 	}
 	
+	/**
+	 * Make the splash window from a JWindow, and make
+	 * it visible. We're not using SplashScreen because the
+	 * JVM has started with IJ, and so getSplashScreen() will
+	 * return null.
+	 * @return
+	 */
 	private JWindow createSplash(){
 		JWindow window = new JWindow();
 		window.getContentPane().add(
