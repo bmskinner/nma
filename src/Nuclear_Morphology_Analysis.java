@@ -22,15 +22,16 @@ import ij.IJ;
 import ij.plugin.PlugIn;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JWindow;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
 import logging.Loggable;
 
 public class Nuclear_Morphology_Analysis
@@ -64,11 +65,27 @@ implements PlugIn, Loggable
 		}
 	}
 	
-	
 	/* 
      * The first method run when the plugin starts.
 	 */
-	public void run(String paramString)  {
+	public void run(String paramString){
+		/*
+		 * Add a splash screen for long load times
+		 */
+		final JWindow splash = createSplash();
+		
+		try {
+			load();
+		} catch(Exception e){
+			
+		} finally {
+			splash.dispose();
+		}
+	}
+	
+	
+	
+	public void load()  {
 
 		try {
 			
@@ -80,6 +97,8 @@ implements PlugIn, Loggable
 				IJ.log("http://rsb.info.nih.gov/ij/download.html");
 				return;
 			}
+			
+			
 
 			if(checkPlugins()){ 
 
@@ -111,9 +130,35 @@ implements PlugIn, Loggable
 				IJ.log("https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Installation");
 
 			}
+			
+			
 		} catch (Exception e) {
 			logToImageJ("Error initialising", e);
+		} 
+		
+	}
+	
+	private URL getSplashURL(){
+		
+		String path = "res/splash.gif";
+		ClassLoader cl = this.getClass().getClassLoader();
+		URL urlToGif = cl.getResource(path);
+		if(urlToGif!=null){
+			return urlToGif;
+		} else {
+			path = "splash.gif";
+			urlToGif = cl.getResource(path);
+			return urlToGif;
 		}
+	}
+	
+	private JWindow createSplash(){
+		JWindow window = new JWindow();
+		window.getContentPane().add(
+		    new JLabel("", new ImageIcon(getSplashURL()), SwingConstants.CENTER));
+		window.setBounds(500, 150, 300, 200);
+		window.setVisible(true);
+		return window;
 	}
 	
 	/**
