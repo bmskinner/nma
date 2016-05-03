@@ -933,46 +933,43 @@ public class AnalysisDataset implements Serializable {
 	 * @param dataset
 	 * @throws Exception
 	 */
-	public void updateSourceImageDirectory(File expectedImageDirectory) throws Exception {
+	public void updateSourceImageDirectory(File expectedImageDirectory) {
 		
 		Logger logger = Logger.getLogger("ProgramLogger");
 		logger.log(Level.FINE, "Searching "+expectedImageDirectory.getAbsolutePath());
-
-		if(expectedImageDirectory.exists()){
-
-			// Is the name of the expectedImageDirectory the same as the dataset image directory?
-			if(checkName(expectedImageDirectory, this)){
-				logger.log(Level.FINE, "Dataset name matches new folder");
-
-				// Does expectedImageDirectory contain image files?
-				if(checkHasImages(expectedImageDirectory)){
-					logger.log(Level.FINE, "Target folder contains at least one image");
-
-					logger.log(Level.FINE, "Updating dataset image paths");
-					boolean ok = this.getCollection().updateSourceFolder(expectedImageDirectory);
-					if(!ok){
-						logger.log(Level.WARNING, "Error updating dataset image paths; update cancelled");
-					}
-
-					logger.log(Level.FINE, "Updating child dataset image paths");
-					for(AnalysisDataset child : this.getAllChildDatasets()){
-						ok = child.getCollection().updateSourceFolder(expectedImageDirectory);
-						if(!ok){
-							logger.log(Level.SEVERE, "Error updating child dataset image paths; update cancelled");
-						}
-					}
-
-					logger.log(Level.INFO, "Updated image paths to new folder location");
-				} else {
-					logger.log(Level.WARNING, "Target folder contains no images; unable to update paths");
-				}
-			} else {
-				logger.log(Level.WARNING, "Dataset name does not match new folder; unable to update paths");
-			}
-
-		} else {
-			logger.log(Level.WARNING, "Unable to locate image directory and/or analysis directory; unable to update paths");
+		
+		if( ! expectedImageDirectory.exists()){
+			throw new IllegalArgumentException("Requested directory does not exist: "+expectedImageDirectory);
 		}
+
+		// Is the name of the expectedImageDirectory the same as the dataset image directory?
+		if( ! checkName(expectedImageDirectory, this)){
+			throw new IllegalArgumentException("Dataset name does not match new folder; unable to update paths");
+		}
+		logger.log(Level.FINE, "Dataset name matches new folder");
+			
+		// Does expectedImageDirectory contain image files?
+		if( ! checkHasImages(expectedImageDirectory)){
+			throw new IllegalArgumentException("Target folder contains no images; unable to update paths");
+		}
+		
+		logger.log(Level.FINE, "Target folder contains at least one image");
+
+		logger.log(Level.FINE, "Updating dataset image paths");
+		boolean ok = this.getCollection().updateSourceFolder(expectedImageDirectory);
+		if(!ok){
+			logger.log(Level.WARNING, "Error updating dataset image paths; update cancelled");
+		}
+
+		logger.log(Level.FINE, "Updating child dataset image paths");
+		for(AnalysisDataset child : this.getAllChildDatasets()){
+			ok = child.getCollection().updateSourceFolder(expectedImageDirectory);
+			if(!ok){
+				logger.log(Level.SEVERE, "Error updating child dataset image paths; update cancelled");
+			}
+		}
+
+		logger.log(Level.INFO, "Updated image paths to new folder location");
 	}
 	
 	/**

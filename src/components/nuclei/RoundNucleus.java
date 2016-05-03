@@ -1273,7 +1273,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		profileMap.put(ProfileType.REGULAR, profile);
 	}
 	
-	public void updateSourceFolder(File newFolder) throws Exception {
+	public void updateSourceFolder(File newFolder) {
 		File oldFile = this.getSourceFile();
 		String oldName = oldFile.getName();
 		File newFile = new File(newFolder+File.separator+oldName);
@@ -1281,7 +1281,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			this.setSourceFile(newFile);
 			this.setNucleusFolder(new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension()));
 		} else {
-			throw new Exception("Cannot find file "+oldName+" in folder "+newFolder.getAbsolutePath());
+			throw new IllegalArgumentException("Cannot find file "+oldName+" in folder "+newFolder.getAbsolutePath());
 		}
 		
 	}

@@ -490,7 +490,7 @@ public interface Nucleus extends CellularComponent {
 	 * @param newFolder
 	 * @throws Exception 
 	 */
-	public void updateSourceFolder(File newFolder) throws Exception;
+	public void updateSourceFolder(File newFolder);
 	
 	/**
 	 * Get the reason for a nucleus failing checks

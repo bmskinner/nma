@@ -120,6 +120,9 @@ public class PopulationImportWorker extends AnalysisWorker {
 			}
 			
 			
+		} catch (IllegalArgumentException e){
+			warn("Unable to open file: "+e.getMessage());
+			return false;
 		} catch(Exception e){
 			logError("Unable to open file", e);
 			return false;
@@ -189,10 +192,14 @@ public class PopulationImportWorker extends AnalysisWorker {
 		return ok;
 	}
 	
-	private AnalysisDataset readDataset(File inputFile) throws Exception {
+	private AnalysisDataset readDataset(File inputFile) {
 
-		if(!inputFile.exists()){
+		if( ! inputFile.exists()){
 			throw new IllegalArgumentException("Requested file does not exist");
+		}
+		
+		if( ! inputFile.getName().endsWith(".nmd")){
+			throw new IllegalArgumentException("File is not nmd format");
 		}
 
 		AnalysisDataset dataset = null;
@@ -219,8 +226,13 @@ public class PopulationImportWorker extends AnalysisWorker {
 		} catch (ClassNotFoundException e1) {
 			logError("Class not found error: "+inputFile.getAbsolutePath(), e1);
 		} finally {
-			ois.close();
-			fis.close();
+			
+			try {
+				ois.close();
+				fis.close();
+			} catch(Exception e){
+				error("Error closing file stream", e);
+			}
 		}
 		return dataset;
 	}
@@ -232,7 +244,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 	 * @param inputFile the file being opened
 	 * @param dataset the dataset being opened
 	 */
-	private void updateSavePath(File inputFile, AnalysisDataset dataset) throws Exception {
+	private void updateSavePath(File inputFile, AnalysisDataset dataset) {
 		
 		log(Level.FINE, "File path has changed: attempting to relocate images");
 
@@ -246,8 +258,11 @@ public class PopulationImportWorker extends AnalysisWorker {
 			// This should be /ImageDir/
 			File expectedImageDirectory = expectedAnalysisDirectory.getParentFile();
 			
+			try {
 			dataset.updateSourceImageDirectory(expectedImageDirectory);
-
+			} catch (IllegalArgumentException e){
+				log(Level.WARNING, e.getMessage());
+			}
 //			updateSourceImageDirectory(expectedImageDirectory, dataset);
 
 		}else {

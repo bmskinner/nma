@@ -339,7 +339,8 @@ public class CellCollection implements Serializable {
 	  int i=0;
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  result[i++] =  n.getPathLength();
+		  result[i] =  n.getPathLength();
+		  i++;
 	  }
 	  return result;
   }
@@ -353,15 +354,12 @@ public class CellCollection implements Serializable {
 
 	  int count = this.getNucleusCount();
 	  double[] result = new double[count];
-			  
-//	  List<Double> list = new ArrayList<Double>();
+
 	  int i=0;
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-//		  list.add(  (double) n.getBorderLength());
 		  result[i++] =  n.getBorderLength();
 	  }
-//	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
 	  return result;
   }
   
@@ -876,7 +874,7 @@ public class CellCollection implements Serializable {
 	  }
   }
 
-  public boolean updateSourceFolder(File newFolder) throws Exception{
+  public boolean updateSourceFolder(File newFolder) {
 		File oldFile = this.getFolder();
 		boolean ok = false;
 
@@ -890,12 +888,13 @@ public class CellCollection implements Serializable {
 				}
 				ok = true;
 				
-			} catch (Exception e){
+			} catch (IllegalArgumentException e){
 				// one of the nuclei failed to update
 				// reset all to previous
 				this.folder = oldFile;
 
 				for(Nucleus n : this.getNuclei()){
+					
 					n.updateSourceFolder(oldFile);
 				}
 				ok = false;
