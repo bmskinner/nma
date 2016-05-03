@@ -623,15 +623,16 @@ public class RoundNucleus extends AbstractCellularComponent
 	public double getPathLength() throws Exception{
 		double pathLength = 0;
 
-		XYPoint prevPoint = new XYPoint(0,0);
+		Profile angleProfile = this.getProfile(ProfileType.REGULAR);
+		
+		// First previous point is the last point of the profile
+		XYPoint prevPoint = new XYPoint(0,angleProfile.get(this.getBorderLength()-1));
 		 
 		for (int i=0; i<this.getBorderLength();i++ ) {
 				double normalisedX = ((double)i/(double)this.getBorderLength())*100; // normalise to 100 length
-
-				// calculate the path length as if it were a border
 				
-				Profile angleProfile = this.getProfile(ProfileType.REGULAR);
-				
+				// We are measuring along the chart of angle vs position
+				// Each median angle value is treated as an XYPoint
 				XYPoint thisPoint = new XYPoint(normalisedX, angleProfile.get(i));
 				pathLength += thisPoint.getLengthTo(prevPoint);
 				prevPoint = thisPoint;

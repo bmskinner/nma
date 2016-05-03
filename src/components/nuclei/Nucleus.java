@@ -147,6 +147,12 @@ public interface Nucleus extends CellularComponent {
 	 */
 	public double getNarrowestDiameter() throws Exception;
 
+	/**
+	 * Calculate the distance from point to point around the 
+	 * periphery of the nucleus.
+	 * @return
+	 * @throws Exception
+	 */
 	public double getPathLength() throws Exception;
 
 	
