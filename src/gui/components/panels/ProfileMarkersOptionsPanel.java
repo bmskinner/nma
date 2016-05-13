@@ -23,7 +23,8 @@ import javax.swing.JCheckBox;
 @SuppressWarnings("serial")
 public class ProfileMarkersOptionsPanel extends EnumeratedOptionsPanel {
 	
-	private JCheckBox   checkBox 	= new JCheckBox("Show markers");	
+	private JCheckBox   checkBox 	   = new JCheckBox("Show markers");
+	private JCheckBox   hideRawProfile = new JCheckBox("Hide profiles");
 	
 	public ProfileMarkersOptionsPanel(){
 		super();
@@ -32,16 +33,36 @@ public class ProfileMarkersOptionsPanel extends EnumeratedOptionsPanel {
 		checkBox.setSelected(true);
 		checkBox.addActionListener(this);
 		this.add(checkBox);
-	
+		
+		// checkbox to show or hide individual nucleus profiles
+		hideRawProfile.setSelected(false);
+		hideRawProfile.addActionListener(this);
+		this.add(hideRawProfile);
+
 	}
 	
+	/**
+	 * Test if the options panel is set to show profile markers
+	 * @return
+	 */
 	public boolean showMarkers(){
 		return this.checkBox.isSelected();
+	}
+	
+	/**
+	 * Test if the options panel is set to hide raw profiles
+	 * @return
+	 */
+	public boolean isHideProfiles(){
+		return hideRawProfile.isSelected();
 	}
 	
 	public void setEnabled(boolean b){
 
 		this.checkBox.setEnabled(b);
+		this.hideRawProfile.setEnabled(b);
 	}
+	
+	
 
 }

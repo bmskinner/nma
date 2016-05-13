@@ -96,11 +96,11 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			return makeEmptyProfileChart(options.getType());
 		}
 		
-		if(options.isSingleDataset()){
+		if(options.isSingleDataset() &&  !options.isHideProfiles() ){
 			return makeSingleProfileChart(options);
 		}
 		
-		if(options.getDatasets().size()>1){
+		if(options.isMultipleDatasets() || options.isHideProfiles() ){
 			return makeMultiProfileChart(options);
 		}
 		return makeEmptyProfileChart(options.getType());

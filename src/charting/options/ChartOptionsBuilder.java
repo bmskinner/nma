@@ -47,6 +47,7 @@ public class ChartOptionsBuilder {
 	private ProfileAlignment alignment = ProfileAlignment.LEFT;
 	private BorderTag tag              = BorderTag.REFERENCE_POINT;
 	private boolean showMarkers        = false;
+	private boolean hideProfiles       = false;
 	private ProfileType type           = ProfileType.REGULAR;
 	private int signalGroup            = 1;
 	private boolean useDensity         = false;
@@ -120,6 +121,11 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
+	public ChartOptionsBuilder setHideProfiles(boolean b){
+		this.hideProfiles = b;
+		return this;
+	}
+	
 	public ChartOptionsBuilder setProfileType(ProfileType type){
 		this.type = type;
 		return this;
@@ -152,6 +158,7 @@ public class ChartOptionsBuilder {
 		result.setNormalised(normalised);
 		result.setScale(scale);
 		result.setShowMarkers(showMarkers);
+		result.setHideProfiles(hideProfiles);
 		result.setSignalGroup(signalGroup);
 		result.setStat(stat);
 		result.setTag(tag);

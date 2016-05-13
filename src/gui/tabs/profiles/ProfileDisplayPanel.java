@@ -91,6 +91,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 			ProfileAlignment alignment = normalised ?  ProfileAlignment.LEFT : profileAlignmentOptionsPanel.getSelected();
 			BorderTag tag              = borderTagOptionsPanel.getSelected();
 			boolean showMarkers        = profileMarkersOptionsPanel.showMarkers();
+			boolean hideProfiles       = profileMarkersOptionsPanel.isHideProfiles();
 			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
@@ -98,6 +99,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 				.setAlignment(alignment)
 				.setTag(tag)
 				.setShowMarkers(showMarkers)
+				.setHideProfiles(hideProfiles)
 				.setProfileType(type)
 				.build();
 			return options;

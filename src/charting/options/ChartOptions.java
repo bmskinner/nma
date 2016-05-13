@@ -40,6 +40,7 @@ public class ChartOptions extends AbstractOptions {
 	private ProfileAlignment alignment = ProfileAlignment.LEFT;
 	private BorderTag tag              = BorderTag.REFERENCE_POINT;
 	private boolean showMarkers        = false;
+	private boolean hideProfiles       = false;
 	private ProfileType type           = ProfileType.REGULAR;
 	private int signalGroup            = 1;
 	private boolean useDensity         = false;
@@ -116,6 +117,14 @@ public class ChartOptions extends AbstractOptions {
 	public void setShowMarkers(boolean showMarkers) {
 		this.showMarkers = showMarkers;
 	}
+	
+	public boolean isHideProfiles() {
+		return hideProfiles;
+	}
+
+	public void setHideProfiles(boolean hideProfiles) {
+		this.hideProfiles = hideProfiles;
+	}
 
 	public ProfileType getType() {
 		return type;
@@ -152,6 +161,7 @@ public class ChartOptions extends AbstractOptions {
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + (normalised ? 1231 : 1237);
 		result = prime * result + (showMarkers ? 1231 : 1237);
+		result = prime * result + (hideProfiles ? 1231 : 1237);
 		result = prime * result + signalGroup;
 		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
 		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
@@ -177,6 +187,8 @@ public class ChartOptions extends AbstractOptions {
 		if (normalised != other.normalised)
 			return false;
 		if (showMarkers != other.showMarkers)
+			return false;
+		if (hideProfiles != other.hideProfiles)
 			return false;
 		if (signalGroup != other.signalGroup)
 			return false;
