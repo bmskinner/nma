@@ -19,6 +19,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
@@ -38,9 +39,15 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.table.TableModel;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 import org.jfree.chart.JFreeChart;
 
@@ -55,12 +62,14 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 	
-	private JTextArea textArea = new JTextArea();
+	private JTextPane  textArea = new JTextPane();
 	
 	private JPanel 					logPanel;				// messages and errors
 	private JPanel 					progressPanel;			// progress bars for analyses
 	
 	private JTextField				console = new JTextField();
+	
+	private SimpleAttributeSet attrs; // the styling attributes
 	
 	private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
 	
@@ -95,16 +104,36 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
 		JScrollPane scrollPane = new JScrollPane();
-		textArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
+		
+		Font font = new Font("Monospaced", Font.PLAIN, 13);
+
+		
+		// Set the wrapped line indent
+		StyledDocument doc = textArea.getStyledDocument();
+		
+		attrs = new SimpleAttributeSet();
+        StyleConstants.setFirstLineIndent(attrs, -70);
+        StyleConstants.setLeftIndent(     attrs, 70);
+        StyleConstants.setFontFamily(     attrs, font.getFamily());
+        StyleConstants.setFontSize(       attrs, font.getSize());
+        StyleConstants.setForeground(     attrs, Color.BLACK);
+        StyleConstants.setBackground(     attrs, SystemColor.menu);
+        StyleConstants.setItalic(         attrs, false);
+        StyleConstants.setBold(           attrs, false);
+
+        doc.setParagraphAttributes(0, doc.getLength()+1, attrs, true);
+        doc.setCharacterAttributes(0, doc.getLength()+1, attrs, true);
+        
+        
 		DefaultCaret caret = (DefaultCaret)textArea.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		
-		scrollPane.setViewportView(textArea);
-		textArea.setBackground(SystemColor.menu);
 		textArea.setEditable(false);
-		textArea.setRows(9);
-		textArea.setColumns(30);
+		textArea.setBackground(SystemColor.menu);
 		
+		scrollPane.setViewportView(textArea);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+				
 		
 		panel.add(scrollPane, BorderLayout.CENTER);
 
@@ -117,7 +146,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		this.getActionMap().put("ShowConsole",
 				new ShowConsoleAction());
 		
-		console.setFont(new Font("Monospaced", Font.PLAIN, 13));
+		console.setFont(font);
 		panel.add(console, BorderLayout.SOUTH);
 		console.setVisible(false);
 		console.addActionListener(this);
@@ -130,11 +159,20 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	 * @param s the string to log
 	 */
 	public void log(String s){
-		logc(s+"\n");
+		print(s+"\n");
 	}
 	
 	public void print(String s){
-		textArea.append(s);
+		StyledDocument doc = textArea.getStyledDocument();
+
+		try {
+			
+			doc.insertString(doc.getLength(), s, attrs );
+			
+		} catch (BadLocationException e) {
+			logToImageJ("Error appending to log panel", e);
+		}
+
 	}
 	
 	public void clear(){
@@ -146,7 +184,15 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	 * @param s the string to log
 	 */
 	public void logc(String s){
-		textArea.append(s);
+		print(s);
+//		StyledDocument doc = (StyledDocument) textArea.getDocument();
+//		SimpleAttributeSet keyWord = new SimpleAttributeSet();
+//		try {
+//			doc.insertString(doc.getLength(), s, keyWord );
+//		} catch (BadLocationException e) {
+//			error("Error appending", e);
+//		}
+//		textArea.append(s);
 	}
 	
 	public void addProgressBar(JProgressBar progressBar){
