@@ -1,5 +1,6 @@
 package gui.tabs.segments;
 
+import gui.Labels;
 import gui.components.ExportableChartPanel;
 import gui.tabs.BoxplotsTabPanel;
 
@@ -103,7 +104,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		} else { // different number of segments, blank chart
 			measurementUnitSettingsPanel.setEnabled(false);
 			mainPanel.setLayout(new FlowLayout());
-			mainPanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
+			mainPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
 		}
 		mainPanel.revalidate();
 		mainPanel.repaint();

@@ -20,6 +20,7 @@
  *******************************************************************************/
 package gui.tabs.segments;
 
+import gui.Labels;
 import gui.components.FixedAspectRatioChartPanel;
 import gui.tabs.BoxplotsTabPanel;
 
@@ -161,7 +162,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 		} else { // different number of segments, blank chart
 			this.setEnabled(false);
 			mainPanel.setLayout(new FlowLayout());
-			mainPanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
+			mainPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
 //			scrollPane.setViewportView(mainPanel);
 		}
 

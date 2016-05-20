@@ -18,6 +18,8 @@
  *******************************************************************************/
 package charting.datasets;
 
+import gui.Labels;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +42,7 @@ import charting.options.TableOptions;
 import charting.options.TableOptions.TableType;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
+import analysis.ProfileManager;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
@@ -92,7 +95,7 @@ private static NucleusTableDatasetCreator instance = null;
 	
 	public TableModel createBlankTable(){
 		DefaultTableModel model = new DefaultTableModel();
-		model.addColumn("No data loaded");
+		model.addColumn(Labels.NO_DATA_LOADED);
 		return model;
 	}
 	
@@ -226,68 +229,80 @@ private static NucleusTableDatasetCreator instance = null;
 		df.setMinimumFractionDigits(2);
 		df.setMaximumFractionDigits(2);
 		df.setMinimumIntegerDigits(1);
+		
+		// If the datasets have different segment counts, show error message
+		if( ! ProfileManager.segmentCountsMatch(list)){
+			model.addColumn(Labels.INCONSISTENT_SEGMENT_NUMBER);
+			return model;
+		}
+		
+		// If there are no datasets, show error message
+		if( ! options.hasDatasets()){
+			model.addColumn(Labels.NO_DATA_LOADED);
+			return model;
 
+		} 
+
+		// Everything after this is building the table assuming valid data
+		
 		List<Object> fieldNames = new ArrayList<Object>(0);
-		if(list==null){
-			model.addColumn("No data loaded");
+		
+		BorderTag point = BorderTag.REFERENCE_POINT;//.ORIENTATION_POINT;
 
-		} else {
-			
-			BorderTag point = BorderTag.REFERENCE_POINT;//.ORIENTATION_POINT;
-			
-			// assumes all datasets have the same number of segments
-			List<NucleusBorderSegment> segments = list.get(0)
-					.getCollection()
+		// assumes all datasets have the same number of segments
+		List<NucleusBorderSegment> segments = list.get(0)
+				.getCollection()
+				.getProfileCollection(ProfileType.REGULAR)
+				.getSegmentedProfile(point)
+				.getOrderedSegments();
+
+
+		// Add the dataset names column
+		fieldNames.add("Dataset");
+		for(NucleusBorderSegment segment : segments) {
+			fieldNames.add(segment.getName());
+		}
+		model.setColumnIdentifiers(fieldNames.toArray());;
+
+		// Add the segment colours column
+		List<Object> colours = new ArrayList<Object>(0);
+		colours.add("");
+
+		for(NucleusBorderSegment segment : segments) {
+			colours.add("");
+		}
+		model.addRow(colours.toArray(new Object[0]));
+
+		// Add the segment stats columns
+
+		for(AnalysisDataset dataset : list){
+
+			CellCollection collection = dataset.getCollection();		
+
+			// get the offset segments
+			//				List<NucleusBorderSegment> segs = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
+
+			List<NucleusBorderSegment> segs = collection
 					.getProfileCollection(ProfileType.REGULAR)
 					.getSegmentedProfile(point)
 					.getOrderedSegments();
-			
 
-			fieldNames.add("Dataset");
-			for(NucleusBorderSegment segment : segments) {
-				fieldNames.add(segment.getName());
+			List<Object> rowData = new ArrayList<Object>(0);
+			rowData.add(dataset.getName());
+
+			for(NucleusBorderSegment segment : segs) {
+
+				double[] meanLengths = collection.getSegmentStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
+
+				double mean = Stats.mean(meanLengths); 
+
+				double ci = Stats.calculateConfidenceIntervalSize(meanLengths, 0.95);
+
+				rowData.add(df.format(mean)+" ± "+ df.format(ci));
 			}
-			model.setColumnIdentifiers(fieldNames.toArray());;
-			
-			// add the segment colours
-			List<Object> colours = new ArrayList<Object>(0);
-			colours.add("");
-			
-			for(NucleusBorderSegment segment : segments) {
-				colours.add("");
-			}
-			model.addRow(colours.toArray(new Object[0]));
-			
-			
-
-			for(AnalysisDataset dataset : list){
-
-				CellCollection collection = dataset.getCollection();		
-
-				// get the offset segments
-//				List<NucleusBorderSegment> segs = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
-				
-				List<NucleusBorderSegment> segs = collection
-						.getProfileCollection(ProfileType.REGULAR)
-						.getSegmentedProfile(point)
-						.getOrderedSegments();
-				
-				List<Object> rowData = new ArrayList<Object>(0);
-				rowData.add(dataset.getName());
-
-				for(NucleusBorderSegment segment : segs) {
-					
-					double[] meanLengths = collection.getSegmentStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
-
-					double mean = Stats.mean(meanLengths); 
-
-					double ci = Stats.calculateConfidenceIntervalSize(meanLengths, 0.95);
-					
-					rowData.add(df.format(mean)+" ± "+ df.format(ci));
-				}
-				model.addRow(rowData.toArray(new Object[0]));
-			}
+			model.addRow(rowData.toArray(new Object[0]));
 		}
+
 		return model;	
 	}
 	

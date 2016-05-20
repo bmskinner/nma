@@ -20,6 +20,7 @@
  *******************************************************************************/
 package gui.tabs.segments;
 
+import gui.Labels;
 import gui.components.ExportableTable;
 import gui.components.PairwiseTableCellRenderer;
 import gui.tabs.AbstractPairwiseDetailPanel;
@@ -110,7 +111,7 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel  {
 			tablePanel.revalidate();
 
 		} else {
-			tablePanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
+			tablePanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
 		} 
 		
 		scrollPane.setViewportView(tablePanel);;

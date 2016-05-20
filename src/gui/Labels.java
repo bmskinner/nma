@@ -60,5 +60,11 @@ public class Labels {
 			+ "be used in the clustering";
 	public static final String USE_SIMILARITY_MATRIX = "<html>If selected, use the difference between each nucleus profile<br>"
 			+ "and every other nucleus for clustering.<br>Otherwise, use area, circularity and aspect ratio</html>";
-
+	
+	
+	/*
+	 * Table headers
+	 */
+	public static final String INCONSISTENT_SEGMENT_NUMBER = "Segment number is not consistent across datasets";
+	public static final String NO_DATA_LOADED = "No data loaded";
 }
