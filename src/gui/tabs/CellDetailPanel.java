@@ -712,6 +712,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					rotationPanel.setEnabled( ! makeMeshPanel.isSelected() );
 					showHookHump.setEnabled(  ! makeMeshPanel.isSelected() );
 					
+					// Don't enable the hook-hump box unless we have a rodent sperm dataset
+					if( ! activeDataset().getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
+						showHookHump.setEnabled(  false );
+					}
+					
 					makeMeshPanel.setEnabled(true);
 
 					if(makeMeshPanel.isSelected()){
