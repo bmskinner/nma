@@ -30,6 +30,7 @@ import components.nuclei.Nucleus;
 import gui.LoadingIconDialog;
 import gui.components.ExportableChartPanel;
 import gui.components.FixedAspectRatioChartPanel;
+import gui.components.panels.DatasetSelectionPanel;
 
 /**
  * A dialog window allowing comparisons between the consensus nuclei of multiple collections.
@@ -52,8 +53,11 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 	private JSpinner maxRatioSpinner;
 	private JSpinner meshSizeSpinner;
 	
-	private JComboBox<AnalysisDataset> boxOne;
-	private JComboBox<AnalysisDataset> boxTwo;
+//	private JComboBox<AnalysisDataset> boxOne;
+//	private JComboBox<AnalysisDataset> boxTwo;
+	
+	private DatasetSelectionPanel boxOne;
+	private DatasetSelectionPanel boxTwo;
 	
 	public ConsensusCompareDialog(List<AnalysisDataset> datasets){
 		super();
@@ -146,14 +150,18 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 	
 	private JPanel createHeader(){
 		JPanel panel = new JPanel(new FlowLayout());
-		boxOne = new JComboBox<AnalysisDataset>();
-		boxTwo = new JComboBox<AnalysisDataset>();
-		for(AnalysisDataset d : datasets){
-			boxOne.addItem(d);
-			boxTwo.addItem(d);
-		}
-		boxOne.setSelectedItem(datasets.get(0));
-		boxTwo.setSelectedItem(datasets.get(1));
+		
+		boxOne = new DatasetSelectionPanel(datasets);
+		boxTwo = new DatasetSelectionPanel(datasets);
+		boxTwo.setSelectionIndex(1);
+//		boxOne = new JComboBox<AnalysisDataset>();
+//		boxTwo = new JComboBox<AnalysisDataset>();
+//		for(AnalysisDataset d : datasets){
+//			boxOne.addItem(d);
+//			boxTwo.addItem(d);
+//		}
+//		boxOne.setSelectedItem(datasets.get(0));
+//		boxTwo.setSelectedItem(datasets.get(1));
 		
 		boxOne.addActionListener(this);
 		boxTwo.addActionListener(this);
@@ -197,8 +205,8 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 	private void runComparison(){
 		
 		setLoading(true);
-		AnalysisDataset one = (AnalysisDataset) boxOne.getSelectedItem();
-		AnalysisDataset two = (AnalysisDataset) boxTwo.getSelectedItem();
+		AnalysisDataset one = boxOne.getSelectedDataset();
+		AnalysisDataset two = boxTwo.getSelectedDataset();
 		
 		double logRatio = (double) maxRatioSpinner.getValue();
 		int    meshSize = (int)    meshSizeSpinner.getValue();

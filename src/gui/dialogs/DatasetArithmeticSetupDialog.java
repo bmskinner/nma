@@ -35,13 +35,14 @@ import javax.swing.border.EmptyBorder;
 
 import analysis.AnalysisDataset;
 import gui.MainWindow;
+import gui.components.panels.DatasetSelectionPanel;
 
 @SuppressWarnings("serial")
 public class DatasetArithmeticSetupDialog extends SettingsDialog implements ActionListener{
 	
 	
-	JComboBox<AnalysisDataset> boxOne;
-	JComboBox<AnalysisDataset> boxTwo;
+	DatasetSelectionPanel boxOne;
+	DatasetSelectionPanel boxTwo;
 	JComboBox<DatasetArithmeticOperation> operatorBox;
 	JLabel operatorDescription = new JLabel(DatasetArithmeticOperation.AND.getDescription());
 	
@@ -74,11 +75,11 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 	}
 	
 	public AnalysisDataset getDatasetOne(){
-		return (AnalysisDataset) boxOne.getSelectedItem();
+		return boxOne.getSelectedDataset();
 	}
 	
 	public AnalysisDataset getDatasetTwo(){
-		return (AnalysisDataset) boxTwo.getSelectedItem();
+		return boxTwo.getSelectedDataset();
 	}
 	
 	public DatasetArithmeticOperation getOperation(){
@@ -96,13 +97,13 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		List<JLabel> labels = new ArrayList<JLabel>();
 		List<Component> fields = new ArrayList<Component>();
 		
-		boxOne = new JComboBox<AnalysisDataset>();
-		boxTwo = new JComboBox<AnalysisDataset>();
-		for(AnalysisDataset d : list){
-			boxOne.addItem(d);
-			boxTwo.addItem(d);
-		}
-		boxOne.setSelectedItem(selected);
+		boxOne = new DatasetSelectionPanel(list); //JComboBox<AnalysisDataset>();
+		boxTwo = new DatasetSelectionPanel(list);
+//		for(AnalysisDataset d : list){
+//			boxOne.addItem(d);
+//			boxTwo.addItem(d);
+//		}
+		boxOne.setSelectedDataset(selected);
 		
 		operatorBox = new JComboBox<DatasetArithmeticOperation>(DatasetArithmeticOperation.values());
 		operatorBox.setSelectedItem(DatasetArithmeticOperation.AND);
