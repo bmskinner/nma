@@ -93,6 +93,26 @@ public class Constants {
 			return stackNumber;
 		}
 		
+		/**
+		 * Given a channel integer, return the name of the channel.
+		 * Handles red (0), green (1) and blue(2). Other ints will 
+		 * return a null string.
+		 * @param channel
+		 * @return
+		 */
+		public static String channelIntToName(int channel){
+			if(channel == RGB_RED){
+				return "Red";
+			}
+			if(channel == RGB_GREEN){
+				return "Green";
+			}
+			if(channel == RGB_BLUE){
+				return "Blue";
+			}
+			return null;
+		}
+		
 		public enum CellComponent {
 			NUCLEUS 		("Nucleus"			), 
 			SPERM_TAIL 		("Sperm tail"		), 

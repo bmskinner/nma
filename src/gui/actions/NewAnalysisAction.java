@@ -49,8 +49,9 @@ public class NewAnalysisAction extends ProgressableAction {
 		super("Nucleus detection", mw);
 
 		this.cooldown();
+		
 		log(Level.FINE, "Making analysis options");
-		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog();
+		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(mw.getOpenDatasets());
 		
 		if( analysisSetup.getOptions()!=null){
 

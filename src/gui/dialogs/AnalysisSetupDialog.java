@@ -43,6 +43,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
@@ -52,6 +53,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import utility.Constants;
+import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import components.nuclear.NucleusType;
@@ -113,12 +115,15 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	private JSpinner scaleSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_SCALE,	0, 100, 0.001));
 
 	private JCheckBox keepFailedheckBox = new JCheckBox();
+	
+	private List<AnalysisDataset> openDatasets; // the other datasets open in the program, for copying options
 
 	/**
 	 * Create the frame.
 	 */
-	public AnalysisSetupDialog() {
+	public AnalysisSetupDialog(List<AnalysisDataset> datasets) {
 		super();
+		openDatasets = datasets;
 		setModal(true); // ensure nothing happens until this window is closed
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // disable the 'X'; we need to use the footer buttons 
 		setDefaultOptions();
@@ -131,8 +136,9 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	 * Create the dialog with an existing set of options
 	 * Allows settings to be reloaded.
 	 */
-	public AnalysisSetupDialog(AnalysisOptions options) {
+	public AnalysisSetupDialog(List<AnalysisDataset> datasets, AnalysisOptions options) {
 		super();
+		openDatasets = datasets;
 		setModal(true); // ensure nothing happens until this window is closed
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		analysisOptions = options;
@@ -229,6 +235,87 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		tailCannyOptions.setFlattenThreshold(CannyOptions.DEFAULT_FLATTEN_THRESHOLD);
 		
 	}
+	
+	/**
+	 * Set this options object to use the values in the given options
+	 * @param options
+	 */
+	public void setOptions(final AnalysisOptions options ){
+		analysisOptions.setNucleusThreshold(options.getNucleusThreshold());
+
+		analysisOptions.setMinNucleusSize(options.getMinNucleusSize());
+		analysisOptions.setMaxNucleusSize(options.getMaxNucleusSize());
+
+		analysisOptions.setMinNucleusCirc(options.getMinNucleusCirc());
+		analysisOptions.setMaxNucleusCirc(options.getMinNucleusCirc());
+
+		analysisOptions.setAngleProfileWindowSize(options.getAngleProfileWindowSize());
+
+		analysisOptions.setPerformReanalysis(options.isReanalysis());
+		analysisOptions.setRealignMode(options.realignImages());
+
+		analysisOptions.setRefoldNucleus(options.refoldNucleus());
+		analysisOptions.setRefoldMode(options.getRefoldMode());
+
+		analysisOptions.setScale(options.getScale());	
+		analysisOptions.setNucleusType(options.getNucleusType());
+		analysisOptions.setChannel(options.getChannel());
+		
+		
+		analysisOptions.addCannyOptions("nucleus");
+		CannyOptions templateCannyOptions = options.getCannyOptions("nucleus");
+		CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
+		
+		nucleusCannyOptions.setUseCanny(templateCannyOptions.isUseCanny());
+		nucleusCannyOptions.setCannyAutoThreshold(templateCannyOptions.isCannyAutoThreshold());
+		nucleusCannyOptions.setLowThreshold( templateCannyOptions.getLowThreshold());
+		nucleusCannyOptions.setHighThreshold( templateCannyOptions.getHighThreshold());
+		nucleusCannyOptions.setKernelRadius( templateCannyOptions.getKernelRadius());
+		nucleusCannyOptions.setKernelWidth(templateCannyOptions.getKernelWidth());
+		nucleusCannyOptions.setClosingObjectRadius(templateCannyOptions.getClosingObjectRadius());
+		
+		nucleusCannyOptions.setUseKuwahara(templateCannyOptions.isUseKuwahara());
+		nucleusCannyOptions.setKuwaharaKernel(templateCannyOptions.getKuwaharaKernel());
+		nucleusCannyOptions.setFlattenImage(templateCannyOptions.isUseFlattenImage());
+		nucleusCannyOptions.setFlattenThreshold(templateCannyOptions.getFlattenThreshold());
+		
+		// Update the gui
+		fine("Updated options object");
+		
+		try{
+			
+			channelSelection.setSelectedItem(Constants.channelIntToName(options.getChannel()));
+			
+			nucleusThresholdSpinner.setValue(options.getNucleusThreshold());
+		
+			txtMinNuclearSize.setValue( (int) options.getMinNucleusSize());
+
+
+			txtMaxNuclearSize.setValue( (int) options.getMaxNucleusSize());
+
+			minNuclearCircSpinner.setValue(options.getMinNucleusCirc());
+
+			maxNuclearCircSpinner.setValue(options.getMaxNucleusCirc());
+
+			scaleSpinner.setValue(options.getScale());
+			txtProfileWindowSize.setValue(options.getAngleProfileWindowSize());
+			finest("Updated spinners");
+
+
+			nucleusSelectionBox.setSelectedItem(options.getNucleusType());
+			refoldCheckBox.setEnabled(options.refoldNucleus());
+			finest("Updated checkboxes");
+
+			nucleusCannyPanel.update(templateCannyOptions);
+			finest("Updated canny panel");
+			
+			fine("Updated gui");
+			
+		} catch(Exception e){
+			error("Error updating gui", e);
+		}
+
+	}
 
 	private JPanel makeNucleusTypePanel(){
 		JPanel panel = new JPanel();
@@ -247,6 +334,45 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	private JPanel makeLowerButtonPanel(){
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout());
+		
+		// Button to copy existing dataset options
+		JButton btnCopy = new JButton("Copy");
+		btnCopy.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				// display panel of open datasets
+				
+				AnalysisDataset[] nameArray = openDatasets.toArray(new AnalysisDataset[0]);
+
+				AnalysisDataset sourceDataset = (AnalysisDataset) JOptionPane.showInputDialog(null, 
+						"Choose source dataset",
+						"Source dataset",
+						JOptionPane.QUESTION_MESSAGE, 
+						null, 
+						nameArray, 
+						nameArray[0]);
+
+				
+				if(sourceDataset!=null){
+
+					fine("Copying options from dataset: "+sourceDataset.getName());
+					setOptions(sourceDataset.getAnalysisOptions());
+					
+				}	else {
+					fine("No dataset selected");
+				}
+				
+			}
+			
+		});
+		
+		// Only enable if there are open datasets
+		if(openDatasets.size()==0){
+			btnCopy.setEnabled(false);
+		}
+		panel.add(btnCopy);
 
 		JButton btnOk = new JButton("OK");
 		btnOk.addMouseListener(new MouseAdapter() {

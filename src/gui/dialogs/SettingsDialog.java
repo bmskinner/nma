@@ -221,6 +221,27 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 			
 		}
 		
+		/**
+		 * Update the display to the given options 
+		 * @param options
+		 */
+		public void update(final CannyOptions options){
+			
+			cannyLowThreshold.setValue( (double) options.getLowThreshold());
+			cannyHighThreshold.setValue( (double) options.getHighThreshold());
+			cannyKernelRadius.setValue( (double) options.getKernelRadius());
+			cannyKernelWidth.setValue(options.getKernelWidth());
+			closingObjectRadiusSpinner.setValue(options.getClosingObjectRadius());
+			kuwaharaRadiusSpinner.setValue(options.getKuwaharaKernel());
+			flattenImageThresholdSpinner.setValue(options.getFlattenThreshold());
+			finest("Updated Canny spinners");
+			
+			cannyAutoThresholdCheckBox.setSelected(options.isCannyAutoThreshold());
+			useKuwaharaCheckBox.setSelected(options.isUseKuwahara());
+			flattenImageCheckBox.setSelected(options.isUseFlattenImage());
+			finest("Updated Canny checkboxes");
+		}
+		
 		
 		private void createPanel(){
 			

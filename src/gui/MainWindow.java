@@ -1152,6 +1152,14 @@ public class MainWindow
 		super.dispose();
 	}
 	
+	public List<AnalysisDataset> getOpenDatasets(){
+		return populationsPanel.getAllDatasets();
+	}
+	
+	public boolean hasOpenDatasets(){
+		return populationsPanel.getAllDatasets().size()>0;
+	}
+	
 //	@SuppressWarnings("serial")
 //	class GlassPane extends JPanel implements ItemListener {
 //        
