@@ -21,6 +21,7 @@ package gui.tabs;
 import gui.tabs.nuclear.NuclearBoxplotsPanel;
 import gui.tabs.nuclear.NuclearHistogramsPanel;
 import gui.tabs.nuclear.NuclearOverlaysPanel;
+import gui.tabs.nuclear.NuclearStatsPanel;
 import gui.tabs.nuclear.NucleusMagnitudePanel;
 import gui.tabs.nuclear.WilcoxonDetailPanel;
 
@@ -35,15 +36,15 @@ import org.jfree.chart.JFreeChart;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 
+@SuppressWarnings("serial")
 public class NuclearStatisticsPanel extends DetailPanel {
-	
-	private static final long serialVersionUID = 1L;
-	
+		
 	private NuclearBoxplotsPanel   boxplotPanel;
 	private NuclearHistogramsPanel histogramsPanel;
 	private WilcoxonDetailPanel    wilcoxonPanel;
 	private NucleusMagnitudePanel  nucleusMagnitudePanel;
 	private NuclearOverlaysPanel   nuclearOverlaysPanel;
+	private NuclearStatsPanel      nuclearStatsPanel;
 	
 	private JTabbedPane 	tabPane;
 
@@ -51,6 +52,10 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		super();
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane(JTabbedPane.TOP);
+		
+		nuclearStatsPanel 	= new NuclearStatsPanel();
+		this.addSubPanel(nuclearStatsPanel);
+		tabPane.addTab("Average stats", null, nuclearStatsPanel, null);
 		
 		boxplotPanel = new NuclearBoxplotsPanel();
 		this.addSubPanel(boxplotPanel);
@@ -62,7 +67,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		
 		wilcoxonPanel 	= new WilcoxonDetailPanel();
 		this.addSubPanel(wilcoxonPanel);
-		tabPane.addTab("Stats", null, wilcoxonPanel, null);
+		tabPane.addTab("Wilcoxon stats", null, wilcoxonPanel, null);
 		
 		nucleusMagnitudePanel 	= new NucleusMagnitudePanel();
 		this.addSubPanel(nucleusMagnitudePanel);
@@ -78,6 +83,11 @@ public class NuclearStatisticsPanel extends DetailPanel {
 	
 	@Override
 	protected void updateSingle() throws Exception {
+		
+		
+		nuclearStatsPanel.update(getDatasets());
+		log(Level.FINEST, "Updated nuclear stats panel");
+		
 		boxplotPanel.update(getDatasets());
 		log(Level.FINEST, "Updated nuclear boxplots panel");
 		
@@ -85,7 +95,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		log(Level.FINEST, "Updated nuclear histograms panel");
 		
 		wilcoxonPanel.update(getDatasets());
-		log(Level.FINEST, "Updating Wilcoxon panel");
+		log(Level.FINEST, "Updating nuclear Wilcoxon panel");
 		
 		nucleusMagnitudePanel.update(getDatasets());
 		log(Level.FINEST, "Updating magnitude panel");
@@ -108,7 +118,6 @@ public class NuclearStatisticsPanel extends DetailPanel {
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options)
 			throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	

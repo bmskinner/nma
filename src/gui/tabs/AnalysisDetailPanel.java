@@ -42,34 +42,24 @@ import gui.components.AnalysisTableCellRenderer;
 import gui.components.ExportableTable;
 
 /**
- * Holds the nuclear detection parameters and basic stats about the
- * population
+ * Holds the nuclear detection parameters
  *
  */
+@SuppressWarnings("serial")
 public class AnalysisDetailPanel extends DetailPanel {
 
-
-	private static final long serialVersionUID = 1L;
-	
-	private ExportableTable tablePopulationStats;
 	private ExportableTable tableAnalysisParameters;
-	private JTabbedPane tabPane;
 
 	public AnalysisDetailPanel() {
 		
 		super();
 		
 		this.setLayout(new BorderLayout());
-		tabPane = new JTabbedPane();
-		this.add(tabPane, BorderLayout.CENTER);
-		
-		JScrollPane statsPanel = createStatsPanel();
-		tabPane.addTab("Nuclear statistics", statsPanel);
-		
+				
 		JScrollPane parametersPanel = createAnalysisParametersPanel();
-		tabPane.addTab("Nucleus detection", parametersPanel);
 
-
+		this.add(parametersPanel, BorderLayout.CENTER);
+		
 	}
 	
 	@Override
@@ -92,9 +82,6 @@ public class AnalysisDetailPanel extends DetailPanel {
 	protected void updateMultiple() throws Exception {
 		updateAnalysisParametersPanel();
 		log(Level.FINEST, "Updated analysis parameter panel");
-		
-		updateStatsPanel();
-		log(Level.FINEST, "Updated analysis stats panel");
 	}
 	
 	@Override
@@ -121,65 +108,11 @@ public class AnalysisDetailPanel extends DetailPanel {
 		tableAnalysisParameters.setModel(model);
 	
 		if(options.hasDatasets()){
-//			tableAnalysisParamters.createDefaultColumnsFromModel();
 			setRenderer(tableAnalysisParameters, new AnalysisTableCellRenderer());
 		}
 	}
 	
-	
-	
-	/**
-	 * Update the stats panel with data from the given datasets
-	 * @param list the datasets
-	 */
-	private void updateStatsPanel(){
-		try{
 
-			TableOptions options = new TableOptionsBuilder()
-			.setDatasets(getDatasets())
-			.setType(TableType.ANALYSIS_STATS)
-			.build();
-
-			TableModel model = getTable(options);
-
-
-			tablePopulationStats.setModel(model);
-		} catch(Exception e){
-			log(Level.SEVERE, "Error updating stats panel", e);
-		}
-	}
-	
-	private JScrollPane createStatsPanel(){
-		JScrollPane scrollPane = new JScrollPane();
-		try {
-
-			
-			JPanel panel = new JPanel();
-
-			panel.setLayout(new BorderLayout(0, 0));
-
-			tablePopulationStats = new ExportableTable();
-			panel.add(tablePopulationStats, BorderLayout.CENTER);
-			tablePopulationStats.setEnabled(false);
-
-			scrollPane.setViewportView(panel);
-			scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
-			
-			TableOptions options = new TableOptionsBuilder()
-			.setDatasets(null)
-			.setType(TableType.ANALYSIS_STATS)
-			.build();
-
-			TableModel model = getTable(options);
-			
-			tablePopulationStats.setModel(model);
-			
-		}catch(Exception e){
-			log(Level.SEVERE, "Error creating stats panel", e);
-		}
-		return scrollPane;
-	}
-	
 	private JScrollPane createAnalysisParametersPanel() {
 		JScrollPane scrollPane = new JScrollPane();
 		
