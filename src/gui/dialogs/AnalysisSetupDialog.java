@@ -240,7 +240,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	 * Set this options object to use the values in the given options
 	 * @param options
 	 */
-	public void setOptions(final AnalysisOptions options ){
+	private void setOptions(final AnalysisOptions options ){
 		analysisOptions.setNucleusThreshold(options.getNucleusThreshold());
 
 		analysisOptions.setMinNucleusSize(options.getMinNucleusSize());
@@ -316,6 +316,10 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		}
 
 	}
+	
+	private boolean hasOpenDatasetTemplates(){
+		return openDatasets.size()>0;
+	}
 
 	private JPanel makeNucleusTypePanel(){
 		JPanel panel = new JPanel();
@@ -369,9 +373,10 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		});
 		
 		// Only enable if there are open datasets
-		if(openDatasets.size()==0){
+		if( ! hasOpenDatasetTemplates()){
 			btnCopy.setEnabled(false);
 		}
+		btnCopy.setToolTipText("Copy from open dataset");
 		panel.add(btnCopy);
 
 		JButton btnOk = new JButton("OK");
