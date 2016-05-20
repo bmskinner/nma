@@ -52,7 +52,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 	private static final long serialVersionUID = 1L;
 	
 	private ExportableTable tablePopulationStats;
-	private ExportableTable tableAnalysisParamters;
+	private ExportableTable tableAnalysisParameters;
 	private JTabbedPane tabPane;
 
 	public AnalysisDetailPanel() {
@@ -118,9 +118,12 @@ public class AnalysisDetailPanel extends DetailPanel {
 
 		TableModel model = getTable(options);
 
-		tableAnalysisParamters.setModel(model);
-		tableAnalysisParamters.createDefaultColumnsFromModel();
-		setRenderer(tableAnalysisParamters, new AnalysisTableCellRenderer());
+		tableAnalysisParameters.setModel(model);
+	
+		if(options.hasDatasets()){
+//			tableAnalysisParamters.createDefaultColumnsFromModel();
+			setRenderer(tableAnalysisParameters, new AnalysisTableCellRenderer());
+		}
 	}
 	
 	
@@ -151,15 +154,15 @@ public class AnalysisDetailPanel extends DetailPanel {
 		try {
 
 			
-			JPanel panelGeneralStats = new JPanel();
+			JPanel panel = new JPanel();
 
-			panelGeneralStats.setLayout(new BorderLayout(0, 0));
+			panel.setLayout(new BorderLayout(0, 0));
 
 			tablePopulationStats = new ExportableTable();
-			panelGeneralStats.add(tablePopulationStats, BorderLayout.CENTER);
+			panel.add(tablePopulationStats, BorderLayout.CENTER);
 			tablePopulationStats.setEnabled(false);
 
-			scrollPane.setViewportView(panelGeneralStats);
+			scrollPane.setViewportView(panel);
 			scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
 			
 			TableOptions options = new TableOptionsBuilder()
@@ -181,26 +184,25 @@ public class AnalysisDetailPanel extends DetailPanel {
 		JScrollPane scrollPane = new JScrollPane();
 		
 		try {
+					
+			JPanel panel = new JPanel();
+			panel.setLayout(new BorderLayout(0, 0));
+
+			tableAnalysisParameters = new ExportableTable();
+			panel.add(tableAnalysisParameters, BorderLayout.CENTER);
+			tableAnalysisParameters.setEnabled(false);
+
+			scrollPane.setViewportView(panel);
+			scrollPane.setColumnHeaderView(tableAnalysisParameters.getTableHeader());
+
 			TableOptions options = new TableOptionsBuilder()
 			.setDatasets(null)
 			.setType(TableType.ANALYSIS_PARAMETERS)
 			.build();
-
+			
 			TableModel model = getTable(options);
+			tableAnalysisParameters.setModel(model);
 
-
-			JPanel panel = new JPanel();
-
-			panel.setLayout(new BorderLayout(0, 0));
-
-			tableAnalysisParamters = new ExportableTable();
-			tableAnalysisParamters.setAutoCreateColumnsFromModel(false);
-			tableAnalysisParamters.setModel(model);
-			tableAnalysisParamters.setEnabled(false);
-			panel.add(tableAnalysisParamters, BorderLayout.CENTER);
-
-			scrollPane.setViewportView(panel);
-			scrollPane.setColumnHeaderView(tableAnalysisParamters.getTableHeader());
 		}catch(Exception e){
 			log(Level.SEVERE, "Error creating stats panel", e);
 		}

@@ -364,7 +364,7 @@ private static NucleusTableDatasetCreator instance = null;
 		model.addColumn("", columnData);
 		
 		if( ! options.hasDatasets()){
-			options.log(Level.FINE, "No datasets in options, returning blank parameter table");
+			finer("No datasets in options, returning blank parameter table");
 			model.addColumn("No data loaded");
 			return model;
 		} 
@@ -591,41 +591,43 @@ private static NucleusTableDatasetCreator instance = null;
 
 		model.addColumn("", columnData.toArray());
 		
-		if(list==null){
+		if( ! options.hasDatasets()){
+			finer("No datasets in options, returning blank nuclear stats table");
 			model.addColumn("No data loaded");
-		} else {
+			return model;
+		} 
 
-			// format the numbers and make into a tablemodel
-			DecimalFormat df = new DecimalFormat("#0.00"); 
-			DecimalFormat pf = new DecimalFormat("#0.000"); 
+		// format the numbers and make into a tablemodel
+		DecimalFormat df = new DecimalFormat("#0.00"); 
+		DecimalFormat pf = new DecimalFormat("#0.000"); 
 
-			for(AnalysisDataset dataset : list){
-				CellCollection collection = dataset.getCollection();
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
 
-				List<Object> datasetData = new ArrayList<Object>();			
-				double signalPerNucleus = (double) collection.getSignalManager().getSignalCount()/  (double) collection.getNucleusCount();
+			List<Object> datasetData = new ArrayList<Object>();			
+			double signalPerNucleus = (double) collection.getSignalManager().getSignalCount()/  (double) collection.getNucleusCount();
 
-				datasetData.add(collection.getNucleusCount());
+			datasetData.add(collection.getNucleusCount());
 
-				for(NucleusStatistic stat : NucleusStatistic.values()){
-					double[] stats 	= collection.getNuclearStatistics(stat, MeasurementScale.PIXELS);
-					double median 	= Stats.quartile(stats, 50);
-					double[] ci 	= Stats.calculateMeanConfidenceInterval(stats, 0.95);
-					String ciString = df.format(ci[0]) + " - " + df.format(ci[1]);
-					double diptest 	= DipTester.getDipTestPValue(stats);
+			for(NucleusStatistic stat : NucleusStatistic.values()){
+				double[] stats 	= collection.getNuclearStatistics(stat, MeasurementScale.PIXELS);
+				double median 	= Stats.quartile(stats, 50);
+				double[] ci 	= Stats.calculateMeanConfidenceInterval(stats, 0.95);
+				String ciString = df.format(ci[0]) + " - " + df.format(ci[1]);
+				double diptest 	= DipTester.getDipTestPValue(stats);
 
-					datasetData.add(df.format(median));
-					datasetData.add(ciString);
-					datasetData.add(pf.format(diptest));					
-				}
-				
-				datasetData.add(dataset.getCollection().getSignalManager().getSignalGroupCount());
-				datasetData.add(collection.getSignalManager().getSignalCount());
-				datasetData.add(df.format(signalPerNucleus));
-				
-				model.addColumn(collection.getName(), datasetData.toArray());
+				datasetData.add(df.format(median));
+				datasetData.add(ciString);
+				datasetData.add(pf.format(diptest));					
 			}
+
+			datasetData.add(dataset.getCollection().getSignalManager().getSignalGroupCount());
+			datasetData.add(collection.getSignalManager().getSignalCount());
+			datasetData.add(df.format(signalPerNucleus));
+
+			model.addColumn(collection.getName(), datasetData.toArray());
 		}
+
 		return model;	
 	}
 	
