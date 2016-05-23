@@ -226,6 +226,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				.setTag(BorderTag.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType( ProfileType.REGULAR)
+				.setShowPoints(true)
 				.build();
 			
 			// Set the button configuration
@@ -253,6 +254,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				.setShowMarkers(false)
 				.setProfileType( ProfileType.REGULAR)
 				.setSwatch(ColourSwatch.NO_SWATCH)
+				.setShowPoints(false)
 				.build();
 			
 			JFreeChart rangeChart = getChart(rangeOptions);
