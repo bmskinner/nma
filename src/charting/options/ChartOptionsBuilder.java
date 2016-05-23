@@ -56,6 +56,8 @@ public class ChartOptionsBuilder {
 	private UUID segID                 = null;
 	private int segPosition            = 0;
 	private double modalityPosition    = 0;
+	private boolean showPoints         = false;
+	private boolean showLines          = true;
 	
 	public ChartOptionsBuilder(){
 		
@@ -126,6 +128,16 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
+	public ChartOptionsBuilder setShowPoints(boolean b){
+		this.showPoints = b;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setShowLines(boolean b){
+		this.showLines = b;
+		return this;
+	}
+	
 	public ChartOptionsBuilder setProfileType(ProfileType type){
 		this.type = type;
 		return this;
@@ -167,6 +179,8 @@ public class ChartOptionsBuilder {
 		result.setSegID(segID);
 		result.setSegPosition(segPosition);
 		result.setModalityPosition(modalityPosition);
+		result.setShowLines(showLines);
+		result.setShowPoints(showPoints);
 		return result;
 	}
 	

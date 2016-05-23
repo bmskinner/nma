@@ -45,6 +45,8 @@ public class ChartOptions extends AbstractOptions {
 	private int signalGroup            = 1;
 	private boolean useDensity         = false;
 	private double modalityPosition    = 0;
+	private boolean showPoints         = false;
+	private boolean showLines          = true;
 	
 	public ChartOptions(List<AnalysisDataset> list){
 		this(list, null);
@@ -125,6 +127,23 @@ public class ChartOptions extends AbstractOptions {
 	public void setHideProfiles(boolean hideProfiles) {
 		this.hideProfiles = hideProfiles;
 	}
+	
+
+	public boolean isShowPoints() {
+		return showPoints;
+	}
+
+	public void setShowPoints(boolean showPoints) {
+		this.showPoints = showPoints;
+	}
+
+	public boolean isShowLines() {
+		return showLines;
+	}
+
+	public void setShowLines(boolean showLines) {
+		this.showLines = showLines;
+	}
 
 	public ProfileType getType() {
 		return type;
@@ -162,6 +181,8 @@ public class ChartOptions extends AbstractOptions {
 		result = prime * result + (normalised ? 1231 : 1237);
 		result = prime * result + (showMarkers ? 1231 : 1237);
 		result = prime * result + (hideProfiles ? 1231 : 1237);
+		result = prime * result + (showPoints ? 1231 : 1237);
+		result = prime * result + (showLines ? 1231 : 1237);
 		result = prime * result + signalGroup;
 		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
 		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
@@ -189,6 +210,10 @@ public class ChartOptions extends AbstractOptions {
 		if (showMarkers != other.showMarkers)
 			return false;
 		if (hideProfiles != other.hideProfiles)
+			return false;
+		if (showPoints != other.showPoints)
+			return false;
+		if (showLines != other.showLines)
 			return false;
 		if (signalGroup != other.signalGroup)
 			return false;

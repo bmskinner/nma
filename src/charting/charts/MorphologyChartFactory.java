@@ -232,7 +232,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			plot.setDataset(datasetIndex, ds);
 			
 			DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
-			renderer.setBaseShapesVisible(false);
+			renderer.setBaseShapesVisible(options.isShowPoints());
 			plot.setRenderer(datasetIndex, renderer);
 
 			int seriesCount = plot.getDataset(datasetIndex).getSeriesCount();
