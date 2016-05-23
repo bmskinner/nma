@@ -24,7 +24,9 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
+import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.DraggableOverlayChartPanel;
+import gui.components.PositionSelectionChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.dialogs.AngleWindowSizeExplorer;
 
@@ -47,6 +49,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.TableModel;
 
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.nucleus.SegmentFitter;
@@ -75,21 +78,18 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		this.setLayout(new BorderLayout());
 		segmentProfilePanel  = new SegmentProfilePanel();
 		this.addSubPanel(segmentProfilePanel);
-		this.add(segmentProfilePanel, BorderLayout.CENTER);
+        this.add(segmentProfilePanel, BorderLayout.CENTER);
 
-		
 	}
 	
 	@Override
 	protected void updateSingle() throws Exception {
-//		windowSizeButton.setEnabled(true);
 		updateMultiple();
 	}
 	
 
 	@Override
 	protected void updateMultiple() throws Exception {
-//		windowSizeButton.setEnabled(false);
 		segmentProfilePanel.update(getDatasets());
 		
 		
@@ -118,12 +118,20 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 	public class SegmentProfilePanel extends DetailPanel implements ActionListener, SignalChangeListener {
 		
 		private DraggableOverlayChartPanel chartPanel; // for displaying the legnth of a given segment
+		private PositionSelectionChartPanel rangePanel; // a small chart to show the entire profile
+		
 		private JPanel buttonsPanel;
 		private JButton mergeButton;
 		private JButton unmergeButton;
 		private JButton splitButton;
-		private JButton windowSizeButton = new JButton("Window sizes");
-		private JButton updatewindowButton = new JButton("Set window size");
+		private JButton windowSizeButton;
+		private JButton updatewindowButton;
+		
+		private static final String STR_MERGE_SEGMENT     = "Hide segment boundary";
+		private static final String STR_UNMERGE_SEGMENT   = "Unhide segment boundary";
+		private static final String STR_SPLIT_SEGMENT     = "Split segment";
+		private static final String STR_SET_WINDOW_SIZE   = "Set window size";
+		private static final String STR_SHOW_WINDOW_SIZES = "Window sizes";
 		
 		protected SegmentProfilePanel(){
 			super();
@@ -143,7 +151,23 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 			buttonsPanel = makeButtonPanel();
 			this.add(buttonsPanel, BorderLayout.NORTH);
+			
+			
+			/*
+			 * TESTING: A second chart panel at the south
+			 * with a domain overlay crosshair to define the 
+			 * centre of the zoomed range on the 
+			 * centre chart panel 
+			 */
+			JFreeChart rangeChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
+			rangePanel = new PositionSelectionChartPanel(rangeChart);
+			rangePanel.setPreferredSize(minimumChartSize);
+			rangePanel.addSignalChangeListener(this);
+			this.add(rangePanel, BorderLayout.SOUTH);
+			updateChartPanelRange();
+			
 			setButtonsEnabled(false);
+			
 			
 		}
 		
@@ -164,24 +188,24 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 					}
 				}
 			};
-			mergeButton = new JButton("Hide segment boundary");
-			mergeButton.addActionListener(this);
 			
+			mergeButton = new JButton(STR_MERGE_SEGMENT);
+			mergeButton.addActionListener(this);
 			panel.add(mergeButton);
 			
-			unmergeButton = new JButton("Unhide segment boundary");
+			unmergeButton = new JButton(STR_UNMERGE_SEGMENT);
 			unmergeButton.addActionListener(this);
-			
 			panel.add(unmergeButton);
 			
-			splitButton = new JButton("Split segment");
+			splitButton = new JButton(STR_SPLIT_SEGMENT);
 			splitButton.addActionListener(this);
-
 			panel.add(splitButton);
 
+			windowSizeButton = new JButton(STR_SHOW_WINDOW_SIZES);
 			windowSizeButton.addActionListener(this);
 			panel.add(windowSizeButton);
 			
+			updatewindowButton = new JButton(STR_SET_WINDOW_SIZE);
 			updatewindowButton.addActionListener(this);
 			panel.add(updatewindowButton);
 			
@@ -214,6 +238,38 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 			
 			chartPanel.setChart(chart, profile, true);
+			updateChartPanelRange();
+			
+			
+			/*
+			 * Create the chart for the range panel
+			 */
+			
+			ChartOptions rangeOptions = new ChartOptionsBuilder()
+				.setDatasets(getDatasets())
+				.setNormalised(true)
+				.setAlignment(ProfileAlignment.LEFT)
+				.setTag(BorderTag.REFERENCE_POINT)
+				.setShowMarkers(false)
+				.setProfileType( ProfileType.REGULAR)
+				.setSwatch(ColourSwatch.NO_SWATCH)
+				.build();
+			
+			JFreeChart rangeChart = getChart(rangeOptions);
+			
+			rangePanel.setChart(rangeChart);
+		}
+		
+		/**
+		 * Set the main chart panel domain range to centre on the 
+		 * position in the range panel, +- 10
+		 */
+		private void updateChartPanelRange(){
+			double xValue = rangePanel.getDomainCrosshairPosition();
+			
+			double min = xValue-10;
+			double max = xValue+10;
+			chartPanel.getChart().getXYPlot().getDomainAxis().setRange(min, max);
 		}
 		
 
@@ -316,6 +372,14 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 					SegmentsEditingPanel.this.setAnalysing(false);
 				}
 
+			}
+			
+			
+			// Change the range of the main chart based on the lower chart  
+			if(event.type().contains("UpdatePosition") && event.getSource().equals(rangePanel)){
+				
+				updateChartPanelRange();
+				
 			}
 
 		}
