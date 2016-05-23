@@ -23,25 +23,21 @@ import gui.LoadingIconDialog;
 import ij.process.ImageProcessor;
 
 import java.awt.BorderLayout;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Point2D;
 import java.io.File;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -288,16 +284,12 @@ public abstract class ImageProber extends LoadingIconDialog {
 			label.repaint();
 			iconMap.put(key, label);
 			
+						
 			label.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
 
-					Thread thr = new Thread(){
-						public void run() {
-							showLargeImage(key);
-						}
-					};	
-					thr.start();
+					new LargeImageDialog(key, ImageProber.this);
 
 				}
 			});
@@ -462,26 +454,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 		}
 		return files;
 	}
-	
-	
-	/**
-	 * Display the image for the given key in a new non-modal window
-	 * @param key
-	 */
-	private void showLargeImage(ImageType key){
-		final ImageIcon icon = createViewableImage(procMap.get(key), true);
-		JOptionPane pane = new JOptionPane(null, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_OPTION, icon);
-        
-		double scale = (double) icon.getIconHeight() / (double) procMap.get(key).getHeight();
-		scale *=100;
-		DecimalFormat df = new DecimalFormat("#0.00"); 
 		
-        Dialog dialog = pane.createDialog(this, key.toString()+": "+ df.format(scale) +"% scale");
-
-        dialog.setModal(false);
-        dialog.setVisible(true);
-	}
-	
 	
 	/**
 	 * Set the header label and the image icons to display
@@ -680,6 +653,41 @@ public abstract class ImageProber extends LoadingIconDialog {
 			smallImageIcon = new ImageIcon( ip.getBufferedImage()  );
 		}
 		return smallImageIcon;
+	}
+	
+	/**
+	 * Show images in a non-modal window at IMAGE_SCREEN_PROPORTION of the 
+	 * screen width or size
+	 *
+	 */
+	private class LargeImageDialog extends JDialog {
+		
+		/**
+		 * Create a full-scale image for the given key in this ImageProber.
+		 * @param key the image to show
+		 * @param parent the parent ImageProber window
+		 */
+		public LargeImageDialog(final ImageType key, Window parent){
+			super(parent);
+			
+			final ImageIcon icon = createViewableImage(procMap.get(key), true);
+			
+			this.setLayout(new BorderLayout());
+			
+			this.add(new JLabel(icon), BorderLayout.CENTER);
+
+			// Show the scaling factor in the title bar
+			double scale = (double) icon.getIconHeight() / (double) procMap.get(key).getHeight();
+			scale *=100;
+			DecimalFormat df = new DecimalFormat("#0.00"); 
+
+	        this.setTitle(key.toString()+": "+ df.format(scale) +"% scale");
+	        this.setModal(false);
+	        this.setResizable(false);
+	        this.pack();
+	        this.setVisible(true);
+		}
+		
 	}
 
 }
