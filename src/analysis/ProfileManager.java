@@ -237,7 +237,7 @@ public class ProfileManager implements Loggable {
 	 */
 	public void updateMedianProfileSegmentIndex(boolean start, UUID id, int index) throws Exception {
 		
-//		programLogger.log(Level.FINE, "Updating median profile segment: "+segName+" to index "+index);
+//		fine("Updating median profile segment: "+segName+" to index "+index);
 		// Get the median profile from the reference point
 		
 		SegmentedProfile oldProfile = collection
@@ -250,15 +250,26 @@ public class ProfileManager implements Loggable {
 
 		NucleusBorderSegment seg = oldProfile.getSegment(id);
 
+		// Check if the start or end of the segment is updated, and select the
+		// new endpoints appropriately
 		int newStart = start ? index : seg.getStartIndex();
 		int newEnd = start ? seg.getEndIndex() : index;
 		
-		// TODO - if the segment is the orientation point boundary, update it
+		// if the segment is the orientation point or reference point boundary, update it
+		
 		if(start){
 			if(seg.getStartIndex()==collection
-					.getProfileCollection(ProfileType.REGULAR).getOffset(BorderTag.ORIENTATION_POINT)){
+					.getProfileCollection(ProfileType.REGULAR)
+					.getOffset(BorderTag.ORIENTATION_POINT)){
 				collection
 				.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, index);
+			}
+			
+			if(seg.getStartIndex()==collection
+					.getProfileCollection(ProfileType.REGULAR)
+					.getOffset(BorderTag.REFERENCE_POINT)){
+				collection
+				.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, index);
 			}
 		}
 
@@ -275,10 +286,10 @@ public class ProfileManager implements Loggable {
 			.getProfileCollection(ProfileType.REGULAR)
 			.addSegments(BorderTag.REFERENCE_POINT, oldProfile.getSegments());
 			
-//			programLogger.log(Level.FINEST, "Segments added, refresh the charts");
+			finest("Segments added, refresh the charts");
 							
 		} else {
-//			programLogger.log(Level.WARNING, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+			warn("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
 		}
 		
 	}
