@@ -22,6 +22,9 @@ import gui.DatasetEventListener;
 import gui.InterfaceEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
+import gui.tabs.editing.BorderTagEditingPanel;
+import gui.tabs.editing.SegmentsEditingPanel;
+
 import java.awt.BorderLayout;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,6 +43,7 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 	private JTabbedPane tabPane;
 	protected CellDetailPanel		cellDetailPanel;
 	protected SegmentsEditingPanel segmentsEditingPanel;
+	protected BorderTagEditingPanel borderTagEditingPanel;
 	
 	
 	
@@ -69,6 +73,16 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 		
 		this.addSubPanel(segmentsEditingPanel);
 		tabPane.addTab("Segmentation", segmentsEditingPanel);
+		
+		/*
+		 * Edit the border tag locations on the median profile
+		 */
+		borderTagEditingPanel = new BorderTagEditingPanel();
+		borderTagEditingPanel.addSignalChangeListener(this);
+		this.addSignalChangeListener(borderTagEditingPanel);
+		
+		this.addSubPanel(borderTagEditingPanel);
+		tabPane.addTab("Border tags", borderTagEditingPanel);
 
 		
 	}
@@ -91,10 +105,13 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 		segmentsEditingPanel.setEnabled(true);
 
 		cellDetailPanel.update(getDatasets()); 
-		log(Level.FINEST, "Updated segments boxplot panel");
+		finest("Updated segments boxplot panel");
 
 		segmentsEditingPanel.update(getDatasets()); 
-		log(Level.FINEST, "Updated segments histogram panel");
+		finest("Updated segments editing panel");
+		
+		borderTagEditingPanel.update(getDatasets()); 
+		finest("Updated border tag editing panel");
 	}
 	
 	/**
