@@ -18,9 +18,6 @@
  *******************************************************************************/
 package gui.components;
 
-import gui.SignalChangeEvent;
-import gui.SignalChangeListener;
-import gui.tabs.DetailPanel;
 import ij.IJ;
 
 import java.awt.Color;
@@ -32,12 +29,7 @@ import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.panel.CrosshairOverlay;
@@ -50,20 +42,12 @@ import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
-public class DraggableOverlayChartPanel extends ExportableChartPanel {
-	
-
-	private List<Object> listeners = new ArrayList<Object>();
-	
+public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
+		
 	private SegmentedProfile profile = null;
 
 	private List<SegmentCrosshair> crosses = new ArrayList<SegmentCrosshair>(); // drawing lines on the chart
-	
-	private CrosshairOverlay activeOverlay = null;
-	private SegmentCrosshair activeCrosshair = null;
-	
-	private volatile boolean mouseIsDown = false;
-	
+
 	private boolean isChartNormalised = false;
 		
 
@@ -89,8 +73,8 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	}
 	
 	private void clearOverlays(){
-		if(activeOverlay!=null){
-			this.removeOverlay(activeOverlay);
+		if(overlay!=null){
+			this.removeOverlay(overlay);
 		}
 	}
 	
@@ -104,7 +88,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 		if(profile!=null){
 			try {
 
-				activeOverlay = new CrosshairOverlay();
+				overlay = new CrosshairOverlay();
 				int i=0;
 				for(NucleusBorderSegment seg : profile.getOrderedSegments()){
 
@@ -121,11 +105,11 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 					xCrosshair.setValue(value);
 					crosses.add(xCrosshair);
 					
-					activeOverlay.addDomainCrosshair(xCrosshair);
+					overlay.addDomainCrosshair(xCrosshair);
 					
 				}
 				
-				this.addOverlay(activeOverlay);
+				this.addOverlay(overlay);
 				
 			} catch (Exception e1) {
 				IJ.log("Error sending signal: "+e1.getMessage());
@@ -144,8 +128,8 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 		this.profile = profile;
 		this.isChartNormalised = normalised;
 		crosses = new ArrayList<SegmentCrosshair>();
-		activeOverlay = null;
-		activeCrosshair = null;
+		overlay = null;
+		xCrosshair = null;
 		updateOverlays();
 	}
 	
@@ -158,7 +142,8 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	public void mousePressed(MouseEvent e) {
 	    if (e.getButton() == MouseEvent.BUTTON1) {
 
-	    	if(activeCrosshair!=null && ! activeCrosshair.getSegment().isStartPositionLocked()){
+	    	
+	    	if(xCrosshair!=null && ! ((SegmentCrosshair) xCrosshair).getSegment().isStartPositionLocked()){
 //	    		IJ.log("Mouse down : Running :"+checkRunning()); 
 	    		mouseIsDown = true;
 	    		initThread();
@@ -166,9 +151,10 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	    }
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e) {
 		
-		final int x = e.getX();
+//		final int x = e.getX();
 //		final int y = e.getY();
 		
 	    if (e.getButton() == MouseEvent.BUTTON1) {
@@ -179,42 +165,43 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	    	 * Get the location on the chart, and send a signal to update the profile
 	    	 */
 	    	
-	    	if(activeCrosshair!=null){
-//	    		IJ.log("Mouse up on active crosshair");
+	    	if(xCrosshair!=null){
 	    		
-//	    		for(Crosshair c : lines.keySet()){
-//	    			IJ.log(lines.get(c).toString());
-//	    		}
+	    		// Get the normalised position
+	    		double xValue = this.getDomainCrosshairPosition();
 	    		
-	    		try {
-	    			Rectangle2D dataArea = getScreenDataArea();
-	    			JFreeChart chart     = getChart();
-	    			XYPlot plot          = (XYPlot) chart.getPlot();
-	    			ValueAxis xAxis      = plot.getDomainAxis();
-	    			
-	    			int xValue = (int) xAxis.java2DToValue(x, dataArea, 
-	    					RectangleEdge.BOTTOM);
-	    			
-	    			if(isChartNormalised){
-	    				xValue = (int) (profile.size() * ( (double) xValue / 100));
-	    			}
+	    			    		
+	    		fine("Double of domain value is "+xValue);
+	    		
+	    		// Correct for normalisation
+	    		if(isChartNormalised){
+    				
+	    			if(xValue<0){
+    					xValue += 100; // Wrap values below 0
+    				}
+    				
+    				if(xValue>=100){ // Wrap values above 100
+    					xValue -= 100;
+    				}
+    				
+	    			xValue = profile.size() * ( xValue / 100);
 
-	    			NucleusBorderSegment seg = activeCrosshair.getSegment();
+    				fine("Profile position of domain value is "+xValue);
+    			}
+	    		
+	    		// Get the closest integer to the selected point
+	    		int intXValue = (int) Math.round(xValue); 
+	    		
+	    		fine("Integer of domain value is "+intXValue);
+	    		
+	    		// Get the segment associated with the point
+	    		NucleusBorderSegment seg = ((SegmentCrosshair) xCrosshair).getSegment();
 
-	    			if(seg!=null){
-//	    				IJ.log("UpdateSegment|"+seg.getName()+"|"+xValue);
-	    				//	    			isRunning = false;
-	    				fireSignalChangeEvent("UpdateSegment|"+seg.getMidpointIndex()+"|"+xValue);
-	    			}
-
-	    		} catch(Exception e1){
-	    			IJ.log("Error sending signal: "+e1.getMessage());
-	    			for(StackTraceElement e2 : e1.getStackTrace()){
-	    				IJ.log(e2.toString());
-	    			}
+	    		    		
+	    		// Trigger the update
+	    		if(seg!=null){
+	    			fireSignalChangeEvent("UpdateSegment|"+seg.getMidpointIndex()+"|"+intXValue);
 	    		}
-
-	    		
 	    	}
 	    }
 	}
@@ -232,7 +219,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
 			if (checkCursorIsOverLine(x, y)) {
 				
-				if(activeCrosshair.getSegment().isStartPositionLocked()){
+				if(((SegmentCrosshair) xCrosshair).getSegment().isStartPositionLocked()){
 					this.setCursor(Cursor.getDefaultCursor());
 				} else {
 					this.setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
@@ -245,10 +232,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	
 	private void updateActiveCrosshairLocation(int x, int y){
 
-		if(activeCrosshair!=null){
-
-			//					NucleusBorderSegment seg = lines.get(activeCrosshair);
-			//					lines.remove(activeCrosshair);
+		if(xCrosshair!=null){
 
 			Rectangle2D dataArea = getScreenDataArea();
 			JFreeChart chart = getChart();
@@ -256,29 +240,13 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 			ValueAxis xAxis = plot.getDomainAxis();
 			double movex = xAxis.java2DToValue(x, dataArea, 
 					RectangleEdge.BOTTOM);
-			activeCrosshair.setValue(movex);
-			//					activeOverlay.fireOverlayChanged();
-			//			activeOverlay.paintOverlay(arg0, arg1);
+			xCrosshair.setValue(movex);
 
-			//					lines.put(activeCrosshair, seg);
 		}
 	}
 	
-	private synchronized boolean checkRunning(){
-		if (isRunning) 
-			return true;
-		else 
-			return false;
-	}
-
-	volatile private boolean isRunning = false;
-	private synchronized boolean checkAndMark() {
-	    if (isRunning) return false;
-	    isRunning = true;
-	    return true;
-	}
 	
-	private void initThread( ) {
+	protected void initThread( ) {
 	    if (checkAndMark()) {
 	        new Thread() {
 	            public void run() {
@@ -296,11 +264,9 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	                	
 	                } while (mouseIsDown);
 	                isRunning = false;
-//	                IJ.log("Thread end : Running :"+checkRunning()); 
+
 	            }
 	        }.start();
-	    } else {
-//	    	IJ.log("Not starting thread: Running is "+checkRunning());
 	    }
 	}
 	
@@ -314,11 +280,11 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	private boolean checkCursorIsOverLine(int x, int y){
 		Rectangle2D dataArea = this.getScreenDataArea(); 
 		ValueAxis xAxis = this.getChart().getXYPlot().getDomainAxis();
-		activeCrosshair = null;
+		xCrosshair = null;
 
 		boolean isOverLine = false;
 
-		List<Crosshair> crosshairs = activeOverlay.getDomainCrosshairs();
+		List<Crosshair> crosshairs = overlay.getDomainCrosshairs();
 		// only display a hand if the cursor is over the items
 		for(Crosshair c : crosshairs ){
 
@@ -336,28 +302,12 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
 			if (bounds != null && bounds.contains(x, y)) {
 				isOverLine = true;
-				activeCrosshair = (SegmentCrosshair) c;
+				xCrosshair = (SegmentCrosshair) c;
 			}
 		}
 		return isOverLine;
 	}
 	
-    protected synchronized void fireSignalChangeEvent(String message) {
-    	
-        SignalChangeEvent event = new SignalChangeEvent( this, message, this.getClass().getSimpleName());
-        Iterator<Object> iterator = listeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-        }
-    }
-
-    public synchronized void addSignalChangeListener( SignalChangeListener l ) {
-        listeners.add( l );
-    }
-    
-    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
-        listeners.remove( l );
-    }
     
     private class SegmentCrosshair extends Crosshair {
     	private NucleusBorderSegment segment;

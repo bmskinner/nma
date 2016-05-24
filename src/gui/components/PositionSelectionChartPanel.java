@@ -37,11 +37,13 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 
 	private List<Object> listeners = new ArrayList<Object>();
 	
-	private CrosshairOverlay overlay = null;
+	protected CrosshairOverlay overlay = null;
 	
-	private Crosshair xCrosshair;
+	protected Crosshair xCrosshair;
 	
-	private volatile boolean mouseIsDown = false;
+	protected volatile boolean mouseIsDown = false;
+	
+	protected volatile boolean isRunning = false;
 			
 
 	public PositionSelectionChartPanel(final JFreeChart chart){
@@ -51,7 +53,6 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		this.setDomainZoomable(false);		
 		
 		overlay = new CrosshairOverlay();
-		int i=0;
 
 
 		xCrosshair = new Crosshair(Double.NaN, Color.DARK_GRAY, ChartComponents.MARKER_STROKE);
@@ -69,11 +70,12 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	
 	public double getDomainCrosshairPosition(){
 		
-		List<Crosshair> crosshairs = overlay.getDomainCrosshairs();
-		for(Crosshair c : crosshairs){
-			return c.getValue();
-		}
+		if(xCrosshair!=null){
+			finest("Domain value is "+xCrosshair.getValue());
+			return xCrosshair.getValue();
+		} 
 		return 0;
+
 	}
 	
 	@Override
@@ -90,32 +92,32 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 
 	public void mouseReleased(MouseEvent e) {
 		
-		final int x = e.getX();
+//		final int x = e.getX();
 
 		
 	    if (e.getButton() == MouseEvent.BUTTON1) {
 	    	mouseIsDown = false;
-	    		
-	    	try {
-	    		Rectangle2D dataArea = getScreenDataArea();
-	    		JFreeChart chart     = getChart();
-	    		XYPlot plot          = (XYPlot) chart.getPlot();
-	    		ValueAxis xAxis      = plot.getDomainAxis();
-
-	    		int xValue = (int) xAxis.java2DToValue(x, dataArea, 
-	    				RectangleEdge.BOTTOM);
-
-	    		fine("Position selection x="+xValue);
+//	    		
+//	    	try {
+//	    		Rectangle2D dataArea = getScreenDataArea();
+//	    		JFreeChart chart     = getChart();
+//	    		XYPlot plot          = (XYPlot) chart.getPlot();
+//	    		ValueAxis xAxis      = plot.getDomainAxis();
+//
+//	    		int xValue = (int) xAxis.java2DToValue(x, dataArea, 
+//	    				RectangleEdge.BOTTOM);
+//
+//	    		fine("Position selection x="+xValue);
 
 	    		fireSignalChangeEvent("UpdatePosition");
 	    		
 
-	    	} catch(Exception e1){
-	    		IJ.log("Error sending signal: "+e1.getMessage());
-	    		for(StackTraceElement e2 : e1.getStackTrace()){
-	    			IJ.log(e2.toString());
-	    		}
-	    	}
+//	    	} catch(Exception e1){
+//	    		IJ.log("Error sending signal: "+e1.getMessage());
+//	    		for(StackTraceElement e2 : e1.getStackTrace()){
+//	    			IJ.log(e2.toString());
+//	    		}
+//	    	}
 
 	    		
 
@@ -162,14 +164,14 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 			return false;
 	}
 
-	volatile private boolean isRunning = false;
-	private synchronized boolean checkAndMark() {
+	
+	protected synchronized boolean checkAndMark() {
 	    if (isRunning) return false;
 	    isRunning = true;
 	    return true;
 	}
 	
-	private void initThread( ) {
+	protected void initThread( ) {
 	    if (checkAndMark()) {
 	        new Thread() {
 	            public void run() {
@@ -205,17 +207,17 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	private boolean checkCursorIsOverLine(int x, int y){
 		Rectangle2D dataArea = this.getScreenDataArea(); 
 		ValueAxis xAxis = this.getChart().getXYPlot().getDomainAxis();
-		xCrosshair = null;
+//		xCrosshair = null;
 
 		boolean isOverLine = false;
 
-		List<Crosshair> crosshairs = overlay.getDomainCrosshairs();
+//		List<Crosshair> crosshairs = overlay.getDomainCrosshairs();
 		// only display a hand if the cursor is over the items
-		for(Crosshair c : crosshairs ){
+//		for(Crosshair c : crosshairs ){
 
 
 			// Turn the chart coordinates into panel coordinates
-			double rectangleX = xAxis.valueToJava2D(c.getValue(), dataArea, 
+			double rectangleX = xAxis.valueToJava2D(xCrosshair.getValue(), dataArea, 
 					RectangleEdge.BOTTOM);
 
 
@@ -227,9 +229,9 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 
 			if (bounds != null && bounds.contains(x, y)) {
 				isOverLine = true;
-				xCrosshair = (Crosshair) c;
+//				xCrosshair = (Crosshair) c;
 			}
-		}
+//		}
 		return isOverLine;
 	}
 	

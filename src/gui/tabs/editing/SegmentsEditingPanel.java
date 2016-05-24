@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package gui.tabs;
+package gui.tabs.editing;
 
 import gui.DatasetEventListener;
 import gui.InterfaceEventListener;
@@ -29,6 +29,7 @@ import gui.components.DraggableOverlayChartPanel;
 import gui.components.PositionSelectionChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.dialogs.AngleWindowSizeExplorer;
+import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -268,6 +269,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		 */
 		private void updateChartPanelRange(){
 			double xValue = rangePanel.getDomainCrosshairPosition();
+			finest("Range panel crosshair is at "+xValue);
 			
 			double min = xValue-10;
 			double max = xValue+10;
