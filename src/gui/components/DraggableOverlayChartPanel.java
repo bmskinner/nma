@@ -257,6 +257,11 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 		}
 	}
 	
+	protected synchronized boolean checkAndMark() {
+		if (isRunning) return false;
+		isRunning = true;
+		return true;
+	}
 	
 	protected void initThread( ) {
 	    if (checkAndMark()) {
