@@ -211,6 +211,8 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		
 		setButtonsEnabled(true);
 		
+		ColourSwatch swatch = activeDataset().getSwatch();
+		
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setNormalised(false)
@@ -219,7 +221,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 			.setShowMarkers(true)
 			.setProfileType( ProfileType.REGULAR)
 			.setShowPoints(true)
-			.setSwatch(ColourSwatch.NO_SWATCH)
+			.setSwatch(swatch)
 			.setShowAnnotations(false)
 			.build();
 		
@@ -241,7 +243,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 			.setTag(BorderTag.REFERENCE_POINT)
 			.setShowMarkers(true)
 			.setProfileType( ProfileType.REGULAR)
-			.setSwatch(ColourSwatch.NO_SWATCH)
+			.setSwatch(swatch)
 			.setShowPoints(false)
 			.setShowAnnotations(false)
 			.build();

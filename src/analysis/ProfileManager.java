@@ -68,6 +68,11 @@ public class ProfileManager implements Loggable {
 		ProfileOffsetter offsetter = new ProfileOffsetter(collection);
 		try {
 			offsetter.assignBorderTagViaFrankenProfile(tag);
+			
+			for(Nucleus n : collection.getNuclei()){
+				n.updateVerticallyRotatedNucleus();
+			}
+			
 		} catch (Exception e1) {
 			error("Error assigning tag", e1);
 		}
@@ -80,19 +85,7 @@ public class ProfileManager implements Loggable {
 					.getProfile(tag, Constants.MEDIAN); 
 
 			
-			//REMOVE: this has been replaced above by the ProfileOffsetter
-//			for(Nucleus n : collection.getNuclei()){
-//				
-//				int oldNIndex = n.getBorderIndex(tag);
-//				if(oldNIndex==-1){
-//					finer("Border tag does not exist and will be created");
-//				}
-//				int newIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
-//				n.setBorderTag(tag, newIndex);
-//				n.updateVerticallyRotatedNucleus();
-//				finest("Set border tag in nucleus to "+newIndex+ " from "+oldNIndex);
-//
-//			}
+			
 			
 			/*
 			 * Set the border tag in the consensus median profile 

@@ -96,6 +96,11 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 //	    			log("Cursor is over rectangle");
 	    		
 	    			initThread();
+	    		} else {
+	    		
+	    			// Move the rectangle directly over the mouse
+	    			updateDomainRectangleLocation(x);
+	    			
 	    		}
 	    	}
 	    }

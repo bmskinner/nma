@@ -231,7 +231,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				.setTag(BorderTag.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType( ProfileType.REGULAR)
-				.setSwatch(ColourSwatch.REGULAR_SWATCH)
+				.setSwatch(activeDataset().getSwatch())
 				.setShowPoints(true)
 				.build();
 			
@@ -259,7 +259,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				.setTag(BorderTag.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType( ProfileType.REGULAR)
-				.setSwatch(ColourSwatch.REGULAR_SWATCH)
+				.setSwatch(activeDataset().getSwatch())
 				.setShowPoints(false)
 				.build();
 			

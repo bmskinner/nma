@@ -176,8 +176,9 @@ public class ProfileOffsetter implements Loggable {
 
 
 			} catch (IllegalArgumentException e){
-				logError("Error assigning vertical in dataset "+collection.getName(), e);
+//				logError("Error assigning vertical in dataset "+collection.getName(), e);
 				// This occurs when the median profile did not have detectable verticals. Return quietly.
+				
 				return;
 			}
 			for(Nucleus n : collection.getNuclei()){
