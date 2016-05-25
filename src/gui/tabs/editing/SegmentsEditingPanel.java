@@ -296,6 +296,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		@Override
 		protected void updateNull() throws Exception {			
 			chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
+			rangePanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
 			setButtonsEnabled(false);
 		}
 		

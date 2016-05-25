@@ -267,6 +267,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	protected void updateNull() throws Exception {
 		setButtonsEnabled(false);
 		chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
+		rangePanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
 	}
 	
 	@Override
