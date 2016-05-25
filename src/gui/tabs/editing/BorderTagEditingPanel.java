@@ -194,19 +194,15 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	
 	/**
 	 * Set the main chart panel domain range to centre on the 
-	 * position in the range panel, +- 10
+	 * position in the range panel
 	 */
 	private void updateChartPanelRange(){
 		
 		RectangleOverlayObject ob = rangePanel.getDomainRectangleOverlay();
-//		double xValue = rangePanel.getDomainCrosshairPosition();
-//		finest("Range panel crosshair is at "+xValue);
 		
 		double min = ob.getMinValue();
 		double max = ob.getMaxValue();
 		
-//		double min = xValue-RANGE_WINDOW;
-//		double max = xValue+RANGE_WINDOW;
 		chartPanel.getChart().getXYPlot().getDomainAxis().setRange(min, max);
 	}
 	

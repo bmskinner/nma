@@ -24,18 +24,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.nuclear.NucleusType;
-import components.nuclei.Nucleus;
-import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
-import analysis.nucleus.DatasetProfiler;
-import analysis.nucleus.NucleusDetector;
-import analysis.nucleus.DatasetProfiler.TailFinder;
+import analysis.nucleus.ProfileFeatureFinder;
+import analysis.nucleus.ProfileOffsetter;
 import utility.Constants;
 import utility.Version;
 
@@ -135,31 +130,33 @@ public class PopulationImportWorker extends AnalysisWorker {
 	 * @param d
 	 * @throws Exception
 	 */
-	private void updateRodentSpermHookHumpSplits(AnalysisDataset d) throws Exception{
-		
-		if(d.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
-			for(Nucleus n : d.getCollection().getNuclei()){
-
-				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
-				// recalculate - old datasets have problems
-				nucleus.splitNucleusToHeadAndHump();
-
-				// recalculate signal angles - old datasets have problems
-				nucleus.calculateSignalAnglesFromPoint(nucleus.getPoint(BorderTag.ORIENTATION_POINT));
-			}
-		}
-		
-	}
+//	private void updateRodentSpermHookHumpSplits(AnalysisDataset d) throws Exception{
+//		
+//		if(d.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
+//			for(Nucleus n : d.getCollection().getNuclei()){
+//
+//				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
+//				// recalculate - old datasets have problems
+//				nucleus.splitNucleusToHeadAndHump();
+//
+//				// recalculate signal angles - old datasets have problems
+//				nucleus.calculateSignalAnglesFromPoint(nucleus.getPoint(BorderTag.ORIENTATION_POINT));
+//			}
+//		}
+//		
+//	}
 	
 	private void calculateTopAndBottomVerticals(AnalysisDataset dataset) throws Exception {
 		
 		log(Level.FINE, "Detecting flat region");
-		DatasetProfiler p = new DatasetProfiler(dataset);
-		TailFinder finder = p. new TailFinder(dataset.getCollection());
+
+		ProfileFeatureFinder finder = new ProfileFeatureFinder(dataset.getCollection());
 		finder.assignTopAndBottomVerticalInMouse();
 		
 		log(Level.FINE, "Assigning flat region to nuclei");
-		DatasetProfiler.Offsetter.assignFlatRegionToMouseNuclei(dataset.getCollection());
+		ProfileOffsetter offsetter = new ProfileOffsetter(dataset.getCollection());
+		offsetter.calculateVerticals();
+//		DatasetProfiler.Offsetter.assignFlatRegionToMouseNuclei(dataset.getCollection());
 	}
 	
 	/**
