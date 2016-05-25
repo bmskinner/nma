@@ -32,6 +32,18 @@ public class ProfileManager implements Loggable {
 		this.collection = collection;
 	}
 	
+	
+	/**
+	 * Update the location of the given border tag within the profile
+	 * @param tag
+	 * @param index
+	 */
+	public void updateBorderTag(BorderTag tag, int index){
+		
+		log("Updating border tag location");		
+		
+	}
+	
 	/**
 	 * Test if the regular median profiles of the given datasets have the same segment counts
 	 * @param list
