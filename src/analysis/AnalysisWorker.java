@@ -109,6 +109,33 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
 		Loggable.super.log(level, message);
     }
     
+    
+    
+    @Override
+    public void fine(String message){
+    	log(Level.FINE, message);
+    }
+    
+    @Override
+    public void finer(String message){
+    	log(Level.FINER, message);
+    }
+    
+    @Override
+    public void finest(String message){
+    	log(Level.FINEST, message);
+    }
+    
+    @Override
+    public void warn(String message){
+    	log(Level.WARNING, message);
+    }
+    
+    @Override
+    public void error(String message, Throwable t){
+    	logError(message, t);
+    }
+    
     /**
      * Log an error to the program log window and to the dataset
      * debug file. Logs with Level.SEVERE

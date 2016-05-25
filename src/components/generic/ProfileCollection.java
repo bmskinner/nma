@@ -55,9 +55,9 @@ public class ProfileCollection implements Serializable {
 			
 	/**
 	 * Get the offset needed to transform a profile to start from the given 
-	 * point type
+	 * point type. Returns -1 if the border tag is not found
 	 * @param pointType
-	 * @return
+	 * @return the offset or -1
 	 */
 	public int getOffset(BorderTag pointType){
 		if(pointType==null){
@@ -66,7 +66,8 @@ public class ProfileCollection implements Serializable {
 		if(offsets.containsKey(pointType)){	
 			return offsets.get(pointType);
 		} else {
-			throw new IllegalArgumentException("The requested offset key does not exist: "+pointType);
+			return -1;
+//			throw new IllegalArgumentException("The requested offset key does not exist: "+pointType);
 		}
 	}
 	

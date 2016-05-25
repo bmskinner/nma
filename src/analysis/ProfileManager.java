@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 
-import java.util.logging.Level;
-
+import analysis.nucleus.ProfileOffsetter;
 import logging.Loggable;
 //import analysis.nucleus.DatasetSegmenter.SegmentFitter;
 import utility.Constants;
@@ -15,12 +14,10 @@ import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
-import components.generic.XYPoint;
 import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
-import components.nuclei.sperm.RodentSpermNucleus;
 
 /**
  * This class is designed to simplify operations on CellCollections
@@ -65,8 +62,17 @@ public class ProfileManager implements Loggable {
 
 		/* 
 		 * Set the border tag in the individual nuclei
-		 * using the offset method
+		 * using the segment proportion method
 		 */
+		
+		ProfileOffsetter offsetter = new ProfileOffsetter(collection);
+		try {
+			offsetter.assignBorderTagViaFrankenProfile(tag);
+		} catch (Exception e1) {
+			error("Error assigning tag", e1);
+		}
+		
+		
 		
 		try{
 			
@@ -74,19 +80,19 @@ public class ProfileManager implements Loggable {
 					.getProfile(tag, Constants.MEDIAN); 
 
 			
-
-			for(Nucleus n : collection.getNuclei()){
-				
-				int oldNIndex = n.getBorderIndex(tag);
-				if(oldNIndex==-1){
-					finer("Border tag does not exist and will be created");
-				}
-				int newIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
-				n.setBorderTag(tag, newIndex);
-				n.updateVerticallyRotatedNucleus();
-				finest("Set border tag in nucleus to "+newIndex+ " from "+oldNIndex);
-
-			}
+			//REMOVE: this has been replaced above by the ProfileOffsetter
+//			for(Nucleus n : collection.getNuclei()){
+//				
+//				int oldNIndex = n.getBorderIndex(tag);
+//				if(oldNIndex==-1){
+//					finer("Border tag does not exist and will be created");
+//				}
+//				int newIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
+//				n.setBorderTag(tag, newIndex);
+//				n.updateVerticallyRotatedNucleus();
+//				finest("Set border tag in nucleus to "+newIndex+ " from "+oldNIndex);
+//
+//			}
 			
 			/*
 			 * Set the border tag in the consensus median profile 

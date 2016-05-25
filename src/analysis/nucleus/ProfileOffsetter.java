@@ -6,7 +6,9 @@ import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileType;
+import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
+import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.PigSpermNucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
@@ -80,42 +82,84 @@ public class ProfileOffsetter implements Loggable {
 
 	}
 	
-	public void assignFlatRegionToMouseNuclei() throws Exception{
-//		Profile median = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50); // returns a median profile
+	
+	/**
+	 * This method requires the frankenprofiling to be completed
+	 * @throws Exception
+	 */
+	public void assignBorderTagViaFrankenProfile(BorderTag tag) throws Exception{
 
-//		{
-			/*
-			 * TODO: This will not work: the segmnets and frankenprofiling has not yet been performed
-			 * Find the median profile segment with the flat region
-			 */
+		int index = collection.getProfileCollection(ProfileType.REGULAR)
+				.getOffset(tag); 
+
+		/*
+		 * Check that the points exist
+		 */
+		if( index == -1  ){
+			warn("Cannot find "+tag+" index in median");
+			return;
+		}
+
+		String segName = collection.getProfileCollection(ProfileType.REGULAR)
+				.getSegmentContaining(tag).getName();
+
+
+
+		SegmentedProfile profile = collection.getProfileCollection(ProfileType.REGULAR)
+				.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+
+		NucleusBorderSegment segFromRef    = profile.getSegment(segName);
+
+
+		/*
+		 * Get the proportion of the index through the segment
+		 */
+		double proportion    = segFromRef.getIndexProportion(index);
+
+
+		/*
+		 * Go through each nucleus and apply the position
+		 */
+		
+		for(Nucleus nucleus : collection.getNuclei()){
+
+			int oldNIndex = nucleus.getBorderIndex(tag);
+			if(oldNIndex==-1){
+				finer("Border tag does not exist and will be created");
+			}
+			int newIndex = nucleus.getProfile(ProfileType.REGULAR)
+					.getSegment(segName)
+					.getProportionalIndex(proportion); // find the index in the segment closest to the proportion 
+
+
+			nucleus.setBorderTag(tag, newIndex);		
+			finest("Set border tag in nucleus to "+newIndex+ " from "+oldNIndex);
+		}
+		
+	}
+	
+	/**
+	 * This method requires the frankenprofiling to be completed
+	 * @throws Exception
+	 */
+	private void assignTopAndBottomVerticalsViaFrankenProfile() throws Exception{
+				
 		
 		/*
 		 * Franken profile method: segment proportionality
 		 */
-//			int verticalTopIndex = collection.getProfileCollection(ProfileCollectionType.REGULAR)
-//					.getOffset(BorderTag.TOP_VERTICAL); 
-//
-//			int verticalBottomIndex = collection.getProfileCollection(ProfileCollectionType.REGULAR)
-//					.getOffset(BorderTag.BOTTOM_VERTICAL); 
-//
-//			String topSegName = collection.getProfileCollection(ProfileCollectionType.REGULAR)
-//					.getSegmentContaining(BorderTag.TOP_VERTICAL).getName();
-//
-//			String bottomSegName = collection.getProfileCollection(ProfileCollectionType.REGULAR)
-//					.getSegmentContaining(BorderTag.BOTTOM_VERTICAL).getName();
-//
-//			SegmentedProfile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
-//					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
-//
-//			NucleusBorderSegment topSegFromRef    = profile.getSegment(topSegName);
-//			NucleusBorderSegment bottomSegFromRef = profile.getSegment(bottomSegName);
-//
-//			/*
-//			 * Get the proportion of the indexes through the segment
-//			 */
-//			double topProportion = topSegFromRef.getIndexProportion(verticalTopIndex);
-//			double bottomProportion = bottomSegFromRef.getIndexProportion(verticalBottomIndex);
-//		}
+		
+		assignBorderTagViaFrankenProfile(BorderTag.TOP_VERTICAL);
+		assignBorderTagViaFrankenProfile(BorderTag.BOTTOM_VERTICAL);
+		
+		
+		for(Nucleus nucleus : collection.getNuclei()){			
+			nucleus.updateVerticallyRotatedNucleus();
+		}	
+		
+	}
+	
+	private void assignTopAndBottomVerticalsToMouseViaOffsetting() throws Exception{
 		
 		/*
 		 * Regular profile method: offsetting
@@ -195,19 +239,8 @@ public class ProfileOffsetter implements Loggable {
 	 */
 	public void calculateOffsets() throws Exception {
 
-		switch(collection.getNucleusType()){
-
-			case PIG_SPERM:
-				calculateOffsetsInPigSpermNuclei();
-				break;
-			case RODENT_SPERM:
-				calculateOffsetsInRodentSpermNuclei();
-				assignFlatRegionToMouseNuclei();
-				break;
-			default:
-				calculateOffsetsInRoundNuclei();
-				break;
-		}
+		calculateOPOffsets();
+		calculateVerticals();
 	}
 	
 	/**
@@ -231,15 +264,27 @@ public class ProfileOffsetter implements Loggable {
 		}
 	}
 	
+	/**
+	 * Offset the position of top and bottom vertical points in each nucleus
+	 * @throws Exception
+	 */
 	public void calculateVerticals()  throws Exception {
 		switch(collection.getNucleusType()){
 		case RODENT_SPERM:
-			assignFlatRegionToMouseNuclei();
+			assignTopAndBottomVerticalsToMouseViaOffsetting();
 			break;
 		default:
 			break;
 		}
 	}
 	
+	/**
+	 * Use the proportional segment method to update top and bottom vertical positions
+	 * within the dataset
+	 * @throws Exception
+	 */
+	public void reCalculateVerticals() throws Exception{
+		assignTopAndBottomVerticalsViaFrankenProfile();
+	}
 
 }
