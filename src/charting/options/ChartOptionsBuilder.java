@@ -58,6 +58,7 @@ public class ChartOptionsBuilder {
 	private double modalityPosition    = 0;
 	private boolean showPoints         = false;
 	private boolean showLines          = true;
+	private boolean showAnnotations    = true;
 	
 	public ChartOptionsBuilder(){
 		
@@ -138,6 +139,11 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
+	public ChartOptionsBuilder setShowAnnotations(boolean showAnnotations) {
+		this.showAnnotations = showAnnotations;
+		return this;
+	}
+	
 	public ChartOptionsBuilder setProfileType(ProfileType type){
 		this.type = type;
 		return this;
@@ -181,6 +187,7 @@ public class ChartOptionsBuilder {
 		result.setModalityPosition(modalityPosition);
 		result.setShowLines(showLines);
 		result.setShowPoints(showPoints);
+		result.setShowAnnotations(showAnnotations);
 		return result;
 	}
 	

@@ -204,8 +204,15 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 */	
 	public static JFreeChart makeMultiSegmentedProfileChart(ChartOptions options) throws Exception {
 		
-		
-		int length = 100;
+		// Set the length to 100 if normalised or multiple datasets.
+		// Otherwise use the median profile length
+		int length = options.isNormalised() || options.isMultipleDatasets()
+				   ? 100 
+				   : options.firstDataset()
+				   		.getCollection()
+				   		.getProfileCollection(ProfileType.REGULAR)
+				   		.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN)
+				   		.size();
 				
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
@@ -248,7 +255,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				if(name.startsWith("Seg_")){
 					int colourIndex = getIndexFromLabel(name);
 					renderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
-					ColourSwatch swatch = dataset.getSwatch() == null ? options.getSwatch() : dataset.getSwatch();
+					ColourSwatch swatch = options.getSwatch();
 					renderer.setSeriesPaint(i, swatch.color(colourIndex));
 				} 
 			}	
@@ -256,20 +263,53 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			datasetIndex++;
 		}
 		
-		// Add segment name annotations
+		
 		if(options.isSingleDataset()){
 			
-			for(NucleusBorderSegment seg :  options.firstDataset().getCollection()
-					.getProfileCollection(ProfileType.REGULAR)
-					.getSegmentedProfile(options.getTag())
-					.getOrderedSegments()){
+			// Add markers
+			if(options.isShowMarkers()){
 
-				int midPoint = seg.getMidpointIndex();
+				CellCollection collection = options.firstDataset().getCollection();
+				for (BorderTag tag : collection.getProfileCollection(options.getType()).getOffsetKeys()){
 
-				double x = ((double) midPoint / (double) seg.getTotalLength() ) * 100;
-				XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
-				segmentAnnotation.setPaint(options.firstDataset().getSwatch().color(seg.getPosition()));
-				plot.addAnnotation(segmentAnnotation);
+					// get the index of the tag
+					int index = collection.getProfileCollection(options.getType()).getOffset(tag);
+
+					// get the offset from to the current draw point
+					int offset = collection.getProfileCollection(options.getType()).getOffset(options.getTag());
+
+					// adjust the index to the offset
+					index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection(options.getType()).getAggregate().length());
+
+					double indexToDraw = index; // convert to a double to allow normalised positioning
+
+					if(options.isNormalised()){ // set to the proportion of the point along the profile
+						indexToDraw =  (( indexToDraw / collection.getProfileCollection(options.getType()).getAggregate().length() ) * 100);
+					}
+
+
+
+
+					addMarkerToXYPlot(plot, tag, indexToDraw);
+
+				}
+			}
+			
+			// Add segment name annotations
+			
+			if(options.isShowAnnotations()){
+				for(NucleusBorderSegment seg :  options.firstDataset().getCollection()
+						.getProfileCollection(ProfileType.REGULAR)
+						.getSegmentedProfile(options.getTag())
+						.getOrderedSegments()){
+
+					int midPoint = seg.getMidpointIndex();
+
+					double x = ((double) midPoint / (double) seg.getTotalLength() ) * 100;
+					XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
+					segmentAnnotation.setPaint(options.getSwatch().color(seg.getPosition()));
+					plot.addAnnotation(segmentAnnotation);
+				}
 			}
 		}
 		return chart;

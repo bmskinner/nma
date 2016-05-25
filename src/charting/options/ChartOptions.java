@@ -47,6 +47,7 @@ public class ChartOptions extends AbstractOptions {
 	private double modalityPosition    = 0;
 	private boolean showPoints         = false;
 	private boolean showLines          = true;
+	private boolean showAnnotations    = true;
 	
 	public ChartOptions(List<AnalysisDataset> list){
 		this(list, null);
@@ -144,6 +145,16 @@ public class ChartOptions extends AbstractOptions {
 	public void setShowLines(boolean showLines) {
 		this.showLines = showLines;
 	}
+	
+	
+
+	public boolean isShowAnnotations() {
+		return showAnnotations;
+	}
+
+	public void setShowAnnotations(boolean showAnnotations) {
+		this.showAnnotations = showAnnotations;
+	}
 
 	public ProfileType getType() {
 		return type;
@@ -183,6 +194,7 @@ public class ChartOptions extends AbstractOptions {
 		result = prime * result + (hideProfiles ? 1231 : 1237);
 		result = prime * result + (showPoints ? 1231 : 1237);
 		result = prime * result + (showLines ? 1231 : 1237);
+		result = prime * result + (showAnnotations ? 1231 : 1237);
 		result = prime * result + signalGroup;
 		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
 		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
@@ -214,6 +226,8 @@ public class ChartOptions extends AbstractOptions {
 		if (showPoints != other.showPoints)
 			return false;
 		if (showLines != other.showLines)
+			return false;
+		if (showLines != other.showAnnotations)
 			return false;
 		if (signalGroup != other.signalGroup)
 			return false;
