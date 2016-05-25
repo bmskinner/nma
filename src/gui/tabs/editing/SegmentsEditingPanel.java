@@ -167,6 +167,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			rangePanel = new PositionSelectionChartPanel(rangeChart);
 			rangePanel.setPreferredSize(minimumChartSize);
 			rangePanel.addSignalChangeListener(this);
+			rangePanel.setRangeWidth(RANGE_WINDOW);
 			this.add(rangePanel, BorderLayout.SOUTH);
 			updateChartPanelRange();
 			

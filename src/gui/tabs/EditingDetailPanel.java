@@ -135,14 +135,17 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
-		log(Level.FINER, "Editing panel heard signal: "+event.type());
+		finer("Editing panel heard signal: "+event.type());
 		
-		if(event.sourceName().equals("CellDetailPanel") || event.sourceName().equals("SegmentsEditingPanel")){
+		if(event.sourceName().equals("CellDetailPanel") 
+				|| event.sourceName().equals("SegmentsEditingPanel")
+				|| event.sourceName().equals("BorderTagEditingPanel")){
 			fireSignalChangeEvent(event.type());			
 		} 
 			
 		cellDetailPanel.signalChangeReceived(event);
 		segmentsEditingPanel.signalChangeReceived(event);
+		borderTagEditingPanel.signalChangeReceived(event);
 
 		
 	}

@@ -4,18 +4,23 @@ import java.util.List;
 import java.util.UUID;
 
 
+import java.util.logging.Level;
+
 import logging.Loggable;
 //import analysis.nucleus.DatasetSegmenter.SegmentFitter;
 import utility.Constants;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.generic.XYPoint;
 import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
+import components.nuclei.sperm.RodentSpermNucleus;
 
 /**
  * This class is designed to simplify operations on CellCollections
@@ -40,8 +45,67 @@ public class ProfileManager implements Loggable {
 	 */
 	public void updateBorderTag(BorderTag tag, int index){
 		
-		log("Updating border tag location");		
+		finer("Updating border tag "+tag);
 		
+		int oldIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
+
+		/*
+		 * Set the border tag in the median profile 
+		 */
+		finest("Setting border tag in median to "+index+ " from "+oldIndex);
+		collection.getProfileCollection(ProfileType.REGULAR)
+			.addOffset(tag, index);
+		
+
+
+		/* 
+		 * Set the border tag in the individual nuclei
+		 * using the offset method
+		 */
+		
+		try{
+			
+			Profile median = collection.getProfileCollection(ProfileType.REGULAR)
+					.getProfile(tag, Constants.MEDIAN); 
+
+			
+
+			for(Nucleus n : collection.getNuclei()){
+				
+				int oldNIndex = n.getBorderIndex(tag);
+				int newIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
+				n.setBorderTag(tag, newIndex);
+				n.updateVerticallyRotatedNucleus();
+				finest("Set border tag in nucleus to "+newIndex+ " from "+oldNIndex);
+
+			}
+			
+			/*
+			 * Set the border tag in the consensus median profile 
+			 */
+			if(collection.hasConsensusNucleus()){
+				Nucleus n = collection.getConsensusNucleus();
+				int oldNIndex = n.getBorderIndex(tag);
+				int newIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
+				n.setBorderTag(tag, newIndex);
+				
+				n.updateVerticallyRotatedNucleus();
+				finest("Set border tag in consensus to "+newIndex+ " from "+oldNIndex);
+			}
+
+		} catch (Exception e){
+
+			warn("Error updating "+tag+": resetting");
+			
+			collection.getProfileCollection(ProfileType.REGULAR)
+			.addOffset(tag, oldIndex);
+			
+			warn("Individual nuclei not reset");
+						
+			return;
+		}
+
+
 	}
 	
 	/**

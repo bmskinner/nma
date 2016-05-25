@@ -26,15 +26,23 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.util.logging.Level;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.TableModel;
 
+import org.jfree.chart.ChartMouseEvent;
+import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.entity.XYItemEntity;
 
 import components.generic.BorderTag;
 import components.generic.ProfileType;
@@ -44,6 +52,7 @@ import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import gui.SignalChangeEvent;
 import gui.DatasetEvent.DatasetMethod;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.DraggableOverlayChartPanel;
 import gui.components.PositionSelectionChartPanel;
 import gui.components.ColourSelecter.ColourSwatch;
@@ -59,9 +68,13 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	private PositionSelectionChartPanel rangePanel; // a small chart to show the entire profile
 	
 	private JPanel buttonsPanel;
-	private JButton setButton;
+//	private JButton setButton;
 	
-	private static final String STR_SET_BORDER_TAG     = "Set border tag";
+	JPopupMenu popupMenu = new JPopupMenu("Popup");
+	
+	private int activeProfileIndex = 0;
+	
+//	private static final String STR_SET_BORDER_TAG     = "Set border tag";
 	private static final int RANGE_WINDOW = 30;
 	
 	public BorderTagEditingPanel() {
@@ -69,6 +82,9 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		super();
 		
 		this.setLayout(new BorderLayout());
+		
+		createBorderTagPopup();
+		
 		Dimension minimumChartSize = new Dimension(50, 100);
 		Dimension preferredChartSize = new Dimension(400, 300);
 		
@@ -81,6 +97,24 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		chartPanel.setMinimumDrawHeight( 0 );
 		chartPanel.addSignalChangeListener(this);
 		this.add(chartPanel, BorderLayout.CENTER);
+		
+		chartPanel.addChartMouseListener(new ChartMouseListener() {
+
+		    public void chartMouseClicked(ChartMouseEvent e) {
+		    	XYItemEntity ent = (XYItemEntity) e.getEntity();
+		    	int series = ent.getSeriesIndex();
+		    	int item   = ent.getItem();
+		    	double x   = ent.getDataset().getXValue(series, item);
+		    	
+		    	activeProfileIndex = (int) x;
+		    	MouseEvent ev = e.getTrigger();
+		    	popupMenu.show(ev.getComponent(), ev.getX(), ev.getY());
+
+		    }
+
+		    public void chartMouseMoved(ChartMouseEvent e) {}
+
+		});
 				
 		
 		buttonsPanel = makeButtonPanel();
@@ -97,6 +131,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		rangePanel = new PositionSelectionChartPanel(rangeChart);
 		rangePanel.setPreferredSize(minimumChartSize);
 		rangePanel.addSignalChangeListener(this);
+		rangePanel.setRangeWidth(RANGE_WINDOW);
 		this.add(rangePanel, BorderLayout.SOUTH);
 		updateChartPanelRange();
 		
@@ -104,8 +139,28 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 
 	}
 	
+	private void createBorderTagPopup(){
+		
+		for(BorderTag tag : BorderTag.values()){
+			JMenuItem item = new JMenuItem(tag.toString());
+		    
+			item.addActionListener(new ActionListener() {
+		      public void actionPerformed(ActionEvent e) {
+//		        log("Selected "+tag);
+		        setBorderTagAction(tag);
+		      }
+		    });
+		    popupMenu.add(item);
+		    
+		    if(tag.equals(BorderTag.REFERENCE_POINT)){
+		    	item.setEnabled(false);
+		    }
+		}
+		 
+	}
+	
 	public void setButtonsEnabled(boolean b){
-		setButton.setEnabled(b);
+//		setButton.setEnabled(b);
 	}
 	
 	private JPanel makeButtonPanel(){
@@ -120,9 +175,11 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 			}
 		};
 		
-		setButton = new JButton(STR_SET_BORDER_TAG);
-		setButton.addActionListener(this);
-		panel.add(setButton);
+//		setButton = new JButton(STR_SET_BORDER_TAG);
+//		setButton.addActionListener(this);
+		
+		JLabel text = new JLabel("Click a point to set as a border tag");
+		panel.add(text);
 				
 		return panel;
 		
@@ -257,78 +314,42 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	}
 	
 	
-	private void setBorderTagAction(){
-
-		BorderTag tag = (BorderTag) JOptionPane.showInputDialog(null, 
-				"Choose tag to set",
-				"Choose tag",
-				JOptionPane.QUESTION_MESSAGE, 
-				null, 
-				BorderTag.values(), 
-				BorderTag.TOP_VERTICAL);
+	private void setBorderTagAction(BorderTag tag){
 
 		if(tag!=null){
 			
-			SpinnerNumberModel sModel = new SpinnerNumberModel(0, 0, 400, 1); // TODO: replace with profile max
-			JSpinner spinner = new JSpinner(sModel);
+				int newTagIndex = activeProfileIndex;
 
-
-			int option = JOptionPane.showOptionDialog(null, 
-					spinner, 
-					"Choose the new position", 
-					JOptionPane.OK_CANCEL_OPTION, 
-					JOptionPane.QUESTION_MESSAGE, null, null, null);
-			
-			if (option == JOptionPane.CANCEL_OPTION) {
-				log("Cancelled update");
-				return;
-				
-			} else if (option == JOptionPane.OK_OPTION)	{
-				
-				int newTagIndex = (int) spinner.getModel().getValue();
-				
 				log("Updating "+tag+" to index "+newTagIndex);
 				
+				this.setAnalysing(true);
+
 				activeDataset()
 					.getCollection()
 					.getProfileManager()
 					.updateBorderTag(tag, newTagIndex);
 				
-			}
-			
+				this.setAnalysing(false);
+				this.refreshChartCache();
+				fine("Firing refresh cache request for loaded datasets");
+				fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
+
 			
 		} else {
-			log("Cancelled update");
+			fine("Tag is null");
 			return;
 		}
 
-
-//			if(activeDataset()
-//					.getCollection()
-//					.getProfileManager().testSegmentsMergeable(mergeOption.getOne(), mergeOption.getTwo())){
-//				activeDataset()
-//					.getCollection()
-//					.getProfileManager()
-//					.mergeSegments(mergeOption.getOne(), mergeOption.getTwo());
-//				
-//				log(Level.FINEST, "Merged segments: "+mergeOption.toString());
-//				log(Level.FINEST, "Refreshing chart cache for editing panel");
-//				this.refreshChartCache();
-//				log(Level.FINEST, "Firing general refresh cache request for loaded datasets");
-//				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
-//			} else {
-//				JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
-//			}
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if(e.getSource().equals(setButton)){
-			fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
-			setBorderTagAction();
-			
-		}
+//		if(e.getSource().equals(setButton)){
+//			fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
+//			setBorderTagAction();
+//			
+//		}
 		
 	}
 

@@ -29,7 +29,8 @@ import charting.ChartComponents;
 
 /**
  * This class takes a chart and adds a single draggable domain
- * rectangle overlay
+ * rectangle overlay. The overlay moves with the mouse when dragged,
+ * and fires a SignalChangeEvent when the overlay is released.
  * @author bms41
  *
  */
@@ -41,17 +42,15 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	
 	protected Overlay overlay = null;
 	protected RectangleOverlayObject xRectangle;
-	
-	
-//	protected Crosshair xCrosshair;
+
 	
 	protected volatile boolean mouseIsDown = false;
 	
 	protected volatile boolean isRunning = false;
 	
-//	protected volatile boolean overlayMoving = false;
+	protected int rangeWidth = DEFAULT_RANGE_WIDTH;
 	
-	protected int rangeWidth = 20;
+	private static final int DEFAULT_RANGE_WIDTH = 20;
 			
 
 	public PositionSelectionChartPanel(final JFreeChart chart){
@@ -59,9 +58,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		
 		this.setRangeZoomable(false);
 		this.setDomainZoomable(false);		
-		
-//		
-		
+
 		overlay = new RectangleOverlay();
 		xRectangle = new RectangleOverlayObject(40, 60);
 		((RectangleOverlay) overlay).setDomainRectangle(xRectangle);
@@ -72,6 +69,14 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		
 	public RectangleOverlayObject getDomainRectangleOverlay(){
 		return xRectangle;
+	}
+	
+	/**
+	 * Set the width of the rectangle overlay, if present
+	 * @param i
+	 */
+	public void setRangeWidth(int i){
+		this.rangeWidth = i;
 	}
 	
 	@Override

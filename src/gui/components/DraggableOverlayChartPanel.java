@@ -41,6 +41,13 @@ import charting.ChartComponents;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 
+/**
+ * This chart panel provides a list of draggable markers as
+ * crosshair overlays, corresponding to the start positions of
+ * segments in a segmented profile
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 		

@@ -678,20 +678,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			return panel;
 			
 		}
-		
-//		public void drawCellBackgroundImage(File f, int channel){
-//			panel.drawImageAsAnnotation(f, channel);
-//		}
-				
+						
 		protected void update(Cell cell){
 
 			RotationMode rotateMode = rotationPanel.getSelected();
 			boolean showHook = showHookHump.isSelected();
-			
-//			panel.setCell(cell);
-			
-//			panel.removeOverlay(overlay);
-			
+						
 			try{
 				JFreeChart chart;
 				if(cell==null){
