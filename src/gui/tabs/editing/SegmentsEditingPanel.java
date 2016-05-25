@@ -27,6 +27,7 @@ import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.DraggableOverlayChartPanel;
 import gui.components.PositionSelectionChartPanel;
+import gui.components.RectangleOverlayObject;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.dialogs.AngleWindowSizeExplorer;
 import gui.tabs.DetailPanel;
@@ -134,6 +135,8 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		private static final String STR_SET_WINDOW_SIZE   = "Set window size";
 		private static final String STR_SHOW_WINDOW_SIZES = "Window sizes";
 		
+		private static final int RANGE_WINDOW = 10;
+		
 		protected SegmentProfilePanel(){
 			super();
 			this.setLayout(new BorderLayout());
@@ -227,6 +230,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				.setTag(BorderTag.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType( ProfileType.REGULAR)
+				.setSwatch(ColourSwatch.REGULAR_SWATCH)
 				.setShowPoints(true)
 				.build();
 			
@@ -254,7 +258,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				.setTag(BorderTag.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType( ProfileType.REGULAR)
-				.setSwatch(ColourSwatch.NO_SWATCH)
+				.setSwatch(ColourSwatch.REGULAR_SWATCH)
 				.setShowPoints(false)
 				.build();
 			
@@ -268,11 +272,16 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		 * position in the range panel, +- 10
 		 */
 		private void updateChartPanelRange(){
-			double xValue = rangePanel.getDomainCrosshairPosition();
-			finest("Range panel crosshair is at "+xValue);
+//			double xValue = rangePanel.getDomainCrosshairPosition();
+//			finest("Range panel crosshair is at "+xValue);
+//			
+//			double min = xValue-RANGE_WINDOW;
+//			double max = xValue+RANGE_WINDOW;
+//			chartPanel.getChart().getXYPlot().getDomainAxis().setRange(min, max);
 			
-			double min = xValue-10;
-			double max = xValue+10;
+			RectangleOverlayObject ob = rangePanel.getDomainRectangleOverlay();
+			double min = ob.getMinValue();
+			double max = ob.getMaxValue();
 			chartPanel.getChart().getXYPlot().getDomainAxis().setRange(min, max);
 		}
 		

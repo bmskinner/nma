@@ -48,6 +48,8 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 
 	private List<SegmentCrosshair> crosses = new ArrayList<SegmentCrosshair>(); // drawing lines on the chart
 
+	protected Crosshair xCrosshair;
+	
 	private boolean isChartNormalised = false;
 		
 
@@ -78,6 +80,16 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 		}
 	}
 	
+	public double getDomainCrosshairPosition(){
+	
+	if(xCrosshair!=null){
+		finest("Domain value is "+xCrosshair.getValue());
+		return xCrosshair.getValue();
+	} 
+	return 0;
+
+}
+	
 	private void updateOverlays(){
 		/*
 		 * Create an x-axis overlay for each segment start
@@ -105,7 +117,7 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 					xCrosshair.setValue(value);
 					crosses.add(xCrosshair);
 					
-					overlay.addDomainCrosshair(xCrosshair);
+					((CrosshairOverlay) overlay).addDomainCrosshair(xCrosshair);
 					
 				}
 				
@@ -129,7 +141,7 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 		this.isChartNormalised = normalised;
 		crosses = new ArrayList<SegmentCrosshair>();
 		overlay = null;
-		xCrosshair = null;
+//		xCrosshair = null;
 		updateOverlays();
 	}
 	
@@ -284,7 +296,7 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 
 		boolean isOverLine = false;
 
-		List<Crosshair> crosshairs = overlay.getDomainCrosshairs();
+		List<Crosshair> crosshairs = ((CrosshairOverlay) overlay).getDomainCrosshairs();
 		// only display a hand if the cursor is over the items
 		for(Crosshair c : crosshairs ){
 

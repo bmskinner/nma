@@ -17,9 +17,11 @@ import java.util.List;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.panel.CrosshairOverlay;
+import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
+
 
 
 import charting.ChartComponents;
@@ -27,7 +29,7 @@ import charting.ChartComponents;
 
 /**
  * This class takes a chart and adds a single draggable domain
- * overlay crosshair
+ * rectangle overlay
  * @author bms41
  *
  */
@@ -37,13 +39,17 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 
 	private List<Object> listeners = new ArrayList<Object>();
 	
-	protected CrosshairOverlay overlay = null;
+	protected Overlay overlay = null;
+	protected RectangleOverlayObject xRectangle;
 	
-	protected Crosshair xCrosshair;
+	
+//	protected Crosshair xCrosshair;
 	
 	protected volatile boolean mouseIsDown = false;
 	
 	protected volatile boolean isRunning = false;
+	
+	protected int rangeWidth = 20;
 			
 
 	public PositionSelectionChartPanel(final JFreeChart chart){
@@ -52,37 +58,47 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		this.setRangeZoomable(false);
 		this.setDomainZoomable(false);		
 		
-		overlay = new CrosshairOverlay();
-
-
-		xCrosshair = new Crosshair(Double.NaN, Color.DARK_GRAY, ChartComponents.MARKER_STROKE);
-		xCrosshair.setLabelVisible(false);
-
-		xCrosshair.setValue(50);
-
-
-		overlay.addDomainCrosshair(xCrosshair);
+//		
+		
+		overlay = new RectangleOverlay();
+		xRectangle = new RectangleOverlayObject(40, 60);
+		((RectangleOverlay) overlay).setDomainRectangle(xRectangle);
+		
+		
+//		overlay = new CrosshairOverlay();
+//
+//		xCrosshair = new Crosshair(Double.NaN, Color.DARK_GRAY, ChartComponents.MARKER_STROKE);
+//		xCrosshair.setLabelVisible(false);
+////
+//		xCrosshair.setValue(50);
+//
+//
+//		overlay.addDomainCrosshair(xCrosshair);
 			
 		
 		
 		this.addOverlay(overlay);
 	}
 	
-	public double getDomainCrosshairPosition(){
-		
-		if(xCrosshair!=null){
-			finest("Domain value is "+xCrosshair.getValue());
-			return xCrosshair.getValue();
-		} 
-		return 0;
-
+//	public double getDomainCrosshairPosition(){
+//		
+//		if(xCrosshair!=null){
+//			finest("Domain value is "+xCrosshair.getValue());
+//			return xCrosshair.getValue();
+//		} 
+//		return 0;
+//
+//	}
+	
+	public RectangleOverlayObject getDomainRectangleOverlay(){
+		return xRectangle;
 	}
 	
 	@Override
 	public void mousePressed(MouseEvent e) {
 	    if (e.getButton() == MouseEvent.BUTTON1) {
 
-	    	if(xCrosshair!=null){
+	    	if(xRectangle!=null){
 //	    		IJ.log("Mouse down : Running :"+checkRunning()); 
 	    		mouseIsDown = true;
 	    		initThread();
@@ -135,27 +151,43 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	
 		} else {
 
-			if (checkCursorIsOverLine(x, y)) {
-
-				this.setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
-				
-			} else {
-				this.setCursor(Cursor.getDefaultCursor());
-			}
+//			if (checkCursorIsOverLine(x, y)) {
+//
+//				this.setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
+//				
+//			} else {
+//				this.setCursor(Cursor.getDefaultCursor());
+//			}
 		}
 	}
 	
-	private void updateActiveCrosshairLocation(int x, int y){
+	private void updateDomainRectangleLocation(int x){
 
 		Rectangle2D dataArea = getScreenDataArea();
 		JFreeChart chart = getChart();
 		XYPlot plot = (XYPlot) chart.getPlot();
 		ValueAxis xAxis = plot.getDomainAxis();
-		double movex = xAxis.java2DToValue(x, dataArea, 
+		
+		
+		int halfRange = rangeWidth / 2;
+		
+		double xValue = xAxis.java2DToValue(x, dataArea, 
 				RectangleEdge.BOTTOM);
-		xCrosshair.setValue(movex);
+		
+		double moveMin = xValue - halfRange;
+		moveMin = moveMin < 0 ? 0 : moveMin;
+		
+		double moveMax = xValue + halfRange;
+		
+		log("Click centre at "+x+" -> "+xValue);
+		log("Setting rectangle from click to "+moveMin+" - "+moveMax );
+				
+		
+		xRectangle.setMinValue(moveMin);
+		xRectangle.setMaxValue(moveMax);
 		
 	}
+	
 	
 	private synchronized boolean checkRunning(){
 		if (isRunning) 
@@ -184,7 +216,9 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	                	
 	                	int x = MouseInfo.getPointerInfo().getLocation().x - getLocationOnScreen().x;
 	                    int y = MouseInfo.getPointerInfo().getLocation().y - getLocationOnScreen().y;
-	                    updateActiveCrosshairLocation(x, y);
+	                    
+	                    updateDomainRectangleLocation(x);
+//	                    updateActiveCrosshairLocation(x, y);
 
 	                	
 	                } while (mouseIsDown);
@@ -211,27 +245,28 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 
 		boolean isOverLine = false;
 
-//		List<Crosshair> crosshairs = overlay.getDomainCrosshairs();
-		// only display a hand if the cursor is over the items
-//		for(Crosshair c : crosshairs ){
 
 
 			// Turn the chart coordinates into panel coordinates
-			double rectangleX = xAxis.valueToJava2D(xCrosshair.getValue(), dataArea, 
+			double rectangleMinX = xAxis.valueToJava2D(xRectangle.getMinValue(), dataArea, 
 					RectangleEdge.BOTTOM);
+			
+			double rectangleMaxX = xAxis.valueToJava2D(xRectangle.getMaxValue(), dataArea, 
+					RectangleEdge.BOTTOM);
+			
+			double rectangleW = rectangleMaxX - rectangleMinX;
 
 
-			final Rectangle bounds = new Rectangle( (int)rectangleX-2, 
+			final Rectangle bounds = new Rectangle( (int)xRectangle.getMinValue()-2, 
 					(int) dataArea.getMinY(), 
-					(int) 4,   
+					(int) rectangleW,   
 					(int) dataArea.getHeight() );
 
 
 			if (bounds != null && bounds.contains(x, y)) {
 				isOverLine = true;
-//				xCrosshair = (Crosshair) c;
 			}
-//		}
+//		
 		return isOverLine;
 	}
 	
