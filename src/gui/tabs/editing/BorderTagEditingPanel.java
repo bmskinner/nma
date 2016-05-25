@@ -152,7 +152,13 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		    });
 		    popupMenu.add(item);
 		    
-		    if(tag.equals(BorderTag.REFERENCE_POINT)){
+		    /*
+		     * We can't handle changing the OP or RP yet -
+		     * requires segment boundary changes
+		     */
+		    if(tag.equals(BorderTag.REFERENCE_POINT) 
+		    		|| tag.equals(BorderTag.INTERSECTION_POINT)
+		    		|| tag.equals(BorderTag.ORIENTATION_POINT )){
 		    	item.setEnabled(false);
 		    }
 		}
@@ -329,10 +335,11 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 					.getProfileManager()
 					.updateBorderTag(tag, newTagIndex);
 				
-				this.setAnalysing(false);
+
 				this.refreshChartCache();
 				fine("Firing refresh cache request for loaded datasets");
-				fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
+				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+				this.setAnalysing(false);
 
 			
 		} else {

@@ -1047,7 +1047,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		BorderPoint result = new BorderPoint(0,0);
 		if(this.getBorderIndex(tag)>-1){
 			result = this.getBorderPoint((this.getBorderIndex(tag)));
-//			result = new BorderPoint(this.getBorderPoint((this.getBorderIndex(tag))));
 		} else {
 			return null;
 		}

@@ -47,7 +47,12 @@ public class ProfileManager implements Loggable {
 		
 		finer("Updating border tag "+tag);
 		
-		int oldIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
+		int oldIndex =0;
+		try {
+			oldIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
+		} catch(IllegalArgumentException e){
+			finer("Border tag does not exist and will be created");
+		}
 
 		/*
 		 * Set the border tag in the median profile 
@@ -73,6 +78,9 @@ public class ProfileManager implements Loggable {
 			for(Nucleus n : collection.getNuclei()){
 				
 				int oldNIndex = n.getBorderIndex(tag);
+				if(oldNIndex==-1){
+					finer("Border tag does not exist and will be created");
+				}
 				int newIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
 				n.setBorderTag(tag, newIndex);
 				n.updateVerticallyRotatedNucleus();
@@ -89,7 +97,12 @@ public class ProfileManager implements Loggable {
 				int newIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
 				n.setBorderTag(tag, newIndex);
 				
-				n.updateVerticallyRotatedNucleus();
+				if(n.hasBorderTag(BorderTag.TOP_VERTICAL) && n.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+					n.alignPointsOnVertical(n.getBorderTag(BorderTag.TOP_VERTICAL), n.getBorderTag(BorderTag.BOTTOM_VERTICAL));
+				} else {
+					n.rotatePointToBottom(n.getBorderTag(BorderTag.ORIENTATION_POINT));
+				}
+//				
 				finest("Set border tag in consensus to "+newIndex+ " from "+oldNIndex);
 			}
 
