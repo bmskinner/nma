@@ -78,7 +78,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		List<Component> fields = new ArrayList<Component>();
 
 		JLabel logLabel = new JLabel("Logging level");
-		Level[] levelArray = { Level.INFO, Level.FINE, Level.FINEST };
+		Level[] levelArray = { Level.INFO, Level.FINE, Level.FINER, Level.FINEST };
 		levelBox = new JComboBox<Level>(levelArray);
 		levelBox.setSelectedItem(Logger.getLogger(PROGRAM_LOGGER).getLevel());
 		levelBox.addActionListener(this);
