@@ -50,7 +50,7 @@ public class LogPanelFormatter extends Formatter {
 
 		if(record.getThrown()!=null){
 			Throwable t = record.getThrown();
-
+			buffer.append( " ");
 			buffer.append( t.getClass().getSimpleName());
 			buffer.append( ": ");
 			buffer.append(t.getMessage() );
