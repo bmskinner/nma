@@ -1,7 +1,14 @@
 package analysis;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+
+
+
+
+
 
 
 import analysis.nucleus.ProfileOffsetter;
@@ -43,6 +50,11 @@ public class ProfileManager implements Loggable {
 	public void updateBorderTag(BorderTag tag, int index){
 		
 		finer("Updating border tag "+tag);
+		
+		if(tag.type().equals(BorderTagType.CORE )){
+			resegmentWithCoreBorderTagUpdate(tag, index);
+			return;
+		}
 		
 		int oldIndex =0;
 		try {
@@ -117,6 +129,98 @@ public class ProfileManager implements Loggable {
 			return;
 		}
 
+
+	}
+	
+	/**
+	 * Find the appropriate offset for each nucleus in the collection
+	 * @param tag
+	 * @param index
+	 */
+	private void applyBorderTagOffsetToNuclei(BorderTag tag, int index){
+		
+	}
+	
+	/**
+	 * If a core border tag is moved, the profile needs to be resegmented.
+	 * @param tag
+	 * @param index
+	 */
+	private void resegmentWithCoreBorderTagUpdate(BorderTag tag, int index){
+		
+		fine("Resegmenting for core border tag change");
+		// Store the existing core points in a map (OP and RP)
+		Map<BorderTag, Integer> map = new HashMap<BorderTag, Integer>();
+		for(BorderTag test : BorderTag.values(BorderTagType.CORE)){
+			int i = collection.getProfileCollection(ProfileType.REGULAR).getOffset(test);
+			map.put(test, i);
+			finest("Storing existing median "+test+" at index "+i);
+		}
+		
+		// Overwrite the new tag
+		map.put(tag, index);
+		finest("Replacing median "+tag+" with index "+index+" in segmenter map");
+		
+		
+		/*
+		 * Now we need to overwite the default OP and RP locations in the nucleus
+		 * profiles. This is because the offsetter assumes the RP is always correct by default.
+		 */
+		
+		ProfileOffsetter offsetter = new ProfileOffsetter(collection);
+		try {
+			finer("Using ProfileOffsetter to remap "+tag+" in nuclei");
+			offsetter.assignBorderTagViaFrankenProfile(tag);
+			
+		} catch (Exception e1) {
+			error("Error assigning tag to nuclei", e1);
+		}
+		
+		// Resegment the median
+		try {
+			
+			fine("Resegmenting the median profile");
+			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+
+			// the reference point is always index 0, so the segments will match
+			// the profile
+			Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+
+			ProfileSegmenter segmenter = new ProfileSegmenter(median, map);		
+
+			List<NucleusBorderSegment> segments = segmenter.segment();
+			
+			pc.addSegments(BorderTag.REFERENCE_POINT, segments);
+			
+			fine("Resegmented the median profile");
+
+		} catch (Exception e1) {
+
+			error("Error resegmenting the median profile", e1);
+			return;
+		}
+		
+		
+		// TODO: What is the impact of changing the RP? 
+		
+		// Reprofile the collection
+		// Realign nuclei to the new tag positions
+		fine("Offsetting nucleus profiles against new median");
+		offsetter = new ProfileOffsetter(collection);
+		try {
+			offsetter.calculateOffsets();
+		} catch (Exception e) {
+			error("Error offsetting nucleus profiles", e);
+		} 
+		
+		fine("Calculated new offsets for nuclei");
+		
+		
+		
+		// Run a new morphological analysis to apply the new segments
+		// TODO: this needs to trigger the progressable action
+		// Temp solution - if a core border tag is detected in the UI selection,
+		// trigger morphological analysis after this step
 
 	}
 	

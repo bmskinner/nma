@@ -45,6 +45,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.entity.XYItemEntity;
 
 import components.generic.BorderTag;
+import components.generic.BorderTag.BorderTagType;
 import components.generic.ProfileType;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
@@ -156,9 +157,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		     * We can't handle changing the OP or RP yet -
 		     * requires segment boundary changes
 		     */
-		    if(tag.equals(BorderTag.REFERENCE_POINT) 
-		    		|| tag.equals(BorderTag.INTERSECTION_POINT)
-		    		|| tag.equals(BorderTag.ORIENTATION_POINT )){
+		    if( tag.equals(BorderTag.INTERSECTION_POINT)){
 		    	item.setEnabled(false);
 		    }
 		}
@@ -280,34 +279,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		
 	
 	@Override
-	public void signalChangeReceived(SignalChangeEvent event) {
-//		if(event.type().contains("UpdateSegment") && event.getSource().equals(chartPanel)){
-//			log(Level.FINEST, "Heard update segment request");
-//			try{
-//
-//				
-//				SegmentsEditingPanel.this.setAnalysing(true);
-//
-//				String[] array = event.type().split("\\|");
-//				int segMidpointIndex = Integer.valueOf(array[1]);
-//				int index = Integer.valueOf(array[2]);
-//				
-//				UUID segID = activeDataset()
-//						.getCollection()
-//						.getProfileCollection(ProfileType.REGULAR)
-//						.getSegmentedProfile(BorderTag.REFERENCE_POINT)
-//						.getSegmentContaining(segMidpointIndex)
-//						.getID();
-//				updateSegmentStartIndex(segID, index);
-//
-//			} catch(Exception e){
-//				log(Level.SEVERE, "Error updating segment", e);
-//			} finally {
-//				SegmentsEditingPanel.this.setAnalysing(false);
-//			}
-//
-//		}
-		
+	public void signalChangeReceived(SignalChangeEvent event) {		
 		
 		// Change the range of the main chart based on the lower chart  
 		if(event.type().contains("UpdatePosition") && event.getSource().equals(rangePanel)){
@@ -334,10 +306,17 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 					.getProfileManager()
 					.updateBorderTag(tag, newTagIndex);
 				
-
+				
 				this.refreshChartCache();
-				fine("Firing refresh cache request for loaded datasets");
-				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+				
+				if(tag.type().equals(BorderTagType.CORE)){
+					log("Resegmenting dataset");
+					fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
+				} else {
+					fine("Firing refresh cache request for loaded datasets");
+					fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+				}
+
 				this.setAnalysing(false);
 
 			

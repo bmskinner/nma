@@ -32,12 +32,10 @@ import java.io.Serializable;
 import components.nuclear.BorderPoint;
 
 public class XYPoint  implements Serializable{
-  /**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
-private double x;
-  private double y;
+	private double x;
+	private double y;
   
   /**
   * Constructor using doubles. 
@@ -46,7 +44,7 @@ private double x;
   * @param y the y-coordinate
   * @return An XYPoint at these coordinates
   */
-  public XYPoint (double x, double y){
+  public XYPoint (final double x, final double y){
     this.x = x;
     this.y = y;
   }
@@ -59,7 +57,7 @@ private double x;
   * @param p the XYPoint
   * @return An XYPoint at these coordinates
   */
-  public XYPoint(XYPoint p){
+  public XYPoint(final XYPoint p){
     this.x = p.getX();
     this.y = p.getY();
   }
@@ -126,14 +124,18 @@ private double x;
   * @return the distance between the points
   */
   public double getLengthTo(final XYPoint a){
+	  
+	  if(a==null){
+		  throw new IllegalArgumentException("Destination point is null");
+	  }
 
-    // a2 = b2 + c2
-    double dx = Math.abs(this.getX() - a.getX());
-    double dy = Math.abs(this.getY() - a.getY());
-    double dx2 = dx * dx;
-    double dy2 = dy * dy;
-    double length = Math.sqrt(dx2+dy2);
-    return length;
+	  // a2 = b2 + c2
+	  double dx = Math.abs(this.getX() - a.getX());
+	  double dy = Math.abs(this.getY() - a.getY());
+	  double dx2 = dx * dx;
+	  double dy2 = dy * dy;
+	  double length = Math.sqrt(dx2+dy2);
+	  return length;
   }
 
   /**
@@ -144,6 +146,11 @@ private double x;
    * @return boolean whether they overlap as integers
    */
   public boolean overlaps(final XYPoint a){
+	  
+	  if(a==null){
+		  throw new IllegalArgumentException("Destination point is null");
+	  }
+	  
 	  if( this.getXAsInt() == a.getXAsInt() && this.getYAsInt() == a.getYAsInt()){
 		  return true;
 	  } else {
@@ -159,6 +166,11 @@ private double x;
    * @return boolean whether they overlap as doubles
    */
   public boolean overlapsPerfectly(final XYPoint a){
+	  
+	  if(a==null){
+		  throw new IllegalArgumentException("Destination point is null");
+	  }
+	  
 	  if( this.getX() == a.getX() && this.getY() == a.getY()){
 		  return true;
 	  } else {
@@ -208,13 +220,5 @@ private double x;
 		  return false;
 	  return true;
   }
-
-//public boolean equals(final XYPoint p) {
-//	  if(this.getX()==p.getX()  && this.getY()==p.getY()){
-//		  return true;
-//	  } else {
-//		  return false;
-//	  }
-//  }
 
 }

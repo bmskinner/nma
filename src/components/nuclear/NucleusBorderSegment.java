@@ -36,10 +36,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import logging.Loggable;
 import components.AbstractCellularComponent;
-import utility.Utils;
 
-public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
+public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, Loggable{
 
 	private static final long serialVersionUID = 1L;
 	
@@ -216,13 +216,14 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	
 	/**
 	 * Get the proportion of the given index along the segment
-	 * from zero to one
+	 * from zero to one. Returns -1 if the index was not found
 	 * @param index the index to test
 	 * @return
 	 */
 	public double getIndexProportion(int index){
 		if(!this.contains(index)){
-			throw new IllegalArgumentException("Segment does not contain index "+index);
+			finest("Segment does not contain index "+index);
+			return -1;
 		}
 		
 		int counter = 0;
@@ -231,8 +232,16 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 			int test = it.next();
 			
 			if(index==test){
-				return (double) counter / (double) this.length();
+				return (double) ( (double) counter / (double) this.length());
 			}
+			counter++;
+		}
+		finest("Error finding position of index "+index+", returning -1");
+		finest("Listing indexes within segment");
+		it = this.iterator();
+		while(it.hasNext()){
+			int test = it.next();
+			finest("Segment contains index "+test);
 			counter++;
 		}
 		return -1;

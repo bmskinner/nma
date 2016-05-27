@@ -62,7 +62,9 @@ public enum NucleusType {
         
     
     /**
-     * Get the name of the given border tag, if present
+     * Get the name of the given border tag, if present.
+     * For example, the name of the RP in mouse sperm is
+     * the tip. The name of the RP in pig sperm is the head.
      * @param point
      * @return
      */

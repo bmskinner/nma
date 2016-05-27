@@ -1,10 +1,13 @@
 package analysis;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import components.generic.BooleanProfile;
+import components.generic.BorderTag;
 import components.generic.Profile;
 import components.nuclear.NucleusBorderSegment;
 import logging.Loggable;
@@ -36,6 +39,13 @@ public class ProfileSegmenter implements Loggable {
 	private BooleanProfile inflectionPoints = null;
 	private Profile        deltaProfile     = null;
 	private double         minRateOfChange  = 1;
+	
+	
+	// These are points at which a segment boundary must be called.
+	// Specifying indexes here will suppress automatic segmentation at points within
+	// MIN_SEGMENT_SIZE of the index. If two BorderTag indexes in this list are within
+	// MIN_SEGMENT_SIZE of each other, only the first will be assigned.
+	private Map<BorderTag, Integer> tagsToSplitOn = new HashMap<BorderTag, Integer>(); 
 		
 	/**
 	 * Constructed from a profile
@@ -50,6 +60,70 @@ public class ProfileSegmenter implements Loggable {
 		this.initialise();
 		
 		log(Level.FINE, "Created profile segmenter");
+	}
+	
+	/**
+	 * Construct from a profile, and a map specifying BorderTags which must
+	 * be segmented upon.
+	 * @param p the profile
+	 * @param map the border tags to segment at (RP is automatic)
+	 */
+	public ProfileSegmenter(final Profile p, final Map<BorderTag, Integer> map){
+		
+		this(p);
+		if(map==null){
+			throw new IllegalArgumentException("Index map is null");
+		}
+		tagsToSplitOn = map;
+		validateBorderTagMap();
+		fine("Added map of BorderTag indexes to force segmentation");
+		
+	}
+	
+	/**
+	 * Check that the given map is suitable for segmentation.
+	 * If two BorderTag indexes in this list are within
+	 *  MIN_SEGMENT_SIZE of each other, the second will be silently removed.
+	 */
+	private void validateBorderTagMap(){
+		
+		List<BorderTag> toRemove = new ArrayList<BorderTag>();
+		
+		for(BorderTag tag : tagsToSplitOn.keySet()){
+			
+			Integer index = tagsToSplitOn.get(tag);
+			
+			for(BorderTag test : tagsToSplitOn.keySet()){
+				if(test.equals(tag)){
+					continue;
+				}
+				
+				// Check if the test is within MIN_SEGMENT_SIZE of tag
+				Integer testIndex = tagsToSplitOn.get(test);
+				
+				if(testIndex >= index){
+					
+					if(testIndex - index < MIN_SEGMENT_SIZE ){
+						toRemove.add(test); // Remove whichever has larger index
+						fine("Removing "+test+": too close to "+tag);
+					}
+					
+				} else {
+					if( index - testIndex < MIN_SEGMENT_SIZE ){
+						toRemove.add(tag);
+					}
+				}
+				
+				
+			}
+			
+		}
+		
+		// Remove the unsuitable tags from the map
+		for(BorderTag tag : toRemove){
+			tagsToSplitOn.remove(tag);
+		}
+		
 	}
 	
 	private void initialise(){
@@ -156,6 +230,34 @@ public class ProfileSegmenter implements Loggable {
 		if(index < MIN_SEGMENT_SIZE ){
 			return false;
 		}
+		
+		/*
+		 * If the index is a forced BorderTag boundary, 
+		 * must segment
+		 */
+		for(BorderTag tag : tagsToSplitOn.keySet()){
+			
+			Integer test = tagsToSplitOn.get(tag);
+			if(test.intValue()==index){
+				finest("Forcing segment for "+test);
+				return true;
+			}
+			
+		}
+		
+		/*
+		 * If the index is within MIN_SEGMENT_SIZE of a
+		 * forced BorderTag boundary, must not segment
+		 */
+		for(BorderTag tag : tagsToSplitOn.keySet()){
+			
+			Integer test = tagsToSplitOn.get(tag);
+			if(Math.abs(test.intValue()-index) < MIN_SEGMENT_SIZE){
+				return false;
+			}
+			
+		}
+		
 		
 
 		/*

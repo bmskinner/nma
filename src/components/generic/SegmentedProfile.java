@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import utility.ProfileException;
 import utility.Utils;
 import components.AbstractCellularComponent;
 import components.nuclear.NucleusBorderSegment;
@@ -601,31 +602,25 @@ public class SegmentedProfile extends Profile implements Serializable {
 		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
 				
 		
-//		List<NucleusBorderSegment> tempList = template.getOrderedSegments();
-//		
-//		List<NucleusBorderSegment> testList = this.getOrderedSegments();
-		
 		
 		for(UUID segID : template.getSegmentIDs()){
 			// Get the corresponding segment in this profile, by segment position
 			NucleusBorderSegment testSeg     = this.getSegment(segID);
 			NucleusBorderSegment templateSeg = template.getSegment(segID);
+			
+			if(testSeg==null){
+				throw new ProfileException("Cannot find segment "+segID+" in test profile");
+			}
+			
+			if(templateSeg==null){
+				throw new ProfileException("Cannot find segment "+segID+" in template profile");
+			}
 
 			// Interpolate the segment region to the new length
 			Profile revisedProfile = interpolateSegment(testSeg, templateSeg.length());
 			finalSegmentProfiles.add(revisedProfile);
 		}
-		
-//		int counter = 0;
-//		for(NucleusBorderSegment templateSeg : tempList){
-//			// Get the corresponding segment in this profile, by segment position
-//			NucleusBorderSegment testSeg = testList.get(counter++);
-//
-//			// Interpolate the segment region to the new length
-//			Profile revisedProfile = interpolateSegment(testSeg, templateSeg.length());
-//			finalSegmentProfiles.add(revisedProfile);
-//		}
-		
+				
 		
 //		Recombine the segment profiles
 		Profile mergedProfile = new Profile( Profile.merge(finalSegmentProfiles));

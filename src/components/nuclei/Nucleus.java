@@ -18,8 +18,6 @@
  *******************************************************************************/
 package components.nuclei;
 
-import ij.process.FloatPolygon;
-
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.List;
@@ -29,15 +27,11 @@ import java.util.UUID;
 
 import components.CellularComponent;
 import components.generic.BorderTag;
-import components.generic.MeasurementScale;
-import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
-import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.BorderPoint;
 import components.nuclear.SignalCollection;
-import stats.NucleusStatistic;
 
 /**
  * A Nucleus is the interface to all the possible types of nuclei that will be
@@ -324,7 +318,8 @@ public interface Nucleus extends CellularComponent {
 
 	
 	/**
-	 * Get a copy of the border point at the given tag
+	 * Get a copy of the border point at the given tag,
+	 * or null if the tag is not present
 	 * @param tag
 	 * @return
 	 */

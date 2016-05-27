@@ -21,6 +21,7 @@ package analysis.nucleus;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
+
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.ProfileSegmenter;
@@ -39,8 +40,9 @@ import utility.Constants;
 
 /**
  * This is the core of the morphology analysis pipeline.
- * This segments median profiles, and applies the segments to
- * nuclei.
+ * 1) Segments median profiles
+ * 2) Apply the segments to nuclei
+ * 3) Use frankenprofiles to generate best fist of segments in each nucleus
  */
 public class DatasetSegmenter extends AnalysisWorker implements ProgressListener {
 
@@ -114,7 +116,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			
 		} catch(Exception e){
 			result = false;
-			logError("Error in segmentation analysis", e);
+			error("Error in segmentation analysis", e);
 			return false;
 		}
 
@@ -122,8 +124,15 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 
 	}
         
+    /**
+     * This has to do everything: segment the median, appy the segments
+     * to nuclei, generate the frankenmedian, and adjust the nuclear segments
+     * based on the frankenprofiles.
+     * @return
+     * @throws Exception
+     */
     private boolean runNewAnalysis() throws Exception {
-    	log(Level.FINE, "Beginning core morphology analysis");
+    	fine("Beginning core morphology analysis");
 
 		this.setProgressTotal(getDataset().getCollection().getNucleusCount()*2);
 
@@ -133,28 +142,28 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		// segment the profiles from head
 		runSegmentation(getDataset().getCollection(), pointType);
 
-		log(Level.FINE, "Core morphology analysis complete");
+		fine("Core morphology analysis complete");
 		return true;
     }
     
     private boolean runCopyAnalysis() throws Exception{
     	if(sourceCollection==null){
-			log(Level.WARNING,  "Cannot copy: source collection is null");
+			warn("Cannot copy: source collection is null");
 			return false;
 		} else {
 			this.setProgressTotal(getDataset().getCollection().getNucleusCount());
-			log(Level.FINE,  "Copying segmentation pattern");
+			fine( "Copying segmentation pattern");
 			reapplyProfiles(getDataset().getCollection(), sourceCollection);
-			log(Level.FINE, "Copying complete");
+			fine("Copying complete");
 			return true;
 		}
     }
     
     private boolean runRefreshAnalysis() throws Exception{
-    	log(Level.FINE, "Refreshing segmentation");
+    	fine("Refreshing segmentation");
     	this.setProgressTotal(getDataset().getCollection().getNucleusCount()*3);
 		refresh(getDataset().getCollection());
-		log(Level.FINE, "Refresh complete");
+		fine("Refresh complete");
 		return true;
     }
     
@@ -173,7 +182,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	 */
 	public boolean reapplyProfiles(CellCollection collection, CellCollection sourceCollection) throws Exception {
 		
-		log(Level.FINE, "Applying existing segmentation profile to population...");
+		fine("Applying existing segmentation profile to population");
 		
 		
 		sourceCollection.getProfileManager().copyCollectionOffsets(collection);
@@ -184,8 +193,46 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		reviseSegments(collection, BorderTag.REFERENCE_POINT);	
 
 
-		log(Level.FINE, "Re-profiling complete");
+		fine("Re-profiling complete");
 		return true;
+	}
+	
+	/**
+	 * Copy the profile offsets from the median profile to a
+	 * frankenprofile ProfileCollection. Also copies the 
+	 * segments from the median profile.
+	 * @param collection
+	 * @throws Exception 
+	 */
+	private ProfileCollection createFrankenMedian(CellCollection collection) throws Exception{
+		
+		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+		
+		// make a new profile collection to hold the frankendata
+		ProfileCollection frankenCollection = new ProfileCollection();
+
+		// add the correct offset keys
+		// These are the same as the profile collection keys, and have
+		// the same positions (since a franken profile is based on the median)
+		// The reference point is at index 0
+		for(BorderTag key : pc.getOffsetKeys()){
+			frankenCollection.addOffset(key, pc.getOffset(key));
+		}
+		finest("Added frankenCollection index offsets for border tags");
+		
+		finest("Creating profile aggregate for FrankenCollection");
+		// add all the nucleus frankenprofiles to the frankencollection
+		frankenCollection.createProfileAggregate(collection, ProfileType.FRANKEN, (int)pc.getAggregate().length());
+
+		finer("FrankenProfile generated");
+
+		// copy the segments from the profile collection
+		finer("Copying profile collection segments to frankenCollection");
+		
+		List<NucleusBorderSegment> segments = pc.getSegments(BorderTag.REFERENCE_POINT);
+		frankenCollection.addSegments( BorderTag.REFERENCE_POINT, segments);
+		finer("Added segments to frankenmedian");
+		return frankenCollection;
 	}
 	
 	/**
@@ -197,7 +244,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	 */
 	public boolean refresh(CellCollection collection) throws Exception {
 
-		log(Level.FINE, "Refreshing mophology");
+		fine("Refreshing mophology");
 
 		BorderTag pointType = BorderTag.REFERENCE_POINT;
 
@@ -213,22 +260,17 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 
 		List<NucleusBorderSegment> segments = pc.getSegments(BorderTag.REFERENCE_POINT);
 
-		// make a new profile collection to hold the frankendata
-		ProfileCollection frankenCollection = new ProfileCollection();
-
-		// add the correct offset keys
-		// These are the same as the profile collection keys, and have
-		// the same positions (since a franken profile is based on the median)
-		// The reference point is at index 0
-		for(BorderTag key : pc.getOffsetKeys()){
-			frankenCollection.addOffset(key, pc.getOffset(key));
-		}
+//		// make a new profile collection to hold the frankendata
+		ProfileCollection frankenCollection = createFrankenMedian(collection);
 
 		// At this point, the FrankenCollection is identical to the ProfileCollection
 		// We need to add the individual recombined frankenProfiles
 
+		// Ensure that the median profile segment IDs are propogated to the nuclei
+		assignMedianSegmentsToNuclei(collection);
 
 		// make a segment fitter to do the recombination of profiles
+		finest("Creating segment fitter");
 		SegmentFitter fitter = new SegmentFitter(pc.getSegmentedProfile(pointType));
 
 
@@ -242,23 +284,13 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		}
 		
 		fitter = null;
-
-		// add all the nucleus frankenprofiles to the frankencollection
-		frankenCollection.createProfileAggregate(collection, ProfileType.FRANKEN, (int)pc.getAggregate().length());
-
-		// update the profile aggregate
-//		frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
-		log(Level.FINER, "FrankenProfile generated");
-
-		// copy the segments from the profile collection
-		log(Level.FINER, "Copying profile collection segments to frankenCollection");
-		frankenCollection.addSegments(pointType, segments);
+		finest("Segment fitting complete");
 		
 		// copy the segments from the profile collection to other profiles
-		log(Level.FINER, "Copying profile collection segments to distance profile");
+		finer("Copying profile collection segments to distance profile");
 		collection.getProfileCollection(ProfileType.DISTANCE).addSegments(pointType, segments);
 		
-		log(Level.FINER, "Copying profile collection segments to single distance profile");
+		finer("Copying profile collection segments to single distance profile");
 		collection.getProfileCollection(ProfileType.SINGLE_DISTANCE).addSegments(pointType, segments);
 		
 		// attach the frankencollection to the cellcollection
@@ -267,16 +299,19 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 
 
 		// Ensure each nucleus gets the new profile pattern
-//		assignSegments(collection);
+//		assignMedianSegmentsToNuclei(collection);
 
 		// find the corresponding point in each Nucleus
 		SegmentedProfile median = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 		
+		finer("Creating segmnent assignment task");
 		SegmentAssignmentTask task = new SegmentAssignmentTask(median, collection.getNuclei().toArray(new Nucleus[0]));
 		task.addProgressListener(this);
 //		task.invoke();
 		mainPool.invoke(task);
 		reviseSegments(collection, pointType);
+		
+		finer("Segments revised for nuclei");
 		
 		// Unlock all the segments
 		collection.getProfileManager().setLockOnAllNucleusSegments(false);
@@ -291,15 +326,40 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	 */
 	private void runSegmentation(CellCollection collection, BorderTag pointType) throws Exception {
 
-		log(Level.FINE, "Beginning segmentation...");
+		fine("Beginning segmentation...");
 	
 			
 		// generate segments in the median profile
-		log(Level.FINE, "Creating segments...");
-		createSegments(collection);
+		fine("Creating segments...");
+		createSegmentsInMedian(collection);
 
 		// map the segments from the median directly onto the nuclei
-		log(Level.FINE, "Assigning segments...");
+		assignMedianSegmentsToNuclei(collection);
+
+		// adjust the segments to better fit each nucleus
+		fine("Revising segments by frankenprofile...");
+		
+		try{
+			reviseSegments(collection, pointType);
+		} catch (Exception e){
+			logError("Error revising segments", e);
+		}
+		
+		// update the aggregate in case any borders have changed
+		collection.getProfileCollection(ProfileType.REGULAR).createProfileAggregate(collection, ProfileType.REGULAR);
+
+
+		fine("Segmentation complete");
+	}
+	
+	/**
+	 * Assign the segments in the median profile to the 
+	 * nuclei within the collection
+	 * @param collection
+	 * @throws Exception
+	 */
+	private void assignMedianSegmentsToNuclei(CellCollection collection) throws Exception{
+		fine("Assigning segments to nuclei");
 		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
 
 		// find the corresponding point in each Nucleus
@@ -308,27 +368,19 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		SegmentAssignmentTask task = new SegmentAssignmentTask(median, collection.getNuclei().toArray(new Nucleus[0]));
 		task.addProgressListener(this);
 		task.invoke();
-
-		// adjust the segments to better fit each nucleus
-		log(Level.FINE, "Revising segments...");
-		try{
-			reviseSegments(collection, pointType);
-		} catch (Exception e){
-			logError("Error revising segments", e);
-		}
-		// update the aggregate in case any borders have changed
-		collection.getProfileCollection(ProfileType.REGULAR).createProfileAggregate(collection, ProfileType.REGULAR);
-
-
-		log(Level.FINE, "Segmentation complete");
+		fine("Assigned segments to nuclei");
 	}
 	
+	
 	/**
-	 * Run the segmenter on the median profile for the given point type
+	 * Use a ProfileSegmenter to segment the regular median profile of the collection starting
+	 * from the reference point 
 	 * @param collection
+	 * @return
+	 * @throws Exception
 	 */
-	private void createSegments(CellCollection collection) throws Exception {
-
+	private List<NucleusBorderSegment> segmentMedianProfile(CellCollection collection) throws Exception{
+		
 		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
 
 		// the reference point is always index 0, so the segments will match
@@ -339,26 +391,59 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 
 		List<NucleusBorderSegment> segments = segmenter.segment();
 
-		log(Level.FINER, "Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
+		finer("Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
 
 		segmenter = null; // clean up
+		return segments;
+	}
+	
+	/**
+	 * Run the segmenter on the median profile for the given point type
+	 * @param collection
+	 */
+	private void createSegmentsInMedian(CellCollection collection) throws Exception {
+
+		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+
+		List<NucleusBorderSegment> segments = segmentMedianProfile(collection);
 
 		/*
+		 * Handle edge cases where the segmenter has buggered up
 		 * TODO: Check if this is still relevant
 		 */
 		if(collection.getNucleusType().equals(NucleusType.ROUND) && segments.size()==2){
 
-			log(Level.FINER, "Updating segment pattern to match orientation point in round nuclei");
+			finer("Updating segment pattern to match orientation point in round nuclei");
 
 			int medianOrientationIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
 			
-			log(Level.FINER, "Orientation point is at index "+medianOrientationIndex);
+			finer("Orientation point is at index "+medianOrientationIndex);
 						
 			NucleusBorderSegment firstSegment = segments.get(0);
 			firstSegment.update(firstSegment.getStartIndex(), medianOrientationIndex);
 		}
 		
 		pc.addSegments(BorderTag.REFERENCE_POINT, segments);
+		
+		/*
+		 * TODO: Find the root cause
+		 */
+		
+		if(collection.getNucleusType().equals(NucleusType.PIG_SPERM) ){
+			
+			if( ! pc.hasSegmentStartingWith(BorderTag.ORIENTATION_POINT)){
+				finer("The pig RP is at "+pc.getOffset(BorderTag.REFERENCE_POINT));
+				finer("The pig OP is at "+pc.getOffset(BorderTag.ORIENTATION_POINT));
+				
+				
+
+				int medianRPIndex = pc.getOffset(BorderTag.REFERENCE_POINT);
+				pc.addOffset(BorderTag.ORIENTATION_POINT, medianRPIndex);
+				finer("Updating OP to "+medianRPIndex);
+			}
+		}
+		
+		
 		
 		
 		/* 
@@ -369,22 +454,30 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		 * 
 		 * There should not be a problem with segment lengths here, because
 		 * a highly segmentatble profile will have a detectable tail in the 
-		 * first place 
+		 * first place.
+		 * 
+		 * 2016-05-25 There is a problem in pig nuclei. The OP does not always 
+		 * have segment boundary. We need to find the segment start closest to the
+		 * opIndex and update the segment
 		 */
 		
 		if( ! pc.hasSegmentStartingWith(BorderTag.ORIENTATION_POINT)){
-			log(Level.FINER, "The orientation point is not at a segment boundary");
+			finer("The orientation point is not at a segment boundary");
+			finer("The RP is at "+pc.getOffset(BorderTag.REFERENCE_POINT));
+			finer("The OP is at "+pc.getOffset(BorderTag.ORIENTATION_POINT));
 			int opIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
 			NucleusBorderSegment seg = pc.getSegmentContaining(opIndex);
 			
-			log(Level.FINEST, "Trying to split the segment at index "+opIndex);
+			finest("Trying to split the segment at index "+opIndex);
 			
 			UUID newID1 = java.util.UUID.randomUUID();
 			UUID newID2 = java.util.UUID.randomUUID();
 
 			/*
 			 * This causes an error when only one segment is present in the profile.
-			 * This is because the start and end points of the segment are the same
+			 * This is because the start and end points of the segment are the same.
+			 * 
+			 * An error also occurs if a segment boundary lies too close to the opIndex 
 			 */
 			SegmentedProfile p = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 			
@@ -406,20 +499,20 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	}
 
 	/**
-	 * Update initial segment assignments by stretching each segment to the best possible fit along
+	 * Update segment assignments in individual nuclei by stretching each segment to the best possible fit along
 	 * the median profile 
 	 * @param collection
 	 * @param pointType
 	 */
 	private void reviseSegments(CellCollection collection, BorderTag pointType) throws Exception {
-		log(Level.FINER, "Refining segment assignments...");
+		finer("Refining segment assignments...");
 
 			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
-			log(Level.FINE, "Median profile");
-			log(Level.FINE, pc.toString());
+			fine("Median profile");
+			fine(pc.toString());
 			List<NucleusBorderSegment> segments = pc.getSegments(pointType);
-			log(Level.FINE, "Fetched segments from profile collection");
-			log(Level.FINE, NucleusBorderSegment.toString(segments));
+			fine("Fetched segments from profile collection");
+			fine(NucleusBorderSegment.toString(segments));
 
 			// make a new profile collection to hold the frankendata
 			ProfileCollection frankenCollection = new ProfileCollection();
@@ -432,7 +525,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			for(BorderTag key : pc.getOffsetKeys()){
 				
 				int offset = pc.getOffset(key);
-				log(Level.FINEST, "Adding franken collection offset "+offset+" for "+ key);
+				finest("Adding franken collection offset "+offset+" for "+ key);
 				frankenCollection.addOffset(key, pc.getOffset(key));
 			}
 
@@ -446,7 +539,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 
 			// Get the median profile for the population
 			SegmentedProfile medianProfile = pc.getSegmentedProfile(pointType);
-			log(Level.FINER, "Median profile: angle at index 0 for "+BorderTag.REFERENCE_POINT+" is "+medianProfile.get(0));
+			finer("Median profile: angle at index 0 for "+BorderTag.REFERENCE_POINT+" is "+medianProfile.get(0));
 
 			
 			/*
@@ -463,8 +556,8 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			 * stored frankenprofiles from each nucleus in the collection
 			 */
 			try {
-				log(Level.FINEST, "Creating franken profile aggregate of length "+(int)pc.getAggregate().length());
-				frankenCollection.createProfileAggregate(collection, ProfileType.FRANKEN, (int)pc.getAggregate().length());
+				finest("Creating franken profile aggregate of length "+pc.getAggregate().length());
+				frankenCollection.createProfileAggregate(collection, ProfileType.FRANKEN, pc.getAggregate().length());
 			} catch(Exception e){
 				log(Level.SEVERE, "Error creating franken profile aggregate");
 				log(Level.SEVERE, "Attempting to continue without franken profiling");
@@ -479,219 +572,21 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			frankenCollection.addSegments(pointType, segments);
 
 			double firstPoint = frankenCollection.getSegmentedProfile(BorderTag.REFERENCE_POINT).get(0);
-			log(Level.FINER, "FrankenProfile generated: angle at index 0 for "+BorderTag.REFERENCE_POINT+" is "+firstPoint);
+			finer("FrankenProfile generated: angle at index 0 for "+BorderTag.REFERENCE_POINT+" is "+firstPoint);
 			
 			// attach the frankencollection to the cellcollection
 			collection.setProfileCollection(ProfileType.FRANKEN, frankenCollection);
-			log(Level.FINER, "Segment assignments refined");
+			finer("Segment assignments refined");
 			
 			// copy the segments from the profile collection to other profiles
-			log(Level.FINER, "Copying profile collection segments to distance profile");
+			finer("Copying profile collection segments to distance profile");
 			collection.getProfileCollection(ProfileType.DISTANCE).addSegments(pointType, segments);
 			
-			log(Level.FINER, "Copying profile collection segments to single distance profile");
+			finer("Copying profile collection segments to single distance profile");
 			collection.getProfileCollection(ProfileType.SINGLE_DISTANCE).addSegments(pointType, segments);
 	}
 	
 	
-//	/**
-//	 * Divide a profile into segments of interest based on
-//	 * minima and maxima.
-//	 */
-//	public class ProfileSegmenter {
-//		
-//		/**
-//		 * The smallest number of points a segment can contain. 
-//		 * Increasing this value will make the segment fitting more robust, 
-//		 * but reduces resolution
-//		 */
-//		public static final int MIN_SEGMENT_SIZE = 10;
-//		
-//		private static final int SMOOTH_WINDOW	 = 2; // the window size for smoothing profiles
-//		private static final int MAXIMA_WINDOW	 = 5; // the window size for calculating minima and maxima
-//		private static final int DELTA_WINDOW	 = 2; // the window size for calculating deltas
-//		private static final int ANGLE_THRESHOLD = 180; // a maximum must be above this, a minimum below it
-//		
-//		private static final double MIN_RATE_OF_CHANGE = 0.02; // a potential inflection cannot vary by more than this
-//		
-//		
-//		private final Profile profile; // the profile to segment
-//		private final List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(0);
-//		
-//		private BooleanProfile inflectionPoints = null;
-//		private Profile        deltaProfile     = null;
-//		private double         minRateOfChange  = 1;
-//			
-//		/**
-//		 * Constructed from a profile
-//		 * @param p
-//		 */
-//		public ProfileSegmenter(final Profile p){
-//			if(p==null){
-//				throw new IllegalArgumentException("Profile is null");
-//			}
-//			this.profile = p;
-//
-//			this.initialise();
-//			
-//			log(Level.FINE, "Created profile segmenter");
-//		}
-//		
-//		private void initialise(){
-//
-//			/*
-//			 * Find minima and maxima, to set the inflection points in the profile
-//			 */
-//			BooleanProfile maxima = this.profile.smooth(SMOOTH_WINDOW).getLocalMaxima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
-//			BooleanProfile minima = this.profile.smooth(SMOOTH_WINDOW).getLocalMinima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
-//			inflectionPoints = minima.or(maxima);
-//			
-//			/*
-//			 * Find second derivative rates of change
-//			 */
-//			Profile deltas  = this.profile.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // minima and maxima should be near 0 
-//			deltaProfile =       deltas.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // second differential
-//			
-//			/*
-//			 * Find levels of variation within the complete profile
-//			 */
-//			double dMax = deltaProfile.getMax();
-//			double dMin = deltaProfile.getMin();
-//			double variationRange = Math.abs(dMax - dMin);
-//			
-//			minRateOfChange = variationRange * MIN_RATE_OF_CHANGE;
-//			
-//		}
-//		
-//		/**
-//		 * Get the deltas and find minima and maxima. These switch between segments
-//		 * @param splitIndex an index point that must be segmented on
-//		 * @return a list of segments
-//		 */
-//		public List<NucleusBorderSegment> segment(){
-//
-//			/*
-//			 * Prepare segment start index
-//			 */
-//			int segmentStart = 0;
-//
-//					
-//			try{
-//				
-//				/*
-//				 * Iterate through the profile, looking for breakpoints
-//				 * The reference point is at index 0, as defined by the 
-//				 * calling method.
-//				 * 
-//				 *  Therefore, a segment should always be started at index 0
-//				 */
-//				for(int index=0; index<profile.size(); index++){
-//					
-//					if(testSegmentEndFound(index, segmentStart)){
-//						
-//						// we've hit a new segment
-//						NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, index, profile.size());
-//
-//						segments.add(seg);
-//						
-//						log(Level.FINE, "New segment found in profile: "+seg.toString());
-//						
-//						segmentStart = index; // Prepare for the next segment
-//					}
-//					
-//				}
-//				
-//				/*
-//				 * Now, there is a list of segments which covers most but not all of 
-//				 * the profile. The final segment has not been defined: is is the current segment
-//				 * start, but has not had an endpoint added. Since segment ends cannot be
-//				 * called within MIN_SIZE of the profile end, there is enough space to make a segment
-//				 * running from the current segment start back to index 0
-//				 */
-//				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, 0, profile.size());
-//				segments.add(seg);
-//								
-//				NucleusBorderSegment.linkSegments(segments);
-//				
-//				log(Level.FINE, "Segments linked");
-//				for(NucleusBorderSegment s : segments){
-//					log(Level.FINE, s.toString());
-//				}
-//				
-//
-//			} catch (Exception e){
-//				logError( "Error in segmentation", e);
-//			}
-//			
-//			return segments;
-//		}
-//		
-//
-//		/**
-//		 * @param index the current index being tested
-//		 * @param segmentStart the start of the current segment being built
-//		 * @return
-//		 * @throws Exception 
-//		 */
-//		private boolean testSegmentEndFound(int index, int segmentStart) throws Exception{
-//
-//			/*
-//			 * The first segment must meet the length limit
-//			 */
-//			if(index < MIN_SEGMENT_SIZE ){
-//				return false;
-//			}
-//			
-//
-//			/*
-//			 * Segment must be long enough
-//			 */
-//			int potentialSegLength = index-segmentStart;
-//			
-//			if(potentialSegLength < MIN_SEGMENT_SIZE ){
-//				return false;
-//			}
-//			
-//			/*
-//			 * Once the index has got close to the end of the profile, a new segmnet cannot be called,
-//			 * even at a really nice infection point, because it would be too close to the 
-//			 * reference point
-//			 */
-//			if( index >  profile.size() - MIN_SEGMENT_SIZE ){
-//				return false;
-//			}
-//			
-//			/*
-//			 * All length and position checks are passed.
-//			 * Now test for a good inflection point.
-//			 * 
-//			 * We want a minima or maxima, and the value
-//			 * must be distinct from its surroundings.	
-//			 */
-//
-//			if( (   inflectionPoints.get(index)==true 
-//					&& Math.abs(deltaProfile.get(index)) > minRateOfChange
-//					&& potentialSegLength >= MIN_SEGMENT_SIZE)){
-//				
-//				return true;
-//
-//			}
-//			return false;
-//		}
-//
-//		
-//		
-//		
-//		/**
-//		 * For debugging. Print the details of each segment found 
-//		 */
-//		public void print(){
-//			for(NucleusBorderSegment s : segments){
-//				s.print();
-//			}
-//		}
-//	}
-
 	@Override
 	public void progressEventReceived(ProgressEvent event) {
 		publish(++progressCount);

@@ -18,7 +18,6 @@
  *******************************************************************************/
 package analysis.nucleus;
 
-import java.util.logging.Level;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import components.CellCollection;
@@ -33,6 +32,8 @@ import components.generic.ProfileType;
  *
  */
 public class DatasetProfiler extends AnalysisWorker {
+	
+	private static final BorderTag DEFAULT_BORDER_TAG = BorderTag.REFERENCE_POINT;
 
 	public DatasetProfiler(AnalysisDataset dataset){
 		super(dataset);
@@ -47,12 +48,8 @@ public class DatasetProfiler extends AnalysisWorker {
 
 				fine("Profiling dataset");
 
-//				this.setProgressTotal(3);
-
-				BorderTag pointType = BorderTag.REFERENCE_POINT;
-
 				// profile the collection from head/tip, then apply to tail
-				runProfiler(pointType);
+				runProfiler(DEFAULT_BORDER_TAG);
 
 				fine("Datset profiling complete");
 			
@@ -67,6 +64,72 @@ public class DatasetProfiler extends AnalysisWorker {
 	}
 	
 	/**
+	 * Create the regular profile collection to hold angles from nuclear
+	 * profiles
+	 * @return
+	 * @throws Exception
+	 */
+	private ProfileCollection createProfileCollection() throws Exception{
+		CellCollection collection = getDataset().getCollection();
+		
+		
+		/*
+		 * Build a first set of profile aggregates
+		 * Default is to make profile aggregate from reference point
+		 * Do not build an aggregate for the non-existent frankenprofile
+		 */
+		for(ProfileType type : ProfileType.values()){
+			if(type.equals(ProfileType.FRANKEN)){
+				continue;
+			}
+			fine("Creating initial profile aggregate: "+type);
+			ProfileCollection pc = collection.getProfileCollection(type);
+			pc.createProfileAggregate(collection, type);
+		}
+		
+		// Use the angle profiles to identify features
+		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);	
+		return pc;
+	}
+	
+	/**
+	 * Perform a tail finding in the current median profile, and offset
+	 * the nucleus profiles for best fit. Create the profile aggregate fresh.
+	 * The idea here is to refine the median to the best fit across all nuclei. 
+	 * @param pointType
+	 * @param finder
+	 * @return
+	 * @throws Exception
+	 */
+	private double rebuildProfileAggregate(BorderTag pointType, ProfileFeatureFinder finder) throws Exception{
+		// rebuild the aggregate - needed if the orientation point index has changed in any nuclei
+		CellCollection collection = getDataset().getCollection();
+		
+		for(ProfileType type : ProfileType.values()){
+			if(type.equals(ProfileType.FRANKEN)){
+				continue;
+			}
+			fine("Rebuilding profile aggregate: "+type);
+			collection.getProfileCollection(type)
+					.createProfileAggregate(collection, type);
+		}
+
+		// carry out the orientation point detection in the median again
+		finder.findTailIndexInMedianCurve();
+
+		// apply offsets to each nucleus in the collection
+		ProfileOffsetter offsetter = new ProfileOffsetter(collection);
+		offsetter.calculateOffsets(); 
+
+
+
+		// get the difference between aligned profiles and the median
+		double score = compareProfilesToMedian(pointType);
+		fine("Reticulating splines: score: "+(int)score);
+		return score;
+	}
+	
+	/**
 	 * Calculaate the median profile of the colleciton, and generate the
 	 * best fit offsets of each nucleus to match
 	 * @param collection
@@ -78,24 +141,8 @@ public class DatasetProfiler extends AnalysisWorker {
 			fine("Profiling collection");
 			
 			CellCollection collection = getDataset().getCollection();
-			
-			
-			/*
-			 * Build a first set of profile aggregates
-			 * Default is to make profile aggregate from reference point
-			 * Do not build an aggregate for the non-existent frankenprofile
-			 */
-			for(ProfileType type : ProfileType.values()){
-				if(type.equals(ProfileType.FRANKEN)){
-					continue;
-				}
-				fine("Creating initial profile aggregate: "+type);
-				ProfileCollection pc = collection.getProfileCollection(type);
-				pc.createProfileAggregate(collection, type);
-			}
-			
-			// Use the angle profiles to identify features
-			ProfileCollection angleCollection = collection.getProfileCollection(ProfileType.REGULAR);			
+
+			ProfileCollection angleCollection = createProfileCollection();		
 			
 
 			// use the median profile of this aggregate to find the orientation point ("tail")
@@ -107,30 +154,10 @@ public class DatasetProfiler extends AnalysisWorker {
 			double score = compareProfilesToMedian(pointType);
 			double prevScore = score*2;
 			while(score < prevScore){
-
-				// rebuild the aggregate - needed if the orientation point index has changed in any nuclei
 				
-				for(ProfileType type : ProfileType.values()){
-					if(type.equals(ProfileType.FRANKEN)){
-						continue;
-					}
-					fine("Rebuilding profile aggregate: "+type);
-					collection.getProfileCollection(type)
-							.createProfileAggregate(collection, type);
-				}
-
-				// carry out the orientation point detection in the median again
-				finder.findTailIndexInMedianCurve();
-
-				// apply offsets to each nucleus in the collection
-				ProfileOffsetter offsetter = new ProfileOffsetter(collection);
-				offsetter.calculateOffsets(); 
-
 				prevScore = score;
-
-				// get the difference between aligned profiles and the median
-				score = compareProfilesToMedian(pointType);
-				fine("Reticulating splines: score: "+(int)score);
+				
+				score = rebuildProfileAggregate(pointType, finder);
 			}
 			
 			/*

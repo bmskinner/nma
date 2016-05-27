@@ -1,5 +1,7 @@
 package analysis.nucleus;
 
+import java.util.UUID;
+
 import utility.Constants;
 import logging.Loggable;
 import components.CellCollection;
@@ -57,7 +59,8 @@ public class ProfileOffsetter implements Loggable {
 	private void calculateOffsetsInRodentSpermNuclei() throws Exception {
 
 		// Get the median profile starting from the orientation point
-		Profile median = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.MEDIAN); // returns a median profile
+		Profile median = collection.getProfileCollection(ProfileType.REGULAR)
+				.getProfile(BorderTag.ORIENTATION_POINT, Constants.MEDIAN); // returns a median profile
 
 		// go through each nucleus
 		for(Nucleus n : collection.getNuclei()){
@@ -75,7 +78,8 @@ public class ProfileOffsetter implements Loggable {
 			// also update the head position (same as round reference point)
 			// - the point opposite the tail through the CoM
 			int headIndex = nucleus.getBorderIndex(nucleus.findOppositeBorder( nucleus.getBorderPoint(newTailIndex) ));
-			nucleus.setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
+			nucleus.setBorderTag(BorderTag.INTERSECTION_POINT, headIndex);
+//			nucleus.setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
 			nucleus.splitNucleusToHeadAndHump();
 
 		}			
@@ -100,36 +104,59 @@ public class ProfileOffsetter implements Loggable {
 			return;
 		}
 
-		String segName = collection.getProfileCollection(ProfileType.REGULAR)
-				.getSegmentContaining(tag).getName();
+		UUID segID = collection.getProfileCollection(ProfileType.REGULAR)
+				.getSegmentContaining(tag).getID();
+//		String segName = collection.getProfileCollection(ProfileType.REGULAR)
+//				.getSegmentContaining(tag)..getName();
 
 
 
 		SegmentedProfile profile = collection.getProfileCollection(ProfileType.REGULAR)
 				.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 
-		NucleusBorderSegment segFromRef    = profile.getSegment(segName);
+		
+		NucleusBorderSegment segFromRef    = profile.getSegment(segID);
+		
+//		NucleusBordersSegment segFromRef    = profile.getSegment(segName);
 
 
 		/*
 		 * Get the proportion of the index through the segment
 		 */
 		double proportion    = segFromRef.getIndexProportion(index);
+		finest("Found "+tag+" at "+proportion+" through median segment "+segFromRef.getID());
 
 
 		/*
 		 * Go through each nucleus and apply the position
 		 */
-		
+		finer("Updating tag location in nuclei");
 		for(Nucleus nucleus : collection.getNuclei()){
 
 			int oldNIndex = nucleus.getBorderIndex(tag);
 			if(oldNIndex==-1){
 				finer("Border tag does not exist and will be created");
+			} else {
+				finer("Previous "+tag+" index at "+oldNIndex);
 			}
-			int newIndex = nucleus.getProfile(ProfileType.REGULAR)
-					.getSegment(segName)
-					.getProportionalIndex(proportion); // find the index in the segment closest to the proportion 
+			
+//			NucleusBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.REGULAR)
+//					.getSegment(segName);
+			NucleusBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.REGULAR)
+					.getSegment(segID);
+			
+			if(nucleusSegment==null){
+				warn("Error updating nucleus, segment "+segID+" not found");
+			} else {
+				finest("Using nucleus segment "+nucleusSegment.getID());
+			}
+			
+			int newIndex = nucleusSegment.getProportionalIndex(proportion); // find the index in the segment closest to the proportion 
+			
+			if(newIndex==-1){
+				warn("Cannot find "+tag+" index in nucleus profile at proportion "+proportion);
+				continue;
+			}
 
 
 			nucleus.setBorderTag(tag, newIndex);		
@@ -176,7 +203,8 @@ public class ProfileOffsetter implements Loggable {
 
 
 			} catch (IllegalArgumentException e){
-//				logError("Error assigning vertical in dataset "+collection.getName(), e);
+				warn("Error assigning vertical in dataset "+collection.getName());
+				warn("No vertical points detected");
 				// This occurs when the median profile did not have detectable verticals. Return quietly.
 				
 				return;
@@ -191,6 +219,7 @@ public class ProfileOffsetter implements Loggable {
 
 				XYPoint p0 = nucleus.getBorderPoint(newIndexOne);
 				XYPoint p1 = nucleus.getBorderPoint(newIndexTwo);
+				
 
 				if(p0.getLengthTo(nucleus.getBorderTag(BorderTag.REFERENCE_POINT))> p1.getLengthTo(nucleus.getBorderTag(BorderTag.REFERENCE_POINT)) ){
 
@@ -214,7 +243,8 @@ public class ProfileOffsetter implements Loggable {
 	private void calculateOffsetsInPigSpermNuclei() throws Exception {
 
 		// get the median profile zeroed on the orientation point
-		Profile medianToCompare = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50); 
+		Profile medianToCompare = collection.getProfileCollection(ProfileType.REGULAR)
+				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN); 
 
 		for(Nucleus nucleus : collection.getNuclei()){
 			PigSpermNucleus n = (PigSpermNucleus) nucleus;
@@ -223,11 +253,11 @@ public class ProfileOffsetter implements Loggable {
 			int tailIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(medianToCompare);
 
 			n.setBorderTag(BorderTag.ORIENTATION_POINT, tailIndex);
-
+			n.setBorderTag(BorderTag.REFERENCE_POINT, tailIndex);
 
 			// also update the head position
 			int headIndex = n.getBorderIndex(n.findOppositeBorder( n.getBorderPoint(tailIndex) ));
-			n.setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
+			n.setBorderTag(BorderTag.INTERSECTION_POINT, headIndex);
 		}
 
 	}

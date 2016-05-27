@@ -426,15 +426,20 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 
 	public BorderPoint[] getBorderPointsForVerticalAlignment(){
-		BorderPoint topPoint =  this.getBorderTag(BorderTag.TOP_VERTICAL);
-		BorderPoint bottomPoint =this.getBorderTag(BorderTag.BOTTOM_VERTICAL);
+		BorderPoint topPoint    = this.getBorderTag(BorderTag.TOP_VERTICAL);
+		BorderPoint bottomPoint = this.getBorderTag(BorderTag.BOTTOM_VERTICAL);
+		
+		if(topPoint==null || bottomPoint==null){
+			warn("Border points not found");
+			return new BorderPoint[] {topPoint, bottomPoint};
+		}
 		
 		// Find the best line across the region
 //		Profile region = this.getAngleProfile().getSubregion(this.getBorderIndex(BorderTag.TOP_VERTICAL), this.getBorderIndex(BorderTag.BOTTOM_VERTICAL));
 		
 		List<BorderPoint> pointsInRegion = new ArrayList<BorderPoint>();
 		int startIndex = Math.min(this.getBorderIndex(BorderTag.TOP_VERTICAL),  this.getBorderIndex(BorderTag.BOTTOM_VERTICAL));
-		int endIndex = Math.max(this.getBorderIndex(BorderTag.TOP_VERTICAL),  this.getBorderIndex(BorderTag.BOTTOM_VERTICAL));
+		int endIndex =   Math.max(this.getBorderIndex(BorderTag.TOP_VERTICAL),  this.getBorderIndex(BorderTag.BOTTOM_VERTICAL));
 		for(int index = startIndex; index < endIndex; index++ ){
 			pointsInRegion.add(this.getBorderPoint(index));
 		}

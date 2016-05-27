@@ -2,6 +2,7 @@ package analysis.nucleus;
 
 import java.util.logging.Level;
 
+import utility.Constants;
 import logging.Loggable;
 import components.AbstractCellularComponent;
 import components.CellCollection;
@@ -88,34 +89,31 @@ public class ProfileFeatureFinder implements Loggable {
 		
 		// define the current zero offset at the reference point
 		// It does not matter, it just gives an offset key for the ProfileCollection
-		collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, 0);
+		collection.getProfileCollection(ProfileType.REGULAR)
+			.addOffset(BorderTag.REFERENCE_POINT, 0);
 		
 		// get the profile
 		// This is starting from an arbitrary point?
 		// Starting from the head in test data, so the reference point is correct
-		Profile medianProfile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50);
-//		medianProfile.print();
+		Profile medianProfile = collection.getProfileCollection(ProfileType.REGULAR)
+				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+
 
 		// find local maxima in the median profile over 180
 		BooleanProfile maxima = medianProfile.smooth(2).getLocalMaxima(5, 180); // window size 5, only values over 180
 
 
 		double minAngle = 180;
-		int tailIndex = 0;
+		int tailIndex   = 0; // the tail is, by default, the reference point
 
-		// do not consider maxima that are too close to the head of the sperm
-		/*
-		 * ERROR when head is defined near to tail by chance - we exclude the true tail
-		 */
-//		int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
-//		int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
 
 		if(maxima.size()==0){
 			log(Level.WARNING, "Error: no maxima found in median line");
-			tailIndex = 100; // set to roughly the middle of the array for the moment
-
-		} else{
 			
+			tailIndex = medianProfile.size() / 2; // set to roughly the middle of the array for the moment
+
+		} else{  // Maxima were found
+
 			for(int i = 0; i<maxima.size();i++){
 				
 				if(maxima.get(i)==true){ // look at local maxima
@@ -123,8 +121,7 @@ public class ProfileFeatureFinder implements Loggable {
 
 					double angle = medianProfile.get(index); // get the angle at this maximum
 					
-					// look for the highest local maximum outside the exclusion range
-//					if(angle>minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){
+					// look for the highest local maximum
 					if(angle>minAngle){
 						minAngle = angle;
 						tailIndex = index;
@@ -133,29 +130,31 @@ public class ProfileFeatureFinder implements Loggable {
 			}
 		}
 
-		// add this index to be the orientation point
-		log(Level.FINEST, "Setting tail to index: "+tailIndex);
-		collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
+		// add this index to be the reference point
 		collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, tailIndex);
+		finer("Added RP at index "+tailIndex);
+		
+		
+		// ensure we have teh correct offset 
+		tailIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(BorderTag.REFERENCE_POINT);
+		
+		collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
+		finer("Added OP at index "+tailIndex);
 		/*
 		 * Looks like reference point needs to be 0. Check the process aligning the profiles - they must be settling on 
 		 * the RP 
 		 */
 		
-		
-		
-		// set the reference point half way around from the tail
+		// set the intersection point half way around from the tail
+		// find the offset to use
 		double length = (double) collection.getProfileCollection(ProfileType.REGULAR).getAggregate().length();		
-		int offset =  (int) Math.ceil(length / 2d); // ceil to ensure offsets are correct
+		int offset    =  (int) Math.ceil(length / 2d); // ceil to ensure offsets are correct
 		
-		// now we have the tail point located, update the reference point to be opposite
-//		fileLogger.log(Level.FINE, "Profile collection before intersection point re-index: ");
-//		fileLogger.log(Level.FINE, collection.getProfileCollection(ProfileCollectionType.REGULAR).toString());
 		
-//		 adjust the index to the offset
+//		 adjust the intersection point index using the offset
 		int headIndex  = AbstractCellularComponent.wrapIndex( tailIndex - offset, collection.getProfileCollection(ProfileType.REGULAR).getAggregate().length());
-//		fileLogger.log(Level.FINE, "Setting head to index: "+headIndex);
 		collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.INTERSECTION_POINT, headIndex);
+		finer("Added IP at index "+headIndex);
 	}
 	
 
@@ -163,14 +162,6 @@ public class ProfileFeatureFinder implements Loggable {
 		
 		collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, 0);
 		collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, 0);
-		
-//		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
-//
-//		Profile medianProfile = pc.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
-//
-//		int tailIndex = (int) Math.floor(medianProfile.size()/2);
-//					
-//		collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
 	}
 
 	/**

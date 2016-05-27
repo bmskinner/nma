@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import utility.ProfileException;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
@@ -133,15 +134,21 @@ public class SegmentFitter implements Loggable {
 		n.log("Initial profile starting at "+tag+":");
 		n.log(nucleusProfile.toString());
 
-
-		//				log(Level.FINEST, "    Segmentation beginning from "+tag);
-		//				log(Level.FINEST, "    The border tag "+tag+" in this nucleus is at raw index "+n.getBorderIndex(tag));
-		//				log(Level.FINEST, "    Angle at incoming segmented profile index 0 ("+tag+") is "+nucleusProfile.get(0));
-
 		// stretch or squeeze the segments to match the length of the median profile of the collection
-		SegmentedProfile frankenProfile = nucleusProfile.frankenNormaliseToProfile(medianProfile);
-		n.log("Complete frankenprofile:");
-		n.log(frankenProfile.toString());
+		SegmentedProfile frankenProfile = null;
+		
+		try {
+			frankenProfile = nucleusProfile.frankenNormaliseToProfile(medianProfile);
+			n.log("Complete frankenprofile:");
+			n.log(frankenProfile.toString());
+		} catch(ProfileException e){
+			error("Malformed profile in frankenprofiling", e);
+			finest("Median profile:");
+			finest(medianProfile.toString());
+			finest("Nucleus profile:");
+			finest(nucleusProfile.toString());
+			
+		}
 
 		return frankenProfile;
 	}
