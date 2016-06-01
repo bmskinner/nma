@@ -140,6 +140,20 @@ public class DatasetProfiler extends AnalysisWorker {
 		try{
 			fine("Profiling collection");
 			
+			/*
+			 * The individual nuclei within the collection have had RP and OP
+			 * determined from their internal profiles.
+			 * 
+			 * Build the median based on these RP and OP indexes.
+			 * 
+			 * If moving a border tag index in a nucleus improves the 
+			 * median, move it.
+			 * 
+			 * Continue until the best-fit of RP and OP has been obtained.
+			 * 
+			 * 
+			 */
+			
 			CellCollection collection = getDataset().getCollection();
 
 			ProfileCollection angleCollection = createProfileCollection();		

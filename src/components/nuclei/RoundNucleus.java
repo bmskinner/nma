@@ -148,6 +148,31 @@ public class RoundNucleus extends AbstractCellularComponent
 			return null;
 		}
 	}
+	
+	
+	public int identifyBorderTagIndex(BorderTag tag){
+		
+		int result = 0;
+		switch(tag){
+		
+			case REFERENCE_POINT: 
+			try {
+				
+				// The RP in round nuclei is the index with the max diameter
+				
+				result = this.getProfile(ProfileType.DISTANCE).getIndexOfMax();
+			} catch (Exception e) {
+				error("Error detecting RP in nucleus", e);
+				result = 0;
+			}
+				break;
+			default:
+				break;
+		}
+		return result;
+		
+	}
+	
 
 	/*
 	* Finds the key points of interest around the border
@@ -158,16 +183,13 @@ public class RoundNucleus extends AbstractCellularComponent
 	*/
 	public void findPointsAroundBorder() throws Exception{
 
-		int index = this.getProfile(ProfileType.DISTANCE).getIndexOfMax();
+		int rpIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
 		
 		// Make the reference point at the widest axis
-		setBorderTag(BorderTag.REFERENCE_POINT, index);
+		setBorderTag(BorderTag.REFERENCE_POINT, rpIndex);
 				
-//		BorderPoint tailPoint = this.getBorderPoint(tailIndex);
-		setBorderTag(BorderTag.ORIENTATION_POINT, index);
+		setBorderTag(BorderTag.ORIENTATION_POINT, rpIndex);
 		
-		
-//    	setBorderTag(BorderTag.REFERENCE_POINT, this.getBorderIndex(this.findOppositeBorder(tailPoint)));
 	}
 	
 

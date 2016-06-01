@@ -78,7 +78,31 @@ public class PigSpermNucleus
 			return null;
 		}
 	}
-
+    
+    @Override
+	public int identifyBorderTagIndex(BorderTag tag){
+		
+		int result = 0;
+		switch(tag){
+		
+			case REFERENCE_POINT: 
+			try {
+				
+				// The RP in pig sperm is index with the maximum angle
+				
+				result = this.getProfile(ProfileType.REGULAR).getIndexOfMax();
+			} catch (Exception e) {
+				error("Error detecting RP in nucleus", e);
+				result = 0;
+			}
+				break;
+			default:
+				break;
+		}
+		return result;
+		
+	}
+    
   /**
   * {@inheritDoc}
   * <p>
@@ -90,30 +114,22 @@ public class PigSpermNucleus
     @Override
     public void findPointsAroundBorder() throws Exception{
 
-//      NucleusBorderPoint tailPoint1 = this.findTailByMinima();
-      int tailPointIndex2 = this.findTailByMaxima();
-      BorderPoint tailPoint2 = this.getBorderPoint(tailPointIndex2);
-      
-//      NucleusBorderPoint tailPoint3 = this.findTailByNarrowestPoint();
-
-//      this.addTailEstimatePosition(tailPoint1);
-      this.addTailEstimatePosition(tailPoint2);
-//      this.addTailEstimatePosition(tailPoint3);
-
-      // int consensusTailIndex = this.getPositionBetween(tailPoint2, tailPoint3);
-      // NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
-      // consensusTailIndex = this.getPositionBetween(consensusTail, tailPoint1);
-      // consensusTail = this.getBorderPoint(consensusTailIndex);
-
-      int consensusTailIndex = this.getBorderIndex(tailPoint2);
-      BorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
-
-      setBorderTag(BorderTag.ORIENTATION_POINT, consensusTailIndex);
-
-      // The estimated reference point is opposite the tail
-      int headIndex = getBorderIndex(this.findOppositeBorder(consensusTail));
-      setBorderTag(BorderTag.REFERENCE_POINT, consensusTailIndex);
-      setBorderTag(BorderTag.INTERSECTION_POINT, headIndex);
+    	int rpIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
+    	setBorderTag(BorderTag.REFERENCE_POINT, rpIndex);
+    	
+    	
+    	/*
+    	 * The OP is the same as the RP in pigs
+    	 */
+    	setBorderTag(BorderTag.ORIENTATION_POINT, rpIndex);
+    	
+    	/*
+    	 * The IP is opposite the OP
+    	 */
+    	BorderPoint op = this.getBorderPoint(rpIndex);
+    	int ipIndex = getBorderIndex(this.findOppositeBorder(op));
+    	setBorderTag(BorderTag.INTERSECTION_POINT, ipIndex);
+    	      
     }
     
     /*
@@ -130,7 +146,7 @@ public class PigSpermNucleus
      * @throws Exception 
     * @see Profile
     */
-    public BorderPoint findTailByMinima() throws Exception{
+    private BorderPoint findTailByMinima() throws Exception{
 
       // the two lowest minima are at the tail-end corners. 
       // between them lies the tail. Find the two lowest minima,
@@ -176,24 +192,10 @@ public class PigSpermNucleus
      * @throws Exception 
     * @see Profile
     */
-    public int findTailByMaxima() throws Exception{
+    private int findTailByMaxima() throws Exception{
       // the tail is the ?only local maximum with an interior angle above the 180 line
 
-     int tailPoint = this.getProfile(ProfileType.REGULAR).getIndexOfMax();
-
-     //  Profile maxima = this.getAngleProfile().getLocalMaxima(5);
-     //  int tailPoint = (int)maxima.get(0);
-
-     //  double maxAngle = 170;
-
-     // for(int i=0; i<maxima.size();i++){
-     //    if(maxima.get(i)==1){
-     //      if (this.getAngle(i)>maxAngle){
-     //        tailPoint = i;
-     //      }
-     //    }
-     //  }
-      return tailPoint;
+    	return this.getProfile(ProfileType.REGULAR).getIndexOfMax();
     }
 
 
@@ -206,7 +208,7 @@ public class PigSpermNucleus
      * @throws Exception 
     * @see Profile
     */
-    public BorderPoint findTailByNarrowestPoint() throws Exception{
+    private BorderPoint findTailByNarrowestPoint() throws Exception{
 
       BorderPoint narrowPoint = this.getNarrowestDiameterPoint();
       this.orthPoint1  = this.findOrthogonalBorderPoint(narrowPoint);

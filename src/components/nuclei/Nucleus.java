@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import analysis.nucleus.Indexable;
 import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
@@ -39,7 +40,7 @@ import components.nuclear.SignalCollection;
  * @author bms41
  *
  */
-public interface Nucleus extends CellularComponent {
+public interface Nucleus extends CellularComponent, Indexable {
 	
 	// for debugging - use in calling dumpInfo()
 	public static final int ALL_POINTS = 0;
@@ -47,6 +48,13 @@ public interface Nucleus extends CellularComponent {
 	public static final int BORDER_TAGS = 2;
 
 	public void findPointsAroundBorder() throws Exception;
+	
+	/**
+	 * Contains the code to find the reference point in the nucleus.
+	 * @return the index of the reference point
+	 */
+//	public int identifyReferencePoint();
+	
 	public void intitialiseNucleus(int angleProfileWindowSize) throws Exception;
 	
 	/**

@@ -292,6 +292,31 @@ public class RodentSpermNucleus extends SpermNucleus {
 		
 	}
 			
+    @Override
+	public int identifyBorderTagIndex(BorderTag tag){
+		
+		int result = 0;
+		switch(tag){
+		
+			case REFERENCE_POINT: 
+			try {
+				
+				// The RP in mouse sperm is index with the minimum angle
+				
+				result = this.getProfile(ProfileType.REGULAR).getIndexOfMin();
+			} catch (Exception e) {
+				error("Error detecting RP in nucleus", e);
+				result = 0;
+			}
+				break;
+			default:
+				break;
+		}
+		return result;
+		
+	}
+    
+	
 	/*
     Identify key points: tip, estimated tail position
 	 */
@@ -299,11 +324,11 @@ public class RodentSpermNucleus extends SpermNucleus {
 	public void findPointsAroundBorder() throws Exception{
 
 		// find tip - use the least angle method
-		int tipIndex = this.getProfile(ProfileType.REGULAR).getIndexOfMin();
+		int tipIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
 		setBorderTag(BorderTag.REFERENCE_POINT, tipIndex);
 
 		// decide if the profile is right or left handed; flip if needed
-		// IJ.log("    Nucleus "+this.getNucleusNumber());
+
 		if(!this.isProfileOrientationOK()){
 			this.reverse(); // reverses all profiles, border array and tagged points
 		}  

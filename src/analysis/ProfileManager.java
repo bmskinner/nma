@@ -79,7 +79,7 @@ public class ProfileManager implements Loggable {
 		
 		ProfileOffsetter offsetter = new ProfileOffsetter(collection);
 		try {
-			offsetter.assignBorderTagViaFrankenProfile(tag);
+			offsetter.assignBorderTagToNucleiViaFrankenProfile(tag);
 			
 			for(Nucleus n : collection.getNuclei()){
 				n.updateVerticallyRotatedNucleus();
@@ -148,6 +148,26 @@ public class ProfileManager implements Loggable {
 	 */
 	private void resegmentWithCoreBorderTagUpdate(BorderTag tag, int index){
 		
+		
+		/*
+		 * Updating core border tags:
+
+			1) Identify the new OP or RP index in the median
+			   - save out the offsets for the old border tags against the old RP
+
+			2) Update the RP / OP location in nuclei using frankenprofiling
+			   - RP update requires ofsetting OP also
+			   - border tags should save offsets too
+
+			3) Create a new profile aggregate and profile collection 
+			   - use the saved offsets from the old RP to calculate the new offsets for border tags
+
+			4) Resegment the median profile, with the new border tag map
+
+			5) Apply the new segments to the nucleus profiles
+			*/
+		
+		
 		fine("Resegmenting for core border tag change");
 		// Store the existing core points in a map (OP and RP)
 		Map<BorderTag, Integer> map = new HashMap<BorderTag, Integer>();
@@ -170,7 +190,7 @@ public class ProfileManager implements Loggable {
 		ProfileOffsetter offsetter = new ProfileOffsetter(collection);
 		try {
 			finer("Using ProfileOffsetter to remap "+tag+" in nuclei");
-			offsetter.assignBorderTagViaFrankenProfile(tag);
+			offsetter.assignBorderTagToNucleiViaFrankenProfile(tag);
 			
 		} catch (Exception e1) {
 			error("Error assigning tag to nuclei", e1);

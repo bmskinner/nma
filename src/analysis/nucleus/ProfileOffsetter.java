@@ -31,7 +31,8 @@ public class ProfileOffsetter implements Loggable {
 	
 	private void calculateOffsetsInRoundNuclei() throws Exception {
 
-		Profile medianToCompare = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN); // returns a median profile with head at 0
+		Profile medianToCompare = collection.getProfileCollection(ProfileType.REGULAR)
+				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN); // returns a median profile with head at 0
 
 		for(Nucleus n : collection.getNuclei()){
 
@@ -91,7 +92,7 @@ public class ProfileOffsetter implements Loggable {
 	 * This method requires the frankenprofiling to be completed
 	 * @throws Exception
 	 */
-	public void assignBorderTagViaFrankenProfile(BorderTag tag) throws Exception{
+	public void assignBorderTagToNucleiViaFrankenProfile(BorderTag tag) throws Exception{
 
 		int index = collection.getProfileCollection(ProfileType.REGULAR)
 				.getOffset(tag); 
@@ -176,8 +177,8 @@ public class ProfileOffsetter implements Loggable {
 		 * Franken profile method: segment proportionality
 		 */
 		
-		assignBorderTagViaFrankenProfile(BorderTag.TOP_VERTICAL);
-		assignBorderTagViaFrankenProfile(BorderTag.BOTTOM_VERTICAL);
+		assignBorderTagToNucleiViaFrankenProfile(BorderTag.TOP_VERTICAL);
+		assignBorderTagToNucleiViaFrankenProfile(BorderTag.BOTTOM_VERTICAL);
 		
 		
 		for(Nucleus nucleus : collection.getNuclei()){			
@@ -317,5 +318,6 @@ public class ProfileOffsetter implements Loggable {
 	public void reCalculateVerticals() throws Exception{
 		assignTopAndBottomVerticalsViaFrankenProfile();
 	}
+
 
 }
