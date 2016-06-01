@@ -863,6 +863,14 @@ public class SegmentedProfile extends Profile implements Serializable {
 		return builder.toString();
 	}
 	
+	/**
+	 * Restore the toString from Profile
+	 * @return
+	 */
+	public String valueString(){
+		return super.toString();
+	}
+	
 	  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		    in.defaultReadObject();
 //		    this.firstSegment = segments.get(0);

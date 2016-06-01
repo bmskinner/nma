@@ -58,11 +58,41 @@ public class BooleanProfile {
 	}
 	
 	/**
+	 * Construct an empty (false) profile with
+	 * the same length as the input
+	 * @param p
+	 */
+	public BooleanProfile(final Profile p){
+		this(p, false);
+	}
+	
+	/**
+	 * Construct a profile with
+	 * the same length as the input and the given values
+	 * @param p
+	 */
+	public BooleanProfile(final Profile p, boolean b){
+		this.array = new boolean[p.size()];
+		for(int i=0; i<this.array.length; i++){
+			array[i] = b;
+		}
+	}
+	
+	/**
 	 * Get the length of the array in the profile
 	 * @return the size of the profile
 	 */
 	public int size(){
 		return array.length;
+	}
+	
+	/**
+	 * Set the value at the given index
+	 * @param index
+	 * @param b
+	 */
+	public void set(int index, boolean b){
+		array[index] = b;
 	}
 	
 	/**
