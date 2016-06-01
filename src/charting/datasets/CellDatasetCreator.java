@@ -77,8 +77,11 @@ public class CellDatasetCreator implements Loggable {
 			
 			Nucleus n = cell.getNucleus();
 			
-			fieldNames.add("Source image");
+			fieldNames.add("Source image file");
 			rowData.add(n.getPathAndNumber());
+			
+			fieldNames.add("Source image name");
+			rowData.add(n.getSourceFileName());
 			
 			fieldNames.add("Source channel");
 			rowData.add(n.getChannel());
