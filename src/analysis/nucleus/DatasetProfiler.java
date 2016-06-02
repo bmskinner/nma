@@ -28,9 +28,7 @@ import analysis.profiles.RuleSet;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.Profile;
-import components.generic.ProfileCollection;
 import components.generic.ProfileType;
-import components.nuclei.Nucleus;
 
 /**
  * This class contains the methods for detecting the reference and orientation points in a median
@@ -69,70 +67,7 @@ public class DatasetProfiler extends AnalysisWorker {
 
 		return result;
 	}
-	
-	/**
-	 * Create the regular profile collection to hold angles from nuclear
-	 * profiles
-	 * @return
-	 * @throws Exception
-	 */
-	private void createProfileCollections() {
-		CellCollection collection = getDataset().getCollection();
-
-		/*
-		 * Build a first set of profile aggregates
-		 * Default is to make profile aggregate from reference point
-		 * Do not build an aggregate for the non-existent frankenprofile
-		 */
-		for(ProfileType type : ProfileType.values()){
 			
-			if(type.equals(ProfileType.FRANKEN)){
-				continue;
-			}
-			
-			fine("Creating profile aggregate: "+type);
-			ProfileCollection pc = collection.getProfileCollection(type);
-			pc.createProfileAggregate(collection, type);
-		}
-	}
-	
-//	/**
-//	 * Perform a tail finding in the current median profile, and offset
-//	 * the nucleus profiles for best fit. Create the profile aggregate fresh.
-//	 * The idea here is to refine the median to the best fit across all nuclei. 
-//	 * @param pointType
-//	 * @param finder
-//	 * @return
-//	 * @throws Exception
-//	 */
-////	private double rebuildProfileAggregate(BorderTag pointType, ProfileFeatureFinder finder) throws Exception{
-////		// rebuild the aggregate - needed if the orientation point index has changed in any nuclei
-////		CellCollection collection = getDataset().getCollection();
-////		
-////		for(ProfileType type : ProfileType.values()){
-////			if(type.equals(ProfileType.FRANKEN)){
-////				continue;
-////			}
-////			fine("Rebuilding profile aggregate: "+type);
-////			collection.getProfileCollection(type)
-////					.createProfileAggregate(collection, type);
-////		}
-////
-////		// carry out the orientation point detection in the median again
-////		finder.findTailIndexInMedianCurve();
-////
-////		// apply offsets to each nucleus in the collection
-////		ProfileOffsetter offsetter = new ProfileOffsetter(collection);
-////		offsetter.calculateOffsets(); 
-////
-////
-////
-////		// get the difference between aligned profiles and the median
-////		double score = compareProfilesToMedian(pointType);
-////		fine("Reticulating splines: score: "+(int)score);
-////		return score;
-////	}
-	
 	/**
 	 * Calculaate the median profile of the colleciton, and generate the
 	 * best fit offsets of each nucleus to match
@@ -168,7 +103,7 @@ public class DatasetProfiler extends AnalysisWorker {
 
 			
 			// Build the ProfileCollections for each ProfileType
-			createProfileCollections();	
+			collection.getProfileManager().createProfileCollections();	
 			
 			// Set the RP in the ProfileCollection to index zero
 			collection.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, 0);
@@ -180,7 +115,8 @@ public class DatasetProfiler extends AnalysisWorker {
 			// RP index is zero in the median profile at this point
 			
 			// Update the nucleus profiles to the median
-			offsetNucleusProfiles(BorderTag.REFERENCE_POINT, ProfileType.REGULAR, median);
+			collection.getProfileManager()
+				.offsetNucleusProfiles(BorderTag.REFERENCE_POINT, ProfileType.REGULAR, median);
 			
 			// Rebuild the median
 			
@@ -194,11 +130,6 @@ public class DatasetProfiler extends AnalysisWorker {
 			
 			}
 			
-			
-//			// use the median profile of this aggregate to find the orientation point ("tail")
-//			ProfileFeatureFinder finder = new ProfileFeatureFinder(collection);
-//			finder.findTailIndexInMedianCurve();
-
 
 			// carry out iterative offsetting to refine the RP
 			double score = compareProfilesToMedian(pointType);
@@ -211,10 +142,11 @@ public class DatasetProfiler extends AnalysisWorker {
 						.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
 				
 				// Update the nucleus profiles to the median
-				offsetNucleusProfiles(BorderTag.REFERENCE_POINT, ProfileType.REGULAR, median);
+				collection.getProfileManager()
+					.offsetNucleusProfiles(BorderTag.REFERENCE_POINT, ProfileType.REGULAR, median);
 				
 				// Build the ProfileCollections for each ProfileType
-				createProfileCollections();	
+				collection.getProfileManager().createProfileCollections();	
 				
 //				score = rebuildProfileAggregate(pointType, finder);
 				score = compareProfilesToMedian(BorderTag.REFERENCE_POINT);
@@ -236,7 +168,8 @@ public class DatasetProfiler extends AnalysisWorker {
 					
 					int index = finder.identifyIndex(median, ruleSets);
 					// Add the index to the median profiles
-					updateProfileCollectionOffsets(tag, index);
+					collection.getProfileManager().
+						updateProfileCollectionOffsets(tag, index);
 
 					fine(tag+" in median is located at index "+index);
 					
@@ -244,7 +177,8 @@ public class DatasetProfiler extends AnalysisWorker {
 					Profile tagMedian = collection.getProfileCollection(ProfileType.REGULAR)
 							.getProfile(tag, Constants.MEDIAN);
 					
-					offsetNucleusProfiles(tag, ProfileType.REGULAR, tagMedian);
+					collection.getProfileManager()
+						.offsetNucleusProfiles(tag, ProfileType.REGULAR, tagMedian);
 					fine("Assigned offset in nucleus profiles for "+tag);
 					
 				} else {
@@ -262,26 +196,7 @@ public class DatasetProfiler extends AnalysisWorker {
 		}
 	}
 	
-	/**
-	 * Add the given offset to each of the profile types in the ProfileCollection
-	 * except for the frankencollection
-	 * @param tag
-	 * @param index
-	 */
-	private void updateProfileCollectionOffsets(BorderTag tag, int index){
-		
-		for(ProfileType type : ProfileType.values()){
-			if(type.equals(ProfileType.FRANKEN)){
-				continue;
-			}
-			
-			getDataset().getCollection()
-				.getProfileCollection(type)
-				.addOffset(tag, index);
 
-		}
-		
-	}
 	
 	/**
 	 * Get the total differences to the median for all the nuclei in
@@ -297,27 +212,5 @@ public class DatasetProfiler extends AnalysisWorker {
 		}
 		return result;
 	}
-	
-	
-	/**
-	 * Update the given tag in each nucleus of the collection to the index with a best fit
-	 * of the profile to the given median profile
-	 * @param tag
-	 * @param type
-	 * @param median
-	 */
-	private void offsetNucleusProfiles(BorderTag tag, ProfileType type, Profile median){
-		
-		CellCollection collection = this.getDataset().getCollection();
-		
-		for(Nucleus n : collection.getNuclei()){
-
-			// returns the positive offset index of this profile which best matches the median profile
-			
-			int newIndex = n.getProfile(type).getSlidingWindowOffset(median);
-			n.setBorderTag(tag, newIndex);			
-		}
-		
-	}
-		 
+			 
 }

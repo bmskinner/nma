@@ -30,8 +30,6 @@ import components.generic.ProfileType;
 import components.nuclear.NucleusType;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
-import analysis.nucleus.ProfileFeatureFinder;
-import analysis.profiles.ProfileOffsetter;
 import utility.Constants;
 import utility.Version;
 
@@ -56,10 +54,10 @@ public class PopulationImportWorker extends AnalysisWorker {
 		try {
 			dataset = readDataset(file);
 			
-			log(Level.FINE, "Read dataset");
+			fine("Read dataset");
 			if(checkVersion( dataset.getVersion() )){
 
-				log(Level.FINE, "Version check OK");
+				fine("Version check OK");
 				dataset.setRoot(true);
 
 				
@@ -69,7 +67,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 						+file.getName().replace(Constants.SAVE_FILE_EXTENSION, Constants.LOG_FILE_EXTENSION));
 				
 				dataset.setDebugFile(logFile);
-				log(Level.FINE, "Updated log file location");
+				fine("Updated log file location");
 				
 				
 				// If rodent sperm, check if the TOP_VERTICAL and BOTTOM_VERTICAL 
@@ -80,11 +78,11 @@ public class PopulationImportWorker extends AnalysisWorker {
 							.getProfileCollection(ProfileType.REGULAR)
 							.hasBorderTag(BorderTag.TOP_VERTICAL)  ){
 						
-						log(Level.FINE, "TOP_ and BOTTOM_VERTICAL not assigned; calculating");
-						calculateTopAndBottomVerticals(dataset);
-						log(Level.FINE, "Calculating TOP and BOTTOM for child datasets");
+						fine("TOP_ and BOTTOM_VERTICAL not assigned; calculating");
+						dataset.getCollection().getProfileManager().calculateTopAndBottomVerticals();
+						fine("Calculating TOP and BOTTOM for child datasets");
 						for(AnalysisDataset child : dataset.getAllChildDatasets()){
-							calculateTopAndBottomVerticals(child);
+							child.getCollection().getProfileManager().calculateTopAndBottomVerticals();
 						}
 						
 					}
@@ -125,40 +123,9 @@ public class PopulationImportWorker extends AnalysisWorker {
 		}
 	}
 	
-	/**
-	 * Recalculate the hook-hunp split, and signal angle measurements for the 
-	 * given dataset of rodent sperm nuclei
-	 * @param d
-	 * @throws Exception
-	 */
-//	private void updateRodentSpermHookHumpSplits(AnalysisDataset d) throws Exception{
-//		
-//		if(d.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
-//			for(Nucleus n : d.getCollection().getNuclei()){
-//
-//				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
-//				// recalculate - old datasets have problems
-//				nucleus.splitNucleusToHeadAndHump();
-//
-//				// recalculate signal angles - old datasets have problems
-//				nucleus.calculateSignalAnglesFromPoint(nucleus.getPoint(BorderTag.ORIENTATION_POINT));
-//			}
-//		}
-//		
-//	}
-	
-	private void calculateTopAndBottomVerticals(AnalysisDataset dataset) throws Exception {
-		
-		log(Level.FINE, "Detecting flat region");
 
-		ProfileFeatureFinder finder = new ProfileFeatureFinder(dataset.getCollection());
-		finder.assignTopAndBottomVerticalInMouse();
-		
-		log(Level.FINE, "Assigning flat region to nuclei");
-		ProfileOffsetter offsetter = new ProfileOffsetter(dataset.getCollection());
-		offsetter.calculateVerticals();
-//		DatasetProfiler.Offsetter.assignFlatRegionToMouseNuclei(dataset.getCollection());
-	}
+	
+
 	
 	/**
 	 * Check a version string to see if the program will be able to open a 

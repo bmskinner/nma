@@ -104,7 +104,7 @@ public class ProfileCollection implements Serializable {
 	 * @return the quartile profile from the given tag
 	 * @throws Exception
 	 */
-	public Profile getProfile(BorderTag tag, double quartile) throws Exception {
+	public Profile getProfile(BorderTag tag, double quartile) {
 		if(tag==null){
 			throw new IllegalArgumentException("A profile key is required");
 		}

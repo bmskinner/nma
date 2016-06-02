@@ -12,7 +12,11 @@ import java.util.UUID;
 
 
 
+
+
+import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.ProfileOffsetter;
+import analysis.profiles.RuleSet;
 import logging.Loggable;
 //import analysis.nucleus.DatasetSegmenter.SegmentFitter;
 import utility.Constants;
@@ -30,7 +34,8 @@ import components.nuclei.Nucleus;
 /**
  * This class is designed to simplify operations on CellCollections
  * involving copying and refreshing of ProfileCollections and 
- * ProfileAggregates
+ * ProfileAggregates. It handles movement of tag indexes within the median
+ * and the nuclei
  * @author bms41
  *
  */
@@ -42,21 +47,152 @@ public class ProfileManager implements Loggable {
 		this.collection = collection;
 	}
 	
+	/**
+	 * Update the given tag in each nucleus of the collection to the index with a best fit
+	 * of the profile to the given median profile
+	 * @param tag
+	 * @param type
+	 * @param median
+	 */
+	public void offsetNucleusProfiles(BorderTag tag, ProfileType type, Profile median){
+				
+		for(Nucleus n : collection.getNuclei()){
+
+			// returns the positive offset index of this profile which best matches the median profile
+			
+			int newIndex = n.getProfile(type).getSlidingWindowOffset(median);
+			n.setBorderTag(tag, newIndex);			
+		}
+		
+	}
+	
+	/**
+	 * Create the profile collections to hold angles from nuclear
+	 * profiles based on the current nucleus profiles
+	 * @return
+	 * @throws Exception
+	 */
+	public void createProfileCollections() {
+
+		/*
+		 * Build a first set of profile aggregates
+		 * Default is to make profile aggregate from reference point
+		 * Do not build an aggregate for the non-existent frankenprofile
+		 */
+		for(ProfileType type : ProfileType.values()){
+			
+			if(type.equals(ProfileType.FRANKEN)){
+				continue;
+			}
+			
+			fine("Creating profile aggregate: "+type);
+			ProfileCollection pc = collection.getProfileCollection(type);
+			pc.createProfileAggregate(collection, type);
+		}
+	}
+	
+	/**
+	 * Add the given offset to each of the profile types in the ProfileCollection
+	 * except for the frankencollection
+	 * @param tag
+	 * @param index
+	 */
+	public void updateProfileCollectionOffsets(BorderTag tag, int index){
+		
+		for(ProfileType type : ProfileType.values()){
+			if(type.equals(ProfileType.FRANKEN)){
+				continue;
+			}
+			
+			collection
+				.getProfileCollection(type)
+				.addOffset(tag, index);
+
+		}
+		
+	}
+	
+	/**
+	 * Use the collection's ruleset to calculate the positions of the top and bottom
+	 * verticals in the median profile, and assign these to the nuclei
+	 */
+	public void calculateTopAndBottomVerticals() {
+		
+		List<RuleSet> top = collection.getRuleSetCollection().getRuleSets(BorderTag.TOP_VERTICAL);
+		List<RuleSet> btm = collection.getRuleSetCollection().getRuleSets(BorderTag.BOTTOM_VERTICAL);
+		
+		if(top.size()>0 && btm.size()>0){
+			
+			fine("Detecting top and bottom verticals");
+			
+			ProfileIndexFinder finder = new ProfileIndexFinder();
+			
+			Profile median = collection
+					.getProfileCollection(ProfileType.REGULAR)
+					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+
+			int topIndex = finder.identifyIndex(median, top);
+			int btmIndex = finder.identifyIndex(median, btm);
+			
+			if(topIndex > -1 && btmIndex > -1){
+			
+				fine("TV in median is located at index "+topIndex);
+				fine("BV in median is located at index "+btmIndex);
+
+				updateProfileCollectionOffsets(BorderTag.TOP_VERTICAL, topIndex);
+
+				updateProfileCollectionOffsets(BorderTag.BOTTOM_VERTICAL, btmIndex);
+
+
+				fine("Updating nuclei");
+				Profile topMedian = collection
+						.getProfileCollection(ProfileType.REGULAR)
+						.getProfile(BorderTag.TOP_VERTICAL, Constants.MEDIAN);
+
+				Profile btmMedian = collection
+						.getProfileCollection(ProfileType.REGULAR)
+						.getProfile(BorderTag.BOTTOM_VERTICAL, Constants.MEDIAN);
+
+				offsetNucleusProfiles(BorderTag.TOP_VERTICAL, ProfileType.REGULAR, topMedian);
+
+				offsetNucleusProfiles(BorderTag.BOTTOM_VERTICAL, ProfileType.REGULAR, btmMedian);
+				
+				fine("Updated nuclei");
+			} else {
+				fine("Cannot find TV or BV in median profile");
+			}
+		} else {
+			fine("No rulesets for top and bottom verticals");
+		}
+		
+		
+	}
+	
 	
 	/**
 	 * Update the location of the given border tag within the profile
 	 * @param tag
-	 * @param index
+	 * @param index the new index within the median profile
 	 */
 	public void updateBorderTag(BorderTag tag, int index){
 		
 		finer("Updating border tag "+tag);
 		
 		if(tag.type().equals(BorderTagType.CORE )){
-			resegmentWithCoreBorderTagUpdate(tag, index);
+			updateCoreBorderTagIndex(tag, index);
 			return;
+		} else {
+			updateExtendedBorderTagIndex(tag, index);
 		}
 		
+	}
+	
+	/**
+	 * Update the extended border tags that don't need resegmenting
+	 * @param tag
+	 * @param index
+	 */
+	private void updateExtendedBorderTagIndex(BorderTag tag, int index){
 		int oldIndex =0;
 		try {
 			oldIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
@@ -129,8 +265,6 @@ public class ProfileManager implements Loggable {
 						
 			return;
 		}
-
-
 	}
 	
 	/**
@@ -147,7 +281,7 @@ public class ProfileManager implements Loggable {
 	 * @param tag
 	 * @param index
 	 */
-	private void resegmentWithCoreBorderTagUpdate(BorderTag tag, int index){
+	private void updateCoreBorderTagIndex(BorderTag tag, int index){
 		
 		
 		/*
@@ -178,34 +312,42 @@ public class ProfileManager implements Loggable {
 			finest("Storing existing median "+test+" at index "+i);
 		}
 		
-		// Overwrite the new tag
+		// Overwrite the new tag for segmentation
 		map.put(tag, index);
 		finest("Replacing median "+tag+" with index "+index+" in segmenter map");
 		
+		// Store the offset for the new point
+		collection.getProfileCollection(ProfileType.REGULAR).addOffset(tag, index);
 		
+				
 		/*
-		 * Now we need to overwite the default OP and RP locations in the nucleus
-		 * profiles. This is because the offsetter assumes the RP is always correct by default.
+		 * Now we need to update the tag indexes in the nucleus
+		 * profiles.
 		 */
+		Profile median = collection.getProfileCollection(ProfileType.REGULAR)
+				.getProfile(tag, Constants.MEDIAN);
 		
-		ProfileOffsetter offsetter = new ProfileOffsetter(collection);
-		try {
-			finer("Using ProfileOffsetter to remap "+tag+" in nuclei");
-			offsetter.assignBorderTagToNucleiViaFrankenProfile(tag);
+		offsetNucleusProfiles(tag, ProfileType.REGULAR, median);
+		
+		finer("Nucleus indexes for "+tag+" updated");
+		
+
+		
+		if(tag.equals(BorderTag.REFERENCE_POINT)){
 			
-		} catch (Exception e1) {
-			error("Error assigning tag to nuclei", e1);
+			// We need to rebuild the ProfileAggregate for the new RP
+			// This will reset the RP to index zero
+			// Make new profile collections
+			createProfileCollections();
+			finer("Recreated profile collections");
+			map.put(tag, 0); // the RP is back at zero
 		}
-		
+				
 		// Resegment the median
 		try {
 			
 			fine("Resegmenting the median profile");
 			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
-
-			// the reference point is always index 0, so the segments will match
-			// the profile
-			Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
 
 			ProfileSegmenter segmenter = new ProfileSegmenter(median, map);		
 
@@ -222,21 +364,6 @@ public class ProfileManager implements Loggable {
 		}
 		
 		
-		// TODO: What is the impact of changing the RP? 
-		
-		// Reprofile the collection
-		// Realign nuclei to the new tag positions
-		fine("Offsetting nucleus profiles against new median");
-		offsetter = new ProfileOffsetter(collection);
-		try {
-			offsetter.calculateOffsets();
-		} catch (Exception e) {
-			error("Error offsetting nucleus profiles", e);
-		} 
-		
-		fine("Calculated new offsets for nuclei");
-		
-		
 		
 		// Run a new morphological analysis to apply the new segments
 		// TODO: this needs to trigger the progressable action
@@ -244,6 +371,13 @@ public class ProfileManager implements Loggable {
 		// trigger morphological analysis after this step
 
 	}
+	
+	
+	
+	private void updateRPIndex(int index){
+		
+	}
+	
 	
 	/**
 	 * Test if the regular median profiles of the given datasets have the same segment counts

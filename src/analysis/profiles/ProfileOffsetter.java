@@ -1,3 +1,23 @@
+/*******************************************************************************
+ *  	Copyright (C) 2015, 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details. Gluten-free. May contain 
+ *     traces of LDL asbestos. Avoid children using heavy machinery while under the
+ *     influence of alcohol.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 package analysis.profiles;
 
 import java.util.UUID;
@@ -29,63 +49,63 @@ public class ProfileOffsetter implements Loggable {
 		this.collection = collection;
 	}
 	
-	private void calculateOffsetsInRoundNuclei() throws Exception {
-
-		Profile medianToCompare = collection.getProfileCollection(ProfileType.REGULAR)
-				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN); // returns a median profile with head at 0
-
-		for(Nucleus n : collection.getNuclei()){
-
-			// returns the positive offset index of this profile which best matches the median profile
-			int newHeadIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(medianToCompare);
-			n.setBorderTag(BorderTag.REFERENCE_POINT, newHeadIndex);
-
-			// check if flipping the profile will help
-
-			double differenceToMedian1 = n.getProfile(ProfileType.REGULAR,BorderTag.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
-			n.reverse();
-			double differenceToMedian2 = n.getProfile(ProfileType.REGULAR,BorderTag.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
-
-			if(differenceToMedian1<differenceToMedian2){
-				n.reverse(); // put it back if no better
-			}
-
-			// also update the orientation position
-			n.setBorderTag(BorderTag.ORIENTATION_POINT, n.getBorderIndex(BorderTag.REFERENCE_POINT));
-			
-		}
-	}
+//	private void calculateOffsetsInRoundNuclei() throws Exception {
+//
+//		Profile medianToCompare = collection.getProfileCollection(ProfileType.REGULAR)
+//				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN); // returns a median profile with head at 0
+//
+//		for(Nucleus n : collection.getNuclei()){
+//
+//			// returns the positive offset index of this profile which best matches the median profile
+//			int newHeadIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(medianToCompare);
+//			n.setBorderTag(BorderTag.REFERENCE_POINT, newHeadIndex);
+//
+//			// check if flipping the profile will help
+//
+//			double differenceToMedian1 = n.getProfile(ProfileType.REGULAR,BorderTag.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
+//			n.reverse();
+//			double differenceToMedian2 = n.getProfile(ProfileType.REGULAR,BorderTag.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
+//
+//			if(differenceToMedian1<differenceToMedian2){
+//				n.reverse(); // put it back if no better
+//			}
+//
+//			// also update the orientation position
+//			n.setBorderTag(BorderTag.ORIENTATION_POINT, n.getBorderIndex(BorderTag.REFERENCE_POINT));
+//			
+//		}
+//	}
 
 	
-	private void calculateOffsetsInRodentSpermNuclei() throws Exception {
-
-		// Get the median profile starting from the orientation point
-		Profile median = collection.getProfileCollection(ProfileType.REGULAR)
-				.getProfile(BorderTag.ORIENTATION_POINT, Constants.MEDIAN); // returns a median profile
-
-		// go through each nucleus
-		for(Nucleus n : collection.getNuclei()){
-
-			// ensure the correct class is chosen
-			RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
-
-			// get the offset for the best fit to the median profile
-			int newTailIndex = nucleus.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
-
-			// add the offset of the tail to the nucleus
-			nucleus.setBorderTag(BorderTag.ORIENTATION_POINT, newTailIndex);
-
-
-			// also update the head position (same as round reference point)
-			// - the point opposite the tail through the CoM
-			int headIndex = nucleus.getBorderIndex(nucleus.findOppositeBorder( nucleus.getBorderPoint(newTailIndex) ));
-			nucleus.setBorderTag(BorderTag.INTERSECTION_POINT, headIndex);
-//			nucleus.setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
-			nucleus.splitNucleusToHeadAndHump();
-
-		}			
-
-	}
+//	private void calculateOffsetsInRodentSpermNuclei() throws Exception {
+//
+//		// Get the median profile starting from the orientation point
+//		Profile median = collection.getProfileCollection(ProfileType.REGULAR)
+//				.getProfile(BorderTag.ORIENTATION_POINT, Constants.MEDIAN); // returns a median profile
+//
+//		// go through each nucleus
+//		for(Nucleus n : collection.getNuclei()){
+//
+//			// ensure the correct class is chosen
+//			RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
+//
+//			// get the offset for the best fit to the median profile
+//			int newTailIndex = nucleus.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
+//
+//			// add the offset of the tail to the nucleus
+//			nucleus.setBorderTag(BorderTag.ORIENTATION_POINT, newTailIndex);
+//
+//
+//			// also update the head position (same as round reference point)
+//			// - the point opposite the tail through the CoM
+//			int headIndex = nucleus.getBorderIndex(nucleus.findOppositeBorder( nucleus.getBorderPoint(newTailIndex) ));
+//			nucleus.setBorderTag(BorderTag.INTERSECTION_POINT, headIndex);
+////			nucleus.setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
+//			nucleus.splitNucleusToHeadAndHump();
+//
+//		}			
+//
+//	}
 	
 	
 	/**
@@ -187,81 +207,81 @@ public class ProfileOffsetter implements Loggable {
 		
 	}
 	
-	private void assignTopAndBottomVerticalsToMouseViaOffsetting() throws Exception{
-		
-		/*
-		 * Regular profile method: offsetting
-		 */
-		{
-			Profile verticalTopMedian;
-			Profile verticalBottomMedian;
-			try{
-				verticalTopMedian = collection.getProfileCollection(ProfileType.REGULAR)
-						.getProfile(BorderTag.TOP_VERTICAL, Constants.MEDIAN); 
-
-				verticalBottomMedian = collection.getProfileCollection(ProfileType.REGULAR)
-						.getProfile(BorderTag.BOTTOM_VERTICAL, Constants.MEDIAN); 
-
-
-			} catch (IllegalArgumentException e){
-				warn("Error assigning vertical in dataset "+collection.getName());
-				warn("No vertical points detected");
-				// This occurs when the median profile did not have detectable verticals. Return quietly.
-				
-				return;
-			}
-			for(Nucleus n : collection.getNuclei()){
-
-				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
-
-
-				int newIndexOne = nucleus.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(verticalTopMedian);
-				int newIndexTwo = nucleus.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(verticalBottomMedian);
-
-				XYPoint p0 = nucleus.getBorderPoint(newIndexOne);
-				XYPoint p1 = nucleus.getBorderPoint(newIndexTwo);
-				
-
-				if(p0.getLengthTo(nucleus.getBorderTag(BorderTag.REFERENCE_POINT))> p1.getLengthTo(nucleus.getBorderTag(BorderTag.REFERENCE_POINT)) ){
-
-					// P0 is further from the reference point than p1
-
-					nucleus.setBorderTag(BorderTag.TOP_VERTICAL, newIndexTwo);
-					nucleus.setBorderTag(BorderTag.BOTTOM_VERTICAL, newIndexOne);
-
-				} else {
-
-					nucleus.setBorderTag(BorderTag.TOP_VERTICAL, newIndexOne);
-					nucleus.setBorderTag(BorderTag.BOTTOM_VERTICAL, newIndexTwo);
-
-				}
-			}
-
-
-		}
-	}
+//	private void assignTopAndBottomVerticalsToMouseViaOffsetting() throws Exception{
+//		
+//		/*
+//		 * Regular profile method: offsetting
+//		 */
+//		{
+//			Profile verticalTopMedian;
+//			Profile verticalBottomMedian;
+//			try{
+//				verticalTopMedian = collection.getProfileCollection(ProfileType.REGULAR)
+//						.getProfile(BorderTag.TOP_VERTICAL, Constants.MEDIAN); 
+//
+//				verticalBottomMedian = collection.getProfileCollection(ProfileType.REGULAR)
+//						.getProfile(BorderTag.BOTTOM_VERTICAL, Constants.MEDIAN); 
+//
+//
+//			} catch (IllegalArgumentException e){
+//				warn("Error assigning vertical in dataset "+collection.getName());
+//				warn("No vertical points detected");
+//				// This occurs when the median profile did not have detectable verticals. Return quietly.
+//				
+//				return;
+//			}
+//			for(Nucleus n : collection.getNuclei()){
+//
+//				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
+//
+//
+//				int newIndexOne = nucleus.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(verticalTopMedian);
+//				int newIndexTwo = nucleus.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(verticalBottomMedian);
+//
+//				XYPoint p0 = nucleus.getBorderPoint(newIndexOne);
+//				XYPoint p1 = nucleus.getBorderPoint(newIndexTwo);
+//				
+//
+//				if(p0.getLengthTo(nucleus.getBorderTag(BorderTag.REFERENCE_POINT))> p1.getLengthTo(nucleus.getBorderTag(BorderTag.REFERENCE_POINT)) ){
+//
+//					// P0 is further from the reference point than p1
+//
+//					nucleus.setBorderTag(BorderTag.TOP_VERTICAL, newIndexTwo);
+//					nucleus.setBorderTag(BorderTag.BOTTOM_VERTICAL, newIndexOne);
+//
+//				} else {
+//
+//					nucleus.setBorderTag(BorderTag.TOP_VERTICAL, newIndexOne);
+//					nucleus.setBorderTag(BorderTag.BOTTOM_VERTICAL, newIndexTwo);
+//
+//				}
+//			}
+//
+//
+//		}
+//	}
 	
-	private void calculateOffsetsInPigSpermNuclei() throws Exception {
-
-		// get the median profile zeroed on the orientation point
-		Profile medianToCompare = collection.getProfileCollection(ProfileType.REGULAR)
-				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN); 
-
-		for(Nucleus nucleus : collection.getNuclei()){
-			PigSpermNucleus n = (PigSpermNucleus) nucleus;
-
-			// returns the positive offset index of this profile which best matches the median profile
-			int tailIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(medianToCompare);
-
-			n.setBorderTag(BorderTag.ORIENTATION_POINT, tailIndex);
-			n.setBorderTag(BorderTag.REFERENCE_POINT, tailIndex);
-
-			// also update the head position
-			int headIndex = n.getBorderIndex(n.findOppositeBorder( n.getBorderPoint(tailIndex) ));
-			n.setBorderTag(BorderTag.INTERSECTION_POINT, headIndex);
-		}
-
-	}
+//	private void calculateOffsetsInPigSpermNuclei() throws Exception {
+//
+//		// get the median profile zeroed on the orientation point
+//		Profile medianToCompare = collection.getProfileCollection(ProfileType.REGULAR)
+//				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN); 
+//
+//		for(Nucleus nucleus : collection.getNuclei()){
+//			PigSpermNucleus n = (PigSpermNucleus) nucleus;
+//
+//			// returns the positive offset index of this profile which best matches the median profile
+//			int tailIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(medianToCompare);
+//
+//			n.setBorderTag(BorderTag.ORIENTATION_POINT, tailIndex);
+//			n.setBorderTag(BorderTag.REFERENCE_POINT, tailIndex);
+//
+//			// also update the head position
+//			int headIndex = n.getBorderIndex(n.findOppositeBorder( n.getBorderPoint(tailIndex) ));
+//			n.setBorderTag(BorderTag.INTERSECTION_POINT, headIndex);
+//		}
+//
+//	}
 
 	/**
 	 * Offset the position of the tail in each nucleus based on the difference to the median.
@@ -269,46 +289,46 @@ public class ProfileOffsetter implements Loggable {
 	 * @param collection the nuclei
 	 * @param nucleusClass the class of nucleus
 	 */
-	public void calculateOffsets() throws Exception {
-
-		calculateOPOffsets();
-		calculateVerticals();
-	}
+//	public void calculateOffsets() throws Exception {
+//
+////		calculateOPOffsets();
+//		calculateVerticals();
+//	}
 	
 	/**
 	 * Offset the position of the tail in each nucleus based on the difference to the median
 	 * @param collection the nuclei
 	 * @param nucleusClass the class of nucleus
 	 */
-	public void calculateOPOffsets() throws Exception {
-
-		switch(collection.getNucleusType()){
-
-			case PIG_SPERM:
-				calculateOffsetsInPigSpermNuclei();
-				break;
-			case RODENT_SPERM:
-				calculateOffsetsInRodentSpermNuclei();
-				break;
-			default:
-				calculateOffsetsInRoundNuclei();
-				break;
-		}
-	}
+//	public void calculateOPOffsets() throws Exception {
+//
+//		switch(collection.getNucleusType()){
+//
+//			case PIG_SPERM:
+////				calculateOffsetsInPigSpermNuclei();
+//				break;
+//			case RODENT_SPERM:
+////				calculateOffsetsInRodentSpermNuclei();
+//				break;
+//			default:
+////				calculateOffsetsInRoundNuclei();
+//				break;
+//		}
+//	}
 	
 	/**
 	 * Offset the position of top and bottom vertical points in each nucleus
 	 * @throws Exception
 	 */
-	public void calculateVerticals()  throws Exception {
-		switch(collection.getNucleusType()){
-		case RODENT_SPERM:
-			assignTopAndBottomVerticalsToMouseViaOffsetting();
-			break;
-		default:
-			break;
-		}
-	}
+//	public void calculateVerticals()  throws Exception {
+//		switch(collection.getNucleusType()){
+//		case RODENT_SPERM:
+////			assignTopAndBottomVerticalsToMouseViaOffsetting();
+//			break;
+//		default:
+//			break;
+//		}
+//	}
 	
 	/**
 	 * Use the proportional segment method to update top and bottom vertical positions
