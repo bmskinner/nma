@@ -7,7 +7,7 @@ import components.generic.ProfileType;
 
 /**
  * A collection of rules that can be followed to
- * identify a feature in a proflile. Rules will be applied
+ * identify a feature in a profile. Rules will be applied
  * sequentially: if rule n limits indexes, rule n+1 will only
  * be applied to those remaining indexes
  * @author bms41

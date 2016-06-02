@@ -55,6 +55,7 @@ import analysis.NucleusStatisticFetchingTask;
 import analysis.ProfileManager;
 import analysis.SegmentStatisticFetchingTask;
 import analysis.SignalManager;
+import analysis.profiles.RuleSetCollection;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
@@ -73,7 +74,6 @@ public class CellCollection implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	// TODO: this needs reworking
 	private final UUID 	uuid;			// the collection id
 	
 	private File 	    folder; 		// the source of the nuclei
@@ -97,6 +97,9 @@ public class CellCollection implements Serializable {
 	private Map<UUID, Cell> mappedCollection  = new HashMap<UUID, Cell>();	// store all the nuclei analysed
 	
 	private transient boolean isRefolding = false;
+	
+	// TODO: for version 1.13+, make non transient
+	private transient RuleSetCollection ruleSets = new RuleSetCollection();
 
 	/**
 	 * Constructor.
@@ -925,10 +928,21 @@ public class CellCollection implements Serializable {
 	  return false;
   }
   
+  /**
+   * Get the RuleSetCollection with the index finding rules for this nucleus type
+   * @return
+   */
+  public RuleSetCollection getRuleSetCollection(){
+	  return this.ruleSets;
+  }
+
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-	    in.defaultReadObject();
-	    isRefolding = false;
-	}
+	  in.defaultReadObject();
+	  isRefolding = false;
+
+	  ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType); 
+  }
+  
   
   /**
    * Store plottable statistics for the collection
