@@ -1,5 +1,8 @@
 package analysis.profiles;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * An instruction for finding an index in a profile
@@ -8,35 +11,48 @@ package analysis.profiles;
  */
 public class Rule {
 
-	private RuleType type;
-	private double   value;
+	final private RuleType type;
+	final private List<Double> values = new ArrayList<Double>(); // spare field
 
 	public Rule(RuleType type, double value){
 
 		this.type = type;
-		this.value = value;
+		this.values.add(value);
 	}
 
 	public Rule(RuleType type, boolean value){
 
 		this.type = type;
-		this.value = value ? 1d : 0d;
+		double v = value ? 1d : 0d;
+		this.values.add(v);
 	} 
+	
+	public void addValue(double d){
+		values.add(d);
+	}
 
+	/**
+	 * Get the first value in the rule
+	 * @return
+	 */
 	public double getValue(){
-		return value;
+		return values.get(0);
+	}
+	
+	public double getValue(int index){
+		return values.get(index);
 	}
 
 	public boolean getBooleanValue(){
-		if(value==1d){
+		return getBooleanValue(0);
+	}
+	
+	public boolean getBooleanValue(int index){
+		if(values.get(index)==1d){
 			return true;
 		} else {
 			return false;
 		}
-	}
-
-	public int getIntValue(){
-		return (int) value;
 	}
 	
 	public RuleType getType(){
@@ -44,7 +60,12 @@ public class Rule {
 	}
 	
 	public String toString(){
-		return type+" : "+value;
+		StringBuilder b = new StringBuilder();
+		b.append(type + " : ");
+		for(Double d : values){
+			b.append(d+" : ");
+		}
+		return b.toString();
 	}
 	
 	/**
@@ -64,7 +85,12 @@ public class Rule {
 		VALUE_IS_MORE_THAN,
 		
 		INDEX_IS_LESS_THAN,
-		INDEX_IS_MORE_THAN;
+		INDEX_IS_MORE_THAN,
+		
+		IS_CONSTANT_REGION,
+		
+		FIRST_TRUE,
+		LAST_TRUE;
 
 	}
 }

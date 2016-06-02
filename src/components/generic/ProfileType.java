@@ -21,10 +21,10 @@ package components.generic;
 import stats.StatisticDimension;
 
 public enum ProfileType { 
-	  REGULAR (       "Angle profile"          , "Angle"              , StatisticDimension.ANGLE), 
-	  FRANKEN (       "Franken profile"        , "Angle"              , StatisticDimension.ANGLE),
-	  DISTANCE(       "Distance profile"       , "Distance across CoM", StatisticDimension.LENGTH),
-	  SINGLE_DISTANCE("Single distance profile", "Distance from CoM"  , StatisticDimension.LENGTH);
+	  REGULAR (       "Angle profile"      , "Angle"              , StatisticDimension.ANGLE), 
+	  FRANKEN (       "Franken profile"    , "Angle"              , StatisticDimension.ANGLE),
+	  DISTANCE(       "Diameter profile"   , "Distance across CoM", StatisticDimension.LENGTH),
+	  SINGLE_DISTANCE("Radius profile"     , "Distance from CoM"  , StatisticDimension.LENGTH);
 	  
 	  private String name;
 	  private String label;

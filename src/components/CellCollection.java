@@ -132,6 +132,8 @@ public class CellCollection implements Serializable {
 			profileCollections.put(type, new ProfileCollection());
 		}
 		
+		ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType); 
+		
 	}
   
   /**

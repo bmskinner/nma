@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import analysis.profiles.ProfileIndexFinder;
+import analysis.profiles.RuleSet;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
 import utility.Utils;
@@ -323,8 +325,15 @@ public class RodentSpermNucleus extends SpermNucleus {
 	@Override
 	public void findPointsAroundBorder() throws Exception{
 
+		
+		RuleSet rpSet = RuleSet.mouseSpermRPRuleSet();
+		Profile p     = this.getProfile(rpSet.getType());
+		ProfileIndexFinder f = new ProfileIndexFinder();
+		int tipIndex = f.identifyIndex(p, rpSet);
+		
+		
 		// find tip - use the least angle method
-		int tipIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
+//		int tipIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
 		setBorderTag(BorderTag.REFERENCE_POINT, tipIndex);
 
 		// decide if the profile is right or left handed; flip if needed

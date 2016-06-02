@@ -43,6 +43,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import analysis.profiles.ProfileIndexFinder;
+import analysis.profiles.RuleSet;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import stats.SignalStatistic;
@@ -182,10 +184,15 @@ public class RoundNucleus extends AbstractCellularComponent
 	*  the head/tail axis.
 	*/
 	public void findPointsAroundBorder() throws Exception{
-
-		int rpIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
 		
-		// Make the reference point at the widest axis
+		RuleSet rpSet = RuleSet.roundRPRuleSet();
+		Profile p = this.getProfile(rpSet.getType());
+		ProfileIndexFinder f = new ProfileIndexFinder();
+		int rpIndex = f.identifyIndex(p, rpSet);
+
+//		int rpIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
+//		
+//		// Make the reference point at the widest axis
 		setBorderTag(BorderTag.REFERENCE_POINT, rpIndex);
 				
 		setBorderTag(BorderTag.ORIENTATION_POINT, rpIndex);
@@ -997,7 +1004,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		-----------------------
 	*/
 
-	public SegmentedProfile getProfile(ProfileType type) throws Exception {
+	public SegmentedProfile getProfile(ProfileType type) {
 		if(this.hasProfile(type)){
 			return new SegmentedProfile(this.profileMap.get(type));
 		} else {
@@ -1017,7 +1024,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * @see no.nuclei.Nucleus#getAngleProfile(java.lang.String)
 	 * Returns a copy
 	 */
-	public SegmentedProfile getProfile(ProfileType type, BorderTag tag) throws Exception{
+	public SegmentedProfile getProfile(ProfileType type, BorderTag tag){
 		
 		// fetch the index of the pointType (the new zero)
 		int pointIndex = this.borderTags.get(tag);

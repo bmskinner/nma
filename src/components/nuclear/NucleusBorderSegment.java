@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import utility.ProfileException;
 import logging.Loggable;
 import components.AbstractCellularComponent;
 
@@ -799,7 +800,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 	 * @param list
 	 * @throws Exception 
 	 */
-	public static void linkSegments(List<NucleusBorderSegment> list) throws Exception{
+	public static void linkSegments(List<NucleusBorderSegment> list) throws ProfileException {
 		if(list==null || list.isEmpty() ){ // || list.size()==1
 			throw new IllegalArgumentException("List of segments is null, empty or one");
 		}
@@ -838,7 +839,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 
 			boolean ok = firstSegment.update(lastSegment.getEndIndex(), firstSegment.getEndIndex());
 			if(!ok){
-				throw new Exception("Error fitting final segment: "+firstSegment.getLastFailReason());
+				throw new ProfileException("Error fitting final segment: "+firstSegment.getLastFailReason());
 			}
 
 			lastSegment.setNextSegment(firstSegment); // ensure they match up at the end
@@ -868,11 +869,8 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 	 * @return a new list of segments
 	 * @throws Exception 
 	 */
-	public static List<NucleusBorderSegment> nudge(List<NucleusBorderSegment> list, int value) throws Exception{
+	public static List<NucleusBorderSegment> nudge(List<NucleusBorderSegment> list, int value)  {
 		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
-		
-//		IJ.log("Nudging list:");
-//		IJ.log(NucleusBorderSegment.toString(list));
 		
 		for(NucleusBorderSegment segment : list){
 			
@@ -906,7 +904,11 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 			result.add( newSeg );
 		}
 		
-		linkSegments(result);
+		try {
+			linkSegments(result);
+		} catch (ProfileException e) {
+			IJ.log("Error linking segments");
+		}
 		
 		return result;
 	}
@@ -919,7 +921,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 	 * @return
 	 * @throws Exception
 	 */
-	private static List<NucleusBorderSegment> nudgeUnlinked(List<NucleusBorderSegment> list, int value) throws Exception{
+	private static List<NucleusBorderSegment> nudgeUnlinked(List<NucleusBorderSegment> list, int value) {
 		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
 		
 		for(NucleusBorderSegment segment : list){
@@ -928,28 +930,18 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 					AbstractCellularComponent.wrapIndex(segment.getEndIndex()+value, segment.getTotalLength()), 
 					segment.getTotalLength(),
 					segment.getID());
-			
-//			newSeg.setName(segment.getName());
-			
+						
 			
 			// adjust merge sources also and readd
 			if(segment.hasMergeSources()){
 				
-//				IJ.log("Nudging merge sources for "+segment.getName());
-//				
+
 				List<NucleusBorderSegment> adjustedMergeSources = nudgeUnlinked(segment.getMergeSources(), value);
 				for(NucleusBorderSegment newMergeSource : adjustedMergeSources){
 					newSeg.addMergeSource(newMergeSource);
 				}
 				
-//				for(NucleusBorderSegment oldMergeSource : segment.getMergeSources()){
-//					NucleusBorderSegment newMergeSource = new NucleusBorderSegment(AbstractCellularComponent.wrapIndex(oldMergeSource.getStartIndex()+value, oldMergeSource.getTotalLength()), 
-//							AbstractCellularComponent.wrapIndex(oldMergeSource.getEndIndex()+value, oldMergeSource.getTotalLength()), 
-//							oldMergeSource.getTotalLength() );
-//					
-//					newMergeSource.setName(oldMergeSource.getName());
-//					newSeg.addMergeSource(newMergeSource);
-//				}
+
 			}
 			
 			result.add( newSeg );
@@ -963,7 +955,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 	 * @return a new list
 	 * @throws Exception 
 	 */
-	public static List<NucleusBorderSegment> copy(List<NucleusBorderSegment> list) throws Exception{
+	public static List<NucleusBorderSegment> copy(List<NucleusBorderSegment> list) throws ProfileException{
 		
 		if(list==null || list.isEmpty()){
 			throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");

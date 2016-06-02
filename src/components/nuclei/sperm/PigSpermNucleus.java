@@ -27,6 +27,8 @@ import ij.gui.Roi;
 
 import java.io.File;
 
+import analysis.profiles.ProfileIndexFinder;
+import analysis.profiles.RuleSet;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
 import components.generic.Profile;
@@ -113,8 +115,13 @@ public class PigSpermNucleus
   */
     @Override
     public void findPointsAroundBorder() throws Exception{
+    	
+    	RuleSet rpSet = RuleSet.pigSpermRPRuleSet();
+		Profile p     = this.getProfile(rpSet.getType());
+		ProfileIndexFinder f = new ProfileIndexFinder();
+		int rpIndex = f.identifyIndex(p, rpSet);
 
-    	int rpIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
+//    	int rpIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
     	setBorderTag(BorderTag.REFERENCE_POINT, rpIndex);
     	
     	

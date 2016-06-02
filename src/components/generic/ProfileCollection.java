@@ -399,7 +399,7 @@ public class ProfileCollection implements Serializable {
 	 * @param length the length of the aggregate
 	 * @throws Exception 
 	 */
-	public void createProfileAggregate(CellCollection collection, ProfileType type, int length) throws Exception{
+	public void createProfileAggregate(CellCollection collection, ProfileType type, int length) {
 		if(length<0){
 			throw new IllegalArgumentException("Requested length is negative");
 		}
@@ -434,7 +434,7 @@ public class ProfileCollection implements Serializable {
 	 * @param collection the Cellcollection
 	 * @throws Exception 
 	 */
-	public void createProfileAggregate(CellCollection collection, ProfileType type) throws Exception{
+	public void createProfileAggregate(CellCollection collection, ProfileType type) {
 		
 		createProfileAggregate(collection, type, (int)collection.getMedianArrayLength());
 

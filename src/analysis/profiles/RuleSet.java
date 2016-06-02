@@ -32,6 +32,10 @@ public class RuleSet {
 		return rules;
 	}
 	
+	public ProfileType getType(){
+		return type;
+	}
+	
 	public String toString(){
 		StringBuilder b = new StringBuilder();
 		b.append(type+"\n");
@@ -75,6 +79,36 @@ public class RuleSet {
 			.isMinimum()
 			.build();
 		
+	}
+	
+	/**
+	 * Create a RuleSet that describes how to find the top vertical in 
+	 * mouse sperm nuclear profiles
+	 * @return
+	 */
+	public static RuleSet mouseSpermTVRuleSet(){
+		
+		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.REGULAR);
+		
+		return builder
+			.isConstantRegionAtValue(180, 10, 2)
+			.isFirstIndexInRegion()
+			.build();
+	}
+	
+	/**
+	 * Create a RuleSet that describes how to find the bottom 
+	 * vertical in mouse sperm nuclear profiles
+	 * @return
+	 */
+	public static RuleSet mouseSpermBVRuleSet(){
+		
+		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.REGULAR);
+		
+		return builder
+			.isConstantRegionAtValue(180, 10, 2)
+			.isLastIndexInRegion()
+			.build();
 	}
 	
 	/**

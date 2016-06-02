@@ -263,7 +263,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public SegmentedProfile getProfile(ProfileType type) throws Exception;
+	public SegmentedProfile getProfile(ProfileType type) ;
 	
 	/**
 	 * Get a copy of the angle profile offset to start at the given point
@@ -272,7 +272,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @return a copy of the segmented profile
 	 * @throws Exception 
 	 */
-	public SegmentedProfile getProfile(ProfileType type, BorderTag tag) throws Exception;
+	public SegmentedProfile getProfile(ProfileType type, BorderTag tag);
 	
 		
 	/**

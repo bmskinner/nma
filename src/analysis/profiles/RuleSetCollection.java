@@ -96,6 +96,8 @@ public class RuleSetCollection {
 		
 		r.addRuleSet(BorderTag.REFERENCE_POINT,   RuleSet.mouseSpermRPRuleSet());
 		r.addRuleSet(BorderTag.ORIENTATION_POINT, RuleSet.mouseSpermOPRuleSet());
+		r.addRuleSet(BorderTag.TOP_VERTICAL,      RuleSet.mouseSpermTVRuleSet());
+		r.addRuleSet(BorderTag.BOTTOM_VERTICAL,   RuleSet.mouseSpermBVRuleSet());
 		return r;
 	}
 	

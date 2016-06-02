@@ -635,7 +635,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * Create a chart of the variability in the interquartile ranges across the angle profiles of the given datasets
 	 * @param list
 	 * @param borderTag
-	 * @param type
+	 * @param data.type
 	 * @return
 	 * @throws Exception
 	 */

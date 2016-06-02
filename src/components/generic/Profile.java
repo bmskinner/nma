@@ -298,7 +298,7 @@ public class Profile implements Serializable, Loggable {
 	 * @param profile2 the profile to compare
 	 * @return a new profile with the length of the longest input profile
 	 */
-	private Profile equaliseLengths(Profile profile1, Profile profile2) throws Exception {
+	private Profile equaliseLengths(Profile profile1, Profile profile2) {
 		if(profile1==null || profile2==null){
 			throw new IllegalArgumentException("Input profile is null when equilising lengths");
 		}
@@ -322,7 +322,7 @@ public class Profile implements Serializable, Loggable {
 	 * @param testProfile the profile to compare to 
 	 * @return the sum-of-squares difference
 	 */
-	public double absoluteSquareDifference(Profile testProfile) throws Exception {
+	public double absoluteSquareDifference(Profile testProfile) {
 
 		if(testProfile==null){
 			throw new IllegalArgumentException("Test profile is null");
@@ -416,7 +416,7 @@ public class Profile implements Serializable, Loggable {
 	 * @return a new offset Profile
 	 * @throws Exception 
 	 */
-	public Profile offset(int j) throws Exception{
+	public Profile offset(int j) {
 		double[] newArray = new double[this.size()];
 		for(int i=0;i<this.size();i++){
 			newArray[i] = this.array[ AbstractCellularComponent.wrapIndex( i+j , this.size() ) ];
@@ -487,11 +487,10 @@ public class Profile implements Serializable, Loggable {
    * @return an interpolated profile
  * @throws Exception 
    */
-  public Profile interpolate(int newLength) throws Exception {
+  public Profile interpolate(int newLength) {
 
     if(newLength < this.size()){
-    	System.out.println("Interpolating to a smaller array!");
-//       throw new Exception("Cannot interpolate to a smaller array!");
+    	fine("Interpolating to a smaller array!");
     }
     
     double[] newArray = new double[newLength];
@@ -578,7 +577,7 @@ public class Profile implements Serializable, Loggable {
     along it one index at a time. Find the point of least difference, 
     and return this offset. Returns the positive offset to this profile
    */
-  public int getSlidingWindowOffset(Profile testProfile) throws Exception {
+  public int getSlidingWindowOffset(Profile testProfile) {
 
 	  double lowestScore = this.absoluteSquareDifference(testProfile);
 	  int index = 0;

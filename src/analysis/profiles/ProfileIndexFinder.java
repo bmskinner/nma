@@ -1,8 +1,12 @@
 package analysis.profiles;
 
+import java.util.List;
+
 import analysis.profiles.Rule.RuleType;
 import components.generic.BooleanProfile;
+import components.generic.BorderTag;
 import components.generic.Profile;
+import components.generic.ProfileType;
 import logging.Loggable;
 
 /**
@@ -69,6 +73,33 @@ public class ProfileIndexFinder implements Loggable {
 	}
 	
 	/**
+	 * Use the provided RuleSets to identify an index within a 
+	 * profile. Returns the first matching index in the
+	 * profile. On error or no hit, return -1
+	 * @param p the profile
+	 * @param r the ruleset to use for identification
+	 * @return
+	 */
+	public int identifyIndex(final Profile p, final List<RuleSet> list){
+		
+//		TODO: RuleSets can apply to different profileTypes. How to handle this?
+		BooleanProfile indexes = new BooleanProfile(p, true);
+		
+		for(RuleSet r : list){
+			BooleanProfile matchingIndexes = getMatchingIndexes(p, r);
+			indexes = indexes.and(matchingIndexes);
+		}
+				
+		for(int i=0;i<p.size();i++){
+			
+			if(indexes.get(i)){
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	/**
 	 * Test a profile for the applicability of a ruleset
 	 * @param p
 	 * @param r
@@ -98,9 +129,9 @@ public class ProfileIndexFinder implements Loggable {
 		switch(type){
 		
 			case IS_LOCAL_MINIMUM:
-				return findLocalMinima(p, r.getBooleanValue());
+				return findLocalMinima(p, r.getBooleanValue(), r.getValue(1));
 			case IS_LOCAL_MAXIMUM:
-				return findLocalMaxima(p, r.getBooleanValue());
+				return findLocalMaxima(p, r.getBooleanValue(), r.getValue(1));
 				
 			case IS_MINIMUM:
 				return findMinimum(p, limits);
@@ -117,6 +148,14 @@ public class ProfileIndexFinder implements Loggable {
 			case VALUE_IS_MORE_THAN:
 				return findValueMoreThan(p, r.getValue());
 				
+			case IS_CONSTANT_REGION:
+				return findConstantRegion(p, r.getValue(0), r.getValue(1), r.getValue(2));
+				
+			case FIRST_TRUE:
+				return findFirstTrue(p, limits);	
+			case LAST_TRUE:
+				return findLastTrue(p, limits);	
+				
 			default:
 				return new BooleanProfile(p);
 		
@@ -125,14 +164,79 @@ public class ProfileIndexFinder implements Loggable {
 	}
 	
 	/**
-	 * Find local minima within the profile.
+	 * Find constant regions within the profile.
 	 * @param p the profile to test
 	 * @param include if false, will find indexes that are NOT local minima
 	 * @return
 	 */
-	private BooleanProfile findLocalMinima(final Profile p, boolean include){ 
+	private BooleanProfile findConstantRegion(final Profile p, final double value, final double window, final double epsilon){ 
 		
-		BooleanProfile result = p.getLocalMinima(5); // hard code the smoothing window size for now
+		BooleanProfile result = new BooleanProfile(p); // hard code the smoothing window size for now
+		
+
+	    int[] verticalPoints = p.getConsistentRegionBounds(value, epsilon, (int) window);
+	    if(verticalPoints[0]!=-1 && verticalPoints[1]!=-1){
+	    	
+	    	for(int i=verticalPoints[0]; i<=verticalPoints[1]; i++){
+	    		result.set(i, true);
+	    	}
+
+	    }
+	
+		return result;
+	}
+	
+	/**
+	 * Find the first true value in a BooleanProfile
+	 * @param p
+	 * @return
+	 */
+	private BooleanProfile findFirstTrue(final Profile p, final BooleanProfile b){
+		
+		BooleanProfile result = new BooleanProfile(p); // hard code the smoothing window size for now
+		
+		for(int i=0;i<p.size();i++){
+			if(b.get(i)){
+				result.set(i, true);
+				return result;
+			}
+		}	
+		return result;
+	}
+	
+	/**
+	 * Find the last true value in a BooleanProfile
+	 * @param p
+	 * @return
+	 */
+	private BooleanProfile findLastTrue(final Profile p, final BooleanProfile b){
+		
+		BooleanProfile result = new BooleanProfile(p); // hard code the smoothing window size for now
+		
+		int maxTrueIndex = -1;
+		for(int i=0;i<p.size();i++){
+			if(b.get(i)){
+				maxTrueIndex=i;
+				
+			}
+		}	
+		
+		if(maxTrueIndex>-1){
+			result.set(maxTrueIndex, true);
+		}
+		return result;
+	}
+	
+	/**
+	 * Find local minima within the profile.
+	 * @param p the profile to test
+	 * @param include if false, will find indexes that are NOT local minima
+	 * @param window the size of the smoothing window
+	 * @return
+	 */
+	private BooleanProfile findLocalMinima(final Profile p, boolean include, double window){ 
+		
+		BooleanProfile result = p.getLocalMinima((int) window); // hard code the smoothing window size for now
 		
 		if( ! include){
 			result = result.invert();
@@ -144,11 +248,12 @@ public class ProfileIndexFinder implements Loggable {
 	 * Find local maxima within the profile.
 	 * @param p the profile to test
 	 * @param include if false, will find indexes that are NOT local maxima
+	 * @param window the size of the smoothing window
 	 * @return
 	 */
-	private BooleanProfile findLocalMaxima(final Profile p, boolean include){ 
+	private BooleanProfile findLocalMaxima(final Profile p, boolean include, double window){ 
 		
-		BooleanProfile result = p.getLocalMaxima(5); // hard code the smoothing window size for now
+		BooleanProfile result = p.getLocalMaxima((int) window); // hard code the smoothing window size for now
 		
 		if( ! include){
 			result = result.invert();

@@ -50,7 +50,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @param p the profile
 	 * @param segments the list of segments to use
 	 */
-	public SegmentedProfile(Profile p, List<NucleusBorderSegment> segments) throws Exception{		
+	public SegmentedProfile(Profile p, List<NucleusBorderSegment> segments) {		
 		super(p);
 		
 		if(segments==null || segments.isEmpty()){
@@ -64,7 +64,12 @@ public class SegmentedProfile extends Profile implements Serializable {
 							+")");
 		}
 		
-		NucleusBorderSegment.linkSegments(segments);
+		
+		try {
+			NucleusBorderSegment.linkSegments(segments);
+		} catch (ProfileException e) {
+			error("Profile error linking segments", e);
+		}
 
 		this.segments = segments;
 	}
@@ -74,7 +79,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * and segments
 	 * @param profile the segmented profile to copy
 	 */
-	public SegmentedProfile(final SegmentedProfile profile) throws Exception {
+	public SegmentedProfile(final SegmentedProfile profile) {
 		this(profile, profile.getSegments());
 	}
 	
@@ -129,8 +134,14 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * if you need to offset a profile, do it by a profile offset 
 	 * @return
 	 */
-	public List<NucleusBorderSegment> getSegments() throws Exception {
-		return NucleusBorderSegment.copy(this.segments);
+	public List<NucleusBorderSegment> getSegments() {
+		List<NucleusBorderSegment> result = null;
+		try {
+			result = NucleusBorderSegment.copy(this.segments);
+		} catch (ProfileException e) {
+			error("Error copying segments", e);
+		}
+		return result;
 	}
 	
 
@@ -544,7 +555,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * Offset the segment by the given amount. Returns a copy
 	 * of the profile.
 	 */
-	public SegmentedProfile offset(int newStartIndex) throws Exception {
+	public SegmentedProfile offset(int newStartIndex) {
 	
 		// get the basic profile with the offset applied
 		Profile offsetProfile = super.offset(newStartIndex);

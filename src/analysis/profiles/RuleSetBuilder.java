@@ -44,10 +44,12 @@ public class RuleSetBuilder implements Loggable {
 	 * @return
 	 */
 	public RuleSetBuilder isMinimum(){
-		Rule r = new Rule(RuleType.IS_MINIMUM, 1d);
+		Rule r = new Rule(RuleType.IS_MINIMUM, true);
 		rules.add(r);
 		return this;
 	}
+	
+	
 	
 	/**
 	 * Will find the highest remaining value in the profile
@@ -55,17 +57,28 @@ public class RuleSetBuilder implements Loggable {
 	 * @return
 	 */
 	public RuleSetBuilder isMaximum(){
-		Rule r = new Rule(RuleType.IS_MAXIMUM, 1d);
+		Rule r = new Rule(RuleType.IS_MAXIMUM, true);
 		rules.add(r);
 		return this;
 	}
 	
 	/**
-	 * The index must be a local minimum
+	 * The index must be a local minimum. Uses a default smoothing
+	 * window size of 5
 	 * @return
 	 */
 	public RuleSetBuilder isLocalMinimum(){
-		Rule r = new Rule(RuleType.IS_LOCAL_MINIMUM, 1d);
+		return isLocalMinimum(5);
+	}
+	
+	/**
+	 * The index must be a local minimum
+	 * @param window the smoothing window size
+	 * @return
+	 */
+	public RuleSetBuilder isLocalMinimum(double window){
+		Rule r = new Rule(RuleType.IS_LOCAL_MINIMUM, true);
+		r.addValue(window);
 		rules.add(r);
 		return this;
 	}
@@ -75,7 +88,16 @@ public class RuleSetBuilder implements Loggable {
 	 * @return
 	 */
 	public RuleSetBuilder isNotLocalMinimum(){
-		Rule r = new Rule(RuleType.IS_LOCAL_MINIMUM, 0d);
+		return isNotLocalMinimum(5);
+	}
+	
+	/**
+	 * The index must not be a local minimum
+	 * @return
+	 */
+	public RuleSetBuilder isNotLocalMinimum(double window){
+		Rule r = new Rule(RuleType.IS_LOCAL_MINIMUM, false);
+		r.addValue(window);
 		rules.add(r);
 		return this;
 	}
@@ -85,7 +107,17 @@ public class RuleSetBuilder implements Loggable {
 	 * @return
 	 */
 	public RuleSetBuilder isLocalMaximum(){
-		Rule r = new Rule(RuleType.IS_LOCAL_MAXIMUM, 1d);
+		return isLocalMaximum(5);
+	}
+	
+	/**
+	 * The index must be a local maximum
+	 * @param window the smoothing window size
+	 * @return
+	 */
+	public RuleSetBuilder isLocalMaximum(double window){
+		Rule r = new Rule(RuleType.IS_LOCAL_MAXIMUM, true);
+		r.addValue(window);
 		rules.add(r);
 		return this;
 	}
@@ -95,7 +127,18 @@ public class RuleSetBuilder implements Loggable {
 	 * @return
 	 */
 	public RuleSetBuilder isNotLocalMaximum(){
-		Rule r = new Rule(RuleType.IS_LOCAL_MAXIMUM, 0d);
+		Rule r = new Rule(RuleType.IS_LOCAL_MAXIMUM, false);
+		rules.add(r);
+		return isNotLocalMaximum(5);
+	}
+	
+	/**
+	 * The index must not be a local maximum
+	 * @return
+	 */
+	public RuleSetBuilder isNotLocalMaximum(double window){
+		Rule r = new Rule(RuleType.IS_LOCAL_MINIMUM, false);
+		r.addValue(window);
 		rules.add(r);
 		return this;
 	}
@@ -154,6 +197,46 @@ public class RuleSetBuilder implements Loggable {
 		return this;
 	}
 	
+	/**
+	 * Detects a region of constant value
+	 * @param value the value to remain at
+	 * @param window the minimum length of the region
+	 * @param epsilon the maximum variation from the value
+	 * @return
+	 */
+	public RuleSetBuilder isConstantRegionAtValue(final double value, final double window, final double epsilon){
+
+		Rule r = new Rule(RuleType.IS_CONSTANT_REGION, value);
+		r.addValue(window);
+		r.addValue(epsilon);
+		rules.add(r);
+		return this;
+	}
+	
+	
+	/**
+	 * For searching boolean profiles
+	 * @param d
+	 * @return
+	 */
+	public RuleSetBuilder isFirstIndexInRegion(){
+
+		Rule r = new Rule(RuleType.FIRST_TRUE, 1d);
+		rules.add(r);
+		return this;
+	}
+	
+	/**
+	 * For searching boolean profiles
+	 * @param d
+	 * @return
+	 */
+	public RuleSetBuilder isLastIndexInRegion(){
+
+		Rule r = new Rule(RuleType.LAST_TRUE, 1d);
+		rules.add(r);
+		return this;
+	}
 	
 	/**
 	 * Create the RuleSet
