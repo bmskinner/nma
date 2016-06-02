@@ -1,4 +1,4 @@
-package analysis.nucleus;
+package analysis.profiles;
 
 import java.util.UUID;
 

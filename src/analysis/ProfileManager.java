@@ -11,7 +11,8 @@ import java.util.UUID;
 
 
 
-import analysis.nucleus.ProfileOffsetter;
+
+import analysis.profiles.ProfileOffsetter;
 import logging.Loggable;
 //import analysis.nucleus.DatasetSegmenter.SegmentFitter;
 import utility.Constants;

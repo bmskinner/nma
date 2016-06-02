@@ -24,13 +24,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.logging.Level;
+
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.nuclear.NucleusType;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.nucleus.ProfileFeatureFinder;
-import analysis.nucleus.ProfileOffsetter;
+import analysis.profiles.ProfileOffsetter;
 import utility.Constants;
 import utility.Version;
 
