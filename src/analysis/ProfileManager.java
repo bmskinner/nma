@@ -59,7 +59,6 @@ public class ProfileManager implements Loggable {
 		for(Nucleus n : collection.getNuclei()){
 
 			// returns the positive offset index of this profile which best matches the median profile
-			
 			int newIndex = n.getProfile(type).getSlidingWindowOffset(median);
 			n.setBorderTag(tag, newIndex);			
 		}
@@ -157,6 +156,10 @@ public class ProfileManager implements Loggable {
 
 				offsetNucleusProfiles(BorderTag.BOTTOM_VERTICAL, ProfileType.REGULAR, btmMedian);
 				
+				for(Nucleus n : collection.getNuclei()){
+					n.updateVerticallyRotatedNucleus();
+				}
+				
 				fine("Updated nuclei");
 			} else {
 				fine("Cannot find TV or BV in median profile");
@@ -207,64 +210,32 @@ public class ProfileManager implements Loggable {
 		collection.getProfileCollection(ProfileType.REGULAR)
 			.addOffset(tag, index);
 		
+		// Use the median profile to set the tag in the nuclei
+
+		Profile median = collection.getProfileCollection(ProfileType.REGULAR)
+				.getProfile(tag, Constants.MEDIAN); 
+		
+		offsetNucleusProfiles(tag, ProfileType.REGULAR, median);
 
 
-		/* 
-		 * Set the border tag in the individual nuclei
-		 * using the segment proportion method
+		/*
+		 * Set the border tag in the consensus median profile 
 		 */
-		
-		ProfileOffsetter offsetter = new ProfileOffsetter(collection);
-		try {
-			offsetter.assignBorderTagToNucleiViaFrankenProfile(tag);
-			
-			for(Nucleus n : collection.getNuclei()){
-				n.updateVerticallyRotatedNucleus();
+		if(collection.hasConsensusNucleus()){
+			Nucleus n = collection.getConsensusNucleus();
+			int oldNIndex = n.getBorderIndex(tag);
+			int newIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
+			n.setBorderTag(tag, newIndex);
+
+			if(n.hasBorderTag(BorderTag.TOP_VERTICAL) && n.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+				n.alignPointsOnVertical(n.getBorderTag(BorderTag.TOP_VERTICAL), n.getBorderTag(BorderTag.BOTTOM_VERTICAL));
+			} else {
+				n.rotatePointToBottom(n.getBorderTag(BorderTag.ORIENTATION_POINT));
 			}
-			
-		} catch (Exception e1) {
-			error("Error assigning tag", e1);
+			//				
+			finest("Set border tag in consensus to "+newIndex+ " from "+oldNIndex);
 		}
-		
-		
-		
-		try{
-			
-			Profile median = collection.getProfileCollection(ProfileType.REGULAR)
-					.getProfile(tag, Constants.MEDIAN); 
 
-			
-			
-			
-			/*
-			 * Set the border tag in the consensus median profile 
-			 */
-			if(collection.hasConsensusNucleus()){
-				Nucleus n = collection.getConsensusNucleus();
-				int oldNIndex = n.getBorderIndex(tag);
-				int newIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
-				n.setBorderTag(tag, newIndex);
-				
-				if(n.hasBorderTag(BorderTag.TOP_VERTICAL) && n.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
-					n.alignPointsOnVertical(n.getBorderTag(BorderTag.TOP_VERTICAL), n.getBorderTag(BorderTag.BOTTOM_VERTICAL));
-				} else {
-					n.rotatePointToBottom(n.getBorderTag(BorderTag.ORIENTATION_POINT));
-				}
-//				
-				finest("Set border tag in consensus to "+newIndex+ " from "+oldNIndex);
-			}
-
-		} catch (Exception e){
-
-			warn("Error updating "+tag+": resetting");
-			
-			collection.getProfileCollection(ProfileType.REGULAR)
-			.addOffset(tag, oldIndex);
-			
-			warn("Individual nuclei not reset");
-						
-			return;
-		}
 	}
 	
 	/**
@@ -372,11 +343,7 @@ public class ProfileManager implements Loggable {
 
 	}
 	
-	
-	
-	private void updateRPIndex(int index){
-		
-	}
+
 	
 	
 	/**
