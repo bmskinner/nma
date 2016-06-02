@@ -4,9 +4,7 @@ import java.util.List;
 
 import analysis.profiles.Rule.RuleType;
 import components.generic.BooleanProfile;
-import components.generic.BorderTag;
 import components.generic.Profile;
-import components.generic.ProfileType;
 import logging.Loggable;
 
 /**
@@ -166,7 +164,9 @@ public class ProfileIndexFinder implements Loggable {
 	/**
 	 * Find constant regions within the profile.
 	 * @param p the profile to test
-	 * @param include if false, will find indexes that are NOT local minima
+	 * @param value the value to remain at
+	 * @param window the window size in indexes
+	 * @param epsilon the maximum distance from value allowed
 	 * @return
 	 */
 	private BooleanProfile findConstantRegion(final Profile p, final double value, final double window, final double epsilon){ 

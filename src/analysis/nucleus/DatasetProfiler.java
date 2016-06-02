@@ -240,7 +240,11 @@ public class DatasetProfiler extends AnalysisWorker {
 
 					fine(tag+" in median is located at index "+index);
 					
-					offsetNucleusProfiles(tag, ProfileType.REGULAR, median);
+					// Create a median from the current reference points in the nuclei
+					Profile tagMedian = collection.getProfileCollection(ProfileType.REGULAR)
+							.getProfile(tag, Constants.MEDIAN);
+					
+					offsetNucleusProfiles(tag, ProfileType.REGULAR, tagMedian);
 					fine("Assigned offset in nucleus profiles for "+tag);
 					
 				} else {
