@@ -163,18 +163,40 @@ public class Profile implements Serializable, Loggable {
 	 * Get the index of the maximum value in the profile
 	 * If there are multiple values at maximum, this returns the
 	 * first only
+	 * @param limits indexes that should be included or excluded from the search
 	 * @return the index
 	 */
-	public int getIndexOfMax(){
+	public int getIndexOfMax(BooleanProfile limits){
 		double max = 0;
 		int maxIndex = 0;
 		for(int i=0; i<array.length;i++){
-			if(array[i]>max){
+			if( limits.get(i) && array[i]>max){
 				max = array[i];
 				maxIndex = i;
 			}
 		}
 		return maxIndex;
+	}
+	
+	/**
+	 * Get the index of the maximum value in the profile
+	 * If there are multiple values at maximum, this returns the
+	 * first only
+	 * @return the index
+	 */
+	public int getIndexOfMax(){
+		
+		BooleanProfile b = new BooleanProfile(this, true);
+		return getIndexOfMax(b);
+//		double max = 0;
+//		int maxIndex = 0;
+//		for(int i=0; i<array.length;i++){
+//			if(array[i]>max){
+//				max = array[i];
+//				maxIndex = i;
+//			}
+//		}
+//		return maxIndex;
 	}
 
 	/**
@@ -194,18 +216,41 @@ public class Profile implements Serializable, Loggable {
 
 	/**
 	 * Get the index of the minimum value in the profile
+	 * @param limits indexes that should be included or excluded from the search
 	 * @return the index
 	 */
-	public int getIndexOfMin(){
+	public int getIndexOfMin(BooleanProfile limits){
 		double min = this.getMax();
+		
 		int minIndex = 0;
+		
 		for(int i=0; i<array.length;i++){
-			if(array[i]<min){
+			if( limits.get(i) && array[i]<min){
 				min = array[i];
 				minIndex = i;
 			}
 		}
+		
 		return minIndex;
+	}
+	
+	/**
+	 * Get the index of the minimum value in the profile
+	 * @return the index
+	 */
+	public int getIndexOfMin(){
+		
+		BooleanProfile b = new BooleanProfile(this, true);
+		return getIndexOfMin(b);
+//		double min = this.getMax();
+//		int minIndex = 0;
+//		for(int i=0; i<array.length;i++){
+//			if(array[i]<min){
+//				min = array[i];
+//				minIndex = i;
+//			}
+//		}
+//		return minIndex;
 	}
 
 	/**

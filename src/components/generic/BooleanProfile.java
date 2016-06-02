@@ -187,5 +187,20 @@ public class BooleanProfile {
 		  return new BooleanProfile(result);
 	  }
 	
+	  /**
+	   * Inverts the profile
+	   * @param profile the template
+	   * @return
+	   */
+	  public BooleanProfile invert(){
+		  boolean[] result = new boolean[this.size()];
+
+		  for (int i=0; i<array.length; i++) { 
+			  result[i] = ! array[i];
+		  }
+		  return new BooleanProfile(result);
+		  
+
+	  }
 	
 }
