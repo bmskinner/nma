@@ -27,16 +27,10 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.util.logging.Level;
-
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.ChartMouseEvent;
@@ -75,8 +69,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	
 	private int activeProfileIndex = 0;
 	
-//	private static final String STR_SET_BORDER_TAG     = "Set border tag";
-	private static final int RANGE_WINDOW = 30;
+//	private static final int RANGE_WINDOW = 10;
 	
 	public BorderTagEditingPanel() {
 		
@@ -113,8 +106,15 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 
 		    }
 
-		    public void chartMouseMoved(ChartMouseEvent e) {}
-
+		    public void chartMouseMoved(ChartMouseEvent e) {
+//		    	XYItemEntity ent = (XYItemEntity) e.getEntity();
+//		    	if(ent!=null){
+//		    		chartPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+//		    	} else {
+//		    		chartPanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+//		    	}
+		    }
+		    	
 		});
 				
 		
@@ -132,7 +132,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		rangePanel = new PositionSelectionChartPanel(rangeChart);
 		rangePanel.setPreferredSize(minimumChartSize);
 		rangePanel.addSignalChangeListener(this);
-		rangePanel.setRangeWidth(RANGE_WINDOW);
+
 		this.add(rangePanel, BorderLayout.SOUTH);
 		updateChartPanelRange();
 		

@@ -57,6 +57,10 @@ public class RectangleOverlayObject {
 		this.maxValue = maxValue;
 		this.pcs.firePropertyChange("maxValue", oldValue, maxValue);
 	}
+	
+	public double getMidValue(){
+		return (maxValue - minValue) /2;
+	}
 
 	public Stroke getStroke() {
 		return stroke;

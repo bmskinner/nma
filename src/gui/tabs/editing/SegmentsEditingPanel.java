@@ -134,9 +134,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		private static final String STR_SPLIT_SEGMENT     = "Split segment";
 		private static final String STR_SET_WINDOW_SIZE   = "Set window size";
 		private static final String STR_SHOW_WINDOW_SIZES = "Window sizes";
-		
-		private static final int RANGE_WINDOW = 10;
-		
+				
 		protected SegmentProfilePanel(){
 			super();
 			this.setLayout(new BorderLayout());
@@ -167,7 +165,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			rangePanel = new PositionSelectionChartPanel(rangeChart);
 			rangePanel.setPreferredSize(minimumChartSize);
 			rangePanel.addSignalChangeListener(this);
-			rangePanel.setRangeWidth(RANGE_WINDOW);
+
 			this.add(rangePanel, BorderLayout.SOUTH);
 			updateChartPanelRange();
 			

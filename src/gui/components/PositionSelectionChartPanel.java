@@ -20,7 +20,9 @@ import org.jfree.chart.panel.CrosshairOverlay;
 import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.general.DatasetUtilities;
 import org.jfree.ui.RectangleEdge;
+
 
 
 
@@ -41,26 +43,29 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	private List<Object> listeners = new ArrayList<Object>();
 	
 	protected Overlay overlay = null;
-	protected RectangleOverlayObject xRectangle;
+	protected RectangleOverlayObject xRectangle = null;
 
 	
 	protected volatile boolean mouseIsDown = false;
 	
 	protected volatile boolean isRunning = false;
 	
-	protected int rangeWidth = DEFAULT_RANGE_WIDTH;
+	private double rangeWidth;
+	private double rangePct = DEFAULT_RANGE_PCT;
 	
-	private static final int DEFAULT_RANGE_WIDTH = 20;
+	private static final int DEFAULT_RANGE_PCT = 10; // 10% of x-range
 			
 
 	public PositionSelectionChartPanel(final JFreeChart chart){
 		super(chart);
 		
 		this.setRangeZoomable(false);
-		this.setDomainZoomable(false);		
+		this.setDomainZoomable(false);	
+		
+		updateRangeWidth();
 
 		overlay = new RectangleOverlay();
-		xRectangle = new RectangleOverlayObject(40, 60);
+		xRectangle = new RectangleOverlayObject(0, rangeWidth);
 		((RectangleOverlay) overlay).setDomainRectangle(xRectangle);
 		
 		
@@ -71,12 +76,40 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		return xRectangle;
 	}
 	
+	@Override
+	public void setChart(final JFreeChart chart){
+		super.setChart(chart);
+		updateRangeWidth();
+		if(xRectangle!=null){
+			updateDomainRectangleLocation((int) xRectangle.getMidValue());
+		}
+	}
+	
+	private void updateRangeWidth(){
+		
+		// Get the x bounds of the plot
+		double maxX = getChart().getXYPlot().getDomainAxis().getUpperBound();
+		double minX = getChart().getXYPlot().getDomainAxis().getLowerBound();
+		
+		// Get the size of the total X range
+		double fullRange = maxX - minX;
+		
+		// Find 10% of that (in chart units)
+		rangeWidth = fullRange * (rangePct /100);
+	}
+	
 	/**
-	 * Set the width of the rectangle overlay, if present
+	 * Set the width of the rectangle overlay if present,
+	 * as a percent of the total x-range
 	 * @param i
 	 */
-	public void setRangeWidth(int i){
-		this.rangeWidth = i;
+	public void setRangePct(double i){
+		this.rangePct = i;
+		updateRangeWidth();
+		// get the current rectangle x location
+		if(xRectangle!=null){
+			updateDomainRectangleLocation((int) xRectangle.getMidValue());
+		}
 	}
 	
 	@Override
@@ -145,9 +178,8 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		ValueAxis xAxis = plot.getDomainAxis();
 		
 		double xUpper = xAxis.getUpperBound();
-		
-		
-		int halfRange = rangeWidth / 2;
+				
+		double halfRange = rangeWidth / 2;
 		
 		double xValue = xAxis.java2DToValue(x, dataArea, 
 				RectangleEdge.BOTTOM);
@@ -190,9 +222,6 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	            		 */
 	                	
 	                	int x = MouseInfo.getPointerInfo().getLocation().x - getLocationOnScreen().x;
-	                    int y = MouseInfo.getPointerInfo().getLocation().y - getLocationOnScreen().y;
-	                	
-//	        				log("Updating rectangle location: "+x+" "+y);
 	                    
 	                    // Move the box with the mouse
 	                    updateDomainRectangleLocation(x);
