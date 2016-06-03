@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
+ *  	Copyright (C) 2015, 2016 Ben Skinner
  *   
  *     This file is part of Nuclear Morphology Analysis.
  *
@@ -11,14 +11,18 @@
  *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
+ *     GNU General Public License for more details. Gluten-free. May contain 
+ *     traces of LDL asbestos. Avoid children using heavy machinery while under the
+ *     influence of alcohol.
  *
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 package analysis.profiles;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -378,123 +382,56 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	 * @return
 	 * @throws Exception
 	 */
-	private List<NucleusBorderSegment> segmentMedianProfile(CellCollection collection) throws Exception{
-		
-		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
-
-		// the reference point is always index 0, so the segments will match
-		// the profile
-		Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
-
-		ProfileSegmenter segmenter = new ProfileSegmenter(median);		
-
-		List<NucleusBorderSegment> segments = segmenter.segment();
-
-		finer("Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
-
-		segmenter = null; // clean up
-		return segments;
-	}
+//	private List<NucleusBorderSegment> segmentMedianProfile(CellCollection collection) throws Exception{
+//		
+//		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+//
+//		// the reference point is always index 0, so the segments will match
+//		// the profile
+//		Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+//		
+//		Map<BorderTag, Integer> map = new HashMap<BorderTag, Integer>();
+//		int opIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
+//		map.put(BorderTag.ORIENTATION_POINT, opIndex);
+//		
+//
+//		ProfileSegmenter segmenter = new ProfileSegmenter(median, map);		
+//
+//		List<NucleusBorderSegment> segments = segmenter.segment();
+//
+//		finer("Found "+segments.size()+" segments in regular profile");
+//
+//		segmenter = null; // clean up
+//		return segments;
+//	}
 	
 	/**
-	 * Run the segmenter on the median profile for the given point type
+	 * Use a ProfileSegmenter to segment the regular median profile of the collection starting
+	 * from the reference point 
 	 * @param collection
 	 */
 	private void createSegmentsInMedian(CellCollection collection) throws Exception {
 
 		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+	
 
-		List<NucleusBorderSegment> segments = segmentMedianProfile(collection);
+		// the reference point is always index 0, so the segments will match
+		// the profile
+		Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+		
+		Map<BorderTag, Integer> map = new HashMap<BorderTag, Integer>();
+		int opIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
+		map.put(BorderTag.ORIENTATION_POINT, opIndex);
+		
 
-		/*
-		 * Handle edge cases where the segmenter has buggered up
-		 * TODO: Check if this is still relevant
-		 */
-		if(collection.getNucleusType().equals(NucleusType.ROUND) && segments.size()==2){
+		ProfileSegmenter segmenter = new ProfileSegmenter(median, map);		
 
-			finer("Updating segment pattern to match orientation point in round nuclei");
+		List<NucleusBorderSegment> segments = segmenter.segment();
 
-			int medianOrientationIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
-			
-			finer("Orientation point is at index "+medianOrientationIndex);
-						
-			NucleusBorderSegment firstSegment = segments.get(0);
-			firstSegment.update(firstSegment.getStartIndex(), medianOrientationIndex);
-		}
+		finer("Found "+segments.size()+" segments in regular profile");
 		
 		pc.addSegments(BorderTag.REFERENCE_POINT, segments);
-		
-		/*
-		 * TODO: Find the root cause
-		 */
-		
-		if(collection.getNucleusType().equals(NucleusType.PIG_SPERM) ){
-			
-			if( ! pc.hasSegmentStartingWith(BorderTag.ORIENTATION_POINT)){
-				finer("The pig RP is at "+pc.getOffset(BorderTag.REFERENCE_POINT));
-				finer("The pig OP is at "+pc.getOffset(BorderTag.ORIENTATION_POINT));
 				
-				
-
-				int medianRPIndex = pc.getOffset(BorderTag.REFERENCE_POINT);
-				pc.addOffset(BorderTag.ORIENTATION_POINT, medianRPIndex);
-				finer("Updating OP to "+medianRPIndex);
-			}
-		}
-		
-		
-		
-		
-		/* 
-		 * If only two segments were created, the orientation point 
-		 * may not be at a segment breakpoint. 
-		 * 
-		 * Split segments appropriately so that the OP is on a boundary.
-		 * 
-		 * There should not be a problem with segment lengths here, because
-		 * a highly segmentatble profile will have a detectable tail in the 
-		 * first place.
-		 * 
-		 * 2016-05-25 There is a problem in pig nuclei. The OP does not always 
-		 * have segment boundary. We need to find the segment start closest to the
-		 * opIndex and update the segment
-		 */
-		
-		if( ! pc.hasSegmentStartingWith(BorderTag.ORIENTATION_POINT)){
-			finer("The orientation point is not at a segment boundary");
-			finer("The RP is at "+pc.getOffset(BorderTag.REFERENCE_POINT));
-			finer("The OP is at "+pc.getOffset(BorderTag.ORIENTATION_POINT));
-			int opIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
-			NucleusBorderSegment seg = pc.getSegmentContaining(opIndex);
-			
-			finest("Trying to split the segment at index "+opIndex);
-			
-			UUID newID1 = java.util.UUID.randomUUID();
-			UUID newID2 = java.util.UUID.randomUUID();
-
-			/*
-			 * This causes an error when only one segment is present in the profile.
-			 * This is because the start and end points of the segment are the same.
-			 * 
-			 * An error also occurs if a segment boundary lies too close to the opIndex 
-			 */
-			SegmentedProfile p = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);
-			
-			try{
-				p.splitSegment(seg, opIndex, newID1, newID2);
-
-				segments = p.getOrderedSegments();
-				pc.addSegments(BorderTag.REFERENCE_POINT, segments);
-			} catch (Exception e){
-				log(Level.SEVERE, "Profile:");
-				log(Level.SEVERE, p.toString());
-				log(Level.SEVERE, "Segment to split:");
-				log(Level.SEVERE, seg.toString());
-				throw e;
-			}
-			
-		}
-		
 	}
 
 	/**

@@ -1,3 +1,23 @@
+/*******************************************************************************
+ *  	Copyright (C) 2015, 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details. Gluten-free. May contain 
+ *     traces of LDL asbestos. Avoid children using heavy machinery while under the
+ *     influence of alcohol.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 package analysis.mesh;
 
 import java.util.ArrayList;
@@ -16,6 +36,25 @@ import components.generic.XYPoint;
 import components.nuclei.Nucleus;
 
 /**
+ * 
+ * The mesh should allow comparisons of equivalent points between different nuclei.
+ * 
+ * The requirement is to:
+ * 1) consistently identify points around the periphery of the nucleus
+ * 2) Translate those points to another nucleus.
+ * 
+ * The points are identified based on proportion through segments. We can
+ * be reasonably confident that segment boundaries are at equivalent biological
+ * features. Each segment is divided into points, separated by about 10 pixels.
+ * 
+ * These points around the periphery of the nucleus are used to build a skeleton for
+ * the object. The skeleton travels from the reference point through the centre of the 
+ * nucleus.
+ * 
+ * Edges are constructed between the peripheral vertices and their corresponding
+ * skeleton vertices, making a triangular mesh.
+ * 
+ * All vertices can be located in another nucleus using segment proportions.
  * @author bms41
  *
  */
@@ -37,16 +76,13 @@ public class NucleusMesh implements Loggable{
 	private List<NucleusMeshEdge> peripheralEdges  = new ArrayList<NucleusMeshEdge>();
 	
 	private Nucleus nucleus;
-	
-	private String nucleusName;
-	
+		
 	/**
 	 * Construct a mesh from the given nucleus
 	 * @param n
 	 */
 	public NucleusMesh(Nucleus n){
 		this.nucleus = n;
-		this.nucleusName = n.getNameAndNumber();
 	}
 	
 	
@@ -66,7 +102,7 @@ public class NucleusMesh implements Loggable{
 	
 	
 	public String getNucleusName() {
-		return nucleusName;
+		return  nucleus.getNameAndNumber();
 	}
 
 	
