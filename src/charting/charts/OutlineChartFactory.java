@@ -42,7 +42,7 @@ import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
 import analysis.detection.BooleanAligner;
-import analysis.nucleus.NucleusMeshBuilder.NucleusMesh;
+import analysis.mesh.NucleusMesh;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;

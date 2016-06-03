@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
+
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
@@ -75,9 +76,10 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 import org.jfree.chart.JFreeChart;
+
 import analysis.AnalysisDataset;
-import analysis.nucleus.NucleusMeshBuilder;
-import analysis.nucleus.NucleusMeshBuilder.NucleusMesh;
+import analysis.mesh.NucleusMesh;
+import analysis.mesh.NucleusMeshBuilder;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;

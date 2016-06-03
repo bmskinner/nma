@@ -22,8 +22,8 @@ import javax.swing.event.ChangeListener;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
-import analysis.nucleus.NucleusMeshBuilder;
-import analysis.nucleus.NucleusMeshBuilder.NucleusMesh;
+import analysis.mesh.NucleusMesh;
+import analysis.mesh.NucleusMeshBuilder;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.OutlineChartFactory;
 import components.nuclei.Nucleus;
