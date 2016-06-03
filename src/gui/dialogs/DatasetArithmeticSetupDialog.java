@@ -20,6 +20,7 @@ package gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -48,7 +49,7 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 	
 	public enum DatasetArithmeticOperation {
 		AND ("Cells are present in both datasets"),
-		OR ("Cells are in either dataset (this merges the datasets"), 
+		OR ("Cells are in either dataset (this merges the datasets)"), 
 		NOT ("Cells are in dataset one, but not dataset two"), 
 		XOR ("Cells are in one or other dataset, but not both datasets");
 		
@@ -70,7 +71,7 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		setSize(450, 300);
 		this.setLocationRelativeTo(null);
 		createGUI(selected, list);
-		this.pack();
+//		this.pack();
 		this.setVisible(true);
 	}
 	
@@ -99,29 +100,36 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		
 		boxOne = new DatasetSelectionPanel(list); //JComboBox<AnalysisDataset>();
 		boxTwo = new DatasetSelectionPanel(list);
-//		for(AnalysisDataset d : list){
-//			boxOne.addItem(d);
-//			boxTwo.addItem(d);
-//		}
+
 		boxOne.setSelectedDataset(selected);
 		
 		operatorBox = new JComboBox<DatasetArithmeticOperation>(DatasetArithmeticOperation.values());
 		operatorBox.setSelectedItem(DatasetArithmeticOperation.AND);
+		operatorBox.setPreferredSize(boxOne.getPreferredSize());
 		operatorBox.addActionListener(this);
 		
 		labels.add(new JLabel("Dataset one"));
 		fields.add(boxOne);
-		labels.add(new JLabel("Operation"));
-		fields.add(operatorBox);
 		
+		JPanel operatorPanel = new JPanel(new FlowLayout());
+		operatorPanel.add(operatorBox);
+		labels.add(new JLabel("Operation"));
+		fields.add(operatorPanel);
+		
+		JPanel descPanel = new JPanel(new FlowLayout());
+		descPanel.add(operatorDescription);
 		labels.add(new JLabel("Description"));
-		fields.add(operatorDescription);
+		fields.add(descPanel);
 		
 		labels.add(new JLabel("Dataset two"));
 		fields.add(boxTwo);
 		
 		this.addLabelTextRows(labels, fields, layout, panel);
 		
+		JPanel header = new JPanel(new FlowLayout());
+		header.add(new JLabel("Create a new dataset using the following rule:"));
+		
+		this.add(header, BorderLayout.NORTH);
 		this.add(panel, BorderLayout.CENTER);
 		
 		this.add(createFooter(), BorderLayout.SOUTH);
