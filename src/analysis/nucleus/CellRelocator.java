@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
-import analysis.ProfileManager;
+import analysis.profiles.ProfileManager;
 import components.Cell;
 import components.CellCollection;
 import components.CellularComponent;

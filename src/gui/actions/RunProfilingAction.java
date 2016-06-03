@@ -25,8 +25,8 @@ import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 
 import analysis.AnalysisDataset;
-import analysis.nucleus.DatasetProfiler;
-import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
+import analysis.profiles.DatasetProfiler;
+import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import gui.MainWindow;
 
 public class RunProfilingAction extends ProgressableAction {

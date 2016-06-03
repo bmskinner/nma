@@ -28,10 +28,10 @@ import components.nuclei.Nucleus;
 public abstract class AbstractStatisticFetchingTask extends RecursiveTask<double[]>{
 	
 	protected final int low, high;
-	final Nucleus[] nuclei;
+	protected final Nucleus[] nuclei;
 	public static final int THRESHOLD = 200;
-	final PlottableStatistic stat;
-	final MeasurementScale scale;
+	protected final PlottableStatistic stat;
+	protected final MeasurementScale scale;
 	
 	public AbstractStatisticFetchingTask(Nucleus[] nuclei, PlottableStatistic stat, MeasurementScale scale){
 		this(nuclei, stat, scale, 0,nuclei.length );

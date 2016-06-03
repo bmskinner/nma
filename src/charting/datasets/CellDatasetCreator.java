@@ -37,7 +37,7 @@ import org.jfree.data.xy.XYDataset;
 
 import charting.options.ChartOptions;
 import analysis.AnalysisDataset;
-import analysis.ProfileManager;
+import analysis.profiles.ProfileManager;
 import components.AbstractCellularComponent;
 import components.Cell;
 import components.generic.BorderTag;

@@ -16,15 +16,13 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package analysis.nucleus;
+package analysis.profiles;
 
 import java.util.List;
 
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
-import analysis.profiles.ProfileIndexFinder;
-import analysis.profiles.RuleSet;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.Profile;

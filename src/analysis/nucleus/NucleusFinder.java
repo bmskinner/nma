@@ -31,6 +31,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+
 import utility.Constants;
 //import utility.Logger;
 
@@ -38,8 +39,8 @@ import utility.Constants;
 import utility.StatsMap;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
-import analysis.Detector;
-import analysis.ImageFilterer;
+import analysis.detection.Detector;
+import analysis.detection.ImageFilterer;
 import components.Cell;
 import components.generic.XYPoint;
 import components.nuclear.NucleusType;

@@ -30,7 +30,7 @@ import components.CellCollection;
 import gui.MainWindow;
 import gui.dialogs.ManualCellCurator;
 import analysis.AnalysisDataset;
-import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
+import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 
 public class CurateCollectionAction extends ProgressableAction {
 

@@ -33,7 +33,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
-import analysis.ProfileManager;
+import analysis.profiles.ProfileManager;
 import stats.SegmentStatistic;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.TableOptions;

@@ -18,7 +18,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
-import analysis.ProfileManager;
+import analysis.profiles.ProfileManager;
 import stats.SegmentStatistic;
 import charting.charts.BoxplotChartFactory;
 import charting.options.ChartOptions;

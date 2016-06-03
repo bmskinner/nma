@@ -16,13 +16,13 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package analysis;
+package analysis.detection;
 
 import java.awt.image.BufferedImage;
 
 import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
-
+import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import stats.Stats;
 import ij.IJ;

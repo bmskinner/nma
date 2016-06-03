@@ -2,6 +2,8 @@ package analysis;
 
 import org.junit.Test;
 
+import analysis.detection.BooleanAligner;
+
 public class BooleanAlignerTest {
 	
 	/**

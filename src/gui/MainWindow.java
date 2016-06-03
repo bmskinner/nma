@@ -82,7 +82,7 @@ import logging.TextAreaHandler;
 import utility.Constants;
 import utility.Version;
 import analysis.AnalysisDataset;
-import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
+import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import components.generic.BorderTag;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;

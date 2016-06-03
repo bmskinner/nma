@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.NuclearSignalOptions;
-import analysis.nucleus.SignalFinder;
+import analysis.signals.SignalFinder;
 import components.CellularComponent;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;

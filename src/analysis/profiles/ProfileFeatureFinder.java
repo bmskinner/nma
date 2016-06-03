@@ -1,5 +1,6 @@
-package analysis.nucleus;
+package analysis.profiles;
 
+import analysis.nucleus.Indexable;
 import utility.Constants;
 import logging.Loggable;
 import components.AbstractCellularComponent;

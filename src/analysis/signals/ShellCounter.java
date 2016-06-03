@@ -17,7 +17,7 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package analysis.nucleus;
+package analysis.signals;
 
 import ij.IJ;
 import logging.Loggable;

@@ -1,4 +1,4 @@
-package analysis;
+package analysis.detection;
 
 import ij.IJ;
 import ij.ImagePlus;

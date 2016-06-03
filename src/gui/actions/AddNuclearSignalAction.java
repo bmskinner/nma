@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
-import analysis.nucleus.SignalDetector;
+import analysis.signals.SignalDetector;
 import components.Cell;
 import components.CellCollection;
 

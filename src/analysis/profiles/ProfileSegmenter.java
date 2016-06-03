@@ -1,4 +1,4 @@
-package analysis;
+package analysis.profiles;
 
 import java.util.ArrayList;
 import java.util.HashMap;

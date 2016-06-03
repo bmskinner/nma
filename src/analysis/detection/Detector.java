@@ -23,7 +23,7 @@
   Contains the variables for detecting
   nuclei and signals
 */  
-package analysis;
+package analysis.detection;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;

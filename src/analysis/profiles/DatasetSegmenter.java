@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package analysis.nucleus;
+package analysis.profiles;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +24,6 @@ import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
-import analysis.ProfileSegmenter;
 import analysis.ProgressEvent;
 import analysis.ProgressListener;
 import components.CellCollection;

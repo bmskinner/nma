@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package analysis;
+package analysis.profiles;
 
 
 import java.util.ArrayList;
@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinTask;
 
+import analysis.AbstractStatisticFetchingTask;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import components.generic.BorderTag;

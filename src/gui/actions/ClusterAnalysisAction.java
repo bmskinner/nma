@@ -29,8 +29,8 @@ import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
-import analysis.ProfileManager;
 import analysis.nucleus.NucleusClusterer;
+import analysis.profiles.ProfileManager;
 import components.CellCollection;
 import components.ClusterGroup;
 

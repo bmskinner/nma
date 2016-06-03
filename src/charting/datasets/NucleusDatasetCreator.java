@@ -44,7 +44,7 @@ import charting.options.ChartOptions;
 import utility.Constants;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
-import analysis.BooleanAligner;
+import analysis.detection.BooleanAligner;
 import analysis.nucleus.NucleusMeshBuilder;
 import analysis.nucleus.NucleusMeshBuilder.NucleusMesh;
 import analysis.nucleus.NucleusMeshBuilder.NucleusMeshEdge;

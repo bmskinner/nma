@@ -1,4 +1,4 @@
-package analysis.nucleus;
+package analysis.profiles;
 
 import java.util.ArrayList;
 import java.util.List;

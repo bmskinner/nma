@@ -47,9 +47,9 @@ import components.generic.XYPoint;
 import components.nuclei.Nucleus;
 //import Skeletonize3D_.Skeletonize3D_;
 import analysis.AnalysisOptions;
-import analysis.Detector;
-import analysis.ImageFilterer;
 import analysis.AnalysisOptions.CannyOptions;
+import analysis.detection.Detector;
+import analysis.detection.ImageFilterer;
 
 public class TailFinder implements Loggable {
 	

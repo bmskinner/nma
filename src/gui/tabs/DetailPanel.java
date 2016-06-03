@@ -52,7 +52,7 @@ import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import analysis.AnalysisDataset;
-import analysis.ProfileManager;
+import analysis.profiles.ProfileManager;
 
 /**
  * The DetailPanels hold chart and table caches, and track other DetailPanels

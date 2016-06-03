@@ -8,6 +8,7 @@ import ij.process.ImageProcessor;
 
 import org.junit.Test;
 
+import analysis.detection.ImageFilterer;
 import components.generic.ProfileAggregate;
 
 public class ImageFiltererTest {

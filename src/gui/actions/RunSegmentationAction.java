@@ -26,8 +26,8 @@ import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 
 import analysis.AnalysisDataset;
-import analysis.nucleus.DatasetSegmenter;
-import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
+import analysis.profiles.DatasetSegmenter;
+import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.MainWindow;
 import gui.DatasetEvent.DatasetMethod;

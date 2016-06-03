@@ -39,7 +39,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import analysis.ProfileManager;
+import analysis.profiles.ProfileManager;
 import utility.Constants;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;

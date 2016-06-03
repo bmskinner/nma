@@ -30,7 +30,7 @@ import gui.MainWindow;
 import gui.dialogs.DatasetArithmeticSetupDialog;
 import gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
 import analysis.AnalysisDataset;
-import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
+import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 
 public class DatasetArithmeticAction extends ProgressableAction {
 

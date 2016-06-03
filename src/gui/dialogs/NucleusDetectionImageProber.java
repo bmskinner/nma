@@ -25,8 +25,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import analysis.AnalysisOptions;
-import analysis.ImageFilterer;
 import analysis.AnalysisOptions.CannyOptions;
+import analysis.detection.ImageFilterer;
 import analysis.nucleus.NucleusFinder;
 import components.Cell;
 import components.CellularComponent;

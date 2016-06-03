@@ -1,4 +1,4 @@
-package analysis;
+package analysis.detection;
 
 import java.util.logging.Level;
 

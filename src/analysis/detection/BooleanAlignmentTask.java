@@ -1,9 +1,10 @@
-package analysis;
+package analysis.detection;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
 
+import analysis.AbstractProgressAction;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
 

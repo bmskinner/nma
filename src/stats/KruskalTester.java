@@ -19,13 +19,14 @@
 package stats;
 
 import java.util.logging.Level;
+
 import charting.options.ChartOptions;
 import jdistlib.disttest.DistributionTest;
 import analysis.AnalysisDataset;
-import analysis.ProfileManager;
-import analysis.nucleus.DatasetSegmenter;
-import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
-import analysis.nucleus.SegmentFitter;
+import analysis.profiles.DatasetSegmenter;
+import analysis.profiles.ProfileManager;
+import analysis.profiles.SegmentFitter;
+import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;

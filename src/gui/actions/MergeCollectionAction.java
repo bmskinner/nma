@@ -27,7 +27,7 @@ import java.util.List;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.nucleus.DatasetMerger;
-import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
+import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 
 public class MergeCollectionAction extends ProgressableAction {
 

@@ -40,7 +40,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
-import analysis.ProfileManager;
+import analysis.profiles.ProfileManager;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import charting.charts.MorphologyChartFactory;

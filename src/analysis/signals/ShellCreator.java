@@ -22,7 +22,7 @@
   -----------------------
   Signal positions in round nuclei.
 */  
-package analysis.nucleus;
+package analysis.signals;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -47,7 +47,7 @@ import java.util.logging.Logger;
 import utility.Constants;
 import utility.StatsMap;
 import utility.Utils;
-import analysis.Detector;
+import analysis.detection.Detector;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;

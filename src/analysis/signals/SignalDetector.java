@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package analysis.nucleus;
+package analysis.signals;
 
 import ij.ImageStack;
 import ij.gui.Roi;
@@ -45,8 +45,8 @@ import utility.StatsMap;
 import utility.Utils;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions.NuclearSignalOptions;
+import analysis.detection.Detector;
 import analysis.AnalysisWorker;
-import analysis.Detector;
 import components.Cell;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;

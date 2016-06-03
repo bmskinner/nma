@@ -25,7 +25,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import analysis.AnalysisDataset;
-import analysis.nucleus.ShellAnalysis;
+import analysis.signals.ShellAnalysis;
 
 public class ShellAnalysisAction extends ProgressableAction {
 

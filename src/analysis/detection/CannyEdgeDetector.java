@@ -1,8 +1,9 @@
-package analysis;
+package analysis.detection;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
+import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 
 /**

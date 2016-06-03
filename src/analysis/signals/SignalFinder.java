@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package analysis.nucleus;
+package analysis.signals;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import analysis.Detector;
 import analysis.AnalysisOptions.NuclearSignalOptions;
+import analysis.detection.Detector;
 import components.CellularComponent;
 import components.generic.BooleanProfile;
 import components.generic.Profile;

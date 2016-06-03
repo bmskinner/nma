@@ -1,4 +1,4 @@
-package analysis;
+package analysis.profiles;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,9 +15,9 @@ import java.util.UUID;
 
 
 
-import analysis.profiles.ProfileIndexFinder;
-import analysis.profiles.ProfileOffsetter;
-import analysis.profiles.RuleSet;
+
+
+import analysis.AnalysisDataset;
 import logging.Loggable;
 //import analysis.nucleus.DatasetSegmenter.SegmentFitter;
 import utility.Constants;
