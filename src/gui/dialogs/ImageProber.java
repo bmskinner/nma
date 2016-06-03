@@ -59,11 +59,11 @@ public abstract class ImageProber extends LoadingIconDialog {
 	
 	private static double IMAGE_SCREEN_PROPORTION = 0.90;
 
-	private final JPanel contentPanel = new JPanel();
+	private final JPanel      contentPanel = new JPanel();
 	protected AnalysisOptions options; // the options to detect with
-	protected File openImage;			// the image currently open
+	protected File            openImage;			// the image currently open
 	
-	protected Map<ImageType, JLabel> iconMap = new HashMap<ImageType, JLabel>(); // allow multiple images 
+	protected Map<ImageType, JLabel>         iconMap = new HashMap<ImageType, JLabel>(); // allow multiple images 
 	protected Map<ImageType, ImageProcessor> procMap = new HashMap<ImageType, ImageProcessor>(); // allow multiple images 
 	
 	private ImageType imageType;
