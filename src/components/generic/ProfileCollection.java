@@ -365,7 +365,7 @@ public class ProfileCollection implements Serializable {
 	 * @param pointType the point with the zero index in the segments
 	 * @param n the segment list
 	 */
-	public void addSegments(BorderTag tag, List<NucleusBorderSegment> n) throws Exception {
+	public void addSegments(BorderTag tag, List<NucleusBorderSegment> n) {
 		if(n==null || n.isEmpty()){
 			throw new NullPointerException("String or segment list is null or empty");
 		}

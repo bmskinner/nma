@@ -183,7 +183,7 @@ public class ProfileSegmenter implements Loggable {
 
 					segments.add(seg);
 					
-					log(Level.FINE, "New segment found in profile: "+seg.toString());
+					fine("New segment found in profile: "+seg.toString());
 					
 					segmentStart = index; // Prepare for the next segment
 				}

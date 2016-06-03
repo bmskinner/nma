@@ -1140,6 +1140,12 @@ public class MainWindow
 			}
 			break;
 			
+		case INFO:
+			for(AnalysisDataset d : populationsPanel.getSelectedDatasets()){
+				
+				log(d.getCollection().toString());
+			}
+			
 		default:
 			break;
 

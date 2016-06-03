@@ -124,8 +124,7 @@ public class DatasetProfiler extends AnalysisWorker {
 				// This section is not really necessary
 				// check the RP in the median is still at zero
 				ProfileIndexFinder finder = new ProfileIndexFinder();
-				List<RuleSet> rpSet = collection.getRuleSetCollection().getRuleSets(BorderTag.REFERENCE_POINT);
-				int rpIndex = finder.identifyIndex(median, rpSet);
+				int rpIndex = finder.identifyIndex(collection, BorderTag.REFERENCE_POINT);
 				fine("RP in median is located at index "+rpIndex);
 			
 			}
@@ -162,27 +161,36 @@ public class DatasetProfiler extends AnalysisWorker {
 
 			ProfileIndexFinder finder = new ProfileIndexFinder();
 			for(BorderTag tag : BorderTag.values() ){
-				List<RuleSet> ruleSets = collection.getRuleSetCollection().getRuleSets(tag);
 				
-				if(ruleSets.size()>0){ // Rules might not all be set
+				// Don't identify the RP again, it could cause off-by-one errors
+				// We do need to assign the RP in other ProfileTypes though
+				if(tag.equals(BorderTag.REFERENCE_POINT)){
 					
-					int index = finder.identifyIndex(median, ruleSets);
+					collection.getProfileManager()
+						.updateProfileCollectionOffsets(tag, 0);
+					continue; 
+				}
+					
+				int index = finder.identifyIndex(collection, tag);
+
+				if( index > -1){
+					//					int index = finder.identifyIndex(median, ruleSets);
 					// Add the index to the median profiles
-					collection.getProfileManager().
-						updateProfileCollectionOffsets(tag, index);
+					collection.getProfileManager()
+						.updateProfileCollectionOffsets(tag, index);
 
 					fine(tag+" in median is located at index "+index);
-					
+
 					// Create a median from the current reference points in the nuclei
 					Profile tagMedian = collection.getProfileCollection(ProfileType.REGULAR)
 							.getProfile(tag, Constants.MEDIAN);
-					
+
 					collection.getProfileManager()
 						.offsetNucleusProfiles(tag, ProfileType.REGULAR, tagMedian);
 					fine("Assigned offset in nucleus profiles for "+tag);
-					
+
 				} else {
-					fine("No ruleset for "+tag+"; skipping");
+					fine("No ruleset for "+tag+" or index not found; skipping");
 				}
 			}
 			

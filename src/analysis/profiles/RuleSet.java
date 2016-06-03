@@ -141,7 +141,6 @@ public class RuleSet {
 		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.REGULAR);
 		
 		return builder
-				.isLocalMaximum()
 				.valueIsMoreThan(180)
 				.isMaximum()
 				.build();

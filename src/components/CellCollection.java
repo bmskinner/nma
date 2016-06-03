@@ -937,6 +937,28 @@ public class CellCollection implements Serializable {
   public RuleSetCollection getRuleSetCollection(){
 	  return this.ruleSets;
   }
+  
+  public String toString(){
+	  
+	  String newLine = System.getProperty("line.separator");
+	  StringBuilder b = new StringBuilder();
+
+	  b.append("Collection:" + getName() + newLine);
+	  b.append("Nuclei: "+ this.getNucleusCount() + newLine);
+	  b.append("Source folder: "+this.getFolder().getAbsolutePath()+newLine);
+	  b.append("Nucleus type: "+this.nucleusType+newLine);
+	  b.append("Profile collections:"+newLine);
+	  
+	  for(ProfileType type : ProfileType.values() ){
+		  b.append("Profile type: "+type+newLine);
+		  ProfileCollection pc = this.getProfileCollection(type);
+		  b.append( pc.toString()+ newLine);
+	  }
+	  
+	  b.append( this.ruleSets.toString()+newLine);
+	  
+	  return b.toString();
+  }
 
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	  in.defaultReadObject();

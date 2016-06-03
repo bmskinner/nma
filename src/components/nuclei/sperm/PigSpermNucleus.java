@@ -120,6 +120,7 @@ public class PigSpermNucleus
 		Profile p     = this.getProfile(rpSet.getType());
 		ProfileIndexFinder f = new ProfileIndexFinder();
 		int rpIndex = f.identifyIndex(p, rpSet);
+		this.log("RP index found at "+rpIndex);
 
 //    	int rpIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
     	setBorderTag(BorderTag.REFERENCE_POINT, rpIndex);

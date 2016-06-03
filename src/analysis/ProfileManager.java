@@ -14,12 +14,14 @@ import java.util.UUID;
 
 
 
+
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.ProfileOffsetter;
 import analysis.profiles.RuleSet;
 import logging.Loggable;
 //import analysis.nucleus.DatasetSegmenter.SegmentFitter;
 import utility.Constants;
+import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.Profile;
@@ -116,59 +118,46 @@ public class ProfileManager implements Loggable {
 	 * verticals in the median profile, and assign these to the nuclei
 	 */
 	public void calculateTopAndBottomVerticals() {
-		
-		List<RuleSet> top = collection.getRuleSetCollection().getRuleSets(BorderTag.TOP_VERTICAL);
-		List<RuleSet> btm = collection.getRuleSetCollection().getRuleSets(BorderTag.BOTTOM_VERTICAL);
-		
-		if(top.size()>0 && btm.size()>0){
-			
-			fine("Detecting top and bottom verticals");
-			
-			ProfileIndexFinder finder = new ProfileIndexFinder();
-			
-			Profile median = collection
+
+		fine("Detecting top and bottom verticals");
+
+		ProfileIndexFinder finder = new ProfileIndexFinder();
+
+		int topIndex = finder.identifyIndex(collection, BorderTag.TOP_VERTICAL);
+		int btmIndex = finder.identifyIndex(collection, BorderTag.BOTTOM_VERTICAL);
+
+		if(topIndex > -1 && btmIndex > -1){
+
+			fine("TV in median is located at index "+topIndex);
+			fine("BV in median is located at index "+btmIndex);
+
+			updateProfileCollectionOffsets(BorderTag.TOP_VERTICAL, topIndex);
+
+			updateProfileCollectionOffsets(BorderTag.BOTTOM_VERTICAL, btmIndex);
+
+
+			fine("Updating nuclei");
+			Profile topMedian = collection
 					.getProfileCollection(ProfileType.REGULAR)
-					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+					.getProfile(BorderTag.TOP_VERTICAL, Constants.MEDIAN);
 
-			int topIndex = finder.identifyIndex(median, top);
-			int btmIndex = finder.identifyIndex(median, btm);
-			
-			if(topIndex > -1 && btmIndex > -1){
-			
-				fine("TV in median is located at index "+topIndex);
-				fine("BV in median is located at index "+btmIndex);
+			Profile btmMedian = collection
+					.getProfileCollection(ProfileType.REGULAR)
+					.getProfile(BorderTag.BOTTOM_VERTICAL, Constants.MEDIAN);
 
-				updateProfileCollectionOffsets(BorderTag.TOP_VERTICAL, topIndex);
+			offsetNucleusProfiles(BorderTag.TOP_VERTICAL, ProfileType.REGULAR, topMedian);
 
-				updateProfileCollectionOffsets(BorderTag.BOTTOM_VERTICAL, btmIndex);
+			offsetNucleusProfiles(BorderTag.BOTTOM_VERTICAL, ProfileType.REGULAR, btmMedian);
 
-
-				fine("Updating nuclei");
-				Profile topMedian = collection
-						.getProfileCollection(ProfileType.REGULAR)
-						.getProfile(BorderTag.TOP_VERTICAL, Constants.MEDIAN);
-
-				Profile btmMedian = collection
-						.getProfileCollection(ProfileType.REGULAR)
-						.getProfile(BorderTag.BOTTOM_VERTICAL, Constants.MEDIAN);
-
-				offsetNucleusProfiles(BorderTag.TOP_VERTICAL, ProfileType.REGULAR, topMedian);
-
-				offsetNucleusProfiles(BorderTag.BOTTOM_VERTICAL, ProfileType.REGULAR, btmMedian);
-				
-				for(Nucleus n : collection.getNuclei()){
-					n.updateVerticallyRotatedNucleus();
-				}
-				
-				fine("Updated nuclei");
-			} else {
-				fine("Cannot find TV or BV in median profile");
+			for(Nucleus n : collection.getNuclei()){
+				n.updateVerticallyRotatedNucleus();
 			}
+
+			fine("Updated nuclei");
 		} else {
-			fine("No rulesets for top and bottom verticals");
+			fine("Cannot find TV or BV in median profile");
 		}
-		
-		
+
 	}
 	
 	
@@ -182,9 +171,11 @@ public class ProfileManager implements Loggable {
 		finer("Updating border tag "+tag);
 		
 		if(tag.type().equals(BorderTagType.CORE )){
+			finer("Updating core border tag");
 			updateCoreBorderTagIndex(tag, index);
 			return;
 		} else {
+			finer("Updating extended border tag");
 			updateExtendedBorderTagIndex(tag, index);
 		}
 		
@@ -196,19 +187,18 @@ public class ProfileManager implements Loggable {
 	 * @param index
 	 */
 	private void updateExtendedBorderTagIndex(BorderTag tag, int index){
-		int oldIndex =0;
-		try {
-			oldIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
-		} catch(IllegalArgumentException e){
+		
+		int oldIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
+		
+		if(oldIndex == -1){
 			finer("Border tag does not exist and will be created");
 		}
 
 		/*
 		 * Set the border tag in the median profile 
 		 */
-		finest("Setting border tag in median to "+index+ " from "+oldIndex);
-		collection.getProfileCollection(ProfileType.REGULAR)
-			.addOffset(tag, index);
+		finest("Setting border tag in median profiles to "+index+ " from "+oldIndex);
+		updateProfileCollectionOffsets(tag, index);
 		
 		// Use the median profile to set the tag in the nuclei
 
@@ -238,14 +228,6 @@ public class ProfileManager implements Loggable {
 
 	}
 	
-	/**
-	 * Find the appropriate offset for each nucleus in the collection
-	 * @param tag
-	 * @param index
-	 */
-	private void applyBorderTagOffsetToNuclei(BorderTag tag, int index){
-		
-	}
 	
 	/**
 	 * If a core border tag is moved, the profile needs to be resegmented.
@@ -274,22 +256,22 @@ public class ProfileManager implements Loggable {
 			*/
 		
 		
-		fine("Resegmenting for core border tag change");
+		fine("Updating core border tag index");
 		// Store the existing core points in a map (OP and RP)
 		Map<BorderTag, Integer> map = new HashMap<BorderTag, Integer>();
 		for(BorderTag test : BorderTag.values(BorderTagType.CORE)){
 			int i = collection.getProfileCollection(ProfileType.REGULAR).getOffset(test);
 			map.put(test, i);
-			finest("Storing existing median "+test+" at index "+i);
+			finer("Storing existing median "+test+" at index "+i+" in map");
 		}
 		
 		// Overwrite the new tag for segmentation
 		map.put(tag, index);
-		finest("Replacing median "+tag+" with index "+index+" in segmenter map");
+		finer("Replacing median "+tag+" with index "+index+" in segmenter map");
 		
 		// Store the offset for the new point
 		collection.getProfileCollection(ProfileType.REGULAR).addOffset(tag, index);
-		
+		finer("Offset the "+tag+"index in the regular profile to "+index);
 				
 		/*
 		 * Now we need to update the tag indexes in the nucleus
@@ -297,6 +279,13 @@ public class ProfileManager implements Loggable {
 		 */
 		Profile median = collection.getProfileCollection(ProfileType.REGULAR)
 				.getProfile(tag, Constants.MEDIAN);
+		finer("Fetched median from new offset of "+tag);
+		
+		finest("New median from "+tag+":");
+		finest(median.toString());
+		
+		finest("Current state of regular profile collection:");
+		finest(collection.getProfileCollection(ProfileType.REGULAR).toString());
 		
 		offsetNucleusProfiles(tag, ProfileType.REGULAR, median);
 		
@@ -309,31 +298,54 @@ public class ProfileManager implements Loggable {
 			// We need to rebuild the ProfileAggregate for the new RP
 			// This will reset the RP to index zero
 			// Make new profile collections
+			int rpIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
+			finer("RP index is changing - moved to index "+rpIndex);
+			
 			createProfileCollections();
 			finer("Recreated profile collections");
+			
+			rpIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
+			finer("New ProfileAggregates move RP index to index "+rpIndex);
+			
+			// We need to update the offsets for the BorderTags since zero has moved
+			for(BorderTag test : BorderTag.values()){
+				if(test.equals(BorderTag.REFERENCE_POINT)){
+					collection.getProfileCollection(ProfileType.REGULAR).addOffset(tag, 0);
+					finer("Explicit setting of RP index to zero");
+					continue;
+				} else {
+					int oldIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(test);
+					int newIndex = AbstractCellularComponent.wrapIndex(oldIndex - index, median.size());
+					collection.getProfileCollection(ProfileType.REGULAR).addOffset(test, newIndex);
+					finer("Explicit setting of "+test+" index to "+newIndex+" from "+oldIndex);
+				}
+				
+			}
+						
+			rpIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
+			finer("After explicit set, RP index is "+rpIndex);
+			
 			map.put(tag, 0); // the RP is back at zero
+			
+			
 		}
 				
 		// Resegment the median
-		try {
 			
-			fine("Resegmenting the median profile");
-			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+		fine("Resegmenting the median profile from the RP");
+		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
 
-			ProfileSegmenter segmenter = new ProfileSegmenter(median, map);		
+		Profile medianToSegment = collection.getProfileCollection(ProfileType.REGULAR)
+				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
 
-			List<NucleusBorderSegment> segments = segmenter.segment();
-			
-			pc.addSegments(BorderTag.REFERENCE_POINT, segments);
-			
-			fine("Resegmented the median profile");
+		ProfileSegmenter segmenter = new ProfileSegmenter(medianToSegment, map);		
 
-		} catch (Exception e1) {
+		List<NucleusBorderSegment> segments = segmenter.segment();
 
-			error("Error resegmenting the median profile", e1);
-			return;
-		}
-		
+		pc.addSegments(BorderTag.REFERENCE_POINT, segments);
+
+		fine("Resegmented the median profile");
+	
 		
 		
 		// Run a new morphological analysis to apply the new segments
