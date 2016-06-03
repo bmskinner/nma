@@ -374,37 +374,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		fine("Assigned segments to nuclei");
 	}
 	
-	
-	/**
-	 * Use a ProfileSegmenter to segment the regular median profile of the collection starting
-	 * from the reference point 
-	 * @param collection
-	 * @return
-	 * @throws Exception
-	 */
-//	private List<NucleusBorderSegment> segmentMedianProfile(CellCollection collection) throws Exception{
-//		
-//		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
-//
-//		// the reference point is always index 0, so the segments will match
-//		// the profile
-//		Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
-//		
-//		Map<BorderTag, Integer> map = new HashMap<BorderTag, Integer>();
-//		int opIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
-//		map.put(BorderTag.ORIENTATION_POINT, opIndex);
-//		
-//
-//		ProfileSegmenter segmenter = new ProfileSegmenter(median, map);		
-//
-//		List<NucleusBorderSegment> segments = segmenter.segment();
-//
-//		finer("Found "+segments.size()+" segments in regular profile");
-//
-//		segmenter = null; // clean up
-//		return segments;
-//	}
-	
+		
 	/**
 	 * Use a ProfileSegmenter to segment the regular median profile of the collection starting
 	 * from the reference point 
