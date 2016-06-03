@@ -784,12 +784,14 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 		builder.append(this.getPosition());
 		builder.append(" | ");
 		builder.append(this.startIndex);
-		builder.append(" | ");
+		builder.append(" - ");
 		builder.append(this.endIndex);
 		builder.append(" | ");
 		builder.append(this.length());
-		builder.append(" | ");
+		builder.append(" of ");
 		builder.append(this.getTotalLength()-1);
+		builder.append(" | ");
+		builder.append(this.wraps());
 
 		return builder.toString();
 	}

@@ -17,6 +17,9 @@ public class SegmentProfilePanel extends ProfileDisplayPanel {
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		options.setShowMarkers(false);
+		options.setShowAnnotations(false);
+		options.setShowLines(true);
 		return MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
 	}
 

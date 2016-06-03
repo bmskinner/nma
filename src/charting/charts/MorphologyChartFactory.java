@@ -46,6 +46,7 @@ import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
+import org.jfree.util.ShapeUtilities;
 
 import stats.DipTester;
 import stats.StatisticDimension;
@@ -240,6 +241,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			
 			DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
 			renderer.setBaseShapesVisible(options.isShowPoints());
+			renderer.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
 			plot.setRenderer(datasetIndex, renderer);
 
 			int seriesCount = plot.getDataset(datasetIndex).getSeriesCount();
@@ -257,6 +259,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 					renderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
 					ColourSwatch swatch = options.getSwatch();
 					renderer.setSeriesPaint(i, swatch.color(colourIndex));
+					renderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
 				} 
 			}	
 
@@ -286,9 +289,6 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 					if(options.isNormalised()){ // set to the proportion of the point along the profile
 						indexToDraw =  (( indexToDraw / collection.getProfileCollection(options.getType()).getAggregate().length() ) * 100);
 					}
-
-
-
 
 					addMarkerToXYPlot(plot, tag, indexToDraw);
 
@@ -595,6 +595,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		StandardXYToolTipGenerator tooltip = new StandardXYToolTipGenerator();
 		XYLineAndShapeRenderer pointRenderer = new XYLineAndShapeRenderer();
 		pointRenderer.setBaseShapesVisible(true);
+		pointRenderer.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
 		pointRenderer.setBaseLinesVisible(false);
 		pointRenderer.setBaseStroke(ChartComponents.QUARTILE_STROKE);
 		pointRenderer.setBaseSeriesVisibleInLegend(false);
@@ -634,6 +635,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 					: options.getDatasets().get(j).getDatasetColour();
 			
 			pointRenderer.setSeriesPaint(j, profileColour);
+			pointRenderer.setSeriesShape(j, ChartComponents.DEFAULT_POINT_SHAPE);
 			
 			if(hasConsensus){
 				plot.getRenderer(1).setSeriesPaint(j, profileColour);

@@ -87,29 +87,41 @@ public class NucleusDatasetCreator implements Loggable {
 
 			if(seg.wraps()){ // case when array wraps. We need to plot the two ends as separate series
 				
-				if(seg.getStartIndex()<profile.size()){
-										
+				if(seg.getEndIndex()==0){
+					// no need to make two sections
+					Profile subProfile = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
+					Profile subPoints  = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
+					
+					double[][] data = { subPoints.asArray(), subProfile.asArray() };
+					
+					// check if the series key is taken
+					String seriesName = checkSeriesName(ds, seg.getName());
+					
+					ds.addSeries(seriesName, data);
+					
+				} else {
+							
+					int lowerIndex = Math.min(seg.getEndIndex(), seg.getStartIndex());
+					int upperIndex = Math.max(seg.getEndIndex(), seg.getStartIndex());
 
 					// beginning of array
-					Profile subProfileA = profile.getSubregion(0, seg.getEndIndex());
-					Profile subPointsA  = xpoints.getSubregion(0, seg.getEndIndex());
+					Profile subProfileA = profile.getSubregion(0, lowerIndex);
+					Profile subPointsA  = xpoints.getSubregion(0, lowerIndex);
 
 					double[][] dataA = { subPointsA.asArray(), subProfileA.asArray() };
 					ds.addSeries(seg.getName()+"_A", dataA);
 
 					// end of array
-					Profile subProfileB = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
-					Profile subPointsB  = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
-					
+					Profile subProfileB = profile.getSubregion(upperIndex, profile.size()-1);
+					Profile subPointsB  = xpoints.getSubregion(upperIndex, profile.size()-1);
+
 					double[][] dataB = { subPointsB.asArray(), subProfileB.asArray() };
 					ds.addSeries(seg.getName()+"_B", dataB);
-					
-					continue; // move on to the next segment
-					
-				} else { // there is an error in the segment assignment; skip and warn
-//					// commented out - this should never be able to happen now
-//					IJ.log("Profile skipping issue: "+seg.getName()+" : "+seg.getStartIndex()+" - "+seg.getEndIndex()+" in total of "+profile.size());
 				}
+
+				continue; // move on to the next segment
+					
+				
 			} 
 			Profile subProfile = profile.getSubregion(seg);
 			Profile subPoints  = xpoints.getSubregion(seg);

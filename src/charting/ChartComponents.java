@@ -20,8 +20,10 @@ package charting;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Shape;
 
 import org.jfree.chart.plot.ValueMarker;
+import org.jfree.util.ShapeUtilities;
 
 public class ChartComponents {
 	public static final BasicStroke SEGMENT_STROKE = new BasicStroke(3);
@@ -30,4 +32,6 @@ public class ChartComponents {
 	public static final BasicStroke QUARTILE_STROKE = new BasicStroke(1);
 	
 	public static final ValueMarker DEGREE_LINE_180 = new ValueMarker(180, Color.BLACK, MARKER_STROKE);
+	
+	public static final Shape DEFAULT_POINT_SHAPE = ShapeUtilities.createDiamond(5);
 }
