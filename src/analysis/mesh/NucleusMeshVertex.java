@@ -34,7 +34,7 @@ public class NucleusMeshVertex {
 	Set<NucleusMeshEdge> edges = new HashSet<NucleusMeshEdge>(); // store the edges attached to the vertex
 	
 	public NucleusMeshVertex(int i, XYPoint p, boolean peripheral){
-		this.number = i;
+//		this.number = i;
 		this.position = p;
 		this.peripheral = peripheral;
 	}

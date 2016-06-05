@@ -30,12 +30,12 @@ import components.generic.XYPoint;
 public class NucleusMeshEdge {
 	private NucleusMeshVertex v1;
 	private NucleusMeshVertex v2;
-	private double ratio;
+	private double value;
 	
 	public NucleusMeshEdge(NucleusMeshVertex v1, NucleusMeshVertex v2, double ratio){
 		this.v1 = v1;
 		this.v2 = v2;
-		this.ratio = ratio;
+		this.value = ratio;
 	}
 
 	public NucleusMeshVertex getV1() {
@@ -47,11 +47,11 @@ public class NucleusMeshEdge {
 	}
 
 	public double getRatio() {
-		return ratio;
+		return value;
 	}
 	
 	public double getLog2Ratio(){
-		return Stats.calculateLog2Ratio(ratio);
+		return Stats.calculateLog2Ratio(value);
 	}
 	
 	public double getLength(){
