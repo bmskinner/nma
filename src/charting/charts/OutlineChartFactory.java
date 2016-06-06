@@ -20,6 +20,8 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYShapeAnnotation;
+import org.jfree.chart.annotations.XYTextAnnotation;
+import org.jfree.chart.labels.StandardXYItemLabelGenerator;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
@@ -43,6 +45,8 @@ import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
 import analysis.detection.BooleanAligner;
 import analysis.mesh.NucleusMesh;
+import analysis.mesh.NucleusMeshEdge;
+import analysis.mesh.NucleusMeshVertex;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
@@ -587,7 +591,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createMeshChart(NucleusMesh mesh, double log2Ratio) throws Exception{
+	public static JFreeChart createMeshChart(NucleusMesh mesh, double log2Ratio, ChartOptions options) throws Exception{
 		
 		NucleusMeshXYDataset dataset = NucleusDatasetCreator.createNucleusMeshDataset(mesh);
 
@@ -604,7 +608,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		renderer.setBaseSeriesVisibleInLegend(false);
 		renderer.setBaseStroke(ChartComponents.MARKER_STROKE);
 		
-		
 		double max = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue();
 		for(int series=0; series<dataset.getSeriesCount(); series++){
 			
@@ -613,10 +616,43 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 			renderer.setSeriesPaint(series, colour);
 			renderer.setSeriesStroke(series, ChartComponents.MARKER_STROKE);
+			renderer.setSeriesItemLabelsVisible(series, false);
+
 		}
 		
 		plot.setDataset(0, dataset);
-		plot.setRenderer(0, renderer);		
+		plot.setRenderer(0, renderer);	
+		
+		/*
+		 * If the annotations are set, create a new set of labels for the vertices
+		 */
+		
+		if(options.isShowAnnotations()){
+			
+			for(NucleusMeshVertex v : mesh.getPeripheralVertices()){
+				XYTextAnnotation annotation = new XYTextAnnotation(v.getName(), v.getPosition().getX()-1, v.getPosition().getY());
+				annotation.setPaint(Color.BLACK);
+				plot.addAnnotation(annotation);
+			}
+			
+			for(NucleusMeshVertex v : mesh.getInternalVertices()){
+				XYTextAnnotation annotation = new XYTextAnnotation(v.getName(), v.getPosition().getX()-1, v.getPosition().getY());
+				annotation.setPaint(Color.BLACK);
+				plot.addAnnotation(annotation);
+			}
+			
+			for(NucleusMeshEdge v : mesh.getEdges()){
+				XYTextAnnotation annotation = new XYTextAnnotation(v.getName(), v.getMidpoint().getX(), v.getMidpoint().getY()+1);
+				annotation.setPaint(Color.BLUE);
+				plot.addAnnotation(annotation);
+			}
+			
+			
+		}
+		
+		
+		
+		
 		return chart;
 	}
 	

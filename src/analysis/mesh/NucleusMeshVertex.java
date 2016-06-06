@@ -27,24 +27,34 @@ import components.generic.XYPoint;
 
 public class NucleusMeshVertex {
 	
-	private int number; // the number in the mesh - use to compare vertexes between nuclei
+	private String name; // the number in the mesh - use to compare vertexes between nuclei
 	private XYPoint position; // the posiiton of the vertex
 	private boolean peripheral; // is the vertex on the border of the object
 	
 	Set<NucleusMeshEdge> edges = new HashSet<NucleusMeshEdge>(); // store the edges attached to the vertex
 	
-	public NucleusMeshVertex(int i, XYPoint p, boolean peripheral){
-//		this.number = i;
+	public NucleusMeshVertex(XYPoint p, String name, boolean peripheral){
+		this.name = name;
 		this.position = p;
 		this.peripheral = peripheral;
+	}
+	
+	/**
+	 * Duplicate the vertex.
+	 * @param v
+	 */
+	public NucleusMeshVertex(NucleusMeshVertex v){
+		this.name = v.name;
+		this.position = new XYPoint(v.position);
+		this.peripheral = v.peripheral;
 	}
 	
 	public boolean isPeripheral() {
 		return peripheral;
 	}
 
-	public int getNumber() {
-		return number;
+	public String getName() {
+		return name;
 	}
 
 	public XYPoint getPosition() {
@@ -82,7 +92,7 @@ public class NucleusMeshVertex {
 	}
 	
 	public String toString(){
-		return position.toString();
+		return this.name+": "+position.toString();
 	}
 	
 }

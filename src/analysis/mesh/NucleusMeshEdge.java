@@ -37,6 +37,17 @@ public class NucleusMeshEdge {
 		this.v2 = v2;
 		this.value = ratio;
 	}
+	
+	/**
+	 * Duplicate the edge
+	 * @param e
+	 */
+	public NucleusMeshEdge(NucleusMeshEdge e){
+		this.v1 = new NucleusMeshVertex(e.v1);
+		this.v2 = new NucleusMeshVertex(e.v2);
+
+		this.value = e.value;
+	}
 
 	public NucleusMeshVertex getV1() {
 		return v1;
@@ -44,6 +55,10 @@ public class NucleusMeshEdge {
 
 	public NucleusMeshVertex getV2() {
 		return v2;
+	}
+	
+	public void setValue(double d){
+		this.value = d;
 	}
 
 	public double getRatio() {
@@ -67,22 +82,7 @@ public class NucleusMeshEdge {
 		}
 		
 	}
-	
-	/**
-	 * Test if both vertices lie on the periphery of the mesh, and are adjacent
-	 * in the vertex list. TODO: end of list wrapping
-	 * @return
-	 */
-	public boolean isPeripheral(){
 		
-		if(v1.isPeripheral() && v2.isPeripheral()){
-			if(  Math.abs(v1.getNumber() - v2.getNumber())==1 ){
-				return true;
-			}
-		}
-		return false;
-	}
-	
 	public boolean isLongerThan(NucleusMeshEdge e){
 		return getLength() > e.getLength();
 	}
@@ -126,6 +126,14 @@ public class NucleusMeshEdge {
 		return v1.overlaps(v)  || v2.overlaps(v);
 	}
 	
+	public boolean equals(NucleusMeshEdge e){
+		if(this==e){
+			return true;
+		}
+		
+		return this.overlaps(e);
+	}
+	
 	/**
 	 * Compare the length of this edge to the given edge, and return
 	 * a new edge with the ratio
@@ -141,9 +149,13 @@ public class NucleusMeshEdge {
 		return new NucleusMeshEdge(v1, v2, ratio);
 		
 	}
+	
+	public String getName(){
+		return v1.getName()+" - "+v2.getName();
+	}
 					
 	public String toString(){
-		return v1.toString()+" : "+v2.toString()+" : "+getLength();
+		return v1.getName()+" - "+v2.getName()+" : "+getLength();
 	}
 
 }

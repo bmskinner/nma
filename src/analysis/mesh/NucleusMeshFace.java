@@ -13,6 +13,12 @@ public class NucleusMeshFace {
 	public NucleusMeshFace(final NucleusMeshEdge e1,  final NucleusMeshEdge e2,  final NucleusMeshEdge e3){
 		
 		// Check  that the edges make an enclosed space - there are only 3 unique vertices
+		
+		this.edges.add(e1);
+		this.edges.add(e2);
+		this.edges.add(e3);
+		
+		
 		Set<NucleusMeshVertex> vertices = new HashSet<NucleusMeshVertex>();
 		for(NucleusMeshEdge e : edges){
 			vertices.add(e.getV1());
@@ -23,9 +29,18 @@ public class NucleusMeshFace {
 			throw new IllegalArgumentException("Edges must enclose a triangle");
 		}
 		
-		this.edges.add(e1);
-		this.edges.add(e2);
-		this.edges.add(e3);
+		
+	}
+	
+	/**
+	 * Duplicate the face
+	 * @param f
+	 */
+	public NucleusMeshFace(NucleusMeshFace f){
+		for(NucleusMeshEdge e : f.edges){
+			edges.add(new NucleusMeshEdge(e));
+		}
+		this.value = f.value;
 	}
 	
 //	public NucleusMeshFace(final List<NucleusMeshEdge> edges){
@@ -107,5 +122,33 @@ public class NucleusMeshFace {
 		double a = Math.sqrt(a2);
 		return a;
 		
+	}
+	
+	public boolean equals(NucleusMeshFace f){
+		if(this==f){
+			return true;
+		}
+		
+		
+		for(NucleusMeshEdge e : f.edges){
+			if( ! this.hasEdge(e)){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+//	public XYPoint getMidpoint(){
+//		return null;
+//	}
+	
+	
+	public String toString(){
+		StringBuilder b = new StringBuilder();
+		b.append("Face:\n");
+		for(NucleusMeshEdge e : edges){
+			b.append(e.toString()+"\n");
+		}
+		return b.toString();
 	}
 }

@@ -717,13 +717,15 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 						if(activeDataset().getCollection().hasConsensusNucleus()){
 
-							NucleusMesh result = new NucleusMeshBuilder()
-									.createComparisonMesh(cell.getNucleus().getVerticallyRotatedNucleus(), 
-											activeDataset().getCollection().getConsensusNucleus(),
-											NucleusMeshBuilder.DIVISION_LENGTH);
-							result.pruneOverlaps();
+							NucleusMesh mesh1 = new NucleusMesh(cell.getNucleus().getVerticallyRotatedNucleus());
+							NucleusMesh mesh2 = new NucleusMesh(activeDataset().getCollection().getConsensusNucleus(), mesh1);
 							
-							chart = OutlineChartFactory.createMeshChart(result, 0.5);
+							NucleusMesh result = mesh1.compareTo(mesh2);
+
+							ChartOptions options = new ChartOptionsBuilder().setShowAnnotations(false).build();
+							
+//							chart = OutlineChartFactory.createMeshChart(mesh1, 0.5, options);
+							chart = OutlineChartFactory.createMeshChart(result, 0.5, options);
 
 						} else {
 							chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
@@ -735,13 +737,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				}
 				
 				panel.setChart(chart);
-//				panel.clearShapeAnnotations();
-//				panel.setChart(chart);
-//				if(rotateMode.equals(RotationMode.ACTUAL)){
-//					panel.drawNucleusImageAsAnnotation();
-//				} else {
-//					panel.clearShapeAnnotations();
-//				}
 				
 				
 				
