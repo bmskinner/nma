@@ -337,25 +337,29 @@ public class NucleusMesh implements Loggable {
 		
 		List<NucleusMeshFace> ourFaces   = new ArrayList<NucleusMeshFace>(faces);
 		List<NucleusMeshFace> theirFaces = new ArrayList<NucleusMeshFace>(mesh.faces);
+		List<NucleusMeshFace> resultFaces = new ArrayList<NucleusMeshFace>(result.faces);
+		
 		for(int i = 0; i<ourFaces.size(); i++){
 			NucleusMeshFace our   = ourFaces.get(i);
 			NucleusMeshFace their = theirFaces.get(i);
 			
 			double ratio = our.getArea() / their.getArea();
 			
-			NucleusMeshFace f = result.getFace(our);
-			if( f != null){
-				result.getFace(our).setValue(ratio);
-			} else {
-				warn("Missing face in comparison mesh : "+our.toString());
-				warn("Our mesh:");
-				log(this.toString());
-				warn("Their mesh:");
-				log(mesh.toString());
-				warn("Result mesh:");
-				log(result.toString());
-				return result;
-			}
+			resultFaces.get(i).setValue(ratio);
+			
+//			NucleusMeshFace f = reimsult.getFace(our);
+//			if( f != null){
+//				result.getFace(our).setValue(ratio);
+//			} else {
+//				warn("Missing face in comparison mesh : "+our.toString());
+//				warn("Our mesh:");
+//				log(this.toString());
+//				warn("Their mesh:");
+//				log(mesh.toString());
+//				warn("Result mesh:");
+//				log(result.toString());
+//				return result;
+//			}
 			
 		}
 		
