@@ -49,6 +49,16 @@ public class ChartOptions extends AbstractOptions {
 	private boolean showLines          = true;
 	private boolean showAnnotations    = true;
 	
+	// Options for nucleus mesh creation
+	private boolean showMesh           = false;
+	private boolean showMeshEdges      = true;
+	private boolean showMeshFaces      = false;
+	private int     meshSize           = 10;
+	
+	// Chart axis options
+	private boolean showXAxis           = true;
+	private boolean showYAxis           = true;
+	
 	public ChartOptions(List<AnalysisDataset> list){
 		this(list, null);
 	}
@@ -179,6 +189,57 @@ public class ChartOptions extends AbstractOptions {
 	public void setUseDensity(boolean useDensity) {
 		this.useDensity = useDensity;
 	}
+	
+	
+
+	public boolean isShowMesh() {
+		return showMesh;
+	}
+
+	public void setShowMesh(boolean showMesh) {
+		this.showMesh = showMesh;
+	}
+
+	public boolean isShowMeshEdges() {
+		return showMeshEdges;
+	}
+
+	public void setShowMeshEdges(boolean showMeshEdges) {
+		this.showMeshEdges = showMeshEdges;
+	}
+
+	public boolean isShowMeshFaces() {
+		return showMeshFaces;
+	}
+
+	public void setShowMeshFaces(boolean showMeshFaces) {
+		this.showMeshFaces = showMeshFaces;
+	}
+		
+	
+	public int getMeshSize() {
+		return meshSize;
+	}
+
+	public void setMeshSize(int meshSize) {
+		this.meshSize = meshSize;
+	}
+
+	public boolean isShowXAxis() {
+		return showXAxis;
+	}
+
+	public void setShowXAxis(boolean showXAxis) {
+		this.showXAxis = showXAxis;
+	}
+
+	public boolean isShowYAxis() {
+		return showYAxis;
+	}
+
+	public void setShowYAxis(boolean showYAxis) {
+		this.showYAxis = showYAxis;
+	}
 
 	@Override
 	public int hashCode() {
@@ -195,6 +256,16 @@ public class ChartOptions extends AbstractOptions {
 		result = prime * result + (showPoints ? 1231 : 1237);
 		result = prime * result + (showLines ? 1231 : 1237);
 		result = prime * result + (showAnnotations ? 1231 : 1237);
+		
+		result = prime * result + (showMesh ? 1231 : 1237);
+		result = prime * result + (showMeshEdges ? 1231 : 1237);
+		result = prime * result + (showMeshFaces ? 1231 : 1237);
+		result = prime * result + meshSize;
+		
+		result = prime * result + (showXAxis ? 1231 : 1237);
+		result = prime * result + (showYAxis ? 1231 : 1237);
+		
+		
 		result = prime * result + signalGroup;
 		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
 		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
@@ -229,6 +300,23 @@ public class ChartOptions extends AbstractOptions {
 			return false;
 		if (showLines != other.showAnnotations)
 			return false;
+		
+		if (showMesh != other.showMesh)
+			return false;
+		if (showMeshEdges != other.showMeshEdges)
+			return false;
+		if (showMeshFaces != other.showMeshFaces)
+			return false;
+		if (meshSize != other.meshSize)
+			return false;
+		
+		
+		if (showXAxis != other.showXAxis)
+			return false;
+		if (showYAxis != other.showYAxis)
+			return false;
+		
+		
 		if (signalGroup != other.signalGroup)
 			return false;
 		if (swatch != other.swatch)

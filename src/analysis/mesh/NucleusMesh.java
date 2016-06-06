@@ -317,6 +317,8 @@ public class NucleusMesh implements Loggable {
 			throw new IllegalArgumentException("Face count mismatch");
 		}
 		
+		finer("Comparing this mesh "+this.getNucleusName()+" to "+mesh.getNucleusName());
+		
 		NucleusMesh result = new NucleusMesh(this);
 		
 		List<NucleusMeshEdge> ourEdges   = new ArrayList<NucleusMeshEdge>(edges);
@@ -333,7 +335,7 @@ public class NucleusMesh implements Loggable {
 			result.getEdge(our).setValue(ratio);
 		}
 		
-		List<NucleusMeshFace> ourFaces = new ArrayList<NucleusMeshFace>(faces);
+		List<NucleusMeshFace> ourFaces   = new ArrayList<NucleusMeshFace>(faces);
 		List<NucleusMeshFace> theirFaces = new ArrayList<NucleusMeshFace>(mesh.faces);
 		for(int i = 0; i<ourFaces.size(); i++){
 			NucleusMeshFace our   = ourFaces.get(i);
@@ -346,6 +348,13 @@ public class NucleusMesh implements Loggable {
 				result.getFace(our).setValue(ratio);
 			} else {
 				warn("Missing face in comparison mesh : "+our.toString());
+				warn("Our mesh:");
+				log(this.toString());
+				warn("Their mesh:");
+				log(mesh.toString());
+				warn("Result mesh:");
+				log(result.toString());
+				return result;
 			}
 			
 		}
@@ -578,12 +587,25 @@ public class NucleusMesh implements Loggable {
 			this.getEdge(p2_x, i2);
 //			
 //			
-//			// Make the faces
-//			this.getFace(p1_a, i1, i2);
-//			this.getFace(p1_a, p2_a, i2);
-//			
-//			this.getFace(p1_x, i1, i2);
-//			this.getFace(p1_x, p2_x, i2);
+			// Make the faces
+			this.getFace(p1_a, i1, i2);
+			this.getFace(p1_a, p2_a, i2);
+			
+			this.getFace(p1_x, i1, i2);
+			this.getFace(p1_x, p2_x, i2);
+		}
+		
+		// create the top face - RP to nearest peripheral indexes
+		
+		this.getFace(peripheralVertices.get(0), 
+				peripheralVertices.get(1), 
+				peripheralVertices.get(peripheralVertices.size()-1));
+		
+		// if needed, create the bottom face (final intenal vertex to central peripheral vertices)
+		if(peripheralVertices.size()%2!=0){
+			this.getFace(peripheralVertices.get(halfArray), 
+					peripheralVertices.get(halfArray+1), 
+					internalVertices.get(internalVertices.size()-1));
 		}
 		
 

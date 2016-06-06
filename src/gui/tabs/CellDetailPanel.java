@@ -632,7 +632,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 		private JCheckBox showHookHump = new JCheckBox("Show hook ROI");
 		private FixedAspectRatioChartPanel panel;
-		private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Warp to consensus");
+		private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus");
 		
 //		boolean drawPointOverlay = false; // debugging
 //		private ShapeOverlay overlay = new ShapeOverlay();

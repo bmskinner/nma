@@ -35,6 +35,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
 import analysis.AnalysisDataset;
+import analysis.mesh.NucleusMesh;
 import charting.ChartComponents;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
@@ -342,7 +343,19 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		
 		if(options.isSingleDataset()){
 			options.log(Level.FINEST, "Creating single consensus chart");
-			return makeSegmentedConsensusChart(options.firstDataset());
+			
+			if(options.isShowMesh()){ 
+				
+				NucleusMesh mesh = new NucleusMesh(options.firstDataset()
+						.getCollection()
+						.getConsensusNucleus(), options.getMeshSize());
+				return OutlineChartFactory.createMeshChart(mesh, 0.5, options);
+				
+			} else {
+				return makeSegmentedConsensusChart(options.firstDataset());
+			}
+			
+			
 		}
 		options.log(Level.FINEST, "Options failed to match: creating empty consensus chart");
 		return makeEmptyNucleusOutlineChart();

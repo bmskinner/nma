@@ -23,6 +23,7 @@ import gui.components.ConsensusNucleusChartPanel;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ComponentAdapter;
@@ -34,11 +35,15 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
@@ -54,7 +59,7 @@ import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclei.ConsensusNucleus;
 
-public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeListener {
+public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeListener, ChangeListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -63,6 +68,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	
 	private JPanel offsetsPanel; // store controls for rotating and translating
 	private JPanel mainPanel;	
+	
+	private JCheckBox showMeshBox;
+	private JCheckBox showMeshEdgesBox;
+	private JCheckBox showMeshFacesBox;
+	private JSpinner  meshSizeSpinner;
 	
 	public ConsensusNucleusPanel() {
 		super();
@@ -136,10 +146,53 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		JPanel rotatePanel = createRotationPanel();
 		panel.add(rotatePanel, BorderLayout.NORTH);
 		
+		JPanel meshPanel = createMeshPanel();
+		panel.add(meshPanel, BorderLayout.CENTER);
+		
 		JPanel offsetPanel = createTranslatePanel();
 		panel.add(offsetPanel, BorderLayout.SOUTH);
 		
 		return panel;
+	}
+	
+	private JPanel createMeshPanel(){
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		
+		showMeshBox = new JCheckBox("Show mesh");
+		showMeshBox.setSelected(false);
+		showMeshBox.addChangeListener( this);
+		
+		SpinnerNumberModel meshSizeModel = new SpinnerNumberModel(10,
+				2,
+				100,
+				1);
+		meshSizeSpinner = new JSpinner(meshSizeModel);
+		meshSizeSpinner.addChangeListener(this);
+		meshSizeSpinner.setToolTipText("Mesh size");
+		JSpinner.NumberEditor meshNumberEditor = new JSpinner.NumberEditor(meshSizeSpinner,"0");
+		meshSizeSpinner.setEditor(meshNumberEditor);
+
+		
+		showMeshEdgesBox = new JCheckBox("Mesh edges");
+		showMeshEdgesBox.setSelected(true);
+		showMeshEdgesBox.setEnabled(false);
+		showMeshEdgesBox.addChangeListener( this);
+		
+		showMeshFacesBox = new JCheckBox("Mesh faces");
+		showMeshFacesBox.setSelected(false);
+		showMeshFacesBox.setEnabled(false);
+		showMeshFacesBox.addChangeListener( this);
+		
+		
+		
+		panel.add(showMeshBox);
+		panel.add(meshSizeSpinner);
+		panel.add(showMeshEdgesBox);
+		panel.add(showMeshFacesBox);
+		
+		return panel;
+		
 	}
 	
 	private JPanel createTranslatePanel(){
@@ -173,7 +226,6 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 				if(activeDataset().getCollection().hasConsensusNucleus()){
 					activeDataset().getCollection().getConsensusNucleus().offset(0, -1);;
 					refreshChartCache(getDatasets());
-//					update(activeDatasetToList());
 				}
 			}
 		});
@@ -188,7 +240,6 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 				if(activeDataset().getCollection().hasConsensusNucleus()){
 					activeDataset().getCollection().getConsensusNucleus().offset(-1, 0);;
 					refreshChartCache(getDatasets());
-//					update(activeDatasetToList());
 				}
 			}
 		});
@@ -326,7 +377,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return ConsensusNucleusChartFactory.makeConsensusChart(options);
+			return ConsensusNucleusChartFactory.makeConsensusChart(options);
 	}
 	
 	@Override
@@ -337,23 +388,32 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	private void updateSingleDataset() throws Exception {
 		runRefoldingButton.setVisible(false);
 		
+		showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
+		showMeshFacesBox.setEnabled(showMeshBox.isSelected());
+
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
+			.setShowMesh(showMeshBox.isSelected())
+			.setShowMeshEdges(showMeshEdgesBox.isSelected())
+			.setShowMeshFaces(showMeshFacesBox.isSelected())
+			.setShowAnnotations(false)
+			.setShowXAxis(false)
+			.setShowYAxis(false)
+			.setMeshSize((int) meshSizeSpinner.getValue())
 			.build();
 		
 		JFreeChart consensusChart = getChart(options);
 
-//		JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 
 		CellCollection collection = activeDataset().getCollection();
 		if(collection.hasConsensusNucleus()){
-//			consensusChart = ConsensusNucleusChartFactory.makeSegmentedConsensusChart(activeDataset());
 
 			// hide the refold button
 			runRefoldingButton.setVisible(false);
 			offsetsPanel.setVisible(true);
 			consensusChartPanel.setChart(consensusChart);
 			consensusChartPanel.restoreAutoBounds();
+						
 		} else {
 			
 			if(collection.isRefolding()){
@@ -365,6 +425,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			runRefoldingButton.setVisible(true);
 			offsetsPanel.setVisible(false);
 			consensusChartPanel.setChart(consensusChart);
+			
+			
 		}
 	}
 	
@@ -562,6 +624,12 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			
 		}
 		
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent arg0) {
+				
+		this.update(getDatasets());
 	}
     
     

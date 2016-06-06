@@ -6,13 +6,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.List;
 import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -24,7 +24,6 @@ import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
 import analysis.mesh.NucleusMesh;
-import analysis.mesh.NucleusMeshBuilder;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
@@ -41,7 +40,7 @@ import gui.components.panels.DatasetSelectionPanel;
  *
  */
 @SuppressWarnings("serial")
-public class ConsensusCompareDialog extends LoadingIconDialog implements ActionListener, ChangeListener {
+public class ConsensusCompareDialog extends LoadingIconDialog implements ActionListener, ChangeListener, ItemListener {
 	
 	private List<AnalysisDataset> datasets;
 	private FixedAspectRatioChartPanel chartPanelOne;
@@ -49,30 +48,31 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 	
 	private ExportableChartPanel histoOne;
 	private ExportableChartPanel histoTwo;
-	
-//	private FixedAspectRatioChartPanel pointOne;
-//	private FixedAspectRatioChartPanel pointTwo;
 
 	private JSpinner maxRatioSpinner;
 	private JSpinner meshSizeSpinner;
 	
 	private JCheckBox showAnnotationsBox;
+	private JCheckBox showEdgesBox;
+	private JCheckBox showFacesBox;
 		
 	private DatasetSelectionPanel boxOne;
 	private DatasetSelectionPanel boxTwo;
 	
 	public ConsensusCompareDialog(List<AnalysisDataset> datasets){
 		super();
+		finest("Creating consensus comparison dialog");
 		this.datasets = datasets;
 		
 		this.setTitle("Consensus nucleus comparator");
 		this.setLayout(new BorderLayout());
 		
 		JPanel header = createHeader();
+		finest("Created consensus compare header");
 		this.add(header, BorderLayout.NORTH);
 		
 		JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-		
+		finest("Created empty chart");
 		/*
 		 * Create a central panel for all charts
 		 */
@@ -115,25 +115,9 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		histoOne = new ExportableChartPanel(chart);
 		histoTwo = new ExportableChartPanel(chart);
 		
-//		pointOne = new FixedAspectRatioChartPanel(chart);
-//		pointTwo = new FixedAspectRatioChartPanel(chart);
-		
-		histoPanel.add(histoOne);
-//		histoPanel.add(pointOne);
-		
+		histoPanel.add(histoOne);	
 		histoPanel.add(histoTwo);
-//		histoPanel.add(pointTwo);
-		
-//		histoPanel.addComponentListener( new ComponentAdapter(){
-//			
-//			@Override
-//			public void componentResized(ComponentEvent arg0) {
-//				pointOne.restoreAutoBounds();
-//				pointTwo.restoreAutoBounds();
-//				
-//			}
-//
-//		});
+
 		
 		/*
 		 * Add the chart panels to the centre panel
@@ -141,11 +125,11 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		centrePanel.add(meshPanel);
 		centrePanel.add(histoPanel);
 		this.add(centrePanel,BorderLayout.CENTER);
-		
+		finest("Created panels");
 		
 		this.setModal(false);
 		this.pack();
-		log(Level.FINEST, "Displaying consensus comparator");
+		finest("Displaying consensus comparator");
 		runComparison();
 		this.setVisible(true);
 	}
@@ -154,14 +138,17 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		JPanel panel = new JPanel(new FlowLayout());
 		
 		boxOne = new DatasetSelectionPanel(datasets);
+		boxOne.setSelectedDataset(datasets.get(0));
 		boxTwo = new DatasetSelectionPanel(datasets);
-		boxTwo.setSelectionIndex(1);
+		boxOne.setSelectedDataset(datasets.get(1));
 		
 		boxOne.addActionListener(this);
 		boxTwo.addActionListener(this);
 		
 		panel.add(boxOne);
 		panel.add(boxTwo);
+		
+		finest("Added dataset boxes");
 
 		double maxRatio = 0.5;
 
@@ -190,13 +177,25 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		panel.add(maxRatioSpinner);
 		panel.add(new JLabel("Mesh distance"));
 		panel.add(meshSizeSpinner);
+		finest("Added log2 and mesh size boxes");
 		
-		showAnnotationsBox = new JCheckBox("Show labels");
-		showAnnotationsBox.addChangeListener(this);
-		showAnnotationsBox.setSelected(false);
+		showAnnotationsBox = new JCheckBox("Show labels", false);
+		showAnnotationsBox.addItemListener(this);
 		panel.add(showAnnotationsBox);
+		finest("Added annotations checkbox");
 		
-		panel.add(getLoadingLabel());
+		showEdgesBox = new JCheckBox("Show edges", true);
+		showEdgesBox.addItemListener(this);
+		panel.add(showEdgesBox);
+		finest("Added edges checkbox");
+		
+		showFacesBox = new JCheckBox("Show faces", false);
+		showFacesBox.addItemListener(this);
+		panel.add(showFacesBox);
+		finest("Added faces checkbox");
+		
+		
+//		panel.add(getLoadingLabel());
 		
 		return panel;
 	}
@@ -211,16 +210,15 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		int    meshSize = (int)    meshSizeSpinner.getValue();
 		
 		boolean showAnnotations = showAnnotationsBox.isSelected();
+		boolean showFaces       = showFacesBox.isSelected();
+		boolean showEdges       = showEdgesBox.isSelected();
 		
 		
 		JFreeChart chartOne;
 		JFreeChart chartTwo;
 		JFreeChart histoChartOne;
 		JFreeChart histoChartTwo;
-//		JFreeChart pointChartOne;
-//		JFreeChart pointChartTwo;
-		
-//		NucleusMeshBuilder builder = new NucleusMeshBuilder();
+
 		
 		if(one.getCollection().hasConsensusNucleus() && two.getCollection().hasConsensusNucleus()){
 
@@ -243,24 +241,11 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				histoChartOne = OutlineChartFactory.createMeshHistogram(comparison1);
 				histoChartTwo = OutlineChartFactory.createMeshHistogram(comparison2);
 				
-				/*
-				 * Create point cloud for edges inside the mesh
-				 */
-//				comparison1.removeExternalEdges();
-//				comparison2.removeExternalEdges();
-				
-//				pointChartOne = OutlineChartFactory.createMeshMidpointChart(comparison1, logRatio);
-//				pointChartTwo = OutlineChartFactory.createMeshMidpointChart(comparison2, logRatio);
-				
-				
-				/*
-				 * Remove overlapping edges for a clean chart
-				 */
-//				comparison1.pruneOverlaps();
-//				comparison2.pruneOverlaps();
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setShowAnnotations(showAnnotations)
+					.setShowMeshFaces(showFaces)
+					.setShowMeshEdges(showEdges)
 					.build();
 	
 				chartOne = OutlineChartFactory.createMeshChart(comparison1, logRatio, options);
@@ -274,9 +259,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				
 				histoChartOne = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
 				histoChartTwo = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
-				
-//				pointChartOne = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
-//				pointChartTwo = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
+
 				logError("Error creating mesh chart", e);
 			}
 			
@@ -290,9 +273,6 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 			histoChartOne = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 			histoChartTwo = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 			
-//			pointChartOne = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-//			pointChartTwo = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-			
 		}
 		
 		chartPanelOne.setChart(chartOne);
@@ -304,29 +284,24 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		histoOne.setChart(histoChartOne);
 		histoTwo.setChart(histoChartTwo);
 		
-//		pointOne.setChart(pointChartOne);
-//		pointTwo.setChart(pointChartTwo);
-//		
-//		pointOne.restoreAutoBounds();
-//		pointTwo.restoreAutoBounds();
-		
-		
 		
 		setLoading(false);
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		Thread thr = new Thread(    ()-> {	runComparison(); }   );
-		thr.start();
-
+		runComparison();
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent arg0) {
-		Thread thr = new Thread(    ()-> {	runComparison(); }   );
-		thr.start();
+		runComparison();
 		
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent arg0) {
+		runComparison();
 	}
 
 }

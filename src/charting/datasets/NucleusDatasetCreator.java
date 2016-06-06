@@ -1624,7 +1624,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static NucleusMeshXYDataset createNucleusMeshDataset(NucleusMesh mesh) throws Exception {
+	public static NucleusMeshXYDataset createNucleusMeshEdgeDataset(NucleusMesh mesh) throws Exception {
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 		
 		for(NucleusMeshEdge edge : mesh.getEdges()){

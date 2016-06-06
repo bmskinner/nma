@@ -60,6 +60,16 @@ public class ChartOptionsBuilder {
 	private boolean showLines          = true;
 	private boolean showAnnotations    = true;
 	
+	// Options for nucleus mesh creation
+	private boolean showMesh           = false;
+	private boolean showMeshEdges      = true;
+	private boolean showMeshFaces      = false;
+	private int     meshSize           = 10;
+	
+	// Chart axis options
+	private boolean showXAxis           = true;
+	private boolean showYAxis           = true;
+	
 	public ChartOptionsBuilder(){
 		
 	}
@@ -169,6 +179,36 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
+	public ChartOptionsBuilder setShowMesh(boolean b){
+		this.showMesh = b;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setMeshSize(int i){
+		this.meshSize = i;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setShowMeshEdges(boolean b){
+		this.showMeshEdges = b;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setShowMeshFaces(boolean b){
+		this.showMeshFaces = b;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setShowXAxis(boolean b){
+		this.showXAxis = b;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setShowYAxis(boolean b){
+		this.showYAxis = b;
+		return this;
+	}
+	
 	public ChartOptions build(){
 		ChartOptions result =  new ChartOptions(list, programLogger);
 		result.setSwatch(swatch);
@@ -188,6 +228,14 @@ public class ChartOptionsBuilder {
 		result.setShowLines(showLines);
 		result.setShowPoints(showPoints);
 		result.setShowAnnotations(showAnnotations);
+		
+		result.setShowMesh(showMesh);
+		result.setShowMeshEdges(showMeshEdges);
+		result.setShowMeshFaces(showMeshFaces);
+		result.setMeshSize(meshSize);
+		
+		result.setShowXAxis(showXAxis);
+		result.setShowYAxis(showYAxis);
 		return result;
 	}
 	

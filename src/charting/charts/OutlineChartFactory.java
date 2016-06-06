@@ -6,8 +6,10 @@ import ij.process.ImageProcessor;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +48,7 @@ import analysis.AnalysisDataset;
 import analysis.detection.BooleanAligner;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshEdge;
+import analysis.mesh.NucleusMeshFace;
 import analysis.mesh.NucleusMeshVertex;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
@@ -593,7 +596,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 */
 	public static JFreeChart createMeshChart(NucleusMesh mesh, double log2Ratio, ChartOptions options) throws Exception{
 		
-		NucleusMeshXYDataset dataset = NucleusDatasetCreator.createNucleusMeshDataset(mesh);
+		NucleusMeshXYDataset dataset = NucleusDatasetCreator.createNucleusMeshEdgeDataset(mesh);
 
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -617,11 +620,41 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			renderer.setSeriesPaint(series, colour);
 			renderer.setSeriesStroke(series, ChartComponents.MARKER_STROKE);
 			renderer.setSeriesItemLabelsVisible(series, false);
+			renderer.setSeriesVisible(series, options.isShowMeshEdges());
 
 		}
 		
 		plot.setDataset(0, dataset);
 		plot.setRenderer(0, renderer);	
+				
+		// Show faces as polygon annotations under the chart
+		if(options.isShowMeshFaces()){ 
+			
+			for(NucleusMeshFace f : mesh.getFaces()){
+				
+				Path2D path = new Path2D.Double();
+
+				int i=0;
+				for(NucleusMeshVertex v : f.getVertices()){
+					if(i==0){
+						path.moveTo(v.getPosition().getX(), v.getPosition().getY());
+						i++;
+					} else {
+						path.lineTo(v.getPosition().getX(), v.getPosition().getY());
+					}
+					
+					
+				}
+				path.closePath();
+				
+				Color colour = getGradientColour(f.getLog2Ratio(), log2Ratio); // not quite black
+				
+				XYShapeAnnotation a = new XYShapeAnnotation(path, null, null, colour);
+
+				renderer.addAnnotation(a, Layer.BACKGROUND);
+			}
+			
+		}
 		
 		/*
 		 * If the annotations are set, create a new set of labels for the vertices
@@ -641,59 +674,34 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				plot.addAnnotation(annotation);
 			}
 			
-			for(NucleusMeshEdge v : mesh.getEdges()){
-				XYTextAnnotation annotation = new XYTextAnnotation(v.getName(), v.getMidpoint().getX(), v.getMidpoint().getY()+1);
-				annotation.setPaint(Color.BLUE);
-				plot.addAnnotation(annotation);
+			if(options.isShowMeshEdges()){ 
+
+				for(NucleusMeshEdge v : mesh.getEdges()){
+					XYTextAnnotation annotation = new XYTextAnnotation(v.getName(), v.getMidpoint().getX(), v.getMidpoint().getY()+1);
+					annotation.setPaint(Color.BLUE);
+					plot.addAnnotation(annotation);
+				}
 			}
 			
+			if(options.isShowMeshFaces()){ 
+				for(NucleusMeshFace f : mesh.getFaces()){
+					XYTextAnnotation annotation = new XYTextAnnotation(f.getName(),
+							f.getMidpoint().getX(),
+							f.getMidpoint().getY());
+					annotation.setPaint(Color.GREEN);
+					plot.addAnnotation(annotation);
+				}
+			}
 			
 		}
 		
-		
+		chart.getXYPlot().getDomainAxis().setVisible(options.isShowXAxis());
+		chart.getXYPlot().getRangeAxis().setVisible(options.isShowYAxis());
 		
 		
 		return chart;
 	}
 	
-	/**
-	 * Create the chart with the outlines of all the nuclei within a single dataset.
-	 * @param options
-	 * @return
-	 * @throws Exception 
-	 */
-	public static JFreeChart createMeshMidpointChart(NucleusMesh mesh, double log2Ratio) throws Exception{
-		
-		NucleusMeshXYDataset dataset = NucleusDatasetCreator.createNucleusMeshMidpointDataset(mesh);
-
-		JFreeChart chart = ChartFactory.createXYLineChart(null,
-				null, null, null, PlotOrientation.VERTICAL, true, true,
-				false);
-
-		XYPlot plot = chart.getXYPlot();
-		plot.setBackgroundPaint(Color.WHITE);
-		
-		StandardXYToolTipGenerator tooltip = new StandardXYToolTipGenerator();
-		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(false, true);
-		renderer.setBaseSeriesVisibleInLegend(false);
-		renderer.setBaseStroke(ChartComponents.MARKER_STROKE);
-		renderer.setBaseToolTipGenerator(tooltip);
-		
-
-		for(int series=0; series<dataset.getSeriesCount(); series++){
-			
-			double ratio = dataset.getRatio(dataset.getSeriesKey(series));
-			Color colour = getGradientColour(ratio, log2Ratio);
-			
-			renderer.setSeriesPaint(series, colour);
-			renderer.setSeriesStroke(series, ChartComponents.MARKER_STROKE);
-			renderer.setSeriesShape(series, ShapeUtilities.createDiamond(2));
-		}
-		
-		plot.setDataset(0, dataset);
-		plot.setRenderer(0, renderer);		
-		return chart;
-	}
 	
 	/**
 	 * Log2 ratios are coming in, which must be converted to real ratios
