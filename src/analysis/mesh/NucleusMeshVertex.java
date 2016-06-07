@@ -123,8 +123,6 @@ public class NucleusMeshVertex {
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + (peripheral ? 1231 : 1237);
-		result = prime * result
-				+ ((position == null) ? 0 : position.hashCode());
 		return result;
 	}
 

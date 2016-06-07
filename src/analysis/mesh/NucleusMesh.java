@@ -90,7 +90,7 @@ public class NucleusMesh implements Loggable {
 	// Track the faces of interest in the mesh
 	private Set<NucleusMeshFace> faces  = new LinkedHashSet<NucleusMeshFace>();
 	
-	private Nucleus nucleus;
+	Nucleus nucleus;
 		
 	/**
 	 * Construct a mesh from the given nucleus with default vertex
@@ -236,7 +236,7 @@ public class NucleusMesh implements Loggable {
 			return null;
 		}
 	}
-	
+		
 	public boolean contains(NucleusMeshVertex v){
 		return(peripheralVertices.contains(v) || internalVertices.contains(v));
 	}
@@ -292,6 +292,26 @@ public class NucleusMesh implements Loggable {
 		return this.faces;
 	}
 	
+	public boolean isComparableTo(NucleusMesh mesh){
+		
+		if(this.peripheralVertices.size()!= mesh.peripheralVertices.size()){
+			return false;
+		}
+		
+		if(this.internalVertices.size()!= mesh.internalVertices.size()){
+			return false;
+		}
+		
+		if(this.edges.size()!= mesh.edges.size()){
+			return false;
+		}
+		
+		if(this.faces.size()!= mesh.faces.size()){
+			return false;
+		}
+		return true;
+	}
+	
 	
 	/**
 	 * Find the edge and face ratios of this mesh versus the given mesh.
@@ -301,23 +321,12 @@ public class NucleusMesh implements Loggable {
 	 */
 	public NucleusMesh compareTo(NucleusMesh mesh){
 		
-		if(this.peripheralVertices.size()!= mesh.peripheralVertices.size()){
-			throw new IllegalArgumentException("Peripheral vertex count mismatch");
-		}
-		
-		if(this.internalVertices.size()!= mesh.internalVertices.size()){
-			throw new IllegalArgumentException("Internal vertex count mismatch");
-		}
-		
-		if(this.edges.size()!= mesh.edges.size()){
-			throw new IllegalArgumentException("Edge count mismatch");
-		}
-		
-		if(this.faces.size()!= mesh.faces.size()){
-			throw new IllegalArgumentException("Face count mismatch");
+		if( ! this.isComparableTo(mesh) ){
+			throw new IllegalArgumentException("Cannot compare meshes");
 		}
 		
 		finer("Comparing this mesh "+this.getNucleusName()+" to "+mesh.getNucleusName());
+		finer("Mesh has "+mesh.getFaceCount()+" faces");
 		
 		NucleusMesh result = new NucleusMesh(this);
 		
@@ -359,14 +368,14 @@ public class NucleusMesh implements Loggable {
 	 * @param f
 	 * @return
 	 */
-	private NucleusMeshFace getFace(NucleusMeshFace test){
+	protected NucleusMeshFace getFace(NucleusMeshFace test){
 		
 		for(NucleusMeshFace f : faces){
 			if(f.equals(test)){
 				return f;
 			}
 		}
-		
+		finer("Cannot find face in mesh: "+test.toString());
 		return null;
 	}
 	
@@ -382,7 +391,7 @@ public class NucleusMesh implements Loggable {
 				return e;
 			}
 		}
-		
+		finer("Cannot find edge in mesh: "+test.toString());
 		return null;
 	}
 	
@@ -468,7 +477,7 @@ public class NucleusMesh implements Loggable {
 						.wrapIndex(index+nucleus.getBorderIndex(BorderTag.REFERENCE_POINT), segment.getTotalLength());
 				
 				finest("Fetching point at index "+correctedIndex);
-				addVertex(nucleus.getBorderPoint(correctedIndex), true);
+				addVertex(nucleus.getOriginalBorderPoint(correctedIndex), true);
 			}
 			
 		}
@@ -479,9 +488,8 @@ public class NucleusMesh implements Loggable {
 	 * @param p
 	 * @return
 	 */
-	private NucleusMeshFace getFaceContaining(XYPoint p){
-		if(nucleus.containsPoint(p)){
-			
+	protected NucleusMeshFace getFaceContaining(XYPoint p){
+		if(nucleus.containsOriginalPoint(p)){
 			for(NucleusMeshFace f : faces){
 				if(f.contains(p)){
 					return f;
@@ -492,34 +500,20 @@ public class NucleusMesh implements Loggable {
 		return null;
 	}
 	
-	
-	/**
-	 * Given an image, find the pixels within the nucleus, and convert them to face
-	 * coordinates
-	 * @param ip
-	 * @return
-	 */
-	public Map<NucleusMeshFaceCoordinate, Integer> getFaceCoordinates(ImageProcessor ip){
+	protected boolean hasFaceContaining(XYPoint p){
 		
-		Map<NucleusMeshFaceCoordinate, Integer> map = new HashMap<NucleusMeshFaceCoordinate, Integer>();
-		
-		for(int x=0; x<ip.getWidth(); x++){
-			
-			for(int y=0; y<ip.getHeight(); y++){
-				XYPoint p = new XYPoint(x, y);
+		if(nucleus.containsOriginalPoint(p)){
 
-				if(nucleus.containsPoint(p)){
-					int pixel = ip.get(x, y);
-					NucleusMeshFace f = getFaceContaining(p);
-					NucleusMeshFaceCoordinate c = f.getFaceCoordinate(p);
-					map.put(c, pixel);
+
+			for(NucleusMeshFace f : faces){
+				if(f.contains(p)){
+					return true;
 				}
-				
 			}
-		}
-		return map;
-	}
 
+		} 
+		return false;
+	}
 	
 	/**
 	 * Starting at the reference point, create vertices

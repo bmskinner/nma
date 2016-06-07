@@ -188,18 +188,17 @@ public class NucleusMeshFace {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
+		
 		NucleusMeshFace other = (NucleusMeshFace) obj;
-		if (vertices == null) {
-			if (other.vertices != null)
+
+		// vertex tests for name and peripheral only
+		for(NucleusMeshVertex v : vertices){
+			if( ! other.vertices.contains(v)){
 				return false;
-		} else {
-			for(NucleusMeshVertex v : vertices){
-				if( ! other.vertices.contains(v)){
-					return false;
-				}
 			}
 		}
-			
+		
+		
 		return true;
 	}
 
@@ -231,21 +230,37 @@ public class NucleusMeshFace {
 	public String toString(){
 		StringBuilder b = new StringBuilder();
 		b.append("Face: Area: "+this.getArea()+" | Value: "+this.getValue()+"\n");
-		for(NucleusMeshEdge e : edges){
-			b.append(e.toString()+"\n");
+
+		for(NucleusMeshVertex v : vertices){
+			b.append(v.toString()+"\n");
 		}
 		return b.toString();
 	}
 	
+	/**
+	 * Test if the given point is within the face
+	 * @param p
+	 * @return
+	 */
 	public boolean contains(XYPoint p){
 		
+		return this.toPath().contains(p.asPoint());
+
+	}
+	
+	/**
+	 * Generate a closed path for the face
+	 * @return
+	 */
+	public Path2D toPath(){
 		Path2D path = new Path2D.Double();
 
 		int i=0;
 		for(NucleusMeshVertex v : vertices){
-			if(i==0){
+			
+			
+			if( i++ == 0){
 				path.moveTo(v.getPosition().getX(), v.getPosition().getY());
-				i++;
 			} else {
 				path.lineTo(v.getPosition().getX(), v.getPosition().getY());
 			}
@@ -253,7 +268,7 @@ public class NucleusMeshFace {
 			
 		}
 		path.closePath();
-		return path.contains(p.asPoint());
+		return path;
 	}
 	
 	
@@ -475,6 +490,52 @@ public class NucleusMeshFace {
 			
 			// Return at point
 			return position;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			long temp;
+			temp = Double.doubleToLongBits(i1);
+			result = prime * result + (int) (temp ^ (temp >>> 32));
+			temp = Double.doubleToLongBits(p1);
+			result = prime * result + (int) (temp ^ (temp >>> 32));
+			temp = Double.doubleToLongBits(p2);
+			result = prime * result + (int) (temp ^ (temp >>> 32));
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			NucleusMeshFaceCoordinate other = (NucleusMeshFaceCoordinate) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (Double.doubleToLongBits(i1) != Double
+					.doubleToLongBits(other.i1))
+				return false;
+			if (Double.doubleToLongBits(p1) != Double
+					.doubleToLongBits(other.p1))
+				return false;
+			if (Double.doubleToLongBits(p2) != Double
+					.doubleToLongBits(other.p2))
+				return false;
+			return true;
+		}
+
+		private NucleusMeshFace getOuterType() {
+			return NucleusMeshFace.this;
+		}
+		
+		public String toString(){
+			return i1 + " : " + p1 + " : " + p2;
 		}
 		
 	}

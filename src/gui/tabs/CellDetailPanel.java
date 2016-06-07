@@ -32,6 +32,7 @@ import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.components.panels.RotationSelectionSettingsPanel;
 import gui.dialogs.CellImageDialog;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
+import ij.process.ImageProcessor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -76,10 +77,13 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYAnnotation;
+import org.jfree.chart.annotations.XYShapeAnnotation;
 
 import analysis.AnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshBuilder;
+import analysis.mesh.NucleusMeshImage;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
@@ -633,10 +637,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		private JCheckBox showHookHump = new JCheckBox("Show hook ROI");
 		private FixedAspectRatioChartPanel panel;
 		private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus");
-		
-//		boolean drawPointOverlay = false; // debugging
-//		private ShapeOverlay overlay = new ShapeOverlay();
-		
+		private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp to consensus");
+				
 		protected OutlinePanel(){
 			
 			// make the chart for each nucleus
@@ -653,14 +655,17 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			makeMeshPanel.addActionListener(this);
 			makeMeshPanel.setEnabled(false);
 			
+			warpMeshPanel.addActionListener(this);
+			warpMeshPanel.setEnabled(false);
+			
 			settingsPanel.add(rotationPanel);
 			settingsPanel.add(createHookHumpPanel());
 			settingsPanel.add(makeMeshPanel);
+			settingsPanel.add(warpMeshPanel);
 			
 			this.add(settingsPanel, BorderLayout.NORTH);
 			
 			panel = new FixedAspectRatioChartPanel(chart);
-//			panel.addOverlay(overlay);
 			panel.addComponentListener(new ComponentAdapter() {
 				@Override
 				public void componentResized(ComponentEvent e) {
@@ -692,6 +697,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					rotationPanel.setEnabled(false);
 					showHookHump.setEnabled(false);
 					makeMeshPanel.setEnabled(false);
+					warpMeshPanel.setEnabled(false);
 					chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 				} else {
 					
@@ -711,7 +717,9 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 						showHookHump.setEnabled(  false );
 					}
 					
-					makeMeshPanel.setEnabled(true);
+					// Only allow one mesh activity to be active
+					makeMeshPanel.setEnabled(  ! warpMeshPanel.isSelected() );
+					warpMeshPanel.setEnabled(  ! makeMeshPanel.isSelected() );
 
 					if(makeMeshPanel.isSelected()){
 
@@ -723,8 +731,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							      : new NucleusMesh(cell.getNucleus().getVerticallyRotatedNucleus());
 								
 							
-//							NucleusMesh mesh1 = new NucleusMesh(cell.getNucleus());
-//							NucleusMesh mesh1 = new NucleusMesh(cell.getNucleus().getVerticallyRotatedNucleus());
 							NucleusMesh mesh2 = new NucleusMesh(activeDataset().getCollection().getConsensusNucleus(), mesh1);
 							
 							NucleusMesh result = mesh1.compareTo(mesh2);
@@ -743,6 +749,42 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 
 						} 
+						
+						
+					} else if(warpMeshPanel.isSelected()) { // Try to warp the nucleus onto the consensus mesh
+						
+						if(activeDataset().getCollection().hasConsensusNucleus()){
+							
+							NucleusMesh mesh1 = new NucleusMesh(cell.getNucleus());
+							NucleusMesh mesh2 = new NucleusMesh(activeDataset()
+									.getCollection()
+									.getConsensusNucleus(), mesh1);
+							
+							NucleusMeshImage im = new NucleusMeshImage(mesh1, cell.getNucleus().getImage());
+							log(im.toString());
+							ImageProcessor ip = im.meshToImage(mesh2);
+							
+							chart = OutlineChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode, showHook, component);
+							
+							// Clear existing pixel annotations
+							List<Object> ann = chart.getXYPlot().getAnnotations();
+							for(Object a : ann){
+								if (a.getClass().isInstance(XYShapeAnnotation.class)){
+									chart.getXYPlot().removeAnnotation((XYAnnotation) a);
+								}
+								
+							}
+							
+							
+							OutlineChartFactory.drawImageAsAnnotation(chart.getXYPlot(), ip);
+							
+							chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+						} else {
+							chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+						}
+						
+						
+						
 					} else {
 						chart = OutlineChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode, showHook, component);
 					}
@@ -755,15 +797,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				if(cell!=null){
 					panel.restoreAutoBounds();
 										
-//					overlay.clearShapes();
-//
-//					for(BorderPoint p : cell.getNucleus().getBorderList()){
-//						Shape s = new Ellipse2D.Double(p.getX(), p.getY(), 1d, 1d);
-//						ShapeOverlayObject ov = new ShapeOverlayObject(s);
-//						ov.setVisible(drawPointOverlay);
-//						overlay.addShape(ov);
-//					}
-//					panel.addOverlay(overlay);
+
 				}
 				
 			} catch(Exception e){

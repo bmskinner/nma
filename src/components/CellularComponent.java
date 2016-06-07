@@ -185,6 +185,13 @@ public interface CellularComponent {
 	public BorderPoint getBorderPoint(int i);
 	
 	/**
+	 * Get a copy of the original (non-offset) border point at the given index
+	 * @param i
+	 * @return
+	 */
+	public BorderPoint getOriginalBorderPoint(int i);
+	
+	/**
 	 * Get the index of the given point in the border list
 	 * @param p
 	 * @return
@@ -244,7 +251,9 @@ public interface CellularComponent {
 	public boolean containsPoint(XYPoint p);
 	
 	/**
-	 * Test if the given point is within the original nucleus
+	 * Test if the given point is within the object. This uses
+	 * the original coordinates of the object within its source
+	 * image
 	 * @param p
 	 * @return
 	 */

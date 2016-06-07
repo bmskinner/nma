@@ -282,10 +282,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	 * 
 	 */
 	
-//	public BorderPoint getPoint(int i){
-//		return new BorderPoint(this.borderList.get(i));
-//	}
-	
+
 	public int getBorderLength(){
 		return this.borderList.size();
 	}
@@ -293,7 +290,12 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 
 	public BorderPoint getBorderPoint(int i){
 		return this.borderList.get(i);
-//		return new BorderPoint(this.borderList.get(i));
+	}
+	
+	public BorderPoint getOriginalBorderPoint(int i){
+//		return this.borderList.get(i);
+		BorderPoint p = getBorderPoint(i);
+		return new BorderPoint( p.getX() + getPosition()[X_BASE], p.getY() + getPosition()[Y_BASE]);
 	}
 	
 	public int getBorderIndex(BorderPoint p){

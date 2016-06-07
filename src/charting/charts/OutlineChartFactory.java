@@ -156,17 +156,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			// duplicate the cell
 			Cell newCell = new Cell();
 			Nucleus verticalNucleus = cell.getNucleus().getVerticallyRotatedNucleus();
-//			duplicate();
+
 			newCell.setNucleus(verticalNucleus);
-//			if(verticalNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && verticalNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
-//
-//				// Rotate vertical
-//				BorderPoint[] points = verticalNucleus.getBorderPointsForVerticalAlignment();
-//				verticalNucleus.alignPointsOnVertical(points[0], points[1] );
-//			} else {
-//				// If the verticals are not present, use the orientation point
-//				verticalNucleus.rotatePointToBottom(verticalNucleus.getBorderTag(BorderTag.ORIENTATION_POINT));
-//			}
+
 			cell = newCell;
 			
 			// Need to have top point at the top of the image
@@ -349,6 +341,27 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			}
 		}
 	}
+	
+	public static void drawImageAsAnnotation(XYPlot plot, ImageProcessor ip){
+		XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
+		int padding = 10;
+		
+		for(int x=0; x<ip.getWidth(); x++){
+			for(int y=0; y<ip.getHeight(); y++){
+
+				//				int pixel = im.getRGB(x, y);
+				int pixel = ip.get(x, y);
+				Color col = new Color(pixel, pixel, pixel, 255);
+
+				// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
+				Rectangle2D r = new Rectangle2D.Double(x-padding-0.1, y-padding-0.1, 1.2, 1.2);
+				XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+
+				rend.addAnnotation(a, Layer.BACKGROUND);
+			}
+		}
+	}
+	
 	
 	/**
 	 * Draw the greyscale image from teh given channel on the plot
@@ -605,14 +618,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		
-		
-		
-		
+
 		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
 		renderer.setBaseSeriesVisibleInLegend(false);
 		renderer.setBaseStroke(ChartComponents.MARKER_STROKE);
 		
-		double max = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue();
 		for(int series=0; series<dataset.getSeriesCount(); series++){
 			
 			double ratio = dataset.getRatio(dataset.getSeriesKey(series));
@@ -633,20 +643,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 			for(NucleusMeshFace f : mesh.getFaces()){
 				
-				Path2D path = new Path2D.Double();
-
-				int i=0;
-				for(NucleusMeshVertex v : f.getVertices()){
-					if(i==0){
-						path.moveTo(v.getPosition().getX(), v.getPosition().getY());
-						i++;
-					} else {
-						path.lineTo(v.getPosition().getX(), v.getPosition().getY());
-					}
-					
-					
-				}
-				path.closePath();
+				Path2D path = f.toPath();
 				
 				Color colour = getGradientColour(f.getLog2Ratio(), log2Ratio); // not quite black
 				
