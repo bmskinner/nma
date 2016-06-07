@@ -703,7 +703,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 						showHookHump.setEnabled(false);
 					}
 					
-					rotationPanel.setEnabled( ! makeMeshPanel.isSelected() );
+					rotationPanel.setEnabled(true);
 					showHookHump.setEnabled(  ! makeMeshPanel.isSelected() );
 					
 					// Don't enable the hook-hump box unless we have a rodent sperm dataset
@@ -716,13 +716,25 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					if(makeMeshPanel.isSelected()){
 
 						if(activeDataset().getCollection().hasConsensusNucleus()){
-
-							NucleusMesh mesh1 = new NucleusMesh(cell.getNucleus().getVerticallyRotatedNucleus());
+							
+							
+							NucleusMesh mesh1 = rotateMode.equals(RotationMode.ACTUAL) 
+								  ? new NucleusMesh(cell.getNucleus())
+							      : new NucleusMesh(cell.getNucleus().getVerticallyRotatedNucleus());
+								
+							
+//							NucleusMesh mesh1 = new NucleusMesh(cell.getNucleus());
+//							NucleusMesh mesh1 = new NucleusMesh(cell.getNucleus().getVerticallyRotatedNucleus());
 							NucleusMesh mesh2 = new NucleusMesh(activeDataset().getCollection().getConsensusNucleus(), mesh1);
 							
 							NucleusMesh result = mesh1.compareTo(mesh2);
 
-							ChartOptions options = new ChartOptionsBuilder().setShowAnnotations(false).build();
+							ChartOptions options = new ChartOptionsBuilder()
+								.setShowAnnotations(false)
+								.setShowMeshEdges(false)
+								.setShowMeshFaces(true)
+								.setInvertYAxis( rotateMode.equals(RotationMode.ACTUAL) ) // only invert for actual
+								.build();
 							
 //							chart = OutlineChartFactory.createMeshChart(mesh1, 0.5, options);
 							chart = OutlineChartFactory.createMeshChart(result, 0.5, options);

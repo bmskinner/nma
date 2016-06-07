@@ -164,7 +164,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		maxRatioSpinner.setEditor(maxNumberEditor);
 		
 		SpinnerNumberModel meshSizeModel = new SpinnerNumberModel(10,
-				1,
+				2,
 				100,
 				1);
 		meshSizeSpinner = new JSpinner(meshSizeModel);

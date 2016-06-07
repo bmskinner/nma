@@ -607,6 +607,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		
 		
+		
 		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
 		renderer.setBaseSeriesVisibleInLegend(false);
 		renderer.setBaseStroke(ChartComponents.MARKER_STROKE);
@@ -698,6 +699,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		chart.getXYPlot().getDomainAxis().setVisible(options.isShowXAxis());
 		chart.getXYPlot().getRangeAxis().setVisible(options.isShowYAxis());
 		
+		chart.getXYPlot().getDomainAxis().setInverted(options.isInvertXAxis());
+		chart.getXYPlot().getRangeAxis().setInverted(options.isInvertYAxis());
 		
 		return chart;
 	}

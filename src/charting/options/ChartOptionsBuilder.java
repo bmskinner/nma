@@ -69,6 +69,9 @@ public class ChartOptionsBuilder {
 	// Chart axis options
 	private boolean showXAxis           = true;
 	private boolean showYAxis           = true;
+	private boolean invertXAxis         = false;
+	private boolean invertYAxis         = false;
+	
 	
 	public ChartOptionsBuilder(){
 		
@@ -209,6 +212,16 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
+	public ChartOptionsBuilder setInvertXAxis(boolean b){
+		this.invertXAxis = b;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setInvertYAxis(boolean b){
+		this.invertYAxis = b;
+		return this;
+	}
+	
 	public ChartOptions build(){
 		ChartOptions result =  new ChartOptions(list, programLogger);
 		result.setSwatch(swatch);
@@ -236,6 +249,8 @@ public class ChartOptionsBuilder {
 		
 		result.setShowXAxis(showXAxis);
 		result.setShowYAxis(showYAxis);
+		result.setInvertXAxis(invertXAxis);
+		result.setInvertYAxis(invertYAxis);
 		return result;
 	}
 	

@@ -58,6 +58,8 @@ public class ChartOptions extends AbstractOptions {
 	// Chart axis options
 	private boolean showXAxis           = true;
 	private boolean showYAxis           = true;
+	private boolean invertXAxis         = false;
+	private boolean invertYAxis         = false;
 	
 	public ChartOptions(List<AnalysisDataset> list){
 		this(list, null);
@@ -240,6 +242,24 @@ public class ChartOptions extends AbstractOptions {
 	public void setShowYAxis(boolean showYAxis) {
 		this.showYAxis = showYAxis;
 	}
+	
+	
+
+	public boolean isInvertXAxis() {
+		return invertXAxis;
+	}
+
+	public void setInvertXAxis(boolean invertXAxis) {
+		this.invertXAxis = invertXAxis;
+	}
+
+	public boolean isInvertYAxis() {
+		return invertYAxis;
+	}
+
+	public void setInvertYAxis(boolean invertYAxis) {
+		this.invertYAxis = invertYAxis;
+	}
 
 	@Override
 	public int hashCode() {
@@ -264,6 +284,8 @@ public class ChartOptions extends AbstractOptions {
 		
 		result = prime * result + (showXAxis ? 1231 : 1237);
 		result = prime * result + (showYAxis ? 1231 : 1237);
+		result = prime * result + (invertXAxis ? 1231 : 1237);
+		result = prime * result + (invertYAxis ? 1231 : 1237);
 		
 		
 		result = prime * result + signalGroup;
@@ -315,7 +337,10 @@ public class ChartOptions extends AbstractOptions {
 			return false;
 		if (showYAxis != other.showYAxis)
 			return false;
-		
+		if (invertXAxis != other.invertXAxis)
+			return false;
+		if (invertYAxis != other.invertYAxis)
+			return false;
 		
 		if (signalGroup != other.signalGroup)
 			return false;
