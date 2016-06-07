@@ -216,18 +216,15 @@ public class NucleusMesh implements Loggable {
 	 * @return
 	 */
 	private NucleusMeshFace getFace(NucleusMeshVertex v1, NucleusMeshVertex v2, NucleusMeshVertex v3){
+		
 		if(this.contains(v1) && this.contains(v2) && this.contains(v3)){
-			
-			NucleusMeshEdge e1 = this.getEdge(v1, v2);
-			NucleusMeshEdge e2 = this.getEdge(v1, v3);
-			NucleusMeshEdge e3 = this.getEdge(v2, v3);
-			
+						
 			for(NucleusMeshFace f : faces){
-				if(f.hasEdge(e1) && f.hasEdge(e2) && f.hasEdge(e3)){
+				if(f.contains(v1) && f.contains(v2) && f.contains(v3)){
 					return f;
 				}
 			}
-			NucleusMeshFace f = new NucleusMeshFace(e1, e2, e3);
+			NucleusMeshFace f = new NucleusMeshFace(v1, v2, v3);
 			faces.add(f);
 			return f;
 			
@@ -346,20 +343,6 @@ public class NucleusMesh implements Loggable {
 			double ratio = our.getArea() / their.getArea();
 			
 			resultFaces.get(i).setValue(ratio);
-			
-//			NucleusMeshFace f = reimsult.getFace(our);
-//			if( f != null){
-//				result.getFace(our).setValue(ratio);
-//			} else {
-//				warn("Missing face in comparison mesh : "+our.toString());
-//				warn("Our mesh:");
-//				log(this.toString());
-//				warn("Their mesh:");
-//				log(mesh.toString());
-//				warn("Result mesh:");
-//				log(result.toString());
-//				return result;
-//			}
 			
 		}
 		
@@ -592,11 +575,11 @@ public class NucleusMesh implements Loggable {
 //			
 //			
 			// Make the faces
-			this.getFace(p1_a, i1, i2);
-			this.getFace(p1_a, p2_a, i2);
+			this.getFace(p1_a, i1, p2_a);
+			this.getFace(p2_a, i1, i2);
 			
-			this.getFace(p1_x, i1, i2);
-			this.getFace(p1_x, p2_x, i2);
+			this.getFace(p1_x, i1, p2_x);
+			this.getFace(p2_x, i1, i2);
 		}
 		
 		// create the top face - RP to nearest peripheral indexes
@@ -607,9 +590,17 @@ public class NucleusMesh implements Loggable {
 		
 		// if needed, create the bottom face (final intenal vertex to central peripheral vertices)
 		if(peripheralVertices.size()%2!=0){
-			this.getFace(peripheralVertices.get(halfArray), 
-					peripheralVertices.get(halfArray+1), 
-					internalVertices.get(internalVertices.size()-1));
+			
+			NucleusMeshVertex p1 = peripheralVertices.get(halfArray);
+			NucleusMeshVertex p2 = peripheralVertices.get(halfArray+1);
+			NucleusMeshVertex i1 = internalVertices.get(internalVertices.size()-1);
+			
+			// Ensure the edges are created
+			getEdge(p1, p2);
+			getEdge(p1, i1);
+			getEdge(p2, i1);
+			
+			this.getFace(p1, p2, i1);
 		}
 		
 

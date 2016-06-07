@@ -76,11 +76,27 @@ public class NucleusMeshVertex {
 	public boolean hasEdgeTo(NucleusMeshVertex v){
 		
 		for(NucleusMeshEdge e : edges){
-			if( e.getV1().equals(v)  || e.getV2().equals(v)){
+			if( e.getV1().equals(v)  || e.getV2().equals(v)) {
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Get the edge linking this vertex to the given vertex, if present.
+	 * Otherwise returns null
+	 * @param v
+	 * @return
+	 */
+	public NucleusMeshEdge getEdgeTo(NucleusMeshVertex v){
+		
+		for(NucleusMeshEdge e : edges){
+			if( e.getV1().equals(v)  || e.getV2().equals(v)){
+				return e;
+			}
+		}
+		return null;
 	}
 	
 	public double getLengthTo(NucleusMeshVertex v){
@@ -122,11 +138,14 @@ public class NucleusMeshVertex {
 			return false;
 		if (peripheral != other.peripheral)
 			return false;
-		if (position == null) {
-			if (other.position != null)
-				return false;
-		} else if (!position.equals(other.position))
-			return false;
+		
+		// Don't worry about position - the name will allow equality
+		// testing between meshes
+//		if (position == null) {
+//			if (other.position != null)
+//				return false;
+//		} else if (!position.equals(other.position))
+//			return false;
 		return true;
 	}
 	

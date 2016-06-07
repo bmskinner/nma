@@ -35,6 +35,9 @@ public class NucleusMeshEdge {
 		this.v1 = v1;
 		this.v2 = v2;
 		this.value = ratio;
+		
+		v1.addEdge(this);
+		v2.addEdge(this);
 	}
 	
 	/**
@@ -44,7 +47,7 @@ public class NucleusMeshEdge {
 	public NucleusMeshEdge(NucleusMeshEdge e){
 		this.v1 = new NucleusMeshVertex(e.v1);
 		this.v2 = new NucleusMeshVertex(e.v2);
-
+		
 		this.value = e.value;
 	}
 
@@ -134,22 +137,6 @@ public class NucleusMeshEdge {
 	}
 	
 
-
-	/**
-	 * Compare the length of this edge to the given edge, and return
-	 * a new edge with the ratio
-	 * @param e
-	 * @return
-	 */
-	public NucleusMeshEdge compare(NucleusMeshEdge e){
-		
-		double thisDistance = getLength();
-		double thatDistance = e.getLength();
-		
-		double ratio = thisDistance / thatDistance ;
-		return new NucleusMeshEdge(v1, v2, ratio);
-		
-	}
 	
 	@Override
 	public int hashCode() {
