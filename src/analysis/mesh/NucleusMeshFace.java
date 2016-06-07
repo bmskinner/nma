@@ -4,11 +4,12 @@ import java.awt.geom.Path2D;
 import java.util.HashSet;
 import java.util.Set;
 
+import logging.Loggable;
 import stats.Stats;
 import components.generic.Equation;
 import components.generic.XYPoint;
 
-public class NucleusMeshFace {
+public class NucleusMeshFace implements Loggable {
 	
 	final private Set<NucleusMeshEdge> edges      = new  HashSet<NucleusMeshEdge>();
 	
@@ -489,6 +490,7 @@ public class NucleusMeshFace {
 			XYPoint position = eq1.getIntercept(eq2);
 			
 			// Return at point
+			finest("Found position "+position.toString());
 			return position;
 		}
 
