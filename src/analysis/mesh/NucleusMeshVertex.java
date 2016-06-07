@@ -99,6 +99,7 @@ public class NucleusMeshVertex {
 		return null;
 	}
 	
+	
 	public double getLengthTo(NucleusMeshVertex v){
 		return position.getLengthTo(v.getPosition());
 	}
@@ -107,6 +108,11 @@ public class NucleusMeshVertex {
 		return position.overlapsPerfectly(v.position);
 	}
 	
+	public int getNumber(){
+		String[] chars = this.name.split("");
+		return Integer.valueOf(chars[1]);
+	}
+		
 	public String toString(){
 		return this.name+": "+position.toString();
 	}

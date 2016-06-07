@@ -1,9 +1,11 @@
 package analysis.mesh;
 
+import java.awt.geom.Path2D;
 import java.util.HashSet;
 import java.util.Set;
 
 import stats.Stats;
+import components.generic.Equation;
 import components.generic.XYPoint;
 
 public class NucleusMeshFace {
@@ -129,6 +131,40 @@ public class NucleusMeshFace {
 		
 	}
 	
+	/**
+	 * Get the vertex opposite the given edge. This is the vertex
+	 * that does not contain the edge.
+	 * @param e
+	 * @return
+	 */
+	private NucleusMeshVertex getOppositeVertex(NucleusMeshEdge e){
+
+		for(NucleusMeshVertex v : vertices){
+			if( ! v.getEdges().contains(e)){
+				return v;
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Get the edge opposite the given vertex. This is the edge
+	 * that does not contain the vertex.
+	 * @param e
+	 * @return
+	 */
+	private NucleusMeshEdge getOppositeEdge(NucleusMeshVertex v){
+		
+		for(NucleusMeshEdge e : edges){
+			if( ! e.containsVertex(v)){
+				return e;
+			}
+		}
+		return null;
+		
+	}
+	
 
 	
 	
@@ -199,5 +235,247 @@ public class NucleusMeshFace {
 			b.append(e.toString()+"\n");
 		}
 		return b.toString();
+	}
+	
+	public boolean contains(XYPoint p){
+		
+		Path2D path = new Path2D.Double();
+
+		int i=0;
+		for(NucleusMeshVertex v : vertices){
+			if(i==0){
+				path.moveTo(v.getPosition().getX(), v.getPosition().getY());
+				i++;
+			} else {
+				path.lineTo(v.getPosition().getX(), v.getPosition().getY());
+			}
+			
+			
+		}
+		path.closePath();
+		return path.contains(p.asPoint());
+	}
+	
+	
+	
+	/**
+	 * Get the internal vertex of the face
+	 * @return
+	 */
+	private NucleusMeshVertex getInternalVertex(){
+		
+		for(NucleusMeshVertex v : vertices){
+			 if( ! v.isPeripheral() ){
+				 return v;
+			 }
+		}
+		return null;
+		
+	}
+	
+	/**
+	 * Get the lower peripheral vertex of the face
+	 * @return
+	 */
+	private NucleusMeshVertex getLowerPeripheralVertex(){
+		
+		int index = Integer.MAX_VALUE;
+		NucleusMeshVertex result = null;
+		
+		for(NucleusMeshVertex v : vertices){
+			 if( v.isPeripheral() ){
+				 if(v.getNumber()<index){
+					 result=v;
+				 }
+			 }
+		}
+		return result;	
+	}
+	
+	/**
+	 * Get the upper peripheral vertex of the face
+	 * @return
+	 */
+	private NucleusMeshVertex getHigherPeripheralVertex(){
+		
+		int index = -1;
+		NucleusMeshVertex result = null;
+		
+		for(NucleusMeshVertex v : vertices){
+			 if( v.isPeripheral() ){
+				 if(v.getNumber()>index){
+					 result=v;
+				 }
+			 }
+		}
+		return result;	
+	}
+	
+	
+	/**
+	 * Get the proportional distance of the given point along the edge
+	 * opposite the given vertex
+	 * @param v the vertex opposite the edge
+	 * @param p the point within the face
+	 * @return
+	 */
+	private double getEdgeProportion(NucleusMeshVertex v, XYPoint p){
+		
+		// Line from vertex to point
+		Equation eq1 = new Equation(v.getPosition(), p);
+		
+		// Edge opposite the vertex
+		NucleusMeshEdge oppEdge = this.getOppositeEdge(v);
+		oppEdge = correctEdgeOrientation(oppEdge);
+		
+		NucleusMeshVertex o1 = oppEdge.getV1(); 
+		NucleusMeshVertex o2 = oppEdge.getV2(); 
+		
+		// Line marking opposite edge
+		Equation eq2 = new Equation(o1.getPosition(), o2.getPosition());
+		
+		// Position on edge intercepting line from vertex through point p
+		XYPoint intercept = eq2.getIntercept(eq1);
+		
+		// Proportion through edge
+		double proportion = oppEdge.getPositionProportion(intercept);
+		return proportion;
+	}
+	
+	/**
+	 * Check that v1 is the internal vertex, or the lower perpheral vertex.
+	 * If not, return new new edge with reversed orientation
+	 * @param e
+	 * @return
+	 */
+	private NucleusMeshEdge correctEdgeOrientation(NucleusMeshEdge e){
+		// Identify and correct the orientation of the edges
+		NucleusMeshVertex p1 = getLowerPeripheralVertex();
+		NucleusMeshVertex p2 = getHigherPeripheralVertex();
+		NucleusMeshVertex i1 = getInternalVertex();
+		
+		NucleusMeshVertex o1 = e.getV1(); 
+		NucleusMeshVertex o2 = e.getV2(); 
+					
+		if(o1.equals(p1) && o2.equals(i1)){
+			return e.reverse();
+		}
+		
+		if(o1.equals(p2) && o2.equals(i1)){
+			return e.reverse();
+		}
+		
+		if(o1.equals(p2) && o2.equals(p1)){
+			return e.reverse();
+		}
+
+		return e;
+	}
+	
+	/**
+	 * Given a point within the face, get the face coordinate
+	 * @param p
+	 * @return
+	 */
+	public NucleusMeshFaceCoordinate getFaceCoordinate(XYPoint p){
+		
+		if( ! contains(p)  ){
+			throw new IllegalArgumentException("Point is not within face: "+p.toString());
+		}
+		
+		NucleusMeshVertex p1 = getLowerPeripheralVertex();
+		NucleusMeshVertex p2 = getHigherPeripheralVertex();
+		NucleusMeshVertex i1 = getInternalVertex();
+		
+		double p1p = getEdgeProportion(p1, p);
+		double p2p = getEdgeProportion(p2, p);
+		double i1p = getEdgeProportion(i1, p);
+		
+		return new NucleusMeshFaceCoordinate(p1p, p2p, i1p);
+
+	}
+	
+	/**
+	 * This tracks coordinates within the face based on intersecting lines
+	 * between vertices and proportional distances along opposite edges
+	 * along edges. Immutable.
+	 * @author bms41
+	 *
+	 */
+	public class NucleusMeshFaceCoordinate{
+				
+		// edge opposite peripheral vertex with lower number
+		// Value runs from 0 at internal vertex to 1 at peripheral vertex
+		final private double p1; 
+		
+		// edge opposite peripheral vertex with higher number
+		// Value runs from 0 at internal vertex to 1 at peripheral vertex
+		final private double p2; 
+		
+		
+		// edge opposite internal vertex
+		// Value runs from 0 at peripheral vertex with lower number to 1 at peripheral vertex with higher number
+		final private double i1; 
+		
+		public NucleusMeshFaceCoordinate(double p1, double p2, double i1){
+			
+			if(p1>1 || p2>1 || i1>1){
+				throw new IllegalArgumentException("Coordinates must be less than 1");
+			}
+			
+			if(p1<0 || p2<0 || i1<0){
+				throw new IllegalArgumentException("Coordinates must be greater than 0");
+			}
+			
+			this.p1 = p1;
+			this.p2 = p2;
+			this.i1 = i1;
+		}
+		
+		/**
+		 * Convert the face coordinate into the cartesian coordinates in the given face 
+		 * @param face
+		 * @return
+		 */
+		public XYPoint getPixelCoordinate(NucleusMeshFace face){
+			
+			// Identify the vertices
+			NucleusMeshVertex p1 = face.getLowerPeripheralVertex();
+			NucleusMeshVertex p2 = face.getHigherPeripheralVertex();
+			NucleusMeshVertex i1 = face.getInternalVertex();
+			
+			NucleusMeshEdge i1_p1;
+			NucleusMeshEdge i1_p2;
+			NucleusMeshEdge p1_p2;
+						
+			// Identify the edges
+			i1_p1 = i1.getEdgeTo(p1);
+			i1_p2 = i1.getEdgeTo(p2);
+			p1_p2 = p1.getEdgeTo(p2);
+			
+			// Identify and correct the orientation of the edges
+			i1_p1 = correctEdgeOrientation(i1_p1);
+			i1_p2 = correctEdgeOrientation(i1_p2);
+			p1_p2 = correctEdgeOrientation(p1_p2);
+						
+
+			// Draw lines
+			XYPoint i1_p1_prop = i1_p1.getProportionalPosition(this.p2);
+			Equation eq1 = new Equation(p2.getPosition(), i1_p1_prop);
+			
+			XYPoint i1_p2_prop = i1_p2.getProportionalPosition(this.p1);
+			Equation eq2 = new Equation(p1.getPosition(), i1_p2_prop);
+			
+			
+			
+			
+			
+			// Find intersection
+			XYPoint position = eq1.getIntercept(eq2);
+			
+			// Return at point
+			return position;
+		}
+		
 	}
 }

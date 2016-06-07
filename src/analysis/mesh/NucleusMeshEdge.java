@@ -59,6 +59,10 @@ public class NucleusMeshEdge {
 		return v2;
 	}
 	
+	public NucleusMeshEdge reverse(){
+		return new NucleusMeshEdge(new NucleusMeshVertex(v2), new NucleusMeshVertex(v1), value);
+	}
+	
 	public void setValue(double d){
 		this.value = d;
 	}
@@ -134,6 +138,38 @@ public class NucleusMeshEdge {
 		}
 		
 		return this.overlaps(e);
+	}
+	
+	/**
+	 * Get the point a given fraction of the way along the edge (starting at v1)
+	 * @param d
+	 * @return
+	 */
+	public XYPoint getProportionalPosition(double d){
+		
+		return Equation.getProportionalDistance(v1.getPosition(), v2.getPosition(), d);
+	}
+	
+	/**
+	 * If the point lies on the edge, get the proportional distance along the 
+	 * edge from v1. Otherwise return 0
+	 * @param p
+	 * @return
+	 */
+	public double getPositionProportion(XYPoint p ){
+		
+		Equation eq = new Equation(v1.getPosition(), v2.getPosition());
+		if(eq.isOnLine(p)){
+			
+			double totalLength = v1.getLengthTo(v2);
+			double length = p.getLengthTo(v1.getPosition());
+			
+			return length / totalLength;
+			
+		} else {
+			return 0;
+		}
+		
 	}
 	
 

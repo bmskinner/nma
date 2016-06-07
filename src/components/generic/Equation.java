@@ -95,6 +95,15 @@ public class Equation{
 	public double getC(){
 		return this.c;
 	}
+	
+	/**
+	 * Test if the point fulfils the equation
+	 * @param p
+	 * @return
+	 */
+	public boolean isOnLine(XYPoint p){
+		return p.getY() == (   (m * p.getX())    +c);
+	}
 
 	/**
 	*	Returns a point a given distance away from a given point
@@ -164,7 +173,7 @@ public class Equation{
 	}
 	
 	/**
-	 * Find the intercept between this equation and another
+	 * Find the intercept between this equation and another.
 	 * @param eq
 	 * @return
 	 */
@@ -186,6 +195,29 @@ public class Equation{
 			return c==eq.c; 
 		}
 		return true;
+	}
+	
+	/**
+	 * Get the point that lies proportion of the way between points start and end
+	 * @param start
+	 * @param end
+	 * @param proportion
+	 * @return
+	 */
+	public static XYPoint getProportionalDistance(XYPoint start, XYPoint end, double proportion){
+		
+		Equation eq = new Equation(start, end);
+		double totalLength = start.getLengthTo(end);
+		double propLength  = totalLength * proportion;
+		
+		XYPoint p = eq.getPointOnLine(start, propLength);
+		
+		// check direction of the line
+		if(p.getLengthTo(end) > totalLength){
+			p = eq.getPointOnLine(start, -propLength);
+		}
+		
+		return p;
 	}
 	
 	

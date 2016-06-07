@@ -20,6 +20,8 @@
  *******************************************************************************/
 package analysis.mesh;
 
+import ij.process.ImageProcessor;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import analysis.mesh.NucleusMeshFace.NucleusMeshFaceCoordinate;
 import logging.Loggable;
 import components.AbstractCellularComponent;
 import components.generic.BorderTag;
@@ -470,6 +473,52 @@ public class NucleusMesh implements Loggable {
 			
 		}
 	}
+	
+	/**
+	 * Get the face containing the given point within the nucleus
+	 * @param p
+	 * @return
+	 */
+	private NucleusMeshFace getFaceContaining(XYPoint p){
+		if(nucleus.containsPoint(p)){
+			
+			for(NucleusMeshFace f : faces){
+				if(f.contains(p)){
+					return f;
+				}
+			}
+			
+		} 
+		return null;
+	}
+	
+	
+	/**
+	 * Given an image, find the pixels within the nucleus, and convert them to face
+	 * coordinates
+	 * @param ip
+	 * @return
+	 */
+	public Map<NucleusMeshFaceCoordinate, Integer> getFaceCoordinates(ImageProcessor ip){
+		
+		Map<NucleusMeshFaceCoordinate, Integer> map = new HashMap<NucleusMeshFaceCoordinate, Integer>();
+		
+		for(int x=0; x<ip.getWidth(); x++){
+			
+			for(int y=0; y<ip.getHeight(); y++){
+				XYPoint p = new XYPoint(x, y);
+
+				if(nucleus.containsPoint(p)){
+					int pixel = ip.get(x, y);
+					NucleusMeshFace f = getFaceContaining(p);
+					NucleusMeshFaceCoordinate c = f.getFaceCoordinate(p);
+					map.put(c, pixel);
+				}
+				
+			}
+		}
+		return map;
+	}
 
 	
 	/**
@@ -582,11 +631,21 @@ public class NucleusMesh implements Loggable {
 			this.getFace(p2_x, i1, i2);
 		}
 		
-		// create the top face - RP to nearest peripheral indexes
+		// create the top faces - RP to nearest peripheral indexes to I0
+		getEdge(peripheralVertices.get(0), internalVertices.get(0));
+		getEdge(peripheralVertices.get(1), internalVertices.get(0));
+		getEdge(peripheralVertices.get(peripheralVertices.size()-1), internalVertices.get(0));
+		
 		
 		this.getFace(peripheralVertices.get(0), 
 				peripheralVertices.get(1), 
-				peripheralVertices.get(peripheralVertices.size()-1));
+				internalVertices.get(0));
+		
+		this.getFace(peripheralVertices.get(0), 
+				peripheralVertices.get(peripheralVertices.size()-1), 
+				internalVertices.get(0));
+		
+		
 		
 		// if needed, create the bottom face (final intenal vertex to central peripheral vertices)
 		if(peripheralVertices.size()%2!=0){
