@@ -342,9 +342,22 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		}
 	}
 	
-	public static void drawImageAsAnnotation(XYPlot plot, ImageProcessor ip){
+	public static JFreeChart drawImageAsAnnotation( ImageProcessor ip){
+		
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+						null, null, null, PlotOrientation.VERTICAL, true, true,
+						false);
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		plot.getRangeAxis().setInverted(true);
+		plot.setDataset(0, new DefaultXYDataset());
 		XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
-		int padding = 10;
+		int padding = 0; // what is this?
+		
+		plot.getDomainAxis().setRange(0, ip.getWidth());
+		plot.getRangeAxis().setRange(0, ip.getHeight());
 		
 		for(int x=0; x<ip.getWidth(); x++){
 			for(int y=0; y<ip.getHeight(); y++){
@@ -360,6 +373,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				rend.addAnnotation(a, Layer.BACKGROUND);
 			}
 		}
+		return chart;
 	}
 	
 	

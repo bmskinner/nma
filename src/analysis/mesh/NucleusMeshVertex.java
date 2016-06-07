@@ -109,12 +109,12 @@ public class NucleusMeshVertex {
 	}
 	
 	public int getNumber(){
-		String[] chars = this.name.split("");
-		return Integer.valueOf(chars[1]);
+		String chars = this.name.substring(1); //, replacement)split("");
+		return Integer.valueOf(chars);
 	}
 		
 	public String toString(){
-		return this.name+": "+position.toString();
+		return this.name+": "+position.toString()+" : "+peripheral;
 	}
 
 	@Override

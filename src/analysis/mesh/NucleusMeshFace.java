@@ -230,7 +230,7 @@ public class NucleusMeshFace implements Loggable {
 	
 	public String toString(){
 		StringBuilder b = new StringBuilder();
-		b.append("Face: Area: "+this.getArea()+" | Value: "+this.getValue()+"\n");
+		b.append("Face: "+this.countVertices(true)+" peripheral vertices | Area: "+this.getArea()+" | Value: "+this.getValue()+"\n");
 
 		for(NucleusMeshVertex v : vertices){
 			b.append(v.toString()+"\n");
@@ -273,20 +273,65 @@ public class NucleusMeshFace implements Loggable {
 	}
 	
 	
-	
 	/**
-	 * Get the internal vertex of the face
+	 * Count the number of vertices in the face that are peripheral
+	 * or internal
+	 * @param peripheral
 	 * @return
 	 */
-	private NucleusMeshVertex getInternalVertex(){
+	private int countVertices(boolean peripheral){
+		int count = 0;
+		for(NucleusMeshVertex v : vertices){
+			 if(  v.isPeripheral() ){
+				 count++;
+			 }
+		}
+		
+		if(peripheral){
+			return count;
+		} else {
+			return vertices.size()-count;
+		}
+	}
+	
+	/**
+	 * Get the internal vertex of the face if it has two peripheral
+	 * vertices, or the peripheral vertex if there are two internal vertices
+	 * @return
+	 */
+	private NucleusMeshVertex getLowerInternalVertex(){
+		
+		int index = Integer.MAX_VALUE;
+		NucleusMeshVertex result = null;
 		
 		for(NucleusMeshVertex v : vertices){
 			 if( ! v.isPeripheral() ){
-				 return v;
+				 
+				 int number = v.getNumber();
+				 if( number<index ){
+					 index  = number;
+					 result = v;
+				 }
 			 }
 		}
-		return null;
+		return result;	
+	}
+	
+	private NucleusMeshVertex getHigherInternalVertex(){
 		
+		int index = -1;
+		NucleusMeshVertex result = null;
+		
+		for(NucleusMeshVertex v : vertices){
+			 if( ! v.isPeripheral() ){
+				 int number = v.getNumber();
+				 if( number>index ){
+					 index  = number;
+					 result = v;
+				 }
+			 }
+		}
+		return result;	
 	}
 	
 	/**
@@ -300,8 +345,11 @@ public class NucleusMeshFace implements Loggable {
 		
 		for(NucleusMeshVertex v : vertices){
 			 if( v.isPeripheral() ){
-				 if(v.getNumber()<index){
-					 result=v;
+				 
+				 int number = v.getNumber();
+				 if( number<index ){
+					 index  = number;
+					 result = v;
 				 }
 			 }
 		}
@@ -319,8 +367,10 @@ public class NucleusMeshFace implements Loggable {
 		
 		for(NucleusMeshVertex v : vertices){
 			 if( v.isPeripheral() ){
-				 if(v.getNumber()>index){
-					 result=v;
+				 int number = v.getNumber();
+				 if( number>index ){
+					 index  = number;
+					 result = v;
 				 }
 			 }
 		}
@@ -366,9 +416,11 @@ public class NucleusMeshFace implements Loggable {
 	 */
 	private NucleusMeshEdge correctEdgeOrientation(NucleusMeshEdge e){
 		// Identify and correct the orientation of the edges
-		NucleusMeshVertex p1 = getLowerPeripheralVertex();
-		NucleusMeshVertex p2 = getHigherPeripheralVertex();
-		NucleusMeshVertex i1 = getInternalVertex();
+		boolean usePeripheral = countVertices(true)==2;
+		
+		NucleusMeshVertex p1 = usePeripheral ? getLowerPeripheralVertex() : getLowerInternalVertex();
+		NucleusMeshVertex p2 = usePeripheral ? getHigherPeripheralVertex() : getHigherInternalVertex();
+		NucleusMeshVertex i1 = usePeripheral ? getLowerInternalVertex() : getLowerPeripheralVertex();
 		
 		NucleusMeshVertex o1 = e.getV1(); 
 		NucleusMeshVertex o2 = e.getV2(); 
@@ -399,9 +451,15 @@ public class NucleusMeshFace implements Loggable {
 			throw new IllegalArgumentException("Point is not within face: "+p.toString());
 		}
 		
-		NucleusMeshVertex p1 = getLowerPeripheralVertex();
-		NucleusMeshVertex p2 = getHigherPeripheralVertex();
-		NucleusMeshVertex i1 = getInternalVertex();
+		boolean usePeripheral = countVertices(true)==2;
+		
+		NucleusMeshVertex p1 = usePeripheral ? getLowerPeripheralVertex() : getLowerInternalVertex();
+		NucleusMeshVertex p2 = usePeripheral ? getHigherPeripheralVertex() : getHigherInternalVertex();
+		NucleusMeshVertex i1 = usePeripheral ? getLowerInternalVertex() : getLowerPeripheralVertex();
+		
+//		NucleusMeshVertex p1 = getLowerPeripheralVertex();
+//		NucleusMeshVertex p2 = getHigherPeripheralVertex();
+//		NucleusMeshVertex i1 = getInternalVertex();
 		
 		double p1p = getEdgeProportion(p1, p);
 		double p2p = getEdgeProportion(p2, p);
@@ -456,41 +514,46 @@ public class NucleusMeshFace implements Loggable {
 		public XYPoint getPixelCoordinate(NucleusMeshFace face){
 			
 			// Identify the vertices
-			NucleusMeshVertex p1 = face.getLowerPeripheralVertex();
-			NucleusMeshVertex p2 = face.getHigherPeripheralVertex();
-			NucleusMeshVertex i1 = face.getInternalVertex();
-			
-			NucleusMeshEdge i1_p1;
-			NucleusMeshEdge i1_p2;
-			NucleusMeshEdge p1_p2;
+			boolean usePeripheral = face.countVertices(true)==2;
 						
+			NucleusMeshVertex p1 = usePeripheral ? face.getLowerPeripheralVertex() : face.getLowerInternalVertex();
+			NucleusMeshVertex p2 = usePeripheral ? face.getHigherPeripheralVertex() : face.getHigherInternalVertex();
+			NucleusMeshVertex i1 = usePeripheral ? face.getLowerInternalVertex() : face.getLowerPeripheralVertex();
+			
+			finest("P1: "+p1.toString());
+			finest("P2: "+p2.toString());
+			finest("I1: "+i1.toString());;
+									
 			// Identify the edges
-			i1_p1 = i1.getEdgeTo(p1);
-			i1_p2 = i1.getEdgeTo(p2);
-			p1_p2 = p1.getEdgeTo(p2);
+			NucleusMeshEdge i1_p1 = i1.getEdgeTo(p1);
+			NucleusMeshEdge i1_p2 = i1.getEdgeTo(p2);
+			NucleusMeshEdge p1_p2 = p1.getEdgeTo(p2);
 			
 			// Identify and correct the orientation of the edges
 			i1_p1 = correctEdgeOrientation(i1_p1);
 			i1_p2 = correctEdgeOrientation(i1_p2);
 			p1_p2 = correctEdgeOrientation(p1_p2);
 						
-
+			finer("Corrected edges");
+			finest(i1_p1.toString());
+			finest(i1_p2.toString());
+			finest(p1_p2.toString());
+			
 			// Draw lines
 			XYPoint i1_p1_prop = i1_p1.getProportionalPosition(this.p2);
+			finest("Point along I1-P1: "+i1_p1_prop.toString());
+			
 			Equation eq1 = new Equation(p2.getPosition(), i1_p1_prop);
 			
 			XYPoint i1_p2_prop = i1_p2.getProportionalPosition(this.p1);
+			finest("Point along I1-P2: "+i1_p2_prop.toString());
 			Equation eq2 = new Equation(p1.getPosition(), i1_p2_prop);
-			
-			
-			
-			
-			
+						
 			// Find intersection
 			XYPoint position = eq1.getIntercept(eq2);
 			
 			// Return at point
-			finest("Found position "+position.toString());
+			finest("\tFound intercept: "+position.toString());
 			return position;
 		}
 

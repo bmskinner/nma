@@ -20,8 +20,6 @@
  *******************************************************************************/
 package analysis.mesh;
 
-import ij.process.ImageProcessor;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -29,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import analysis.mesh.NucleusMeshFace.NucleusMeshFaceCoordinate;
 import logging.Loggable;
 import components.AbstractCellularComponent;
 import components.generic.BorderTag;

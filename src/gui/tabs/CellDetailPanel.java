@@ -761,24 +761,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 									.getConsensusNucleus(), mesh1);
 							
 							NucleusMeshImage im = new NucleusMeshImage(mesh1, cell.getNucleus().getImage());
-							log(im.toString());
-							ImageProcessor ip = im.meshToImage(mesh2);
+
+							ImageProcessor ip = im.meshToImage(mesh1);
 							
-							chart = OutlineChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode, showHook, component);
-							
-							// Clear existing pixel annotations
-							List<Object> ann = chart.getXYPlot().getAnnotations();
-							for(Object a : ann){
-								if (a.getClass().isInstance(XYShapeAnnotation.class)){
-									chart.getXYPlot().removeAnnotation((XYAnnotation) a);
-								}
-								
-							}
-							
-							
-							OutlineChartFactory.drawImageAsAnnotation(chart.getXYPlot(), ip);
-							
-							chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+							chart = OutlineChartFactory.drawImageAsAnnotation(ip);
+
 						} else {
 							chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 						}
@@ -794,7 +781,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				
 				
 				
-				if(cell!=null){
+				if(cell!=null && !warpMeshPanel.isSelected() ){
 					panel.restoreAutoBounds();
 										
 

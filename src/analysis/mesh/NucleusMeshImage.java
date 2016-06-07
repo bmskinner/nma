@@ -49,21 +49,28 @@ public class NucleusMeshImage implements Loggable {
 		Rectangle r = mesh.nucleus.getBounds();
 		if(r==null){
 			warn("No bounding rectange in nucleus");
-			warn("Using default bounds (200x200)");
-			r = new Rectangle(200, 200); 
+			warn("Using default bounds (300x300)");
+			r = new Rectangle(300, 300); 
 		}
 		ImageProcessor ip = new ByteProcessor(r.width, r.height);
+		
+		for(int i=0; i<ip.getPixelCount(); i++){
+			ip.set(i, 255); // set all to white initially
+		}
 				
 		for(NucleusMeshFace f : map.keySet()){
 			
 			Map<NucleusMeshFaceCoordinate, Integer> faceMap = map.get(f);
-			
+			finest("Getting pixels from face");
+			finest(f.toString());
 			
 			for(NucleusMeshFaceCoordinate c : faceMap.keySet() ){
 				
-				int pixelValue = faceMap.get(c);
 				
+				int pixelValue = faceMap.get(c);
+				finest(c.toString()+" : Value: "+pixelValue);
 				XYPoint p = c.getPixelCoordinate(mesh.getFace(f));
+				finest("\tAt point: "+p.toString());
 				
 				ip.set(p.getXAsInt(), p.getYAsInt(), pixelValue);
 				
@@ -129,7 +136,7 @@ public class NucleusMeshImage implements Loggable {
 						NucleusMeshFaceCoordinate c = f.getFaceCoordinate(p);
 						faceMap.put(c, pixel);
 					} else {
-						finer("Cannot find face in target mesh for point "+p.toString() + "(Total "+missedCount+")");
+						finer("Cannot find face in target mesh for point "+p.toString() + " (Total "+missedCount+")");
 						missedCount++;
 					}
 				}
