@@ -45,17 +45,7 @@ import stats.PlottableStatistic;
 public interface CellularComponent {
 		
 	public UUID getID();
-	
-	
-	/**
-	 * Get the position of the object in the 
-	 * original image. The indexes in the double are
-	 * 0 - X_BASE of the bounding box
-	 * 1 - Y_BASE of the bounding box
-	 * 2 - WIDTH of the bounding box
-	 * 3 - HEIGHT of the bounding box
-	 * @return
-	 */
+
 	public static final int X_BASE 	= 0;
 	public static final int Y_BASE 	= 1;
 	public static final int WIDTH 	= 2;
@@ -63,7 +53,15 @@ public interface CellularComponent {
 	
 	public static final String IMAGE_PREFIX = "export.";
 	
-	
+	/**
+	 * Get the position of the object in the 
+	 * original image. The indexes in the array are
+	 * 0 - X_BASE of the bounding box
+	 * 1 - Y_BASE of the bounding box
+	 * 2 - WIDTH of the bounding box
+	 * 3 - HEIGHT of the bounding box
+	 * @return
+	 */
 	public double[] getPosition();
 	
 		

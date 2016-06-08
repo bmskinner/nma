@@ -762,7 +762,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							
 							NucleusMeshImage im = new NucleusMeshImage(mesh1, cell.getNucleus().getImage());
 
-							ImageProcessor ip = im.meshToImage(mesh1);
+							ImageProcessor ip = im.meshToImage(mesh2);
 							
 							chart = OutlineChartFactory.drawImageAsAnnotation(ip);
 
@@ -781,7 +781,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				
 				
 				
-				if(cell!=null && !warpMeshPanel.isSelected() ){
+				if(cell!=null  ){  //&& !warpMeshPanel.isSelected()
 					panel.restoreAutoBounds();
 										
 

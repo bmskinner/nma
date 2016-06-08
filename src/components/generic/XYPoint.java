@@ -86,7 +86,7 @@ public class XYPoint  implements Serializable{
   * @return the x-value of the point
   */
   public int getXAsInt(){
-    return (int)this.x;
+    return (int) Math.round(x);
   }
 
   /**
@@ -95,7 +95,7 @@ public class XYPoint  implements Serializable{
   * @return the y-value of the point
   */
   public int getYAsInt(){
-    return (int)this.y;
+    return (int)  Math.round(y);
   }
 
   /**

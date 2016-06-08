@@ -351,10 +351,17 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
-		plot.getRangeAxis().setInverted(true);
-		plot.setDataset(0, new DefaultXYDataset());
+		plot.getRangeAxis().setInverted(false);
+		
+		// Make a dataset to allow the autoscale to work
+		XYDataset bounds = NucleusDatasetCreator.createAnnotationRectangleDataset(ip.getWidth(), ip.getHeight());
+		plot.setDataset(0, bounds);
+		
+		
+		
 		XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
-		int padding = 0; // what is this?
+		rend.setBaseSeriesVisible(false);
+		int padding = 0; 
 		
 		plot.getDomainAxis().setRange(0, ip.getWidth());
 		plot.getRangeAxis().setRange(0, ip.getHeight());
@@ -398,7 +405,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 		XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
 		
-		int padding = 10;
+		int padding = 10; // a border of pixels beyond the cell boundary
 		int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
 		int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
 		int wideX = (int) (positions[CellularComponent.X_BASE]-padding);

@@ -156,6 +156,17 @@ public class NucleusDatasetCreator implements Loggable {
 		return result;
 
 	}
+	
+	public static DefaultXYDataset createAnnotationRectangleDataset(int w, int h){
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		double[] xpoints = { 0, 0, w, w };
+		double[] ypoints = { 0, h, 0, h };
+		
+		 double[][] data = { xpoints, ypoints };
+         ds.addSeries("Bounds", data);
+         return ds;
+	}
 
 
     /**
