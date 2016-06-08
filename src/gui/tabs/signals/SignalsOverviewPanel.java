@@ -47,6 +47,7 @@ import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import charting.options.TableOptions.TableType;
 import charting.options.TableOptionsBuilder;
@@ -54,6 +55,7 @@ import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter;
 import gui.components.ConsensusNucleusChartPanel;
 import gui.components.ExportableTable;
+import gui.components.panels.GenericCheckboxPanel;
 import gui.tabs.DetailPanel;
 import ij.io.DirectoryChooser;
 
@@ -64,6 +66,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	private ExportableTable 		statsTable;					// table for signal stats
 	private JPanel 		consensusAndCheckboxPanel;	// holds the consensus chart and the checkbox
 	private JPanel		checkboxPanel;
+	
+	private GenericCheckboxPanel warpPanel = new GenericCheckboxPanel("Warp");
 	
 	
 	public SignalsOverviewPanel(){
@@ -237,6 +241,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		
+
 		if(isSingleDataset()){
 			try {
 
@@ -262,6 +267,9 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 				log(Level.SEVERE, "Error creating signal checkboxes", e);
 			}
 		}
+		
+		warpPanel.addActionListener(this);
+		panel.add(warpPanel);
 		return panel;
 	}
 		
@@ -314,21 +322,20 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	
 	private void updateSignalConsensusChart(){
 		try {
-			JFreeChart chart;
-			if(isSingleDataset()){
-
-				chart = OutlineChartFactory.makeSignalCoMNucleusOutlineChart(activeDataset());
-
-			} else { 
-	
-				chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-
-			}
 			
+			ChartOptions options = new ChartOptionsBuilder()
+					.setDatasets(getDatasets())
+					.setSignalGroup(1)
+					.setShowWarp(warpPanel.isSelected())
+					.build();
+			
+			JFreeChart chart = getChart(options);
+						
 			chartPanel.setChart(chart);
 			chartPanel.restoreAutoBounds();
 		} catch(Exception e){
-			log(Level.SEVERE, "Error updating signals", e);
+			warn("Error updating signal overview panel");
+			log(Level.FINE, "Error updating signal overview panel", e);
 		}
 	}
 	
@@ -394,6 +401,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			activeDataset().setSignalGroupVisible(signalGroup, box.isSelected());
 			fireSignalChangeEvent("GroupVisble_");
 		}
+		updateSignalConsensusChart();
 		
 	}
 
@@ -424,7 +432,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return null;
+		return OutlineChartFactory.getInstance().makeSignalOutlineChart(options);
 	}
 	
 	@Override

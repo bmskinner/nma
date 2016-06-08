@@ -2,8 +2,11 @@ package charting.charts;
 
 import gui.RotationMode;
 import gui.components.ColourSelecter;
+import ij.ImageStack;
 import ij.process.ImageProcessor;
 import io.ImageExporter;
+import io.ImageImporter;
+import utility.Constants;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -12,6 +15,7 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +33,7 @@ import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.DatasetUtilities;
@@ -52,6 +57,7 @@ import analysis.mesh.NucleusMeshEdge;
 import analysis.mesh.NucleusMeshFace;
 import analysis.mesh.NucleusMeshImage;
 import analysis.mesh.NucleusMeshVertex;
+import analysis.signals.SignalManager;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
@@ -76,6 +82,82 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	}
 	
 	/**
+	 * Create a chart showing the nuclear signal locations in a dataset
+	 * @param options
+	 * @return
+	 */
+	public JFreeChart makeSignalOutlineChart(ChartOptions options){
+		
+		try{
+			if(options.isMultipleDatasets()){
+				return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+			}
+			
+			if( ! options.firstDataset().getCollection().hasConsensusNucleus()){
+				return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+			}
+			
+			if(options.isShowWarp()){
+				
+				return makeSignalWarpChart(options);
+			} else {
+				return makeSignalCoMNucleusOutlineChart(options.firstDataset());
+			}
+		} catch(Exception e){
+			warn("Error making signal chart");
+			log(Level.FINE, "Error making signal chart", e);
+			return ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
+		}
+
+	}
+	
+	private JFreeChart makeSignalWarpChart(ChartOptions options){
+
+		
+		AnalysisDataset dataset = options.firstDataset();
+		
+		// Create the outline of the consensus
+		JFreeChart chart = ConsensusNucleusChartFactory.makeNucleusOutlineChart(dataset);
+
+		XYPlot plot = chart.getXYPlot();
+		
+		// Get consensus mesh.
+		NucleusMesh meshConsensus = new NucleusMesh(dataset.getCollection().getConsensusNucleus());
+		
+		SignalManager m = dataset.getCollection().getSignalManager();
+		List<Cell> cells = m.getCellsWithNuclearSignals(options.getSignalGroup(), true);
+		
+		for(Cell cell : cells){
+			
+			// Get each nucleus. Make a mesh.
+			NucleusMesh cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
+			
+			// Get the image with the signal
+			File imageFile = cell.getNucleus().getSignalCollection().getSourceFile(options.getSignalGroup());
+			
+			ImageStack is = ImageImporter.getInstance().importImage(imageFile);
+			ImageProcessor ip = is.getProcessor(Constants.rgbToStack(m.getSignalChannel(options.getSignalGroup())));
+			
+			// Create NucleusMeshImage from nucleus.
+			NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
+			
+			// Draw NucleusMeshImage onto consensus mesh.
+			ImageProcessor warped = im.meshToImage(meshConsensus);
+			
+			drawImageAsAnnotation(warped, plot, 2);
+		}
+		
+		return chart;
+		
+		
+
+		
+		
+		
+		
+	}
+	
+	/**
 	 * Create a nucleus outline chart with nuclear signals drawn as transparent
 	 * circles
 	 * @param dataset the AnalysisDataset to use to draw the consensus nucleus
@@ -83,16 +165,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart makeSignalCoMNucleusOutlineChart(AnalysisDataset dataset) throws Exception{
-		
-		if( ! dataset.getCollection().hasConsensusNucleus()){
-			
-			ChartOptions options = new ChartOptionsBuilder()
-			.setDatasets(null)
-			.build();
-			return ConsensusNucleusChartFactory.makeConsensusChart(options);
-		}
-		
+	private JFreeChart makeSignalCoMNucleusOutlineChart(AnalysisDataset dataset) throws Exception{
 		
 		XYDataset signalCoMs = NuclearSignalDatasetCreator.createSignalCoMDataset(dataset);
 		
@@ -418,14 +491,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		}
 	}
 	
-	private static JFreeChart drawImageAsAnnotation( ImageProcessor ip){
-		
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-						null, null, null, PlotOrientation.VERTICAL, true, true,
-						false);
-
-		XYPlot plot = chart.getXYPlot();
+	
+	/**
+	 * Create a chart with an image drawn as an annotation in the background layer.
+	 * The image pixels are fully opaque
+	 * @param ip
+	 * @param alpha
+	 * @return
+	 */
+	private static void drawImageAsAnnotation( ImageProcessor ip, XYPlot plot, int alpha){
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.getRangeAxis().setInverted(false);
 		
@@ -434,7 +508,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		plot.setDataset(0, bounds);
 		
 		
-		
+		plot.setRenderer(0, new DefaultXYItemRenderer());
 		XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
 		rend.setBaseSeriesVisible(false);
 		int padding = 0; 
@@ -447,7 +521,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 				//				int pixel = im.getRGB(x, y);
 				int pixel = ip.get(x, y);
-				Color col = new Color(pixel, pixel, pixel, 255);
+				Color col = new Color(pixel, pixel, pixel, alpha);
 
 				// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
 				Rectangle2D r = new Rectangle2D.Double(x-padding-0.1, y-padding-0.1, 1.2, 1.2);
@@ -456,6 +530,34 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				rend.addAnnotation(a, Layer.BACKGROUND);
 			}
 		}
+	}
+	
+	/**
+	 * Create a chart with an image drawn as an annotation in the background layer.
+	 * The image pixels are fully opaque
+	 * @param ip
+	 * @return
+	 */
+	private static JFreeChart drawImageAsAnnotation( ImageProcessor ip){
+		return drawImageAsAnnotation(ip, 255);
+	}
+	
+	/**
+	 * Create a chart with an image drawn as an annotation in the background layer.
+	 * The image pixels have the given alpha transparency value
+	 * @param ip
+	 * @param alpha
+	 * @return
+	 */
+	private static JFreeChart drawImageAsAnnotation( ImageProcessor ip, int alpha){
+		
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+						null, null, null, PlotOrientation.VERTICAL, true, true,
+						false);
+
+		XYPlot plot = chart.getXYPlot();
+		drawImageAsAnnotation(ip, plot, alpha);
 		return chart;
 	}
 	
