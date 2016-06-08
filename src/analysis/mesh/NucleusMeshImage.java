@@ -65,8 +65,8 @@ public class NucleusMeshImage implements Loggable {
 		
 		boolean zeroCoM = false;
 		if(mesh.nucleus.getCentreOfMass().getXAsInt()==0 && mesh.nucleus.getCentreOfMass().getYAsInt()==0){
-			log("Nucleus centre of mass is at zero; correcting");
-			log("Offsetting all pixels to the centre of the new image");
+			fine("Nucleus centre of mass is at zero; correcting");
+			fine("Offsetting all pixels to the centre of the new image");
 			zeroCoM = true;
 		}
 		
@@ -113,7 +113,7 @@ public class NucleusMeshImage implements Loggable {
 				try {
 					ip.set(offsetX, offsetY, pixelValue);
 				} catch (ArrayIndexOutOfBoundsException e){
-					warn("Point outside image bounds: "+offsetX+", "+offsetY);
+					finer("Point outside image bounds: "+offsetX+", "+offsetY);
 					missingPixels++;
 				}
 				
@@ -121,7 +121,7 @@ public class NucleusMeshImage implements Loggable {
 			
 		}
 		if(missingPixels >0){
-			warn(missingPixels+" points lay outside the new image bounds");			
+			fine(missingPixels+" points lay outside the new image bounds");			
 		}
 		
 		interpolateMissingPixels(ip);
@@ -268,7 +268,7 @@ public class NucleusMeshImage implements Loggable {
 						}
 						
 						if(f==null){
-							warn("Error fetching face from mesh at "+p.toString());
+							fine("Error fetching face from mesh at "+p.toString());
 						}
 
 						NucleusMeshFaceCoordinate c = f.getFaceCoordinate(p);
@@ -282,7 +282,7 @@ public class NucleusMeshImage implements Loggable {
 			}
 		}
 		if(missedCount >0){
-			warn("Faces could not be found for "+missedCount+" points");
+			fine("Faces could not be found for "+missedCount+" points");
 			finer(mesh.toString());
 			
 		}

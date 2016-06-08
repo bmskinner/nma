@@ -3,6 +3,7 @@ package charting.charts;
 import gui.RotationMode;
 import gui.components.ColourSelecter;
 import ij.process.ImageProcessor;
+import io.ImageExporter;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -49,6 +50,7 @@ import analysis.detection.BooleanAligner;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshEdge;
 import analysis.mesh.NucleusMeshFace;
+import analysis.mesh.NucleusMeshImage;
 import analysis.mesh.NucleusMeshVertex;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
@@ -61,6 +63,17 @@ import charting.options.ChartOptionsBuilder;
 public class OutlineChartFactory extends AbstractChartFactory {
 	
 	protected static final ForkJoinPool mainPool = new ForkJoinPool();
+	
+	private static OutlineChartFactory instance = null;
+	
+	private OutlineChartFactory(){}
+	
+	public static OutlineChartFactory getInstance(){
+		if(instance==null){
+			instance = new OutlineChartFactory();
+		}
+		return instance;
+	}
 	
 	/**
 	 * Create a nucleus outline chart with nuclear signals drawn as transparent
@@ -126,6 +139,69 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 	
+	public JFreeChart makeCellOutlineChart(ChartOptions options){
+		
+		if(options.getCell()==null || !options.hasDatasets()){
+			fine("No datasets or active cell");
+			return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+		}
+		
+		try {
+			if(options.isShowMesh()){
+				
+				if(options.firstDataset().getCollection().hasConsensusNucleus()){
+	
+					NucleusMesh mesh1 = options.getRotateMode().equals(RotationMode.ACTUAL) 
+						  ? new NucleusMesh(options.getCell().getNucleus())
+					      : new NucleusMesh(options.getCell().getNucleus().getVerticallyRotatedNucleus());
+						
+					
+					NucleusMesh mesh2 = new NucleusMesh(options.firstDataset()
+							.getCollection()
+							.getConsensusNucleus(), mesh1);
+					
+					NucleusMesh result = mesh1.compareTo(mesh2);				
+					return createMeshChart(result, 0.5, options);
+	
+				} else {
+					return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+	
+				} 
+				
+			}
+			
+			if(options.isShowWarp()){
+				
+				if(options.firstDataset().getCollection().hasConsensusNucleus()){
+					
+					NucleusMesh mesh1 = new NucleusMesh(options.getCell().getNucleus());
+					NucleusMesh mesh2 = new NucleusMesh(options.firstDataset()
+							.getCollection()
+							.getConsensusNucleus(), mesh1);
+					
+					NucleusMeshImage im = new NucleusMeshImage(mesh1, options.getCell().getNucleus().getImage());
+	
+					ImageProcessor ip = im.meshToImage(mesh2);
+					
+					return OutlineChartFactory.drawImageAsAnnotation(ip);
+	
+				} else {
+					return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+				}
+			}
+			return OutlineChartFactory.makeCellOutlineChart(options.getCell(), 
+					options.firstDataset(), 
+					options.getRotateMode(), 
+					false, 
+					options.getComponent());
+		} catch(Exception e){
+			warn("Error creating cell outline chart");
+			log(Level.FINE, "Error creating cell outline chart", e);
+			return ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
+		}
+		
+	}
+	
 	/**
 	 * Get a chart contaning the details of the given cell from the given dataset
 	 * @param cell the cell to draw
@@ -134,7 +210,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset, RotationMode rotateMode, boolean showhookHump, CellularComponent componentToHighlight) throws Exception{
+	private static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset, RotationMode rotateMode, boolean showhookHump, CellularComponent componentToHighlight) throws Exception{
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -342,7 +418,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		}
 	}
 	
-	public static JFreeChart drawImageAsAnnotation( ImageProcessor ip){
+	private static JFreeChart drawImageAsAnnotation( ImageProcessor ip){
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,

@@ -18,12 +18,15 @@
  *******************************************************************************/
 package charting.options;
 
+import gui.RotationMode;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import java.util.List;
 import java.util.logging.Logger;
 
+import components.Cell;
+import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import analysis.AnalysisDataset;
@@ -60,6 +63,11 @@ public class ChartOptions extends AbstractOptions {
 	private boolean showYAxis           = true;
 	private boolean invertXAxis         = false;
 	private boolean invertYAxis         = false;
+	
+	private RotationMode rotateMode     = RotationMode.ACTUAL;
+	private Cell cell                   = null;
+	private CellularComponent component = null;
+	private boolean showWarp            = false;
 	
 	public ChartOptions(List<AnalysisDataset> list){
 		this(list, null);
@@ -260,6 +268,40 @@ public class ChartOptions extends AbstractOptions {
 	public void setInvertYAxis(boolean invertYAxis) {
 		this.invertYAxis = invertYAxis;
 	}
+	
+	
+	public RotationMode getRotateMode() {
+		return rotateMode;
+	}
+
+	public void setRotateMode(RotationMode rotateMode) {
+		this.rotateMode = rotateMode;
+	}
+	
+	public Cell getCell() {
+		return cell;
+	}
+
+	public void setCell(Cell cell) {
+		this.cell = cell;
+	}
+
+	public CellularComponent getComponent() {
+		return component;
+	}
+
+	public void setComponent(CellularComponent component) {
+		this.component = component;
+	}
+	
+	
+	public boolean isShowWarp() {
+		return showWarp;
+	}
+
+	public void setShowWarp(boolean showWarp) {
+		this.showWarp = showWarp;
+	}
 
 	@Override
 	public int hashCode() {
@@ -293,6 +335,15 @@ public class ChartOptions extends AbstractOptions {
 		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		result = prime * result + (useDensity ? 1231 : 1237);
+		
+		result = prime * result
+				+ ((rotateMode == null) ? 0 : rotateMode.hashCode());
+		result = prime * result
+				+ ((cell == null) ? 0 : cell.hashCode());
+		result = prime * result
+				+ ((component == null) ? 0 : component.hashCode());
+		result = prime * result + (showWarp ? 1231 : 1237);
+		
 		return result;
 	}
 
@@ -352,6 +403,16 @@ public class ChartOptions extends AbstractOptions {
 			return false;
 		if (useDensity != other.useDensity)
 			return false;
+		
+		if (rotateMode != other.rotateMode)
+			return false;
+		if (cell != other.cell)
+			return false;
+		if (component != other.component)
+			return false;
+		if (showWarp != other.showWarp)
+			return false;
+		
 		return true;
 	}
 	

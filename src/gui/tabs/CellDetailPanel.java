@@ -32,6 +32,7 @@ import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.components.panels.RotationSelectionSettingsPanel;
 import gui.dialogs.CellImageDialog;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
+import gui.tabs.cells.CellOutlinePanel;
 import ij.process.ImageProcessor;
 
 import java.awt.BorderLayout;
@@ -108,9 +109,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	
 	private Cell activeCell = null;
 	
+	private CellularComponent activeComponent = null; 
+	
 	protected CellsListPanel	cellsListPanel;		// the list of cells in the active dataset
 	protected ProfilePanel	 	profilePanel; 		// the nucleus angle profile
-	protected OutlinePanel 	 	outlinePanel; 		// the outline of the cell and detected objects
+//	protected OutlinePanel 	 	outlinePanel; 		// the outline of the cell and detected objects
+	protected CellOutlinePanel 	 	outlinePanel = new CellOutlinePanel(); 		// the outline of the cell and detected objects
 	protected CellStatsPanel 	cellStatsPanel;		// the stats table
 	protected SignalListPanel 	signalListPanel;	// choose which background image to display
 
@@ -157,12 +161,14 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			this.add(centrePanel, constraints);
 
 
-			outlinePanel = new OutlinePanel();
+//			outlinePanel = new OutlinePanel();
 			outlinePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 			constraints.gridx = 3;
 			constraints.gridy = 0;
 			constraints.weightx = 0.7;
 			this.add(outlinePanel, constraints);
+			outlinePanel.setParent(this);
+//			this.addSubPanel(outlinePanel);
 
 
 			this.validate();
@@ -200,8 +206,18 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 //		setUpdating(false);
 //	}
 	
+	public CellularComponent getActiveComponent(){
+		return this.activeComponent;
+	}
+	
+	public Cell getActiveCell(){
+		return this.activeCell;
+	}
+	
 	protected void updateSingle() throws Exception {
 		cellsListPanel.updateDataset( activeDataset()  );
+		outlinePanel.update(getDatasets());
+		
 		log(Level.FINEST, "Updated cell list panel");
 		updateCell(activeCell);
 		log(Level.FINEST, "Updated active cell panel");
@@ -213,7 +229,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	
 	protected void updateNull() throws Exception {
 		cellsListPanel.updateDataset(null);
-		log(Level.FINEST, "Updated cell list panel");
+		finest("Updated cell list panel");
 		updateCell(null);
 	}
 		
@@ -629,183 +645,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		}
 
 	}
-	
-	protected class OutlinePanel extends JPanel implements ActionListener{
 		
-		private RotationSelectionSettingsPanel rotationPanel;
-
-		private JCheckBox showHookHump = new JCheckBox("Show hook ROI");
-		private FixedAspectRatioChartPanel panel;
-		private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus");
-		private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp to consensus");
-				
-		protected OutlinePanel(){
-			
-			// make the chart for each nucleus
-			this.setLayout(new BorderLayout());
-			JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-
-			
-			JPanel settingsPanel = new JPanel(new FlowLayout());
-			
-			rotationPanel = new RotationSelectionSettingsPanel();
-			rotationPanel.setEnabled(false);
-			rotationPanel.addActionListener(this);
-			
-			makeMeshPanel.addActionListener(this);
-			makeMeshPanel.setEnabled(false);
-			
-			warpMeshPanel.addActionListener(this);
-			warpMeshPanel.setEnabled(false);
-			
-			settingsPanel.add(rotationPanel);
-			settingsPanel.add(createHookHumpPanel());
-			settingsPanel.add(makeMeshPanel);
-			settingsPanel.add(warpMeshPanel);
-			
-			this.add(settingsPanel, BorderLayout.NORTH);
-			
-			panel = new FixedAspectRatioChartPanel(chart);
-			panel.addComponentListener(new ComponentAdapter() {
-				@Override
-				public void componentResized(ComponentEvent e) {
-					panel.restoreAutoBounds();
-				}
-			});
-						
-			this.add(panel, BorderLayout.CENTER);
-			
-		}
-		
-		private JPanel createHookHumpPanel(){
-			JPanel panel = new JPanel();
-			panel.add(showHookHump);
-			showHookHump.setEnabled(false);
-			showHookHump.addActionListener(this);
-			return panel;
-			
-		}
-						
-		protected void update(Cell cell){
-
-			RotationMode rotateMode = rotationPanel.getSelected();
-			boolean showHook = showHookHump.isSelected();
-						
-			try{
-				JFreeChart chart;
-				if(cell==null){
-					rotationPanel.setEnabled(false);
-					showHookHump.setEnabled(false);
-					makeMeshPanel.setEnabled(false);
-					warpMeshPanel.setEnabled(false);
-					chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-				} else {
-					
-					CellularComponent component = signalListPanel.getActiveComponent();
-					
-					if(activeDataset().getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
-						showHookHump.setEnabled(true);
-					} else {
-						showHookHump.setEnabled(false);
-					}
-					
-					rotationPanel.setEnabled(true);
-					showHookHump.setEnabled(  ! makeMeshPanel.isSelected() );
-					
-					// Don't enable the hook-hump box unless we have a rodent sperm dataset
-					if( ! activeDataset().getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
-						showHookHump.setEnabled(  false );
-					}
-					
-					// Only allow one mesh activity to be active
-					makeMeshPanel.setEnabled(  ! warpMeshPanel.isSelected() );
-					warpMeshPanel.setEnabled(  ! makeMeshPanel.isSelected() );
-
-					if(makeMeshPanel.isSelected()){
-
-						if(activeDataset().getCollection().hasConsensusNucleus()){
-							
-							
-							NucleusMesh mesh1 = rotateMode.equals(RotationMode.ACTUAL) 
-								  ? new NucleusMesh(cell.getNucleus())
-							      : new NucleusMesh(cell.getNucleus().getVerticallyRotatedNucleus());
-								
-							
-							NucleusMesh mesh2 = new NucleusMesh(activeDataset().getCollection().getConsensusNucleus(), mesh1);
-							
-							NucleusMesh result = mesh1.compareTo(mesh2);
-
-							ChartOptions options = new ChartOptionsBuilder()
-								.setShowAnnotations(false)
-								.setShowMeshEdges(false)
-								.setShowMeshFaces(true)
-								.setInvertYAxis( rotateMode.equals(RotationMode.ACTUAL) ) // only invert for actual
-								.build();
-							
-//							chart = OutlineChartFactory.createMeshChart(mesh1, 0.5, options);
-							chart = OutlineChartFactory.createMeshChart(result, 0.5, options);
-
-						} else {
-							chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-
-						} 
-						
-						
-					} else if(warpMeshPanel.isSelected()) { // Try to warp the nucleus onto the consensus mesh
-						
-						if(activeDataset().getCollection().hasConsensusNucleus()){
-							
-							NucleusMesh mesh1 = new NucleusMesh(cell.getNucleus());
-							NucleusMesh mesh2 = new NucleusMesh(activeDataset()
-									.getCollection()
-									.getConsensusNucleus(), mesh1);
-							
-							NucleusMeshImage im = new NucleusMeshImage(mesh1, cell.getNucleus().getImage());
-
-							ImageProcessor ip = im.meshToImage(mesh2);
-							
-							chart = OutlineChartFactory.drawImageAsAnnotation(ip);
-
-						} else {
-							chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-						}
-						
-						
-						
-					} else {
-						chart = OutlineChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode, showHook, component);
-					}
-				}
-				
-				panel.setChart(chart);
-				
-				
-				
-				if(cell!=null  ){  //&& !warpMeshPanel.isSelected()
-					panel.restoreAutoBounds();
-										
-
-				}
-				
-			} catch(Exception e){
-				log(Level.SEVERE, "Error updating outline chart", e);
-				JFreeChart chart = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
-				panel.setChart(chart);
-				rotationPanel.setEnabled(false);
-				showHookHump.setEnabled(false);
-			}
-		}
-
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			
-			update(activeCell);
-			
-		}
-
-	}
-	
 	protected class CellStatsPanel extends JPanel {
 		
 		private ExportableTable table; // individual cell stats
@@ -1018,9 +858,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	protected class SignalListPanel extends JPanel implements ListSelectionListener {
 		
 		private static final long serialVersionUID = 1L;
-		
-		private CellularComponent activeComponent; 
-		
+				
 		private JList<String> signalList;
 		private JScrollPane scrollPane;
 		
@@ -1049,10 +887,10 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			this.add(scrollPane, BorderLayout.CENTER);
 		}
 		
-		public CellularComponent getActiveComponent(){
-			return this.activeComponent;
-		}
-						
+//		public CellularComponent getActiveComponent(){
+//			return this.activeComponent;
+//		}
+//						
 		protected void update(Cell cell){
 
 			if(cell!=null){
@@ -1156,17 +994,5 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 	}
 	
-//	private void testMeshBuilder() throws Exception{
-//		
-//		if(activeDataset().getCollection().hasConsensusNucleus()){
-//			NucleusMeshBuilder builder = new NucleusMeshBuilder();
-//			
-//			NucleusMesh template = builder.buildMesh(activeDataset().getCollection().getConsensusNucleus());
-//			
-//			NucleusMesh cellMesh = builder.buildMesh(activeCell.getNucleus().getVerticallyRotatedNucleus(), template);
-//			
-//			cellMesh.compare(template);
-//		}
-//	}
 
 }

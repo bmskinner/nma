@@ -490,7 +490,7 @@ public class Profile implements Serializable, Loggable {
   public Profile interpolate(int newLength) {
 
     if(newLength < this.size()){
-    	fine("Interpolating to a smaller array!");
+    	finer("Interpolating to a smaller array!");
     }
     
     double[] newArray = new double[newLength];

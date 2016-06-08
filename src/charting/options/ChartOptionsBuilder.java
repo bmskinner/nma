@@ -18,6 +18,7 @@
  *******************************************************************************/
 package charting.options;
 
+import gui.RotationMode;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
@@ -27,6 +28,8 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import stats.PlottableStatistic;
+import components.Cell;
+import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
@@ -71,6 +74,12 @@ public class ChartOptionsBuilder {
 	private boolean showYAxis           = true;
 	private boolean invertXAxis         = false;
 	private boolean invertYAxis         = false;
+	
+	// Cells tab
+	private RotationMode rotateMode     = RotationMode.ACTUAL;
+	private Cell cell                   = null;
+	private CellularComponent component = null;
+	private boolean showWarp            = false;
 	
 	
 	public ChartOptionsBuilder(){
@@ -222,6 +231,27 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
+	public ChartOptionsBuilder setRotationMode(RotationMode r){
+		this.rotateMode = r;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setCell(Cell c){
+		this.cell = c;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setCellularComponent(CellularComponent c){
+		this.component = c;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setShowWarp(boolean b){
+		this.showWarp = b;
+		return this;
+	}
+	
+	
 	public ChartOptions build(){
 		ChartOptions result =  new ChartOptions(list, programLogger);
 		result.setSwatch(swatch);
@@ -251,6 +281,11 @@ public class ChartOptionsBuilder {
 		result.setShowYAxis(showYAxis);
 		result.setInvertXAxis(invertXAxis);
 		result.setInvertYAxis(invertYAxis);
+		
+		result.setRotateMode(rotateMode);
+		result.setCell(cell);
+		result.setComponent(component);
+		result.setShowWarp(showWarp);
 		return result;
 	}
 	
