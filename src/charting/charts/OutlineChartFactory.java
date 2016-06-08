@@ -91,6 +91,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	public JFreeChart makeSignalOutlineChart(ChartOptions options){
 		
 		try{
+			
+			if( ! options.hasDatasets()){
+				return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+			}
+			
 			if(options.isMultipleDatasets()){
 				return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 			}

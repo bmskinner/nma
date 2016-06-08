@@ -39,11 +39,8 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.XYPlot;
-import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.ChartOptions;
@@ -82,6 +79,51 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		consensusAndCheckboxPanel = createConsensusPanel();
 		this.add(consensusAndCheckboxPanel);
 		
+	}
+	
+	private JPanel createConsensusPanel(){
+		
+		final JPanel panel = new JPanel(new BorderLayout());
+		
+		ChartOptions options = new ChartOptionsBuilder()
+				.setDatasets(null)
+				.build();
+		
+		JFreeChart chart = null;
+		try {
+			chart = getChart(options);
+		} catch (Exception e1) {
+			warn("Error creating blank signals chart");
+			log(Level.FINE, "Error creating blank signals chart", e1);
+		}
+						
+		// the chart is inside a chartPanel; the chartPanel is inside a JPanel
+		// this allows a checkbox panel to be added to the JPanel later
+		chartPanel = new ConsensusNucleusChartPanel(chart);// {
+		panel.add(chartPanel, BorderLayout.CENTER);
+		
+		
+		chartPanel.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				resizePreview(chartPanel, panel);
+				chartPanel.restoreAutoBounds();
+			}
+		});
+		
+		panel.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				resizePreview(chartPanel, panel);
+			}
+		});
+		
+		
+		checkboxPanel = createSignalCheckboxPanel();
+		
+		panel.add(checkboxPanel, BorderLayout.NORTH);
+
+		return panel;
 	}
 	
 	private JScrollPane createStatsPane(){
@@ -183,48 +225,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 		}
 	}
-	
-	private JPanel createConsensusPanel(){
 		
-		final JPanel panel = new JPanel(new BorderLayout());
-		// make a blank chart for signal locations on a consensus nucleus
-		JFreeChart signalsChart = ChartFactory.createXYLineChart(null,  // chart for conseusns
-				null, null, null);
-		XYPlot signalsPlot = signalsChart.getXYPlot();
-
-		signalsPlot.setBackgroundPaint(Color.WHITE);
-		signalsPlot.getDomainAxis().setVisible(false);
-		signalsPlot.getRangeAxis().setVisible(false);
-				
-		// the chart is inside a chartPanel; the chartPanel is inside a JPanel
-		// this allows a checkbox panel to be added to the JPanel later
-		chartPanel = new ConsensusNucleusChartPanel(signalsChart);// {
-		panel.add(chartPanel, BorderLayout.CENTER);
-		
-		
-		chartPanel.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				resizePreview(chartPanel, panel);
-				chartPanel.restoreAutoBounds();
-			}
-		});
-		
-		panel.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				resizePreview(chartPanel, panel);
-			}
-		});
-		
-		
-		checkboxPanel = createSignalCheckboxPanel();
-		
-		panel.add(checkboxPanel, BorderLayout.NORTH);
-
-		return panel;
-	}
-	
 	private static void resizePreview(ChartPanel innerPanel, JPanel container) {
         int w = container.getWidth();
         int h = container.getHeight();
