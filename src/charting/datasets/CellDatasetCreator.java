@@ -35,6 +35,7 @@ import logging.Loggable;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
@@ -53,13 +54,24 @@ import components.nuclei.Nucleus;
 
 public class CellDatasetCreator implements Loggable {
 	
+	private static CellDatasetCreator instance = null;
+	
+	private CellDatasetCreator(){}
+	
+	public static CellDatasetCreator getInstance(){
+		if(instance==null){
+			instance = new CellDatasetCreator();
+		}
+		return instance;
+	}
+	
 	/**
 	 * Create a table of stats for the given cell.
 	 * @param cell the cell
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public static TableModel createCellInfoTable(TableOptions options) {
+	public TableModel createCellInfoTable(TableOptions options) {
 
 		Cell cell = options.getCell();
 		DefaultTableModel model = new DefaultTableModel();
@@ -186,7 +198,7 @@ public class CellDatasetCreator implements Loggable {
 	 * @param options the chart options
 	 * @return a chart
 	 */
-	public static XYDataset createPositionFeatureDataset(ChartOptions options) throws Exception {
+	public XYDataset createPositionFeatureDataset(ChartOptions options) throws Exception {
 
 		XYDataset ds = null;
 		
@@ -216,7 +228,7 @@ public class CellDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	private static XYDataset createSinglePositionFeatureDataset(ChartOptions options) throws Exception{
+	private XYDataset createSinglePositionFeatureDataset(ChartOptions options) throws Exception{
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		List<XYPoint> offsetPoints = createAbsolutePositionFeatureList(options.firstDataset(), options.getSegID());
@@ -243,7 +255,7 @@ public class CellDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	private static XYDataset createMultiPositionFeatureDataset(ChartOptions options) throws Exception{
+	private XYDataset createMultiPositionFeatureDataset(ChartOptions options) throws Exception{
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -285,7 +297,7 @@ public class CellDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<XYPoint> createAbsolutePositionFeatureList(AnalysisDataset dataset, UUID segmentID) throws Exception{
+	public List<XYPoint> createAbsolutePositionFeatureList(AnalysisDataset dataset, UUID segmentID) throws Exception{
 		
 		if(dataset==null){
 			throw new IllegalArgumentException("Dataset is null");
@@ -329,7 +341,7 @@ public class CellDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static List<XYPoint> createRelativePositionFeatureList(AnalysisDataset dataset, UUID segmentID) throws Exception{
+	public List<XYPoint> createRelativePositionFeatureList(AnalysisDataset dataset, UUID segmentID) throws Exception{
 		
 		List<XYPoint> result = createAbsolutePositionFeatureList( dataset, segmentID);
 		

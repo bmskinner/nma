@@ -92,11 +92,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		try{
 			if(options.isMultipleDatasets()){
-				return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+				return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 			}
 			
 			if( ! options.firstDataset().getCollection().hasConsensusNucleus()){
-				return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+				return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 			}
 			
 			if(options.isShowWarp()){
@@ -108,7 +108,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		} catch(Exception e){
 			warn("Error making signal chart");
 			log(Level.FINE, "Error making signal chart", e);
-			return ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
+			return ConsensusNucleusChartFactory.getInstance().makeErrorNucleusOutlineChart();
 		}
 
 	}
@@ -120,7 +120,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		// Create the outline of the consensus
 		
-		JFreeChart chart = ConsensusNucleusChartFactory.makeNucleusOutlineChart(dataset);
+		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(dataset);
 
 		XYPlot plot = chart.getXYPlot();
 		
@@ -178,7 +178,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		XYDataset signalCoMs = NuclearSignalDatasetCreator.createSignalCoMDataset(dataset);
 		
-		JFreeChart chart = ConsensusNucleusChartFactory.makeNucleusOutlineChart(dataset);
+		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(dataset);
 
 		XYPlot plot = chart.getXYPlot();
 		
@@ -225,7 +225,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		if(options.getCell()==null || !options.hasDatasets()){
 			fine("No datasets or active cell");
-			return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 		}
 		
 		try {
@@ -246,7 +246,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					return createMeshChart(result, 0.5, options);
 	
 				} else {
-					return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+					return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 	
 				} 
 				
@@ -268,7 +268,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					return OutlineChartFactory.drawImageAsAnnotation(ip);
 	
 				} else {
-					return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+					return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 				}
 			}
 			return OutlineChartFactory.makeCellOutlineChart(options.getCell(), 
@@ -279,7 +279,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		} catch(Exception e){
 			warn("Error creating cell outline chart");
 			log(Level.FINE, "Error creating cell outline chart", e);
-			return ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
+			return ConsensusNucleusChartFactory.getInstance().makeErrorNucleusOutlineChart();
 		}
 		
 	}
@@ -652,7 +652,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		if( ! options.hasDatasets()){
 			options.log(Level.FINEST, "No datasets - returning empty chart");
-			return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 		}
 		
 		if(options.isMultipleDatasets()){

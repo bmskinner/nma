@@ -46,16 +46,31 @@ import components.CellCollection;
  */
 public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	
+	private static ConsensusNucleusChartFactory instance = null;
+	
+	protected ConsensusNucleusChartFactory(){}
+	
+	/**
+	 * Fetch an instance of the factory
+	 * @return
+	 */
+	public static ConsensusNucleusChartFactory getInstance(){
+		if(instance==null){
+			instance = new ConsensusNucleusChartFactory();
+		}
+		return instance;
+	}
+	
 	/**
 	 * Create an empty chart as a placeholder for nucleus outlines
 	 * and consensus chart panels
 	 * @return
 	 */
-	public static JFreeChart makeEmptyNucleusOutlineChart(){
+	public JFreeChart makeEmptyNucleusOutlineChart(){
 		return makeConsensusChart( (XYDataset) null);
 	}
 	
-	public static JFreeChart makeErrorNucleusOutlineChart(){
+	public JFreeChart makeErrorNucleusOutlineChart(){
 		JFreeChart chart = makeConsensusChart( (XYDataset) null);
 
 		
@@ -75,7 +90,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param AnalysisDataset
 	 * @return
 	 */
-	public static boolean hasConsensusNucleus(List<AnalysisDataset>  list){
+	public boolean hasConsensusNucleus(List<AnalysisDataset>  list){
 		for (AnalysisDataset dataset : list){
 			if(dataset.getCollection().hasConsensusNucleus()){
 				return true;
@@ -90,7 +105,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param ds
 	 * @return
 	 */
-	private static JFreeChart makeConsensusChart(XYDataset ds){
+	private JFreeChart makeConsensusChart(XYDataset ds){
 		JFreeChart chart = null;
 		if(ds==null){
 			chart = ChartFactory.createXYLineChart(null,
@@ -111,7 +126,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * add the markers and set the ranges
 	 * @param chart
 	 */
-	private static void formatConsensusChart(JFreeChart chart){
+	private void formatConsensusChart(JFreeChart chart){
 		chart.getPlot().setBackgroundPaint(Color.WHITE);
 		chart.getXYPlot().getDomainAxis().setVisible(false);
 		chart.getXYPlot().getRangeAxis().setVisible(false);
@@ -129,7 +144,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param collection the NucleusCollection to draw the consensus from
 	 * @return the consensus chart
 	 */
-	public static JFreeChart makeNucleusOutlineChart(AnalysisDataset dataset){
+	public JFreeChart makeNucleusOutlineChart(AnalysisDataset dataset){
 
 		XYDataset ds = NucleusDatasetCreator.createBareNucleusOutline(dataset);
 		JFreeChart chart = makeConsensusChart(ds);
@@ -157,7 +172,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param dataset
 	 * @return
 	 */
-	private static double getconsensusChartRange(AnalysisDataset dataset){
+	private double getconsensusChartRange(AnalysisDataset dataset){
 		CellCollection collection = dataset.getCollection();
 		double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
 		double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
@@ -175,7 +190,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param list the datasets to test
 	 * @return
 	 */
-	public static double getconsensusChartRange(List<AnalysisDataset> list){
+	public double getconsensusChartRange(List<AnalysisDataset> list){
 		
 		double max = 1;
 		for (AnalysisDataset dataset : list){
@@ -192,7 +207,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param dataset the dataset to draw
 	 * @return
 	 */
-	private static JFreeChart makeSegmentedConsensusChart(AnalysisDataset dataset) throws Exception {
+	private JFreeChart makeSegmentedConsensusChart(AnalysisDataset dataset) throws Exception {
 		
 		if( ! dataset.getCollection().hasConsensusNucleus()){
 			return makeEmptyNucleusOutlineChart();
@@ -223,7 +238,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * Format the series colours for a consensus nucleus
 	 * @param plot
 	 */
-	private static void formatConsensusChartSeries(XYPlot plot, boolean showIQR, ColourSwatch swatch){
+	private void formatConsensusChartSeries(XYPlot plot, boolean showIQR, ColourSwatch swatch){
 		
 		XYDataset ds = plot.getDataset();
 		int seriesCount = plot.getSeriesCount();
@@ -269,7 +284,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	private static JFreeChart makeMultipleConsensusChart(List<AnalysisDataset> list) throws Exception {
+	private JFreeChart makeMultipleConsensusChart(List<AnalysisDataset> list) throws Exception {
 		// multiple nuclei
 		XYDataset ds = NucleusDatasetCreator.createMultiNucleusOutline(list);
 		JFreeChart chart = makeConsensusChart(ds);
@@ -316,7 +331,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JFreeChart makeConsensusChart(ChartOptions options) throws Exception {
+	public JFreeChart makeConsensusChart(ChartOptions options) throws Exception {
 		
 		if(! options.hasDatasets()){
 			options.log(Level.FINEST, "No datasets: creating empty consensus chart");

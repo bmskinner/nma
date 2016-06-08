@@ -71,7 +71,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		finest("Created consensus compare header");
 		this.add(header, BorderLayout.NORTH);
 		
-		JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 		finest("Created empty chart");
 		/*
 		 * Create a central panel for all charts
@@ -254,11 +254,11 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				
 			} catch (Exception e){
 				
-				chartOne = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
-				chartTwo = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
+				chartOne = ConsensusNucleusChartFactory.getInstance().makeErrorNucleusOutlineChart();
+				chartTwo = ConsensusNucleusChartFactory.getInstance().makeErrorNucleusOutlineChart();
 				
-				histoChartOne = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
-				histoChartTwo = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
+				histoChartOne = ConsensusNucleusChartFactory.getInstance().makeErrorNucleusOutlineChart();
+				histoChartTwo = ConsensusNucleusChartFactory.getInstance().makeErrorNucleusOutlineChart();
 
 				logError("Error creating mesh chart", e);
 			}
@@ -267,11 +267,11 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 			
 		} else {
 			
-			chartOne = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-			chartTwo = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+			chartOne = ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+			chartTwo = ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 			
-			histoChartOne = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-			histoChartTwo = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+			histoChartOne = ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+			histoChartTwo = ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 			
 		}
 		

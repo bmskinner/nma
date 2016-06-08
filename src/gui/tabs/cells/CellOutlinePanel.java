@@ -38,7 +38,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		super();
 		// make the chart for each nucleus
 		this.setLayout(new BorderLayout());
-		JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 
 		
 		JPanel settingsPanel = new JPanel(new FlowLayout());
@@ -111,7 +111,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 			} catch (Exception e) {
 				warn("Error getting chart in cell outline panel");
 				log(Level.FINE, "Error getting chart in cell outline panel", e);
-				chart = ConsensusNucleusChartFactory.makeErrorNucleusOutlineChart();
+				chart = ConsensusNucleusChartFactory.getInstance().makeErrorNucleusOutlineChart();
 			}
 
 			

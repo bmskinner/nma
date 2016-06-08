@@ -569,13 +569,13 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 */
 	private static JFreeChart makeMultiSegmentStartPositionChart(ChartOptions options) throws Exception {
 		
-		XYDataset positionDataset = CellDatasetCreator.createPositionFeatureDataset(options);
+		XYDataset positionDataset = CellDatasetCreator.getInstance().createPositionFeatureDataset(options);
 		
 		XYDataset nuclearOutlines = NucleusDatasetCreator.createMultiNucleusOutline(options.getDatasets());
 		
 		if(positionDataset == null || nuclearOutlines == null){
 			// a null dataset is returned if segment counts do not match
-			return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 		}
 		
 		JFreeChart chart = 
@@ -602,10 +602,10 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		pointRenderer.setBaseToolTipGenerator(tooltip);
 		plot.setRenderer(0, pointRenderer);
 		
-		boolean hasConsensus = ConsensusNucleusChartFactory.hasConsensusNucleus(options.getDatasets());
+		boolean hasConsensus = ConsensusNucleusChartFactory.getInstance().hasConsensusNucleus(options.getDatasets());
 		if(hasConsensus){
 			// Find the bounds of the consensus nuclei in the options
-			double max = ConsensusNucleusChartFactory.getconsensusChartRange(options.getDatasets());
+			double max = ConsensusNucleusChartFactory.getInstance().getconsensusChartRange(options.getDatasets());
 			plot.setDataset(1, nuclearOutlines);
 					
 			plot.getDomainAxis().setRange(-max,max);
@@ -656,7 +656,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		if(  options.hasDatasets()){
 			return  makeMultiSegmentStartPositionChart(options);
 		}
-		return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+		return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 	}
 	
 		

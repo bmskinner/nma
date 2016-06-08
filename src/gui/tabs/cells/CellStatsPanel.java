@@ -290,7 +290,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception {
-		return CellDatasetCreator.createCellInfoTable(options);
+		return CellDatasetCreator.getInstance().createCellInfoTable(options);
 	}
 
 

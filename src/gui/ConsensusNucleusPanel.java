@@ -377,7 +377,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-			return ConsensusNucleusChartFactory.makeConsensusChart(options);
+			return ConsensusNucleusChartFactory.getInstance().makeConsensusChart(options);
 	}
 	
 	@Override
