@@ -97,6 +97,8 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		// link endpoints
 		borderList.get(borderList.size()-1).setNextPoint(borderList.get(0));
 		borderList.get(0).setPrevPoint(borderList.get(borderList.size()-1));
+		
+		this.boundingRectangle = new Rectangle(polygon.getBounds());
 	}
 	
 	
@@ -499,6 +501,9 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 			this.updateBorderPoint(i, x, y );
 		}
 		this.setCentreOfMass(point);
+		
+		// Update the bounding rectangle
+		this.boundingRectangle = this.createPolygon().getBounds();
 	}
 	
 	/**

@@ -48,17 +48,15 @@ public class NucleusMeshImage implements Loggable {
 		
 		
 		
-		int baseX =  (int) mesh.nucleus.getPosition()[CellularComponent.X_BASE];
-		int baseY =  (int) mesh.nucleus.getPosition()[CellularComponent.Y_BASE];
+//		int baseX =  (int) mesh.nucleus.getPosition()[CellularComponent.X_BASE];
+//		int baseY =  (int) mesh.nucleus.getPosition()[CellularComponent.Y_BASE];
 		
 		
 		// Get the bounding box size
-		Rectangle r = mesh.nucleus.createPolygon().getBounds();
+		Rectangle r = mesh.nucleus.getBounds(); //.createPolygon().getBounds();
+		r = r==null ? mesh.nucleus.createPolygon().getBounds() : r; // in case the bounds were not set (fixed 1.12.2)
 		int w = (int) ( (double) r.width*1.2);
 		int h = (int) ( (double) r.height*1.2);
-		
-//		int w = (int) mesh.nucleus.getPosition()[CellularComponent.WIDTH];
-//		int h = (int) mesh.nucleus.getPosition()[CellularComponent.HEIGHT];
 		
 		int xCentre = w >>1;
 		int yCentre = h >>1;
@@ -92,22 +90,17 @@ public class NucleusMeshImage implements Loggable {
 				XYPoint p = c.getPixelCoordinate(mesh.getFace(f));
 
 				
-				
-				
-				
-//				int offsetX = (int) (p.getXAsInt());
-//				int offsetY = (int) (p.getYAsInt());
-				
 				// Adjust from absolute position in original image
 				int offsetX = (int) (p.getXAsInt() - mesh.nucleus.getPosition()[CellularComponent.X_BASE]);
 				int offsetY = (int) (p.getYAsInt() - mesh.nucleus.getPosition()[CellularComponent.Y_BASE]);
 				finest("\tOffset to: "+offsetX+", "+offsetY);
 				
 				// Handle array out of bounds errors from consensus nuclei. 
+				// This is because the consensus has -ve x and y positions
 				if(zeroCoM){
 
 					offsetX += xCentre;
-					offsetY += yCentre; //offsetY < 0 ? p.getYAsInt() : offsetY;
+					offsetY += yCentre;
 				}
 				
 				try {

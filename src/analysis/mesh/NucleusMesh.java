@@ -156,9 +156,7 @@ public class NucleusMesh implements Loggable {
 		
 
 	}
-	
-	
-	
+		
 	public String getNucleusName() {
 		return  nucleus.getNameAndNumber();
 	}

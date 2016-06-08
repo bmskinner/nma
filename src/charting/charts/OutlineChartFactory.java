@@ -2,6 +2,7 @@ package charting.charts;
 
 import gui.RotationMode;
 import gui.components.ColourSelecter;
+import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 import io.ImageExporter;
@@ -11,6 +12,7 @@ import utility.Constants;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
@@ -117,6 +119,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		AnalysisDataset dataset = options.firstDataset();
 		
 		// Create the outline of the consensus
+		
 		JFreeChart chart = ConsensusNucleusChartFactory.makeNucleusOutlineChart(dataset);
 
 		XYPlot plot = chart.getXYPlot();
@@ -124,37 +127,43 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		// Get consensus mesh.
 		NucleusMesh meshConsensus = new NucleusMesh(dataset.getCollection().getConsensusNucleus());
 		
+		// Get the bounding box size for the consensus, to find the offsets for the images created
+		Rectangle r = dataset.getCollection().getConsensusNucleus().getBounds(); //.createPolygon().getBounds();
+		r = r==null ? dataset.getCollection().getConsensusNucleus().createPolygon().getBounds() : r; // in case the bounds were not set (fixed 1.12.2)
+		int w = (int) ( (double) r.width*1.2);
+		int h = (int) ( (double) r.height*1.2);
+		
+		int xOffset = w >>1;
+		int yOffset = h >>1;
+		
 		SignalManager m = dataset.getCollection().getSignalManager();
 		List<Cell> cells = m.getCellsWithNuclearSignals(options.getSignalGroup(), true);
 		
 		for(Cell cell : cells){
-			
+			fine("Drawing signals for cell "+cell.getNucleus().getNameAndNumber());
 			// Get each nucleus. Make a mesh.
 			NucleusMesh cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
 			
 			// Get the image with the signal
-			File imageFile = cell.getNucleus().getSignalCollection().getSourceFile(options.getSignalGroup());
-			
-			ImageStack is = ImageImporter.getInstance().importImage(imageFile);
-			ImageProcessor ip = is.getProcessor(Constants.rgbToStack(m.getSignalChannel(options.getSignalGroup())));
+			ImageProcessor ip = cell.getNucleus().getSignalCollection().getImage(options.getSignalGroup());
 			
 			// Create NucleusMeshImage from nucleus.
 			NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
 			
 			// Draw NucleusMeshImage onto consensus mesh.
 			ImageProcessor warped = im.meshToImage(meshConsensus);
+//			ImagePlus image = new ImagePlus(cell.getNucleus().getNameAndNumber(), warped);
+//			image.show();
 			
-			drawImageAsAnnotation(warped, plot, 2);
+			
+			drawImageAsAnnotation(warped, plot, 20, -xOffset, -yOffset);
 		}
-		
-		return chart;
-		
-		
-
-		
-		
-		
-		
+		XYDataset ds = NucleusDatasetCreator.createBareNucleusOutline(dataset);
+		plot.setDataset(0, ds);
+		plot.getRenderer(0).setBasePaint(Color.BLACK);
+		plot.getRenderer(0).setBaseSeriesVisible(true);
+				
+		return chart;	
 	}
 	
 	/**
@@ -492,14 +501,18 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	}
 	
 	
+	
+
 	/**
 	 * Create a chart with an image drawn as an annotation in the background layer.
-	 * The image pixels are fully opaque
 	 * @param ip
+	 * @param plot
 	 * @param alpha
+	 * @param xOffset a position to move the image 0,0 to
+	 * @param yOffset a position to move the image 0,0 to
 	 * @return
-	 */
-	private static void drawImageAsAnnotation( ImageProcessor ip, XYPlot plot, int alpha){
+	 */		
+	private static void drawImageAsAnnotation( ImageProcessor ip, XYPlot plot, int alpha, int xOffset, int yOffset){	
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.getRangeAxis().setInverted(false);
 		
@@ -508,10 +521,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		plot.setDataset(0, bounds);
 		
 		
-		plot.setRenderer(0, new DefaultXYItemRenderer());
+//		plot.setRenderer(0, new DefaultXYItemRenderer());
 		XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
 		rend.setBaseSeriesVisible(false);
-		int padding = 0; 
 		
 		plot.getDomainAxis().setRange(0, ip.getWidth());
 		plot.getRangeAxis().setRange(0, ip.getHeight());
@@ -519,17 +531,32 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		for(int x=0; x<ip.getWidth(); x++){
 			for(int y=0; y<ip.getHeight(); y++){
 
-				//				int pixel = im.getRGB(x, y);
 				int pixel = ip.get(x, y);
-				Color col = new Color(pixel, pixel, pixel, alpha);
+				
+				if(pixel<255){// Ignore anything that is not signal - the background is already white
+				
+					Color col = new Color(pixel, pixel, pixel, alpha);
 
-				// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
-				Rectangle2D r = new Rectangle2D.Double(x-padding-0.1, y-padding-0.1, 1.2, 1.2);
-				XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+					// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
+					Rectangle2D r = new Rectangle2D.Double(x+xOffset-0.1, y+yOffset-0.1, 1.2, 1.2);
+					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
 
-				rend.addAnnotation(a, Layer.BACKGROUND);
+					rend.addAnnotation(a, Layer.BACKGROUND);
+				}
 			}
 		}
+		
+	}
+			
+	/**
+	 * Create a chart with an image drawn as an annotation in the background layer.
+	 * The image pixels are fully opaque
+	 * @param ip
+	 * @param alpha
+	 * @return
+	 */
+	private static void drawImageAsAnnotation( ImageProcessor ip, XYPlot plot, int alpha){
+		drawImageAsAnnotation(ip, plot, alpha, 0, 0);
 	}
 	
 	/**

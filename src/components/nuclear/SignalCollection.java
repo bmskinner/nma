@@ -19,6 +19,8 @@
 package components.nuclear;
 
 import ij.IJ;
+import ij.process.ImageProcessor;
+import io.ImageImporter;
 import stats.SignalStatistic;
 
 import java.io.File;
@@ -517,6 +519,14 @@ public class SignalCollection implements Serializable {
 			result.add(list.get(i).getStatistic(stat, scale));
 		}
 		return result;
+	}
+	
+	
+	public ImageProcessor getImage(int signalGroup){
+		File f = this.sourceFiles.get(signalGroup);
+		int channel = this.sourceChannels.get(signalGroup);
+		
+		return ImageImporter.getInstance().importImage(f, channel);
 	}
 		
 	public String toString(){

@@ -94,19 +94,19 @@ public class CurveRefolder extends AnalysisWorker {
 
 		collection = dataset.getCollection();
 
-		log(Level.FINE, "Creating refolder");
+		fine("Creating refolder");
 
 
 		// make an entirely new nucleus to play with
-		log(Level.FINEST, "Fetching best refold candiate");
+		finest("Fetching best refold candiate");
 
-		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian(BorderTag.REFERENCE_POINT);	
+		Nucleus n = collection.getNucleusMostSimilarToMedian(BorderTag.REFERENCE_POINT);	
 		
-		log(Level.FINEST, "Creating consensus nucleus template");
+		finest("Creating consensus nucleus template");
 		refoldNucleus = new ConsensusNucleus(n, collection.getNucleusType());
 
-		log(Level.FINEST, "Refolding nucleus of class: "+collection.getNucleusType().toString());
-		log(Level.FINEST, "Subject: "+refoldNucleus.getSourceFileName()+"-"+refoldNucleus.getNucleusNumber());
+		finest("Refolding nucleus of class: "+collection.getNucleusType().toString());
+		finest("Subject: "+refoldNucleus.getSourceFileName()+"-"+refoldNucleus.getNucleusNumber());
 
 		Profile targetProfile 	= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
 		Profile q25 			= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.LOWER_QUARTILE);
@@ -147,11 +147,11 @@ public class CurveRefolder extends AnalysisWorker {
 			// orient refolded nucleus to put tail at the bottom
 			
 			if(refoldNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && refoldNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
-				log(Level.FINER, "Calculating rotation angle via TopVertical");
+				finer("Calculating rotation angle via TopVertical");
 				refoldNucleus.alignPointsOnVertical(refoldNucleus.getBorderTag(BorderTag.TOP_VERTICAL), refoldNucleus.getBorderTag(BorderTag.BOTTOM_VERTICAL));
 				
 			} else {
-				log(Level.FINER, "Calculating rotation angle via OrientationPoint");
+				finer("Calculating rotation angle via OrientationPoint");
 				refoldNucleus.rotatePointToBottom(refoldNucleus.getBorderTag(BorderTag.ORIENTATION_POINT));
 
 			}
@@ -191,7 +191,7 @@ public class CurveRefolder extends AnalysisWorker {
 			double score = refoldNucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
 			
 //			fileLogger.log(Level.INFO, "Refolding curve: initial score: "+(int)score);
-			log(Level.FINE, "Refolding curve: initial score: "+(int)score);
+			fine("Refolding curve: initial score: "+(int)score);
 
 //			double originalScore = score;
 			double prevScore = score*2;
@@ -204,7 +204,7 @@ public class CurveRefolder extends AnalysisWorker {
 					prevScore = score;
 					score = this.iterateOverNucleus();
 					publish(++i);
-					log(Level.FINE, "Iteration "+i+": "+(int)score);
+					fine("Iteration "+i+": "+(int)score);
 				}
 //			}
 
@@ -216,8 +216,8 @@ public class CurveRefolder extends AnalysisWorker {
 //					i++;
 //					publish(i);
 //					if(i%50==0){
-//						fileLogger.log(Level.FINE, "Iteration "+i+": "+(int)score);
-//						logger.log(Level.FINE, "Iteration "+i+": "+(int)score);
+//						fileLogger.fine("Iteration "+i+": "+(int)score);
+//						logger.fine("Iteration "+i+": "+(int)score);
 ////						logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
 //					}
 //				}
@@ -231,13 +231,13 @@ public class CurveRefolder extends AnalysisWorker {
 //					i++;
 //					publish(i);
 //					if(i%50==0){
-//						fileLogger.log(Level.FINE, "Iteration "+i+": "+(int)score);
-//						logger.log(Level.FINE, "Iteration "+i+": "+(int)score);
+//						fileLogger.fine("Iteration "+i+": "+(int)score);
+//						logger.fine("Iteration "+i+": "+(int)score);
 //					}
 //				}
 //			}
 //			fileLogger.log(Level.INFO, "Refolded curve: final score: "+(int)score);
-			log(Level.FINE, "Refolded curve: final score: "+(int)score);
+			fine("Refolded curve: final score: "+(int)score);
 
 		} catch(Exception e){
 			throw new Exception("Cannot calculate scores: "+e.getMessage());

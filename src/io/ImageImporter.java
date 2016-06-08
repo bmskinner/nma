@@ -22,6 +22,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
 import ij.process.ImageConverter;
+import ij.process.ImageProcessor;
 
 import java.io.File;
 import java.util.logging.Level;
@@ -101,6 +102,22 @@ public class ImageImporter implements Loggable {
 
 		}
 		return stack;
+	}
+	
+	/**
+	 * Import the image in the given file, and return an image processor
+	 * for the channel requested. Inverts the greyscale image so white==no signal
+	 * and black==full signal
+	 * @param f
+	 * @param channel
+	 * @return
+	 */
+	public ImageProcessor importImage(File f, int channel){
+		ImageStack s = importImage(f);
+		int stack = Constants.rgbToStack(channel);
+		ImageProcessor ip = s.getProcessor(stack);
+		ip.invert();
+		return ip;
 	}
 	
 	/**

@@ -73,6 +73,10 @@ public interface CellularComponent {
 	 */
 	public File getSourceFile();
 	
+	/**
+	 * Set the image file the component was found in
+	 * @param sourceFile
+	 */
 	public void setSourceFile(File sourceFile);
 		
 	public int getChannel();
@@ -85,6 +89,10 @@ public interface CellularComponent {
 	 */
 	public ImageProcessor getImage();
 
+	/**
+	 * Set the RGB channel the component was detected in
+	 * @param channel
+	 */
 	public void setChannel(int channel);
 	
 	/**
@@ -123,6 +131,10 @@ public interface CellularComponent {
 	public PlottableStatistic[] getStatistics();
 	
 	
+	/**
+	 * Get the bounding rectangle for the object.
+	 * @return
+	 */
 	public Rectangle getBounds();
 	
 	/**
