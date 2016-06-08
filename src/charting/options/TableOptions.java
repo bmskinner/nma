@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import stats.PlottableStatistic;
 import analysis.AnalysisDataset;
+import components.Cell;
 
 /*
  * Hold the drawing options for a table. 
@@ -32,6 +33,8 @@ import analysis.AnalysisDataset;
 public class TableOptions extends AbstractOptions {
 	
 	private TableType type = null;
+	
+	private Cell cell      = null;
 	
 	public TableOptions(List<AnalysisDataset> list) {
 		super(list);
@@ -51,6 +54,18 @@ public class TableOptions extends AbstractOptions {
 	public TableType getType(){
 		return this.type;
 	}
+	
+	
+
+	public Cell getCell() {
+		return cell;
+	}
+
+	public void setCell(Cell cell) {
+		this.cell = cell;
+	}
+
+
 
 	public enum TableType {
 		ANALYSIS_PARAMETERS,
@@ -67,6 +82,9 @@ public class TableOptions extends AbstractOptions {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		
+		result = prime * result
+				+ ((cell == null) ? 0 : cell.hashCode());
 		return result;
 	}
 
@@ -80,6 +98,8 @@ public class TableOptions extends AbstractOptions {
 			return false;
 		TableOptions other = (TableOptions) obj;
 		if (type != other.type)
+			return false;
+		if (cell != other.cell)
 			return false;
 		return true;
 	}

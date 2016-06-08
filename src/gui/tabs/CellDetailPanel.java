@@ -20,31 +20,20 @@ package gui.tabs;
 
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
-import gui.RotationMode;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import gui.components.FixedAspectRatioChartPanel;
-import gui.components.ColourSelecter;
 import gui.components.DraggableOverlayChartPanel;
-import gui.components.ExportableTable;
-import gui.components.panels.GenericCheckboxPanel;
 import gui.components.panels.ProfileTypeOptionsPanel;
-import gui.components.panels.RotationSelectionSettingsPanel;
-import gui.dialogs.CellImageDialog;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
 import gui.tabs.cells.CellOutlinePanel;
-import ij.process.ImageProcessor;
-
+import gui.tabs.cells.CellStatsPanel;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
@@ -56,17 +45,11 @@ import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
-import javax.swing.JColorChooser;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JTable;
 import javax.swing.JTree;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -78,30 +61,18 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYAnnotation;
-import org.jfree.chart.annotations.XYShapeAnnotation;
-
 import analysis.AnalysisDataset;
-import analysis.mesh.NucleusMesh;
-import analysis.mesh.NucleusMeshBuilder;
-import analysis.mesh.NucleusMeshImage;
-import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
-import charting.charts.OutlineChartFactory;
-import charting.datasets.CellDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
-import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellularComponent;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
-import components.nuclear.BorderPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
@@ -113,9 +84,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	
 	protected CellsListPanel	cellsListPanel;		// the list of cells in the active dataset
 	protected ProfilePanel	 	profilePanel; 		// the nucleus angle profile
-//	protected OutlinePanel 	 	outlinePanel; 		// the outline of the cell and detected objects
-	protected CellOutlinePanel 	 	outlinePanel = new CellOutlinePanel(); 		// the outline of the cell and detected objects
-	protected CellStatsPanel 	cellStatsPanel;		// the stats table
+	protected CellOutlinePanel 	outlinePanel     = new CellOutlinePanel(); 		// the outline of the cell and detected objects
+	protected CellStatsPanel 	cellStatsPanel   = new CellStatsPanel();		// the stats table
 	protected SignalListPanel 	signalListPanel;	// choose which background image to display
 
 	public CellDetailPanel() {
@@ -189,7 +159,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		centrePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
 		
-		cellStatsPanel = new CellStatsPanel();
 		centrePanel.add(cellStatsPanel);
 		
 		profilePanel = new ProfilePanel();
@@ -199,13 +168,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		centrePanel.setMinimumSize(minSize);
 		return centrePanel;
 	}
-	
-//	@Override
-//	public void updateDetail(){
-//		updateList(getDatasets());
-//		setUpdating(false);
-//	}
-	
+		
 	public CellularComponent getActiveComponent(){
 		return this.activeComponent;
 	}
@@ -217,10 +180,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	protected void updateSingle() throws Exception {
 		cellsListPanel.updateDataset( activeDataset()  );
 		outlinePanel.update(getDatasets());
+		cellStatsPanel.update(getDatasets());
 		
-		log(Level.FINEST, "Updated cell list panel");
+		finest("Updated cell list panel");
 		updateCell(activeCell);
-		log(Level.FINEST, "Updated active cell panel");
+		finest("Updated active cell panel");
 	}
 	
 	protected void updateMultiple() throws Exception {
@@ -301,42 +265,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		}
 	}
 	
-	
-	/**
-	 * Allows for cell background to be coloured based on position in a list. Used to colour
-	 * the signal stats list
-	 *
-	 */
-	private class StatsTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
-
-		private static final long serialVersionUID = 1L;
-
-		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
-			// default cell colour is white
-			Color colour = Color.WHITE;
-
-			// get the value in the first column of the row below
-			if(row<table.getModel().getRowCount()-1){
-				String nextRowHeader = table.getModel().getValueAt(row+1, 0).toString();
-
-				if(nextRowHeader.equals("Signal group")){
-					// we want to colour this cell preemptively
-					// get the signal group from the table
-					String groupString = table.getModel().getValueAt(row+1, 1).toString();
-					colour = activeDataset().getSignalGroupColour(Integer.valueOf(groupString));
-//					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
-				}
-			}
-			//Cells are by default rendered as a JLabel.
-			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			l.setBackground(colour);
-
-			//Return the JLabel which renders the cell.
-			return l;
-		}
-	}
-	
+		
 
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
@@ -645,216 +574,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		}
 
 	}
-		
-	protected class CellStatsPanel extends JPanel {
-		
-		private ExportableTable table; // individual cell stats
-		
-		private JScrollPane scrollPane;
-		
-		protected CellStatsPanel() throws Exception{
-			
-			this.setLayout(new BorderLayout());
-			
-			scrollPane = new JScrollPane();
-						
-			table = new ExportableTable(CellDatasetCreator.createCellInfoTable(null));
-			table.setEnabled(false);
-			
-			table.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					
-					JTable table = (JTable) e.getSource();
-					int row = table.rowAtPoint((e.getPoint()));
-					String rowName = table.getModel().getValueAt(row, 0).toString();
-					
-					// double click
-					if (e.getClickCount() == 2) {
-						
-						if(rowName.equals("Source image")){
-							showCellImage();
-						}
-						
-						// Look for signal group colour
-						if(rowName.equals("")){
-							String value = table.getModel().getValueAt(row+1, 0).toString();
-							if(value.equals("Signal group")){
-								
-								changeSignalGroupColour(row);
 
-							}
-						}
-
-						// Adjust the scale
-						if(rowName.equals("Scale (um/pixel)")){
-							
-							updateScale();
-						}
-						
-						// Adjust the point position of tags
-						Nucleus n = activeCell.getNucleus();
-						BorderTag tag = activeDataset().getCollection().getNucleusType().getTagFromName(rowName);
-						if(n.hasBorderTag(tag)){
-							
-							updateBorderTagIndex(n, tag);
-							
-						}
-							
-					}
-
-				}
-			});
-			
-			scrollPane.setViewportView(table);
-			scrollPane.setColumnHeaderView(table.getTableHeader());
-			
-			this.add(scrollPane, BorderLayout.CENTER);
-		}
-		
-		private void updateBorderTagIndex(Nucleus n, BorderTag tag){
-//			String pointType = rowName;
-			
-			
-			int index = AbstractCellularComponent.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
-			
-			SpinnerNumberModel sModel 
-				= new SpinnerNumberModel(index, 0, n.getBorderLength(), 1);
-			JSpinner spinner = new JSpinner(sModel);
-			
-			int option = JOptionPane.showOptionDialog(null, 
-					spinner, 
-					"Choose the new "+tag.toString(), 
-					JOptionPane.OK_CANCEL_OPTION, 
-					JOptionPane.QUESTION_MESSAGE, null, null, null);
-			if (option == JOptionPane.CANCEL_OPTION) {
-			    // user hit cancel
-			} else if (option == JOptionPane.OK_OPTION)	{
-				
-				// the value chosen by the user
-				int chosenIndex = (Integer) spinner.getModel().getValue();
-				
-				int existingIndex = n.getBorderIndex(tag);
-				
-				// adjust to the actual point index
-				int pointIndex = AbstractCellularComponent.wrapIndex(chosenIndex + n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
-				
-				// find the amount the index is changing by
-				int difference = pointIndex - existingIndex;
-				
-				// TODO: update segment boundaries 
-				try {
-					
-					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, tag);
-					NucleusBorderSegment seg = profile.getSegment("Seg_0");
-					// this updates the correct direction, but the wrong end of the segment
-					seg.lengthenStart(-difference);
-					
-					n.setProfile(ProfileType.REGULAR, tag, profile);
-					
-				} catch(Exception e1){
-					log(Level.SEVERE, "Error updating cell profile", e1);
-				}
-				
-				// Update the border tag index
-				n.setBorderTag(tag, pointIndex);
-				
-				if(tag.equals(BorderTag.ORIENTATION_POINT)){
-					if(n.hasBorderTag(BorderTag.INTERSECTION_POINT)){
-						// only rodent sperm use the intersection point, which is equivalent to the head.
-						BorderPoint newPoint = n.findOppositeBorder(n.getBorderPoint(BorderTag.ORIENTATION_POINT));
-						n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getBorderIndex(newPoint));
-					}
-				}
-				
-				
-				updateCell(activeCell);
-				
-			}
-		}
-		
-		private void showCellImage(){
-			new CellImageDialog( activeCell);
-		}
-		
-		private void changeSignalGroupColour(int row){
-			// the group number is in the next row down
-			String groupString = table.getModel().getValueAt(row+1, 1).toString();
-			int signalGroup = Integer.valueOf(groupString);
-			
-			Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
-			
-			Color newColor = JColorChooser.showDialog(
-                     CellDetailPanel.this,
-                     "Choose signal Color",
-                     oldColour);
-			
-			if(newColor != null){
-				activeDataset().setSignalGroupColour(signalGroup, newColor);
-				updateCell(activeCell);
-				fireSignalChangeEvent("SignalColourUpdate");
-			}
-		}
-		
-		private void updateScale(){
-			SpinnerNumberModel sModel 
-			= new SpinnerNumberModel(activeCell.getNucleus().getScale(), 0, 100, 0.001);
-			JSpinner spinner = new JSpinner(sModel);
-
-
-			int option = JOptionPane.showOptionDialog(null, 
-					spinner, 
-					"Choose the new scale", 
-					JOptionPane.OK_CANCEL_OPTION, 
-					JOptionPane.QUESTION_MESSAGE, null, null, null);
-			if (option == JOptionPane.CANCEL_OPTION) {
-				// user hit cancel
-			} else if (option == JOptionPane.OK_OPTION)	{
-
-				Object[] options = { "Apply to all cells" , "Apply to only this cell", };
-				int applyAllOption = JOptionPane.showOptionDialog(null, "Apply this scale to all cells in the dataset?", "Apply to all?",
-
-						JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-
-						null, options, options[1]);
-
-				double scale = (Double) spinner.getModel().getValue();
-
-				if(scale>0){ // don't allow a scale to cause divide by zero errors
-					if(applyAllOption==0){ // button at index 1
-						//								if(applyAllOption==JOptionPane.YES_OPTION){
-
-						for(Nucleus n : activeDataset().getCollection().getNuclei()){
-							n.setScale(scale);
-						}
-
-					} else {
-						activeCell.getNucleus().setScale(scale);
-
-					}
-					updateCell(activeCell);
-				} else {
-					log(Level.WARNING, "Cannot set a scale to zero");
-				}
-			}
-		}
-		
-		protected void update(Cell cell){
-			
-			try{
-
-				if(cell==null){
-					table.setModel(CellDatasetCreator.createCellInfoTable(null));
-				} else {
-					table.setModel(CellDatasetCreator.createCellInfoTable(cell));
-					table.getColumnModel().getColumn(1).setCellRenderer(new StatsTableCellRenderer());
-				}
-			} catch(Exception e){
-				log(Level.SEVERE, "Error updating cell", e);
-			}
-		}
-	}
-	
 	protected class SignalListPanel extends JPanel implements ListSelectionListener {
 		
 		private static final long serialVersionUID = 1L;
@@ -985,7 +705,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				activeCell = activeDataset().getCollection().getCell(cellID);
 				updateCell(activeCell);
 				
-//				testMeshBuilder();
 			} catch (Exception e1){
 				log(Level.SEVERE, "Error fetching cell");
 				log(Level.FINE, "Error fetching cell", e1);

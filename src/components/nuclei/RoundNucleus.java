@@ -118,7 +118,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		super();
 	}
 
-	public RoundNucleus(Nucleus n) throws Exception {
+	public RoundNucleus(Nucleus n) {
 		super(n);
 
 		this.setOutputFolder(n.getOutputFolderName());
@@ -309,7 +309,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	@Override
-	protected double calculateStatistic(PlottableStatistic stat) throws Exception{
+	protected double calculateStatistic(PlottableStatistic stat) {
 		
 		if(stat.getClass().isAssignableFrom(NucleusStatistic.class)){
 			return calculateStatistic( (NucleusStatistic) stat);
@@ -319,7 +319,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 	}
 	
-	protected double calculateStatistic(NucleusStatistic stat) throws Exception{
+	protected double calculateStatistic(NucleusStatistic stat) {
 		
 		double result = 0;
 		switch(stat){
@@ -414,7 +414,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * @return
 	 * @throws Exception
 	 */
-	public Rectangle getBoundingRectangle(BorderTag point) throws Exception{
+	public Rectangle getBoundingRectangle(BorderTag point) {
 		
 		if(this.boundingRectangles == null){
 			boundingRectangles = new HashMap<BorderTag, Rectangle>();
@@ -435,7 +435,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * @return
 	 * @throws Exception
 	 */
-	protected Rectangle calculateBoundingRectangle(BorderTag point) throws Exception{
+	protected Rectangle calculateBoundingRectangle(BorderTag point) {
 		ConsensusNucleus testw = new ConsensusNucleus( this, NucleusType.ROUND);
 
 		if(this.hasBorderTag(BorderTag.TOP_VERTICAL) && this.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
@@ -555,7 +555,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 		
-	public double getCircularity() throws Exception{
+	public double getCircularity() {
 		double perim2 = Math.pow(this.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS), 2);
 		return (4 * Math.PI) * (this.getStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS) / perim2);
 	}
@@ -623,7 +623,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		this.failureCode = this.failureCode | i;
 	}
 
-	public void setAngleProfileWindowSize(int i) throws Exception{
+	public void setAngleProfileWindowSize(int i){
 		this.angleProfileWindowSize = i;
 		this.profileMap.put(ProfileType.REGULAR, this.calculateAngleProfile());
 	}
@@ -909,7 +909,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		return new BorderPoint(this.getBorderPoint(index));
 	}
 	
-	public double getNarrowestDiameter() throws Exception{
+	public double getNarrowestDiameter() {
 		return Arrays.stream(this.getProfile(ProfileType.DISTANCE).asArray()).min().orElse(0);
 	}
 
@@ -1224,7 +1224,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		return new SegmentedProfile(profile);
 	}
 
-	protected SegmentedProfile calculateAngleProfile() throws Exception{
+	protected SegmentedProfile calculateAngleProfile() {
 
 		List<NucleusBorderSegment> segments = null;
 		

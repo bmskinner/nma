@@ -58,7 +58,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 	private transient double bodyWidth  = 0;
 
 	
-	public RodentSpermNucleus(Nucleus n) throws Exception{
+	public RodentSpermNucleus(Nucleus n) {
 		super(n);
 		this.splitNucleusToHeadAndHump();
 	}
@@ -83,7 +83,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 	}
 	
 	@Override
-	protected double calculateStatistic(NucleusStatistic stat) throws Exception{
+	protected double calculateStatistic(NucleusStatistic stat){
 		double result = super.calculateStatistic(stat);
 		
 		switch(stat){
@@ -128,7 +128,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		
 	}
 	
-	private double getHookOrBodyLength(boolean useHook) throws Exception{
+	private double getHookOrBodyLength(boolean useHook) {
 
 		if(hookLength==0 || bodyWidth==0){
 			calculateHookOrBodyLength();
@@ -141,7 +141,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		}	
 	}
 	
-	private void calculateHookOrBodyLength() throws Exception{
+	private void calculateHookOrBodyLength() {
 			
 		// Copy the nucleus
 		RodentSpermNucleus testNucleus = new RodentSpermNucleus( this); //.duplicate();
@@ -621,7 +621,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     we need to get an intersection point of the line through the 
     tail and centre of mass with the opposite border of the nucleus.
   */
-  private int findIntersectionPointForNuclearSplit() throws Exception{
+  private int findIntersectionPointForNuclearSplit() {
     // test if each point from the tail intersects the splitting line
     // determine the coordinates of the point intersected as int
     // for each xvalue of each point in array, get the line y value
@@ -646,7 +646,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     return minDeltaYIndex;
   }
 
-  public void splitNucleusToHeadAndHump() throws Exception{
+  public void splitNucleusToHeadAndHump() {
 
 	  if(!this.hasBorderTag(BorderTag.INTERSECTION_POINT)){
 		  int index = findIntersectionPointForNuclearSplit();

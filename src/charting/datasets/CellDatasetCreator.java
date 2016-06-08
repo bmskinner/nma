@@ -36,6 +36,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import analysis.AnalysisDataset;
 import analysis.profiles.ProfileManager;
 import components.AbstractCellularComponent;
@@ -58,8 +59,9 @@ public class CellDatasetCreator implements Loggable {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public static TableModel createCellInfoTable(Cell cell) throws Exception{
+	public static TableModel createCellInfoTable(TableOptions options) {
 
+		Cell cell = options.getCell();
 		DefaultTableModel model = new DefaultTableModel();
 		
 		List<Object> fieldNames = new ArrayList<Object>(0);

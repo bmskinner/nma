@@ -34,7 +34,7 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	private NucleusType type;
 	
 	
-	public ConsensusNucleus(Nucleus n, NucleusType type) throws Exception{
+	public ConsensusNucleus(Nucleus n, NucleusType type) {
 		
 		super(n);
 		this.type = type;

@@ -52,7 +52,7 @@ public class SpermNucleus
   * @return a SpermNucleus
  * @throws Exception 
   */
-  public SpermNucleus(Nucleus n) throws Exception{
+  public SpermNucleus(Nucleus n) {
   	super(n);
   }
   

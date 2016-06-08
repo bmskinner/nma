@@ -104,7 +104,7 @@ public interface CellularComponent {
 	 * @return the value or zero if stat.equals(NucleusStatistic.VARIABILILTY)==true
 	 * @throws Exception 
 	 */
-	public double getStatistic(PlottableStatistic stat, MeasurementScale scale) throws Exception;
+	public double getStatistic(PlottableStatistic stat, MeasurementScale scale);
 	
 	/**
 	 * Get the value of the given statistic for this nucleus.

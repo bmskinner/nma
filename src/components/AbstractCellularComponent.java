@@ -226,7 +226,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	}
 
 	@Override
-	public double getStatistic(PlottableStatistic stat, MeasurementScale scale) throws Exception {
+	public double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
 		if(this.statistics.containsKey(stat)){
 			double result = this.statistics.get(stat);
 			result = stat.convert(result, this.getScale(), scale);
@@ -248,12 +248,12 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	}
 	
 	// For subclasses to override
-	protected double calculateStatistic(PlottableStatistic stat) throws Exception{
+	protected double calculateStatistic(PlottableStatistic stat){
 		return 0;
 	}
 	
 	@Override
-	public double getStatistic(PlottableStatistic stat) throws Exception {
+	public double getStatistic(PlottableStatistic stat) {
 		return this.getStatistic(stat, MeasurementScale.PIXELS);
 	}
 

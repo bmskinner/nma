@@ -88,7 +88,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * that span the entire profile, half each
 	 * @param profile
 	 */
-	public SegmentedProfile(Profile profile) throws Exception {
+	public SegmentedProfile(Profile profile) {
 		super(profile);
 		int midpoint = profile.size()/2;
 		NucleusBorderSegment segment1 = new NucleusBorderSegment(0, midpoint, profile.size());
@@ -101,10 +101,14 @@ public class SegmentedProfile extends Profile implements Serializable {
 		segments.add(segment1);
 		segments.add(segment2);
 		
-		NucleusBorderSegment.linkSegments(segments);
+		
+		try {
+			NucleusBorderSegment.linkSegments(segments);
+		} catch (ProfileException e) {
+			warn("Error linking segments");
+		}
 
 		this.segments = segments;
-//		this.firstSegment = segments.get(0);
 	}
 	
 	/**
@@ -112,7 +116,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @param values
 	 * @throws Exception 
 	 */
-	public SegmentedProfile(double[] values) throws Exception{
+	public SegmentedProfile(double[] values) {
 		this( new Profile(values));
 	}
 	
@@ -343,7 +347,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * Replace the segments in the profile with the given list
 	 * @param segments
 	 */
-	public void setSegments(List<NucleusBorderSegment> segments) throws Exception {
+	public void setSegments(List<NucleusBorderSegment> segments) {
 		if(segments==null || segments.isEmpty()){
 			throw new IllegalArgumentException("Segment list is null or empty");
 		}
@@ -352,8 +356,11 @@ public class SegmentedProfile extends Profile implements Serializable {
 			throw new IllegalArgumentException("Segment list is from a different total length");
 		}
 		
-		this.segments = NucleusBorderSegment.copy(segments);
-//		this.firstSegment = new NucleusBorderSegment(segments.get(0));
+		try {
+			this.segments = NucleusBorderSegment.copy(segments);
+		} catch (ProfileException e) {
+			warn("Cannot copy segments");
+		}
 	}
 	
 	/**

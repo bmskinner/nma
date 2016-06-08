@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import components.Cell;
 import components.generic.MeasurementScale;
 import stats.PlottableStatistic;
 import charting.options.TableOptions.TableType;
@@ -25,6 +26,8 @@ public class TableOptionsBuilder {
 	private UUID segID                 = null; // the id of the segment (not consistent between datasets)
 	private int segPosition            = 0;    // the position of the segment in the profile (consistent between datasets)
 	private MeasurementScale scale     = MeasurementScale.PIXELS;
+	
+	private Cell cell                  = null;
 		
 		public TableOptionsBuilder(){}
 		
@@ -63,6 +66,11 @@ public class TableOptionsBuilder {
 			return this;
 		}
 		
+		public TableOptionsBuilder setCell(Cell cell){
+			this.cell = cell;
+			return this;
+		}
+		
 		public TableOptions build(){
 			TableOptions options =  new TableOptions(list, programLogger);
 			options.setType(type);
@@ -70,6 +78,7 @@ public class TableOptionsBuilder {
 			options.setSegID(segID);
 			options.setSegPosition(segPosition);
 			options.setScale(scale);
+			options.setCell(cell);
 			return options;
 			
 		}
