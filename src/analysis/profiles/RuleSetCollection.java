@@ -20,11 +20,14 @@
  *******************************************************************************/
 package analysis.profiles;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import logging.Loggable;
 import components.generic.BorderTag;
 import components.nuclear.NucleusType;
 
@@ -36,7 +39,9 @@ import components.nuclear.NucleusType;
  * @author bms41
  *
  */
-public class RuleSetCollection {
+public class RuleSetCollection implements Serializable, Loggable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private Map<BorderTag, List<RuleSet>> map = new HashMap<BorderTag, List<RuleSet>>();
 	
@@ -142,6 +147,18 @@ public class RuleSetCollection {
 		r.addRuleSet(BorderTag.REFERENCE_POINT,   RuleSet.roundRPRuleSet());
 		r.addRuleSet(BorderTag.ORIENTATION_POINT, RuleSet.roundRPRuleSet());
 		return r;
+	}
+	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\tReading RulesetCollection");
+		in.defaultReadObject();
+		finest("\tRead RulesetCollection");
+	}
+
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\tWriting RulesetCollection");
+		out.defaultWriteObject();
+		finest("\tWrote RulesetCollection");
 	}
 
 }

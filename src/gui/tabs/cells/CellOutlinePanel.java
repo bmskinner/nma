@@ -60,12 +60,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		this.add(settingsPanel, BorderLayout.NORTH);
 		
 		panel = new FixedAspectRatioChartPanel(chart);
-		panel.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				panel.restoreAutoBounds();
-			}
-		});
 					
 		this.add(panel, BorderLayout.CENTER);
 		

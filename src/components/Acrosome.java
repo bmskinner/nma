@@ -18,6 +18,8 @@
  *******************************************************************************/
 package components;
 
+import java.io.IOException;
+
 public class Acrosome extends  AbstractCellularComponent {
 
 	private static final long serialVersionUID = 1L;
@@ -28,6 +30,18 @@ public class Acrosome extends  AbstractCellularComponent {
 	
 	public Acrosome(Acrosome a){
 		super(a);
+	}
+	
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\tWriting acrosome");
+		out.defaultWriteObject();
+		finest("\tWrote acrosome");
+	}
+
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\tReading acrosome");
+		in.defaultReadObject();
+		finest("\tRead acrosome"); 
 	}
 
 }

@@ -30,6 +30,7 @@ package components.nuclei.sperm;
 import ij.gui.Roi;
 
 import java.io.File;
+import java.io.IOException;
 
 import components.nuclear.SignalCollection;
 import components.nuclei.AsymmetricNucleus;
@@ -73,6 +74,18 @@ public class SpermNucleus
 	  } catch (Exception e) {
 		  return null;
 	  }
+  }
+  
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	  finest("\tReading sperm nucleus");
+	  in.defaultReadObject();
+	  finest("\tRead sperm nucleus");
+  }
+
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+	  finest("\tWriting sperm nucleus");
+	  out.defaultWriteObject();
+	  finest("\tWrote sperm nucleus");
   }
 
 

@@ -36,12 +36,13 @@ import utility.Version;
 public class PopulationImportWorker extends AnalysisWorker {
 	
 	private File file;
-	private AnalysisDataset dataset;
+	private AnalysisDataset dataset = null;
 	
 	public PopulationImportWorker(final File f){
 		super(null);
 		this.file = f;
 		this.setProgressTotal(1);
+		finest("Created instance of "+this.getClass().getSimpleName());
 	}
 	
 	public AnalysisDataset getLoadedDataset(){
@@ -50,12 +51,30 @@ public class PopulationImportWorker extends AnalysisWorker {
 	
 	@Override
 	protected Boolean doInBackground() {
-		
+		finest("Beginning background work");
 		try {
 			dataset = readDataset(file);
 			
+			if(dataset == null){
+				warn("Unable to open dataset");
+				return false;
+			}
+			
 			fine("Read dataset");
-			if(checkVersion( dataset.getVersion() )){
+			
+			Version v = null;
+			
+			
+			try {
+				v = dataset.getVersion();
+			} catch (Exception e) {
+				error("Error getting version from dataset", e);
+				return false;
+			}
+			
+			
+			
+			if(checkVersion( v )){
 
 				fine("Version check OK");
 				dataset.setRoot(true);
@@ -109,7 +128,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 				return true;
 				
 			} else {
-				log(Level.SEVERE, "Unable to open dataset version: "+ dataset.getVersion());
+				warn("Unable to open dataset version: "+ dataset.getVersion());
 				return false;
 			}
 			
@@ -118,7 +137,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 			warn("Unable to open file: "+e.getMessage());
 			return false;
 		} catch(Exception e){
-			logError("Unable to open file", e);
+			error("Unable to open file", e);
 			return false;
 		}
 	}
@@ -136,29 +155,31 @@ public class PopulationImportWorker extends AnalysisWorker {
 	 * @return a pass or fail
 	 */
 	public boolean checkVersion(Version version){
-		boolean ok = true;
+
 		
 		if(version==null){ // allow for debugging, but warn
-			log(Level.WARNING, "No version info found: functions may not work as expected");
+			warn("No version info found: functions may not work as expected");
 			return true;
 		}
 				
-//		String[] parts = version.split("\\.");
 		
 		// major version MUST be the same
 		if(version.getMajor()!=Constants.VERSION_MAJOR){
-			ok = false;
+			warn("Major version difference");
+			return false;
 		}
 		// dataset revision should be equal or greater to program
 		if(version.getMinor()<Constants.VERSION_MINOR){
-			log(Level.WARNING, "Dataset was created with an older version of the program");
-			log(Level.WARNING, "Some functionality may not work as expected");
+			warn("Dataset was created with an older version of the program");
+			warn("Some functionality may not work as expected");
 		}
-		return ok;
+		return true;
 	}
 	
 	private AnalysisDataset readDataset(File inputFile) {
 
+		finest("Checking input file");
+		
 		if( ! inputFile.exists()){
 			throw new IllegalArgumentException("Requested file does not exist");
 		}
@@ -172,26 +193,42 @@ public class PopulationImportWorker extends AnalysisWorker {
 		ObjectInputStream ois   = null;
 				
 		try {
+			
+			finest("Attempting to read file");
+			
 			fis = new FileInputStream(inputFile.getAbsolutePath());
-
+			finest("Created file stream");
 			ois = new ObjectInputStream(fis);
+			finest("Created object stream");
 			
+			
+			finest("Attempting to read object");
 			dataset = (AnalysisDataset) ois.readObject();
-						
-			// Replace existing save file path with the path to the file that has been opened
+			finest("Read object as analysis dataset");	
 			
+			// Replace existing save file path with the path to the file that has been opened
+			finest("Checking file path");
 			if(!dataset.getSavePath().equals(inputFile)){
 				updateSavePath(inputFile, dataset);
 			}
 			
 		} catch (FileNotFoundException e1) {
-			logError("File not found: "+inputFile.getAbsolutePath(), e1);
+			error("File not found: "+inputFile.getAbsolutePath(), e1);
+			dataset = null;
 		} catch (IOException e1) {
-			logError("File IO error: "+inputFile.getAbsolutePath(), e1);
+			error("File IO error: "+inputFile.getAbsolutePath(), e1);
+			dataset = null;
 		} catch (ClassNotFoundException e1) {
-			logError("Class not found error: "+inputFile.getAbsolutePath(), e1);
+			error("Class not found error: "+inputFile.getAbsolutePath(), e1);
+			dataset = null;
+		} catch(Exception e1){
+			error("Unexpected exception opening dataset: "+inputFile.getAbsolutePath(), e1);
+			dataset = null;
+		} catch(StackOverflowError e){
+			error("StackOverflow opening dataset: "+inputFile.getAbsolutePath(), e);
+			dataset = null;
 		} finally {
-			
+			finest("Closing file stream");
 			try {
 				ois.close();
 				fis.close();
@@ -199,6 +236,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 				error("Error closing file stream", e);
 			}
 		}
+		finest("Returning opened dataset");
 		return dataset;
 	}
 	
@@ -211,7 +249,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 	 */
 	private void updateSavePath(File inputFile, AnalysisDataset dataset) {
 		
-		log(Level.FINE, "File path has changed: attempting to relocate images");
+		fine("File path has changed: attempting to relocate images");
 
 		dataset.setSavePath(inputFile);
 		
@@ -226,13 +264,13 @@ public class PopulationImportWorker extends AnalysisWorker {
 			try {
 			dataset.updateSourceImageDirectory(expectedImageDirectory);
 			} catch (IllegalArgumentException e){
-				log(Level.WARNING, e.getMessage());
+				warn("Cannot update save path: "+e.getMessage());
 			}
 //			updateSourceImageDirectory(expectedImageDirectory, dataset);
 
 		}else {
-			log(Level.WARNING, "Dataset is a merge");
-			log(Level.WARNING, "Unable to find single source image directory");
+			warn("Dataset is a merge");
+			warn("Unable to find single source image directory");
 		}
 	}
 	

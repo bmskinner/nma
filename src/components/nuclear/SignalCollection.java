@@ -23,7 +23,9 @@ import ij.process.ImageProcessor;
 import io.ImageImporter;
 import stats.SignalStatistic;
 
+import java.awt.Rectangle;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import logging.Loggable;
+import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
 
@@ -42,7 +46,7 @@ import components.generic.XYPoint;
  *  they came from and (c) the channel within the file they came from 
  * and links to the channel number in the ImageStack for the nucleus.
  */
-public class SignalCollection implements Serializable {
+public class SignalCollection implements Serializable, Loggable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -543,5 +547,17 @@ public class SignalCollection implements Serializable {
 					+"\n";
 		}
 		return s;
+	}
+	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\tReading signal collection");
+		in.defaultReadObject();
+		finest("\tRead signal collection");
+	}
+	
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\tWriting signal collection");
+		out.defaultWriteObject();
+		finest("\tWrote signal collection");
 	}
 }

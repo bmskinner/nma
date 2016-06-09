@@ -33,6 +33,7 @@ package components.nuclei;
 import ij.gui.Roi;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,14 +105,26 @@ private List<BorderPoint> tailEstimatePoints = new ArrayList<BorderPoint>(0); //
   */
   @Override
   public double findRotationAngle(){
-    XYPoint end = new XYPoint(this.getPoint(BorderTag.ORIENTATION_POINT).getXAsInt(),this.getPoint(BorderTag.ORIENTATION_POINT).getYAsInt()-50);
+	  XYPoint end = new XYPoint(this.getPoint(BorderTag.ORIENTATION_POINT).getXAsInt(),this.getPoint(BorderTag.ORIENTATION_POINT).getYAsInt()-50);
 
-    double angle = Utils.findAngleBetweenXYPoints(end, this.getPoint(BorderTag.ORIENTATION_POINT), this.getCentreOfMass());
+	  double angle = Utils.findAngleBetweenXYPoints(end, this.getPoint(BorderTag.ORIENTATION_POINT), this.getCentreOfMass());
 
-    if(this.getCentreOfMass().getX() < this.getPoint(BorderTag.ORIENTATION_POINT).getX()){
-      return angle;
-    } else {
-      return 0-angle;
-    }
+	  if(this.getCentreOfMass().getX() < this.getPoint(BorderTag.ORIENTATION_POINT).getX()){
+		  return angle;
+	  } else {
+		  return 0-angle;
+	  }
+  }
+  
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	  finest("\tReading asymmetric nucleus");
+	  in.defaultReadObject();
+	  finest("\tRead asymmetric nucleus");
+  }
+
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+	  finest("\tWriting asymmetric nucleus");
+	  out.defaultWriteObject();
+	  finest("\tWrote asymmetric nucleus");
   }
 }

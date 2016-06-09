@@ -29,7 +29,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.logging.Level;
+
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JLabel;
@@ -41,6 +43,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+
 import charting.charts.OutlineChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.ChartOptions;
@@ -53,6 +56,8 @@ import gui.components.ColourSelecter;
 import gui.components.ConsensusNucleusChartPanel;
 import gui.components.ExportableTable;
 import gui.components.panels.GenericCheckboxPanel;
+import gui.dialogs.RandomSamplingDialog;
+import gui.dialogs.SignalWarpingDialog;
 import gui.tabs.DetailPanel;
 import ij.io.DirectoryChooser;
 
@@ -63,6 +68,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	private ExportableTable 		statsTable;					// table for signal stats
 	private JPanel 		consensusAndCheckboxPanel;	// holds the consensus chart and the checkbox
 	private JPanel		checkboxPanel;
+	
+	private JButton warpButton;
 	
 	private GenericCheckboxPanel warpPanel = new GenericCheckboxPanel("Warp");
 	
@@ -269,8 +276,16 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			}
 		}
 		
-		warpPanel.addActionListener(this);
-		panel.add(warpPanel);
+		warpButton = new JButton("Warp signals");
+		warpButton.addActionListener( e -> { 
+				new SignalWarpingDialog(  getDatasets() );
+			}  
+		);
+
+		warpButton.setEnabled(false);
+		
+
+		panel.add(warpButton);
 		return panel;
 	}
 		
@@ -317,6 +332,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			consensusAndCheckboxPanel.revalidate();
 			consensusAndCheckboxPanel.repaint();
 			consensusAndCheckboxPanel.setVisible(true);
+			
+			warpButton.setEnabled(true);
 		}
 	}
 	
@@ -327,7 +344,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.setSignalGroup(1)
-					.setShowWarp(warpPanel.isSelected())
+					.setShowWarp(false)
 					.build();
 			
 			JFreeChart chart = getChart(options);

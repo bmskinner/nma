@@ -108,6 +108,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				
 				return makeSignalWarpChart(options);
 			} else {
+				
 				return makeSignalCoMNucleusOutlineChart(options.firstDataset());
 			}
 		} catch(Exception e){
@@ -116,6 +117,50 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			return ConsensusNucleusChartFactory.getInstance().makeErrorNucleusOutlineChart();
 		}
 
+	}
+	
+	/**
+	 * Draw the given images onto a consensus outline nucleus.
+	 * @param options
+	 * @param images
+	 * @return
+	 */
+	public JFreeChart makeSignalWarpChart(ChartOptions options, ImageProcessor[] images){
+		
+		AnalysisDataset dataset = options.firstDataset();
+		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(dataset);
+
+		XYPlot plot = chart.getXYPlot();
+		
+		// Get the bounding box size for the consensus, to find the offsets for the images created
+		Rectangle r = dataset.getCollection().getConsensusNucleus().getBounds(); //.createPolygon().getBounds();
+		r = r==null ? dataset.getCollection().getConsensusNucleus().createPolygon().getBounds() : r; // in case the bounds were not set (fixed 1.12.2)
+		int w = (int) ( (double) r.width*1.2);
+		int h = (int) ( (double) r.height*1.2);
+
+		int xOffset = w >>1;
+		int yOffset = h >>1;
+				
+//		int alpha = 20; // TODO : scale by number of images
+//		int alpha = (int) Math.floor( 255 / ((double) images.length) )+20;
+//		alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
+		
+		
+		drawImagesAsAnnotation(images, plot, 255, -xOffset, -yOffset);
+		
+//		for(ImageProcessor image : images){
+//			
+//			if(image!=null){
+//
+//				drawImageAsAnnotation(image, plot, alpha, -xOffset, -yOffset);
+//			}
+//		}
+		XYDataset ds = NucleusDatasetCreator.createBareNucleusOutline(dataset);
+		plot.setDataset(0, ds);
+		plot.getRenderer(0).setBasePaint(Color.BLACK);
+		plot.getRenderer(0).setBaseSeriesVisible(true);
+				
+		return chart;	
 	}
 	
 	private JFreeChart makeSignalWarpChart(ChartOptions options){
@@ -505,7 +550,78 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		}
 	}
 	
-	
+	/**
+	 * Create a chart with overlapping images drawn as an annotation in the background layer.
+	 * Note, all images must be the same size
+	 * @param ip
+	 * @param plot
+	 * @param alpha the transparency
+	 * @param xOffset a position to move the image 0,0 to
+	 * @param yOffset a position to move the image 0,0 to
+	 * @return
+	 */		
+	private static void drawImagesAsAnnotation( ImageProcessor[] images, XYPlot plot, int alpha, int xOffset, int yOffset){	
+		plot.setBackgroundPaint(Color.WHITE);
+		plot.getRangeAxis().setInverted(false);
+		
+		int w = images[0].getWidth();
+		int h = images[0].getHeight();
+		
+		int nonNull = 0;
+		
+		// check sizes match
+		for(ImageProcessor ip : images){
+			if(ip==null){
+				continue;
+			}
+			nonNull++;
+			if(ip.getHeight()!=h && ip.getWidth()!=w){
+				return;
+			}
+		}
+		
+		// Make a dataset to allow the autoscale to work
+		XYDataset bounds = NucleusDatasetCreator.createAnnotationRectangleDataset(w, h);
+		plot.setDataset(0, bounds);
+		
+		
+//		plot.setRenderer(0, new DefaultXYItemRenderer());
+		XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
+		rend.setBaseSeriesVisible(false);
+		
+		plot.getDomainAxis().setRange(0, w);
+		plot.getRangeAxis().setRange(0, h);
+		
+		int range = images.length;
+		
+		for(int x=0; x<w; x++){
+			for(int y=0; y<h; y++){
+
+				int pixelTotal = 0;
+				for(ImageProcessor ip : images){
+					if(ip==null){
+						continue;
+					}
+					pixelTotal += ip.get(x, y);
+				}
+				
+				pixelTotal /= nonNull; // scale back down to 0-255;
+				
+				
+				if(pixelTotal<255){// Ignore anything that is not signal - the background is already white
+				
+					Color col = new Color(pixelTotal, pixelTotal, pixelTotal, alpha);
+
+					// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
+					Rectangle2D r = new Rectangle2D.Double(x+xOffset-0.1, y+yOffset-0.1, 1.2, 1.2);
+					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+
+					rend.addAnnotation(a, Layer.BACKGROUND);
+				}
+			}
+		}
+		
+	}
 	
 
 	/**

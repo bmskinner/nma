@@ -27,15 +27,17 @@
 package components.generic;
 
 import java.awt.geom.Point2D;
+import java.io.IOException;
 import java.io.Serializable;
 
+import logging.Loggable;
 import components.nuclear.BorderPoint;
 
-public class XYPoint  implements Serializable{
+public class XYPoint  implements Serializable, Loggable {
 
 	private static final long serialVersionUID = 1L;
-	private double x;
-	private double y;
+	protected double x;
+	protected double y;
   
   /**
   * Constructor using doubles. 
@@ -220,5 +222,17 @@ public class XYPoint  implements Serializable{
 		  return false;
 	  return true;
   }
+  
+//  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+//		finest("\t\tReading XYPoint");
+//		in.defaultReadObject();
+//		finest("\t\tRead XYPoint");
+//	}
+//
+//	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+//		finest("\t\tWriting XYPoint");
+//		out.defaultWriteObject();
+//		finest("\t\tWrote XYPoint");
+//	}
 
 }

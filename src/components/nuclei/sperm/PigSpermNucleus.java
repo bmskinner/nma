@@ -26,6 +26,7 @@ package components.nuclei.sperm;
 import ij.gui.Roi;
 
 import java.io.File;
+import java.io.IOException;
 
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
@@ -231,5 +232,18 @@ public class PigSpermNucleus
                                     : orthPoint2;
       return tailPoint;
     }
+    
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+  	  finest("\tReading pig sperm nucleus");
+  	  in.defaultReadObject();
+  	  finest("\tRead pig sperm nucleus");
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+  	  finest("\tWriting pig sperm nucleus");
+  	  out.defaultWriteObject();
+  	  finest("\tWrote pig sperm nucleus");
+    }
+    
 
 }

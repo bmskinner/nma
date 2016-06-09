@@ -21,6 +21,7 @@ package components.generic;
 
 import stats.Stats;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -382,5 +383,17 @@ public class ProfileAggregate implements Loggable, Serializable {
 	
 		return builder.toString();
 	}
+	
+	 private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		  finest("\tReading profile aggregate");
+		  in.defaultReadObject();
+		  finest("\tRead profile aggregate");
+	  }
+
+	  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		  finest("\tWriting profile aggregate");
+		  out.defaultWriteObject();
+		  finest("\tWrote profile aggregate");
+	  }
 	
 }

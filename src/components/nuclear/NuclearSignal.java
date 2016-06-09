@@ -23,6 +23,7 @@ import ij.process.FloatPolygon;
 import stats.SignalStatistic;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,5 +78,17 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 
 	public void setClosestBorderPoint(int p){
 		this.closestNuclearBorderPoint = p;
+	}
+	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\tReading nuclear signal");
+		in.defaultReadObject();
+		finest("\tRead nuclear signal");
+	}
+	
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\t\tWriting nuclear signal");
+		out.defaultWriteObject();
+		finest("\t\tWrote nuclear signal");
 	}
 }

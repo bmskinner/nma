@@ -18,10 +18,13 @@
  *******************************************************************************/
 package components.nuclear;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
-public class ShellResult implements Serializable {
+import logging.Loggable;
+
+public class ShellResult implements Serializable, Loggable {
 
 	private static final long serialVersionUID = 1L;
 	private List<Double> means;
@@ -59,5 +62,17 @@ public class ShellResult implements Serializable {
 	
 	public int getNumberOfShells(){
 		return this.means.size();
+	}
+
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\tReading shell result");
+		in.defaultReadObject();
+		finest("\tRead shell result");
+	}
+
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\tWriting shell result");
+		out.defaultWriteObject();
+		finest("\tWrote shell result");
 	}
 }

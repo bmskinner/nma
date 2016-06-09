@@ -20,6 +20,10 @@
 
 package components.nuclear;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import components.generic.XYPoint;
 
 /**
@@ -127,6 +131,94 @@ public class BorderPoint
 			return  false;
 		}
 	}
+	
+//	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+//		finest("\t\tReading BorderPoint");
+//		in.defaultReadObject();
+//		finest("\t\tRead BorderPoint");
+//	}
+//
+//	private void writeObject(ObjectOutputStream out) throws IOException {
+//		finest("\t\tWriting BorderPoint");
+//		out.defaultWriteObject();
+//		finest("\t\tWrote BorderPoint");
+//	}
 
+//	private void writeObject(ObjectOutputStream stream) throws IOException {
+//		
+//		// Fields from XYPoint
+//		stream.writeDouble(x);
+//		stream.writeDouble(y);
+//		
+//		
+//		
+//		BorderPoint next = nextPoint;
+//		while (next != null) {
+//			stream.writeBoolean(true);
+//			stream.writeDouble(next.x);
+//			stream.writeDouble(next.y);
+//			next = next.nextPoint();
+//		}
+//		stream.writeBoolean(false);
+//		
+////		private BorderPoint prevPoint = null;
+////		private BorderPoint nextPoint = null;
+////		
+////        stream.writeObject(beforeWindowData);
+////        stream.writeObject(onAfterWindowData);
+////        stream.writeObject(outputData);
+////        stream.writeObject(type);
+////        stream.writeLong(timestamp);
+////        StreamEvent nextEvent = next;
+////        while (nextEvent != null) {
+////            stream.writeBoolean(true);
+////            stream.writeObject(nextEvent.beforeWindowData);
+////            stream.writeObject(nextEvent.onAfterWindowData);
+////            stream.writeObject(nextEvent.outputData);
+////            stream.writeObject(nextEvent.type);
+////            stream.writeLong(nextEvent.timestamp);
+////            nextEvent = nextEvent.getNext();
+////        }
+////        stream.writeBoolean(false);
+//    }
+
+
+//    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+//    	
+////    	BorderPoint prev;
+////    	x = stream.readDouble();
+////    	y = stream.readDouble();
+////    	prev = this;
+////    	boolean isNextAvailable = stream.readBoolean();
+////    	
+////    	while (isNextAvailable) {
+////    		BorderPoint next = new BorderPoint(0, 0);
+////    		next.x = stream.readDouble();
+////    		next.y = stream.readDouble();
+////    		prev.nextPoint = next;
+////    		prev = next;
+////    		isNextAvailable = stream.readBoolean();
+////    	}
+//		
+////        StreamEvent previousStreamEvent;
+////        beforeWindowData = (Object[]) stream.readObject();
+////        onAfterWindowData = (Object[]) stream.readObject();
+////        outputData = (Object[]) stream.readObject();
+////        type = (Type) stream.readObject();
+////        timestamp = stream.readLong();
+////        previousStreamEvent = this;
+////        boolean isNextAvailable = stream.readBoolean();
+////        while (isNextAvailable) {
+////            StreamEvent nextEvent = new StreamEvent(0, 0, 0);
+////            nextEvent.beforeWindowData = (Object[]) stream.readObject();
+////            nextEvent.onAfterWindowData = (Object[]) stream.readObject();
+////            nextEvent.outputData = (Object[]) stream.readObject();
+////            nextEvent.type = (Type) stream.readObject();
+////            nextEvent.timestamp = stream.readLong();
+////            previousStreamEvent.next = nextEvent;
+////            previousStreamEvent = nextEvent;
+////            isNextAvailable = stream.readBoolean();
+////        }
+//    }
 
 }

@@ -18,17 +18,22 @@
  *******************************************************************************/
 package components.generic;
 
-import components.AbstractCellularComponent;
+import java.io.IOException;
+import java.io.Serializable;
 
+import logging.Loggable;
+import components.AbstractCellularComponent;
 import ij.IJ;
-import utility.Utils;
 
 /**
  * Use to hold boolean results from a Profile
  * - for example, local minima or maxima. 
  *
  */
-public class BooleanProfile {
+public class BooleanProfile implements Serializable, Loggable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	
 	final protected boolean[] array;
 	
@@ -199,8 +204,18 @@ public class BooleanProfile {
 			  result[i] = ! array[i];
 		  }
 		  return new BooleanProfile(result);
-		  
+	  }
+	  
+	  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		  finest("\tReading boolean profile");
+		  in.defaultReadObject();
+		  finest("\tRead boolean profile");
+	  }
 
+	  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		  finest("\tWriting boolean profile");
+		  out.defaultWriteObject();
+		  finest("\tWrote boolean profile");
 	  }
 	
 }

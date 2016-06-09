@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.components;
 
+import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.logging.Level;
@@ -33,6 +34,12 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel implements 
 
 	public FixedAspectRatioChartPanel(JFreeChart chart){
 		super(chart);
+		this.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				restoreAutoBounds();
+			}
+		});
 	}
 						
 	@Override

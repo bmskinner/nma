@@ -18,11 +18,13 @@
  *******************************************************************************/
 package components;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import logging.Loggable;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 
@@ -33,7 +35,7 @@ import analysis.ClusteringOptions;
  *
  */
 
-public class ClusterGroup implements Serializable {
+public class ClusterGroup implements Serializable, Loggable {
 	
 	private static final long serialVersionUID = 1L;
 	private List<UUID> ids = new ArrayList<UUID>(0); // hold the ids of datasets in a cluster
@@ -146,6 +148,18 @@ public class ClusterGroup implements Serializable {
 	
 	public String toString(){
 		return this.name;
+	}
+	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\tReading cluster group");
+		in.defaultReadObject();
+		finest("\tRead cluster group");
+	}
+
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\tWriting cluster group");
+		out.defaultWriteObject();
+		finest("\tWrote cluster group");
 	}
 
 }

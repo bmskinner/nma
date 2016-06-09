@@ -18,6 +18,8 @@
  *******************************************************************************/
 package components;
 
+import java.io.IOException;
+
 public class Mitochondrion extends AbstractCellularComponent {
 
 	private static final long serialVersionUID = 1L;
@@ -29,5 +31,17 @@ public class Mitochondrion extends AbstractCellularComponent {
 	public Mitochondrion(final Mitochondrion m){
 		super(m);
 	} 
+	
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\tWriting mitochondrion");
+		out.defaultWriteObject();
+		finest("\tWrote mitochondrion");
+	}
+
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("Reading mitochondrion");
+		in.defaultReadObject();
+		finest("Read mitochondrion"); 
+	}
 
 }

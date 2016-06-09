@@ -20,6 +20,7 @@
  *******************************************************************************/
 package analysis.profiles;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,8 +30,9 @@ import java.util.List;
  * @author bms41
  *
  */
-public class Rule {
+public class Rule implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	final private RuleType type;
 	final private List<Double> values = new ArrayList<Double>(); // spare field
 

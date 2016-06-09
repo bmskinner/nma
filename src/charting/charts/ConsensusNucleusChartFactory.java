@@ -145,6 +145,10 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @return the consensus chart
 	 */
 	public JFreeChart makeNucleusOutlineChart(AnalysisDataset dataset){
+		
+		if( ! dataset.getCollection().hasConsensusNucleus()){
+			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+		}
 
 		XYDataset ds = NucleusDatasetCreator.createBareNucleusOutline(dataset);
 		JFreeChart chart = makeConsensusChart(ds);

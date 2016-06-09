@@ -663,10 +663,11 @@ public class MainWindow
 			this.populationsPanel.refreshDatasets();;
 		}
 		
-//		if(event.type().startsWith("Log_")){
-//			String s = event.type().replace("Log_", "");
-//			log(Level.INFO, s);
-//		}
+		if(event.type().equals("SaveCollectionAction")){
+			this.saveDatasetAs(selectedDataset);
+		}
+		
+
 		
 		if(event.type().startsWith("Status_")){
 			String s = event.type().replace("Status_", "");
@@ -913,6 +914,48 @@ public class MainWindow
 		});
 	}
 	
+	
+	
+	private void saveDatasetAs(final AnalysisDataset d){
+		
+		executorService.execute(new Runnable() {
+			public void run() {
+				if(d.isRoot()){
+
+					final CountDownLatch latch = new CountDownLatch(1);
+					new SaveDatasetAction(d, MainWindow.this, latch, true);
+					try {
+						finest("Awaiting latch for save action");
+						latch.await();
+					} catch (InterruptedException e) {
+						error("Interruption to thread", e);
+					}
+
+					log(Level.FINE, "Root dataset saved");
+				} else {
+
+					AnalysisDataset target = null; 
+					for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+
+						for(AnalysisDataset child : root.getAllChildDatasets()){
+							if(child.getUUID().equals(d.getUUID())){
+								target = root;
+								break;
+							}
+						}
+						if(target!=null){
+							break;
+						}
+					}
+					if(target!=null){
+						saveDatasetAs(target);
+					}
+				}
+			}
+
+		});
+		
+	}
 	
 	/**
 	 * Save the given dataset. If it is root, save directly.

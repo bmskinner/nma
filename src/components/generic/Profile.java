@@ -20,6 +20,7 @@ package components.generic;
 
 import ij.IJ;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1315,14 +1316,22 @@ public Profile calculateDeltas(int windowSize){
 		  for(double d : p.array){
 			  combinedArray[i++] = d;
 		  }
-//		  double[] values = p.array;
-//		  List<Double> valueList = Arrays.asList(Utils.getDoubleFromdouble(values));
-//		  combinedList.addAll(valueList);
 	  }
 
-//	  Double[] combinedArray = (Double[]) combinedList.toArray(new Double[0]);
 	  result = new Profile(combinedArray);
-//	  result = new Profile(Utils.getdoubleFromDouble(combinedArray));
 	  return result;
   }
+  
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\tWriting profile");
+		out.defaultWriteObject();
+		finest("\tWrote profile");
+	}
+  
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\tReading profile");
+	    in.defaultReadObject();
+	    finest("\tRead profile");
+  }
+  
 }

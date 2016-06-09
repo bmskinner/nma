@@ -40,6 +40,10 @@ public class Version implements Serializable {
 		this.revision = revision;
 	}
 	
+	public static Version currentVersion(){
+		return new Version(Constants.VERSION_MAJOR, Constants.VERSION_MINOR, Constants.VERSION_REVISION);
+	}
+	
 	/**
 	 * Parse the given string to a version. The string should have
 	 * three integers separated by dots - e.g. 1.11.5

@@ -59,7 +59,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     		fileLogger = null;
     	}
 
-    	log(Level.FINEST, "Created worker");
+    	finest("Created worker");
     	
     }
     
@@ -179,25 +179,25 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     @Override
     public void done() {
     	
-    	log(Level.FINEST, "Worker completed task");
+    	finest("Worker completed task");
 
-    	log(Level.FINEST, "Closing log file handlers");
+    	finest("Closing log file handlers");
     	closeLogFileHandlers();
 
     	 try {
             if(this.get()){
-            	log(Level.FINEST, "Firing trigger for sucessful task");
+            	finest("Firing trigger for sucessful task");
                 firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
 
             } else {
-            	log(Level.FINEST, "Firing trigger for failed task");
+            	finest("Firing trigger for failed task");
                 firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
             }
         } catch (InterruptedException e) {
-        	logError("Interruption error in worker", e);
+        	error("Interruption error in worker", e);
         	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
         } catch (ExecutionException e) {
-        	logError("Execution error in worker", e);
+        	error("Execution error in worker", e);
         	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
        }
 

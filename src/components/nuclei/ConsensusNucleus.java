@@ -18,6 +18,7 @@
  *******************************************************************************/
 package components.nuclei;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 import components.generic.ProfileType;
@@ -49,6 +50,18 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 
 		this.profileMap.put(ProfileType.REGULAR, this.calculateAngleProfile());
 
+	}
+	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\tReading consensus nucleus");
+		in.defaultReadObject();
+		finest("\tRead consensus nucleus");
+	}
+	
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\tWriting consensus nucleus");
+		out.defaultWriteObject();
+		finest("\tWrote consensus nucleus");
 	}
 
 }

@@ -19,11 +19,14 @@
 
 package components;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import logging.Loggable;
+import analysis.profiles.RuleSetCollection;
 import components.nuclei.Nucleus;
 
 /**
@@ -32,7 +35,7 @@ import components.nuclei.Nucleus;
  * @author bms41
  *
  */
-public class Cell implements Serializable {
+public class Cell implements Serializable, Loggable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -44,10 +47,10 @@ public class Cell implements Serializable {
 	protected List<Acrosome> acrosomes;
 	
 	public Cell(){
-		this.uuid = java.util.UUID.randomUUID();
+		this.uuid    = java.util.UUID.randomUUID();
 		mitochondria = new ArrayList<Mitochondrion>(0);
-		tails = new ArrayList<Flagellum>(0);
-		acrosomes = new ArrayList<Acrosome>(0);
+		tails        = new ArrayList<Flagellum>(0);
+		acrosomes    = new ArrayList<Acrosome>(0);
 	}
 	
 	/**
@@ -149,5 +152,17 @@ public class Cell implements Serializable {
 		} else {
 			return false;
 		}
+	}
+	
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\tWriting cell");
+		out.defaultWriteObject();
+		finest("\tWrote cell");
+	}
+
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("Reading cell");
+		in.defaultReadObject();
+		finest("Read cell"); 
 	}
 }

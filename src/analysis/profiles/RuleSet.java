@@ -20,6 +20,7 @@
  *******************************************************************************/
 package analysis.profiles;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +34,9 @@ import components.generic.ProfileType;
  * @author bms41
  *
  */
-public class RuleSet {
+public class RuleSet implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	// combine rules with AND conditions
 	List<Rule> rules;
 	ProfileType type; // the type of profile to which the rules apply

@@ -30,6 +30,7 @@ package components.nuclear;
 
 import ij.IJ;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -1025,6 +1026,18 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 		}
 		
 		return indexes.iterator();
+	}
+	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\t\tReading nucleus border segment");
+		in.defaultReadObject();
+		finest("\t\tRead nucleus border segment");
+	}
+	
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\t\tWriting nucleus border segment");
+		out.defaultWriteObject();
+		finest("\t\tWrote nucleus border segment");
 	}
 
 }

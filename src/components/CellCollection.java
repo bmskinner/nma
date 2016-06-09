@@ -48,6 +48,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import logging.Loggable;
 import utility.Constants;
 import utility.Utils;
 import analysis.AnalysisDataset;
@@ -70,7 +71,7 @@ import components.nuclei.Nucleus;
  * @author bms41
  *
  */
-public class CellCollection implements Serializable {
+public class CellCollection implements Serializable, Loggable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -959,11 +960,19 @@ public class CellCollection implements Serializable {
 	  
 	  return b.toString();
   }
+  
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+	  finest("Writing cell collection");
+	  out.defaultWriteObject();
+	  finest("Wrote cell collection");
+  }
 
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	  finest("Reading cell collection");
 	  in.defaultReadObject();
+	  finest("Read cell collection");
 	  isRefolding = false;
-
+	  finest("Creating default ruleset for nucleus type "+nucleusType);
 	  ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType); 
   }
   

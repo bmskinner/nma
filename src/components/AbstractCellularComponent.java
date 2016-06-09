@@ -1,8 +1,12 @@
 package components;
 
 import java.awt.Rectangle;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +30,7 @@ import stats.PlottableStatistic;
 import stats.Stats;
 import utility.Constants;
 import utility.Utils;
+import utility.Version;
 
 public class AbstractCellularComponent implements CellularComponent, Serializable, Loggable {
 
@@ -645,6 +650,149 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		}
 			
 		return result;
+	}
+	
+
+
+	
+
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\tReading abstract cellular component");
+		
+		if(Version.currentVersion().isOlderThan(new Version(1, 12, 2))){
+			
+			try{
+				finest("\tAttempting default deserialization");
+				in.defaultReadObject();
+				return;
+			} catch(StackOverflowError e){
+				
+			} catch(Exception e){
+				finest("\tDefault deserialization failed");
+			}
+			
+		} 
+			
+		// Else use the new deserialization
+
+		finest("\tAttempting custom deserialization");
+
+		// id is final, so cannot be assigned normally. 
+		// Reflect around the problem by making the field
+		// temporarily assignable
+		try {
+			Class type = AbstractCellularComponent.class;
+
+	        // use getDeclaredField as the field is non public
+	        Field idField = type.getDeclaredField("id");
+			idField.setAccessible(true);
+			UUID id = (UUID) in.readObject();
+			idField.set(this, id );
+			idField.setAccessible(false);
+			
+			
+		} catch (NoSuchFieldException e) {
+			error("No field", e);
+		} catch (SecurityException e) {
+			error("Security error", e);
+		} catch (IllegalArgumentException e) {
+			error("Illegal argument", e);
+		} catch (IllegalAccessException e) {
+			error("Illegal access", e);
+		} catch(Exception e){
+			error("Unexpected exception", e);
+		}
+
+		finest("\tSet final id field");
+		
+		// Read the standard fields
+		
+		position     = (double[]) in.readObject();
+		centreOfMass = (XYPoint) in.readObject();
+		statistics   = (Map<PlottableStatistic, Double>) in.readObject();
+		boundingRectangle = (Rectangle) in.readObject();
+		sourceFolder      = (File) in.readObject();
+		sourceFileName    = (String) in.readObject();
+		channel           = in.readInt();
+		scale             = in.readDouble();
+		
+		List<BorderPoint> list  = new ArrayList<BorderPoint>();
+
+		boolean isNextAvailable = in.readBoolean();
+		
+    	while (isNextAvailable) {
+    		BorderPoint next = new BorderPoint(0, 0);
+    		
+    		next.setX(in.readDouble());
+    		next.setY(in.readDouble());
+    		isNextAvailable = in.readBoolean();
+    		
+    		list.add(next);
+    	}
+    	this.setBorderList(list);
+
+		finest("\tRead abstract cellular component");
+	}
+
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+//		finest("\tWriting abstract cellular component");
+//		out.defaultWriteObject();
+//		finest("\tWrote abstract cellular component");
+
+/*
+	    Java serialization keeps a record of every object written to a stream.
+	     If the same object is encountered a second time, only a reference to it is
+	      written to the stream, and not a second copy of the object; so circular 
+	      references aren't the problem here.
+
+	    But serialization is vulnerable to stack overflow
+	     for certain kinds of structures; for example, a long linked 
+	     list with no special writeObject() methods will be serialized
+	      by recursively writing each link. If you've got a 100,000 links, you're
+	       going to try to use 100,000 stack frames, and quite likely fail with a 
+	       StackOverflowError.
+
+	    It's possible to define a writeObject() method for such a list class that,
+	     when the first link is serialized, simply walks the list and serializes each 
+	     link iteratively; this will prevent the default recursive mechanism from 
+	     being used.
+	     
+	The fields to serialise here:
+	     
+	private final UUID id;
+	private double[] position;
+	private XYPoint centreOfMass;
+	private Map<PlottableStatistic, Double> statistics = new HashMap<PlottableStatistic, Double>();
+	private Rectangle boundingRectangle;
+	private File sourceFolder;
+	private String sourceFileName;
+	private int channel; // the RGB channel in which the signal was seen
+	private double scale = 1; // allow conversion between pixels and SI units. The length of a pixel in microns
+	private List<BorderPoint> borderList    = new ArrayList<BorderPoint>(0);
+	
+*/
+		// Use the default methods to write everything until the borderlist
+		finest("\tWriting abstract cellular component");
+		out.writeObject(id);
+		out.writeObject(position);
+		out.writeObject(centreOfMass);
+		out.writeObject(statistics);
+		out.writeObject(boundingRectangle);
+		out.writeObject(sourceFolder);
+		out.writeObject(sourceFileName);
+		out.writeInt(channel);
+		out.writeDouble(scale);
+		
+		// Now ensure we don't recurse over the BorderList
+		
+				
+		for(BorderPoint p : borderList){
+			out.writeBoolean(true); // Another point awaits
+			out.writeDouble(p.getX());
+			out.writeDouble(p.getY());
+		}
+		out.writeBoolean(false);
+		finest("\tWrote abstract cellular component");	
 	}
 	
 }

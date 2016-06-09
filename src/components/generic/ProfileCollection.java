@@ -18,12 +18,14 @@
  *******************************************************************************/
 package components.generic;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import logging.Loggable;
 import components.CellCollection;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
@@ -31,7 +33,7 @@ import components.nuclei.Nucleus;
 
 import utility.Constants;
 
-public class ProfileCollection implements Serializable {
+public class ProfileCollection implements Serializable, Loggable {
 		
 	private static final long serialVersionUID = 1L;
 	
@@ -548,7 +550,19 @@ public class ProfileCollection implements Serializable {
 		return result;
 	}
 	
-	private class ProfileCache implements Serializable {
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\tReading profile collection");
+		in.defaultReadObject();
+		finest("\tRead profile collection");
+	}
+	
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("Writing profile collection");
+		out.defaultWriteObject();
+		finest("Wrote profile collection");
+	}
+	
+	private class ProfileCache implements Serializable, Loggable {
 		
 		private static final long serialVersionUID = 1L;
 		
@@ -642,6 +656,18 @@ public class ProfileCollection implements Serializable {
 			  cache = null;
 			  cache = new HashMap<BorderTag, Map<Double, Profile>>();
 
+		  }
+		  
+		  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+			  finest("\tReading profile cache");
+			  in.defaultReadObject();
+			  finest("\tRead profile cache");
+		  }
+
+		  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+			  finest("\tWriting profile cache");
+			  out.defaultWriteObject();
+			  finest("\tWrote profile cache");
 		  }
 		 
 	}

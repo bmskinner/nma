@@ -22,6 +22,7 @@ import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +125,18 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 			} else {
 				return false;
 			}
+		}
+		
+		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+			finest("\tWriting sperm tail");
+			out.defaultWriteObject();
+			finest("\tWrote sperm tail");
+		}
+
+		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+			finest("\tReading sperm tail");
+			in.defaultReadObject();
+			finest("\tRead sperm tail"); 
 		}
 
 }

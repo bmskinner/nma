@@ -1318,17 +1318,20 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 		
 	}
-	
-
-
-	
-	
-
+		
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\tWriting nucleus");
+		out.defaultWriteObject();
+		finest("\tWrote nucleus");
+	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-	    in.defaultReadObject();
+		finest("\tReading nucleus");
+		in.defaultReadObject();
+	    finest("\tCreating bounding rectangles for nucleus");
 	    this.boundingRectangles = new HashMap<BorderTag, Rectangle>();	  
 	    log = new StringBuffer();
+	    finest("\tRead nucleus");
 	}
 
 	@Override

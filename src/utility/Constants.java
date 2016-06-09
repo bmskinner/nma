@@ -73,7 +73,7 @@ public class Constants {
 		// The file types that the program will try to open
 		public static final String[] IMPORTABLE_FILE_TYPES = {".tif", ".tiff", ".jpg"};
 				
-				
+		
 		/**
 		 * Given an RGB channel, get the ImageStack stack for internal use
 		 * @param channel the channel

@@ -880,7 +880,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		}
 		return builder.toString();
 	}
-	
+
 	/**
 	 * Restore the toString from Profile
 	 * @return
@@ -889,8 +889,15 @@ public class SegmentedProfile extends Profile implements Serializable {
 		return super.toString();
 	}
 	
-	  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		    in.defaultReadObject();
-//		    this.firstSegment = segments.get(0);
-		}
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\tWriting segmented profile");
+		out.defaultWriteObject();
+		finest("\tWrote segmented profile");
+	}
+
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\tReading segmented profile");
+		in.defaultReadObject();
+		finest("\tRead segmented profile");
+	}
 }

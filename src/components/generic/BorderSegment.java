@@ -18,8 +18,11 @@
  *******************************************************************************/
 package components.generic;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
+
+import logging.Loggable;
 
 /**
  * This is a generic class of segment, made of border points.
@@ -28,7 +31,7 @@ import java.util.List;
  * segments as in a nucleus border, and index based segments,
  * as in a profile. The internal methods keep the two synchronised 
  */
-public abstract class BorderSegment implements Serializable{
+public abstract class BorderSegment implements Serializable, Loggable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -279,6 +282,18 @@ public abstract class BorderSegment implements Serializable{
 			
 		}
 	}
+	
+	 private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+			finest("\tReading border segment");
+			in.defaultReadObject();
+			finest("\tRead border segment");
+		}
+
+		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+			finest("\tWriting border segment");
+			out.defaultWriteObject();
+			finest("\tWrote border segment");
+		}
 	
 
 }
