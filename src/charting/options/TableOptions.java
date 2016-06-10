@@ -19,9 +19,6 @@
 package charting.options;
 
 import java.util.List;
-import java.util.logging.Logger;
-
-import stats.PlottableStatistic;
 import analysis.AnalysisDataset;
 import components.Cell;
 
@@ -38,11 +35,6 @@ public class TableOptions extends AbstractOptions {
 	
 	public TableOptions(List<AnalysisDataset> list) {
 		super(list);
-
-	}
-
-	public TableOptions(List<AnalysisDataset> list, Logger programLogger){
-		super(list, programLogger);
 
 	}
 	

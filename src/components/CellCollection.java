@@ -99,8 +99,7 @@ public class CellCollection implements Serializable, Loggable {
 	
 	private transient boolean isRefolding = false;
 	
-	// TODO: for version 1.13+, make non transient
-	private transient RuleSetCollection ruleSets = new RuleSetCollection();
+	private RuleSetCollection ruleSets = new RuleSetCollection();
 
 	/**
 	 * Constructor.
@@ -970,10 +969,10 @@ public class CellCollection implements Serializable, Loggable {
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	  finest("Reading cell collection");
 	  in.defaultReadObject();
-	  finest("Read cell collection");
 	  isRefolding = false;
-	  finest("Creating default ruleset for nucleus type "+nucleusType);
-	  ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType); 
+//	  finest("Creating default ruleset for nucleus type "+nucleusType);
+//	  ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType); 
+	  finest("Read cell collection");
   }
   
   

@@ -135,8 +135,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		// Get the bounding box size for the consensus, to find the offsets for the images created
 		Rectangle r = dataset.getCollection().getConsensusNucleus().getBounds(); //.createPolygon().getBounds();
 		r = r==null ? dataset.getCollection().getConsensusNucleus().createPolygon().getBounds() : r; // in case the bounds were not set (fixed 1.12.2)
-		int w = (int) ( (double) r.width*1.2);
-		int h = (int) ( (double) r.height*1.2);
+//		int w = (int) ( (double) r.width*1.2);
+//		int h = (int) ( (double) r.height*1.2);
+		
+		int w = r.width;
+		int h = r.height;
 
 		int xOffset = w >>1;
 		int yOffset = h >>1;
@@ -304,9 +307,13 @@ public class OutlineChartFactory extends AbstractChartFactory {
 							.getCollection()
 							.getConsensusNucleus(), mesh1);
 					
+					// Create a mesh image from the nucleus
 					NucleusMeshImage im = new NucleusMeshImage(mesh1, options.getCell().getNucleus().getImage());
 	
+					// Apply the mesh image to the shape of the consensus image
 					ImageProcessor ip = im.meshToImage(mesh2);
+//					ImagePlus imp = new ImagePlus("", ip);
+//					imp.show();
 					
 					return OutlineChartFactory.drawImageAsAnnotation(ip);
 	
@@ -602,9 +609,18 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				
 				if(pixelTotal<255){// Ignore anything that is not signal - the background is already white
 					
-//					pixelTotal /= 2; // increase the intensities
+//					pixelTotal *= 2; // increase the intensities 50%
+//					pixelTotal /= 3;
 				
 					Color col = new Color(pixelTotal, pixelTotal, pixelTotal, alpha);
+
+					// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
+					Rectangle2D r = new Rectangle2D.Double(x+xOffset-0.1, y+yOffset-0.1, 1.2, 1.2);
+					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+
+					rend.addAnnotation(a, Layer.BACKGROUND);
+				} else {
+					Color col = new Color(255, 0, 0, alpha);
 
 					// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
 					Rectangle2D r = new Rectangle2D.Double(x+xOffset-0.1, y+yOffset-0.1, 1.2, 1.2);

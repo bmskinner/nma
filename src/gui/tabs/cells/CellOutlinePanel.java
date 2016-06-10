@@ -75,6 +75,11 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 			rotationPanel.setEnabled(! warpMeshPanel.isSelected());
 			makeMeshPanel.setEnabled(  ! warpMeshPanel.isSelected() );
 			warpMeshPanel.setEnabled(  ! makeMeshPanel.isSelected() );
+			
+			if( ! activeDataset().getCollection().hasConsensusNucleus()){
+				makeMeshPanel.setEnabled(false);
+				warpMeshPanel.setEnabled(false);
+			}
 		}
 	}
 							

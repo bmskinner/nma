@@ -45,7 +45,6 @@ import analysis.AnalysisDataset;
 public class ChartOptionsBuilder {
 	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	private ColourSwatch swatch        = ColourSwatch.REGULAR_SWATCH;
-	private Logger programLogger       = null;
 	private boolean normalised         = false;
 	private ProfileAlignment alignment = ProfileAlignment.LEFT;
 	private BorderTag tag              = BorderTag.REFERENCE_POINT;
@@ -105,12 +104,7 @@ public class ChartOptionsBuilder {
 		this.swatch = swatch;
 		return this;
 	}
-	
-	public ChartOptionsBuilder setLogger(Logger logger){
-		this.programLogger = logger;
-		return this;
-	}
-	
+		
 	public ChartOptionsBuilder setNormalised(boolean b){
 		this.normalised = b;
 		return this;
@@ -253,7 +247,7 @@ public class ChartOptionsBuilder {
 	
 	
 	public ChartOptions build(){
-		ChartOptions result =  new ChartOptions(list, programLogger);
+		ChartOptions result =  new ChartOptions(list);
 		result.setSwatch(swatch);
 		result.setAlignment(alignment);
 		result.setNormalised(normalised);

@@ -30,8 +30,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -49,8 +47,6 @@ import analysis.AnalysisDataset;
 import analysis.signals.SignalManager;
 import analysis.signals.SignalWarper;
 import gui.LoadingIconDialog;
-import gui.MainWindow;
-import gui.actions.ClusterAnalysisAction;
 import gui.components.FixedAspectRatioChartPanel;
 
 @SuppressWarnings("serial")
@@ -68,8 +64,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	
 	private JProgressBar progressBar = new JProgressBar(0, 100);
 	
-	private int totalCells = 0;
-	private int cellsDone  = 0;
+	private int totalCells = 0; // The cells in the signal group being processed
+	private int cellsDone  = 0; // Progress through cells in the signal group
 
 	
 	public SignalWarpingDialog(List<AnalysisDataset> datasets){

@@ -1,6 +1,5 @@
 package analysis.signals;
 
-import java.awt.Rectangle;
 import java.util.List;
 
 import components.Cell;
@@ -62,15 +61,6 @@ public class SignalWarper extends AnalysisWorker {
 	private void generateImages(){
 		
 		NucleusMesh meshConsensus = new NucleusMesh( getDataset().getCollection().getConsensusNucleus());
-		
-		// Get the bounding box size for the consensus, to find the offsets for the images created
-//		Rectangle r =  getDataset().getCollection().getConsensusNucleus().getBounds(); //.createPolygon().getBounds();
-//		r = r==null ?  getDataset().getCollection().getConsensusNucleus().createPolygon().getBounds() : r; // in case the bounds were not set (fixed 1.12.2)
-//		int w = (int) ( (double) r.width*1.2);
-//		int h = (int) ( (double) r.height*1.2);
-		
-//		int xOffset = w >>1;
-//		int yOffset = h >>1;
 		
 		SignalManager m =  getDataset().getCollection().getSignalManager();
 		List<Cell> cells = m.getCellsWithNuclearSignals(signalGroup, true);

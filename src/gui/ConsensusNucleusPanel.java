@@ -117,15 +117,15 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		
 		consensusChartPanel.add(runRefoldingButton);
 		
-		
-		this.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-//				resizePreview(consensusChartPanel, mainPanel);
-				consensusChartPanel.restoreAutoBounds();
-			}
-		});
-		
+//		
+//		this.addComponentListener(new ComponentAdapter() {
+//			@Override
+//			public void componentResized(ComponentEvent e) {
+////				resizePreview(consensusChartPanel, mainPanel);
+//				consensusChartPanel.restoreAutoBounds();
+//			}
+//		});
+//		
 		mainPanel.add(consensusChartPanel, c);
 		this.add(mainPanel, BorderLayout.CENTER);
 		

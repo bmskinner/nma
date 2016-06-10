@@ -338,7 +338,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	public JFreeChart makeConsensusChart(ChartOptions options) throws Exception {
 		
 		if(! options.hasDatasets()){
-			options.log(Level.FINEST, "No datasets: creating empty consensus chart");
+			finest("No datasets: creating empty consensus chart");
 			return makeEmptyNucleusOutlineChart();
 		}
 		
@@ -352,16 +352,16 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			}
 			
 			if(oneHasConsensus){
-				options.log(Level.FINEST, "Creating multiple consensus chart");
+				finest("Creating multiple consensus chart");
 				return makeMultipleConsensusChart(options.getDatasets());
 			} else {
-				options.log(Level.FINEST, "No dataset with consensus: creating empty consensus chart");
+				finest("No dataset with consensus: creating empty consensus chart");
 				return makeEmptyNucleusOutlineChart();
 			}
 		}
 		
 		if(options.isSingleDataset()){
-			options.log(Level.FINEST, "Creating single consensus chart");
+			finest("Creating single consensus chart");
 			
 			if(options.isShowMesh()){ 
 				
@@ -376,7 +376,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			
 			
 		}
-		options.log(Level.FINEST, "Options failed to match: creating empty consensus chart");
+		finest("Options failed to match: creating empty consensus chart");
 		return makeEmptyNucleusOutlineChart();
 	}
 

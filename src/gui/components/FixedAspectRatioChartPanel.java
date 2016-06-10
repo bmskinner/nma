@@ -51,68 +51,63 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel implements 
 				return;
 			}
 
-			double chartWidth = this.getWidth();
+			// Find the aspect ratio of the chart
+			double chartWidth  = this.getWidth();
 			double chartHeight = this.getHeight();
 			double aspectRatio = chartWidth / chartHeight;
 			
-			log(Level.FINEST, "Plot w: "+chartWidth+"; h: "+chartHeight+"; asp: "+aspectRatio);
+			finest("Plot w: "+chartWidth+"; h: "+chartHeight+"; asp: "+aspectRatio);
 
-			// start with impossible values
-			double xMin = chartWidth;
-			double yMin = chartHeight;
+			// start with impossible values, before finding the real chart values
+			double xMin = Double.MAX_VALUE;
+			double yMin = Double.MAX_VALUE;
 			//		
-			double xMax = 0;
-			double yMax = 0;
+			double xMax = Double.MIN_VALUE;
+			double yMax = Double.MIN_VALUE;
 
-			log(Level.FINEST, "Plot has "+plot.getDatasetCount()+" datasets");
-			// get the max and min values of the chart
+//			finest("Plot has "+plot.getDatasetCount()+" datasets");
+			
+			// get the max and min values of each dataset in the chart
 			for(int i = 0; i<plot.getDatasetCount();i++){
 				XYDataset dataset = plot.getDataset(i);
 
 				if(dataset==null){
-					log(Level.FINEST, "Null dataset "+i);
-					return;
+					finest("Null dataset "+i);
+					continue;
 				}
 
 				xMax = DatasetUtilities.findMaximumDomainValue(dataset).doubleValue() > xMax
 						? DatasetUtilities.findMaximumDomainValue(dataset).doubleValue()
 								: xMax;
 
-						xMin = DatasetUtilities.findMinimumDomainValue(dataset).doubleValue() < xMin
-								? DatasetUtilities.findMinimumDomainValue(dataset).doubleValue()
-										: xMin;
+				xMin = DatasetUtilities.findMinimumDomainValue(dataset).doubleValue() < xMin
+					 ? DatasetUtilities.findMinimumDomainValue(dataset).doubleValue()
+					 : xMin;
 
-								yMax = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue() > yMax
-										? DatasetUtilities.findMaximumRangeValue(dataset).doubleValue()
-												: yMax;
+				yMax = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue() > yMax
+					 ? DatasetUtilities.findMaximumRangeValue(dataset).doubleValue()
+					 : yMax;
 
-										yMin = DatasetUtilities.findMinimumRangeValue(dataset).doubleValue() < yMin
-												? DatasetUtilities.findMinimumRangeValue(dataset).doubleValue()
-														: yMin;
+				yMin = DatasetUtilities.findMinimumRangeValue(dataset).doubleValue() < yMin
+					 ? DatasetUtilities.findMinimumRangeValue(dataset).doubleValue()
+					 : yMin;
 			}
 			
-//			IJ.log("Found min max range");
-
 
 			// find the ranges they cover
 			double xRange = xMax - xMin;
 			double yRange = yMax - yMin;
 
-			//		double aspectRatio = xRange / yRange;
-
 			double newXRange = xRange;
 			double newYRange = yRange;
 
 			// test the aspect ratio
-			log(Level.FINEST, "Old range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
 			if( (xRange / yRange) > aspectRatio){
 				// width is not enough
-				//			IJ.log("Too narrow: "+xRange+", "+yRange+":  aspect ratio "+aspectRatio);
 				newXRange = xRange * 1.1;
 				newYRange = newXRange / aspectRatio;
 			} else {
 				// height is not enough
-				//			IJ.log("Too short: "+xRange+", "+yRange+":  aspect ratio "+aspectRatio);
 				newYRange = yRange * 1.1; // add some extra x space
 				newXRange = newYRange * aspectRatio; // get the new Y range
 			}
@@ -126,13 +121,12 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel implements 
 			xMax += xDiff;
 			yMin -= yDiff;
 			yMax += yDiff;
-			log(Level.FINEST, "New range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
 
 			plot.getRangeAxis().setRange(yMin, yMax);
 			plot.getDomainAxis().setRange(xMin, xMax);
-//			IJ.log("Set min max range");
+
 		} catch (Exception e){
-			logError("Error restoring auto bounds", e);
+			fine("Error restoring auto bounds, falling back to default");
 			super.restoreAutoBounds();
 		}
 	

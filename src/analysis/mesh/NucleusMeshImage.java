@@ -44,81 +44,165 @@ public class NucleusMeshImage implements Loggable {
 		finer("Mesh has "+mesh.getFaceCount()+" faces");
 		if( ! mesh.isComparableTo(template)){
 			warn("Cannot compare meshes");
+			return null;
 		}
+				
+		
+		// Get the bounding box size for the correctly oriented nucleus within the mesh
+		Rectangle r = mesh.nucleus.getVerticallyRotatedNucleus().createPolygon().getBounds();
+
+		// Add padding: TODO: figure out why this is needed, and remove
+		// Images have teh correct size, but the position of pixels within the image is off
+		// when using the consensus as a target by 11x8 pixels in Testing.
+		// Not a rounding issue.
+		// the misalignment is also present in the signal warping images
+		int w = r.width  ;
+		int h = r.height ;
+		
+		// Find the centre of each axis in the bounding rectangle
+		int xCentre = (int) Math.round((double) w /2); //w >>1;
+		int yCentre = (int) Math.round((double) h /2); //h >>1;
 		
 		
-		
-//		int baseX =  (int) mesh.nucleus.getPosition()[CellularComponent.X_BASE];
-//		int baseY =  (int) mesh.nucleus.getPosition()[CellularComponent.Y_BASE];
-		
-		
-		// Get the bounding box size
-		Rectangle r = mesh.nucleus.getBounds(); //.createPolygon().getBounds();
-		r = r==null ? mesh.nucleus.createPolygon().getBounds() : r; // in case the bounds were not set (fixed 1.12.2)
-		int w = (int) ( (double) r.width*1.2);
-		int h = (int) ( (double) r.height*1.2);
-		
-		int xCentre = w >>1;
-		int yCentre = h >>1;
-		
+		// Check if this is a consensus nucleus, where the CoM is at zero
+		// If so, some face pixels will be at -ve x and y coordinates
+		// These must be moved back to +ve
 		boolean zeroCoM = false;
 		if(mesh.nucleus.getCentreOfMass().getXAsInt()==0 && mesh.nucleus.getCentreOfMass().getYAsInt()==0){
-			fine("Nucleus centre of mass is at zero; correcting");
+			fine("Nucleus centre of mass is at zero");
 			fine("Offsetting all pixels to the centre of the new image");
 			zeroCoM = true;
 		}
 		
 
-		ImageProcessor ip = new ByteProcessor(w, h);
-		
-		for(int i=0; i<ip.getPixelCount(); i++){
-			ip.set(i, 255); // set all to white initially
-		}
+		// Create a blank image processor with an appropriate size
+		// to hold the new image. Note that if the height or width is
+		// not sufficient, the image will wrap
+		ImageProcessor ip = createWhiteProcessor(w, h);
 				
+		// Adjust from absolute position in original target image
+		// Note that the consensus will have a position from it's template nucleus
+		int xBase = (int) mesh.nucleus.getPosition()[CellularComponent.X_BASE];
+		int yBase = (int) mesh.nucleus.getPosition()[CellularComponent.Y_BASE];
+		finest("\tOffset image by: "+xBase+", "+yBase);
+		
 		int missingPixels = 0;
 		for(NucleusMeshFace f : map.keySet()){
 			
-			Map<NucleusMeshFaceCoordinate, Integer> faceMap = map.get(f);
-			finest("Getting pixels from face");
-			finest(f.toString());
+			// Fetch the equivalent face in the target mesh
+			NucleusMeshFace targetFace = mesh.getFace(f);
 			
-			for(NucleusMeshFaceCoordinate c : faceMap.keySet() ){
-				
-				
-				int pixelValue = faceMap.get(c);
-				finest(c.toString()+" : Value: "+pixelValue);
-				XYPoint p = c.getPixelCoordinate(mesh.getFace(f));
-
-				
-				// Adjust from absolute position in original image
-				int offsetX = (int) (p.getXAsInt() - mesh.nucleus.getPosition()[CellularComponent.X_BASE]);
-				int offsetY = (int) (p.getYAsInt() - mesh.nucleus.getPosition()[CellularComponent.Y_BASE]);
-				finest("\tOffset to: "+offsetX+", "+offsetY);
-				
-				// Handle array out of bounds errors from consensus nuclei. 
-				// This is because the consensus has -ve x and y positions
-				if(zeroCoM){
-
-					offsetX += xCentre;
-					offsetY += yCentre;
-				}
-				
-				try {
-					ip.set(offsetX, offsetY, pixelValue);
-				} catch (ArrayIndexOutOfBoundsException e){
-					finer("Point outside image bounds: "+offsetX+", "+offsetY);
-					missingPixels++;
-				}
-				
+			if(zeroCoM){
+				// Consensus nucleus is target
+//				missingPixels += addFaceToImage(f, targetFace, ip, xBase, yBase);
+				missingPixels += addFaceToImage(f, targetFace, ip, xCentre-xBase, yCentre-yBase);
+			} else {
+				// Other nucleus is target
+				missingPixels += addFaceToImage(f, targetFace, ip, xBase, yBase);
 			}
 			
 		}
+		
 		if(missingPixels >0){
 			fine(missingPixels+" points lay outside the new image bounds");			
 		}
 		
 		interpolateMissingPixels(ip);
 		
+		return ip;
+	}
+	
+	/**
+	 * Add the pixels in the given face to an image processor. 
+	 * @param f
+	 * @param mesh
+	 * @param ip
+	 * @param xOffset
+	 * @param yOffset
+	 * @return
+	 */
+	private int addFaceToImage(NucleusMeshFace templateFace, NucleusMeshFace targetFace, ImageProcessor ip, int xOffset, int yOffset){
+		
+		int missingPixels = 0;
+		Map<NucleusMeshFaceCoordinate, Integer> faceMap = map.get(templateFace);
+		finest("Getting pixels from face");
+		finest(templateFace.toString());
+		
+		for(NucleusMeshFaceCoordinate c : faceMap.keySet() ){
+			
+			
+			int pixelValue = faceMap.get(c);
+			finest(c.toString()+" : Value: "+pixelValue);
+			XYPoint p = c.getPixelCoordinate(targetFace);
+
+			
+			int x = p.getXAsInt() + xOffset;
+			int y = p.getYAsInt() + yOffset;
+			
+			// Handle array out of bounds errors from consensus nuclei. 
+			// This is because the consensus has -ve x and y positions			
+			try {
+				ip.set(x, y, pixelValue);
+			} catch (ArrayIndexOutOfBoundsException e){
+				finer("Point outside image bounds: "+x+", "+y);
+				missingPixels++;
+			}
+			
+		}
+		return missingPixels;
+	}
+	
+	/**
+	 * Get the size of the resulting image for the given mesh
+	 * @param mesh
+	 * @return
+	 */
+	private int[] findImageDimensions(NucleusMesh mesh){
+		
+		int maxX = 0;
+		int minX = Integer.MAX_VALUE;
+		
+		int maxY = 0;
+		int minY = Integer.MAX_VALUE;
+		
+		for(NucleusMeshFace f : map.keySet()){
+			
+			Map<NucleusMeshFaceCoordinate, Integer> faceMap = map.get(f);
+
+			for(NucleusMeshFaceCoordinate c : faceMap.keySet() ){
+
+				XYPoint p = c.getPixelCoordinate(mesh.getFace(f));
+				
+				
+				maxX = p.getXAsInt() > maxX ? p.getXAsInt() : maxX;
+				minX = p.getXAsInt() < minX ? p.getXAsInt() : minX;
+				
+				maxY = p.getYAsInt() > maxY ? p.getYAsInt() : maxY;
+				minY = p.getYAsInt() < minY ? p.getYAsInt() : minY;
+						
+			}
+			
+		}
+		
+		int xRange = maxX - minX;
+		int yRange = maxY - minY;
+		int[] result =  {xRange, yRange};
+		return result;
+	}
+	
+	/**
+	 * Make a ByteProcessor of the given dimensions with all
+	 * pixels at 255
+	 * @param w
+	 * @param h
+	 * @return
+	 */
+	private ImageProcessor createWhiteProcessor(int w, int h){
+		ImageProcessor ip = new ByteProcessor(w, h);
+		
+		for(int i=0; i<ip.getPixelCount(); i++){
+			ip.set(i, 255); // set all to white initially
+		}
 		return ip;
 	}
 	

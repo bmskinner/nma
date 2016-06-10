@@ -22,12 +22,8 @@ public abstract class AbstractOptions implements Loggable {
 	private UUID segID                 = null; // the id of the segment (not consistent between datasets)
 	private int segPosition            = 0;    // the position of the segment in the profile (consistent between datasets)
 	private MeasurementScale scale     = MeasurementScale.PIXELS;
-		
+			
 	public AbstractOptions(List<AnalysisDataset> list){
-		this(list, null);
-	}
-	
-	public AbstractOptions(List<AnalysisDataset> list, Logger programLogger){
 		this.list = list;
 	}
 

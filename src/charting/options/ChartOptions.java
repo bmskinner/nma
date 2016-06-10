@@ -69,12 +69,10 @@ public class ChartOptions extends AbstractOptions {
 	private CellularComponent component = null;
 	private boolean showWarp            = false;
 	
-	public ChartOptions(List<AnalysisDataset> list){
-		this(list, null);
-	}
+
 	
-	public ChartOptions(List<AnalysisDataset> list, Logger l){
-		super(list, l);
+	public ChartOptions(List<AnalysisDataset> list){
+		super(list);
 		if(hasDatasets()){
 			if(firstDataset().getSwatch()!=null){
 				this.swatch = firstDataset().getSwatch();
