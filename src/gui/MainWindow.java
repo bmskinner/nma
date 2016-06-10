@@ -121,7 +121,7 @@ public class MainWindow
 	
 	private ColourSwatch activeSwatch = ColourSwatch.REGULAR_SWATCH;
 	
-	private final Version version = new Version(Constants.VERSION_MAJOR, Constants.VERSION_MINOR, Constants.VERSION_REVISION);
+//	private final Version version = new Version(Constants.VERSION_MAJOR, Constants.VERSION_MINOR, Constants.VERSION_REVISION);
 		
 	// Flags to pass to ProgressableActions to determine the analyses
 	// to carry out in subsequently
@@ -160,7 +160,7 @@ public class MainWindow
 		
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		try {
-			setTitle("Nuclear Morphology Analysis v"+getVersion().toString());
+			setTitle("Nuclear Morphology Analysis v"+Version.currentVersion().toString());
 			setBounds(100, 100, 1012, 804);
 			this.setLocationRelativeTo(null); // centre on screen
 			contentPane = new JPanel();
@@ -438,13 +438,13 @@ public class MainWindow
 		return panelHeader;
 	}
 	
-	/**
-	 * Get the program version
-	 * @return the version
-	 */
-	public Version getVersion(){
-		return version;
-	}
+//	/**
+//	 * Get the program version
+//	 * @return the version
+//	 */
+//	public Version getVersion(){
+//		return version;
+//	}
 	
 	/**
 	 * Create the status panel at the base of the window
