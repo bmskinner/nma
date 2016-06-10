@@ -81,10 +81,10 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
   }
   
   private void getTotalImagesToAnalyse(){
-	  log(Level.INFO, "Calculating number of images to analyse");
+	  log("Calculating number of images to analyse");
 	  int totalImages = countSuitableImages(analysisOptions.getFolder());
 	  this.setProgressTotal(totalImages);
-	  log(Level.INFO, "Analysing "+totalImages+" images");
+	  log("Analysing "+totalImages+" images");
   }
 	
 	@Override
@@ -96,25 +96,25 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 			
 			getTotalImagesToAnalyse();
 			
-			log(Level.INFO, "Running nucleus detector");
+			log("Running nucleus detector");
 			processFolder(this.inputFolder);
 
-			log(Level.FINE, "Folder processed");
+			fine("Folder processed");
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
 
-			log(Level.FINE, "Getting collections");
+			fine( "Getting collections");
 
 			List<CellCollection> folderCollection = this.getNucleiCollections();
 
 			// Run the analysis pipeline
 
-			log(Level.FINE,"Analysing collections");
+			fine("Analysing collections");
 
 			datasets = analysePopulations(folderCollection);		
 
 			result = true;
-			log(Level.FINE, "Analysis complete; return collections");
+			fine( "Analysis complete; return collections");
 
 		} catch(Exception e){
 			result = false;
@@ -128,8 +128,8 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 	}
 	
 	public List<AnalysisDataset> analysePopulations(List<CellCollection> folderCollection){
-//		programLogger.log(Level.INFO, "Beginning analysis");
-		log(Level.INFO, "Beginning analysis");
+//		programLogger.log("Beginning analysis");
+		log("Beginning analysis");
 
 		List<AnalysisDataset> result = new ArrayList<AnalysisDataset>();
 
@@ -142,7 +142,7 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 //			File debugFile = dataset.getDebugFile();
 
 			File folder = collection.getFolder();
-			log(Level.INFO, "Analysing: "+folder.getName());
+			log("Analysing: "+folder.getName());
 
 			try{
 
@@ -152,12 +152,12 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 						NucleusType.ROUND);
 
 
-				log(Level.INFO, "Filtering collection...");
+				log("Filtering collection...");
 				boolean ok = CollectionFilterer.run(collection, failedNuclei, fileLogger); // put fails into failedNuclei, remove from r
 				if(ok){
-					log(Level.INFO, "Filtered OK");
+					log("Filtered OK");
 				} else {
-					log(Level.INFO, "Filtering error");
+					log("Filtering error");
 				}
 				
 				/*
@@ -165,6 +165,7 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 				 */
 
 				if(analysisOptions.isKeepFailedCollections()){
+					log("Keeping failed nuclei as new collection");
 					AnalysisDataset failed = new AnalysisDataset(failedNuclei);
 					AnalysisOptions failedOptions = new AnalysisOptions(analysisOptions);
 					failedOptions.setNucleusType(NucleusType.ROUND);
@@ -173,23 +174,26 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 					result.add(failed);
 				} else {
 				
-					if(failedNuclei.getNucleusCount()>0){
-						log(Level.INFO, "Exporting failed nuclei...");
-						ok = CompositeExporter.run(failedNuclei, fileLogger);
-						if(ok){
-							log(Level.INFO, "Export OK");
-						} else {
-							log(Level.INFO, "Export error");
-						}
-					}
+//					// TODO: handle large failed collections
+//					if(failedNuclei.getNucleusCount()>0 && failedNuclei.getNucleusCount()<50){
+//						log("Exporting failed nuclei...");
+//						ok = CompositeExporter.run(failedNuclei, fileLogger);
+//						if(ok){
+//							log("Export OK");
+//						} else {
+//							log("Export error");
+//						}
+//					} else {
+//						log("Too many failed nuclei to export, skipping");
+//					}
 				}
-				log(Level.INFO, spacerString);
+				log(spacerString);
 				
-				log(Level.INFO, "Population: "+collection.getName());
-				log(Level.INFO, "Passed: "+collection.getNucleusCount()+" nuclei");
-				log(Level.INFO, "Failed: "+failedNuclei.getNucleusCount()+" nuclei");
+				log("Population: "+collection.getName());
+				log("Passed: "+collection.getNucleusCount()+" nuclei");
+				log("Failed: "+failedNuclei.getNucleusCount()+" nuclei");
 				
-				log(Level.INFO, spacerString);
+				log(spacerString);
 				
 				result.add(dataset);
 				
@@ -226,29 +230,29 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
   public List<CellCollection> getNucleiCollections(){
 	  // remove any empty collections before returning
 
-	  log(Level.FINE, "Getting all collections");
+	  fine( "Getting all collections");
 
 	  List<File> toRemove = new ArrayList<File>(0);
 
-	  log(Level.FINE, "Testing nucleus counts");
+	  fine( "Testing nucleus counts");
 
 	  Set<File> keys = collectionGroup.keySet();
 	  for (File key : keys) {
 		  CellCollection collection = collectionGroup.get(key);
 		  if(collection.cellCount()==0){
-			  log(Level.FINE, "Removing collection "+key.toString());
+			  fine( "Removing collection "+key.toString());
 			  toRemove.add(key);
 		  }    
 	  }
 
-	  log(Level.FINE, "Got collections to remove");
+	  fine( "Got collections to remove");
 
 	  Iterator<File> iter = toRemove.iterator();
 	  while(iter.hasNext()){
 		  collectionGroup.remove(iter.next());
 	  }
 
-	  log(Level.FINE, "Removed collections");
+	  fine( "Removed collections");
 
 	  List<CellCollection> result = new ArrayList<CellCollection>();
 	  for(CellCollection c : collectionGroup.values()){

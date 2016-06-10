@@ -43,7 +43,7 @@ import components.nuclei.Nucleus;
 public class CompositeExporter {
 
 	private static Logger logger;
-	public static final int MAX_COMPOSITABLE_NUCLEI = 600;
+	public static final int MAX_COMPOSITABLE_NUCLEI = 100;
 	
 	public static boolean run(AnalysisDataset dataset){
 		logger = Logger.getLogger(CompositeExporter.class.getName());
@@ -68,6 +68,11 @@ public class CompositeExporter {
 
 		if(collection.getNucleusCount()==0){
 			logger.log(Level.FINE, "No nuclei in collection");
+			return false;
+		}
+		
+		if(collection.getNucleusCount()>MAX_COMPOSITABLE_NUCLEI){
+			logger.log(Level.FINE, "Too many nuclei to draw");
 			return false;
 		}
 
