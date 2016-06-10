@@ -41,18 +41,13 @@ import utility.Utils;
 import components.generic.BorderTag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
-import components.nuclear.NucleusType;
-import components.nuclear.SignalCollection;
 
 public class AsymmetricNucleus
   extends RoundNucleus
 {
 
-  /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-private List<BorderPoint> tailEstimatePoints = new ArrayList<BorderPoint>(0); // holds the points considered to be sperm tails before filtering
+	private transient List<BorderPoint> tailEstimatePoints = new ArrayList<BorderPoint>(0); // holds the points considered to be sperm tails before filtering
 
   public AsymmetricNucleus(Nucleus n) {
     super(n);
@@ -119,12 +114,24 @@ private List<BorderPoint> tailEstimatePoints = new ArrayList<BorderPoint>(0); //
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	  finest("\tReading asymmetric nucleus");
 	  in.defaultReadObject();
+	  tailEstimatePoints = new ArrayList<BorderPoint>(0);
 	  finest("\tRead asymmetric nucleus");
   }
 
   private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 	  finest("\tWriting asymmetric nucleus");
 	  out.defaultWriteObject();
+
+		// Now ensure we don't recurse over the BorderList
+//			
+//					
+//		for(BorderPoint p : tailEstimatePoints){
+//			out.writeBoolean(true); // Another point awaits
+//			out.writeDouble(p.getX());
+//			out.writeDouble(p.getY());
+//		}
+//		out.writeBoolean(false);
+	  
 	  finest("\tWrote asymmetric nucleus");
   }
 }

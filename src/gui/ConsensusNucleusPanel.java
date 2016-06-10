@@ -207,6 +207,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		constraints.anchor = GridBagConstraints.CENTER;
 		
 		JButton moveUp = new JButton("+y");
+		moveUp.setToolTipText("Move centre of mass y+1");
 		moveUp.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -220,6 +221,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		panel.add(moveUp, constraints);
 		
 		JButton moveDown = new JButton("-y");
+		moveDown.setToolTipText("Move centre of mass y-1");
 		moveDown.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -234,6 +236,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		panel.add(moveDown, constraints);
 		
 		JButton moveLeft = new JButton("-x");
+		moveLeft.setToolTipText("Move centre of mass x-1");
 		moveLeft.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -248,6 +251,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		panel.add(moveLeft, constraints);
 		
 		JButton moveright = new JButton("+x");
+		moveright.setToolTipText("Move centre of mass x+1");
 		moveright.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -263,6 +267,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		panel.add(moveright, constraints);
 		
 		JButton moveRst = new JButton("!");
+		moveRst.setToolTipText("Reset centre of mass to 0,0");
 		moveRst.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -295,6 +300,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		constraints.anchor = GridBagConstraints.CENTER;
 		
 		JButton rotateFwd = new JButton("-r");
+		rotateFwd.setToolTipText("Rotate anti-clockwise 1 degree");
 		rotateFwd.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -309,6 +315,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		panel.add(rotateFwd, constraints);
 
 		JButton rotateBck = new JButton("+r");
+		rotateBck.setToolTipText("Rotate clockwise 1 degree");
 		rotateBck.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -324,6 +331,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		panel.add(rotateBck, constraints);
 
 		JButton rotateRst = new JButton("!");
+		rotateRst.setToolTipText("Reset rotation to orientation point");
 		rotateRst.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {

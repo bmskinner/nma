@@ -173,11 +173,18 @@ public class DatasetProfiler extends AnalysisWorker {
 					
 				int index = finder.identifyIndex(collection, tag);
 
-				if( index > -1){
-					//					int index = finder.identifyIndex(median, ruleSets);
+				if( index > -2){ // Ruleset was applied
+					
+					if( index == -1){
+						warn("Unable to detect "+tag+" using default ruleset");
+						warn("Falling back on reference point");
+						index = 0;
+						
+					}
+					
 					// Add the index to the median profiles
 					collection.getProfileManager()
-						.updateProfileCollectionOffsets(tag, index);
+					.updateProfileCollectionOffsets(tag, index);
 
 					fine(tag+" in median is located at index "+index);
 
@@ -186,8 +193,9 @@ public class DatasetProfiler extends AnalysisWorker {
 							.getProfile(tag, Constants.MEDIAN);
 
 					collection.getProfileManager()
-						.offsetNucleusProfiles(tag, ProfileType.REGULAR, tagMedian);
+					.offsetNucleusProfiles(tag, ProfileType.REGULAR, tagMedian);
 					fine("Assigned offset in nucleus profiles for "+tag);
+					
 
 				} else {
 					fine("No ruleset for "+tag+" or index not found; skipping");

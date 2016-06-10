@@ -22,19 +22,14 @@ package io;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
-import components.CellCollection;
-import components.nuclei.Nucleus;
 
 public class PopulationExporter extends AnalysisWorker {
 	
@@ -57,17 +52,16 @@ public class PopulationExporter extends AnalysisWorker {
 			} 
 
 			if(saveAnalysisDataset(getDataset(), saveFile)){
-				log(Level.FINEST, "Save was sucessful");
-//				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());         
+				finest("Save was sucessful");        
 				return true;
 				
 			} else{
-				log(Level.WARNING, "Save was unsucessful");
+				warn("Save was unsucessful");
 				return false;
 			}
 		
 		} catch(Exception e){
-			logError("Unable to save dataset", e);
+			error("Unable to save dataset", e);
 			return false;
 		}
 		
@@ -82,37 +76,46 @@ public class PopulationExporter extends AnalysisWorker {
 	 */
 	public boolean saveAnalysisDataset(AnalysisDataset dataset, File saveFile){
 
+		boolean ok = true;
 		try{
 			// Since we're creating a save format, go with nmd: Nuclear Morphology Dataset
-			log(Level.INFO, "Saving dataset to "+saveFile.getAbsolutePath());
+			fine("Saving dataset to "+saveFile.getAbsolutePath());
+
+			//use buffering
+			OutputStream file         = new FileOutputStream(saveFile);
+			OutputStream buffer       = new BufferedOutputStream(file);
+			ObjectOutputStream output = new ObjectOutputStream(buffer);
 
 			try{
-				//use buffering
-				OutputStream file = new FileOutputStream(saveFile);
-				OutputStream buffer = new BufferedOutputStream(file);
-				ObjectOutputStream output = new ObjectOutputStream(buffer);
 
-				try{
+				output.writeObject(dataset);
+				output.reset();
 
-					output.writeObject(dataset);
-					log(Level.FINE, "Save complete");
-
-				} catch(IOException e){
-					logError("Unable to save dataset", e);
-
-				} finally{
-					output.close();
-					buffer.close();
-					file.close();
-				}
-
-			} catch(Exception e){
-				logError("Error saving dataset", e);
-				return false;
+			} catch(IOException e){
+				error("IO error saving dataset", e);
+				ok =  false;
+			} catch(Exception e1){
+				error("Unexpected exception saving dataset to: "+saveFile.getAbsolutePath(), e1);
+				ok =  false;
+			} catch(StackOverflowError e){
+				error("StackOverflow saving dataset to: "+saveFile.getAbsolutePath(), e);
+				ok =  false;
+			} finally{
+				output.close();
+				buffer.close();
+				file.close();
 			}
 			
-		} catch(Exception e){
-			logError("Error saving dataset", e);
+			if(!ok){
+				return false;
+			}
+			fine("Save complete");
+			
+		} catch(FileNotFoundException e){
+			warn("File not found when saving dataset");
+			return false;
+		} catch (IOException e2) {
+			error("IO error saving dataset", e2);
 			return false;
 		}
 		return true;
@@ -133,41 +136,7 @@ public class PopulationExporter extends AnalysisWorker {
 		return saveAnalysisDataset(dataset, saveFile);
 
 	}
-	
-//	public static boolean extractNucleiToFolder(AnalysisDataset dataset, File exportFolder){
-//
-//		try{
-//
-//			log(Level.INFO, "Extracting nuclei to "+exportFolder.getAbsolutePath());
-//
-//			for(Nucleus n : dataset.getCollection().getNuclei()){
-//
-//				// get the path to the enlarged image
-//				File imagePath = new File(n.getEnlargedImagePath());
-//
-//				// trim the name back to image name and number
-//				String imageName = n.getSourceFileName();
-//				if(imageName.endsWith(".tiff")){
-//					imageName = imageName.replace(".tiff", "");
-//				}
-//				
-//				File newPath = new File(exportFolder+File.separator+n.getSourceFileName()+"-"+n.getNucleusNumber()+".tiff");
-//
-//				if(imagePath.exists()){		
-//					
-//					copyFile(imagePath, newPath);
-//
-//				}
-//			}
-//
-//		}catch(Exception e){
-//			logError("Error extracting nuclei", e);
-//			return false;
-//		}
-//		return true;
-//
-//	}
-	
+		
 	/**
 	 * Directly copy the source file to the destination file
 	 * @param sourceFile

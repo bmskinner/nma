@@ -110,20 +110,20 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		panel.add(chartPanel, BorderLayout.CENTER);
 		
 		
-		chartPanel.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				resizePreview(chartPanel, panel);
-				chartPanel.restoreAutoBounds();
-			}
-		});
+//		chartPanel.addComponentListener(new ComponentAdapter() {
+//			@Override
+//			public void componentResized(ComponentEvent e) {
+//				resizePreview(chartPanel, panel);
+//				chartPanel.restoreAutoBounds();
+//			}
+//		});
 		
-		panel.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				resizePreview(chartPanel, panel);
-			}
-		});
+//		panel.addComponentListener(new ComponentAdapter() {
+//			@Override
+//			public void componentResized(ComponentEvent e) {
+//				resizePreview(chartPanel, panel);
+//			}
+//		});
 		
 		
 		checkboxPanel = createSignalCheckboxPanel();
@@ -233,13 +233,13 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		}
 	}
 		
-	private static void resizePreview(ChartPanel innerPanel, JPanel container) {
-        int w = container.getWidth();
-        int h = container.getHeight();
-        int size =  Math.min(w, h);
-        innerPanel.setPreferredSize(new Dimension(size, size));
-        container.revalidate();
-    }
+//	private static void resizePreview(ChartPanel innerPanel, JPanel container) {
+//        int w = container.getWidth();
+//        int h = container.getHeight();
+//        int size =  Math.min(w, h);
+//        innerPanel.setPreferredSize(new Dimension(size, size));
+//        container.revalidate();
+//    }
 	
 	/**
 	 * Create the checkboxes that set each signal channel visible or not
@@ -251,32 +251,30 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		
 
 		if(isSingleDataset()){
-			try {
 
-				for(int signalGroup : activeDataset().getCollection().getSignalManager().getSignalGroups()){
+			for(int signalGroup : activeDataset().getCollection().getSignalManager().getSignalGroups()){
 
-					boolean visible = activeDataset().isSignalGroupVisible(signalGroup);
+				boolean visible = activeDataset().isSignalGroupVisible(signalGroup);
 
-					String name = activeDataset().getCollection().getSignalManager().getSignalGroupName(signalGroup);
-					// make a checkbox for each signal group in the dataset
-					JCheckBox box = new JCheckBox(name);
+				String name = activeDataset().getCollection().getSignalManager().getSignalGroupName(signalGroup);
+				// make a checkbox for each signal group in the dataset
+				JCheckBox box = new JCheckBox(name);
 
-					// get the status within each dataset
-					box.setSelected(visible);
+				// get the status within each dataset
+				box.setSelected(visible);
 
-					// apply the appropriate action 
-					box.setActionCommand("GroupVisble_"+signalGroup);
-					box.addActionListener(this);
-					panel.add(box);
+				// apply the appropriate action 
+				box.setActionCommand("GroupVisble_"+signalGroup);
+				box.addActionListener(this);
+				panel.add(box);
 
-				}
-
-			} catch(Exception e){
-				log(Level.SEVERE, "Error creating signal checkboxes", e);
 			}
+
+
 		}
 		
 		warpButton = new JButton("Warp signals");
+		warpButton.setToolTipText("Requires consensus nucleus refolded");
 		warpButton.addActionListener( e -> { 
 				new SignalWarpingDialog(  getDatasets() );
 			}  
@@ -333,7 +331,12 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			consensusAndCheckboxPanel.repaint();
 			consensusAndCheckboxPanel.setVisible(true);
 			
-			warpButton.setEnabled(true);
+			if(activeDataset().getCollection().hasConsensusNucleus()
+					&& activeDataset().getCollection().getSignalManager().hasSignals()){
+				warpButton.setEnabled(true);
+			}
+			
+			
 		}
 	}
 	

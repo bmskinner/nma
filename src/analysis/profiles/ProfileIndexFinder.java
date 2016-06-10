@@ -146,7 +146,7 @@ public class ProfileIndexFinder implements Loggable {
 	public int identifyIndex(final CellCollection collection, final List<RuleSet> list){
 		
 		if(list.size()==0){
-			return -1;
+			return -2;
 		}
 		
 		BooleanProfile indexes = new BooleanProfile(collection
