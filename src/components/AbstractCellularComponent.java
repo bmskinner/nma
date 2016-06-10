@@ -659,23 +659,23 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		finest("\tReading abstract cellular component");
 		
-		if(Version.currentVersion().isOlderThan(new Version(1, 12, 2))){
-			
-			try{
-				finest("\tAttempting default deserialization");
-				in.defaultReadObject();
-				return;
-			} catch(StackOverflowError e){
-				
-			} catch(Exception e){
-				finest("\tDefault deserialization failed");
-			}
-			
-		} 
+//		if(Version.currentVersion().isOlderThan(new Version(1, 12, 2))){
+//			
+//			try{
+//				finest("\tAttempting default deserialization");
+//				in.defaultReadObject();
+//				return;
+//			} catch(StackOverflowError e){
+//				
+//			} catch(Exception e){
+//				finest("\tDefault deserialization failed");
+//			}
+//			
+//		} 
 			
 		// Else use the new deserialization
 
-		finest("\tAttempting custom deserialization");
+//		finest("\tAttempting custom deserialization");
 
 		// id is final, so cannot be assigned normally. 
 		// Reflect around the problem by making the field

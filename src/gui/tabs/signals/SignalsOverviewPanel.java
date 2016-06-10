@@ -276,6 +276,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		warpButton = new JButton("Warp signals");
 		warpButton.setToolTipText("Requires consensus nucleus refolded");
 		warpButton.addActionListener( e -> { 
+			
 				new SignalWarpingDialog(  getDatasets() );
 			}  
 		);
@@ -344,9 +345,13 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	private void updateSignalConsensusChart(){
 		try {
 			
+			
+			// The options do not hold which signal groups are visible
+			// so we must invalidate the cache whenever they change
+			this.clearChartCache(getDatasets());
+			
 			ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
-					.setSignalGroup(1)
 					.setShowWarp(false)
 					.build();
 			
@@ -421,6 +426,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			JCheckBox box = (JCheckBox) e.getSource();
 			activeDataset().setSignalGroupVisible(signalGroup, box.isSelected());
 			fireSignalChangeEvent("GroupVisble_");
+			this.refreshChartCache(getDatasets());
 		}
 		updateSignalConsensusChart();
 		
@@ -435,14 +441,9 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	@Override
 	protected void updateMultiple() throws Exception {
 		
-		try {
-			updateCheckboxPanel();
-			updateSignalConsensusChart();
-			updateSignalStatsPanel();
-		} catch (Exception e){
-			error("Error updating signal overview panel", e);
-		}
-		
+		updateCheckboxPanel();
+		updateSignalConsensusChart();
+		updateSignalStatsPanel();		
 	}
 
 	@Override

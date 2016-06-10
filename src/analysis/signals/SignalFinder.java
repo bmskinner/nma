@@ -238,7 +238,7 @@ public class SignalFinder implements Loggable {
 	private List<NuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 		
 //		SignalCollection signalCollection = n.getSignalCollection();
-		log( "Beginning reverse detection for nucleus");
+		finest( "Beginning reverse detection for nucleus");
 		// choose the right stack number for the channel
 		int stackNumber = Constants.rgbToStack(channel);
 		

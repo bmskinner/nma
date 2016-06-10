@@ -37,6 +37,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
 
 import org.jfree.chart.JFreeChart;
 
@@ -48,6 +49,8 @@ import analysis.AnalysisDataset;
 import analysis.signals.SignalManager;
 import analysis.signals.SignalWarper;
 import gui.LoadingIconDialog;
+import gui.MainWindow;
+import gui.actions.ClusterAnalysisAction;
 import gui.components.FixedAspectRatioChartPanel;
 
 @SuppressWarnings("serial")
@@ -64,6 +67,9 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private SignalWarper warper;
 	
 	private JProgressBar progressBar = new JProgressBar(0, 100);
+	
+	private int totalCells = 0;
+	private int cellsDone  = 0;
 
 	
 	public SignalWarpingDialog(List<AnalysisDataset> datasets){
@@ -103,6 +109,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		signalGroupSelectedBox = new JComboBox<Integer>(signalGroups.toArray( new Integer[0] ));
 		signalGroupSelectedBox.setSelectedIndex(0);
 		int signalGroup = (int) signalGroupSelectedBox.getSelectedItem();
+
+		totalCells = m.getNumberOfCellsWithNuclearSignals(signalGroup);
 		
 		panel.add(new JLabel("Signal group"));
 		panel.add(signalGroupSelectedBox);		
@@ -115,24 +123,24 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 			int group = (int) signalGroupSelectedBox.getSelectedItem();
 			signalGroupNameLabel.setText(m.getSignalGroupName(group));
+			totalCells = m.getNumberOfCellsWithNuclearSignals(group);
 		});
 
 		
 		runButton = new JButton("Run");
+		
 		runButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 
-				Thread thr = new Thread(){
-					public void run(){
-						runWarping();
-					}
+				Runnable task = () -> { 
+					runWarping();
 				};
-				thr.start();
-				
-			
+				SwingUtilities.invokeLater(task);
+								
 			}
 		});	
+
 		panel.add(runButton);
 		
 		panel.add(progressBar);
@@ -154,12 +162,18 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		try {
 			setStatusLoading();
 			setEnabled(false);
+			progressBar.setStringPainted(true);
+			
+			
+			progressBar.setString("0 of "+totalCells);
 			progressBar.setVisible(true);
+			
+			
 
 			warper = new SignalWarper(datasets.get(0), signalGroup);
 			warper.addPropertyChangeListener(this);
 			warper.execute();
-
+			
 		} catch (Exception e) {
 			error("Error running warping", e);
 			setEnabled(true);
@@ -186,20 +200,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		try {
 			updateChart();
 			
-//			ImageProcessor[] images = warper.getResults();
-//
-//			JFreeChart chart = null;
-//			
-//			ChartOptions options = new ChartOptionsBuilder()
-//				.setDatasets(datasets)
-//				.build();
-//
-//			chart = OutlineChartFactory.getInstance().makeSignalWarpChart(options, images);
-//					
-//			chartPanel.setChart(chart);
-//			chartPanel.restoreAutoBounds();
-			
-			
 			setEnabled(true);
 			setStatusLoaded();
 			
@@ -213,7 +213,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	public void propertyChange(PropertyChangeEvent evt) {
 
 		int value = (Integer) evt.getNewValue(); // should be percent
-		log(Level.FINEST,"Property change: "+value);
+		finest("Property change: "+value);
 		
 		if(value >=0 && value <=100){
 			
@@ -221,12 +221,15 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				this.progressBar.setIndeterminate(false);
 			}
 			this.progressBar.setValue(value);
+			cellsDone++;
+			progressBar.setString(cellsDone+" of "+totalCells);
 			updateChart();
 		}
 
 		if(evt.getPropertyName().equals("Finished")){
-			log(Level.FINEST,"Worker signaled finished");
+			finest("Worker signaled finished");
 			progressBar.setVisible(false);
+			cellsDone = 0;
 			finished();
 		}
 		

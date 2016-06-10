@@ -94,7 +94,7 @@ public class SignalDetector extends AnalysisWorker {
 	@Override
 	protected Boolean doInBackground() throws Exception {
 		boolean result = true;
-		log(Level.FINE, "Beginning signal detection in channel "+channel);
+		fine("Beginning signal detection in channel "+channel);
 
 		try{
 			int progress = 0;
@@ -109,12 +109,12 @@ public class SignalDetector extends AnalysisWorker {
 				options.setThreshold(originalMinThreshold);
 
 				Nucleus n = c.getNucleus();
-				log(Level.FINER, "Looking for signals associated with nucleus "+n.getSourceFileName()+"-"+n.getNucleusNumber());
+				finer("Looking for signals associated with nucleus "+n.getSourceFileName()+"-"+n.getNucleusNumber());
 				
 				// get the image in the folder with the same name as the
 				// nucleus source image
 				File imageFile = new File(folder + File.separator + n.getSourceFileName());
-				log(Level.FINER, "Source file: "+imageFile.getAbsolutePath());
+				finer("Source file: "+imageFile.getAbsolutePath());
 
 				try{
 					
@@ -122,7 +122,7 @@ public class SignalDetector extends AnalysisWorker {
 
 					List<NuclearSignal> signals = finder.detectSignal(imageFile, stack, n);
 					
-					log(Level.FINER, "Creating signal collection");
+					finer("Creating signal collection");
 					
 					SignalCollection signalCollection = n.getSignalCollection();
 					signalCollection.addSignalGroup(signals, signalGroup, imageFile, channel);
@@ -130,18 +130,18 @@ public class SignalDetector extends AnalysisWorker {
 					n.calculateSignalDistancesFromCoM();
 					n.calculateFractionalSignalDistancesFromCoM();
 
-					log(Level.FINE, "Calculating signal angles");
+					fine("Calculating signal angles");
 					if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
-						log(Level.FINER, "Nucleus type is asymmetric: "+n.getClass().getSimpleName());
+						finer("Nucleus type is asymmetric: "+n.getClass().getSimpleName());
 						
 						if(n.hasBorderTag(BorderTag.ORIENTATION_POINT)){
-							log(Level.FINEST, "Calculating angle from orientation point");
+							finest("Calculating angle from orientation point");
 							n.calculateSignalAnglesFromPoint(n.getBorderPoint(BorderTag.ORIENTATION_POINT));
 						} else {
-							log(Level.FINEST, "No orientation point in nucleus");
+							finest("No orientation point in nucleus");
 						}
 					} else {
-						log(Level.FINER, "Nucleus type is round: "+n.getClass().getSimpleName());
+						finer("Nucleus type is round: "+n.getClass().getSimpleName());
 					}
 					
 					

@@ -105,19 +105,19 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	 */
 	protected void updateMultiple() throws Exception {
 		shellsPanel.update(getDatasets());
-		log(Level.FINEST, "Updated shells panel");
+		finest("Updated shells panel");
 		
 		overviewPanel.update(getDatasets());
-		log(Level.FINEST, "Updated signals overview panel");
+		finest("Updated signals overview panel");
 		
 		histogramPanel.update(getDatasets());
-		log(Level.FINEST, "Updated signals histogram panel");
+		finest("Updated signals histogram panel");
 		
 		analysisPanel.update(getDatasets());
-		log(Level.FINEST, "Updated signals analysis panel");
+		finest("Updated signals analysis panel");
 		
 		boxplotPanel.update(getDatasets());
-		log(Level.FINEST, "Updated signals boxplot panel");
+		finest("Updated signals boxplot panel");
 	}
 	
 	/**
@@ -145,6 +145,8 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 		if(e.getActionCommand().startsWith("GroupVisble_")){
 			overviewPanel.update(getDatasets());
 			histogramPanel.update(getDatasets());
+			boxplotPanel.update(getDatasets());
+			shellsPanel.update(getDatasets());
 		}
 		
 	}

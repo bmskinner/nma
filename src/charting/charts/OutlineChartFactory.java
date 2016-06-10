@@ -148,13 +148,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		drawImagesAsAnnotation(images, plot, 255, -xOffset, -yOffset);
 		
-//		for(ImageProcessor image : images){
-//			
-//			if(image!=null){
-//
-//				drawImageAsAnnotation(image, plot, alpha, -xOffset, -yOffset);
-//			}
-//		}
 		XYDataset ds = NucleusDatasetCreator.createBareNucleusOutline(dataset);
 		plot.setDataset(0, ds);
 		plot.getRenderer(0).setBasePaint(Color.BLACK);
@@ -592,7 +585,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		plot.getDomainAxis().setRange(0, w);
 		plot.getRangeAxis().setRange(0, h);
 		
-		int range = images.length;
 		
 		for(int x=0; x<w; x++){
 			for(int y=0; y<h; y++){
@@ -609,6 +601,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				
 				
 				if(pixelTotal<255){// Ignore anything that is not signal - the background is already white
+					
+//					pixelTotal /= 2; // increase the intensities
 				
 					Color col = new Color(pixelTotal, pixelTotal, pixelTotal, alpha);
 
