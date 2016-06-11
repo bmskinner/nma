@@ -234,13 +234,18 @@ public class HistogramChartFactory extends AbstractChartFactory {
 				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
 
 				String seriesKey = (String) ds.getSeriesKey(j);
+                UUID signalGroup = getSignalGroupFromLabel(seriesKey);
+
 				String seriesName = seriesKey.replaceFirst(options.getStat().toString()+"_", "");
 
 				Color colour = ColourSelecter.getSegmentColor(j);
 				for(AnalysisDataset dataset : options.getDatasets()){
 
 					if(seriesName.equals(dataset.getName())){
-                        colour = dataset.getCollection().getSignalGroup(options.getSignalGroup()).getGroupColour();
+                        colour = dataset.getCollection().getSignalGroup(signalGroup).hasColour()
+                                ? dataset.getCollection().getSignalGroup(signalGroup).getGroupColour()
+                                : ColourSelecter.getSegmentColor(j);
+
 
 						plot.getRenderer().setSeriesPaint(j, colour);
 

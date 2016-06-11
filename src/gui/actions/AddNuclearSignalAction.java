@@ -127,6 +127,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		try{
 
             SignalGroup group = r.getSignalGroup(signalGroup);
+            group.setVisible(true);
 
 			List<Cell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
 			if(!list.isEmpty()){

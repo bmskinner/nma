@@ -284,7 +284,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 							Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
 
 
-					ds.addSeries(groupLabel+"_"+collection.getName(), data);
+	                ds.addSeries( "Group_"+signalGroup+"_"+stat.toString(), data);
 				}
 			
 		}

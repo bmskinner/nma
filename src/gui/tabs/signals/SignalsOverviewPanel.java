@@ -201,14 +201,21 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		
             for(UUID signalGroup : activeDataset().getCollection().getSignalGroups()){
 
+            	// get the status within each dataset
                 boolean visible = activeDataset().getCollection().getSignalGroup(signalGroup).isVisible();
 
 				String name = activeDataset().getCollection().getSignalManager().getSignalGroupName(signalGroup);
+				
 				// make a checkbox for each signal group in the dataset
-				JCheckBox box = new JCheckBox(name);
+				JCheckBox box = new JCheckBox(name, visible);
 
-				// get the status within each dataset
-				box.setSelected(visible);
+				// Don't enable when the consensus is missing
+                if(activeDataset().getCollection().hasConsensusNucleus()){
+                    box.setEnabled(true);
+                } else {
+                    box.setEnabled(false);
+                }
+
 
 				// apply the appropriate action 
 				box.setActionCommand("GroupVisble_"+signalGroup);
