@@ -18,6 +18,7 @@
  *******************************************************************************/
 package charting.datasets;
 
+import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
@@ -470,7 +471,6 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			for(int i=0;i<maxSignalGroup;i++){
 				fieldNames.add("");
 				fieldNames.add("Signal group");
-				fieldNames.add("Group name");
 				fieldNames.add("Channel");
 				fieldNames.add("Source");
 				fieldNames.add("Signals");
@@ -495,9 +495,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 			for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){// : collection.getSignalGroups()){
 				if(collection.getSignalManager().hasSignals(signalGroup)){
+					
+					SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
 					rowData.add("");
-					rowData.add(signalGroup);
-					rowData.add(collection.getSignalManager().getSignalGroupName(signalGroup));
+					rowData.add(cell);
 					rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
 					rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
 					rowData.add(collection.getSignalManager().getSignalCount(signalGroup));
@@ -558,7 +559,6 @@ public class NuclearSignalDatasetCreator implements Loggable {
 				for(int i=0;i<maxSignalGroup;i++){
 					fieldNames.add("");
 					fieldNames.add("Signal group");
-					fieldNames.add("Group name");
 					fieldNames.add("Channel");
 					fieldNames.add("Source");
 					fieldNames.add("Signals");
@@ -588,9 +588,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	
 					for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){// : collection.getSignalGroups()){
 //						if(collection.getSignalManager().hasSignals(signalGroup)){
+						SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
+						
 							rowData.add("");
-							rowData.add(signalGroup);
-							rowData.add(collection.getSignalManager().getSignalGroupName(signalGroup));
+							rowData.add(cell);
 							rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
 							rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
 							rowData.add(collection.getSignalManager().getSignalCount(signalGroup));

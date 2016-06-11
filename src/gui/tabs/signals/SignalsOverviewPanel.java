@@ -43,6 +43,7 @@ import org.jfree.chart.JFreeChart;
 
 import charting.charts.OutlineChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
+import charting.datasets.SignalTableCell;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
@@ -151,13 +152,13 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 					String rowName = table.getModel().getValueAt(row, 0).toString();
 					String nextRowName = table.getModel().getValueAt(row+1, 0).toString();
 					if(nextRowName.equals("Signal group")){
-						UUID signalGroup = getSignalGroupFromTable(table, row+1, column);
+						SignalTableCell signalGroup = getSignalGroupFromTable(table, row+1, column);
 						updateSignalColour( signalGroup );
 					}
 					
 					if(rowName.equals("Source")){
 						
-						UUID signalGroup = getSignalGroupFromTable(table, row-3, column);
+						SignalTableCell signalGroup = getSignalGroupFromTable(table, row-3, column);
 						updateSignalSource( signalGroup );
 					}
 						
@@ -170,11 +171,12 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		return scrollPane;
 	}
 	
-	private UUID getSignalGroupFromTable(JTable table, int row, int column){
-		return UUID.fromString( table.getModel().getValueAt(row, column).toString() );
+	private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column){
+		return (SignalTableCell) table.getModel().getValueAt(row, column);
+//		return UUID.fromString( table.getModel().getValueAt(row, column).toString() );
 	}
 	
-	private void updateSignalSource(UUID signalGroup){
+	private void updateSignalSource(SignalTableCell signalGroup){
 		if(isSingleDataset()){
 			log(Level.FINEST, "Updating signal source for signal group "+signalGroup);
 
@@ -197,7 +199,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 				return;
 			}
 
-			activeDataset().getCollection().getSignalManager().updateSignalSourceFolder(signalGroup, folder);
+			activeDataset().getCollection().getSignalManager().updateSignalSourceFolder(signalGroup.getID(), folder);
 //			SignalsDetailPanel.this.update(getDatasets());
 			refreshTableCache();
 			log(Level.FINEST, "Updated signal source for signal group "+signalGroup+" to "+folder.getAbsolutePath() );
@@ -208,10 +210,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	 * Update the colour of the clicked signal group
 	 * @param row the row selected (the colour bar, one above the group name)
 	 */
-	private void updateSignalColour(UUID signalGroup){
-		
-		Color oldColour = Color.RED;
-//		Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
+	private void updateSignalColour(SignalTableCell signalGroup){
+		Color oldColour = activeDataset().getSignalGroupColour(signalGroup.getID());
 		
 		Color newColor = JColorChooser.showDialog(
                  this,
@@ -219,7 +219,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
                  oldColour);
 		
 		if(newColor != null){
-			activeDataset().setSignalGroupColour(signalGroup, newColor);
+			activeDataset().setSignalGroupColour(signalGroup.getID(), newColor);
 			this.update(getDatasets());
 //			fireSignalChangeEvent("SignalColourUpdate");
 			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
@@ -372,7 +372,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 
 			// default cell colour is white
 			Color colour = Color.WHITE;
-			
+
 			try {
 
 				// get the value in the first column of the row below
@@ -382,11 +382,13 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 					if(nextRowHeader.equals("Signal group")){
 						// we want to colour this cell preemptively
 						// get the signal group from the table
-						String groupString = table.getModel().getValueAt(row+1, column).toString();
 
-						if( ! groupString.equals("")){
-							colour = activeDataset().getSignalGroupColour(UUID.fromString(groupString));
+						if( ! table.getModel().getValueAt(row+1, column).toString().equals("")){
+							SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row+1, column);
+
+							colour = activeDataset().getSignalGroupColour(cell.getID());
 						}
+
 					}
 				}
 			} catch (Exception e){
@@ -396,7 +398,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			//Cells are by default rendered as a JLabel.
 			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			l.setBackground(colour);
-			
+
 
 			//Return the JLabel which renders the cell.
 			return l;

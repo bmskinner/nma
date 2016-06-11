@@ -104,6 +104,16 @@ public class SignalManager {
 		  return result;
 	  }
 	  
+	  public int getSignalGroupNumber(UUID signalGroup){
+		  int result = 0;
+		  for(Nucleus n : collection.getNuclei()){
+			  if(n.getSignalCollection().hasSignal(signalGroup)){
+				  result = n.getSignalCollection().getSignalGroupNumber(signalGroup);
+			  }
+		  }
+		  return result;
+	  }
+	  
 	  public int getSignalChannel(UUID signalGroup){
 		  int result = 0;
 		  
