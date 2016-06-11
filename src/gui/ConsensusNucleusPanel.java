@@ -146,8 +146,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		JPanel rotatePanel = createRotationPanel();
 		panel.add(rotatePanel, BorderLayout.NORTH);
 		
-		JPanel meshPanel = createMeshPanel();
-		panel.add(meshPanel, BorderLayout.CENTER);
+//		JPanel meshPanel = createMeshPanel();
+//		panel.add(meshPanel, BorderLayout.CENTER);
 		
 		JPanel offsetPanel = createTranslatePanel();
 		panel.add(offsetPanel, BorderLayout.SOUTH);
@@ -396,18 +396,18 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	private void updateSingleDataset() throws Exception {
 		runRefoldingButton.setVisible(false);
 		
-		showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
-		showMeshFacesBox.setEnabled(showMeshBox.isSelected());
+//		showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
+//		showMeshFacesBox.setEnabled(showMeshBox.isSelected());
 
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setShowMesh(showMeshBox.isSelected())
-			.setShowMeshEdges(showMeshEdgesBox.isSelected())
-			.setShowMeshFaces(showMeshFacesBox.isSelected())
+//			.setShowMesh(showMeshBox.isSelected())
+//			.setShowMeshEdges(showMeshEdgesBox.isSelected())
+//			.setShowMeshFaces(showMeshFacesBox.isSelected())
 			.setShowAnnotations(false)
 			.setShowXAxis(false)
 			.setShowYAxis(false)
-			.setMeshSize((int) meshSizeSpinner.getValue())
+//			.setMeshSize((int) meshSizeSpinner.getValue())
 			.build();
 		
 		JFreeChart consensusChart = getChart(options);

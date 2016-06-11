@@ -1039,7 +1039,7 @@ public class MainWindow
 	private void clearChartCache(final List<AnalysisDataset> list){
 		
 		if(list==null || list.isEmpty()){
-			log(Level.WARNING, "A cache clear was requested for a specific list, which was null or empty");
+			warn("A cache clear was requested for a specific list, which was null or empty");
 			clearChartCache();
 			return;
 		}

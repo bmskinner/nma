@@ -31,6 +31,7 @@
 
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
+import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import utility.Utils;
 
@@ -191,8 +192,21 @@ import utility.Utils;
   }
   
   public static double calculateLog2Ratio(double d){
-		return Math.log(d)/LOG2;
-	}
+	  return Math.log(d)/LOG2;
+  }
+  
+  /**
+   * Calculate the Spearman's rank  correlation coefficient between
+   * two arrays of paired values
+   * @param x
+   * @param y
+   * @return
+   */
+  public static double getSpearmansCorrelation(double[] x, double[] y){
+	  SpearmansCorrelation sp = new SpearmansCorrelation();
+	  return sp.correlation(x, y);
+
+  }
 
  }
   

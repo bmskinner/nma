@@ -14,6 +14,7 @@ import charting.options.ChartOptions;
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 import stats.NucleusStatistic;
+import stats.PlottableStatistic;
 
 public class ScatterChartFactory extends AbstractChartFactory {
 	
@@ -43,7 +44,6 @@ public class ScatterChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 	
-	
 	/**
 	 * Create a scatter plot of two nucleus statistics
 	 * @param options
@@ -59,6 +59,30 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			return createEmptyScatterChart();
 		}
 		
+		PlottableStatistic firstStat = options.getStat();
+		
+		for(PlottableStatistic stat : options.getStats()){
+			if( ! stat.getClass().equals(firstStat.getClass())){
+				fine("Statistic classes are different");
+				return createEmptyScatterChart();
+			}
+		}
+		
+		if(firstStat.getClass().equals(NucleusStatistic.class)){
+			return createNucleusStatisticScatterChart(options);
+		}
+		
+		return createEmptyScatterChart();
+	}
+	
+	
+	/**
+	 * Create a scatter plot of two nucleus statistics
+	 * @param options
+	 * @return
+	 */
+	private JFreeChart createNucleusStatisticScatterChart(ChartOptions options){
+				
 		XYDataset ds = ScatterChartDatasetCreator.getInstance().createNucleusScatterDataset(options);
 		
 		String xLabel = options.getStat(0).label(options.getScale());
@@ -83,11 +107,13 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			renderer.setSeriesLinesVisible(i, false);
 			renderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
 			
-			Color colour = options.getDatasets().get(i).getDatasetColour() == null 
-					? ColourSelecter.getSegmentColor(i)
-					: options.getDatasets().get(i).getDatasetColour();
-					
-			renderer.setSeriesFillPaint(i, colour);
+			Color colour = ColourSelecter.getSegmentColor(i);
+			
+			if(options.getDatasets().get(i).hasDatasetColour()){
+				colour = options.getDatasets().get(i).getDatasetColour();
+			}
+								
+			renderer.setSeriesPaint(i, colour);
 			 
 		}	
 		return chart;
