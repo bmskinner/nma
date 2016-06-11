@@ -1,6 +1,7 @@
 package analysis.signals;
 
 import java.util.List;
+import java.util.UUID;
 
 import components.Cell;
 
@@ -12,10 +13,10 @@ import analysis.mesh.NucleusMeshImage;
 
 public class SignalWarper extends AnalysisWorker {
 	
-	private int signalGroup;
+	private UUID signalGroup;
 	ImageProcessor[] warpedImages;
 		
-	public SignalWarper(AnalysisDataset dataset, int signalGroup){
+	public SignalWarper(AnalysisDataset dataset, UUID signalGroup){
 		super(dataset);
 		this.signalGroup = signalGroup;
 		

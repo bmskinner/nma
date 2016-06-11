@@ -51,7 +51,7 @@ public class ChartOptionsBuilder {
 	private boolean showMarkers        = false;
 	private boolean hideProfiles       = false;
 	private ProfileType type           = ProfileType.REGULAR;
-	private int signalGroup            = 1;
+	private UUID signalGroup           = null;
 	private boolean useDensity         = false;
 	private PlottableStatistic stat    = null;
 	private MeasurementScale scale     = MeasurementScale.PIXELS;
@@ -165,7 +165,7 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
-	public ChartOptionsBuilder setSignalGroup(int group){
+	public ChartOptionsBuilder setSignalGroup(UUID group){
 		this.signalGroup = group;
 		return this;
 	}

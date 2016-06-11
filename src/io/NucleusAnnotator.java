@@ -28,6 +28,7 @@ import ij.process.ImageProcessor;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -196,8 +197,9 @@ public class NucleusAnnotator {
 		
 		ip.setLineWidth(3);
 		SignalCollection signalCollection = n.getSignalCollection();
-		for( int i : signalCollection.getSignalGroups()){
-			List<NuclearSignal> signals = signalCollection.getSignals(i);
+		for( UUID id : signalCollection.getSignalGroupIDs()){
+			int i = signalCollection.getSignalGroupNumber(id);
+			List<NuclearSignal> signals = signalCollection.getSignals(id);
 			Color colour = i==Constants.FIRST_SIGNAL_CHANNEL 
 						 ? Color.RED 
 						 : i==Constants.FIRST_SIGNAL_CHANNEL+1 

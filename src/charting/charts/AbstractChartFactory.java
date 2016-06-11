@@ -19,6 +19,7 @@
 package charting.charts;
 
 import java.awt.Color;
+import java.util.UUID;
 
 import logging.Loggable;
 
@@ -43,6 +44,18 @@ public abstract class AbstractChartFactory implements Loggable {
 		String[] names = label.split("_");
 		return Integer.parseInt(names[1]);
 	}
+	
+	/**
+	 * Find the UUID of a signal group from a label
+	 * @param label
+	 * @return
+	 */
+	public static UUID getSignalGroupFromLabel(String label){
+		String[] names = label.split("_");
+		return UUID.fromString(names[1]);
+	}
+	
+
 	
 	/**
 	 * Draw domain markers for the given border tag at the given position

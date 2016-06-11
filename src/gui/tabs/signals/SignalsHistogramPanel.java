@@ -50,7 +50,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 					.setStatistic(stat)
 					.setScale(scale)
 					.setUseDensity(false)
-					.setSignalGroup(0)
+					.setSignalGroup(null)
 					.build();
 				
 				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createStatisticHistogram(options), stat.toString());
@@ -70,7 +70,6 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 	@Override
 	protected void updateSingle() throws Exception {
 		this.setEnabled(true);
-		int signalGroup = 1; //TODO - get the number  of signal groups in the selected datasets, and iterate 
 		
 		MeasurementScale scale  = measurementUnitSettingsPanel.getSelected();
 		boolean useDensity = useDensityPanel.isSelected();
@@ -85,22 +84,10 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 				.setStatistic(stat)
 				.setScale(scale)
 				.setUseDensity(useDensity)
-				.setSignalGroup(signalGroup)
 				.build();
 			
-
-			if(this.getChartCache().hasChart(options)){
-				log(Level.FINEST, "Using cached histogram: "+stat.toString());
-				chart = getChartCache().getChart(options);
-
-			} else { // No cache
-
-				chart = HistogramChartFactory.createStatisticHistogram(options);
-				getChartCache().addChart(options, chart);
-
-
-				log(Level.FINEST, "Added cached histogram chart: "+stat);
-			}
+			
+			chart = getChart(options);
 
 			XYPlot plot = (XYPlot) chart.getPlot();
 			plot.setDomainPannable(true);

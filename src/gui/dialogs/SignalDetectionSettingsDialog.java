@@ -31,6 +31,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,7 +85,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 	private JRadioButton histogramThresholding = new JRadioButton("Adaptive");
 	private ButtonGroup thresholdModeGroup;
 	
-	private int signalGroup;
+	private UUID signalGroup;
 	private File folder;
 
 	/**
@@ -216,7 +217,8 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 							//						NuclearSignalOptions options = dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroupName);
 
 							// the new signal group is one more than the highest in the collection
-							int newSignalGroup = dataset.getHighestSignalGroup()+1;
+							UUID newSignalGroup = java.util.UUID.randomUUID();
+//							int newSignalGroup = dataset.getHighestSignalGroup()+1;
 
 							// create the options object with the given name
 							options.addNuclearSignalOptions(finalGroupName);
@@ -258,7 +260,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 		return panel;
 	}
 	
-	public int getSignalGroup(){
+	public UUID getSignalGroup(){
 		return this.signalGroup;
 	}
 	

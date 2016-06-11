@@ -18,20 +18,10 @@
  *******************************************************************************/
 package charting.datasets;
 
-import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-//import ij.IJ;
-import ij.process.FloatPolygon;
-import stats.DipTester;
-import stats.KruskalTester;
-import stats.NucleusStatistic;
-import stats.SegmentStatistic;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import logging.Loggable;
+import java.util.UUID;
 
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
@@ -40,14 +30,10 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import charting.options.ChartOptions;
-import utility.Constants;
-import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
-import analysis.detection.BooleanAligner;
 import analysis.mesh.NucleusMesh;
-import analysis.mesh.NucleusMeshBuilder;
 import analysis.mesh.NucleusMeshEdge;
+import charting.options.ChartOptions;
 import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellCollection;
@@ -60,12 +46,22 @@ import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
-import components.nuclear.NuclearSignal;
 import components.nuclear.BorderPoint;
+import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
+import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+
+import ij.process.FloatPolygon;
+import logging.Loggable;
+import stats.DipTester;
+import stats.KruskalTester;
+import stats.NucleusStatistic;
+import stats.SegmentStatistic;
+import utility.Constants;
+import weka.estimators.KernelEstimator;
 
 public class NucleusDatasetCreator implements Loggable {
 	
@@ -1356,14 +1352,14 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		Nucleus nucleus = cell.getNucleus();
 		
-		for(int signalGroup : nucleus.getSignalGroups()){
+		for(UUID signalGroup : nucleus.getSignalCollection().getSignalGroupIDs()){
 			
 			if(dataset.isSignalGroupVisible(signalGroup)){ // only add the groups that are set to visible
 
 				DefaultXYDataset groupDataset = new DefaultXYDataset();
 				int signalNumber = 0;
 
-				for(NuclearSignal signal : nucleus.getSignals(signalGroup)){
+				for(NuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)){
 
 					double[] xpoints = new double[signal.getBorderLength()];
 					double[] ypoints = new double[signal.getBorderLength()];

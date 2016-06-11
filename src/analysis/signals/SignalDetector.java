@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,7 +69,7 @@ public class SignalDetector extends AnalysisWorker {
 	protected NuclearSignalOptions options = null;
 	protected File folder;
 	protected int channel;
-	protected int signalGroup;
+	protected UUID signalGroup;
 	protected String channelName;
 		
 	/**
@@ -79,10 +80,11 @@ public class SignalDetector extends AnalysisWorker {
 	 * @param options the analysis options
 	 * @param group the signal group to add signals to
 	 */
-	public SignalDetector(AnalysisDataset d, File folder, int channel, NuclearSignalOptions options, int group, String channelName){
+
+	public SignalDetector(AnalysisDataset d, File folder, int channel, NuclearSignalOptions options, UUID group, String channelName){
 		super(d);
-		this.options	 = options;
 		
+		this.options	 = options;
 		this.folder		 = folder;
 		this.channel	 = channel;
 		this.signalGroup = group;

@@ -23,6 +23,7 @@ import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import components.Cell;
@@ -45,7 +46,7 @@ public class ChartOptions extends AbstractOptions {
 	private boolean showMarkers        = false;
 	private boolean hideProfiles       = false;
 	private ProfileType type           = ProfileType.REGULAR;
-	private int signalGroup            = 1;
+	private UUID signalGroup            = null;
 	private boolean useDensity         = false;
 	private double modalityPosition    = 0;
 	private boolean showPoints         = false;
@@ -182,11 +183,11 @@ public class ChartOptions extends AbstractOptions {
 		this.type = type;
 	}
 
-	public int getSignalGroup() {
+	public UUID getSignalGroup() {
 		return signalGroup;
 	}
 
-	public void setSignalGroup(int signalGroup) {
+	public void setSignalGroup(UUID signalGroup) {
 		this.signalGroup = signalGroup;
 	}
 
@@ -327,8 +328,8 @@ public class ChartOptions extends AbstractOptions {
 		result = prime * result + (invertXAxis ? 1231 : 1237);
 		result = prime * result + (invertYAxis ? 1231 : 1237);
 		
+		result = prime * result + ((signalGroup == null) ? 0 : signalGroup.hashCode());
 		
-		result = prime * result + signalGroup;
 		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
 		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
@@ -391,6 +392,10 @@ public class ChartOptions extends AbstractOptions {
 		if (invertYAxis != other.invertYAxis)
 			return false;
 		
+//		if(signalGroup != null){
+//			if( ! signalGroup.equals(other.signalGroup))
+//				return false;
+//		}
 		if (signalGroup != other.signalGroup)
 			return false;
 		if (swatch != other.swatch)

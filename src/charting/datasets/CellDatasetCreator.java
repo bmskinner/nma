@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
-
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
@@ -35,7 +34,6 @@ import logging.Loggable;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
@@ -141,13 +139,13 @@ public class CellDatasetCreator implements Loggable {
 			} 
 
 			// add info for signals
-			for(int signalGroup : n.getSignalGroups()){
+			for(UUID signalGroup : n.getSignalCollection().getSignalGroupIDs()){
 				
 				fieldNames.add("");
 				rowData.add("");
 				
 				fieldNames.add("Signal group");
-				rowData.add(signalGroup);
+				rowData.add(n.getSignalCollection().getSignalGroupNumber(signalGroup));
 				
 				fieldNames.add("Signal name");
 				rowData.add(n.getSignalCollection().getSignalGroupName(signalGroup));
@@ -159,9 +157,9 @@ public class CellDatasetCreator implements Loggable {
 				rowData.add(n.getSignalCollection().getSourceChannel(signalGroup));
 				
 				fieldNames.add("Number of signals");
-				rowData.add(n.getSignalCount(signalGroup));
+				rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
 				
-				for(NuclearSignal s : n.getSignals(signalGroup)){
+				for(NuclearSignal s : n.getSignalCollection().getSignals(signalGroup)){
 					
 					for(SignalStatistic stat : SignalStatistic.values()){
 						

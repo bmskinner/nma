@@ -580,19 +580,19 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * Check if the given signal group contains signals
 	 * @see no.nuclei.Nucleus#hasSignal(int)
 	 */
-	public boolean hasSignal(int signalGroup){
-		return signalCollection.hasSignal(signalGroup);
-	}
-	
-	public boolean hasSignal(){
-		boolean result = false;
-		for(int signalGroup : signalCollection.getSignalGroups()){
-			if(this.hasSignal(signalGroup)){
-				result = true;
-			}
-		}
-		return result;
-	}
+//	public boolean hasSignal(int signalGroup){
+//		return signalCollection.hasSignal(signalGroup);
+//	}
+//	
+//	public boolean hasSignal(){
+//		boolean result = false;
+//		for(int signalGroup : signalCollection.getSignalGroups()){
+//			if(this.hasSignal(signalGroup)){
+//				result = true;
+//			}
+//		}
+//		return result;
+//	}
 
 	/*
 		-----------------------
@@ -640,17 +640,17 @@ public class RoundNucleus extends AbstractCellularComponent
 		-----------------------
 	*/
 
-	public int getSignalCount(){
-		return this.signalCollection.numberOfSignals();
-	}
-	
-	public int getSignalCount(int channel){
-		if(signalCollection.hasSignal(channel)){
-			return this.signalCollection.numberOfSignals(channel);
-		} else {
-			return 0;
-		}
-	}
+//	public int getSignalCount(){
+//		return this.signalCollection.numberOfSignals();
+//	}
+//	
+//	public int getSignalCount(UUID signalGroup){
+//		if(signalCollection.hasSignal(signalGroup)){
+//			return this.signalCollection.numberOfSignals(signalGroup);
+//		} else {
+//			return 0;
+//		}
+//	}
 
 
 
@@ -681,23 +681,23 @@ public class RoundNucleus extends AbstractCellularComponent
 		-----------------------
 	*/
 	
-	public Set<Integer> getSignalGroups(){
-		return signalCollection.getSignalGroups();
-	}
-	
-	public List<List<NuclearSignal>> getSignals(){
-		return this.signalCollection.getSignals();
-	}
-		
-
-	public List<NuclearSignal> getSignals(int signalGroup){
-		List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
-		List<NuclearSignal> signals = this.signalCollection.getSignals(signalGroup);
-		for( NuclearSignal n : signals){
-			result.add(new NuclearSignal(n));
-		}
-		return result;
-	}
+//	public Set<UUID> getSignalGroups(){
+//		return signalCollection.getSignalGroups();
+//	}
+//	
+//	public List<List<NuclearSignal>> getSignals(){
+//		return this.signalCollection.getSignals();
+//	}
+//		
+//
+//	public List<NuclearSignal> getSignals(int signalGroup){
+//		List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
+//		List<NuclearSignal> signals = this.signalCollection.getSignals(signalGroup);
+//		for( NuclearSignal n : signals){
+//			result.add(new NuclearSignal(n));
+//		}
+//		return result;
+//	}
 	
 	public SignalCollection getSignalCollection(){
 		return this.signalCollection;
@@ -707,9 +707,9 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * @param n the signal
 	 * @param signalGroup the signal group to add to
 	 */
-	public void addSignal(NuclearSignal n, int signalGroup){
-		this.signalCollection.addSignal(n, signalGroup);
-	}
+//	public void addSignal(NuclearSignal n, UUID signalGroup){
+//		this.signalCollection.addSignal(n, signalGroup);
+//	}
 
 
 	 /*
@@ -811,7 +811,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 	}
 
-	public void updateSignalAngle(int channel, int signal, double angle){
+	public void updateSignalAngle(UUID channel, int signal, double angle){
 		signalCollection.getSignals(channel).get(signal).setStatistic(SignalStatistic.ANGLE, angle);
 	}
 
@@ -948,7 +948,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	// do not move this into SignalCollection - it is overridden in RodentSpermNucleus
 	public void calculateSignalAnglesFromPoint(BorderPoint p) throws Exception {
 
-		for( int signalGroup : signalCollection.getSignalGroups()){
+		for( UUID signalGroup : signalCollection.getSignalGroupIDs()){
 			
 			if(signalCollection.hasSignal(signalGroup)){
 				
@@ -965,9 +965,9 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 	}
 
-	public void exportSignalDistanceMatrix(){
-		signalCollection.exportDistanceMatrix(this.nucleusFolder);
-	}
+//	public void exportSignalDistanceMatrix(){
+//		signalCollection.exportDistanceMatrix(this.nucleusFolder);
+//	}
 
 	
 	 /*

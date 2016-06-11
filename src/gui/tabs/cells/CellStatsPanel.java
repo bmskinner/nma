@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import javax.swing.JColorChooser;
@@ -183,9 +184,10 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	private void changeSignalGroupColour(int row){
 		// the group number is in the next row down
 		String groupString = table.getModel().getValueAt(row+1, 1).toString();
-		int signalGroup = Integer.valueOf(groupString);
+		UUID signalGroup = UUID.fromString(groupString);
 		
-		Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
+		Color oldColour = activeDataset().getSignalGroupColour(signalGroup);
+//		Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
 		
 		Color newColor = JColorChooser.showDialog(
 				CellStatsPanel.this,
@@ -323,7 +325,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 					// we want to colour this cell preemptively
 					// get the signal group from the table
 					String groupString = table.getModel().getValueAt(row+1, 1).toString();
-					colour = activeDataset().getSignalGroupColour(Integer.valueOf(groupString));
+					UUID signalGroup = UUID.fromString(groupString);
+					colour = activeDataset().getSignalGroupColour(signalGroup);
 //					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
 				}
 			}

@@ -27,6 +27,7 @@ import io.ImageExporter;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.UUID;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -191,7 +192,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 
 		for(int series=0;series<ds.getRowCount();series++){
 			String name = (String) ds.getRowKey(series);
-			int seriesGroup = getIndexFromLabel(name);
+			UUID seriesGroup = getSignalGroupFromLabel(name);
 
 			Color color = options.firstDataset().getSignalGroupColour(seriesGroup) == null 
 					? ColourSelecter.getSegmentColor(series)

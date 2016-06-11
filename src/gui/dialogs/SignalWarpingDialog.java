@@ -30,6 +30,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -56,7 +58,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private FixedAspectRatioChartPanel chartPanel;
 	
 
-	private JComboBox<Integer> signalGroupSelectedBox;
+	private JComboBox<UUID> signalGroupSelectedBox;
 	private JLabel signalGroupNameLabel;
 	private JButton runButton;
 	
@@ -100,11 +102,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		JPanel panel = new JPanel(new FlowLayout());
 		
 		SignalManager m =  datasets.get(0).getCollection().getSignalManager();
-		Set<Integer> signalGroups = m.getSignalGroups();
+		Set<UUID> signalGroups = m.getSignalGroups();
 		
-		signalGroupSelectedBox = new JComboBox<Integer>(signalGroups.toArray( new Integer[0] ));
+		signalGroupSelectedBox = new JComboBox<UUID>(signalGroups.toArray( new UUID[0] ));
 		signalGroupSelectedBox.setSelectedIndex(0);
-		int signalGroup = (int) signalGroupSelectedBox.getSelectedItem();
+		UUID signalGroup = (UUID) signalGroupSelectedBox.getSelectedItem();
 
 		totalCells = m.getNumberOfCellsWithNuclearSignals(signalGroup);
 		
@@ -117,7 +119,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 		signalGroupSelectedBox.addActionListener( e ->{
 			
-			int group = (int) signalGroupSelectedBox.getSelectedItem();
+			UUID group = (UUID) signalGroupSelectedBox.getSelectedItem();
 			signalGroupNameLabel.setText(m.getSignalGroupName(group));
 			totalCells = m.getNumberOfCellsWithNuclearSignals(group);
 		});
@@ -153,7 +155,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	} 
 	
 	private void runWarping(){
-		int signalGroup = (int) signalGroupSelectedBox.getSelectedItem();
+		UUID signalGroup = (UUID) signalGroupSelectedBox.getSelectedItem();
 				
 		try {
 			setStatusLoading();

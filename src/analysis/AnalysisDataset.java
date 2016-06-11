@@ -72,10 +72,10 @@ public class AnalysisDataset implements Serializable {
 	
 	private AnalysisOptions analysisOptions;
 	
-	private Map<Integer, ShellResult> shellResults 		  = new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
-	private Map<Integer, String>      signalGroupsAdded	  = new HashMap<Integer, String>(0);	// store the names of the groups added
-	private Map<Integer, Boolean>     signalGroupsVisible = new HashMap<Integer, Boolean>(0); // is the given signal group shown in plots
-	private Map<Integer, Color> 	  signalGroupColours  = new HashMap<Integer, Color>(0); // allow saving of colour choices
+	private Map<UUID, ShellResult> shellResults 	   = new HashMap<UUID, ShellResult>(0); // store shell analysis for each channel
+	private Map<UUID, String>      signalGroupsAdded   = new HashMap<UUID, String>(0);	// store the names of the groups added
+	private Map<UUID, Boolean>     signalGroupsVisible = new HashMap<UUID, Boolean>(0); // is the given signal group shown in plots
+	private Map<UUID, Color> 	   signalGroupColours  = new HashMap<UUID, Color>(0); // allow saving of colour choices
 	
 	private Color datasetColour = null; // use for colouring the dataset in comparison with other datasets
 	
@@ -532,12 +532,12 @@ public class AnalysisDataset implements Serializable {
 		return this.thisCollection;
 	}
 
-	public void addShellResult(int channel, ShellResult result){
-		this.shellResults.put(channel, result);
+	public void addShellResult(UUID signalGroup, ShellResult result){
+		this.shellResults.put(signalGroup, result);
 	}
 
-	public ShellResult getShellResult(int channel){
-		return this.shellResults.get(channel);
+	public ShellResult getShellResult(UUID group){
+		return this.shellResults.get(group);
 	}
 
 	/**
@@ -545,7 +545,7 @@ public class AnalysisDataset implements Serializable {
 	 * 
 	 */
 	public boolean hasShellResult(){
-		for(Integer channel : thisCollection.getSignalManager().getSignalGroups()){
+		for(UUID channel : thisCollection.getSignalManager().getSignalGroups()){
 			if(this.shellResults.containsKey(channel)){
 				return true;
 			}
@@ -797,7 +797,7 @@ public class AnalysisDataset implements Serializable {
 	 * @param signalGroup the group
 	 * @param b visible or not
 	 */
-	public void setSignalGroupVisible(int signalGroup, boolean b){
+	public void setSignalGroupVisible(UUID signalGroup, boolean b){
 		this.signalGroupsVisible.put(signalGroup, b);
 	}
 	
@@ -806,7 +806,7 @@ public class AnalysisDataset implements Serializable {
 	 * @param signalGroup the group
 	 * @return
 	 */
-	public boolean isSignalGroupVisible(int signalGroup){
+	public boolean isSignalGroupVisible(UUID signalGroup){
 		if(this.signalGroupsVisible.containsKey(signalGroup)){
 			return this.signalGroupsVisible.get(signalGroup);
 		} else {
@@ -820,12 +820,13 @@ public class AnalysisDataset implements Serializable {
 	 * @param signalGroup the group
 	 * @return a colour
 	 */
-	public Color getSignalGroupColour(int signalGroup){
+	public Color getSignalGroupColour(UUID signalGroup){
 		if(this.signalGroupColours.containsKey(signalGroup)){
 			return this.signalGroupColours.get(signalGroup);
 		} else {
 //			The default is the colour selection model for the entire program
-			return ColourSelecter.getSignalColour(  signalGroup-1); 
+			return Color.RED;
+//			return ColourSelecter.getSignalColour(  signalGroup-1); 
 		}
 	}
 	
@@ -834,7 +835,7 @@ public class AnalysisDataset implements Serializable {
 	 * @param signalGroup the group
 	 * @param colour the colour
 	 */
-	public void setSignalGroupColour(int signalGroup, Color colour){
+	public void setSignalGroupColour(UUID signalGroup, Color colour){
 		this.signalGroupColours.put(signalGroup, colour);
 	}
 	
@@ -844,7 +845,7 @@ public class AnalysisDataset implements Serializable {
 	 * @param signalGroup the group the fetch
 	 * @return
 	 */
-	public String getSignalGroupName(int signalGroup){
+	public String getSignalGroupName(UUID signalGroup){
 		return this.signalGroupsAdded.get(signalGroup);
 	}
 	
@@ -853,7 +854,7 @@ public class AnalysisDataset implements Serializable {
 	 * @param signalGroup
 	 * @param name
 	 */
-	public void setSignalGroupName(int signalGroup, String name){
+	public void setSignalGroupName(UUID signalGroup, String name){
 		this.signalGroupsAdded.put(signalGroup, name);
 	}
 	
@@ -862,13 +863,13 @@ public class AnalysisDataset implements Serializable {
 	   * are present
 	 * @return the highest signal group
 	 */
-	  public int getHighestSignalGroup(){
-		  int maxGroup = 0;
-		  for(Integer n : signalGroupsAdded.keySet()){
-			  maxGroup = n > maxGroup ? n : maxGroup; 
-		  }
-		  return maxGroup;
-	  }
+//	  public int getHighestSignalGroup(){
+//		  int maxGroup = 0;
+//		  for(UUID n : signalGroupsAdded.keySet()){
+//			  maxGroup = n > maxGroup ? n : maxGroup; 
+//		  }
+//		  return maxGroup;
+//	  }
 	
 	/**
 	 * Set the dataset colour (used in comparisons between datasets)
