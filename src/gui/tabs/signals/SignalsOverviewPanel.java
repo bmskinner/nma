@@ -41,6 +41,14 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+//<<<<<<< HEAD
+//=======
+import analysis.AnalysisDataset;
+//import analysis.SignalManager;
+import charting.charts.ConsensusNucleusChartFactory;
+import charting.charts.MorphologyChartFactory;
+import charting.charts.NuclearSignalChartFactory;
+//>>>>>>> 80f8c2ce5ece277dacebd32467e86ec1a826439f
 import charting.charts.OutlineChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.SignalTableCell;
@@ -289,8 +297,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	 */
 	private void updateSignalStatsPanel() throws Exception{
 		
-//		TableModel model = NuclearSignalDatasetCreator.createSignalStatsTable(null);
-		
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.SIGNAL_STATS_TABLE)
@@ -325,6 +331,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			consensusAndCheckboxPanel.revalidate();
 			consensusAndCheckboxPanel.repaint();
 			consensusAndCheckboxPanel.setVisible(true);
+//<<<<<<< HEAD
 			
 			if(activeDataset().getCollection().hasConsensusNucleus()
 					&& activeDataset().getCollection().getSignalManager().hasSignals()){
@@ -332,12 +339,19 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			}
 			
 			
+//=======
+//		} else {
+//			consensusAndCheckboxPanel.remove(checkboxPanel);
+//			consensusAndCheckboxPanel.revalidate();
+//			consensusAndCheckboxPanel.repaint();
+//>>>>>>> 80f8c2ce5ece277dacebd32467e86ec1a826439f
 		}
 	}
 	
 	
 	private void updateSignalConsensusChart(){
 		try {
+//<<<<<<< HEAD
 			
 			
 			// The options do not hold which signal groups are visible
@@ -351,7 +365,20 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			
 			JFreeChart chart = getChart(options);
 						
+//=======
+//			JFreeChart chart;
+//			
+//			ChartOptions options = new ChartOptionsBuilder()
+//				.setDatasets(getDatasets())
+//				.setLogger(programLogger)
+//				.build();
+//
+//
+//			chart = getChart(options);
+//>>>>>>> 80f8c2ce5ece277dacebd32467e86ec1a826439f
 			chartPanel.setChart(chart);
+			
+			
 			chartPanel.restoreAutoBounds();
 		} catch(Exception e){
 			warn("Error updating signal overview panel");
@@ -387,7 +414,12 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 							SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row+1, column);
 
 							colour = activeDataset().getSignalGroupColour(cell.getID());
+							
+							// TODO:  this may be wrong, check position of line later
+							// The 0th column is labels, so subtract 1 to column index to map to dataset list
+							colour = getDatasets().get(column-1).getSignalGroupColour(cell.getID());
 						}
+
 
 					}
 				}

@@ -71,6 +71,7 @@ import charting.options.ChartOptionsBuilder;
 
 public class OutlineChartFactory extends AbstractChartFactory {
 	
+//<<<<<<< HEAD
 	protected static final ForkJoinPool mainPool = new ForkJoinPool();
 	
 	private static OutlineChartFactory instance = null;
@@ -268,6 +269,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		}
 		return chart;
 	}
+//=======
+//>>>>>>> 80f8c2ce5ece277dacebd32467e86ec1a826439f
 	
 	public JFreeChart makeCellOutlineChart(ChartOptions options){
 		
