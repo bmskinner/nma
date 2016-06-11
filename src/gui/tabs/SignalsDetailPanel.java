@@ -21,6 +21,7 @@ package gui.tabs;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
+import gui.tabs.signals.SignalScatterChartPanel;
 import gui.tabs.signals.SignalShellsPanel;
 import gui.tabs.signals.SignalsAnalysisPanel;
 import gui.tabs.signals.SignalsBoxplotPanel;
@@ -39,15 +40,15 @@ import org.jfree.chart.JFreeChart;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 
+@SuppressWarnings("serial")
 public class SignalsDetailPanel extends DetailPanel implements ActionListener, SignalChangeListener {
-
-	private static final long serialVersionUID = 1L;
 		
 	private SignalsOverviewPanel	overviewPanel; 	//container for chart and stats table
 	private SignalsHistogramPanel 	histogramPanel;
 	private SignalsAnalysisPanel	analysisPanel;
 	private SignalsBoxplotPanel	    boxplotPanel;
 	private SignalShellsPanel		shellsPanel;
+	private SignalScatterChartPanel signalScatterChartPanel;
 
 	private JTabbedPane signalsTabPane;
 
@@ -67,18 +68,21 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			histogramPanel = new SignalsHistogramPanel();
 			shellsPanel    = new SignalShellsPanel();
 			analysisPanel  = new SignalsAnalysisPanel();
+			signalScatterChartPanel = new SignalScatterChartPanel();
 			
 			signalsTabPane.addTab("Overview", overviewPanel);
 			signalsTabPane.addTab("Boxplots", boxplotPanel);
 			signalsTabPane.addTab("Histograms", histogramPanel);
 			signalsTabPane.addTab("Shells", shellsPanel);
 			signalsTabPane.addTab("Detection settings", analysisPanel);
+			signalsTabPane.addTab("Scatter", signalScatterChartPanel);
 
 			this.addSubPanel(overviewPanel);
 			this.addSubPanel(boxplotPanel);
 			this.addSubPanel(histogramPanel);
 			this.addSubPanel(shellsPanel);
 			this.addSubPanel(analysisPanel);
+			this.addSubPanel(signalScatterChartPanel);
 			
 			this.add(signalsTabPane, BorderLayout.CENTER);
 			
@@ -114,6 +118,9 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 		
 		boxplotPanel.update(getDatasets());
 		finest("Updated signals boxplot panel");
+		
+		signalScatterChartPanel.update(getDatasets());
+		finest("Updated signals scatter panel");
 	}
 	
 	/**
@@ -143,6 +150,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			histogramPanel.update(getDatasets());
 			boxplotPanel.update(getDatasets());
 			shellsPanel.update(getDatasets());
+			
 		}
 		
 	}

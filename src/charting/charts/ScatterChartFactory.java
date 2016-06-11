@@ -1,6 +1,7 @@
 package charting.charts;
 
 import java.awt.Color;
+import java.util.UUID;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -8,6 +9,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.data.xy.XYDataset;
 
+import analysis.AnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.ScatterChartDatasetCreator;
 import charting.options.ChartOptions;
@@ -15,6 +17,7 @@ import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
+import stats.SignalStatistic;
 
 public class ScatterChartFactory extends AbstractChartFactory {
 	
@@ -72,6 +75,10 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			return createNucleusStatisticScatterChart(options);
 		}
 		
+		if(firstStat.getClass().equals(SignalStatistic.class)){
+			return createSignalStatisticScatterChart(options);
+		}
+		
 		return createEmptyScatterChart();
 	}
 	
@@ -113,6 +120,57 @@ public class ScatterChartFactory extends AbstractChartFactory {
 				colour = options.getDatasets().get(i).getDatasetColour();
 			}
 								
+			renderer.setSeriesPaint(i, colour);
+			 
+		}	
+		return chart;
+	}
+	
+	/**
+	 * Create a scatter plot of two nucleus statistics
+	 * @param options
+	 * @return
+	 */
+	private JFreeChart createSignalStatisticScatterChart(ChartOptions options){
+				
+		XYDataset ds = ScatterChartDatasetCreator.getInstance().createSignalScatterDataset(options);
+		
+		String xLabel = options.getStat(0).label(options.getScale());
+		String yLabel = options.getStat(1).label(options.getScale());
+		
+		JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel,
+				yLabel,  ds);  
+		
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		
+		DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
+		renderer.setBaseShapesVisible(true);
+		renderer.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
+		plot.setRenderer(renderer);
+		
+		int seriesCount = plot.getDataset().getSeriesCount();
+		
+		for (int i = 0; i < seriesCount; i++) {
+			
+			renderer.setSeriesVisibleInLegend(i, false);
+			renderer.setSeriesLinesVisible(i, false);
+			renderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
+			
+			String seriesName = ds.getSeriesKey(i).toString();
+			String[] split = seriesName.split("\\|");
+			String datasetName = split[0];
+			UUID id = UUID.fromString(split[1]);
+			
+			Color colour = ColourSelecter.getSegmentColor(i);
+			
+			for(AnalysisDataset d : options.getDatasets()){
+				if(d.getName().equals(datasetName)){
+					colour = d.getCollection().getSignalGroup(id).hasColour()
+							? d.getCollection().getSignalGroup(id).getGroupColour()
+							: colour;
+				}
+			}				
 			renderer.setSeriesPaint(i, colour);
 			 
 		}	

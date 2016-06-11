@@ -257,12 +257,14 @@ public abstract class DetailPanel
 					log(Level.SEVERE, "Error updating panel: "+ this.getClass().getName());
 					log(Level.FINE, "Error updating panel: "+ this.getClass().getName(), e); // save detail for fine logging
 					setUpdating(false);
-					update( (List<AnalysisDataset>) null); // don't use updateNull because it throws an exception
+					try {
+						updateNull();
+					} catch(Exception e1){
+						warn("Error recovering from error updating panel: "+ this.getClass().getName());
+					}
 				} finally {
 					setUpdating(false);
 				}
-//			}
-//		});
 	}
 			
 	/**
