@@ -26,21 +26,31 @@ import charting.options.ChartOptionsBuilder;
 
 public class NuclearSignalChartFactory  extends AbstractChartFactory {
 	
+	private static NuclearSignalChartFactory instance = null;
 	
-	private static JFreeChart createEmptyShellChart(){
+	private NuclearSignalChartFactory(){}
+	
+	public static NuclearSignalChartFactory getInstance(){
+		if(instance==null){
+			instance = new NuclearSignalChartFactory();
+		}
+		return instance;
+	}
+	
+	private JFreeChart createEmptyShellChart(){
 		JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
 		shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
 		shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
 		return shellsChart;
 	}
 	
-	public static JFreeChart createShellChart(ChartOptions options){
+	public JFreeChart createShellChart(ChartOptions options){
 		
 		if( ! options.hasDatasets()){
 			return createEmptyShellChart();
 		}
 		
-		CategoryDataset ds = NuclearSignalDatasetCreator.createShellBarChartDataset(options.getDatasets());
+		CategoryDataset ds = NuclearSignalDatasetCreator.getInstance().createShellBarChartDataset(options.getDatasets());
 		JFreeChart chart = ChartFactory.createBarChart(null, "Outer <--- Shell ---> Interior", "Percent", ds);
 		chart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
 		chart.getCategoryPlot().getRangeAxis().setRange(0,100);
@@ -75,24 +85,27 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart makeSignalCoMNucleusOutlineChart(ChartOptions options) throws Exception{
+	public JFreeChart makeSignalCoMNucleusOutlineChart(ChartOptions options) throws Exception{
 		
 		if( ! options.hasDatasets()){
+			finer("No datasets for signal outline chart");
 			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 		}
 		
 		// Do not allow multi datasets here
-		if( ! options.isMultipleDatasets()){
+		if( options.isMultipleDatasets()){
+			finer("Multiple datasets for signal outline chart");
 			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 		}
 		
 		// Check for consensus nucleus
 		if( ! options.firstDataset().getCollection().hasConsensusNucleus()){
+			finer("No consensus for signal outline chart");
 			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 		}
 		
 		
-		XYDataset signalCoMs = NuclearSignalDatasetCreator.createSignalCoMDataset(options.firstDataset());
+		XYDataset signalCoMs = NuclearSignalDatasetCreator.getInstance().createSignalCoMDataset(options.firstDataset());
 		
 		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(options.firstDataset());
 
@@ -123,7 +136,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 
 			int j=0;
 			for(UUID signalGroup : options.firstDataset().getCollection().getSignalManager().getSignalGroups()){
-				List<Shape> shapes = NuclearSignalDatasetCreator.createSignalRadiusDataset(options.firstDataset(), signalGroup);
+				List<Shape> shapes = NuclearSignalDatasetCreator.getInstance().createSignalRadiusDataset(options.firstDataset(), signalGroup);
 
 				int signalCount = shapes.size();
 

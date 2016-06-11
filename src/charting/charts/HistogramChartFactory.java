@@ -181,7 +181,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
 		HistogramDataset ds = options.hasDatasets() 
-							? NuclearSignalDatasetCreator.createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
+							? NuclearSignalDatasetCreator.getInstance().createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
 							: null;
 				
 		JFreeChart chart = createHistogram(ds, stat.label(options.getScale()), "Count");
@@ -211,7 +211,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		if (options.hasDatasets()){
 			
 			SignalStatistic stat = (SignalStatistic) options.getStat();
-			ds = NuclearSignalDatasetCreator.createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale());
+			ds = NuclearSignalDatasetCreator.getInstance().createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale());
 		}
 
 		String xLabel = options.getStat().label(options.getScale());

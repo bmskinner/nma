@@ -158,6 +158,8 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 		if(event.type().startsWith("GroupVisble_")){
 			overviewPanel.update(getDatasets());
 			histogramPanel.update(getDatasets());
+			boxplotPanel.update(getDatasets());
+			shellsPanel.update(getDatasets());
 		}
 	}
 

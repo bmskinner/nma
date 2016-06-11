@@ -60,19 +60,11 @@ public abstract class AbstractOptions implements Loggable {
 	 * @return
 	 */
 	public boolean isSingleDataset(){
-		if(list.size()==1){
-			return true;
-		} else {
-			return false;
-		}
+		return(list.size()==1);
 	}
 	
 	public boolean isMultipleDatasets(){
-		if(list.size()>1){
-			return true;
-		} else {
-			return false;
-		}
+		return(list.size()>1);
 	}
 	
 	/**

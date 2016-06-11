@@ -247,7 +247,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return NuclearSignalDatasetCreator.createSignalDetectionParametersTable(options);
+		return NuclearSignalDatasetCreator.getInstance().createSignalDetectionParametersTable(options);
 	}
 
 }

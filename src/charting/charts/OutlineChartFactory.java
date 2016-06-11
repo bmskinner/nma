@@ -71,7 +71,6 @@ import charting.options.ChartOptionsBuilder;
 
 public class OutlineChartFactory extends AbstractChartFactory {
 	
-//<<<<<<< HEAD
 	protected static final ForkJoinPool mainPool = new ForkJoinPool();
 	
 	private static OutlineChartFactory instance = null;
@@ -95,23 +94,26 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		try{
 			
 			if( ! options.hasDatasets()){
+				finer("No datasets for signal outline chart");
 				return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 			}
 			
 			if(options.isMultipleDatasets()){
+				finer("Multiple datasets for signal outline chart");
 				return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 			}
 			
 			if( ! options.firstDataset().getCollection().hasConsensusNucleus()){
+				finer("No consensus for signal outline chart");
 				return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 			}
 			
 			if(options.isShowWarp()){
-				
+				finer("Warp chart for signal outline chart");
 				return makeSignalWarpChart(options);
 			} else {
-				
-				return NuclearSignalChartFactory.makeSignalCoMNucleusOutlineChart(options);
+				finer("Signal CoM for signal outline chart");
+				return NuclearSignalChartFactory.getInstance().makeSignalCoMNucleusOutlineChart(options);
 			}
 		} catch(Exception e){
 			warn("Error making signal chart");

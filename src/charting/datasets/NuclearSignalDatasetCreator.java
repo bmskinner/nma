@@ -40,6 +40,7 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import stats.SignalStatistic;
@@ -59,6 +60,17 @@ import components.nuclei.Nucleus;
 import gui.components.ColourSelecter;
 
 public class NuclearSignalDatasetCreator implements Loggable {
+	
+	private static NuclearSignalDatasetCreator instance = null;
+
+	private NuclearSignalDatasetCreator(){}
+
+	public static NuclearSignalDatasetCreator getInstance(){
+		if(instance==null){
+			instance = new NuclearSignalDatasetCreator();
+		}
+		return instance;
+	}
 
 	/**
 	 * Create a table of signal stats for the given list of datasets. This table
@@ -66,7 +78,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @param list the AnalysisDatasets to include
 	 * @return a table model
 	 */
-	public static TableModel createSignalDetectionParametersTable(TableOptions options){
+	public TableModel createSignalDetectionParametersTable(TableOptions options){
 
 		List<AnalysisDataset> list = options.getDatasets();
 		DefaultTableModel model = new DefaultTableModel();
@@ -78,53 +90,52 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 		if(list==null){
 			model.addColumn("No data loaded");
+			return model;
+		}
 			
-		} else {
-			
-			int maxChannels = 0;
-			for(AnalysisDataset dataset : list){
-				CellCollection collection = dataset.getCollection();
-				maxChannels = Math.max(collection.getSignalManager().getSignalGroups().size(), maxChannels);
+		int maxChannels = 0;
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+			maxChannels = Math.max(collection.getSignalManager().getSignalGroups().size(), maxChannels);
+		}
+		if(maxChannels>0){
+
+			// create the row names
+			fieldNames.add("Number of signal groups");
+
+			for(int i=0;i<maxChannels;i++){
+				fieldNames.add("");
+				fieldNames.add("Group name");
+				fieldNames.add("Channel");
+				fieldNames.add("Source");
+				fieldNames.add("Threshold");
+				fieldNames.add("Min size");
+				fieldNames.add("Max fraction");
+				fieldNames.add("Min circ");
+				fieldNames.add("Max circ");
+				fieldNames.add("Detection mode");
 			}
-			if(maxChannels>0){
-			
-				// create the row names
-				fieldNames.add("Number of signal groups");
-				
-				for(int i=0;i<maxChannels;i++){
-					fieldNames.add("");
-					fieldNames.add("Signal group");
-					fieldNames.add("Group name");
-					fieldNames.add("Channel");
-					fieldNames.add("Source");
-					fieldNames.add("Threshold");
-					fieldNames.add("Min size");
-					fieldNames.add("Max fraction");
-					fieldNames.add("Min circ");
-					fieldNames.add("Max circ");
-					fieldNames.add("Signal detection");
-				}
-				
-				int numberOfRowsPerSignalGroup = fieldNames.size()/ (maxChannels+1);
-				model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
-				
-					
-					
-				// make a new column for each collection
-				for(AnalysisDataset dataset : list){
-					
-                    List<Object> rowData = makeDetectionSettingsRowDataForDataset(dataset, maxChannels, numberOfRowsPerSignalGroup);
-                    model.addColumn(dataset.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
-                }
-            } else {
-                model.addColumn("No data loaded");
-            }
-        }
+
+			int numberOfRowsPerSignalGroup = fieldNames.size()/ (maxChannels+1);
+			model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
+
+
+
+			// make a new column for each collection
+			for(AnalysisDataset dataset : list){
+
+				List<Object> rowData = makeDetectionSettingsRowDataForDataset(dataset, maxChannels, numberOfRowsPerSignalGroup);
+				model.addColumn(dataset.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
+			}
+		} else {
+			model.addColumn("No data loaded");
+		}
+        
         return model;    
     }
 
 
-    private static List<Object> makeDetectionSettingsRowDataForDataset(AnalysisDataset dataset, int signalGroupCount, int rowsPerSignalGroup){
+    private List<Object> makeDetectionSettingsRowDataForDataset(AnalysisDataset dataset, int signalGroupCount, int rowsPerSignalGroup){
         
         // format the numbers and make into a tablemodel
         DecimalFormat df = new DecimalFormat("#0.00"); 
@@ -229,7 +240,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a histogram of angles
 	 * @throws Exception 
 	 */
-	public static HistogramDataset createSignaStatisticHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception{
+	public HistogramDataset createSignaStatisticHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception{
 		HistogramDataset ds = new HistogramDataset();
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
@@ -259,7 +270,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a charting dataset
 	 * @throws Exception
 	 */
-	public static DefaultXYDataset createSignalDensityHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception {
+	public DefaultXYDataset createSignalDensityHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		int[] minMaxRange = calculateMinAndMaxRange(list, stat, scale);
@@ -323,7 +334,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return an array with the min and max of the range
 	 * @throws Exception
 	 */
-	private static int[] calculateMinAndMaxRange(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception {
+	private int[] calculateMinAndMaxRange(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception {
 		
 		int[] result = new int[2];
 		result[0] = Integer.MAX_VALUE; // holds min
@@ -350,7 +361,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return the array of values
 	 * @throws Exception
 	 */
-	public static double[] findSignalDatasetValues(AnalysisDataset dataset, SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception {
+	public double[] findSignalDatasetValues(AnalysisDataset dataset, SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception {
 		
 		CellCollection collection = dataset.getCollection();			
         double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);             			
@@ -366,7 +377,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return the point of the signal centre of mass
 	 * @throws Exception 
 	 */
-	public static XYPoint getXYCoordinatesForSignal(NuclearSignal n, Nucleus outline) throws Exception{
+	public XYPoint getXYCoordinatesForSignal(NuclearSignal n, Nucleus outline) throws Exception{
 
 		double angle = n.getStatistic(SignalStatistic.ANGLE);
 
@@ -390,16 +401,19 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static XYDataset createSignalCoMDataset(AnalysisDataset dataset) throws Exception{
+	public XYDataset createSignalCoMDataset(AnalysisDataset dataset) throws Exception{
+		finer("Making signal CoM dataset");
 		DefaultXYDataset ds = new DefaultXYDataset();
 		CellCollection collection = dataset.getCollection();
 
 		if(collection.getSignalManager().hasSignals()){
+			finer("Collection "+collection.getName()+" has signals");
 
 			for(UUID group : collection.getSignalManager().getSignalGroups()){
 
+				finest("Signal group "+group.toString());
                 if(dataset.getCollection().getSignalGroup(group).isVisible()){
-
+                	finest("Group "+group.toString()+" is visible");
 					double[] xpoints = new double[collection.getSignalManager().getSignals(group).size()];
 					double[] ypoints = new double[collection.getSignalManager().getSignals(group).size()];
 
@@ -415,13 +429,15 @@ public class NuclearSignalDatasetCreator implements Loggable {
 					}
 					double[][] data = { xpoints, ypoints };
 					ds.addSeries("Group_"+group, data);
+					finest("Group "+group.toString()+" added "+signalCount+" signals");
 				}
 			}
 		}
+		finer("Finished signal CoM dataset");
 		return ds;
 	}
 	
-	public static List<Shape> createSignalRadiusDataset(AnalysisDataset dataset, UUID signalGroup) throws Exception{
+	public List<Shape> createSignalRadiusDataset(AnalysisDataset dataset, UUID signalGroup) throws Exception{
 
 		CellCollection collection = dataset.getCollection();
 		List<Shape> result = new ArrayList<Shape>(0);
@@ -451,7 +467,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public static TableModel createSignalStatsTable(TableOptions options) throws Exception{
+	public TableModel createSignalStatsTable(TableOptions options) throws Exception{
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -473,7 +489,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		return model;
 	}
 	
-	private static TableModel createSingleDatasetSignalStatsTable(TableOptions options) throws Exception {
+	private TableModel createSingleDatasetSignalStatsTable(TableOptions options) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -570,7 +586,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		return model;	
 	}
 	
-	private static TableModel createMultiDatasetSignalStatsTable(TableOptions options) throws Exception {
+	private TableModel createMultiDatasetSignalStatsTable(TableOptions options) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -679,7 +695,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
      * @return a boxplot dataset
      * @throws Exception 
      */
-    public static BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) throws Exception{
+    public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) throws Exception{
         
         if(options.isSingleDataset()){
             return createSingleDatasetSignalStatisticBoxplotDataset(options);
@@ -698,7 +714,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a boxplot dataset
 	 * @throws Exception 
 	 */
-    private static BoxAndWhiskerCategoryDataset createSingleDatasetSignalStatisticBoxplotDataset(ChartOptions options) throws Exception {
+    private BoxAndWhiskerCategoryDataset createSingleDatasetSignalStatisticBoxplotDataset(ChartOptions options) throws Exception {
 
 
 		OutlierFreeBoxAndWhiskerCategoryDataset result = new OutlierFreeBoxAndWhiskerCategoryDataset();
@@ -727,7 +743,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		return result;
 	}
 		
-	public static CategoryDataset createShellBarChartDataset(List<AnalysisDataset> list){
+	public CategoryDataset createShellBarChartDataset(List<AnalysisDataset> list){
 		DefaultStatisticalCategoryDataset ds = new DefaultStatisticalCategoryDataset();
 		for(AnalysisDataset dataset : list){
 			

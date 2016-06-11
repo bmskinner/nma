@@ -295,9 +295,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	
 	private void updateSignalConsensusChart(){
 		try {
-//<<<<<<< HEAD
-			
-			
+
 			// The options do not hold which signal groups are visible
 			// so we must invalidate the cache whenever they change
 			this.clearChartCache(getDatasets());
@@ -366,6 +364,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return NuclearSignalDatasetCreator.createSignalStatsTable(options);
+		return NuclearSignalDatasetCreator.getInstance().createSignalStatsTable(options);
 	}
 }

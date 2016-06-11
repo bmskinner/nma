@@ -189,7 +189,7 @@ public class SignalShellsPanel extends DetailPanel {
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return NuclearSignalChartFactory.createShellChart(options);
+		return NuclearSignalChartFactory.getInstance().createShellChart(options);
 	}
 	
 	@Override
