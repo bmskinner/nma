@@ -504,7 +504,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			maxSignalGroup = Math.max(collection.getSignalManager().getSignalGroups().size(), maxSignalGroup);
 		}
 		
-		options.log(Level.FINEST, "Selected collections have "+maxSignalGroup+" signal groups");
+		finest("Selected collections have "+maxSignalGroup+" signal groups");
 
 		/*
 		 * Create the row names for the table
@@ -602,7 +602,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		}
 			
 
-			options.log(Level.FINEST, "Selected collections have "+maxSignalGroup+" signal groups");
+			finest("Selected collections have "+maxSignalGroup+" signal groups");
 
 			if(maxSignalGroup>0){
 				// create the row names
@@ -638,7 +638,14 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	
 					for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){// : collection.getSignalGroups()){
 //						if(collection.getSignalManager().hasSignals(signalGroup)){
-						SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
+						SignalTableCell cell = new SignalTableCell(signalGroup, 
+								collection.getSignalManager().getSignalGroupName(signalGroup));
+						
+						Color colour = collection.getSignalGroup(signalGroup).hasColour()
+	                            ? collection.getSignalGroup(signalGroup).getGroupColour()
+	                            : Color.WHITE;
+	                    
+	                    cell.setColor(colour);
 						
 							rowData.add("");
 							rowData.add(cell);
