@@ -74,18 +74,18 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 		
 		// Do not allow multi datasets here
 		if( ! options.isMultipleDatasets()){
-			return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 		}
 		
 		// Check for consensus nucleus
 		if( ! options.firstDataset().getCollection().hasConsensusNucleus()){
-			return ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 		}
 		
 		
 		XYDataset signalCoMs = NuclearSignalDatasetCreator.createSignalCoMDataset(options.firstDataset());
 		
-		JFreeChart chart = ConsensusNucleusChartFactory.makeNucleusOutlineChart(options.firstDataset());
+		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(options.firstDataset());
 
 		XYPlot plot = chart.getXYPlot();
 		
