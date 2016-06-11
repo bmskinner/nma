@@ -55,7 +55,12 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 			rend.setSeriesVisibleInLegend(j, Boolean.FALSE);
 			rend.setSeriesStroke(j, new BasicStroke(2));
 			UUID signalGroup = getSignalGroupFromLabel( (String) ds.getRowKey((j)));
-			Color colour = options.firstDataset().getSignalGroupColour(signalGroup);
+            
+            Color colour = options.firstDataset().getCollection().getSignalGroup(signalGroup).hasColour()
+                    ? options.firstDataset().getCollection().getSignalGroup(signalGroup).getGroupColour()
+                    : ColourSelecter.getSegmentColor(j);
+            
+
 			rend.setSeriesPaint(j, colour);
 		}	
 
@@ -71,6 +76,10 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 	 * @throws Exception 
 	 */
 	public static JFreeChart makeSignalCoMNucleusOutlineChart(ChartOptions options) throws Exception{
+		
+		if( ! options.hasDatasets()){
+			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+		}
 		
 		// Do not allow multi datasets here
 		if( ! options.isMultipleDatasets()){
@@ -101,7 +110,10 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 				String name = (String) signalCoMs.getSeriesKey(series);
 //				int seriesGroup = getIndexFromLabel(name);
 				UUID seriesGroup = getSignalGroupFromLabel(name);
-				Color colour = options.firstDataset().getSignalGroupColour(seriesGroup);
+                Color colour = options.firstDataset().getCollection().getSignalGroup(seriesGroup).hasColour()
+                        ? options.firstDataset().getCollection().getSignalGroup(seriesGroup).getGroupColour()
+                        : ColourSelecter.getSegmentColor(series);
+
 				rend.setSeriesPaint(series, colour);
 				rend.setBaseLinesVisible(false);
 				rend.setBaseShapesVisible(true);
@@ -109,6 +121,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 			}
 			plot.setRenderer(1, rend);
 
+			int j=0;
 			for(UUID signalGroup : options.firstDataset().getCollection().getSignalManager().getSignalGroups()){
 				List<Shape> shapes = NuclearSignalDatasetCreator.createSignalRadiusDataset(options.firstDataset(), signalGroup);
 
@@ -117,7 +130,10 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 				int alpha = (int) Math.floor( 255 / ((double) signalCount) )+20;
 				alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
 
-				Color colour = options.firstDataset().getSignalGroupColour(signalGroup);
+                Color colour = options.firstDataset().getCollection().getSignalGroup(signalGroup).hasColour()
+                        ? options.firstDataset().getCollection().getSignalGroup(signalGroup).getGroupColour()
+                        : ColourSelecter.getSegmentColor(j++);
+
 
 				for(Shape s : shapes){
 					XYShapeAnnotation an = new XYShapeAnnotation( s, null,

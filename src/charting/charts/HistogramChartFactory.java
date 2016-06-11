@@ -240,13 +240,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 				for(AnalysisDataset dataset : options.getDatasets()){
 
 					if(seriesName.equals(dataset.getName())){
-						
-						colour = dataset.getSignalGroupColour( options.getSignalGroup());
-
-//						colour = dataset.hasDatasetColour()
-//								? dataset.getDatasetColour()
-//								: colour;
-
+                        colour = dataset.getCollection().getSignalGroup(options.getSignalGroup()).getGroupColour();
 
 						plot.getRenderer().setSeriesPaint(j, colour);
 
@@ -271,7 +265,11 @@ public class HistogramChartFactory extends AbstractChartFactory {
 				UUID signalGroup = getSignalGroupFromLabel(name);
 				plot.getRenderer().setSeriesVisibleInLegend(j, false);
 				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
-				Color colour = dataset.getSignalGroupColour(signalGroup);
+                Color colour = dataset.getCollection().getSignalGroup(signalGroup).hasColour()
+                        ? dataset.getCollection().getSignalGroup(signalGroup).getGroupColour()
+                        : ColourSelecter.getSegmentColor(j);
+
+
 				plot.getRenderer().setSeriesPaint(j, colour);
 			}	
 		}

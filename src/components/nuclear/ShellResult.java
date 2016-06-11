@@ -20,6 +20,7 @@ package components.nuclear;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import logging.Loggable;
@@ -43,6 +44,26 @@ public class ShellResult implements Serializable, Loggable {
 		this.chisquare = chi;
 		this.pvalue = pvalue;
 	}
+	
+    public ShellResult(ShellResult s){
+        if(s==null){
+            throw new IllegalArgumentException("Template shell result is null");
+        }
+        this.means = new ArrayList<Double>();
+        for(Double d : s.means){
+            means.add(d.doubleValue());
+        }
+        
+        this.stderrs = new ArrayList<Double>();
+        for(Double d : s.stderrs){
+            stderrs.add(d.doubleValue());
+        }
+        
+        this.chisquare = s.chisquare;
+        this.pvalue    = s.pvalue;
+    }
+    
+
 	
 	public List<Double> getMeans(){
 		return this.means;

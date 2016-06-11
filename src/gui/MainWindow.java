@@ -875,6 +875,8 @@ public class MainWindow
 					list.add(dataset);
 					segmentsDetailPanel.refreshChartCache(list); // segment positions charts need updating
 					nuclearBoxplotsPanel.refreshChartCache(list); // overlaid nuclei need updating
+                    signalsDetailPanel.refreshChartCache(list); // signal consensus needs updating
+
 
 					fine("Preparing to select refolded dataset");
 					populationsPanel.selectDataset(dataset);

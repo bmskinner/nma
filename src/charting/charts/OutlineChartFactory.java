@@ -111,7 +111,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				return makeSignalWarpChart(options);
 			} else {
 				
-				return makeSignalCoMNucleusOutlineChart(options.firstDataset());
+				return NuclearSignalChartFactory.makeSignalCoMNucleusOutlineChart(options);
 			}
 		} catch(Exception e){
 			warn("Error making signal chart");
@@ -213,65 +213,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				
 		return chart;	
 	}
-	
-	/**
-	 * Create a nucleus outline chart with nuclear signals drawn as transparent
-	 * circles
-	 * @param dataset the AnalysisDataset to use to draw the consensus nucleus
-	 * @param signalCoMs the dataset with the signal centre of masses
-	 * @return
-	 * @throws Exception 
-	 */
-	private JFreeChart makeSignalCoMNucleusOutlineChart(AnalysisDataset dataset) throws Exception{
 		
-		XYDataset signalCoMs = NuclearSignalDatasetCreator.createSignalCoMDataset(dataset);
-		
-		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(dataset);
-
-		XYPlot plot = chart.getXYPlot();
-		
-		if(signalCoMs.getSeriesCount()>0){
-			plot.setDataset(1, signalCoMs);
-
-			XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
-			for(int series=0;series<signalCoMs.getSeriesCount();series++){
-
-				Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
-				rend.setSeriesShape(series, circle);
-
-				String name = (String) signalCoMs.getSeriesKey(series);
-//				int seriesGroup = getIndexFromLabel(name);
-				UUID seriesGroup = getSignalGroupFromLabel(name);
-				Color colour = dataset.getSignalGroupColour(seriesGroup);
-				rend.setSeriesPaint(series, colour);
-				rend.setBaseLinesVisible(false);
-				rend.setBaseShapesVisible(true);
-				rend.setBaseSeriesVisibleInLegend(false);
-			}
-			plot.setRenderer(1, rend);
-
-			for(UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
-				List<Shape> shapes = NuclearSignalDatasetCreator.createSignalRadiusDataset(dataset, signalGroup);
-
-				int signalCount = shapes.size();
-
-				int alpha = (int) Math.floor( 255 / ((double) signalCount) )+20;
-				alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
-
-				Color colour = dataset.getSignalGroupColour(signalGroup);
-
-				for(Shape s : shapes){
-					XYShapeAnnotation an = new XYShapeAnnotation( s, null,
-							null, ColourSelecter.getTransparentColour(colour, true, alpha)); // layer transparent signals
-					plot.addAnnotation(an);
-				}
-			}
-		}
-		return chart;
-	}
-//=======
-//>>>>>>> 80f8c2ce5ece277dacebd32467e86ec1a826439f
-	
 	public JFreeChart makeCellOutlineChart(ChartOptions options){
 		
 		if(options.getCell()==null || !options.hasDatasets()){
@@ -510,7 +452,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				if(hash.get(key).startsWith("SignalGroup_")){
 //					int colourIndex = getIndexFromLabel(hash.get(key));
 					UUID seriesGroup = getSignalGroupFromLabel(hash.get(key));
-					Color colour = dataset.getSignalGroupColour(seriesGroup);
+                    Color colour = dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour();//.getSignalGroupColour(seriesGroup);
+
 					plot.getRenderer(key).setSeriesPaint(i, colour);
 				}
 

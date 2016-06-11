@@ -1354,7 +1354,8 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		for(UUID signalGroup : nucleus.getSignalCollection().getSignalGroupIDs()){
 			
-			if(dataset.isSignalGroupVisible(signalGroup)){ // only add the groups that are set to visible
+            if(dataset.getCollection().getSignalGroup(signalGroup).isVisible()){ // only add the groups that are set to visible
+
 
 				DefaultXYDataset groupDataset = new DefaultXYDataset();
 				int signalNumber = 0;

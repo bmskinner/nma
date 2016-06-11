@@ -123,7 +123,8 @@ public class SignalShellsPanel extends DetailPanel {
 //		AnalysisDataset dataset = list.get(0);
 	CellCollection collection = activeDataset().getCollection();
 
-	if(activeDataset().hasShellResult()){ // only if there is something to display
+    if(collection.getSignalManager().hasShellResult()){ // only if there is something to display
+
 
 		
 		ChartOptions options = new ChartOptionsBuilder()
@@ -142,7 +143,8 @@ public class SignalShellsPanel extends DetailPanel {
 		
 		for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
 			String groupName = collection.getSignalManager().getSignalGroupName(signalGroup);
-			ShellResult r = activeDataset().getShellResult(signalGroup);
+            ShellResult r = activeDataset().getCollection().getSignalGroup(signalGroup).getShellResult();
+
 			label += groupName+": p="+r.getChiSquare();
 			String sig 	= r.getChiSquare() < Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL 
 					? "Significantly different to random at 5% level"

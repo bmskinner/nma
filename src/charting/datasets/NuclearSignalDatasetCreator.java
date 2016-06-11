@@ -47,8 +47,8 @@ import stats.Stats;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
-import analysis.AnalysisOptions.NuclearSignalOptions;
 import analysis.nucleus.CurveRefolder;
+import analysis.signals.NuclearSignalOptions;
 import analysis.signals.SignalManager;
 import components.CellCollection;
 import components.generic.MeasurementScale;
@@ -56,6 +56,7 @@ import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
 import components.nuclei.Nucleus;
+import gui.components.ColourSelecter;
 
 public class NuclearSignalDatasetCreator implements Loggable {
 
@@ -134,14 +135,23 @@ public class NuclearSignalDatasetCreator implements Loggable {
 							}
 						}
 					} else {
-	
+                        int j=0;
+
 						for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
 						
-						
+	                    SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
+                        Color colour = collection.getSignalGroup(signalGroup).hasColour()
+                                ? collection.getSignalGroup(signalGroup).getGroupColour()
+                                : ColourSelecter.getSegmentColor(j++);
+                        
+                        cell.setColor(colour);
+                        
 
 
 							NuclearSignalOptions ns = dataset.getAnalysisOptions()
-									.getNuclearSignalOptions(collection.getSignalManager().getSignalGroupName(signalGroup));
+                                    .getNuclearSignalOptions(signalGroup);
+
+
 
 
 							if(ns==null){ // occurs when no signals are present?
@@ -151,20 +161,24 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 
 							} else {
-								Object signalThreshold = ns.getMode()==NuclearSignalOptions.FORWARD
-										? ns.getSignalThreshold()
-												: "Variable";
+                                Object signalThreshold = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
+                                        ? ns.getThreshold()
+										: "Variable";
 
-										Object signalMode = ns.getMode()==NuclearSignalOptions.FORWARD
+                                        Object signalMode = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
+
 												? "Forward"
-														: ns.getMode()==NuclearSignalOptions.REVERSE
+                                                : ns.getDetectionMode()==NuclearSignalOptions.REVERSE
+
 														? "Reverse"
-																: "Adaptive";					
+														: "Adaptive";					
 
 
 										rowData.add("");
-										rowData.add(signalGroup);
-										rowData.add(collection.getSignalManager().getSignalGroupName(signalGroup));
+//										rowData.add(signalGroup);
+//										rowData.add(collection.getSignalManager().getSignalGroupName(signalGroup));
+                                        rowData.add(cell);
+
 										rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
 										rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
 										rowData.add(  signalThreshold );
@@ -189,7 +203,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	
 		
 	/**
-	 * Create a histogram dataset covering the signal angles for the given analysis datasets
+     * Create a histogram dataset covering the signal statistic for the given analysis datasets
 	 * @param list the list of datasets
 	 * @return a histogram of angles
 	 * @throws Exception 
@@ -201,16 +215,12 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			
 			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
 
-				if(dataset.isSignalGroupVisible(signalGroup)){
+                if(collection.getSignalGroup(signalGroup).isVisible()){
 	
 					if(collection.getSignalManager().hasSignals(signalGroup)){
 	
-						List<Double> angles = new ArrayList<Double>(0);
-	
-						for(Nucleus n : collection.getNuclei()){
-							angles.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
-						}
-						double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
+                        double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);
+
 						ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
 					}
 				}
@@ -237,12 +247,11 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			CellCollection collection = dataset.getCollection();
 			
 			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
-				
-				if(dataset.isSignalGroupVisible(signalGroup)){
+								
+                String groupLabel = dataset.getCollection().getSignalManager().getSignalGroupName(signalGroup)+"_"+stat.toString();
+                double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
+                KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values, 0.001);
 
-					String groupLabel = stat.toString();
-					double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
-					KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values, 0.001);
 
 					double min = Arrays.stream(values).min().orElse(0); //Stats.min(values);
 					double max = Arrays.stream(values).max().orElse(0); //Stats.max(values);
@@ -254,9 +263,6 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 					int binLog = log-2;
 					double stepSize = Math.pow(10, binLog);
-
-					//			IJ.log("   roundLog: "+roundLog);
-					//			IJ.log("   round to nearest: "+roundAbs);
 
 					// use int truncation to round to nearest 100 above max
 					int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
@@ -280,7 +286,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 					ds.addSeries(groupLabel+"_"+collection.getName(), data);
 				}
-			}
+			
 		}
 
 		return ds;
@@ -324,7 +330,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	public static double[] findSignalDatasetValues(AnalysisDataset dataset, SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception {
 		
 		CellCollection collection = dataset.getCollection();			
-		double[] values = collection.getSignalStatistics(stat, scale, signalGroup); 			
+        double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);             			
 		return values;
 	}
 	
@@ -369,7 +375,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 			for(UUID group : collection.getSignalManager().getSignalGroups()){
 
-				if(dataset.isSignalGroupVisible(group)){
+                if(dataset.getCollection().getSignalGroup(group).isVisible()){
 
 					double[] xpoints = new double[collection.getSignalManager().getSignals(group).size()];
 					double[] ypoints = new double[collection.getSignalManager().getSignals(group).size()];
@@ -397,7 +403,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		CellCollection collection = dataset.getCollection();
 		List<Shape> result = new ArrayList<Shape>(0);
 		
-		if(dataset.isSignalGroupVisible(signalGroup)){
+        if(collection.getSignalGroup(signalGroup).isVisible()){
 			if(collection.getSignalManager().hasSignals(signalGroup)){
 
 				for(NuclearSignal n : collection.getSignalManager().getSignals(signalGroup)){
@@ -471,8 +477,6 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			for(int i=0;i<maxSignalGroup;i++){
 				fieldNames.add("");
 				fieldNames.add("Signal group");
-				fieldNames.add("Channel");
-				fieldNames.add("Source");
 				fieldNames.add("Signals");
 				fieldNames.add("Signals per nucleus");
 
@@ -493,25 +497,34 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			List<Object> rowData = new ArrayList<Object>(0);
 			rowData.add(collection.getSignalManager().getSignalGroups().size());
 
+            int k=0;
+
 			for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){// : collection.getSignalGroups()){
 				if(collection.getSignalManager().hasSignals(signalGroup)){
 					
 					SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
+                    
+                    Color colour = collection.getSignalGroup(signalGroup).hasColour()
+                            ? collection.getSignalGroup(signalGroup).getGroupColour()
+                            : ColourSelecter.getSegmentColor(k++);
+                    
+                    cell.setColor(colour);
+                    
+
+					
 					rowData.add("");
 					rowData.add(cell);
-					rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
-					rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
 					rowData.add(collection.getSignalManager().getSignalCount(signalGroup));
 					double signalPerNucleus = (double) collection.getSignalManager().getSignalCount(signalGroup)/  (double) collection.getSignalManager().getNumberOfCellsWithNuclearSignals(signalGroup);
 					rowData.add(df.format(signalPerNucleus));
 
 					for(SignalStatistic stat : SignalStatistic.values()){
-						double pixel = collection.getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
+                        double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
 
 						if(stat.isDimensionless()){
 							rowData.add(df.format(pixel) );
 						} else {
-							double micron = collection.getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
+                            double micron = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
 							rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
 						}
 					}
@@ -559,8 +572,6 @@ public class NuclearSignalDatasetCreator implements Loggable {
 				for(int i=0;i<maxSignalGroup;i++){
 					fieldNames.add("");
 					fieldNames.add("Signal group");
-					fieldNames.add("Channel");
-					fieldNames.add("Source");
 					fieldNames.add("Signals");
 					fieldNames.add("Signals per nucleus");
 					
@@ -592,19 +603,18 @@ public class NuclearSignalDatasetCreator implements Loggable {
 						
 							rowData.add("");
 							rowData.add(cell);
-							rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
-							rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
 							rowData.add(collection.getSignalManager().getSignalCount(signalGroup));
 							double signalPerNucleus = (double) collection.getSignalManager().getSignalCount(signalGroup)/  (double) collection.getSignalManager().getNumberOfCellsWithNuclearSignals(signalGroup);
 							rowData.add(df.format(signalPerNucleus));
 							
 							for(SignalStatistic stat : SignalStatistic.values()){
-								double pixel = collection.getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
+		                        double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
+
 
 								if(stat.isDimensionless()){
 									rowData.add(df.format(pixel) );
 								} else {
-									double micron = collection.getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
+		                            double micron = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
 									rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
 								}
 							}
@@ -698,7 +708,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
 				
 				if(collection.getSignalManager().hasSignals(signalGroup)){
-					ShellResult r = dataset.getShellResult(signalGroup);
+					ShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
 
 					for(int shell = 0; shell<r.getNumberOfShells();shell++){
 						Double d = r.getMeans().get(shell);

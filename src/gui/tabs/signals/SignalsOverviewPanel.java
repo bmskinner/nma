@@ -112,23 +112,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		// this allows a checkbox panel to be added to the JPanel later
 		chartPanel = new ConsensusNucleusChartPanel(chart);// {
 		panel.add(chartPanel, BorderLayout.CENTER);
-		
-		
-//		chartPanel.addComponentListener(new ComponentAdapter() {
-//			@Override
-//			public void componentResized(ComponentEvent e) {
-//				resizePreview(chartPanel, panel);
-//				chartPanel.restoreAutoBounds();
-//			}
-//		});
-		
-//		panel.addComponentListener(new ComponentAdapter() {
-//			@Override
-//			public void componentResized(ComponentEvent e) {
-//				resizePreview(chartPanel, panel);
-//			}
-//		});
-		
+				
 		
 		checkboxPanel = createSignalCheckboxPanel();
 		
@@ -164,11 +148,11 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 						updateSignalColour( signalGroup );
 					}
 					
-					if(rowName.equals("Source")){
-						
-						SignalTableCell signalGroup = getSignalGroupFromTable(table, row-3, column);
-						updateSignalSource( signalGroup );
-					}
+//					if(rowName.equals("Source")){
+//						
+//						SignalTableCell signalGroup = getSignalGroupFromTable(table, row-3, column);
+//						updateSignalSource( signalGroup );
+//					}
 						
 				}
 
@@ -181,45 +165,15 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	
 	private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column){
 		return (SignalTableCell) table.getModel().getValueAt(row, column);
-//		return UUID.fromString( table.getModel().getValueAt(row, column).toString() );
 	}
 	
-	private void updateSignalSource(SignalTableCell signalGroup){
-		if(isSingleDataset()){
-			log(Level.FINEST, "Updating signal source for signal group "+signalGroup);
-
-			DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
-			String folderName = openDialog.getDirectory();
-
-			if(folderName==null){
-				log(Level.FINEST, "Folder name null");
-				return;
-			}
-
-			File folder =  new File(folderName);
-
-			if(!folder.isDirectory() ){
-				log(Level.FINEST, "Folder is not directory");
-				return;
-			}
-			if(!folder.exists()){
-				log(Level.FINEST, "Folder does not exist");
-				return;
-			}
-
-			activeDataset().getCollection().getSignalManager().updateSignalSourceFolder(signalGroup.getID(), folder);
-//			SignalsDetailPanel.this.update(getDatasets());
-			refreshTableCache();
-			log(Level.FINEST, "Updated signal source for signal group "+signalGroup+" to "+folder.getAbsolutePath() );
-		}
-	}
 	
 	/**
 	 * Update the colour of the clicked signal group
 	 * @param row the row selected (the colour bar, one above the group name)
 	 */
 	private void updateSignalColour(SignalTableCell signalGroup){
-		Color oldColour = activeDataset().getSignalGroupColour(signalGroup.getID());
+        Color oldColour = signalGroup.getColor();
 		
 		Color newColor = JColorChooser.showDialog(
                  this,
@@ -227,21 +181,12 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
                  oldColour);
 		
 		if(newColor != null){
-			activeDataset().setSignalGroupColour(signalGroup.getID(), newColor);
+            activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);
 			this.update(getDatasets());
-//			fireSignalChangeEvent("SignalColourUpdate");
 			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 		}
 	}
-		
-//	private static void resizePreview(ChartPanel innerPanel, JPanel container) {
-//        int w = container.getWidth();
-//        int h = container.getHeight();
-//        int size =  Math.min(w, h);
-//        innerPanel.setPreferredSize(new Dimension(size, size));
-//        container.revalidate();
-//    }
-	
+			
 	/**
 	 * Create the checkboxes that set each signal channel visible or not
 	 */
@@ -252,11 +197,11 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		
 
 		if(isSingleDataset()){
+			
+		
+            for(UUID signalGroup : activeDataset().getCollection().getSignalGroups()){
 
-			for(UUID signalGroup : activeDataset().getCollection().getSignalManager().getSignalGroups()){
-
-
-				boolean visible = activeDataset().isSignalGroupVisible(signalGroup);
+                boolean visible = activeDataset().getCollection().getSignalGroup(signalGroup).isVisible();
 
 				String name = activeDataset().getCollection().getSignalManager().getSignalGroupName(signalGroup);
 				// make a checkbox for each signal group in the dataset
@@ -311,7 +256,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			int columns = statsTable.getColumnModel().getColumnCount();
 			if(columns>1){
 				for(int i=1;i<columns;i++){
-					statsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
+                    statsTable.getColumnModel().getColumn(i).setCellRenderer(new SignalTableCellRenderer());
 				}
 			}
 		}
@@ -331,20 +276,12 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			consensusAndCheckboxPanel.revalidate();
 			consensusAndCheckboxPanel.repaint();
 			consensusAndCheckboxPanel.setVisible(true);
-//<<<<<<< HEAD
 			
 			if(activeDataset().getCollection().hasConsensusNucleus()
 					&& activeDataset().getCollection().getSignalManager().hasSignals()){
 				warpButton.setEnabled(true);
 			}
-			
-			
-//=======
-//		} else {
-//			consensusAndCheckboxPanel.remove(checkboxPanel);
-//			consensusAndCheckboxPanel.revalidate();
-//			consensusAndCheckboxPanel.repaint();
-//>>>>>>> 80f8c2ce5ece277dacebd32467e86ec1a826439f
+
 		}
 	}
 	
@@ -364,18 +301,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 					.build();
 			
 			JFreeChart chart = getChart(options);
-						
-//=======
-//			JFreeChart chart;
-//			
-//			ChartOptions options = new ChartOptionsBuilder()
-//				.setDatasets(getDatasets())
-//				.setLogger(programLogger)
-//				.build();
-//
-//
-//			chart = getChart(options);
-//>>>>>>> 80f8c2ce5ece277dacebd32467e86ec1a826439f
 			chartPanel.setChart(chart);
 			
 			
@@ -386,56 +311,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		}
 	}
 	
-	/**
-	 * Allows for cell background to be coloured based on poition in a list. Used to colour
-	 * the signal stats list
-	 *
-	 */
-	private class StatsTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
-
-		private static final long serialVersionUID = 1L;
-
-		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
-			// default cell colour is white
-			Color colour = Color.WHITE;
-
-			try {
-
-				// get the value in the first column of the row below
-				if(row<table.getModel().getRowCount()-1){
-					String nextRowHeader = table.getModel().getValueAt(row+1, 0).toString();
-
-					if(nextRowHeader.equals("Signal group")){
-						// we want to colour this cell preemptively
-						// get the signal group from the table
-
-						if( ! table.getModel().getValueAt(row+1, column).toString().equals("")){
-							SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row+1, column);
-
-							colour = activeDataset().getSignalGroupColour(cell.getID());
-							
-							// TODO:  this may be wrong, check position of line later
-							// The 0th column is labels, so subtract 1 to column index to map to dataset list
-							colour = getDatasets().get(column-1).getSignalGroupColour(cell.getID());
-						}
-
-
-					}
-				}
-			} catch (Exception e){
-				fine("Error setting table colour renderer: "+e.getMessage());
-				colour = Color.WHITE;
-			}
-			//Cells are by default rendered as a JLabel.
-			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			l.setBackground(colour);
-
-
-			//Return the JLabel which renders the cell.
-			return l;
-		}
-	}
 	
 
 	private UUID getSignalGroupFromLabel(String label){
@@ -449,7 +324,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			
 			UUID signalGroup = getSignalGroupFromLabel(e.getActionCommand());
 			JCheckBox box = (JCheckBox) e.getSource();
-			activeDataset().setSignalGroupVisible(signalGroup, box.isSelected());
+            activeDataset().getCollection().getSignalGroup(signalGroup).setVisible( box.isSelected());
 			fireSignalChangeEvent("GroupVisble_");
 			this.refreshChartCache(getDatasets());
 		}

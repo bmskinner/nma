@@ -27,8 +27,14 @@ import java.util.UUID;
 
 import components.Cell;
 import components.CellCollection;
+import components.generic.MeasurementScale;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
+import stats.SignalStatistic;
+import stats.StatisticDimension;
+import stats.Stats;
+import utility.Constants;
+import utility.Utils;
 
 /**
  * This class is designed to simplify operations on CellCollections
@@ -94,14 +100,7 @@ public class SignalManager {
 	  }
 	  
 	  public String getSignalGroupName(UUID signalGroup){
-		  String result = null;
-		  
-		  for(Nucleus n : collection.getNuclei()){
-			  if(n.getSignalCollection().hasSignal(signalGroup)){
-				  result = n.getSignalCollection().getSignalGroupName(signalGroup);
-			  }
-		  }
-		  return result;
+		  return collection.getSignalGroup(signalGroup).getGroupName();
 	  }
 	  
 	  public int getSignalGroupNumber(UUID signalGroup){
@@ -115,14 +114,7 @@ public class SignalManager {
 	  }
 	  
 	  public int getSignalChannel(UUID signalGroup){
-		  int result = 0;
-		  
-		  for(Nucleus n : collection.getNuclei()){
-			  if(n.getSignalCollection().hasSignal(signalGroup)){
-				  result = n.getSignalCollection().getSignalChannel(signalGroup);
-			  }
-		  }
-		  return result;
+          return collection.getSignalGroup(signalGroup).getChannel();
 	  }
 	  
 	  /**
@@ -131,15 +123,7 @@ public class SignalManager {
 	   * @return
 	   */
 	  public String getSignalSourceFolder(UUID signalGroup){
-		  String result = null;
-
-		  for(Nucleus n : collection.getNuclei()){
-			  if(n.getSignalCollection().hasSignal(signalGroup)){
-				  File file = n.getSignalCollection().getSourceFile(signalGroup);
-				  result = file.getParentFile().getAbsolutePath();
-			  }
-		  }
-		  return result;
+          return collection.getSignalGroup(signalGroup).getFolder().getAbsolutePath();
 	  }
 	  
 	  /**
@@ -155,6 +139,8 @@ public class SignalManager {
 				  n.getSignalCollection().updateSourceFile(signalGroup, newFile);
 			  }
 		  }
+          collection.getSignalGroup(signalGroup).setFolder(f);
+
 	  }
 	  
 	  /**
@@ -209,22 +195,21 @@ public class SignalManager {
 
 	  }
 	  
-	  /**
-	   * Check the signal groups for all nuclei in the colleciton, and
-	   * return the highest signal group present, or 0 if no signal groups
-	   * are present
-	 * @return the highest signal group
-	 */
-//	  public int getHighestSignalGroup(){
-//		  int maxGroup = 0;
-//		  for(Nucleus n : collection.getNuclei()){
-//			  for(UUID group : n.getSignalCollection().getSignalGroupIDs()){
-//				  maxGroup = group > maxGroup ? group : maxGroup;
-//			  }
-//		  }
-//		  return maxGroup;
-//	  }
+      /**
+       * Test if any of the signal groups in the collection have a shell result
+       * @return
+       */
+      public boolean hasShellResult(){
+          for(UUID id : this.getSignalGroups()){
+              if(collection.getSignalGroup(id).hasShellResult()){
+                  return true;
+              }
+          }
+          return false;
+      }
 
+
+	  
 	  /**
 	   * Get all the signals from all nuclei in the given channel
 	   * @param channel the channel to search
@@ -238,5 +223,88 @@ public class SignalManager {
 		  }
 		  return result;
 	  }
+	  
+      
+      /**
+       * Get the median of the signal statistic in the given signal group
+       * @param  signalGroup
+       * @return the median
+     * @throws Exception 
+       */
+      public double getMedianSignalStatistic(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception{
+          
+          double[] values = null;
+          double median;
+          /*
+           * Angles must be wrapped
+           */
+          if(stat.getDimension().equals(StatisticDimension.ANGLE)){
+              values = getOffsetSignalAngles(signalGroup);
+              median = Stats.quartile(values, Constants.MEDIAN);
+              median += getMeanSignalAngle(signalGroup);
+          } else {
+              values = this.getSignalStatistics(stat, scale, signalGroup);
+              median =  Stats.quartile(values, Constants.MEDIAN);
+          }
+          
+          return median;
+             
+      }
+      
+      public double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception{
+
+          List<Cell> cells = getCellsWithNuclearSignals(signalGroup, true);
+          List<Double> a = new ArrayList<Double>(0);
+          for(Cell c : cells){
+              Nucleus n = c.getNucleus();
+              a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
+
+          }
+          return Utils.getdoubleFromDouble(a.toArray(new Double[0]));
+      }
+      
+      /**
+       * Signal angles wrap, so a mean must be calculated as a zero point for boxplots.
+       * Uses http://catless.ncl.ac.uk/Risks/7.44.html#subj4:
+       *                   sum_i_from_1_to_N sin(a[i])
+       *   a = arctangent ---------------------------
+       *                   sum_i_from_1_to_N cos(a[i])
+       * @param signalGroup
+       * @return
+       */
+      public double getMeanSignalAngle(UUID signalGroup) throws Exception {
+
+          double[] values = getSignalStatistics(SignalStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup); 
+          
+          double sumSin = 0;
+          double sumCos = 0;
+          for(double value : values){
+              sumSin += Math.sin(value);
+              sumCos += Math.cos(value);
+          }
+          return Math.atan2(sumSin, sumCos);
+      }
+      
+      /**
+       * For the signals in a group, find the corrected mean angle using the arctangent
+       * method, then rescale the angles to use the mean as a zero point 
+     * @param signalGroup
+     * @return
+     * @throws Exception
+     */
+    public double[] getOffsetSignalAngles(UUID signalGroup) throws Exception{
+
+          double[] values = getSignalStatistics(SignalStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup); 
+          double meanAngle = getMeanSignalAngle(signalGroup);
+          
+          double[] result = new double[values.length];
+          
+          for(int i=0;i<values.length; i++){
+              result[i] = values[i] - meanAngle;
+          }
+          return result;
+      }
+
+
 	  
 }

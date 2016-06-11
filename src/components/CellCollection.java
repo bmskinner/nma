@@ -64,6 +64,7 @@ import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
+import components.nuclear.SignalGroup;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 
@@ -96,6 +97,9 @@ public class CellCollection implements Serializable, Loggable {
 	private ConsensusNucleus consensusNucleus; 	// the refolded consensus nucleus
 	
 	private Map<UUID, Cell> mappedCollection  = new HashMap<UUID, Cell>();	// store all the nuclei analysed
+	
+    private Map<UUID, SignalGroup> signalGroups = new HashMap<UUID, SignalGroup>(0);
+
 	
 	private transient boolean isRefolding = false;
 	
@@ -509,33 +513,7 @@ public class CellCollection implements Serializable, Loggable {
 	  return Arrays.stream(this.getArrayLengths()).max().orElse(0); //Stats.max(values);
   }
   
-    
-  /**
-   * Get the median of the signal statistic in the given signal group
-   * @param  signalGroup
-   * @return the median
- * @throws Exception 
-   */
-  public double getMedianSignalStatistic(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception{
-
-		  double[] values = this.getSignalStatistics(stat, scale, signalGroup);
-		  double median =  Stats.quartile(values, Constants.MEDIAN);
-		  return median;
-  }
-	  
-
-  public double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception{
-
-	  List<Cell> cells = this.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
-	  List<Double> a = new ArrayList<Double>(0);
-	  for(Cell c : cells){
-		  Nucleus n = c.getNucleus();
-		  a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
-
-	  }
-	  return Utils.getdoubleFromDouble(a.toArray(new Double[0]));
-  }
-  
+      
   /*
     --------------------
     Profile methods
@@ -695,7 +673,9 @@ public class CellCollection implements Serializable, Loggable {
 	  }
 	  
 	  if(stat.getClass()==SignalStatistic.class){
-		  return getMedianSignalStatistic((SignalStatistic) stat, scale, signalGroup);
+          return getSignalManager().getMedianSignalStatistic((SignalStatistic) stat, scale, signalGroup);
+
+//		  return getMedianSignalStatistic((SignalStatistic) stat, scale, signalGroup);
 	  }
 	  
 	  if(stat.getClass()==SegmentStatistic.class){
@@ -946,6 +926,31 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  }
 	  return false;
   }
+  
+  /**
+   * Fetch the signal group ids in this collection
+   * @param id
+   * @return
+   */
+  public Set<UUID> getSignalGroups(){
+      return this.signalGroups.keySet();
+  }
+
+  /**
+   * Fetch the signal group with the given ID
+   * @param id
+   * @return
+   */
+  public SignalGroup getSignalGroup(UUID id){
+      return this.signalGroups.get(id);
+  }
+  
+  public void addSignalGroup(UUID id, SignalGroup group){
+      this.signalGroups.put(id, group);
+  }
+
+
+
   
   /**
    * Get the RuleSetCollection with the index finding rules for this nucleus type

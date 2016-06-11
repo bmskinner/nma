@@ -24,7 +24,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
+import analysis.signals.NuclearSignalOptions;
 import logging.Loggable;
 import components.nuclear.NucleusType;
 
@@ -39,7 +41,7 @@ public class AnalysisOptions implements Serializable, Loggable {
 	
 	private Map<String, CannyOptions> edgeDetection = new HashMap<String, CannyOptions>(0);
 	
-	private Map<String, NuclearSignalOptions> signalDetection = new HashMap<String, NuclearSignalOptions>(0);
+	private Map<UUID, NuclearSignalOptions> signalDetection = new HashMap<UUID, NuclearSignalOptions>(0);
 		
 	private boolean normaliseContrast = false; 
 
@@ -79,7 +81,6 @@ public class AnalysisOptions implements Serializable, Loggable {
 		
 		this.addCannyOptions("nucleus");
 		this.addCannyOptions("tail");
-		this.addNuclearSignalOptions("default");
 	}
 	
 	
@@ -100,8 +101,9 @@ public class AnalysisOptions implements Serializable, Loggable {
 			edgeDetection.put(s, template.getCannyOptions(s));
 		}
 
-		signalDetection = new HashMap<String, NuclearSignalOptions>(0);
-		for(String s : template.getNuclearSignalOptionTypes()){
+        signalDetection = new HashMap<UUID, NuclearSignalOptions>(0);
+        
+        for(UUID s : template.getNuclearSignalGroups()){
 			signalDetection.put(s, template.getNuclearSignalOptions(s));
 		}
 		
@@ -325,31 +327,44 @@ public class AnalysisOptions implements Serializable, Loggable {
 		}
 	}
 	
-	public Set<String> getNuclearSignalOptionTypes(){
+    public Set<UUID> getNuclearSignalGroups(){
 		return signalDetection.keySet();
 	}
 	
 	/**
 	 * Get the nuclear signal options associated with the
-	 * given type, or null if not present
+     * given signal group id. If not present, the group is created
 	 * @param type the name to check
 	 * @return nuclear detection options
 	 */
-	public NuclearSignalOptions getNuclearSignalOptions(String type){
-		return this.signalDetection.get(type);
+    public NuclearSignalOptions getNuclearSignalOptions(UUID signalGroup){
+        if(this.signalDetection.containsKey(signalGroup)){
+            return this.signalDetection.get(signalGroup);
+        } else {
+            this.addNuclearSignalOptions(signalGroup);
+            return this.signalDetection.get(signalGroup);
+        }
+
 	}
 	
-	public void addNuclearSignalOptions(String type){
-		signalDetection.put(type, new NuclearSignalOptions());
-	}
+    public void addNuclearSignalOptions(UUID id){
+        signalDetection.put(id, new NuclearSignalOptions());
+    }
+    
+    public void addNuclearSignalOptions(UUID id, NuclearSignalOptions options){
+        signalDetection.put(id, options);
+    }
+
+
 	
 	/**
 	 * Check if the given type name is already present
 	 * @param type the name to check
 	 * @return present or not
 	 */
-	public boolean hasSignalDetectionOptions(String type){
-		if(this.signalDetection.containsKey(type)){
+    public boolean hasSignalDetectionOptions(UUID signalGroup){
+        if(this.signalDetection.containsKey(signalGroup)){
+
 			return true;
 		} else {
 			return false;
@@ -677,131 +692,131 @@ public class AnalysisOptions implements Serializable, Loggable {
 	
 	
 	
-	/**
-	 * Allow each signal group to have independent signal detection options
-	 *
-	 */
-	public class NuclearSignalOptions implements Serializable {
-		
-		public static final int    DEFAULT_SIGNAL_THRESHOLD		 	= 70;
-		public static final int    DEFAULT_MIN_SIGNAL_SIZE 			= 5;
-		public static final double DEFAULT_MAX_SIGNAL_FRACTION 		= 0.1;
-		public static final double DEFAULT_MIN_CIRC 				= 0.0;
-		public static final double DEFAULT_MAX_CIRC 				= 1.0;
-		
-		// modes for detecting signals
-		public static final int FORWARD 	= 0;
-		public static final int REVERSE 	= 1;
-		public static final int HISTOGRAM 	= 2;
-
-		private static final long serialVersionUID = 1L;
-		private int threshold		= DEFAULT_SIGNAL_THRESHOLD;
-		private double minCirc		= DEFAULT_MIN_CIRC;
-		private double maxCirc		= DEFAULT_MAX_CIRC;
-		
-		private double minSize 		= DEFAULT_MIN_SIGNAL_SIZE;
-		private double maxFraction	= DEFAULT_MAX_SIGNAL_FRACTION;
-		
-		private int detectionMode = NuclearSignalOptions.FORWARD;
-		
-		public NuclearSignalOptions(){
-//			
-		}
-		
-		public int getSignalThreshold(){
-			return this.threshold;
-		}
-
-		public double getMinSize(){
-			return this.minSize;
-		}
-
-		public double getMaxFraction(){
-			return this.maxFraction;
-		}
-
-		public double getMinCirc(){
-			return this.minCirc;
-		}
-
-		public double getMaxCirc(){
-			return this.maxCirc;
-		}
-
-		public void setThreshold(int threshold) {
-			this.threshold = threshold;
-		}
-
-		public void setMinCirc(double minCirc) {
-			this.minCirc = minCirc;
-		}
-
-		public void setMaxCirc(double maxCirc) {
-			this.maxCirc = maxCirc;
-		}
-
-		public void setMinSize(double minSize) {
-			this.minSize = minSize;
-		}
-
-		public void setMaxFraction(double maxFraction) {
-			this.maxFraction = maxFraction;
-		}
-		
-		public int getMode(){
-			return this.detectionMode;
-		}
-		
-		public void setMode(int mode){
-			this.detectionMode = mode;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + detectionMode;
-			long temp;
-			temp = Double.doubleToLongBits(maxCirc);
-			result = prime * result + (int) (temp ^ (temp >>> 32));
-			temp = Double.doubleToLongBits(maxFraction);
-			result = prime * result + (int) (temp ^ (temp >>> 32));
-			temp = Double.doubleToLongBits(minCirc);
-			result = prime * result + (int) (temp ^ (temp >>> 32));
-			temp = Double.doubleToLongBits(minSize);
-			result = prime * result + (int) (temp ^ (temp >>> 32));
-			result = prime * result + threshold;
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			NuclearSignalOptions other = (NuclearSignalOptions) obj;
-
-			if (detectionMode != other.detectionMode)
-				return false;
-			if (Double.doubleToLongBits(maxCirc) != Double
-					.doubleToLongBits(other.maxCirc))
-				return false;
-			if (Double.doubleToLongBits(maxFraction) != Double
-					.doubleToLongBits(other.maxFraction))
-				return false;
-			if (Double.doubleToLongBits(minCirc) != Double
-					.doubleToLongBits(other.minCirc))
-				return false;
-			if (Double.doubleToLongBits(minSize) != Double
-					.doubleToLongBits(other.minSize))
-				return false;
-			if (threshold != other.threshold)
-				return false;
-			return true;
-		}
-
-	}
+//	/**
+//	 * Allow each signal group to have independent signal detection options
+//	 *
+//	 */
+//	public class NuclearSignalOptions implements Serializable {
+//		
+//		public static final int    DEFAULT_SIGNAL_THRESHOLD		 	= 70;
+//		public static final int    DEFAULT_MIN_SIGNAL_SIZE 			= 5;
+//		public static final double DEFAULT_MAX_SIGNAL_FRACTION 		= 0.1;
+//		public static final double DEFAULT_MIN_CIRC 				= 0.0;
+//		public static final double DEFAULT_MAX_CIRC 				= 1.0;
+//		
+//		// modes for detecting signals
+//		public static final int FORWARD 	= 0;
+//		public static final int REVERSE 	= 1;
+//		public static final int HISTOGRAM 	= 2;
+//
+//		private static final long serialVersionUID = 1L;
+//		private int threshold		= DEFAULT_SIGNAL_THRESHOLD;
+//		private double minCirc		= DEFAULT_MIN_CIRC;
+//		private double maxCirc		= DEFAULT_MAX_CIRC;
+//		
+//		private double minSize 		= DEFAULT_MIN_SIGNAL_SIZE;
+//		private double maxFraction	= DEFAULT_MAX_SIGNAL_FRACTION;
+//		
+//		private int detectionMode = NuclearSignalOptions.FORWARD;
+//		
+//		public NuclearSignalOptions(){
+////			
+//		}
+//		
+//		public int getSignalThreshold(){
+//			return this.threshold;
+//		}
+//
+//		public double getMinSize(){
+//			return this.minSize;
+//		}
+//
+//		public double getMaxFraction(){
+//			return this.maxFraction;
+//		}
+//
+//		public double getMinCirc(){
+//			return this.minCirc;
+//		}
+//
+//		public double getMaxCirc(){
+//			return this.maxCirc;
+//		}
+//
+//		public void setThreshold(int threshold) {
+//			this.threshold = threshold;
+//		}
+//
+//		public void setMinCirc(double minCirc) {
+//			this.minCirc = minCirc;
+//		}
+//
+//		public void setMaxCirc(double maxCirc) {
+//			this.maxCirc = maxCirc;
+//		}
+//
+//		public void setMinSize(double minSize) {
+//			this.minSize = minSize;
+//		}
+//
+//		public void setMaxFraction(double maxFraction) {
+//			this.maxFraction = maxFraction;
+//		}
+//		
+//		public int getMode(){
+//			return this.detectionMode;
+//		}
+//		
+//		public void setMode(int mode){
+//			this.detectionMode = mode;
+//		}
+//
+//		@Override
+//		public int hashCode() {
+//			final int prime = 31;
+//			int result = 1;
+//			result = prime * result + detectionMode;
+//			long temp;
+//			temp = Double.doubleToLongBits(maxCirc);
+//			result = prime * result + (int) (temp ^ (temp >>> 32));
+//			temp = Double.doubleToLongBits(maxFraction);
+//			result = prime * result + (int) (temp ^ (temp >>> 32));
+//			temp = Double.doubleToLongBits(minCirc);
+//			result = prime * result + (int) (temp ^ (temp >>> 32));
+//			temp = Double.doubleToLongBits(minSize);
+//			result = prime * result + (int) (temp ^ (temp >>> 32));
+//			result = prime * result + threshold;
+//			return result;
+//		}
+//
+//		@Override
+//		public boolean equals(Object obj) {
+//			if (this == obj)
+//				return true;
+//			if (obj == null)
+//				return false;
+//			if (getClass() != obj.getClass())
+//				return false;
+//			NuclearSignalOptions other = (NuclearSignalOptions) obj;
+//
+//			if (detectionMode != other.detectionMode)
+//				return false;
+//			if (Double.doubleToLongBits(maxCirc) != Double
+//					.doubleToLongBits(other.maxCirc))
+//				return false;
+//			if (Double.doubleToLongBits(maxFraction) != Double
+//					.doubleToLongBits(other.maxFraction))
+//				return false;
+//			if (Double.doubleToLongBits(minCirc) != Double
+//					.doubleToLongBits(other.minCirc))
+//				return false;
+//			if (Double.doubleToLongBits(minSize) != Double
+//					.doubleToLongBits(other.minSize))
+//				return false;
+//			if (threshold != other.threshold)
+//				return false;
+//			return true;
+//		}
+//
+//	}
 }

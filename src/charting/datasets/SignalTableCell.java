@@ -13,6 +13,8 @@ public class SignalTableCell {
 	
 	private UUID   id;
 	private String name;
+    private Color  color;
+
 	
 	public SignalTableCell(UUID id, String name) {
 		this.id     = id;
@@ -26,6 +28,17 @@ public class SignalTableCell {
 	public String toString(){
 		return name;
 	}
+	
+    public Color getColor() {
+        return color;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+    
+    
+
 
 
 }

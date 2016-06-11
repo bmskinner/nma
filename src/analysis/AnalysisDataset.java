@@ -72,11 +72,11 @@ public class AnalysisDataset implements Serializable {
 	
 	private AnalysisOptions analysisOptions;
 	
-	private Map<UUID, ShellResult> shellResults 	   = new HashMap<UUID, ShellResult>(0); // store shell analysis for each channel
-	private Map<UUID, String>      signalGroupsAdded   = new HashMap<UUID, String>(0);	// store the names of the groups added
-	private Map<UUID, Boolean>     signalGroupsVisible = new HashMap<UUID, Boolean>(0); // is the given signal group shown in plots
-	private Map<UUID, Color> 	   signalGroupColours  = new HashMap<UUID, Color>(0); // allow saving of colour choices
-	
+//	private Map<UUID, ShellResult> shellResults 	   = new HashMap<UUID, ShellResult>(0); // store shell analysis for each channel
+//	private Map<UUID, String>      signalGroupsAdded   = new HashMap<UUID, String>(0);	// store the names of the groups added
+//	private Map<UUID, Boolean>     signalGroupsVisible = new HashMap<UUID, Boolean>(0); // is the given signal group shown in plots
+//	private Map<UUID, Color> 	   signalGroupColours  = new HashMap<UUID, Color>(0); // allow saving of colour choices
+//	
 	private Color datasetColour = null; // use for colouring the dataset in comparison with other datasets
 	
 	private List<ClusterGroup> clusterGroups = new ArrayList<ClusterGroup>(0); // hold groups of cluster results
@@ -532,26 +532,26 @@ public class AnalysisDataset implements Serializable {
 		return this.thisCollection;
 	}
 
-	public void addShellResult(UUID signalGroup, ShellResult result){
-		this.shellResults.put(signalGroup, result);
-	}
-
-	public ShellResult getShellResult(UUID group){
-		return this.shellResults.get(group);
-	}
+//	public void addShellResult(UUID signalGroup, ShellResult result){
+//		this.shellResults.put(signalGroup, result);
+//	}
+//
+//	public ShellResult getShellResult(UUID group){
+//		return this.shellResults.get(group);
+//	}
 
 	/**
 	 * Test if the collection has a ShellResult in any channel
 	 * 
 	 */
-	public boolean hasShellResult(){
-		for(UUID channel : thisCollection.getSignalManager().getSignalGroups()){
-			if(this.shellResults.containsKey(channel)){
-				return true;
-			}
-		}
-		return false;
-	}
+//	public boolean hasShellResult(){
+//		for(UUID channel : thisCollection.getSignalManager().getSignalGroups()){
+//			if(this.shellResults.containsKey(channel)){
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 
 	/**
 	 * Get the analysis options from this dataset
@@ -792,71 +792,71 @@ public class AnalysisDataset implements Serializable {
 		}
 	}
 			
-	/**
-	 * Set the given signal group to be visible in plots
-	 * @param signalGroup the group
-	 * @param b visible or not
-	 */
-	public void setSignalGroupVisible(UUID signalGroup, boolean b){
-		this.signalGroupsVisible.put(signalGroup, b);
-	}
-	
-	/**
-	 * Check if the given signal group is visible in plots
-	 * @param signalGroup the group
-	 * @return
-	 */
-	public boolean isSignalGroupVisible(UUID signalGroup){
-		if(this.signalGroupsVisible.containsKey(signalGroup)){
-			return this.signalGroupsVisible.get(signalGroup);
-		} else {
-			return true; // default true - only store the false toggle as needed
-		}
-	}
-	
-	/**
-	 * Get the set colour for the signal group, or the default colour if
-	 * none is set
-	 * @param signalGroup the group
-	 * @return a colour
-	 */
-	public Color getSignalGroupColour(UUID signalGroup){
-		if(this.signalGroupColours.containsKey(signalGroup)){
-			return this.signalGroupColours.get(signalGroup);
-		} else {
-//			The default is the colour selection model for the entire program
-			return Color.RED;
-//			return ColourSelecter.getSignalColour(  signalGroup-1); 
-		}
-	}
-	
-	/**
-	 * Set the given signal group colour for plots
-	 * @param signalGroup the group
-	 * @param colour the colour
-	 */
-	public void setSignalGroupColour(UUID signalGroup, Color colour){
-		this.signalGroupColours.put(signalGroup, colour);
-	}
-	
-	
-	/**
-	 * Get the name of the signal group
-	 * @param signalGroup the group the fetch
-	 * @return
-	 */
-	public String getSignalGroupName(UUID signalGroup){
-		return this.signalGroupsAdded.get(signalGroup);
-	}
-	
-	/**
-	 * Set the given signal group name
-	 * @param signalGroup
-	 * @param name
-	 */
-	public void setSignalGroupName(UUID signalGroup, String name){
-		this.signalGroupsAdded.put(signalGroup, name);
-	}
+//	/**
+//	 * Set the given signal group to be visible in plots
+//	 * @param signalGroup the group
+//	 * @param b visible or not
+//	 */
+//	public void setSignalGroupVisible(UUID signalGroup, boolean b){
+//		this.signalGroupsVisible.put(signalGroup, b);
+//	}
+//	
+//	/**
+//	 * Check if the given signal group is visible in plots
+//	 * @param signalGroup the group
+//	 * @return
+//	 */
+//	public boolean isSignalGroupVisible(UUID signalGroup){
+//		if(this.signalGroupsVisible.containsKey(signalGroup)){
+//			return this.signalGroupsVisible.get(signalGroup);
+//		} else {
+//			return true; // default true - only store the false toggle as needed
+//		}
+//	}
+//	
+//	/**
+//	 * Get the set colour for the signal group, or the default colour if
+//	 * none is set
+//	 * @param signalGroup the group
+//	 * @return a colour
+//	 */
+//	public Color getSignalGroupColour(UUID signalGroup){
+//		if(this.signalGroupColours.containsKey(signalGroup)){
+//			return this.signalGroupColours.get(signalGroup);
+//		} else {
+////			The default is the colour selection model for the entire program
+//			return Color.RED;
+////			return ColourSelecter.getSignalColour(  signalGroup-1); 
+//		}
+//	}
+//	
+//	/**
+//	 * Set the given signal group colour for plots
+//	 * @param signalGroup the group
+//	 * @param colour the colour
+//	 */
+//	public void setSignalGroupColour(UUID signalGroup, Color colour){
+//		this.signalGroupColours.put(signalGroup, colour);
+//	}
+//	
+//	
+//	/**
+//	 * Get the name of the signal group
+//	 * @param signalGroup the group the fetch
+//	 * @return
+//	 */
+//	public String getSignalGroupName(UUID signalGroup){
+//		return this.signalGroupsAdded.get(signalGroup);
+//	}
+//	
+//	/**
+//	 * Set the given signal group name
+//	 * @param signalGroup
+//	 * @param name
+//	 */
+//	public void setSignalGroupName(UUID signalGroup, String name){
+//		this.signalGroupsAdded.put(signalGroup, name);
+//	}
 	
 	  /**
 	   * Return the highest signal group present, or 0 if no signal groups

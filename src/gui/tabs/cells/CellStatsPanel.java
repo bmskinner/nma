@@ -186,8 +186,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 		String groupString = table.getModel().getValueAt(row+1, 1).toString();
 		UUID signalGroup = UUID.fromString(groupString);
 		
-		Color oldColour = activeDataset().getSignalGroupColour(signalGroup);
-//		Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
+		Color oldColour = activeDataset().getCollection().getSignalGroup(signalGroup).getGroupColour();
 		
 		Color newColor = JColorChooser.showDialog(
 				CellStatsPanel.this,
@@ -195,7 +194,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
                  oldColour);
 		
 		if(newColor != null){
-			activeDataset().setSignalGroupColour(signalGroup, newColor);
+            activeDataset().getCollection().getSignalGroup(signalGroup).setGroupColour(newColor);//.setSignalGroupColour(signalGroup, newColor);
+
 			update(activeCell);
 			fireSignalChangeEvent("SignalColourUpdate");
 		}
@@ -326,8 +326,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 					// get the signal group from the table
 					String groupString = table.getModel().getValueAt(row+1, 1).toString();
 					UUID signalGroup = UUID.fromString(groupString);
-					colour = activeDataset().getSignalGroupColour(signalGroup);
-//					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
+                    colour = activeDataset().getCollection().getSignalGroup(UUID.fromString(groupString)).getGroupColour();
+
 				}
 			}
 			//Cells are by default rendered as a JLabel.

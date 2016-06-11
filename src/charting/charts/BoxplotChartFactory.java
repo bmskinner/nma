@@ -192,11 +192,14 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 
 		for(int series=0;series<ds.getRowCount();series++){
 			String name = (String) ds.getRowKey(series);
-			UUID seriesGroup = getSignalGroupFromLabel(name);
+            UUID signalGroup = getSignalGroupFromLabel(name);
 
-			Color color = options.firstDataset().getSignalGroupColour(seriesGroup) == null 
-					? ColourSelecter.getSegmentColor(series)
-							: options.firstDataset().getSignalGroupColour(seriesGroup);
+
+            Color color = options.firstDataset().getCollection().getSignalGroup(signalGroup).hasColour()
+                    ? options.firstDataset().getCollection().getSignalGroup(signalGroup).getGroupColour()
+                    : ColourSelecter.getSegmentColor(series);
+                        
+
 
 					renderer.setSeriesPaint(series, color);
 		}		

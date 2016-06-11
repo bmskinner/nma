@@ -52,7 +52,8 @@ import javax.swing.event.ChangeListener;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
-import analysis.AnalysisOptions.NuclearSignalOptions;
+import analysis.signals.NuclearSignalOptions;
+import components.nuclear.SignalGroup;
 
 public class SignalDetectionSettingsDialog extends SettingsDialog implements ChangeListener {
 
@@ -195,7 +196,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 
-				// check the selected name is valid - is the key for the options map
+                // check a name has been entered
 				finalGroupName = checkGroupName(groupName.getText());
 
 				try{
@@ -203,32 +204,27 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 					if(getImageDirectory()){
 
 						// Use the default options to store settings without creating a new signal group yet
-						NuclearSignalOptions testOptions = options.getNuclearSignalOptions("default");
+                        NuclearSignalOptions testOptions = new NuclearSignalOptions();
+
 						assignSettings(testOptions);
 
-						// Run the image prober TODO
+                        /*
+                         * Run the image prober on the signal settings
+                         */
+
 						ImageProber ip = new SignalDetectionImageProber(options, folder, dataset, channel, testOptions);
 						if(ip.getOK()){
-							// Image prober returns ok, validate signal group and assign
-							//						int channel = getChannel();
-							String signalGroupName = getSignalGroupName();
+                            signalGroup = java.util.UUID.randomUUID();
+                            
+                            SignalGroup group = new SignalGroup();
+                            group.setGroupName(finalGroupName);
+                            group.setChannel(channel);
+                            group.setFolder(folder);
+                            
+                            
+                            dataset.getCollection().addSignalGroup(signalGroup, group);
+                            options.addNuclearSignalOptions( signalGroup, testOptions);
 
-
-							//						NuclearSignalOptions options = dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroupName);
-
-							// the new signal group is one more than the highest in the collection
-							UUID newSignalGroup = java.util.UUID.randomUUID();
-//							int newSignalGroup = dataset.getHighestSignalGroup()+1;
-
-							// create the options object with the given name
-							options.addNuclearSignalOptions(finalGroupName);
-
-							// assign the options
-							NuclearSignalOptions ns = options.getNuclearSignalOptions(finalGroupName);
-							assignSettings(ns);
-
-							signalGroup = newSignalGroup;
-							dataset.setSignalGroupName(newSignalGroup, signalGroupName);
 							readyToRun = true;
 							SignalDetectionSettingsDialog.this.setVisible(false);
 						} else {
@@ -273,16 +269,16 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 	}
 	
 	/**
-	 * Check that the selected signal group name is not already
-	 * used. If present or blank, requests a new name 
+     * Check that the input signal group name is ok. 
+     * If blank, requests a new name 
 	 * @param name the name to check
 	 * @return a valid name
 	 */
 	private String checkGroupName(String name){
 
 //		IJ.log("Checking "+name);
-		if(options.hasSignalDetectionOptions(name) || name.equals("")){
-			String newName = (String) JOptionPane.showInputDialog("Enter another signal group name");
+        if(name.equals("")){
+            String newName = (String) JOptionPane.showInputDialog("Enter a signal group name");
 			name = checkGroupName(newName);
 		}
 		return name;
@@ -302,14 +298,14 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 		
 		
 		if(forwardThresholding.isSelected()){
-			ns.setMode(NuclearSignalOptions.FORWARD);
+            ns.setDetectionMode(NuclearSignalOptions.FORWARD);
 		} 
 		if(reverseThresholding.isSelected()){
-			ns.setMode(NuclearSignalOptions.REVERSE);
+            ns.setDetectionMode(NuclearSignalOptions.REVERSE);
 		} 
 		
 		if(histogramThresholding.isSelected()){
-			ns.setMode(NuclearSignalOptions.HISTOGRAM);
+            ns.setDetectionMode(NuclearSignalOptions.HISTOGRAM);
 		} 
 		
 		this.channel = channelSelection.getSelectedItem().equals("Red") 

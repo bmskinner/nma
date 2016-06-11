@@ -31,6 +31,7 @@ import analysis.AnalysisDataset;
 import analysis.signals.SignalDetector;
 import components.Cell;
 import components.CellCollection;
+import components.nuclear.SignalGroup;
 
 public class AddNuclearSignalAction extends ProgressableAction {
 	
@@ -46,11 +47,19 @@ public class AddNuclearSignalAction extends ProgressableAction {
 			if(analysisSetup.isReadyToRun()){
 
 				this.signalGroup = analysisSetup.getSignalGroup();
-				//				this.signalGroup = newSignalGroup;
-				String signalGroupName = dataset.getSignalGroupName(signalGroup);
+
+                String signalGroupName = dataset.getCollection().getSignalGroup(signalGroup).getGroupName();//.getSignalGroupName(signalGroup);
 
 
-				worker = new SignalDetector(dataset, analysisSetup.getFolder(), analysisSetup.getChannel(), dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroupName), signalGroup, signalGroupName);
+
+                worker = new SignalDetector(dataset, 
+                        analysisSetup.getFolder(), 
+                        analysisSetup.getChannel(), 
+                        dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroup), 
+                        signalGroup, 
+                        signalGroupName);
+
+               
 				this.setProgressMessage("Signal detection: "+signalGroupName);
 				worker.addPropertyChangeListener(this);
 				worker.execute();
@@ -117,13 +126,14 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		log("Dividing population by signals...");
 		try{
 
-			
+            SignalGroup group = r.getSignalGroup(signalGroup);
+
 			List<Cell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
 			if(!list.isEmpty()){
 				log("Signal group "+signalGroup+": found nuclei with signals");
 				CellCollection listCollection = new CellCollection(r.getFolder(), 
 						r.getOutputFolderName(), 
-						"SignalGroup_"+signalGroup+"_with_signals", 
+                        group.getGroupName()+"_with_signals", 
 						r.getNucleusType());
 
 				for(Cell c : list){
@@ -136,13 +146,15 @@ public class AddNuclearSignalAction extends ProgressableAction {
 					listCollection.addCell( newCell );
 				}
 				signalPopulations.add(listCollection);
+                listCollection.addSignalGroup(signalGroup, new SignalGroup(r.getSignalGroup(signalGroup)));
+
 
 				List<Cell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
 				if(!notList.isEmpty()){
 					log("Signal group "+signalGroup+": found nuclei without signals");
 					CellCollection notListCollection = new CellCollection(r.getFolder(), 
 							r.getOutputFolderName(), 
-							"SignalGroup_"+signalGroup+"_without_signals", 
+                            group.getGroupName()+"_without_signals", 
 							r.getNucleusType());
 
 					for(Cell c : notList){
@@ -154,7 +166,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 			}
 
 		} catch(Exception e){
-			logError("Cannot create collection", e);
+			error("Cannot create collection", e);
 		}
 
 		return signalPopulations;

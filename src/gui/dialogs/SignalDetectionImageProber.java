@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
-import analysis.AnalysisOptions.NuclearSignalOptions;
+import analysis.signals.NuclearSignalOptions;
 import analysis.signals.SignalFinder;
 import components.CellularComponent;
 import components.nuclear.NuclearSignal;
@@ -50,7 +50,7 @@ public class SignalDetectionImageProber extends ImageProber {
 	
 	private AnalysisDataset dataset;
 	private int channel;
-	NuclearSignalOptions testOptions;
+	private NuclearSignalOptions testOptions;
 
 	private enum SignalImageType implements ImageType {
 		DETECTED_OBJECTS ("Detected objects");
@@ -103,9 +103,9 @@ public class SignalDetectionImageProber extends ImageProber {
 			procMap.put(SignalImageType.DETECTED_OBJECTS, openProcessor);
 
 			// Store the options
-			double minSize = testOptions.getMinSize();
+			double minSize  = testOptions.getMinSize();
 			double maxFract = testOptions.getMaxFraction();
-			int threshold = testOptions.getSignalThreshold();
+			int threshold   = testOptions.getThreshold();
 			
 			testOptions.setMinSize(5);
 			testOptions.setMaxFraction(1d);

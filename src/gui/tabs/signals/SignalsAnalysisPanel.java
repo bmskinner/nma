@@ -18,18 +18,28 @@
  *******************************************************************************/
 package gui.tabs.signals;
 
+import gui.DatasetEvent.DatasetMethod;
 import gui.components.ExportableTable;
 import gui.tabs.DetailPanel;
+import ij.io.DirectoryChooser;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
 
+import javax.swing.JColorChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
 import charting.datasets.NuclearSignalDatasetCreator;
+import charting.datasets.SignalTableCell;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
@@ -49,9 +59,143 @@ public class SignalsAnalysisPanel extends DetailPanel {
 		table  = new ExportableTable(new DefaultTableModel());
 		table.setAutoCreateColumnsFromModel(false);
 		table.setEnabled(false);
+		
+        
+        table.addMouseListener(new MouseAdapter() {
+            
+        	@Override
+        	public void mouseClicked(MouseEvent e) {
+                
+                JTable table = (JTable) e.getSource();
+                
+                int row = table.rowAtPoint(e.getPoint());
+                int column = table.columnAtPoint(e.getPoint());
+                                
+                // double click
+                if (e.getClickCount() == 2) {
+
+                    String rowName = table.getModel().getValueAt(row, 0).toString();
+                    
+                    if(rowName.equals("Source")){
+                        
+                        SignalTableCell signalGroup = getSignalGroupFromTable(table, row-2, column);
+                        updateSignalSource( signalGroup );
+                    }
+                    
+                    
+                    if(rowName.equals("Signal group")){
+                        SignalTableCell signalGroup = getSignalGroupFromTable(table, row, column);
+                        updateSignalName( signalGroup );
+                    }
+                    
+                    String nextRowName = table.getModel().getValueAt(row+1, 0).toString();
+                    if(nextRowName.equals("Signal group")){
+                        SignalTableCell signalGroup = getSignalGroupFromTable(table, row+1, column);
+                        updateSignalColour( signalGroup );
+                    }
+
+                        
+                }
+
+            }
+        });
+        
+
+		
 		scrollPane = new JScrollPane(table);
 		this.add(scrollPane, BorderLayout.CENTER);
 	}
+	
+    
+    private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column){
+        return (SignalTableCell) table.getModel().getValueAt(row, column);
+//        return UUID.fromString( table.getModel().getValueAt(row, column).toString() );
+    }
+    
+    
+    /**
+     * Update the colour of the clicked signal group
+     * @param row the row selected (the colour bar, one above the group name)
+     */
+    private void updateSignalColour(SignalTableCell signalGroup){
+        
+        if(isSingleDataset()){
+            Color oldColour = signalGroup.getColor();
+
+            Color newColor = JColorChooser.showDialog(
+                    this,
+                    "Choose signal Color",
+                    oldColour);
+
+            if(newColor != null){
+                activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);// .setSignalGroupColour(signalGroup.getID(), newColor);
+                refreshTableCache();
+                fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+            }
+        }
+    }
+    
+
+    
+    private void updateSignalSource(SignalTableCell signalGroup){
+        if(isSingleDataset()){
+            finest("Updating signal source for signal group "+signalGroup);
+
+            DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
+            String folderName = openDialog.getDirectory();
+
+            if(folderName==null){
+                finest("Folder name null");
+                return;
+            }
+
+            File folder =  new File(folderName);
+
+            if(!folder.isDirectory() ){
+                finest("Folder is not directory");
+                return;
+            }
+            if(!folder.exists()){
+                finest("Folder does not exist");
+                return;
+            }
+
+            activeDataset().getCollection().getSignalManager().updateSignalSourceFolder(signalGroup.getID(), folder);
+//            SignalsDetailPanel.this.update(getDatasets());
+            refreshTableCache();
+            finest("Updated signal source for signal group "+signalGroup+" to "+folder.getAbsolutePath() );
+        }
+    }
+    
+    
+    /**
+     * Update the name of a signal group in the active dataset
+     * @param signalGroup
+     */
+    private void updateSignalName(SignalTableCell signalGroup){
+        if(isSingleDataset()){
+            
+            String oldName = signalGroup.toString();
+            finest("Updating signal name for signal group "+signalGroup);
+
+            String newName = (String) JOptionPane.showInputDialog("Enter new signal group name");
+
+            if(newName==null){
+            	finest("New name is null - not changing");
+                return;
+            }
+
+            activeDataset().getCollection()
+                .getSignalGroup(signalGroup.getID())
+                .setGroupName(newName);
+
+            refreshTableCache();
+            fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+            finest("Updated name of signal group "+oldName+" to "+newName );
+        }
+    }
+    
+
 
 	@Override
 	protected void updateSingle() throws Exception {
@@ -63,6 +207,18 @@ public class SignalsAnalysisPanel extends DetailPanel {
 		TableModel model = getTable(options);
 		table.setModel(model);
 		table.createDefaultColumnsFromModel();
+		
+        // Add the signal group colours
+        if(hasDatasets()){
+            int columns = table.getColumnModel().getColumnCount();
+            if(columns>1){
+                for(int i=1;i<columns;i++){
+                    table.getColumnModel().getColumn(i).setCellRenderer(new SignalTableCellRenderer());
+                }
+            }
+        }
+        
+
 		
 	}
 
