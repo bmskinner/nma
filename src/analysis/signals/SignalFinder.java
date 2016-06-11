@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import analysis.AnalysisOptions.NuclearSignalOptions;
 import analysis.detection.Detector;
 import components.CellularComponent;
 import components.generic.BooleanProfile;
@@ -65,7 +64,7 @@ public class SignalFinder implements Loggable {
 	public SignalFinder(NuclearSignalOptions options, int channel){
 		this.options = options;
 		this.channel = channel;
-		this.minThreshold = options.getSignalThreshold();
+		this.minThreshold = options.getThreshold();
 	}
 	
 	/**
@@ -79,17 +78,17 @@ public class SignalFinder implements Loggable {
 		
 		options.setThreshold(minThreshold); // reset to default;
 		
-		if(options==null || options.getMode()==NuclearSignalOptions.FORWARD){
+		if(options==null || options.getDetectionMode()==NuclearSignalOptions.FORWARD){
 			finest("Running forward detection");
 			return detectForwardThresholdSignal(sourceFile, stack, n);
 		}
 		
-		if(options.getMode()==NuclearSignalOptions.REVERSE){
+		if(options.getDetectionMode()==NuclearSignalOptions.REVERSE){
 			finest( "Running reverse detection");
 			return detectReverseThresholdSignal(sourceFile, stack, n);
 		}
 		
-		if(options.getMode()==NuclearSignalOptions.HISTOGRAM){
+		if(options.getDetectionMode()==NuclearSignalOptions.HISTOGRAM){
 			finest( "Running adaptive detection");
 			return detectHistogramThresholdSignal(sourceFile, stack, n);
 		}
@@ -135,7 +134,7 @@ public class SignalFinder implements Loggable {
 		detector.setMinSize(options.getMinSize());
 		detector.setMinCirc(options.getMinCirc());
 		detector.setMaxCirc(options.getMaxCirc());
-		detector.setThreshold(options.getSignalThreshold());
+		detector.setThreshold(options.getThreshold());
 
 		try{
 			ImageProcessor ip = stack.getProcessor(stackNumber);

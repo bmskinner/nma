@@ -116,8 +116,11 @@ public class ShellAnalysis extends AnalysisWorker {
 			for(UUID group : counters.keySet()){
 				if(collection.getSignalManager().hasSignals(group)){
 					ShellCounter channelCounter = counters.get(group);
-//					channelCounter.export(new File(collection.getLogFileName( "log.shells."+channel  )));
-					getDataset().addShellResult(group, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
+
+					getDataset().getCollection()
+						.getSignalGroup(group)
+						.setShellResult(new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
+
 				}
 			}
 			
@@ -188,7 +191,9 @@ public class ShellAnalysis extends AnalysisWorker {
 			for(UUID group : counters.keySet()){
 				if(collection.getSignalManager().hasSignals(group)){
 					ShellCounter channelCounter = counters.get(group);
-					dataset.addShellResult(group, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
+					dataset.getCollection()
+					.getSignalGroup(group)
+					.setShellResult(new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
 				}
 			}
 			

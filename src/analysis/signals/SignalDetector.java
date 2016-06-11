@@ -19,40 +19,15 @@
 package analysis.signals;
 
 import ij.ImageStack;
-import ij.gui.Roi;
-import ij.measure.Calibration;
-import ij.measure.Measurements;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-import ij.process.ImageStatistics;
 import io.ImageImporter;
 
-import java.awt.Rectangle;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.swing.SwingWorker;
-
-import logging.DebugFileHandler;
-import utility.Constants;
-import utility.StatsMap;
-import utility.Utils;
 import analysis.AnalysisDataset;
-import analysis.AnalysisOptions.NuclearSignalOptions;
-import analysis.detection.Detector;
 import analysis.AnalysisWorker;
 import components.Cell;
-import components.generic.BooleanProfile;
 import components.generic.BorderTag;
-import components.generic.Profile;
-import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.SignalCollection;
 import components.nuclei.AsymmetricNucleus;
@@ -101,7 +76,7 @@ public class SignalDetector extends AnalysisWorker {
 		try{
 			int progress = 0;
 			
-			int originalMinThreshold = options.getSignalThreshold();
+			int originalMinThreshold = options.getThreshold();
 			
 			SignalFinder finder = new SignalFinder(options, channel);
 			
