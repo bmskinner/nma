@@ -27,12 +27,14 @@ public enum SignalStatistic implements PlottableStatistic {
 	  }
 	  
 	  public boolean isDimensionless(){
-		  if(this.dimension.equals(StatisticDimension.DIMENSIONLESS)){
-			  return true;
-		  } else {
-			  return false;
-		  }
+		  return this.dimension.equals(StatisticDimension.DIMENSIONLESS);
 	  }
+	  
+      public boolean isAngle(){
+          return this.dimension.equals(StatisticDimension.ANGLE);
+      }
+      
+
 	  
 	  /**
 	   * Get the dimension of the statistic (area, length, none)

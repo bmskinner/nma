@@ -109,97 +109,118 @@ public class NuclearSignalDatasetCreator implements Loggable {
 				model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
 				
 					
-				// format the numbers and make into a tablemodel
-				DecimalFormat df = new DecimalFormat("#0.00"); 
-	
+					
 				// make a new column for each collection
 				for(AnalysisDataset dataset : list){
-					CellCollection collection = dataset.getCollection();
 					
-					List<Object> rowData = new ArrayList<Object>(0);
-					rowData.add(collection.getSignalManager().getSignalGroups().size());
-					/*
-					 * If the dataset is a merge, then the analysis options will be null.
-					 * We could loop through the merge sources until finding the merge
-					 * with the signal options BUT there could be conflicts with 
-					 * signal groups when merging.
-					 * 
-					 * For now, do not display a table if the dataset has merge sources
-					 */
-					
-					if(dataset.hasMergeSources()){
-						for(int i=0;i<maxChannels;i++){
-							rowData.add("");
-							for(int j=0; j<10;j++){
-								rowData.add("N/A - merge");
-							}
-						}
-					} else {
-                        int j=0;
-
-						for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
-						
-	                    SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
-                        Color colour = collection.getSignalGroup(signalGroup).hasColour()
-                                ? collection.getSignalGroup(signalGroup).getGroupColour()
-                                : ColourSelecter.getSegmentColor(j++);
-                        
-                        cell.setColor(colour);
-                        
+                    List<Object> rowData = makeDetectionSettingsRowDataForDataset(dataset, maxChannels, numberOfRowsPerSignalGroup);
+                    model.addColumn(dataset.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
+                }
+            } else {
+                model.addColumn("No data loaded");
+            }
+        }
+        return model;    
+    }
 
 
-							NuclearSignalOptions ns = dataset.getAnalysisOptions()
-                                    .getNuclearSignalOptions(signalGroup);
+    private static List<Object> makeDetectionSettingsRowDataForDataset(AnalysisDataset dataset, int signalGroupCount, int rowsPerSignalGroup){
+        
+        // format the numbers and make into a tablemodel
+        DecimalFormat df = new DecimalFormat("#0.00"); 
+        
+        CellCollection collection = dataset.getCollection();
+        
+        List<Object> rowData = new ArrayList<Object>(0);
+        rowData.add(collection.getSignalManager().getSignalGroups().size());
+        
+        /*
+         * If the dataset is a merge, then the analysis options will be null.
+         * We could loop through the merge sources until finding the merge
+         * with the signal options BUT there could be conflicts with 
+         * signal groups when merging.
+         * 
+         * For now, do not display a table if the dataset has merge sources
+         */
+        
+        if(dataset.hasMergeSources()){
+            for(int i=0;i<signalGroupCount;i++){
+                rowData.add("");
+                for(int j=0; j<rowsPerSignalGroup;j++){
+                    rowData.add("N/A - merge");
+                }
+            }
+        } else {
+            
+            int signalGroupNumber = 0; // Store the number of signal groups processed from this dataset
+
+            int j=0;
+            for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
+            
+                signalGroupNumber++;
+            
+                SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
+                
+                Color colour = collection.getSignalGroup(signalGroup).hasColour()
+                        ? collection.getSignalGroup(signalGroup).getGroupColour()
+                        : ColourSelecter.getSegmentColor(j++);
+                
+                cell.setColor(colour);
+                
 
 
+                NuclearSignalOptions ns = dataset.getAnalysisOptions()
+                        .getNuclearSignalOptions(signalGroup);
+  
+                if(ns==null){ // occurs when no signals are present? Should never occur with the new SignalGroup system
+                    for(int i=0; i<rowsPerSignalGroup;i++){
+                        rowData.add("");
+                    }
+                   
+
+                } else {
+                    Object signalThreshold = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
+                            ? ns.getThreshold()
+                                    : "Variable";
+
+                            Object signalMode = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
+                                    ? "Forward"
+                                            : ns.getDetectionMode()==NuclearSignalOptions.REVERSE
+                                            ? "Reverse"
+                                                    : "Adaptive";                    
 
 
-							if(ns==null){ // occurs when no signals are present?
-								for(int i=0; i<numberOfRowsPerSignalGroup;i++){
-									rowData.add("");
-								}
+                            rowData.add("");
+                            rowData.add(cell);
+                            rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
+                            rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
+                            rowData.add(  signalThreshold );
+                            rowData.add(ns.getMinSize());
+                            rowData.add(df.format(ns.getMaxFraction()));
+                            rowData.add(df.format(ns.getMinCirc()));
+                            rowData.add(df.format(ns.getMaxCirc()));
+                            rowData.add(signalMode);
+                }
+            }
+            
+            /*
+             * If the number of signal groups in the dataset is less than the size of the table,
+             * the remainder should be filled with blank cells
+             */
+            
+            if(signalGroupNumber < signalGroupCount){
+                
+                // There will be empty rows in the table. Fill the blanks
+                for(int i = signalGroupNumber+1; i<=signalGroupCount;i++){
+                    for(int k = 0; k<rowsPerSignalGroup;k++){
+                        rowData.add("");
+                    }
+                }                
+            }
+        }
+        return rowData;
+    }
 
-
-							} else {
-                                Object signalThreshold = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
-                                        ? ns.getThreshold()
-										: "Variable";
-
-                                        Object signalMode = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
-
-												? "Forward"
-                                                : ns.getDetectionMode()==NuclearSignalOptions.REVERSE
-
-														? "Reverse"
-														: "Adaptive";					
-
-
-										rowData.add("");
-//										rowData.add(signalGroup);
-//										rowData.add(collection.getSignalManager().getSignalGroupName(signalGroup));
-                                        rowData.add(cell);
-
-										rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
-										rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
-										rowData.add(  signalThreshold );
-										rowData.add(ns.getMinSize());
-										rowData.add(df.format(ns.getMaxFraction()));
-										rowData.add(df.format(ns.getMinCirc()));
-										rowData.add(df.format(ns.getMaxCirc()));
-										rowData.add(signalMode);
-							}
-
-						}
-					}
-					model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
-				}
-			} else {
-				model.addColumn("No data loaded");
-			}
-		}
-//		IJ.log("Created model");
-		return model;	
-	}
 	
 		
 	/**
@@ -523,7 +544,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 					for(SignalStatistic stat : SignalStatistic.values()){
                         double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
 
-						if(stat.isDimensionless()){
+                        if(stat.isDimensionless() || stat.isAngle()){
 							rowData.add(df.format(pixel) );
 						} else {
                             double micron = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);

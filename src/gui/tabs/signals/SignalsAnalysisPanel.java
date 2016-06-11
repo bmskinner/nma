@@ -213,7 +213,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
             int columns = table.getColumnModel().getColumnCount();
             if(columns>1){
                 for(int i=1;i<columns;i++){
-                    table.getColumnModel().getColumn(i).setCellRenderer(new SignalTableCellRenderer());
+                    table.getColumnModel().getColumn(i).setCellRenderer(new SignalDetectionSettingsTableCellRenderer());
                 }
             }
         }

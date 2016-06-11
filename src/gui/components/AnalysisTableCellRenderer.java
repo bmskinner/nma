@@ -1,3 +1,23 @@
+/*******************************************************************************
+ *      Copyright (C) 2015, 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details. Gluten-free. May contain 
+ *     traces of LDL asbestos. Avoid children using heavy machinery while under the
+ *     influence of alcohol.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 package gui.components;
 
 import java.awt.Color;
@@ -10,7 +30,7 @@ import javax.swing.JTable;
  * have the same value, colour them light green
  */
 @SuppressWarnings("serial")
-public class AnalysisTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+public class AnalysisTableCellRenderer extends ConsistentRowTableCellRenderer {
 
     public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         
@@ -30,29 +50,5 @@ public class AnalysisTableCellRenderer extends javax.swing.table.DefaultTableCel
       return l;
     }
     
-    /**
-     * Test if the values across the given row are consistent between columns
-     * @param table
-     * @param row
-     * @return
-     */
-    private boolean isRowConsistentAcrossColumns(JTable table, int row){
-         
-        boolean ok = true;
-        if(table.getColumnCount()>2){ // don't colour single datasets
-            
-            Object test = table.getModel().getValueAt(row, 1);
-            for(int col = 1; col<table.getColumnCount(); col++){
-                Object value = table.getModel().getValueAt(row, col);
-                if( ! test.equals(value)){
-                    ok = false;
-                }
-            }
-
-        } else{
-            ok = false;
-        }
-        return ok;
-    }
 }
 
