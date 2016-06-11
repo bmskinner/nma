@@ -282,12 +282,20 @@ public class SignalManager {
               sumSin += Math.sin(value);
               sumCos += Math.cos(value);
           }
-          return Math.atan2(sumSin, sumCos);
+          
+          double mean = Math.atan2(sumSin, sumCos);
+          
+          if(mean<0){
+              mean += 360;
+          }
+          return mean;
       }
       
       /**
        * For the signals in a group, find the corrected mean angle using the arctangent
-       * method, then rescale the angles to use the mean as a zero point 
+       * method, then rescale the angles to use the mean as a zero point.
+       * The returned values should be in the range -180 - +180 from the new zero
+
      * @param signalGroup
      * @return
      * @throws Exception
@@ -295,16 +303,53 @@ public class SignalManager {
     public double[] getOffsetSignalAngles(UUID signalGroup) throws Exception{
 
           double[] values = getSignalStatistics(SignalStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup); 
-          double meanAngle = getMeanSignalAngle(signalGroup);
           
+          /*
+           * The mean is the actual mean of the series of signal angles, with correction for wrapping.
+           */
+
+          double meanAngle = getMeanSignalAngle(signalGroup);
+         
+          /*
+           * This is the distance from the mean angle to the zero angle, so values can be
+           * corrected back to 'real' angles
+           */
+          double offset = angleDistance (meanAngle, 0) ;
+
           double[] result = new double[values.length];
           
           for(int i=0;i<values.length; i++){
-              result[i] = values[i] - meanAngle;
+             
+        	  /*
+               * Calculate the distance of the signal from the mean value, including a wrap.
+               */
+              
+              double distance = angleDistance (values[i], meanAngle) ;
+              
+              /*
+               * Correct the distance into the distance from the zero point of the nucleus
+               */
+              result[i] = distance + offset;
+
           }
           return result;
       }
 
+    
+    /**
+     * Length (angular) of a shortest way between two angles.
+     * It will be in range [-180, 180].
+     */
+    private double angleDistance(double a, double b) {
+    	double phi = Math.abs(b - a) % 360;       // This is either the distance or 360 - distance
+    	double distance = phi > 180 ? 360 - phi : phi;
+
+    	double sign = (a - b >= 0 && a - b <= 180) || (a - b <= -180 && a- b>= -360) ? 1 : -1;
+    	distance *= sign; 
+    	return distance;
+
+
+    }
 
 	  
 }

@@ -246,9 +246,11 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			
-			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
+            for( UUID signalGroup : collection.getSignalManager().getSignalGroups()){
+
 								
-                String groupLabel = dataset.getCollection().getSignalManager().getSignalGroupName(signalGroup)+"_"+stat.toString();
+                String groupLabel = collection.getSignalManager().getSignalGroupName(signalGroup)+"_"+stat.toString();
+
                 double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
                 KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values, 0.001);
 
@@ -651,54 +653,59 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	}
 	
 	/**
-	 * Create a boxplot dataset for signal areas
+     * Create a boxplot dataset for signal statistics
+     * @param options the chart options
+     * @return a boxplot dataset
+     * @throws Exception 
+     */
+    public static BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) throws Exception{
+        
+        if(options.isSingleDataset()){
+            return createSingleDatasetSignalStatisticBoxplotDataset(options);
+        }
+        
+        /*
+         * TODO: make multi dataset version
+         */
+        return createSingleDatasetSignalStatisticBoxplotDataset(options);
+        
+    }
+    
+    /**
+     * Create a boxplot dataset for signal statistics for a single analysis dataset
 	 * @param dataset the AnalysisDataset to get signal info from
 	 * @return a boxplot dataset
 	 * @throws Exception 
 	 */
-	public static BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) throws Exception {
+    private static BoxAndWhiskerCategoryDataset createSingleDatasetSignalStatisticBoxplotDataset(ChartOptions options) throws Exception {
+
 
 		OutlierFreeBoxAndWhiskerCategoryDataset result = new OutlierFreeBoxAndWhiskerCategoryDataset();
 		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
-		CellCollection c = options.firstDataset().getCollection();
+        CellCollection collection = options.firstDataset().getCollection();
+
 		
-		for(UUID signalGroup : c.getSignalManager().getSignalGroups()){
-			
-			List<Double> list = new ArrayList<Double>();
-			for(NuclearSignal s : c.getSignalManager().getSignals(signalGroup)){
-				
-				list.add(s.getStatistic(stat));
-			}
+        for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
+
+            double[] values = collection.getSignalManager().getSignalStatistics(stat, options.getScale(), signalGroup);
+            /*
+             * For charting, use offset angles, otherwise the boxplots will fail on wrapped signals
+             */
+            if(stat.equals(SignalStatistic.ANGLE)){
+                values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
+            }
+
+            List<Double> list = new ArrayList<Double>();
+            for(double value : values){
+                list.add(value);
+            }
+
 			result.add(list, "Group_"+signalGroup, stat.toString());
 		}
 		return result;
 	}
-	
-	/**
-	 * Create a boxplot dataset for signal areas
-	 * @param dataset the AnalysisDataset to get signal info from
-	 * @return a boxplot dataset
-	 * @throws Exception 
-	 */
-	public static BoxAndWhiskerCategoryDataset createSignalAreaBoxplotDataset(AnalysisDataset dataset) throws Exception {
-
-		OutlierFreeBoxAndWhiskerCategoryDataset result = new OutlierFreeBoxAndWhiskerCategoryDataset();
-
-		CellCollection c = dataset.getCollection();
 		
-		for(UUID signalGroup : c.getSignalManager().getSignalGroups()){
-			
-			List<Double> list = new ArrayList<Double>();
-			for(NuclearSignal s : c.getSignalManager().getSignals(signalGroup)){
-				
-				list.add(s.getStatistic(SignalStatistic.AREA));
-			}
-			result.add(list, "Group_"+signalGroup, "Area");
-		}
-		return result;
-	}
-	
 	public static CategoryDataset createShellBarChartDataset(List<AnalysisDataset> list){
 		DefaultStatisticalCategoryDataset ds = new DefaultStatisticalCategoryDataset();
 		for(AnalysisDataset dataset : list){
