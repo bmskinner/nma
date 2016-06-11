@@ -21,6 +21,7 @@ package gui.tabs;
 import gui.tabs.nuclear.NuclearBoxplotsPanel;
 import gui.tabs.nuclear.NuclearHistogramsPanel;
 import gui.tabs.nuclear.NuclearOverlaysPanel;
+import gui.tabs.nuclear.NuclearScatterChartPanel;
 import gui.tabs.nuclear.NuclearStatsPanel;
 import gui.tabs.nuclear.NucleusMagnitudePanel;
 import gui.tabs.nuclear.WilcoxonDetailPanel;
@@ -45,6 +46,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
 	private NucleusMagnitudePanel  nucleusMagnitudePanel;
 	private NuclearOverlaysPanel   nuclearOverlaysPanel;
 	private NuclearStatsPanel      nuclearStatsPanel;
+	private NuclearScatterChartPanel nuclearScatterChartPanel;
 	
 	private JTabbedPane 	tabPane;
 
@@ -78,6 +80,11 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		this.addSubPanel(nuclearOverlaysPanel);
 		tabPane.addTab("Overlays", null, nuclearOverlaysPanel, null);
 		
+		nuclearScatterChartPanel 	= new NuclearScatterChartPanel();
+		this.addSubPanel(nuclearScatterChartPanel);
+		tabPane.addTab("Scatter", null, nuclearScatterChartPanel, null);
+		
+		
 		this.add(tabPane, BorderLayout.CENTER);
 	}
 	
@@ -86,22 +93,25 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		
 		
 		nuclearStatsPanel.update(getDatasets());
-		log(Level.FINEST, "Updated nuclear stats panel");
+		finest("Updated nuclear stats panel");
 		
 		boxplotPanel.update(getDatasets());
-		log(Level.FINEST, "Updated nuclear boxplots panel");
+		finest("Updated nuclear boxplots panel");
 		
 		histogramsPanel.update(getDatasets());
-		log(Level.FINEST, "Updated nuclear histograms panel");
+		finest("Updated nuclear histograms panel");
 		
 		wilcoxonPanel.update(getDatasets());
-		log(Level.FINEST, "Updating nuclear Wilcoxon panel");
+		finest("Updating nuclear Wilcoxon panel");
 		
 		nucleusMagnitudePanel.update(getDatasets());
-		log(Level.FINEST, "Updating magnitude panel");
+		finest("Updating magnitude panel");
 		
 		nuclearOverlaysPanel.update(getDatasets());
-		log(Level.FINEST, "Updating overlays panel");
+		finest("Updating overlays panel");
+		
+		nuclearScatterChartPanel.update(getDatasets());
+		finest("Updating scatter panel");
 	}
 	
 	@Override

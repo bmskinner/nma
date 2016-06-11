@@ -147,6 +147,11 @@ public class AddNuclearSignalAction extends ProgressableAction {
 					listCollection.addCell( newCell );
 				}
 				signalPopulations.add(listCollection);
+				
+				// Copy over existing signal groups
+				for(UUID id  : r.getSignalGroups()){
+					listCollection.addSignalGroup(id, new SignalGroup(r.getSignalGroup(id)));
+				}
                 listCollection.addSignalGroup(signalGroup, new SignalGroup(r.getSignalGroup(signalGroup)));
 
 
@@ -160,6 +165,11 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 					for(Cell c : notList){
 						notListCollection.addCell( new Cell(c) );
+					}
+					
+					// Copy over existing signal groups
+					for(UUID id  : r.getSignalGroups()){
+						notListCollection.addSignalGroup(id, new SignalGroup(r.getSignalGroup(id)));
 					}
 					signalPopulations.add(notListCollection);
 				}

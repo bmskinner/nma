@@ -51,7 +51,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(getDatasets())
-					.setStatistic(stat)
+					.addStatistic(stat)
 					.setScale(MeasurementScale.PIXELS)
 					.build();
 
@@ -103,7 +103,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(getDatasets())
-					.setStatistic(stat)
+					.addStatistic(stat)
 					.setScale(scale)
 					.build();
 				

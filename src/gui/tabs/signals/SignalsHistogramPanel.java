@@ -47,7 +47,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(null)
-					.setStatistic(stat)
+					.addStatistic(stat)
 					.setScale(scale)
 					.setUseDensity(false)
 					.setSignalGroup(null)
@@ -81,7 +81,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			
 			ChartOptionsBuilder builder = new ChartOptionsBuilder();
 			ChartOptions options = builder.setDatasets(getDatasets())
-				.setStatistic(stat)
+				.addStatistic(stat)
 				.setScale(scale)
 				.setUseDensity(useDensity)
 				.build();

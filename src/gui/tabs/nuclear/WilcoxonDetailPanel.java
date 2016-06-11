@@ -54,7 +54,7 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 
 			TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setStat(stat)
+			.addStatistic(stat)
 			.build();
 
 			TableModel model = getTable(options);

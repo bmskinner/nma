@@ -81,7 +81,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 					
 					TableOptions options = new TableOptionsBuilder()
 					.setDatasets(getDatasets())
-					.setStat(stat)
+					.addStatistic(stat)
 					.setSegPosition(seg.getPosition())
 					.build();
 

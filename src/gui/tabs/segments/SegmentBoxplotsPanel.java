@@ -87,7 +87,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
-					.setStatistic(SegmentStatistic.LENGTH)
+					.addStatistic(SegmentStatistic.LENGTH)
 					.setScale(scale)
 					.setSegPosition(seg.getPosition())
 					.build();

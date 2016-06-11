@@ -74,7 +74,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
-					.setStatistic(SegmentStatistic.LENGTH)
+					.addStatistic(SegmentStatistic.LENGTH)
 					.setScale(scale)
 					.setUseDensity(useDensity)
 					.setSegPosition(seg.getPosition())

@@ -979,6 +979,12 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  
 	  b.append( this.ruleSets.toString()+newLine);
 	  
+	  b.append("Signal groups:"+newLine);
+	  for(UUID signalGroupID : this.signalGroups.keySet() ){
+		  SignalGroup group = this.signalGroups.get(signalGroupID);
+		  b.append( signalGroupID.toString()+": "+group.toString()+newLine);
+	  }
+	  
 	  return b.toString();
   }
   

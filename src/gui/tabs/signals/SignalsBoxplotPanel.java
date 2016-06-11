@@ -52,7 +52,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
 			ChartOptionsBuilder builder = new ChartOptionsBuilder();
 			ChartOptions options = builder.setDatasets(null)
-					.setStatistic(stat)
+					.addStatistic(stat)
 					.setScale(MeasurementScale.PIXELS)
 					.build();
 
@@ -104,7 +104,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
 			ChartOptionsBuilder builder = new ChartOptionsBuilder();
 			ChartOptions options = builder.setDatasets(getDatasets())
-					.setStatistic(stat)
+					.addStatistic(stat)
 					.setScale(scale)
 					.build();
 

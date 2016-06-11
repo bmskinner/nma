@@ -15,13 +15,21 @@ import analysis.AnalysisDataset;
  * @author bms41
  *
  */
+/**
+ * @author ben
+ *
+ */
+/**
+ * @author ben
+ *
+ */
 public abstract class AbstractOptions implements Loggable {
 	
-	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-	private PlottableStatistic stat    = null;
-	private UUID segID                 = null; // the id of the segment (not consistent between datasets)
-	private int segPosition            = 0;    // the position of the segment in the profile (consistent between datasets)
-	private MeasurementScale scale     = MeasurementScale.PIXELS;
+	private List<AnalysisDataset> list      = new ArrayList<AnalysisDataset>();
+	private List<PlottableStatistic> stats  = new ArrayList<PlottableStatistic>();;
+	private UUID segID                      = null; // the id of the segment (not consistent between datasets)
+	private int segPosition                 = 0;    // the position of the segment in the profile (consistent between datasets)
+	private MeasurementScale scale          = MeasurementScale.PIXELS;
 			
 	public AbstractOptions(List<AnalysisDataset> list){
 		this.list = list;
@@ -75,12 +83,49 @@ public abstract class AbstractOptions implements Loggable {
 		return this.list.get(0);
 	}
 	
+	/**
+	 * Get the first statistic in the list
+	 * @return
+	 */
 	public PlottableStatistic getStat() {
-		return stat;
+		return stats.get(0);
 	}
 
+	
+	/**
+	 * Set the first statistic in the list (for backwards compatibility)
+	 * @param stat
+	 */
 	public void setStat(PlottableStatistic stat) {
-		this.stat = stat;
+		this.stats.set(0, stat);
+	}
+	
+	/**
+	 * Replace all internal stats with the given list
+	 * @param stats
+	 */
+	public void setStats(List<PlottableStatistic> stats){
+		this.stats = stats;
+	}
+	
+	/**
+	 * Append the given stat to the end of the internal list
+	 * @param stat
+	 */
+	public void addStat(PlottableStatistic stat){
+		stats.add(stat);
+	}
+	
+	/**
+	 * Get the saved stats
+	 * @return
+	 */
+	public List<PlottableStatistic> getStats(){
+		return stats;
+	}
+	
+	public PlottableStatistic getStat(int index){
+		return stats.get(index);
 	}
 	
 	public UUID getSegID() {
@@ -115,7 +160,7 @@ public abstract class AbstractOptions implements Loggable {
 		result = prime * result + ((scale == null) ? 0 : scale.hashCode());
 		result = prime * result + ((segID == null) ? 0 : segID.hashCode());
 		result = prime * result + segPosition;
-		result = prime * result + ((stat == null) ? 0 : stat.hashCode());
+		result = prime * result + ((stats == null) ? 0 : stats.hashCode());
 		return result;
 	}
 
@@ -142,10 +187,10 @@ public abstract class AbstractOptions implements Loggable {
 			return false;
 		if (segPosition != other.segPosition)
 			return false;
-		if (stat == null) {
-			if (other.stat != null)
+		if (stats == null) {
+			if (other.stats != null)
 				return false;
-		} else if (!stat.equals(other.stat))
+		} else if (!stats.equals(other.stats))
 			return false;
 		return true;
 	}

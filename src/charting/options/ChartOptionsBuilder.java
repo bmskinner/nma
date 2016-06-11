@@ -53,7 +53,7 @@ public class ChartOptionsBuilder {
 	private ProfileType type           = ProfileType.REGULAR;
 	private UUID signalGroup           = null;
 	private boolean useDensity         = false;
-	private PlottableStatistic stat    = null;
+	private List<PlottableStatistic> stats    = new ArrayList<PlottableStatistic>();
 	private MeasurementScale scale     = MeasurementScale.PIXELS;
 	private UUID segID                 = null;
 	private int segPosition            = 0;
@@ -175,8 +175,8 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
-	public ChartOptionsBuilder setStatistic(PlottableStatistic s){
-		this.stat = s;
+	public ChartOptionsBuilder addStatistic(PlottableStatistic s){
+		this.stats.add(s);
 		return this;
 	}
 	
@@ -255,7 +255,7 @@ public class ChartOptionsBuilder {
 		result.setShowMarkers(showMarkers);
 		result.setHideProfiles(hideProfiles);
 		result.setSignalGroup(signalGroup);
-		result.setStat(stat);
+		result.setStats(stats);
 		result.setTag(tag);
 		result.setType(type);
 		result.setUseDensity(useDensity);

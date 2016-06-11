@@ -21,7 +21,7 @@ public class TableOptionsBuilder {
 
 	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	private TableType type             = null;
-	private PlottableStatistic stat    = null;
+	private List<PlottableStatistic> stats    = new ArrayList<PlottableStatistic>();;
 	private UUID segID                 = null; // the id of the segment (not consistent between datasets)
 	private int segPosition            = 0;    // the position of the segment in the profile (consistent between datasets)
 	private MeasurementScale scale     = MeasurementScale.PIXELS;
@@ -41,8 +41,8 @@ public class TableOptionsBuilder {
 		return this;
 	}
 
-	public TableOptionsBuilder setStat(PlottableStatistic stat) {
-		this.stat = stat;
+	public TableOptionsBuilder addStatistic(PlottableStatistic s){
+		this.stats.add(s);
 		return this;
 	}
 
@@ -69,7 +69,7 @@ public class TableOptionsBuilder {
 	public TableOptions build(){
 		TableOptions options =  new TableOptions(list);
 		options.setType(type);
-		options.setStat(stat);
+		options.setStats(stats);
 		options.setSegID(segID);
 		options.setSegPosition(segPosition);
 		options.setScale(scale);

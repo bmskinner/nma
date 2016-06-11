@@ -55,7 +55,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 					
 					ChartOptionsBuilder builder = new ChartOptionsBuilder();
 					ChartOptions options = builder.setDatasets(null)
-						.setStatistic(stat)
+						.addStatistic(stat)
 						.setScale(scale)
 						.setUseDensity(false)
 						.build();
@@ -91,7 +91,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(getDatasets())
-					.setStatistic(stat)
+					.addStatistic(stat)
 					.setScale(scale)
 					.setUseDensity(useDensity)
 					.build();
