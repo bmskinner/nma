@@ -20,11 +20,13 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +89,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
 		commandMap.put("nucleus history", InterfaceMethod.DUMP_LOG_INFO);
 		commandMap.put("info", InterfaceMethod.INFO);
+		commandMap.put("kill", InterfaceMethod.KILL_ALL_TASKS);
 		
 	}
 	
@@ -195,14 +198,21 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	 */
 	public void logc(String s){
 		print(s);
-//		StyledDocument doc = (StyledDocument) textArea.getDocument();
-//		SimpleAttributeSet keyWord = new SimpleAttributeSet();
-//		try {
-//			doc.insertString(doc.getLength(), s, keyWord );
-//		} catch (BadLocationException e) {
-//			error("Error appending", e);
-//		}
-//		textArea.append(s);
+	}
+	
+	/**
+	 * Get all the progress bars attached to the log panel
+	 * @return
+	 */
+	public List<JProgressBar> getProgressBars(){
+		List<JProgressBar> result = new ArrayList<JProgressBar>();
+		for(Component c : progressPanel.getComponents()){
+			if(c.getClass().isInstance(JProgressBar.class)){
+				result.add((JProgressBar) c);
+			}
+			
+		}
+		return result;
 	}
 	
 	public void addProgressBar(JProgressBar progressBar){

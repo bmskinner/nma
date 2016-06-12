@@ -23,6 +23,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.RGBStackMerge;
 import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
 import utility.Constants;
 
 /**
@@ -140,5 +141,24 @@ public class ImageExporter implements Loggable {
 		
 		result = result.flatten();
 		return result;
+	}
+	
+	
+	/**
+	 * Given a greyscale image processor, make a grey RGB processor
+	 * @param ip
+	 * @return
+	 */
+	public ImageProcessor convertTORGBGreyscale(ImageProcessor ip){
+		ImagePlus[] images = new ImagePlus[3];
+		images[Constants.RGB_RED]   = new ImagePlus("red", ip);  
+		images[Constants.RGB_GREEN] = new ImagePlus("green", ip);  
+		images[Constants.RGB_BLUE]  = new ImagePlus("blue", ip);      
+
+		ImagePlus result = RGBStackMerge.mergeChannels(images, false); 
+		
+		result = result.flatten();
+		
+		return result.getProcessor();
 	}
 }     

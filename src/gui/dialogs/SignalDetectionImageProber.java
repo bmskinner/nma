@@ -42,6 +42,7 @@ import io.ImageExporter;
 import io.ImageImporter;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
+import utility.Constants;
 import utility.Utils;
 
 
@@ -92,13 +93,24 @@ public class SignalDetectionImageProber extends ImageProber {
 			setStatusLoading();
 			this.setLoadingLabelText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
 
+			finest("Importing image "+imageFile.getAbsolutePath());
+			
+			// Import the image as a stack
 			ImageStack stack = ImageImporter.getInstance().importImage(imageFile);
 
-			// Import the image as a stack
+			// Find the processor number in the stack to use
+			int stackNumber = Constants.rgbToStack(channel);
+			
+			finest("Converting image");
+			// Get the greyscale processor for the signal channel
+			ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
+			
+			// Convert to an RGB processor for annotation
+			ImageProcessor openProcessor = ImageExporter.getInstance().convertTORGBGreyscale(greyProcessor);
+			
 			String imageName = imageFile.getName();
 
-			log(Level.FINEST, "Converting image");
-			ImageProcessor openProcessor = ImageExporter.getInstance().makeGreyRGBImage(stack).getProcessor();
+//			ImageProcessor openProcessor = ImageExporter.getInstance().makeGreyRGBImage(stack).getProcessor();
 			openProcessor.invert();
 			procMap.put(SignalImageType.DETECTED_OBJECTS, openProcessor);
 

@@ -71,6 +71,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
@@ -157,7 +158,7 @@ public class MainWindow
 	 * Create the frame.
 	 */
 	public MainWindow() {
-		
+				
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		try {
 			setTitle("Nuclear Morphology Analysis v"+Version.currentVersion().toString());
@@ -1191,6 +1192,9 @@ public class MainWindow
 				log(d.getCollection().toString());
 			}
 			
+		case KILL_ALL_TASKS:
+			killAllTasks();
+			
 		default:
 			break;
 
@@ -1211,24 +1215,15 @@ public class MainWindow
 		return populationsPanel.getAllDatasets().size()>0;
 	}
 	
-//	@SuppressWarnings("serial")
-//	class GlassPane extends JPanel implements ItemListener {
-//        
-//    	public GlassPane(){
-//    		JLabel l = new JLabel();
-//            l.setText("Hello");
-//            l.setBorder(new LineBorder(Color.BLACK, 1));
-//            l.setBounds(10, 10, 50, 20);
-//            l.setBackground(Color.RED);
-//            l.setOpaque(true);
-//            l.setPreferredSize(l.getSize());
-//           add(l);
-//    	}
-//    	
-//        //React to change button clicks.
-//        public void itemStateChanged(ItemEvent e) {
-//            setVisible(e.getStateChange() == ItemEvent.SELECTED);
-//        }
-//
-//    }
+	private void killAllTasks(){
+		executorService.shutdownNow();
+		
+		warn("Found "+logPanel.getProgressBars().size()+" active bars");
+		for(JProgressBar bar : logPanel.getProgressBars()){
+			logPanel.remove(bar);
+		}
+		warn("Killed all running tasks");
+		
+	}
+
 }

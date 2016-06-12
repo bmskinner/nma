@@ -87,7 +87,8 @@ public class InterfaceEvent extends EventObject {
 		UPDATE_IN_PROGRESS  ("Updating"),
 		UPDATE_COMPLETE     ("Update finished"),
 		DUMP_LOG_INFO		("Dump logs for nuclei"),
-		INFO		        ("Show information about the selected dataset");
+		INFO		        ("Show information about the selected dataset"),
+		KILL_ALL_TASKS      ("Attempt to halt all tasks in the executor service");
 		
 		private final String name;
 		
