@@ -1,10 +1,16 @@
 package gui.components;
 
+import java.awt.Color;
+
 import javax.swing.JTable;
 
-@SuppressWarnings("serial")
-public abstract class ConsistentRowTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+import logging.Loggable;
 
+@SuppressWarnings("serial")
+public abstract class ConsistentRowTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer implements Loggable {
+
+	public static final Color CONSISTENT_CELL_COLOUR = new Color(178, 255, 102);
+	
     /**
      * Test if the values across the given row are consistent between columns
      * @param table
@@ -19,6 +25,17 @@ public abstract class ConsistentRowTableCellRenderer extends javax.swing.table.D
             Object test = table.getModel().getValueAt(row, 1);
             for(int col = 1; col<table.getColumnCount(); col++){
                 Object value = table.getModel().getValueAt(row, col);
+                
+                // Ignore empty cells
+                if(value==null){
+//               
+                	ok = false;
+                } else {
+                	 if(value.toString().equals("")){
+                		 ok = false;
+                	 }
+                }
+                
                 if( ! test.equals(value)){
                     ok = false;
                 }

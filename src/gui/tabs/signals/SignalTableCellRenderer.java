@@ -13,10 +13,9 @@ import gui.components.ConsistentRowTableCellRenderer;
  * @author bms41
  *
  */
+@SuppressWarnings("serial")
 public class SignalTableCellRenderer extends ConsistentRowTableCellRenderer {
 
-
-	private static final long serialVersionUID = 1L;
 
 	public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
@@ -26,15 +25,16 @@ public class SignalTableCellRenderer extends ConsistentRowTableCellRenderer {
 		
 		if(row<table.getModel().getRowCount()-1){
 			
+			int nextRow = row+1;
 			// get the value in the first column of the row below
-			String nextRowHeader = table.getModel().getValueAt(row+1, 0).toString();
+			String nextRowHeader = table.getModel().getValueAt(nextRow, 0).toString();
 
 			if(nextRowHeader.equals("Signal group")){
 				// we want to colour this cell preemptively
 				// get the signal table cell from the table
 				
-				if( ! table.getModel().getValueAt(row+1, column).toString().equals("")){
-					SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row+1, column);
+				if( ! table.getModel().getValueAt(nextRow, column).toString().equals("")){
+					SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(nextRow, column);
 
 					colour = cell.getColor();
 				}

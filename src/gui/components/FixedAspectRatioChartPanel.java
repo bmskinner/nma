@@ -31,6 +31,7 @@ import org.jfree.data.xy.XYDataset;
 @SuppressWarnings("serial")
 public class FixedAspectRatioChartPanel extends ExportableChartPanel implements ComponentListener {
 
+	private static final double DEFAULT_AUTO_RANGE = 10;
 
 	public FixedAspectRatioChartPanel(JFreeChart chart){
 		super(chart);
@@ -93,6 +94,14 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel implements 
 					 : yMin;
 			}
 			
+			// If not datasets were found, set defaults
+			if(xMin == Double.MAX_VALUE || yMin == Double.MAX_VALUE){
+				xMin = -DEFAULT_AUTO_RANGE;
+				yMin = -DEFAULT_AUTO_RANGE;
+				xMax = DEFAULT_AUTO_RANGE;
+				yMax = DEFAULT_AUTO_RANGE;
+			}
+			
 
 			// find the ranges they cover
 			double xRange = xMax - xMin;
@@ -126,7 +135,8 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel implements 
 			plot.getDomainAxis().setRange(xMin, xMax);
 
 		} catch (Exception e){
-			fine("Error restoring auto bounds, falling back to default");
+			finer("Error restoring auto bounds, falling back to default");
+			log(Level.FINEST,"Error restoring auto bounds, falling back to default", e);
 			super.restoreAutoBounds();
 		}
 	

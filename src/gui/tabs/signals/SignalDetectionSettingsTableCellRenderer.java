@@ -24,6 +24,7 @@
 import ij.IJ;
 
 import java.awt.Color;
+import java.util.logging.Level;
 
 import javax.swing.JLabel;
 
@@ -48,7 +49,7 @@ import charting.datasets.SignalTableCell;
 				// Highlight consistent rows
 				if(isRowConsistentAcrossColumns(table, row)){
 
-					colour = new Color(178, 255, 102);
+					colour = ConsistentRowTableCellRenderer.CONSISTENT_CELL_COLOUR;
 
 				}
 
@@ -82,10 +83,8 @@ import charting.datasets.SignalTableCell;
 				}
 
 			} catch(Exception e){
-				IJ.log("Error in renderer:");
-				for(StackTraceElement e1 : e.getStackTrace()){
-					IJ.log(e1.toString());
-				}
+				warn("Error in signal detection table renderer");
+				log(Level.FINE, "Error in signal detection table renderer", e);
 			}
 			
 			

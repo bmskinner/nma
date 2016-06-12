@@ -58,9 +58,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		headerPanel.add(correlationLabel);
 
 		JPanel tablePanel = new JPanel(new BorderLayout());
-		
-		tablePanel.setMinimumSize(new Dimension(300, 200));
-		
+				
 		TableModel model = NucleusTableDatasetCreator.getInstance().createBlankTable();
 		rhoTable = new ExportableTable(model);
 		rhoTable.setEnabled(false);
@@ -74,6 +72,9 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		JScrollPane scrollPane  = new JScrollPane();
 		scrollPane.setViewportView(tablePanel);
 		scrollPane.setColumnHeaderView(rhoTable.getTableHeader());
+		Dimension size = new Dimension(300, 200);
+		scrollPane.setMinimumSize(size);
+		scrollPane.setPreferredSize(size);
 		
 		this.add(scrollPane, BorderLayout.WEST);
 	}

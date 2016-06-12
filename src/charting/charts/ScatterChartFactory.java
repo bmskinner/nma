@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.data.xy.XYDataset;
@@ -101,6 +102,9 @@ public class ScatterChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		
+		NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+		yAxis.setAutoRangeIncludesZero(false);
+		
 		DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
 		renderer.setBaseShapesVisible(true);
 		renderer.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
@@ -143,6 +147,9 @@ public class ScatterChartFactory extends AbstractChartFactory {
 		
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
+		
+		NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+		yAxis.setAutoRangeIncludesZero(false);
 		
 		DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
 		renderer.setBaseShapesVisible(true);

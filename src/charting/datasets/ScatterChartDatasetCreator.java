@@ -172,50 +172,11 @@ private static ScatterChartDatasetCreator instance = null;
 
 
 		model.addColumn("Dataset", names);
-		model.addColumn("Rho", rho);
+		model.addColumn("Spearman's Rho", rho);
 		return model;
 
 	}
-	
-	/**
-	 * Calculate the Spearman's rank correlations between the given stats 
-	 * @param options
-	 * @return
-	 */
-	public List<Double> createNucleusSpearmanCorrelation(ChartOptions options){
-		List<AnalysisDataset> datasets = options.getDatasets();
 		
-		List<PlottableStatistic> stats =  options.getStats();
-		
-		MeasurementScale scale = options.getScale();
-		
-		NucleusStatistic statA = (NucleusStatistic) stats.get(0);
-		NucleusStatistic statB = (NucleusStatistic) stats.get(1);
-
-		List<Double> result = new ArrayList<Double>();
-
-		for (int i=0; i < datasets.size(); i++) {
-			
-			CellCollection c = datasets.get(i).getCollection();
-
-			// draw the segment itself
-			double[] xpoints = new double[c.getNucleusCount()];
-			double[] ypoints = new double[c.getNucleusCount()];
-			
-			List<Cell> cells = c.getCells();
-			// go through each index in the segment.
-			for(int j=0; j<cells.size();j++){
-				
-				xpoints[j] = cells.get(j).getNucleus().getStatistic(statA, scale);
-				ypoints[j] = cells.get(j).getNucleus().getStatistic(statB, scale);
-
-			}
-
-			result.add( Stats.getSpearmansCorrelation(xpoints, ypoints) );
-		}
-		return result;
-	}
-	
 	/**
 	 * Get a boxplot dataset for the given statistic for each collection
 	 * @param options the charting options
@@ -317,7 +278,7 @@ private static ScatterChartDatasetCreator instance = null;
 		}
 
 		model.addColumn("Dataset", names);
-		model.addColumn("Rho", rho);
+		model.addColumn("Spearman's Rho", rho);
 		return model;
 
 	}

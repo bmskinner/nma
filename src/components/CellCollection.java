@@ -942,6 +942,9 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
    * @return
    */
   public SignalGroup getSignalGroup(UUID id){
+	  if(this.signalGroups.get(id)==null){
+		  return null; // placeholder
+	  }
       return this.signalGroups.get(id);
   }
   

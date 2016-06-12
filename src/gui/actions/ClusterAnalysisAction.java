@@ -25,6 +25,7 @@ import gui.dialogs.ClusteringSetupDialog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
@@ -33,6 +34,7 @@ import analysis.nucleus.NucleusClusterer;
 import analysis.profiles.ProfileManager;
 import components.CellCollection;
 import components.ClusterGroup;
+import components.nuclear.SignalGroup;
 
 public class ClusterAnalysisAction extends ProgressableAction {
 
@@ -91,6 +93,13 @@ public class ClusterAnalysisAction extends ProgressableAction {
 				} catch (Exception e) {
 					logError("Error copying segments to cluster "+c.getName(), e);
 				}
+				
+				//Copy signal groups
+				for(UUID id  : dataset.getCollection().getSignalGroups()){
+					c.addSignalGroup(id, new SignalGroup(dataset.getCollection().getSignalGroup(id)));
+				}
+				
+				
 				group.addDataset(c);
 				c.setName(group.getName()+"_"+c.getName());
 				log(Level.FINEST, "Renamed cluster: "+c.getName());

@@ -218,7 +218,7 @@ public abstract class DetailPanel
 	public void update(final List<AnalysisDataset> list){
 		
 		if(this.isUpdating()){
-			log(Level.FINEST, this.getClass().getName() + ": panel is already updating");
+			finest(this.getClass().getName() + ": panel is already updating");
 		} else {
 			if(list!=null){
 				this.list = list;
@@ -239,7 +239,7 @@ public abstract class DetailPanel
 		
 //		SwingUtilities.invokeLater(new Runnable(){
 //			public void run(){
-		log(Level.FINEST, "Updating detail panel: "+ this.getClass().getName());
+		finest("Updating detail panel: "+ this.getClass().getName());
 				try {
 					if(hasDatasets()){
 						
@@ -261,6 +261,8 @@ public abstract class DetailPanel
 						updateNull();
 					} catch(Exception e1){
 						warn("Error recovering from error updating panel: "+ this.getClass().getName());
+						log(Level.FINE, "Error recovering from error updating panel: "+ this.getClass().getName(), e1);
+						setUpdating(false);
 					}
 				} finally {
 					setUpdating(false);
@@ -295,14 +297,14 @@ public abstract class DetailPanel
 	protected JFreeChart getChart(ChartOptions options) throws Exception{
 		JFreeChart chart;
 		if(getChartCache().hasChart(options)){
-			log(Level.FINEST, "Fetched cached chart: "+ this.getClass().getName());
+			finest("Fetched cached chart: "+ this.getClass().getName());
 			chart = getChartCache().getChart(options);
 
 		} else { // No cache
 
 			chart = createPanelChartType(options);
 			getChartCache().addChart(options, chart);
-			log(Level.FINEST, "Added cached chart");
+			finest("Added cached chart");
 		}
 		return chart;
 	}
@@ -317,11 +319,11 @@ public abstract class DetailPanel
 		
 		TableModel model;
 		if(getTableCache().hasTable(options)){
-			log(Level.FINEST, "Fetched cached table: "+ this.getClass().getName());
+			finest("Fetched cached table: "+ this.getClass().getName());
 			model = getTableCache().getTable(options);
 		} else {
 			model = createPanelTableType(options);
-			log(Level.FINEST, "Added cached table: "+ this.getClass().getName());
+			finest("Added cached table: "+ this.getClass().getName());
 			getTableCache().addTable(options, model);
 		}
 		return model;
@@ -349,12 +351,12 @@ public abstract class DetailPanel
 	 * @param list
 	 */
 	public void clearChartCache(){
-		log(Level.FINEST, "Clearing chart cache: "+ this.getClass().getName());
+		finest("Clearing chart cache: "+ this.getClass().getName());
 		this.getChartCache().clear();
 		for(DetailPanel panel : this.subPanels){
 			panel.clearChartCache();
 		}
-		log(Level.FINEST, "Chart cache cleared: "+ this.getClass().getName());
+		finest("Chart cache cleared: "+ this.getClass().getName());
 	}
 	
 	/**
@@ -362,16 +364,16 @@ public abstract class DetailPanel
 	 * @param list
 	 */
 	public void clearChartCache(final List<AnalysisDataset> list){
-		log(Level.FINEST, "Clearing chart cache for specific datasets: "+ this.getClass().getName());
+		finest("Clearing chart cache for specific datasets: "+ this.getClass().getName());
 		this.getChartCache().clear(list);
-		log(Level.FINEST, "Panel chart cache cleared: "+ this.getClass().getName());
+		finest("Panel chart cache cleared: "+ this.getClass().getName());
 		if(this.hasSubPanels()){
-			log(Level.FINEST, "Clearing sub-panel chart caches: "+ this.getClass().getName());
+			finest("Clearing sub-panel chart caches: "+ this.getClass().getName());
 			for(DetailPanel panel : this.subPanels){
 				panel.clearChartCache(list);
 			}
 		}
-		log(Level.FINEST, "Chart cache cleared: "+ this.getClass().getName());
+		finest("Chart cache cleared: "+ this.getClass().getName());
 	}
 	
 	/**
@@ -380,7 +382,7 @@ public abstract class DetailPanel
 	 */
 	public void refreshChartCache(){
 		clearChartCache();
-		log(Level.FINEST, "Updating charts after clear: "+ this.getClass().getName());
+		finest("Updating charts after clear: "+ this.getClass().getName());
 		this.update(getDatasets());
 	}
 	
@@ -391,9 +393,9 @@ public abstract class DetailPanel
 	 * @param list
 	 */
 	public void refreshChartCache(final List<AnalysisDataset> list){
-		log(Level.FINEST, "Refreshing chart cache for specific datasets: "+ this.getClass().getName());
+		finest("Refreshing chart cache for specific datasets: "+ this.getClass().getName());
 		clearChartCache(list);
-		log(Level.FINEST, "Updating panel for specific datasets: "+ this.getClass().getName());
+		finest("Updating panel for specific datasets: "+ this.getClass().getName());
 		this.update(getDatasets());
 	}
 	
@@ -406,12 +408,12 @@ public abstract class DetailPanel
 	 * @param list
 	 */
 	public void clearTableCache(){
-		log(Level.FINEST, "Clearing table cache: "+ this.getClass().getName());
+		finest("Clearing table cache: "+ this.getClass().getName());
 		this.getTableCache().clear();
 		for(DetailPanel panel : this.subPanels){
 			panel.clearTableCache();
 		}
-		log(Level.FINEST, "Table cache cleared: "+ this.getClass().getName());
+		finest("Table cache cleared: "+ this.getClass().getName());
 	}
 	
 	/**
@@ -420,14 +422,14 @@ public abstract class DetailPanel
 	 * @param list
 	 */
 	public void clearTableCache(final List<AnalysisDataset> list){
-		log(Level.FINEST, "Clearing table cache for specific datasets: "+ this.getClass().getName());
+		finest("Clearing table cache for specific datasets: "+ this.getClass().getName());
 		this.getTableCache().clear(list);
 		if(this.hasSubPanels()){
 			for(DetailPanel panel : this.subPanels){
 				panel.clearTableCache(list);
 			}
 		}
-		log(Level.FINEST, "Table cache cleared for specific datasets: "+ this.getClass().getName());
+		finest("Table cache cleared for specific datasets: "+ this.getClass().getName());
 	}
 	
 	/**
@@ -436,7 +438,7 @@ public abstract class DetailPanel
 	 */
 	public void refreshTableCache(){
 		clearTableCache();
-		log(Level.FINEST, "Updating charts after clear: "+ this.getClass().getName());
+		finest("Updating charts after clear: "+ this.getClass().getName());
 		this.update(getDatasets());
 	}
 	
@@ -559,7 +561,7 @@ public abstract class DetailPanel
     	// Pass messages upwards
     	for(DetailPanel panel : this.subPanels){
 			if(event.getSource().equals(panel)){
-				log(Level.FINEST, "Passing interface event upwards");
+				finest("Passing interface event upwards");
 				fireInterfaceEvent(new InterfaceEvent(this, event));
 			}
 		}
@@ -570,7 +572,7 @@ public abstract class DetailPanel
     	// Pass messages upwards
     	for(DetailPanel panel : this.subPanels){
 			if(event.getSource().equals(panel)){
-				log(Level.FINEST, "Passing dataset event upwards");
+				finest("Passing dataset event upwards");
 				fireDatasetEvent(new DatasetEvent(this, event));
 			}
 		}
@@ -580,7 +582,7 @@ public abstract class DetailPanel
     	// Pass messages upwards
     	for(DetailPanel panel : this.subPanels){
 			if(event.getSource().equals(panel)){
-				log(Level.FINEST, "Passing signal change event upwards: "+ this.getClass().getName());
+				finest("Passing signal change event upwards: "+ this.getClass().getName());
 				fireSignalChangeEvent(new SignalChangeEvent(this, event));
 			}
 		}

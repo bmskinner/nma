@@ -100,7 +100,12 @@ public class SignalManager {
 	  }
 	  
 	  public String getSignalGroupName(UUID signalGroup){
-		  return collection.getSignalGroup(signalGroup).getGroupName();
+		  if(this.hasSignals(signalGroup)){
+			  return collection.getSignalGroup(signalGroup).getGroupName();
+		  } else {
+			  return "Null signal group";
+		  }
+		 
 	  }
 	  
 	  public int getSignalGroupNumber(UUID signalGroup){
@@ -200,7 +205,7 @@ public class SignalManager {
        * @return
        */
       public boolean hasShellResult(){
-          for(UUID id : this.getSignalGroups()){
+          for(UUID id : collection.getSignalGroups()){
               if(collection.getSignalGroup(id).hasShellResult()){
                   return true;
               }

@@ -91,8 +91,9 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		this.setLayout(new BorderLayout());
 		
 		int cellCount = dataset.getCollection().getNucleusCount();
+		int halfCellCount = cellCount >>1;
 		
-		SpinnerNumberModel first = new SpinnerNumberModel(cellCount,
+		SpinnerNumberModel first = new SpinnerNumberModel(halfCellCount,
 				1,
 				cellCount,
 				1);
@@ -100,7 +101,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		set1SizeSpinner.addChangeListener(this);
 		set1SizeSpinner.setToolTipText("Size of population 1");
 
-		SpinnerNumberModel second = new SpinnerNumberModel(cellCount,
+		SpinnerNumberModel second = new SpinnerNumberModel(halfCellCount,
 				1,
 				cellCount,
 				1);
