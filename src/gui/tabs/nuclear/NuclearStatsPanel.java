@@ -44,21 +44,25 @@ public class NuclearStatsPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
-		updateMultiple() ;
+	protected void updateSingle() {
+		finest("Passing to update multiple");
+		updateMultiple();
 	}
 	
 
 	@Override
-	protected void updateMultiple() throws Exception {
-		
+	protected void updateMultiple() {
+		super.updateMultiple();
+		finest("Updating analysis stats panel");
 		updateStatsPanel();
-		log(Level.FINEST, "Updated analysis stats panel");
+		finest("Updated analysis stats panel");
 	}
 	
 	@Override
-	protected void updateNull() throws Exception {
-		updateMultiple() ;
+	protected void updateNull() {
+		super.updateNull();
+		finest("Passing to update multiple");
+		updateMultiple();
 	}
 				
 	
@@ -67,20 +71,22 @@ public class NuclearStatsPanel extends DetailPanel {
 	 * @param list the datasets
 	 */
 	private void updateStatsPanel(){
-		try{
 
-			TableOptions options = new TableOptionsBuilder()
+		finest("Updating stats panel");
+		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.ANALYSIS_STATS)
 			.build();
 
-			TableModel model = getTable(options);
+		finest("Built table options");
+		TableModel model = getTable(options);
 
+		finest("Fetched table model");
 
-			tablePopulationStats.setModel(model);
-		} catch(Exception e){
-			log(Level.SEVERE, "Error updating stats panel", e);
-		}
+		tablePopulationStats.setModel(model);
+
+		finest("Set table model");
+		
 	}
 	
 	private JScrollPane createStatsPanel(){

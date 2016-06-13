@@ -796,7 +796,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static BoxAndWhiskerCategoryDataset createBoxplotDataset(ChartOptions options) throws Exception{
+	public static BoxAndWhiskerCategoryDataset createBoxplotDataset(ChartOptions options) {
 		List<AnalysisDataset> datasets = options.getDatasets();
 		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 		MeasurementScale scale = options.getScale();
@@ -826,7 +826,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static BoxAndWhiskerCategoryDataset createSegmentStatDataset(ChartOptions options) throws Exception {
+	public static BoxAndWhiskerCategoryDataset createSegmentStatDataset(ChartOptions options) {
 		
 		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
@@ -847,7 +847,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, int segPosition, MeasurementScale scale) throws Exception {
+	public static BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, int segPosition, MeasurementScale scale) {
 
 		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset();
 
@@ -891,7 +891,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static BoxAndWhiskerCategoryDataset createSegmentDisplacementDataset(List<AnalysisDataset> collections, int segPosition) throws Exception {
+	public static BoxAndWhiskerCategoryDataset createSegmentDisplacementDataset(List<AnalysisDataset> collections, int segPosition) {
 
 		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset();
 

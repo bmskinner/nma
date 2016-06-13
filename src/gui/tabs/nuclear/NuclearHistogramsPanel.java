@@ -76,11 +76,11 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 
 		}
 		
-		protected void updateSingle() throws Exception {
+		protected void updateSingle() {
 			updateMultiple();
 		}
 		
-		protected void updateMultiple() throws Exception {
+		protected void updateMultiple() {
 			this.setEnabled(true);
 			MeasurementScale scale  = measurementUnitSettingsPanel.getSelected();
 			boolean useDensity = useDensityPanel.isSelected();
@@ -102,28 +102,28 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 			}
 		}
 		
-		protected void updateNull() throws Exception {
+		protected void updateNull() {
 			this.setEnabled(false);
 		}
 
 				
-		private void detectModes(JFreeChart chart, List<AnalysisDataset> list, int stat){
-			
-			XYPlot plot = chart.getXYPlot();
-			
-			
-			for(AnalysisDataset dataset : list){
-				
-//				double[] values;
-				try {
-//					
-				} catch (Exception e) {
-					log(Level.SEVERE, "Unable to detect modes", e);
-				}
-				
-			}
-			
-		}
+//		private void detectModes(JFreeChart chart, List<AnalysisDataset> list, int stat){
+//			
+//			XYPlot plot = chart.getXYPlot();
+//			
+//			
+//			for(AnalysisDataset dataset : list){
+//				
+////				double[] values;
+//				try {
+////					
+//				} catch (Exception e) {
+//					log(Level.SEVERE, "Unable to detect modes", e);
+//				}
+//				
+//			}
+//			
+//		}
 
 		@Override
 		public void signalChangeReceived(SignalChangeEvent event) {

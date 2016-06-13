@@ -204,7 +204,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	}
 
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 
 			this.setEnabled(true);
 
@@ -226,7 +226,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	}
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		updateSingle();
 		// Don't allow marker selection for multiple datasets
 		profileMarkersOptionsPanel.setEnabled(false);
@@ -234,7 +234,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	}
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		updateSingle();
 		this.setEnabled(false);
 	}

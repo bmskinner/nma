@@ -139,37 +139,44 @@ public class SegmentsDetailPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		updateMultiple() ;
 	}
 	
 
 	@Override
-	protected void updateMultiple() throws Exception {
-		segmentBoxplotsPanel.update(getDatasets()); // get segname from panel
-		log(Level.FINEST, "Updated segments boxplot panel");
+	protected void updateMultiple() {
+		finest("Updating segments boxplot panel: "+this.getClass().getName());
+		segmentBoxplotsPanel.update(getDatasets()); 
+		finest("Updated segments boxplot panel: "+this.getClass().getName());
 
-		segmentHistogramsPanel.update(getDatasets()); // get segname from panel
-		log(Level.FINEST, "Updated segments histogram panel");
+		finest("Updating segments histogram panel: "+this.getClass().getName());
+		segmentHistogramsPanel.update(getDatasets());
+		finest("Updated segments histogram panel: "+this.getClass().getName());
 
-		segmentProfilePanel.update(getDatasets()); // get segname from panel
-		log(Level.FINEST, "Updated segments profile panel");
+		finest("Updating segments profile panel: "+this.getClass().getName());
+		segmentProfilePanel.update(getDatasets()); 
+		finest("Updated segments profile panel: "+this.getClass().getName());
 
+		finest("Updating segments stats panel: "+this.getClass().getName());
 		segmentStatsPanel.update(getDatasets());
-		log(Level.FINEST, "Updated segments stats panel");
+		finest("Updated segments stats panel: "+this.getClass().getName());
 		
+		finest("Updating segments stats panel: "+this.getClass().getName());
 		segmentWilcoxonPanel.update(getDatasets());
-		log(Level.FINEST, "Updated segments stats panel");
+		finest("Updated segments stats panel: "+this.getClass().getName());
 		
+		finest("Updating segments magnitude panel: "+this.getClass().getName());
 		segmentMagnitudePanel.update(getDatasets());
-		log(Level.FINEST, "Updated segments magnitude panel");
+		finest("Updated segments magnitude panel: "+this.getClass().getName());
 		
+		finest("Updating segments positions panel: "+this.getClass().getName());
 		segmentPositionsPanel.update(getDatasets());
-		log(Level.FINEST, "Updated segments positions panel");
+		finest("Updated segments positions panel: "+this.getClass().getName());
 	}
 	
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		updateMultiple() ;
 	}
 					

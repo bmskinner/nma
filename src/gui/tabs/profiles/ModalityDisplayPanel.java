@@ -148,12 +148,12 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 		}
 		
 		@Override
-		protected void updateSingle() throws Exception {
+		protected void updateSingle() {
 			updateMultiple();
 		}
 		
 		@Override
-		protected void updateMultiple() throws Exception {
+		protected void updateMultiple() {
 			this.setEnabled(true);
 
 			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
@@ -189,7 +189,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 		}
 		
 		@Override
-		protected void updateNull() throws Exception {
+		protected void updateNull() {
 			this.setEnabled(false);
 			modalityProfileChartPanel.setChart(createModalityProfileChart());
 			chartPanel.setChart(createPositionChart());

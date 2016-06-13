@@ -83,37 +83,34 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		updateNull();
 	}
 	
 
 	@Override
-	protected void updateMultiple() throws Exception {
-		log(Level.FINE, "Updating pairwise venn table");
-
-
-		// format the numbers and make into a tablemodel
-		
+	protected void updateMultiple() {
+		fine("Updating pairwise venn table for multiple datasets");
+	
 		
 		TableOptions options = new TableOptionsBuilder()
-		.setDatasets(getDatasets())
-		.setType(TableType.PAIRWISE_VENN)
-		.build();
+			.setDatasets(getDatasets())
+			.setType(TableType.PAIRWISE_VENN)
+			.build();
 
 		TableModel model = getTable(options);
 		pairwiseVennTable.setModel(model);
 		setRenderer(pairwiseVennTable, new PairwiseVennTableCellRenderer());
 		
-		log(Level.FINEST, "Updated pairwise venn panel");
+		finest("Updated pairwise venn panel");
 	}
 	
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		TableOptions options = new TableOptionsBuilder()
-		.setDatasets(null)
-		.setType(TableType.PAIRWISE_VENN)
-		.build();
+			.setDatasets(null)
+			.setType(TableType.PAIRWISE_VENN)
+			.build();
 
 		TableModel model = getTable(options);
 		pairwiseVennTable.setModel(model);

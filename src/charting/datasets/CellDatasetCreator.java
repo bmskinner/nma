@@ -201,6 +201,7 @@ public class CellDatasetCreator implements Loggable {
 		XYDataset ds = null;
 		
 		if(options.isSingleDataset()){
+			finest("Creating single dataset position dataset");
 			
 			ds = createSinglePositionFeatureDataset(options);
 
@@ -208,11 +209,13 @@ public class CellDatasetCreator implements Loggable {
 		
 		if(options.isMultipleDatasets()){
 			
+			finest("Creating multiple dataset position dataset");
+			
 			if(ProfileManager.segmentCountsMatch(options.getDatasets())){
 			
 				ds = createMultiPositionFeatureDataset(options);
 			} else {
-				options.log(Level.WARNING, "Unable to create multiple chart: segment counts do not match");
+				fine("Unable to create multiple chart: segment counts do not match");
 			}
 		}
 
@@ -229,6 +232,9 @@ public class CellDatasetCreator implements Loggable {
 	private XYDataset createSinglePositionFeatureDataset(ChartOptions options) throws Exception{
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		finest("Fetching segment position list");
+		
 		List<XYPoint> offsetPoints = createAbsolutePositionFeatureList(options.firstDataset(), options.getSegID());
 
 		double[] xPoints = new double[offsetPoints.size()];
@@ -243,7 +249,9 @@ public class CellDatasetCreator implements Loggable {
 
 		double[][] data = { xPoints, yPoints };
 
+		
 		ds.addSeries("Segment_"+options.getSegID()+"_"+options.firstDataset().getName(), data);
+		finest("Created segment position dataset for segment "+options.getSegID());
 		return ds;
 	}
 	
@@ -310,6 +318,7 @@ public class CellDatasetCreator implements Loggable {
 		/*
 		 * Fetch the cells from the dataset, and rotate the nuclei appropriately
 		 */
+		finest("Fetching segment position for each nucleus");
 		for(Nucleus nucleus : dataset.getCollection().getNuclei()){
 			
 			// For these, only include the nuclei with explicit top and bottom tags
@@ -317,15 +326,19 @@ public class CellDatasetCreator implements Loggable {
 				
 				
 				Nucleus verticalNucleus = nucleus.getVerticallyRotatedNucleus();
+				finest("Fetched vertical nucleus");
 
 				// Get the segment start position XY coordinates
 				NucleusBorderSegment segment = verticalNucleus.getProfile(ProfileType.REGULAR)
 													.getSegment(segmentID);
+				finest("Fetched segment "+segmentID.toString());
 				
 				XYPoint point = verticalNucleus.getBorderPoint(segment.getStartIndex());
+				finest("Fetched segment start point");
 				result.add(point);
 //			}		
 		}	
+		finest("Fetched segment position for each nucleus");
 		return result;
 	}
 

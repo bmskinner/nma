@@ -141,7 +141,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @return the profile
 	 * @throws Exception
 	 */
-	public SegmentedProfile getSegmentedProfile(BorderTag tag) throws Exception {
+	public SegmentedProfile getSegmentedProfile(BorderTag tag) {
 		if(tag==null){
 			throw new IllegalArgumentException("A profile key is required");
 		}
@@ -188,7 +188,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param s the name of the tag
 	 * @return a copy of the segments in the profile, offset to start at the tag
 	 */
-	public List<NucleusBorderSegment> getSegments(BorderTag tag) throws Exception {
+	public List<NucleusBorderSegment> getSegments(BorderTag tag) {
 		if(tag==null){
 			throw new IllegalArgumentException("The requested segment key is null: "+tag);
 		}
@@ -197,16 +197,9 @@ public class ProfileCollection implements Serializable, Loggable {
 		// since we are moving the pointIndex back to the beginning
 		// of the array
 		int offset = -getOffset(tag);
-		
-//		IJ.log("");
-		
-//		IJ.log("Existing segments:");
-//		IJ.log(NucleusBorderSegment.toString(this.segments));
-//		IJ.log("Border tag "+tag+"    Offset "+offset);
-//		IJ.log("Nudging segments");
+
 		List<NucleusBorderSegment> result = NucleusBorderSegment.nudge(segments, offset);
-//		IJ.log(NucleusBorderSegment.toString(result));
-//		IJ.log("");
+
 		return result;
 	}
 	

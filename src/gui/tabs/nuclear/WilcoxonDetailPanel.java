@@ -37,7 +37,7 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		scrollPane.setColumnHeaderView(null);
 		tablePanel = createTablePanel();
 		tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
@@ -47,7 +47,7 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		scrollPane.setColumnHeaderView(null);
 		tablePanel = createTablePanel();
 		for(NucleusStatistic stat : NucleusStatistic.values()){
@@ -72,7 +72,7 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	}
 	
 	@Override
-	protected void updateNull() throws Exception {		
+	protected void updateNull() {		
 		scrollPane.setColumnHeaderView(null);
 		tablePanel = createTablePanel();
 		tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));

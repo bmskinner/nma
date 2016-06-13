@@ -312,13 +312,22 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @param collection
 	 * @return
 	 */
-	public TableModel createAnalysisTable(TableOptions options) throws Exception{
+	public TableModel createAnalysisTable(TableOptions options) {
+
+		if( ! options.hasDatasets()){
+			finest("No datasets, creating blank table");
+			return createBlankTable();
+		} 
+		
+		finest("Table options type "+options.getType());
 		
 		if(options.getType().equals(TableType.ANALYSIS_PARAMETERS)){
+			finest("Creating analysis parameters table model");
 			return createAnalysisParametersTable(options);
 		}
 		
 		if(options.getType().equals(TableType.ANALYSIS_STATS)){
+			finest("Creating analysis stats table model");
 			return createStatsTable(options);
 		}
 		
@@ -570,8 +579,12 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @param collection
 	 * @return
 	 */
-	private TableModel createStatsTable(TableOptions options) throws Exception {
+	private TableModel createStatsTable(TableOptions options) {
 
+		if( ! options.hasDatasets()){
+			return createBlankTable();
+		} 
+		
 		DefaultTableModel model = new DefaultTableModel();
 		
 		List<AnalysisDataset> list = options.getDatasets();
@@ -589,55 +602,64 @@ private static NucleusTableDatasetCreator instance = null;
 
 		model.addColumn("", columnData.toArray());
 		
-		if( ! options.hasDatasets()){
-			finer("No datasets in options, returning blank nuclear stats table");
-			model.addColumn("No data loaded");
-			return model;
-		} 
+		finest("Created model row headers");
 
-		// format the numbers and make into a tablemodel
-		DecimalFormat df = new DecimalFormat("#0.00"); 
-		DecimalFormat pf = new DecimalFormat("#0.000"); 
-
+		finest("Making column for each dataset");
 		for(AnalysisDataset dataset : list){
-			CellCollection collection = dataset.getCollection();
+			
+			finest("Making column for "+dataset.getName());
+			
+			List<Object> datasetData = createDatasetStatsTableColumn(dataset);
 
-			List<Object> datasetData = new ArrayList<Object>();			
-			double signalPerNucleus = (double) collection.getSignalManager().getSignalCount()/  (double) collection.getNucleusCount();
-
-			datasetData.add(collection.getNucleusCount());
-
-			for(NucleusStatistic stat : NucleusStatistic.values()){
-				double[] stats 	= collection.getNuclearStatistics(stat, MeasurementScale.PIXELS);
-				double median 	= Stats.quartile(stats, 50);
-				double[] ci 	= Stats.calculateMeanConfidenceInterval(stats, 0.95);
-				String ciString = df.format(ci[0]) + " - " + df.format(ci[1]);
-				double diptest 	= DipTester.getDipTestPValue(stats);
-
-				datasetData.add(df.format(median));
-				datasetData.add(ciString);
-				datasetData.add(pf.format(diptest));					
-			}
-
-			datasetData.add(dataset.getCollection().getSignalManager().getSignalGroupCount());
-			datasetData.add(collection.getSignalManager().getSignalCount());
-			datasetData.add(df.format(signalPerNucleus));
-
-			model.addColumn(collection.getName(), datasetData.toArray());
+			model.addColumn(dataset.getName(), datasetData.toArray());
+			finest("Added column for "+dataset.getName());
 		}
-
+		finest("Created table model");
+		
 		return model;	
 	}
 	
+	private List<Object> createDatasetStatsTableColumn(AnalysisDataset dataset){
+		
+		// format the numbers and make into a tablemodel
+		DecimalFormat df = new DecimalFormat("#0.00"); 
+		DecimalFormat pf = new DecimalFormat("#0.000"); 
+		
+		CellCollection collection = dataset.getCollection();
+
+		List<Object> datasetData = new ArrayList<Object>();			
+		double signalPerNucleus = (double) collection.getSignalManager().getSignalCount()/  (double) collection.getNucleusCount();
+
+		datasetData.add(collection.getNucleusCount());
+
+		for(NucleusStatistic stat : NucleusStatistic.values()){
+			double[] stats 	= collection.getNuclearStatistics(stat, MeasurementScale.PIXELS);
+			double median 	= Stats.quartile(stats, 50);
+			double[] ci 	= Stats.calculateMeanConfidenceInterval(stats, 0.95);
+			String ciString = df.format(ci[0]) + " - " + df.format(ci[1]);
+			double diptest 	= DipTester.getDipTestPValue(stats);
+
+			datasetData.add(df.format(median));
+			datasetData.add(ciString);
+			datasetData.add(pf.format(diptest));					
+		}
+
+		datasetData.add(dataset.getCollection().getSignalManager().getSignalGroupCount());
+		datasetData.add(collection.getSignalManager().getSignalCount());
+		datasetData.add(df.format(signalPerNucleus));
+		
+		return datasetData;
+		
+	}
+	
 	public TableModel createVennTable(TableOptions options){
-		DefaultTableModel model = new DefaultTableModel();
+		
 				
 		if( ! options.hasDatasets()){
-			Object[] columnData = {""};
-			model.addColumn("Population", columnData );
-			model.addColumn("", columnData );
-			return model;
+			return createBlankTable();
 		}
+		
+		DefaultTableModel model = new DefaultTableModel();
 		
 		List<AnalysisDataset> list = options.getDatasets();
 		

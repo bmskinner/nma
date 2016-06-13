@@ -231,7 +231,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			log(Level.FINEST, "Button pressed: "+e.getActionCommand());
+			finest("Button pressed: "+e.getActionCommand());
 			if(console.isVisible()){
 				console.setVisible(false);
 			} else {
@@ -251,11 +251,9 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-//		log(Level.FINEST, "Log panel detected action: "+e.getActionCommand());
-//		log(Level.FINEST, "Log panel detected action: "+e.getSource().toString());
+
 		if(e.getSource().equals(console)){
-//			log(Level.FINEST, "Entering text at console");
-			log(Level.INFO, console.getText());
+			log(console.getText());
 			runCommand(console.getText());
 			console.setText("");
 		}
@@ -311,23 +309,23 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		
 	}
 
-	@Override
-	protected void updateSingle() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void updateMultiple() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void updateNull() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
+//	@Override
+//	protected void updateSingle() throws Exception {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	protected void updateMultiple() throws Exception {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	protected void updateNull() throws Exception {
+//		// TODO Auto-generated method stub
+//		
+//	}
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {

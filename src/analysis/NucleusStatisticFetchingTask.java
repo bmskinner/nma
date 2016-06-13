@@ -21,6 +21,7 @@ package analysis;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
+import java.util.logging.Level;
 
 import stats.PlottableStatistic;
 import components.generic.MeasurementScale;
@@ -43,15 +44,14 @@ public class NucleusStatisticFetchingTask extends AbstractStatisticFetchingTask 
 		
 		 if (high - low < THRESHOLD)
 				try {
-
 					result = getStatistics();
 					return result;
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					 warn("Error fetching statistic "+stat);
+					 log(Level.FINE, "Error fetching statistic "+stat, e);
 				}
 		     else {
-		    	 int mid = (low + high) >>> 1;
+		    	 int mid = (low + high) >>> 1; // Unsigned bit shift (0 to leftmost position)
 
 		    	 List<NucleusStatisticFetchingTask> tasks = new ArrayList<NucleusStatisticFetchingTask>();
 		    	 
@@ -71,8 +71,8 @@ public class NucleusStatisticFetchingTask extends AbstractStatisticFetchingTask 
 		    		 return result;
 		    		 
 		    	 } catch (Exception e) {
-		    		 // TODO Auto-generated catch block
-		    		 e.printStackTrace();
+		    		 warn("Error fetching statistic "+stat);
+		    		 log(Level.FINE, "Error fetching statistic "+stat, e);
 		    	 }
 
 		     }
@@ -87,9 +87,10 @@ public class NucleusStatisticFetchingTask extends AbstractStatisticFetchingTask 
 	 * @throws Exception 
 	   */
 	  private double[] getStatistics() throws Exception{
-
 		  double[] result = new double[high-low];
 
+		  finest("Fetching statistic "+stat+" for "+result.length+" nuclei");
+		 
 		  for(int i=0, j=low; j<high; i++, j++){
 			  result[i] = nuclei[j].getStatistic(stat, scale);
 		  }

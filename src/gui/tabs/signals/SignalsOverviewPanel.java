@@ -247,7 +247,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	 * @param list the datasets
 	 * @throws Exception 
 	 */
-	private void updateSignalStatsPanel() throws Exception{
+	private void updateSignalStatsPanel() {
 		
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
@@ -338,13 +338,13 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	}
 
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		updateMultiple();
 		
 	}
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		
 		updateCheckboxPanel();
 		updateSignalConsensusChart();
@@ -352,7 +352,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	}
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		updateMultiple();
 		
 	}

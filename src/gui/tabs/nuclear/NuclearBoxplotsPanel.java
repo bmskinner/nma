@@ -87,13 +87,16 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		}
 
 		@Override
-		protected void updateSingle() throws Exception {
+		protected void updateSingle() {
+			super.updateSingle();
+			finest("Passing to update multiple in "+this.getClass().getName());
 			updateMultiple();
 			
 		}
 
 		@Override
-		protected void updateMultiple() throws Exception {
+		protected void updateMultiple() {
+			super.updateMultiple();
 			measurementUnitSettingsPanel.setEnabled(true);
 			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
 
@@ -114,7 +117,9 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		}
 
 		@Override
-		protected void updateNull() throws Exception {
+		protected void updateNull() {
+			super.updateNull();
+			finest("Passing to update multiple in "+this.getClass().getName());
 			updateMultiple();
 			measurementUnitSettingsPanel.setEnabled(false);
 		}

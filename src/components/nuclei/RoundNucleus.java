@@ -360,52 +360,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		return result;
 	}
 	
-//	
-//	public double getStatistic(NucleusStatistic stat, MeasurementScale scale) throws Exception{
-//		double result = 0;
-//		
-//		switch(stat){
-//			
-//			case AREA:
-//				result = this.getArea();
-//				break;
-//			case ASPECT:
-//				result = this.getAspectRatio();
-//				break;
-//			case CIRCULARITY:
-//				result = this.getCircularity();
-//				break;
-//			case MAX_FERET:
-//				result = this.getFeret();
-//				break;
-//			case MIN_DIAMETER:
-//				result = this.getNarrowestDiameter();
-//				break;
-//			case PERIMETER:
-//				result = this.getPerimeter();
-//				break;
-//			case VARIABILITY:
-//				break;
-//			case BOUNDING_HEIGHT:
-//				result = this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getHeight();
-//				break;
-//			case BOUNDING_WIDTH:
-//				result = this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getWidth();
-//				break;
-//			case OP_RP_ANGLE:
-//				result = RoundNucleus.findAngleBetweenXYPoints(this.getBorderTag(BorderTag.REFERENCE_POINT), this.getCentreOfMass(), this.getBorderTag(BorderTag.ORIENTATION_POINT));
-//				break;
-//			default:
-//				result = 0;
-//				break;
-//		
-//		}
-//		
-//		result = stat.convert(result, this.getScale(), scale);
-//
-//		return result;
-//		
-//	}
 		
 	/**
 	 * Get the cached bounding rectangle for the nucleus. If not present,
@@ -464,97 +418,33 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 		
 		// Find the best line across the region
-//		Profile region = this.getAngleProfile().getSubregion(this.getBorderIndex(BorderTag.TOP_VERTICAL), this.getBorderIndex(BorderTag.BOTTOM_VERTICAL));
-		
 		List<BorderPoint> pointsInRegion = new ArrayList<BorderPoint>();
-		int startIndex = Math.min(this.getBorderIndex(BorderTag.TOP_VERTICAL),  this.getBorderIndex(BorderTag.BOTTOM_VERTICAL));
-		int endIndex =   Math.max(this.getBorderIndex(BorderTag.TOP_VERTICAL),  this.getBorderIndex(BorderTag.BOTTOM_VERTICAL));
-		for(int index = startIndex; index < endIndex; index++ ){
+		
+		int topIndex  = this.getBorderIndex(BorderTag.TOP_VERTICAL);
+		int btmIndex  = this.getBorderIndex(BorderTag.BOTTOM_VERTICAL);
+		int totalSize = this.getProfile(ProfileType.REGULAR).size();
+		
+		NucleusBorderSegment region = new NucleusBorderSegment(topIndex, btmIndex, totalSize );
+
+		int index = topIndex;
+		
+		Iterator<Integer> it = region.iterator();
+		
+		while(it.hasNext()){
+			index = it.next();
 			pointsInRegion.add(this.getBorderPoint(index));
 		}
-//		IJ.log(this.getNameAndNumber()+": "+ pointsInRegion.size());
 		
-		// Make an equation covering the region
-		Equation eq = new Equation(topPoint, bottomPoint);
-//		IJ.log("Equation: "+eq.toString());
-		// Find the orthogonal
-		Equation bottomOrth = eq.getPerpendicular(bottomPoint);
-		Equation topOrth = eq.getPerpendicular(topPoint);
-//		IJ.log("Bottom: "+bottomOrth.toString());
-//		IJ.log("Top:    "+topOrth.toString());
+		// Use the line of best fit to find appropriate top and bottom vertical points
+		Equation eq = Equation.calculateBestFitLine(pointsInRegion);
 		
-		double minScore = Double.MAX_VALUE;
-		// With variation about the orthogonal, test sum-of-squares
-		// Make new points to align at based on best fit to the region
+		BorderPoint top = new BorderPoint(eq.getX(topPoint.getY()), topPoint.getY());
+		BorderPoint btm = new BorderPoint(eq.getX(bottomPoint.getY()), bottomPoint.getY());
 		
-		int variation = 10;
-		double movementSize = 1;
-		double bestI = 0;
-		double bestJ = 0;
+		return new BorderPoint[] {top, btm};
 		
-		for(int i=-variation; i<variation;i+=movementSize){
-			// change the posiiton of the top point
-			XYPoint iPoint = topOrth.getPointOnLine(topPoint, i);
-			
-			for(int j=-variation; j<variation;j+=movementSize){
-				// change the posiiton of the bottom point
-				XYPoint jPoint = bottomOrth.getPointOnLine(bottomPoint, j);
-				
-				// make a new equation for the line
-				Equation newLine = new Equation(iPoint, jPoint);
-				
-				// Check the fit of the line aginst the profile region
-				// Build a line from the border points in the region
-				// Test each point's distance to the equation line
-				double score = 0;
-				for(XYPoint p : pointsInRegion){
-					score += Math.pow(newLine.getClosestDistanceToPoint(p), 2);
-				}
-//				IJ.log("i="+i+" : j="+j+" : Score: "+score);
-				if(score<minScore){
-					minScore = score;
-					topPoint = new BorderPoint(iPoint);
-					bottomPoint = new BorderPoint(jPoint);
-					bestI = i;
-					bestJ = j;
-				}
-			}
-
-		}
-		
-		movementSize = 0.1;
-		for(double i=bestI-0.9; i<bestI+1;i+=movementSize){
-			// change the posiiton of the top point
-			XYPoint iPoint = topOrth.getPointOnLine(topPoint, i);
-			
-			for(double j=bestJ-0.9; i<bestJ+1;i+=movementSize){
-				// change the posiiton of the bottom point
-				XYPoint jPoint = bottomOrth.getPointOnLine(bottomPoint, j);
-				
-				// make a new equation for the line
-				Equation newLine = new Equation(iPoint, jPoint);
-				
-				// Check the fit of the line aginst the profile region
-				// Build a line from the border points in the region
-				// Test each point's distance to the equation line
-				double score = 0;
-				for(XYPoint p : pointsInRegion){
-					score += Math.pow(newLine.getClosestDistanceToPoint(p), 2);
-				}
-//				IJ.log("i="+i+" : j="+j+" : Score: "+score);
-				if(score<minScore){
-					minScore = score;
-					topPoint = new BorderPoint(iPoint);
-					bottomPoint = new BorderPoint(jPoint);
-				}
-			}
-
-		}
-		
-		return new BorderPoint[] {topPoint, bottomPoint};
 	}
-	
-		
+			
 	public double getCircularity() {
 		double perim2 = Math.pow(this.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS), 2);
 		return (4 * Math.PI) * (this.getStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS) / perim2);
@@ -576,23 +466,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		return this.failureCode;
 	}
 		
-	/* (non-Javadoc)
-	 * Check if the given signal group contains signals
-	 * @see no.nuclei.Nucleus#hasSignal(int)
-	 */
-//	public boolean hasSignal(int signalGroup){
-//		return signalCollection.hasSignal(signalGroup);
-//	}
-//	
-//	public boolean hasSignal(){
-//		boolean result = false;
-//		for(int signalGroup : signalCollection.getSignalGroups()){
-//			if(this.hasSignal(signalGroup)){
-//				result = true;
-//			}
-//		}
-//		return result;
-//	}
 
 	/*
 		-----------------------

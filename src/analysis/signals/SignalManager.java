@@ -256,7 +256,7 @@ public class SignalManager {
              
       }
       
-      public double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception{
+      public double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) {
 
           List<Cell> cells = getCellsWithNuclearSignals(signalGroup, true);
           List<Double> a = new ArrayList<Double>(0);
@@ -277,7 +277,7 @@ public class SignalManager {
        * @param signalGroup
        * @return
        */
-      public double getMeanSignalAngle(UUID signalGroup) throws Exception {
+      public double getMeanSignalAngle(UUID signalGroup) {
 
           double[] values = getSignalStatistics(SignalStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup); 
           
@@ -305,7 +305,7 @@ public class SignalManager {
      * @return
      * @throws Exception
      */
-    public double[] getOffsetSignalAngles(UUID signalGroup) throws Exception{
+    public double[] getOffsetSignalAngles(UUID signalGroup) {
 
           double[] values = getSignalStatistics(SignalStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup); 
           

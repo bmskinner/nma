@@ -34,11 +34,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.JPanel;
 import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
@@ -46,13 +43,11 @@ import org.jfree.chart.JFreeChart;
 
 import charting.ChartCache;
 import charting.TableCache;
+import charting.charts.ScatterChartFactory;
+import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
-import components.CellCollection;
-import components.generic.BorderTag;
-import components.generic.ProfileType;
 import analysis.AnalysisDataset;
-import analysis.profiles.ProfileManager;
 
 /**
  * The DetailPanels hold chart and table caches, and track other DetailPanels
@@ -218,74 +213,86 @@ public abstract class DetailPanel
 	public void update(final List<AnalysisDataset> list){
 		
 		if(this.isUpdating()){
-			finest(this.getClass().getName() + ": panel is already updating");
+			finest("Panel is already updating");
 		} else {
+			finest("Preparing to update");
 			if(list!=null){
 				this.list = list;
 			} else {
 				this.list = new ArrayList<AnalysisDataset>();
 			}
+			finest("Set dataset list");
 			setUpdating(true);
+			finest("Set updating state");
 			updateDetail();
 		}
 
 	}
 	
 	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update 
+	 * This method sets which of the overriden handling methods
+	 * are run by extending classes.
 	 */
 	private void updateDetail(){
 		
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-		finest("Updating detail panel: "+ this.getClass().getName());
-				try {
-					if(hasDatasets()){
-						
-						if(isSingleDataset()){
-							updateSingle();
-						} else {
-							updateMultiple();
-						}
-						
-					} else {
-						updateNull();
-					}
-					
-				} catch (Exception e) {
-					log(Level.SEVERE, "Error updating panel: "+ this.getClass().getName());
-					log(Level.FINE, "Error updating panel: "+ this.getClass().getName(), e); // save detail for fine logging
-					setUpdating(false);
-					try {
-						updateNull();
-					} catch(Exception e1){
-						warn("Error recovering from error updating panel: "+ this.getClass().getName());
-						log(Level.FINE, "Error recovering from error updating panel: "+ this.getClass().getName(), e1);
-						setUpdating(false);
-					}
-				} finally {
-					setUpdating(false);
+		finest("Updating detail panel");
+		try {
+			finest("Checking dataset list");
+			if(hasDatasets()){
+				finest("Datasets present");
+				if(isSingleDataset()){
+					finest("Single dataset present");
+					updateSingle();
+				} else {
+					finest("Multiple datasets present");
+					updateMultiple();
 				}
+				
+			} else {
+				finest("No datasets present");
+				updateNull();
+			}
+			
+		} catch (Exception e) {
+			warn("Error updating panel: "+ this.getClass().getName());
+			log(Level.FINE, "Error updating panel: "+ this.getClass().getName(), e); // save detail for fine logging
+			setUpdating(false);
+			try {
+				updateNull();
+			} catch(Exception e1){
+				warn("Error recovering from error updating panel: "+ this.getClass().getName());
+				log(Level.FINE, "Error recovering from error updating panel: "+ this.getClass().getName(), e1);
+				setUpdating(false);
+			}
+		} finally {
+			setUpdating(false);
+			finest("Finished update");
+		}
 	}
 			
 	/**
 	 * This method must be overridden by the extending class
 	 * to perform the actual update when a single dataset is selected
 	 */
-	protected abstract void updateSingle() throws Exception; 
+	protected void updateSingle(){
+		finest("Updating single dataset");
+	}
 	
 	/**
 	 * This method must be overridden by the extending class
 	 * to perform the actual update when a multiple datasets are selected
 	 */
-	protected abstract void updateMultiple() throws Exception;
+	protected void updateMultiple(){
+		finest("Updating multiple datasets");
+	}
 	
 	/**
 	 * This method must be overridden by the extending class
 	 * to perform the actual update when a no datasets are selected
 	 */
-	protected abstract void updateNull() throws Exception;
+	protected void updateNull(){
+		finest("Updating null dataset");
+	}
 		
 	
 	/**
@@ -294,15 +301,25 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected JFreeChart getChart(ChartOptions options) throws Exception{
+	protected JFreeChart getChart(ChartOptions options) {
 		JFreeChart chart;
 		if(getChartCache().hasChart(options)){
-			finest("Fetched cached chart: "+ this.getClass().getName());
+			finest("Fetched cached chart");
 			chart = getChartCache().getChart(options);
 
 		} else { // No cache
+			
+			
 
-			chart = createPanelChartType(options);
+			try {
+				chart = createPanelChartType(options);
+			} catch (Exception e) {
+				warn("Error creating chart"+ this.getClass().getName());
+				log(Level.FINE, this.getClass().getName()+"Error creating chart", e);
+				
+				// Draw an empty chart to fill the space
+				chart = ScatterChartFactory.getInstance().createEmptyScatterChart();
+			}
 			getChartCache().addChart(options, chart);
 			finest("Added cached chart");
 		}
@@ -315,15 +332,21 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected TableModel getTable(TableOptions options) throws Exception{
+	protected TableModel getTable(TableOptions options) {
 		
 		TableModel model;
 		if(getTableCache().hasTable(options)){
-			finest("Fetched cached table: "+ this.getClass().getName());
+			finest("Fetched cached table");
 			model = getTableCache().getTable(options);
 		} else {
-			model = createPanelTableType(options);
-			finest("Added cached table: "+ this.getClass().getName());
+			try {
+				model = createPanelTableType(options);
+			} catch (Exception e) {
+				warn("Error creating table");
+				log(Level.FINE, "Error creating chart", e);
+				model = NucleusTableDatasetCreator.getInstance().createBlankTable();
+			}
+			finest("Added cached table");
 			getTableCache().addTable(options, model);
 		}
 		return model;
@@ -351,12 +374,12 @@ public abstract class DetailPanel
 	 * @param list
 	 */
 	public void clearChartCache(){
-		finest("Clearing chart cache: "+ this.getClass().getName());
+		finest("Clearing chart cache");
 		this.getChartCache().clear();
 		for(DetailPanel panel : this.subPanels){
 			panel.clearChartCache();
 		}
-		finest("Chart cache cleared: "+ this.getClass().getName());
+		finest("Chart cache cleared");
 	}
 	
 	/**
@@ -364,16 +387,16 @@ public abstract class DetailPanel
 	 * @param list
 	 */
 	public void clearChartCache(final List<AnalysisDataset> list){
-		finest("Clearing chart cache for specific datasets: "+ this.getClass().getName());
+		finest("Clearing chart cache for specific datasets");
 		this.getChartCache().clear(list);
-		finest("Panel chart cache cleared: "+ this.getClass().getName());
+		finest("Panel chart cache cleared");
 		if(this.hasSubPanels()){
-			finest("Clearing sub-panel chart caches: "+ this.getClass().getName());
+			finest("Clearing sub-panel chart caches");
 			for(DetailPanel panel : this.subPanels){
 				panel.clearChartCache(list);
 			}
 		}
-		finest("Chart cache cleared: "+ this.getClass().getName());
+		finest("Chart cache cleared");
 	}
 	
 	/**
@@ -382,7 +405,7 @@ public abstract class DetailPanel
 	 */
 	public void refreshChartCache(){
 		clearChartCache();
-		finest("Updating charts after clear: "+ this.getClass().getName());
+		finest("Updating charts after clear");
 		this.update(getDatasets());
 	}
 	
@@ -393,9 +416,9 @@ public abstract class DetailPanel
 	 * @param list
 	 */
 	public void refreshChartCache(final List<AnalysisDataset> list){
-		finest("Refreshing chart cache for specific datasets: "+ this.getClass().getName());
+		finest("Refreshing chart cache for specific datasets");
 		clearChartCache(list);
-		finest("Updating panel for specific datasets: "+ this.getClass().getName());
+		finest("Updating panel for specific datasets");
 		this.update(getDatasets());
 	}
 	
@@ -408,12 +431,12 @@ public abstract class DetailPanel
 	 * @param list
 	 */
 	public void clearTableCache(){
-		finest("Clearing table cache: "+ this.getClass().getName());
+		finest("Clearing table cache");
 		this.getTableCache().clear();
 		for(DetailPanel panel : this.subPanels){
 			panel.clearTableCache();
 		}
-		finest("Table cache cleared: "+ this.getClass().getName());
+		finest("Table cache cleared");
 	}
 	
 	/**
@@ -422,14 +445,14 @@ public abstract class DetailPanel
 	 * @param list
 	 */
 	public void clearTableCache(final List<AnalysisDataset> list){
-		finest("Clearing table cache for specific datasets: "+ this.getClass().getName());
+		finest("Clearing table cache for specific datasets");
 		this.getTableCache().clear(list);
 		if(this.hasSubPanels()){
 			for(DetailPanel panel : this.subPanels){
 				panel.clearTableCache(list);
 			}
 		}
-		finest("Table cache cleared for specific datasets: "+ this.getClass().getName());
+		finest("Table cache cleared for specific datasets");
 	}
 	
 	/**
@@ -438,7 +461,7 @@ public abstract class DetailPanel
 	 */
 	public void refreshTableCache(){
 		clearTableCache();
-		finest("Updating charts after clear: "+ this.getClass().getName());
+		finest("Updating charts after clear");
 		this.update(getDatasets());
 	}
 	
@@ -582,7 +605,7 @@ public abstract class DetailPanel
     	// Pass messages upwards
     	for(DetailPanel panel : this.subPanels){
 			if(event.getSource().equals(panel)){
-				finest("Passing signal change event upwards: "+ this.getClass().getName());
+				finest("Passing signal change event upwards");
 				fireSignalChangeEvent(new SignalChangeEvent(this, event));
 			}
 		}

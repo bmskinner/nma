@@ -267,7 +267,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		activeCell = null;
 		update(activeCell);
 	}
@@ -275,14 +275,14 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		updateNull();
 	}
 
 
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		activeCell = null;
 		update(activeCell);
 		

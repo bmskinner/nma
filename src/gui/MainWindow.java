@@ -58,6 +58,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -145,13 +146,17 @@ public class MainWindow
 	 * Handle threading
 	 */
 	
-	public static final int corePoolSize = 8;
-	public static final int maximumPoolSize = 16;
+	public static final int corePoolSize    = 4;
+	public static final int maximumPoolSize = 8;
 	public static final int keepAliveTime = 5000;
 
 	ExecutorService executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
 			keepAliveTime, TimeUnit.MILLISECONDS,
 			new LinkedBlockingQueue<Runnable>());
+	
+//	ExecutorService checkTasksExecutorService = new ThreadPoolExecutor(1, 20,
+//		    100000, TimeUnit.MILLISECONDS,
+//		    new SynchronousQueue<Runnable>());
 	
 	
 	/**
@@ -808,8 +813,9 @@ public class MainWindow
 			}
 			
 			if(event.method().equals(DatasetMethod.ADD_DATASET)){
-				
+				finest("Creating runnable for add dataset");
 				Runnable task = () -> { addDataset(event.firstDataset()); };
+				finest("Running add dataset via executor service");
 				executorService.execute(task);	
 			}
 		}
@@ -823,14 +829,14 @@ public class MainWindow
 	 */
 	private void addDataset(final AnalysisDataset dataset){
 
-		log(Level.FINEST, "Adding dataset");
+		finest("Adding dataset");
 		dataset.setSwatch(activeSwatch);
 		populationsPanel.addDataset(dataset);
 		for(AnalysisDataset child : dataset.getAllChildDatasets() ){
 			populationsPanel.addDataset(child);
 		}
 
-		log(Level.FINEST, "Ordering update of populations panel");
+		finest("Ordering update of populations panel");
 		final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		list.add(dataset);
 		populationsPanel.update(list);
@@ -1216,13 +1222,19 @@ public class MainWindow
 	}
 	
 	private void killAllTasks(){
-		executorService.shutdownNow();
+//		executorService.shutdownNow();
 		
-		warn("Found "+logPanel.getProgressBars().size()+" active bars");
-		for(JProgressBar bar : logPanel.getProgressBars()){
-			logPanel.remove(bar);
+//		warn("Found "+logPanel.getProgressBars().size()+" active bars");
+//		for(JProgressBar bar : logPanel.getProgressBars()){
+//			logPanel.remove(bar);
+//		}
+//		warn("Killed all running tasks");
+		
+		log("Threads running in the JVM:");
+		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+		for(Thread t : threadSet){
+			log("Thread "+t.getId()+": "+t.getState());
 		}
-		warn("Killed all running tasks");
 		
 	}
 

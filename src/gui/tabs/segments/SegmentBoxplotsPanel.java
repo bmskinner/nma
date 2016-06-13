@@ -57,14 +57,14 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 
 
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		updateMultiple();
 		
 	}
 
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 		
@@ -113,13 +113,15 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 		
-		MeasurementScale scale = measurementUnitSettingsPanel.getSelected();
-		// No datasets, show blank chart
 		measurementUnitSettingsPanel.setEnabled(false);
+		
+//		ChartOptions options = new ChartOptionsBuilder()
+//		.setDatasets(null)
+//		.build();
 
 		ChartPanel chartPanel = new ChartPanel(BoxplotChartFactory.getInstance().createEmptyBoxplot());
 		mainPanel.add(chartPanel);

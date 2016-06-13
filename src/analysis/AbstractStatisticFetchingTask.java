@@ -20,12 +20,13 @@ package analysis;
 
 import java.util.concurrent.RecursiveTask;
 
+import logging.Loggable;
 import stats.PlottableStatistic;
 import components.generic.MeasurementScale;
 import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
-public abstract class AbstractStatisticFetchingTask extends RecursiveTask<double[]>{
+public abstract class AbstractStatisticFetchingTask extends RecursiveTask<double[]> implements Loggable{
 	
 	protected final int low, high;
 	protected final Nucleus[] nuclei;

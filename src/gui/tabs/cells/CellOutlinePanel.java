@@ -131,20 +131,20 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 	}
 
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		activeCell = null;
 		update(activeCell);
 		
 	}
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		updateNull();
 		
 	}
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		activeCell = null;
 		
 		updateSettingsPanels();

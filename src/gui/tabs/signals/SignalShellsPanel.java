@@ -119,7 +119,7 @@ public class SignalShellsPanel extends DetailPanel {
 	}
 
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 //		AnalysisDataset dataset = list.get(0);
 	CellCollection collection = activeDataset().getCollection();
 
@@ -173,7 +173,7 @@ public class SignalShellsPanel extends DetailPanel {
 	}
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		// Multiple populations. Do not display
 		// container in tab if no shell chart
 		makeNoShellAnalysisAvailablePanel(false, null, "Cannot display shell results for multiple populations");
@@ -182,7 +182,7 @@ public class SignalShellsPanel extends DetailPanel {
 	}
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		updateMultiple();
 		
 	}

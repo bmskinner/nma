@@ -75,7 +75,7 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 	 * This method must be overridden by the extending class
 	 * to perform the actual update when a single dataset is selected
 	 */
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		updateMultiple();
 	}
 	
@@ -83,7 +83,7 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 	 * This method must be overridden by the extending class
 	 * to perform the actual update when a multiple datasets are selected
 	 */
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		vennPanel.update(getDatasets());
 		log(Level.FINEST, "Updating Venn panel");
 		
@@ -98,7 +98,7 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 	 * This method must be overridden by the extending class
 	 * to perform the actual update when a no datasets are selected
 	 */
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		updateMultiple();
 	}
 	

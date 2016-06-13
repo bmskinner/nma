@@ -84,7 +84,7 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		TableModel model = getTable(makeOptions());
 		table.setModel(model);
 		
@@ -93,7 +93,7 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 	}
 	
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		TableModel model = getTable(makeOptions());
 		
 		table.setModel(model);
@@ -109,7 +109,7 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 	}
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		
 		TableModel model = getTable(makeOptions());
 

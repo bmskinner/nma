@@ -209,29 +209,16 @@ public class MergesDetailPanel extends DetailPanel {
 		mainPanel.setVisible(true);
 	}
 	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a single dataset is selected
-	 */
-	protected void updateSingle() throws Exception {
-
-//		TableOptions options = new TableOptionsBuilder()
-//		.setDatasets(getDatasets())
-//		.setLogger(programLogger)
-//		.setType(TableType.MERGE_SOURCES)
-//		.build();
-//
-//		TableModel model = getTable(options);
-
-//		mergeSources.setModel(model);
+	@Override
+	protected void updateSingle()  {
 
 		updateSourceButtonsPanel();
 		
 		
 		TableOptions parameterOptions = new TableOptionsBuilder()
-		.setDatasets(activeDataset().getAllMergeSources())
-		.setType(TableType.ANALYSIS_PARAMETERS)
-		.build();
+			.setDatasets(activeDataset().getAllMergeSources())
+			.setType(TableType.ANALYSIS_PARAMETERS)
+			.build();
 		
 		TableModel parameterModel = getTable(parameterOptions);
 		
@@ -240,34 +227,20 @@ public class MergesDetailPanel extends DetailPanel {
 		
 	}
 	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a multiple datasets are selected
-	 */
-	protected void updateMultiple() throws Exception {
+	@Override
+	protected void updateMultiple() {
 		updateNull();
 	}
 	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a no datasets are selected
-	 */
-	protected void updateNull() throws Exception {
+	@Override
+	protected void updateNull() {
 		getSourceButtonPanel.setVisible(false);
-		
-//		TableOptions options = new TableOptionsBuilder()
-//		.setDatasets(null)
-//		.setType(TableType.MERGE_SOURCES)
-//		.setLogger(programLogger)
-//		.build();
-//		
-//		TableModel model = getTable(options);
-		
+			
 		
 		TableOptions parameterOptions = new TableOptionsBuilder()
-		.setDatasets(null)
-		.setType(TableType.ANALYSIS_PARAMETERS)
-		.build();
+			.setDatasets(null)
+			.setType(TableType.ANALYSIS_PARAMETERS)
+			.build();
 		
 		TableModel parameterModel = getTable(parameterOptions);
 		

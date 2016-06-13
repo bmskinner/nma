@@ -47,7 +47,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 	}
 
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		tablePanel = createTablePanel();
 		scrollPane.setColumnHeaderView(null);
 		tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
@@ -57,7 +57,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 	}
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		tablePanel = createTablePanel();
 		scrollPane.setColumnHeaderView(null);
 		
@@ -109,7 +109,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 	}
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		tablePanel = createTablePanel();
 		scrollPane.setColumnHeaderView(null);
 		tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));

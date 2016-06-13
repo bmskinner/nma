@@ -112,21 +112,21 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 		}
 		
 		@Override
-		protected void updateSingle() throws Exception {
+		protected void updateSingle() {
 			
 			this.setEnabled(true);
 
 		}
 		
 		@Override
-		protected void updateMultiple() throws Exception {
+		protected void updateMultiple() {
 			// Don't allow marker selection for multiple datasets
 			this.setEnabled(true);
 			profileMarkersOptionsPanel.setEnabled(false);
 		}
 		
 		@Override
-		protected void updateNull() throws Exception {
+		protected void updateNull() {
 			this.setEnabled(false);		
 		}
 		

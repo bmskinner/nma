@@ -553,7 +553,7 @@ public class SignalCollection implements Serializable, Loggable {
 	 * @return the areas
 	 * @throws Exception 
 	 */
-	public List<Double> getStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception{
+	public List<Double> getStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) {
 		List<NuclearSignal> list = getSignals(signalGroup);
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<list.size();i++){

@@ -206,7 +206,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		
 		setButtonsEnabled(true);
 		
@@ -254,14 +254,14 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		updateNull();
 		
 		
 	}
 	
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		setButtonsEnabled(false);
 		chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
 		rangePanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
@@ -312,7 +312,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 				if(tag.type().equals(BorderTagType.CORE)){
 					log("Resegmenting dataset");
 					fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
-				} else {
+				} else {					
 					fine("Firing refresh cache request for loaded datasets");
 					fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 				}

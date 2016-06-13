@@ -81,19 +81,19 @@ public class VennDetailPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		updateNull();
 	}
 	
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		log(Level.FINE, "Updating venn panel");
 
 		TableOptions options = new TableOptionsBuilder()
-		.setDatasets(getDatasets())
-		.setType(TableType.VENN)
-		.build();
+			.setDatasets(getDatasets())
+			.setType(TableType.VENN)
+			.build();
 
 
 
@@ -112,12 +112,12 @@ public class VennDetailPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected void updateNull() throws Exception {		
+	protected void updateNull() {		
 		
 		TableOptions options = new TableOptionsBuilder()
-		.setDatasets(null)
-		.setType(TableType.VENN)
-		.build();
+			.setDatasets(null)
+			.setType(TableType.VENN)
+			.build();
 		
 		TableModel model = getTable(options);
 		vennTable.setModel(model);

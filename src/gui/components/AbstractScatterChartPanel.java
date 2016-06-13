@@ -80,7 +80,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		
 		PlottableStatistic statA = (PlottableStatistic) statABox.getSelectedItem();
 		PlottableStatistic statB = (PlottableStatistic) statBBox.getSelectedItem();
@@ -106,12 +106,12 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 	}
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		updateSingle();
 	}
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(null)
 			.build();

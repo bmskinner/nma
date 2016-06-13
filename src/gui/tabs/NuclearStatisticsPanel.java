@@ -75,7 +75,6 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		this.addSubPanel(nucleusMagnitudePanel);
 		tabPane.addTab("Magnitude", null, nucleusMagnitudePanel, null);
 		
-		
 		nuclearOverlaysPanel 	= new NuclearOverlaysPanel();
 		this.addSubPanel(nuclearOverlaysPanel);
 		tabPane.addTab("Overlays", null, nuclearOverlaysPanel, null);
@@ -89,38 +88,44 @@ public class NuclearStatisticsPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		
-		
+		finest("Updating nuclear stats panel");
 		nuclearStatsPanel.update(getDatasets());
 		finest("Updated nuclear stats panel");
 		
+		finest("Updating nuclear boxplots panel");
 		boxplotPanel.update(getDatasets());
 		finest("Updated nuclear boxplots panel");
 		
+		finest("Updating nuclear histograms panel");
 		histogramsPanel.update(getDatasets());
 		finest("Updated nuclear histograms panel");
 		
-		wilcoxonPanel.update(getDatasets());
 		finest("Updating nuclear Wilcoxon panel");
+		wilcoxonPanel.update(getDatasets());
+		finest("Updated nuclear Wilcoxon panel");
 		
+		finest("Updating nuclear magnitude panel");
 		nucleusMagnitudePanel.update(getDatasets());
-		finest("Updating magnitude panel");
+		finest("Updated nuclear magnitude panel");
 		
+		finest("Updating nuclear overlays panel");
 		nuclearOverlaysPanel.update(getDatasets());
-		finest("Updating overlays panel");
+		finest("Updated nuclear overlays panel");
 		
+		finest("Updating nuclear scatter panel");
 		nuclearScatterChartPanel.update(getDatasets());
-		finest("Updating scatter panel");
+		finest("Updated nuclear scatter panel");
 	}
 	
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple(){
 		updateSingle();
 	}
 	
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		updateSingle();
 	}
 	

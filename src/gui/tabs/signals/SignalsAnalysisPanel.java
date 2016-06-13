@@ -198,7 +198,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
 
 
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(getDatasets())
@@ -223,16 +223,16 @@ public class SignalsAnalysisPanel extends DetailPanel {
 	}
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		updateSingle();
 	}
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		
 		TableOptions options = new TableOptionsBuilder()
-		.setDatasets(null)
-		.build();
+			.setDatasets(null)
+			.build();
 		
 		TableModel model = getTable(options);
 		table.setModel(model);

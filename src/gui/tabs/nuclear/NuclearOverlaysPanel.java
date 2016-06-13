@@ -141,7 +141,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	}
 
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 //		log(Level.INFO, "Updating overlays panel: single");
 		compareConsensusButton.setEnabled(false);
 		makeOverlayChartButton.setVisible(false);
@@ -194,7 +194,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	}
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		makeOverlayChartButton.setVisible(false);
 		updateSingle();
 		
@@ -218,7 +218,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	}
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		compareConsensusButton.setEnabled(false);
 		checkBoxPanel.setEnabled(false);
 		makeOverlayChartButton.setVisible(false);

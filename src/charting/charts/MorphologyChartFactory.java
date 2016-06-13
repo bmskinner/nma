@@ -55,6 +55,7 @@ import analysis.AnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
+import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import components.AbstractCellularComponent;
 import components.CellCollection;
@@ -65,6 +66,20 @@ import components.nuclei.Nucleus;
 
 public class MorphologyChartFactory extends AbstractChartFactory {
 	
+	private static MorphologyChartFactory instance = null;
+	
+	protected MorphologyChartFactory(){}
+	
+	/**
+	 * Fetch an instance of the factory
+	 * @return
+	 */
+	public static MorphologyChartFactory getInstance(){
+		if(instance==null){
+			instance = new MorphologyChartFactory();
+		}
+		return instance;
+	}
 	
 	/**
 	 * Create an empty chart to display when no datasets are selected
@@ -567,24 +582,29 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	private static JFreeChart makeMultiSegmentStartPositionChart(ChartOptions options) throws Exception {
+	private JFreeChart makeMultiSegmentStartPositionChart(ChartOptions options) throws Exception {
+		
+		finest("Creating multi segment start position chart");
 		
 		XYDataset positionDataset = CellDatasetCreator.getInstance().createPositionFeatureDataset(options);
+		finest("Created position dataset");
+		
 		
 		XYDataset nuclearOutlines = NucleusDatasetCreator.createMultiNucleusOutline(options.getDatasets());
+		finest("Created nucleus outline dataset");
 		
 		if(positionDataset == null || nuclearOutlines == null){
 			// a null dataset is returned if segment counts do not match
 			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 		}
 		
+		
+		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                null, null, null, PlotOrientation.VERTICAL, true, true,
 				                false);
 		
-		
-
 		XYPlot plot = chart.getXYPlot();
 
 		plot.setDataset(0, positionDataset);
@@ -641,6 +661,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				plot.getRenderer(1).setSeriesPaint(j, profileColour);
 			}
 		}
+		finest("Created segment position chart");
 		return chart;
 		
 	}
@@ -651,7 +672,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param options the chart options. Should have a segID
 	 * @return a chart
 	 */
-	public static JFreeChart makeSegmentStartPositionChart(ChartOptions options) throws Exception {
+	public JFreeChart makeSegmentStartPositionChart(ChartOptions options) throws Exception {
 		
 		if(  options.hasDatasets()){
 			return  makeMultiSegmentStartPositionChart(options);

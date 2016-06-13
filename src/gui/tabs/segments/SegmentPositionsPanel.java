@@ -78,12 +78,14 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
-		return MorphologyChartFactory.makeSegmentStartPositionChart(options);
+		return MorphologyChartFactory.getInstance().makeSegmentStartPositionChart(options);
 	}
 
 
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
+		super.updateSingle();
+		finest("Passing to update multiple datasets");
 		updateMultiple();
 	}
 	
@@ -92,7 +94,9 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
+		super.updateMultiple();
+		finest("Creating new main panel");
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 		
@@ -125,10 +129,12 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 			
 		});
 
-		log(Level.FINEST, "Dataset list is not empty");
-		
+		finest("Checking segment counts");
+				
 		// Check that all the datasets have the same number of segments
 		if(ProfileManager.segmentCountsMatch(getDatasets())){
+			
+			finest("Segment counts match");
 
 			CellCollection collection = activeDataset().getCollection();
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
@@ -136,9 +142,12 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 					.getOrderedSegments();
 
 
+			finest("Creating segment charts");
+			
 			// Get each segment as a boxplot
 			for(NucleusBorderSegment seg : segments){
 
+				finest("Creating chart for segment "+seg.getName());
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
@@ -146,24 +155,27 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 					.setSegID(seg.getID())
 					.build();
 				
-				log(Level.FINEST, "Making segment start position chart for seg "+seg.getName());
 
 				JFreeChart chart = getChart(options);
 
 				FixedAspectRatioChartPanel chartPanel = new FixedAspectRatioChartPanel(chart);
 				
+				finest("Adding new chart panel for segment "+seg.getName());
+				
 				chartPanel.setPreferredSize(preferredSize);
 				chartPanel.setSize(preferredSize);
 				chartPanels.put(seg.getName(), chartPanel);
 				mainPanel.add(chartPanel);			
-//				
+			
 			}
+			
+			finest("Finshed creating segment charts");
 
 		} else { // different number of segments, blank chart
+			finest("Segment counts do not match");
 			this.setEnabled(false);
 			mainPanel.setLayout(new FlowLayout());
 			mainPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
-//			scrollPane.setViewportView(mainPanel);
 		}
 
 		mainPanel.revalidate();
@@ -174,6 +186,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 		/*
 		 * Ensure charts maintain aspect ratio
 		 */
+		finest("Restoring aspect ratios");
 		restoreAspectRatio();
 	}
 	
@@ -186,7 +199,8 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
+		super.updateNull();
 		this.setEnabled(false);
 		mainPanel.setLayout(new FlowLayout());
 		mainPanel.add(new JLabel("No datasets selected", JLabel.CENTER));

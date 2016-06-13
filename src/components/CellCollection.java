@@ -561,7 +561,7 @@ public class CellCollection implements Serializable, Loggable {
    * @param pointType the point to fetch profiles from
    * @return an array of normalised differences
    */
-  public double[] getNormalisedDifferencesToMedianFromPoint(BorderTag pointType) throws Exception {
+  public double[] getNormalisedDifferencesToMedianFromPoint(BorderTag pointType) {
 //	  List<Double> list = new ArrayList<Double>();
 	  int count = this.getNucleusCount();
 	  double[] result = new double[count];
@@ -749,7 +749,7 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
    * @return a list of values
    * @throws Exception
    */
-  public double[] getNuclearStatistics(NucleusStatistic stat, MeasurementScale scale) throws Exception {
+  public double[] getNuclearStatistics(NucleusStatistic stat, MeasurementScale scale) {
 
 	  double[] result = null;
 	  switch (stat) {
@@ -760,10 +760,12 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 		  }
 	
 		  default: {
+			  finest("Making statistic fetching task for "+stat);
 			  NucleusStatisticFetchingTask task = new NucleusStatisticFetchingTask(getNucleusArray(),
 					  stat,
 					  scale);
 			  result = task.invoke();
+			  finest("Fetched statistic result for "+stat);
 			  break;
 		  }
 

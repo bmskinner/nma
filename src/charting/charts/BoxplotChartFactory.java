@@ -80,7 +80,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 		return boxplot;
 	}
 	
-	public JFreeChart createStatisticBoxplot(ChartOptions options) throws Exception{
+	public JFreeChart createStatisticBoxplot(ChartOptions options) {
 		
 		if(!options.hasDatasets()){
 			return createEmptyBoxplot();
@@ -112,7 +112,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * 
 	 */
 
-	private JFreeChart createNucleusStatisticBoxplot(ChartOptions options) throws Exception{
+	private JFreeChart createNucleusStatisticBoxplot(ChartOptions options) {
 		
 		BoxAndWhiskerCategoryDataset ds = null;
 		if(options.getDatasets()!=null){
@@ -134,7 +134,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * @param ds the dataset
 	 * @return
 	 */
-	private JFreeChart createSegmentBoxplot(ChartOptions options) throws Exception {
+	private JFreeChart createSegmentBoxplot(ChartOptions options) {
 
 		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
@@ -175,7 +175,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	private JFreeChart createSignalStatisticBoxplot(ChartOptions options) throws Exception{
+	private JFreeChart createSignalStatisticBoxplot(ChartOptions options){
 		
 		BoxAndWhiskerCategoryDataset ds = NuclearSignalDatasetCreator.getInstance().createSignalStatisticBoxplotDataset(options);
 

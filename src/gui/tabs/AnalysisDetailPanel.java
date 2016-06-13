@@ -73,19 +73,19 @@ public class AnalysisDetailPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		updateMultiple() ;
 	}
 	
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		updateAnalysisParametersPanel();
 		log(Level.FINEST, "Updated analysis parameter panel");
 	}
 	
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		updateMultiple() ;
 	}
 			
@@ -95,7 +95,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 	 * @param list the datasets
 	 * @throws Exception 
 	 */
-	private void updateAnalysisParametersPanel() throws Exception{
+	private void updateAnalysisParametersPanel() {
 
 
 		TableOptions options = new TableOptionsBuilder()

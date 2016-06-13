@@ -121,7 +121,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 	 * between curves
 	 * @return
 	 */
-	private void updateChartPanel() throws Exception {
+	private void updateChartPanel() {
 
 
 		ChartOptions options = new ChartOptionsBuilder()
@@ -150,19 +150,13 @@ public class KruskalDetailPanel  extends DetailPanel {
 		return null;
 	}
 	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a single dataset is selected
-	 */
-	protected void updateSingle() throws Exception {
+	@Override
+	protected void updateSingle() {
 		updateNull();
 	}
 	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a multiple datasets are selected
-	 */
-	protected void updateMultiple() throws Exception {
+	@Override
+	protected void updateMultiple() {
 		if(getDatasets().size()==2){ // Only create a chart if exactly two datasets are selected
 			
 			// Only allow a franken normlisation if datasets have the same number of segments
@@ -182,11 +176,8 @@ public class KruskalDetailPanel  extends DetailPanel {
 		log(Level.FINEST, "Updated Kruskal panel");
 	}
 	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a no datasets are selected
-	 */
-	protected void updateNull() throws Exception {
+	@Override
+	protected void updateNull()  {
 		setEnabled(false);
 		JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
 		chartPanel.setChart(chart);

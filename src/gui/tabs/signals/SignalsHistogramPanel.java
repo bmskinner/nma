@@ -68,7 +68,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		this.setEnabled(true);
 		
 		MeasurementScale scale  = measurementUnitSettingsPanel.getSelected();
@@ -100,13 +100,13 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 	}
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		 updateNull();
 		
 	}
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		this.setEnabled(false);
 		
 	}

@@ -1149,23 +1149,23 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 	}
 
-	@Override
-	protected void updateSingle() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void updateMultiple() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void updateNull() throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
+//	@Override
+//	protected void updateSingle() throws Exception {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	protected void updateMultiple() throws Exception {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	protected void updateNull() throws Exception {
+//		// TODO Auto-generated method stub
+//		
+//	}
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {

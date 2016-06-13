@@ -71,27 +71,30 @@ public class NucleusProfilesPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		updateMultiple();
 	}
 	
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		
 		for(ProfileType type : profilePanels.keySet()){
+			finest("Updating "+type.toString()+" profile panel: "+this.getClass().getName());
 			profilePanels.get(type).update(getDatasets());
-			log(Level.FINEST, "Updated "+type.toString()+" profile panel");
+			finest("Updated "+type.toString()+" profile panel: "+this.getClass().getName());
 		}
 		
+		finest("Updating variabililty panel: "+this.getClass().getName());
 		variabilityChartPanel.update(getDatasets());
-		log(Level.FINEST, "Updated variabililty panel");
+		finest("Updated variabililty panel: "+this.getClass().getName());
 		
+		finest("Updating modality panel: "+this.getClass().getName());
 		modalityDisplayPanel.update(getDatasets());
-		log(Level.FINEST, "Updated modality panel");
+		finest("Updated modality panel: "+this.getClass().getName());
 	}
 	
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		updateMultiple();
 	}
 	

@@ -49,20 +49,20 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 		}
 		
 		@Override
-		protected void updateSingle() throws Exception {
+		protected void updateSingle() {
 			super.updateSingle();
 			updateChart();
 			
 		}
 		
 		@Override
-		protected void updateMultiple() throws Exception {
+		protected void updateMultiple() {
 			super.updateMultiple();
 			updateChart();
 		}
 		
 		@Override
-		protected void updateNull() throws Exception {
+		protected void updateNull() {
 			super.updateNull();
 			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(type);
 			chartPanel.setChart(chart);
@@ -79,7 +79,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 			return null;
 		}
 		
-		private void updateChart() throws Exception{
+		private void updateChart() {
 			ChartOptions options = makeOptions();
 			JFreeChart   chart   = getChart(options);
 			chartPanel.setChart(chart);			

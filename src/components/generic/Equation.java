@@ -1,5 +1,9 @@
 package components.generic;
 
+import java.util.List;
+
+import components.nuclear.BorderPoint;
+
 /*******************************************************************************
  *  	Copyright (C) 2015 Ben Skinner
  *   
@@ -241,6 +245,58 @@ public class Equation{
 		// measure the distance between p and the intercept
 		double distance = p.getLengthTo(intercept);
 		return distance;
+	}
+	
+
+	/**
+	 * Find the best fit to the points using the least square
+	 * method
+	 * @param points
+	 * @return
+	 */
+	public static Equation calculateBestFitLine(List<BorderPoint> points){
+		
+		// Find the means of x and y
+		double xMean = 0;
+		double yMean = 0;
+		
+		for(BorderPoint p : points){
+			xMean += p.getX();
+			yMean += p.getY();
+		}
+		
+		xMean /= points.size();
+		yMean /= points.size();
+		
+		/*
+		 *  Find the slope of the line
+		
+		m = sumof(  (x - xMean) (y-yMean)  )
+			--------------------------------
+			sumof(  (x - xMean)^2 )
+		
+		 */
+		
+		double sumDiffs = 0;
+		double sumSquare = 0;
+		
+		for(BorderPoint p : points){
+			
+			double x = p.getX() - xMean;
+			double y = p.getY() - yMean;
+			double x2 = x*x;
+			sumDiffs  += x*y;
+			sumSquare += x2;
+		}
+		
+		double m = sumDiffs / sumSquare;
+		
+		// Calculate the intercept: b = yMean - m*xMean
+		double c = yMean - (  m * xMean);
+		
+		// Return the equation
+		Equation eq = new Equation(m, c);
+		return eq;
 	}
 
 	/**

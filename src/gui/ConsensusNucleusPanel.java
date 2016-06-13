@@ -366,20 +366,21 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
+		super.updateSingle();
 		updateSingleDataset();
 		log(Level.FINEST, "Updated consensus panel");
 	}
 	
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		updateMultipleDatasets();
 		log(Level.FINEST, "Updated consensus panel");
 	}
 	
 	@Override
-	protected void updateNull() throws Exception {		
+	protected void updateNull() {		
 		updateBlankChart();
 	}
 	
@@ -393,7 +394,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		return null;
 	}
 		
-	private void updateSingleDataset() throws Exception {
+	private void updateSingleDataset() {
 		runRefoldingButton.setVisible(false);
 		
 //		showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
@@ -438,7 +439,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		}
 	}
 	
-	private void updateMultipleDatasets() throws Exception{
+	private void updateMultipleDatasets() {
 
 		ChartOptions options = new ChartOptionsBuilder()
 		.setDatasets(getDatasets())
@@ -454,13 +455,13 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		offsetsPanel.setVisible(false);
 	}
 	
-	private void updateBlankChart()  throws Exception {
+	private void updateBlankChart() {
 		
 		ChartOptions options = new ChartOptionsBuilder()
-		.setDatasets(null)
-		.build();
+			.setDatasets(null)
+			.build();
 		JFreeChart consensusChart = getChart(options);
-//		JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+
 		consensusChartPanel.setChart(consensusChart);
 		runRefoldingButton.setVisible(false);
 		offsetsPanel.setVisible(false);

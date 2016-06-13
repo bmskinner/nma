@@ -86,13 +86,13 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 	}
 
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		updateMultiple();
 
 	}
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		measurementUnitSettingsPanel.setEnabled(true);
 		MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
 
@@ -125,7 +125,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 	}
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		updateMultiple();
 		measurementUnitSettingsPanel.setEnabled(false);
 	}

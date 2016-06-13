@@ -85,20 +85,20 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		updateMultiple();
 	}
 	
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		segmentProfilePanel.update(getDatasets());
 		
 		
 	}
 	
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		updateMultiple();
 	}
 	
@@ -218,7 +218,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		}
 						
 		@Override
-		protected void updateSingle() throws Exception {
+		protected void updateSingle() {
 			
 			SegmentedProfile profile = null;
 			
@@ -286,13 +286,13 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		
 
 		@Override
-		protected void updateMultiple() throws Exception {
+		protected void updateMultiple() {
 			updateNull();
 			
 		}
 		
 		@Override
-		protected void updateNull() throws Exception {			
+		protected void updateNull() {			
 			chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
 			rangePanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
 			setButtonsEnabled(false);
@@ -315,7 +315,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		 * @param options
 		 * @throws Exception
 		 */
-		private void configureButtons(ChartOptions options) throws Exception {
+		private void configureButtons(ChartOptions options) {
 			if(options.isSingleDataset()){
 				
 				setButtonsEnabled(true);

@@ -702,7 +702,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
      * @return a boxplot dataset
      * @throws Exception 
      */
-    public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) throws Exception{
+    public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) {
         
         if(options.isSingleDataset()){
             return createSingleDatasetSignalStatisticBoxplotDataset(options);
@@ -721,7 +721,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a boxplot dataset
 	 * @throws Exception 
 	 */
-    private BoxAndWhiskerCategoryDataset createSingleDatasetSignalStatisticBoxplotDataset(ChartOptions options) throws Exception {
+    private BoxAndWhiskerCategoryDataset createSingleDatasetSignalStatisticBoxplotDataset(ChartOptions options) {
 
 
 		OutlierFreeBoxAndWhiskerCategoryDataset result = new OutlierFreeBoxAndWhiskerCategoryDataset();

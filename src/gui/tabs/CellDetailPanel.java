@@ -177,7 +177,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		return this.activeCell;
 	}
 	
-	protected void updateSingle() throws Exception {
+	@Override
+	protected void updateSingle() {
 		cellsListPanel.updateDataset( activeDataset()  );
 		outlinePanel.update(getDatasets());
 		cellStatsPanel.update(getDatasets());
@@ -187,11 +188,13 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		finest("Updated active cell panel");
 	}
 	
-	protected void updateMultiple() throws Exception {
+	@Override
+	protected void updateMultiple() {
 		updateNull();
 	}
 	
-	protected void updateNull() throws Exception {
+	@Override
+	protected void updateNull() {
 		cellsListPanel.updateDataset(null);
 		finest("Updated cell list panel");
 		updateCell(null);

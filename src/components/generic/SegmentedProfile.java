@@ -211,7 +211,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @return
 	 * @throws Exception
 	 */
-	private List<NucleusBorderSegment> getSegmentsFrom(NucleusBorderSegment firstSeg) throws Exception {
+	private List<NucleusBorderSegment> getSegmentsFrom(NucleusBorderSegment firstSeg) throws ProfileException{
 		
 		if(firstSeg==null){
 			throw new IllegalArgumentException("Requested first segment is null");
@@ -228,7 +228,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 				result.add(firstSeg);
 				i--;
 			} else {
-				throw new Exception(i+": No next segment in "+firstSeg.toString());
+				throw new ProfileException(i+": No next segment in "+firstSeg.toString());
 			}
 		}
 		return NucleusBorderSegment.copy(result);
@@ -240,7 +240,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * from the zero index of the profile
 	 * @return
 	 */
-	public List<NucleusBorderSegment> getOrderedSegments() throws Exception {
+	public List<NucleusBorderSegment> getOrderedSegments() {
 		
 		NucleusBorderSegment firstSeg = null; // default to the first segment in the profile
 		
@@ -265,7 +265,16 @@ public class SegmentedProfile extends Profile implements Serializable {
 			firstSeg = this.getSegments().get(0); // default to the first segment in the profile
 		}
 		
-		return getSegmentsFrom(firstSeg);
+		List<NucleusBorderSegment> result;
+		try {
+			result = getSegmentsFrom(firstSeg);
+		} catch (ProfileException e) {
+			warn("Profile error getting segments");
+			log(Level.FINE, "Profile error getting segments", e);
+			result = new ArrayList<NucleusBorderSegment>();
+		}
+		
+		return result;
 	
 	}
 	

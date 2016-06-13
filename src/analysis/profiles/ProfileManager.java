@@ -82,7 +82,13 @@ public class ProfileManager implements Loggable {
 
 			// returns the positive offset index of this profile which best matches the median profile
 			int newIndex = n.getProfile(type).getSlidingWindowOffset(median);
-			n.setBorderTag(tag, newIndex);			
+			n.setBorderTag(tag, newIndex);		
+			
+			if(tag.equals(BorderTag.TOP_VERTICAL) || tag.equals(BorderTag.BOTTOM_VERTICAL)){
+				
+				n.updateVerticallyRotatedNucleus();
+				
+			}
 		}
 		
 	}

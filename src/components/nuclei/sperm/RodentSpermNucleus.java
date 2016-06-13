@@ -114,16 +114,8 @@ public class RodentSpermNucleus extends SpermNucleus {
 			if(tag.equals(BorderTag.TOP_VERTICAL) || tag.equals(BorderTag.BOTTOM_VERTICAL)){
 				
 				// Clear cached stats
-				this.hookLength = 0;
-				this.bodyWidth  = 0;
-//				try {
-//					
-//					calculateHookOrBodyLength();
-//					
-//				} catch (Exception e) {
-//					this.hookLength = 0;
-//					this.bodyWidth  = 0;
-//				}
+				this.hookLength = -1;
+				this.bodyWidth  = -1;
 			}
 		}
 		
@@ -131,7 +123,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 	
 	private double getHookOrBodyLength(boolean useHook) {
 
-		if(hookLength==0 || bodyWidth==0){
+		if(hookLength==-1 || bodyWidth==-1){
 			calculateHookOrBodyLength();
 		}
 		
@@ -145,6 +137,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 	private void calculateHookOrBodyLength() {
 			
 		// Copy the nucleus
+		finest("Calculating hook and body length");
 		RodentSpermNucleus testNucleus = new RodentSpermNucleus( this); //.duplicate();
 
 		// Only proceed if the verticals have been set
@@ -203,10 +196,11 @@ public class RodentSpermNucleus extends SpermNucleus {
 			
 			this.hookLength = distanceHook;
 			this.bodyWidth  = distanceHump;
-
+			finest("Hook length and body width calculated");
 		} else {
-			this.hookLength = 0;
-			this.bodyWidth 	= 0;
+			finest("Top and bottom vertical not assigned, skipping");
+			this.hookLength = -1;
+			this.bodyWidth 	= -1;
 		}
 		testNucleus = null;
 	}

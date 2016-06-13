@@ -19,14 +19,12 @@
 package gui.tabs;
 
 
-import gui.DatasetEvent;
 import gui.DatasetEvent.DatasetMethod;
 import gui.DatasetEventListener;
 import gui.components.ExportableTable;
 import gui.dialogs.ClusterTreeDialog;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -39,8 +37,6 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -50,7 +46,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
@@ -76,20 +71,20 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 	}
 	
 	@Override
-	protected void updateSingle() throws Exception {
+	protected void updateSingle() {
 		updateMultiple();
 		
 	}
 
 	@Override
-	protected void updateMultiple() throws Exception {
+	protected void updateMultiple() {
 		clusterPanel.update(getDatasets());		
 		log(Level.FINEST, "Updated cluster panel");
 		
 	}
 
 	@Override
-	protected void updateNull() throws Exception {
+	protected void updateNull() {
 		updateMultiple();
 		
 	}
