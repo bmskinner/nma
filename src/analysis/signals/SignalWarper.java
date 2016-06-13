@@ -61,12 +61,14 @@ public class SignalWarper extends AnalysisWorker {
 	
 	private void generateImages(){
 		
+		finest("Fetching consensus nucleus from dataset");
 		NucleusMesh meshConsensus = new NucleusMesh( getDataset().getCollection().getConsensusNucleus());
 		
 		SignalManager m =  getDataset().getCollection().getSignalManager();
 		List<Cell> cells = m.getCellsWithNuclearSignals(signalGroup, true);
 		
 		int cellNumber = 0;
+		
 		for(Cell cell : cells){
 			fine("Drawing signals for cell "+cell.getNucleus().getNameAndNumber());
 			// Get each nucleus. Make a mesh.
@@ -74,12 +76,16 @@ public class SignalWarper extends AnalysisWorker {
 			
 			// Get the image with the signal
 			ImageProcessor ip = cell.getNucleus().getSignalCollection().getImage(signalGroup);
+			finest("Image for "+cell.getNucleus().getNameAndNumber()+" is "+ip.getWidth()+"x"+ip.getHeight());
 			
 			// Create NucleusMeshImage from nucleus.
+			finest("Making nucleus mesh image");
 			NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
 			
 			// Draw NucleusMeshImage onto consensus mesh.
+			finest("Warping image onto consensus mesh");
 			ImageProcessor warped = im.meshToImage(meshConsensus);
+			finest("Warped image is "+ip.getWidth()+"x"+ip.getHeight());
 			warpedImages[cellNumber] = warped;
 			publish(cellNumber++);
 			

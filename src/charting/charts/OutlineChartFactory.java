@@ -256,13 +256,29 @@ public class OutlineChartFactory extends AbstractChartFactory {
 							.getCollection()
 							.getConsensusNucleus(), mesh1);
 					
+					Rectangle2D bounds1 = mesh1.toPath().getBounds2D();
+					finest("Mesh1 bounds are "+bounds1.getWidth()
+							+" x "+bounds1.getHeight()
+							+" at "+bounds1.getX()
+							+", "+bounds1.getY());
+					
+					
+					Rectangle2D bounds = mesh2.toPath().getBounds2D();
+					finest("Mesh2 bounds are "+bounds.getWidth()
+							+" x "+bounds.getHeight()
+							+" at "+bounds.getX()
+							+", "+bounds.getY());
+					
 					// Create a mesh image from the nucleus
 					NucleusMeshImage im = new NucleusMeshImage(mesh1, options.getCell().getNucleus().getImage());
 	
 					// Apply the mesh image to the shape of the consensus image
 					ImageProcessor ip = im.meshToImage(mesh2);
-//					ImagePlus imp = new ImagePlus("", ip);
-//					imp.show();
+					
+					// For testing - does mapping to itself generate the correct image?
+//					ImageProcessor ip = im.meshToImage(mesh1);
+//					ImagePlus img = new ImagePlus("warped", ip);
+//					img.show();
 					
 					return OutlineChartFactory.drawImageAsAnnotation(ip);
 	

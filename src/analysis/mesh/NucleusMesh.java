@@ -20,6 +20,8 @@
  *******************************************************************************/
 package analysis.mesh;
 
+import java.awt.Shape;
+import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -55,6 +57,14 @@ import components.nuclei.Nucleus;
  * skeleton vertices, making a triangular mesh.
  * 
  * All vertices can be located in another nucleus using segment proportions.
+ * @author bms41
+ *
+ */
+/**
+ * @author bms41
+ *
+ */
+/**
  * @author bms41
  *
  */
@@ -355,6 +365,29 @@ public class NucleusMesh implements Loggable {
 		
 		return result;
 		
+	}
+	
+	
+	/**
+	 * Get a closed path comprising the peripheral points of the mesh 
+	 * @return
+	 */
+	public Path2D toPath(){
+		Path2D path = new Path2D.Double();
+
+		int i=0;
+		for(NucleusMeshVertex v : peripheralVertices){
+			
+			if( i++ == 0){
+				path.moveTo(v.getPosition().getX(), v.getPosition().getY());
+			} else {
+				path.lineTo(v.getPosition().getX(), v.getPosition().getY());
+			}
+			
+			
+		}
+		path.closePath();
+		return path;
 	}
 	
 	/**

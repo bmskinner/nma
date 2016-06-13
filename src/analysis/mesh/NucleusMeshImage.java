@@ -1,5 +1,6 @@
 package analysis.mesh;
 
+import ij.ImagePlus;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
@@ -46,34 +47,31 @@ public class NucleusMeshImage implements Loggable {
 			warn("Cannot compare meshes");
 			return null;
 		}
-				
 		
-		// Get the bounding box size for the correctly oriented nucleus within the mesh
-		Rectangle r = mesh.nucleus.getVerticallyRotatedNucleus().createPolygon().getBounds();
+//		boolean zeroCoM = false;
+//		if(mesh.nucleus.getCentreOfMass().getXAsInt()==0 && mesh.nucleus.getCentreOfMass().getYAsInt()==0){
+//			zeroCoM = true;
+//			fine("Nucleus centre of mass is at zero");
+//			fine("All pixels must be offset relative to the centre of the new image");
+//		}
+						
+		Rectangle r = mesh.toPath().getBounds();
+		finest("Target mesh bounds are "+r.getWidth()+" x "+r.getHeight()+"  : "+r.getX()+", "+r.getY());
 
-		// Add padding: TODO: figure out why this is needed, and remove
-		// Images have teh correct size, but the position of pixels within the image is off
-		// when using the consensus as a target by 11x8 pixels in Testing.
-		// Not a rounding issue.
-		// the misalignment is also present in the signal warping images
+		
+		// The new image size
 		int w = r.width  ;
 		int h = r.height ;
 		
 		// Find the centre of each axis in the bounding rectangle
-		int xCentre = (int) Math.round((double) w /2); //w >>1;
-		int yCentre = (int) Math.round((double) h /2); //h >>1;
+		int xCentre = w >>1;
+		int yCentre = h >>1;
 		
+		int xBase = (int) mesh.toPath().getBounds().getX();
+		int yBase = (int) mesh.toPath().getBounds().getY();
 		
-		// Check if this is a consensus nucleus, where the CoM is at zero
-		// If so, some face pixels will be at -ve x and y coordinates
-		// These must be moved back to +ve
-		boolean zeroCoM = false;
-		if(mesh.nucleus.getCentreOfMass().getXAsInt()==0 && mesh.nucleus.getCentreOfMass().getYAsInt()==0){
-			fine("Nucleus centre of mass is at zero");
-			fine("Offsetting all pixels to the centre of the new image");
-			zeroCoM = true;
-		}
-		
+		finest("New image dimensions are "+w+" x "+h);
+		finest("New image centre point is at "+xCentre+", "+yCentre);
 
 		// Create a blank image processor with an appropriate size
 		// to hold the new image. Note that if the height or width is
@@ -82,24 +80,16 @@ public class NucleusMeshImage implements Loggable {
 				
 		// Adjust from absolute position in original target image
 		// Note that the consensus will have a position from it's template nucleus
-		int xBase = (int) mesh.nucleus.getPosition()[CellularComponent.X_BASE];
-		int yBase = (int) mesh.nucleus.getPosition()[CellularComponent.Y_BASE];
-		finest("\tOffset image by: "+xBase+", "+yBase);
-		
+
+		finest("Target nucleus original x,y base in image is "+xBase+", "+yBase);
+		finest("The pixels should be moved by: -"+xBase+", -"+yBase);
 		int missingPixels = 0;
 		for(NucleusMeshFace f : map.keySet()){
 			
 			// Fetch the equivalent face in the target mesh
 			NucleusMeshFace targetFace = mesh.getFace(f);
-			
-			if(zeroCoM){
-				// Consensus nucleus is target
-//				missingPixels += addFaceToImage(f, targetFace, ip, xBase, yBase);
-				missingPixels += addFaceToImage(f, targetFace, ip, xCentre-xBase, yCentre-yBase);
-			} else {
-				// Other nucleus is target
-				missingPixels += addFaceToImage(f, targetFace, ip, xBase, yBase);
-			}
+
+			missingPixels += addFaceToImage(f, targetFace, ip, -xBase, -yBase);
 			
 		}
 		
@@ -126,7 +116,6 @@ public class NucleusMeshImage implements Loggable {
 		int missingPixels = 0;
 		Map<NucleusMeshFaceCoordinate, Integer> faceMap = map.get(templateFace);
 		finest("Getting pixels from face");
-		finest(templateFace.toString());
 		
 		for(NucleusMeshFaceCoordinate c : faceMap.keySet() ){
 			
@@ -139,10 +128,13 @@ public class NucleusMeshImage implements Loggable {
 			int x = p.getXAsInt() + xOffset;
 			int y = p.getYAsInt() + yOffset;
 			
+			finest("Coordinate in target face is "+p.toString());
+			finest("Moving point to "+x+", "+y);
 			// Handle array out of bounds errors from consensus nuclei. 
 			// This is because the consensus has -ve x and y positions			
 			try {
 				ip.set(x, y, pixelValue);
+				finest("Pixel set at "+x+", "+y);
 			} catch (ArrayIndexOutOfBoundsException e){
 				finer("Point outside image bounds: "+x+", "+y);
 				missingPixels++;

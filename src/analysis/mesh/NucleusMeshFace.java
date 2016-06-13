@@ -520,9 +520,9 @@ public class NucleusMeshFace implements Loggable {
 			NucleusMeshVertex p2 = usePeripheral ? face.getHigherPeripheralVertex() : face.getHigherInternalVertex();
 			NucleusMeshVertex i1 = usePeripheral ? face.getLowerInternalVertex() : face.getLowerPeripheralVertex();
 			
-			finest("P1: "+p1.toString());
-			finest("P2: "+p2.toString());
-			finest("I1: "+i1.toString());;
+//			finest("P1: "+p1.toString());
+//			finest("P2: "+p2.toString());
+//			finest("I1: "+i1.toString());;
 									
 			// Identify the edges
 			NucleusMeshEdge i1_p1 = i1.getEdgeTo(p1);
@@ -534,26 +534,26 @@ public class NucleusMeshFace implements Loggable {
 			i1_p2 = correctEdgeOrientation(i1_p2);
 			p1_p2 = correctEdgeOrientation(p1_p2);
 						
-			finer("Corrected edges");
-			finest(i1_p1.toString());
-			finest(i1_p2.toString());
-			finest(p1_p2.toString());
+//			finer("Corrected edges");
+//			finest(i1_p1.toString());
+//			finest(i1_p2.toString());
+//			finest(p1_p2.toString());
 			
 			// Draw lines
 			XYPoint i1_p1_prop = i1_p1.getProportionalPosition(this.p2);
-			finest("Point along I1-P1: "+i1_p1_prop.toString());
+//			finest("Point along I1-P1: "+i1_p1_prop.toString());
 			
 			Equation eq1 = new Equation(p2.getPosition(), i1_p1_prop);
 			
 			XYPoint i1_p2_prop = i1_p2.getProportionalPosition(this.p1);
-			finest("Point along I1-P2: "+i1_p2_prop.toString());
+//			finest("Point along I1-P2: "+i1_p2_prop.toString());
 			Equation eq2 = new Equation(p1.getPosition(), i1_p2_prop);
 						
 			// Find intersection
 			XYPoint position = eq1.getIntercept(eq2);
 			
 			// Return at point
-			finest("\tFound intercept: "+position.toString());
+//			finest("\tFound intercept: "+position.toString());
 			return position;
 		}
 

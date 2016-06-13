@@ -1197,9 +1197,11 @@ public class MainWindow
 				
 				log(d.getCollection().toString());
 			}
+			break;
 			
 		case KILL_ALL_TASKS:
 			killAllTasks();
+			break;
 			
 		default:
 			break;

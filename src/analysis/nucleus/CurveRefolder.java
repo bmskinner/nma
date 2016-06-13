@@ -25,6 +25,7 @@
  */
 package analysis.nucleus;
 
+import java.awt.Rectangle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -156,7 +157,6 @@ public class CurveRefolder extends AnalysisWorker {
 
 			}
 			
-
 			// if rodent sperm, put tip on left if needed
 			if(collection.getNucleusType().equals(NucleusType.RODENT_SPERM)){
 				if(refoldNucleus.getBorderTag(BorderTag.REFERENCE_POINT).getX()>0){
@@ -164,6 +164,17 @@ public class CurveRefolder extends AnalysisWorker {
 				}
 			}
 
+			refoldNucleus.updateVerticallyRotatedNucleus();
+			// Update the bounding box to reflect the rotated nucleus position
+			Rectangle bounds = refoldNucleus.getVerticallyRotatedNucleus().createPolygon().getBounds();
+			double newWidth  = bounds.getWidth();
+			double newHeight = bounds.getHeight();
+			double newX      = bounds.getX();
+			double newY      = bounds.getY();
+
+			double[] newPosition = { newX, newY, newWidth, newHeight };
+			refoldNucleus.setPosition(newPosition);
+			
 			collection.addConsensusNucleus(refoldNucleus);
 
 		} catch(Exception e){
