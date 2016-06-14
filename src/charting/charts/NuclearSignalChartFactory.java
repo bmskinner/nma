@@ -135,7 +135,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 			plot.setRenderer(1, rend);
 
 			int j=0;
-			for(UUID signalGroup : options.firstDataset().getCollection().getSignalManager().getSignalGroups()){
+			for(UUID signalGroup : options.firstDataset().getCollection().getSignalManager().getSignalGroupIDs()){
 				List<Shape> shapes = NuclearSignalDatasetCreator.getInstance().createSignalRadiusDataset(options.firstDataset(), signalGroup);
 
 				int signalCount = shapes.size();

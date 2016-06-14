@@ -593,13 +593,13 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 					rend.addAnnotation(a, Layer.BACKGROUND);
 				} else {
-					Color col = new Color(255, 0, 0, alpha);
-
-					// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
-					Rectangle2D r = new Rectangle2D.Double(x+xOffset-0.1, y+yOffset-0.1, 1.2, 1.2);
-					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
-
-					rend.addAnnotation(a, Layer.BACKGROUND);
+//					Color col = new Color(255, 0, 0, alpha);
+//
+//					// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
+//					Rectangle2D r = new Rectangle2D.Double(x+xOffset-0.1, y+yOffset-0.1, 1.2, 1.2);
+//					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+//
+//					rend.addAnnotation(a, Layer.BACKGROUND);
 				}
 			}
 		}

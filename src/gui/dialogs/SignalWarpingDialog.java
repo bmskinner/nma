@@ -28,6 +28,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -45,6 +46,7 @@ import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
+import components.nuclear.SignalGroup;
 import analysis.AnalysisDataset;
 import analysis.signals.SignalManager;
 import analysis.signals.SignalWarper;
@@ -58,7 +60,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private FixedAspectRatioChartPanel chartPanel;
 	
 
-	private JComboBox<UUID> signalGroupSelectedBox;
+	private JComboBox<SignalIDToGroup> signalGroupSelectedBox;
 	private JLabel signalGroupNameLabel;
 	private JButton runButton;
 	
@@ -102,26 +104,30 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		JPanel panel = new JPanel(new FlowLayout());
 		
 		SignalManager m =  datasets.get(0).getCollection().getSignalManager();
-		Set<UUID> signalGroups = m.getSignalGroups();
+		Set<UUID> signalGroups = m.getSignalGroupIDs();
 		
-		signalGroupSelectedBox = new JComboBox<UUID>(signalGroups.toArray( new UUID[0] ));
+		List<SignalIDToGroup> list = new ArrayList<SignalIDToGroup>();
+		for(UUID id : signalGroups){
+			list.add(new SignalIDToGroup(id, datasets.get(0).getCollection().getSignalGroup(id)));
+		}
+		
+		signalGroupSelectedBox = new JComboBox<SignalIDToGroup>(list.toArray( new SignalIDToGroup[0] ));
 		signalGroupSelectedBox.setSelectedIndex(0);
-		UUID signalGroup = (UUID) signalGroupSelectedBox.getSelectedItem();
+		SignalIDToGroup signalGroup = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
+		
+		UUID id = signalGroup.id;
 
-		totalCells = m.getNumberOfCellsWithNuclearSignals(signalGroup);
+		totalCells = m.getNumberOfCellsWithNuclearSignals(id);
 		
 		panel.add(new JLabel("Signal group"));
 		panel.add(signalGroupSelectedBox);		
 		finest("Added signal group box");
-		
-		signalGroupNameLabel = new JLabel(m.getSignalGroupName(signalGroup));
-		panel.add(signalGroupNameLabel);
-		
+				
 		signalGroupSelectedBox.addActionListener( e ->{
 			
-			UUID group = (UUID) signalGroupSelectedBox.getSelectedItem();
-			signalGroupNameLabel.setText(m.getSignalGroupName(group));
-			totalCells = m.getNumberOfCellsWithNuclearSignals(group);
+			SignalIDToGroup group = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
+			signalGroupNameLabel.setText(m.getSignalGroupName(group.id));
+			totalCells = m.getNumberOfCellsWithNuclearSignals(group.id);
 		});
 
 		
@@ -136,7 +142,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				};
 				Thread thr = new Thread(task);
 				thr.start();
-//				SwingUtilities.invokeLater(task);
 								
 			}
 		});	
@@ -157,8 +162,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	} 
 	
 	private void runWarping(){
-		UUID signalGroup = (UUID) signalGroupSelectedBox.getSelectedItem();
+		
+		finest("Running warping");
+		SignalIDToGroup group = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
 				
+		finest("Signal group: "+group);
 		try {
 			setStatusLoading();
 			setEnabled(false);
@@ -170,7 +178,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 			
 
-			warper = new SignalWarper(datasets.get(0), signalGroup);
+			warper = new SignalWarper(datasets.get(0), group.id);
 			warper.addPropertyChangeListener(this);
 			warper.execute();
 			
@@ -187,8 +195,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(datasets)
-			.setShowXAxis(true)
-			.setShowYAxis(true)
+//			.setShowXAxis(true)
+//			.setShowYAxis(true)
 			.build();
 
 		chart = OutlineChartFactory.getInstance().makeSignalWarpChart(options, images);
@@ -237,6 +245,30 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 	}
 	
-	
+	@SuppressWarnings("unused")
+	private class SignalIDToGroup {
+		
+		final private UUID id;
+		final private SignalGroup group;
+		
+		public SignalIDToGroup(final UUID id, final SignalGroup group){
+			this.id = id;
+			this.group = group;
+		}
+				
+		public UUID getId() {
+			return id;
+		}
+
+		public SignalGroup getGroup() {
+			return group;
+		}
+
+
+
+		public String toString(){
+			return group.getGroupName();
+		}
+	}
 
 }

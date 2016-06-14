@@ -39,6 +39,7 @@ import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -934,8 +935,17 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
    * @param id
    * @return
    */
-  public Set<UUID> getSignalGroups(){
+  public Set<UUID> getSignalGroupIDs(){
       return this.signalGroups.keySet();
+  }
+  
+  /**
+   * Fetch the signal groups in this collection
+   * @param id
+   * @return
+   */
+  public Collection<SignalGroup> getSignalGroups(){
+      return this.signalGroups.values();
   }
 
   /**

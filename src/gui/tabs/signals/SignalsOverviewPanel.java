@@ -199,7 +199,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		if(isSingleDataset()){
 			
 		
-            for(UUID signalGroup : activeDataset().getCollection().getSignalGroups()){
+            for(UUID signalGroup : activeDataset().getCollection().getSignalGroupIDs()){
 
             	// get the status within each dataset
                 boolean visible = activeDataset().getCollection().getSignalGroup(signalGroup).isVisible();

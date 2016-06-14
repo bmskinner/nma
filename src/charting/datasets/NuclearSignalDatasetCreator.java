@@ -96,7 +96,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		int maxChannels = 0;
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
-			maxChannels = Math.max(collection.getSignalManager().getSignalGroups().size(), maxChannels);
+			maxChannels = Math.max(collection.getSignalManager().getSignalGroupIDs().size(), maxChannels);
 		}
 		if(maxChannels>0){
 
@@ -143,7 +143,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
         CellCollection collection = dataset.getCollection();
         
         List<Object> rowData = new ArrayList<Object>(0);
-        rowData.add(collection.getSignalManager().getSignalGroups().size());
+        rowData.add(collection.getSignalManager().getSignalGroupIDs().size());
         
         /*
          * If the dataset is a merge, then the analysis options will be null.
@@ -166,7 +166,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
             int signalGroupNumber = 0; // Store the number of signal groups processed from this dataset
 
             int j=0;
-            for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
+            for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
             
                 signalGroupNumber++;
             
@@ -245,7 +245,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			
-			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
+			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()){
 
                 if(collection.getSignalGroup(signalGroup).isVisible()){
 	
@@ -278,7 +278,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			
-            for( UUID signalGroup : collection.getSignalManager().getSignalGroups()){
+            for( UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 
 								
                 String groupLabel = collection.getSignalManager().getSignalGroupName(signalGroup)+"_"+stat.toString();
@@ -342,7 +342,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 		for(AnalysisDataset dataset : list){
 			
-			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroups()){
+			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()){
 
 				double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
 
@@ -409,7 +409,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		if(collection.getSignalManager().hasSignals()){
 			finer("Collection "+collection.getName()+" has signals");
 
-			for(UUID group : collection.getSignalManager().getSignalGroups()){
+			for(UUID group : collection.getSignalManager().getSignalGroupIDs()){
 
 				finest("Signal group "+group.toString());
                 if(dataset.getCollection().getSignalGroup(group).isVisible()){
@@ -501,7 +501,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 		CellCollection collection = dataset.getCollection();
 		if(collection.getSignalManager().hasSignals()){
-			maxSignalGroup = Math.max(collection.getSignalManager().getSignalGroups().size(), maxSignalGroup);
+			maxSignalGroup = Math.max(collection.getSignalManager().getSignalGroupIDs().size(), maxSignalGroup);
 		}
 		
 		finest("Selected collections have "+maxSignalGroup+" signal groups");
@@ -534,11 +534,11 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 
 			List<Object> rowData = new ArrayList<Object>(0);
-			rowData.add(collection.getSignalManager().getSignalGroups().size());
+			rowData.add(collection.getSignalManager().getSignalGroupIDs().size());
 
             int k=0;
 
-			for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){// : collection.getSignalGroups()){
+			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){// : collection.getSignalGroups()){
 				if(collection.getSignalManager().hasSignals(signalGroup)){
 					
 					SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
@@ -597,7 +597,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		for(AnalysisDataset dataset : options.getDatasets()){
 			CellCollection collection = dataset.getCollection();
 			if(collection.getSignalManager().hasSignals()){
-				maxSignalGroup = Math.max(collection.getSignalManager().getSignalGroups().size(), maxSignalGroup);
+				maxSignalGroup = Math.max(collection.getSignalManager().getSignalGroupIDs().size(), maxSignalGroup);
 			}
 		}
 			
@@ -636,7 +636,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 					List<Object> rowData = new ArrayList<Object>(0);
 					rowData.add(signalGroupCount);
 	
-					for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){// : collection.getSignalGroups()){
+					for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){// : collection.getSignalGroups()){
 //						if(collection.getSignalManager().hasSignals(signalGroup)){
 						SignalTableCell cell = new SignalTableCell(signalGroup, 
 								collection.getSignalManager().getSignalGroupName(signalGroup));
@@ -730,7 +730,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
         CellCollection collection = options.firstDataset().getCollection();
 
 		
-        for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
+        for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 
             double[] values = collection.getSignalManager().getSignalStatistics(stat, options.getScale(), signalGroup);
             /*
@@ -756,7 +756,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			
 			CellCollection collection = dataset.getCollection();
 
-			for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
+			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 				
 				if(collection.getSignalManager().hasSignals(signalGroup)){
 					ShellResult r = collection.getSignalGroup(signalGroup).getShellResult();

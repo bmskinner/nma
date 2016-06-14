@@ -64,7 +64,7 @@ public class ShellAnalysis extends AnalysisWorker {
 		try {
 			counters = new HashMap<UUID, ShellCounter>(0);
 
-			for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
+			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 				counters.put(signalGroup, new ShellCounter(shells));
 			}
 
@@ -153,7 +153,7 @@ public class ShellAnalysis extends AnalysisWorker {
 		try {
 			counters = new HashMap<UUID, ShellCounter>(0);
 
-			for(UUID group : collection.getSignalManager().getSignalGroups()){
+			for(UUID group : collection.getSignalManager().getSignalGroupIDs()){
 				counters.put(group, new ShellCounter(shells));
 			}
 

@@ -200,7 +200,7 @@ private static ScatterChartDatasetCreator instance = null;
 			CellCollection c = datasets.get(i).getCollection();
 			SignalManager m = c.getSignalManager();
 			
-			Set<UUID> groups = m.getSignalGroups();
+			Set<UUID> groups = m.getSignalGroupIDs();
 			
 			for(UUID id : groups){
 				
@@ -253,7 +253,7 @@ private static ScatterChartDatasetCreator instance = null;
 			CellCollection c = datasets.get(i).getCollection();
 			SignalManager m = c.getSignalManager();
 			
-			Set<UUID> groups = m.getSignalGroups();
+			Set<UUID> groups = m.getSignalGroupIDs();
 			
 			for(UUID id : groups){
 				

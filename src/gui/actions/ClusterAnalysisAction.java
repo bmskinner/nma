@@ -95,7 +95,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 				}
 				
 				//Copy signal groups
-				for(UUID id  : dataset.getCollection().getSignalGroups()){
+				for(UUID id  : dataset.getCollection().getSignalGroupIDs()){
 					c.addSignalGroup(id, new SignalGroup(dataset.getCollection().getSignalGroup(id)));
 				}
 				

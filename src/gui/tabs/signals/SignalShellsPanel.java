@@ -141,7 +141,7 @@ public class SignalShellsPanel extends DetailPanel {
 		String label = "";
 		
 		
-		for(UUID signalGroup : collection.getSignalManager().getSignalGroups()){
+		for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 			String groupName = collection.getSignalManager().getSignalGroupName(signalGroup);
             ShellResult r = activeDataset().getCollection().getSignalGroup(signalGroup).getShellResult();
 

@@ -20,6 +20,7 @@ package analysis.signals;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +30,7 @@ import components.Cell;
 import components.CellCollection;
 import components.generic.MeasurementScale;
 import components.nuclear.NuclearSignal;
+import components.nuclear.SignalGroup;
 import components.nuclei.Nucleus;
 import stats.SignalStatistic;
 import stats.StatisticDimension;
@@ -80,23 +82,41 @@ public class SignalManager {
 	  }
 	  
 	  public int getSignalGroupCount(){
-		  return getSignalGroups().size();
+		  return getSignalGroupIDs().size();
 	  }
 	  
 	  /**
 	   * Find the signal groups present within the nuclei of the collection
 	   * @return the list of groups. Order is not guaranteed
 	   */
-	  public Set<UUID> getSignalGroups(){
-		  Set<UUID> result = new HashSet<UUID>(0);
-		  for(Nucleus n : collection.getNuclei()){
-			  for( UUID group : n.getSignalCollection().getSignalGroupIDs()){
-				  if(n.getSignalCollection().hasSignal(group)){ // signal groups can be copied over from split collections. Check signals exist
-					  result.add(group);
-				  }
-			  }
-		  }
-		  return result;
+//	  public Set<UUID> getSignalGroupIDs(){
+//		  Set<UUID> result = new HashSet<UUID>(0);
+//		  for(Nucleus n : collection.getNuclei()){
+//			  for( UUID group : n.getSignalCollection().getSignalGroupIDs()){
+//				  if(n.getSignalCollection().hasSignal(group)){ // signal groups can be copied over from split collections. Check signals exist
+//					  result.add(group);
+//				  }
+//			  }
+//		  }
+//		  return result;
+//	  }
+	  
+	  /**
+	   * Fetch the signal group ids in this collection
+	   * @param id
+	   * @return
+	   */
+	  public Set<UUID> getSignalGroupIDs(){
+	      return collection.getSignalGroupIDs();
+	  }
+	  
+	  /**
+	   * Fetch the signal groups in this collection
+	   * @param id
+	   * @return
+	   */
+	  public Collection<SignalGroup> getSignalGroups(){
+	      return collection.getSignalGroups();
 	  }
 	  
 	  public String getSignalGroupName(UUID signalGroup){
@@ -154,7 +174,7 @@ public class SignalManager {
 	   */
 	  public int getSignalCount(){
 		  int count = 0;
-		  for(UUID signalGroup : getSignalGroups()){
+		  for(UUID signalGroup : getSignalGroupIDs()){
 			  count+= this.getSignalCount(signalGroup);
 		  }
 		  return count;
@@ -179,7 +199,7 @@ public class SignalManager {
 	   * @return
 	   */
 	  public boolean hasSignals(){
-		  for(UUID i : getSignalGroups()){
+		  for(UUID i : getSignalGroupIDs()){
 			  if(this.hasSignals(i)){
 				  return true;
 			  }
@@ -205,7 +225,7 @@ public class SignalManager {
        * @return
        */
       public boolean hasShellResult(){
-          for(UUID id : collection.getSignalGroups()){
+          for(UUID id : collection.getSignalGroupIDs()){
               if(collection.getSignalGroup(id).hasShellResult()){
                   return true;
               }
