@@ -78,10 +78,33 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	
 	@Override
 	public void setChart(final JFreeChart chart){
+		finest("Setting new chart");
+		double oldPct = 0;
+		if(xRectangle!=null){
+			
+			double maxX = getChart().getXYPlot().getDomainAxis().getUpperBound();
+			double minX = getChart().getXYPlot().getDomainAxis().getLowerBound();
+			double fullRange = maxX - minX;
+			finest("Chart range "+fullRange+": "+minX+" - "+maxX);
+			finest("Rectangle is "+xRectangle.getMinValue()+" - "+xRectangle.getMaxValue());
+			oldPct = (xRectangle.getMidValue()-minX) / fullRange;
+			finest("Existing rectangle overlay midpoint ("+xRectangle.getMidValue()+") at fraction "+oldPct);
+		}
 		super.setChart(chart);
 		updateRangeWidth();
 		if(xRectangle!=null){
-			updateDomainRectangleLocation((int) xRectangle.getMidValue());
+			double maxX = getChart().getXYPlot().getDomainAxis().getUpperBound();
+			double minX = getChart().getXYPlot().getDomainAxis().getLowerBound();
+			double fullRange = maxX - minX;
+			finest("New chart range "+fullRange+": "+minX+" - "+maxX);
+			
+			double newPosition = minX + (oldPct*fullRange);
+			
+			double halfRange = rangeWidth / 2;
+			xRectangle.setMinValue(newPosition-halfRange);
+			xRectangle.setMaxValue(newPosition+halfRange);
+			finest("Restoring rectangle overlay midpoint to "+newPosition+": "+xRectangle.getMinValue()+" - "+xRectangle.getMaxValue());
+			fireSignalChangeEvent("UpdatePosition");
 		}
 	}
 	
@@ -173,9 +196,9 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	private void updateDomainRectangleLocation(int x){
 
 		Rectangle2D dataArea = getScreenDataArea();
-		JFreeChart chart = getChart();
-		XYPlot plot = (XYPlot) chart.getPlot();
-		ValueAxis xAxis = plot.getDomainAxis();
+		JFreeChart  chart    = getChart();
+		XYPlot      plot     = (XYPlot) chart.getPlot();
+		ValueAxis   xAxis    = plot.getDomainAxis();
 		
 		double xUpper = xAxis.getUpperBound();
 				
@@ -200,7 +223,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		// Set the values in chart units
 		xRectangle.setMinValue(moveMin);
 		xRectangle.setMaxValue(moveMax);
-		
+//		finest("Set rectangle min and max: "+moveMin+" & "+moveMax);
 	}
 	
 		

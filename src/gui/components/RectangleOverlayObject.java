@@ -59,7 +59,7 @@ public class RectangleOverlayObject {
 	}
 	
 	public double getMidValue(){
-		return (maxValue - minValue) /2;
+		return ((maxValue - minValue) /2) +minValue;
 	}
 
 	public Stroke getStroke() {

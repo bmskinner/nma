@@ -107,12 +107,6 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		    }
 
 		    public void chartMouseMoved(ChartMouseEvent e) {
-//		    	XYItemEntity ent = (XYItemEntity) e.getEntity();
-//		    	if(ent!=null){
-//		    		chartPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-//		    	} else {
-//		    		chartPanel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-//		    	}
 		    }
 		    	
 		});

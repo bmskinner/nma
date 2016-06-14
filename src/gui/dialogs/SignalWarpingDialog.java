@@ -26,8 +26,6 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -96,7 +94,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	
 	private void createUI(){
 		this.setLayout(new BorderLayout());
-		this.setTitle("Signal warping: "+datasets.get(0).getName());
+		this.setTitle("Signal warping");
 		
 		
 		JPanel header = createHeader();
