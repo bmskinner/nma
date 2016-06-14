@@ -532,27 +532,6 @@ public class AnalysisDataset implements Serializable {
 		return this.thisCollection;
 	}
 
-//	public void addShellResult(UUID signalGroup, ShellResult result){
-//		this.shellResults.put(signalGroup, result);
-//	}
-//
-//	public ShellResult getShellResult(UUID group){
-//		return this.shellResults.get(group);
-//	}
-
-	/**
-	 * Test if the collection has a ShellResult in any channel
-	 * 
-	 */
-//	public boolean hasShellResult(){
-//		for(UUID channel : thisCollection.getSignalManager().getSignalGroups()){
-//			if(this.shellResults.containsKey(channel)){
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
-
 	/**
 	 * Get the analysis options from this dataset
 	 * @return
@@ -792,84 +771,6 @@ public class AnalysisDataset implements Serializable {
 		}
 	}
 			
-//	/**
-//	 * Set the given signal group to be visible in plots
-//	 * @param signalGroup the group
-//	 * @param b visible or not
-//	 */
-//	public void setSignalGroupVisible(UUID signalGroup, boolean b){
-//		this.signalGroupsVisible.put(signalGroup, b);
-//	}
-//	
-//	/**
-//	 * Check if the given signal group is visible in plots
-//	 * @param signalGroup the group
-//	 * @return
-//	 */
-//	public boolean isSignalGroupVisible(UUID signalGroup){
-//		if(this.signalGroupsVisible.containsKey(signalGroup)){
-//			return this.signalGroupsVisible.get(signalGroup);
-//		} else {
-//			return true; // default true - only store the false toggle as needed
-//		}
-//	}
-//	
-//	/**
-//	 * Get the set colour for the signal group, or the default colour if
-//	 * none is set
-//	 * @param signalGroup the group
-//	 * @return a colour
-//	 */
-//	public Color getSignalGroupColour(UUID signalGroup){
-//		if(this.signalGroupColours.containsKey(signalGroup)){
-//			return this.signalGroupColours.get(signalGroup);
-//		} else {
-////			The default is the colour selection model for the entire program
-//			return Color.RED;
-////			return ColourSelecter.getSignalColour(  signalGroup-1); 
-//		}
-//	}
-//	
-//	/**
-//	 * Set the given signal group colour for plots
-//	 * @param signalGroup the group
-//	 * @param colour the colour
-//	 */
-//	public void setSignalGroupColour(UUID signalGroup, Color colour){
-//		this.signalGroupColours.put(signalGroup, colour);
-//	}
-//	
-//	
-//	/**
-//	 * Get the name of the signal group
-//	 * @param signalGroup the group the fetch
-//	 * @return
-//	 */
-//	public String getSignalGroupName(UUID signalGroup){
-//		return this.signalGroupsAdded.get(signalGroup);
-//	}
-//	
-//	/**
-//	 * Set the given signal group name
-//	 * @param signalGroup
-//	 * @param name
-//	 */
-//	public void setSignalGroupName(UUID signalGroup, String name){
-//		this.signalGroupsAdded.put(signalGroup, name);
-//	}
-	
-	  /**
-	   * Return the highest signal group present, or 0 if no signal groups
-	   * are present
-	 * @return the highest signal group
-	 */
-//	  public int getHighestSignalGroup(){
-//		  int maxGroup = 0;
-//		  for(UUID n : signalGroupsAdded.keySet()){
-//			  maxGroup = n > maxGroup ? n : maxGroup; 
-//		  }
-//		  return maxGroup;
-//	  }
 	
 	/**
 	 * Set the dataset colour (used in comparisons between datasets)
@@ -1018,4 +919,17 @@ public class AnalysisDataset implements Serializable {
 	}
 	
 
+	  /**
+	   * Test if all the datasets in the list have a consensus nucleus
+	 * @param list
+	 * @return
+	 */
+	public static boolean haveConsensusNuclei(List<AnalysisDataset> list){
+		  for(AnalysisDataset d : list){
+			  if( ! d.getCollection().hasConsensusNucleus()){
+				  return false;
+			  }
+		  }
+		  return true;
+	  }
 }

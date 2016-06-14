@@ -29,6 +29,7 @@ import javax.swing.JScrollPane;
 
 import org.jfree.chart.JFreeChart;
 
+import analysis.AnalysisDataset;
 import stats.SignalStatistic;
 import components.generic.MeasurementScale;
 import charting.charts.BoxplotChartFactory;
@@ -51,7 +52,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 		for(SignalStatistic stat : SignalStatistic.values()){
 
 			ChartOptionsBuilder builder = new ChartOptionsBuilder();
-			ChartOptions options = builder.setDatasets(null)
+			ChartOptions options = builder
 					.addStatistic(stat)
 					.setScale(MeasurementScale.PIXELS)
 					.build();

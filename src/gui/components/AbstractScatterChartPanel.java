@@ -113,7 +113,6 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 	@Override
 	protected void updateNull() {
 		ChartOptions options = new ChartOptionsBuilder()
-			.setDatasets(null)
 			.build();
 		
 		chartPanel.setChart(getChart(options));

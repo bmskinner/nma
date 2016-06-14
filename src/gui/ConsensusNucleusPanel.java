@@ -90,7 +90,6 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		
 		try {
 			ChartOptions options = new ChartOptionsBuilder()
-				.setDatasets(null)
 				.build();
 			JFreeChart consensusChart = getChart(options);
 			consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
@@ -458,7 +457,6 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	private void updateBlankChart() {
 		
 		ChartOptions options = new ChartOptionsBuilder()
-			.setDatasets(null)
 			.build();
 		JFreeChart consensusChart = getChart(options);
 

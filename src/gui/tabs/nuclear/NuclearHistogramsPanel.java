@@ -53,8 +53,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 				Dimension preferredSize = new Dimension(400, 150);
 				for(NucleusStatistic stat : NucleusStatistic.values()){
 					
-					ChartOptionsBuilder builder = new ChartOptionsBuilder();
-					ChartOptions options = builder.setDatasets(null)
+					ChartOptions options = new ChartOptionsBuilder()
 						.addStatistic(stat)
 						.setScale(scale)
 						.setUseDensity(false)

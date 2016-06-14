@@ -97,7 +97,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		final JPanel panel = new JPanel(new BorderLayout());
 		
 		ChartOptions options = new ChartOptionsBuilder()
-				.setDatasets(null)
 				.build();
 		
 		JFreeChart chart = null;
@@ -289,6 +288,14 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 				warpButton.setEnabled(true);
 			}
 
+		}
+		
+		if(isMultipleDatasets()){
+			if(AnalysisDataset.haveConsensusNuclei(getDatasets())){
+				warpButton.setEnabled(true);
+			} else {
+				warpButton.setEnabled(false);
+			}
 		}
 	}
 	

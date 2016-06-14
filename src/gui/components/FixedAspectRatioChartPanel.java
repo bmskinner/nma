@@ -41,6 +41,13 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel implements 
 				restoreAutoBounds();
 			}
 		});
+		restoreAutoBounds();
+	}
+	
+	@Override
+	public void setChart(JFreeChart chart){
+		super.setChart(chart);
+		restoreAutoBounds();
 	}
 						
 	@Override

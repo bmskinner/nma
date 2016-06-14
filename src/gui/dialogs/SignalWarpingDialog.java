@@ -35,6 +35,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.swing.BoxLayout;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -55,6 +58,7 @@ import analysis.signals.SignalManager;
 import analysis.signals.SignalWarper;
 import gui.LoadingIconDialog;
 import gui.components.FixedAspectRatioChartPanel;
+import gui.components.panels.DatasetSelectionPanel;
 
 @SuppressWarnings("serial")
 public class SignalWarpingDialog extends LoadingIconDialog implements PropertyChangeListener, ActionListener{
@@ -62,9 +66,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private List<AnalysisDataset> datasets;
 	private FixedAspectRatioChartPanel chartPanel;
 	
+	private DatasetSelectionPanel datasetBoxOne;
+	private DatasetSelectionPanel datasetBoxTwo;
 
 	private JComboBox<SignalIDToGroup> signalGroupSelectedBox;
-	private JLabel signalGroupNameLabel;
+
 	private JButton runButton;
 	private JCheckBox cellsWithSignalsBox;
 	
@@ -83,6 +89,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		createUI();
 		this.setModal(false);
 		this.pack();
+		chartPanel.restoreAutoBounds();
 		this.setVisible(true);
 		finest("Created signal warping dialog");
 	}
@@ -98,6 +105,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(datasets.get(0));
 		chartPanel = new FixedAspectRatioChartPanel(chart);
+		
 
 		finest("Created empty chart");
 		this.add(chartPanel, BorderLayout.CENTER);
@@ -105,16 +113,30 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	}
 	
 	private JPanel createHeader(){
-		JPanel panel = new JPanel(new FlowLayout());
+		
+		JPanel headerPanel = new JPanel();
+		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+		
+		JPanel upperPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel lowerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		
+		datasetBoxOne = new DatasetSelectionPanel(datasets);
+		datasetBoxTwo = new DatasetSelectionPanel(datasets);
+		
+		datasetBoxOne.setSelectedDataset(datasets.get(0));
+		datasetBoxTwo.setSelectedDataset(datasets.get(0));
+		
+		datasetBoxOne.addActionListener(this);
+		datasetBoxTwo.addActionListener(this);
+		
+		upperPanel.add(new JLabel("Source dataset"));
+		upperPanel.add(datasetBoxOne);
 		
 		SignalManager m =  datasets.get(0).getCollection().getSignalManager();
-		Set<UUID> signalGroups = m.getSignalGroupIDs();
+
 		
-		List<SignalIDToGroup> list = new ArrayList<SignalIDToGroup>();
-		for(UUID id : signalGroups){
-			list.add(new SignalIDToGroup(id, datasets.get(0).getCollection().getSignalGroup(id)));
-		}
-		
+		List<SignalIDToGroup> list = getGroups(datasetBoxOne.getSelectedDataset());
+
 		signalGroupSelectedBox = new JComboBox<SignalIDToGroup>(list.toArray( new SignalIDToGroup[0] ));
 		signalGroupSelectedBox.setSelectedIndex(0);
 		SignalIDToGroup signalGroup = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
@@ -123,56 +145,58 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
 		totalCells = m.getNumberOfCellsWithNuclearSignals(id);
 		
-		panel.add(new JLabel("Signal group"));
-		panel.add(signalGroupSelectedBox);		
+		upperPanel.add(new JLabel("Signal group"));
+		upperPanel.add(signalGroupSelectedBox);		
 		finest("Added signal group box");
 				
 		signalGroupSelectedBox.addActionListener(this);
 		
 		cellsWithSignalsBox = new JCheckBox("Only include cells with signals", true);
 		cellsWithSignalsBox.addActionListener(this);
-		panel.add(cellsWithSignalsBox);
+		upperPanel.add(cellsWithSignalsBox);
+		
+		lowerPanel.add(new JLabel("Target dataset"));
+		lowerPanel.add(datasetBoxTwo);
 		
 		runButton = new JButton("Run");
 		
-		runButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
+		runButton.addActionListener( e -> {
 
 				Runnable task = () -> { 
 					runWarping();
 				};
 				Thread thr = new Thread(task);
 				thr.start();
-								
-			}
+				
+			
 		});	
 
-		panel.add(runButton);
+		lowerPanel.add(runButton);
 		
-		panel.add(progressBar);
+		lowerPanel.add(progressBar);
 		progressBar.setVisible(false);
 		
-		panel.add(this.getLoadingLabel());
+		lowerPanel.add(this.getLoadingLabel());
 		
-		if(datasets.size()>1){
-			signalGroupSelectedBox.setEnabled(false);
-			cellsWithSignalsBox.setEnabled(false);
-			runButton.setEnabled(false);
-		}
-		
-		return panel;
+		headerPanel.add(upperPanel);
+		headerPanel.add(lowerPanel);
+				
+		return headerPanel;
 	} 
 	
 	private void runWarping(){
 		
 		finest("Running warping");
-		SignalIDToGroup group = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
+		
+		AnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
+		AnalysisDataset targetDataset = datasetBoxTwo.getSelectedDataset();
+		
+		SignalIDToGroup group    = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
 		boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
 		
 		totalCells = cellsWithSignals 
-				? datasets.get(0).getCollection().getSignalManager().getNumberOfCellsWithNuclearSignals(group.id) 
-				: datasets.get(0).getCollection().getNucleusCount();
+				? sourceDataset.getCollection().getSignalManager().getNumberOfCellsWithNuclearSignals(group.id) 
+				: sourceDataset.getCollection().getNucleusCount();
 				
 //		log("Found "+totalCells+" using signals only = "+cellsWithSignals);
 						
@@ -180,35 +204,33 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		try {
 			setStatusLoading();
 			setEnabled(false);
-			
-			
+
 			progressBar.setStringPainted(true);
-			
 			
 			progressBar.setString("0 of "+totalCells);
 			progressBar.setVisible(true);
 			
 			
 
-			warper = new SignalWarper(datasets.get(0), group.id, cellsWithSignals);
+			warper = new SignalWarper(sourceDataset, targetDataset, group.id, cellsWithSignals);
 			warper.addPropertyChangeListener(this);
 			warper.execute();
 			
 		} catch (Exception e) {
 			error("Error running warping", e);
-			JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(datasets.get(0));
+			JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(targetDataset);
 			chartPanel.setChart(chart);
-		} finally{
 			setEnabled(true);
-		}
+		} 
 	}
 	
 	@Override
 	public void setEnabled(boolean b){
-		super.setEnabled(b);
 		signalGroupSelectedBox.setEnabled(b);
 		cellsWithSignalsBox.setEnabled(b);
 		runButton.setEnabled(b);
+		datasetBoxOne.setEnabled(b);
+		datasetBoxTwo.setEnabled(b);
 	}
 	
 	private void updateChart(){
@@ -217,7 +239,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			ImageProcessor image = warper.getResult();
 			
 			ChartOptions options = new ChartOptionsBuilder()
-				.setDatasets(datasets)
+				.setDatasets(datasetBoxTwo.getSelectedDataset())
 				.setShowXAxis(false)
 				.setShowYAxis(false)
 				.setShowBounds(false)
@@ -269,6 +291,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
 		if(evt.getPropertyName().equals("Finished")){
 			finest("Worker signaled finished");
+			progressBar.setValue(0);
 			progressBar.setVisible(false);
 			cellsDone = 0;
 			finished();
@@ -300,21 +323,65 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		public String toString(){
 			return group.getGroupName();
 		}
+	
+	}
+	
+	public List<SignalIDToGroup> getGroups(AnalysisDataset d){
+		SignalManager m =  d.getCollection().getSignalManager();
+		Set<UUID> signalGroups = m.getSignalGroupIDs();
+		List<SignalIDToGroup> list = new ArrayList<SignalIDToGroup>();
+		for(UUID id : signalGroups){
+			list.add(new SignalIDToGroup(id, d.getCollection().getSignalGroup(id)));
+		}
+		return list;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		AnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
 		
-		SignalManager m =  datasets.get(0).getCollection().getSignalManager();
+		SignalManager m =  sourceDataset.getCollection().getSignalManager();
+		if( ! m.hasSignals()){
+			signalGroupSelectedBox.setEnabled(false);
+			cellsWithSignalsBox.setEnabled(false);
+			runButton.setEnabled(false);
+			datasetBoxTwo.setEnabled(false);
+			
+		} else {
+			signalGroupSelectedBox.setEnabled(true);
+			cellsWithSignalsBox.setEnabled(true);
+			runButton.setEnabled(true);
+			datasetBoxTwo.setEnabled(true);
+		}
+		
+		if(e.getSource()==datasetBoxOne){
+			
+			if( m.hasSignals()){
+
+				List<SignalIDToGroup> list = getGroups(sourceDataset);
+
+				ComboBoxModel<SignalIDToGroup> model = new DefaultComboBoxModel<SignalIDToGroup>(list.toArray( new SignalIDToGroup[0] ));
+
+				signalGroupSelectedBox.setModel(model);
+				signalGroupSelectedBox.setSelectedIndex(0);
+			}
+
+			
+		}
+		
+		if(e.getSource()==datasetBoxTwo){
+			JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(datasetBoxTwo.getSelectedDataset());
+			chartPanel.setChart(chart);
+		}
 		
 		SignalIDToGroup group = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
-		signalGroupNameLabel.setText(m.getSignalGroupName(group.id));
 				
 		boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
 		
 		totalCells = cellsWithSignals 
 				? m.getNumberOfCellsWithNuclearSignals(group.id) 
 				: datasets.get(0).getCollection().getNucleusCount();
+				
 		
 	}
 

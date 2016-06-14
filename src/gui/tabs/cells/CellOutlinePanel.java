@@ -157,7 +157,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		updateSettingsPanels();
 		
 		ChartOptions options = new ChartOptionsBuilder()
-				.setDatasets(null)
 				.build();
 		
 		JFreeChart chart = getChart(options);

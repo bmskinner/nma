@@ -13,15 +13,17 @@ import analysis.mesh.NucleusMeshImage;
 
 public class SignalWarper extends AnalysisWorker {
 	
+	private AnalysisDataset targetDataset;
 	private UUID signalGroup;
 	private boolean cellsWithSignals; // Only warp the cell images with detected signals
 	ImageProcessor[] warpedImages;
 	
 	ImageProcessor mergedImage;
 		
-	public SignalWarper(AnalysisDataset dataset, UUID signalGroup, boolean cellsWithSignals){
+	public SignalWarper(AnalysisDataset dataset, AnalysisDataset target, UUID signalGroup, boolean cellsWithSignals){
 		super(dataset);
-		this.signalGroup = signalGroup;
+		this.targetDataset    = target;
+		this.signalGroup      = signalGroup;
 		this.cellsWithSignals = cellsWithSignals;
 		
 		// Count the number of cells to include
@@ -51,7 +53,7 @@ public class SignalWarper extends AnalysisWorker {
 		try {
 			finer("Running warper");
 			
-			if( ! getDataset().getCollection().hasConsensusNucleus()){
+			if( ! targetDataset.getCollection().hasConsensusNucleus()){
 				warn("No consensus nucleus in dataset");
 				return false;
 			}
@@ -75,8 +77,8 @@ public class SignalWarper extends AnalysisWorker {
 	
 	private void generateImages(){
 		finer("Generating warped images for "+getDataset().getName());
-		finest("Fetching consensus nucleus from dataset");
-		NucleusMesh meshConsensus = new NucleusMesh( getDataset().getCollection().getConsensusNucleus());
+		finest("Fetching consensus nucleus from target dataset");
+		NucleusMesh meshConsensus = new NucleusMesh( targetDataset.getCollection().getConsensusNucleus());
 		
 		SignalManager m =  getDataset().getCollection().getSignalManager();
 		

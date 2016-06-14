@@ -34,6 +34,12 @@ public class DatasetSelectionPanel extends EnumeratedOptionsPanel {
 		return (AnalysisDataset) box.getSelectedItem();
 	}
 	
+	@Override
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
+		box.setEnabled(b);
+	}
+	
 	public void setSelectionIndex(int i){
 		
 		if(i>box.getItemCount()-1){

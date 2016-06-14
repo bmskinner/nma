@@ -130,19 +130,19 @@ public abstract class DetailPanel
 	 * @return
 	 */
 	public boolean isSingleDataset(){
-		if(this.list.size()==1){
-			return true;
-		} else {
-			return false;
-		}
+		return(this.list.size()==1);
+	}
+	
+	/**
+	 * Test if multiple datasets are selected
+	 * @return
+	 */
+	public boolean isMultipleDatasets(){
+		return(this.list.size()>1);
 	}
 	
 	public boolean hasDatasets(){
-		if(this.list.size()>0){
-			return true;
-		} else {
-			return false;
-		}
+		return(this.list.size()>0);
 	}
 	
 	protected List<AnalysisDataset> getDatasets(){

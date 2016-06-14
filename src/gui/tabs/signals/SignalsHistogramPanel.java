@@ -46,7 +46,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			for(SignalStatistic stat : SignalStatistic.values()){
 
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
-				ChartOptions options = builder.setDatasets(null)
+				ChartOptions options = builder
 					.addStatistic(stat)
 					.setScale(scale)
 					.setUseDensity(false)

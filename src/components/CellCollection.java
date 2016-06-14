@@ -841,25 +841,6 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 				    .filter(p -> p.getNucleus().getSafeStatistic(stat, scale) <= upper)
 				    .collect(Collectors.toList());
 	  }
-
-//	  for(Cell c : this.getCells()){
-//		  Nucleus n = c.getNucleus();
-//
-//		  double value = n.getStatistic(stat, scale);
-//
-//
-//		  // variability must be calculated from the collection, not the nucleus
-//		  if(stat.equals(NucleusStatistic.VARIABILITY)){
-//
-//			  value = this.calculateVariabililtyOfNucleusProfile(n);
-//		  }
-//
-//		  if(value>= lower && value<= upper){
-//			  subCollection.addCell(new Cell(c));
-//		  }
-//		  
-//		  
-//	  }
 	  
 	  for(Cell cell : filteredCells){
 		  subCollection.addCell(new Cell(cell));
@@ -974,7 +955,7 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
   public RuleSetCollection getRuleSetCollection(){
 	  return this.ruleSets;
   }
-  
+    
   public String toString(){
 	  
 	  String newLine = System.getProperty("line.separator");

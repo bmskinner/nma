@@ -40,6 +40,7 @@ import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.category.StatisticalBarRenderer;
 import org.jfree.data.category.CategoryDataset;
 
+import analysis.AnalysisDataset;
 import utility.Constants;
 import charting.charts.AbstractChartFactory;
 import charting.charts.NuclearSignalChartFactory;
@@ -85,7 +86,6 @@ public class SignalShellsPanel extends DetailPanel {
 	
 	private void createChartPanel() {
 		ChartOptions options = new ChartOptionsBuilder()
-			.setDatasets(null)
 			.build();
 	
 		JFreeChart chart = null;

@@ -163,7 +163,6 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		} else {
 			
 			options = new ChartOptionsBuilder()
-			.setDatasets(null)
 			.build();
 			
 			JFreeChart chart = getChart(options);

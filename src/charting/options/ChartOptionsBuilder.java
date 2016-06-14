@@ -101,6 +101,12 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
+	public ChartOptionsBuilder setDatasets(AnalysisDataset dataset){
+		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		list.add(dataset);
+		return this.setDatasets(list);
+	}
+	
 	public ChartOptionsBuilder setSwatch(ColourSwatch swatch){
 		this.swatch = swatch;
 		return this;
