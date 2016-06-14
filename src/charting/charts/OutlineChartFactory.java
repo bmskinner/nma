@@ -23,6 +23,7 @@ package charting.charts;
 import gui.RotationMode;
 import gui.components.ColourSelecter;
 import ij.process.ImageProcessor;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -50,9 +51,11 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
+
 import components.Cell;
 import components.CellularComponent;
 import components.generic.BorderTag;
+import components.generic.ProfileType;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
@@ -292,7 +295,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 				}
 			}
-			return OutlineChartFactory.makeCellOutlineChart(options.getCell(), 
+			
+			return makeCellOutlineChart(options.getCell(), 
 					options.firstDataset(), 
 					options.getRotateMode(), 
 					false, 
@@ -313,9 +317,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset, RotationMode rotateMode, boolean showhookHump, CellularComponent componentToHighlight) throws Exception{
+	private JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset, RotationMode rotateMode, boolean showhookHump, CellularComponent componentToHighlight) throws Exception{
 		
 		if(cell==null){
+			finest("No cell to draw");
 			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
 		}
 		
@@ -334,13 +339,18 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		Map<Integer, XYDataset> datasetHash = new HashMap<Integer, XYDataset>(0); 
 		
 		if(rotateMode.equals(RotationMode.VERTICAL)){
+			finest("Rotation mode is vertical");
 			// duplicate the cell
 			Cell newCell = new Cell();
+			finest("Cell segments    :"+ cell.getNucleus().getProfile(ProfileType.REGULAR).toString());
+			cell.getNucleus().updateVerticallyRotatedNucleus();
 			Nucleus verticalNucleus = cell.getNucleus().getVerticallyRotatedNucleus();
-
+			finest("Vertical nucleus is "+verticalNucleus.getNameAndNumber());
 			newCell.setNucleus(verticalNucleus);
+			finest("Vertical segments:"+verticalNucleus.getProfile(ProfileType.REGULAR).toString());
 
 			cell = newCell;
+			finest("Fetched vertical nucleus");
 			
 			// Need to have top point at the top of the image
 			plot.getRangeAxis().setInverted(false);
@@ -353,7 +363,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		XYDataset nucleus = NucleusDatasetCreator.getInstance().createNucleusOutline(cell, true);
 		hash.put(hash.size(), "Nucleus"); // add to the first free entry
 		datasetHash.put(datasetHash.size(), nucleus);
-
+		finest("Created nucleus outline");
 
 		/*
 		 * If the cell has a rodent sperm nucleus, get the hook and hump rois
@@ -369,11 +379,13 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		XYDataset tags = NucleusDatasetCreator.getInstance().createNucleusIndexTags(cell);
 		hash.put(hash.size(), "Tags"); // add to the first free entry
 		datasetHash.put(datasetHash.size(), tags);
+		finest("Created border index tags");
 		
 		// get the signals datasets and add each group to the hash
 		// Only display the signal outlines if the rotation is ACTUAL;
 		// TODO: the RoundNucleus.rotate() is not working with signals 
 		if(rotateMode.equals(RotationMode.ACTUAL)){
+			finest("Rotation mode is actual, fetching signals");
 			if(cell.getNucleus().getSignalCollection().hasSignal()){
 				List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.getInstance().createSignalOutlines(cell, dataset);
 
@@ -402,7 +414,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		}
 
 		// set the rendering options for each dataset type
-
+		finest("Rendering chart");
 		for(int key : hash.keySet()){
 
 			plot.setDataset(key, datasetHash.get(key));

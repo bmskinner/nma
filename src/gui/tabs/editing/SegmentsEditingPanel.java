@@ -18,13 +18,10 @@
  *******************************************************************************/
 package gui.tabs.editing;
 
-import gui.DatasetEventListener;
-import gui.InterfaceEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
-import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.DraggableOverlayChartPanel;
 import gui.components.PositionSelectionChartPanel;
 import gui.components.RectangleOverlayObject;
@@ -42,8 +39,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -51,7 +46,6 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.TableModel;
 
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.profiles.SegmentFitter;
@@ -69,55 +63,55 @@ import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
-public class SegmentsEditingPanel extends DetailPanel implements SignalChangeListener, DatasetEventListener, InterfaceEventListener {
+public class SegmentsEditingPanel extends DetailPanel implements ActionListener, SignalChangeListener {
 	
-	private final SegmentProfilePanel		segmentProfilePanel;	// draw the segments on the median profile
-		
-	public SegmentsEditingPanel() {
-		
-		super();
-		
-		this.setLayout(new BorderLayout());
-		segmentProfilePanel  = new SegmentProfilePanel();
-		this.addSubPanel(segmentProfilePanel);
-        this.add(segmentProfilePanel, BorderLayout.CENTER);
-
-	}
-	
-	@Override
-	protected void updateSingle() {
-		updateMultiple();
-	}
-	
-
-	@Override
-	protected void updateMultiple() {
-		segmentProfilePanel.update(getDatasets());
-		
-		
-	}
-	
-	@Override
-	protected void updateNull() {
-		updateMultiple();
-	}
-	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return null;
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return null;
-	}
-		
-	@Override
-	public void signalChangeReceived(SignalChangeEvent event) {
-		fireSignalChangeEvent(event);
-	}
-			
-	public class SegmentProfilePanel extends DetailPanel implements ActionListener, SignalChangeListener {
+//	private final SegmentProfilePanel		segmentProfilePanel;	// draw the segments on the median profile
+//		
+//	public SegmentsEditingPanel() {
+//		
+//		super();
+//		
+//		this.setLayout(new BorderLayout());
+//		segmentProfilePanel  = new SegmentProfilePanel();
+//		this.addSubPanel(segmentProfilePanel);
+//        this.add(segmentProfilePanel, BorderLayout.CENTER);
+//
+//	}
+//	
+//	@Override
+//	protected void updateSingle() {
+//		updateMultiple();
+//	}
+//	
+//
+//	@Override
+//	protected void updateMultiple() {
+//		segmentProfilePanel.update(getDatasets());
+//		
+//		
+//	}
+//	
+//	@Override
+//	protected void updateNull() {
+//		updateMultiple();
+//	}
+//	
+//	@Override
+//	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+//		return null;
+//	}
+//	
+//	@Override
+//	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+//		return null;
+//	}
+//		
+//	@Override
+//	public void signalChangeReceived(SignalChangeEvent event) {
+//		fireSignalChangeEvent(event);
+//	}
+//			
+//	public class SegmentProfilePanel extends DetailPanel implements ActionListener, SignalChangeListener {
 		
 		private DraggableOverlayChartPanel chartPanel; // for displaying the legnth of a given segment
 		private PositionSelectionChartPanel rangePanel; // a small chart to show the entire profile
@@ -135,7 +129,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		private static final String STR_SET_WINDOW_SIZE   = "Set window size";
 		private static final String STR_SHOW_WINDOW_SIZES = "Window sizes";
 				
-		protected SegmentProfilePanel(){
+		public SegmentsEditingPanel(){
 			super();
 			this.setLayout(new BorderLayout());
 			Dimension minimumChartSize = new Dimension(50, 100);
@@ -361,7 +355,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		@Override
 		public void signalChangeReceived(SignalChangeEvent event) {
 			if(event.type().contains("UpdateSegment") && event.getSource().equals(chartPanel)){
-				log(Level.FINEST, "Heard update segment request");
+				finest("Heard update segment request");
 				try{
 
 					
@@ -415,13 +409,13 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			 * Invalidate the chart cache for the active dataset.
 			 * This will force the morphology refresh to create a new chart
 			 */
-			log(Level.FINEST, "Clearing chart cache for editing panel");
+			finest("Clearing chart cache for editing panel");
 			fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
 //			this.clearChartCache();
 			
 			
 			//  Update each nucleus profile
-			log(Level.FINEST, "Firing refresh morphology action");
+			finest("Firing refresh morphology action");
 			fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
 
 			
@@ -587,10 +581,10 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 						.getProfileManager()
 						.mergeSegments(mergeOption.getOne(), mergeOption.getTwo());
 					
-					log(Level.FINEST, "Merged segments: "+mergeOption.toString());
-					log(Level.FINEST, "Refreshing chart cache for editing panel");
+					finest("Merged segments: "+mergeOption.toString());
+					finest("Refreshing chart cache for editing panel");
 					this.refreshChartCache();
-					log(Level.FINEST, "Firing general refresh cache request for loaded datasets");
+					finest("Firing general refresh cache request for loaded datasets");
 					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 				} else {
 					JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
@@ -657,10 +651,10 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 						.getProfileManager()
 						.splitSegment(seg)){
 					
-					log(Level.FINEST, "Split segment "+option.toString());
-					log(Level.FINEST, "Refreshing chart cache for editing panel");
+					finest("Split segment "+option.toString());
+					finest("Refreshing chart cache for editing panel");
 					this.refreshChartCache();
-					log(Level.FINEST, "Firing general refresh cache request for loaded datasets");
+					finest("Firing general refresh cache request for loaded datasets");
 					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 				}
 			}
@@ -701,15 +695,15 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				.getProfileManager()
 				.unmergeSegments(mergeOption.getSeg());
 				
-				log(Level.FINEST, "Unmerged segment "+mergeOption.toString());
+				finest("Unmerged segment "+mergeOption.toString());
 
-				log(Level.FINEST, "Refreshing chart cache for editing panel");
+				finest("Refreshing chart cache for editing panel");
 				this.refreshChartCache();
-				log(Level.FINEST, "Firing general refresh cache request for loaded datasets");
+				finest("Firing general refresh cache request for loaded datasets");
 				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 			}
 		}
-	}
+//	}
 
 
 }

@@ -497,6 +497,10 @@ public class RodentSpermNucleus extends SpermNucleus {
 		 * Ensure the nucleus is cached
 		 */
 		super.getVerticallyRotatedNucleus();
+		finest("Fetched vertical nucleus from round nucleus");
+		if(verticalNucleus==null){
+			finest("Unknown error creating vertical nucleus");
+		}
 		
 		/*
 		 * Get the X position of the reference point
@@ -512,7 +516,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 			verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
 			verticalNucleus.moveCentreOfMass(new XYPoint(0,0));
 		}
-		
+		finest("Checked hook is to the left");
 		return verticalNucleus;
 	}
 

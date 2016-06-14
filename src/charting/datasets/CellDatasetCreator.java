@@ -319,23 +319,27 @@ public class CellDatasetCreator implements Loggable {
 		 */
 		finest("Fetching segment position for each nucleus");
 		for(Nucleus nucleus : dataset.getCollection().getNuclei()){
-			
-			// For these, only include the nuclei with explicit top and bottom tags
-//			if(nucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && nucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
-				
-				
-				Nucleus verticalNucleus = nucleus.getVerticallyRotatedNucleus();
-				finest("Fetched vertical nucleus");
 
-				// Get the segment start position XY coordinates
-				NucleusBorderSegment segment = verticalNucleus.getProfile(ProfileType.REGULAR)
-													.getSegment(segmentID);
-				finest("Fetched segment "+segmentID.toString());
-				
-				XYPoint point = verticalNucleus.getBorderPoint(segment.getStartIndex());
-				finest("Fetched segment start point");
-				result.add(point);
-//			}		
+			nucleus.updateVerticallyRotatedNucleus(); // TODO: forcing an update here because new analyses don't have a proper vertical yet
+			Nucleus verticalNucleus = nucleus.getVerticallyRotatedNucleus();
+			finest("Fetched vertical nucleus");
+
+			// Get the segment start position XY coordinates
+
+			if( ! verticalNucleus.getProfile(ProfileType.REGULAR)
+					.hasSegment(segmentID)){
+				fine("Segment "+segmentID.toString()+" not found in vertical nucleus for "+nucleus.getNameAndNumber());
+				continue;
+
+			}
+			NucleusBorderSegment segment = verticalNucleus.getProfile(ProfileType.REGULAR)
+					.getSegment(segmentID);
+			finest("Fetched segment "+segmentID.toString());
+
+			int start = segment.getStartIndex();
+			finest("Getting start point at index "+start);
+			XYPoint point = verticalNucleus.getBorderPoint(start);
+			result.add(point);	
 		}	
 		finest("Fetched segment position for each nucleus");
 		return result;

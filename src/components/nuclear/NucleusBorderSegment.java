@@ -177,10 +177,18 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 		this.lastFailReason = reason;
 	}
 
+	/**
+	 * Get the index at the start of the segment
+	 * @return
+	 */
 	public int getStartIndex(){
 		return this.startIndex;
 	}
 
+	/**
+	 * Get the index at the end of the segment
+	 * @return
+	 */
 	public int getEndIndex(){
 		return this.endIndex;
 	}

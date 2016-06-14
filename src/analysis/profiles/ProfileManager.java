@@ -284,10 +284,11 @@ public class ProfileManager implements Loggable {
 		
 		fine("Updating core border tag index");
 		// Store the existing core points in a map (OP and RP)
+		// This is to force segmentation at the OP and RP
 		Map<BorderTag, Integer> map = new HashMap<BorderTag, Integer>();
 		for(BorderTag test : BorderTag.values(BorderTagType.CORE)){
 			int i = collection.getProfileCollection(ProfileType.REGULAR).getOffset(test);
-			map.put(test, i);
+			map.put(test,i-1); 
 			finer("Storing existing median "+test+" at index "+i+" in map");
 		}
 		
@@ -335,15 +336,23 @@ public class ProfileManager implements Loggable {
 			
 			// We need to update the offsets for the BorderTags since zero has moved
 			for(BorderTag test : BorderTag.values()){
+				
+				// The RP is forced to start at zero
 				if(test.equals(BorderTag.REFERENCE_POINT)){
 					collection.getProfileCollection(ProfileType.REGULAR).addOffset(tag, 0);
 					finer("Explicit setting of RP index to zero");
 					continue;
+					
 				} else {
+					
+					// Other points are offset by an appropriate amount relative to the new RP index
 					int oldIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(test);
-					int newIndex = AbstractCellularComponent.wrapIndex(oldIndex - index, median.size());
-					collection.getProfileCollection(ProfileType.REGULAR).addOffset(test, newIndex);
-					finer("Explicit setting of "+test+" index to "+newIndex+" from "+oldIndex);
+					if(oldIndex!=-1){ // Only bother if the tag exists
+						
+						int newIndex = AbstractCellularComponent.wrapIndex(oldIndex - index - 1 , median.size()); // offset by 1
+						collection.getProfileCollection(ProfileType.REGULAR).addOffset(test, newIndex);
+						finer("Explicit setting of "+test+" index to "+newIndex+" from "+oldIndex);
+					}
 				}
 				
 			}

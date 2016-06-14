@@ -66,20 +66,27 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 	}
 	
 	private void updateSettingsPanels(){
-		if(activeCell==null){
+		if(this.hasDatasets()){
+
+			if(activeCell==null){
+				rotationPanel.setEnabled(false);
+				makeMeshPanel.setEnabled(false);
+				warpMeshPanel.setEnabled(false);
+			} else {
+				// Only allow one mesh activity to be active
+				rotationPanel.setEnabled(! warpMeshPanel.isSelected());
+				makeMeshPanel.setEnabled(  ! warpMeshPanel.isSelected() );
+				warpMeshPanel.setEnabled(  ! makeMeshPanel.isSelected() );
+
+				if( ! activeDataset().getCollection().hasConsensusNucleus()){
+					makeMeshPanel.setEnabled(false);
+					warpMeshPanel.setEnabled(false);
+				}
+			}
+		} else {
 			rotationPanel.setEnabled(false);
 			makeMeshPanel.setEnabled(false);
 			warpMeshPanel.setEnabled(false);
-		} else {
-			// Only allow one mesh activity to be active
-			rotationPanel.setEnabled(! warpMeshPanel.isSelected());
-			makeMeshPanel.setEnabled(  ! warpMeshPanel.isSelected() );
-			warpMeshPanel.setEnabled(  ! makeMeshPanel.isSelected() );
-			
-			if( ! activeDataset().getCollection().hasConsensusNucleus()){
-				makeMeshPanel.setEnabled(false);
-				warpMeshPanel.setEnabled(false);
-			}
 		}
 	}
 							
@@ -110,7 +117,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 			} catch (Exception e) {
 				warn("Error getting chart in cell outline panel");
 				log(Level.FINE, "Error getting chart in cell outline panel", e);
-				chart = ConsensusNucleusChartFactory.getInstance().makeErrorNucleusOutlineChart();
+				chart = ConsensusNucleusChartFactory.getInstance().makeErrorChart();
 			}
 
 			

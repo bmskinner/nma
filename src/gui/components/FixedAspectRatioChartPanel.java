@@ -76,6 +76,11 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel implements 
 					finest("Null dataset "+i);
 					continue;
 				}
+				
+				// No values in the dataset, skip
+				if(DatasetUtilities.findMaximumDomainValue(dataset)==null){
+					continue;
+				}
 
 				xMax = DatasetUtilities.findMaximumDomainValue(dataset).doubleValue() > xMax
 						? DatasetUtilities.findMaximumDomainValue(dataset).doubleValue()

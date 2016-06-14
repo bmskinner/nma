@@ -26,9 +26,6 @@ import gui.tabs.editing.BorderTagEditingPanel;
 import gui.tabs.editing.SegmentsEditingPanel;
 
 import java.awt.BorderLayout;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.JTabbedPane;
 import javax.swing.table.TableModel;
 
@@ -57,8 +54,6 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 		
 		cellDetailPanel = new CellDetailPanel();
 		this.addSubPanel(cellDetailPanel);
-		
-
 		this.addSignalChangeListener(cellDetailPanel);
 		tabPane.addTab("Cells", cellDetailPanel);
 		
@@ -70,7 +65,6 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 		segmentsEditingPanel = new SegmentsEditingPanel();
 		segmentsEditingPanel.addSignalChangeListener(this);
 		this.addSignalChangeListener(segmentsEditingPanel);
-		
 		this.addSubPanel(segmentsEditingPanel);
 		tabPane.addTab("Segmentation", segmentsEditingPanel);
 		
@@ -80,7 +74,6 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 		borderTagEditingPanel = new BorderTagEditingPanel();
 		borderTagEditingPanel.addSignalChangeListener(this);
 		this.addSignalChangeListener(borderTagEditingPanel);
-		
 		this.addSubPanel(borderTagEditingPanel);
 		tabPane.addTab("Border tags", borderTagEditingPanel);
 

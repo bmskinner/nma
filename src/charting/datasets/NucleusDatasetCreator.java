@@ -1192,22 +1192,24 @@ private static NucleusDatasetCreator instance = null;
 	 * @return
 	 * @throws Exception 
 	 */
-	public XYDataset createNucleusOutline(Nucleus nucleus, boolean segmented) throws Exception{
+	public XYDataset createNucleusOutline(Nucleus nucleus, boolean segmented) {
 		DefaultXYDataset ds = new DefaultXYDataset();
-
+		finest("Creating nucleus outline");
 		if(segmented){
-
+			finest("Creating segmented nucleus outline");
 			/*
 			 * With the ability to merge segments, we cannot be sure that an iterator
 			 * based on numbers will work
 			 */
 			List<NucleusBorderSegment> segmentList = nucleus.getProfile(ProfileType.REGULAR).getSegments();
-//			SegmentedProfile profile = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT);
 
 			
 			if(!segmentList.isEmpty()){ // only draw if there are segments
+				finest("Nucleus has "+segmentList.size()+" segments");
 				
 				for(NucleusBorderSegment seg  : segmentList){
+					
+					finest("Drawing segment "+seg.getID());
 
 					double[] xpoints = new double[seg.length()+1];
 					double[] ypoints = new double[seg.length()+1];
@@ -1227,18 +1229,21 @@ private static NucleusDatasetCreator instance = null;
 					for(int j=0; j<=seg.length();j++){
 						int k = AbstractCellularComponent.wrapIndex(seg.getStartIndex()+j, nucleus.getBorderLength());
 						BorderPoint p = nucleus.getBorderPoint(k); // get the border points in the segment
-//						nucleus.getB
+
 						xpoints[j] = p.getX();
 						ypoints[j] = p.getY();
 					}
 
 					double[][] data = { xpoints, ypoints };
-//					ds.addSeries(seg.getName(), data);
+
 					ds.addSeries("Seg_"+segmentPosition, data);
 				}
+			} else {
+				finest("Nucleus does not have segments");
 			}
 
 		} else {
+			finest("Creating bare nucleus outline");
 			double[] xpoints = new double[nucleus.getOriginalBorderList().size()];
 			double[] ypoints = new double[nucleus.getOriginalBorderList().size()];
 
@@ -1284,20 +1289,7 @@ private static NucleusDatasetCreator instance = null;
 
 			double[][] data = { xpoints, ypoints };
 			ds.addSeries("Hook", data);
-			
-//			double[] xpoints2 = new double[nucleus.getHumpRoi().size()];
-//			double[] ypoints2 = new double[nucleus.getHumpRoi().size()];
-//
-//			i =0;
-//			for(XYPoint p : nucleus.getHumpRoi()){
-//				xpoints2[i] = p.getX();
-//				ypoints2[i] = p.getY();
-//				i++;
-//			}
-//
-//			double[][] data2 = { xpoints2, ypoints2 };
-//			ds.addSeries("Hump", data2);
-			
+						
 		} 
 		return ds;
 	}

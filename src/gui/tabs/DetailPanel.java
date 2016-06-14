@@ -315,7 +315,7 @@ public abstract class DetailPanel
 				chart = createPanelChartType(options);
 			} catch (Exception e) {
 				warn("Error creating chart"+ this.getClass().getName());
-				log(Level.FINE, this.getClass().getName()+"Error creating chart", e);
+				log(Level.FINE, this.getClass().getName()+" Error creating chart", e);
 				
 				// Draw an empty chart to fill the space
 				chart = ScatterChartFactory.getInstance().createEmptyScatterChart();
@@ -343,7 +343,7 @@ public abstract class DetailPanel
 				model = createPanelTableType(options);
 			} catch (Exception e) {
 				warn("Error creating table");
-				log(Level.FINE, "Error creating chart", e);
+				log(Level.FINE, " Error creating table", e);
 				model = NucleusTableDatasetCreator.getInstance().createBlankTable();
 			}
 			finest("Added cached table");
