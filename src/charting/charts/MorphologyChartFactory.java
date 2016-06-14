@@ -303,7 +303,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 					}
 
 					addMarkerToXYPlot(plot, tag, indexToDraw);
-
+					
 				}
 			}
 			

@@ -288,9 +288,13 @@ public class ProfileManager implements Loggable {
 		Map<BorderTag, Integer> map = new HashMap<BorderTag, Integer>();
 		for(BorderTag test : BorderTag.values(BorderTagType.CORE)){
 			int i = collection.getProfileCollection(ProfileType.REGULAR).getOffset(test);
-			map.put(test,i-1); 
+			map.put(test,i); 
 			finer("Storing existing median "+test+" at index "+i+" in map");
 		}
+		
+		finest("Existing median from "+tag+":");
+		finest(collection.getProfileCollection(ProfileType.REGULAR)
+				.getProfile(tag, Constants.MEDIAN).toString());
 		
 		// Overwrite the new tag for segmentation
 		map.put(tag, index);
@@ -298,7 +302,7 @@ public class ProfileManager implements Loggable {
 		
 		// Store the offset for the new point
 		collection.getProfileCollection(ProfileType.REGULAR).addOffset(tag, index);
-		finer("Offset the "+tag+"index in the regular profile to "+index);
+		finer("Offset the "+tag+" index in the regular profile to "+index);
 				
 		/*
 		 * Now we need to update the tag indexes in the nucleus
@@ -311,9 +315,9 @@ public class ProfileManager implements Loggable {
 		finest("New median from "+tag+":");
 		finest(median.toString());
 		
-		finest("Current state of regular profile collection:");
-		finest(collection.getProfileCollection(ProfileType.REGULAR).toString());
-		
+//		finest("Current state of regular profile collection:");
+//		finest(collection.getProfileCollection(ProfileType.REGULAR).toString());
+		finest("Offsetting individual nucleus indexes");
 		offsetNucleusProfiles(tag, ProfileType.REGULAR, median);
 		
 		finer("Nucleus indexes for "+tag+" updated");
@@ -331,7 +335,10 @@ public class ProfileManager implements Loggable {
 			createProfileCollections();
 			finer("Recreated profile collections");
 			
-			rpIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
+			// Get the recreated profile collections from the new RP
+			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+			
+			rpIndex = pc.getOffset(tag);
 			finer("New ProfileAggregates move RP index to index "+rpIndex);
 			
 			// We need to update the offsets for the BorderTags since zero has moved
@@ -339,25 +346,36 @@ public class ProfileManager implements Loggable {
 				
 				// The RP is forced to start at zero
 				if(test.equals(BorderTag.REFERENCE_POINT)){
-					collection.getProfileCollection(ProfileType.REGULAR).addOffset(tag, 0);
+					pc.addOffset(tag, 0);
 					finer("Explicit setting of RP index to zero");
 					continue;
 					
 				} else {
 					
+
 					// Other points are offset by an appropriate amount relative to the new RP index
-					int oldIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(test);
+					int oldIndex = pc.getOffset(test);
 					if(oldIndex!=-1){ // Only bother if the tag exists
 						
-						int newIndex = AbstractCellularComponent.wrapIndex(oldIndex - index - 1 , median.size()); // offset by 1
-						collection.getProfileCollection(ProfileType.REGULAR).addOffset(test, newIndex);
+						int newIndex = AbstractCellularComponent.wrapIndex( (oldIndex - index)  , pc.length()); // offset by 1
+						pc.addOffset(test, newIndex);
 						finer("Explicit setting of "+test+" index to "+newIndex+" from "+oldIndex);
+						
+						// Ensure that core tags (the OP) get segmented
+						if(test.type().equals(BorderTagType.CORE)){
+							map.put(test, newIndex); // Overwrite the map
+							finest("Forcing segmentation at index "+newIndex+" for "+test );
+						}
 					}
+					
+					
 				}
 				
 			}
+			
+			
 						
-			rpIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
+			rpIndex = pc.getOffset(tag);
 			finer("After explicit set, RP index is "+rpIndex);
 			
 			map.put(tag, 0); // the RP is back at zero

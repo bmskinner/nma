@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  	Copyright (C) 2015, 2016 Ben Skinner
+  *  	Copyright (C) 2015, 2016 Ben Skinner
  *   
  *     This file is part of Nuclear Morphology Analysis.
  *
@@ -87,7 +87,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		
 		chartPanel.setMinimumSize(minimumChartSize);
 		chartPanel.setPreferredSize(preferredChartSize);
-		chartPanel.setMinimumDrawWidth( 0 );
+		chartPanel.setMinimumDrawWidth(  0 );
 		chartPanel.setMinimumDrawHeight( 0 );
 		chartPanel.addSignalChangeListener(this);
 		this.add(chartPanel, BorderLayout.CENTER);

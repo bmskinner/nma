@@ -1203,6 +1203,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		in.defaultReadObject();
 	    finest("\tCreating bounding rectangles for nucleus");
 	    this.boundingRectangles = new HashMap<BorderTag, Rectangle>();	  
+	    this.verticalNucleus = null;
 	    log = new StringBuffer();
 	    finest("\tRead nucleus");
 	}

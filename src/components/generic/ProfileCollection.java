@@ -27,6 +27,7 @@ import java.util.Map;
 
 import logging.Loggable;
 import components.CellCollection;
+import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 //import ij.IJ;
@@ -458,15 +459,13 @@ public class ProfileCollection implements Serializable, Loggable {
 			builder.append("\r\nNo segments in profile collection");
 		} else {
 			try {
-				builder.append("\r\nRaw segments:\r\n");
-				for(NucleusBorderSegment s : this.getSegments(BorderTag.REFERENCE_POINT)){
-					builder.append(s.toString()+"\r\n");
-				}
 
 				for(BorderTag tag : this.offsets.keySet()){
-					builder.append("\r\nSegments from "+tag+":\r\n");
-					for(NucleusBorderSegment s : this.getSegments(tag)){
-						builder.append(s.toString()+"\r\n");
+					if(tag.type().equals(BorderTagType.CORE)){
+						builder.append("\r\nSegments from "+tag+":\r\n");
+						for(NucleusBorderSegment s : this.getSegments(tag)){
+							builder.append(s.toString()+"\r\n");
+						}
 					}
 				}
 
