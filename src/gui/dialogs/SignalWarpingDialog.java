@@ -134,7 +134,9 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				Runnable task = () -> { 
 					runWarping();
 				};
-				SwingUtilities.invokeLater(task);
+				Thread thr = new Thread(task);
+				thr.start();
+//				SwingUtilities.invokeLater(task);
 								
 			}
 		});	
@@ -185,6 +187,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(datasets)
+			.setShowXAxis(true)
+			.setShowYAxis(true)
 			.build();
 
 		chart = OutlineChartFactory.getInstance().makeSignalWarpChart(options, images);

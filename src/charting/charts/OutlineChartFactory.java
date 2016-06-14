@@ -46,6 +46,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
 import org.jfree.util.ShapeUtilities;
 
+import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellularComponent;
 import components.generic.BorderTag;
@@ -136,29 +137,34 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 		XYPlot plot = chart.getXYPlot();
 		
+		NucleusMesh meshConsensus = new NucleusMesh( dataset.getCollection().getConsensusNucleus());
+		
+		XYDataset ds = NucleusDatasetCreator.createBareNucleusOutline(dataset);
+		
+		double xMin = DatasetUtilities.findMinimumDomainValue(ds).doubleValue();
+		double yMin = DatasetUtilities.findMinimumRangeValue(ds).doubleValue();
+		
 		// Get the bounding box size for the consensus, to find the offsets for the images created
-		Rectangle r = dataset.getCollection().getConsensusNucleus().getBounds(); //.createPolygon().getBounds();
-		r = r==null ? dataset.getCollection().getConsensusNucleus().createPolygon().getBounds() : r; // in case the bounds were not set (fixed 1.12.2)
-//		int w = (int) ( (double) r.width*1.2);
-//		int h = (int) ( (double) r.height*1.2);
+		Rectangle r = meshConsensus.toPath().getBounds();
+
+		int xOffset = (int) Math.round( -xMin);
+		int yOffset = (int) Math.round( -yMin);
 		
 		int w = r.width;
 		int h = r.height;
+		
+		finest("Consensus bounds: "+w+" x "+h+" : "+r.x+", "+r.y);
+		finest("Images: "+images[0].getWidth()+" x "+images[0].getHeight());
 
-		int xOffset = w >>1;
-		int yOffset = h >>1;
-				
-//		int alpha = 20; // TODO : scale by number of images
-//		int alpha = (int) Math.floor( 255 / ((double) images.length) )+20;
-//		alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
-		
-		
 		drawImagesAsAnnotation(images, plot, 255, -xOffset, -yOffset);
 		
-		XYDataset ds = NucleusDatasetCreator.createBareNucleusOutline(dataset);
+		
 		plot.setDataset(0, ds);
 		plot.getRenderer(0).setBasePaint(Color.BLACK);
 		plot.getRenderer(0).setBaseSeriesVisible(true);
+		
+		plot.getDomainAxis().setVisible(options.isShowXAxis());
+		plot.getRangeAxis().setVisible(options.isShowYAxis());
 				
 		return chart;	
 	}
