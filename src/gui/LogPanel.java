@@ -176,15 +176,16 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	public void print(String s){
 		StyledDocument doc = textArea.getStyledDocument();
 
-		try {
-
-			doc.insertString(doc.getLength(), s, attrs );
-			
-		} catch (BadLocationException e) {
-			logIJ(s);
-			logIJ("Requested insert at "+e.offsetRequested()+" in document of "+doc.getLength());
-			logToImageJ("Error appending to log panel", e);
-		}
+		Runnable r = () -> {
+			try {
+				doc.insertString(doc.getLength(), s, attrs );
+			} catch (BadLocationException e) {
+				logIJ(s);
+				logIJ("Requested insert at "+e.offsetRequested()+" in document of "+doc.getLength());
+				logToImageJ("Error appending to log panel", e);
+			}
+		};
+		SwingUtilities.invokeLater(r);
 
 	}
 	

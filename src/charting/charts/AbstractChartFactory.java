@@ -20,19 +20,22 @@ package charting.charts;
 
 import java.awt.Color;
 import java.util.UUID;
+import java.util.concurrent.ForkJoinPool;
 
 import logging.Loggable;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 
-import stats.Stats;
 import charting.ChartComponents;
 import components.generic.BorderTag;
 
 public abstract class AbstractChartFactory implements Loggable {
 
-	
+	protected static final ForkJoinPool mainPool = new ForkJoinPool();
 	
 	/**
 	 * Get a series or dataset index for colour selection when drawing charts. The index
@@ -72,6 +75,26 @@ public abstract class AbstractChartFactory implements Loggable {
 			colour = Color.ORANGE;
 		}
 		plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));	
+	}
+	
+	public JFreeChart makeErrorChart(){
+		JFreeChart chart = ChartFactory.createXYLineChart(null,
+				null, null, null); 
+		
+		XYPlot plot = chart.getXYPlot();
+		
+		plot.getDomainAxis().setRange(-10, 10);
+		plot.getRangeAxis().setRange(-10, 10);
+
+		for(int i=-100 ; i<=100; i+=20){
+			for(int j=-100 ; j<=100; j+=20){
+				XYTextAnnotation annotation = new XYTextAnnotation("Error creating chart", i, j);
+				annotation.setPaint(Color.BLACK);
+				plot.addAnnotation(annotation);
+			}
+		}
+		
+		return chart;
 	}
 		
 }

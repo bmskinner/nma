@@ -67,6 +67,7 @@ public class ChartOptionsBuilder {
 	private boolean showMeshEdges      = true;
 	private boolean showMeshFaces      = false;
 	private int     meshSize           = 10;
+	private boolean showBounds         = false; // Bounding box for meshes and warped images
 	
 	// Chart axis options
 	private boolean showXAxis           = true;
@@ -195,6 +196,11 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
+	public ChartOptionsBuilder setShowBounds(boolean b){
+		this.showBounds = b;
+		return this;
+	}
+	
 	public ChartOptionsBuilder setShowMeshEdges(boolean b){
 		this.showMeshEdges = b;
 		return this;
@@ -270,6 +276,7 @@ public class ChartOptionsBuilder {
 		result.setShowMeshEdges(showMeshEdges);
 		result.setShowMeshFaces(showMeshFaces);
 		result.setMeshSize(meshSize);
+		result.setShowBounds(showBounds);
 		
 		result.setShowXAxis(showXAxis);
 		result.setShowYAxis(showYAxis);

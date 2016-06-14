@@ -49,11 +49,11 @@ import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
+import components.nuclear.SignalGroup;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-
 import ij.process.FloatPolygon;
 import logging.Loggable;
 import stats.DipTester;
@@ -65,6 +65,17 @@ import weka.estimators.KernelEstimator;
 
 public class NucleusDatasetCreator implements Loggable {
 	
+private static NucleusDatasetCreator instance = null;
+	
+	private NucleusDatasetCreator(){}
+	
+	public static NucleusDatasetCreator getInstance(){
+		if(instance==null){
+			instance = new NucleusDatasetCreator();
+		}
+		return instance;
+	}
+	
 	/**
 	 * Add individual segments from a profile to a dataset. Offset them to the given length
 	 * @param segments the list of segments to add
@@ -75,7 +86,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param binSize the size of the ProfileAggregate bins, to adjust the offset of the median
 	 * @return the updated dataset
 	 */
-	private static XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, Profile profile, DefaultXYDataset ds, int length, double offset) throws Exception {
+	private XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, Profile profile, DefaultXYDataset ds, int length, double offset) throws Exception {
 		
 		Profile xpoints = profile.getPositions(length);
 		xpoints = xpoints.add(offset);
@@ -138,7 +149,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param name the name to check
 	 * @return a valid name
 	 */
-	private static String checkSeriesName(XYDataset ds, String name){
+	private String checkSeriesName(XYDataset ds, String name){
 		String result = name;
 		boolean ok = true;
 		for(int i=0;i<ds.getSeriesCount();i++){
@@ -153,7 +164,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 	}
 	
-	public static DefaultXYDataset createAnnotationRectangleDataset(int w, int h){
+	public DefaultXYDataset createAnnotationRectangleDataset(int w, int h){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		double[] xpoints = { 0, 0, w, w };
@@ -172,7 +183,7 @@ public class NucleusDatasetCreator implements Loggable {
      * @param segName the segment to add in each dataset
      * @return an XYDataset to plot
      */
-    public static DefaultXYDataset createMultiProfileSegmentDataset(List<AnalysisDataset> list, String segName) throws Exception{
+    public DefaultXYDataset createMultiProfileSegmentDataset(List<AnalysisDataset> list, String segName) throws Exception{
         
         DefaultXYDataset ds = new DefaultXYDataset();
         for (int i=0; i < list.size(); i++) {
@@ -208,7 +219,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param list the datasets to check
 	 * @return the maximum length
 	 */
-	public static double getMaximumMedianProfileLength(List<AnalysisDataset> list){
+	public double getMaximumMedianProfileLength(List<AnalysisDataset> list){
 		double length = 100;
 		for(AnalysisDataset dataset : list){
 			length = dataset.getCollection().getMedianArrayLength()>length ? dataset.getCollection().getMedianArrayLength() : length;
@@ -221,7 +232,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param list
 	 * @return
 	 */
-	public static double getMaximumNucleusProfileLength(CellCollection collection){
+	public double getMaximumNucleusProfileLength(CellCollection collection){
 		double length = 100;
 
 		for(Nucleus n : collection.getNuclei()){
@@ -240,7 +251,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return a dataset to plot
 	 * @throws Exception 
 	 */
-	public static DefaultXYDataset createRawMultiProfileSegmentDataset(List<AnalysisDataset> list, String segName, ProfileAlignment alignment) throws Exception{
+	public DefaultXYDataset createRawMultiProfileSegmentDataset(List<AnalysisDataset> list, String segName, ProfileAlignment alignment) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		double length = getMaximumMedianProfileLength(list);
@@ -290,7 +301,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @see createSegmentedMedianProfileDataset()
 	 * @throws Exception 
 	 */
-	public static XYDataset createNonsegmentedMedianProfileDataset(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag point) throws Exception{
+	public XYDataset createNonsegmentedMedianProfileDataset(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag point) throws Exception{
 		CellCollection collection = dataset.getCollection();
 		DefaultXYDataset ds = new DefaultXYDataset();
 				
@@ -327,7 +338,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return a dataset
 	 * @throws Exception 
 	 */
-	public static XYDataset createSegmentedMedianProfileDataset(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag point) throws Exception{
+	public XYDataset createSegmentedMedianProfileDataset(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag point) throws Exception{
 		
 		CellCollection collection = dataset.getCollection();
 		DefaultXYDataset ds = new DefaultXYDataset();
@@ -370,37 +381,26 @@ public class NucleusDatasetCreator implements Loggable {
 	
 	/**
 	 * Create a segmented profile dataset
-	 * @param options
+	 * @param options the chart options
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createSegmentedProfileDataset(ChartOptions options) throws Exception{
-//		IJ.log(options.toString());
-		return createSegmentedProfileDataset(options.firstDataset().getCollection(),
-				options.isNormalised(),
-				options.getAlignment(),
-				options.getTag(),
-				options.getType());
-	}
-	
-	/**
-	 * Make a dataset from the given collection, with each segment profile as a separate series
-	 * @param collection the NucleusCollection
-	 * @param normalised normalise profile length to 100, or show raw
-	 * @return a dataset
-	 * @throws Exception 
-	 */
-	private static XYDataset createSegmentedProfileDataset(CellCollection collection, boolean normalised, ProfileAlignment alignment, BorderTag point, ProfileType type) throws Exception{
+	public XYDataset createSegmentedProfileDataset(ChartOptions options) throws Exception {
 		
-//		IJ.log("Creating segmented profile dataset");
+		finest("Creating segmented profile dataset");
+		CellCollection collection  = options.firstDataset().getCollection();
+		boolean normalised         = options.isNormalised();
+		ProfileAlignment alignment = options.getAlignment();
+		BorderTag borderTag        = options.getTag();
+		ProfileType type           = options.getType();
+		
 		DefaultXYDataset ds = new DefaultXYDataset();
 				
 		int maxLength = (int) getMaximumNucleusProfileLength(collection);
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-//		IJ.log("Getting median profile dataset");
-		Profile profile = collection.getProfileCollection(type).getProfile(point, Constants.MEDIAN);
+		Profile profile = collection.getProfileCollection(type).getProfile(borderTag, Constants.MEDIAN);
 		Profile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);
@@ -418,10 +418,10 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		// add the segments
 		List<NucleusBorderSegment> segments = collection.getProfileCollection(type)
-				.getSegmentedProfile(point)
+				.getSegmentedProfile(borderTag)
 				.getOrderedSegments();
 		
-//		IJ.log("Adding segments from median angle profile");
+
 		if(normalised){
 			addSegmentsFromProfile(segments, profile, ds, 100, 0);
 		} else {
@@ -429,8 +429,8 @@ public class NucleusDatasetCreator implements Loggable {
 		}
 
 		// make the IQR
-		Profile profile25 = collection.getProfileCollection(type).getProfile(point, Constants.LOWER_QUARTILE);
-		Profile profile75 = collection.getProfileCollection(type).getProfile(point, Constants.UPPER_QUARTILE);
+		Profile profile25 = collection.getProfileCollection(type).getProfile(borderTag, Constants.LOWER_QUARTILE);
+		Profile profile75 = collection.getProfileCollection(type).getProfile(borderTag, Constants.UPPER_QUARTILE);
 		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
 		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
@@ -443,10 +443,10 @@ public class NucleusDatasetCreator implements Loggable {
 			if(normalised){
 				
 				int length = xpoints.size();
-				angles = n.getProfile(type, point).interpolate(length);
+				angles = n.getProfile(type, borderTag).interpolate(length);
 				x = xpoints;
 			} else {
-				angles = n.getProfile(type, point);
+				angles = n.getProfile(type, borderTag);
 				x = angles.getPositions(n.getBorderLength());
 				if(alignment.equals(ProfileAlignment.RIGHT)){
 					double differenceToMaxLength = maxLength - n.getBorderLength();
@@ -461,25 +461,20 @@ public class NucleusDatasetCreator implements Loggable {
 		return ds;
 	}
 	
-		
-	public static DefaultXYDataset createMultiProfileDataset(ChartOptions options) throws Exception{
-		return createMultiProfileDataset(options.getDatasets(),
-				options.isNormalised(),
-				options.getAlignment(),
-				options.getTag(),
-				options.getType());
-	}
-		
-	
 	/**
 	 * Create a dataset for multiple AnalysisDatsets
-	 * @param list the datasets
-	 * @param normalised is the length normalised to 100 
-	 * @param rightAlign is a non-normalised dataset hung to the right
+	 * @param options the chart options
 	 * @return
 	 * @throws Exception 
-	 */
-	private static DefaultXYDataset createMultiProfileDataset(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, ProfileType type) throws Exception{
+	 */	
+	public DefaultXYDataset createMultiProfileDataset(ChartOptions options) {
+		
+		List<AnalysisDataset> list = options.getDatasets();
+		boolean normalised         = options.isNormalised();
+		ProfileAlignment alignment = options.getAlignment();
+		BorderTag borderTag        = options.getTag();
+		ProfileType type           = options.getType();
+		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		double length = getMaximumMedianProfileLength(list);
@@ -516,7 +511,15 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static DefaultXYDataset createMultiProfileFrankenDataset(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag borderTag) throws Exception{
+	public DefaultXYDataset createMultiProfileFrankenDataset(ChartOptions options) throws Exception{
+		
+		
+		List<AnalysisDataset> list = options.getDatasets();
+//		boolean normalised         = options.isNormalised();
+//		ProfileAlignment alignment = options.getAlignment();
+		BorderTag borderTag        = options.getTag();
+//		ProfileType type           = options.getType();
+		
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 		int i=0;
@@ -544,7 +547,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return a new series
 	 * @throws Exception 
 	 */
-	private static XYSeriesCollection addMultiProfileIQRSeries(ProfileCollection pc, BorderTag point, int series, double length, double medianLength, boolean normalised, ProfileAlignment alignment) throws Exception{
+	private XYSeriesCollection addMultiProfileIQRSeries(ProfileCollection pc, BorderTag point, int series, double length, double medianLength, boolean normalised, ProfileAlignment alignment) throws Exception{
 		Profile profile = pc.getProfile(point, 50);
 		
 		Profile xpoints = null;
@@ -583,7 +586,7 @@ public class NucleusDatasetCreator implements Loggable {
 	}
 	
 	
-	public static List<XYSeriesCollection> createMultiProfileIQRDataset(ChartOptions options) throws Exception{
+	public List<XYSeriesCollection> createMultiProfileIQRDataset(ChartOptions options) throws Exception{
 		return createMultiProfileIQRDataset(options.getDatasets(),
 				options.isNormalised(),
 				options.getAlignment(),
@@ -600,7 +603,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return a dataset
 	 * @throws Exception 
 	 */
-	private static List<XYSeriesCollection> createMultiProfileIQRDataset(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, ProfileType type) throws Exception{
+	private List<XYSeriesCollection> createMultiProfileIQRDataset(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, ProfileType type) throws Exception{
 
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
 		
@@ -629,7 +632,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static List<XYSeriesCollection> createMultiProfileIQRFrankenDataset(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment,  BorderTag borderTag) throws Exception{
+	public List<XYSeriesCollection> createMultiProfileIQRFrankenDataset(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment,  BorderTag borderTag) throws Exception{
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
 
 		int i=0;
@@ -658,7 +661,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createIQRVariabilityDataset(ChartOptions options) throws Exception{
+	public XYDataset createIQRVariabilityDataset(ChartOptions options) throws Exception{
 
 		
 		if(options.isSingleDataset()){
@@ -689,7 +692,7 @@ public class NucleusDatasetCreator implements Loggable {
 		
 	}
 	
-	public static XYDataset createFrankenSegmentDataset(ChartOptions options) throws Exception{
+	public XYDataset createFrankenSegmentDataset(ChartOptions options) throws Exception{
 		return createFrankenSegmentDataset(options.firstDataset().getCollection(),
 				options.isNormalised(),
 				options.getAlignment(),
@@ -706,7 +709,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	private static XYDataset createFrankenSegmentDataset(CellCollection collection, boolean normalised, ProfileAlignment alignment, BorderTag point) throws Exception{
+	private XYDataset createFrankenSegmentDataset(CellCollection collection, boolean normalised, ProfileAlignment alignment, BorderTag point) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 //		String pointType = collection.getOrientationPoint();
@@ -765,7 +768,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static XYDataset createSegmentedProfileDataset(Nucleus nucleus, ProfileType type) throws Exception{
+	public XYDataset createSegmentedProfileDataset(Nucleus nucleus, ProfileType type) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		SegmentedProfile profile;
@@ -796,7 +799,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static BoxAndWhiskerCategoryDataset createBoxplotDataset(ChartOptions options) {
+	public BoxAndWhiskerCategoryDataset createBoxplotDataset(ChartOptions options) {
 		List<AnalysisDataset> datasets = options.getDatasets();
 		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 		MeasurementScale scale = options.getScale();
@@ -826,7 +829,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static BoxAndWhiskerCategoryDataset createSegmentStatDataset(ChartOptions options) {
+	public BoxAndWhiskerCategoryDataset createSegmentStatDataset(ChartOptions options) {
 		
 		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
@@ -847,7 +850,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, int segPosition, MeasurementScale scale) {
+	public BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, int segPosition, MeasurementScale scale) {
 
 		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset();
 
@@ -891,7 +894,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static BoxAndWhiskerCategoryDataset createSegmentDisplacementDataset(List<AnalysisDataset> collections, int segPosition) {
+	public BoxAndWhiskerCategoryDataset createSegmentDisplacementDataset(List<AnalysisDataset> collections, int segPosition) {
 
 		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset();
 
@@ -928,7 +931,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static BoxAndWhiskerCategoryDataset createSegmentVariabillityDataset(List<AnalysisDataset> datasets) throws Exception {
+	public BoxAndWhiskerCategoryDataset createSegmentVariabillityDataset(List<AnalysisDataset> datasets) throws Exception {
 
 		if(datasets==null || datasets.isEmpty()){
 			return null;
@@ -971,7 +974,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param dataset
 	 * @return
 	 */
-	public static XYDataset createBareNucleusOutline(AnalysisDataset dataset){
+	public XYDataset createBareNucleusOutline(AnalysisDataset dataset){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Nucleus n = dataset.getCollection().getConsensusNucleus();
 		
@@ -998,7 +1001,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param n
 	 * @return
 	 */
-	private static double getScaleForIQRRange(Nucleus n){
+	private double getScaleForIQRRange(Nucleus n){
 		// get the maximum values from nuclear diameters
 		// get the limits  for the plot  	
 		double min = Math.min(n.getMinX(), n.getMinY());
@@ -1013,7 +1016,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static XYDataset createSegmentedNucleusOutline(CellCollection collection) throws Exception {
+	public XYDataset createSegmentedNucleusOutline(CellCollection collection) throws Exception {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		// get the consensus nucleus for the population
@@ -1099,7 +1102,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param n the consensus nucleus
 	 * @param scaledRange the IQR scale profile
 	 */
-	private static void addSegmentIQRToConsensus(NucleusBorderSegment segment, DefaultXYDataset ds, Nucleus n, Profile scaledRange, BorderTag pointType){
+	private void addSegmentIQRToConsensus(NucleusBorderSegment segment, DefaultXYDataset ds, Nucleus n, Profile scaledRange, BorderTag pointType){
 
 		// what we need to do is match the profile positions to the borderpoints
 		// Add lines to show the IQR of the angle profile at each point
@@ -1177,7 +1180,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static XYDataset createNucleusOutline(Cell cell, boolean segmented) throws Exception{
+	public XYDataset createNucleusOutline(Cell cell, boolean segmented) throws Exception{
 		return createNucleusOutline(cell.getNucleus(), segmented);
 	}
 	
@@ -1189,7 +1192,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static XYDataset createNucleusOutline(Nucleus nucleus, boolean segmented) throws Exception{
+	public XYDataset createNucleusOutline(Nucleus nucleus, boolean segmented) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 		if(segmented){
@@ -1260,7 +1263,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createNucleusHookHumpOutline(Cell cell) throws Exception{
+	public XYDataset createNucleusHookHumpOutline(Cell cell) throws Exception{
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
@@ -1305,7 +1308,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param seg
 	 * @return
 	 */
-	public static int getSegmentPosition(Nucleus n, NucleusBorderSegment seg){
+	public int getSegmentPosition(Nucleus n, NucleusBorderSegment seg){
 		
 		int result = 0;
 		if(seg.getStartIndex()==n.getBorderIndex(BorderTag.REFERENCE_POINT)){
@@ -1324,7 +1327,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createNucleusIndexTags(Cell cell) throws Exception {
+	public XYDataset createNucleusIndexTags(Cell cell) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -1346,15 +1349,22 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param cell the cell to get signals from
 	 * @return a dataset for charting
 	 */
-	public static List<DefaultXYDataset> createSignalOutlines(Cell cell, AnalysisDataset dataset){
+	public List<DefaultXYDataset> createSignalOutlines(Cell cell, AnalysisDataset dataset){
 		
 		List<DefaultXYDataset> result = new ArrayList<DefaultXYDataset>(0);
+		
+		if(cell==null){
+			return result;
+		}
 		
 		Nucleus nucleus = cell.getNucleus();
 		
 		for(UUID signalGroup : nucleus.getSignalCollection().getSignalGroupIDs()){
 			
-            if(dataset.getCollection().getSignalGroup(signalGroup).isVisible()){ // only add the groups that are set to visible
+			SignalGroup group = dataset.getCollection().getSignalGroup(signalGroup);
+			finer("Fetching signals from signal group "+group);
+			
+            if(group.isVisible()){ // only add the groups that are set to visible
 
 
 				DefaultXYDataset groupDataset = new DefaultXYDataset();
@@ -1389,7 +1399,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param list the analysis datasets
 	 * @return a chartable dataset
 	 */
-	public static XYDataset createMultiNucleusOutline(List<AnalysisDataset> list){
+	public XYDataset createMultiNucleusOutline(List<AnalysisDataset> list){
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -1429,7 +1439,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createModalityProbabililtyDataset(double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
+	public XYDataset createModalityProbabililtyDataset(double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -1473,7 +1483,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createModalityProfileDataset(ChartOptions options) throws Exception {
+	public XYDataset createModalityProfileDataset(ChartOptions options) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 	
@@ -1501,7 +1511,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createModalityValuesDataset(double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
+	public XYDataset createModalityValuesDataset(double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
@@ -1525,7 +1535,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static KernelEstimator createProfileProbabililtyKernel(double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
+	public KernelEstimator createProfileProbabililtyKernel(double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
 		CellCollection collection = dataset.getCollection();
 		KernelEstimator est = new KernelEstimator(0.001);
 		double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(xposition);
@@ -1544,7 +1554,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static KernelEstimator createProbabililtyKernel(double[] values, double binWidth) throws Exception {
+	public KernelEstimator createProbabililtyKernel(double[] values, double binWidth) throws Exception {
 		KernelEstimator est = new KernelEstimator(binWidth);
 		// add the values to a kernel estimator
 		// give each value equal weighting
@@ -1560,7 +1570,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param values the array of values to use
 	 * @return a dataset for charting
 	 */
-	public static XYDataset createQQDataset(double[] values){
+	public XYDataset createQQDataset(double[] values){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		Arrays.sort(values);
@@ -1586,7 +1596,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createKruskalProfileDataset(ChartOptions options) throws Exception {
+	public XYDataset createKruskalProfileDataset(ChartOptions options) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
@@ -1611,7 +1621,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createFrankenKruskalProfileDataset(ChartOptions options) throws Exception {
+	public XYDataset createFrankenKruskalProfileDataset(ChartOptions options) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Profile pvalues = KruskalTester.testCollectionGetFrankenPValues(options);
@@ -1632,7 +1642,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static NucleusMeshXYDataset createNucleusMeshEdgeDataset(NucleusMesh mesh) throws Exception {
+	public NucleusMeshXYDataset createNucleusMeshEdgeDataset(NucleusMesh mesh) throws Exception {
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 		
 		for(NucleusMeshEdge edge : mesh.getEdges()){
@@ -1661,7 +1671,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public static NucleusMeshXYDataset createNucleusMeshMidpointDataset(NucleusMesh mesh) throws Exception {
+	public NucleusMeshXYDataset createNucleusMeshMidpointDataset(NucleusMesh mesh) throws Exception {
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 		
 		for(NucleusMeshEdge edge : mesh.getEdges()){
@@ -1683,7 +1693,7 @@ public class NucleusDatasetCreator implements Loggable {
 	}
 	
 	
-	public static HistogramDataset createNucleusMeshHistogramDataset(NucleusMesh mesh)throws Exception {
+	public HistogramDataset createNucleusMeshHistogramDataset(NucleusMesh mesh)throws Exception {
 		HistogramDataset ds = new HistogramDataset();
 		
 		int bins = 100;

@@ -25,7 +25,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
@@ -381,22 +380,7 @@ public class CellDatasetCreator implements Loggable {
 		 * The list of XYPoints are the absolute positions in cartesian space.
 		 * This should be corrected to offsets from the geometric centre of the cluster
 		 */
-		
-//		// Calculate the average x and y positions
-//		
-//		double sumX = 0;
-//		double sumY = 0;
-//		for(XYPoint p : result){
-//			
-//			sumX += p.getX();
-//			sumY += p.getY();
-//			
-//		}
-//		
-//		sumX /= result.size();
-//		sumY /= result.size();
-//		XYPoint centrePoint = new XYPoint(sumX,sumY);
-		
+				
 		/*
 		 * Update the result positions to be offsets to the centre 
 		 */

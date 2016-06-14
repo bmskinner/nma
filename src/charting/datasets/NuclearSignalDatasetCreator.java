@@ -40,17 +40,14 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import stats.SignalStatistic;
-import stats.Stats;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import analysis.nucleus.CurveRefolder;
 import analysis.signals.NuclearSignalOptions;
-import analysis.signals.SignalManager;
 import components.CellCollection;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
@@ -284,7 +281,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
                 String groupLabel = collection.getSignalManager().getSignalGroupName(signalGroup)+"_"+stat.toString();
 
                 double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
-                KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values, 0.001);
+                KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(values, 0.001);
 
 
 					double min = Arrays.stream(values).min().orElse(0); //Stats.min(values);
@@ -346,7 +343,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 				double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
 
-				NuclearHistogramDatasetCreator.updateMinMaxRange(result, values);
+				NuclearHistogramDatasetCreator.getInstance().updateMinMaxRange(result, values);
 			}
 		}
 		

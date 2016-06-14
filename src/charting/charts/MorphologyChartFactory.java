@@ -46,8 +46,6 @@ import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
-import org.jfree.util.ShapeUtilities;
-
 import stats.DipTester;
 import stats.StatisticDimension;
 import utility.Constants;
@@ -55,7 +53,6 @@ import analysis.AnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
-import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import components.AbstractCellularComponent;
 import components.CellCollection;
@@ -130,7 +127,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 */
 	public static JFreeChart makeIndividualNucleusProfileChart(Nucleus n, ChartOptions options) throws Exception{
 		
-		XYDataset  ds 	 = NucleusDatasetCreator.createSegmentedProfileDataset(n, options.getType());
+		XYDataset  ds 	 = NucleusDatasetCreator.getInstance().createSegmentedProfileDataset(n, options.getType());
 		JFreeChart chart = makeProfileChart(ds, n.getBorderLength(), options.getSwatch(), options.getType());
 		return chart;
 	}
@@ -153,10 +150,10 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		if(options.hasDatasets()){
 
 			if(options.getType().equals(ProfileType.FRANKEN)){
-				ds = NucleusDatasetCreator.createFrankenSegmentDataset(options);
+				ds = NucleusDatasetCreator.getInstance().createFrankenSegmentDataset(options);
 
 			} else {
-				ds = NucleusDatasetCreator.createSegmentedProfileDataset(options);
+				ds = NucleusDatasetCreator.getInstance().createSegmentedProfileDataset(options);
 			}
 			
 
@@ -250,7 +247,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		int datasetIndex = 0;
 		for(AnalysisDataset dataset : options.getDatasets()){
 
-			XYDataset ds = NucleusDatasetCreator.createSegmentedMedianProfileDataset(dataset, options.isNormalised(), options.getAlignment(), options.getTag());
+			XYDataset ds = NucleusDatasetCreator.getInstance().createSegmentedMedianProfileDataset(dataset, options.isNormalised(), options.getAlignment(), options.getTag());
 
 			plot.setDataset(datasetIndex, ds);
 			
@@ -415,11 +412,11 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		XYDataset medianProfiles			 = null;
 				
 		if(options.getType().equals(ProfileType.FRANKEN)){
-			iqrProfiles     = NucleusDatasetCreator.createMultiProfileIQRFrankenDataset(  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());				
-			medianProfiles	= NucleusDatasetCreator.createMultiProfileFrankenDataset(	  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());
+			iqrProfiles     = NucleusDatasetCreator.getInstance().createMultiProfileIQRFrankenDataset(  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());				
+			medianProfiles	= NucleusDatasetCreator.getInstance().createMultiProfileFrankenDataset(	options );
 		} else {
-			iqrProfiles     = NucleusDatasetCreator.createMultiProfileIQRDataset( options );				
-			medianProfiles	= NucleusDatasetCreator.createMultiProfileDataset(	  options );
+			iqrProfiles     = NucleusDatasetCreator.getInstance().createMultiProfileIQRDataset( options );				
+			medianProfiles	= NucleusDatasetCreator.getInstance().createMultiProfileDataset(    options );
 		
 		}
 		
@@ -427,7 +424,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		// find the maximum profile length - used when rendering raw profiles
 		int length = 100;
 
-		if(!options.isNormalised()){
+		if( ! options.isNormalised()){
 			for(AnalysisDataset d : options.getDatasets()){
 				length = (int) Math.max( d.getCollection().getMedianArrayLength(), length);
 			}
@@ -461,7 +458,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			String name = (String) seriesCollection.getSeriesKey(0);
 
 			// index should be the position in the AnalysisDatase list
-			// see construction in NucleusDatasetCreator
+			// see construction in NucleusDatasetCreator.getInstance()
 			int index = MorphologyChartFactory.getIndexFromLabel(name); 
 
 			// make a transparent color based on teh profile segmenter system
@@ -532,7 +529,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return a chart
 	 */
 	private static JFreeChart makeSingleVariabilityChart(ChartOptions options) throws Exception {
-		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(options);
+		XYDataset ds = NucleusDatasetCreator.getInstance().createIQRVariabilityDataset(options);
 
 		ColourSwatch swatch = options.firstDataset().getSwatch() == null 
 				? ColourSwatch.REGULAR_SWATCH 
@@ -552,7 +549,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return a chart
 	 */
 	private static JFreeChart makeMultiVariabilityChart(ChartOptions options) throws Exception {
-		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(options);
+		XYDataset ds = NucleusDatasetCreator.getInstance().createIQRVariabilityDataset(options);
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                "Position", "IQR", ds, PlotOrientation.VERTICAL, true, true,
@@ -590,7 +587,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		finest("Created position dataset");
 		
 		
-		XYDataset nuclearOutlines = NucleusDatasetCreator.createMultiNucleusOutline(options.getDatasets());
+		XYDataset nuclearOutlines = NucleusDatasetCreator.getInstance().createMultiNucleusOutline(options.getDatasets());
 		finest("Created nucleus outline dataset");
 		
 		if(positionDataset == null || nuclearOutlines == null){
@@ -712,8 +709,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		int iteration = 0;
 		for(AnalysisDataset dataset : list){
 			
-			XYDataset ds 	 = NucleusDatasetCreator.createModalityProbabililtyDataset(position, dataset, type);
-			XYDataset values = NucleusDatasetCreator.createModalityValuesDataset(position, dataset, type);
+			XYDataset ds 	 = NucleusDatasetCreator.getInstance().createModalityProbabililtyDataset(position, dataset, type);
+			XYDataset values = NucleusDatasetCreator.getInstance().createModalityValuesDataset(position, dataset, type);
 			
 			Color colour = dataset.getDatasetColour() == null 
 					? ColourSelecter.getSegmentColor(iteration)
@@ -755,7 +752,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	
 	public static JFreeChart createModalityProfileChart(ChartOptions options) throws Exception {
 		
-		XYDataset ds = NucleusDatasetCreator.createModalityProfileDataset(options);
+		XYDataset ds = NucleusDatasetCreator.getInstance().createModalityProfileDataset(options);
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
@@ -849,12 +846,12 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		int iteration = 0;
 		for(AnalysisDataset dataset : list){
 			
-//			XYDataset ds 	 = NucleusDatasetCreator.createModalityProbabililtyDataset(position, dataset, type);
-//			XYDataset values = NucleusDatasetCreator.createModalityValuesDataset(position, dataset, type);
+//			XYDataset ds 	 = NucleusDatasetCreator.getInstance().createModalityProbabililtyDataset(position, dataset, type);
+//			XYDataset values = NucleusDatasetCreator.getInstance().createModalityValuesDataset(position, dataset, type);
 			CellCollection collection = dataset.getCollection();
 
 			double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(position);
-			XYDataset ds = NucleusDatasetCreator.createQQDataset(values);
+			XYDataset ds = NucleusDatasetCreator.getInstance().createQQDataset(values);
 			
 			Color colour = dataset.getDatasetColour() == null 
 					? ColourSelecter.getSegmentColor(iteration)
@@ -910,17 +907,17 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		XYDataset kruskalDataset = null;
 		
 		if(frankenNormalise){
-			kruskalDataset = NucleusDatasetCreator.createFrankenKruskalProfileDataset(options);
+			kruskalDataset = NucleusDatasetCreator.getInstance().createFrankenKruskalProfileDataset(options);
 		} else {
-			kruskalDataset = NucleusDatasetCreator.createKruskalProfileDataset(options);
+			kruskalDataset = NucleusDatasetCreator.getInstance().createKruskalProfileDataset(options);
 		}
 
-		XYDataset firstProfileDataset = NucleusDatasetCreator.createNonsegmentedMedianProfileDataset(options.firstDataset(),
+		XYDataset firstProfileDataset = NucleusDatasetCreator.getInstance().createNonsegmentedMedianProfileDataset(options.firstDataset(),
 				true,
 				options.getAlignment(),
 				options.getTag());
 		
-		XYDataset secondProfileDataset = NucleusDatasetCreator.createNonsegmentedMedianProfileDataset(options.getDatasets().get(1),
+		XYDataset secondProfileDataset = NucleusDatasetCreator.getInstance().createNonsegmentedMedianProfileDataset(options.getDatasets().get(1),
 				true,
 				options.getAlignment(),
 				options.getTag());

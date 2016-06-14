@@ -58,6 +58,7 @@ public class ChartOptions extends AbstractOptions {
 	private boolean showMeshEdges      = true;
 	private boolean showMeshFaces      = false;
 	private int     meshSize           = 10;
+	private boolean showBounds         = false;
 	
 	// Chart axis options
 	private boolean showXAxis           = true;
@@ -233,6 +234,15 @@ public class ChartOptions extends AbstractOptions {
 	public void setMeshSize(int meshSize) {
 		this.meshSize = meshSize;
 	}
+	
+
+	public boolean isShowBounds() {
+		return showBounds;
+	}
+
+	public void setShowBounds(boolean showBounds) {
+		this.showBounds = showBounds;
+	}
 
 	public boolean isShowXAxis() {
 		return showXAxis;
@@ -322,6 +332,7 @@ public class ChartOptions extends AbstractOptions {
 		result = prime * result + (showMeshEdges ? 1231 : 1237);
 		result = prime * result + (showMeshFaces ? 1231 : 1237);
 		result = prime * result + meshSize;
+		result = prime * result + (showBounds ? 1231 : 1237);
 		
 		result = prime * result + (showXAxis ? 1231 : 1237);
 		result = prime * result + (showYAxis ? 1231 : 1237);
@@ -381,7 +392,8 @@ public class ChartOptions extends AbstractOptions {
 			return false;
 		if (meshSize != other.meshSize)
 			return false;
-		
+		if (showBounds != other.showBounds)
+			return false;
 		
 		if (showXAxis != other.showXAxis)
 			return false;
