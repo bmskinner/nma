@@ -230,11 +230,11 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		deleteMenuItem.setEnabled(false);
 	}
 	
-	public void enableSplit(){
+	public void enableBoolean(){
 		booleanMenuItem.setEnabled(true);
 	}
 	
-	public void disableSplit(){
+	public void disableBoolean(){
 		booleanMenuItem.setEnabled(false);
 	}
 	

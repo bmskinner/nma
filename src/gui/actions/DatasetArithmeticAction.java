@@ -34,17 +34,17 @@ import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 
 public class DatasetArithmeticAction extends ProgressableAction {
 
-	public DatasetArithmeticAction(AnalysisDataset selected, List<AnalysisDataset> list, MainWindow mw) {
+	public DatasetArithmeticAction(List<AnalysisDataset> list, MainWindow mw) {
 		super("Dataset arithmetic", mw);
 		this.cooldown();
 		try {
-			log(Level.FINE, "Performing arithmetic...");
+			fine("Performing arithmetic...");
 
 			/*
 			 * Make a dialog with a dropdown for dataset 1, operator, then  dropdown for dataset 2
 			 */
 
-			DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(selected, list, mw);
+			DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(list, mw);
 
 			if(dialog.isReadyToRun()){
 

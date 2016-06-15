@@ -115,9 +115,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		this.update();
 		finest("Preparing to select datasets");
 		selectDatasets(list);
-//		if(list.size()==1){
-//			selectDataset(list.get(0));
-//		}
 	}
 	
 	/**
@@ -555,9 +552,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		if(dataset.isRoot()){ // add to the list of datasets that can be ordered
 			treeOrderMap.put(dataset.getUUID(), treeOrderMap.size()); // add to the end of the list
 		}
-//		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-//		list.add(dataset);
-//		update(list);
 	}
 	
 	/**
@@ -929,6 +923,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						populationPopup.disableAll();
 						populationPopup.enableMerge();
 						populationPopup.enableDelete();
+						populationPopup.enableBoolean();
 						
 					} else { // single population
 						AnalysisDataset d = datasets.get(0);
@@ -946,7 +941,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 		populationPopup.enableDelete();
 		populationPopup.disableMerge();
-		populationPopup.enableSplit();
+		populationPopup.enableBoolean();
 		populationPopup.enableSave();
 		populationPopup.enableExtract();
 		populationPopup.enableCurate();
