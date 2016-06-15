@@ -41,9 +41,11 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+
 //<<<<<<< HEAD
 //=======
 import analysis.AnalysisDataset;
+import analysis.signals.SignalManager;
 //import analysis.SignalManager;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
@@ -292,7 +294,19 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		
 		if(isMultipleDatasets()){
 			if(AnalysisDataset.haveConsensusNuclei(getDatasets())){
-				warpButton.setEnabled(true);
+				
+				// Check at least one of the selected datasets has signals
+				boolean hasSignals = false;
+				for(AnalysisDataset d : getDatasets()){
+				
+					SignalManager m =  d.getCollection().getSignalManager();
+					if(m.hasSignals()){
+						hasSignals = true;
+						break;
+					}
+				}
+				
+				warpButton.setEnabled(hasSignals);
 			} else {
 				warpButton.setEnabled(false);
 			}
