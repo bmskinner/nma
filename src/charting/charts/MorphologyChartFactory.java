@@ -350,7 +350,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		plot.getDomainAxis().setRange(0,xLength);
 
 		// always set the y range to 360 degrees
-		if(type.equals(ProfileType.REGULAR) || type.equals(ProfileType.FRANKEN)){
+		if(type.getDimension().equals(StatisticDimension.ANGLE)){
 			plot.getRangeAxis().setRange(0,360);
 			// the 180 degree line
 			plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
@@ -439,11 +439,13 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		XYPlot plot = chart.getXYPlot();
 		plot.getDomainAxis().setRange(0,length);
-		plot.getRangeAxis().setRange(0,360);
+		
+		if(options.getType().getDimension().equals(StatisticDimension.ANGLE)){
+			plot.getRangeAxis().setRange(0,360);
+			plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
+		}
 		plot.setBackgroundPaint(Color.WHITE);
 
-		// add 180 degree horizontal line
-		plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
 
 		int lastSeries = 0;
 
