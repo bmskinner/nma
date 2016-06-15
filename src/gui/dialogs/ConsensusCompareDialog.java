@@ -135,18 +135,27 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 	}
 	
 	private JPanel createHeader(){
-		JPanel panel = new JPanel(new FlowLayout());
+		
+		JPanel headerPanel = new JPanel();
+		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+		
+		JPanel upperPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel lowerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		
 		
 		boxOne = new DatasetSelectionPanel(datasets);
 		boxOne.setSelectedDataset(datasets.get(0));
+		
 		boxTwo = new DatasetSelectionPanel(datasets);
-		boxOne.setSelectedDataset(datasets.get(1));
+		boxTwo.setSelectedDataset(datasets.get(1));
 		
 		boxOne.addActionListener(this);
 		boxTwo.addActionListener(this);
 		
-		panel.add(boxOne);
-		panel.add(boxTwo);
+		upperPanel.add(new JLabel("Dataset one"));
+		upperPanel.add(boxOne);
+		lowerPanel.add(new JLabel("Dataset two"));
+		lowerPanel.add(boxTwo);
 		
 		finest("Added dataset boxes");
 
@@ -173,31 +182,31 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		JSpinner.NumberEditor meshNumberEditor = new JSpinner.NumberEditor(meshSizeSpinner,"0");
 		meshSizeSpinner.setEditor(meshNumberEditor);
 		
-		panel.add(new JLabel("Log2 ratio max"));
-		panel.add(maxRatioSpinner);
-		panel.add(new JLabel("Mesh distance"));
-		panel.add(meshSizeSpinner);
+		lowerPanel.add(new JLabel("Log2 ratio max"));
+		lowerPanel.add(maxRatioSpinner);
+		upperPanel.add(new JLabel("Mesh distance"));
+		upperPanel.add(meshSizeSpinner);
 		finest("Added log2 and mesh size boxes");
 		
 		showAnnotationsBox = new JCheckBox("Show labels", false);
 		showAnnotationsBox.addItemListener(this);
-		panel.add(showAnnotationsBox);
+		lowerPanel.add(showAnnotationsBox);
 		finest("Added annotations checkbox");
 		
 		showEdgesBox = new JCheckBox("Show edges", true);
 		showEdgesBox.addItemListener(this);
-		panel.add(showEdgesBox);
+		lowerPanel.add(showEdgesBox);
 		finest("Added edges checkbox");
 		
 		showFacesBox = new JCheckBox("Show faces", false);
 		showFacesBox.addItemListener(this);
-		panel.add(showFacesBox);
+		lowerPanel.add(showFacesBox);
 		finest("Added faces checkbox");
 		
-		
-//		panel.add(getLoadingLabel());
-		
-		return panel;
+		headerPanel.add(upperPanel);
+		headerPanel.add(lowerPanel);
+				
+		return headerPanel;
 	}
 	
 	private void runComparison(){
