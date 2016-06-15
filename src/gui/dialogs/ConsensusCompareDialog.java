@@ -269,7 +269,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				histoChartOne = ConsensusNucleusChartFactory.getInstance().makeErrorNucleusOutlineChart();
 				histoChartTwo = ConsensusNucleusChartFactory.getInstance().makeErrorNucleusOutlineChart();
 
-				logError("Error creating mesh chart", e);
+				log(Level.FINE, "Error creating mesh chart", e);
 			}
 			
 			

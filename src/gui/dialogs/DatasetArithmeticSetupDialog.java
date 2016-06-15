@@ -64,13 +64,13 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		}
 	}
 
-	public DatasetArithmeticSetupDialog(AnalysisDataset selected, List<AnalysisDataset> list, MainWindow mw) {
+	public DatasetArithmeticSetupDialog(List<AnalysisDataset> list, MainWindow mw) {
 		super( mw, true);
 
 		this.setTitle("Dataset arithmetic options");
 		setSize(450, 300);
 		this.setLocationRelativeTo(null);
-		createGUI(selected, list);
+		createGUI(list);
 //		this.pack();
 		this.setVisible(true);
 	}
@@ -87,7 +87,7 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		return (DatasetArithmeticOperation) operatorBox.getSelectedItem();
 	}
 
-	private void createGUI(AnalysisDataset selected, List<AnalysisDataset> list) {
+	private void createGUI(List<AnalysisDataset> list) {
 		
 		setLayout(new BorderLayout());
 
@@ -101,7 +101,8 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		boxOne = new DatasetSelectionPanel(list); //JComboBox<AnalysisDataset>();
 		boxTwo = new DatasetSelectionPanel(list);
 
-		boxOne.setSelectedDataset(selected);
+		boxOne.setSelectedDataset(list.get(0));
+		boxOne.setSelectedDataset(list.get(0));
 		
 		operatorBox = new JComboBox<DatasetArithmeticOperation>(DatasetArithmeticOperation.values());
 		operatorBox.setSelectedItem(DatasetArithmeticOperation.AND);
