@@ -29,11 +29,13 @@ package components.nuclei;
 
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
 
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -102,6 +104,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	
 	private transient StringBuffer log = new StringBuffer();
+	
 	
 	public RoundNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 		super(roi);

@@ -1,13 +1,32 @@
+/*******************************************************************************
+ *  	Copyright (C) 2015, 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details. Gluten-free. May contain 
+ *     traces of LDL asbestos. Avoid children using heavy machinery while under the
+ *     influence of alcohol.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 package components;
 
 import java.awt.Rectangle;
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +34,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import logging.Loggable;
-import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
@@ -29,8 +47,6 @@ import io.ImageImporter;
 import stats.PlottableStatistic;
 import stats.Stats;
 import utility.Constants;
-import utility.Utils;
-import utility.Version;
 
 public class AbstractCellularComponent implements CellularComponent, Serializable, Loggable {
 
@@ -73,6 +89,9 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	
 	// The points around the border of the object
 	private List<BorderPoint> borderList    = new ArrayList<BorderPoint>(0);
+	
+	private transient SoftReference<ImageProcessor> imageRef = new SoftReference<ImageProcessor>(null); // allow caching of images while memory is available
+	
 	
 	public AbstractCellularComponent(){
 		this.id = java.util.UUID.randomUUID();
@@ -167,6 +186,12 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	}
 	
 	public ImageProcessor getImage(){
+		
+		ImageProcessor ip = imageRef.get();
+		if(ip !=null){
+			return ip;
+		}
+		
 
 		if(getSourceFile().exists()){
 			ImageStack imageStack = ImageImporter.getInstance().importImage(getSourceFile());
@@ -174,8 +199,10 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 			// Get the stack, make greyscale and invert
 			int stack = Constants.rgbToStack(getChannel());
 
-			ImageProcessor ip = imageStack.getProcessor(stack);
+			ip = imageStack.getProcessor(stack);
 			ip.invert();	
+			
+			imageRef = new SoftReference<ImageProcessor>(ip);
 
 			return ip;
 		} else {
@@ -659,24 +686,6 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		finest("\tReading abstract cellular component");
 		
-//		if(Version.currentVersion().isOlderThan(new Version(1, 12, 2))){
-//			
-//			try{
-//				finest("\tAttempting default deserialization");
-//				in.defaultReadObject();
-//				return;
-//			} catch(StackOverflowError e){
-//				
-//			} catch(Exception e){
-//				finest("\tDefault deserialization failed");
-//			}
-//			
-//		} 
-			
-		// Else use the new deserialization
-
-//		finest("\tAttempting custom deserialization");
-
 		// id is final, so cannot be assigned normally. 
 		// Reflect around the problem by making the field
 		// temporarily assignable
@@ -730,6 +739,8 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
     		list.add(next);
     	}
     	this.setBorderList(list);
+    	
+    	imageRef = new SoftReference<ImageProcessor>(null); 
 
 		finest("\tRead abstract cellular component");
 	}
