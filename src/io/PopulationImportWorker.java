@@ -105,23 +105,6 @@ public class PopulationImportWorker extends AnalysisWorker {
 						}
 						
 					}
-//					Version version = dataset.getVersion();
-//					
-//					// This is when bugs were fixed for hook hump assignment
-//					Version testVersion = new Version(1, 12, 1); //TODO: change this when fixed
-					
-					/*
-					 * Correct hook-hump for older versions
-					 * Don't run a load of calculations unnecessarily in newer versions
-					 */
-//					if(version.isOlderThan(testVersion)){
-//						
-//						programLogger.log(Level.FINE, "Updating older dataset hook-hump split and signals");
-//						updateRodentSpermHookHumpSplits(dataset);
-//						for(AnalysisDataset child : dataset.getAllChildDatasets()){
-//							updateRodentSpermHookHumpSplits(child);
-//						}
-//					}
 					
 				}
 				

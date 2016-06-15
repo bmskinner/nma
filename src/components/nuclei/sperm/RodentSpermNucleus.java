@@ -807,8 +807,9 @@ public class RodentSpermNucleus extends SpermNucleus {
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	  finest("\tReading rodent sperm nucleus");
 	  in.defaultReadObject();
-	  this.hookLength = 0;
-	  this.bodyWidth = 0;
+	  calculateHookOrBodyLength();
+//	  this.hookLength = 0;
+//	  this.bodyWidth = 0;
 	  finest("\tRead rodent sperm nucleus");
   }
 
