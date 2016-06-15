@@ -54,7 +54,7 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 		protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
 		protected ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 		
-		private ProfileType type;
+		protected ProfileType type;
 		
 		public AbstractProfileDisplayPanel(ProfileType type){
 			super();

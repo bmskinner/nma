@@ -107,10 +107,6 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	private JComboBox<NucleusType> nucleusSelectionBox;
 
 	private JCheckBox refoldCheckBox;
-//	private JRadioButton refoldFastButton = new JRadioButton("Fast");
-//	private JRadioButton refoldIntensiveButton = new JRadioButton("Intensive");
-//	private JRadioButton refoldBrutalButton = new JRadioButton("Brutal");
-//	private ButtonGroup refoldModeGroup;
 	
 	private JSpinner scaleSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_SCALE,	0, 100, 0.001));
 
@@ -303,7 +299,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 
 
 			nucleusSelectionBox.setSelectedItem(options.getNucleusType());
-			refoldCheckBox.setEnabled(options.refoldNucleus());
+			refoldCheckBox.setSelected(options.refoldNucleus());
 			finest("Updated checkboxes");
 
 			nucleusCannyPanel.update(templateCannyOptions);

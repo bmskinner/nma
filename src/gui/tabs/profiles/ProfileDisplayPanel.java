@@ -33,20 +33,18 @@ import components.generic.ProfileType;
 
 @SuppressWarnings("serial")
 public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
-	
-	private ProfileType type;
-		
-		public ProfileDisplayPanel(ProfileType type){
-			super(type);
 			
-			
-			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(type);
-			chartPanel.setChart(chart);
-			
-			if(this.type==ProfileType.FRANKEN){
-				this.profileAlignmentOptionsPanel.setEnabled(false);
-			}
+	public ProfileDisplayPanel(ProfileType type){
+		super(type);
+
+
+		JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(type);
+		chartPanel.setChart(chart);
+
+		if(this.type==ProfileType.FRANKEN){
+			this.profileAlignmentOptionsPanel.setEnabled(false);
 		}
+	}
 		
 		@Override
 		protected void updateSingle() {
