@@ -105,6 +105,8 @@ public class CellCollection implements Serializable, Loggable {
 	private transient boolean isRefolding = false;
 	
 	private RuleSetCollection ruleSets = new RuleSetCollection();
+	
+	protected transient Map<UUID, Integer> vennCache = new HashMap<UUID, Integer>(); // cache the number of shared nuclei with other datasets
 
 	/**
 	 * Constructor.
@@ -963,6 +965,53 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
   public RuleSetCollection getRuleSetCollection(){
 	  return this.ruleSets;
   }
+  
+  /**
+   * Get the number of nuclei shared with the given dataset
+   * @param d2
+   * @return
+   */
+  public int getSharedNucleusCount(AnalysisDataset d2){
+
+	  if(this.vennCache.containsKey(d2.getUUID())){
+		  return vennCache.get(d2.getUUID());
+	  }
+	  int shared  = countSharedNuclei(d2);
+	  vennCache.put(d2.getUUID(), shared);
+	  d2.getCollection().vennCache.put(getID(), shared);
+	  return shared;
+
+  }
+  
+	/**
+	 * Count the number of nuclei from this dataset that are present in d2
+	 * @param d1
+	 * @param d2
+	 * @return
+	 */
+	private int countSharedNuclei(AnalysisDataset d2){
+		
+		if(d2.getCollection()==this){
+			return this.getNucleusCount();
+		}
+		
+		if(d2.getCollection().getNucleusType() != this.nucleusType){
+			return 0;
+		}
+		
+		
+		int shared = 0;
+		for(Cell c : this.mappedCollection.values()){
+			UUID n1id = c.getNucleus().getID();
+			
+			for(Nucleus n2 : d2.getCollection().getNuclei()){
+				if( n2.getID().equals(n1id)){
+					shared++;
+				}
+			}
+		}
+		return shared;
+	}
     
   public String toString(){
 	  
@@ -1002,6 +1051,7 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  finest("Reading cell collection");
 	  in.defaultReadObject();
 	  isRefolding = false;
+	  vennCache   = new HashMap<UUID, Integer>(); // cache the number of shared nuclei with other datasets
 //	  finest("Creating default ruleset for nucleus type "+nucleusType);
 //	  ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType); 
 	  finest("Read cell collection");

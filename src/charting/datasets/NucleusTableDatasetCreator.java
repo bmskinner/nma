@@ -52,6 +52,7 @@ import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
+import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import stats.DipTester;
 import stats.NucleusStatistic;
@@ -656,9 +657,16 @@ private static NucleusTableDatasetCreator instance = null;
 		
 				
 		if( ! options.hasDatasets()){
+			finest("No datasets, creating blank venn table");
 			return createBlankTable();
 		}
 		
+		if(options.isSingleDataset()){
+			finest("Single dataset, creating blank venn table");
+			return createBlankTable();
+		}
+		
+		finer("Creating venn table model");
 		DefaultTableModel model = new DefaultTableModel();
 		
 		List<AnalysisDataset> list = options.getDatasets();
@@ -672,40 +680,37 @@ private static NucleusTableDatasetCreator instance = null;
 		}
 		model.addColumn("Population", columnData);
 		
+		DecimalFormat df = new DecimalFormat("#0.00"); 
+		
 		// add columns
 		for(AnalysisDataset dataset : list){
+			
+			finest("Fetching comparisons for "+dataset.getName());
 			
 			Object[] popData = new Object[list.size()];
 			
 			int i = 0;
 			for(AnalysisDataset dataset2 : list){
+								
+				String valueString = "";
 				
-				if(dataset2.getUUID().equals(dataset.getUUID())){
-					popData[i] = "";
-				} else {
-					// compare the number of shared nucleus ids
-					int shared = 0;
-					for(Nucleus n : dataset.getCollection().getNuclei()){
-						UUID n1id = n.getID();
-						for(Nucleus n2 : dataset2.getCollection().getNuclei()){
-							if( n2.getID().equals(n1id)){
-								shared++;
-							}
-						}
-//						if( dataset2.getCollection().getNuclei().contains(n)){
-//							shared++;
-//						}
-					}
-					DecimalFormat df = new DecimalFormat("#0.00"); 
+				if( ! dataset2.getUUID().equals(dataset.getUUID())){	
+
+					int shared = dataset.getCollection().getSharedNucleusCount(dataset2);
+
 					double pct = ((double) shared / (double) dataset2.getCollection().getNucleusCount())*100;
-					popData[i] = shared+" ("+df.format(pct)+"% of row)";
+					valueString = shared+" ("+df.format(pct)+"% of row)";
 				}
-				i++;
+				
+				popData[i++] = valueString;
 			}
 			model.addColumn(dataset.getName(), popData);
 		}
+		finer("Created venn table model");
 		return model;
 	}
+	
+
 	
 	
 	/**
@@ -716,9 +721,15 @@ private static NucleusTableDatasetCreator instance = null;
 	public TableModel createPairwiseVennTable(TableOptions options) {
 				
 		if( ! options.hasDatasets()){
+			finest("No datasets, creating blank pairwise venn table");
 			return createBlankTable();
 		}
 		
+		if(options.isSingleDataset()){
+			finest("Single dataset, creating blank pairwise venn table");
+			return createBlankTable();
+		}
+		finer("Creating venn pairwise table model");
 		DefaultTableModel model = new DefaultTableModel();
 		
 		Object[] columnNames = new Object[] {
@@ -738,6 +749,8 @@ private static NucleusTableDatasetCreator instance = null;
 		List<AnalysisDataset> list = options.getDatasets();
 		// Track the pairwase comparisons performed to avoid duplicates
 		Map<UUID, ArrayList<UUID>> existingMatches = new HashMap<UUID, ArrayList<UUID>>();
+		
+		DecimalFormat df = new DecimalFormat("#0.00"); 
 
 		// add columns
 		for(AnalysisDataset dataset1 : list){
@@ -766,19 +779,9 @@ private static NucleusTableDatasetCreator instance = null;
 					popData[8] = dataset2.getName();
 
 					// compare the number of shared nucleus ids
-					int shared = 0;
-					for(Nucleus n1 : dataset1.getCollection().getNuclei()){
+					int shared = dataset1.getCollection().getSharedNucleusCount(dataset2);
 
-						for(Nucleus n2 : dataset2.getCollection().getNuclei()){
-							if( n2.getID().equals(n1.getID())){
-								shared++;
-							}
-						}
-
-					}
 					popData[4] = shared;
-
-					DecimalFormat df = new DecimalFormat("#0.00"); 
 
 					int unique1 = dataset1.getCollection().getNucleusCount() - shared;
 					int unique2 = dataset2.getCollection().getNucleusCount() - shared; 
@@ -802,6 +805,7 @@ private static NucleusTableDatasetCreator instance = null;
 				}
 			}
 		}
+		finer("Created venn pairwise table model");
 		return model;
 	}
 				

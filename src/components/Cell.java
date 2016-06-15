@@ -60,7 +60,7 @@ public class Cell implements Serializable, Loggable {
 	public Cell(Cell c){
 
 		this.uuid = c.getId();
-		nucleus = c.getNucleus().duplicate();
+		nucleus   = c.getNucleus().duplicate();
 		
 		mitochondria = new ArrayList<Mitochondrion>(0);
 		for(Mitochondrion m : c.getMitochondria()){

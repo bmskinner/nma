@@ -22,8 +22,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.text.NumberFormat;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -39,10 +37,8 @@ import charting.options.TableOptionsBuilder;
 import charting.options.TableOptions.TableType;
 import gui.components.ExportableTable;
 
+@SuppressWarnings("serial")
 public class VennDetailPanel extends DetailPanel {
-
-
-	private static final long serialVersionUID = 1L;
 	
 	private JPanel mainPanel = new JPanel();
 	
@@ -88,7 +84,7 @@ public class VennDetailPanel extends DetailPanel {
 
 	@Override
 	protected void updateMultiple() {
-		log(Level.FINE, "Updating venn panel");
+		fine("Updating venn panel");
 
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
@@ -102,7 +98,7 @@ public class VennDetailPanel extends DetailPanel {
 		vennTable.setModel(model);
 		setRenderer(vennTable, new VennTableCellRenderer());
 
-		log(Level.FINEST, "Updated venn panel");
+		fine("Updated venn panel");
 		
 	}
 	
@@ -115,7 +111,6 @@ public class VennDetailPanel extends DetailPanel {
 	protected void updateNull() {		
 		
 		TableOptions options = new TableOptionsBuilder()
-			.setDatasets(null)
 			.setType(TableType.VENN)
 			.build();
 		
@@ -130,50 +125,54 @@ public class VennDetailPanel extends DetailPanel {
 	}
 		
 	/**
-	 * Colour table cell backsground to show pairwise comparisons. All cells are white, apart
+	 * Colour table cell background to show pairwise comparisons. All cells are white, apart
 	 * from the diagonal, which is made light grey
 	 */
 	class VennTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
-		private static final long serialVersionUID = 1L;
-
 		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 	        
-	      //Cells are by default rendered as a JLabel.
+			Color backColour = Color.WHITE;
+			Color foreColour = Color.BLACK;
+
 	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
 	        String cellContents = l.getText();
-	        if(cellContents!=null && !cellContents.equals("")){ // ensure value
-
+	        
+	        if(cellContents==null || cellContents.equals("")){
+	        	
+	        	backColour = Color.LIGHT_GRAY;
+	        
+	        } else {
+	        
 	        	String columnName = table.getColumnName(column);
 	        	String[] array = cellContents.split("%");
 		        String[] array2 = array[0].split("\\(");
 		        
-		        double pct;
+		        double pct = 0;
 		        try {
 		        	
 		        	NumberFormat nf = NumberFormat.getInstance();
 		        	pct = nf.parse(array2[1]).doubleValue();
-//		        	pct = Double.valueOf(array2[1]);
+
 		        } catch (Exception e){
-		        	log(Level.FINEST, "Error getting value: "+cellContents+" in column "+columnName, e);
+		        	log(Level.FINER, "Error getting value: "+cellContents+" in column "+columnName, e);
 		        	pct = 0;
 		        }
 		        		        
 		        double colourIndex = 255 - ((pct/100) * 255);
 		        
-		        Color colour = new Color((int) colourIndex,(int) colourIndex, 255);
-		        l.setBackground(colour);
+		        backColour = new Color((int) colourIndex,(int) colourIndex, 255);
+
 		        
 		        if(pct>60){
-		        	l.setForeground(Color.WHITE);
-		        } else {
-		        	l.setForeground(Color.black);
+		        	foreColour = Color.WHITE;
 		        }
 		        
-	        } else {
-	            l.setBackground(Color.LIGHT_GRAY);
-	        }
+	        } 
+	        
+	        l.setBackground(backColour);
+	        l.setForeground(foreColour);
 
 	      //Return the JLabel which renders the cell.
 	      return l;

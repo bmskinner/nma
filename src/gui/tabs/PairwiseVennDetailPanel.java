@@ -132,18 +132,18 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	 */
 	class PairwiseVennTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
-		private static final long serialVersionUID = 1L;
-
 		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 	        
-	      //Cells are by default rendered as a JLabel.
+			Color backColour = Color.WHITE;
+			Color foreColour = Color.BLACK;
+			
 	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
 	        String cellContents = l.getText();
 	        
 	        String columnName = table.getColumnName(column);
 	        if(  (columnName.equals("Unique %") || columnName.equals("Shared %"))){
-	        	
+//	        	finest("Column name: "+columnName);
 		        double pct;
 		        try {
 		        	
@@ -156,19 +156,18 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		        
 		        double colourIndex = 255 - ((pct/100) * 255);
 		        
-		        Color colour = new Color((int) colourIndex,(int) colourIndex, 255);
-		        l.setBackground(colour);
+		        backColour = new Color((int) colourIndex,(int) colourIndex, 255);
+
 		        
 		        if(pct>60){
-		        	l.setForeground(Color.WHITE);
-		        } else {
-		        	l.setForeground(Color.black);
+		        	foreColour = Color.WHITE;
+		        	
 		        }
 		       
 	        }
-//	        } else {
-//	            l.setBackground(Color.LIGHT_GRAY);
-//	        }
+	        
+	        l.setBackground(backColour);
+	        l.setForeground(foreColour);
 
 	      //Return the JLabel which renders the cell.
 	      return l;

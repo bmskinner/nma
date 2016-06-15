@@ -320,7 +320,7 @@ public class CellDatasetCreator implements Loggable {
 		finest("Fetching segment position for each nucleus");
 		for(Nucleus nucleus : dataset.getCollection().getNuclei()){
 
-			nucleus.updateVerticallyRotatedNucleus(); // TODO: forcing an update here because new analyses don't have a proper vertical yet
+//			nucleus.updateVerticallyRotatedNucleus(); // TODO: forcing an update here because new analyses don't have a proper vertical yet
 			Nucleus verticalNucleus = nucleus.getVerticallyRotatedNucleus();
 			finest("Fetched vertical nucleus");
 
