@@ -37,8 +37,8 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 	private ProfileType type;
 		
 		public ProfileDisplayPanel(ProfileType type){
-			super();
-			this.type = type;
+			super(type);
+			
 			
 			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(type);
 			chartPanel.setChart(chart);

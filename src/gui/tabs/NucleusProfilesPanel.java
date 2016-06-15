@@ -65,7 +65,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 		this.addSubPanel(variabilityChartPanel);
 		
 		profilesTabPanel.addTab("Variability", null, variabilityChartPanel, null);
-		profilesTabPanel.addTab("Modality", null, modalityDisplayPanel, null);
+		profilesTabPanel.addTab("Modality"   , null, modalityDisplayPanel, null);
 		this.add(profilesTabPanel, BorderLayout.CENTER);
 
 	}

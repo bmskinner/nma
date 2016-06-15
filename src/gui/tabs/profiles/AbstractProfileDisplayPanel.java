@@ -37,8 +37,8 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 
+import stats.StatisticDimension;
 import components.generic.ProfileType;
-
 import charting.charts.MorphologyChartFactory;
 
 @SuppressWarnings("serial")
@@ -54,8 +54,12 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 		protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
 		protected ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 		
-		public AbstractProfileDisplayPanel(){
+		private ProfileType type;
+		
+		public AbstractProfileDisplayPanel(ProfileType type){
 			super();
+			this.type = type;
+			
 			this.setLayout(new BorderLayout());
 			JFreeChart rawChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
 			chartPanel = makeProfileChartPanel(rawChart);
@@ -97,7 +101,13 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 						Number maximum = DatasetUtilities.findMaximumDomainValue(dataset);
 						length = maximum.intValue() > length ? maximum.intValue() : length;
 					}
-					plot.getRangeAxis().setRange(0, 360);
+					
+					if(type.getDimension().equals(StatisticDimension.ANGLE)){
+						plot.getRangeAxis().setRange(0, 360);
+					} else {
+						plot.getRangeAxis().setAutoRange(true);
+					}
+					
 					plot.getDomainAxis().setRange(0, length);				
 					return;
 				} 
