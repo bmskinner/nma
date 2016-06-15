@@ -32,8 +32,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -46,10 +44,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYTextAnnotation;
-
 import analysis.AnalysisDataset;
 import analysis.RandomSampler;
 import charting.charts.HistogramChartFactory;
@@ -162,7 +157,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		
 		
 		try {
-			chartPanel = new ExportableChartPanel(HistogramChartFactory.createRandomSampleHistogram(resultList));
+			chartPanel = new ExportableChartPanel(HistogramChartFactory.getInstance().createRandomSampleHistogram(resultList));
 			this.add(chartPanel, BorderLayout.CENTER);
 		} catch (Exception e) {
 			log(Level.SEVERE, "Error making chart", e);
@@ -241,9 +236,9 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 
 			JFreeChart chart = null;
 			if(showDensity.isSelected()){
-				chart = HistogramChartFactory.createRandomSampleDensity(resultList);
+				chart = HistogramChartFactory.getInstance().createRandomSampleDensity(resultList);
 			} else {
-				chart = HistogramChartFactory.createRandomSampleHistogram(resultList);
+				chart = HistogramChartFactory.getInstance().createRandomSampleHistogram(resultList);
 			}
 			chartPanel.setChart(chart);
 			setStatusLoaded();
@@ -258,10 +253,10 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		try {
 			if(showDensity.isSelected()){
 
-				chart = HistogramChartFactory.createRandomSampleDensity(resultList);
+				chart = HistogramChartFactory.getInstance().createRandomSampleDensity(resultList);
 
 			} else {
-				chart = HistogramChartFactory.createRandomSampleHistogram(resultList);
+				chart = HistogramChartFactory.getInstance().createRandomSampleHistogram(resultList);
 			}
 		}catch (Exception e) {
 			log(Level.SEVERE, "Error running sampling", e);

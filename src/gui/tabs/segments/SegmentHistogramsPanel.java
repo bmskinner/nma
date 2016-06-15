@@ -34,7 +34,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 	public SegmentHistogramsPanel(){
 		super();
 		
-		JFreeChart chart = HistogramChartFactory.createHistogram(null, "Segment", "Length");		
+		JFreeChart chart = HistogramChartFactory.getInstance().createHistogram(null, "Segment", "Length");		
 		SelectableChartPanel panel = new SelectableChartPanel(chart, "null");
 		panel.setPreferredSize(preferredSize);
 		SegmentHistogramsPanel.this.chartPanels.put("null", panel);
@@ -109,7 +109,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-		JFreeChart chart = HistogramChartFactory.createHistogram(null, "Segment", "Length");		
+		JFreeChart chart = HistogramChartFactory.getInstance().createHistogram(null, "Segment", "Length");		
 		SelectableChartPanel panel = new SelectableChartPanel(chart, "null");
 		panel.setPreferredSize(preferredSize);
 		SegmentHistogramsPanel.this.chartPanels.put("null", panel);

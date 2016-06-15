@@ -23,8 +23,6 @@ import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import stats.SegmentStatistic;
 import stats.SignalStatistic;
-import io.ImageExporter;
-
 import java.awt.Color;
 import java.util.List;
 import java.util.UUID;
@@ -68,7 +66,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * Create an empty boxplot
 	 * @return
 	 */
-	public JFreeChart createEmptyBoxplot(){
+	public JFreeChart makeEmptyChart(){
 		
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, 
 				null, 
@@ -83,7 +81,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	public JFreeChart createStatisticBoxplot(ChartOptions options) {
 		
 		if(!options.hasDatasets()){
-			return createEmptyBoxplot();
+			return makeEmptyChart();
 		}
 		
 		PlottableStatistic stat = options.getStat();
@@ -102,7 +100,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 			return createSegmentBoxplot(options);
 		}
 		
-		return createEmptyBoxplot();
+		return makeEmptyChart();
 		
 	}
 	

@@ -64,7 +64,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		rhoTable.setEnabled(false);
 		tablePanel.add(rhoTable, BorderLayout.CENTER);
 		
-		JFreeChart chart = ScatterChartFactory.getInstance().createEmptyScatterChart();
+		JFreeChart chart = ScatterChartFactory.getInstance().makeEmptyChart();
 		
 		chartPanel = new ExportableChartPanel(chart);
 		this.add(chartPanel, BorderLayout.CENTER);

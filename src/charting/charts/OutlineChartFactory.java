@@ -74,9 +74,7 @@ import charting.datasets.TailDatasetCreator;
 import charting.options.ChartOptions;
 
 public class OutlineChartFactory extends AbstractChartFactory {
-	
-	
-	
+
 	private static OutlineChartFactory instance = null;
 	
 	private OutlineChartFactory(){}
@@ -86,6 +84,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			instance = new OutlineChartFactory();
 		}
 		return instance;
+	}
+	
+	public JFreeChart makeEmptyChart(){
+		return ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
 	}
 	
 	/**
@@ -99,17 +101,17 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 			if( ! options.hasDatasets()){
 				finer("No datasets for signal outline chart");
-				return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+				return makeEmptyChart();
 			}
 			
 			if(options.isMultipleDatasets()){
 				finer("Multiple datasets for signal outline chart");
-				return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+				return makeEmptyChart();
 			}
 			
 			if( ! options.firstDataset().getCollection().hasConsensusNucleus()){
 				finer("No consensus for signal outline chart");
-				return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+				return makeEmptyChart();
 			}
 			
 			if(options.isShowWarp()){
@@ -229,7 +231,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		if(options.getCell()==null || !options.hasDatasets()){
 			fine("No datasets or active cell");
-			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+			return makeEmptyChart();
 		}
 		
 		try {
@@ -250,7 +252,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					return createMeshChart(result, 0.5, options);
 	
 				} else {
-					return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+					return makeEmptyChart();
 	
 				} 
 				
@@ -292,7 +294,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					return OutlineChartFactory.drawImageAsAnnotation(ip);
 	
 				} else {
-					return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+					return makeEmptyChart();
 				}
 			}
 			
@@ -321,7 +323,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		if(cell==null){
 			finest("No cell to draw");
-			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+			return ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
 		}
 		
 		JFreeChart chart = 
@@ -693,11 +695,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createVerticalNucleiChart(ChartOptions options) throws Exception{
+	public JFreeChart createVerticalNucleiChart(ChartOptions options) throws Exception{
 		
 		if( ! options.hasDatasets()){
 			options.log(Level.FINEST, "No datasets - returning empty chart");
-			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+			return makeEmptyChart();
 		}
 		
 		if(options.isMultipleDatasets()){
@@ -716,7 +718,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private static JFreeChart createSingleDatasetVerticalNucleiChart(ChartOptions options) throws Exception{
+	private JFreeChart createSingleDatasetVerticalNucleiChart(ChartOptions options) throws Exception{
 		
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -828,7 +830,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private static JFreeChart createMultipleDatasetVerticalNucleiChart(ChartOptions options) throws Exception{
+	private JFreeChart createMultipleDatasetVerticalNucleiChart(ChartOptions options) throws Exception{
 		
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -878,7 +880,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createMeshChart(NucleusMesh mesh, double log2Ratio, ChartOptions options) throws Exception{
+	public JFreeChart createMeshChart(NucleusMesh mesh, double log2Ratio, ChartOptions options) throws Exception{
 		
 		NucleusMeshXYDataset dataset = NucleusDatasetCreator.getInstance().createNucleusMeshEdgeDataset(mesh);
 
@@ -981,7 +983,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param maxRatio
 	 * @return
 	 */
-	private static Color getGradientColour(double ratio, double maxRatio){
+	private Color getGradientColour(double ratio, double maxRatio){
 			
 		double log2Min = -maxRatio;
 		double log2Max = maxRatio;
@@ -1032,10 +1034,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createMeshHistogram(NucleusMesh mesh) throws Exception{
+	public JFreeChart createMeshHistogram(NucleusMesh mesh) throws Exception{
 
 		HistogramDataset ds = NucleusDatasetCreator.getInstance().createNucleusMeshHistogramDataset(mesh);
-		JFreeChart chart = HistogramChartFactory.createHistogram(ds, "Log2 ratio", "Number of edges");
+		JFreeChart chart = HistogramChartFactory.getInstance().createHistogram(ds, "Log2 ratio", "Number of edges");
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.addDomainMarker(new ValueMarker(0, Color.BLACK, ChartComponents.PROFILE_STROKE));

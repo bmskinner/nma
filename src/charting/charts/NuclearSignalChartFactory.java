@@ -37,6 +37,10 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 		return instance;
 	}
 	
+	public JFreeChart makeEmptyChart(){
+		return ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
+	}
+	
 	private JFreeChart createEmptyShellChart(){
 		JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
 		shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
@@ -89,19 +93,19 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 		
 		if( ! options.hasDatasets()){
 			finer("No datasets for signal outline chart");
-			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+			return makeEmptyChart();
 		}
 		
 		// Do not allow multi datasets here
 		if( options.isMultipleDatasets()){
 			finer("Multiple datasets for signal outline chart");
-			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+			return makeEmptyChart();
 		}
 		
 		// Check for consensus nucleus
 		if( ! options.firstDataset().getCollection().hasConsensusNucleus()){
 			finer("No consensus for signal outline chart");
-			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+			return makeEmptyChart();
 		}
 		
 		

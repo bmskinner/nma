@@ -66,24 +66,10 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * and consensus chart panels
 	 * @return
 	 */
-	public JFreeChart makeEmptyNucleusOutlineChart(){
+	public JFreeChart makeEmptyChart(){
 		return makeConsensusChart( (XYDataset) null);
 	}
 	
-	public JFreeChart makeErrorNucleusOutlineChart(){
-		JFreeChart chart = makeConsensusChart( (XYDataset) null);
-
-		
-		for(int i=-100 ; i<=100; i+=20){
-			for(int j=-100 ; j<=100; j+=20){
-				XYTextAnnotation annotation = new XYTextAnnotation("Error creating chart", i, j);
-				annotation.setPaint(Color.BLACK);
-				((XYPlot) chart.getPlot()).addAnnotation(annotation);
-			}
-		}
-		
-		return chart;
-	}
 	
 	/**
 	 * Test if any of the datasets have a consensus nucleus folded
@@ -147,7 +133,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	public JFreeChart makeNucleusOutlineChart(AnalysisDataset dataset){
 		
 		if( ! dataset.getCollection().hasConsensusNucleus()){
-			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+			return makeEmptyChart();
 		}
 
 		XYDataset ds = NucleusDatasetCreator.getInstance().createBareNucleusOutline(dataset);
@@ -214,7 +200,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	private JFreeChart makeSegmentedConsensusChart(AnalysisDataset dataset) throws Exception {
 		
 		if( ! dataset.getCollection().hasConsensusNucleus()){
-			return makeEmptyNucleusOutlineChart();
+			return makeEmptyChart();
 		}
 		XYDataset ds = null;
 		
@@ -339,7 +325,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		
 		if(! options.hasDatasets()){
 			finest("No datasets: creating empty consensus chart");
-			return makeEmptyNucleusOutlineChart();
+			return makeEmptyChart();
 		}
 		
 		if(options.isMultipleDatasets()){
@@ -356,7 +342,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 				return makeMultipleConsensusChart(options.getDatasets());
 			} else {
 				finest("No dataset with consensus: creating empty consensus chart");
-				return makeEmptyNucleusOutlineChart();
+				return makeEmptyChart();
 			}
 		}
 		
@@ -368,7 +354,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 				NucleusMesh mesh = new NucleusMesh(options.firstDataset()
 						.getCollection()
 						.getConsensusNucleus(), options.getMeshSize());
-				return OutlineChartFactory.createMeshChart(mesh, 0.5, options);
+				return OutlineChartFactory.getInstance().createMeshChart(mesh, 0.5, options);
 				
 			} else {
 				return makeSegmentedConsensusChart(options.firstDataset());
@@ -377,7 +363,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			
 		}
 		finest("Options failed to match: creating empty consensus chart");
-		return makeEmptyNucleusOutlineChart();
+		return makeEmptyChart();
 	}
 
 }

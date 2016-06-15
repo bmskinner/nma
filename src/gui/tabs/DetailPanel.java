@@ -318,7 +318,7 @@ public abstract class DetailPanel
 				log(Level.FINE, this.getClass().getName()+" Error creating chart", e);
 				
 				// Draw an empty chart to fill the space
-				chart = ScatterChartFactory.getInstance().createEmptyScatterChart();
+				chart = ScatterChartFactory.getInstance().makeEmptyChart();
 			}
 			getChartCache().addChart(options, chart);
 			finest("Added cached chart");

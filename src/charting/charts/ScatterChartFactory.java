@@ -1,3 +1,23 @@
+/*******************************************************************************
+ *  	Copyright (C) 2015, 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details. Gluten-free. May contain 
+ *     traces of LDL asbestos. Avoid children using heavy machinery while under the
+ *     influence of alcohol.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 package charting.charts;
 
 import java.awt.Color;
@@ -15,7 +35,6 @@ import charting.ChartComponents;
 import charting.datasets.ScatterChartDatasetCreator;
 import charting.options.ChartOptions;
 import gui.components.ColourSelecter;
-import gui.components.ColourSelecter.ColourSwatch;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import stats.SignalStatistic;
@@ -41,7 +60,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 * Create a blank scatter chart
 	 * @return
 	 */
-	public JFreeChart createEmptyScatterChart(){
+	public JFreeChart makeEmptyChart(){
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				null, null, null); 
 		chart.getXYPlot().setBackgroundPaint(Color.WHITE);
@@ -56,11 +75,11 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	public JFreeChart createScatterChart(ChartOptions options){
 		
 		if( ! options.hasDatasets()){
-			return createEmptyScatterChart();
+			return makeEmptyChart();
 		}
 		
 		if(options.getStats().size()!=2){
-			return createEmptyScatterChart();
+			return makeEmptyChart();
 		}
 		
 		PlottableStatistic firstStat = options.getStat();
@@ -68,7 +87,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 		for(PlottableStatistic stat : options.getStats()){
 			if( ! stat.getClass().equals(firstStat.getClass())){
 				fine("Statistic classes are different");
-				return createEmptyScatterChart();
+				return makeEmptyChart();
 			}
 		}
 		
@@ -80,7 +99,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			return createSignalStatisticScatterChart(options);
 		}
 		
-		return createEmptyScatterChart();
+		return makeEmptyChart();
 	}
 	
 	

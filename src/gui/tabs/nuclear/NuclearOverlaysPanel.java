@@ -240,7 +240,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		finest("Creating nuclear overlay chart");
-		return OutlineChartFactory.createVerticalNucleiChart(options);
+		return OutlineChartFactory.getInstance().createVerticalNucleiChart(options);
 	}
 	
 	

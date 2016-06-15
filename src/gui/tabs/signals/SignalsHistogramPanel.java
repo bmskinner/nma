@@ -53,7 +53,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 					.setSignalGroup(null)
 					.build();
 				
-				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createStatisticHistogram(options), stat.toString());
+				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.getInstance().createStatisticHistogram(options), stat.toString());
 				panel.setPreferredSize(preferredSize);
 				panel.addSignalChangeListener(this);
 				chartPanels.put(stat.toString(), panel);

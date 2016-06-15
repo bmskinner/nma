@@ -49,6 +49,21 @@ import analysis.AnalysisDataset;
 
 public class HistogramChartFactory extends AbstractChartFactory {
 
+	private static HistogramChartFactory instance = null;
+
+	protected HistogramChartFactory(){}
+
+	/**
+	 * Fetch an instance of the factory
+	 * @return
+	 */
+	public static HistogramChartFactory getInstance(){
+		if(instance==null){
+			instance = new HistogramChartFactory();
+		}
+		return instance;
+	}
+	
 	/**
 	 * Create a histogram from a histogram dataset and
 	 * apply basic formatting
@@ -57,10 +72,9 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @param yLabel the label of the y axis
 	 * @return a chart
 	 */
-	public static JFreeChart createEmptyHistogram(){
+	public JFreeChart makeEmptyChart(){
 		
 		JFreeChart chart = ChartFactory.createHistogram(null, null, null, null, PlotOrientation.VERTICAL, true, true, true);
-		
 		
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.white);
@@ -79,7 +93,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @param yLabel the label of the y axis
 	 * @return a chart
 	 */
-	public static JFreeChart createHistogram(HistogramDataset ds, String xLabel, String yLabel){
+	public JFreeChart createHistogram(HistogramDataset ds, String xLabel, String yLabel){
 		
 		JFreeChart chart = ChartFactory.createHistogram(null, xLabel, yLabel, ds, PlotOrientation.VERTICAL, true, true, true);
 		
@@ -98,10 +112,10 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 	
-	public static JFreeChart createStatisticHistogram(ChartOptions options) throws Exception{
+	public JFreeChart createStatisticHistogram(ChartOptions options) throws Exception{
 		
 		if(!options.hasDatasets()){
-			return createEmptyHistogram();
+			return makeEmptyChart();
 		}
 		
 		PlottableStatistic stat = options.getStat();
@@ -118,7 +132,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 			return createSegmentStatisticHistogram(options);
 		}
 		
-		return createEmptyHistogram();
+		return makeEmptyChart();
 		
 	}
 	
@@ -128,7 +142,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JFreeChart createRandomSampleHistogram(List<Double> list) throws Exception{
+	public JFreeChart createRandomSampleHistogram(List<Double> list) throws Exception{
 		HistogramDataset ds = NuclearHistogramDatasetCreator.getInstance().createHistogramDatasetFromList(list);
 		JFreeChart chart = createHistogram(ds, "Magnitude difference between populations", "Observed instances");
 		
@@ -142,7 +156,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JFreeChart createRandomSampleDensity(List<Double> list) throws Exception{
+	public JFreeChart createRandomSampleDensity(List<Double> list) throws Exception{
 		XYDataset ds = NuclearHistogramDatasetCreator.getInstance().createDensityDatasetFromList(list, 0.0001);
 		String xLabel = "Magnitude difference between populations";
 		JFreeChart chart = 
@@ -172,7 +186,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private static JFreeChart createSignalStatisticHistogram(ChartOptions options) throws Exception{
+	private JFreeChart createSignalStatisticHistogram(ChartOptions options) throws Exception{
 		
 		if(options.isUseDensity()){
 			return createSignalDensityStatsChart(options);
@@ -204,7 +218,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private static JFreeChart createSignalDensityStatsChart(ChartOptions options) throws Exception{
+	private JFreeChart createSignalDensityStatsChart(ChartOptions options) throws Exception{
 	
 		DefaultXYDataset ds = null;
 		
@@ -259,7 +273,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	}
 	
 	
-	private static void setSeriesPropertiesForSignalHistogram(JFreeChart chart, AnalysisDataset dataset){
+	private void setSeriesPropertiesForSignalHistogram(JFreeChart chart, AnalysisDataset dataset){
 		
 		if(dataset.getCollection().getSignalManager().hasSignals()){
 			XYPlot plot = chart.getXYPlot();
@@ -288,10 +302,14 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @param xLabel the x axis label
 	 * @return
 	 */
-	private static JFreeChart createNuclearStatsHistogram(ChartOptions options) throws Exception{
+	private JFreeChart createNuclearStatsHistogram(ChartOptions options) throws Exception{
 
 		if(options.isUseDensity()){
 			return createNuclearDensityStatsChart(options);
+		}
+		
+		if( ! options.hasDatasets()){
+			return makeEmptyChart();
 		}
 		
 		HistogramDataset ds = null;
@@ -353,7 +371,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private static JFreeChart createNuclearDensityStatsChart(ChartOptions options) throws Exception{
+	private JFreeChart createNuclearDensityStatsChart(ChartOptions options) throws Exception{
 	
 		DefaultXYDataset ds = null;
 		
@@ -413,7 +431,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @param segName the segment to plot
 	 * @return
 	 */
-	private static JFreeChart createSegmentStatisticHistogram(ChartOptions options) throws Exception{
+	private JFreeChart createSegmentStatisticHistogram(ChartOptions options) throws Exception{
 
 		if(options.isUseDensity()){
 			return createSegmentLengthDensityChart(options);
@@ -426,7 +444,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		}
 		
 		
-		options.log(Level.FINER, "Creating histogram for Seg_"+options.getSegPosition());
+		finer("Creating histogram for Seg_"+options.getSegPosition());
 		
 		
 		JFreeChart chart = createHistogram(ds, "Seg_"+options.getSegPosition()+" length ("+options.getScale()+")", "Nuclei" );
@@ -475,7 +493,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private static JFreeChart createSegmentLengthDensityChart(ChartOptions options) throws Exception{
+	private JFreeChart createSegmentLengthDensityChart(ChartOptions options) throws Exception{
 		
 		DefaultXYDataset ds = null;
 		
@@ -533,7 +551,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @param plot
 	 * @param ds
 	 */
-	private static void setDomainRange(XYPlot plot, XYDataset ds){
+	private void setDomainRange(XYPlot plot, XYDataset ds){
 		Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
 		Number minX = DatasetUtilities.findMinimumDomainValue(ds);
 		if(maxX.doubleValue()>minX.doubleValue()){ // stop if 0 and 0

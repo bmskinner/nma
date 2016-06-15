@@ -100,7 +100,7 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
-		return HistogramChartFactory.createStatisticHistogram(options);
+		return HistogramChartFactory.getInstance().createStatisticHistogram(options);
 	}
 	
 	@Override

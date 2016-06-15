@@ -78,6 +78,15 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		return instance;
 	}
 	
+	
+	/**
+	 * Create an empty chart
+	 * @return
+	 */
+	public JFreeChart makeEmptyChart(){
+		return makeEmptyProfileChart(ProfileType.REGULAR);
+	}
+	
 	/**
 	 * Create an empty chart to display when no datasets are selected
 	 * @return a chart
@@ -594,7 +603,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		if(positionDataset == null || nuclearOutlines == null){
 			// a null dataset is returned if segment counts do not match
-			return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+			return ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
 		}
 		
 		
@@ -676,7 +685,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		if(  options.hasDatasets()){
 			return  makeMultiSegmentStartPositionChart(options);
 		}
-		return ConsensusNucleusChartFactory.getInstance().makeEmptyNucleusOutlineChart();
+		return ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
 	}
 	
 		
