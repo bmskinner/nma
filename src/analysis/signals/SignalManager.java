@@ -32,6 +32,7 @@ import components.generic.MeasurementScale;
 import components.nuclear.NuclearSignal;
 import components.nuclear.SignalGroup;
 import components.nuclei.Nucleus;
+import logging.Loggable;
 import stats.SignalStatistic;
 import stats.StatisticDimension;
 import stats.Stats;
@@ -44,7 +45,7 @@ import utility.Utils;
  * @author bms41
  *
  */
-public class SignalManager {
+public class SignalManager implements Loggable{
 	
 	private CellCollection collection;
 	
@@ -108,6 +109,10 @@ public class SignalManager {
 	   */
 	  public Set<UUID> getSignalGroupIDs(){
 	      return collection.getSignalGroupIDs();
+	  }
+	  
+	  public void removeSignalGroup(UUID id){
+		  collection.removeSignalGroup(id);
 	  }
 	  
 	  /**
@@ -195,6 +200,20 @@ public class SignalManager {
 	  }
 
 	  /**
+	   * Get the mean number of signals in each nucleus
+	   * @param signalGroup
+	   * @return
+	   */
+	  public double getSignalCountPerNucleus(UUID signalGroup){
+		  if(getSignalCount(signalGroup)==0){
+			  return 0;
+		  }
+
+		  return (double) getSignalCount(signalGroup) / (double) getNumberOfCellsWithNuclearSignals(signalGroup);
+	  }
+		
+
+	  /**
 	   * Test whether the current population has signals in any channel
 	   * @return
 	   */
@@ -265,10 +284,22 @@ public class SignalManager {
            */
           if(stat.getDimension().equals(StatisticDimension.ANGLE)){
               values = getOffsetSignalAngles(signalGroup);
+              
+              if(values.length==0){
+            	  fine("No signals detected in group for "+stat);
+            	  return 0;
+              }
+              
               median = Stats.quartile(values, Constants.MEDIAN);
               median += getMeanSignalAngle(signalGroup);
           } else {
               values = this.getSignalStatistics(stat, scale, signalGroup);
+              
+              if(values.length==0){
+            	  fine("No signals detected in group for "+stat);
+            	  return 0;
+              }
+              
               median =  Stats.quartile(values, Constants.MEDIAN);
           }
           
@@ -328,6 +359,10 @@ public class SignalManager {
     public double[] getOffsetSignalAngles(UUID signalGroup) {
 
           double[] values = getSignalStatistics(SignalStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup); 
+                    
+          if(values.length==0){
+        	  return new double[0];
+          }
           
           /*
            * The mean is the actual mean of the series of signal angles, with correction for wrapping.

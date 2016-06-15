@@ -634,20 +634,27 @@ public class NuclearSignalDatasetCreator implements Loggable {
 					rowData.add(signalGroupCount);
 	
 					for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){// : collection.getSignalGroups()){
-//						if(collection.getSignalManager().hasSignals(signalGroup)){
+						
+						if(collection.getSignalManager().getSignalCount(signalGroup)==0){ // Signal group has no signals
+							for(int j = 0; j<numberOfRowsPerSignalGroup;j++){ // Make a blank block of cells
+								rowData.add("");
+							}
+							continue;
+						}
+
 						SignalTableCell cell = new SignalTableCell(signalGroup, 
 								collection.getSignalManager().getSignalGroupName(signalGroup));
 						
 						Color colour = collection.getSignalGroup(signalGroup).hasColour()
-	                            ? collection.getSignalGroup(signalGroup).getGroupColour()
-	                            : Color.WHITE;
+	                                 ? collection.getSignalGroup(signalGroup).getGroupColour()
+	                                 : Color.WHITE;
 	                    
 	                    cell.setColor(colour);
 						
 							rowData.add("");
 							rowData.add(cell);
 							rowData.add(collection.getSignalManager().getSignalCount(signalGroup));
-							double signalPerNucleus = (double) collection.getSignalManager().getSignalCount(signalGroup)/  (double) collection.getSignalManager().getNumberOfCellsWithNuclearSignals(signalGroup);
+							double signalPerNucleus = collection.getSignalManager().getSignalCountPerNucleus(signalGroup);
 							rowData.add(df.format(signalPerNucleus));
 							
 							for(SignalStatistic stat : SignalStatistic.values()){
@@ -662,12 +669,6 @@ public class NuclearSignalDatasetCreator implements Loggable {
 								}
 							}
 							
-//						} else {
-//							
-//							for(int i = 0; i<numberOfRowsPerSignalGroup;i++){
-//								rowData.add("");
-//							}
-//						}
 					}
 					
 					if(signalGroupCount < maxSignalGroup){
@@ -678,8 +679,6 @@ public class NuclearSignalDatasetCreator implements Loggable {
 								rowData.add("");
 							}
 						}
-//							rowData.add("");
-//						}
 						
 					}
 					model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel

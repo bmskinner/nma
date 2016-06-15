@@ -30,13 +30,14 @@ public class SignalTableCellRenderer extends ConsistentRowTableCellRenderer {
 			String nextRowHeader = table.getModel().getValueAt(nextRow, 0).toString();
 
 			if(nextRowHeader.equals("Signal group")){
-				// we want to colour this cell preemptively
-				// get the signal table cell from the table
 				
-				if( ! table.getModel().getValueAt(nextRow, column).toString().equals("")){
-					SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(nextRow, column);
+				// Check if the signal block has a signal group by looking at the next row
+				if(table.getModel().getValueAt(nextRow, column) != null){
+					if( ! table.getModel().getValueAt(nextRow, column).toString().equals("")){
+						SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(nextRow, column);
 
-					colour = cell.getColor();
+						colour = cell.getColor();
+					}
 				}
 				
 				

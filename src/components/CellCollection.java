@@ -944,6 +944,14 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
   public void addSignalGroup(UUID id, SignalGroup group){
       this.signalGroups.put(id, group);
   }
+  
+  /**
+   * Remove the given group
+   * @param id
+   */
+  public void removeSignalGroup(UUID id){
+	  this.signalGroups.remove(id);
+  }
 
 
 

@@ -33,9 +33,11 @@ import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
+import logging.Loggable;
 import utility.Utils;
 
- public class Stats {
+ public class Stats implements Loggable {
 	 
 	 public static final double LOG2 = Math.log(2);
 	 public static final String NULL_OR_EMPTY_ARRAY_ERROR = "The data array either is null or does not contain any data.";
@@ -46,7 +48,7 @@ import utility.Utils;
   public static double quartile(double[] values, double lowerPercent) {
 
       if (values == null || values.length == 0) {
-          throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+    	  throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
       }
 
       if(values.length==1){
@@ -203,6 +205,18 @@ import utility.Utils;
    * @return
    */
   public static double getSpearmansCorrelation(double[] x, double[] y){
+	  
+	  if (x == null || x.length == 0) {
+		  throw new IllegalArgumentException("x:"+NULL_OR_EMPTY_ARRAY_ERROR);
+	  }
+	  
+	  if (y == null || y.length == 0) {
+		  throw new IllegalArgumentException("y:"+NULL_OR_EMPTY_ARRAY_ERROR);
+	  }
+	  
+	  if(x.length != y.length){
+		  throw new IllegalArgumentException("Input arrays have different lengths"); 
+	  }
 	  SpearmansCorrelation sp = new SpearmansCorrelation();
 	  return sp.correlation(x, y);
 

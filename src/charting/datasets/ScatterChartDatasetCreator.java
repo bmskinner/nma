@@ -271,7 +271,14 @@ private static ScatterChartDatasetCreator instance = null;
 
 				}
 				names.add(c.getName()+"_"+m.getSignalGroupName(id));
-				rho.add( df.format( Stats.getSpearmansCorrelation(xpoints, ypoints)) );
+				
+				double rhoValue = 0;
+				
+				if(xpoints.length>0){ // If a collection has signal group, but not signals
+					rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
+				}
+				
+				rho.add( df.format( rhoValue ) );
 			}
 
 			

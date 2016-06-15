@@ -85,10 +85,10 @@ public class ClusterAnalysisAction extends ProgressableAction {
 			CellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
 
 			if(c.hasCells()){
-				log(Level.FINEST, "Cluster "+cluster+": "+c.getName());
+				finest("Cluster "+cluster+": "+c.getName());
 				
 				try {
-					log(Level.FINE, "Copying profiles to cluster");
+					fine("Copying profiles to cluster");
 					dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
 				} catch (Exception e) {
 					logError("Error copying segments to cluster "+c.getName(), e);
@@ -97,6 +97,12 @@ public class ClusterAnalysisAction extends ProgressableAction {
 				//Copy signal groups
 				for(UUID id  : dataset.getCollection().getSignalGroupIDs()){
 					c.addSignalGroup(id, new SignalGroup(dataset.getCollection().getSignalGroup(id)));
+					finest("Removing signal groups with no signals");
+					if(c.getSignalManager().getSignalCount(id)==0){ // Signal group has no signals
+						c.removeSignalGroup(id);
+						finest("Removed signal group "+id.toString());
+					}
+					
 				}
 				
 				

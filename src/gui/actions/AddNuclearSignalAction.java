@@ -93,7 +93,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		flag |= MainWindow.ADD_POPULATION;
 		fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
 		new RunSegmentationAction(list, dataset, flag, mw);
-//		fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+
 		cancel();
 	}
 
@@ -108,6 +108,13 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
 
 		log("Sub-population: "+collection.getNucleusCount()+" nuclei");
+		
+		for(UUID signalGroup : collection.getSignalGroupIDs()){// : collection.getSignalGroups()){
+			
+			if(collection.getSignalManager().getSignalCount(signalGroup)==0){ // Signal group has no signals
+				collection.removeSignalGroup(signalGroup);
+			}
+		}
 
 		dataset.addChildDataset(subDataset);
 	}
