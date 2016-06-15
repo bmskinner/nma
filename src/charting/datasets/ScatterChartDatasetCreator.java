@@ -135,7 +135,7 @@ private static ScatterChartDatasetCreator instance = null;
 
 		Vector<Object> names 	= new Vector<Object>();
 		Vector<Object> rho   	= new Vector<Object>();
-
+		Vector<Object> pValue  	= new Vector<Object>();
 
 		List<AnalysisDataset> datasets = options.getDatasets();
 
@@ -166,13 +166,17 @@ private static ScatterChartDatasetCreator instance = null;
 			}
 			names.add(c.getName());
 			
+			double rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
+			rho.add( df.format( rhoValue ));
 			
-			rho.add( df.format( Stats.getSpearmansCorrelation(xpoints, ypoints)) );
+//			double p = Stats.getSpearmanPValue(rhoValue, cells.size());
+//			pValue.add( df.format( p ));
 		}
 
 
 		model.addColumn("Dataset", names);
 		model.addColumn("Spearman's Rho", rho);
+//		model.addColumn("p", pValue);
 		return model;
 
 	}
@@ -235,6 +239,7 @@ private static ScatterChartDatasetCreator instance = null;
 
 		Vector<Object> names 	= new Vector<Object>();
 		Vector<Object> rho   	= new Vector<Object>();
+		Vector<Object> pValue  	= new Vector<Object>();
 
 
 		List<AnalysisDataset> datasets = options.getDatasets();
@@ -273,12 +278,15 @@ private static ScatterChartDatasetCreator instance = null;
 				names.add(c.getName()+"_"+m.getSignalGroupName(id));
 				
 				double rhoValue = 0;
+//				double p        = 0;
 				
 				if(xpoints.length>0){ // If a collection has signal group, but not signals
 					rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
+//					p = Stats.getSpearmanPValue(rhoValue, list.size());
 				}
 				
 				rho.add( df.format( rhoValue ) );
+//				pValue.add( df.format( p ));
 			}
 
 			
@@ -286,6 +294,7 @@ private static ScatterChartDatasetCreator instance = null;
 
 		model.addColumn("Dataset", names);
 		model.addColumn("Spearman's Rho", rho);
+//		model.addColumn("p", pValue);
 		return model;
 
 	}

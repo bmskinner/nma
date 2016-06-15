@@ -221,6 +221,27 @@ import utility.Utils;
 	  return sp.correlation(x, y);
 
   }
+  
+  public static double getSpearmanPValue(double r, double n){
+	  double t = getTStatistic(r, n);
+	  TDistribution tDist = new TDistribution(n - 1);
+	  return tDist.probability(t);
+  } 
+  
+  /**
+   * Get the t-statistic for a Spearman's rho at a given sample size
+   * @param r
+   * @param n
+   * @return
+   */
+  public static double getTStatistic(double r, double n){
+	  // t =  r * sqrt( n-2 / 1-r^2   )
+
+	  double t = r * Math.sqrt(  ( (n-2) / (1- (r*r)) )  );
+	  
+	  return t;
+
+  }
 
  }
   

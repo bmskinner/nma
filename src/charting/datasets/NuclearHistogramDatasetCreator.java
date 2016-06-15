@@ -69,43 +69,19 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 
 			for(AnalysisDataset dataset : options.getDatasets()){
 
-				
-//					options.log(Level.FINEST, "  Dataset: "+dataset.getName());
-				
-
 				CellCollection collection = dataset.getCollection();
 
-				
-//					options.log(Level.FINEST, "  Stat: "+options.getStat().toString()+"; Scale: "+options.getScale().toString());
-				
-				
+
 				NucleusStatistic stat = (NucleusStatistic) options.getStat();
-				double[] values = findDatasetValues(dataset, stat, options.getScale()); 
+				double[] values = collection.getNuclearStatistics(stat, options.getScale());
+				
+				double[] minMaxStep = findMinAndMaxForHistogram(values);
+				int minRounded = (int) minMaxStep[0];
+				int maxRounded = (int) minMaxStep[1];
+
+				int bins = findBinSizeForHistogram(values, minMaxStep);
 
 				String groupLabel = options.getStat().toString();
-
-				double min = Arrays.stream(values).min().orElse(0); //Stats.min(values);
-				double max = Arrays.stream(values).max().orElse(0); //Stats.max(values);
-
-//				options.log(Level.FINEST, "  Min: "+min+"; max: "+max);
-
-				int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
-
-				int roundLog = log-1 == 0 ? log-2 : log-1;
-				double roundAbs = Math.pow(10, roundLog);
-
-				// use int truncation to round to nearest 100 above max
-				int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
-				maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
-				int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
-				minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
-				minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
-
-
-//				options.log(Level.FINEST, "  Rounded min: "+minRounded+"; max: "+maxRounded);
-
-
-				int bins = 100;
 
 				ds.addSeries(groupLabel+"_"+collection.getName(), values, bins, minRounded, maxRounded );
 			}
@@ -113,37 +89,42 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 //		options.log(Level.FINEST, "Completed histogram dataset");
 		return ds;
 	}
-	
-	/**
-	 * Given a dataset and a stats parameter, get the values for that stat
-	 * @param dataset the Analysis Dataset
-	 * @param stat the statistic to fetch
-	 * @param scale the scale to display at
-	 * @return the array of values
-	 * @throws Exception
-	 */
-	public double[] findDatasetValues(AnalysisDataset dataset, NucleusStatistic stat, MeasurementScale scale) throws Exception {
 		
-		CellCollection collection = dataset.getCollection();			
-		double[] values = collection.getNuclearStatistics(stat, scale); 			
-		return values;
-	}
-	
-	
 	private double[] findMinAndMaxForHistogram(double[] values){
 		double min = Arrays.stream(values).min().orElse(0); //Stats.min(values);
 		double max = Arrays.stream(values).max().orElse(0); //Stats.max(values);
 
 		int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
 		
-		int roundLog = log-1 == 0 ? log-2 : log-1;
-		double roundAbs = Math.pow(10, roundLog);
+		int roundLog = log-1 == 0 ? log-2 : log-1; // get the nearest log value that is not zero
+		double roundAbs = Math.pow(10, roundLog); // find the absolute value of the log
 		
-		int binLog = log-2;
-		double stepSize = Math.pow(10, binLog);
+		int binLog = log-2; // get a value for the bin sizes that is 1/100 of the main log
+		double stepSize = Math.pow(10, binLog); // turn the log into an absolute step size
 		
-//		IJ.log("   roundLog: "+roundLog);
-//		IJ.log("   round to nearest: "+roundAbs);
+		finest("Range finding: binLog: "+binLog+"; step: "+stepSize);
+		// If stepsize is < 1 for stats that increment in steps of 1, we will get blanks in the histogram
+		// Correct based on the stat.
+		if(stepSize<=1){
+			
+			// Only worry if there are non integer values in the array
+			boolean isInteger = true;
+			for(double value : values){
+				// Check is an integer equivalent
+				if (   value != Math.floor(value)) {
+					isInteger = false;
+				}
+			}
+			
+			if(isInteger){
+				finest("Detected integer only values: setting histogram step size to 1");
+				stepSize=1;
+			} else {
+				finest("Non-integer values: setting histogram step size to "+stepSize);
+			}
+			
+		}
+		
 		
 		// use int truncation to round to nearest 100 above max
 		int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
@@ -157,6 +138,22 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 		result[1] = maxRounded;
 		result[2] = stepSize;
 		return result;
+	}
+	
+	private int findBinSizeForHistogram(double[] values, double[] minMaxStep){
+
+		int minRounded = (int) minMaxStep[0];
+		int maxRounded = (int) minMaxStep[1];
+		double stepSize= minMaxStep[2];
+		
+		int bins = (int) (( (double) maxRounded - (double) minRounded) / stepSize);
+		
+		if(stepSize == 1d){
+			bins = maxRounded - minRounded; // set integer steps directly
+		}
+		
+		bins = bins>100 ? 100 : bins; // but don't have too many bins
+		return bins;
 	}
 	
 	/**
@@ -175,33 +172,11 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			CellCollection collection = dataset.getCollection();
 			
 			String groupLabel = stat.toString();
-			double[] values = findDatasetValues(dataset, stat, scale); 
+			double[] values = collection.getNuclearStatistics(stat, scale);
 			KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(values, 0.001);
 	
 			
 			double[] minMax = findMinAndMaxForHistogram(values);
-//			double min = Stats.min(values);
-//			double max = Stats.max(values);
-//
-//			int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
-//			
-//			int roundLog = log-1 == 0 ? log-2 : log-1;
-//			double roundAbs = Math.pow(10, roundLog);
-//			
-//			int binLog = log-2;
-//			double stepSize = Math.pow(10, binLog);
-//			
-////			IJ.log("   roundLog: "+roundLog);
-////			IJ.log("   round to nearest: "+roundAbs);
-//			
-//			// use int truncation to round to nearest 100 above max
-//			int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
-//			maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
-//			int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
-//			minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
-//			minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
-//	
-			
 
 			List<Double> xValues = new ArrayList<Double>();
 			List<Double> yValues = new ArrayList<Double>();
@@ -215,26 +190,6 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			}
 			double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
 					Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
-
-
-			/*
-			 * TODO: test this works
-			 */
-			//			int numberOfPoints = (minMaxRange[1] - minMaxRange[0]) / (int) minMax[STEP_SIZE];
-			//			
-			//			double[] xvalues = new double[numberOfPoints];
-			//			double[] yvalues = new double[numberOfPoints];
-			//
-			//			for(int i=0; i<xvalues.length; i++){	
-			//				
-			//				double position = minMaxRange[0] + (minMax[STEP_SIZE] * i);
-			//				
-			//				xvalues[i] = position;
-			//				yvalues[i] = est.getProbability(position);
-			//
-			//			}
-			//			
-			//			double[][] data = { xvalues, yvalues };
 
 
 			ds.addSeries(groupLabel+"_"+collection.getName(), data);
@@ -259,7 +214,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 
 		for(AnalysisDataset dataset : list){
 			
-			double[] values = findDatasetValues(dataset, stat, scale); 
+			double[] values = dataset.getCollection().getNuclearStatistics(stat, scale);
 			
 			updateMinMaxRange(result, values);
 		}
@@ -327,35 +282,17 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			 * Use the segment id for this collection to fetch the individual nucleus segments
 			 */
 			
-			double[] lengths = collection.getSegmentStatistics(SegmentStatistic.LENGTH, 
+			double[] values = collection.getSegmentStatistics(SegmentStatistic.LENGTH, 
 					options.getScale(), 
 					medianSeg.getID());
 			
-			double min = Arrays.stream(lengths).min().orElse(0); //Stats.min(values);
-			double max = Arrays.stream(lengths).max().orElse(0); //Stats.max(values);
+			double[] minMaxStep = findMinAndMaxForHistogram(values);
+			int minRounded = (int) minMaxStep[0];
+			int maxRounded = (int) minMaxStep[1];
 
+			int bins = findBinSizeForHistogram(values, minMaxStep);
 
-//			options.log(Level.FINEST, "  Min: "+min+"; max: "+max);
-
-
-			int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
-
-			int roundLog = log-1 == 0 ? log-2 : log-1;
-			double roundAbs = Math.pow(10, roundLog);
-
-			// use int truncation to round to nearest 100 above max
-			int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
-			maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
-			int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
-			minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
-			minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
-
-//				options.log(Level.FINEST, "  Rounded min: "+minRounded+"; max: "+maxRounded);
-
-
-			int bins = 100;
-
-			ds.addSeries(Constants.SEGMENT_PREFIX+options.getSegPosition()+"_"+collection.getName(), lengths, bins, minRounded, maxRounded );
+			ds.addSeries(Constants.SEGMENT_PREFIX+options.getSegPosition()+"_"+collection.getName(), values, bins, minRounded, maxRounded );
 		}
 
 		options.log(Level.FINEST, "Completed histogram dataset");

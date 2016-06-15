@@ -745,6 +745,7 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  
   }
   
+  
   /**
    * Get a list of the given statistic values for each nucleus in the collection
    * @param stat the statistic to use
