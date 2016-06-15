@@ -72,7 +72,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
@@ -81,7 +80,6 @@ import javax.swing.border.EmptyBorder;
 import logging.LogPanelFormatter;
 import logging.Loggable;
 import logging.TextAreaHandler;
-import utility.Constants;
 import utility.Version;
 import analysis.AnalysisDataset;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
@@ -141,6 +139,9 @@ public class MainWindow
 	 */
 	private static final Logger programLogger =
 	        Logger.getLogger(Loggable.PROGRAM_LOGGER); // the program logger will report status and errors in the running of the program, not involving datasets 
+	
+	
+	private static DatasetListManager datasetManager = DatasetListManager.getInstance(); 
 	
 	/*
 	 * Handle threading
@@ -573,7 +574,9 @@ public class MainWindow
 		
 		if(event.type().equals("DatasetArithmeticAction")){
 			
-			Runnable task = () -> { new DatasetArithmeticAction(selectedDataset, populationsPanel.getAllDatasets(), MainWindow.this); }; 
+			Runnable task = () -> { 
+				new DatasetArithmeticAction(populationsPanel.getAllDatasets(), MainWindow.this); 
+			}; 
 			executorService.execute(task);
 		}
 
@@ -830,6 +833,9 @@ public class MainWindow
 	private void addDataset(final AnalysisDataset dataset){
 
 		finest("Adding dataset");
+		
+		datasetManager.addDataset(dataset);
+		
 		dataset.setSwatch(activeSwatch);
 		populationsPanel.addDataset(dataset);
 		for(AnalysisDataset child : dataset.getAllChildDatasets() ){
