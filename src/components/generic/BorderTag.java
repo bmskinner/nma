@@ -23,8 +23,9 @@ import java.util.List;
 
 // use in charting
 public enum BorderTag {
-	ORIENTATION_POINT ("Orientation point", BorderTagType.CORE ),
+	
 	REFERENCE_POINT   ("Reference point",   BorderTagType.CORE ),
+	ORIENTATION_POINT ("Orientation point", BorderTagType.CORE ),
 	INTERSECTION_POINT ("Intersection point", BorderTagType.EXTENDED),
 	TOP_VERTICAL		("Top vertical point", BorderTagType.EXTENDED),
 	BOTTOM_VERTICAL		("Bottom vertical point", BorderTagType.EXTENDED);

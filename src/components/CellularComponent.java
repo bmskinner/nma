@@ -124,7 +124,7 @@ public interface CellularComponent {
 	 * @return
 	 * @throws Exception
 	 */
-	public double getStatistic(PlottableStatistic stat) throws Exception;
+	public double getStatistic(PlottableStatistic stat);
 	
 	public void setStatistic(PlottableStatistic stat, double d);
 	

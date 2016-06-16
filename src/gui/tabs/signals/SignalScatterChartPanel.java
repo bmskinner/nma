@@ -9,8 +9,8 @@ public class SignalScatterChartPanel extends AbstractScatterChartPanel {
 
 	public SignalScatterChartPanel(){
 		super(SignalStatistic.AREA);
+		gateButton.setVisible(false); // filtering not enabled
 	}
-
-
+	
 }
 

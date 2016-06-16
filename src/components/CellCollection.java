@@ -198,7 +198,7 @@ public class CellCollection implements Serializable, Loggable {
 	  return  result;
   }
 
-  public void addCell(Cell r) throws Exception{
+  public void addCell(Cell r) {
 	  if(mappedCollection.containsKey(r.getId())){
 		  return;
 	  } else {
@@ -658,7 +658,7 @@ public class CellCollection implements Serializable, Loggable {
    * @return the variabililty score of the nucleus
    * @throws Exception
    */
-  public double calculateVariabililtyOfNucleusProfile(Nucleus n) throws Exception {
+  public double calculateVariabililtyOfNucleusProfile(Nucleus n) {
 	  BorderTag pointType = BorderTag.REFERENCE_POINT;
 	  Profile medianProfile = this.getProfileCollection(ProfileType.REGULAR).getProfile(pointType,50);
 	  Profile angleProfile = n.getProfile(ProfileType.REGULAR, pointType);
@@ -809,6 +809,25 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  return task.invoke();
   }
   
+  public CellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower, double upper) {
+	 
+	  if(stat.getClass()==NucleusStatistic.class){
+		  return filterCollection(  (NucleusStatistic) stat, scale, lower, upper);
+	  } 
+	  
+	  if(stat.getClass()==SignalStatistic.class){
+		  return null;
+	  } 
+	  
+	  if(stat.getClass()==SegmentStatistic.class){
+		  return null;
+	  }
+	  return null;
+	  
+  }
+
+  
+  
   /**
    * Create a new CellCollection based on this as a template. Filter the nuclei by the given statistic
    * between a lower and upper bound.
@@ -819,7 +838,7 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
  * @return a new collection
  * @throws Exception 
  */
-  public CellCollection filterCollection(NucleusStatistic stat, MeasurementScale scale, double lower, double upper) throws Exception{
+  private CellCollection filterCollection(NucleusStatistic stat, MeasurementScale scale, double lower, double upper) {
 	  DecimalFormat df = new DecimalFormat("#.##");
 	  CellCollection subCollection = new CellCollection(this, "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
 
