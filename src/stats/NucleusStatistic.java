@@ -21,6 +21,7 @@ package stats;
 import java.util.ArrayList;
 import java.util.List;
 
+import logging.Loggable;
 import utility.Utils;
 import components.generic.MeasurementScale;
 import components.nuclear.NucleusType;
@@ -33,7 +34,7 @@ import components.nuclear.NucleusType;
  * @author ben
  *
  */
-public enum NucleusStatistic implements PlottableStatistic {
+public enum NucleusStatistic implements PlottableStatistic, Loggable {
 	  AREA ("Area", StatisticDimension.AREA, new NucleusType[]{NucleusType.ROUND}),
 	  PERIMETER("Perimeter", StatisticDimension.LENGTH, new NucleusType[]{NucleusType.ROUND}),
 	  MAX_FERET("Max feret", StatisticDimension.LENGTH, new NucleusType[]{NucleusType.ROUND}),
@@ -115,6 +116,7 @@ public enum NucleusStatistic implements PlottableStatistic {
 	   */
 	  public double convert(double value, double factor, MeasurementScale scale){
 		  double result = value;
+		 
 
 		  switch(scale){
 		  	case MICRONS: {
@@ -136,6 +138,7 @@ public enum NucleusStatistic implements PlottableStatistic {
 			  break;
 				
 		}
+		finer("Converting "+value+" to "+scale+" gives "+result);
 		return result;
 	  }
 	  

@@ -19,6 +19,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.datasets.CellDatasetCreator;
+import charting.datasets.SignalTableCell;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
@@ -48,7 +49,6 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 		scrollPane = new JScrollPane();
 		
 		TableOptions options = new TableOptionsBuilder()
-				.setDatasets(null)
 				.setCell(null)
 				.build();
 		
@@ -318,15 +318,18 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 			Color colour = Color.WHITE;
 
 			// get the value in the first column of the row below
-			if(row<table.getModel().getRowCount()-1){
-				String nextRowHeader = table.getModel().getValueAt(row+1, 0).toString();
+			if(row < table.getModel().getRowCount()-1){
+				
+				int nextRow = row+1;
+				String nextRowHeader = table.getModel().getValueAt(nextRow, 0).toString();
 
 				if(nextRowHeader.equals("Signal group")){
 					// we want to colour this cell preemptively
 					// get the signal group from the table
-					String groupString = table.getModel().getValueAt(row+1, 1).toString();
-					UUID signalGroup = UUID.fromString(groupString);
-                    colour = activeDataset().getCollection().getSignalGroup(UUID.fromString(groupString)).getGroupColour();
+					
+					SignalTableCell tableCell = (SignalTableCell) table.getModel().getValueAt(nextRow, 1);
+					
+                    colour = tableCell.getColor();
 
 				}
 			}

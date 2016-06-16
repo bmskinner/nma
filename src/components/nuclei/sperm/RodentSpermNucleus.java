@@ -55,10 +55,6 @@ public class RodentSpermNucleus extends SpermNucleus {
 
 	private static final long serialVersionUID = 1L;
 	
-	private transient double hookLength = 0;
-	private transient double bodyWidth  = 0;
-
-	
 	public RodentSpermNucleus(Nucleus n) {
 		super(n);
 		this.splitNucleusToHeadAndHump();
@@ -114,8 +110,10 @@ public class RodentSpermNucleus extends SpermNucleus {
 			if(tag.equals(BorderTag.TOP_VERTICAL) || tag.equals(BorderTag.BOTTOM_VERTICAL)){
 				
 				// Clear cached stats
-				this.hookLength = -1;
-				this.bodyWidth  = -1;
+//				this.hookLength = -1;
+//				this.bodyWidth  = -1;
+				setStatistic(NucleusStatistic.HOOK_LENGTH, -1);
+				setStatistic(NucleusStatistic.BODY_WIDTH,  -1);
 			}
 		}
 		
@@ -123,56 +121,71 @@ public class RodentSpermNucleus extends SpermNucleus {
 	
 	private double getHookOrBodyLength(boolean useHook) {
 
-		if(hookLength==-1 || bodyWidth==-1){
-			calculateHookOrBodyLength();
+		if(getStatistic(NucleusStatistic.HOOK_LENGTH) == -1 || getStatistic(NucleusStatistic.BODY_WIDTH) ==-1){
+			calculateHookAndBodyLength();
 		}
 		
 		if(useHook){
-			return hookLength;
+			return getStatistic(NucleusStatistic.HOOK_LENGTH);
 		} else {
-			return bodyWidth;
+			return getStatistic(NucleusStatistic.BODY_WIDTH);
 		}	
 	}
 	
-	private void calculateHookOrBodyLength() {
+	private void calculateHookAndBodyLength() {
 			
 		// Copy the nucleus
 		finest("Calculating hook and body length");
-		RodentSpermNucleus testNucleus = new RodentSpermNucleus( this); //.duplicate();
+//		RodentSpermNucleus testNucleus = new RodentSpermNucleus( this); //.duplicate();
+		
+		// Start with the vertically rotated nucleus
+		Nucleus testNucleus = getVerticallyRotatedNucleus();
 
 		// Only proceed if the verticals have been set
 		if(testNucleus!=null && testNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) 
 				&& testNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
 
+//			Nucleus testVertical = testNucleus.getVerticallyRotatedNucleus();
 			
+			finer("Nucleus "+this.getNameAndNumber());
 			/*
 			 * Get the X position of the top vertical
 			 */
+//			double vertX = testNucleus.getBorderTag(BorderTag.TOP_VERTICAL).getX();
+
+//			/*
+//			 * Rotate the nucleus to put vertical
+//			 */
+//			BorderPoint[] points = getBorderPointsForVerticalAlignment();
+//			testNucleus.alignPointsOnVertical(points[0], points[1] );
+			
+
+			
 			double vertX = testNucleus.getBorderTag(BorderTag.TOP_VERTICAL).getX();
-
-			/*
-			 * Rotate the nucleus to put vertical
-			 */
-			BorderPoint[] points = getBorderPointsForVerticalAlignment();
-			testNucleus.alignPointsOnVertical(points[0], points[1] );
-			
-
-			
-			vertX = testNucleus.getBorderTag(BorderTag.TOP_VERTICAL).getX();
 
 
 			/*
 			 * Find the x values in the bounding box of the 
-			 * vertical nucleus. Using reference point here is ok, the method
-			 * is using the TOP and BOTTOM points internally.
+			 * vertical nucleus.
 			 */
-			double maxBoundingX = testNucleus.getBoundingRectangle(BorderTag.REFERENCE_POINT).getMaxX();
-			double minBoundingX = testNucleus.getBoundingRectangle(BorderTag.REFERENCE_POINT).getMinX();
+			double maxBoundingX = testNucleus.createPolygon().getBounds().getMaxX();
+			double minBoundingX = testNucleus.createPolygon().getBounds().getMinX();
+			
+			if(vertX < minBoundingX || vertX > maxBoundingX ){
+				finer("Error calculating hook and body: vertical is out of bounds" );
+				setStatistic(NucleusStatistic.HOOK_LENGTH, -1);
+				setStatistic(NucleusStatistic.BODY_WIDTH,  -1);
+				return;
+			}
+			
+			
 
 			/*
 			 * Find the distance from the vertical X position to the min and max points of the 
 			 * bounding box. VertX must lie between these points.
 			 */
+			
+			
 			double distanceLower  = vertX - minBoundingX;
 			double distanceHigher = maxBoundingX - vertX;
 
@@ -186,6 +199,13 @@ public class RodentSpermNucleus extends SpermNucleus {
 			double distanceHump = 0;
 			double referenceX   = testNucleus.getBorderTag(BorderTag.REFERENCE_POINT).getX();
 			
+			finer("TV is at "+vertX);
+			finer("Max bounding x is "+ maxBoundingX);
+			finer("Min bounding x is "+ minBoundingX);
+			finer("RP x is "+ referenceX);
+			finer("Distance lower is "+ distanceLower);
+			finer("Distance higher is "+ distanceHigher);
+			
 			if(referenceX < vertX){
 				distanceHook = distanceLower;
 				distanceHump = distanceHigher;
@@ -194,13 +214,22 @@ public class RodentSpermNucleus extends SpermNucleus {
 				distanceHump = distanceLower;
 			}
 			
-			this.hookLength = distanceHook;
-			this.bodyWidth  = distanceHump;
+			setStatistic(NucleusStatistic.HOOK_LENGTH, distanceHook);
+			setStatistic(NucleusStatistic.BODY_WIDTH,  distanceHump);
+			
+//			this.hookLength = distanceHook;
+//			this.bodyWidth  = distanceHump;
+			
+			finer("Hook length is "+ distanceHook);
+			finer("Body width is "+ distanceHump);
+			
 			finest("Hook length and body width calculated");
 		} else {
 			finest("Top and bottom vertical not assigned, skipping");
-			this.hookLength = -1;
-			this.bodyWidth 	= -1;
+//			this.hookLength = -1;
+//			this.bodyWidth 	= -1;
+			setStatistic(NucleusStatistic.HOOK_LENGTH, -1);
+			setStatistic(NucleusStatistic.BODY_WIDTH,  -1);
 		}
 		testNucleus = null;
 	}
@@ -692,10 +721,9 @@ public class RodentSpermNucleus extends SpermNucleus {
 						  // These rois are offset, not original
 						  if( this.isHookSide(com) ){ 
 							  angle = 360 - angle;
-//							  IJ.log("Signal com is hookside");
+
 						  } 
-//						  IJ.log("Signal com: "  +com.toString());
-//						  IJ.log("Signal angle: "+angle);
+
 					  } catch(Exception e){
 						  // IJ.log(this.getNameAndNumber()+": Error detected: falling back on default angle: "+e.getMessage());
 					  } finally {
@@ -714,71 +742,6 @@ public class RodentSpermNucleus extends SpermNucleus {
 				
 		if(angle!=0){
 
-//			for(BorderPoint p : hookRoi){
-////				XYPoint p = this.getBorderPoint(i);
-//
-//
-//				// get the distance from this point to the centre of mass
-//				double distance = p.getLengthTo(this.getCentreOfMass());
-//
-//				// get the angle between the centre of mass (C), the point (P) and a
-//				// point directly under the centre of mass (V)
-//
-//				/*
-//				 *      C
-//				 *      |\  
-//				 *      V P
-//				 * 
-//				 */
-//				double oldAngle = Utils.findAngleBetweenXYPoints( p, 
-//						this.getCentreOfMass(), 
-//						new XYPoint(this.getCentreOfMass().getX(),-10));
-//
-//
-//				if(p.getX()<this.getCentreOfMass().getX()){
-//					oldAngle = 360-oldAngle;
-//				}
-//
-//				double newAngle = oldAngle + angle;
-//				double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
-//				double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
-//
-//				p.setX(newX);
-//				p.setY(newY);
-//			}
-//			
-//			for(BorderPoint p : humpRoi){
-////				XYPoint p = this.getBorderPoint(i);
-//
-//
-//				// get the distance from this point to the centre of mass
-//				double distance = p.getLengthTo(this.getCentreOfMass());
-//
-//				// get the angle between the centre of mass (C), the point (P) and a
-//				// point directly under the centre of mass (V)
-//
-//				/*
-//				 *      C
-//				 *      |\  
-//				 *      V P
-//				 * 
-//				 */
-//				double oldAngle = Utils.findAngleBetweenXYPoints( p, 
-//						this.getCentreOfMass(), 
-//						new XYPoint(this.getCentreOfMass().getX(),-10));
-//
-//
-//				if(p.getX()<this.getCentreOfMass().getX()){
-//					oldAngle = 360-oldAngle;
-//				}
-//
-//				double newAngle = oldAngle + angle;
-//				double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
-//				double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
-//
-//				p.setX(newX);
-//				p.setY(newY);
-//			}
 			super.rotate(angle);
 		}
 	}
@@ -787,19 +750,7 @@ public class RodentSpermNucleus extends SpermNucleus {
   @Override
   public String dumpInfo(int type){
 	  String result = super.dumpInfo(type);
-	  
-//	  result += "  Hook roi:\n";
-//	  for(int i=0; i<hookRoi.size(); i++){
-//		  BorderPoint p = hookRoi.get(i);
-//		  result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\n";
-//	  }
-//	  
-//	  result += "  Hump roi:\n";
-//	  for(int i=0; i<humpRoi.size(); i++){
-//		  BorderPoint p = humpRoi.get(i);
-//		  result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\n";
-//	  }
-	  
+	  	  
 	  return result;
 	  
   }
@@ -807,9 +758,7 @@ public class RodentSpermNucleus extends SpermNucleus {
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	  finest("\tReading rodent sperm nucleus");
 	  in.defaultReadObject();
-	  calculateHookOrBodyLength();
-//	  this.hookLength = 0;
-//	  this.bodyWidth = 0;
+	  calculateHookAndBodyLength();
 	  finest("\tRead rodent sperm nucleus");
   }
 
@@ -819,14 +768,4 @@ public class RodentSpermNucleus extends SpermNucleus {
 	  finest("\tWrote rodent sperm nucleus");
   }
   
-//  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-//	    in.defaultReadObject();
-////	    try {
-////						
-////		} catch (Exception e) {
-//		    this.hookLength = 0;
-//		    this.bodyWidth = 0;
-////		}
-//
-//	}
 }

@@ -348,10 +348,10 @@ public class RoundNucleus extends AbstractCellularComponent
 		case VARIABILITY:
 			break;
 		case BOUNDING_HEIGHT:
-			result = this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getHeight();
+			result = this.getVerticallyRotatedNucleus().getBounds().getHeight();
 			break;
 		case BOUNDING_WIDTH:
-			result = this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getWidth();
+			result = this.getVerticallyRotatedNucleus().getBounds().getWidth();
 			break;
 		case OP_RP_ANGLE:
 			result = Utils.findAngleBetweenXYPoints(this.getBorderTag(BorderTag.REFERENCE_POINT), this.getCentreOfMass(), this.getBorderTag(BorderTag.ORIENTATION_POINT));

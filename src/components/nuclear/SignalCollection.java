@@ -23,7 +23,6 @@ import ij.process.ImageProcessor;
 import io.ImageImporter;
 import stats.SignalStatistic;
 
-import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -37,7 +36,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import logging.Loggable;
-import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
 

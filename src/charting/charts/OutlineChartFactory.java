@@ -326,6 +326,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			return ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
 		}
 		
+		if(dataset==null){
+			finest("No dataset to draw");
+			return ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
+		}
+		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -490,9 +495,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				 * Nuclear signals
 				 */
 				if(hash.get(key).startsWith("SignalGroup_")){
-//					int colourIndex = getIndexFromLabel(hash.get(key));
+
 					UUID seriesGroup = getSignalGroupFromLabel(hash.get(key));
-                    Color colour = dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour();//.getSignalGroupColour(seriesGroup);
+                    Color colour = dataset.getCollection().getSignalGroup(seriesGroup).hasColour()
+                    		     ? dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour()
+                    		     : ColourSelecter.getSegmentColor(i);
 
 					plot.getRenderer(key).setSeriesPaint(i, colour);
 				}

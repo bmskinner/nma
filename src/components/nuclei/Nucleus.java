@@ -128,7 +128,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @return
 	 * @throws Exception
 	 */
-	public Rectangle getBoundingRectangle(BorderTag point) throws Exception;
+	public Rectangle getBoundingRectangle(BorderTag point) ;
 	
 	
 	/**

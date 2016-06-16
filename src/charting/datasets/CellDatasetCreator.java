@@ -20,11 +20,14 @@ package charting.datasets;
 
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
+import gui.components.ColourSelecter;
 
+import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
@@ -37,6 +40,7 @@ import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
 import analysis.profiles.ProfileManager;
+import analysis.signals.SignalManager;
 import components.AbstractCellularComponent;
 import components.Cell;
 import components.generic.BorderTag;
@@ -47,6 +51,7 @@ import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
+import components.nuclear.SignalGroup;
 import components.nuclei.Nucleus;
 
 public class CellDatasetCreator implements Loggable {
@@ -69,126 +74,183 @@ public class CellDatasetCreator implements Loggable {
 	 * @throws Exception 
 	 */
 	public TableModel createCellInfoTable(TableOptions options) {
+		
+		if( ! options.hasDatasets()){
+			return NucleusTableDatasetCreator.getInstance().createBlankTable();
+		}
+		
+		if(options.isMultipleDatasets()){
+			return NucleusTableDatasetCreator.getInstance().createBlankTable();
+		}
 
 		Cell cell = options.getCell();
+		
+		if(cell==null){
+			return NucleusTableDatasetCreator.getInstance().createBlankTable();
+		}
+		
+		AnalysisDataset d = options.firstDataset();
 		DefaultTableModel model = new DefaultTableModel();
 		
 		List<Object> fieldNames = new ArrayList<Object>(0);
 		List<Object> rowData 	= new ArrayList<Object>(0);
-		
-		DecimalFormat df = new DecimalFormat("#0.00"); 
-				
+						
 		// find the collection with the most channels
 		// this defines  the number of rows
+			
+		Nucleus n = cell.getNucleus();
 
-		if(cell==null){
-			model.addColumn("No data loaded");
-			
-		} else {
-			
-			Nucleus n = cell.getNucleus();
-			
-			fieldNames.add("Source image file");
-			rowData.add(n.getPathAndNumber());
-			
-			fieldNames.add("Source image name");
-			rowData.add(n.getSourceFileName());
-			
-			fieldNames.add("Source channel");
-			rowData.add(n.getChannel());
-			
-			fieldNames.add("Scale (um/pixel)");
-			rowData.add(n.getScale());
-			
-			for(NucleusStatistic stat : NucleusStatistic.values()){
-				
-				if(!stat.equals(NucleusStatistic.VARIABILITY)){
-					
-					fieldNames.add(stat.label(MeasurementScale.PIXELS)  );
+		fieldNames.add("Source image file");
+		rowData.add(n.getPathAndNumber());
 
-					double pixel = n.getStatistic(stat, MeasurementScale.PIXELS);
-					
-					if(stat.isDimensionless()){
-						rowData.add(df.format(pixel) );
-					} else {
-						double micron = n.getStatistic(stat, MeasurementScale.MICRONS);
-						rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
-					}
-					
-				}
-				
+		fieldNames.add("Source image name");
+		rowData.add(n.getSourceFileName());
+
+		fieldNames.add("Source channel");
+		rowData.add(n.getChannel());
+
+		fieldNames.add("Scale (um/pixel)");
+		rowData.add(n.getScale());
+
+		addNuclearStatisticsToTable(fieldNames, rowData, n);
+
+		fieldNames.add("Nucleus CoM");
+		rowData.add(n.getCentreOfMass().toString());
+
+		fieldNames.add("Nucleus position");
+		rowData.add(n.getPosition()[0]+"-"+n.getPosition()[1]);
+
+
+
+		NucleusType type = NucleusType.getNucleusType(n);
+
+		if(type!=null){
+			for(BorderTag tag : BorderTag.values(BorderTagType.CORE)){
+				fieldNames.add(type.getPoint(tag));
+				int index = AbstractCellularComponent.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
+				rowData.add(index);
 			}
+		} 
+		addNuclearSignalsToTable(fieldNames, rowData, n, d);
 
-			fieldNames.add("Nucleus CoM");
-			rowData.add(n.getCentreOfMass().toString());
-			
-			fieldNames.add("Nucleus position");
-			rowData.add(n.getPosition()[0]+"-"+n.getPosition()[1]);
-			
-			
-			
-			NucleusType type = NucleusType.getNucleusType(n);
-			
-			if(type!=null){
-				for(BorderTag tag : BorderTag.values(BorderTagType.CORE)){
-					fieldNames.add(type.getPoint(tag));
-					int index = AbstractCellularComponent.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
-					rowData.add(index);
-				}
-			} 
+		model.addColumn("", fieldNames.toArray(new Object[0])); 
+		model.addColumn("Info", rowData.toArray(new Object[0]));
 
-			// add info for signals
-			for(UUID signalGroup : n.getSignalCollection().getSignalGroupIDs()){
-				
-				fieldNames.add("");
-				rowData.add("");
-				
-				fieldNames.add("Signal group");
-				rowData.add(n.getSignalCollection().getSignalGroupNumber(signalGroup));
-				
-				fieldNames.add("Signal name");
-				rowData.add(n.getSignalCollection().getSignalGroupName(signalGroup));
-				
-				fieldNames.add("Source image");
-				rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
-				
-				fieldNames.add("Source channel");
-				rowData.add(n.getSignalCollection().getSourceChannel(signalGroup));
-				
-				fieldNames.add("Number of signals");
-				rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
-				
-				for(NuclearSignal s : n.getSignalCollection().getSignals(signalGroup)){
-					
-					for(SignalStatistic stat : SignalStatistic.values()){
-						
-						fieldNames.add(stat.label(MeasurementScale.PIXELS)  );
-
-						double pixel = s.getStatistic(stat, MeasurementScale.PIXELS);
-						
-						if(stat.isDimensionless()){
-							rowData.add(df.format(pixel) );
-						} else {
-							double micron = s.getStatistic(stat, MeasurementScale.MICRONS);
-							rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
-						}
-					}
-					
-					fieldNames.add("Signal CoM");
-					rowData.add(s.getCentreOfMass().toString());
-					
-				}			
-				
-			}
 			
-			model.addColumn("", fieldNames.toArray(new Object[0])); 
-			model.addColumn("Info", rowData.toArray(new Object[0]));
-
-			}
 		return model;	
 	}
 	
+	/**
+	 * Add the nuclear statistic information to a cell table
+	 * @param fieldNames
+	 * @param rowData
+	 * @param n
+	 */
+	private void addNuclearStatisticsToTable(List<Object> fieldNames,  List<Object> rowData, Nucleus n){
+		
+		DecimalFormat df = new DecimalFormat("#0.00"); 
+		
+		for(NucleusStatistic stat : NucleusStatistic.values()){
+
+			if( ! stat.equals(NucleusStatistic.VARIABILITY)){
+
+				fieldNames.add(stat.label(MeasurementScale.PIXELS)  );
+
+				double pixel = n.getStatistic(stat, MeasurementScale.PIXELS);
+
+				if(stat.isDimensionless()){
+					rowData.add(df.format(pixel) );
+				} else {
+					double micron = n.getStatistic(stat, MeasurementScale.MICRONS);
+					rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
+				}
+
+			}
+
+		}
+		
+	}
 	
+	/**
+	 * Add the nuclear signal information to a cell table
+	 * @param fieldNames
+	 * @param rowData
+	 * @param n the nucleus
+	 * @param d the source dataset for the nucleus
+	 */
+	private void addNuclearSignalsToTable(List<Object> fieldNames,  List<Object> rowData, Nucleus n, AnalysisDataset d){
+		
+		int j=0;
+
+		for(UUID signalGroup : d.getCollection().getSignalGroupIDs()){
+			
+
+			if( ! n.getSignalCollection().hasSignal(signalGroup)){
+				j++;
+				continue;
+			}
+			
+			SignalGroup g = d.getCollection().getSignalGroup(signalGroup);
+
+			fieldNames.add("");
+			rowData.add("");
+
+			SignalTableCell tableCell = new SignalTableCell(signalGroup, g.getGroupName());
+
+			Color colour = g.hasColour()
+					     ? g.getGroupColour()
+						 : ColourSelecter.getSegmentColor(j++);
+
+			tableCell.setColor(colour);
+
+			fieldNames.add("Signal group");
+			rowData.add(tableCell);		
+
+			fieldNames.add("Source image");
+			rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
+
+			fieldNames.add("Source channel");
+			rowData.add(g.getChannel());
+
+			fieldNames.add("Number of signals");
+			rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
+
+			for(NuclearSignal s : n.getSignalCollection().getSignals(signalGroup)){
+				addSignalStatisticsToTable(fieldNames, rowData, s );
+			}			
+
+		}
+		
+	}
+	
+	/**
+	 * Add the nuclear signal statistics to a cell table
+	 * @param fieldNames
+	 * @param rowData
+	 * @param s
+	 */
+	private void addSignalStatisticsToTable(List<Object> fieldNames,  List<Object> rowData, NuclearSignal s){
+		
+		DecimalFormat df = new DecimalFormat("#0.00"); 
+		
+		for(SignalStatistic stat : SignalStatistic.values()){
+
+			fieldNames.add(stat.label(MeasurementScale.PIXELS)  );
+
+			double pixel = s.getStatistic(stat, MeasurementScale.PIXELS);
+
+			if(stat.isDimensionless()){
+				rowData.add(df.format(pixel) );
+			} else {
+				double micron = s.getStatistic(stat, MeasurementScale.MICRONS);
+				rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
+			}
+		}
+
+		fieldNames.add("Signal CoM");
+		rowData.add(s.getCentreOfMass().toString());
+		
+	}
 	
 	/**
 	 * Create an XY dataset for the offset xy positions of the start positions of a segment 
