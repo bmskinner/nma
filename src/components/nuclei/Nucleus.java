@@ -68,7 +68,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * format /SourceDir/ImageName/
 	 * @return
 	 */
-	public File getNucleusFolder();
+//	public File getNucleusFolder();
 	
 	
 	/**
@@ -84,7 +84,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * images of the nucleus as a string
 	 * @return
 	 */
-	public String getAnnotatedImagePath();
+//	public String getAnnotatedImagePath();
 
 	/**
 	 * Get the name of the image the nucleus was found in

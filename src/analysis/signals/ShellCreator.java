@@ -245,25 +245,25 @@ public class ShellCreator implements Loggable {
 	/**
 	 * Draw the shells on the nucleus, and export the image to the Nucleus folder.
 	 */
-	public void exportImage(){
-	  ImagePlus shellImage = ImageExporter.getInstance().convertToRGB(nucleusStack);
-      ImageProcessor ip = shellImage.getProcessor();
-      List<Roi> shells = this.getShells();
-      if(shells.size()>0){ // check we actually got shells out
-        for(Roi r : shells){
-          ip.setColor(Color.YELLOW);
-          ip.setLineWidth(1);
-          r.drawPixels(ip);
-        }
-
-        String outPath = nucleus.getNucleusFolder().getAbsolutePath()+
-                        File.separator+
-                        RoundNucleus.IMAGE_PREFIX+
-                        nucleus.getNucleusNumber()+
-                        ".shells.tiff";
-        IJ.saveAsTiff(shellImage, outPath);
-      }
-	}
+//	public void exportImage(){
+//	  ImagePlus shellImage = ImageExporter.getInstance().convertToRGB(nucleusStack);
+//      ImageProcessor ip = shellImage.getProcessor();
+//      List<Roi> shells = this.getShells();
+//      if(shells.size()>0){ // check we actually got shells out
+//        for(Roi r : shells){
+//          ip.setColor(Color.YELLOW);
+//          ip.setLineWidth(1);
+//          r.drawPixels(ip);
+//        }
+//
+//        String outPath = nucleus.getNucleusFolder().getAbsolutePath()+
+//                        File.separator+
+//                        RoundNucleus.IMAGE_PREFIX+
+//                        nucleus.getNucleusNumber()+
+//                        ".shells.tiff";
+//        IJ.saveAsTiff(shellImage, outPath);
+//      }
+//	}
 	
 	/**
 	*	Find the pixels within an roi. Create XYPoints

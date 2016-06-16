@@ -91,7 +91,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	protected Map<String, Integer>       segmentTags = new HashMap<String, Integer>(0);
 
 
-	protected File nucleusFolder; // the folder to store nucleus information e.g. /Testing/2015-11-24_10:00:00/1/
+//	protected File nucleusFolder; // the folder to store nucleus information e.g. /Testing/2015-11-24_10:00:00/1/
 	protected String outputFolder;  // the top-level path in which to store outputs; has analysis date e.g. /Testing/2015-11-24_10:00:00
 	
 	
@@ -133,7 +133,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		this.setOutputFolder(n.getOutputFolderName());
 				
 		this.setNucleusNumber(n.getNucleusNumber());
-		this.setNucleusFolder(n.getNucleusFolder());
+//		this.setNucleusFolder(n.getNucleusFolder());
 				
 		this.setSignals( new SignalCollection(n.getSignalCollection()));
 		
@@ -211,11 +211,11 @@ public class RoundNucleus extends AbstractCellularComponent
 
 	public void intitialiseNucleus(int angleProfileWindowSize) throws Exception {
 
-		this.nucleusFolder = new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension());
-
-		if (!this.nucleusFolder.exists()) {
-			this.nucleusFolder.mkdir();
-		}
+//		this.nucleusFolder = new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension());
+//
+//		if (!this.nucleusFolder.exists()) {
+//			this.nucleusFolder.mkdir();
+//		}
 
 
 		// calculate profiles
@@ -251,19 +251,19 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 
 
-	public File getNucleusFolder(){
-		return new File(this.nucleusFolder.getAbsolutePath());
-	}
+//	public File getNucleusFolder(){
+//		return new File(this.nucleusFolder.getAbsolutePath());
+//	}
 
 
-	public String getAnnotatedImagePath(){
-		String outPath = this.nucleusFolder.getAbsolutePath()+
-											File.separator+
-											Constants.IMAGE_PREFIX+
-											this.getNucleusNumber()+
-											".annotated.tiff";
-		return new String(outPath);
-	}
+//	public String getAnnotatedImagePath(){
+//		String outPath = this.nucleusFolder.getAbsolutePath()+
+//											File.separator+
+//											Constants.IMAGE_PREFIX+
+//											this.getNucleusNumber()+
+//											".annotated.tiff";
+//		return new String(outPath);
+//	}
 
 	public String getImageNameWithoutExtension(){
 
@@ -492,9 +492,9 @@ public class RoundNucleus extends AbstractCellularComponent
 		this.nucleusNumber = d;
 	}
 
-	protected void setNucleusFolder(File d){
-		this.nucleusFolder = d;
-	}
+//	protected void setNucleusFolder(File d){
+//		this.nucleusFolder = d;
+//	}
 
 	public void setAngleProfileWindowSize(int i){
 		this.angleProfileWindowSize = i;
@@ -1185,7 +1185,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		File newFile = new File(newFolder+File.separator+oldName);
 		if(newFile.exists()){
 			this.setSourceFile(newFile);
-			this.setNucleusFolder(new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension()));
+//			this.setNucleusFolder(new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension()));
 		} else {
 			throw new IllegalArgumentException("Cannot find file "+oldName+" in folder "+newFolder.getAbsolutePath());
 		}

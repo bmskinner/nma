@@ -45,102 +45,102 @@ public class CompositeExporter {
 	private static Logger logger;
 	public static final int MAX_COMPOSITABLE_NUCLEI = 100;
 	
-	public static boolean run(AnalysisDataset dataset){
-		logger = Logger.getLogger(CompositeExporter.class.getName());
-		try {
-			logger.addHandler(dataset.getLogHandler());
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		CellCollection collection = dataset.getCollection();
-		boolean ok = run(collection, logger);
-		return ok;
-	}
+//	public static boolean run(AnalysisDataset dataset){
+//		logger = Logger.getLogger(CompositeExporter.class.getName());
+//		try {
+//			logger.addHandler(dataset.getLogHandler());
+//		} catch (SecurityException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		CellCollection collection = dataset.getCollection();
+////		boolean ok = run(collection, logger);
+//		return ok;
+//	}
 
-	public static boolean run(CellCollection collection, Logger logger){
-
-		CompositeExporter.logger = logger;
-		
-
-		if(collection.getNucleusCount()==0){
-			logger.log(Level.FINE, "No nuclei in collection");
-			return false;
-		}
-		
-		if(collection.getNucleusCount()>MAX_COMPOSITABLE_NUCLEI){
-			logger.log(Level.FINE, "Too many nuclei to draw");
-			return false;
-		}
-
-		try{
-
-			logger.log(Level.INFO, "Creating composite image...");
-
-			int totalWidth = 0;
-			int totalHeight = 0;
-
-			int boxWidth  = (int)(collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS)/1.4);
-			int boxHeight = (int)(collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS)/1.2);
-
-			int maxBoxWidth = boxWidth * 5;
-			int maxBoxHeight = (boxHeight * (int)(Math.ceil(collection.getNucleusCount()/5)) + boxHeight );
-
-			ImagePlus finalImage = new ImagePlus("Final image", new BufferedImage(maxBoxWidth, maxBoxHeight, BufferedImage.TYPE_INT_RGB));
-			ImageProcessor finalProcessor = finalImage.getProcessor();
-			finalProcessor.setBackgroundValue(0);
-
-			for(Nucleus n : collection.getNuclei()){
-
-				String path = n.getAnnotatedImagePath();
-
-				try {
-					Opener localOpener = new Opener();
-					ImagePlus image = localOpener.openImage(path);
-					ImageProcessor ip = image.getProcessor();
-
-					FloatPolygon polygon = n.createPolygon();
-					PolygonRoi roi = new PolygonRoi(polygon, Roi.POLYGON);
-					ip.setRoi(roi);
-
-
-					ImageProcessor newProcessor = ip.createProcessor(boxWidth, boxHeight);
-
-					newProcessor.setBackgroundValue(0);
-					newProcessor.insert(ip, (int)boxWidth/4, (int)boxWidth/4); // put the original halfway in
-					newProcessor.setInterpolationMethod(ImageProcessor.BICUBIC);
-					newProcessor.rotate( n.findRotationAngle() );
-					newProcessor.setBackgroundValue(0);
-
-					if(totalWidth>maxBoxWidth-boxWidth){
-						totalWidth=0;
-						totalHeight+=(int)(boxHeight);
-					}
-					int newX = totalWidth;
-					int newY = totalHeight;
-					totalWidth+=(int)(boxWidth);
-
-					finalProcessor.insert(newProcessor, newX, newY);
-					TextRoi label = new TextRoi(newX, newY, n.getSourceFileName()+"-"+n.getNucleusNumber());
-					Overlay overlay = new Overlay(label);
-					finalProcessor.drawOverlay(overlay);  
-				} catch(Exception e){
-					logger.log(Level.SEVERE, "Error adding image to composite", e);
-				}     
-			}
-			IJ.saveAsTiff(finalImage, collection.getFolder()+File.separator+collection.getOutputFolderName()+File.separator+"composite"+"."+collection.getName()+".tiff");
-		} catch(Exception e){
-			logger.log(Level.SEVERE, "Error creating composite image", e);
-			return false;
-		} finally {
-			for(Handler h : logger.getHandlers()){
-				h.close();
-				logger.removeHandler(h);
-			}
-		}
-		return true;
-	}
+//	public static boolean run(CellCollection collection, Logger logger){
+//
+//		CompositeExporter.logger = logger;
+//		
+//
+//		if(collection.getNucleusCount()==0){
+//			logger.log(Level.FINE, "No nuclei in collection");
+//			return false;
+//		}
+//		
+//		if(collection.getNucleusCount()>MAX_COMPOSITABLE_NUCLEI){
+//			logger.log(Level.FINE, "Too many nuclei to draw");
+//			return false;
+//		}
+//
+//		try{
+//
+//			logger.log(Level.INFO, "Creating composite image...");
+//
+//			int totalWidth = 0;
+//			int totalHeight = 0;
+//
+//			int boxWidth  = (int)(collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS)/1.4);
+//			int boxHeight = (int)(collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS)/1.2);
+//
+//			int maxBoxWidth = boxWidth * 5;
+//			int maxBoxHeight = (boxHeight * (int)(Math.ceil(collection.getNucleusCount()/5)) + boxHeight );
+//
+//			ImagePlus finalImage = new ImagePlus("Final image", new BufferedImage(maxBoxWidth, maxBoxHeight, BufferedImage.TYPE_INT_RGB));
+//			ImageProcessor finalProcessor = finalImage.getProcessor();
+//			finalProcessor.setBackgroundValue(0);
+//
+//			for(Nucleus n : collection.getNuclei()){
+//
+//				String path = n.getAnnotatedImagePath();
+//
+//				try {
+//					Opener localOpener = new Opener();
+//					ImagePlus image = localOpener.openImage(path);
+//					ImageProcessor ip = image.getProcessor();
+//
+//					FloatPolygon polygon = n.createPolygon();
+//					PolygonRoi roi = new PolygonRoi(polygon, Roi.POLYGON);
+//					ip.setRoi(roi);
+//
+//
+//					ImageProcessor newProcessor = ip.createProcessor(boxWidth, boxHeight);
+//
+//					newProcessor.setBackgroundValue(0);
+//					newProcessor.insert(ip, (int)boxWidth/4, (int)boxWidth/4); // put the original halfway in
+//					newProcessor.setInterpolationMethod(ImageProcessor.BICUBIC);
+//					newProcessor.rotate( n.findRotationAngle() );
+//					newProcessor.setBackgroundValue(0);
+//
+//					if(totalWidth>maxBoxWidth-boxWidth){
+//						totalWidth=0;
+//						totalHeight+=(int)(boxHeight);
+//					}
+//					int newX = totalWidth;
+//					int newY = totalHeight;
+//					totalWidth+=(int)(boxWidth);
+//
+//					finalProcessor.insert(newProcessor, newX, newY);
+//					TextRoi label = new TextRoi(newX, newY, n.getSourceFileName()+"-"+n.getNucleusNumber());
+//					Overlay overlay = new Overlay(label);
+//					finalProcessor.drawOverlay(overlay);  
+//				} catch(Exception e){
+//					logger.log(Level.SEVERE, "Error adding image to composite", e);
+//				}     
+//			}
+//			IJ.saveAsTiff(finalImage, collection.getFolder()+File.separator+collection.getOutputFolderName()+File.separator+"composite"+"."+collection.getName()+".tiff");
+//		} catch(Exception e){
+//			logger.log(Level.SEVERE, "Error creating composite image", e);
+//			return false;
+//		} finally {
+//			for(Handler h : logger.getHandlers()){
+//				h.close();
+//				logger.removeHandler(h);
+//			}
+//		}
+//		return true;
+//	}
 }

@@ -78,7 +78,7 @@ public class ShellAnalysis extends AnalysisWorker {
 				ShellCreator shellAnalyser = new ShellCreator(n);
 //				IJ.log("Making shells");
 				shellAnalyser.createShells();
-				shellAnalyser.exportImage();
+//				shellAnalyser.exportImage();
 
 				for(UUID signalGroup : n.getSignalCollection().getSignalGroupIDs()){
 					if(collection.getSignalManager().hasSignals(signalGroup)){
@@ -163,7 +163,7 @@ public class ShellAnalysis extends AnalysisWorker {
 
 				ShellCreator shellAnalyser = new ShellCreator(n);
 				shellAnalyser.createShells();
-				shellAnalyser.exportImage();
+//				shellAnalyser.exportImage();
 
 				for(UUID group : n.getSignalCollection().getSignalGroupIDs()){
 					if(collection.getSignalManager().hasSignals(group)){
