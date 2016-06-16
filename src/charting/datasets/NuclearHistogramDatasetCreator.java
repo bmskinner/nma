@@ -153,6 +153,8 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 		}
 		
 		bins = bins>100 ? 100 : bins; // but don't have too many bins
+		
+		bins = bins < 1 ? 11 : bins;  // and also don't have too few bins, or the chart looks silly
 		return bins;
 	}
 	
