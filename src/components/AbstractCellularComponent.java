@@ -98,6 +98,30 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	}
 	
 	/**
+	 * Construct with an ROI, and a source image and channel
+	 * @param roi
+	 * @param f
+	 * @param channel
+	 */
+	public AbstractCellularComponent(Roi roi, File f, int channel){
+		this(roi);
+		this.setSourceFile(f);
+		this.setChannel(channel);
+	}
+	
+	/**
+	 * Construct with an ROI, a source image and channel, and the original position in the source image
+	 * @param roi
+	 * @param f
+	 * @param channel
+	 * @param position
+	 */
+	public AbstractCellularComponent(Roi roi, File f, int channel, double[] position){
+		this(roi, f, channel);
+		this.position = position;
+	}
+	
+	/**
 	 * Construct using an roi
 	 * @param roi
 	 */

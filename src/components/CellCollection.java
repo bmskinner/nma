@@ -298,6 +298,14 @@ public class CellCollection implements Serializable, Loggable {
 	  this.profileCollections.put(type, p);
   }
   
+  /**
+   * Remove the given profile collection
+   * @param type
+   */
+  public void removeProfileCollection(ProfileType type){
+	  this.profileCollections.remove(type);
+  }
+  
   public File getFolder(){
     return this.folder;
   }

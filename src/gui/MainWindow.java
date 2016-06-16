@@ -568,7 +568,9 @@ public class MainWindow
 
 		if(event.type().equals("MergeCollectionAction")){
 			
-			Runnable task = () -> { new MergeCollectionAction(populationsPanel.getSelectedDatasets(), MainWindow.this); }; 
+			Runnable task = () -> { 
+				new MergeCollectionAction(populationsPanel.getSelectedDatasets(), MainWindow.this); 
+			}; 
 			executorService.execute(task);
 		}
 		

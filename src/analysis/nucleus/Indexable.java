@@ -18,6 +18,6 @@ public interface Indexable {
 	 * @param tag
 	 * @return the index or -1 on error
 	 */
-	public int identifyBorderTagIndex(BorderTag tag);
+//	public int identifyBorderTagIndex(BorderTag tag);
 
 }

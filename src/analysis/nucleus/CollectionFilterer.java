@@ -93,30 +93,31 @@ public class CollectionFilterer {
 	    for(Cell c : collection.getCells()){
 
 	      Nucleus n = c.getNucleus();
+	      int failureCode = 0;
 	      
 	      if(n.getStatistic(NucleusStatistic.AREA) > maxArea || n.getStatistic(NucleusStatistic.AREA) < minArea ){
-	        n.updateFailureCode(FAILURE_AREA);
+	        failureCode = failureCode | FAILURE_AREA;
 	        area++;
 	      }
 	      if(n.getStatistic(NucleusStatistic.PERIMETER) > maxPerim || n.getStatistic(NucleusStatistic.PERIMETER) < minPerim ){
-	        n.updateFailureCode(FAILURE_PERIM);
+	        failureCode = failureCode | FAILURE_PERIM;
 	        perim++;
 	      }
 	      if(n.getPathLength() > maxPathLength){ // only filter for values too big here - wibbliness detector
-	        n.updateFailureCode(FAILURE_THRESHOLD);
-	        pathlength++;
+	    	  failureCode = failureCode | FAILURE_THRESHOLD;
+	    	  pathlength++;
 	      }
 	      if(n.getBorderLength() > medianArrayLength * maxDifferenceFromMedian || n.getBorderLength() < medianArrayLength / maxDifferenceFromMedian ){
-	        n.updateFailureCode(FAILURE_ARRAY);
-	         arraylength++;
+	    	  failureCode = failureCode | FAILURE_ARRAY;
+	    	  arraylength++;
 	      }
 
 	      if(n.getStatistic(NucleusStatistic.MAX_FERET) < minFeret){
-	        n.updateFailureCode(FAILURE_FERET);
-	        feretlength++;
+	    	  failureCode = failureCode | FAILURE_FERET;
+	    	  feretlength++;
 	      }
 
-	      if(n.getFailureCode() > 0){
+	      if(failureCode > 0){
 	    	  RoundNucleus faiNucleus = new RoundNucleus(n);
 	    	  Cell failCell = new Cell();
 	    	  failCell.setNucleus(faiNucleus);
@@ -140,27 +141,11 @@ public class CollectionFilterer {
 	    medianArrayLength = collection.getMedianArrayLength();
 	    medianFeretLength = collection.getMedianStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
 
-	    int afterSize = collection.getNucleusCount();
-	    int removed = beforeSize - afterSize;
+//	    int afterSize = collection.getNucleusCount();
+//	    int removed = beforeSize - afterSize;
 
-//	    logger.log("Postfiltered values found");
-//	    exportFilterStats(collection);
-//	    logger.log("Removed due to size or length issues: "+removed+" nuclei");
-//	    logger.log("Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei");
-//	    logger.log("Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei");
-//	    logger.log("Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei");
-//	    logger.log("Due to array length: "+arraylength+" nuclei");
-//	    logger.log("Due to feret length: "+feretlength+" nuclei");
 	    logger.log(Level.INFO, "Remaining: "+collection.getNucleusCount()+" nuclei");
 	    
 	  }
 	
-//	private static void exportFilterStats(CellCollection collection) throws Exception{
-//
-//		double medianArea = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
-//	    double medianPerimeter = collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
-//	    double medianPathLength = collection.getMedianPathLength();
-//	    double medianArrayLength = collection.getMedianArrayLength();
-//	    double medianFeretLength = collection.getMedianStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);	    
-//	  }
 }

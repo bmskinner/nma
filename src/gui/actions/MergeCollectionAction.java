@@ -27,7 +27,6 @@ import java.util.List;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.nucleus.DatasetMerger;
-import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 
 public class MergeCollectionAction extends ProgressableAction {
 
@@ -36,7 +35,7 @@ public class MergeCollectionAction extends ProgressableAction {
 
 		SaveDialog saveDialog = new SaveDialog("Save merged dataset as...", "Merge_of_datasets", Constants.SAVE_FILE_EXTENSION);
 
-		String fileName = saveDialog.getFileName();
+		String fileName   = saveDialog.getFileName();
 		String folderName = saveDialog.getDirectory();
 		
 		if(fileName!=null && folderName!=null){

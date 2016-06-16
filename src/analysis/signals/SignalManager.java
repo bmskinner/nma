@@ -111,8 +111,18 @@ public class SignalManager implements Loggable{
 	      return collection.getSignalGroupIDs();
 	  }
 	  
+	  /**
+	   * Remove the given signal group
+	   * @param id
+	   */
 	  public void removeSignalGroup(UUID id){
 		  collection.removeSignalGroup(id);
+	  }
+	  
+	  public void removeSignalGroups(){
+		  for(UUID id : this.getSignalGroupIDs()){
+			  removeSignalGroup(id);
+		  }
 	  }
 	  
 	  /**

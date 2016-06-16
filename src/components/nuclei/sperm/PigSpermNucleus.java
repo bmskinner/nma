@@ -82,29 +82,7 @@ public class PigSpermNucleus
 		}
 	}
     
-    @Override
-	public int identifyBorderTagIndex(BorderTag tag){
-		
-		int result = 0;
-		switch(tag){
-		
-			case REFERENCE_POINT: 
-			try {
-				
-				// The RP in pig sperm is index with the maximum angle
-				
-				result = this.getProfile(ProfileType.REGULAR).getIndexOfMax();
-			} catch (Exception e) {
-				error("Error detecting RP in nucleus", e);
-				result = 0;
-			}
-				break;
-			default:
-				break;
-		}
-		return result;
-		
-	}
+
     
   /**
   * {@inheritDoc}

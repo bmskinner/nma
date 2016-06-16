@@ -408,6 +408,26 @@ public class SignalCollection implements Serializable, Loggable {
 	}
 	
 	/**
+	 * Remove all signals from the collection
+	 */
+	public void removeSignals(){
+		collection     = new LinkedHashMap<UUID, List<NuclearSignal>>();
+		sourceFiles    = new HashMap<UUID, File>(0);
+		sourceChannels = new HashMap<UUID, Integer>(0);
+		names          = new HashMap<UUID, String>();
+	}
+	
+	/**
+	 * Remove the given signal group from the collection
+	 */
+	public void removeSignals(UUID signalGroup){
+		collection.remove(signalGroup);
+		sourceFiles.remove(signalGroup);
+		sourceChannels.remove(signalGroup);
+		names.remove(signalGroup);
+	}	
+	
+	/**
 	 * Find the pairwise distances between all signals in the nucleus 
 	 */
 	private double[][] calculateDistanceMatrix(){

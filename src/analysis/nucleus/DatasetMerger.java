@@ -85,20 +85,20 @@ public class DatasetMerger extends AnalysisWorker {
 	private boolean merge(){
 				
 		if(datasets.size() <= 1){
-			log(Level.WARNING, "Must have multiple datasets to merge");
+			warn("Must have multiple datasets to merge");
 			return false;
 		}
 		
 		// check we are not merging a parent and child (would just get parent)
 		if(datasets.size()==2){ 
 			if(datasets.get(0).hasChild(datasets.get(1))  || datasets.get(1).hasChild(datasets.get(0)) ){
-				log(Level.WARNING, "Merging parent and child would be silly.");
+				warn("Merging parent and child would be silly.");
 				return false;
 			}
 		}
 
 		try{
-			log(Level.FINE, "Finding new names");
+			fine("Finding new names");
 
 			// Set the names for the new collection
 			File   newDatasetFolder = saveFile.getParentFile();
@@ -108,14 +108,14 @@ public class DatasetMerger extends AnalysisWorker {
 			newDatasetFile = checkName(newDatasetFile);
 
 			String newDatasetName = newDatasetFile.getName().replace(Constants.SAVE_FILE_EXTENSION, "");
-			log(Level.FINE, "Checked new file names");
+			fine("Checked new file names");
 
 			// check all collections are of the same type
 			if(! checkNucleusClass()){
-				log(Level.WARNING, "Error: cannot merge collections of different class");
+				warn( "Error: cannot merge collections of different class");
 				return false;
 			}
-			log(Level.FINE, "Checked nucleus classes match");
+			fine("Checked nucleus classes match");
 
 
 //			// make a new collection based on the first dataset
@@ -128,37 +128,6 @@ public class DatasetMerger extends AnalysisWorker {
 					);
 			
 			AnalysisDataset newDataset = performMerge(newCollection, datasets);
-//
-//			log(Level.FINE, "Created collection");
-//
-//			// add the cells from each population to the new collection
-//			log(Level.FINE, "Merging datasets");
-//			
-//			for(AnalysisDataset d : datasets){
-//
-//				for(Cell n : d.getCollection().getCells()){
-//					if(!newCollection.getCells().contains(n)){
-//						newCollection.addCell(new Cell(n)); // make a copy of the cell so segments can be merged
-//					}
-//				}
-//
-//			}
-//
-//
-//			// create the dataset; has no analysis options at present
-//			AnalysisDataset newDataset = new AnalysisDataset(newCollection);
-//			newDataset.setName(newDatasetName);
-//			newDataset.setRoot(true);
-//
-//			// Add the original datasets as merge sources
-//			for(AnalysisDataset d : datasets){
-//				newDataset.addMergeSource(d);
-//			}
-//
-//			// a merged dataset should not have analysis options
-//			// of its own; it lets each merge source display options
-//			// appropriately
-//			newDataset.setAnalysisOptions(null);
 
 			resultDatasets.add(newDataset);
 
@@ -183,17 +152,31 @@ public class DatasetMerger extends AnalysisWorker {
 	 */
 	private AnalysisDataset performMerge(CellCollection newCollection, List<AnalysisDataset> sources) throws Exception{
 
-		log(Level.FINE, "Merging datasets");
+		fine("Merging datasets");
 
 		for(AnalysisDataset d : datasets){
 
 			for(Cell cell : d.getCollection().getCells()){
+				
 				if(!newCollection.getCells().contains(cell)){
-					newCollection.addCell(new Cell(cell)); // make a copy of the cell so segments can be merged
+					
+					Cell newCell = new Cell(cell);
+					
+					// remove all signal information
+					newCell.getNucleus().getSignalCollection().removeSignals();
+					
+					newCollection.addCell(newCell); // make a copy of the cell so segments can be merged
+					
 				}
 			}
 
 		}
+		
+		// Remove signal groups
+		newCollection.getSignalManager().removeSignalGroups();
+		
+		// Remove existing profiles
+		newCollection.getProfileManager().removeProfiles();
 
 
 		// create the dataset; has no analysis options at present

@@ -79,7 +79,6 @@ public class RoundNucleus extends AbstractCellularComponent
 	private static final long serialVersionUID = 1L;
 		
 	protected int nucleusNumber; // the number of the nucleus in the current image
-	protected int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
 	protected int angleProfileWindowSize;
 
@@ -105,6 +104,13 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	private transient StringBuffer log = new StringBuffer();
 	
+	public RoundNucleus(Roi roi, File f, int channel, int number, double[] position){
+		
+		super(roi, f, channel, position);
+		
+		this.nucleusNumber   = number;
+		
+	}
 	
 	public RoundNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 		super(roi);
@@ -155,28 +161,28 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	
-	public int identifyBorderTagIndex(BorderTag tag){
-		
-		int result = 0;
-		switch(tag){
-		
-			case REFERENCE_POINT: 
-			try {
-				
-				// The RP in round nuclei is the index with the max diameter
-				
-				result = this.getProfile(ProfileType.DISTANCE).getIndexOfMax();
-			} catch (Exception e) {
-				error("Error detecting RP in nucleus", e);
-				result = 0;
-			}
-				break;
-			default:
-				break;
-		}
-		return result;
-		
-	}
+//	public int identifyBorderTagIndex(BorderTag tag){
+//		
+//		int result = 0;
+//		switch(tag){
+//		
+//			case REFERENCE_POINT: 
+//			try {
+//				
+//				// The RP in round nuclei is the index with the max diameter
+//				
+//				result = this.getProfile(ProfileType.DISTANCE).getIndexOfMax();
+//			} catch (Exception e) {
+//				error("Error detecting RP in nucleus", e);
+//				result = 0;
+//			}
+//				break;
+//			default:
+//				break;
+//		}
+//		return result;
+//		
+//	}
 	
 
 	/*
@@ -465,11 +471,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		return this.angleProfileWindowSize;
 	}
 
-	public int getFailureCode(){
-		return this.failureCode;
-	}
-		
-
 	/*
 		-----------------------
 		Protected setters for subclasses
@@ -493,10 +494,6 @@ public class RoundNucleus extends AbstractCellularComponent
 
 	protected void setNucleusFolder(File d){
 		this.nucleusFolder = d;
-	}
-
-	public void updateFailureCode(int i){
-		this.failureCode = this.failureCode | i;
 	}
 
 	public void setAngleProfileWindowSize(int i){

@@ -317,30 +317,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		return result;
 		
 	}
-			
-    @Override
-	public int identifyBorderTagIndex(BorderTag tag){
-		
-		int result = 0;
-		switch(tag){
-		
-			case REFERENCE_POINT: 
-			try {
-				
-				// The RP in mouse sperm is index with the minimum angle
-				
-				result = this.getProfile(ProfileType.REGULAR).getIndexOfMin();
-			} catch (Exception e) {
-				error("Error detecting RP in nucleus", e);
-				result = 0;
-			}
-				break;
-			default:
-				break;
-		}
-		return result;
-		
-	}
+
     
 	
 	/*

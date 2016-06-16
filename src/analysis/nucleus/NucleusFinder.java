@@ -215,8 +215,7 @@ public class NucleusFinder implements Loggable {
 
 		Cell result = null;
 		  // measure the area, density etc within the nucleus
-//		  Detector detector = new Detector();
-//		  detector.setStackNumber(Constants.rgbToStack(options.getChannel()));
+
 		ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
 		  StatsMap values = detector.measure(nucleus, ip);
 

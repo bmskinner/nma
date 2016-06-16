@@ -392,48 +392,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 */
 	public SignalCollection getSignalCollection();
 	
-	
-	/**
-	 * Get the number of signals in the nucleus
-	 * @return
-	 */
-//	public int getSignalCount();
-	
-	
-	/**
-	 * Get the number of signals in the given signal group
-	 * @param signalGroup
-	 * @return
-	 */
-//	public int getSignalCount(int signalGroup);
-	
-	
-	/**
-	 * @param n the signal
-	 * @param signalGroup the signal group to add to
-	 */
-//	public void addSignal(NuclearSignal n, int signalGroup);
-	
-	
-	/**
-	 * Get a copy of the signals in the given signal group
-	 * @param signalGroup the group
-	 * @return a list of COPIES of the nuclear signals in the group
-	 */
-//	public List<NuclearSignal> getSignals(int signalGroup);
-	
-	/**
-	 * Get the signals in the nucleus by group as a list of lists
-	 * @return the list of lists
-	 */
-//	public List<List<NuclearSignal>> getSignals();
-	
-	/**
-	 * Get the signal groups in the current signal collection
-	 * @return the set of group ids
-	 */
-//	public Set<Integer> getSignalGroups();
-	
+		
 	/**
 	 * Get a copy of the mapping of border tags to index positions within 
 	 * the border list of the nucleus
@@ -494,19 +453,6 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @throws Exception 
 	 */
 	public void updateSourceFolder(File newFolder);
-	
-	/**
-	 * Get the reason for a nucleus failing checks
-	 * @return
-	 */
-	public int getFailureCode();
-	
-	/**
-	 * Add a failure code to the nucleus
-	 * @param failureFeret
-	 */
-	public void updateFailureCode(int failCode);
-	
 	
 	/*
 	 * Rotations

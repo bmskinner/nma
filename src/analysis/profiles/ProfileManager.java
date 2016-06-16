@@ -73,6 +73,13 @@ public class ProfileManager implements Loggable {
 		return collection.getProfileCollection(ProfileType.REGULAR).length();
 	}
 	
+	public void removeProfiles(){
+		for(ProfileType type : ProfileType.values()){
+			collection.removeProfileCollection(type);
+		}
+		
+	}
+	
 	/**
 	 * Update the given tag in each nucleus of the collection to the index with a best fit
 	 * of the profile to the given median profile
