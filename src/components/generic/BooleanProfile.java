@@ -74,7 +74,8 @@ public class BooleanProfile implements Serializable, Loggable {
 	/**
 	 * Construct a profile with
 	 * the same length as the input and the given values
-	 * @param p
+	 * @param p the template profile (for length)
+	 * @param b the default value
 	 */
 	public BooleanProfile(final Profile p, boolean b){
 		this.array = new boolean[p.size()];

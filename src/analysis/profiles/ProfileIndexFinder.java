@@ -141,7 +141,7 @@ public class ProfileIndexFinder implements Loggable {
 	 * given RuleSets
 	 * @param collection
 	 * @param list
-	 * @return
+	 * @return -2 if the RuleSet list is empty; -1 if the index is not found; else the index
 	 */
 	public int identifyIndex(final CellCollection collection, final List<RuleSet> list){
 		
@@ -149,6 +149,8 @@ public class ProfileIndexFinder implements Loggable {
 			return -2;
 		}
 		
+		
+		// Make a 'true' profile
 		BooleanProfile indexes = new BooleanProfile(collection
 					.getProfileCollection(ProfileType.REGULAR)
 					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN), true);
@@ -161,11 +163,13 @@ public class ProfileIndexFinder implements Loggable {
 					.getProfileCollection(r.getType())
 					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
 			
+			// Apply the rule, and update the result profile
 			BooleanProfile matchingIndexes = getMatchingIndexes(p, r);
 			indexes = indexes.and(matchingIndexes);
 			
 		}
 		
+		// Find the first true in the result profile
 		for(int i=0;i<indexes.size();i++){
 
 			if(indexes.get(i)){

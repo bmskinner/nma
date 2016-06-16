@@ -133,7 +133,8 @@ public class RuleSetCollection implements Serializable, Loggable {
 	private static RuleSetCollection createPigSpermRuleSets(){
 		RuleSetCollection r = new RuleSetCollection();
 		
-		r.addRuleSet(BorderTag.REFERENCE_POINT, RuleSet.pigSpermRPRuleSet());
+		r.addRuleSet(BorderTag.REFERENCE_POINT,   RuleSet.pigSpermRPRuleSet());
+		r.addRuleSet(BorderTag.ORIENTATION_POINT, RuleSet.pigSpermRPRuleSet());
 		return r;
 	}
 	

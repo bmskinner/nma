@@ -118,14 +118,35 @@ public class DatasetProfiler extends AnalysisWorker {
 			collection.getProfileManager()
 				.offsetNucleusProfiles(BorderTag.REFERENCE_POINT, ProfileType.REGULAR, median);
 			
+			// Now each nucleus should be at the best fit to the median profile from the RP
+			
 			// Rebuild the median
 			
 			{
-				// This section is not really necessary
 				// check the RP in the median is still at zero
+				
 				ProfileIndexFinder finder = new ProfileIndexFinder();
 				int rpIndex = finder.identifyIndex(collection, BorderTag.REFERENCE_POINT);
 				fine("RP in median is located at index "+rpIndex);
+				
+				// If RP is not at zero, update
+				if(rpIndex!=0){
+					fine("RP in median is not yet at zero");
+					collection.getProfileManager()
+						.updateProfileCollectionOffsets(BorderTag.REFERENCE_POINT, rpIndex);
+					finer("Changed RP index in median to "+rpIndex);
+					
+					// Get the median again, using the new RP
+					median = collection.getProfileCollection(ProfileType.REGULAR)
+							.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+					
+					// Update the nuclei
+					collection.getProfileManager()
+						.offsetNucleusProfiles(BorderTag.REFERENCE_POINT, ProfileType.REGULAR, median);
+					
+					rpIndex = finder.identifyIndex(collection, BorderTag.REFERENCE_POINT);
+					fine("RP in median is now located at index "+rpIndex);
+				}
 			
 			}
 			
@@ -152,6 +173,7 @@ public class DatasetProfiler extends AnalysisWorker {
 				fine("Reticulating splines: score: "+(int)score);
 			}
 			
+
 			fine("Identified best RP in nuclei and constructed median profiles");
 			
 			fine("Identifying OP and other BorderTags");
@@ -166,10 +188,19 @@ public class DatasetProfiler extends AnalysisWorker {
 				// We do need to assign the RP in other ProfileTypes though
 				if(tag.equals(BorderTag.REFERENCE_POINT)){
 					
-					collection.getProfileManager()
+					fine("Checking location of RP in profile");
+					int index = finder.identifyIndex(collection, tag);
+					
+					fine("RP is found at index "+index);
+
+					if(index!=0){
+						collection.getProfileManager()
 						.updateProfileCollectionOffsets(tag, 0);
+						fine("Forcing RP to index zero");
+					}
 					continue; 
 				}
+				
 					
 				int index = finder.identifyIndex(collection, tag);
 
@@ -181,10 +212,10 @@ public class DatasetProfiler extends AnalysisWorker {
 						index = 0;
 						
 					}
-					
+										
 					// Add the index to the median profiles
 					collection.getProfileManager()
-					.updateProfileCollectionOffsets(tag, index);
+						.updateProfileCollectionOffsets(tag, index);
 
 					fine(tag+" in median is located at index "+index);
 
@@ -193,7 +224,7 @@ public class DatasetProfiler extends AnalysisWorker {
 							.getProfile(tag, Constants.MEDIAN);
 
 					collection.getProfileManager()
-					.offsetNucleusProfiles(tag, ProfileType.REGULAR, tagMedian);
+						.offsetNucleusProfiles(tag, ProfileType.REGULAR, tagMedian);
 					fine("Assigned offset in nucleus profiles for "+tag);
 					
 

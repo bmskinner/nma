@@ -69,6 +69,10 @@ public class ProfileManager implements Loggable {
 		this.collection = collection;
 	}
 	
+	public int getProfileLength(){
+		return collection.getProfileCollection(ProfileType.REGULAR).length();
+	}
+	
 	/**
 	 * Update the given tag in each nucleus of the collection to the index with a best fit
 	 * of the profile to the given median profile
@@ -125,6 +129,10 @@ public class ProfileManager implements Loggable {
 	 * @param index
 	 */
 	public void updateProfileCollectionOffsets(BorderTag tag, int index){
+		
+		// check the index for wrapping - observed problem when OP==RP in rulesets
+		
+		index = AbstractCellularComponent.wrapIndex(index, getProfileLength());
 		
 		for(ProfileType type : ProfileType.values()){
 			if(type.equals(ProfileType.FRANKEN)){
@@ -483,7 +491,7 @@ public class ProfileManager implements Loggable {
 	 * @param destination the collection to update
 	 * @throws Exception 
 	 */
-	public void copyCollectionOffsets( final CellCollection destination) throws Exception{
+	public void copyCollectionOffsets( final CellCollection destination) {
 		
 		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
 				.getSegments(BorderTag.REFERENCE_POINT);
