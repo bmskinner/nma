@@ -29,6 +29,7 @@ import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
 import analysis.signals.SignalDetector;
+import analysis.signals.SignalManager;
 import components.Cell;
 import components.CellCollection;
 import components.nuclear.SignalGroup;
@@ -78,23 +79,30 @@ public class AddNuclearSignalAction extends ProgressableAction {
 	
 	@Override
 	public void finished(){
+		finer("Finished signal detection");
 		// divide population into clusters with and without signals
 		List<CellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
 
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		for(CellCollection collection : signalPopulations){
-			
+			finer("Processing "+collection.getName());
 			processSubPopulation(collection);
+			finer("Processed "+collection.getName());
 			list.add(dataset.getChildDataset(collection.getID()));
 		}
+		
+		fine("Finished processing sub-populations");
 		// we have morphology analysis to carry out, so don't use the super finished
 		// use the same segmentation from the initial analysis
 		int flag = 0; // set the downstream analyses to run
 		flag |= MainWindow.ADD_POPULATION;
+		fine("Firing cache refresh request");
 		fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
+		fine("Running new segmentation on sub-populations");
 		new RunSegmentationAction(list, dataset, flag, mw);
 
 		cancel();
+		
 	}
 
 	/**
@@ -104,18 +112,28 @@ public class AddNuclearSignalAction extends ProgressableAction {
 	 */
 	private void processSubPopulation(CellCollection collection){
 
+		finer("Creating new analysis dataset for "+collection.getName());
 		AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
 		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
 
-		log("Sub-population: "+collection.getNucleusCount()+" nuclei");
+		log("Sub-population "+collection.getName()+": "+collection.getNucleusCount()+" nuclei");
+		SignalManager m = collection.getSignalManager();
 		
+		// Remove any signal groups that have no signals in the population
+		finer(collection.getName()+" has "+collection.getSignalGroupIDs().size()+" signal groups");
 		for(UUID signalGroup : collection.getSignalGroupIDs()){// : collection.getSignalGroups()){
+			fine("Checking signal group "+m.getSignalGroupName(signalGroup));
 			
 			if(collection.getSignalManager().getSignalCount(signalGroup)==0){ // Signal group has no signals
+				finer("Signals not present in group "+m.getSignalGroupName(signalGroup));
+				
+				// No need to keep the group
 				collection.removeSignalGroup(signalGroup);
+				finer("Removed signal group");
 			}
+			finer("Checked signal group "+m.getSignalGroupName(signalGroup));
 		}
-
+		finer("Adding "+collection.getName()+" as child dataset");
 		dataset.addChildDataset(subDataset);
 	}
 
@@ -138,7 +156,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 			List<Cell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
 			if(!list.isEmpty()){
-				log("Signal group "+signalGroup+": found nuclei with signals");
+				log("Signal group "+group.getGroupName()+": found nuclei with signals");
 				CellCollection listCollection = new CellCollection(r.getFolder(), 
 						r.getOutputFolderName(), 
                         group.getGroupName()+"_with_signals", 
@@ -146,17 +164,19 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 				for(Cell c : list){
 
-					finest("  Added cell: "+c.getNucleus().getNameAndNumber());
-					finest("  Cell has: "+c.getNucleus().getSignalCollection().numberOfSignals()+" signals");
+					finer("  Added cell: "+c.getNucleus().getNameAndNumber());
+					finer("  Cell has: "+c.getNucleus().getSignalCollection().numberOfSignals()+" signals");
 					Cell newCell = new Cell(c);
-					finest("  New cell has: "+newCell.getNucleus().getSignalCollection().numberOfSignals()+" signals");
+					finer("  New cell has: "+newCell.getNucleus().getSignalCollection().numberOfSignals()+" signals");
 
 					listCollection.addCell( newCell );
 				}
 				signalPopulations.add(listCollection);
 				
 				// Copy over existing signal groups
+				finer("Adding existing signal groups to collection "+listCollection.getName());
 				for(UUID id  : r.getSignalGroupIDs()){
+					finer("Adding signal group "+r.getSignalGroup(id).getGroupName()+ " to "+listCollection.getName());
 					listCollection.addSignalGroup(id, new SignalGroup(r.getSignalGroup(id)));
 				}
                 listCollection.addSignalGroup(signalGroup, new SignalGroup(r.getSignalGroup(signalGroup)));
@@ -164,7 +184,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 				List<Cell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
 				if(!notList.isEmpty()){
-					log("Signal group "+signalGroup+": found nuclei without signals");
+					log("Signal group "+r.getSignalGroup(signalGroup).getGroupName()+": found nuclei without signals");
 					CellCollection notListCollection = new CellCollection(r.getFolder(), 
 							r.getOutputFolderName(), 
                             group.getGroupName()+"_without_signals", 
@@ -175,18 +195,22 @@ public class AddNuclearSignalAction extends ProgressableAction {
 					}
 					
 					// Copy over existing signal groups
+					finer("Adding existing signal groups to collection "+notListCollection.getName());
 					for(UUID id  : r.getSignalGroupIDs()){
-						notListCollection.addSignalGroup(id, new SignalGroup(r.getSignalGroup(id)));
+						if( ! id.equals(signalGroup)){ // don't bother adding the signals that aren't there
+							finer("Adding signal group "+r.getSignalGroup(signalGroup).getGroupName()+" to "+notListCollection.getName());
+							notListCollection.addSignalGroup(id, new SignalGroup(r.getSignalGroup(id)));
+						}
 					}
 					signalPopulations.add(notListCollection);
 				}
 
 			}
-
+			
 		} catch(Exception e){
 			error("Cannot create collection", e);
 		}
-
+		fine("Finished dividing populations based on signals");
 		return signalPopulations;
 	}
 }

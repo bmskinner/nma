@@ -135,11 +135,11 @@ public class SignalManager implements Loggable{
 	  }
 	  
 	  public String getSignalGroupName(UUID signalGroup){
-		  if(this.hasSignals(signalGroup)){
+//		  if(this.hasSignals(signalGroup)){
 			  return collection.getSignalGroup(signalGroup).getGroupName();
-		  } else {
-			  return "Null signal group";
-		  }
+//		  } else {
+//			  return "Null signal group";
+//		  }
 		 
 	  }
 	  
@@ -198,14 +198,18 @@ public class SignalManager implements Loggable{
 	  /**
 	   * Get the number of signals in the given group
 	   * @param signalGroup the group to search
-	   * @return the count
+	   * @return the count or -1 if the signal group is not present
 	   */
 	  public int getSignalCount(UUID signalGroup){
 		  int count = 0;
-		  for(Nucleus n : collection.getNuclei()){
-			  count += n.getSignalCollection().numberOfSignals(signalGroup);
+		  
+		  if(collection.getSignalGroupIDs().contains(signalGroup)){
+			  count=0;
+			  for(Nucleus n : collection.getNuclei()){
+				  count += n.getSignalCollection().numberOfSignals(signalGroup);
 
-		  } // end nucleus iterations
+			  } // end nucleus iterations
+		  }
 		  return count;
 	  }
 

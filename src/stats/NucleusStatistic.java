@@ -138,7 +138,7 @@ public enum NucleusStatistic implements PlottableStatistic, Loggable {
 			  break;
 				
 		}
-		finer("Converting "+value+" to "+scale+" gives "+result);
+//		finer("Converting "+value+" to "+scale+" gives "+result);
 		return result;
 	  }
 	  
