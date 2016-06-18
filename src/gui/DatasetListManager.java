@@ -1,7 +1,9 @@
 package gui;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import analysis.AnalysisDataset;
 
@@ -14,7 +16,7 @@ public final class DatasetListManager {
 	
 	private static DatasetListManager instance = null;
 	
-	private final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+	private final Set<AnalysisDataset> list = new HashSet<AnalysisDataset>();
 	
 	protected DatasetListManager(){}
 	
@@ -27,6 +29,10 @@ public final class DatasetListManager {
 			instance = new DatasetListManager();
 		}
 		return instance;
+	}
+	
+	public Set<AnalysisDataset> getRootDatasets(){
+		return list;
 	}
 	
 	public void addDataset(AnalysisDataset d){

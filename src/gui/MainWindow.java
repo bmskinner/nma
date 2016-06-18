@@ -151,13 +151,10 @@ public class MainWindow
 	public static final int maximumPoolSize = 8;
 	public static final int keepAliveTime = 5000;
 
-	ExecutorService executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
+	public final ExecutorService executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
 			keepAliveTime, TimeUnit.MILLISECONDS,
 			new LinkedBlockingQueue<Runnable>());
 	
-//	ExecutorService checkTasksExecutorService = new ThreadPoolExecutor(1, 20,
-//		    100000, TimeUnit.MILLISECONDS,
-//		    new SynchronousQueue<Runnable>());
 	
 	
 	/**
@@ -675,7 +672,7 @@ public class MainWindow
 		}
 		
 		if(event.type().equals("SaveCollectionAction")){
-			this.saveDatasetAs(selectedDataset);
+			this.saveDataset(selectedDataset, true);
 		}
 		
 
@@ -788,14 +785,16 @@ public class MainWindow
 			
 			if(event.method().equals(DatasetMethod.SAVE)){
 				
-				Runnable task = () -> { saveDataset(event.firstDataset());};
-				executorService.execute(task);
+//				Runnable task = () -> { 
+					saveDataset(event.firstDataset(), false);
+//				};
+//				executorService.execute(task);
 				
 			}
 			
 			if(event.method().equals(DatasetMethod.EXTRACT_SOURCE)){
 				Runnable task = () -> { 
-					log(Level.INFO, "Recovering source dataset");
+					log("Recovering source dataset");
 					for(AnalysisDataset d : list){
 						d.setRoot(true);
 						populationsPanel.addDataset(d);
@@ -922,83 +921,53 @@ public class MainWindow
 					try {
 						latch.await();
 					} catch (InterruptedException e) {
-						log(Level.SEVERE, "Interruption to thread", e);
+						error("Interruption to thread", e);
 					}
 				}
-				log(Level.INFO, "All root datasets saved");
+				log("All root datasets saved");
 			}
 			
 		});
 	}
 	
 	
-	
-	private void saveDatasetAs(final AnalysisDataset d){
-		
-		executorService.execute(new Runnable() {
-			public void run() {
-				if(d.isRoot()){
-
-					final CountDownLatch latch = new CountDownLatch(1);
-					new SaveDatasetAction(d, MainWindow.this, latch, true);
-					try {
-						finest("Awaiting latch for save action");
-						latch.await();
-					} catch (InterruptedException e) {
-						error("Interruption to thread", e);
-					}
-
-					log(Level.FINE, "Root dataset saved");
-				} else {
-
-					AnalysisDataset target = null; 
-					for(AnalysisDataset root : populationsPanel.getRootDatasets()){
-
-						for(AnalysisDataset child : root.getAllChildDatasets()){
-							if(child.getUUID().equals(d.getUUID())){
-								target = root;
-								break;
-							}
-						}
-						if(target!=null){
-							break;
-						}
-					}
-					if(target!=null){
-						saveDatasetAs(target);
-					}
-				}
-			}
-
-		});
-		
-	}
-	
 	/**
 	 * Save the given dataset. If it is root, save directly.
 	 * If it is not root, find the root parent and save it.
 	 * @param d
+	 * @param saveAs should the action ask for a directory
 	 */	
-	private void saveDataset(final AnalysisDataset d){
+	public void saveDataset(final AnalysisDataset d, boolean saveAs){
 		
-		executorService.execute(new Runnable() {
-			public void run() {
+//		executorService.execute(new Runnable() {
+//			public void run() {
 				if(d.isRoot()){
-
+					finer("Dataset is root");
+					finest("Creating latch");
 					final CountDownLatch latch = new CountDownLatch(1);
-					new SaveDatasetAction(d, MainWindow.this, latch, false);
-					try {
-						log(Level.FINEST, "Awaiting latch for save action");
-						latch.await();
-					} catch (InterruptedException e) {
-						log(Level.SEVERE, "Interruption to thread", e);
-					}
+					
+					Runnable r = () -> {
+						finest("Running save action");
+						new SaveDatasetAction(d, MainWindow.this, latch, saveAs);
+					};
+					finest("Passing save action to executor service");
+					executorService.submit(r);//.execute(r);
+//					Thread thr = new Thread(r);
+//					thr.start();
+					
+//					try {
+//						finest("Awaiting latch for save action");
+//						latch.await();
+//					} catch (InterruptedException e) {
+//						error("Interruption to thread", e);
+//					}
 
-					log(Level.FINE, "Root dataset saved");
+					fine("Root dataset saved");
 				} else {
-
+					finest("Not a root dataset, checking for parent");
 					AnalysisDataset target = null; 
-					for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+					for(AnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
+//					for(AnalysisDataset root : populationsPanel.getRootDatasets()){
 
 						for(AnalysisDataset child : root.getAllChildDatasets()){
 							if(child.getUUID().equals(d.getUUID())){
@@ -1011,12 +980,12 @@ public class MainWindow
 						}
 					}
 					if(target!=null){
-						saveDataset(target);
+						saveDataset(target, saveAs);
 					}
 				}
-			}
+//			}
 
-		});
+//		});
 	}
 	
 	

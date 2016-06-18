@@ -34,7 +34,7 @@ import analysis.AnalysisWorker;
 public class PopulationExporter extends AnalysisWorker {
 	
 	private File   saveFile = null;
-	private boolean useHDF5 = false;
+//	private boolean useHDF5 = false;
 	
 	public PopulationExporter(AnalysisDataset dataset, File saveFile) {
 		super(dataset);		
@@ -46,10 +46,10 @@ public class PopulationExporter extends AnalysisWorker {
 		
 		try{
 		
-			if(useHDF5){
-				saveAnalysisDatasetToHDF5(getDataset());
-				return true;
-			} 
+//			if(useHDF5){
+//				saveAnalysisDatasetToHDF5(getDataset());
+//				return true;
+//			} 
 
 			if(saveAnalysisDataset(getDataset(), saveFile)){
 				finest("Save was sucessful");        

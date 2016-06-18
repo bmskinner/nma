@@ -81,7 +81,7 @@ abstract class ProgressableAction implements PropertyChangeListener, Loggable {
 
 		this.addInterfaceEventListener(mw);
 		this.addDatasetEventListener(mw);
-		log(Level.FINEST, "Created progressable action");
+		finest( "Created progressable action");
 
 	}
 	
@@ -101,7 +101,7 @@ abstract class ProgressableAction implements PropertyChangeListener, Loggable {
 
 		this.addInterfaceEventListener(mw);
 		this.addDatasetEventListener(mw);
-		log(Level.FINEST, "Created progressable action");
+		finest( "Created progressable action");
 
 	}
 	
@@ -181,7 +181,7 @@ abstract class ProgressableAction implements PropertyChangeListener, Loggable {
 	 * Remove the progress bar and dataset and interface listeners 
 	 */
 	public void cancel(){
-		log(Level.FINEST, "Removing interface and dataset listeners");
+		finest( "Removing interface and dataset listeners");
 		removeProgressBar();
 		removeDatasetEventListener(mw);
 		removeInterfaceEventListener(mw);
@@ -216,7 +216,7 @@ abstract class ProgressableAction implements PropertyChangeListener, Loggable {
 		}
 
 		if(evt.getPropertyName().equals("Finished")){
-			log(Level.FINEST,"Worker signaled finished");
+			finest("Worker signaled finished");
 			finished();
 		}
 
@@ -226,7 +226,7 @@ abstract class ProgressableAction implements PropertyChangeListener, Loggable {
 		}
 		
 		if(evt.getPropertyName().equals("Cooldown")){
-			log(Level.FINEST,"Worker signaled cooldown");
+			finest("Worker signaled cooldown");
 			cooldown();
 		}
 		
@@ -237,7 +237,7 @@ abstract class ProgressableAction implements PropertyChangeListener, Loggable {
 	 */
 	public void finished(){
 		removeProgressBar();		
-		log(Level.FINEST, "Removing event listeners from action");
+		finest( "Removing event listeners from action");
 		this.removeInterfaceEventListener(mw);
 		this.removeDatasetEventListener(mw);
 	}
