@@ -57,6 +57,7 @@ import analysis.signals.SignalWarper;
 import gui.LoadingIconDialog;
 import gui.components.FixedAspectRatioChartPanel;
 import gui.components.panels.DatasetSelectionPanel;
+import gui.components.panels.SignalGroupSelectionPanel;
 
 @SuppressWarnings("serial")
 public class SignalWarpingDialog extends LoadingIconDialog implements PropertyChangeListener, ActionListener{
@@ -66,8 +67,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	
 	private DatasetSelectionPanel datasetBoxOne;
 	private DatasetSelectionPanel datasetBoxTwo;
-
-	private JComboBox<SignalIDToGroup> signalGroupSelectedBox;
+	
+	private SignalGroupSelectionPanel signalBox;
 
 	private JButton runButton;
 	private JCheckBox cellsWithSignalsBox;
@@ -132,22 +133,16 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 		SignalManager m =  datasets.get(0).getCollection().getSignalManager();
 
-		
-		List<SignalIDToGroup> list = getGroups(datasetBoxOne.getSelectedDataset());
-
-		signalGroupSelectedBox = new JComboBox<SignalIDToGroup>(list.toArray( new SignalIDToGroup[0] ));
-		signalGroupSelectedBox.setSelectedIndex(0);
-		SignalIDToGroup signalGroup = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
-		
-		UUID id = signalGroup.id;
+		signalBox = new SignalGroupSelectionPanel(datasetBoxOne.getSelectedDataset());
+		UUID id   = signalBox.getSelectedID();
 
 		totalCells = m.getNumberOfCellsWithNuclearSignals(id);
 		
 		upperPanel.add(new JLabel("Signal group"));
-		upperPanel.add(signalGroupSelectedBox);		
+		upperPanel.add(signalBox);		
 		finest("Added signal group box");
 				
-		signalGroupSelectedBox.addActionListener(this);
+		signalBox.addActionListener(this);
 		
 		cellsWithSignalsBox = new JCheckBox("Only include cells with signals", true);
 		cellsWithSignalsBox.addActionListener(this);
@@ -189,16 +184,16 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		AnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
 		AnalysisDataset targetDataset = datasetBoxTwo.getSelectedDataset();
 		
-		SignalIDToGroup group    = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
+//		SignalIDToGroup group    = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
 		boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
 		
 		totalCells = cellsWithSignals 
-				? sourceDataset.getCollection().getSignalManager().getNumberOfCellsWithNuclearSignals(group.id) 
+				? sourceDataset.getCollection().getSignalManager().getNumberOfCellsWithNuclearSignals(signalBox.getSelectedID()) 
 				: sourceDataset.getCollection().getNucleusCount();
 				
 //		log("Found "+totalCells+" using signals only = "+cellsWithSignals);
 						
-		finest("Signal group: "+group);
+		finest("Signal group: "+signalBox.getSelectedGroup());
 		try {
 			setStatusLoading();
 			setEnabled(false);
@@ -210,7 +205,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 			
 
-			warper = new SignalWarper(sourceDataset, targetDataset, group.id, cellsWithSignals);
+			warper = new SignalWarper(sourceDataset, targetDataset, signalBox.getSelectedID(), cellsWithSignals);
 			warper.addPropertyChangeListener(this);
 			warper.execute();
 			
@@ -224,7 +219,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	
 	@Override
 	public void setEnabled(boolean b){
-		signalGroupSelectedBox.setEnabled(b);
+		signalBox.setEnabled(b);
 		cellsWithSignalsBox.setEnabled(b);
 		runButton.setEnabled(b);
 		datasetBoxOne.setEnabled(b);
@@ -297,42 +292,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 	}
 	
-	@SuppressWarnings("unused")
-	private class SignalIDToGroup {
-		
-		final private UUID id;
-		final private SignalGroup group;
-		
-		public SignalIDToGroup(final UUID id, final SignalGroup group){
-			this.id = id;
-			this.group = group;
-		}
-				
-		public UUID getId() {
-			return id;
-		}
-
-		public SignalGroup getGroup() {
-			return group;
-		}
-
-
-
-		public String toString(){
-			return group.getGroupName();
-		}
-	
-	}
-	
-	public List<SignalIDToGroup> getGroups(AnalysisDataset d){
-		SignalManager m =  d.getCollection().getSignalManager();
-		Set<UUID> signalGroups = m.getSignalGroupIDs();
-		List<SignalIDToGroup> list = new ArrayList<SignalIDToGroup>();
-		for(UUID id : signalGroups){
-			list.add(new SignalIDToGroup(id, d.getCollection().getSignalGroup(id)));
-		}
-		return list;
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -340,13 +299,13 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 		SignalManager m =  sourceDataset.getCollection().getSignalManager();
 		if( ! m.hasSignals()){
-			signalGroupSelectedBox.setEnabled(false);
+			signalBox.setEnabled(false);
 			cellsWithSignalsBox.setEnabled(false);
 			runButton.setEnabled(false);
 			datasetBoxTwo.setEnabled(false);
 			
 		} else {
-			signalGroupSelectedBox.setEnabled(true);
+			signalBox.setEnabled(true);
 			cellsWithSignalsBox.setEnabled(true);
 			runButton.setEnabled(true);
 			datasetBoxTwo.setEnabled(true);
@@ -355,13 +314,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		if(e.getSource()==datasetBoxOne){
 			
 			if( m.hasSignals()){
-
-				List<SignalIDToGroup> list = getGroups(sourceDataset);
-
-				ComboBoxModel<SignalIDToGroup> model = new DefaultComboBoxModel<SignalIDToGroup>(list.toArray( new SignalIDToGroup[0] ));
-
-				signalGroupSelectedBox.setModel(model);
-				signalGroupSelectedBox.setSelectedIndex(0);
+				
+				signalBox.setDataset(sourceDataset);
 			}
 
 			
@@ -372,12 +326,12 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			chartPanel.setChart(chart);
 		}
 		
-		SignalIDToGroup group = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
+//		SignalIDToGroup group = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
 				
 		boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
 		
 		totalCells = cellsWithSignals 
-				? m.getNumberOfCellsWithNuclearSignals(group.id) 
+				? m.getNumberOfCellsWithNuclearSignals(signalBox.getSelectedID()) 
 				: datasets.get(0).getCollection().getNucleusCount();
 				
 		
