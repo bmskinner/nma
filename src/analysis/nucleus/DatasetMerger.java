@@ -56,9 +56,13 @@ public class DatasetMerger extends AnalysisWorker {
 	
 	@Override
 	protected Boolean doInBackground() {
-		
-		boolean result = merge();
-		return result;
+		try {
+			boolean result = merge();
+			return result;
+		} catch(Exception e){
+			error("Error merging datasets", e);
+			return false;
+		}
 	}
 		
 	public List<AnalysisDataset> getResults(){
@@ -163,7 +167,7 @@ public class DatasetMerger extends AnalysisWorker {
 					Cell newCell = new Cell(cell);
 					
 					// remove all signal information
-					newCell.getNucleus().getSignalCollection().removeSignals();
+//					newCell.getNucleus().getSignalCollection().removeSignals();
 					
 					newCollection.addCell(newCell); // make a copy of the cell so segments can be merged
 					
@@ -176,7 +180,7 @@ public class DatasetMerger extends AnalysisWorker {
 		newCollection.getSignalManager().removeSignalGroups();
 		
 		// Remove existing profiles
-		newCollection.getProfileManager().removeProfiles();
+//		newCollection.getProfileManager().removeProfiles();
 
 
 		// create the dataset; has no analysis options at present

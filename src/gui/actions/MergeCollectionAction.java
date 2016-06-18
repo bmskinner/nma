@@ -19,6 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
+import gui.dialogs.DatasetMergingDialog;
 import ij.io.SaveDialog;
 
 import java.io.File;
@@ -40,6 +41,9 @@ public class MergeCollectionAction extends ProgressableAction {
 		
 		if(fileName!=null && folderName!=null){
 			File saveFile = new File(folderName+File.separator+fileName);
+			
+			new DatasetMergingDialog(datasets);
+			
 			worker = new DatasetMerger(datasets, saveFile);
 			worker.addPropertyChangeListener(this);
 			worker.execute();	

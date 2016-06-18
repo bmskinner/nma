@@ -24,15 +24,28 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 	
 	public SignalGroupSelectionPanel(AnalysisDataset d) {
 		
+		
 		List<SignalIDToGroup> list = getGroups(d);
 
 		box = new JComboBox<SignalIDToGroup>(list.toArray( new SignalIDToGroup[0] ));
-		box.setSelectedIndex(0);
+		
+		SignalManager m =  d.getCollection().getSignalManager();
+		if( m.hasSignals()){
+			box.setSelectedIndex(0);
+		}
+		
 		box.addActionListener(this);
 		this.add(box);
 	}
 	
 	public void setDataset(AnalysisDataset d){
+		
+		SignalManager m =  d.getCollection().getSignalManager();
+		if( ! m.hasSignals()){
+			this.setEnabled(false);
+			return;
+		}
+		
 		List<SignalIDToGroup> list = getGroups(d);
 		
 		ComboBoxModel<SignalIDToGroup> model = new DefaultComboBoxModel<SignalIDToGroup>(list.toArray( new SignalIDToGroup[0] ));
