@@ -91,7 +91,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 					}
 
 					// Adjust the scale
-					if(rowName.equals("Scale (um/pixel)")){
+					if(rowName.equals("Scale (pixels/um)")){
 						
 						updateScale();
 					}
@@ -203,18 +203,20 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	
 	private void updateScale(){
 		SpinnerNumberModel sModel 
-		= new SpinnerNumberModel(activeCell.getNucleus().getScale(), 0, 100, 0.001);
+		= new SpinnerNumberModel(activeCell.getNucleus().getScale(), 1, 100000, 1);
 		JSpinner spinner = new JSpinner(sModel);
 
 
 		int option = JOptionPane.showOptionDialog(null, 
 				spinner, 
-				"Choose the new scale", 
+				"Choose the new scale: pixels per micron", 
 				JOptionPane.OK_CANCEL_OPTION, 
 				JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (option == JOptionPane.CANCEL_OPTION) {
 			// user hit cancel
 		} else if (option == JOptionPane.OK_OPTION)	{
+			
+			//TODO: merged datasets - apply to merge source cells only or all cells
 
 			Object[] options = { "Apply to all cells" , "Apply to only this cell", };
 			int applyAllOption = JOptionPane.showOptionDialog(null, "Apply this scale to all cells in the dataset?", "Apply to all?",

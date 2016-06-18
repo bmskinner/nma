@@ -303,18 +303,18 @@ public class Utils {
 	
 	/**
 	 * Convert the length in pixels into a length in microns.
-	 * Assumes that the scale is in metres
+	 * Assumes that the scale is in pixels per micron
 	 * @param pixels the number of pixels
 	 * @param scale the size of a pixel in microns
 	 * @return
 	 */
 	public static double micronLength(double pixels, double scale){
-		double microns = pixels * scale;
+		double microns = pixels / scale;
 		return microns;
 	}
 	
 	public static double micronArea(double pixels, double scale){
-		double microns = pixels * scale;
+		double microns = pixels / scale;
 		return microns;
 	}	
  }

@@ -110,7 +110,7 @@ public enum NucleusStatistic implements PlottableStatistic, Loggable {
 	   * Convert the input value (assumed to be pixels) using the given
 	   * factor ( Nucleus.getScale() ) into the appropriate scale
 	   * @param value the pixel measure
-	   * @param factor the conversion factor to microns
+	   * @param factor the conversion factor pixels per micron
 	   * @param scale the desired scale
 	   * @return
 	   */

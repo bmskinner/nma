@@ -108,7 +108,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 
 	private JCheckBox refoldCheckBox;
 	
-	private JSpinner scaleSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_SCALE,	0, 100, 0.001));
+	private JSpinner scaleSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_SCALE,	1, 100000, 1));
 
 	private JCheckBox keepFailedheckBox = new JCheckBox();
 	
@@ -518,7 +518,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		labels.add(new JLabel("Min nucleus circ"));
 		labels.add(new JLabel("Max nucleus circ"));
 		labels.add(new JLabel("Profile window"));
-		labels.add(new JLabel("Scale (microns/pixel)"));
+		labels.add(new JLabel("Scale (pixels/micron)"));
 		labels.add(new JLabel("Keep filtered nuclei"));
 		
 		List<Component> fields = new ArrayList<Component>();

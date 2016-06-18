@@ -85,7 +85,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	
 	private int channel; // the RGB channel in which the signal was seen
 	
-	private double scale = 1; // allow conversion between pixels and SI units. The length of a pixel in microns
+	private double scale = 1; // allow conversion between pixels and SI units. The length of a micron in pixels
 	
 	// The points around the border of the object
 	private List<BorderPoint> borderList    = new ArrayList<BorderPoint>(0);

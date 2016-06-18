@@ -109,7 +109,7 @@ public class CellDatasetCreator implements Loggable {
 		fieldNames.add("Source channel");
 		rowData.add(n.getChannel());
 
-		fieldNames.add("Scale (um/pixel)");
+		fieldNames.add("Scale (pixels/um)");
 		rowData.add(n.getScale());
 
 		addNuclearStatisticsToTable(fieldNames, rowData, n);
