@@ -261,12 +261,12 @@ public class FishRemappingDialog extends ImageProber {
 	}
 	
 	private Color chooseNucleusOutlineColor(Cell c){
-		Color color = Color.ORANGE;
+		Color color = Color.BLUE;
 		if(selectedNucleiLeft.contains(c.getId())){
 			color = Color.GREEN;
 		}
 		if(selectedNucleiRight.contains(c.getId())){
-			color = Color.MAGENTA;
+			color = Color.RED;
 		}
 		
 		return color;
@@ -282,7 +282,8 @@ public class FishRemappingDialog extends ImageProber {
 		FloatPolygon polygon = n.createPolygon();
 		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 		roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
-		ip.draw(roi);
+		ip.fill(roi);
+//		ip.draw(roi);
 	}
 
 
