@@ -22,9 +22,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,15 +72,15 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 	public AngleWindowSizeExplorer(final AnalysisDataset dataset){
 		super();
 		this.dataset = dataset;
-		log(Level.FINEST, "Creating angle window explorer UI");
+		finest("Creating angle window explorer UI");
 		try{
 			createUI();
 		} catch (Exception e){
-			log(Level.SEVERE, "Error creating angle window explorer UI", e);
+			error("Error creating angle window explorer UI", e);
 		}
 		this.setModal(false);
 		this.pack();
-		log(Level.FINEST, "Displaying angle window explorer");
+		finest("Displaying angle window explorer");
 		this.setVisible(true);
 	}
 	
@@ -97,35 +99,46 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 	private JPanel createSettingsPanel(){
 		JPanel panel = new JPanel(new FlowLayout());
 		
-		int windowSizeMin = 1;
-		int windowSizeMax = (int) dataset.getCollection().getMedianArrayLength();
+		double windowSizeMin = 0.001;
+		double windowSizeMax = 0.50d;
 		
-		int windowSizeActual = 15; // default if analysis options are not present - e.g. a merge
+		double windowSizeActual = 0.05d; // default if analysis options are not present - e.g. a merge
 		if(dataset.hasAnalysisOptions()){
-			windowSizeActual = dataset.getAnalysisOptions().getAngleProfileWindowSize();
+			windowSizeActual = dataset.getAnalysisOptions().getAngleWindowProportion();
 		}
 		
-		SpinnerNumberModel minSpinnerModel = new SpinnerNumberModel(windowSizeActual-2,
+		Dimension dim = new Dimension(80, 20);
+		
+		SpinnerNumberModel minSpinnerModel = new SpinnerNumberModel(windowSizeActual-0.02d,
 				windowSizeMin,
 				windowSizeMax,
-				1);
+				0.001d);
 		windowSizeMinSpinner = new JSpinner(minSpinnerModel);
+		windowSizeMinSpinner.setPreferredSize(dim);
+//		JSpinner.NumberEditor numberEditorMin = new JSpinner.NumberEditor(windowSizeMinSpinner,"0.01");
+//		windowSizeMinSpinner.setEditor(numberEditorMin);
 		windowSizeMinSpinner.addChangeListener(this);
 		windowSizeMinSpinner.setToolTipText("Minimum window size");
 		
-		SpinnerNumberModel maxSpinnerModel = new SpinnerNumberModel(windowSizeActual+2,
+		SpinnerNumberModel maxSpinnerModel = new SpinnerNumberModel(windowSizeActual+0.02d,
 				windowSizeMin,
 				windowSizeMax,
-				1);
+				0.001d);
 		windowSizeMaxSpinner = new JSpinner(maxSpinnerModel);
+		windowSizeMaxSpinner.setPreferredSize(dim);
+//		JSpinner.NumberEditor numberEditorMax = new JSpinner.NumberEditor(	windowSizeMaxSpinner,"0.01");
+//		windowSizeMaxSpinner.setEditor(numberEditorMax);
 		windowSizeMaxSpinner.addChangeListener(this);
 		windowSizeMaxSpinner.setToolTipText("Maximum window size");
 		
-		SpinnerNumberModel stepSpinnerModel = new SpinnerNumberModel(1,
-				1,
-				100,
-				1);
+		SpinnerNumberModel stepSpinnerModel = new SpinnerNumberModel(0.01d,
+				0.001d,
+				0.50d,
+				0.001d);
 		stepSizeSpinner = new JSpinner(stepSpinnerModel);
+		stepSizeSpinner.setPreferredSize(dim);
+//		JSpinner.NumberEditor numberEditorStep = new JSpinner.NumberEditor(	stepSizeSpinner,"0.01");
+//		stepSizeSpinner.setEditor(numberEditorStep);
 		stepSizeSpinner.addChangeListener(this);
 		stepSizeSpinner.setToolTipText("Step size");
 		
@@ -191,18 +204,23 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 	}
 	
 	private void runAnalysis() throws Exception {
-		int windowSizeMin  = (Integer) windowSizeMinSpinner.getValue();
-		int windowSizeMax  = (Integer) windowSizeMaxSpinner.getValue(); 
-		int stepSize       = (Integer) stepSizeSpinner.getValue(); 
+		
+		windowSizeMinSpinner.commitEdit();
+		windowSizeMaxSpinner.commitEdit();
+		stepSizeSpinner.commitEdit();
+		
+		double windowSizeMin  = (double) windowSizeMinSpinner.getValue();
+		double windowSizeMax  = (double) windowSizeMaxSpinner.getValue(); 
+		double stepSize       = (double) stepSizeSpinner.getValue(); 
 		
 		setAnalysing(true);
 		
 		// Clear the old chart
 		chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
 		
-		log(Level.INFO, "Testing "+windowSizeMin+" - "+windowSizeMax);
+		log("Testing "+windowSizeMin+" - "+windowSizeMax);
 		
-		for(int i=windowSizeMin; i<=windowSizeMax; i+=stepSize){
+		for(double i=windowSizeMin; i<=windowSizeMax; i+=stepSize){
 			
 			// make a duplicate collection
 //			log(Level.INFO, "\t"+i);
@@ -213,10 +231,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 			for(Cell c : dataset.getCollection().getCells()){
 				
 				Cell newCell = new Cell(c);
-				newCell.getNucleus().setAngleProfileWindowSize(i);
-				
-//				// recalc the profiles
-//				newCell.getNucleus().calculateProfiles();
+				newCell.getNucleus().setAngleWindowProportion(i); // triggers recalc of profile
 				
 				duplicateCollection.addCell(newCell);
 			}
@@ -247,10 +262,10 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 			duplicateCollection = null;
 		}
 		setAnalysing(false);
-		log(Level.INFO, "Profiling complete");
+		log("Profiling complete");
 	}
 	
-	private void updateChart(Profile profile, int windowSize){
+	private void updateChart(Profile profile, double windowSize){
 		
 		XYPlot plot = chartPanel.getChart().getXYPlot();
 		int datasetCount = plot.getDatasetCount();
@@ -259,7 +274,10 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		
         Profile xpoints = profile.getPositions(100);
         double[][] data = { xpoints.asArray(), profile.asArray() };
-        ds.addSeries(windowSize, data);
+        
+        DecimalFormat df = new DecimalFormat("#0.000"); 
+        
+        ds.addSeries(df.format(windowSize), data);
         		
 		for(int series=0;series<ds.getSeriesCount(); series++){
 			XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
@@ -268,7 +286,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 			rend.setSeriesLinesVisible(series, true);
 			rend.setSeriesStroke(series, ChartComponents.MARKER_STROKE);
 			rend.setSeriesPaint(series, chooseGradientColour(datasetCount));
-//			rend.setSeriesOutlineStroke(series, new BasicStroke(4f));
+
 			plot.setRenderer(datasetCount, rend);
 		}
 		
@@ -277,10 +295,10 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 	}
 	
 	private Color chooseGradientColour(int index){
-		int windowSizeMin  = (Integer) windowSizeMinSpinner.getValue();
-		int windowSizeMax  = (Integer) windowSizeMaxSpinner.getValue(); 
-		int stepSize       = (Integer) stepSizeSpinner.getValue(); 
-		int totalSteps = (int) Math.ceil(    ((windowSizeMax+1) - windowSizeMin) / stepSize);
+		double windowSizeMin  = (double) windowSizeMinSpinner.getValue();
+		double windowSizeMax  = (double) windowSizeMaxSpinner.getValue(); 
+		double stepSize       = (double) stepSizeSpinner.getValue(); 
+		int totalSteps = (int) Math.ceil(    ((windowSizeMax) - windowSizeMin) / stepSize);
 		
 		double proportion = (double) index / (double) totalSteps;
 		
@@ -306,8 +324,8 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		
 		try {
 			
-			int windowSizeMin  = (Integer) windowSizeMinSpinner.getValue();
-			int windowSizeMax  = (Integer) windowSizeMaxSpinner.getValue(); 
+			double windowSizeMin  = (double) windowSizeMinSpinner.getValue();
+			double windowSizeMax  = (double) windowSizeMaxSpinner.getValue(); 
 			
 			if(e.getSource()==windowSizeMinSpinner){
 				JSpinner j = (JSpinner) e.getSource();
@@ -336,7 +354,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 			}
 			
 		} catch (ParseException e1) {
-			log(Level.SEVERE, "Error in spinners", e1);
+			error("Error in spinners", e1);
 		}
 		
 	}

@@ -244,7 +244,7 @@ public class NucleusFinder implements Loggable {
 			  currentNucleus.setScale(options.getScale());
 		
 			  currentNucleus.setOutputFolder(outputFolderName);
-			  currentNucleus.intitialiseNucleus(options.getAngleProfileWindowSize());
+			  currentNucleus.intitialiseNucleus(options.getAngleWindowProportion());
 			  
 			  currentNucleus.findPointsAroundBorder();
 		

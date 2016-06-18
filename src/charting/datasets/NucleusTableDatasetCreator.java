@@ -547,7 +547,7 @@ private static NucleusTableDatasetCreator instance = null;
 		String cannyClosingRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : "N/A";
 
 		Object[] collectionData = {
-				options.getAngleProfileWindowSize(),
+				options.getAngleWindowProportion(),
 				detectionMethod,
 				nucleusThreshold,
 				kuwaharaRadius,

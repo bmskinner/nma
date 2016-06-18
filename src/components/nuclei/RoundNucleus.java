@@ -80,7 +80,8 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 	protected int nucleusNumber; // the number of the nucleus in the current image
 
-	protected int angleProfileWindowSize;
+	protected double angleWindowProportion; // The proportion of the perimeter to use for profiling
+	protected int    angleProfileWindowSize; // the chosen window size for the nucleus based on proportion
 
 	protected double pathLength;  // the angle profile path length - measures wibbliness in border
 	
@@ -137,7 +138,11 @@ public class RoundNucleus extends AbstractCellularComponent
 				
 		this.setSignals( new SignalCollection(n.getSignalCollection()));
 		
-		this.setAngleProfileWindowSize(n.getAngleProfileWindowSize());
+		this.angleWindowProportion = n.getAngleWindowProportion();
+//		this.setAngleWindowProportion(n.getAngleWindowProportion());
+		this.angleProfileWindowSize = n.getAngleProfileWindowSize();
+//		this.setAngleProfileWindowSize(n.getAngleProfileWindowSize());
+		
 		
 		for(ProfileType type : ProfileType.values()){
 			if(n.hasProfile(type)){
@@ -160,31 +165,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 	}
 	
-	
-//	public int identifyBorderTagIndex(BorderTag tag){
-//		
-//		int result = 0;
-//		switch(tag){
-//		
-//			case REFERENCE_POINT: 
-//			try {
-//				
-//				// The RP in round nuclei is the index with the max diameter
-//				
-//				result = this.getProfile(ProfileType.DISTANCE).getIndexOfMax();
-//			} catch (Exception e) {
-//				error("Error detecting RP in nucleus", e);
-//				result = 0;
-//			}
-//				break;
-//			default:
-//				break;
-//		}
-//		return result;
-//		
-//	}
-	
-
 	/*
 	* Finds the key points of interest around the border
 	* of the Nucleus. Can use several different methods, and 
@@ -209,19 +189,18 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 
-	public void intitialiseNucleus(int angleProfileWindowSize) throws Exception {
+	public void intitialiseNucleus(double proportion) throws Exception {
 
-//		this.nucleusFolder = new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension());
-//
-//		if (!this.nucleusFolder.exists()) {
-//			this.nucleusFolder.mkdir();
-//		}
-
-
-		// calculate profiles
-
-		this.setAngleProfileWindowSize(angleProfileWindowSize);
+		this.angleWindowProportion = proportion;
+//		this.setAngleWindowProportion(proportion);
 		
+		double perimeter = this.getStatistic(NucleusStatistic.PERIMETER);
+		double angleWindow = perimeter * proportion;
+		
+		
+		// calculate profiles
+		this.angleProfileWindowSize = (int) Math.round(angleWindow);
+
 		calculateProfiles();
 		
 
@@ -251,19 +230,6 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 
 
-//	public File getNucleusFolder(){
-//		return new File(this.nucleusFolder.getAbsolutePath());
-//	}
-
-
-//	public String getAnnotatedImagePath(){
-//		String outPath = this.nucleusFolder.getAbsolutePath()+
-//											File.separator+
-//											Constants.IMAGE_PREFIX+
-//											this.getNucleusNumber()+
-//											".annotated.tiff";
-//		return new String(outPath);
-//	}
 
 	public String getImageNameWithoutExtension(){
 
@@ -470,6 +436,10 @@ public class RoundNucleus extends AbstractCellularComponent
 	public int getAngleProfileWindowSize(){
 		return this.angleProfileWindowSize;
 	}
+	
+	public double getAngleWindowProportion(){
+		return this.angleWindowProportion;
+	}
 
 	/*
 		-----------------------
@@ -492,13 +462,29 @@ public class RoundNucleus extends AbstractCellularComponent
 		this.nucleusNumber = d;
 	}
 
-//	protected void setNucleusFolder(File d){
-//		this.nucleusFolder = d;
-//	}
 
-	public void setAngleProfileWindowSize(int i){
+	protected void setAngleProfileWindowSize(int i){
 		this.angleProfileWindowSize = i;
-		this.profileMap.put(ProfileType.REGULAR, this.calculateAngleProfile());
+	}
+	
+	/**
+	 * Set the fraction of the perimeter to use to calculate the angle window size
+	 * @param d
+	 */
+	public void setAngleWindowProportion(double d){
+		if(d<0 || d> 1){
+			throw new IllegalArgumentException("Angle window proportion must be 0-1");
+		}
+		this.angleWindowProportion = d;
+		
+		double perimeter = this.getStatistic(NucleusStatistic.PERIMETER);
+		double angleWindow = perimeter * d;
+		
+		
+		// calculate profiles
+		this.angleProfileWindowSize = (int) Math.round(angleWindow);
+		finest("Recalculating angle profile");
+		this.profileMap.put(ProfileType.REGULAR, this.calculateAngleProfile());		
 	}
 
 		

@@ -45,7 +45,7 @@ public class AnalysisOptions implements Serializable, Loggable {
 		
 	private boolean normaliseContrast = false; 
 
-	private int angleProfileWindowSize = 15;
+	private double angleWindowProportion = 0.05;
 	
 	private double scale = 1; // hold the length of a pixel in metres
 
@@ -108,7 +108,7 @@ public class AnalysisOptions implements Serializable, Loggable {
 		}
 		
 		normaliseContrast      = template.isNormaliseContrast(); 
-		angleProfileWindowSize = template.getAngleProfileWindowSize();
+		angleWindowProportion  = template.getAngleWindowProportion();
 		scale                  = template.getScale(); 
 		nucleusType            = template.getNucleusType();
 		performReanalysis      = template.isReanalysis() ;
@@ -158,8 +158,8 @@ public class AnalysisOptions implements Serializable, Loggable {
 		return this.maxNucleusCirc;
 	}
 
-	public int getAngleProfileWindowSize(){
-		return this.angleProfileWindowSize;
+	public double getAngleWindowProportion(){
+		return this.angleWindowProportion;
 	}
 
 	public NucleusType getNucleusType(){
@@ -238,8 +238,8 @@ public class AnalysisOptions implements Serializable, Loggable {
 	}
 
 
-	public void setAngleProfileWindowSize(int angleProfileWindowSize) {
-		this.angleProfileWindowSize = angleProfileWindowSize;
+	public void setAngleWindowProportion(double proportion) {
+		this.angleWindowProportion = proportion;
 	}
 
 
@@ -387,12 +387,15 @@ public class AnalysisOptions implements Serializable, Loggable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + angleProfileWindowSize;
+		long temp;
+		temp = Double.doubleToLongBits(angleWindowProportion);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		
 		result = prime * result + channel;
 		result = prime * result
 				+ ((edgeDetection == null) ? 0 : edgeDetection.hashCode());
 		result = prime * result + ((folder == null) ? 0 : folder.hashCode());
-		long temp;
+		
 		temp = Double.doubleToLongBits(maxNucleusCirc);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		temp = Double.doubleToLongBits(maxNucleusSize);
@@ -426,7 +429,8 @@ public class AnalysisOptions implements Serializable, Loggable {
 		if (getClass() != obj.getClass())
 			return false;
 		AnalysisOptions other = (AnalysisOptions) obj;
-		if (angleProfileWindowSize != other.angleProfileWindowSize)
+		if (Double.doubleToLongBits(angleWindowProportion) != Double
+				.doubleToLongBits(other.angleWindowProportion))
 			return false;
 		if (channel != other.channel)
 			return false;

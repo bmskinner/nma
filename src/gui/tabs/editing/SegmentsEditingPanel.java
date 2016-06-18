@@ -423,14 +423,14 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 		}
 				
 		private void updateCollectionWindowSize() throws Exception{
-			int windowSizeMin = 1;
-			int windowSizeMax = (int) activeDataset().getCollection().getMedianArrayLength();
-			int windowSizeActual = activeDataset().getAnalysisOptions().getAngleProfileWindowSize();
+			double windowSizeMin = 0.01;
+			double windowSizeMax = 0.1;
+			double windowSizeActual = activeDataset().getAnalysisOptions().getAngleWindowProportion();
 			
 			SpinnerNumberModel spinnerModel = new SpinnerNumberModel(windowSizeActual,
 					windowSizeMin,
 					windowSizeMax,
-					1);
+					0.01);
 			JSpinner windowSizeSpinner = new JSpinner(spinnerModel);
 			
 			
@@ -444,7 +444,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 
 			} else if (option == JOptionPane.OK_OPTION)	{
 				this.setAnalysing(true);
-				int windowSize = (Integer) windowSizeSpinner.getModel().getValue();
+				double windowSize = (double) windowSizeSpinner.getModel().getValue();
 				setCollectionWindowSize(windowSize);
 				this.refreshChartCache();
 				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
@@ -453,12 +453,12 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			
 		}
 		
-		private void setCollectionWindowSize(int windowSize) throws Exception{
+		private void setCollectionWindowSize(double windowSize) throws Exception{
 			
 			// Update cells
 			
 			for(Cell c : activeDataset().getCollection().getCells()){
-				c.getNucleus().setAngleProfileWindowSize(windowSize);
+				c.getNucleus().setAngleWindowProportion(windowSize);
 			}
 
 			// recalc the aggregate
@@ -490,7 +490,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 
 			fitter = null; // clean up
 			
-			activeDataset().getAnalysisOptions().setAngleProfileWindowSize(windowSize);
+			activeDataset().getAnalysisOptions().setAngleWindowProportion(windowSize);
 
 		}
 		

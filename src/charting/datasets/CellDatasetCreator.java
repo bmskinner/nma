@@ -108,6 +108,12 @@ public class CellDatasetCreator implements Loggable {
 
 		fieldNames.add("Source channel");
 		rowData.add(n.getChannel());
+		
+		fieldNames.add("Angle window prop.");
+		rowData.add(n.getAngleWindowProportion());
+		
+		fieldNames.add("Angle window size");
+		rowData.add(n.getAngleProfileWindowSize());
 
 		fieldNames.add("Scale (pixels/um)");
 		rowData.add(n.getScale());

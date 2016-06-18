@@ -55,7 +55,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 */
 //	public int identifyReferencePoint();
 	
-	public void intitialiseNucleus(int angleProfileWindowSize) throws Exception;
+	public void intitialiseNucleus(double angleWindowProportion) throws Exception;
 	
 	/**
 	 * @return a copy of the data in this nucleus or null on Exception
@@ -165,13 +165,28 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 */
 	public int getAngleProfileWindowSize();
 	
+	
+	/**
+	 * Get the fraction of the perimeter to use for calculating the window size
+	 * in pixels
+	 * @return
+	 */
+	public double getAngleWindowProportion();
+	
 	/**
 	 * Set the angle profile window size, and recalculate the angle
 	 * profile
 	 * @param i
 	 * @throws Exception
 	 */
-	public void setAngleProfileWindowSize(int i) throws Exception;
+//	public void setAngleProfileWindowSize(int i) throws Exception;
+	
+	/**
+	 * Set the fraction of the perimeter to use for calculating the window size
+	 * in pixels. 
+	 * @param d Proportion from 0 to 1
+	 */
+	public void setAngleWindowProportion(double d);
 
 
 	/**

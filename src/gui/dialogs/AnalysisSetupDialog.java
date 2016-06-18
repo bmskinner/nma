@@ -68,7 +68,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	private static final double DEFAULT_MAX_NUCLEUS_CIRC = 0.8;
 	private static final int    DEFAULT_NUCLEUS_THRESHOLD = 36;
 		
-	private static final int    DEFAULT_PROFILE_WINDOW_SIZE = 15;
+	private static final double    DEFAULT_PROFILE_WINDOW_SIZE = 0.05;
 	
 	private static final double    DEFAULT_SCALE = 1.0;
 	
@@ -97,7 +97,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	private JSpinner txtMinNuclearSize = new JSpinner(new SpinnerNumberModel(DEFAULT_MIN_NUCLEUS_SIZE,	100, 50000, 1));
 	private JSpinner txtMaxNuclearSize = new JSpinner(new SpinnerNumberModel(DEFAULT_MAX_NUCLEUS_SIZE,	100, 50000, 1));
 
-	private JSpinner txtProfileWindowSize = new JSpinner(new SpinnerNumberModel(DEFAULT_PROFILE_WINDOW_SIZE,	5, 50, 1));
+	private JSpinner txtProfileWindowSize = new JSpinner(new SpinnerNumberModel(DEFAULT_PROFILE_WINDOW_SIZE,	0, 1, 0.01));
 
 	private JSpinner nucleusThresholdSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_NUCLEUS_THRESHOLD,	0, 255, 1));
 
@@ -182,7 +182,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		analysisOptions.setMinNucleusCirc(DEFAULT_MIN_NUCLEUS_CIRC);
 		analysisOptions.setMaxNucleusCirc(DEFAULT_MAX_NUCLEUS_CIRC);
 
-		analysisOptions.setAngleProfileWindowSize(DEFAULT_PROFILE_WINDOW_SIZE);
+		analysisOptions.setAngleWindowProportion(DEFAULT_PROFILE_WINDOW_SIZE);
 
 		analysisOptions.setPerformReanalysis(false);
 		analysisOptions.setRealignMode(true);
@@ -245,7 +245,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		analysisOptions.setMinNucleusCirc(options.getMinNucleusCirc());
 		analysisOptions.setMaxNucleusCirc(options.getMinNucleusCirc());
 
-		analysisOptions.setAngleProfileWindowSize(options.getAngleProfileWindowSize());
+		analysisOptions.setAngleWindowProportion(options.getAngleWindowProportion());
 
 		analysisOptions.setPerformReanalysis(options.isReanalysis());
 		analysisOptions.setRealignMode(options.realignImages());
@@ -294,7 +294,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 			maxNuclearCircSpinner.setValue(options.getMaxNucleusCirc());
 
 			scaleSpinner.setValue(options.getScale());
-			txtProfileWindowSize.setValue(options.getAngleProfileWindowSize());
+			txtProfileWindowSize.setValue(options.getAngleWindowProportion());
 			finest("Updated spinners");
 
 
@@ -585,30 +585,6 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		return panel;
 	}
 
-	/**
-	 * Currently not enabled. Can hold settings for automated remapping of pre- and 
-	 * post-FISHed nuclei
-	 * @return
-	 */
-//	private JPanel makeRenappingSettingsPanel(){
-//
-//		JPanel panel = new JPanel();
-//		//	panel.setLayout(new GridBagLayout());
-//
-//
-//		//----------------------
-//		// make remapping panel
-//		//----------------------
-//
-//		//	panel.add(new Box.Filler(minSize, prefSize, maxSize));
-//		//	
-//		//	JLabel lblReanalysisSettings = new JLabel("Refolding settings");
-//		//	panel.add(lblRefoldSettings);
-//		//	JPanel refoldPanel = new JPanel();
-//
-//
-//		return panel;
-//	}	
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -771,7 +747,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 			if(e.getSource()==txtProfileWindowSize){
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
-				this.analysisOptions.setAngleProfileWindowSize(  (Integer) j.getValue());
+				this.analysisOptions.setAngleWindowProportion(  (Double) j.getValue());
 			}	
 			
 			if(e.getSource()==scaleSpinner){
