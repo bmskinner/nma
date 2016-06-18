@@ -118,7 +118,7 @@ public class CollectionFilterer {
 	      }
 
 	      if(failureCode > 0){
-	    	  RoundNucleus faiNucleus = new RoundNucleus(n);
+	    	  Nucleus faiNucleus = n.duplicate();
 	    	  Cell failCell = new Cell();
 	    	  failCell.setNucleus(faiNucleus);
 	    	  newFailCollection.addCell(c);

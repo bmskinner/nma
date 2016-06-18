@@ -149,7 +149,7 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 				CellCollection failedNuclei = new CellCollection(folder, 
 						collection.getOutputFolderName(), 
 						collection.getName()+" - failed", 
-						NucleusType.ROUND);
+						collection.getNucleusType());
 
 
 				log("Filtering collection...");
@@ -172,21 +172,8 @@ public class NucleusDetector extends AnalysisWorker  implements ProgressListener
 					failed.setAnalysisOptions(failedOptions);
 					failed.setRoot(true);
 					result.add(failed);
-				} else {
-				
-//					// TODO: handle large failed collections
-//					if(failedNuclei.getNucleusCount()>0 && failedNuclei.getNucleusCount()<50){
-//						log("Exporting failed nuclei...");
-//						ok = CompositeExporter.run(failedNuclei, fileLogger);
-//						if(ok){
-//							log("Export OK");
-//						} else {
-//							log("Export error");
-//						}
-//					} else {
-//						log("Too many failed nuclei to export, skipping");
-//					}
 				}
+				
 				log(spacerString);
 				
 				log("Population: "+collection.getName());
