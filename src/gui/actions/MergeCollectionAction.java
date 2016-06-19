@@ -24,6 +24,9 @@ import ij.io.SaveDialog;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import utility.Constants;
 import analysis.AnalysisDataset;
@@ -42,9 +45,32 @@ public class MergeCollectionAction extends ProgressableAction {
 		if(fileName!=null && folderName!=null){
 			File saveFile = new File(folderName+File.separator+fileName);
 			
-			new DatasetMergingDialog(datasets);
+			// Check for signals in >1 dataset
+			int signals=0;
+			for(AnalysisDataset d : datasets){
+				if(d.getCollection().getSignalManager().hasSignals()){
+					signals++;
+				}
+			}
 			
-			worker = new DatasetMerger(datasets, saveFile);
+			if(signals>1){
+			
+				DatasetMergingDialog dialog = new DatasetMergingDialog(datasets);
+				
+				Map<UUID, Set<UUID>> pairs = dialog.getPairedSignalGroups();
+				
+				if(pairs.keySet().size()!=0){
+					// User decided to merge signals
+					worker = new DatasetMerger(datasets, saveFile, pairs);
+				} else {
+					worker = new DatasetMerger(datasets, saveFile);
+				}
+			} else {
+				// no signals to merge
+				worker = new DatasetMerger(datasets, saveFile);
+			}
+			
+			
 			worker.addPropertyChangeListener(this);
 			worker.execute();	
 		} else {

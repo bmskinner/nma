@@ -184,6 +184,40 @@ public class SignalManager implements Loggable{
 	  }
 	  
 	  /**
+	   * Update the signal group id
+	   * @param signalGroup
+	   * @param newID
+	   */
+	  public void updateSignalGroupID(UUID signalGroup, UUID newID){
+		  for(Nucleus n : collection.getNuclei()){
+			  if(n.getSignalCollection().hasSignal(signalGroup)){
+				  n.getSignalCollection().updateSignalGroupID(signalGroup, newID);
+			  }
+		  }
+
+		  SignalGroup oldGroup = collection.getSignalGroup(signalGroup);
+		  
+		  SignalGroup newGroup = new SignalGroup(collection.getSignalGroup(signalGroup));
+		  
+		  // Merge and rename signal groups
+		  if(collection.getSignalGroup(newID)!=null){ // check if the group already exists
+			  
+			  if( ! oldGroup.getGroupName().equals(newGroup.getGroupName())){
+				  newGroup.setGroupName("Merged_"+oldGroup.getGroupName()+"_"+newGroup.getGroupName());
+			  }
+			  
+			  if( oldGroup.getChannel()!=newGroup.getChannel()){
+				  newGroup.setChannel(-1);
+			  }
+			  
+			  // Shells and colours?
+			  
+		  }
+		  collection.addSignalGroup(newID, newGroup);
+		  collection.removeSignalGroup(signalGroup);
+	  }
+	  
+	  /**
 	   * Find the total number of signals within all nuclei of the collection.
 	   * @return the total
 	   */

@@ -20,7 +20,11 @@ package analysis.nucleus;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import utility.Constants;
@@ -29,6 +33,7 @@ import analysis.AnalysisWorker;
 import components.Cell;
 import components.CellCollection;
 import components.nuclear.NucleusType;
+import components.nuclear.SignalGroup;
 
 public class DatasetMerger extends AnalysisWorker {
 
@@ -37,6 +42,8 @@ public class DatasetMerger extends AnalysisWorker {
 	private File saveFile;
 	
 	private List<AnalysisDataset> resultDatasets = new ArrayList<AnalysisDataset>();
+	
+	private Map<UUID, Set<UUID>> pairedSignalGroups = null;
 		
 	private static final int MAX_PROGRESS = 100;
 	
@@ -52,6 +59,11 @@ public class DatasetMerger extends AnalysisWorker {
 		this.setProgressTotal(MAX_PROGRESS);
 		this.datasets = datasets;
 		this.saveFile = saveFile;
+	}
+	
+	public DatasetMerger(List<AnalysisDataset> datasets, File saveFile, Map<UUID, Set<UUID>> pairedSignalGroups){
+		this(datasets, saveFile);
+		this.pairedSignalGroups = pairedSignalGroups;
 	}
 	
 	@Override
@@ -173,11 +185,18 @@ public class DatasetMerger extends AnalysisWorker {
 					
 				}
 			}
+			
+			// All all the exisiting signal groups before merging
+			for(UUID signalGroupID : d.getCollection().getSignalGroupIDs()){
+				newCollection.addSignalGroup(signalGroupID, new SignalGroup(d.getCollection().getSignalGroup(signalGroupID)));
+			}
+			
 
 		}
 		
 		// Remove signal groups
-		newCollection.getSignalManager().removeSignalGroups();
+		mergeSignalGroups(newCollection);
+//		newCollection.getSignalManager().removeSignalGroups();
 		
 		// Remove existing profiles
 //		newCollection.getProfileManager().removeProfiles();
@@ -198,6 +217,49 @@ public class DatasetMerger extends AnalysisWorker {
 		newDataset.setAnalysisOptions(null);
 		
 		return newDataset;
+	}
+	
+	private void mergeSignalGroups(CellCollection newCollection){
+		if(pairedSignalGroups==null){
+			finer("No signal groups to merge");
+			return;
+		}
+		
+		// Decide which signal groups get which new ids
+		// Key is old signal group. Entry is new id
+		Map<UUID, UUID> mergedSignalGroups = new HashMap<UUID, UUID>();
+		
+		for(UUID id1 : pairedSignalGroups.keySet()){
+			
+			// If this id is not encountered, make a new one
+			if( ! mergedSignalGroups.keySet().contains(id1)){
+				mergedSignalGroups.put(id1, UUID.randomUUID());
+			}
+			
+			UUID newID = mergedSignalGroups.get(id1);
+			
+			// All the set share this new id
+			Set<UUID> id2Set = pairedSignalGroups.get(id1);
+			for(UUID id2 : id2Set){
+				mergedSignalGroups.put(id2, newID);
+			}
+		}
+		
+		// Now, all the old ids have a link to a new id
+		// Update the signal groups in the merged dataset
+		
+		// Add the old signal groups to the new collection
+		
+		
+		finer("Updating signal group ids");
+		for(UUID oldID : mergedSignalGroups.keySet()){
+			
+			UUID newID = mergedSignalGroups.get(oldID);
+			newCollection.getSignalManager().updateSignalGroupID(oldID, newID);
+		}
+		
+		
+		
 	}
 	
 	// 

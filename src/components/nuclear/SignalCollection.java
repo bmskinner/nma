@@ -122,6 +122,23 @@ public class SignalCollection implements Serializable, Loggable {
 	}
 	
 	/**
+	 * Change the id of the given signal group
+	 * @param signalGroup
+	 * @param newID
+	 */
+	public void updateSignalGroupID(UUID signalGroup, UUID newID){
+		collection.put(newID, collection.get(signalGroup));
+		sourceFiles.put(newID, sourceFiles.get(signalGroup));
+		sourceChannels.put(newID, sourceChannels.get(signalGroup));
+		names.put(newID, names.get(signalGroup));
+		
+		collection.remove(signalGroup);
+		sourceFiles.remove(signalGroup);
+		sourceChannels.remove(signalGroup);
+		names.remove(signalGroup);
+	}
+	
+	/**
 	 * Get the group number of a signal group in the collection.
 	 * @param signalGroup
 	 * @return the group number, or zero if not present
