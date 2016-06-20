@@ -396,7 +396,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 			tree.setEnabled(false);
 			JScrollPane scrollPane = new JScrollPane(tree);
-			Dimension size = new Dimension(200, 200);
+			Dimension size = new Dimension(120, 200);
 			scrollPane.setMinimumSize(size);
 			scrollPane.setPreferredSize(size);
 			
@@ -927,7 +927,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			}
 						
 			scrollPane.setViewportView(signalList);
-			Dimension size = new Dimension(200, 200);
+			Dimension size = new Dimension(120, 200);
 			scrollPane.setMinimumSize(size);
 			scrollPane.setPreferredSize(size);
 			
