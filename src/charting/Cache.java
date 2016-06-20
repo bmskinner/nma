@@ -3,8 +3,9 @@ package charting;
 import java.util.List;
 
 import analysis.AnalysisDataset;
+import logging.Loggable;
 
-public interface Cache {
+public interface Cache extends Loggable {
 
 	/**
 	 * Remove all cached charts

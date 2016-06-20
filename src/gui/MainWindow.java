@@ -371,7 +371,7 @@ public class MainWindow
 		
 		btnLoadSavedDataset.addActionListener(	
 			e -> {
-				log(Level.FINEST, "Creating import action");
+				finest("Creating import action");
 				new PopulationImportAction(MainWindow.this);
 			}
 		);
@@ -386,13 +386,13 @@ public class MainWindow
 		btnSavePopulation.addActionListener(
 
 				e -> {
-					log(Level.INFO, "Saving root populations...");
+					log("Saving root populations...");
 
-					Thread thr = new Thread(){
-						public void run(){
-							saveRootDatasets();
-						}};
-						thr.start();
+//					Thread thr = new Thread(){
+//						public void run(){
+					saveRootDatasets();
+//						}};
+//						thr.start();
 				}
 		);
 
@@ -421,20 +421,20 @@ public class MainWindow
 							 * If the recache is not waited on, the update conflicts
 							 * with the updating status
 							 */
-							log(Level.FINEST, "Options closed, clearing all caches");
+							finest("Options closed, clearing all caches");
 							
 							CountDownLatch l = new CountDownLatch(1);
 							clearChartCache(l);
 							l.await();
-							log(Level.FINEST, "Options closed, updating charts");
+							finest("Options closed, updating charts");
 		                    updatePanels(populationsPanel.getSelectedDatasets());
 							
 						} catch (InterruptedException e1) {
-							log(Level.SEVERE, "Interruption to recaching", e1);
+							error("Interruption to recaching", e1);
 						}
 	
 					} else {
-						log(Level.FINEST, "Options cancelled");
+						finest("Options cancelled");
 					}
 			}
 		);		
@@ -470,9 +470,9 @@ public class MainWindow
 	 */
 	private void updatePanels(final List<AnalysisDataset> list){
 		if(list!=null){
-			log(Level.FINE, "Updating tab panels for "+list.size()+" datasets");
+			fine("Updating tab panels for "+list.size()+" datasets");
 		} else {
-			log(Level.FINE, "Updating tab panels with null datasets");
+			fine("Updating tab panels with null datasets");
 		}
 		
 		Runnable task = () -> {
@@ -482,10 +482,10 @@ public class MainWindow
 					panel.update(list);
 				}
 
-				log(Level.FINE, "Updated tab panels");
+				fine("Updated tab panels");
 
 			} catch (Exception e) {
-				log(Level.SEVERE,"Error updating panels", e);
+				error("Error updating panels", e);
 			}
 		};
 		
@@ -519,7 +519,6 @@ public class MainWindow
 						for(DetailPanel panel : MainWindow.this.detailPanels){
 							if(panel.isUpdating()){
 								isRunning = true;
-//								IJ.log(isRunning+": Panel: "+panel.getClass().getSimpleName());
 							}
 							
 						}
@@ -534,7 +533,7 @@ public class MainWindow
 					}
 				} catch (InterruptedException e) {
 
-					log(Level.SEVERE,"Error checking update state", e);
+					error("Error checking update state", e);
 
 				}
 			}
@@ -548,7 +547,7 @@ public class MainWindow
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
-		log(Level.FINEST, "Heard signal change event: "+event.type());
+		finest("Heard signal change event: "+event.type());
 		
 		final AnalysisDataset selectedDataset = populationsPanel.getSelectedDatasets().isEmpty() 
 				? null 
@@ -582,7 +581,9 @@ public class MainWindow
 		
 		if(event.type().equals("CurateCollectionAction")){
 
-			Runnable task = () -> { new CurateCollectionAction(selectedDataset, MainWindow.this); }; 
+			Runnable task = () -> { 
+				new CurateCollectionAction(selectedDataset, MainWindow.this); 
+			}; 
 			executorService.execute(task);
 		}
 				
@@ -593,11 +594,11 @@ public class MainWindow
 		}
 				
 		if(event.type().equals("SaveCellLocations")){
-			log(Level.INFO, "Exporting cell locations...");
+			log("Exporting cell locations...");
 			if(MappingFileExporter.exportCellLocations(selectedDataset)){
-				log(Level.INFO, "Export complete");
+				log( "Export complete");
 			} else {
-				log(Level.INFO, "Export failed");
+				log("Export failed");
 			}
 			
 		}
@@ -690,8 +691,6 @@ public class MainWindow
 		final List<AnalysisDataset> list = event.getDatasets();
 		if(!list.isEmpty()){
 			
-			
-			
 			if(event.method().equals(DatasetMethod.PROFILING_ACTION)){
 				fine("Running new profiling and segmentation");
 				
@@ -759,37 +758,20 @@ public class MainWindow
 			}
 			
 			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
-				
-				Runnable task = () -> { 
-					log(Level.INFO, "Refolding consensus nucleus");
-					refoldConsensus(event.firstDataset());
-				};
-				executorService.execute(task);			
+				log("Refolding consensus nucleus");
+				refoldConsensus(event.firstDataset());		
 			}
 			
 			if(event.method().equals(DatasetMethod.SELECT_DATASETS)){
-				
-				Runnable task = () -> { 
-					populationsPanel.selectDatasets(event.getDatasets());
-				};
-				executorService.execute(task);						
+				populationsPanel.selectDatasets(event.getDatasets());
 			}
 			
 			if(event.method().equals(DatasetMethod.SELECT_ONE_DATASET)){
-				
-				Runnable task = () -> { 
-					populationsPanel.selectDataset(event.firstDataset());
-				};
-				executorService.execute(task);					
+				populationsPanel.selectDataset(event.firstDataset());				
 			}
 			
 			if(event.method().equals(DatasetMethod.SAVE)){
-				
-//				Runnable task = () -> { 
-					saveDataset(event.firstDataset(), false);
-//				};
-//				executorService.execute(task);
-				
+				saveDataset(event.firstDataset(), false);
 			}
 			
 			if(event.method().equals(DatasetMethod.EXTRACT_SOURCE)){
@@ -805,22 +787,17 @@ public class MainWindow
 			}
 			
 			if(event.method().equals(DatasetMethod.REFRESH_CACHE)){
-				Runnable task = () -> { recacheCharts(list);};
-				executorService.execute(task);				
+				recacheCharts(list);				
 			}
 			
 			if(event.method().equals(DatasetMethod.CLEAR_CACHE)){
 				
-				Runnable task = () -> { clearChartCache(list); };
-				executorService.execute(task);	
+				clearChartCache(list);
 				
 			}
 			
 			if(event.method().equals(DatasetMethod.ADD_DATASET)){
-				finest("Creating runnable for add dataset");
-				Runnable task = () -> { addDataset(event.firstDataset()); };
-				finest("Running add dataset via executor service");
-				executorService.execute(task);	
+				addDataset(event.firstDataset());
 			}
 		}
 		
@@ -862,48 +839,47 @@ public class MainWindow
 		fine("Refolding consensus");
 		finest("Refold consensus dataset method is EDT: "+SwingUtilities.isEventDispatchThread());
 		
-		executorService.execute(new Runnable() {
-			public void run() {
-				/*
-				 * The refold action needs to be able to hold up a series
-				 * of following actions, when it is being used in a New Analysis.
-				 * The countdown latch does nothing here, but must be retained for
-				 * compatibility.
-				 */
-				consensusNucleusPanel.clearChartCache();
-				
-				final CountDownLatch latch = new CountDownLatch(1);
-				finest("Created latch: "+latch.getCount());
-				new RefoldNucleusAction(dataset, MainWindow.this, latch);
+		Runnable r = () -> {
+			/*
+			 * The refold action needs to be able to hold up a series
+			 * of following actions, when it is being used in a New Analysis.
+			 * The countdown latch does nothing here, but must be retained for
+			 * compatibility.
+			 */
+			consensusNucleusPanel.clearChartCache();
 
-				finest("Running refolding");
-				try {
-					latch.await();
-					dataset.getAnalysisOptions().setRefoldNucleus(true);
-					dataset.getAnalysisOptions().setRefoldMode("Fast");
-					
-					
-					
-					fine("Set refold status in options");
-					final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-					list.add(dataset);
-					segmentsDetailPanel.refreshChartCache(list); // segment positions charts need updating
-					nuclearBoxplotsPanel.refreshChartCache(list); // overlaid nuclei need updating
-                    signalsDetailPanel.refreshChartCache(list); // signal consensus needs updating
+			final CountDownLatch latch = new CountDownLatch(1);
+			finest("Created latch: "+latch.getCount());
+			new RefoldNucleusAction(dataset, MainWindow.this, latch);
+
+			finest("Running refolding");
+			try {
+				latch.await();
+				dataset.getAnalysisOptions().setRefoldNucleus(true);
+				dataset.getAnalysisOptions().setRefoldMode("Fast");
 
 
-					fine("Preparing to select refolded dataset");
-					populationsPanel.selectDataset(dataset);
-//					log(Level.FINE, "Clearing consensus chart cache for refolded dataset");
-//					consensusNucleusPanel.refreshChartCache();
-					
-					fine("Latch counted down: "+latch.getCount());
-				} catch (InterruptedException e) {
-					error("Interruption to thread", e);
-				}
+
+				fine("Set refold status in options");
+				final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+				list.add(dataset);
+				segmentsDetailPanel.refreshChartCache(list); // segment positions charts need updating
+				nuclearBoxplotsPanel.refreshChartCache(list); // overlaid nuclei need updating
+				signalsDetailPanel.refreshChartCache(list); // signal consensus needs updating
+
+
+				fine("Preparing to select refolded dataset");
+				populationsPanel.selectDataset(dataset);
+				//					log(Level.FINE, "Clearing consensus chart cache for refolded dataset");
+				//					consensusNucleusPanel.refreshChartCache();
+
+				fine("Latch counted down: "+latch.getCount());
+			} catch (InterruptedException e) {
+				error("Interruption to thread", e);
 			}
+		};
 			
-		});
+		executorService.execute(r);
 	}
 	
 	
@@ -912,22 +888,22 @@ public class MainWindow
 	 * Save all the root datasets in the populations panel
 	 */
 	private void saveRootDatasets(){
-		executorService.execute(new Runnable() {
-			public void run() {
-				for(AnalysisDataset root : populationsPanel.getRootDatasets()){
-					final CountDownLatch latch = new CountDownLatch(1);
+		
+		Runnable r = () -> {
+			for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+				final CountDownLatch latch = new CountDownLatch(1);
 
-					new SaveDatasetAction(root, MainWindow.this, latch, false);
-					try {
-						latch.await();
-					} catch (InterruptedException e) {
-						error("Interruption to thread", e);
-					}
+				new SaveDatasetAction(root, MainWindow.this, latch, false);
+				try {
+					latch.await();
+				} catch (InterruptedException e) {
+					error("Interruption to thread", e);
 				}
-				log("All root datasets saved");
 			}
+			log("All root datasets saved");
+		};
 			
-		});
+		executorService.execute(r);
 	}
 	
 	
@@ -939,53 +915,39 @@ public class MainWindow
 	 */	
 	public void saveDataset(final AnalysisDataset d, boolean saveAs){
 		
-//		executorService.execute(new Runnable() {
-//			public void run() {
-				if(d.isRoot()){
-					finer("Dataset is root");
-					finest("Creating latch");
-					final CountDownLatch latch = new CountDownLatch(1);
-					
-					Runnable r = () -> {
-						finest("Running save action");
-						new SaveDatasetAction(d, MainWindow.this, latch, saveAs);
-					};
-					finest("Passing save action to executor service");
-					executorService.submit(r);//.execute(r);
-//					Thread thr = new Thread(r);
-//					thr.start();
-					
-//					try {
-//						finest("Awaiting latch for save action");
-//						latch.await();
-//					} catch (InterruptedException e) {
-//						error("Interruption to thread", e);
-//					}
+		if(d.isRoot()){
+			finer("Dataset is root");
+			finest("Creating latch");
+			final CountDownLatch latch = new CountDownLatch(1);
 
-					fine("Root dataset saved");
-				} else {
-					finest("Not a root dataset, checking for parent");
-					AnalysisDataset target = null; 
-					for(AnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
-//					for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+			Runnable r = () -> {
+				finest("Running save action");
+				new SaveDatasetAction(d, MainWindow.this, latch, saveAs);
+			};
+			finest("Passing save action to executor service");
+			executorService.submit(r);//.execute(r);
 
-						for(AnalysisDataset child : root.getAllChildDatasets()){
-							if(child.getUUID().equals(d.getUUID())){
-								target = root;
-								break;
-							}
-						}
-						if(target!=null){
-							break;
-						}
-					}
-					if(target!=null){
-						saveDataset(target, saveAs);
+			fine("Root dataset saved");
+		} else {
+			finest("Not a root dataset, checking for parent");
+			AnalysisDataset target = null; 
+			for(AnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
+				//					for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+
+				for(AnalysisDataset child : root.getAllChildDatasets()){
+					if(child.getUUID().equals(d.getUUID())){
+						target = root;
+						break;
 					}
 				}
-//			}
-
-//		});
+				if(target!=null){
+					break;
+				}
+			}
+			if(target!=null){
+				saveDataset(target, saveAs);
+			}
+		}
 	}
 	
 	

@@ -37,6 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import analysis.AnalysisDataset;
 import utility.ProfileException;
 import logging.Loggable;
 import components.AbstractCellularComponent;
@@ -998,6 +999,23 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Test if the regular median profiles of the given datasets have the same segment counts
+	 * @param list
+	 * @return
+	 */
+	public static boolean segmentCountsMatch(List<AnalysisDataset> list){
+		
+		int segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
+		for(AnalysisDataset d : list){
+			if( d.getCollection().getProfileManager().getSegmentCount() != segCount){
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	public static String toString(List<NucleusBorderSegment> list){

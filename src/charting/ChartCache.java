@@ -78,9 +78,7 @@ public class ChartCache implements Cache {
 		this.purge();
 	}
 	
-	/* (non-Javadoc)
-	 * @see charting.Cache#refresh(java.util.List)
-	 */
+
 	@Override
 	public void clear(List<AnalysisDataset> list){
 		
@@ -100,24 +98,24 @@ public class ChartCache implements Cache {
 				if(op.hasDatasets()){
 					if(op.getDatasets().contains(d)){
 						toRemove.add(op);
-						op.log(Level.FINEST, "Need to remove options with dataset "+d.getName());
+						finest("Need to remove options with dataset "+d.getName());
 					}
 				}
 			}
 		}
 		
-		try {
+//		try {
 		
 			//Remove the options with the datasets
 			for(ChartOptions op : toRemove){
-				op.log(Level.FINEST, "Clearing options");
+				finest("Clearing options");
 				chartMap.remove(op);
 			}
-		} catch(Exception e){
-			
-			purge();
-			return;
-		}
+//		} catch(Exception e){
+//			log(Level.FINE, "Error clearing chart cache", e );
+//			purge();
+//			return;
+//		}
 	}
 	
 	

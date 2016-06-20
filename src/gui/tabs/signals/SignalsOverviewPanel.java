@@ -59,6 +59,7 @@ import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import charting.options.TableOptions.TableType;
 import charting.options.TableOptionsBuilder;
+import components.nuclear.NucleusBorderSegment;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ConsensusNucleusChartPanel;
 import gui.components.ExportableTable;
@@ -229,7 +230,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 		}
 		
 		warpButton = new JButton("Warp signals");
-		warpButton.setToolTipText("Requires consensus nucleus refolded");
+		warpButton.setToolTipText("Requires consensus nucleus refolded, at least one dataset with signals, and all datasets to have matching segments");
 		warpButton.addActionListener( e -> { 
 			
 				new SignalWarpingDialog(  getDatasets() );
@@ -306,7 +307,16 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 					}
 				}
 				
-				warpButton.setEnabled(hasSignals);
+				// Segments need to match for mesh creation
+				boolean segmentsMatch = NucleusBorderSegment.segmentCountsMatch(getDatasets());		
+				
+				if(hasSignals && segmentsMatch){
+					warpButton.setEnabled(true);
+				} else {
+					warpButton.setEnabled(false);
+				}
+				
+				
 			} else {
 				warpButton.setEnabled(false);
 			}

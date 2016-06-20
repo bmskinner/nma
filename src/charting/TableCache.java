@@ -18,60 +18,45 @@
  *******************************************************************************/
 package charting;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-
 import javax.swing.table.TableModel;
 
-import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
 
 
 public class TableCache implements Cache {
-	private Map<UUID, TableModel> tableMap = new HashMap<UUID, TableModel>();
-	private Map<TableOptions, UUID> optionsMap = new HashMap<TableOptions, UUID>();
+	private Map<TableOptions, TableModel> tableMap = new HashMap<TableOptions, TableModel>();
 	
 	public TableCache(){
 		
 	}
 	
 	public void addTable(TableOptions options, TableModel model){
-		UUID id = UUID.randomUUID();
-		tableMap.put(id, model);
-		optionsMap.put(options, id);
+		tableMap.put(options, model);
 	}
 	
 	public TableModel getTable(TableOptions options){
-		for(TableOptions op : this.optionsMap.keySet()){
-			if(op.equals(options)){
-				UUID id = optionsMap.get(op);
-				return tableMap.get(id);
-			}
+		
+		if(tableMap.containsKey(options)){
+			return tableMap.get(options);
 		}
 		return null;
 	}
 	
 	public boolean hasTable(TableOptions options){
-		for(TableOptions op : this.optionsMap.keySet()){
-			if(op.equals(options)){
-				return true;
-			}
-		}
-		return false;
+		return tableMap.containsKey(options);
 	}
 	
 	/**
 	 * Remove all cached charts
 	 */
 	public void purge(){
-		tableMap = new HashMap<UUID, TableModel>();
-		optionsMap = new HashMap<TableOptions, UUID>();
+		tableMap = new HashMap<TableOptions, TableModel>();
 	}
 	
 	/**
@@ -87,23 +72,30 @@ public class TableCache implements Cache {
 	 * @param list
 	 */
 	public void clear(List<AnalysisDataset> list){
+		
+		if(list==null || list.isEmpty()){
+			purge();
+			return;
+		}
+		
 		Set<TableOptions> toRemove = new HashSet<TableOptions>();
+		
 		// Find the options with the datasets
 		for(AnalysisDataset d : list){
-			for(TableOptions op : this.optionsMap.keySet()){
+			for(TableOptions op : tableMap.keySet()){
+				
+				if( ! op.hasDatasets()){
+					continue;
+				}
 				if(op.getDatasets().contains(d)){
-					if(!toRemove.contains(op)){
 						toRemove.add(op);
-					}
 				}
 			}
 		}
 		
 		//Remove the options with the datasets
 		for(TableOptions op : toRemove){
-			UUID id = optionsMap.get(op);
-			tableMap.remove(id);
-			optionsMap.remove(op);
+			tableMap.remove(op);
 		}
 	}
 }
