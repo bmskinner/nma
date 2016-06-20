@@ -514,12 +514,12 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * Store an internal record of loggable activity
 	 * @param message
 	 */
-	public void log(String message);
+//	public void log(String message);
 	
 	/**
 	 * Fetch the current nucleus log
 	 * @return
 	 */
-	public String printLog();
+//	public String printLog();
 		
 }

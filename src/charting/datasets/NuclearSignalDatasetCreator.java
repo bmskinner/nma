@@ -54,6 +54,7 @@ import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
 import components.nuclei.Nucleus;
+import gui.Labels;
 import gui.components.ColourSelecter;
 
 public class NuclearSignalDatasetCreator implements Loggable {
@@ -68,6 +69,12 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		}
 		return instance;
 	}
+	
+	public TableModel createBlankTable(){
+		DefaultTableModel model = new DefaultTableModel();
+		model.addColumn(Labels.NO_DATA_LOADED);
+		return model;
+	}
 
 	/**
 	 * Create a table of signal stats for the given list of datasets. This table
@@ -77,6 +84,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 */
 	public TableModel createSignalDetectionParametersTable(TableOptions options){
 
+		if( ! options.hasDatasets()){
+			return createBlankTable();
+		}
+		
 		List<AnalysisDataset> list = options.getDatasets();
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -84,11 +95,6 @@ public class NuclearSignalDatasetCreator implements Loggable {
 				
 		// find the collection with the most channels
 		// this defines  the number of rows
-
-		if(list==null){
-			model.addColumn("No data loaded");
-			return model;
-		}
 			
 		int maxChannels = 0;
 		for(AnalysisDataset dataset : list){
@@ -115,8 +121,6 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 			int numberOfRowsPerSignalGroup = fieldNames.size()/ (maxChannels+1);
 			model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
-
-
 
 			// make a new column for each collection
 			for(AnalysisDataset dataset : list){
@@ -189,25 +193,25 @@ public class NuclearSignalDatasetCreator implements Loggable {
                 } else {
                     Object signalThreshold = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
                             ? ns.getThreshold()
-                                    : "Variable";
+                            : "Variable";
 
-                            Object signalMode = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
-                                    ? "Forward"
-                                            : ns.getDetectionMode()==NuclearSignalOptions.REVERSE
-                                            ? "Reverse"
-                                                    : "Adaptive";                    
+                    Object signalMode = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
+                            ? "Forward"
+                            : ns.getDetectionMode()==NuclearSignalOptions.REVERSE
+                            ? "Reverse"
+                            : "Adaptive";                    
 
 
-                            rowData.add("");
-                            rowData.add(cell);
-                            rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
-                            rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
-                            rowData.add(  signalThreshold );
-                            rowData.add(ns.getMinSize());
-                            rowData.add(df.format(ns.getMaxFraction()));
-                            rowData.add(df.format(ns.getMinCirc()));
-                            rowData.add(df.format(ns.getMaxCirc()));
-                            rowData.add(signalMode);
+                    rowData.add("");
+                    rowData.add(cell);
+                    rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
+                    rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
+                    rowData.add(  signalThreshold );
+                    rowData.add(ns.getMinSize());
+                    rowData.add(df.format(ns.getMaxFraction()));
+                    rowData.add(df.format(ns.getMinCirc()));
+                    rowData.add(df.format(ns.getMaxCirc()));
+                    rowData.add(signalMode);
                 }
             }
             

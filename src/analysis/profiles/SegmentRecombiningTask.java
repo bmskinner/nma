@@ -102,7 +102,7 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 				processNucleus(nuclei[i]);
 			} catch(Exception e){
 				// On error, dump the nucleus logs
-				log(Level.SEVERE, nuclei[i].printLog());
+//				log(Level.SEVERE, nuclei[i].printLog());
 				throw e;
 			}
 			fireProgressEvent();
@@ -112,7 +112,7 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 	
 	private void processNucleus(Nucleus n) throws Exception {
 		log(Level.FINEST, "Recombining segments for nucleus "+n.getNameAndNumber());
-		n.log("Recombining segments");
+//		n.log("Recombining segments");
 		fitter.fit(n, pc);
 
 		// recombine the segments to the lengths of the median profile segments
@@ -122,8 +122,8 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 		SegmentedProfile segmented = new SegmentedProfile(recombinedProfile, medianProfile.getOrderedSegments());
 		n.setProfile(ProfileType.FRANKEN, segmented);
 		
-		n.log("Recombined segments:");
-		n.log(segmented.toString());
+//		n.log("Recombined segments:");
+//		n.log(segmented.toString());
 		
 		log(Level.FINEST, "Recombined segments for nucleus "+n.getNameAndNumber());
 		log(Level.FINEST, segmented.toString());

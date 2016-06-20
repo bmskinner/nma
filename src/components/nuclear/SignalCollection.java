@@ -18,7 +18,6 @@
  *******************************************************************************/
 package components.nuclear;
 
-import ij.IJ;
 import ij.process.ImageProcessor;
 import io.ImageImporter;
 import stats.SignalStatistic;
@@ -37,7 +36,6 @@ import java.util.UUID;
 
 import logging.Loggable;
 import components.generic.MeasurementScale;
-import components.generic.XYPoint;
 
 /**
  * This holds all the signals within a nucleus, within a hash.
@@ -75,27 +73,25 @@ public class SignalCollection implements Serializable, Loggable {
 	 * @param s
 	 */
 	public SignalCollection(SignalCollection s){
-		
-//		IJ.log("Duplicating signal collection");
-//		IJ.log(s.toString());
-		
-		for(UUID group : s.getSignalGroupIDs() ){
-//			IJ.log("  Group "+group);
-			String groupName = s.getSignalGroupName(group);
-			int channel = s.getSignalChannel(group);
-			File f = new File(s.getSourceFile(group).getAbsolutePath());
+				
+		for(UUID group : s.collection.keySet() ){
+
+			String groupName = s.names.get(group);
+			int channel      = s.sourceChannels.get(group);
+			File f           = new File(s.sourceFiles.get(group).getAbsolutePath());
 			
-			ArrayList<NuclearSignal> list = new ArrayList<NuclearSignal>();
+			List<NuclearSignal> list = new ArrayList<NuclearSignal>();
+			
 			for(NuclearSignal signal : s.getSignals(group)){
 				list.add(  new NuclearSignal(signal) );
-//				IJ.log("  Copying signal");
 			}
-						
-			this.addSignalGroup(list, group, f, channel);
-			this.setSignalGroupName(group, groupName);
+			
+			collection.put(    group, list);
+			sourceFiles.put(   group, f);
+			sourceChannels.put(group, channel);
+			names.put(         group, groupName);
 		}
-//		IJ.log("  New collection has "+this.numberOfSignals()+" signals");
-//		IJ.log(this.toString());
+
 	}
 	
 	/**
@@ -109,8 +105,6 @@ public class SignalCollection implements Serializable, Loggable {
 		if(list==null || Integer.valueOf(sourceChannel)==null || sourceFile==null || groupID==null){
 			throw new IllegalArgumentException("Signal list or channel is null");
 		}
-		
-//		UUID groupID = java.util.UUID.randomUUID();
 		
 		collection.put(    groupID, list);
 		sourceFiles.put(   groupID, sourceFile);
@@ -126,16 +120,31 @@ public class SignalCollection implements Serializable, Loggable {
 	 * @param signalGroup
 	 * @param newID
 	 */
-	public void updateSignalGroupID(UUID signalGroup, UUID newID){
-		collection.put(newID, collection.get(signalGroup));
-		sourceFiles.put(newID, sourceFiles.get(signalGroup));
-		sourceChannels.put(newID, sourceChannels.get(signalGroup));
-		names.put(newID, names.get(signalGroup));
+	public void updateSignalGroupID(UUID oldID, UUID newID){
 		
-		collection.remove(signalGroup);
-		sourceFiles.remove(signalGroup);
-		sourceChannels.remove(signalGroup);
-		names.remove(signalGroup);
+		if( ! collection.containsKey(oldID)){
+			// The nucleus does not have the old id - skip
+			return;
+		}
+		
+		List<NuclearSignal> list = collection.get(oldID);
+		File sourceFile          = sourceFiles.get(oldID);
+		int sourceChannel        = sourceChannels.get(oldID);
+		String name              = names.get(oldID);
+		
+		// Remove the old values
+		collection.remove(    oldID);
+		sourceFiles.remove(   oldID);
+		sourceChannels.remove(oldID);
+		names.remove(         oldID);
+		
+		// Insert the new values
+		collection.put(    newID, list);
+		sourceFiles.put(   newID, sourceFile);
+		sourceChannels.put(newID, sourceChannel);
+		names.put(         newID, name);
+		
+		
 	}
 	
 	/**
@@ -197,7 +206,7 @@ public class SignalCollection implements Serializable, Loggable {
 	 * Fetches the actual signals, not a copy
 	 * @return the list of signal lists
 	 */
-	public ArrayList<List<NuclearSignal>> getSignals(){
+	public List<List<NuclearSignal>> getSignals(){
 		ArrayList<List<NuclearSignal>> result = new ArrayList<List<NuclearSignal>>(0);
 		for(UUID signalGroup : this.getSignalGroupIDs()){
 			result.add(getSignals(signalGroup));
@@ -447,114 +456,114 @@ public class SignalCollection implements Serializable, Loggable {
 	/**
 	 * Find the pairwise distances between all signals in the nucleus 
 	 */
-	private double[][] calculateDistanceMatrix(){
-
-		// create a matrix to hold the data
-		// needs to be between every signal and every other signal, irrespective of colour
-		int matrixSize = this.numberOfSignals();
-
-		double [][] matrix = new double[matrixSize][matrixSize];
-		
-		int matrixRow = 0;
-		int matrixCol = 0;
-		
-		for( List<NuclearSignal> signalsRow : getSignals()){
-
-			if(!signalsRow.isEmpty()){
-
-				for(NuclearSignal row : signalsRow){
-					
-					matrixCol=0;
-
-					XYPoint aCoM = row.getCentreOfMass();
-
-					for( List<NuclearSignal> signalsCol : getSignals()){
-
-						if(!signalsCol.isEmpty()){
-
-							for(NuclearSignal col : signalsCol){
-								XYPoint bCoM = col.getCentreOfMass();
-								matrix[matrixRow][matrixCol] = aCoM.getLengthTo(bCoM);
-								matrixCol++;
-							}
-
-						}
-
-					}
-					matrixRow++;
-				}
-			}
-		}
-		return matrix;
-	}
-	
-	/**
-	 * Export the pairwise distances between all signals to the given folder
-	 * @param outputFolder the folder to export to
-	 */
-	public void exportDistanceMatrix(File outputFolder){
-		
-		double[][] matrix = calculateDistanceMatrix();
-		
-		File f = new File(outputFolder.getAbsolutePath()+File.separator+"signalDistanceMatrix.txt");
-		if(f.exists()){
-			f.delete();
-		}
-
-//		int matrixSize = matrix.length;
-		StringBuilder outLine = new StringBuilder("Signal\t");
-		
-		// prepare the column headings
-		int col = 0;
-		for(List<NuclearSignal> signalsRow : getSignals()){
-			
-			if(!signalsRow.isEmpty()){
-
-				for(NuclearSignal s : signalsRow){
-					outLine.append("SIGNAL_"+col+"\t");
-					col++;
-				}	
-			}
-			outLine.append("|\t"); // separator between signal channels
-		}
-		outLine.append("\r\n");
-
-		// add the rows of values
-		int matrixRow = 0;
-		int matrixCol = 0;
-		for(List<NuclearSignal> imagePlane : getSignals()){
-			
-			
-			if(!imagePlane.isEmpty()){
-				
-				
-				for(NuclearSignal s : imagePlane){ // go through all the signals, row by row
-					matrixCol=0; // begin a new column
-					outLine.append("SIGNAL_"+matrixRow+"\t");
-					// within the row, get all signals as a column
-					for(List<NuclearSignal> signalsCol : getSignals()){
-
-						if(!signalsCol.isEmpty()){							
-							for(NuclearSignal c : signalsCol){
-								outLine.append(matrix[matrixRow][matrixCol]+"\t");
-								matrixCol++;
-							}
-						}
-						outLine.append("|\t"); // separate between channels within row
-					}
-					
-					outLine.append("\r\n"); // end of a row
-					matrixRow++; // increase the row number if we are onto another row
-				}
-				
-			}
-			for(int i=0; i<=matrix.length;i++){
-				outLine.append("--\t"); // make separator across entire line
-			}
-			outLine.append("\r\n"); // separate between channels between rows
-		}
-		IJ.append(outLine.toString(), f.getAbsolutePath());
-	}
+//	private double[][] calculateDistanceMatrix(){
+//
+//		// create a matrix to hold the data
+//		// needs to be between every signal and every other signal, irrespective of colour
+//		int matrixSize = this.numberOfSignals();
+//
+//		double [][] matrix = new double[matrixSize][matrixSize];
+//		
+//		int matrixRow = 0;
+//		int matrixCol = 0;
+//		
+//		for( List<NuclearSignal> signalsRow : getSignals()){
+//
+//			if(!signalsRow.isEmpty()){
+//
+//				for(NuclearSignal row : signalsRow){
+//					
+//					matrixCol=0;
+//
+//					XYPoint aCoM = row.getCentreOfMass();
+//
+//					for( List<NuclearSignal> signalsCol : getSignals()){
+//
+//						if(!signalsCol.isEmpty()){
+//
+//							for(NuclearSignal col : signalsCol){
+//								XYPoint bCoM = col.getCentreOfMass();
+//								matrix[matrixRow][matrixCol] = aCoM.getLengthTo(bCoM);
+//								matrixCol++;
+//							}
+//
+//						}
+//
+//					}
+//					matrixRow++;
+//				}
+//			}
+//		}
+//		return matrix;
+//	}
+//	
+//	/**
+//	 * Export the pairwise distances between all signals to the given folder
+//	 * @param outputFolder the folder to export to
+//	 */
+//	public void exportDistanceMatrix(File outputFolder){
+//		
+//		double[][] matrix = calculateDistanceMatrix();
+//		
+//		File f = new File(outputFolder.getAbsolutePath()+File.separator+"signalDistanceMatrix.txt");
+//		if(f.exists()){
+//			f.delete();
+//		}
+//
+////		int matrixSize = matrix.length;
+//		StringBuilder outLine = new StringBuilder("Signal\t");
+//		
+//		// prepare the column headings
+//		int col = 0;
+//		for(List<NuclearSignal> signalsRow : getSignals()){
+//			
+//			if(!signalsRow.isEmpty()){
+//
+//				for(NuclearSignal s : signalsRow){
+//					outLine.append("SIGNAL_"+col+"\t");
+//					col++;
+//				}	
+//			}
+//			outLine.append("|\t"); // separator between signal channels
+//		}
+//		outLine.append("\r\n");
+//
+//		// add the rows of values
+//		int matrixRow = 0;
+//		int matrixCol = 0;
+//		for(List<NuclearSignal> imagePlane : getSignals()){
+//			
+//			
+//			if(!imagePlane.isEmpty()){
+//				
+//				
+//				for(NuclearSignal s : imagePlane){ // go through all the signals, row by row
+//					matrixCol=0; // begin a new column
+//					outLine.append("SIGNAL_"+matrixRow+"\t");
+//					// within the row, get all signals as a column
+//					for(List<NuclearSignal> signalsCol : getSignals()){
+//
+//						if(!signalsCol.isEmpty()){							
+//							for(NuclearSignal c : signalsCol){
+//								outLine.append(matrix[matrixRow][matrixCol]+"\t");
+//								matrixCol++;
+//							}
+//						}
+//						outLine.append("|\t"); // separate between channels within row
+//					}
+//					
+//					outLine.append("\r\n"); // end of a row
+//					matrixRow++; // increase the row number if we are onto another row
+//				}
+//				
+//			}
+//			for(int i=0; i<=matrix.length;i++){
+//				outLine.append("--\t"); // make separator across entire line
+//			}
+//			outLine.append("\r\n"); // separate between channels between rows
+//		}
+//		IJ.append(outLine.toString(), f.getAbsolutePath());
+//	}
 	
 	/**
 	 * Given the id of a signal group, make sure it is suitable to use
@@ -578,7 +587,7 @@ public class SignalCollection implements Serializable, Loggable {
 	// the print function bypasses all input checks to show everything present
 	public void print(){
 		for(UUID signalGroup : this.collection.keySet()){
-			IJ.log("    Signal group "+signalGroup+": "+this.collection.get(signalGroup).size());
+			log("    Signal group "+signalGroup+": "+this.collection.get(signalGroup).size());
 		}
 	}
 	

@@ -55,8 +55,10 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 	public DatasetMergingDialog(List<AnalysisDataset> datasets){
 		this.datasets = datasets;
 		createUI();
+
 		this.setModal(true);
 		this.pack();
+		centerOnScreen();
 		this.setVisible(true);
 		finest("Created dataset merging dialog");
 	}

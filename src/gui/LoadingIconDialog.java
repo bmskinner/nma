@@ -21,8 +21,11 @@ package gui;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.net.URL;
 import java.util.logging.Level;
+
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -63,6 +66,17 @@ public abstract class LoadingIconDialog extends JDialog implements Loggable {
 		
 		this.loadingLabel.setIcon(blankGif);
 
+	}
+	
+	// Center on screen ( absolute true/false (exact center or 25% upper left) )
+	public void centerOnScreen() {
+	    final int width = getWidth();
+	    final int height = getHeight();
+	    final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	    int x = (screenSize.width / 2) - (width / 2);
+	    int y = (screenSize.height / 2) - (height / 2);
+
+	    setLocation(x, y);
 	}
 
 	

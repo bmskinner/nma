@@ -86,6 +86,7 @@ public abstract class AbstractChartFactory implements Loggable {
 				null, null, null); 
 		
 		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.WHITE);
 		
 		plot.getDomainAxis().setRange(-10, 10);
 		plot.getRangeAxis().setRange(-10, 10);

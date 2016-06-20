@@ -185,36 +185,59 @@ public class SignalManager implements Loggable{
 	  
 	  /**
 	   * Update the signal group id
-	   * @param signalGroup
-	   * @param newID
+	   * @param oldID the id to replace
+	   * @param newID the new id
 	   */
-	  public void updateSignalGroupID(UUID signalGroup, UUID newID){
-		  for(Nucleus n : collection.getNuclei()){
-			  if(n.getSignalCollection().hasSignal(signalGroup)){
-				  n.getSignalCollection().updateSignalGroupID(signalGroup, newID);
-			  }
-		  }
-
-		  SignalGroup oldGroup = collection.getSignalGroup(signalGroup);
+	  public void updateSignalGroupID(UUID oldID, UUID newID){
 		  
-		  SignalGroup newGroup = new SignalGroup(collection.getSignalGroup(signalGroup));
+		  finer("Updating signals to new group id in nuclei");
+		  for(Nucleus n : collection.getNuclei()){
+			  n.getSignalCollection().updateSignalGroupID(oldID, newID);
+		  }
+		  
+		  finer("Updating signal group in cell collection");
+
+		  // the group the signals are currently in
+		  SignalGroup oldGroup = collection.getSignalGroup(oldID);
+		  
+		  finer("Old group: "+oldID+" | "+oldGroup.toString());
+		  
+		 
 		  
 		  // Merge and rename signal groups
-		  if(collection.getSignalGroup(newID)!=null){ // check if the group already exists
+		  
+		  if(collection.hasSignalGroup(newID)){ // check if the group already exists
 			  
-			  if( ! oldGroup.getGroupName().equals(newGroup.getGroupName())){
-				  newGroup.setGroupName("Merged_"+oldGroup.getGroupName()+"_"+newGroup.getGroupName());
+			  finer("A signal group of id "+newID+" already exists");
+			  SignalGroup existingGroup = collection.getSignalGroup(newID);
+			  
+			  if( ! oldGroup.getGroupName().equals(existingGroup.getGroupName())){
+				  finer("Setting signal group name to merge");
+				  existingGroup.setGroupName("Merged_"+oldGroup.getGroupName()+"_"+existingGroup.getGroupName());
 			  }
 			  
-			  if( oldGroup.getChannel()!=newGroup.getChannel()){
-				  newGroup.setChannel(-1);
+			  if( oldGroup.getChannel()!=existingGroup.getChannel()){
+				  finer("Setting signal group name to -1");
+				  existingGroup.setChannel(-1);
 			  }
 			  
 			  // Shells and colours?
 			  
+		  } else { // the signal group does not exist, just copy the old group
+			  
+			  finer("A signal group of id "+newID+" does not exist");
+			  
+			  // the new group for the signals
+			  SignalGroup newGroup = new SignalGroup(oldGroup);
+			  
+			  finer("New group: "+newID+" | "+newGroup.toString());
+			  collection.addSignalGroup(newID, newGroup);
+			  finer("Added new signal group: "+newID);
+			  
 		  }
-		  collection.addSignalGroup(newID, newGroup);
-		  collection.removeSignalGroup(signalGroup);
+		  
+		  collection.removeSignalGroup(oldID);
+		  finer("Removed old signal group");
 	  }
 	  
 	  /**

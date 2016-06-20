@@ -107,8 +107,8 @@ public class SegmentFitter implements Loggable {
 		log(Level.FINEST, "Fitted profile against median for nucleus "+n.getNameAndNumber());
 		log(Level.FINEST, newProfile.toString());
 		
-		n.log("Fitted profile against median:");
-		n.log(newProfile.toString());
+		finest("Fitted profile against median:");
+		finest(newProfile.toString());
 
 		n.setProfile(ProfileType.REGULAR, newProfile);
 
@@ -118,8 +118,8 @@ public class SegmentFitter implements Loggable {
 		log(Level.FINEST, "Remapped border points for nucleus "+n.getNameAndNumber());
 		log(Level.FINEST, n.getProfile(ProfileType.REGULAR).toString());
 		
-		n.log("Remapped border points:");
-		n.log(n.getProfile(ProfileType.REGULAR).toString());
+		finest("Remapped border points:");
+		finest(n.getProfile(ProfileType.REGULAR).toString());
 		
 	}
 		
@@ -139,9 +139,9 @@ public class SegmentFitter implements Loggable {
 			throw new IllegalArgumentException("Test nucleus has no segments");
 		}
 		
-		n.log("Recombining profile");
-		n.log("Template profile:");
-		n.log(medianProfile.toString());
+		finest("Recombining profile");
+		finest("Template profile:");
+		finest(medianProfile.toString());
 
 		/*
 		 * Generate a segmented profile from the angle profile of the point type.
@@ -151,16 +151,16 @@ public class SegmentFitter implements Loggable {
 
 		SegmentedProfile nucleusProfile = new SegmentedProfile(n.getProfile(ProfileType.REGULAR, tag));
 		
-		n.log("Initial profile starting at "+tag+":");
-		n.log(nucleusProfile.toString());
+		finest("Initial profile starting at "+tag+":");
+		finest(nucleusProfile.toString());
 
 		// stretch or squeeze the segments to match the length of the median profile of the collection
 		SegmentedProfile frankenProfile = null;
 		
 		try {
 			frankenProfile = nucleusProfile.frankenNormaliseToProfile(medianProfile);
-			n.log("Complete frankenprofile:");
-			n.log(frankenProfile.toString());
+			finest("Complete frankenprofile:");
+			finest(frankenProfile.toString());
 		} catch(ProfileException e){
 			error("Malformed profile in frankenprofiling", e);
 			finest("Median profile:");
@@ -186,7 +186,7 @@ public class SegmentFitter implements Loggable {
 			return; // this allows the unit tests to skip this section if a profile collection has not been created
 		}
 		
-		n.log("Remapping border points");
+		finest("Remapping border points");
 		/*
 		 * Not all the tags will be associated with endpoints;
 		 * e.g. the intersection point. The orientation and 
@@ -216,7 +216,7 @@ public class SegmentFitter implements Loggable {
 				NucleusBorderSegment nSeg = n.getProfile(ProfileType.REGULAR).getSegment(seg.getName());
 				n.setBorderTag(tag, nSeg.getStartIndex());
 				log(Level.FINEST, "Remapped border point '"+tag+"' to "+nSeg.getStartIndex()+" in "+n.getNameAndNumber());
-				n.log("Remapped border point '"+tag+"' to "+nSeg.getStartIndex());
+//				finest("Remapped border point '"+tag+"' to "+nSeg.getStartIndex());
 			} else {
 								
 				// A segment was not found with a start index at zero; segName is null
@@ -226,7 +226,7 @@ public class SegmentFitter implements Loggable {
 				log(Level.WARNING, pc.toString());
 				log(Level.WARNING, "Median segment list:");
 				log(Level.WARNING, NucleusBorderSegment.toString(segments));
-				n.log("Could not remapped border point '"+tag+"'");
+//				n.log("Could not remapped border point '"+tag+"'");
 				// Check to see if the segments are reversed
 				seg = pc.getSegmentEndingWith(tag);
 				if(seg!=null){

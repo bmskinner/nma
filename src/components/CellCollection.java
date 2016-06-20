@@ -975,6 +975,10 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
       this.signalGroups.put(id, group);
   }
   
+  public boolean hasSignalGroup(UUID id){
+	  return this.signalGroups.containsKey(id);
+  }
+  
   /**
    * Remove the given group
    * @param id
@@ -1063,7 +1067,8 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  b.append("Signal groups:"+newLine);
 	  for(UUID signalGroupID : this.signalGroups.keySet() ){
 		  SignalGroup group = this.signalGroups.get(signalGroupID);
-		  b.append( signalGroupID.toString()+": "+group.toString()+newLine);
+		  int count = this.getSignalManager().getSignalCount(signalGroupID);
+		  b.append( signalGroupID.toString()+": "+group.toString()+" | "+count+newLine);
 	  }
 	  
 	  return b.toString();

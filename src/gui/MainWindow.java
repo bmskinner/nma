@@ -1164,7 +1164,7 @@ public class MainWindow
 			for(AnalysisDataset d : populationsPanel.getSelectedDatasets()){
 				
 				for(Nucleus n : d.getCollection().getNuclei()){
-					log(Level.INFO, n.printLog());
+					log(Level.INFO, n.toString());
 				}
 			}
 			break;

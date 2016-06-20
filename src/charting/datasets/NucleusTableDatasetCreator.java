@@ -597,9 +597,9 @@ private static NucleusTableDatasetCreator instance = null;
 			columnData.add(stat.toString()+" mean 95% CI");
 			columnData.add(stat.toString()+" p(unimodal)");
 		}
-		columnData.add("Signal channels");
-		columnData.add("Number of signals");
-		columnData.add("Signals per nucleus");
+//		columnData.add("Signal channels");
+//		columnData.add("Number of signals");
+//		columnData.add("Signals per nucleus");
 
 		model.addColumn("", columnData.toArray());
 		
@@ -629,7 +629,7 @@ private static NucleusTableDatasetCreator instance = null;
 		CellCollection collection = dataset.getCollection();
 
 		List<Object> datasetData = new ArrayList<Object>();			
-		double signalPerNucleus = (double) collection.getSignalManager().getSignalCount()/  (double) collection.getNucleusCount();
+//		double signalPerNucleus = (double) collection.getSignalManager().getSignalCount()/  (double) collection.getNucleusCount();
 
 		datasetData.add(collection.getNucleusCount());
 
@@ -645,9 +645,9 @@ private static NucleusTableDatasetCreator instance = null;
 			datasetData.add(pf.format(diptest));					
 		}
 
-		datasetData.add(dataset.getCollection().getSignalManager().getSignalGroupCount());
-		datasetData.add(collection.getSignalManager().getSignalCount());
-		datasetData.add(df.format(signalPerNucleus));
+//		datasetData.add(dataset.getCollection().getSignalManager().getSignalGroupCount());
+//		datasetData.add(collection.getSignalManager().getSignalCount());
+//		datasetData.add(df.format(signalPerNucleus));
 		
 		return datasetData;
 		

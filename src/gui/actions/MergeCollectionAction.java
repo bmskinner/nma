@@ -59,13 +59,18 @@ public class MergeCollectionAction extends ProgressableAction {
 				
 				Map<UUID, Set<UUID>> pairs = dialog.getPairedSignalGroups();
 				
+				
+				
 				if(pairs.keySet().size()!=0){
+					finest("Found paired signal groups");
 					// User decided to merge signals
 					worker = new DatasetMerger(datasets, saveFile, pairs);
 				} else {
+					finest("No paired signal groups");
 					worker = new DatasetMerger(datasets, saveFile);
 				}
 			} else {
+				finest("No signal groups to merge");
 				// no signals to merge
 				worker = new DatasetMerger(datasets, saveFile);
 			}

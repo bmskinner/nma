@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
-
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
@@ -186,7 +184,7 @@ public class DatasetMerger extends AnalysisWorker {
 				}
 			}
 			
-			// All all the exisiting signal groups before merging
+			// All the existing signal groups before merging
 			for(UUID signalGroupID : d.getCollection().getSignalGroupIDs()){
 				newCollection.addSignalGroup(signalGroupID, new SignalGroup(d.getCollection().getSignalGroup(signalGroupID)));
 			}
@@ -225,14 +223,18 @@ public class DatasetMerger extends AnalysisWorker {
 			return;
 		}
 		
+		finer("Merging signal groups");
+		
 		// Decide which signal groups get which new ids
 		// Key is old signal group. Entry is new id
 		Map<UUID, UUID> mergedSignalGroups = new HashMap<UUID, UUID>();
 		
 		for(UUID id1 : pairedSignalGroups.keySet()){
 			
+			
 			// If this id is not encountered, make a new one
 			if( ! mergedSignalGroups.keySet().contains(id1)){
+				finest("No merge group, creating");
 				mergedSignalGroups.put(id1, UUID.randomUUID());
 			}
 			
@@ -241,6 +243,7 @@ public class DatasetMerger extends AnalysisWorker {
 			// All the set share this new id
 			Set<UUID> id2Set = pairedSignalGroups.get(id1);
 			for(UUID id2 : id2Set){
+				finest("Adding "+id2+" to "+newID);
 				mergedSignalGroups.put(id2, newID);
 			}
 		}
@@ -254,7 +257,11 @@ public class DatasetMerger extends AnalysisWorker {
 		finer("Updating signal group ids");
 		for(UUID oldID : mergedSignalGroups.keySet()){
 			
+			finer("Old group id for signals  : "+oldID);
+			
 			UUID newID = mergedSignalGroups.get(oldID);
+			finer("New group id to merge into: "+newID);
+			
 			newCollection.getSignalManager().updateSignalGroupID(oldID, newID);
 		}
 		

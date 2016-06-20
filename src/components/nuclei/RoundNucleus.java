@@ -102,9 +102,6 @@ public class RoundNucleus extends AbstractCellularComponent
 
 	protected transient Nucleus verticalNucleus = null; // cache the vertically rotated nucleus
 	
-	
-	private transient StringBuffer log = new StringBuffer();
-	
 	public RoundNucleus(Roi roi, File f, int channel, int number, double[] position){
 		
 		super(roi, f, channel, position);
@@ -1191,7 +1188,6 @@ public class RoundNucleus extends AbstractCellularComponent
 	    this.boundingRectangles = new HashMap<BorderTag, Rectangle>();	  
 	    this.verticalNucleus    = null;
 	    updateVerticallyRotatedNucleus(); // force an update
-	    log = new StringBuffer();
 	    finest("\tRead nucleus");
 	}
 
@@ -1466,22 +1462,20 @@ public class RoundNucleus extends AbstractCellularComponent
 //			}
 		}
 	}
-	
-	/**
-	 * Store an internal record of loggable activity
-	 * @param message
-	 */
-	public void log(String message){
-		log.append(message+System.getProperty("line.separator"));
-	}
-	
+		
 	/**
 	 * Fetch the current nucleus log
 	 * @return
 	 */
-	public String printLog(){
+	public String toString(){
+		String newLine = System.getProperty("line.separator");
+		StringBuilder b = new StringBuilder();
 		
-		return this.getNameAndNumber()+"\n"+log.toString();
+		b.append(this.getNameAndNumber()+newLine);
+		
+		b.append(this.getSignalCollection().toString()+newLine);
+		  
+		return b.toString();
 	}
 	
 	
