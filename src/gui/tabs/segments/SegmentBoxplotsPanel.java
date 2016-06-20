@@ -74,7 +74,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		log(Level.FINEST, "Dataset list is not empty");
 
 		// Check that all the datasets have the same number of segments
-		if(ProfileManager.segmentCountsMatch(getDatasets())){ // make a boxplot for each segment
+		if(NucleusBorderSegment.segmentCountsMatch(getDatasets())){ // make a boxplot for each segment
 			
 			CellCollection collection = activeDataset().getCollection();
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)

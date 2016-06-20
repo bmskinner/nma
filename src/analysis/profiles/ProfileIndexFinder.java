@@ -132,6 +132,11 @@ public class ProfileIndexFinder implements Loggable {
 	public int identifyIndex(final CellCollection collection, final BorderTag tag){
 		
 		List<RuleSet> list = collection.getRuleSetCollection().getRuleSets(tag);
+		
+		if(list.size()==0){
+			// no rule set
+			return -2;
+		}
 		return identifyIndex(collection, list);
 		
 	}
@@ -146,7 +151,7 @@ public class ProfileIndexFinder implements Loggable {
 	public int identifyIndex(final CellCollection collection, final List<RuleSet> list){
 		
 		if(list.size()==0){
-			return -2;
+			return -2; // no rule sets
 		}
 		
 		

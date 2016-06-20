@@ -441,7 +441,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * Get the points associated with offsets currently present
 	 * @return a string with the points
 	 */
-	public String printKeys(){
+	public String tagString(){
 		
 		StringBuilder builder = new StringBuilder();
 
@@ -454,7 +454,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	
 	public String toString(){
 		StringBuilder builder = new StringBuilder();
-		builder.append(this.printKeys());
+		builder.append(this.tagString());
 		if(this.segments.isEmpty()){
 			builder.append("\r\nNo segments in profile collection");
 		} else {

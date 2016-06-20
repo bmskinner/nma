@@ -61,7 +61,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 		tablePanel = createTablePanel();
 		scrollPane.setColumnHeaderView(null);
 		
-		if(ProfileManager.segmentCountsMatch(getDatasets())){
+		if(NucleusBorderSegment.segmentCountsMatch(getDatasets())){
 
 			List<NucleusBorderSegment> segments = activeDataset()
 					.getCollection()

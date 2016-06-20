@@ -60,7 +60,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 		log(Level.FINEST, "Dataset list is not empty");
 
 		// Check that all the datasets have the same number of segments
-		if(ProfileManager.segmentCountsMatch(getDatasets())){ // make a histogram for each segment
+		if(NucleusBorderSegment.segmentCountsMatch(getDatasets())){ // make a histogram for each segment
 
 			CellCollection collection = activeDataset().getCollection();
 			

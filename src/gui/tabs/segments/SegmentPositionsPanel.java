@@ -132,7 +132,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 		finest("Checking segment counts");
 				
 		// Check that all the datasets have the same number of segments
-		if(ProfileManager.segmentCountsMatch(getDatasets())){
+		if(NucleusBorderSegment.segmentCountsMatch(getDatasets())){
 			
 			finest("Segment counts match");
 

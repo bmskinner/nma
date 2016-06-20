@@ -232,7 +232,7 @@ private static NucleusTableDatasetCreator instance = null;
 		df.setMinimumIntegerDigits(1);
 		
 		// If the datasets have different segment counts, show error message
-		if( ! ProfileManager.segmentCountsMatch(list)){
+		if( ! NucleusBorderSegment.segmentCountsMatch(list)){
 			model.addColumn(Labels.INCONSISTENT_SEGMENT_NUMBER);
 			return model;
 		}

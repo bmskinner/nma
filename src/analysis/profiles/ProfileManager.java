@@ -426,22 +426,22 @@ public class ProfileManager implements Loggable {
 
 	
 	
-	/**
-	 * Test if the regular median profiles of the given datasets have the same segment counts
-	 * @param list
-	 * @return
-	 */
-	public static boolean segmentCountsMatch(List<AnalysisDataset> list){
-		
-		int segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
-		for(AnalysisDataset d : list){
-			if( d.getCollection().getProfileManager().getSegmentCount() != segCount){
-				return false;
-			}
-		}
-		
-		return true;
-	}
+//	/**
+//	 * Test if the regular median profiles of the given datasets have the same segment counts
+//	 * @param list
+//	 * @return
+//	 */
+//	public static boolean segmentCountsMatch(List<AnalysisDataset> list){
+//		
+//		int segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
+//		for(AnalysisDataset d : list){
+//			if( d.getCollection().getProfileManager().getSegmentCount() != segCount){
+//				return false;
+//			}
+//		}
+//		
+//		return true;
+//	}
 	
 	/**
 	 * Get the number of segments in the regular profile of the collection. On error

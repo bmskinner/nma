@@ -414,8 +414,8 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		finer("Refining segment assignments...");
 
 			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
-			fine("Median profile");
-			fine(pc.toString());
+//			fine("Median profile");
+			fine(pc.tagString());
 			List<NucleusBorderSegment> segments = pc.getSegments(pointType);
 			fine("Fetched segments from profile collection");
 			fine(NucleusBorderSegment.toString(segments));

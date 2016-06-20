@@ -133,6 +133,10 @@ public class DatasetProfiler extends AnalysisWorker {
 				rpIndex = coerceRPToZero(collection);
 			}
 			
+			fine("Ensuring profile collections have RP at index zero");
+			collection.getProfileManager()
+				.updateProfileCollectionOffsets(BorderTag.REFERENCE_POINT, 0);
+			
 //			{
 //				// check the RP in the median is still at zero
 //				rpIndex = finder.identifyIndex(collection, BorderTag.REFERENCE_POINT);
@@ -161,29 +165,32 @@ public class DatasetProfiler extends AnalysisWorker {
 			
 
 			// carry out iterative offsetting to refine the RP
-			double score = compareProfilesToMedian(pointType);
-			double prevScore = score+1;
-			while(score < prevScore){
-				
-				prevScore = score;
-				
-				median = collection.getProfileCollection(ProfileType.REGULAR)
-						.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
-				
-				// Update the nucleus profiles to the median
-				collection.getProfileManager()
-					.offsetNucleusProfiles(BorderTag.REFERENCE_POINT, ProfileType.REGULAR, median);
-				
-				// Build the ProfileCollections for each ProfileType
-				collection.getProfileManager().createProfileCollections();	
-				
-//				score = rebuildProfileAggregate(pointType, finder);
-				score = compareProfilesToMedian(BorderTag.REFERENCE_POINT);
-				fine("Reticulating splines: score: "+(int)score);
-			}
+//			double score = compareProfilesToMedian(pointType);
+//			double prevScore = score+1;
+//			while(score < prevScore){
+//				
+//				prevScore = score;
+//				
+//				median = collection.getProfileCollection(ProfileType.REGULAR)
+//						.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+//				
+//				// Update the nucleus profiles to the median
+//				collection.getProfileManager()
+//					.offsetNucleusProfiles(BorderTag.REFERENCE_POINT, ProfileType.REGULAR, median);
+//				
+//				// Build the ProfileCollections for each ProfileType
+//				collection.getProfileManager().createProfileCollections();	
+//				
+////				score = rebuildProfileAggregate(pointType, finder);
+//				score = compareProfilesToMedian(BorderTag.REFERENCE_POINT);
+//				fine("Reticulating splines: score: "+(int)score);
+//			}
 			
 
 			fine("Identified best RP in nuclei and constructed median profiles");
+			
+			fine("Current state of profile collection:");
+			fine(collection.getProfileCollection(ProfileType.REGULAR).tagString());
 			
 			fine("Identifying OP and other BorderTags");
 			
@@ -198,14 +205,13 @@ public class DatasetProfiler extends AnalysisWorker {
 					
 					fine("Checking location of RP in profile");
 					int index = finder.identifyIndex(collection, tag);
-					
 					fine("RP is found at index "+index);
 
-					if(index!=0){
-						collection.getProfileManager()
-						.updateProfileCollectionOffsets(tag, 0);
-						fine("Forcing RP to index zero");
-					}
+//					if(index!=0){
+//						collection.getProfileManager()
+//						.updateProfileCollectionOffsets(tag, 0);
+//						fine("Forcing RP to index zero");
+//					}
 					continue; 
 				}
 				
@@ -235,9 +241,10 @@ public class DatasetProfiler extends AnalysisWorker {
 						.offsetNucleusProfiles(tag, ProfileType.REGULAR, tagMedian);
 					fine("Assigned offset in nucleus profiles for "+tag);
 					
-
+					fine("Current state of profile collection:");
+					fine(collection.getProfileCollection(ProfileType.REGULAR).tagString());
 				} else {
-					fine("No ruleset for "+tag+" or index not found; skipping");
+					fine("No ruleset for "+tag+"; skipping");
 				}
 			}
 			

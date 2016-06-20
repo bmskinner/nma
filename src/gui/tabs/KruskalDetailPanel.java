@@ -43,6 +43,7 @@ import org.jfree.chart.JFreeChart;
 import analysis.profiles.ProfileManager;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
+import components.nuclear.NucleusBorderSegment;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
@@ -160,7 +161,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 		if(getDatasets().size()==2){ // Only create a chart if exactly two datasets are selected
 			
 			// Only allow a franken normlisation if datasets have the same number of segments
-			if(ProfileManager.segmentCountsMatch(getDatasets())){
+			if(NucleusBorderSegment.segmentCountsMatch(getDatasets())){
 				setEnabled(true);
 			} else {
 				setEnabled(false);

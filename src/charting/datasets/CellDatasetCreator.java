@@ -278,7 +278,7 @@ public class CellDatasetCreator implements Loggable {
 			
 			finest("Creating multiple dataset position dataset");
 			
-			if(ProfileManager.segmentCountsMatch(options.getDatasets())){
+			if(NucleusBorderSegment.segmentCountsMatch(options.getDatasets())){
 			
 				ds = createMultiPositionFeatureDataset(options);
 			} else {
