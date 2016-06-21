@@ -27,6 +27,7 @@ import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
 import gui.tabs.cells.CellOutlinePanel;
 import gui.tabs.cells.CellStatsPanel;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -61,8 +62,10 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 import org.jfree.chart.JFreeChart;
+
 import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
+import charting.datasets.SignalTableCell;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
@@ -143,7 +146,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 			this.validate();
 		} catch(Exception e){
-			log(Level.SEVERE, "Error creating cell detail panel", e);
+			error("Error creating cell detail panel", e);
 		}
 
 	}
@@ -362,7 +365,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							try {
 								activeDataset().getCollection().removeCell(cell);
 							} catch (Exception e2) {
-								log(Level.SEVERE, "Error removing cell from collection", e2);
+								error("Error removing cell from collection", e2);
 							}
 							node.removeFromParent();
 							DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
@@ -376,13 +379,13 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 								fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, list);
 
 							} catch (Exception e1) {
-								log(Level.SEVERE, "Error deleting cell", e1);
+								error("Error deleting cell", e1);
 							}
 							
 							try {
 								CellDetailPanel.this.updateSingle();
 							} catch (Exception e1) {
-								log(Level.SEVERE, "Error updating cell", e1);
+								error("Error updating cell", e1);
 							}
 							fireSignalChangeEvent("UpdatePanels");
 							fireSignalChangeEvent("UpdatePopulationPanel");
@@ -562,7 +565,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				}
 
 			} catch(Exception e){
-				log(Level.SEVERE, "Error updating cell panel", e);
+				error("Error updating cell panel", e);
 				JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
 				profileChartPanel.setChart(chart);
 				profileOptions.setEnabled(false);
@@ -598,7 +601,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					n.updateVerticallyRotatedNucleus();
 					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 				} catch(Exception e){
-					log(Level.SEVERE, "Error updating segment", e);
+					error("Error updating segment", e);
 				}
 
 			}
@@ -617,293 +620,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		}
 
 	}
-
-//			RotationMode rotateMode = rotationPanel.getSelected();
-//			boolean showHook = showHookHump.isSelected();
-//			
-////			panel.setCell(cell);
-//			
-////			panel.removeOverlay(overlay);
-//			
-//			try{
-//				JFreeChart chart;
-//				if(cell==null){
-//					rotationPanel.setEnabled(false);
-//					showHookHump.setEnabled(false);
-//					chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-//				} else {
-//					
-//					CellularComponent component = signalListPanel.getActiveComponent();
-//					
-//					if(activeDataset().getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
-//						showHookHump.setEnabled(true);
-//					} else {
-//						showHookHump.setEnabled(false);
-//					}
-//					
-//					rotationPanel.setEnabled(true);
-//					
-//					chart = OutlineChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode, showHook, component);
-//				}
-//				
-//				panel.setChart(chart);
-////				panel.clearShapeAnnotations();
-////				panel.setChart(chart);
-////				if(rotateMode.equals(RotationMode.ACTUAL)){
-////					panel.drawNucleusImageAsAnnotation();
-////				} else {
-////					panel.clearShapeAnnotations();
-////				}
-//				
-//				
-//				
-//				if(cell!=null){
-//					panel.restoreAutoBounds();
-//										
-////					overlay.clearShapes();
-////
-////					for(BorderPoint p : cell.getNucleus().getBorderList()){
-////						Shape s = new Ellipse2D.Double(p.getX(), p.getY(), 1d, 1d);
-////						ShapeOverlayObject ov = new ShapeOverlayObject(s);
-////						ov.setVisible(drawPointOverlay);
-////						overlay.addShape(ov);
-////					}
-////					panel.addOverlay(overlay);
-//				}
-//				
-//			} catch(Exception e){
-//				programLogger.log(Level.SEVERE, "Error updating outline chart", e);
-//				JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
-//				panel.setChart(chart);
-//				rotationPanel.setEnabled(false);
-//				showHookHump.setEnabled(false);
-//			}
-//		}
-//
-//		
-//		@Override
-//		public void actionPerformed(ActionEvent e) {
-//			
-//			update(activeCell);
-//			
-//		}
-//
-//	}
-	
-//	protected class CellStatsPanel extends JPanel {
-//		
-//		private ExportableTable table; // individual cell stats
-//		
-//		private JScrollPane scrollPane;
-//		
-//		protected CellStatsPanel() throws Exception{
-//			
-//			this.setLayout(new BorderLayout());
-//			
-//			scrollPane = new JScrollPane();
-//						
-//			table = new ExportableTable(CellDatasetCreator.createCellInfoTable(null));
-//			table.setEnabled(false);
-//			
-//			table.addMouseListener(new MouseAdapter() {
-//				@Override
-//				public void mouseClicked(MouseEvent e) {
-//					
-//					JTable table = (JTable) e.getSource();
-//					int row = table.rowAtPoint((e.getPoint()));
-//					String rowName = table.getModel().getValueAt(row, 0).toString();
-//					
-//					// double click
-//					if (e.getClickCount() == 2) {
-//						
-//						if(rowName.equals("Source image")){
-//							showCellImage();
-//						}
-//						
-//						// Look for signal group colour
-//						if(rowName.equals("")){
-//							String value = table.getModel().getValueAt(row+1, 0).toString();
-//							if(value.equals("Signal group")){
-//								
-//								changeSignalGroupColour(row);
-//
-//							}
-//						}
-//
-//						// Adjust the scale
-//						if(rowName.equals("Scale (um/pixel)")){
-//							
-//							updateScale();
-//						}
-//						
-//						// Adjust the point position of tags
-//						Nucleus n = activeCell.getNucleus();
-//						BorderTag tag = activeDataset().getCollection().getNucleusType().getTagFromName(rowName);
-//						if(n.hasBorderTag(tag)){
-//							
-//							updateBorderTagIndex(n, tag);
-//							
-//						}
-//							
-//					}
-//
-//				}
-//			});
-//			
-//			scrollPane.setViewportView(table);
-//			scrollPane.setColumnHeaderView(table.getTableHeader());
-//			
-//			this.add(scrollPane, BorderLayout.CENTER);
-//		}
-//		
-//		private void updateBorderTagIndex(Nucleus n, BorderTag tag){
-////			String pointType = rowName;
-//			
-//			
-//			int index = AbstractCellularComponent.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
-//			
-//			SpinnerNumberModel sModel 
-//				= new SpinnerNumberModel(index, 0, n.getBorderLength(), 1);
-//			JSpinner spinner = new JSpinner(sModel);
-//			
-//			int option = JOptionPane.showOptionDialog(null, 
-//					spinner, 
-//					"Choose the new "+tag.toString(), 
-//					JOptionPane.OK_CANCEL_OPTION, 
-//					JOptionPane.QUESTION_MESSAGE, null, null, null);
-//			if (option == JOptionPane.CANCEL_OPTION) {
-//			    // user hit cancel
-//			} else if (option == JOptionPane.OK_OPTION)	{
-//				
-//				// the value chosen by the user
-//				int chosenIndex = (Integer) spinner.getModel().getValue();
-//				
-//				int existingIndex = n.getBorderIndex(tag);
-//				
-//				// adjust to the actual point index
-//				int pointIndex = AbstractCellularComponent.wrapIndex(chosenIndex + n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
-//				
-//				// find the amount the index is changing by
-//				int difference = pointIndex - existingIndex;
-//				
-//				// TODO: update segment boundaries 
-//				try {
-//					
-//					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, tag);
-//					NucleusBorderSegment seg = profile.getSegment("Seg_0");
-//					// this updates the correct direction, but the wrong end of the segment
-//					seg.lengthenStart(-difference);
-//					
-//					n.setProfile(ProfileType.REGULAR, tag, profile);
-//					
-//				} catch(Exception e1){
-//					programLogger.log(Level.SEVERE, "Error updating cell profile", e1);
-//				}
-//				
-//				// Update the border tag index
-//				n.setBorderTag(tag, pointIndex);
-//				
-//				if(tag.equals(BorderTag.ORIENTATION_POINT)){
-//					if(n.hasBorderTag(BorderTag.INTERSECTION_POINT)){
-//						// only rodent sperm use the intersection point, which is equivalent to the head.
-//						BorderPoint newPoint = n.findOppositeBorder(n.getBorderPoint(BorderTag.ORIENTATION_POINT));
-//						n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getBorderIndex(newPoint));
-//					}
-//				}
-//				
-//				
-//				updateCell(activeCell);
-//				
-//			}
-//		}
-//		
-//		private void showCellImage(){
-//			new CellImageDialog(programLogger, activeCell);
-//		}
-//		
-//		private void changeSignalGroupColour(int row){
-//			// the group number is in the next row down
-//			String groupString = table.getModel().getValueAt(row+1, 1).toString();
-//			UUID signalGroup = UUID.fromString(groupString);
-//			
-////			Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
-//			
-//			Color newColor = JColorChooser.showDialog(
-//                     CellDetailPanel.this,
-//                     "Choose signal Color",
-//                     Color.RED);
-//			
-//			if(newColor != null){
-//				activeDataset().setSignalGroupColour(signalGroup, newColor);
-//				updateCell(activeCell);
-//				fireSignalChangeEvent("SignalColourUpdate");
-//			}
-//		}
-//		
-//		private void updateScale(){
-//			SpinnerNumberModel sModel 
-//			= new SpinnerNumberModel(activeCell.getNucleus().getScale(), 0, 100, 0.001);
-//			JSpinner spinner = new JSpinner(sModel);
-//
-//
-//			int option = JOptionPane.showOptionDialog(null, 
-//					spinner, 
-//					"Choose the new scale", 
-//					JOptionPane.OK_CANCEL_OPTION, 
-//					JOptionPane.QUESTION_MESSAGE, null, null, null);
-//			if (option == JOptionPane.CANCEL_OPTION) {
-//				// user hit cancel
-//			} else if (option == JOptionPane.OK_OPTION)	{
-//
-//				Object[] options = { "Apply to all cells" , "Apply to only this cell", };
-//				int applyAllOption = JOptionPane.showOptionDialog(null, "Apply this scale to all cells in the dataset?", "Apply to all?",
-//
-//						JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-//
-//						null, options, options[1]);
-//
-//				double scale = (Double) spinner.getModel().getValue();
-//
-//				if(scale>0){ // don't allow a scale to cause divide by zero errors
-//					if(applyAllOption==0){ // button at index 1
-//						//								if(applyAllOption==JOptionPane.YES_OPTION){
-//
-//						for(Nucleus n : activeDataset().getCollection().getNuclei()){
-//							n.setScale(scale);
-//						}
-//
-//					} else {
-//						activeCell.getNucleus().setScale(scale);
-//
-//					}
-//					updateCell(activeCell);
-//				} else {
-//					programLogger.log(Level.WARNING, "Cannot set a scale to zero");
-//				}
-//			}
-//		}
-//		
-//		protected void update(Cell cell){
-//			
-//			try{
-//
-//				if(cell==null){
-//					table.setModel(CellDatasetCreator.createCellInfoTable(null));
-//				} else {
-//					table.setModel(CellDatasetCreator.createCellInfoTable(cell));
-//					table.getColumnModel().getColumn(1).setCellRenderer(new StatsTableCellRenderer());
-//				}
-//			} catch(Exception e){
-//				programLogger.log(Level.SEVERE, "Error updating cell", e);
-//			}
-//		}
-//	}
 	
 	protected class SignalListPanel extends JPanel implements ListSelectionListener {
 		
 		private static final long serialVersionUID = 1L;
 				
-		private JList<String> signalList;
+		private JList<Object> signalList;
 		private JScrollPane scrollPane;
 		
 		protected SignalListPanel(){
@@ -915,15 +637,15 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			try {
 				
 				
-				signalList = new JList<String>();
-				DefaultListModel<String> model = new DefaultListModel<String>();
+				signalList = new JList<Object>();
+				DefaultListModel<Object> model = new DefaultListModel<Object>();
 
 				signalList.setModel(model);
 				signalList.addListSelectionListener(this);
 				signalList.setEnabled(false);
 				
 			} catch (Exception e) {
-				log(Level.SEVERE, "Error in segment stats", e);
+				error("Error in segment stats", e);
 			}
 						
 			scrollPane.setViewportView(signalList);
@@ -945,11 +667,14 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				activeComponent = activeCell.getNucleus();
 				
 				try {
-					DefaultListModel<String> model = new DefaultListModel<String>();
-					model.addElement("Nucleus");
+					DefaultListModel<Object> model = new DefaultListModel<Object>();
+					SignalTableCell nucleusCell = new SignalTableCell(activeCell.getNucleus().getID(), "Nucleus");
+					model.addElement(nucleusCell);
 					for(UUID i : activeCell.getNucleus().getSignalCollection().getSignalGroupIDs()){
 						if(activeCell.getNucleus().getSignalCollection().hasSignal(i)){
-							model.addElement(activeCell.getNucleus().getSignalCollection().getSignalGroupName(i));
+							
+							SignalTableCell signalCell = new SignalTableCell(i, activeDataset().getCollection().getSignalGroup(i).getGroupName());
+							model.addElement(signalCell);
 						}
 					}
 					signalList.setModel(model);
@@ -957,16 +682,16 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					signalList.setEnabled(true);
 
 				} catch (Exception e) {
-					log(Level.SEVERE, "Error updating signal list", e);
+					error("Error updating signal list", e);
 				}
 			} else {
 				try {
-					DefaultListModel<String> model = new DefaultListModel<String>();
+					DefaultListModel<Object> model = new DefaultListModel<Object>();
 
 					signalList.setModel(model);
 					signalList.setEnabled(false);
 				} catch (Exception e) {
-					log(Level.SEVERE, "Error updating signal list", e);
+					error("Error updating signal list", e);
 				}
 			}
 		}
@@ -979,7 +704,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			int row = signalList.getSelectedIndex();
 			
 			if(row>=0){ // -1 if nothing selected
-				String signalGroupName = signalList.getModel().getElementAt(row);
+				SignalTableCell cell   =  (SignalTableCell) signalList.getModel().getElementAt(row);
+				String signalGroupName = cell.toString();
 
 				if(signalGroupName.equals("Nucleus")){
 					
@@ -987,7 +713,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 				} else {
 
-					UUID signalGroup = activeCell.getNucleus().getSignalCollection().getSignalGroup(signalGroupName);
+					UUID signalGroup = cell.getID();
 
 					for(NuclearSignal n : activeCell.getNucleus().getSignalCollection().getSignals(signalGroup)){
 						activeComponent = n;
@@ -1016,7 +742,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				updateCell(activeCell);
 				
 			} catch (Exception e1){
-				log(Level.SEVERE, "Error fetching cell");
+				warn("Error fetching cell");
 				log(Level.FINE, "Error fetching cell", e1);
 			}
 		}

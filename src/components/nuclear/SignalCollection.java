@@ -62,7 +62,7 @@ public class SignalCollection implements Serializable, Loggable {
 	/**
 	 * Holds the names of the channels for presentation purposes
 	 */
-	private Map<UUID, String > names = new HashMap<UUID, String>();
+//	private Map<UUID, String > names = new HashMap<UUID, String>();
 	
 	public SignalCollection(){
 		
@@ -76,7 +76,7 @@ public class SignalCollection implements Serializable, Loggable {
 				
 		for(UUID group : s.collection.keySet() ){
 
-			String groupName = s.names.get(group);
+//			String groupName = s.names.get(group);
 			int channel      = s.sourceChannels.get(group);
 			File f           = new File(s.sourceFiles.get(group).getAbsolutePath());
 			
@@ -89,7 +89,7 @@ public class SignalCollection implements Serializable, Loggable {
 			collection.put(    group, list);
 			sourceFiles.put(   group, f);
 			sourceChannels.put(group, channel);
-			names.put(         group, groupName);
+//			names.put(         group, groupName);
 		}
 
 	}
@@ -130,19 +130,19 @@ public class SignalCollection implements Serializable, Loggable {
 		List<NuclearSignal> list = collection.get(oldID);
 		File sourceFile          = sourceFiles.get(oldID);
 		int sourceChannel        = sourceChannels.get(oldID);
-		String name              = names.get(oldID);
+//		String name              = names.get(oldID);
 		
 		// Remove the old values
 		collection.remove(    oldID);
 		sourceFiles.remove(   oldID);
 		sourceChannels.remove(oldID);
-		names.remove(         oldID);
+//		names.remove(         oldID);
 		
 		// Insert the new values
 		collection.put(    newID, list);
 		sourceFiles.put(   newID, sourceFile);
 		sourceChannels.put(newID, sourceChannel);
-		names.put(         newID, name);
+//		names.put(         newID, name);
 		
 		
 	}
@@ -192,13 +192,13 @@ public class SignalCollection implements Serializable, Loggable {
 	 * @param list the signals
 	 * @param signalGroupName the signal group name
 	 */
-	public void addSignals(List<NuclearSignal> list, String signalGroupName){
-		if(list==null){
-			throw new IllegalArgumentException("Signal or group is null");
-		}
-		checkSignalGroup(signalGroupName);
-		this.addSignals(list, names.get(signalGroupName));
-	}
+//	public void addSignals(List<NuclearSignal> list, String signalGroupName){
+//		if(list==null){
+//			throw new IllegalArgumentException("Signal or group is null");
+//		}
+//		checkSignalGroup(signalGroupName);
+//		this.addSignals(list, names.get(signalGroupName));
+//	}
 	
 	
 	/**
@@ -221,7 +221,7 @@ public class SignalCollection implements Serializable, Loggable {
 	 * @return a list of signals
 	 */
 	public List<NuclearSignal> getSignals(UUID signalGroup){
-		checkSignalGroup(signalGroup);
+//		checkSignalGroup(signalGroup);
 		if(this.hasSignal(signalGroup)){
 			return this.collection.get(signalGroup);
 		} else {
@@ -234,14 +234,14 @@ public class SignalCollection implements Serializable, Loggable {
 	 * @param channel the channel name
 	 * @return a list of signals
 	 */
-	public List<NuclearSignal> getSignals(String channel){
-		checkSignalGroup(channel);
-		if(this.hasSignal(channel)){
-			return this.collection.get(names.get(channel));
-		} else {
-			return new ArrayList<NuclearSignal>(0);
-		}
-	}
+//	public List<NuclearSignal> getSignals(String channel){
+//		checkSignalGroup(channel);
+//		if(this.hasSignal(channel)){
+//			return this.collection.get(names.get(channel));
+//		} else {
+//			return new ArrayList<NuclearSignal>(0);
+//		}
+//	}
 	
 	/**
 	 * Get the file containing the signals in the given signal group
@@ -270,49 +270,49 @@ public class SignalCollection implements Serializable, Loggable {
 		return this.sourceChannels.get(signalGroup);
 	}
 	
-	/**
-	 * Set the channel name
-	 * @param channel the channel to name
-	 * @param name the new name
-	 */
-	public void setSignalGroupName(UUID signalGroup, String name){
-		if(signalGroup==null || name==null){
-			throw new IllegalArgumentException("Channel or name is null");
-		}
-		names.put(signalGroup, name);
-	}
+//	/**
+//	 * Set the channel name
+//	 * @param channel the channel to name
+//	 * @param name the new name
+//	 */
+//	public void setSignalGroupName(UUID signalGroup, String name){
+//		if(signalGroup==null || name==null){
+//			throw new IllegalArgumentException("Channel or name is null");
+//		}
+//		names.put(signalGroup, name);
+//	}
 	
 	/**
 	 * Get the signal group with the given name
 	 * @param signalGroupName
 	 * @return
 	 */
-	public UUID getSignalGroup(String signalGroupName){
-		if(signalGroupName==null){
-			throw new IllegalArgumentException("Signal group name is null");
-		}
-		if(!names.containsValue(signalGroupName)){
-			throw new IllegalArgumentException("Signal group name is not present");
-		}
-		
-		for(UUID signalGroup : names.keySet()){
-			if(names.get(signalGroup).equals(signalGroupName)){
-				return signalGroup;
-			}
-		}
-		return null;
-	}
+//	public UUID getSignalGroup(String signalGroupName){
+//		if(signalGroupName==null){
+//			throw new IllegalArgumentException("Signal group name is null");
+//		}
+//		if(!names.containsValue(signalGroupName)){
+//			throw new IllegalArgumentException("Signal group name is not present");
+//		}
+//		
+//		for(UUID signalGroup : names.keySet()){
+//			if(names.get(signalGroup).equals(signalGroupName)){
+//				return signalGroup;
+//			}
+//		}
+//		return null;
+//	}
 	
-	public String getSignalGroupName(UUID signalGroup){
-		if(signalGroup==null){
-			throw new IllegalArgumentException("Channel is null");
-		}
-		if(!names.containsKey(signalGroup)){
-			throw new IllegalArgumentException("Channel name is not present");
-		}
-		String result = names.get(signalGroup);
-		return result;
-	}
+//	public String getSignalGroupName(UUID signalGroup){
+//		if(signalGroup==null){
+//			throw new IllegalArgumentException("Channel is null");
+//		}
+//		if(!names.containsKey(signalGroup)){
+//			throw new IllegalArgumentException("Channel name is not present");
+//		}
+//		String result = names.get(signalGroup);
+//		return result;
+//	}
 	
 	/**
 	 * Get the channel of the source image containing the given signal
@@ -327,13 +327,13 @@ public class SignalCollection implements Serializable, Loggable {
 		return this.sourceChannels.get(signalGroup);
 	}
 	
-	/**
-	 * Get the names of signal groups which have been named; ignores unnamed channels
-	 * @return the set of names
-	 */
-	public Collection<String> getSignalGroupNames(){
-		return names.values();
-	}
+//	/**
+//	 * Get the names of signal groups which have been named; ignores unnamed channels
+//	 * @return the set of names
+//	 */
+//	public Collection<String> getSignalGroupNames(){
+//		return names.values();
+//	}
 	
 	/**
 	 * Get the set of signal groups in this collection
@@ -388,30 +388,27 @@ public class SignalCollection implements Serializable, Loggable {
 	 */
 	public boolean hasSignal(){
 		
-		if(collection.isEmpty()){
-			return false;
-		}
-		return true;
+		return  !collection.isEmpty();
 	}
 	
-	/**
-	 * Check if the signal group contains signals in this collection
-	 * @param signalGroup the group name
-	 * @return yes or no
-	 */
-	public boolean hasSignal(String signalGroupName){
-		if(signalGroupName==null){
-			throw new IllegalArgumentException("Channel is null");
-		}
-		if(!collection.containsValue(signalGroupName)){
-			return false;
-		}
-		if(collection.get(signalGroupName).isEmpty()){
-			return false;
-		} else {
-			return true;
-		}
-	}
+//	/**
+//	 * Check if the signal group contains signals in this collection
+//	 * @param signalGroup the group name
+//	 * @return yes or no
+//	 */
+//	public boolean hasSignal(String signalGroupName){
+//		if(signalGroupName==null){
+//			throw new IllegalArgumentException("Channel is null");
+//		}
+//		if(!collection.containsValue(signalGroupName)){
+//			return false;
+//		}
+//		if(collection.get(signalGroupName).isEmpty()){
+//			return false;
+//		} else {
+//			return true;
+//		}
+//	}
 	
 	/**
 	 * Get the total number of signals in a given channel
@@ -423,15 +420,15 @@ public class SignalCollection implements Serializable, Loggable {
 		return collection.get(signalGroup).size();
 	}
 	
-	/**
-	 * Get the total number of signals in a given signal group
-	 * @param signalGroup the group name
-	 * @return the count
-	 */
-	public int numberOfSignals(String signalGroupName){
-		checkSignalGroup(signalGroupName);
-		return numberOfSignals(names.get(signalGroupName));
-	}
+//	/**
+//	 * Get the total number of signals in a given signal group
+//	 * @param signalGroup the group name
+//	 * @return the count
+//	 */
+//	public int numberOfSignals(String signalGroupName){
+//		checkSignalGroup(signalGroupName);
+//		return numberOfSignals(names.get(signalGroupName));
+//	}
 	
 	/**
 	 * Remove all signals from the collection
@@ -440,7 +437,7 @@ public class SignalCollection implements Serializable, Loggable {
 		collection     = new LinkedHashMap<UUID, List<NuclearSignal>>();
 		sourceFiles    = new HashMap<UUID, File>(0);
 		sourceChannels = new HashMap<UUID, Integer>(0);
-		names          = new HashMap<UUID, String>();
+//		names          = new HashMap<UUID, String>();
 	}
 	
 	/**
@@ -450,7 +447,7 @@ public class SignalCollection implements Serializable, Loggable {
 		collection.remove(signalGroup);
 		sourceFiles.remove(signalGroup);
 		sourceChannels.remove(signalGroup);
-		names.remove(signalGroup);
+//		names.remove(signalGroup);
 	}	
 	
 	/**
@@ -575,14 +572,14 @@ public class SignalCollection implements Serializable, Loggable {
 		}
 	}
 	
-	private void checkSignalGroup(String signalGroupName){
-		if(signalGroupName==null){
-			throw new IllegalArgumentException("Group is null");
-		}
-		if(!names.containsKey(signalGroupName)){
-			throw new IllegalArgumentException("Group name not present: "+signalGroupName);
-		}
-	}
+//	private void checkSignalGroup(String signalGroupName){
+//		if(signalGroupName==null){
+//			throw new IllegalArgumentException("Group is null");
+//		}
+//		if(!names.containsKey(signalGroupName)){
+//			throw new IllegalArgumentException("Group name not present: "+signalGroupName);
+//		}
+//	}
 	
 	// the print function bypasses all input checks to show everything present
 	public void print(){
@@ -619,7 +616,6 @@ public class SignalCollection implements Serializable, Loggable {
 		s += "Signal groups: "+this.numberOfSignalGroups()+"\n";
 		for(UUID group : collection.keySet()){
 			s += "  "+group+": "
-					+names.get(group)
 					+" : Channel "
 					+sourceChannels.get(group)
 					+" : "+sourceFiles.get(group)

@@ -103,7 +103,6 @@ public class SignalDetector extends AnalysisWorker {
 					
 					SignalCollection signalCollection = n.getSignalCollection();
 					signalCollection.addSignalGroup(signals, signalGroup, imageFile, channel);
-					signalCollection.setSignalGroupName(signalGroup, channelName);
 					n.calculateSignalDistancesFromCoM();
 					n.calculateFractionalSignalDistancesFromCoM();
 
