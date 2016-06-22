@@ -270,45 +270,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
 		}
 	}
-	
-	
-//	/**
-//	 * Allows for cell background to be coloured based on position in a list. Used to colour
-//	 * the signal stats list
-//	 *
-//	 */
-//	private class StatsTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
-//
-//		private static final long serialVersionUID = 1L;
-//
-//		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-//
-//			// default cell colour is white
-//			Color colour = Color.WHITE;
-//
-//			// get the value in the first column of the row below
-//			if(row<table.getModel().getRowCount()-1){
-//				String nextRowHeader = table.getModel().getValueAt(row+1, 0).toString();
-//
-//				if(nextRowHeader.equals("Signal group")){
-//					// we want to colour this cell preemptively
-//					// get the signal group from the table
-//					String groupString = table.getModel().getValueAt(row+1, 1).toString();
-//					colour = activeDataset().getSignalGroupColour(UUID.fromString(groupString));
-////					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
-//				}
-//			}
-//			//Cells are by default rendered as a JLabel.
-//			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-//			l.setBackground(colour);
-//
-//			//Return the JLabel which renders the cell.
-//			return l;
-//>>>>>>> 65528df080f1ec54696a6c38da6751ce4325517f
-//		}
-//	}
-	
-		
+			
 
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
@@ -656,10 +618,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			this.add(scrollPane, BorderLayout.CENTER);
 		}
 		
-//		public CellularComponent getActiveComponent(){
-//			return this.activeComponent;
-//		}
-//						
+			
 		protected void update(Cell cell){
 
 			if(cell!=null){

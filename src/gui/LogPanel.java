@@ -149,6 +149,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		panel.add(scrollPane, BorderLayout.CENTER);
 
 		progressPanel = new JPanel();
+//		progressPanel = new ProgressBarPanel();
 		progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
 		panel.add(progressPanel, BorderLayout.NORTH);
 		
@@ -310,23 +311,6 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		
 	}
 
-//	@Override
-//	protected void updateSingle() throws Exception {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	protected void updateMultiple() throws Exception {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	protected void updateNull() throws Exception {
-//		// TODO Auto-generated method stub
-//		
-//	}
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {

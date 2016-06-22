@@ -27,6 +27,8 @@ import gui.LogPanel;
 import gui.DatasetEvent.DatasetMethod;
 import gui.MainWindow;
 
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -45,7 +47,7 @@ import analysis.AnalysisWorker;
  * is triggered as a SwingWorker. Subclassed for each action type.
  *
  */
-abstract class ProgressableAction implements PropertyChangeListener, Loggable {
+public abstract class ProgressableAction implements PropertyChangeListener, Loggable, MouseListener {
 
 	protected AnalysisDataset dataset = null; // the dataset being worked on
 	private JProgressBar progressBar = null;
@@ -67,22 +69,7 @@ abstract class ProgressableAction implements PropertyChangeListener, Loggable {
 	 * @param mw
 	 */
 	protected ProgressableAction(String barMessage, MainWindow mw){
-		this.dataset 		= null;
-		this.progressBar 	= new JProgressBar(0, 100);
-		this.progressBar.setString(barMessage);
-		this.progressBar.setStringPainted(true);
-
-		this.mw 			= mw;
-		this.logPanel 		= mw.getLogPanel();
-		
-		logPanel.addProgressBar(this.progressBar);
-		logPanel.revalidate();
-		logPanel.repaint();
-
-		this.addInterfaceEventListener(mw);
-		this.addDatasetEventListener(mw);
-		finest( "Created progressable action");
-
+		this( (AnalysisDataset) null, barMessage, mw);
 	}
 	
 	public ProgressableAction(AnalysisDataset dataset, String barMessage, MainWindow mw){
@@ -91,6 +78,7 @@ abstract class ProgressableAction implements PropertyChangeListener, Loggable {
 		this.progressBar 	= new JProgressBar(0, 100);
 		this.progressBar.setString(barMessage);
 		this.progressBar.setStringPainted(true);
+		this.progressBar.addMouseListener(this);
 
 		this.mw 			= mw;
 		this.logPanel 		= mw.getLogPanel();
@@ -170,7 +158,7 @@ abstract class ProgressableAction implements PropertyChangeListener, Loggable {
 	public void setProgressMessage(String messsage){
 		this.progressBar.setString(messsage);
 	}
-	
+		
 	private void removeProgressBar(){
 		logPanel.removeProgressBar(this.progressBar);
 		logPanel.revalidate();
@@ -204,6 +192,7 @@ abstract class ProgressableAction implements PropertyChangeListener, Loggable {
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 
+		finest("Property change event heard");
 		int value = (Integer) evt.getNewValue(); // should be percent
 //		IJ.log("Property change: "+value);
 		
@@ -254,6 +243,10 @@ abstract class ProgressableAction implements PropertyChangeListener, Loggable {
 		logPanel.repaint();
 	}
 	
+	public synchronized boolean isDone(){
+		return worker.isDone();
+	}
+		
 	protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
     	
         InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());
@@ -302,5 +295,41 @@ abstract class ProgressableAction implements PropertyChangeListener, Loggable {
 
 	public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
 		interfaceListeners.remove( l );
+	}
+	
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		if(e.getSource()==progressBar){
+			if(e.getClickCount()==2){
+				if(progressBar.isIndeterminate()){
+					this.removeProgressBar();
+				}
+			}
+		}
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }
