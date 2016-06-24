@@ -155,10 +155,24 @@ public class RuleSet implements Serializable {
 	 */
 	public static RuleSet roundRPRuleSet(){
 		
-		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.DISTANCE);
+		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.REGULAR);
 		
 		return builder
 			.isMaximum()
+			.build();
+	}
+	
+	/**
+	 * Create a RuleSet that describes how to find the RP in 
+	 * round nucleus profiles
+	 * @return
+	 */
+	public static RuleSet roundOPRuleSet(){
+		
+		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.REGULAR);
+		
+		return builder
+			.isMinimum()
 			.build();
 	}
 	

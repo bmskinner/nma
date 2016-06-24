@@ -100,38 +100,32 @@ public class ProfileCollection implements Serializable, Loggable {
 	}
 	
 	/**
-	 * Get the requested profile. Generates it dynamically from the
-	 * appropriate ProfileAggregate each time. 
+	 * Get the requested profile from the cached profiles, or
+	 * generate it from the ProfileAggregate if it is not cached.
 	 * @param tag the BorderTag to use as index zero
 	 * @param quartile the collection quartile to return (0-100) 
 	 * @return the quartile profile from the given tag
-	 * @throws Exception
 	 */
 	public Profile getProfile(BorderTag tag, double quartile) {
+		
 		if(tag==null){
-			throw new IllegalArgumentException("A profile key is required");
+			throw new IllegalArgumentException("BorderTag is null");
 		}
 		
-		if(this.hasBorderTag(tag)){
-
-			if( ! profileCache.hasProfile(tag, quartile)){
-				
-//				IJ.log("Profile "+tag+" - "+quartile+" not present in cache");
-				
-				int indexOffset = offsets.get(tag);
-				Profile profile = getAggregate().getQuartile(quartile).offset(indexOffset);
-				profileCache.setProfile(tag, quartile, profile );
-				
-			} else {
-//				IJ.log("Profile "+tag+" - "+quartile+" present in cache");
-			}
-			Profile profile = profileCache.getProfile(tag, quartile);
-//			IJ.log("Median: getting profile "+tag+" from cache: start "+profile.get(0));
-			return profile;
-			
-		} else {
-			throw new IllegalArgumentException("The requested tag is not present: "+tag.toString());
+		if(  ! this.hasBorderTag(tag)){
+			throw new IllegalArgumentException("BorderTag is not present: "+tag.toString());
 		}
+		
+		// If the profile is not in the cache, make it and add to the cache
+		if( ! profileCache.hasProfile(tag, quartile)){
+
+			int indexOffset = offsets.get(tag);
+			Profile profile = getAggregate().getQuartile(quartile).offset(indexOffset);
+			profileCache.setProfile(tag, quartile, profile );
+
+		}
+		return profileCache.getProfile(tag, quartile);	
+		
 	}
 	
 	

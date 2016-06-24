@@ -146,7 +146,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 		RuleSetCollection r = new RuleSetCollection();
 		
 		r.addRuleSet(BorderTag.REFERENCE_POINT,   RuleSet.roundRPRuleSet());
-		r.addRuleSet(BorderTag.ORIENTATION_POINT, RuleSet.roundRPRuleSet());
+		r.addRuleSet(BorderTag.ORIENTATION_POINT, RuleSet.roundOPRuleSet());
 		return r;
 	}
 	

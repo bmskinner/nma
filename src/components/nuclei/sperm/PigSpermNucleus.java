@@ -52,7 +52,7 @@ public class PigSpermNucleus
     * diameter, through the centre of mass.
     * Used in tail identification functions only.
     */
-    private BorderPoint orthPoint1;
+//    private BorderPoint orthPoint1;
 
   /**
   * Constructor using a Nucleus; passes up
@@ -99,9 +99,7 @@ public class PigSpermNucleus
 		Profile p     = this.getProfile(rpSet.getType());
 		ProfileIndexFinder f = new ProfileIndexFinder();
 		int rpIndex = f.identifyIndex(p, rpSet);
-		this.log("RP index found at "+rpIndex);
 
-//    	int rpIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
     	setBorderTag(BorderTag.REFERENCE_POINT, rpIndex);
     	
     	
@@ -133,44 +131,44 @@ public class PigSpermNucleus
      * @throws Exception 
     * @see Profile
     */
-    private BorderPoint findTailByMinima() throws Exception{
-
-      // the two lowest minima are at the tail-end corners. 
-      // between them lies the tail. Find the two lowest minima,
-      // and get the point between them
-
-      
-      Profile angleProfile = this.getProfile(ProfileType.REGULAR);
-      
-      BooleanProfile minima = angleProfile.getLocalMinima(5);
-
-      // sort minima by interior angle
-      int lowestMinima = 0;
-      int secondLowestMinima = 0;
-
-      for(int i=0; i<minima.size();i++){
-        if(minima.get(i)==true){
-          if (angleProfile.get(i)<angleProfile.get(lowestMinima)){
-            secondLowestMinima = lowestMinima;
-            lowestMinima = i;
-          }
-        }
-      }
-      for(int i=0; i<minima.size();i++){
-        if(minima.get(i)==true){
-          if (angleProfile.get(i)<angleProfile.get(secondLowestMinima) && 
-        		  angleProfile.get(i)>angleProfile.get(lowestMinima)){
-            secondLowestMinima = i;
-          }
-        }
-      }
-
-      BorderPoint a = this.getBorderPoint(lowestMinima);
-      BorderPoint b = this.getBorderPoint(secondLowestMinima);
-
-      BorderPoint tailPoint = this.getBorderPoint(this.getPositionBetween(a, b));
-      return tailPoint;
-    }
+//    private BorderPoint findTailByMinima() throws Exception{
+//
+//      // the two lowest minima are at the tail-end corners. 
+//      // between them lies the tail. Find the two lowest minima,
+//      // and get the point between them
+//
+//      
+//      Profile angleProfile = this.getProfile(ProfileType.REGULAR);
+//      
+//      BooleanProfile minima = angleProfile.getLocalMinima(5);
+//
+//      // sort minima by interior angle
+//      int lowestMinima = 0;
+//      int secondLowestMinima = 0;
+//
+//      for(int i=0; i<minima.size();i++){
+//        if(minima.get(i)==true){
+//          if (angleProfile.get(i)<angleProfile.get(lowestMinima)){
+//            secondLowestMinima = lowestMinima;
+//            lowestMinima = i;
+//          }
+//        }
+//      }
+//      for(int i=0; i<minima.size();i++){
+//        if(minima.get(i)==true){
+//          if (angleProfile.get(i)<angleProfile.get(secondLowestMinima) && 
+//        		  angleProfile.get(i)>angleProfile.get(lowestMinima)){
+//            secondLowestMinima = i;
+//          }
+//        }
+//      }
+//
+//      BorderPoint a = this.getBorderPoint(lowestMinima);
+//      BorderPoint b = this.getBorderPoint(secondLowestMinima);
+//
+//      BorderPoint tailPoint = this.getBorderPoint(this.getPositionBetween(a, b));
+//      return tailPoint;
+//    }
 
     /**
     * This method attempts to find the pig sperm tail point
@@ -179,11 +177,11 @@ public class PigSpermNucleus
      * @throws Exception 
     * @see Profile
     */
-    private int findTailByMaxima() throws Exception{
-      // the tail is the ?only local maximum with an interior angle above the 180 line
-
-    	return this.getProfile(ProfileType.REGULAR).getIndexOfMax();
-    }
+//    private int findTailByMaxima() throws Exception{
+//      // the tail is the ?only local maximum with an interior angle above the 180 line
+//
+//    	return this.getProfile(ProfileType.REGULAR).getIndexOfMax();
+//    }
 
 
     /**
@@ -195,21 +193,21 @@ public class PigSpermNucleus
      * @throws Exception 
     * @see Profile
     */
-    private BorderPoint findTailByNarrowestPoint() throws Exception{
-
-      BorderPoint narrowPoint = this.getNarrowestDiameterPoint();
-      this.orthPoint1  = this.findOrthogonalBorderPoint(narrowPoint);
-      BorderPoint orthPoint2  = this.findOppositeBorder(orthPoint1);
-
-      // NucleusBorderPoint[] array = { orthPoint1, orthPoint2 };
-      Profile angleProfile = this.getProfile(ProfileType.REGULAR);
-      // the tail should be a maximum, hence have a high angle
-      BorderPoint tailPoint  = angleProfile.get(this.getBorderIndex(orthPoint1)) >
-      									angleProfile.get(this.getBorderIndex(orthPoint2))
-                                    ? orthPoint1
-                                    : orthPoint2;
-      return tailPoint;
-    }
+//    private BorderPoint findTailByNarrowestPoint() throws Exception{
+//
+//      BorderPoint narrowPoint = this.getNarrowestDiameterPoint();
+//      this.orthPoint1  = this.findOrthogonalBorderPoint(narrowPoint);
+//      BorderPoint orthPoint2  = this.findOppositeBorder(orthPoint1);
+//
+//      // NucleusBorderPoint[] array = { orthPoint1, orthPoint2 };
+//      Profile angleProfile = this.getProfile(ProfileType.REGULAR);
+//      // the tail should be a maximum, hence have a high angle
+//      BorderPoint tailPoint  = angleProfile.get(this.getBorderIndex(orthPoint1)) >
+//      									angleProfile.get(this.getBorderIndex(orthPoint2))
+//                                    ? orthPoint1
+//                                    : orthPoint2;
+//      return tailPoint;
+//    }
     
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
   	  finest("\tReading pig sperm nucleus");
