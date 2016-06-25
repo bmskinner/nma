@@ -538,7 +538,7 @@ public class CellCollection implements Serializable, Loggable {
   public List<String> getSegmentNames() throws Exception {
 
 	  List<String> result = new ArrayList<String>(0);
-	  ProfileCollection pc = this.getProfileCollection(ProfileType.REGULAR);
+	  ProfileCollection pc = this.getProfileCollection(ProfileType.ANGLE);
 	  List<NucleusBorderSegment> segs = pc.getSegments(BorderTag.ORIENTATION_POINT);
 	  for(NucleusBorderSegment segment : segs){
 		  result.add(segment.getName());
@@ -557,9 +557,9 @@ public class CellCollection implements Serializable, Loggable {
 	  double[] result = new double[count];
 	  int i=0;
 
-	  Profile medianProfile = this.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.MEDIAN);
+	  Profile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.MEDIAN);
 	  for(Nucleus n : this.getNuclei()){
-		  Profile angleProfile = n.getProfile(ProfileType.REGULAR);
+		  Profile angleProfile = n.getProfile(ProfileType.ANGLE);
 		  result[i++] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
 	  }
 	  return result;
@@ -577,11 +577,11 @@ public class CellCollection implements Serializable, Loggable {
 	  int count = this.getNucleusCount();
 	  double[] result = new double[count];
 	  int i=0;
-	  Profile medianProfile = this.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.MEDIAN);
+	  Profile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.MEDIAN);
 
 	  for(Nucleus n : this.getNuclei()){
 		  
-		  Profile angleProfile = n.getProfile(ProfileType.REGULAR, pointType);
+		  Profile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
 		  double diff = angleProfile.absoluteSquareDifference(medianProfile);		
 		  diff /= n.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 		  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
@@ -643,12 +643,12 @@ public class CellCollection implements Serializable, Loggable {
    */
   public Nucleus getNucleusMostSimilarToMedian(BorderTag pointType) throws Exception {
 
-	  Profile medianProfile = this.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, 50); // the profile we compare the nucleus to
+	  Profile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, 50); // the profile we compare the nucleus to
 	  Nucleus n = this.getNuclei().get(0); // default to the first nucleus
 
 	  double difference = Arrays.stream(getDifferencesToMedianFromPoint(pointType)).max().orElse(0);
 	  for(Nucleus p : this.getNuclei()){
-		  Profile angleProfile = p.getProfile(ProfileType.REGULAR, pointType);
+		  Profile angleProfile = p.getProfile(ProfileType.ANGLE, pointType);
 		  double nDifference = angleProfile.absoluteSquareDifference(medianProfile);
 		  if(nDifference<difference){
 			  difference = nDifference;
@@ -668,8 +668,8 @@ public class CellCollection implements Serializable, Loggable {
    */
   public double calculateVariabililtyOfNucleusProfile(Nucleus n) {
 	  BorderTag pointType = BorderTag.REFERENCE_POINT;
-	  Profile medianProfile = this.getProfileCollection(ProfileType.REGULAR).getProfile(pointType,50);
-	  Profile angleProfile = n.getProfile(ProfileType.REGULAR, pointType);
+	  Profile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType,50);
+	  Profile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
 	  double diff = angleProfile.absoluteSquareDifference(medianProfile);										 
 	  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 	  double var = (rootDiff / n.getStatistic(NucleusStatistic.PERIMETER)  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)

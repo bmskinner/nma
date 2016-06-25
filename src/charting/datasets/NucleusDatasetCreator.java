@@ -190,12 +190,12 @@ private static NucleusDatasetCreator instance = null;
 
             CellCollection collection = list.get(i).getCollection();
             
-            Profile profile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+            Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
             Profile xpoints = profile.getPositions(100);
             double[][] data = { xpoints.asArray(), profile.asArray() };
             ds.addSeries("Profile_"+i, data);
             
-            List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegments(BorderTag.REFERENCE_POINT);
+            List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(BorderTag.REFERENCE_POINT);
             List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
             
             // add only the segment of interest
@@ -259,7 +259,7 @@ private static NucleusDatasetCreator instance = null;
 		for (int i=0; i < list.size(); i++) {
 			CellCollection collection = list.get(i).getCollection();
 
-			Profile profile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+			Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
 			Profile xpoints = profile.getPositions((int) collection.getMedianArrayLength());
 			
 			double offset = 0;
@@ -271,7 +271,7 @@ private static NucleusDatasetCreator instance = null;
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
 			
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegments(BorderTag.REFERENCE_POINT);
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(BorderTag.REFERENCE_POINT);
 			List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
 			
 			// add only the segment of interest
@@ -309,7 +309,7 @@ private static NucleusDatasetCreator instance = null;
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		Profile profile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(point, 50);
+		Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(point, 50);
 		Profile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);
@@ -349,7 +349,7 @@ private static NucleusDatasetCreator instance = null;
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		Profile profile = collection.getProfileCollection(ProfileType.REGULAR).getProfile(point, Constants.MEDIAN);
+		Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(point, Constants.MEDIAN);
 		Profile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);
@@ -366,7 +366,7 @@ private static NucleusDatasetCreator instance = null;
 		// rendering order will be first on top
 		
 		// add the segments
-		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
+		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(point)
 				.getOrderedSegments();
 
@@ -720,7 +720,7 @@ private static NucleusDatasetCreator instance = null;
 		
 		// add the segments (these are the same as in the regular profile collection)
 //		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
-		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
+		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(point)
 				.getOrderedSegments();
 		addSegmentsFromProfile(segments, profile, ds, 100, 0);
@@ -782,7 +782,7 @@ private static NucleusDatasetCreator instance = null;
 			xpoints = profile.getPositions(nucleus.getBorderLength());
 			
 			// add the segments
-			List<NucleusBorderSegment> segments = nucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments();
+			List<NucleusBorderSegment> segments = nucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT).getOrderedSegments();
 			addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0);
 		}
 
@@ -859,7 +859,7 @@ private static NucleusDatasetCreator instance = null;
 			CellCollection collection = collections.get(i).getCollection();
 			
 			NucleusBorderSegment medianSeg = collection
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
 
@@ -868,7 +868,7 @@ private static NucleusDatasetCreator instance = null;
 
 			for(Nucleus n : collection.getNuclei()){
 				
-				NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
+				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());			
 
 				
@@ -903,7 +903,7 @@ private static NucleusDatasetCreator instance = null;
 			CellCollection collection = collections.get(i).getCollection();
 			
 			NucleusBorderSegment medianSeg = collection
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
 
@@ -911,7 +911,7 @@ private static NucleusDatasetCreator instance = null;
 			List<Double> list = new ArrayList<Double>(0);
 
 			for(Nucleus n : collection.getNuclei()){
-				SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
+				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
 				
 				NucleusBorderSegment seg = profile.getSegment(medianSeg.getID());
 				
@@ -942,7 +942,7 @@ private static NucleusDatasetCreator instance = null;
 
 			CellCollection collection = datasets.get(i).getCollection();
 
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(BorderTag.REFERENCE_POINT).getOrderedSegments();
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegmentedProfile(BorderTag.REFERENCE_POINT).getOrderedSegments();
 //			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(BorderTag.ORIENTATION_POINT);
 			
 			for(NucleusBorderSegment medianSeg : segments){
@@ -952,7 +952,7 @@ private static NucleusDatasetCreator instance = null;
 				List<Integer> list = new ArrayList<Integer>(0);
 				
 				for(Nucleus n : collection.getNuclei()){
-					NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR).getSegment(medianSeg.getName());
+					NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment(medianSeg.getName());
 					
 					int differenceToMedian = 0;
 					// if seg is null, catch before we throw an error
@@ -1025,8 +1025,8 @@ private static NucleusDatasetCreator instance = null;
 		BorderTag pointType = BorderTag.REFERENCE_POINT;
 		
 		// get the quartile profiles, beginning from the orientation point
-		Profile q25 = collection.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.LOWER_QUARTILE).interpolate(n.getBorderLength());
-		Profile q75 = collection.getProfileCollection(ProfileType.REGULAR).getProfile(pointType, Constants.UPPER_QUARTILE).interpolate(n.getBorderLength());
+		Profile q25 = collection.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.LOWER_QUARTILE).interpolate(n.getBorderLength());
+		Profile q75 = collection.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.UPPER_QUARTILE).interpolate(n.getBorderLength());
 		
 		// get the limits  for the plot  	
 		double scale = getScaleForIQRRange(n);
@@ -1039,7 +1039,7 @@ private static NucleusDatasetCreator instance = null;
 
 		
 		// Get the angle profile, starting from the tail point
-		SegmentedProfile angleProfile = n.getProfile(ProfileType.REGULAR, pointType);
+		SegmentedProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
 		
 		// At this point, the angle profile and the iqr profile should be in sync
 		// The following set of checks confirms this.
@@ -1201,7 +1201,7 @@ private static NucleusDatasetCreator instance = null;
 			 * With the ability to merge segments, we cannot be sure that an iterator
 			 * based on numbers will work
 			 */
-			List<NucleusBorderSegment> segmentList = nucleus.getProfile(ProfileType.REGULAR).getSegments();
+			List<NucleusBorderSegment> segmentList = nucleus.getProfile(ProfileType.ANGLE).getSegments();
 
 			
 			if(!segmentList.isEmpty()){ // only draw if there are segments

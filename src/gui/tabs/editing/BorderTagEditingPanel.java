@@ -82,7 +82,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		Dimension minimumChartSize = new Dimension(50, 100);
 		Dimension preferredChartSize = new Dimension(400, 300);
 		
-		JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
+		JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE);
 		chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
 		
 		chartPanel.setMinimumSize(minimumChartSize);
@@ -122,7 +122,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		 * centre of the zoomed range on the 
 		 * centre chart panel 
 		 */
-		JFreeChart rangeChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
+		JFreeChart rangeChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE);
 		rangePanel = new PositionSelectionChartPanel(rangeChart);
 		rangePanel.setPreferredSize(minimumChartSize);
 		rangePanel.addSignalChangeListener(this);
@@ -212,7 +212,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 			.setAlignment(ProfileAlignment.LEFT)
 			.setTag(BorderTag.REFERENCE_POINT)
 			.setShowMarkers(true)
-			.setProfileType( ProfileType.REGULAR)
+			.setProfileType( ProfileType.ANGLE)
 			.setShowPoints(true)
 			.setSwatch(swatch)
 			.setShowAnnotations(false)
@@ -235,7 +235,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 			.setAlignment(ProfileAlignment.LEFT)
 			.setTag(BorderTag.REFERENCE_POINT)
 			.setShowMarkers(true)
-			.setProfileType( ProfileType.REGULAR)
+			.setProfileType( ProfileType.ANGLE)
 			.setSwatch(swatch)
 			.setShowPoints(false)
 			.setShowAnnotations(false)
@@ -257,8 +257,8 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	@Override
 	protected void updateNull() {
 		setButtonsEnabled(false);
-		chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
-		rangePanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
+		chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
+		rangePanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
 	}
 	
 	@Override

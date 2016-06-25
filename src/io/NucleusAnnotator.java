@@ -161,10 +161,10 @@ public class NucleusAnnotator {
 
 		try{
 
-			if(n.getProfile(ProfileType.REGULAR).getSegments().size()>0){ // only draw if there are segments
-				for(int i=0;i<n.getProfile(ProfileType.REGULAR).getSegments().size();i++){
+			if(n.getProfile(ProfileType.ANGLE).getSegments().size()>0){ // only draw if there are segments
+				for(int i=0;i<n.getProfile(ProfileType.ANGLE).getSegments().size();i++){
 
-					NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR).getSegment("Seg_"+i);
+					NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_"+i);
 
 					float[] xpoints = new float[seg.length()+1];
 					float[] ypoints = new float[seg.length()+1];

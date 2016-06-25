@@ -109,9 +109,9 @@ public class CurveRefolder extends AnalysisWorker {
 		finest("Refolding nucleus of class: "+collection.getNucleusType().toString());
 		finest("Subject: "+refoldNucleus.getSourceFileName()+"-"+refoldNucleus.getNucleusNumber());
 
-		Profile targetProfile 	= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
-		Profile q25 			= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.LOWER_QUARTILE);
-		Profile q75 			= collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.UPPER_QUARTILE);
+		Profile targetProfile 	= collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+		Profile q25 			= collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, Constants.LOWER_QUARTILE);
+		Profile q75 			= collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, Constants.UPPER_QUARTILE);
 
 		if(targetProfile==null){
 			throw new Exception("Null reference to target profile");
@@ -199,7 +199,7 @@ public class CurveRefolder extends AnalysisWorker {
 		}
 
 		try{
-			double score = refoldNucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
+			double score = refoldNucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
 			
 //			fileLogger.log(Level.INFO, "Refolding curve: initial score: "+(int)score);
 			fine("Refolding curve: initial score: "+(int)score);
@@ -341,7 +341,7 @@ public class CurveRefolder extends AnalysisWorker {
 	*/
 	private double iterateOverNucleus() throws Exception {
 
-		SegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
+		SegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
 
 		// Get the difference between the candidate nucleus profile and the median profile
 		double similarityScore = refoldProfile.absoluteSquareDifference(targetCurve);
@@ -377,7 +377,7 @@ public class CurveRefolder extends AnalysisWorker {
 //		// make all changes to a fresh nucleus before buggering up the real one
 //		RoundNucleus testNucleus = new RoundNucleus( (RoundNucleus)refoldNucleus);
 
-		double score = testNucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
+		double score = testNucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
 
 		// Get a copy of the point at this index
 		BorderPoint p = testNucleus.getBorderPoint(index);
@@ -412,7 +412,7 @@ public class CurveRefolder extends AnalysisWorker {
 			//						testNucleus.setProfile(ProfileType.REGULAR, testNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize()));
 
 			// Get the new score
-			score = testNucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
+			score = testNucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
 
 			// Apply the change if better fit
 			if(score < similarityScore) {

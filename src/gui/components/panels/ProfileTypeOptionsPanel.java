@@ -31,7 +31,7 @@ public class ProfileTypeOptionsPanel extends EnumeratedOptionsPanel {
 		super();
 		this.add(profileTypeBox);
 		profileTypeBox.addActionListener(this);
-		profileTypeBox.setSelectedItem(ProfileType.REGULAR);
+		profileTypeBox.setSelectedItem(ProfileType.ANGLE);
 	
 	}
 

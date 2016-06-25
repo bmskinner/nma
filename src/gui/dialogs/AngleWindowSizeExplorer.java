@@ -90,7 +90,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		
 		this.add(createSettingsPanel(), BorderLayout.NORTH);
 		
-		chartPanel = new ExportableChartPanel(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
+		chartPanel = new ExportableChartPanel(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
 		this.add(chartPanel, BorderLayout.CENTER);
 
 		
@@ -216,7 +216,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		setAnalysing(true);
 		
 		// Clear the old chart
-		chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
+		chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
 		
 		log("Testing "+windowSizeMin+" - "+windowSizeMax);
 		
@@ -238,14 +238,14 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 //			log(Level.INFO, "\tMade collection");
 			// recalc the aggregate
 			
-			ProfileCollection pc = duplicateCollection.getProfileCollection(ProfileType.REGULAR);
+			ProfileCollection pc = duplicateCollection.getProfileCollection(ProfileType.ANGLE);
 			
-			pc.createProfileAggregate(duplicateCollection, ProfileType.REGULAR);
+			pc.createProfileAggregate(duplicateCollection, ProfileType.ANGLE);
 			
 //			log(Level.INFO, "\tCalculated aggregate");
 			
-			for(BorderTag tag : dataset.getCollection().getProfileCollection(ProfileType.REGULAR).getOffsetKeys()){
-				pc.addOffset(tag, dataset.getCollection().getProfileCollection(ProfileType.REGULAR).getOffset(tag));
+			for(BorderTag tag : dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getBorderTags()){
+				pc.addIndex(tag, dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getIndex(tag));
 			}
 			
 //			log(Level.INFO, "\tAdded offsets");

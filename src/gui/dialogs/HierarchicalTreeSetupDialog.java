@@ -288,7 +288,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		}
 		
 		for(NucleusBorderSegment s : dataset.getCollection()
-				.getProfileCollection(ProfileType.REGULAR)
+				.getProfileCollection(ProfileType.ANGLE)
 				.getSegments(BorderTag.REFERENCE_POINT)){
 			
 			
@@ -341,7 +341,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			try{
 			
 			for(NucleusBorderSegment s : dataset.getCollection()
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getSegments(BorderTag.REFERENCE_POINT)){
 				
 				JCheckBox box = segmentBoxMap.get(s.getID());

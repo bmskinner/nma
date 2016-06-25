@@ -349,12 +349,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			finest("Rotation mode is vertical");
 			// duplicate the cell
 			Cell newCell = new Cell();
-			finest("Cell segments    :"+ cell.getNucleus().getProfile(ProfileType.REGULAR).toString());
+			finest("Cell segments    :"+ cell.getNucleus().getProfile(ProfileType.ANGLE).toString());
 			cell.getNucleus().updateVerticallyRotatedNucleus();
 			Nucleus verticalNucleus = cell.getNucleus().getVerticallyRotatedNucleus();
 			finest("Vertical nucleus is "+verticalNucleus.getNameAndNumber());
 			newCell.setNucleus(verticalNucleus);
-			finest("Vertical segments:"+verticalNucleus.getProfile(ProfileType.REGULAR).toString());
+			finest("Vertical segments:"+verticalNucleus.getProfile(ProfileType.ANGLE).toString());
 
 			cell = newCell;
 			finest("Fetched vertical nucleus");

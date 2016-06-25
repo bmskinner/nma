@@ -34,6 +34,21 @@ import components.nuclei.Nucleus;
 
 import utility.Constants;
 
+/**
+ * Holds the ProfileAggregate with individual nucleus values,
+ * and stores the indexes of BorderTags within the profile.
+ * Provides methods to get the median and other quartiles from 
+ * the collection. The Reference Point is always at the zero index
+ * of the collection.
+ * 
+ * Also stores the NucleusBorderSegments within the profile, and provides
+ * methods to transform the segments to fit profiles offset from given 
+ * border tags.
+ * 
+ * An internal ProfileCache holds average profiles to save repeated calculation
+ * @author ben
+ *
+ */
 public class ProfileCollection implements Serializable, Loggable {
 		
 	private static final long serialVersionUID = 1L;
@@ -42,7 +57,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	
 	private ProfileAggregate 	       aggregate = null;
 	
-	private Map<BorderTag, Integer>    offsets  = new HashMap<BorderTag, Integer>();
+	private Map<BorderTag, Integer>    indexes  = new HashMap<BorderTag, Integer>();
 	private List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
 	
 	
@@ -53,7 +68,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * Create an empty profile collection
 	 */
 	public ProfileCollection(){
-		
+		indexes.put(BorderTag.REFERENCE_POINT, ZERO_INDEX);
 	}
 			
 	/**
@@ -62,15 +77,14 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param pointType
 	 * @return the offset or -1
 	 */
-	public int getOffset(BorderTag pointType){
+	public int getIndex(BorderTag pointType){
 		if(pointType==null){
 			throw new IllegalArgumentException("The requested offset key is null: "+pointType);
 		}
-		if(offsets.containsKey(pointType)){	
-			return offsets.get(pointType);
+		if(indexes.containsKey(pointType)){	
+			return indexes.get(pointType);
 		} else {
 			return -1;
-//			throw new IllegalArgumentException("The requested offset key does not exist: "+pointType);
 		}
 	}
 	
@@ -78,9 +92,9 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * Get all the offset keys attached to this profile collection
 	 * @return
 	 */
-	public List<BorderTag> getOffsetKeys(){
+	public List<BorderTag> getBorderTags(){
 		List<BorderTag> result = new ArrayList<BorderTag>();
-		for(BorderTag s: offsets.keySet()){
+		for(BorderTag s: indexes.keySet()){
 			result.add(s);
 		}
 		return result;
@@ -92,11 +106,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @return
 	 */
 	public boolean hasBorderTag(BorderTag tag){
-		if(offsets.keySet().contains(tag)){
-			return true;
-		} else {
-			return false;
-		}
+		return indexes.keySet().contains(tag);
 	}
 	
 	/**
@@ -115,11 +125,11 @@ public class ProfileCollection implements Serializable, Loggable {
 		if(  ! this.hasBorderTag(tag)){
 			throw new IllegalArgumentException("BorderTag is not present: "+tag.toString());
 		}
-		
+
 		// If the profile is not in the cache, make it and add to the cache
 		if( ! profileCache.hasProfile(tag, quartile)){
 
-			int indexOffset = offsets.get(tag);
+			int indexOffset = indexes.get(tag);			
 			Profile profile = getAggregate().getQuartile(quartile).offset(indexOffset);
 			profileCache.setProfile(tag, quartile, profile );
 
@@ -191,7 +201,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		// this must be negative offset for segments
 		// since we are moving the pointIndex back to the beginning
 		// of the array
-		int offset = -getOffset(tag);
+		int offset = -getIndex(tag);
 
 		List<NucleusBorderSegment> result = NucleusBorderSegment.nudge(segments, offset);
 
@@ -319,11 +329,16 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param pointType the point
 	 * @param offset the position of the point in the profile
 	 */
-	public void addOffset(BorderTag tag, int offset){
+	public void addIndex(BorderTag tag, int offset){
 		if(tag==null){
-			throw new IllegalArgumentException("String is null");
+			throw new IllegalArgumentException("BorderTag is null");
 		}
-		offsets.put(tag, offset);
+		
+		// Cannot move the RP from zero
+		if(tag.equals(BorderTag.REFERENCE_POINT)){
+			return;
+		}
+		indexes.put(tag, offset);
 		profileCache.clear();
 	}
 	
@@ -373,7 +388,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		 * This means the indexes must be moved forwards appropriately.
 		 * Hence, add a positive offset.
 		 */
-		int offset = getOffset(tag);
+		int offset = getIndex(tag);
 
 		List<NucleusBorderSegment> result = NucleusBorderSegment.nudge(n, offset);
 
@@ -398,7 +413,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		}
 		profileCache.clear();
 		aggregate = new ProfileAggregate(length);
-//		IJ.log("Making new aggregate: "+type);
+
 		for(Nucleus n : collection.getNuclei()){
 			
 			
@@ -440,8 +455,8 @@ public class ProfileCollection implements Serializable, Loggable {
 		StringBuilder builder = new StringBuilder();
 
 		builder.append("\tPoint types:");
-		for(BorderTag tag : this.offsets.keySet()){
-			builder.append("\t"+tag+": "+this.offsets.get(tag));
+		for(BorderTag tag : this.indexes.keySet()){
+			builder.append("\t"+tag+": "+this.indexes.get(tag));
 		}
 		return builder.toString();
 	}
@@ -454,7 +469,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		} else {
 			try {
 
-				for(BorderTag tag : this.offsets.keySet()){
+				for(BorderTag tag : this.indexes.keySet()){
 					if(tag.type().equals(BorderTagType.CORE)){
 						builder.append("\r\nSegments from "+tag+":\r\n");
 						for(NucleusBorderSegment s : this.getSegments(tag)){

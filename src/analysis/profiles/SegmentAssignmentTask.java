@@ -108,7 +108,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 			
 		finest("Assigning segments to "+n.getNameAndNumber());
 		// remove any existing segments in the nucleus
-		SegmentedProfile nucleusProfile = n.getProfile(ProfileType.REGULAR);
+		SegmentedProfile nucleusProfile = n.getProfile(ProfileType.ANGLE);
 		nucleusProfile.clearSegments();
 
 		List<NucleusBorderSegment> nucleusSegments = new ArrayList<NucleusBorderSegment>();
@@ -129,8 +129,8 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 			Profile endOffsetMedian 	= median.offset(endIndexInMedian);
 
 			// find the index at the point of the best fit
-			int startIndex 	= n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(startOffsetMedian);
-			int endIndex 	= n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(endOffsetMedian);
+			int startIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(startOffsetMedian);
+			int endIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(endOffsetMedian);
 
 			// create a segment at these points
 			// ensure that the segment meets length requirements
@@ -149,7 +149,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 		
 		nucleusProfile.setSegments(nucleusSegments);
 
-		n.setProfile(ProfileType.REGULAR, nucleusProfile);
+		n.setProfile(ProfileType.ANGLE, nucleusProfile);
 		log(Level.FINEST, "Assigned segments to nucleus "+n.getNameAndNumber()+":");
 		log(Level.FINEST, nucleusProfile.toString());
 		

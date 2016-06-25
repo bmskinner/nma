@@ -121,14 +121,14 @@ public class StatsExporter {
 		try {
 			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 
-			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+			ProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
 			List<NucleusBorderSegment> segs = pc.getSegments(BorderTag.ORIENTATION_POINT);
 			for(NucleusBorderSegment segment : segs){
 				String s = segment.getName();
 
 				List<Integer> list = new ArrayList<Integer>(0);
 				for(Nucleus n : collection.getNuclei()){
-					NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR).getSegment(s);
+					NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment(s);
 					list.add(seg.length());
 				}
 				logger.addColumn(s, list.toArray(new Integer[0]));
@@ -146,7 +146,7 @@ public class StatsExporter {
 		
 		try {
 
-			Profile normalisedMedian = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50);
+			Profile normalisedMedian = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.ORIENTATION_POINT, 50);
 			Profile interpolatedMedian = normalisedMedian.interpolate( (int)collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS));
 
 			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());

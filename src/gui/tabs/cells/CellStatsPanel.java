@@ -149,12 +149,12 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 			// TODO: update segment boundaries 
 			try {
 				
-				SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, tag);
+				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, tag);
 				NucleusBorderSegment seg = profile.getSegment("Seg_0");
 				// this updates the correct direction, but the wrong end of the segment
 				seg.lengthenStart(-difference);
 				
-				n.setProfile(ProfileType.REGULAR, tag, profile);
+				n.setProfile(ProfileType.ANGLE, tag, profile);
 				
 			} catch(Exception e1){
 				log(Level.SEVERE, "Error updating cell profile", e1);

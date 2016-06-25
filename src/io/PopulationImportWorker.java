@@ -94,7 +94,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 				if(dataset.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
 					
 					if(! dataset.getCollection()
-							.getProfileCollection(ProfileType.REGULAR)
+							.getProfileCollection(ProfileType.ANGLE)
 							.hasBorderTag(BorderTag.TOP_VERTICAL)  ){
 						
 						fine("TOP_ and BOTTOM_VERTICAL not assigned; calculating");

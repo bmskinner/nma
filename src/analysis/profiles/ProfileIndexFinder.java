@@ -127,7 +127,7 @@ public class ProfileIndexFinder implements Loggable {
 	 * internal RuleSets for the given border tag
 	 * @param collection
 	 * @param tag
-	 * @return
+	 * @return -2 if the RuleSet list is empty; -1 if the index is not found; else the index
 	 */
 	public int identifyIndex(final CellCollection collection, final BorderTag tag){
 		
@@ -157,7 +157,7 @@ public class ProfileIndexFinder implements Loggable {
 		
 		// Make a 'true' profile
 		BooleanProfile indexes = new BooleanProfile(collection
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN), true);
 		
 		

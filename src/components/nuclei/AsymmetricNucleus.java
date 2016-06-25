@@ -48,6 +48,7 @@ public class AsymmetricNucleus
 
 	private static final long serialVersionUID = 1L;
 	private transient List<BorderPoint> tailEstimatePoints = new ArrayList<BorderPoint>(0); // holds the points considered to be sperm tails before filtering
+	protected transient boolean clockwiseRP = false; // is the original orientation of the nucleus with RP clockwise to the CoM, or not
 
   public AsymmetricNucleus(Nucleus n) {
     super(n);
@@ -88,6 +89,10 @@ public class AsymmetricNucleus
     Set nucleus features
     -----------------------
   */
+  
+  protected boolean isRPClockwise(){
+	  return this.clockwiseRP;
+  }
 
   protected void addTailEstimatePosition(BorderPoint p){
     this.tailEstimatePoints.add(p);
@@ -115,23 +120,13 @@ public class AsymmetricNucleus
 	  finest("\tReading asymmetric nucleus");
 	  in.defaultReadObject();
 	  tailEstimatePoints = new ArrayList<BorderPoint>(0);
+	  clockwiseRP = false;
 	  finest("\tRead asymmetric nucleus");
   }
 
   private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 	  finest("\tWriting asymmetric nucleus");
-	  out.defaultWriteObject();
-
-		// Now ensure we don't recurse over the BorderList
-//			
-//					
-//		for(BorderPoint p : tailEstimatePoints){
-//			out.writeBoolean(true); // Another point awaits
-//			out.writeDouble(p.getX());
-//			out.writeDouble(p.getY());
-//		}
-//		out.writeBoolean(false);
-	  
+	  out.defaultWriteObject();  
 	  finest("\tWrote asymmetric nucleus");
   }
 }

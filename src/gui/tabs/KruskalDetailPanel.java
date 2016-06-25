@@ -131,7 +131,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 			.setAlignment(ProfileAlignment.LEFT)
 			.setTag(BorderTag.REFERENCE_POINT)
 			.setShowMarkers(true)
-			.setProfileType(ProfileType.REGULAR)
+			.setProfileType(ProfileType.ANGLE)
 			.build();
 		
 

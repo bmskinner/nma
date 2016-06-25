@@ -156,7 +156,7 @@ private static NucleusTableDatasetCreator instance = null;
 			BorderTag point = BorderTag.REFERENCE_POINT;
 
 			// get mapping from ordered segments to segment names
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(point)
 					.getOrderedSegments();
 
@@ -253,7 +253,7 @@ private static NucleusTableDatasetCreator instance = null;
 		// assumes all datasets have the same number of segments
 		List<NucleusBorderSegment> segments = list.get(0)
 				.getCollection()
-				.getProfileCollection(ProfileType.REGULAR)
+				.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(point)
 				.getOrderedSegments();
 
@@ -284,7 +284,7 @@ private static NucleusTableDatasetCreator instance = null;
 			//				List<NucleusBorderSegment> segs = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
 
 			List<NucleusBorderSegment> segs = collection
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(point)
 					.getOrderedSegments();
 
@@ -945,7 +945,7 @@ private static NucleusTableDatasetCreator instance = null;
 			Object[] popData = new Object[options.datasetCount()];
 			
 			NucleusBorderSegment medianSeg1 = dataset.getCollection()
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 
@@ -959,7 +959,7 @@ private static NucleusTableDatasetCreator instance = null;
 				} else {
 					
 					NucleusBorderSegment medianSeg2 = dataset2.getCollection()
-							.getProfileCollection(ProfileType.REGULAR)
+							.getProfileCollection(ProfileType.ANGLE)
 							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 							.getSegmentAt(options.getSegPosition());
 					
@@ -1067,7 +1067,7 @@ private static NucleusTableDatasetCreator instance = null;
 		for(AnalysisDataset dataset : options.getDatasets()){
 			
 			NucleusBorderSegment medianSeg1 = dataset.getCollection()
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 									
@@ -1088,7 +1088,7 @@ private static NucleusTableDatasetCreator instance = null;
 				} else {
 					
 					NucleusBorderSegment medianSeg2 = dataset2.getCollection()
-							.getProfileCollection(ProfileType.REGULAR)
+							.getProfileCollection(ProfileType.ANGLE)
 							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 							.getSegmentAt(options.getSegPosition());
 					

@@ -338,7 +338,7 @@ public class CellDatasetCreator implements Loggable {
 			 * We need to convert the seg position into a seg id
 			 */
 			UUID segID = dataset.getCollection()
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 					.getSegmentAt(  options.getSegPosition()   )
 					.getID();
@@ -394,13 +394,13 @@ public class CellDatasetCreator implements Loggable {
 
 			// Get the segment start position XY coordinates
 
-			if( ! verticalNucleus.getProfile(ProfileType.REGULAR)
+			if( ! verticalNucleus.getProfile(ProfileType.ANGLE)
 					.hasSegment(segmentID)){
 				fine("Segment "+segmentID.toString()+" not found in vertical nucleus for "+nucleus.getNameAndNumber());
 				continue;
 
 			}
-			NucleusBorderSegment segment = verticalNucleus.getProfile(ProfileType.REGULAR)
+			NucleusBorderSegment segment = verticalNucleus.getProfile(ProfileType.ANGLE)
 					.getSegment(segmentID);
 			finest("Fetched segment "+segmentID.toString());
 
@@ -443,7 +443,7 @@ public class CellDatasetCreator implements Loggable {
 				.getVerticallyRotatedNucleus();
 		
 		// Get the segment start position XY coordinates
-		NucleusBorderSegment segment = consensus.getProfile(ProfileType.REGULAR)
+		NucleusBorderSegment segment = consensus.getProfile(ProfileType.ANGLE)
 											.getSegment(segmentID);
 		
 		XYPoint centrePoint = consensus.getBorderPoint(segment.getStartIndex());

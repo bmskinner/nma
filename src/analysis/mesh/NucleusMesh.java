@@ -434,7 +434,7 @@ public class NucleusMesh implements Loggable {
 		finer("Determining vertex proportions");
 		List<NucleusBorderSegment> list;
 		try {
-			list = nucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments();
+			list = nucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT).getOrderedSegments();
 		} catch (Exception e) {
 			error("Error getting segments from nucleus", e);
 			return;
@@ -483,7 +483,7 @@ public class NucleusMesh implements Loggable {
 		finer("Creating peripheral vertices");
 		List<NucleusBorderSegment> list;
 		try {
-			list = nucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getOrderedSegments();
+			list = nucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT).getOrderedSegments();
 		} catch (Exception e) {
 			error("Error getting segments from nucleus", e);
 			return;

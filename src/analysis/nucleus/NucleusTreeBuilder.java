@@ -171,7 +171,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		
 		if(options.isIncludeProfile()){ // An attribute for each angle in the median profile
 			log(Level.FINEST, "Including profile");
-			profileAttributeCount = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50).size();
+			profileAttributeCount = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, 50).size();
 			profileAttributeCount /= windowSize;
 			attributeCount += profileAttributeCount;
 		}
@@ -227,7 +227,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	 */
 	private Instances makeProfileInstances(CellCollection collection)throws Exception {
 		
-		int profileSize = collection.getProfileCollection(ProfileType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50).size();
+		int profileSize = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, 50).size();
 		int windowSize = collection.getNuclei().get(0).getAngleProfileWindowSize(); // use the first window size found for now
 		
 		
@@ -245,7 +245,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				Instance inst = new SparseInstance(attributes.size());
 
 				// Interpolate the profile to the median length
-				Profile p = n1.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).interpolate(profileSize);
+				Profile p = n1.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT).interpolate(profileSize);
 				
 				int attNumber=0;
 				if(options.isIncludeProfile()){
@@ -266,7 +266,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				for(UUID segID : options.getSegments()){
 					if(options.isIncludeSegment(segID)){
 						Attribute att = (Attribute) attributes.elementAt(attNumber++);
-						double length = n1.getProfile(ProfileType.REGULAR).getSegment(segID).length();
+						double length = n1.getProfile(ProfileType.ANGLE).getSegment(segID).length();
 						inst.setValue(att, length);
 					}
 				}

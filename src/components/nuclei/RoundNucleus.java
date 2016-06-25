@@ -29,13 +29,10 @@ package components.nuclei;
 
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,8 +47,6 @@ import analysis.profiles.RuleSet;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import stats.SignalStatistic;
-import stats.Stats;
-import utility.Constants;
 import utility.Utils;
 import components.AbstractCellularComponent;
 import components.CellularComponent;
@@ -91,8 +86,6 @@ public class RoundNucleus extends AbstractCellularComponent
 	protected Map<BorderTag, Integer>    borderTags  = new HashMap<BorderTag, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
 	protected Map<String, Integer>       segmentTags = new HashMap<String, Integer>(0);
 
-
-//	protected File nucleusFolder; // the folder to store nucleus information e.g. /Testing/2015-11-24_10:00:00/1/
 	protected String outputFolder;  // the top-level path in which to store outputs; has analysis date e.g. /Testing/2015-11-24_10:00:00
 	
 	
@@ -136,9 +129,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		this.setSignals( new SignalCollection(n.getSignalCollection()));
 		
 		this.angleWindowProportion = n.getAngleWindowProportion();
-//		this.setAngleWindowProportion(n.getAngleWindowProportion());
 		this.angleProfileWindowSize = n.getAngleProfileWindowSize();
-//		this.setAngleProfileWindowSize(n.getAngleProfileWindowSize());
 		
 		
 		for(ProfileType type : ProfileType.values()){
@@ -175,12 +166,8 @@ public class RoundNucleus extends AbstractCellularComponent
 		Profile p = this.getProfile(rpSet.getType());
 		ProfileIndexFinder f = new ProfileIndexFinder();
 		int rpIndex = f.identifyIndex(p, rpSet);
-
-//		int rpIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
-//		
-//		// Make the reference point at the widest axis
-		setBorderTag(BorderTag.REFERENCE_POINT, rpIndex);
-				
+		
+		setBorderTag(BorderTag.REFERENCE_POINT, rpIndex);		
 		setBorderTag(BorderTag.ORIENTATION_POINT, rpIndex);
 		
 	}
@@ -211,12 +198,15 @@ public class RoundNucleus extends AbstractCellularComponent
 		 * All these calculations operate on the same border point order
 		 */
 		
-		this.profileMap.put(ProfileType.REGULAR, this.calculateAngleProfile());
+		this.profileMap.put(ProfileType.ANGLE, this.calculateAngleProfile());
 
 		// calc distances around nucleus through CoM
-		this.profileMap.put(ProfileType.DISTANCE, this.calculateDistanceProfile());
+		this.profileMap.put(ProfileType.DIAMETER, this.calculateDistanceProfile());
 
-		this.profileMap.put(ProfileType.SINGLE_DISTANCE, this.calculateSingleDistanceProfile());
+		this.profileMap.put(ProfileType.RADIUS, this.calculateSingleDistanceProfile());
+		
+		// By default, the franken profile is the same as the angle profile until corrected
+		this.profileMap.put(ProfileType.FRANKEN, new SegmentedProfile(this.getProfile(ProfileType.ANGLE)));
 	}
 
 	/*
@@ -394,7 +384,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		int topIndex  = this.getBorderIndex(BorderTag.TOP_VERTICAL);
 		int btmIndex  = this.getBorderIndex(BorderTag.BOTTOM_VERTICAL);
-		int totalSize = this.getProfile(ProfileType.REGULAR).size();
+		int totalSize = this.getProfile(ProfileType.ANGLE).size();
 		
 		NucleusBorderSegment region = new NucleusBorderSegment(topIndex, btmIndex, totalSize );
 
@@ -481,7 +471,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		// calculate profiles
 		this.angleProfileWindowSize = (int) Math.round(angleWindow);
 		finest("Recalculating angle profile");
-		this.profileMap.put(ProfileType.REGULAR, this.calculateAngleProfile());		
+		this.profileMap.put(ProfileType.ANGLE, this.calculateAngleProfile());		
 	}
 
 		
@@ -513,7 +503,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	public double getPathLength() throws Exception{
 		double pathLength = 0;
 
-		Profile angleProfile = this.getProfile(ProfileType.REGULAR);
+		Profile angleProfile = this.getProfile(ProfileType.ANGLE);
 		
 		// First previous point is the last point of the profile
 		XYPoint prevPoint = new XYPoint(0,angleProfile.get(this.getBorderLength()-1));
@@ -760,13 +750,13 @@ public class RoundNucleus extends AbstractCellularComponent
 	// Uses the distance profile
 	public BorderPoint getNarrowestDiameterPoint() throws Exception{
 
-		int index = this.getProfile(ProfileType.DISTANCE).getIndexOfMin();
+		int index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
 
 		return new BorderPoint(this.getBorderPoint(index));
 	}
 	
 	public double getNarrowestDiameter() {
-		return Arrays.stream(this.getProfile(ProfileType.DISTANCE).asArray()).min().orElse(0);
+		return Arrays.stream(this.getProfile(ProfileType.DIAMETER).asArray()).min().orElse(0);
 	}
 
 
@@ -1085,9 +1075,9 @@ public class RoundNucleus extends AbstractCellularComponent
 		List<NucleusBorderSegment> segments = null;
 		
 		// store segments to reapply later
-		if(this.hasProfile(ProfileType.REGULAR)){
-			if(this.getProfile(ProfileType.REGULAR).hasSegments()){
-				segments = this.getProfile(ProfileType.REGULAR).getSegments();
+		if(this.hasProfile(ProfileType.ANGLE)){
+			if(this.getProfile(ProfileType.ANGLE).hasSegments()){
+				segments = this.getProfile(ProfileType.ANGLE).getSegments();
 			}
 		}
 		
@@ -1157,9 +1147,9 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	public void flipAngleProfile()throws Exception{
 		
-		SegmentedProfile profile = profileMap.get(ProfileType.REGULAR);
+		SegmentedProfile profile = profileMap.get(ProfileType.ANGLE);
 		profile.reverse();
-		profileMap.put(ProfileType.REGULAR, profile);
+		profileMap.put(ProfileType.ANGLE, profile);
 	}
 	
 	public void updateSourceFolder(File newFolder) {

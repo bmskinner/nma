@@ -78,7 +78,7 @@ public class RuleSet implements Serializable {
 	 */
 	public static RuleSet mouseSpermRPRuleSet(){
 		
-		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.REGULAR);
+		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
 		
 		return builder
 				.isMinimum()
@@ -92,7 +92,7 @@ public class RuleSet implements Serializable {
 	 */
 	public static RuleSet mouseSpermOPRuleSet(){
 		
-		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.REGULAR);
+		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
 		
 		return builder
 			.isLocalMinimum()
@@ -110,7 +110,7 @@ public class RuleSet implements Serializable {
 	 */
 	public static RuleSet mouseSpermTVRuleSet(){
 		
-		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.REGULAR);
+		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
 		
 		return builder
 			.isConstantRegionAtValue(180, 10, 2)
@@ -125,7 +125,7 @@ public class RuleSet implements Serializable {
 	 */
 	public static RuleSet mouseSpermBVRuleSet(){
 		
-		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.REGULAR);
+		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
 		
 		return builder
 			.isConstantRegionAtValue(180, 10, 2)
@@ -140,7 +140,7 @@ public class RuleSet implements Serializable {
 	 */
 	public static RuleSet pigSpermRPRuleSet(){
 		
-		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.REGULAR);
+		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
 		
 		return builder
 				.valueIsMoreThan(180)
@@ -155,7 +155,7 @@ public class RuleSet implements Serializable {
 	 */
 	public static RuleSet roundRPRuleSet(){
 		
-		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.REGULAR);
+		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.DIAMETER);
 		
 		return builder
 			.isMaximum()
@@ -169,7 +169,7 @@ public class RuleSet implements Serializable {
 	 */
 	public static RuleSet roundOPRuleSet(){
 		
-		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.REGULAR);
+		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.DIAMETER);
 		
 		return builder
 			.isMinimum()

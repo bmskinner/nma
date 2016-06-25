@@ -50,7 +50,7 @@ public class ChartOptionsBuilder {
 	private BorderTag tag              = BorderTag.REFERENCE_POINT;
 	private boolean showMarkers        = false;
 	private boolean hideProfiles       = false;
-	private ProfileType type           = ProfileType.REGULAR;
+	private ProfileType type           = ProfileType.ANGLE;
 	private UUID signalGroup           = null;
 	private boolean useDensity         = false;
 	private List<PlottableStatistic> stats    = new ArrayList<PlottableStatistic>();

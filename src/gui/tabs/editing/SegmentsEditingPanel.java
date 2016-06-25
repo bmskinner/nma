@@ -135,7 +135,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			Dimension minimumChartSize = new Dimension(50, 100);
 			Dimension preferredChartSize = new Dimension(400, 300);
 			
-			JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
+			JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE);
 			chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
 			
 			chartPanel.setMinimumSize(minimumChartSize);
@@ -155,7 +155,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			 * centre of the zoomed range on the 
 			 * centre chart panel 
 			 */
-			JFreeChart rangeChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
+			JFreeChart rangeChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE);
 			rangePanel = new PositionSelectionChartPanel(rangeChart);
 			rangePanel.setPreferredSize(minimumChartSize);
 			rangePanel.addSignalChangeListener(this);
@@ -222,7 +222,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				.setAlignment(ProfileAlignment.LEFT)
 				.setTag(BorderTag.REFERENCE_POINT)
 				.setShowMarkers(false)
-				.setProfileType( ProfileType.REGULAR)
+				.setProfileType( ProfileType.ANGLE)
 				.setSwatch(activeDataset().getSwatch())
 				.setShowPoints(true)
 				.build();
@@ -233,7 +233,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			JFreeChart chart = getChart(options);
 			
 			profile = activeDataset().getCollection()
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 			
 			chartPanel.setChart(chart, profile, true);
@@ -250,7 +250,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				.setAlignment(ProfileAlignment.LEFT)
 				.setTag(BorderTag.REFERENCE_POINT)
 				.setShowMarkers(false)
-				.setProfileType( ProfileType.REGULAR)
+				.setProfileType( ProfileType.ANGLE)
 				.setSwatch(activeDataset().getSwatch())
 				.setShowPoints(false)
 				.build();
@@ -287,8 +287,8 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 		
 		@Override
 		protected void updateNull() {			
-			chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
-			rangePanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR));
+			chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
+			rangePanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
 			setButtonsEnabled(false);
 		}
 		
@@ -314,7 +314,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				
 				setButtonsEnabled(true);
 				CellCollection collection = options.firstDataset().getCollection();
-				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR)
+				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE)
 						.getSegmentedProfile(BorderTag.ORIENTATION_POINT);
 				
 				// Don't allow merging below 2 segments (causes errors)
@@ -367,7 +367,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 					
 					UUID segID = activeDataset()
 							.getCollection()
-							.getProfileCollection(ProfileType.REGULAR)
+							.getProfileCollection(ProfileType.ANGLE)
 							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 							.getSegmentContaining(segMidpointIndex)
 							.getID();
@@ -463,8 +463,8 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 
 			// recalc the aggregate
 			
-			ProfileCollection pc = activeDataset().getCollection().getProfileCollection(ProfileType.REGULAR);			
-			pc.createProfileAggregate(activeDataset().getCollection(), ProfileType.REGULAR);
+			ProfileCollection pc = activeDataset().getCollection().getProfileCollection(ProfileType.ANGLE);			
+			pc.createProfileAggregate(activeDataset().getCollection(), ProfileType.ANGLE);
 					
 			
 			SegmentedProfile medianProfile = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);	
@@ -506,7 +506,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			try {
 				CellCollection collection = activeDataset().getCollection();
 				SegmentedProfile medianProfile = collection
-						.getProfileCollection(ProfileType.REGULAR)
+						.getProfileCollection(ProfileType.ANGLE)
 						.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 				
 //				List<NucleusBorderSegment> list =collection.getProfileCollection(ProfileCollectionType.REGULAR)

@@ -77,7 +77,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		if(NucleusBorderSegment.segmentCountsMatch(getDatasets())){ // make a boxplot for each segment
 			
 			CellCollection collection = activeDataset().getCollection();
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
 					.getOrderedSegments();
 			

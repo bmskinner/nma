@@ -449,7 +449,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		int frontPoints = 0;
 		int rearPoints = 0;
 
-		Profile profile = this.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
+		Profile profile = this.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
 
 		int midPoint = (int) (this.getBorderLength()/2) ;
 		for(int i=0; i<this.getBorderLength();i++){ // integrate points over 180
@@ -544,7 +544,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     // distance are both far from each other and far from the centre, and are a more robust estimate
     // of the true ends of the signal
     double tipToCoMDistance = this.getBorderTag(BorderTag.REFERENCE_POINT).getLengthTo(this.getCentreOfMass());
-    BooleanProfile array = this.getProfile(ProfileType.REGULAR).getLocalMinima(5);
+    BooleanProfile array = this.getProfile(ProfileType.ANGLE).getLocalMinima(5);
 
     double maxDistance = 0;
     BorderPoint tail = this.getBorderTag(BorderTag.REFERENCE_POINT); // start at tip, move round

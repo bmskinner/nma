@@ -275,7 +275,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			 * Find the seg id for the median segment at the requested position
 			 */
 			NucleusBorderSegment medianSeg = collection
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 
@@ -318,7 +318,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			 * Find the seg id for the median segment at the requested position
 			 */
 			NucleusBorderSegment medianSeg = collection
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 
@@ -330,7 +330,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			double[] lengths = new double[collection.cellCount()];
 			for(Nucleus n : collection.getNuclei()){
 
-				NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
+				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());
 
 				int indexLength = seg.length();
@@ -354,7 +354,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			 * Find the seg id for the median segment at the requested position
 			 */
 			NucleusBorderSegment medianSeg = collection
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 
@@ -366,7 +366,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			double[] lengths = new double[collection.cellCount()];
 			for(Nucleus n : collection.getNuclei()){
 
-				NucleusBorderSegment seg = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT)
+				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());
 				
 				int indexLength = seg.length();

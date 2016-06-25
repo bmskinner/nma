@@ -70,7 +70,7 @@ public class ProfileManager implements Loggable {
 	}
 	
 	public int getProfileLength(){
-		return collection.getProfileCollection(ProfileType.REGULAR).length();
+		return collection.getProfileCollection(ProfileType.ANGLE).length();
 	}
 	
 	public void removeProfiles(){
@@ -148,10 +148,34 @@ public class ProfileManager implements Loggable {
 			
 			collection
 				.getProfileCollection(type)
-				.addOffset(tag, index);
+				.addIndex(tag, index);
 
 		}
 		
+	}
+	
+	/**
+	 * Change the RP to the given index in the current median from 
+	 * the profile collection.
+	 * @param index
+	 */
+	public void updateRP(int index){
+		
+		// Get the existing median, and offset it to the new index
+		Profile median = collection.getProfileCollection(ProfileType.ANGLE)
+				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN).offset(index);
+		
+		finer("Fetched median from new offset of RP to "+index);
+		
+		finest("New median from "+BorderTag.REFERENCE_POINT+":");
+		finest(median.toString());
+		
+		finest("Offsetting individual nucleus indexes");
+		offsetNucleusProfiles(BorderTag.REFERENCE_POINT, ProfileType.ANGLE, median);
+		
+		finer("Nucleus indexes for "+BorderTag.REFERENCE_POINT+" updated");
+		createProfileCollections();
+		finer("Rebuilt the profile collcctions");
 	}
 	
 	/**
@@ -179,16 +203,16 @@ public class ProfileManager implements Loggable {
 
 			fine("Updating nuclei");
 			Profile topMedian = collection
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getProfile(BorderTag.TOP_VERTICAL, Constants.MEDIAN);
 
 			Profile btmMedian = collection
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getProfile(BorderTag.BOTTOM_VERTICAL, Constants.MEDIAN);
 
-			offsetNucleusProfiles(BorderTag.TOP_VERTICAL, ProfileType.REGULAR, topMedian);
+			offsetNucleusProfiles(BorderTag.TOP_VERTICAL, ProfileType.ANGLE, topMedian);
 
-			offsetNucleusProfiles(BorderTag.BOTTOM_VERTICAL, ProfileType.REGULAR, btmMedian);
+			offsetNucleusProfiles(BorderTag.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
 
 			for(Nucleus n : collection.getNuclei()){
 				n.updateVerticallyRotatedNucleus();
@@ -211,6 +235,11 @@ public class ProfileManager implements Loggable {
 		
 		finer("Updating border tag "+tag);
 		
+		if(tag.equals(BorderTag.REFERENCE_POINT)){
+			updateRP(index);
+			return;
+		}
+		
 		if(tag.type().equals(BorderTagType.CORE )){
 			finer("Updating core border tag");
 			updateCoreBorderTagIndex(tag, index);
@@ -229,7 +258,7 @@ public class ProfileManager implements Loggable {
 	 */
 	private void updateExtendedBorderTagIndex(BorderTag tag, int index){
 		
-		int oldIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
+		int oldIndex = collection.getProfileCollection(ProfileType.ANGLE).getIndex(tag);
 		
 		if(oldIndex == -1){
 			finer("Border tag does not exist and will be created");
@@ -243,10 +272,10 @@ public class ProfileManager implements Loggable {
 		
 		// Use the median profile to set the tag in the nuclei
 
-		Profile median = collection.getProfileCollection(ProfileType.REGULAR)
+		Profile median = collection.getProfileCollection(ProfileType.ANGLE)
 				.getProfile(tag, Constants.MEDIAN); 
 		
-		offsetNucleusProfiles(tag, ProfileType.REGULAR, median);
+		offsetNucleusProfiles(tag, ProfileType.ANGLE, median);
 
 
 		/*
@@ -255,7 +284,7 @@ public class ProfileManager implements Loggable {
 		if(collection.hasConsensusNucleus()){
 			Nucleus n = collection.getConsensusNucleus();
 			int oldNIndex = n.getBorderIndex(tag);
-			int newIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
+			int newIndex = n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(median);
 			n.setBorderTag(tag, newIndex);
 
 			if(n.hasBorderTag(BorderTag.TOP_VERTICAL) && n.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
@@ -308,13 +337,13 @@ public class ProfileManager implements Loggable {
 		// This is to force segmentation at the OP and RP
 		Map<BorderTag, Integer> map = new HashMap<BorderTag, Integer>();
 		for(BorderTag test : BorderTag.values(BorderTagType.CORE)){
-			int i = collection.getProfileCollection(ProfileType.REGULAR).getOffset(test);
+			int i = collection.getProfileCollection(ProfileType.ANGLE).getIndex(test);
 			map.put(test,i); 
 			finer("Storing existing median "+test+" at index "+i+" in map");
 		}
 		
 		finest("Existing median from "+tag+":");
-		finest(collection.getProfileCollection(ProfileType.REGULAR)
+		finest(collection.getProfileCollection(ProfileType.ANGLE)
 				.getProfile(tag, Constants.MEDIAN).toString());
 		
 		// Overwrite the new tag for segmentation
@@ -322,14 +351,14 @@ public class ProfileManager implements Loggable {
 		finer("Replacing median "+tag+" with index "+index+" in segmenter map");
 		
 		// Store the offset for the new point
-		collection.getProfileCollection(ProfileType.REGULAR).addOffset(tag, index);
+		collection.getProfileCollection(ProfileType.ANGLE).addIndex(tag, index);
 		finer("Offset the "+tag+" index in the regular profile to "+index);
 				
 		/*
 		 * Now we need to update the tag indexes in the nucleus
 		 * profiles.
 		 */
-		Profile median = collection.getProfileCollection(ProfileType.REGULAR)
+		Profile median = collection.getProfileCollection(ProfileType.ANGLE)
 				.getProfile(tag, Constants.MEDIAN);
 		finer("Fetched median from new offset of "+tag);
 		
@@ -339,7 +368,7 @@ public class ProfileManager implements Loggable {
 //		finest("Current state of regular profile collection:");
 //		finest(collection.getProfileCollection(ProfileType.REGULAR).toString());
 		finest("Offsetting individual nucleus indexes");
-		offsetNucleusProfiles(tag, ProfileType.REGULAR, median);
+		offsetNucleusProfiles(tag, ProfileType.ANGLE, median);
 		
 		finer("Nucleus indexes for "+tag+" updated");
 		
@@ -350,16 +379,16 @@ public class ProfileManager implements Loggable {
 			// We need to rebuild the ProfileAggregate for the new RP
 			// This will reset the RP to index zero
 			// Make new profile collections
-			int rpIndex = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
+			int rpIndex = collection.getProfileCollection(ProfileType.ANGLE).getIndex(tag);
 			finer("RP index is changing - moved to index "+rpIndex);
 			
 			createProfileCollections();
 			finer("Recreated profile collections");
 			
 			// Get the recreated profile collections from the new RP
-			ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+			ProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
 			
-			rpIndex = pc.getOffset(tag);
+			rpIndex = pc.getIndex(tag);
 			finer("New ProfileAggregates move RP index to index "+rpIndex);
 			
 			// We need to update the offsets for the BorderTags since zero has moved
@@ -367,7 +396,7 @@ public class ProfileManager implements Loggable {
 				
 				// The RP is forced to start at zero
 				if(test.equals(BorderTag.REFERENCE_POINT)){
-					pc.addOffset(tag, 0);
+					pc.addIndex(tag, 0);
 					finer("Explicit setting of RP index to zero");
 					continue;
 					
@@ -375,11 +404,11 @@ public class ProfileManager implements Loggable {
 					
 
 					// Other points are offset by an appropriate amount relative to the new RP index
-					int oldIndex = pc.getOffset(test);
+					int oldIndex = pc.getIndex(test);
 					if(oldIndex!=-1){ // Only bother if the tag exists
 						
 						int newIndex = AbstractCellularComponent.wrapIndex( (oldIndex - index)  , pc.length()); // offset by 1
-						pc.addOffset(test, newIndex);
+						pc.addIndex(test, newIndex);
 						finer("Explicit setting of "+test+" index to "+newIndex+" from "+oldIndex);
 						
 						// Ensure that core tags (the OP) get segmented
@@ -396,7 +425,7 @@ public class ProfileManager implements Loggable {
 			
 			
 						
-			rpIndex = pc.getOffset(tag);
+			rpIndex = pc.getIndex(tag);
 			finer("After explicit set, RP index is "+rpIndex);
 			
 			map.put(tag, 0); // the RP is back at zero
@@ -407,9 +436,9 @@ public class ProfileManager implements Loggable {
 		// Resegment the median
 			
 		fine("Resegmenting the median profile from the RP");
-		ProfileCollection pc = collection.getProfileCollection(ProfileType.REGULAR);
+		ProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
 
-		Profile medianToSegment = collection.getProfileCollection(ProfileType.REGULAR)
+		Profile medianToSegment = collection.getProfileCollection(ProfileType.ANGLE)
 				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
 
 		ProfileSegmenter segmenter = new ProfileSegmenter(medianToSegment, map);		
@@ -455,7 +484,7 @@ public class ProfileManager implements Loggable {
 	 * @return
 	 */
 	public int getSegmentCount(){
-		ProfileCollection pc =    collection.getProfileCollection(ProfileType.REGULAR);
+		ProfileCollection pc =    collection.getProfileCollection(ProfileType.ANGLE);
 		try {
 			return pc.getSegments(BorderTag.REFERENCE_POINT).size();
 		} catch (Exception e) {
@@ -470,10 +499,10 @@ public class ProfileManager implements Loggable {
 	 * collection. The length is set to the angle profile length
 	 * @throws Exception
 	 */
-	public void recalculateProfileAggregates() throws Exception{
+	public void recalculateProfileAggregates(){
 
 		// use the same array length as the source collection to avoid segment slippage
-		int profileLength = collection.getProfileCollection(ProfileType.REGULAR)
+		int profileLength = collection.getProfileCollection(ProfileType.ANGLE)
 				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN) 
 				.size(); 
 
@@ -506,12 +535,12 @@ public class ProfileManager implements Loggable {
 	 */
 	public void copyCollectionOffsets( final CellCollection destination) {
 		
-		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
+		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegments(BorderTag.REFERENCE_POINT);
 
 
 		// use the same array length as the source collection to avoid segment slippage
-		int profileLength = collection.getProfileCollection(ProfileType.REGULAR)
+		int profileLength = collection.getProfileCollection(ProfileType.ANGLE)
 				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN) 
 				.size(); 
 
@@ -541,8 +570,8 @@ public class ProfileManager implements Loggable {
 			 * Copy the offset keys from the source collection
 			 */
 
-			for(BorderTag key : oldPC.getOffsetKeys()){
-				newPC.addOffset(key, oldPC.getOffset(key));
+			for(BorderTag key : oldPC.getBorderTags()){
+				newPC.addIndex(key, oldPC.getIndex(key));
 			}
 			newPC.addSegments(BorderTag.REFERENCE_POINT, segments);
 
@@ -586,7 +615,7 @@ public class ProfileManager implements Loggable {
 	 */
 	public void setLockOnAllNucleusSegmentsExcept(UUID id, boolean b) throws Exception{
 		
-		List<UUID> ids = collection.getProfileCollection(ProfileType.REGULAR)
+		List<UUID> ids = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 				.getSegmentIDs();
 		
@@ -613,7 +642,7 @@ public class ProfileManager implements Loggable {
 	 */
 	public void setLockOnAllNucleusSegments(boolean b) throws Exception{
 		
-		List<UUID> ids = collection.getProfileCollection(ProfileType.REGULAR)
+		List<UUID> ids = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 				.getSegmentIDs();
 		
@@ -641,7 +670,7 @@ public class ProfileManager implements Loggable {
 		// Get the median profile from the reference point
 		
 		SegmentedProfile oldProfile = collection
-				.getProfileCollection(ProfileType.REGULAR)
+				.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 		
 //		programLogger.log(Level.FINEST, "Old profile: "+oldProfile.toString());
@@ -659,17 +688,17 @@ public class ProfileManager implements Loggable {
 		
 		if(start){
 			if(seg.getStartIndex()==collection
-					.getProfileCollection(ProfileType.REGULAR)
-					.getOffset(BorderTag.ORIENTATION_POINT)){
+					.getProfileCollection(ProfileType.ANGLE)
+					.getIndex(BorderTag.ORIENTATION_POINT)){
 				collection
-				.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, index);
+				.getProfileCollection(ProfileType.ANGLE).addIndex(BorderTag.ORIENTATION_POINT, index);
 			}
 			
 			if(seg.getStartIndex()==collection
-					.getProfileCollection(ProfileType.REGULAR)
-					.getOffset(BorderTag.REFERENCE_POINT)){
+					.getProfileCollection(ProfileType.ANGLE)
+					.getIndex(BorderTag.REFERENCE_POINT)){
 				collection
-				.getProfileCollection(ProfileType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, index);
+				.getProfileCollection(ProfileType.ANGLE).addIndex(BorderTag.REFERENCE_POINT, index);
 			}
 		}
 
@@ -683,7 +712,7 @@ public class ProfileManager implements Loggable {
 //			programLogger.log(Level.FINEST, "Adding segments to profile collection");
 			
 			collection
-			.getProfileCollection(ProfileType.REGULAR)
+			.getProfileCollection(ProfileType.ANGLE)
 			.addSegments(BorderTag.REFERENCE_POINT, oldProfile.getSegments());
 			
 			finest("Segments added, refresh the charts");
@@ -713,9 +742,9 @@ public class ProfileManager implements Loggable {
 			 * Find the position of the border tag in the median profile
 			 * 
 			 */
-			int offsetForOp = collection.getProfileCollection(ProfileType.REGULAR).getOffset(BorderTag.REFERENCE_POINT);
+			int offsetForOp = collection.getProfileCollection(ProfileType.ANGLE).getIndex(BorderTag.REFERENCE_POINT);
 			
-			int offset = collection.getProfileCollection(ProfileType.REGULAR).getOffset(tag);
+			int offset = collection.getProfileCollection(ProfileType.ANGLE).getIndex(tag);
 			
 			// this should be zero for the orientation point and  totalLength+difference for the reference point
 			int difference = offset - offsetForOp;
@@ -736,7 +765,7 @@ public class ProfileManager implements Loggable {
 	 */
 	public void mergeSegments(NucleusBorderSegment seg1, NucleusBorderSegment seg2) throws Exception {
 
-		SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR)
+		SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 
 		/*
@@ -751,7 +780,7 @@ public class ProfileManager implements Loggable {
 			medianProfile.mergeSegments(seg1, seg2, newID);
 
 			// put the new segment pattern back with the appropriate offset
-			collection.getProfileCollection(ProfileType.REGULAR)
+			collection.getProfileCollection(ProfileType.ANGLE)
 				.addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
 
 			/*
@@ -760,11 +789,11 @@ public class ProfileManager implements Loggable {
 			 */
 			for(Nucleus n : collection.getNuclei()){
 
-				SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
+				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
 				NucleusBorderSegment nSeg1 = profile.getSegment(seg1.getID());
 				NucleusBorderSegment nSeg2 = profile.getSegment(seg2.getID());
 				profile.mergeSegments(nSeg1, nSeg2, newID);
-				n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
+				n.setProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT, profile);
 			}
 
 			/*
@@ -772,11 +801,11 @@ public class ProfileManager implements Loggable {
 			 */
 			if(collection.hasConsensusNucleus()){
 				ConsensusNucleus n = collection.getConsensusNucleus();
-				SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
+				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
 				NucleusBorderSegment nSeg1 = profile.getSegment(seg1.getID());
 				NucleusBorderSegment nSeg2 = profile.getSegment(seg2.getID());
 				profile.mergeSegments(nSeg1, nSeg2, newID);
-				n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
+				n.setProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT, profile);
 			}
 			
 			// Ensure the vertical nuclei have the same segment pattern
@@ -793,7 +822,7 @@ public class ProfileManager implements Loggable {
 	 */
 	public boolean splitSegment(NucleusBorderSegment seg, int index)  throws Exception {
 		
-		SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(BorderTag.REFERENCE_POINT);
+		SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE).getSegmentedProfile(BorderTag.REFERENCE_POINT);
 		
 
 		// Do not try to split segments that are a merge of other segments
@@ -813,7 +842,7 @@ public class ProfileManager implements Loggable {
 				medianProfile.splitSegment(seg, index, newID1, newID2);
 
 				// put the new segment pattern back with the appropriate offset
-				collection.getProfileCollection(ProfileType.REGULAR)
+				collection.getProfileCollection(ProfileType.ANGLE)
 					.addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
 
 				/*
@@ -823,12 +852,12 @@ public class ProfileManager implements Loggable {
 				for(Nucleus n : collection.getNuclei()){
 
 
-					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
+					SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
 					NucleusBorderSegment nSeg = profile.getSegment(seg.getID());
 
 					int targetIndex = nSeg.getProportionalIndex(proportion);
 					profile.splitSegment(nSeg, targetIndex, newID1, newID2);
-					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
+					n.setProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT, profile);
 				}
 
 				/*
@@ -836,11 +865,11 @@ public class ProfileManager implements Loggable {
 				 */
 				if(collection.hasConsensusNucleus()){
 					ConsensusNucleus n = collection.getConsensusNucleus();
-					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
+					SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
 					NucleusBorderSegment nSeg1 = profile.getSegment(seg.getID());
 					int targetIndex = nSeg1.getProportionalIndex(proportion);
 					profile.splitSegment(nSeg1, targetIndex, newID1, newID2);
-					n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
+					n.setProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT, profile);
 				}
 				
 				// Ensure the vertical nuclei have the same segment pattern
@@ -869,7 +898,7 @@ public class ProfileManager implements Loggable {
 	
 	public void unmergeSegments(NucleusBorderSegment seg) throws Exception {
 		
-		SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.REGULAR)
+		SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 		
 		// Get the segments to merge
@@ -878,7 +907,7 @@ public class ProfileManager implements Loggable {
 		medianProfile.unmergeSegment(seg);
 		
 		// put the new segment pattern back with the appropriate offset
-		collection.getProfileCollection(ProfileType.REGULAR).addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
+		collection.getProfileCollection(ProfileType.ANGLE).addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
 
 		/*
 		 * With the median profile segments unmerged, also unmerge the segments
@@ -886,10 +915,10 @@ public class ProfileManager implements Loggable {
 		 */
 		for(Nucleus n : collection.getNuclei()){
 
-			SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
+			SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
 			NucleusBorderSegment nSeg = profile.getSegment(seg.getID());
 			profile.unmergeSegment(nSeg);
-			n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
+			n.setProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT, profile);
 		}
 		
 		/*
@@ -897,10 +926,10 @@ public class ProfileManager implements Loggable {
 		 */
 		if(collection.hasConsensusNucleus()){
 			ConsensusNucleus n = collection.getConsensusNucleus();
-			SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
+			SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
 			NucleusBorderSegment nSeg1 = profile.getSegment(seg.getID());
 			profile.unmergeSegment(nSeg1);
-			n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
+			n.setProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT, profile);
 		}
 		
 		// Ensure the vertical nuclei have the same segment pattern

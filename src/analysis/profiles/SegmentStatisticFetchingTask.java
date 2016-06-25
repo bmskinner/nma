@@ -106,7 +106,7 @@ public class SegmentStatisticFetchingTask extends AbstractStatisticFetchingTask 
 		for(int i=0, j=low; j<high; i++, j++){
 			
 			
-			NucleusBorderSegment segment = nuclei[j].getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT).getSegment(id);
+			NucleusBorderSegment segment = nuclei[j].getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT).getSegment(id);
 
 			  double perimeterLength = 0;
 			  if(segment!=null){

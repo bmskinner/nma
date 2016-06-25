@@ -137,7 +137,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 			finest("Segment counts match");
 
 			CellCollection collection = activeDataset().getCollection();
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.REGULAR)
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 					.getOrderedSegments();
 

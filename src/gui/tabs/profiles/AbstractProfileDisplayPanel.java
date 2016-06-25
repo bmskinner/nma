@@ -61,7 +61,7 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 			this.type = type;
 			
 			this.setLayout(new BorderLayout());
-			JFreeChart rawChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
+			JFreeChart rawChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE);
 			chartPanel = makeProfileChartPanel(rawChart);
 			
 			

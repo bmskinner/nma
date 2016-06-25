@@ -125,7 +125,7 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 
 		
 		// annotate the image processor with the nucleus outline
-		List<NucleusBorderSegment> segmentList = n.getProfile(ProfileType.REGULAR).getSegments();
+		List<NucleusBorderSegment> segmentList = n.getProfile(ProfileType.ANGLE).getSegments();
 		
 		ip.setLineWidth(2);
 		if(!segmentList.isEmpty()){ // only draw if there are segments

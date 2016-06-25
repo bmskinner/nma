@@ -84,7 +84,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return
 	 */
 	public JFreeChart makeEmptyChart(){
-		return makeEmptyProfileChart(ProfileType.REGULAR);
+		return makeEmptyProfileChart(ProfileType.ANGLE);
 	}
 	
 	/**
@@ -181,13 +181,13 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
 			XYPlot plot = chart.getXYPlot();
 
-			for (BorderTag tag : collection.getProfileCollection(options.getType()).getOffsetKeys()){
+			for (BorderTag tag : collection.getProfileCollection(options.getType()).getBorderTags()){
 
 				// get the index of the tag
-				int index = collection.getProfileCollection(options.getType()).getOffset(tag);
+				int index = collection.getProfileCollection(options.getType()).getIndex(tag);
 
 				// get the offset from to the current draw point
-				int offset = collection.getProfileCollection(options.getType()).getOffset(options.getTag());
+				int offset = collection.getProfileCollection(options.getType()).getIndex(options.getTag());
 
 				// adjust the index to the offset
 				index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection(options.getType()).getAggregate().length());
@@ -232,7 +232,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				   ? 100 
 				   : options.firstDataset()
 				   		.getCollection()
-				   		.getProfileCollection(ProfileType.REGULAR)
+				   		.getProfileCollection(ProfileType.ANGLE)
 				   		.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN)
 				   		.size();
 				
@@ -294,13 +294,13 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			if(options.isShowMarkers()){
 
 				CellCollection collection = options.firstDataset().getCollection();
-				for (BorderTag tag : collection.getProfileCollection(options.getType()).getOffsetKeys()){
+				for (BorderTag tag : collection.getProfileCollection(options.getType()).getBorderTags()){
 
 					// get the index of the tag
-					int index = collection.getProfileCollection(options.getType()).getOffset(tag);
+					int index = collection.getProfileCollection(options.getType()).getIndex(tag);
 
 					// get the offset from to the current draw point
-					int offset = collection.getProfileCollection(options.getType()).getOffset(options.getTag());
+					int offset = collection.getProfileCollection(options.getType()).getIndex(options.getTag());
 
 					// adjust the index to the offset
 					index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection(options.getType()).getAggregate().length());
@@ -320,7 +320,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			
 			if(options.isShowAnnotations()){
 				for(NucleusBorderSegment seg :  options.firstDataset().getCollection()
-						.getProfileCollection(ProfileType.REGULAR)
+						.getProfileCollection(ProfileType.ANGLE)
 						.getSegmentedProfile(options.getTag())
 						.getOrderedSegments()){
 

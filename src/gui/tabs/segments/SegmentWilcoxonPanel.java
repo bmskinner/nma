@@ -65,7 +65,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 
 			List<NucleusBorderSegment> segments = activeDataset()
 					.getCollection()
-					.getProfileCollection(ProfileType.REGULAR)
+					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 					.getOrderedSegments();
 //					.getSegmentCount();

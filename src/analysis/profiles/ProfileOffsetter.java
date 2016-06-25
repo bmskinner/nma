@@ -114,8 +114,8 @@ public class ProfileOffsetter implements Loggable {
 	 */
 	public void assignBorderTagToNucleiViaFrankenProfile(BorderTag tag) throws Exception{
 
-		int index = collection.getProfileCollection(ProfileType.REGULAR)
-				.getOffset(tag); 
+		int index = collection.getProfileCollection(ProfileType.ANGLE)
+				.getIndex(tag); 
 
 		/*
 		 * Check that the points exist
@@ -125,14 +125,14 @@ public class ProfileOffsetter implements Loggable {
 			return;
 		}
 
-		UUID segID = collection.getProfileCollection(ProfileType.REGULAR)
+		UUID segID = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentContaining(tag).getID();
 //		String segName = collection.getProfileCollection(ProfileType.REGULAR)
 //				.getSegmentContaining(tag)..getName();
 
 
 
-		SegmentedProfile profile = collection.getProfileCollection(ProfileType.REGULAR)
+		SegmentedProfile profile = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 
 		
@@ -163,7 +163,7 @@ public class ProfileOffsetter implements Loggable {
 			
 //			NucleusBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.REGULAR)
 //					.getSegment(segName);
-			NucleusBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.REGULAR)
+			NucleusBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.ANGLE)
 					.getSegment(segID);
 			
 			if(nucleusSegment==null){

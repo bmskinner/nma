@@ -106,12 +106,12 @@ public class DatasetProfiler extends AnalysisWorker {
 			
 			// Set the RP in the ProfileCollection to index zero
 			// Each nucleus currently has a best-guess RP and nothing else
-			collection.getProfileCollection(ProfileType.REGULAR)
-				.addOffset(BorderTag.REFERENCE_POINT, 0);
-			finest("Added RP at offset zero");
+//			collection.getProfileCollection(ProfileType.ANGLE)
+//				.addIndex(BorderTag.REFERENCE_POINT, 0);
+//			finest("Added RP is at offset zero");
 			
 			// Create a median from the current reference points in the nuclei
-			Profile median = collection.getProfileCollection(ProfileType.REGULAR)
+			Profile median = collection.getProfileCollection(ProfileType.ANGLE)
 					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
 			finest("Fetched median from initial RP");
 			
@@ -123,25 +123,32 @@ public class DatasetProfiler extends AnalysisWorker {
 			
 			// Update the nucleus profiles to best fit the median
 			collection.getProfileManager()
-				.offsetNucleusProfiles(BorderTag.REFERENCE_POINT, ProfileType.REGULAR, median);
+				.offsetNucleusProfiles(BorderTag.REFERENCE_POINT, ProfileType.ANGLE, median);
 			
+//			fine("Current median profile:");
+//			fine(collection.getProfileCollection(ProfileType.ANGLE).getProfile(DEFAULT_BORDER_TAG, 50).toString());
 			// Now each nucleus should be at the best fit to the median profile from the RP
 			// Rebuilding the median may cause the RP index to change in the median
 			
+			int coercionCounter = 0;
 			while(rpIndex != 0){
 				
 				// Rebuild the median and offset the nuclei until the RP settles at zero
+				fine("Coercing RP to zero, round "+coercionCounter);
+				coercionCounter++;
 				rpIndex = coerceRPToZero(collection);
+				
+				if(coercionCounter>200){
+					warn("Unable to cleanly assign RP");
+					break;
+				}
 			}
 			
-			fine("Ensuring profile collections have RP at index zero");
-			collection.getProfileManager()
-				.updateProfileCollectionOffsets(BorderTag.REFERENCE_POINT, 0);			
-
+			
 			fine("Identified best RP in nuclei and constructed median profiles");
 			
-			fine("Current state of profile collection:");
-			fine(collection.getProfileCollection(ProfileType.REGULAR).tagString());
+			fine("Current state of profile collection:"+collection.getProfileCollection(ProfileType.ANGLE).tagString());
+			
 			
 			fine("Identifying OP and other BorderTags");
 			
@@ -157,13 +164,6 @@ public class DatasetProfiler extends AnalysisWorker {
 					fine("Checking location of RP in profile");
 					int index = finder.identifyIndex(collection, tag);
 					fine("RP is found at index "+index);
-
-					if(index!=0){
-						finest("Something has fucked up, trying to recover");
-						collection.getProfileManager()
-						.updateProfileCollectionOffsets(tag, 0);
-						fine("Forced RP to index zero");
-					}
 					continue; 
 				}
 				
@@ -186,15 +186,15 @@ public class DatasetProfiler extends AnalysisWorker {
 					fine(tag+" in median is located at index "+index);
 
 					// Create a median from the current reference points in the nuclei
-					Profile tagMedian = collection.getProfileCollection(ProfileType.REGULAR)
+					Profile tagMedian = collection.getProfileCollection(ProfileType.ANGLE)
 							.getProfile(tag, Constants.MEDIAN);
 
 					collection.getProfileManager()
-						.offsetNucleusProfiles(tag, ProfileType.REGULAR, tagMedian);
+						.offsetNucleusProfiles(tag, ProfileType.ANGLE, tagMedian);
 					fine("Assigned offset in nucleus profiles for "+tag);
 					
-					fine("Current state of profile collection:");
-					fine(collection.getProfileCollection(ProfileType.REGULAR).tagString());
+					fine("Current state of profile collection:"+collection.getProfileCollection(ProfileType.ANGLE).tagString());
+					
 				} else {
 					fine("No ruleset for "+tag+"; skipping");
 				}
@@ -220,25 +220,25 @@ public class DatasetProfiler extends AnalysisWorker {
 
 		// If RP is not at zero, update
 		if(rpIndex!=0){
-			fine("RP in median is not yet at zero");
-			collection.getProfileManager()
-				.updateProfileCollectionOffsets(BorderTag.REFERENCE_POINT, rpIndex);
-			finer("Changed RP index in median to "+rpIndex);
-
-			// Get the median again, using the new RP
-			Profile median = collection.getProfileCollection(ProfileType.REGULAR)
-					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
-
-			finer("Rebuilt the profile collection");
 			
-			// Update the nuclei
-			collection.getProfileManager()
-				.offsetNucleusProfiles(BorderTag.REFERENCE_POINT, ProfileType.REGULAR, median);
-			finer("Offset the nuclei");
+			fine("RP in median is not yet at zero");
+			
+			// Update the offsets in the profile collection to the new RP
+			collection.getProfileManager().updateRP(rpIndex);
+			
+					
+			
+			// Find the effects of the offsets on the RP
+			// It should be found at zero
 			finer("Checking RP index again");
-
 			rpIndex = finder.identifyIndex(collection, BorderTag.REFERENCE_POINT);
 			fine("RP in median is now located at index "+rpIndex);
+//			fine("Current median profile:");
+//			fine(collection.getProfileCollection(ProfileType.ANGLE).getProfile(DEFAULT_BORDER_TAG, Constants.MEDIAN).toString());
+			
+			fine("Current state of profile collection:");
+			fine(collection.getProfileCollection(ProfileType.ANGLE).tagString());
+			
 		}
 
 		return rpIndex;

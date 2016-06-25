@@ -114,7 +114,7 @@ public class KruskalTester {
 			 * 
 			 * Create a new ProfileCollection based on the segments from dataset one
 			 */
-			ProfileCollection pc = one.getCollection().getProfileCollection(ProfileType.REGULAR);
+			ProfileCollection pc = one.getCollection().getProfileCollection(ProfileType.ANGLE);
 //			List<NucleusBorderSegment> segments = pc.getSegments(tag);
 //			ProfileCollection frankenCollection = new ProfileCollection();
 			

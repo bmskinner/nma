@@ -238,7 +238,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 						
 		if(profile.update(seg, newStart, newEnd)){
-			n.setProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT, profile);
+			n.setProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT, profile);
 			
 			/* Check the border tags - if they overlap the old index
 			 * replace them. 
@@ -482,7 +482,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 			this.setLayout(new BorderLayout());
 			
-			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);	
+			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE);	
 			
 			profileChartPanel = new DraggableOverlayChartPanel(chart, null, false); 
 			profileChartPanel.addSignalChangeListener(this);
@@ -522,13 +522,13 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(nucleus, options);
 
-					profileChartPanel.setChart(chart, nucleus.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT), false);
+					profileChartPanel.setChart(chart, nucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT), false);
 					
 				}
 
 			} catch(Exception e){
 				error("Error updating cell panel", e);
-				JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.REGULAR);
+				JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE);
 				profileChartPanel.setChart(chart);
 				profileOptions.setEnabled(false);
 			}
@@ -547,7 +547,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					int indexValue = Integer.valueOf(index);
 
 					Nucleus n = activeCell.getNucleus();
-					SegmentedProfile profile = n.getProfile(ProfileType.REGULAR, BorderTag.REFERENCE_POINT);
+					SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
 					
 					/*
 					 * The numbering of segments is adjusted for profile charts, so we can't rely on 

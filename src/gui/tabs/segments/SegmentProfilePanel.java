@@ -11,7 +11,7 @@ import gui.tabs.profiles.ProfileDisplayPanel;
 public class SegmentProfilePanel extends ProfileDisplayPanel {
 	
 	public SegmentProfilePanel(){
-		super(ProfileType.REGULAR);
+		super(ProfileType.ANGLE);
 		this.remove(buttonPanel); // customisation is not needed here
 	}
 	

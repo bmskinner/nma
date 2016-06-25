@@ -48,7 +48,7 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	@Override
 	public void calculateProfiles() throws Exception{
 
-		this.profileMap.put(ProfileType.REGULAR, this.calculateAngleProfile());
+		this.profileMap.put(ProfileType.ANGLE, this.calculateAngleProfile());
 
 	}
 	

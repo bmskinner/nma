@@ -92,8 +92,8 @@ public class SegmentFitter implements Loggable {
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
 		
-		if(        n.getProfile(ProfileType.REGULAR).getSegments()==null 
-				|| n.getProfile(ProfileType.REGULAR).getSegments().isEmpty()){
+		if(        n.getProfile(ProfileType.ANGLE).getSegments()==null 
+				|| n.getProfile(ProfileType.ANGLE).getSegments().isEmpty()){
 			throw new IllegalArgumentException("Nucleus has no segments");
 		}
 		
@@ -102,7 +102,7 @@ public class SegmentFitter implements Loggable {
 		
 		// Begin fitting the segments to the median
 		// get the best fit of segments to the median
-		SegmentedProfile newProfile = this.runFitter(n.getProfile(ProfileType.REGULAR));
+		SegmentedProfile newProfile = this.runFitter(n.getProfile(ProfileType.ANGLE));
 		
 		log(Level.FINEST, "Fitted profile against median for nucleus "+n.getNameAndNumber());
 		log(Level.FINEST, newProfile.toString());
@@ -110,16 +110,16 @@ public class SegmentFitter implements Loggable {
 		finest("Fitted profile against median:");
 		finest(newProfile.toString());
 
-		n.setProfile(ProfileType.REGULAR, newProfile);
+		n.setProfile(ProfileType.ANGLE, newProfile);
 
 		// modify tail and head/tip point to nearest segment end
 		remapBorderPoints(n, pc);
 		
 		log(Level.FINEST, "Remapped border points for nucleus "+n.getNameAndNumber());
-		log(Level.FINEST, n.getProfile(ProfileType.REGULAR).toString());
+		log(Level.FINEST, n.getProfile(ProfileType.ANGLE).toString());
 		
 		finest("Remapped border points:");
-		finest(n.getProfile(ProfileType.REGULAR).toString());
+		finest(n.getProfile(ProfileType.ANGLE).toString());
 		
 	}
 		
@@ -135,7 +135,7 @@ public class SegmentFitter implements Loggable {
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
 		
-		if( ! n.getProfile(ProfileType.REGULAR).hasSegments()){
+		if( ! n.getProfile(ProfileType.ANGLE).hasSegments()){
 			throw new IllegalArgumentException("Test nucleus has no segments");
 		}
 		
@@ -149,7 +149,7 @@ public class SegmentFitter implements Loggable {
 		 * begins with seg 0 at the border tag.
 		 */
 
-		SegmentedProfile nucleusProfile = new SegmentedProfile(n.getProfile(ProfileType.REGULAR, tag));
+		SegmentedProfile nucleusProfile = new SegmentedProfile(n.getProfile(ProfileType.ANGLE, tag));
 		
 		finest("Initial profile starting at "+tag+":");
 		finest(nucleusProfile.toString());
@@ -213,7 +213,7 @@ public class SegmentFitter implements Loggable {
 						
 			if(seg!=null){
 				// Get the same segment in the nucleus, and move the tag to the segment start point
-				NucleusBorderSegment nSeg = n.getProfile(ProfileType.REGULAR).getSegment(seg.getName());
+				NucleusBorderSegment nSeg = n.getProfile(ProfileType.ANGLE).getSegment(seg.getName());
 				n.setBorderTag(tag, nSeg.getStartIndex());
 				log(Level.FINEST, "Remapped border point '"+tag+"' to "+nSeg.getStartIndex()+" in "+n.getNameAndNumber());
 //				finest("Remapped border point '"+tag+"' to "+nSeg.getStartIndex());
