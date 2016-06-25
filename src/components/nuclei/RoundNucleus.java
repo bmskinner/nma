@@ -190,6 +190,8 @@ public class RoundNucleus extends AbstractCellularComponent
 
 		this.calculateSignalDistancesFromCoM();
 		this.calculateFractionalSignalDistancesFromCoM();
+		
+	    
 	}
 	
 	public void calculateProfiles() throws Exception{
@@ -521,29 +523,6 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 
 
-	/*
-		-----------------------
-		Process and fetch signals
-		-----------------------
-	*/
-	
-//	public Set<UUID> getSignalGroups(){
-//		return signalCollection.getSignalGroups();
-//	}
-//	
-//	public List<List<NuclearSignal>> getSignals(){
-//		return this.signalCollection.getSignals();
-//	}
-//		
-//
-//	public List<NuclearSignal> getSignals(int signalGroup){
-//		List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
-//		List<NuclearSignal> signals = this.signalCollection.getSignals(signalGroup);
-//		for( NuclearSignal n : signals){
-//			result.add(new NuclearSignal(n));
-//		}
-//		return result;
-//	}
 	
 	public SignalCollection getSignalCollection(){
 		return this.signalCollection;
@@ -668,82 +647,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		-----------------------
 	*/
 
-	/*
-		For two NucleusBorderPoints in a Nucleus, find the point that lies halfway between them
-		Used for obtaining a consensus between potential tail positions. Ensure we choose the
-		smaller distance
-	*/
-	public int getPositionBetween(BorderPoint pointA, BorderPoint pointB){
-
-		int a = 0;
-		int b = 0;
-		// find the indices that correspond on the array
-		for(int i = 0; i<this.getBorderLength(); i++){
-				if(this.getBorderPoint(i).overlaps(pointA)){
-					a = i;
-				}
-				if(this.getBorderPoint(i).overlaps(pointB)){
-					b = i;
-				}
-		}
-
-		// find the higher and lower index of a and b
-		int maxIndex = a > b ? a : b;
-		int minIndex = a > b ? b : a;
-
-		// there are two midpoints between any points on a ring; we want to take the 
-		// midpoint that is in the smaller segment.
-
-		int difference1 = maxIndex - minIndex;
-		int difference2 = this.getBorderLength() - difference1;
-
-		// get the midpoint
-		int mid1 = AbstractCellularComponent.wrapIndex( (int)Math.floor( (difference1/2)+minIndex ),
-															this.getBorderLength() );
-
-		int mid2 = AbstractCellularComponent.wrapIndex( (int)Math.floor( (difference2/2)+maxIndex ), 
-															this.getBorderLength() );
-
-		return difference1 < difference2 ? mid1 : mid2;
-	}
-
-	// For a position in the roi, draw a line through the CoM and get the intersection point
-	public BorderPoint findOppositeBorder(BorderPoint p){
-
-		int minDeltaYIndex = 0;
-		double minAngle = 180;
-
-		for(int i = 0; i<this.getBorderLength();i++){
-			double angle = Utils.findAngleBetweenXYPoints(p, this.getCentreOfMass(), this.getBorderPoint(i));
-			if(Math.abs(180 - angle) < minAngle){
-				minDeltaYIndex = i;
-				minAngle = 180 - angle;
-			}
-		}
-		return this.getBorderPoint(minDeltaYIndex);
-	}
-
-	/*
-		From the point given, create a line to the CoM. Measure angles from all 
-		other points. Pick the point closest to 90 degrees. Can then get opposite
-		point. Defaults to input point if unable to find point.
-	*/
-	public BorderPoint findOrthogonalBorderPoint(BorderPoint a){
-
-		BorderPoint orthgonalPoint = a;
-		double bestAngle = 0;
-
-		for(int i=0;i<this.getBorderLength();i++){
-
-			BorderPoint p = this.getBorderPoint(i);
-			double angle = Utils.findAngleBetweenXYPoints(a, this.getCentreOfMass(), p); 
-			if(Math.abs(90-angle)< Math.abs(90-bestAngle)){
-				bestAngle = angle;
-				orthgonalPoint = p;
-			}
-		}
-		return orthgonalPoint;
-	}
 	
 
 	// find the point with the narrowest diameter through the CoM
@@ -811,9 +714,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 	}
 
-//	public void exportSignalDistanceMatrix(){
-//		signalCollection.exportDistanceMatrix(this.nucleusFolder);
-//	}
 
 	
 	 /*
@@ -859,11 +759,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	public boolean hasProfile(ProfileType type){
-		if(this.profileMap.containsKey(type)){
-			return true;
-		} else {
-			return false;
-		}
+		return this.profileMap.containsKey(type);
 	}
 
 	/* (non-Javadoc)
@@ -920,6 +816,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		// remove the offset from the profile, by setting the profile to start from the pointIndex
 		this.setProfile(type, new SegmentedProfile(p).offset(-pointIndex));
+//		this.updateVerticallyRotatedNucleus();
 	}
 
 	
@@ -965,6 +862,11 @@ public class RoundNucleus extends AbstractCellularComponent
 		if(tag.equals(BorderTag.ORIENTATION_POINT)){
 			int intersectionIndex = this.getBorderIndex(this.findOppositeBorder( this.getBorderPoint(i) ));
 			this.setBorderTag(BorderTag.INTERSECTION_POINT, intersectionIndex);
+			updateVerticallyRotatedNucleus(); // force an update
+		}
+		
+		if(tag.equals(BorderTag.TOP_VERTICAL) || tag.equals(BorderTag.BOTTOM_VERTICAL)){
+			updateVerticallyRotatedNucleus();
 		}
 	}
 	
@@ -976,20 +878,11 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 		
 	public boolean hasBorderTag(BorderTag tag){
-		if(this.borderTags.containsKey(tag)){
-			return true;
-		} else {
-			return false;
-		}
+		return this.borderTags.containsKey(tag);
 	}
 	
 	public boolean hasBorderTag( int index){
-				
-		if(this.borderTags.containsValue(index)){
-			return true;
-		} else {
-			return false;
-		}
+		return this.borderTags.containsValue(index);
 	}
 	
 	public boolean hasBorderTag(BorderTag tag, int index){

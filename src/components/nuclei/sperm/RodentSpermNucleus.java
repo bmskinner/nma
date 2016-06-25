@@ -109,11 +109,12 @@ public class RodentSpermNucleus extends SpermNucleus {
 
 			if(tag.equals(BorderTag.TOP_VERTICAL) || tag.equals(BorderTag.BOTTOM_VERTICAL)){
 				
+				calculateHookAndBodyLength();
 				// Clear cached stats
 //				this.hookLength = -1;
 //				this.bodyWidth  = -1;
-				setStatistic(NucleusStatistic.HOOK_LENGTH, -1);
-				setStatistic(NucleusStatistic.BODY_WIDTH,  -1);
+//				setStatistic(NucleusStatistic.HOOK_LENGTH, -1);
+//				setStatistic(NucleusStatistic.BODY_WIDTH,  -1);
 			}
 		}
 		
@@ -522,7 +523,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 			verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
 			verticalNucleus.moveCentreOfMass(new XYPoint(0,0));
 		}
-		finest("Checked hook is to the left");
+//		finest("Checked hook is to the left");
 		return verticalNucleus;
 	}
 

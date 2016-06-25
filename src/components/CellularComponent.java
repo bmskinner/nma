@@ -334,6 +334,30 @@ public interface CellularComponent {
 	 * @return
 	 */
 	public boolean[][] getBooleanMask(int height, int width);
+	
+	/*
+    For two NucleusBorderPoints in a Nucleus, find the point that lies halfway between them
+    Used for obtaining a consensus between potential tail positions
+	 */
+	public int getPositionBetween(BorderPoint pointA, BorderPoint pointB);
+
+	// For a position in the roi, draw a line through the CoM and get the intersection point
+	public BorderPoint findOppositeBorder(BorderPoint p);
+
+	/*
+    From the point given, create a line to the CoM. Measure angles from all 
+    other points. Pick the point closest to 90 degrees. Can then get opposite
+    point. Defaults to input point if unable to find point.
+	 */
+	public BorderPoint findOrthogonalBorderPoint(BorderPoint a);
+
+	/**
+	 *  Find the point with the narrowest diameter through the CoM
+	 *  using the distance profile
+	 * @return
+	 * @throws Exception 
+	 */
+//	public BorderPoint getNarrowestDiameterPoint() throws Exception;
 		
 	
 }
