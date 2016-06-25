@@ -801,6 +801,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			if(treeOrderMap.contains(id)){
 				finest("Removing dataset from treeOrderMap");
 				treeOrderMap.remove(id);
+				DatasetListManager.getInstance().removeDataset(d);
 			} else {
 				finest("Dataset is not root");
 			}

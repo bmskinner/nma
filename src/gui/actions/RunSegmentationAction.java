@@ -170,12 +170,6 @@ public class RunSegmentationAction extends ProgressableAction {
 				 */
 				finest("Saving the dataset");
 				fireDatasetEvent(DatasetMethod.SAVE, dataset);
-//				Runnable r = () -> {
-//					mw.saveDataset(dataset, false);
-////					saveDataset(dataset);
-//				};
-//				finest("Sending save command to executor service");
-//				mw.executorService.execute(r);
 				
 				
 				/*

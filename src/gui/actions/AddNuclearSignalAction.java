@@ -24,7 +24,9 @@ import gui.MainWindow;
 import gui.ThreadManager;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -81,10 +83,14 @@ public class AddNuclearSignalAction extends ProgressableAction {
 	@Override
 	public void finished(){
 		finer("Finished signal detection");
+		this.cleanup(); // remove the property change listener
+		
+		
 		// divide population into clusters with and without signals
 		List<CellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
 
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		
 		for(CellCollection collection : signalPopulations){
 			finer("Processing "+collection.getName());
 			processSubPopulation(collection);
@@ -113,6 +119,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 	 */
 	private void processSubPopulation(CellCollection collection){
 
+		try{
 		finer("Creating new analysis dataset for "+collection.getName());
 		AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
 		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
@@ -122,20 +129,34 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		
 		// Remove any signal groups that have no signals in the population
 		finer(collection.getName()+" has "+collection.getSignalGroupIDs().size()+" signal groups");
+		
+		Set<UUID> toRemove = new HashSet<UUID>();
+		
 		for(UUID signalGroup : collection.getSignalGroupIDs()){// : collection.getSignalGroups()){
-			fine("Checking signal group "+m.getSignalGroupName(signalGroup));
+			
+			String groupName = m.getSignalGroupName(signalGroup);
+			fine("Checking signal group "+groupName);
 			
 			if(collection.getSignalManager().getSignalCount(signalGroup)==0){ // Signal group has no signals
-				finer("Signals not present in group "+m.getSignalGroupName(signalGroup));
+				finer("Signals not present in group "+groupName);
 				
 				// No need to keep the group
-				collection.removeSignalGroup(signalGroup);
-				finer("Removed signal group");
+				toRemove.add(signalGroup);
+				
 			}
-			finer("Checked signal group "+m.getSignalGroupName(signalGroup));
+			finer("Checked signal group "+groupName);
 		}
+		finer("Removing empty signal groups");
+		for(UUID id : toRemove){
+			collection.removeSignalGroup(id);
+			finer("Removed signal group");
+		}
+		
 		finer("Adding "+collection.getName()+" as child dataset");
 		dataset.addChildDataset(subDataset);
+		} catch(Exception e){
+			error("Error processing signal group", e);
+		}
 	}
 
 
@@ -166,10 +187,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 				for(Cell c : list){
 
 					finer("  Added cell: "+c.getNucleus().getNameAndNumber());
-					finer("  Cell has: "+c.getNucleus().getSignalCollection().numberOfSignals()+" signals");
 					Cell newCell = new Cell(c);
-					finer("  New cell has: "+newCell.getNucleus().getSignalCollection().numberOfSignals()+" signals");
-
 					listCollection.addCell( newCell );
 				}
 				signalPopulations.add(listCollection);
@@ -182,6 +200,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 				}
                 listCollection.addSignalGroup(signalGroup, new SignalGroup(r.getSignalGroup(signalGroup)));
 
+                // Only add a group of cells without signals if at least one cell does havea signal
 
 				List<Cell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
 				if(!notList.isEmpty()){
@@ -193,6 +212,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 					for(Cell c : notList){
 						notListCollection.addCell( new Cell(c) );
+						finer("  Added cell: "+c.getNucleus().getNameAndNumber());
 					}
 					
 					// Copy over existing signal groups
@@ -204,6 +224,8 @@ public class AddNuclearSignalAction extends ProgressableAction {
 						}
 					}
 					signalPopulations.add(notListCollection);
+				} else {
+					finest("No cells without signals");
 				}
 
 			}

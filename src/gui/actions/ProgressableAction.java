@@ -184,7 +184,11 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 	 */
 	public void cleanup(){
 		if (this.worker.isDone() || this.worker.isCancelled()){
+			this.worker.removePropertyChangeListener(this);
+			finest("Removed property change listener from worker");
 			this.removeProgressBar();
+			finest("Removed progress bar");
+			
 		}
 	}
 	
@@ -237,10 +241,13 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 	 * The method run when the analysis has completed
 	 */
 	public void finished(){
+		this.worker.removePropertyChangeListener(this);
+		finest("Removed property change listener from worker");
 		removeProgressBar();		
-		finest( "Removing event listeners from action");
+		
 		this.removeInterfaceEventListener(mw);
 		this.removeDatasetEventListener(mw);
+		finest("Removed event listeners from action");
 	}
 	
 	

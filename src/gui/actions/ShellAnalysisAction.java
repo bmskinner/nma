@@ -18,6 +18,8 @@
  *******************************************************************************/
 package gui.actions;
 
+import gui.DatasetEvent.DatasetMethod;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.MainWindow;
 import gui.ThreadManager;
 
@@ -54,5 +56,11 @@ public class ShellAnalysisAction extends ProgressableAction {
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
 		}
+	}
+	
+	@Override
+	public void finished() {
+		fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
+		super.finished();
 	}
 }
