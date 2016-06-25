@@ -28,6 +28,7 @@ import analysis.AnalysisDataset;
 import analysis.profiles.DatasetProfiler;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import gui.MainWindow;
+import gui.ThreadManager;
 
 public class RunProfilingAction extends ProgressableAction {
 	
@@ -71,7 +72,7 @@ public class RunProfilingAction extends ProgressableAction {
 			worker = new DatasetProfiler(this.dataset);
 			worker.addPropertyChangeListener(this);
 			log(Level.FINE, "Running morphology analysis");
-			worker.execute();
+			ThreadManager.getInstance().submit(worker);
 		} catch(Exception e){
 			this.cancel();
 			logError("Error in morphology analysis", e);

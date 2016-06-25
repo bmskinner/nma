@@ -19,6 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
+import gui.ThreadManager;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.dialogs.ClusteringSetupDialog;
@@ -50,7 +51,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 			worker = new NucleusClusterer( dataset , options );
 
 			worker.addPropertyChangeListener(this);
-			worker.execute();
+			ThreadManager.getInstance().submit(worker);
 
 		} else {
 			this.cancel();

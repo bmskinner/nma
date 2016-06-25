@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import ij.io.SaveDialog;
 import io.PopulationExporter;
 import gui.MainWindow;
+import gui.ThreadManager;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import analysis.AnalysisDataset;
@@ -50,7 +51,9 @@ public class SaveDatasetAction extends ProgressableAction {
 		this.cooldown();
 		worker = new PopulationExporter(dataset, saveFile);
 		worker.addPropertyChangeListener(this);
-		worker.execute();	
+		
+		ThreadManager.getInstance().submit(worker);
+//		worker.execute();	
 	}	
 	
 	/**

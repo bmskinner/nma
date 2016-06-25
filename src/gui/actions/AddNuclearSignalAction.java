@@ -21,6 +21,7 @@ package gui.actions;
 import gui.dialogs.SignalDetectionSettingsDialog;
 import gui.DatasetEvent.DatasetMethod;
 import gui.MainWindow;
+import gui.ThreadManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +64,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
                
 				this.setProgressMessage("Signal detection: "+signalGroupName);
 				worker.addPropertyChangeListener(this);
-				worker.execute();
+				ThreadManager.getInstance().submit(worker);
 			} else {
 				this.cancel();
 				return;

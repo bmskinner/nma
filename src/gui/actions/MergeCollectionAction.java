@@ -19,6 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
+import gui.ThreadManager;
 import gui.dialogs.DatasetMergingDialog;
 import ij.io.SaveDialog;
 
@@ -77,7 +78,7 @@ public class MergeCollectionAction extends ProgressableAction {
 			
 			
 			worker.addPropertyChangeListener(this);
-			worker.execute();	
+			ThreadManager.getInstance().submit(worker);
 		} else {
 			this.cancel();
 		}

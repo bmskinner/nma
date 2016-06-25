@@ -23,6 +23,7 @@ import gui.DatasetEventListener;
 import gui.InterfaceEvent;
 import gui.InterfaceEventListener;
 import gui.MainWindow;
+import gui.ThreadManager;
 import gui.DatasetEvent.DatasetMethod;
 import gui.dialogs.ClusterTreeDialog;
 import gui.dialogs.HierarchicalTreeSetupDialog;
@@ -55,7 +56,7 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 //			worker = new NeighbourJoiningTreeBuilder( dataset , mw.getProgramLogger());
 
 			worker.addPropertyChangeListener(this);
-			worker.execute();
+			ThreadManager.getInstance().submit(worker);
 
 		} else {
 			this.cancel();

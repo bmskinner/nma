@@ -11,6 +11,7 @@ import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.nucleus.CellRelocator;
 import gui.MainWindow;
+import gui.ThreadManager;
 import gui.InterfaceEvent.InterfaceMethod;
 
 public class RelocateFromFileAction extends ProgressableAction {
@@ -36,7 +37,7 @@ public class RelocateFromFileAction extends ProgressableAction {
 			
 			this.setProgressMessage("Locating cells...");
 			log(Level.INFO, "Locating cells...");
-			worker.execute();
+			ThreadManager.getInstance().submit(worker);
 		} else {
 			log(Level.FINE, "Cancelled");
 			cancel();

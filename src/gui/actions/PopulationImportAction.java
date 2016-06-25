@@ -30,6 +30,7 @@ import analysis.AnalysisDataset;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.MainWindow;
+import gui.ThreadManager;
 import io.PopulationImportWorker;
 
 /**
@@ -53,7 +54,7 @@ public class PopulationImportAction extends ProgressableAction {
 			
 			this.setProgressMessage("Opening file...");
 			log(Level.FINE, "Opening dataset...");
-			worker.execute();
+			ThreadManager.getInstance().submit(worker);
 		} else {
 			log(Level.FINE, "Open cancelled");
 			cancel();

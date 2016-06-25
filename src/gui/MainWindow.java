@@ -60,10 +60,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -141,20 +137,22 @@ public class MainWindow
 	        Logger.getLogger(Loggable.PROGRAM_LOGGER); // the program logger will report status and errors in the running of the program, not involving datasets 
 	
 	
-	private static DatasetListManager datasetManager = DatasetListManager.getInstance(); 
+	private static final DatasetListManager datasetManager = DatasetListManager.getInstance(); 
 	
-	/*
-	 * Handle threading
-	 */
 	
-	public static final int corePoolSize    = 4;
-	public static final int maximumPoolSize = 8;
-	public static final int keepAliveTime = 5000;
-
-	public final ExecutorService executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
-			keepAliveTime, TimeUnit.MILLISECONDS,
-			new LinkedBlockingQueue<Runnable>());
-	
+	private static final ThreadManager threadManager = ThreadManager.getInstance();
+//	/*
+//	 * Handle threading
+//	 */
+//	
+//	public static final int corePoolSize    = 4;
+//	public static final int maximumPoolSize = 8;
+//	public static final int keepAliveTime = 5000;
+//
+//	public final threadManager threadManager = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
+//			keepAliveTime, TimeUnit.MILLISECONDS,
+//			new LinkedBlockingQueue<Runnable>());
+		
 	
 	
 	/**
@@ -489,7 +487,7 @@ public class MainWindow
 			}
 		};
 		
-		executorService.execute(task);
+		threadManager.execute(task);
 	}
 	
 	
@@ -559,7 +557,7 @@ public class MainWindow
 				log(Level.FINER, "Shell analysis selected");
 				new ShellAnalysisAction(selectedDataset, MainWindow.this);
 			};
-			executorService.execute(task);
+			threadManager.execute(task);
 		}
 
 		if(event.type().equals("MergeCollectionAction")){
@@ -567,7 +565,7 @@ public class MainWindow
 			Runnable task = () -> { 
 				new MergeCollectionAction(populationsPanel.getSelectedDatasets(), MainWindow.this); 
 			}; 
-			executorService.execute(task);
+			threadManager.execute(task);
 		}
 		
 		if(event.type().equals("DatasetArithmeticAction")){
@@ -575,7 +573,7 @@ public class MainWindow
 			Runnable task = () -> { 
 				new DatasetArithmeticAction(populationsPanel.getAllDatasets(), MainWindow.this); 
 			}; 
-			executorService.execute(task);
+			threadManager.execute(task);
 		}
 
 		
@@ -584,7 +582,7 @@ public class MainWindow
 			Runnable task = () -> { 
 				new CurateCollectionAction(selectedDataset, MainWindow.this); 
 			}; 
-			executorService.execute(task);
+			threadManager.execute(task);
 		}
 				
 
@@ -708,7 +706,7 @@ public class MainWindow
 					new RunProfilingAction(list, flag, MainWindow.this);
 				
 				}; 
-				executorService.execute(task);
+				threadManager.execute(task);
 			}
 						
 			if(event.method().equals(DatasetMethod.NEW_MORPHOLOGY)){
@@ -718,7 +716,7 @@ public class MainWindow
 				Runnable task = () -> { 
 					new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
 				};
-				executorService.execute(task);
+				threadManager.execute(task);
 			}
 			
 			if(event.method().equals(DatasetMethod.REFRESH_MORPHOLOGY)){
@@ -726,7 +724,7 @@ public class MainWindow
 				Runnable task = () -> { 
 					new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
 				};
-				executorService.execute(task);
+				threadManager.execute(task);
 			}
 			
 			if(event.method().equals(DatasetMethod.COPY_MORPHOLOGY)){
@@ -735,7 +733,7 @@ public class MainWindow
 				Runnable task = () -> { 
 					new RunSegmentationAction(event.getDatasets(), source, null, MainWindow.this);
 				};
-				executorService.execute(task);
+				threadManager.execute(task);
 			}
 			
 						
@@ -745,7 +743,7 @@ public class MainWindow
 					log(Level.INFO, "Clustering dataset");
 					new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
 				};
-				executorService.execute(task);
+				threadManager.execute(task);
 			
 			}
 			
@@ -754,7 +752,7 @@ public class MainWindow
 					log(Level.INFO, "Building a tree from dataset");
 					new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
 				};
-				executorService.execute(task);
+				threadManager.execute(task);
 			}
 			
 			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
@@ -783,7 +781,7 @@ public class MainWindow
 					}
 					populationsPanel.update(list);
 				};
-				executorService.execute(task);			
+				threadManager.execute(task);			
 			}
 			
 			if(event.method().equals(DatasetMethod.REFRESH_CACHE)){
@@ -879,7 +877,7 @@ public class MainWindow
 			}
 		};
 			
-		executorService.execute(r);
+		threadManager.execute(r);
 	}
 	
 	
@@ -903,7 +901,7 @@ public class MainWindow
 			log("All root datasets saved");
 		};
 			
-		executorService.execute(r);
+		threadManager.execute(r);
 	}
 	
 	
@@ -925,7 +923,7 @@ public class MainWindow
 				new SaveDatasetAction(d, MainWindow.this, latch, saveAs);
 			};
 			finest("Passing save action to executor service");
-			executorService.submit(r);//.execute(r);
+			threadManager.submit(r);//.execute(r);
 
 			fine("Root dataset saved");
 		} else {
@@ -962,7 +960,7 @@ public class MainWindow
 				panel.refreshTableCache();
 			}
 		};
-		executorService.execute(task);
+		threadManager.execute(task);
 	}
 	
 	private void clearChartCache(){
@@ -1009,7 +1007,7 @@ public class MainWindow
 				panel.refreshTableCache(list);
 			}
 		};
-		executorService.execute(task);
+		threadManager.execute(task);
 
 	}
 	
@@ -1051,7 +1049,7 @@ public class MainWindow
 			List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
 			new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
 		};
-		executorService.execute(task);
+		threadManager.execute(task);
 	}
 
 	
@@ -1150,7 +1148,7 @@ public class MainWindow
 	
 	@Override
 	public void dispose(){
-		executorService.shutdownNow();
+//		threadManager.shutdownNow();
 		super.dispose();
 	}
 	
@@ -1163,7 +1161,7 @@ public class MainWindow
 	}
 	
 	private void killAllTasks(){
-//		executorService.shutdownNow();
+//		threadManager.shutdownNow();
 		
 //		warn("Found "+logPanel.getProgressBars().size()+" active bars");
 //		for(JProgressBar bar : logPanel.getProgressBars()){

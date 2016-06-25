@@ -19,6 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
+import gui.ThreadManager;
 import gui.InterfaceEvent.InterfaceMethod;
 
 import java.util.concurrent.CountDownLatch;
@@ -50,8 +51,8 @@ public class RefoldNucleusAction extends ProgressableAction {
 
 			worker.addPropertyChangeListener(this);
 			this.setProgressMessage("Refolding: "+dataset.getName());
-			
-			worker.execute();
+			ThreadManager.getInstance().submit(worker);
+//			worker.execute();
 
 		} catch(Exception e1){
 			this.cancel();

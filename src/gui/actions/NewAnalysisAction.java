@@ -19,6 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
+import gui.ThreadManager;
 import gui.DatasetEvent.DatasetMethod;
 import gui.dialogs.AnalysisSetupDialog;
 
@@ -77,7 +78,7 @@ public class NewAnalysisAction extends ProgressableAction {
 			
 			worker = new NucleusDetector(this.outputFolderName, logFile, options);
 			worker.addPropertyChangeListener(this);
-			worker.execute();
+			ThreadManager.getInstance().submit(worker);
 			log(Level.FINEST, "Worker has executed");
 			analysisSetup.dispose();
 			

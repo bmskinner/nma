@@ -28,6 +28,7 @@ import analysis.AnalysisDataset;
 import analysis.profiles.DatasetSegmenter;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import gui.MainWindow;
+import gui.ThreadManager;
 import gui.DatasetEvent.DatasetMethod;
 import gui.DatasetListManager;
 
@@ -87,7 +88,7 @@ public class RunSegmentationAction extends ProgressableAction {
 	private void runCopyAnalysis(){
 		worker = new DatasetSegmenter(dataset, source.getCollection());
 		worker.addPropertyChangeListener(this);
-		worker.execute();
+		ThreadManager.getInstance().submit(worker);
 	}
 	
 	private void runNewAnalysis(){
@@ -110,7 +111,7 @@ public class RunSegmentationAction extends ProgressableAction {
 			worker = new DatasetSegmenter(this.dataset, mode);
 			worker.addPropertyChangeListener(this);
 			log(Level.FINE, "Running morphology analysis");
-			worker.execute();
+			ThreadManager.getInstance().submit(worker);
 		} catch(Exception e){
 			this.cancel();
 			logError("Error in morphology analysis", e);

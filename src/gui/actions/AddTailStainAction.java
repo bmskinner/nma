@@ -19,6 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
+import gui.ThreadManager;
 import gui.dialogs.TailDetectionSettingsDialog;
 import ij.io.DirectoryChooser;
 
@@ -60,7 +61,7 @@ public class AddTailStainAction extends ProgressableAction {
 			worker = new TubulinTailDetector(dataset, folder, channel);
 			worker.addPropertyChangeListener(this);
 			this.setProgressMessage("Tail detection:"+dataset.getName());
-			worker.execute();
+			ThreadManager.getInstance().submit(worker);
 		} catch(Exception e){
 			this.cancel();
 			logError("Error in tail analysis", e);

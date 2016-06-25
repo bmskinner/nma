@@ -19,6 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
+import gui.ThreadManager;
 
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
@@ -51,7 +52,7 @@ public class ShellAnalysisAction extends ProgressableAction {
 			worker = new ShellAnalysis(dataset,shellCount);
 
 			worker.addPropertyChangeListener(this);
-			worker.execute();	
+			ThreadManager.getInstance().submit(worker);
 		}
 	}
 }
