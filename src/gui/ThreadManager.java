@@ -12,9 +12,9 @@ public class ThreadManager {
 	 * Handle threading
 	 */
 	
-	public static final int corePoolSize    = 4;
-	public static final int maximumPoolSize = 8;
-	public static final int keepAliveTime = 5000;
+	public static final int corePoolSize    = 8;
+	public static final int maximumPoolSize = 16;
+	public static final int keepAliveTime = 10000;
 
 	private final ExecutorService executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
 			keepAliveTime, TimeUnit.MILLISECONDS,

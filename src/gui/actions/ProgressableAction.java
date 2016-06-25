@@ -192,9 +192,21 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 
-		finest("Property change event heard");
-		int value = (Integer) evt.getNewValue(); // should be percent
-//		IJ.log("Property change: "+value);
+	    int value = 0;
+	    try{
+	    	Object newValue = evt.getNewValue();
+	    	
+	    	if(newValue.getClass().isAssignableFrom(Integer.class)){
+	    		value = (int) newValue;
+	    		
+	    	}
+	    	
+	    } catch (Exception e){
+	    	error("Error getting value from property change", e);
+	    }
+	    	    
+
+		finest("Property change event heard: "+value);
 		
 		if(value >=0 && value <=100){
 			

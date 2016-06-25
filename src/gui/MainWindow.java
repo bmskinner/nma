@@ -918,12 +918,12 @@ public class MainWindow
 			finest("Creating latch");
 			final CountDownLatch latch = new CountDownLatch(1);
 
-			Runnable r = () -> {
+//			Runnable r = () -> {
 				finest("Running save action");
 				new SaveDatasetAction(d, MainWindow.this, latch, saveAs);
-			};
+//			};
 			finest("Passing save action to executor service");
-			threadManager.submit(r);//.execute(r);
+//			threadManager.submit(r);//.execute(r);
 
 			fine("Root dataset saved");
 		} else {

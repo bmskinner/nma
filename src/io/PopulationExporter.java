@@ -89,7 +89,6 @@ public class PopulationExporter extends AnalysisWorker {
 			try{
 
 				output.writeObject(dataset);
-				output.reset();
 
 			} catch(IOException e){
 				error("IO error saving dataset", e);
@@ -106,10 +105,14 @@ public class PopulationExporter extends AnalysisWorker {
 				file.close();
 			}
 			
+			// This line is not always reached when saving multiple datasets
+			fine("Save complete");
+						
 			if(!ok){
 				return false;
 			}
-			fine("Save complete");
+			
+			
 			
 		} catch(FileNotFoundException e){
 			warn("File not found when saving dataset");
