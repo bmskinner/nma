@@ -82,7 +82,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		Dimension minimumChartSize = new Dimension(50, 100);
 		Dimension preferredChartSize = new Dimension(400, 300);
 		
-		JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE);
+		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart();
 		chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
 		
 		chartPanel.setMinimumSize(minimumChartSize);
@@ -122,7 +122,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		 * centre of the zoomed range on the 
 		 * centre chart panel 
 		 */
-		JFreeChart rangeChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE);
+		JFreeChart rangeChart = MorphologyChartFactory.getInstance().makeEmptyChart();
 		rangePanel = new PositionSelectionChartPanel(rangeChart);
 		rangePanel.setPreferredSize(minimumChartSize);
 		rangePanel.addSignalChangeListener(this);
@@ -257,8 +257,8 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	@Override
 	protected void updateNull() {
 		setButtonsEnabled(false);
-		chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
-		rangePanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
+		chartPanel.setChart(MorphologyChartFactory.getInstance().makeEmptyChart());
+		rangePanel.setChart(MorphologyChartFactory.getInstance().makeEmptyChart());
 	}
 	
 	@Override

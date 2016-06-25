@@ -88,10 +88,18 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	}
 	
 	/**
+	 * Create an empty chart
+	 * @return
+	 */
+	public JFreeChart makeEmptyChart(ProfileType type){
+		return makeEmptyProfileChart(type);
+	}
+	
+	/**
 	 * Create an empty chart to display when no datasets are selected
 	 * @return a chart
 	 */
-	public static JFreeChart makeEmptyProfileChart(ProfileType type){
+	private static JFreeChart makeEmptyProfileChart(ProfileType type){
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				"Position", type.getLabel(), null);
 		
@@ -126,6 +134,20 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			return makeMultiProfileChart(options);
 		}
 		return makeEmptyProfileChart(options.getType());
+	}
+	
+	public JFreeChart makeIndividualNucleusProfileChart(ChartOptions options) {
+		
+		if(options.getCell()==null){
+			return makeEmptyChart();
+		}
+		
+		try {
+			return makeIndividualNucleusProfileChart(options.getCell().getNucleus(), options);
+		} catch (Exception e) {
+			error("Error making nucleus profile chart", e);
+		}
+		return makeEmptyChart();
 	}
 	
 	/**

@@ -1,13 +1,16 @@
 package gui.tabs.cells;
 
 import components.Cell;
+import components.CellularComponent;
 import gui.tabs.CellDetailPanel;
 import gui.tabs.DetailPanel;
 
+@SuppressWarnings("serial")
 public abstract class AbstractCellDetailPanel extends DetailPanel {
 		
 	protected CellDetailPanel parent;
 	protected Cell activeCell;
+	protected CellularComponent activeComponent;
 	
 	public AbstractCellDetailPanel(){
 		super();

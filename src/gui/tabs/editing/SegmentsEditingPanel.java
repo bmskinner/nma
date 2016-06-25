@@ -64,55 +64,7 @@ import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
 public class SegmentsEditingPanel extends DetailPanel implements ActionListener, SignalChangeListener {
-	
-//	private final SegmentProfilePanel		segmentProfilePanel;	// draw the segments on the median profile
-//		
-//	public SegmentsEditingPanel() {
-//		
-//		super();
-//		
-//		this.setLayout(new BorderLayout());
-//		segmentProfilePanel  = new SegmentProfilePanel();
-//		this.addSubPanel(segmentProfilePanel);
-//        this.add(segmentProfilePanel, BorderLayout.CENTER);
-//
-//	}
-//	
-//	@Override
-//	protected void updateSingle() {
-//		updateMultiple();
-//	}
-//	
-//
-//	@Override
-//	protected void updateMultiple() {
-//		segmentProfilePanel.update(getDatasets());
-//		
-//		
-//	}
-//	
-//	@Override
-//	protected void updateNull() {
-//		updateMultiple();
-//	}
-//	
-//	@Override
-//	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-//		return null;
-//	}
-//	
-//	@Override
-//	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-//		return null;
-//	}
-//		
-//	@Override
-//	public void signalChangeReceived(SignalChangeEvent event) {
-//		fireSignalChangeEvent(event);
-//	}
-//			
-//	public class SegmentProfilePanel extends DetailPanel implements ActionListener, SignalChangeListener {
-		
+			
 		private DraggableOverlayChartPanel chartPanel; // for displaying the legnth of a given segment
 		private PositionSelectionChartPanel rangePanel; // a small chart to show the entire profile
 		
@@ -135,7 +87,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			Dimension minimumChartSize = new Dimension(50, 100);
 			Dimension preferredChartSize = new Dimension(400, 300);
 			
-			JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE);
+			JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart();
 			chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
 			
 			chartPanel.setMinimumSize(minimumChartSize);
@@ -155,7 +107,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			 * centre of the zoomed range on the 
 			 * centre chart panel 
 			 */
-			JFreeChart rangeChart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE);
+			JFreeChart rangeChart = MorphologyChartFactory.getInstance().makeEmptyChart();
 			rangePanel = new PositionSelectionChartPanel(rangeChart);
 			rangePanel.setPreferredSize(minimumChartSize);
 			rangePanel.addSignalChangeListener(this);
@@ -287,8 +239,8 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 		
 		@Override
 		protected void updateNull() {			
-			chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
-			rangePanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
+			chartPanel.setChart(MorphologyChartFactory.getInstance().makeEmptyChart());
+			rangePanel.setChart(MorphologyChartFactory.getInstance().makeEmptyChart());
 			setButtonsEnabled(false);
 		}
 		

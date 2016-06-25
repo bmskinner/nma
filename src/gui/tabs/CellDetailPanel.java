@@ -26,6 +26,7 @@ import gui.components.DraggableOverlayChartPanel;
 import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
 import gui.tabs.cells.CellOutlinePanel;
+import gui.tabs.cells.CellProfilePanel;
 import gui.tabs.cells.CellStatsPanel;
 
 import java.awt.BorderLayout;
@@ -50,6 +51,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTree;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -64,6 +66,7 @@ import javax.swing.tree.TreeModel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
+import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.SignalTableCell;
 import charting.options.ChartOptions;
@@ -85,8 +88,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	
 	private CellularComponent activeComponent = null; 
 	
+	private JTabbedPane tabPane; 
+	
 	protected CellsListPanel	cellsListPanel;		// the list of cells in the active dataset
-	protected ProfilePanel	 	profilePanel; 		// the nucleus angle profile
+	protected CellProfilePanel	 	profilePanel = new CellProfilePanel(); 		// the nucleus angle profile
+//	protected ProfilePanel	 	profilePanel; 		// the nucleus angle profile
 	protected CellOutlinePanel 	outlinePanel     = new CellOutlinePanel(); 		// the outline of the cell and detected objects
 	protected CellStatsPanel 	cellStatsPanel   = new CellStatsPanel();		// the stats table
 	protected SignalListPanel 	signalListPanel;	// choose which background image to display
@@ -96,81 +102,136 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		super();
 
 		try{
-			this.setLayout(new GridBagLayout());
-
-			GridBagConstraints constraints = new GridBagConstraints();
-			constraints.fill = GridBagConstraints.BOTH;
-			constraints.gridx = 0;
-			constraints.gridy = 0;
-			constraints.gridheight = 2;
-			constraints.gridwidth = 1;
-			constraints.weightx = 0.5;
-			constraints.weighty = 0.6;
-			constraints.anchor = GridBagConstraints.CENTER;
-
-			cellsListPanel = new CellsListPanel();
-			cellsListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-			this.add(cellsListPanel, constraints);
 			
-			constraints.gridx = 0;
-			constraints.gridy = 2;
-			constraints.gridheight = 2;
-			constraints.gridwidth = 1;
-			constraints.weightx = 0.5;
-			constraints.weighty = 0.4;
-			signalListPanel = new SignalListPanel();
-			signalListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-			this.add(signalListPanel, constraints);
-
-			// make the chart for each nucleus
-			JPanel centrePanel = createCentrePanel();
-
-			constraints.gridx = 1;
-			constraints.gridy = 0;
-			constraints.gridwidth = 2;
-			constraints.gridheight = 4;
-			constraints.weightx = 0.9;
-			constraints.weighty = 1;
-			this.add(centrePanel, constraints);
-
-
-//			outlinePanel = new OutlinePanel();
-			outlinePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-			constraints.gridx = 3;
-			constraints.gridy = 0;
-			constraints.weightx = 0.7;
-			this.add(outlinePanel, constraints);
+			this.setLayout(new BorderLayout());
+			
+			this.add(createCellandSignalListPanels(), BorderLayout.WEST);
+			
+			tabPane = new JTabbedPane(JTabbedPane.LEFT);
+			this.add(tabPane, BorderLayout.CENTER);
+			
+			tabPane.add("Profiles", profilePanel);
+			
+			tabPane.add("Outline", outlinePanel);
+			
+			tabPane.add("Stats", cellStatsPanel);
+			
+			
+//			this.setLayout(new GridBagLayout());
+//			
+//			
+//
+//			GridBagConstraints constraints = new GridBagConstraints();
+//			constraints.fill = GridBagConstraints.BOTH;
+//			constraints.gridx = 0;
+//			constraints.gridy = 0;
+//			constraints.gridheight = 2;
+//			constraints.gridwidth = 1;
+//			constraints.weightx = 0.5;
+//			constraints.weighty = 0.6;
+//			constraints.anchor = GridBagConstraints.CENTER;
+//
+//			cellsListPanel = new CellsListPanel();
+//			cellsListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+//			this.add(cellsListPanel, constraints);
+//			
+//			constraints.gridx = 0;
+//			constraints.gridy = 2;
+//			constraints.gridheight = 2;
+//			constraints.gridwidth = 1;
+//			constraints.weightx = 0.5;
+//			constraints.weighty = 0.4;
+//			signalListPanel = new SignalListPanel();
+//			signalListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+//			this.add(signalListPanel, constraints);
+//
+//			// make the chart for each nucleus
+//			JPanel centrePanel = createCentrePanel();
+//
+//			constraints.gridx = 1;
+//			constraints.gridy = 0;
+//			constraints.gridwidth = 2;
+//			constraints.gridheight = 4;
+//			constraints.weightx = 0.9;
+//			constraints.weighty = 1;
+//			this.add(centrePanel, constraints);
+//
+//
+////			outlinePanel = new OutlinePanel();
+//			outlinePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+//			constraints.gridx = 3;
+//			constraints.gridy = 0;
+//			constraints.weightx = 0.7;
+//			this.add(outlinePanel, constraints);
 			outlinePanel.setParent(this);
-//			this.addSubPanel(outlinePanel);
-
-
+////			this.addSubPanel(outlinePanel);
+//
+//
+//			this.validate();
 			this.validate();
 		} catch(Exception e){
 			error("Error creating cell detail panel", e);
 		}
 
 	}
+	
+	private JPanel createCellandSignalListPanels(){
+		JPanel panel = new JPanel(new BorderLayout());
+		
+		cellsListPanel = new CellsListPanel();
+		panel.add(cellsListPanel, BorderLayout.NORTH);
+		
+		signalListPanel = new SignalListPanel();
+		panel.add(signalListPanel, BorderLayout.SOUTH);
+		
+		return panel;
+	}
 
+	
+	private JPanel createProfileTabPanel(){
+		JPanel panel = new JPanel();
+
+		panel.add(profilePanel,BorderLayout.CENTER);
+		
+		return panel;
+	}
+	
+	private JPanel createStatsTabPanel(){
+		JPanel panel = new JPanel(new BorderLayout());
+		
+		panel.add(cellStatsPanel, BorderLayout.CENTER);
+				
+		return panel;
+	}
+	
+	private JPanel createOutlineTabPanel(){
+//		JPanel panel = new JPanel(new BorderLayout());
+//				
+//		panel.add(outlinePanel, BorderLayout.CENTER);
+		
+		return outlinePanel;
+	}
+	
 	/**
 	 * Create the central column panel
 	 * @return
 	 * @throws Exception 
 	 */
-	private JPanel createCentrePanel() throws Exception{
-		JPanel centrePanel = new JPanel();
-		centrePanel.setLayout(new BoxLayout(centrePanel, BoxLayout.Y_AXIS));
-		centrePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		
-		
-		centrePanel.add(cellStatsPanel);
-		
-		profilePanel = new ProfilePanel();
-		centrePanel.add(profilePanel);
-
-		Dimension minSize = new Dimension(200, 300);
-		centrePanel.setMinimumSize(minSize);
-		return centrePanel;
-	}
+//	private JPanel createCentrePanel() throws Exception{
+//		JPanel centrePanel = new JPanel();
+//		centrePanel.setLayout(new BoxLayout(centrePanel, BoxLayout.Y_AXIS));
+//		centrePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+//		
+//		
+//		centrePanel.add(cellStatsPanel);
+//		
+//		profilePanel = new ProfilePanel();
+//		centrePanel.add(profilePanel);
+//
+//		Dimension minSize = new Dimension(200, 300);
+//		centrePanel.setMinimumSize(minSize);
+//		return centrePanel;
+//	}
 		
 	public CellularComponent getActiveComponent(){
 		return this.activeComponent;
@@ -458,7 +519,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					return name;
 				}
 				NumberFormat df = DecimalFormat.getInstance();
-//				df.setRoundingMode(RoundingMode.FLOOR);
 				df.setMaximumFractionDigits(0);
 				df.setMinimumIntegerDigits(2);
 				return imageName+"-"+df.format(nucleusNumber);
@@ -475,14 +535,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 		private DraggableOverlayChartPanel profileChartPanel; // holds the chart with the cell
 		private ProfileTypeOptionsPanel profileOptions  = new ProfileTypeOptionsPanel();
-		
-//		private JButton windowSizeButton = new JButton("Window sizes");
-		
+				
 		protected ProfilePanel(){
 
 			this.setLayout(new BorderLayout());
-			
-			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE);	
+			JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
 			
 			profileChartPanel = new DraggableOverlayChartPanel(chart, null, false); 
 			profileChartPanel.addSignalChangeListener(this);
@@ -491,10 +548,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			JPanel header = new JPanel(new FlowLayout());
 			header.add(profileOptions);
 			profileOptions.addActionListener(  e -> update(activeCell)   );
-			
-//			windowSizeButton.addActionListener(this);
-//			header.add(windowSizeButton);
-			
+						
 			this.add(header, BorderLayout.NORTH);
 			
 		}
@@ -506,7 +560,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				ProfileType type = profileOptions.getSelected();
 
 				if(cell==null){
-					JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(type);
+					JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
 					profileChartPanel.setChart(chart);
 					profileOptions.setEnabled(false);
 
@@ -528,7 +582,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 			} catch(Exception e){
 				error("Error updating cell panel", e);
-				JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE);
+				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
 				profileChartPanel.setChart(chart);
 				profileOptions.setEnabled(false);
 			}
@@ -573,12 +627,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			update(activeCell);
-			
-//			if(e.getSource()==windowSizeButton){
-//				new AngleWindowSizeExplorer(activeDataset(), programLogger);
-//			}
-			
+			update(activeCell);			
 		}
 
 	}

@@ -75,7 +75,7 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 
 		this.add(createSettingsPanel(), BorderLayout.NORTH);
 
-		chartPanel = new ExportableChartPanel(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
+		chartPanel = new ExportableChartPanel(MorphologyChartFactory.getInstance().makeEmptyChart());
 		this.add(chartPanel, BorderLayout.CENTER);
 
 
@@ -144,7 +144,7 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 		setAnalysing(true);
 		log(Level.INFO, "Franken-normalising collections");
 		// Clear the old chart
-		chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
+		chartPanel.setChart(MorphologyChartFactory.getInstance().makeEmptyChart());
 		
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		list.add(dataset1);

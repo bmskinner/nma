@@ -90,7 +90,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		
 		this.add(createSettingsPanel(), BorderLayout.NORTH);
 		
-		chartPanel = new ExportableChartPanel(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
+		chartPanel = new ExportableChartPanel(MorphologyChartFactory.getInstance().makeEmptyChart());
 		this.add(chartPanel, BorderLayout.CENTER);
 
 		
@@ -216,7 +216,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		setAnalysing(true);
 		
 		// Clear the old chart
-		chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart(ProfileType.ANGLE));
+		chartPanel.setChart(MorphologyChartFactory.getInstance().makeEmptyChart());
 		
 		log("Testing "+windowSizeMin+" - "+windowSizeMax);
 		
