@@ -120,7 +120,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JFreeChart createProfileChart(ChartOptions options) throws Exception {
+	public JFreeChart createProfileChart(ChartOptions options) throws Exception {
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyProfileChart(options.getType());
@@ -136,30 +136,100 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		return makeEmptyProfileChart(options.getType());
 	}
 	
+	/**
+	 * Make a profile chart for a single nucleus
+	 * @param options
+	 * @return
+	 */
 	public JFreeChart makeIndividualNucleusProfileChart(ChartOptions options) {
+		
+		if(options.isMultipleDatasets()){
+			return makeEmptyChart();
+		}
 		
 		if(options.getCell()==null){
 			return makeEmptyChart();
 		}
 		
-		try {
-			return makeIndividualNucleusProfileChart(options.getCell().getNucleus(), options);
-		} catch (Exception e) {
-			error("Error making nucleus profile chart", e);
-		}
-		return makeEmptyChart();
-	}
-	
-	/**
-	 * Make a profile chart for a single nucleus
-	 * @param n
-	 * @return
-	 * @throws Exception 
-	 */
-	public static JFreeChart makeIndividualNucleusProfileChart(Nucleus n, ChartOptions options) throws Exception{
+		finest("Creating individual nucleus profile chart");
+				
+		Nucleus n = options.getCell().getNucleus();
 		
 		XYDataset  ds 	 = NucleusDatasetCreator.getInstance().createSegmentedProfileDataset(n, options.getType());
 		JFreeChart chart = makeProfileChart(ds, n.getBorderLength(), options.getSwatch(), options.getType());
+		
+		XYPlot plot = chart.getXYPlot();
+				
+		DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
+		renderer.setBaseShapesVisible(options.isShowPoints());
+		renderer.setBaseLinesVisible(options.isShowLines());
+		renderer.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
+		plot.setRenderer(0, renderer);
+		
+		// Colour the segments in the plot
+		int seriesCount = plot.getDataset().getSeriesCount();
+
+		for (int i = 0; i < seriesCount; i++) {
+			
+			renderer.setSeriesVisibleInLegend(i, false);
+			
+			String name = (String) ds.getSeriesKey(i);
+			
+			// segments along the median profile
+			if(name.startsWith("Seg_")){
+				int colourIndex = getIndexFromLabel(name);
+				renderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
+				ColourSwatch swatch = options.getSwatch();
+				renderer.setSeriesPaint(i, swatch.color(colourIndex));
+				renderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
+			} 
+		}
+					
+		// Add markers
+		if(options.isShowMarkers()){
+
+			finest("Adding segment markers");
+			for (BorderTag tag : n.getBorderTags().keySet()){
+
+				// get the index of the tag
+
+				int index = n.getBorderIndex(tag);
+				finest("Raw index of "+tag+" is "+index);
+				
+				// Correct to start from RP
+				// get the offset from to the current draw point
+				int offset = n.getBorderIndex(options.getTag());
+
+				// adjust the index to the offset
+				index = AbstractCellularComponent.wrapIndex( index - offset, n.getBorderLength());
+
+				finest("Index of "+tag+" from RP is "+index);
+				double indexToDraw = index; // convert to a double to allow normalised positioning
+
+				addMarkerToXYPlot(plot, tag, indexToDraw);
+
+			}
+		}
+
+		// Add segment name annotations
+
+		if(options.isShowAnnotations()){
+			finest("Adding segment annotations");
+			for(NucleusBorderSegment seg : n.getProfile(options.getType(), options.getTag()).getOrderedSegments()){
+
+				int midPoint = seg.getMidpointIndex();
+
+				double x = midPoint;
+				if(options.isNormalised()){
+					x = ((double) midPoint / (double) seg.getTotalLength() ) * 100;
+				}
+				XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
+				segmentAnnotation.setPaint(options.getSwatch().color(seg.getPosition()));
+				plot.addAnnotation(segmentAnnotation);
+			}
+		}
+		
+				
 		return chart;
 	}
 		
@@ -171,7 +241,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	private static JFreeChart makeSingleProfileChart(ChartOptions options) throws Exception {
+	private JFreeChart makeSingleProfileChart(ChartOptions options) throws Exception {
 		
 		XYDataset ds = null;
 		AnalysisDataset dataset = options.firstDataset();
@@ -246,7 +316,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @throws Exception
 	 */	
-	public static JFreeChart makeMultiSegmentedProfileChart(ChartOptions options) throws Exception {
+	public JFreeChart makeMultiSegmentedProfileChart(ChartOptions options) throws Exception {
 		
 		// Set the length to 100 if normalised or multiple datasets.
 		// Otherwise use the median profile length
@@ -274,7 +344,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
 		// the 180 degree line
 		plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
-		
+				
 		int datasetIndex = 0;
 		for(AnalysisDataset dataset : options.getDatasets()){
 
@@ -365,7 +435,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param ds the profile dataset
 	 * @return a chart
 	 */
-	private static JFreeChart makeProfileChart(XYDataset ds, int xLength, ColourSwatch swatch, ProfileType type) throws Exception{
+	private static JFreeChart makeProfileChart(XYDataset ds, int xLength, ColourSwatch swatch, ProfileType type) {
 
 
 		JFreeChart chart = 

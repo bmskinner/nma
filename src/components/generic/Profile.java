@@ -891,7 +891,7 @@ public class Profile implements Serializable, Loggable {
    * @param indexEnd the index to end
    * @return a Profile
    */
-  public Profile getSubregion(int indexStart, int indexEnd) throws Exception {
+  public Profile getSubregion(int indexStart, int indexEnd) {
 
 	  if(indexStart < indexEnd ){
 		  
@@ -927,7 +927,7 @@ public class Profile implements Serializable, Loggable {
    * @param segment the segment to find
    * @return a Profile
    */
-  public Profile getSubregion(NucleusBorderSegment segment) throws Exception {
+  public Profile getSubregion(NucleusBorderSegment segment) {
 	  
 	  if(segment==null){
 		  throw new IllegalArgumentException("Segment is null");

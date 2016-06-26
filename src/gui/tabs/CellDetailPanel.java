@@ -92,7 +92,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	
 	protected CellsListPanel	cellsListPanel;		// the list of cells in the active dataset
 	protected CellProfilePanel	 	profilePanel = new CellProfilePanel(); 		// the nucleus angle profile
-//	protected ProfilePanel	 	profilePanel; 		// the nucleus angle profile
 	protected CellOutlinePanel 	outlinePanel     = new CellOutlinePanel(); 		// the outline of the cell and detected objects
 	protected CellStatsPanel 	cellStatsPanel   = new CellStatsPanel();		// the stats table
 	protected SignalListPanel 	signalListPanel;	// choose which background image to display
@@ -107,14 +106,21 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 			this.add(createCellandSignalListPanels(), BorderLayout.WEST);
 			
+			
+			this.addSubPanel(cellStatsPanel);
+			this.addSubPanel(profilePanel);
+			this.addSubPanel(outlinePanel);
+			
 			tabPane = new JTabbedPane(JTabbedPane.LEFT);
 			this.add(tabPane, BorderLayout.CENTER);
 			
-			tabPane.add("Profiles", profilePanel);
+			tabPane.add("Info", cellStatsPanel);
+			
+			tabPane.add("Segments", profilePanel);
 			
 			tabPane.add("Outline", outlinePanel);
 			
-			tabPane.add("Stats", cellStatsPanel);
+			
 			
 			
 //			this.setLayout(new GridBagLayout());
@@ -176,63 +182,45 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	}
 	
 	private JPanel createCellandSignalListPanels(){
-		JPanel panel = new JPanel(new BorderLayout());
+		JPanel panel = new JPanel(new GridBagLayout());
 		
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridheight = 2;
+		constraints.gridwidth = 1;
+		constraints.weightx = 0.5;
+		constraints.weighty = 0.6;
+		constraints.anchor = GridBagConstraints.CENTER;
+
 		cellsListPanel = new CellsListPanel();
-		panel.add(cellsListPanel, BorderLayout.NORTH);
+		cellsListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		panel.add(cellsListPanel, constraints);
 		
+		constraints.gridx = 0;
+		constraints.gridy = 2;
+		constraints.gridheight = 2;
+		constraints.gridwidth = 1;
+		constraints.weightx = 0.5;
+		constraints.weighty = 0.4;
 		signalListPanel = new SignalListPanel();
-		panel.add(signalListPanel, BorderLayout.SOUTH);
+		signalListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		panel.add(signalListPanel, constraints);
+		
+//		cellsListPanel = new CellsListPanel();
+//		panel.add(cellsListPanel, BorderLayout.NORTH);
+		
+//		signalListPanel = new SignalListPanel();
+//		panel.add(signalListPanel, BorderLayout.SOUTH);
 		
 		return panel;
 	}
 
 	
-	private JPanel createProfileTabPanel(){
-		JPanel panel = new JPanel();
 
-		panel.add(profilePanel,BorderLayout.CENTER);
-		
-		return panel;
-	}
 	
-	private JPanel createStatsTabPanel(){
-		JPanel panel = new JPanel(new BorderLayout());
-		
-		panel.add(cellStatsPanel, BorderLayout.CENTER);
-				
-		return panel;
-	}
-	
-	private JPanel createOutlineTabPanel(){
-//		JPanel panel = new JPanel(new BorderLayout());
-//				
-//		panel.add(outlinePanel, BorderLayout.CENTER);
-		
-		return outlinePanel;
-	}
-	
-	/**
-	 * Create the central column panel
-	 * @return
-	 * @throws Exception 
-	 */
-//	private JPanel createCentrePanel() throws Exception{
-//		JPanel centrePanel = new JPanel();
-//		centrePanel.setLayout(new BoxLayout(centrePanel, BoxLayout.Y_AXIS));
-//		centrePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-//		
-//		
-//		centrePanel.add(cellStatsPanel);
-//		
-//		profilePanel = new ProfilePanel();
-//		centrePanel.add(profilePanel);
-//
-//		Dimension minSize = new Dimension(200, 300);
-//		centrePanel.setMinimumSize(minSize);
-//		return centrePanel;
-//	}
-		
+			
 	public CellularComponent getActiveComponent(){
 		return this.activeComponent;
 	}
@@ -246,6 +234,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		cellsListPanel.updateDataset( activeDataset()  );
 		outlinePanel.update(getDatasets());
 		cellStatsPanel.update(getDatasets());
+		profilePanel.update(getDatasets());
+		
 		
 		finest("Updated cell list panel");
 		updateCell(activeCell);
@@ -289,48 +279,48 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	}
 	
 	
-	private void updateSegmentIndex(boolean start, int index, NucleusBorderSegment seg, Nucleus n, SegmentedProfile profile) throws Exception{
-		
-		int startPos = start ? seg.getStartIndex() : seg.getEndIndex();
-		int newStart = start ? index : seg.getStartIndex();
-		int newEnd = start ? seg.getEndIndex() : index;
-		
-		int rawOldIndex =  n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, startPos);
-
-						
-		if(profile.update(seg, newStart, newEnd)){
-			n.setProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT, profile);
-			
-			/* Check the border tags - if they overlap the old index
-			 * replace them. 
-			 */
-			int rawIndex = n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, index);
-			log(Level.FINEST, "Testing border tags");
-			log(Level.FINEST, "Updating to index "+index+" from reference point");
-			log(Level.FINEST, "Raw old border point is index "+rawOldIndex);
-			log(Level.FINEST, "Raw new border point is index "+rawIndex);
-			
-			if(n.hasBorderTag(rawOldIndex)){						
-				BorderTag tagToUpdate = n.getBorderTag(rawOldIndex);
-				log(Level.FINE, "Updating tag "+tagToUpdate);
-				n.setBorderTag(tagToUpdate, rawIndex);	
-				
-				// Update intersection point if needed
-				if(tagToUpdate.equals(BorderTag.ORIENTATION_POINT)){
-					n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getBorderIndex(n.findOppositeBorder(n.getBorderTag(BorderTag.ORIENTATION_POINT))));
-				}
-				
-			} else {
-				log(Level.FINEST, "No border tag at index "+rawOldIndex+" from reference point");
-//				log(Level.FINEST, n.dumpInfo(Nucleus.ALL_POINTS));
-			}
-
-			updateCell(activeCell);
-			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-		} else {
-			log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
-		}
-	}
+//	private void updateSegmentIndex(boolean start, int index, NucleusBorderSegment seg, Nucleus n, SegmentedProfile profile) throws Exception{
+//		
+//		int startPos = start ? seg.getStartIndex() : seg.getEndIndex();
+//		int newStart = start ? index : seg.getStartIndex();
+//		int newEnd = start ? seg.getEndIndex() : index;
+//		
+//		int rawOldIndex =  n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, startPos);
+//
+//						
+//		if(profile.update(seg, newStart, newEnd)){
+//			n.setProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT, profile);
+//			
+//			/* Check the border tags - if they overlap the old index
+//			 * replace them. 
+//			 */
+//			int rawIndex = n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, index);
+//			log(Level.FINEST, "Testing border tags");
+//			log(Level.FINEST, "Updating to index "+index+" from reference point");
+//			log(Level.FINEST, "Raw old border point is index "+rawOldIndex);
+//			log(Level.FINEST, "Raw new border point is index "+rawIndex);
+//			
+//			if(n.hasBorderTag(rawOldIndex)){						
+//				BorderTag tagToUpdate = n.getBorderTag(rawOldIndex);
+//				log(Level.FINE, "Updating tag "+tagToUpdate);
+//				n.setBorderTag(tagToUpdate, rawIndex);	
+//				
+//				// Update intersection point if needed
+//				if(tagToUpdate.equals(BorderTag.ORIENTATION_POINT)){
+//					n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getBorderIndex(n.findOppositeBorder(n.getBorderTag(BorderTag.ORIENTATION_POINT))));
+//				}
+//				
+//			} else {
+//				log(Level.FINEST, "No border tag at index "+rawOldIndex+" from reference point");
+////				log(Level.FINEST, n.dumpInfo(Nucleus.ALL_POINTS));
+//			}
+//
+//			updateCell(activeCell);
+//			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+//		} else {
+//			log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+//		}
+//	}
 			
 
 	@Override
@@ -527,110 +517,110 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	}
 	
 	
-	/**
-	 * Show the profile for the nuclei in the given cell
-	 *
-	 */
-	protected class ProfilePanel extends JPanel implements SignalChangeListener, ActionListener {
-		
-		private DraggableOverlayChartPanel profileChartPanel; // holds the chart with the cell
-		private ProfileTypeOptionsPanel profileOptions  = new ProfileTypeOptionsPanel();
-				
-		protected ProfilePanel(){
-
-			this.setLayout(new BorderLayout());
-			JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-			
-			profileChartPanel = new DraggableOverlayChartPanel(chart, null, false); 
-			profileChartPanel.addSignalChangeListener(this);
-			this.add(profileChartPanel, BorderLayout.CENTER);
-			
-			JPanel header = new JPanel(new FlowLayout());
-			header.add(profileOptions);
-			profileOptions.addActionListener(  e -> update(activeCell)   );
-						
-			this.add(header, BorderLayout.NORTH);
-			
-		}
-		
-		protected void update(Cell cell){
-
-			try{
-				
-				ProfileType type = profileOptions.getSelected();
-
-				if(cell==null){
-					JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-					profileChartPanel.setChart(chart);
-					profileOptions.setEnabled(false);
-
-				} else {
-
-					profileOptions.setEnabled(true);
-					Nucleus nucleus = cell.getNucleus();
-					
-					ChartOptions options = new ChartOptionsBuilder()
-							.setSwatch(activeDataset().getSwatch())
-							.setProfileType(type)
-							.build();
-
-					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(nucleus, options);
-
-					profileChartPanel.setChart(chart, nucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT), false);
-					
-				}
-
-			} catch(Exception e){
-				error("Error updating cell panel", e);
-				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-				profileChartPanel.setChart(chart);
-				profileOptions.setEnabled(false);
-			}
-
-		}
-
-		@Override
-		public void signalChangeReceived(SignalChangeEvent event) {
-			if(event.type().contains("UpdateSegment")){
-
-				try{
+//	/**
+//	 * Show the profile for the nuclei in the given cell
+//	 *
+//	 */
+//	protected class ProfilePanel extends JPanel implements SignalChangeListener, ActionListener {
+//		
+//		private DraggableOverlayChartPanel profileChartPanel; // holds the chart with the cell
+//		private ProfileTypeOptionsPanel profileOptions  = new ProfileTypeOptionsPanel();
+//				
+//		protected ProfilePanel(){
+//
+//			this.setLayout(new BorderLayout());
+//			JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
+//			
+//			profileChartPanel = new DraggableOverlayChartPanel(chart, null, false); 
+//			profileChartPanel.addSignalChangeListener(this);
+//			this.add(profileChartPanel, BorderLayout.CENTER);
+//			
+//			JPanel header = new JPanel(new FlowLayout());
+//			header.add(profileOptions);
+//			profileOptions.addActionListener(  e -> update(activeCell)   );
+//						
+//			this.add(header, BorderLayout.NORTH);
+//			
+//		}
+//		
+//		protected void update(Cell cell){
+//
+//			try{
+//				
+//				ProfileType type = profileOptions.getSelected();
+//
+//				if(cell==null){
+//					JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
+//					profileChartPanel.setChart(chart);
+//					profileOptions.setEnabled(false);
+//
+//				} else {
+//
+//					profileOptions.setEnabled(true);
+//					Nucleus nucleus = cell.getNucleus();
 //					
-					String[] array = event.type().split("\\|");
-					int selectedSegMidpoint = Integer.valueOf(array[1]);
-					String index = array[2];
-					int indexValue = Integer.valueOf(index);
-
-					Nucleus n = activeCell.getNucleus();
-					SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
-					
-					/*
-					 * The numbering of segments is adjusted for profile charts, so we can't rely on 
-					 * the segment name stored in the profile.
-					 * 
-					 * Get the name via the midpoint index of the segment that was selected. 
-					 */
-					NucleusBorderSegment seg = profile.getSegmentContaining(selectedSegMidpoint);
-//					NucleusBorderSegment seg = profile.getSegment(segName);
-
-					updateSegmentIndex(true, indexValue, seg, n, profile);
-					
-					n.updateVerticallyRotatedNucleus();
-					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
-				} catch(Exception e){
-					error("Error updating segment", e);
-				}
-
-			}
-			
-			
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			update(activeCell);			
-		}
-
-	}
+//					ChartOptions options = new ChartOptionsBuilder()
+//							.setSwatch(activeDataset().getSwatch())
+//							.setProfileType(type)
+//							.build();
+//
+////					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(nucleus, options);
+//
+////					profileChartPanel.setChart(chart, nucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT), false);
+//					
+//				}
+//
+//			} catch(Exception e){
+//				error("Error updating cell panel", e);
+//				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
+//				profileChartPanel.setChart(chart);
+//				profileOptions.setEnabled(false);
+//			}
+//
+//		}
+//
+//		@Override
+//		public void signalChangeReceived(SignalChangeEvent event) {
+//			if(event.type().contains("UpdateSegment")){
+//
+//				try{
+////					
+//					String[] array = event.type().split("\\|");
+//					int selectedSegMidpoint = Integer.valueOf(array[1]);
+//					String index = array[2];
+//					int indexValue = Integer.valueOf(index);
+//
+//					Nucleus n = activeCell.getNucleus();
+//					SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
+//					
+//					/*
+//					 * The numbering of segments is adjusted for profile charts, so we can't rely on 
+//					 * the segment name stored in the profile.
+//					 * 
+//					 * Get the name via the midpoint index of the segment that was selected. 
+//					 */
+//					NucleusBorderSegment seg = profile.getSegmentContaining(selectedSegMidpoint);
+////					NucleusBorderSegment seg = profile.getSegment(segName);
+//
+//					updateSegmentIndex(true, indexValue, seg, n, profile);
+//					
+//					n.updateVerticallyRotatedNucleus();
+//					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+//				} catch(Exception e){
+//					error("Error updating segment", e);
+//				}
+//
+//			}
+//			
+//			
+//		}
+//
+//		@Override
+//		public void actionPerformed(ActionEvent e) {
+//			update(activeCell);			
+//		}
+//
+//	}
 	
 	protected class SignalListPanel extends JPanel implements ListSelectionListener {
 		

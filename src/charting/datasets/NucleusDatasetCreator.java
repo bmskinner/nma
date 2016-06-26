@@ -86,7 +86,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @param binSize the size of the ProfileAggregate bins, to adjust the offset of the median
 	 * @return the updated dataset
 	 */
-	private XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, Profile profile, DefaultXYDataset ds, int length, double offset) throws Exception {
+	private XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, Profile profile, DefaultXYDataset ds, int length, double offset) {
 		
 		Profile xpoints = profile.getPositions(length);
 		xpoints = xpoints.add(offset);
@@ -768,7 +768,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @return
 	 * @throws Exception 
 	 */
-	public XYDataset createSegmentedProfileDataset(Nucleus nucleus, ProfileType type) throws Exception{
+	public XYDataset createSegmentedProfileDataset(Nucleus nucleus, ProfileType type) {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		SegmentedProfile profile;
@@ -786,8 +786,8 @@ private static NucleusDatasetCreator instance = null;
 			addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0);
 		}
 
-		double[][] ndata = { xpoints.asArray(), profile.asArray() };
-		ds.addSeries("Nucleus_"+nucleus.getSourceFileName()+"-"+nucleus.getNucleusNumber(), ndata);
+//		double[][] ndata = { xpoints.asArray(), profile.asArray() };
+//		ds.addSeries("Nucleus_"+nucleus.getSourceFileName()+"-"+nucleus.getNucleusNumber(), ndata);
 		
 		return ds;
 	}

@@ -263,7 +263,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
+		return MorphologyChartFactory.getInstance().makeMultiSegmentedProfileChart(options);
 	}
 	
 	@Override

@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.util.UUID;
+import java.util.logging.Level;
 
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
@@ -18,12 +20,17 @@ import components.Cell;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
+import gui.DatasetEvent.DatasetMethod;
+import gui.InterfaceEvent.InterfaceMethod;
+import gui.SignalChangeEvent;
 import gui.components.DraggableOverlayChartPanel;
 import gui.components.PositionSelectionChartPanel;
 import gui.components.RectangleOverlayObject;
 import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.tabs.editing.SegmentsEditingPanel;
 
 @SuppressWarnings("serial")
 public class CellProfilePanel extends AbstractCellDetailPanel {
@@ -119,7 +126,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.setCell(activeCell)
-					.setNormalised(true)
+					.setNormalised(false)
 					.setAlignment(ProfileAlignment.LEFT)
 					.setTag(BorderTag.REFERENCE_POINT)
 					.setShowMarkers(false)
@@ -131,11 +138,9 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 							
 				JFreeChart chart = getChart(options);
 				
-				profile = activeDataset().getCollection()
-						.getProfileCollection(type)
-						.getSegmentedProfile(BorderTag.REFERENCE_POINT);
-				
-				chartPanel.setChart(chart, profile, true);
+				profile = activeCell.getNucleus().getProfile(type, BorderTag.REFERENCE_POINT);
+								
+				chartPanel.setChart(chart, profile, false); // use the profile, don't normalise
 				updateChartPanelRange();
 				
 				
@@ -146,7 +151,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				ChartOptions rangeOptions = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.setCell(activeCell)
-					.setNormalised(true)
+					.setNormalised(false)
 					.setAlignment(ProfileAlignment.LEFT)
 					.setTag(BorderTag.REFERENCE_POINT)
 					.setShowMarkers(false)
@@ -159,18 +164,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				
 				rangePanel.setChart(rangeChart);
 
-				profileOptions.setEnabled(true);
-				Nucleus nucleus = cell.getNucleus();
-				
-//				ChartOptions options = new ChartOptionsBuilder()
-//						.setSwatch(activeDataset().getSwatch())
-//						.setProfileType(type)
-//						.build();
-
-//				JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(nucleus, options);
-
-//				chartPanel.setChart(chart, nucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT), false);
-				
+				profileOptions.setEnabled(true);				
 			}
 
 		} catch(Exception e){
@@ -203,6 +197,93 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return MorphologyChartFactory.getInstance().makeIndividualNucleusProfileChart( options);
+	}
+	
+	@Override
+	public void signalChangeReceived(SignalChangeEvent event) {
+		if(event.type().contains("UpdateSegment") && event.getSource().equals(chartPanel)){
+			fine("Heard segment update request");
+			
+			try{
+
+				String[] array = event.type().split("\\|");
+				int selectedSegMidpoint = Integer.valueOf(array[1]);
+				String index = array[2];
+				int indexValue = Integer.valueOf(index);
+
+				Nucleus n = activeCell.getNucleus();
+				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
+
+				/*
+				 * The numbering of segments is adjusted for profile charts, so we can't rely on 
+				 * the segment name stored in the profile.
+				 * 
+				 * Get the name via the midpoint index of the segment that was selected. 
+				 */
+				NucleusBorderSegment seg = profile.getSegmentContaining(selectedSegMidpoint);
+
+//				carry out the update
+				updateSegmentIndex(true, indexValue, seg, n, profile);
+
+				n.updateVerticallyRotatedNucleus();
+				
+				// Recache necessary charts
+				this.clearChartCache();
+				this.update(activeCell);
+				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+			} catch(Exception e){
+				error("Error updating segment", e);
+			}
+
+		}
+		
+		// Change the range of the main chart based on the lower chart  
+		if(event.type().contains("UpdatePosition") && event.getSource().equals(rangePanel)){
+			
+			updateChartPanelRange();
+			
+		}
+
+	}
+	
+	private void updateSegmentIndex(boolean start, int index, NucleusBorderSegment seg, Nucleus n, SegmentedProfile profile) throws Exception{
+		
+		int startPos = start ? seg.getStartIndex() : seg.getEndIndex();
+		int newStart = start ? index : seg.getStartIndex();
+		int newEnd   = start ? seg.getEndIndex() : index;
+		
+		int rawOldIndex =  n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, startPos);
+
+						
+		if(profile.update(seg, newStart, newEnd)){
+			n.setProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT, profile);
+			finest("Updated nucleus profile with new segment boundaries");
+			
+			/* Check the border tags - if they overlap the old index
+			 * replace them. 
+			 */
+			int rawIndex = n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, index);
+
+			finest("Updating to index "+index+" from reference point");
+			finest("Raw old border point is index "+rawOldIndex);
+			finest("Raw new border point is index "+rawIndex);
+			
+			if(n.hasBorderTag(rawOldIndex)){						
+				BorderTag tagToUpdate = n.getBorderTag(rawOldIndex);
+				log(Level.FINE, "Updating tag "+tagToUpdate);
+				n.setBorderTag(tagToUpdate, rawIndex);	
+				
+				// Update intersection point if needed
+				if(tagToUpdate.equals(BorderTag.ORIENTATION_POINT)){
+					n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getBorderIndex(n.findOppositeBorder(n.getBorderTag(BorderTag.ORIENTATION_POINT))));
+				}
+				
+			} else {
+				finest("No border tag needing update at index "+rawOldIndex+" from reference point");
+			}
+		} else {
+			log("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+		}
 	}
 
 }

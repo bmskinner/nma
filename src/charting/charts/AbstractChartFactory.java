@@ -70,7 +70,7 @@ public abstract class AbstractChartFactory implements Loggable {
 	 * @param tag
 	 * @param value
 	 */
-	protected static void addMarkerToXYPlot(XYPlot plot, BorderTag tag, double value){
+	protected void addMarkerToXYPlot(XYPlot plot, BorderTag tag, double value){
 		Color colour = Color.BLACK;
 		if(tag.equals(BorderTag.ORIENTATION_POINT)){
 			colour = Color.BLUE;
