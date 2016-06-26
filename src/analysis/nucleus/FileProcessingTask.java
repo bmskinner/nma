@@ -126,16 +126,6 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 		  
 		  double[] position = n.getPosition();
 		  nucleus.setLocation(position[CellularComponent.X_BASE],position[CellularComponent.Y_BASE]); // translate the roi to the image coordinates
-		  
-		  // Disabled the save of nucleus image - we don't really use it now
-		  
-//		  ImageStack smallRegion = NucleusFinder.getRoiAsStack(nucleus, imageStack);
-		  
-//		  try{
-//			  IJ.saveAsTiff(ImageExporter.getInstance().convertToRGB(smallRegion), n.getAnnotatedImagePath());
-//		  } catch(Exception e){
-////			  logError("Error saving original, enlarged or annotated image", e);
-//		  }
 	}
 
 	/**

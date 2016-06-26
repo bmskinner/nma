@@ -339,7 +339,6 @@ public class RodentSpermNucleus extends SpermNucleus {
 		setBorderTag(BorderTag.REFERENCE_POINT, tipIndex);
 
 		// decide if the profile is right or left handed; flip if needed
-
 		if(!this.isProfileOrientationOK()){
 			this.reverse(); // reverses all profiles, border array and tagged points
 		}  
@@ -445,30 +444,30 @@ public class RodentSpermNucleus extends SpermNucleus {
 	 * @return true if acrosome is at the beginning of the profile
 	 * @throws Exception
 	 */
-	public boolean isProfileOrientationOK() throws Exception{
-
-		int frontPoints = 0;
-		int rearPoints = 0;
-
-		Profile profile = this.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
-
-		int midPoint = (int) (this.getBorderLength()/2) ;
-		for(int i=0; i<this.getBorderLength();i++){ // integrate points over 180
-
-			if(i<midPoint){
-				frontPoints += profile.get(i);
-			}
-			if(i>midPoint){
-				rearPoints  += profile.get(i);
-			}
-		}
-
-		if(frontPoints > rearPoints){ // if the maxIndex is closer to the end than the beginning
-			return true;
-		} else{ 
-			return false;
-		}
-	}
+//	public boolean isProfileOrientationOK() throws Exception{
+//
+//		int frontPoints = 0;
+//		int rearPoints = 0;
+//
+//		Profile profile = this.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
+//
+//		int midPoint = (int) (this.getBorderLength()/2) ;
+//		for(int i=0; i<this.getBorderLength();i++){ // integrate points over 180
+//
+//			if(i<midPoint){
+//				frontPoints += profile.get(i);
+//			}
+//			if(i>midPoint){
+//				rearPoints  += profile.get(i);
+//			}
+//		}
+//
+//		if(frontPoints > rearPoints){ // if the maxIndex is closer to the end than the beginning
+//			return true;
+//		} else{ 
+//			return false;
+//		}
+//	}
 	
 	/*
 	 * Test if the nucleus, after rotating to vertical, has the hook to the left

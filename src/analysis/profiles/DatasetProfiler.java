@@ -103,12 +103,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			// Build the ProfileCollections for each ProfileType
 			collection.getProfileManager().createProfileCollections();	
 			finest("Created profile collections");
-			
-			// Set the RP in the ProfileCollection to index zero
-			// Each nucleus currently has a best-guess RP and nothing else
-//			collection.getProfileCollection(ProfileType.ANGLE)
-//				.addIndex(BorderTag.REFERENCE_POINT, 0);
-//			finest("Added RP is at offset zero");
+					
 			
 			// Create a median from the current reference points in the nuclei
 			Profile median = collection.getProfileCollection(ProfileType.ANGLE)
@@ -138,7 +133,7 @@ public class DatasetProfiler extends AnalysisWorker {
 				coercionCounter++;
 				rpIndex = coerceRPToZero(collection);
 				
-				if(coercionCounter>200){
+				if(coercionCounter>50){
 					warn("Unable to cleanly assign RP");
 					break;
 				}

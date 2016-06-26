@@ -99,14 +99,15 @@ public class PigSpermNucleus
 		Profile p     = this.getProfile(rpSet.getType());
 		ProfileIndexFinder f = new ProfileIndexFinder();
 		int rpIndex = f.identifyIndex(p, rpSet);
-
+		
     	setBorderTag(BorderTag.REFERENCE_POINT, rpIndex);
-    	
     	
     	/*
     	 * The OP is the same as the RP in pigs
     	 */
     	setBorderTag(BorderTag.ORIENTATION_POINT, rpIndex);
+    	
+    	
     	
     	/*
     	 * The IP is opposite the OP
@@ -114,6 +115,10 @@ public class PigSpermNucleus
     	BorderPoint op = this.getBorderPoint(rpIndex);
     	int ipIndex = getBorderIndex(this.findOppositeBorder(op));
     	setBorderTag(BorderTag.INTERSECTION_POINT, ipIndex);
+    	
+    	if(!this.isProfileOrientationOK()){
+			this.reverse();
+		}
     	      
     }
     

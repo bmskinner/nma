@@ -322,12 +322,15 @@ public class CellDetailPanel extends AbstractCellDetailPanel implements SignalCh
 				createNodes(root, dataset);
 				tree.setEnabled(true);
 			} else {
-				TreeModel model = new DefaultTreeModel(root);
-				tree.setModel(model);
+//				TreeModel model = new DefaultTreeModel(root);
+//				tree.setModel(model);
 				tree.setEnabled(false);
 			}
 			TreeModel model = new DefaultTreeModel(root);
+			
+			tree.removeTreeSelectionListener(CellDetailPanel.this);
 			tree.setModel(model);
+			tree.addTreeSelectionListener(CellDetailPanel.this);
 		}
 		
 		/**
@@ -528,6 +531,7 @@ public class CellDetailPanel extends AbstractCellDetailPanel implements SignalCh
 	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
 		finest("Cell list selection changed");
+		
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) arg0.getPath().getLastPathComponent();
 		NodeData data = (NodeData) node.getUserObject();
 
@@ -536,9 +540,15 @@ public class CellDetailPanel extends AbstractCellDetailPanel implements SignalCh
 		if(getDatasets().size()==1){	
 			try{
 				
-				activeCell = activeDataset().getCollection().getCell(cellID);
-				finest("Updating selected cell to "+activeCell.getNucleus().getNameAndNumber());
-				updateCell(activeCell);
+				if(cellID!=null){ // only null for root
+					activeCell = activeDataset().getCollection().getCell(cellID);
+					finest("Updating selected cell to "+activeCell.getNucleus().getNameAndNumber());
+					updateCell(activeCell);
+				} else {
+					updateCell(null);
+				}
+				
+				
 				
 			} catch (Exception e1){
 				warn("Error fetching cell");

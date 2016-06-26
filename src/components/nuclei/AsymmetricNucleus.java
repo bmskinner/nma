@@ -39,6 +39,8 @@ import java.util.List;
 
 import utility.Utils;
 import components.generic.BorderTag;
+import components.generic.Profile;
+import components.generic.ProfileType;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 
@@ -115,6 +117,8 @@ public class AsymmetricNucleus
 		  return 0-angle;
 	  }
   }
+  
+
   
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	  finest("\tReading asymmetric nucleus");

@@ -89,7 +89,21 @@ public class ProfileManager implements Loggable {
 	 */
 	public void offsetNucleusProfiles(BorderTag tag, ProfileType type, Profile median){
 				
+		
+		
 		for(Nucleus n : collection.getNuclei()){
+			
+//			Profile existing = n.getProfile(type);
+//			Profile reversed = existing.copy();
+//			reversed.reverse();
+//			
+//			// Find the orientation of the profile most similar to the median
+//			double existingScore = median.absoluteSquareDifference(existing);	
+//			double reversedScore = median.absoluteSquareDifference(reversed);
+//			
+//			if(reversedScore < existingScore){
+//				n.reverse();
+//			}
 
 			// returns the positive offset index of this profile which best matches the median profile
 			int newIndex = n.getProfile(type).getSlidingWindowOffset(median);

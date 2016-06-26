@@ -167,8 +167,14 @@ public class RoundNucleus extends AbstractCellularComponent
 		ProfileIndexFinder f = new ProfileIndexFinder();
 		int rpIndex = f.identifyIndex(p, rpSet);
 		
+		
+		
 		setBorderTag(BorderTag.REFERENCE_POINT, rpIndex);		
 		setBorderTag(BorderTag.ORIENTATION_POINT, rpIndex);
+		
+		if(!this.isProfileOrientationOK()){
+			this.reverse();
+		}  
 		
 	}
 	
@@ -801,6 +807,37 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 //		
 	}
+	
+	  /**
+	   * Checks if the smoothed array nuclear shape profile has the appropriate
+	   * orientation.Counts the number of points above 180 degrees
+	   * in each half of the array.
+	   * @return 
+	   * @throws Exception
+	   */
+		public boolean isProfileOrientationOK(){
+			int frontPoints = 0;
+			int rearPoints = 0;
+
+			Profile profile = this.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
+
+			int midPoint = (int) (this.getBorderLength()/2) ;
+			for(int i=0; i<this.getBorderLength();i++){ // integrate points over 180
+
+				if(i<midPoint){
+					frontPoints += profile.get(i);
+				}
+				if(i>midPoint){
+					rearPoints  += profile.get(i);
+				}
+			}
+
+			if(frontPoints > rearPoints){ // if the maxIndex is closer to the end than the beginning
+				return true;
+			} else{ 
+				return false;
+			}
+		}
 	
 	
 	/**
