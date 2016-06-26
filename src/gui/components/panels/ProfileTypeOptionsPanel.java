@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.components.panels;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
 import components.generic.ProfileType;
@@ -25,10 +26,19 @@ import components.generic.ProfileType;
 @SuppressWarnings("serial")
 public class ProfileTypeOptionsPanel extends EnumeratedOptionsPanel {
 
-	private JComboBox<ProfileType> profileTypeBox = new JComboBox<ProfileType>(ProfileType.values());
+	private JComboBox<ProfileType> profileTypeBox; //= new JComboBox<ProfileType>(ProfileType.values());
 
 	public ProfileTypeOptionsPanel(){
 		super();
+		
+		// FrankenProfiles cause problems for individual nuclei, so disable for now
+		DefaultComboBoxModel<ProfileType> model = new DefaultComboBoxModel<ProfileType>();
+		model.addElement(ProfileType.ANGLE);
+		model.addElement(ProfileType.DIAMETER);
+		model.addElement(ProfileType.RADIUS);
+		
+		profileTypeBox = new JComboBox<ProfileType>(model);
+		
 		this.add(profileTypeBox);
 		profileTypeBox.addActionListener(this);
 		profileTypeBox.setSelectedItem(ProfileType.ANGLE);

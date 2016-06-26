@@ -437,6 +437,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 						
 		private JList<Object> signalList;
 		private JScrollPane   scrollPane;
+		private Cell componentCell = null;
+		private String componentString = null; // store the active component name, and use it if available when cells change
 		
 		protected SignalListPanel(){
 			
@@ -478,36 +480,48 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 			
 		protected void update(Cell cell){
-			finest("Updating component list for cell");
-			ListModel<Object> model = createListModel(cell);
-			signalList.setModel(model);
 
-			if(cell!=null){
-				finest("Cell is not null");
-				signalList.removeListSelectionListener(this);
-				setActiveComponent(cell.getNucleus());
-				signalList.setSelectedIndex(0);
-				signalList.addListSelectionListener(this);
-				signalList.setEnabled(true);
+			// Only update the component list if the cell has changed
+			if(cell!=componentCell){
+				componentCell = cell;
+				finest("Updating component list for cell");
+				ListModel<Object> model = createListModel(cell);
+				signalList.setModel(model);
+
+				if(cell!=null){
+					finest("Cell is not null");
+					signalList.removeListSelectionListener(this);
+					
+					// Check if the new cell has the same component as the last
+					int index = 0;
+					for(int i=0; i<model.getSize();i++){
+						SignalTableCell tableCell   =  (SignalTableCell) signalList.getModel().getElementAt(i);
+						if(tableCell.toString().equals(componentString)){
+							index=i;
+						}
+					}
+					signalList.setSelectedIndex(index);
+					componentString = ((SignalTableCell) signalList.getModel().getElementAt(index)).toString(); // set the new component string
+					
+					setActiveComponent(getActiveComponent());
+					
+					signalList.addListSelectionListener(this);
+					signalList.setEnabled(true);
+				}
 			}
 		}
-
-		@Override
-		public void valueChanged(ListSelectionEvent e) {
-
-			finest("Component selection changed");
-//			if selected value is a valid file reference, load the file and update the
-			// nucleus annotation
+		
+		private CellularComponent getActiveComponent(){
 			int row = signalList.getSelectedIndex();
-			
+			CellularComponent c = null;
 			if(row>=0){ // -1 if nothing selected
 				SignalTableCell cell   =  (SignalTableCell) signalList.getModel().getElementAt(row);
 				String signalGroupName = cell.toString();
+
 				
-				CellularComponent c = null;
 
 				if(signalGroupName.equals("Nucleus")){
-					
+
 					c = activeCell.getNucleus();
 
 				} else {
@@ -520,9 +534,18 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 				}
 				finest("Component selected is "+signalGroupName);
-				setActiveComponent(c);
-				updateCell(activeCell);
 			}
+			return c;
+		}
+
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+
+			finest("Component selection changed");
+			CellularComponent c = getActiveComponent();
+			setActiveComponent(c);
+			updateCell(activeCell);
+
 			
 		}
 	}
