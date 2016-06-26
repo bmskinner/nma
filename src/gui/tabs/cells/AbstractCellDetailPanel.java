@@ -23,5 +23,9 @@ public abstract class AbstractCellDetailPanel extends DetailPanel {
 	public void setParent(CellDetailPanel p){
 		this.parent = p;
 	}
+	
+	public void setActiveComponent(CellularComponent activeComponent){
+		this.activeComponent = activeComponent;
+	}
 
 }

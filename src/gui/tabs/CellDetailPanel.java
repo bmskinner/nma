@@ -25,6 +25,7 @@ import gui.SignalChangeListener;
 import gui.components.DraggableOverlayChartPanel;
 import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
+import gui.tabs.cells.CellBorderTagPanel;
 import gui.tabs.cells.CellOutlinePanel;
 import gui.tabs.cells.CellProfilePanel;
 import gui.tabs.cells.CellStatsPanel;
@@ -53,6 +54,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTree;
+import javax.swing.ListModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -91,9 +93,10 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	private JTabbedPane tabPane; 
 	
 	protected CellsListPanel	cellsListPanel;		// the list of cells in the active dataset
-	protected CellProfilePanel	 	profilePanel = new CellProfilePanel(); 		// the nucleus angle profile
-	protected CellOutlinePanel 	outlinePanel     = new CellOutlinePanel(); 		// the outline of the cell and detected objects
-	protected CellStatsPanel 	cellStatsPanel   = new CellStatsPanel();		// the stats table
+	protected CellProfilePanel	segmentProfilePanel = new CellProfilePanel(); 		// the nucleus angle profile
+	protected CellBorderTagPanel cellBorderTagPanel = new CellBorderTagPanel();
+	protected CellOutlinePanel 	outlinePanel        = new CellOutlinePanel(); 		// the outline of the cell and detected objects
+	protected CellStatsPanel 	cellStatsPanel      = new CellStatsPanel();		// the stats table
 	protected SignalListPanel 	signalListPanel;	// choose which background image to display
 
 	public CellDetailPanel() {
@@ -108,72 +111,28 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 			
 			this.addSubPanel(cellStatsPanel);
-			this.addSubPanel(profilePanel);
+			this.addSubPanel(segmentProfilePanel);
+			this.addSubPanel(cellBorderTagPanel);
 			this.addSubPanel(outlinePanel);
+			
+			cellStatsPanel.setParent(this);
+			segmentProfilePanel.setParent(this);
+			cellBorderTagPanel.setParent(this);
+			outlinePanel.setParent(this);
 			
 			tabPane = new JTabbedPane(JTabbedPane.LEFT);
 			this.add(tabPane, BorderLayout.CENTER);
 			
 			tabPane.add("Info", cellStatsPanel);
 			
-			tabPane.add("Segments", profilePanel);
+			tabPane.add("Segments", segmentProfilePanel);
+			
+			tabPane.add("Tags", cellBorderTagPanel);
 			
 			tabPane.add("Outline", outlinePanel);
+
 			
-			
-			
-			
-//			this.setLayout(new GridBagLayout());
-//			
-//			
-//
-//			GridBagConstraints constraints = new GridBagConstraints();
-//			constraints.fill = GridBagConstraints.BOTH;
-//			constraints.gridx = 0;
-//			constraints.gridy = 0;
-//			constraints.gridheight = 2;
-//			constraints.gridwidth = 1;
-//			constraints.weightx = 0.5;
-//			constraints.weighty = 0.6;
-//			constraints.anchor = GridBagConstraints.CENTER;
-//
-//			cellsListPanel = new CellsListPanel();
-//			cellsListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-//			this.add(cellsListPanel, constraints);
-//			
-//			constraints.gridx = 0;
-//			constraints.gridy = 2;
-//			constraints.gridheight = 2;
-//			constraints.gridwidth = 1;
-//			constraints.weightx = 0.5;
-//			constraints.weighty = 0.4;
-//			signalListPanel = new SignalListPanel();
-//			signalListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-//			this.add(signalListPanel, constraints);
-//
-//			// make the chart for each nucleus
-//			JPanel centrePanel = createCentrePanel();
-//
-//			constraints.gridx = 1;
-//			constraints.gridy = 0;
-//			constraints.gridwidth = 2;
-//			constraints.gridheight = 4;
-//			constraints.weightx = 0.9;
-//			constraints.weighty = 1;
-//			this.add(centrePanel, constraints);
-//
-//
-////			outlinePanel = new OutlinePanel();
-//			outlinePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-//			constraints.gridx = 3;
-//			constraints.gridy = 0;
-//			constraints.weightx = 0.7;
-//			this.add(outlinePanel, constraints);
-			outlinePanel.setParent(this);
-////			this.addSubPanel(outlinePanel);
-//
-//
-//			this.validate();
+
 			this.validate();
 		} catch(Exception e){
 			error("Error creating cell detail panel", e);
@@ -208,18 +167,19 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		signalListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		panel.add(signalListPanel, constraints);
 		
-//		cellsListPanel = new CellsListPanel();
-//		panel.add(cellsListPanel, BorderLayout.NORTH);
-		
-//		signalListPanel = new SignalListPanel();
-//		panel.add(signalListPanel, BorderLayout.SOUTH);
+
 		
 		return panel;
 	}
 
 	
 
-	
+	private void setActiveComponent(CellularComponent c){
+		this.activeComponent = c;
+		outlinePanel.setActiveComponent(activeComponent);
+		cellStatsPanel.setActiveComponent(activeComponent);
+		segmentProfilePanel.setActiveComponent(activeComponent);
+	}
 			
 	public CellularComponent getActiveComponent(){
 		return this.activeComponent;
@@ -234,8 +194,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		cellsListPanel.updateDataset( activeDataset()  );
 		outlinePanel.update(getDatasets());
 		cellStatsPanel.update(getDatasets());
-		profilePanel.update(getDatasets());
-		
+		segmentProfilePanel.update(getDatasets());
+		cellBorderTagPanel.update(getDatasets());
 		
 		finest("Updated cell list panel");
 		updateCell(activeCell);
@@ -272,56 +232,13 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 		signalListPanel.update(cell);
 		cellStatsPanel.update(cell);
-		profilePanel.update(cell);
+		segmentProfilePanel.update(cell);
+		cellBorderTagPanel.update(cell);
 		outlinePanel.update(cell);
 		
 		
 	}
 	
-	
-//	private void updateSegmentIndex(boolean start, int index, NucleusBorderSegment seg, Nucleus n, SegmentedProfile profile) throws Exception{
-//		
-//		int startPos = start ? seg.getStartIndex() : seg.getEndIndex();
-//		int newStart = start ? index : seg.getStartIndex();
-//		int newEnd = start ? seg.getEndIndex() : index;
-//		
-//		int rawOldIndex =  n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, startPos);
-//
-//						
-//		if(profile.update(seg, newStart, newEnd)){
-//			n.setProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT, profile);
-//			
-//			/* Check the border tags - if they overlap the old index
-//			 * replace them. 
-//			 */
-//			int rawIndex = n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, index);
-//			log(Level.FINEST, "Testing border tags");
-//			log(Level.FINEST, "Updating to index "+index+" from reference point");
-//			log(Level.FINEST, "Raw old border point is index "+rawOldIndex);
-//			log(Level.FINEST, "Raw new border point is index "+rawIndex);
-//			
-//			if(n.hasBorderTag(rawOldIndex)){						
-//				BorderTag tagToUpdate = n.getBorderTag(rawOldIndex);
-//				log(Level.FINE, "Updating tag "+tagToUpdate);
-//				n.setBorderTag(tagToUpdate, rawIndex);	
-//				
-//				// Update intersection point if needed
-//				if(tagToUpdate.equals(BorderTag.ORIENTATION_POINT)){
-//					n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getBorderIndex(n.findOppositeBorder(n.getBorderTag(BorderTag.ORIENTATION_POINT))));
-//				}
-//				
-//			} else {
-//				log(Level.FINEST, "No border tag at index "+rawOldIndex+" from reference point");
-////				log(Level.FINEST, n.dumpInfo(Nucleus.ALL_POINTS));
-//			}
-//
-//			updateCell(activeCell);
-//			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-//		} else {
-//			log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
-//		}
-//	}
-			
 
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
@@ -337,7 +254,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	 */
 	protected class CellsListPanel extends JPanel {
 		
-		private static final long serialVersionUID = 1L;
 		private JTree tree;
 		
 		protected CellsListPanel(){
@@ -516,139 +432,25 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		}
 	}
 	
-	
-//	/**
-//	 * Show the profile for the nuclei in the given cell
-//	 *
-//	 */
-//	protected class ProfilePanel extends JPanel implements SignalChangeListener, ActionListener {
-//		
-//		private DraggableOverlayChartPanel profileChartPanel; // holds the chart with the cell
-//		private ProfileTypeOptionsPanel profileOptions  = new ProfileTypeOptionsPanel();
-//				
-//		protected ProfilePanel(){
-//
-//			this.setLayout(new BorderLayout());
-//			JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-//			
-//			profileChartPanel = new DraggableOverlayChartPanel(chart, null, false); 
-//			profileChartPanel.addSignalChangeListener(this);
-//			this.add(profileChartPanel, BorderLayout.CENTER);
-//			
-//			JPanel header = new JPanel(new FlowLayout());
-//			header.add(profileOptions);
-//			profileOptions.addActionListener(  e -> update(activeCell)   );
-//						
-//			this.add(header, BorderLayout.NORTH);
-//			
-//		}
-//		
-//		protected void update(Cell cell){
-//
-//			try{
-//				
-//				ProfileType type = profileOptions.getSelected();
-//
-//				if(cell==null){
-//					JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-//					profileChartPanel.setChart(chart);
-//					profileOptions.setEnabled(false);
-//
-//				} else {
-//
-//					profileOptions.setEnabled(true);
-//					Nucleus nucleus = cell.getNucleus();
-//					
-//					ChartOptions options = new ChartOptionsBuilder()
-//							.setSwatch(activeDataset().getSwatch())
-//							.setProfileType(type)
-//							.build();
-//
-////					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(nucleus, options);
-//
-////					profileChartPanel.setChart(chart, nucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT), false);
-//					
-//				}
-//
-//			} catch(Exception e){
-//				error("Error updating cell panel", e);
-//				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-//				profileChartPanel.setChart(chart);
-//				profileOptions.setEnabled(false);
-//			}
-//
-//		}
-//
-//		@Override
-//		public void signalChangeReceived(SignalChangeEvent event) {
-//			if(event.type().contains("UpdateSegment")){
-//
-//				try{
-////					
-//					String[] array = event.type().split("\\|");
-//					int selectedSegMidpoint = Integer.valueOf(array[1]);
-//					String index = array[2];
-//					int indexValue = Integer.valueOf(index);
-//
-//					Nucleus n = activeCell.getNucleus();
-//					SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
-//					
-//					/*
-//					 * The numbering of segments is adjusted for profile charts, so we can't rely on 
-//					 * the segment name stored in the profile.
-//					 * 
-//					 * Get the name via the midpoint index of the segment that was selected. 
-//					 */
-//					NucleusBorderSegment seg = profile.getSegmentContaining(selectedSegMidpoint);
-////					NucleusBorderSegment seg = profile.getSegment(segName);
-//
-//					updateSegmentIndex(true, indexValue, seg, n, profile);
-//					
-//					n.updateVerticallyRotatedNucleus();
-//					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
-//				} catch(Exception e){
-//					error("Error updating segment", e);
-//				}
-//
-//			}
-//			
-//			
-//		}
-//
-//		@Override
-//		public void actionPerformed(ActionEvent e) {
-//			update(activeCell);			
-//		}
-//
-//	}
-	
-	protected class SignalListPanel extends JPanel implements ListSelectionListener {
 		
-		private static final long serialVersionUID = 1L;
-				
+	protected class SignalListPanel extends JPanel implements ListSelectionListener {
+						
 		private JList<Object> signalList;
-		private JScrollPane scrollPane;
+		private JScrollPane   scrollPane;
 		
 		protected SignalListPanel(){
 			
 			this.setLayout(new BorderLayout());
 			
 			scrollPane = new JScrollPane();
-						
-			try {
-				
-				
-				signalList = new JList<Object>();
-				DefaultListModel<Object> model = new DefaultListModel<Object>();
+	
+			signalList = new JList<Object>();
+			ListModel<Object> model = createListModel(null);
 
-				signalList.setModel(model);
-				signalList.addListSelectionListener(this);
-				signalList.setEnabled(false);
-				
-			} catch (Exception e) {
-				error("Error in segment stats", e);
-			}
-						
+			signalList.setModel(model);
+			signalList.addListSelectionListener(this);
+			signalList.setEnabled(false);
+										
 			scrollPane.setViewportView(signalList);
 			Dimension size = new Dimension(120, 200);
 			scrollPane.setMinimumSize(size);
@@ -657,46 +459,43 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			this.add(scrollPane, BorderLayout.CENTER);
 		}
 		
+		private ListModel<Object> createListModel(Cell cell){
+			DefaultListModel<Object> model = new DefaultListModel<Object>();
+			
+			if(cell!=null){
+				SignalTableCell nucleusCell = new SignalTableCell(activeCell.getNucleus().getID(), "Nucleus");
+				model.addElement(nucleusCell);
+				for(UUID i : activeCell.getNucleus().getSignalCollection().getSignalGroupIDs()){
+					if(activeCell.getNucleus().getSignalCollection().hasSignal(i)){
+
+						SignalTableCell signalCell = new SignalTableCell(i, activeDataset().getCollection().getSignalGroup(i).getGroupName());
+						model.addElement(signalCell);
+					}
+				}
+			}
+			return model;
+		}
+		
 			
 		protected void update(Cell cell){
+			finest("Updating component list for cell");
+			ListModel<Object> model = createListModel(cell);
+			signalList.setModel(model);
 
 			if(cell!=null){
-				
-				activeComponent = activeCell.getNucleus();
-				
-				try {
-					DefaultListModel<Object> model = new DefaultListModel<Object>();
-					SignalTableCell nucleusCell = new SignalTableCell(activeCell.getNucleus().getID(), "Nucleus");
-					model.addElement(nucleusCell);
-					for(UUID i : activeCell.getNucleus().getSignalCollection().getSignalGroupIDs()){
-						if(activeCell.getNucleus().getSignalCollection().hasSignal(i)){
-							
-							SignalTableCell signalCell = new SignalTableCell(i, activeDataset().getCollection().getSignalGroup(i).getGroupName());
-							model.addElement(signalCell);
-						}
-					}
-					signalList.setModel(model);
-					signalList.setSelectedIndex(0);
-					signalList.setEnabled(true);
-
-				} catch (Exception e) {
-					error("Error updating signal list", e);
-				}
-			} else {
-				try {
-					DefaultListModel<Object> model = new DefaultListModel<Object>();
-
-					signalList.setModel(model);
-					signalList.setEnabled(false);
-				} catch (Exception e) {
-					error("Error updating signal list", e);
-				}
+				finest("Cell is not null");
+				signalList.removeListSelectionListener(this);
+				setActiveComponent(cell.getNucleus());
+				signalList.setSelectedIndex(0);
+				signalList.addListSelectionListener(this);
+				signalList.setEnabled(true);
 			}
 		}
 
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
 
+			finest("Component selection changed");
 //			if selected value is a valid file reference, load the file and update the
 			// nucleus annotation
 			int row = signalList.getSelectedIndex();
@@ -704,21 +503,25 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			if(row>=0){ // -1 if nothing selected
 				SignalTableCell cell   =  (SignalTableCell) signalList.getModel().getElementAt(row);
 				String signalGroupName = cell.toString();
+				
+				CellularComponent c = null;
 
 				if(signalGroupName.equals("Nucleus")){
 					
-					activeComponent = activeCell.getNucleus();
+					c = activeCell.getNucleus();
 
 				} else {
 
 					UUID signalGroup = cell.getID();
 
 					for(NuclearSignal n : activeCell.getNucleus().getSignalCollection().getSignals(signalGroup)){
-						activeComponent = n;
+						c = n;
 					}
 
 				}
-				outlinePanel.update(activeCell);
+				finest("Component selected is "+signalGroupName);
+				setActiveComponent(c);
+				updateCell(activeCell);
 			}
 			
 		}
@@ -727,7 +530,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
-
+		finest("Cell list selection changed");
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) arg0.getPath().getLastPathComponent();
 		NodeData data = (NodeData) node.getUserObject();
 
@@ -737,6 +540,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			try{
 				
 				activeCell = activeDataset().getCollection().getCell(cellID);
+				finest("Updating selected cell to "+activeCell.getNucleus().getNameAndNumber());
 				updateCell(activeCell);
 				
 			} catch (Exception e1){
