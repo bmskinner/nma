@@ -19,12 +19,10 @@
 package gui.tabs;
 
 import gui.DatasetEvent.DatasetMethod;
-import gui.InterfaceEvent.InterfaceMethod;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import gui.components.DraggableOverlayChartPanel;
-import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
+import gui.tabs.cells.AbstractCellDetailPanel;
 import gui.tabs.cells.CellBorderTagPanel;
 import gui.tabs.cells.CellOutlinePanel;
 import gui.tabs.cells.CellProfilePanel;
@@ -32,11 +30,8 @@ import gui.tabs.cells.CellStatsPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
@@ -46,7 +41,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -68,36 +62,24 @@ import javax.swing.tree.TreeModel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
-import charting.charts.ConsensusNucleusChartFactory;
-import charting.charts.MorphologyChartFactory;
 import charting.datasets.SignalTableCell;
 import charting.options.ChartOptions;
-import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import components.Cell;
 import components.CellularComponent;
-import components.generic.BorderTag;
-import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.nuclear.NuclearSignal;
-import components.nuclear.NucleusBorderSegment;
-import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
-public class CellDetailPanel extends DetailPanel implements SignalChangeListener, TreeSelectionListener {
-	
-	private Cell activeCell = null;
-	
-	private CellularComponent activeComponent = null; 
-	
+public class CellDetailPanel extends AbstractCellDetailPanel implements SignalChangeListener, TreeSelectionListener {
+		
 	private JTabbedPane tabPane; 
 	
-	protected CellsListPanel	cellsListPanel;		// the list of cells in the active dataset
-	protected CellProfilePanel	segmentProfilePanel = new CellProfilePanel(); 		// the nucleus angle profile
-	protected CellBorderTagPanel cellBorderTagPanel = new CellBorderTagPanel();
-	protected CellOutlinePanel 	outlinePanel        = new CellOutlinePanel(); 		// the outline of the cell and detected objects
-	protected CellStatsPanel 	cellStatsPanel      = new CellStatsPanel();		// the stats table
-	protected SignalListPanel 	signalListPanel;	// choose which background image to display
+	protected CellsListPanel	 cellsListPanel;		// the list of cells in the active dataset
+	protected CellProfilePanel	 segmentProfilePanel = new CellProfilePanel(); 		// the nucleus angle profile
+	protected CellBorderTagPanel cellBorderTagPanel  = new CellBorderTagPanel();
+	protected CellOutlinePanel 	 outlinePanel        = new CellOutlinePanel(); 		// the outline of the cell and detected objects
+	protected CellStatsPanel 	 cellStatsPanel      = new CellStatsPanel();		// the stats table
+	protected ComponentListPanel signalListPanel;	// choose which background image to display
 
 	public CellDetailPanel() {
 
@@ -163,7 +145,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		constraints.gridwidth = 1;
 		constraints.weightx = 0.5;
 		constraints.weighty = 0.4;
-		signalListPanel = new SignalListPanel();
+		signalListPanel = new ComponentListPanel();
 		signalListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		panel.add(signalListPanel, constraints);
 		
@@ -173,22 +155,14 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	}
 
 	
-
-	private void setActiveComponent(CellularComponent c){
-		this.activeComponent = c;
+	@Override
+	public void setActiveComponent(CellularComponent c){
+		super.setActiveComponent(c);
 		outlinePanel.setActiveComponent(activeComponent);
 		cellStatsPanel.setActiveComponent(activeComponent);
 		segmentProfilePanel.setActiveComponent(activeComponent);
 	}
-			
-	public CellularComponent getActiveComponent(){
-		return this.activeComponent;
-	}
-	
-	public Cell getActiveCell(){
-		return this.activeCell;
-	}
-	
+				
 	@Override
 	protected void updateSingle() {
 		cellsListPanel.updateDataset( activeDataset()  );
@@ -433,14 +407,14 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	}
 	
 		
-	protected class SignalListPanel extends JPanel implements ListSelectionListener {
+	protected class ComponentListPanel extends JPanel implements ListSelectionListener {
 						
 		private JList<Object> signalList;
 		private JScrollPane   scrollPane;
 		private Cell componentCell = null;
 		private String componentString = null; // store the active component name, and use it if available when cells change
 		
-		protected SignalListPanel(){
+		protected ComponentListPanel(){
 			
 			this.setLayout(new BorderLayout());
 			

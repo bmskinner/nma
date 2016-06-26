@@ -1014,7 +1014,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 
 
-	public void reverse() throws Exception{
+	public void reverse(){
 		
 		for(ProfileType type : profileMap.keySet()){
 

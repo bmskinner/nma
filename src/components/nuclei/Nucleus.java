@@ -435,7 +435,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * profile, the border list and updates the border tags to the new positions
 	 * @throws Exception
 	 */
-	public void reverse() throws Exception;
+	public void reverse();
 	
 	
 	/**

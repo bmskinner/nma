@@ -7,6 +7,7 @@ import java.awt.FlowLayout;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
@@ -41,6 +42,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 	private ProfileTypeOptionsPanel profileOptions  = new ProfileTypeOptionsPanel();
 	
 	private JPanel buttonsPanel;
+	private JButton flipButton;
 	
 	public CellProfilePanel() {
 		super();
@@ -96,6 +98,18 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		panel.add(profileOptions);
 		profileOptions.addActionListener(  e -> update(activeCell)   );
 		
+		flipButton = new JButton("Reverse profile");
+		panel.add(flipButton);
+		flipButton.setEnabled(false);
+		
+		flipButton.addActionListener( e -> {
+			this.setAnalysing(true);
+			activeCell.getNucleus().reverse();
+			activeDataset().getCollection().getProfileManager().createProfileCollections();
+			this.setAnalysing(false);
+			fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+			
+		} );
 		
 		return panel;
 		
@@ -104,6 +118,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 	
 	public void setButtonsEnabled(boolean b){
 		profileOptions.setEnabled(b);
+		flipButton.setEnabled(b);
 	}
 	
 	public void update(Cell cell){

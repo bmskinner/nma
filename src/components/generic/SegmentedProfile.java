@@ -700,7 +700,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	}
 	
 	@Override
-	public void reverse() throws Exception {
+	public void reverse() {
 		super.reverse();
 		
 		// reverse the segments
@@ -719,7 +719,11 @@ public class SegmentedProfile extends Profile implements Serializable {
 			// since the order is reversed, add them to the top of the new list
 			segments.add(0,newSeg);
 		}
-		NucleusBorderSegment.linkSegments(segments);
+		try {
+			NucleusBorderSegment.linkSegments(segments);
+		} catch (ProfileException e) {
+			error("Cannot link segments in reversed profile", e);
+		}
 		this.setSegments(segments);
 		
 	}

@@ -472,7 +472,7 @@ public class Profile implements Serializable, Loggable {
 	 * Reverse the profile. Does not copy.
 	 * @throws Exception 
 	 */
-	public void reverse() throws Exception{
+	public void reverse(){
 
 		double tmp;
 		for (int i = 0; i < this.array.length / 2; i++) {

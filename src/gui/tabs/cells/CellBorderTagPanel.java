@@ -270,8 +270,15 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 					int newTagIndex = activeProfileIndex;
 
 					log("Updating nucleus "+tag+" to index "+newTagIndex);
+					this.setAnalysing(true);
 					
 					activeCell.getNucleus().setBorderTag(BorderTag.REFERENCE_POINT, tag, newTagIndex);
+					
+					if(tag.equals(BorderTag.REFERENCE_POINT)){
+						// Update the profile aggregate to use the new RP
+						activeDataset().getCollection().getProfileManager().createProfileCollections();
+					}
+					this.setAnalysing(false);
 					this.clearChartCache();
 					this.fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());//.refreshChartCache();
 
