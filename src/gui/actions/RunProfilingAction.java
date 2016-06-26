@@ -67,7 +67,7 @@ public class RunProfilingAction extends ProgressableAction {
 		
 
 			this.setProgressMessage(message);
-			this.cooldown();
+//			this.cooldown();
 
 			worker = new DatasetProfiler(this.dataset);
 			worker.addPropertyChangeListener(this);
@@ -84,7 +84,7 @@ public class RunProfilingAction extends ProgressableAction {
 
 		// ensure the progress bar gets hidden even if it is not removed
 		this.setProgressBarVisible(false);
-
+//		cleanup();
 		// The analysis takes place in a new thread to accomodate refolding.
 		// See specific comment in RunSegmentationAction
 		Thread thr = new Thread(){

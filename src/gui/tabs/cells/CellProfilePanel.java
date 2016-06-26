@@ -132,7 +132,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
 				chartPanel.setChart(chart);
 				rangePanel.setChart(chart);
-				profileOptions.setEnabled(false);
+				setButtonsEnabled(false);
 
 			} else {
 				
@@ -179,7 +179,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				
 				rangePanel.setChart(rangeChart);
 
-				profileOptions.setEnabled(true);				
+				setButtonsEnabled(true);		
 			}
 
 		} catch(Exception e){
@@ -187,7 +187,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 			JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
 			chartPanel.setChart(chart);
 			rangePanel.setChart(chart);
-			profileOptions.setEnabled(false);
+			setButtonsEnabled(false);
 		}
 
 	}

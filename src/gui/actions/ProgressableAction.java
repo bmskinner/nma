@@ -78,6 +78,7 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 		this.progressBar 	= new JProgressBar(0, 100);
 		this.progressBar.setString(barMessage);
 		this.progressBar.setStringPainted(true);
+		this.progressBar.setIndeterminate(true);
 		this.progressBar.addMouseListener(this);
 
 		this.mw 			= mw;
@@ -258,8 +259,8 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 	 */
 	public void cooldown(){
 		this.progressBar.setIndeterminate(true);
-		logPanel.revalidate();
-		logPanel.repaint();
+//		logPanel.revalidate();
+//		logPanel.repaint();
 	}
 	
 	public synchronized boolean isDone(){
