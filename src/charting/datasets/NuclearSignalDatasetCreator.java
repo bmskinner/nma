@@ -24,6 +24,7 @@ import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -53,6 +54,7 @@ import components.generic.MeasurementScale;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
+import components.nuclear.SignalGroup;
 import components.nuclei.Nucleus;
 import gui.Labels;
 import gui.components.ColourSelecter;
@@ -101,32 +103,50 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			CellCollection collection = dataset.getCollection();
 			maxChannels = Math.max(collection.getSignalManager().getSignalGroupIDs().size(), maxChannels);
 		}
+		
 		if(maxChannels>0){
+			
+			Object[] rowNameBlock = {
+					"",
+					"Group name",
+					"Channel",
+					"Source",
+					"Threshold",
+					"Min size",
+					"Max fraction",
+					"Min circ",
+					"Max circ",
+					"Detection mode"
+			};
 
 			// create the row names
 			fieldNames.add("Number of signal groups");
 
 			for(int i=0;i<maxChannels;i++){
-				fieldNames.add("");
-				fieldNames.add("Group name");
-				fieldNames.add("Channel");
-				fieldNames.add("Source");
-				fieldNames.add("Threshold");
-				fieldNames.add("Min size");
-				fieldNames.add("Max fraction");
-				fieldNames.add("Min circ");
-				fieldNames.add("Max circ");
-				fieldNames.add("Detection mode");
+				
+				for(Object o : rowNameBlock){
+					fieldNames.add(o);
+				}
+//				fieldNames.add("");
+//				fieldNames.add("Group name");
+//				fieldNames.add("Channel");
+//				fieldNames.add("Source");
+//				fieldNames.add("Threshold");
+//				fieldNames.add("Min size");
+//				fieldNames.add("Max fraction");
+//				fieldNames.add("Min circ");
+//				fieldNames.add("Max circ");
+//				fieldNames.add("Detection mode");
 			}
 
-			int numberOfRowsPerSignalGroup = fieldNames.size()/ (maxChannels+1);
+			int numberOfRowsPerSignalGroup = rowNameBlock.length;
 			model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
 
 			// make a new column for each collection
 			for(AnalysisDataset dataset : list){
 
-				List<Object> rowData = makeDetectionSettingsRowDataForDataset(dataset, maxChannels, numberOfRowsPerSignalGroup);
-				model.addColumn(dataset.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
+				List<Object> columnData = makeDetectionSettingsRowDataForDataset(dataset, maxChannels, numberOfRowsPerSignalGroup);
+				model.addColumn(dataset.getName(), columnData.toArray(new Object[0])); // separate row block for each channel
 			}
 		} else {
 			model.addColumn("No data loaded");
@@ -156,12 +176,37 @@ public class NuclearSignalDatasetCreator implements Loggable {
          */
         
         if(dataset.hasMergeSources()){
-            for(int i=0;i<signalGroupCount;i++){
-                rowData.add("");
-                for(int j=0; j<rowsPerSignalGroup;j++){
+        	
+        	
+        	Collection<SignalGroup> signalGroups = collection.getSignalManager().getSignalGroups();
+        	
+        	int j=0;
+            for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+            	SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
+                
+                Color colour = collection.getSignalGroup(signalGroup).hasColour()
+                        ? collection.getSignalGroup(signalGroup).getGroupColour()
+                        : ColourSelecter.getSegmentColor(j++);
+                
+                cell.setColor(colour);
+                
+                rowData.add("");// empty row for colour
+                rowData.add(cell);  // group name
+                
+                
+                for(int i=0; i<rowsPerSignalGroup-2;i++){ // rest are NA
                     rowData.add("N/A - merge");
                 }
             }
+            
+            // Add blank rows for any empty spaces in the table
+            int remaining = signalGroupCount - signalGroups.size();
+            for(int i=0;i<remaining;i++){
+              for(int k=0; k<rowsPerSignalGroup;k++){
+                  rowData.add("");
+              }
+          }
+            
         } else {
             
             int signalGroupNumber = 0; // Store the number of signal groups processed from this dataset

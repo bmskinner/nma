@@ -41,7 +41,7 @@ public class SegmentedProfileTest {
 	public static SegmentedProfile createNucleusProfile() throws Exception{
 		
 		Nucleus n = NucleusTest.createTestRodentSpermNucleus();
-		SegmentedProfile profile = n.getProfile(ProfileType.REGULAR);	
+		SegmentedProfile profile = n.getProfile(ProfileType.ANGLE);	
 		return profile;
 	}
 	
