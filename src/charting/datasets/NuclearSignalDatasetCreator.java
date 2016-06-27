@@ -127,16 +127,6 @@ public class NuclearSignalDatasetCreator implements Loggable {
 				for(Object o : rowNameBlock){
 					fieldNames.add(o);
 				}
-//				fieldNames.add("");
-//				fieldNames.add("Group name");
-//				fieldNames.add("Channel");
-//				fieldNames.add("Source");
-//				fieldNames.add("Threshold");
-//				fieldNames.add("Min size");
-//				fieldNames.add("Max fraction");
-//				fieldNames.add("Min circ");
-//				fieldNames.add("Max circ");
-//				fieldNames.add("Detection mode");
 			}
 
 			int numberOfRowsPerSignalGroup = rowNameBlock.length;
@@ -145,7 +135,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			// make a new column for each collection
 			for(AnalysisDataset dataset : list){
 
-				List<Object> columnData = makeDetectionSettingsRowDataForDataset(dataset, maxChannels, numberOfRowsPerSignalGroup);
+				List<Object> columnData = makeDetectionSettingsColumn(dataset, maxChannels, numberOfRowsPerSignalGroup);
 				model.addColumn(dataset.getName(), columnData.toArray(new Object[0])); // separate row block for each channel
 			}
 		} else {
@@ -156,7 +146,17 @@ public class NuclearSignalDatasetCreator implements Loggable {
     }
 
 
-    private List<Object> makeDetectionSettingsRowDataForDataset(AnalysisDataset dataset, int signalGroupCount, int rowsPerSignalGroup){
+    /**
+     * Create a column of signal group information for the given dataset. 
+     * If the number of signal groups in the dataset is less than the number
+     * of signal groups in the table total, then the empty spaces will be 
+     * added explicitly to the column 
+     * @param dataset the dataset
+     * @param signalGroupCount the total number of signal groups in the table
+     * @param rowsPerSignalGroup the number of rows a signal group takes up
+     * @return a list of rows for a table.
+     */
+    private List<Object> makeDetectionSettingsColumn(AnalysisDataset dataset, int signalGroupCount, int rowsPerSignalGroup){
         
         // format the numbers and make into a tablemodel
         DecimalFormat df = new DecimalFormat("#0.00"); 
@@ -327,7 +327,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
             for( UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 
 								
-                String groupLabel = collection.getSignalManager().getSignalGroupName(signalGroup)+"_"+stat.toString();
+                String groupLabel = collection.getName()+"_"+collection.getSignalManager().getSignalGroupName(signalGroup)+"_"+stat.toString();
 
                 double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
                 KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(values, 0.001);
@@ -364,7 +364,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 							Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
 
 
-	                ds.addSeries( "Group_"+signalGroup+"_"+stat.toString(), data);
+	                ds.addSeries( groupLabel, data);
 				}
 			
 		}
@@ -749,14 +749,19 @@ public class NuclearSignalDatasetCreator implements Loggable {
      */
     public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) {
         
-        if(options.isSingleDataset()){
-            return createSingleDatasetSignalStatisticBoxplotDataset(options);
-        }
-        
-        /*
-         * TODO: make multi dataset version
-         */
-        return createSingleDatasetSignalStatisticBoxplotDataset(options);
+    	return createMultiDatasetSignalStatisticBoxplotDataset(options);
+    	
+//        if(options.isSingleDataset()){
+//        	finest("Making single signal statistic dataset");
+//            return createMultiDatasetSignalStatisticBoxplotDataset(options);
+//        }
+//        
+//        if(options.isMultipleDatasets()){
+//        	finest("Making multiple signal statistic dataset");
+//        	return createMultiDatasetSignalStatisticBoxplotDataset(options);
+//        }
+//        
+//        return createSingleDatasetSignalStatisticBoxplotDataset(options);
         
     }
     
@@ -766,32 +771,72 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a boxplot dataset
 	 * @throws Exception 
 	 */
-    private BoxAndWhiskerCategoryDataset createSingleDatasetSignalStatisticBoxplotDataset(ChartOptions options) {
+//    private BoxAndWhiskerCategoryDataset createSingleDatasetSignalStatisticBoxplotDataset(ChartOptions options) {
+//
+//
+//		OutlierFreeBoxAndWhiskerCategoryDataset result = new OutlierFreeBoxAndWhiskerCategoryDataset();
+//		SignalStatistic stat = (SignalStatistic) options.getStat();
+//		
+//        CellCollection collection = options.firstDataset().getCollection();
+//
+//		
+//        for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+//
+//            double[] values = collection.getSignalManager().getSignalStatistics(stat, options.getScale(), signalGroup);
+//            /*
+//             * For charting, use offset angles, otherwise the boxplots will fail on wrapped signals
+//             */
+//            if(stat.equals(SignalStatistic.ANGLE)){
+//                values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
+//            }
+//
+//            List<Double> list = new ArrayList<Double>();
+//            for(double value : values){
+//                list.add(value);
+//            }
+//
+//			result.add(list, "Group_"+signalGroup, stat.toString());
+//		}
+//		return result;
+//	}
+    
+    /**
+     * Create a boxplot dataset for signal statistics for a single analysis dataset
+	 * @param dataset the AnalysisDataset to get signal info from
+	 * @return a boxplot dataset
+	 * @throws Exception 
+	 */
+    private BoxAndWhiskerCategoryDataset createMultiDatasetSignalStatisticBoxplotDataset(ChartOptions options) {
 
 
 		OutlierFreeBoxAndWhiskerCategoryDataset result = new OutlierFreeBoxAndWhiskerCategoryDataset();
 		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
-        CellCollection collection = options.firstDataset().getCollection();
+ 
+        for(AnalysisDataset d : options.getDatasets()){
+        	
+        	CellCollection collection = d.getCollection();
 
-		
-        for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+        	for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+        		
+//        		String groupName = collection.getName()+"_"+collection.getSignalManager().getSignalGroupName(signalGroup);
 
-            double[] values = collection.getSignalManager().getSignalStatistics(stat, options.getScale(), signalGroup);
-            /*
-             * For charting, use offset angles, otherwise the boxplots will fail on wrapped signals
-             */
-            if(stat.equals(SignalStatistic.ANGLE)){
-                values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
-            }
+        		double[] values = collection.getSignalManager().getSignalStatistics(stat, options.getScale(), signalGroup);
+        		/*
+        		 * For charting, use offset angles, otherwise the boxplots will fail on wrapped signals
+        		 */
+        		if(stat.equals(SignalStatistic.ANGLE)){
+        			values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
+        		}
 
-            List<Double> list = new ArrayList<Double>();
-            for(double value : values){
-                list.add(value);
-            }
+        		List<Double> list = new ArrayList<Double>();
+        		for(double value : values){
+        			list.add(value);
+        		}
 
-			result.add(list, "Group_"+signalGroup, stat.toString());
-		}
+        		result.add(list, "Group_"+signalGroup, collection.getName());
+        	}
+        }
 		return result;
 	}
 		

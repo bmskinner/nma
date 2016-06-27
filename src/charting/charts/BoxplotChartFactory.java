@@ -177,6 +177,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 		
 		BoxAndWhiskerCategoryDataset ds = NuclearSignalDatasetCreator.getInstance().createSignalStatisticBoxplotDataset(options);
 
+		
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, 
 				null, 
 				options.getStat().label(options.getScale()), 
@@ -186,21 +187,49 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 		formatBoxplot(boxplot);
 		
 		CategoryPlot plot = boxplot.getCategoryPlot();
+		
+		plot.getDomainAxis().setCategoryMargin(0.10);
+		plot.getDomainAxis().setLowerMargin(0.05);
+		plot.getDomainAxis().setUpperMargin(0.05);
+		
 		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
-
-		for(int series=0;series<ds.getRowCount();series++){
-			String name = (String) ds.getRowKey(series);
-            UUID signalGroup = getSignalGroupFromLabel(name);
+		renderer.setItemMargin(0.05);
+		renderer.setMaximumBarWidth(0.5);
 
 
-            Color color = options.firstDataset().getCollection().getSignalGroup(signalGroup).hasColour()
-                    ? options.firstDataset().getCollection().getSignalGroup(signalGroup).getGroupColour()
-                    : ColourSelecter.getSegmentColor(series);
-                        
+
+		
+		int series=0;
+		for(int column=0; column<ds.getColumnCount(); column++){
+	
+			// The column is the dataset
+//			String datasetName = ds.getColumnKey(column).toString();
+//			log("Looking at dataset "+datasetName);
+			AnalysisDataset d  = options.getDatasets().get(column);
+						
+			for(int row=0; row<ds.getRowCount(); row++){
+												
+//				log("Series "+series);
+				String name = (String) ds.getRowKey(row);
+//				log("Looking at row "+name);
+				
+				UUID signalGroup = getSignalGroupFromLabel(name);
+				
+				// Not every dataset will have every row.
+				if(d.getCollection().hasSignalGroup(signalGroup)){
 
 
-					renderer.setSeriesPaint(series, color);
-		}		
+					Color color = d.getCollection().getSignalGroup(signalGroup).hasColour()
+							    ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
+								: ColourSelecter.getSegmentColor(row);
+							    
+					    renderer.setSeriesPaint(series, color);
+						series++;
+				}
+
+				
+			}		
+		}
 		return boxplot;
 	}
 		
