@@ -101,7 +101,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 
 	@Override
 	protected void updateMultiple() {
-		 updateNull();
+		updateSingle();
 		
 	}
 

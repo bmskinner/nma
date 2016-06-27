@@ -286,9 +286,12 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a histogram of angles
 	 * @throws Exception 
 	 */
-	public HistogramDataset createSignaStatisticHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception{
-		HistogramDataset ds = new HistogramDataset();
+	public List<HistogramDataset> createSignaStatisticHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception{
+		
+		List<HistogramDataset> result = new ArrayList<HistogramDataset>();
+		
 		for(AnalysisDataset dataset : list){
+			HistogramDataset ds = new HistogramDataset();
 			CellCollection collection = dataset.getCollection();
 			
 			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()){
@@ -303,9 +306,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
 					}
 				}
 			}
+			result.add(ds);
 			
 		}
-		return ds;
+		return result;
 	}
 	
 	
@@ -316,18 +320,23 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a charting dataset
 	 * @throws Exception
 	 */
-	public DefaultXYDataset createSignalDensityHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception {
-		DefaultXYDataset ds = new DefaultXYDataset();
+	public List<DefaultXYDataset> createSignalDensityHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception {
+		
+		List<DefaultXYDataset> result = new ArrayList<DefaultXYDataset>();
+		
 		
 		int[] minMaxRange = calculateMinAndMaxRange(list, stat, scale);
 		
 		for(AnalysisDataset dataset : list){
+			
+			DefaultXYDataset ds = new DefaultXYDataset();
+			
 			CellCollection collection = dataset.getCollection();
 			
             for( UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 
 								
-                String groupLabel = collection.getName()+"_"+collection.getSignalManager().getSignalGroupName(signalGroup)+"_"+stat.toString();
+                String groupLabel = "Group_"+signalGroup+"_"+stat.toString();
 
                 double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
                 KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(values, 0.001);
@@ -366,10 +375,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 	                ds.addSeries( groupLabel, data);
 				}
-			
+			result.add(ds);
 		}
 
-		return ds;
+		return result;
 	}
 	
 	/**

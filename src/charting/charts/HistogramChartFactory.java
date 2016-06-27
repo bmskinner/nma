@@ -35,6 +35,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -194,17 +195,59 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		
 		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
-		HistogramDataset ds = options.hasDatasets() 
-							? NuclearSignalDatasetCreator.getInstance().createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
-							: null;
+		
+		List<HistogramDataset> list = options.hasDatasets() 
+									? NuclearSignalDatasetCreator.getInstance().createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
+									: null;
+									
+									
 				
-		JFreeChart chart = createHistogram(ds, stat.label(options.getScale()), "Count");
-		if(ds!=null && options.hasDatasets()){
+		JFreeChart chart = createHistogram(list.get(0), stat.label(options.getScale()), "Count");
+		
+		
+		if(list!=null && options.hasDatasets()){
+			
 			XYPlot plot = chart.getXYPlot();
 			if(stat.equals(SignalStatistic.ANGLE)){
 				plot.getDomainAxis().setRange(0,360);
 			}
-			setSeriesPropertiesForSignalHistogram(chart, options.firstDataset());	
+			
+			int datasetCount = 0;
+			for(HistogramDataset ds : list){
+			
+				plot.setDataset(datasetCount, ds);
+				
+				AnalysisDataset d = options.getDatasets().get(datasetCount);
+				
+				XYBarRenderer rend = new XYBarRenderer();
+				rend.setBarPainter(new StandardXYBarPainter());
+				rend.setShadowVisible(false);
+				
+				plot.setRenderer(datasetCount, rend);
+
+				int seriesCount = ds.getSeriesCount();
+				
+				for (int j = 0; j < seriesCount; j++) {
+					
+					String name = ds.getSeriesKey(j).toString();
+
+					UUID signalGroup = getSignalGroupFromLabel(name);
+					
+					
+					
+					rend.setSeriesVisibleInLegend(j, false);
+					rend.setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+					
+					Color colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
+								 ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
+								 : ColourSelecter.getSegmentColor(j);
+
+
+					rend.setSeriesPaint(j, colour);
+				}	
+				datasetCount++;
+			}
+			
 		}
 		return chart;
 	}
@@ -220,79 +263,90 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart createSignalDensityStatsChart(ChartOptions options) throws Exception{
 	
-		DefaultXYDataset ds = null;
-		
-		if (options.hasDatasets()){
-			
-			SignalStatistic stat = (SignalStatistic) options.getStat();
-			ds = NuclearSignalDatasetCreator.getInstance().createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale());
+		if( ! options.hasDatasets()){
+			return this.makeEmptyChart();
 		}
+		
+		SignalStatistic stat = (SignalStatistic) options.getStat();
+		
+		List<DefaultXYDataset> list = NuclearSignalDatasetCreator.getInstance().createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale());
+
 
 		String xLabel = options.getStat().label(options.getScale());
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
-				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,
+				                xLabel, "Probability", list.get(0), PlotOrientation.VERTICAL, true, true,
 				                false);
 		
 		XYPlot plot = chart.getXYPlot();
 		
 		plot.setBackgroundPaint(Color.WHITE);
 		
-		if(ds!=null && options.hasDatasets()){
+		if( !list.isEmpty()){
+				
+			int datasetCount = 0;
+			for(DefaultXYDataset ds : list){
+				
+				plot.setDataset(datasetCount, ds);
+				XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
+				rend.setBaseLinesVisible(true);
+				rend.setBaseShapesVisible(false);
+				plot.setRenderer(datasetCount, rend);
 						
-			setDomainRange(plot, ds);
-						
-			for (int j = 0; j < ds.getSeriesCount(); j++) {
+				for (int j = 0; j < ds.getSeriesCount(); j++) {
+	
+					rend.setSeriesVisibleInLegend(j, false);
+					rend.setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+	
+					String seriesKey = ds.getSeriesKey(j).toString();
+	                UUID signalGroup = getSignalGroupFromLabel(seriesKey);
+	
+//					String seriesName = seriesKey.replacseFirst(options.getStat().toString()+"_", "");
+	
+					Color colour = ColourSelecter.getSegmentColor(j);
+					
+					AnalysisDataset d = options.getDatasets().get(datasetCount);
 
-				plot.getRenderer().setSeriesVisibleInLegend(j, false);
-				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
-
-				String seriesKey = (String) ds.getSeriesKey(j);
-                UUID signalGroup = getSignalGroupFromLabel(seriesKey);
-
-				String seriesName = seriesKey.replaceFirst(options.getStat().toString()+"_", "");
-
-				Color colour = ColourSelecter.getSegmentColor(j);
-				for(AnalysisDataset dataset : options.getDatasets()){
-
-					if(seriesName.equals(dataset.getName())){
-                        colour = dataset.getCollection().getSignalGroup(signalGroup).hasColour()
-                                ? dataset.getCollection().getSignalGroup(signalGroup).getGroupColour()
-                                : ColourSelecter.getSegmentColor(j);
+                    colour  = d.getCollection().getSignalGroup(signalGroup).hasColour()
+                            ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
+                            : ColourSelecter.getSegmentColor(j);
 
 
-						plot.getRenderer().setSeriesPaint(j, colour);
+                    rend.setSeriesPaint(j, colour);
 
-					}
+	
 				}
-
+				datasetCount++;
 			}
-
+			setDomainRange(plot, list);
 		}
+		
+		
+		
 		return chart;
 	}
 	
 	
-	private void setSeriesPropertiesForSignalHistogram(JFreeChart chart, AnalysisDataset dataset){
-		
-		if(dataset.getCollection().getSignalManager().hasSignals()){
-			XYPlot plot = chart.getXYPlot();
-			int seriesCount = plot.getDataset().getSeriesCount();
-			for (int j = 0; j < seriesCount; j++) {
-				String name = (String) plot.getDataset().getSeriesKey(j);
-//				int seriesGroup = getIndexFromLabel(name);
-				UUID signalGroup = getSignalGroupFromLabel(name);
-				plot.getRenderer().setSeriesVisibleInLegend(j, false);
-				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
-                Color colour = dataset.getCollection().getSignalGroup(signalGroup).hasColour()
-                        ? dataset.getCollection().getSignalGroup(signalGroup).getGroupColour()
-                        : ColourSelecter.getSegmentColor(j);
-
-
-				plot.getRenderer().setSeriesPaint(j, colour);
-			}	
-		}
-	}
+//	private void setSeriesPropertiesForSignalHistogram(JFreeChart chart, AnalysisDataset dataset){
+//		
+//		if(dataset.getCollection().getSignalManager().hasSignals()){
+//			XYPlot plot = chart.getXYPlot();
+//			int seriesCount = plot.getDataset().getSeriesCount();
+//			for (int j = 0; j < seriesCount; j++) {
+//				String name = (String) plot.getDataset().getSeriesKey(j);
+////				int seriesGroup = getIndexFromLabel(name);
+//				UUID signalGroup = getSignalGroupFromLabel(name);
+//				plot.getRenderer().setSeriesVisibleInLegend(j, false);
+//				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+//                Color colour = dataset.getCollection().getSignalGroup(signalGroup).hasColour()
+//                        ? dataset.getCollection().getSignalGroup(signalGroup).getGroupColour()
+//                        : ColourSelecter.getSegmentColor(j);
+//
+//
+//				plot.getRenderer().setSeriesPaint(j, colour);
+//			}	
+//		}
+//	}
 	
 
 	/**
@@ -552,10 +606,40 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @param ds
 	 */
 	private void setDomainRange(XYPlot plot, XYDataset ds){
-		Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
-		Number minX = DatasetUtilities.findMinimumDomainValue(ds);
-		if(maxX.doubleValue()>minX.doubleValue()){ // stop if 0 and 0
-			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());
+
+			Number max = DatasetUtilities.findMaximumDomainValue(ds);
+			Number min = DatasetUtilities.findMinimumDomainValue(ds);
+			if(max.doubleValue()>min.doubleValue()){ // stop if 0 and 0 or no values found
+				plot.getDomainAxis().setRange(min.doubleValue(), max.doubleValue());
+			}		
+	}
+	
+	/**
+	 * Update the range of the plot domain axis to the min and max
+	 * values within the given dataset
+	 * @param plot
+	 * @param ds
+	 */
+	private void setDomainRange(XYPlot plot, List<DefaultXYDataset> list){
+		
+		Number min = Double.MAX_VALUE;
+		Number max = Double.MIN_VALUE;
+		
+		for(XYDataset ds : list){
+			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
+			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
+			
+			if(maxX==null || minX==null){
+				continue;
+			}
+			
+			min = min.doubleValue() < minX.doubleValue() ? min : minX;
+			max = max.doubleValue() > maxX.doubleValue() ? max : maxX;
+			
+		}
+		
+		if(max.doubleValue()>min.doubleValue()){ // stop if 0 and 0 or no values found
+			plot.getDomainAxis().setRange(min.doubleValue(), max.doubleValue());
 		}
 	}
 
