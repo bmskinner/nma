@@ -416,8 +416,15 @@ public class SignalCollection implements Serializable, Loggable {
 	 * @return the count
 	 */
 	public int numberOfSignals(UUID signalGroup){
-		checkSignalGroup(signalGroup);
-		return collection.get(signalGroup).size();
+		if(signalGroup==null){
+			return 0;
+		}
+		
+		if(this.hasSignal(signalGroup)){
+			return collection.get(signalGroup).size();
+		} else {
+			return 0;
+		}
 	}
 	
 //	/**
