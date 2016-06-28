@@ -146,7 +146,7 @@ private static NucleusTableDatasetCreator instance = null;
 
 		DefaultTableModel model = new DefaultTableModel();
 
-		List<Object> fieldNames = new ArrayList<Object>(0);
+//		List<Object> fieldNames = new ArrayList<Object>(0);
 		if(dataset==null){
 			model.addColumn("No data loaded");
 
@@ -168,16 +168,29 @@ private static NucleusTableDatasetCreator instance = null;
 //			}
 			
 			// create the row names
-			fieldNames.add("Colour");
-			fieldNames.add("Length");
-			fieldNames.add("Start index");
-			fieldNames.add("End index");
-			fieldNames.add("Mean length ("+ scale+")");
-			fieldNames.add("Mean length 95% CI ("+ scale+")");
-			fieldNames.add("Length std err. ("+ scale+")");
-			fieldNames.add("Length p(unimodal)");
+			Object[] fieldNames = {
+					"Colour",
+					"Length",
+					"Start index",
+					"End index",
+					"Mean length ("+ scale+")",
+					"Mean length 95% CI ("+ scale+")",
+					"Length std err. ("+ scale+")",
+					"Length p(unimodal)"
+			};
+			
+//			fieldNames.add("Colour");
+//			fieldNames.add("Length");
+//			fieldNames.add("Start index");
+//			fieldNames.add("End index");
+//			fieldNames.add("Mean length ("+ scale+")");
+//			fieldNames.add("Mean length 95% CI ("+ scale+")");
+//			fieldNames.add("Length std err. ("+ scale+")");
+//			fieldNames.add("Length p(unimodal)");
 
-			model.addColumn("", fieldNames.toArray(new Object[0]));
+			model.addColumn("", fieldNames);
+			
+//			model.addColumn("", fieldNames.toArray(new Object[0]));
 						
 			DecimalFormat df = new DecimalFormat("#.##");
 			df.setMaximumFractionDigits(2);

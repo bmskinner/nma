@@ -18,11 +18,14 @@
  *******************************************************************************/
 package gui.tabs.signals;
 
+import gui.components.ExportableChartPanel;
+import gui.components.ExportableTable;
 import gui.tabs.DetailPanel;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.UUID;
@@ -30,6 +33,8 @@ import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableModel;
 
@@ -45,9 +50,11 @@ import utility.Constants;
 import charting.charts.AbstractChartFactory;
 import charting.charts.NuclearSignalChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
+import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
+import charting.options.TableOptionsBuilder;
 import components.CellCollection;
 import components.nuclear.ShellResult;
 
@@ -55,23 +62,62 @@ import components.nuclear.ShellResult;
 @SuppressWarnings("serial")
 public class SignalShellsPanel extends DetailPanel {
 
-	private ChartPanel 	chartPanel; 
-	private JLabel 		statusLabel  = new JLabel();
+	private ExportableChartPanel 	chartPanel; 
+	private JLabel 		statusLabel  = new JLabel("Shell analysis results");
 	private JButton 	newAnalysis	 = new JButton("Run new shell analysis");
+	protected ExportableTable table;
 
 	public SignalShellsPanel(){
 		super();
 		this.setLayout(new BorderLayout());
 		
+		JPanel header          = createHeader();
+		JPanel mainPanel       = createChartPanel();
+		JScrollPane tablePanel = createTablePanel();
 		
-		createChartPanel();
-		
-		
-		this.add(chartPanel, BorderLayout.CENTER);
+			
+		this.add(tablePanel, BorderLayout.WEST);
+		this.add(mainPanel,  BorderLayout.CENTER);		
+		this.add(header,     BorderLayout.NORTH);
 
-		this.add(statusLabel, BorderLayout.NORTH);
-		statusLabel.setVisible(false);
+	}
+	
+	private JPanel createHeader(){
+		JPanel panel = new JPanel();
+		panel.add(statusLabel);
+		return panel;
+	}
+	
+	private JScrollPane createTablePanel(){
+		JPanel tablePanel = new JPanel(new BorderLayout());
+		
+		TableModel model = NucleusTableDatasetCreator.getInstance().createBlankTable();
+		table = new ExportableTable(model);
+		table.setEnabled(false);
+		tablePanel.add(table, BorderLayout.CENTER);
+		
+		JScrollPane scrollPane  = new JScrollPane();
+		scrollPane.setViewportView(tablePanel);
+		scrollPane.setColumnHeaderView(table.getTableHeader());
+		Dimension size = new Dimension(300, 200);
+		scrollPane.setMinimumSize(size);
+		scrollPane.setPreferredSize(size);
 
+		return scrollPane;
+	}
+	
+	private JPanel createChartPanel() {
+		JPanel panel = new JPanel(new BorderLayout());
+		
+		ChartOptions options = new ChartOptionsBuilder()
+			.build();
+	
+		JFreeChart chart = getChart(options);
+		
+		chartPanel = new ExportableChartPanel(chart);
+		
+		panel.add(chartPanel, BorderLayout.CENTER);
+		
 		newAnalysis.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -79,23 +125,9 @@ public class SignalShellsPanel extends DetailPanel {
 			}
 		});
 		newAnalysis.setVisible(false);
-		this.add(newAnalysis, BorderLayout.SOUTH);
-
-
-	}
-	
-	private void createChartPanel() {
-		ChartOptions options = new ChartOptionsBuilder()
-			.build();
-	
-		JFreeChart chart = null;
-		try {
-			chart = getChart(options);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		chartPanel = new ChartPanel(chart);
+		panel.add(newAnalysis, BorderLayout.SOUTH);
+		
+		return panel;
 	}
 
 	/**
@@ -107,10 +139,6 @@ public class SignalShellsPanel extends DetailPanel {
 	 */
 	private void makeNoShellAnalysisAvailablePanel(boolean showRunButton, CellCollection collection, String label){
 		chartPanel.setVisible(false);
-		statusLabel.setText(label);
-		statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		statusLabel.setVisible(true);
-
 		newAnalysis.setVisible(showRunButton);
 
 		this.revalidate();
@@ -120,7 +148,7 @@ public class SignalShellsPanel extends DetailPanel {
 
 	@Override
 	protected void updateSingle() {
-//		AnalysisDataset dataset = list.get(0);
+
 	CellCollection collection = activeDataset().getCollection();
 
     if(collection.getSignalManager().hasShellResult()){ // only if there is something to display
@@ -136,25 +164,14 @@ public class SignalShellsPanel extends DetailPanel {
 
 		chartPanel.setChart(chart);
 		chartPanel.setVisible(true);
-
-		statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
-		String label = "";
 		
 		
-		for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
-			String groupName = collection.getSignalManager().getSignalGroupName(signalGroup);
-            ShellResult r = activeDataset().getCollection().getSignalGroup(signalGroup).getShellResult();
-
-			label += groupName+": p="+r.getChiSquare();
-			String sig 	= r.getChiSquare() < Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL 
-					? "Significantly different to random at 5% level"
-							: "Not significantly different to random at 5% level";
-
-			label += "; "+sig+" \n";
-
-		}
-		statusLabel.setText(label);
-		statusLabel.setVisible(true);
+		TableOptions tableOptions = new TableOptionsBuilder()
+			.setDatasets(getDatasets())
+			.build();
+		
+		TableModel model = getTable(tableOptions);
+		table.setModel(model);
 
 
 		newAnalysis.setVisible(false);
@@ -174,9 +191,18 @@ public class SignalShellsPanel extends DetailPanel {
 
 	@Override
 	protected void updateMultiple() {
-		// Multiple populations. Do not display
-		// container in tab if no shell chart
-		makeNoShellAnalysisAvailablePanel(false, null, "Cannot display shell results for multiple populations");
+		
+		 updateSingle();
+		
+//		// Multiple populations. Do not display
+//		// container in tab if no shell chart
+//		makeNoShellAnalysisAvailablePanel(false, null, "Cannot display shell results for multiple populations");
+//		
+//		TableOptions tableOptions = new TableOptionsBuilder()
+//		.build();
+//	
+//		TableModel model = getTable(tableOptions);
+//		table.setModel(model);
 	
 		
 	}
@@ -194,6 +220,6 @@ public class SignalShellsPanel extends DetailPanel {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return null;
+		return NuclearSignalDatasetCreator.getInstance().createShellChiSquareTable(options);
 	}
 }

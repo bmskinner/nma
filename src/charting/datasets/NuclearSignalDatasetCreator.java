@@ -44,6 +44,7 @@ import org.jfree.data.xy.XYDataset;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import stats.SignalStatistic;
+import utility.Constants;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
@@ -849,9 +850,13 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		return result;
 	}
 		
-	public CategoryDataset createShellBarChartDataset(List<AnalysisDataset> list){
-		DefaultStatisticalCategoryDataset ds = new DefaultStatisticalCategoryDataset();
-		for(AnalysisDataset dataset : list){
+	public List<CategoryDataset> createShellBarChartDataset(ChartOptions options){
+		
+		List<CategoryDataset> result = new ArrayList<CategoryDataset>();
+
+		for(AnalysisDataset dataset : options.getDatasets()){
+			
+			DefaultStatisticalCategoryDataset ds = new DefaultStatisticalCategoryDataset();
 			
 			CellCollection collection = dataset.getCollection();
 
@@ -871,7 +876,61 @@ public class NuclearSignalDatasetCreator implements Loggable {
 					}
 				}
 			}
+			result.add(ds);
 		}
-		return ds;
+		return result;
 	}
+	
+	/**
+	 * Create a table with columns for dataset, signal group, and the p value of a chi-square test for all
+	 * shell analyses run
+	 * @param options
+	 * @return
+	 */
+	public TableModel createShellChiSquareTable(TableOptions options){
+		
+		if( ! options.hasDatasets()){
+			return this.createBlankTable();
+		}
+		
+		DefaultTableModel model = new DefaultTableModel();
+		
+		Object[] columnNames = {
+				
+				"Dataset",
+				"Signal group",
+				"p"
+		};
+		
+		model.setColumnIdentifiers(columnNames);
+		
+		for(AnalysisDataset d : options.getDatasets()){
+			
+			for(UUID signalGroup : d.getCollection().getSignalManager().getSignalGroupIDs()){
+				
+				SignalGroup group = d.getCollection().getSignalGroup(signalGroup);
+				
+				if(group.hasShellResult()){
+				
+					String groupName = group.getGroupName();
+
+					ShellResult r    = group.getShellResult();
+
+					Object[] rowData = {
+
+							d.getName(),
+							groupName,
+							r.getChiSquare()
+					};
+
+
+					model.addRow(rowData);
+				}
+			}
+			
+		}
+
+		return model;
+	}
+	
 }

@@ -54,29 +54,51 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 			return createEmptyShellChart();
 		}
 		
-		CategoryDataset ds = NuclearSignalDatasetCreator.getInstance().createShellBarChartDataset(options.getDatasets());
-		JFreeChart chart = ChartFactory.createBarChart(null, "Outer <--- Shell ---> Interior", "Percent", ds);
+		List<CategoryDataset> list = NuclearSignalDatasetCreator.getInstance().createShellBarChartDataset(options);
+		
+		JFreeChart chart = ChartFactory.createBarChart(null, "Outer <--- Shell ---> Interior", "Percent", list.get(0));
 		chart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
 		chart.getCategoryPlot().getRangeAxis().setRange(0,100);
-		StatisticalBarRenderer rend = new StatisticalBarRenderer();
-		rend.setBarPainter(new StandardBarPainter());
-		rend.setShadowVisible(false);
-		rend.setErrorIndicatorPaint(Color.black);
-		rend.setErrorIndicatorStroke(new BasicStroke(2));
-		chart.getCategoryPlot().setRenderer(rend);
+		
+		int datasetCount = 0;
+		for(CategoryDataset ds : list){
+			
+			chart.getCategoryPlot().setDataset(datasetCount, ds);
+			
+			AnalysisDataset d = options.getDatasets().get(datasetCount);
+			
+			StatisticalBarRenderer rend = new StatisticalBarRenderer();
+			rend.setBarPainter(new StandardBarPainter());
+			rend.setShadowVisible(false);
+			rend.setErrorIndicatorPaint(Color.black);
+			rend.setErrorIndicatorStroke(new BasicStroke(2));
+			chart.getCategoryPlot().setRenderer(datasetCount, rend);
+			
+			for (int j = 0; j < ds.getRowCount(); j++) {
+				
+				rend.setSeriesVisibleInLegend(j, false);
+				rend.setSeriesStroke(j, new BasicStroke(2));
+				UUID signalGroup = getSignalGroupFromLabel(  ds.getRowKey(j).toString()    );
+	            
+	            Color colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
+	                         ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
+	                         : ColourSelecter.getSegmentColor(j);
+	            
 
-		for (int j = 0; j < ds.getRowCount(); j++) {
-			rend.setSeriesVisibleInLegend(j, Boolean.FALSE);
-			rend.setSeriesStroke(j, new BasicStroke(2));
-			UUID signalGroup = getSignalGroupFromLabel( (String) ds.getRowKey((j)));
-            
-            Color colour = options.firstDataset().getCollection().getSignalGroup(signalGroup).hasColour()
-                    ? options.firstDataset().getCollection().getSignalGroup(signalGroup).getGroupColour()
-                    : ColourSelecter.getSegmentColor(j);
-            
+				rend.setSeriesPaint(j, colour);
+			}	
+			
+			
+			datasetCount++;
+		}
+		
+		
+		
+		
+		
+		
 
-			rend.setSeriesPaint(j, colour);
-		}	
+		
 
 		return chart;
 	}
