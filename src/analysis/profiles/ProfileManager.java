@@ -464,6 +464,8 @@ public class ProfileManager implements Loggable {
 		fine("Resegmented the median profile");
 	
 		
+		// Update signals as needed
+		collection.getSignalManager().recalculateSignalAngles();
 		
 		// Run a new morphological analysis to apply the new segments
 		// TODO: this needs to trigger the progressable action

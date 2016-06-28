@@ -701,7 +701,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 
 	// do not move this into SignalCollection - it is overridden in RodentSpermNucleus
-	public void calculateSignalAnglesFromPoint(BorderPoint p) throws Exception {
+	public void calculateSignalAnglesFromPoint(BorderPoint p) {
 
 		for( UUID signalGroup : signalCollection.getSignalGroupIDs()){
 			

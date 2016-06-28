@@ -524,6 +524,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 
 			if(mergeOption!=null){
 
+				this.setAnalysing(true);
 
 				if(activeDataset()
 						.getCollection()
@@ -541,7 +542,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				} else {
 					JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
 				}
-
+				this.setAnalysing(false);
 			}
 		}
 		
@@ -595,6 +596,8 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 					nameArray[0]);
 
 			if(option!=null){
+				
+				this.setAnalysing(true);
 
 				NucleusBorderSegment seg = option.getSeg();
 
@@ -609,6 +612,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 					finest("Firing general refresh cache request for loaded datasets");
 					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 				}
+				this.setAnalysing(false);
 			}
 		}
 		
@@ -641,11 +645,14 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 
 			if(mergeOption!=null){
 				// a choice was made
+				this.setAnalysing(true);
 
 				activeDataset()
 				.getCollection()
 				.getProfileManager()
 				.unmergeSegments(mergeOption.getSeg());
+				
+				this.setAnalysing(false);
 				
 				finest("Unmerged segment "+mergeOption.toString());
 

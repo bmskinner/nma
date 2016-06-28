@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import components.Cell;
 import components.CellCollection;
+import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.nuclear.NuclearSignal;
 import components.nuclear.SignalGroup;
@@ -494,5 +495,16 @@ public class SignalManager implements Loggable{
 
     }
 
+    
+    /**
+     * If the OP has moved, signal angles need to be recalculated
+     * 
+     */
+    public void recalculateSignalAngles(){
+    	finer("Recalcalculating signal angles");
+    	for(Nucleus n : collection.getNuclei()){
+    		n.calculateSignalAnglesFromPoint(n.getBorderPoint(BorderTag.ORIENTATION_POINT));
+    	}
+    }
 	  
 }

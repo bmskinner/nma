@@ -257,7 +257,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @param p the border point to orient from (the zero angle)
 	 * @throws Exception
 	 */
-	public void calculateSignalAnglesFromPoint(BorderPoint p) throws Exception;
+	public void calculateSignalAnglesFromPoint(BorderPoint p);
 	
 //	public void exportSignalDistanceMatrix();
 

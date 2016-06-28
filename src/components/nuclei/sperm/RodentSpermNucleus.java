@@ -667,7 +667,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 
   // needs to override AsymmetricNucleus version because hook/hump
   @Override
-  public void calculateSignalAnglesFromPoint(BorderPoint p) throws Exception {
+  public void calculateSignalAnglesFromPoint(BorderPoint p) {
 
 
 	  super.calculateSignalAnglesFromPoint(p);
