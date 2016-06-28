@@ -23,18 +23,11 @@ import gui.components.ConsensusNucleusChartPanel;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -48,7 +41,6 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import analysis.AnalysisDataset;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -59,16 +51,16 @@ import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclei.ConsensusNucleus;
 
-public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeListener, ChangeListener {
-
-	private static final long serialVersionUID = 1L;
+@SuppressWarnings("serial")
+public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener {
 
 	private ConsensusNucleusChartPanel consensusChartPanel;
 	private JButton runRefoldingButton;
 	
 	private JPanel offsetsPanel; // store controls for rotating and translating
-	private JPanel mainPanel;	
+//	private JPanel mainPanel;	
 	
+	// Debugging tools for the nucleus mesh - not visible in the final panel
 	private JCheckBox showMeshBox;
 	private JCheckBox showMeshEdgesBox;
 	private JCheckBox showMeshFacesBox;
@@ -77,32 +69,29 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	public ConsensusNucleusPanel() {
 		super();
 		this.setLayout(new BorderLayout());
-		mainPanel = new JPanel();
-		mainPanel.setLayout(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		c.gridwidth  = 2;
-		c.gridheight = 1;
-		c.gridx = 0;
-		c.gridy = 0;
-		c.fill = GridBagConstraints.BOTH;      //reset to default
-		c.weightx = 1.0;  
-		c.weighty = 1.0; 
+//		mainPanel = new JPanel();
+//		mainPanel.setLayout(new GridBagLayout());
+//		GridBagConstraints c = new GridBagConstraints();
+//		c.gridwidth  = 2;
+//		c.gridheight = 1;
+//		c.gridx = 0;
+//		c.gridy = 0;
+//		c.fill = GridBagConstraints.BOTH;      //reset to default
+//		c.weightx = 1.0;  
+//		c.weighty = 1.0; 
 		
-		try {
-			ChartOptions options = new ChartOptionsBuilder()
-				.build();
-			JFreeChart consensusChart = getChart(options);
-			consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
-			consensusChartPanel.addSignalChangeListener(this);
-		} catch (Exception e){
-			log(Level.SEVERE, "Error creating blank consensus chart", e);
-		}
+		ChartOptions options = new ChartOptionsBuilder().build();
 		
+		JFreeChart consensusChart = getChart(options);
+		consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
+		consensusChartPanel.addSignalChangeListener(this);
+	
 		
 		
 		
 		runRefoldingButton = new JButton("Refold");
 
+		
 		runRefoldingButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -116,23 +105,14 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		
 		consensusChartPanel.add(runRefoldingButton);
 		
-//		
-//		this.addComponentListener(new ComponentAdapter() {
-//			@Override
-//			public void componentResized(ComponentEvent e) {
-////				resizePreview(consensusChartPanel, mainPanel);
-//				consensusChartPanel.restoreAutoBounds();
-//			}
-//		});
-//		
-		mainPanel.add(consensusChartPanel, c);
-		this.add(mainPanel, BorderLayout.CENTER);
+//		mainPanel.add(consensusChartPanel, c);
+		this.add(consensusChartPanel, BorderLayout.CENTER);
 		
-		
-		c.gridwidth = 1;
-		c.gridheight = 1;
-		c.gridx = 1;
-		c.weightx = 0.3;  
+//		
+//		c.gridwidth = 1;
+//		c.gridheight = 1;
+//		c.gridx = 1;
+//		c.weightx = 0.3;  
 		
 		offsetsPanel = createOffsetsPanel();
 		this.add(offsetsPanel, BorderLayout.EAST);
@@ -463,6 +443,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		consensusChartPanel.setChart(consensusChart);
 		runRefoldingButton.setVisible(false);
 		offsetsPanel.setVisible(false);
+		consensusChartPanel.restoreAutoBounds();
 	}
 	
 	

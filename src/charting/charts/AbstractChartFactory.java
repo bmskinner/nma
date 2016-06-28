@@ -37,6 +37,8 @@ public abstract class AbstractChartFactory implements Loggable {
 
 	protected static final ForkJoinPool mainPool = new ForkJoinPool();
 	
+	protected static final int DEFAULT_EMPTY_RANGE = 10;
+	
 	
 	public abstract JFreeChart makeEmptyChart();
 	
@@ -88,8 +90,8 @@ public abstract class AbstractChartFactory implements Loggable {
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		
-		plot.getDomainAxis().setRange(-10, 10);
-		plot.getRangeAxis().setRange(-10, 10);
+		plot.getDomainAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
+		plot.getRangeAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
 
 		for(int i=-100 ; i<=100; i+=20){
 			for(int j=-100 ; j<=100; j+=20){

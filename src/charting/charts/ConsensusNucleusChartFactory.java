@@ -67,7 +67,21 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @return
 	 */
 	public JFreeChart makeEmptyChart(){
-		return makeConsensusChart( (XYDataset) null);
+		
+		JFreeChart chart = ChartFactory.createXYLineChart(null,
+						null, null, null, PlotOrientation.VERTICAL, true, true,
+						false);
+		
+		chart.getPlot().setBackgroundPaint(Color.WHITE);
+		chart.getXYPlot().getDomainAxis().setVisible(false);
+		chart.getXYPlot().getRangeAxis().setVisible(false);
+		chart.getXYPlot().addRangeMarker(ChartComponents.CONSENSUS_ZERO_MARKER);
+		chart.getXYPlot().addDomainMarker(ChartComponents.CONSENSUS_ZERO_MARKER);
+		
+		int range = DEFAULT_EMPTY_RANGE;
+		chart.getXYPlot().getDomainAxis().setRange(-range, range);
+		chart.getXYPlot().getRangeAxis().setRange( -range, range);
+		return chart;
 	}
 	
 	
@@ -116,8 +130,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		chart.getPlot().setBackgroundPaint(Color.WHITE);
 		chart.getXYPlot().getDomainAxis().setVisible(false);
 		chart.getXYPlot().getRangeAxis().setVisible(false);
-		chart.getXYPlot().addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-		chart.getXYPlot().addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
+		chart.getXYPlot().addRangeMarker(ChartComponents.CONSENSUS_ZERO_MARKER);
+		chart.getXYPlot().addDomainMarker(ChartComponents.CONSENSUS_ZERO_MARKER);
 		
 		int range = 50;
 		chart.getXYPlot().getDomainAxis().setRange(-range,range);

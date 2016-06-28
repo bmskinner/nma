@@ -31,7 +31,7 @@ import org.jfree.data.xy.XYDataset;
 @SuppressWarnings("serial")
 public class FixedAspectRatioChartPanel extends ExportableChartPanel implements ComponentListener {
 
-	private static final double DEFAULT_AUTO_RANGE = 10;
+	protected static final double DEFAULT_AUTO_RANGE = 10;
 
 	public FixedAspectRatioChartPanel(JFreeChart chart){
 		super(chart);
@@ -148,7 +148,7 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel implements 
 
 		} catch (Exception e){
 			finer("Error restoring auto bounds, falling back to default");
-			log(Level.FINEST,"Error restoring auto bounds, falling back to default", e);
+			log(Level.INFO,"Error restoring auto bounds, falling back to default", e);
 			super.restoreAutoBounds();
 		}
 	
