@@ -27,7 +27,7 @@ public class SignalWarper extends AnalysisWorker {
 		this.cellsWithSignals = cellsWithSignals;
 		
 		// Count the number of cells to include
-//		log("Cells with signals only: "+cellsWithSignals);
+
 		List<Cell> cells;
 		if(cellsWithSignals){
 			SignalManager m =  getDataset().getCollection().getSignalManager();
@@ -37,7 +37,7 @@ public class SignalWarper extends AnalysisWorker {
 			cells = getDataset().getCollection().getCells();
 		}
 		int count = cells.size();
-//		log("Count of cells: "+count);
+
 		
 		warpedImages = new ImageProcessor[ count ];
 		this.setProgressTotal(count);

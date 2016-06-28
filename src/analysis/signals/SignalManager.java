@@ -465,6 +465,18 @@ public class SignalManager implements Loggable{
           }
           return result;
       }
+    
+    
+    /**
+     * Copy the signal groups in this cell collection to the target collection,
+     * preserving the signal group IDs
+     * @param target
+     */
+    public void copySignalGroups(CellCollection target){
+    	 for(UUID id : collection.getSignalGroupIDs()){
+    		 target.addSignalGroup(id, new SignalGroup(collection.getSignalGroup(id)));
+   	  }
+    }
 
     
     /**

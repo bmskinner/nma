@@ -877,6 +877,9 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  }
 	  
 	  this.getProfileManager().copyCollectionOffsets(subCollection);
+	  
+	  this.getSignalManager().copySignalGroups(subCollection);
+	  	  
 	  return subCollection;
   }
   
