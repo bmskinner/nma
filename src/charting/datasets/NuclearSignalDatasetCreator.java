@@ -863,16 +863,19 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 				
 				if(collection.getSignalManager().hasSignals(signalGroup)){
-					ShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
+					
+					if(collection.getSignalGroup(signalGroup).hasShellResult()){
+						ShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
 
-					for(int shell = 0; shell<r.getNumberOfShells();shell++){
-						Double d = r.getMeans().get(shell);
-						Double std = r.getStandardErrors().get(shell);
-						ds.add(d*100, std.doubleValue()*100, "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
-						// we need the string value for shell otherwise we get error
-						// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
-						// ditto the doublevalue for std
+						for(int shell = 0; shell<r.getNumberOfShells();shell++){
+							Double d = r.getMeans().get(shell);
+							Double std = r.getStandardErrors().get(shell);
+							ds.add(d*100, std.doubleValue()*100, "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
+							// we need the string value for shell otherwise we get error
+							// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
+							// ditto the doublevalue for std
 
+						}
 					}
 				}
 			}
