@@ -19,11 +19,13 @@
 package gui.dialogs;
 
 import gui.Labels;
+import gui.components.ColourSelecter;
 import ij.IJ;
 import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -221,8 +223,16 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
                             group.setChannel(channel);
                             group.setFolder(folder);
                             
+                           
                             
                             dataset.getCollection().addSignalGroup(signalGroup, group);
+                            
+                            // Set the default colour for the signal group
+                            int totalGroups = dataset.getCollection().getSignalGroups().size();
+                            Color colour = ColourSelecter.getSegmentColor(totalGroups);
+                            group.setGroupColour(colour);
+                            
+                            
                             options.addNuclearSignalOptions( signalGroup, testOptions);
 
 							readyToRun = true;
