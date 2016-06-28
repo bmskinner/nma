@@ -100,6 +100,11 @@ public class PigSpermNucleus
 		ProfileIndexFinder f = new ProfileIndexFinder();
 		int rpIndex = f.identifyIndex(p, rpSet);
 		
+		if( rpIndex== -1 ){
+			finest("RP index was not found in nucleus, setting to zero in profile");
+			rpIndex = 0;
+		}
+		
     	setBorderTag(BorderTag.REFERENCE_POINT, rpIndex);
     	
     	/*
