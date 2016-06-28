@@ -31,6 +31,7 @@ import components.generic.SegmentedProfile;
 import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
+import gui.DatasetEvent.DatasetMethod;
 import gui.components.ColourSelecter;
 import gui.components.ExportableTable;
 import gui.dialogs.CellImageDialog;
@@ -239,7 +240,9 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 					activeCell.getNucleus().setScale(scale);
 
 				}
+				
 				update(activeCell);
+				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 			} else {
 				warn("Cannot set a scale to zero");
 			}

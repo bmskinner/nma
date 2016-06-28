@@ -130,86 +130,66 @@ public class SignalShellsPanel extends DetailPanel {
 		return panel;
 	}
 
-	/**
-	 * Create a panel to display when a shell analysis is not available
-	 * @param showRunButton should there be an option to run a shell analysis on the dataset
-	 * @param collection the nucleus collection from the dataset
-	 * @param label the text to display on the panel
-	 * @return a panel to put in the shell tab
-	 */
-	private void makeNoShellAnalysisAvailablePanel(boolean showRunButton, CellCollection collection, String label){
-		chartPanel.setVisible(false);
-		newAnalysis.setVisible(showRunButton);
-
-		this.revalidate();
-		this.repaint();
-
-	}
-
-	@Override
-	protected void updateSingle() {
-
-	CellCollection collection = activeDataset().getCollection();
-
-    if(collection.getSignalManager().hasShellResult()){ // only if there is something to display
-
-
-		
+//	/**
+//	 * Create a panel to display when a shell analysis is not available
+//	 * @param showRunButton should there be an option to run a shell analysis on the dataset
+//	 * @param collection the nucleus collection from the dataset
+//	 * @param label the text to display on the panel
+//	 * @return a panel to put in the shell tab
+//	 */
+//	private void makeNoShellAnalysisAvailablePanel(boolean showRunButton, CellCollection collection, String label){
+//		chartPanel.setVisible(false);
+//		newAnalysis.setVisible(showRunButton);
+//
+//		this.revalidate();
+//		this.repaint();
+//
+//	}
+	
+	private void updateChartAndTable(){
 		ChartOptions options = new ChartOptionsBuilder()
-			.setDatasets(getDatasets())
-			.build();
-		
+		.setDatasets(getDatasets())
+		.build();
+
 		JFreeChart chart = getChart(options);
 
 
 		chartPanel.setChart(chart);
 		chartPanel.setVisible(true);
-		
-		
+
+
 		TableOptions tableOptions = new TableOptionsBuilder()
-			.setDatasets(getDatasets())
-			.build();
-		
+		.setDatasets(getDatasets())
+		.build();
+
 		TableModel model = getTable(tableOptions);
 		table.setModel(model);
+	}
 
+	@Override
+	protected void updateSingle() {
+
+		updateChartAndTable();
 
 		newAnalysis.setVisible(false);
-
-	} else { // no shell analysis available
-
-		if(collection.getSignalManager().hasSignals()){
-			// if signals, offer to run
-			makeNoShellAnalysisAvailablePanel(true, collection, "No shell results available"); // allow option to run analysis
-		} else {
-			// otherwise don't show button
-			makeNoShellAnalysisAvailablePanel(false, null, "No signals in population"); // container in tab if no shell chart
+		
+		if(activeDataset().getCollection().getSignalManager().hasSignals() 
+				&& ! activeDataset().getCollection().getSignalManager().hasShellResult()){
+			newAnalysis.setVisible(true);
 		}
-	}
 		
 	}
 
 	@Override
 	protected void updateMultiple() {
 		
-		 updateSingle();
-		
-//		// Multiple populations. Do not display
-//		// container in tab if no shell chart
-//		makeNoShellAnalysisAvailablePanel(false, null, "Cannot display shell results for multiple populations");
-//		
-//		TableOptions tableOptions = new TableOptionsBuilder()
-//		.build();
-//	
-//		TableModel model = getTable(tableOptions);
-//		table.setModel(model);
-	
+		updateChartAndTable();
 		
 	}
 
 	@Override
 	protected void updateNull() {
-		updateMultiple();
+		updateChartAndTable();
 		
 	}
 	

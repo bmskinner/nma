@@ -535,7 +535,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
-				                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
+				                "Position", options.getType().getLabel(), null, PlotOrientation.VERTICAL, true, true,
 				                false);
 		
 		XYPlot plot = chart.getXYPlot();
