@@ -165,6 +165,7 @@ public class CellDetailPanel extends AbstractCellDetailPanel implements SignalCh
 				
 	@Override
 	protected void updateSingle() {
+		activeCell=null;
 		cellsListPanel.updateDataset( activeDataset()  );
 		outlinePanel.update(getDatasets());
 		cellStatsPanel.update(getDatasets());
@@ -183,7 +184,9 @@ public class CellDetailPanel extends AbstractCellDetailPanel implements SignalCh
 	
 	@Override
 	protected void updateNull() {
+		activeCell=null;
 		cellsListPanel.updateDataset(null);
+		
 		finest("Updated cell list panel");
 		updateCell(null);
 	}

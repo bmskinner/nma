@@ -62,6 +62,14 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel implements 
 			// Find the aspect ratio of the chart
 			double chartWidth  = this.getWidth();
 			double chartHeight = this.getHeight();
+			
+			if(Double.valueOf(chartWidth)==null || Double.valueOf(chartHeight)==null){
+				plot.getRangeAxis().setRange(-DEFAULT_AUTO_RANGE, DEFAULT_AUTO_RANGE);
+				plot.getDomainAxis().setRange(-DEFAULT_AUTO_RANGE, DEFAULT_AUTO_RANGE);
+				return;
+			}
+			
+			
 			double aspectRatio = chartWidth / chartHeight;
 			
 			finest("Plot w: "+chartWidth+"; h: "+chartHeight+"; asp: "+aspectRatio);
@@ -142,13 +150,23 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel implements 
 			xMax += xDiff;
 			yMin -= yDiff;
 			yMax += yDiff;
-
+			
+			if(yMin>=yMax){
+				finer("Min and max are equal");
+				xMin = -DEFAULT_AUTO_RANGE;
+				yMin = -DEFAULT_AUTO_RANGE;
+				xMax = DEFAULT_AUTO_RANGE;
+				yMax = DEFAULT_AUTO_RANGE;
+			} 
+			
 			plot.getRangeAxis().setRange(yMin, yMax);
 			plot.getDomainAxis().setRange(xMin, xMax);
+			
+		
+			
 
 		} catch (Exception e){
-			finer("Error restoring auto bounds, falling back to default");
-			log(Level.INFO,"Error restoring auto bounds, falling back to default", e);
+			log(Level.FINER,"Error restoring auto bounds, falling back to default", e);
 			super.restoreAutoBounds();
 		}
 	
