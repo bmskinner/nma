@@ -94,7 +94,7 @@ public class CurveRefolder extends AnalysisWorker {
 		this.setProgressTotal(refoldMode.maxIterations());
 
 		collection = dataset.getCollection();
-
+		
 		fine("Creating refolder");
 
 
@@ -130,6 +130,11 @@ public class CurveRefolder extends AnalysisWorker {
 		
 
 		try{ 
+			
+			if(collection.getNucleusCount()==1){
+				collection.addConsensusNucleus(refoldNucleus);
+				return true;
+			}
 			
 			collection.setRefolding(true);
 			// smooth the candidate nucleus to remove jagged edges
