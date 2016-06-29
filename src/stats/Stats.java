@@ -217,6 +217,10 @@ import utility.Utils;
 	  if(x.length != y.length){
 		  throw new IllegalArgumentException("Input arrays have different lengths"); 
 	  }
+	  
+	  if(x.length==1){
+		  return 0;
+	  }
 	  SpearmansCorrelation sp = new SpearmansCorrelation();
 	  return sp.correlation(x, y);
 
