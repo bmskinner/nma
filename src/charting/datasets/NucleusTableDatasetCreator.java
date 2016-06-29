@@ -607,12 +607,12 @@ private static NucleusTableDatasetCreator instance = null;
 		columnData.add("Nuclei");
 		for(NucleusStatistic stat : NucleusStatistic.values()){
 			columnData.add(stat.toString()+" median");
+			columnData.add(stat.toString()+" mean");
+			columnData.add(stat.toString()+" S.E.M.");
 			columnData.add(stat.toString()+" mean 95% CI");
 			columnData.add(stat.toString()+" p(unimodal)");
 		}
-//		columnData.add("Signal channels");
-//		columnData.add("Number of signals");
-//		columnData.add("Signals per nucleus");
+
 
 		model.addColumn("", columnData.toArray());
 		
@@ -623,7 +623,7 @@ private static NucleusTableDatasetCreator instance = null;
 			
 			finest("Making column for "+dataset.getName());
 			
-			List<Object> datasetData = createDatasetStatsTableColumn(dataset);
+			List<Object> datasetData = createDatasetStatsTableColumn(dataset, options.getScale());
 
 			model.addColumn(dataset.getName(), datasetData.toArray());
 			finest("Added column for "+dataset.getName());
@@ -633,7 +633,7 @@ private static NucleusTableDatasetCreator instance = null;
 		return model;	
 	}
 	
-	private List<Object> createDatasetStatsTableColumn(AnalysisDataset dataset){
+	private List<Object> createDatasetStatsTableColumn(AnalysisDataset dataset, MeasurementScale scale){
 		
 		// format the numbers and make into a tablemodel
 		DecimalFormat df = new DecimalFormat("#0.00"); 
@@ -647,20 +647,21 @@ private static NucleusTableDatasetCreator instance = null;
 		datasetData.add(collection.getNucleusCount());
 
 		for(NucleusStatistic stat : NucleusStatistic.values()){
-			double[] stats 	= collection.getNuclearStatistics(stat, MeasurementScale.PIXELS);
+			double[] stats 	= collection.getNuclearStatistics(stat, scale);
+			
+			double mean     = Stats.mean(stats);
+			double sem      = Stats.stderr(stats);
 			double median 	= Stats.quartile(stats, 50);
 			double[] ci 	= Stats.calculateMeanConfidenceInterval(stats, 0.95);
 			String ciString = df.format(ci[0]) + " - " + df.format(ci[1]);
 			double diptest 	= DipTester.getDipTestPValue(stats);
 
 			datasetData.add(df.format(median));
+			datasetData.add(df.format(mean));
+			datasetData.add(df.format(sem));
 			datasetData.add(ciString);
 			datasetData.add(pf.format(diptest));					
 		}
-
-//		datasetData.add(dataset.getCollection().getSignalManager().getSignalGroupCount());
-//		datasetData.add(collection.getSignalManager().getSignalCount());
-//		datasetData.add(df.format(signalPerNucleus));
 		
 		return datasetData;
 		

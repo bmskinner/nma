@@ -1,6 +1,9 @@
 package gui.tabs.nuclear;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.logging.Level;
 
 import javax.swing.JPanel;
@@ -15,12 +18,15 @@ import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import charting.options.TableOptions.TableType;
 import gui.components.ExportableTable;
+import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
-public class NuclearStatsPanel extends DetailPanel {
+public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 	
 	private ExportableTable tablePopulationStats;
+	
+	protected MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
 	
 	public NuclearStatsPanel(){
 		super();
@@ -28,6 +34,14 @@ public class NuclearStatsPanel extends DetailPanel {
 		this.setLayout(new BorderLayout());
 		
 		JScrollPane statsPanel = createStatsPanel();
+		
+		JPanel headerPanel = new JPanel(new FlowLayout());
+		
+		headerPanel.add(measurementUnitSettingsPanel);
+		measurementUnitSettingsPanel.addActionListener(this);
+		measurementUnitSettingsPanel.setEnabled(false);
+		
+		this.add(headerPanel, BorderLayout.NORTH);
 
 		this.add(statsPanel, BorderLayout.CENTER);
 
@@ -73,9 +87,17 @@ public class NuclearStatsPanel extends DetailPanel {
 	private void updateStatsPanel(){
 
 		finest("Updating stats panel");
+		
+		if(this.hasDatasets()){
+			measurementUnitSettingsPanel.setEnabled(true);
+		} else {
+			measurementUnitSettingsPanel.setEnabled(false);
+		}
+		
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.ANALYSIS_STATS)
+			.setScale(measurementUnitSettingsPanel.getSelected())
 			.build();
 
 		finest("Built table options");
@@ -119,5 +141,18 @@ public class NuclearStatsPanel extends DetailPanel {
 		}
 		return scrollPane;
 	}
+
+	 @Override
+     public void actionPerformed(ActionEvent e) {
+
+         try {
+        	 log(Level.FINEST, "Updating nucleus stats panel");
+             this.update(getDatasets());
+         } catch (Exception e1) {
+         	log(Level.SEVERE, "Error updating boxplot panel from action listener", e1);
+         }
+         
+         
+     }
 
 }
