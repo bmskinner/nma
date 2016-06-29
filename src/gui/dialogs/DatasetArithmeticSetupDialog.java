@@ -98,11 +98,15 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		List<JLabel> labels = new ArrayList<JLabel>();
 		List<Component> fields = new ArrayList<Component>();
 		
-		boxOne = new DatasetSelectionPanel(list); //JComboBox<AnalysisDataset>();
+		boxOne = new DatasetSelectionPanel(list);
 		boxTwo = new DatasetSelectionPanel(list);
 
 		boxOne.setSelectedDataset(list.get(0));
-		boxOne.setSelectedDataset(list.get(0));
+		boxTwo.setSelectedDataset(list.get(0));
+		
+		if(list.size()==2){
+			boxTwo.setSelectedDataset(list.get(1));
+		}
 		
 		operatorBox = new JComboBox<DatasetArithmeticOperation>(DatasetArithmeticOperation.values());
 		operatorBox.setSelectedItem(DatasetArithmeticOperation.AND);

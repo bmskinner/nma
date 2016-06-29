@@ -577,7 +577,7 @@ public class MainWindow
 		if(event.type().equals("DatasetArithmeticAction")){
 			
 			Runnable task = () -> { 
-				new DatasetArithmeticAction(populationsPanel.getAllDatasets(), MainWindow.this); 
+				new DatasetArithmeticAction(populationsPanel.getSelectedDatasets(), MainWindow.this); 
 			}; 
 			threadManager.execute(task);
 		}
