@@ -288,16 +288,16 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	private JFreeChart makeMultipleConsensusChart(List<AnalysisDataset> list) throws Exception {
+	private JFreeChart makeMultipleConsensusChart(ChartOptions options) throws Exception {
 		// multiple nuclei
-		XYDataset ds = NucleusDatasetCreator.getInstance().createMultiNucleusOutline(list);
+		XYDataset ds = NucleusDatasetCreator.getInstance().createMultiNucleusOutline(options.getDatasets(), options.getScale());
 		JFreeChart chart = makeConsensusChart(ds);
 		
 		formatConsensusChart(chart);
 		
 		XYPlot plot = chart.getXYPlot();
 		
-		double max = getconsensusChartRange(list);
+		double max = getconsensusChartRange(options.getDatasets());
 		
 		plot.getDomainAxis().setRange(-max,max);
 		plot.getRangeAxis().setRange(-max,max);
@@ -310,7 +310,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
 
 			int index = MorphologyChartFactory.getIndexFromLabel(name);
-			AnalysisDataset d = list.get(index);
+			AnalysisDataset d = options.getDatasets().get(index);
 
 			// in this context, segment colour refers to the entire
 			// dataset colour (they use the same pallates in ColourSelecter)
@@ -353,7 +353,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			
 			if(oneHasConsensus){
 				finest("Creating multiple consensus chart");
-				return makeMultipleConsensusChart(options.getDatasets());
+				return makeMultipleConsensusChart(options);
 			} else {
 				finest("No dataset with consensus: creating empty consensus chart");
 				return makeEmptyChart();

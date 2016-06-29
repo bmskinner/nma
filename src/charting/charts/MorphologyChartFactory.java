@@ -690,7 +690,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		finest("Created position dataset");
 		
 		
-		XYDataset nuclearOutlines = NucleusDatasetCreator.getInstance().createMultiNucleusOutline(options.getDatasets());
+		XYDataset nuclearOutlines = NucleusDatasetCreator.getInstance().createMultiNucleusOutline(options.getDatasets(), options.getScale());
 		finest("Created nucleus outline dataset");
 		
 		if(positionDataset == null || nuclearOutlines == null){

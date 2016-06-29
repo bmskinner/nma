@@ -20,14 +20,19 @@ package gui;
 
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.ConsensusNucleusChartPanel;
+import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.logging.Level;
+
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -52,13 +57,15 @@ import components.nuclear.BorderPoint;
 import components.nuclei.ConsensusNucleus;
 
 @SuppressWarnings("serial")
-public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener {
+public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener, ActionListener {
 
 	private ConsensusNucleusChartPanel consensusChartPanel;
 	private JButton runRefoldingButton;
 	
 	private JPanel offsetsPanel; // store controls for rotating and translating
 //	private JPanel mainPanel;	
+	
+	private MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
 	
 	// Debugging tools for the nucleus mesh - not visible in the final panel
 	private JCheckBox showMeshBox;
@@ -69,26 +76,13 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	public ConsensusNucleusPanel() {
 		super();
 		this.setLayout(new BorderLayout());
-//		mainPanel = new JPanel();
-//		mainPanel.setLayout(new GridBagLayout());
-//		GridBagConstraints c = new GridBagConstraints();
-//		c.gridwidth  = 2;
-//		c.gridheight = 1;
-//		c.gridx = 0;
-//		c.gridy = 0;
-//		c.fill = GridBagConstraints.BOTH;      //reset to default
-//		c.weightx = 1.0;  
-//		c.weighty = 1.0; 
 		
 		ChartOptions options = new ChartOptionsBuilder().build();
 		
 		JFreeChart consensusChart = getChart(options);
 		consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
 		consensusChartPanel.addSignalChangeListener(this);
-	
-		
-		
-		
+
 		runRefoldingButton = new JButton("Refold");
 
 		
@@ -105,15 +99,14 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		
 		consensusChartPanel.add(runRefoldingButton);
 		
-//		mainPanel.add(consensusChartPanel, c);
+		
+		
 		this.add(consensusChartPanel, BorderLayout.CENTER);
 		
-//		
-//		c.gridwidth = 1;
-//		c.gridheight = 1;
-//		c.gridx = 1;
-//		c.weightx = 0.3;  
+		JPanel headerPanel = createHeaderPanel();
+		this.add(headerPanel, BorderLayout.NORTH);
 		
+
 		offsetsPanel = createOffsetsPanel();
 		this.add(offsetsPanel, BorderLayout.EAST);
 		offsetsPanel.setVisible(false);
@@ -135,12 +128,24 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 //		JPanel meshPanel = createMeshPanel();
 //		panel.add(meshPanel, BorderLayout.CENTER);
 		
+		
 		JPanel offsetPanel = createTranslatePanel();
 		panel.add(offsetPanel, BorderLayout.SOUTH);
 		
 		return panel;
 	}
 	
+	private JPanel createHeaderPanel(){
+		JPanel panel = new JPanel(new FlowLayout());
+		
+		panel.add(measurementUnitSettingsPanel);
+		measurementUnitSettingsPanel.addActionListener(this);
+		measurementUnitSettingsPanel.setEnabled(false);
+		
+		
+		return panel;
+	}
+		
 	private JPanel createMeshPanel(){
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -382,6 +387,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		
 	private void updateSingleDataset() {
 		runRefoldingButton.setVisible(false);
+		measurementUnitSettingsPanel.setEnabled(true);
 		
 //		showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
 //		showMeshFacesBox.setEnabled(showMeshBox.isSelected());
@@ -391,6 +397,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 //			.setShowMesh(showMeshBox.isSelected())
 //			.setShowMeshEdges(showMeshEdgesBox.isSelected())
 //			.setShowMeshFaces(showMeshFacesBox.isSelected())
+			.setScale(measurementUnitSettingsPanel.getSelected())
 			.setShowAnnotations(false)
 			.setShowXAxis(false)
 			.setShowYAxis(false)
@@ -427,8 +434,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	
 	private void updateMultipleDatasets() {
 
+		measurementUnitSettingsPanel.setEnabled(true);
+		
 		ChartOptions options = new ChartOptionsBuilder()
 		.setDatasets(getDatasets())
+		.setScale(measurementUnitSettingsPanel.getSelected())
 		.build();
 
 		JFreeChart chart = getChart(options);
@@ -451,6 +461,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		runRefoldingButton.setVisible(false);
 		offsetsPanel.setVisible(false);
 		consensusChartPanel.restoreAutoBounds();
+		measurementUnitSettingsPanel.setEnabled(false);
 	}
 	
 	
@@ -625,6 +636,17 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	public void stateChanged(ChangeEvent arg0) {
 				
 		this.update(getDatasets());
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		 try {
+        	 log(Level.FINEST, "Updating consensus panel");
+             this.update(getDatasets());
+         } catch (Exception e1) {
+         	log(Level.SEVERE, "Error updating consensus panel from action listener", e1);
+         }
+		
 	}
     
     

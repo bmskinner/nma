@@ -61,6 +61,7 @@ import stats.KruskalTester;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
 import utility.Constants;
+import utility.Utils;
 import weka.estimators.KernelEstimator;
 
 public class NucleusDatasetCreator implements Loggable {
@@ -1391,7 +1392,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @param list the analysis datasets
 	 * @return a chartable dataset
 	 */
-	public XYDataset createMultiNucleusOutline(List<AnalysisDataset> list){
+	public XYDataset createMultiNucleusOutline(List<AnalysisDataset> list, MeasurementScale scale){
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -1400,15 +1401,24 @@ private static NucleusDatasetCreator instance = null;
 			CellCollection collection = dataset.getCollection();
 			if(collection.hasConsensusNucleus()){
 				Nucleus n = collection.getConsensusNucleus();
-
+				
 				double[] xpoints = new double[n.getBorderLength()];
 				double[] ypoints = new double[n.getBorderLength()];
 
 				int j =0;
 
 				for(BorderPoint p : n.getBorderList()){
-					xpoints[j] = p.getX();
-					ypoints[j] = p.getY();
+					
+					double x = p.getX();
+					double y = p.getY();
+					
+					if(scale.equals(MeasurementScale.MICRONS)){
+						x = Utils.micronLength(x, n.getScale());
+						y = Utils.micronLength(y, n.getScale());
+					}
+					
+					xpoints[j] = x;
+					ypoints[j] = y;
 					j++;
 				}
 				double[][] data = { xpoints, ypoints };

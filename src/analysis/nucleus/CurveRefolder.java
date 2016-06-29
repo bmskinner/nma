@@ -131,22 +131,24 @@ public class CurveRefolder extends AnalysisWorker {
 
 		try{ 
 			
-			if(collection.getNucleusCount()==1){
-				collection.addConsensusNucleus(refoldNucleus);
-				return true;
-			}
-			
-			collection.setRefolding(true);
-			// smooth the candidate nucleus to remove jagged edges
-			this.smoothCurve(0); // smooth with no offset
-			this.smoothCurve(1); // smooth with intercalated offset
-			
-			// carry out the refolding
-			this.refoldCurve();
 
-			// smooth the refolded nucleus to remove jagged edges
-			this.smoothCurve(0); // smooth with no offset
-			this.smoothCurve(1); // smooth with offset 1 to intercalate
+			refoldNucleus.moveCentreOfMass(new XYPoint(0, 0));
+
+			
+			if(collection.getNucleusCount()>1){
+			
+				collection.setRefolding(true);
+				// smooth the candidate nucleus to remove jagged edges
+				this.smoothCurve(0); // smooth with no offset
+				this.smoothCurve(1); // smooth with intercalated offset
+
+				// carry out the refolding
+				this.refoldCurve();
+
+				// smooth the refolded nucleus to remove jagged edges
+				this.smoothCurve(0); // smooth with no offset
+				this.smoothCurve(1); // smooth with offset 1 to intercalate
+			}
 						
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
@@ -196,12 +198,6 @@ public class CurveRefolder extends AnalysisWorker {
 		all other functions will hang off this
 	*/
 	public void refoldCurve() throws Exception {
-
-		try{
-			refoldNucleus.moveCentreOfMass(new XYPoint(0, 0));
-		} catch(Exception e){
-			throw new Exception("Unable to move centre of mass");
-		}
 
 		try{
 			double score = refoldNucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
