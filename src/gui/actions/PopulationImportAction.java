@@ -48,6 +48,17 @@ public class PopulationImportAction extends ProgressableAction {
 		cooldown();
 		
 		File file = selectFile();
+		processFile(file);		
+	}
+	
+	public PopulationImportAction(MainWindow mw, File file) {
+		super("Opening file", mw);
+		cooldown();
+		processFile(file);
+		
+	}
+	
+	private void processFile(File file){
 		if(file!=null){
 			worker = new PopulationImportWorker(file);
 			worker.addPropertyChangeListener(this);
@@ -59,14 +70,13 @@ public class PopulationImportAction extends ProgressableAction {
 			log(Level.FINE, "Open cancelled");
 			cancel();
 		}
-		
 	}
 	
 	/**
 	 * Get the file to be loaded
 	 * @return
 	 */
-	public File selectFile(){
+	private File selectFile(){
 
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Nuclear morphology datasets", "nmd");
 		

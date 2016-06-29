@@ -56,6 +56,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -685,6 +686,12 @@ public class MainWindow
 		if(event.type().startsWith("Status_")){
 			String s = event.type().replace("Status_", "");
 			setStatus(s);
+		}
+		
+		if(event.type().startsWith("Open|")){
+			String s = event.type().replace("Open|", "");
+			File f = new File(s);
+			new PopulationImportAction(this, f);
 		}
 				
 	}

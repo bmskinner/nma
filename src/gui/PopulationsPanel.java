@@ -27,9 +27,16 @@ import gui.tabs.DetailPanel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,6 +72,7 @@ import org.jfree.chart.JFreeChart;
 
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
+import utility.Constants;
 import utility.TreeOrderHashMap;
 import analysis.AnalysisDataset;
 import components.CellCollection;
@@ -100,6 +108,37 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		panelPopulations.setLayout(new BoxLayout(panelPopulations, BoxLayout.Y_AXIS));
 		
 		treeTable = createTreeTable();
+		
+		treeTable.setDropTarget(new DropTarget(){
+			
+			@Override
+            public synchronized void drop(DropTargetDropEvent dtde) {
+				
+				
+				try {
+					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+					Transferable t = dtde.getTransferable();
+					List<File> fileList = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+					File f = (File)fileList.get(0);
+					
+					if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
+						finer("Opening file "+f.getAbsolutePath());
+						fireSignalChangeEvent("Open|"+f.getAbsolutePath());
+						
+					} else {
+						finer("File is not nmd, ignoring");
+					}
+					
+					
+				} catch (UnsupportedFlavorException e) {
+					error("Error in DnD", e);
+				} catch (IOException e) {
+					error("IO error in DnD", e);
+				}
+               
+            }
+			
+		});
 							
 		
 		JScrollPane populationScrollPane = new JScrollPane(treeTable);		
