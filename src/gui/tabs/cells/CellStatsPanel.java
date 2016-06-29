@@ -34,6 +34,7 @@ import components.nuclei.Nucleus;
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.ColourSelecter;
 import gui.components.ExportableTable;
+import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.dialogs.CellImageDialog;
 
 @SuppressWarnings("serial")
@@ -230,19 +231,20 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
 			if(scale>0){ // don't allow a scale to cause divide by zero errors
 				if(applyAllOption==0){ // button at index 1
-					//								if(applyAllOption==JOptionPane.YES_OPTION){
 
 					for(Nucleus n : activeDataset().getCollection().getNuclei()){
 						n.setScale(scale);
 					}
+					activeDataset().getCollection().getConsensusNucleus().setScale(scale);
+					
 
 				} else {
 					activeCell.getNucleus().setScale(scale);
 
 				}
-				
-				update(activeCell);
 				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+//				update(activeCell);
+				
 			} else {
 				warn("Cannot set a scale to zero");
 			}
@@ -255,6 +257,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 		TableOptions options = new TableOptionsBuilder()
 				.setDatasets(getDatasets())
 				.setCell(activeCell)
+				.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
 				.build();
 		
 		try{
