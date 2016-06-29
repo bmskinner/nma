@@ -678,6 +678,7 @@ public class MainWindow
 		}
 		
 		if(event.type().equals("SaveCollectionAction")){
+			
 			this.saveDataset(selectedDataset, true);
 		}
 		
@@ -691,7 +692,11 @@ public class MainWindow
 		if(event.type().startsWith("Open|")){
 			String s = event.type().replace("Open|", "");
 			File f = new File(s);
-			new PopulationImportAction(this, f);
+			
+			Runnable task = () -> { 
+				new PopulationImportAction(this, f);
+			};
+			threadManager.execute(task);
 		}
 				
 	}
@@ -931,12 +936,12 @@ public class MainWindow
 			finest("Creating latch");
 			final CountDownLatch latch = new CountDownLatch(1);
 
-//			Runnable r = () -> {
+			Runnable r = () -> {
 				finest("Running save action");
 				new SaveDatasetAction(d, MainWindow.this, latch, saveAs);
-//			};
+			};
 			finest("Passing save action to executor service");
-//			threadManager.submit(r);//.execute(r);
+			threadManager.submit(r);
 
 			fine("Root dataset saved");
 		} else {
