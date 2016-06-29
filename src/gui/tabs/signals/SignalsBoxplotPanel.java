@@ -19,6 +19,7 @@
 package gui.tabs.signals;
 
 import gui.components.ExportableChartPanel;
+import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.BoxplotsTabPanel;
 
 import java.awt.BorderLayout;
@@ -29,7 +30,6 @@ import javax.swing.JScrollPane;
 
 import org.jfree.chart.JFreeChart;
 
-import analysis.AnalysisDataset;
 import stats.SignalStatistic;
 import components.generic.MeasurementScale;
 import charting.charts.BoxplotChartFactory;
@@ -74,9 +74,6 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 		scrollPane  = new JScrollPane(mainPanel);
 		this.add(scrollPane, BorderLayout.CENTER);
 
-		measurementUnitSettingsPanel.addActionListener(this);
-		measurementUnitSettingsPanel.setEnabled(false);
-		this.add(measurementUnitSettingsPanel, BorderLayout.NORTH);
 	}
 
 	@Override
@@ -94,8 +91,8 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
 	@Override
 	protected void updateMultiple() {
-		measurementUnitSettingsPanel.setEnabled(true);
-		MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
+
+		MeasurementScale scale  = MeasurementUnitSettingsPanel.getInstance().getSelected();
 
 		for(SignalStatistic stat : SignalStatistic.values()){
 
@@ -128,7 +125,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 	@Override
 	protected void updateNull() {
 		updateMultiple();
-		measurementUnitSettingsPanel.setEnabled(false);
+//		measurementUnitSettingsPanel.setEnabled(false);
 	}
 
 }

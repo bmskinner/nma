@@ -27,19 +27,14 @@ import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.NumberFormat;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import analysis.profiles.ProfileManager;
 import utility.Constants;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
@@ -48,11 +43,10 @@ import charting.options.TableOptionsBuilder;
 import components.generic.MeasurementScale;
 import components.nuclear.NucleusBorderSegment;
 
-public class SegmentStatsPanel extends DetailPanel implements ActionListener {
+public class SegmentStatsPanel extends DetailPanel {
 	
 	private static final long serialVersionUID = 1L;
 	private ExportableTable table; // individual segment stats
-	private MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel() ;
 			
 	private JScrollPane scrollPane;
 			
@@ -60,7 +54,7 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 		super();
 		
 		this.setLayout(new BorderLayout());
-		measurementUnitSettingsPanel.addActionListener(this);
+
 		scrollPane = new JScrollPane();
 					
 		try {
@@ -122,7 +116,7 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 	}
 	
 	private TableOptions makeOptions(){
-		MeasurementScale scale = measurementUnitSettingsPanel.getSelected();
+		MeasurementScale scale =MeasurementUnitSettingsPanel.getInstance().getSelected();
 		
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
@@ -141,11 +135,11 @@ public class SegmentStatsPanel extends DetailPanel implements ActionListener {
 		return null;
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		update(getDatasets());
-		
-	}
+//	@Override
+//	public void actionPerformed(ActionEvent e) {
+//		update(getDatasets());
+//		
+//	}
 	
 	private class SegmentTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 

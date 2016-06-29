@@ -27,13 +27,10 @@ import gui.tabs.BoxplotsTabPanel;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -41,14 +38,11 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
-import analysis.profiles.ProfileManager;
-import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.generic.BorderTag;
-import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 
@@ -61,7 +55,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 		super();
 		
 		// Not needed for a consensus panel
-		headerPanel.remove(measurementUnitSettingsPanel);
+//		headerPanel.remove(measurementUnitSettingsPanel);
 
 		try {
 			this.updateNull();

@@ -21,6 +21,7 @@
 package gui.tabs.nuclear;
 
 import gui.components.ExportableChartPanel;
+import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.BoxplotsTabPanel;
 
 import java.awt.BorderLayout;
@@ -73,9 +74,9 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 			scrollPane  = new JScrollPane(mainPanel);
 			this.add(scrollPane, BorderLayout.CENTER);
 			
-			measurementUnitSettingsPanel.addActionListener(this);
-			measurementUnitSettingsPanel.setEnabled(false);
-			this.add(measurementUnitSettingsPanel, BorderLayout.NORTH);
+//			measurementUnitSettingsPanel.addActionListener(this);
+//			measurementUnitSettingsPanel.setEnabled(false);
+//			this.add(measurementUnitSettingsPanel, BorderLayout.NORTH);
 			
 		}
 								
@@ -97,8 +98,8 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		@Override
 		protected void updateMultiple() {
 			super.updateMultiple();
-			measurementUnitSettingsPanel.setEnabled(true);
-			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
+//			measurementUnitSettingsPanel.setEnabled(true);
+//			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
 
 			for(NucleusStatistic stat : NucleusStatistic.values()){
 
@@ -107,7 +108,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(getDatasets())
 					.addStatistic(stat)
-					.setScale(scale)
+					.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
 					.build();
 				
 				JFreeChart chart = getChart(options);
@@ -121,7 +122,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 			super.updateNull();
 			finest("Passing to update multiple in "+this.getClass().getName());
 			updateMultiple();
-			measurementUnitSettingsPanel.setEnabled(false);
+//			measurementUnitSettingsPanel.setEnabled(false);
 		}
 		
 		

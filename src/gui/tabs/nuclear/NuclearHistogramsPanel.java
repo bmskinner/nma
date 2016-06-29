@@ -25,15 +25,13 @@ import gui.SignalChangeListener;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.HistogramsTabPanel;
 import gui.components.SelectableChartPanel;
+import gui.components.panels.MeasurementUnitSettingsPanel;
 
 import java.awt.Dimension;
 import java.text.DecimalFormat;
-import java.util.List;
 import java.util.logging.Level;
 
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.XYPlot;
-
 import stats.NucleusStatistic;
 import analysis.AnalysisDataset;
 import charting.options.ChartOptions;
@@ -49,7 +47,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 
 			try {
 
-				MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
+				MeasurementScale scale  = MeasurementUnitSettingsPanel.getInstance().getSelected();
 				Dimension preferredSize = new Dimension(400, 150);
 				for(NucleusStatistic stat : NucleusStatistic.values()){
 					
@@ -81,7 +79,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 		
 		protected void updateMultiple() {
 			this.setEnabled(true);
-			MeasurementScale scale  = measurementUnitSettingsPanel.getSelected();
+//			MeasurementScale scale  = measurementUnitSettingsPanel.getSelected();
 			boolean useDensity = useDensityPanel.isSelected();
 
 
@@ -91,7 +89,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(getDatasets())
 					.addStatistic(stat)
-					.setScale(scale)
+					.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
 					.setUseDensity(useDensity)
 					.build();
 				
@@ -152,7 +150,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 		 */
 		public void filterByChartSelection(SelectableChartPanel panel){
 			// check the scale to use for selection
-			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
+			MeasurementScale scale  = MeasurementUnitSettingsPanel.getInstance().getSelected();
 
 			// get the parameters to filter on
 			Double lower = panel.getGateLower();

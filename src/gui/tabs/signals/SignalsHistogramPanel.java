@@ -20,6 +20,7 @@ package gui.tabs.signals;
 
 import gui.components.HistogramsTabPanel;
 import gui.components.SelectableChartPanel;
+import gui.components.panels.MeasurementUnitSettingsPanel;
 
 import java.awt.Dimension;
 import java.util.logging.Level;
@@ -41,7 +42,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 		
 		try {
 
-			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
+			MeasurementScale scale  = MeasurementUnitSettingsPanel.getInstance().getSelected();
 			Dimension preferredSize = new Dimension(400, 150);
 			for(SignalStatistic stat : SignalStatistic.values()){
 
@@ -71,7 +72,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 	protected void updateSingle() {
 		this.setEnabled(true);
 		
-		MeasurementScale scale  = measurementUnitSettingsPanel.getSelected();
+		MeasurementScale scale  = MeasurementUnitSettingsPanel.getInstance().getSelected();
 		boolean useDensity = useDensityPanel.isSelected();
 		
 		for(SignalStatistic stat : SignalStatistic.values()){

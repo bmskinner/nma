@@ -61,7 +61,7 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 	protected JPanel 		mainPanel; // hold the charts
 	protected JPanel		headerPanel; // hold buttons
 	protected GenericCheckboxPanel useDensityPanel = new GenericCheckboxPanel("Probability density function");
-	protected MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
+//	protected MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
 
 	protected JScrollPane scrollPane; // hold the main panel
 	
@@ -81,8 +81,8 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 
 			useDensityPanel.addActionListener(this);
 			
-			headerPanel.add(measurementUnitSettingsPanel);
-			measurementUnitSettingsPanel.addActionListener(this);
+//			headerPanel.add(measurementUnitSettingsPanel);
+//			measurementUnitSettingsPanel.addActionListener(this);
 
 
 			this.add(headerPanel, BorderLayout.NORTH);
@@ -111,7 +111,7 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 	public void setEnabled(boolean b){
 		super.setEnabled(b);
 		useDensityPanel.setEnabled(b);
-		measurementUnitSettingsPanel.setEnabled(b);
+//		measurementUnitSettingsPanel.setEnabled(b);
 	}
 	
 	 @Override

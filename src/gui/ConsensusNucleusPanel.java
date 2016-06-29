@@ -65,7 +65,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	private JPanel offsetsPanel; // store controls for rotating and translating
 //	private JPanel mainPanel;	
 	
-	private MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
+//	private MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
 	
 	// Debugging tools for the nucleus mesh - not visible in the final panel
 	private JCheckBox showMeshBox;
@@ -138,9 +138,9 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	private JPanel createHeaderPanel(){
 		JPanel panel = new JPanel(new FlowLayout());
 		
-		panel.add(measurementUnitSettingsPanel);
-		measurementUnitSettingsPanel.addActionListener(this);
-		measurementUnitSettingsPanel.setEnabled(false);
+//		panel.add(measurementUnitSettingsPanel);
+//		measurementUnitSettingsPanel.addActionListener(this);
+//		measurementUnitSettingsPanel.setEnabled(false);
 		
 		
 		return panel;
@@ -387,7 +387,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		
 	private void updateSingleDataset() {
 		runRefoldingButton.setVisible(false);
-		measurementUnitSettingsPanel.setEnabled(true);
+//		measurementUnitSettingsPanel.setEnabled(true);
 		
 //		showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
 //		showMeshFacesBox.setEnabled(showMeshBox.isSelected());
@@ -397,7 +397,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 //			.setShowMesh(showMeshBox.isSelected())
 //			.setShowMeshEdges(showMeshEdgesBox.isSelected())
 //			.setShowMeshFaces(showMeshFacesBox.isSelected())
-			.setScale(measurementUnitSettingsPanel.getSelected())
+			.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
 			.setShowAnnotations(false)
 			.setShowXAxis(false)
 			.setShowYAxis(false)
@@ -434,11 +434,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	
 	private void updateMultipleDatasets() {
 
-		measurementUnitSettingsPanel.setEnabled(true);
+//		measurementUnitSettingsPanel.setEnabled(true);
 		
 		ChartOptions options = new ChartOptionsBuilder()
 		.setDatasets(getDatasets())
-		.setScale(measurementUnitSettingsPanel.getSelected())
+		.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
 		.build();
 
 		JFreeChart chart = getChart(options);
@@ -461,7 +461,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		runRefoldingButton.setVisible(false);
 		offsetsPanel.setVisible(false);
 		consensusChartPanel.restoreAutoBounds();
-		measurementUnitSettingsPanel.setEnabled(false);
+//		measurementUnitSettingsPanel.setEnabled(false);
 	}
 	
 	

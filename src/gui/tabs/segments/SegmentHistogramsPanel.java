@@ -3,6 +3,7 @@ package gui.tabs.segments;
 import gui.Labels;
 import gui.components.HistogramsTabPanel;
 import gui.components.SelectableChartPanel;
+import gui.components.panels.MeasurementUnitSettingsPanel;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -15,7 +16,6 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.JFreeChart;
 
-import analysis.profiles.ProfileManager;
 import stats.SegmentStatistic;
 import charting.charts.HistogramChartFactory;
 import charting.options.ChartOptions;
@@ -54,7 +54,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-		MeasurementScale scale = this.measurementUnitSettingsPanel.getSelected();
+		MeasurementScale scale = MeasurementUnitSettingsPanel.getInstance().getSelected();
 		boolean useDensity = this.useDensityPanel.isSelected();
 		
 		log(Level.FINEST, "Dataset list is not empty");

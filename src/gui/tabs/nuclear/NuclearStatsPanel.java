@@ -25,9 +25,7 @@ import gui.tabs.DetailPanel;
 public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 	
 	private ExportableTable tablePopulationStats;
-	
-	protected MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
-	
+		
 	public NuclearStatsPanel(){
 		super();
 		
@@ -36,11 +34,7 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 		JScrollPane statsPanel = createStatsPanel();
 		
 		JPanel headerPanel = new JPanel(new FlowLayout());
-		
-		headerPanel.add(measurementUnitSettingsPanel);
-		measurementUnitSettingsPanel.addActionListener(this);
-		measurementUnitSettingsPanel.setEnabled(false);
-		
+
 		this.add(headerPanel, BorderLayout.NORTH);
 
 		this.add(statsPanel, BorderLayout.CENTER);
@@ -88,16 +82,16 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 
 		finest("Updating stats panel");
 		
-		if(this.hasDatasets()){
-			measurementUnitSettingsPanel.setEnabled(true);
-		} else {
-			measurementUnitSettingsPanel.setEnabled(false);
-		}
+//		if(this.hasDatasets()){
+//			measurementUnitSettingsPanel.setEnabled(true);
+//		} else {
+//			measurementUnitSettingsPanel.setEnabled(false);
+//		}
 		
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.ANALYSIS_STATS)
-			.setScale(measurementUnitSettingsPanel.getSelected())
+			.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
 			.build();
 
 		finest("Built table options");

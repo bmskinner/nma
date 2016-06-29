@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 
+import charting.charts.BoxplotChartFactory;
 import components.generic.MeasurementScale;
 
 @SuppressWarnings("serial")
@@ -32,7 +33,9 @@ public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
 	
 	private Map<MeasurementScale, JRadioButton> map  = new  HashMap<MeasurementScale, JRadioButton>();
 	
-	public MeasurementUnitSettingsPanel(){
+	private static MeasurementUnitSettingsPanel instance = null;
+		
+	private MeasurementUnitSettingsPanel(){
 		super();
 		
 		final ButtonGroup group = new ButtonGroup();
@@ -47,6 +50,13 @@ public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
 		}
 		// Set the default
 		map.get(MeasurementScale.PIXELS).setSelected(true);		
+	}
+	
+	public static MeasurementUnitSettingsPanel getInstance(){
+		if(instance==null){
+			instance = new MeasurementUnitSettingsPanel();
+		}
+		return instance;
 	}
 		
 	public MeasurementScale getSelected(){

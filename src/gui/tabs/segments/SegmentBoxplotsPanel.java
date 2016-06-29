@@ -2,6 +2,7 @@ package gui.tabs.segments;
 
 import gui.Labels;
 import gui.components.ExportableChartPanel;
+import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.BoxplotsTabPanel;
 
 import java.awt.Dimension;
@@ -18,7 +19,6 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
-import analysis.profiles.ProfileManager;
 import stats.SegmentStatistic;
 import charting.charts.BoxplotChartFactory;
 import charting.options.ChartOptions;
@@ -68,8 +68,8 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 		
-		MeasurementScale scale = measurementUnitSettingsPanel.getSelected();
-		measurementUnitSettingsPanel.setEnabled(true);
+		MeasurementScale scale = MeasurementUnitSettingsPanel.getInstance().getSelected();
+//		measurementUnitSettingsPanel.setEnabled(true);
 		
 		log(Level.FINEST, "Dataset list is not empty");
 
@@ -102,7 +102,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 
 			
 		} else { // different number of segments, blank chart
-			measurementUnitSettingsPanel.setEnabled(false);
+//			measurementUnitSettingsPanel.setEnabled(false);
 			mainPanel.setLayout(new FlowLayout());
 			mainPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
 		}
@@ -117,7 +117,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 		
-		measurementUnitSettingsPanel.setEnabled(false);
+//		measurementUnitSettingsPanel.setEnabled(false);
 		
 //		ChartOptions options = new ChartOptionsBuilder()
 //		.setDatasets(null)

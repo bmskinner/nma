@@ -19,7 +19,6 @@
 package gui.tabs;
 
 import gui.components.ExportableChartPanel;
-import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
@@ -29,8 +28,6 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -39,7 +36,6 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.BoxplotChartFactory;
-import charting.charts.HistogramChartFactory;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 
@@ -56,7 +52,6 @@ import charting.options.TableOptions;
 
 		protected JPanel 		mainPanel; // hold the charts
 		protected JPanel		headerPanel; // hold buttons
-		protected MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
 
 		protected JScrollPane scrollPane; // hold the main panel
 		
@@ -71,10 +66,6 @@ import charting.options.TableOptions;
 
 				headerPanel = new JPanel(new FlowLayout());
 				
-				headerPanel.add(measurementUnitSettingsPanel);
-				measurementUnitSettingsPanel.addActionListener(this);
-
-
 				this.add(headerPanel, BorderLayout.NORTH);
 
 				// add the scroll pane to the tab
@@ -98,12 +89,7 @@ import charting.options.TableOptions;
 			return null;
 		}
 
-		
-		public void setEnabled(boolean b){
-			super.setEnabled(b);
-			measurementUnitSettingsPanel.setEnabled(b);
-		}
-		
+				
 		 @Override
 	     public void actionPerformed(ActionEvent e) {
 

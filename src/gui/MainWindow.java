@@ -38,6 +38,7 @@ import gui.actions.PopulationImportAction;
 import gui.actions.SaveDatasetAction;
 import gui.actions.ShellAnalysisAction;
 import gui.components.ColourSelecter.ColourSwatch;
+import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.dialogs.MainOptionsDialog;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.ClusterDetailPanel;
@@ -56,6 +57,8 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,7 +95,7 @@ import components.nuclei.sperm.RodentSpermNucleus;
 @SuppressWarnings("serial")
 public class MainWindow 
 	extends JFrame 
-	implements SignalChangeListener, DatasetEventListener, InterfaceEventListener, Loggable {
+	implements SignalChangeListener, DatasetEventListener, InterfaceEventListener, Loggable, ActionListener {
 				
 	private JPanel contentPane;
 
@@ -444,6 +447,11 @@ public class MainWindow
 			}
 		);		
 		panelHeader.add(btnSetLogLevel);
+		
+		MeasurementUnitSettingsPanel unitsPanel = MeasurementUnitSettingsPanel.getInstance();
+		unitsPanel.addActionListener(this);
+		panelHeader.add(unitsPanel);
+		
 		return panelHeader;
 	}
 	
@@ -1192,6 +1200,13 @@ public class MainWindow
 		for(Thread t : threadSet){
 			log("Thread "+t.getId()+": "+t.getState());
 		}
+		
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		
+		updatePanels(populationsPanel.getSelectedDatasets());
 		
 	}
 
