@@ -314,7 +314,7 @@ public class Utils {
 	}
 	
 	public static double micronArea(double pixels, double scale){
-		double microns = pixels / scale;
+		double microns = pixels / (scale*scale);
 		return microns;
 	}	
  }
