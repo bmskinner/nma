@@ -402,8 +402,8 @@ public abstract class ImageProber extends LoadingIconDialog {
 	 */
 	protected void createFileList(final File folder){
 		
-		log(Level.FINEST, "Generating file list");
-//		setStatusLoading();
+		finest("Generating file list from "+folder.getAbsolutePath());
+
 		
 		Thread thr = new Thread(){
 			public void run() {
@@ -415,7 +415,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 					openImage = probableFiles.get(index);
 					importAndDisplayImage(openImage);
 				} else {
-					log(Level.WARNING, "No images found in folder");
+					warn("No images found in folder");
 					JOptionPane.showMessageDialog(ImageProber.this,  
 							"No images found in folder.", 
 							"Nope.",
@@ -606,8 +606,8 @@ public abstract class ImageProber extends LoadingIconDialog {
 	 */
 	protected ImageIcon createViewableImage(ImageProcessor ip, boolean fullSize){
 		
-		log(Level.FINEST, "Display has "+rows+" rows");
-		log(Level.FINEST, "Display has "+cols+" columns");
+		finest("Display is "+rows+" rows x "+cols+" columns");
+
 		
 		if(ip==null){
 			return new ImageIcon(); // blank image

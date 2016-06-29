@@ -150,7 +150,7 @@ public class FishRemappingDialog extends ImageProber {
 		// ask for a folder of post-FISH images
 		if(this.getPostFISHDirectory()){
 
-			createFileList(dataset.getAnalysisOptions().getFolder());
+			createFileList(  dataset.getCollection().getFolder()  );
 			this.setVisible(true);
 		} else {
 			this.dispose();
@@ -306,7 +306,9 @@ public class FishRemappingDialog extends ImageProber {
 	    if(!folder.exists()){
 	    	return false; // check folder is ok
 	    }
+	   
 	    this.postFISHImageDirectory = folder;
+	    finer("Selected "+postFISHImageDirectory.getAbsolutePath()+" as post-FISH image directory");
 	    return true;
 	}
 
