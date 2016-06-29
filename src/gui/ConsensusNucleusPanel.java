@@ -119,6 +119,13 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		offsetsPanel.setVisible(false);
 	}
 	
+	/**
+	 * Force the chart panel to restore bounds
+	 */
+	public void restoreAutoBounds(){
+		consensusChartPanel.restoreAutoBounds();
+	}
+	
 	private JPanel createOffsetsPanel(){
 		JPanel panel = new JPanel(new BorderLayout());
 		
