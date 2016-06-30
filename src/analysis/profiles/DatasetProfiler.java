@@ -27,6 +27,7 @@ import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileType;
+import components.generic.BorderTag.BorderTagType;
 
 /**
  * This class contains the methods for detecting the reference and orientation points in a median
@@ -167,29 +168,34 @@ public class DatasetProfiler extends AnalysisWorker {
 
 				if( index > -2){ // Ruleset was applied
 					
-					if( index == -1){
+					if( index > -1){
+						
+						// Add the index to the median profiles
+						collection.getProfileManager()
+							.updateProfileCollectionOffsets(tag, index);
+
+						fine(tag+" in median is located at index "+index);
+
+						// Create a median from the current reference points in the nuclei
+						Profile tagMedian = collection.getProfileCollection(ProfileType.ANGLE)
+								.getProfile(tag, Constants.MEDIAN);
+
+						collection.getProfileManager()
+							.offsetNucleusProfiles(tag, ProfileType.ANGLE, tagMedian);
+						fine("Assigned offset in nucleus profiles for "+tag);
+
+					} else {
+						
 						warn("Unable to detect "+tag+" using default ruleset");
-						warn("Falling back on reference point");
-						index = 0;
+						
+						if(tag.type().equals(BorderTagType.CORE)){
+							warn("Falling back on reference point");
+							index = 0;
+						}
 						
 					}
-										
-					// Add the index to the median profiles
-					collection.getProfileManager()
-						.updateProfileCollectionOffsets(tag, index);
-
-					fine(tag+" in median is located at index "+index);
-
-					// Create a median from the current reference points in the nuclei
-					Profile tagMedian = collection.getProfileCollection(ProfileType.ANGLE)
-							.getProfile(tag, Constants.MEDIAN);
-
-					collection.getProfileManager()
-						.offsetNucleusProfiles(tag, ProfileType.ANGLE, tagMedian);
-					fine("Assigned offset in nucleus profiles for "+tag);
-					
 					fine("Current state of profile collection:"+collection.getProfileCollection(ProfileType.ANGLE).tagString());
-					
+									
 				} else {
 					fine("No ruleset for "+tag+"; skipping");
 				}
