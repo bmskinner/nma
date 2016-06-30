@@ -241,67 +241,67 @@ public class CellDetailPanel extends AbstractCellDetailPanel implements SignalCh
 			TreeModel model = new DefaultTreeModel(root);
 			tree = new JTree(model);
 			tree.addTreeSelectionListener(CellDetailPanel.this);
-			tree.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					
-					JTree tree = (JTree) e.getSource();
-					
-					DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent();
-					NodeData data = (NodeData) node.getUserObject();
-
-					UUID cellID = data.getID();
-
-					// double click - remove cell
-					
-					if (e.getClickCount() == 2) {
-						
-						Object[] options = { "Don't delete cell" , "Delete cell", };
-						int result = JOptionPane.showOptionDialog(null, "Delete this cell?", "Confirm delete",
-
-						        JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-
-						        null, options, options[0]);
-
-						if(result==1){ // button at index 1
-
-							
-							// delete the cell
-							Cell cell = activeDataset().getCollection().getCell(cellID);
-							try {
-								activeDataset().getCollection().removeCell(cell);
-							} catch (Exception e2) {
-								error("Error removing cell from collection", e2);
-							}
-							node.removeFromParent();
-							DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-							model.reload();
-							
-							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-							list.add(activeDataset());
-							
-							try {
-								fireDatasetEvent(DatasetMethod.REFRESH_CACHE, list);
-								fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, list);
-
-							} catch (Exception e1) {
-								error("Error deleting cell", e1);
-							}
-							
-							try {
-								CellDetailPanel.this.updateSingle();
-							} catch (Exception e1) {
-								error("Error updating cell", e1);
-							}
-							fireSignalChangeEvent("UpdatePanels");
-							fireSignalChangeEvent("UpdatePopulationPanel");
-							fireDatasetEvent(DatasetMethod.SELECT_ONE_DATASET, list);
-
-						}
-						
-					}
-				}
-			});
+//			tree.addMouseListener(new MouseAdapter() {
+//				@Override
+//				public void mouseClicked(MouseEvent e) {
+//					
+//					JTree tree = (JTree) e.getSource();
+//					
+//					DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent();
+//					NodeData data = (NodeData) node.getUserObject();
+//
+//					UUID cellID = data.getID();
+//
+//					// double click - remove cell
+//					
+//					if (e.getClickCount() == 2) {
+//						
+//						Object[] options = { "Don't delete cell" , "Delete cell", };
+//						int result = JOptionPane.showOptionDialog(null, "Delete this cell?", "Confirm delete",
+//
+//						        JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+//
+//						        null, options, options[0]);
+//
+//						if(result==1){ // button at index 1
+//
+//							
+//							// delete the cell
+//							Cell cell = activeDataset().getCollection().getCell(cellID);
+//							try {
+//								activeDataset().getCollection().removeCell(cell);
+//							} catch (Exception e2) {
+//								error("Error removing cell from collection", e2);
+//							}
+//							node.removeFromParent();
+//							DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+//							model.reload();
+//							
+//							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+//							list.add(activeDataset());
+//							
+//							try {
+//								fireDatasetEvent(DatasetMethod.REFRESH_CACHE, list);
+//								fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, list);
+//
+//							} catch (Exception e1) {
+//								error("Error deleting cell", e1);
+//							}
+//							
+//							try {
+//								CellDetailPanel.this.updateSingle();
+//							} catch (Exception e1) {
+//								error("Error updating cell", e1);
+//							}
+//							fireSignalChangeEvent("UpdatePanels");
+//							fireSignalChangeEvent("UpdatePopulationPanel");
+//							fireDatasetEvent(DatasetMethod.SELECT_ONE_DATASET, list);
+//
+//						}
+//						
+//					}
+//				}
+//			});
 			
 			tree.setEnabled(false);
 			JScrollPane scrollPane = new JScrollPane(tree);
@@ -546,11 +546,13 @@ public class CellDetailPanel extends AbstractCellDetailPanel implements SignalCh
 				if(cellID!=null){ // only null for root
 					activeCell = activeDataset().getCollection().getCell(cellID);
 					finest("Updating selected cell to "+activeCell.getNucleus().getNameAndNumber());
-					updateCell(activeCell);
+					
 				} else {
-					updateCell(null);
+					activeCell = null;
+					finest("Null cell selected");
+
 				}
-				
+				updateCell(activeCell);
 				
 				
 			} catch (Exception e1){

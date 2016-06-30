@@ -508,19 +508,28 @@ public class CellCollection implements Serializable, Loggable {
   }
   
   public double getMedianPathLength() throws Exception{
-    double[] p = this.getPathLengths();
-    double median = Stats.quartile(p, Constants.MEDIAN);
-    return median;
+
+	  if(this.getNucleusCount()==0){
+		  return 0;
+	  }
+
+	  double[] p = this.getPathLengths();
+	  double median = Stats.quartile(p, Constants.MEDIAN);
+	  return median;
   }
 
   public double getMedianArrayLength(){
-    double[] p = this.getArrayLengths();
-    double median = Stats.quartile(p, Constants.MEDIAN);
-    return median;
+	  if(this.getNucleusCount()==0){
+		  return 0;
+	  }
+
+	  double[] p = this.getArrayLengths();
+	  double median = Stats.quartile(p, Constants.MEDIAN);
+	  return median;
   }
 
   public double getMaxProfileLength(){
-//	  return Stats.max(this.getArrayLengths());
+
 	  return Arrays.stream(this.getArrayLengths()).max().orElse(0); //Stats.max(values);
   }
   
@@ -703,6 +712,9 @@ public class CellCollection implements Serializable, Loggable {
   }
   
   public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale)  throws Exception {
+	  if(this.getNucleusCount()==0){
+		  return 0;
+	  }
 	  return getMedianStatistic(stat, scale, null, null);
   }
   
@@ -744,8 +756,12 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 		  return(this.statsCache.getStatistic(stat, scale));
 	  } else {
 		  
-		  double[] values = this.getNuclearStatistics(stat, scale);
-		  double median =  Stats.quartile(values, Constants.MEDIAN);
+		  double median = 0;
+		  if(this.getNucleusCount()>0){
+			  double[] values = this.getNuclearStatistics(stat, scale);
+			  median =  Stats.quartile(values, Constants.MEDIAN);
+		  }
+		  
 		  statsCache.setStatistic(stat, scale, median);
 		  return median;
 	  }
@@ -794,6 +810,10 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
    */
   private double getMedianSegmentStatistic(SegmentStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
  
+	  if(this.getNucleusCount()==0){
+		  return 0;
+	  }
+	  
 	  double[] values = this.getSegmentStatistics(stat, scale, id);
 	  double median =  Stats.quartile(values, Constants.MEDIAN);
 	  return median;

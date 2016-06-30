@@ -154,15 +154,31 @@ public class CurveRefolder extends AnalysisWorker {
 
 			// orient refolded nucleus to put tail at the bottom
 			
+			boolean orientByTV = true;
+			
 			if(refoldNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && refoldNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+				
+				if(refoldNucleus.getBorderIndex(BorderTag.TOP_VERTICAL) == -1){
+					orientByTV = false;
+				}
+				
+				if(refoldNucleus.getBorderIndex(BorderTag.BOTTOM_VERTICAL) == -1){
+					orientByTV = false;
+				}
+				
+			} else {
+				orientByTV = false;
+			}
+			
+			if(orientByTV){
 				finer("Calculating rotation angle via TopVertical");
 				refoldNucleus.alignPointsOnVertical(refoldNucleus.getBorderTag(BorderTag.TOP_VERTICAL), refoldNucleus.getBorderTag(BorderTag.BOTTOM_VERTICAL));
-				
 			} else {
 				finer("Calculating rotation angle via OrientationPoint");
 				refoldNucleus.rotatePointToBottom(refoldNucleus.getBorderTag(BorderTag.ORIENTATION_POINT));
 
 			}
+			
 			
 			// if rodent sperm, put tip on left if needed
 			if(collection.getNucleusType().equals(NucleusType.RODENT_SPERM)){

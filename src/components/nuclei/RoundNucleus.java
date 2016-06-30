@@ -1135,7 +1135,27 @@ public class RoundNucleus extends AbstractCellularComponent
 		if(this.verticalNucleus==null){
 			verticalNucleus = this.duplicate();
 			
+			boolean useTVandBV = true;
+			
 			if(this.hasBorderTag(BorderTag.TOP_VERTICAL) && this.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+				
+				if( getBorderIndex(BorderTag.TOP_VERTICAL)== -1){
+					useTVandBV = false;
+				}
+				
+				if( getBorderIndex(BorderTag.BOTTOM_VERTICAL)== -1){
+					useTVandBV = false;
+				}
+
+			} else {
+				
+				useTVandBV = false;
+
+			}
+			
+			
+			
+			if(useTVandBV){
 				// Rotate vertical
 				BorderPoint[] points = verticalNucleus.getBorderPointsForVerticalAlignment();
 				verticalNucleus.alignPointsOnVertical(points[0], points[1] );
@@ -1145,6 +1165,8 @@ public class RoundNucleus extends AbstractCellularComponent
 				verticalNucleus.rotatePointToBottom(verticalNucleus.getBorderPoint(BorderTag.ORIENTATION_POINT));
 
 			}
+			
+			
 			// Ensure all nuclei have overlapping centres of mass
 			verticalNucleus.moveCentreOfMass(new XYPoint(0,0));
 		}
