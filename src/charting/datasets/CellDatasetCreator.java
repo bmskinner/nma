@@ -21,6 +21,7 @@ package charting.datasets;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
 import gui.components.ColourSelecter;
+import gui.components.panels.MeasurementUnitSettingsPanel;
 
 import java.awt.Color;
 import java.text.DecimalFormat;
@@ -131,10 +132,17 @@ public class CellDatasetCreator implements Loggable {
 		NucleusType type = NucleusType.getNucleusType(n);
 
 		if(type!=null){
-			for(BorderTag tag : BorderTag.values(BorderTagType.CORE)){
-				fieldNames.add(type.getPoint(tag));
-				int index = AbstractCellularComponent.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
-				rowData.add(index);
+//			for(BorderTag tag : n.getBorderTags().keySet()){
+			for(BorderTag tag : BorderTag.values()){
+				fieldNames.add(tag);
+				if(n.hasBorderTag(tag)){
+					
+					
+					int index = AbstractCellularComponent.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
+					rowData.add(index);
+				} else {
+					rowData.add("N/A");
+				}
 			}
 		} 
 		addNuclearSignalsToTable(fieldNames, rowData, n, d);
@@ -160,17 +168,10 @@ public class CellDatasetCreator implements Loggable {
 
 			if( ! stat.equals(NucleusStatistic.VARIABILITY)){
 
-				fieldNames.add(stat.label(MeasurementScale.PIXELS)  );
+				fieldNames.add(stat.label(MeasurementUnitSettingsPanel.getInstance().getSelected())  );
 
-				double pixel = n.getStatistic(stat, MeasurementScale.PIXELS);
-
-				if(stat.isDimensionless()){
-					rowData.add(df.format(pixel) );
-				} else {
-					double micron = n.getStatistic(stat, MeasurementScale.MICRONS);
-					rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
-				}
-
+				double value = n.getStatistic(stat, MeasurementUnitSettingsPanel.getInstance().getSelected());
+					rowData.add(df.format(value) );
 			}
 
 		}
@@ -241,16 +242,16 @@ public class CellDatasetCreator implements Loggable {
 		
 		for(SignalStatistic stat : SignalStatistic.values()){
 
-			fieldNames.add(stat.label(MeasurementScale.PIXELS)  );
+			fieldNames.add(    stat.label(   MeasurementUnitSettingsPanel.getInstance().getSelected() )  );
 
-			double pixel = s.getStatistic(stat, MeasurementScale.PIXELS);
+			double value = s.getStatistic(stat, MeasurementUnitSettingsPanel.getInstance().getSelected());
 
-			if(stat.isDimensionless()){
-				rowData.add(df.format(pixel) );
-			} else {
-				double micron = s.getStatistic(stat, MeasurementScale.MICRONS);
-				rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
-			}
+//			if(stat.isDimensionless()){
+				rowData.add(df.format(value) );
+//			} else {
+//				double micron = s.getStatistic(stat, MeasurementScale.MICRONS);
+//				rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
+//			}
 		}
 
 		fieldNames.add("Signal CoM");
