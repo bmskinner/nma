@@ -277,7 +277,9 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				this.progressBar.setIndeterminate(false);
 			}
 			this.progressBar.setValue(value);
-			cellsDone++;
+			
+			
+			cellsDone = (value * totalCells) /100 ;
 			progressBar.setString(cellsDone+" of "+totalCells);
 			updateChart();
 		}
