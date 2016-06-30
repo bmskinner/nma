@@ -43,7 +43,7 @@ public class SignalWarper extends AnalysisWorker {
 		this.setProgressTotal(count);
 		
 		
-		fine("Created signal warper for "+dataset.getName()+" signal group "+signalGroup);
+		fine("Created signal warper for "+dataset.getName()+" signal group "+signalGroup+" with "+count+" cells");
 	}
 	
 
