@@ -29,6 +29,7 @@ import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import gui.InterfaceEvent.InterfaceMethod;
+import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
 import stats.PlottableStatistic;
 
@@ -97,9 +98,10 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		panel.add(new JLabel("Y axis"));
 		panel.add(statBBox);
 		
+		panel.add(gateButton);
 		panel.add( new JLabel("Spearman's rank correlation coefficients are shown in the table")  );
 		
-		panel.add(gateButton);
+		
 		return panel;
 	}
 	
@@ -113,6 +115,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 				.setDatasets(getDatasets())
 				.addStatistic(statA)
 				.addStatistic(statB)
+				.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
 				.build();
 		
 		chartPanel.setChart(getChart(options));
@@ -122,6 +125,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 				.setDatasets(getDatasets())
 				.addStatistic(statA)
 				.addStatistic(statB)
+				.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
 				.build();
 		
 		rhoTable.setModel(getTable(tableOptions));
@@ -143,6 +147,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		
 		TableOptions tableOptions = new TableOptionsBuilder()
 				.setDatasets(null)
+				.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
 				.build();
 		
 		rhoTable.setModel(getTable(tableOptions));
@@ -197,7 +202,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 			finest("Filtering on "+statBBox.getSelectedItem().toString());
 			CellCollection stat2 = stat1
 					.filterCollection((PlottableStatistic) statBBox.getSelectedItem(),
-							MeasurementScale.PIXELS, 
+							MeasurementUnitSettingsPanel.getInstance().getSelected(),
 							range[0], range[1]);
 			
 			if(stat2 == null){
