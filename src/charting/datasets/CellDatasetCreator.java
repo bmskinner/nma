@@ -120,6 +120,12 @@ public class CellDatasetCreator implements Loggable {
 		rowData.add(n.getScale());
 
 		addNuclearStatisticsToTable(fieldNames, rowData, n);
+		
+		fieldNames.add("Original bounding width");
+		rowData.add(n.getBounds().getWidth());
+		
+		fieldNames.add("Original bounding height");
+		rowData.add(n.getBounds().getHeight());
 
 		fieldNames.add("Nucleus CoM");
 		rowData.add(n.getCentreOfMass().toString());

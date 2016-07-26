@@ -273,6 +273,8 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 					this.setAnalysing(true);
 					
 					activeCell.getNucleus().setBorderTag(BorderTag.REFERENCE_POINT, tag, newTagIndex);
+					activeCell.getNucleus().updateVerticallyRotatedNucleus();
+					
 					
 					if(tag.equals(BorderTag.REFERENCE_POINT)){
 						// Update the profile aggregate to use the new RP

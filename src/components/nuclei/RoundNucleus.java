@@ -1169,6 +1169,11 @@ public class RoundNucleus extends AbstractCellularComponent
 			
 			// Ensure all nuclei have overlapping centres of mass
 			verticalNucleus.moveCentreOfMass(new XYPoint(0,0));
+			this.setStatistic(NucleusStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
+			this.setStatistic(NucleusStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
+			
+			double aspect = verticalNucleus.getBounds().getHeight() / verticalNucleus.getBounds().getWidth();
+			this.setStatistic(NucleusStatistic.ASPECT,  aspect);
 		}
 		return verticalNucleus;
 	}
