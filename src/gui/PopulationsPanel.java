@@ -119,15 +119,20 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 					Transferable t = dtde.getTransferable();
 					List<File> fileList = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
-					File f = (File)fileList.get(0);
 					
-					if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
-						finer("Opening file "+f.getAbsolutePath());
-						fireSignalChangeEvent("Open|"+f.getAbsolutePath());
+					for(File f : fileList){
+						if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
+							finer("Opening file "+f.getAbsolutePath());
+							fireSignalChangeEvent("Open|"+f.getAbsolutePath());
+							
+						} else {
+							finer("File is not nmd, ignoring");
+						}
 						
-					} else {
-						finer("File is not nmd, ignoring");
 					}
+//					File f = (File)fileList.get(0);
+					
+					
 					
 					
 				} catch (UnsupportedFlavorException e) {
