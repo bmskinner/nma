@@ -461,7 +461,7 @@ public abstract class DetailPanel
 	 */
 	public void refreshTableCache(){
 		clearTableCache();
-		finest("Updating charts after clear");
+		finest("Updating tables after clear");
 		this.update(getDatasets());
 	}
 	

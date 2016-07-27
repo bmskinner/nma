@@ -34,8 +34,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 	private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus");
 	private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp to consensus");
 			
-	public CellOutlinePanel(){
-		super();
+	public CellOutlinePanel(CellViewModel model) {
+		super(model);
 		// make the chart for each nucleus
 		this.setLayout(new BorderLayout());
 		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
@@ -68,7 +68,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 	private void updateSettingsPanels(){
 		if(this.hasDatasets()){
 
-			if(activeCell==null){
+			if(this.getCellModel().getCell()==null){
 				rotationPanel.setEnabled(false);
 				makeMeshPanel.setEnabled(false);
 				warpMeshPanel.setEnabled(false);
@@ -90,16 +90,15 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		}
 	}
 							
-	public void update(Cell cell){
-		super.update(cell);
+	public void update(){
 
-		CellularComponent component = parent.getActiveComponent();
+		CellularComponent component = this.getCellModel().getComponent();
 								
 			updateSettingsPanels();
 			
 			ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
-					.setCell(activeCell)
+					.setCell(this.getCellModel().getCell())
 					.setRotationMode(rotationPanel.getSelected())
 					.setShowAnnotations(false)
 					.setShowMesh(makeMeshPanel.isSelected())
@@ -123,7 +122,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 			
 			panel.setChart(chart);
 
-			if(cell!=null  ){ 
+			if(this.getCellModel().hasCell()  ){ 
 				panel.restoreAutoBounds();
 			}
 			
@@ -133,14 +132,13 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		update(activeCell);
+		update();
 		
 	}
 
 	@Override
 	protected void updateSingle() {
-		activeCell = null;
-		update(activeCell);
+		update();
 		
 	}
 
@@ -152,7 +150,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
 	@Override
 	protected void updateNull() {
-		activeCell = null;
+//		activeCell = null;
 		
 		updateSettingsPanels();
 		

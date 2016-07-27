@@ -48,8 +48,8 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 		
 		private int activeProfileIndex = 0; // the position that has been clicked
 		
-		public CellBorderTagPanel() {
-			super();
+		public CellBorderTagPanel(CellViewModel model) {
+			super(model);
 
 			this.setLayout(new BorderLayout());
 			createBorderTagPopup();
@@ -145,7 +145,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 			};
 			
 			panel.add(profileOptions);
-			profileOptions.addActionListener(  e -> update(activeCell)   );
+			profileOptions.addActionListener(  e -> update()   );
 			
 			
 			return panel;
@@ -157,14 +157,13 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 			profileOptions.setEnabled(b);
 		}
 		
-		public void update(Cell cell){
+		public void update(){
 
-			super.update(cell);
 			try{
 				
 				ProfileType type = profileOptions.getSelected();
 
-				if(cell==null){
+				if( ! this.getCellModel().hasCell()){
 					JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
 					chartPanel.setChart(chart);
 					rangePanel.setChart(chart);
@@ -176,7 +175,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 					
 					ChartOptions options = new ChartOptionsBuilder()
 						.setDatasets(getDatasets())
-						.setCell(activeCell)
+						.setCell(this.getCellModel().getCell())
 						.setNormalised(false)
 						.setAlignment(ProfileAlignment.LEFT)
 						.setTag(BorderTag.REFERENCE_POINT)
@@ -190,7 +189,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 								
 					JFreeChart chart = getChart(options);
 					
-					profile = activeCell.getNucleus().getProfile(type, BorderTag.REFERENCE_POINT);
+					profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTag.REFERENCE_POINT);
 									
 					chartPanel.setChart(chart, null, false); // no profile, don't normalise
 					updateChartPanelRange();
@@ -202,7 +201,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 					
 					ChartOptions rangeOptions = new ChartOptionsBuilder()
 						.setDatasets(getDatasets())
-						.setCell(activeCell)
+						.setCell(this.getCellModel().getCell())
 						.setNormalised(false)
 						.setAlignment(ProfileAlignment.LEFT)
 						.setTag(BorderTag.REFERENCE_POINT)
@@ -272,8 +271,8 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 					log("Updating nucleus "+tag+" to index "+newTagIndex);
 					this.setAnalysing(true);
 					
-					activeCell.getNucleus().setBorderTag(BorderTag.REFERENCE_POINT, tag, newTagIndex);
-					activeCell.getNucleus().updateVerticallyRotatedNucleus();
+					this.getCellModel().getCell().getNucleus().setBorderTag(BorderTag.REFERENCE_POINT, tag, newTagIndex);
+					this.getCellModel().getCell().getNucleus().updateVerticallyRotatedNucleus();
 					
 					
 					if(tag.equals(BorderTag.REFERENCE_POINT)){
@@ -281,8 +280,8 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 						activeDataset().getCollection().getProfileManager().createProfileCollections();
 					}
 					this.setAnalysing(false);
-					this.clearChartCache();
-					this.fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());//.refreshChartCache();
+					this.refreshChartCache();
+					this.fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 
 				
 			} else {
@@ -290,5 +289,12 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 				return;
 			}
 
+		}
+		
+		@Override
+		public void refreshChartCache(){
+			clearChartCache();
+			finest("Updating chart after clear");
+			this.update();
 		}
 }

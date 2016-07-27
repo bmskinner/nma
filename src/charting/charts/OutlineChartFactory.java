@@ -342,7 +342,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		
 		// make a hash to track the contents of each dataset produced
-		Map<Integer, String> hash = new HashMap<Integer, String>(0); 
+		Map<Integer, String>    hash        = new HashMap<Integer, String>(0); 
 		Map<Integer, XYDataset> datasetHash = new HashMap<Integer, XYDataset>(0); 
 		
 		if(rotateMode.equals(RotationMode.VERTICAL)){

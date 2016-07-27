@@ -1,39 +1,26 @@
 package gui.tabs.cells;
 
-import components.Cell;
-import components.CellularComponent;
-import gui.tabs.CellDetailPanel;
 import gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public abstract class AbstractCellDetailPanel extends DetailPanel {
 		
-	protected CellDetailPanel parent;
-	protected Cell activeCell;
-	protected CellularComponent activeComponent;
+	private   CellViewModel   model;
 	
-	public AbstractCellDetailPanel(){
+	public AbstractCellDetailPanel(CellViewModel model){
 		super();
+		this.model = model;
 	}
 	
-	public void update(Cell cell){
-		this.activeCell = cell;
-	}
+	public abstract void update();
 	
-	public void setParent(CellDetailPanel p){
-		this.parent = p;
+//	public void update(Cell cell){
+//		model.setCell(cell);
+//	}
+		
+	public CellViewModel getCellModel(){
+		return model;
 	}
-	
-	public void setActiveComponent(CellularComponent activeComponent){
-		this.activeComponent = activeComponent;
-	}
-	
-	public CellularComponent getActiveComponent(){
-		return this.activeComponent;
-	}
-	
-	public Cell getActiveCell(){
-		return this.activeCell;
-	}
+		
 
 }

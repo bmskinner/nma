@@ -44,8 +44,9 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 	private JPanel buttonsPanel;
 	private JButton flipButton;
 	
-	public CellProfilePanel() {
-		super();
+	
+	public CellProfilePanel(CellViewModel model) {
+		super(model);
 
 		this.setLayout(new BorderLayout());
 		this.setBorder(null);
@@ -96,7 +97,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		};
 		
 		panel.add(profileOptions);
-		profileOptions.addActionListener(  e -> update(activeCell)   );
+		profileOptions.addActionListener(  e -> update()   );
 		
 		flipButton = new JButton("Reverse profile");
 		panel.add(flipButton);
@@ -104,9 +105,10 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		
 		flipButton.addActionListener( e -> {
 			this.setAnalysing(true);
-			activeCell.getNucleus().reverse();
+			this.getCellModel().getCell().getNucleus().reverse();
 			activeDataset().getCollection().getProfileManager().createProfileCollections();
 			this.setAnalysing(false);
+			refreshChartCache();
 			fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 			
 		} );
@@ -121,14 +123,13 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		flipButton.setEnabled(b);
 	}
 	
-	public void update(Cell cell){
-
-		super.update(cell);
+	public void update(){
+		
 		try{
 			
 			ProfileType type = profileOptions.getSelected();
 
-			if(cell==null){
+			if(getCellModel().getCell()==null){
 				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
 				chartPanel.setChart(chart);
 				rangePanel.setChart(chart);
@@ -140,7 +141,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
-					.setCell(activeCell)
+					.setCell(this.getCellModel().getCell())
 					.setNormalised(false)
 					.setAlignment(ProfileAlignment.LEFT)
 					.setTag(BorderTag.REFERENCE_POINT)
@@ -153,7 +154,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 							
 				JFreeChart chart = getChart(options);
 				
-				profile = activeCell.getNucleus().getProfile(type, BorderTag.REFERENCE_POINT);
+				profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTag.REFERENCE_POINT);
 								
 				chartPanel.setChart(chart, profile, false); // use the profile, don't normalise
 				updateChartPanelRange();
@@ -165,7 +166,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				
 				ChartOptions rangeOptions = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
-					.setCell(activeCell)
+					.setCell(this.getCellModel().getCell())
 					.setNormalised(false)
 					.setAlignment(ProfileAlignment.LEFT)
 					.setTag(BorderTag.REFERENCE_POINT)
@@ -189,8 +190,79 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 			rangePanel.setChart(chart);
 			setButtonsEnabled(false);
 		}
-
+		
 	}
+	
+//	public void update(Cell cell){
+//
+//		super.update(cell);
+//		try{
+//			
+//			ProfileType type = profileOptions.getSelected();
+//
+//			if(cell==null){
+//				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
+//				chartPanel.setChart(chart);
+//				rangePanel.setChart(chart);
+//				setButtonsEnabled(false);
+//
+//			} else {
+//				
+//				SegmentedProfile profile = null;
+//				
+//				ChartOptions options = new ChartOptionsBuilder()
+//					.setDatasets(getDatasets())
+//					.setCell(this.getCellModel().getCell())
+//					.setNormalised(false)
+//					.setAlignment(ProfileAlignment.LEFT)
+//					.setTag(BorderTag.REFERENCE_POINT)
+//					.setShowMarkers(false)
+//					.setProfileType( type)
+//					.setSwatch(activeDataset().getSwatch())
+//					.setShowPoints(true)
+//					.build();
+//				
+//							
+//				JFreeChart chart = getChart(options);
+//				
+//				profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTag.REFERENCE_POINT);
+//								
+//				chartPanel.setChart(chart, profile, false); // use the profile, don't normalise
+//				updateChartPanelRange();
+//				
+//				
+//				/*
+//				 * Create the chart for the range panel
+//				 */
+//				
+//				ChartOptions rangeOptions = new ChartOptionsBuilder()
+//					.setDatasets(getDatasets())
+//					.setCell(this.getCellModel().getCell())
+//					.setNormalised(false)
+//					.setAlignment(ProfileAlignment.LEFT)
+//					.setTag(BorderTag.REFERENCE_POINT)
+//					.setShowMarkers(false)
+//					.setProfileType( type)
+//					.setSwatch(activeDataset().getSwatch())
+//					.setShowPoints(false)
+//					.build();
+//				
+//				JFreeChart rangeChart = getChart(rangeOptions);
+//				
+//				rangePanel.setChart(rangeChart);
+//
+//				setButtonsEnabled(true);		
+//			}
+//
+//		} catch(Exception e){
+//			error("Error updating cell panel", e);
+//			JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
+//			chartPanel.setChart(chart);
+//			rangePanel.setChart(chart);
+//			setButtonsEnabled(false);
+//		}
+//
+//	}
 	
 	/**
 	 * Set the main chart panel domain range to centre on the 
@@ -226,7 +298,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				String index = array[2];
 				int indexValue = Integer.valueOf(index);
 
-				Nucleus n = activeCell.getNucleus();
+				Nucleus n = this.getCellModel().getCell().getNucleus();
 				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
 
 				/*
@@ -243,8 +315,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				n.updateVerticallyRotatedNucleus();
 				
 				// Recache necessary charts
-				this.clearChartCache();
-				this.update(activeCell);
+				refreshChartCache();
 				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 			} catch(Exception e){
 				error("Error updating segment", e);
@@ -299,6 +370,13 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		} else {
 			log("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
 		}
+	}
+	
+	@Override
+	public void refreshChartCache(){
+		clearChartCache();
+		finest("Updating chart after clear");
+		this.update();
 	}
 
 }

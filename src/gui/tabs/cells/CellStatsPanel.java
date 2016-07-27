@@ -44,8 +44,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	
 	private JScrollPane scrollPane;
 	
-	public CellStatsPanel() {
-		
+	public CellStatsPanel(CellViewModel model) {
+		super(model);
 		this.setLayout(new BorderLayout());
 		
 		scrollPane = new JScrollPane();
@@ -54,17 +54,17 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 				.setCell(null)
 				.build();
 		
-		TableModel model;
+		TableModel tableModel;
 		try {
-			model = getTable(options);
+			tableModel = getTable(options);
 		} catch (Exception e1) {
 			warn("Error creating cell stats table model");
 			log(Level.FINE, "Error creating cell stats table model", e1);
-			model = null;
+			tableModel = null;
 		}
 					
 		
-		table = new ExportableTable(model);
+		table = new ExportableTable(tableModel);
 		table.setEnabled(false);
 		
 		table.addMouseListener(new MouseAdapter() {
@@ -99,7 +99,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 					}
 					
 					// Adjust the point position of tags
-					Nucleus n = activeCell.getNucleus();
+					Nucleus n = getCellModel().getCell().getNucleus();
 					BorderTag tag = activeDataset().getCollection().getNucleusType().getTagFromName(rowName);
 					if(n.hasBorderTag(tag)){
 						
@@ -174,13 +174,13 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 			}
 			
 			
-			update(activeCell);
+			update();
 			
 		}
 	}
 	
 	private void showCellImage(){
-		new CellImageDialog( activeCell);
+		new CellImageDialog( this.getCellModel().getCell());
 	}
 	
 	private void changeSignalGroupColour(int row){
@@ -198,14 +198,14 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 		if(newColor != null){
             activeDataset().getCollection().getSignalGroup(signalGroup).setGroupColour(newColor);//.setSignalGroupColour(signalGroup, newColor);
 
-			update(activeCell);
+			update();
 			fireSignalChangeEvent("SignalColourUpdate");
 		}
 	}
 	
 	private void updateScale(){
 		SpinnerNumberModel sModel 
-		= new SpinnerNumberModel(activeCell.getNucleus().getScale(), 1, 100000, 1);
+		= new SpinnerNumberModel(this.getCellModel().getCell().getNucleus().getScale(), 1, 100000, 1);
 		JSpinner spinner = new JSpinner(sModel);
 
 
@@ -232,18 +232,24 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 			if(scale>0){ // don't allow a scale to cause divide by zero errors
 				if(applyAllOption==0){ // button at index 1
 
+					finest("Updating scale for all cells");
 					for(Nucleus n : activeDataset().getCollection().getNuclei()){
 						n.setScale(scale);
 					}
-					activeDataset().getCollection().getConsensusNucleus().setScale(scale);
+					if(activeDataset().getCollection().hasConsensusNucleus()){
+						activeDataset().getCollection().getConsensusNucleus().setScale(scale);
+					}
 					
 
 				} else {
-					activeCell.getNucleus().setScale(scale);
+					finest("Updating scale for single cell");
+					this.getCellModel().getCell().getNucleus().setScale(scale);
 
 				}
+				finest("Refreshing cache");
+				this.refreshTableCache();
 				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
-//				update(activeCell);
+
 				
 			} else {
 				warn("Cannot set a scale to zero");
@@ -251,21 +257,27 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 		}
 	}
 	
-	public void update(Cell cell){
-		super.update(cell);
-		
+	@Override
+	public void refreshTableCache(){
+		finest("Preparing to refresh table cache");
+		clearTableCache();
+		finest("Updating tables after clear");
+		this.update();
+	}
+	
+	public void update(){
 		TableOptions options = new TableOptionsBuilder()
-				.setDatasets(getDatasets())
-				.setCell(activeCell)
-				.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
-				.build();
-		
+		.setDatasets(getDatasets())
+		.setCell(this.getCellModel().getCell())
+		.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
+		.build();
+
 		try{
-			
+
 			TableModel model = getTable(options);
 			table.setModel(model);
-			
-			if(cell!=null){
+
+			if(this.getCellModel().getCell()!=null){
 				table.getColumnModel().getColumn(1).setCellRenderer(  new StatsTableCellRenderer() );
 			}
 		} catch(Exception e){
@@ -276,8 +288,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	
 	@Override
 	protected void updateSingle() {
-		activeCell = null;
-		update(activeCell);
+		update();
 	}
 
 
@@ -291,8 +302,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
 	@Override
 	protected void updateNull() {
-		activeCell = null;
-		update(activeCell);
+		update();
 		
 	}
 
