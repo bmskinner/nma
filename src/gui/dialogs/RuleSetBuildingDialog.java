@@ -1,8 +1,10 @@
 package gui.dialogs;
 
+import gui.LoadingIconDialog;
 import gui.components.panels.ProfileTypeOptionsPanel;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -33,7 +36,7 @@ import analysis.profiles.RuleSet;
 import analysis.profiles.RuleSetCollection;
 
 @SuppressWarnings("serial")
-public class RuleSetBuildingDialog extends JDialog implements Loggable {
+public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable {
 			
 	private boolean isOK = false;
 	
@@ -46,9 +49,10 @@ public class RuleSetBuildingDialog extends JDialog implements Loggable {
 		
 		createUI();
 
-		Dimension dim = new Dimension(300, 400);
+		Dimension dim = new Dimension(500, 400);
 		this.setMinimumSize(dim);
 		this.pack();
+		this.centerOnScreen();
 		this.setVisible(true);
 	}
 	
@@ -93,6 +97,7 @@ public class RuleSetBuildingDialog extends JDialog implements Loggable {
 		RuleSetPanel ruleSetPanel = new RuleSetPanel();	
 		ruleSetPanel.setBorder(BorderFactory.createTitledBorder("Ruleset"));
 		mainPanel.add(ruleSetPanel);
+		mainPanel.add(Box.createVerticalGlue());
 		mainPanel.revalidate();
 		mainPanel.repaint();
 	}
@@ -187,9 +192,10 @@ public class RuleSetBuildingDialog extends JDialog implements Loggable {
 		
 		private void addRule(){
 			
-			RulePanel r = new RulePanel();
+			RulePanel r = new RulePanel(this);
 			rules.add(r);
 			main.add(r);
+			main.add(Box.createVerticalStrut(5)) ;
 			
 			this.revalidate();
 			this.repaint();
@@ -224,37 +230,49 @@ public class RuleSetBuildingDialog extends JDialog implements Loggable {
 		
 		private final Dimension SPINNER_DIMENSION = new Dimension(80, 20);
 		
-		private JLabel label = new JLabel("");
+		private final Dimension PANEL_MAX_DIMENSION = new Dimension(500, 50);
+		private final Dimension PANEL_MIN_DIMENSION = new Dimension(300, 50);
+				
+		private RuleSetPanel parent;
 		
 		List<JSpinner> spinners = new ArrayList<JSpinner>();
 		
-		public RulePanel(){
+		public RulePanel(RuleSetPanel parent){
+			this.parent = parent;
 			
 			this.setLayout(new FlowLayout(FlowLayout.LEFT));
+			
+			JButton removeButton = new JButton("-");
+			removeButton.addActionListener( e -> {
+				this.parent.removeRule(this);
+			});
+			this.add(removeButton);
 			
 			this.add(typeBox);
 			
 			typeBox.setSelectedItem(RuleType.IS_MINIMUM);
-			spinners.add(    new JSpinner(new SpinnerNumberModel(1,	0, 1, 1))    );
+			
+			JSpinner s = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+			s.setToolTipText("1=True; 0=False");
+			spinners.add(   s   );
+			
 			for(JSpinner spinner : spinners){
 				spinner.setPreferredSize(SPINNER_DIMENSION);
 				this.add(spinner);
 			}
-			label.setText("1=true, 0=false");
-			this.add(label);
 			
 			typeBox.addActionListener(this);
 			
-			
+			this.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+			this.setMaximumSize(PANEL_MAX_DIMENSION);
+			this.setMinimumSize(PANEL_MIN_DIMENSION);
+			this.setPreferredSize(PANEL_MIN_DIMENSION);
 		}
 		
 		public Rule getRule(){
 			Rule result = null;
-//			log("Getting rule from panel");
 			try {
-				
-//				log("Committing edits for "+spinners.size()+" spinners");
-				
+								
 				List<Double> values = new ArrayList<Double>();
 				
 				for(JSpinner spinner : spinners){
@@ -287,7 +305,6 @@ public class RuleSetBuildingDialog extends JDialog implements Loggable {
 			for(JSpinner spinner : spinners){
 				this.remove(spinner);
 			}
-			this.remove(label);
 			
 			spinners = new ArrayList<JSpinner>();
 			RuleType type = (RuleType) typeBox.getSelectedItem();
@@ -296,75 +313,95 @@ public class RuleSetBuildingDialog extends JDialog implements Loggable {
 			
 				case IS_MINIMUM:{
 					
-					
-					spinners.add(   new JSpinner(new SpinnerNumberModel(1,	0, 1, 1))   );
-					label.setText("1=true, 0=false");
+					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+					spinner.setToolTipText("1=True; 0=False");
+					spinners.add(   spinner   );
 					break;
 				}
 				
 				case IS_MAXIMUM:{
-					spinners.add(  new JSpinner(new SpinnerNumberModel(1,	0, 1, 1))   );
-					label.setText("1=true, 0=false");
+					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+					spinner.setToolTipText("1=True; 0=False");
+					spinners.add(   spinner   );
 					break;
 				}
 				
 				case IS_LOCAL_MINIMUM:{
-					spinners.add(   new JSpinner(new SpinnerNumberModel(1,	0, 1, 1))   );
-					spinners.add(   new JSpinner(new SpinnerNumberModel(5,	1, 100, 1))   );
-					label.setText("A) true/false B) window");
+					
+					JSpinner spinner1 =  new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+					JSpinner spinner2 =  new JSpinner(new SpinnerNumberModel(5,	1, 100, 1));
+					spinner1.setToolTipText("1=True; 0=False");
+					spinner2.setToolTipText("Smoothing window size");
+					spinners.add(  spinner1  );
+					spinners.add(  spinner2    );
 					break;
 				}
 				
 				case IS_LOCAL_MAXIMUM:{
-					spinners.add(   new JSpinner(new SpinnerNumberModel(1,	0, 1, 1))   );
-					spinners.add(   new JSpinner(new SpinnerNumberModel(5,	1, 100, 1))   );
-					label.setText("A) true/false B) window");
+					JSpinner spinner1 =  new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+					JSpinner spinner2 =  new JSpinner(new SpinnerNumberModel(5,	1, 100, 1));
+					spinner1.setToolTipText("1=True; 0=False");
+					spinner2.setToolTipText("Window size");
+					spinners.add(  spinner1  );
+					spinners.add(  spinner2    );
 					break;
 				}
 				
 				case VALUE_IS_LESS_THAN:{
-					spinners.add(   new JSpinner()   );
-					label.setText("Value");
+					JSpinner spinner = new JSpinner();
+					spinner.setToolTipText("Value");
+					spinners.add(   spinner   );
 					break;
 				}
 				
 				case VALUE_IS_MORE_THAN:{
-					spinners.add(   new JSpinner()   );
-					label.setText("Value");
+					JSpinner spinner = new JSpinner();
+					spinner.setToolTipText("Value");
+					spinners.add(   spinner   );
 					break;
 				}
 				
 				case INDEX_IS_LESS_THAN:{
-					spinners.add(    new JSpinner(new SpinnerNumberModel(0.5,	0, 1, 0.01))   );
-					label.setText("Fraction 0-1");
+					JSpinner spinner = new JSpinner(new SpinnerNumberModel(0.5,	0, 1, 0.01));
+					spinner.setToolTipText("Fraction of profile 0-1");
+					spinners.add(    spinner   );
 					break;
 				}
 				
 				case INDEX_IS_MORE_THAN:{
-					spinners.add(   new JSpinner(new SpinnerNumberModel(0.5,	0, 1, 0.01))   );
-					label.setText("Fraction 0-1");
+					JSpinner spinner = new JSpinner(new SpinnerNumberModel(0.5,	0, 1, 0.01));
+					spinner.setToolTipText("Fraction of profile 0-1");
+					spinners.add(    spinner   );
 					break;
 				}
 				
 				
 				
 				case IS_CONSTANT_REGION:{
-					spinners.add(   new JSpinner()   );
-					spinners.add(   new JSpinner()   );
-					spinners.add(   new JSpinner()   );
-					label.setText("A) Value B) Length C) Flexibility");
+					
+					JSpinner spinner1 =  new JSpinner();
+					JSpinner spinner2 =  new JSpinner();
+					JSpinner spinner3 =  new JSpinner();
+					spinner1.setToolTipText("Value");
+					spinner2.setToolTipText("Minimum length of region");
+					spinner3.setToolTipText("Maximum permitted difference from value");
+					spinners.add(  spinner1  );
+					spinners.add(  spinner2  );
+					spinners.add(  spinner3  );
 					break;
 				}
 				
 				case FIRST_TRUE:{
-					spinners.add(   new JSpinner(new SpinnerNumberModel(1,	0, 1, 1))   );
-					label.setText("1=true, 0=false");
+					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+					spinner.setToolTipText("1=True; 0=False");
+					spinners.add(   spinner   );
 					break;
 				}
 				
 				case LAST_TRUE:{
-					spinners.add(  new JSpinner(new SpinnerNumberModel(1,	0, 1, 1))   );
-					label.setText("1=true, 0=false");
+					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+					spinner.setToolTipText("1=True; 0=False");
+					spinners.add(   spinner   );
 					break;
 				}
 				
@@ -377,7 +414,6 @@ public class RuleSetBuildingDialog extends JDialog implements Loggable {
 				spinner.setPreferredSize(SPINNER_DIMENSION);
 				this.add(spinner);
 			}
-			this.add(label);
 			
 			this.revalidate();
 			this.repaint();

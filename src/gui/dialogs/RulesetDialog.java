@@ -58,6 +58,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		
 		this.setModal(false);
 		this.pack();
+		this.centerOnScreen();
 		this.setVisible(true);
 		
 	}
