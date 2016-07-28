@@ -27,7 +27,6 @@ import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import components.AbstractCellularComponent;
-import components.Cell;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
@@ -35,7 +34,6 @@ import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import gui.DatasetEvent.DatasetMethod;
-import gui.components.ColourSelecter;
 import gui.components.ExportableTable;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.dialogs.CellImageDialog;
@@ -81,11 +79,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 				
 				// double click
 				if (e.getClickCount() == 2) {
-					
-//					if(rowName.equals("Source image")){
-//						showCellImage();
-//					}
-					
+										
 					// Look for signal group colour
 					if(rowName.equals("")){
 						String value = table.getModel().getValueAt(row+1, 0).toString();
@@ -96,20 +90,14 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 						}
 					}
 
-//					// Adjust the scale
-//					if(rowName.equals("Scale (pixels/um)")){
-//						
-//						updateScale();
-//					}
-					
 					// Adjust the point position of tags
-					Nucleus n = getCellModel().getCell().getNucleus();
-					BorderTag tag = activeDataset().getCollection().getNucleusType().getTagFromName(rowName);
-					if(n.hasBorderTag(tag)){
-						
-						updateBorderTagIndex(n, tag);
-						
-					}
+//					Nucleus n = getCellModel().getCell().getNucleus();
+//					BorderTag tag = activeDataset().getCollection().getNucleusType().getTagFromName(rowName);
+//					if(n.hasBorderTag(tag)){
+//						
+//						updateBorderTagIndex(n, tag);
+//						
+//					}
 						
 				}
 

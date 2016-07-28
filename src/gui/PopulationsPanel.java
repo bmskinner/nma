@@ -988,20 +988,20 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		populationPopup.disableMerge();
 		populationPopup.enableBoolean();
 		populationPopup.enableSave();
-		populationPopup.enableExtract();
+//		populationPopup.enableExtract();
 		populationPopup.enableCurate();
-		populationPopup.enableExportStats();
+//		populationPopup.enableExportStats();
 		populationPopup.enableRelocateCells();
 		populationPopup.enableSaveCells();
 //		populationPopup.enableAddTailStain();
 		populationPopup.enableAddNuclearSignal();
-		populationPopup.enableRunShellAnalysis();
+//		populationPopup.enableRunShellAnalysis();
 		
 		// check if we can move the dataset
 		if(d.isRoot()){
 
 			if(treeOrderMap.size()>1){
-				populationPopup.enableApplySegmentation();
+//				populationPopup.enableApplySegmentation();
 
 				// check if the selected dataset is at the top of the list
 				if(treeOrderMap.get(0).equals(d.getUUID())){
@@ -1032,7 +1032,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		} else { // not root
 			
 			if(treeOrderMap.size()>1){
-				populationPopup.enableApplySegmentation();
+//				populationPopup.enableApplySegmentation();
 			}
 			
 			populationPopup.disableReplaceFolder();

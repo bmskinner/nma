@@ -77,6 +77,8 @@ public class SaveDatasetAction extends ProgressableAction {
 			String folderName = saveDialog.getDirectory();
 			if(fileName!=null && folderName!=null){
 				saveFile = new File(folderName+File.separator+fileName);
+			} else {
+				this.finished();
 			}
 
 		} else {
