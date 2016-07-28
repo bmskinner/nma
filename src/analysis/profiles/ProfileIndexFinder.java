@@ -51,6 +51,17 @@ public class ProfileIndexFinder implements Loggable {
 		return isApplicable(p, r);
 	}
 	
+	/**
+	 * Get the indexes in the profile that match the given Rule
+	 * @param p
+	 * @param r
+	 * @return
+	 */
+	public BooleanProfile getMatchingIndexes(final Profile p, final Rule r){
+		BooleanProfile result = new BooleanProfile(p, true);
+		return isApplicable(p, r, result);
+	}
+	
 	
 	/**
 	 * Count the indexes in the profile that match the given RuleSet

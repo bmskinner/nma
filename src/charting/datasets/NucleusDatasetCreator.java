@@ -38,6 +38,7 @@ import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellCollection;
 import components.CellularComponent;
+import components.generic.BooleanProfile;
 import components.generic.BorderTag;
 import components.generic.Equation;
 import components.generic.MeasurementScale;
@@ -1719,7 +1720,38 @@ private static NucleusDatasetCreator instance = null;
 		return ds;
 	}
 	
+	public XYDataset createBooleanProfileDataset(Profile p, BooleanProfile limits){
+		DefaultXYDataset result  = new DefaultXYDataset();
+		
+		List<Double> trueXValues  = new ArrayList<Double>();
+		List<Double> trueYValues  = new ArrayList<Double>();
+		
+		List<Double> falseXValues = new ArrayList<Double>();
+		List<Double> falseYValues = new ArrayList<Double>();
 	
+		for(int i=0; i<p.size(); i++){
+			
+			boolean b = limits.get(i);
+			double value = p.get(i);
+			
+			if(b){
+				trueXValues.add((double) i);
+				trueYValues.add(value);
+				
+			} else {
+				falseXValues.add((double) i);
+				falseYValues.add(value);
+			}
+			
+		}
+		
+		double[][] trueData = { Utils.getdoubleFromDouble(trueXValues.toArray(new Double[0])), Utils.getdoubleFromDouble(trueYValues.toArray(new Double[0])) };
+		result.addSeries("True", trueData);
+		
+		double[][] falseData = { Utils.getdoubleFromDouble(falseXValues.toArray(new Double[0])), Utils.getdoubleFromDouble(falseYValues.toArray(new Double[0])) };
+		result.addSeries("False", falseData);
+		return result;
+	}
 
 	
 }

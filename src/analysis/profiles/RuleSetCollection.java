@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import logging.Loggable;
 import components.generic.BorderTag;
@@ -78,6 +79,14 @@ public class RuleSetCollection implements Serializable, Loggable {
 	 */
 	public List<RuleSet> getRuleSets(BorderTag tag){
 		return map.get(tag);
+	}
+	
+	public Set<BorderTag> getTags(){
+		return map.keySet();
+	}
+	
+	public boolean hasRulesets(BorderTag tag){
+		return map.get(tag).size()>0;
 	}
 	
 	public String toString(){

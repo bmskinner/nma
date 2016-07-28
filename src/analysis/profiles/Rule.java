@@ -64,6 +64,10 @@ public class Rule implements Serializable {
 	public double getValue(int index){
 		return values.get(index);
 	}
+	
+	public int valueCount(){
+		return values.size();
+	}
 
 	public boolean getBooleanValue(){
 		return getBooleanValue(0);

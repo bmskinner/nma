@@ -46,6 +46,7 @@ import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
+
 import stats.DipTester;
 import stats.StatisticDimension;
 import utility.Constants;
@@ -56,7 +57,9 @@ import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 import components.AbstractCellularComponent;
 import components.CellCollection;
+import components.generic.BooleanProfile;
 import components.generic.BorderTag;
+import components.generic.Profile;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
@@ -1085,6 +1088,46 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		plot.mapDatasetToRangeAxis(1, 1);
 		plot.mapDatasetToRangeAxis(2, 1);
 		
+
+		return chart;
+	}
+	
+	/**
+	 * Create a chart showing the effect of a boolean profile on a profile
+	 * @param p
+	 * @param limits
+	 * @return
+	 */
+	public JFreeChart createBooleanProfileChart(Profile p, BooleanProfile limits){
+		
+		XYDataset ds = NucleusDatasetCreator.getInstance().createBooleanProfileDataset(p, limits);
+		
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+						"Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
+						false);
+		
+		XYPlot plot = chart.getXYPlot();
+		
+		plot.setBackgroundPaint(Color.WHITE);
+
+		plot.addRangeMarker(new ValueMarker(180, Color.BLACK, ChartComponents.MARKER_STROKE));
+		
+		
+		
+		DefaultXYItemRenderer rend = new DefaultXYItemRenderer();
+		rend.setBaseShapesVisible(true);
+		rend.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
+		rend.setSeriesPaint(0, Color.BLACK);
+		rend.setSeriesVisibleInLegend(0, false);
+		rend.setSeriesPaint(1, Color.LIGHT_GRAY);
+		rend.setSeriesVisibleInLegend(1, false);
+		rend.setSeriesLinesVisible(0, false);
+		rend.setSeriesShape(0, ChartComponents.DEFAULT_POINT_SHAPE);
+		rend.setSeriesLinesVisible(1, false);
+		rend.setSeriesShape(1, ChartComponents.DEFAULT_POINT_SHAPE);
+		
+		plot.setRenderer(rend);
 
 		return chart;
 	}

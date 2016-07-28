@@ -27,6 +27,7 @@ import gui.components.PositionSelectionChartPanel;
 import gui.components.RectangleOverlayObject;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.dialogs.AngleWindowSizeExplorer;
+import gui.dialogs.RulesetDialog;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
+
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -74,12 +76,14 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 		private JButton splitButton;
 		private JButton windowSizeButton;
 		private JButton updatewindowButton;
+		private JButton ruleSetButton;
 		
 		private static final String STR_MERGE_SEGMENT     = "Hide segment boundary";
 		private static final String STR_UNMERGE_SEGMENT   = "Unhide segment boundary";
 		private static final String STR_SPLIT_SEGMENT     = "Split segment";
 		private static final String STR_SET_WINDOW_SIZE   = "Set window size";
 		private static final String STR_SHOW_WINDOW_SIZES = "Window sizes";
+		private static final String STR_SHOW_RULESETS     = "RuleSets";
 				
 		public SegmentsEditingPanel(){
 			super();
@@ -157,6 +161,10 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			updatewindowButton = new JButton(STR_SET_WINDOW_SIZE);
 			updatewindowButton.addActionListener(this);
 			panel.add(updatewindowButton);
+			
+			ruleSetButton = new JButton(STR_SHOW_RULESETS);
+			ruleSetButton.addActionListener(this);
+			panel.add(ruleSetButton);
 			
 			return panel;
 			
@@ -302,6 +310,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			splitButton.setEnabled(b);
 			windowSizeButton.setEnabled(b);
 			updatewindowButton.setEnabled(b);
+			ruleSetButton.setEnabled(b);
 		}
 
 		@Override
@@ -451,6 +460,10 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			
 			if(e.getSource()==windowSizeButton){
 				new AngleWindowSizeExplorer(activeDataset());
+			}
+			
+			if(e.getSource()==ruleSetButton){
+				new RulesetDialog(getDatasets());
 			}
 			
 			

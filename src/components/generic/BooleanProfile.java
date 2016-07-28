@@ -49,6 +49,13 @@ public class BooleanProfile implements Serializable, Loggable {
 		}
 	}
 	
+	public BooleanProfile(final int length, final boolean b){
+		this.array = new boolean[length];
+		for(int i=0; i<this.array.length; i++){
+			array[i] = b;
+		}
+	}
+	
 	/**
 	 * Constructor based on an existing Profile. Makes a copy 
 	 * of the existing Profile
