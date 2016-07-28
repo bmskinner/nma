@@ -18,11 +18,8 @@
  *******************************************************************************/
 package gui.tabs;
 
-import gui.DatasetEvent.DatasetMethod;
-import gui.DatasetEvent;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import gui.tabs.cells.AbstractCellDetailPanel;
 import gui.tabs.cells.CellBorderTagPanel;
 import gui.tabs.cells.CellOutlinePanel;
 import gui.tabs.cells.CellProfilePanel;
@@ -32,45 +29,16 @@ import gui.tabs.cells.CellsListPanel;
 import gui.tabs.cells.ComponentListPanel;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.logging.Level;
-
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTree;
-import javax.swing.ListModel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
-
 import org.jfree.chart.JFreeChart;
 
-import analysis.AnalysisDataset;
-import charting.datasets.SignalTableCell;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
-import components.Cell;
-import components.CellularComponent;
-import components.nuclear.NuclearSignal;
 
 @SuppressWarnings("serial")
 public class CellDetailPanel extends DetailPanel implements SignalChangeListener {
@@ -105,13 +73,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			this.addSubPanel(outlinePanel);
 			this.addSubPanel(cellsListPanel);
 			this.addSubPanel(signalListPanel);
-			
-			
-			
-//			cellStatsPanel.setParent(this);
-//			segmentProfilePanel.setParent(this);
-//			cellBorderTagPanel.setParent(this);
-//			outlinePanel.setParent(this);
+
 			
 			tabPane = new JTabbedPane(JTabbedPane.LEFT);
 			this.add(tabPane, BorderLayout.CENTER);
@@ -179,21 +141,18 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				
 	@Override
 	protected void updateSingle() {
+		
+		if( model.hasCell() && ! activeDataset().getCollection().containsExact(model.getCell())){
+			model.setCell(null);
+		}
+		
 		cellsListPanel.update(getDatasets());
 		outlinePanel.update(getDatasets());
 		cellStatsPanel.update(getDatasets());
 		segmentProfilePanel.update(getDatasets());
 		cellBorderTagPanel.update(getDatasets());
 		signalListPanel.update(getDatasets());
-		
-		if( model.hasCell() && ! activeDataset().getCollection().contains(model.getCell())){
-			model.setCell(null);
-		}
-		
-		
-		finest("Updated cell list panel");
-//		updateCell(activeCell);
-		finest("Updated active cell panel");
+
 	}
 	
 	@Override
@@ -203,17 +162,16 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	
 	@Override
 	protected void updateNull() {
-//		activeCell=null;
+		model.setCell(null);
+		model.setComponent(null);
+		
 		cellsListPanel.update(getDatasets());
 		outlinePanel.update(getDatasets());
 		cellStatsPanel.update(getDatasets());
 		segmentProfilePanel.update(getDatasets());
 		cellBorderTagPanel.update(getDatasets());
 		signalListPanel.update(getDatasets());
-		model.setCell(null);
-		model.setComponent(null);
-		
-		finest("Updated cell list panel");
+
 	}
 		
 	@Override

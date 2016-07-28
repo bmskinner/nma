@@ -24,7 +24,7 @@ import components.nuclei.Nucleus;
 @SuppressWarnings("serial")
 public class ComponentListPanel extends AbstractCellDetailPanel implements ListSelectionListener {
 	
-	private JList<Object> list;
+	private JList<ComponentListCell> list;
 	private JScrollPane   scrollPane;
 	private String prevComponent = "";
 	
@@ -35,8 +35,8 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 		
 		scrollPane = new JScrollPane();
 
-		list = new JList<Object>();
-		ListModel<Object> objectModel = createListModel();
+		list = new JList<ComponentListCell>();
+		ListModel<ComponentListCell> objectModel = createListModel();
 
 		list.setModel(objectModel);
 		list.addListSelectionListener(this);
@@ -50,14 +50,19 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 		this.add(scrollPane, BorderLayout.CENTER);
 	}
 	
-	private ListModel<Object> createListModel(){
-		DefaultListModel<Object> model = new DefaultListModel<Object>();
+	/**
+	 * Create a list with all the components in the active cell
+	 * @return
+	 */
+	private ListModel<ComponentListCell> createListModel(){
+		DefaultListModel<ComponentListCell> model = new DefaultListModel<ComponentListCell>();
 		
 		if(this.getCellModel().hasCell()){
 			
 			Nucleus n = getCellModel().getCell().getNucleus();
 			// Every cell has a nucleus
-			SignalTableCell nucleusCell = new SignalTableCell(n.getID(), "Nucleus");
+			ComponentListCell nucleusCell = new ComponentListCell("Nucleus", n);
+			
 			model.addElement(nucleusCell);
 			
 			// Add signals present
@@ -65,7 +70,8 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 				
 				if(n.getSignalCollection().hasSignal(i)){
 
-					SignalTableCell signalCell = new SignalTableCell(i, activeDataset().getCollection().getSignalGroup(i).getGroupName());
+					NuclearSignal signal = n.getSignalCollection().getSignals(i).get(0);
+					ComponentListCell signalCell = new ComponentListCell( activeDataset().getCollection().getSignalGroup(i).getGroupName(), signal);
 					model.addElement(signalCell);
 				}
 			}
@@ -78,7 +84,7 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 
 		finest("Updating component list for cell");
 		list.removeListSelectionListener(this);
-		ListModel<Object> model = createListModel();
+		ListModel<ComponentListCell> model = createListModel();
 		list.setModel(model);
 
 		if(this.getCellModel().hasCell()){
@@ -88,44 +94,38 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 			// Check if the new cell has the same component as the last
 			int selectedIndex = 0;
 			for(int i=0; i<model.getSize();i++){
-				SignalTableCell tableCell   =  (SignalTableCell) list.getModel().getElementAt(i);
+				ComponentListCell tableCell   =  (ComponentListCell) list.getModel().getElementAt(i);
 				if(tableCell.toString().equals(prevComponent)){
 					selectedIndex=i;
 				}
 			}
 			list.setSelectedIndex(selectedIndex);
-			prevComponent = ((SignalTableCell) list.getModel().getElementAt(selectedIndex)).toString(); // set the new component string
-//			this.getCellModel().setComponent(getSelectedComponent());
+			prevComponent = ((ComponentListCell) list.getModel().getElementAt(selectedIndex)).toString(); // set the new component string
+			this.getCellModel().setComponent(getSelectedComponent());
 			list.setEnabled(true);
+		} else {
+			list.setEnabled(false);
 		}
 		list.addListSelectionListener(this);
 		
+	}
+	
+	private ComponentListCell getSelectedRow(){
+		ComponentListCell tableCell   = null;
+		int row = list.getSelectedIndex();
+		finer("Selected component row "+row);
+		if(row>=0){ // -1 if nothing selected
+			tableCell   =  (ComponentListCell) list.getModel().getElementAt(row);
+		}
+		return tableCell;
 	}
 	
 	private CellularComponent getSelectedComponent(){
 		int row = list.getSelectedIndex();
 		CellularComponent c = null;
 		if(row>=0){ // -1 if nothing selected
-			SignalTableCell tableCell   =  (SignalTableCell) list.getModel().getElementAt(row);
-			String signalGroupName = tableCell.toString();
-
-			
-			
-
-			if(signalGroupName.equals("Nucleus")){
-
-				c = getCellModel().getCell().getNucleus();
-
-			} else {
-
-				UUID signalGroup = tableCell.getID();
-				
-				for(NuclearSignal n : getCellModel().getCell().getNucleus().getSignalCollection().getSignals(signalGroup)){
-					c = n;
-				}
-
-			}
-			finest("Component selected is "+signalGroupName);
+			ComponentListCell tableCell   = getSelectedRow();
+			c = tableCell.getComponent();
 		}
 		return c;
 	}
@@ -134,10 +134,13 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 	public void valueChanged(ListSelectionEvent e) {
 
 		finest("Component selection changed");
-		CellularComponent c = getSelectedComponent();
-		prevComponent = ((SignalTableCell) list.getSelectedValue()).toString(); // set the new component string
-		
-		this.getCellModel().setComponent(c);
+		ComponentListCell cell = getSelectedRow();
+		if(cell != null){
+			prevComponent = cell.toString(); // set the new component string
+			CellularComponent c = cell.getComponent();
+			this.getCellModel().setComponent(c);
+		}
+				
 	}
 	
 	@Override

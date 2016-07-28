@@ -22,6 +22,7 @@ public class CellViewModel {
 	public void setCell(Cell c){
 		if(c!=cell){
 			this.cell = c;
+			component = null; // component cannot be carried over
 			updateViews();
 		}
 	}
@@ -32,6 +33,10 @@ public class CellViewModel {
 	
 	public boolean hasCell(){
 		return cell!=null;
+	}
+	
+	public void updateComponent(){
+		
 	}
 	
 	public void setComponent(CellularComponent component){

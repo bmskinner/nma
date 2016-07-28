@@ -951,13 +951,28 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
   }
   
   /**
-   * Test if the collection contains the given cell
+   * Test if the collection contains a cell with
+   * the same id as the given cell
    * @param c
    * @return
    */
   public boolean contains(Cell c){
 	  for(Cell cell : this.getCells()){
 		  if (cell.equals(c)){
+			  return true;
+		  }
+	  }
+	  return false;
+  }
+  
+  /**
+   * Test if the collection contains the given cell
+   * @param c
+   * @return
+   */
+  public boolean containsExact(Cell c){
+	  for(Cell cell : this.getCells()){
+		  if (cell==c){
 			  return true;
 		  }
 	  }

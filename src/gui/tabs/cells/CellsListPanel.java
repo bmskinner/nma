@@ -56,7 +56,6 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 	 */
 	@Override
 	protected void updateSingle() {
-//	public void updateDataset(AnalysisDataset dataset){		
 		DefaultMutableTreeNode root =
 				new DefaultMutableTreeNode(new NodeData("Cells", null));
 		
@@ -84,15 +83,21 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 		tree.addTreeSelectionListener(this);
 	}
 	
+	@Override
+	protected void updateMultiple(){
+		updateNull();
+	}
+
+	@Override
 	protected void updateNull(){
 		DefaultMutableTreeNode root =
 				new DefaultMutableTreeNode(new NodeData("Cells", null));
-		
-		
+
+
 		tree.setEnabled(false);
-		
+
 		TreeModel model = new DefaultTreeModel(root);
-		
+
 		tree.removeTreeSelectionListener(this);
 		tree.setModel(model);
 		tree.addTreeSelectionListener(this);
