@@ -91,8 +91,12 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			
 			RuleSetBuildingDialog builder = new RuleSetBuildingDialog();
 			if(builder.isOK()){
+
 				RuleSetCollection custom = builder.getCollection();
-				customCollections.put("Custom", custom);
+				int size = customCollections.size();
+				customCollections.put("Custom_"+size, custom);
+
+//				log(custom.toString());
 				
 				DefaultMutableTreeNode root = new DefaultMutableTreeNode(new RuleNodeData(dataset.getName()));
 				
@@ -193,7 +197,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			DefaultMutableTreeNode node = new DefaultMutableTreeNode(r);
 			root.add( node );
 
-			for(RuleSet ruleSet : c.getRuleSets(BorderTag.REFERENCE_POINT)){
+			for(RuleSet ruleSet : collection.getRuleSets(BorderTag.REFERENCE_POINT)){
 
 				RuleNodeData profileData = new RuleNodeData(ruleSet.getType().toString());
 				profileData.setRuleSet(ruleSet);
