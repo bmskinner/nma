@@ -2,14 +2,17 @@ package gui.tabs.cells;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
@@ -43,6 +46,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	private ExportableTable table; // individual cell stats
 	
 	private JScrollPane scrollPane;
+	
 	
 	public CellStatsPanel(CellViewModel model) {
 		super(model);
@@ -78,9 +82,9 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 				// double click
 				if (e.getClickCount() == 2) {
 					
-					if(rowName.equals("Source image")){
-						showCellImage();
-					}
+//					if(rowName.equals("Source image")){
+//						showCellImage();
+//					}
 					
 					// Look for signal group colour
 					if(rowName.equals("")){
@@ -92,11 +96,11 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 						}
 					}
 
-					// Adjust the scale
-					if(rowName.equals("Scale (pixels/um)")){
-						
-						updateScale();
-					}
+//					// Adjust the scale
+//					if(rowName.equals("Scale (pixels/um)")){
+//						
+//						updateScale();
+//					}
 					
 					// Adjust the point position of tags
 					Nucleus n = getCellModel().getCell().getNucleus();
@@ -116,8 +120,25 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 		scrollPane.setColumnHeaderView(table.getTableHeader());
 		
 		this.add(scrollPane, BorderLayout.CENTER);
+		
+		JPanel header = createHeader();
+		this.add(header, BorderLayout.NORTH);
 	}
 	
+	private JPanel createHeader(){
+		JPanel panel = new JPanel(new FlowLayout());
+		
+		JButton scaleButton = new JButton("Change scale");
+		scaleButton.addActionListener( e -> { updateScale();}  );
+		
+		JButton sourceButton = new JButton("Show source image");
+		sourceButton.addActionListener( e -> { showCellImage();}  );
+		
+		panel.add(scaleButton);
+		panel.add(sourceButton);
+		
+		return panel;
+	}
 	
 	
 	private void updateBorderTagIndex(Nucleus n, BorderTag tag){
