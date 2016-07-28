@@ -80,7 +80,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 	public List<RuleSet> getRuleSets(BorderTag tag){
 		return map.get(tag);
 	}
-	
+		
 	public Set<BorderTag> getTags(){
 		return map.keySet();
 	}

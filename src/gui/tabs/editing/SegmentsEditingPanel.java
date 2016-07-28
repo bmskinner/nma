@@ -463,7 +463,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			}
 			
 			if(e.getSource()==ruleSetButton){
-				new RulesetDialog(getDatasets());
+				new RulesetDialog(activeDataset());
 			}
 			
 			

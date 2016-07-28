@@ -1,7 +1,12 @@
 package gui.dialogs;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
@@ -36,25 +41,75 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 	
 	private JTree tree;
 	
+	private Map<String, RuleSetCollection> customCollections = new HashMap<String, RuleSetCollection>();
+	
 	public RulesetDialog (AnalysisDataset dataset){
 		super();
 		this.setLayout(new BorderLayout());
 		this.setTitle("RuleSets for "+dataset.getName());
 		this.dataset = dataset;
 		
-		JPanel mainPanel = createRuleSetUI();
 		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setViewportView(mainPanel);
-		
+		JPanel westPanel = createWestPanel();
 		JPanel sidePanel = createChartPanel();
 		
-		this.add(scrollPane, BorderLayout.WEST);
+		this.add(westPanel, BorderLayout.WEST);
 		this.add(sidePanel, BorderLayout.CENTER);
 		
 		this.setModal(false);
 		this.pack();
 		this.setVisible(true);
+		
+	}
+	
+	private JPanel createWestPanel(){
+		
+		JPanel panel = new JPanel(new BorderLayout());
+		
+		
+		JPanel mainPanel = createRuleSetUI();
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setViewportView(mainPanel);
+		
+		panel.add(scrollPane, BorderLayout.CENTER);
+		
+		JPanel footer = createFooter();
+		
+		panel.add(footer, BorderLayout.SOUTH);
+		
+		return panel;
+		
+	}
+	
+	private JPanel createFooter(){
+		JPanel panel = new JPanel(new FlowLayout());
+		
+		JButton addButton = new JButton("Custom ruleset");
+		
+		addButton.addActionListener( e -> { 
+			
+			RuleSetBuildingDialog builder = new RuleSetBuildingDialog();
+			if(builder.isOK()){
+				RuleSetCollection custom = builder.getCollection();
+				customCollections.put("Custom", custom);
+				
+				DefaultMutableTreeNode root = new DefaultMutableTreeNode(new RuleNodeData(dataset.getName()));
+				
+				createNodes(root, dataset);
+								
+				TreeModel model = new DefaultTreeModel(root);
+				tree.setModel(model);
+				
+				for (int i = 0; i < tree.getRowCount(); i++) {
+				    tree.expandRow(i);
+				}
+			}
+			
+		} );
+		
+		panel.add(addButton);
+		return panel;
 		
 	}
 	
@@ -125,6 +180,37 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 
 			}
 		}
+		
+		// Add any custom collections created
+		for(String s : customCollections.keySet()){
+			
+			RuleSetCollection collection = customCollections.get(s);
+			
+			RuleNodeData r = new RuleNodeData(s);
+			r.setTag(BorderTag.REFERENCE_POINT); // Always use reference point as tag for custom
+			r.setCollection(collection);
+
+			DefaultMutableTreeNode node = new DefaultMutableTreeNode(r);
+			root.add( node );
+
+			for(RuleSet ruleSet : c.getRuleSets(BorderTag.REFERENCE_POINT)){
+
+				RuleNodeData profileData = new RuleNodeData(ruleSet.getType().toString());
+				profileData.setRuleSet(ruleSet);
+				DefaultMutableTreeNode profileNode = new DefaultMutableTreeNode(profileData);
+				node.add(profileNode);
+
+				for(Rule rule : ruleSet.getRules()){
+					RuleNodeData ruleData = new RuleNodeData(rule.toString());
+					ruleData.setRule(rule);
+					DefaultMutableTreeNode ruleNode = new DefaultMutableTreeNode(ruleData);
+					profileNode.add(ruleNode);
+
+				}
+
+			}
+			
+		}
 
 	}
 
@@ -138,6 +224,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		return panel;
 	}
 	
+		
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
 
