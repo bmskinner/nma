@@ -76,14 +76,14 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 		private JButton splitButton;
 		private JButton windowSizeButton;
 		private JButton updatewindowButton;
-		private JButton ruleSetButton;
+		
 		
 		private static final String STR_MERGE_SEGMENT     = "Hide segment boundary";
 		private static final String STR_UNMERGE_SEGMENT   = "Unhide segment boundary";
 		private static final String STR_SPLIT_SEGMENT     = "Split segment";
 		private static final String STR_SET_WINDOW_SIZE   = "Set window size";
 		private static final String STR_SHOW_WINDOW_SIZES = "Window sizes";
-		private static final String STR_SHOW_RULESETS     = "RuleSets";
+		
 				
 		public SegmentsEditingPanel(){
 			super();
@@ -161,11 +161,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			updatewindowButton = new JButton(STR_SET_WINDOW_SIZE);
 			updatewindowButton.addActionListener(this);
 			panel.add(updatewindowButton);
-			
-			ruleSetButton = new JButton(STR_SHOW_RULESETS);
-			ruleSetButton.addActionListener(this);
-			panel.add(ruleSetButton);
-			
+
 			return panel;
 			
 			
@@ -310,7 +306,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			splitButton.setEnabled(b);
 			windowSizeButton.setEnabled(b);
 			updatewindowButton.setEnabled(b);
-			ruleSetButton.setEnabled(b);
+			
 		}
 
 		@Override
@@ -462,11 +458,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				new AngleWindowSizeExplorer(activeDataset());
 			}
 			
-			if(e.getSource()==ruleSetButton){
-				new RulesetDialog(activeDataset());
-			}
-			
-			
+
 			
 			try {
 				CellCollection collection = activeDataset().getCollection();

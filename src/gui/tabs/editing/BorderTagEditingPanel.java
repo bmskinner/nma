@@ -27,6 +27,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -53,6 +55,7 @@ import gui.components.PositionSelectionChartPanel;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.RectangleOverlayObject;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.dialogs.RulesetDialog;
 import gui.tabs.DetailPanel;
 
 
@@ -68,6 +71,10 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	JPopupMenu popupMenu = new JPopupMenu("Popup");
 	
 	private int activeProfileIndex = 0;
+	
+	private JButton ruleSetButton;
+	
+	private static final String STR_SHOW_RULESETS     = "RuleSets";
 	
 //	private static final int RANGE_WINDOW = 10;
 	
@@ -159,7 +166,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	}
 	
 	public void setButtonsEnabled(boolean b){
-//		setButton.setEnabled(b);
+		ruleSetButton.setEnabled(b);
 	}
 	
 	private JPanel makeButtonPanel(){
@@ -174,11 +181,14 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 			}
 		};
 		
-//		setButton = new JButton(STR_SET_BORDER_TAG);
-//		setButton.addActionListener(this);
+		
 		
 		JLabel text = new JLabel("Click a point to set as a border tag");
 		panel.add(text);
+		
+		ruleSetButton = new JButton(STR_SHOW_RULESETS);
+		ruleSetButton.addActionListener(this);
+		panel.add(ruleSetButton);
 				
 		return panel;
 		
@@ -324,11 +334,9 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-//		if(e.getSource().equals(setButton)){
-//			fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
-//			setBorderTagAction();
-//			
-//		}
+		if(e.getSource()==ruleSetButton){
+			new RulesetDialog(activeDataset());
+		}
 		
 	}
 

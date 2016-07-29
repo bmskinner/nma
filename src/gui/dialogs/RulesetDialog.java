@@ -2,7 +2,10 @@ package gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -176,6 +179,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 					for(Rule rule : ruleSet.getRules()){
 						RuleNodeData ruleData = new RuleNodeData(rule.toString());
 						ruleData.setRule(rule);
+						ruleData.setType(ruleSet.getType());
 						DefaultMutableTreeNode ruleNode = new DefaultMutableTreeNode(ruleData);
 						profileNode.add(ruleNode);
 
@@ -186,8 +190,10 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			}
 		}
 		
-		// Add any custom collections created
-		for(String s : customCollections.keySet()){
+		// Add any custom collections created in ascending order
+		List<String> customList = new ArrayList<String>(customCollections.keySet());
+		Collections.sort(customList);
+		for(String s : customList){
 			
 			RuleSetCollection collection = customCollections.get(s);
 			
@@ -208,6 +214,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 				for(Rule rule : ruleSet.getRules()){
 					RuleNodeData ruleData = new RuleNodeData(rule.toString());
 					ruleData.setRule(rule);
+					ruleData.setType(ruleSet.getType());
 					DefaultMutableTreeNode ruleNode = new DefaultMutableTreeNode(ruleData);
 					profileNode.add(ruleNode);
 
@@ -245,7 +252,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			
 			Rule r = data.getRule();
 			
-			Profile p = dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+			Profile p = dataset.getCollection().getProfileCollection(data.getType()).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
 			BooleanProfile b = finder.getMatchingIndexes(p, r);
 			chart = MorphologyChartFactory.getInstance().createBooleanProfileChart(p, b);
 		}

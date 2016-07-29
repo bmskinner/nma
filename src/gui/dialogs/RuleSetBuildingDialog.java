@@ -19,17 +19,13 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import logging.Loggable;
-import sun.awt.SunHints.Value;
 import components.generic.BorderTag;
-import components.generic.ProfileType;
 import analysis.profiles.Rule;
 import analysis.profiles.Rule.RuleType;
 import analysis.profiles.RuleSet;
