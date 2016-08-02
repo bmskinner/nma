@@ -21,6 +21,7 @@ package gui.components;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.List;
@@ -32,19 +33,9 @@ import jebl.evolution.trees.RootedTree;
 import jebl.gui.trees.treeviewer.painters.BasicLabelPainter;
 
 public class VariableNodePainter extends BasicLabelPainter {
-
-//	List<Node> highlights = null; // the nodes to highlight
-	Map<Node, Color> clusterMemberships = null; // nodes to highlight
 	
-//	public VariableNodePainter(String title, RootedTree tree, PainterIntent intent, List<Node> highlights) {
-//		super(title, tree, intent);
-////		this.highlights = highlights;
-//		
-//	}
-	
-	public VariableNodePainter(String title, RootedTree tree, PainterIntent intent, Map<Node, Color> highlights) {
+	public VariableNodePainter(String title, RootedTree tree, PainterIntent intent) {
 		super(title, tree, intent);
-		this.clusterMemberships = highlights;
 		
 	}
 	
@@ -54,20 +45,21 @@ public class VariableNodePainter extends BasicLabelPainter {
 		final Font newFont = new Font(oldFont.getFontName(), Font.BOLD, oldFont.getSize());
 	
 
-        g2.setPaint(Color.LIGHT_GRAY);
-        g2.setFont(oldFont);
-
-        
-        if(clusterMemberships.containsKey(item)){
+        if(item.getAttributeNames().contains("Color")){
         	g2.setFont(newFont);
-        	g2.setPaint(clusterMemberships.get(item));
+        	Paint p = (Paint) item.getAttribute("Color");
+        	g2.setPaint(p);
         } else {
         	g2.setFont(newFont);
-        	g2.setPaint(Color.LIGHT_GRAY);
+        	g2.setPaint(Color.PINK);
         }
 
 
-        final String label = getLabel(item);
+//        final String label = getLabel(item);
+        
+        final String label = item.getAttribute("ShortName").toString();
+        
+        
         if (label != null) {
 
         	Rectangle2D rect = g2.getFontMetrics().getStringBounds(label, g2);

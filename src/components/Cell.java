@@ -146,6 +146,11 @@ public class Cell implements Serializable, Loggable {
 		}
 	}
 	
+	/**
+	 * Compare the cells using the UUID only
+	 * @param c
+	 * @return
+	 */
 	public boolean equals(Cell c){
 		if(c.getId().equals(this.getId())){
 			return true;

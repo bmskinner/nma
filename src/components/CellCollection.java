@@ -465,6 +465,24 @@ public class CellCollection implements Serializable, Loggable {
 	  }
 	  return result;
   }
+  
+  /**
+   * Fetch all the cells in the collection that are not members of
+   * the given collection 
+   * @param collection
+   * @return
+   */
+  public List<Cell> getCellsNotIn(CellCollection collection){
+	  
+	  List<Cell> result = new ArrayList<Cell>(0);
+	  for(Cell cell : this.getCells()){
+		  if( ! collection.contains(cell)){
+			  result.add(cell);
+		  }
+	  }
+	  return result;
+
+  }
 
   /**
    * Get the nuclei in this collection

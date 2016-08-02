@@ -28,6 +28,7 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.components.ColourSelecter;
 import gui.components.DraggableTreeViewer;
 import gui.components.VariableNodePainter;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -71,6 +72,7 @@ import jebl.evolution.taxa.Taxon;
 import jebl.evolution.trees.RootedTree;
 import jebl.evolution.trees.TransformedRootedTree;
 import jebl.evolution.trees.Tree;
+import jebl.gui.trees.treeviewer.painters.BasicLabelPainter;
 import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
 import jebl.gui.trees.treeviewer.TreePaneSelector.SelectionMode;
 import jebl.gui.trees.treeviewer.TreeViewer.TreeLayoutType;
@@ -82,9 +84,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	private DraggableTreeViewer viewer;
 	private AnalysisDataset dataset;
 	private ClusterGroup group;
-	
-	private int numberOfTimesColouringCalled = 0; // for debugging, ignore
-	
+		
 	private JComboBox<AnalysisDataset> selectedClusterBox;
 	private JComboBox<ClusterGroup> selectedClusterGroupBox;
 	
@@ -120,7 +120,8 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 			this.add(buttonPanel, BorderLayout.NORTH);
 
 			log(Level.FINEST, "Importing tree");
-			importTree();
+			RootedTree r = importTree();
+			displayTree(r);
 			log(Level.FINEST, "Imported tree");
 
 			this.setModal(false);
@@ -136,10 +137,11 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	}
 	
 	/**
-	 * Turn the Newick string in the cluster group into a tree,
-	 * and display it  
+	 * Turn the Newick string in the cluster group into a tree
+	 * @return
 	 */
-	private void importTree(){
+	private RootedTree importTree(){
+		RootedTree topTree = null;
 		log(Level.FINE, "Reading tree");
 		StringReader reader = new StringReader(group.getTree());
 
@@ -148,34 +150,21 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 		try {
 			List<Tree> trees =  imp.importTrees();
-			RootedTree topTree = (RootedTree) trees.get(0);
+			topTree = (RootedTree) trees.get(0);
 			
-			/*
-			 * TODO
-			 * The tree (if created in 1.11.6 or above) will
-			 * have the taxon labels as the Cell UUID.
-			 * 
-			 * If below 1.11.6, the label will be the path and nucleus name
-			 * 
-			 * Where UUIDs are used, the tree must be converted to a tree
-			 * with image names
-			 */
-			
-			
-			
-			int numTaxa = topTree.getTaxa().size(); 
-			log(Level.FINE, "Tree has "+numTaxa+" taxa");
-			
-			viewer.setTree( topTree );
-			
-			viewer.setSelectionMode(SelectionMode.CLADE);
-			viewer.setTreeLayoutType(TreeLayoutType.RECTILINEAR);
-			viewer.getTreePane().setBranchTransform(true,  TransformedRootedTree.Transform.PROPORTIONAL);
-			
+			// Add the cells to the external nodes as attributes
+			// Also set the short names for the nodes
+			for(Node n : topTree.getNodes()){
 
-			this.setTitle(dataset.getName() + " : " + group.getName() +" : "+numTaxa+ " taxa");
-			colourTreeNodesByClusterGroup(group);
-			
+				if(topTree.isExternal(n)){ // choose the taxon nodes
+
+					Taxon t = topTree.getTaxon(n);					
+					Cell c  = getCell(t);
+					
+					t.setAttribute("Cell", c);
+					n.setAttribute("ShortName", c.getNucleus().getSourceFolder().getName()+"/"+c.getNucleus().getNameAndNumber());
+				}
+			}
 		} catch (IOException e) {
 			log(Level.SEVERE, "Error reading tree", e);
 		} catch (DuplicateTaxaException e){
@@ -183,6 +172,48 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		} catch (ImportException e) {
 			log(Level.SEVERE, "Error in tree IO", e);
 		}
+		return topTree;
+	}
+	
+	/**
+	 * Set the display options for the given tree
+	 */
+	private void displayTree(RootedTree topTree){
+
+		int numTaxa = topTree.getTaxa().size(); 
+		log(Level.FINE, "Tree has "+numTaxa+" taxa");
+
+		viewer.setTree( topTree );
+
+		viewer.setSelectionMode(SelectionMode.CLADE);
+		viewer.setTreeLayoutType(TreeLayoutType.RECTILINEAR);
+		viewer.getTreePane().setBranchTransform(true,  TransformedRootedTree.Transform.PROPORTIONAL);
+
+		
+		colourTreeNodesByClusterGroup(group);
+		
+		
+		this.setTitle(dataset.getName() + " : " + group.getName() +" : "+numTaxa+ " taxa");
+	}
+	
+	
+	/**
+	 * Fetch the cell from the active dataset that matches the given taxon from
+	 * a tree. The match is based on the cell image path.
+	 * @param t
+	 * @return
+	 */
+	private Cell getCell(Taxon t){
+		
+		for(Cell c :dataset.getCollection().getCells()){
+			
+			if(taxonNamesMatch(t.getName(), c.getNucleus())){
+				return c;
+			}
+		}
+		
+		return null;
+		
 	}
 		
 	private JPanel createButtonPanel(){
@@ -236,49 +267,44 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	 * @param cluster the dataset of nuclei in the cluster
 	 */
 	private void colourTreeNodesByCluster(final CellCollection cluster){
-
+		
+		setStatusLoading();
+		// Set everything  to grey
+		setNodeColour( dataset.getCollection(), Color.LIGHT_GRAY );
+		
 		if(cluster!=null){
-			setStatusLoading();
-			
-			Map<Node, Color> clusterMemberships = new HashMap<Node, Color>();
-			
-			List<UUID> completedNuclei = new ArrayList<UUID>(); // store each nucleus assigned
-			
-			Map<Node, Color> map = assignNodeMemberships(completedNuclei, cluster, -1);
-			 
-			for(Node n : map.keySet()){
-				clusterMemberships.put(n, map.get(n));
-			}
-			
-			RootedTree tree = viewer.getTreePane().getTree();		
 
-			VariableNodePainter painter = new VariableNodePainter("cluster", tree, PainterIntent.TIP, clusterMemberships);
-			painter.setBorder(Color.BLACK, new BasicStroke(2f));
-			viewer.getTreePane().setTaxonLabelPainter(painter);
-			setStatusLoaded();
-
+			// Set the cluster colour
+			setNodeColour( cluster, Color.BLACK);
+			
 		}
+		updateNodePainter();
+		setStatusLoaded();
+
+	}
+	
+	private void updateNodePainter(){
+		VariableNodePainter painter = new VariableNodePainter("Cluster", viewer.getTreePane().getTree(), PainterIntent.TIP);
+		painter.setBorder(Color.BLACK, new BasicStroke(2f));
+		viewer.getTreePane().setTaxonLabelPainter(painter);
+
 	}
 		
 	private void colourTreeNodesByClusterGroup(final ClusterGroup group){
 
-		numberOfTimesColouringCalled++;
 		if(group!=null){
-			log(Level.FINER, "Colouring nodes by cluster group: "+group.getName()+" iteration "+numberOfTimesColouringCalled);	
-			
-			setStatusLoading();
+			log(Level.FINER, "Colouring nodes by cluster group: "+group.getName());	
+
 			Thread thr = new Thread(){
 				
 				public void run(){
-			
-					Map<Node, Color> clusterMemberships = new HashMap<Node, Color>();
-//					RootedTree tree = viewer.getTreePane().getTree();
-					
-					List<UUID> completedNuclei = new ArrayList<UUID>(); // store each nucleus assigned
+								
+					setStatusLoading();
 					
 					int clusterNumber = 0;
 					for(UUID id : group.getUUIDs()){
 						
+						// Find the appropriate dataset
 						AnalysisDataset cluster = null;
 												
 						if(dataset.hasChild(id)){
@@ -294,72 +320,57 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 							return;
 						}
 						
-						 Map<Node, Color> map = assignNodeMemberships(completedNuclei, cluster.getCollection(), clusterNumber);
-						 
-						 for(Node n : map.keySet()){
-							 clusterMemberships.put(n, map.get(n));
-						 }
-						
-						clusterNumber++;
+						Color colour = ColourSelecter.getSegmentColor(clusterNumber++);
+						setNodeColour(cluster.getCollection(), colour);
+
 						log(Level.FINER, "Node colours assigned");	
 		
 					}
-					RootedTree tree = viewer.getTreePane().getTree();
-					VariableNodePainter painter = new VariableNodePainter("Cluster", tree, PainterIntent.TIP, clusterMemberships);
-					painter.setBorder(Color.BLACK, new BasicStroke(2f));
-					viewer.getTreePane().setTaxonLabelPainter(painter);
+					updateNodePainter();
 					setStatusLoaded();
 				}
 			};
 			thr.start();
 		}
+		
 	}
 	
-	private Map<Node, Color> assignNodeMemberships(List<UUID> completedNuclei, CellCollection cluster, int clusterNumber){
+	/**
+	 * Set the label colour for the given cells
+	 * @param cells
+	 * @param colour
+	 */
+	private void setNodeColour(final List<Cell> cells, final Color colour){
 		
 		RootedTree tree = viewer.getTreePane().getTree();
 		
-		Map<Node, Color> clusterMemberships = new HashMap<Node, Color>();
-		
-		// Cache the list of nuclei to be tested
-		List<UUID> toAnalyse = new ArrayList<UUID>();
-		for(Cell cell : cluster.getCells()){
-			
-			if( ! completedNuclei.contains(cell.getId())){
-				toAnalyse.add(UUID.fromString(cell.getId().toString()));
-			}
-		}
-		log(Level.FINEST, "Built "+toAnalyse.size()+" cell list");	
-								
-		log(Level.FINER, "Colouring dataset "+cluster.getName());				
-		
-		Color colour = clusterNumber == -1 ? Color.BLACK : ColourSelecter.getSegmentColor(clusterNumber);
-
 		for(Node n : tree.getNodes()){
 
 			if(tree.isExternal(n)){ // choose the taxon nodes
 
 				Taxon t = tree.getTaxon(n);
-				String name = t.getName();
 				
-
-				log(Level.FINEST, "Testing "+name+" against "+toAnalyse.size()+" cells");	
+				Cell c = (Cell) t.getAttribute("Cell");
 				
-				
-				for (Iterator<UUID> iterator = toAnalyse.iterator(); iterator.hasNext();) {
-					UUID nid = iterator.next();
-					Nucleus nucleus = cluster.getCell(nid).getNucleus();
-					if(taxonNamesMatch(name, nucleus)){
-						log(Level.FINEST, "Added colour for "+name);	
-						clusterMemberships.put(n, colour);
-						iterator.remove();
-						completedNuclei.add(nid);
+				for(Cell cell : cells){
+					if(cell.equals(c)){
+						n.setAttribute("Color", colour);
 					}
-				}						
+				}
 			}
-
 		}
-		return clusterMemberships;
+	}
+	
+	/**
+	 * Assign colours to external nodes in the tree, based on their membership of a cluster
+	 * @param completedNuclei
+	 * @param cluster
+	 * @param clusterNumber
+	 * @return
+	 */
+	private void setNodeColour(CellCollection cluster, Color colour){
+		
+		setNodeColour(cluster.getCells(), colour);
 	}
 
 	/**
