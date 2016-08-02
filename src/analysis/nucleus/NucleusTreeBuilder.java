@@ -160,7 +160,9 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	 * @return
 	 */
 	private String makeUniqueName(Nucleus n){
+		
 		return "'"+n.getSourceFile()+"-"+n.getNameAndNumber()+"'";
+//		return n.getID().toString();
 	}
 	
 	private FastVector makeAttributes(CellCollection collection, int windowSize)throws Exception {
@@ -272,7 +274,8 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				}
 				
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-					String uniqueName = makeUniqueName(n1);
+//					String uniqueName = makeUniqueName(n1);
+					String uniqueName = c.getId().toString();
 					Attribute att = (Attribute) attributes.elementAt(attNumber++);
 					inst.setValue(att, uniqueName);
 				}

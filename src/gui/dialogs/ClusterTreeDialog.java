@@ -106,32 +106,32 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 			this.setLayout(new BorderLayout());
 			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 			this.viewer = new DraggableTreeViewer();
-			log(Level.FINEST, "Created draggable viewer");
+//			log(Level.FINEST, "Created draggable viewer");
 			
 			viewer.getTreePane().addMouseListener(new MouseClusterSelectionAdapter());
-			log(Level.FINEST, "Added listener");
+//			log(Level.FINEST, "Added listener");
 
 
 			this.add(viewer, BorderLayout.CENTER);
-			log(Level.FINEST, "Added viewer");
+//			log(Level.FINEST, "Added viewer");
 
 			this.buttonPanel = createButtonPanel();
-			log(Level.FINEST, "Made button panel");
+//			log(Level.FINEST, "Made button panel");
 			this.add(buttonPanel, BorderLayout.NORTH);
 
-			log(Level.FINEST, "Importing tree");
+//			log(Level.FINEST, "Importing tree");
 			RootedTree r = importTree();
 			displayTree(r);
-			log(Level.FINEST, "Imported tree");
+//			log(Level.FINEST, "Imported tree");
 
 			this.setModal(false);
 			this.setMinimumSize(new Dimension(500, 500));
 			this.pack();
 			this.setLocationRelativeTo(null);
-			log(Level.FINEST, "Displaying dialog");
+//			log(Level.FINEST, "Displaying dialog");
 			this.setVisible(true);
 		} catch(Exception e){
-				logError( "Error creating tree view", e);
+				error( "Error creating tree view", e);
 				this.dispose();
 		}
 	}
@@ -160,7 +160,6 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 					Taxon t = topTree.getTaxon(n);					
 					Cell c  = getCell(t);
-					
 					t.setAttribute("Cell", c);
 					n.setAttribute("ShortName", c.getNucleus().getSourceFolder().getName()+"/"+c.getNucleus().getNameAndNumber());
 				}
@@ -178,17 +177,17 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	/**
 	 * Set the display options for the given tree
 	 */
-	private void displayTree(RootedTree topTree){
+	private void displayTree(RootedTree tree){
 
-		int numTaxa = topTree.getTaxa().size(); 
+		int numTaxa = tree.getTaxa().size(); 
 		log(Level.FINE, "Tree has "+numTaxa+" taxa");
 
-		viewer.setTree( topTree );
+		viewer.setTree( tree );
 
 		viewer.setSelectionMode(SelectionMode.CLADE);
 		viewer.setTreeLayoutType(TreeLayoutType.RECTILINEAR);
 		viewer.getTreePane().setBranchTransform(true,  TransformedRootedTree.Transform.PROPORTIONAL);
-
+		viewer.getTreePane().setBranchLineWeight(2f);
 		
 		colourTreeNodesByClusterGroup(group);
 		
@@ -205,10 +204,32 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	 */
 	private Cell getCell(Taxon t){
 		
-		for(Cell c :dataset.getCollection().getCells()){
+		// Check if the taxon name is a UUID, as the tree format is changing for 1.13.2
+		// 4ca18dcd-7f5c-4443-89bc-c705435c30f7
+		
+		boolean isUUID = false;
+		UUID id = null;
+		if(t.getName().length()==36){
+
+			try {
+				id = UUID.fromString(t.getName());
+				isUUID = true;
+			} catch(IllegalArgumentException e){
+//				36 char String was not a UUID
+			}
+		}
+		
+		if(isUUID){
+//			log("Found UUID taxon name: "+id.toString());
+			return dataset.getCollection().getCell(id);
 			
-			if(taxonNamesMatch(t.getName(), c.getNucleus())){
-				return c;
+		} else {
+//			log("Found regular taxon name");
+			for(Cell c :dataset.getCollection().getCells()){
+
+				if(taxonNamesMatch(t.getName(), c.getNucleus())){
+					return c;
+				}
 			}
 		}
 		
@@ -262,6 +283,13 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		return panel;
 	}
 	
+	
+	private void updateNodePainter(){
+		VariableNodePainter painter = new VariableNodePainter("Cluster", viewer.getTreePane().getTree(), PainterIntent.TIP);
+		painter.setBorder(Color.BLACK, new BasicStroke(2f));
+		viewer.getTreePane().setTaxonLabelPainter(painter);
+	}
+	
 	/**
 	 * Update the taxon colours to match their cluster
 	 * @param cluster the dataset of nuclei in the cluster
@@ -283,12 +311,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 	}
 	
-	private void updateNodePainter(){
-		VariableNodePainter painter = new VariableNodePainter("Cluster", viewer.getTreePane().getTree(), PainterIntent.TIP);
-		painter.setBorder(Color.BLACK, new BasicStroke(2f));
-		viewer.getTreePane().setTaxonLabelPainter(painter);
 
-	}
 		
 	private void colourTreeNodesByClusterGroup(final ClusterGroup group){
 
@@ -477,14 +500,17 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 				Taxon t = tree.getTaxon(n);
 				
-				String name = t.getName();
+//				String name = t.getName();
 				
-				for(Cell c : dataset.getCollection().getCells()){
-
-					if(taxonNamesMatch(name, c.getNucleus())){
-						clusterCollection.addCell(new Cell (c));
-					}
-				}
+				Cell c = (Cell) t.getAttribute("Cell");
+				clusterCollection.addCell(new Cell (c));
+				
+//				for(Cell c : dataset.getCollection().getCells()){
+//
+//					if(taxonNamesMatch(name, c.getNucleus())){
+//						clusterCollection.addCell(new Cell (c));
+//					}
+//				}
 			}
 
 		}
