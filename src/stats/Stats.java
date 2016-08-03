@@ -68,13 +68,13 @@ import utility.Utils;
 	  }
 
 	  // Rank order the values
-	  double[] v = new double[values.length];
+	  Number[] v = new Number[values.length];
 	  System.arraycopy(values, 0, v, 0, values.length);
 	  Arrays.sort(v);
 
 	  int n = (int) Math.round(v.length * lowerPercent / 100);
 
-	  return (double)v[n];
+	  return v[n];
   }
 
   /**

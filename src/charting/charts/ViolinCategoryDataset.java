@@ -21,6 +21,13 @@ public class ViolinCategoryDataset extends DefaultMultiValueCategoryDataset {
 	
 	private KeyedObjects2D boxplotData;
 	
+	public ViolinCategoryDataset(){
+		
+		super();
+		boxplotData = new KeyedObjects2D();
+		
+	}
+	
 	public void addBoxplot(List<Number> values, Comparable rowKey, Comparable columnKey){
 		if (values == null) {
             throw new IllegalArgumentException("Null 'values' argument.");

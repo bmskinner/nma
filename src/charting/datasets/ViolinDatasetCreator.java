@@ -36,7 +36,7 @@ public class ViolinDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public ViolinCategoryDataset createViolinDataset(ChartOptions options) {
+	public ViolinCategoryDataset createNucleusStatisticViolinDataset(ChartOptions options) {
 		List<AnalysisDataset> datasets = options.getDatasets();
 		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 		MeasurementScale scale = options.getScale();
