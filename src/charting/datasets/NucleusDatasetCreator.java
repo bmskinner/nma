@@ -1551,9 +1551,21 @@ private static NucleusDatasetCreator instance = null;
 	}
 	
 	/**
-	 * Create a probability kernel estimator for the profile angle values in the dataset
-	 * @param xposition the profile position
-	 * @param dataset
+	 * Create a probability kernel estimator for an array of values
+	 * using default precision of the KernelEstimator (0.001)
+	 * @param values the array of values
+	 * @return
+	 * @throws Exception
+	 */
+	public KernelEstimator createProbabililtyKernel(double[] values) throws Exception {
+		
+		return createProbabililtyKernel(values, 0.001);
+	}
+	
+	/**
+	 * Create a probability kernel estimator for an array of values
+	 * @param values the array of values
+	 * @param binWidth the precision of the KernelEstimator 
 	 * @return
 	 * @throws Exception
 	 */
@@ -1563,6 +1575,24 @@ private static NucleusDatasetCreator instance = null;
 		// give each value equal weighting
 		for(double d : values){
 			est.addValue(d, 1);
+		}
+		return est;
+	}
+	
+	/**
+	 * Create a probability kernel estimator for an array of values
+	 * @param values the array of values
+	 * @param binWidth the precision of the KernelEstimator 
+	 * @return
+	 * @throws Exception
+	 */
+	public KernelEstimator createProbabililtyKernel(List<Number> values, double binWidth) {
+		KernelEstimator est = new KernelEstimator(binWidth);
+		// add the values to a kernel estimator
+		// give each value equal weighting
+		
+		for(Number d : values){
+			est.addValue(d.doubleValue(), 1);
 		}
 		return est;
 	}

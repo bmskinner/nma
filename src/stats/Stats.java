@@ -28,6 +28,7 @@
  package stats;
 
  import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
@@ -47,26 +48,33 @@ import utility.Utils;
   */
   public static double quartile(double[] values, double lowerPercent) {
 
-      if (values == null || values.length == 0) {
-    	  throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-      }
+	  return quartile(Utils.getDoubleFromdouble(values), lowerPercent).doubleValue();
 
-      if(values.length==1){
-        return values[0];
-      }
-
-      // Rank order the values
-      double[] v = new double[values.length];
-      System.arraycopy(values, 0, v, 0, values.length);
-      Arrays.sort(v);
-
-      int n = (int) Math.round(v.length * lowerPercent / 100);
-      
-      return (double)v[n];
   }
+  
+  /**
+   * Calculate the given quartile for an array of values
+   * @param values
+   * @param lowerPercent
+   * @return
+   */
+  public static Number quartile(Number[] values, double lowerPercent) {
+	  if (values == null || values.length == 0) {
+		  throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+	  }
 
-  public static double quartile(Double[] values, double lowerPercent) {
-	return quartile(Utils.getdoubleFromDouble(values), lowerPercent);
+	  if(values.length==1){
+		  return values[0];
+	  }
+
+	  // Rank order the values
+	  double[] v = new double[values.length];
+	  System.arraycopy(values, 0, v, 0, values.length);
+	  Arrays.sort(v);
+
+	  int n = (int) Math.round(v.length * lowerPercent / 100);
+
+	  return (double)v[n];
   }
 
   /**
@@ -75,6 +83,15 @@ import utility.Utils;
    * @return
    */
   public static double mean(double[] m) {
+	  return mean(Utils.getDoubleFromdouble(m)).doubleValue();
+  }
+  
+  /**
+   * Calculate the mean of an array of values
+   * @param m
+   * @return
+   */
+  public static Number mean(Number[] m) {
     if (m == null || m.length == 0) {
         throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
     }
@@ -84,8 +101,8 @@ import utility.Utils;
     }
     
     double sum = 0;
-    for(double d : m){
-    	sum += d;
+    for(Number d : m){
+    	sum += d.doubleValue();
     }
     return sum / m.length;
   }
@@ -246,6 +263,52 @@ import utility.Utils;
 	  return t;
 
   }
+  
+  /**
+   * Get the minimum Number in the list
+   * @param values
+   * @return
+   */
+  public static Number min(List<Number> values){
+	  Number result = Double.MAX_VALUE; 
+	  for(Number n : values){
+		  if(n.doubleValue()<result.doubleValue()){
+			  result=n;
+		  }
+	  }
+	  return result;
+  }
+  
+  /**
+   * Get the maximum Number in the list
+   * @param values
+   * @return
+   */
+  public static Number max(List<Number> values){
 
+	  Number result = Double.MIN_VALUE; 
+	  for(Number n : values){
+		  if(n.doubleValue()>result.doubleValue()){
+			  result=n;
+		  }
+	  }
+	  return result;
+  }
+  
+  public static Number quartile(List<Number> values, double lowerPercent) {
+	  
+	  Number[] array = values.toArray(new Number[0]);
+	  Number result = quartile(array, lowerPercent);
+	  return result;
+  }
+  
+  public static Number mean(List<Number> values) {
+	  
+	  Number[] array = values.toArray(new Number[0]);
+	  Number result = mean(array);
+	  return result;
+  }
+
+  
  }
   
