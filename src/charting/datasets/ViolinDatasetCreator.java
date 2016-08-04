@@ -3,6 +3,8 @@ package charting.datasets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jfree.data.Range;
+
 import stats.NucleusStatistic;
 import stats.Stats;
 import weka.estimators.KernelEstimator;
@@ -40,7 +42,7 @@ public class ViolinDatasetCreator implements Loggable {
 		MeasurementScale scale = options.getScale();
 		ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
-		List<Number> list = new ArrayList<Number>();
+		
 		for (int i=0; i < datasets.size(); i++) {
 			CellCollection c = datasets.get(i).getCollection();
 			
@@ -49,7 +51,7 @@ public class ViolinDatasetCreator implements Loggable {
 			// Add the boxplot values
 
 			double[] stats = c.getNuclearStatistics(stat, scale);
-
+			List<Number> list = new ArrayList<Number>();
 			for (double d : stats) {
 				list.add(new Double(d));
 			}
@@ -57,21 +59,33 @@ public class ViolinDatasetCreator implements Loggable {
 			ds.add(list, rowKey, stat.toString());
 			
 			// Add the probability values
-			KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(  list , 0.001 );
 			
-			List<Number> pdfValues = new ArrayList<Number>();
 			
-			double min = Stats.min(list).doubleValue();
-			double max = Stats.max(list).doubleValue();
-			
-			double stepSize = ( max - min ) / 100;
-			
-			for(double d=min; d<=max; d+=stepSize){
+				
 
-				pdfValues.add(est.getProbability(d));
-			}
-			
-			ds.addProbabilities(pdfValues, rowKey, stat.toString());
+				List<Number> pdfValues = new ArrayList<Number>();
+
+				if(list.size()>1){ // don't bother with a dataset of a single cell
+					
+					KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(  list , 0.001 );
+					double min = Stats.min(list).doubleValue();
+					double max = Stats.max(list).doubleValue();
+
+					double stepSize = ( max - min ) / 100;
+
+					for(double d=min; d<=max; d+=stepSize){
+
+						pdfValues.add(est.getProbability(d));
+					}
+
+					
+					Range r = new Range(min, max);
+					ds.addProbabilityRange(r, rowKey, stat.toString());
+				} else {
+					Range r = new Range(list.get(0).doubleValue(), list.get(0).doubleValue());
+					ds.addProbabilityRange(r, rowKey, stat.toString());
+				}
+				ds.addProbabilities(pdfValues, rowKey, stat.toString());
 		}
 
 		return ds;

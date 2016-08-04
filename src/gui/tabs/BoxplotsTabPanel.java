@@ -37,6 +37,7 @@ import org.jfree.chart.JFreeChart;
 
 import charting.charts.BoxplotChartFactory;
 import charting.charts.ViolinChartFactory;
+import charting.charts.ViolinChartPanel;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 
@@ -50,6 +51,7 @@ import charting.options.TableOptions;
 	public abstract class BoxplotsTabPanel extends DetailPanel implements ActionListener {
 		
 		protected Map<String, ExportableChartPanel> chartPanels = new HashMap<String, ExportableChartPanel>();
+//		protected Map<String, ViolinChartPanel> chartPanels = new HashMap<String, ViolinChartPanel>();
 
 		protected JPanel 		mainPanel; // hold the charts
 		protected JPanel		headerPanel; // hold buttons

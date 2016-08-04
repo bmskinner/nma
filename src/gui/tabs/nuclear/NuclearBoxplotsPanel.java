@@ -36,6 +36,7 @@ import org.jfree.chart.JFreeChart;
 
 import stats.NucleusStatistic;
 import charting.charts.BoxplotChartFactory;
+import charting.charts.ViolinChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.MeasurementScale;
@@ -63,7 +64,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 					log(Level.SEVERE, "Error creating boxplots panel", e);
 				}
 				
-				ExportableChartPanel panel = new ExportableChartPanel(chart);
+				ViolinChartPanel panel = new ViolinChartPanel(chart);
 				panel.setPreferredSize(preferredSize);
 				chartPanels.put(stat.toString(), panel);
 				mainPanel.add(panel);

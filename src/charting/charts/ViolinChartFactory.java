@@ -101,17 +101,16 @@ private static ViolinChartFactory instance = null;
 		
 		JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, true);
 		
-		log("Making violin chart");
+//		log("Making violin chart");
 		
 		CategoryPlot plot = chart.getCategoryPlot();
 		ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
 
 		for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
 
-//			ViolinRenderer renderer = new ViolinRenderer();
-
 			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
 
+				renderer.setSeriesVisibleInLegend(series, false);
 				Color color = options.getDatasets().get(series).getDatasetColour() == null 
 						? ColourSelecter.getSegmentColor(series)
 								: options.getDatasets().get(series).getDatasetColour();
@@ -119,10 +118,12 @@ private static ViolinChartFactory instance = null;
 						renderer.setSeriesPaint(series, color);
 						renderer.setSeriesOutlinePaint(series, Color.BLACK);
 			}
-
-//			plot.setRenderer(datasetIndex, renderer);
 		}
 		
+		if(ds.hasProbabilities()){
+			plot.getRangeAxis().setRange(ds.getProbabiltyRange());
+		}
+				
 		return chart;
 		
 	}

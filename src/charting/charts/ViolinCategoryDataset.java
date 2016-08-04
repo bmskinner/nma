@@ -46,12 +46,66 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
             throw new IllegalArgumentException("Null 'columnKey' argument.");
         }
         
-		Number min = Stats.min(list);
-		Number max = Stats.max(list);
-		Range r = new Range(min.doubleValue(), max.doubleValue());
-		ranges.addObject(r, rowKey, columnKey);
+//		Number min = Stats.min(list);
+//		Number max = Stats.max(list);
+//		Range r = new Range(min.doubleValue(), max.doubleValue());
+//		ranges.addObject(r, rowKey, columnKey);
 		super.add(list, rowKey, columnKey);
 		
+	}
+	
+	public boolean hasProbabilities(){
+		
+		
+		int total = 0;
+		for( Object c : ranges.getColumnKeys()){
+			
+			for( Object r : ranges.getRowKeys()){
+				
+				List<Number> values = (List<Number>) pdfData.getObject( (Comparable) r, (Comparable) c);
+				total +=values.size();
+			}
+			
+		}
+		return total>0;
+	}
+	
+	public void addProbabilityRange(Range r, Comparable rowKey, Comparable columnKey){
+		ranges.addObject(r, rowKey, columnKey);
+	}
+	
+	/**
+	 * Fetch the RangeAxis range covering all probabilities in the dataset
+	 * @return
+	 */
+	public Range getProbabiltyRange(){
+		
+		double min = Double.MAX_VALUE;
+		double max = Double.MIN_VALUE;
+		
+		for( Object c : ranges.getColumnKeys()){
+			
+			for( Object r : ranges.getRowKeys()){
+				
+				Range range = (Range) ranges.getObject( (Comparable) r, (Comparable) c);
+				if( range.getLowerBound()<min){
+					min = range.getLowerBound();
+				}
+				
+				if( range.getUpperBound()>max){
+					max = range.getUpperBound();
+				}
+				
+			}
+			
+		}
+		
+		if(min==Double.MAX_VALUE || max==Double.MIN_VALUE){
+			return null;
+		}
+		
+		double range = max - min;
+		return new Range(min - (range /10), max+ (range /10)); // add 10% to each end for space
 	}
 	
 	
@@ -116,84 +170,4 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
 		}
 		return r.getLowerBound();
 	}
-	
-	
-//	/**
-//	 * Hold the values needed to construct a boxplot
-//	 * @author bms41
-//	 *
-//	 */
-//	public class BoxplotData {
-//		
-//		private Number min;
-//		private Number max;
-//		private Number q1;
-//		private Number q3;
-//		private Number mean;
-//		private Number median;
-//		
-//		
-//		public BoxplotData(List<Number> values){
-//			
-//			min    = Stats.min(values);
-//			max    = Stats.max(values);
-//			q1     = Stats.quartile(values, 25);
-//			q3     = Stats.quartile(values, 75);
-//			mean   = Stats.mean(values);
-//			median = Stats.quartile(values, 50);
-//			
-//		}
-//
-//
-//		public Number getMin() {
-//			return min;
-//		}
-//
-//
-//		public Number getMax() {
-//			return max;
-//		}
-//
-//
-//		public Number getQ1() {
-//			return q1;
-//		}
-//
-//
-//		public Number getQ3() {
-//			return q3;
-//		}
-//
-//
-//		public Number getMean() {
-//			return mean;
-//		}
-//
-//
-//		public Number getMedian() {
-//			return median;
-//		}
-//		
-//		public Number getRange(){
-//			return max.doubleValue() - min.doubleValue();
-//		}
-//		
-//		public String toString(){
-//			StringBuilder b = new StringBuilder();
-//			b.append(min);
-//			b.append(" - ");
-//			b.append(q1);
-//			b.append(" - ");
-//			b.append(median);
-//			b.append(" - ");
-//			b.append(q3);
-//			b.append(" - ");
-//			b.append(max);
-//			return b.toString();
-//		}
-//		
-//	}
-	
-	
-
 }
