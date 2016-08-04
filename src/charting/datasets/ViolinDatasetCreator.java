@@ -3,13 +3,11 @@ package charting.datasets;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-
 import stats.NucleusStatistic;
+import stats.Stats;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import charting.charts.ViolinCategoryDataset;
-import charting.charts.ViolinCategoryDataset.BoxplotData;
 import charting.options.ChartOptions;
 import components.CellCollection;
 import components.generic.MeasurementScale;
@@ -56,23 +54,24 @@ public class ViolinDatasetCreator implements Loggable {
 				list.add(new Double(d));
 			}
 			
-			ds.addBoxplot(list, rowKey, stat.toString());
-			
-			BoxplotData boxplot = ds.getBoxplot(rowKey, stat.toString());
+			ds.add(list, rowKey, stat.toString());
 			
 			// Add the probability values
 			KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(  list , 0.001 );
 			
 			List<Number> pdfValues = new ArrayList<Number>();
 			
-			double stepSize = boxplot.getRange().doubleValue() / 100;
+			double min = Stats.min(list).doubleValue();
+			double max = Stats.max(list).doubleValue();
 			
-			for(double d=boxplot.getMin().doubleValue(); d<=boxplot.getMax().doubleValue(); d+=stepSize){
+			double stepSize = ( max - min ) / 100;
+			
+			for(double d=min; d<=max; d+=stepSize){
 
 				pdfValues.add(est.getProbability(d));
 			}
 			
-			ds.add(pdfValues, rowKey, stat.toString());
+			ds.addProbabilities(pdfValues, rowKey, stat.toString());
 		}
 
 		return ds;

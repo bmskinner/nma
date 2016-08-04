@@ -1,8 +1,16 @@
 package charting.charts;
 
+import gui.components.ColourSelecter;
+
+import java.awt.Color;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.BoxAndWhiskerToolTipGenerator;
 import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
@@ -66,24 +74,55 @@ private static ViolinChartFactory instance = null;
 	 * PRIVATE METHODS
 	 * 
 	 */
+	
+	private static JFreeChart createViolinChart(String title,
+            String categoryAxisLabel, String valueAxisLabel,
+            ViolinCategoryDataset dataset, boolean legend) {
+        
+        CategoryAxis categoryAxis = new CategoryAxis(categoryAxisLabel);
+        NumberAxis valueAxis = new NumberAxis(valueAxisLabel);
+        valueAxis.setAutoRangeIncludesZero(false);
+        
+        ViolinRenderer renderer = new ViolinRenderer();
+//        renderer.setToolTipGenerator(new BoxAndWhiskerToolTipGenerator());
+           
+        CategoryPlot plot = new CategoryPlot(dataset, categoryAxis, valueAxis, 
+                renderer);
+        return new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, 
+                legend);
+    } 
 
 	private JFreeChart createNucleusStatisticPlot(ChartOptions options) {
 		
 		ViolinCategoryDataset ds = null;
-		if(options.getDatasets()!=null){
+		if(options.hasDatasets()){
 			 ds = ViolinDatasetCreator.getInstance().createNucleusStatisticViolinDataset(options);
 		}
 		
-		CategoryPlot plot = new CategoryPlot();
-		plot.setDataset(ds);
-
+		JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, true);
 		
-		ViolinRenderer rend = new ViolinRenderer();
+		log("Making violin chart");
 		
-		plot.setRenderer(rend);
+		CategoryPlot plot = chart.getCategoryPlot();
+		ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
 
+		for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
 
-		JFreeChart chart = new JFreeChart(plot);
+//			ViolinRenderer renderer = new ViolinRenderer();
+
+			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
+
+				Color color = options.getDatasets().get(series).getDatasetColour() == null 
+						? ColourSelecter.getSegmentColor(series)
+								: options.getDatasets().get(series).getDatasetColour();
+
+						renderer.setSeriesPaint(series, color);
+						renderer.setSeriesOutlinePaint(series, Color.BLACK);
+			}
+
+//			plot.setRenderer(datasetIndex, renderer);
+		}
+		
 		return chart;
 		
 	}
