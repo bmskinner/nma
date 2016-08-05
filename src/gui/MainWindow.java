@@ -149,6 +149,7 @@ public class MainWindow
 	public MainWindow() {
 				
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		this.addWindowListener(datasetManager);
 		try {
 			setTitle("Nuclear Morphology Analysis v"+Version.currentVersion().toString());
 			
@@ -554,37 +555,37 @@ public class MainWindow
 		
 		
 		
-		if(event.type().equals("ReapplySegmentProfileAction")){
-			
-			Runnable task = () -> {
-				try{
-
-					// get the names of other populations
-					List<String> nameList = populationsPanel.getPopulationNames();
-					nameList.remove(selectedDataset.getName());
-					
-					String[] names = nameList.toArray(new String[0]);
-
-					String selectedValue = (String) JOptionPane.showInputDialog(null,
-							"Choose population to take segments from", "Reapply segmentation",
-							JOptionPane.INFORMATION_MESSAGE, null,
-							names, names[0]);
-
-					if(selectedValue!=null){
-
-						AnalysisDataset source = populationsPanel.getDataset(selectedValue);
-						final CountDownLatch latch = new CountDownLatch(1);
-						new RunSegmentationAction(selectedDataset, source, null, MainWindow.this, latch);
-						latch.await();
-					}
-				} catch(Exception e1){
-					log(Level.SEVERE, "Error applying morphology", e1);
-				}
-
-			};
-			
-			SwingUtilities.invokeLater(task);
-		}
+//		if(event.type().equals("ReapplySegmentProfileAction")){
+//			
+//			Runnable task = () -> {
+//				try{
+//
+//					// get the names of other populations
+//					List<String> nameList = populationsPanel.getPopulationNames();
+//					nameList.remove(selectedDataset.getName());
+//					
+//					String[] names = nameList.toArray(new String[0]);
+//
+//					String selectedValue = (String) JOptionPane.showInputDialog(null,
+//							"Choose population to take segments from", "Reapply segmentation",
+//							JOptionPane.INFORMATION_MESSAGE, null,
+//							names, names[0]);
+//
+//					if(selectedValue!=null){
+//
+//						AnalysisDataset source = populationsPanel.getDataset(selectedValue);
+//						final CountDownLatch latch = new CountDownLatch(1);
+//						new RunSegmentationAction(selectedDataset, source, null, MainWindow.this, latch);
+//						latch.await();
+//					}
+//				} catch(Exception e1){
+//					log(Level.SEVERE, "Error applying morphology", e1);
+//				}
+//
+//			};
+//			
+//			SwingUtilities.invokeLater(task);
+//		}
 		
 		if(event.type().equals("AddTailStainAction")){
 			new AddTailStainAction(selectedDataset, this);
@@ -837,7 +838,7 @@ public class MainWindow
 	private void saveRootDatasets(){
 		
 		Runnable r = () -> {
-			for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+			for(AnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
 				final CountDownLatch latch = new CountDownLatch(1);
 
 				new SaveDatasetAction(root, MainWindow.this, latch, false);
@@ -1031,7 +1032,7 @@ public class MainWindow
 			break;
 		case LIST_DATASETS:
 			int i=0;
-			for(AnalysisDataset d : populationsPanel.getAllDatasets()){
+			for(AnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()){
 				log(Level.INFO, i+"\t"+d.getName());
 				i++;
 			}
@@ -1099,12 +1100,12 @@ public class MainWindow
 		super.dispose();
 	}
 	
-	public List<AnalysisDataset> getOpenDatasets(){
-		return populationsPanel.getAllDatasets();
-	}
+//	public List<AnalysisDataset> getOpenDatasets(){
+//		return DatasetListManager.getInstance().getAllDatasets();
+//	}
 	
 	public boolean hasOpenDatasets(){
-		return populationsPanel.getAllDatasets().size()>0;
+		return DatasetListManager.getInstance().getAllDatasets().size()>0;
 	}
 	
 	private void killAllTasks(){

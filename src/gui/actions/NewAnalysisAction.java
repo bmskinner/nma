@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.actions;
 
+import gui.DatasetListManager;
 import gui.MainWindow;
 import gui.ThreadManager;
 import gui.DatasetEvent.DatasetMethod;
@@ -52,7 +53,7 @@ public class NewAnalysisAction extends ProgressableAction {
 		this.cooldown();
 		
 		log(Level.FINE, "Making analysis options");
-		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(mw.getOpenDatasets());
+		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(DatasetListManager.getInstance().getRootDatasets());
 		
 		if( analysisSetup.getOptions()!=null){
 

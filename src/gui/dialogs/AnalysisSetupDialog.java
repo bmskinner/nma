@@ -35,6 +35,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -112,12 +113,12 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 
 	private JCheckBox keepFailedheckBox = new JCheckBox();
 	
-	private List<AnalysisDataset> openDatasets; // the other datasets open in the program, for copying options
+	private Collection<AnalysisDataset> openDatasets; // the other datasets open in the program, for copying options
 
 	/**
 	 * Create the frame.
 	 */
-	public AnalysisSetupDialog(List<AnalysisDataset> datasets) {
+	public AnalysisSetupDialog(Collection<AnalysisDataset> datasets) {
 		super();
 		openDatasets = datasets;
 		setModal(true); // ensure nothing happens until this window is closed
