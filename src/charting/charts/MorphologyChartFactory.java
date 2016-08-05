@@ -269,7 +269,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				length = (int) collection.getMaxProfileLength();
 			}
 
-			ColourSwatch swatch = dataset.getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : dataset.getSwatch();
+			ColourSwatch swatch = options.getSwatch();
 			chart = makeProfileChart(ds, length, swatch, options.getType());
 
 			// mark the reference and orientation points
@@ -637,9 +637,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	private static JFreeChart makeSingleVariabilityChart(ChartOptions options) throws Exception {
 		XYDataset ds = NucleusDatasetCreator.getInstance().createIQRVariabilityDataset(options);
 
-		ColourSwatch swatch = options.firstDataset().getSwatch() == null 
-				? ColourSwatch.REGULAR_SWATCH 
-						: options.firstDataset().getSwatch();
+		ColourSwatch swatch = options.getSwatch();
 		
 		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, 100, swatch, options.getType());
 		XYPlot plot = chart.getXYPlot();

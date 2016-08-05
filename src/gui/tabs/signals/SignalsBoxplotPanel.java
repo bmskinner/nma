@@ -18,21 +18,22 @@
  *******************************************************************************/
 package gui.tabs.signals;
 
+import gui.GlobalOptions;
 import gui.components.ExportableChartPanel;
-import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.BoxplotsTabPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.logging.Level;
+
 import javax.swing.JScrollPane;
 
 import org.jfree.chart.JFreeChart;
 
 import stats.SignalStatistic;
-import components.generic.MeasurementScale;
-import charting.charts.BoxplotChartFactory;
+import charting.charts.ViolinChartFactory;
+import charting.charts.ViolinChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 
@@ -54,17 +55,18 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 			ChartOptionsBuilder builder = new ChartOptionsBuilder();
 			ChartOptions options = builder
 					.addStatistic(stat)
-					.setScale(MeasurementScale.PIXELS)
+					.setScale(GlobalOptions.getInstance().getScale())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.build();
 
 			JFreeChart chart = null;
 			try {
-				chart = BoxplotChartFactory.getInstance().createStatisticBoxplot(options);
+				chart = ViolinChartFactory.getInstance().createStatisticPlot(options);
 			} catch (Exception e) {
 				log(Level.SEVERE, "Error creating boxplots panel", e);
 			}
 
-			ExportableChartPanel panel = new ExportableChartPanel(chart);
+			ViolinChartPanel panel = new ViolinChartPanel(chart);
 			panel.setPreferredSize(preferredSize);
 			chartPanels.put(stat.toString(), panel);
 			mainPanel.add(panel);
@@ -92,30 +94,19 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 	@Override
 	protected void updateMultiple() {
 
-		MeasurementScale scale  = MeasurementUnitSettingsPanel.getInstance().getSelected();
-
 		for(SignalStatistic stat : SignalStatistic.values()){
 
 			ExportableChartPanel panel = chartPanels.get(stat.toString());
 
-			JFreeChart chart = null;
-
 			ChartOptionsBuilder builder = new ChartOptionsBuilder();
 			ChartOptions options = builder.setDatasets(getDatasets())
 					.addStatistic(stat)
-					.setScale(scale)
+					.setScale(GlobalOptions.getInstance().getScale())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.build();
-
-			if(getChartCache().hasChart(options)){
-				log(Level.FINEST, "Using cached boxplot chart: "+stat.toString());
-				chart = getChartCache().getChart(options);
-
-			} else { // No cache
-
-				chart = BoxplotChartFactory.getInstance().createStatisticBoxplot(options);
-				getChartCache().addChart(options, chart);
-				log(Level.FINEST, "Added cached boxplot chart: "+stat.toString());
-			}
+			
+			JFreeChart chart = getChart(options);
+			panel.setChart(chart);
 
 			panel.setChart(chart);
 		}
@@ -125,7 +116,6 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 	@Override
 	protected void updateNull() {
 		updateMultiple();
-//		measurementUnitSettingsPanel.setEnabled(false);
 	}
 
 }

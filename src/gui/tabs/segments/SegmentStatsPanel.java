@@ -20,6 +20,7 @@
  *******************************************************************************/
 package gui.tabs.segments;
 
+import gui.GlobalOptions;
 import gui.components.ExportableTable;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.panels.MeasurementUnitSettingsPanel;
@@ -29,6 +30,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.text.NumberFormat;
 import java.util.logging.Level;
+
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
@@ -116,11 +118,10 @@ public class SegmentStatsPanel extends DetailPanel {
 	}
 	
 	private TableOptions makeOptions(){
-		MeasurementScale scale =MeasurementUnitSettingsPanel.getInstance().getSelected();
 		
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setScale(scale)
+			.setScale(GlobalOptions.getInstance().getScale())
 			.build();
 		return options;
 	}

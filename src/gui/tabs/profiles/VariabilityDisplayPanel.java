@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.tabs.profiles;
 
+import gui.GlobalOptions;
 import gui.components.ExportableChartPanel;
 import gui.components.panels.BorderTagOptionsPanel;
 import gui.components.panels.ProfileCollectionTypeSettingsPanel;
@@ -218,6 +219,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 			.setAlignment(ProfileAlignment.LEFT)
 			.setTag(tag)
 			.setShowMarkers(showMarkers)
+			.setSwatch(GlobalOptions.getInstance().getSwatch())
 			.setProfileType(type)
 			.build();
 

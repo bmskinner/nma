@@ -20,6 +20,7 @@
  *******************************************************************************/
 package gui.tabs.nuclear;
 
+import gui.GlobalOptions;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.InterfaceEvent.InterfaceMethod;
@@ -32,6 +33,7 @@ import java.text.DecimalFormat;
 import java.util.logging.Level;
 
 import org.jfree.chart.JFreeChart;
+
 import stats.NucleusStatistic;
 import analysis.AnalysisDataset;
 import charting.options.ChartOptions;
@@ -47,7 +49,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 
 			try {
 
-				MeasurementScale scale  = MeasurementUnitSettingsPanel.getInstance().getSelected();
+				MeasurementScale scale  = GlobalOptions.getInstance().getScale();
 				Dimension preferredSize = new Dimension(400, 150);
 				for(NucleusStatistic stat : NucleusStatistic.values()){
 					
@@ -89,7 +91,8 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(getDatasets())
 					.addStatistic(stat)
-					.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
+					.setScale(GlobalOptions.getInstance().getScale())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setUseDensity(useDensity)
 					.build();
 				
@@ -150,7 +153,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 		 */
 		public void filterByChartSelection(SelectableChartPanel panel){
 			// check the scale to use for selection
-			MeasurementScale scale  = MeasurementUnitSettingsPanel.getInstance().getSelected();
+			MeasurementScale scale  = GlobalOptions.getInstance().getScale();
 
 			// get the parameters to filter on
 			Double lower = panel.getGateLower();

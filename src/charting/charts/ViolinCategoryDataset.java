@@ -64,7 +64,9 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
 			for( Object r : ranges.getRowKeys()){
 				
 				List<Number> values = (List<Number>) pdfData.getObject( (Comparable) r, (Comparable) c);
-				total +=values.size();
+				if(values != null){
+					total +=values.size();
+				}
 			}
 			
 		}
@@ -89,12 +91,14 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
 			for( Object r : ranges.getRowKeys()){
 				
 				Range range = (Range) ranges.getObject( (Comparable) r, (Comparable) c);
-				if( range.getLowerBound()<min){
-					min = range.getLowerBound();
-				}
-				
-				if( range.getUpperBound()>max){
-					max = range.getUpperBound();
+				if(range != null){
+					if( range.getLowerBound()<min){
+						min = range.getLowerBound();
+					}
+
+					if( range.getUpperBound()>max){
+						max = range.getUpperBound();
+					}
 				}
 				
 			}

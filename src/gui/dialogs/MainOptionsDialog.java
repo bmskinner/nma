@@ -21,36 +21,42 @@ package gui.dialogs;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import utility.Constants;
-import analysis.AnalysisDataset;
+import gui.GlobalOptions;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.MainWindow;
 import gui.components.ColourSelecter.ColourSwatch;
 
 @SuppressWarnings("serial")
 public class MainOptionsDialog extends SettingsDialog implements ActionListener {
 	
-	private MainWindow mw;
+//	private MainWindow mw;
 	
 	private JComboBox<Level> levelBox;
 	private JComboBox<ColourSwatch> colourBox;
+	private JCheckBox violinBox;
 	
 	public MainOptionsDialog(final MainWindow mw){
-		super( mw, true);
+		super( mw, false);
 
-		this.mw = mw;
+//		this.mw = mw;
 		this.setLayout(new BorderLayout());
 		this.setTitle("Options");
 		
@@ -68,13 +74,36 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 				
 	}
 	
+	/**
+	 * Create the panel footer, with just a close button
+	 * buttons
+	 * @return
+	 */
+	@Override
+	protected JPanel createFooter(){
+
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout(FlowLayout.CENTER));
+		JButton okButton = new JButton("Close");
+		okButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				setVisible(false);	
+				dispose();
+			}
+		});
+		panel.add(okButton);
+
+		return panel;
+	}
+	
 	private JPanel createMainPanel(){
 		JPanel panel = new JPanel();
 		GridBagLayout layout = new GridBagLayout();
 		panel.setLayout(layout);
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
-		List<JLabel> labels = new ArrayList<JLabel>();
+		List<JLabel>    labels = new ArrayList<JLabel>();
 		List<Component> fields = new ArrayList<Component>();
 
 		JLabel logLabel = new JLabel("Logging level");
@@ -88,11 +117,19 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		
 		JLabel swatchLabel = new JLabel("Colour swatch");
 		colourBox = new JComboBox<ColourSwatch>(ColourSwatch.values());
-		colourBox.setSelectedItem(mw.getColourSwatch());
+		colourBox.setSelectedItem(GlobalOptions.getInstance().getSwatch());
 		colourBox.addActionListener(this);
 		
 		labels.add(swatchLabel);
 		fields.add(colourBox);
+		
+		JLabel violinLabel = new JLabel("Violin plots");
+		violinBox = new JCheckBox( (String) null, GlobalOptions.getInstance().isViolinPlots());
+		violinBox.addActionListener(this);
+		
+		
+		labels.add(violinLabel);
+		fields.add(violinBox);
 		
 		this.addLabelTextRows(labels, fields, layout, panel);
 		return panel;
@@ -105,19 +142,30 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		Level level = (Level) levelBox.getSelectedItem();
 		if(!level.equals(Logger.getLogger(PROGRAM_LOGGER).getLevel())){
 			Logger.getLogger(PROGRAM_LOGGER).setLevel(level);
-			log(Level.INFO, "Set the logging level to "+level.toString());
+			GlobalOptions.getInstance().setLogLevel(level);
+//			log(Level.INFO, "Set the logging level to "+level.toString());
 		}
 		
 		
 		ColourSwatch swatch = (ColourSwatch) colourBox.getSelectedItem();
 		
-		if(! swatch.equals(mw.getColourSwatch())){
+		
+		
+		if(! swatch.equals(GlobalOptions.getInstance().getSwatch())){
 
-			for(AnalysisDataset d : mw.getPopulationsPanel().getAllDatasets()){
-				d.setSwatch(swatch);
-			}
-			mw.setColourSwatch(swatch);
-			log(Level.INFO, "Set the colour swatch level to "+swatch.toString());
+//			for(AnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()){
+//				d.setSwatch(swatch);
+//			}
+			
+			GlobalOptions.getInstance().setSwatch(swatch);
+			fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+//			log(Level.INFO, "Set the colour swatch level to "+swatch.toString());
+		}
+		
+		boolean useViolins = violinBox.isSelected();
+		if(GlobalOptions.getInstance().isViolinPlots() != useViolins){
+			GlobalOptions.getInstance().setViolinPlots(useViolins);
+			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 		}
 		
 		

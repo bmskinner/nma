@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.GlobalOptions;
 import gui.components.ExportableChartPanel;
 import gui.tabs.DetailPanel;
 
@@ -28,6 +29,7 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -37,7 +39,6 @@ import org.jfree.chart.JFreeChart;
 
 import charting.charts.BoxplotChartFactory;
 import charting.charts.ViolinChartFactory;
-import charting.charts.ViolinChartPanel;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 
@@ -84,7 +85,11 @@ import charting.options.TableOptions;
 		
 		@Override
 		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
-			return ViolinChartFactory.getInstance().createStatisticPlot(options);
+			if(GlobalOptions.getInstance().isViolinPlots()){
+				return ViolinChartFactory.getInstance().createStatisticPlot(options);
+			} else {
+				return BoxplotChartFactory.getInstance().createStatisticBoxplot(options);
+			}
 		}
 		
 		@Override

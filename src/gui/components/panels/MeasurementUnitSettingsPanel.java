@@ -19,6 +19,11 @@
 package gui.components.panels;
 
 
+import gui.GlobalOptions;
+import gui.InterfaceEvent.InterfaceMethod;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,9 +38,9 @@ public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
 	
 	private Map<MeasurementScale, JRadioButton> map  = new  HashMap<MeasurementScale, JRadioButton>();
 	
-	private static MeasurementUnitSettingsPanel instance = null;
+//	private static MeasurementUnitSettingsPanel instance = null;
 		
-	private MeasurementUnitSettingsPanel(){
+	public MeasurementUnitSettingsPanel(){
 		super();
 		
 		final ButtonGroup group = new ButtonGroup();
@@ -52,12 +57,19 @@ public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
 		map.get(MeasurementScale.PIXELS).setSelected(true);		
 	}
 	
-	public static MeasurementUnitSettingsPanel getInstance(){
-		if(instance==null){
-			instance = new MeasurementUnitSettingsPanel();
-		}
-		return instance;
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		GlobalOptions.getInstance().setScale(getSelected());
+		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 	}
+	
+//	public static MeasurementUnitSettingsPanel getInstance(){
+//		if(instance==null){
+//			instance = new MeasurementUnitSettingsPanel();
+//		}
+//		return instance;
+//	}
 		
 	public MeasurementScale getSelected(){
 		for(MeasurementScale type : MeasurementScale.values()){

@@ -17,6 +17,7 @@ import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import charting.options.TableOptions.TableType;
+import gui.GlobalOptions;
 import gui.components.ExportableTable;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
@@ -91,7 +92,7 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.ANALYSIS_STATS)
-			.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
+			.setScale(GlobalOptions.getInstance().getScale())
 			.build();
 
 		finest("Built table options");

@@ -75,8 +75,9 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		this.setLayout(new BorderLayout());
 		
 		ChartOptions options = new ChartOptionsBuilder()
-				.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
-				.build();
+			.setScale(GlobalOptions.getInstance().getScale())
+			.setSwatch(GlobalOptions.getInstance().getSwatch())
+			.build();
 		
 		JFreeChart consensusChart = getChart(options);
 		consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
@@ -386,14 +387,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
-//			.setShowMesh(showMeshBox.isSelected())
-//			.setShowMeshEdges(showMeshEdgesBox.isSelected())
-//			.setShowMeshFaces(showMeshFacesBox.isSelected())
-			.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
+			.setScale(GlobalOptions.getInstance().getScale())
+			.setSwatch(GlobalOptions.getInstance().getSwatch())
 			.setShowAnnotations(false)
 			.setShowXAxis(false)
 			.setShowYAxis(false)
-//			.setMeshSize((int) meshSizeSpinner.getValue())
 			.build();
 		
 		JFreeChart consensusChart = getChart(options);
@@ -427,9 +425,10 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	private void updateMultipleDatasets() {
 		
 		ChartOptions options = new ChartOptionsBuilder()
-		.setDatasets(getDatasets())
-		.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
-		.build();
+			.setDatasets(getDatasets())
+			.setScale(GlobalOptions.getInstance().getScale())
+			.setSwatch(GlobalOptions.getInstance().getSwatch())
+			.build();
 
 		JFreeChart chart = getChart(options);
 

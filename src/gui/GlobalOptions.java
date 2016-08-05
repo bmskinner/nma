@@ -1,0 +1,75 @@
+package gui;
+
+import gui.components.ColourSelecter.ColourSwatch;
+
+import java.util.logging.Level;
+
+import components.generic.MeasurementScale;
+
+
+/**
+ * This holds the options set globally for the program
+ * @author bms41
+ *
+ */
+public class GlobalOptions {
+	
+	private static GlobalOptions instance;
+	
+	private MeasurementScale scale;
+	
+	private Level logLevel;
+	
+	private ColourSwatch swatch;
+	
+	private boolean violinPlots; // show violin plots or just boxplots
+	
+	public static GlobalOptions getInstance(){
+		if(instance==null){
+			instance = new GlobalOptions();
+		}
+		return instance;
+	}
+	
+	private GlobalOptions(){
+		this.logLevel    = Level.INFO;
+		this.scale       = MeasurementScale.PIXELS;
+		this.swatch      = ColourSwatch.REGULAR_SWATCH;
+		this.violinPlots = true;
+	}
+
+	public MeasurementScale getScale() {
+		return scale;
+	}
+
+	public void setScale(MeasurementScale scale) {
+		this.scale = scale;
+	}
+
+	public Level getLogLevel() {
+		return logLevel;
+	}
+
+	public void setLogLevel(Level logLevel) {
+		this.logLevel = logLevel;
+	}
+
+	public ColourSwatch getSwatch() {
+		return swatch;
+	}
+
+	public void setSwatch(ColourSwatch swatch) {
+		this.swatch = swatch;
+	}
+
+	public boolean isViolinPlots() {
+		return violinPlots;
+	}
+
+	public void setViolinPlots(boolean violinPlots) {
+		this.violinPlots = violinPlots;
+	}
+	
+	
+
+}

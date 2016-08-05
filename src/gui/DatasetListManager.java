@@ -35,6 +35,17 @@ public final class DatasetListManager {
 		return list;
 	}
 	
+	
+	public Set<AnalysisDataset> getAllDatasets(){
+		
+		Set<AnalysisDataset> result = new HashSet<AnalysisDataset>();
+		for(AnalysisDataset d : list){
+			result.addAll(d.getAllChildDatasets());
+		}
+		return result;
+		
+	}
+	
 	public void addDataset(AnalysisDataset d){
 		list.add(d);
 	}

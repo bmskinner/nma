@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.tabs.signals;
 
+import gui.GlobalOptions;
 import gui.components.HistogramsTabPanel;
 import gui.components.SelectableChartPanel;
 import gui.components.panels.MeasurementUnitSettingsPanel;
@@ -42,14 +43,14 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 		
 		try {
 
-			MeasurementScale scale  = MeasurementUnitSettingsPanel.getInstance().getSelected();
 			Dimension preferredSize = new Dimension(400, 150);
 			for(SignalStatistic stat : SignalStatistic.values()){
 
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder
 					.addStatistic(stat)
-					.setScale(scale)
+					.setScale(GlobalOptions.getInstance().getScale())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setUseDensity(false)
 					.setSignalGroup(null)
 					.build();
@@ -72,7 +73,6 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 	protected void updateSingle() {
 		this.setEnabled(true);
 		
-		MeasurementScale scale  = MeasurementUnitSettingsPanel.getInstance().getSelected();
 		boolean useDensity = useDensityPanel.isSelected();
 		
 		for(SignalStatistic stat : SignalStatistic.values()){
@@ -83,7 +83,8 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			ChartOptionsBuilder builder = new ChartOptionsBuilder();
 			ChartOptions options = builder.setDatasets(getDatasets())
 				.addStatistic(stat)
-				.setScale(scale)
+				.setScale(GlobalOptions.getInstance().getScale())
+				.setSwatch(GlobalOptions.getInstance().getSwatch())
 				.setUseDensity(useDensity)
 				.build();
 			

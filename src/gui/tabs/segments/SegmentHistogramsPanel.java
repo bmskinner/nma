@@ -1,5 +1,6 @@
 package gui.tabs.segments;
 
+import gui.GlobalOptions;
 import gui.Labels;
 import gui.components.HistogramsTabPanel;
 import gui.components.SelectableChartPanel;
@@ -54,7 +55,6 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-		MeasurementScale scale = MeasurementUnitSettingsPanel.getInstance().getSelected();
 		boolean useDensity = this.useDensityPanel.isSelected();
 		
 		log(Level.FINEST, "Dataset list is not empty");
@@ -75,7 +75,8 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.addStatistic(SegmentStatistic.LENGTH)
-					.setScale(scale)
+					.setScale(GlobalOptions.getInstance().getScale())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setUseDensity(useDensity)
 					.setSegPosition(seg.getPosition())
 					.build();

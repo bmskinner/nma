@@ -20,6 +20,7 @@ package charting.datasets;
 
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
+import gui.GlobalOptions;
 import gui.components.ColourSelecter;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 
@@ -174,9 +175,9 @@ public class CellDatasetCreator implements Loggable {
 
 			if( ! stat.equals(NucleusStatistic.VARIABILITY)){
 
-				fieldNames.add(stat.label(MeasurementUnitSettingsPanel.getInstance().getSelected())  );
+				fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()  )  );
 
-				double value = n.getStatistic(stat, MeasurementUnitSettingsPanel.getInstance().getSelected());
+				double value = n.getStatistic(stat, GlobalOptions.getInstance().getScale()  );
 					rowData.add(df.format(value) );
 			}
 
@@ -248,9 +249,9 @@ public class CellDatasetCreator implements Loggable {
 		
 		for(SignalStatistic stat : SignalStatistic.values()){
 
-			fieldNames.add(    stat.label(   MeasurementUnitSettingsPanel.getInstance().getSelected() )  );
+			fieldNames.add(    stat.label(   GlobalOptions.getInstance().getScale() )  );
 
-			double value = s.getStatistic(stat, MeasurementUnitSettingsPanel.getInstance().getSelected());
+			double value = s.getStatistic(stat, GlobalOptions.getInstance().getScale() );
 
 //			if(stat.isDimensionless()){
 				rowData.add(df.format(value) );

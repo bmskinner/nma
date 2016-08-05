@@ -33,6 +33,7 @@ import components.generic.SegmentedProfile;
 import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
+import gui.GlobalOptions;
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.ExportableTable;
 import gui.components.panels.MeasurementUnitSettingsPanel;
@@ -278,7 +279,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(getDatasets())
 		.setCell(this.getCellModel().getCell())
-		.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
+		.setScale(GlobalOptions.getInstance().getScale())
 		.build();
 
 		try{

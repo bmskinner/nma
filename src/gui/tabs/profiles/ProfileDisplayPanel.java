@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.tabs.profiles;
 
+import gui.GlobalOptions;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import javax.swing.table.TableModel;
@@ -98,6 +99,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 				.setTag(tag)
 				.setShowMarkers(showMarkers)
 				.setHideProfiles(hideProfiles)
+				.setSwatch(GlobalOptions.getInstance().getSwatch())
 				.setProfileType(type)
 				.build();
 			return options;

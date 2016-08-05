@@ -1,5 +1,6 @@
 package gui.tabs.segments;
 
+import gui.GlobalOptions;
 import gui.Labels;
 import gui.components.ExportableChartPanel;
 import gui.components.panels.MeasurementUnitSettingsPanel;
@@ -68,8 +69,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 		
-		MeasurementScale scale = MeasurementUnitSettingsPanel.getInstance().getSelected();
-//		measurementUnitSettingsPanel.setEnabled(true);
+		MeasurementScale scale = GlobalOptions.getInstance().getScale();
 		
 		log(Level.FINEST, "Dataset list is not empty");
 

@@ -20,6 +20,7 @@
  *******************************************************************************/
 package gui.tabs.nuclear;
 
+import gui.GlobalOptions;
 import gui.components.ExportableChartPanel;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.BoxplotsTabPanel;
@@ -54,7 +55,8 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(getDatasets())
 					.addStatistic(stat)
-					.setScale(MeasurementScale.PIXELS)
+					.setScale(GlobalOptions.getInstance().getScale())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.build();
 
 				JFreeChart chart = null;
@@ -109,7 +111,8 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				ChartOptions options = builder.setDatasets(getDatasets())
 					.addStatistic(stat)
-					.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
+					.setScale(GlobalOptions.getInstance().getScale())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.build();
 				
 				JFreeChart chart = getChart(options);

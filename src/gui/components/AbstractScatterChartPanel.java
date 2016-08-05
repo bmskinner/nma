@@ -28,6 +28,7 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
+import gui.GlobalOptions;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
@@ -115,7 +116,8 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 				.setDatasets(getDatasets())
 				.addStatistic(statA)
 				.addStatistic(statB)
-				.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
+				.setScale(GlobalOptions.getInstance().getScale())
+				.setSwatch(GlobalOptions.getInstance().getSwatch())
 				.build();
 		
 		chartPanel.setChart(getChart(options));
@@ -125,7 +127,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 				.setDatasets(getDatasets())
 				.addStatistic(statA)
 				.addStatistic(statB)
-				.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
+				.setScale(GlobalOptions.getInstance().getScale())
 				.build();
 		
 		rhoTable.setModel(getTable(tableOptions));
@@ -147,7 +149,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		
 		TableOptions tableOptions = new TableOptionsBuilder()
 				.setDatasets(null)
-				.setScale(MeasurementUnitSettingsPanel.getInstance().getSelected())
+				.setScale(GlobalOptions.getInstance().getScale())
 				.build();
 		
 		rhoTable.setModel(getTable(tableOptions));
@@ -202,7 +204,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 			finest("Filtering on "+statBBox.getSelectedItem().toString());
 			CellCollection stat2 = stat1
 					.filterCollection((PlottableStatistic) statBBox.getSelectedItem(),
-							MeasurementUnitSettingsPanel.getInstance().getSelected(),
+							GlobalOptions.getInstance().getScale(),
 							range[0], range[1]);
 			
 			if(stat2 == null){

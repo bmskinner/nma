@@ -95,7 +95,7 @@ import components.nuclei.sperm.RodentSpermNucleus;
 @SuppressWarnings("serial")
 public class MainWindow 
 	extends JFrame 
-	implements SignalChangeListener, DatasetEventListener, InterfaceEventListener, Loggable, ActionListener {
+	implements SignalChangeListener, DatasetEventListener, InterfaceEventListener, Loggable {
 				
 	private JPanel contentPane;
 
@@ -119,10 +119,6 @@ public class MainWindow
 	
 	private List<DetailPanel> detailPanels = new ArrayList<DetailPanel>(); // store panels for iterating messsages
 	
-	private ColourSwatch activeSwatch = ColourSwatch.REGULAR_SWATCH;
-	
-//	private final Version version = new Version(Constants.VERSION_MAJOR, Constants.VERSION_MINOR, Constants.VERSION_REVISION);
-		
 	// Flags to pass to ProgressableActions to determine the analyses
 	// to carry out in subsequently
 	public static final int ADD_POPULATION		 = 1;
@@ -143,20 +139,10 @@ public class MainWindow
 	
 	private static final DatasetListManager datasetManager = DatasetListManager.getInstance(); 
 	
+	private static final GlobalOptions globalOptions = GlobalOptions.getInstance();
 	
-	private static final ThreadManager threadManager = ThreadManager.getInstance();
-//	/*
-//	 * Handle threading
-//	 */
-//	
-//	public static final int corePoolSize    = 4;
-//	public static final int maximumPoolSize = 8;
-//	public static final int keepAliveTime = 5000;
-//
-//	public final threadManager threadManager = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
-//			keepAliveTime, TimeUnit.MILLISECONDS,
-//			new LinkedBlockingQueue<Runnable>());
-		
+	
+	private static final ThreadManager threadManager = ThreadManager.getInstance();	
 	
 	
 	/**
@@ -340,15 +326,7 @@ public class MainWindow
 		}
 		
 	}
-		
-	public ColourSwatch getColourSwatch(){
-		return activeSwatch;
-	}
-	
-	public void setColourSwatch(ColourSwatch swatch){
-		activeSwatch = swatch;
-	}
-	
+			
 	public PopulationsPanel getPopulationsPanel(){
 		return this.populationsPanel;
 	}
@@ -416,53 +394,24 @@ public class MainWindow
 		);
 		panelHeader.add(btnPostanalysisMapping);
 				
-		JButton btnSetLogLevel = new JButton("Options");
-		btnSetLogLevel.addActionListener(
+		JButton optionsButton = new JButton("Options");
+		optionsButton.addActionListener(
 				
 				e -> { 
 
 					MainOptionsDialog dialog = new MainOptionsDialog(MainWindow.this);
-					if(dialog.isReadyToRun()){
-	
-						try {
-							/*
-							 * If the recache is not waited on, the update conflicts
-							 * with the updating status
-							 */
-							finest("Options closed, clearing all caches");
-							
-							CountDownLatch l = new CountDownLatch(1);
-							clearChartCache(l);
-							l.await();
-							finest("Options closed, updating charts");
-		                    updatePanels(populationsPanel.getSelectedDatasets());
-							
-						} catch (InterruptedException e1) {
-							error("Interruption to recaching", e1);
-						}
-	
-					} else {
-						finest("Options cancelled");
-					}
+					dialog.addInterfaceEventListener(this);
 			}
 		);		
-		panelHeader.add(btnSetLogLevel);
+		panelHeader.add(optionsButton);
 		
-		MeasurementUnitSettingsPanel unitsPanel = MeasurementUnitSettingsPanel.getInstance();
-		unitsPanel.addActionListener(this);
+		MeasurementUnitSettingsPanel unitsPanel = new MeasurementUnitSettingsPanel();
+		unitsPanel.addInterfaceEventListener(this);
 		panelHeader.add(unitsPanel);
 		
 		return panelHeader;
 	}
-	
-//	/**
-//	 * Get the program version
-//	 * @return the version
-//	 */
-//	public Version getVersion(){
-//		return version;
-//	}
-	
+		
 	/**
 	 * Create the status panel at the base of the window
 	 * @return the panel
@@ -838,7 +787,7 @@ public class MainWindow
 		
 		datasetManager.addDataset(dataset);
 		
-		dataset.setSwatch(activeSwatch);
+		dataset.setSwatch(GlobalOptions.getInstance().getSwatch());
 		populationsPanel.addDataset(dataset);
 		for(AnalysisDataset child : dataset.getAllChildDatasets() ){
 			populationsPanel.addDataset(child);
@@ -1099,8 +1048,6 @@ public class MainWindow
 			break;
 			
 		case UPDATE_PANELS:
-//			populationsPanel.refreshDatasets();
-//			populationsPanel.update(populationsPanel.getSelectedDatasets()); // ensure all child datasets are included
 			this.updatePanels(populationsPanel.getSelectedDatasets());
 			break;
 			
@@ -1203,11 +1150,11 @@ public class MainWindow
 		
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		
-		updatePanels(populationsPanel.getSelectedDatasets());
-		
-	}
+//	@Override
+//	public void actionPerformed(ActionEvent arg0) {
+//		
+//		updatePanels(populationsPanel.getSelectedDatasets());
+//		
+//	}
 
 }
