@@ -161,6 +161,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 			}
 
 			renderer.setMeanVisible(false);
+			renderer.setUseOutlinePaintForWhiskers(true);
 			plot.setRenderer(datasetIndex, renderer);
 		}
 			

@@ -1,5 +1,7 @@
 package charting.options;
 
+import gui.components.ColourSelecter.ColourSwatch;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -19,6 +21,7 @@ import analysis.AnalysisDataset;
  */
 public class TableOptionsBuilder {
 
+	private ColourSwatch swatch        = ColourSwatch.REGULAR_SWATCH;
 	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	private TableType type             = null;
 	private List<PlottableStatistic> stats    = new ArrayList<PlottableStatistic>();;
@@ -65,6 +68,11 @@ public class TableOptionsBuilder {
 		this.cell = cell;
 		return this;
 	}
+	
+	public TableOptionsBuilder setSwatch(ColourSwatch swatch){
+		this.swatch = swatch;
+		return this;
+	}
 
 	public TableOptions build(){
 		TableOptions options =  new TableOptions(list);
@@ -74,6 +82,7 @@ public class TableOptionsBuilder {
 		options.setSegPosition(segPosition);
 		options.setScale(scale);
 		options.setCell(cell);
+		options.setSwatch(swatch);
 		return options;
 
 	}

@@ -1,5 +1,7 @@
 package charting.options;
 
+import gui.components.ColourSelecter.ColourSwatch;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +32,7 @@ public abstract class AbstractOptions implements Loggable {
 	private UUID segID                      = null; // the id of the segment (not consistent between datasets)
 	private int segPosition                 = 0;    // the position of the segment in the profile (consistent between datasets)
 	private MeasurementScale scale          = MeasurementScale.PIXELS;
+	private ColourSwatch swatch             = ColourSwatch.REGULAR_SWATCH;
 			
 	public AbstractOptions(List<AnalysisDataset> list){
 		this.list = list;
@@ -44,6 +47,18 @@ public abstract class AbstractOptions implements Loggable {
 
 	public List<AnalysisDataset> getDatasets(){
 		return this.list;
+	}
+	
+	public void setSwatch(ColourSwatch swatch) {
+		this.swatch = swatch;
+	}
+			
+	/**
+	 * Get the segmentation colour swatch
+	 * @return
+	 */
+	public ColourSwatch getSwatch(){
+		return this.swatch;
 	}
 	
 	/**
@@ -161,6 +176,7 @@ public abstract class AbstractOptions implements Loggable {
 		result = prime * result + ((segID == null) ? 0 : segID.hashCode());
 		result = prime * result + segPosition;
 		result = prime * result + ((stats == null) ? 0 : stats.hashCode());
+		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
 		return result;
 	}
 
@@ -191,6 +207,8 @@ public abstract class AbstractOptions implements Loggable {
 			if (other.stats != null)
 				return false;
 		} else if (!stats.equals(other.stats))
+			return false;
+		if (swatch != other.swatch)
 			return false;
 		return true;
 	}

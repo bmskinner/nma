@@ -22,6 +22,7 @@ import org.jfree.chart.JFreeChart;
 import stats.SegmentStatistic;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.ExportableChartPanel;
+import charting.charts.ViolinChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
@@ -68,9 +69,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 	protected void updateMultiple() {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
-		
-		MeasurementScale scale = GlobalOptions.getInstance().getScale();
-		
+				
 		log(Level.FINEST, "Dataset list is not empty");
 
 		// Check that all the datasets have the same number of segments
@@ -88,13 +87,19 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.addStatistic(SegmentStatistic.LENGTH)
-					.setScale(scale)
+					.setScale(GlobalOptions.getInstance().getScale())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setSegPosition(seg.getPosition())
 					.build();
 				
 				JFreeChart chart = getChart(options);
 				
-				ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
+				ExportableChartPanel chartPanel;
+				if(GlobalOptions.getInstance().isViolinPlots()){
+					chartPanel = new ViolinChartPanel(chart);
+				} else {
+					chartPanel = new ExportableChartPanel(chart);
+				}
 				chartPanel.setPreferredSize(preferredSize);
 				chartPanels.put(seg.getName(), chartPanel);
 				mainPanel.add(chartPanel);							
@@ -102,12 +107,16 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 
 			
 		} else { // different number of segments, blank chart
-//			measurementUnitSettingsPanel.setEnabled(false);
 			mainPanel.setLayout(new FlowLayout());
 			mainPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
 		}
 		mainPanel.revalidate();
 		mainPanel.repaint();
+		
+//		for(ExportableChartPanel p : chartPanels.values()){
+//			p.restoreAutoBounds();
+//		}
+		
 		scrollPane.setViewportView(mainPanel);
 	}
 
@@ -117,12 +126,6 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 		
-//		measurementUnitSettingsPanel.setEnabled(false);
-		
-//		ChartOptions options = new ChartOptionsBuilder()
-//		.setDatasets(null)
-//		.build();
-
 		ChartPanel chartPanel = new ChartPanel(BoxplotChartFactory.getInstance().makeEmptyChart());
 		mainPanel.add(chartPanel);
 		mainPanel.revalidate();

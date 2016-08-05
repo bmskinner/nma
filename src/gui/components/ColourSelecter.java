@@ -18,6 +18,8 @@
  *******************************************************************************/
 package gui.components;
 
+import gui.GlobalOptions;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,38 +105,45 @@ public class ColourSelecter {
 	public static int getSignalListSize(){
 		return ColourSelecter.signalColourList.size();
 	}
-	
-	/**
-	 * Get an colour from the desired swatch for the given index.
-	 * @param swatch the swatch to use
-	 * @param i the number of the colour to return
-	 * @return a colour
-	 */
-	public static Color getSwatchColour(int swatch, int index){
 		
-		Color color = null;
-		switch(swatch){
-			case REGULAR_SWATCH: color = getSegmentColor(index);
-					break;
-			case NO_SWATCH: color = Color.BLACK;
-					break;
-			case ACCESSIBLE_SWATCH: color = getOptimisedColor(index);
-					break;
-			default: color = getSegmentColor(index);
-					break;
-		}
-		return color;
-	}
-	
 	/**
 	 * Get an appropriate segment colour for the given number.
 	 * Loops through 8 colours.
 	 * @param i the number of the colour to return
 	 * @return a colour
 	 */
-	public static Color getSegmentColor(int i){		
-		Color color = ColourSelecter.segmentColourList.get(i % ColourSelecter.segmentColourList.size());
+	public static Color getSegmentColor(int i){	
+		
+		Color color = null;
+		ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
+		switch(swatch){
+		case ACCESSIBLE_SWATCH:
+			color = getOptimisedColor(i);
+			break;
+		case NO_SWATCH:
+			color = Color.BLACK;
+			break;
+		case REGULAR_SWATCH:
+			color = getRegularColor(i);
+			break;
+		default:
+			color = getRegularColor(i);
+			break;
+		
+		}
+		
+		
 		return color;
+	}
+	
+	/**
+	 * Get an appropriate colour for the given number from
+	 * the regular colour set. Loops through 8 colours.
+	 * @param i the number of the colour to return
+	 * @return a colour
+	 */
+	private static Color getRegularColor(int i){		
+		return ColourSelecter.segmentColourList.get(i % ColourSelecter.segmentColourList.size());
 	}
 	
 	/**
@@ -145,7 +154,7 @@ public class ColourSelecter {
 	 * @param i the number of the colour to return
 	 * @return a colour
 	 */
-	public static Color getOptimisedColor(int i){		
+	private static Color getOptimisedColor(int i){		
 		Color color = ColourSelecter.optimisedSwatchList.get(i % ColourSelecter.optimisedSwatchList.size());
 		return color;
 	}

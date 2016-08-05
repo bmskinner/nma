@@ -39,7 +39,6 @@ import analysis.AnalysisDataset;
  */
 public class ChartOptions extends AbstractOptions {
 	
-	private ColourSwatch swatch        = ColourSwatch.REGULAR_SWATCH;
 	private boolean normalised         = false;
 	private ProfileAlignment alignment = ProfileAlignment.LEFT;
 	private BorderTag tag              = BorderTag.REFERENCE_POINT;
@@ -75,30 +74,8 @@ public class ChartOptions extends AbstractOptions {
 	
 	public ChartOptions(List<AnalysisDataset> list){
 		super(list);
-		if(hasDatasets()){
-			if(firstDataset().getSwatch()!=null){
-				this.swatch = firstDataset().getSwatch();
-			} else {
-				this.swatch = ColourSwatch.REGULAR_SWATCH;
-				firstDataset().setSwatch(swatch);
-			}
-		} else {
-			this.swatch = ColourSwatch.REGULAR_SWATCH;
-		}
-	}
-		
-	public void setSwatch(ColourSwatch swatch) {
-		this.swatch = swatch;
 	}
 			
-	/**
-	 * Get the segmentation colour swatch
-	 * @return
-	 */
-	public ColourSwatch getSwatch(){
-		return this.swatch;
-	}
-	
 	public boolean isNormalised() {
 		return normalised;
 	}
@@ -341,7 +318,6 @@ public class ChartOptions extends AbstractOptions {
 		
 		result = prime * result + ((signalGroup == null) ? 0 : signalGroup.hashCode());
 		
-		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
 		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		result = prime * result + (useDensity ? 1231 : 1237);
@@ -409,8 +385,6 @@ public class ChartOptions extends AbstractOptions {
 //				return false;
 //		}
 		if (signalGroup != other.signalGroup)
-			return false;
-		if (swatch != other.swatch)
 			return false;
 		if (tag != other.tag)
 			return false;

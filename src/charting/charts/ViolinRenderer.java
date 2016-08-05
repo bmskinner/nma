@@ -114,8 +114,11 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
 //			log("Got ymin: "+ymin);
 
 			List<Number> values = dataset.getPdfValues(row, column);
-
-			stepSize = (ymax - ymin) / values.size();
+			
+			if(values !=null){
+				stepSize = (ymax - ymin) / values.size();
+			}
+			
 		} catch (Exception e){
 			error("Error in step size", e);
 		}
@@ -272,7 +275,7 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
                 = (ViolinCategoryDataset) dataset;
     	
     	
-    	if(vioDataset.hasProbabilities()){
+    	if(vioDataset.hasProbabilities(row, column)){
     	
     		// Draw the pdf behind of the boxplot
 

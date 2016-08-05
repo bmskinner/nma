@@ -63,7 +63,8 @@ public class SegmentStatsPanel extends DetailPanel {
 			
 			TableOptions options = new TableOptionsBuilder()
 			.setDatasets(null)
-			.setScale(MeasurementScale.PIXELS)
+			.setScale(GlobalOptions.getInstance().getScale())
+			.setSwatch(GlobalOptions.getInstance().getSwatch())
 			.build();
 			
 			TableModel model = NucleusTableDatasetCreator.getInstance().createMedianProfileStatisticTable(options);
@@ -122,6 +123,7 @@ public class SegmentStatsPanel extends DetailPanel {
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setScale(GlobalOptions.getInstance().getScale())
+			.setSwatch(GlobalOptions.getInstance().getSwatch())
 			.build();
 		return options;
 	}
@@ -166,7 +168,7 @@ public class SegmentStatsPanel extends DetailPanel {
 					segment = 0;
 				}
 
-				ColourSwatch swatch = activeDataset().getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : activeDataset().getSwatch();
+				ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
 				colour = swatch.color(segment);
 				log(Level.FINEST, "SegmentTableCellRenderer for segment "+segment+" uses color "+colour);
 

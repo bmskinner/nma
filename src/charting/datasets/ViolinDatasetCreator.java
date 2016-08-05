@@ -8,14 +8,21 @@ import org.jfree.data.Range;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 
 import stats.NucleusStatistic;
+import stats.SegmentStatistic;
 import stats.SignalStatistic;
 import stats.Stats;
+import utility.Constants;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import charting.charts.ViolinCategoryDataset;
 import charting.options.ChartOptions;
 import components.CellCollection;
+import components.generic.BorderTag;
 import components.generic.MeasurementScale;
+import components.generic.ProfileType;
+import components.generic.SegmentedProfile;
+import components.nuclear.NucleusBorderSegment;
+import components.nuclei.Nucleus;
 import logging.Loggable;
 
 public class ViolinDatasetCreator implements Loggable {
@@ -50,6 +57,7 @@ public class ViolinDatasetCreator implements Loggable {
 			CellCollection c = datasets.get(i).getCollection();
 			
 			String rowKey = c.getName()+"_"+i;
+			String colKey = stat.toString();
 
 			// Add the boxplot values
 
@@ -59,38 +67,9 @@ public class ViolinDatasetCreator implements Loggable {
 				list.add(new Double(d));
 			}
 			
-			ds.add(list, rowKey, stat.toString());
+			ds.add(list, rowKey, colKey);
 			
-			// Add the probability values
-			
-			
-				
-
-				List<Number> pdfValues = new ArrayList<Number>();
-				
-				Number total = Stats.sum(list);
-
-				if(list.size()>1 && total.doubleValue()>0){ // don't bother with a dataset of a single cell, or if the stat is not present
-					
-					KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(  list , 0.001 );
-					double min = Stats.min(list).doubleValue();
-					double max = Stats.max(list).doubleValue();
-
-					double stepSize = ( max - min ) / 100;
-
-					for(double d=min; d<=max; d+=stepSize){
-
-						pdfValues.add(est.getProbability(d));
-					}
-
-					
-					Range r = new Range(min, max);
-					ds.addProbabilityRange(r, rowKey, stat.toString());
-				} else {
-					Range r = new Range(list.get(0).doubleValue(), list.get(0).doubleValue());
-					ds.addProbabilityRange(r, rowKey, stat.toString());
-				}
-				ds.addProbabilities(pdfValues, rowKey, stat.toString());
+			addProbabilities(ds, list, rowKey, colKey);  
 		}
 
 		return ds;
@@ -119,6 +98,7 @@ public class ViolinDatasetCreator implements Loggable {
         		double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);
         		
         		String rowKey = "Group_"+signalGroup;
+        		String colKey = collection.getName();
         		/*
         		 * For charting, use offset angles, otherwise the boxplots will fail on wrapped signals
         		 */
@@ -131,39 +111,158 @@ public class ViolinDatasetCreator implements Loggable {
     				list.add(new Double(value));
     			}
     			
-    			ds.add(list, rowKey, collection.getName());
+    			ds.add(list, rowKey, colKey);
 
-    			// Add pdf values
-    			
-    			List<Number> pdfValues = new ArrayList<Number>();
-				
-				Number total = Stats.sum(list);
-
-				if(list.size()>1 && total.doubleValue()>0){ // don't bother with a dataset of a single cell, or if the stat is not present
-					
-					KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(  list , 0.001 );
-					double min = Stats.min(list).doubleValue();
-					double max = Stats.max(list).doubleValue();
-
-					double stepSize = ( max - min ) / 100;
-
-					for(double v=min; v<=max; v+=stepSize){
-
-						pdfValues.add(est.getProbability(v));
-					}
-
-					
-					Range r = new Range(min, max);
-					ds.addProbabilityRange(r, rowKey, collection.getName());
-				} else {
-					Range r = new Range(list.get(0).doubleValue(), list.get(0).doubleValue());
-					ds.addProbabilityRange(r, rowKey, collection.getName());
-				}
-				ds.addProbabilities(pdfValues, rowKey, collection.getName());
-        		
+    			addProbabilities(ds, list, rowKey, colKey);        		
         	}
         }
 		return ds;
 	}
+    
+    /**
+	 * Create a box and whisker dataset for the desired segment statistic
+	 * @param collections the datasets to include
+	 * @param segName the segment to calculate for
+	 * @param scale the scale
+	 * @param stat the segment statistic to use
+	 * @return
+	 * @throws Exception
+	 */
+	public ViolinCategoryDataset createSegmentStatisticDataset(ChartOptions options) {
+		
+		SegmentStatistic stat = (SegmentStatistic) options.getStat();
+		
+		switch(stat){
+		case DISPLACEMENT:
+			return createSegmentDisplacementDataset(options.getDatasets(), options.getSegPosition());
+		case LENGTH:
+			return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition(), options.getScale());
+		default:
+			return null;
+		}
+	}
+	
+	/**
+	 * Get the lengths of the given segment in the collections
+	 * @param collections
+	 * @param segName
+	 * @return
+	 * @throws Exception 
+	 */
+	private ViolinCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, int segPosition, MeasurementScale scale) {
+
+		ViolinCategoryDataset dataset = new ViolinCategoryDataset();
+
+		for (int i=0; i < collections.size(); i++) {
+
+			CellCollection collection = collections.get(i).getCollection();
+			
+			NucleusBorderSegment medianSeg = collection
+					.getProfileCollection(ProfileType.ANGLE)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentAt(segPosition);
+
+
+			List<Number> list = new ArrayList<Number>(0);
+
+			for(Nucleus n : collection.getNuclei()){
+				
+				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT)
+						.getSegment(medianSeg.getID());			
+
+				
+				double length = 0;
+				if(seg!=null){
+					int indexLength = seg.length();
+					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+					length = n.getStatistic(NucleusStatistic.PERIMETER, scale) * proportionPerimeter;
+					
+				}
+				list.add(length);
+			}
+				
+			String rowKey = Constants.SEGMENT_PREFIX+segPosition+"_"+i;
+			String colKey = Constants.SEGMENT_PREFIX+segPosition;
+			dataset.add(list, rowKey, colKey);
+
+			addProbabilities(dataset, list, rowKey, colKey);
+			
+		}
+		return dataset;
+	}
+	
+	/**
+	 * Get the displacements of the given segment in the collections
+	 * @param collections
+	 * @param segName
+	 * @return
+	 * @throws Exception 
+	 */
+	private ViolinCategoryDataset createSegmentDisplacementDataset(List<AnalysisDataset> collections, int segPosition) {
+
+		ViolinCategoryDataset dataset = new ViolinCategoryDataset();
+
+		for (int i=0; i < collections.size(); i++) {
+
+			CellCollection collection = collections.get(i).getCollection();
+			
+			NucleusBorderSegment medianSeg = collection
+					.getProfileCollection(ProfileType.ANGLE)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentAt(segPosition);
+
+
+			List<Number> list = new ArrayList<Number>(0);
+
+			for(Nucleus n : collection.getNuclei()){
+				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
+				
+				NucleusBorderSegment seg = profile.getSegment(medianSeg.getID());
+				
+				double displacement = profile.getDisplacement(seg);
+				list.add(displacement);
+			}
+			
+			String rowKey = Constants.SEGMENT_PREFIX+segPosition+"_"+i;
+			String colKey = Constants.SEGMENT_PREFIX+segPosition;
+
+			dataset.add(list, rowKey, colKey);
+
+			addProbabilities(dataset, list, rowKey, colKey);
+		}
+		return dataset;
+	}
+	
+	private void addProbabilities(ViolinCategoryDataset dataset, List<Number> list, Comparable rowKey, Comparable colKey){
+		
+		List<Number> pdfValues = new ArrayList<Number>();
+		
+		Number total = Stats.sum(list);
+
+		if(list.size()>2 && total.doubleValue()>0){ // don't bother with a dataset of a single cell, or if the stat is not present
+			
+			KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(  list , 0.001 );
+			double min = Stats.min(list).doubleValue();
+			double max = Stats.max(list).doubleValue();
+
+			double stepSize = ( max - min ) / 100;
+
+			for(double v=min; v<=max; v+=stepSize){
+
+				pdfValues.add(est.getProbability(v));
+			}
+
+			
+			Range r = new Range(min, max);
+			dataset.addProbabilityRange(r, rowKey, colKey);
+		} else {
+			Range r = new Range(list.get(0).doubleValue(), list.get(0).doubleValue());
+			dataset.addProbabilityRange(r, rowKey, colKey);
+		}
+		dataset.addProbabilities(pdfValues, rowKey, colKey);
+		
+	}
+	
+	
 	
 }

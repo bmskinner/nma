@@ -176,7 +176,17 @@ public class NuclearSignalDatasetCreator implements Loggable {
          * For now, do not display a table if the dataset has merge sources
          */
         
+        boolean isFromMerge = false;
+        
         if(dataset.hasMergeSources()){
+        	isFromMerge = true;
+        }
+        
+        if( ! dataset.isRoot() && ! dataset.hasAnalysisOptions()){ // temp fix for missing options in clusters from a merge
+        	isFromMerge = true;
+        }
+        
+        if(isFromMerge){
         	
         	
         	Collection<SignalGroup> signalGroups = collection.getSignalManager().getSignalGroups();

@@ -18,6 +18,7 @@
  *******************************************************************************/
 package charting.options;
 
+import gui.GlobalOptions;
 import gui.RotationMode;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -44,7 +45,7 @@ import analysis.AnalysisDataset;
  */
 public class ChartOptionsBuilder {
 	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-	private ColourSwatch swatch        = ColourSwatch.REGULAR_SWATCH;
+	private ColourSwatch swatch        = GlobalOptions.getInstance().getSwatch();
 	private boolean normalised         = false;
 	private ProfileAlignment alignment = ProfileAlignment.LEFT;
 	private BorderTag tag              = BorderTag.REFERENCE_POINT;
@@ -88,16 +89,6 @@ public class ChartOptionsBuilder {
 	
 	public ChartOptionsBuilder setDatasets(List<AnalysisDataset> list){
 		this.list = list;
-		if(list!=null && !list.isEmpty()){
-			if(list.get(0).getSwatch()!=null){
-				this.swatch = list.get(0).getSwatch();
-			} else {
-				this.swatch = ColourSwatch.REGULAR_SWATCH;
-				list.get(0).setSwatch(swatch);
-			}
-		} else {
-			this.swatch = ColourSwatch.REGULAR_SWATCH;
-		}
 		return this;
 	}
 	

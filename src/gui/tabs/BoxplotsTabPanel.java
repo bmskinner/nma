@@ -52,7 +52,6 @@ import charting.options.TableOptions;
 	public abstract class BoxplotsTabPanel extends DetailPanel implements ActionListener {
 		
 		protected Map<String, ExportableChartPanel> chartPanels = new HashMap<String, ExportableChartPanel>();
-//		protected Map<String, ViolinChartPanel> chartPanels = new HashMap<String, ViolinChartPanel>();
 
 		protected JPanel 		mainPanel; // hold the charts
 		protected JPanel		headerPanel; // hold buttons

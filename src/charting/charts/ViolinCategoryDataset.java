@@ -55,6 +55,27 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
 		
 	}
 	
+	public boolean hasProbabilities(Comparable r, Comparable c){
+
+		List<Number> values = (List<Number>) pdfData.getObject( (Comparable) r, (Comparable) c);
+		if(values != null){
+			return values.size()>0;
+		} else {
+			return false;
+		}
+	}
+	
+	public boolean hasProbabilities(int r, int c){
+
+		@SuppressWarnings("unchecked")
+		List<Number> values = (List<Number>) pdfData.getObject( r,  c);
+		if(values != null){
+			return values.size()>0;
+		} else {
+			return false;
+		}
+	}
+	
 	public boolean hasProbabilities(){
 		
 		

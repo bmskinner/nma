@@ -56,17 +56,23 @@ private static ViolinChartFactory instance = null;
 		
 		finest("Creating boxplot for "+stat);
 		
-		if(stat.getClass()==NucleusStatistic.class){
-			return createNucleusStatisticPlot(options);
-		}
+		try {
 		
-		if(stat.getClass()==SignalStatistic.class){
-			return createSignalStatisticPlot(options);
+			if(stat.getClass()==NucleusStatistic.class){
+				return createNucleusStatisticPlot(options);
+			}
+
+			if(stat.getClass()==SignalStatistic.class){
+				return createSignalStatisticPlot(options);
+			}
+
+			if(stat.getClass()==SegmentStatistic.class){
+				return createSegmentPlot(options);
+			}
+		} catch(Exception e){
+			error("Error making violin chart", e);
+			return makeEmptyChart();
 		}
-//		
-//		if(stat.getClass()==SegmentStatistic.class){
-//			return createSegmentBoxplot(options);
-//		}
 		
 		return makeEmptyChart();
 		
@@ -204,6 +210,45 @@ private static ViolinChartFactory instance = null;
 			plot.getRangeAxis().setRange(ds.getProbabiltyRange());
 		}
 		
+		return chart;
+	}
+	
+	/**
+	 * Create a segment length boxplot for the given segment name
+	 * @param ds the dataset
+	 * @return
+	 */
+	private JFreeChart createSegmentPlot(ChartOptions options) {
+		
+		ViolinCategoryDataset ds = null;
+		if(options.hasDatasets()){
+			 ds = ViolinDatasetCreator.getInstance().createSegmentStatisticDataset(options);
+		}
+		
+		JFreeChart chart = createViolinChart(null, 
+				null, 
+				options.getStat().label(options.getScale()), 
+				ds, 
+				false);
+		
+
+		CategoryPlot plot = chart.getCategoryPlot();
+		ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
+		
+		for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
+
+			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
+
+				Color color = options.getDatasets().get(series).getDatasetColour() == null 
+						? ColourSelecter.getSegmentColor(series)
+								: options.getDatasets().get(series).getDatasetColour();
+
+						renderer.setSeriesPaint(series, color);
+						renderer.setSeriesOutlinePaint(series, Color.BLACK);
+			}
+
+		}
+			
 		return chart;
 	}
 
