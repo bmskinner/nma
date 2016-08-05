@@ -159,7 +159,7 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
         
         
         double xxmid = xx + state.getBarWidth() / 2d ; // the middle of the active bar
-        double xxrange = state.getBarWidth()*2;
+        double xxrange = state.getBarWidth()*1.5;
         
         // Get the y-values that must be used for step calculations
         double yValMin = dataset.getMin(row, column); // the lowest  y-value in the dataset

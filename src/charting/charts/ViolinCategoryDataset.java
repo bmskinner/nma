@@ -1,5 +1,6 @@
 package charting.charts;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import logging.Loggable;
@@ -169,5 +170,11 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
 			return 0;
 		}
 		return r.getLowerBound();
+	}
+	
+	@Override
+	public List<?> getOutliers(int row, int column){
+		return new ArrayList(); // don't display outliers on violin plots
+		
 	}
 }
