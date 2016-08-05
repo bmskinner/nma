@@ -74,7 +74,7 @@ public class NewAnalysisAction extends ProgressableAction {
 					+ outputFolderName
 					+ File.separator+options.getFolder().getName()+".log");
 
-			mw.setStatus("New analysis in progress");
+//			mw.setStatus("New analysis in progress");
 			
 			worker = new NucleusDetector(this.outputFolderName, logFile, options);
 			worker.addPropertyChangeListener(this);

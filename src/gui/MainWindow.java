@@ -98,8 +98,6 @@ public class MainWindow
 	implements SignalChangeListener, DatasetEventListener, InterfaceEventListener, Loggable {
 				
 	private JPanel contentPane;
-
-	private JLabel lblStatusLine = new JLabel("No analysis open");
 	
 	private LogPanel				logPanel;				// progress and messages
 	private PopulationsPanel 		populationsPanel; 		// holds and selects open datasets
@@ -167,12 +165,7 @@ public class MainWindow
 			// Create the header buttons
 			//---------------
 			contentPane.add(createHeaderButtons(), BorderLayout.NORTH);
-
-			//---------------
-			// Footer
-			//---------------
-			contentPane.add(createFooterRow(), BorderLayout.SOUTH);
-			
+		
 			
 			//---------------
 			// Create the log panel
@@ -412,19 +405,6 @@ public class MainWindow
 		return panelHeader;
 	}
 		
-	/**
-	 * Create the status panel at the base of the window
-	 * @return the panel
-	 */
-	private JPanel createFooterRow(){
-		JPanel panel = new JPanel();
-		panel.add(lblStatusLine);
-		return panel;
-	}
-		
-	public void setStatus(String message){
-		lblStatusLine.setText(message);
-	}
 			
 	/**
 	 * Update the display panels with information from the given datasets
@@ -639,12 +619,6 @@ public class MainWindow
 			this.saveDataset(selectedDataset, true);
 		}
 		
-
-		
-		if(event.type().startsWith("Status_")){
-			String s = event.type().replace("Status_", "");
-			setStatus(s);
-		}
 		
 		if(event.type().startsWith("Open|")){
 			String s = event.type().replace("Open|", "");
@@ -1149,12 +1123,5 @@ public class MainWindow
 		}
 		
 	}
-
-//	@Override
-//	public void actionPerformed(ActionEvent arg0) {
-//		
-//		updatePanels(populationsPanel.getSelectedDatasets());
-//		
-//	}
 
 }
