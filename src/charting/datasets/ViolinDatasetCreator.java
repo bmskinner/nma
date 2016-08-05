@@ -64,8 +64,10 @@ public class ViolinDatasetCreator implements Loggable {
 				
 
 				List<Number> pdfValues = new ArrayList<Number>();
+				
+				Number total = Stats.sum(list);
 
-				if(list.size()>1){ // don't bother with a dataset of a single cell
+				if(list.size()>1 && total.doubleValue()>0){ // don't bother with a dataset of a single cell, or if the stat is not present
 					
 					KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(  list , 0.001 );
 					double min = Stats.min(list).doubleValue();

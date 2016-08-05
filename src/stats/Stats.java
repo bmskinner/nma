@@ -308,6 +308,14 @@ import utility.Utils;
 	  Number result = mean(array);
 	  return result;
   }
+  
+  public static Number sum(List<Number> values){
+	  double result = 0; 
+	  for(Number n : values){
+		  result += n.doubleValue();
+	  }
+	  return result;
+  }
 
   
  }
