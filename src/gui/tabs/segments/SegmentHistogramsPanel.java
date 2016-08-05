@@ -3,7 +3,6 @@ package gui.tabs.segments;
 import gui.GlobalOptions;
 import gui.Labels;
 import gui.components.HistogramsTabPanel;
-import gui.components.SelectableChartPanel;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 
 import java.awt.Dimension;
@@ -19,6 +18,7 @@ import org.jfree.chart.JFreeChart;
 
 import stats.SegmentStatistic;
 import charting.charts.HistogramChartFactory;
+import charting.charts.SelectableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;

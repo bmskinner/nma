@@ -20,7 +20,6 @@ package gui.tabs.signals;
 
 import gui.GlobalOptions;
 import gui.components.HistogramsTabPanel;
-import gui.components.SelectableChartPanel;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 
 import java.awt.Dimension;
@@ -31,6 +30,7 @@ import org.jfree.chart.plot.XYPlot;
 
 import stats.SignalStatistic;
 import charting.charts.HistogramChartFactory;
+import charting.charts.SelectableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.MeasurementScale;

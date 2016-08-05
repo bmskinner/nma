@@ -21,7 +21,6 @@
 package gui.tabs.nuclear;
 
 import gui.GlobalOptions;
-import gui.components.ExportableChartPanel;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.BoxplotsTabPanel;
 
@@ -37,6 +36,7 @@ import org.jfree.chart.JFreeChart;
 
 import stats.NucleusStatistic;
 import charting.charts.BoxplotChartFactory;
+import charting.charts.ExportableChartPanel;
 import charting.charts.ViolinChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;

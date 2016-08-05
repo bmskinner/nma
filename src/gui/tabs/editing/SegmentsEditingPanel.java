@@ -22,8 +22,6 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
-import gui.components.DraggableOverlayChartPanel;
-import gui.components.PositionSelectionChartPanel;
 import gui.components.RectangleOverlayObject;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.dialogs.AngleWindowSizeExplorer;
@@ -51,7 +49,9 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.profiles.SegmentFitter;
+import charting.charts.DraggableOverlayChartPanel;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.PositionSelectionChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;

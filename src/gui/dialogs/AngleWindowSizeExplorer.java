@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 
 import gui.LoadingIconDialog;
 import gui.components.ColourSelecter;
-import gui.components.ExportableChartPanel;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -54,6 +54,7 @@ import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import charting.ChartComponents;
+import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 import analysis.AnalysisDataset;
 

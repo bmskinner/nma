@@ -18,7 +18,6 @@
  *******************************************************************************/
 package gui.tabs.profiles;
 
-import gui.components.ExportableChartPanel;
 import gui.components.panels.BorderTagOptionsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel;
 import gui.components.panels.ProfileMarkersOptionsPanel;
@@ -39,6 +38,7 @@ import org.jfree.data.xy.XYDataset;
 
 import stats.StatisticDimension;
 import components.generic.ProfileType;
+import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 
 @SuppressWarnings("serial")

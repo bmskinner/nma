@@ -23,23 +23,24 @@ import gui.GlobalOptions;
 import gui.InterfaceEvent.InterfaceMethod;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 
-import charting.charts.BoxplotChartFactory;
 import components.generic.MeasurementScale;
 
 @SuppressWarnings("serial")
 public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
 	
 	private Map<MeasurementScale, JRadioButton> map  = new  HashMap<MeasurementScale, JRadioButton>();
-	
-//	private static MeasurementUnitSettingsPanel instance = null;
-		
+			
+	/**
+	 * Create a panel with all available MeasurementScales as
+	 * radio buttons
+	 * 
+	 */
 	public MeasurementUnitSettingsPanel(){
 		super();
 		
@@ -63,15 +64,13 @@ public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
 		GlobalOptions.getInstance().setScale(getSelected());
 		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 	}
-	
-//	public static MeasurementUnitSettingsPanel getInstance(){
-//		if(instance==null){
-//			instance = new MeasurementUnitSettingsPanel();
-//		}
-//		return instance;
-//	}
+
 		
-	public MeasurementScale getSelected(){
+	/**
+	 * Get the currently selected scale
+	 * @return
+	 */
+	private MeasurementScale getSelected(){
 		for(MeasurementScale type : MeasurementScale.values()){
 			JRadioButton button = map.get(type);
 			if(button.isSelected()){

@@ -18,7 +18,6 @@
  *******************************************************************************/
 package gui.tabs;
 
-import gui.components.ExportableChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.dialogs.KruskalTestDialog;
 
@@ -44,6 +43,7 @@ import analysis.profiles.ProfileManager;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
+import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;

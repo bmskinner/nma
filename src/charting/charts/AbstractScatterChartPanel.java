@@ -1,4 +1,4 @@
-package gui.components;
+package charting.charts;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -21,7 +21,6 @@ import org.jfree.chart.JFreeChart;
 import components.CellCollection;
 import components.generic.MeasurementScale;
 import analysis.AnalysisDataset;
-import charting.charts.ScatterChartFactory;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.datasets.ScatterChartDatasetCreator;
 import charting.options.ChartOptions;
@@ -30,6 +29,7 @@ import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import gui.GlobalOptions;
 import gui.InterfaceEvent.InterfaceMethod;
+import gui.components.ExportableTable;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
 import stats.PlottableStatistic;

@@ -14,6 +14,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.ConsensusNucleusChartFactory;
+import charting.charts.FixedAspectRatioChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -21,7 +22,6 @@ import charting.options.TableOptions;
 import components.Cell;
 import components.CellularComponent;
 import gui.RotationMode;
-import gui.components.FixedAspectRatioChartPanel;
 import gui.components.panels.GenericCheckboxPanel;
 import gui.components.panels.RotationSelectionSettingsPanel;
 

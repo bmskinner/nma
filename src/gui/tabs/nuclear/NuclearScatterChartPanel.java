@@ -1,6 +1,6 @@
 package gui.tabs.nuclear;
 
-import gui.components.AbstractScatterChartPanel;
+import charting.charts.AbstractScatterChartPanel;
 import stats.NucleusStatistic;
 
 @SuppressWarnings("serial")

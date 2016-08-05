@@ -47,6 +47,7 @@ import javax.swing.SwingUtilities;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.ConsensusNucleusChartFactory;
+import charting.charts.FixedAspectRatioChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -55,7 +56,6 @@ import analysis.AnalysisDataset;
 import analysis.signals.SignalManager;
 import analysis.signals.SignalWarper;
 import gui.LoadingIconDialog;
-import gui.components.FixedAspectRatioChartPanel;
 import gui.components.panels.DatasetSelectionPanel;
 import gui.components.panels.SignalGroupSelectionPanel;
 

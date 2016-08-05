@@ -42,12 +42,14 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 
+
 //<<<<<<< HEAD
 //=======
 import analysis.AnalysisDataset;
 import analysis.signals.SignalManager;
 //import analysis.SignalManager;
 import charting.charts.ConsensusNucleusChartFactory;
+import charting.charts.ConsensusNucleusChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.NuclearSignalChartFactory;
 //>>>>>>> 80f8c2ce5ece277dacebd32467e86ec1a826439f
@@ -61,7 +63,6 @@ import charting.options.TableOptions.TableType;
 import charting.options.TableOptionsBuilder;
 import components.nuclear.NucleusBorderSegment;
 import gui.InterfaceEvent.InterfaceMethod;
-import gui.components.ConsensusNucleusChartPanel;
 import gui.components.ExportableTable;
 import gui.components.panels.GenericCheckboxPanel;
 import gui.dialogs.SignalWarpingDialog;

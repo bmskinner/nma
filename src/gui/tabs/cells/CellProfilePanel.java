@@ -13,7 +13,9 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.charts.DraggableOverlayChartPanel;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.PositionSelectionChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
@@ -26,8 +28,6 @@ import components.nuclei.Nucleus;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.SignalChangeEvent;
-import gui.components.DraggableOverlayChartPanel;
-import gui.components.PositionSelectionChartPanel;
 import gui.components.RectangleOverlayObject;
 import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;

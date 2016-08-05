@@ -22,6 +22,7 @@ import javax.swing.tree.TreeModel;
 import org.jfree.chart.JFreeChart;
 
 import utility.Constants;
+import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
@@ -33,7 +34,6 @@ import analysis.profiles.Rule;
 import analysis.profiles.RuleSet;
 import analysis.profiles.RuleSetCollection;
 import gui.LoadingIconDialog;
-import gui.components.ExportableChartPanel;
 
 @SuppressWarnings("serial")
 public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionListener {

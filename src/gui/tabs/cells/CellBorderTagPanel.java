@@ -18,7 +18,9 @@ import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.entity.XYItemEntity;
 
+import charting.charts.DraggableOverlayChartPanel;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.PositionSelectionChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
@@ -28,8 +30,6 @@ import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import gui.DatasetEvent.DatasetMethod;
 import gui.SignalChangeEvent;
-import gui.components.DraggableOverlayChartPanel;
-import gui.components.PositionSelectionChartPanel;
 import gui.components.RectangleOverlayObject;
 import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;

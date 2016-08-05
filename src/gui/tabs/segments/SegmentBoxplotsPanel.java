@@ -2,7 +2,6 @@ package gui.tabs.segments;
 
 import gui.GlobalOptions;
 import gui.Labels;
-import gui.components.ExportableChartPanel;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.BoxplotsTabPanel;
 
@@ -22,6 +21,7 @@ import org.jfree.chart.JFreeChart;
 
 import stats.SegmentStatistic;
 import charting.charts.BoxplotChartFactory;
+import charting.charts.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;

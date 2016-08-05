@@ -19,7 +19,6 @@
 package gui.tabs.profiles;
 
 import gui.GlobalOptions;
-import gui.components.ExportableChartPanel;
 import gui.components.panels.BorderTagOptionsPanel;
 import gui.components.panels.ProfileCollectionTypeSettingsPanel;
 import gui.components.panels.ProfileMarkersOptionsPanel;
@@ -56,6 +55,7 @@ import org.jfree.ui.TextAnchor;
 
 import stats.DipTester;
 import utility.Constants;
+import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;

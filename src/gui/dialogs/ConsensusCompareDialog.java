@@ -25,13 +25,13 @@ import org.jfree.chart.JFreeChart;
 import analysis.AnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import charting.charts.ConsensusNucleusChartFactory;
+import charting.charts.ExportableChartPanel;
+import charting.charts.FixedAspectRatioChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.nuclei.Nucleus;
 import gui.LoadingIconDialog;
-import gui.components.ExportableChartPanel;
-import gui.components.FixedAspectRatioChartPanel;
 import gui.components.panels.DatasetSelectionPanel;
 
 /**

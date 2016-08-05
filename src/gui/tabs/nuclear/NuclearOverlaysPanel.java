@@ -15,12 +15,12 @@ import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
 import analysis.profiles.ProfileManager;
+import charting.charts.FixedAspectRatioChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import components.nuclear.NucleusBorderSegment;
-import gui.components.FixedAspectRatioChartPanel;
 import gui.components.panels.GenericCheckboxPanel;
 import gui.dialogs.ConsensusCompareDialog;
 import gui.tabs.DetailPanel;

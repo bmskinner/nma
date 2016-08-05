@@ -4,8 +4,6 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.data.Range;
 
-import gui.components.ExportableChartPanel;
-
 @SuppressWarnings("serial")
 public class ViolinChartPanel extends ExportableChartPanel{
 	

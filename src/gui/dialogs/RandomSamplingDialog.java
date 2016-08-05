@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -45,11 +46,12 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.JFreeChart;
+
 import analysis.AnalysisDataset;
 import analysis.RandomSampler;
+import charting.charts.ExportableChartPanel;
 import charting.charts.HistogramChartFactory;
 import gui.LoadingIconDialog;
-import gui.components.ExportableChartPanel;
 import stats.NucleusStatistic;
 
 @SuppressWarnings("serial")

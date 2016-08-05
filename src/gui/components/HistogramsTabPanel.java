@@ -43,6 +43,7 @@ import org.jfree.chart.JFreeChart;
 
 import charting.charts.BoxplotChartFactory;
 import charting.charts.HistogramChartFactory;
+import charting.charts.SelectableChartPanel;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;

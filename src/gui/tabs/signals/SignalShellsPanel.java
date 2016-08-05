@@ -18,7 +18,6 @@
  *******************************************************************************/
 package gui.tabs.signals;
 
-import gui.components.ExportableChartPanel;
 import gui.components.ExportableTable;
 import gui.tabs.DetailPanel;
 
@@ -48,6 +47,7 @@ import org.jfree.data.category.CategoryDataset;
 import analysis.AnalysisDataset;
 import utility.Constants;
 import charting.charts.AbstractChartFactory;
+import charting.charts.ExportableChartPanel;
 import charting.charts.NuclearSignalChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusTableDatasetCreator;

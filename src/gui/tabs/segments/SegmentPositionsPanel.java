@@ -21,7 +21,6 @@
 package gui.tabs.segments;
 
 import gui.Labels;
-import gui.components.FixedAspectRatioChartPanel;
 import gui.tabs.BoxplotsTabPanel;
 
 import java.awt.Dimension;
@@ -31,6 +30,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.List;
 import java.util.logging.Level;
+
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -38,6 +38,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
+import charting.charts.FixedAspectRatioChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;

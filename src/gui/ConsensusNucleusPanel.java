@@ -19,7 +19,6 @@
 package gui;
 
 import gui.DatasetEvent.DatasetMethod;
-import gui.components.ConsensusNucleusChartPanel;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
 
@@ -47,6 +46,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.ConsensusNucleusChartFactory;
+import charting.charts.ConsensusNucleusChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;

@@ -32,7 +32,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import gui.LoadingIconDialog;
-import gui.components.ExportableChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import javax.swing.JButton;
@@ -43,6 +42,7 @@ import org.jfree.chart.JFreeChart;
 
 import components.generic.BorderTag;
 import components.generic.ProfileType;
+import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;

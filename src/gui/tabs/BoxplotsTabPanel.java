@@ -19,7 +19,6 @@
 package gui.tabs;
 
 import gui.GlobalOptions;
-import gui.components.ExportableChartPanel;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
@@ -38,6 +37,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.BoxplotChartFactory;
+import charting.charts.ExportableChartPanel;
 import charting.charts.ViolinChartFactory;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;

@@ -1,7 +1,6 @@
 package gui.tabs.profiles;
 
 import gui.GlobalOptions;
-import gui.components.ExportableChartPanel;
 import gui.components.panels.ProfileCollectionTypeSettingsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.tabs.DetailPanel;
@@ -28,6 +27,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 
+import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;

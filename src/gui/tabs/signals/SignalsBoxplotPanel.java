@@ -19,7 +19,6 @@
 package gui.tabs.signals;
 
 import gui.GlobalOptions;
-import gui.components.ExportableChartPanel;
 import gui.tabs.BoxplotsTabPanel;
 
 import java.awt.BorderLayout;
@@ -32,6 +31,7 @@ import javax.swing.JScrollPane;
 import org.jfree.chart.JFreeChart;
 
 import stats.SignalStatistic;
+import charting.charts.ExportableChartPanel;
 import charting.charts.ViolinChartFactory;
 import charting.charts.ViolinChartPanel;
 import charting.options.ChartOptions;
