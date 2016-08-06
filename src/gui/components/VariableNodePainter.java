@@ -51,7 +51,7 @@ public class VariableNodePainter extends BasicLabelPainter {
         	g2.setPaint(p);
         } else {
         	g2.setFont(newFont);
-        	g2.setPaint(Color.PINK);
+        	g2.setPaint(Color.BLACK);
         }
 
 

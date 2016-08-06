@@ -81,6 +81,7 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 
 		ClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, newick);
+//		group.addDataset(dataset);
 		
 		ClusterTreeDialog clusterPanel = new ClusterTreeDialog( dataset, group);
 		clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);

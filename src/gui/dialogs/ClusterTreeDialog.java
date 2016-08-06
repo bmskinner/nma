@@ -318,9 +318,9 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		if(group!=null){
 			log(Level.FINER, "Colouring nodes by cluster group: "+group.getName());	
 
-			Thread thr = new Thread(){
-				
-				public void run(){
+//			Thread thr = new Thread(){
+//				
+//				public void run(){
 								
 					setStatusLoading();
 					
@@ -350,12 +350,15 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		
 					}
 					updateNodePainter();
-					setStatusLoaded();
-				}
-			};
-			thr.start();
+					
+//				}
+//			};
+//			thr.start();
+		} else { // no cluster group, colour everything black
+			setNodeColour(dataset.getCollection(), Color.BLACK);
 		}
-		
+		updateNodePainter();
+		setStatusLoaded();
 	}
 	
 	/**
@@ -683,9 +686,12 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 						ClusterGroup newGroup = makeNewClusterGroup(list);
 
+						int i=0;
 						for(AnalysisDataset d : list){
-							d.setName(newGroup.getName()+"_"+d.getName());
+//							d.setName(newGroup.getName()+"_"+d.getName());
+							d.setName("Cluster_"+i);
 							newGroup.addDataset(d);
+							i++;
 						}
 						dataset.addClusterGroup(newGroup);
 
