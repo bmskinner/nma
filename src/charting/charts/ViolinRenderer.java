@@ -368,10 +368,10 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
         Shape box = null;
         
      // Get values for the box that are half the normal box width
-        double barQuarter  = state.getBarWidth() / 4.0;
-        double barHalf     = barQuarter * 2d;
-        double xxq1 = xx   + state.getBarWidth() / 4.0;
-        double xxq3 = xxq1 + state.getBarWidth() / 2.0;
+        double barSixth    = state.getBarWidth() / 6.0;
+        double barThird    = barSixth * 2d;
+        double xxq1 = xx   + barThird;
+        double xxq3 = xxq1 + barThird;
         
         if (yQ1 != null && yQ3 != null && yMax != null && yMin != null) {
 
@@ -393,7 +393,7 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
 //            box = new Rectangle2D.Double(xx, Math.min(yyQ1, yyQ3),
 //                    state.getBarWidth(), Math.abs(yyQ1 - yyQ3));
             box = new Rectangle2D.Double(xxq1, Math.min(yyQ1, yyQ3),
-            		barHalf, Math.abs(yyQ1 - yyQ3));
+            		barThird, Math.abs(yyQ1 - yyQ3));
             if (this.getFillBox()) {
                 g2.fill(box);
             }
