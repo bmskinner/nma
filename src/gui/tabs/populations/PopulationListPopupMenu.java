@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package gui;
+package gui.tabs.populations;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -27,6 +27,9 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+
+import gui.SignalChangeEvent;
+import gui.SignalChangeListener;
 
 public class PopulationListPopupMenu extends JPopupMenu {
 	

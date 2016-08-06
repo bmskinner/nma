@@ -16,9 +16,12 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package gui;
+package gui.tabs.populations;
 
 
+import gui.DatasetListManager;
+import gui.SignalChangeEvent;
+import gui.SignalChangeListener;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter;
@@ -81,16 +84,13 @@ import components.ClusterGroup;
 @SuppressWarnings("serial")
 public class PopulationsPanel extends DetailPanel implements SignalChangeListener {
 	
-	private static final int COLUMN_NAME       = 0;
-	private static final int COLUMN_CELL_COUNT = 1;
-	private static final int COLUMN_COLOUR     = 2;
+	public static final int COLUMN_NAME       = 0;
+	public static final int COLUMN_CELL_COUNT = 1;
+	public static final int COLUMN_COLOUR     = 2;
 
 	final private JXTreeTable treeTable;
 	private PopulationListPopupMenu populationPopup;
-	
-//	final private HashMap<String, UUID>           populationNames = new HashMap<String, UUID>();
-//	final private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
-	
+		
 	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
 	
 	final private TreeSelectionHandler treeListener = new TreeSelectionHandler();
@@ -125,27 +125,16 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * Find the datasets which are collapsed in the tree
 	 * @return
 	 */
-	private List<UUID> getCollapsedRows(){
-		List<UUID> collapsedRows = new ArrayList<UUID>();		
+	private List<Object> getCollapsedRows(){
+		List<Object> collapsedRows = new ArrayList<Object>();		
 		for (int row = 0; row < treeTable.getRowCount(); row++) {
 			if(!treeTable.isExpanded(row)){
 				
-				String key = treeTable.getModel().getValueAt(row, COLUMN_NAME).toString();
-				if(!key.equals("No populations")){
-					AnalysisDataset d = (AnalysisDataset) treeTable.getModel().getValueAt(row, COLUMN_NAME); // row i, column 0
-					
-					collapsedRows.add(d.getUUID());
-					
-					// get uuid from populationNames, then population via uuid from analysisDatasets
-//					if(populationNames.containsKey(key)){
-//						finest("Key "+key+" found collapsed; saving id");
-//						UUID id = populationNames.get(key);
-//						collapsedRows.add(id);
-//					}
-				}
+				Object columnOneObject = treeTable.getModel().getValueAt(row, PopulationsPanel.COLUMN_NAME);
+				collapsedRows.add(columnOneObject);
 			}
 		}
-		finest("Got all collapsed IDs");
+		finest("Got all collapsed rows");
 		return collapsedRows;
 	}
 	
@@ -154,24 +143,18 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * Set the dataset rows with the given IDs to be collapsed
 	 * @param collapsedRows
 	 */
-	private void setCollapsedRows(List<UUID> collapsedRows){
+	private void setCollapsedRows(List<Object> collapsedRows){
 		if(DatasetListManager.getInstance().hasDatasets()){
-//		if(this.analysisDatasets.size()>0){
+
 			finest("Expanding rows");
 			for (int row = 0; row < treeTable.getRowCount(); row++) {
 				
-				String key = treeTable.getModel().getValueAt(row, COLUMN_NAME).toString();
+				Object columnOneObject = treeTable.getModel().getValueAt(row, PopulationsPanel.COLUMN_NAME);
 				
-				if(!key.equals("No populations")){
-					
-					AnalysisDataset d = (AnalysisDataset) treeTable.getModel().getValueAt(row, COLUMN_NAME); // row i, column 0
-					// get uuid from populationNames, then population via uuid from analysisDatasets
-					UUID id = d.getUUID();
-					if(collapsedRows.contains(id)){
-						treeTable.collapseRow(row);	
-					} else {
-						treeTable.expandRow(row);
-					}
+				if(collapsedRows.contains(columnOneObject)){
+					treeTable.collapseRow(row);	
+				} else {
+					treeTable.expandRow(row);
 				}
 			}
 		}
@@ -190,7 +173,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		 * Determine the ids of collapsed datasets, and store them
 		 */
 		finest("Storing collapsed rows");
-		List<UUID> collapsedRows = getCollapsedRows();		
+		List<Object> collapsedRows = getCollapsedRows();		
 		
 		finest("Creating columns");
 		List<String> columns = new ArrayList<String>();
@@ -205,24 +188,23 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		treeTableModel.setColumnIdentifiers(columns);
 		finer("Created tree table model");
 		
-		if(DatasetListManager.getInstance().hasDatasets()){
-//		if(this.analysisDatasets.size()>0){ // if there are datasets to display
-//			finer("Loaded: "+analysisDatasets.size()+" datasets");
-			
-			for(AnalysisDataset rootDataset : DatasetListManager.getInstance().getRootDatasets()){
-				root.add( addTreeTableChildNodes(    rootDataset    )     );
-			}
-			finer("Added datasets to nodes");
-//			for(UUID id : treeOrderMap.getIDs()){
-//												
-//				AnalysisDataset rootDataset = analysisDatasets.get(id);
-//				root.add( addTreeTableChildNodes(    rootDataset    )     );
-//			}
+		try {
 
-		} else {
-			finer("No datasets loaded");
+			if(DatasetListManager.getInstance().hasDatasets()){
+
+				for(AnalysisDataset rootDataset : DatasetListManager.getInstance().getRootDatasets()){
+					root.add( addTreeTableChildNodes(    rootDataset    )     );
+				}
+				
+				finer("Added datasets to nodes");
+
+			} else {
+				finer("No datasets loaded");
+			}
+		} catch(Exception e){
+			error("Error adding nodes to table model", e);
 		}
-		
+
 		treeTable.setTreeTableModel(treeTableModel);
 
 		finer("Set the tree table model");
@@ -302,16 +284,34 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		}
 
 		PopulationTreeTableNode category = new PopulationTreeTableNode(dataset);
-		category.setValueAt(dataset, COLUMN_NAME);
-		category.setValueAt(dataset.getCollection().getNucleusCount(), COLUMN_CELL_COUNT);
+//		category.setValueAt(dataset, COLUMN_NAME);
+//		category.setValueAt(dataset.getCollection().getNucleusCount(), COLUMN_CELL_COUNT);
 				
-//		for(ClusterGroup group : dataset.getClusterGroups()){
-//			for(AnalysisDatasetgroup.getUUIDs();
-//		}
+		// Add cluster groups separately
+		Set<UUID> clusterIDs = new HashSet<UUID>(); // track the child datasets in clusters, so they are not added twice
+		
+		for(ClusterGroup group : dataset.getClusterGroups()){
+			PopulationTreeTableNode clusterGroupNode = new PopulationTreeTableNode(group);
+//			clusterGroupNode.setValueAt(group.toString(), COLUMN_NAME);
+//			clusterGroupNode.setValueAt(0, COLUMN_CELL_COUNT);
+			category.add(clusterGroupNode);
+			
+			for(UUID clusterID : group.getUUIDs()){
+				AnalysisDataset clusterDataset = DatasetListManager.getInstance().getDataset(clusterID);
+				PopulationTreeTableNode childNode = addTreeTableChildNodes(clusterDataset);
+				clusterGroupNode.add(childNode);
+				clusterIDs.add(clusterID);
+			}
+		
+		}
+		
+		// Add remaining child datasets not in clusters
 		
 		for(AnalysisDataset childDataset : dataset.getChildDatasets()){
-			PopulationTreeTableNode childNode = addTreeTableChildNodes(childDataset);
-			category.add(childNode);
+			if( ! clusterIDs.contains(childDataset.getUUID())){
+				PopulationTreeTableNode childNode = addTreeTableChildNodes(childDataset);
+				category.add(childNode);
+			}
 		}
 		finer("Added all child nodes for dataset "+dataset.toString());
 		
@@ -354,20 +354,21 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				int column 	= table.columnAtPoint(e.getPoint());
 				String populationName = table.getModel().getValueAt(row, 0).toString();
 				
-				// double click
-				if (e.getClickCount() == 2) {
-					
-					AnalysisDataset dataset = (AnalysisDataset) treeTable.getModel().getValueAt(row, COLUMN_NAME); // row i, column 0
-//					UUID id = PopulationsPanel.this.populationNames.get(populationName);
-//					AnalysisDataset dataset = PopulationsPanel.this.analysisDatasets.get(id);
-					
-					if (row >= 0 && column == 0) { // first (names) column						
-						renameCollection(dataset);
-					}
-					
-					if(row >= 0 && column == 2){ // third (colours) column
-						changeDatasetColour(dataset, row);
-						
+				if( ! populationName.startsWith("ClusterGroup")){ // Only allow datasets to change
+
+					// double click
+					if (e.getClickCount() == 2) {
+
+						AnalysisDataset dataset = (AnalysisDataset) treeTable.getModel().getValueAt(row, COLUMN_NAME); // row i, column 0
+
+						if (row >= 0 && column == 0) { // first (names) column						
+							renameCollection(dataset);
+						}
+
+						if(row >= 0 && column == 2){ // third (colours) column
+							changeDatasetColour(dataset, row);
+
+						}
 					}
 				}
 			}
@@ -437,13 +438,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 	}
 	
-	/**
-	 * Get the number of datasets currently loaded
-	 * @return
-	 */
-//	public int getDatasetCount(){
-//		return this.analysisDatasets.size();
-//	}
 	
 	/**
 	 * Get the datasets currently selected
@@ -464,19 +458,17 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			for (int i = minIndex; i <= maxIndex; i++) {
 				if (lsm.isRowSelected(i)) {
 
-					String key = treeTable.getModel().getValueAt(i, 0).toString(); // row i, column 0
 					
-					if(!key.equals("No populations")){
-						
+					Object columnOneObject = treeTable.getModel().getValueAt(i, COLUMN_NAME);
+					
+					if(columnOneObject instanceof ClusterGroup){
+						continue;
+					}
+
+					if(columnOneObject instanceof AnalysisDataset){
 						AnalysisDataset d = (AnalysisDataset) treeTable.getModel().getValueAt(i, COLUMN_NAME); // row i, column 0
 						datasets.add(d);
 						selectedIndexes.add(i);
-						
-						
-						// get uuid from populationNames, then population via uuid from analysisDatasets
-//						datasets.add(analysisDatasets.get(populationNames.get(key)));
-//						selectedIndexes.add(i);
-
 					}
 
 				}
@@ -485,116 +477,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		return datasets;
 	}
 	
-	/**
-	 * Get all the datasets currently loaded
-	 * @return
-	 */
-//	public List<AnalysisDataset> getAllDatasets(){
-//		List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
-//		for(DatasetListManager.getInstance().get){
-//		for(AnalysisDataset d : analysisDatasets.values()){
-//			datasets.add(d);
-//		}
-//		return datasets;
-//	}
-	
-	/**
-	 * Get root datasets currently loaded
-	 * @return
-	 */
-//	public List<AnalysisDataset> getRootDatasets(){
-//		List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
-//		for(AnalysisDataset d : analysisDatasets.values()){
-//			if(d.isRoot()){
-//				datasets.add(d);
-//			}
-//		}
-//		return datasets;
-//	}
-	
-	/**
-	 * Get the names of loaded populations
-	 * @return
-	 */
-//	public List<String> getPopulationNames(){
-//		List<String> result = new ArrayList<String>(0);
-//		for(String s : populationNames.keySet()){
-//			result.add(s);
-//		}
-//		return result;
-//	}
-	
-	/**
-	 * Given a population display name, get the UUID of the analysis dataset
-	 * @param name
-	 * @return
-	 */
-//	public UUID getUuidFromName(String name){
-//		if(this.populationNames.containsKey(name)){
-//			return this.populationNames.get(name);
-//		} else {
-//			return null;
-//		}
-//	}
-	
-	/**
-	 * Given an analysis dataset UUID, get the population display name
-	 * @param uuid the id to fetch
-	 * @return the name
-	 */
-//	public String getNameFromUuid(UUID id){
-//		String result = null;
-//		if(this.populationNames.containsValue(id)){
-//
-//			for(String s : populationNames.keySet()){
-//				
-//				if(populationNames.get(s).equals(id)){
-//					result = s;
-//				}
-//			}
-//		}
-//		return result;
-//	}
-	
-//	/**
-//	 * Fetch the dataset with the given id, or null if not present
-//	 * @param id
-//	 * @return
-//	 */
-//	public AnalysisDataset getDataset(UUID id){
-//		AnalysisDataset result = null;
-//		if(this.analysisDatasets.containsKey(id)){
-//			result = this.analysisDatasets.get(id);
-//		}
-//		return result;
-//	}
-	
-	/**
-	 * Given a population name, get the dataset
-	 * @param name
-	 * @return
-	 */
-//	public AnalysisDataset getDataset(String name){
-//		UUID id = populationNames.get(name);
-//		AnalysisDataset result = getDataset(id);
-//		return result;
-//	}
-	
-	 
-	
-	/**
-	 * Check if the given dataset is present in the list
-	 * @param id
-	 * @return
-	 */
-//	public boolean hasDataset(UUID id){
-//		boolean result = false;
-//		if(this.analysisDatasets.containsKey(id)){
-//			result = true;
-//		}
-//		return result;
-//	}
-	
+		
 	/**
 	 * Add the given dataset to the main population list
 	 * Check that the name is valid, and update if needed
@@ -604,8 +487,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		finest("Checking dataset name is suitable");
 //		dataset.setName(checkName(dataset.getName(), dataset.getUUID()));
 		finest("Set name as "+dataset.getName());
-//		this.analysisDatasets.put(dataset.getUUID(), dataset);
-//		this.populationNames.put(dataset.getName(), dataset.getUUID());
 		
 		if(dataset.isRoot()){ // add to the list of datasets that can be ordered
 			treeOrderMap.put(dataset.getUUID(), treeOrderMap.size()); // add to the end of the list
@@ -841,18 +722,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				}
 
 			}
-
-//			finest("Removing dataset from analysisDatasets");
-//			if(analysisDatasets.containsKey(id)){
-//				analysisDatasets.remove(id);
-//				finest("Removed from analysisDatasets");
-//			}
-
-//			finest("Removing dataset from populationNames");
-//			if(populationNames.containsValue(id)){
-//				populationNames.remove(d.getName());
-//				finest("Removed from populationNames");
-//			}		
 			
 			finest("Checking if dataset is root");
 //			if(d.isRoot()){
@@ -947,53 +816,58 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 */
 	class TreeSelectionHandler implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
-			
-			List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
-			
-			TreeSelectionModel lsm = (TreeSelectionModel)e.getSource();
-			
-			List<Integer> selectedIndexes = new ArrayList<Integer>(0);
-			if (!lsm.isSelectionEmpty()) {
-				// Find out which indexes are selected.
-				int minIndex = lsm.getMinSelectionRow();
-				int maxIndex = lsm.getMaxSelectionRow();
-				for (int i = minIndex; i <= maxIndex; i++) {
-					if (lsm.isRowSelected(i)) {
 
-						String key = treeTable.getModel().getValueAt(i, COLUMN_NAME).toString(); // row i, column 0
-						if(!key.equals("No populations")){
+			try {
+
+				List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
+
+				TreeSelectionModel lsm = (TreeSelectionModel)e.getSource();
+
+				List<Integer> selectedIndexes = new ArrayList<Integer>(0);
+				if (!lsm.isSelectionEmpty()) {
+					// Find out which indexes are selected.
+					int minIndex = lsm.getMinSelectionRow();
+					int maxIndex = lsm.getMaxSelectionRow();
+					for (int i = minIndex; i <= maxIndex; i++) {
+						if (lsm.isRowSelected(i)) {
 							
-							// get uuid from populationNames, then population via uuid from analysisDatasets
-							AnalysisDataset d = (AnalysisDataset) treeTable.getModel().getValueAt(i, COLUMN_NAME); // row i, column 0
-							datasets.add(d);
-//							datasets.add(analysisDatasets.get(populationNames.get(key)));
-							selectedIndexes.add(i);
+							Object columnOneObject = treeTable.getModel().getValueAt(i, COLUMN_NAME);
+							
+							if(columnOneObject instanceof ClusterGroup){
+								continue;
+							}
+
+							if(columnOneObject instanceof AnalysisDataset){
+								AnalysisDataset d = (AnalysisDataset) treeTable.getModel().getValueAt(i, COLUMN_NAME); // row i, column 0
+								datasets.add(d);
+								selectedIndexes.add(i);
+							}
+							
 						}
-
 					}
-				}
-//				String count = datasets.size() == 1 ? "population" : "populations"; // it matters to ME
-//				status(datasets.size()+" "+count+" selected");
-				treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
 
-				if(datasets.isEmpty()){
-					populationPopup.disableAll();
-				} else {
-					
-					if(datasets.size()>1){ // multiple populations
+					treeTable.getColumnModel().getColumn(COLUMN_COLOUR).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
+
+					if(datasets.isEmpty()){
 						populationPopup.disableAll();
-						populationPopup.enableMerge();
-						populationPopup.enableDelete();
-						populationPopup.enableBoolean();
-						
-					} else { // single population
-						AnalysisDataset d = datasets.get(0);
-						setMenuForSingleDataset(d);
+					} else {
+
+						if(datasets.size()>1){ // multiple populations
+							populationPopup.disableAll();
+							populationPopup.enableMerge();
+							populationPopup.enableDelete();
+							populationPopup.enableBoolean();
+
+						} else { // single population
+							AnalysisDataset d = datasets.get(0);
+							setMenuForSingleDataset(d);
+						}
+						finest("Firing update panel event due to tree selection");
+						fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 					}
-					finest("Firing update panel event due to tree selection");
-					fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-//					fireSignalChangeEvent("UpdatePanels");
 				}
+			} catch(Exception ex){
+				error("Error in tree selection handler", ex);
 			}
 		}
 	}
@@ -1004,36 +878,27 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		populationPopup.disableMerge();
 		populationPopup.enableBoolean();
 		populationPopup.enableSave();
-//		populationPopup.enableExtract();
 		populationPopup.enableCurate();
-//		populationPopup.enableExportStats();
 		populationPopup.enableRelocateCells();
 		populationPopup.enableSaveCells();
-//		populationPopup.enableAddTailStain();
 		populationPopup.enableAddNuclearSignal();
-//		populationPopup.enableRunShellAnalysis();
 		
 		// check if we can move the dataset
 		if(d.isRoot()){
 
 			if(treeOrderMap.size()>1){
-//				populationPopup.enableApplySegmentation();
 
 				// check if the selected dataset is at the top of the list
 				if(treeOrderMap.get(0).equals(d.getUUID())){
 					populationPopup.disableMenuUp();
-//					populationPopup.disableMenuDown();
 				} else {
 					populationPopup.enableMenuUp();
-//					populationPopup.enableMenuDown();
 				}
 
 				// check if the selected dataset is at the bottom of the list
 				if(treeOrderMap.get(treeOrderMap.size()-1).equals(d.getUUID())){
 					populationPopup.disableMenuDown();
-//					populationPopup.disableMenuUp();
 				} else {
-//					populationPopup.enableMenuUp();
 					populationPopup.enableMenuDown();
 				}
 
@@ -1046,11 +911,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			populationPopup.enableReplaceFolder();
 
 		} else { // not root
-			
-			if(treeOrderMap.size()>1){
-//				populationPopup.enableApplySegmentation();
-			}
-			
+						
 			populationPopup.disableReplaceFolder();
 			populationPopup.disableMenuUp();
 			populationPopup.disableMenuDown();
@@ -1058,155 +919,16 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 	}
 		
-	/**
-	 * Allows for cell background to be coloured based on poition in a list
-	 *
-	 */
-	class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
-
-		List<Integer> indexList = new ArrayList<Integer>(0);
-		
-		public PopulationTableCellRenderer(List<Integer> list){
-			super();
-			this.indexList = list;
-		}
-		
-		public PopulationTableCellRenderer(){
-			super();
-		}
-
-		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-	        
-	      //Cells are by default rendered as a JLabel.
-	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-	        if (indexList.contains(row)) {
-	        	
-	        	// get the analysis dataset corresponding to this row
-	        	
-	        	AnalysisDataset dataset = (AnalysisDataset) table.getModel().getValueAt(row, COLUMN_NAME);
-//	        	String populationName = table.getModel().getValueAt(row, COLUMN_NAME).toString();
-//	        	UUID id = PopulationsPanel.this.populationNames.get(populationName);
-//				AnalysisDataset dataset = PopulationsPanel.this.analysisDatasets.get(id);
-	        	
-				
-	        	// if a preferred colour is specified, use it, otherwise go for defaults
-	        	Color colour 	= dataset.getDatasetColour() == null 
-	        					? ColourSelecter.getSegmentColor(indexList.indexOf(row))
-	        					: dataset.getDatasetColour();
-
-	        	l.setBackground(colour);
-	        } else {
-	        	l.setBackground(Color.WHITE); // only colour the selected rows
-	        }
-
-	      //Return the JLabel which renders the cell.
-	      return l;
-	    }
-	}
-
-		
-	
-	
-	class PopulationTreeTableNode extends AbstractMutableTreeTableNode {
-		
-		Object[] columnData = new Object[3];
-
-		AnalysisDataset dataset = null; // the dataset in the node
-		ClusterGroup group      = null;
-
-		PopulationTreeTableNode(AnalysisDataset dataset) {
-			super(dataset.getUUID().toString());
-			this.dataset = dataset;
-		}
-		
-		PopulationTreeTableNode() {
-			super();
-		}
-		
-		PopulationTreeTableNode(ClusterGroup group) {
-			super(UUID.randomUUID().toString());
-			this.group = group; 		}
-		
-		public boolean hasDataset(){
-			return dataset!=null;
-		}
-		
-		public boolean hasClusterGroup(){
-			return group!=null;
-		}
-				
-		public AnalysisDataset getDataset() {
-			return dataset;
-		}
-
-		public ClusterGroup getGroup() {
-			return group;
-		}
-
-		public int getColumnCount() {
-		    return 3;
-		}
-
-		public Object getValueAt(int column){
-			return columnData[column];
-		}
-		
-		public void setValueAt(Object aValue, int column){
-			columnData[column] = aValue;
-		}
-		
-		/**
-		 * This method recursively (or not) sorts the nodes, ascending, or descending by the specified column.
-		 * @param sortColumn Column to do the sorting by.
-		 * @param sortAscending Boolean value of weather the sorting to be done ascending or not (descending).
-		 * @param recursive Boolean value of weather or not the sorting should be recursively applied to children nodes.
-		 * @author Alex Burdu Burdusel
-		 */
-		public void sortNode(int sortColumn, boolean sortAscending, boolean recursive) {
-//			boolean mLastSortAscending = sortAscending;
-//		    int mLastSortedColumn = sortColumn;
-//		    boolean mLastSortRecursive = recursive;
-
-		    int childCount = this.getChildCount();
-		    TreeMap<Object, PopulationTreeTableNode> nodeData = new TreeMap(String.CASE_INSENSITIVE_ORDER);
-
-		    for (int i = 0; i < childCount; i++) {
-		    	PopulationTreeTableNode child = (PopulationTreeTableNode) this.getChildAt(i);
-		        if (child.getChildCount() > 0 & recursive) {
-		            child.sortNode(sortColumn, sortAscending, recursive);
-		        }
-		        Object key = child.getValueAt(sortColumn);
-		        nodeData.put(key, child);
-		    }
-
-		    Iterator<Map.Entry<Object, PopulationTreeTableNode>> nodesIterator;
-		    if (sortAscending) {
-		        nodesIterator = nodeData.entrySet().iterator();
-		    } else {
-		        nodesIterator = nodeData.descendingMap().entrySet().iterator();
-		    }
-
-		    while (nodesIterator.hasNext()) {
-		        Map.Entry<Object, PopulationTreeTableNode> nodeEntry = nodesIterator.next();
-		        this.add(nodeEntry.getValue());
-		    }
-		}
-	}
-	
-	
 
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 
+		// Pass on events from the popup menu
 		if(event.sourceName().equals(PopulationListPopupMenu.SOURCE_COMPONENT)){
 				fireSignalChangeEvent(event.type());
 				finest("Firing signal change event: "+event.type());
 			}
-			
-//		}
-
-		
+					
 		// catch any signals that affect the datasets directly
 		if(event.type().equals("MoveDatasetDownAction")){
 			moveDatasetDown();

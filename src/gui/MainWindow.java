@@ -50,6 +50,7 @@ import gui.tabs.NuclearStatisticsPanel;
 import gui.tabs.NucleusProfilesPanel;
 import gui.tabs.SegmentsDetailPanel;
 import gui.tabs.SignalsDetailPanel;
+import gui.tabs.populations.PopulationsPanel;
 import io.MappingFileExporter;
 
 import java.awt.BorderLayout;
