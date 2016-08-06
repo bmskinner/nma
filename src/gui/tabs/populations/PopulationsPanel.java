@@ -251,7 +251,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		try {
 		finest("Refreshing clusters...");
 		if(DatasetListManager.getInstance().hasDatasets()){
-//		if(this.analysisDatasets.size()>0){
+
 			for(UUID id : treeOrderMap.getIDs()){
 												
 				AnalysisDataset rootDataset = DatasetListManager.getInstance().getDataset(id);
@@ -484,13 +484,16 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * @param dataset the dataset to add
 	 */
 	public void addDataset(AnalysisDataset dataset){
-		finest("Checking dataset name is suitable");
+//		finest("Checking dataset name is suitable");
 //		dataset.setName(checkName(dataset.getName(), dataset.getUUID()));
-		finest("Set name as "+dataset.getName());
+//		finest("Set name as "+dataset.getName());
 		
 		if(dataset.isRoot()){ // add to the list of datasets that can be ordered
 			treeOrderMap.put(dataset.getUUID(), treeOrderMap.size()); // add to the end of the list
+			fine("Adding root dataset "+dataset.getName()+" to list manager");
+			DatasetListManager.getInstance().addDataset(dataset);
 		}
+		
 	}
 	
 	/**
@@ -724,7 +727,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			}
 			
 			finest("Checking if dataset is root");
-//			if(d.isRoot()){
+
 			if(treeOrderMap.contains(id)){
 				finest("Removing dataset from treeOrderMap");
 				treeOrderMap.remove(id);

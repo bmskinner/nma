@@ -68,6 +68,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 	@Override
 	public void finished() {
 
+		this.setProgressBarVisible(false);
 		log(Level.INFO, "Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
 
 		String tree = (((NucleusClusterer) worker).getNewickTree());
@@ -108,8 +109,8 @@ public class ClusterAnalysisAction extends ProgressableAction {
 				
 				
 				group.addDataset(c);
-				c.setName(group.getName()+"_"+c.getName());
-				log(Level.FINEST, "Renamed cluster: "+c.getName());
+//				c.setName(group.getName()+"_"+c.getName());
+//				log(Level.FINEST, "Renamed cluster: "+c.getName());
 				dataset.addChildCollection(c);
 				
 				

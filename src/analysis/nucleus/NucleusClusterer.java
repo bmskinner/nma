@@ -185,10 +185,13 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 
 			for(int i=0;i<clusterer.numberOfClusters();i++ ){
 				log(Level.FINE, "Cluster "+i+": " +	collection.getName()+"_Cluster_"+i);
+//				CellCollection clusterCollection = new CellCollection(collection, 
+//						collection.getName()+"_Cluster_"+i);
 				CellCollection clusterCollection = new CellCollection(collection, 
-						collection.getName()+"_Cluster_"+i);
+						"Cluster_"+i);
 				
-				clusterCollection.setName(collection.getName()+"_Cluster_"+i);
+//				clusterCollection.setName(collection.getName()+"_Cluster_"+i);
+				clusterCollection.setName("Cluster_"+i);
 				clusterMap.put(i, clusterCollection);
 			}
 

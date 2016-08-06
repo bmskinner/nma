@@ -103,7 +103,7 @@ public class PopulationImportAction extends ProgressableAction {
 
 	@Override
 	public void finished(){
-//		setProgressBarVisible(false);
+		setProgressBarVisible(false);
 		AnalysisDataset dataset = ((PopulationImportWorker) worker).getLoadedDataset();
 		log(Level.FINE, "Opened dataset");
 
@@ -112,6 +112,7 @@ public class PopulationImportAction extends ProgressableAction {
 		log(Level.FINE, "Firing add signal");
 		fireDatasetEvent(DatasetMethod.ADD_DATASET, list);
 		
+		log(Level.FINE, "Finishing action");
 		/*
 		 * Code after this point is never reached - check thread 16
 		 */

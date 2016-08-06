@@ -759,17 +759,14 @@ public class MainWindow
 	 */
 	private void addDataset(final AnalysisDataset dataset){
 
-		finest("Adding dataset");
-		
-		datasetManager.addDataset(dataset);
-		
-		dataset.setSwatch(GlobalOptions.getInstance().getSwatch());
+		fine("Adding dataset");
+
 		populationsPanel.addDataset(dataset);
 		for(AnalysisDataset child : dataset.getAllChildDatasets() ){
 			populationsPanel.addDataset(child);
 		}
 
-		finest("Ordering update of populations panel");
+		finer("Ordering update of populations panel");
 		final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		list.add(dataset);
 		populationsPanel.update(list);

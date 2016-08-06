@@ -47,6 +47,7 @@ public final class DatasetListManager implements WindowListener {
 		
 		Set<AnalysisDataset> result = new HashSet<AnalysisDataset>();
 		for(AnalysisDataset d : list){
+			result.add(d);
 			result.addAll(d.getAllChildDatasets());
 		}
 		return result;
