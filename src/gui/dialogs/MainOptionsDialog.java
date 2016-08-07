@@ -152,14 +152,9 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		
 		
 		if(! swatch.equals(GlobalOptions.getInstance().getSwatch())){
-
-//			for(AnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()){
-//				d.setSwatch(swatch);
-//			}
 			
 			GlobalOptions.getInstance().setSwatch(swatch);
 			fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-//			log(Level.INFO, "Set the colour swatch level to "+swatch.toString());
 		}
 		
 		boolean useViolins = violinBox.isSelected();

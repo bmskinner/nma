@@ -17,18 +17,21 @@ public class ViolinChartPanel extends ExportableChartPanel{
 		
 		CategoryPlot plot = this.getChart().getCategoryPlot();
 		
-		if(  ((ViolinCategoryDataset) plot.getDataset(0)).hasProbabilities()){
-			Range result = ((ViolinCategoryDataset) plot.getDataset(0)).getProbabiltyRange();
-			for(int i=1; i<plot.getDatasetCount(); i++){
-				ViolinCategoryDataset ds = (ViolinCategoryDataset) plot.getDataset(i);
-				Range r = ds.getProbabiltyRange();
-				result = Range.combine(result, r);
+		if(plot.getDataset(0) instanceof ViolinCategoryDataset){
+			if(  ((ViolinCategoryDataset) plot.getDataset(0)).hasProbabilities()){
+				Range result = ((ViolinCategoryDataset) plot.getDataset(0)).getProbabiltyRange();
+				for(int i=1; i<plot.getDatasetCount(); i++){
+					ViolinCategoryDataset ds = (ViolinCategoryDataset) plot.getDataset(i);
+					Range r = ds.getProbabiltyRange();
+					result = Range.combine(result, r);
+				}
+				plot.getRangeAxis().setRange(result);
+			} else {
+				super.restoreAutoBounds();
 			}
-			plot.getRangeAxis().setRange(result);
 		} else {
 			super.restoreAutoBounds();
 		}
-
 	}
 
 }

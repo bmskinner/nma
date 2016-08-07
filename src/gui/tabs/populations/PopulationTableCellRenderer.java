@@ -44,7 +44,7 @@ class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRend
 
     	   if(columnOneObject instanceof AnalysisDataset){
     		   
-    		   AnalysisDataset dataset = (AnalysisDataset) table.getModel().getValueAt(row, PopulationsPanel.COLUMN_NAME);      	
+    		   AnalysisDataset dataset = (AnalysisDataset) columnOneObject;      	
 
     		   // if a preferred colour is specified, use it, otherwise go for defaults
     		   Color colour 	= dataset.getDatasetColour() == null 

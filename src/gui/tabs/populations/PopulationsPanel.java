@@ -106,6 +106,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		populationPopup.addSignalChangeListener(this);
 		
 		treeTable = createTreeTable();
+		
 				
 		JScrollPane populationScrollPane = new JScrollPane(treeTable);		
 		
@@ -114,11 +115,12 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	}
 	
 	
-	
+	@Override
 	public void update(final List<AnalysisDataset> list){
 		this.update();
 		finest("Preparing to select datasets");
 		selectDatasets(list);
+		treeTable.repaint();
 	}
 	
 	/**
@@ -208,6 +210,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		treeTable.setTreeTableModel(treeTableModel);
 
 		finer("Set the tree table model");
+		
+		
+		
 		/*
 		 * Collapse the same ids as saved earlier
 		 */
@@ -216,6 +221,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		finer("Restoring column widths");
 		treeTable.getColumnModel().getColumn(COLUMN_NAME).setWidth(nameColWidth);
 		treeTable.getColumnModel().getColumn(COLUMN_COLOUR).setWidth(colourColWidth);
+//		treeTable.repaint();
 		finer("Update complete");
 	}
 	
@@ -477,7 +483,17 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		return datasets;
 	}
 	
+	
+	private List<Integer> getSelectedDatasetIndexes(){
+		List<Integer> result = new ArrayList<Integer>();
+		List<AnalysisDataset> datasets = getSelectedDatasets();
+		for(AnalysisDataset d : datasets){
+			result.add( getIndexOfDataset(d));
+		}
+		return result;
 		
+	}
+	
 	/**
 	 * Add the given dataset to the main population list
 	 * Check that the name is valid, and update if needed
@@ -534,6 +550,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			
 
 		}
+		
+		// Update the table colours
+		List<Integer> selectedIndexes = getSelectedDatasetIndexes();
+		treeTable.getColumnModel().getColumn(COLUMN_COLOUR).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
+//		treeTable.repaint();
 	}
 	
 	public void selectDataset(UUID id){
@@ -548,7 +569,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		int index = 0;
 		
 		for(int row = 0; row< treeTable.getRowCount(); row++){
-			String populationName = (String) treeTable.getModel().getValueAt(row, 0);
+			
+			String populationName = treeTable.getModel().getValueAt(row, COLUMN_NAME).toString();
 			
 			if(dataset.getName().equals(populationName)){
 				index = row;

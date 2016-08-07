@@ -94,12 +94,12 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				
 				JFreeChart chart = getChart(options);
 				
-				ExportableChartPanel chartPanel;
-				if(GlobalOptions.getInstance().isViolinPlots()){
-					chartPanel = new ViolinChartPanel(chart);
-				} else {
-					chartPanel = new ExportableChartPanel(chart);
-				}
+				ViolinChartPanel chartPanel = new ViolinChartPanel(chart);
+//				if(GlobalOptions.getInstance().isViolinPlots()){
+//					chartPanel = new ViolinChartPanel(chart);
+//				} else {
+//					chartPanel = new ExportableChartPanel(chart);
+//				}
 				chartPanel.setPreferredSize(preferredSize);
 				chartPanels.put(seg.getName(), chartPanel);
 				mainPanel.add(chartPanel);							
@@ -113,9 +113,9 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		mainPanel.revalidate();
 		mainPanel.repaint();
 		
-//		for(ExportableChartPanel p : chartPanels.values()){
-//			p.restoreAutoBounds();
-//		}
+		for(ExportableChartPanel p : chartPanels.values()){
+			p.restoreAutoBounds();
+		}
 		
 		scrollPane.setViewportView(mainPanel);
 	}
