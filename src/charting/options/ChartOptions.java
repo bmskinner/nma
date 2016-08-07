@@ -56,6 +56,7 @@ public class ChartOptions extends AbstractOptions {
 	private boolean showMesh           = false;
 	private boolean showMeshEdges      = true;
 	private boolean showMeshFaces      = false;
+	private boolean straightenMesh     = false;
 	private int     meshSize           = 10;
 	private boolean showBounds         = false;
 	
@@ -202,8 +203,15 @@ public class ChartOptions extends AbstractOptions {
 	public void setShowMeshFaces(boolean showMeshFaces) {
 		this.showMeshFaces = showMeshFaces;
 	}
-		
 	
+	public boolean isStraightenMesh() {
+		return straightenMesh;
+	}
+
+	public void setStraightenMesh(boolean straightenMesh) {
+		this.straightenMesh = straightenMesh;
+	}
+
 	public int getMeshSize() {
 		return meshSize;
 	}
@@ -310,6 +318,7 @@ public class ChartOptions extends AbstractOptions {
 		result = prime * result + (showMeshFaces ? 1231 : 1237);
 		result = prime * result + meshSize;
 		result = prime * result + (showBounds ? 1231 : 1237);
+		result = prime * result + (straightenMesh ? 1231 : 1237);
 		
 		result = prime * result + (showXAxis ? 1231 : 1237);
 		result = prime * result + (showYAxis ? 1231 : 1237);
@@ -370,6 +379,9 @@ public class ChartOptions extends AbstractOptions {
 			return false;
 		if (showBounds != other.showBounds)
 			return false;
+		if (straightenMesh != other.straightenMesh)
+			return false;
+		
 		
 		if (showXAxis != other.showXAxis)
 			return false;

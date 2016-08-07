@@ -68,6 +68,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	private JCheckBox showMeshBox;
 	private JCheckBox showMeshEdgesBox;
 	private JCheckBox showMeshFacesBox;
+	private JCheckBox straightenMeshBox;
 	private JSpinner  meshSizeSpinner;
 	
 	public ConsensusNucleusPanel() {
@@ -169,12 +170,18 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		showMeshFacesBox.setEnabled(false);
 		showMeshFacesBox.addChangeListener( this);
 		
+		straightenMeshBox = new JCheckBox("Straighten mesh");
+		straightenMeshBox.setSelected(false);
+		straightenMeshBox.setEnabled(false);
+		straightenMeshBox.addChangeListener( this);
 		
+
 		
 		panel.add(showMeshBox);
 		panel.add(meshSizeSpinner);
 		panel.add(showMeshEdgesBox);
 		panel.add(showMeshFacesBox);
+		panel.add(straightenMeshBox);
 		
 		return panel;
 		
@@ -384,12 +391,16 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		
 		showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
 		showMeshFacesBox.setEnabled(showMeshBox.isSelected());
+		straightenMeshBox.setEnabled(showMeshBox.isSelected());
 
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setScale(GlobalOptions.getInstance().getScale())
 			.setSwatch(GlobalOptions.getInstance().getSwatch())
 			.setShowMesh(showMeshBox.isSelected())
+			.setShowMeshEdges(showMeshEdgesBox.isSelected())
+			.setShowMeshFaces(showMeshFacesBox.isSelected())
+			.setStraightenMesh(straightenMeshBox.isSelected())
 			.setShowAnnotations(false)
 			.setShowXAxis(false)
 			.setShowYAxis(false)

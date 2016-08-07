@@ -55,6 +55,7 @@ import components.nuclear.SignalGroup;
 import analysis.AnalysisDataset;
 import analysis.signals.SignalManager;
 import analysis.signals.SignalWarper;
+import gui.GlobalOptions;
 import gui.LoadingIconDialog;
 import gui.components.panels.DatasetSelectionPanel;
 import gui.components.panels.SignalGroupSelectionPanel;
@@ -72,6 +73,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
 	private JButton runButton;
 	private JCheckBox cellsWithSignalsBox;
+	private JCheckBox straightenMeshBox;
 	
 	private SignalWarper warper;
 	
@@ -148,6 +150,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		cellsWithSignalsBox.addActionListener(this);
 		upperPanel.add(cellsWithSignalsBox);
 		
+		straightenMeshBox = new JCheckBox("Straighten meshes", false);
+		straightenMeshBox.addActionListener(this);
+		upperPanel.add(straightenMeshBox);
+		
+		
 		lowerPanel.add(new JLabel("Target dataset"));
 		lowerPanel.add(datasetBoxTwo);
 		
@@ -180,12 +187,15 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private void runWarping(){
 		
 		finest("Running warping");
+		progressBar.setString("0 of "+totalCells);
+		progressBar.setValue(0);
 		
 		AnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
 		AnalysisDataset targetDataset = datasetBoxTwo.getSelectedDataset();
 		
 //		SignalIDToGroup group    = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
 		boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
+		boolean straighten       = straightenMeshBox.isSelected();
 		
 		totalCells = cellsWithSignals 
 				? sourceDataset.getCollection().getSignalManager().getNumberOfCellsWithNuclearSignals(signalBox.getSelectedID()) 
@@ -200,12 +210,12 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
 			progressBar.setStringPainted(true);
 			
-			progressBar.setString("0 of "+totalCells);
+//			progressBar.setString("0 of "+totalCells);
 			progressBar.setVisible(true);
 			
 			
 
-			warper = new SignalWarper(sourceDataset, targetDataset, signalBox.getSelectedID(), cellsWithSignals);
+			warper = new SignalWarper(sourceDataset, targetDataset, signalBox.getSelectedID(), cellsWithSignals, straighten);
 			warper.addPropertyChangeListener(this);
 			warper.execute();
 			
@@ -221,6 +231,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	public void setEnabled(boolean b){
 		signalBox.setEnabled(b);
 		cellsWithSignalsBox.setEnabled(b);
+		straightenMeshBox.setEnabled(b);
 		runButton.setEnabled(b);
 		datasetBoxOne.setEnabled(b);
 		datasetBoxTwo.setEnabled(b);
@@ -231,11 +242,14 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		Runnable task = () -> { 
 			ImageProcessor image = warper.getResult();
 			
+			boolean straighten = straightenMeshBox.isSelected();
+			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(datasetBoxTwo.getSelectedDataset())
 				.setShowXAxis(false)
 				.setShowYAxis(false)
 				.setShowBounds(false)
+				.setStraightenMesh(straighten)
 				.build();
 
 			final JFreeChart chart = OutlineChartFactory.getInstance().makeSignalWarpChart(options, image);
@@ -294,6 +308,32 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 	}
 	
+	private void updateOutlineChart(){
+		JFreeChart chart = null;
+		if(straightenMeshBox.isSelected()){
+			
+			ChartOptions options = new ChartOptionsBuilder()
+					.setDatasets(datasetBoxTwo.getSelectedDataset())
+					.setShowMesh(true)
+					.setStraightenMesh(true)
+					.setShowAnnotations(false)
+					.build();
+			
+			try{
+				chart = ConsensusNucleusChartFactory.getInstance().makeConsensusChart(options);
+			} catch(Exception ex){
+				error("Error making straight mesh chart", ex);
+				chart = ConsensusNucleusChartFactory.getInstance().makeErrorChart();
+			}
+			
+		} else {
+		
+			chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(datasetBoxTwo.getSelectedDataset());
+			
+		}
+		chartPanel.setChart(chart);
+	}
+	
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -303,12 +343,14 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		if( ! m.hasSignals()){
 			signalBox.setEnabled(false);
 			cellsWithSignalsBox.setEnabled(false);
+			straightenMeshBox.setEnabled(false);
 			runButton.setEnabled(false);
 			datasetBoxTwo.setEnabled(false);
 			
 		} else {
 			signalBox.setEnabled(true);
 			cellsWithSignalsBox.setEnabled(true);
+			straightenMeshBox.setEnabled(true);
 			runButton.setEnabled(true);
 			datasetBoxTwo.setEnabled(true);
 		}
@@ -323,13 +365,16 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 		}
 		
-		if(e.getSource()==datasetBoxTwo){
-			JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(datasetBoxTwo.getSelectedDataset());
-			chartPanel.setChart(chart);
+		if(e.getSource()==straightenMeshBox){
+			
+			updateOutlineChart();
+			
 		}
 		
-//		SignalIDToGroup group = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
-				
+		if(e.getSource()==datasetBoxTwo){
+			updateOutlineChart();
+		}
+						
 		boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
 		
 		totalCells = cellsWithSignals 

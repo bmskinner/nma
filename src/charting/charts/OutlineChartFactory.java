@@ -144,6 +144,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		NucleusMesh meshConsensus = new NucleusMesh( dataset.getCollection().getConsensusNucleus());
 		
+		if(options.isStraightenMesh()){
+			meshConsensus = meshConsensus.straighten();
+		}
+		
 		XYDataset ds = NucleusDatasetCreator.getInstance().createBareNucleusOutline(dataset);
 		
 		double xMin = DatasetUtilities.findMinimumDomainValue(ds).doubleValue();

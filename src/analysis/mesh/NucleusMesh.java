@@ -392,13 +392,22 @@ public class NucleusMesh implements Loggable {
 		result.clearEdges();
 		result.clearFaces();
 		
-		XYPoint pos = new XYPoint(10, 10);
-		double yStep  = 10;
+		double nucleusHeight = result.nucleus.getBounds().getHeight();
+		double nucleusWidth  = result.nucleus.getBounds().getWidth();
+		double vertices      = result.getInternalVertexCount();
+		
+		double xStep  = nucleusWidth/2;
+		double xStart = 0;
+		double yStart = 0;
+		double yStep  = nucleusHeight / vertices;
+		
+		XYPoint pos = new XYPoint(xStart, yStart);
+		
 		
 		// Straighten internal skeleton
 		for(NucleusMeshVertex v : result.internalVertices){
 			v.setPosition(pos);
-			pos = new XYPoint( 10,  pos.getY()+yStep);
+			pos = new XYPoint( xStart,  pos.getY()+yStep);
 		}
 		finer("Set skeleton");
 		
@@ -406,7 +415,7 @@ public class NucleusMesh implements Loggable {
 		
 		// Positon the first vertex under the skeleton
 		NucleusMeshVertex v = result.peripheralVertices.get(0);
-		v.setPosition( new XYPoint(10, 0)  );
+		v.setPosition( new XYPoint(xStart, yStart-yStep)  );
 		
 		int halfArray = (int) Math.floor(( (double) result.peripheralVertices.size() / 2));
 		
@@ -416,8 +425,8 @@ public class NucleusMesh implements Loggable {
 			NucleusMeshVertex v1 = result.peripheralVertices.get(i);
 			NucleusMeshVertex v2 = result.peripheralVertices.get(j);
 			
-			v1.setPosition( new XYPoint(  5 ,   (i*yStep)-5 ));
-			v2.setPosition( new XYPoint(  15 ,  (i*yStep)-5 ));
+			v1.setPosition( new XYPoint(  xStart-xStep ,   (i*yStep)-(yStep/2) ));
+			v2.setPosition( new XYPoint(  xStart+xStep ,   (i*yStep)-(yStep/2) ));
 		}
 		
 		finer("Peripheral vertex count = "+result.getPeripheralVertexCount());
@@ -426,7 +435,7 @@ public class NucleusMesh implements Loggable {
 		if(result.peripheralVertices.size()%2==0){
 			finer("Setting final vertex");
 			NucleusMeshVertex p1 = result.peripheralVertices.get(halfArray);
-			p1.setPosition(new XYPoint(  10 ,   (halfArray*yStep)-5 ));
+			p1.setPosition(new XYPoint(  xStart ,   (halfArray*yStep)-(yStep/2) ));
 		}
 		
 		finer("Set periphery");

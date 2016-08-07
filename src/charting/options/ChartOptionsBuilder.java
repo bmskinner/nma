@@ -67,6 +67,7 @@ public class ChartOptionsBuilder {
 	private boolean showMesh           = false;
 	private boolean showMeshEdges      = true;
 	private boolean showMeshFaces      = false;
+	private boolean straightenMesh     = false;
 	private int     meshSize           = 10;
 	private boolean showBounds         = false; // Bounding box for meshes and warped images
 	
@@ -208,6 +209,11 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
+	public ChartOptionsBuilder setStraightenMesh(boolean b){
+		this.straightenMesh = b;
+		return this;
+	}
+	
 	public ChartOptionsBuilder setShowXAxis(boolean b){
 		this.showXAxis = b;
 		return this;
@@ -274,6 +280,7 @@ public class ChartOptionsBuilder {
 		result.setShowMeshFaces(showMeshFaces);
 		result.setMeshSize(meshSize);
 		result.setShowBounds(showBounds);
+		result.setStraightenMesh(straightenMesh);
 		
 		result.setShowXAxis(showXAxis);
 		result.setShowYAxis(showYAxis);

@@ -16,15 +16,17 @@ public class SignalWarper extends AnalysisWorker {
 	private AnalysisDataset targetDataset;
 	private UUID signalGroup;
 	private boolean cellsWithSignals; // Only warp the cell images with detected signals
+	private boolean straighten; // Straighten the meshes
 	ImageProcessor[] warpedImages;
 	
-	ImageProcessor mergedImage;
+	ImageProcessor mergedImage = null;
 		
-	public SignalWarper(AnalysisDataset dataset, AnalysisDataset target, UUID signalGroup, boolean cellsWithSignals){
+	public SignalWarper(AnalysisDataset dataset, AnalysisDataset target, UUID signalGroup, boolean cellsWithSignals, boolean straighten){
 		super(dataset);
 		this.targetDataset    = target;
 		this.signalGroup      = signalGroup;
 		this.cellsWithSignals = cellsWithSignals;
+		this.straighten       = straighten;
 		
 		// Count the number of cells to include
 
@@ -75,10 +77,18 @@ public class SignalWarper extends AnalysisWorker {
 		return mergedImage;
 	} 
 	
+	public boolean hasResult(){
+		return  mergedImage!=null;
+	}
+	
 	private void generateImages(){
 		finer("Generating warped images for "+getDataset().getName());
 		finest("Fetching consensus nucleus from target dataset");
 		NucleusMesh meshConsensus = new NucleusMesh( targetDataset.getCollection().getConsensusNucleus());
+		
+		if(straighten){
+			meshConsensus = meshConsensus.straighten();
+		}
 		
 		SignalManager m =  getDataset().getCollection().getSignalManager();
 		
@@ -101,6 +111,10 @@ public class SignalWarper extends AnalysisWorker {
 			fine("Drawing signals for cell "+cell.getNucleus().getNameAndNumber());
 			// Get each nucleus. Make a mesh.
 			NucleusMesh cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
+			
+			if(straighten){
+				cellMesh = cellMesh.straighten();
+			}
 			
 			// Get the image with the signal
 			ImageProcessor ip = cell.getNucleus().getSignalCollection().getImage(signalGroup);
