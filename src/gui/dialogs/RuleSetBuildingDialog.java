@@ -14,12 +14,17 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -231,7 +236,8 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 				
 		private RuleSetPanel parent;
 		
-		List<JSpinner> spinners = new ArrayList<JSpinner>();
+		List<JComponent> components = new ArrayList<JComponent>();
+//		List<JSpinner> spinners = new ArrayList<JSpinner>();
 		
 		public RulePanel(RuleSetPanel parent){
 			this.parent = parent;
@@ -248,15 +254,28 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 			
 			typeBox.setSelectedItem(RuleType.IS_MINIMUM);
 			
-			JSpinner s = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
-			s.setToolTipText("1=True; 0=False");
-			spinners.add(   s   );
+			// Using radio buttons
+			JCheckBox trueButton = new JCheckBox("True", true);
+			components.add(trueButton);			
+			trueButton.addActionListener(this);
 			
-			for(JSpinner spinner : spinners){
-				spinner.setPreferredSize(SPINNER_DIMENSION);
-				this.add(spinner);
+			for(JComponent component : components){
+				component.setPreferredSize(SPINNER_DIMENSION);
+				this.add(component);
 			}
+
 			
+			// Using spinners
+//			JSpinner s = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+//			s.setToolTipText("1=True; 0=False");
+//			
+//			spinners.add(   s   );
+//			
+//			for(JSpinner spinner : spinners){
+//				spinner.setPreferredSize(SPINNER_DIMENSION);
+//				this.add(spinner);
+//			}
+//			
 			typeBox.addActionListener(this);
 			
 			this.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
@@ -271,11 +290,25 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 								
 				List<Double> values = new ArrayList<Double>();
 				
-				for(JSpinner spinner : spinners){
-					spinner.commitEdit();
-					double value = ((SpinnerNumberModel )spinner.getModel()).getNumber().doubleValue();
-					values.add(value);
+				for(JComponent component : components){
+					
+					if(component instanceof JSpinner){
+						((JSpinner) component).commitEdit();
+						double value = ((SpinnerNumberModel )((JSpinner) component).getModel()).getNumber().doubleValue();
+						values.add(value);
+					}
+					
+					if(component instanceof JCheckBox){
+						double value = ((JCheckBox) component).isSelected() ? 1 :0;
+						values.add(value);
+					}
 				}
+				
+//				for(JSpinner spinner : spinners){
+//					spinner.commitEdit();
+//					double value = ((SpinnerNumberModel )spinner.getModel()).getNumber().doubleValue();
+//					values.add(value);
+//				}
 
 
 				double first = values.get(0);
@@ -297,77 +330,88 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-						
-			for(JSpinner spinner : spinners){
-				this.remove(spinner);
+					
+			for(JComponent component : components){
+				this.remove(component);
 			}
+			components = new ArrayList<JComponent>();
 			
-			spinners = new ArrayList<JSpinner>();
+//			for(JSpinner spinner : spinners){
+//				this.remove(spinner);
+//			}
+			
+//			spinners = new ArrayList<JSpinner>();
 			RuleType type = (RuleType) typeBox.getSelectedItem();
 			
 			switch(  type ){
 			
 				case IS_MINIMUM:{
-					
-					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
-					spinner.setToolTipText("1=True; 0=False");
-					spinners.add(   spinner   );
+					JCheckBox box = new JCheckBox("True", true);
+					components.add(box);
+//					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+//					spinner.setToolTipText("1=True; 0=False");
+//					spinners.add(   spinner   );
 					break;
 				}
 				
 				case IS_MAXIMUM:{
-					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
-					spinner.setToolTipText("1=True; 0=False");
-					spinners.add(   spinner   );
+					JCheckBox box = new JCheckBox("True", true);
+					components.add(box);
+//					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+//					spinner.setToolTipText("1=True; 0=False");
+//					spinners.add(   spinner   );
 					break;
 				}
 				
 				case IS_LOCAL_MINIMUM:{
-					
-					JSpinner spinner1 =  new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+					JCheckBox box = new JCheckBox("True", true);
+					components.add(box);
+//					JSpinner spinner1 =  new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
 					JSpinner spinner2 =  new JSpinner(new SpinnerNumberModel(5,	1, 100, 1));
-					spinner1.setToolTipText("1=True; 0=False");
+//					spinner1.setToolTipText("1=True; 0=False");
 					spinner2.setToolTipText("Smoothing window size");
-					spinners.add(  spinner1  );
-					spinners.add(  spinner2    );
+//					spinners.add(  spinner1  );
+					components.add(  spinner2    );
 					break;
 				}
 				
 				case IS_LOCAL_MAXIMUM:{
-					JSpinner spinner1 =  new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+					JCheckBox box = new JCheckBox("True", true);
+					components.add(box);
+//					JSpinner spinner1 =  new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
 					JSpinner spinner2 =  new JSpinner(new SpinnerNumberModel(5,	1, 100, 1));
-					spinner1.setToolTipText("1=True; 0=False");
-					spinner2.setToolTipText("Window size");
-					spinners.add(  spinner1  );
-					spinners.add(  spinner2    );
+//					spinner1.setToolTipText("1=True; 0=False");
+					spinner2.setToolTipText("Smoothing window size");
+//					spinners.add(  spinner1  );
+					components.add(  spinner2    );
 					break;
 				}
 				
 				case VALUE_IS_LESS_THAN:{
 					JSpinner spinner = new JSpinner();
 					spinner.setToolTipText("Value");
-					spinners.add(   spinner   );
+					components.add(   spinner   );
 					break;
 				}
 				
 				case VALUE_IS_MORE_THAN:{
 					JSpinner spinner = new JSpinner();
 					spinner.setToolTipText("Value");
-					spinners.add(   spinner   );
+					components.add(   spinner   );
 					break;
 				}
 				
 				case INDEX_IS_LESS_THAN:{
 					JSpinner spinner = new JSpinner(new SpinnerNumberModel(0.5,	0, 1, 0.01));
 					spinner.setToolTipText("Fraction of profile 0-1");
-					spinners.add(    spinner   );
+					components.add(    spinner   );
 					break;
 				}
 				
 				case INDEX_IS_MORE_THAN:{
 					JSpinner spinner = new JSpinner(new SpinnerNumberModel(0.5,	0, 1, 0.01));
 					spinner.setToolTipText("Fraction of profile 0-1");
-					spinners.add(    spinner   );
+					components.add(    spinner   );
 					break;
 				}
 				
@@ -381,23 +425,27 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 					spinner1.setToolTipText("Value");
 					spinner2.setToolTipText("Minimum length of region");
 					spinner3.setToolTipText("Maximum permitted difference from value");
-					spinners.add(  spinner1  );
-					spinners.add(  spinner2  );
-					spinners.add(  spinner3  );
+					components.add(  spinner1  );
+					components.add(  spinner2  );
+					components.add(  spinner3  );
 					break;
 				}
 				
 				case FIRST_TRUE:{
-					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
-					spinner.setToolTipText("1=True; 0=False");
-					spinners.add(   spinner   );
+					JCheckBox box = new JCheckBox("True", true);
+					components.add(box);
+//					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+//					spinner.setToolTipText("1=True; 0=False");
+//					spinners.add(   spinner   );
 					break;
 				}
 				
 				case LAST_TRUE:{
-					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
-					spinner.setToolTipText("1=True; 0=False");
-					spinners.add(   spinner   );
+					JCheckBox box = new JCheckBox("True", true);
+					components.add(box);
+//					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
+//					spinner.setToolTipText("1=True; 0=False");
+//					spinners.add(   spinner   );
 					break;
 				}
 				
@@ -405,11 +453,16 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 					break;
 			
 			}
-
-			for(JSpinner spinner : spinners){
-				spinner.setPreferredSize(SPINNER_DIMENSION);
-				this.add(spinner);
+			
+			for(JComponent component : components){
+				component.setPreferredSize(SPINNER_DIMENSION);
+				this.add(component);
 			}
+
+//			for(JSpinner spinner : spinners){
+//				spinner.setPreferredSize(SPINNER_DIMENSION);
+//				this.add(spinner);
+//			}
 			
 			this.revalidate();
 			this.repaint();
