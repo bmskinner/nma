@@ -1678,7 +1678,13 @@ private static NucleusDatasetCreator instance = null;
 	public NucleusMeshXYDataset createNucleusMeshEdgeDataset(NucleusMesh mesh) throws Exception {
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 		
+//		log(mesh.toString());
+		
+//		log("Building dataset");
+		
 		for(NucleusMeshEdge edge : mesh.getEdges()){
+			
+//			log(edge.getV1().toString());
 			
 			double[] yvalues = {
 					edge.getV1().getPosition().getY(),

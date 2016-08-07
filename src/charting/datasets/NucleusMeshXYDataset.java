@@ -22,6 +22,24 @@ public class NucleusMeshXYDataset extends DefaultXYDataset {
 		this.ratioMap.put(seriesKey, ratio); 
 	}
 	
+	public String toString(){
+		
+		StringBuilder b = new StringBuilder();
+		for(int series=0; series<this.getSeriesCount(); series++){
+			
+			for(int item=0; item<this.getItemCount(series); item++){
+				
+				double x = this.getXValue(series, item);
+				double y = this.getYValue(series, item);
+				
+				b.append("Series "+series+" - Item "+item+": "+x+"   "+y+"\n");
+				
+			}
+
+		}
+		return b.toString();
+	}
+	
 	
 
 }

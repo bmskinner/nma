@@ -368,7 +368,10 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 				NucleusMesh mesh = new NucleusMesh(options.firstDataset()
 						.getCollection()
 						.getConsensusNucleus(), options.getMeshSize());
-				return OutlineChartFactory.getInstance().createMeshChart(mesh, 0.5, options);
+				
+				NucleusMesh straight = mesh.straighten();
+//				log(straight.toString());
+				return OutlineChartFactory.getInstance().createMeshChart(straight, 0.5, options);
 				
 			} else {
 				return makeSegmentedConsensusChart(options.firstDataset());

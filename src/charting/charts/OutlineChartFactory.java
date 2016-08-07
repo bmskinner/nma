@@ -883,13 +883,17 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	
 	/**
 	 * Create the chart with the outlines of all the nuclei within a single dataset.
-	 * @param options
+	 * @param mesh the mesh to draw
+	 * @param log2ratio the ratio to set as full colour intensity
+	 * @param options the drawing options
 	 * @return
 	 * @throws Exception 
 	 */
 	public JFreeChart createMeshChart(NucleusMesh mesh, double log2Ratio, ChartOptions options) throws Exception{
 		
 		NucleusMeshXYDataset dataset = NucleusDatasetCreator.getInstance().createNucleusMeshEdgeDataset(mesh);
+		
+//		log(dataset.toString());
 
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				null, null, null, PlotOrientation.VERTICAL, true, true,

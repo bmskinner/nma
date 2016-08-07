@@ -61,6 +61,10 @@ public class NucleusMeshVertex {
 		return position;
 	}
 	
+	public void setPosition(XYPoint p){
+		this.position = p;
+	}
+	
 	public void addEdge(NucleusMeshEdge e){
 		edges.add(e);
 	}

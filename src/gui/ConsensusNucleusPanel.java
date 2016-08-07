@@ -125,8 +125,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		JPanel rotatePanel = createRotationPanel();
 		panel.add(rotatePanel, BorderLayout.NORTH);
 		
-//		JPanel meshPanel = createMeshPanel();
-//		panel.add(meshPanel, BorderLayout.CENTER);
+		JPanel meshPanel = createMeshPanel();
+		panel.add(meshPanel, BorderLayout.CENTER);
 		
 		
 		JPanel offsetPanel = createTranslatePanel();
@@ -382,13 +382,14 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	private void updateSingleDataset() {
 		runRefoldingButton.setVisible(false);
 		
-//		showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
-//		showMeshFacesBox.setEnabled(showMeshBox.isSelected());
+		showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
+		showMeshFacesBox.setEnabled(showMeshBox.isSelected());
 
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setScale(GlobalOptions.getInstance().getScale())
 			.setSwatch(GlobalOptions.getInstance().getSwatch())
+			.setShowMesh(showMeshBox.isSelected())
 			.setShowAnnotations(false)
 			.setShowXAxis(false)
 			.setShowYAxis(false)

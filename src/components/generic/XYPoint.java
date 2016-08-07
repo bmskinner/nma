@@ -117,6 +117,11 @@ public class XYPoint  implements Serializable, Loggable {
   public void setY(double y){
     this.y = y;
   }
+  
+  public void set(XYPoint p){
+	  this.x = p.x;
+	  this.y = p.y;
+  }
 
   /**
   * Find the distance between this point and

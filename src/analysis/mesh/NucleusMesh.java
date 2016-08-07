@@ -147,10 +147,10 @@ public class NucleusMesh implements Loggable {
 	 * @param template
 	 */
 	public NucleusMesh(NucleusMesh template){
-		this.nucleus = template.nucleus;
+		this.nucleus                  = template.nucleus;
 		this.segmentVertexProportions = template.segmentVertexProportions;
-		this.vertexSpacing = template.vertexSpacing;
-		this.segmentCount = template.segmentCount;
+		this.vertexSpacing            = template.vertexSpacing;
+		this.segmentCount             = template.segmentCount;
 		
 		for(NucleusMeshEdge e : template.edges){
 			this.edges.add(new NucleusMeshEdge(e));
@@ -161,7 +161,7 @@ public class NucleusMesh implements Loggable {
 		}
 		
 		this.peripheralVertices = template.peripheralVertices;
-		this.internalVertices = template.internalVertices;
+		this.internalVertices   = template.internalVertices;
 		
 		
 
@@ -252,11 +252,11 @@ public class NucleusMesh implements Loggable {
 	 * @param test
 	 * @return
 	 */
-	private boolean contains(NucleusMeshFace test){
+	public boolean contains(NucleusMeshFace test){
 		return faces.contains(test);
 	}
 	
-	private boolean contains(NucleusMeshEdge e){
+	public boolean contains(NucleusMeshEdge e){
 		return edges.contains(e);
 	}
 	
@@ -269,8 +269,20 @@ public class NucleusMesh implements Loggable {
 		return this.vertexSpacing;
 	}
 	
+	/**
+	 * The total number of vertices, internal and peripheral
+	 * @return
+	 */
 	public int getVertexCount(){
 		return peripheralVertices.size() + internalVertices.size();
+	}
+	
+	public int getInternalVertexCount(){
+		return internalVertices.size();
+	}
+	
+	public int getPeripheralVertexCount(){
+		return peripheralVertices.size();
 	}
 	
 	public int getEdgeCount(){
@@ -367,6 +379,66 @@ public class NucleusMesh implements Loggable {
 		
 	}
 	
+	/**
+	 * Reposition the vertices such that the internal
+	 * skeleton vertices form a vertical line, equally
+	 * spaced.
+	 * @return
+	 */
+	public NucleusMesh straighten(){
+		fine("Straightening mesh");
+		NucleusMesh result = new NucleusMesh(this);
+		
+		result.clearEdges();
+		result.clearFaces();
+		
+		XYPoint pos = new XYPoint(10, 10);
+		double yStep  = 10;
+		
+		// Straighten internal skeleton
+		for(NucleusMeshVertex v : result.internalVertices){
+			v.setPosition(pos);
+			pos = new XYPoint( 10,  pos.getY()+yStep);
+		}
+		finer("Set skeleton");
+		
+		// Position peripheral vertices around skeleton
+		
+		// Positon the first vertex under the skeleton
+		NucleusMeshVertex v = result.peripheralVertices.get(0);
+		v.setPosition( new XYPoint(10, 0)  );
+		
+		int halfArray = (int) Math.floor(( (double) result.peripheralVertices.size() / 2));
+		
+		for(int i=1, j=result.getPeripheralVertexCount()-1; i<halfArray; i++, j--){
+			
+			// Get the vertices either side of the skeleton
+			NucleusMeshVertex v1 = result.peripheralVertices.get(i);
+			NucleusMeshVertex v2 = result.peripheralVertices.get(j);
+			
+			v1.setPosition( new XYPoint(  5 ,   (i*yStep)-5 ));
+			v2.setPosition( new XYPoint(  15 ,  (i*yStep)-5 ));
+		}
+		
+		finer("Peripheral vertex count = "+result.getPeripheralVertexCount());
+				
+		// if needed, adjust the final vertex above the skeleton
+		if(result.peripheralVertices.size()%2==0){
+			finer("Setting final vertex");
+			NucleusMeshVertex p1 = result.peripheralVertices.get(halfArray);
+			p1.setPosition(new XYPoint(  10 ,   (halfArray*yStep)-5 ));
+		}
+		
+		finer("Set periphery");
+		
+		result.createEdgesAndFaces();
+		
+		finer("Straightened mesh");
+		
+	
+		return result;
+	}
+	
 	
 	/**
 	 * Get a closed path comprising the peripheral points of the mesh 
@@ -423,6 +495,13 @@ public class NucleusMesh implements Loggable {
 		return null;
 	}
 	
+	private void clearEdges(){
+		this.edges.clear();
+	}
+	
+	private void clearFaces(){
+		this.faces.clear();
+	}
 
 	
 	/**
