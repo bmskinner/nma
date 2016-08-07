@@ -50,7 +50,7 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 		
 		createUI();
 
-		Dimension dim = new Dimension(500, 400);
+		Dimension dim = new Dimension(600, 400);
 		this.setMinimumSize(dim);
 		this.pack();
 		this.centerOnScreen();
@@ -230,9 +230,10 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 		private JComboBox<RuleType> typeBox = new JComboBox<RuleType>(RuleType.values());
 		
 		private final Dimension SPINNER_DIMENSION = new Dimension(80, 20);
+		private final Dimension PANEL_DIMENSION = new Dimension(200, 30);
 		
-		private final Dimension PANEL_MAX_DIMENSION = new Dimension(500, 50);
-		private final Dimension PANEL_MIN_DIMENSION = new Dimension(300, 50);
+		private final Dimension PANEL_MAX_DIMENSION = new Dimension(600, 50);
+		private final Dimension PANEL_MIN_DIMENSION = new Dimension(400, 50);
 				
 		private RuleSetPanel parent;
 		
@@ -255,12 +256,12 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 			typeBox.setSelectedItem(RuleType.IS_MINIMUM);
 			
 			// Using radio buttons
-			JCheckBox trueButton = new JCheckBox("True", true);
-			components.add(trueButton);			
-			trueButton.addActionListener(this);
+			TrueFalsePanel p = new TrueFalsePanel();
+			components.add(p);		
+			p.addActionListener(this);
 			
 			for(JComponent component : components){
-				component.setPreferredSize(SPINNER_DIMENSION);
+				component.setPreferredSize(PANEL_DIMENSION);
 				this.add(component);
 			}
 
@@ -298,8 +299,8 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 						values.add(value);
 					}
 					
-					if(component instanceof JCheckBox){
-						double value = ((JCheckBox) component).isSelected() ? 1 :0;
+					if(component instanceof TrueFalsePanel){
+						double value = ((TrueFalsePanel) component).isSelected() ? 1 :0;
 						values.add(value);
 					}
 				}
@@ -346,8 +347,8 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 			switch(  type ){
 			
 				case IS_MINIMUM:{
-					JCheckBox box = new JCheckBox("True", true);
-					components.add(box);
+					TrueFalsePanel p = new TrueFalsePanel();
+					components.add(p);
 //					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
 //					spinner.setToolTipText("1=True; 0=False");
 //					spinners.add(   spinner   );
@@ -355,8 +356,8 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 				}
 				
 				case IS_MAXIMUM:{
-					JCheckBox box = new JCheckBox("True", true);
-					components.add(box);
+					TrueFalsePanel p = new TrueFalsePanel();
+					components.add(p);
 //					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
 //					spinner.setToolTipText("1=True; 0=False");
 //					spinners.add(   spinner   );
@@ -364,8 +365,8 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 				}
 				
 				case IS_LOCAL_MINIMUM:{
-					JCheckBox box = new JCheckBox("True", true);
-					components.add(box);
+					TrueFalsePanel p = new TrueFalsePanel();
+					components.add(p);
 //					JSpinner spinner1 =  new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
 					JSpinner spinner2 =  new JSpinner(new SpinnerNumberModel(5,	1, 100, 1));
 //					spinner1.setToolTipText("1=True; 0=False");
@@ -376,8 +377,8 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 				}
 				
 				case IS_LOCAL_MAXIMUM:{
-					JCheckBox box = new JCheckBox("True", true);
-					components.add(box);
+					TrueFalsePanel p = new TrueFalsePanel();
+					components.add(p);
 //					JSpinner spinner1 =  new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
 					JSpinner spinner2 =  new JSpinner(new SpinnerNumberModel(5,	1, 100, 1));
 //					spinner1.setToolTipText("1=True; 0=False");
@@ -432,8 +433,8 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 				}
 				
 				case FIRST_TRUE:{
-					JCheckBox box = new JCheckBox("True", true);
-					components.add(box);
+					TrueFalsePanel p = new TrueFalsePanel();
+					components.add(p);
 //					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
 //					spinner.setToolTipText("1=True; 0=False");
 //					spinners.add(   spinner   );
@@ -441,8 +442,8 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 				}
 				
 				case LAST_TRUE:{
-					JCheckBox box = new JCheckBox("True", true);
-					components.add(box);
+					TrueFalsePanel p = new TrueFalsePanel();
+					components.add(p);
 //					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
 //					spinner.setToolTipText("1=True; 0=False");
 //					spinners.add(   spinner   );
@@ -455,17 +456,62 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 			}
 			
 			for(JComponent component : components){
-				component.setPreferredSize(SPINNER_DIMENSION);
+				
+				if(component instanceof JSpinner){
+					component.setPreferredSize(SPINNER_DIMENSION);
+				}
+				
+				if(component instanceof TrueFalsePanel){
+					component.setPreferredSize(PANEL_DIMENSION);
+				}
+				
 				this.add(component);
 			}
-
-//			for(JSpinner spinner : spinners){
-//				spinner.setPreferredSize(SPINNER_DIMENSION);
-//				this.add(spinner);
-//			}
 			
 			this.revalidate();
 			this.repaint();
+			
+		}
+		
+		public class TrueFalsePanel extends JPanel implements ActionListener{
+			
+			private JRadioButton trueButton  = new JRadioButton("True");
+			private JRadioButton falseButton = new JRadioButton("False");
+			private ButtonGroup group = new ButtonGroup();
+			
+			List<Object> listeners = new ArrayList<Object>();
+			
+			public TrueFalsePanel(){
+				this.setLayout(new FlowLayout());
+				this.setPreferredSize(PANEL_DIMENSION);
+				group.add(trueButton);
+				group.add(falseButton);
+				
+				this.add(trueButton);
+				this.add(falseButton);
+				
+				trueButton.setSelected(true);
+				
+				trueButton.addActionListener(this);
+				falseButton.addActionListener(this);
+			}
+			
+			public void addActionListener(RulePanel rulePanel) {
+				listeners.add(rulePanel);
+				
+			}
+
+			public boolean isSelected(){
+				return trueButton.isSelected();
+			}
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				for(Object o : listeners){
+					((ActionListener) o).actionPerformed(e);
+				}
+				
+			}
 			
 		}
 		
