@@ -17,6 +17,7 @@ import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
+import org.jfree.data.Range;
 
 import components.CellCollection;
 import components.generic.MeasurementScale;
@@ -174,20 +175,20 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		if(result!=0){ // button at index 0 - continue
 			return;
 		}
-		finest("Gating datasets on "+statABox.getSelectedItem().toString()+" and "+statBBox.getSelectedItem().toString());
+		finer("Gating datasets on "+statABox.getSelectedItem().toString()+" and "+statBBox.getSelectedItem().toString());
 		
 		for(AnalysisDataset d : getDatasets()){
 			
 			finest("Filtering dataset "+d.getName());
 			
-			double[] domain = getDomainBounds();
-			double[] range  = getRangeBounds();
+			Range domain = getDomainBounds();
+			Range range  = getRangeBounds();
 			
-			finest("Filtering on "+statABox.getSelectedItem().toString());
+			finer("Filtering on "+statABox.getSelectedItem().toString());
 			CellCollection stat1 = d.getCollection()
 					.filterCollection((PlottableStatistic) statABox.getSelectedItem(),
 							MeasurementScale.PIXELS, 
-							domain[0], domain[1]);
+							domain.getLowerBound(), domain.getUpperBound());
 			
 			if(stat1 == null){
 				finest("No collection returned");
@@ -201,30 +202,30 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 			}
 			
 			
-			finest("Filtering on "+statBBox.getSelectedItem().toString());
+			finer("Filtering on "+statBBox.getSelectedItem().toString());
 			CellCollection stat2 = stat1
 					.filterCollection((PlottableStatistic) statBBox.getSelectedItem(),
 							GlobalOptions.getInstance().getScale(),
-							range[0], range[1]);
+							range.getLowerBound(), range.getUpperBound());
 			
 			if(stat2 == null){
-				finest("No collection returned");
+				finer("No collection returned");
 				// filtering on given PlottableStatistic is not yet implemented
 				continue;
 			}
 			
 			if( ! stat2.hasCells()){
-				finest("No cells returned for "+statBBox.getSelectedItem().toString());
+				finer("No cells returned for "+statBBox.getSelectedItem().toString());
 				continue;
 			}
 			
 			if( stat2.getNucleusCount() ==  d.getCollection().getNucleusCount()){
-				fine("Filtered collection is same as starting collection");
+				finer("Filtered collection is same as starting collection");
 				continue;
 			}
 
 			stat2.setName("Filtered_"+statABox.getSelectedItem().toString()+"_"+statBBox.getSelectedItem().toString());
-			fine("Filtered "+stat2.getNucleusCount()+" cells");
+			finer("Filtered "+stat2.getNucleusCount()+" cells");
 			d.addChildCollection(stat2);
 			d.getCollection().getProfileManager().copyCollectionOffsets(stat2);
 
@@ -232,7 +233,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		}
 		log("Filtered datasets");
 		
-		finest("Firing population update request");
+		finer("Firing population update request");
 		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 	}
 
@@ -250,18 +251,20 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		}
 	}
 	
-	protected double[] getRangeBounds(){
-		double[] result = new double[2];
-		result[0]= chartPanel.getChart().getXYPlot().getRangeAxis().getRange().getLowerBound();
-		result[1]= chartPanel.getChart().getXYPlot().getRangeAxis().getRange().getUpperBound();
-		return result;
+	protected Range getRangeBounds(){
+		return chartPanel.getChart().getXYPlot().getRangeAxis().getRange();
+//		double[] result = new double[2];
+//		result[0]= chartPanel.getChart().getXYPlot().getRangeAxis().getRange().getLowerBound();
+//		result[1]= chartPanel.getChart().getXYPlot().getRangeAxis().getRange().getUpperBound();
+//		return result;
 	}
 	
-	protected double[] getDomainBounds(){
-		double[] result = new double[2];
-		result[0]= chartPanel.getChart().getXYPlot().getDomainAxis().getRange().getLowerBound();
-		result[1]= chartPanel.getChart().getXYPlot().getDomainAxis().getRange().getUpperBound();
-		return result;
+	protected Range getDomainBounds(){
+		return chartPanel.getChart().getXYPlot().getDomainAxis().getRange();
+//		double[] result = new double[2];
+//		result[0]= chartPanel.getChart().getXYPlot().getDomainAxis().getRange().getLowerBound();
+//		result[1]= chartPanel.getChart().getXYPlot().getDomainAxis().getRange().getUpperBound();
+//		return result;
 	}
 	
 	protected int getFilterDialogResult(){

@@ -95,7 +95,9 @@ public final class DatasetListManager implements WindowListener {
 	}
 	
 	public void addDataset(AnalysisDataset d){
-		list.add(d);
+		if(d.isRoot()){
+			list.add(d);
+		}
 	}
 	
 	public void removeDataset(AnalysisDataset d){

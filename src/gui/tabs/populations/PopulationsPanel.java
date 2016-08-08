@@ -290,16 +290,12 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		}
 
 		PopulationTreeTableNode category = new PopulationTreeTableNode(dataset);
-//		category.setValueAt(dataset, COLUMN_NAME);
-//		category.setValueAt(dataset.getCollection().getNucleusCount(), COLUMN_CELL_COUNT);
 				
 		// Add cluster groups separately
 		Set<UUID> clusterIDs = new HashSet<UUID>(); // track the child datasets in clusters, so they are not added twice
 		
 		for(ClusterGroup group : dataset.getClusterGroups()){
 			PopulationTreeTableNode clusterGroupNode = new PopulationTreeTableNode(group);
-//			clusterGroupNode.setValueAt(group.toString(), COLUMN_NAME);
-//			clusterGroupNode.setValueAt(0, COLUMN_CELL_COUNT);
 			category.add(clusterGroupNode);
 			
 			for(UUID clusterID : group.getUUIDs()){
@@ -500,9 +496,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * @param dataset the dataset to add
 	 */
 	public void addDataset(AnalysisDataset dataset){
-//		finest("Checking dataset name is suitable");
-//		dataset.setName(checkName(dataset.getName(), dataset.getUUID()));
-//		finest("Set name as "+dataset.getName());
 		
 		if(dataset.isRoot()){ // add to the list of datasets that can be ordered
 			treeOrderMap.put(dataset.getUUID(), treeOrderMap.size()); // add to the end of the list

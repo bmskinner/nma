@@ -617,6 +617,23 @@ public class CellCollection implements Serializable, Loggable {
 	  }
 	  return result;
   }
+  
+/**
+* Get the perimeter normalised veriabililty of a nucleus angle profile compared to the
+* median profile of the collection
+* @param pointType the tag to use as index 0
+* @param c the cell to test
+* @return the variabililty score of the nucleus
+* @throws Exception
+*/
+  public double getNormalisedDifferenceToMedian(BorderTag pointType, Cell c){
+	  Profile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.MEDIAN);
+	  Profile angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
+	  double diff = angleProfile.absoluteSquareDifference(medianProfile);		
+	  diff /= c.getNucleus().getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+	  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
+	  return rootDiff;
+  }
 
   public double compareProfilesToMedian(BorderTag pointType) throws Exception{
 	  double[] scores = this.getDifferencesToMedianFromPoint(pointType);
@@ -686,22 +703,22 @@ public class CellCollection implements Serializable, Loggable {
   }
 
   
-  /**
-   * Get the perimeter normalised veriabililty of a nucleus angle profile compared to the
-   * median profile of the collection
-   * @param n the nucleus to test
-   * @return the variabililty score of the nucleus
-   * @throws Exception
-   */
-  public double calculateVariabililtyOfNucleusProfile(Nucleus n) {
-	  BorderTag pointType = BorderTag.REFERENCE_POINT;
-	  Profile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType,50);
-	  Profile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
-	  double diff = angleProfile.absoluteSquareDifference(medianProfile);										 
-	  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
-	  double var = (rootDiff / n.getStatistic(NucleusStatistic.PERIMETER)  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
-	  return var;
-  }
+//  /**
+//   * Get the perimeter normalised veriabililty of a nucleus angle profile compared to the
+//   * median profile of the collection
+//   * @param n the nucleus to test
+//   * @return the variabililty score of the nucleus
+//   * @throws Exception
+//   */
+//  public double calculateVariabililtyOfNucleusProfile(Nucleus n) {
+//	  BorderTag pointType = BorderTag.REFERENCE_POINT;
+//	  Profile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType,50);
+//	  Profile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
+//	  double diff = angleProfile.absoluteSquareDifference(medianProfile);										 
+//	  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
+//	  double var = (rootDiff / n.getStatistic(NucleusStatistic.PERIMETER)  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+//	  return var;
+//  }
   
  
   private double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
@@ -895,7 +912,7 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 		  for(Cell c : this.getCells()){
 			  Nucleus n = c.getNucleus();
 
-			  double value = this.calculateVariabililtyOfNucleusProfile(n);
+			  double value = getNormalisedDifferenceToMedian(BorderTag.REFERENCE_POINT, c);
 
 			  if(value>= lower && value<= upper){
 				  filteredCells.add(c);
@@ -985,6 +1002,8 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
   
   /**
    * Test if the collection contains the given cell
+   * (this must be the same object, not just a cell
+   * with the same id)
    * @param c
    * @return
    */
