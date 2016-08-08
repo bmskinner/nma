@@ -818,7 +818,7 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  switch (stat) {
 
 		  case VARIABILITY:{
-			  result = this.getNormalisedDifferencesToMedianFromPoint(BorderTag.ORIENTATION_POINT);
+			  result = this.getNormalisedDifferencesToMedianFromPoint(BorderTag.REFERENCE_POINT);
 			  break;
 		  }
 	

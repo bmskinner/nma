@@ -77,7 +77,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 			
 			CellCollection collection = activeDataset().getCollection();
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 					.getOrderedSegments();
 			
 

@@ -148,7 +148,8 @@ public class DatasetEvent extends EventObject {
 		SAVE				("Save selected"),
 		SAVE_AS				("Save as new file"),
 		ADD_DATASET			("Add dataset"),
-		RESEGMENT			("Resegment dataset");
+		RESEGMENT			("Resegment dataset"),
+		RECALCULATE_MEDIAN  ("Recalculate median profiles");
 		
 		private final String name;
 		

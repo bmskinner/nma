@@ -65,7 +65,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 			CellCollection collection = activeDataset().getCollection();
 			
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
 					.getOrderedSegments();
 			
 

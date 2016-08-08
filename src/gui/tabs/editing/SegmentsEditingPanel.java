@@ -76,6 +76,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 		private JButton splitButton;
 		private JButton windowSizeButton;
 		private JButton updatewindowButton;
+		private JButton reprofileButton;
 		
 		
 		private static final String STR_MERGE_SEGMENT     = "Hide segment boundary";
@@ -83,6 +84,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 		private static final String STR_SPLIT_SEGMENT     = "Split segment";
 		private static final String STR_SET_WINDOW_SIZE   = "Set window size";
 		private static final String STR_SHOW_WINDOW_SIZES = "Window sizes";
+		private static final String STR_REPROFILE         = "Recalculate median profiles";
 		
 				
 		public SegmentsEditingPanel(){
@@ -161,6 +163,10 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			updatewindowButton = new JButton(STR_SET_WINDOW_SIZE);
 			updatewindowButton.addActionListener(this);
 			panel.add(updatewindowButton);
+			
+			reprofileButton = new JButton(STR_REPROFILE);
+			reprofileButton.addActionListener(this);
+			panel.add(reprofileButton);
 
 			return panel;
 			
@@ -271,7 +277,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				setButtonsEnabled(true);
 				CellCollection collection = options.firstDataset().getCollection();
 				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE)
-						.getSegmentedProfile(BorderTag.ORIENTATION_POINT);
+						.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 				
 				// Don't allow merging below 2 segments (causes errors)
 				if(medianProfile.getSegmentCount()<=2){
@@ -306,6 +312,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			splitButton.setEnabled(b);
 			windowSizeButton.setEnabled(b);
 			updatewindowButton.setEnabled(b);
+			reprofileButton.setEnabled(b);
 			
 		}
 
@@ -497,6 +504,12 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				if(e.getSource()==updatewindowButton){
 					fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
 					updateCollectionWindowSize();
+				}
+				
+				if(e.getSource()==reprofileButton){
+					
+					activeDataset().getCollection().getProfileManager().recalculateProfileAggregates();
+					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
 				}
 				
 			} catch (Exception e1) {

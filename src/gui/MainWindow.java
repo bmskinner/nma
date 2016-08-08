@@ -748,6 +748,19 @@ public class MainWindow
 			if(event.method().equals(DatasetMethod.ADD_DATASET)){
 				addDataset(event.firstDataset());
 			}
+			
+			if(event.method().equals(DatasetMethod.RECALCULATE_MEDIAN)){
+				fine("Recalculating the median for the given datasets");
+				
+				Runnable task = () -> { 
+					int flag = 0; // set the downstream analyses to run
+					
+					new RunProfilingAction(list, flag, MainWindow.this);
+				
+				}; 
+				threadManager.execute(task);
+			}
+			
 		}
 		
 	}

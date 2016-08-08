@@ -38,6 +38,8 @@ import components.generic.BorderTag.BorderTagType;
 public class DatasetProfiler extends AnalysisWorker {
 	
 	private static final BorderTag DEFAULT_BORDER_TAG = BorderTag.REFERENCE_POINT;
+	
+	public static final int RECALCULATE_MEDIAN = 0;
 
 	public DatasetProfiler(AnalysisDataset dataset){
 		super(dataset);
