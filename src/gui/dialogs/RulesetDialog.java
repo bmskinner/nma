@@ -270,12 +270,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			RuleSetCollection c = data.getCollection();
 			Profile p = dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
 			
-			BooleanProfile limits = new BooleanProfile(p, true);
-			for(RuleSet r : c.getRuleSets(data.getTag())){
-				Profile profile = dataset.getCollection().getProfileCollection(r.getType()).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
-				BooleanProfile b = finder.getMatchingIndexes(profile, r);
-				limits = limits.and(b);
-			}
+			BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(), c.getRuleSets(data.getTag()));
 			
 			chart = MorphologyChartFactory.getInstance().createBooleanProfileChart(p, limits);
 			

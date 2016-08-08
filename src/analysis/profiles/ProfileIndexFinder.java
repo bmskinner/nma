@@ -132,7 +132,7 @@ public class ProfileIndexFinder implements Loggable {
 		}
 		return -1;
 	}
-	
+		
 	/**
 	 * Identify the index for the median profile of the collection based on the 
 	 * internal RuleSets for the given border tag
@@ -166,24 +166,26 @@ public class ProfileIndexFinder implements Loggable {
 		}
 		
 		
-		// Make a 'true' profile
-		BooleanProfile indexes = new BooleanProfile(collection
-					.getProfileCollection(ProfileType.ANGLE)
-					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN), true);
+//		// Make a 'true' profile
+//		BooleanProfile indexes = new BooleanProfile(collection
+//					.getProfileCollection(ProfileType.ANGLE)
+//					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN), true);
+//		
+//		
+//		for(RuleSet r : list){
+//			
+//			// Get the correct profile for the RuleSet
+//			Profile p = collection
+//					.getProfileCollection(r.getType())
+//					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+//			
+//			// Apply the rule, and update the result profile
+//			BooleanProfile matchingIndexes = getMatchingIndexes(p, r);
+//			indexes = indexes.and(matchingIndexes);
+//			
+//		}
+		BooleanProfile indexes = getMatchingProfile(collection, list);
 		
-		
-		for(RuleSet r : list){
-			
-			// Get the correct profile for the RuleSet
-			Profile p = collection
-					.getProfileCollection(r.getType())
-					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
-			
-			// Apply the rule, and update the result profile
-			BooleanProfile matchingIndexes = getMatchingIndexes(p, r);
-			indexes = indexes.and(matchingIndexes);
-			
-		}
 		
 		// Find the first true in the result profile
 		for(int i=0;i<indexes.size();i++){
@@ -194,6 +196,28 @@ public class ProfileIndexFinder implements Loggable {
 		}
 		return -1;
 		
+	}
+	
+	public BooleanProfile getMatchingProfile(final CellCollection collection, final List<RuleSet> list){
+		// Make a 'true' profile
+		BooleanProfile indexes = new BooleanProfile(collection
+				.getProfileCollection(ProfileType.ANGLE)
+				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN), true);
+
+
+		for(RuleSet r : list){
+
+			// Get the correct profile for the RuleSet
+			Profile p = collection
+					.getProfileCollection(r.getType())
+					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+
+			// Apply the rule, and update the result profile
+			BooleanProfile matchingIndexes = getMatchingIndexes(p, r);
+			indexes = indexes.and(matchingIndexes);
+
+		}
+		return indexes;
 	}
 	
 	/**
