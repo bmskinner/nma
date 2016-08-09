@@ -41,6 +41,7 @@ import org.jfree.chart.JFreeChart;
 
 import analysis.profiles.ProfileManager;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 import charting.charts.ExportableChartPanel;
@@ -129,7 +130,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 			.setDatasets(getDatasets())
 			.setNormalised(true)
 			.setAlignment(ProfileAlignment.LEFT)
-			.setTag(BorderTag.REFERENCE_POINT)
+			.setTag(BorderTagObject.REFERENCE_POINT)
 			.setShowMarkers(true)
 			.setProfileType(ProfileType.ANGLE)
 			.build();

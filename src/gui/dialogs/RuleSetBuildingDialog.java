@@ -31,6 +31,7 @@ import javax.swing.SpinnerNumberModel;
 
 import logging.Loggable;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import analysis.profiles.Rule;
 import analysis.profiles.Rule.RuleType;
 import analysis.profiles.RuleSet;
@@ -141,7 +142,7 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 			if(c.getClass().isAssignableFrom(RuleSetPanel.class)){
 //				log("Found ruleset panel, fetching ruleset");
 				RuleSetPanel panel = (RuleSetPanel) c;
-				collection.addRuleSet(BorderTag.REFERENCE_POINT, panel.getRuleSet());
+				collection.addRuleSet(BorderTagObject.REFERENCE_POINT, panel.getRuleSet());
 				
 			}
 			

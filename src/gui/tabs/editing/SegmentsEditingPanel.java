@@ -58,6 +58,7 @@ import charting.options.TableOptions;
 import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
@@ -182,7 +183,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				.setDatasets(getDatasets())
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
-				.setTag(BorderTag.REFERENCE_POINT)
+				.setTag(BorderTagObject.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType( ProfileType.ANGLE)
 				.setSwatch(activeDataset().getSwatch())
@@ -196,7 +197,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			
 			profile = activeDataset().getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT);
 			
 			chartPanel.setChart(chart, profile, true);
 			updateChartPanelRange();
@@ -210,7 +211,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				.setDatasets(getDatasets())
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
-				.setTag(BorderTag.REFERENCE_POINT)
+				.setTag(BorderTagObject.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType( ProfileType.ANGLE)
 				.setSwatch(activeDataset().getSwatch())
@@ -277,7 +278,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				setButtonsEnabled(true);
 				CellCollection collection = options.firstDataset().getCollection();
 				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE)
-						.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+						.getSegmentedProfile(BorderTagObject.REFERENCE_POINT);
 				
 				// Don't allow merging below 2 segments (causes errors)
 				if(medianProfile.getSegmentCount()<=2){
@@ -332,7 +333,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 					UUID segID = activeDataset()
 							.getCollection()
 							.getProfileCollection(ProfileType.ANGLE)
-							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+							.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 							.getSegmentContaining(segMidpointIndex)
 							.getID();
 					updateSegmentStartIndex(segID, index);
@@ -431,7 +432,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			pc.createProfileAggregate(activeDataset().getCollection(), ProfileType.ANGLE);
 					
 			
-			SegmentedProfile medianProfile = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);	
+			SegmentedProfile medianProfile = pc.getSegmentedProfile(BorderTagObject.REFERENCE_POINT);	
 			
 			// Does nothing, but needed to access segment fitter
 //			DatasetSegmenter segmenter = new DatasetSegmenter(activeDataset(), MorphologyAnalysisMode.NEW, programLogger);
@@ -442,7 +443,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			for(Cell c : activeDataset().getCollection().getCells()){
 
 				// recombine the segments at the lengths of the median profile segments
-				Profile frankenProfile = fitter.recombine(c.getNucleus(), BorderTag.REFERENCE_POINT);
+				Profile frankenProfile = fitter.recombine(c.getNucleus(), BorderTagObject.REFERENCE_POINT);
 
 				c.getNucleus().setProfile(ProfileType.FRANKEN, new SegmentedProfile(frankenProfile));
 
@@ -471,10 +472,10 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				CellCollection collection = activeDataset().getCollection();
 				SegmentedProfile medianProfile = collection
 						.getProfileCollection(ProfileType.ANGLE)
-						.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+						.getSegmentedProfile(BorderTagObject.REFERENCE_POINT);
 				
 //				List<NucleusBorderSegment> list =collection.getProfileCollection(ProfileCollectionType.REGULAR)
-//						.getSegmentedProfile(BorderTag.REFERENCE_POINT).getOrderedSegments();
+//						.getSegmentedProfile(BorderTagObject.REFERENCE_POINT).getOrderedSegments();
 				
 				
 				// Update the segment pattern to the same ordered pattern seen in the profile chart

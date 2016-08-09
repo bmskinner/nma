@@ -35,6 +35,7 @@ import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
@@ -276,7 +277,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			 */
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 
 			
@@ -319,7 +320,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			 */
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 
 			
@@ -330,7 +331,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			double[] lengths = new double[collection.cellCount()];
 			for(Nucleus n : collection.getNuclei()){
 
-				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT)
+				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());
 
 				int indexLength = seg.length();
@@ -355,7 +356,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			 */
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 
 			
@@ -366,7 +367,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			double[] lengths = new double[collection.cellCount()];
 			for(Nucleus n : collection.getNuclei()){
 
-				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT)
+				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());
 				
 				int indexLength = seg.length();

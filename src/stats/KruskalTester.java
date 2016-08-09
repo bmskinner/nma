@@ -28,6 +28,7 @@ import analysis.profiles.ProfileManager;
 import analysis.profiles.SegmentFitter;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
@@ -36,7 +37,7 @@ import components.nuclei.Nucleus;
 
 public class KruskalTester {
 	
-	public static Profile testCollectionGetPValues(AnalysisDataset one, AnalysisDataset two, BorderTag tag, ProfileType type){
+	public static Profile testCollectionGetPValues(AnalysisDataset one, AnalysisDataset two, BorderTagObject tag, ProfileType type){
 		
 		Profile resultProfile = null;
 		int sampleNumber = 200;
@@ -131,7 +132,7 @@ public class KruskalTester {
 				fitter.fit(n, pc);
 
 				// recombine the segments at the lengths of the median profile segments
-				Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
+				Profile recombinedProfile = fitter.recombine(n, BorderTagObject.REFERENCE_POINT);
 				n.setProfile(ProfileType.FRANKEN, new SegmentedProfile(recombinedProfile));
 			}
 			

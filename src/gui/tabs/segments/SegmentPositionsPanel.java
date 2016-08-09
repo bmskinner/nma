@@ -44,6 +44,7 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 
@@ -133,7 +134,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 
 			CellCollection collection = activeDataset().getCollection();
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 					.getOrderedSegments();
 
 

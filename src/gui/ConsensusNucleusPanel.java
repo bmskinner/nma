@@ -52,6 +52,7 @@ import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclei.ConsensusNucleus;
@@ -328,7 +329,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				if(activeDataset().getCollection().hasConsensusNucleus()){
-					BorderPoint orientationPoint = activeDataset().getCollection().getConsensusNucleus().getBorderTag(BorderTag.ORIENTATION_POINT);
+					BorderPoint orientationPoint = activeDataset().getCollection().getConsensusNucleus().getBorderTag(BorderTagObject.ORIENTATION_POINT);
 					activeDataset().getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
 					refreshChartCache(getDatasets());
 //					update(activeDatasetToList());
@@ -502,7 +503,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 				BorderPoint orientationPoint = activeDataset()
 						.getCollection()
 						.getConsensusNucleus()
-						.getBorderTag(BorderTag.ORIENTATION_POINT);
+						.getBorderTag(BorderTagObject.ORIENTATION_POINT);
 				
 				activeDataset().getCollection()
 				.getConsensusNucleus()
@@ -523,9 +524,9 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 				
 				ConsensusNucleus nucleus = activeDataset().getCollection().getConsensusNucleus();
 				
-				if(nucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && nucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+				if(nucleus.hasBorderTag(BorderTagObject.TOP_VERTICAL) && nucleus.hasBorderTag(BorderTagObject.BOTTOM_VERTICAL)){
 					
-					nucleus.alignPointsOnVertical(nucleus.getBorderTag(BorderTag.TOP_VERTICAL), nucleus.getBorderTag(BorderTag.BOTTOM_VERTICAL));
+					nucleus.alignPointsOnVertical(nucleus.getBorderTag(BorderTagObject.TOP_VERTICAL), nucleus.getBorderTag(BorderTagObject.BOTTOM_VERTICAL));
 					
 					this.update(activeDatasetToList());
 					

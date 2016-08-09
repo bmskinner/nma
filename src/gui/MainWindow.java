@@ -85,6 +85,7 @@ import utility.Version;
 import analysis.AnalysisDataset;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
@@ -988,7 +989,7 @@ public class MainWindow
 						r.splitNucleusToHeadAndHump();
 						try {
 
-							r.calculateSignalAnglesFromPoint(r.getPoint(BorderTag.ORIENTATION_POINT));
+							r.calculateSignalAnglesFromPoint(r.getPoint(BorderTagObject.ORIENTATION_POINT));
 						} catch (Exception e) {
 							log(Level.SEVERE, "Error restoring signal angles", e);
 						}

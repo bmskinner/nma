@@ -41,6 +41,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.JFreeChart;
 
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
@@ -154,7 +155,7 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 			.setDatasets(list)
 			.setNormalised(true)
 			.setAlignment(ProfileAlignment.LEFT)
-			.setTag(BorderTag.REFERENCE_POINT)
+			.setTag(BorderTagObject.REFERENCE_POINT)
 			.setShowMarkers(false)
 			.setProfileType(ProfileType.FRANKEN)
 			.build();

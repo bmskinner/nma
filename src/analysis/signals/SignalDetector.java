@@ -24,10 +24,12 @@ import io.ImageImporter;
 import java.io.File;
 import java.util.List;
 import java.util.UUID;
+
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import components.Cell;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.nuclear.NuclearSignal;
 import components.nuclear.SignalCollection;
 import components.nuclei.AsymmetricNucleus;
@@ -110,9 +112,9 @@ public class SignalDetector extends AnalysisWorker {
 					if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
 						finer("Nucleus type is asymmetric: "+n.getClass().getSimpleName());
 						
-						if(n.hasBorderTag(BorderTag.ORIENTATION_POINT)){
+						if(n.hasBorderTag(BorderTagObject.ORIENTATION_POINT)){
 							finest("Calculating angle from orientation point");
-							n.calculateSignalAnglesFromPoint(n.getBorderPoint(BorderTag.ORIENTATION_POINT));
+							n.calculateSignalAnglesFromPoint(n.getBorderPoint(BorderTagObject.ORIENTATION_POINT));
 						} else {
 							finest("No orientation point in nucleus");
 						}

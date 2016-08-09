@@ -30,6 +30,7 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 
 @SuppressWarnings("serial")
@@ -88,7 +89,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
 			boolean normalised         = profileAlignmentOptionsPanel.isNormalised();
 			ProfileAlignment alignment = normalised ?  ProfileAlignment.LEFT : profileAlignmentOptionsPanel.getSelected();
-			BorderTag tag              = borderTagOptionsPanel.getSelected();
+			BorderTagObject tag        = borderTagOptionsPanel.getSelected();
 			boolean showMarkers        = profileMarkersOptionsPanel.showMarkers();
 			boolean hideProfiles       = profileMarkersOptionsPanel.isHideProfiles();
 			

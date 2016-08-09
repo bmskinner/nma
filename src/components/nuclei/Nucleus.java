@@ -28,6 +28,7 @@ import java.util.UUID;
 import analysis.nucleus.Indexable;
 import components.CellularComponent;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclear.NuclearSignal;
@@ -128,7 +129,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @return
 	 * @throws Exception
 	 */
-	public Rectangle getBoundingRectangle(BorderTag point) ;
+//	public Rectangle getBoundingRectangle(BorderTag point) ;
 	
 	
 	/**
@@ -279,7 +280,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @return a copy of the segmented profile
 	 * @throws Exception 
 	 */
-	public SegmentedProfile getProfile(ProfileType type, BorderTag tag);
+	public SegmentedProfile getProfile(ProfileType type, BorderTagObject tag);
 	
 		
 	/**
@@ -287,7 +288,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @param type
 	 * @param profile
 	 */
-	public void setProfile(ProfileType type, BorderTag tag, SegmentedProfile profile) throws Exception;
+	public void setProfile(ProfileType type, BorderTagObject tag, SegmentedProfile profile) throws Exception;
 	
 	/**
 	 * Set the profile for the given type
@@ -313,7 +314,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @param s the tag
 	 * @return the index of the border in borderList
 	 */
-	public int getBorderIndex(BorderTag tag);
+	public int getBorderIndex(BorderTagObject tag);
 	
 	/**
 	 * Get the tag at a given index, given a zero tag
@@ -322,14 +323,14 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @param index the index to fetch
 	 * @return the border tag at the index
 	 */
-	public BorderTag getBorderTag(BorderTag tag, int index);
+	public BorderTagObject getBorderTag(BorderTagObject tag, int index);
 	
 	/**
 	 * Get the tag at the given raw index in the border list
 	 * @param index
 	 * @return the tag at the index, or null if no tag present
 	 */
-	public BorderTag getBorderTag(int index);
+	public BorderTagObject getBorderTag(int index);
 
 	
 	/**
@@ -338,14 +339,14 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @param tag
 	 * @return
 	 */
-	public BorderPoint getBorderTag(BorderTag tag);
+	public BorderPoint getBorderTag(BorderTagObject tag);
 	
 	/**
 	 * Check if the nucleus has the given border tag
 	 * @param tag
 	 * @return
 	 */
-	public boolean hasBorderTag(BorderTag tag);
+	public boolean hasBorderTag(BorderTagObject tag);
 	
 	/**
 	 * Check if the nucleus has any border tag at the given index
@@ -354,7 +355,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @param i the index to be tested
 	 * @return true if a tag is present at the index
 	 */
-	public boolean hasBorderTag(BorderTag tag, int i);
+	public boolean hasBorderTag(BorderTagObject tag, int i);
 	
 	/**
 	 * Check if the nucleus has any border tag at the given index
@@ -370,7 +371,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @param i the index of the border point
 	 */
 	
-	public void setBorderTag(BorderTag tag, int i);
+	public void setBorderTag(BorderTagObject tag, int i);
 	
 	/**
 	 * Set or update a border tag based on an index from a reference tag
@@ -378,7 +379,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @param tag the new tag to use
 	 * @param i the index of the border point relative to the reference
 	 */
-	public void setBorderTag(BorderTag reference, BorderTag tag, int i);
+	public void setBorderTag(BorderTagObject reference, BorderTagObject tag, int i);
 
 
 	/**
@@ -405,14 +406,14 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * the border list of the nucleus
 	 * @return
 	 */
-	public Map<BorderTag, Integer> getBorderTags();
+	public Map<BorderTagObject, Integer> getBorderTags();
 	
 	/**
 	 * Get a copy of the border point mapped to the given tag
 	 * @param tag
 	 * @return
 	 */
-	public BorderPoint getBorderPoint(BorderTag tag); 
+	public BorderPoint getBorderPoint(BorderTagObject tag); 
 	
 	/**
 	 * Get the border index of a tag in the border list, 
@@ -421,7 +422,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @param index the index to offset. Should be counting from the reference tag
 	 * @return the offset index, or -1 if the reference tag is not present
 	 */
-	public int getOffsetBorderIndex(BorderTag reference, int index);
+	public int getOffsetBorderIndex(BorderTagObject reference, int index);
 	
 	/**
 	 * Set the lock on this segment of all the profile types

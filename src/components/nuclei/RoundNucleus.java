@@ -29,6 +29,7 @@ package components.nuclei;
 
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
+
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
@@ -51,6 +52,7 @@ import utility.Utils;
 import components.AbstractCellularComponent;
 import components.CellularComponent;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Equation;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
@@ -83,7 +85,9 @@ public class RoundNucleus extends AbstractCellularComponent
 	protected Map<ProfileType, SegmentedProfile> profileMap = new HashMap<ProfileType, SegmentedProfile>();
 	
 	protected List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
-	protected Map<BorderTag, Integer>    borderTags  = new HashMap<BorderTag, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
+//	protected Map<BorderTag, Integer>          borderTags  = new HashMap<BorderTag, Integer>(0);
+	protected Map<BorderTagObject, Integer>    borderTags  = new HashMap<BorderTagObject, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
+	
 	protected Map<String, Integer>       segmentTags = new HashMap<String, Integer>(0);
 
 	protected String outputFolder;  // the top-level path in which to store outputs; has analysis date e.g. /Testing/2015-11-24_10:00:00
@@ -91,7 +95,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	protected SignalCollection signalCollection = new SignalCollection();
 	
-	private transient Map<BorderTag, Rectangle> boundingRectangles = new HashMap<BorderTag, Rectangle>(); // cache the bounding rectange to save time
+//	private transient Map<BorderTag, Rectangle> boundingRectangles = new HashMap<BorderTag, Rectangle>(); // cache the bounding rectange to save time
 
 	protected transient Nucleus verticalNucleus = null; // cache the vertically rotated nucleus
 	
@@ -169,8 +173,8 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		
 		
-		setBorderTag(BorderTag.REFERENCE_POINT, rpIndex);		
-		setBorderTag(BorderTag.ORIENTATION_POINT, rpIndex);
+		setBorderTag(BorderTagObject.REFERENCE_POINT, rpIndex);		
+		setBorderTag(BorderTagObject.ORIENTATION_POINT, rpIndex);
 		
 		if(!this.isProfileOrientationOK()){
 			this.reverse();
@@ -273,7 +277,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 
 
-	public BorderPoint getPoint(BorderTag tag){	
+	public BorderPoint getPoint(BorderTagObject tag){	
 		int index = this.getBorderIndex(tag);
 		return this.getBorderPoint(index);
 	}
@@ -321,7 +325,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			result = this.getVerticallyRotatedNucleus().getBounds().getWidth();
 			break;
 		case OP_RP_ANGLE:
-			result = Utils.findAngleBetweenXYPoints(this.getBorderTag(BorderTag.REFERENCE_POINT), this.getCentreOfMass(), this.getBorderTag(BorderTag.ORIENTATION_POINT));
+			result = Utils.findAngleBetweenXYPoints(this.getBorderTag(BorderTagObject.REFERENCE_POINT), this.getCentreOfMass(), this.getBorderTag(BorderTagObject.ORIENTATION_POINT));
 			break;
 		default:
 			break;
@@ -338,18 +342,18 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * @return
 	 * @throws Exception
 	 */
-	public Rectangle getBoundingRectangle(BorderTag point) {
-		
-		if(this.boundingRectangles == null){
-			boundingRectangles = new HashMap<BorderTag, Rectangle>();
-			boundingRectangles.put(point, calculateBoundingRectangle(point));
-		}
-		if(! this.boundingRectangles.containsKey(point)){
-			boundingRectangles.put(point, calculateBoundingRectangle(point));
-		}
-		
-		return boundingRectangles.get(point);
-	}
+//	public Rectangle getBoundingRectangle(BorderTag point) {
+//		
+//		if(this.boundingRectangles == null){
+//			boundingRectangles = new HashMap<BorderTag, Rectangle>();
+//			boundingRectangles.put(point, calculateBoundingRectangle(point));
+//		}
+//		if(! this.boundingRectangles.containsKey(point)){
+//			boundingRectangles.put(point, calculateBoundingRectangle(point));
+//		}
+//		
+//		return boundingRectangles.get(point);
+//	}
 	
 	/**
 	 * Find the bounding rectangle of the Nucleus. If the TopVertical and
@@ -359,10 +363,10 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * @return
 	 * @throws Exception
 	 */
-	protected Rectangle calculateBoundingRectangle(BorderTag point) {
+	protected Rectangle calculateBoundingRectangle(BorderTagObject point) {
 		ConsensusNucleus testw = new ConsensusNucleus( this, NucleusType.ROUND);
 
-		if(this.hasBorderTag(BorderTag.TOP_VERTICAL) && this.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+		if(this.hasBorderTag(BorderTagObject.TOP_VERTICAL) && this.hasBorderTag(BorderTagObject.BOTTOM_VERTICAL)){
 			
 			BorderPoint[] points = getBorderPointsForVerticalAlignment();
 
@@ -379,8 +383,8 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 
 	public BorderPoint[] getBorderPointsForVerticalAlignment(){
-		BorderPoint topPoint    = this.getBorderTag(BorderTag.TOP_VERTICAL);
-		BorderPoint bottomPoint = this.getBorderTag(BorderTag.BOTTOM_VERTICAL);
+		BorderPoint topPoint    = this.getBorderTag(BorderTagObject.TOP_VERTICAL);
+		BorderPoint bottomPoint = this.getBorderTag(BorderTagObject.BOTTOM_VERTICAL);
 		
 		if(topPoint==null || bottomPoint==null){
 			warn("Border points not found");
@@ -390,8 +394,8 @@ public class RoundNucleus extends AbstractCellularComponent
 		// Find the best line across the region
 		List<BorderPoint> pointsInRegion = new ArrayList<BorderPoint>();
 		
-		int topIndex  = this.getBorderIndex(BorderTag.TOP_VERTICAL);
-		int btmIndex  = this.getBorderIndex(BorderTag.BOTTOM_VERTICAL);
+		int topIndex  = this.getBorderIndex(BorderTagObject.TOP_VERTICAL);
+		int btmIndex  = this.getBorderIndex(BorderTagObject.BOTTOM_VERTICAL);
 		int totalSize = this.getProfile(ProfileType.ANGLE).size();
 		
 		NucleusBorderSegment region = new NucleusBorderSegment(topIndex, btmIndex, totalSize );
@@ -422,7 +426,12 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	public double getAspectRatio() {
 		try {
-			return this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getHeight() / this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getWidth();
+			double h = this.getVerticallyRotatedNucleus().getBounds().getHeight();
+			double w = this.getVerticallyRotatedNucleus().getBounds().getWidth();
+			
+			return h / w;
+			
+//			return this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getHeight() / this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getWidth();
 		} catch(Exception e){
 			return 0;
 		}
@@ -678,22 +687,22 @@ public class RoundNucleus extends AbstractCellularComponent
 	public double findRotationAngle(){
 		
 		double angle;
-		if(this.hasBorderTag(BorderTag.TOP_VERTICAL) && this.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+		if(this.hasBorderTag(BorderTagObject.TOP_VERTICAL) && this.hasBorderTag(BorderTagObject.BOTTOM_VERTICAL)){
 //			IJ.log("Calculating rotation angle via TopVertical");
-			XYPoint end = new XYPoint(this.getBorderTag(BorderTag.BOTTOM_VERTICAL).getXAsInt(),this.getBorderTag(BorderTag.BOTTOM_VERTICAL).getYAsInt()-50);
-			angle = Utils.findAngleBetweenXYPoints(end, this.getBorderTag(BorderTag.BOTTOM_VERTICAL), this.getBorderTag(BorderTag.TOP_VERTICAL));
+			XYPoint end = new XYPoint(this.getBorderTag(BorderTagObject.BOTTOM_VERTICAL).getXAsInt(),this.getBorderTag(BorderTagObject.BOTTOM_VERTICAL).getYAsInt()-50);
+			angle = Utils.findAngleBetweenXYPoints(end, this.getBorderTag(BorderTagObject.BOTTOM_VERTICAL), this.getBorderTag(BorderTagObject.TOP_VERTICAL));
 
 			
 		} else {
 //			IJ.log("Calculating rotation angle via OrientationPoint");
 			// Make a point directly below the orientation point
-			XYPoint end = new XYPoint(this.getBorderTag(BorderTag.ORIENTATION_POINT).getXAsInt(),this.getBorderTag(BorderTag.ORIENTATION_POINT).getYAsInt()-50);
+			XYPoint end = new XYPoint(this.getBorderTag(BorderTagObject.ORIENTATION_POINT).getXAsInt(),this.getBorderTag(BorderTagObject.ORIENTATION_POINT).getYAsInt()-50);
 
-		    angle = Utils.findAngleBetweenXYPoints(end, this.getBorderTag(BorderTag.ORIENTATION_POINT), this.getCentreOfMass());
+		    angle = Utils.findAngleBetweenXYPoints(end, this.getBorderTag(BorderTagObject.ORIENTATION_POINT), this.getCentreOfMass());
 
 		}
 		
-	    if(this.getCentreOfMass().getX() < this.getBorderTag(BorderTag.ORIENTATION_POINT).getX()){
+	    if(this.getCentreOfMass().getX() < this.getBorderTag(BorderTagObject.ORIENTATION_POINT).getX()){
 	      return angle;
 	    } else {
 	      return 0-angle;
@@ -740,9 +749,9 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 		if(type==ALL_POINTS || type==BORDER_TAGS){
 			result += "    Points of interest:\n";
-			Map<BorderTag, Integer> pointHash = this.getBorderTags();
+			Map<BorderTagObject, Integer> pointHash = this.getBorderTags();
 
-			for(BorderTag s : pointHash.keySet()){
+			for(BorderTagObject s : pointHash.keySet()){
 			 BorderPoint p = getBorderPoint(pointHash.get(s));
 			 result += "    "+s+": "+p.getX()+"    "+p.getY()+" at index "+pointHash.get(s)+"\n";
 			}
@@ -772,7 +781,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * @see no.nuclei.Nucleus#getAngleProfile(java.lang.String)
 	 * Returns a copy
 	 */
-	public SegmentedProfile getProfile(ProfileType type, BorderTag tag){
+	public SegmentedProfile getProfile(ProfileType type, BorderTagObject tag){
 		
 		// fetch the index of the pointType (the new zero)
 		int pointIndex = this.borderTags.get(tag);
@@ -819,7 +828,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			int frontPoints = 0;
 			int rearPoints = 0;
 
-			Profile profile = this.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
+			Profile profile = this.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
 
 			int midPoint = (int) (this.getBorderLength()/2) ;
 			for(int i=0; i<this.getBorderLength();i++){ // integrate points over 180
@@ -846,7 +855,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * @param pointType
 	 * @throws Exception
 	 */
-	public void setProfile(ProfileType type, BorderTag tag, SegmentedProfile p) throws Exception{
+	public void setProfile(ProfileType type, BorderTagObject tag, SegmentedProfile p) throws Exception{
 		
 		// fetch the index of the pointType (the zero of the input profile)
 		int pointIndex = this.borderTags.get(tag);
@@ -857,7 +866,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 
 	
-	public BorderPoint getBorderTag(BorderTag tag){
+	public BorderPoint getBorderTag(BorderTagObject tag){
 		BorderPoint result = new BorderPoint(0,0);
 		if(this.getBorderIndex(tag)>-1){
 			result = this.getBorderPoint((this.getBorderIndex(tag)));
@@ -867,23 +876,23 @@ public class RoundNucleus extends AbstractCellularComponent
 		return result;
 	}
 	
-	public BorderPoint getBorderPoint(BorderTag tag){
+	public BorderPoint getBorderPoint(BorderTagObject tag){
 		return getBorderTag(tag) ;
 	}
 		
-	public Map<BorderTag, Integer> getBorderTags(){
-		Map<BorderTag, Integer> result = new HashMap<BorderTag, Integer>();
-		for(BorderTag b : borderTags.keySet()){
+	public Map<BorderTagObject, Integer> getBorderTags(){
+		Map<BorderTagObject, Integer> result = new HashMap<BorderTagObject, Integer>();
+		for(BorderTagObject b : borderTags.keySet()){
 			result.put(b,  borderTags.get(b));
 		}
 		return result;
 	}
 	
-	public void setBorderTags(Map<BorderTag, Integer> m){
+	public void setBorderTags(Map<BorderTagObject, Integer> m){
 		this.borderTags = m;
 	}
 	
-	public int getBorderIndex(BorderTag tag){
+	public int getBorderIndex(BorderTagObject tag){
 		int result = -1;
 		if(this.borderTags.containsKey(tag)){
 			result = this.borderTags.get(tag);
@@ -892,29 +901,29 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	
-	public void setBorderTag(BorderTag tag, int i){
+	public void setBorderTag(BorderTagObject tag, int i){
 		this.borderTags.put(tag, i);
 		
 		// The intersection point should always be opposite the orientation point
-		if(tag.equals(BorderTag.ORIENTATION_POINT)){
+		if(tag.getTag().equals(BorderTagObject.ORIENTATION_POINT)){
 			int intersectionIndex = this.getBorderIndex(this.findOppositeBorder( this.getBorderPoint(i) ));
-			this.setBorderTag(BorderTag.INTERSECTION_POINT, intersectionIndex);
+			this.setBorderTag(BorderTagObject.INTERSECTION_POINT, intersectionIndex);
 			updateVerticallyRotatedNucleus(); // force an update
 		}
 		
-		if(tag.equals(BorderTag.TOP_VERTICAL) || tag.equals(BorderTag.BOTTOM_VERTICAL)){
+		if(tag.equals(BorderTagObject.TOP_VERTICAL) || tag.equals(BorderTagObject.BOTTOM_VERTICAL)){
 			updateVerticallyRotatedNucleus();
 		}
 	}
 	
-	public void setBorderTag(BorderTag reference, BorderTag tag, int i){
+	public void setBorderTag(BorderTagObject reference, BorderTagObject tag, int i){
 		int newIndex = getOffsetBorderIndex(reference, i);
 		this.setBorderTag(tag, newIndex);
 	}
 	
 	
 		
-	public boolean hasBorderTag(BorderTag tag){
+	public boolean hasBorderTag(BorderTagObject tag){
 		return this.borderTags.containsKey(tag);
 	}
 	
@@ -922,14 +931,14 @@ public class RoundNucleus extends AbstractCellularComponent
 		return this.borderTags.containsValue(index);
 	}
 	
-	public boolean hasBorderTag(BorderTag tag, int index){
+	public boolean hasBorderTag(BorderTagObject tag, int index){
 				
 		// remove offset
 		int newIndex = getOffsetBorderIndex(tag, index);
 		return this.hasBorderTag(newIndex);
 	}
 	
-	public int getOffsetBorderIndex(BorderTag reference, int index){
+	public int getOffsetBorderIndex(BorderTagObject reference, int index){
 		if(this.getBorderIndex(reference)>-1){
 			int newIndex =  AbstractCellularComponent.wrapIndex( index+this.getBorderIndex(reference) , this.getBorderLength() );
 			return newIndex;
@@ -937,14 +946,14 @@ public class RoundNucleus extends AbstractCellularComponent
 		return -1;
 	}
 	
-	public BorderTag getBorderTag(BorderTag tag, int index){
+	public BorderTagObject getBorderTag(BorderTagObject tag, int index){
 		int newIndex = getOffsetBorderIndex(tag, index);
 		return this.getBorderTag(newIndex);
 	}
 	
-	public BorderTag getBorderTag(int index){
+	public BorderTagObject getBorderTag(int index){
 
-		for(BorderTag b : this.borderTags.keySet()){
+		for(BorderTagObject b : this.borderTags.keySet()){
 			if(this.borderTags.get(b)==index){
 				return b;
 			}
@@ -1067,8 +1076,8 @@ public class RoundNucleus extends AbstractCellularComponent
 		this.setBorderList(reversed);
 
 		// replace the tag positions also
-		Set<BorderTag> keys = borderTags.keySet();
-		for( BorderTag s : keys){
+		Set<BorderTagObject> keys = borderTags.keySet();
+		for( BorderTagObject s : keys){
 			int index = borderTags.get(s);
 			int newIndex = this.getBorderLength() - index - 1; // if was 0, will now be <length-1>; if was length-1, will be 0
 			setBorderTag(s, newIndex);
@@ -1104,8 +1113,58 @@ public class RoundNucleus extends AbstractCellularComponent
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		finest("\tReading nucleus");
 		in.defaultReadObject();
-	    finest("\tCreating bounding rectangles for nucleus");
-	    this.boundingRectangles = new HashMap<BorderTag, Rectangle>();	  
+		
+		// Override to allow BorderTagObject creation from BorderTags
+//		
+//		Object ob = in.readObject();
+//		log(ob.getClass().getSimpleName());
+//		
+//		// Read the standard fields
+//		nucleusNumber          = in.readInt();
+//		angleWindowProportion  = in.readDouble();
+//		angleProfileWindowSize = in.readInt();
+//		pathLength             = in.readDouble();
+//		profileMap             = (Map<ProfileType, SegmentedProfile>) in.readObject();
+//		segmentList            = (List<NucleusBorderSegment>) in.readObject();
+//		
+//		Map<?, ?> borderObject    = (Map<?, ?>) in.readObject();
+//		boolean isObjectStyle = true;
+//		
+//		for (Object o : borderObject.keySet()){
+//			
+//			if(o instanceof BorderTagObject){
+//				isObjectStyle = true;
+//			} else {
+//				isObjectStyle = false;
+//			}
+//			
+//		}
+//		
+//		if(isObjectStyle){
+//			borderTags = (Map<BorderTagObject, Integer>) borderObject;
+//		} else {
+//			
+//			borderTags = new HashMap<BorderTagObject, Integer>();
+//			
+//			for (Object o : borderObject.keySet()){
+//				
+//				BorderTag b = (BorderTag) o;
+//				Integer i = (Integer) borderObject.get(o);
+//				
+//				borderTags.put(new BorderTagObject(b), i);
+//				
+//			}
+//			
+//		}
+//			
+//		segmentTags = (Map<String, Integer>) in.readObject();
+//		
+//		outputFolder = (String) in.readObject();
+//		signalCollection = (SignalCollection) in.readObject();
+
+		
+//	    finest("\tCreating bounding rectangles for nucleus");
+//	    this.boundingRectangles = new HashMap<BorderTagObject, Rectangle>();	  
 	    this.verticalNucleus    = null;
 	    updateVerticallyRotatedNucleus(); // force an update
 	    finest("\tRead nucleus");
@@ -1137,13 +1196,13 @@ public class RoundNucleus extends AbstractCellularComponent
 			
 			boolean useTVandBV = true;
 			
-			if(this.hasBorderTag(BorderTag.TOP_VERTICAL) && this.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+			if(this.hasBorderTag(BorderTagObject.TOP_VERTICAL) && this.hasBorderTag(BorderTagObject.BOTTOM_VERTICAL)){
 				
-				if( getBorderIndex(BorderTag.TOP_VERTICAL)== -1){
+				if( getBorderIndex(BorderTagObject.TOP_VERTICAL)== -1){
 					useTVandBV = false;
 				}
 				
-				if( getBorderIndex(BorderTag.BOTTOM_VERTICAL)== -1){
+				if( getBorderIndex(BorderTagObject.BOTTOM_VERTICAL)== -1){
 					useTVandBV = false;
 				}
 
@@ -1162,7 +1221,7 @@ public class RoundNucleus extends AbstractCellularComponent
 
 			} else {
 				
-				verticalNucleus.rotatePointToBottom(verticalNucleus.getBorderPoint(BorderTag.ORIENTATION_POINT));
+				verticalNucleus.rotatePointToBottom(verticalNucleus.getBorderPoint(BorderTagObject.ORIENTATION_POINT));
 
 			}
 			

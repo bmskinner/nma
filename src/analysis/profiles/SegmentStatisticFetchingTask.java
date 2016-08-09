@@ -30,6 +30,7 @@ import analysis.AbstractStatisticFetchingTask;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
@@ -106,7 +107,7 @@ public class SegmentStatisticFetchingTask extends AbstractStatisticFetchingTask 
 		for(int i=0, j=low; j<high; i++, j++){
 			
 			
-			NucleusBorderSegment segment = nuclei[j].getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT).getSegment(id);
+			NucleusBorderSegment segment = nuclei[j].getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegment(id);
 
 			  double perimeterLength = 0;
 			  if(segment!=null){

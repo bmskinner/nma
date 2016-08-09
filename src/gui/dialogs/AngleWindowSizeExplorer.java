@@ -50,6 +50,7 @@ import utility.Constants;
 import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
@@ -245,7 +246,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 			
 //			log(Level.INFO, "\tCalculated aggregate");
 			
-			for(BorderTag tag : dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getBorderTags()){
+			for(BorderTagObject tag : dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getBorderTags()){
 				pc.addIndex(tag, dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getIndex(tag));
 			}
 			
@@ -253,7 +254,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 			
 			// get the profile median
 			
-			Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+			Profile median = pc.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
 			
 //			log(Level.INFO, "\tMade median");
 			// add to the chart

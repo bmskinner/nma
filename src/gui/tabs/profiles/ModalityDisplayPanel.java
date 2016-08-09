@@ -33,6 +33,7 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 
 @SuppressWarnings("serial")
@@ -219,7 +220,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 				.setDatasets(getDatasets())
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
-				.setTag(BorderTag.REFERENCE_POINT)
+				.setTag(BorderTagObject.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType(type)
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -243,7 +244,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 				.setDatasets(getDatasets())
 				.setNormalised(false)
 				.setAlignment(ProfileAlignment.RIGHT)
-				.setTag(BorderTag.REFERENCE_POINT)
+				.setTag(BorderTagObject.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType(type)
 				.setModalityPosition(xvalue)

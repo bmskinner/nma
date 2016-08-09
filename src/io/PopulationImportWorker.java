@@ -26,6 +26,7 @@ import java.io.ObjectInputStream;
 import java.util.logging.Level;
 
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.nuclear.NucleusType;
 import analysis.AnalysisDataset;
@@ -95,7 +96,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 					
 					if(! dataset.getCollection()
 							.getProfileCollection(ProfileType.ANGLE)
-							.hasBorderTag(BorderTag.TOP_VERTICAL)  ){
+							.hasBorderTag(BorderTagObject.TOP_VERTICAL)  ){
 						
 						fine("TOP_ and BOTTOM_VERTICAL not assigned; calculating");
 						dataset.getCollection().getProfileManager().calculateTopAndBottomVerticals();

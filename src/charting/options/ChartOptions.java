@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import components.Cell;
 import components.CellularComponent;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import analysis.AnalysisDataset;
 
@@ -41,7 +42,7 @@ public class ChartOptions extends AbstractOptions {
 	
 	private boolean normalised         = false;
 	private ProfileAlignment alignment = ProfileAlignment.LEFT;
-	private BorderTag tag              = BorderTag.REFERENCE_POINT;
+	private BorderTagObject tag              = BorderTagObject.REFERENCE_POINT;
 	private boolean showMarkers        = false;
 	private boolean hideProfiles       = false;
 	private ProfileType type           = ProfileType.ANGLE;
@@ -103,11 +104,11 @@ public class ChartOptions extends AbstractOptions {
 		this.modalityPosition = modalityPosition;
 	}
 
-	public BorderTag getTag() {
+	public BorderTagObject getTag() {
 		return tag;
 	}
 
-	public void setTag(BorderTag tag) {
+	public void setTag(BorderTagObject tag) {
 		this.tag = tag;
 	}
 

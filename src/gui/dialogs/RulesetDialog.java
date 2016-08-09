@@ -26,6 +26,7 @@ import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import analysis.AnalysisDataset;
@@ -156,9 +157,9 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		RuleSetCollection c = dataset.getCollection().getRuleSetCollection();
 
 
-		Set<BorderTag> tags = c.getTags();
+		Set<BorderTagObject> tags = c.getTags();
 
-		for(BorderTag t : tags){
+		for(BorderTagObject t : tags){
 
 			if(c.hasRulesets(t)){
 
@@ -198,13 +199,13 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			RuleSetCollection collection = customCollections.get(s);
 			
 			RuleNodeData r = new RuleNodeData(s);
-			r.setTag(BorderTag.REFERENCE_POINT); // Always use reference point as tag for custom
+			r.setTag(BorderTagObject.REFERENCE_POINT); // Always use reference point as tag for custom
 			r.setCollection(collection);
 
 			DefaultMutableTreeNode node = new DefaultMutableTreeNode(r);
 			root.add( node );
 
-			for(RuleSet ruleSet : collection.getRuleSets(BorderTag.REFERENCE_POINT)){
+			for(RuleSet ruleSet : collection.getRuleSets(BorderTagObject.REFERENCE_POINT)){
 
 				RuleNodeData profileData = new RuleNodeData(ruleSet.getType().toString());
 				profileData.setRuleSet(ruleSet);
@@ -252,7 +253,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			
 			Rule r = data.getRule();
 			
-			Profile p = dataset.getCollection().getProfileCollection(data.getType()).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+			Profile p = dataset.getCollection().getProfileCollection(data.getType()).getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
 			BooleanProfile b = finder.getMatchingIndexes(p, r);
 			chart = MorphologyChartFactory.getInstance().createBooleanProfileChart(p, b);
 		}
@@ -260,7 +261,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		if(data.hasRuleSet()){
 			
 			RuleSet r = data.getRuleSet();
-			Profile p = dataset.getCollection().getProfileCollection(r.getType()).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+			Profile p = dataset.getCollection().getProfileCollection(r.getType()).getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
 			BooleanProfile b = finder.getMatchingIndexes(p, r);
 			chart = MorphologyChartFactory.getInstance().createBooleanProfileChart(p, b);
 		}
@@ -268,7 +269,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		if(data.hasRuleSetCollection()){
 			
 			RuleSetCollection c = data.getCollection();
-			Profile p = dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+			Profile p = dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
 			
 			BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(), c.getRuleSets(data.getTag()));
 			
@@ -287,7 +288,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		private RuleSet     ruleSet  = null;
 		private Rule        rule     = null;
 		private ProfileType type     = null;
-		private BorderTag   tag      = null;
+		private BorderTagObject   tag      = null;
 		private RuleSetCollection collection  = null;
 		
 		
@@ -311,7 +312,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			this.type = type;
 		}
 		
-		public void setTag(BorderTag tag){
+		public void setTag(BorderTagObject tag){
 			this.tag = tag;
 		}
 		
@@ -337,7 +338,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			this.collection = collection;
 		}
 
-		public BorderTag getTag() {
+		public BorderTagObject getTag() {
 			return tag;
 		}
 

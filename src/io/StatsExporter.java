@@ -29,6 +29,7 @@ import stats.NucleusStatistic;
 import analysis.AnalysisDataset;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
@@ -83,8 +84,8 @@ public class StatsExporter {
 		nuclearStats.addColumn("PATH_LENGTH",                collection.getPathLengths());
 		nuclearStats.addColumn("MEDIAN_DIST_BETWEEN_POINTS", collection.getMedianDistanceBetweenPoints());
 		nuclearStats.addColumn("MIN_FERET",                  collection.getNuclearStatistics(NucleusStatistic.MIN_DIAMETER, MeasurementScale.PIXELS));
-//		nuclearStats.addColumn("NORM_TAIL_INDEX",            collection.getBorderIndex(BorderTag.ORIENTATION_POINT));
-		nuclearStats.addColumn("DIFFERENCE_TO_MEDIAN",       collection.getDifferencesToMedianFromPoint(BorderTag.ORIENTATION_POINT));
+//		nuclearStats.addColumn("NORM_TAIL_INDEX",            collection.getBorderIndex(BorderTagObject.ORIENTATION_POINT));
+		nuclearStats.addColumn("DIFFERENCE_TO_MEDIAN",       collection.getDifferencesToMedianFromPoint(BorderTagObject.ORIENTATION_POINT));
 		nuclearStats.addColumn("PATH",                       collection.getNucleusImagePaths());
 		nuclearStats.export(filename+"."+collection.getName());
 	}
@@ -122,7 +123,7 @@ public class StatsExporter {
 			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 
 			ProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
-			List<NucleusBorderSegment> segs = pc.getSegments(BorderTag.ORIENTATION_POINT);
+			List<NucleusBorderSegment> segs = pc.getSegments(BorderTagObject.ORIENTATION_POINT);
 			for(NucleusBorderSegment segment : segs){
 				String s = segment.getName();
 
@@ -146,7 +147,7 @@ public class StatsExporter {
 		
 		try {
 
-			Profile normalisedMedian = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.ORIENTATION_POINT, 50);
+			Profile normalisedMedian = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.ORIENTATION_POINT, 50);
 			Profile interpolatedMedian = normalisedMedian.interpolate( (int)collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS));
 
 			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());

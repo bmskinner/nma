@@ -27,6 +27,7 @@ import analysis.profiles.Rule.RuleType;
 import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import logging.Loggable;
@@ -140,7 +141,7 @@ public class ProfileIndexFinder implements Loggable {
 	 * @param tag
 	 * @return -2 if the RuleSet list is empty; -1 if the index is not found; else the index
 	 */
-	public int identifyIndex(final CellCollection collection, final BorderTag tag){
+	public int identifyIndex(final CellCollection collection, final BorderTagObject tag){
 		
 		List<RuleSet> list = collection.getRuleSetCollection().getRuleSets(tag);
 		
@@ -202,7 +203,7 @@ public class ProfileIndexFinder implements Loggable {
 		// Make a 'true' profile
 		BooleanProfile indexes = new BooleanProfile(collection
 				.getProfileCollection(ProfileType.ANGLE)
-				.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN), true);
+				.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN), true);
 
 
 		for(RuleSet r : list){
@@ -210,7 +211,7 @@ public class ProfileIndexFinder implements Loggable {
 			// Get the correct profile for the RuleSet
 			Profile p = collection
 					.getProfileCollection(r.getType())
-					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+					.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
 
 			// Apply the rule, and update the result profile
 			BooleanProfile matchingIndexes = getMatchingIndexes(p, r);

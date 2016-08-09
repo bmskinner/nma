@@ -39,6 +39,7 @@ import java.util.List;
 
 import utility.Utils;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
@@ -107,11 +108,11 @@ public class AsymmetricNucleus
   */
   @Override
   public double findRotationAngle(){
-	  XYPoint end = new XYPoint(this.getPoint(BorderTag.ORIENTATION_POINT).getXAsInt(),this.getPoint(BorderTag.ORIENTATION_POINT).getYAsInt()-50);
+	  XYPoint end = new XYPoint(this.getPoint(BorderTagObject.ORIENTATION_POINT).getXAsInt(),this.getPoint(BorderTagObject.ORIENTATION_POINT).getYAsInt()-50);
 
-	  double angle = Utils.findAngleBetweenXYPoints(end, this.getPoint(BorderTag.ORIENTATION_POINT), this.getCentreOfMass());
+	  double angle = Utils.findAngleBetweenXYPoints(end, this.getPoint(BorderTagObject.ORIENTATION_POINT), this.getCentreOfMass());
 
-	  if(this.getCentreOfMass().getX() < this.getPoint(BorderTag.ORIENTATION_POINT).getX()){
+	  if(this.getCentreOfMass().getX() < this.getPoint(BorderTagObject.ORIENTATION_POINT).getX()){
 		  return angle;
 	  } else {
 		  return 0-angle;

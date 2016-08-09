@@ -46,6 +46,7 @@ import analysis.signals.SignalManager;
 import components.AbstractCellularComponent;
 import components.Cell;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.BorderTag.BorderTagType;
 import components.generic.ProfileType;
@@ -139,13 +140,13 @@ public class CellDatasetCreator implements Loggable {
 		NucleusType type = NucleusType.getNucleusType(n);
 
 		if(type!=null){
-//			for(BorderTag tag : n.getBorderTags().keySet()){
-			for(BorderTag tag : BorderTag.values()){
+//			for(BorderTagObject tag : n.getBorderTags().keySet()){
+			for(BorderTagObject tag : BorderTagObject.values()){
 				fieldNames.add(tag);
 				if(n.hasBorderTag(tag)){
 					
 					
-					int index = AbstractCellularComponent.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
+					int index = AbstractCellularComponent.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTagObject.REFERENCE_POINT), n.getBorderLength());
 					rowData.add(index);
 				} else {
 					rowData.add("N/A");
@@ -347,7 +348,7 @@ public class CellDatasetCreator implements Loggable {
 			 */
 			UUID segID = dataset.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 					.getSegmentAt(  options.getSegPosition()   )
 					.getID();
 			

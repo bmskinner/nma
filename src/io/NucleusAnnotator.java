@@ -39,6 +39,7 @@ import analysis.AnalysisDataset;
 import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.nuclear.NuclearSignal;
 import components.nuclear.BorderPoint;
@@ -121,8 +122,8 @@ public class NucleusAnnotator {
 		
 		ip.setColor(Color.CYAN);
 		ip.setLineWidth(3);
-		ip.drawDot( n.getBorderPoint(BorderTag.ORIENTATION_POINT).getXAsInt(), 
-				n.getBorderPoint(BorderTag.ORIENTATION_POINT).getYAsInt());
+		ip.drawDot( n.getBorderPoint(BorderTagObject.ORIENTATION_POINT).getXAsInt(), 
+				n.getBorderPoint(BorderTagObject.ORIENTATION_POINT).getYAsInt());
 	}
 
 	private static void annotateHead(ImagePlus image, Nucleus n){
@@ -130,8 +131,8 @@ public class NucleusAnnotator {
 		
 		ip.setColor(Color.YELLOW);
 		ip.setLineWidth(3);
-		ip.drawDot( n.getBorderPoint(BorderTag.REFERENCE_POINT).getXAsInt(), 
-				n.getBorderPoint(BorderTag.REFERENCE_POINT).getYAsInt());
+		ip.drawDot( n.getBorderPoint(BorderTagObject.REFERENCE_POINT).getXAsInt(), 
+				n.getBorderPoint(BorderTagObject.REFERENCE_POINT).getYAsInt());
 	}
 	
 	private static void annotateCoM(ImagePlus image, Nucleus n){

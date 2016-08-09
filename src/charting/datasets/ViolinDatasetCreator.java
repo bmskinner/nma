@@ -18,6 +18,7 @@ import charting.charts.ViolinCategoryDataset;
 import charting.options.ChartOptions;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
@@ -159,7 +160,7 @@ public class ViolinDatasetCreator implements Loggable {
 			
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
 
 
@@ -167,7 +168,7 @@ public class ViolinDatasetCreator implements Loggable {
 
 			for(Nucleus n : collection.getNuclei()){
 				
-				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT)
+				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());			
 
 				
@@ -208,14 +209,14 @@ public class ViolinDatasetCreator implements Loggable {
 			
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
 
 
 			List<Number> list = new ArrayList<Number>(0);
 
 			for(Nucleus n : collection.getNuclei()){
-				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
+				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
 				
 				NucleusBorderSegment seg = profile.getSegment(medianSeg.getID());
 				
