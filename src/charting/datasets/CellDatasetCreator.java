@@ -213,7 +213,7 @@ public class CellDatasetCreator implements Loggable {
 
 			Color colour = g.hasColour()
 					     ? g.getGroupColour()
-						 : ColourSelecter.getSegmentColor(j++);
+						 : ColourSelecter.getColor(j++);
 
 			tableCell.setColor(colour);
 

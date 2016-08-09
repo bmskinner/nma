@@ -22,12 +22,14 @@ package gui.tabs.segments;
 
 import gui.GlobalOptions;
 import gui.components.ExportableTable;
+import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.text.NumberFormat;
 import java.util.logging.Level;
 
@@ -151,7 +153,7 @@ public class SegmentStatsPanel extends DetailPanel {
 		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
 			//Cells are by default rendered as a JLabel.
-			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			Component l = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			// default cell colour is white
 			Color colour = Color.WHITE;
 
@@ -168,16 +170,15 @@ public class SegmentStatsPanel extends DetailPanel {
 					segment = 0;
 				}
 
-				ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
-				colour = swatch.color(segment);
+				colour = ColourSelecter.getColor(segment);
 				log(Level.FINEST, "SegmentTableCellRenderer for segment "+segment+" uses color "+colour);
 
 			}
 
-			String rowName = (String) table.getModel().getValueAt(row, 0);
+			String rowName = table.getModel().getValueAt(row, 0).toString();
 			if(rowName.equals("Length p(unimodal)") && column > 0){
 
-				String cellContents = l.getText();
+				String cellContents = ((JLabel) l).getText();
 
 				double pval;
 				try {

@@ -229,7 +229,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
                             
                             // Set the default colour for the signal group
                             int totalGroups = dataset.getCollection().getSignalGroups().size();
-                            Color colour = ColourSelecter.getSegmentColor(totalGroups);
+                            Color colour = ColourSelecter.getColor(totalGroups);
                             group.setGroupColour(colour);
                             
                             

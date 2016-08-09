@@ -343,7 +343,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 							return;
 						}
 						
-						Color colour = ColourSelecter.getSegmentColor(clusterNumber++);
+						Color colour = ColourSelecter.getColor(clusterNumber++);
 						setNodeColour(cluster.getCollection(), colour);
 
 						log(Level.FINER, "Node colours assigned");	

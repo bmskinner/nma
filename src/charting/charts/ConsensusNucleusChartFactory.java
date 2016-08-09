@@ -270,7 +270,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 				
 				if(showIQR){
 					plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
-					Color colour = swatch.color(segIndex);
+					Color colour = ColourSelecter.getColor(segIndex);
 					plot.getRenderer().setSeriesPaint(i, colour);
 					
 				} else {
@@ -315,7 +315,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			// in this context, segment colour refers to the entire
 			// dataset colour (they use the same pallates in ColourSelecter)
 			Color color = d.getDatasetColour() == null 
-						? ColourSelecter.getSegmentColor(i)
+						? ColourSelecter.getColor(i)
 						: d.getDatasetColour();
 
 			// get the group id from the name, and make colour

@@ -795,11 +795,7 @@ public class AnalysisDataset implements Serializable {
 	 * @return
 	 */
 	public boolean hasDatasetColour(){
-		if(this.getDatasetColour()==null){
-			return false;
-		} else {
-			return true;
-		}
+		return this.getDatasetColour()!=null;
 	}
 
 	/**

@@ -197,7 +197,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
                 
                 Color colour = collection.getSignalGroup(signalGroup).hasColour()
                         ? collection.getSignalGroup(signalGroup).getGroupColour()
-                        : ColourSelecter.getSegmentColor(j++);
+                        : ColourSelecter.getColor(j++);
                 
                 cell.setColor(colour);
                 
@@ -231,7 +231,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
                 
                 Color colour = collection.getSignalGroup(signalGroup).hasColour()
                         ? collection.getSignalGroup(signalGroup).getGroupColour()
-                        : ColourSelecter.getSegmentColor(j++);
+                        : ColourSelecter.getColor(j++);
                 
                 cell.setColor(colour);
                 
@@ -611,7 +611,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
                     
                     Color colour = collection.getSignalGroup(signalGroup).hasColour()
                             ? collection.getSignalGroup(signalGroup).getGroupColour()
-                            : ColourSelecter.getSegmentColor(k++);
+                            : ColourSelecter.getColor(k++);
                     
                     cell.setColor(colour);
                     

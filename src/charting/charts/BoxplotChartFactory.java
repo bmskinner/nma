@@ -153,7 +153,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
 
 				Color color = options.getDatasets().get(series).getDatasetColour() == null 
-						? ColourSelecter.getSegmentColor(series)
+						? ColourSelecter.getColor(series)
 								: options.getDatasets().get(series).getDatasetColour();
 
 						renderer.setSeriesPaint(series, color);
@@ -222,7 +222,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 
 					Color color = d.getCollection().getSignalGroup(signalGroup).hasColour()
 							    ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
-								: ColourSelecter.getSegmentColor(row);
+								: ColourSelecter.getColor(row);
 							    
 					    renderer.setSeriesPaint(series, color);
 						series++;
@@ -249,7 +249,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 
 			Color color = d.hasDatasetColour()
 						? d.getDatasetColour()
-						: ColourSelecter.getSegmentColor(i);
+						: ColourSelecter.getColor(i);
 						
 						renderer.setSeriesPaint(i, color);
 		}

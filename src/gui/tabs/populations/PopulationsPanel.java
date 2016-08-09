@@ -421,7 +421,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * @param row
 	 */
 	private void changeDatasetColour(AnalysisDataset dataset, int row){
-		Color oldColour = ColourSelecter.getSegmentColor( row );
+		Color oldColour = ColourSelecter.getColor( row );
 		
 		Color newColor = JColorChooser.showDialog(
 				PopulationsPanel.this,
@@ -546,8 +546,12 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 		// Update the table colours
 		List<Integer> selectedIndexes = getSelectedDatasetIndexes();
-		treeTable.getColumnModel().getColumn(COLUMN_COLOUR).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
-//		treeTable.repaint();
+		PopulationTableCellRenderer rend = (PopulationTableCellRenderer) treeTable.getColumnModel().getColumn(COLUMN_COLOUR).getCellRenderer();
+		rend.update(selectedIndexes);
+	}
+	
+	public void repaintTreeTable(){
+		treeTable.repaint();
 	}
 	
 	public void selectDataset(UUID id){

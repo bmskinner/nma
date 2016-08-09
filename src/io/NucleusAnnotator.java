@@ -18,6 +18,7 @@
  *******************************************************************************/
 package io;
 
+import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 import ij.IJ;
 import ij.ImagePlus;
@@ -178,8 +179,7 @@ public class NucleusAnnotator {
 					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
 
 					// avoid colour wrapping when segment number is 1 more than the colour list
-					Color color = swatch.color(i);
-//					Color color = i==0 && n.getAngleProfile().getSegments().size()==9 ? Color.MAGENTA : ColourSelecter.getOptimisedColor(i);
+					Color color = ColourSelecter.getColor(i);
 
 					ip.setColor(color);
 					ip.setLineWidth(2);

@@ -445,8 +445,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				if(hash.get(key).equals("Nucleus")){
 					String name = (String) plot.getDataset(key).getSeriesKey(i);
 					int colourIndex = getIndexFromLabel(name);
-					
-					plot.getRenderer().setSeriesPaint(i, dataset.getSwatch().color(colourIndex));
+					Color colour = ColourSelecter.getColor(colourIndex);
+					plot.getRenderer().setSeriesPaint(i, colour);
 					
 					/*
 					 * Add a line between the top and bottom vertical points
@@ -503,7 +503,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					UUID seriesGroup = getSignalGroupFromLabel(hash.get(key));
                     Color colour = dataset.getCollection().getSignalGroup(seriesGroup).hasColour()
                     		     ? dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour()
-                    		     : ColourSelecter.getSegmentColor(i);
+                    		     : ColourSelecter.getColor(i);
 
 					plot.getRenderer(key).setSeriesPaint(i, colour);
 				}
@@ -861,7 +861,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 			Color colour = dataset.hasDatasetColour()
 					? dataset.getDatasetColour()
-					: ColourSelecter.getSegmentColor(datasetNumber++);
+					: ColourSelecter.getColor(datasetNumber++);
 			
 			XYLineAndShapeRenderer r = new XYLineAndShapeRenderer(true, false);
 			r.setBaseSeriesVisibleInLegend(false);

@@ -123,7 +123,7 @@ private static ViolinChartFactory instance = null;
 
 				renderer.setSeriesVisibleInLegend(series, false);
 				Color color = options.getDatasets().get(series).getDatasetColour() == null 
-						? ColourSelecter.getSegmentColor(series)
+						? ColourSelecter.getColor(series)
 								: options.getDatasets().get(series).getDatasetColour();
 
 						renderer.setSeriesPaint(series, color);
@@ -196,7 +196,7 @@ private static ViolinChartFactory instance = null;
 
 					Color color = d.getCollection().getSignalGroup(signalGroup).hasColour()
 							    ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
-								: ColourSelecter.getSegmentColor(row);
+								: ColourSelecter.getColor(row);
 							    
 					    renderer.setSeriesPaint(series, color);
 						series++;
@@ -240,7 +240,7 @@ private static ViolinChartFactory instance = null;
 			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
 
 				Color color = options.getDatasets().get(series).getDatasetColour() == null 
-						? ColourSelecter.getSegmentColor(series)
+						? ColourSelecter.getColor(series)
 								: options.getDatasets().get(series).getDatasetColour();
 
 						renderer.setSeriesPaint(series, color);

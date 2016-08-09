@@ -144,7 +144,7 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 				}
 				
 				int segIndex = AbstractChartFactory.getIndexFromLabel (seg.getName());
-				ip.setColor(ColourSelecter.getSegmentColor(segIndex));
+				ip.setColor(ColourSelecter.getColor(segIndex));
 				
 				PolygonRoi segRoi = new PolygonRoi(x, y, PolygonRoi.POLYLINE);
 				

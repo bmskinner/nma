@@ -282,7 +282,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
         		
 		for(int series=0;series<ds.getSeriesCount(); series++){
 			XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer();
-			rend.setSeriesOutlinePaint(series, ColourSelecter.getSegmentColor(datasetCount));
+			rend.setSeriesOutlinePaint(series, ColourSelecter.getColor(datasetCount));
 			rend.setSeriesShapesVisible(series, false);
 			rend.setSeriesLinesVisible(series, true);
 			rend.setSeriesStroke(series, ChartComponents.MARKER_STROKE);

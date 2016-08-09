@@ -82,7 +82,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 	            
 	            Color colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
 	                         ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
-	                         : ColourSelecter.getSegmentColor(j);
+	                         : ColourSelecter.getColor(j);
 	            
 
 				rend.setSeriesPaint(j, colour);
@@ -151,7 +151,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 				UUID seriesGroup = getSignalGroupFromLabel(name);
                 Color colour = options.firstDataset().getCollection().getSignalGroup(seriesGroup).hasColour()
                         ? options.firstDataset().getCollection().getSignalGroup(seriesGroup).getGroupColour()
-                        : ColourSelecter.getSegmentColor(series);
+                        : ColourSelecter.getColor(series);
 
 				rend.setSeriesPaint(series, colour);
 				rend.setBaseLinesVisible(false);
@@ -171,7 +171,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 
                 Color colour = options.firstDataset().getCollection().getSignalGroup(signalGroup).hasColour()
                         ? options.firstDataset().getCollection().getSignalGroup(signalGroup).getGroupColour()
-                        : ColourSelecter.getSegmentColor(j++);
+                        : ColourSelecter.getColor(j++);
 
 
 				for(Shape s : shapes){

@@ -422,6 +422,7 @@ public class MainWindow
 		Runnable task = () -> {
 			try {
 
+				populationsPanel.repaintTreeTable();
 				for(DetailPanel panel : MainWindow.this.detailPanels){
 					panel.update(list);
 				}

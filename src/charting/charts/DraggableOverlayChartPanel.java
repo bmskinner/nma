@@ -113,7 +113,7 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 				int i=0;
 				for(NucleusBorderSegment seg : profile.getOrderedSegments()){
 
-					Color colour = ColourSelecter.getSegmentColor(i++);
+					Color colour = ColourSelecter.getColor(i++);
 					if(seg.isStartPositionLocked()){
 						colour = Color.DARK_GRAY;
 					}

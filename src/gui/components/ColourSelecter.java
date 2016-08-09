@@ -21,98 +21,75 @@ package gui.components;
 import gui.GlobalOptions;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ColourSelecter {
-	
-	public static final int REGULAR_SWATCH 		= 0; // segmentColourList
-	public static final int NO_SWATCH 			= 1; // black
-	public static final int ACCESSIBLE_SWATCH 	= 2; // colour blind optimisedSwatchList
-	
-	public static List<Color> segmentColourList = new ArrayList<Color>(0);
-	
-	public static List<Color> signalColourList = new ArrayList<Color>(0);
-	
-	public static List<Color> optimisedSwatchList = new ArrayList<Color>(0);
-	
-	public static List<Color> blackList = new ArrayList<Color>(0);
-	
-	// these are the colours for segments in the order they will loop
-	static {
 
-//		 Regular
-		segmentColourList.add(Color.BLUE);
-		segmentColourList.add(Color.ORANGE);
-		segmentColourList.add(Color.GREEN);
-		segmentColourList.add(Color.MAGENTA);
-		segmentColourList.add(Color.DARK_GRAY);
-		segmentColourList.add(Color.CYAN);
-		segmentColourList.add(Color.RED);
-		segmentColourList.add(Color.YELLOW);
-		segmentColourList.add(Color.PINK);
-		segmentColourList.add( new Color(0,153,0)); // lime green
-		segmentColourList.add(new Color(135,206,235)); // sky blue
-				
-		// Colours for signals in nuclei
-		signalColourList.add(Color.RED);
-		signalColourList.add(Color.GREEN);
-		signalColourList.add(Color.CYAN);
-		signalColourList.add(Color.MAGENTA);
-		signalColourList.add(Color.YELLOW);
-		signalColourList.add(Color.LIGHT_GRAY);
+	public static Color[] segmentColourList = {
+			
+			Color.BLUE,
+			Color.ORANGE,
+			Color.GREEN,
+			Color.MAGENTA,
+			Color.DARK_GRAY,
+			Color.CYAN,
+			Color.RED,
+			Color.YELLOW,
+			Color.PINK,
+			new Color(0,153,0),    // lime green
+			new Color(135,206,235) // sky blue
+	};
+	
+	// Colours for FISH signals in nuclei
+	public static Color[] signalColourList = {
+			Color.RED,
+			Color.GREEN,
+			Color.CYAN,
+			Color.MAGENTA,
+			Color.YELLOW,
+			Color.LIGHT_GRAY
+	};
 		
-//		Color blind friendly swatch
-		// See http://optional.is/required/2011/06/20/accessible-color-swatches/
-		optimisedSwatchList.add(Color.decode("#fff200"));
-		optimisedSwatchList.add(Color.decode("#006f45"));
-		optimisedSwatchList.add(Color.decode("#f7941e"));
-		optimisedSwatchList.add(Color.decode("#008fd5"));
-		optimisedSwatchList.add(Color.decode("#abd69c"));
-		optimisedSwatchList.add(Color.decode("#741472"));
-		
-		// no segments shown
-		blackList.add(Color.BLACK);
-
-	}
+//	Color blind friendly swatch
+//	 See http://optional.is/required/2011/06/20/accessible-color-swatches/
+	public static Color[] optimisedSwatchList = {
+			Color.decode("#fff200"),
+			Color.decode("#006f45"),
+			Color.decode("#f7941e"),
+			Color.decode("#008fd5"),
+			Color.decode("#abd69c"),
+			Color.decode("#741472")
+	};
+	
+	public static Color[] blackList = {
+			Color.BLACK
+	};
+	
 	
 	public enum ColourSwatch {
 		REGULAR_SWATCH 	  ("Regular", 	segmentColourList), 
 		NO_SWATCH		  ("No colours"	, blackList),
 		ACCESSIBLE_SWATCH ("Acessible colours", optimisedSwatchList);
 		
-	    private final String asString;   
-	    private final List<Color> colours;
+	    private final String  name;   
+	    private final Color[] colours;
 	    
-	    ColourSwatch(String value, List<Color> colours) {
-	        this.asString = value;
+	    ColourSwatch(String value, Color[] colours) {
+	        this.name = value;
 	        this.colours = colours;
 		}
 	    
 	    public String toString(){
-	    	return this.asString;
-	    }
-	    
-	    public Color color(int index){
-	    	return colours.get(index % colours.size());
+	    	return this.name;
 	    }
 	}
-	
-	public static int getSegmentListSize(){
-		return ColourSelecter.segmentColourList.size();
-	}
-	
-	public static int getSignalListSize(){
-		return ColourSelecter.signalColourList.size();
-	}
-		
+	    		
 	/**
-	 * Get an appropriate segment colour for the given number.
-	 * Loops through 8 colours.
+	 * Get an appropriate segment colour for the given number,
+	 * and the current swatch
 	 * @param i the number of the colour to return
 	 * @return a colour
 	 */
-	public static Color getSegmentColor(int i){	
+	public static Color getColor(int i){	
 		
 		Color color = null;
 		ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
@@ -143,7 +120,7 @@ public class ColourSelecter {
 	 * @return a colour
 	 */
 	private static Color getRegularColor(int i){		
-		return ColourSelecter.segmentColourList.get(i % ColourSelecter.segmentColourList.size());
+		return ColourSelecter.segmentColourList[i % ColourSelecter.segmentColourList.length];
 	}
 	
 	/**
@@ -155,7 +132,7 @@ public class ColourSelecter {
 	 * @return a colour
 	 */
 	private static Color getOptimisedColor(int i){		
-		Color color = ColourSelecter.optimisedSwatchList.get(i % ColourSelecter.optimisedSwatchList.size());
+		Color color = ColourSelecter.optimisedSwatchList[i % ColourSelecter.optimisedSwatchList.length];
 		return color;
 	}
 	
@@ -168,7 +145,7 @@ public class ColourSelecter {
 	 */
 	public static Color getSignalColour(int channel, boolean transparent, int defaultAlpha){
 		Color result;
-		Color color = ColourSelecter.signalColourList.get(channel % ColourSelecter.signalColourList.size());
+		Color color = ColourSelecter.signalColourList[channel % ColourSelecter.signalColourList.length];
 		result = transparent ? new Color(color.getRed(),color.getGreen(),color.getBlue(),defaultAlpha) : color;
 		return result;
 	}

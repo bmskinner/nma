@@ -137,7 +137,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			renderer.setSeriesLinesVisible(i, false);
 			renderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
 			
-			Color colour = ColourSelecter.getSegmentColor(i);
+			Color colour = ColourSelecter.getColor(i);
 			
 			if(options.getDatasets().get(i).hasDatasetColour()){
 				colour = options.getDatasets().get(i).getDatasetColour();
@@ -188,7 +188,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			String datasetName = split[0];
 			UUID id = UUID.fromString(split[1]);
 			
-			Color colour = ColourSelecter.getSegmentColor(i);
+			Color colour = ColourSelecter.getColor(i);
 			
 			for(AnalysisDataset d : options.getDatasets()){
 				if(d.getName().equals(datasetName)){
