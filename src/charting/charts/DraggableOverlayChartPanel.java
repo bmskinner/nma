@@ -64,6 +64,8 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 
 	public DraggableOverlayChartPanel(final JFreeChart chart, final SegmentedProfile profile, boolean normalised){
 		super(chart);
+		chart.getXYPlot().getDomainAxis().setVisible(true);
+		chart.getXYPlot().getRangeAxis().setVisible(true);
 		this.profile = profile;
 		this.isChartNormalised = normalised;
 		updateOverlays();
@@ -145,6 +147,8 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 	
 	public void setChart(JFreeChart chart, SegmentedProfile profile, boolean normalised){
 		super.setChart(chart);
+		chart.getXYPlot().getDomainAxis().setVisible(true);
+		chart.getXYPlot().getRangeAxis().setVisible(true);
 		clearOverlays();
 		this.profile = profile;
 		this.isChartNormalised = normalised;
