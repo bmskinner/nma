@@ -339,7 +339,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		table.setEnabled(true);
 		table.setCellSelectionEnabled(false);
 		table.setColumnSelectionAllowed(false);
+		table.getTableHeader().setReorderingAllowed(false);
 		table.setRowSelectionAllowed(true);
+		table.setAutoCreateColumnsFromModel(false);
 		table.getColumnModel().getColumn(COLUMN_COLOUR).setCellRenderer(new PopulationTableCellRenderer());
 		table.getColumnModel().getColumn(COLUMN_NAME).setPreferredWidth(120);
 		table.getColumnModel().getColumn(COLUMN_COLOUR).setPreferredWidth(5);
