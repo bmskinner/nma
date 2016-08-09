@@ -35,7 +35,8 @@ import charting.ChartComponents;
 /**
  * This class takes a chart and adds a single draggable domain
  * rectangle overlay. The overlay moves with the mouse when dragged,
- * and fires a SignalChangeEvent when the overlay is released.
+ * and fires a SignalChangeEvent when the overlay is released requesting that
+ * listeners update positions based on the new rectangle location.
  * @author bms41
  *
  */
@@ -151,6 +152,10 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 //	    		log("Mouse down");
 	    		mouseIsDown = true;
 	    		
+	    		if(cursorIsOverMinEdge(x, y)){
+					// drag to change the overlay width
+				} 
+	    		
 	    		if (cursorIsOverRectangle(x, y)) {
 //	    			log("Cursor is over rectangle");
 	    		
@@ -185,14 +190,19 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		final int y = e.getY();
 				
 		if( ! mouseIsDown){ // Mouse is up
+			
+//			if(cursorIsOverMinEdge(x, y)){
+//				this.setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
+//			} else {
 
-			if (cursorIsOverRectangle(x, y)) {
+				if (cursorIsOverRectangle(x, y)) {
 
-				this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				
-			} else {
-				this.setCursor(Cursor.getDefaultCursor());
-			}
+					this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+				} else {
+					this.setCursor(Cursor.getDefaultCursor());
+				}
+//			}
 		}
 	}
 	
@@ -227,6 +237,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		xRectangle.setMinValue(moveMin);
 		xRectangle.setMaxValue(moveMax);
 //		finest("Set rectangle min and max: "+moveMin+" & "+moveMax);
+		fireSignalChangeEvent("UpdatePosition");
 	}
 	
 		
@@ -302,6 +313,32 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		}
 //		
 		return isOverLine;
+	}
+	
+	public boolean cursorIsOverMinEdge(int x, int y){
+		Rectangle2D dataArea = this.getScreenDataArea(); 
+		ValueAxis xAxis = this.getChart().getXYPlot().getDomainAxis();
+		boolean isOverEdge = false;
+		
+		// Turn the chart coordinates into screen coordinates
+		double rectangleMinX = xAxis.valueToJava2D(xRectangle.getMinValue(), dataArea, 
+						RectangleEdge.BOTTOM)-2;
+		
+		double rectangleMaxX = xAxis.valueToJava2D(xRectangle.getMinValue(), dataArea, 
+				RectangleEdge.BOTTOM)+2;
+
+		double rectangleW = rectangleMaxX - rectangleMinX;
+		
+		final Rectangle bounds = new Rectangle( (int)rectangleMinX, 
+				(int) dataArea.getMinY(), 
+				(int) rectangleW,   
+				(int) dataArea.getHeight() );
+
+		if (bounds != null && bounds.contains(x, y)) {
+			isOverEdge = true;
+		}
+		return isOverEdge;
+		
 	}
 	
     protected synchronized void fireSignalChangeEvent(String message) {
