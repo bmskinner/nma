@@ -30,6 +30,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 
+import gui.dialogs.MessagingDialog;
 import logging.Loggable;
 
 /**
@@ -39,7 +40,7 @@ import logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public abstract class LoadingIconDialog extends JDialog implements Loggable {
+public abstract class LoadingIconDialog extends MessagingDialog implements Loggable {
 	
 	private static final String LOADING_GIF_NAME = "ajax-loader.gif";
 	private static final String BLANK_GIF_NAME   = "blank.gif";

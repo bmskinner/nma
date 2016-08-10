@@ -14,7 +14,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -58,9 +61,6 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 	
 	private JTree tree;
 	
-	private final List<Object> datasetListeners 	= new ArrayList<Object>();
-	private final List<Object> interfaceListeners 	= new ArrayList<Object>();
-	
 	private Map<String, RuleSetCollection> customCollections = new HashMap<String, RuleSetCollection>();
 	
 	public RulesetDialog (AnalysisDataset dataset){
@@ -72,7 +72,9 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		
 		JPanel westPanel = createWestPanel();
 		JPanel sidePanel = createChartPanel();
+		JPanel headPanel = createHeader();
 		
+		this.add(headPanel, BorderLayout.NORTH);
 		this.add(westPanel, BorderLayout.WEST);
 		this.add(sidePanel, BorderLayout.CENTER);
 		
@@ -108,6 +110,24 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		
 		return panel;
 		
+	}
+	
+	private JPanel createHeader(){
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		panel.setBorder( BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		
+		JLabel label0 = new JLabel("This window displays the rules that are used to find points in the outlines of nuclei");
+		JLabel label1 = new JLabel("Double click a border point name to replace an existing ruleset");
+		JLabel label2 = new JLabel("Experiment with rules via 'Custom ruleset' - these can be saved when you close this window");
+		JLabel label3 = new JLabel("Rules are combined via the logical AND operator ('ANDed') to determine final valid positions");
+		
+		panel.add(label0);
+		panel.add(label1);
+		panel.add(label2);
+		panel.add(label3);
+		
+		return panel;
 	}
 	
 	private JPanel createFooter(){
@@ -165,6 +185,10 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 	}
 	
 	
+	/**
+	 * Recreate the tree model from the dataset border tags and any custom collections
+	 * in this dialog
+	 */
 	private void updateTreeNodes(){
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode(new RuleNodeData(dataset.getName()));
 		
@@ -181,20 +205,51 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 	
 	private void askToSaveCustomPoints(){
 		
-		Object[] options = { "Save new RuleSets" , "Discard RuleSets", };
+		Object[] options = { "Save new rulesets" , "Discard rulesets", };
 		int save = JOptionPane.showOptionDialog(null,
-				"Do you want to save custom RuleSet(s)?", 
-				"Save RuleSets?",
+				"Do you want to save some or all custom ruleset(s)?", 
+				"Save rulesets?",
 				JOptionPane.DEFAULT_OPTION, 
 				JOptionPane.QUESTION_MESSAGE,
 				null, options, options[0]);
 		
 		if(save==0){
+			saveCustomPoints();
 			
-			// make a dialog of custom sets to save
+		}
+		
+	}
+	
+	private void saveCustomPoints(){
+		// make a dialog of custom sets to save
+		// checkbox to save; name field to edit; existing name
+		RulesetSaveDialog d = new RulesetSaveDialog(this, customCollections);
+		
+		if(d.isReadyToRun()){
+			// get selected sets
+			
+			RuleSetCollection r = d.getSelected();
+//			log(r.toString());
+			
+			for(BorderTagObject tag : r.getTags()){
+				
+				if(r.hasRulesets(tag)){
+					
+					dataset.getCollection().getRuleSetCollection().setRuleSets(tag, r.getRuleSets(tag));
+					updateBorderTagAction(tag);
+				}
+				
+			}
 			
 			// add the custom sets to the dataset
+			
+			// trigger a point finding for cells
+			
+			
+		} else {
+			fine("Save was cancelled");
 		}
+		
 		
 	}
 	
@@ -267,8 +322,11 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 
 
 		Set<BorderTagObject> tags = c.getTags();
+		
+		List<BorderTagObject> sortedList = new ArrayList<BorderTagObject>(tags);
+		Collections.sort(sortedList);
 
-		for(BorderTagObject t : tags){
+		for(BorderTagObject t : sortedList){
 
 			if(c.hasRulesets(t)){
 
@@ -395,65 +453,6 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		chartPanel.setChart(chart);
 		
 	}
-	
-	public synchronized void addDatasetEventListener( DatasetEventListener l ) {
-    	datasetListeners.add( l );
-    }
-    
-    public synchronized void removeDatasetEventListener( DatasetEventListener l ) {
-    	datasetListeners.remove( l );
-    }
-    
-    public synchronized void addInterfaceEventListener( InterfaceEventListener l ) {
-    	interfaceListeners.add( l );
-    }
-    
-    public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
-    	interfaceListeners.remove( l );
-    }
-    
-    
-    protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list) {
-    	
-        DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);
-        Iterator<Object> iterator = datasetListeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
-        }
-    }
-    
-    protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list, AnalysisDataset template) {
-
-    	DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, template);
-    	Iterator<Object> iterator = datasetListeners.iterator();
-    	while( iterator.hasNext() ) {
-    		( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
-    	}
-    }
-    
-    protected synchronized void fireDatasetEvent(DatasetEvent event) {
-    	Iterator<Object> iterator = datasetListeners.iterator();
-    	while( iterator.hasNext() ) {
-    		( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
-    	}
-    }
-    
-    protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
-    	
-    	InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());
-        Iterator<Object> iterator = interfaceListeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
-        }
-    }
-    
-    protected synchronized void fireInterfaceEvent(InterfaceEvent event) {
-
-        Iterator<Object> iterator = interfaceListeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
-        }
-    }
 		
 	public class RuleNodeData {
 		private String      name     = null;

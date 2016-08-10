@@ -14,13 +14,11 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -28,9 +26,9 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.Border;
 
 import logging.Loggable;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import analysis.profiles.Rule;
 import analysis.profiles.Rule.RuleType;
@@ -105,7 +103,8 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 		
 		// Add a panel to the main panel with a profile type, and button to add a rule
 		RuleSetPanel ruleSetPanel = new RuleSetPanel();	
-		ruleSetPanel.setBorder(BorderFactory.createTitledBorder("Ruleset"));
+		Border border = BorderFactory.createLineBorder(Color.DARK_GRAY);
+		ruleSetPanel.setBorder(BorderFactory.createTitledBorder(border, "Ruleset"));
 		mainPanel.add(ruleSetPanel);
 		mainPanel.add(Box.createVerticalGlue());
 		mainPanel.revalidate();
@@ -218,15 +217,12 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 		
 									
 		public RuleSet getRuleSet(){
-//			log("Getting ruleset");
 			RuleSet r = new RuleSet(profileOptions.getSelected());
 			for(RulePanel panel : rules){
 				Rule rule = panel.getRule();
-//				log("  Adding rule "+rule.toString());
 				r.addRule(rule);
 			}
-//			log("Ruleset final:");
-//			log(r.toString());
+
 			return r;
 		}
 		
@@ -241,11 +237,12 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 		
 		private final Dimension PANEL_MAX_DIMENSION = new Dimension(600, 50);
 		private final Dimension PANEL_MIN_DIMENSION = new Dimension(400, 50);
+		
+		private final Color BACKGROUND_COLOUR = Color.LIGHT_GRAY;
 				
 		private RuleSetPanel parent;
 		
 		List<JComponent> components = new ArrayList<JComponent>();
-//		List<JSpinner> spinners = new ArrayList<JSpinner>();
 		
 		public RulePanel(RuleSetPanel parent){
 			this.parent = parent;
@@ -272,21 +269,10 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 				this.add(component);
 			}
 
-			
-			// Using spinners
-//			JSpinner s = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
-//			s.setToolTipText("1=True; 0=False");
-//			
-//			spinners.add(   s   );
-//			
-//			for(JSpinner spinner : spinners){
-//				spinner.setPreferredSize(SPINNER_DIMENSION);
-//				this.add(spinner);
-//			}
-//			
 			typeBox.addActionListener(this);
 			
-			this.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+			this.setBorder(BorderFactory.createLineBorder(BACKGROUND_COLOUR));
+			this.setBackground(BACKGROUND_COLOUR);
 			this.setMaximumSize(PANEL_MAX_DIMENSION);
 			this.setMinimumSize(PANEL_MIN_DIMENSION);
 			this.setPreferredSize(PANEL_MIN_DIMENSION);
@@ -311,13 +297,6 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 						values.add(value);
 					}
 				}
-				
-//				for(JSpinner spinner : spinners){
-//					spinner.commitEdit();
-//					double value = ((SpinnerNumberModel )spinner.getModel()).getNumber().doubleValue();
-//					values.add(value);
-//				}
-
 
 				double first = values.get(0);
 				RuleType type = (RuleType) typeBox.getSelectedItem();
@@ -491,6 +470,12 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 			public TrueFalsePanel(){
 				this.setLayout(new FlowLayout());
 				this.setPreferredSize(PANEL_DIMENSION);
+				
+				this.setBackground(BACKGROUND_COLOUR);
+				trueButton.setBackground(BACKGROUND_COLOUR);
+				falseButton.setBackground(BACKGROUND_COLOUR);
+				
+				
 				group.add(trueButton);
 				group.add(falseButton);
 				

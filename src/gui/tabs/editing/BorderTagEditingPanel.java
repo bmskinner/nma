@@ -351,7 +351,8 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
     	super.interfaceEventReceived(event);// Pass messages upwards
     	
     	if(event.getSource() instanceof RulesetDialog){
-    		fireInterfaceEvent(event);
+    		fine("Heard interface event");
+    		fireInterfaceEvent(event.method());
     	}
     	
     }
@@ -361,7 +362,8 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
     	super.datasetEventReceived(event);
     	
     	if(event.getSource() instanceof RulesetDialog){
-    		fireDatasetEvent(event);
+    		fine("Heard dataset event");
+    		fireDatasetEvent(event.method(), event.getDatasets());
     	}
     }
 

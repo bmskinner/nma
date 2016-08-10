@@ -32,7 +32,7 @@ import components.generic.BorderTag.BorderTagType;
  * @author bms41
  *
  */
-public class BorderTagObject implements Serializable {
+public class BorderTagObject implements Serializable, Comparable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -123,6 +123,11 @@ public class BorderTagObject implements Serializable {
 		if (tag != other.tag)
 			return false;
 		return true;
+	}
+
+	@Override
+	public int compareTo(Object arg0) {
+		return name.compareTo(arg0.toString());
 	}
 	
 	

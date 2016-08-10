@@ -26,6 +26,7 @@ import logging.Loggable;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -56,9 +57,9 @@ import analysis.AnalysisOptions.CannyOptions;
 /**
  * Contains methods for laying out panels in settings dialog options
  */
+@SuppressWarnings("serial")
 public abstract class SettingsDialog extends JDialog implements Loggable {
 	
-	private static final long serialVersionUID = 1L;
 	protected boolean readyToRun = false;
 	private final List<Object> interfaceListeners 	= new ArrayList<Object>();
 		
@@ -79,6 +80,11 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 	 * @param modal is the dialog modal
 	 */
 	public SettingsDialog(Frame owner, boolean modal){
+		super(owner, modal);
+		this.setLocationRelativeTo(null);
+	}
+	
+	public SettingsDialog(Dialog owner, boolean modal){
 		super(owner, modal);
 		this.setLocationRelativeTo(null);
 	}

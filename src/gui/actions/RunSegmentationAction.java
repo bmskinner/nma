@@ -196,6 +196,8 @@ public class RunSegmentationAction extends ProgressableAction {
 					if(latch!=null){
 						latch.countDown();
 					}
+					finest("Firing refresh cache event");
+					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
 
 					finest("Firing select dataset event");
 					fireDatasetEvent(DatasetMethod.SELECT_ONE_DATASET, dataset);
