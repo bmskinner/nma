@@ -32,6 +32,9 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.DefaultBoxAndWhiskerXYDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
@@ -83,21 +86,39 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 		String result = "";
 
 		try{
-			try{
 
-				result = getXYProfileData(); // single profiles
 
-			} catch (ClassCastException e){
+			if(this.getChart().getPlot() instanceof CategoryPlot){
 
-				try{
+				if( this.getChart().getCategoryPlot().getDataset() instanceof BoxAndWhiskerCategoryDataset ){
 
 					result = getBoxplotData();
+				}
 
-				} catch (ClassCastException e1){
+//				if( this.getChart().getCategoryPlot().getDataset() instanceof HistogramDataset ){
+//
+//					result = getHistogramData();
+//				}
+
+			} else {
+
+				if( this.getChart().getXYPlot().getDataset() instanceof DefaultXYDataset ){
+
+
+					result = getXYProfileData(); // single profiles
+
+				}
+				
+				if( this.getChart().getXYPlot().getDataset() instanceof HistogramDataset ){
 
 					result = getHistogramData();
 				}
+
 			}
+
+
+
+
 
 
 		} catch (ClassCastException e2){
@@ -226,7 +247,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 		
 		for(int dataset=0; dataset<plot.getDatasetCount();dataset++){
 
-			OutlierFreeBoxAndWhiskerCategoryDataset ds = (OutlierFreeBoxAndWhiskerCategoryDataset) plot.getDataset(dataset);
+			DefaultBoxAndWhiskerCategoryDataset ds = (DefaultBoxAndWhiskerCategoryDataset) plot.getDataset(dataset);
 
 			for(int column=0; column<ds.getColumnCount();column++){
 				
