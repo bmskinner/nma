@@ -261,9 +261,9 @@ public class ProfileIndexFinder implements Loggable {
 				return findLocalMaxima(p, r.getBooleanValue(), r.getValue(1));
 				
 			case IS_MINIMUM:
-				return findMinimum(p, limits);
+				return findMinimum(p, limits, r.getBooleanValue());
 			case IS_MAXIMUM:
-				return findMaximum(p, limits);
+				return findMaximum(p, limits, r.getBooleanValue());
 				
 			case INDEX_IS_LESS_THAN:
 				return findIndexLessThan(p, r.getValue());
@@ -279,9 +279,9 @@ public class ProfileIndexFinder implements Loggable {
 				return findConstantRegion(p, r.getValue(0), r.getValue(1), r.getValue(2));
 				
 			case FIRST_TRUE:
-				return findFirstTrue(p, limits);	
+				return findFirstTrue(limits, r.getBooleanValue());	
 			case LAST_TRUE:
-				return findLastTrue(p, limits);	
+				return findLastTrue(limits, r.getBooleanValue());	
 				
 			default:
 				return new BooleanProfile(p);
@@ -317,17 +317,37 @@ public class ProfileIndexFinder implements Loggable {
 	
 	/**
 	 * Find the first true value in a BooleanProfile
-	 * @param p
+	 * @param b the limits to test within
+	 * @param v find the first true value [true], or true values that are not the first true value [false]
 	 * @return
 	 */
-	private BooleanProfile findFirstTrue(final Profile p, final BooleanProfile b){
+	private BooleanProfile findFirstTrue(final BooleanProfile b, boolean v){
 		
-		BooleanProfile result = new BooleanProfile(p); // hard code the smoothing window size for now
+		BooleanProfile result = new BooleanProfile(b.size(), false); 
+		boolean foundFirst = false;
 		
-		for(int i=0;i<p.size();i++){
-			if(b.get(i)){
-				result.set(i, true);
-				return result;
+		for(int i=0;i<b.size();i++){
+			
+			if(v){
+				if(b.get(i)){
+					result.set(i, true);
+					return result;
+				}
+			} else {
+				if(b.get(i)){
+					
+					if(foundFirst){
+						result.set(i, true);
+					} else {
+						result.set(i, false);
+					}
+						
+					foundFirst = true;
+					
+					
+				}
+				
+				
 			}
 		}	
 		return result;
@@ -335,24 +355,46 @@ public class ProfileIndexFinder implements Loggable {
 	
 	/**
 	 * Find the last true value in a BooleanProfile
+	 * @param b the limits to test within
+	 * @param v find the last true value [true], or true values that are not the last true value [false]
 	 * @param p
 	 * @return
 	 */
-	private BooleanProfile findLastTrue(final Profile p, final BooleanProfile b){
+	private BooleanProfile findLastTrue(final BooleanProfile b, boolean v){
 		
-		BooleanProfile result = new BooleanProfile(p); // hard code the smoothing window size for now
+		BooleanProfile result = new BooleanProfile(b.size(), false); 
+
 		
 		int maxTrueIndex = -1;
-		for(int i=0;i<p.size();i++){
+		for(int i=0;i<b.size();i++){
 			if(b.get(i)){
 				maxTrueIndex=i;
 				
 			}
 		}	
-		
-		if(maxTrueIndex>-1){
-			result.set(maxTrueIndex, true);
+
+		if(v){
+			if(maxTrueIndex>-1){
+				result.set(maxTrueIndex, true);
+			}
+			
+		} else {
+			
+			if(maxTrueIndex>-1){
+				
+				for(int i=0;i<b.size();i++){
+					if(b.get(i) && i!= maxTrueIndex){
+						result.set(i, true);
+						
+					}
+				}
+				
+			}
+			
+			
 		}
+		
+		
 		return result;
 	}
 	
@@ -396,13 +438,23 @@ public class ProfileIndexFinder implements Loggable {
 	 * @param p
 	 * @return
 	 */
-	private BooleanProfile findMinimum(final Profile p, BooleanProfile limits){
+	private BooleanProfile findMinimum(final Profile p, BooleanProfile limits, boolean b){
 		
 		int index = p.getIndexOfMin(limits);
 		
-		BooleanProfile result = new BooleanProfile(p);
+		BooleanProfile result;
 		
-		result.set(index, true);
+		if(b){
+			
+			result = new BooleanProfile(p, false);
+			result.set(index, true);
+			
+		} else {
+			result = new BooleanProfile(p, true);
+			result.set(index, false);
+		}
+		
+
 		return result;
 	}
 	
@@ -411,13 +463,22 @@ public class ProfileIndexFinder implements Loggable {
 	 * @param p
 	 * @return
 	 */
-	private BooleanProfile findMaximum(final Profile p, BooleanProfile limits){
+	private BooleanProfile findMaximum(final Profile p, BooleanProfile limits, boolean b){
 		
 		int index = p.getIndexOfMax(limits);
 		
-		BooleanProfile result = new BooleanProfile(p);
+		BooleanProfile result;
 		
-		result.set(index, true);
+		if(b){
+			
+			result = new BooleanProfile(p, false);
+			result.set(index, true);
+			
+		} else {
+			result = new BooleanProfile(p, true);
+			result.set(index, false);
+		}
+		
 		return result;
 	}
 	
