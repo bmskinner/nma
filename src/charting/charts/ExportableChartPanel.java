@@ -19,6 +19,8 @@
 package charting.charts;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -64,6 +66,16 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 		popup.add(exportItem);
 	
 		this.setPopupMenu(popup);
+		
+		this.addComponentListener(new ComponentAdapter() {
+	        @Override
+	        public void componentResized(ComponentEvent e) {
+	            setMaximumDrawHeight(e.getComponent().getHeight());
+	            setMaximumDrawWidth(e.getComponent().getWidth());
+	            setMinimumDrawWidth(e.getComponent().getWidth());
+	            setMinimumDrawHeight(e.getComponent().getHeight());
+	        }
+	    });
 	}
 	
 	private String getData(){
