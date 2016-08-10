@@ -327,7 +327,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 					}
 				} else { // more than one dataset selected
 					statusLabel.setText("Multiple datasets selected");
-					setButtonsVisible(false);
+//					setButtonsVisible(false);
 					setButtonsEnabled(false);
 				}
 			}

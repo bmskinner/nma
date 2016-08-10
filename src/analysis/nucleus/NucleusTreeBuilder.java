@@ -174,7 +174,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		
 		if(options.isIncludeProfile()){ // An attribute for each angle in the median profile
 			log(Level.FINEST, "Including profile");
-			profileAttributeCount = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.REFERENCE_POINT, 50).size();
+			profileAttributeCount = collection.getProfileCollection(options.getProfileType()).getProfile(BorderTagObject.REFERENCE_POINT, 50).size();
 			profileAttributeCount /= windowSize;
 			attributeCount += profileAttributeCount;
 		}
@@ -248,7 +248,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				Instance inst = new SparseInstance(attributes.size());
 
 				// Interpolate the profile to the median length
-				Profile p = n1.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).interpolate(profileSize);
+				Profile p = n1.getProfile(options.getProfileType(), BorderTagObject.REFERENCE_POINT).interpolate(profileSize);
 				
 				int attNumber=0;
 				if(options.isIncludeProfile()){
