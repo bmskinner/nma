@@ -36,12 +36,14 @@ import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -83,6 +85,11 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	protected JPanel optionsPanel;
 	protected JPanel footerPanel;
 	
+	static final ProfileType DEFAULT_PROFILE_TYPE = ProfileType.ANGLE;
+	
+//	List<JRadioButton> profileButtons = new ArrayList<JRadioButton>();
+	ButtonGroup profileButtonGroup = new ButtonGroup();
+	
 	
 	protected JComboBox<HierarchicalClusterMethod> hierarchicalClusterMethodCheckBox;
 	
@@ -102,9 +109,9 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		this.dataset = dataset;
 		this.setTitle("Tree building options");
 		setSize(450, 300);
-		this.setLocationRelativeTo(null);
 		initialise();
 		this.pack();
+		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 		
 	}
@@ -153,6 +160,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		options.setIterations(ClusteringSetupDialog.DEFAULT_EM_ITERATIONS);
 		options.setUseSimilarityMatrix(ClusteringSetupDialog.DEFAULT_USE_SIMILARITY_MATRIX);
 		options.setIncludeProfile(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
+		options.setProfileType(DEFAULT_PROFILE_TYPE);
 	}
 		
 	protected JPanel createHeader(){
@@ -206,18 +214,9 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		
 		panel.add(createClusterMethodPanel());
-//		hierarchicalClusterMethodCheckBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
-//		hierarchicalClusterMethodCheckBox.setSelectedItem(ClusteringSetupDialog.DEFAULT_HIERARCHICAL_METHOD);
-//		hierarchicalClusterMethodCheckBox.addActionListener(this);
 		
 		
-//		List<JLabel> labels = new ArrayList<JLabel>();
-////		List<Component> fields = new ArrayList<Component>();
-//		
-//		JLabel clusterLabel = new JLabel("Cluster method");
-//		clusterLabel.setToolTipText(Labels.HIERARCHICAL_CLUSTER_METHOD);
-//		labels.add(clusterLabel);
-//		panel.add(hierarchicalClusterMethodCheckBox);
+		
 		
 		try { 
 			panel.add(createIncludePanel());
@@ -264,6 +263,20 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		JLabel profileLabel = new JLabel("Include profiles");
 		labels.add(profileLabel);
 		fields.add(includeProfilesCheckBox);
+		
+		
+		// Add selection of profile type
+//		ButtonGroup group = new ButtonGroup();
+		for(ProfileType type : ProfileType.values()){
+			JRadioButton button = new JRadioButton("", type.equals(ProfileType.ANGLE)); // set angle selected
+			JLabel label = new JLabel(type.toString());
+			profileButtonGroup.add(button);
+			button.setActionCommand(type.toString());
+			button.addActionListener(this);
+			
+			labels.add(label);
+			fields.add(button);
+		}
 		
 		
 		DecimalFormat pf = new DecimalFormat("#0.000"); 
@@ -323,6 +336,15 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		
 		
 		options.setHierarchicalMethod((HierarchicalClusterMethod) hierarchicalClusterMethodCheckBox.getSelectedItem());
+		
+		Enumeration<AbstractButton> buttons  = profileButtonGroup.getElements();
+		while(buttons.hasMoreElements()){
+			AbstractButton b = buttons.nextElement();
+			if(b.isSelected()){
+				options.setProfileType(ProfileType.fromString(b.getActionCommand()));
+			}
+			
+		}
 						
 	}
 
@@ -336,7 +358,17 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			}
 			
 			if(e.getSource()==includeProfilesCheckBox){
-				options.setIncludeProfile(includeProfilesCheckBox.isSelected());				
+				options.setIncludeProfile(includeProfilesCheckBox.isSelected());	
+				
+				
+				Enumeration<AbstractButton> buttons  = profileButtonGroup.getElements();
+				while(buttons.hasMoreElements()){
+					AbstractButton b = buttons.nextElement();
+					b.setEnabled(includeProfilesCheckBox.isSelected());
+					
+				}
+					
+				
 			} 
 			
 			try{

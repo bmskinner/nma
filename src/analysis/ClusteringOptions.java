@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import components.generic.ProfileType;
+
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 
@@ -41,6 +43,8 @@ public class ClusteringOptions implements Serializable {
 	private Map<UUID, Boolean>            segmentMap = new HashMap<UUID, Boolean>(); // which segments should be included
 	
 	private boolean includeProfile; // should the nuclear profiles be a part of the clustering?
+	
+	private ProfileType profileType;
 	
 	private transient boolean useSimilarityMatrix;
 	
@@ -73,6 +77,8 @@ public class ClusteringOptions implements Serializable {
 		for(UUID i : oldOptions.getSegments()){
 			segmentMap.put(i, oldOptions.isIncludeSegment(i));
 		}
+		
+		this.profileType = oldOptions.getProfileType();
 		
 	}
 	
@@ -222,7 +228,16 @@ public class ClusteringOptions implements Serializable {
 	public int getIterations() {
 		return iterations;
 	}
+	
+	
 
+	public ProfileType getProfileType() {
+		return profileType;
+	}
+
+	public void setProfileType(ProfileType profileType) {
+		this.profileType = profileType;
+	}
 
 	/**
 	 * Get a string array of the options set here suitable
@@ -263,6 +278,10 @@ public class ClusteringOptions implements Serializable {
 	    
 	    if(segmentMap==null){
 	    	segmentMap = new HashMap<UUID, Boolean>();
+	    }
+	    
+	    if(profileType==null){
+	    	profileType = ProfileType.ANGLE;
 	    }
 	}
 	

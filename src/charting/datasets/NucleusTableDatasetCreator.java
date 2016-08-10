@@ -1137,6 +1137,7 @@ private static NucleusTableDatasetCreator instance = null;
 		columnList.add("Hierarchical method");
 		columnList.add("Target cluster number");
 		columnList.add("Include profile");
+		columnList.add("Profile type");
 
 		for(NucleusStatistic stat : NucleusStatistic.values()){
 			columnList.add("Include "+stat.toString());
@@ -1179,9 +1180,14 @@ private static NucleusTableDatasetCreator instance = null;
 					dataList.add(g.size());
 					dataList.add(op.getType().toString());
 					dataList.add(iterationString);
+
 					dataList.add(hierarchicalMethodString);
 					dataList.add(hierarchicalClusterString);
 					dataList.add(op.isIncludeProfile());
+					
+					String profileTypeString = op.isIncludeProfile() ? op.getProfileType().toString() : "N/A";
+					dataList.add(profileTypeString);
+					
 					for(NucleusStatistic stat : NucleusStatistic.values()){
 						try{
 							dataList.add(op.isIncludeStatistic(stat));

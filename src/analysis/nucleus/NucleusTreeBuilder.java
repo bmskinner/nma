@@ -230,7 +230,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	 */
 	private Instances makeProfileInstances(CellCollection collection)throws Exception {
 		
-		int profileSize = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.REFERENCE_POINT, 50).size();
+		int profileSize = collection.getProfileCollection(options.getProfileType()).getProfile(BorderTagObject.REFERENCE_POINT, 50).size();
 		int windowSize = collection.getNuclei().get(0).getAngleProfileWindowSize(); // use the first window size found for now
 		
 		

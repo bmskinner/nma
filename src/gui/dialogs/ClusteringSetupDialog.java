@@ -53,6 +53,7 @@ import analysis.AnalysisDataset;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
 import components.generic.MeasurementScale;
+import components.generic.ProfileType;
 
 @SuppressWarnings("serial")
 public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implements ActionListener, ChangeListener {
@@ -68,6 +69,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 	static final boolean DEFAULT_INCLUDE_ASPECT = false;
 	static final boolean DEFAULT_INCLUDE_PROFILE = true;
 	
+	
 	private JPanel 		cardPanel;
 	
 	private JSpinner clusterNumberSpinner;
@@ -82,8 +84,8 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 
 		super(mw, dataset, "Clustering options");
 		this.initialise();
-		this.setLocationRelativeTo(null);
 		this.pack();
+		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 
 	}

@@ -44,6 +44,15 @@ public enum ProfileType {
 		  return this.label;
 	  }
 	  
+	  public static ProfileType fromString(String s){
+		  for(ProfileType p : ProfileType.values()){
+			  if(s.equals(p.name)){
+				  return p;
+			  }
+		  }
+		  return null;
+	  }
+	  
 	  public StatisticDimension getDimension(){
 		  return this.dimension;
 	  }

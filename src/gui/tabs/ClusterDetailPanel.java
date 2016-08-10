@@ -25,6 +25,8 @@ import gui.components.ExportableTable;
 import gui.dialogs.ClusterTreeDialog;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -37,6 +39,7 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -46,6 +49,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
@@ -130,6 +134,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 				}
 			};
 			clusterDetailsTable.addMouseListener(this);
+			setRenderer(clusterDetailsTable, new ClusterTableCellRenderer());
+			
 			
 			JScrollPane detailScrollPanel = new JScrollPane(clusterDetailsTable);
 			clusterDetailPanel.add(detailScrollPanel, BorderLayout.CENTER);
@@ -299,6 +305,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			
 			TableModel optionsModel = NucleusTableDatasetCreator.getInstance().createClusterOptionsTable(list);
 			clusterDetailsTable.setModel(optionsModel);
+			setRenderer(clusterDetailsTable, new ClusterTableCellRenderer());
 
 			updateTreeButtonsPanel();
 			
@@ -390,14 +397,35 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 		}
 
 	}
+	
+	
 
-//	@Override
-//	public void datasetEventReceived(DatasetEvent event) {
-//
-//		// Pass morphology on
-////		if(event.method()==DatasetMethod.COPY_MORPHOLOGY){
-////			fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, event.getDatasets(), event.secondaryDataset());
-////		}
-//		
-//	}
+	/**
+	 * Colour analysis parameter table cell background. If all the datasets selected
+	 * have the same value, colour them light green
+	 */
+	@SuppressWarnings("serial")
+	public class ClusterTableCellRenderer extends DefaultTableCellRenderer {
+
+		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+
+			Color colour = Color.BLACK;
+			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+			if(value !=null && !value.toString().equals("")){
+			
+				if(value.toString().equals("false") || value.toString().equals("N/A")){
+					colour = Color.GRAY;
+				}
+			}
+
+
+			l.setForeground(colour);
+
+			return l;
+		}
+
+	}
+
 }
