@@ -48,7 +48,7 @@ public class BorderTagObject implements Serializable {
 	
 	public BorderTagObject(final BorderTag tag){
 		this.tag = tag;
-		this.name = tag.name();
+		this.name = tag.toString();
 	}
 	
 	public BorderTagObject(final String name, final BorderTag tag){
@@ -66,6 +66,10 @@ public class BorderTagObject implements Serializable {
 	
 	public BorderTagType type(){
 		return tag.type();
+	}
+	
+	public String toString(){
+		return name;
 	}
 	
 	public static BorderTagObject[] values(){

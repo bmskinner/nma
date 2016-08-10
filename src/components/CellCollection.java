@@ -1161,6 +1161,11 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  in.defaultReadObject();
 	  isRefolding = false;
 	  vennCache   = new HashMap<UUID, Integer>(); // cache the number of shared nuclei with other datasets
+	  
+	  if(ruleSets==null || ruleSets.isEmpty()){
+		  log("Creating default ruleset for collection");
+		  ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType); 
+	  }
 //	  finest("Creating default ruleset for nucleus type "+nucleusType);
 //	  ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType); 
 	  finest("Read cell collection");

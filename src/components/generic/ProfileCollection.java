@@ -22,9 +22,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import analysis.profiles.RuleSet;
 import logging.Loggable;
 import components.CellCollection;
 import components.nuclear.NucleusBorderSegment;
@@ -553,6 +555,26 @@ public class ProfileCollection implements Serializable, Loggable {
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		finest("\tReading profile collection");
 		in.defaultReadObject();
+		
+		Map<BorderTagObject, Integer> newIndexes = new HashMap<BorderTagObject, Integer>();
+		
+		Iterator it = indexes.keySet().iterator();
+		
+		while(it.hasNext()){
+			Object tag = it.next();
+			if(tag instanceof BorderTag){
+				fine("Deserialization has no BorderTagObject for "+tag.toString()+", creating");
+				
+				newIndexes.put(new BorderTagObject( (BorderTag) tag), indexes.get(tag));						
+			}
+			
+		}
+		
+		if( ! newIndexes.isEmpty()){
+			indexes = newIndexes;
+		}
+
+		
 		finest("\tRead profile collection");
 	}
 	
@@ -661,6 +683,26 @@ public class ProfileCollection implements Serializable, Loggable {
 		  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 			  finest("\tReading profile cache");
 			  in.defaultReadObject();
+			  
+			  Map<BorderTagObject, Map<Double, Profile>> newCache = new HashMap<BorderTagObject, Map<Double, Profile>>();
+				
+				Iterator it = cache.keySet().iterator();
+				
+				while(it.hasNext()){
+					Object tag = it.next();
+					if(tag instanceof BorderTag){
+						fine("Deserialization has no BorderTagObject for "+tag.toString()+", creating");
+						
+						newCache.put(new BorderTagObject( (BorderTag) tag), cache.get(tag));						
+					}
+					
+				}
+				
+				
+				if( ! newCache.isEmpty()){
+					cache = newCache;
+				}
+			  
 			  finest("\tRead profile cache");
 		  }
 

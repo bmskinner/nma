@@ -118,6 +118,11 @@ public class ProfileIndexFinder implements Loggable {
 	 */
 	public int identifyIndex(final Profile p, final List<RuleSet> list){
 		
+		if(list==null || list.size()==0){
+			// no rule set
+			return -2;
+		}
+		
 		BooleanProfile indexes = new BooleanProfile(p, true);
 		
 		for(RuleSet r : list){
@@ -145,7 +150,7 @@ public class ProfileIndexFinder implements Loggable {
 		
 		List<RuleSet> list = collection.getRuleSetCollection().getRuleSets(tag);
 		
-		if(list.size()==0){
+		if(list==null || list.size()==0){
 			// no rule set
 			return -2;
 		}
@@ -162,7 +167,7 @@ public class ProfileIndexFinder implements Loggable {
 	 */
 	public int identifyIndex(final CellCollection collection, final List<RuleSet> list){
 		
-		if(list.size()==0){
+		if(list==null || list.size()==0){
 			return -2; // no rule sets
 		}
 		

@@ -1112,59 +1112,28 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		finest("\tReading nucleus");
+		
 		in.defaultReadObject();
-		
-		// Override to allow BorderTagObject creation from BorderTags
-//		
-//		Object ob = in.readObject();
-//		log(ob.getClass().getSimpleName());
-//		
-//		// Read the standard fields
-//		nucleusNumber          = in.readInt();
-//		angleWindowProportion  = in.readDouble();
-//		angleProfileWindowSize = in.readInt();
-//		pathLength             = in.readDouble();
-//		profileMap             = (Map<ProfileType, SegmentedProfile>) in.readObject();
-//		segmentList            = (List<NucleusBorderSegment>) in.readObject();
-//		
-//		Map<?, ?> borderObject    = (Map<?, ?>) in.readObject();
-//		boolean isObjectStyle = true;
-//		
-//		for (Object o : borderObject.keySet()){
-//			
-//			if(o instanceof BorderTagObject){
-//				isObjectStyle = true;
-//			} else {
-//				isObjectStyle = false;
-//			}
-//			
-//		}
-//		
-//		if(isObjectStyle){
-//			borderTags = (Map<BorderTagObject, Integer>) borderObject;
-//		} else {
-//			
-//			borderTags = new HashMap<BorderTagObject, Integer>();
-//			
-//			for (Object o : borderObject.keySet()){
-//				
-//				BorderTag b = (BorderTag) o;
-//				Integer i = (Integer) borderObject.get(o);
-//				
-//				borderTags.put(new BorderTagObject(b), i);
-//				
-//			}
-//			
-//		}
-//			
-//		segmentTags = (Map<String, Integer>) in.readObject();
-//		
-//		outputFolder = (String) in.readObject();
-//		signalCollection = (SignalCollection) in.readObject();
 
-		
-//	    finest("\tCreating bounding rectangles for nucleus");
-//	    this.boundingRectangles = new HashMap<BorderTagObject, Rectangle>();	  
+		Map<BorderTagObject, Integer> newCache = new HashMap<BorderTagObject, Integer>(0);
+
+		Iterator it = borderTags.keySet().iterator();
+
+		while(it.hasNext()){
+			Object tag = it.next();
+			if(tag instanceof BorderTag){
+				fine("Deserialization has no BorderTagObject for "+tag.toString()+", creating");
+
+				newCache.put(new BorderTagObject( (BorderTag) tag), borderTags.get(tag));						
+			}
+
+		}
+
+
+		if( ! newCache.isEmpty()){
+			borderTags = newCache;
+		}
+				
 	    this.verticalNucleus    = null;
 	    updateVerticallyRotatedNucleus(); // force an update
 	    finest("\tRead nucleus");

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +46,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private Map<BorderTagObject, List<RuleSet>> map = new HashMap<BorderTagObject, List<RuleSet>>();
+	private Map<BorderTagObject, List<RuleSet>> map    = new HashMap<BorderTagObject, List<RuleSet>>();
 	
 	/**
 	 * Create a new empty collection
@@ -88,6 +89,10 @@ public class RuleSetCollection implements Serializable, Loggable {
 	
 	public boolean hasRulesets(BorderTagObject tag){
 		return map.get(tag).size()>0;
+	}
+	
+	public boolean isEmpty(){
+		return map.isEmpty();
 	}
 	
 	public String toString(){
@@ -163,6 +168,32 @@ public class RuleSetCollection implements Serializable, Loggable {
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		finest("\tReading RulesetCollection");
 		in.defaultReadObject();
+		
+		
+		
+		if(  map!=null ){
+						
+			Map<BorderTagObject, List<RuleSet>> newMap = new HashMap<BorderTagObject, List<RuleSet>>();
+			
+			Iterator it = map.keySet().iterator();
+			
+			while(it.hasNext()){
+				Object tag = it.next();
+				if(tag instanceof BorderTag){
+					fine("No BorderTagObject for "+tag.toString()+": creating");
+					
+					newMap.put(new BorderTagObject( (BorderTag) tag), map.get(tag));					
+				}
+				
+			}
+			
+			if( ! newMap.isEmpty()){
+				map = newMap;
+			}
+
+			
+		}
+				
 		finest("\tRead RulesetCollection");
 	}
 
