@@ -60,6 +60,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -151,7 +153,16 @@ public class MainWindow
 	public MainWindow() {
 				
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		this.addWindowListener(datasetManager);
+		
+		this.addWindowListener(new WindowAdapter() {
+			  public void windowClosed(WindowEvent e) {
+				  datasetManager.clear();
+				  globalOptions.setDefaults();
+			  }
+
+		});
+		
+		
 		try {
 			setTitle("Nuclear Morphology Analysis v"+Version.currentVersion().toString());
 			

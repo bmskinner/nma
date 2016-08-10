@@ -50,6 +50,8 @@ import charting.charts.PositionSelectionChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
+import gui.DatasetEvent;
+import gui.InterfaceEvent;
 import gui.SignalChangeEvent;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
@@ -336,9 +338,31 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getSource()==ruleSetButton){
-			new RulesetDialog(activeDataset());
+			RulesetDialog d =  new RulesetDialog(activeDataset());
+			d.addInterfaceEventListener(this);
+			d.addDatasetEventListener(this);
+			d.setVisible(true);
 		}
 		
 	}
+	
+	@Override
+	public void interfaceEventReceived(InterfaceEvent event){
+    	super.interfaceEventReceived(event);// Pass messages upwards
+    	
+    	if(event.getSource() instanceof RulesetDialog){
+    		fireInterfaceEvent(event);
+    	}
+    	
+    }
+
+	@Override
+    public void datasetEventReceived(DatasetEvent event){
+    	super.datasetEventReceived(event);
+    	
+    	if(event.getSource() instanceof RulesetDialog){
+    		fireDatasetEvent(event);
+    	}
+    }
 
 }

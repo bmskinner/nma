@@ -15,7 +15,7 @@ import analysis.AnalysisDataset;
  * @author bms41
  *
  */
-public final class DatasetListManager implements WindowListener {
+public final class DatasetListManager {
 	
 	private static DatasetListManager instance = null;
 	
@@ -112,46 +112,46 @@ public final class DatasetListManager implements WindowListener {
 		list.clear();
 	}
 
-	@Override
-	public void windowActivated(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowClosed(WindowEvent arg0) {
-		clear();
-		
-	}
-
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowDeactivated(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowIconified(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowOpened(WindowEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+//	@Override
+//	public void windowActivated(WindowEvent arg0) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public void windowClosed(WindowEvent arg0) {
+//		clear();
+//		
+//	}
+//
+//	@Override
+//	public void windowClosing(WindowEvent arg0) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public void windowDeactivated(WindowEvent arg0) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public void windowDeiconified(WindowEvent arg0) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public void windowIconified(WindowEvent arg0) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public void windowOpened(WindowEvent arg0) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
 }

@@ -42,6 +42,8 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 			
 	private boolean isOK = false;
 	
+	private BorderTagObject targetTag = BorderTagObject.CUSTOM_POINT;
+	
 	private JPanel mainPanel;
 		
 	public RuleSetBuildingDialog(){
@@ -56,6 +58,12 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 		this.pack();
 		this.centerOnScreen();
 		this.setVisible(true);
+	}
+	
+	
+	public RuleSetBuildingDialog(BorderTagObject target){
+		this();
+		targetTag = target;
 	}
 	
 	public void createUI(){
@@ -140,15 +148,13 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 		RuleSetCollection collection = new RuleSetCollection();
 		for(Component c : mainPanel.getComponents()){
 			if(c.getClass().isAssignableFrom(RuleSetPanel.class)){
-//				log("Found ruleset panel, fetching ruleset");
+
 				RuleSetPanel panel = (RuleSetPanel) c;
-				collection.addRuleSet(BorderTagObject.REFERENCE_POINT, panel.getRuleSet());
+				collection.addRuleSet(targetTag, panel.getRuleSet());
 				
 			}
 			
 		}
-//		log("Added all rulesets");
-		
 		return collection;
 	}
 	

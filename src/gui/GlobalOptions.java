@@ -32,6 +32,10 @@ public class GlobalOptions {
 	}
 	
 	private GlobalOptions(){
+		setDefaults();
+	}
+	
+	public void setDefaults(){
 		this.logLevel    = Level.INFO;
 		this.scale       = MeasurementScale.PIXELS;
 		this.swatch      = ColourSwatch.REGULAR_SWATCH;

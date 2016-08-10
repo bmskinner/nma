@@ -44,6 +44,7 @@ public class BorderTagObject implements Serializable {
 	public static final BorderTagObject TOP_VERTICAL       = new BorderTagObject(BorderTag.TOP_VERTICAL);
 	public static final BorderTagObject BOTTOM_VERTICAL    = new BorderTagObject(BorderTag.BOTTOM_VERTICAL);
 	public static final BorderTagObject INTERSECTION_POINT = new BorderTagObject(BorderTag.INTERSECTION_POINT);
+	public static final BorderTagObject CUSTOM_POINT        = new BorderTagObject(BorderTag.CUSTOM);
 	
 	
 	public BorderTagObject(final BorderTag tag){

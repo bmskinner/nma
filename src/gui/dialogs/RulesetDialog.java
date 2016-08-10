@@ -2,14 +2,20 @@ package gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
@@ -29,21 +35,31 @@ import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileType;
+import components.generic.BorderTag.BorderTagType;
 import analysis.AnalysisDataset;
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.Rule;
 import analysis.profiles.RuleSet;
 import analysis.profiles.RuleSetCollection;
+import gui.DatasetEvent;
+import gui.DatasetEventListener;
+import gui.InterfaceEvent;
+import gui.InterfaceEventListener;
 import gui.LoadingIconDialog;
+import gui.DatasetEvent.DatasetMethod;
+import gui.InterfaceEvent.InterfaceMethod;
 
 @SuppressWarnings("serial")
-public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionListener {
+public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionListener  {
 	
 	private AnalysisDataset dataset;
 	
 	private ExportableChartPanel chartPanel;
 	
 	private JTree tree;
+	
+	private final List<Object> datasetListeners 	= new ArrayList<Object>();
+	private final List<Object> interfaceListeners 	= new ArrayList<Object>();
 	
 	private Map<String, RuleSetCollection> customCollections = new HashMap<String, RuleSetCollection>();
 	
@@ -63,7 +79,14 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		this.setModal(false);
 		this.pack();
 		this.centerOnScreen();
-		this.setVisible(true);
+			
+		this.addWindowListener(new WindowAdapter(){
+			 public void windowClosing(WindowEvent e) {
+				  if(!customCollections.isEmpty()){
+					  askToSaveCustomPoints();
+				  }
+			  }
+		});
 		
 	}
 	
@@ -97,22 +120,12 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			RuleSetBuildingDialog builder = new RuleSetBuildingDialog();
 			if(builder.isOK()){
 
+//				log("Getting custom collection");
 				RuleSetCollection custom = builder.getCollection();
 				int size = customCollections.size();
 				customCollections.put("Custom_"+size, custom);
-
-//				log(custom.toString());
-				
-				DefaultMutableTreeNode root = new DefaultMutableTreeNode(new RuleNodeData(dataset.getName()));
-				
-				createNodes(root, dataset);
-								
-				TreeModel model = new DefaultTreeModel(root);
-				tree.setModel(model);
-				
-				for (int i = 0; i < tree.getRowCount(); i++) {
-				    tree.expandRow(i);
-				}
+//				log("Added as "+"Custom_"+size);
+				updateTreeNodes();		
 			}
 			
 		} );
@@ -128,7 +141,31 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		panel.setLayout(new BorderLayout());
 		
 		tree = new JTree();
+		updateTreeNodes();		
 		
+		panel.add(tree);
+		tree.addTreeSelectionListener(this);
+		tree.setToggleClickCount(3);
+		
+		tree.addMouseListener(new MouseAdapter(){
+			@Override
+			public void mouseClicked(MouseEvent e){
+				
+				if(e.getClickCount()==2){
+
+					DefaultMutableTreeNode o = (DefaultMutableTreeNode) tree.getSelectionModel().getSelectionPath().getLastPathComponent();
+					RuleNodeData r = (RuleNodeData) o.getUserObject();
+					changeData(r);
+				}
+			}
+		});
+		
+		return panel;
+		
+	}
+	
+	
+	private void updateTreeNodes(){
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode(new RuleNodeData(dataset.getName()));
 		
 		createNodes(root, dataset);
@@ -139,12 +176,84 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		for (int i = 0; i < tree.getRowCount(); i++) {
 		    tree.expandRow(i);
 		}
+	}
+	
+	
+	private void askToSaveCustomPoints(){
 		
-		panel.add(tree);
-		tree.addTreeSelectionListener(this);
+		Object[] options = { "Save new RuleSets" , "Discard RuleSets", };
+		int save = JOptionPane.showOptionDialog(null,
+				"Do you want to save custom RuleSet(s)?", 
+				"Save RuleSets?",
+				JOptionPane.DEFAULT_OPTION, 
+				JOptionPane.QUESTION_MESSAGE,
+				null, options, options[0]);
 		
-		return panel;
+		if(save==0){
+			
+			// make a dialog of custom sets to save
+			
+			// add the custom sets to the dataset
+		}
 		
+	}
+	
+	private void changeData(RuleNodeData data){
+
+		if(data.hasRuleSetCollection()){
+
+			BorderTagObject tag = data.getTag();
+					
+			RuleSetBuildingDialog builder = new RuleSetBuildingDialog(tag);
+			if(builder.isOK()){
+
+				RuleSetCollection custom = builder.getCollection();
+				List<RuleSet> list = custom.getRuleSets(tag);
+
+				dataset.getCollection().getRuleSetCollection().setRuleSets(tag, list);
+
+				updateTreeNodes();		
+				log("Replaced RuleSet for "+tag.toString());
+				//TODO - update points in cell profiles
+				updateBorderTagAction(tag);
+
+			}
+			
+		}
+		
+	}
+	
+	private void updateBorderTagAction(BorderTagObject tag){
+
+		if(tag!=null){
+			ProfileIndexFinder finder = new ProfileIndexFinder();
+			
+				int newTagIndex = finder.identifyIndex(dataset.getCollection(), tag);
+
+				log("Updating "+tag+" to index "+newTagIndex);
+
+				dataset
+					.getCollection()
+					.getProfileManager()
+					.updateBorderTag(tag, newTagIndex);
+								
+				if(tag.type().equals(BorderTagType.CORE)){
+					log("Resegmenting dataset");
+					
+					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+					list.add(dataset);
+					fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, list);
+				} else {					
+					fine("Firing refresh cache request for loaded datasets");
+					fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+				}
+
+			
+		} else {
+			fine("Tag is null");
+			return;
+		}
+
 	}
 	
 	/**
@@ -192,20 +301,24 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		}
 		
 		// Add any custom collections created in ascending order
+//		log("Adding custom nodes");
 		List<String> customList = new ArrayList<String>(customCollections.keySet());
 		Collections.sort(customList);
 		for(String s : customList){
-			
+//			log("Adding "+s);
 			RuleSetCollection collection = customCollections.get(s);
 			
 			RuleNodeData r = new RuleNodeData(s);
-			r.setTag(BorderTagObject.REFERENCE_POINT); // Always use reference point as tag for custom
+//			BorderTagObject tagObject = new BorderTagObject(s, BorderTag.CUSTOM);
+//			log("Adding node for "+tagObject);
+			
+			r.setTag(BorderTagObject.CUSTOM_POINT); 
 			r.setCollection(collection);
 
 			DefaultMutableTreeNode node = new DefaultMutableTreeNode(r);
 			root.add( node );
 
-			for(RuleSet ruleSet : collection.getRuleSets(BorderTagObject.REFERENCE_POINT)){
+			for(RuleSet ruleSet : collection.getRuleSets(BorderTagObject.CUSTOM_POINT)){
 
 				RuleNodeData profileData = new RuleNodeData(ruleSet.getType().toString());
 				profileData.setRuleSet(ruleSet);
@@ -282,6 +395,65 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		chartPanel.setChart(chart);
 		
 	}
+	
+	public synchronized void addDatasetEventListener( DatasetEventListener l ) {
+    	datasetListeners.add( l );
+    }
+    
+    public synchronized void removeDatasetEventListener( DatasetEventListener l ) {
+    	datasetListeners.remove( l );
+    }
+    
+    public synchronized void addInterfaceEventListener( InterfaceEventListener l ) {
+    	interfaceListeners.add( l );
+    }
+    
+    public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
+    	interfaceListeners.remove( l );
+    }
+    
+    
+    protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list) {
+    	
+        DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);
+        Iterator<Object> iterator = datasetListeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
+        }
+    }
+    
+    protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list, AnalysisDataset template) {
+
+    	DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, template);
+    	Iterator<Object> iterator = datasetListeners.iterator();
+    	while( iterator.hasNext() ) {
+    		( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
+    	}
+    }
+    
+    protected synchronized void fireDatasetEvent(DatasetEvent event) {
+    	Iterator<Object> iterator = datasetListeners.iterator();
+    	while( iterator.hasNext() ) {
+    		( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
+    	}
+    }
+    
+    protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
+    	
+    	InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());
+        Iterator<Object> iterator = interfaceListeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
+        }
+    }
+    
+    protected synchronized void fireInterfaceEvent(InterfaceEvent event) {
+
+        Iterator<Object> iterator = interfaceListeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
+        }
+    }
 		
 	public class RuleNodeData {
 		private String      name     = null;

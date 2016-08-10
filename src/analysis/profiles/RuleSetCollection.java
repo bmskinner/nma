@@ -55,6 +55,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 		for(BorderTagObject tag : BorderTagObject.values()){
 			clearRuleSets(tag);
 		}
+		clearRuleSets(BorderTagObject.CUSTOM_POINT);
 	}
 	
 	/**
@@ -72,6 +73,15 @@ public class RuleSetCollection implements Serializable, Loggable {
 	 */
 	public void addRuleSet(BorderTagObject tag, RuleSet r){
 		map.get(tag).add(r);
+	}
+	
+	/**
+	 * Replace existing RuleSets for the given tag with the list
+	 * @param tag
+	 * @param list
+	 */
+	public void setRuleSets(BorderTagObject tag, List<RuleSet> list){
+		map.put(tag, list);
 	}
 	
 	/**
