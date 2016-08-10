@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.virion.jam.controlpanels.ControlPalette;
+
 import jebl.evolution.graphs.Node;
 import jebl.evolution.trees.RootedTree;
 import jebl.evolution.trees.Tree;
@@ -38,11 +40,14 @@ import jebl.gui.trees.treeviewer.TreeViewer;
 public class DraggableTreeViewer extends TreeViewer {
 	
 	List<Line2D.Double> lines = new ArrayList<Line2D.Double>();
-//	SelectableTreePane sampleTreePane;
 	
 	public DraggableTreeViewer(){
 		super();
-//		sampleTreePane = new SelectableTreePane();
+
+	}
+	
+	public DraggableTreeViewer(ControlPalette controlPalette, int CONTROL_PALETTE_ALIGNMENT) {
+		super(controlPalette, CONTROL_PALETTE_ALIGNMENT);
 	}
 	
 

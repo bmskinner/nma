@@ -57,6 +57,9 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+
+import org.virion.jam.controlpanels.BasicControlPalette;
 
 import components.Cell;
 import components.CellCollection;
@@ -105,7 +108,8 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 			log(Level.FINEST, "Building tree view");
 			this.setLayout(new BorderLayout());
 			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-			this.viewer = new DraggableTreeViewer();
+			this.viewer = new DraggableTreeViewer(new BasicControlPalette(0, BasicControlPalette.DisplayMode.INITIALLY_CLOSED, true), SwingConstants.LEFT);
+//			this.viewer = new DraggableTreeViewer();
 //			log(Level.FINEST, "Created draggable viewer");
 			
 			viewer.getTreePane().addMouseListener(new MouseClusterSelectionAdapter());
@@ -188,7 +192,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		viewer.setTreeLayoutType(TreeLayoutType.RECTILINEAR);
 		viewer.getTreePane().setBranchTransform(true,  TransformedRootedTree.Transform.PROPORTIONAL);
 		viewer.getTreePane().setBranchLineWeight(2f);
-		
+				
 		colourTreeNodesByClusterGroup(group);
 		
 		
