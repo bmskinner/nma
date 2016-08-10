@@ -42,6 +42,7 @@ import analysis.ClusteringOptions.ClusteringMethod;
 import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileType;
@@ -173,7 +174,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		
 		if(options.isIncludeProfile()){ // An attribute for each angle in the median profile
 			log(Level.FINEST, "Including profile");
-			profileAttributeCount = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, 50).size();
+			profileAttributeCount = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.REFERENCE_POINT, 50).size();
 			profileAttributeCount /= windowSize;
 			attributeCount += profileAttributeCount;
 		}
@@ -229,7 +230,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	 */
 	private Instances makeProfileInstances(CellCollection collection)throws Exception {
 		
-		int profileSize = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, 50).size();
+		int profileSize = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.REFERENCE_POINT, 50).size();
 		int windowSize = collection.getNuclei().get(0).getAngleProfileWindowSize(); // use the first window size found for now
 		
 		
@@ -247,7 +248,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				Instance inst = new SparseInstance(attributes.size());
 
 				// Interpolate the profile to the median length
-				Profile p = n1.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT).interpolate(profileSize);
+				Profile p = n1.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).interpolate(profileSize);
 				
 				int attNumber=0;
 				if(options.isIncludeProfile()){

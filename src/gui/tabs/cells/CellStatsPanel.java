@@ -28,6 +28,7 @@ import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import components.AbstractCellularComponent;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclear.BorderPoint;
@@ -93,7 +94,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
 					// Adjust the point position of tags
 //					Nucleus n = getCellModel().getCell().getNucleus();
-//					BorderTag tag = activeDataset().getCollection().getNucleusType().getTagFromName(rowName);
+//					BorderTagObject tag = activeDataset().getCollection().getNucleusType().getTagFromName(rowName);
 //					if(n.hasBorderTag(tag)){
 //						
 //						updateBorderTagIndex(n, tag);
@@ -130,9 +131,9 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	}
 	
 	
-	private void updateBorderTagIndex(Nucleus n, BorderTag tag){
+	private void updateBorderTagIndex(Nucleus n, BorderTagObject tag){
 
-		int index = AbstractCellularComponent.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
+		int index = AbstractCellularComponent.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTagObject.REFERENCE_POINT), n.getBorderLength());
 		
 		SpinnerNumberModel sModel 
 			= new SpinnerNumberModel(index, 0, n.getBorderLength(), 1);
@@ -153,7 +154,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 			int existingIndex = n.getBorderIndex(tag);
 			
 			// adjust to the actual point index
-			int pointIndex = AbstractCellularComponent.wrapIndex(chosenIndex + n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getBorderLength());
+			int pointIndex = AbstractCellularComponent.wrapIndex(chosenIndex + n.getBorderIndex(BorderTagObject.REFERENCE_POINT), n.getBorderLength());
 			
 			// find the amount the index is changing by
 			int difference = pointIndex - existingIndex;
@@ -175,11 +176,11 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 			// Update the border tag index
 			n.setBorderTag(tag, pointIndex);
 			
-			if(tag.equals(BorderTag.ORIENTATION_POINT)){
-				if(n.hasBorderTag(BorderTag.INTERSECTION_POINT)){
+			if(tag.equals(BorderTagObject.ORIENTATION_POINT)){
+				if(n.hasBorderTag(BorderTagObject.INTERSECTION_POINT)){
 					// only rodent sperm use the intersection point, which is equivalent to the head.
-					BorderPoint newPoint = n.findOppositeBorder(n.getBorderPoint(BorderTag.ORIENTATION_POINT));
-					n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getBorderIndex(newPoint));
+					BorderPoint newPoint = n.findOppositeBorder(n.getBorderPoint(BorderTagObject.ORIENTATION_POINT));
+					n.setBorderTag(BorderTagObject.INTERSECTION_POINT, n.getBorderIndex(newPoint));
 				}
 			}
 			

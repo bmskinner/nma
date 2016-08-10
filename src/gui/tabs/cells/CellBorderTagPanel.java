@@ -26,6 +26,7 @@ import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import components.Cell;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import gui.DatasetEvent.DatasetMethod;
@@ -110,7 +111,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 		
 		private void createBorderTagPopup(){
 			
-			for(BorderTag tag : BorderTag.values()){
+			for(BorderTagObject tag : BorderTagObject.values()){
 				JMenuItem item = new JMenuItem(tag.toString());
 			    
 				item.addActionListener(new ActionListener() {
@@ -125,7 +126,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 			     * We can't handle changing the OP or RP yet -
 			     * requires segment boundary changes
 			     */
-			    if( tag.equals(BorderTag.INTERSECTION_POINT)){
+			    if( tag.equals(BorderTagObject.INTERSECTION_POINT)){
 			    	item.setEnabled(false);
 			    }
 			}
@@ -178,7 +179,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 						.setCell(this.getCellModel().getCell())
 						.setNormalised(false)
 						.setAlignment(ProfileAlignment.LEFT)
-						.setTag(BorderTag.REFERENCE_POINT)
+						.setTag(BorderTagObject.REFERENCE_POINT)
 						.setShowMarkers(true)
 						.setProfileType( type)
 						.setSwatch(activeDataset().getSwatch())
@@ -189,7 +190,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 								
 					JFreeChart chart = getChart(options);
 					
-					profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTag.REFERENCE_POINT);
+					profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTagObject.REFERENCE_POINT);
 									
 					chartPanel.setChart(chart, null, false); // no profile, don't normalise
 					updateChartPanelRange();
@@ -204,7 +205,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 						.setCell(this.getCellModel().getCell())
 						.setNormalised(false)
 						.setAlignment(ProfileAlignment.LEFT)
-						.setTag(BorderTag.REFERENCE_POINT)
+						.setTag(BorderTagObject.REFERENCE_POINT)
 						.setShowMarkers(true)
 						.setProfileType( type)
 						.setSwatch(activeDataset().getSwatch())
@@ -262,7 +263,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 
 		}
 		
-		private void setBorderTagAction(BorderTag tag){
+		private void setBorderTagAction(BorderTagObject tag){
 
 			if(tag!=null){
 				
@@ -271,11 +272,11 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 					log("Updating nucleus "+tag+" to index "+newTagIndex);
 					this.setAnalysing(true);
 					
-					this.getCellModel().getCell().getNucleus().setBorderTag(BorderTag.REFERENCE_POINT, tag, newTagIndex);
+					this.getCellModel().getCell().getNucleus().setBorderTag(BorderTagObject.REFERENCE_POINT, tag, newTagIndex);
 					this.getCellModel().getCell().getNucleus().updateVerticallyRotatedNucleus();
 					
 					
-					if(tag.equals(BorderTag.REFERENCE_POINT)){
+					if(tag.equals(BorderTagObject.REFERENCE_POINT)){
 						// Update the profile aggregate to use the new RP
 						activeDataset().getCollection().getProfileManager().createProfileCollections();
 					}

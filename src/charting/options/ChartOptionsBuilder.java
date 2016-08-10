@@ -32,6 +32,7 @@ import stats.PlottableStatistic;
 import components.Cell;
 import components.CellularComponent;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import analysis.AnalysisDataset;
@@ -48,7 +49,7 @@ public class ChartOptionsBuilder {
 	private ColourSwatch swatch        = GlobalOptions.getInstance().getSwatch();
 	private boolean normalised         = false;
 	private ProfileAlignment alignment = ProfileAlignment.LEFT;
-	private BorderTag tag              = BorderTag.REFERENCE_POINT;
+	private BorderTagObject tag              = BorderTagObject.REFERENCE_POINT;
 	private boolean showMarkers        = false;
 	private boolean hideProfiles       = false;
 	private ProfileType type           = ProfileType.ANGLE;
@@ -129,7 +130,7 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
-	public ChartOptionsBuilder setTag(BorderTag tag){
+	public ChartOptionsBuilder setTag(BorderTagObject tag){
 		this.tag = tag;
 		return this;
 	}

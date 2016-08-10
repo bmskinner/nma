@@ -32,6 +32,7 @@ import org.jfree.chart.plot.XYPlot;
 
 import charting.ChartComponents;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 
 public abstract class AbstractChartFactory implements Loggable {
 
@@ -72,12 +73,12 @@ public abstract class AbstractChartFactory implements Loggable {
 	 * @param tag
 	 * @param value
 	 */
-	protected void addMarkerToXYPlot(XYPlot plot, BorderTag tag, double value){
+	protected void addMarkerToXYPlot(XYPlot plot, BorderTagObject tag, double value){
 		Color colour = Color.BLACK;
-		if(tag.equals(BorderTag.ORIENTATION_POINT)){
+		if(tag.equals(BorderTagObject.ORIENTATION_POINT)){
 			colour = Color.BLUE;
 		}
-		if(tag.equals(BorderTag.REFERENCE_POINT)){
+		if(tag.equals(BorderTagObject.REFERENCE_POINT)){
 			colour = Color.ORANGE;
 		}
 		plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));	

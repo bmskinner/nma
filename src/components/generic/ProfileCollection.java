@@ -22,12 +22,13 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import analysis.profiles.RuleSet;
 import logging.Loggable;
 import components.CellCollection;
-import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 //import ij.IJ;
@@ -57,7 +58,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	
 	private ProfileAggregate 	       aggregate = null;
 	
-	private Map<BorderTag, Integer>    indexes  = new HashMap<BorderTag, Integer>();
+	private Map<BorderTagObject, Integer>    indexes  = new HashMap<BorderTagObject, Integer>();
 	private List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
 	
 	
@@ -68,7 +69,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * Create an empty profile collection
 	 */
 	public ProfileCollection(){
-		indexes.put(BorderTag.REFERENCE_POINT, ZERO_INDEX);
+		indexes.put(BorderTagObject.REFERENCE_POINT, ZERO_INDEX);
 	}
 			
 	/**
@@ -77,7 +78,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param pointType
 	 * @return the offset or -1
 	 */
-	public int getIndex(BorderTag pointType){
+	public int getIndex(BorderTagObject pointType){
 		if(pointType==null){
 			throw new IllegalArgumentException("The requested offset key is null: "+pointType);
 		}
@@ -92,9 +93,9 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * Get all the offset keys attached to this profile collection
 	 * @return
 	 */
-	public List<BorderTag> getBorderTags(){
-		List<BorderTag> result = new ArrayList<BorderTag>();
-		for(BorderTag s: indexes.keySet()){
+	public List<BorderTagObject> getBorderTags(){
+		List<BorderTagObject> result = new ArrayList<BorderTagObject>();
+		for(BorderTagObject s: indexes.keySet()){
 			result.add(s);
 		}
 		return result;
@@ -105,25 +106,25 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param tag
 	 * @return
 	 */
-	public boolean hasBorderTag(BorderTag tag){
+	public boolean hasBorderTag(BorderTagObject tag){
 		return indexes.keySet().contains(tag);
 	}
 	
 	/**
 	 * Get the requested profile from the cached profiles, or
 	 * generate it from the ProfileAggregate if it is not cached.
-	 * @param tag the BorderTag to use as index zero
+	 * @param tag the BorderTagObject to use as index zero
 	 * @param quartile the collection quartile to return (0-100) 
 	 * @return the quartile profile from the given tag
 	 */
-	public Profile getProfile(BorderTag tag, double quartile) {
+	public Profile getProfile(BorderTagObject tag, double quartile) {
 		
 		if(tag==null){
-			throw new IllegalArgumentException("BorderTag is null");
+			throw new IllegalArgumentException("BorderTagObject is null");
 		}
 		
 		if(  ! this.hasBorderTag(tag)){
-			throw new IllegalArgumentException("BorderTag is not present: "+tag.toString());
+			throw new IllegalArgumentException("BorderTagObject is not present: "+tag.toString());
 		}
 
 		// If the profile is not in the cache, make it and add to the cache
@@ -146,7 +147,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @return the profile
 	 * @throws Exception
 	 */
-	public SegmentedProfile getSegmentedProfile(BorderTag tag) {
+	public SegmentedProfile getSegmentedProfile(BorderTagObject tag) {
 		if(tag==null){
 			throw new IllegalArgumentException("A profile key is required");
 		}
@@ -193,7 +194,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param s the name of the tag
 	 * @return a copy of the segments in the profile, offset to start at the tag
 	 */
-	public List<NucleusBorderSegment> getSegments(BorderTag tag) {
+	public List<NucleusBorderSegment> getSegments(BorderTagObject tag) {
 		if(tag==null){
 			throw new IllegalArgumentException("The requested segment key is null: "+tag);
 		}
@@ -214,7 +215,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean hasSegmentStartingWith(BorderTag tag) throws Exception {
+	public boolean hasSegmentStartingWith(BorderTagObject tag) throws Exception {
 		
 		if(getSegmentStartingWith( tag) == null){
 			return false;
@@ -230,7 +231,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param tag the border tag
 	 * @return a copy of the segment with the tag at its start index, or null
 	 */
-	public NucleusBorderSegment getSegmentStartingWith(BorderTag tag) throws Exception {
+	public NucleusBorderSegment getSegmentStartingWith(BorderTagObject tag) throws Exception {
 		List<NucleusBorderSegment> segments = this.getSegments(tag);
 
 		NucleusBorderSegment result = null;
@@ -251,7 +252,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean hasSegmentEndingWith(BorderTag tag) throws Exception {
+	public boolean hasSegmentEndingWith(BorderTagObject tag) throws Exception {
 		
 		if(getSegmentEndingWith( tag) == null){
 			return false;
@@ -267,7 +268,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param tag the border tag
 	 * @return a copy of the segment with the tag at its start index, or null
 	 */
-	public NucleusBorderSegment getSegmentEndingWith(BorderTag tag) throws Exception {
+	public NucleusBorderSegment getSegmentEndingWith(BorderTagObject tag) throws Exception {
 		List<NucleusBorderSegment> segments = this.getSegments(tag);
 
 		NucleusBorderSegment result = null;
@@ -289,7 +290,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @return a copy of the segment with the index inside, or null
 	 */
 	public NucleusBorderSegment getSegmentContaining(int index) throws Exception {
-		List<NucleusBorderSegment> segments = this.getSegments(BorderTag.REFERENCE_POINT);
+		List<NucleusBorderSegment> segments = this.getSegments(BorderTagObject.REFERENCE_POINT);
 
 		NucleusBorderSegment result = null;
 		// get the name of the segment with the tag at the start
@@ -308,7 +309,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param tag the border tag
 	 * @return a copy of the segment with the tag index inside, or null
 	 */
-	public NucleusBorderSegment getSegmentContaining(BorderTag tag) throws Exception {
+	public NucleusBorderSegment getSegmentContaining(BorderTagObject tag) throws Exception {
 		List<NucleusBorderSegment> segments = this.getSegments(tag);
 
 		NucleusBorderSegment result = null;
@@ -329,13 +330,13 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param pointType the point
 	 * @param offset the position of the point in the profile
 	 */
-	public void addIndex(BorderTag tag, int offset){
+	public void addIndex(BorderTagObject tag, int offset){
 		if(tag==null){
-			throw new IllegalArgumentException("BorderTag is null");
+			throw new IllegalArgumentException("BorderTagObject is null");
 		}
 		
 		// Cannot move the RP from zero
-		if(tag.equals(BorderTag.REFERENCE_POINT)){
+		if(tag.equals(BorderTagObject.REFERENCE_POINT)){
 			return;
 		}
 		indexes.put(tag, offset);
@@ -370,7 +371,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param pointType the point with the zero index in the segments
 	 * @param n the segment list
 	 */
-	public void addSegments(BorderTag tag, List<NucleusBorderSegment> n) {
+	public void addSegments(BorderTagObject tag, List<NucleusBorderSegment> n) {
 		if(n==null || n.isEmpty()){
 			throw new NullPointerException("String or segment list is null or empty");
 		}
@@ -424,7 +425,7 @@ public class ProfileCollection implements Serializable, Loggable {
 					aggregate.addValues(n.getProfile(type));
 					break;
 				default:
-					aggregate.addValues(n.getProfile(type, BorderTag.REFERENCE_POINT)); 
+					aggregate.addValues(n.getProfile(type, BorderTagObject.REFERENCE_POINT)); 
 					break;
 			
 			}
@@ -455,7 +456,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		StringBuilder builder = new StringBuilder();
 
 		builder.append("\tPoint types:");
-		for(BorderTag tag : this.indexes.keySet()){
+		for(BorderTagObject tag : this.indexes.keySet()){
 			builder.append("\t"+tag+": "+this.indexes.get(tag));
 		}
 		return builder.toString();
@@ -469,8 +470,8 @@ public class ProfileCollection implements Serializable, Loggable {
 		} else {
 			try {
 
-				for(BorderTag tag : this.indexes.keySet()){
-					if(tag.type().equals(BorderTagType.CORE)){
+				for(BorderTagObject tag : this.indexes.keySet()){
+					if(tag.type().equals(components.generic.BorderTag.BorderTagType.CORE)){
 						builder.append("\r\nSegments from "+tag+":\r\n");
 						for(NucleusBorderSegment s : this.getSegments(tag)){
 							builder.append(s.toString()+"\r\n");
@@ -491,7 +492,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param pointType the profile type to use
 	 * @return the profile
 	 */
-	public Profile getIQRProfile(BorderTag tag) throws Exception {
+	public Profile getIQRProfile(BorderTagObject tag) throws Exception {
 		
 //		int offset = getOffset(tag);
 		
@@ -506,7 +507,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	/**
 	 * Find the points in the profile that are most variable
 	 */
-	public List<Integer> findMostVariableRegions(BorderTag tag) throws Exception {
+	public List<Integer> findMostVariableRegions(BorderTagObject tag) throws Exception {
 		
 		// get the IQR and maxima
 		Profile iqrProfile = getIQRProfile(tag);
@@ -554,6 +555,26 @@ public class ProfileCollection implements Serializable, Loggable {
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		finest("\tReading profile collection");
 		in.defaultReadObject();
+		
+		Map<BorderTagObject, Integer> newIndexes = new HashMap<BorderTagObject, Integer>();
+		
+		Iterator it = indexes.keySet().iterator();
+		
+		while(it.hasNext()){
+			Object tag = it.next();
+			if(tag instanceof BorderTag){
+				fine("Deserialization has no BorderTagObject for "+tag.toString()+", creating");
+				
+				newIndexes.put(new BorderTagObject( (BorderTag) tag), indexes.get(tag));						
+			}
+			
+		}
+		
+		if( ! newIndexes.isEmpty()){
+			indexes = newIndexes;
+		}
+
+		
 		finest("\tRead profile collection");
 	}
 	
@@ -570,7 +591,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		/**
 		 * Store the median profiles from the profile aggregate to save calculation time with large datasets
 		 */
-		private Map<BorderTag, Map<Double, Profile>> cache = new HashMap<BorderTag, Map<Double, Profile>>();
+		private Map<BorderTagObject, Map<Double, Profile>> cache = new HashMap<BorderTagObject, Map<Double, Profile>>();
 		
 		public ProfileCache(){
 			
@@ -582,7 +603,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		   * @param scale
 		   * @param d
 		   */
-		  public void setProfile(BorderTag tag, Double quartile, Profile profile){
+		  public void setProfile(BorderTagObject tag, Double quartile, Profile profile){
 
 			  Map<Double, Profile> map;
 
@@ -608,7 +629,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		 * @param quartile
 		 * @return
 		 */
-		  public Profile getProfile(BorderTag tag, Double quartile){
+		  public Profile getProfile(BorderTagObject tag, Double quartile){
 
 			  if(this.hasProfile(tag, quartile)){
 //				  IJ.log("Found "+tag+" - "+quartile+" in profile cache");
@@ -627,7 +648,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		 * @param quartile
 		 * @return
 		 */
-		public boolean hasProfile(BorderTag tag, Double quartile){
+		public boolean hasProfile(BorderTagObject tag, Double quartile){
 			  Map<Double, Profile> map;
 
 			  if(cache.containsKey(tag)){
@@ -655,13 +676,33 @@ public class ProfileCollection implements Serializable, Loggable {
 		  public void clear(){
 //			  IJ.log("Clearing cache");
 			  cache = null;
-			  cache = new HashMap<BorderTag, Map<Double, Profile>>();
+			  cache = new HashMap<BorderTagObject, Map<Double, Profile>>();
 
 		  }
 		  
 		  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 			  finest("\tReading profile cache");
 			  in.defaultReadObject();
+			  
+			  Map<BorderTagObject, Map<Double, Profile>> newCache = new HashMap<BorderTagObject, Map<Double, Profile>>();
+				
+				Iterator it = cache.keySet().iterator();
+				
+				while(it.hasNext()){
+					Object tag = it.next();
+					if(tag instanceof BorderTag){
+						fine("Deserialization has no BorderTagObject for "+tag.toString()+", creating");
+						
+						newCache.put(new BorderTagObject( (BorderTag) tag), cache.get(tag));						
+					}
+					
+				}
+				
+				
+				if( ! newCache.isEmpty()){
+					cache = newCache;
+				}
+			  
 			  finest("\tRead profile cache");
 		  }
 

@@ -39,6 +39,7 @@ import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 
@@ -82,7 +83,7 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel  {
 			List<NucleusBorderSegment> segments = activeDataset()
 					.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 					.getOrderedSegments();
 
 			for(SegmentStatistic stat : SegmentStatistic.values()){

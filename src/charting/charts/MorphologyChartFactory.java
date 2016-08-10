@@ -59,6 +59,7 @@ import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
@@ -195,7 +196,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		if(options.isShowMarkers()){
 
 			finest("Adding segment markers");
-			for (BorderTag tag : n.getBorderTags().keySet()){
+			for (BorderTagObject tag : n.getBorderTags().keySet()){
 
 				// get the index of the tag
 
@@ -282,7 +283,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
 			XYPlot plot = chart.getXYPlot();
 
-			for (BorderTag tag : collection.getProfileCollection(options.getType()).getBorderTags()){
+			for (BorderTagObject tag : collection.getProfileCollection(options.getType()).getBorderTags()){
 
 				// get the index of the tag
 				int index = collection.getProfileCollection(options.getType()).getIndex(tag);
@@ -334,7 +335,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				   : options.firstDataset()
 				   		.getCollection()
 				   		.getProfileCollection(ProfileType.ANGLE)
-				   		.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN)
+				   		.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN)
 				   		.size();
 				
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
@@ -397,7 +398,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			if(options.isShowMarkers()){
 
 				CellCollection collection = options.firstDataset().getCollection();
-				for (BorderTag tag : collection.getProfileCollection(options.getType()).getBorderTags()){
+				for (BorderTagObject tag : collection.getProfileCollection(options.getType()).getBorderTags()){
 
 					// get the index of the tag
 					int index = collection.getProfileCollection(options.getType()).getIndex(tag);

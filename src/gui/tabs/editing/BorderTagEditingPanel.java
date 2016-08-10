@@ -41,6 +41,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.entity.XYItemEntity;
 
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.BorderTag.BorderTagType;
 import components.generic.ProfileType;
 import charting.charts.DraggableOverlayChartPanel;
@@ -143,7 +144,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	
 	private void createBorderTagPopup(){
 		
-		for(BorderTag tag : BorderTag.values()){
+		for(BorderTagObject tag : BorderTagObject.values()){
 			JMenuItem item = new JMenuItem(tag.toString());
 		    
 			item.addActionListener(new ActionListener() {
@@ -158,7 +159,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 		     * We can't handle changing the OP or RP yet -
 		     * requires segment boundary changes
 		     */
-		    if( tag.equals(BorderTag.INTERSECTION_POINT)){
+		    if( tag.equals(BorderTagObject.INTERSECTION_POINT)){
 		    	item.setEnabled(false);
 		    }
 		}
@@ -220,7 +221,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 			.setDatasets(getDatasets())
 			.setNormalised(false)
 			.setAlignment(ProfileAlignment.LEFT)
-			.setTag(BorderTag.REFERENCE_POINT)
+			.setTag(BorderTagObject.REFERENCE_POINT)
 			.setShowMarkers(true)
 			.setProfileType( ProfileType.ANGLE)
 			.setShowPoints(true)
@@ -243,7 +244,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 			.setDatasets(getDatasets())
 			.setNormalised(false)
 			.setAlignment(ProfileAlignment.LEFT)
-			.setTag(BorderTag.REFERENCE_POINT)
+			.setTag(BorderTagObject.REFERENCE_POINT)
 			.setShowMarkers(true)
 			.setProfileType( ProfileType.ANGLE)
 			.setSwatch(swatch)
@@ -295,7 +296,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	}
 	
 	
-	private void setBorderTagAction(BorderTag tag){
+	private void setBorderTagAction(BorderTagObject tag){
 
 		if(tag!=null){
 			

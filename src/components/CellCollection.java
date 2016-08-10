@@ -59,6 +59,7 @@ import analysis.profiles.RuleSetCollection;
 import analysis.profiles.SegmentStatisticFetchingTask;
 import analysis.signals.SignalManager;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
@@ -276,7 +277,7 @@ public class CellCollection implements Serializable, Loggable {
 	  return this.consensusNucleus;
   }
   
-  public String getPoint(BorderTag tag){
+  public String getPoint(BorderTagObject tag){
 	  
 	  return this.nucleusType.getPoint(tag);
   }
@@ -566,7 +567,7 @@ public class CellCollection implements Serializable, Loggable {
 
 	  List<String> result = new ArrayList<String>(0);
 	  ProfileCollection pc = this.getProfileCollection(ProfileType.ANGLE);
-	  List<NucleusBorderSegment> segs = pc.getSegments(BorderTag.ORIENTATION_POINT);
+	  List<NucleusBorderSegment> segs = pc.getSegments(BorderTagObject.ORIENTATION_POINT);
 	  for(NucleusBorderSegment segment : segs){
 		  result.add(segment.getName());
 	  }
@@ -578,7 +579,7 @@ public class CellCollection implements Serializable, Loggable {
    * @param pointType the point to fetch profiles from
    * @return an array of differences
    */
-  public double[] getDifferencesToMedianFromPoint(BorderTag pointType) throws Exception {
+  public double[] getDifferencesToMedianFromPoint(BorderTagObject pointType) throws Exception {
 	  
 	  int count = this.getNucleusCount();
 	  double[] result = new double[count];
@@ -599,7 +600,7 @@ public class CellCollection implements Serializable, Loggable {
    * @param pointType the point to fetch profiles from
    * @return an array of normalised differences
    */
-  public double[] getNormalisedDifferencesToMedianFromPoint(BorderTag pointType) {
+  public double[] getNormalisedDifferencesToMedianFromPoint(BorderTagObject pointType) {
 //	  List<Double> list = new ArrayList<Double>();
 	  int count = this.getNucleusCount();
 	  double[] result = new double[count];
@@ -626,7 +627,7 @@ public class CellCollection implements Serializable, Loggable {
 * @return the variabililty score of the nucleus
 * @throws Exception
 */
-  public double getNormalisedDifferenceToMedian(BorderTag pointType, Cell c){
+  public double getNormalisedDifferenceToMedian(BorderTagObject pointType, Cell c){
 	  Profile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.MEDIAN);
 	  Profile angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
 	  double diff = angleProfile.absoluteSquareDifference(medianProfile);		
@@ -635,7 +636,7 @@ public class CellCollection implements Serializable, Loggable {
 	  return rootDiff;
   }
 
-  public double compareProfilesToMedian(BorderTag pointType) throws Exception{
+  public double compareProfilesToMedian(BorderTagObject pointType) throws Exception{
 	  double[] scores = this.getDifferencesToMedianFromPoint(pointType);
 	  double result = 0;
 	  for(double s : scores){
@@ -645,7 +646,7 @@ public class CellCollection implements Serializable, Loggable {
   }
 
 
-  public int[] getPointIndexes(BorderTag pointType){
+  public int[] getPointIndexes(BorderTagObject pointType){
 //	  List<Integer> list = new ArrayList<Integer>();
 
 	  int count = this.getNucleusCount();
@@ -666,7 +667,7 @@ public class CellCollection implements Serializable, Loggable {
    * @param pointTypeB
    * @return
    */
-  public double[] getPointToPointDistances(BorderTag pointTypeA, BorderTag pointTypeB){
+  public double[] getPointToPointDistances(BorderTagObject pointTypeA, BorderTagObject pointTypeB){
 //	  List<Double> list = new ArrayList<Double>();
 	  int count = this.getNucleusCount();
 	  double[] result = new double[count];
@@ -685,7 +686,7 @@ public class CellCollection implements Serializable, Loggable {
    * @return the best nucleus
    * @throws Exception
    */
-  public Nucleus getNucleusMostSimilarToMedian(BorderTag pointType) throws Exception {
+  public Nucleus getNucleusMostSimilarToMedian(BorderTagObject pointType) throws Exception {
 
 	  Profile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, 50); // the profile we compare the nucleus to
 	  Nucleus n = this.getNuclei().get(0); // default to the first nucleus
@@ -711,7 +712,7 @@ public class CellCollection implements Serializable, Loggable {
 //   * @throws Exception
 //   */
 //  public double calculateVariabililtyOfNucleusProfile(Nucleus n) {
-//	  BorderTag pointType = BorderTag.REFERENCE_POINT;
+//	  BorderTagObject pointType = BorderTagObject.REFERENCE_POINT;
 //	  Profile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType,50);
 //	  Profile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
 //	  double diff = angleProfile.absoluteSquareDifference(medianProfile);										 
@@ -818,7 +819,7 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  switch (stat) {
 
 		  case VARIABILITY:{
-			  result = this.getNormalisedDifferencesToMedianFromPoint(BorderTag.REFERENCE_POINT);
+			  result = this.getNormalisedDifferencesToMedianFromPoint(BorderTagObject.REFERENCE_POINT);
 			  break;
 		  }
 	
@@ -912,7 +913,7 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 		  for(Cell c : this.getCells()){
 			  Nucleus n = c.getNucleus();
 
-			  double value = getNormalisedDifferenceToMedian(BorderTag.REFERENCE_POINT, c);
+			  double value = getNormalisedDifferenceToMedian(BorderTagObject.REFERENCE_POINT, c);
 
 			  if(value>= lower && value<= upper){
 				  filteredCells.add(c);
@@ -1160,6 +1161,11 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  in.defaultReadObject();
 	  isRefolding = false;
 	  vennCache   = new HashMap<UUID, Integer>(); // cache the number of shared nuclei with other datasets
+	  
+	  if(ruleSets==null || ruleSets.isEmpty()){
+		  log("Creating default ruleset for collection");
+		  ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType); 
+	  }
 //	  finest("Creating default ruleset for nucleus type "+nucleusType);
 //	  ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType); 
 	  finest("Read cell collection");

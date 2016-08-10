@@ -28,6 +28,7 @@ import jdistlib.disttest.NormalityTest;
 import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileType;
 
@@ -47,7 +48,7 @@ public class DipTester {
 	 * @param tag the border tag to offset from
 	 * @return a boolean profile of results
 	 */
-	public static Profile testCollectionGetPValues(CellCollection collection, BorderTag tag, ProfileType type){
+	public static Profile testCollectionGetPValues(CellCollection collection, BorderTagObject tag, ProfileType type){
 		Profile resultProfile = null;
 		
 		double[] pvals = null;
@@ -112,7 +113,7 @@ public class DipTester {
 	 * @param significance the p-value threshold
 	 * @return a boolean profile of results
 	 */
-	public static BooleanProfile testCollectionIsUniModal(CellCollection collection, BorderTag tag, double significance, ProfileType type){
+	public static BooleanProfile testCollectionIsUniModal(CellCollection collection, BorderTagObject tag, double significance, ProfileType type){
 		
 		BooleanProfile resultProfile = null;
 		boolean[] modes = null;

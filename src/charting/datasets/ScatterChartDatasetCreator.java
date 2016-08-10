@@ -23,6 +23,7 @@ import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.nuclear.BorderPoint;
 import components.nuclear.NuclearSignal;
@@ -81,13 +82,13 @@ private static ScatterChartDatasetCreator instance = null;
 			for(int j=0; j<cells.size();j++){
 				
 				if(statA.equals(NucleusStatistic.VARIABILITY)){
-					xpoints[j] = c.getNormalisedDifferenceToMedian(BorderTag.REFERENCE_POINT, cells.get(j));
+					xpoints[j] = c.getNormalisedDifferenceToMedian(BorderTagObject.REFERENCE_POINT, cells.get(j));
 				} else {
 					xpoints[j] = cells.get(j).getNucleus().getStatistic(statA, scale);
 				}
 				
 				if(statB.equals(NucleusStatistic.VARIABILITY)){
-					ypoints[j] = c.getNormalisedDifferenceToMedian(BorderTag.REFERENCE_POINT, cells.get(j));
+					ypoints[j] = c.getNormalisedDifferenceToMedian(BorderTagObject.REFERENCE_POINT, cells.get(j));
 				} else {
 					ypoints[j] = cells.get(j).getNucleus().getStatistic(statB, scale);
 				}
@@ -172,13 +173,13 @@ private static ScatterChartDatasetCreator instance = null;
 			for(int j=0; j<cells.size();j++){
 
 				if(statA.equals(NucleusStatistic.VARIABILITY)){
-					xpoints[j] = c.getNormalisedDifferenceToMedian(BorderTag.REFERENCE_POINT, cells.get(j));
+					xpoints[j] = c.getNormalisedDifferenceToMedian(BorderTagObject.REFERENCE_POINT, cells.get(j));
 				} else {
 					xpoints[j] = cells.get(j).getNucleus().getStatistic(statA, scale);
 				}
 				
 				if(statB.equals(NucleusStatistic.VARIABILITY)){
-					ypoints[j] = c.getNormalisedDifferenceToMedian(BorderTag.REFERENCE_POINT, cells.get(j));
+					ypoints[j] = c.getNormalisedDifferenceToMedian(BorderTagObject.REFERENCE_POINT, cells.get(j));
 				} else {
 					ypoints[j] = cells.get(j).getNucleus().getStatistic(statB, scale);
 				}

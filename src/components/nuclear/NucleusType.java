@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
@@ -68,7 +69,7 @@ public enum NucleusType {
      * @param point
      * @return
      */
-    public String getPoint(BorderTag point){
+    public String getPoint(BorderTagObject point){
     	return this.map.get(point);
     }
     

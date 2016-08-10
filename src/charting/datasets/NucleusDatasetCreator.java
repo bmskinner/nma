@@ -40,6 +40,7 @@ import components.CellCollection;
 import components.CellularComponent;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Equation;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
@@ -192,12 +193,12 @@ private static NucleusDatasetCreator instance = null;
 
             CellCollection collection = list.get(i).getCollection();
             
-            Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+            Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
             Profile xpoints = profile.getPositions(100);
             double[][] data = { xpoints.asArray(), profile.asArray() };
             ds.addSeries("Profile_"+i, data);
             
-            List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(BorderTag.REFERENCE_POINT);
+            List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(BorderTagObject.REFERENCE_POINT);
             List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
             
             // add only the segment of interest
@@ -261,7 +262,7 @@ private static NucleusDatasetCreator instance = null;
 		for (int i=0; i < list.size(); i++) {
 			CellCollection collection = list.get(i).getCollection();
 
-			Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+			Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
 			Profile xpoints = profile.getPositions((int) collection.getMedianArrayLength());
 			
 			double offset = 0;
@@ -273,7 +274,7 @@ private static NucleusDatasetCreator instance = null;
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
 			
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(BorderTag.REFERENCE_POINT);
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(BorderTagObject.REFERENCE_POINT);
 			List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
 			
 			// add only the segment of interest
@@ -303,7 +304,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @see createSegmentedMedianProfileDataset()
 	 * @throws Exception 
 	 */
-	public XYDataset createNonsegmentedMedianProfileDataset(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag point) throws Exception{
+	public XYDataset createNonsegmentedMedianProfileDataset(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTagObject point) throws Exception{
 		CellCollection collection = dataset.getCollection();
 		DefaultXYDataset ds = new DefaultXYDataset();
 				
@@ -340,7 +341,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @return a dataset
 	 * @throws Exception 
 	 */
-	public XYDataset createSegmentedMedianProfileDataset(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag point) throws Exception{
+	public XYDataset createSegmentedMedianProfileDataset(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTagObject point) throws Exception{
 		
 		CellCollection collection = dataset.getCollection();
 		DefaultXYDataset ds = new DefaultXYDataset();
@@ -393,7 +394,7 @@ private static NucleusDatasetCreator instance = null;
 		CellCollection collection  = options.firstDataset().getCollection();
 		boolean normalised         = options.isNormalised();
 		ProfileAlignment alignment = options.getAlignment();
-		BorderTag borderTag        = options.getTag();
+		BorderTagObject borderTag  = options.getTag();
 		ProfileType type           = options.getType();
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
@@ -474,7 +475,7 @@ private static NucleusDatasetCreator instance = null;
 		List<AnalysisDataset> list = options.getDatasets();
 		boolean normalised         = options.isNormalised();
 		ProfileAlignment alignment = options.getAlignment();
-		BorderTag borderTag        = options.getTag();
+		BorderTagObject borderTag  = options.getTag();
 		ProfileType type           = options.getType();
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
@@ -519,7 +520,7 @@ private static NucleusDatasetCreator instance = null;
 		List<AnalysisDataset> list = options.getDatasets();
 //		boolean normalised         = options.isNormalised();
 //		ProfileAlignment alignment = options.getAlignment();
-		BorderTag borderTag        = options.getTag();
+		BorderTagObject borderTag  = options.getTag();
 //		ProfileType type           = options.getType();
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
@@ -549,7 +550,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @return a new series
 	 * @throws Exception 
 	 */
-	private XYSeriesCollection addMultiProfileIQRSeries(ProfileCollection pc, BorderTag point, int series, double length, double medianLength, boolean normalised, ProfileAlignment alignment) throws Exception{
+	private XYSeriesCollection addMultiProfileIQRSeries(ProfileCollection pc, BorderTagObject point, int series, double length, double medianLength, boolean normalised, ProfileAlignment alignment) throws Exception{
 		Profile profile = pc.getProfile(point, 50);
 		
 		Profile xpoints = null;
@@ -605,7 +606,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @return a dataset
 	 * @throws Exception 
 	 */
-	private List<XYSeriesCollection> createMultiProfileIQRDataset(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, ProfileType type) throws Exception{
+	private List<XYSeriesCollection> createMultiProfileIQRDataset(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTagObject borderTag, ProfileType type) throws Exception{
 
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
 		
@@ -634,7 +635,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<XYSeriesCollection> createMultiProfileIQRFrankenDataset(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment,  BorderTag borderTag) throws Exception{
+	public List<XYSeriesCollection> createMultiProfileIQRFrankenDataset(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment,  BorderTagObject borderTag) throws Exception{
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
 
 		int i=0;
@@ -711,7 +712,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @return
 	 * @throws Exception
 	 */
-	private XYDataset createFrankenSegmentDataset(CellCollection collection, boolean normalised, ProfileAlignment alignment, BorderTag point) throws Exception{
+	private XYDataset createFrankenSegmentDataset(CellCollection collection, boolean normalised, ProfileAlignment alignment, BorderTagObject point) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 //		String pointType = collection.getOrientationPoint();
@@ -780,11 +781,11 @@ private static NucleusDatasetCreator instance = null;
 			profile = nucleus.getProfile(type);
 			xpoints = profile.getPositions(profile.size());
 		} else {
-			profile = nucleus.getProfile(type, BorderTag.REFERENCE_POINT);
+			profile = nucleus.getProfile(type, BorderTagObject.REFERENCE_POINT);
 			xpoints = profile.getPositions(nucleus.getBorderLength());
 			
 			// add the segments
-			List<NucleusBorderSegment> segments = nucleus.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT).getOrderedSegments();
+			List<NucleusBorderSegment> segments = nucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getOrderedSegments();
 			addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0);
 		}
 
@@ -862,7 +863,7 @@ private static NucleusDatasetCreator instance = null;
 			
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
 
 
@@ -870,7 +871,7 @@ private static NucleusDatasetCreator instance = null;
 
 			for(Nucleus n : collection.getNuclei()){
 				
-				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT)
+				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());			
 
 				
@@ -906,14 +907,14 @@ private static NucleusDatasetCreator instance = null;
 			
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
 
 
 			List<Double> list = new ArrayList<Double>(0);
 
 			for(Nucleus n : collection.getNuclei()){
-				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
+				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
 				
 				NucleusBorderSegment seg = profile.getSegment(medianSeg.getID());
 				
@@ -944,8 +945,8 @@ private static NucleusDatasetCreator instance = null;
 
 			CellCollection collection = datasets.get(i).getCollection();
 
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegmentedProfile(BorderTag.REFERENCE_POINT).getOrderedSegments();
-//			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(BorderTag.ORIENTATION_POINT);
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegmentedProfile(BorderTagObject.REFERENCE_POINT).getOrderedSegments();
+//			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(BorderTagObject.ORIENTATION_POINT);
 			
 			for(NucleusBorderSegment medianSeg : segments){
 				
@@ -1024,7 +1025,7 @@ private static NucleusDatasetCreator instance = null;
 		// get the consensus nucleus for the population
 		ConsensusNucleus n = collection.getConsensusNucleus();
 		
-		BorderTag pointType = BorderTag.REFERENCE_POINT;
+		BorderTagObject pointType = BorderTagObject.REFERENCE_POINT;
 		
 		// get the quartile profiles, beginning from the orientation point
 		Profile q25 = collection.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.LOWER_QUARTILE).interpolate(n.getBorderLength());
@@ -1104,7 +1105,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @param n the consensus nucleus
 	 * @param scaledRange the IQR scale profile
 	 */
-	private void addSegmentIQRToConsensus(NucleusBorderSegment segment, DefaultXYDataset ds, Nucleus n, Profile scaledRange, BorderTag pointType){
+	private void addSegmentIQRToConsensus(NucleusBorderSegment segment, DefaultXYDataset ds, Nucleus n, Profile scaledRange, BorderTagObject pointType){
 
 		// what we need to do is match the profile positions to the borderpoints
 		// Add lines to show the IQR of the angle profile at each point
@@ -1305,7 +1306,7 @@ private static NucleusDatasetCreator instance = null;
 	public int getSegmentPosition(Nucleus n, NucleusBorderSegment seg){
 		
 		int result = 0;
-		if(seg.getStartIndex()==n.getBorderIndex(BorderTag.REFERENCE_POINT)){
+		if(seg.getStartIndex()==n.getBorderIndex(BorderTagObject.REFERENCE_POINT)){
 			return result;
 		} else {
 			result++;
@@ -1326,7 +1327,7 @@ private static NucleusDatasetCreator instance = null;
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 		Nucleus nucleus = cell.getNucleus();// draw the index points on the nucleus border
-		for(BorderTag tag : nucleus.getBorderTags().keySet()){
+		for(BorderTagObject tag : nucleus.getBorderTags().keySet()){
 			BorderPoint tagPoint = nucleus.getBorderPoint(tag);
 			double[] xpoints = { tagPoint.getX(), nucleus.getCentreOfMass().getX() };
 			double[] ypoints = { tagPoint.getY(), nucleus.getCentreOfMass().getY() };

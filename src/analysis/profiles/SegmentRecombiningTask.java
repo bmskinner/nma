@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import analysis.AbstractProgressAction;
 //import analysis.nucleus.DatasetSegmenter.SegmentFitter;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
@@ -117,7 +118,7 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 
 		// recombine the segments to the lengths of the median profile segments
 
-		Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
+		Profile recombinedProfile = fitter.recombine(n, BorderTagObject.REFERENCE_POINT);
 
 		SegmentedProfile segmented = new SegmentedProfile(recombinedProfile, medianProfile.getOrderedSegments());
 		n.setProfile(ProfileType.FRANKEN, segmented);

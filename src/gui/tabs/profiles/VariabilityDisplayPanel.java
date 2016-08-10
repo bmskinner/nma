@@ -63,6 +63,7 @@ import charting.options.TableOptions;
 import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileType;
 
@@ -209,7 +210,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 
 			this.setEnabled(true);
 
-			BorderTag tag = borderTagOptionsPanel.getSelected();
+			BorderTagObject tag = borderTagOptionsPanel.getSelected();
 			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
 			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 

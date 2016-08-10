@@ -27,6 +27,7 @@ import java.util.logging.Level;
 
 import utility.ProfileException;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
@@ -126,11 +127,11 @@ public class SegmentFitter implements Loggable {
 	/**
 	 * Join the segments within the given nucleus into Frankenstein's Profile. 
 	 * @param n the nucleus to recombine
-	 * @param tag the BorderTag to start from
+	 * @param tag the BorderTagObject to start from
 	 * @return a profile
 	 * @throws Exception  
 	 */
-	public Profile recombine(Nucleus n, BorderTag tag) throws Exception {
+	public Profile recombine(Nucleus n, BorderTagObject tag) throws Exception {
 		if(n==null){
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
@@ -194,7 +195,7 @@ public class SegmentFitter implements Loggable {
 		 * the core border tag population
 		 */
 		
-		for(BorderTag tag : BorderTag.values(BorderTagType.CORE)){
+		for(BorderTagObject tag : BorderTagObject.values(BorderTagType.CORE)){
 			
 			// get the segments the point should lie between
 			// from the median profile

@@ -24,12 +24,14 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import logging.Loggable;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.nuclear.NucleusType;
 
 /**
@@ -44,13 +46,13 @@ public class RuleSetCollection implements Serializable, Loggable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private Map<BorderTag, List<RuleSet>> map = new HashMap<BorderTag, List<RuleSet>>();
+	private Map<BorderTagObject, List<RuleSet>> map    = new HashMap<BorderTagObject, List<RuleSet>>();
 	
 	/**
 	 * Create a new empty collection
 	 */
 	public RuleSetCollection(){
-		for(BorderTag tag : BorderTag.values()){
+		for(BorderTagObject tag : BorderTagObject.values()){
 			clearRuleSets(tag);
 		}
 	}
@@ -59,7 +61,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 	 * Remove all the RuleSets for the given tag
 	 * @param tag
 	 */
-	public void clearRuleSets(BorderTag tag){
+	public void clearRuleSets(BorderTagObject tag){
 		map.put(tag, new ArrayList<RuleSet>());
 	}
 	
@@ -68,7 +70,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 	 * @param tag
 	 * @param r
 	 */
-	public void addRuleSet(BorderTag tag, RuleSet r){
+	public void addRuleSet(BorderTagObject tag, RuleSet r){
 		map.get(tag).add(r);
 	}
 	
@@ -77,22 +79,26 @@ public class RuleSetCollection implements Serializable, Loggable {
 	 * @param tag
 	 * @param r
 	 */
-	public List<RuleSet> getRuleSets(BorderTag tag){
+	public List<RuleSet> getRuleSets(BorderTagObject tag){
 		return map.get(tag);
 	}
 		
-	public Set<BorderTag> getTags(){
+	public Set<BorderTagObject> getTags(){
 		return map.keySet();
 	}
 	
-	public boolean hasRulesets(BorderTag tag){
+	public boolean hasRulesets(BorderTagObject tag){
 		return map.get(tag).size()>0;
+	}
+	
+	public boolean isEmpty(){
+		return map.isEmpty();
 	}
 	
 	public String toString(){
 		StringBuilder b = new StringBuilder();
 		b.append("RuleSets:\n");
-		for(BorderTag tag : map.keySet()){
+		for(BorderTagObject tag : map.keySet()){
 			b.append("\t"+tag+":\n");
 			List<RuleSet> l = map.get(tag);
 			for(RuleSet r : l){
@@ -128,10 +134,10 @@ public class RuleSetCollection implements Serializable, Loggable {
 	private static RuleSetCollection createMouseSpermRuleSets(){
 		RuleSetCollection r = new RuleSetCollection();
 		
-		r.addRuleSet(BorderTag.REFERENCE_POINT,   RuleSet.mouseSpermRPRuleSet());
-		r.addRuleSet(BorderTag.ORIENTATION_POINT, RuleSet.mouseSpermOPRuleSet());
-		r.addRuleSet(BorderTag.TOP_VERTICAL,      RuleSet.mouseSpermTVRuleSet());
-		r.addRuleSet(BorderTag.BOTTOM_VERTICAL,   RuleSet.mouseSpermBVRuleSet());
+		r.addRuleSet(BorderTagObject.REFERENCE_POINT,   RuleSet.mouseSpermRPRuleSet());
+		r.addRuleSet(BorderTagObject.ORIENTATION_POINT, RuleSet.mouseSpermOPRuleSet());
+		r.addRuleSet(BorderTagObject.TOP_VERTICAL,      RuleSet.mouseSpermTVRuleSet());
+		r.addRuleSet(BorderTagObject.BOTTOM_VERTICAL,   RuleSet.mouseSpermBVRuleSet());
 		return r;
 	}
 	
@@ -142,8 +148,8 @@ public class RuleSetCollection implements Serializable, Loggable {
 	private static RuleSetCollection createPigSpermRuleSets(){
 		RuleSetCollection r = new RuleSetCollection();
 		
-		r.addRuleSet(BorderTag.REFERENCE_POINT,   RuleSet.pigSpermRPRuleSet());
-		r.addRuleSet(BorderTag.ORIENTATION_POINT, RuleSet.pigSpermRPRuleSet());
+		r.addRuleSet(BorderTagObject.REFERENCE_POINT,   RuleSet.pigSpermRPRuleSet());
+		r.addRuleSet(BorderTagObject.ORIENTATION_POINT, RuleSet.pigSpermRPRuleSet());
 		return r;
 	}
 	
@@ -154,14 +160,40 @@ public class RuleSetCollection implements Serializable, Loggable {
 	private static RuleSetCollection createRoundRuleSets(){
 		RuleSetCollection r = new RuleSetCollection();
 		
-		r.addRuleSet(BorderTag.REFERENCE_POINT,   RuleSet.roundRPRuleSet());
-		r.addRuleSet(BorderTag.ORIENTATION_POINT, RuleSet.roundOPRuleSet());
+		r.addRuleSet(BorderTagObject.REFERENCE_POINT,   RuleSet.roundRPRuleSet());
+		r.addRuleSet(BorderTagObject.ORIENTATION_POINT, RuleSet.roundOPRuleSet());
 		return r;
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		finest("\tReading RulesetCollection");
 		in.defaultReadObject();
+		
+		
+		
+		if(  map!=null ){
+						
+			Map<BorderTagObject, List<RuleSet>> newMap = new HashMap<BorderTagObject, List<RuleSet>>();
+			
+			Iterator it = map.keySet().iterator();
+			
+			while(it.hasNext()){
+				Object tag = it.next();
+				if(tag instanceof BorderTag){
+					fine("No BorderTagObject for "+tag.toString()+": creating");
+					
+					newMap.put(new BorderTagObject( (BorderTag) tag), map.get(tag));					
+				}
+				
+			}
+			
+			if( ! newMap.isEmpty()){
+				map = newMap;
+			}
+
+			
+		}
+				
 		finest("\tRead RulesetCollection");
 	}
 

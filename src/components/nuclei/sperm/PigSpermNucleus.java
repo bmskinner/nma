@@ -32,6 +32,7 @@ import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import components.nuclear.BorderPoint;
@@ -105,12 +106,12 @@ public class PigSpermNucleus
 			rpIndex = 0;
 		}
 		
-    	setBorderTag(BorderTag.REFERENCE_POINT, rpIndex);
+    	setBorderTag(BorderTagObject.REFERENCE_POINT, rpIndex);
     	
     	/*
     	 * The OP is the same as the RP in pigs
     	 */
-    	setBorderTag(BorderTag.ORIENTATION_POINT, rpIndex);
+    	setBorderTag(BorderTagObject.ORIENTATION_POINT, rpIndex);
     	
     	
     	
@@ -119,7 +120,7 @@ public class PigSpermNucleus
     	 */
     	BorderPoint op = this.getBorderPoint(rpIndex);
     	int ipIndex = getBorderIndex(this.findOppositeBorder(op));
-    	setBorderTag(BorderTag.INTERSECTION_POINT, ipIndex);
+    	setBorderTag(BorderTagObject.INTERSECTION_POINT, ipIndex);
     	
     	if(!this.isProfileOrientationOK()){
 			this.reverse();

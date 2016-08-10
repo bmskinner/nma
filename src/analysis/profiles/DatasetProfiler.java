@@ -25,6 +25,7 @@ import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.BorderTag.BorderTagType;
@@ -37,7 +38,7 @@ import components.generic.BorderTag.BorderTagType;
  */
 public class DatasetProfiler extends AnalysisWorker {
 	
-	private static final BorderTag DEFAULT_BORDER_TAG = BorderTag.REFERENCE_POINT;
+	private static final BorderTagObject DEFAULT_BORDER_TAG = BorderTagObject.REFERENCE_POINT;
 	
 	public static final int RECALCULATE_MEDIAN = 0;
 
@@ -75,7 +76,7 @@ public class DatasetProfiler extends AnalysisWorker {
 	 * @param collection
 	 * @param pointType
 	 */
-	private void runProfiler(BorderTag pointType){
+	private void runProfiler(BorderTagObject pointType){
 		
 		try{
 			fine("Profiling collection");
@@ -110,18 +111,18 @@ public class DatasetProfiler extends AnalysisWorker {
 			
 			// Create a median from the current reference points in the nuclei
 			Profile median = collection.getProfileCollection(ProfileType.ANGLE)
-					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
+					.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
 			finest("Fetched median from initial RP");
 			
 			// RP index *should be* zero in the median profile at this point
 			// Check this before updating nuclei
 			ProfileIndexFinder finder = new ProfileIndexFinder();
-			int rpIndex = finder.identifyIndex(collection, BorderTag.REFERENCE_POINT);
+			int rpIndex = finder.identifyIndex(collection, BorderTagObject.REFERENCE_POINT);
 			fine("RP in default median is located at index "+rpIndex);
 			
 			// Update the nucleus profiles to best fit the median
 			collection.getProfileManager()
-				.offsetNucleusProfiles(BorderTag.REFERENCE_POINT, ProfileType.ANGLE, median);
+				.offsetNucleusProfiles(BorderTagObject.REFERENCE_POINT, ProfileType.ANGLE, median);
 			
 //			fine("Current median profile:");
 //			fine(collection.getProfileCollection(ProfileType.ANGLE).getProfile(DEFAULT_BORDER_TAG, 50).toString());
@@ -153,11 +154,11 @@ public class DatasetProfiler extends AnalysisWorker {
 	
 			// Identify the border tags in the median profile
 
-			for(BorderTag tag : BorderTag.values() ){
+			for(BorderTagObject tag : BorderTagObject.values() ){
 				
 				// Don't identify the RP again, it could cause off-by-one errors
 				// We do need to assign the RP in other ProfileTypes though
-				if(tag.equals(BorderTag.REFERENCE_POINT)){
+				if(tag.equals(BorderTagObject.REFERENCE_POINT)){
 					
 					fine("Checking location of RP in profile");
 					int index = finder.identifyIndex(collection, tag);
@@ -190,7 +191,7 @@ public class DatasetProfiler extends AnalysisWorker {
 						
 						warn("Unable to detect "+tag+" using default ruleset");
 						
-						if(tag.type().equals(BorderTagType.CORE)){
+						if(tag.type().equals(components.generic.BorderTag.BorderTagType.CORE)){
 							warn("Falling back on reference point");
 							index = 0;
 						}
@@ -218,7 +219,7 @@ public class DatasetProfiler extends AnalysisWorker {
 		ProfileIndexFinder finder = new ProfileIndexFinder();
 		
 		// check the RP index in the median
-		int rpIndex = finder.identifyIndex(collection, BorderTag.REFERENCE_POINT);
+		int rpIndex = finder.identifyIndex(collection, BorderTagObject.REFERENCE_POINT);
 		fine("RP in median is located at index "+rpIndex);
 
 		// If RP is not at zero, update
@@ -234,7 +235,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			// Find the effects of the offsets on the RP
 			// It should be found at zero
 			finer("Checking RP index again");
-			rpIndex = finder.identifyIndex(collection, BorderTag.REFERENCE_POINT);
+			rpIndex = finder.identifyIndex(collection, BorderTagObject.REFERENCE_POINT);
 			fine("RP in median is now located at index "+rpIndex);
 //			fine("Current median profile:");
 //			fine(collection.getProfileCollection(ProfileType.ANGLE).getProfile(DEFAULT_BORDER_TAG, Constants.MEDIAN).toString());
@@ -252,10 +253,10 @@ public class DatasetProfiler extends AnalysisWorker {
 	/**
 	 * Get the total differences to the median for all the nuclei in
 	 * the collection
-	 * @param pointType the BorderTag to compare to
+	 * @param pointType the BorderTagObject to compare to
 	 * @return
 	 */
-	private double compareProfilesToMedian(BorderTag pointType) throws Exception {
+	private double compareProfilesToMedian(BorderTagObject pointType) throws Exception {
 		double[] scores = getDataset().getCollection().getDifferencesToMedianFromPoint(pointType);
 		double result = 0;
 		for(double s : scores){

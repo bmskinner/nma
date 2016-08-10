@@ -68,6 +68,7 @@ import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
@@ -289,7 +290,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		
 		for(NucleusBorderSegment s : dataset.getCollection()
 				.getProfileCollection(ProfileType.ANGLE)
-				.getSegments(BorderTag.REFERENCE_POINT)){
+				.getSegments(BorderTagObject.REFERENCE_POINT)){
 			
 			
 			String pval = "";
@@ -342,7 +343,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			
 			for(NucleusBorderSegment s : dataset.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegments(BorderTag.REFERENCE_POINT)){
+					.getSegments(BorderTagObject.REFERENCE_POINT)){
 				
 				JCheckBox box = segmentBoxMap.get(s.getID());
 				

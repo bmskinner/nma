@@ -49,6 +49,7 @@ import analysis.profiles.ProfileManager;
 import components.CellCollection;
 import components.ClusterGroup;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
@@ -153,7 +154,7 @@ private static NucleusTableDatasetCreator instance = null;
 		} else {
 			CellCollection collection = dataset.getCollection();
 			// check which reference point to use
-			BorderTag point = BorderTag.REFERENCE_POINT;
+			BorderTagObject point = BorderTagObject.REFERENCE_POINT;
 
 			// get mapping from ordered segments to segment names
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
@@ -261,7 +262,7 @@ private static NucleusTableDatasetCreator instance = null;
 		
 		List<Object> fieldNames = new ArrayList<Object>(0);
 		
-		BorderTag point = BorderTag.REFERENCE_POINT;//.ORIENTATION_POINT;
+		BorderTagObject point = BorderTagObject.REFERENCE_POINT;//.ORIENTATION_POINT;
 
 		// assumes all datasets have the same number of segments
 		List<NucleusBorderSegment> segments = list.get(0)
@@ -960,7 +961,7 @@ private static NucleusTableDatasetCreator instance = null;
 			
 			NucleusBorderSegment medianSeg1 = dataset.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 
 			int i = 0;
@@ -974,7 +975,7 @@ private static NucleusTableDatasetCreator instance = null;
 					
 					NucleusBorderSegment medianSeg2 = dataset2.getCollection()
 							.getProfileCollection(ProfileType.ANGLE)
-							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+							.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 							.getSegmentAt(options.getSegPosition());
 					
 					popData[i] = df.format( runWilcoxonTest( 
@@ -1082,7 +1083,7 @@ private static NucleusTableDatasetCreator instance = null;
 			
 			NucleusBorderSegment medianSeg1 = dataset.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 									
 		
@@ -1103,7 +1104,7 @@ private static NucleusTableDatasetCreator instance = null;
 					
 					NucleusBorderSegment medianSeg2 = dataset2.getCollection()
 							.getProfileCollection(ProfileType.ANGLE)
-							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+							.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 							.getSegmentAt(options.getSegPosition());
 					
 					double value2 = Stats.quartile( dataset2.getCollection()

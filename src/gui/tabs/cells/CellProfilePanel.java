@@ -21,6 +21,7 @@ import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import components.Cell;
 import components.generic.BorderTag;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
@@ -144,7 +145,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 					.setCell(this.getCellModel().getCell())
 					.setNormalised(false)
 					.setAlignment(ProfileAlignment.LEFT)
-					.setTag(BorderTag.REFERENCE_POINT)
+					.setTag(BorderTagObject.REFERENCE_POINT)
 					.setShowMarkers(false)
 					.setProfileType( type)
 					.setSwatch(activeDataset().getSwatch())
@@ -154,7 +155,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 							
 				JFreeChart chart = getChart(options);
 				
-				profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTag.REFERENCE_POINT);
+				profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTagObject.REFERENCE_POINT);
 								
 				chartPanel.setChart(chart, profile, false); // use the profile, don't normalise
 				updateChartPanelRange();
@@ -169,7 +170,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 					.setCell(this.getCellModel().getCell())
 					.setNormalised(false)
 					.setAlignment(ProfileAlignment.LEFT)
-					.setTag(BorderTag.REFERENCE_POINT)
+					.setTag(BorderTagObject.REFERENCE_POINT)
 					.setShowMarkers(false)
 					.setProfileType( type)
 					.setSwatch(activeDataset().getSwatch())
@@ -215,7 +216,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 //					.setCell(this.getCellModel().getCell())
 //					.setNormalised(false)
 //					.setAlignment(ProfileAlignment.LEFT)
-//					.setTag(BorderTag.REFERENCE_POINT)
+//					.setTag(BorderTagObject.REFERENCE_POINT)
 //					.setShowMarkers(false)
 //					.setProfileType( type)
 //					.setSwatch(activeDataset().getSwatch())
@@ -225,7 +226,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 //							
 //				JFreeChart chart = getChart(options);
 //				
-//				profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTag.REFERENCE_POINT);
+//				profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTagObject.REFERENCE_POINT);
 //								
 //				chartPanel.setChart(chart, profile, false); // use the profile, don't normalise
 //				updateChartPanelRange();
@@ -240,7 +241,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 //					.setCell(this.getCellModel().getCell())
 //					.setNormalised(false)
 //					.setAlignment(ProfileAlignment.LEFT)
-//					.setTag(BorderTag.REFERENCE_POINT)
+//					.setTag(BorderTagObject.REFERENCE_POINT)
 //					.setShowMarkers(false)
 //					.setProfileType( type)
 //					.setSwatch(activeDataset().getSwatch())
@@ -299,7 +300,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				int indexValue = Integer.valueOf(index);
 
 				Nucleus n = this.getCellModel().getCell().getNucleus();
-				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
+				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
 
 				/*
 				 * The numbering of segments is adjusted for profile charts, so we can't rely on 
@@ -338,30 +339,30 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		int newStart = start ? index : seg.getStartIndex();
 		int newEnd   = start ? seg.getEndIndex() : index;
 		
-		int rawOldIndex =  n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, startPos);
+		int rawOldIndex =  n.getOffsetBorderIndex(BorderTagObject.REFERENCE_POINT, startPos);
 
 						
 		if(profile.update(seg, newStart, newEnd)){
-			n.setProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT, profile);
+			n.setProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT, profile);
 			finest("Updated nucleus profile with new segment boundaries");
 			
 			/* Check the border tags - if they overlap the old index
 			 * replace them. 
 			 */
-			int rawIndex = n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, index);
+			int rawIndex = n.getOffsetBorderIndex(BorderTagObject.REFERENCE_POINT, index);
 
 			finest("Updating to index "+index+" from reference point");
 			finest("Raw old border point is index "+rawOldIndex);
 			finest("Raw new border point is index "+rawIndex);
 			
 			if(n.hasBorderTag(rawOldIndex)){						
-				BorderTag tagToUpdate = n.getBorderTag(rawOldIndex);
+				BorderTagObject tagToUpdate = n.getBorderTag(rawOldIndex);
 				log(Level.FINE, "Updating tag "+tagToUpdate);
 				n.setBorderTag(tagToUpdate, rawIndex);	
 				
 				// Update intersection point if needed
-				if(tagToUpdate.equals(BorderTag.ORIENTATION_POINT)){
-					n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getBorderIndex(n.findOppositeBorder(n.getBorderTag(BorderTag.ORIENTATION_POINT))));
+				if(tagToUpdate.equals(BorderTagObject.ORIENTATION_POINT)){
+					n.setBorderTag(BorderTagObject.INTERSECTION_POINT, n.getBorderIndex(n.findOppositeBorder(n.getBorderTag(BorderTagObject.ORIENTATION_POINT))));
 				}
 				
 			} else {
