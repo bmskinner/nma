@@ -58,11 +58,18 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -83,6 +90,7 @@ import javax.swing.border.EmptyBorder;
 import logging.LogPanelFormatter;
 import logging.Loggable;
 import logging.TextAreaHandler;
+import utility.Constants;
 import utility.Version;
 import analysis.AnalysisDataset;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
@@ -152,14 +160,80 @@ public class MainWindow
 	 */
 	public MainWindow() {
 				
-		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		
 		this.addWindowListener(new WindowAdapter() {
+			
+			public void windowClosing(WindowEvent e) {
+				fine("Checking dataset state");
+
+				if(datasetManager.hashCodeChanged()){
+					fine("Found changed hashcode");
+					Object[] options = { "Save datasets" , "Cancel exit" };
+					int save = JOptionPane.showOptionDialog(MainWindow.this,
+							"Datasets have changed since last save!", 
+							"Save datasets?",
+							JOptionPane.DEFAULT_OPTION, 
+							JOptionPane.QUESTION_MESSAGE,
+							null, options, options[0]);
+
+					if(save==0){
+						saveRootDatasets();
+
+					} else {
+						fine("No save option selected");
+					}
+				} else {
+					fine("No change found");
+					datasetManager.clear();
+					globalOptions.setDefaults();
+					dispose();
+				}
+			}
+			
 			  public void windowClosed(WindowEvent e) {
 				  datasetManager.clear();
 				  globalOptions.setDefaults();
 			  }
 
+		});
+		
+		
+		this.setDropTarget(new DropTarget(){
+			
+			@Override
+            public synchronized void drop(DropTargetDropEvent dtde) {
+				
+				
+				try {
+					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+					Transferable t = dtde.getTransferable();
+					List<File> fileList = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+					
+					for(File f : fileList){
+						if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
+							finer("Opening file "+f.getAbsolutePath());
+							
+							Runnable task = () -> { 
+								new PopulationImportAction(MainWindow.this, f);
+							};
+							threadManager.execute(task);
+							
+							
+						} else {
+							finer("File is not nmd, ignoring");
+						}
+						
+					}
+					
+				} catch (UnsupportedFlavorException e) {
+					error("Error in DnD", e);
+				} catch (IOException e) {
+					error("IO error in DnD", e);
+				}
+               
+            }
+			
 		});
 		
 		

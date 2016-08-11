@@ -1154,6 +1154,89 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 	}
 	
+	
+	
+	
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + angleProfileWindowSize;
+		long temp;
+		temp = Double.doubleToLongBits(angleWindowProportion);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result
+				+ ((borderTags == null) ? 0 : borderTags.hashCode());
+		result = prime * result + nucleusNumber;
+		result = prime * result
+				+ ((outputFolder == null) ? 0 : outputFolder.hashCode());
+		temp = Double.doubleToLongBits(pathLength);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result
+				+ ((profileMap == null) ? 0 : profileMap.hashCode());
+		result = prime * result
+				+ ((segmentList == null) ? 0 : segmentList.hashCode());
+		result = prime * result
+				+ ((segmentTags == null) ? 0 : segmentTags.hashCode());
+		result = prime
+				* result
+				+ ((signalCollection == null) ? 0 : signalCollection.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RoundNucleus other = (RoundNucleus) obj;
+		if (angleProfileWindowSize != other.angleProfileWindowSize)
+			return false;
+		if (Double.doubleToLongBits(angleWindowProportion) != Double
+				.doubleToLongBits(other.angleWindowProportion))
+			return false;
+		if (borderTags == null) {
+			if (other.borderTags != null)
+				return false;
+		} else if (!borderTags.equals(other.borderTags))
+			return false;
+		if (nucleusNumber != other.nucleusNumber)
+			return false;
+		if (outputFolder == null) {
+			if (other.outputFolder != null)
+				return false;
+		} else if (!outputFolder.equals(other.outputFolder))
+			return false;
+		if (Double.doubleToLongBits(pathLength) != Double
+				.doubleToLongBits(other.pathLength))
+			return false;
+		if (profileMap == null) {
+			if (other.profileMap != null)
+				return false;
+		} else if (!profileMap.equals(other.profileMap))
+			return false;
+		if (segmentList == null) {
+			if (other.segmentList != null)
+				return false;
+		} else if (!segmentList.equals(other.segmentList))
+			return false;
+		if (segmentTags == null) {
+			if (other.segmentTags != null)
+				return false;
+		} else if (!segmentTags.equals(other.segmentTags))
+			return false;
+		if (signalCollection == null) {
+			if (other.signalCollection != null)
+				return false;
+		} else if (!signalCollection.equals(other.signalCollection))
+			return false;
+		return true;
+	}
+
 	public void updateVerticallyRotatedNucleus(){
 		this.verticalNucleus = null;
 		this.getVerticallyRotatedNucleus();

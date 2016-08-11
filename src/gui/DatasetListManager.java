@@ -1,13 +1,12 @@
 package gui;
 
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import logging.Loggable;
 import analysis.AnalysisDataset;
 
 /**
@@ -15,11 +14,14 @@ import analysis.AnalysisDataset;
  * @author bms41
  *
  */
-public final class DatasetListManager {
+public final class DatasetListManager implements Loggable {
 	
 	private static DatasetListManager instance = null;
 	
 	private final Set<AnalysisDataset> list = new HashSet<AnalysisDataset>();
+	
+	private final Map<UUID, Integer> map = new HashMap<UUID, Integer>(); // store the hash for a dataset id
+	
 	
 	protected DatasetListManager(){}
 	
@@ -97,61 +99,64 @@ public final class DatasetListManager {
 	public void addDataset(AnalysisDataset d){
 		if(d.isRoot()){
 			list.add(d);
+			fine("Adding hash code: "+d.getName()+" - "+d.hashCode());
+			map.put(d.getUUID(), d.hashCode());
+		} else {
+			finer("Not adding a root dataset");
 		}
 	}
 	
 	public void removeDataset(AnalysisDataset d){
-		list.remove(d);
+		map.remove(d);
 	}
 	
 	public int count(){
-		return list.size();
+		return map.size();
 	}
 	
 	public void clear(){
 		list.clear();
+		map.clear();
 	}
+	
+	public boolean hashCodeChanged(AnalysisDataset d){
+		if(d.isRoot()){
+			
+			if(map.containsKey(d.getUUID())){
+				return d.hashCode()!=map.get(d.getUUID());
+			} else {
+				warn("Missing root dataset hashcode");
+			}
+			
+		}
+		return false;
+	}
+	
+	/**
+	 * Check if any of the root datasets have a different hashcode
+	 * to their last save
+	 * @return
+	 */
+	public boolean hashCodeChanged(){
 
-//	@Override
-//	public void windowActivated(WindowEvent arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void windowClosed(WindowEvent arg0) {
-//		clear();
-//		
-//	}
-//
-//	@Override
-//	public void windowClosing(WindowEvent arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void windowDeactivated(WindowEvent arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void windowDeiconified(WindowEvent arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void windowIconified(WindowEvent arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void windowOpened(WindowEvent arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
+		for(AnalysisDataset d : list){
+			if(hashCodeChanged(d)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void updateHashCode(AnalysisDataset d){
+		if(d.isRoot()){
+			map.put(d.getUUID(), d.hashCode());
+		}
+	}
+	
+	public void updateHashCodes(){
+		for(AnalysisDataset d : list){
+			updateHashCode(d);
+		}
+	}
 
 }

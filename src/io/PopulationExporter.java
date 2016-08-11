@@ -19,6 +19,8 @@
 package io;
 
 
+import gui.DatasetListManager;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,6 +30,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 
@@ -112,8 +115,8 @@ public class PopulationExporter extends AnalysisWorker {
 				return false;
 			}
 			
-			
-			
+			DatasetListManager.getInstance().updateHashCode(dataset); // track the state since last save
+
 		} catch(FileNotFoundException e){
 			warn("File not found when saving dataset");
 			return false;

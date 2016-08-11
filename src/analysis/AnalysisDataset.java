@@ -928,4 +928,99 @@ public class AnalysisDataset implements Serializable {
 		  }
 		  return true;
 	  }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((analysisOptions == null) ? 0 : analysisOptions.hashCode());
+		result = prime
+				* result
+				+ ((childCollections == null) ? 0 : childCollections.hashCode());
+		result = prime * result
+				+ ((clusterGroups == null) ? 0 : clusterGroups.hashCode());
+		result = prime * result
+				+ ((datasetColour == null) ? 0 : datasetColour.hashCode());
+		result = prime * result
+				+ ((debugFile == null) ? 0 : debugFile.hashCode());
+		result = prime * result + (isRoot ? 1231 : 1237);
+		result = prime * result
+				+ ((mergeSources == null) ? 0 : mergeSources.hashCode());
+		result = prime
+				* result
+				+ ((otherCollections == null) ? 0 : otherCollections.hashCode());
+		result = prime * result
+				+ ((savePath == null) ? 0 : savePath.hashCode());
+		result = prime * result
+				+ ((thisCollection == null) ? 0 : thisCollection.hashCode());
+		result = prime * result + ((version == null) ? 0 : version.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AnalysisDataset other = (AnalysisDataset) obj;
+		if (analysisOptions == null) {
+			if (other.analysisOptions != null)
+				return false;
+		} else if (!analysisOptions.equals(other.analysisOptions))
+			return false;
+		if (childCollections == null) {
+			if (other.childCollections != null)
+				return false;
+		} else if (!childCollections.equals(other.childCollections))
+			return false;
+		if (clusterGroups == null) {
+			if (other.clusterGroups != null)
+				return false;
+		} else if (!clusterGroups.equals(other.clusterGroups))
+			return false;
+		if (datasetColour == null) {
+			if (other.datasetColour != null)
+				return false;
+		} else if (!datasetColour.equals(other.datasetColour))
+			return false;
+		if (debugFile == null) {
+			if (other.debugFile != null)
+				return false;
+		} else if (!debugFile.equals(other.debugFile))
+			return false;
+		if (isRoot != other.isRoot)
+			return false;
+		if (mergeSources == null) {
+			if (other.mergeSources != null)
+				return false;
+		} else if (!mergeSources.equals(other.mergeSources))
+			return false;
+		if (otherCollections == null) {
+			if (other.otherCollections != null)
+				return false;
+		} else if (!otherCollections.equals(other.otherCollections))
+			return false;
+		if (savePath == null) {
+			if (other.savePath != null)
+				return false;
+		} else if (!savePath.equals(other.savePath))
+			return false;
+		if (thisCollection == null) {
+			if (other.thisCollection != null)
+				return false;
+		} else if (!thisCollection.equals(other.thisCollection))
+			return false;
+		if (version == null) {
+			if (other.version != null)
+				return false;
+		} else if (!version.equals(other.version))
+			return false;
+		return true;
+	}
+	
+	
 }

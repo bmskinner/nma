@@ -122,7 +122,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		selectDatasets(list);
 		treeTable.repaint();
 	}
-	
+		
 	/**
 	 * Find the datasets which are collapsed in the tree
 	 * @return
@@ -378,39 +378,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			}
 		});
 		
-		table.setDropTarget(new DropTarget(){
-			
-			@Override
-            public synchronized void drop(DropTargetDropEvent dtde) {
-				
-				
-				try {
-					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-					Transferable t = dtde.getTransferable();
-					List<File> fileList = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
-					
-					for(File f : fileList){
-						if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
-							finer("Opening file "+f.getAbsolutePath());
-							fireSignalChangeEvent("Open|"+f.getAbsolutePath());
-							
-						} else {
-							finer("File is not nmd, ignoring");
-						}
-						
-					}
-					
-				} catch (UnsupportedFlavorException e) {
-					error("Error in DnD", e);
-				} catch (IOException e) {
-					error("IO error in DnD", e);
-				}
-               
-            }
-			
-		});
-		
-
 		TreeSelectionModel tableSelectionModel = table.getTreeSelectionModel();
 		tableSelectionModel.addTreeSelectionListener(treeListener);
 		

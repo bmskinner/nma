@@ -1172,7 +1172,102 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
   }
   
   
-  /**
+  
+  
+  @Override
+public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result
+			+ ((consensusNucleus == null) ? 0 : consensusNucleus.hashCode());
+	result = prime * result + ((folder == null) ? 0 : folder.hashCode());
+	result = prime * result
+			+ ((mappedCollection == null) ? 0 : mappedCollection.hashCode());
+	result = prime * result + ((name == null) ? 0 : name.hashCode());
+	result = prime * result
+			+ ((nucleusType == null) ? 0 : nucleusType.hashCode());
+	result = prime * result
+			+ ((outputFolder == null) ? 0 : outputFolder.hashCode());
+	result = prime
+			* result
+			+ ((profileCollections == null) ? 0 : profileCollections.hashCode());
+	result = prime * result + ((ruleSets == null) ? 0 : ruleSets.hashCode());
+	result = prime * result
+			+ ((signalGroups == null) ? 0 : signalGroups.hashCode());
+	result = prime * result
+			+ ((statsCache == null) ? 0 : statsCache.hashCode());
+	result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+	return result;
+}
+
+@Override
+public boolean equals(Object obj) {
+	if (this == obj)
+		return true;
+	if (obj == null)
+		return false;
+	if (getClass() != obj.getClass())
+		return false;
+	CellCollection other = (CellCollection) obj;
+	if (consensusNucleus == null) {
+		if (other.consensusNucleus != null)
+			return false;
+	} else if (!consensusNucleus.equals(other.consensusNucleus))
+		return false;
+	if (folder == null) {
+		if (other.folder != null)
+			return false;
+	} else if (!folder.equals(other.folder))
+		return false;
+	if (mappedCollection == null) {
+		if (other.mappedCollection != null)
+			return false;
+	} else if (!mappedCollection.equals(other.mappedCollection))
+		return false;
+	if (name == null) {
+		if (other.name != null)
+			return false;
+	} else if (!name.equals(other.name))
+		return false;
+	if (nucleusType != other.nucleusType)
+		return false;
+	if (outputFolder == null) {
+		if (other.outputFolder != null)
+			return false;
+	} else if (!outputFolder.equals(other.outputFolder))
+		return false;
+	if (profileCollections == null) {
+		if (other.profileCollections != null)
+			return false;
+	} else if (!profileCollections.equals(other.profileCollections))
+		return false;
+	if (ruleSets == null) {
+		if (other.ruleSets != null)
+			return false;
+	} else if (!ruleSets.equals(other.ruleSets))
+		return false;
+	if (signalGroups == null) {
+		if (other.signalGroups != null)
+			return false;
+	} else if (!signalGroups.equals(other.signalGroups))
+		return false;
+	if (statsCache == null) {
+		if (other.statsCache != null)
+			return false;
+	} else if (!statsCache.equals(other.statsCache))
+		return false;
+	if (uuid == null) {
+		if (other.uuid != null)
+			return false;
+	} else if (!uuid.equals(other.uuid))
+		return false;
+	return true;
+}
+
+
+
+
+/**
    * Store plottable statistics for the collection
    * @author bms41
    *
