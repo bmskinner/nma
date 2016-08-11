@@ -88,6 +88,13 @@ public interface CellularComponent {
 	 * @return
 	 */
 	public ImageProcessor getImage();
+	
+	/**
+	 * Get the image from which the component was detected, and crops
+	 * it to only the region containing the component
+	 * @return
+	 */
+	public ImageProcessor getComponentImage();
 
 	/**
 	 * Set the RGB channel the component was detected in

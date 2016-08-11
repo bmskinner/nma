@@ -8,6 +8,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.logging.Level;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
@@ -24,6 +25,7 @@ import components.CellularComponent;
 import gui.RotationMode;
 import gui.components.panels.GenericCheckboxPanel;
 import gui.components.panels.RotationSelectionSettingsPanel;
+import gui.dialogs.CellCollectionOverviewDialog;
 
 @SuppressWarnings("serial")
 public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener{
@@ -56,6 +58,13 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		settingsPanel.add(rotationPanel);
 		settingsPanel.add(makeMeshPanel);
 		settingsPanel.add(warpMeshPanel);
+		
+		JButton allCellsButton = new JButton("All cells");
+		allCellsButton.addActionListener( e ->{
+			new CellCollectionOverviewDialog(activeDataset());
+		});
+		settingsPanel.add(allCellsButton);
+		
 		
 		this.add(settingsPanel, BorderLayout.NORTH);
 		

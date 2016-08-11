@@ -20,7 +20,9 @@
  *******************************************************************************/
 package components;
 
+import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -32,6 +34,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.jfree.chart.annotations.XYShapeAnnotation;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.ui.Layer;
 
 import logging.Loggable;
 import components.generic.MeasurementScale;
@@ -233,6 +239,31 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		} else {
 			return null;
 		}
+	}
+	
+
+	public ImageProcessor getComponentImage(){
+		ImageProcessor openProcessor = this.getImage();
+
+		if(openProcessor==null){	
+			return null;	
+		}
+		
+		double[] positions = getPosition();
+		
+		int padding = 10; // a border of pixels beyond the cell boundary
+		int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
+		int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
+		int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
+		int wideY = (int) (positions[CellularComponent.Y_BASE]-padding);
+
+		wideX = wideX<0 ? 0 : wideX;
+		wideY = wideY<0 ? 0 : wideY;
+
+		openProcessor.setRoi(wideX, wideY, wideW, wideH);
+		openProcessor = openProcessor.crop();
+
+		return openProcessor;
 	}
 
 	public void setPosition(double[] position) {
