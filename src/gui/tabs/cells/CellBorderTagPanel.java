@@ -2,136 +2,56 @@ package gui.tabs.cells;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.table.TableModel;
 
-import org.jfree.chart.ChartMouseEvent;
-import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.entity.XYItemEntity;
-
-import charting.charts.DraggableOverlayChartPanel;
 import charting.charts.MorphologyChartFactory;
-import charting.charts.PositionSelectionChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
-import components.Cell;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import gui.BorderTagEventListener;
 import gui.DatasetEvent.DatasetMethod;
-import gui.SignalChangeEvent;
-import gui.components.RectangleOverlayObject;
+import gui.components.BorderTagEvent;
+import gui.components.panels.BorderTagDualChartPanel;
 import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 @SuppressWarnings("serial")
-public class CellBorderTagPanel extends AbstractCellDetailPanel {
+public class CellBorderTagPanel extends AbstractCellDetailPanel implements BorderTagEventListener {
 		
-		private DraggableOverlayChartPanel chartPanel; // for displaying the legnth of a given segment
-		private PositionSelectionChartPanel rangePanel; // a small chart to show the entire profile
+		private BorderTagDualChartPanel dualPanel;
 		
 		private ProfileTypeOptionsPanel profileOptions  = new ProfileTypeOptionsPanel();
 		
 		private JPanel buttonsPanel;
 		
-		private JPopupMenu popupMenu = new JPopupMenu("Popup");
-		
-		private int activeProfileIndex = 0; // the position that has been clicked
-		
 		public CellBorderTagPanel(CellViewModel model) {
 			super(model);
-
+			
 			this.setLayout(new BorderLayout());
-			createBorderTagPopup();
-			
-			this.setBorder(null);
-			Dimension minimumChartSize = new Dimension(50, 100);
-			Dimension preferredChartSize = new Dimension(400, 300);
-			
-			JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart();
-			chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
-			
-			chartPanel.setMinimumSize(minimumChartSize);
-			chartPanel.setPreferredSize(preferredChartSize);
-			chartPanel.setMinimumDrawWidth( 0 );
-			chartPanel.setMinimumDrawHeight( 0 );
-			chartPanel.addSignalChangeListener(this);
-			
-			chartPanel.addChartMouseListener(new ChartMouseListener() {
-
-			    public void chartMouseClicked(ChartMouseEvent e) {
-			    	XYItemEntity ent = (XYItemEntity) e.getEntity();
-			    	int series = ent.getSeriesIndex();
-			    	int item   = ent.getItem();
-			    	double x   = ent.getDataset().getXValue(series, item);
-			    	
-			    	activeProfileIndex = (int) x;
-			    	MouseEvent ev = e.getTrigger();
-			    	popupMenu.show(ev.getComponent(), ev.getX(), ev.getY());
-
-			    }
-
-			    public void chartMouseMoved(ChartMouseEvent e) {
-			    }
-			    	
-			});
-			this.add(chartPanel, BorderLayout.CENTER);
 			
 			buttonsPanel = makeButtonPanel();
 			this.add(buttonsPanel, BorderLayout.NORTH);
+			setButtonsEnabled(false);
 			
+			dualPanel = new BorderTagDualChartPanel();
+			dualPanel.addBorderTagEventListener(this);
 			
-			/*
-			 * TESTING: A second chart panel at the south
-			 * with a domain overlay crosshair to define the 
-			 * centre of the zoomed range on the 
-			 * centre chart panel 
-			 */
-			JFreeChart rangeChart = MorphologyChartFactory.getInstance().makeEmptyChart();
-			rangePanel = new PositionSelectionChartPanel(rangeChart);
-			rangePanel.setPreferredSize(minimumChartSize);
-			rangePanel.addSignalChangeListener(this);
+			this.add(dualPanel, BorderLayout.CENTER);
 
-			this.add(rangePanel, BorderLayout.SOUTH);
-			updateChartPanelRange();
+			this.setBorder(null);
+
 			
 			setButtonsEnabled(false);
 		}
 		
-		private void createBorderTagPopup(){
-			
-			for(BorderTagObject tag : BorderTagObject.values()){
-				JMenuItem item = new JMenuItem(tag.toString());
-			    
-				item.addActionListener(new ActionListener() {
-			      public void actionPerformed(ActionEvent e) {
 
-			        setBorderTagAction(tag);
-			      }
-			    });
-			    popupMenu.add(item);
-			    
-			    /*
-			     * We can't handle changing the OP or RP yet -
-			     * requires segment boundary changes
-			     */
-			    if( tag.equals(BorderTagObject.INTERSECTION_POINT)){
-			    	item.setEnabled(false);
-			    }
-			}
-			 
-		}
 		
 		private JPanel makeButtonPanel(){
 			
@@ -166,8 +86,8 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 
 				if( ! this.getCellModel().hasCell()){
 					JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-					chartPanel.setChart(chart);
-					rangePanel.setChart(chart);
+					
+					dualPanel.setCharts(chart, chart);
 					profileOptions.setEnabled(false);
 
 				} else {
@@ -191,10 +111,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 					JFreeChart chart = getChart(options);
 					
 					profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTagObject.REFERENCE_POINT);
-									
-					chartPanel.setChart(chart, null, false); // no profile, don't normalise
-					updateChartPanelRange();
-					
+
 					
 					/*
 					 * Create the chart for the range panel
@@ -214,34 +131,21 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 						.build();
 					
 					JFreeChart rangeChart = getChart(rangeOptions);
-					
-					rangePanel.setChart(rangeChart);
 
-					profileOptions.setEnabled(true);				
+					profileOptions.setEnabled(true);	
+					
+					dualPanel.setCharts(chart, rangeChart);
 				}
 
 			} catch(Exception e){
 				error("Error updating cell panel", e);
 				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-				chartPanel.setChart(chart);
-				rangePanel.setChart(chart);
+				dualPanel.setCharts(chart, chart);
 				profileOptions.setEnabled(false);
 			}
 
 		}
 		
-		/**
-		 * Set the main chart panel domain range to centre on the 
-		 * position in the range panel, +- 10
-		 */
-		private void updateChartPanelRange(){
-			
-			RectangleOverlayObject ob = rangePanel.getDomainRectangleOverlay();
-			double min = ob.getMinValue();
-			double max = ob.getMaxValue();
-			chartPanel.getChart().getXYPlot().getDomainAxis().setRange(min, max);
-		}
-
 		@Override
 		protected TableModel createPanelTableType(TableOptions options) throws Exception {
 			return null;
@@ -252,22 +156,11 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 			return MorphologyChartFactory.getInstance().makeIndividualNucleusProfileChart( options);
 		}
 		
-		@Override
-		public void signalChangeReceived(SignalChangeEvent event) {			
-			// Change the range of the main chart based on the lower chart  
-			if(event.type().contains("UpdatePosition") && event.getSource().equals(rangePanel)){
-				
-				updateChartPanelRange();
-				
-			}
-
-		}
-		
 		private void setBorderTagAction(BorderTagObject tag){
 
 			if(tag!=null){
 				
-					int newTagIndex = activeProfileIndex;
+					int newTagIndex = dualPanel.getActiveIndex(); //activeProfileIndex;
 
 					log("Updating nucleus "+tag+" to index "+newTagIndex);
 					this.setAnalysing(true);
@@ -297,5 +190,14 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 			clearChartCache();
 			finest("Updating chart after clear");
 			this.update();
+		}
+
+		@Override
+		public void borderTagEventReceived(BorderTagEvent event) {
+			if(event.getSource() instanceof JMenuItem){
+				BorderTagObject tag = event.getTag();
+				setBorderTagAction(tag);
+			}
+			
 		}
 }

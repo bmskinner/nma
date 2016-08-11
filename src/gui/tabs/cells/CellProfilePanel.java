@@ -2,9 +2,7 @@ package gui.tabs.cells;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.util.UUID;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
@@ -13,32 +11,25 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.charts.DraggableOverlayChartPanel;
 import charting.charts.MorphologyChartFactory;
-import charting.charts.PositionSelectionChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
-import components.Cell;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import gui.DatasetEvent.DatasetMethod;
-import gui.InterfaceEvent.InterfaceMethod;
 import gui.SignalChangeEvent;
-import gui.components.RectangleOverlayObject;
 import gui.components.panels.ProfileTypeOptionsPanel;
+import gui.components.panels.SegmentationDualChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import gui.tabs.editing.SegmentsEditingPanel;
 
 @SuppressWarnings("serial")
 public class CellProfilePanel extends AbstractCellDetailPanel {
 	
-	private DraggableOverlayChartPanel chartPanel; // for displaying the legnth of a given segment
-	private PositionSelectionChartPanel rangePanel; // a small chart to show the entire profile
+	private SegmentationDualChartPanel dualPanel;
 	
 	private ProfileTypeOptionsPanel profileOptions  = new ProfileTypeOptionsPanel();
 	
@@ -51,37 +42,14 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 
 		this.setLayout(new BorderLayout());
 		this.setBorder(null);
-		Dimension minimumChartSize = new Dimension(50, 100);
-		Dimension preferredChartSize = new Dimension(400, 300);
 		
-		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart();
-		chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
-		
-		chartPanel.setMinimumSize(minimumChartSize);
-		chartPanel.setPreferredSize(preferredChartSize);
-		chartPanel.setMinimumDrawWidth( 0 );
-		chartPanel.setMinimumDrawHeight( 0 );
-		chartPanel.addSignalChangeListener(this);
-		this.add(chartPanel, BorderLayout.CENTER);
+		dualPanel = new SegmentationDualChartPanel();
+		dualPanel.addSignalChangeListener(this);
+		this.add(dualPanel, BorderLayout.CENTER);
 		
 		buttonsPanel = makeButtonPanel();
 		this.add(buttonsPanel, BorderLayout.NORTH);
-		
-		
-		/*
-		 * TESTING: A second chart panel at the south
-		 * with a domain overlay crosshair to define the 
-		 * centre of the zoomed range on the 
-		 * centre chart panel 
-		 */
-		JFreeChart rangeChart = MorphologyChartFactory.getInstance().makeEmptyChart();
-		rangePanel = new PositionSelectionChartPanel(rangeChart);
-		rangePanel.setPreferredSize(minimumChartSize);
-		rangePanel.addSignalChangeListener(this);
-
-		this.add(rangePanel, BorderLayout.SOUTH);
-		updateChartPanelRange();
-		
+				
 		setButtonsEnabled(false);
 	}
 	
@@ -132,8 +100,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 
 			if(getCellModel().getCell()==null){
 				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-				chartPanel.setChart(chart);
-				rangePanel.setChart(chart);
+				
+				dualPanel.setCharts(chart, chart);
 				setButtonsEnabled(false);
 
 			} else {
@@ -156,10 +124,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				JFreeChart chart = getChart(options);
 				
 				profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTagObject.REFERENCE_POINT);
-								
-				chartPanel.setChart(chart, profile, false); // use the profile, don't normalise
-				updateChartPanelRange();
-				
+			
 				
 				/*
 				 * Create the chart for the range panel
@@ -179,103 +144,20 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				
 				JFreeChart rangeChart = getChart(rangeOptions);
 				
-				rangePanel.setChart(rangeChart);
-
+				dualPanel.setCharts(chart, profile, false, rangeChart);
 				setButtonsEnabled(true);		
 			}
 
 		} catch(Exception e){
 			error("Error updating cell panel", e);
 			JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-			chartPanel.setChart(chart);
-			rangePanel.setChart(chart);
+			dualPanel.setCharts(chart, chart);
 			setButtonsEnabled(false);
 		}
 		
 	}
 	
-//	public void update(Cell cell){
-//
-//		super.update(cell);
-//		try{
-//			
-//			ProfileType type = profileOptions.getSelected();
-//
-//			if(cell==null){
-//				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-//				chartPanel.setChart(chart);
-//				rangePanel.setChart(chart);
-//				setButtonsEnabled(false);
-//
-//			} else {
-//				
-//				SegmentedProfile profile = null;
-//				
-//				ChartOptions options = new ChartOptionsBuilder()
-//					.setDatasets(getDatasets())
-//					.setCell(this.getCellModel().getCell())
-//					.setNormalised(false)
-//					.setAlignment(ProfileAlignment.LEFT)
-//					.setTag(BorderTagObject.REFERENCE_POINT)
-//					.setShowMarkers(false)
-//					.setProfileType( type)
-//					.setSwatch(activeDataset().getSwatch())
-//					.setShowPoints(true)
-//					.build();
-//				
-//							
-//				JFreeChart chart = getChart(options);
-//				
-//				profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTagObject.REFERENCE_POINT);
-//								
-//				chartPanel.setChart(chart, profile, false); // use the profile, don't normalise
-//				updateChartPanelRange();
-//				
-//				
-//				/*
-//				 * Create the chart for the range panel
-//				 */
-//				
-//				ChartOptions rangeOptions = new ChartOptionsBuilder()
-//					.setDatasets(getDatasets())
-//					.setCell(this.getCellModel().getCell())
-//					.setNormalised(false)
-//					.setAlignment(ProfileAlignment.LEFT)
-//					.setTag(BorderTagObject.REFERENCE_POINT)
-//					.setShowMarkers(false)
-//					.setProfileType( type)
-//					.setSwatch(activeDataset().getSwatch())
-//					.setShowPoints(false)
-//					.build();
-//				
-//				JFreeChart rangeChart = getChart(rangeOptions);
-//				
-//				rangePanel.setChart(rangeChart);
-//
-//				setButtonsEnabled(true);		
-//			}
-//
-//		} catch(Exception e){
-//			error("Error updating cell panel", e);
-//			JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-//			chartPanel.setChart(chart);
-//			rangePanel.setChart(chart);
-//			setButtonsEnabled(false);
-//		}
-//
-//	}
-	
-	/**
-	 * Set the main chart panel domain range to centre on the 
-	 * position in the range panel, +- 10
-	 */
-	private void updateChartPanelRange(){
-		
-		RectangleOverlayObject ob = rangePanel.getDomainRectangleOverlay();
-		double min = ob.getMinValue();
-		double max = ob.getMaxValue();
-		chartPanel.getChart().getXYPlot().getDomainAxis().setRange(min, max);
-	}
+
 
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception {
@@ -289,7 +171,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 	
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
-		if(event.type().contains("UpdateSegment") && event.getSource().equals(chartPanel)){
+		if(event.type().contains("UpdateSegment") ){
 			fine("Heard segment update request");
 			
 			try{
@@ -322,13 +204,6 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				error("Error updating segment", e);
 			}
 
-		}
-		
-		// Change the range of the main chart based on the lower chart  
-		if(event.type().contains("UpdatePosition") && event.getSource().equals(rangePanel)){
-			
-			updateChartPanelRange();
-			
 		}
 
 	}

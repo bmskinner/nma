@@ -23,7 +23,9 @@ import gui.SignalChangeListener;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.RectangleOverlayObject;
+import gui.components.panels.BorderTagDualChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.components.panels.SegmentationDualChartPanel;
 import gui.dialogs.AngleWindowSizeExplorer;
 import gui.dialogs.RulesetDialog;
 import gui.tabs.DetailPanel;
@@ -67,10 +69,9 @@ import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
 public class SegmentsEditingPanel extends DetailPanel implements ActionListener, SignalChangeListener {
-			
-		private DraggableOverlayChartPanel chartPanel; // for displaying the legnth of a given segment
-		private PositionSelectionChartPanel rangePanel; // a small chart to show the entire profile
-		
+					
+	private SegmentationDualChartPanel dualPanel;
+	
 		private JPanel buttonsPanel;
 		private JButton mergeButton;
 		private JButton unmergeButton;
@@ -91,37 +92,15 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 		public SegmentsEditingPanel(){
 			super();
 			this.setLayout(new BorderLayout());
-			Dimension minimumChartSize = new Dimension(50, 100);
-			Dimension preferredChartSize = new Dimension(400, 300);
 			
-			JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart();
-			chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
-			
-			chartPanel.setMinimumSize(minimumChartSize);
-			chartPanel.setPreferredSize(preferredChartSize);
-			chartPanel.setMinimumDrawWidth( 0 );
-			chartPanel.setMinimumDrawHeight( 0 );
-			chartPanel.addSignalChangeListener(this);
-			this.add(chartPanel, BorderLayout.CENTER);
+			dualPanel = new SegmentationDualChartPanel();
+			dualPanel.addSignalChangeListener(this);
+			this.add(dualPanel, BorderLayout.CENTER);
+
 			
 			buttonsPanel = makeButtonPanel();
 			this.add(buttonsPanel, BorderLayout.NORTH);
-			
-			
-			/*
-			 * TESTING: A second chart panel at the south
-			 * with a domain overlay crosshair to define the 
-			 * centre of the zoomed range on the 
-			 * centre chart panel 
-			 */
-			JFreeChart rangeChart = MorphologyChartFactory.getInstance().makeEmptyChart();
-			rangePanel = new PositionSelectionChartPanel(rangeChart);
-			rangePanel.setPreferredSize(minimumChartSize);
-			rangePanel.addSignalChangeListener(this);
 
-			this.add(rangePanel, BorderLayout.SOUTH);
-			updateChartPanelRange();
-			
 			setButtonsEnabled(false);
 			
 			
@@ -130,7 +109,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 		@Override
 		public void setAnalysing(boolean b){
 			super.setAnalysing(b);
-			chartPanel.setAnalysing(b);
+			dualPanel.setAnalysing(b);
 		}
 		
 		private JPanel makeButtonPanel(){
@@ -199,9 +178,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT);
 			
-			chartPanel.setChart(chart, profile, true);
-			updateChartPanelRange();
-			
+
 			
 			/*
 			 * Create the chart for the range panel
@@ -219,28 +196,9 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				.build();
 			
 			JFreeChart rangeChart = getChart(rangeOptions);
-			
-			rangePanel.setChart(rangeChart);
+
+			dualPanel.setCharts(chart, profile, true, rangeChart);
 		}
-		
-		/**
-		 * Set the main chart panel domain range to centre on the 
-		 * position in the range panel, +- 10
-		 */
-		private void updateChartPanelRange(){
-//			double xValue = rangePanel.getDomainCrosshairPosition();
-//			finest("Range panel crosshair is at "+xValue);
-//			
-//			double min = xValue-RANGE_WINDOW;
-//			double max = xValue+RANGE_WINDOW;
-//			chartPanel.getChart().getXYPlot().getDomainAxis().setRange(min, max);
-			
-			RectangleOverlayObject ob = rangePanel.getDomainRectangleOverlay();
-			double min = ob.getMinValue();
-			double max = ob.getMaxValue();
-			chartPanel.getChart().getXYPlot().getDomainAxis().setRange(min, max);
-		}
-		
 
 		@Override
 		protected void updateMultiple() {
@@ -250,8 +208,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 		
 		@Override
 		protected void updateNull() {			
-			chartPanel.setChart(MorphologyChartFactory.getInstance().makeEmptyChart());
-			rangePanel.setChart(MorphologyChartFactory.getInstance().makeEmptyChart());
+			dualPanel.setCharts(MorphologyChartFactory.getInstance().makeEmptyChart(),MorphologyChartFactory.getInstance().makeEmptyChart());
 			setButtonsEnabled(false);
 		}
 		
@@ -319,12 +276,12 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 
 		@Override
 		public void signalChangeReceived(SignalChangeEvent event) {
-			if(event.type().contains("UpdateSegment") && event.getSource().equals(chartPanel)){
+			if(event.type().contains("UpdateSegment")){
 				finest("Heard update segment request");
 				try{
 
 					
-					SegmentsEditingPanel.this.setAnalysing(true);
+					dualPanel.setAnalysing(true);
 
 					String[] array = event.type().split("\\|");
 					int segMidpointIndex = Integer.valueOf(array[1]);
@@ -341,17 +298,9 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				} catch(Exception e){
 					log(Level.SEVERE, "Error updating segment", e);
 				} finally {
-					SegmentsEditingPanel.this.setAnalysing(false);
+					dualPanel.setAnalysing(false);
 				}
 
-			}
-			
-			
-			// Change the range of the main chart based on the lower chart  
-			if(event.type().contains("UpdatePosition") && event.getSource().equals(rangePanel)){
-				
-				updateChartPanelRange();
-				
 			}
 
 		}
