@@ -1,7 +1,10 @@
 package gui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -18,7 +21,7 @@ public final class DatasetListManager implements Loggable {
 	
 	private static DatasetListManager instance = null;
 	
-	private final Set<AnalysisDataset> list = new HashSet<AnalysisDataset>();
+	private final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	
 	private final Map<UUID, Integer> map = new HashMap<UUID, Integer>(); // store the hash for a dataset id
 	
@@ -37,11 +40,11 @@ public final class DatasetListManager implements Loggable {
 	}
 	
 	public Set<AnalysisDataset> getRootDatasets(){
-		return list;
+		return new HashSet<AnalysisDataset>(list);
 	}
 	
 	public boolean hasDatasets(){
-		return list.size()>0;
+		return map.size()>0;
 	}
 	
 	
@@ -107,7 +110,35 @@ public final class DatasetListManager implements Loggable {
 	}
 	
 	public void removeDataset(AnalysisDataset d){
-		map.remove(d);
+		
+		if( ! d.isRoot()){
+			return;
+		}
+		
+		if( ! list.contains(d)){
+			warn("Requested dataset "+d.getName()+" is not in list; checking UUIDs");
+		}
+		
+		// The hashcode may have changed from what is stored in the list, so check
+		if(hashCodeChanged(d)){
+			finer("Dataset hashcode changed");
+		}
+		
+		finer("List manager has "+list.size()+" root datasets and "+map.size()+" hashcodes");
+
+		Iterator<AnalysisDataset> it = list.iterator();
+		while (it.hasNext()){
+			AnalysisDataset test = it.next();
+			
+			if(test.getUUID().equals(d.getUUID())){
+				finer("Found id matching dataset");
+				it.remove(); //TODO: figure out why this does not actually remove anything from the list
+			}
+		}
+		map.remove(d.getUUID());
+		
+		finer("List manager now has "+list.size()+" root datasets and "+map.size()+" hashcodes");
+
 	}
 	
 	public int count(){

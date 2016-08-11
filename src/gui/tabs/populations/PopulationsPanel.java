@@ -193,8 +193,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		try {
 
 			if(DatasetListManager.getInstance().hasDatasets()){
+				
+				finer("List manager has "+DatasetListManager.getInstance().count()+" datasets");
 
 				for(AnalysisDataset rootDataset : DatasetListManager.getInstance().getRootDatasets()){
+					finer("Adding "+rootDataset.getName()+" as node");
 					root.add( addTreeTableChildNodes(    rootDataset    )     );
 				}
 				
@@ -286,6 +289,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 		UUID id = dataset.getUUID();
 		if( ! DatasetListManager.getInstance().hasDataset(id)){
+			finer("Adding missing dataset to list manager");
 			this.addDataset(dataset);
 		}
 
@@ -696,12 +700,12 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 		try{
 
-			finest("Deleting dataset: "+d.getName());
+			finer("Deleting dataset: "+d.getName());
 			UUID id = d.getUUID();
 
 
 			// remove the dataset from its parents
-			finest("Removing dataset from its parents");
+			finer("Removing dataset from its parents");
 			for(AnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()){ //analysisDatasets.keySet()){
 //				AnalysisDataset parent = analysisDatasets.get(parentID);
 
@@ -714,15 +718,23 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 			}
 			
-			finest("Checking if dataset is root");
-
-			if(treeOrderMap.contains(id)){
-				finest("Removing dataset from treeOrderMap");
+			finer("Checking if dataset is root");
+			
+			if(d.isRoot()){
+				finer("Removing dataset from treeOrderMap and list manager");
 				treeOrderMap.remove(id);
 				DatasetListManager.getInstance().removeDataset(d);
 			} else {
-				finest("Dataset is not root");
+				finer("Dataset is not root");
 			}
+
+//			if(treeOrderMap.contains(id)){
+//				finest("Removing dataset from treeOrderMap");
+//				treeOrderMap.remove(id);
+//				DatasetListManager.getInstance().removeDataset(d);
+//			} else {
+//				finest("Dataset is not root");
+//			}
 			finest("Clearing dataset from memory");
 			d=null; // clear from memory
 			finest("Deleted dataset");
