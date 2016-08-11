@@ -169,7 +169,7 @@ public class MainWindow
 
 				if(datasetManager.hashCodeChanged()){
 					fine("Found changed hashcode");
-					Object[] options = { "Save datasets" , "Cancel exit" };
+					Object[] options = { "Save datasets" , "Exit anyway", "Cancel exit" };
 					int save = JOptionPane.showOptionDialog(MainWindow.this,
 							"Datasets have changed since last save!", 
 							"Save datasets?",
@@ -180,20 +180,30 @@ public class MainWindow
 					if(save==0){
 						saveRootDatasets();
 
-					} else {
-						fine("No save option selected");
+					} 
+					
+					if(save==1){
+						fine("Exiting without save");
+						close();					
+					} 
+					
+					if(save==2){
+						fine("Ignoring close");
 					}
 				} else {
 					fine("No change found");
-					datasetManager.clear();
-					globalOptions.setDefaults();
-					dispose();
+					close();
 				}
 			}
 			
+			public void close(){
+				datasetManager.clear();
+				globalOptions.setDefaults();
+				dispose();
+			}
+			
 			  public void windowClosed(WindowEvent e) {
-				  datasetManager.clear();
-				  globalOptions.setDefaults();
+				  close();
 			  }
 
 		});
