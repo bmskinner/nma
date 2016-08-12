@@ -88,11 +88,22 @@ public class ImageExporter implements Loggable {
 	 */
 	public ImagePlus makeGreyRGBImage(ImageStack stack){
 		
+		return makeGreyRGBImage(stack, Constants.COUNTERSTAIN);
+
+	}
+	
+	/**
+	 * Given a stack, make an RGB greyscale image from the given stack
+	 * @param stack
+	 * @return a new ImagePlus, or null if the stack was null
+	 */
+	public ImagePlus makeGreyRGBImage(ImageStack stack, int stackNumber){
+		
 		if(stack!=null){
 			ImagePlus[] images = new ImagePlus[3];
-			images[Constants.RGB_RED]   = new ImagePlus("red", stack.getProcessor(Constants.COUNTERSTAIN));  
-			images[Constants.RGB_GREEN] = new ImagePlus("green", stack.getProcessor(Constants.COUNTERSTAIN));  
-			images[Constants.RGB_BLUE]  = new ImagePlus("blue", stack.getProcessor(Constants.COUNTERSTAIN));      
+			images[Constants.RGB_RED]   = new ImagePlus("red", stack.getProcessor(stackNumber));  
+			images[Constants.RGB_GREEN] = new ImagePlus("green", stack.getProcessor(stackNumber));  
+			images[Constants.RGB_BLUE]  = new ImagePlus("blue", stack.getProcessor(stackNumber));      
 
 			ImagePlus result = RGBStackMerge.mergeChannels(images, false); 
 			result = result.flatten();

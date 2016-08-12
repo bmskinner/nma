@@ -51,6 +51,8 @@ public interface CellularComponent {
 	public static final int WIDTH 	= 2;
 	public static final int HEIGHT 	= 3;
 	
+	public static final int COMPONENT_BUFFER = 10;
+	
 	public static final String IMAGE_PREFIX = "export.";
 	
 	/**

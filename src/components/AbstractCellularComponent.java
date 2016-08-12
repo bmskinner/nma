@@ -49,6 +49,7 @@ import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
+import io.ImageExporter;
 import io.ImageImporter;
 import stats.PlottableStatistic;
 import stats.Stats;
@@ -225,12 +226,16 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		
 
 		if(getSourceFile().exists()){
-			ImageStack imageStack = ImageImporter.getInstance().importImage(getSourceFile());
-
+			
 			// Get the stack, make greyscale and invert
 			int stack = Constants.rgbToStack(getChannel());
+						
+			ImageStack imageStack = ImageImporter.getInstance().importImage(getSourceFile());
+			ip = ImageExporter.getInstance().makeGreyRGBImage(imageStack, stack).getProcessor();
 
-			ip = imageStack.getProcessor(stack);
+			
+
+//			ip = imageStack.getProcessor(stack);
 			ip.invert();	
 			
 			imageRef = new SoftReference<ImageProcessor>(ip);
@@ -251,7 +256,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		
 		double[] positions = getPosition();
 		
-		int padding = 10; // a border of pixels beyond the cell boundary
+		int padding = CellularComponent.COMPONENT_BUFFER; // a border of pixels beyond the cell boundary
 		int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
 		int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
 		int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
