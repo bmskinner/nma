@@ -21,25 +21,40 @@ package gui.tabs.cells;
 
 import javax.swing.ImageIcon;
 
+import components.Cell;
+
 public class LabelInfo {
 	private ImageIcon icon;
-	private String text;
+	private boolean isSelected = false;
+	private Cell cell;
 	
-	public LabelInfo(ImageIcon icon, String text){
+	public LabelInfo(ImageIcon icon, Cell cell){
 		this.icon = icon;
-		this.text = text;
+		this.cell = cell;
 	}
 
 	public ImageIcon getIcon() {
 		return icon;
 	}
-
-	public String getText() {
-		return text;
+	
+	public Cell getCell(){
+		return cell;
 	}
 	
 	public String toString(){
-		return text;
+		return cell==null ? "" : cell.getNucleus().getNameAndNumber();
 	}
 
+	public boolean isSelected() {
+		return isSelected;
+	}
+
+	public void setSelected(boolean isSelected) {
+		this.isSelected = isSelected;
+	}
+	
+	public String state(){
+		return this.toString()+": "+isSelected;
+	}
+	
 }

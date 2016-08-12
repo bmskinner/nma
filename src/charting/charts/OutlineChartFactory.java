@@ -685,7 +685,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 				//				int pixel = im.getRGB(x, y);
 				int pixel = openProcessor.get(x, y);
-				Color col = new Color(pixel, pixel, pixel, 255);
+				Color col = new Color(pixel);
+//				Color col = new Color(pixel, pixel, pixel, 255);
 
 				// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
 				Rectangle2D r = new Rectangle2D.Double(x-padding-0.1, y-padding-0.1, 1.2, 1.2);

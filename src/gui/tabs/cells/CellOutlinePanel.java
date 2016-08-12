@@ -22,10 +22,13 @@ import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import components.Cell;
 import components.CellularComponent;
+import gui.DatasetEvent;
+import gui.InterfaceEvent;
 import gui.RotationMode;
 import gui.components.panels.GenericCheckboxPanel;
 import gui.components.panels.RotationSelectionSettingsPanel;
 import gui.dialogs.CellCollectionOverviewDialog;
+import gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener{
@@ -61,7 +64,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		
 		JButton allCellsButton = new JButton("All cells");
 		allCellsButton.addActionListener( e ->{
-			new CellCollectionOverviewDialog(activeDataset());
+			CellCollectionOverviewDialog d =new CellCollectionOverviewDialog(activeDataset());
+//			d.addInterfaceEventListener(this);
+			d.addDatasetEventListener(this);
 		});
 		settingsPanel.add(allCellsButton);
 		
@@ -180,5 +185,16 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return OutlineChartFactory.getInstance().makeCellOutlineChart(options);
 	}
+	
+	@Override
+	public void datasetEventReceived(DatasetEvent event){
+		super.datasetEventReceived(event);
+//		log("Heard dataset event");
+    	// Pass messages upwards
+    	if(event.getSource() instanceof CellCollectionOverviewDialog){
+//    		log("Is from CellCollectionDialog");
+    		fireDatasetEvent(new DatasetEvent(this, event));
+    	}
+    }
 
 }

@@ -1,7 +1,9 @@
 package io;
 
 import java.awt.Color;
+import java.awt.Rectangle;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.ImageIcon;
 import javax.swing.SwingWorker;
@@ -12,17 +14,26 @@ import analysis.AnalysisDataset;
 import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellularComponent;
+import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import gui.components.ColourSelecter;
 import gui.dialogs.CellCollectionOverviewDialog;
 import gui.tabs.cells.LabelInfo;
+import ij.IJ;
+import ij.Undo;
 import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.process.Blitter;
+import ij.process.ColorProcessor;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import logging.Loggable;
+import utility.Constants;
+import utility.Utils;
 
 /**
  * Handles the import of all images within a given AnalysisDataset
@@ -54,7 +65,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 
 				ImageIcon ic = importCellImage(c);
 				
-				LabelInfo inf = new LabelInfo(ic, c.getNucleus().getNameAndNumber());
+				LabelInfo inf = new LabelInfo(ic, c);
 
 				publish(inf);
 			} catch(Exception e){
@@ -66,19 +77,131 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		return true;
 	}
 	
+	@Override
+    public void done() {
+    	
+    	finest("Worker completed task");
+
+    	 try {
+            if(this.get()){
+            	finest("Firing trigger for sucessful task");
+                firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
+
+            } else {
+            	finest("Firing trigger for failed task");
+                firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+            }
+        } catch (InterruptedException e) {
+        	error("Interruption error in worker", e);
+        	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+        } catch (ExecutionException e) {
+        	error("Execution error in worker", e);
+        	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+       }
+
+    } 
+	
 	private ImageIcon importCellImage(Cell c){
-		ImageProcessor ip = c.getNucleus().getComponentImage();
+		Nucleus n = c.getNucleus();
+		ImageProcessor ip = n.getComponentImage();
 		drawNucleus(c, ip);
 		
+//		log(n.getNameAndNumber());
+		// Calculate angle for vertical rotation
+		XYPoint topPoint = n.getBorderPoint(BorderTagObject.TOP_VERTICAL);
+		XYPoint btmPoint = n.getBorderPoint(BorderTagObject.BOTTOM_VERTICAL);
 		
-		double aspect =  (double) ip.getWidth() / (double) ip.getHeight();
-		double newWidth = 150 * aspect; // fix height
-		newWidth = newWidth > 150 ? 150 : newWidth; // but constrain width too
+		// Find which point is higher in the image
+		XYPoint upperPoint = topPoint.getY()>btmPoint.getY()? topPoint : btmPoint;
+		XYPoint lowerPoint = upperPoint==topPoint ? btmPoint : topPoint;
+				
+		XYPoint comp = new XYPoint(lowerPoint.getX(),upperPoint.getY());
 		
-		ip = ip.resize( (int) newWidth); 
+		/*
+		 *      LA             RA        RB         LB         
+		 * 
+		 *      T  C          C  T      B  C       C  B
+		 *       \ |          | /        \ |       | /
+		 *         B          B            T       T
+		 * 
+		 * When Ux<Lx, angle describes the clockwise rotation around L needed to move U above it.
+		 * When Ux>Lx, angle describes the anticlockwise rotation needed to move U above it.
+		 * 
+		 * If L is supposed to be on top, the clockwise rotation must be 180+a
+		 * 
+		 * However, the image coordinates have a reversed Y axis
+		 */
+
+		double angleFromVertical = Utils.findAngleBetweenXYPoints( upperPoint, lowerPoint, comp);
 		
-		ImageIcon ic = new ImageIcon(ip.getBufferedImage());
+		double angle = 0;
+		if(topPoint.isLeftOf(btmPoint) && topPoint.isAbove(btmPoint)){		
+			angle = 360-angleFromVertical;
+//			log("LA: "+angleFromVertical+" to "+angle); // Tested working
+		}
+		
+		if(topPoint.isRightOf(btmPoint) && topPoint.isAbove(btmPoint)){
+			angle = angleFromVertical;
+//			log("RA: "+angleFromVertical+" to "+angle); // Tested working
+		}
+		
+		if(topPoint.isLeftOf(btmPoint) && topPoint.isBelow(btmPoint)){
+			angle = angleFromVertical+180;
+//			angle = 180-angleFromVertical;
+//			log("LB: "+angleFromVertical+" to "+angle); // Tested working
+		}
+		
+		if(topPoint.isRightOf(btmPoint) && topPoint.isBelow(btmPoint)){
+//			angle = angleFromVertical+180;
+			angle = 180-angleFromVertical;
+//			log("RB: "+angleFromVertical+" to "+angle); // Tested working
+		}
+								
+		// Increase the canvas size so rotation does not crop the nucleus
+		ImageProcessor newIp = createEnlargedProcessor(ip, angle);
+
+		newIp.rotate(angle);
+		
+		// Rescale the resulting image	
+		newIp = scaleImage(newIp);
+		
+		newIp.flipVertical(); // Y axis needs inverting
+						
+		ImageIcon ic = new ImageIcon(newIp.getBufferedImage());
 		return ic;
+	}
+	
+	private ImageProcessor createEnlargedProcessor(ImageProcessor ip, double degrees){
+		double rad = Math.toRadians(degrees);
+		
+		// Calculate the new width and height of the canvas
+		double newWidth  = Math.abs(  Math.abs((Math.sin(rad) * ip.getHeight())) + Math.abs((Math.cos(rad)* ip.getWidth())));
+		double newHeight = Math.abs(( Math.abs(Math.sin(rad) * ip.getWidth()))   + Math.abs((Math.cos(rad)* ip.getHeight())));
+		
+		int w = (int) Math.ceil(newWidth);
+		int h = (int) Math.ceil(newHeight);
+		
+		int xBase = (w-ip.getWidth()) /2;
+		int yBase = (h-ip.getHeight()) /2;
+		
+//		log("New image "+w+" x "+h+" from "+ip.getWidth()+" x "+ip.getHeight()+" : Rot: "+degrees);
+		
+		ImageProcessor newIp= new ColorProcessor(w,h);
+		newIp.setBackgroundValue(16777215); // fill on rotate is RGB int white 
+
+		newIp.setColor(Color.WHITE); // fill current space
+		newIp.fill();
+		newIp.copyBits(ip, xBase, yBase, Blitter.COPY);
+		return newIp;
+	}
+	
+	private ImageProcessor scaleImage(ImageProcessor ip){
+		double aspect =  (double) ip.getWidth() / (double) ip.getHeight();
+		double finalWidth = 150 * aspect; // fix height
+		finalWidth = finalWidth > 150 ? 150 : finalWidth; // but constrain width too
+		
+		ip = ip.resize( (int) finalWidth); 
+		return ip;
 	}
 	
 	/**

@@ -1141,6 +1141,10 @@ public class RoundNucleus extends AbstractCellularComponent
 
 	@Override
 	public boolean equals(CellularComponent c) {
+		if(c==null){
+			return false;
+		}
+		
 		if(c.getClass()==this.getClass()){
 			if(this.getID().equals(c.getID())){
 				return true;

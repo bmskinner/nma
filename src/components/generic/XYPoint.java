@@ -165,6 +165,22 @@ public class XYPoint  implements Serializable, Loggable {
 	  }
   }
   
+  public boolean isAbove(XYPoint p){
+	  return y>p.y;
+  }
+  
+  public boolean isBelow(XYPoint p){
+	  return y<p.y;
+  }
+  
+  public boolean isLeftOf(XYPoint p){
+	  return x<p.x;
+  }
+  
+  public boolean isRightOf(XYPoint p){
+	  return x>p.x;
+  }
+  
   /**
    * Tests if the two points overlap with
    * double precision
