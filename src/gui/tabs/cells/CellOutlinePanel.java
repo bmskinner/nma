@@ -62,13 +62,12 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		settingsPanel.add(makeMeshPanel);
 		settingsPanel.add(warpMeshPanel);
 		
-		JButton allCellsButton = new JButton("All cells");
-		allCellsButton.addActionListener( e ->{
-			CellCollectionOverviewDialog d =new CellCollectionOverviewDialog(activeDataset());
-//			d.addInterfaceEventListener(this);
-			d.addDatasetEventListener(this);
-		});
-		settingsPanel.add(allCellsButton);
+//		JButton allCellsButton = new JButton("All cells");
+//		allCellsButton.addActionListener( e ->{
+//			CellCollectionOverviewDialog d =new CellCollectionOverviewDialog(activeDataset());
+//			d.addDatasetEventListener(this);
+//		});
+//		settingsPanel.add(allCellsButton);
 		
 		
 		this.add(settingsPanel, BorderLayout.NORTH);

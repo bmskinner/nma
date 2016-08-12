@@ -38,6 +38,7 @@ import gui.actions.PopulationImportAction;
 import gui.actions.SaveDatasetAction;
 import gui.actions.ShellAnalysisAction;
 import gui.components.panels.MeasurementUnitSettingsPanel;
+import gui.dialogs.CellCollectionOverviewDialog;
 import gui.dialogs.MainOptionsDialog;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.ClusterDetailPanel;
@@ -617,10 +618,13 @@ public class MainWindow
 		
 		if(event.type().equals("CurateCollectionAction")){
 
-			Runnable task = () -> { 
-				new CurateCollectionAction(selectedDataset, MainWindow.this); 
-			}; 
-			threadManager.execute(task);
+				CellCollectionOverviewDialog d = new CellCollectionOverviewDialog(populationsPanel.getSelectedDatasets().get(0));
+				d.addDatasetEventListener(this);
+
+//			Runnable task = () -> { 
+//				new CurateCollectionAction(selectedDataset, MainWindow.this); 
+//			}; 
+//			threadManager.execute(task);
 		}
 				
 
@@ -645,40 +649,6 @@ public class MainWindow
 			new RelocateFromFileAction(selectedDataset, MainWindow.this, latch);			
 			
 		}
-		
-		
-		
-//		if(event.type().equals("ReapplySegmentProfileAction")){
-//			
-//			Runnable task = () -> {
-//				try{
-//
-//					// get the names of other populations
-//					List<String> nameList = populationsPanel.getPopulationNames();
-//					nameList.remove(selectedDataset.getName());
-//					
-//					String[] names = nameList.toArray(new String[0]);
-//
-//					String selectedValue = (String) JOptionPane.showInputDialog(null,
-//							"Choose population to take segments from", "Reapply segmentation",
-//							JOptionPane.INFORMATION_MESSAGE, null,
-//							names, names[0]);
-//
-//					if(selectedValue!=null){
-//
-//						AnalysisDataset source = populationsPanel.getDataset(selectedValue);
-//						final CountDownLatch latch = new CountDownLatch(1);
-//						new RunSegmentationAction(selectedDataset, source, null, MainWindow.this, latch);
-//						latch.await();
-//					}
-//				} catch(Exception e1){
-//					log(Level.SEVERE, "Error applying morphology", e1);
-//				}
-//
-//			};
-//			
-//			SwingUtilities.invokeLater(task);
-//		}
 		
 		if(event.type().equals("AddTailStainAction")){
 			new AddTailStainAction(selectedDataset, this);

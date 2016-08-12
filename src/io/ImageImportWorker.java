@@ -48,12 +48,13 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 	private final TableModel model;
 	private final static int COLUMN_COUNT = CellCollectionOverviewDialog.COLUMN_COUNT;
 	private int loaded = 0;
+	private boolean rotate;
 	
-	public ImageImportWorker(AnalysisDataset dataset, TableModel model) {
+	public ImageImportWorker(AnalysisDataset dataset, TableModel model, boolean rotate) {
 		super();
 		this.dataset = dataset;
 		this.model = model;
-		
+		this.rotate = rotate;
 	}
 
 	@Override
@@ -105,18 +106,30 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		Nucleus n = c.getNucleus();
 		ImageProcessor ip = n.getComponentImage();
 		drawNucleus(c, ip);
-		
-//		log(n.getNameAndNumber());
+
+		if(rotate){
+			ip = rotateToVertical(c, ip);
+			ip.flipVertical(); // Y axis needs inverting
+		}
+		// Rescale the resulting image	
+		ip = scaleImage(ip);
+			
+		ImageIcon ic = new ImageIcon(ip.getBufferedImage());
+		return ic;
+	}
+	
+	private ImageProcessor rotateToVertical(Cell c, ImageProcessor ip){
 		// Calculate angle for vertical rotation
+		Nucleus n = c.getNucleus();
 		XYPoint topPoint = n.getBorderPoint(BorderTagObject.TOP_VERTICAL);
 		XYPoint btmPoint = n.getBorderPoint(BorderTagObject.BOTTOM_VERTICAL);
-		
+
 		// Find which point is higher in the image
 		XYPoint upperPoint = topPoint.getY()>btmPoint.getY()? topPoint : btmPoint;
 		XYPoint lowerPoint = upperPoint==topPoint ? btmPoint : topPoint;
-				
+
 		XYPoint comp = new XYPoint(lowerPoint.getX(),upperPoint.getY());
-		
+
 		/*
 		 *      LA             RA        RB         LB         
 		 * 
@@ -133,42 +146,35 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		 */
 
 		double angleFromVertical = Utils.findAngleBetweenXYPoints( upperPoint, lowerPoint, comp);
-		
+
 		double angle = 0;
 		if(topPoint.isLeftOf(btmPoint) && topPoint.isAbove(btmPoint)){		
 			angle = 360-angleFromVertical;
-//			log("LA: "+angleFromVertical+" to "+angle); // Tested working
+			//					log("LA: "+angleFromVertical+" to "+angle); // Tested working
 		}
-		
+
 		if(topPoint.isRightOf(btmPoint) && topPoint.isAbove(btmPoint)){
 			angle = angleFromVertical;
-//			log("RA: "+angleFromVertical+" to "+angle); // Tested working
+			//					log("RA: "+angleFromVertical+" to "+angle); // Tested working
 		}
-		
+
 		if(topPoint.isLeftOf(btmPoint) && topPoint.isBelow(btmPoint)){
 			angle = angleFromVertical+180;
-//			angle = 180-angleFromVertical;
-//			log("LB: "+angleFromVertical+" to "+angle); // Tested working
+			//					angle = 180-angleFromVertical;
+			//					log("LB: "+angleFromVertical+" to "+angle); // Tested working
 		}
-		
+
 		if(topPoint.isRightOf(btmPoint) && topPoint.isBelow(btmPoint)){
-//			angle = angleFromVertical+180;
+			//					angle = angleFromVertical+180;
 			angle = 180-angleFromVertical;
-//			log("RB: "+angleFromVertical+" to "+angle); // Tested working
+			//					log("RB: "+angleFromVertical+" to "+angle); // Tested working
 		}
-								
+
 		// Increase the canvas size so rotation does not crop the nucleus
 		ImageProcessor newIp = createEnlargedProcessor(ip, angle);
 
 		newIp.rotate(angle);
-		
-		// Rescale the resulting image	
-		newIp = scaleImage(newIp);
-		
-		newIp.flipVertical(); // Y axis needs inverting
-						
-		ImageIcon ic = new ImageIcon(newIp.getBufferedImage());
-		return ic;
+		return newIp;
 	}
 	
 	private ImageProcessor createEnlargedProcessor(ImageProcessor ip, double degrees){

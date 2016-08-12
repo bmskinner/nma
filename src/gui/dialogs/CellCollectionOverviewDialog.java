@@ -54,7 +54,7 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
 		
 		createUI();
 		
-		ImageImportWorker worker = new ImageImportWorker(dataset, table.getModel());
+		ImageImportWorker worker = new ImageImportWorker(dataset, table.getModel(), true);
 		worker.addPropertyChangeListener(this);
 		
 		worker.execute();
@@ -67,7 +67,7 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
 	private void createUI(){
 		
 		this.setLayout(new BorderLayout());
-		this.setTitle("Nuclei in "+dataset.getName());
+		this.setTitle("Showing "+dataset.getCollection().cellCount()+" nuclei in "+dataset.getName());
 		
 		int cellCount = dataset.getCollection().cellCount();
 		
@@ -80,6 +80,17 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
 		progressBar.setStringPainted(true);
 		
 		JPanel header = new JPanel(new FlowLayout());
+		
+		JCheckBox rotateBtn = new JCheckBox("Rotate vertical", true);
+		rotateBtn.addActionListener( e-> {
+			progressBar.setVisible(true);
+			ImageImportWorker worker = new ImageImportWorker(dataset, table.getModel(), rotateBtn.isSelected());
+			worker.addPropertyChangeListener(this);
+			
+			worker.execute();
+		
+		});
+		header.add(rotateBtn);
 		
 		JCheckBox selectAll = new JCheckBox("Select all");
 		selectAll.addActionListener( e-> {
@@ -99,35 +110,10 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
 		header.add(selectAll);
 
 		
-		JButton curateBtn = new JButton("Extract selected");
+		JButton curateBtn = new JButton("Make new collection from selected");
 		curateBtn.addActionListener( e ->{
 			
-			List<Cell> cells = new ArrayList<Cell>();
-			for(int r=0; r<table.getModel().getRowCount(); r++){
-
-				for(int c=0; c<table.getModel().getColumnCount(); c++){
-					LabelInfo info = (LabelInfo) table.getModel().getValueAt(r, c);
-					
-					if(info.isSelected() && info.getCell()!=null){
-						cells.add(info.getCell());
-					}
-				}
-			}
-			
-			CellCollection newCollection = new CellCollection(dataset, dataset.getName()+"_Curated");
-			for(Cell c : cells){
-				newCollection.addCell(new Cell(c));
-			}
-			log("Added "+cells.size()+" cells to new collection");
-			
-			if(cells.size()>0){
-				dataset.addChildCollection(newCollection);
-				
-				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-				list.add(dataset.getChildDataset(newCollection.getID()));
-				log("Firing dataset events");
-				fireDatasetEvent(DatasetMethod.PROFILING_ACTION, list);
-			}
+			makeNewCollection();
 		
 		});
 		
@@ -156,6 +142,7 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
         table.setCellSelectionEnabled(true);
         table.setRowSelectionAllowed(false);
         table.setColumnSelectionAllowed(false);
+        table.setTableHeader(null);
 
         
         ListSelectionModel cellSelectionModel = table.getSelectionModel();
@@ -193,6 +180,35 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
 		
 		
 		
+	}
+	
+	private void makeNewCollection(){
+		List<Cell> cells = new ArrayList<Cell>();
+		for(int r=0; r<table.getModel().getRowCount(); r++){
+
+			for(int c=0; c<table.getModel().getColumnCount(); c++){
+				LabelInfo info = (LabelInfo) table.getModel().getValueAt(r, c);
+				
+				if(info.isSelected() && info.getCell()!=null){
+					cells.add(info.getCell());
+				}
+			}
+		}
+		
+		CellCollection newCollection = new CellCollection(dataset, dataset.getName()+"_Curated");
+		for(Cell c : cells){
+			newCollection.addCell(new Cell(c));
+		}
+		log("Added "+cells.size()+" cells to new collection");
+		
+		if(cells.size()>0){
+			dataset.addChildCollection(newCollection);
+			
+			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+			list.add(dataset.getChildDataset(newCollection.getID()));
+			log("Firing dataset events");
+			fireDatasetEvent(DatasetMethod.PROFILING_ACTION, list);
+		}
 	}
 	
 	private TableModel createEmptyTableModel(int rows, int cols){
