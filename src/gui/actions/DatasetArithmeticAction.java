@@ -53,17 +53,17 @@ public class DatasetArithmeticAction extends ProgressableAction {
 				DatasetArithmeticOperation operation = dialog.getOperation();
 
 				
-				log(Level.INFO,"Performing "+operation+" on datasets");
+				log("Performing "+operation+" on datasets");
 				// prepare a new collection
 
 				CellCollection newCollection = null; 
 
 				switch(operation){
 					case AND: // present in both
-						newCollection = datasetsAND(one, two);
+						newCollection = one.getCollection().and(two.getCollection());
 						break;
 					case NOT: // present in one, not present in two
-						newCollection = datasetsNOT(one, two);
+						newCollection = one.getCollection().not(two.getCollection());
 						break;
 					case OR: // present in either (merge)
 						
@@ -73,7 +73,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 						new MergeCollectionAction(toMerge, mw);
 						break;
 					case XOR: // present in either but not both
-						newCollection = datasetsXOR(one, two);
+						newCollection = one.getCollection().xor(two.getCollection());
 						break;
 					default:
 						break;
@@ -82,8 +82,8 @@ public class DatasetArithmeticAction extends ProgressableAction {
 
 
 				if(newCollection !=null && newCollection.getNucleusCount()>0){
-					log(Level.INFO,"Found "+newCollection.getNucleusCount()+" cells");
-					log(Level.INFO,"Applying morphology...");
+					log("Found "+newCollection.getNucleusCount()+" cells");
+					log("Running morphology analysis...");
 					AnalysisDataset newDataset = new AnalysisDataset(newCollection);
 					newDataset.setRoot(true);
 					int flag = MainWindow.ADD_POPULATION;
@@ -92,90 +92,19 @@ public class DatasetArithmeticAction extends ProgressableAction {
 					new RunProfilingAction(newDataset, flag, mw);
 										
 				} else {
-					log(Level.INFO,"No populations returned");
+					log("No populations returned");
 				}
 			} else {
-				log(Level.FINE,"User cancelled operation");
+				fine("User cancelled operation");
 			}
 
 
 
 		} catch (Exception e1) {
-			logError("Error in dataset arithmetic", e1);
+			error("Error in dataset arithmetic", e1);
 		} finally {
 			cancel();
 		}
 
 	} 
-	
-	/**
-	 * Return a collection of cells present in both datasets
-	 * @param one
-	 * @param two
-	 * @return
-	 * @throws Exception 
-	 */
-	private CellCollection datasetsAND(AnalysisDataset one, AnalysisDataset two) throws Exception{
-
-		CellCollection newCollection = new CellCollection(one, "AND operation");
-		
-		for(Cell c : one.getCollection().getCells()){
-
-			if(two.getCollection().contains(c)){
-				newCollection.addCell(new Cell(c));
-			}
-		}
-
-		return newCollection;
-	}
-	
-	/**
-	 * Return a collection of cells present in one, not two
-	 * @param one
-	 * @param two
-	 * @return
-	 * @throws Exception 
-	 */
-	private CellCollection datasetsNOT(AnalysisDataset one, AnalysisDataset two) throws Exception{
-
-		CellCollection newCollection = new CellCollection(one, "NOT operation");
-		
-		for(Cell c : one.getCollection().getCells()){
-
-			if(!two.getCollection().contains(c)){
-				newCollection.addCell(new Cell(c));
-			}
-		}
-
-		return newCollection;
-	}
-	
-	/**
-	 * Return a collection of cells present in one, or two, but not both
-	 * @param one
-	 * @param two
-	 * @return
-	 * @throws Exception 
-	 */
-	private CellCollection datasetsXOR(AnalysisDataset one, AnalysisDataset two) throws Exception{
-
-		CellCollection newCollection = new CellCollection(one, "XOR operation");
-		
-		for(Cell c : one.getCollection().getCells()){
-
-			if(!two.getCollection().contains(c)){
-				newCollection.addCell(new Cell(c));
-			}
-		}
-		
-		for(Cell c : two.getCollection().getCells()){
-
-			if(!one.getCollection().contains(c)){
-				newCollection.addCell(new Cell(c));
-			}
-		}
-
-		return newCollection;
-	}
-
 }

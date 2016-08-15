@@ -73,6 +73,7 @@ import jebl.evolution.io.ImportException.DuplicateTaxaException;
 import jebl.evolution.io.NewickImporter;
 import jebl.evolution.taxa.Taxon;
 import jebl.evolution.trees.RootedTree;
+import jebl.evolution.trees.SimpleRootedTree;
 import jebl.evolution.trees.TransformedRootedTree;
 import jebl.evolution.trees.Tree;
 import jebl.gui.trees.treeviewer.painters.BasicLabelPainter;
@@ -768,7 +769,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		}
 		
 	}
-	
+		
 	protected class MouseClusterSelectionAdapter extends MouseAdapter{
 		
 		public MouseClusterSelectionAdapter(){

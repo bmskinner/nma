@@ -939,6 +939,74 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  return subCollection;
   }
   
+  
+	/**
+	 * Return a collection of cells present in both collections
+	 * @param other the other collection
+	 * @return
+	 * @throws Exception 
+	 */
+	public CellCollection and(CellCollection other) {
+
+		CellCollection newCollection = new CellCollection(this, "AND operation");
+		
+		for(Cell c : other.getCells()){
+
+			if(this.contains(c)){
+				newCollection.addCell(new Cell(c));
+			}
+		}
+
+		return newCollection;
+	}
+  
+	/**
+	 * Return a collection of cells present this collection but not the other
+	 * @param other the other collection
+	 * @return
+	 * @throws Exception 
+	 */
+	public CellCollection not(CellCollection other) {
+
+		CellCollection newCollection = new CellCollection(this, "NOT operation");
+		
+		for(Cell c : getCells()){
+
+			if( ! other.contains(c)){
+				newCollection.addCell(new Cell(c));
+			}
+		}
+
+		return newCollection;
+	}
+	
+	/**
+	 * Return a collection of cells present this collection or the other but not both
+	 * @param other the other collection
+	 * @return
+	 * @throws Exception 
+	 */
+	public CellCollection xor(CellCollection other) {
+
+		CellCollection newCollection = new CellCollection(this, "XOR operation");
+		
+		for(Cell c : getCells()){
+
+			if( ! other.contains(c)){
+				newCollection.addCell(new Cell(c));
+			}
+		}
+		
+		for(Cell c : other.getCells()){
+
+			if( ! this.contains(c)){
+				newCollection.addCell(new Cell(c));
+			}
+		}
+
+		return newCollection;
+	}
+  
   /**
    * Invalidate the existing cached vertically rotated nuclei,
 	 and recalculate.

@@ -121,7 +121,7 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		labels.add(new JLabel("Operation"));
 		fields.add(operatorPanel);
 		
-		JPanel descPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JPanel descPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		descPanel.add(operatorDescription);
 		labels.add(new JLabel("Description"));
 		fields.add(descPanel);
