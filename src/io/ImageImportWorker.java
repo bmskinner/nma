@@ -24,6 +24,7 @@ import gui.components.ColourSelecter;
 import gui.dialogs.CellCollectionOverviewDialog;
 import gui.tabs.cells.LabelInfo;
 import ij.IJ;
+import ij.ImagePlus;
 import ij.Undo;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -144,7 +145,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		 * 
 		 * However, the image coordinates have a reversed Y axis
 		 */
-
+		
 		double angleFromVertical = Utils.findAngleBetweenXYPoints( upperPoint, lowerPoint, comp);
 
 		double angle = 0;
@@ -171,6 +172,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		}
 
 		// Increase the canvas size so rotation does not crop the nucleus
+		finer("Input: "+n.getNameAndNumber()+" - "+ip.getWidth()+" x "+ip.getHeight());
 		ImageProcessor newIp = createEnlargedProcessor(ip, angle);
 
 		newIp.rotate(angle);
@@ -178,25 +180,38 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 	}
 	
 	private ImageProcessor createEnlargedProcessor(ImageProcessor ip, double degrees){
+		
+
 		double rad = Math.toRadians(degrees);
 		
 		// Calculate the new width and height of the canvas
-		double newWidth  = Math.abs(  Math.abs((Math.sin(rad) * ip.getHeight())) + Math.abs((Math.cos(rad)* ip.getWidth())));
-		double newHeight = Math.abs(( Math.abs(Math.sin(rad) * ip.getWidth()))   + Math.abs((Math.cos(rad)* ip.getHeight())));
+		// new width is h sin(a) + w cos(a) and vice versa for height
+		double newWidth  = Math.abs(   Math.sin(rad) * ip.getHeight() )  +   Math.abs(   Math.cos(rad)* ip.getWidth()     );
+		double newHeight = Math.abs(   Math.sin(rad) * ip.getWidth()  )  +   Math.abs(   Math.cos(rad)* ip.getHeight()    );
 		
 		int w = (int) Math.ceil(newWidth);
 		int h = (int) Math.ceil(newHeight);
 		
-		int xBase = (w-ip.getWidth()) /2;
-		int yBase = (h-ip.getHeight()) /2;
 		
-//		log("New image "+w+" x "+h+" from "+ip.getWidth()+" x "+ip.getHeight()+" : Rot: "+degrees);
+		// The new image may be narrower or shorter following rotation.
+		// To avoid clipping, ensure the image never gets smaller in either dimension.
+		w = w < ip.getWidth()  ? ip.getWidth()  : w;
+		h = h < ip.getHeight() ? ip.getHeight() : h;
+		
+		// paste old image to centre of enlarged canvas
+		int xBase = (w-ip.getWidth())  >> 1; 
+		int yBase = (h-ip.getHeight()) >> 1;
+		
+		finer("New image "+w+" x "+h+" from "+ip.getWidth()+" x "+ip.getHeight()+" : Rot: "+degrees);
+		
+		finest("Copy starting at "+xBase+", "+yBase);
 		
 		ImageProcessor newIp= new ColorProcessor(w,h);
-		newIp.setBackgroundValue(16777215); // fill on rotate is RGB int white 
 
-		newIp.setColor(Color.WHITE); // fill current space
+		newIp.setColor(Color.WHITE); // fill current space with white
 		newIp.fill();
+		
+		newIp.setBackgroundValue(16777215); // fill on rotate is RGB int white 
 		newIp.copyBits(ip, xBase, yBase, Blitter.COPY);
 		return newIp;
 	}

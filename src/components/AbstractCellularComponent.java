@@ -45,6 +45,7 @@ import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
 import ij.IJ;
+import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
@@ -232,14 +233,10 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 						
 			ImageStack imageStack = ImageImporter.getInstance().importImage(getSourceFile());
 			ip = ImageExporter.getInstance().makeGreyRGBImage(imageStack, stack).getProcessor();
-
-			
-
-//			ip = imageStack.getProcessor(stack);
 			ip.invert();	
 			
 			imageRef = new SoftReference<ImageProcessor>(ip);
-
+			
 			return ip;
 		} else {
 			return null;
@@ -248,9 +245,9 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	
 
 	public ImageProcessor getComponentImage(){
-		ImageProcessor openProcessor = this.getImage();
+		ImageProcessor ip = getImage();
 
-		if(openProcessor==null){	
+		if(ip==null){	
 			return null;	
 		}
 		
@@ -265,10 +262,10 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		wideX = wideX<0 ? 0 : wideX;
 		wideY = wideY<0 ? 0 : wideY;
 
-		openProcessor.setRoi(wideX, wideY, wideW, wideH);
-		openProcessor = openProcessor.crop();
+		ip.setRoi(wideX, wideY, wideW, wideH);
+		ip = ip.crop();
 
-		return openProcessor;
+		return ip;
 	}
 
 	public void setPosition(double[] position) {
