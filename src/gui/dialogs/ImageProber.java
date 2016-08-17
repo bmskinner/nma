@@ -20,9 +20,14 @@ package gui.dialogs;
 
 import gui.ImageType;
 import gui.LoadingIconDialog;
+import gui.MainWindow;
+import gui.dialogs.CellCollectionOverviewDialog.LabelInfoRenderer;
+import gui.tabs.cells.LabelInfo;
 import ij.process.ImageProcessor;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -30,6 +35,10 @@ import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -44,32 +53,38 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import analysis.AnalysisOptions;
+import analysis.detection.IconCell;
 import analysis.nucleus.NucleusDetector;
 
 @SuppressWarnings("serial")
-public abstract class ImageProber extends LoadingIconDialog {
+public abstract class ImageProber extends LoadingIconDialog implements PropertyChangeListener {
 	
-	Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-	
-	private double windowWidth;
-	private double windowHeight;
-	
-	private static double IMAGE_SCREEN_PROPORTION = 0.90;
+	public static final int DEFAULT_COLUMN_COUNT = 2;
+	private static final double IMAGE_SCREEN_PROPORTION = 0.90;
 
-	private final JPanel      contentPanel = new JPanel();
+	private int rowHeight = 200;
+	
+	protected JProgressBar progressBar;
+	
+
 	protected AnalysisOptions options; // the options to detect with
 	protected File            openImage;			// the image currently open
-	
-	protected Map<ImageType, JLabel>         iconMap = new HashMap<ImageType, JLabel>(); // allow multiple images 
-	protected Map<ImageType, ImageProcessor> procMap = new HashMap<ImageType, ImageProcessor>(); // allow multiple images 
-	
+
 	private ImageType imageType;
 	
-	private int rows = 0;
-	private int cols = 2;
+	protected int rows = 0;
+	protected int cols = 2;
+	
+	protected JTable table; 
 	
 	private JLabel headerLabel = new JLabel("Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version.");
 	
@@ -78,42 +93,9 @@ public abstract class ImageProber extends LoadingIconDialog {
 	
 	private boolean ok = false;
 	
-	protected List<File> probableFiles;	// the list of image files
+	protected List<File> imageFiles;	// the list of image files
 	protected int index = 0; 				// the index of the open file
-	
-	private static final String[] logTestMessages = {
-		"Constructing additional pylons",
-		"Detecting strategic launch",
-		"Staying a while, and listening",
-		"Bullseyeing womp rats",
-		"Avoiding a land war in Asia",
-		"Baking a delicious cake",
-		"Deciding who you're gonna call",
-		"Loving it when a plan comes together",
-		"Wondering why it has to be snakes",
-		"Generating 1.21 gigawatts",
-		"Not simply walking into Mordor",
-		"Taking the hobbits to Isengard",
-		"Searching out there for the truth",
-		"Feeding them after midnight",
-		"Learning the princess is in another castle",
-		"Getting your ass to Mars",
-		"Changing the laws of physics",
-		"Likely to be eaten by a grue",
-		"Never giving up, never surrendering",
-		"Making everything shiny",
-		"Crossing the streams",
-		"Reversing the polarity of the neutron flow",
-		"Phoning home",
-		"Requiring a bigger boat",
-		"Shaking, not stirring",
-		"Reaching 88 miles per hour",
-		"Considering it only a flesh wound",
-		"Activating the machine that goes ping",
-		"Weighing the same as a duck",
-		"Noting that winter is coming"
-	};
- 	
+	 	
 	/**
 	 * Create the dialog.
 	 */
@@ -125,105 +107,107 @@ public abstract class ImageProber extends LoadingIconDialog {
 
 		try{
 			this.options = options;
-
 			this.imageType = type;
 			
-			for(ImageType key : imageType.getValues()){
-				iconMap.put(key, null);
-				procMap.put(key, null);
-			}
-			
 			createGUI();
+			
+			this.setLocationRelativeTo(null); // centre on screen
+			
+			this.setModal(true);
 
 		} catch(Exception e){
-			logError( "Error creating prober", e);
+			error("Error creating image prober", e);
 		}
 	}
 	
 	private void createGUI(){
-		this.setModal(true);
+
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		this.addWindowListener(new WindowAdapter() {
+			
+			public void windowClosing(WindowEvent e) {
+				ok = false;
+				finest("Set ok to "+ok);
+				ImageProber.this.setVisible(false);
+			}
+
+
+		});
+		
 		this.setTitle("Image Prober");
 
+		Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+		
 		int w = (int) (screenSize.getWidth() * IMAGE_SCREEN_PROPORTION);
-		windowWidth = w;
+//		windowWidth = w;
 		int h = (int) (screenSize.getHeight() * IMAGE_SCREEN_PROPORTION);
-		windowHeight = h;
+//		windowHeight = h;
 
 		setBounds(100, 100, w, h);
-		this.setLocationRelativeTo(null); // centre on screen
+		
 	
-
-		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setLayout(new BorderLayout());
-		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setLayout(new BorderLayout());
+		
 
 		JPanel header = this.createHeader();
-		contentPanel.add(header, BorderLayout.NORTH);
+		this.add(header, BorderLayout.NORTH);
 
 		JPanel footer = this.createFooter();
-		contentPanel.add(footer, BorderLayout.SOUTH);
+		this.add(footer, BorderLayout.SOUTH);
 
-		JPanel imagePane = createImagePanel();
-		contentPanel.add(imagePane, BorderLayout.CENTER);
+		
+		table = createImageTable();
+		
+		JPanel centralPanel = new JPanel(new BorderLayout());
+		centralPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setViewportView(table);
+		
+		centralPanel.add(scrollPane, BorderLayout.CENTER);
+		
+		progressBar = new JProgressBar();
+		progressBar.setString("Working...");
+		progressBar.setStringPainted(true);
+		progressBar.setVisible(false);
+		centralPanel.add(progressBar, BorderLayout.SOUTH);
 
-		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		
+		this.add(centralPanel, BorderLayout.CENTER);
 
-		{
-			JButton nextButton = new JButton("Next");
-			nextButton.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
 
-					Thread thr = new Thread(){
-						public void run() {
-							log(Level.FINEST, "Selecting next image");
-							openImage = getNextImage();
+		JButton nextButton = new JButton("Next");
+		nextButton.addActionListener( e ->{
+			openImage = getNextImage();
 
-							try{
-								log(Level.FINEST, "Opening image");
-								importAndDisplayImage(openImage);
-							} catch(Exception e){
-								log(Level.SEVERE, "Error opening image");
-							}
-							
-						}
-					};	
-					thr.start();
+			try{
+				finest("Opening image "+openImage.getAbsolutePath());
+				importAndDisplayImage(openImage);
+			} catch(Exception ex){
+				error("Error opening image", ex);
+			}
 
-				}
-			});
-			contentPanel.add(nextButton, BorderLayout.EAST);
+		});
+		
+		
+		JButton prevButton = new JButton("Prev");
+		prevButton.addActionListener( e ->{
+			openImage = getPrevImage();
 
-			JButton prevButton = new JButton("Prev");
-			prevButton.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
+			try{
+				finest("Opening image "+openImage.getAbsolutePath());
+				importAndDisplayImage(openImage);
+			} catch(Exception ex){
+				error("Error opening image", ex);
+			}
 
-					Thread thr = new Thread(){
-						public void run() {
-							log(Level.FINEST, "Selecting previous image");
-							openImage = getPrevImage();
-//							setStatusLoading();
-							try{
-								log(Level.FINEST, "Opening image");
-								importAndDisplayImage(openImage);
-							} catch(Exception e){
-								log(Level.SEVERE, "Error opening image");
-//								openImage = getNextImage();
-//								importAndDisplayImage(openImage);
-							}
-							
-//							log(Level.FINEST, "Opening image");
-//							importAndDisplayImage(openImage);
-						}
-					};	
-					thr.start();
+		});
 
-				}
-			});
-			contentPanel.add(prevButton, BorderLayout.WEST);
-		}
+
+		this.add(nextButton, BorderLayout.EAST);
+		this.add(prevButton, BorderLayout.WEST);
+
 	}
 	
 	/**
@@ -244,6 +228,8 @@ public abstract class ImageProber extends LoadingIconDialog {
 		return panel;
 	}
 	
+
+	
 	/**
 	 * Update the heading text
 	 * @param s
@@ -252,53 +238,107 @@ public abstract class ImageProber extends LoadingIconDialog {
 		this.headerLabel.setText(s);
 	}
 	
-	/**
-	 * Make the image panel 
-	 * @return
-	 */
-	private JPanel createImagePanel(){
-		JPanel panel = new JPanel();
+	private JTable createImageTable(){
 		
-		if(imageType.getValues().length == 1){
+		int values = imageType.getValues().length;
+		if(values == 1){
 			rows = 1;
 			cols = 1;
 		} else {
-			rows = (int) Math.ceil(  ( (double) imageType.getValues().length / 2d)  );
-			cols = 2;
+			rows = values%DEFAULT_COLUMN_COUNT==0 ? values >> 1 : (values >> 1) + 1;
+			cols = DEFAULT_COLUMN_COUNT;
 		}
 
-		log(Level.FINEST, "Creating image panel size "+rows+" by "+cols);
-		panel.setLayout(new GridLayout(rows, cols ));
+		finer("Creating image panel size "+rows+" by "+cols+" for "+imageType.getValues().length+" steps");
+		
+		
+		
+		TableModel model = createEmptyTableModel(rows, cols);
+		
+		table = new JTable( model ) {
+            //  Returning the Class of each column will allow different
+            //  renderers to be used based on Class
+            public Class getColumnClass(int column){
+            	return IconCell.class;
+            }
+        };
+        
+        for(int col=0; col<cols; col++){
+        	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
+        }
+        
+//		int rowHeight = 200;
+        rowHeight =  (int) Math.ceil(((java.awt.Toolkit.getDefaultToolkit().getScreenSize().getHeight() * IMAGE_SCREEN_PROPORTION) / (rows+1)));
+//		int rowHeight =  (int) (windowHeight / (rows+1));
+		table.setRowHeight(rowHeight);	
 
-		for(final ImageType key : imageType.getValues()){
+        table.setCellSelectionEnabled(true);
+        table.setRowSelectionAllowed(false);
+        table.setColumnSelectionAllowed(false);
+        table.setTableHeader(null);
+        
+        table.addMouseListener( new MouseAdapter(){
+        	
+        	@Override
+        	public void mouseClicked(MouseEvent e){
+        		if(e.getClickCount()==1){
+        			
+        			// Get the data model for this table
+        			TableModel model = (TableModel)table.getModel();
+        			
+        			Point pnt = e.getPoint();
+        			int row = table.rowAtPoint(pnt);
+        			int col = table.columnAtPoint(pnt);
 
-			JLabel label = new JLabel("", this.getLoadingGif(), JLabel.CENTER);
-			label.setText(key.toString());
-			label.setHorizontalTextPosition(JLabel.CENTER);
-			label.setVerticalTextPosition(JLabel.TOP);
-			ImageIcon icon = (ImageIcon) label.getIcon();
-			icon.getImage().flush();
-			label.setIcon(this.getLoadingGif());
-			
-			panel.add(label);
-			label.repaint();
-			iconMap.put(key, label);
-			
-						
-			label.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
+        			IconCell selectedData = (IconCell) model.getValueAt( row, col );
 
-					new LargeImageDialog(key, ImageProber.this);
-
-				}
-			});
-		}
-
-
-		return panel;
+        			if(selectedData.getLargeIcon()!=null){
+        				new LargeImageDialog(selectedData, ImageProber.this);
+        			}
+        			
+        		}
+        	}
+        	
+        });
+		
+		return table;
+		
 	}
+	
+	protected TableModel createEmptyTableModel(int rows, int cols){
+		DefaultTableModel model = new DefaultTableModel(){
+			@Override
+			public boolean isCellEditable(int row, int column) { // custom isCellEditable function
+				return false;
+			}
+		};
+		
+		model.setRowCount(rows);
+		model.setColumnCount(cols);
+		
+		int count = 0;
+		int values = imageType.getValues().length;
+		
+		for(int row=0; row<rows; row++){
+			for(int col=0; col<cols; col++){
+				
+//				IconCell cell = new IconCell(null, imageType);
+				
+				if(count<values){
+				
+					IconCell cell = new IconCell(null, imageType.getValues()[count++]);
 
+					model.setValueAt(cell, row, col);
+				} else {
+					IconCell cell = new IconCell(null, null);
+					model.setValueAt(cell, row, col);
+				}
+			}
+		}
+
+		return model;
+	}
+	
 
 	/**
 	 * Make the footer panel, with ok and cancel buttons
@@ -307,6 +347,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 	private JPanel createFooter(){
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+				
 
 		okButton.addMouseListener(new MouseAdapter() {
 			@Override
@@ -369,12 +410,12 @@ public abstract class ImageProber extends LoadingIconDialog {
 	 */
 	private File getNextImage(){
 
-		if(index >= probableFiles.size()-1){
+		if(index >= imageFiles.size()-1){
 			index = 0;
 		} else {
 			index++;
 		}
-		File f =  probableFiles.get(index);
+		File f =  imageFiles.get(index);
 		return f;
 
 	}
@@ -386,12 +427,12 @@ public abstract class ImageProber extends LoadingIconDialog {
 	private File getPrevImage(){
 		
 		if(index <= 0){
-			index = probableFiles.size()-1;
+			index = imageFiles.size()-1;
 		} else {
 			index--;
 		}
 
-		File f =  probableFiles.get(index);
+		File f =  imageFiles.get(index);
 		return f;
 	}
 	
@@ -408,11 +449,11 @@ public abstract class ImageProber extends LoadingIconDialog {
 		Thread thr = new Thread(){
 			public void run() {
 				
-				probableFiles = new ArrayList<File>();
-				probableFiles = importImages(folder);
+				imageFiles = new ArrayList<File>();
+				imageFiles = importImages(folder);
 				
-				if(probableFiles.size()>0){
-					openImage = probableFiles.get(index);
+				if(imageFiles.size()>0){
+					openImage = imageFiles.get(index);
 					importAndDisplayImage(openImage);
 				} else {
 					warn("No images found in folder");
@@ -460,199 +501,120 @@ public abstract class ImageProber extends LoadingIconDialog {
 	 * Set the header label and the image icons to display
 	 * the loading gif
 	 */
-	@Override
-	protected void setStatusLoading(){
-		super.setStatusLoading();
-		if(this.getLoadingGif()!=null){
-			for(ImageType key : imageType.getValues()){
-				
-				JLabel label = iconMap.get(key);
-				if(label!=null){
-					ImageIcon icon = (ImageIcon) label.getIcon();
-					if(icon.getImage()!=null){
-						icon.getImage().flush();
-					}
-					label.setIcon(this.getLoadingGif());
-				}
-			}
-		}
-	}
+//	@Override
+//	protected void setStatusLoading(){
+//		super.setStatusLoading();
+//		if(this.getLoadingGif()!=null){
+//			for(ImageType key : imageType.getValues()){
+//				
+//				JLabel label = iconMap.get(key);
+//				if(label!=null){
+//					ImageIcon icon = (ImageIcon) label.getIcon();
+//					if(icon.getImage()!=null){
+//						icon.getImage().flush();
+//					}
+//					label.setIcon(this.getLoadingGif());
+//				}
+//			}
+//		}
+//	}
 	
 	/**
 	 * Set the header label and the image icons to display
 	 * the loading gif
 	 */
-	protected void setStatusError(){
-		
-//		headerLabel.setIcon(null);
-//		headerLabel.repaint();
-		super.setStatusLoaded();
-
-		for(ImageType key : imageType.getValues()){
-
-			JLabel label = iconMap.get(key);
-			ImageIcon icon = (ImageIcon) label.getIcon();
-			icon.getImage().flush();
-			label.setIcon(null);
-			label.setText("Error reading image");
-		}
-		
-	}
+//	protected void setStatusError(){
+//		
+////		headerLabel.setIcon(null);
+////		headerLabel.repaint();
+//		super.setStatusLoaded();
+//
+//		for(ImageType key : imageType.getValues()){
+//
+//			JLabel label = iconMap.get(key);
+//			ImageIcon icon = (ImageIcon) label.getIcon();
+//			icon.getImage().flush();
+//			label.setIcon(null);
+//			label.setText("Error reading image");
+//		}
+//		
+//	}
 	
 	/**
 	 * Import the given file as an image, detect objects and
 	 * display the image with annotated  outlines
 	 * @param imageFile
 	 */
-	protected void importAndDisplayImage(File imageFile){
-		log(Level.FINEST, "Calling abstract class import method");
-	}
+	protected abstract void importAndDisplayImage(File imageFile);
 	
-	protected void updateImageThumbnails(){
-		// update the map of icons
-		for(ImageType key : imageType.getValues()){
-
-			JLabel label = iconMap.get(key);
-			ImageIcon icon = null;
-			if(label.getIcon()!=null){
-				icon = (ImageIcon) label.getIcon();
-				icon.getImage().flush();
-			}
-			icon = createViewableImage(procMap.get(key), false);
-			label.setIcon(icon);
-			label.revalidate();
-			label.repaint();
-			System.gc(); // try to clean up the unused thumbnails
-		}
-	}
-
-	protected void testLog(){
-		double rnd = Math.random() * logTestMessages.length;
-		int index = (int) Math.floor(rnd);
-		log(Level.INFO, logTestMessages[index]+"...");
-	}
 	
-	/**
-	 * Given a location in the image icon, find the location in the original 
-	 * full size image
-	 * @param image
-	 * @param iconLocation
-	 * @return the converted point with int precision
-	 */
-	protected Point convertIconLocationToOriginalImage(ImageType image, Point iconLocation){
-		
-		// The original image
-		ImageProcessor ip = procMap.get(image);
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		int value = 0;
+	    try{
+	    	Object newValue = evt.getNewValue();
+	    	
+	    	if(newValue.getClass().isAssignableFrom(Integer.class)){
+	    		value = (int) newValue;
+	    		
+	    	}
+	    	if(value >=0 && value <=100){
+	    		progressBar.setValue(value);
+//	    		log("Progress: "+value);
+	    		table.repaint();
+	    		repaint();
+	    	}
+	    	
+	    	
+	    	if(evt.getPropertyName().equals("Finished")){
+//				log("Worker signaled finished");
+				progressBar.setVisible(false);
+				this.setLoadingLabelText("Showing nuclei in "+openImage.getAbsolutePath());
+				this.setStatusLoaded();
+				table.repaint();
+				repaint();
 				
-		int originalWidth = ip.getWidth();
-		int labelWidth    = iconMap.get(image).getWidth();
-		int iconWidth     = iconMap.get(image).getIcon().getIconWidth();
-		int labelHeight   = iconMap.get(image).getHeight();
-		int iconHeight    = iconMap.get(image).getIcon().getIconHeight();
-		
-		// Get the conversion ratio
-		// Divide an icon value by this to get an original value
-		double conversion = (double) iconWidth / (double) originalWidth;
-
-		// Get the position on the label
-		double labelX = iconLocation.getX();
-		double labelY = iconLocation.getY();
-		
-		// convert to positions on the image icon
-		double iconX = labelX - (  (labelWidth  - iconWidth ) / 2 );
-		double iconY = labelY - (  (labelHeight - iconHeight) / 2 );
-		
-		int originalX =  (int) ( iconX / conversion) ;
-		int originalY =  (int) ( iconY / conversion) ;
-		
-		return new Point(  originalX,  originalY  );
-	}
-	
-	/**
-	 * Calculate the aspect ratio of an image
-	 * @param width
-	 * @param height
-	 * @return
-	 */
-	protected double getAspectRatio(int width, int height){
-		return (double) width / (double) height;
-	}
-	
-	/**
-	 * Calculate a new height based on a new width, preserving the aspect ratio
-	 * @param ip
-	 * @param newHeight
-	 * @return
-	 */
-	protected int getNewHeight(ImageProcessor ip, int newWidth){
-		return (int) (newWidth / getAspectRatio(ip.getWidth(), ip.getHeight()));
-	}
-	
-	/**
-	 * Calculate a new width based on a new height, preserving the aspect ratio
-	 * @param ip
-	 * @param newHeight
-	 * @return
-	 */
-	protected int getNewWidth(ImageProcessor ip, int newHeight){
-		return (int) (newHeight * getAspectRatio(ip.getWidth(), ip.getHeight()));
-	}
-
-	/**
-	 * Rezize the given image processor to fit in the screen,
-	 * and make an icon
-	 * @param ip an image processor
-	 * @return an image icon with the resized image
-	 */
-	protected ImageIcon createViewableImage(ImageProcessor ip, boolean fullSize){
-		
-		finest("Display is "+rows+" rows x "+cols+" columns");
-
-		
-		if(ip==null){
-			return new ImageIcon(); // blank image
-		}
-		
-		ImageIcon smallImageIcon = null;
-		
-		// set the image width to be less than half the screen width
-		int smallWidth = 0;
-		if(fullSize){
-			smallWidth = (int) ((double) screenSize.getWidth() * IMAGE_SCREEN_PROPORTION);
-		} else {
-			smallWidth = (int) ((double) windowWidth / (cols+1));
-		}
-		
-		// keep the image aspect ratio
-		int smallHeight = getNewHeight(ip, smallWidth);
-		
-		if(!fullSize){
-			if(smallHeight > windowHeight / (rows+1) ){ // image is too high, adjust to scale on height
-				smallHeight = (int) (windowHeight / (rows+1));
-				smallWidth = getNewWidth(ip, smallHeight);
 			}
-		} else { // full size image must still be scaled to fit
-			if(smallHeight > screenSize.getHeight() * IMAGE_SCREEN_PROPORTION){ // image is too high, adjust to scale on height
-				smallHeight = (int) (windowHeight * IMAGE_SCREEN_PROPORTION);
-				smallWidth = getNewWidth(ip, smallHeight);
-			}
-		}
+	    	
+	    } catch (Exception e){
+	    	error("Error getting value from property change", e);
+	    }
 		
-		
-		
-		// Create the image
-		
-		
+	}
+	
+//	@SuppressWarnings("serial")
+	public class IconCellRenderer extends DefaultTableCellRenderer	{
+	    @Override
+	    public Component getTableCellRendererComponent(
+	        JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	        
+	    	super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-		if(ip.getWidth()>smallWidth || ip.getHeight() > smallHeight){
-			
-			smallImageIcon = new ImageIcon(ip.resize(smallWidth, smallHeight ).getBufferedImage());
-			
-		} else {
-			
-			smallImageIcon = new ImageIcon( ip.getBufferedImage()  );
-		}
-		return smallImageIcon;
+	        IconCell info = (IconCell) value;
+	        setHorizontalAlignment(JLabel.CENTER);
+	        setHorizontalTextPosition(JLabel.CENTER);
+	        setVerticalTextPosition(JLabel.BOTTOM);
+	        setBackground(Color.WHITE);
+	        
+	        if(info==null){
+	        	setText("");
+	        	return this;
+	        }
+	        
+	        if(info.hasType()){
+	        	setText(info.toString());
+	        } else {
+	        	setText("");
+	        }
+	        
+	        if(info.hasSmallIcon()){
+	        	setIcon( info.getSmallIcon() );
+	        } else {
+	        	setIcon(null);
+	        }
+
+	        return this;
+	    }
 	}
 	
 	/**
@@ -667,21 +629,21 @@ public abstract class ImageProber extends LoadingIconDialog {
 		 * @param key the image to show
 		 * @param parent the parent ImageProber window
 		 */
-		public LargeImageDialog(final ImageType key, Window parent){
+		public LargeImageDialog(final IconCell cell, Window parent){
 			super(parent);
 			
-			final ImageIcon icon = createViewableImage(procMap.get(key), true);
+			final ImageIcon icon = cell.getLargeIcon();
 			
 			this.setLayout(new BorderLayout());
 			
 			this.add(new JLabel(icon), BorderLayout.CENTER);
 
 			// Show the scaling factor in the title bar
-			double scale = (double) icon.getIconHeight() / (double) procMap.get(key).getHeight();
-			scale *=100;
-			DecimalFormat df = new DecimalFormat("#0.00"); 
-
-	        this.setTitle(key.toString()+": "+ df.format(scale) +"% scale");
+//			double scale = (double) icon.getIconHeight() / (double) procMap.get(key).getHeight();
+//			scale *=100;
+//			DecimalFormat df = new DecimalFormat("#0.00"); 
+//
+//	        this.setTitle(key.toString()+": "+ df.format(scale) +"% scale");
 	        this.setModal(false);
 	        this.setResizable(false);
 	        this.pack();
@@ -689,5 +651,5 @@ public abstract class ImageProber extends LoadingIconDialog {
 		}
 		
 	}
-
+	
 }

@@ -32,11 +32,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -122,6 +125,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		super();
 		openDatasets = datasets;
 		setModal(true); // ensure nothing happens until this window is closed
+		
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // disable the 'X'; we need to use the footer buttons 
 		setDefaultOptions();
 		createAndShowGUI();
@@ -138,6 +142,17 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		openDatasets = datasets;
 		setModal(true); // ensure nothing happens until this window is closed
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		
+		this.addWindowListener(new WindowAdapter() {
+			
+			public void windowClosing(WindowEvent e) {
+				analysisOptions = null;
+				AnalysisSetupDialog.this.setVisible(false);
+			}
+
+
+		});
+
 		analysisOptions = options;
 		createAndShowGUI();
 		pack();

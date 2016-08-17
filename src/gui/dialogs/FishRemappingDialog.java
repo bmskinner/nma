@@ -20,6 +20,7 @@ package gui.dialogs;
 
 import gui.ImageType;
 import gui.MainWindow;
+import gui.dialogs.NucleusDetectionImageProber.NucleusImageType;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.io.DirectoryChooser;
@@ -58,15 +59,20 @@ public class FishRemappingDialog extends ImageProber {
 	private List<UUID> selectedNucleiLeft = new ArrayList<UUID>(0);
 	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(0);
 		
+	
+	/**
+	 * Hold the stages of the detection pipeline to display 
+	 */
 	public enum FishMappingImageType implements ImageType {
-		
-		ORIGINAL_IMAGE   ("Original image"),
-		FISH_IMAGE		 ("FISHed image");
+		ORIGINAL_IMAGE 		("Original image", 0),
+		FISH_IMAGE 			("FISHed image",   1);
 		
 		private String name;
+		private int position; // the order in which the processed images should be displayed
 		
-		FishMappingImageType(String name){
+		FishMappingImageType(String name, int position){
 			this.name = name;
+			this.position = position;
 		}
 		public String toString(){
 			return this.name;
@@ -75,8 +81,12 @@ public class FishRemappingDialog extends ImageProber {
 		public ImageType[] getValues(){
 			return FishMappingImageType.values();
 		}
-		
+		@Override
+		public int getPosition() {
+			return position;
+		}
 	}
+	
 		
 	/**
 	 * Create the dialog.

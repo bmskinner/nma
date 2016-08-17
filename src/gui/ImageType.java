@@ -34,5 +34,12 @@ public interface ImageType {
 	 * @return
 	 */
 	public ImageType[] getValues();
+	
+	/**
+	 * Get the position this image type occupies 
+	 * in an image prober window
+	 * @return
+	 */
+	public int getPosition();
 
 }

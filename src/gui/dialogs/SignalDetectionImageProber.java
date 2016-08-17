@@ -18,32 +18,15 @@
  *******************************************************************************/
 package gui.dialogs;
 
-import java.awt.Color;
+import java.awt.Dimension;
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.signals.NuclearSignalOptions;
-import analysis.signals.SignalFinder;
-import components.CellularComponent;
-import components.nuclear.NuclearSignal;
-import components.nuclei.Nucleus;
+import analysis.signals.SignalProberWorker;
 import gui.ImageType;
-import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-import io.ImageExporter;
-import io.ImageImporter;
-import stats.NucleusStatistic;
-import stats.SignalStatistic;
-import utility.Constants;
-import utility.Utils;
 
 
 @SuppressWarnings("serial")
@@ -53,13 +36,17 @@ public class SignalDetectionImageProber extends ImageProber {
 	private int channel;
 	private NuclearSignalOptions testOptions;
 
-	private enum SignalImageType implements ImageType {
-		DETECTED_OBJECTS ("Detected objects");
+
+	
+	public enum SignalImageType implements ImageType {
+		DETECTED_OBJECTS ("Detected objects",  0);
 		
 		private String name;
+		private int position; // the order in which the processed images should be displayed
 		
-		SignalImageType(String name){
+		SignalImageType(String name, int position){
 			this.name = name;
+			this.position = position;
 		}
 		public String toString(){
 			return this.name;
@@ -67,6 +54,10 @@ public class SignalDetectionImageProber extends ImageProber {
 		
 		public ImageType[] getValues(){
 			return SignalImageType.values();
+		}
+		@Override
+		public int getPosition() {
+			return position;
 		}
 	}
 	
@@ -92,67 +83,87 @@ public class SignalDetectionImageProber extends ImageProber {
 		try{
 			setStatusLoading();
 			this.setLoadingLabelText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
-
-			finest("Importing image "+imageFile.getAbsolutePath());
 			
-			// Import the image as a stack
-			ImageStack stack = ImageImporter.getInstance().importImage(imageFile);
-
-			// Find the processor number in the stack to use
-			int stackNumber = Constants.rgbToStack(channel);
+			table.setModel(createEmptyTableModel(rows, cols));
 			
-			finest("Converting image");
-			// Get the greyscale processor for the signal channel
-			ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
+			for(int col=0; col<cols; col++){
+	        	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
+	        }
 			
-			// Convert to an RGB processor for annotation
-			ImageProcessor openProcessor = ImageExporter.getInstance().convertTORGBGreyscale(greyProcessor);
+			SignalProberWorker worker = new SignalProberWorker(imageFile, 
+					options, 
+					SignalImageType.DETECTED_OBJECTS, 
+					table.getModel(),
+					dataset,
+					channel,
+					testOptions);
 			
-			String imageName = imageFile.getName();
-
-//			ImageProcessor openProcessor = ImageExporter.getInstance().makeGreyRGBImage(stack).getProcessor();
-			openProcessor.invert();
-			procMap.put(SignalImageType.DETECTED_OBJECTS, openProcessor);
-
-			// Store the options
-			double minSize  = testOptions.getMinSize();
-			double maxFract = testOptions.getMaxFraction();
-			int threshold   = testOptions.getThreshold();
+			worker.setSmallIconSize(new Dimension(500, table.getRowHeight()-30));
 			
-			testOptions.setMinSize(5);
-			testOptions.setMaxFraction(1d);
-			
-			// Create the finder
-			SignalFinder finder = new SignalFinder(testOptions, channel);
+			worker.addPropertyChangeListener(this);
+			progressBar.setVisible(true);
+			worker.execute();
 
-			Map<Nucleus, List<NuclearSignal>> map = new HashMap<Nucleus, List<NuclearSignal>>();
-
-			// Get the cells matching the desred imageFile, and find signals
-			log(Level.FINEST, "Detecting signals in image");
-
-			for(Nucleus n : dataset.getCollection().getNuclei()){
-//				log(Level.FINEST, "Testing nucleus "+n.getImageName()+" against "+imageName);
-				if(n.getSourceFileName().equals(imageName)){
-//					log(Level.FINEST, "  Nucleus is in image; finding signals");
-					List<NuclearSignal> list = finder.detectSignal(imageFile, stack, n);
-					log(Level.FINEST, "  Detected "+list.size()+" signals");
-					map.put(n, list);
-				}
-			}
-			
-			// Reset the test options
-			testOptions.setMinSize(minSize);
-			testOptions.setMaxFraction(maxFract);
-			testOptions.setThreshold(threshold);
-
-			log(Level.FINEST, "Drawing signals");
-			// annotate detected signals onto the imagefile
-			drawSignals(map, openProcessor);
-
-			updateImageThumbnails();
-
-			this.setLoadingLabelText("Showing signals in "+imageFile.getAbsolutePath());
-			this.setStatusLoaded();
+//			finest("Importing image "+imageFile.getAbsolutePath());
+//			
+//			// Import the image as a stack
+//			ImageStack stack = ImageImporter.getInstance().importImage(imageFile);
+//
+//			// Find the processor number in the stack to use
+//			int stackNumber = Constants.rgbToStack(channel);
+//			
+//			finest("Converting image");
+//			// Get the greyscale processor for the signal channel
+//			ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
+//			
+//			// Convert to an RGB processor for annotation
+//			ImageProcessor openProcessor = ImageExporter.getInstance().convertTORGBGreyscale(greyProcessor);
+//			
+//			String imageName = imageFile.getName();
+//
+////			ImageProcessor openProcessor = ImageExporter.getInstance().makeGreyRGBImage(stack).getProcessor();
+//			openProcessor.invert();
+//			procMap.put(SignalImageType.DETECTED_OBJECTS, openProcessor);
+//
+//			// Store the options
+//			double minSize  = testOptions.getMinSize();
+//			double maxFract = testOptions.getMaxFraction();
+//			int threshold   = testOptions.getThreshold();
+//			
+//			testOptions.setMinSize(5);
+//			testOptions.setMaxFraction(1d);
+//			
+//			// Create the finder
+//			SignalFinder finder = new SignalFinder(testOptions, channel);
+//
+//			Map<Nucleus, List<NuclearSignal>> map = new HashMap<Nucleus, List<NuclearSignal>>();
+//
+//			// Get the cells matching the desred imageFile, and find signals
+//			log(Level.FINEST, "Detecting signals in image");
+//
+//			for(Nucleus n : dataset.getCollection().getNuclei()){
+////				log(Level.FINEST, "Testing nucleus "+n.getImageName()+" against "+imageName);
+//				if(n.getSourceFileName().equals(imageName)){
+////					log(Level.FINEST, "  Nucleus is in image; finding signals");
+//					List<NuclearSignal> list = finder.detectSignal(imageFile, stack, n);
+//					log(Level.FINEST, "  Detected "+list.size()+" signals");
+//					map.put(n, list);
+//				}
+//			}
+//			
+//			// Reset the test options
+//			testOptions.setMinSize(minSize);
+//			testOptions.setMaxFraction(maxFract);
+//			testOptions.setThreshold(threshold);
+//
+//			log(Level.FINEST, "Drawing signals");
+//			// annotate detected signals onto the imagefile
+//			drawSignals(map, openProcessor);
+//
+//			updateImageThumbnails();
+//
+//			this.setLoadingLabelText("Showing signals in "+imageFile.getAbsolutePath());
+//			this.setStatusLoaded();
 //			headerLabel.setIcon(null);
 //			headerLabel.repaint();
 		} catch(Exception e){
@@ -160,58 +171,58 @@ public class SignalDetectionImageProber extends ImageProber {
 			}
 		}
 	
-	protected void drawSignals(Map<Nucleus, List<NuclearSignal>> map, ImageProcessor ip) throws Exception{
-		if(map==null){
-			throw new IllegalArgumentException("Input cell is null");
-		}
-		
-		ip.setLineWidth(2);
-		for(Nucleus n : map.keySet()){
-			double[] positions = n.getPosition();
-			List<NuclearSignal> list = map.get(n);
-			
-			// Draw the nucleus
-			ip.setColor(Color.BLUE);
-			FloatPolygon npolygon = n.createPolygon();
-			PolygonRoi nroi = new PolygonRoi(npolygon, PolygonRoi.POLYGON);
-			nroi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
-			ip.draw(nroi);
-			
-			
-		
-			for(NuclearSignal s : list){
-				if(checkSignal(s, n)){
-					ip.setColor(Color.YELLOW);
-				} else {
-					ip.setColor(Color.RED);
-				}
-
-				FloatPolygon polygon = s.createPolygon();
-				PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-				
-				// Offset the roi to the nucleus bouding box
-				double x = positions[CellularComponent.X_BASE]+s.getCentreOfMass().getX() - ( roi.getBounds().getWidth() /2);
-				double y = positions[CellularComponent.Y_BASE]+s.getCentreOfMass().getY()- ( roi.getBounds().getHeight() /2);
-				
-				roi.setLocation( x,y );
-				ip.draw(roi);
-			}
-		}
-	}
-	
-	private boolean checkSignal(NuclearSignal s, Nucleus n) throws Exception{
-		boolean result = true;
-		
-		if(s.getStatistic(SignalStatistic.AREA) < testOptions.getMinSize()){
-			
-			result = false;
-		}
-		
-		if(s.getStatistic(SignalStatistic.AREA) > (testOptions.getMaxFraction() * n.getStatistic(NucleusStatistic.AREA) )   ){
-			
-			result = false;
-		}		
-		return result;
-	}
+//	protected void drawSignals(Map<Nucleus, List<NuclearSignal>> map, ImageProcessor ip) throws Exception{
+//		if(map==null){
+//			throw new IllegalArgumentException("Input cell is null");
+//		}
+//		
+//		ip.setLineWidth(2);
+//		for(Nucleus n : map.keySet()){
+//			double[] positions = n.getPosition();
+//			List<NuclearSignal> list = map.get(n);
+//			
+//			// Draw the nucleus
+//			ip.setColor(Color.BLUE);
+//			FloatPolygon npolygon = n.createPolygon();
+//			PolygonRoi nroi = new PolygonRoi(npolygon, PolygonRoi.POLYGON);
+//			nroi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
+//			ip.draw(nroi);
+//			
+//			
+//		
+//			for(NuclearSignal s : list){
+//				if(checkSignal(s, n)){
+//					ip.setColor(Color.YELLOW);
+//				} else {
+//					ip.setColor(Color.RED);
+//				}
+//
+//				FloatPolygon polygon = s.createPolygon();
+//				PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+//				
+//				// Offset the roi to the nucleus bouding box
+//				double x = positions[CellularComponent.X_BASE]+s.getCentreOfMass().getX() - ( roi.getBounds().getWidth() /2);
+//				double y = positions[CellularComponent.Y_BASE]+s.getCentreOfMass().getY()- ( roi.getBounds().getHeight() /2);
+//				
+//				roi.setLocation( x,y );
+//				ip.draw(roi);
+//			}
+//		}
+//	}
+//	
+//	private boolean checkSignal(NuclearSignal s, Nucleus n) throws Exception{
+//		boolean result = true;
+//		
+//		if(s.getStatistic(SignalStatistic.AREA) < testOptions.getMinSize()){
+//			
+//			result = false;
+//		}
+//		
+//		if(s.getStatistic(SignalStatistic.AREA) > (testOptions.getMaxFraction() * n.getStatistic(NucleusStatistic.AREA) )   ){
+//			
+//			result = false;
+//		}		
+//		return result;
+//	}
 
 }

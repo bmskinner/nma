@@ -53,6 +53,24 @@ public class ImageFilterer {
 	}
 	
 	/**
+	 * Run a Kuwahara filter to enhance edges in the image
+	 * @param stack the image
+	 * @param filterSize the radius of the kernel
+	 */
+	public static ImageProcessor runKuwaharaFiltering(ImageProcessor ip, int filterSize){
+		
+		Kuwahara_Filter kw = new Kuwahara_Filter();
+		ImagePlus img = new ImagePlus("", ip);
+		kw.setup("", img);
+		
+		ImageProcessor result = ip.duplicate();
+		
+		kw.filter(result, filterSize);
+		return result;
+	}
+	
+	
+	/**
 	 * The chromocentre can cause 'skipping' of the edge detection
 	 * from the edge to the interior of the nucleus. Make any pixel
 	 * over threshold equal threshold to remove internal structures
