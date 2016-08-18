@@ -496,50 +496,7 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 		return files;
 	}
 		
-	
-	/**
-	 * Set the header label and the image icons to display
-	 * the loading gif
-	 */
-//	@Override
-//	protected void setStatusLoading(){
-//		super.setStatusLoading();
-//		if(this.getLoadingGif()!=null){
-//			for(ImageType key : imageType.getValues()){
-//				
-//				JLabel label = iconMap.get(key);
-//				if(label!=null){
-//					ImageIcon icon = (ImageIcon) label.getIcon();
-//					if(icon.getImage()!=null){
-//						icon.getImage().flush();
-//					}
-//					label.setIcon(this.getLoadingGif());
-//				}
-//			}
-//		}
-//	}
-	
-	/**
-	 * Set the header label and the image icons to display
-	 * the loading gif
-	 */
-//	protected void setStatusError(){
-//		
-////		headerLabel.setIcon(null);
-////		headerLabel.repaint();
-//		super.setStatusLoaded();
-//
-//		for(ImageType key : imageType.getValues()){
-//
-//			JLabel label = iconMap.get(key);
-//			ImageIcon icon = (ImageIcon) label.getIcon();
-//			icon.getImage().flush();
-//			label.setIcon(null);
-//			label.setText("Error reading image");
-//		}
-//		
-//	}
-	
+		
 	/**
 	 * Import the given file as an image, detect objects and
 	 * display the image with annotated  outlines
@@ -560,7 +517,7 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 	    	}
 	    	if(value >=0 && value <=100){
 	    		progressBar.setValue(value);
-//	    		log("Progress: "+value);
+//	    		finest("Progress: "+value);
 	    		table.repaint();
 	    		repaint();
 	    	}
@@ -622,7 +579,7 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 	 * screen width or size
 	 *
 	 */
-	private class LargeImageDialog extends JDialog {
+	public class LargeImageDialog extends JDialog {
 		
 		/**
 		 * Create a full-scale image for the given key in this ImageProber.

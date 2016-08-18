@@ -22,6 +22,8 @@ package components;
 
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
@@ -635,6 +637,34 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	 */
 	public FloatPolygon createPolygon(){
 		return createOffsetPolygon(0, 0);
+	}
+	
+	public Shape toShape(){
+		
+		return toOffsetShape(0, 0);
+		
+	}
+	
+	public Shape toOriginalShape(){
+		
+		double xOffset = position[CellularComponent.X_BASE];
+		double yOffset = position[CellularComponent.Y_BASE];
+
+		return toOffsetShape(xOffset, yOffset);
+	}
+	
+	private Shape toOffsetShape(double xOffset, double yOffset){
+		Path2D.Double path = new Path2D.Double();
+		
+		BorderPoint first = borderList.get(0);
+		path.moveTo(first.getX()+xOffset, first.getY()+yOffset);
+		
+		for(BorderPoint b : this.borderList){
+			path.lineTo(b.getX()+xOffset, b.getY()+yOffset);
+		}
+		path.closePath();
+
+		return path;
 	}
 
 	/**

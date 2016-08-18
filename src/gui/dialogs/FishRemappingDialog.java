@@ -20,33 +20,35 @@ package gui.dialogs;
 
 import gui.ImageType;
 import gui.MainWindow;
-import gui.dialogs.NucleusDetectionImageProber.NucleusImageType;
-import ij.ImageStack;
-import ij.gui.PolygonRoi;
+import gui.dialogs.ImageProber.LargeImageDialog;
 import ij.io.DirectoryChooser;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-import io.ImageExporter;
-import io.ImageImporter;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import utility.Utils;
+import javax.swing.ImageIcon;
+import javax.swing.table.TableModel;
+
 import analysis.AnalysisDataset;
+import analysis.detection.IconCell;
+import analysis.signals.FishRemappingWorker;
 import components.Cell;
 import components.CellCollection;
-import components.CellularComponent;
-import components.nuclei.Nucleus;
+import components.generic.XYPoint;
 
 @SuppressWarnings("serial")
 public class FishRemappingDialog extends ImageProber {
@@ -56,8 +58,8 @@ public class FishRemappingDialog extends ImageProber {
 	private AnalysisDataset dataset;
 	private File postFISHImageDirectory;
 		
-	private List<UUID> selectedNucleiLeft = new ArrayList<UUID>(0);
-	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(0);
+	private List<UUID> selectedNucleiLeft  = new ArrayList<UUID>(0); // Nuclei selected with the left button
+	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(0); // Nuclei selected with the right button
 		
 	
 	/**
@@ -97,65 +99,51 @@ public class FishRemappingDialog extends ImageProber {
 		
 		this.setTitle("FISH remapping");
 		
+		this.setCancelButtonText("Cancel");
+		this.setHeaderText("Nuclei are highlighted in blue. Click with the left or right button to assign them to groups.");
+		
+		
 		// set the collectio of pre-FISH images
 		this.dataset = dataset;
 		
-		// Clear the 'large image' mouse listener
-		// It must be replaced with a custom listener
-		for(MouseListener l : iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).getMouseListeners()){
-			iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).removeMouseListener(l);
+		
+		// Remove existing listeners
+		for(MouseListener l : table.getMouseListeners()){
+			table.removeMouseListener(l);
 		}
 		
-		iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
+		// Add listener for nucleus click
+		table.addMouseListener( new MouseAdapter(){
+        	
+        	@Override
+        	public void mouseClicked(MouseEvent e){
+        		if(e.getClickCount()==1){
+        			
+        			Point pnt = e.getPoint();
+        			int row = table.rowAtPoint(pnt);
+        			int col = table.columnAtPoint(pnt);
+        			
+        			if(row==0 && col==0){
+        				
+        				originalImageClicked(e, pnt);
+        				
+        			} else { // Show a large image for the FISH image when clicked
 
-//				getProgramLogger().log(Level.FINER, "Mouse clicked");
-//				 correct scaling 
-				ImageProcessor openProcessor = procMap.get(FishMappingImageType.ORIGINAL_IMAGE);
-				
-				double labelWidth = iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).getWidth();
-				double labelHeight = iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).getHeight();
-				
-				double iconWidth = iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).getIcon().getIconWidth();
-				double iconHeight = iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).getIcon().getIconHeight();
-				
-				double conversion = (double) iconWidth / (double) openProcessor.getWidth();
-				
-				
-				double x = e.getX() ; // positions on label
-				double y = e.getY() ;
-				
-				// convert to positions on the image icon
-				double xIcon = x - (  (labelWidth  - iconWidth ) /2 );
-				double yIcon = y - (  (labelHeight - iconHeight) /2 );;
-				int originalX =  (int) ( xIcon / conversion) ;
-				int originalY =  (int) ( yIcon / conversion) ;
-				
-//				getProgramLogger().log(Level.FINEST, "x: "+x);
-//				getProgramLogger().log(Level.FINEST, "y: "+y);
-//				getProgramLogger().log(Level.FINEST, "orignal x: "+originalX);
-//				getProgramLogger().log(Level.FINEST, "orignal y: "+originalY);
+            			TableModel model = (TableModel)table.getModel();
 
-				List<Cell> imageNuclei = FishRemappingDialog.this.dataset.getCollection().getCells(openImage);
-				for(Cell c : imageNuclei){
-					Nucleus n = c.getNucleus();
-					double[] positions = n.getPosition();
+            			IconCell selectedData = (IconCell) model.getValueAt( row, col );
 
-					FloatPolygon polygon = n.createPolygon();
-					PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-					roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
+            			if(selectedData.getLargeIcon()!=null){
+            				new LargeImageDialog(selectedData, FishRemappingDialog.this);
+            			}
+        			}
+        			
+        			
+        		}
+        	}
+        	
+        });
 
-					if(roi.contains(originalX, originalY)){
-//						getProgramLogger().log(Level.FINER, "Nucleus clicked");
-						respondToMouseEvent(e, c, openProcessor);
-					}
-				}
-				updateImageThumbnails();
-			}
-		});
-		
-		
 
 		// ask for a folder of post-FISH images
 		if(this.getPostFISHDirectory()){
@@ -166,6 +154,56 @@ public class FishRemappingDialog extends ImageProber {
 			this.dispose();
 		}
 		
+	}
+	
+	private synchronized void originalImageClicked(MouseEvent e, Point pnt){
+		
+		// Get the data model for this table
+		TableModel model = (TableModel)table.getModel();
+		
+		int row = table.rowAtPoint(pnt);
+		int col = table.columnAtPoint(pnt);
+		
+		// The coordinates are relative to the cell of the table.
+		// The height of the image is less than the table height, so 
+		// subtract the y difference
+		double x = pnt.getX();
+		double y = pnt.getY();
+		
+		finer("Clicked "+x+" : "+y);
+		
+		Rectangle cellRectangle = table.getCellRect(row, col, false);
+
+		IconCell selectedData = (IconCell) model.getValueAt( row, col );
+		        			
+		int iconHeight = selectedData.getSmallIcon().getIconHeight() + 20; // add padding for text
+		
+		int offset = (cellRectangle.height - iconHeight) >>1;
+		
+		int offsetY = (int) (y-offset);
+		
+		finer("Offset to "+x+" : "+offsetY);
+
+		// Translate coordinates back to large image
+		double factor = selectedData.getFactor();
+		
+		double largeX = x * factor;
+		double largeY = offsetY * factor;
+		
+		// See if the selected position in the large icon is in a nucleus
+		
+		for(Cell c : dataset.getCollection().getCells(openImage)){
+			if(c.getNucleus().containsOriginalPoint(new XYPoint(largeX, largeY))){
+				
+				respondToMouseEvent(e, c);
+				fine("Click is in nucleus");
+				drawNucleus(c, selectedData.getLargeIcon().getImage());
+				// Update the small icon
+				selectedData.setSmallIcon( new ImageIcon(scaleImage( selectedData.getLargeIcon() )) );
+				table.repaint();
+			}
+			
+		}
 	}
 	
 	/**
@@ -201,49 +239,79 @@ public class FishRemappingDialog extends ImageProber {
 	@Override
 	protected void importAndDisplayImage(File imageFile){
 
-		try{
-			setStatusLoading();
+		try {
+			this.setStatusLoading();
 			this.setLoadingLabelText("Opening image "+index+": "+imageFile.getAbsolutePath()+"...");
-
-			ImageStack stack = ImageImporter.getInstance().importImage(imageFile);
-
-			// Import the image as a stack
-			String imageName = imageFile.getName();
-
-			log(Level.FINEST, "Converting image");
-			ImageProcessor openProcessor = ImageExporter.getInstance().makeGreyRGBImage(stack).getProcessor();
-			openProcessor.invert();
-			procMap.put(FishMappingImageType.ORIGINAL_IMAGE, openProcessor);
-
-						
-			File fishImageFile = new File(postFISHImageDirectory+File.separator+imageName);
-			ImageStack fishStack = ImageImporter.getInstance().importImage(fishImageFile);
+			table.setModel(createEmptyTableModel(rows, cols));
 			
-			ImageProcessor fishProcessor = ImageExporter.getInstance().convertToRGB(fishStack).getProcessor();
+			for(int col=0; col<cols; col++){
+	        	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
+	        }
 			
-			procMap.put(FishMappingImageType.FISH_IMAGE, fishProcessor);
+			FishRemappingWorker worker = new FishRemappingWorker(imageFile, 
+					 
+					FishMappingImageType.ORIGINAL_IMAGE, 
+					table.getModel(), postFISHImageDirectory);
 			
-			// Get the cells matching the imageFile
-			for(Cell c : dataset.getCollection().getCells(imageFile)){
-				drawNucleus(c, openProcessor);
-			}
-
+			worker.setSmallIconSize(new Dimension(500, table.getRowHeight()-30));
 			
+			worker.addPropertyChangeListener(this);
+			progressBar.setVisible(true);
+			worker.execute();
 
-			updateImageThumbnails();
 
-			this.setLoadingLabelText("Showing nuclei in "+imageFile.getAbsolutePath());
-			this.setStatusLoaded();
-
-		} catch(Exception e){
-				log(Level.SEVERE, "Error in signal probing", e);
-			}
+		} catch (Exception e) { // end try
+			error("Error in image processing", e);
+		} 
+	}
+	
+	
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		super.propertyChange(evt);
+		
+		IconCell infoCell = (IconCell) table.getModel().getValueAt(0, 0); // TODO: make dynamic
+		
+		Image largeImage = infoCell.getLargeIcon().getImage();
+		
+		// Get the cells matching the imageFile
+		for(Cell c : dataset.getCollection().getCells(openImage)){
+			drawNucleus(c, largeImage);
 		}
+		
+
+		// Update the small icon
+		infoCell.setSmallIcon( new ImageIcon(scaleImage( infoCell.getLargeIcon() )) );
+		
+		
+		
+	}
+	
+	/**
+	 * Create a copy of the given processor, and scale it fit the maximum
+	 * dimensions specified by setSmallIconSize(). The aspect ratio is preserved.
+	 * @param ip
+	 * @return
+	 */
+	protected Image scaleImage(ImageIcon ic){
+				
+		double aspect =  (double) ic.getIconWidth() / (double) ic.getIconHeight();
+		
+		
+		Dimension smallDimension = new Dimension(500, table.getRowHeight()-30);
+		
+		double finalWidth = smallDimension.getHeight() * aspect; // fix height
+		finalWidth = finalWidth > smallDimension.getWidth() 
+				   ? smallDimension.getWidth() 
+				   : finalWidth; // but constrain width too
+				   
+		return ic.getImage().getScaledInstance( (int) finalWidth, -1, Image.SCALE_SMOOTH);
+	}
 	
 	
 
 	
-	private void respondToMouseEvent(MouseEvent e, Cell c, ImageProcessor ip){
+	private void respondToMouseEvent(MouseEvent e, Cell c){
 		
 		
 		// if present in list, remove it, otherwise add it
@@ -266,7 +334,6 @@ public class FishRemappingDialog extends ImageProber {
 
 		}
 		
-		drawNucleus(c, ip);
 		
 	}
 	
@@ -282,18 +349,29 @@ public class FishRemappingDialog extends ImageProber {
 		return color;
 	}
 	
-	private void drawNucleus(Cell c, ImageProcessor ip){
+	private void drawNucleus(Cell c, Image image){
 		
-		// update the image
-		Nucleus n = c.getNucleus();
-		double[] positions = n.getPosition();
-		ip.setColor(chooseNucleusOutlineColor(c));
-		ip.setLineWidth(NUCLEUS_OUTLINE_WIDTH);
-		FloatPolygon polygon = n.createPolygon();
-		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-		roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
-		ip.fill(roi);
-//		ip.draw(roi);
+//		int position = FishMappingImageType.ORIGINAL_IMAGE.getPosition();
+		
+		Graphics2D g2 = (Graphics2D) image.getGraphics();
+		
+		
+		g2.setColor(chooseNucleusOutlineColor(c));
+		
+		Shape p = c.getNucleus().toOriginalShape();
+		
+		g2.fill(p);
+		
+		
+//		// update the image
+//		Nucleus n = c.getNucleus();
+//		double[] positions = n.getPosition();
+//		ip.setColor(chooseNucleusOutlineColor(c));
+//		ip.setLineWidth(NUCLEUS_OUTLINE_WIDTH);
+//		FloatPolygon polygon = n.createPolygon();
+//		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+//		roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
+//		ip.fill(roi);
 	}
 
 
@@ -322,163 +400,6 @@ public class FishRemappingDialog extends ImageProber {
 	    return true;
 	}
 
-//	@SuppressWarnings("serial")
-//	private class DrawableImageArea extends JLabel {
-//		Rectangle currentRect = null;
-//
-//		Rectangle rectToDraw = null;
-//
-//		Rectangle previousRectDrawn = new Rectangle();
-//
-////		FishMappingWindow controller;
-//
-//		public DrawableImageArea(ImageIcon image) {
-//			super("", image, JLabel.CENTER); //This component displays an image.
-////			this.controller = controller;
-//			setOpaque(true);
-//			setMinimumSize(new Dimension(10, 10)); //don't hog space
-//
-//			MyListener myListener = new MyListener();
-//			addMouseListener(myListener);
-//			addMouseMotionListener(myListener);
-//		}
-//
-//		private class MyListener extends MouseInputAdapter {
-//			public void mousePressed(MouseEvent e) {
-//				int x = e.getX();
-//				int y = e.getY();
-//				currentRect = new Rectangle(x, y, 0, 0);
-//				updateDrawableRect(getWidth(), getHeight());
-//				repaint();
-//			}
-//
-//			public void mouseDragged(MouseEvent e) {
-//				updateSize(e);
-//			}
-//
-//			public void mouseReleased(MouseEvent e) {
-//				updateSize(e);
-//				
-//				 // correct scaling 
-//		    	int x = currentRect.x;
-//		    	int y = currentRect.y;
-//		    	int originalX = openProcessor.getWidth()>smallWidth ? (int) ( (double) x / (double) conversion) : x;
-//		    	int originalY = openProcessor.getWidth()>smallWidth ? (int) ( (double)y / (double) conversion) : y;
-//		    	
-//		    	int originalWidth = openProcessor.getWidth()>smallWidth ? (int) ( (double) currentRect.getWidth() / (double) conversion) : (int) currentRect.getWidth();
-//		    	int originalHeight = openProcessor.getWidth()>smallWidth ? (int) ( (double) currentRect.getHeight() / (double) conversion) : (int) currentRect.getHeight();
-//		    	
-//		    	Rectangle originalRect = new Rectangle(originalX, originalY, originalWidth, originalHeight);
-//		    	
-//		    	List<Nucleus> imageNuclei = FishRemappingDialog.this.dataset.getCollection().getNuclei(openFile);
-//		    	for(Nucleus n : imageNuclei){
-//
-//		    		if(originalRect.contains(n.getCentreOfMass().getX(), n.getCentreOfMass().getY())){
-//		    			double[] positions = n.getPosition();
-//		    			FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
-//		    			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-//		    			roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-//
-//		    			FishRemappingDialog.this.selectedNucleiLeft.add(n.getID());
-//		    			FishRemappingDialog.this.selectedNucleiRight.remove(n.getID());
-//		    			openProcessor.setColor(Color.GREEN);
-//
-//		    			// update the image
-//
-//		    			roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-//		    			openProcessor.setLineWidth(2);
-//		    			openProcessor.draw(roi);
-//		    		}
-//
-//		    	}
-//		    	ImagePlus preSmall;
-//		    	if(openProcessor.getWidth()>smallWidth){
-//		    		preSmall = new ImagePlus("small", openProcessor.resize(smallWidth, smallHeight ));
-//		    	} else {
-//		    		preSmall = new ImagePlus("small", openProcessor);
-//		    	}
-//
-//		    	ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
-//		    	preImageLabel.setIcon(preImageIcon);
-//			}
-//
-//			/*
-//			 * Update the size of the current rectangle and call repaint.
-//			 * Because currentRect always has the same origin, translate it if
-//			 * the width or height is negative.
-//			 * 
-//			 * For efficiency (though that isn't an issue for this program),
-//			 * specify the painting region using arguments to the repaint()
-//			 * call.
-//			 *  
-//			 */
-//			void updateSize(MouseEvent e) {
-//				int x = e.getX();
-//				int y = e.getY();
-//				currentRect.setSize(x - currentRect.x, y - currentRect.y);
-//				updateDrawableRect(getWidth(), getHeight());
-//				Rectangle totalRepaint = rectToDraw.union(previousRectDrawn);
-//				repaint(totalRepaint.x, totalRepaint.y, totalRepaint.width,
-//						totalRepaint.height);
-//			}
-//		}
-//
-//		protected void paintComponent(Graphics g) {
-//			super.paintComponent(g); //paints the background and image
-//
-//			//If currentRect exists, paint a box on top.
-//			if (currentRect != null) {
-//				//Draw a rectangle on top of the image.
-//				g.setXORMode(Color.white); //Color of line varies
-//				//depending on image colors
-//				g.drawRect(rectToDraw.x, rectToDraw.y, rectToDraw.width - 1,
-//						rectToDraw.height - 1);
-//
-//			}
-//		}
-//
-//		private void updateDrawableRect(int compWidth, int compHeight) {
-//			int x = currentRect.x;
-//			int y = currentRect.y;
-//			int width = currentRect.width;
-//			int height = currentRect.height;
-//
-//			//Make the width and height positive, if necessary.
-//			if (width < 0) {
-//				width = 0 - width;
-//				x = x - width + 1;
-//				if (x < 0) {
-//					width += x;
-//					x = 0;
-//				}
-//			}
-//			if (height < 0) {
-//				height = 0 - height;
-//				y = y - height + 1;
-//				if (y < 0) {
-//					height += y;
-//					y = 0;
-//				}
-//			}
-//
-//			//The rectangle shouldn't extend past the drawing area.
-//			if ((x + width) > compWidth) {
-//				width = compWidth - x;
-//			}
-//			if ((y + height) > compHeight) {
-//				height = compHeight - y;
-//			}
-//
-//			//Update rectToDraw after saving old value.
-//			if (rectToDraw != null) {
-//				previousRectDrawn.setBounds(rectToDraw.x, rectToDraw.y,
-//						rectToDraw.width, rectToDraw.height);
-//				rectToDraw.setBounds(x, y, width, height);
-//			} else {
-//				rectToDraw = new Rectangle(x, y, width, height);
-//			}
-//		}
-//	}
 }
 
 

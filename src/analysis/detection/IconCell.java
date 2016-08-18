@@ -71,6 +71,12 @@ public class IconCell {
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
+	
+	public double getFactor(){
+		// Translate coordinates back to large image
+		double factor = (double) largeIcon.getIconWidth() / (double)smallIcon.getIconWidth();
+		return factor;
+	}
 
 	public String toString(){
 		return type==null ? "" : enabled ? type.toString() : type.toString()+" (disabled)";

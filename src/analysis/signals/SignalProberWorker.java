@@ -64,7 +64,7 @@ public class SignalProberWorker extends ImageProberWorker {
 //		setStatusLoading();
 //		this.setLoadingLabelText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
 
-		finest("Importing image "+file.getAbsolutePath());
+		finer("Importing image "+file.getAbsolutePath());
 		
 		// Import the image as a stack
 		ImageStack stack = ImageImporter.getInstance().importImage(file);
@@ -72,7 +72,7 @@ public class SignalProberWorker extends ImageProberWorker {
 		// Find the processor number in the stack to use
 		int stackNumber = Constants.rgbToStack(channel);
 		
-		finest("Converting image");
+		finer("Converting image");
 		// Get the greyscale processor for the signal channel
 		ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
 		
@@ -99,7 +99,7 @@ public class SignalProberWorker extends ImageProberWorker {
 		Map<Nucleus, List<NuclearSignal>> map = new HashMap<Nucleus, List<NuclearSignal>>();
 
 		// Get the cells matching the desred imageFile, and find signals
-		finest("Detecting signals in image");
+		finer("Detecting signals in image");
 
 		for(Nucleus n : dataset.getCollection().getNuclei()){
 //			log(Level.FINEST, "Testing nucleus "+n.getImageName()+" against "+imageName);
@@ -116,7 +116,7 @@ public class SignalProberWorker extends ImageProberWorker {
 		testOptions.setMaxFraction(maxFract);
 		testOptions.setThreshold(threshold);
 
-		finest("Drawing signals");
+		finer("Drawing signals");
 		// annotate detected signals onto the imagefile
 		drawSignals(map, openProcessor);
 		

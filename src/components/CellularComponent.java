@@ -22,6 +22,7 @@ import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.io.File;
 import java.util.List;
 import java.util.UUID;
@@ -325,7 +326,27 @@ public interface CellularComponent {
 	 */
 	public void offset(double xOffset, double yOffset);
 	
+	/**
+	 * Create a polygon with the same position as the component
+	 * in its source image.
+	 * @return
+	 */
 	public FloatPolygon createOriginalPolygon();
+	
+	/**
+	 * Create a shape (in this case a Path2D encompassing 
+	 * the border points of the component)
+	 * @return
+	 */
+	public Shape toShape();
+	
+	/**
+	 * Create a shape (in this case a Path2D encompassing 
+	 * the border points of the component) at the position 
+	 * of the shape in its source image
+	 * @return
+	 */
+	public Shape toOriginalShape();
 	
 	 /**
 	 * Turn a list of border points into a polygon. 
