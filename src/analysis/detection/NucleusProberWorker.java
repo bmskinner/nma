@@ -31,9 +31,6 @@ import io.ImageImporter;
 import java.awt.Color;
 import java.io.File;
 import java.util.List;
-import java.util.logging.Level;
-
-import javax.swing.ImageIcon;
 import javax.swing.table.TableModel;
 
 import stats.NucleusStatistic;
@@ -87,8 +84,9 @@ public class NucleusProberWorker extends ImageProberWorker {
 				finer("Applying Kuwahara filter");
 				kuwaharaProcessor = ImageFilterer.runKuwaharaFiltering(processedImage, cannyOptions.getKuwaharaKernel());
 				processedImage = kuwaharaProcessor.duplicate(); 
-				kuwaharaProcessor.invert();
+				
 			}
+			kuwaharaProcessor.invert();
 			
 			IconCell iconCell = makeIconCell(kuwaharaProcessor, NucleusImageType.KUWAHARA);
 			iconCell.setEnabled(cannyOptions.isUseKuwahara());
@@ -105,6 +103,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 				processedImage = flattenProcessor.duplicate();
 				flattenProcessor.invert();
 			} 
+			flattenProcessor.invert();
 			
 			IconCell iconCell1 = makeIconCell(flattenProcessor, NucleusImageType.FLATTENED);
 			iconCell1.setEnabled(cannyOptions.isUseFlattenImage());

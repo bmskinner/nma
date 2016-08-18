@@ -31,6 +31,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.MouseAdapter;
@@ -539,7 +540,7 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 		
 	}
 	
-//	@SuppressWarnings("serial")
+
 	public class IconCellRenderer extends DefaultTableCellRenderer	{
 	    @Override
 	    public Component getTableCellRendererComponent(
@@ -589,9 +590,12 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 		public LargeImageDialog(final IconCell cell, Window parent){
 			super(parent);
 			
+			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+			
 			final ImageIcon icon = cell.getLargeIcon();
 			
 			this.setLayout(new BorderLayout());
+			
 			
 			this.add(new JLabel(icon), BorderLayout.CENTER);
 
@@ -601,11 +605,30 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 //			DecimalFormat df = new DecimalFormat("#0.00"); 
 //
 //	        this.setTitle(key.toString()+": "+ df.format(scale) +"% scale");
+			this.setTitle(cell.getType().toString());
+			
 	        this.setModal(false);
 	        this.setResizable(false);
 	        this.pack();
+	        this.setLocationRelativeTo(null);
 	        this.setVisible(true);
 		}
+		
+//		private ImageIcon scale(ImageIcon icon){
+//			
+//			Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+//			
+//			int w = (int) (screenSize.getWidth() * IMAGE_SCREEN_PROPORTION);
+//			int h = (int) (screenSize.getHeight() * IMAGE_SCREEN_PROPORTION);
+//			
+//			int width = icon.getIconWidth() > w ? w : icon.getIconWidth();
+//			int height = 
+//			
+//			if(icon.getIconHeight()>)
+//			
+//			return image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+//			
+//		}
 		
 	}
 	

@@ -20,6 +20,7 @@ package gui.dialogs;
 
 import gui.ImageType;
 import gui.MainWindow;
+import gui.ThreadManager;
 import gui.dialogs.ImageProber.LargeImageDialog;
 import ij.io.DirectoryChooser;
 
@@ -125,7 +126,13 @@ public class FishRemappingDialog extends ImageProber {
         			
         			if(row==0 && col==0){
         				
-        				originalImageClicked(e, pnt);
+        				Runnable r = () -> {
+        					originalImageClicked(e, pnt);
+        				};
+        				
+        				ThreadManager.getInstance().execute(r);
+        				
+        				
         				
         			} else { // Show a large image for the FISH image when clicked
 
@@ -156,7 +163,7 @@ public class FishRemappingDialog extends ImageProber {
 		
 	}
 	
-	private synchronized void originalImageClicked(MouseEvent e, Point pnt){
+	private void originalImageClicked(MouseEvent e, Point pnt){
 		
 		// Get the data model for this table
 		TableModel model = (TableModel)table.getModel();
@@ -200,7 +207,8 @@ public class FishRemappingDialog extends ImageProber {
 				drawNucleus(c, selectedData.getLargeIcon().getImage());
 				// Update the small icon
 				selectedData.setSmallIcon( new ImageIcon(scaleImage( selectedData.getLargeIcon() )) );
-				table.repaint();
+				table.repaint(cellRectangle);
+
 			}
 			
 		}
@@ -311,25 +319,25 @@ public class FishRemappingDialog extends ImageProber {
 	
 
 	
-	private void respondToMouseEvent(MouseEvent e, Cell c){
+	private synchronized void respondToMouseEvent(MouseEvent e, Cell c){
 		
 		
 		// if present in list, remove it, otherwise add it
-		if(FishRemappingDialog.this.selectedNucleiLeft.contains(c.getId()) ||  FishRemappingDialog.this.selectedNucleiRight.contains(c.getId()) ){
+		if(selectedNucleiLeft.contains(c.getId()) ||  selectedNucleiRight.contains(c.getId()) ){
 
-			FishRemappingDialog.this.selectedNucleiLeft.remove(c.getId());
-			FishRemappingDialog.this.selectedNucleiRight.remove(c.getId());
+			selectedNucleiLeft.remove(c.getId());
+			selectedNucleiRight.remove(c.getId());
 
 		} else {
 
 			if((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){ // right button
-				FishRemappingDialog.this.selectedNucleiRight.add(c.getId());
-				FishRemappingDialog.this.selectedNucleiLeft.remove(c.getId());
+				selectedNucleiRight.add(c.getId());
+				selectedNucleiLeft.remove(c.getId());
 			}
 
 			if((e.getModifiers() & InputEvent.BUTTON1_MASK)	== InputEvent.BUTTON1_MASK){ // left button
-				FishRemappingDialog.this.selectedNucleiLeft.add(c.getId());
-				FishRemappingDialog.this.selectedNucleiRight.remove(c.getId());
+				selectedNucleiLeft.add(c.getId());
+				selectedNucleiRight.remove(c.getId());
 			}
 
 		}
@@ -362,16 +370,6 @@ public class FishRemappingDialog extends ImageProber {
 		
 		g2.fill(p);
 		
-		
-//		// update the image
-//		Nucleus n = c.getNucleus();
-//		double[] positions = n.getPosition();
-//		ip.setColor(chooseNucleusOutlineColor(c));
-//		ip.setLineWidth(NUCLEUS_OUTLINE_WIDTH);
-//		FloatPolygon polygon = n.createPolygon();
-//		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-//		roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
-//		ip.fill(roi);
 	}
 
 

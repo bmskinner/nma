@@ -39,11 +39,11 @@ public class NucleusDetectionImageProber extends ImageProber {
 	 * Hold the stages of the detection pipeline to display 
 	 */
 	public enum NucleusImageType implements ImageType {
-		KUWAHARA 			("Kuwahara filtered", 0),
-		FLATTENED 			("Flattened",         1),
-		EDGE_DETECTION 		("Edge detection",    2),
-		MORPHOLOGY_CLOSED 	("Morphology closed", 3),
-		DETECTED_OBJECTS 	("Detected objects",  4);
+		KUWAHARA 			("Kuwahara filtering",      0),
+		FLATTENED 			("Chromocentre flattening", 1),
+		EDGE_DETECTION 		("Edge detection",          2),
+		MORPHOLOGY_CLOSED 	("Gap closing",             3),
+		DETECTED_OBJECTS 	("Detected objects",        4);
 		
 		private String name;
 		private int position; // the order in which the processed images should be displayed
