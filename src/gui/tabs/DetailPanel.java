@@ -29,11 +29,13 @@ import gui.SignalChangeListener;
 import logging.Loggable;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
+
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
@@ -43,6 +45,7 @@ import org.jfree.chart.JFreeChart;
 
 import charting.ChartCache;
 import charting.TableCache;
+import charting.charts.ExportableChartPanel;
 import charting.charts.ScatterChartFactory;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
@@ -207,6 +210,45 @@ public abstract class DetailPanel
 		
 		for(DetailPanel panel : this.subPanels){
 			panel.setEnabled(b);
+		}
+	}
+	
+	/**
+	 * Force any chart panels currently visible on screen
+	 * to redraw, allowing text to be rendered with the 
+	 * appropriate aspect ratio
+	 */
+	public void updateSize(){
+		
+		updateSize(this);
+				
+		for(DetailPanel panel : this.subPanels){
+			panel.updateSize();
+		}
+	}
+	
+	/**
+	 * Carries out the resize - recursively search all
+	 * containers for chart panels, and refresh the chart
+	 * cache if any are found.
+	 * @param container
+	 */
+	private void updateSize(Container container){
+		for(Component c : container.getComponents()){
+			if(c instanceof ExportableChartPanel){
+				
+				if(c.isShowing()){
+					this.refreshChartCache();
+					return;
+				}
+				
+				
+			}
+			
+			if(c instanceof Container){
+				updateSize((Container) c);
+			}
+				
 		}
 	}
 	

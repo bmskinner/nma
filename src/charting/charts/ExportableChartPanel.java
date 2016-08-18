@@ -80,7 +80,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 	        }
 	    });
 	}
-	
+		
 	private String getData(){
 
 		String result = "";

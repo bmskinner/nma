@@ -56,6 +56,7 @@ import io.MappingFileExporter;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.datatransfer.DataFlavor;
@@ -66,6 +67,7 @@ import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -201,8 +203,35 @@ public class MainWindow
 			  public void windowClosed(WindowEvent e) {
 				  close();
 			  }
+			  
+			  
+			  
+			  
 
 		});
+		
+		this.addWindowStateListener(new WindowStateListener() {
+			public void windowStateChanged(WindowEvent e){
+
+				Runnable r = () -> {
+					  try {
+						  // If the update is called immediately, then the chart size has
+						  // not yet changed, and therefore will render at the wrong aspect
+						  // ratio
+						  
+						  Thread.sleep(100);
+					  } catch (InterruptedException e1) {
+						  
+					  }
+
+					  for(DetailPanel d : detailPanels){
+						  d.updateSize();
+					  }
+				  };
+				  ThreadManager.getInstance().submit(r);
+
+			  }
+			});
 		
 		
 		this.setDropTarget(new DropTarget(){
