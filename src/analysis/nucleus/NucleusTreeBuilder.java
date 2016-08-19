@@ -27,6 +27,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.plaf.metal.MetalBorders.OptionDialogBorder;
+
 import utility.Constants;
 import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
@@ -39,6 +41,9 @@ import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
+import analysis.mesh.NucleusMesh;
+import analysis.mesh.NucleusMeshBuilder;
+import analysis.mesh.NucleusMeshFace;
 import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTag;
@@ -153,21 +158,10 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		}
 		return true;
 	}
-				
-	/**
-	 * Make a taxon name with quoting, suitable for use in a Newick tree.
-	 * Uses the full nucleus original file path, so will work in merged datsets.
-	 * @param n
-	 * @return
-	 */
-	private String makeUniqueName(Nucleus n){
-		
-		return "'"+n.getSourceFile()+"-"+n.getNameAndNumber()+"'";
-//		return n.getID().toString();
-	}
-	
+					
 	private FastVector makeAttributes(CellCollection collection, int windowSize)throws Exception {
 		
+		// Determine the number of attributes required
 		
 		int attributeCount        = 0;
 		int profileAttributeCount = 0;
@@ -186,13 +180,22 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 			}
 		}
 		
+		NucleusMesh mesh = null;
+		if(options.isIncludeMesh() && collection.hasConsensusNucleus()){	
+			mesh = new NucleusMesh(collection.getConsensusNucleus());
+			attributeCount+= mesh.getFaces().size();
+		}
+		
 		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
 			attributeCount++;
 		}
 		
+		// Create the attributes
+		
 		FastVector attributes = new FastVector(attributeCount);
 		
 		if(options.isIncludeProfile()){
+			finer("Including profile");
 			for(int i=0; i<profileAttributeCount; i++){
 				Attribute a = new Attribute("att_"+i); 
 				attributes.addElement(a);
@@ -209,8 +212,17 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		
 		for(UUID segID : options.getSegments()){
 			if(options.isIncludeSegment(segID)){
-				log(Level.FINEST, "Including segment"+segID.toString());
+				finer("Including segment"+segID.toString());
 				Attribute a = new Attribute("att_"+segID.toString()); 
+				attributes.addElement(a);
+			}
+		}
+		
+		if(options.isIncludeMesh() && collection.hasConsensusNucleus()){
+			
+			for(NucleusMeshFace face : mesh.getFaces()){
+				finer("Including face "+face.toString());
+				Attribute a = new Attribute("mesh_"+face.toString()); 
 				attributes.addElement(a);
 			}
 		}
@@ -219,6 +231,8 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 			Attribute name = new Attribute("name", (FastVector) null); 
 			attributes.addElement(name);
 		}
+		
+		
 		
 		return attributes;
 	}
@@ -239,6 +253,11 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
 		
 		int profilePointsToCount = profileSize/windowSize;
+		
+		NucleusMesh template = null;
+		if(options.isIncludeMesh() && collection.hasConsensusNucleus()){
+			template = new NucleusMesh(collection.getConsensusNucleus());
+		}
 
 		try{
 			
@@ -247,11 +266,14 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				Nucleus n1 = c.getNucleus();
 				Instance inst = new SparseInstance(attributes.size());
 
-				// Interpolate the profile to the median length
-				Profile p = n1.getProfile(options.getProfileType(), BorderTagObject.REFERENCE_POINT).interpolate(profileSize);
 				
 				int attNumber=0;
+				
+				
 				if(options.isIncludeProfile()){
+					// Interpolate the profile to the median length
+					Profile p = n1.getProfile(options.getProfileType(), BorderTagObject.REFERENCE_POINT).interpolate(profileSize);
+					
 					for(attNumber=0; attNumber<profilePointsToCount; attNumber++){
 						Attribute att = (Attribute) attributes.elementAt(attNumber);
 						inst.setValue(att, p.get(attNumber*windowSize));
@@ -274,12 +296,23 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 					}
 				}
 				
+				if(options.isIncludeMesh() && collection.hasConsensusNucleus()){
+					
+					
+					NucleusMesh mesh = new NucleusMesh(n1, template);
+					for(NucleusMeshFace face : mesh.getFaces()){
+						Attribute att = (Attribute) attributes.elementAt(attNumber++);
+						inst.setValue(att, face.getArea());
+					}
+				}
+				
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-//					String uniqueName = makeUniqueName(n1);
 					String uniqueName = c.getId().toString();
 					Attribute att = (Attribute) attributes.elementAt(attNumber++);
 					inst.setValue(att, uniqueName);
 				}
+				
+				
 				
 
 				instances.add(inst);

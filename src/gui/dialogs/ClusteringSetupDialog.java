@@ -68,6 +68,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 	static final boolean DEFAULT_INCLUDE_AREA = false;
 	static final boolean DEFAULT_INCLUDE_ASPECT = false;
 	static final boolean DEFAULT_INCLUDE_PROFILE = true;
+	static final boolean DEFAULT_INCLUDE_MESH    = false;
 	
 	
 	private JPanel 		cardPanel;

@@ -38,6 +38,7 @@ public class ClusteringOptions implements Serializable {
 	private HierarchicalClusterMethod hierarchicalMethod;
 	private int iterations;
 	private boolean autoClusterNumber;
+	private boolean includeMesh;
 	
 	private Map<PlottableStatistic, Boolean> statMap = new HashMap<PlottableStatistic, Boolean>();
 	private Map<UUID, Boolean>            segmentMap = new HashMap<UUID, Boolean>(); // which segments should be included
@@ -79,6 +80,7 @@ public class ClusteringOptions implements Serializable {
 		}
 		
 		this.profileType = oldOptions.getProfileType();
+		this.includeMesh = oldOptions.includeMesh;
 		
 	}
 	
@@ -238,6 +240,16 @@ public class ClusteringOptions implements Serializable {
 	public void setProfileType(ProfileType profileType) {
 		this.profileType = profileType;
 	}
+	
+	
+
+	public boolean isIncludeMesh() {
+		return includeMesh;
+	}
+
+	public void setIncludeMesh(boolean includeMesh) {
+		this.includeMesh = includeMesh;
+	}
 
 	/**
 	 * Get a string array of the options set here suitable
@@ -282,6 +294,10 @@ public class ClusteringOptions implements Serializable {
 	    
 	    if(profileType==null){
 	    	profileType = ProfileType.ANGLE;
+	    }
+	    
+	    if(Boolean.valueOf(includeMesh)==null){ 
+	    	includeMesh = false;
 	    }
 	}
 	

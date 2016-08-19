@@ -71,6 +71,8 @@ import components.nuclei.Nucleus;
  */
 public class NucleusMesh implements Loggable {
 	
+	public static final int DEFAULT_VERTEX_SPACING = 10;
+	
 	private int segmentCount = 0; // the number of segments to divide on
 	
 	private int vertexSpacing = 10; // the default average number of border points between vertices
@@ -106,7 +108,7 @@ public class NucleusMesh implements Loggable {
 	 * @param n
 	 */
 	public NucleusMesh(Nucleus n){
-		this(n, 10);
+		this(n, DEFAULT_VERTEX_SPACING);
 	}
 	
 	/**

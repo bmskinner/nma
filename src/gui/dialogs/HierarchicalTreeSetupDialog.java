@@ -75,9 +75,8 @@ import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 
+@SuppressWarnings("serial")
 public class HierarchicalTreeSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
-
-	private static final long serialVersionUID = 1L;
 
 	protected final JPanel contentPanel = new JPanel();
 	
@@ -96,6 +95,9 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	protected AnalysisDataset dataset;
 	
 	protected JCheckBox includeProfilesCheckBox;
+	
+	protected JCheckBox includeMeshCheckBox;
+	
 	protected Map<NucleusStatistic, JCheckBox> statBoxMap = new HashMap<NucleusStatistic, JCheckBox>();
 	
 	protected Map<UUID, JCheckBox> segmentBoxMap =  new HashMap<UUID, JCheckBox>();
@@ -161,6 +163,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		options.setUseSimilarityMatrix(ClusteringSetupDialog.DEFAULT_USE_SIMILARITY_MATRIX);
 		options.setIncludeProfile(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
 		options.setProfileType(DEFAULT_PROFILE_TYPE);
+		options.setIncludeMesh(ClusteringSetupDialog.DEFAULT_INCLUDE_MESH);
 	}
 		
 	protected JPanel createHeader(){
@@ -265,8 +268,9 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		fields.add(includeProfilesCheckBox);
 		
 		
+		
+		
 		// Add selection of profile type
-//		ButtonGroup group = new ButtonGroup();
 		for(ProfileType type : ProfileType.values()){
 			JRadioButton button = new JRadioButton("", type.equals(ProfileType.ANGLE)); // set angle selected
 			JLabel label = new JLabel(type.toString());
@@ -278,6 +282,15 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			fields.add(button);
 		}
 		
+		
+		includeMeshCheckBox = new JCheckBox("");
+		includeMeshCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_INCLUDE_MESH);
+		includeMeshCheckBox.addChangeListener(this);
+		includeMeshCheckBox.setToolTipText("Requires consensus nucleus");
+		JLabel meshLabel = new JLabel("Include mesh faces");
+		meshLabel.setToolTipText("Requires consensus nucleus");
+		labels.add(meshLabel);
+		fields.add(includeMeshCheckBox);
 		
 		DecimalFormat pf = new DecimalFormat("#0.000"); 
 		for(NucleusStatistic stat : NucleusStatistic.values()){
@@ -327,6 +340,11 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		
 		
 		this.addLabelTextRows(labels, fields, layout, panel);
+		
+		boolean hasConsensus = dataset.getCollection().hasConsensusNucleus();
+		includeMeshCheckBox.setEnabled(hasConsensus); // using consensus for building attributes and template mesh
+		meshLabel.setEnabled(hasConsensus);
+		
 		return panel;
 		
 	}
@@ -370,6 +388,12 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 					
 				
 			} 
+			
+			if(e.getSource()==includeMeshCheckBox){
+				options.setIncludeMesh(includeMeshCheckBox.isSelected());						
+				
+			} 
+			
 			
 			try{
 			
