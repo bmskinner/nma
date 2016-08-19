@@ -53,6 +53,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 	@Override
 	protected Boolean doInBackground() {
 		finest("Beginning background work");
+		fireCooldown();
 		try {
 			dataset = readDataset(file);
 			
