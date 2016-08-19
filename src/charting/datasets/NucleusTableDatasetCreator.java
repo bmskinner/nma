@@ -1138,6 +1138,7 @@ private static NucleusTableDatasetCreator instance = null;
 		columnList.add("Target cluster number");
 		columnList.add("Include profile");
 		columnList.add("Profile type");
+		columnList.add("Include mesh");
 
 		for(NucleusStatistic stat : NucleusStatistic.values()){
 			columnList.add("Include "+stat.toString());
@@ -1187,6 +1188,8 @@ private static NucleusTableDatasetCreator instance = null;
 					
 					String profileTypeString = op.isIncludeProfile() ? op.getProfileType().toString() : "N/A";
 					dataList.add(profileTypeString);
+					
+					dataList.add(op.isIncludeMesh());
 					
 					for(NucleusStatistic stat : NucleusStatistic.values()){
 						try{
