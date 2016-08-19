@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.swing.JDialog;
 
+import logging.Loggable;
 import analysis.AnalysisDataset;
 import gui.DatasetEvent;
 import gui.DatasetEventListener;
@@ -17,7 +18,7 @@ import gui.InterfaceEvent.InterfaceMethod;
 
 
 @SuppressWarnings("serial")
-public abstract class MessagingDialog extends JDialog {
+public abstract class MessagingDialog extends JDialog implements Loggable {
 	
 	private final List<Object> datasetListeners 	= new ArrayList<Object>();
 	private final List<Object> interfaceListeners 	= new ArrayList<Object>();

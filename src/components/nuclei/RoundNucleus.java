@@ -777,10 +777,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		return this.profileMap.containsKey(type);
 	}
 
-	/* (non-Javadoc)
-	 * @see no.nuclei.Nucleus#getAngleProfile(java.lang.String)
-	 * Returns a copy
-	 */
+
 	public SegmentedProfile getProfile(ProfileType type, BorderTagObject tag){
 		
 		// fetch the index of the pointType (the new zero)
@@ -798,23 +795,23 @@ public class RoundNucleus extends AbstractCellularComponent
 		return profile;
 	}
 	
-	/**
-	 * Update the profile of the given type. Since only franken profiles are 
-	 * not calculated internally, the other profiles just replace the segment list.
-	 * @param type
-	 * @param profile
-	 * @throws Exception
-	 */
+
 	public void setProfile(ProfileType type, SegmentedProfile profile) throws Exception{
 		if(profile==null){
 			throw new IllegalArgumentException("Error setting nucleus profile: type "+type+" is null");
 		}
+		
+		// Replace frankenprofiles completely
 		if(type.equals(ProfileType.FRANKEN)){
 			this.profileMap.put(type, profile);
-		} else {
-			this.profileMap.get(type).setSegments(profile.getSegments());
+		} else { // Otherwise update the segment lists for all other profile types
+
+			for(ProfileType t : profileMap.keySet()){
+				if( ! t.equals(ProfileType.FRANKEN)){
+					this.profileMap.get(type).setSegments(profile.getSegments());
+				}
+			}
 		}
-//		
 	}
 	
 	  /**

@@ -291,12 +291,15 @@ public interface Nucleus extends CellularComponent, Indexable {
 	public void setProfile(ProfileType type, BorderTagObject tag, SegmentedProfile profile) throws Exception;
 	
 	/**
-	 * Set the profile for the given type
+	 * Update the profile of the given type. Since only franken profiles are 
+	 * not calculated internally, the other profiles just replace the segment list.
+	 * This will replace the segment list on all other profile types, to keep
+	 * the segmentation pattern consistent.
 	 * @param type
 	 * @param profile
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	public void setProfile(ProfileType regular, SegmentedProfile nucleusProfile) throws Exception;
+	public void setProfile(ProfileType type, SegmentedProfile profile) throws Exception;
 	
 	/**
 	 * Test if the given type of profile is available

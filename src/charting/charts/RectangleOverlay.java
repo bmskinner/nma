@@ -1,4 +1,4 @@
-package gui.components;
+package charting.charts;
 
 import java.awt.Graphics2D;
 import java.awt.Paint;
@@ -29,12 +29,6 @@ import org.jfree.ui.RectangleEdge;
 public class RectangleOverlay extends AbstractOverlay implements Overlay,
         PropertyChangeListener, Serializable, Loggable {
 
-    /** Storage for the crosshairs along the x-axis. */
-//    private List xCrosshairs;
-
-    /** Storage for the crosshairs along the y-axis. */
-//    private List yCrosshairs;
-	
 	private RectangleOverlayObject xRectangle = null;
 	private RectangleOverlayObject yRectangle = null;
 
@@ -75,87 +69,6 @@ public class RectangleOverlay extends AbstractOverlay implements Overlay,
         fireOverlayChanged();
         
     }
-
-    /**
-     * Clears all the domain crosshairs from the overlay and sends an
-     * {@link OverlayChangeEvent} to all registered listeners.
-     */
-//    public void clearDomainCrosshairs() {
-//        if (this.xCrosshairs.isEmpty()) {
-//            return;  // nothing to do
-//        }
-//        List crosshairs = getDomainCrosshairs();
-//        for (int i = 0; i < crosshairs.size(); i++) {
-//            Crosshair c = (Crosshair) crosshairs.get(i);
-//            this.xCrosshairs.remove(c);
-//            c.removePropertyChangeListener(this);
-//        }
-//        fireOverlayChanged();
-//    }
-
-    /**
-     * Returns a new list containing the domain crosshairs for this overlay.
-     *
-     * @return A list of crosshairs.
-     */
-//    public List getDomainCrosshairs() {
-//        return new ArrayList(this.xCrosshairs);
-//    }
-
-    /**
-     * Adds a crosshair against the range axis and sends an
-     * {@link OverlayChangeEvent} to all registered listeners.
-     *
-     * @param crosshair  the crosshair (<code>null</code> not permitted).
-     */
-//    public void addRangeCrosshair(Crosshair crosshair) {
-//        ParamChecks.nullNotPermitted(crosshair, "crosshair");
-//        this.yCrosshairs.add(crosshair);
-//        crosshair.addPropertyChangeListener(this);
-//        fireOverlayChanged();
-//    }
-//
-//    /**
-//     * Removes a range axis crosshair and sends an {@link OverlayChangeEvent}
-//     * to all registered listeners.
-//     *
-//     * @param crosshair  the crosshair (<code>null</code> not permitted).
-//     *
-//     * @see #addRangeCrosshair(org.jfree.chart.plot.Crosshair)
-//     */
-//    public void removeRangeCrosshair(Crosshair crosshair) {
-//        ParamChecks.nullNotPermitted(crosshair, "crosshair");
-//        if (this.yCrosshairs.remove(crosshair)) {
-//            crosshair.removePropertyChangeListener(this);
-//            fireOverlayChanged();
-//        }
-//    }
-//
-//    /**
-//     * Clears all the range crosshairs from the overlay and sends an
-//     * {@link OverlayChangeEvent} to all registered listeners.
-//     */
-//    public void clearRangeCrosshairs() {
-//        if (this.yCrosshairs.isEmpty()) {
-//            return;  // nothing to do
-//        }
-//        List crosshairs = getRangeCrosshairs();
-//        for (int i = 0; i < crosshairs.size(); i++) {
-//            Crosshair c = (Crosshair) crosshairs.get(i);
-//            this.yCrosshairs.remove(c);
-//            c.removePropertyChangeListener(this);
-//        }
-//        fireOverlayChanged();
-//    }
-//
-//    /**
-//     * Returns a new list containing the range crosshairs for this overlay.
-//     *
-//     * @return A list of crosshairs.
-//     */
-//    public List getRangeCrosshairs() {
-//        return new ArrayList(this.yCrosshairs);
-//    }
 
     /**
      * Receives a property change event (typically a change in one of the

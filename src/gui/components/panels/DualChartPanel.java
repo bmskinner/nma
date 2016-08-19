@@ -23,7 +23,6 @@ import gui.BorderTagEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.BorderTagEvent;
-import gui.components.RectangleOverlayObject;
 import gui.tabs.DetailPanel;
 
 import java.awt.Component;
@@ -41,6 +40,7 @@ import org.jfree.chart.JFreeChart;
 import charting.charts.DraggableOverlayChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.PositionSelectionChartPanel;
+import charting.charts.RectangleOverlayObject;
 
 /**
  * This holds two JFreeChart ChartPanels. One is an overview, with a draggable

@@ -22,6 +22,7 @@ import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import gui.DatasetEvent.DatasetMethod;
 import gui.SignalChangeEvent;
+import gui.dialogs.CellResegmentationDialog;
 import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.components.panels.SegmentationDualChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -35,7 +36,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 	
 	private JPanel buttonsPanel;
 	private JButton flipButton;
-	
+	private JButton resegmentButton;
 	
 	public CellProfilePanel(CellViewModel model) {
 		super(model);
@@ -82,6 +83,16 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 			
 		} );
 		
+		
+		resegmentButton = new JButton("Resegment");
+		panel.add(resegmentButton);
+		resegmentButton.setEnabled(false);
+		
+		resegmentButton.addActionListener( e -> {
+			new CellResegmentationDialog(getCellModel().getCell(), activeDataset());
+			
+		} );
+		
 		return panel;
 		
 		
@@ -90,6 +101,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 	public void setButtonsEnabled(boolean b){
 		profileOptions.setEnabled(b);
 		flipButton.setEnabled(b);
+		resegmentButton.setEnabled(b);
 	}
 	
 	public void update(){

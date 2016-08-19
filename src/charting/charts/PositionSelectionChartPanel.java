@@ -2,8 +2,6 @@ package charting.charts;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import gui.components.RectangleOverlay;
-import gui.components.RectangleOverlayObject;
 import ij.IJ;
 
 import java.awt.Color;
@@ -24,6 +22,7 @@ import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.ui.RectangleEdge;
+
 
 
 

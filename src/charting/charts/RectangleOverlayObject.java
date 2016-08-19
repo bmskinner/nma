@@ -1,4 +1,4 @@
-package gui.components;
+package charting.charts;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
