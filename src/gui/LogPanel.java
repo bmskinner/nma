@@ -23,9 +23,17 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.SystemColor;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +71,7 @@ import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
 import gui.InterfaceEvent.InterfaceMethod;
+import gui.actions.PopulationImportAction;
 import gui.tabs.DetailPanel;
 
 public class LogPanel extends DetailPanel implements ActionListener {
@@ -162,6 +171,41 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		panel.add(console, BorderLayout.SOUTH);
 		console.setVisible(false);
 		console.addActionListener(this);
+		
+		// Need an extra drop target for file opening  as well as in the main window
+		textArea.setDropTarget(new DropTarget(){
+			
+			@Override
+            public synchronized void drop(DropTargetDropEvent dtde) {
+				
+				
+				try {
+					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+					Transferable t = dtde.getTransferable();
+					List<File> fileList = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+					
+					for(File f : fileList){
+						if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
+							finer("Opening file "+f.getAbsolutePath());
+							
+							fireSignalChangeEvent("Open|"+f.getAbsolutePath());
+							
+							
+						} else {
+							finer("File is not nmd, ignoring");
+						}
+						
+					}
+					
+				} catch (UnsupportedFlavorException e) {
+					error("Error in DnD", e);
+				} catch (IOException e) {
+					error("IO error in DnD", e);
+				}
+               
+            }
+			
+		});
 
 		return panel;
 	}

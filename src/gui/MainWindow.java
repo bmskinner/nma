@@ -296,6 +296,7 @@ public class MainWindow
 			logPanel = new LogPanel();
 			logPanel.addDatasetEventListener(this);
 			logPanel.addInterfaceEventListener(this);
+			logPanel.addSignalChangeListener(this);
 			TextAreaHandler textHandler = new TextAreaHandler(logPanel);
 			textHandler.setFormatter(new LogPanelFormatter());
 			programLogger.addHandler(textHandler);
