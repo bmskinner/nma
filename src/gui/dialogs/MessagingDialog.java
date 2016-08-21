@@ -58,6 +58,13 @@ public abstract class MessagingDialog extends JDialog implements Loggable {
         }
     }
     
+    protected synchronized void fireDatasetEvent(DatasetMethod method, AnalysisDataset dataset) {
+    	
+    	List<AnalysisDataset> list= new ArrayList<AnalysisDataset>();
+    	list.add(dataset);
+    	fireDatasetEvent(method, list);
+    }
+    
     protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list, AnalysisDataset template) {
 
     	DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, template);

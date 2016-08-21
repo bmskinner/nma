@@ -19,33 +19,15 @@
 
 package gui.dialogs;
 
+import gui.DatasetEvent.DatasetMethod;
 import gui.GlobalOptions;
 import gui.RotationMode;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,14 +35,14 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTable;
-
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import utility.ProfileException;
 import analysis.AnalysisDataset;
+import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.CoupledProfileOutlineChartPanel;
 import charting.charts.CoupledProfileOutlineChartPanel.BorderPointEvent;
 import charting.charts.CoupledProfileOutlineChartPanel.BorderPointEventListener;
@@ -95,12 +77,12 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 	int segStart = 0;
 	int segStop  = 0;
 	
-	JButton resegmentBtn;
-	JButton reassignRpBtn;
+	private JButton resegmentBtn;
+	private JButton reassignRpBtn;
+	private JButton reverseProfileBtn;
 	
-	
-	public CellResegmentationDialog(Cell cell, AnalysisDataset dataset){
-		super();
+	public CellResegmentationDialog(final Cell cell, final AnalysisDataset dataset){
+		super( null );
 		
 		if(cell==null || dataset==null){
 			throw new IllegalArgumentException("Cell or dataset is null");
@@ -111,9 +93,36 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		this.workingCell = new Cell(cell);
 		createUI();
 		
-		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
 		this.pack();
+		panel.getOutlinePanel().restoreAutoBounds(); // fixed aspect must be set after components are packed
+		
+		this.addWindowListener(new WindowAdapter() {
+			
+			public void windowClosing(WindowEvent e) {
+				
+				Object[] options = { "Save changes" , "Discard changes" };
+				int save = JOptionPane.showOptionDialog(CellResegmentationDialog.this,
+						"Save changes to cell segmentation?", 
+						"Save cell?",
+						JOptionPane.DEFAULT_OPTION, 
+						JOptionPane.QUESTION_MESSAGE,
+						null, options, options[0]);
+
+				// Replace the input cell with the working cell
+				if(save==0){
+					dataset.getCollection().replaceCell(workingCell);
+
+					// Trigger a dataset update and reprofiling
+					dataset.getCollection().getProfileManager().createProfileCollections();
+					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
+				} 
+				dispose();
+				
+			}
+		});
+		
 		this.setLocationRelativeTo(null);
 		this.setModal(false);
 		this.setVisible(true);
@@ -133,9 +142,10 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			
 			JPanel mainPanel = new JPanel(new BorderLayout());
 
+			JFreeChart outlineChart = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
 
 			ChartPanel profile = new ExportableChartPanel(MorphologyChartFactory.getInstance().makeEmptyChart(ProfileType.ANGLE));
-			ChartPanel outline = new ExportableChartPanel(OutlineChartFactory.getInstance().makeEmptyChart());
+			ChartPanel outline = new FixedAspectRatioChartPanel(outlineChart);
 
 			panel = new CoupledProfileOutlineChartPanel(profile, outline, workingCell);
 			panel.addBorderPointEventListener(this);
@@ -159,8 +169,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			this.isSelectRP = true;
 			newTags     = new HashMap<BorderTagObject, Integer>();
 			log("Select RP");
-			resegmentBtn.setEnabled(false);
-			reassignRpBtn.setEnabled(false);
+			setEnabled(false);
 		});
 		panel.add(reassignRpBtn);
 		
@@ -170,11 +179,17 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			newSegments = new ArrayList<NucleusBorderSegment>();
 			segCount    = 0;
 			segStart    = workingCell.getNucleus().getBorderIndex(BorderTagObject.REFERENCE_POINT);
-			log("Select endpoint for seg 0");
-			resegmentBtn.setEnabled(false);
-			reassignRpBtn.setEnabled(false);
+			log("Select endpoint for segment 0");
+			setEnabled(false);
 		});
 		panel.add(resegmentBtn);
+		
+		reverseProfileBtn = new JButton("Flip profile");
+		reverseProfileBtn.addActionListener( e -> {
+			workingCell.getNucleus().reverse();
+			updateCharts(workingCell);
+		});
+		panel.add(reverseProfileBtn);
 		
 		JButton undoBtn = new JButton("Undo");
 		undoBtn.addActionListener( e ->{
@@ -188,12 +203,18 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		return panel;
 	}
 	
+	@Override
+	public void setEnabled(boolean b){
+		resegmentBtn.setEnabled(b);
+		reassignRpBtn.setEnabled(b);
+		reverseProfileBtn.setEnabled(b);
+	}
+	
 	private void resegmentationComplete(){
 
 		try {
 			isRunning = false;
-			resegmentBtn.setEnabled(true);
-			reassignRpBtn.setEnabled(true);
+			setEnabled(true);
 
 			Nucleus n = workingCell.getNucleus();
 			UUID id = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegments().get(segCount).getID();
@@ -201,21 +222,25 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 
 			NucleusBorderSegment last = new NucleusBorderSegment(segStart, n.getBorderIndex(BorderTagObject.REFERENCE_POINT), n.getBorderLength(), id);
 			newSegments.add(last);
+			finer("Added "+last.toString());
 
-			log("Assigned all segments");
+			finer("Assigned all segments");
 			try {
 				NucleusBorderSegment.linkSegments(newSegments);
 			} catch (ProfileException e) {
 				error("Cannot link segments", e);
 			}
 			log("Resegmenting complete");
-
-			SegmentedProfile oldProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
-			SegmentedProfile newProfile = new SegmentedProfile(oldProfile);
-
+			SegmentedProfile newProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
 			newProfile.setSegments(newSegments);
+			finer("Segments added: ");
+			finer(NucleusBorderSegment.toString(newSegments));
+			finer("New profile:");
+			finer(newProfile.toString());
+			finer("RP index: "+n.getBorderIndex(BorderTagObject.REFERENCE_POINT));
+			
 			try {
-				workingCell.getNucleus().setProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT, newProfile);
+				workingCell.getNucleus().setProfile(ProfileType.ANGLE, newProfile);
 			} catch (Exception e) {
 				error("Error setting profile", e);
 			}
@@ -232,22 +257,21 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 
 		try {
 			isSelectRP = false;
-			resegmentBtn.setEnabled(true);
-			reassignRpBtn.setEnabled(true);
+			setEnabled(true);
 			
 			int newRpIndex =  newTags.get(BorderTagObject.REFERENCE_POINT);
 			
-			log("Selected RP index: "+newRpIndex);
+			fine("Selected RP index: "+newRpIndex);
 
 			// Make a new cell with the updated RP	
 			workingCell.getNucleus().setBorderTag(BorderTagObject.REFERENCE_POINT, newRpIndex);
 			
-			log("Updated RP");
+			fine("Updated RP");
 
 			// Draw the new cell
 			updateCharts(workingCell);
 			
-			log("Finished updating RP chart");
+			fine("Finished updating RP chart");
 
 
 		} catch(Exception e){
@@ -257,7 +281,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 	
 	private void updateCharts(Cell cell){
 		
-		log("Making profile chart options");
+		finer("Making profile chart options");
 		ChartOptions profileOptions = new ChartOptionsBuilder()
 			.setDatasets(dataset)
 			.setCell(cell)
@@ -270,7 +294,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			.setShowPoints(true)
 			.build();
 
-		log("Making outline chart options");
+		finer("Making outline chart options");
 		ChartOptions outlineOptions = new ChartOptionsBuilder()
 			.setDatasets(dataset)
 			.setCell(cell)
@@ -280,10 +304,10 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			.setCellularComponent(cell.getNucleus())
 			.build();
 
-		log("Making charts");
+		finer("Making charts");
 		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeIndividualNucleusProfileChart(profileOptions);
 		JFreeChart outlineChart = OutlineChartFactory.getInstance().makeCellOutlineChart(outlineOptions);
-		log("Updating charts");
+		finer("Updating charts");
 		panel.setCell(cell);
 		panel.getProfilePanel().setChart(profileChart);
 		panel.getOutlinePanel().setChart(outlineChart);
@@ -302,16 +326,15 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		
 		if(isRunning){
 
-			UUID id = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegments().get(segCount).getID();
+			UUID id = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegments().get(segCount++).getID();
 
 			segStop = n.getBorderIndex(p);
 			NucleusBorderSegment seg = new NucleusBorderSegment(segStart, segStop, n.getBorderLength(), id);
 			newSegments.add(seg);
-			log("Added new seg");
+			finer("Added "+seg.toString());
 			segStart = segStop;
 
-			segCount++;
-			log("Select the endpoint for segment "+segCount);
+			log("Select endpoint for segment "+segCount);
 
 
 			if(segCount==n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegmentCount()-1){

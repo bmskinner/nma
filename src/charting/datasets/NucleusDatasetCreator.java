@@ -781,10 +781,12 @@ private static NucleusDatasetCreator instance = null;
 			profile = nucleus.getProfile(type);
 			xpoints = profile.getPositions(profile.size());
 		} else {
+			finest("Getting XY positions along profile from reference point");
 			profile = nucleus.getProfile(type, BorderTagObject.REFERENCE_POINT);
 			xpoints = profile.getPositions(nucleus.getBorderLength());
 			
 			// add the segments
+			finest("Adding ordered segments from reference point");
 			List<NucleusBorderSegment> segments = nucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getOrderedSegments();
 			addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0);
 		}

@@ -796,7 +796,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 
-	public void setProfile(ProfileType type, SegmentedProfile profile) throws Exception{
+	public void setProfile(ProfileType type, SegmentedProfile profile) {
 		if(profile==null){
 			throw new IllegalArgumentException("Error setting nucleus profile: type "+type+" is null");
 		}
@@ -899,10 +899,23 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	
 	public void setBorderTag(BorderTagObject tag, int i){
-		this.borderTags.put(tag, i);
 		
+		// When moving the RP, move all segments to match
+		if(tag.equals(BorderTagObject.REFERENCE_POINT)){
+			SegmentedProfile p = getProfile(ProfileType.ANGLE);
+			int oldRP = getBorderIndex(tag);
+			int diff  = i-oldRP;
+			p.nudgeSegments(diff);
+			finest("Old RP at "+oldRP);
+			finest("New RP at "+i);
+			finest("Moving segments by"+diff);
+			setProfile(ProfileType.ANGLE, p);
+		}
+
+		this.borderTags.put(tag, i);
+
 		// The intersection point should always be opposite the orientation point
-		if(tag.getTag().equals(BorderTagObject.ORIENTATION_POINT)){
+		if(tag.equals(BorderTagObject.ORIENTATION_POINT)){
 			int intersectionIndex = this.getBorderIndex(this.findOppositeBorder( this.getBorderPoint(i) ));
 			this.setBorderTag(BorderTagObject.INTERSECTION_POINT, intersectionIndex);
 			updateVerticallyRotatedNucleus(); // force an update
@@ -1077,7 +1090,9 @@ public class RoundNucleus extends AbstractCellularComponent
 		for( BorderTagObject s : keys){
 			int index = borderTags.get(s);
 			int newIndex = this.getBorderLength() - index - 1; // if was 0, will now be <length-1>; if was length-1, will be 0
-			setBorderTag(s, newIndex);
+//			 update the bordertag map directly to avoid segmentation changes due to RP shift
+			borderTags.put(s, newIndex);
+//			setBorderTag(s, newIndex);
 		}
 	}
 	

@@ -207,6 +207,19 @@ public class CellCollection implements Serializable, Loggable {
 	  }
   }
 
+  /**
+   * Replace the cell with the same ID as the given cell with
+   * the new copy
+   * @param r
+   */
+  public void replaceCell(Cell r) {
+	  if( ! mappedCollection.containsKey(r.getId())){
+		  return;
+	  } else {
+		  this.mappedCollection.put(r.getId(), r);
+	  }
+  }
+
   public void removeCell(Cell c) throws Exception{
 	  this.mappedCollection.remove(c.getId());
   }

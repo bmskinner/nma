@@ -20,6 +20,7 @@ import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
+import gui.DatasetEvent;
 import gui.DatasetEvent.DatasetMethod;
 import gui.SignalChangeEvent;
 import gui.dialogs.CellResegmentationDialog;
@@ -35,7 +36,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 	private ProfileTypeOptionsPanel profileOptions  = new ProfileTypeOptionsPanel();
 	
 	private JPanel buttonsPanel;
-	private JButton flipButton;
+//	private JButton flipButton;
 	private JButton resegmentButton;
 	
 	public CellProfilePanel(CellViewModel model) {
@@ -69,19 +70,19 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		panel.add(profileOptions);
 		profileOptions.addActionListener(  e -> update()   );
 		
-		flipButton = new JButton("Reverse profile");
-		panel.add(flipButton);
-		flipButton.setEnabled(false);
-		
-		flipButton.addActionListener( e -> {
-			this.setAnalysing(true);
-			this.getCellModel().getCell().getNucleus().reverse();
-			activeDataset().getCollection().getProfileManager().createProfileCollections();
-			this.setAnalysing(false);
-			refreshChartCache();
-			fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
-			
-		} );
+//		flipButton = new JButton("Reverse profile");
+//		panel.add(flipButton);
+//		flipButton.setEnabled(false);
+//		
+//		flipButton.addActionListener( e -> {
+//			this.setAnalysing(true);
+//			this.getCellModel().getCell().getNucleus().reverse();
+//			activeDataset().getCollection().getProfileManager().createProfileCollections();
+//			this.setAnalysing(false);
+//			refreshChartCache();
+//			fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+//			
+//		} );
 		
 		
 		resegmentButton = new JButton("Resegment");
@@ -89,7 +90,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		resegmentButton.setEnabled(false);
 		
 		resegmentButton.addActionListener( e -> {
-			new CellResegmentationDialog(getCellModel().getCell(), activeDataset());
+			CellResegmentationDialog dialog = new CellResegmentationDialog(getCellModel().getCell(), activeDataset());
+			dialog.addDatasetEventListener(this);
 			
 		} );
 		
@@ -100,7 +102,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 	
 	public void setButtonsEnabled(boolean b){
 		profileOptions.setEnabled(b);
-		flipButton.setEnabled(b);
+//		flipButton.setEnabled(b);
 		resegmentButton.setEnabled(b);
 	}
 	
@@ -179,6 +181,13 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return MorphologyChartFactory.getInstance().makeIndividualNucleusProfileChart( options);
+	}
+	
+	@Override
+	public void datasetEventReceived(DatasetEvent event) {
+		if(event.getSource() instanceof CellResegmentationDialog){ // Pass upwards
+			fireDatasetEvent(event.method(), event.getDatasets());
+		}
 	}
 	
 	@Override
