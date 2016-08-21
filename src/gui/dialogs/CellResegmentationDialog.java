@@ -23,8 +23,12 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.GlobalOptions;
 import gui.RotationMode;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.dialogs.CellCollectionOverviewDialog.LabelInfoRenderer;
+import gui.tabs.cells.LabelInfo;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -35,8 +39,14 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
@@ -80,6 +90,9 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 	private JButton resegmentBtn;
 	private JButton reassignRpBtn;
 	private JButton reverseProfileBtn;
+	
+	private JTable table;
+	private static final int COLUMN_STATE = 1;
 	
 	public CellResegmentationDialog(final Cell cell, final AnalysisDataset dataset){
 		super( null );
@@ -138,7 +151,8 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			JPanel header = createHeader();
 			this.add(header, BorderLayout.NORTH);
 			
-//			JTable table = new JTable();
+			table = new JTable(createTableModel(""));
+			
 			
 			JPanel mainPanel = new JPanel(new BorderLayout());
 
@@ -154,10 +168,36 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 
 			mainPanel.add(profile, BorderLayout.SOUTH);
 			mainPanel.add(outline, BorderLayout.CENTER);
+			mainPanel.add(table,BorderLayout.WEST);
 			this.add(mainPanel, BorderLayout.CENTER);
 		} catch (Exception e){
 			error("Error making UI", e);
 		}
+	}
+	
+	private TableModel createTableModel(String message){
+		
+		DefaultTableModel model = new DefaultTableModel();
+		
+//		model.setColumnCount(2);
+		int segTotal = dataset.getCollection().getProfileManager().getSegmentCount();
+//		model.setRowCount(segTotal+1);
+		
+		List<Object> colOne = new ArrayList<Object>();
+//		colOne.add("Reference point");
+		for(int i=0; i<segTotal; i++){
+			colOne.add("Segment "+i);
+		}
+		model.addColumn("Detail", colOne.toArray());
+		
+		List<Object> colTwo = new ArrayList<Object>();
+		for(int i=0; i<segTotal; i++){
+			colTwo.add(message);
+		}
+		model.addColumn("Set", colTwo.toArray());
+		
+		return model;
+		
 	}
 	
 	private JPanel createHeader(){
@@ -168,6 +208,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			
 			this.isSelectRP = true;
 			newTags     = new HashMap<BorderTagObject, Integer>();
+			table.setModel(createTableModel(""));
 			log("Select RP");
 			setEnabled(false);
 		});
@@ -177,6 +218,8 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		resegmentBtn.addActionListener( e -> {
 			this.isRunning = true;
 			newSegments = new ArrayList<NucleusBorderSegment>();
+			table.setModel(createTableModel("Not set"));
+			table.getColumnModel().getColumn(COLUMN_STATE).setCellRenderer(new SegmentStateRenderer());
 			segCount    = 0;
 			segStart    = workingCell.getNucleus().getBorderIndex(BorderTagObject.REFERENCE_POINT);
 			log("Select endpoint for segment 0");
@@ -194,6 +237,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		JButton undoBtn = new JButton("Undo");
 		undoBtn.addActionListener( e ->{
 			workingCell = new Cell(cell);
+			table.setModel(createTableModel(""));
 			updateCharts(workingCell);
 			
 		});
@@ -215,6 +259,8 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		try {
 			isRunning = false;
 			setEnabled(true);
+			
+			table.getModel().setValueAt("OK", segCount, COLUMN_STATE);
 
 			Nucleus n = workingCell.getNucleus();
 			UUID id = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegments().get(segCount).getID();
@@ -244,6 +290,8 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			} catch (Exception e) {
 				error("Error setting profile", e);
 			}
+			
+			// Need to update OP to new segment boundary position
 
 			// Draw the new cell
 			updateCharts(workingCell);
@@ -326,14 +374,16 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		
 		if(isRunning){
 
-			UUID id = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegments().get(segCount++).getID();
+			UUID id = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegments().get(segCount).getID();
 
 			segStop = n.getBorderIndex(p);
 			NucleusBorderSegment seg = new NucleusBorderSegment(segStart, segStop, n.getBorderLength(), id);
 			newSegments.add(seg);
 			finer("Added "+seg.toString());
 			segStart = segStop;
-
+			
+			table.getModel().setValueAt("OK", segCount, COLUMN_STATE);
+			segCount++;
 			log("Select endpoint for segment "+segCount);
 
 
@@ -346,6 +396,21 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			
 		}
 		
+	}
+	
+	public class SegmentStateRenderer extends DefaultTableCellRenderer	{
+	    @Override
+	    public Component getTableCellRendererComponent(
+	        JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	        
+	    	super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+	    	setBackground(Color.WHITE);
+	        if(value.toString().equals("OK")){
+	        	setBackground(Color.GREEN);
+	        }
+	        return this;
+	    }
 	}
 
 }
