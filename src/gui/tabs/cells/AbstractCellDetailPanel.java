@@ -1,9 +1,9 @@
 package gui.tabs.cells;
 
-import gui.tabs.DetailPanel;
+import gui.tabs.editing.AbstractEditingPanel;
 
 @SuppressWarnings("serial")
-public abstract class AbstractCellDetailPanel extends DetailPanel {
+public abstract class AbstractCellDetailPanel extends AbstractEditingPanel {
 		
 	private   CellViewModel   model;
 	
@@ -12,12 +12,17 @@ public abstract class AbstractCellDetailPanel extends DetailPanel {
 		this.model = model;
 	}
 	
+	/**
+	 * Update the charts and tables for the current cell
+	 * and component
+	 */
 	public abstract void update();
 	
-//	public void update(Cell cell){
-//		model.setCell(cell);
-//	}
 		
+	/**
+	 * Get the current cell view 
+	 * @return
+	 */
 	public CellViewModel getCellModel(){
 		return model;
 	}

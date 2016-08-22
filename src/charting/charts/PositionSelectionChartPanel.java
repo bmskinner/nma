@@ -1,5 +1,7 @@
 package charting.charts;
 
+import gui.SegmentEvent;
+import gui.SegmentEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import ij.IJ;
@@ -13,6 +15,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
@@ -22,6 +25,7 @@ import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.ui.RectangleEdge;
+
 
 
 
@@ -496,5 +500,33 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
     public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
         listeners.remove( l );
     }
+    
+    public synchronized void addSegmentEventListener(SegmentEventListener l){
+		listeners.add(l);
+	}
+	
+	public synchronized void removeSegmentEventListener(SegmentEventListener l){
+		listeners.remove(l);
+	}
+	
+	protected synchronized void fireSegmentEvent(SegmentEvent e){
+		for(Object l : listeners){
+			((SegmentEventListener) l).segmentEventReceived(e);
+		}
+	}
+	
+	/**
+	 * Fire a segment event
+	 * @param id the segment ID
+	 * @param index the new index
+	 * @param type the type of change to make
+	 */
+	protected synchronized void fireSegmentEvent(UUID id, int index, int type){
+		SegmentEvent e = new SegmentEvent(this, id, index, type);
+		
+		for(Object l : listeners){
+			((SegmentEventListener) l).segmentEventReceived(e);
+		}
+	}
 
 }

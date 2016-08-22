@@ -17,18 +17,20 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package gui.components;
+package gui;
 
 import java.util.EventObject;
-
-import components.generic.BorderTagObject;
+import java.util.UUID;
 
 @SuppressWarnings("serial")
-public class BorderTagEvent extends EventObject {
-
-	private BorderTagObject tag;
+public class SegmentEvent extends EventObject {
+	
+	private UUID id;
 	private int index;
-
+	private int type;
+	
+	public static final int MOVE_START_INDEX = 0;
+	
 	/**
 	 * Create an event from a source, with the given message
 	 * @param source the source of the datasets
@@ -36,19 +38,29 @@ public class BorderTagEvent extends EventObject {
 	 * @param sourceName the name of the object or component generating the datasets
 	 * @param list the datasets to carry
 	 */
-	public BorderTagEvent( Object source, BorderTagObject tag, int index ) {
+	public SegmentEvent( Object source, UUID id, int index, int type ) {
 		super( source );
-		this.tag = tag;
+		this.id = id;
 		this.index = index;
+		this.type = type;
 	}
 
-	public BorderTagObject getTag() {
-		return tag;
+	public UUID getId() {
+		return id;
 	}
 
 	public int getIndex() {
 		return index;
 	}
 
+	/**
+	 * The type of action to take - see the static ints
+	 * of SegmentEvent
+	 * @return
+	 */
+	public int getType() {
+		return type;
+	}
+	
 
 }

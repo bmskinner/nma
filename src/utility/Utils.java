@@ -27,19 +27,11 @@
 
  package utility;
 
- import ij.IJ;
-import ij.gui.PolygonRoi;
+ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import ij.process.FloatPolygon;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import components.CellularComponent;
 import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
-import components.nuclei.Nucleus;
 
  /**
  * @author bms41

@@ -400,7 +400,9 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected abstract TableModel createPanelTableType(TableOptions options) throws Exception;
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		return null;
+	}
 	
 	/**
 	 * This should be overridden to create the appropriate charts for caching
@@ -408,7 +410,9 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected abstract JFreeChart createPanelChartType(ChartOptions options) throws Exception;
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
+		return null;
+	}
 	
 	
 	/**

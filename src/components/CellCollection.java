@@ -247,6 +247,21 @@ public class CellCollection implements Serializable, Loggable {
 		  return true;
 	  }
   }
+  
+  public boolean hasLockedCells(){
+	  for(Nucleus n : this.getNuclei()){
+		  if(n.isLocked()){
+			  return true;
+		  }	  
+	  }
+	  return false;
+  }
+  
+  public void setCellsLocked(boolean b){
+	  for(Nucleus n : this.getNuclei()){
+		  n.setLocked(b); 
+	  }
+  }
 
   public void addConsensusNucleus(ConsensusNucleus n){
 	  this.consensusNucleus = n;

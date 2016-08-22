@@ -65,11 +65,7 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 		    	
 		});
 	}
-	
-	public int getActiveIndex(){
-		return activeProfileIndex;
-	}
-	
+		
 	private void createBorderTagPopup(){
 
 		for(BorderTagObject tag : BorderTagObject.values()){
@@ -78,7 +74,7 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 			item.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 
-					fireBorderTagEvent(new BorderTagEvent(item, tag));
+					fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));
 
 					
 				}
@@ -86,8 +82,7 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 			popupMenu.add(item);
 
 			/*
-			 * We can't handle changing the OP or RP yet -
-			 * requires segment boundary changes
+			 * The IP is determined solely by the OP
 			 */
 			if( tag.equals(BorderTagObject.INTERSECTION_POINT)){
 				item.setEnabled(false);

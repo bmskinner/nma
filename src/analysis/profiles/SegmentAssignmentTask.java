@@ -105,8 +105,14 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 	 * @param median the segmented median profile
 	 */
 	private void assignSegmentsToNucleus(Nucleus n) throws Exception {
-			
-		finest("Assigning segments to "+n.getNameAndNumber());
+
+		if(n.isLocked()){
+			finest(n.getNameAndNumber()+" is locked, skipping");
+			return;
+		} else {
+			finest("Assigning segments to "+n.getNameAndNumber());
+		}
+		
 		// remove any existing segments in the nucleus
 		SegmentedProfile nucleusProfile = n.getProfile(ProfileType.ANGLE);
 		nucleusProfile.clearSegments();

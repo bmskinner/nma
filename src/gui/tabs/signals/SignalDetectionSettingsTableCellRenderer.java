@@ -21,8 +21,6 @@
 	package gui.tabs.signals;
 
 	import gui.components.ConsistentRowTableCellRenderer;
-import ij.IJ;
-
 import java.awt.Color;
 import java.util.logging.Level;
 

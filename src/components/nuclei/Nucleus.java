@@ -18,20 +18,15 @@
  *******************************************************************************/
 package components.nuclei;
 
-import java.awt.Rectangle;
 import java.io.File;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import analysis.nucleus.Indexable;
 import components.CellularComponent;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
-import components.nuclear.NuclearSignal;
 import components.nuclear.BorderPoint;
 import components.nuclear.SignalCollection;
 
@@ -203,8 +198,8 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 */
 //	public boolean hasSignal();
 	
-	public void calculateFractionalSignalDistancesFromCoM() throws Exception;
-	public void calculateSignalDistancesFromCoM();
+//	public void calculateFractionalSignalDistancesFromCoM() throws Exception;
+//	public void calculateSignalDistancesFromCoM();
 
 	/*
     -----------------------
@@ -260,7 +255,6 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 */
 	public void calculateSignalAnglesFromPoint(BorderPoint p);
 	
-//	public void exportSignalDistanceMatrix();
 
 	
 	/**
@@ -440,15 +434,7 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * @throws Exception
 	 */
 	public void reverse();
-	
-	
-	/**
-	 * Reverses the angle profile, without reversing the border points,
-	 * distance profile or border tag indexes.
-	 * @throws Exception
-	 */
-	public void flipAngleProfile()throws Exception;
-	
+		
 	
 	/**
 	 * Get the name of the folder to store analysis specific data.
@@ -507,15 +493,17 @@ public interface Nucleus extends CellularComponent, Indexable {
 	
 	
 	/**
-	 * Store an internal record of loggable activity
-	 * @param message
-	 */
-//	public void log(String message);
-	
-	/**
-	 * Fetch the current nucleus log
+	 * Check if the segments and tags are able to be
+	 * modified
 	 * @return
 	 */
-//	public String printLog();
+	public boolean isLocked();
+	
+	/**
+	 * Set if the segments and tags are able to be
+	 * modified
+	 * @param b
+	 */
+	public void setLocked(boolean b);
 		
 }

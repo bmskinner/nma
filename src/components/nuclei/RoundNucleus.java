@@ -45,6 +45,7 @@ import java.util.UUID;
 
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
+import analysis.signals.SignalAnalyser;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import stats.SignalStatistic;
@@ -85,7 +86,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	protected Map<ProfileType, SegmentedProfile> profileMap = new HashMap<ProfileType, SegmentedProfile>();
 	
 	protected List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
-//	protected Map<BorderTag, Integer>          borderTags  = new HashMap<BorderTag, Integer>(0);
+
 	protected Map<BorderTagObject, Integer>    borderTags  = new HashMap<BorderTagObject, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
 	
 	protected Map<String, Integer>       segmentTags = new HashMap<String, Integer>(0);
@@ -95,9 +96,10 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	protected SignalCollection signalCollection = new SignalCollection();
 	
-//	private transient Map<BorderTag, Rectangle> boundingRectangles = new HashMap<BorderTag, Rectangle>(); // cache the bounding rectange to save time
-
 	protected transient Nucleus verticalNucleus = null; // cache the vertically rotated nucleus
+	
+	
+	private boolean segsLocked = false; // allow locking of segments and tags if manually assigned
 	
 	public RoundNucleus(Roi roi, File f, int channel, int number, double[] position){
 		
@@ -144,6 +146,8 @@ public class RoundNucleus extends AbstractCellularComponent
 
 
 		this.setBorderTags(n.getBorderTags());
+		
+		this.segsLocked = n.isLocked();
 
 	}
 		
@@ -155,6 +159,19 @@ public class RoundNucleus extends AbstractCellularComponent
 		} catch (Exception e) {
 			return null;
 		}
+	}
+	
+	public boolean isLocked(){
+		return segsLocked;
+	}
+	
+	/**
+	 * Set if the segments and tags are able to be
+	 * modified
+	 * @param b
+	 */
+	public void setLocked(boolean b){
+		segsLocked = b;
 	}
 	
 	/*
@@ -197,9 +214,9 @@ public class RoundNucleus extends AbstractCellularComponent
 
 		calculateProfiles();
 		
-
-		this.calculateSignalDistancesFromCoM();
-		this.calculateFractionalSignalDistancesFromCoM();
+		SignalAnalyser s = new SignalAnalyser();
+		s.calculateSignalDistancesFromCoM(this);
+		s.calculateFractionalSignalDistancesFromCoM(this);
 		
 	    
 	}
@@ -334,27 +351,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		return result;
 	}
 	
-		
-	/**
-	 * Get the cached bounding rectangle for the nucleus. If not present,
-	 * the rectangle is calculated and stored
-	 * @param point the border point to place at the bottom
-	 * @return
-	 * @throws Exception
-	 */
-//	public Rectangle getBoundingRectangle(BorderTag point) {
-//		
-//		if(this.boundingRectangles == null){
-//			boundingRectangles = new HashMap<BorderTag, Rectangle>();
-//			boundingRectangles.put(point, calculateBoundingRectangle(point));
-//		}
-//		if(! this.boundingRectangles.containsKey(point)){
-//			boundingRectangles.put(point, calculateBoundingRectangle(point));
-//		}
-//		
-//		return boundingRectangles.get(point);
-//	}
-	
+			
 	/**
 	 * Find the bounding rectangle of the Nucleus. If the TopVertical and
 	 * BottomVertical points have been set, these will be used. Otherwise,
@@ -479,6 +476,11 @@ public class RoundNucleus extends AbstractCellularComponent
 		if(d<0 || d> 1){
 			throw new IllegalArgumentException("Angle window proportion must be 0-1");
 		}
+		
+		if(segsLocked){
+			return;
+		}
+		
 		this.angleWindowProportion = d;
 		
 		double perimeter = this.getStatistic(NucleusStatistic.PERIMETER);
@@ -493,6 +495,9 @@ public class RoundNucleus extends AbstractCellularComponent
 
 		
 	public void setSegmentMap(Map<String, Integer> map){
+		if(segsLocked){
+			return;
+		}
 		this.segmentTags = map;
 	}
 		
@@ -543,113 +548,104 @@ public class RoundNucleus extends AbstractCellularComponent
 		return this.signalCollection;
 	}
 	
-	/**
-	 * @param n the signal
-	 * @param signalGroup the signal group to add to
-	 */
-//	public void addSignal(NuclearSignal n, UUID signalGroup){
-//		this.signalCollection.addSignal(n, signalGroup);
+//	 /*
+//		For each signal within the nucleus, calculate the distance to the nCoM
+//		and update the signal
+//	*/
+//	public void calculateSignalDistancesFromCoM(){
+//		
+////		IJ.log("Getting signal distances");
+////		this.signalCollection.print();
+//		for(List<NuclearSignal> signals : signalCollection.getSignals()){
+////			IJ.log("    Found "+signals.size()+" signals in channel");
+//			if(!signals.isEmpty()){
+//				for(NuclearSignal n : signals){
+//					double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
+//					n.setStatistic(SignalStatistic.DISTANCE_FROM_COM, distance); //.setDistanceFromCoM(distance);
+//				}
+//			}
+//		}
 //	}
 
+//	/*
+//		Calculate the distance from the nuclear centre of
+//		mass as a fraction of the distance from the nuclear CoM, through the 
+//		signal CoM, to the nuclear border
+//	*/
+//	public void calculateFractionalSignalDistancesFromCoM() throws Exception{
+//
+//		this.calculateClosestBorderToSignals();
+//
+//		for(List<NuclearSignal> signals : signalCollection.getSignals()){
+//
+//			if(!signals.isEmpty()){
+//
+//				for(NuclearSignal n : signals){
+//
+//					// get the line equation
+//					Equation eq = new Equation(n.getCentreOfMass(), this.getCentreOfMass());
+//
+//					// using the equation, get the y postion on the line for each X point around the roi
+//					double minDeltaY = 100;
+//					int minDeltaYIndex = 0;
+//					double minDistanceToSignal = 1000;
+//
+//					for(int j = 0; j<getBorderLength();j++){
+//						double x = this.getBorderPoint(j).getX();
+//						double y = this.getBorderPoint(j).getY();
+//						double yOnLine = eq.getY(x);
+//						double distanceToSignal = this.getBorderPoint(j).getLengthTo(n.getCentreOfMass()); // fetch
+//
+//						double deltaY = Math.abs(y - yOnLine);
+//						// find the point closest to the line; this could find either intersection
+//						// hence check it is as close as possible to the signal CoM also
+//						if(deltaY < minDeltaY && distanceToSignal < minDistanceToSignal){
+//							minDeltaY = deltaY;
+//							minDeltaYIndex = j;
+//							minDistanceToSignal = distanceToSignal;
+//						}
+//					}
+//					BorderPoint borderPoint = this.getBorderPoint(minDeltaYIndex);
+//					double nucleusCoMToBorder = borderPoint.getLengthTo(this.getCentreOfMass());
+//					double signalCoMToNucleusCoM = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
+//					double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
+//					n.setStatistic(SignalStatistic.FRACT_DISTANCE_FROM_COM, fractionalDistance);
+//				}
+//			}
+//		}
+//	}
 
-	 /*
-		For each signal within the nucleus, calculate the distance to the nCoM
-		and update the signal
-	*/
-	public void calculateSignalDistancesFromCoM(){
-		
-//		IJ.log("Getting signal distances");
-//		this.signalCollection.print();
-		for(List<NuclearSignal> signals : signalCollection.getSignals()){
-//			IJ.log("    Found "+signals.size()+" signals in channel");
-			if(!signals.isEmpty()){
-				for(NuclearSignal n : signals){
-					double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
-					n.setStatistic(SignalStatistic.DISTANCE_FROM_COM, distance); //.setDistanceFromCoM(distance);
-				}
-			}
-		}
-	}
-
-	/*
-		Calculate the distance from the nuclear centre of
-		mass as a fraction of the distance from the nuclear CoM, through the 
-		signal CoM, to the nuclear border
-	*/
-	public void calculateFractionalSignalDistancesFromCoM() throws Exception{
-
-		this.calculateClosestBorderToSignals();
-
-		for(List<NuclearSignal> signals : signalCollection.getSignals()){
-
-			if(!signals.isEmpty()){
-
-				for(NuclearSignal n : signals){
-
-					// get the line equation
-					Equation eq = new Equation(n.getCentreOfMass(), this.getCentreOfMass());
-
-					// using the equation, get the y postion on the line for each X point around the roi
-					double minDeltaY = 100;
-					int minDeltaYIndex = 0;
-					double minDistanceToSignal = 1000;
-
-					for(int j = 0; j<getBorderLength();j++){
-						double x = this.getBorderPoint(j).getX();
-						double y = this.getBorderPoint(j).getY();
-						double yOnLine = eq.getY(x);
-						double distanceToSignal = this.getBorderPoint(j).getLengthTo(n.getCentreOfMass()); // fetch
-
-						double deltaY = Math.abs(y - yOnLine);
-						// find the point closest to the line; this could find either intersection
-						// hence check it is as close as possible to the signal CoM also
-						if(deltaY < minDeltaY && distanceToSignal < minDistanceToSignal){
-							minDeltaY = deltaY;
-							minDeltaYIndex = j;
-							minDistanceToSignal = distanceToSignal;
-						}
-					}
-					BorderPoint borderPoint = this.getBorderPoint(minDeltaYIndex);
-					double nucleusCoMToBorder = borderPoint.getLengthTo(this.getCentreOfMass());
-					double signalCoMToNucleusCoM = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
-					double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
-					n.setStatistic(SignalStatistic.FRACT_DISTANCE_FROM_COM, fractionalDistance);
-				}
-			}
-		}
-	}
-
-	/*
-		Go through the signals in the nucleus, and find the point on
-		the nuclear ROI that is closest to the signal centre of mass.
-	 */
-	private void calculateClosestBorderToSignals() throws Exception{
-
-		for(List<NuclearSignal> signals : signalCollection.getSignals()){
-
-			if(!signals.isEmpty()){
-
-				for(NuclearSignal s : signals){
-
-					int minIndex = 0;
-					double minDistance = this.getStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
-
-					for(int j = 0; j<getBorderLength();j++){
-						XYPoint p = this.getBorderPoint(j);
-						double distance = p.getLengthTo(s.getCentreOfMass());
-
-						// find the point closest to the CoM
-						if(distance < minDistance){
-							minIndex = j;
-							minDistance = distance;
-						}
-					}
-					s.setClosestBorderPoint(minIndex);
-
-				}
-			}
-		}
-	}
+//	/*
+//		Go through the signals in the nucleus, and find the point on
+//		the nuclear ROI that is closest to the signal centre of mass.
+//	 */
+//	private void calculateClosestBorderToSignals() throws Exception{
+//
+//		for(List<NuclearSignal> signals : signalCollection.getSignals()){
+//
+//			if(!signals.isEmpty()){
+//
+//				for(NuclearSignal s : signals){
+//
+//					int minIndex = 0;
+//					double minDistance = this.getStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
+//
+//					for(int j = 0; j<getBorderLength();j++){
+//						XYPoint p = this.getBorderPoint(j);
+//						double distance = p.getLengthTo(s.getCentreOfMass());
+//
+//						// find the point closest to the CoM
+//						if(distance < minDistance){
+//							minIndex = j;
+//							minDistance = distance;
+//						}
+//					}
+//					s.setClosestBorderPoint(minIndex);
+//
+//				}
+//			}
+//		}
+//	}
 
 	public void updateSignalAngle(UUID channel, int signal, double angle){
 		signalCollection.getSignals(channel).get(signal).setStatistic(SignalStatistic.ANGLE, angle);
@@ -801,6 +797,10 @@ public class RoundNucleus extends AbstractCellularComponent
 			throw new IllegalArgumentException("Error setting nucleus profile: type "+type+" is null");
 		}
 		
+		if(segsLocked){
+			return;
+		}
+		
 		// Replace frankenprofiles completely
 		if(type.equals(ProfileType.FRANKEN)){
 			this.profileMap.put(type, profile);
@@ -854,6 +854,10 @@ public class RoundNucleus extends AbstractCellularComponent
 	 */
 	public void setProfile(ProfileType type, BorderTagObject tag, SegmentedProfile p) throws Exception{
 		
+		if(segsLocked){
+			return;
+		}
+		
 		// fetch the index of the pointType (the zero of the input profile)
 		int pointIndex = this.borderTags.get(tag);
 		
@@ -886,6 +890,9 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	public void setBorderTags(Map<BorderTagObject, Integer> m){
+		if(segsLocked){
+			return;
+		}
 		this.borderTags = m;
 	}
 	
@@ -899,7 +906,9 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	
 	public void setBorderTag(BorderTagObject tag, int i){
-		
+		if(segsLocked){
+			return;
+		}
 		// When moving the RP, move all segments to match
 		if(tag.equals(BorderTagObject.REFERENCE_POINT)){
 			SegmentedProfile p = getProfile(ProfileType.ANGLE);
@@ -927,6 +936,9 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	public void setBorderTag(BorderTagObject reference, BorderTagObject tag, int i){
+		if(segsLocked){
+			return;
+		}
 		int newIndex = getOffsetBorderIndex(reference, i);
 		this.setBorderTag(tag, newIndex);
 	}
@@ -1071,7 +1083,9 @@ public class RoundNucleus extends AbstractCellularComponent
 
 
 	public void reverse(){
-		
+		if(segsLocked){
+			return;
+		}
 		for(ProfileType type : profileMap.keySet()){
 
 			SegmentedProfile profile = profileMap.get(type);
@@ -1094,13 +1108,6 @@ public class RoundNucleus extends AbstractCellularComponent
 			borderTags.put(s, newIndex);
 //			setBorderTag(s, newIndex);
 		}
-	}
-	
-	public void flipAngleProfile()throws Exception{
-		
-		SegmentedProfile profile = profileMap.get(ProfileType.ANGLE);
-		profile.reverse();
-		profileMap.put(ProfileType.ANGLE, profile);
 	}
 	
 	public void updateSourceFolder(File newFolder) {
@@ -1145,6 +1152,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		if( ! newCache.isEmpty()){
 			borderTags = newCache;
 		}
+		
 				
 	    this.verticalNucleus    = null;
 	    updateVerticallyRotatedNucleus(); // force an update

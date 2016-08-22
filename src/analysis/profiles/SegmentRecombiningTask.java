@@ -112,8 +112,15 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 	}
 	
 	private void processNucleus(Nucleus n) throws Exception {
-		log(Level.FINEST, "Recombining segments for nucleus "+n.getNameAndNumber());
-//		n.log("Recombining segments");
+		
+
+		if(n.isLocked()){
+			finest(n.getNameAndNumber()+" is locked, skipping");
+			return;
+		} else {
+			finest("Recombining segments for nucleus "+n.getNameAndNumber());
+		}
+		
 		fitter.fit(n, pc);
 
 		// recombine the segments to the lengths of the median profile segments

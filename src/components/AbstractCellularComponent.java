@@ -901,7 +901,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
     		list.add(next);
     	}
     	this.setBorderList(list);
-    	
+    	    	
     	imageRef = new SoftReference<ImageProcessor>(null); 
 
 		finest("\tRead abstract cellular component");

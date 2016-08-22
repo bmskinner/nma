@@ -39,14 +39,14 @@ public class SegmentationDualChartPanel extends DualChartPanel{
 		this.updateChartPanelRange();
 	}
 	
-	@Override
-	public void signalChangeReceived(SignalChangeEvent event) {
-		super.signalChangeReceived(event);
-		
-		if(event.type().contains("UpdateSegment")){
-			fireSignalChangeEvent(event);
-		}
-		
-	}
+//	@Override
+//	public void signalChangeReceived(SignalChangeEvent event) {
+//		super.signalChangeReceived(event);
+//		
+//		if(event.type().contains("UpdateSegment")){
+//			fireSignalChangeEvent(event);
+//		}
+//		
+//	}
 
 }

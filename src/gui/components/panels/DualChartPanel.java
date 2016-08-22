@@ -20,10 +20,11 @@
 package gui.components.panels;
 
 import gui.BorderTagEventListener;
+import gui.SegmentEvent;
+import gui.SegmentEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.BorderTagEvent;
-import gui.tabs.DetailPanel;
 
 import java.awt.Component;
 import java.awt.Cursor;
@@ -32,6 +33,7 @@ import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.swing.JPanel;
 
@@ -44,12 +46,13 @@ import charting.charts.RectangleOverlayObject;
 
 /**
  * This holds two JFreeChart ChartPanels. One is an overview, with a draggable
- * overlay to choose the region to focus on in the second chart.
+ * overlay to choose the region to focus on in the second chart. Is able to fire 
+ * BorderTagEvents to registered listeners
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
-public abstract class DualChartPanel extends JPanel implements SignalChangeListener {
+public abstract class DualChartPanel extends JPanel implements SignalChangeListener, SegmentEventListener {
 	
 	protected DraggableOverlayChartPanel chartPanel;
 	
@@ -159,6 +162,7 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 
 	}
 	
+	
 	public synchronized void addBorderTagEventListener(BorderTagEventListener l){
 		listeners.add(l);
 	}
@@ -173,28 +177,58 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 		}
 	}
 	
-	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
-        listeners.add( l );
-    }
+//	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
+//        listeners.add( l );
+//    }
+//    
+//    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
+//        listeners.remove( l );
+//    }
+//    
+//    protected synchronized void fireSignalChangeEvent(String message) {
+//    	
+//        SignalChangeEvent event = new SignalChangeEvent( this, message, this.getClass().getSimpleName());
+//        Iterator<Object> iterator = listeners.iterator();
+//        while( iterator.hasNext() ) {
+//            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
+//        }
+//    }
+//    
+//    protected synchronized void fireSignalChangeEvent(SignalChangeEvent event) {
+//    	Iterator<Object> iterator = listeners.iterator();
+//    	while( iterator.hasNext() ) {
+//    		( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
+//    	}
+//    }
     
-    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
-        listeners.remove( l );
-    }
-    
-    protected synchronized void fireSignalChangeEvent(String message) {
-    	
-        SignalChangeEvent event = new SignalChangeEvent( this, message, this.getClass().getSimpleName());
-        Iterator<Object> iterator = listeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-        }
-    }
-    
-    protected synchronized void fireSignalChangeEvent(SignalChangeEvent event) {
-    	Iterator<Object> iterator = listeners.iterator();
-    	while( iterator.hasNext() ) {
-    		( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-    	}
-    }
+    public synchronized void addSegmentEventListener(SegmentEventListener l){
+		listeners.add(l);
+	}
+	
+	public synchronized void removeSegmentEventListener(SegmentEventListener l){
+		listeners.remove(l);
+	}
+	
+	protected synchronized void fireSegmentEvent(SegmentEvent e){
+		for(Object l : listeners){
+			((SegmentEventListener) l).segmentEventReceived(e);
+		}
+	}
+	
+	protected synchronized void fireSegmentEvent(UUID id, int index, int type){
+		SegmentEvent e = new SegmentEvent(this, id, index, type);
+		
+		for(Object l : listeners){
+			((SegmentEventListener) l).segmentEventReceived(e);
+		}
+	}
+	
+	
+	@Override
+	public void segmentEventReceived(SegmentEvent event) {
+		for(Object l : listeners){
+			((SegmentEventListener) l).segmentEventReceived(event);
+		}
+	}
 
 }

@@ -3,18 +3,16 @@ package gui.tabs.cells;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.table.TableModel;
-
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.TableOptions;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
@@ -22,7 +20,7 @@ import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import gui.DatasetEvent;
 import gui.DatasetEvent.DatasetMethod;
-import gui.SignalChangeEvent;
+import gui.SegmentEvent;
 import gui.dialogs.CellResegmentationDialog;
 import gui.components.panels.ProfileTypeOptionsPanel;
 import gui.components.panels.SegmentationDualChartPanel;
@@ -36,7 +34,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 	private ProfileTypeOptionsPanel profileOptions  = new ProfileTypeOptionsPanel();
 	
 	private JPanel buttonsPanel;
-//	private JButton flipButton;
+
 	private JButton resegmentButton;
 	
 	public CellProfilePanel(CellViewModel model) {
@@ -46,7 +44,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		this.setBorder(null);
 		
 		dualPanel = new SegmentationDualChartPanel();
-		dualPanel.addSignalChangeListener(this);
+//		dualPanel.addSignalChangeListener(this);
+		dualPanel.addSegmentEventListener(this);
 		this.add(dualPanel, BorderLayout.CENTER);
 		
 		buttonsPanel = makeButtonPanel();
@@ -70,21 +69,6 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		panel.add(profileOptions);
 		profileOptions.addActionListener(  e -> update()   );
 		
-//		flipButton = new JButton("Reverse profile");
-//		panel.add(flipButton);
-//		flipButton.setEnabled(false);
-//		
-//		flipButton.addActionListener( e -> {
-//			this.setAnalysing(true);
-//			this.getCellModel().getCell().getNucleus().reverse();
-//			activeDataset().getCollection().getProfileManager().createProfileCollections();
-//			this.setAnalysing(false);
-//			refreshChartCache();
-//			fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
-//			
-//		} );
-		
-		
 		resegmentButton = new JButton("Resegment");
 		panel.add(resegmentButton);
 		resegmentButton.setEnabled(false);
@@ -102,7 +86,6 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 	
 	public void setButtonsEnabled(boolean b){
 		profileOptions.setEnabled(b);
-//		flipButton.setEnabled(b);
 		resegmentButton.setEnabled(b);
 	}
 	
@@ -174,11 +157,6 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 
 
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception {
-		return null;
-	}
-
-	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return MorphologyChartFactory.getInstance().makeIndividualNucleusProfileChart( options);
 	}
@@ -189,47 +167,11 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 			fireDatasetEvent(event.method(), event.getDatasets());
 		}
 	}
-	
-	@Override
-	public void signalChangeReceived(SignalChangeEvent event) {
-		if(event.type().contains("UpdateSegment") ){
-			fine("Heard segment update request");
-			
-			try{
-
-				String[] array = event.type().split("\\|");
-				int selectedSegMidpoint = Integer.valueOf(array[1]);
-				String index = array[2];
-				int indexValue = Integer.valueOf(index);
-
-				Nucleus n = this.getCellModel().getCell().getNucleus();
-				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
-
-				/*
-				 * The numbering of segments is adjusted for profile charts, so we can't rely on 
-				 * the segment name stored in the profile.
-				 * 
-				 * Get the name via the midpoint index of the segment that was selected. 
-				 */
-				NucleusBorderSegment seg = profile.getSegmentContaining(selectedSegMidpoint);
-
-//				carry out the update
-				updateSegmentIndex(true, indexValue, seg, n, profile);
-
-				n.updateVerticallyRotatedNucleus();
-				
-				// Recache necessary charts
-				refreshChartCache();
-				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
-			} catch(Exception e){
-				error("Error updating segment", e);
-			}
-
-		}
-
-	}
-	
+		
 	private void updateSegmentIndex(boolean start, int index, NucleusBorderSegment seg, Nucleus n, SegmentedProfile profile) throws Exception{
+		
+		boolean wasLocked = this.getCellModel().getCell().getNucleus().isLocked();
+		this.getCellModel().getCell().getNucleus().setLocked(false);
 		
 		int startPos = start ? seg.getStartIndex() : seg.getEndIndex();
 		int newStart = start ? index : seg.getStartIndex();
@@ -267,6 +209,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		} else {
 			log("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
 		}
+		this.getCellModel().getCell().getNucleus().setLocked(wasLocked);
 	}
 	
 	@Override
@@ -274,6 +217,43 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		clearChartCache();
 		finest("Updating chart after clear");
 		this.update();
+	}
+
+	@Override
+	public void segmentEventReceived(SegmentEvent event) {
+		// TODO Auto-generated method stub
+		
+		if(event.getType()==SegmentEvent.MOVE_START_INDEX){
+			try{
+
+				
+				UUID id = event.getId();
+				int index = event.getIndex();
+
+
+				Nucleus n = this.getCellModel().getCell().getNucleus();
+				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
+
+				/*
+				 * The numbering of segments is adjusted for profile charts, so we can't rely on 
+				 * the segment name stored in the profile.
+				 * 
+				 * Get the name via the midpoint index of the segment that was selected. 
+				 */
+				NucleusBorderSegment seg = profile.getSegment(id);
+
+				//	Carry out the update
+				updateSegmentIndex(true, index, seg, n, profile);
+
+				n.updateVerticallyRotatedNucleus();
+
+				// Recache necessary charts
+				refreshChartCache();
+				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+			} catch(Exception e){
+				error("Error updating segment", e);
+			}
+		}
 	}
 
 }

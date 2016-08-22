@@ -18,6 +18,7 @@
  *******************************************************************************/
 package charting.charts;
 
+import gui.SegmentEvent;
 import gui.components.ColourSelecter;
 import ij.IJ;
 
@@ -135,10 +136,7 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 				this.addOverlay(overlay);
 				
 			} catch (Exception e1) {
-				IJ.log("Error sending signal: "+e1.getMessage());
-    			for(StackTraceElement e2 : e1.getStackTrace()){
-    				IJ.log(e2.toString());
-    			}
+				error("Error sending signal", e1);
 			}
 
 
@@ -225,7 +223,7 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 	    		    		
 	    		// Trigger the update
 	    		if(seg!=null){
-	    			fireSignalChangeEvent("UpdateSegment|"+seg.getMidpointIndex()+"|"+intXValue);
+	    			fireSegmentEvent(seg.getID(), intXValue, SegmentEvent.MOVE_START_INDEX);
 	    		}
 	    	}
 	    }

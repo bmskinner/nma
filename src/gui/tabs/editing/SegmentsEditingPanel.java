@@ -18,20 +18,15 @@
  *******************************************************************************/
 package gui.tabs.editing;
 
-import gui.SignalChangeEvent;
-import gui.SignalChangeListener;
+import gui.SegmentEvent;
+import gui.SegmentEventListener;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
-import gui.components.panels.BorderTagDualChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.components.panels.SegmentationDualChartPanel;
 import gui.dialogs.AngleWindowSizeExplorer;
-import gui.dialogs.RulesetDialog;
-import gui.tabs.DetailPanel;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,16 +45,12 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.profiles.SegmentFitter;
-import charting.charts.DraggableOverlayChartPanel;
 import charting.charts.MorphologyChartFactory;
-import charting.charts.PositionSelectionChartPanel;
-import charting.charts.RectangleOverlayObject;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import components.Cell;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
@@ -68,7 +59,7 @@ import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
-public class SegmentsEditingPanel extends DetailPanel implements ActionListener, SignalChangeListener {
+public class SegmentsEditingPanel extends AbstractEditingPanel implements ActionListener, SegmentEventListener {
 					
 	private SegmentationDualChartPanel dualPanel;
 	
@@ -94,7 +85,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			this.setLayout(new BorderLayout());
 			
 			dualPanel = new SegmentationDualChartPanel();
-			dualPanel.addSignalChangeListener(this);
+			dualPanel.addSegmentEventListener(this);
 			this.add(dualPanel, BorderLayout.CENTER);
 
 			
@@ -216,13 +207,6 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 			return MorphologyChartFactory.getInstance().makeMultiSegmentedProfileChart(options);
 		}
-		
-		@Override
-		protected TableModel createPanelTableType(TableOptions options) throws Exception{
-			return null;
-		}
-		
-
 				
 		/**
 		 * Enable or disable buttons depending on datasets selected
@@ -273,68 +257,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			reprofileButton.setEnabled(b);
 			
 		}
-
-		@Override
-		public void signalChangeReceived(SignalChangeEvent event) {
-			if(event.type().contains("UpdateSegment")){
-				finest("Heard update segment request");
-				try{
-
-					
-					dualPanel.setAnalysing(true);
-
-					String[] array = event.type().split("\\|");
-					int segMidpointIndex = Integer.valueOf(array[1]);
-					int index = Integer.valueOf(array[2]);
-					
-					UUID segID = activeDataset()
-							.getCollection()
-							.getProfileCollection(ProfileType.ANGLE)
-							.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
-							.getSegmentContaining(segMidpointIndex)
-							.getID();
-					updateSegmentStartIndex(segID, index);
-
-				} catch(Exception e){
-					log(Level.SEVERE, "Error updating segment", e);
-				} finally {
-					dualPanel.setAnalysing(false);
-				}
-
-			}
-
-		}
 		
-		private void updateSegmentStartIndex(UUID id, int index) throws Exception{
-
-			// Update the median profile
-			activeDataset()
-				.getCollection()
-				.getProfileManager()
-				.updateMedianProfileSegmentIndex(true, id, index); // DraggablePanel always uses seg start index
-
-			// Lock all the segments except the one to change
-			activeDataset()
-			.getCollection()
-			.getProfileManager()
-			.setLockOnAllNucleusSegmentsExcept(id, true);
-							
-			/*
-			 * Invalidate the chart cache for the active dataset.
-			 * This will force the morphology refresh to create a new chart
-			 */
-			finest("Clearing chart cache for editing panel");
-			fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
-//			this.clearChartCache();
-			
-			
-			//  Update each nucleus profile
-			finest("Firing refresh morphology action");
-			fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
-
-			
-			
-		}
 				
 		private void updateCollectionWindowSize() throws Exception{
 			double windowSizeMin = 0.01;
@@ -423,14 +346,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 						.getProfileCollection(ProfileType.ANGLE)
 						.getSegmentedProfile(BorderTagObject.REFERENCE_POINT);
 				
-//				List<NucleusBorderSegment> list =collection.getProfileCollection(ProfileCollectionType.REGULAR)
-//						.getSegmentedProfile(BorderTagObject.REFERENCE_POINT).getOrderedSegments();
-				
-				
-				// Update the segment pattern to the same ordered pattern seen in the profile chart
-//				medianProfile.setSegments(list);
-				
-//				List<String> names = new ArrayList<String>();
+
 				SegmentsEditingPanel.this.setAnalysing(true);
 				
 				
@@ -469,6 +385,7 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 				SegmentsEditingPanel.this.setAnalysing(false);
 			}
 		}
+		
 		
 		private void mergeAction(SegmentedProfile medianProfile) throws Exception{
 			
@@ -631,6 +548,31 @@ public class SegmentsEditingPanel extends DetailPanel implements ActionListener,
 			}
 		}
 //	}
+
+		@Override
+		public void segmentEventReceived(SegmentEvent event) {
+			if(event.getType()==SegmentEvent.MOVE_START_INDEX){
+				finest("Heard update segment request");
+				try{
+
+					
+					setAnalysing(true);
+
+					UUID segID = event.getId();
+					
+					int index = event.getIndex();
+
+					updateSegmentStartIndexAction(segID, index);
+
+				} catch(Exception e){
+					error("Error updating segment", e);
+				} finally {
+					setAnalysing(false);
+				}
+
+			}
+			
+		}
 
 
 }

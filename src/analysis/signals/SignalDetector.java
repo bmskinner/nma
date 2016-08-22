@@ -105,8 +105,10 @@ public class SignalDetector extends AnalysisWorker {
 					
 					SignalCollection signalCollection = n.getSignalCollection();
 					signalCollection.addSignalGroup(signals, signalGroup, imageFile, channel);
-					n.calculateSignalDistancesFromCoM();
-					n.calculateFractionalSignalDistancesFromCoM();
+					
+					SignalAnalyser s = new SignalAnalyser();
+					s.calculateSignalDistancesFromCoM(n);
+					s.calculateFractionalSignalDistancesFromCoM(n);
 
 					fine("Calculating signal angles");
 					if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){

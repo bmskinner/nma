@@ -1,5 +1,5 @@
 /*******************************************************************************
-  *  	Copyright (C) 2015, 2016 Ben Skinner
+ *  	Copyright (C) 2015, 2016 Ben Skinner
  *   
  *     This file is part of Nuclear Morphology Analysis.
  *
@@ -25,6 +25,7 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -32,8 +33,8 @@ import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
+
 import components.generic.BorderTagObject;
-import components.generic.BorderTag.BorderTagType;
 import components.generic.ProfileType;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
@@ -42,26 +43,21 @@ import charting.options.TableOptions;
 import gui.BorderTagEventListener;
 import gui.DatasetEvent;
 import gui.InterfaceEvent;
-import gui.DatasetEvent.DatasetMethod;
-import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.BorderTagEvent;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.panels.BorderTagDualChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.dialogs.RulesetDialog;
-import gui.tabs.DetailPanel;
 
 
 @SuppressWarnings("serial")
-public class BorderTagEditingPanel extends DetailPanel implements ActionListener, BorderTagEventListener {
+public class BorderTagEditingPanel extends AbstractEditingPanel implements ActionListener, BorderTagEventListener {
 
 	private JPanel buttonsPanel;
 	
 	private JButton ruleSetButton;
 	
-	private static final String STR_SHOW_RULESETS     = "RuleSets";
-	
-//	private static final int RANGE_WINDOW = 10;
+	private static final String STR_SHOW_RULESETS     = "Rulesets";
 	
 	private BorderTagDualChartPanel dualPanel;
 	
@@ -184,44 +180,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
-			
-	
-	private void setBorderTagAction(BorderTagObject tag){
 
-		if(tag!=null){
-			
-			int newTagIndex = dualPanel.getActiveIndex();
-//				int newTagIndex = activeProfileIndex;
-
-				log("Updating "+tag+" to index "+newTagIndex);
-				
-				this.setAnalysing(true);
-
-				activeDataset()
-					.getCollection()
-					.getProfileManager()
-					.updateBorderTag(tag, newTagIndex);
-				
-				
-				this.refreshChartCache();
-				
-				if(tag.type().equals(BorderTagType.CORE)){
-					log("Resegmenting dataset");
-					fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
-				} else {					
-					fine("Firing refresh cache request for loaded datasets");
-					fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-				}
-
-				this.setAnalysing(false);
-
-			
-		} else {
-			fine("Tag is null");
-			return;
-		}
-
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -261,8 +220,7 @@ public class BorderTagEditingPanel extends DetailPanel implements ActionListener
 	@Override
 	public void borderTagEventReceived(BorderTagEvent event) {
 		if(event.getSource() instanceof JMenuItem){
-			BorderTagObject tag = event.getTag();
-			setBorderTagAction(tag);
+			setBorderTagAction(event.getTag(), event.getIndex());
 		}
 		
 	}

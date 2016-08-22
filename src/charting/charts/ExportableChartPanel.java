@@ -48,7 +48,8 @@ import logging.Loggable;
 
 /**
  * This panel should add a right click menu item for 'Export'
- * This will extract the chart data, and save it to a desired location
+ * This will extract the chart data, and save it to a desired location.
+ * It also redraws the chart as the panel is resized for better UX
  * @author ben
  *
  */
@@ -70,6 +71,8 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 	
 		this.setPopupMenu(popup);
 		
+		// Ensure that the chart text and images are redrawn to 
+		// a proper aspect ratio when the panel is resized
 		this.addComponentListener(new ComponentAdapter() {
 	        @Override
 	        public void componentResized(ComponentEvent e) {

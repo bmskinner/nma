@@ -104,6 +104,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		this.cell = cell;
 		this.dataset = dataset;
 		this.workingCell = new Cell(cell);
+		workingCell.getNucleus().setLocked(false);
 		createUI();
 		
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -125,10 +126,13 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 
 				// Replace the input cell with the working cell
 				if(save==0){
+					
+					workingCell.getNucleus().setLocked(true); // Prevent further changes without unlocking
 					dataset.getCollection().replaceCell(workingCell);
 
 					// Trigger a dataset update and reprofiling
 					dataset.getCollection().getProfileManager().createProfileCollections();
+					
 					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
 				} 
 				dispose();

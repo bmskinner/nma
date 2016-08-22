@@ -25,26 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-import analysis.AnalysisDataset;
 import logging.Loggable;
-//import analysis.nucleus.DatasetSegmenter.SegmentFitter;
 import utility.Constants;
 import components.AbstractCellularComponent;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
@@ -95,18 +79,10 @@ public class ProfileManager implements Loggable {
 		
 		for(Nucleus n : collection.getNuclei()){
 			
-//			Profile existing = n.getProfile(type);
-//			Profile reversed = existing.copy();
-//			reversed.reverse();
-//			
-//			// Find the orientation of the profile most similar to the median
-//			double existingScore = median.absoluteSquareDifference(existing);	
-//			double reversedScore = median.absoluteSquareDifference(reversed);
-//			
-//			if(reversedScore < existingScore){
-//				n.reverse();
-//			}
-
+			if(n.isLocked()){
+				continue;
+			}
+			
 			// returns the positive offset index of this profile which best matches the median profile
 			int newIndex = n.getProfile(type).getSlidingWindowOffset(median);
 			n.setBorderTag(tag, newIndex);		
@@ -806,12 +782,16 @@ public class ProfileManager implements Loggable {
 			 * in the individual nuclei
 			 */
 			for(Nucleus n : collection.getNuclei()){
+				
+				boolean wasLocked = n.isLocked();
+				n.setLocked(false); // Merging segments is not destructive
 
 				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
 				NucleusBorderSegment nSeg1 = profile.getSegment(seg1.getID());
 				NucleusBorderSegment nSeg2 = profile.getSegment(seg2.getID());
 				profile.mergeSegments(nSeg1, nSeg2, newID);
 				n.setProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT, profile);
+				n.setLocked(wasLocked);
 			}
 
 			/*
@@ -868,7 +848,8 @@ public class ProfileManager implements Loggable {
 				 * in the individual nuclei. Requires proportional alignment
 				 */
 				for(Nucleus n : collection.getNuclei()){
-
+					boolean wasLocked = n.isLocked();
+					n.setLocked(false); // Merging segments is not destructive
 
 					SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
 					NucleusBorderSegment nSeg = profile.getSegment(seg.getID());
@@ -876,6 +857,7 @@ public class ProfileManager implements Loggable {
 					int targetIndex = nSeg.getProportionalIndex(proportion);
 					profile.splitSegment(nSeg, targetIndex, newID1, newID2);
 					n.setProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT, profile);
+					n.setLocked(wasLocked);
 				}
 
 				/*
@@ -932,11 +914,13 @@ public class ProfileManager implements Loggable {
 		 * in the individual nuclei
 		 */
 		for(Nucleus n : collection.getNuclei()){
-
+			boolean wasLocked = n.isLocked();
+			n.setLocked(false); // Merging segments is not destructive
 			SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
 			NucleusBorderSegment nSeg = profile.getSegment(seg.getID());
 			profile.unmergeSegment(nSeg);
 			n.setProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT, profile);
+			n.setLocked(wasLocked);
 		}
 		
 		/*
