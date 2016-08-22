@@ -22,9 +22,8 @@ package gui.dialogs;
 import gui.DatasetEvent.DatasetMethod;
 import gui.GlobalOptions;
 import gui.RotationMode;
+import gui.ThreadManager;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import gui.dialogs.CellCollectionOverviewDialog.LabelInfoRenderer;
-import gui.tabs.cells.LabelInfo;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -39,7 +38,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
@@ -125,6 +123,8 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			}
 		});
 		
+		finer("Displaying resegmentation dialog");
+		updateCharts(workingCell);
 		this.setLocationRelativeTo(null);
 		this.setModal(false);
 		this.setVisible(true);
@@ -163,6 +163,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 	private void createUI(){
 
 		try{
+			finer("Creating resegmentation dialog");
 			this.setLayout(new BorderLayout());
 			this.setTitle("Resegmenting "+cell.getNucleus().getNameAndNumber());
 			
@@ -182,8 +183,6 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			panel = new CoupledProfileOutlineChartPanel(profile, outline, workingCell);
 			panel.addBorderPointEventListener(this);
 			
-			updateCharts(workingCell);
-
 			mainPanel.add(profile, BorderLayout.SOUTH);
 			mainPanel.add(outline, BorderLayout.CENTER);
 			mainPanel.add(table,BorderLayout.WEST);
@@ -247,6 +246,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		
 		reverseProfileBtn = new JButton("Flip profile");
 		reverseProfileBtn.addActionListener( e -> {
+			hasChanged = true;
 			workingCell.getNucleus().reverse();
 			updateCharts(workingCell);
 		});
@@ -347,36 +347,41 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 	
 	private void updateCharts(Cell cell){
 		
-		finer("Making profile chart options");
-		ChartOptions profileOptions = new ChartOptionsBuilder()
-			.setDatasets(dataset)
-			.setCell(cell)
-			.setNormalised(false)
-			.setAlignment(ProfileAlignment.LEFT)
-			.setTag(BorderTagObject.REFERENCE_POINT)
-			.setShowMarkers(false)
-			.setProfileType( ProfileType.ANGLE )
-			.setSwatch(GlobalOptions.getInstance().getSwatch())
-			.setShowPoints(true)
-			.build();
-
-		finer("Making outline chart options");
-		ChartOptions outlineOptions = new ChartOptionsBuilder()
-			.setDatasets(dataset)
-			.setCell(cell)
-			.setRotationMode(RotationMode.ACTUAL)
-			.setShowAnnotations(false)
-			.setInvertYAxis( true ) // only invert for actual
-			.setCellularComponent(cell.getNucleus())
-			.build();
-
-		finer("Making charts");
-		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeIndividualNucleusProfileChart(profileOptions);
-		JFreeChart outlineChart = OutlineChartFactory.getInstance().makeCellOutlineChart(outlineOptions);
-		finer("Updating charts");
-		panel.setCell(cell);
-		panel.getProfilePanel().setChart(profileChart);
-		panel.getOutlinePanel().setChart(outlineChart);
+		Runnable r = () ->{
+					
+			finer("Making profile chart options");
+			ChartOptions profileOptions = new ChartOptionsBuilder()
+				.setDatasets(dataset)
+				.setCell(cell)
+				.setNormalised(false)
+				.setAlignment(ProfileAlignment.LEFT)
+				.setTag(BorderTagObject.REFERENCE_POINT)
+				.setShowMarkers(false)
+				.setProfileType( ProfileType.ANGLE )
+				.setSwatch(GlobalOptions.getInstance().getSwatch())
+				.setShowPoints(true)
+				.build();
+	
+			finer("Making outline chart options");
+			ChartOptions outlineOptions = new ChartOptionsBuilder()
+				.setDatasets(dataset)
+				.setCell(cell)
+				.setRotationMode(RotationMode.ACTUAL)
+				.setShowAnnotations(false)
+				.setInvertYAxis( true ) // only invert for actual
+				.setCellularComponent(cell.getNucleus())
+				.build();
+	
+			finer("Making charts");
+			JFreeChart profileChart = MorphologyChartFactory.getInstance().makeIndividualNucleusProfileChart(profileOptions);
+			JFreeChart outlineChart = OutlineChartFactory.getInstance().makeCellOutlineChart(outlineOptions);
+			finer("Updating charts");
+			panel.setCell(cell);
+			panel.getProfilePanel().setChart(profileChart);
+			panel.getOutlinePanel().setChart(outlineChart);
+		};
+		
+		ThreadManager.getInstance().submit(r);
 	}
 
 	@Override

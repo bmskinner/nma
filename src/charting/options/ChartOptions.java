@@ -347,28 +347,49 @@ public class ChartOptions extends AbstractOptions {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		
+//		log("Equals reached level 0");
+		
 		if (!super.equals(obj))
 			return false;
+		
 		if (getClass() != obj.getClass())
 			return false;
+		
 		ChartOptions other = (ChartOptions) obj;
+//		log("Equals reached level 0.5");
+		
 		if (alignment != other.alignment)
 			return false;
+		
 		if (Double.doubleToLongBits(modalityPosition) != Double
 				.doubleToLongBits(other.modalityPosition))
 			return false;
+		
 		if (normalised != other.normalised)
 			return false;
+		
+//		log("Equals reached level 0.6");
+		
 		if (showMarkers != other.showMarkers)
 			return false;
+		
 		if (hideProfiles != other.hideProfiles)
 			return false;
+		
+//		log("Equals reached level 0.7");
+		
 		if (showPoints != other.showPoints)
 			return false;
 		if (showLines != other.showLines)
 			return false;
-		if (showLines != other.showAnnotations)
+		
+//		log("Equals reached level 0.8");
+		
+		if (showAnnotations != other.showAnnotations)
 			return false;
+		
+//		log("Equals reached level 1");
 		
 		if (showMesh != other.showMesh)
 			return false;
@@ -383,6 +404,7 @@ public class ChartOptions extends AbstractOptions {
 		if (straightenMesh != other.straightenMesh)
 			return false;
 		
+//		log("Equals reached level 2");
 		
 		if (showXAxis != other.showXAxis)
 			return false;
@@ -393,14 +415,17 @@ public class ChartOptions extends AbstractOptions {
 		if (invertYAxis != other.invertYAxis)
 			return false;
 		
-//		if(signalGroup != null){
-//			if( ! signalGroup.equals(other.signalGroup))
-//				return false;
-//		}
+//		log("Equals reached level 3");
+
 		if (signalGroup != other.signalGroup)
 			return false;
-		if (tag != other.tag)
+		
+		if (tag == null) {
+			if (other.tag != null)
+				return false;
+		} else if (!tag.equals(other.tag))
 			return false;
+		
 		if (type != other.type)
 			return false;
 		if (useDensity != other.useDensity)
@@ -408,12 +433,29 @@ public class ChartOptions extends AbstractOptions {
 		
 		if (rotateMode != other.rotateMode)
 			return false;
-		if (cell != other.cell)
+		
+//		log("Equals reached level 4");
+
+		if (cell == null) {
+			if (other.cell != null)
+				return false;
+		} else if (!cell.equals(other.cell))
 			return false;
-		if (component != other.component)
+		
+//		log("Equals reached level 5");
+
+		
+		if (component == null) {
+			if (other.component != null)
+				return false;
+		} else if (!component.equals(other.component))
 			return false;
+//		log("Equals reached level 6");
+
+		
 		if (showWarp != other.showWarp)
 			return false;
+		
 		
 		return true;
 	}

@@ -188,7 +188,9 @@ public abstract class AbstractOptions implements Loggable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
+		
 		AbstractOptions other = (AbstractOptions) obj;
+		
 		if (list == null) {
 			if (other.list != null)
 				return false;
@@ -210,6 +212,7 @@ public abstract class AbstractOptions implements Loggable {
 			return false;
 		if (swatch != other.swatch)
 			return false;
+		
 		return true;
 	}
 }

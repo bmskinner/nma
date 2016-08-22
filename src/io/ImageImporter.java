@@ -18,6 +18,7 @@
  *******************************************************************************/
 package io;
 
+import gui.ThreadManager;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
@@ -26,6 +27,7 @@ import ij.process.ImageProcessor;
 
 import java.io.File;
 import java.util.logging.Level;
+
 import logging.DebugFileHandler;
 import logging.Loggable;
 import utility.Constants;
@@ -74,9 +76,7 @@ public class ImageImporter implements Loggable {
 		} catch (Exception e){
 			log(Level.SEVERE, "Error importing image", e);
 		} finally {
-//			for(Handler h : getHandlers()){
-//				h.close();
-//			}
+
 		}
 		return stack;
 	}
@@ -84,23 +84,25 @@ public class ImageImporter implements Loggable {
 	public ImageStack importImage(File f){
 
 		ImageStack stack = null;
+
 		try{
 			if(f.isFile()){
 
-				log(Level.FINE, "Importing image: "+f.getAbsolutePath());
+				fine("Importing image: "+f.getAbsolutePath());
 
 				ImagePlus image = new ImagePlus(f.getAbsolutePath());
 				stack = convert(image);
 
 			} else {
-				log(Level.WARNING, "Not a file: "+f.getAbsolutePath());
+				warn("Not a file: "+f.getAbsolutePath());
 			}
 
 		} catch (Exception e){
 
-			log(Level.SEVERE, "Error importing image", e);
+			error("Error importing image", e);
 
 		}
+
 		return stack;
 	}
 	

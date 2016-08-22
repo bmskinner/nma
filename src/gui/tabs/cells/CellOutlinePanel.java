@@ -4,11 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.util.logging.Level;
 
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
@@ -20,18 +17,15 @@ import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
-import components.Cell;
 import components.CellularComponent;
 import gui.DatasetEvent;
-import gui.InterfaceEvent;
 import gui.RotationMode;
 import gui.components.panels.GenericCheckboxPanel;
 import gui.components.panels.RotationSelectionSettingsPanel;
 import gui.dialogs.CellCollectionOverviewDialog;
-import gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
-public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener{
+public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener {
 	
 	private RotationSelectionSettingsPanel rotationPanel;
 
@@ -62,13 +56,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		settingsPanel.add(makeMeshPanel);
 		settingsPanel.add(warpMeshPanel);
 		
-//		JButton allCellsButton = new JButton("All cells");
-//		allCellsButton.addActionListener( e ->{
-//			CellCollectionOverviewDialog d =new CellCollectionOverviewDialog(activeDataset());
-//			d.addDatasetEventListener(this);
-//		});
-//		settingsPanel.add(allCellsButton);
-		
+//		this.addChartOptionsRenderedEventListener(this);
 		
 		this.add(settingsPanel, BorderLayout.NORTH);
 		
@@ -188,12 +176,16 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 	@Override
 	public void datasetEventReceived(DatasetEvent event){
 		super.datasetEventReceived(event);
-//		log("Heard dataset event");
     	// Pass messages upwards
     	if(event.getSource() instanceof CellCollectionOverviewDialog){
-//    		log("Is from CellCollectionDialog");
     		fireDatasetEvent(new DatasetEvent(this, event));
     	}
     }
+
+	@Override
+	public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e) {
+
+		update();
+	}
 
 }

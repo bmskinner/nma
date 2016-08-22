@@ -26,6 +26,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -103,7 +104,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * Create an empty chart to display when no datasets are selected
 	 * @return a chart
 	 */
-	private static JFreeChart makeEmptyProfileChart(ProfileType type){
+	private JFreeChart makeEmptyProfileChart(ProfileType type){
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				"Position", type.getLabel(), null);
 		
@@ -522,7 +523,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param xLength the length of the x axis
 	 * @return a chart
 	 */
-	private static JFreeChart makeMultiProfileChart(ChartOptions options)  throws Exception{
+	private JFreeChart makeMultiProfileChart(ChartOptions options)  throws Exception{
 				
 		List<XYSeriesCollection> iqrProfiles = null;
 		XYDataset medianProfiles			 = null;
@@ -622,18 +623,25 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 	
-	public static JFreeChart makeVariabilityChart(ChartOptions options) throws Exception {
+	public JFreeChart makeVariabilityChart(ChartOptions options) {
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyProfileChart(options.getType());
 		}
 		
-		if(options.isSingleDataset()){
-			return makeSingleVariabilityChart(options);
-		}
-		
-		if(options.isMultipleDatasets()){
-			return makeMultiVariabilityChart(options);
+		try {
+
+			if(options.isSingleDataset()){
+				return makeSingleVariabilityChart(options);
+			}
+
+			if(options.isMultipleDatasets()){
+				return makeMultiVariabilityChart(options);
+			}
+		} catch(Exception e){
+			warn("Error making variability chart");
+			log(Level.FINE, "Error making variability chart", e);
+			return makeEmptyProfileChart(options.getType());
 		}
 		
 		return makeEmptyProfileChart(options.getType());
@@ -646,7 +654,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	private static JFreeChart makeSingleVariabilityChart(ChartOptions options) throws Exception {
+	private JFreeChart makeSingleVariabilityChart(ChartOptions options) throws Exception {
 		XYDataset ds = NucleusDatasetCreator.getInstance().createIQRVariabilityDataset(options);
 
 		ColourSwatch swatch = options.getSwatch();
@@ -655,6 +663,42 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 		plot.getRangeAxis().setLabel("IQR");
 		plot.getRangeAxis().setAutoRange(true);
+		
+		
+		if(options.isShowMarkers()){ // add the bimodal regions
+			CellCollection collection = options.firstDataset().getCollection();
+
+			// dip test the profiles
+
+			double significance   = options.getModalityPosition();
+			BooleanProfile modes  = DipTester.testCollectionIsUniModal(collection, options.getTag(), significance, options.getType());
+
+
+			// add any regions with bimodal distribution to the chart
+
+			Profile xPositions = modes.getPositions(100);
+
+			for(int i=0; i<modes.size(); i++){
+				double x = xPositions.get(i);
+				if(modes.get(i)==true){
+					ValueMarker marker = new ValueMarker(x, Color.black, new BasicStroke(2f));
+					plot.addDomainMarker(marker);
+				}
+			}
+			
+			
+			try {
+
+				double ymax = DatasetUtilities.findMaximumRangeValue(plot.getDataset()).doubleValue();
+				DecimalFormat df = new DecimalFormat("#0.000"); 
+				XYTextAnnotation annotation = new XYTextAnnotation("Markers for non-unimodal positions (p<"+df.format(significance)+")",1, ymax);
+				annotation.setTextAnchor(TextAnchor.TOP_LEFT);
+				plot.addAnnotation(annotation);
+			} catch (IllegalArgumentException ex){
+				fine("Missing data in variability chart");
+			}
+		}
+		
 		return chart;
 	}
 	
@@ -664,7 +708,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	private static JFreeChart makeMultiVariabilityChart(ChartOptions options) throws Exception {
+	private JFreeChart makeMultiVariabilityChart(ChartOptions options) throws Exception {
 		XYDataset ds = NucleusDatasetCreator.getInstance().createIQRVariabilityDataset(options);
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,

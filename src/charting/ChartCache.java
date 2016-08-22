@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import logging.Loggable;
+
 import org.jfree.chart.JFreeChart;
 
 import charting.options.ChartOptions;
@@ -36,7 +38,7 @@ import analysis.AnalysisDataset;
  * This needs to hold a UUID for any combination of datasets and display options,
  *  and map this uuid to the appropriate chart
  */
-public class ChartCache implements Cache {
+public class ChartCache implements Cache, Loggable {
 	
 	private Map<ChartOptions, JFreeChart> chartMap = new HashMap<ChartOptions, JFreeChart>();
 	
@@ -44,29 +46,40 @@ public class ChartCache implements Cache {
 		
 	}
 	
-	public void addChart(ChartOptions options, JFreeChart chart){
-		chartMap.put(options, chart);
+	public String toString(){
+		StringBuilder b = new StringBuilder();
+		b.append("Chart cache:\n");
+		for(ChartOptions op : chartMap.keySet()){
+			b.append(op.hashCode()+"\t");
+			for(ChartOptions op2 : chartMap.keySet()){
+				b.append(op.equals(op2)+"\t");
+			}
+			b.append("\n");
+		}
+		return b.toString();
 	}
 	
-	public JFreeChart getChart(ChartOptions options){
+	public synchronized void addChart(ChartOptions options, JFreeChart chart){
+		chartMap.put(options, chart);		
+	}
+	
+	public synchronized JFreeChart getChart(ChartOptions options){
 		if(chartMap.containsKey(options)){
 			return chartMap.get(options);
 		}
+		
 		return null;
 	}
 	
-	public boolean hasChart(ChartOptions options){
-		if(chartMap.containsKey(options)){
-			return true;
-		}
-		return false;
+	public synchronized boolean hasChart(ChartOptions options){
+		return chartMap.containsKey(options);
 	}
 	
 	/* (non-Javadoc)
 	 * @see charting.Cache#purge()
 	 */
 	@Override
-	public void purge(){
+	public synchronized void purge(){
 		chartMap   = new HashMap<ChartOptions, JFreeChart>();
 	}
 	
@@ -74,13 +87,13 @@ public class ChartCache implements Cache {
 	 * @see charting.Cache#refresh()
 	 */
 	@Override
-	public void clear(){
+	public synchronized void clear(){
 		this.purge();
 	}
 	
 
 	@Override
-	public void clear(List<AnalysisDataset> list){
+	public synchronized void clear(List<AnalysisDataset> list){
 		
 		// If the list is malformed, clear everything
 		if(list==null || list.isEmpty()){
@@ -104,18 +117,12 @@ public class ChartCache implements Cache {
 			}
 		}
 		
-//		try {
-		
-			//Remove the options with the datasets
-			for(ChartOptions op : toRemove){
-				finest("Clearing options");
-				chartMap.remove(op);
-			}
-//		} catch(Exception e){
-//			log(Level.FINE, "Error clearing chart cache", e );
-//			purge();
-//			return;
-//		}
+
+		//Remove the options with the datasets
+		for(ChartOptions op : toRemove){
+			finest("Clearing options");
+			chartMap.remove(op);
+		}
 	}
 	
 	

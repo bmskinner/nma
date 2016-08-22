@@ -24,6 +24,7 @@ import gui.components.panels.ProfileCollectionTypeSettingsPanel;
 import gui.components.panels.ProfileMarkersOptionsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.tabs.DetailPanel;
+import gui.tabs.DetailPanel.ChartOptionsRenderedEvent;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -81,15 +82,16 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	public VariabilityDisplayPanel(){
 		super();
 		this.setLayout(new BorderLayout());
+		
+		ChartOptions options =  new ChartOptionsBuilder()
+			.setProfileType(ProfileType.ANGLE)
+			.build();
+		
+		JFreeChart chart = MorphologyChartFactory.getInstance().makeVariabilityChart(options);
 
-		JFreeChart variablityChart = ChartFactory.createXYLineChart(null,
-				"Position", "IQR", null);
-		XYPlot variabilityPlot = variablityChart.getXYPlot();
-		variabilityPlot.setBackgroundPaint(Color.WHITE);
-		variabilityPlot.getDomainAxis().setRange(0,100);
-		chartPanel = new ExportableChartPanel(variablityChart);
-		chartPanel.setMinimumDrawWidth( 0 );
-		chartPanel.setMinimumDrawHeight( 0 );
+
+		chartPanel = new ExportableChartPanel(chart);
+
 		this.add(chartPanel, BorderLayout.CENTER);
 
 		buttonPanel.add(borderTagOptionsPanel);
@@ -119,6 +121,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 		this.add(buttonPanel, BorderLayout.NORTH);
 	}
 
+
 	public void setEnabled(boolean b){
 		borderTagOptionsPanel.setEnabled(b);
 		profileCollectionTypeSettingsPanel.setEnabled(b);
@@ -140,44 +143,10 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	private void updateProfiles(ChartOptions options){
 
 		try {
-			if(options.isSingleDataset()){
-				JFreeChart chart = getChart(options);
-
-
-				if(options.isShowMarkers()){ // add the bimodal regions
-					CellCollection collection = options.firstDataset().getCollection();
-
-					// dip test the profiles
-
-					double significance = (Double) pvalueSpinner.getValue();
-					BooleanProfile modes  = DipTester.testCollectionIsUniModal(collection, options.getTag(), significance, options.getType());
-
-
-					// add any regions with bimodal distribution to the chart
-					XYPlot plot = chart.getXYPlot();
-
-					Profile xPositions = modes.getPositions(100);
-
-					for(int i=0; i<modes.size(); i++){
-						double x = xPositions.get(i);
-						if(modes.get(i)==true){
-							ValueMarker marker = new ValueMarker(x, Color.black, new BasicStroke(2f));
-							plot.addDomainMarker(marker);
-						}
-					}
-
-					double ymax = DatasetUtilities.findMaximumRangeValue(plot.getDataset()).doubleValue();
-					DecimalFormat df = new DecimalFormat("#0.000"); 
-					XYTextAnnotation annotation = new XYTextAnnotation("Markers for non-unimodal positions (p<"+df.format(significance)+")",1, ymax);
-					annotation.setTextAnchor(TextAnchor.TOP_LEFT);
-					plot.addAnnotation(annotation);
-				}
-
-				chartPanel.setChart(chart);
-			} else { // multiple nuclei
-				JFreeChart chart = MorphologyChartFactory.makeVariabilityChart(options);
-				chartPanel.setChart(chart);
-			}
+			
+			JFreeChart chart = getChart(options);			
+			chartPanel.setChart(chart);
+			
 		} catch (Exception e) {
 			log(Level.SEVERE, "Error in plotting variability chart", e);
 		}	
@@ -204,6 +173,13 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 		update(getDatasets());
 
 	}
+	
+//	@Override
+//	public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e) {
+//
+//		JFreeChart chart = this.getChartCache().getChart(e.getOptions());
+//		chartPanel.setChart(chart);		
+//	}
 
 	@Override
 	protected void updateSingle() {
@@ -215,14 +191,15 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 
 			ChartOptions options =  new ChartOptionsBuilder()
-			.setDatasets(getDatasets())
-			.setNormalised(true)
-			.setAlignment(ProfileAlignment.LEFT)
-			.setTag(tag)
-			.setShowMarkers(showMarkers)
-			.setSwatch(GlobalOptions.getInstance().getSwatch())
-			.setProfileType(type)
-			.build();
+				.setDatasets(getDatasets())
+				.setNormalised(true)
+				.setAlignment(ProfileAlignment.LEFT)
+				.setTag(tag)
+				.setShowMarkers(showMarkers)
+				.setModalityPosition((Double) pvalueSpinner.getValue())
+				.setSwatch(GlobalOptions.getInstance().getSwatch())
+				.setProfileType(type)
+				.build();
 
 			updateProfiles(options);
 		
@@ -244,11 +221,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return MorphologyChartFactory.makeVariabilityChart(options);
+		return MorphologyChartFactory.getInstance().makeVariabilityChart(options);
 	}
 	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return null;
-	}
 }

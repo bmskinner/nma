@@ -21,6 +21,7 @@
 package charting.charts;
 
 import gui.RotationMode;
+import gui.ThreadManager;
 import gui.components.ColourSelecter;
 import ij.process.ImageProcessor;
 
@@ -77,7 +78,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 	private static OutlineChartFactory instance = null;
 	
-	private OutlineChartFactory(){}
+	public OutlineChartFactory(){}
 	
 	public static OutlineChartFactory getInstance(){
 		if(instance==null){
@@ -447,19 +448,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					int colourIndex = getIndexFromLabel(name);
 					Color colour = ColourSelecter.getColor(colourIndex);
 					plot.getRenderer().setSeriesPaint(i, colour);
-					
-					/*
-					 * Add a line between the top and bottom vertical points
-					 */
-//					if(cell.getNucleus().hasBorderTag(BorderTag.TOP_VERTICAL) && cell.getNucleus().hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
-//						BorderPoint[] verticals = cell.getNucleus().getBorderPointsForVerticalAlignment();
-//						plot.addAnnotation(new XYLineAnnotation(verticals[0].getX(),
-//								verticals[0].getY(),
-//								verticals[1].getX(),
-//								verticals[1].getY()
-//								));
-//					}
-
 				}
 				
 				/*
@@ -657,46 +645,44 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		if(component==null){
 			return;
 		}
-
-		ImageProcessor openProcessor = component.getImage();
-
-		if(openProcessor==null){	
-			return;	
-		}
 		
-		double[] positions = cell.getNucleus().getPosition();
+			ImageProcessor openProcessor = component.getImage();
 
-		XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
-		
-		int padding = 10; // a border of pixels beyond the cell boundary
-		int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
-		int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
-		int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
-		int wideY = (int) (positions[CellularComponent.Y_BASE]-padding);
-
-		wideX = wideX<0 ? 0 : wideX;
-		wideY = wideY<0 ? 0 : wideY;
-
-		openProcessor.setRoi(wideX, wideY, wideW, wideH);
-		openProcessor = openProcessor.crop();
-
-		for(int x=0; x<openProcessor.getWidth(); x++){
-			for(int y=0; y<openProcessor.getHeight(); y++){
-
-				//				int pixel = im.getRGB(x, y);
-				int pixel = openProcessor.get(x, y);
-				Color col = new Color(pixel);
-//				Color col = new Color(pixel, pixel, pixel, 255);
-
-				// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
-				Rectangle2D r = new Rectangle2D.Double(x-padding-0.1, y-padding-0.1, 1.2, 1.2);
-				XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
-
-				rend.addAnnotation(a, Layer.BACKGROUND);
+			if(openProcessor==null){	
+				return;	
 			}
-		}
 
+			double[] positions = cell.getNucleus().getPosition();
 
+			XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
+
+			int padding = 10; // a border of pixels beyond the cell boundary
+			int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
+			int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
+			int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
+			int wideY = (int) (positions[CellularComponent.Y_BASE]-padding);
+
+			wideX = wideX<0 ? 0 : wideX;
+			wideY = wideY<0 ? 0 : wideY;
+
+			openProcessor.setRoi(wideX, wideY, wideW, wideH);
+			openProcessor = openProcessor.crop();
+
+			for(int x=0; x<openProcessor.getWidth(); x++){
+				for(int y=0; y<openProcessor.getHeight(); y++){
+
+					//				int pixel = im.getRGB(x, y);
+					int pixel = openProcessor.get(x, y);
+					Color col = new Color(pixel);
+					//				Color col = new Color(pixel, pixel, pixel, 255);
+
+					// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
+					Rectangle2D r = new Rectangle2D.Double(x-padding-0.1, y-padding-0.1, 1.2, 1.2);
+					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+
+					rend.addAnnotation(a, Layer.BACKGROUND);
+				}
+			}
 	}
 	
 	

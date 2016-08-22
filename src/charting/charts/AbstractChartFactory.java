@@ -31,10 +31,10 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 
 import charting.ChartComponents;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 
 public abstract class AbstractChartFactory implements Loggable {
+	//extends ChartFactoryWorker 
 
 	protected static final ForkJoinPool mainPool = new ForkJoinPool();
 	

@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.ChartOptionsRenderedEventListener;
 import gui.DatasetEvent;
 import gui.DatasetEvent.DatasetMethod;
 import gui.DatasetEventListener;
@@ -32,12 +33,14 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.util.ArrayList;
+import java.util.EventObject;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.SwingWorker;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
@@ -62,7 +65,7 @@ import analysis.AnalysisDataset;
 @SuppressWarnings("serial")
 public abstract class DetailPanel 
 	extends JPanel 
-	implements TabPanel, SignalChangeListener, DatasetEventListener, InterfaceEventListener, Loggable {
+	implements TabPanel, SignalChangeListener, DatasetEventListener, InterfaceEventListener, Loggable, ChartOptionsRenderedEventListener {
 	
 	private final List<Object> listeners 			= new ArrayList<Object>();
 	private final List<Object> datasetListeners 	= new ArrayList<Object>();
@@ -81,6 +84,7 @@ public abstract class DetailPanel
 	volatile private boolean isUpdating = false;
 	
 	public DetailPanel( ){
+		this.addChartOptionsRenderedEventListener(this);
 	}
 
 	
@@ -343,27 +347,38 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected JFreeChart getChart(ChartOptions options) {
+	protected synchronized JFreeChart getChart(ChartOptions options) {
 		JFreeChart chart;
-		if(getChartCache().hasChart(options)){
-			finest("Fetched cached chart");
+		if(chartCache.hasChart(options)){
+			finest("Fetched cached chart with hashcode "+options.hashCode());
 			chart = getChartCache().getChart(options);
 
-		} else { // No cache
-			
-			
+		} else { // No cached chart
+			finest("No cached chart available with hashcode "+options.hashCode());
 
-			try {
-				chart = createPanelChartType(options);
-			} catch (Exception e) {
-				warn("Error creating chart: "+ this.getClass().getSimpleName());
-				log(Level.FINE, this.getClass().getName()+": Error creating chart", e);
-				
-				// Draw an empty chart to fill the space
-				chart = ScatterChartFactory.getInstance().makeEmptyChart();
-			}
-			getChartCache().addChart(options, chart);
-			finest("Added cached chart");
+			// Create an empty placeholder chart
+			chart = ScatterChartFactory.getInstance().makeEmptyChart();
+			chartCache.addChart(options, chart);
+//			log(chartCache.toString());
+
+			// Make a background worker to generate the chart and
+			// notify the panel when it is complete
+			ChartFactoryWorker worker = new ChartFactoryWorker(options);
+			worker.execute();
+			
+//			log(this.getClass().getSimpleName()+": Rendering new chart");
+
+//			try {
+//				chart = createPanelChartType(options);
+//			} catch (Exception e) {
+//				warn("Error creating chart: "+ this.getClass().getSimpleName());
+//				log(Level.FINE, this.getClass().getName()+": Error creating chart", e);
+//				
+//				// Draw an empty chart to fill the space
+//				chart = ScatterChartFactory.getInstance().makeEmptyChart();
+//			}
+//			getChartCache().addChart(options, chart);
+//			finest("Added cached chart");
 		}
 		return chart;
 	}
@@ -374,7 +389,7 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected TableModel getTable(TableOptions options) {
+	protected synchronized TableModel getTable(TableOptions options) {
 		
 		TableModel model;
 		if(getTableCache().hasTable(options)){
@@ -419,7 +434,7 @@ public abstract class DetailPanel
 	 * Remove all charts from the cache. Does not invoke an update 
 	 * @param list
 	 */
-	public void clearChartCache(){
+	public synchronized void clearChartCache(){
 		finest("Clearing chart cache");
 		this.getChartCache().clear();
 		for(DetailPanel panel : this.subPanels){
@@ -432,7 +447,7 @@ public abstract class DetailPanel
 	 * Remove all charts from the cache. Does not invoke an update 
 	 * @param list
 	 */
-	public void clearChartCache(final List<AnalysisDataset> list){
+	public synchronized void clearChartCache(final List<AnalysisDataset> list){
 		finest("Clearing chart cache for specific datasets");
 		this.getChartCache().clear(list);
 		finest("Panel chart cache cleared");
@@ -449,7 +464,7 @@ public abstract class DetailPanel
 	 * Remove all charts from the cache. Then call an update of the panel
 	 * @param list
 	 */
-	public void refreshChartCache(){
+	public synchronized void refreshChartCache(){
 		clearChartCache();
 		finest("Updating charts after clear");
 		this.update(getDatasets());
@@ -461,14 +476,14 @@ public abstract class DetailPanel
 	 * some of the charts in the chache, without recalculating everything
 	 * @param list
 	 */
-	public void refreshChartCache(final List<AnalysisDataset> list){
+	public synchronized void refreshChartCache(final List<AnalysisDataset> list){
 		finest("Refreshing chart cache for specific datasets");
 		clearChartCache(list);
 		finest("Updating panel for specific datasets");
 		this.update(getDatasets());
 	}
 	
-	public TableCache getTableCache(){
+	public synchronized TableCache getTableCache(){
 		return this.tableCache;
 	}
 	
@@ -476,7 +491,7 @@ public abstract class DetailPanel
 	 * Remove all tables from the cache
 	 * @param list
 	 */
-	public void clearTableCache(){
+	public synchronized void clearTableCache(){
 		finest("Clearing table cache");
 		this.getTableCache().clear();
 		for(DetailPanel panel : this.subPanels){
@@ -490,7 +505,7 @@ public abstract class DetailPanel
 	 * the given list, so they will be recalculated
 	 * @param list
 	 */
-	public void clearTableCache(final List<AnalysisDataset> list){
+	public synchronized void clearTableCache(final List<AnalysisDataset> list){
 		finest("Clearing table cache for specific datasets");
 		this.getTableCache().clear(list);
 		if(this.hasSubPanels()){
@@ -505,7 +520,7 @@ public abstract class DetailPanel
 	 * Remove all charts from the cache and trigger an update
 	 * @param list
 	 */
-	public void refreshTableCache(){
+	public synchronized void refreshTableCache(){
 		clearTableCache();
 		finest("Updating tables after clear");
 		this.update(getDatasets());
@@ -516,7 +531,7 @@ public abstract class DetailPanel
 	 * the given list, so they will be recalculated
 	 * @param list
 	 */
-	public void refreshTableCache(final List<AnalysisDataset> list){
+	public synchronized void refreshTableCache(final List<AnalysisDataset> list){
 		clearTableCache(list);
 		this.update(getDatasets());
 	}
@@ -557,6 +572,12 @@ public abstract class DetailPanel
     
     public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
     	interfaceListeners.remove( l );
+    }
+    
+    @Override
+	public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e){
+    	// To be overridden as needed by extending classes
+    	update(getDatasets());
     }
         
     
@@ -655,6 +676,90 @@ public abstract class DetailPanel
 				fireSignalChangeEvent(new SignalChangeEvent(this, event));
 			}
 		}
+    }
+    
+    /**
+     * Charting can be an intensive process, especially with background
+     * images being imported for outline charts. This worker will keep the 
+     * chart generation off the EDT
+     * @author bms41
+     *
+     */
+    protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void> {
+    	
+    	private ChartOptions options;
+    	
+    	public ChartFactoryWorker(ChartOptions options){
+    		this.options = options;
+    	}
+
+    	@Override
+    	protected JFreeChart doInBackground() throws Exception {
+
+    		try {
+
+    			JFreeChart chart = createPanelChartType(options);
+    			chartCache.addChart(options, chart);
+
+    			
+    			return chart;
+    		} catch(Exception e){
+    			error("Error creating chart", e);
+    			return null;
+    		}
+
+    	}
+    	
+    	
+    	
+    	@Override
+        public void done() {
+   	
+    		fireChartOptionsRenderedEvent(options);
+        } 
+    	
+
+    }
+    
+    /**
+     * Signal listeners that the chart with the given options
+     * has been rendered
+     * @param options
+     */
+    public void fireChartOptionsRenderedEvent(ChartOptions options){
+    	ChartOptionsRenderedEvent e = new ChartOptionsRenderedEvent(this, options);
+    	Iterator<Object> iterator = listeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (ChartOptionsRenderedEventListener) iterator.next() ).chartOptionsRenderedEventReceived( e );
+        }
+    }
+    
+    
+    /**
+     * Add a listener for completed charts rendered into the chart cache of this panel.
+     * @param l
+     */
+    public synchronized void addChartOptionsRenderedEventListener( ChartOptionsRenderedEventListener l ) {
+    	listeners.add( l );
+    }
+    
+    public synchronized void removeChartOptionsRenderedEventListener( ChartOptionsRenderedEventListener l ) {
+    	listeners.remove( l );
+    }
+        
+    public class ChartOptionsRenderedEvent extends EventObject {
+    	
+    	private ChartOptions options;
+    	
+    	public ChartOptionsRenderedEvent(Object source, ChartOptions options){
+    		super(source);
+    		this.options = options;
+    		
+    	}
+
+		public ChartOptions getOptions() {
+			return options;
+		}	
     }
 
 }

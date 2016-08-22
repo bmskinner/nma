@@ -106,24 +106,6 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 			this.setEnabled(false);
 		}
 
-				
-//		private void detectModes(JFreeChart chart, List<AnalysisDataset> list, int stat){
-//			
-//			XYPlot plot = chart.getXYPlot();
-//			
-//			
-//			for(AnalysisDataset dataset : list){
-//				
-////				double[] values;
-//				try {
-////					
-//				} catch (Exception e) {
-//					log(Level.SEVERE, "Unable to detect modes", e);
-//				}
-//				
-//			}
-//			
-//		}
 
 		@Override
 		public void signalChangeReceived(SignalChangeEvent event) {

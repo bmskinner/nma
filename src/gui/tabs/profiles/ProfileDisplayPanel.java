@@ -20,6 +20,7 @@ package gui.tabs.profiles;
 
 import gui.GlobalOptions;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.tabs.DetailPanel.ChartOptionsRenderedEvent;
 
 import javax.swing.table.TableModel;
 
@@ -84,6 +85,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 			JFreeChart   chart   = getChart(options);
 			chartPanel.setChart(chart);			
 		}
+		
 		
 		private ChartOptions makeOptions(){
 
