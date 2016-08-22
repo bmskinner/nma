@@ -125,6 +125,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 						.setSwatch(activeDataset().getSwatch())
 						.setShowAnnotations(false)
 						.setShowPoints(true)
+						.setTarget(dualPanel.getMainPanel())
 						.build();
 					
 								
@@ -145,6 +146,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 						.setSwatch(activeDataset().getSwatch())
 						.setShowPoints(false)
 						.setShowAnnotations(false)
+						.setTarget(dualPanel.getRangePanel())
 						.build();
 					
 					JFreeChart rangeChart = getChart(rangeOptions);

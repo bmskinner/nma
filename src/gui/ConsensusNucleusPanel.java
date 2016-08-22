@@ -405,6 +405,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			.setShowAnnotations(false)
 			.setShowXAxis(false)
 			.setShowYAxis(false)
+			.setTarget(consensusChartPanel)
 			.build();
 		
 		JFreeChart consensusChart = getChart(options);
@@ -441,6 +442,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			.setDatasets(getDatasets())
 			.setScale(GlobalOptions.getInstance().getScale())
 			.setSwatch(GlobalOptions.getInstance().getSwatch())
+			.setTarget(consensusChartPanel)
 			.build();
 
 		JFreeChart chart = getChart(options);
@@ -456,6 +458,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	private void updateBlankChart() {
 		
 		ChartOptions options = new ChartOptionsBuilder()
+			.setTarget(consensusChartPanel)
 			.build();
 		JFreeChart consensusChart = getChart(options);
 

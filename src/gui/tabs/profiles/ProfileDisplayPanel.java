@@ -104,6 +104,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 				.setHideProfiles(hideProfiles)
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
 				.setProfileType(type)
+				.setTarget(chartPanel)
 				.build();
 			return options;
 		}

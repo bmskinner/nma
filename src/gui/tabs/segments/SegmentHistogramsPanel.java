@@ -17,8 +17,10 @@ import javax.swing.JPanel;
 import org.jfree.chart.JFreeChart;
 
 import stats.SegmentStatistic;
+import charting.charts.BoxplotChartFactory;
 import charting.charts.HistogramChartFactory;
 import charting.charts.SelectableChartPanel;
+import charting.charts.ViolinChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
@@ -73,6 +75,9 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 			// Get each segment as a boxplot
 			for(NucleusBorderSegment seg : segments){
 				
+				JFreeChart chart = HistogramChartFactory.getInstance().makeEmptyChart();
+				SelectableChartPanel chartPanel = new SelectableChartPanel(chart, seg.getName());
+				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.addStatistic(SegmentStatistic.LENGTH)
@@ -80,12 +85,13 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setUseDensity(useDensity)
 					.setSegPosition(seg.getPosition())
+					.setTarget(chartPanel)
 					.build();
 				
 				
-				JFreeChart chart = getChart(options);
-				
-				SelectableChartPanel chartPanel = new SelectableChartPanel(chart, seg.getName());
+				chart = getChart(options);
+				chartPanel.setChart(chart);
+
 				chartPanel.setPreferredSize(preferredSize);
 				mainPanel.add(chartPanel);							
 			}

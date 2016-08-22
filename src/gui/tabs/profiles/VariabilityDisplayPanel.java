@@ -199,6 +199,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 				.setModalityPosition((Double) pvalueSpinner.getValue())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
 				.setProfileType(type)
+				.setTarget(chartPanel)
 				.build();
 
 			updateProfiles(options);

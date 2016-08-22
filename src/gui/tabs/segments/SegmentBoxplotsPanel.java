@@ -85,22 +85,21 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 			// Get each segment as a boxplot
 			for(NucleusBorderSegment seg : segments){
 				
+				JFreeChart chart = BoxplotChartFactory.getInstance().makeEmptyChart();
+				ViolinChartPanel chartPanel = new ViolinChartPanel(chart);
+				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.addStatistic(SegmentStatistic.LENGTH)
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setSegPosition(seg.getPosition())
+					.setTarget(chartPanel)
 					.build();
 				
-				JFreeChart chart = getChart(options);
-				
-				ViolinChartPanel chartPanel = new ViolinChartPanel(chart);
-//				if(GlobalOptions.getInstance().isViolinPlots()){
-//					chartPanel = new ViolinChartPanel(chart);
-//				} else {
-//					chartPanel = new ExportableChartPanel(chart);
-//				}
+				chart = getChart(options);
+				chartPanel.setChart(chart);
+
 				chartPanel.setPreferredSize(preferredSize);
 				chartPanels.put(seg.getName(), chartPanel);
 				mainPanel.add(chartPanel);							

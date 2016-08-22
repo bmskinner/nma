@@ -55,7 +55,7 @@ import logging.Loggable;
  */
 @SuppressWarnings("serial")
 public class ExportableChartPanel extends ChartPanel implements Loggable {
-	
+		
 	public ExportableChartPanel(JFreeChart chart){
 		super(chart);
 		

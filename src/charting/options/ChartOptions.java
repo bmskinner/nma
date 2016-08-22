@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import org.jfree.chart.ChartPanel;
+
 import components.Cell;
 import components.CellularComponent;
 import components.generic.BorderTag;
@@ -72,6 +74,8 @@ public class ChartOptions extends AbstractOptions {
 	private CellularComponent component = null;
 	private boolean showWarp            = false;
 	
+	private ChartPanel target           = null;
+	
 
 	
 	public ChartOptions(List<AnalysisDataset> list){
@@ -84,6 +88,14 @@ public class ChartOptions extends AbstractOptions {
 
 	public void setNormalised(boolean normalised) {
 		this.normalised = normalised;
+	}
+
+	public ChartPanel getTarget() {
+		return target;
+	}
+
+	public void setTarget(ChartPanel target) {
+		this.target = target;
 	}
 
 	public ProfileAlignment getAlignment() {

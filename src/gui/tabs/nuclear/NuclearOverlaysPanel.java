@@ -138,6 +138,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		return new ChartOptionsBuilder()
 		.setDatasets(getDatasets())
 		.setNormalised(alignNuclei)
+		.setTarget(chartPanel)
 		.build();
 	}
 
@@ -226,6 +227,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setNormalised(false)
+			.setTarget(chartPanel)
 			.build();
 		
 		JFreeChart chart = getChart(options);

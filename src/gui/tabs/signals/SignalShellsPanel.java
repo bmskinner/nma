@@ -149,6 +149,7 @@ public class SignalShellsPanel extends DetailPanel {
 	private void updateChartAndTable(){
 		ChartOptions options = new ChartOptionsBuilder()
 		.setDatasets(getDatasets())
+		.setTarget(chartPanel)
 		.build();
 
 		JFreeChart chart = getChart(options);

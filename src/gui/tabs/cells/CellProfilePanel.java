@@ -124,6 +124,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 					.setProfileType( type)
 					.setSwatch(activeDataset().getSwatch())
 					.setShowPoints(true)
+					.setTarget(dualPanel.getMainPanel())
 					.build();
 				
 							
@@ -146,6 +147,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 					.setProfileType( type)
 					.setSwatch(activeDataset().getSwatch())
 					.setShowPoints(false)
+					.setTarget(dualPanel.getRangePanel())
 					.build();
 				
 				JFreeChart rangeChart = getChart(rangeOptions);

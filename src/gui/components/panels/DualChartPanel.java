@@ -37,6 +37,7 @@ import java.util.UUID;
 
 import javax.swing.JPanel;
 
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.DraggableOverlayChartPanel;
@@ -104,6 +105,14 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 		updateChartPanelRange();
 		
 		
+	}
+	
+	public ChartPanel getMainPanel(){
+		return chartPanel;
+	}
+	
+	public ChartPanel getRangePanel(){
+		return rangePanel;
 	}
 	
 	public void setCharts(JFreeChart chart, JFreeChart rangeChart){

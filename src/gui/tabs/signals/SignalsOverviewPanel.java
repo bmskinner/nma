@@ -335,6 +335,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.setShowWarp(false)
+					.setTarget(chartPanel)
 					.build();
 			
 			JFreeChart chart = getChart(options);

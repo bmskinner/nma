@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import javax.swing.JPanel;
@@ -715,7 +716,19 @@ public abstract class DetailPanel
     	@Override
         public void done() {
    	
-    		fireChartOptionsRenderedEvent(options);
+    		try {
+    			if(options.getTarget()!=null){
+    			
+    				options.getTarget().setChart(get());
+    			}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+//    		fireChartOptionsRenderedEvent(options);
         } 
     	
 

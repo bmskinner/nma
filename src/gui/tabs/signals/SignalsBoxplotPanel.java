@@ -103,6 +103,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 					.addStatistic(stat)
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
+					.setTarget(panel)
 					.build();
 			
 			JFreeChart chart = getChart(options);

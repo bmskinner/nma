@@ -119,6 +119,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 				.addStatistic(statB)
 				.setScale(GlobalOptions.getInstance().getScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
+				.setTarget(chartPanel)
 				.build();
 		
 		chartPanel.setChart(getChart(options));

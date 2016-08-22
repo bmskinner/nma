@@ -133,6 +133,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 			.setTag(BorderTagObject.REFERENCE_POINT)
 			.setShowMarkers(true)
 			.setProfileType(ProfileType.ANGLE)
+			.setTarget(chartPanel)
 			.build();
 		
 

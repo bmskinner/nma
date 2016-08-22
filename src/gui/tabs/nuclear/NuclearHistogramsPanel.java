@@ -94,6 +94,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setUseDensity(useDensity)
+					.setTarget(panel)
 					.build();
 				
 				JFreeChart chart = getChart(options);

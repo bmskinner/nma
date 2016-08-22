@@ -127,6 +127,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 			.setShowPoints(true)
 			.setSwatch(swatch)
 			.setShowAnnotations(false)
+			.setTarget(dualPanel.getMainPanel())
 			.build();
 		
 					
@@ -147,6 +148,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 			.setSwatch(swatch)
 			.setShowPoints(false)
 			.setShowAnnotations(false)
+			.setTarget(dualPanel.getRangePanel())
 			.build();
 		
 		JFreeChart rangeChart = getChart(rangeOptions);

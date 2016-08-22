@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import org.jfree.chart.ChartPanel;
+
 import stats.PlottableStatistic;
 import components.Cell;
 import components.CellularComponent;
@@ -84,6 +86,7 @@ public class ChartOptionsBuilder {
 	private CellularComponent component = null;
 	private boolean showWarp            = false;
 	
+	private ChartPanel target           = null;
 	
 	public ChartOptionsBuilder(){
 		
@@ -104,6 +107,12 @@ public class ChartOptionsBuilder {
 		this.swatch = swatch;
 		return this;
 	}
+	
+	public ChartOptionsBuilder setTarget(ChartPanel target) {
+		this.target = target;
+		return this;
+	}
+	
 		
 	public ChartOptionsBuilder setNormalised(boolean b){
 		this.normalised = b;
@@ -292,6 +301,8 @@ public class ChartOptionsBuilder {
 		result.setCell(cell);
 		result.setComponent(component);
 		result.setShowWarp(showWarp);
+		
+		result.setTarget(target);
 		return result;
 	}
 	

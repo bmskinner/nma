@@ -86,6 +86,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 				.setScale(GlobalOptions.getInstance().getScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
 				.setUseDensity(useDensity)
+				.setTarget(panel)
 				.build();
 			
 			

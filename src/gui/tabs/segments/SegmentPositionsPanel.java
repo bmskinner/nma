@@ -40,6 +40,7 @@ import org.jfree.chart.JFreeChart;
 
 import charting.charts.FixedAspectRatioChartPanel;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
@@ -145,16 +146,19 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 
 				finest("Creating chart for segment "+seg.getName());
 				
+				JFreeChart chart = OutlineChartFactory.getInstance().makeEmptyChart();
+				FixedAspectRatioChartPanel chartPanel = new FixedAspectRatioChartPanel(chart);
+				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.setSegPosition(seg.getPosition())
 					.setSegID(seg.getID())
+					.setTarget(chartPanel)
 					.build();
 				
 
-				JFreeChart chart = getChart(options);
-
-				FixedAspectRatioChartPanel chartPanel = new FixedAspectRatioChartPanel(chart);
+				chart = getChart(options);
+				chartPanel.setChart(chart);
 				
 				finest("Adding new chart panel for segment "+seg.getName());
 				

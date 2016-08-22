@@ -158,6 +158,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				.setProfileType( ProfileType.ANGLE)
 				.setSwatch(activeDataset().getSwatch())
 				.setShowPoints(true)
+				.setTarget(dualPanel.getMainPanel())
 				.build();
 			
 			// Set the button configuration
@@ -184,6 +185,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				.setProfileType( ProfileType.ANGLE)
 				.setSwatch(activeDataset().getSwatch())
 				.setShowPoints(false)
+				.setTarget(dualPanel.getRangePanel())
 				.build();
 			
 			JFreeChart rangeChart = getChart(rangeOptions);

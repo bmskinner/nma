@@ -108,6 +108,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 					.setShowMeshFaces(true)
 					.setInvertYAxis( rotationPanel.getSelected().equals(RotationMode.ACTUAL) ) // only invert for actual
 					.setCellularComponent(component)
+					.setTarget(panel)
 					.build();
 			
 			

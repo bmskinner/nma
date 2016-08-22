@@ -224,6 +224,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 				.setShowMarkers(false)
 				.setProfileType(type)
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
+				.setTarget(modalityProfileChartPanel)
 				.build();
 						
 			JFreeChart chart;
@@ -249,6 +250,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 				.setProfileType(type)
 				.setModalityPosition(xvalue)
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
+				.setTarget(chartPanel)
 				.build();
 			
 			JFreeChart chart;
