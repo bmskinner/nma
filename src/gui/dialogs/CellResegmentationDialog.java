@@ -94,6 +94,8 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 	private JTable table;
 	private static final int COLUMN_STATE = 1;
 	
+	private boolean hasChanged = false;
+	
 	public CellResegmentationDialog(final Cell cell, final AnalysisDataset dataset){
 		super( null );
 		
@@ -116,27 +118,10 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			
 			public void windowClosing(WindowEvent e) {
 				
-				Object[] options = { "Save changes" , "Discard changes" };
-				int save = JOptionPane.showOptionDialog(CellResegmentationDialog.this,
-						"Save changes to cell segmentation?", 
-						"Save cell?",
-						JOptionPane.DEFAULT_OPTION, 
-						JOptionPane.QUESTION_MESSAGE,
-						null, options, options[0]);
-
-				// Replace the input cell with the working cell
-				if(save==0){
-					
-					workingCell.getNucleus().setLocked(true); // Prevent further changes without unlocking
-					dataset.getCollection().replaceCell(workingCell);
-
-					// Trigger a dataset update and reprofiling
-					dataset.getCollection().getProfileManager().createProfileCollections();
-					
-					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
+				if(cellHasChanged()){
+					requestSaveOption();
 				} 
 				dispose();
-				
 			}
 		});
 		
@@ -144,6 +129,35 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		this.setModal(false);
 		this.setVisible(true);
 		
+	}
+	
+	private boolean cellHasChanged(){
+		return hasChanged;
+		// Hashcodes are not working
+//		return cell.hashCode() != workingCell.hashCode();
+	}
+	
+	private void requestSaveOption(){
+		
+		Object[] options = { "Save changes" , "Discard changes" };
+		int save = JOptionPane.showOptionDialog(CellResegmentationDialog.this,
+				"Save changes to cell segmentation?", 
+				"Save cell?",
+				JOptionPane.DEFAULT_OPTION, 
+				JOptionPane.QUESTION_MESSAGE,
+				null, options, options[0]);
+
+		// Replace the input cell with the working cell
+		if(save==0){
+			
+			workingCell.getNucleus().setLocked(true); // Prevent further changes without unlocking
+			dataset.getCollection().replaceCell(workingCell);
+
+			// Trigger a dataset update and reprofiling
+			dataset.getCollection().getProfileManager().createProfileCollections();
+			
+			fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
+		} 
 	}
 	
 	private void createUI(){
@@ -371,13 +385,13 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		Nucleus n = workingCell.getNucleus();
 		
 		if(isSelectRP){
-
+			hasChanged = true;
 			newTags.put(BorderTagObject.REFERENCE_POINT, n.getBorderIndex(p));
 			moveRPComplete();
 		}
 		
 		if(isRunning){
-
+			hasChanged = true;
 			UUID id = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegments().get(segCount).getID();
 
 			segStop = n.getBorderIndex(p);
