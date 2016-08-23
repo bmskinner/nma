@@ -227,13 +227,16 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 				.setTarget(modalityProfileChartPanel)
 				.build();
 						
-			JFreeChart chart;
-			try {
-				chart = getChart(options);
-			} catch (Exception e) {
-				chart = MorphologyChartFactory.makeBlankProbabililtyChart();
-			}
-			modalityProfileChartPanel.setChart(chart);
+			
+			setChart(options);
+			
+//			JFreeChart chart;
+//			try {
+//				chart = getChart(options);
+//			} catch (Exception e) {
+//				chart = MorphologyChartFactory.makeBlankProbabililtyChart();
+//			}
+//			modalityProfileChartPanel.setChart(chart);
 			
 		}
 		

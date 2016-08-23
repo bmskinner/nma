@@ -82,8 +82,9 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 		
 		private void updateChart() {
 			ChartOptions options = makeOptions();
-			JFreeChart   chart   = getChart(options);
-			chartPanel.setChart(chart);			
+			setChart(options);
+//			JFreeChart   chart   = getChart(options);
+//			chartPanel.setChart(chart);			
 		}
 		
 		

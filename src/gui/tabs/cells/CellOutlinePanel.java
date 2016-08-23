@@ -111,18 +111,19 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 					.setTarget(panel)
 					.build();
 			
+			setChart(options);
 			
-			JFreeChart chart;
-			try {
-				chart = getChart(options);
-			} catch (Exception e) {
-				warn("Error getting chart in cell outline panel");
-				log(Level.FINE, "Error getting chart in cell outline panel", e);
-				chart = ConsensusNucleusChartFactory.getInstance().makeErrorChart();
-			}
+//			JFreeChart chart;
+//			try {
+//				chart = getChart(options);
+//			} catch (Exception e) {
+//				warn("Error getting chart in cell outline panel");
+//				log(Level.FINE, "Error getting chart in cell outline panel", e);
+//				chart = ConsensusNucleusChartFactory.getInstance().makeErrorChart();
+//			}
 
 			
-			panel.setChart(chart);
+//			panel.setChart(chart);
 
 			if(this.getCellModel().hasCell()  ){ 
 				panel.restoreAutoBounds();

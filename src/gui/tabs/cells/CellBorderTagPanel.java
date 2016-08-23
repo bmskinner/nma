@@ -128,8 +128,8 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 						.setTarget(dualPanel.getMainPanel())
 						.build();
 					
-								
-					JFreeChart chart = getChart(options);
+					setChart(options);		
+//					JFreeChart chart = getChart(options);
 
 					/*
 					 * Create the chart for the range panel
@@ -149,11 +149,13 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 						.setTarget(dualPanel.getRangePanel())
 						.build();
 					
-					JFreeChart rangeChart = getChart(rangeOptions);
+					setChart(options);
+					
+//					JFreeChart rangeChart = getChart(rangeOptions);
 
 					profileOptions.setEnabled(true);	
 					
-					dualPanel.setCharts(chart, rangeChart);
+//					dualPanel.setCharts(chart, rangeChart);
 				}
 
 			} catch(Exception e){

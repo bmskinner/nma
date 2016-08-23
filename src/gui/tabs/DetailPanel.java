@@ -27,6 +27,7 @@ import gui.InterfaceEvent.InterfaceMethod;
 import gui.InterfaceEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
+import gui.ThreadManager;
 import logging.Loggable;
 
 import java.awt.Component;
@@ -340,6 +341,24 @@ public abstract class DetailPanel
 	protected void updateNull(){
 		finest("Updating null dataset");
 	}
+	
+	protected synchronized void setChart(ChartOptions options) {
+		if(chartCache.hasChart(options)){
+			finest("Fetched cached chart with hashcode "+options.hashCode());
+			JFreeChart chart = getChartCache().getChart(options);
+			
+			if(options.getTarget()!=null){
+				options.getTarget().setChart(chart);
+			}
+
+		} else { // No cached chart
+			finest("No cached chart available with hashcode "+options.hashCode());
+			// Make a background worker to generate the chart and
+			// update the target chart panel when done
+			ChartFactoryWorker worker = new ChartFactoryWorker(options);
+			ThreadManager.getInstance().submit(worker);//worker.execute();
+		}
+	}
 		
 	
 	/**
@@ -363,9 +382,9 @@ public abstract class DetailPanel
 //			log(chartCache.toString());
 
 			// Make a background worker to generate the chart and
-			// notify the panel when it is complete
+			// update the target chart panel when done
 			ChartFactoryWorker worker = new ChartFactoryWorker(options);
-			worker.execute();
+			ThreadManager.getInstance().submit(worker);//worker.execute();
 			
 //			log(this.getClass().getSimpleName()+": Rendering new chart");
 

@@ -144,8 +144,9 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 
 		try {
 			
-			JFreeChart chart = getChart(options);			
-			chartPanel.setChart(chart);
+			setChart(options);
+//			JFreeChart chart = getChart(options);			
+//			chartPanel.setChart(chart);
 			
 		} catch (Exception e) {
 			log(Level.SEVERE, "Error in plotting variability chart", e);

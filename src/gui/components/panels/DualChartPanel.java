@@ -86,7 +86,7 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 		chartPanel.setMinimumDrawHeight( 0 );
 		chartPanel.addSignalChangeListener(this);
 		this.add(chartPanel, c);
-
+		
 		
 		/*
 		 * A second chart panel at the south
@@ -107,6 +107,7 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 		
 	}
 	
+	
 	public ChartPanel getMainPanel(){
 		return chartPanel;
 	}
@@ -120,7 +121,7 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 		this.rangePanel.setChart(rangeChart);
 		this.updateChartPanelRange();
 	}
-	
+		
 	/**
 	 * Set the main chart panel domain range to centre on the 
 	 * position in the range panel

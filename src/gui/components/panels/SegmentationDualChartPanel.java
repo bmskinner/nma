@@ -32,6 +32,11 @@ public class SegmentationDualChartPanel extends DualChartPanel{
 		super();		
 	}
 	
+	public void setProfile(SegmentedProfile profile, boolean normalised){
+		chartPanel.setChart(chartPanel.getChart(), profile, normalised);
+		this.updateChartPanelRange();
+	}
+	
 	public void setCharts(JFreeChart chart, SegmentedProfile profile, boolean normalised, JFreeChart rangeChart){
 		
 		chartPanel.setChart(chart, profile, normalised);

@@ -408,7 +408,9 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			.setTarget(consensusChartPanel)
 			.build();
 		
-		JFreeChart consensusChart = getChart(options);
+		setChart(options);
+		
+//		JFreeChart consensusChart = getChart(options);
 
 
 		CellCollection collection = activeDataset().getCollection();
@@ -417,7 +419,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			// hide the refold button
 			runRefoldingButton.setVisible(false);
 			offsetsPanel.setVisible(true);
-			consensusChartPanel.setChart(consensusChart);
+//			consensusChartPanel.setChart(consensusChart);
 			consensusChartPanel.restoreAutoBounds();
 						
 		} else {
@@ -430,7 +432,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			
 			runRefoldingButton.setVisible(true);
 			offsetsPanel.setVisible(false);
-			consensusChartPanel.setChart(consensusChart);
+//			consensusChartPanel.setChart(consensusChart);
 			
 			
 		}
