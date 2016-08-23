@@ -19,7 +19,22 @@
 
 package gui;
 
+import java.util.EventObject;
 
-public interface ChartOptionsRenderedEventListener {
-	public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e);
+import charting.options.ChartOptions;
+
+@SuppressWarnings("serial")
+public class ChartOptionsRenderedEvent extends EventObject {
+	
+	private ChartOptions options;
+	
+	public ChartOptionsRenderedEvent(Object source, ChartOptions options){
+		super(source);
+		this.options = options;
+		
+	}
+
+	public ChartOptions getOptions() {
+		return options;
+	}	
 }

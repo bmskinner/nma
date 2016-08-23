@@ -122,7 +122,8 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 				.setTarget(chartPanel)
 				.build();
 		
-		chartPanel.setChart(getChart(options));
+		
+		setChart(options);
 		
 		
 		TableOptions tableOptions = new TableOptionsBuilder()
@@ -147,7 +148,8 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		ChartOptions options = new ChartOptionsBuilder()
 			.build();
 		
-		chartPanel.setChart(getChart(options));
+		setChart(options);
+
 		
 		TableOptions tableOptions = new TableOptionsBuilder()
 				.setDatasets(null)
@@ -254,18 +256,10 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 	
 	protected Range getRangeBounds(){
 		return chartPanel.getChart().getXYPlot().getRangeAxis().getRange();
-//		double[] result = new double[2];
-//		result[0]= chartPanel.getChart().getXYPlot().getRangeAxis().getRange().getLowerBound();
-//		result[1]= chartPanel.getChart().getXYPlot().getRangeAxis().getRange().getUpperBound();
-//		return result;
 	}
 	
 	protected Range getDomainBounds(){
 		return chartPanel.getChart().getXYPlot().getDomainAxis().getRange();
-//		double[] result = new double[2];
-//		result[0]= chartPanel.getChart().getXYPlot().getDomainAxis().getRange().getLowerBound();
-//		result[1]= chartPanel.getChart().getXYPlot().getDomainAxis().getRange().getUpperBound();
-//		return result;
 	}
 	
 	protected int getFilterDialogResult(){

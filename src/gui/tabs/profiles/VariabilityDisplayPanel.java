@@ -24,16 +24,11 @@ import gui.components.panels.ProfileCollectionTypeSettingsPanel;
 import gui.components.panels.ProfileMarkersOptionsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.tabs.DetailPanel;
-import gui.tabs.DetailPanel.ChartOptionsRenderedEvent;
-
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.logging.Level;
 
@@ -44,28 +39,13 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.TableModel;
-
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.chart.plot.ValueMarker;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.general.DatasetUtilities;
-import org.jfree.ui.TextAnchor;
-
-import stats.DipTester;
 import utility.Constants;
 import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.TableOptions;
-import components.CellCollection;
-import components.generic.BooleanProfile;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
-import components.generic.Profile;
 import components.generic.ProfileType;
 
 @SuppressWarnings("serial")

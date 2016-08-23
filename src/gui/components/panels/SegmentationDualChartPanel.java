@@ -19,6 +19,7 @@
 
 package gui.components.panels;
 
+import gui.ChartSetEvent;
 import gui.SignalChangeEvent;
 
 import org.jfree.chart.JFreeChart;
@@ -44,14 +45,5 @@ public class SegmentationDualChartPanel extends DualChartPanel{
 		this.updateChartPanelRange();
 	}
 	
-//	@Override
-//	public void signalChangeReceived(SignalChangeEvent event) {
-//		super.signalChangeReceived(event);
-//		
-//		if(event.type().contains("UpdateSegment")){
-//			fireSignalChangeEvent(event);
-//		}
-//		
-//	}
 
 }

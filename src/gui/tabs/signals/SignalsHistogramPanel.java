@@ -77,6 +77,10 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 		
 		for(SignalStatistic stat : SignalStatistic.values()){
 			SelectableChartPanel panel = chartPanels.get(stat.toString());
+			
+//			XYPlot plot = (XYPlot) chart.getPlot();
+//			plot.setDomainPannable(true);
+//			plot.setRangePannable(true);
 
 			JFreeChart chart = null;
 			
@@ -90,11 +94,11 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 				.build();
 			
 			
+			setChart(options);
+			
 			chart = getChart(options);
 
-			XYPlot plot = (XYPlot) chart.getPlot();
-			plot.setDomainPannable(true);
-			plot.setRangePannable(true);
+			
 
 			panel.setChart(chart);
 		}

@@ -19,7 +19,17 @@
 
 package gui;
 
+import java.util.EventObject;
 
-public interface ChartOptionsRenderedEventListener {
-	public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e);
+import org.jfree.chart.ChartPanel;
+
+
+@SuppressWarnings("serial")
+public class ChartSetEvent extends EventObject {
+	
+	public ChartSetEvent(Object source){
+		super(source); 
+
+	}
+
 }

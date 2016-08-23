@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.ChartOptionsRenderedEvent;
 import gui.ChartOptionsRenderedEventListener;
 import gui.DatasetEvent;
 import gui.DatasetEvent.DatasetMethod;
@@ -342,6 +343,14 @@ public abstract class DetailPanel
 		finest("Updating null dataset");
 	}
 	
+	/**
+	 * Fetch the chart with the given options from the cache, and display
+	 * it in the target ChartPanel. If the chart is not in the cache, a 
+	 * SwingWorker will be created to render the chart and display it once
+	 * complete. Note that this requires the options to have been created
+	 * with a setTarget() value.
+	 * @param options
+	 */
 	protected synchronized void setChart(ChartOptions options) {
 		if(chartCache.hasChart(options)){
 			finest("Fetched cached chart with hashcode "+options.hashCode());
@@ -779,19 +788,4 @@ public abstract class DetailPanel
     	listeners.remove( l );
     }
         
-    public class ChartOptionsRenderedEvent extends EventObject {
-    	
-    	private ChartOptions options;
-    	
-    	public ChartOptionsRenderedEvent(Object source, ChartOptions options){
-    		super(source);
-    		this.options = options;
-    		
-    	}
-
-		public ChartOptions getOptions() {
-			return options;
-		}	
-    }
-
 }

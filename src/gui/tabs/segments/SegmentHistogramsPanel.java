@@ -77,6 +77,8 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 				
 				JFreeChart chart = HistogramChartFactory.getInstance().makeEmptyChart();
 				SelectableChartPanel chartPanel = new SelectableChartPanel(chart, seg.getName());
+				chartPanel.setPreferredSize(preferredSize);
+				mainPanel.add(chartPanel);	
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
@@ -88,12 +90,8 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 					.setTarget(chartPanel)
 					.build();
 				
-				
-				chart = getChart(options);
-				chartPanel.setChart(chart);
-
-				chartPanel.setPreferredSize(preferredSize);
-				mainPanel.add(chartPanel);							
+				setChart(options);
+						
 			}
 
 

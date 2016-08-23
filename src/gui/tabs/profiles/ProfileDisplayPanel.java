@@ -20,7 +20,7 @@ package gui.tabs.profiles;
 
 import gui.GlobalOptions;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import gui.tabs.DetailPanel.ChartOptionsRenderedEvent;
+import gui.ChartOptionsRenderedEvent;
 
 import javax.swing.table.TableModel;
 

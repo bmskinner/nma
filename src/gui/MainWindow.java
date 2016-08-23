@@ -439,7 +439,7 @@ public class MainWindow
 			consensusNucleusPanel.restoreAutoBounds();
 
 		} catch (Exception e) {
-			logToImageJ("Error initialising Main", e);
+			logToImageJ("Error initialising Main: "+e.getMessage(), e);
 		}
 		
 	}

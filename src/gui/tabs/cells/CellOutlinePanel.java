@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.logging.Level;
 
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
@@ -18,6 +17,9 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import components.CellularComponent;
+import gui.ChartOptionsRenderedEvent;
+import gui.ChartSetEvent;
+import gui.ChartSetEventListener;
 import gui.DatasetEvent;
 import gui.RotationMode;
 import gui.components.panels.GenericCheckboxPanel;
@@ -25,7 +27,7 @@ import gui.components.panels.RotationSelectionSettingsPanel;
 import gui.dialogs.CellCollectionOverviewDialog;
 
 @SuppressWarnings("serial")
-public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener {
+public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener, ChartSetEventListener {
 	
 	private RotationSelectionSettingsPanel rotationPanel;
 
@@ -111,24 +113,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 					.setTarget(panel)
 					.build();
 			
-			setChart(options);
-			
-//			JFreeChart chart;
-//			try {
-//				chart = getChart(options);
-//			} catch (Exception e) {
-//				warn("Error getting chart in cell outline panel");
-//				log(Level.FINE, "Error getting chart in cell outline panel", e);
-//				chart = ConsensusNucleusChartFactory.getInstance().makeErrorChart();
-//			}
-
-			
-//			panel.setChart(chart);
-
-			if(this.getCellModel().hasCell()  ){ 
-				panel.restoreAutoBounds();
-			}
-			
+			setChart(options);			
 	}
 
 	
@@ -188,6 +173,14 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 	public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e) {
 
 		update();
+	}
+
+	@Override
+	public void chartSetEventReceived(ChartSetEvent e) {
+		if(this.getCellModel().hasCell()  ){ 
+			panel.restoreAutoBounds();
+		}
+		
 	}
 
 }

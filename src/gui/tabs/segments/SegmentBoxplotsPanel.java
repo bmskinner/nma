@@ -1,5 +1,7 @@
 package gui.tabs.segments;
 
+import gui.ChartSetEvent;
+import gui.ChartSetEventListener;
 import gui.GlobalOptions;
 import gui.Labels;
 import gui.components.panels.MeasurementUnitSettingsPanel;
@@ -33,7 +35,7 @@ import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
-public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionListener {
+public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionListener, ChartSetEventListener {
 
 	private Dimension preferredSize = new Dimension(200, 300);
 			
@@ -87,6 +89,10 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				
 				JFreeChart chart = BoxplotChartFactory.getInstance().makeEmptyChart();
 				ViolinChartPanel chartPanel = new ViolinChartPanel(chart);
+				chartPanel.addChartSetEventListener(this);
+				chartPanel.setPreferredSize(preferredSize);
+				chartPanels.put(seg.getName(), chartPanel);
+				mainPanel.add(chartPanel);	
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
@@ -96,13 +102,9 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 					.setSegPosition(seg.getPosition())
 					.setTarget(chartPanel)
 					.build();
-				
-				chart = getChart(options);
-				chartPanel.setChart(chart);
 
-				chartPanel.setPreferredSize(preferredSize);
-				chartPanels.put(seg.getName(), chartPanel);
-				mainPanel.add(chartPanel);							
+				
+				setChart(options);
 			}
 
 			
@@ -112,11 +114,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		}
 		mainPanel.revalidate();
 		mainPanel.repaint();
-		
-		for(ExportableChartPanel p : chartPanels.values()){
-			p.restoreAutoBounds();
-		}
-		
+				
 		scrollPane.setViewportView(mainPanel);
 	}
 
@@ -131,5 +129,10 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		mainPanel.revalidate();
 		mainPanel.repaint();
 		scrollPane.setViewportView(mainPanel);
+	}
+
+	@Override
+	public void chartSetEventReceived(ChartSetEvent e) {
+		((ViolinChartPanel) e.getSource()).restoreAutoBounds();
 	}
 }

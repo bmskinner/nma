@@ -20,6 +20,8 @@
 package gui.components.panels;
 
 import gui.BorderTagEventListener;
+import gui.ChartSetEvent;
+import gui.ChartSetEventListener;
 import gui.SegmentEvent;
 import gui.SegmentEventListener;
 import gui.SignalChangeEvent;
@@ -53,7 +55,7 @@ import charting.charts.RectangleOverlayObject;
  *
  */
 @SuppressWarnings("serial")
-public abstract class DualChartPanel extends JPanel implements SignalChangeListener, SegmentEventListener {
+public abstract class DualChartPanel extends JPanel implements SignalChangeListener, SegmentEventListener, ChartSetEventListener {
 	
 	protected DraggableOverlayChartPanel chartPanel;
 	
@@ -85,6 +87,7 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 		chartPanel.setMinimumDrawWidth(  0 );
 		chartPanel.setMinimumDrawHeight( 0 );
 		chartPanel.addSignalChangeListener(this);
+		chartPanel.addChartSetEventListener(this);
 		this.add(chartPanel, c);
 		
 		
@@ -97,6 +100,7 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 		JFreeChart rangeChart = MorphologyChartFactory.getInstance().makeEmptyChart();
 		rangePanel = new PositionSelectionChartPanel(rangeChart);
 		rangePanel.addSignalChangeListener(this);
+		rangePanel.addChartSetEventListener(this);
 
 		c.weighty = 0.3;
 		c.gridx = 0;
@@ -239,6 +243,14 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 		for(Object l : listeners){
 			((SegmentEventListener) l).segmentEventReceived(event);
 		}
+	}
+	
+	@Override
+	public void chartSetEventReceived(ChartSetEvent e) {
+		
+		// One of the two charts was set - ensure the charts remain coupled
+		this.updateChartPanelRange();
+		
 	}
 
 }

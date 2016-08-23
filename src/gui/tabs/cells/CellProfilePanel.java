@@ -111,8 +111,9 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				setButtonsEnabled(false);
 
 			} else {
-				
-				SegmentedProfile profile = null;
+								
+				SegmentedProfile profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTagObject.REFERENCE_POINT);
+				dualPanel.setProfile(profile, false);
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
@@ -128,11 +129,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 					.build();
 				
 				setChart(options);		
+						
 				
-//				JFreeChart chart = getChart(options);
-				
-				profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTagObject.REFERENCE_POINT);
-			
 				
 				/*
 				 * Create the chart for the range panel
@@ -151,13 +149,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 					.setTarget(dualPanel.getRangePanel())
 					.build();
 				
-				setChart(options);
-				
-//				JFreeChart rangeChart = getChart(rangeOptions);
-				
-				dualPanel.setProfile(profile, false);
-				
-//				dualPanel.setCharts(chart, profile, false, rangeChart);
+				setChart(rangeOptions);
+
 				setButtonsEnabled(true);		
 			}
 

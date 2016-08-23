@@ -25,23 +25,27 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerXYDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import utility.Constants;
-import charting.datasets.OutlierFreeBoxAndWhiskerCategoryDataset;
+import gui.ChartSetEvent;
+import gui.ChartSetEventListener;
 import ij.io.SaveDialog;
 import logging.Loggable;
 
@@ -56,6 +60,8 @@ import logging.Loggable;
 @SuppressWarnings("serial")
 public class ExportableChartPanel extends ChartPanel implements Loggable {
 		
+	private final List<Object> listeners = new ArrayList<Object>();
+	
 	public ExportableChartPanel(JFreeChart chart){
 		super(chart);
 		
@@ -82,6 +88,25 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 	            setMinimumDrawHeight(e.getComponent().getHeight());
 	        }
 	    });
+		
+		
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jfree.chart.ChartPanel#setChart(org.jfree.chart.JFreeChart)
+	 * 
+	 * Allows a message to be sent to registered ChartSetEventListeners that a new
+	 * chart has been set
+	 */
+	@Override
+	public void setChart(JFreeChart chart){
+		super.setChart(chart);
+		try{
+			fireChartSetEvent();
+		} catch(NullPointerException e){
+			// This occurs during init because setChart is called internally in ChartPanel
+			// Catch and ignore
+		}
 	}
 		
 	private String getData(){
@@ -97,11 +122,6 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 
 					result = getBoxplotData();
 				}
-
-//				if( this.getChart().getCategoryPlot().getDataset() instanceof HistogramDataset ){
-//
-//					result = getHistogramData();
-//				}
 
 			} else {
 
@@ -314,5 +334,31 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 			export();
 		}
 	}
+	
+	 /**
+     * Signal listeners that the chart with the given options
+     * has been rendered
+     * @param options
+     */
+    public void fireChartSetEvent(){
+    	ChartSetEvent e = new ChartSetEvent(this);
+    	Iterator<Object> iterator = listeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (ChartSetEventListener) iterator.next() ).chartSetEventReceived( e );
+        }
+    }
+    
+    
+    /**
+     * Add a listener for completed charts rendered into the chart cache of this panel.
+     * @param l
+     */
+    public synchronized void addChartSetEventListener( ChartSetEventListener l ) {
+    	listeners.add( l );
+    }
+    
+    public synchronized void removeChartSetEventListener( ChartSetEventListener l ) {
+    	listeners.remove( l );
+    }
 
 }

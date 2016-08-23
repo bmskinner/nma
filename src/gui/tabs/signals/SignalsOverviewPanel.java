@@ -43,6 +43,9 @@ import org.jfree.chart.JFreeChart;
 
 
 
+
+
+
 //<<<<<<< HEAD
 //=======
 import analysis.AnalysisDataset;
@@ -50,6 +53,7 @@ import analysis.signals.SignalManager;
 //import analysis.SignalManager;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.ConsensusNucleusChartPanel;
+import charting.charts.FixedAspectRatioChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.NuclearSignalChartFactory;
 //>>>>>>> 80f8c2ce5ece277dacebd32467e86ec1a826439f
@@ -62,6 +66,8 @@ import charting.options.TableOptions;
 import charting.options.TableOptions.TableType;
 import charting.options.TableOptionsBuilder;
 import components.nuclear.NucleusBorderSegment;
+import gui.ChartSetEvent;
+import gui.ChartSetEventListener;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ExportableTable;
 import gui.components.panels.GenericCheckboxPanel;
@@ -70,7 +76,7 @@ import gui.tabs.DetailPanel;
 import ij.io.DirectoryChooser;
 
 @SuppressWarnings("serial")
-public class SignalsOverviewPanel extends DetailPanel implements ActionListener {
+public class SignalsOverviewPanel extends DetailPanel implements ActionListener, ChartSetEventListener {
 
 	private ConsensusNucleusChartPanel 	chartPanel; 		// consensus nucleus plus signals
 	private ExportableTable 		statsTable;					// table for signal stats
@@ -338,11 +344,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 					.setTarget(chartPanel)
 					.build();
 			
-			JFreeChart chart = getChart(options);
-			chartPanel.setChart(chart);
+			setChart(options);		
 			
-			
-			chartPanel.restoreAutoBounds();
 		} catch(Exception e){
 			warn("Error updating signal overview panel");
 			log(Level.FINE, "Error updating signal overview panel", e);
@@ -398,5 +401,11 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return NuclearSignalDatasetCreator.getInstance().createSignalStatsTable(options);
+	}
+
+	@Override
+	public void chartSetEventReceived(ChartSetEvent e) {
+		((FixedAspectRatioChartPanel) e.getSource()).restoreAutoBounds();
+		
 	}
 }

@@ -20,22 +20,20 @@
  *******************************************************************************/
 package gui.tabs.segments;
 
+import gui.ChartSetEvent;
+import gui.ChartSetEventListener;
 import gui.Labels;
 import gui.tabs.BoxplotsTabPanel;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.util.List;
-import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.FixedAspectRatioChartPanel;
@@ -44,26 +42,28 @@ import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 
+/**
+ * Holds a series of outline panels showing the locations of the segment
+ * starts for all nuclei within a dataset
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
-public class SegmentPositionsPanel extends BoxplotsTabPanel {
+public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetEventListener  {
 
 	private Dimension preferredSize = new Dimension(300, 300);
 			
 	public SegmentPositionsPanel(){
 		super();
 		
-		// Not needed for a consensus panel
-//		headerPanel.remove(measurementUnitSettingsPanel);
-
 		try {
 			this.updateNull();
 		} catch (Exception e) {
-			log(Level.SEVERE, "Error creating segments posistion panel", e);
+			error("Error creating segments posistion panel", e);
 		}		
 	}
 	
@@ -93,38 +93,12 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 	@Override
 	protected void updateMultiple() {
 		super.updateMultiple();
+		
+		// Replace all the charts on the main panel
+		
 		finest("Creating new main panel");
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
-		
-		mainPanel.addComponentListener( new ComponentListener(){
-
-			@Override
-			public void componentHidden(ComponentEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void componentMoved(ComponentEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void componentResized(ComponentEvent e) {
-				restoreAspectRatio();
-				
-			}
-
-			@Override
-			public void componentShown(ComponentEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			
-		});
 
 		finest("Checking segment counts");
 				
@@ -148,6 +122,11 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 				
 				JFreeChart chart = OutlineChartFactory.getInstance().makeEmptyChart();
 				FixedAspectRatioChartPanel chartPanel = new FixedAspectRatioChartPanel(chart);
+				chartPanel.addChartSetEventListener(this);
+				chartPanel.setPreferredSize(preferredSize);
+				chartPanel.setSize(preferredSize);
+				chartPanels.put(seg.getName(), chartPanel);
+				mainPanel.add(chartPanel);			
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
@@ -156,17 +135,11 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 					.setTarget(chartPanel)
 					.build();
 				
+				setChart(options);
 
-				chart = getChart(options);
-				chartPanel.setChart(chart);
 				
 				finest("Adding new chart panel for segment "+seg.getName());
-				
-				chartPanel.setPreferredSize(preferredSize);
-				chartPanel.setSize(preferredSize);
-				chartPanels.put(seg.getName(), chartPanel);
-				mainPanel.add(chartPanel);			
-			
+
 			}
 			
 			finest("Finshed creating segment charts");
@@ -187,15 +160,10 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 		 * Ensure charts maintain aspect ratio
 		 */
 		finest("Restoring aspect ratios");
-		restoreAspectRatio();
+
 	}
 	
-	private void restoreAspectRatio(){
-		for(ChartPanel panel : chartPanels.values()){
-			
-			((FixedAspectRatioChartPanel) panel).restoreAutoBounds();
-		}
-	}
+
 
 
 	@Override
@@ -208,5 +176,10 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel {
 		mainPanel.revalidate();
 		mainPanel.repaint();
 		scrollPane.setViewportView(mainPanel);
+	}
+
+	@Override
+	public void chartSetEventReceived(ChartSetEvent e) {
+		((FixedAspectRatioChartPanel) e.getSource()).restoreAutoBounds();
 	}
 }

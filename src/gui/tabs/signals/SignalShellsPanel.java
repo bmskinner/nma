@@ -152,10 +152,11 @@ public class SignalShellsPanel extends DetailPanel {
 		.setTarget(chartPanel)
 		.build();
 
-		JFreeChart chart = getChart(options);
-
-
-		chartPanel.setChart(chart);
+		setChart(options);
+//		JFreeChart chart = getChart(options);
+//
+//
+//		chartPanel.setChart(chart);
 		chartPanel.setVisible(true);
 
 

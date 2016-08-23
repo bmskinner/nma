@@ -106,10 +106,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 					.setTarget(panel)
 					.build();
 			
-			JFreeChart chart = getChart(options);
-			panel.setChart(chart);
-
-			panel.setChart(chart);
+			setChart(options);
 		}
 
 	}
