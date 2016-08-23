@@ -68,14 +68,20 @@ import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
+/**
+ * This dialog permits complete resegmentation of a cell via a coupled
+ * profile and outline chart. Only one instance is created in the CellProfilePanel
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class CellResegmentationDialog extends MessagingDialog implements BorderPointEventListener{
 	
 	private CoupledProfileOutlineChartPanel panel;
-	private Cell cell;
+	private Cell cell = null;
 	
 	private Cell workingCell;
-	private AnalysisDataset dataset;
+	private AnalysisDataset dataset = null;
 	
 	private boolean isRunning = false;
 	private boolean isSelectRP = false;
@@ -94,22 +100,15 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 	
 	private boolean hasChanged = false;
 	
-	public CellResegmentationDialog(final Cell cell, final AnalysisDataset dataset){
+	public CellResegmentationDialog(){
 		super( null );
 		
-		if(cell==null || dataset==null){
-			throw new IllegalArgumentException("Cell or dataset is null");
-		}
-		
-		this.cell = cell;
-		this.dataset = dataset;
-		this.workingCell = new Cell(cell);
-		workingCell.getNucleus().setLocked(false);
 		createUI();
 		
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
 		this.pack();
+		
 		panel.getOutlinePanel().restoreAutoBounds(); // fixed aspect must be set after components are packed
 		
 		this.addWindowListener(new WindowAdapter() {
@@ -119,16 +118,36 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 				if(cellHasChanged()){
 					requestSaveOption();
 				} 
-				dispose();
+				setVisible(false);
 			}
 		});
 		
 		finer("Displaying resegmentation dialog");
-		updateCharts(workingCell);
+
 		this.setLocationRelativeTo(null);
 		this.setModal(false);
-		this.setVisible(true);
 		
+	}
+	
+	public void load(final Cell cell, final AnalysisDataset dataset){
+		
+		if(cell==null || dataset==null){
+			throw new IllegalArgumentException("Cell or dataset is null");
+		}
+		
+		this.cell = cell;
+		this.dataset = dataset;
+		this.workingCell = new Cell(cell);
+		workingCell.getNucleus().setLocked(false);
+		
+		this.setTitle("Resegmenting "+cell.getNucleus().getNameAndNumber());
+		panel.setCell(workingCell);
+		
+		table.setModel(createTableModel(""));
+		
+		
+		updateCharts(workingCell);
+		this.setVisible(true);
 	}
 	
 	private boolean cellHasChanged(){
@@ -165,8 +184,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		try{
 			finer("Creating resegmentation dialog");
 			this.setLayout(new BorderLayout());
-			this.setTitle("Resegmenting "+cell.getNucleus().getNameAndNumber());
-			
+
 			JPanel header = createHeader();
 			this.add(header, BorderLayout.NORTH);
 			
@@ -180,7 +198,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			ChartPanel profile = new ExportableChartPanel(MorphologyChartFactory.getInstance().makeEmptyChart(ProfileType.ANGLE));
 			ChartPanel outline = new FixedAspectRatioChartPanel(outlineChart);
 
-			panel = new CoupledProfileOutlineChartPanel(profile, outline, workingCell);
+			panel = new CoupledProfileOutlineChartPanel(profile, outline, null);
 			panel.addBorderPointEventListener(this);
 			
 			mainPanel.add(profile, BorderLayout.SOUTH);
@@ -196,12 +214,11 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		
 		DefaultTableModel model = new DefaultTableModel();
 		
-//		model.setColumnCount(2);
-		int segTotal = dataset.getCollection().getProfileManager().getSegmentCount();
-//		model.setRowCount(segTotal+1);
+		int segTotal = dataset==null ? 1 : dataset.getCollection().getProfileManager().getSegmentCount();
+
 		
 		List<Object> colOne = new ArrayList<Object>();
-//		colOne.add("Reference point");
+
 		for(int i=0; i<segTotal; i++){
 			colOne.add("Segment "+i);
 		}

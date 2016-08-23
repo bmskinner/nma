@@ -3,10 +3,7 @@ package gui.tabs.cells;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
-import java.lang.ref.WeakReference;
 import java.util.UUID;
-import java.util.logging.Level;
-
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -40,10 +37,11 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 
 	private JButton resegmentButton;
 	
-	// A JDialog is a top level container, and these are not subject to GC
+	// A JDialog is a top level container, and these are not subject to GC on disposal
 	// according to https://stackoverflow.com/questions/15863178/memory-leaking-on-jdialog-closing
-	// Hence, only keep one weak reference to a dialog, and prevent multiple copies spawning
-	private transient WeakReference<CellResegmentationDialog> dialogRef = new WeakReference<CellResegmentationDialog>(null); // allow caching of images while memory is available
+	// Hence, only keep one dialog, and prevent multiple copies spawning by loading the active cell
+	// in when needed
+	private CellResegmentationDialog resegDialog = new CellResegmentationDialog();
 	
 	
 	public CellProfilePanel(CellViewModel model) {
@@ -58,6 +56,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		
 		buttonsPanel = makeButtonPanel();
 		this.add(buttonsPanel, BorderLayout.NORTH);
+		
+		resegDialog.addDatasetEventListener(this);
 				
 		setEnabled(false);
 	}
@@ -82,10 +82,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		resegmentButton.setEnabled(false);
 		
 		resegmentButton.addActionListener( e -> {
-						
-			dialogRef = new WeakReference<CellResegmentationDialog>(new CellResegmentationDialog(getCellModel().getCell(), activeDataset()));
-			dialogRef.get().addDatasetEventListener(this);
-			
+				
+			resegDialog.load(getCellModel().getCell(), activeDataset());
 		} );
 		
 		return panel;
