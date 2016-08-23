@@ -29,7 +29,6 @@ import java.util.concurrent.ForkJoinTask;
 import analysis.AbstractStatisticFetchingTask;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;

@@ -225,7 +225,7 @@ implements PlugIn, Loggable
 				.filter( s -> requiredFiles.get(s)==false )
 				.count();
 		
-		return count > 0;
+		return count == 0;
 			
 	}
 	

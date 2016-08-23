@@ -20,8 +20,6 @@ package charting.charts;
 
 import gui.SegmentEvent;
 import gui.components.ColourSelecter;
-import ij.IJ;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.MouseInfo;
@@ -312,6 +310,8 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 
 		boolean isOverLine = false;
 
+		
+		
 		List<Crosshair> crosshairs = ((CrosshairOverlay) overlay).getDomainCrosshairs();
 		// only display a hand if the cursor is over the items
 		for(Crosshair c : crosshairs ){

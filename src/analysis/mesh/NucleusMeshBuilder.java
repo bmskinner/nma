@@ -20,13 +20,6 @@
  *******************************************************************************/
 package analysis.mesh;
 
-import java.util.List;
-import java.util.logging.Level;
-import analysis.detection.BooleanAligner;
-import components.generic.ProfileType;
-import components.generic.XYPoint;
-import components.nuclear.NucleusBorderSegment;
-import components.nuclei.Nucleus;
 import logging.Loggable;
 
 public class NucleusMeshBuilder implements Loggable {

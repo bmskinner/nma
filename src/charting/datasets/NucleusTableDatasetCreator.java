@@ -37,7 +37,6 @@ import logging.Loggable;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
-import charting.charts.BoxplotChartFactory;
 import charting.options.TableOptions;
 import charting.options.TableOptions.TableType;
 import analysis.AnalysisDataset;
@@ -45,16 +44,12 @@ import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
-import analysis.profiles.ProfileManager;
 import components.CellCollection;
 import components.ClusterGroup;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclear.NucleusType;
-import components.nuclei.Nucleus;
 import stats.DipTester;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
@@ -283,7 +278,8 @@ private static NucleusTableDatasetCreator instance = null;
 		List<Object> colours = new ArrayList<Object>(0);
 		colours.add("");
 
-		for(NucleusBorderSegment segment : segments) {
+		
+		for(int i=0; i<segments.size();i++) {
 			colours.add("");
 		}
 		model.addRow(colours.toArray(new Object[0]));
@@ -951,8 +947,6 @@ private static NucleusTableDatasetCreator instance = null;
 		
 		DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
 		
-		SegmentStatistic stat = (SegmentStatistic) options.getStat();
-		
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
 		for(AnalysisDataset dataset : options.getDatasets()){
@@ -1074,9 +1068,7 @@ private static NucleusTableDatasetCreator instance = null;
 		}
 		
 		DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
-		
-		SegmentStatistic stat = (SegmentStatistic) options.getStat();
-		
+				
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
 		for(AnalysisDataset dataset : options.getDatasets()){

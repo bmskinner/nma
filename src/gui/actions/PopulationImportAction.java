@@ -28,7 +28,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import analysis.AnalysisDataset;
 import gui.DatasetEvent.DatasetMethod;
-import gui.InterfaceEvent.InterfaceMethod;
 import gui.MainWindow;
 import gui.ThreadManager;
 import io.PopulationImportWorker;

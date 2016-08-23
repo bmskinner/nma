@@ -24,11 +24,9 @@ import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileType;
-import components.generic.BorderTag.BorderTagType;
 
 /**
  * This class contains the methods for detecting the reference and orientation points in a median
@@ -247,22 +245,6 @@ public class DatasetProfiler extends AnalysisWorker {
 
 		return rpIndex;
 	}
-	
 
-	
-	/**
-	 * Get the total differences to the median for all the nuclei in
-	 * the collection
-	 * @param pointType the BorderTagObject to compare to
-	 * @return
-	 */
-	private double compareProfilesToMedian(BorderTagObject pointType) throws Exception {
-		double[] scores = getDataset().getCollection().getDifferencesToMedianFromPoint(pointType);
-		double result = 0;
-		for(double s : scores){
-			result += s;
-		}
-		return result;
-	}
 			 
 }

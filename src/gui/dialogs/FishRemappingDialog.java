@@ -21,7 +21,6 @@ package gui.dialogs;
 import gui.ImageType;
 import gui.MainWindow;
 import gui.ThreadManager;
-import gui.dialogs.ImageProber.LargeImageDialog;
 import ij.io.DirectoryChooser;
 
 import java.awt.Color;

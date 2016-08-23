@@ -32,7 +32,6 @@ import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 

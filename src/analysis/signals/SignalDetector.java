@@ -28,7 +28,6 @@ import java.util.UUID;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import components.Cell;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.nuclear.NuclearSignal;
 import components.nuclear.SignalCollection;

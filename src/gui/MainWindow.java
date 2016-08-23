@@ -24,7 +24,6 @@ import gui.actions.AddNuclearSignalAction;
 import gui.actions.AddTailStainAction;
 import gui.actions.BuildHierarchicalTreeAction;
 import gui.actions.ClusterAnalysisAction;
-import gui.actions.CurateCollectionAction;
 import gui.actions.DatasetArithmeticAction;
 import gui.actions.FishRemappingAction;
 import gui.actions.MergeCollectionAction;
@@ -56,7 +55,6 @@ import io.MappingFileExporter;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.datatransfer.DataFlavor;
@@ -243,22 +241,38 @@ public class MainWindow
 				try {
 					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 					Transferable t = dtde.getTransferable();
-					List<File> fileList = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
 					
-					for(File f : fileList){
-						if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
-							finer("Opening file "+f.getAbsolutePath());
+					List<File> fileList = new ArrayList<File>();
+					
+					// Check that what was provided is a list
+					if(t.getTransferData(DataFlavor.javaFileListFlavor) instanceof List<?>){
+						
+						// Check that what is in the list is files
+						List<?> tempList = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
+						for(Object o : tempList){
 							
-							Runnable task = () -> { 
-								new PopulationImportAction(MainWindow.this, f);
-							};
-							threadManager.execute(task);
-							
-							
-						} else {
-							finer("File is not nmd, ignoring");
+							if(o instanceof File){
+								fileList.add( (File) o);
+							}
 						}
 						
+						// Open the files - we process only *.nmd files
+
+						for(File f : fileList){
+							if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
+								finer("Opening file "+f.getAbsolutePath());
+
+								Runnable task = () -> { 
+									new PopulationImportAction(MainWindow.this, f);
+								};
+								threadManager.execute(task);
+
+
+							} else {
+								finer("File is not nmd, ignoring");
+							}
+
+						}
 					}
 					
 				} catch (UnsupportedFlavorException e) {
@@ -703,11 +717,7 @@ public class MainWindow
 		if(event.type().equals("UpdatePopulationPanel")){
 			this.populationsPanel.update(populationsPanel.getSelectedDatasets());
 		}
-		
-		if(event.type().equals("RefreshPopulationPanelDatasets")){
-			this.populationsPanel.refreshDatasets();;
-		}
-		
+				
 		if(event.type().equals("SaveCollectionAction")){
 			
 			this.saveDataset(selectedDataset, true);
@@ -1023,15 +1033,15 @@ public class MainWindow
 		}	
 	}
 	
-	private void clearChartCache(final CountDownLatch latch){
-		
-		for(DetailPanel panel : detailPanels){
-			panel.clearChartCache();
-			panel.clearTableCache();
-		}
-		latch.countDown();
-		
-	}
+//	private void clearChartCache(final CountDownLatch latch){
+//		
+//		for(DetailPanel panel : detailPanels){
+//			panel.clearChartCache();
+//			panel.clearTableCache();
+//		}
+//		latch.countDown();
+//		
+//	}
 	
 	private void clearChartCache(final List<AnalysisDataset> list){
 		
@@ -1046,11 +1056,11 @@ public class MainWindow
 		}		
 	}
 	
-	private void recacheCharts(final AnalysisDataset dataset){
-		final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-		list.add(dataset);
-		recacheCharts(list);
-	}
+//	private void recacheCharts(final AnalysisDataset dataset){
+//		final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+//		list.add(dataset);
+//		recacheCharts(list);
+//	}
 	
 	private void recacheCharts(final List<AnalysisDataset> list){
 		

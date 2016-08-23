@@ -24,7 +24,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -32,7 +31,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -41,22 +39,11 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-
-
-
-
-
-//<<<<<<< HEAD
-//=======
 import analysis.AnalysisDataset;
 import analysis.signals.SignalManager;
-//import analysis.SignalManager;
-import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.ConsensusNucleusChartPanel;
 import charting.charts.FixedAspectRatioChartPanel;
-import charting.charts.MorphologyChartFactory;
-import charting.charts.NuclearSignalChartFactory;
-//>>>>>>> 80f8c2ce5ece277dacebd32467e86ec1a826439f
+
 import charting.charts.OutlineChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.SignalTableCell;
@@ -70,10 +57,8 @@ import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ExportableTable;
-import gui.components.panels.GenericCheckboxPanel;
 import gui.dialogs.SignalWarpingDialog;
 import gui.tabs.DetailPanel;
-import ij.io.DirectoryChooser;
 
 @SuppressWarnings("serial")
 public class SignalsOverviewPanel extends DetailPanel implements ActionListener, ChartSetEventListener {
@@ -85,7 +70,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	
 	private JButton warpButton;
 	
-	private GenericCheckboxPanel warpPanel = new GenericCheckboxPanel("Warp");
+//	private GenericCheckboxPanel warpPanel = new GenericCheckboxPanel("Warp");
 	
 	
 	public SignalsOverviewPanel(){
@@ -150,7 +135,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 				// double click
 				if (e.getClickCount() == 2) {
 
-					String rowName = table.getModel().getValueAt(row, 0).toString();
+//					String rowName = table.getModel().getValueAt(row, 0).toString();
 					String nextRowName = table.getModel().getValueAt(row+1, 0).toString();
 					if(nextRowName.equals("Signal group")){
 						SignalTableCell signalGroup = getSignalGroupFromTable(table, row+1, column);

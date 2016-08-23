@@ -1,7 +1,6 @@
 package io;
 
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -23,11 +22,7 @@ import components.nuclei.Nucleus;
 import gui.components.ColourSelecter;
 import gui.dialogs.CellCollectionOverviewDialog;
 import gui.tabs.cells.LabelInfo;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.Undo;
 import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 import ij.process.Blitter;
 import ij.process.ColorProcessor;
 import ij.process.FloatPolygon;
@@ -236,7 +231,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		}
 		
 		Nucleus n = cell.getNucleus();
-		double[] positions = n.getPosition();
+//		double[] positions = n.getPosition();
 
 		
 		// annotate the image processor with the nucleus outline

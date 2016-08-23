@@ -21,32 +21,17 @@ package gui.tabs.signals;
 import gui.components.ExportableTable;
 import gui.tabs.DetailPanel;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.UUID;
-import java.util.logging.Logger;
-
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
 import javax.swing.table.TableModel;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.renderer.category.StandardBarPainter;
-import org.jfree.chart.renderer.category.StatisticalBarRenderer;
-import org.jfree.data.category.CategoryDataset;
-
-import analysis.AnalysisDataset;
-import utility.Constants;
-import charting.charts.AbstractChartFactory;
 import charting.charts.ExportableChartPanel;
 import charting.charts.NuclearSignalChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
@@ -55,8 +40,6 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
-import components.CellCollection;
-import components.nuclear.ShellResult;
 
 
 @SuppressWarnings("serial")

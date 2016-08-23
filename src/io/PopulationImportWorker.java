@@ -23,9 +23,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.logging.Level;
-
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.nuclear.NucleusType;

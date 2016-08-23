@@ -34,7 +34,6 @@ import java.util.logging.Level;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.nucleus.NucleusDetector;
-import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 
 /**
  * Run a new analysis

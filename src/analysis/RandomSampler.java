@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import components.Cell;
 import components.CellCollection;
 import components.generic.MeasurementScale;
-import ij.IJ;
 import stats.NucleusStatistic;
 
 /**

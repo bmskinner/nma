@@ -19,17 +19,11 @@
 package gui.actions;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Level;
-
 import ij.io.SaveDialog;
 import io.PopulationExporter;
 import gui.MainWindow;
 import gui.ThreadManager;
-import gui.DatasetEvent.DatasetMethod;
-import gui.InterfaceEvent.InterfaceMethod;
 import analysis.AnalysisDataset;
 
 public class SaveDatasetAction extends ProgressableAction {

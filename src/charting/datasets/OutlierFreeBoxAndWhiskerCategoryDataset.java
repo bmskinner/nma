@@ -38,7 +38,7 @@ public class OutlierFreeBoxAndWhiskerCategoryDataset extends DefaultBoxAndWhiske
 	
 	@Override
 	public List<?> getOutliers(int row, int column){
-		return new ArrayList();
+		return new ArrayList<Object>();
 		
 	}
 

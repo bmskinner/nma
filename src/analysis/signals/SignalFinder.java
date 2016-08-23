@@ -24,9 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import analysis.detection.Detector;
 import components.CellularComponent;
 import components.generic.BooleanProfile;
@@ -45,7 +42,6 @@ import logging.Loggable;
 import stats.NucleusStatistic;
 import utility.Constants;
 import utility.StatsMap;
-import utility.Utils;
 
 public class SignalFinder implements Loggable {
 	

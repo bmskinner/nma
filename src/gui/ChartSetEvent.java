@@ -21,8 +21,6 @@ package gui;
 
 import java.util.EventObject;
 
-import org.jfree.chart.ChartPanel;
-
 
 @SuppressWarnings("serial")
 public class ChartSetEvent extends EventObject {

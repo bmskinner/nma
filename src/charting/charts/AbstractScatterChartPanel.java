@@ -5,9 +5,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
-import java.util.logging.Level;
-
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -31,7 +28,6 @@ import charting.options.TableOptionsBuilder;
 import gui.GlobalOptions;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ExportableTable;
-import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
 import stats.PlottableStatistic;
 

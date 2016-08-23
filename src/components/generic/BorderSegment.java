@@ -20,6 +20,7 @@ package components.generic;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import logging.Loggable;
@@ -37,7 +38,7 @@ public abstract class BorderSegment implements Serializable, Loggable {
 	
 	private int startIndex; // the starting index for index based segments
 	private int length;	// the length of the segment for index based segments
-	private List<XYPoint> points;
+	private List<XYPoint> points = new ArrayList<XYPoint>();
 	private String name; // allow the segment to be named or tagged
 	
 	
@@ -185,18 +186,18 @@ public abstract class BorderSegment implements Serializable, Loggable {
 	 * a problem to remove points in the middle of a segment
 	 * @param p the point to remove
 	 */
-	private void removePoint(XYPoint p){
-		
-		if(p==null){
-			throw new IllegalArgumentException("Point is null");
-		}
-		for(XYPoint exists : points){
-			if(p.equals(exists)){
-				points.remove(p);
-			}
-		}
-		this.length = this.points.size();
-	}
+//	private void removePoint(XYPoint p){
+//		
+//		if(p==null){
+//			throw new IllegalArgumentException("Point is null");
+//		}
+//		for(XYPoint exists : points){
+//			if(p.equals(exists)){
+//				points.remove(p);
+//			}
+//		}
+//		this.length = this.points.size();
+//	}
 	
 	/**
 	 * Remove the point at the start of the segment

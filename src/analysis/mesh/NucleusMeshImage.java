@@ -1,6 +1,5 @@
 package analysis.mesh;
 
-import ij.ImagePlus;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
@@ -10,7 +9,6 @@ import java.util.Map;
 
 import logging.Loggable;
 import analysis.mesh.NucleusMeshFace.NucleusMeshFaceCoordinate;
-import components.CellularComponent;
 import components.generic.XYPoint;
 
 /**

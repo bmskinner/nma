@@ -20,20 +20,15 @@ package gui.tabs.signals;
 
 import gui.GlobalOptions;
 import gui.components.HistogramsTabPanel;
-import gui.components.panels.MeasurementUnitSettingsPanel;
-
 import java.awt.Dimension;
 import java.util.logging.Level;
 
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.XYPlot;
-
 import stats.SignalStatistic;
 import charting.charts.HistogramChartFactory;
 import charting.charts.SelectableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import components.generic.MeasurementScale;
 
 @SuppressWarnings("serial")
 public class SignalsHistogramPanel extends HistogramsTabPanel {

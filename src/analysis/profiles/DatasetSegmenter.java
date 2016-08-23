@@ -23,7 +23,6 @@ package analysis.profiles;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
@@ -31,14 +30,12 @@ import analysis.AnalysisWorker;
 import analysis.ProgressEvent;
 import analysis.ProgressListener;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import utility.Constants;
 

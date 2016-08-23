@@ -26,7 +26,6 @@ import utility.Constants;
 import analysis.profiles.Rule.RuleType;
 import components.CellCollection;
 import components.generic.BooleanProfile;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileType;

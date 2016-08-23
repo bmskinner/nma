@@ -1,8 +1,6 @@
 package analysis.nucleus;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,20 +8,11 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
-import analysis.profiles.ProfileManager;
 import components.Cell;
 import components.CellCollection;
-import components.CellularComponent;
-import components.generic.BorderTag;
-import components.generic.ProfileCollection;
-import components.generic.ProfileType;
 import components.generic.XYPoint;
-import components.nuclear.NucleusBorderSegment;
 
 /**
  * This class is used to parse an input file of original positions and 

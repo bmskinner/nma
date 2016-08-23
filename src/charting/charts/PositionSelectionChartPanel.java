@@ -4,9 +4,6 @@ import gui.SegmentEvent;
 import gui.SegmentEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import ij.IJ;
-
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.MouseInfo;
 import java.awt.Rectangle;
@@ -19,20 +16,9 @@ import java.util.UUID;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.panel.CrosshairOverlay;
 import org.jfree.chart.panel.Overlay;
-import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.general.DatasetUtilities;
 import org.jfree.ui.RectangleEdge;
-
-
-
-
-
-
-
-import charting.ChartComponents;
 
 
 /**

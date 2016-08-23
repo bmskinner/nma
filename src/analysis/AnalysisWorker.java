@@ -14,7 +14,6 @@ import javax.swing.SwingWorker;
 import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
 import logging.Loggable;
-import analysis.nucleus.NucleusDetector;
 import utility.Constants;
 
 /**
@@ -31,8 +30,6 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
 	protected static Logger fileLogger; // log to the active dataset log file
 	protected static final Level FILE_DEBUG_LEVEL = Level.ALL;
 	protected int progressCount = 0;
-
-	private File logFile = null;
 	
 	protected static final ForkJoinPool mainPool = new ForkJoinPool();
     
@@ -72,7 +69,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
      */
     public AnalysisWorker(final AnalysisDataset dataset, final File debugFile){
     	this(dataset);
-    	this.logFile = debugFile;
+
     	log(Level.FINEST, "Creating log file handler");
 		DebugFileHandler handler = null;
 		try {
@@ -86,11 +83,10 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
 		} catch (SecurityException e1) {
 			log(Level.SEVERE, "Could not create the log file handler", e1);
 			fileLogger = null;
-			logFile = null;
+
 		} catch (IOException e1) {
 			log(Level.SEVERE, "Could not create the log file handler", e1);
 			fileLogger = null;
-			logFile = null;
 		}
 		log(Level.FINEST, "Created worker");
     }

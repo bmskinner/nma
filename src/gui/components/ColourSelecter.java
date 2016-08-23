@@ -65,17 +65,21 @@ public class ColourSelecter {
 	};
 	
 	
+	/**
+	 * The available colour choices, used for default dataset,
+	 * segment and signal colours
+	 * @author bms41
+	 *
+	 */
 	public enum ColourSwatch {
-		REGULAR_SWATCH 	  ("Regular", 	segmentColourList), 
-		NO_SWATCH		  ("No colours"	, blackList),
-		ACCESSIBLE_SWATCH ("Acessible colours", optimisedSwatchList);
+		REGULAR_SWATCH 	  ("Regular"), 
+		NO_SWATCH		  ("No colours"),
+		ACCESSIBLE_SWATCH ("Acessible colours");
 		
 	    private final String  name;   
-	    private final Color[] colours;
 	    
-	    ColourSwatch(String value, Color[] colours) {
+	    ColourSwatch(String value) {
 	        this.name = value;
-	        this.colours = colours;
 		}
 	    
 	    public String toString(){

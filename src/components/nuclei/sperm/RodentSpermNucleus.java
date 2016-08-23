@@ -42,7 +42,6 @@ import stats.NucleusStatistic;
 import stats.SignalStatistic;
 import utility.Utils;
 import components.generic.BooleanProfile;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
 import components.generic.Profile;

@@ -19,9 +19,6 @@
 
 package gui.components.panels;
 
-import gui.ChartSetEvent;
-import gui.SignalChangeEvent;
-
 import org.jfree.chart.JFreeChart;
 
 import components.generic.SegmentedProfile;

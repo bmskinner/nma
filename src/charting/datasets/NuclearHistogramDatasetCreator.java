@@ -34,7 +34,6 @@ import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;

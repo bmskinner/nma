@@ -18,11 +18,8 @@
  *******************************************************************************/
 package gui.components;
 
-import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.components.panels.GenericCheckboxPanel;
 import gui.tabs.DetailPanel;
-import stats.NucleusStatistic;
-
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -31,8 +28,6 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.BoxLayout;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -41,10 +36,8 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.charts.BoxplotChartFactory;
 import charting.charts.HistogramChartFactory;
 import charting.charts.SelectableChartPanel;
-import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 

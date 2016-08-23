@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
@@ -14,7 +13,6 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
-import analysis.profiles.ProfileManager;
 import charting.charts.FixedAspectRatioChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;

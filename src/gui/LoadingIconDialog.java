@@ -27,7 +27,6 @@ import java.net.URL;
 import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 
 import gui.dialogs.MessagingDialog;

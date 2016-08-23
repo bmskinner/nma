@@ -30,9 +30,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.io.File;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -40,8 +37,6 @@ import javax.swing.border.EmptyBorder;
 
 import logging.Loggable;
 import charting.charts.AbstractChartFactory;
-import charting.charts.MorphologyChartFactory;
-import utility.Utils;
 import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellularComponent;
@@ -105,11 +100,7 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 		
 		this.repaint();
 	}
-	
-	private void annotateImage(){
 		
-	}
-	
 	/**
 	 * Draw the outline of a nucleus on the given processor
 	 * @param cell

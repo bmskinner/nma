@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.logging.Level;
 
 import analysis.AbstractProgressAction;
-//import analysis.nucleus.DatasetSegmenter.SegmentFitter;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileCollection;

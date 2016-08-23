@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import utility.Constants;
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;

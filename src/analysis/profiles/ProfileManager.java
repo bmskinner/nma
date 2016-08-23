@@ -572,33 +572,33 @@ public class ProfileManager implements Loggable {
 		}
 	}
 
-	/**
-	 * Update the segment with the given id to start at the given index.
-	 * Also updates the individual nuclei in the collection
-	 * @param id
-	 * @param index
-	 * @throws Exception
-	 */
-	private void updateSegmentStartIndex(UUID id, int index) throws Exception{
-
-		// Update the median profile
-		collection
-			.getProfileManager()
-			.updateMedianProfileSegmentIndex(true, id, index);
-
-		// Lock all segments except the one to change
-		setLockOnAllNucleusSegmentsExcept(id, true);
-		
-		// Now run the segment fitting from REFRESH_MORPHOLOGY
-		
-		
-		
-		
-//		Restore the segment locks
-		setLockOnAllNucleusSegments(false);
-		
-		
-	}
+//	/**
+//	 * Update the segment with the given id to start at the given index.
+//	 * Also updates the individual nuclei in the collection
+//	 * @param id
+//	 * @param index
+//	 * @throws Exception
+//	 */
+//	private void updateSegmentStartIndex(UUID id, int index) throws Exception{
+//
+//		// Update the median profile
+//		collection
+//			.getProfileManager()
+//			.updateMedianProfileSegmentIndex(true, id, index);
+//
+//		// Lock all segments except the one to change
+//		setLockOnAllNucleusSegmentsExcept(id, true);
+//		
+//		// Now run the segment fitting from REFRESH_MORPHOLOGY
+//		
+//		
+//		
+//		
+////		Restore the segment locks
+//		setLockOnAllNucleusSegments(false);
+//		
+//		
+//	}
 	
 	/**
 	 * Lock the start index of all segments of all profile types in 

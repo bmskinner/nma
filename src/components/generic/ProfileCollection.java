@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import analysis.profiles.RuleSet;
 import logging.Loggable;
 import components.CellCollection;
 import components.nuclear.NucleusBorderSegment;
@@ -558,7 +557,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		
 		Map<BorderTagObject, Integer> newIndexes = new HashMap<BorderTagObject, Integer>();
 		
-		Iterator it = indexes.keySet().iterator();
+		Iterator<?> it = indexes.keySet().iterator();
 		
 		while(it.hasNext()){
 			Object tag = it.next();
@@ -686,7 +685,7 @@ public class ProfileCollection implements Serializable, Loggable {
 			  
 			  Map<BorderTagObject, Map<Double, Profile>> newCache = new HashMap<BorderTagObject, Map<Double, Profile>>();
 				
-				Iterator it = cache.keySet().iterator();
+				Iterator<?> it = cache.keySet().iterator();
 				
 				while(it.hasNext()){
 					Object tag = it.next();

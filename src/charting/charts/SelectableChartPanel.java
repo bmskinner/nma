@@ -20,18 +20,12 @@ package charting.charts;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import ij.IJ;
-import jebl.evolution.graphs.Edge;
-import jebl.evolution.graphs.Node;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -43,15 +37,12 @@ import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.AxisSpace;
-import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.panel.CrosshairOverlay;
 import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.general.DatasetUtilities;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
 

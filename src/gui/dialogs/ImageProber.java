@@ -20,18 +20,11 @@ package gui.dialogs;
 
 import gui.ImageType;
 import gui.LoadingIconDialog;
-import gui.MainWindow;
-import gui.dialogs.CellCollectionOverviewDialog.LabelInfoRenderer;
-import gui.tabs.cells.LabelInfo;
-import ij.process.ImageProcessor;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.MouseAdapter;
@@ -41,11 +34,8 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
@@ -259,7 +249,7 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 		table = new JTable( model ) {
             //  Returning the Class of each column will allow different
             //  renderers to be used based on Class
-            public Class getColumnClass(int column){
+            public Class<?> getColumnClass(int column){
             	return IconCell.class;
             }
         };

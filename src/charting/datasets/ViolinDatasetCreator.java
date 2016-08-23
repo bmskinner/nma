@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jfree.data.Range;
-import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
 import stats.SignalStatistic;
@@ -17,7 +15,6 @@ import analysis.AnalysisDataset;
 import charting.charts.ViolinCategoryDataset;
 import charting.options.ChartOptions;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
@@ -234,7 +231,7 @@ public class ViolinDatasetCreator implements Loggable {
 		return dataset;
 	}
 	
-	private void addProbabilities(ViolinCategoryDataset dataset, List<Number> list, Comparable rowKey, Comparable colKey){
+	private void addProbabilities(ViolinCategoryDataset dataset, List<Number> list, Comparable<?> rowKey, Comparable<?> colKey){
 		
 		List<Number> pdfValues = new ArrayList<Number>();
 		

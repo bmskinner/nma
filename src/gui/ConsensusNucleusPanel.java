@@ -19,15 +19,11 @@
 package gui;
 
 import gui.DatasetEvent.DatasetMethod;
-import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.logging.Level;
@@ -51,7 +47,6 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
@@ -137,10 +132,10 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		return panel;
 	}
 	
-	private JPanel createHeaderPanel(){
-		JPanel panel = new JPanel(new FlowLayout());		
-		return panel;
-	}
+//	private JPanel createHeaderPanel(){
+//		JPanel panel = new JPanel(new FlowLayout());		
+//		return panel;
+//	}
 		
 	private JPanel createMeshPanel(){
 		JPanel panel = new JPanel();

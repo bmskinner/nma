@@ -24,7 +24,6 @@
 */  
 package analysis.signals;
 
-import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
@@ -32,27 +31,19 @@ import ij.gui.Roi;
 import ij.plugin.RoiEnlarger;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
-import io.ImageExporter;
 import io.ImageImporter;
 import logging.Loggable;
 
-import java.awt.Color;
 import java.awt.Rectangle;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import utility.Constants;
 import utility.StatsMap;
-import utility.Utils;
 import analysis.detection.Detector;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
-import components.nuclei.RoundNucleus;
 
 public class ShellCreator implements Loggable {
 
@@ -339,16 +330,6 @@ public class ShellCreator implements Loggable {
 			for(int i=0;i<shellCount;i++){
 
 				Roi roi = shells.get(i);
-				double xbase = roi.getXBase();
-				double ybase = roi.getYBase();
-				
-				double maxX = roi.getBounds().getWidth()+xbase;
-				double maxY = roi.getBounds().getHeight()+ybase;
-				
-//				IJ.log("    Shell: X base: "+xbase
-//						+"  Y base: "+ybase
-//						+"  X max: "+maxX
-//						+"  Y max: "+maxY);
 				
 				int density = 0;
 

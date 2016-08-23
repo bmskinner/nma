@@ -19,19 +19,14 @@
 package gui.tabs;
 
 import java.awt.BorderLayout;
-import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
-import analysis.AnalysisDataset;
 
 @SuppressWarnings("serial")
 public class InterDatasetComparisonDetailPanel extends DetailPanel {

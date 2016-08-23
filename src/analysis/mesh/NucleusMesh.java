@@ -20,7 +20,6 @@
  *******************************************************************************/
 package analysis.mesh;
 
-import java.awt.Shape;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +30,6 @@ import java.util.Set;
 
 import logging.Loggable;
 import components.AbstractCellularComponent;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.XYPoint;

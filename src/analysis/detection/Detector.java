@@ -24,7 +24,6 @@
   nuclei and signals
 */  
 package analysis.detection;
-import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.measure.Measurements;

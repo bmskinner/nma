@@ -24,13 +24,9 @@ import gui.components.ColourSelecter.ColourSwatch;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.List;
-import java.util.logging.Level;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 

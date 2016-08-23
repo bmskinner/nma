@@ -3,8 +3,6 @@ package charting.charts;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
-import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.Stroke;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;

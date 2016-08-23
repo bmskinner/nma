@@ -22,13 +22,10 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.text.NumberFormat;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;

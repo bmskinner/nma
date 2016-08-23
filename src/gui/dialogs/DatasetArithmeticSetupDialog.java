@@ -26,14 +26,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
-
-import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
 import analysis.AnalysisDataset;
 import gui.MainWindow;
 import gui.components.panels.DatasetSelectionPanel;

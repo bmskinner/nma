@@ -19,16 +19,10 @@
 package analysis.nucleus;
 
 import stats.NucleusStatistic;
-import stats.SegmentStatistic;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.swing.plaf.metal.MetalBorders.OptionDialogBorder;
-
 import utility.Constants;
 import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
@@ -42,11 +36,9 @@ import analysis.AnalysisWorker;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.mesh.NucleusMesh;
-import analysis.mesh.NucleusMeshBuilder;
 import analysis.mesh.NucleusMeshFace;
 import components.Cell;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.Profile;

@@ -20,12 +20,8 @@ package gui.actions;
 
 import gui.MainWindow;
 import gui.ThreadManager;
-import gui.InterfaceEvent.InterfaceMethod;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
-
-import javax.swing.SwingUtilities;
 
 import analysis.AnalysisDataset;
 import analysis.nucleus.CurveRefolder;

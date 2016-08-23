@@ -24,7 +24,6 @@ import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.BorderTag.BorderTagType;
 

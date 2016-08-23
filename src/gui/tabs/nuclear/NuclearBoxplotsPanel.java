@@ -21,7 +21,6 @@
 package gui.tabs.nuclear;
 
 import gui.GlobalOptions;
-import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.BoxplotsTabPanel;
 
 import java.awt.BorderLayout;
@@ -40,7 +39,6 @@ import charting.charts.ExportableChartPanel;
 import charting.charts.ViolinChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import components.generic.MeasurementScale;
 
 @SuppressWarnings("serial")
 public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionListener {

@@ -18,7 +18,6 @@
  *******************************************************************************/
 package analysis;
 
-import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 import ij.IJ;
 
@@ -49,7 +48,6 @@ import utility.Version;
 import components.Cell;
 import components.CellCollection;
 import components.ClusterGroup;
-import components.nuclear.ShellResult;
 
 
 /**

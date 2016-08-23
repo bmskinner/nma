@@ -23,11 +23,6 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.geom.Rectangle2D;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import ij.IJ;
 import jebl.evolution.graphs.Node;
 import jebl.evolution.trees.RootedTree;
 import jebl.gui.trees.treeviewer.painters.BasicLabelPainter;

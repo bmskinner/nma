@@ -212,25 +212,25 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * Ensure that all child datasets are present within the  
 	 * analysisDatasets Map
 	 */
-	public void refreshDatasets(){
-		
-		if(DatasetListManager.getInstance().hasDatasets()){
-//		if(this.analysisDatasets.size()>0){
-			for(UUID id : treeOrderMap.getIDs()){
-				AnalysisDataset rootDataset = DatasetListManager.getInstance().getDataset(id);					
-//				AnalysisDataset rootDataset = analysisDatasets.get(id);
-//				for(AnalysisDataset child : rootDataset.getAllChildDatasets()){
-//					if( ! this.hasDataset(child.getUUID())){
-////						child.setName(checkName(child.getName(), child.getUUID()));
-//						this.analysisDatasets.put(child.getUUID(), child);
-////						this.populationNames.put(child.getName(), child.getUUID());
-//					}
-//				}
-				
-			}
-		}
-		update();
-	}
+//	public void refreshDatasets(){
+//		
+//		if(DatasetListManager.getInstance().hasDatasets()){
+////		if(this.analysisDatasets.size()>0){
+//			for(UUID id : treeOrderMap.getIDs()){
+////				AnalysisDataset rootDataset = DatasetListManager.getInstance().getDataset(id);					
+////				AnalysisDataset rootDataset = analysisDatasets.get(id);
+////				for(AnalysisDataset child : rootDataset.getAllChildDatasets()){
+////					if( ! this.hasDataset(child.getUUID())){
+//////						child.setName(checkName(child.getName(), child.getUUID()));
+////						this.analysisDatasets.put(child.getUUID(), child);
+//////						this.populationNames.put(child.getName(), child.getUUID());
+////					}
+////				}
+//				
+//			}
+//		}
+//		update();
+//	}
 	
 	/**
 	 * Update the cluster groups for each root dataset and its children.
@@ -602,7 +602,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 //			if(this.populationNames.containsKey(newName)){
 //				log(Level.SEVERE, "Name exists, aborting");
 //			} else {
-				String oldName = collection.getName();
+//				String oldName = collection.getName();
 				collection.setName(newName);
 //				this.populationNames.put(newName, collection.getID());
 //				this.populationNames.remove(oldName);

@@ -70,7 +70,7 @@ public class NucleusRefinder  extends NucleusDetector
   public NucleusRefinder(String outputFolder, File pathList, File debugFile, AnalysisOptions options){
 	  super( outputFolder,  debugFile, options);
 	  this.pathList = pathList;
-	  this.fileLogger = Logger.getLogger(NucleusRefinder.class.getName());
+	  fileLogger = Logger.getLogger(NucleusRefinder.class.getName());
 
 	  // get the image names and coordinates from the pathList
 	  try{
@@ -170,48 +170,48 @@ public class NucleusRefinder  extends NucleusDetector
 //    return ok;
 //  }
 
-  private ImagePlus makeGreyscaleFromBlue(ImagePlus image){
+//  private ImagePlus makeGreyscaleFromBlue(ImagePlus image){
+//
+//    ColorProcessor icp = (ColorProcessor) image.getChannelProcessor().convertToRGB();
+//    ImagePlus newImage = new ImagePlus("image",new ByteProcessor( image.getWidth(), 
+//                                                                  image.getHeight(), 
+//                                                                  icp.getChannel(3)));
+//    return newImage;
+//
+//  } 
 
-    ColorProcessor icp = (ColorProcessor) image.getChannelProcessor().convertToRGB();
-    ImagePlus newImage = new ImagePlus("image",new ByteProcessor( image.getWidth(), 
-                                                                  image.getHeight(), 
-                                                                  icp.getChannel(3)));
-    return newImage;
-
-  } 
-
-  private void updateFileMap(File file){
-    for( HashMap<File, XYPoint> hash : nucleiToFind ){ // the hash holds the tmeplate image path and position
-      Set<File> fileSet = hash.keySet();
-      for(File oldFile : fileSet){ // will only be one entry in this hash
-        if(oldFile.getName().equals(file.getName() ) ){
-          fileMap.put(file, oldFile);
-        }
-      }
-    }
-  }
-
-  private void alignImages(File newPath, File oldPath){
-    
-    if(this.realignMode==true){    
-      // this is the template file that matches the file we are checking
-      ImagePlus template = new ImagePlus(oldPath.getAbsolutePath());
-      ImagePlus source   = new ImagePlus(newPath.getAbsolutePath());
-
-      // CONVERT BOTH BLUE CHANNELS TO 8-bit GREYSCALE
-      ImagePlus imageToOffset = makeGreyscaleFromBlue(source);
-      ImagePlus templateImage = makeGreyscaleFromBlue(template);
-
-      // INSERT IMAGE ALIGNMENT HERE
-      ImageAligner aligner = new ImageAligner(templateImage, imageToOffset, analysisOptions.getNucleusThreshold());
-      aligner.setXOffset(this.xOffset);
-      aligner.setYOffset(this.yOffset);
-      aligner.run();
-      offsets.put(newPath, new XYPoint(aligner.getXOffset(), aligner.getYOffset()));
-    } else {
-      offsets.put(newPath, new XYPoint(this.xOffset, this.yOffset));
-    }
-  }
+//  private void updateFileMap(File file){
+//    for( HashMap<File, XYPoint> hash : nucleiToFind ){ // the hash holds the tmeplate image path and position
+//      Set<File> fileSet = hash.keySet();
+//      for(File oldFile : fileSet){ // will only be one entry in this hash
+//        if(oldFile.getName().equals(file.getName() ) ){
+//          fileMap.put(file, oldFile);
+//        }
+//      }
+//    }
+//  }
+//
+//  private void alignImages(File newPath, File oldPath){
+//    
+//    if(this.realignMode==true){    
+//      // this is the template file that matches the file we are checking
+//      ImagePlus template = new ImagePlus(oldPath.getAbsolutePath());
+//      ImagePlus source   = new ImagePlus(newPath.getAbsolutePath());
+//
+//      // CONVERT BOTH BLUE CHANNELS TO 8-bit GREYSCALE
+//      ImagePlus imageToOffset = makeGreyscaleFromBlue(source);
+//      ImagePlus templateImage = makeGreyscaleFromBlue(template);
+//
+//      // INSERT IMAGE ALIGNMENT HERE
+//      ImageAligner aligner = new ImageAligner(templateImage, imageToOffset, analysisOptions.getNucleusThreshold());
+//      aligner.setXOffset(this.xOffset);
+//      aligner.setYOffset(this.yOffset);
+//      aligner.run();
+//      offsets.put(newPath, new XYPoint(aligner.getXOffset(), aligner.getYOffset()));
+//    } else {
+//      offsets.put(newPath, new XYPoint(this.xOffset, this.yOffset));
+//    }
+//  }
 
   /*
     Detects nuclei within the image.
@@ -246,30 +246,30 @@ public class NucleusRefinder  extends NucleusDetector
 //      i++;
 //    } 
 //  }
-  
-  private boolean checkRoi(Roi roi, File path){
-	  boolean result = false;
-	  for( HashMap<File, XYPoint> hash : nucleiToFind ){ // the hash holds the tmeplate image path and position
-
-		  for(File oldFile : hash.keySet()){ // will only be one entry in this hash
-
-			  if(oldFile.getName().equals(path.getName() ) ){
-				  XYPoint p = hash.get(oldFile);
-
-				  // APPLY THE CALCULATED OFFSET HERE
-				  XYPoint imageOffset = offsets.get(path);
-
-				  int xToFind = p.getXAsInt()-imageOffset.getXAsInt();
-				  int yToFind = p.getYAsInt()-imageOffset.getYAsInt();
-
-				  if(roi.getBounds().contains( xToFind, yToFind )){
-					  result = true;
-					  log(Level.INFO, "  Acquiring nucleus at: "+xToFind+","+yToFind);
-				  }
-			  }
-
-		  }
-	  }
-	  return result;
-  }
+//  
+//  private boolean checkRoi(Roi roi, File path){
+//	  boolean result = false;
+//	  for( HashMap<File, XYPoint> hash : nucleiToFind ){ // the hash holds the tmeplate image path and position
+//
+//		  for(File oldFile : hash.keySet()){ // will only be one entry in this hash
+//
+//			  if(oldFile.getName().equals(path.getName() ) ){
+//				  XYPoint p = hash.get(oldFile);
+//
+//				  // APPLY THE CALCULATED OFFSET HERE
+//				  XYPoint imageOffset = offsets.get(path);
+//
+//				  int xToFind = p.getXAsInt()-imageOffset.getXAsInt();
+//				  int yToFind = p.getYAsInt()-imageOffset.getYAsInt();
+//
+//				  if(roi.getBounds().contains( xToFind, yToFind )){
+//					  result = true;
+//					  log(Level.INFO, "  Acquiring nucleus at: "+xToFind+","+yToFind);
+//				  }
+//			  }
+//
+//		  }
+//	  }
+//	  return result;
+//  }
 }

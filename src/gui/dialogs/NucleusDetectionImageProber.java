@@ -24,7 +24,6 @@ import java.io.File;
 import analysis.AnalysisOptions;
 import analysis.detection.NucleusProberWorker;
 import gui.ImageType;
-import gui.dialogs.ImageProber.IconCellRenderer;
 
 @SuppressWarnings("serial")
 public class NucleusDetectionImageProber extends ImageProber {

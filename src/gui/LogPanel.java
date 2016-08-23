@@ -39,7 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
@@ -47,7 +46,6 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
@@ -71,7 +69,6 @@ import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
 import gui.InterfaceEvent.InterfaceMethod;
-import gui.actions.PopulationImportAction;
 import gui.tabs.DetailPanel;
 
 public class LogPanel extends DetailPanel implements ActionListener {
@@ -102,10 +99,6 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		
 	}
 	
-	private Map<Integer, AnalysisDataset> datasetMap = new HashMap<Integer, AnalysisDataset>();
-	
-//	private Logger programLogger;
-
 	public LogPanel() {
 		super();
 		this.setLayout(new BorderLayout());
@@ -117,6 +110,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	 * Create the log panel for updates
 	 * @return a scrollable panel
 	 */
+	@SuppressWarnings("serial")
 	private JPanel createLogPanel(){
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
@@ -180,22 +174,40 @@ public class LogPanel extends DetailPanel implements ActionListener {
 				
 				
 				try {
+					
 					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 					Transferable t = dtde.getTransferable();
-					List<File> fileList = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
 					
-					for(File f : fileList){
-						if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
-							finer("Opening file "+f.getAbsolutePath());
+					List<File> fileList = new ArrayList<File>();
+					
+					// Check that what was provided is a list
+					if(t.getTransferData(DataFlavor.javaFileListFlavor) instanceof List<?>){
+						
+						// Check that what is in the list is files
+						List<?> tempList = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
+						for(Object o : tempList){
 							
-							fireSignalChangeEvent("Open|"+f.getAbsolutePath());
-							
-							
-						} else {
-							finer("File is not nmd, ignoring");
+							if(o instanceof File){
+								fileList.add( (File) o);
+							}
 						}
 						
+						// Open the files - we process only *.nmd files
+
+						for(File f : fileList){
+							if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
+								finer("Opening file "+f.getAbsolutePath());
+
+								fireSignalChangeEvent("Open|"+f.getAbsolutePath());
+
+
+							} else {
+								finer("File is not nmd, ignoring");
+							}
+
+						}
 					}
+
 					
 				} catch (UnsupportedFlavorException e) {
 					error("Error in DnD", e);

@@ -4,18 +4,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import analysis.AbstractProgressAction;
 import analysis.AnalysisOptions;
 import components.Cell;
 import components.CellCollection;
 import components.CellularComponent;
 import components.nuclei.Nucleus;
-import ij.IJ;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
-import io.ImageExporter;
 import io.ImageImporter;
 import utility.Constants;
 

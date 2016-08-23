@@ -25,28 +25,19 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
-import analysis.profiles.ProfileManager;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
-import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;

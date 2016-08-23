@@ -28,8 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
-
 import analysis.AnalysisDataset;
 import analysis.signals.SignalDetector;
 import analysis.signals.SignalManager;

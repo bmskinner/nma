@@ -24,13 +24,9 @@ import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import gui.LoadingIconDialog;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
@@ -40,7 +36,6 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.JFreeChart;
 
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import charting.charts.ExportableChartPanel;

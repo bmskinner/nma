@@ -32,7 +32,6 @@ import ij.gui.Roi;
 import java.io.File;
 import java.io.IOException;
 
-import components.nuclear.SignalCollection;
 import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
 

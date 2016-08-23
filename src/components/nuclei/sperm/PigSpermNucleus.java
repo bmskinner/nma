@@ -30,20 +30,14 @@ import java.io.IOException;
 
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
-import components.generic.BooleanProfile;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
-import components.generic.ProfileType;
 import components.nuclear.BorderPoint;
-import components.nuclear.NucleusType;
-import components.nuclear.SignalCollection;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 
 public class PigSpermNucleus 
-    extends SpermNucleus 
-  {
+    extends SpermNucleus  {
     /**
 	 * 
 	 */

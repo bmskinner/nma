@@ -19,25 +19,19 @@
 package gui.dialogs;
 
 import gui.MainWindow;
-import stats.DipTester;
-import stats.NucleusStatistic;
-
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -52,8 +46,6 @@ import javax.swing.event.ChangeListener;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
-import components.generic.MeasurementScale;
-import components.generic.ProfileType;
 
 @SuppressWarnings("serial")
 public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implements ActionListener, ChangeListener {

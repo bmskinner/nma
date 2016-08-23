@@ -23,9 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-import java.util.logging.Level;
-
 import logging.Loggable;
 
 import org.jfree.chart.JFreeChart;
@@ -35,8 +32,7 @@ import analysis.AnalysisDataset;
 
 /*
  * Store rendered charts in a cache, to avoid slowdowns when reselecting datasets
- * This needs to hold a UUID for any combination of datasets and display options,
- *  and map this uuid to the appropriate chart
+ * Internally uses a Map<ChartOptions, JFreeChart>.
  */
 public class ChartCache implements Cache, Loggable {
 	

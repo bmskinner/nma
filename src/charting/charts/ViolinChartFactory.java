@@ -5,19 +5,11 @@ import gui.components.ColourSelecter;
 import java.awt.Color;
 import java.util.UUID;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.labels.BoxAndWhiskerToolTipGenerator;
 import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
-import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
-
 import analysis.AnalysisDataset;
-import charting.datasets.NuclearSignalDatasetCreator;
-import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.ViolinDatasetCreator;
 import charting.options.ChartOptions;
 import logging.Loggable;

@@ -22,8 +22,6 @@ import gui.Labels;
 import gui.components.ColourSelecter;
 import ij.IJ;
 import ij.io.DirectoryChooser;
-import ij.io.OpenDialog;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -35,8 +33,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;

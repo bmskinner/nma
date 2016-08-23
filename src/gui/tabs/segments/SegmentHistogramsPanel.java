@@ -3,8 +3,6 @@ package gui.tabs.segments;
 import gui.GlobalOptions;
 import gui.Labels;
 import gui.components.HistogramsTabPanel;
-import gui.components.panels.MeasurementUnitSettingsPanel;
-
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.List;
@@ -17,16 +15,12 @@ import javax.swing.JPanel;
 import org.jfree.chart.JFreeChart;
 
 import stats.SegmentStatistic;
-import charting.charts.BoxplotChartFactory;
 import charting.charts.HistogramChartFactory;
 import charting.charts.SelectableChartPanel;
-import charting.charts.ViolinChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
-import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 

@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import analysis.AbstractProgressAction;
 import components.generic.Profile;
 import components.generic.ProfileType;

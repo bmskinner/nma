@@ -23,10 +23,8 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.DatasetEventListener;
 import gui.components.ExportableTable;
 import gui.dialogs.ClusterTreeDialog;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -404,14 +402,15 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 	 * Colour analysis parameter table cell background. If all the datasets selected
 	 * have the same value, colour them light green
 	 */
-	@SuppressWarnings("serial")
 	public class ClusterTableCellRenderer extends DefaultTableCellRenderer {
 
 		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
+			
+			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
+	        
 			Color colour = Color.BLACK;
-			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
 			if(value !=null && !value.toString().equals("")){
 			
@@ -421,9 +420,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			}
 
 
-			l.setForeground(colour);
-
-			return l;
+			setForeground(colour);
+			return this;
 		}
 
 	}

@@ -185,7 +185,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 						
 			Map<BorderTagObject, List<RuleSet>> newMap = new HashMap<BorderTagObject, List<RuleSet>>();
 			
-			Iterator it = map.keySet().iterator();
+			Iterator<?> it = map.keySet().iterator();
 			
 			while(it.hasNext()){
 				Object tag = it.next();

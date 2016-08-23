@@ -19,7 +19,6 @@ import charting.options.TableOptionsBuilder;
 import charting.options.TableOptions.TableType;
 import gui.GlobalOptions;
 import gui.components.ExportableTable;
-import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")

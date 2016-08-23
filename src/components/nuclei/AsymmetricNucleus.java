@@ -38,10 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import utility.Utils;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
-import components.generic.Profile;
-import components.generic.ProfileType;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 

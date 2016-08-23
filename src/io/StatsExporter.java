@@ -28,7 +28,6 @@ import java.util.logging.Logger;
 import stats.NucleusStatistic;
 import analysis.AnalysisDataset;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.Profile;

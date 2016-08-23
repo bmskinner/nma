@@ -22,19 +22,13 @@ package analysis.profiles;
 
 import java.util.UUID;
 
-import utility.Constants;
 import logging.Loggable;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
-import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
-import components.generic.XYPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
-import components.nuclei.sperm.PigSpermNucleus;
-import components.nuclei.sperm.RodentSpermNucleus;
 
 /**
  * Offset the profiles of individual nuclei within a CellCollection

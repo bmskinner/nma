@@ -23,8 +23,6 @@ package gui.tabs.segments;
 import gui.GlobalOptions;
 import gui.components.ExportableTable;
 import gui.components.ColourSelecter;
-import gui.components.ColourSelecter.ColourSwatch;
-import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
@@ -44,7 +42,6 @@ import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
-import components.generic.MeasurementScale;
 import components.nuclear.NucleusBorderSegment;
 
 public class SegmentStatsPanel extends DetailPanel {

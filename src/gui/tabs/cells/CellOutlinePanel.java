@@ -32,6 +32,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 	private RotationSelectionSettingsPanel rotationPanel;
 
 	private FixedAspectRatioChartPanel panel;
+	
 	private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus");
 	private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp to consensus");
 			
@@ -63,7 +64,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		this.add(settingsPanel, BorderLayout.NORTH);
 		
 		panel = new FixedAspectRatioChartPanel(chart);
-					
+
+		panel.addChartSetEventListener(this);
+		
 		this.add(panel, BorderLayout.CENTER);
 		
 	}

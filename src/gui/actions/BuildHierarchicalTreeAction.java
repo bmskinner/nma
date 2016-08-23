@@ -27,17 +27,10 @@ import gui.ThreadManager;
 import gui.DatasetEvent.DatasetMethod;
 import gui.dialogs.ClusterTreeDialog;
 import gui.dialogs.HierarchicalTreeSetupDialog;
-import jebl.evolution.trees.RootedTree;
-import jebl.evolution.trees.Tree;
-import jebl.evolution.trees.Utils;
-
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
-//import analysis.NeighbourJoiningTreeBuilder;
-import analysis.ClusteringOptions.ClusteringMethod;
-import analysis.ClusteringOptions.HierarchicalClusterMethod;
 import analysis.nucleus.NucleusTreeBuilder;
 import components.ClusterGroup;
 

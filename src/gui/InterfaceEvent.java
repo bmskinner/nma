@@ -18,12 +18,7 @@
  *******************************************************************************/
 package gui;
 
-import gui.DatasetEvent.DatasetMethod;
-
 import java.util.EventObject;
-import java.util.List;
-
-import analysis.AnalysisDataset;
 
 /**
  * Instruct a UI change or action, without requiring any particular datasets selected

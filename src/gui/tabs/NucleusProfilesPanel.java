@@ -24,14 +24,10 @@ import gui.tabs.profiles.VariabilityDisplayPanel;
 import java.awt.BorderLayout;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.swing.JTabbedPane;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
-import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import components.generic.ProfileType;

@@ -26,16 +26,12 @@
 package analysis.nucleus;
 
 import java.awt.Rectangle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import utility.Constants;
 import utility.Utils;
 import components.AbstractCellularComponent;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
 import components.generic.Profile;
@@ -46,7 +42,6 @@ import components.nuclear.BorderPoint;
 import components.nuclear.NucleusType;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
-import components.nuclei.RoundNucleus;
 
 
 public class CurveRefolder extends AnalysisWorker {
@@ -235,37 +230,7 @@ public class CurveRefolder extends AnalysisWorker {
 					publish(++i);
 					fine("Iteration "+i+": "+(int)score);
 				}
-//			}
 
-//			if(this.mode==INTENSIVE_MODE){
-//
-//				while(score > (originalScore*0.1) && i<MAX_ITERATIONS_INTENSIVE){ // iterate until 0.6 original score, or 1000 iterations
-//					prevScore = score;
-//					score = this.iterateOverNucleus();
-//					i++;
-//					publish(i);
-//					if(i%50==0){
-//						fileLogger.fine("Iteration "+i+": "+(int)score);
-//						logger.fine("Iteration "+i+": "+(int)score);
-////						logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
-//					}
-//				}
-//			}
-//
-//			if(this.mode==BRUTAL_MODE){
-//
-//				while(score > (originalScore*0.1) && i<MAX_ITERATIONS_BRUTAL){ // iterate until 0.1 original score, or 10000 iterations
-//					prevScore = score;
-//					score = this.iterateOverNucleus();
-//					i++;
-//					publish(i);
-//					if(i%50==0){
-//						fileLogger.fine("Iteration "+i+": "+(int)score);
-//						logger.fine("Iteration "+i+": "+(int)score);
-//					}
-//				}
-//			}
-//			fileLogger.log(Level.INFO, "Refolded curve: final score: "+(int)score);
 			fine("Refolded curve: final score: "+(int)score);
 
 		} catch(Exception e){

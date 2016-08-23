@@ -25,8 +25,6 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.HistogramsTabPanel;
-import gui.components.panels.MeasurementUnitSettingsPanel;
-
 import java.awt.Dimension;
 import java.text.DecimalFormat;
 import java.util.logging.Level;

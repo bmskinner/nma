@@ -1,7 +1,6 @@
 package charting.datasets;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -10,22 +9,17 @@ import java.util.Vector;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import analysis.AnalysisDataset;
 import analysis.signals.SignalManager;
-import charting.charts.ScatterChartFactory;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
-import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
-import components.nuclear.BorderPoint;
 import components.nuclear.NuclearSignal;
 import logging.Loggable;
 import stats.NucleusStatistic;
@@ -147,7 +141,7 @@ private static ScatterChartDatasetCreator instance = null;
 
 		Vector<Object> names 	= new Vector<Object>();
 		Vector<Object> rho   	= new Vector<Object>();
-		Vector<Object> pValue  	= new Vector<Object>();
+
 
 		List<AnalysisDataset> datasets = options.getDatasets();
 
@@ -260,7 +254,6 @@ private static ScatterChartDatasetCreator instance = null;
 
 		Vector<Object> names 	= new Vector<Object>();
 		Vector<Object> rho   	= new Vector<Object>();
-		Vector<Object> pValue  	= new Vector<Object>();
 
 
 		List<AnalysisDataset> datasets = options.getDatasets();

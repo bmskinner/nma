@@ -20,17 +20,11 @@ package gui.actions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-
-import javax.swing.JOptionPane;
-
-import components.Cell;
 import components.CellCollection;
 import gui.MainWindow;
 import gui.dialogs.DatasetArithmeticSetupDialog;
 import gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
 import analysis.AnalysisDataset;
-import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 
 public class DatasetArithmeticAction extends ProgressableAction {
 

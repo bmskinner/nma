@@ -20,20 +20,15 @@ package gui.tabs;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.util.logging.Logger;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.table.TableModel;
-
 import org.jfree.chart.JFreeChart;
 
 import charting.options.ChartOptions;
-import charting.options.TableOptions;
 
 @SuppressWarnings("serial")
 public abstract class AbstractPairwiseDetailPanel extends DetailPanel {

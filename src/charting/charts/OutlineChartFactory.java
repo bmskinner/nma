@@ -21,7 +21,6 @@
 package charting.charts;
 
 import gui.RotationMode;
-import gui.ThreadManager;
 import gui.components.ColourSelecter;
 import ij.process.ImageProcessor;
 

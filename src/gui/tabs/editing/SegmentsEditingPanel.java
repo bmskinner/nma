@@ -40,15 +40,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.table.TableModel;
-
 import org.jfree.chart.JFreeChart;
 
 import analysis.profiles.SegmentFitter;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.TableOptions;
 import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTagObject;

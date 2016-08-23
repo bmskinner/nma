@@ -20,11 +20,9 @@
  *******************************************************************************/
 package components;
 
-import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -37,17 +35,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.jfree.chart.annotations.XYShapeAnnotation;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.ui.Layer;
-
 import logging.Loggable;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
 import ij.IJ;
-import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
@@ -726,17 +719,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		// i is greater than array length
 		 
 		 return i % length;
-		 
-//		 BigDecimal x = new BigDecimal( i );
-//		 BigDecimal bdVal = x.subtract( x.remainder( new BigDecimal( length ) ) );
-//		 
-//		 return bdVal.doubleValue();
-		 
-		 
-//		 if(Math.floor(i / length)>0) // if i is greater than array length 
-//			 i = i - (  (      (int)Math.floor(i / length) )    * length  );
-//
-//		 return i;
+
 	 }
 	
 	/**
@@ -852,7 +835,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		// Reflect around the problem by making the field
 		// temporarily assignable
 		try {
-			Class type = AbstractCellularComponent.class;
+			Class<?> type = AbstractCellularComponent.class;
 
 	        // use getDeclaredField as the field is non public
 	        Field idField = type.getDeclaredField("id");

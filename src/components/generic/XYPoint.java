@@ -27,11 +27,9 @@
 package components.generic;
 
 import java.awt.geom.Point2D;
-import java.io.IOException;
 import java.io.Serializable;
 
 import logging.Loggable;
-import components.nuclear.BorderPoint;
 
 public class XYPoint  implements Serializable, Loggable {
 

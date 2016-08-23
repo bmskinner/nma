@@ -20,7 +20,6 @@ package io;
 
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
-import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -30,16 +29,13 @@ import ij.process.ImageProcessor;
 import java.awt.Color;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import utility.Constants;
-import utility.Utils;
 import analysis.AnalysisDataset;
 import components.AbstractCellularComponent;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.nuclear.NuclearSignal;

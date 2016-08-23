@@ -22,17 +22,11 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-
 import org.virion.jam.controlpanels.ControlPalette;
 
-import jebl.evolution.graphs.Node;
-import jebl.evolution.trees.RootedTree;
-import jebl.evolution.trees.Tree;
 import jebl.gui.trees.treeviewer.TreeViewer;
 //import jebl.gui.trees.treeviewer_dev.DefaultTreeViewer;
 

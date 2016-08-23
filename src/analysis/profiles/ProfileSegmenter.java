@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import components.generic.BooleanProfile;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.nuclear.NucleusBorderSegment;

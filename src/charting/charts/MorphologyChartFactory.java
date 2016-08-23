@@ -59,7 +59,6 @@ import charting.options.ChartOptions;
 import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.generic.BooleanProfile;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileType;

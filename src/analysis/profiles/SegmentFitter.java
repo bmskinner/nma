@@ -20,13 +20,11 @@
  *******************************************************************************/
 package analysis.profiles;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
 import utility.ProfileException;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
@@ -53,16 +51,6 @@ public class SegmentFitter implements Loggable {
 	
 	private final SegmentedProfile medianProfile; // the profile to align against
 	
-	private boolean optimise = false; // a flag to enable test optimisations.
-	
-	// This holds tested profiles so that their scores do not have to be recalculated
-	private List<SegmentedProfile> testedProfiles = new ArrayList<SegmentedProfile>();
-	
-	/**
-	 * The number of points ahead and behind to test
-	 * when creating new segment profiles
-	 */
-//	private static final int POINTS_TO_TEST = 20;
 
 	/**
 	 * Construct with a median profile containing segments. The originals will not be modified
@@ -254,9 +242,6 @@ public class SegmentFitter implements Loggable {
 			throw new IllegalArgumentException("Input profile is null");
 		}
 		
-		testedProfiles = new ArrayList<SegmentedProfile>();
-
-//		log(Level.FINE, "Fitting segments");
 		
 		// By default, return the input profile
 		SegmentedProfile result 	 = new SegmentedProfile(profile);
@@ -403,58 +388,6 @@ public class SegmentFitter implements Loggable {
 		return profile;
 	}
 	
-	/**
-	 * Check if the given profile has already been tested
-	 * @param test
-	 * @return
-	 */
-	private boolean hasBeenTested(SegmentedProfile test){
-		if(testedProfiles.contains(test)){
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
-	/**
-	 * Find the nudge to the given list of segments that gives the best
-	 * fit to the median profile
-	 * @param list the segment list
-	 * @param length the length to cycle through. Use the segment length for simple measure
-	 * @return the best nudge value to use
-	 * @throws Exception when the segmentation comparison fails
-	 */
-	private int testNudge(SegmentedProfile profile, int length) throws Exception {
-		
-//		int totalLength = list.get(0).getTotalLength();
-		double score 		= 0;
-		double bestScore 	= 0;
-		int bestNudge 		= 0;
-				
-		
-		SegmentedProfile newProfile = new SegmentedProfile(profile);
-		newProfile.nudgeSegments(-length);
-		
-		for( int nudge = -length; nudge<length; nudge++){
-//			SegmentedProfile newProfile = new SegmentedProfile(profile);
-			newProfile.nudgeSegments(1); // keep the same profile
-							
-			try{
-				score = compareSegmentationPatterns(medianProfile, newProfile);
-//				fileLogger.log("\tNudge "+nudge+":\tScore:\t"+score, fileLogger.DEBUG);
-				
-			}catch(IllegalArgumentException e){
-//				logError("Nudge error getting segmentation pattern: ", e);
-				throw new Exception("Nudge error getting segmentation pattern");
-			}
-			
-			if(score < bestScore){
-				bestScore = score;
-				bestNudge = nudge;
-			}	
-		}
-		return bestNudge;
-	}
 				
 	/**
 	 * Get the sum-of-squares difference betweene two segments in the given profile

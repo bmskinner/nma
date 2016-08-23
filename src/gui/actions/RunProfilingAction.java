@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
-import javax.swing.SwingUtilities;
-
 import analysis.AnalysisDataset;
 import analysis.profiles.DatasetProfiler;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;

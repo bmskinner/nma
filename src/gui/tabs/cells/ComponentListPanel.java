@@ -14,7 +14,6 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.datasets.SignalTableCell;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import components.CellularComponent;

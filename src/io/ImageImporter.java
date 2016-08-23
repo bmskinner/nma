@@ -18,7 +18,6 @@
  *******************************************************************************/
 package io;
 
-import gui.ThreadManager;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;

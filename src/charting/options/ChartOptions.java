@@ -19,18 +19,14 @@
 package charting.options;
 
 import gui.RotationMode;
-import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
-
 import org.jfree.chart.ChartPanel;
 
 import components.Cell;
 import components.CellularComponent;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import analysis.AnalysisDataset;

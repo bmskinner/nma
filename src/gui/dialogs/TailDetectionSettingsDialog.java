@@ -113,14 +113,18 @@ public class TailDetectionSettingsDialog extends SettingsDialog implements Actio
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		JComboBox<String> cb = (JComboBox<String>)e.getSource();
-        String channelName = (String)cb.getSelectedItem();
-        
-        channel = channelName.equals("Red") 
-				? Constants.RGB_RED
-						: channelName.equals("Green") 
-						? Constants.RGB_GREEN
-								: Constants.RGB_BLUE;
+		if(e.getSource() instanceof JComboBox<?>){
+			
+			JComboBox<?> cb = (JComboBox<?>)e.getSource();
+	        
+			String channelName = cb.getSelectedItem().toString();
+	        
+	        channel = channelName.equals("Red") 
+					? Constants.RGB_RED
+							: channelName.equals("Green") 
+							? Constants.RGB_GREEN
+									: Constants.RGB_BLUE;
+		}
 		
 	}
 		

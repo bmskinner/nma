@@ -1,7 +1,5 @@
 package analysis.nucleus;
 
-import components.generic.BorderTag;
-
 /**
  * These control the border tags that can be identified
  * within a profile. Applies to individual nuclei, and to 

@@ -19,17 +19,11 @@
 package components.nuclear;
 
 import ij.gui.Roi;
-import ij.process.FloatPolygon;
 import stats.SignalStatistic;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 import components.AbstractCellularComponent;
-import components.CellularComponent;
 import components.generic.XYPoint;
 
 /*

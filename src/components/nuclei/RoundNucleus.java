@@ -1136,7 +1136,7 @@ public class RoundNucleus extends AbstractCellularComponent
 
 		Map<BorderTagObject, Integer> newCache = new HashMap<BorderTagObject, Integer>(0);
 
-		Iterator it = borderTags.keySet().iterator();
+		Iterator<?> it = borderTags.keySet().iterator();
 
 		while(it.hasNext()){
 			Object tag = it.next();

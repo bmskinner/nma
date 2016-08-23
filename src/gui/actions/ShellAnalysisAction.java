@@ -19,7 +19,6 @@
 package gui.actions;
 
 import gui.DatasetEvent.DatasetMethod;
-import gui.InterfaceEvent.InterfaceMethod;
 import gui.MainWindow;
 import gui.ThreadManager;
 

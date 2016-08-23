@@ -20,7 +20,6 @@ package gui.actions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;

@@ -26,19 +26,15 @@ import gui.components.PairwiseTableCellRenderer;
 import gui.tabs.AbstractPairwiseDetailPanel;
 
 import java.util.List;
-import java.util.logging.Logger;
-
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
-import analysis.profiles.ProfileManager;
 import stats.SegmentStatistic;
 import charting.datasets.NucleusTableDatasetCreator;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;

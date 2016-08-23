@@ -27,8 +27,6 @@ import gui.tabs.nuclear.NucleusMagnitudePanel;
 import gui.tabs.nuclear.WilcoxonDetailPanel;
 
 import java.awt.BorderLayout;
-import java.util.logging.Level;
-
 import javax.swing.JTabbedPane;
 import javax.swing.table.TableModel;
 

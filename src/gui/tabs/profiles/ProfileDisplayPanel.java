@@ -20,8 +20,6 @@ package gui.tabs.profiles;
 
 import gui.GlobalOptions;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import gui.ChartOptionsRenderedEvent;
-
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
@@ -30,7 +28,6 @@ import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 

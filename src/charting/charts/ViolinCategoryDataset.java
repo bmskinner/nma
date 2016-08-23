@@ -8,9 +8,6 @@ import logging.Loggable;
 import org.jfree.data.KeyedObjects2D;
 import org.jfree.data.Range;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.DefaultMultiValueCategoryDataset;
-
-import stats.Stats;
 
 /**
  * This provides dataset support for a violin plot, which has a box and whisker
@@ -55,7 +52,7 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
 		
 	}
 	
-	public boolean hasProbabilities(Comparable r, Comparable c){
+	public boolean hasProbabilities(Comparable<?> r, Comparable<?> c){
 
 		List<Number> values = (List<Number>) pdfData.getObject( (Comparable) r, (Comparable) c);
 		if(values != null){
@@ -94,7 +91,7 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
 		return total>0;
 	}
 	
-	public void addProbabilityRange(Range r, Comparable rowKey, Comparable columnKey){
+	public void addProbabilityRange(Range r, Comparable<?> rowKey, Comparable<?> columnKey){
 		ranges.addObject(r, rowKey, columnKey);
 	}
 	
@@ -111,7 +108,7 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
 			
 			for( Object r : ranges.getRowKeys()){
 				
-				Range range = (Range) ranges.getObject( (Comparable) r, (Comparable) c);
+				Range range = (Range) ranges.getObject( (Comparable<?>) r, (Comparable<?>) c);
 				if(range != null){
 					if( range.getLowerBound()<min){
 						min = range.getLowerBound();
@@ -135,7 +132,7 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
 	}
 	
 	
-	public void addProbabilities(List<Number> values, Comparable rowKey, Comparable columnKey){
+	public void addProbabilities(List<Number> values, Comparable<?> rowKey, Comparable<?> columnKey){
 		if (values == null) {
             throw new IllegalArgumentException("Null 'values' argument.");
         }
@@ -151,7 +148,7 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
         fireDatasetChanged();
 	}
 	
-	public List<Number> getPdfValues(Comparable rowKey, Comparable columnKey){
+	public List<Number> getPdfValues(Comparable<?> rowKey, Comparable<?> columnKey){
 		return (List<Number>) pdfData.getObject(rowKey, columnKey);
 	}
 	
@@ -159,7 +156,7 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
 		return (List<Number>) pdfData.getObject(row, column);
 	}
 	
-	public double getMax(Comparable rowKey, Comparable columnKey){
+	public double getMax(Comparable<?> rowKey, Comparable<?> columnKey){
 		Range r = (Range) ranges.getObject(rowKey, columnKey);
 		if(r == null){
 			log("Error: range is null");
@@ -178,7 +175,7 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
 	}
 	
 	
-	public double getMin(Comparable rowKey, Comparable columnKey){
+	public double getMin(Comparable<?> rowKey, Comparable<?> columnKey){
 		
 		Range r = (Range) ranges.getObject(rowKey, columnKey);
 		if(r == null){
@@ -199,7 +196,7 @@ public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset i
 	
 	@Override
 	public List<?> getOutliers(int row, int column){
-		return new ArrayList(); // don't display outliers on violin plots
+		return new ArrayList<Object>(); // don't display outliers on violin plots
 		
 	}
 }

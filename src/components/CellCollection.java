@@ -51,14 +51,12 @@ import java.util.stream.Collectors;
 
 import logging.Loggable;
 import utility.Constants;
-import utility.Utils;
 import analysis.AnalysisDataset;
 import analysis.NucleusStatisticFetchingTask;
 import analysis.profiles.ProfileManager;
 import analysis.profiles.RuleSetCollection;
 import analysis.profiles.SegmentStatisticFetchingTask;
 import analysis.signals.SignalManager;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
@@ -939,7 +937,7 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  if(stat.equals(NucleusStatistic.VARIABILITY)){
 		  filteredCells = new ArrayList<Cell>();
 		  for(Cell c : this.getCells()){
-			  Nucleus n = c.getNucleus();
+//			  Nucleus n = c.getNucleus();
 
 			  double value = getNormalisedDifferenceToMedian(BorderTagObject.REFERENCE_POINT, c);
 
@@ -1437,30 +1435,30 @@ public boolean equals(Object obj) {
 
 	  }
 	  
-	  /**
-	   * Empty the cache - all values must be recalculated
-	   */
-	  public void clear(){
-		  cache = null;
-		  cache = new HashMap<PlottableStatistic,  Map<MeasurementScale, Double>>();
-
-	  }
+//	  /**
+//	   * Empty the cache - all values must be recalculated
+//	   */
+//	  public void clear(){
+//		  cache = null;
+//		  cache = new HashMap<PlottableStatistic,  Map<MeasurementScale, Double>>();
+//
+//	  }
 	  
-	  /**
-	   * Recalculate the values in the cache based on the given collection
-	   * @param collection
-	   * @throws Exception
-	   */
-	  public void recalculate(CellCollection collection) throws Exception{
-		  this.clear();
-		  for(NucleusStatistic stat  : NucleusStatistic.values()){
-
-			  for(MeasurementScale scale : MeasurementScale.values()){
-				  // This will automatically refill the cache
-				  collection.getMedianNucleusStatistic(stat, scale);
-			  }
-		  }
-	  }
+//	  /**
+//	   * Recalculate the values in the cache based on the given collection
+//	   * @param collection
+//	   * @throws Exception
+//	   */
+//	  public void recalculate(CellCollection collection) throws Exception{
+//		  this.clear();
+//		  for(NucleusStatistic stat  : NucleusStatistic.values()){
+//
+//			  for(MeasurementScale scale : MeasurementScale.values()){
+//				  // This will automatically refill the cache
+//				  collection.getMedianNucleusStatistic(stat, scale);
+//			  }
+//		  }
+//	  }
   }
 
 }

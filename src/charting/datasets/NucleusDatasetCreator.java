@@ -39,7 +39,6 @@ import components.Cell;
 import components.CellCollection;
 import components.CellularComponent;
 import components.generic.BooleanProfile;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
 import components.generic.MeasurementScale;
@@ -310,7 +309,7 @@ private static NucleusDatasetCreator instance = null;
 				
 		int maxLength = (int) getMaximumNucleusProfileLength(collection);
 		int medianProfileLength = (int) collection.getMedianArrayLength();
-		double offset = 0;
+
 				
 		Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(point, 50);
 		Profile xpoints = null;
@@ -321,7 +320,7 @@ private static NucleusDatasetCreator instance = null;
 			
 			if(alignment.equals(ProfileAlignment.RIGHT)){
 				double differenceToMaxLength = maxLength - collection.getMedianArrayLength();
-				offset = differenceToMaxLength;
+
 				xpoints = xpoints.add(differenceToMaxLength);
 			}
 		}
@@ -775,15 +774,12 @@ private static NucleusDatasetCreator instance = null;
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		SegmentedProfile profile;
-		Profile xpoints;
 		
 		if(type.equals(ProfileType.FRANKEN)){
 			profile = nucleus.getProfile(type);
-			xpoints = profile.getPositions(profile.size());
 		} else {
 			finest("Getting XY positions along profile from reference point");
 			profile = nucleus.getProfile(type, BorderTagObject.REFERENCE_POINT);
-			xpoints = profile.getPositions(nucleus.getBorderLength());
 			
 			// add the segments
 			finest("Adding ordered segments from reference point");
@@ -791,8 +787,6 @@ private static NucleusDatasetCreator instance = null;
 			addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0);
 		}
 
-//		double[][] ndata = { xpoints.asArray(), profile.asArray() };
-//		ds.addSeries("Nucleus_"+nucleus.getSourceFileName()+"-"+nucleus.getNucleusNumber(), ndata);
 		
 		return ds;
 	}

@@ -24,7 +24,6 @@ import java.util.logging.Level;
 import analysis.AnalysisDataset;
 import gui.MainWindow;
 import ij.io.DirectoryChooser;
-import io.PopulationImporter;
 
 public class ReplaceSourceImageDirectoryAction extends ProgressableAction {
 

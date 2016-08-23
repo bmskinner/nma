@@ -22,7 +22,6 @@ import org.jfree.data.xy.XYDataset;
 import analysis.AnalysisDataset;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.ChartOptions;
-import charting.options.ChartOptionsBuilder;
 
 public class NuclearSignalChartFactory  extends AbstractChartFactory {
 	

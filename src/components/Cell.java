@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.UUID;
 
 import logging.Loggable;
-import analysis.profiles.RuleSetCollection;
 import components.nuclei.Nucleus;
 
 /**

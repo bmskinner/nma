@@ -129,7 +129,7 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
         {
             //  Returning the Class of each column will allow different
             //  renderers to be used based on Class
-            public Class getColumnClass(int column){
+            public Class<?> getColumnClass(int column){
             	return JLabel.class;
             }
         };

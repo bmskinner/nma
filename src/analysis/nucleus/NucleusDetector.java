@@ -26,8 +26,6 @@
 */  
 package analysis.nucleus;
 
-import io.CompositeExporter;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import utility.Constants;
 import analysis.AnalysisDataset;

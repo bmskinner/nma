@@ -23,14 +23,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import javax.swing.JOptionPane;
-
 import components.Cell;
 import components.CellCollection;
 import gui.MainWindow;
 import gui.dialogs.ManualCellCurator;
 import analysis.AnalysisDataset;
-import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 
 public class CurateCollectionAction extends ProgressableAction {
 

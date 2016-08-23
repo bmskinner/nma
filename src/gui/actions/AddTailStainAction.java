@@ -24,8 +24,6 @@ import gui.dialogs.TailDetectionSettingsDialog;
 import ij.io.DirectoryChooser;
 
 import java.io.File;
-import java.util.logging.Level;
-
 import analysis.AnalysisDataset;
 import analysis.tail.TubulinTailDetector;
 

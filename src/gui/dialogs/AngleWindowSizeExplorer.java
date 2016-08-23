@@ -29,8 +29,6 @@ import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import gui.LoadingIconDialog;
 import gui.components.ColourSelecter;
 
@@ -49,7 +47,6 @@ import org.jfree.data.xy.DefaultXYDataset;
 import utility.Constants;
 import components.Cell;
 import components.CellCollection;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileCollection;

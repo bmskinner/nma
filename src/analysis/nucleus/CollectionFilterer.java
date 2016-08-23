@@ -26,7 +26,6 @@ import components.Cell;
 import components.CellCollection;
 import components.generic.MeasurementScale;
 import components.nuclei.Nucleus;
-import components.nuclei.RoundNucleus;
 
 public class CollectionFilterer {
 

@@ -26,14 +26,11 @@ import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
-
 import org.jfree.chart.ChartPanel;
 
 import stats.PlottableStatistic;
 import components.Cell;
 import components.CellularComponent;
-import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
