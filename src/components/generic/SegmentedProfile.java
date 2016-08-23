@@ -55,6 +55,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		if(segments==null || segments.isEmpty()){
 			throw new IllegalArgumentException("Segment list is null or empty in segmented profile contructor");
 		}
+		
 		if(p.size() != segments.get(0).getTotalLength() ){
 			throw new IllegalArgumentException("Segments total length ("
 							+segments.get(0).getTotalLength()

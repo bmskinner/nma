@@ -10,7 +10,6 @@ import java.util.logging.Level;
 
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -38,6 +37,9 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	private ExportableTable table; // individual cell stats
 	
 	private JScrollPane scrollPane;
+	
+	private JButton scaleButton;
+	private JButton sourceButton;
 	
 	
 	public CellStatsPanel(CellViewModel model) {
@@ -105,15 +107,24 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 		
 		JPanel header = createHeader();
 		this.add(header, BorderLayout.NORTH);
+		
+		this.setEnabled(false);
+	}
+	
+	@Override
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
+		scaleButton.setEnabled(b);
+		sourceButton.setEnabled(b);
 	}
 	
 	private JPanel createHeader(){
 		JPanel panel = new JPanel(new FlowLayout());
 		
-		JButton scaleButton = new JButton("Change scale");
+		scaleButton = new JButton("Change scale");
 		scaleButton.addActionListener( e -> { updateScale();}  );
 		
-		JButton sourceButton = new JButton("Show source image");
+		sourceButton = new JButton("Show source image");
 		sourceButton.addActionListener( e -> { showCellImage();}  );
 		
 		panel.add(scaleButton);
@@ -220,8 +231,12 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 			TableModel model = getTable(options);
 			table.setModel(model);
 
-			if(this.getCellModel().getCell()!=null){
+			if(this.getCellModel().hasCell()){
 				table.getColumnModel().getColumn(1).setCellRenderer(  new StatsTableCellRenderer() );
+				this.setEnabled(true);
+			} else {
+
+				this.setEnabled(false);
 			}
 		} catch(Exception e){
 			warn("Error updating cell stats table");
@@ -254,13 +269,6 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception {
 		return CellDatasetCreator.getInstance().createCellInfoTable(options);
-	}
-
-
-
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return null;
 	}
 	
 	
@@ -295,11 +303,11 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 				}
 			}
 			//Cells are by default rendered as a JLabel.
-			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			l.setBackground(colour);
+			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			setBackground(colour);
 
 			//Return the JLabel which renders the cell.
-			return l;
+			return this;
 		}
 	}
 

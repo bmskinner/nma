@@ -340,9 +340,11 @@ private static NucleusDatasetCreator instance = null;
 	 * @return a dataset
 	 * @throws Exception 
 	 */
-	public XYDataset createSegmentedMedianProfileDataset(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTagObject point) throws Exception{
+	public XYDataset createSegmentedMedianProfileDataset(ChartOptions options) {
 		
-		CellCollection collection = dataset.getCollection();
+		
+		
+		CellCollection collection = options.firstDataset().getCollection();
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 
@@ -351,14 +353,14 @@ private static NucleusDatasetCreator instance = null;
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(point, Constants.MEDIAN);
+		Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(options.getTag(), Constants.MEDIAN);
 		Profile xpoints = null;
-		if(normalised){
+		if(options.isNormalised()){
 			xpoints = profile.getPositions(100);
 		} else {
 			xpoints = profile.getPositions( medianProfileLength );
 			
-			if(alignment.equals(ProfileAlignment.RIGHT)){
+			if(options.getAlignment().equals(ProfileAlignment.RIGHT)){
 				double differenceToMaxLength = maxLength - collection.getMedianArrayLength();
 				offset = differenceToMaxLength;
 				xpoints = xpoints.add(differenceToMaxLength);
@@ -369,10 +371,10 @@ private static NucleusDatasetCreator instance = null;
 		
 		// add the segments
 		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
-				.getSegmentedProfile(point)
+				.getSegmentedProfile(options.getTag())
 				.getOrderedSegments();
 
-		if(normalised){
+		if(options.isNormalised()){
 			addSegmentsFromProfile(segments, profile, ds, 100, 0);
 		} else {
 			addSegmentsFromProfile(segments, profile, ds, (int) collection.getMedianArrayLength(), offset);

@@ -326,7 +326,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @throws Exception
 	 */	
-	public JFreeChart makeMultiSegmentedProfileChart(ChartOptions options) throws Exception {
+	public JFreeChart makeMultiSegmentedProfileChart(ChartOptions options)  {
 		
 		// Set the length to 100 if normalised or multiple datasets.
 		// Otherwise use the median profile length
@@ -358,7 +358,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		int datasetIndex = 0;
 		for(AnalysisDataset dataset : options.getDatasets()){
 
-			XYDataset ds = NucleusDatasetCreator.getInstance().createSegmentedMedianProfileDataset(dataset, options.isNormalised(), options.getAlignment(), options.getTag());
+			XYDataset ds = NucleusDatasetCreator.getInstance().createSegmentedMedianProfileDataset( options);
 
 			plot.setDataset(datasetIndex, ds);
 			

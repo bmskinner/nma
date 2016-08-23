@@ -58,7 +58,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		buttonsPanel = makeButtonPanel();
 		this.add(buttonsPanel, BorderLayout.NORTH);
 				
-		setButtonsEnabled(false);
+		setEnabled(false);
 	}
 	
 	private JPanel makeButtonPanel(){
@@ -93,7 +93,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		
 	}
 	
-	public void setButtonsEnabled(boolean b){
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
 		profileOptions.setEnabled(b);
 		resegmentButton.setEnabled(b);
 	}
@@ -104,14 +105,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 			
 			ProfileType type = profileOptions.getSelected();
 
-			if(getCellModel().getCell()==null){
-				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
+			if(this.getCellModel().hasCell()){
 				
-				dualPanel.setCharts(chart, chart);
-				setButtonsEnabled(false);
-
-			} else {
-								
 				SegmentedProfile profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTagObject.REFERENCE_POINT);
 				dualPanel.setProfile(profile, false);
 				
@@ -151,14 +146,22 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				
 				setChart(rangeOptions);
 
-				setButtonsEnabled(true);		
+				setEnabled(true);	
+
+
+			} else {
+				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
+				
+				dualPanel.setCharts(chart, chart);
+				setEnabled(false);			
+					
 			}
 
 		} catch(Exception e){
 			error("Error updating cell panel", e);
 			JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
 			dualPanel.setCharts(chart, chart);
-			setButtonsEnabled(false);
+			setEnabled(false);
 		}
 		
 	}

@@ -98,7 +98,9 @@ public class ProfileManager implements Loggable {
 	
 	/**
 	 * Create the profile collections to hold angles from nuclear
-	 * profiles based on the current nucleus profiles
+	 * profiles based on the current nucleus profiles. The ProfileAggregate
+	 * for each ProfileType is recalculated. The resulting median profiles
+	 * will have the same length after this update
 	 * @return
 	 * @throws Exception
 	 */
@@ -116,8 +118,14 @@ public class ProfileManager implements Loggable {
 			}
 			
 			fine("Creating profile aggregate: "+type);
+			
+			finer(type+" length before update: "+collection.getProfileCollection(type).length());
+			
 			ProfileCollection pc = collection.getProfileCollection(type);
-			pc.createProfileAggregate(collection, type);
+			int length = pc.length();
+			
+			pc.createProfileAggregate(collection, type, length);
+			finer(type+" length after update: "+pc.length());
 		}
 	}
 	

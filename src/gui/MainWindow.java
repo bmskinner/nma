@@ -165,7 +165,7 @@ public class MainWindow
 
 				if(datasetManager.hashCodeChanged()){
 					fine("Found changed hashcode");
-					Object[] options = { "Save datasets" , "Exit anyway", "Cancel exit" };
+					Object[] options = { "Save datasets" , "Exit without saving", "Cancel exit" };
 					int save = JOptionPane.showOptionDialog(MainWindow.this,
 							"Datasets have changed since last save!", 
 							"Save datasets?",

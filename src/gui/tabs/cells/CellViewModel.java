@@ -20,7 +20,7 @@ public class CellViewModel {
 	}
 	
 	public void setCell(Cell c){
-		if(c!=cell){
+		if(c==null || c!=cell){
 			this.cell = c;
 			component = null; // component cannot be carried over
 			updateViews();
