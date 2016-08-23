@@ -21,6 +21,7 @@ import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import gui.DatasetEvent;
+import gui.GlobalOptions;
 import gui.DatasetEvent.DatasetMethod;
 import gui.SegmentEvent;
 import gui.dialogs.CellResegmentationDialog;
@@ -46,7 +47,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 	
 	
 	public CellProfilePanel(CellViewModel model) {
-		super(model);
+		super(model); // lol
 
 		this.setLayout(new BorderLayout());
 		this.setBorder(null);
@@ -83,7 +84,6 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		resegmentButton.addActionListener( e -> {
 						
 			dialogRef = new WeakReference<CellResegmentationDialog>(new CellResegmentationDialog(getCellModel().getCell(), activeDataset()));
-//			CellResegmentationDialog dialog = );
 			dialogRef.get().addDatasetEventListener(this);
 			
 		} );
@@ -108,7 +108,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 			if(this.getCellModel().hasCell()){
 				
 				SegmentedProfile profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTagObject.REFERENCE_POINT);
-				dualPanel.setProfile(profile, false);
+				
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
@@ -118,7 +118,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 					.setTag(BorderTagObject.REFERENCE_POINT)
 					.setShowMarkers(false)
 					.setProfileType( type)
-					.setSwatch(activeDataset().getSwatch())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setShowPoints(true)
 					.setTarget(dualPanel.getMainPanel())
 					.build();
@@ -139,12 +139,14 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 					.setTag(BorderTagObject.REFERENCE_POINT)
 					.setShowMarkers(false)
 					.setProfileType( type)
-					.setSwatch(activeDataset().getSwatch())
+					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setShowPoints(false)
 					.setTarget(dualPanel.getRangePanel())
 					.build();
 				
 				setChart(rangeOptions);
+				
+				dualPanel.setProfile(profile, false);
 
 				setEnabled(true);	
 
@@ -207,7 +209,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 			
 			if(n.hasBorderTag(rawOldIndex)){						
 				BorderTagObject tagToUpdate = n.getBorderTag(rawOldIndex);
-				log(Level.FINE, "Updating tag "+tagToUpdate);
+				fine("Updating tag "+tagToUpdate);
 				n.setBorderTag(tagToUpdate, rawIndex);	
 				
 				// Update intersection point if needed

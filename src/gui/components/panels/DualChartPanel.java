@@ -248,6 +248,8 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 	public void chartSetEventReceived(ChartSetEvent e) {
 		
 		// One of the two charts was set - ensure the charts remain coupled
+		
+		
 		this.updateChartPanelRange();
 		
 	}
