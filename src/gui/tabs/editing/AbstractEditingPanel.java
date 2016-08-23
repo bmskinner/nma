@@ -47,10 +47,10 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Segmen
 		CellCollection collection = activeDataset().getCollection();
 		
 		if(collection.hasLockedCells()){
-			Object[] options = { "Keep manual values" , "Overwrite" };
+			Object[] options = { "Keep manual values" , "Overwrite manual values" };
 			int result = JOptionPane.showOptionDialog(null,
 					"Some cells have been manually segmented. Keep manual values?", 
-					"Process manually segmented cells?",
+					"Overwrite manually segmented cells?",
 					JOptionPane.DEFAULT_OPTION, 
 					JOptionPane.QUESTION_MESSAGE,
 					null, options, options[0]);

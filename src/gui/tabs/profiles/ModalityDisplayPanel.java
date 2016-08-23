@@ -116,42 +116,37 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 		
 		@Override
 		protected void updateSingle() {
-			updateMultiple();
+			this.setEnabled(true);
+			
+			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
+			
+			DefaultListModel<Double> model = new DefaultListModel<Double>();
+			List<Double> xvalues = activeDataset().getCollection()
+					.getProfileCollection(type)
+					.getAggregate()
+					.getXKeyset();
+
+			for(Double d: xvalues){
+				model.addElement(d);
+			}
+			pointList.setModel(model);
+			pointList.setCellRenderer(new ModalityListCellRenderer());
+			pointList.setSelectedIndex(0);
+			
+			updateModalityProfileChart();
+//			updatePositionChart(0);
 		}
 		
 		@Override
 		protected void updateMultiple() {
 			this.setEnabled(true);
 
-			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
-
-			
-			
-			if(isSingleDataset()){ // use the actual x-positions
-				DefaultListModel<Double> model = new DefaultListModel<Double>();
-				List<Double> xvalues = activeDataset().getCollection()
-						.getProfileCollection(type)
-						.getAggregate()
-						.getXKeyset();
-
-				for(Double d: xvalues){
-					model.addElement(d);
-				}
-				pointList.setModel(model);
-				pointList.setCellRenderer(new ModalityListCellRenderer());
-
-			} else {
-
-				pointList.setModel(createEmptyListModel());
-				pointList.setCellRenderer(new ModalityListCellRenderer());
-
-			}
-			
+			pointList.setModel(createEmptyListModel());
+			pointList.setCellRenderer(new ModalityListCellRenderer());
 			pointList.setSelectedIndex(0);
 
-
 			updateModalityProfileChart();
-			
+//			updatePositionChart(0);
 		}
 		
 		@Override
@@ -166,9 +161,9 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 		@Override
 		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 			if(options.isNormalised()){
-				return MorphologyChartFactory.createModalityProfileChart(options);
+				return MorphologyChartFactory.getInstance().createModalityProfileChart(options);
 			} else {
-				return MorphologyChartFactory.createModalityPositionChart(options);
+				return MorphologyChartFactory.getInstance().createModalityPositionChart(options);
 			}
 		}
 
@@ -179,7 +174,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
-				.setNormalised(true)
+				.setNormalised(true) // here, the boolean is used to indicate the main chart
 				.setAlignment(ProfileAlignment.LEFT)
 				.setTag(BorderTagObject.REFERENCE_POINT)
 				.setShowMarkers(false)
@@ -199,7 +194,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
-				.setNormalised(false)
+				.setNormalised(false) // here, the boolean is used to indicate the position chart
 				.setAlignment(ProfileAlignment.RIGHT)
 				.setTag(BorderTagObject.REFERENCE_POINT)
 				.setShowMarkers(false)

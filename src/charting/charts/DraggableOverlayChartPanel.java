@@ -89,16 +89,16 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 			this.removeOverlay(overlay);
 		}
 	}
-	
-	public double getDomainCrosshairPosition(){
-	
-	if(xCrosshair!=null){
-		finest("Domain value is "+xCrosshair.getValue());
-		return xCrosshair.getValue();
-	} 
-	return 0;
 
-}
+	public double getDomainCrosshairPosition(){
+
+		if(xCrosshair!=null){
+			finest("Domain value is "+xCrosshair.getValue());
+			return xCrosshair.getValue();
+		} 
+		return 0;
+
+	}
 	
 	private void updateOverlays(){
 		/*
@@ -137,7 +137,8 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 				error("Error sending signal", e1);
 			}
 
-
+			this.revalidate();
+			this.repaint();
 		}
 	}
 	
@@ -145,18 +146,23 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 		super.setChart(chart);
 		chart.getXYPlot().getDomainAxis().setVisible(true);
 		chart.getXYPlot().getRangeAxis().setVisible(true);
+		setProfile(profile, normalised);
+	}
+	
+	public void setProfile(SegmentedProfile profile, boolean normalised){
+		
 		clearOverlays();
 		this.profile = profile;
 		this.isChartNormalised = normalised;
 		crosses = new ArrayList<SegmentCrosshair>();
 		overlay = null;
-//		xCrosshair = null;
 		updateOverlays();
+		finer("Profile has been set");
 	}
 	
 	@Override
 	public void setChart(JFreeChart chart){
-		this.setChart(chart, null, true);
+		super.setChart(chart);
 	}
 	
 	@Override
@@ -174,9 +180,6 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		
-//		final int x = e.getX();
-//		final int y = e.getY();
 		
 	    if (e.getButton() == MouseEvent.BUTTON1) {
 	    	mouseIsDown = false;

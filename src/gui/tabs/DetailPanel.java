@@ -384,29 +384,17 @@ public abstract class DetailPanel
 		} else { // No cached chart
 			finest("No cached chart available with hashcode "+options.hashCode());
 
-			// Create an empty placeholder chart
-			chart = ScatterChartFactory.getInstance().makeEmptyChart();
-			chartCache.addChart(options, chart);
-//			log(chartCache.toString());
-
-			// Make a background worker to generate the chart and
-			// update the target chart panel when done
-			ChartFactoryWorker worker = new ChartFactoryWorker(options);
-			ThreadManager.getInstance().submit(worker);//worker.execute();
-			
-//			log(this.getClass().getSimpleName()+": Rendering new chart");
-
-//			try {
-//				chart = createPanelChartType(options);
-//			} catch (Exception e) {
-//				warn("Error creating chart: "+ this.getClass().getSimpleName());
-//				log(Level.FINE, this.getClass().getName()+": Error creating chart", e);
-//				
-//				// Draw an empty chart to fill the space
-//				chart = ScatterChartFactory.getInstance().makeEmptyChart();
-//			}
-//			getChartCache().addChart(options, chart);
-//			finest("Added cached chart");
+			try {
+				chart = createPanelChartType(options);
+			} catch (Exception e) {
+				warn("Error creating chart: "+ this.getClass().getSimpleName());
+				log(Level.FINE, this.getClass().getName()+": Error creating chart", e);
+				
+				// Draw an empty chart to fill the space
+				chart = ScatterChartFactory.getInstance().makeEmptyChart();
+			}
+			getChartCache().addChart(options, chart);
+			finest("Added cached chart");
 		}
 		return chart;
 	}

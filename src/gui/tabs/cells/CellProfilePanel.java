@@ -14,6 +14,8 @@ import charting.options.ChartOptionsBuilder;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import gui.ChartSetEvent;
+import gui.ChartSetEventListener;
 import gui.DatasetEvent;
 import gui.GlobalOptions;
 import gui.DatasetEvent.DatasetMethod;
@@ -24,7 +26,7 @@ import gui.components.panels.SegmentationDualChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 @SuppressWarnings("serial")
-public class CellProfilePanel extends AbstractCellDetailPanel {
+public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSetEventListener {
 	
 	private SegmentationDualChartPanel dualPanel;
 	
@@ -49,6 +51,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		
 		dualPanel = new SegmentationDualChartPanel();
 		dualPanel.addSegmentEventListener(this);
+		dualPanel.getMainPanel().addChartSetEventListener(this);
 		this.add(dualPanel, BorderLayout.CENTER);
 		
 		buttonsPanel = makeButtonPanel();
@@ -141,7 +144,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 				
 				setChart(rangeOptions);
 				
-				dualPanel.setProfile(profile, false);
+				
 
 				setEnabled(true);	
 
@@ -163,6 +166,12 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		
 	}
 	
+	@Override
+	public void chartSetEventReceived(ChartSetEvent e) {
+		SegmentedProfile profile = this.getCellModel().getCell().getNucleus().getProfile(profileOptions.getSelected(), BorderTagObject.REFERENCE_POINT);
+		dualPanel.setProfile(profile, false);
+		
+	}
 
 
 	@Override
@@ -192,7 +201,6 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 			try{
 				
 				// This is a manual change, so disable any lock
-				boolean wasLocked = this.getCellModel().getCell().getNucleus().isLocked();
 				this.getCellModel().getCell().getNucleus().setLocked(false);
 
 				//	Carry out the update
@@ -200,8 +208,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 					.getProfileManager()
 					.updateCellSegmentStartIndex(getCellModel().getCell(), event.getId(), event.getIndex()); 
 				
-				// reenable the lock if it was set
-				this.getCellModel().getCell().getNucleus().setLocked(wasLocked);
+				// even if no lock was previously set, there should be one now a manual adjustment was made
+				this.getCellModel().getCell().getNucleus().setLocked(true);
 
 				// Recache necessary charts
 				refreshChartCache();
@@ -211,5 +219,6 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 			}
 		}
 	}
+
 
 }

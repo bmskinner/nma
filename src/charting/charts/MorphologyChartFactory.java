@@ -846,7 +846,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	private static JFreeChart createModalityChart(Double position, List<AnalysisDataset> list, ProfileType type) throws Exception {
+	private JFreeChart createModalityChart(Double position, List<AnalysisDataset> list, ProfileType type) throws Exception {
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
@@ -909,7 +909,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 	
-	public static JFreeChart createModalityProfileChart(ChartOptions options) throws Exception {
+	public JFreeChart createModalityProfileChart(ChartOptions options) throws Exception {
 		
 		XYDataset ds = NucleusDatasetCreator.getInstance().createModalityProfileDataset(options);
 		
@@ -928,9 +928,9 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			
 			AnalysisDataset dataset = options.getDatasets().get(i);
 			
-			Color colour = dataset.getDatasetColour() == null 
-					? ColourSelecter.getColor(i)
-							: dataset.getDatasetColour();
+			Color colour = dataset.hasDatasetColour()
+					? dataset.getDatasetColour()
+					: ColourSelecter.getColor(i);
 
 			plot.getRenderer().setSeriesPaint(i, colour);
 			plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
@@ -939,9 +939,14 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 		
-	public static JFreeChart createModalityPositionChart(ChartOptions options) throws Exception {
+	public JFreeChart createModalityPositionChart(ChartOptions options) throws Exception {
 
-		JFreeChart chart = MorphologyChartFactory.createModalityChart(options.getModalityPosition(), options.getDatasets(), options.getType());
+		if( ! options.hasDatasets()){
+			return makeEmptyChart();
+		}
+		
+		
+		JFreeChart chart = createModalityChart(options.getModalityPosition(), options.getDatasets(), options.getType());
 		XYPlot plot = chart.getXYPlot();
 
 		double yMax = 0;

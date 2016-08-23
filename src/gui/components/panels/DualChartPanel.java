@@ -42,6 +42,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.DraggableOverlayChartPanel;
+import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.PositionSelectionChartPanel;
 import charting.charts.RectangleOverlayObject;
@@ -111,11 +112,11 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 	}
 	
 	
-	public ChartPanel getMainPanel(){
+	public ExportableChartPanel getMainPanel(){
 		return chartPanel;
 	}
 	
-	public ChartPanel getRangePanel(){
+	public ExportableChartPanel getRangePanel(){
 		return rangePanel;
 	}
 	

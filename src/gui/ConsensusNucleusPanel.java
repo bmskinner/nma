@@ -437,11 +437,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			.setTarget(consensusChartPanel)
 			.build();
 
-		JFreeChart chart = getChart(options);
-
-		consensusChartPanel.setChart(chart);
-		consensusChartPanel.restoreAutoBounds();
-
+		setChart(options);
 
 		runRefoldingButton.setVisible(false);
 		offsetsPanel.setVisible(false);
@@ -452,9 +448,10 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		ChartOptions options = new ChartOptionsBuilder()
 			.setTarget(consensusChartPanel)
 			.build();
-		JFreeChart consensusChart = getChart(options);
+		
+		
+		setChart(options);
 
-		consensusChartPanel.setChart(consensusChart);
 		runRefoldingButton.setVisible(false);
 		offsetsPanel.setVisible(false);
 		consensusChartPanel.restoreAutoBounds();
