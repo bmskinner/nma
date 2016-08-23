@@ -18,11 +18,8 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.TableModel;
 
-import org.jfree.chart.JFreeChart;
-
 import charting.datasets.CellDatasetCreator;
 import charting.datasets.SignalTableCell;
-import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import components.nuclei.Nucleus;
@@ -84,17 +81,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 							changeSignalGroupColour(row);
 
 						}
-					}
-
-					// Adjust the point position of tags
-//					Nucleus n = getCellModel().getCell().getNucleus();
-//					BorderTagObject tag = activeDataset().getCollection().getNucleusType().getTagFromName(rowName);
-//					if(n.hasBorderTag(tag)){
-//						
-//						updateBorderTagIndex(n, tag);
-//						
-//					}
-						
+					}						
 				}
 
 			}
@@ -168,9 +155,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 				"Choose the new scale: pixels per micron", 
 				JOptionPane.OK_CANCEL_OPTION, 
 				JOptionPane.QUESTION_MESSAGE, null, null, null);
-		if (option == JOptionPane.CANCEL_OPTION) {
-			// user hit cancel
-		} else if (option == JOptionPane.OK_OPTION)	{
+		if (option == JOptionPane.OK_OPTION) {
 			
 			//TODO: merged datasets - apply to merge source cells only or all cells
 
@@ -221,10 +206,10 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	
 	public void update(){
 		TableOptions options = new TableOptionsBuilder()
-		.setDatasets(getDatasets())
-		.setCell(this.getCellModel().getCell())
-		.setScale(GlobalOptions.getInstance().getScale())
-		.build();
+			.setDatasets(getDatasets())
+			.setCell(this.getCellModel().getCell())
+			.setScale(GlobalOptions.getInstance().getScale())
+			.build();
 
 		try{
 

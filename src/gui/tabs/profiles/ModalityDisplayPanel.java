@@ -5,41 +5,36 @@ import gui.components.panels.ProfileCollectionTypeSettingsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.tabs.DetailPanel;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.logging.Level;
 
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.TableModel;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.ValueMarker;
-import org.jfree.chart.plot.XYPlot;
 
 import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.TableOptions;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 
 @SuppressWarnings("serial")
-public class ModalityDisplayPanel extends DetailPanel implements ActionListener {
+public class ModalityDisplayPanel extends DetailPanel implements ActionListener, ListSelectionListener {
 		
 		private JPanel mainPanel = new JPanel(new BorderLayout());
-		private JList<String> pointList;
+		private JList<Double> pointList;
 		private ExportableChartPanel chartPanel;
 		private ExportableChartPanel modalityProfileChartPanel; // hold a chart showing p-values across the profile
 		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
@@ -62,8 +57,8 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 			/*
 			 * Make the main chart panels
 			 */
-			chartPanel                = createPositionChartPanel();
-			modalityProfileChartPanel = createModalityProfileChartPanel();
+			chartPanel                = new ExportableChartPanel( MorphologyChartFactory.getInstance().makeEmptyChart());
+			modalityProfileChartPanel = new ExportableChartPanel( MorphologyChartFactory.getInstance().makeEmptyChart());
 			
 			mainPanel.add(chartPanel, BorderLayout.WEST);
 			mainPanel.add(modalityProfileChartPanel, BorderLayout.CENTER);
@@ -88,66 +83,36 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 		}
 		
 		private JScrollPane createListPanel(){
-			DecimalFormat df = new DecimalFormat("#0.00");
-			pointList = new JList<String>();
-			DefaultListModel<String> model = new DefaultListModel<String>();
-			for(Double d=0.0; d<=100; d+=0.5){
-				model.addElement(df.format(d));
-			}
-			pointList.setModel(model);
+//			DecimalFormat df = new DecimalFormat("#0.00");
+			pointList = new JList<Double>();
+			
+			pointList.setModel(createEmptyListModel());
 			JScrollPane listPanel = new JScrollPane(pointList);
 
-			pointList.addListSelectionListener(new ModalitySelectionListener());
+			pointList.addListSelectionListener(this);
 			pointList.setEnabled(false);
+			
+			pointList.setCellRenderer(new ModalityListCellRenderer());
 			
 			return listPanel;
 		}
 		
 		
+		public ListModel<Double> createEmptyListModel(){
+			DefaultListModel<Double> model = new DefaultListModel<Double>();
+			for(Double d=0.0; d<=100; d+=0.5){
+				model.addElement(d);
+			}
+			return model;
+		}
 		
 		
 		public void setEnabled(boolean b){
+			super.setEnabled(b);
 			profileCollectionTypeSettingsPanel.setEnabled(b);
 			pointList.setEnabled(b);
 		}
-		
-		private ExportableChartPanel createPositionChartPanel(){
-			
-			JFreeChart chart = createPositionChart();
-			ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
-			chartPanel.setMinimumDrawWidth( 0 );
-			chartPanel.setMinimumDrawHeight( 0 );
-			return chartPanel;
-		}
-		
-		private JFreeChart createPositionChart(){
-			JFreeChart chart = ChartFactory.createXYLineChart(null,
-					"Probability", "Angle", null);
-			XYPlot plot = chart.getXYPlot();
-			plot.setBackgroundPaint(Color.WHITE);
-			plot.getDomainAxis().setRange(0,360);
-			plot.addDomainMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2f)));
-			return chart;
-		}
-		
-		private ExportableChartPanel createModalityProfileChartPanel(){
-			
-			JFreeChart chart = createModalityProfileChart();
-			ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
-			chartPanel.setMinimumDrawWidth( 0 );
-			chartPanel.setMinimumDrawHeight( 0 );
-			return chartPanel;
-		}
-		
-		private JFreeChart createModalityProfileChart(){
-			JFreeChart chart = ChartFactory.createXYLineChart(null,
-					"Position", "Probability", null);
-			XYPlot plot = chart.getXYPlot();
-			plot.setBackgroundPaint(Color.WHITE);
-			plot.getDomainAxis().setRange(0,100);
-			plot.getRangeAxis().setRange(0,1);
-			return chart;
-		}
+
 		
 		@Override
 		protected void updateSingle() {
@@ -160,32 +125,31 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 
 			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 
-			DecimalFormat df = new DecimalFormat("#0.00");
-			DefaultListModel<String> model = new DefaultListModel<String>();
+			
+			
 			if(isSingleDataset()){ // use the actual x-positions
+				DefaultListModel<Double> model = new DefaultListModel<Double>();
 				List<Double> xvalues = activeDataset().getCollection()
 						.getProfileCollection(type)
 						.getAggregate()
 						.getXKeyset();
 
 				for(Double d: xvalues){
-					model.addElement(df.format(d));
+					model.addElement(d);
 				}
-
+				pointList.setModel(model);
+				pointList.setCellRenderer(new ModalityListCellRenderer());
 
 			} else {
-				// use a standard 0.5 spacing
-				for(Double d=0.0; d<=100; d+=0.5){
-					model.addElement(df.format(d));
-				}
+
+				pointList.setModel(createEmptyListModel());
+				pointList.setCellRenderer(new ModalityListCellRenderer());
 
 			}
-			pointList.setModel(model);
+			
+			pointList.setSelectedIndex(0);
 
-			String xString = pointList.getModel().getElementAt(0);
-			double xvalue = Double.valueOf(xString);
 
-			updatePositionChart(xvalue);	
 			updateModalityProfileChart();
 			
 		}
@@ -193,23 +157,21 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 		@Override
 		protected void updateNull() {
 			this.setEnabled(false);
-			modalityProfileChartPanel.setChart(createModalityProfileChart());
-			chartPanel.setChart(createPositionChart());
+			
+			updateModalityProfileChart();
+			updatePositionChart(0);
+
 		}
 		
 		@Override
 		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 			if(options.isNormalised()){
-			return MorphologyChartFactory.createModalityProfileChart(options);
+				return MorphologyChartFactory.createModalityProfileChart(options);
 			} else {
 				return MorphologyChartFactory.createModalityPositionChart(options);
 			}
 		}
-		
-		@Override
-		protected TableModel createPanelTableType(TableOptions options) throws Exception{
-			return null;
-		}
+
 		
 		public void updateModalityProfileChart() {
 			
@@ -229,14 +191,6 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 			
 			setChart(options);
 			
-//			JFreeChart chart;
-//			try {
-//				chart = getChart(options);
-//			} catch (Exception e) {
-//				chart = MorphologyChartFactory.makeBlankProbabililtyChart();
-//			}
-//			modalityProfileChartPanel.setChart(chart);
-			
 		}
 		
 		public void updatePositionChart(double xvalue) {
@@ -255,13 +209,9 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 				.setTarget(chartPanel)
 				.build();
 			
-			JFreeChart chart;
-			try {
-				chart = getChart(options);
-			} catch (Exception e) {
-				chart = MorphologyChartFactory.makeBlankProbabililtyChart();
-			}
-			chartPanel.setChart(chart);
+			
+			setChart(options);
+
 		}
 		
 
@@ -274,25 +224,42 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener 
 		}
 		
 		private void updatePointSelection() {
-			int row        = pointList.getSelectedIndex();
-			String xString = pointList.getModel().getElementAt(row);
-			double xvalue  = Double.valueOf(xString);
 			
-			int lastRow    = pointList.getModel().getSize()-1;
-			
-			if(xvalue==100 || row==lastRow){
-				xvalue=0; // wrap arrays
+			if(pointList.getSelectedValue()!=null){
+
+				double xvalue = pointList.getSelectedValue();
+
+				int lastRow    = pointList.getModel().getSize()-1;
+
+				if(xvalue==100 || pointList.getSelectedIndex()==lastRow){
+					xvalue=0; // wrap arrays
+				}
+
+				finest("Selecting profile position "+xvalue);
+				updatePositionChart(xvalue);
 			}
-			
-			log(Level.FINEST, "Selecting profile position "+xvalue +" at index "+row);
-			updatePositionChart(xvalue);
 		}
 		
-		private class ModalitySelectionListener implements ListSelectionListener {
-			public void valueChanged(ListSelectionEvent e) {
-				
-				updatePointSelection();
-				
-			}
+
+		public void valueChanged(ListSelectionEvent e) {
+
+			updatePointSelection();
+
 		}
+		
+		private class ModalityListCellRenderer extends DefaultListCellRenderer {
+
+			DecimalFormat df = new DecimalFormat("#0.00");
+			
+			  public Component getListCellRendererComponent(JList list, Object value, int index,
+			      boolean isSelected, boolean cellHasFocus) {
+				  
+			    super.getListCellRendererComponent(list, value, index,
+			        isSelected, cellHasFocus);
+			    
+			    this.setText(df.format(value));
+			    return this;
+			  }
+			}
+		
 	}

@@ -20,14 +20,11 @@ package gui.tabs.profiles;
 
 import gui.GlobalOptions;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import javax.swing.table.TableModel;
-
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.TableOptions;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 
@@ -72,16 +69,9 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 			return MorphologyChartFactory.getInstance().createProfileChart( options );
 		}
 		
-		@Override
-		protected TableModel createPanelTableType(TableOptions options) throws Exception{
-			return null;
-		}
-		
 		private void updateChart() {
 			ChartOptions options = makeOptions();
-			setChart(options);
-//			JFreeChart   chart   = getChart(options);
-//			chartPanel.setChart(chart);			
+			setChart(options);		
 		}
 		
 		

@@ -28,6 +28,7 @@ import java.util.UUID;
 import logging.Loggable;
 import utility.Constants;
 import components.AbstractCellularComponent;
+import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
@@ -658,6 +659,66 @@ public class ProfileManager implements Loggable {
 
 		}
 	}
+	
+	
+	/**
+	 * Update the start index of a segment in the angle profile of the given cell.
+	 * @param cell the cell to alter
+	 * @param id the segment id
+	 * @param index the new start position of the segment
+	 * @throws Exception
+	 */
+	public void updateCellSegmentStartIndex(Cell cell, UUID id, int index) throws Exception {
+		
+		Nucleus n = cell.getNucleus();
+		SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
+		
+		NucleusBorderSegment seg = profile.getSegment(id);
+		
+		
+		int startPos = seg.getStartIndex();
+		int newStart = index;
+		int newEnd   = seg.getEndIndex();
+		
+		int rawOldIndex =  n.getOffsetBorderIndex(BorderTagObject.REFERENCE_POINT, startPos);
+
+						
+		if(profile.update(seg, newStart, newEnd)){
+			n.setProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT, profile);
+			finest("Updated nucleus profile with new segment boundaries");
+			
+			/* 
+			 * Check the border tags - if they overlap the old index
+			 * replace them. 
+			 */
+			int rawIndex = n.getOffsetBorderIndex(BorderTagObject.REFERENCE_POINT, index);
+
+			finest("Updating to index "+index+" from reference point");
+			finest("Raw old border point is index "+rawOldIndex);
+			finest("Raw new border point is index "+rawIndex);
+			
+			if(n.hasBorderTag(rawOldIndex)){						
+				BorderTagObject tagToUpdate = n.getBorderTag(rawOldIndex);
+				fine("Updating tag "+tagToUpdate);
+				n.setBorderTag(tagToUpdate, rawIndex);	
+				
+				// Update intersection point if needed
+				if(tagToUpdate.equals(BorderTagObject.ORIENTATION_POINT)){
+					n.setBorderTag(BorderTagObject.INTERSECTION_POINT, n.getBorderIndex(n.findOppositeBorder(n.getBorderTag(BorderTagObject.ORIENTATION_POINT))));
+				}
+				
+			} else {
+				finest("No border tag needing update at index "+rawOldIndex+" from reference point");
+			}
+			
+			
+			n.updateVerticallyRotatedNucleus();
+			
+		} else {
+			log("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+		}
+	}
+	
 	
 	/**
 	 * Update the given median profile index in the given segment to a new value

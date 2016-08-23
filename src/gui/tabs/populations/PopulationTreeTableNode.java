@@ -82,12 +82,10 @@ public class PopulationTreeTableNode extends AbstractMutableTreeTableNode {
 	 * @author Alex Burdu Burdusel
 	 */
 	public void sortNode(int sortColumn, boolean sortAscending, boolean recursive) {
-//		boolean mLastSortAscending = sortAscending;
-//	    int mLastSortedColumn = sortColumn;
-//	    boolean mLastSortRecursive = recursive;
 
 	    int childCount = this.getChildCount();
-	    TreeMap<Object, PopulationTreeTableNode> nodeData = new TreeMap(String.CASE_INSENSITIVE_ORDER);
+	    	    
+	    TreeMap<Object, PopulationTreeTableNode> nodeData = new TreeMap( String.CASE_INSENSITIVE_ORDER);
 
 	    for (int i = 0; i < childCount; i++) {
 	    	PopulationTreeTableNode child = (PopulationTreeTableNode) this.getChildAt(i);

@@ -3,7 +3,6 @@ package gui.tabs.cells;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
-import java.util.UUID;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -15,8 +14,6 @@ import charting.options.ChartOptionsBuilder;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
-import components.nuclear.NucleusBorderSegment;
-import components.nuclei.Nucleus;
 import gui.DatasetEvent;
 import gui.GlobalOptions;
 import gui.DatasetEvent.DatasetMethod;
@@ -180,49 +177,6 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 		}
 	}
 		
-	private void updateSegmentIndex(boolean start, int index, NucleusBorderSegment seg, Nucleus n, SegmentedProfile profile) throws Exception{
-		
-		boolean wasLocked = this.getCellModel().getCell().getNucleus().isLocked();
-		this.getCellModel().getCell().getNucleus().setLocked(false);
-		
-		int startPos = start ? seg.getStartIndex() : seg.getEndIndex();
-		int newStart = start ? index : seg.getStartIndex();
-		int newEnd   = start ? seg.getEndIndex() : index;
-		
-		int rawOldIndex =  n.getOffsetBorderIndex(BorderTagObject.REFERENCE_POINT, startPos);
-
-						
-		if(profile.update(seg, newStart, newEnd)){
-			n.setProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT, profile);
-			finest("Updated nucleus profile with new segment boundaries");
-			
-			/* Check the border tags - if they overlap the old index
-			 * replace them. 
-			 */
-			int rawIndex = n.getOffsetBorderIndex(BorderTagObject.REFERENCE_POINT, index);
-
-			finest("Updating to index "+index+" from reference point");
-			finest("Raw old border point is index "+rawOldIndex);
-			finest("Raw new border point is index "+rawIndex);
-			
-			if(n.hasBorderTag(rawOldIndex)){						
-				BorderTagObject tagToUpdate = n.getBorderTag(rawOldIndex);
-				fine("Updating tag "+tagToUpdate);
-				n.setBorderTag(tagToUpdate, rawIndex);	
-				
-				// Update intersection point if needed
-				if(tagToUpdate.equals(BorderTagObject.ORIENTATION_POINT)){
-					n.setBorderTag(BorderTagObject.INTERSECTION_POINT, n.getBorderIndex(n.findOppositeBorder(n.getBorderTag(BorderTagObject.ORIENTATION_POINT))));
-				}
-				
-			} else {
-				finest("No border tag needing update at index "+rawOldIndex+" from reference point");
-			}
-		} else {
-			log("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
-		}
-		this.getCellModel().getCell().getNucleus().setLocked(wasLocked);
-	}
 	
 	@Override
 	public void refreshChartCache(){
@@ -233,31 +187,21 @@ public class CellProfilePanel extends AbstractCellDetailPanel {
 
 	@Override
 	public void segmentEventReceived(SegmentEvent event) {
-		// TODO Auto-generated method stub
 		
 		if(event.getType()==SegmentEvent.MOVE_START_INDEX){
 			try{
-
 				
-				UUID id = event.getId();
-				int index = event.getIndex();
-
-
-				Nucleus n = this.getCellModel().getCell().getNucleus();
-				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
-
-				/*
-				 * The numbering of segments is adjusted for profile charts, so we can't rely on 
-				 * the segment name stored in the profile.
-				 * 
-				 * Get the name via the midpoint index of the segment that was selected. 
-				 */
-				NucleusBorderSegment seg = profile.getSegment(id);
+				// This is a manual change, so disable any lock
+				boolean wasLocked = this.getCellModel().getCell().getNucleus().isLocked();
+				this.getCellModel().getCell().getNucleus().setLocked(false);
 
 				//	Carry out the update
-				updateSegmentIndex(true, index, seg, n, profile);
-
-				n.updateVerticallyRotatedNucleus();
+				activeDataset().getCollection()
+					.getProfileManager()
+					.updateCellSegmentStartIndex(getCellModel().getCell(), event.getId(), event.getIndex()); 
+				
+				// reenable the lock if it was set
+				this.getCellModel().getCell().getNucleus().setLocked(wasLocked);
 
 				// Recache necessary charts
 				refreshChartCache();

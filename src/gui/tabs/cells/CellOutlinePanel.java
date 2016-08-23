@@ -6,8 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
-import javax.swing.table.TableModel;
-
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.ConsensusNucleusChartFactory;
@@ -15,7 +13,6 @@ import charting.charts.FixedAspectRatioChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.TableOptions;
 import components.CellularComponent;
 import gui.ChartOptionsRenderedEvent;
 import gui.ChartSetEvent;
@@ -59,7 +56,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		settingsPanel.add(makeMeshPanel);
 		settingsPanel.add(warpMeshPanel);
 		
-//		this.addChartOptionsRenderedEventListener(this);
 		
 		this.add(settingsPanel, BorderLayout.NORTH);
 		
@@ -141,22 +137,16 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
 	@Override
 	protected void updateNull() {
-//		activeCell = null;
 		
 		updateSettingsPanels();
 		
 		ChartOptions options = new ChartOptionsBuilder()
 				.build();
 		
-		JFreeChart chart = getChart(options);
-		panel.setChart(chart);
+		setChart(options);
 		
 	}
 
-	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception {
-		return null;
-	}
 
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
