@@ -19,6 +19,8 @@
 
 package analysis.profiles;
 
+import ij.process.FloatPolygon;
+
 import java.util.Iterator;
 import java.util.List;
 
@@ -76,8 +78,9 @@ public class ProfileCreator {
 		}
 		
 		double[] angles = new double[target.getBorderLength()];
+		
+		FloatPolygon polygon = target.createPolygon();
 
-//		for(int i=0; i<this.getBorderLength();i++){
 		
 		int index = 0;
 		Iterator<BorderPoint> it = target.getBorderList().iterator();
@@ -87,8 +90,11 @@ public class ProfileCreator {
 			BorderPoint pointBefore = point.prevPoint(target.getWindowSize(ProfileType.ANGLE));
 			BorderPoint pointAfter  = point.nextPoint(target.getWindowSize(ProfileType.ANGLE));
 
+			// Get the smallest angle between the points
 			double angle = Utils.findAngleBetweenXYPoints(pointBefore, point, pointAfter);
 
+			// Now discover if this measured angle is inside or outside the object
+			
 			// find the halfway point between the first and last points.
 				// is this within the roi?
 				// if yes, keep min angle as interior angle
@@ -96,17 +102,17 @@ public class ProfileCreator {
 			double midX = (pointBefore.getX()+pointAfter.getX())/2;
 			double midY = (pointBefore.getY()+pointAfter.getY())/2;
 			
-			// create a polygon from the border list - we are not storing the polygon directly
-//			FloatPolygon polygon = this.createPolygon();
-			if(target.createPolygon().contains((float) midX, (float) midY)){
+			// Check if the polygon contains the point
+			if(polygon.contains((float) midX, (float) midY)){
 			
-//			if(polygon.contains( (float) midX, (float) midY)){
 				angles[index] = angle;
 			} else {
 				angles[index] = 360-angle;
 			}
 			index++;
 		}
+		
+		// Reapply any segments that were present in the profile
 		SegmentedProfile newProfile = new SegmentedProfile(angles);
 		if(segments!=null){
 			newProfile.setSegments(segments);

@@ -132,7 +132,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		this.setOutputFolder(n.getOutputFolderName());
 				
 		this.setNucleusNumber(n.getNucleusNumber());
-//		this.setNucleusFolder(n.getNucleusFolder());
 				
 		this.setSignals( new SignalCollection(n.getSignalCollection()));
 		
@@ -556,148 +555,37 @@ public class RoundNucleus extends AbstractCellularComponent
 //	}
 
 
-
-	public double getPathLength() throws Exception{
+	public double getPathLength(ProfileType type) {
 		double pathLength = 0;
 
-		Profile angleProfile = this.getProfile(ProfileType.ANGLE);
+		Profile profile = this.getProfile(type);
 		
 		// First previous point is the last point of the profile
-		XYPoint prevPoint = new XYPoint(0,angleProfile.get(this.getBorderLength()-1));
+		XYPoint prevPoint = new XYPoint(0,profile.get(this.getBorderLength()-1));
 		 
 		for (int i=0; i<this.getBorderLength();i++ ) {
 				double normalisedX = ((double)i/(double)this.getBorderLength())*100; // normalise to 100 length
 				
 				// We are measuring along the chart of angle vs position
 				// Each median angle value is treated as an XYPoint
-				XYPoint thisPoint = new XYPoint(normalisedX, angleProfile.get(i));
+				XYPoint thisPoint = new XYPoint(normalisedX, profile.get(i));
 				pathLength += thisPoint.getLengthTo(prevPoint);
 				prevPoint = thisPoint;
 		}
 		return pathLength;
 	}
 
-
 	
 	public SignalCollection getSignalCollection(){
 		return this.signalCollection;
 	}
-	
-//	 /*
-//		For each signal within the nucleus, calculate the distance to the nCoM
-//		and update the signal
-//	*/
-//	public void calculateSignalDistancesFromCoM(){
-//		
-////		IJ.log("Getting signal distances");
-////		this.signalCollection.print();
-//		for(List<NuclearSignal> signals : signalCollection.getSignals()){
-////			IJ.log("    Found "+signals.size()+" signals in channel");
-//			if(!signals.isEmpty()){
-//				for(NuclearSignal n : signals){
-//					double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
-//					n.setStatistic(SignalStatistic.DISTANCE_FROM_COM, distance); //.setDistanceFromCoM(distance);
-//				}
-//			}
-//		}
-//	}
 
-//	/*
-//		Calculate the distance from the nuclear centre of
-//		mass as a fraction of the distance from the nuclear CoM, through the 
-//		signal CoM, to the nuclear border
-//	*/
-//	public void calculateFractionalSignalDistancesFromCoM() throws Exception{
-//
-//		this.calculateClosestBorderToSignals();
-//
-//		for(List<NuclearSignal> signals : signalCollection.getSignals()){
-//
-//			if(!signals.isEmpty()){
-//
-//				for(NuclearSignal n : signals){
-//
-//					// get the line equation
-//					Equation eq = new Equation(n.getCentreOfMass(), this.getCentreOfMass());
-//
-//					// using the equation, get the y postion on the line for each X point around the roi
-//					double minDeltaY = 100;
-//					int minDeltaYIndex = 0;
-//					double minDistanceToSignal = 1000;
-//
-//					for(int j = 0; j<getBorderLength();j++){
-//						double x = this.getBorderPoint(j).getX();
-//						double y = this.getBorderPoint(j).getY();
-//						double yOnLine = eq.getY(x);
-//						double distanceToSignal = this.getBorderPoint(j).getLengthTo(n.getCentreOfMass()); // fetch
-//
-//						double deltaY = Math.abs(y - yOnLine);
-//						// find the point closest to the line; this could find either intersection
-//						// hence check it is as close as possible to the signal CoM also
-//						if(deltaY < minDeltaY && distanceToSignal < minDistanceToSignal){
-//							minDeltaY = deltaY;
-//							minDeltaYIndex = j;
-//							minDistanceToSignal = distanceToSignal;
-//						}
-//					}
-//					BorderPoint borderPoint = this.getBorderPoint(minDeltaYIndex);
-//					double nucleusCoMToBorder = borderPoint.getLengthTo(this.getCentreOfMass());
-//					double signalCoMToNucleusCoM = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
-//					double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
-//					n.setStatistic(SignalStatistic.FRACT_DISTANCE_FROM_COM, fractionalDistance);
-//				}
-//			}
-//		}
-//	}
-
-//	/*
-//		Go through the signals in the nucleus, and find the point on
-//		the nuclear ROI that is closest to the signal centre of mass.
-//	 */
-//	private void calculateClosestBorderToSignals() throws Exception{
-//
-//		for(List<NuclearSignal> signals : signalCollection.getSignals()){
-//
-//			if(!signals.isEmpty()){
-//
-//				for(NuclearSignal s : signals){
-//
-//					int minIndex = 0;
-//					double minDistance = this.getStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
-//
-//					for(int j = 0; j<getBorderLength();j++){
-//						XYPoint p = this.getBorderPoint(j);
-//						double distance = p.getLengthTo(s.getCentreOfMass());
-//
-//						// find the point closest to the CoM
-//						if(distance < minDistance){
-//							minIndex = j;
-//							minDistance = distance;
-//						}
-//					}
-//					s.setClosestBorderPoint(minIndex);
-//
-//				}
-//			}
-//		}
-//	}
 
 	public void updateSignalAngle(UUID channel, int signal, double angle){
 		signalCollection.getSignals(channel).get(signal).setStatistic(SignalStatistic.ANGLE, angle);
 	}
 
-	
-	/*
-		-----------------------
-		Determine positions of points
-		-----------------------
-	*/
-
-	
-
-	// find the point with the narrowest diameter through the CoM
-	// Uses the distance profile
-	public BorderPoint getNarrowestDiameterPoint() throws Exception{
+	public BorderPoint getNarrowestDiameterPoint() {
 
 		int index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
 
@@ -707,7 +595,6 @@ public class RoundNucleus extends AbstractCellularComponent
 	public double getNarrowestDiameter() {
 		return Arrays.stream(this.getProfile(ProfileType.DIAMETER).asArray()).min().orElse(0);
 	}
-
 
 	/*
 		-----------------------

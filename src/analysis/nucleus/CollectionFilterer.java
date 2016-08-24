@@ -25,6 +25,7 @@ import stats.NucleusStatistic;
 import components.Cell;
 import components.CellCollection;
 import components.generic.MeasurementScale;
+import components.generic.ProfileType;
 import components.nuclei.Nucleus;
 
 public class CollectionFilterer {
@@ -102,7 +103,7 @@ public class CollectionFilterer {
 	        failureCode = failureCode | FAILURE_PERIM;
 	        perim++;
 	      }
-	      if(n.getPathLength() > maxPathLength){ // only filter for values too big here - wibbliness detector
+	      if(n.getPathLength(ProfileType.ANGLE) > maxPathLength){ // only filter for values too big here - wibbliness detector
 	    	  failureCode = failureCode | FAILURE_THRESHOLD;
 	    	  pathlength++;
 	      }

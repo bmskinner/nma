@@ -35,57 +35,45 @@ import java.io.IOException;
 import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
 
-public class SpermNucleus
-	extends AsymmetricNucleus
-{
-	
-  /**
-	 * 
-	 */
+public class SpermNucleus extends AsymmetricNucleus {
+
 	private static final long serialVersionUID = 1L;
 
-/**
-  * Constructor using a Nucleus; passes up
-  * to the Nucleus constructor
-  *
-  * @param n the Nucleus to construct from
-  * @return a SpermNucleus
- * @throws Exception 
-  */
-  public SpermNucleus(Nucleus n) {
-  	super(n);
-  }
-  
-  protected SpermNucleus(){
-	  super();
-  }
-  
-  public SpermNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
+
+	public SpermNucleus(Nucleus n) {
+		super(n);
+	}
+
+	protected SpermNucleus(){
+		super();
+	}
+
+	public SpermNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 		super(roi, file, number, position);
 	}
-  
-  @Override
-  public Nucleus duplicate(){
-	  try {
-		  SpermNucleus duplicate = new SpermNucleus(this);
-		  return duplicate;
-		  
-	  } catch (Exception e) {
-		  return null;
-	  }
-  }
-  
-  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-	  finest("\tReading sperm nucleus");
-	  in.defaultReadObject();
-	  finest("\tRead sperm nucleus");
-  }
 
-  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-	  finest("\tWriting sperm nucleus");
-	  out.defaultWriteObject();
-	  finest("\tWrote sperm nucleus");
-  }
+	@Override
+	public Nucleus duplicate(){
+		try {
+			SpermNucleus duplicate = new SpermNucleus(this);
+			return duplicate;
+
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\tReading sperm nucleus");
+		in.defaultReadObject();
+		finest("\tRead sperm nucleus");
+	}
+
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\tWriting sperm nucleus");
+		out.defaultWriteObject();
+		finest("\tWrote sperm nucleus");
+	}
 
 
 }

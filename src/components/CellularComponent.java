@@ -280,6 +280,7 @@ public interface CellularComponent {
 	 */
 	public boolean containsOriginalPoint(XYPoint p);
 	
+			
 	
 	/**
 	 * Get the maximum x value from the positions of border points
@@ -382,13 +383,6 @@ public interface CellularComponent {
 	 */
 	public BorderPoint findOrthogonalBorderPoint(BorderPoint a);
 
-	/**
-	 *  Find the point with the narrowest diameter through the CoM
-	 *  using the distance profile
-	 * @return
-	 * @throws Exception 
-	 */
-//	public BorderPoint getNarrowestDiameterPoint() throws Exception;
 		
 	
 }

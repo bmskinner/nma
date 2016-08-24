@@ -40,14 +40,18 @@ public interface Nucleus extends CellularComponent, Indexable, Profileable, Tagg
 	public static final int BORDER_POINTS = 1;
 	public static final int BORDER_TAGS = 2;
 
+	/*
+	* Finds the key points of interest around the border
+	* of the Nucleus. Can use several different methods, and 
+	* take a best-fit, or just use one. The default in a round 
+	* nucleus is to get the longest diameter and set this as
+	*  the head/tail axis.
+	*/
 	public void findPointsAroundBorder() throws Exception;
 	
 	/**
-	 * Contains the code to find the reference point in the nucleus.
-	 * @return the index of the reference point
-	 */
-//	public int identifyReferencePoint();
-	
+	 * Starts profile generation in a newly created nucleus
+	 */	
 	public void intitialiseNucleus(double angleWindowProportion) throws Exception;
 	
 	/**
@@ -97,41 +101,8 @@ public interface Nucleus extends CellularComponent, Indexable, Profileable, Tagg
 	public String getPathAndNumber();
 	
 		
-
-	/**
-	 * Get the narrowest diameter through the centre of mass in pixels
-	 * @return
-	 * @throws Exception 
-	 */
-	public double getNarrowestDiameter() throws Exception;
-
-	/**
-	 * Calculate the distance from point to point around the 
-	 * periphery of the nucleus.
-	 * @return
-	 * @throws Exception
-	 */
-	public double getPathLength() throws Exception;
-
 	
 	public void setOutputFolder(String f);
-
-	/*
-    -----------------------
-    Determine positions of points
-    -----------------------
-	 */
-
-
-//
-//	/**
-//	 *  Find the point with the narrowest diameter through the CoM
-//	 *  using the distance profile
-//	 * @return
-//	 * @throws Exception 
-//	 */
-	public BorderPoint getNarrowestDiameterPoint() throws Exception;
-
 
 	/**
 	 * Calculate the angle signal centres of mass make with the nucleus centre of mass

@@ -379,14 +379,14 @@ public class CellCollection implements Serializable, Loggable {
    * @return
  * @throws Exception 
    */
-  public double[] getPathLengths() throws Exception{
+  public double[] getPathLengths() {
 
 	  int count = this.getNucleusCount();
 	  double[] result = new double[count];
 	  int i=0;
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  result[i] =  n.getPathLength();
+		  result[i] =  n.getPathLength(ProfileType.ANGLE);
 		  i++;
 	  }
 	  return result;

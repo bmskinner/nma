@@ -30,6 +30,7 @@ import java.io.Serializable;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import java.util.UUID;
 import analysis.profiles.Profileable;
 import logging.Loggable;
 import components.generic.MeasurementScale;
+import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
@@ -490,6 +492,8 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		}
 	}
 	
+	
+		
 	/*
 	 * 
 	 * GET MAX AND MIN BORDER POSITIONS

@@ -162,4 +162,27 @@ public interface Profileable {
 	 */
 	void calculateProfiles() throws Exception;
 	
+	/**
+	 * Calculate the distance from point to point around the 
+	 * periphery of the nucleus.
+	 * @return
+	 * @throws Exception
+	 */
+	double getPathLength(ProfileType type);
+	
+	/**
+	 * Get the narrowest diameter through the centre of mass in pixels
+	 * @return
+	 * @throws Exception 
+	 */
+	public double getNarrowestDiameter();
+	
+	/**
+	 *  Find the point with the narrowest diameter through the CoM
+	 *  using the distance profile
+	 * @return
+	 * @throws Exception 
+	 */
+	public BorderPoint getNarrowestDiameterPoint();
+	
 }
