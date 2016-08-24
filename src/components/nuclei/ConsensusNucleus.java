@@ -45,12 +45,12 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 		return this.type;
 	}
 	
-	@Override
-	public void calculateProfiles() throws Exception{
-
-		this.profileMap.put(ProfileType.ANGLE, this.calculateAngleProfile());
-
-	}
+//	@Override
+//	public void calculateProfiles() throws Exception{
+//
+//		this.profileMap.put(ProfileType.ANGLE, this.calculateAngleProfile());
+//
+//	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		finest("\tReading consensus nucleus");

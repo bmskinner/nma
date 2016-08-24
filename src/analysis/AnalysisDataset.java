@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 import analysis.nucleus.NucleusDetector;
 import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
+import logging.Loggable;
 import utility.Constants;
 import utility.Version;
 import components.Cell;
@@ -56,7 +57,7 @@ import components.ClusterGroup;
  * colour and UI options
  *
  */
-public class AnalysisDataset implements Serializable {
+public class AnalysisDataset implements Serializable, Loggable {
 	
 	private static final long serialVersionUID = 1L;
 	private Map<UUID, AnalysisDataset> childCollections  = new HashMap<UUID, AnalysisDataset>(); // hold the UUID of any child collections
@@ -831,8 +832,7 @@ public class AnalysisDataset implements Serializable {
 	 */
 	public void updateSourceImageDirectory(File expectedImageDirectory) {
 		
-		Logger logger = Logger.getLogger("ProgramLogger");
-		logger.log(Level.FINE, "Searching "+expectedImageDirectory.getAbsolutePath());
+		fine("Searching "+expectedImageDirectory.getAbsolutePath());
 		
 		if( ! expectedImageDirectory.exists()){
 			throw new IllegalArgumentException("Requested directory does not exist: "+expectedImageDirectory);
@@ -842,30 +842,30 @@ public class AnalysisDataset implements Serializable {
 		if( ! checkName(expectedImageDirectory, this)){
 			throw new IllegalArgumentException("Dataset name does not match new folder; unable to update paths");
 		}
-		logger.log(Level.FINE, "Dataset name matches new folder");
+		fine("Dataset name matches new folder");
 			
 		// Does expectedImageDirectory contain image files?
 		if( ! checkHasImages(expectedImageDirectory)){
 			throw new IllegalArgumentException("Target folder contains no images; unable to update paths");
 		}
 		
-		logger.log(Level.FINE, "Target folder contains at least one image");
+		fine("Target folder contains at least one image");
 
-		logger.log(Level.FINE, "Updating dataset image paths");
+		fine("Updating dataset image paths");
 		boolean ok = this.getCollection().updateSourceFolder(expectedImageDirectory);
 		if(!ok){
-			logger.log(Level.WARNING, "Error updating dataset image paths; update cancelled");
+			warn("Error updating dataset image paths; update cancelled");
 		}
 
-		logger.log(Level.FINE, "Updating child dataset image paths");
+		fine("Updating child dataset image paths");
 		for(AnalysisDataset child : this.getAllChildDatasets()){
 			ok = child.getCollection().updateSourceFolder(expectedImageDirectory);
 			if(!ok){
-				logger.log(Level.SEVERE, "Error updating child dataset image paths; update cancelled");
+				warn("Error updating child dataset image paths; update cancelled");
 			}
 		}
 
-		logger.log(Level.INFO, "Updated image paths to new folder location");
+		log("Updated image paths to new folder location");
 	}
 	
 	/**

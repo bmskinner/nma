@@ -19,14 +19,11 @@
 package components.nuclei;
 
 import java.io.File;
-import java.util.Map;
-import java.util.UUID;
-
+import analysis.Rotatable;
 import analysis.nucleus.Indexable;
+import analysis.profiles.Profileable;
+import analysis.profiles.Taggable;
 import components.CellularComponent;
-import components.generic.BorderTagObject;
-import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.nuclear.BorderPoint;
 import components.nuclear.SignalCollection;
 
@@ -36,7 +33,7 @@ import components.nuclear.SignalCollection;
  * @author bms41
  *
  */
-public interface Nucleus extends CellularComponent, Indexable {
+public interface Nucleus extends CellularComponent, Indexable, Profileable, Taggable, Rotatable {
 	
 	// for debugging - use in calling dumpInfo()
 	public static final int ALL_POINTS = 0;
@@ -54,17 +51,9 @@ public interface Nucleus extends CellularComponent, Indexable {
 	public void intitialiseNucleus(double angleWindowProportion) throws Exception;
 	
 	/**
-	 * @return a copy of the data in this nucleus or null on Exception
+	 * @return a copy of the data in this nucleus
 	 */
 	public Nucleus duplicate();
-
-	/**
-	 * Get the absolute path to the folder containing
-	 * the details of this nucleus. It will have the
-	 * format /SourceDir/ImageName/
-	 * @return
-	 */
-//	public File getNucleusFolder();
 	
 	
 	/**
@@ -75,12 +64,6 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 */
 	public String getNameAndNumber();
 
-	/**
-	 * Get the absolute path to use to save annotated
-	 * images of the nucleus as a string
-	 * @return
-	 */
-//	public String getAnnotatedImagePath();
 
 	/**
 	 * Get the name of the image the nucleus was found in
@@ -112,31 +95,8 @@ public interface Nucleus extends CellularComponent, Indexable {
 	public int getNucleusNumber();
 
 	public String getPathAndNumber();
-
-	/**
-	 * Get the cached bounding rectangle for the nucleus. If not present,
-	 * the rectangle is calculated and stored.
-	 * 
-	 * If the TopVertical and
-	 * BottomVertical points have been set, these will be used for vertical alignment. Otherwise,
-	 * the given point is moved to directly below the CoM
-	 * @param point the point to put at the bottom. Overridden if TOP_  and BOTTOM_ are set
-	 * @return
-	 * @throws Exception
-	 */
-//	public Rectangle getBoundingRectangle(BorderTag point) ;
 	
-	
-	/**
-	 * Detect the points that can be used for vertical alignment.These are based on the
-	 * BorderTags TOP_VERTICAL and BOTTOM_VETICAL. The actual points returned are not
-	 * necessarily on the border of the nucleus; a bibble correction is performed on the
-	 * line drawn between the two border points, minimising the sum-of-squares to each border
-	 * point within the region covered by the line. 
-	 * @return
-	 */
-	public BorderPoint[] getBorderPointsForVerticalAlignment();
-	
+		
 
 	/**
 	 * Get the narrowest diameter through the centre of mass in pixels
@@ -154,59 +114,6 @@ public interface Nucleus extends CellularComponent, Indexable {
 	public double getPathLength() throws Exception;
 
 	
-
-	/**
-	 * Get the size of the angle profile window in pixels
-	 * @return
-	 */
-	public int getAngleProfileWindowSize();
-	
-	
-	/**
-	 * Get the fraction of the perimeter to use for calculating the window size
-	 * in pixels
-	 * @return
-	 */
-	public double getAngleWindowProportion();
-	
-	/**
-	 * Set the angle profile window size, and recalculate the angle
-	 * profile
-	 * @param i
-	 * @throws Exception
-	 */
-//	public void setAngleProfileWindowSize(int i) throws Exception;
-	
-	/**
-	 * Set the fraction of the perimeter to use for calculating the window size
-	 * in pixels. 
-	 * @param d Proportion from 0 to 1
-	 */
-	public void setAngleWindowProportion(double d);
-
-
-	/**
-	 * Check if the given signal group has a signal in this nucleus
-	 * @param channel the signal group
-	 * @return
-	 */
-//	public boolean hasSignal(UUID signalGroup);
-	
-	/**
-	 * Check if any of the signal groups in the nucleus have a signal
-	 * @return
-	 */
-//	public boolean hasSignal();
-	
-//	public void calculateFractionalSignalDistancesFromCoM() throws Exception;
-//	public void calculateSignalDistancesFromCoM();
-
-	/*
-    -----------------------
-    Protected setters for subclasses
-    -----------------------
-	 */
-	
 	public void setOutputFolder(String f);
 
 	/*
@@ -215,13 +122,7 @@ public interface Nucleus extends CellularComponent, Indexable {
     -----------------------
 	 */
 
-//	
-//	/*
-//    From the point given, create a line to the CoM. Measure angles from all 
-//    other points. Pick the point closest to 90 degrees. Can then get opposite
-//    point. Defaults to input point if unable to find point.
-//	 */
-//	public BorderPoint findOrthogonalBorderPoint(BorderPoint a);
+
 //
 //	/**
 //	 *  Find the point with the narrowest diameter through the CoM
@@ -232,21 +133,6 @@ public interface Nucleus extends CellularComponent, Indexable {
 	public BorderPoint getNarrowestDiameterPoint() throws Exception;
 
 
-	/*
-    -----------------------
-    Exporting data
-    -----------------------
-	 */
-
-	/**
-	 * Calculate the angle that the nucleus must be rotated by. 
-	 * If the BorderTags TOP_VERTICAL and BOTTOM_VERTICAL have been set, 
-	 * the angle will align these points on the y-axis. Otherwise, the angle will
-	 * place the orientation point directly below the centre of mass.
-	 * @return
-	 */
-	public double findRotationAngle();
-
 	/**
 	 * Calculate the angle signal centres of mass make with the nucleus centre of mass
 	 * and the given border point
@@ -256,184 +142,14 @@ public interface Nucleus extends CellularComponent, Indexable {
 	public void calculateSignalAnglesFromPoint(BorderPoint p);
 	
 
-	
-	/**
-	 * Get a copy of the angle profile. The first index of the profile
-	 * is the first border point in the border list. That is, there is no
-	 * consistency to the order of values across multiple nuclei. If consistency
-	 * is needed, specify a pointType
-	 * @return
-	 * @throws Exception 
-	 */
-	public SegmentedProfile getProfile(ProfileType type) ;
-	
-	/**
-	 * Get a copy of the angle profile offset to start at the given point
-	 * @param pointType the point to start at
-	 * @param tag the tag to offset the profile to
-	 * @return a copy of the segmented profile
-	 * @throws Exception 
-	 */
-	public SegmentedProfile getProfile(ProfileType type, BorderTagObject tag);
-	
-		
-	/**
-	 * Set the profile for the given type, offsetting to a border tag
-	 * @param type
-	 * @param profile
-	 */
-	public void setProfile(ProfileType type, BorderTagObject tag, SegmentedProfile profile) throws Exception;
-	
-	/**
-	 * Update the profile of the given type. Since only franken profiles are 
-	 * not calculated internally, the other profiles just replace the segment list.
-	 * This will replace the segment list on all other profile types, to keep
-	 * the segmentation pattern consistent.
-	 * @param type
-	 * @param profile
-	 * @throws Exception
-	 */
-	public void setProfile(ProfileType type, SegmentedProfile profile) throws Exception;
-	
-	/**
-	 * Test if the given type of profile is available
-	 * @param type
-	 * @return
-	 */
-	public boolean hasProfile(ProfileType type);
-	
-
 	public String dumpInfo(int type);
-
-	/**
-	 * Get the index of the border point with the given tag.
-	 * If the point does not exist, returns -1
-	 * @param s the tag
-	 * @return the index of the border in borderList
-	 */
-	public int getBorderIndex(BorderTagObject tag);
-	
-	/**
-	 * Get the tag at a given index, given a zero tag
-	 * If there is no tag at the index, returns null
-	 * @param tag the border tag with index zero
-	 * @param index the index to fetch
-	 * @return the border tag at the index
-	 */
-	public BorderTagObject getBorderTag(BorderTagObject tag, int index);
-	
-	/**
-	 * Get the tag at the given raw index in the border list
-	 * @param index
-	 * @return the tag at the index, or null if no tag present
-	 */
-	public BorderTagObject getBorderTag(int index);
-
-	
-	/**
-	 * Get a copy of the border point at the given tag,
-	 * or null if the tag is not present
-	 * @param tag
-	 * @return
-	 */
-	public BorderPoint getBorderTag(BorderTagObject tag);
-	
-	/**
-	 * Check if the nucleus has the given border tag
-	 * @param tag
-	 * @return
-	 */
-	public boolean hasBorderTag(BorderTagObject tag);
-	
-	/**
-	 * Check if the nucleus has any border tag at the given index
-	 * (offset from the provided tag)
-	 * @param tag the border tag with index zero
-	 * @param i the index to be tested
-	 * @return true if a tag is present at the index
-	 */
-	public boolean hasBorderTag(BorderTagObject tag, int i);
-	
-	/**
-	 * Check if the nucleus has any border tag at the given index
-	 * in the raw border list
-	 * @param i the index to be tested
-	 * @return true if a tag is present at the index
-	 */
-	public boolean hasBorderTag( int index);
-	
-	/**
-	 * Set the name of the given NucleusBorderPoint
-	 * @param tag the new tag to use as a name
-	 * @param i the index of the border point
-	 */
-	
-	public void setBorderTag(BorderTagObject tag, int i);
-	
-	/**
-	 * Set or update a border tag based on an index from a reference tag
-	 * @param reference the border tag with index zero
-	 * @param tag the new tag to use
-	 * @param i the index of the border point relative to the reference
-	 */
-	public void setBorderTag(BorderTagObject reference, BorderTagObject tag, int i);
-
-
-	/**
-	 * Calculate a new angle profile with the given window size. It
-	 * will replace the existing angle profile. It takes the point, 
-	 * a point <windowSize> behind and <windowSize> ahead, and calculates
-	 * the interior angle between them.
-	 * @param angleProfileWindowSize the window size
-	 * @throws Exception 
-	 */
-//	public SegmentedProfile calculateAngleProfile(int angleProfileWindowSize) throws Exception;
-	public void calculateProfiles() throws Exception;
-	
 	
 	/**
 	 * Get the signals in this nucleus
 	 * @return
 	 */
 	public SignalCollection getSignalCollection();
-	
 		
-	/**
-	 * Get a copy of the mapping of border tags to index positions within 
-	 * the border list of the nucleus
-	 * @return
-	 */
-	public Map<BorderTagObject, Integer> getBorderTags();
-	
-	/**
-	 * Get a copy of the border point mapped to the given tag
-	 * @param tag
-	 * @return
-	 */
-	public BorderPoint getBorderPoint(BorderTagObject tag); 
-	
-	/**
-	 * Get the border index of a tag in the border list, 
-	 * removing offset to a reference tag
-	 * @param reference the border tag with index zero
-	 * @param index the index to offset. Should be counting from the reference tag
-	 * @return the offset index, or -1 if the reference tag is not present
-	 */
-	public int getOffsetBorderIndex(BorderTagObject reference, int index);
-	
-	/**
-	 * Set the lock on this segment of all the profile types
-	 * @param lock
-	 * @param segID
-	 */
-	public void setSegmentStartLock(boolean lock, UUID segID);
-
-	/**
-	 * Reverse the angle profile of the nucleus. Also reverses the distance
-	 * profile, the border list and updates the border tags to the new positions
-	 * @throws Exception
-	 */
-	public void reverse();
 		
 	
 	/**
@@ -451,24 +167,6 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 */
 	public void updateSourceFolder(File newFolder);
 	
-	/*
-	 * Rotations
-	 */
-	
-	/**
-	 * Given two points in the nucleus, rotate the nucleus so that they are vertical.
-	 * @param topPoint the point to have the higher Y value
-	 * @param bottomPoint the point to have the lower Y value
-	 */
-	public void alignPointsOnVertical(BorderPoint topPoint, BorderPoint bottomPoint);
-	
-	/**
-	 * Rotate the nucleus so that the given point is directly 
-	 * below the centre of mass
-	 * @param bottomPoint
-	 */
-	public void rotatePointToBottom(BorderPoint bottomPoint);
-	
 	
 	/**
 	 * Fetch the vertically oriented copy of the nucleus. Calculate if 
@@ -484,26 +182,5 @@ public interface Nucleus extends CellularComponent, Indexable {
 	 * and recalculate.
 	 */
 	public void updateVerticallyRotatedNucleus();
-	
-	/**
-	 * Rotate the nucleus by the given amount around the centre of mass
-	 * @param angle
-	 */
-	public void rotate(double angle);
-	
-	
-	/**
-	 * Check if the segments and tags are able to be
-	 * modified
-	 * @return
-	 */
-	public boolean isLocked();
-	
-	/**
-	 * Set if the segments and tags are able to be
-	 * modified
-	 * @param b
-	 */
-	public void setLocked(boolean b);
-		
+			
 }

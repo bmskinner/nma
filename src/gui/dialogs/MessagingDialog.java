@@ -17,42 +17,53 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 
 
+/**
+ * This extension to a JDialog can fire DatasetEvents and InterfaceEvents
+ * to registered listeners. Used to communicate dataset updates and chart
+ * recache requests from dialogs which modify datasets.
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public abstract class MessagingDialog extends JDialog implements Loggable {
 	
-	private final List<Object> datasetListeners 	= new ArrayList<Object>();
-	private final List<Object> interfaceListeners 	= new ArrayList<Object>();
+	protected final List<Object> listeners 	= new ArrayList<Object>();
 	
 	public MessagingDialog(){
 		super( );
 	}
 	
+	/**
+	 * Create with the given Dialog as a parent. Use null to make this
+	 * dialog have a taskbar icon
+	 * @param d the parent. Can be null
+	 */
 	public MessagingDialog(Dialog d){
 		super( d );
 	}
 	
 
 	public synchronized void addDatasetEventListener( DatasetEventListener l ) {
-    	datasetListeners.add( l );
+		listeners.add( l );
     }
     
     public synchronized void removeDatasetEventListener( DatasetEventListener l ) {
-    	datasetListeners.remove( l );
+    	listeners.remove( l );
     }
     
     public synchronized void addInterfaceEventListener( InterfaceEventListener l ) {
-    	interfaceListeners.add( l );
+    	listeners.add( l );
     }
     
     public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
-    	interfaceListeners.remove( l );
+    	listeners.remove( l );
     }
     
     
     protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list) {
     	
         DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);
-        Iterator<Object> iterator = datasetListeners.iterator();
+        Iterator<Object> iterator = listeners.iterator();
         while( iterator.hasNext() ) {
             ( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
         }
@@ -68,14 +79,14 @@ public abstract class MessagingDialog extends JDialog implements Loggable {
     protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list, AnalysisDataset template) {
 
     	DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, template);
-    	Iterator<Object> iterator = datasetListeners.iterator();
+    	Iterator<Object> iterator = listeners.iterator();
     	while( iterator.hasNext() ) {
     		( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
     	}
     }
     
     protected synchronized void fireDatasetEvent(DatasetEvent event) {
-    	Iterator<Object> iterator = datasetListeners.iterator();
+    	Iterator<Object> iterator = listeners.iterator();
     	while( iterator.hasNext() ) {
     		( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
     	}
@@ -84,7 +95,7 @@ public abstract class MessagingDialog extends JDialog implements Loggable {
     protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
     	
     	InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());
-        Iterator<Object> iterator = interfaceListeners.iterator();
+        Iterator<Object> iterator = listeners.iterator();
         while( iterator.hasNext() ) {
             ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
         }
@@ -92,7 +103,7 @@ public abstract class MessagingDialog extends JDialog implements Loggable {
     
     protected synchronized void fireInterfaceEvent(InterfaceEvent event) {
 
-        Iterator<Object> iterator = interfaceListeners.iterator();
+        Iterator<Object> iterator = listeners.iterator();
         while( iterator.hasNext() ) {
             ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
         }

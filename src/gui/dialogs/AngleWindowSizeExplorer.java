@@ -230,7 +230,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 			for(Cell c : dataset.getCollection().getCells()){
 				
 				Cell newCell = new Cell(c);
-				newCell.getNucleus().setAngleWindowProportion(i); // triggers recalc of profile
+				newCell.getNucleus().setWindowProportion(ProfileType.ANGLE, i); // triggers recalc of profile
 				
 				duplicateCollection.addCell(newCell);
 			}

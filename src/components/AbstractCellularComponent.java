@@ -35,8 +35,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import analysis.profiles.Profileable;
 import logging.Loggable;
 import components.generic.MeasurementScale;
+import components.generic.ProfileType;
+import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;

@@ -294,7 +294,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			// Update cells
 			
 			for(Cell c : activeDataset().getCollection().getCells()){
-				c.getNucleus().setAngleWindowProportion(windowSize);
+				c.getNucleus().setWindowProportion(ProfileType.ANGLE, windowSize);
 			}
 
 			// recalc the aggregate

@@ -43,7 +43,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import analysis.profiles.ProfileCreator;
 import analysis.profiles.ProfileIndexFinder;
+import analysis.profiles.Profileable;
 import analysis.profiles.RuleSet;
 import analysis.signals.SignalAnalyser;
 import stats.NucleusStatistic;
@@ -134,8 +136,8 @@ public class RoundNucleus extends AbstractCellularComponent
 				
 		this.setSignals( new SignalCollection(n.getSignalCollection()));
 		
-		this.angleWindowProportion = n.getAngleWindowProportion();
-		this.angleProfileWindowSize = n.getAngleProfileWindowSize();
+		this.angleWindowProportion = n.getWindowProportion(ProfileType.ANGLE);
+		this.angleProfileWindowSize = n.getWindowSize(ProfileType.ANGLE);
 		
 		
 		for(ProfileType type : ProfileType.values()){
@@ -174,6 +176,20 @@ public class RoundNucleus extends AbstractCellularComponent
 		segsLocked = b;
 	}
 	
+	
+	@Override
+	public int getWindowSize(ProfileType type){
+		switch(type){
+			case ANGLE: { 
+				return angleProfileWindowSize;
+			}
+			
+			default:{
+				return Profileable.DEFAULT_PROFILE_WINDOW; // Not needed for DIAMETER and RADIUS
+			}
+		}
+	}
+	
 	/*
 	* Finds the key points of interest around the border
 	* of the Nucleus. Can use several different methods, and 
@@ -203,7 +219,6 @@ public class RoundNucleus extends AbstractCellularComponent
 	public void intitialiseNucleus(double proportion) throws Exception {
 
 		this.angleWindowProportion = proportion;
-//		this.setAngleWindowProportion(proportion);
 		
 		double perimeter = this.getStatistic(NucleusStatistic.PERIMETER);
 		double angleWindow = perimeter * proportion;
@@ -221,21 +236,28 @@ public class RoundNucleus extends AbstractCellularComponent
 	    
 	}
 	
-	public void calculateProfiles() throws Exception{
+	public void calculateProfiles() {
 		
 		/*
 		 * All these calculations operate on the same border point order
 		 */
 		
-		this.profileMap.put(ProfileType.ANGLE, this.calculateAngleProfile());
-
-		// calc distances around nucleus through CoM
-		this.profileMap.put(ProfileType.DIAMETER, this.calculateDistanceProfile());
-
-		this.profileMap.put(ProfileType.RADIUS, this.calculateSingleDistanceProfile());
+		ProfileCreator creator = new ProfileCreator(this);
 		
-		// By default, the franken profile is the same as the angle profile until corrected
-		this.profileMap.put(ProfileType.FRANKEN, new SegmentedProfile(this.getProfile(ProfileType.ANGLE)));
+		for(ProfileType type : ProfileType.values()){
+			SegmentedProfile profile = creator.createProfile(type);
+			profileMap.put(type, profile);
+		}
+		
+//		this.profileMap.put(ProfileType.ANGLE, this.calculateAngleProfile());
+//
+//		// calc distances around nucleus through CoM
+//		this.profileMap.put(ProfileType.DIAMETER, this.calculateDistanceProfile());
+//
+//		this.profileMap.put(ProfileType.RADIUS, this.calculateSingleDistanceProfile());
+//		
+//		// By default, the franken profile is the same as the angle profile until corrected
+//		this.profileMap.put(ProfileType.FRANKEN, new SegmentedProfile(this.getProfile(ProfileType.ANGLE)));
 	}
 
 	/*
@@ -434,12 +456,18 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 	}
 
-	public int getAngleProfileWindowSize(){
-		return this.angleProfileWindowSize;
-	}
 	
-	public double getAngleWindowProportion(){
-		return this.angleWindowProportion;
+	public double getWindowProportion(ProfileType type){
+		
+		switch(type){
+			case ANGLE: { 
+				return angleWindowProportion;
+			}
+			
+			default:{
+				return Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION; // Not needed for DIAMETER and RADIUS
+			}
+		}
 	}
 
 	/*
@@ -464,15 +492,15 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 
 
-	protected void setAngleProfileWindowSize(int i){
-		this.angleProfileWindowSize = i;
-	}
+//	protected void setAngleProfileWindowSize(int i){
+//		this.angleProfileWindowSize = i;
+//	}
 	
 	/**
 	 * Set the fraction of the perimeter to use to calculate the angle window size
 	 * @param d
 	 */
-	public void setAngleWindowProportion(double d){
+	public void setWindowProportion(ProfileType type, double d){
 		if(d<0 || d> 1){
 			throw new IllegalArgumentException("Angle window proportion must be 0-1");
 		}
@@ -481,16 +509,23 @@ public class RoundNucleus extends AbstractCellularComponent
 			return;
 		}
 		
-		this.angleWindowProportion = d;
-		
-		double perimeter = this.getStatistic(NucleusStatistic.PERIMETER);
-		double angleWindow = perimeter * d;
-		
-		
-		// calculate profiles
-		this.angleProfileWindowSize = (int) Math.round(angleWindow);
-		finest("Recalculating angle profile");
-		this.profileMap.put(ProfileType.ANGLE, this.calculateAngleProfile());		
+		if(type.equals(ProfileType.ANGLE)){
+			
+			this.angleWindowProportion = d;
+			
+			double perimeter = this.getStatistic(NucleusStatistic.PERIMETER);
+			double angleWindow = perimeter * d;
+			
+			
+			// calculate profiles
+			this.angleProfileWindowSize = (int) Math.round(angleWindow);
+			finest("Recalculating angle profile");
+			ProfileCreator creator = new ProfileCreator(this);
+			SegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
+			
+			this.profileMap.put(ProfileType.ANGLE, profile);		
+			
+		}
 	}
 
 		
@@ -997,89 +1032,90 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 	}
 
-	private SegmentedProfile calculateDistanceProfile() throws Exception {
+//	private SegmentedProfile calculateDistanceProfile() throws Exception {
+//
+//		double[] profile = new double[this.getBorderLength()];
+//			
+//		int index = 0;
+//		Iterator<BorderPoint> it = this.getBorderList().iterator();
+//		while(it.hasNext()){
+//
+//			BorderPoint point = it.next();
+//			BorderPoint opp = findOppositeBorder(point);
+//
+//			profile[index++] = point.getLengthTo(opp); 
+//			
+//		}
+//
+//		return new SegmentedProfile(profile);
+//	}
+//
+//	private SegmentedProfile calculateSingleDistanceProfile() throws Exception{
+//
+//		double[] profile = new double[this.getBorderLength()];
+//		
+//		int index = 0;
+//		Iterator<BorderPoint> it = this.getBorderList().iterator();
+//		while(it.hasNext()){
+//
+//			BorderPoint point = it.next();
+//			profile[index++] = point.getLengthTo(this.getCentreOfMass()); 
+//			
+//		}
+//
+//		return new SegmentedProfile(profile);
+//	}
 
-		double[] profile = new double[this.getBorderLength()];
-			
-		int index = 0;
-		Iterator<BorderPoint> it = this.getBorderList().iterator();
-		while(it.hasNext()){
-
-			BorderPoint point = it.next();
-			BorderPoint opp = findOppositeBorder(point);
-
-			profile[index++] = point.getLengthTo(opp); 
-			
-		}
-
-		return new SegmentedProfile(profile);
-	}
-
-	private SegmentedProfile calculateSingleDistanceProfile() throws Exception{
-
-		double[] profile = new double[this.getBorderLength()];
-		
-		int index = 0;
-		Iterator<BorderPoint> it = this.getBorderList().iterator();
-		while(it.hasNext()){
-
-			BorderPoint point = it.next();
-			profile[index++] = point.getLengthTo(this.getCentreOfMass()); 
-			
-		}
-
-		return new SegmentedProfile(profile);
-	}
-
-	protected SegmentedProfile calculateAngleProfile() {
-
-		List<NucleusBorderSegment> segments = null;
-		
-		// store segments to reapply later
-		if(this.hasProfile(ProfileType.ANGLE)){
-			if(this.getProfile(ProfileType.ANGLE).hasSegments()){
-				segments = this.getProfile(ProfileType.ANGLE).getSegments();
-			}
-		}
-		
-		double[] angles = new double[this.getBorderLength()];
-
-//		for(int i=0; i<this.getBorderLength();i++){
-		
-		int index = 0;
-		Iterator<BorderPoint> it = this.getBorderList().iterator();
-		while(it.hasNext()){
-
-			BorderPoint point = it.next();
-			BorderPoint pointBefore = point.prevPoint(angleProfileWindowSize);
-			BorderPoint pointAfter  = point.nextPoint(angleProfileWindowSize);
-
-			double angle = Utils.findAngleBetweenXYPoints(pointBefore, point, pointAfter);
-
-			// find the halfway point between the first and last points.
-				// is this within the roi?
-				// if yes, keep min angle as interior angle
-				// if no, 360-min is interior
-			double midX = (pointBefore.getX()+pointAfter.getX())/2;
-			double midY = (pointBefore.getY()+pointAfter.getY())/2;
-			
-			// create a polygon from the border list - we are not storing the polygon directly
-//			FloatPolygon polygon = this.createPolygon();
-			if(this.createPolygon().contains((float) midX, (float) midY)){
-			
-//			if(polygon.contains( (float) midX, (float) midY)){
-				angles[index] = angle;
-			} else {
-				angles[index] = 360-angle;
-			}
-			index++;
-		}
-		SegmentedProfile newProfile = new SegmentedProfile(angles);
-		if(segments!=null){
-			newProfile.setSegments(segments);
-		}
-		return newProfile;
-	}
+//	protected SegmentedProfile calculateAngleProfile() {
+//
+//		List<NucleusBorderSegment> segments = null;
+//		
+//		// store segments to reapply later
+//		if(this.hasProfile(ProfileType.ANGLE)){
+//			if(this.getProfile(ProfileType.ANGLE).hasSegments()){
+//				segments = this.getProfile(ProfileType.ANGLE).getSegments();
+//			}
+//		}
+//		
+//
+//		double[] angles = new double[this.getBorderLength()];
+//
+////		for(int i=0; i<this.getBorderLength();i++){
+//		
+//		int index = 0;
+//		Iterator<BorderPoint> it = this.getBorderList().iterator();
+//		while(it.hasNext()){
+//
+//			BorderPoint point = it.next();
+//			BorderPoint pointBefore = point.prevPoint(angleProfileWindowSize);
+//			BorderPoint pointAfter  = point.nextPoint(angleProfileWindowSize);
+//
+//			double angle = Utils.findAngleBetweenXYPoints(pointBefore, point, pointAfter);
+//
+//			// find the halfway point between the first and last points.
+//				// is this within the roi?
+//				// if yes, keep min angle as interior angle
+//				// if no, 360-min is interior
+//			double midX = (pointBefore.getX()+pointAfter.getX())/2;
+//			double midY = (pointBefore.getY()+pointAfter.getY())/2;
+//			
+//			// create a polygon from the border list - we are not storing the polygon directly
+////			FloatPolygon polygon = this.createPolygon();
+//			if(this.createPolygon().contains((float) midX, (float) midY)){
+//			
+////			if(polygon.contains( (float) midX, (float) midY)){
+//				angles[index] = angle;
+//			} else {
+//				angles[index] = 360-angle;
+//			}
+//			index++;
+//		}
+//		SegmentedProfile newProfile = new SegmentedProfile(angles);
+//		if(segments!=null){
+//			newProfile.setSegments(segments);
+//		}
+//		return newProfile;
+//	}
 
 
 	public void reverse(){

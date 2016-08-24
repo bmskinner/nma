@@ -106,10 +106,10 @@ public class CellDatasetCreator implements Loggable {
 		rowData.add(n.getChannel());
 		
 		fieldNames.add("Angle window prop.");
-		rowData.add(n.getAngleWindowProportion());
+		rowData.add(n.getWindowProportion(ProfileType.ANGLE));
 		
 		fieldNames.add("Angle window size");
-		rowData.add(n.getAngleProfileWindowSize());
+		rowData.add(n.getWindowSize(ProfileType.ANGLE));
 
 		fieldNames.add("Scale (pixels/um)");
 		rowData.add(n.getScale());
@@ -133,7 +133,6 @@ public class CellDatasetCreator implements Loggable {
 		NucleusType type = NucleusType.getNucleusType(n);
 
 		if(type!=null){
-//			for(BorderTagObject tag : n.getBorderTags().keySet()){
 			for(BorderTagObject tag : BorderTagObject.values()){
 				fieldNames.add(tag);
 				if(n.hasBorderTag(tag)){

@@ -76,24 +76,37 @@ public class ProfileManager implements Loggable {
 	 */
 	public void offsetNucleusProfiles(BorderTagObject tag, ProfileType type, Profile median){
 				
-		
-		
-		for(Nucleus n : collection.getNuclei()){
-			
-			if(n.isLocked()){
-				continue;
-			}
-			
-			// returns the positive offset index of this profile which best matches the median profile
-			int newIndex = n.getProfile(type).getSlidingWindowOffset(median);
-			n.setBorderTag(tag, newIndex);		
-			
-			if(tag.equals(BorderTagObject.TOP_VERTICAL) || tag.equals(BorderTagObject.BOTTOM_VERTICAL)){
+		collection.getNuclei().parallelStream().forEach(n -> {
+			if( ! n.isLocked()){
+								
+				// returns the positive offset index of this profile which best matches the median profile
+				int newIndex = n.getProfile(type).getSlidingWindowOffset(median);
+				n.setBorderTag(tag, newIndex);		
 				
-				n.updateVerticallyRotatedNucleus();
-				
+				if(tag.equals(BorderTagObject.TOP_VERTICAL) || tag.equals(BorderTagObject.BOTTOM_VERTICAL)){
+					
+					n.updateVerticallyRotatedNucleus();
+					
+				}
 			}
-		}
+		});
+		
+//		for(Nucleus n : collection.getNuclei()){
+//			
+//			if(n.isLocked()){
+//				continue;
+//			}
+//			
+//			// returns the positive offset index of this profile which best matches the median profile
+//			int newIndex = n.getProfile(type).getSlidingWindowOffset(median);
+//			n.setBorderTag(tag, newIndex);		
+//			
+//			if(tag.equals(BorderTagObject.TOP_VERTICAL) || tag.equals(BorderTagObject.BOTTOM_VERTICAL)){
+//				
+//				n.updateVerticallyRotatedNucleus();
+//				
+//			}
+//		}
 		
 	}
 	
@@ -622,34 +635,6 @@ public class ProfileManager implements Loggable {
 
 		}
 	}
-
-//	/**
-//	 * Update the segment with the given id to start at the given index.
-//	 * Also updates the individual nuclei in the collection
-//	 * @param id
-//	 * @param index
-//	 * @throws Exception
-//	 */
-//	private void updateSegmentStartIndex(UUID id, int index) throws Exception{
-//
-//		// Update the median profile
-//		collection
-//			.getProfileManager()
-//			.updateMedianProfileSegmentIndex(true, id, index);
-//
-//		// Lock all segments except the one to change
-//		setLockOnAllNucleusSegmentsExcept(id, true);
-//		
-//		// Now run the segment fitting from REFRESH_MORPHOLOGY
-//		
-//		
-//		
-//		
-////		Restore the segment locks
-//		setLockOnAllNucleusSegments(false);
-//		
-//		
-//	}
 	
 	/**
 	 * Lock the start index of all segments of all profile types in 
@@ -664,17 +649,22 @@ public class ProfileManager implements Loggable {
 				.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 				.getSegmentIDs();
 		
-		for(Nucleus n : collection.getNuclei()){
-
-			for(UUID segID : ids){
+		
+		collection.getNuclei().forEach(n->{
+			
+			ids.forEach(  segID-> {
+				
 				if(segID.equals(id)){
 					n.setSegmentStartLock(!b, segID);
 				} else {
 					n.setSegmentStartLock(b, segID);
 				}
-			}
-
-		}
+				
+			});
+			
+			
+		});
+		
 	}
 	
 
@@ -691,15 +681,12 @@ public class ProfileManager implements Loggable {
 				.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 				.getSegmentIDs();
 		
-		for(Nucleus n : collection.getNuclei()){
-
-			for(UUID segID : ids){
-				
-				n.setSegmentStartLock(b, segID);
-				
-			}
-
-		}
+		
+		collection.getNuclei().forEach(n->{
+			
+			ids.forEach(  segID->n.setSegmentStartLock(b, segID)  );
+		});
+		
 	}
 	
 	
@@ -1023,7 +1010,7 @@ public class ProfileManager implements Loggable {
 		/*
 		 * With the median profile segments unmerged, also unmerge the segments
 		 * in the individual nuclei
-		 */
+		 */		
 		for(Nucleus n : collection.getNuclei()){
 			boolean wasLocked = n.isLocked();
 			n.setLocked(false); // Merging segments is not destructive
