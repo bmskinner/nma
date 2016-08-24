@@ -188,7 +188,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 
 			if(tag.equals(BorderTagObject.REFERENCE_POINT)){
 				// Update the profile aggregate to use the new RP
-				activeDataset().getCollection().getProfileManager().createProfileCollections();
+				activeDataset().getCollection().getProfileManager().createProfileCollections(true);
 			}
 			this.setAnalysing(false);
 			this.refreshChartCache();

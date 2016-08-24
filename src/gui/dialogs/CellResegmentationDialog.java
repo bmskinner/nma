@@ -173,7 +173,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			dataset.getCollection().replaceCell(workingCell);
 
 			// Trigger a dataset update and reprofiling
-			dataset.getCollection().getProfileManager().createProfileCollections();
+			dataset.getCollection().getProfileManager().createProfileCollections(true);
 			
 			fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
 		} 

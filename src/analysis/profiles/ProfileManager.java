@@ -102,10 +102,11 @@ public class ProfileManager implements Loggable {
 	 * profiles based on the current nucleus profiles. The ProfileAggregate
 	 * for each ProfileType is recalculated. The resulting median profiles
 	 * will have the same length after this update
+	 * @param keepLength when recalculating the profile aggregate, should the previous length be kept
 	 * @return
 	 * @throws Exception
 	 */
-	public void createProfileCollections() {
+	public void createProfileCollections(boolean keepLength) {
 
 		/*
 		 * Build a first set of profile aggregates
@@ -119,16 +120,57 @@ public class ProfileManager implements Loggable {
 			}
 			
 			fine("Creating profile aggregate: "+type);
-			
-			finer(type+" length before update: "+collection.getProfileCollection(type).length());
-			
 			ProfileCollection pc = collection.getProfileCollection(type);
 			int length = pc.length();
+						
+			if(keepLength && length>0){ // failsafe in case some idiot tries to maintain length on an empty aggregate
+				
 			
-			pc.createProfileAggregate(collection, type, length);
-			finer(type+" length after update: "+pc.length());
+				finer(type+" length before update: "+pc.length());
+
+				
+
+				pc.createProfileAggregate(collection, type, length);
+
+				finer(type+" length after update: "+pc.length());
+			} else {
+				pc.createProfileAggregate(collection, type);
+			}
 		}
 	}
+	
+//	/**
+//	 * Create the profile collections to hold angles from nuclear
+//	 * profiles based on the current nucleus profiles. The ProfileAggregate
+//	 * for each ProfileType is recalculated. The resulting median profiles
+//	 * will have the same length after this update
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	public void createProfileCollections() {
+//
+//		/*
+//		 * Build a first set of profile aggregates
+//		 * Default is to make profile aggregate from reference point
+//		 * Do not build an aggregate for the non-existent frankenprofile
+//		 */
+//		for(ProfileType type : ProfileType.values()){
+//			
+//			if(type.equals(ProfileType.FRANKEN)){
+//				continue;
+//			}
+//			
+//			fine("Creating profile aggregate: "+type);
+//			
+//			finer(type+" length before update: "+collection.getProfileCollection(type).length());
+//			
+//			ProfileCollection pc = collection.getProfileCollection(type);
+//			int length = pc.length();
+//			
+//			pc.createProfileAggregate(collection, type, length);
+//			finer(type+" length after update: "+pc.length());
+//		}
+//	}
 	
 	/**
 	 * Add the given offset to each of the profile types in the ProfileCollection
@@ -175,7 +217,7 @@ public class ProfileManager implements Loggable {
 		offsetNucleusProfiles(BorderTagObject.REFERENCE_POINT, ProfileType.ANGLE, median);
 		
 		finer("Nucleus indexes for "+BorderTagObject.REFERENCE_POINT+" updated");
-		createProfileCollections();
+		createProfileCollections(false);
 		finer("Rebuilt the profile collcctions");
 	}
 	
@@ -383,7 +425,7 @@ public class ProfileManager implements Loggable {
 			int rpIndex = collection.getProfileCollection(ProfileType.ANGLE).getIndex(tag);
 			finer("RP index is changing - moved to index "+rpIndex);
 			
-			createProfileCollections();
+			createProfileCollections(false);
 			finer("Recreated profile collections");
 			
 			// Get the recreated profile collections from the new RP

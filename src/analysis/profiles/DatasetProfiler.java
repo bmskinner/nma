@@ -49,7 +49,7 @@ public class DatasetProfiler extends AnalysisWorker {
     	
     	boolean result = true;
 		try{
-
+				fireCooldown();
 
 				fine("Profiling dataset");
 
@@ -103,13 +103,13 @@ public class DatasetProfiler extends AnalysisWorker {
 
 			
 			// Build the ProfileCollections for each ProfileType
-			collection.getProfileManager().createProfileCollections();	
+			collection.getProfileManager().createProfileCollections(false);	
 			finest("Created profile collections");
 					
 			
 			// Create a median from the current reference points in the nuclei
 			Profile median = collection.getProfileCollection(ProfileType.ANGLE)
-					.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
+					.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN); //TODO error here on new analysis
 			finest("Fetched median from initial RP");
 			
 			// RP index *should be* zero in the median profile at this point
