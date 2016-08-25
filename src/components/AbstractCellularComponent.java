@@ -803,7 +803,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		double minAngle = 180;
 
 		for(int i = 0; i<this.getBorderLength();i++){
-			double angle = Utils.findAngleBetweenXYPoints(p, this.getCentreOfMass(), this.getBorderPoint(i));
+			double angle = Utils.findAngle(p, this.getCentreOfMass(), this.getBorderPoint(i));
 			if(Math.abs(180 - angle) < minAngle){
 				minDeltaYIndex = i;
 				minAngle = 180 - angle;
@@ -825,7 +825,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		for(int i=0;i<this.getBorderLength();i++){
 
 			BorderPoint p = this.getBorderPoint(i);
-			double angle = Utils.findAngleBetweenXYPoints(a, this.getCentreOfMass(), p); 
+			double angle = Utils.findAngle(a, this.getCentreOfMass(), p); 
 			if(Math.abs(90-angle)< Math.abs(90-bestAngle)){
 				bestAngle = angle;
 				orthgonalPoint = p;

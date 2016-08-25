@@ -505,7 +505,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		super.getVerticallyRotatedNucleus();
 		finest("Fetched vertical nucleus from round nucleus");
 		if(verticalNucleus==null){
-			finest("Unknown error creating vertical nucleus");
+			warn("Unknown error creating vertical nucleus");
 		}
 		
 		/*
@@ -604,7 +604,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     for(int i=0;i<this.getBorderLength();i++){
 
       BorderPoint p = this.getBorderPoint(i);
-      double angle = Utils.findAngleBetweenXYPoints(reference, this.getCentreOfMass(), p);
+      double angle = Utils.findAngle(reference, this.getCentreOfMass(), p);
       if(  Math.abs(90-angle)<difference && 
           p.getLengthTo(this.getBorderTag(BorderTagObject.REFERENCE_POINT)) > this.getCentreOfMass().getLengthTo( this.getBorderTag(BorderTagObject.REFERENCE_POINT) ) ){
         difference = 90-angle;

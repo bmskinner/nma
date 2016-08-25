@@ -20,6 +20,7 @@ package charting.datasets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -1189,20 +1190,16 @@ private static NucleusDatasetCreator instance = null;
 	 * Get the outline for a specific nucleus in a dataset. Sets the position
 	 * to the original coordinates in the image 
 	 * @param cell
-	 * @param segmented add the segments?
+	 * @param segmented true to include each segment separately, false for an unsegmented outline
 	 * @return
-	 * @throws Exception 
 	 */
 	public XYDataset createNucleusOutline(Nucleus nucleus, boolean segmented) {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		finest("Creating nucleus outline");
 		if(segmented){
 			finest("Creating segmented nucleus outline");
-			/*
-			 * With the ability to merge segments, we cannot be sure that an iterator
-			 * based on numbers will work
-			 */
-			List<NucleusBorderSegment> segmentList = nucleus.getProfile(ProfileType.ANGLE).getSegments();
+
+			List<NucleusBorderSegment> segmentList = nucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegments();
 
 			
 			if(!segmentList.isEmpty()){ // only draw if there are segments
@@ -1212,24 +1209,23 @@ private static NucleusDatasetCreator instance = null;
 					
 					finest("Drawing segment "+seg.getID());
 
+					
+					// If we make the array the length of the segment, 
+					// there will be a gap between the segment end and the
+					// next segment start. Include a position for the next
+					// segment start as well
 					double[] xpoints = new double[seg.length()+1];
 					double[] ypoints = new double[seg.length()+1];
 					
-					/* We are adding the border points directly in the order they are found in the nucleus
-					 * This means the profile cannot be offset for segmentation.
-					 * The choice of segment name must be made in another manner
-					 * 
-					 * Identify Seg_0 by finding the segment with the reference point index 
-					 * at the start
-					 */
-					
-					int segmentPosition = getSegmentPosition(nucleus, seg);
-					
-					
-					
+
+					int segmentPosition = seg.getPosition();
+										
 					for(int j=0; j<=seg.length();j++){
-						int k = AbstractCellularComponent.wrapIndex(seg.getStartIndex()+j, nucleus.getBorderLength());
-						BorderPoint p = nucleus.getBorderPoint(k); // get the border points in the segment
+						
+						int index = seg.getStartIndex()+j;
+						int offsetIndex = nucleus.getOffsetBorderIndex(BorderTagObject.REFERENCE_POINT, index);
+						
+						BorderPoint p = nucleus.getBorderPoint(offsetIndex); // get the border points in the segment
 
 						xpoints[j] = p.getX();
 						ypoints[j] = p.getY();
@@ -1238,6 +1234,7 @@ private static NucleusDatasetCreator instance = null;
 					double[][] data = { xpoints, ypoints };
 
 					ds.addSeries("Seg_"+segmentPosition, data);
+					finest("Added segment data to chart dataset");
 				}
 			} else {
 				finest("Nucleus does not have segments");
@@ -1302,7 +1299,6 @@ private static NucleusDatasetCreator instance = null;
 	 * @return
 	 */
 	public int getSegmentPosition(Nucleus n, NucleusBorderSegment seg){
-		
 		int result = 0;
 		if(seg.getStartIndex()==n.getBorderIndex(BorderTagObject.REFERENCE_POINT)){
 			return result;

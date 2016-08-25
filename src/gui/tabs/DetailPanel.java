@@ -714,7 +714,9 @@ public abstract class DetailPanel
 
     		try {
 
+    			finest("Creating chart type");
     			JFreeChart chart = createPanelChartType(options);
+    			finest("Adding chart type to cache");
     			chartCache.addChart(options, chart);
 
     			
@@ -735,6 +737,7 @@ public abstract class DetailPanel
     			if(options.getTarget()!=null){
     			
     				options.getTarget().setChart(get());
+    				finest("Set chart panel to new chart");
     			}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block

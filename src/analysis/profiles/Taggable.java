@@ -43,7 +43,8 @@ public interface Taggable extends Profileable {
 	public int getBorderIndex(BorderTagObject tag);
 	
 	/**
-	 * Get the tag at a given index, given a zero tag
+	 * Get the tag at a given index, given the zero index is
+	 * set at the given tag
 	 * If there is no tag at the index, returns null
 	 * @param tag the border tag with index zero
 	 * @param index the index to fetch
@@ -139,7 +140,7 @@ public interface Taggable extends Profileable {
 	public BorderPoint getBorderPoint(BorderTagObject tag); 
 	
 	/**
-	 * Get the border index of a tag in the border list, 
+	 * Get the border index of point in the border list, 
 	 * removing offset to a reference tag
 	 * @param reference the border tag with index zero
 	 * @param index the index to offset. Should be counting from the reference tag

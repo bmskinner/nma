@@ -91,7 +91,7 @@ public class ProfileCreator {
 			BorderPoint pointAfter  = point.nextPoint(target.getWindowSize(ProfileType.ANGLE));
 
 			// Get the smallest angle between the points
-			double angle = Utils.findAngleBetweenXYPoints(pointBefore, point, pointAfter);
+			double angle = Utils.findAngle(pointBefore, point, pointAfter);
 
 			// Now discover if this measured angle is inside or outside the object
 			

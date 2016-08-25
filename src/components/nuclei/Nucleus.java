@@ -19,11 +19,12 @@
 package components.nuclei;
 
 import java.io.File;
-import analysis.Rotatable;
+
 import analysis.nucleus.Indexable;
 import analysis.profiles.Profileable;
 import analysis.profiles.Taggable;
 import components.CellularComponent;
+import components.Rotatable;
 import components.nuclear.BorderPoint;
 import components.nuclear.SignalCollection;
 

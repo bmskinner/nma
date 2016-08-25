@@ -363,7 +363,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			result = this.getVerticallyRotatedNucleus().getBounds().getWidth();
 			break;
 		case OP_RP_ANGLE:
-			result = Utils.findAngleBetweenXYPoints(this.getBorderTag(BorderTagObject.REFERENCE_POINT), this.getCentreOfMass(), this.getBorderTag(BorderTagObject.ORIENTATION_POINT));
+			result = Utils.findAngle(this.getBorderTag(BorderTagObject.REFERENCE_POINT), this.getCentreOfMass(), this.getBorderTag(BorderTagObject.ORIENTATION_POINT));
 			break;
 		default:
 			break;
@@ -400,42 +400,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 
-	public BorderPoint[] getBorderPointsForVerticalAlignment(){
-		BorderPoint topPoint    = this.getBorderTag(BorderTagObject.TOP_VERTICAL);
-		BorderPoint bottomPoint = this.getBorderTag(BorderTagObject.BOTTOM_VERTICAL);
-		
-		if(topPoint==null || bottomPoint==null){
-			warn("Border points not found");
-			return new BorderPoint[] {topPoint, bottomPoint};
-		}
-		
-		// Find the best line across the region
-		List<BorderPoint> pointsInRegion = new ArrayList<BorderPoint>();
-		
-		int topIndex  = this.getBorderIndex(BorderTagObject.TOP_VERTICAL);
-		int btmIndex  = this.getBorderIndex(BorderTagObject.BOTTOM_VERTICAL);
-		int totalSize = this.getProfile(ProfileType.ANGLE).size();
-		
-		NucleusBorderSegment region = new NucleusBorderSegment(topIndex, btmIndex, totalSize );
 
-		int index = topIndex;
-		
-		Iterator<Integer> it = region.iterator();
-		
-		while(it.hasNext()){
-			index = it.next();
-			pointsInRegion.add(this.getBorderPoint(index));
-		}
-		
-		// Use the line of best fit to find appropriate top and bottom vertical points
-		Equation eq = Equation.calculateBestFitLine(pointsInRegion);
-		
-		BorderPoint top = new BorderPoint(eq.getX(topPoint.getY()), topPoint.getY());
-		BorderPoint btm = new BorderPoint(eq.getX(bottomPoint.getY()), bottomPoint.getY());
-		
-		return new BorderPoint[] {top, btm};
-		
-	}
 			
 	public double getCircularity() {
 		double perim2 = Math.pow(this.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS), 2);
@@ -596,36 +561,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		return Arrays.stream(this.getProfile(ProfileType.DIAMETER).asArray()).min().orElse(0);
 	}
 
-	/*
-		-----------------------
-		Exporting data
-		-----------------------
-	*/
-	
-	public double findRotationAngle(){
-		
-		double angle;
-		if(this.hasBorderTag(BorderTagObject.TOP_VERTICAL) && this.hasBorderTag(BorderTagObject.BOTTOM_VERTICAL)){
-//			IJ.log("Calculating rotation angle via TopVertical");
-			XYPoint end = new XYPoint(this.getBorderTag(BorderTagObject.BOTTOM_VERTICAL).getXAsInt(),this.getBorderTag(BorderTagObject.BOTTOM_VERTICAL).getYAsInt()-50);
-			angle = Utils.findAngleBetweenXYPoints(end, this.getBorderTag(BorderTagObject.BOTTOM_VERTICAL), this.getBorderTag(BorderTagObject.TOP_VERTICAL));
 
-			
-		} else {
-//			IJ.log("Calculating rotation angle via OrientationPoint");
-			// Make a point directly below the orientation point
-			XYPoint end = new XYPoint(this.getBorderTag(BorderTagObject.ORIENTATION_POINT).getXAsInt(),this.getBorderTag(BorderTagObject.ORIENTATION_POINT).getYAsInt()-50);
-
-		    angle = Utils.findAngleBetweenXYPoints(end, this.getBorderTag(BorderTagObject.ORIENTATION_POINT), this.getCentreOfMass());
-
-		}
-		
-	    if(this.getCentreOfMass().getX() < this.getBorderTag(BorderTagObject.ORIENTATION_POINT).getX()){
-	      return angle;
-	    } else {
-	      return 0-angle;
-	    }
-	}
 
 	// do not move this into SignalCollection - it is overridden in RodentSpermNucleus
 	public void calculateSignalAnglesFromPoint(BorderPoint p) {
@@ -639,7 +575,7 @@ public class RoundNucleus extends AbstractCellularComponent
 
 				for(NuclearSignal s : signals){
 
-					double angle = Utils.findAngleBetweenXYPoints(p, this.getCentreOfMass(), s.getCentreOfMass());
+					double angle = Utils.findAngle(p, this.getCentreOfMass(), s.getCentreOfMass());
 					s.setStatistic(SignalStatistic.ANGLE, angle);
 
 				}
@@ -1190,40 +1126,10 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	public Nucleus getVerticallyRotatedNucleus(){
-		if(this.verticalNucleus==null){
+		if(verticalNucleus==null){
+			
 			verticalNucleus = this.duplicate();
-			
-			boolean useTVandBV = true;
-			
-			if(this.hasBorderTag(BorderTagObject.TOP_VERTICAL) && this.hasBorderTag(BorderTagObject.BOTTOM_VERTICAL)){
-				
-				if( getBorderIndex(BorderTagObject.TOP_VERTICAL)== -1){
-					useTVandBV = false;
-				}
-				
-				if( getBorderIndex(BorderTagObject.BOTTOM_VERTICAL)== -1){
-					useTVandBV = false;
-				}
-
-			} else {
-				
-				useTVandBV = false;
-
-			}
-			
-			
-			
-			if(useTVandBV){
-				// Rotate vertical
-				BorderPoint[] points = verticalNucleus.getBorderPointsForVerticalAlignment();
-				verticalNucleus.alignPointsOnVertical(points[0], points[1] );
-
-			} else {
-				
-				verticalNucleus.rotatePointToBottom(verticalNucleus.getBorderPoint(BorderTagObject.ORIENTATION_POINT));
-
-			}
-			
+			verticalNucleus.alignVertically();			
 			
 			// Ensure all nuclei have overlapping centres of mass
 			verticalNucleus.moveCentreOfMass(new XYPoint(0,0));
@@ -1236,34 +1142,101 @@ public class RoundNucleus extends AbstractCellularComponent
 		return verticalNucleus;
 	}
 	
-	/**
-	 * Test the effect on a given point's position of rotating the nucleus 
-	 * @param point the point of interest
-	 * @param angle the angle of rotation
-	 * @return the new position
+	/*
+	 * #############################################
+	 * Methods implementing the Rotatable interface
+	 * #############################################
 	 */
-	private XYPoint getPositionAfterRotation(BorderPoint point, double angle){
+	
+	public void alignVertically(){
 		
-		// get the angle from the tail to the vertical axis
-		double tailAngle = Utils.findAngleBetweenXYPoints( point, 
-				this.getCentreOfMass(), 
-				new XYPoint(this.getCentreOfMass().getX(),-10));
-		if(point.getX()<this.getCentreOfMass().getX()){
-			tailAngle = 360-tailAngle; // correct for measuring the smallest angle
+		boolean useTVandBV = true;
+		
+		if(this.hasBorderTag(BorderTagObject.TOP_VERTICAL) && this.hasBorderTag(BorderTagObject.BOTTOM_VERTICAL)){
+			
+			int topPoint    = getBorderIndex(BorderTagObject.TOP_VERTICAL);
+			int bottomPoint = getBorderIndex(BorderTagObject.BOTTOM_VERTICAL);
+			
+			if( topPoint == -1){ // check if the point was set but not found
+				useTVandBV = false;
+			}
+			
+			if( bottomPoint == -1){
+				useTVandBV = false;
+			}
+			
+			if(topPoint==bottomPoint){ // Situation when something went very wrong
+				useTVandBV = false;
+			}
+
+		} else {
+			
+			useTVandBV = false;
+
 		}
-		// get a copy of the new bottom point
-		XYPoint p = new XYPoint( point.getX(), point.getY() );
+		
+		
+		
+		
+		if(useTVandBV){
+			BorderPoint[] points = getBorderPointsForVerticalAlignment();
+			alignPointsOnVertical(points[0], points[1] );
+		} else {
+			
+			// Default if top and bottom vertical points have not been specified
+			rotatePointToBottom(getBorderPoint(BorderTagObject.ORIENTATION_POINT));
+		}
+		
+	}
+	
+	/**
+	 * Detect the points that can be used for vertical alignment.These are based on the
+	 * BorderTags TOP_VERTICAL and BOTTOM_VETICAL. The actual points returned are not
+	 * necessarily on the border of the nucleus; a bibble correction is performed on the
+	 * line drawn between the two border points, minimising the sum-of-squares to each border
+	 * point within the region covered by the line. 
+	 * @return
+	 */	
+	private BorderPoint[] getBorderPointsForVerticalAlignment(){
+		
+		
+		BorderPoint topPoint    = this.getBorderTag(BorderTagObject.TOP_VERTICAL);
+		BorderPoint bottomPoint = this.getBorderTag(BorderTagObject.BOTTOM_VERTICAL);
+		
+		
+		// Find the border points between the top and bottom verticals
+		List<BorderPoint> pointsInRegion = new ArrayList<BorderPoint>();
+		
+		int topIndex  = this.getBorderIndex(BorderTagObject.TOP_VERTICAL);
+		int btmIndex  = this.getBorderIndex(BorderTagObject.BOTTOM_VERTICAL);
+		int totalSize = this.getProfile(ProfileType.ANGLE).size();
+		
+		// A segment has built in methods for iterating through just the points it contains
+		NucleusBorderSegment region = new NucleusBorderSegment(topIndex, btmIndex, totalSize );
 
-		// get the distance from the bottom point to the CoM
-		double distance = p.getLengthTo(this.getCentreOfMass());
-
-		// add the suggested rotation amount
-		double newAngle = tailAngle + angle;
-
-		// get the new X and Y coordinates of the point after rotation
-		double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
-		double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
-		return new XYPoint(newX, newY);
+		int index = topIndex;
+		
+		Iterator<Integer> it = region.iterator();
+		
+		while(it.hasNext()){
+			index = it.next();
+			pointsInRegion.add(this.getBorderPoint(index));
+		}
+		
+		// As an anti-bibble defence, get a best fit line acrosss the region
+		// Use the line of best fit to find appropriate top and bottom vertical points
+		Equation eq = Equation.calculateBestFitLine(pointsInRegion);
+		
+		
+		// Take values along the best fit line that are close to the original TV and BV
+		
+		// What about when the TV or BV are in the bibble? TODO
+		
+		BorderPoint top = new BorderPoint(topPoint.getX(), eq.getY(topPoint.getX()));
+		BorderPoint btm = new BorderPoint(eq.getX(bottomPoint.getY()), bottomPoint.getY());
+		
+		return new BorderPoint[] {top, btm};
+		
 	}
 	
 	/**
@@ -1273,128 +1246,52 @@ public class RoundNucleus extends AbstractCellularComponent
 	 */
 	public void rotatePointToBottom(BorderPoint bottomPoint){
 
-		// find the angle to rotate
 		double angleToRotate 	= 0;
-
-		// start with a high distance from the central vertical line
-		double distanceFromZero = 180;
-
-		// Go around in a circle
-		for(int angle=0;angle<360;angle++){
-
-			XYPoint newPoint = getPositionAfterRotation(bottomPoint, angle);
-
-			// get the absolute distance from the vertical
-			double distanceFromCoM = Math.abs(newPoint.getX()-this.getCentreOfMass().getX());
-			// if the new x position is closer to the central vertical line
-			// AND the y position is below zero
-			// this is a better rotation
-			if( distanceFromCoM < distanceFromZero && newPoint.getY() < this.getCentreOfMass().getY()){
-				angleToRotate = angle;
-				distanceFromZero = distanceFromCoM;
-			}
+		
+		// Calculate the current angle between the point and a vertical line
+		
+		XYPoint currentBottom = new XYPoint(getCentreOfMass().getX(), getMinY());
+		
+		double currentAngle = Utils.findAngle(currentBottom, getCentreOfMass(), bottomPoint);
+				
+		/*
+		 * 
+		 * The nucleus is currently rotated such that the desired bottom point (D) makes
+		 * an angle <currentAngle> against the line between the centre of mass (M) and 
+		 * the current bottom point (C). The possible configurations are shown below:
+		 * 
+		 *    D            D
+		 *     \          /
+		 *      M        M               M       M
+		 *      |        |             / |       | \
+		 *      C        C            D  C       C  D
+		 *      
+		 *      
+		 *   Clockwise   Clock        Clock     Clock
+		 *   360 - a     a            360-a      a
+		 */
+		
+		// TODO - these calculations are perfectly wrong. They result in the bottomPoint anywhere
+		// except the bottom
+		
+		if(bottomPoint.isLeftOf(currentBottom) && bottomPoint.isAbove(getCentreOfMass())){
+			
+			angleToRotate = 360 - currentAngle;
 		}
 		
-		// Now we have the int angle.
-		// Test 0.05 degree increments for the degree each side
-				
-		for(double angle=angleToRotate-0.9;angle<angleToRotate+0.9;angle+=0.05){
-
-			XYPoint newPoint = getPositionAfterRotation(bottomPoint, angle);
-
-			// get the absolute distance from the vertical
-			double distanceFromCoM = Math.abs(newPoint.getX()-this.getCentreOfMass().getX());
-			// if the new x position is closer to the central vertical line
-			// AND the y position is below zero
-			// this is a better rotation
-			if( distanceFromCoM < distanceFromZero && newPoint.getY() < this.getCentreOfMass().getY()){
-				angleToRotate = angle;
-				distanceFromZero = distanceFromCoM;
-						}
+		if(bottomPoint.isLeftOf(currentBottom) && bottomPoint.isBelow(getCentreOfMass())){
+			
+			angleToRotate = 360 - currentAngle;
 		}
+		
+		if(bottomPoint.isRightOf(currentBottom)){
+			
+			angleToRotate = currentAngle;
+		}
+				
 		this.rotate(angleToRotate);
 	}
 	
-	/**
-	 * Given two points in the nucleus, rotate the nucleus so that they are vertical.
-	 * @param topPoint the point to have the higher Y value
-	 * @param bottomPoint the point to have the lower Y value
-	 */
-	public void alignPointsOnVertical(BorderPoint topPoint, BorderPoint bottomPoint){
-		
-		/*
-		 * If the points are already aligned vertically, the rotation should not have any effect
-		 */
-		double angleToRotate 	= 0;
-				
-		/*
-		 *  Get the angle from the vertical of the line between the points.
-		 *  
-		 *  This is the line running from top (T) to bottom (B), then up
-		 *  to the y position of the top at the X position of the bottom (V)
-		 * 
-		 *     T V
-		 *      \|
-		 *       B
-		 * 
-		 */
-		double angleToBeat = Utils.findAngleBetweenXYPoints( topPoint, 
-				bottomPoint, 
-				new XYPoint(bottomPoint.getX(),topPoint.getY()));
-		
-		for(int angle=0;angle<360;angle++){
-			
-			XYPoint newTop 		= getPositionAfterRotation(topPoint, angle);
-			XYPoint newBottom 	= getPositionAfterRotation(bottomPoint, angle);
-			
-			// Test that the top point is still on the top; no point getting
-			// angles for the rotations where the top has moved to the bottom 
-			if(newTop.getY() > newBottom.getY()){
-				
-				double newAngle = Utils.findAngleBetweenXYPoints( newTop, 
-						newBottom, 
-						new XYPoint(newBottom.getX(),newTop.getY()));
-				
-				/*
-				 * We want to minimise the angle between the points, whereupon
-				 * they are vertically aligned. 
-				 */
-
-				if( newAngle < angleToBeat ){
-					angleToBeat = newAngle;
-					angleToRotate = angle;
-				}
-			}
-
-		}
-		
-		
-		// Now we have the int angle.
-		// Test 0.05 degree increments for the degree each side
-		
-		for(double angle=angleToRotate-0.9;angle<angleToRotate+0.9;angle+=0.05){
-			
-			XYPoint newTop 		= getPositionAfterRotation(topPoint, angle);
-			XYPoint newBottom 	= getPositionAfterRotation(bottomPoint, angle);
-	
-			double newAngle = Utils.findAngleBetweenXYPoints( newTop, 
-					newBottom, 
-					new XYPoint(newBottom.getX(),newTop.getY()));
-
-			/*
-			 * We want to minimise the angle between the points, whereupon
-			 * they are vertically aligned. 
-			 */
-
-			if( newAngle < angleToBeat ){
-				angleToBeat = newAngle;
-				angleToRotate = angle;
-			}
-		}
-		
-		
-		this.rotate(angleToRotate);
-	}
 		
 	/**
 	 * Rotate the nucleus by the given amount around the centre of mass
@@ -1420,7 +1317,7 @@ public class RoundNucleus extends AbstractCellularComponent
 				 *      V P
 				 * 
 				 */
-				double oldAngle = Utils.findAngleBetweenXYPoints( p, 
+				double oldAngle = Utils.findAngle( p, 
 						this.getCentreOfMass(), 
 						new XYPoint(this.getCentreOfMass().getX(),-10));
 

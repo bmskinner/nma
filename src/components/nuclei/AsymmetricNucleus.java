@@ -97,24 +97,6 @@ public class AsymmetricNucleus
   protected void addTailEstimatePosition(BorderPoint p){
     this.tailEstimatePoints.add(p);
   }
-
-  /*
-    Find the angle that the nucleus must be rotated to make the CoM-tail vertical.
-    Uses the angle between [sperm tail x,0], sperm tail, and sperm CoM
-    Returns an angle
-  */
-  @Override
-  public double findRotationAngle(){
-	  XYPoint end = new XYPoint(this.getPoint(BorderTagObject.ORIENTATION_POINT).getXAsInt(),this.getPoint(BorderTagObject.ORIENTATION_POINT).getYAsInt()-50);
-
-	  double angle = Utils.findAngleBetweenXYPoints(end, this.getPoint(BorderTagObject.ORIENTATION_POINT), this.getCentreOfMass());
-
-	  if(this.getCentreOfMass().getX() < this.getPoint(BorderTagObject.ORIENTATION_POINT).getX()){
-		  return angle;
-	  } else {
-		  return 0-angle;
-	  }
-  }
   
 
   

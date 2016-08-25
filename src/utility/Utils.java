@@ -206,86 +206,24 @@ public class Utils {
 	 }
 	 
 
-	 /**
-	  * Turn the border points in a nucleus into a polygon. The positions in the polygon
-	 * are offset (that is, the min x and y values are zero). To get the absolute positions
-	 * of the points in the source image, use createOriginalPolygon(Nucleus n)
-	  * @param n the nucleus
-	  * @return
-	  */
-//	 public static FloatPolygon createPolygon(CellularComponent c){
-//		 return createPolygon(c.getBorderList());
-//	 }
-
-//	 /**
-//	 * Turn a list of border points into a polygon. 
-//	 * @param list the list of border points
-//	 * @return
-//	 */
-//	public static FloatPolygon createPolygon(List<BorderPoint> list){
-//		 float[] xpoints = new float[list.size()+1];
-//		 float[] ypoints = new float[list.size()+1];
-//
-//		 for(int i=0;i<list.size();i++){
-//			 BorderPoint p = list.get(i);
-//			 xpoints[i] = (float) p.getX();
-//			 ypoints[i] = (float) p.getY();
-//		 }
-//		 
-//		 // Ensure the polygon is closed
-//		 xpoints[list.size()] = (float) list.get(0).getX();
-//		 ypoints[list.size()] = (float) list.get(0).getY();
-//
-//		 return new FloatPolygon(xpoints, ypoints);
-//	 }
-	
-	
 	/**
-	 * Turn the border points in a nucleus into a polygon, offset
-	 * to the original positions of the ROI in the source image.
-	 * @param n the nucleus
-	 * @return a polygon
+	 * Measure the smallest angle between the two lines a-b and b-c connecting
+	 * the three given points
+	 * @param a the first line endpoint
+	 * @param b the point connecting the lines
+	 * @param c the second line endpoint
+	 * @return
 	 */
-//	public static FloatPolygon createOriginalPolygon(CellularComponent c){
-//		return createOriginalPolygon(c.getOriginalBorderList(), c.getPosition());
-//
-//	 }
-	
-//	/**
-//	 * Turn a list of border points into a polygon. Offset the points to the original
-//	 * position in a source image. Uses the Nucleus.originalPosition format
-//	 * @param list the list of border points
-//	 * @param originalPosition an array giving the original positions
-//	 * @see Nucleus.getPosition
-//	 * @return
-//	 */
-//	public static FloatPolygon createOriginalPolygon(List<BorderPoint> list, double[] originalPosition){
-//		float[] xpoints = new float[list.size()+1];
-//		float[] ypoints = new float[list.size()+1];
-//
-//		for(int i=0;i<list.size();i++){
-//			BorderPoint p = list.get(i);
-//			xpoints[i] = (float) p.getX() + (float) originalPosition[CellularComponent.X_BASE];
-//			ypoints[i] = (float) p.getY() + (float) originalPosition[CellularComponent.Y_BASE];
-//		}
-//
-//		// Ensure the polygon is closed
-//		xpoints[list.size()] = (float) list.get(0).getX();
-//		ypoints[list.size()] = (float) list.get(0).getY();
-//
-//		return new FloatPolygon(xpoints, ypoints);
-//	}
-	
+	public static double findAngle(XYPoint a, XYPoint b, XYPoint c){
 
-	
-	/*
-	Given three XYPoints, measure the angle a-b-c
-		a   c
-		 \ /
-			b
-	 */
-	public static double findAngleBetweenXYPoints(XYPoint a, XYPoint b, XYPoint c){
-
+		
+		// See https://stackoverflow.com/questions/26076656/calculating-angle-between-two-points-java
+//		double angle1 = Math.atan2(a.getY() - b.getY(), a.getX() - b.getX());
+//	    double angle2 = Math.atan2(c.getY() - b.getY(), c.getX() - b.getX());
+//
+//	    return Math.toDegrees(angle1 - angle2); 
+		
+		
 		float[] xpoints = { (float) a.getX(), (float) b.getX(), (float) c.getX()};
 		float[] ypoints = { (float) a.getY(), (float) b.getY(), (float) c.getY()};
 		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);

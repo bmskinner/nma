@@ -461,7 +461,7 @@ public class CurveRefolder extends AnalysisWorker {
 		for(int i=0;i<n.getBorderLength();i++){
 			XYPoint p = n.getBorderPoint(i);
 			double distance = p.getLengthTo(n.getCentreOfMass());
-			double pAngle = Utils.findAngleBetweenXYPoints( p, n.getCentreOfMass(), new XYPoint(0,-10));
+			double pAngle = Utils.findAngle( p, n.getCentreOfMass(), new XYPoint(0,-10));
 			if(p.getX()<0){
 				pAngle = 360-pAngle;
 			}
