@@ -49,10 +49,7 @@ public class PopulationExporter extends AnalysisWorker {
 		
 		try{
 		
-//			if(useHDF5){
-//				saveAnalysisDatasetToHDF5(getDataset());
-//				return true;
-//			} 
+			fireCooldown();
 
 			if(saveAnalysisDataset(getDataset(), saveFile)){
 				finest("Save was sucessful");        
