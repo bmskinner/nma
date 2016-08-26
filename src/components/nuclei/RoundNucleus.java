@@ -162,33 +162,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 	}
 	
-	public boolean isLocked(){
-		return segsLocked;
-	}
-	
-	/**
-	 * Set if the segments and tags are able to be
-	 * modified
-	 * @param b
-	 */
-	public void setLocked(boolean b){
-		segsLocked = b;
-	}
-	
-	
-	@Override
-	public int getWindowSize(ProfileType type){
-		switch(type){
-			case ANGLE: { 
-				return angleProfileWindowSize;
-			}
-			
-			default:{
-				return Profileable.DEFAULT_PROFILE_WINDOW; // Not needed for DIAMETER and RADIUS
-			}
-		}
-	}
-	
 	/*
 	* Finds the key points of interest around the border
 	* of the Nucleus. Can use several different methods, and 
@@ -235,29 +208,6 @@ public class RoundNucleus extends AbstractCellularComponent
 	    
 	}
 	
-	public void calculateProfiles() {
-		
-		/*
-		 * All these calculations operate on the same border point order
-		 */
-		
-		ProfileCreator creator = new ProfileCreator(this);
-		
-		for(ProfileType type : ProfileType.values()){
-			SegmentedProfile profile = creator.createProfile(type);
-			profileMap.put(type, profile);
-		}
-		
-//		this.profileMap.put(ProfileType.ANGLE, this.calculateAngleProfile());
-//
-//		// calc distances around nucleus through CoM
-//		this.profileMap.put(ProfileType.DIAMETER, this.calculateDistanceProfile());
-//
-//		this.profileMap.put(ProfileType.RADIUS, this.calculateSingleDistanceProfile());
-//		
-//		// By default, the franken profile is the same as the angle profile until corrected
-//		this.profileMap.put(ProfileType.FRANKEN, new SegmentedProfile(this.getProfile(ProfileType.ANGLE)));
-	}
 
 	/*
 		-----------------------
@@ -265,8 +215,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		-----------------------
 	*/
 	
-
-
 
 	public String getImageNameWithoutExtension(){
 
@@ -323,7 +271,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	@Override
 	protected double calculateStatistic(PlottableStatistic stat) {
 		
-		if(stat.getClass().isAssignableFrom(NucleusStatistic.class)){
+		if(stat instanceof NucleusStatistic){
 			return calculateStatistic( (NucleusStatistic) stat);
 		} else {
 			throw new IllegalArgumentException("Statistic type inappropriate for nucleus: "+stat.getClass().getName());
@@ -420,27 +368,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 	}
 
-	
-	public double getWindowProportion(ProfileType type){
-		
-		switch(type){
-			case ANGLE: { 
-				return angleWindowProportion;
-			}
-			
-			default:{
-				return Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION; // Not needed for DIAMETER and RADIUS
-			}
-		}
-	}
-
-	/*
-		-----------------------
-		Protected setters for subclasses
-		-----------------------
-	*/
-	
-
 
 	public void setOutputFolder(String f){
 		this.outputFolder = f;
@@ -456,43 +383,6 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 
 
-//	protected void setAngleProfileWindowSize(int i){
-//		this.angleProfileWindowSize = i;
-//	}
-	
-	/**
-	 * Set the fraction of the perimeter to use to calculate the angle window size
-	 * @param d
-	 */
-	public void setWindowProportion(ProfileType type, double d){
-		if(d<0 || d> 1){
-			throw new IllegalArgumentException("Angle window proportion must be 0-1");
-		}
-		
-		if(segsLocked){
-			return;
-		}
-		
-		if(type.equals(ProfileType.ANGLE)){
-			
-			this.angleWindowProportion = d;
-			
-			double perimeter = this.getStatistic(NucleusStatistic.PERIMETER);
-			double angleWindow = perimeter * d;
-			
-			
-			// calculate profiles
-			this.angleProfileWindowSize = (int) Math.round(angleWindow);
-			finest("Recalculating angle profile");
-			ProfileCreator creator = new ProfileCreator(this);
-			SegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
-			
-			this.profileMap.put(ProfileType.ANGLE, profile);		
-			
-		}
-	}
-
-		
 	public void setSegmentMap(Map<String, Integer> map){
 		if(segsLocked){
 			return;
@@ -501,44 +391,6 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 		
 
-	/*
-		-----------------------
-		Get aggregate values
-		-----------------------
-	*/
-
-//	public int getSignalCount(){
-//		return this.signalCollection.numberOfSignals();
-//	}
-//	
-//	public int getSignalCount(UUID signalGroup){
-//		if(signalCollection.hasSignal(signalGroup)){
-//			return this.signalCollection.numberOfSignals(signalGroup);
-//		} else {
-//			return 0;
-//		}
-//	}
-
-
-	public double getPathLength(ProfileType type) {
-		double pathLength = 0;
-
-		Profile profile = this.getProfile(type);
-		
-		// First previous point is the last point of the profile
-		XYPoint prevPoint = new XYPoint(0,profile.get(this.getBorderLength()-1));
-		 
-		for (int i=0; i<this.getBorderLength();i++ ) {
-				double normalisedX = ((double)i/(double)this.getBorderLength())*100; // normalise to 100 length
-				
-				// We are measuring along the chart of angle vs position
-				// Each median angle value is treated as an XYPoint
-				XYPoint thisPoint = new XYPoint(normalisedX, profile.get(i));
-				pathLength += thisPoint.getLengthTo(prevPoint);
-				prevPoint = thisPoint;
-		}
-		return pathLength;
-	}
 
 	
 	public SignalCollection getSignalCollection(){
@@ -549,19 +401,6 @@ public class RoundNucleus extends AbstractCellularComponent
 	public void updateSignalAngle(UUID channel, int signal, double angle){
 		signalCollection.getSignals(channel).get(signal).setStatistic(SignalStatistic.ANGLE, angle);
 	}
-
-	public BorderPoint getNarrowestDiameterPoint() {
-
-		int index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
-
-		return new BorderPoint(this.getBorderPoint(index));
-	}
-	
-	public double getNarrowestDiameter() {
-		return Arrays.stream(this.getProfile(ProfileType.DIAMETER).asArray()).min().orElse(0);
-	}
-
-
 
 	// do not move this into SignalCollection - it is overridden in RodentSpermNucleus
 	public void calculateSignalAnglesFromPoint(BorderPoint p) {
@@ -613,95 +452,82 @@ public class RoundNucleus extends AbstractCellularComponent
 		return result;
 	}
 
-	/*
-		-----------------------
-		Methods for the new architecture only
-		-----------------------
-	*/
 
-	public SegmentedProfile getProfile(ProfileType type) {
-		if(this.hasProfile(type)){
-			return new SegmentedProfile(this.profileMap.get(type));
+	
+	/**
+	 * Checks if the smoothed array nuclear shape profile has the appropriate
+	 * orientation.Counts the number of points above 180 degrees
+	 * in each half of the array.
+	 * @return 
+	 * @throws Exception
+	 */
+	public boolean isProfileOrientationOK(){
+		int frontPoints = 0;
+		int rearPoints = 0;
+
+		Profile profile = this.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
+
+		int midPoint = (int) (this.getBorderLength()/2) ;
+		for(int i=0; i<this.getBorderLength();i++){ // integrate points over 180
+
+			if(i<midPoint){
+				frontPoints += profile.get(i);
+			}
+			if(i>midPoint){
+				rearPoints  += profile.get(i);
+			}
+		}
+
+		if(frontPoints > rearPoints){ // if the maxIndex is closer to the end than the beginning
+			return true;
+		} else{ 
+			return false;
+		}
+	}
+
+		
+	public void updateSourceFolder(File newFolder) {
+		File oldFile = this.getSourceFile();
+		String oldName = oldFile.getName();
+		File newFile = new File(newFolder+File.separator+oldName);
+		if(newFile.exists()){
+			this.setSourceFile(newFile);
+//			this.setNucleusFolder(new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension()));
 		} else {
-			throw new IllegalArgumentException("Profile type "+type+" is not found in this nucleus");
+			throw new IllegalArgumentException("Cannot find file "+oldName+" in folder "+newFolder.getAbsolutePath());
 		}
+		
+	}
+		
+	
+	public void updateVerticallyRotatedNucleus(){
+		this.verticalNucleus = null;
+		this.getVerticallyRotatedNucleus();
 	}
 	
-	public boolean hasProfile(ProfileType type){
-		return this.profileMap.containsKey(type);
-	}
-
-
-	public SegmentedProfile getProfile(ProfileType type, BorderTagObject tag){
-		
-		// fetch the index of the pointType (the new zero)
-		int pointIndex = this.borderTags.get(tag);
-		
-		SegmentedProfile profile = null;
-		if(this.hasProfile(type)){
+	public Nucleus getVerticallyRotatedNucleus(){
+		if(verticalNucleus==null){
 			
-			// offset the angle profile to start at the pointIndex
-			profile =  new SegmentedProfile(this.getProfile(type).offset(pointIndex));
+			verticalNucleus = this.duplicate();
+			verticalNucleus.alignVertically();			
 			
+			// Ensure all nuclei have overlapping centres of mass
+			verticalNucleus.moveCentreOfMass(new XYPoint(0,0));
+			this.setStatistic(NucleusStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
+			this.setStatistic(NucleusStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
+			
+			double aspect = verticalNucleus.getBounds().getHeight() / verticalNucleus.getBounds().getWidth();
+			this.setStatistic(NucleusStatistic.ASPECT,  aspect);
 		}
-
-//		IJ.log("Nucleus "+this.getNameAndNumber()+" : "+type +" : "+tag+" : "+profile.get(0));
-		return profile;
+		return verticalNucleus;
 	}
 	
-
-	public void setProfile(ProfileType type, SegmentedProfile profile) {
-		if(profile==null){
-			throw new IllegalArgumentException("Error setting nucleus profile: type "+type+" is null");
-		}
-		
-		if(segsLocked){
-			return;
-		}
-		
-		// Replace frankenprofiles completely
-		if(type.equals(ProfileType.FRANKEN)){
-			this.profileMap.put(type, profile);
-		} else { // Otherwise update the segment lists for all other profile types
-
-			for(ProfileType t : profileMap.keySet()){
-				if( ! t.equals(ProfileType.FRANKEN)){
-					this.profileMap.get(type).setSegments(profile.getSegments());
-				}
-			}
-		}
-	}
+	/*
+	 * #############################################
+	 * Methods implementing the Taggable interface
+	 * #############################################
+	 */
 	
-	  /**
-	   * Checks if the smoothed array nuclear shape profile has the appropriate
-	   * orientation.Counts the number of points above 180 degrees
-	   * in each half of the array.
-	   * @return 
-	   * @throws Exception
-	   */
-		public boolean isProfileOrientationOK(){
-			int frontPoints = 0;
-			int rearPoints = 0;
-
-			Profile profile = this.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
-
-			int midPoint = (int) (this.getBorderLength()/2) ;
-			for(int i=0; i<this.getBorderLength();i++){ // integrate points over 180
-
-				if(i<midPoint){
-					frontPoints += profile.get(i);
-				}
-				if(i>midPoint){
-					rearPoints  += profile.get(i);
-				}
-			}
-
-			if(frontPoints > rearPoints){ // if the maxIndex is closer to the end than the beginning
-				return true;
-			} else{ 
-				return false;
-			}
-		}
 	
 	
 	/**
@@ -842,7 +668,150 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	
+	
+	/*
+	 * #############################################
+	 * Methods implementing the Profileable interface
+	 * #############################################
+	 */
+	
+	
+	public boolean isLocked(){
+		return segsLocked;
+	}
+	
+	/**
+	 * Set if the segments and tags are able to be
+	 * modified
+	 * @param b
+	 */
+	public void setLocked(boolean b){
+		segsLocked = b;
+	}
+	
+	
+	@Override
+	public int getWindowSize(ProfileType type){
+		switch(type){
+			case ANGLE: { 
+				return angleProfileWindowSize;
+			}
+			
+			default:{
+				return Profileable.DEFAULT_PROFILE_WINDOW; // Not needed for DIAMETER and RADIUS
+			}
+		}
+	}
+	
+	public double getWindowProportion(ProfileType type){
+		
+		switch(type){
+			case ANGLE: { 
+				return angleWindowProportion;
+			}
+			
+			default:{
+				return Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION; // Not needed for DIAMETER and RADIUS
+			}
+		}
+	}
+	
 
+	public void setWindowProportion(ProfileType type, double d){
+		if(d<0 || d> 1){
+			throw new IllegalArgumentException("Angle window proportion must be 0-1");
+		}
+		
+		if(segsLocked){
+			return;
+		}
+		
+		if(type.equals(ProfileType.ANGLE)){
+			
+			this.angleWindowProportion = d;
+			
+			double perimeter = this.getStatistic(NucleusStatistic.PERIMETER);
+			double angleWindow = perimeter * d;
+			
+			
+			// calculate profiles
+			this.angleProfileWindowSize = (int) Math.round(angleWindow);
+			finest("Recalculating angle profile");
+			ProfileCreator creator = new ProfileCreator(this);
+			SegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
+			
+			this.profileMap.put(ProfileType.ANGLE, profile);		
+			
+		}
+	}
+	
+	
+	public SegmentedProfile getProfile(ProfileType type) {
+		if(this.hasProfile(type)){
+			return new SegmentedProfile(this.profileMap.get(type));
+		} else {
+			throw new IllegalArgumentException("Profile type "+type+" is not found in this nucleus");
+		}
+	}
+	
+	public boolean hasProfile(ProfileType type){
+		return this.profileMap.containsKey(type);
+	}
+
+
+	public SegmentedProfile getProfile(ProfileType type, BorderTagObject tag){
+		
+		// fetch the index of the pointType (the new zero)
+		int pointIndex = this.borderTags.get(tag);
+		
+		SegmentedProfile profile = null;
+		if(this.hasProfile(type)){
+			
+			// offset the angle profile to start at the pointIndex
+			profile =  new SegmentedProfile(this.getProfile(type).offset(pointIndex));
+			
+		}
+
+		return profile;
+	}
+	
+
+	public void setProfile(ProfileType type, SegmentedProfile profile) {
+		if(profile==null){
+			throw new IllegalArgumentException("Error setting nucleus profile: type "+type+" is null");
+		}
+		
+		if(segsLocked){
+			return;
+		}
+		
+		// Replace frankenprofiles completely
+		if(type.equals(ProfileType.FRANKEN)){
+			this.profileMap.put(type, profile);
+		} else { // Otherwise update the segment lists for all other profile types
+
+			for(ProfileType t : profileMap.keySet()){
+				if( ! t.equals(ProfileType.FRANKEN)){
+					this.profileMap.get(type).setSegments(profile.getSegments());
+				}
+			}
+		}
+	}
+	
+	public void calculateProfiles() {
+		
+		/*
+		 * All these calculations operate on the same border point order
+		 */
+		
+		ProfileCreator creator = new ProfileCreator(this);
+		
+		for(ProfileType type : ProfileType.values()){
+			SegmentedProfile profile = creator.createProfile(type);
+			profileMap.put(type, profile);
+		}
+	}
+	
 	public void setSegmentStartLock(boolean lock, UUID segID){
 		if(segID==null){
 			throw new IllegalArgumentException("Requested seg id is null");
@@ -855,91 +824,26 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 	}
 
-//	private SegmentedProfile calculateDistanceProfile() throws Exception {
-//
-//		double[] profile = new double[this.getBorderLength()];
-//			
-//		int index = 0;
-//		Iterator<BorderPoint> it = this.getBorderList().iterator();
-//		while(it.hasNext()){
-//
-//			BorderPoint point = it.next();
-//			BorderPoint opp = findOppositeBorder(point);
-//
-//			profile[index++] = point.getLengthTo(opp); 
-//			
-//		}
-//
-//		return new SegmentedProfile(profile);
-//	}
-//
-//	private SegmentedProfile calculateSingleDistanceProfile() throws Exception{
-//
-//		double[] profile = new double[this.getBorderLength()];
-//		
-//		int index = 0;
-//		Iterator<BorderPoint> it = this.getBorderList().iterator();
-//		while(it.hasNext()){
-//
-//			BorderPoint point = it.next();
-//			profile[index++] = point.getLengthTo(this.getCentreOfMass()); 
-//			
-//		}
-//
-//		return new SegmentedProfile(profile);
-//	}
 
-//	protected SegmentedProfile calculateAngleProfile() {
-//
-//		List<NucleusBorderSegment> segments = null;
-//		
-//		// store segments to reapply later
-//		if(this.hasProfile(ProfileType.ANGLE)){
-//			if(this.getProfile(ProfileType.ANGLE).hasSegments()){
-//				segments = this.getProfile(ProfileType.ANGLE).getSegments();
-//			}
-//		}
-//		
-//
-//		double[] angles = new double[this.getBorderLength()];
-//
-////		for(int i=0; i<this.getBorderLength();i++){
-//		
-//		int index = 0;
-//		Iterator<BorderPoint> it = this.getBorderList().iterator();
-//		while(it.hasNext()){
-//
-//			BorderPoint point = it.next();
-//			BorderPoint pointBefore = point.prevPoint(angleProfileWindowSize);
-//			BorderPoint pointAfter  = point.nextPoint(angleProfileWindowSize);
-//
-//			double angle = Utils.findAngleBetweenXYPoints(pointBefore, point, pointAfter);
-//
-//			// find the halfway point between the first and last points.
-//				// is this within the roi?
-//				// if yes, keep min angle as interior angle
-//				// if no, 360-min is interior
-//			double midX = (pointBefore.getX()+pointAfter.getX())/2;
-//			double midY = (pointBefore.getY()+pointAfter.getY())/2;
-//			
-//			// create a polygon from the border list - we are not storing the polygon directly
-////			FloatPolygon polygon = this.createPolygon();
-//			if(this.createPolygon().contains((float) midX, (float) midY)){
-//			
-////			if(polygon.contains( (float) midX, (float) midY)){
-//				angles[index] = angle;
-//			} else {
-//				angles[index] = 360-angle;
-//			}
-//			index++;
-//		}
-//		SegmentedProfile newProfile = new SegmentedProfile(angles);
-//		if(segments!=null){
-//			newProfile.setSegments(segments);
-//		}
-//		return newProfile;
-//	}
+	public double getPathLength(ProfileType type) {
+		double pathLength = 0;
 
+		Profile profile = this.getProfile(type);
+		
+		// First previous point is the last point of the profile
+		XYPoint prevPoint = new XYPoint(0,profile.get(this.getBorderLength()-1));
+		 
+		for (int i=0; i<this.getBorderLength();i++ ) {
+				double normalisedX = ((double)i/(double)this.getBorderLength())*100; // normalise to 100 length
+				
+				// We are measuring along the chart of angle vs position
+				// Each median angle value is treated as an XYPoint
+				XYPoint thisPoint = new XYPoint(normalisedX, profile.get(i));
+				pathLength += thisPoint.getLengthTo(prevPoint);
+				prevPoint = thisPoint;
+		}
+		return pathLength;
+	}
 
 	public void reverse(){
 		if(segsLocked){
@@ -969,184 +873,29 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 	}
 	
-	public void updateSourceFolder(File newFolder) {
-		File oldFile = this.getSourceFile();
-		String oldName = oldFile.getName();
-		File newFile = new File(newFolder+File.separator+oldName);
-		if(newFile.exists()){
-			this.setSourceFile(newFile);
-//			this.setNucleusFolder(new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension()));
-		} else {
-			throw new IllegalArgumentException("Cannot find file "+oldName+" in folder "+newFolder.getAbsolutePath());
-		}
-		
-	}
-		
-	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\tWriting nucleus");
-		out.defaultWriteObject();
-		finest("\tWrote nucleus");
+
+	public BorderPoint getNarrowestDiameterPoint() {
+
+		int index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
+
+		return new BorderPoint(this.getBorderPoint(index));
 	}
 	
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("\tReading nucleus");
-		
-		in.defaultReadObject();
-
-		Map<BorderTagObject, Integer> newCache = new HashMap<BorderTagObject, Integer>(0);
-
-		Iterator<?> it = borderTags.keySet().iterator();
-
-		while(it.hasNext()){
-			Object tag = it.next();
-			if(tag instanceof BorderTag){
-				fine("Deserialization has no BorderTagObject for "+tag.toString()+", creating");
-
-				newCache.put(new BorderTagObject( (BorderTag) tag), borderTags.get(tag));						
-			}
-
-		}
-
-
-		if( ! newCache.isEmpty()){
-			borderTags = newCache;
-		}
-		
-				
-	    this.verticalNucleus    = null;
-	    updateVerticallyRotatedNucleus(); // force an update
-	    finest("\tRead nucleus");
+	public double getNarrowestDiameter() {
+		return Arrays.stream(this.getProfile(ProfileType.DIAMETER).asArray()).min().orElse(0);
 	}
 
-	@Override
-	public boolean equals(CellularComponent c) {
-		if(c==null){
-			return false;
-		}
-		
-		if(c.getClass()==this.getClass()){
-			if(this.getID().equals(c.getID())){
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			
-			return false;
-			
-		}
-	}
-	
-	
-	
-	
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + angleProfileWindowSize;
-		long temp;
-		temp = Double.doubleToLongBits(angleWindowProportion);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result
-				+ ((borderTags == null) ? 0 : borderTags.hashCode());
-		result = prime * result + nucleusNumber;
-		result = prime * result
-				+ ((outputFolder == null) ? 0 : outputFolder.hashCode());
-		temp = Double.doubleToLongBits(pathLength);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result
-				+ ((profileMap == null) ? 0 : profileMap.hashCode());
-		result = prime * result
-				+ ((segmentList == null) ? 0 : segmentList.hashCode());
-		result = prime * result
-				+ ((segmentTags == null) ? 0 : segmentTags.hashCode());
-		result = prime
-				* result
-				+ ((signalCollection == null) ? 0 : signalCollection.hashCode());
-		return result;
-	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		RoundNucleus other = (RoundNucleus) obj;
-		if (angleProfileWindowSize != other.angleProfileWindowSize)
-			return false;
-		if (Double.doubleToLongBits(angleWindowProportion) != Double
-				.doubleToLongBits(other.angleWindowProportion))
-			return false;
-		if (borderTags == null) {
-			if (other.borderTags != null)
-				return false;
-		} else if (!borderTags.equals(other.borderTags))
-			return false;
-		if (nucleusNumber != other.nucleusNumber)
-			return false;
-		if (outputFolder == null) {
-			if (other.outputFolder != null)
-				return false;
-		} else if (!outputFolder.equals(other.outputFolder))
-			return false;
-		if (Double.doubleToLongBits(pathLength) != Double
-				.doubleToLongBits(other.pathLength))
-			return false;
-		if (profileMap == null) {
-			if (other.profileMap != null)
-				return false;
-		} else if (!profileMap.equals(other.profileMap))
-			return false;
-		if (segmentList == null) {
-			if (other.segmentList != null)
-				return false;
-		} else if (!segmentList.equals(other.segmentList))
-			return false;
-		if (segmentTags == null) {
-			if (other.segmentTags != null)
-				return false;
-		} else if (!segmentTags.equals(other.segmentTags))
-			return false;
-		if (signalCollection == null) {
-			if (other.signalCollection != null)
-				return false;
-		} else if (!signalCollection.equals(other.signalCollection))
-			return false;
-		return true;
-	}
-
-	public void updateVerticallyRotatedNucleus(){
-		this.verticalNucleus = null;
-		this.getVerticallyRotatedNucleus();
-	}
 	
-	public Nucleus getVerticallyRotatedNucleus(){
-		if(verticalNucleus==null){
-			
-			verticalNucleus = this.duplicate();
-			verticalNucleus.alignVertically();			
-			
-			// Ensure all nuclei have overlapping centres of mass
-			verticalNucleus.moveCentreOfMass(new XYPoint(0,0));
-			this.setStatistic(NucleusStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
-			this.setStatistic(NucleusStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
-			
-			double aspect = verticalNucleus.getBounds().getHeight() / verticalNucleus.getBounds().getWidth();
-			this.setStatistic(NucleusStatistic.ASPECT,  aspect);
-		}
-		return verticalNucleus;
-	}
+
 	
 	/*
 	 * #############################################
 	 * Methods implementing the Rotatable interface
 	 * #############################################
 	 */
+	
+	
 	
 	public void alignVertically(){
 		
@@ -1364,9 +1113,19 @@ public class RoundNucleus extends AbstractCellularComponent
 //			}
 		}
 	}
+	
+	
+	
+	/*
+	 * #############################################
+	 * Object methods
+	 * #############################################
+	 */
+	
+	
 		
 	/**
-	 * Fetch the current nucleus log
+	 * Describes the nucleus state
 	 * @return
 	 */
 	public String toString(){
@@ -1378,6 +1137,140 @@ public class RoundNucleus extends AbstractCellularComponent
 		b.append(this.getSignalCollection().toString()+newLine);
 		  
 		return b.toString();
+	}
+	
+	@Override
+	public boolean equals(CellularComponent c) {
+		if(c==null){
+			return false;
+		}
+		
+		if(c.getClass()==this.getClass()){
+			if(this.getID().equals(c.getID())){
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			
+			return false;
+			
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + angleProfileWindowSize;
+		long temp;
+		temp = Double.doubleToLongBits(angleWindowProportion);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result
+				+ ((borderTags == null) ? 0 : borderTags.hashCode());
+		result = prime * result + nucleusNumber;
+		result = prime * result
+				+ ((outputFolder == null) ? 0 : outputFolder.hashCode());
+		temp = Double.doubleToLongBits(pathLength);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result
+				+ ((profileMap == null) ? 0 : profileMap.hashCode());
+		result = prime * result
+				+ ((segmentList == null) ? 0 : segmentList.hashCode());
+		result = prime * result
+				+ ((segmentTags == null) ? 0 : segmentTags.hashCode());
+		result = prime
+				* result
+				+ ((signalCollection == null) ? 0 : signalCollection.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RoundNucleus other = (RoundNucleus) obj;
+		if (angleProfileWindowSize != other.angleProfileWindowSize)
+			return false;
+		if (Double.doubleToLongBits(angleWindowProportion) != Double
+				.doubleToLongBits(other.angleWindowProportion))
+			return false;
+		if (borderTags == null) {
+			if (other.borderTags != null)
+				return false;
+		} else if (!borderTags.equals(other.borderTags))
+			return false;
+		if (nucleusNumber != other.nucleusNumber)
+			return false;
+		if (outputFolder == null) {
+			if (other.outputFolder != null)
+				return false;
+		} else if (!outputFolder.equals(other.outputFolder))
+			return false;
+		if (Double.doubleToLongBits(pathLength) != Double
+				.doubleToLongBits(other.pathLength))
+			return false;
+		if (profileMap == null) {
+			if (other.profileMap != null)
+				return false;
+		} else if (!profileMap.equals(other.profileMap))
+			return false;
+		if (segmentList == null) {
+			if (other.segmentList != null)
+				return false;
+		} else if (!segmentList.equals(other.segmentList))
+			return false;
+		if (segmentTags == null) {
+			if (other.segmentTags != null)
+				return false;
+		} else if (!segmentTags.equals(other.segmentTags))
+			return false;
+		if (signalCollection == null) {
+			if (other.signalCollection != null)
+				return false;
+		} else if (!signalCollection.equals(other.signalCollection))
+			return false;
+		return true;
+	}
+	
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		finest("\tWriting nucleus");
+		out.defaultWriteObject();
+		finest("\tWrote nucleus");
+	}
+	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		finest("\tReading nucleus");
+		
+		in.defaultReadObject();
+
+		Map<BorderTagObject, Integer> newCache = new HashMap<BorderTagObject, Integer>(0);
+
+		Iterator<?> it = borderTags.keySet().iterator();
+
+		while(it.hasNext()){
+			Object tag = it.next();
+			if(tag instanceof BorderTag){
+				fine("Deserialization has no BorderTagObject for "+tag.toString()+", creating");
+
+				newCache.put(new BorderTagObject( (BorderTag) tag), borderTags.get(tag));						
+			}
+
+		}
+
+
+		if( ! newCache.isEmpty()){
+			borderTags = newCache;
+		}
+		
+				
+	    this.verticalNucleus    = null;
+	    updateVerticallyRotatedNucleus(); // force an update
+	    finest("\tRead nucleus");
 	}
 	
 	

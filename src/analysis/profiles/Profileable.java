@@ -70,6 +70,17 @@ public interface Profileable {
 	 */
 	SegmentedProfile getProfile(ProfileType type);
 	
+	/**
+	 * Update the profile of the given type. Since only franken profiles are 
+	 * not calculated internally, the other profiles just replace the segment list.
+	 * This will replace the segment list on all other profile types, to keep
+	 * the segmentation pattern consistent.
+	 * @param type
+	 * @param profile
+	 * @throws Exception
+	 */
+	void setProfile(ProfileType type, SegmentedProfile profile) throws Exception;
+	
 	
 	/**
 	 * Get the window size for generating the specificed profile
@@ -82,14 +93,14 @@ public interface Profileable {
 	/**
 	 * Get the fraction of the perimeter to use for calculating the window size
 	 * in pixels
-	 * @return
+	 * @return a fraction between 0 and 1
 	 */
 	double getWindowProportion(ProfileType type);
 	
 	/**
 	 * Set the fraction of the perimeter to use for calculating the window size
 	 * in pixels. 
-	 * @param d Proportion from 0 to 1
+	 * @param d Proportion from 0 to 1, or Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION if not previously set
 	 */
 	public void setWindowProportion(ProfileType type, double d);
 	
@@ -112,18 +123,7 @@ public interface Profileable {
 	 */
 	XYPoint getCentreOfMass();
 	
-	
-	/**
-	 * Update the profile of the given type. Since only franken profiles are 
-	 * not calculated internally, the other profiles just replace the segment list.
-	 * This will replace the segment list on all other profile types, to keep
-	 * the segmentation pattern consistent.
-	 * @param type
-	 * @param profile
-	 * @throws Exception
-	 */
-	void setProfile(ProfileType type, SegmentedProfile profile) throws Exception;
-	
+		
 	/**
 	 * Check if the segments and tags are able to be
 	 * modified
