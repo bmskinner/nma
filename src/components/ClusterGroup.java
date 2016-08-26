@@ -113,6 +113,22 @@ public class ClusterGroup implements Serializable, Loggable {
 	}
 	
 	/**
+	 * Remove the selected dataset from the cluster group
+	 * @param dataset
+	 */
+	public void removeDataset(AnalysisDataset dataset){
+		removeDataset(dataset.getUUID());
+	}
+	
+	/**
+	 * Remove the selected dataset id from the cluster group
+	 * @param dataset
+	 */
+	public void removeDataset(UUID id){
+		this.ids.remove(id);
+	}
+	
+	/**
 	 * Get the options used to make this cluster group
 	 * @return
 	 */

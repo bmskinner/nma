@@ -267,6 +267,10 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 */
 	private PopulationTreeTableNode addTreeTableChildNodes(AnalysisDataset dataset){
 		
+		if(dataset==null){
+			throw new IllegalArgumentException("Dataset is null when generating population table nodes");
+		}
+		
 		UUID id = dataset.getUUID();
 		if( ! DatasetListManager.getInstance().hasDataset(id)){
 			finer("Adding missing dataset to list manager");
@@ -279,6 +283,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		Set<UUID> clusterIDs = new HashSet<UUID>(); // track the child datasets in clusters, so they are not added twice
 		
 		for(ClusterGroup group : dataset.getClusterGroups()){
+			fine("Making node for cluster group "+group.getName());
 			PopulationTreeTableNode clusterGroupNode = new PopulationTreeTableNode(group);
 			category.add(clusterGroupNode);
 			
@@ -528,61 +533,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		}
 		return index;
 	}
-	
-	/**
-	 * Check that the name of the dataset is not already in the list of datasets
-	 * If the name is used, adjust and check again
-	 * @param name the suggested name
-	 * @return a valid name
-	 */
-//	private String checkName(String name, UUID id){
-//
-//		String result = name;
-//		finest("Testing name: "+name);
-//
-//		if(this.populationNames.containsKey(name)){
-//			
-//			// Check that the dataset with the same name is not the dataset in question
-//			if(!this.populationNames.get(name).equals(id)){
-//
-//				finest("Found existing dataset with different UUID: "+name);
-//
-//				Pattern pattern = Pattern.compile("_(\\d+)$");
-//				Matcher matcher = pattern.matcher(name);
-//
-//				int digit = 0;
-//
-//				while (matcher.find()) {
-//
-//					finest("Matched regex: "+matcher.toString());
-//					finest("Matched on "+matcher.group(1));
-//
-//					digit = Integer.valueOf(matcher.group(1));
-//					finest("Found "+name+": changing to "+digit);
-//
-//					if(digit>0){
-//						digit++;
-//						finest("Found "+name+": changing to "+digit);
-//						name = matcher.replaceFirst("_"+digit);
-//					}
-//
-//				}
-//
-//				if(digit == 0) {
-//					name = name+"_1";
-//					finest("No matches - appending _1 to name");
-//				}
-//				finest("Rechacking name");
-//				result = checkName(name, id);
-//			} else {
-//				finest("No other datasets with name: "+name);
-//			}
-//		} else {
-//			finest("No matches to "+name+": returning");
-//		}
-//		return result;
-//	}
-	
+		
 	/**
 	 * Rename an existing dataset and update the population list.
 	 * @param dataset the dataset to rename

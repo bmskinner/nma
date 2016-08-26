@@ -199,6 +199,11 @@ public class AnalysisDataset implements Serializable, Loggable {
 	 */
 	private void removeChildCollection(UUID id){
 		this.childCollections.remove(id);
+		for(ClusterGroup g : clusterGroups){
+			if(g.hasDataset(id)){
+				g.removeDataset(id);
+			}
+		}
 	}
 	
 	
@@ -652,11 +657,7 @@ public class AnalysisDataset implements Serializable, Loggable {
 	 * @return
 	 */
 	public boolean hasClusterGroup(ClusterGroup group){
-		if(this.clusterGroups.contains(group)){
-			return true;
-		} else {
-			return false;
-		}
+		return clusterGroups.contains(group);
 	}
 	
 	/**
