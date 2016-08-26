@@ -1038,9 +1038,11 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	 and recalculate.
    */
   public void updateVerticalNuclei(){
-	  for(Nucleus n : this.getNuclei()){
+	  
+	  getNuclei().parallelStream().forEach( n -> {
 		  n.updateVerticallyRotatedNucleus();
-	  }
+	  });
+	  
   }
 
   public boolean updateSourceFolder(File newFolder) {

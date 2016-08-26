@@ -22,6 +22,7 @@ import stats.NucleusStatistic;
 import stats.SignalStatistic;
 import gui.GlobalOptions;
 import gui.components.ColourSelecter;
+
 import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -41,9 +42,11 @@ import charting.options.TableOptions;
 import analysis.AnalysisDataset;
 import components.AbstractCellularComponent;
 import components.Cell;
+import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
+import components.nuclear.BorderPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
@@ -136,10 +139,12 @@ public class CellDatasetCreator implements Loggable {
 			for(BorderTagObject tag : BorderTagObject.values()){
 				fieldNames.add(tag);
 				if(n.hasBorderTag(tag)){
+
+					BorderPoint p = n.getBorderPoint(tag);
 					
+					int index = n.getOffsetBorderIndex(BorderTagObject.REFERENCE_POINT, n.getBorderIndex(tag));
 					
-					int index = AbstractCellularComponent.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTagObject.REFERENCE_POINT), n.getBorderLength());
-					rowData.add(index);
+					rowData.add(p.toString()+" at profile index "+index);
 				} else {
 					rowData.add("N/A");
 				}

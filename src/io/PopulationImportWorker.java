@@ -86,8 +86,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 				
 				dataset.setDebugFile(logFile);
 				fine("Updated log file location");
-				
-				
+
 				// If rodent sperm, check if the TOP_VERTICAL and BOTTOM_VERTICAL 
 				// points have been set, and if not, add them
 				if(dataset.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
@@ -106,6 +105,13 @@ public class PopulationImportWorker extends AnalysisWorker {
 					}
 					
 				}
+				
+				// Generate vertically rotated nuclei for all imported datasets
+				dataset.getCollection().updateVerticalNuclei();
+				for(AnalysisDataset child : dataset.getAllChildDatasets()){
+					child.getCollection().updateVerticalNuclei();
+				}
+				
 				
 				return true;
 				

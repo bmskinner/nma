@@ -507,17 +507,27 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	public Nucleus getVerticallyRotatedNucleus(){
 		if(verticalNucleus==null){
-			
+//			log(this.getNameAndNumber()+": Creating vertical nucleus");
+//			log(this.getNameAndNumber()+": Duplicating this nucleus");
 			verticalNucleus = this.duplicate();
+			//TODO - at this point the nucleus is at 0,0
+//			log(this.getNameAndNumber()+": This CoM - "+this.getCentreOfMass());
+//			log(this.getNameAndNumber()+": Vert CoM - "+verticalNucleus.getCentreOfMass());
+//			
+//			log(this.getNameAndNumber()+": This OP - "+this.getBorderPoint(BorderTagObject.ORIENTATION_POINT));
+//			log(this.getNameAndNumber()+": Vert OP - "+verticalNucleus.getBorderPoint(BorderTagObject.ORIENTATION_POINT));
+			
 			verticalNucleus.alignVertically();			
 			
-			// Ensure all nuclei have overlapping centres of mass
+			// Ensure all vertical nuclei have overlapping centres of mass
+//			log(this.getNameAndNumber()+": Moving vertical nucleus CoM to 0,0");
 			verticalNucleus.moveCentreOfMass(new XYPoint(0,0));
 			this.setStatistic(NucleusStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
 			this.setStatistic(NucleusStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
 			
 			double aspect = verticalNucleus.getBounds().getHeight() / verticalNucleus.getBounds().getWidth();
 			this.setStatistic(NucleusStatistic.ASPECT,  aspect);
+//			log(this.getNameAndNumber()+": Vert CoM now - "+verticalNucleus.getCentreOfMass());
 		}
 		return verticalNucleus;
 	}
@@ -996,9 +1006,13 @@ public class RoundNucleus extends AbstractCellularComponent
 		// Calculate the current angle between the point and a vertical line
 		
 		XYPoint currentBottom = new XYPoint(getCentreOfMass().getX(), getMinY());
+//		String state = "";
 		
 		double currentAngle = Utils.findAngle(currentBottom, getCentreOfMass(), bottomPoint);
-				
+//		log(this.getNameAndNumber()+": Initial angle - "+currentAngle);
+//		log(this.getNameAndNumber()+": Cur - "+currentBottom.toString());
+//		log(this.getNameAndNumber()+": CoM - "+getCentreOfMass().toString());
+//		log(this.getNameAndNumber()+": New - "+bottomPoint.toString());
 		/*
 		 * 
 		 * The nucleus is currently rotated such that the desired bottom point (D) makes
@@ -1016,24 +1030,23 @@ public class RoundNucleus extends AbstractCellularComponent
 		 *   360 - a     a            360-a      a
 		 */
 		
-		// TODO - these calculations are perfectly wrong. They result in the bottomPoint anywhere
-		// except the bottom
-		
-		if(bottomPoint.isLeftOf(currentBottom) && bottomPoint.isAbove(getCentreOfMass())){
-			
-			angleToRotate = 360 - currentAngle;
-		}
-		
-		if(bottomPoint.isLeftOf(currentBottom) && bottomPoint.isBelow(getCentreOfMass())){
-			
-			angleToRotate = 360 - currentAngle;
+		// These calculations are perfectly wrong. They result in the bottomPoint anywhere
+		// except the bottom. The working values from trial and error are below
+				
+		if(bottomPoint.isLeftOf(currentBottom)){
+	
+			angleToRotate = currentAngle - 90; // Tested working
+//			state = "Right of CoM";
 		}
 		
 		if(bottomPoint.isRightOf(currentBottom)){
 			
-			angleToRotate = currentAngle;
+			angleToRotate = 360 - currentAngle - 90; // Tested working
+//			state = "Right of CoM";
 		}
 				
+//		log(this.getNameAndNumber()+": State - "+state);
+//		log(this.getNameAndNumber()+": Rotation angle - "+angleToRotate);
 		this.rotate(angleToRotate);
 	}
 	
@@ -1271,7 +1284,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 				
 	    this.verticalNucleus    = null;
-	    updateVerticallyRotatedNucleus(); // force an update
 	    finest("\tRead nucleus");
 	}
 	
