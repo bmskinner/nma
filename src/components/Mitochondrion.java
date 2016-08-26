@@ -20,6 +20,8 @@ package components;
 
 import java.io.IOException;
 
+import components.nuclear.BorderPoint;
+
 public class Mitochondrion extends AbstractCellularComponent {
 
 	private static final long serialVersionUID = 1L;
@@ -42,6 +44,12 @@ public class Mitochondrion extends AbstractCellularComponent {
 		finest("Reading mitochondrion");
 		in.defaultReadObject();
 		finest("Read mitochondrion"); 
+	}
+
+	@Override
+	public void alignVertically() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

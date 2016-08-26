@@ -269,6 +269,37 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	@Override
+	public void moveCentreOfMass(XYPoint centreOfMass) {
+		
+		double xOffset = getCentreOfMass().getX() - centreOfMass.getX();
+		double yOffset = getCentreOfMass().getY() - centreOfMass.getY();
+		
+		for(UUID id : signalCollection.getSignalGroupIDs()){
+			
+			signalCollection.getSignals(id).parallelStream().forEach( s -> {
+				
+//				XYPoint oldCoM = s.getCentreOfMass();
+//				XYPoint newCoM = new XYPoint(oldCoM.getX()+xOffset, oldCoM.getY()-yOffset);
+//				
+//				log(this.getNameAndNumber()+": Old CoM - "+oldCoM);
+				log(this.getNameAndNumber()+": Offsetting signal - "+xOffset+", "+yOffset);
+				
+				s.offset(xOffset, yOffset);
+//				s.moveCentreOfMass(newCoM);
+//				XYPoint q = new XYPoint(p.getX()+getPosition()[CellularComponent.X_BASE],
+//						p.getY()+getPosition()[CellularComponent.Y_BASE]);
+				
+				// Irritatingly, I set the signal border positions differently to nucleus border
+				// positions, and now they need reuniting. TODO
+//				s.offset(xOffset+getPosition()[CellularComponent.X_BASE], 
+//						yOffset+getPosition()[CellularComponent.Y_BASE]);
+			});
+
+		}
+		super.moveCentreOfMass(centreOfMass);
+	}
+	
+	@Override
 	protected double calculateStatistic(PlottableStatistic stat) {
 		
 		if(stat instanceof NucleusStatistic){
@@ -903,7 +934,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	 */
 	
 	
-	
+	@Override
 	public void alignVertically(){
 		
 		boolean useTVandBV = true;
@@ -995,132 +1026,36 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 	}
 	
-	/**
-	 * Rotate the nucleus so that the given point is directly 
-	 * below the centre of mass
-	 * @param bottomPoint
-	 */
-	public void rotatePointToBottom(BorderPoint bottomPoint){
-
-		double angleToRotate 	= 0;
-		
-		// Calculate the current angle between the point and a vertical line
-		
-		XYPoint currentBottom = new XYPoint(getCentreOfMass().getX(), getMinY());
-//		String state = "";
-		
-		double currentAngle = Utils.findAngle(currentBottom, getCentreOfMass(), bottomPoint);
-//		log(this.getNameAndNumber()+": Initial angle - "+currentAngle);
-//		log(this.getNameAndNumber()+": Cur - "+currentBottom.toString());
-//		log(this.getNameAndNumber()+": CoM - "+getCentreOfMass().toString());
-//		log(this.getNameAndNumber()+": New - "+bottomPoint.toString());
-		/*
-		 * 
-		 * The nucleus is currently rotated such that the desired bottom point (D) makes
-		 * an angle <currentAngle> against the line between the centre of mass (M) and 
-		 * the current bottom point (C). The possible configurations are shown below:
-		 * 
-		 *    D            D
-		 *     \          /
-		 *      M        M               M       M
-		 *      |        |             / |       | \
-		 *      C        C            D  C       C  D
-		 *      
-		 *      
-		 *   Clockwise   Clock        Clock     Clock
-		 *   360 - a     a            360-a      a
-		 */
-		
-		// These calculations are perfectly wrong. They result in the bottomPoint anywhere
-		// except the bottom. The working values from trial and error are below
-				
-		if(bottomPoint.isLeftOf(currentBottom)){
-	
-			angleToRotate = currentAngle - 90; // Tested working
-//			state = "Right of CoM";
-		}
-		
-		if(bottomPoint.isRightOf(currentBottom)){
-			
-			angleToRotate = 360 - currentAngle - 90; // Tested working
-//			state = "Right of CoM";
-		}
-				
-//		log(this.getNameAndNumber()+": State - "+state);
-//		log(this.getNameAndNumber()+": Rotation angle - "+angleToRotate);
-		this.rotate(angleToRotate);
-	}
 	
 		
-	/**
-	 * Rotate the nucleus by the given amount around the centre of mass
-	 * @param angle
-	 */
+	@Override
 	public void rotate(double angle){
 		
+		super.rotate(angle);
+		
 		if(angle!=0){
-
-			for(int i=0; i<this.getBorderLength(); i++){
-				XYPoint p = this.getBorderPoint(i);
-
-
-				// get the distance from this point to the centre of mass
-				double distance = p.getLengthTo(this.getCentreOfMass());
-
-				// get the angle between the centre of mass (C), the point (P) and a
-				// point directly under the centre of mass (V)
-
-				/*
-				 *      C
-				 *      |\  
-				 *      V P
-				 * 
-				 */
-				double oldAngle = Utils.findAngle( p, 
-						this.getCentreOfMass(), 
-						new XYPoint(this.getCentreOfMass().getX(),-10));
-
-
-				if(p.getX()<this.getCentreOfMass().getX()){
-					oldAngle = 360-oldAngle;
-				}
-
-				double newAngle = oldAngle + angle;
-				double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
-				double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
-
-				this.updateBorderPoint(i, newX, newY);
-			}
 			
-			// Also update signal locations
-			// TODO: rotates, but does not get location correct. Is there an offset?
-//			for (int signalGroup : this.getSignalGroups()){
-//				for(NuclearSignal s : this.getSignals(signalGroup)){
-//					for(int i = 0; i<s.getBorderSize(); i++){
-//						XYPoint p = s.getBorderPoint(i);
-//
-//
-//						// get the distance from this point to the centre of mass
-//						double distance = p.getLengthTo(this.getCentreOfMass());
-//						
-//						double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, 
-//								this.getCentreOfMass(), 
-//								new XYPoint(this.getCentreOfMass().getX(),-10));
-//
-//
-//						if(p.getX()<this.getCentreOfMass().getX()){
-//							oldAngle = 360-oldAngle;
-//						}
-//
-//						double newAngle = oldAngle + angle;
-//						double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
-//						double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
-//
-//						s.updateBorderPoint(i, newX, newY);
-//					}
-//					
-//				}
-//			}
+			for(UUID id : signalCollection.getSignalGroupIDs()){
+				
+				signalCollection.getSignals(id).parallelStream().forEach( s -> {
+					s.rotate(angle);
+					
+					// get the new signal centre of mass based on the nucleus rotation
+					XYPoint p = getPositionAfterRotation(s.getCentreOfMass(), angle);
+					
+					// The signals must be offset again against the original position
+					// of the nucleus
+					XYPoint q = new XYPoint(p.getX()+getPosition()[CellularComponent.X_BASE],
+							p.getY()+getPosition()[CellularComponent.Y_BASE]);
+					
+					
+					log(this.getNameAndNumber()+": Old signal CoM - "+s.getCentreOfMass());
+					log(this.getNameAndNumber()+": New signal CoM - "+p);
+
+					s.moveCentreOfMass(p);
+				});
+								
+			}
 		}
 	}
 	

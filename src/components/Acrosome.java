@@ -44,4 +44,10 @@ public class Acrosome extends  AbstractCellularComponent {
 		finest("\tRead acrosome"); 
 	}
 
+	@Override
+	public void alignVertically() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

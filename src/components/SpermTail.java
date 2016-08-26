@@ -137,4 +137,10 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 			finest("\tRead sperm tail"); 
 		}
 
+		@Override
+		public void alignVertically() {
+			// TODO Auto-generated method stub
+			
+		}
+
 }

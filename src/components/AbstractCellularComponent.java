@@ -57,7 +57,7 @@ import stats.Stats;
 import utility.Constants;
 import utility.Utils;
 
-public class AbstractCellularComponent implements CellularComponent, Serializable, Loggable {
+public abstract class AbstractCellularComponent implements CellularComponent, Serializable, Loggable, Rotatable {
 
 	private static final long serialVersionUID = 1L;
 	private final UUID id;
@@ -365,7 +365,8 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 
 
 	public void setCentreOfMass(XYPoint centreOfMass) {
-		this.centreOfMass = centreOfMass;
+//		this.centreOfMass = centreOfMass;
+		moveCentreOfMass(centreOfMass);
 	}
 	
 	/*
@@ -592,7 +593,8 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 
 			this.updateBorderPoint(i, x, y );
 		}
-		this.setCentreOfMass(point);
+//		this.setCentreOfMass(point);
+		this.centreOfMass = point;
 		
 		// Update the bounding rectangle
 		this.boundingRectangle = this.createPolygon().getBounds();
@@ -956,6 +958,121 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		}
 		out.writeBoolean(false);
 		finest("\tWrote abstract cellular component");	
+	}
+	
+	/*
+	 * #############################################
+	 * Methods implementing the Rotatable interface
+	 * #############################################
+	 */
+	
+	/**
+	 * Rotate the nucleus so that the given point is directly 
+	 * below the centre of mass
+	 * @param bottomPoint
+	 */
+	public void rotatePointToBottom(XYPoint bottomPoint){
+
+		double angleToRotate 	= 0;
+		
+		// Calculate the current angle between the point and a vertical line
+		
+		XYPoint currentBottom = new XYPoint(getCentreOfMass().getX(), getMinY());
+//		String state = "";
+		
+		double currentAngle = Utils.findAngle(currentBottom, getCentreOfMass(), bottomPoint);
+//		log(this.getNameAndNumber()+": Initial angle - "+currentAngle);
+//		log(this.getNameAndNumber()+": Cur - "+currentBottom.toString());
+//		log(this.getNameAndNumber()+": CoM - "+getCentreOfMass().toString());
+//		log(this.getNameAndNumber()+": New - "+bottomPoint.toString());
+		/*
+		 * 
+		 * The nucleus is currently rotated such that the desired bottom point (D) makes
+		 * an angle <currentAngle> against the line between the centre of mass (M) and 
+		 * the current bottom point (C). The possible configurations are shown below:
+		 * 
+		 *    D            D
+		 *     \          /
+		 *      M        M               M       M
+		 *      |        |             / |       | \
+		 *      C        C            D  C       C  D
+		 *      
+		 *      
+		 *   Clockwise   Clock        Clock     Clock
+		 *   360 - a     a            360-a      a
+		 */
+		
+		// These calculations are perfectly wrong. They result in the bottomPoint anywhere
+		// except the bottom. The working values from trial and error are below
+				
+		if(bottomPoint.isLeftOf(currentBottom)){
+	
+			angleToRotate = currentAngle - 90; // Tested working
+//			state = "Right of CoM";
+		}
+		
+		if(bottomPoint.isRightOf(currentBottom)){
+			
+			angleToRotate = 360 - currentAngle - 90; // Tested working
+//			state = "Right of CoM";
+		}
+				
+//		log(this.getNameAndNumber()+": State - "+state);
+//		log(this.getNameAndNumber()+": Rotation angle - "+angleToRotate);
+		this.rotate(angleToRotate);
+	}
+	
+	public abstract void alignVertically();
+
+	@Override
+	public void rotate(double angle) {
+		if(angle!=0){
+
+			for(int i=0; i<getBorderLength(); i++){
+				XYPoint p = getBorderPoint(i);
+
+				XYPoint newPoint = getPositionAfterRotation(p, angle);
+
+				updateBorderPoint(i, newPoint.getX(), newPoint.getY());
+			}
+		}
+				
+	}
+	
+	/**
+	 * Get the position of the given point in this object after the object
+	 * has been rotated by the given amount
+	 * @param p the point to move
+	 * @param angle the angle in degrees
+	 * @return
+	 */
+	protected XYPoint getPositionAfterRotation(XYPoint p, double angle){
+		
+		// get the distance from the point to the centre of mass
+		double distance = p.getLengthTo(this.getCentreOfMass());
+
+		// get the angle between the centre of mass (C), the point (P) and a
+		// point directly under the centre of mass (V)
+
+		/*
+		 *      C
+		 *      |\  
+		 *      V P
+		 * 
+		 */
+		double oldAngle = Utils.findAngle( p, 
+				this.getCentreOfMass(), 
+				new XYPoint(this.getCentreOfMass().getX(),-10));
+
+
+		if(p.getX()<this.getCentreOfMass().getX()){
+			oldAngle = 360-oldAngle;
+		}
+
+		double newAngle = oldAngle + angle;
+		double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
+		double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
+		return new XYPoint(newX, newY);
 	}
 	
 }

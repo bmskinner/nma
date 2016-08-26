@@ -1348,6 +1348,9 @@ private static NucleusDatasetCreator instance = null;
 		
 		Nucleus nucleus = cell.getNucleus();
 		
+		log(nucleus.getNameAndNumber()+": X_base: "+nucleus.getPosition()[CellularComponent.X_BASE]);
+		log(nucleus.getNameAndNumber()+": Y_base: "+nucleus.getPosition()[CellularComponent.Y_BASE]);
+		
 		for(UUID signalGroup : nucleus.getSignalCollection().getSignalGroupIDs()){
 			
 			SignalGroup group = dataset.getCollection().getSignalGroup(signalGroup);
@@ -1366,8 +1369,13 @@ private static NucleusDatasetCreator instance = null;
 
 					int i =0;
 					for(XYPoint p : signal.getBorderList()){
+						
+						
 						xpoints[i] = p.getX() - nucleus.getPosition()[CellularComponent.X_BASE];
 						ypoints[i] = p.getY() - nucleus.getPosition()[CellularComponent.Y_BASE];
+						
+						log(nucleus.getNameAndNumber()+": "+xpoints[i]+", "+ypoints[i]);
+
 						i++;
 					}
 					double[][] data = { xpoints, ypoints };

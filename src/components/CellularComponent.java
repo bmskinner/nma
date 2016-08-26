@@ -189,7 +189,7 @@ public interface CellularComponent {
 	public void setScale(double scale);
 	
 	/**
-	 * Get the position of the centre of mass of the nucleus
+	 * Get the position of the centre of mass of the component
 	 * @return
 	 */
 	public XYPoint getCentreOfMass();

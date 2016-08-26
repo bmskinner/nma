@@ -20,9 +20,9 @@ package components.nuclear;
 
 import ij.gui.Roi;
 import stats.SignalStatistic;
-
 import java.io.IOException;
 import java.io.Serializable;
+
 import components.AbstractCellularComponent;
 import components.generic.XYPoint;
 
@@ -50,6 +50,7 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 	    to the measured area, get the radius for that circle
 		 */
 		this.setStatistic(SignalStatistic.RADIUS,  Math.sqrt(area/Math.PI));
+		
 		
 		this.setCentreOfMass(centreOfMass);
 	}
@@ -84,5 +85,11 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 		finest("\t\tWriting nuclear signal");
 		out.defaultWriteObject();
 		finest("\t\tWrote nuclear signal");
+	}
+
+	@Override
+	public void alignVertically() {
+		return;
+		
 	}
 }

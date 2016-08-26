@@ -107,12 +107,13 @@ public interface Rotatable extends Loggable {
 		this.rotate(angleToRotate);
 	}
 	
+	
 	/**
 	 * Rotate the object so that the given point is directly 
 	 * below the centre of mass
 	 * @param bottomPoint
 	 */
-	public void rotatePointToBottom(BorderPoint bottomPoint);
+	public void rotatePointToBottom(XYPoint bottomPoint);
 	
 	/**
 	 * Rotate the object by the given amount around the centre of mass
