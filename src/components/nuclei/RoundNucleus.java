@@ -813,6 +813,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		ProfileCreator creator = new ProfileCreator(this);
 		
 		for(ProfileType type : ProfileType.values()){
+			
 			SegmentedProfile profile = creator.createProfile(type);
 			profileMap.put(type, profile);
 		}

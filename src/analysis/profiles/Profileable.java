@@ -153,11 +153,9 @@ public interface Profileable {
 	void reverse();
 	
 	/**
-	 * Calculate a new angle profile with the given window size. It
-	 * will replace the existing angle profile. It takes the point, 
-	 * a point <windowSize> behind and <windowSize> ahead, and calculates
-	 * the interior angle between them.
-	 * @param angleProfileWindowSize the window size
+	 * Calculate new profiles for the object. Angle profiles are calculated
+	 * with the internal window size - change this with setWindowSize(ProfileType.ANGLE). 
+	 * It will replace the existing profiles.
 	 * @throws Exception 
 	 */
 	void calculateProfiles() throws Exception;

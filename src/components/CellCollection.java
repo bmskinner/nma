@@ -101,7 +101,7 @@ public class CellCollection implements Serializable, Loggable {
     private Map<UUID, SignalGroup> signalGroups = new HashMap<UUID, SignalGroup>(0);
 
 	
-	private transient boolean isRefolding = false;
+	private volatile transient boolean isRefolding = false;
 	
 	private RuleSetCollection ruleSets = new RuleSetCollection();
 	
@@ -1074,11 +1074,11 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 		return ok;
 	}
   
-  public boolean isRefolding(){
+  public synchronized boolean isRefolding(){
 	  return this.isRefolding;
   }
   
-  public void setRefolding(boolean b){
+  public synchronized void setRefolding(boolean b){
 	  this.isRefolding = b;
   }
   

@@ -86,7 +86,8 @@ public class CurveRefolder extends AnalysisWorker {
 	 */
 	public CurveRefolder(AnalysisDataset dataset, CurveRefoldingMode refoldMode) throws Exception {
 		super(dataset);
-//		this.doneSignal = doneSignal;
+
+		dataset.getCollection().setRefolding(true);
 		this.setProgressTotal(refoldMode.maxIterations());
 
 		collection = dataset.getCollection();
@@ -132,49 +133,18 @@ public class CurveRefolder extends AnalysisWorker {
 
 			
 			if(collection.getNucleusCount()>1){
-			
-				collection.setRefolding(true);
-				// smooth the candidate nucleus to remove jagged edges
-				this.smoothCurve(0); // smooth with no offset
-				this.smoothCurve(1); // smooth with intercalated offset
-
-				// carry out the refolding
-				this.refoldCurve();
-
-				// smooth the refolded nucleus to remove jagged edges
-				this.smoothCurve(0); // smooth with no offset
-				this.smoothCurve(1); // smooth with offset 1 to intercalate
+				
+				smoothCurve(); // smooth the candidate nucleus to remove jagged edges
+				refoldCurve(); // carry out the refolding
+				smoothCurve(); // smooth the refolded nucleus to remove jagged edges
 			}
 						
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
 			// orient refolded nucleus to put tail at the bottom
 			
-			boolean orientByTV = true;
-			
-			if(refoldNucleus.hasBorderTag(BorderTagObject.TOP_VERTICAL) && refoldNucleus.hasBorderTag(BorderTagObject.BOTTOM_VERTICAL)){
-				
-				if(refoldNucleus.getBorderIndex(BorderTagObject.TOP_VERTICAL) == -1){
-					orientByTV = false;
-				}
-				
-				if(refoldNucleus.getBorderIndex(BorderTagObject.BOTTOM_VERTICAL) == -1){
-					orientByTV = false;
-				}
-				
-			} else {
-				orientByTV = false;
-			}
-			
-			if(orientByTV){
-				finer("Calculating rotation angle via TopVertical");
-				refoldNucleus.alignPointsOnVertical(refoldNucleus.getBorderTag(BorderTagObject.TOP_VERTICAL), refoldNucleus.getBorderTag(BorderTagObject.BOTTOM_VERTICAL));
-			} else {
-				finer("Calculating rotation angle via OrientationPoint");
-				refoldNucleus.rotatePointToBottom(refoldNucleus.getBorderTag(BorderTagObject.ORIENTATION_POINT));
-
-			}
-			
+			refoldNucleus.alignVertically();
+					
 			
 			// if rodent sperm, put tip on left if needed
 			if(collection.getNucleusType().equals(NucleusType.RODENT_SPERM)){
@@ -183,7 +153,7 @@ public class CurveRefolder extends AnalysisWorker {
 				}
 			}
 
-			refoldNucleus.updateVerticallyRotatedNucleus();
+//			refoldNucleus.updateVerticallyRotatedNucleus();
 			// Update the bounding box to reflect the rotated nucleus position
 			Rectangle bounds = refoldNucleus.getVerticallyRotatedNucleus().createPolygon().getBounds();
 			double newWidth  = bounds.getWidth();
@@ -240,6 +210,11 @@ public class CurveRefolder extends AnalysisWorker {
 
 	public void setMode(CurveRefoldingMode s){
 		this.mode = s;
+	}
+	
+	private void smoothCurve() throws Exception {
+		this.smoothCurve(0); // smooth with no offset
+		this.smoothCurve(1); // smooth with intercalated offset
 	}
 	
 	/**
@@ -331,6 +306,7 @@ public class CurveRefolder extends AnalysisWorker {
 
 		// Get the median distance between each border point in the refold candidate nucleus.
 		// Use this to establish the max and min distances a point can migrate from its neighbours
+		// This is the 'habitable zone' a point can occupy
 		double medianDistanceBetweenPoints = refoldNucleus.getMedianDistanceBetweenPoints();
 		double minDistance = medianDistanceBetweenPoints * 0.5;
 		double maxDistance = medianDistanceBetweenPoints * 1.2;
@@ -358,7 +334,6 @@ public class CurveRefolder extends AnalysisWorker {
 	 */
 	private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore, Nucleus testNucleus) throws Exception{
 //		// make all changes to a fresh nucleus before buggering up the real one
-//		RoundNucleus testNucleus = new RoundNucleus( (RoundNucleus)refoldNucleus);
 
 		double score = testNucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
 
@@ -388,11 +363,9 @@ public class CurveRefolder extends AnalysisWorker {
 			// Update the test nucleus
 			testNucleus.updateBorderPoint(index, newPoint);
 
-
+			finer("Testing profiles");
 			testNucleus.calculateProfiles();
 
-			// Measure the new profile & compare
-			//						testNucleus.setProfile(ProfileType.REGULAR, testNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize()));
 
 			// Get the new score
 			score = testNucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
@@ -400,14 +373,14 @@ public class CurveRefolder extends AnalysisWorker {
 			// Apply the change if better fit
 			if(score < similarityScore) {
 				refoldNucleus.updateBorderPoint(index, newPoint);
+				
+				finer("Re-calculating profiles");
 				refoldNucleus.calculateProfiles();
 
-				//							testNucleus.setProfile(ProfileType.REGULAR, refoldNucleus.getProfile(ProfileType.REGULAR));
 				similarityScore = score;
 			}
 		}
 
-//		testNucleus = null;
 		return similarityScore;
 		
 	}

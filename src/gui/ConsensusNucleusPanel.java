@@ -414,17 +414,9 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			consensusChartPanel.restoreAutoBounds();
 						
 		} else {
-			
-			if(collection.isRefolding()){
-				runRefoldingButton.setVisible(false);
-			} else {
-				runRefoldingButton.setVisible(true);
-			}
-			
-			runRefoldingButton.setVisible(true);
+
+			runRefoldingButton.setVisible( !collection.isRefolding() );
 			offsetsPanel.setVisible(false);
-			
-			
 		}
 	}
 	

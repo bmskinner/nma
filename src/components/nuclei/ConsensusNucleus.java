@@ -21,7 +21,9 @@ package components.nuclei;
 import java.io.IOException;
 import java.io.Serializable;
 
+import analysis.profiles.ProfileCreator;
 import components.generic.ProfileType;
+import components.generic.SegmentedProfile;
 import components.nuclear.NucleusType;
 
 /**
@@ -45,12 +47,19 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 		return this.type;
 	}
 	
-//	@Override
-//	public void calculateProfiles() throws Exception{
-//
-//		this.profileMap.put(ProfileType.ANGLE, this.calculateAngleProfile());
-//
-//	}
+	@Override
+	public void calculateProfiles() {
+		
+		/*
+		 * The CurveRefolder currently only uses the angle profile
+		 * so ignore the others to speed refolding
+		 */
+		ProfileCreator creator = new ProfileCreator(this);
+
+		SegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
+		profileMap.put(ProfileType.ANGLE, profile);
+
+	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		finest("\tReading consensus nucleus");
