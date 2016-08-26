@@ -69,6 +69,12 @@ public interface CellularComponent {
 	public double[] getPosition();
 	
 		
+	/**
+	 * An equality check that relies solely on the component
+	 * ids.
+	 * @param c
+	 * @return true if the components have the same ID
+	 */
 	public boolean equals(CellularComponent c);
 	
 	/**

@@ -680,11 +680,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		return segsLocked;
 	}
 	
-	/**
-	 * Set if the segments and tags are able to be
-	 * modified
-	 * @param b
-	 */
+
 	public void setLocked(boolean b){
 		segsLocked = b;
 	}
@@ -1139,23 +1135,29 @@ public class RoundNucleus extends AbstractCellularComponent
 		return b.toString();
 	}
 	
+
 	@Override
 	public boolean equals(CellularComponent c) {
+		
+		if(this==c){
+			return true;
+		}
+		
 		if(c==null){
 			return false;
 		}
 		
-		if(c.getClass()==this.getClass()){
-			if(this.getID().equals(c.getID())){
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			
+		if(this.getClass()!=c.getClass()){
 			return false;
-			
 		}
+		
+		if( ! this.getID().equals(c.getID())){
+			return false;
+		}
+
+		return true;
+			
+		
 	}
 
 	@Override
