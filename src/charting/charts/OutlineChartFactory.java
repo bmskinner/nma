@@ -375,16 +375,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		hash.put(hash.size(), "Nucleus"); // add to the first free entry
 		datasetHash.put(datasetHash.size(), nucleus);
 		finest("Created nucleus outline");
-
-		/*
-		 * If the cell has a rodent sperm nucleus, get the hook and hump rois
-		 */
-		if(cell.getNucleus().getClass()==RodentSpermNucleus.class){
-			XYDataset hookHump = NucleusDatasetCreator.getInstance().createNucleusHookHumpOutline(cell);
-			hash.put(hash.size(), "HookHump"); // add to the first free entry
-			datasetHash.put(datasetHash.size(), hookHump);
-		}
-		
+	
 		
 		// get the index tags
 		XYDataset tags = NucleusDatasetCreator.getInstance().createNucleusIndexTags(cell);
@@ -393,25 +384,21 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		finest("Created border index tags");
 		
 		// get the signals datasets and add each group to the hash
-		// Only display the signal outlines if the rotation is ACTUAL;
-		// TODO: the RoundNucleus.rotate() is not working with signals 
-//		if(rotateMode.equals(RotationMode.ACTUAL)){
-			finest("Rotation mode is actual, fetching signals");
-			if(cell.getNucleus().getSignalCollection().hasSignal()){
-				List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.getInstance().createSignalOutlines(cell, dataset);
+		finest("Rotation mode is actual, fetching signals");
+		if(cell.getNucleus().getSignalCollection().hasSignal()){
+			List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.getInstance().createSignalOutlines(cell, dataset);
 
-				for(XYDataset d : signalsDatasets){
+			for(XYDataset d : signalsDatasets){
 
-					String name = "default_0";
-					for (int i = 0; i < d.getSeriesCount(); i++) {
-						name = (String) d.getSeriesKey(i);	
-					}
-					UUID signalGroup = getSignalGroupFromLabel(name);
-					hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
-					datasetHash.put(datasetHash.size(), d);
+				String name = "default_0";
+				for (int i = 0; i < d.getSeriesCount(); i++) {
+					name = (String) d.getSeriesKey(i);	
 				}
+				UUID signalGroup = getSignalGroupFromLabel(name);
+				hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
+				datasetHash.put(datasetHash.size(), d);
 			}
-//		}
+		}
 
 		// get tail datasets if present
 		if(cell.hasTail()){
@@ -448,30 +435,16 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					Color colour = ColourSelecter.getColor(colourIndex);
 					plot.getRenderer().setSeriesPaint(i, colour);
 				}
-				
-				/*
-				 * Hook and hump for rodent sperm
-				 */
-				if(hash.get(key).equals("HookHump")){
-					
-					if(showhookHump){
-						String name = (String) plot.getDataset(key).getSeriesKey(i);
-						// Colour the hook blue, the hump green
-						Color color = name.equals("Hump") ? Color.GREEN : Color.BLUE;
-						plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(5));
-						plot.getRenderer(key).setSeriesPaint(i, color);
-						plot.getRenderer(key).setSeriesVisibleInLegend(i, true);
-					}
-					
-				}
-				
+								
 				/*
 				 * Border tags
 				 */
 				
 				if(hash.get(key).equals("Tags")){
 					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
+
 					String name = plot.getDataset(key).getSeriesKey(i).toString().replace("Tag_", "");
+					
 					
 					if(name.equals(BorderTag.ORIENTATION_POINT.toString())){
 						plot.getRenderer(key).setSeriesPaint(i, Color.BLUE);
