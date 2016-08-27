@@ -92,7 +92,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	}
 	
 	/**
-	 * Create an empty chart
+	 * Create an empty chart to display when no datasets are selected
 	 * @return
 	 */
 	public JFreeChart makeEmptyChart(ProfileType type){
@@ -104,16 +104,19 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return a chart
 	 */
 	private JFreeChart makeEmptyProfileChart(ProfileType type){
-		JFreeChart chart = ChartFactory.createXYLineChart(null,
-				"Position", type.getLabel(), null);
 		
+		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
+
+		plot.getDomainAxis().setLabel("Position");
 		plot.getDomainAxis().setRange(0,100);
+		
+		plot.getRangeAxis().setLabel(type.toString());
 		
 		if(type.getDimension().equals(StatisticDimension.ANGLE)){
 			plot.getRangeAxis().setRange(0,360);
+			plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
 		}
-		plot.setBackgroundPaint(Color.WHITE);
 		return chart;
 	}
 	
@@ -160,7 +163,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		Nucleus n = options.getCell().getNucleus();
 		
 		XYDataset  ds 	 = NucleusDatasetCreator.getInstance().createSegmentedProfileDataset(n, options.getType());
-		JFreeChart chart = makeProfileChart(ds, n.getBorderLength(), options.getSwatch(), options.getType());
+		JFreeChart chart = makeProfileChart(ds, n.getBorderLength(), options.getType());
 		
 		XYPlot plot = chart.getXYPlot();
 				
@@ -276,8 +279,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				length = (int) collection.getMaxProfileLength();
 			}
 
-			ColourSwatch swatch = options.getSwatch();
-			chart = makeProfileChart(ds, length, swatch, options.getType());
+			chart = makeProfileChart(ds, length, options.getType());
 
 			// mark the reference and orientation points
 
@@ -314,7 +316,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
 			}
 		} else {
-			chart = makeProfileChart(null, 100, ColourSwatch.REGULAR_SWATCH, options.getType());
+			chart = makeProfileChart(null, 100, options.getType());
 		}
 		return chart;
 	}
@@ -338,19 +340,23 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				   		.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN)
 				   		.size();
 				
-		JFreeChart chart = ChartFactory.createXYLineChart(null,
-				                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
-				                false);
-//		JFreeChart chart = makeProfileChart(null, length, list.get(0).getSwatch());
 		
+		JFreeChart chart = this.makeEmptyChart(options.getType());
 		XYPlot plot = chart.getXYPlot();
+		
+//		JFreeChart chart = ChartFactory.createXYLineChart(null,
+//				                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
+//				                false);
+////		JFreeChart chart = makeProfileChart(null, length, list.get(0).getSwatch());
+//		
+//		XYPlot plot = chart.getXYPlot();
 		
 		// the default is to use an x range of 100, for a normalised chart
 		plot.getDomainAxis().setRange(0,length);
 
-		// always set the y range to 360 degrees
-		plot.getRangeAxis().setRange(0,360);
-		plot.setBackgroundPaint(Color.WHITE);
+//		// always set the y range to 360 degrees
+//		plot.getRangeAxis().setRange(0,360);
+//		plot.setBackgroundPaint(Color.WHITE);
 
 		// the 180 degree line
 		plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
@@ -449,28 +455,16 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param ds the profile dataset
 	 * @return a chart
 	 */
-	private static JFreeChart makeProfileChart(XYDataset ds, int xLength, ColourSwatch swatch, ProfileType type) {
+	private JFreeChart makeProfileChart(XYDataset ds, int xLength, ProfileType type) {
 
 
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-						"Position", type.getLabel(), ds, PlotOrientation.VERTICAL, true, true,
-						false);
-
-
-
+		JFreeChart chart = makeEmptyProfileChart(type);
 		XYPlot plot = chart.getXYPlot();
+		plot.setDataset(ds);
 
 		// the default is to use an x range of 100, for a normalised chart
 		plot.getDomainAxis().setRange(0,xLength);
 
-		// always set the y range to 360 degrees
-		if(type.getDimension().equals(StatisticDimension.ANGLE)){
-			plot.getRangeAxis().setRange(0,360);
-			// the 180 degree line
-			plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
-		}
-		plot.setBackgroundPaint(Color.WHITE);
 		StandardXYToolTipGenerator tooltip = new StandardXYToolTipGenerator();
 		plot.getRenderer().setBaseToolTipGenerator(tooltip);
 
@@ -653,12 +647,10 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	private JFreeChart makeSingleVariabilityChart(ChartOptions options) throws Exception {
+	private JFreeChart makeSingleVariabilityChart(ChartOptions options) {
 		XYDataset ds = NucleusDatasetCreator.getInstance().createIQRVariabilityDataset(options);
-
-		ColourSwatch swatch = options.getSwatch();
 		
-		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, 100, swatch, options.getType());
+		JFreeChart chart = makeProfileChart(ds, 100, options.getType());
 		XYPlot plot = chart.getXYPlot();
 		plot.getRangeAxis().setLabel("IQR");
 		plot.getRangeAxis().setAutoRange(true);
@@ -709,15 +701,16 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart makeMultiVariabilityChart(ChartOptions options) throws Exception {
 		XYDataset ds = NucleusDatasetCreator.getInstance().createIQRVariabilityDataset(options);
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-				                "Position", "IQR", ds, PlotOrientation.VERTICAL, true, true,
-				                false);
-
+		
+		JFreeChart chart = this.createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
+		plot.setDataset(ds);
+		
 		plot.getDomainAxis().setRange(0,100);
+		plot.getDomainAxis().setLabel("Position");;
+		
 		plot.getRangeAxis().setAutoRange(true);
-		plot.setBackgroundPaint(Color.WHITE);
+		plot.getRangeAxis().setLabel("IQR");
 
 		for (int j = 0; j < ds.getSeriesCount(); j++) {
 			plot.getRenderer().setSeriesVisibleInLegend(j, false);

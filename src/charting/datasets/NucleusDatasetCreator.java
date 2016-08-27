@@ -666,10 +666,24 @@ private static NucleusDatasetCreator instance = null;
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createIQRVariabilityDataset(ChartOptions options) throws Exception{
-
+	public XYDataset createIQRVariabilityDataset(ChartOptions options) {
 		
 		if(options.isSingleDataset()){
+			
+			return createSingleIQRVariabilityDataset(options);
+			
+		} else {
+			
+			return createMultiIQRVariabilityDataset(options);
+		}
+	}
+	
+	private XYDataset createSingleIQRVariabilityDataset(ChartOptions options) {
+		
+		XYDataset ds = new DefaultXYDataset();
+		
+		try {
+
 			CellCollection collection = options.firstDataset().getCollection();
 
 			Profile profile = collection.getProfileCollection(options.getType()).getIQRProfile(options.getTag());
@@ -677,12 +691,20 @@ private static NucleusDatasetCreator instance = null;
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(options.getType())
 					.getSegmentedProfile(options.getTag())
 					.getOrderedSegments();
-			
-			XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0);	
-			return ds;
-		} else {
+
+			ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0);	
+		} catch(Exception e){
+			error("Error creating single dataset variability data", e);
+		}
+		return ds;
+	}
+	
+	private XYDataset createMultiIQRVariabilityDataset(ChartOptions options) {
+
+		DefaultXYDataset ds = new DefaultXYDataset();
+
+		try {
 			int i = 0;
-			DefaultXYDataset ds = new DefaultXYDataset();
 			for(AnalysisDataset dataset : options.getDatasets()){
 				CellCollection collection = dataset.getCollection();
 
@@ -692,10 +714,12 @@ private static NucleusDatasetCreator instance = null;
 				ds.addSeries("Profile_"+i+"_"+collection.getName(), data);
 				i++;
 			}
-			return ds;
+		} catch(Exception e){
+			error("Error creating multi dataset variability data", e);
 		}
-		
+		return ds;
 	}
+	
 	
 	public XYDataset createFrankenSegmentDataset(ChartOptions options) throws Exception{
 		return createFrankenSegmentDataset(options.firstDataset().getCollection(),
@@ -742,7 +766,6 @@ private static NucleusDatasetCreator instance = null;
 		int profileCount = 0;
 		
 		for(Nucleus n : collection.getNuclei()){
-//		for(Profile angles : collection.getProfileCollection(ProfileType.FRANKEN).getNucleusProfiles(point)){
 
 			Profile angles = n.getProfile(ProfileType.FRANKEN); // do not offset, the offsets for a nucleus do not match a frankenprofile
 			double[] xArray = xpoints.asArray();

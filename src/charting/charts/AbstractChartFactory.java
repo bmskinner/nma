@@ -27,6 +27,7 @@ import logging.Loggable;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 
@@ -41,6 +42,12 @@ public abstract class AbstractChartFactory implements Loggable {
 	protected static final int DEFAULT_EMPTY_RANGE = 10;
 	
 	
+	/**
+	 * Create an empty chart appropriate for the factory chart
+	 * type - e.g. a category chart for a boxplot factory, or
+	 * an XY chart for a scatter factory
+	 * @return
+	 */
 	public abstract JFreeChart makeEmptyChart();
 	
 	
@@ -85,11 +92,8 @@ public abstract class AbstractChartFactory implements Loggable {
 	}
 	
 	public JFreeChart makeErrorChart(){
-		JFreeChart chart = ChartFactory.createXYLineChart(null,
-				null, null, null); 
-		
+		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
-		plot.setBackgroundPaint(Color.WHITE);
 		
 		plot.getDomainAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
 		plot.getRangeAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
@@ -102,6 +106,22 @@ public abstract class AbstractChartFactory implements Loggable {
 			}
 		}
 		
+		return chart;
+	}
+	
+	/**
+	 * Create a new XY Line Chart, with vertical orientation,
+	 * and set the background to white
+	 * @return
+	 */
+	protected JFreeChart createBaseXYChart(){
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+						null, null, null, PlotOrientation.VERTICAL, true, true,
+						false);
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.WHITE);
 		return chart;
 	}
 		

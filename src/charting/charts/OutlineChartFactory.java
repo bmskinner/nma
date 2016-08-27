@@ -335,13 +335,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			return ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
 		}
 		
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-						null, null, null, PlotOrientation.VERTICAL, true, true,
-						false);
-
+		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
-		plot.setBackgroundPaint(Color.WHITE);
+		
 		plot.getRangeAxis().setInverted(true);
 		
 		
@@ -690,13 +686,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart createSingleDatasetVerticalNucleiChart(ChartOptions options) throws Exception{
 		
-		JFreeChart chart = ChartFactory.createXYLineChart(null,
-						null, null, null, PlotOrientation.VERTICAL, true, true,
-						false);
-		
-
+		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
-		plot.setBackgroundPaint(Color.WHITE);
 		
 		plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
 		plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
@@ -802,12 +793,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart createMultipleDatasetVerticalNucleiChart(ChartOptions options) throws Exception{
 		
-		JFreeChart chart = ChartFactory.createXYLineChart(null,
-						null, null, null, PlotOrientation.VERTICAL, true, true,
-						false);
-
+		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
-		plot.setBackgroundPaint(Color.WHITE);
 		
 		plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
 		plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, ChartComponents.PROFILE_STROKE));
@@ -855,15 +842,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	public JFreeChart createMeshChart(NucleusMesh mesh, double log2Ratio, ChartOptions options) throws Exception{
 		
 		NucleusMeshXYDataset dataset = NucleusDatasetCreator.getInstance().createNucleusMeshEdgeDataset(mesh);
-		
-//		log(dataset.toString());
 
-		JFreeChart chart = ChartFactory.createXYLineChart(null,
-				null, null, null, PlotOrientation.VERTICAL, true, true,
-				false);
-
+		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
-		plot.setBackgroundPaint(Color.WHITE);
 		
 
 		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
