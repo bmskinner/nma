@@ -148,7 +148,9 @@ public class NucleusAnnotator {
 
 		ip.setLineWidth(1);
 		ip.setColor(Color.MAGENTA);
-		BorderPoint narrow1 = n.getNarrowestDiameterPoint();
+		
+		int minIndex = n.getProfile(ProfileType.DIAMETER).getIndexOfMin();
+		BorderPoint narrow1 = n.getBorderPoint(minIndex);
 		BorderPoint narrow2 = n.findOppositeBorder(narrow1);
 		ip.drawLine(narrow1.getXAsInt(), narrow1.getYAsInt(), narrow2.getXAsInt(), narrow2.getYAsInt());
 

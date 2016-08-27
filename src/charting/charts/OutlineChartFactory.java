@@ -395,7 +395,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		// get the signals datasets and add each group to the hash
 		// Only display the signal outlines if the rotation is ACTUAL;
 		// TODO: the RoundNucleus.rotate() is not working with signals 
-		if(rotateMode.equals(RotationMode.ACTUAL)){
+//		if(rotateMode.equals(RotationMode.ACTUAL)){
 			finest("Rotation mode is actual, fetching signals");
 			if(cell.getNucleus().getSignalCollection().hasSignal()){
 				List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.getInstance().createSignalOutlines(cell, dataset);
@@ -411,7 +411,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					datasetHash.put(datasetHash.size(), d);
 				}
 			}
-		}
+//		}
 
 		// get tail datasets if present
 		if(cell.hasTail()){

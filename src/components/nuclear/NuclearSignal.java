@@ -26,12 +26,12 @@ import java.io.Serializable;
 import components.AbstractCellularComponent;
 import components.generic.XYPoint;
 
-/*
-  -----------------------
-  NUCLEUS SIGNAL CLASS
-  -----------------------
-  Contains the variables for storing a signal within the nucleus
-*/  
+/**
+ * A NuclearSignal is a region within a nucleus of interest, such as a chromosome paint. 
+ * It is detected from an image, and thus implements CellularComponent
+ * @author ben
+ *
+ */
 public class NuclearSignal extends AbstractCellularComponent implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -62,15 +62,24 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 	public NuclearSignal(NuclearSignal n){
 		super(n);
 
-		this.closestNuclearBorderPoint = n.getClosestBorderPoint();
+		this.closestNuclearBorderPoint = n.closestNuclearBorderPoint;
 
 	}	
 
+	/**
+	 * Get the index of the closest point in the nuclear 
+	 * periphery to this signal
+	 * @return
+	 */
 	public int getClosestBorderPoint(){
 		return this.closestNuclearBorderPoint;
 	}
 
-
+	/**
+	 * Set the index of the closest point in the nuclear 
+	 * periphery to this signal
+	 * @return
+	 */
 	public void setClosestBorderPoint(int p){
 		this.closestNuclearBorderPoint = p;
 	}

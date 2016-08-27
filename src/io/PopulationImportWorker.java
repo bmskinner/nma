@@ -23,8 +23,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.UUID;
+
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.XYPoint;
 import components.nuclear.NucleusType;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
@@ -106,6 +109,13 @@ public class PopulationImportWorker extends AnalysisWorker {
 					
 				}
 				
+				// Correct signal border locations from older versions for all imported datasets
+				updateSignalPositions(dataset);
+				for(AnalysisDataset child : dataset.getAllChildDatasets()){
+					updateSignalPositions(child);
+				}
+				
+
 				// Generate vertically rotated nuclei for all imported datasets
 				dataset.getCollection().updateVerticalNuclei();
 				for(AnalysisDataset child : dataset.getAllChildDatasets()){
@@ -131,7 +141,37 @@ public class PopulationImportWorker extends AnalysisWorker {
 	}
 	
 
-	
+	/**
+	 * In older versions of the program, signal border positions were stored differently 
+	 * to the CoM. This needs correcting, as it causes errors in rotating signals.
+	 * The CoM is relative to the nucleus, but the border list is relative to the image.
+	 * Adjust the border to bring it back in line with the CoM.
+	 * @param dataset
+	 */
+	private void updateSignalPositions(AnalysisDataset dataset){
+		dataset.getCollection().getNuclei().parallelStream().forEach( n -> {
+			
+			if(n.getSignalCollection().hasSignal()){
+				
+				for(UUID id : n.getSignalCollection().getSignalGroupIDs()){
+					
+					n.getSignalCollection().getSignals(id).parallelStream().forEach( s -> {
+						
+						if( ! s.containsPoint(s.getCentreOfMass())){
+						
+							for(int i=0; i<s.getBorderLength();i++){
+								XYPoint offset = s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
+								s.updateBorderPoint(i, offset);
+							}
+						}
+						
+					});
+				}
+				
+			}
+			
+		});
+	}
 
 	
 	/**

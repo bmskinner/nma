@@ -179,6 +179,10 @@ public class XYPoint  implements Serializable, Loggable {
 	  return x>p.x;
   }
   
+  public XYPoint offset(double x, double y){
+	  return new XYPoint(this.x+x, this.y+y);
+  }
+  
   /**
    * Tests if the two points overlap with
    * double precision

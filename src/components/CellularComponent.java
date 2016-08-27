@@ -27,8 +27,6 @@ import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
-import analysis.profiles.Profileable;
-import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;

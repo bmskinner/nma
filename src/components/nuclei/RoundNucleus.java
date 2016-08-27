@@ -271,28 +271,16 @@ public class RoundNucleus extends AbstractCellularComponent
 	@Override
 	public void moveCentreOfMass(XYPoint centreOfMass) {
 		
-		double xOffset = getCentreOfMass().getX() - centreOfMass.getX();
-		double yOffset = getCentreOfMass().getY() - centreOfMass.getY();
+		double xOffset = centreOfMass.getX() - getCentreOfMass().getX();
+		double yOffset = centreOfMass.getY() - getCentreOfMass().getY();
 		
 		for(UUID id : signalCollection.getSignalGroupIDs()){
 			
 			signalCollection.getSignals(id).parallelStream().forEach( s -> {
 				
-//				XYPoint oldCoM = s.getCentreOfMass();
-//				XYPoint newCoM = new XYPoint(oldCoM.getX()+xOffset, oldCoM.getY()-yOffset);
-//				
-//				log(this.getNameAndNumber()+": Old CoM - "+oldCoM);
-				log(this.getNameAndNumber()+": Offsetting signal - "+xOffset+", "+yOffset);
+//				log(this.getNameAndNumber()+": Offsetting signal - "+xOffset+", "+yOffset);
 				
 				s.offset(xOffset, yOffset);
-//				s.moveCentreOfMass(newCoM);
-//				XYPoint q = new XYPoint(p.getX()+getPosition()[CellularComponent.X_BASE],
-//						p.getY()+getPosition()[CellularComponent.Y_BASE]);
-				
-				// Irritatingly, I set the signal border positions differently to nucleus border
-				// positions, and now they need reuniting. TODO
-//				s.offset(xOffset+getPosition()[CellularComponent.X_BASE], 
-//						yOffset+getPosition()[CellularComponent.Y_BASE]);
 			});
 
 		}
@@ -923,7 +911,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		return Arrays.stream(this.getProfile(ProfileType.DIAMETER).asArray()).min().orElse(0);
 	}
 
-
 	
 
 	
@@ -1035,24 +1022,18 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		if(angle!=0){
 			
+//			log(this.getNameAndNumber()+": Rotating signals");
+			
 			for(UUID id : signalCollection.getSignalGroupIDs()){
 				
 				signalCollection.getSignals(id).parallelStream().forEach( s -> {
-					s.rotate(angle);
 					
+					s.rotate(angle);
+										
 					// get the new signal centre of mass based on the nucleus rotation
 					XYPoint p = getPositionAfterRotation(s.getCentreOfMass(), angle);
-					
-					// The signals must be offset again against the original position
-					// of the nucleus
-					XYPoint q = new XYPoint(p.getX()+getPosition()[CellularComponent.X_BASE],
-							p.getY()+getPosition()[CellularComponent.Y_BASE]);
-					
-					
-					log(this.getNameAndNumber()+": Old signal CoM - "+s.getCentreOfMass());
-					log(this.getNameAndNumber()+": New signal CoM - "+p);
-
-					s.moveCentreOfMass(p);
+//					
+					s.moveCentreOfMass(p);					
 				});
 								
 			}

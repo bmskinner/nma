@@ -19,40 +19,25 @@
 
 package analysis.profiles;
 
-import ij.process.FloatPolygon;
-
-import java.util.List;
 import java.util.UUID;
 
+import components.CellularComponent;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
-import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
 
 /**
  * Object implementing this interface are able to be
- * profiled for morphological analysis
+ * profiled for morphological analysis. This extends the 
+ * CellularComponent interface; thus anything implementing
+ * Profileable will have a border list and associated methods
  * @author bms41
  *
  */
-public interface Profileable {
+public interface Profileable extends CellularComponent {
 
-	static final int DEFAULT_PROFILE_WINDOW = 15;
+	static final int    DEFAULT_PROFILE_WINDOW = 15;
 	static final double DEFAULT_PROFILE_WINDOW_PROPORTION = 0.05;
-	
-	/**
-	 * Get a copy of the component border points in the border list
-	 * @return
-	 */
-	List<BorderPoint> getBorderList();
-	
-	
-	/**
-	 * Get the number of points in the border list
-	 * @return
-	 */
-	int getBorderLength();
-	
+		
 	
 	/**
 	 * Check if the object has a profile of the given type
@@ -103,27 +88,7 @@ public interface Profileable {
 	 * @param d Proportion from 0 to 1, or Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION if not previously set
 	 */
 	public void setWindowProportion(ProfileType type, double d);
-	
-	/**
-	 * Create a float polygon from the border points of the object
-	 * @return
-	 */
-	FloatPolygon createPolygon();
-	
-	/**
-	 * Find the point directly opposite the given point
-	 * through the centre of mass of the object
-	 * @return
-	 */
-	BorderPoint findOppositeBorder(BorderPoint p);
-	
-	/**
-	 * Get the centre of mass of the object
-	 * @return
-	 */
-	XYPoint getCentreOfMass();
-	
-		
+			
 	/**
 	 * Check if the segments and tags are able to be
 	 * modified
@@ -146,9 +111,8 @@ public interface Profileable {
 	void setSegmentStartLock(boolean lock, UUID segID);
 
 	/**
-	 * Reverse the angle profile of the nucleus. Also reverses the distance
+	 * Reverse the angle profile of the object. Also reverses the distance
 	 * profile, the border list and updates the border tags to the new positions
-	 * @throws Exception
 	 */
 	void reverse();
 	
@@ -164,23 +128,7 @@ public interface Profileable {
 	 * Calculate the distance from point to point around the 
 	 * periphery of the nucleus.
 	 * @return
-	 * @throws Exception
 	 */
 	double getPathLength(ProfileType type);
-	
-	/**
-	 * Get the narrowest diameter through the centre of mass in pixels
-	 * @return
-	 * @throws Exception 
-	 */
-	public double getNarrowestDiameter();
-	
-	/**
-	 *  Find the point with the narrowest diameter through the CoM
-	 *  using the distance profile
-	 * @return
-	 * @throws Exception 
-	 */
-	public BorderPoint getNarrowestDiameterPoint();
-	
+		
 }

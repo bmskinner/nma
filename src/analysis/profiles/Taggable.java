@@ -28,7 +28,9 @@ import components.nuclear.BorderPoint;
 
 /**
  * Objects implementing this interface can have BorderTags assigned
- * to points around their periphery
+ * to points around their periphery. These points are linked to
+ * index positions within the various profiles of the Profileable
+ * interface.
  * @author bms41
  *
  */
