@@ -27,12 +27,38 @@ public class CellViewModel {
 		}
 	}
 	
+	/**
+	 * Swap a cell with a new version of the same cell. Used in 
+	 * the resegmentation dialog to update the active cell without
+	 * triggering a view update before the dialog closes.
+	 * @param c the cell. Must have the same ID as the existing cell.
+	 */
+	public void swapCell(Cell c){
+		if(c==null || c.getId().equals(cell.getId())){
+			this.cell = c;
+			component = null; // component cannot be carried over
+			clearChartCache();
+		}
+	}
+	
 	public Cell getCell(){
 		return cell;
 	}
 	
 	public boolean hasCell(){
 		return cell!=null;
+	}
+	
+	/**
+	 * Cause all charts with the current active cell
+	 * to be redrawn
+	 */
+	public void clearChartCache(){
+		for(AbstractCellDetailPanel d : views){
+			d.clearCellCharts();
+		}
+		updateViews();
+		
 	}
 	
 	public void updateComponent(){

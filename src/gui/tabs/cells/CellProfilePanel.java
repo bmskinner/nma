@@ -40,11 +40,13 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 	// according to https://stackoverflow.com/questions/15863178/memory-leaking-on-jdialog-closing
 	// Hence, only keep one dialog, and prevent multiple copies spawning by loading the active cell
 	// in when needed
-	private CellResegmentationDialog resegDialog = new CellResegmentationDialog();
+	private final CellResegmentationDialog resegDialog;
 	
 	
-	public CellProfilePanel(CellViewModel model) {
+	public CellProfilePanel(final CellViewModel model) {
 		super(model); // lol
+		
+		resegDialog = new CellResegmentationDialog(model);
 
 		this.setLayout(new BorderLayout());
 		this.setBorder(null);

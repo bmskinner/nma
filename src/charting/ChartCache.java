@@ -20,6 +20,7 @@ package charting;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,7 @@ import logging.Loggable;
 import org.jfree.chart.JFreeChart;
 
 import charting.options.ChartOptions;
+import components.Cell;
 import analysis.AnalysisDataset;
 
 /*
@@ -121,5 +123,41 @@ public class ChartCache implements Cache, Loggable {
 		}
 	}
 	
-	
+
+	public synchronized void clear(Cell cell){
+		if(cell==null){
+			return;
+		}
+		
+		// Make a list of the options that need removed
+		// These are the options that contain the datasets in the list
+//		Set<ChartOptions> toRemove = new HashSet<ChartOptions>();
+
+		Iterator<ChartOptions> it = chartMap.keySet().iterator();
+
+		while(it.hasNext()){
+			ChartOptions op = it.next();
+			if(op.getCell()==cell){
+
+				chartMap.remove(op);
+			}
+		}
+		
+//		// Find the options with the datasets
+//		for(ChartOptions op : this.chartMap.keySet()){
+//			if(op.getCell()==cell){
+//				
+//					toRemove.add(op);
+//				
+//			}
+//		}
+//		
+//		
+//
+//		//Remove the options with the datasets
+//		for(ChartOptions op : toRemove){
+//			finest("Clearing options");
+//			chartMap.remove(op);
+//		}
+	}
 }

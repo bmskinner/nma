@@ -24,6 +24,7 @@ import gui.GlobalOptions;
 import gui.RotationMode;
 import gui.ThreadManager;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.tabs.cells.CellViewModel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -100,10 +101,13 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 	
 	private boolean hasChanged = false;
 	
-	public CellResegmentationDialog(){
+	private CellViewModel cellModel; // allow changes to be propagated back to the other panels
+	
+	public CellResegmentationDialog(CellViewModel model){
 		super( null );
 		
 		createUI();
+		this.cellModel = model;
 		
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
@@ -174,6 +178,8 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 
 			// Trigger a dataset update and reprofiling
 			dataset.getCollection().getProfileManager().createProfileCollections(true);
+			cellModel.swapCell(workingCell);
+
 			
 			fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
 		} 
