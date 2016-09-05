@@ -709,7 +709,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 			throw new IllegalArgumentException("Segment has a different total length");
 		}
 		if(s.getStartIndex() != this.getEndIndex()){
-			throw new IllegalArgumentException("Segment start ("+s.getStartIndex()+") does not overlap this end: "+this.getEndIndex());
+			throw new IllegalArgumentException("Segment start ("+s.getStartIndex()+") does not overlap the end of this segment: "+this.getEndIndex());
 		}
 		
 		this.nextSegment = s;
@@ -962,12 +962,26 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 	}
 	
 	/**
-	 * Make a copy of the given list of linked segments
+	 * Make a copy of the given list of linked segments, and link the new segments
 	 * @param list the segments to copy
 	 * @return a new list
 	 * @throws Exception 
 	 */
 	public static List<NucleusBorderSegment> copy(List<NucleusBorderSegment> list) throws ProfileException{
+
+		List<NucleusBorderSegment> result = copyWithoutLinking(list);
+
+		linkSegments(result);
+		return result;
+	}
+	
+	/**
+	 * Make a copy of the given list of linked segments, but do not link the segments
+	 * @param list the segments to copy
+	 * @return a new list
+	 * @throws Exception 
+	 */
+	public static List<NucleusBorderSegment> copyWithoutLinking(List<NucleusBorderSegment> list) throws ProfileException{
 		
 		if(list==null || list.isEmpty()){
 			throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
@@ -978,8 +992,6 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 
 			result.add( new NucleusBorderSegment(segment));
 		}
-		
-		linkSegments(result);
 		return result;
 	}
 	

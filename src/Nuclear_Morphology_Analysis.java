@@ -39,6 +39,8 @@ implements PlugIn, Loggable
 
 {
 	
+//	private static Nuclear_Morphology_Analysis instance; // for launching without ImageJ
+	
 	// Store which plugins have been found
 	private HashMap<String, Boolean>  requiredFiles = new HashMap<String, Boolean>();
 	
@@ -55,6 +57,11 @@ implements PlugIn, Loggable
 			"AnalyzeSkeleton",
 			"Gray_Morphology"
 	};
+	
+//	public static void main(String[] args){
+//		instance = new Nuclear_Morphology_Analysis();
+//		instance.run(null);
+//	}
 	
 	/**
 	 * Reset all found files to false

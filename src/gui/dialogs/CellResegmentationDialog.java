@@ -257,6 +257,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			segCount    = 0;
 			segStart    = workingCell.getNucleus().getBorderIndex(BorderTagObject.REFERENCE_POINT);
 			log("Select endpoint for segment 0");
+			drawCurrentSegments(); // clear the segment chart
 			setEnabled(false);
 		});
 		panel.add(resegmentBtn);
@@ -288,15 +289,62 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		reassignRpBtn.setEnabled(b);
 		reverseProfileBtn.setEnabled(b);
 	}
+		
+	/**
+	 * Draw the segments currently assigned to the nucleus
+	 */
+	private void drawCurrentSegments(){
+		
+		Nucleus n = workingCell.getNucleus();
+
+		finer("Assigned all segments");
+		try {
+
+			List<NucleusBorderSegment> tempList;
+			if(segCount>0){
+				tempList = NucleusBorderSegment.copyWithoutLinking(newSegments);
+			} else {
+				tempList = new ArrayList<NucleusBorderSegment>(); // for clearing the profile on start of resegmentation
+			}
+			// Get the segment ID to make the new segment
+			UUID id = cell.getNucleus().getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegments().get(segCount).getID();
+
+			// Make a final segment after the last clicked position
+			NucleusBorderSegment last = new NucleusBorderSegment(segStart, n.getBorderIndex(BorderTagObject.REFERENCE_POINT), n.getBorderLength(), id);
+			tempList.add(last);
+			NucleusBorderSegment.linkSegments(tempList);
+
+			SegmentedProfile newProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
+			newProfile.setSegments(tempList);
+			finer("Segments added: ");
+			finer(NucleusBorderSegment.toString(tempList));
+			finer("New profile:");
+			finer(newProfile.toString());
+			
+			finer("RP index: "+n.getBorderIndex(BorderTagObject.REFERENCE_POINT));
+			
+			workingCell.getNucleus().setProfile(ProfileType.ANGLE, newProfile);
+
+		} catch (ProfileException e) {
+			error("Cannot link segments", e);
+		} catch (Exception e) {
+			error("Error setting profile", e);
+		}
+
+		
+		// Need to update OP to new segment boundary position
+
+		// Draw the new cell
+		updateCharts(workingCell);
+	}
 	
 	private void resegmentationComplete(){
 
-		try {
 			isRunning = false;
 			setEnabled(true);
-			
 			table.getModel().setValueAt("OK", segCount, COLUMN_STATE);
-
+			
+			
 			Nucleus n = workingCell.getNucleus();
 			UUID id = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegments().get(segCount).getID();
 
@@ -305,35 +353,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			newSegments.add(last);
 			finer("Added "+last.toString());
 
-			finer("Assigned all segments");
-			try {
-				NucleusBorderSegment.linkSegments(newSegments);
-			} catch (ProfileException e) {
-				error("Cannot link segments", e);
-			}
 			log("Resegmenting complete");
-			SegmentedProfile newProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
-			newProfile.setSegments(newSegments);
-			finer("Segments added: ");
-			finer(NucleusBorderSegment.toString(newSegments));
-			finer("New profile:");
-			finer(newProfile.toString());
-			finer("RP index: "+n.getBorderIndex(BorderTagObject.REFERENCE_POINT));
-			
-			try {
-				workingCell.getNucleus().setProfile(ProfileType.ANGLE, newProfile);
-			} catch (Exception e) {
-				error("Error setting profile", e);
-			}
-			
-			// Need to update OP to new segment boundary position
-
-			// Draw the new cell
-			updateCharts(workingCell);
-		} catch(Exception e){
-			error("Error resegmenting", e);
-		}
-
 	}
 	
 	private void moveRPComplete(){
@@ -425,9 +445,11 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			table.getModel().setValueAt("OK", segCount, COLUMN_STATE);
 			segCount++;
 			log("Select endpoint for segment "+segCount);
+			
+			drawCurrentSegments();
 
-
-			if(segCount==n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegmentCount()-1){
+			// Check against the original cell segment count
+			if(segCount==cell.getNucleus().getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegmentCount()-1){
 				resegmentationComplete();
 			}
 
