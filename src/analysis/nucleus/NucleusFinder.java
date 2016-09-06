@@ -279,17 +279,12 @@ public class NucleusFinder implements Loggable {
 		  Nucleus n = null;
 		  try {
 			  
-			  Constructor<?> nucleusConstructor = null;
+			  // The classes for the constructor
+			  Class<?>[] classes = {Roi.class, File.class, int.class, double[].class, XYPoint.class };
 			  
-			  Constructor<?>[]  list = nucleusType.getNucleusClass().getConstructors();
-			  for(Constructor<?> c : list){
-				  Class<?>[] classes = c.getParameterTypes();
-
-				  if(classes.length==5){
-					  nucleusConstructor = nucleusType.getNucleusClass()
+			  Constructor<?> nucleusConstructor = nucleusType.getNucleusClass()
 					  .getConstructor(classes);
-				  }
-			  }
+			  
 
 			  n = (Nucleus) nucleusConstructor.newInstance(roi, 
 					  path, 
