@@ -64,15 +64,15 @@ public class SpermNucleus extends AsymmetricNucleus {
 	}
 
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("\tReading sperm nucleus");
+//		finest("\tReading sperm nucleus");
 		in.defaultReadObject();
-		finest("\tRead sperm nucleus");
+//		finest("\tRead sperm nucleus");
 	}
 
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\tWriting sperm nucleus");
+//		finest("\tWriting sperm nucleus");
 		out.defaultWriteObject();
-		finest("\tWrote sperm nucleus");
+//		finest("\tWrote sperm nucleus");
 	}
 
 

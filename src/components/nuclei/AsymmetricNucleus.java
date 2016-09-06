@@ -101,16 +101,16 @@ public class AsymmetricNucleus
 
   
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-	  finest("\tReading asymmetric nucleus");
+//	  finest("\tReading asymmetric nucleus");
 	  in.defaultReadObject();
 	  tailEstimatePoints = new ArrayList<BorderPoint>(0);
 	  clockwiseRP = false;
-	  finest("\tRead asymmetric nucleus");
+//	  finest("\tRead asymmetric nucleus");
   }
 
   private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-	  finest("\tWriting asymmetric nucleus");
+//	  finest("\tWriting asymmetric nucleus");
 	  out.defaultWriteObject();  
-	  finest("\tWrote asymmetric nucleus");
+//	  finest("\tWrote asymmetric nucleus");
   }
 }

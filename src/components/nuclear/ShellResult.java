@@ -86,14 +86,14 @@ public class ShellResult implements Serializable, Loggable {
 	}
 
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("\tReading shell result");
+//		finest("\tReading shell result");
 		in.defaultReadObject();
-		finest("\tRead shell result");
+//		finest("\tRead shell result");
 	}
 
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\tWriting shell result");
+//		finest("\tWriting shell result");
 		out.defaultWriteObject();
-		finest("\tWrote shell result");
+//		finest("\tWrote shell result");
 	}
 }

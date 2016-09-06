@@ -833,7 +833,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 	
 
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("\tReading abstract cellular component");
+//		finest("\tReading abstract cellular component");
 		
 		// id is final, so cannot be assigned normally. 
 		// Reflect around the problem by making the field
@@ -861,7 +861,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 			error("Unexpected exception", e);
 		}
 
-		finest("\tSet final id field");
+//		finest("\tSet final id field");
 		
 		// Read the standard fields
 		
@@ -891,7 +891,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
     	    	
     	imageRef = new SoftReference<ImageProcessor>(null); 
 
-		finest("\tRead abstract cellular component");
+//		finest("\tRead abstract cellular component");
 	}
 
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
@@ -932,7 +932,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 	
 */
 		// Use the default methods to write everything until the borderlist
-		finest("\tWriting abstract cellular component");
+//		finest("\tWriting abstract cellular component");
 		out.writeObject(id);
 		out.writeObject(position);
 		out.writeObject(centreOfMass);
@@ -952,7 +952,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 			out.writeDouble(p.getY());
 		}
 		out.writeBoolean(false);
-		finest("\tWrote abstract cellular component");	
+//		finest("\tWrote abstract cellular component");	
 	}
 	
 	/*

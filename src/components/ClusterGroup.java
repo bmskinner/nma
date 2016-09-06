@@ -167,15 +167,15 @@ public class ClusterGroup implements Serializable, Loggable {
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("\tReading cluster group");
+//		finest("\tReading cluster group");
 		in.defaultReadObject();
-		finest("\tRead cluster group");
+//		finest("\tRead cluster group");
 	}
 
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\tWriting cluster group");
+//		finest("\tWriting cluster group");
 		out.defaultWriteObject();
-		finest("\tWrote cluster group");
+//		finest("\tWrote cluster group");
 	}
 
 }

@@ -1170,13 +1170,13 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\tWriting nucleus");
+//		finest("\tWriting nucleus");
 		out.defaultWriteObject();
-		finest("\tWrote nucleus");
+//		finest("\tWrote nucleus");
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("\tReading nucleus");
+//		finest("\tReading nucleus");
 		
 		in.defaultReadObject();
 
@@ -1201,7 +1201,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 				
 	    this.verticalNucleus    = null;
-	    finest("\tRead nucleus");
+//	    finest("\tRead nucleus");
 	}
 	
 	

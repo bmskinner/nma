@@ -633,14 +633,14 @@ public class SignalCollection implements Serializable, Loggable {
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("\tReading signal collection");
+//		finest("\tReading signal collection");
 		in.defaultReadObject();
-		finest("\tRead signal collection");
+//		finest("\tRead signal collection");
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\tWriting signal collection");
+//		finest("\tWriting signal collection");
 		out.defaultWriteObject();
-		finest("\tWrote signal collection");
+//		finest("\tWrote signal collection");
 	}
 }

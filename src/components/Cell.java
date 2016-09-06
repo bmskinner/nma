@@ -173,14 +173,14 @@ public class Cell implements Serializable, Loggable {
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\tWriting cell");
+//		finest("\tWriting cell");
 		out.defaultWriteObject();
-		finest("\tWrote cell");
+//		finest("\tWrote cell");
 	}
 
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("Reading cell");
+//		finest("Reading cell");
 		in.defaultReadObject();
-		finest("Read cell"); 
+//		finest("Read cell"); 
 	}
 }

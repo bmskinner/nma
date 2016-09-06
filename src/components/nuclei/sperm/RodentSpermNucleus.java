@@ -733,16 +733,16 @@ public class RodentSpermNucleus extends SpermNucleus {
   }
   
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-	  finest("\tReading rodent sperm nucleus");
+//	  finest("\tReading rodent sperm nucleus");
 	  in.defaultReadObject();
 	  calculateHookAndBodyLength();
-	  finest("\tRead rodent sperm nucleus");
+//	  finest("\tRead rodent sperm nucleus");
   }
 
   private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-	  finest("\tWriting rodent sperm nucleus");
+//	  finest("\tWriting rodent sperm nucleus");
 	  out.defaultWriteObject();
-	  finest("\tWrote rodent sperm nucleus");
+//	  finest("\tWrote rodent sperm nucleus");
   }
   
 }

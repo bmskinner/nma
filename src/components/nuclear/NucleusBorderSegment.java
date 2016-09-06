@@ -1067,15 +1067,15 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("\t\tReading nucleus border segment");
+//		finest("\t\tReading nucleus border segment");
 		in.defaultReadObject();
-		finest("\t\tRead nucleus border segment");
+//		finest("\t\tRead nucleus border segment");
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\t\tWriting nucleus border segment");
+//		finest("\t\tWriting nucleus border segment");
 		out.defaultWriteObject();
-		finest("\t\tWrote nucleus border segment");
+//		finest("\t\tWrote nucleus border segment");
 	}
 
 }

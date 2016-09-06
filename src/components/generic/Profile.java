@@ -1323,15 +1323,15 @@ public Profile calculateDeltas(int windowSize){
   }
   
   private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\tWriting profile");
+//		finest("\tWriting profile");
 		out.defaultWriteObject();
-		finest("\tWrote profile");
+//		finest("\tWrote profile");
 	}
   
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("\tReading profile");
+//		finest("\tReading profile");
 	    in.defaultReadObject();
-	    finest("\tRead profile");
+//	    finest("\tRead profile");
   }
   
 }

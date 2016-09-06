@@ -905,14 +905,14 @@ public class SegmentedProfile extends Profile implements Serializable {
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\tWriting segmented profile");
+//		finest("\tWriting segmented profile");
 		out.defaultWriteObject();
-		finest("\tWrote segmented profile");
+//		finest("\tWrote segmented profile");
 	}
 
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("\tReading segmented profile");
+//		finest("\tReading segmented profile");
 		in.defaultReadObject();
-		finest("\tRead segmented profile");
+//		finest("\tRead segmented profile");
 	}
 }

@@ -168,7 +168,7 @@ public class RunSegmentationAction extends ProgressableAction {
 				/*
 				 * Save the dataset, regardless of flags
 				 */
-				finest("Saving the dataset");
+				finer("Saving the dataset");
 				fireDatasetEvent(DatasetMethod.SAVE, dataset);
 				
 				
@@ -192,14 +192,14 @@ public class RunSegmentationAction extends ProgressableAction {
 				// if no list was provided, or no more entries remain,
 				// call the finish
 				if( ! hasRemainingDatasetsToProcess()){
-					log(Level.FINEST, "No more datasets remain to process");
+					finest("No more datasets remain to process");
 					if(latch!=null){
 						latch.countDown();
 					}
-					finest("Firing refresh cache event");
+					finer("Firing refresh cache event");
 					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
 
-					finest("Firing select dataset event");
+					finer("Firing select dataset event");
 					fireDatasetEvent(DatasetMethod.SELECT_ONE_DATASET, dataset);
 
 					RunSegmentationAction.super.finished();

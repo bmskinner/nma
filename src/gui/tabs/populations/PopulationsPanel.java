@@ -480,7 +480,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * @param dataset the dataset to select
 	 */
 	public void selectDatasets(List<AnalysisDataset> list){
-		finest("Selecting list of "+list.size()+" datasets");
+		finer("Selecting list of "+list.size()+" datasets in populations panel");
 		for(AnalysisDataset dataset : list){
 			int index = getIndexOfDataset(dataset);
 

@@ -215,15 +215,15 @@ public class PigSpermNucleus
 //    }
     
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-  	  finest("\tReading pig sperm nucleus");
+//  	  finest("\tReading pig sperm nucleus");
   	  in.defaultReadObject();
-  	  finest("\tRead pig sperm nucleus");
+//  	  finest("\tRead pig sperm nucleus");
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-  	  finest("\tWriting pig sperm nucleus");
+//  	  finest("\tWriting pig sperm nucleus");
   	  out.defaultWriteObject();
-  	  finest("\tWrote pig sperm nucleus");
+//  	  finest("\tWrote pig sperm nucleus");
     }
     
 

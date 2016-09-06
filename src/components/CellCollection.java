@@ -1247,13 +1247,13 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
   }
   
   private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-	  finest("Writing cell collection");
+//	  finest("Writing cell collection");
 	  out.defaultWriteObject();
-	  finest("Wrote cell collection");
+//	  finest("Wrote cell collection");
   }
 
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-	  finest("Reading cell collection");
+//	  finest("Reading cell collection");
 	  in.defaultReadObject();
 	  isRefolding = false;
 	  vennCache   = new HashMap<UUID, Integer>(); // cache the number of shared nuclei with other datasets
@@ -1264,7 +1264,7 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  }
 //	  finest("Creating default ruleset for nucleus type "+nucleusType);
 //	  ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType); 
-	  finest("Read cell collection");
+//	  finest("Read cell collection");
   }
   
   

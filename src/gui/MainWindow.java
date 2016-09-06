@@ -777,7 +777,7 @@ public class MainWindow
 				Runnable task = () -> { 
 					new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
 				};
-				threadManager.execute(task);
+				threadManager.submit(task);
 			}
 			
 			if(event.method().equals(DatasetMethod.COPY_MORPHOLOGY)){
@@ -1065,12 +1065,13 @@ public class MainWindow
 	private void recacheCharts(final List<AnalysisDataset> list){
 		
 		Runnable task = () -> {
+			finer("Heard recache request for list of  "+list.size()+" datasets");
 			for(DetailPanel panel : detailPanels){
 				panel.refreshChartCache(list);
 				panel.refreshTableCache(list);
 			}
 		};
-		threadManager.execute(task);
+		threadManager.submit(task);
 
 	}
 	

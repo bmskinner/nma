@@ -285,15 +285,15 @@ public abstract class BorderSegment implements Serializable, Loggable {
 	}
 	
 	 private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-			finest("\tReading border segment");
+//			finest("\tReading border segment");
 			in.defaultReadObject();
-			finest("\tRead border segment");
+//			finest("\tRead border segment");
 		}
 
 		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-			finest("\tWriting border segment");
+//			finest("\tWriting border segment");
 			out.defaultWriteObject();
-			finest("\tWrote border segment");
+//			finest("\tWrote border segment");
 		}
 	
 

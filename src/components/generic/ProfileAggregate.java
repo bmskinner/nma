@@ -385,15 +385,15 @@ public class ProfileAggregate implements Loggable, Serializable {
 	}
 	
 	 private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		  finest("\tReading profile aggregate");
+//		  finest("\tReading profile aggregate");
 		  in.defaultReadObject();
-		  finest("\tRead profile aggregate");
+//		  finest("\tRead profile aggregate");
 	  }
 
 	  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		  finest("\tWriting profile aggregate");
+//		  finest("\tWriting profile aggregate");
 		  out.defaultWriteObject();
-		  finest("\tWrote profile aggregate");
+//		  finest("\tWrote profile aggregate");
 	  }
 	
 }

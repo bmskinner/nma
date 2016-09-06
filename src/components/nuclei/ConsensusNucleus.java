@@ -62,15 +62,15 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("\tReading consensus nucleus");
+//		finest("\tReading consensus nucleus");
 		in.defaultReadObject();
-		finest("\tRead consensus nucleus");
+//		finest("\tRead consensus nucleus");
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\tWriting consensus nucleus");
+//		finest("\tWriting consensus nucleus");
 		out.defaultWriteObject();
-		finest("\tWrote consensus nucleus");
+//		finest("\tWrote consensus nucleus");
 	}
 
 	@Override

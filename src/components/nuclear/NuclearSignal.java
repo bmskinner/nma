@@ -85,15 +85,15 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("\tReading nuclear signal");
+//		finest("\tReading nuclear signal");
 		in.defaultReadObject();
-		finest("\tRead nuclear signal");
+//		finest("\tRead nuclear signal");
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\t\tWriting nuclear signal");
+//		finest("\t\tWriting nuclear signal");
 		out.defaultWriteObject();
-		finest("\t\tWrote nuclear signal");
+//		finest("\t\tWrote nuclear signal");
 	}
 
 	@Override
