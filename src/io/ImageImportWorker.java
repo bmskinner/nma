@@ -129,6 +129,12 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 			
 			topPoint = n.getBorderPoint(BorderTagObject.TOP_VERTICAL);
 			btmPoint = n.getBorderPoint(BorderTagObject.BOTTOM_VERTICAL);
+			
+			// Sometimes the points have been set to overlap in older datasets
+			if(topPoint.overlapsPerfectly(btmPoint)){
+				topPoint = n.getCentreOfMass();
+				btmPoint = n.getBorderPoint(BorderTagObject.ORIENTATION_POINT);
+			}
 		}
 		
 		
