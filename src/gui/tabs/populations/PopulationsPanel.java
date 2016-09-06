@@ -208,29 +208,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		finer("Update complete");
 	}
 	
-	/**
-	 * Ensure that all child datasets are present within the  
-	 * analysisDatasets Map
-	 */
-//	public void refreshDatasets(){
-//		
-//		if(DatasetListManager.getInstance().hasDatasets()){
-////		if(this.analysisDatasets.size()>0){
-//			for(UUID id : treeOrderMap.getIDs()){
-////				AnalysisDataset rootDataset = DatasetListManager.getInstance().getDataset(id);					
-////				AnalysisDataset rootDataset = analysisDatasets.get(id);
-////				for(AnalysisDataset child : rootDataset.getAllChildDatasets()){
-////					if( ! this.hasDataset(child.getUUID())){
-//////						child.setName(checkName(child.getName(), child.getUUID()));
-////						this.analysisDatasets.put(child.getUUID(), child);
-//////						this.populationNames.put(child.getName(), child.getUUID());
-////					}
-////				}
-//				
-//			}
-//		}
-//		update();
-//	}
 	
 	/**
 	 * Update the cluster groups for each root dataset and its children.
@@ -497,7 +474,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			treeSelectionModel.addTreeSelectionListener(treeListener);
 			
 			finest("Adding index at "+index);
-			selectionModel.addSelectionInterval(index, index);
+			selectionModel.addSelectionInterval(index, index); // this will trigger a chart update
 			
 
 		}
@@ -796,7 +773,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 							AnalysisDataset d = datasets.get(0);
 							setMenuForSingleDataset(d);
 						}
-						finest("Firing update panel event due to tree selection");
+						finer("Firing update panel event due to tree selection");
 						fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 					}
 				}

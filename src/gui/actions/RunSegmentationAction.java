@@ -163,6 +163,17 @@ public class RunSegmentationAction extends ProgressableAction {
 					}
 					finest("Resuming thread after refolding datast");
 				}
+				
+				/*
+				 * Recache charts if the dataset exists
+				 */
+				finer("Firing clear cache event");
+				fireDatasetEvent(DatasetMethod.CLEAR_CACHE, dataset);
+				
+				/* 
+				 * Ideally, wait for the charts to clear before firing the selection
+				 * request
+				 */
 
 				
 				/*
@@ -172,9 +183,7 @@ public class RunSegmentationAction extends ProgressableAction {
 				fireDatasetEvent(DatasetMethod.SAVE, dataset);
 				
 				
-				/*
-				 * We should only need to recache charts if the dataset exists
-				 */
+				
 
 				if(  (downFlag & MainWindow.ADD_POPULATION) == MainWindow.ADD_POPULATION){
 					finest("Adding dataset to list manager");
@@ -185,9 +194,6 @@ public class RunSegmentationAction extends ProgressableAction {
 					
 				} 
 				
-				/*
-				 * Save the dataset, regardless of flags
-				 */
 
 				// if no list was provided, or no more entries remain,
 				// call the finish
@@ -196,8 +202,8 @@ public class RunSegmentationAction extends ProgressableAction {
 					if(latch!=null){
 						latch.countDown();
 					}
-					finer("Firing refresh cache event");
-					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
+//					finer("Firing refresh cache event");
+//					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
 
 					finer("Firing select dataset event");
 					fireDatasetEvent(DatasetMethod.SELECT_ONE_DATASET, dataset);

@@ -359,14 +359,14 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	protected void updateSingle() {
 		super.updateSingle();
 		updateSingleDataset();
-		log(Level.FINEST, "Updated consensus panel");
+		finest("Updated consensus panel");
 	}
 	
 
 	@Override
 	protected void updateMultiple() {
 		updateMultipleDatasets();
-		log(Level.FINEST, "Updated consensus panel");
+		finest("Updated consensus panel");
 	}
 	
 	@Override

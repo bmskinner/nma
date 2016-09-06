@@ -773,11 +773,11 @@ public class MainWindow
 			}
 			
 			if(event.method().equals(DatasetMethod.REFRESH_MORPHOLOGY)){
-				finest("Updating segmentation across nuclei");
+				finer("Updating segmentation across nuclei");
 				Runnable task = () -> { 
 					new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
 				};
-				threadManager.submit(task);
+				threadManager.execute(task);
 			}
 			
 			if(event.method().equals(DatasetMethod.COPY_MORPHOLOGY)){
@@ -1083,7 +1083,7 @@ public class MainWindow
 			if(populationsPanel.getSelectedDatasets().get(0).getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
 
 				try{
-					log(Level.INFO, "Replacing nucleus roi patterns");
+					fine("Replacing nucleus roi patterns");
 					for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
 
 						RodentSpermNucleus r = (RodentSpermNucleus) n;  
@@ -1093,23 +1093,23 @@ public class MainWindow
 
 							r.calculateSignalAnglesFromPoint(r.getPoint(BorderTagObject.ORIENTATION_POINT));
 						} catch (Exception e) {
-							log(Level.SEVERE, "Error restoring signal angles", e);
+							error("Error restoring signal angles", e);
 						}
 
 					}
 
 				}catch(Exception e){
-					log(Level.SEVERE, "Error recalculating angles", e);
+					error("Error recalculating angles", e);
 				}
 			}
 			
-			log(Level.INFO, "Regenerating charts");
+			fine("Regenerating charts");
 			for(DetailPanel panel : detailPanels){
 				panel.refreshChartCache();
 				panel.refreshTableCache();
 			}
 			
-			log(Level.INFO, "Resegmenting datasets");
+			fine("Resegmenting datasets");
 			List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
 			new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
 		};
@@ -1122,12 +1122,11 @@ public class MainWindow
 	public void interfaceEventReceived(InterfaceEvent event) {
 		
 		InterfaceMethod method = event.method();
-		log(Level.FINEST, "Heard interface event: "+event.method().toString());
+		finest("Heard interface event: "+event.method().toString());
 		
 		switch(method){
 		
 		case REFRESH_POPULATIONS:
-//			this.populationsPanel.refreshDatasets();
 			populationsPanel.update(populationsPanel.getSelectedDatasets()); // ensure all child datasets are included
 			break;
 			
@@ -1136,9 +1135,12 @@ public class MainWindow
 
 			break;
 			
-		case UPDATE_PANELS:
-			this.updatePanels(populationsPanel.getSelectedDatasets());
+		case UPDATE_PANELS:{
+			List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
+			finer("Updating tab panels with list of "+list.size()+" datasets");
+			this.updatePanels(list);
 			break;
+		}
 			
 			
 		case RECACHE_CHARTS:
@@ -1147,7 +1149,7 @@ public class MainWindow
 		case LIST_DATASETS:
 			int i=0;
 			for(AnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()){
-				log(Level.INFO, i+"\t"+d.getName());
+				log(i+"\t"+d.getName());
 				i++;
 			}
 			break;
@@ -1158,7 +1160,7 @@ public class MainWindow
 		case LIST_SELECTED_DATASETS:
 			int count=0;
 			for(AnalysisDataset d : populationsPanel.getSelectedDatasets()){
-				log(Level.INFO, count+"\t"+d.getName());
+				log(count+"\t"+d.getName());
 				count++;
 			}
 			break;
@@ -1186,7 +1188,7 @@ public class MainWindow
 			for(AnalysisDataset d : populationsPanel.getSelectedDatasets()){
 				
 				for(Nucleus n : d.getCollection().getNuclei()){
-					log(Level.INFO, n.toString());
+					log(n.toString());
 				}
 			}
 			break;

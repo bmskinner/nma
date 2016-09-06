@@ -107,10 +107,7 @@ public abstract class DetailPanel
 	}
 	
 	public boolean hasSubPanels(){
-		if(subPanels.size()>0){
-			return true;
-		}
-		return false;
+		return subPanels.size()>0;
 	}
 	
 	/**
@@ -289,15 +286,15 @@ public abstract class DetailPanel
 			if(hasDatasets()){
 				finest("Datasets present");
 				if(isSingleDataset()){
-					finest("Single dataset present");
+					finer( this.getClass().getName()+": Single dataset present");
 					updateSingle();
 				} else {
-					finest("Multiple datasets present");
+					finer(this.getClass().getName()+": Multiple datasets present");
 					updateMultiple();
 				}
 				
 			} else {
-				finest("No datasets present");
+				finer(this.getClass().getName()+": No datasets present");
 				updateNull();
 			}
 			
