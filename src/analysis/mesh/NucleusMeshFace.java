@@ -38,10 +38,18 @@ public class NucleusMeshFace implements Loggable {
 	
 	public NucleusMeshFace(final NucleusMeshVertex v1,  final NucleusMeshVertex v2,  final NucleusMeshVertex v3){
 				
-		if( ! v1.hasEdgeTo(v2) || ! v1.hasEdgeTo(v3) || ! v2.hasEdgeTo(v3) ){
-			throw new IllegalArgumentException("Vertices must have linked edges");
+		if( ! v1.hasEdgeTo(v2) ){
+			throw new IllegalArgumentException("Vertices v1 and v2 are not linked in face constructor: "+v1.toString()+" and "+v2.toString());
 		}
 		
+		if( ! v1.hasEdgeTo(v3) ){
+			throw new IllegalArgumentException("Vertices v1 and v3 are not linked in face constructor: "+v1.toString()+" and "+v3.toString());
+		}
+		
+		if( ! v2.hasEdgeTo(v3) ){
+			throw new IllegalArgumentException("Vertices v2 and v3 are not linked in face constructor: "+v2.toString()+" and "+v3.toString());
+		}
+				
 		vertices.add(v1);
 		vertices.add(v2);
 		vertices.add(v3);

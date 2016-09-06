@@ -32,6 +32,10 @@ public class NucleusMeshEdge {
 	private double value;
 	
 	public NucleusMeshEdge(NucleusMeshVertex v1, NucleusMeshVertex v2, double ratio){
+		
+		if(v1==v2){
+			throw new IllegalArgumentException("Vertices are identical in edge constructor");
+		}
 		this.v1 = v1;
 		this.v2 = v2;
 		this.value = ratio;

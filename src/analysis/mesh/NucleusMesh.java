@@ -245,7 +245,7 @@ public class NucleusMesh implements Loggable {
 	}
 		
 	public boolean contains(NucleusMeshVertex v){
-		return(peripheralVertices.contains(v) || internalVertices.contains(v));
+		return( v!=null && (peripheralVertices.contains(v) || internalVertices.contains(v)));
 	}
 	
 	
@@ -255,11 +255,11 @@ public class NucleusMesh implements Loggable {
 	 * @return
 	 */
 	public boolean contains(NucleusMeshFace test){
-		return faces.contains(test);
+		return test !=null && faces.contains(test);
 	}
 	
 	public boolean contains(NucleusMeshEdge e){
-		return edges.contains(e);
+		return e != null && edges.contains(e);
 	}
 	
 
@@ -697,9 +697,9 @@ public class NucleusMesh implements Loggable {
 		int halfArray = (int) Math.floor(( (double) peripheralVertices.size() / 2));
 		
 		finer("Linking peripheral edges and internal edges");
-		finest("Peripheral vertices: "+peripheralVertices.size());
-		finest("Internal vertices: "+internalVertices.size());
-		finest("Half array: "+halfArray);
+		finer("Peripheral vertices: "+peripheralVertices.size());
+		finer("Internal vertices: "+internalVertices.size());
+		finer("Half array: "+halfArray);
 		
 		try {
 
@@ -731,12 +731,13 @@ public class NucleusMesh implements Loggable {
 				this.getEdge(p1_a, i1);
 				this.getEdge(p2_a, i1);
 				this.getEdge(p2_a, i2);
-				//			
+
+		
 				this.getEdge(p1_x, i1);
 				this.getEdge(p2_x, i1);
 				this.getEdge(p2_x, i2);
-				//			
-				//			
+
+				
 				// Make the faces
 				this.getFace(p1_a, i1, p2_a);
 				this.getFace(p2_a, i1, i2);
@@ -744,6 +745,8 @@ public class NucleusMesh implements Loggable {
 				this.getFace(p1_x, i1, p2_x);
 				this.getFace(p2_x, i1, i2);
 			}
+			
+			finer("Created first face set");
 
 			// create the top faces - RP to nearest peripheral indexes to I0
 			getEdge(peripheralVertices.get(0), internalVertices.get(0));
@@ -759,11 +762,13 @@ public class NucleusMesh implements Loggable {
 					peripheralVertices.get(peripheralVertices.size()-1), 
 					internalVertices.get(0));
 
-
+			finer("Created top face set");
 
 			// if needed, create the bottom face (final intenal vertex to central peripheral vertices)
 			if(peripheralVertices.size()%2!=0){
 
+				finer("Need bottom face set");
+				
 				NucleusMeshVertex p1 = peripheralVertices.get(halfArray);
 				NucleusMeshVertex p2 = peripheralVertices.get(halfArray+1);
 				NucleusMeshVertex i1 = internalVertices.get(internalVertices.size()-1);
@@ -774,11 +779,14 @@ public class NucleusMesh implements Loggable {
 				getEdge(p2, i1);
 
 				this.getFace(p1, p2, i1);
+				
+				finer("Created bottom face set");
 			}
 
 		} catch(Exception e){
 			warn("Error linking edges and vertices in mesh");
 			log(Level.FINE, "Error linking edges and vertices in mesh", e);
+			fine(this.toString());
 		}
 		
 		

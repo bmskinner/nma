@@ -326,7 +326,7 @@ public class NucleusMeshImage implements Loggable {
 						int pixel = ip.get(x, y);
 						NucleusMeshFace f = mesh.getFaceContaining(p);
 					
-						finer("Found face in target mesh for point "+p.toString());
+						finest("Found face in target mesh for point "+p.toString());
 						Map<NucleusMeshFaceCoordinate, Integer> faceMap = map.get(f);
 
 						if(faceMap==null){ // create the facemap if not present
@@ -341,8 +341,9 @@ public class NucleusMeshImage implements Loggable {
 						NucleusMeshFaceCoordinate c = f.getFaceCoordinate(p);
 						faceMap.put(c, pixel);
 					} else {
-						finer("Cannot find face in target mesh for point "+p.toString() + " (Total "+missedCount+")");
 						missedCount++;
+						finest("Cannot find face in target mesh for point "+p.toString() + " (Total "+missedCount+")");
+						
 					}
 				}
 				
