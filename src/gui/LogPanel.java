@@ -146,7 +146,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		textArea.setBackground(SystemColor.menu);
 		
 		scrollPane.setViewportView(textArea);
-		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 				
 		
 		panel.add(scrollPane, BorderLayout.CENTER);
