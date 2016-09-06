@@ -47,18 +47,28 @@ public class NewAnalysisAction extends ProgressableAction {
 	public static final int NEW_ANALYSIS = 0;
 	
 	public NewAnalysisAction(MainWindow mw) {
+		this(mw, null);
+		
+	}
+	
+	/**
+	 * Create a new analysis, specifying the initial directory of images
+	 * @param mw
+	 * @param folder
+	 */
+	public NewAnalysisAction(MainWindow mw, File folder) {
 		super("Nucleus detection", mw);
 
 		this.cooldown();
 		
-		log(Level.FINE, "Making analysis options");
-		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(DatasetListManager.getInstance().getRootDatasets());
+		fine("Making analysis options");
+		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(DatasetListManager.getInstance().getRootDatasets(), folder);
 		
 		if( analysisSetup.getOptions()!=null){
 
 			options = analysisSetup.getOptions();
 
-			log(Level.INFO, "Directory: "+options.getFolder().getName());
+			log("Directory: "+options.getFolder().getName());
 
 			this.startTime = Calendar.getInstance().getTime();
 			this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
@@ -87,8 +97,6 @@ public class NewAnalysisAction extends ProgressableAction {
 			log(Level.FINE, "Analysis cancelled");
 			this.cancel();
 		}
-		
-		
 	}
 	
 	@Override

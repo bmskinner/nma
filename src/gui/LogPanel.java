@@ -69,6 +69,7 @@ import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
 import gui.InterfaceEvent.InterfaceMethod;
+import gui.actions.NewAnalysisAction;
 import gui.tabs.DetailPanel;
 
 public class LogPanel extends DetailPanel implements ActionListener {
@@ -192,7 +193,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 							}
 						}
 						
-						// Open the files - we process only *.nmd files
+						// Open the files - we open *.nmd files and analyse directories
 
 						for(File f : fileList){
 							if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
@@ -203,6 +204,12 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
 							} else {
 								finer("File is not nmd, ignoring");
+							}
+							
+							if(f.isDirectory()){
+								// Pass to new analysis
+								fireSignalChangeEvent("New|"+f.getAbsolutePath());
+								
 							}
 
 						}

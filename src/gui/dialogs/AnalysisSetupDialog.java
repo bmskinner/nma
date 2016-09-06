@@ -39,6 +39,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -46,6 +47,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -122,7 +124,16 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	 * Create the frame.
 	 */
 	public AnalysisSetupDialog(Collection<AnalysisDataset> datasets) {
+		this(datasets, null);
+	}
+	
+	/**
+	 * Create the frame.
+	 */
+	public AnalysisSetupDialog(Collection<AnalysisDataset> datasets, File folder) {
 		super();
+		
+		analysisOptions.setFolder(folder);
 		openDatasets = datasets;
 		setModal(true); // ensure nothing happens until this window is closed
 		
@@ -131,6 +142,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		createAndShowGUI();
 		pack();
 		setVisible(true);
+		
 	}
 	
 	/**
@@ -781,12 +793,34 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 
 	
 	private boolean getImageDirectory(){
+		
+//		File defaultDir = new File("J:\\Protocols\\Scripts and macros\\");
+		
+		File defaultDir = analysisOptions.getFolder();
+		
+		JFileChooser fc = new JFileChooser(defaultDir);
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-		DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
-		String folderName = localOpenDialog.getDirectory();
 
-		if(folderName==null) return false; // user cancelled
-		analysisOptions.setFolder( new File(folderName));
+		int returnVal = fc.showOpenDialog(fc);
+		if (returnVal != 0)	{
+			return false;
+		}
+		
+		File file = fc.getSelectedFile();
+
+		if( ! file.isDirectory()){
+			return false;
+		}
+		fine("Selected directory: "+file.getAbsolutePath());
+//		return file;
+		
+
+//		DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
+//		String folderName = localOpenDialog.getDirectory();
+//
+//		if(folderName==null) return false; // user cancelled
+		analysisOptions.setFolder( file);
 
 		if(analysisOptions.isReanalysis()){
 			OpenDialog fileDialog = new OpenDialog("Select a mapping file...");

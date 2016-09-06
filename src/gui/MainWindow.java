@@ -271,6 +271,15 @@ public class MainWindow
 							} else {
 								finer("File is not nmd, ignoring");
 							}
+							
+							if(f.isDirectory()){
+								// Pass to new analysis
+								Runnable task = () -> { 
+									new NewAnalysisAction(MainWindow.this, f);
+								};
+								threadManager.execute(task);
+								
+							}
 
 						}
 					}
@@ -730,6 +739,18 @@ public class MainWindow
 			
 			Runnable task = () -> { 
 				new PopulationImportAction(this, f);
+			};
+			threadManager.execute(task);
+		}
+		
+		
+		if(event.type().startsWith("New|")){
+			String s = event.type().replace("New|", "");
+			File f = new File(s);
+			
+			// Pass to new analysis
+			Runnable task = () -> { 
+				new NewAnalysisAction(this, f);
 			};
 			threadManager.execute(task);
 		}
