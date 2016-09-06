@@ -132,9 +132,9 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			updatewindowButton.addActionListener(this);
 			panel.add(updatewindowButton);
 			
-			reprofileButton = new JButton(STR_REPROFILE);
-			reprofileButton.addActionListener(this);
-			panel.add(reprofileButton);
+//			reprofileButton = new JButton(STR_REPROFILE);
+//			reprofileButton.addActionListener(this);
+//			panel.add(reprofileButton);
 
 			return panel;
 			
@@ -253,7 +253,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			splitButton.setEnabled(b);
 			windowSizeButton.setEnabled(b);
 			updatewindowButton.setEnabled(b);
-			reprofileButton.setEnabled(b);
+//			reprofileButton.setEnabled(b);
 			
 		}
 		

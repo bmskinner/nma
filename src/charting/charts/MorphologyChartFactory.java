@@ -111,7 +111,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		plot.getDomainAxis().setLabel("Position");
 		plot.getDomainAxis().setRange(0,100);
 		
-		plot.getRangeAxis().setLabel(type.toString());
+		plot.getRangeAxis().setLabel(type.getLabel());
 		
 		if(type.getDimension().equals(StatisticDimension.ANGLE)){
 			plot.getRangeAxis().setRange(0,360);

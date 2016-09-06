@@ -121,16 +121,17 @@ public class SignalWarper extends AnalysisWorker {
 			finest("Image for "+cell.getNucleus().getNameAndNumber()+" is "+ip.getWidth()+"x"+ip.getHeight());
 			
 			// Create NucleusMeshImage from nucleus.
-			finest("Making nucleus mesh image");
+			finer("Making nucleus mesh image");
 			NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
 			
 			// Draw NucleusMeshImage onto consensus mesh.
-			finest("Warping image onto consensus mesh");
+			finer("Warping image onto consensus mesh");
 			ImageProcessor warped = im.meshToImage(meshConsensus);
 			finest("Warped image is "+ip.getWidth()+"x"+ip.getHeight());
 			warpedImages[cellNumber] = warped;
 			mergedImage = combineImages();
 			mergedImage = rescaleImageIntensity();
+			finer("Completed cell "+cellNumber);
 			publish(cellNumber++);
 			
 			

@@ -20,6 +20,7 @@
  *******************************************************************************/
 package gui.dialogs;
 
+import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
 import java.awt.BorderLayout;
@@ -30,6 +31,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -38,20 +40,28 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
+import utility.Constants;
+import components.Cell;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.FixedAspectRatioChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import analysis.AnalysisDataset;
+import analysis.AnalysisWorker;
+import analysis.mesh.NucleusMesh;
+import analysis.mesh.NucleusMeshImage;
 import analysis.signals.SignalManager;
 import analysis.signals.SignalWarper;
 import gui.LoadingIconDialog;
 import gui.components.panels.DatasetSelectionPanel;
 import gui.components.panels.SignalGroupSelectionPanel;
+import gui.tabs.cells.LabelInfo;
 
 @SuppressWarnings("serial")
 public class SignalWarpingDialog extends LoadingIconDialog implements PropertyChangeListener, ActionListener{
@@ -203,12 +213,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
 			progressBar.setStringPainted(true);
 			
-//			progressBar.setString("0 of "+totalCells);
 			progressBar.setVisible(true);
 			
 			
 
-			warper = new SignalWarper(sourceDataset, targetDataset, signalBox.getSelectedID(), cellsWithSignals, straighten);
+			warper = new SignalWarper( signalBox.getSelectedID(), cellsWithSignals, straighten, chartPanel);
 			warper.addPropertyChangeListener(this);
 			warper.execute();
 			
@@ -230,38 +239,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		datasetBoxTwo.setEnabled(b);
 	}
 	
-	private void updateChart(){
-		
-		Runnable task = () -> { 
-			ImageProcessor image = warper.getResult();
-			
-			boolean straighten = straightenMeshBox.isSelected();
-			
-			ChartOptions options = new ChartOptionsBuilder()
-				.setDatasets(datasetBoxTwo.getSelectedDataset())
-				.setShowXAxis(false)
-				.setShowYAxis(false)
-				.setShowBounds(false)
-				.setStraightenMesh(straighten)
-				.build();
-
-			final JFreeChart chart = OutlineChartFactory.getInstance().makeSignalWarpChart(options, image);
-					
-			Runnable update = () -> { 
-				chartPanel.setChart(chart);
-				chartPanel.restoreAutoBounds();
-			};
-			SwingUtilities.invokeLater( update );
-			
-		};
-		Thread thr = new Thread(task);
-		thr.start();		
-	}
-
 	
 	public void finished(){
 		try {
-			updateChart();
+//			updateChart();
 			
 			setEnabled(true);
 			setStatusLoaded();
@@ -278,18 +259,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		int value = (Integer) evt.getNewValue(); // should be percent
 		finest("Property change: "+value);
 		
-		if(value >=0 && value <=100){
-			
-			if(this.progressBar.isIndeterminate()){
-				this.progressBar.setIndeterminate(false);
-			}
-			this.progressBar.setValue(value);
-			
-			
-			cellsDone = (value * totalCells) /100 ;
-			progressBar.setString(cellsDone+" of "+totalCells);
-			updateChart();
-		}
+		
 
 		if(evt.getPropertyName().equals("Finished")){
 			finest("Worker signaled finished");
@@ -377,4 +347,292 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 	}
 
+	
+	private class SignalWarper extends SwingWorker<Boolean, Integer> {
+		
+		private AnalysisDataset sourceDataset;
+		private AnalysisDataset targetDataset;
+		private UUID signalGroup;
+		private boolean cellsWithSignals; // Only warp the cell images with detected signals
+		private boolean straighten; // Straighten the meshes
+		ImageProcessor[] warpedImages;
+		private ChartPanel chartPanel;
+		
+		ImageProcessor mergedImage = null;
+			
+		public SignalWarper(UUID signalGroup, boolean cellsWithSignals, boolean straighten, ChartPanel chartPanel){
+			
+			this.sourceDataset    = datasetBoxOne.getSelectedDataset();
+			this.targetDataset    = datasetBoxTwo.getSelectedDataset();
+			this.signalGroup      = signalGroup;
+			this.cellsWithSignals = cellsWithSignals;
+			this.straighten       = straighten;
+			this.chartPanel       = chartPanel;
+			
+			// Count the number of cells to include
+
+			List<Cell> cells;
+			if(cellsWithSignals){
+				SignalManager m =  sourceDataset.getCollection().getSignalManager();
+				cells = m.getCellsWithNuclearSignals(signalGroup, true);
+				
+			} else {
+				cells = sourceDataset.getCollection().getCells();
+			}
+			int count = cells.size();
+
+			
+			warpedImages = new ImageProcessor[ count ];
+			
+			
+			fine("Created signal warper for "+sourceDataset.getName()+" signal group "+signalGroup+" with "+count+" cells");
+		}
+		
+
+		@Override
+		protected Boolean doInBackground() throws Exception {
+
+			try {
+				finer("Running warper");
+				
+				if( ! targetDataset.getCollection().hasConsensusNucleus()){
+					warn("No consensus nucleus in dataset");
+					return false;
+				} else {
+					generateImages();
+				}
+				
+			} catch (Exception e){
+				error("Error in signal warper", e);
+				return false;
+			} 
+			
+			return true;
+			
+		}
+		
+		
+		@Override
+	    protected void process( List<Integer> chunks ) {
+	        
+			
+	        for(Integer i : chunks){
+	        	
+	        	int percent = (int) ( (double) i / (double) sourceDataset.getCollection().cellCount() * 100);
+		        
+		        if(percent >= 0 && percent <=100){
+		        	setProgress(percent); // the integer representation of the percent
+		        							
+						if(progressBar.isIndeterminate()){
+							progressBar.setIndeterminate(false);
+						}
+						progressBar.setValue(percent);
+						int cellNumber = i+1;
+						progressBar.setString(cellNumber+" of "+sourceDataset.getCollection().cellCount());	
+		        }
+		        
+	        	
+	        }
+	        
+	        updateChart();
+	                
+	        
+	    }
+		
+		@Override
+	    public void done() {
+	    	
+	    	finest("Worker completed task");
+
+	    	 try {
+	            if(this.get()){
+	            	finest("Firing trigger for sucessful task");
+	                firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
+
+	            } else {
+	            	finest("Firing trigger for failed task");
+	                firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+	            }
+	        } catch (InterruptedException e) {
+	        	error("Interruption error in worker", e);
+	        	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+	        } catch (ExecutionException e) {
+	        	error("Execution error in worker", e);
+	        	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+	       }
+
+	    } 
+		
+		private void updateChart(){
+			
+			Runnable task = () -> { 
+								
+				boolean straighten = straightenMeshBox.isSelected();
+				
+				ChartOptions options = new ChartOptionsBuilder()
+					.setDatasets(datasetBoxTwo.getSelectedDataset())
+					.setShowXAxis(false)
+					.setShowYAxis(false)
+					.setShowBounds(false)
+					.setStraightenMesh(straighten)
+					.build();
+
+				final JFreeChart chart = OutlineChartFactory.getInstance().makeSignalWarpChart(options, mergedImage);
+						
+				Runnable update = () -> { 
+					chartPanel.setChart(chart);
+					chartPanel.restoreAutoBounds();
+				};
+				SwingUtilities.invokeLater( update );
+				
+			};
+			Thread thr = new Thread(task);
+			thr.start();		
+		}
+		
+	
+		
+		private void generateImages(){
+			finer("Generating warped images for "+sourceDataset.getName());
+			finest("Fetching consensus nucleus from target dataset");
+			NucleusMesh meshConsensus = new NucleusMesh( targetDataset.getCollection().getConsensusNucleus());
+			
+			if(straighten){
+				meshConsensus = meshConsensus.straighten();
+			}
+			
+			SignalManager m =  sourceDataset.getCollection().getSignalManager();
+			
+			
+			
+			List<Cell> cells;
+			if(cellsWithSignals){
+				finer("Only fetching cells with signals");
+				cells = m.getCellsWithNuclearSignals(signalGroup, true);
+			} else {
+				finer("Fetching all cells");
+				cells = sourceDataset.getCollection().getCells();
+				
+			}
+			
+			int cellNumber = 0;
+			
+			
+			for(Cell cell : cells){
+				fine("Drawing signals for cell "+cell.getNucleus().getNameAndNumber());
+				// Get each nucleus. Make a mesh.
+				NucleusMesh cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
+				
+				if(straighten){
+					cellMesh = cellMesh.straighten();
+				}
+				
+				// Get the image with the signal
+				ImageProcessor ip = cell.getNucleus().getSignalCollection().getImage(signalGroup);
+				finest("Image for "+cell.getNucleus().getNameAndNumber()+" is "+ip.getWidth()+"x"+ip.getHeight());
+				
+				// Create NucleusMeshImage from nucleus.
+				finer("Making nucleus mesh image");
+				NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
+				
+				// Draw NucleusMeshImage onto consensus mesh.
+				finer("Warping image onto consensus mesh");
+				ImageProcessor warped = im.meshToImage(meshConsensus);
+				finest("Warped image is "+ip.getWidth()+"x"+ip.getHeight());
+				warpedImages[cellNumber] = warped;
+				mergedImage = combineImages();
+				mergedImage = rescaleImageIntensity();
+				finer("Completed cell "+cellNumber);
+				publish(cellNumber++);
+				
+				
+			}
+			
+		}
+		
+		/**
+		 * Create a new image processor with the average of all warped images
+		 * @return
+		 */
+		private ImageProcessor combineImages(){
+			int w = warpedImages[0].getWidth();
+			int h = warpedImages[0].getHeight();
+			
+			// Create an empty white processor
+			ImageProcessor mergeProcessor = new ByteProcessor(w, h);
+			for(int i=0; i<mergeProcessor.getPixelCount(); i++){
+				mergeProcessor.set(i, 255); // set all to white initially
+			}
+			
+			int nonNull = 0;
+			
+			// check sizes match
+			for(ImageProcessor ip : warpedImages){
+				if(ip==null){
+					continue;
+				}
+				nonNull++;
+				if(ip.getHeight()!=h && ip.getWidth()!=w){
+					return null;
+				}
+			}
+			
+			// Average the pixels
+			
+			for(int x=0; x<w; x++){
+				for(int y=0; y<h; y++){
+
+					int pixelTotal = 0;
+					for(ImageProcessor ip : warpedImages){
+						if(ip==null){
+							continue;
+						}
+						pixelTotal += ip.get(x, y);
+					}
+					
+					pixelTotal /= nonNull; // scale back down to 0-255;
+					
+					if(pixelTotal<255){// Ignore anything that is not signal - the background is already white
+						mergeProcessor.set(x, y, pixelTotal);
+					} 
+				}
+			}
+			return mergeProcessor;
+		}
+		
+		/**
+		 * Adjust the merged image so that the brightet pixel is at 255
+		 * @return
+		 */
+		private ImageProcessor rescaleImageIntensity(){
+			finer("Rescaling image intensities to take full range");
+			ImageProcessor result = new ByteProcessor(mergedImage.getWidth(), mergedImage.getHeight());
+			// Find the range in the image	
+			
+			double maxIntensity = 0;
+			double minIntensity = 255;
+			for(int i=0; i<mergedImage.getPixelCount(); i++){
+				int pixel = mergedImage.get(i);
+				maxIntensity = pixel > maxIntensity ? pixel : maxIntensity;
+				minIntensity = pixel < minIntensity ? pixel : minIntensity;
+			}
+			
+			double range        = maxIntensity - minIntensity;
+			finest("Image intensity runs "+minIntensity+"-"+maxIntensity);
+			
+			// Adjust each pixel to the proportion in range 0-255
+			for(int i=0; i<mergedImage.getPixelCount(); i++){
+				int pixel = mergedImage.get(i);
+
+				double proportion = ( (double) pixel - minIntensity) / range;
+				
+				int newPixel  = (int) (255 * proportion);
+				finest("Converting pixel: "+pixel+" -> "+newPixel);
+				result.set(i, newPixel);
+			}
+			return result;
+		}
+
+	}
+	
 }

@@ -27,6 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import logging.Loggable;
 import components.AbstractCellularComponent;
@@ -700,80 +701,85 @@ public class NucleusMesh implements Loggable {
 		finest("Internal vertices: "+internalVertices.size());
 		finest("Half array: "+halfArray);
 		
-		// Link the RP point (peripheral index 0) to the first internal vertex
-		
-		// Starting at each end of the periperal array, make edges to the internal vertices
-		for(int i=1, j=peripheralVertices.size()-1; i<halfArray; i++, j--){
-			
-			// Points A are ascending from the RP
-			// Points X are decending from the RP
-			
-			NucleusMeshVertex p1_a = peripheralVertices.get(i);
-			NucleusMeshVertex p1_x = peripheralVertices.get(j);
-			
-			NucleusMeshVertex p2_a = peripheralVertices.get(i+1);
-			NucleusMeshVertex p2_x = peripheralVertices.get(j-1);
-			
-			// Each peripheral vertex links to two internal vertices
-			NucleusMeshVertex i1 = internalVertices.get(i-1);
-			
-			// handle the end of the internal skeleton
-			NucleusMeshVertex i2;
-			if(i==internalVertices.size()){
-				i2 = i1; // when there is no point here, use the same vertex as i1
-			} else {
-				i2 = internalVertices.get(i);
-			}
-			
-			this.getEdge(p1_a, i1);
-			this.getEdge(p2_a, i1);
-			this.getEdge(p2_a, i2);
-//			
-			this.getEdge(p1_x, i1);
-			this.getEdge(p2_x, i1);
-			this.getEdge(p2_x, i2);
-//			
-//			
-			// Make the faces
-			this.getFace(p1_a, i1, p2_a);
-			this.getFace(p2_a, i1, i2);
-			
-			this.getFace(p1_x, i1, p2_x);
-			this.getFace(p2_x, i1, i2);
-		}
-		
-		// create the top faces - RP to nearest peripheral indexes to I0
-		getEdge(peripheralVertices.get(0), internalVertices.get(0));
-		getEdge(peripheralVertices.get(1), internalVertices.get(0));
-		getEdge(peripheralVertices.get(peripheralVertices.size()-1), internalVertices.get(0));
-		
-		
-		this.getFace(peripheralVertices.get(0), 
-				peripheralVertices.get(1), 
-				internalVertices.get(0));
-		
-		this.getFace(peripheralVertices.get(0), 
-				peripheralVertices.get(peripheralVertices.size()-1), 
-				internalVertices.get(0));
-		
-		
-		
-		// if needed, create the bottom face (final intenal vertex to central peripheral vertices)
-		if(peripheralVertices.size()%2!=0){
-			
-			NucleusMeshVertex p1 = peripheralVertices.get(halfArray);
-			NucleusMeshVertex p2 = peripheralVertices.get(halfArray+1);
-			NucleusMeshVertex i1 = internalVertices.get(internalVertices.size()-1);
-			
-			// Ensure the edges are created
-			getEdge(p1, p2);
-			getEdge(p1, i1);
-			getEdge(p2, i1);
-			
-			this.getFace(p1, p2, i1);
-		}
-		
+		try {
 
+			// Link the RP point (peripheral index 0) to the first internal vertex
+
+			// Starting at each end of the periperal array, make edges to the internal vertices
+			for(int i=1, j=peripheralVertices.size()-1; i<halfArray; i++, j--){
+
+				// Points A are ascending from the RP
+				// Points X are decending from the RP
+
+				NucleusMeshVertex p1_a = peripheralVertices.get(i);
+				NucleusMeshVertex p1_x = peripheralVertices.get(j);
+
+				NucleusMeshVertex p2_a = peripheralVertices.get(i+1);
+				NucleusMeshVertex p2_x = peripheralVertices.get(j-1);
+
+				// Each peripheral vertex links to two internal vertices
+				NucleusMeshVertex i1 = internalVertices.get(i-1);
+
+				// handle the end of the internal skeleton
+				NucleusMeshVertex i2;
+				if(i==internalVertices.size()){
+					i2 = i1; // when there is no point here, use the same vertex as i1
+				} else {
+					i2 = internalVertices.get(i);
+				}
+
+				this.getEdge(p1_a, i1);
+				this.getEdge(p2_a, i1);
+				this.getEdge(p2_a, i2);
+				//			
+				this.getEdge(p1_x, i1);
+				this.getEdge(p2_x, i1);
+				this.getEdge(p2_x, i2);
+				//			
+				//			
+				// Make the faces
+				this.getFace(p1_a, i1, p2_a);
+				this.getFace(p2_a, i1, i2);
+
+				this.getFace(p1_x, i1, p2_x);
+				this.getFace(p2_x, i1, i2);
+			}
+
+			// create the top faces - RP to nearest peripheral indexes to I0
+			getEdge(peripheralVertices.get(0), internalVertices.get(0));
+			getEdge(peripheralVertices.get(1), internalVertices.get(0));
+			getEdge(peripheralVertices.get(peripheralVertices.size()-1), internalVertices.get(0));
+
+
+			this.getFace(peripheralVertices.get(0), 
+					peripheralVertices.get(1), 
+					internalVertices.get(0));
+
+			this.getFace(peripheralVertices.get(0), 
+					peripheralVertices.get(peripheralVertices.size()-1), 
+					internalVertices.get(0));
+
+
+
+			// if needed, create the bottom face (final intenal vertex to central peripheral vertices)
+			if(peripheralVertices.size()%2!=0){
+
+				NucleusMeshVertex p1 = peripheralVertices.get(halfArray);
+				NucleusMeshVertex p2 = peripheralVertices.get(halfArray+1);
+				NucleusMeshVertex i1 = internalVertices.get(internalVertices.size()-1);
+
+				// Ensure the edges are created
+				getEdge(p1, p2);
+				getEdge(p1, i1);
+				getEdge(p2, i1);
+
+				this.getFace(p1, p2, i1);
+			}
+
+		} catch(Exception e){
+			warn("Error linking edges and vertices in mesh");
+			log(Level.FINE, "Error linking edges and vertices in mesh", e);
+		}
 		
 		
 	}

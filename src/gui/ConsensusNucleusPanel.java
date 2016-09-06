@@ -124,8 +124,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		JPanel rotatePanel = createRotationPanel();
 		panel.add(rotatePanel, BorderLayout.NORTH);
 		
+		/*
+		 * Used for debugging only - do not include in releases
+		 */
 		JPanel meshPanel = createMeshPanel();
-		panel.add(meshPanel, BorderLayout.CENTER);
+//		panel.add(meshPanel, BorderLayout.CENTER);
 		
 		
 		JPanel offsetPanel = createTranslatePanel();
@@ -133,12 +136,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		
 		return panel;
 	}
-	
-//	private JPanel createHeaderPanel(){
-//		JPanel panel = new JPanel(new FlowLayout());		
-//		return panel;
-//	}
-		
+			
 	private JPanel createMeshPanel(){
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
