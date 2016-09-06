@@ -121,6 +121,20 @@ public class RoundNucleus extends AbstractCellularComponent
 		this.setPosition(position);
 		this.nucleusNumber   = number;
 	}
+	
+	/**
+	 * Construct with an ROI, a source image and channel, and the original position in the source image
+	 * @param roi
+	 * @param f
+	 * @param channel
+	 * @param position
+	 * @param centreOfMass
+	 */
+	public RoundNucleus(Roi roi, File f, int number, double[] position, XYPoint centreOfMass){
+		super(roi, f, 0, position, centreOfMass );
+		this.nucleusNumber   = number;
+
+	}
 
 	public RoundNucleus(){
 		super();
@@ -409,7 +423,10 @@ public class RoundNucleus extends AbstractCellularComponent
 		this.segmentTags = map;
 	}
 		
-
+	@Override
+	public boolean isClockwiseRP(){
+		return false;
+	}
 
 	
 	public SignalCollection getSignalCollection(){

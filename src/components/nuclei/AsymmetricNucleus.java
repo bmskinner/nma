@@ -37,8 +37,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import utility.Utils;
-import components.generic.BorderTagObject;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 
@@ -59,19 +57,19 @@ public class AsymmetricNucleus
   }
 
   public AsymmetricNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
-		super(roi, file, number, position);
-	}
+	  super(roi, file, number, position);
+  }
   
+  public AsymmetricNucleus (Roi roi, File file, int number, double[] position, XYPoint centreOfMass) { // construct from an roi
+	  super(roi, file, number, position, centreOfMass);
+  }
+  
+  
+    
   @Override
   public Nucleus duplicate(){
-	  try {
-
-		  AsymmetricNucleus duplicate = new AsymmetricNucleus(this);
-		  return duplicate;
-
-	  } catch (Exception e) {
-		  return null;
-	  }
+	  AsymmetricNucleus duplicate = new AsymmetricNucleus(this);
+	  return duplicate;
   }
 
   /*
@@ -89,8 +87,8 @@ public class AsymmetricNucleus
     Set nucleus features
     -----------------------
   */
-  
-  protected boolean isRPClockwise(){
+  @Override
+  public boolean isClockwiseRP(){
 	  return this.clockwiseRP;
   }
 
@@ -98,7 +96,6 @@ public class AsymmetricNucleus
     this.tailEstimatePoints.add(p);
   }
   
-
   
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 //	  finest("\tReading asymmetric nucleus");

@@ -63,7 +63,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 
 	private double[] position;
 	
-	private XYPoint centreOfMass;
+	private XYPoint centreOfMass = new XYPoint(0,0);
 	
 	private Map<PlottableStatistic, Double> statistics = new HashMap<PlottableStatistic, Double>();
 		
@@ -123,6 +123,19 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 	public AbstractCellularComponent(Roi roi, File f, int channel, double[] position){
 		this(roi, f, channel);
 		this.position = position;
+	}
+	
+	/**
+	 * Construct with an ROI, a source image and channel, and the original position in the source image
+	 * @param roi
+	 * @param f
+	 * @param channel
+	 * @param position
+	 * @param centreOfMass
+	 */
+	public AbstractCellularComponent(Roi roi, File f, int channel, double[] position, XYPoint centreOfMass){
+		this(roi, f, channel, position);
+		this.centreOfMass = centreOfMass;
 	}
 	
 	/**
@@ -358,7 +371,19 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 		return centreOfMass;
 	}
 
+	
+	
+	/**
+	 * This is used only when creating nuclei in the NucleusFinder, since we can't
+	 * disrupt border positions. It sets the centre of mass without moving any of
+	 * the border points
+	 * @param centreOfMass
+	 */
+	public void setCentreOfMassDirectly(XYPoint centreOfMass) {
+		this.centreOfMass = centreOfMass;
+	}
 
+	@Override
 	public void setCentreOfMass(XYPoint centreOfMass) {
 //		this.centreOfMass = centreOfMass;
 		moveCentreOfMass(centreOfMass);

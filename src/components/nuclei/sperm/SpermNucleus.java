@@ -32,6 +32,7 @@ import ij.gui.Roi;
 import java.io.File;
 import java.io.IOException;
 
+import components.generic.XYPoint;
 import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
 
@@ -51,16 +52,16 @@ public class SpermNucleus extends AsymmetricNucleus {
 	public SpermNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 		super(roi, file, number, position);
 	}
+	
+	public SpermNucleus (Roi roi, File file, int number, double[] position, XYPoint centreOfMass) { // construct from an roi
+		super(roi, file, number, position, centreOfMass);
+	}
+	
 
 	@Override
 	public Nucleus duplicate(){
-		try {
-			SpermNucleus duplicate = new SpermNucleus(this);
-			return duplicate;
-
-		} catch (Exception e) {
-			return null;
-		}
+		SpermNucleus duplicate = new SpermNucleus(this);
+		return duplicate;
 	}
 
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {

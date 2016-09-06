@@ -154,5 +154,12 @@ public interface Nucleus extends CellularComponent, Indexable, Profileable, Tagg
 	 * and recalculate.
 	 */
 	public void updateVerticallyRotatedNucleus();
+	
+	/**
+	 * Is the reference point of the vertically rotated nucleus
+	 * pointing to the right?
+	 * @return
+	 */
+	public boolean isClockwiseRP();
 			
 }

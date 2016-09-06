@@ -32,6 +32,7 @@ import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
+import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
@@ -56,7 +57,7 @@ public class PigSpermNucleus
   * @param n the Nucleus to construct from
  * @throws Exception 
   */
-    public PigSpermNucleus(RoundNucleus n) throws Exception{
+    public PigSpermNucleus(Nucleus n) {
       super(n);
     }
 
@@ -68,13 +69,13 @@ public class PigSpermNucleus
 		super(roi, file, number, position);
 	}
     
+    public PigSpermNucleus (Roi roi, File file, int number, double[] position, XYPoint centreOfMass) { // construct from an roi
+		super(roi, file, number, position, centreOfMass);
+	}
+    
     public Nucleus duplicate(){
-		try {
-			PigSpermNucleus duplicate = new PigSpermNucleus(this);
-			return duplicate;
-		} catch (Exception e) {
-			return null;
-		}
+    	PigSpermNucleus duplicate = new PigSpermNucleus(this);
+    	return duplicate;
 	}
     
 

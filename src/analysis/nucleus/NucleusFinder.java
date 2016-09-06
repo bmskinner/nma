@@ -124,7 +124,7 @@ public class NucleusFinder implements Loggable {
   */
 	protected List<Cell> processImage(ImageStack image, File path) throws Exception{
 
-		log(Level.FINE, "File:  "+path.getName());
+		fine("File:  "+path.getName());
 		
 		List<Cell> result = new ArrayList<Cell>();
 						
@@ -136,7 +136,7 @@ public class NucleusFinder implements Loggable {
 						
 		if(roiList.isEmpty()){
 
-			log(Level.FINE, "No usable nuclei in image");
+			fine("No usable nuclei in image");
 			
 			return result;
 		}
@@ -145,18 +145,22 @@ public class NucleusFinder implements Loggable {
 
 		for(Roi roi : roiList){
 
-			log(Level.FINEST, "Acquiring nucleus "+nucleusNumber);
-			
-			
-			try{
-				Cell cell = makeCell(roi, image, nucleusNumber++, path); // get the profile data back for the nucleus
-				result.add(cell);
-				log(Level.FINER, "Cell created");
+			finest( "Acquiring nucleus "+nucleusNumber);
+
+			Cell cell = null;
+			try{	
+				cell = makeCell(roi, image, nucleusNumber++, path); // get the profile data back for the nucleus
 			} catch(Exception e){
 
-				logError("Error acquiring nucleus", e);
-				
+				error("Error acquiring nucleus", e);
+
 			}
+
+			if(cell!=null){
+				result.add(cell);
+				finer("Cell created");
+			}
+			
 		} 
 		return result;
 	}
@@ -206,36 +210,36 @@ public class NucleusFinder implements Loggable {
 	  * Save the region of the input image containing the nucleus
 	  * Create a Nucleus and add it to the collection
 	  *
-	  * @param nucleus the ROI within the image
+	  * @param roi the ROI within the image
 	  * @param image the ImagePlus containing the nucleus
 	  * @param nucleusNumber the count of the nuclei in the image
 	  * @param path the full path to the image
 	  */
-	private Cell makeCell(Roi nucleus, ImageStack image, int nucleusNumber, File path){
+	private Cell makeCell(Roi roi, ImageStack image, int nucleusNumber, File path){
 
 		Cell result = null;
+		
 		  // measure the area, density etc within the nucleus
-
 		ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
-		  StatsMap values = detector.measure(nucleus, ip);
+		StatsMap values   = detector.measure(roi, ip);
 
 		  // save the position of the roi, for later use
-		  double xbase = nucleus.getXBase();
-		  double ybase = nucleus.getYBase();
+		  double xbase = roi.getXBase();
+		  double ybase = roi.getYBase();
 
-		  Rectangle bounds = nucleus.getBounds();
+		  Rectangle bounds = roi.getBounds();
 
 		  double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
 
 		  try{
 		
-			  nucleus.setLocation(0,0); // translate the roi to the new image coordinates
+			  roi.setLocation(0,0); // translate the roi to the new image coordinates
 			  
-			  // turn roi into Nucleus for manipulation
-			  Nucleus currentNucleus = createNucleus(nucleus, path, nucleusNumber, originalPosition, options.getNucleusType());
-			  		
-			  currentNucleus.setCentreOfMass(new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase)); // need to offset
+			  // create a Nucleus from the roi
+			  XYPoint centreOfMass = new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase);
 			  
+			  Nucleus currentNucleus = createNucleus(roi, path, nucleusNumber, originalPosition, options.getNucleusType(), centreOfMass);
+			  					  
 			  currentNucleus.setStatistic(NucleusStatistic.AREA,      values.get("Area"));
 			  currentNucleus.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
 			  currentNucleus.setStatistic(NucleusStatistic.PERIMETER, values.get("Perim"));
@@ -254,21 +258,23 @@ public class NucleusFinder implements Loggable {
 			  
 		  }catch(Exception e){
 	
-			  logError(" Error in nucleus assignment", e);
+			  error(" Error in nucleus assignment", e);
 			  
 		  }
 		  return result;
 	  }
 	
 	/**
-	 * Create a Nucleus from an ROI.
+	 * Create a Nucleus from an ROI. Fetches the appropriate constructor based
+	 * on the nucleus type
 	 * @param roi the ROI
 	 * @param path the path to the image
 	 * @param nucleusNumber the number of the nucleus in the image
 	 * @param originalPosition the bounding box position of the nucleus
+	 * @param nucleusType the class of nucleus
 	 * @return a new nucleus of the appropriate class
 	 */
-	private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition, NucleusType nucleusType){
+	private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition, NucleusType nucleusType, XYPoint centreOfMass){
 
 		  Nucleus n = null;
 		  try {
@@ -279,7 +285,7 @@ public class NucleusFinder implements Loggable {
 			  for(Constructor<?> c : list){
 				  Class<?>[] classes = c.getParameterTypes();
 
-				  if(classes.length==4){
+				  if(classes.length==5){
 					  nucleusConstructor = nucleusType.getNucleusClass()
 					  .getConstructor(classes);
 				  }
@@ -288,11 +294,12 @@ public class NucleusFinder implements Loggable {
 			  n = (Nucleus) nucleusConstructor.newInstance(roi, 
 					  path, 
 					  nucleusNumber, 
-					  originalPosition);
+					  originalPosition,
+					  centreOfMass);
 			  
 		  } catch(Exception e){
 
-			  logError( "Error creating nucleus", e);
+			  error( "Error creating nucleus", e);
 			  
 		  }
 		  return n;

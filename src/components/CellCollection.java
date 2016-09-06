@@ -1216,6 +1216,16 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 		}
 		return shared;
 	}
+	
+	public int countClockWiseRPNuclei(){
+		int count=0;
+		for(Nucleus n : getNuclei()){
+			if(n.isClockwiseRP()){
+				count++;
+			}
+		}
+		return count;
+	}
     
   public String toString(){
 	  
@@ -1224,6 +1234,9 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 
 	  b.append("Collection:" + getName() + newLine);
 	  b.append("Nuclei: "+ this.getNucleusCount() + newLine);
+	  
+	  b.append("Clockwise: "+ this.countClockWiseRPNuclei() + newLine);
+	  
 	  b.append("Source folder: "+this.getFolder().getAbsolutePath()+newLine);
 	  b.append("Nucleus type: "+this.nucleusType+newLine);
 	  b.append("Profile collections:"+newLine);

@@ -68,15 +68,15 @@ public class RodentSpermNucleus extends SpermNucleus {
 		super(roi, file, number, position);
 	}
 	
+	public RodentSpermNucleus (Roi roi, File file, int number, double[] position, XYPoint centreOfMass) { // construct from an roi
+		super(roi, file, number, position, centreOfMass);
+	}
+	
 	@Override
 	public Nucleus duplicate(){
-		try {
-			RodentSpermNucleus duplicate = new RodentSpermNucleus(this);			
-			return duplicate;
-			
-		} catch (Exception e) {
-			return null;
-		}
+		RodentSpermNucleus duplicate = new RodentSpermNucleus(this);			
+		return duplicate;
+
 	}
 	
 	@Override
@@ -437,64 +437,6 @@ public class RodentSpermNucleus extends SpermNucleus {
 		}
 	}
 
-	/**
-	 * Checks if the smoothed array nuclear shape profile has the 
-	 * acrosome to the rear of the array. 
-	 * Counts the number of points above 180 degrees in each half of the array.
-	 * @return true if acrosome is at the beginning of the profile
-	 * @throws Exception
-	 */
-//	public boolean isProfileOrientationOK() throws Exception{
-//
-//		int frontPoints = 0;
-//		int rearPoints = 0;
-//
-//		Profile profile = this.getProfile(ProfileType.ANGLE, BorderTag.REFERENCE_POINT);
-//
-//		int midPoint = (int) (this.getBorderLength()/2) ;
-//		for(int i=0; i<this.getBorderLength();i++){ // integrate points over 180
-//
-//			if(i<midPoint){
-//				frontPoints += profile.get(i);
-//			}
-//			if(i>midPoint){
-//				rearPoints  += profile.get(i);
-//			}
-//		}
-//
-//		if(frontPoints > rearPoints){ // if the maxIndex is closer to the end than the beginning
-//			return true;
-//		} else{ 
-//			return false;
-//		}
-//	}
-	
-	/*
-	 * Test if the nucleus, after rotating to vertical, has the hook to the left
-	 * or to the right
-	 */
-	public boolean isPointingLeft(){
-		
-		Nucleus testNucleus = this.getVerticallyRotatedNucleus();
-		
-
-		/*
-		 * Get the X position of the reference point
-		 */
-		double vertX = testNucleus.getBorderTag(BorderTagObject.REFERENCE_POINT).getX();
-
-		/*
-		 * If the reference point is left of the centre of mass, 
-		 * the nucleus is pointing left
-		 */
-		
-		if(vertX < testNucleus.getCentreOfMass().getX() ){
-			return true;
-		} else {
-			return false;
-		}
-		
-	}
 	
 	@Override
 	public Nucleus getVerticallyRotatedNucleus(){
@@ -519,10 +461,11 @@ public class RodentSpermNucleus extends SpermNucleus {
 		 */
 		
 		if(vertX > verticalNucleus.getCentreOfMass().getX() ){
+			clockwiseRP = true; // this is only set to true, as the default is false, and will become false after the nucleus is flipped
 			verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
 			verticalNucleus.moveCentreOfMass(new XYPoint(0,0));
-		}
-//		finest("Checked hook is to the left");
+		} 
+
 		return verticalNucleus;
 	}
 

@@ -101,7 +101,6 @@ public class NucleusProberWorker extends ImageProberWorker {
 				finer("Applying flattening filter");
 				flattenProcessor = ImageFilterer.squashChromocentres(processedImage, cannyOptions.getFlattenThreshold());
 				processedImage = flattenProcessor.duplicate();
-				flattenProcessor.invert();
 			} 
 			flattenProcessor.invert();
 			
