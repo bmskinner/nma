@@ -907,7 +907,14 @@ public class MainWindow
 			 * The countdown latch does nothing here, but must be retained for
 			 * compatibility.
 			 */
-			consensusNucleusPanel.clearChartCache();
+			fine("Clearing chart cache for consensus charts");
+			
+			final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+			list.add(dataset);
+			segmentsDetailPanel.clearChartCache(list);  // segment positions charts need updating
+			nuclearBoxplotsPanel.clearChartCache(list); // overlaid nuclei need updating
+			signalsDetailPanel.clearChartCache(list);   // signal consensus needs updating
+			consensusNucleusPanel.clearChartCache(list);    // consensus panel needs updating
 
 			final CountDownLatch latch = new CountDownLatch(1);
 			finest("Created latch: "+latch.getCount());
@@ -915,26 +922,24 @@ public class MainWindow
 
 			finest("Running refolding");
 			try {
+				fine("Awaiting latch");
 				latch.await();
-				dataset.getAnalysisOptions().setRefoldNucleus(true);
-				dataset.getAnalysisOptions().setRefoldMode("Fast");
+				fine("Latch has released from refolding");
+				if(dataset.hasAnalysisOptions()){
+					dataset.getAnalysisOptions().setRefoldNucleus(true);
+					dataset.getAnalysisOptions().setRefoldMode("Fast");
+					fine("Set refold status in options");
+				} else {
+					fine("Dataset has no analysis options, cannot set refold state");
+				}
+				
 
 
-
-				fine("Set refold status in options");
-				final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-				list.add(dataset);
-				segmentsDetailPanel.refreshChartCache(list); // segment positions charts need updating
-				nuclearBoxplotsPanel.refreshChartCache(list); // overlaid nuclei need updating
-				signalsDetailPanel.refreshChartCache(list); // signal consensus needs updating
-
-
-				fine("Preparing to select refolded dataset");
+//				fine("Preparing to select refolded dataset");
 				populationsPanel.selectDataset(dataset);
 				//					log(Level.FINE, "Clearing consensus chart cache for refolded dataset");
 				//					consensusNucleusPanel.refreshChartCache();
 
-				fine("Latch counted down: "+latch.getCount());
 			} catch (InterruptedException e) {
 				error("Interruption to thread", e);
 			}

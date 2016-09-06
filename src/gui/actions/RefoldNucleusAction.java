@@ -52,14 +52,14 @@ public class RefoldNucleusAction extends ProgressableAction {
 
 		} catch(Exception e1){
 			this.cancel();
-			logError("Error refolding nucleus", e1);
+			error("Error refolding nucleus", e1);
 		}
 	}
 	
 	@Override
 	public void finished(){
 		this.cancel();
-		log(Level.FINE, "Refolding finished, cleaning up");
+		fine("Refolding finished, cleaning up");
 		super.finished();
 		this.countdownLatch();
 		
