@@ -117,8 +117,21 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 	private ImageProcessor rotateToVertical(Cell c, ImageProcessor ip){
 		// Calculate angle for vertical rotation
 		Nucleus n = c.getNucleus();
-		XYPoint topPoint = n.getBorderPoint(BorderTagObject.TOP_VERTICAL);
-		XYPoint btmPoint = n.getBorderPoint(BorderTagObject.BOTTOM_VERTICAL);
+		
+		XYPoint topPoint;
+		XYPoint btmPoint;
+		
+		if( ! n.hasBorderTag(BorderTagObject.TOP_VERTICAL) || ! n.hasBorderTag(BorderTagObject.BOTTOM_VERTICAL)){
+			topPoint = n.getCentreOfMass();
+			btmPoint = n.getBorderPoint(BorderTagObject.ORIENTATION_POINT);
+			
+		} else {
+			
+			topPoint = n.getBorderPoint(BorderTagObject.TOP_VERTICAL);
+			btmPoint = n.getBorderPoint(BorderTagObject.BOTTOM_VERTICAL);
+		}
+		
+		
 
 		// Find which point is higher in the image
 		XYPoint upperPoint = topPoint.getY()>btmPoint.getY()? topPoint : btmPoint;
