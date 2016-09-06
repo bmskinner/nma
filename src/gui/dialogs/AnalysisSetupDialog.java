@@ -138,6 +138,16 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		setModal(true); // ensure nothing happens until this window is closed
 		
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // disable the 'X'; we need to use the footer buttons 
+		
+		this.addWindowListener(new WindowAdapter() {
+
+			public void windowClosing(WindowEvent e) {
+				analysisOptions = null;
+				AnalysisSetupDialog.this.setVisible(false);
+			}
+
+
+		});
 		setDefaultOptions();
 		createAndShowGUI();
 		pack();
@@ -793,18 +803,17 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 
 	
 	private boolean getImageDirectory(){
-		
-//		File defaultDir = new File("J:\\Protocols\\Scripts and macros\\");
-		
+				
 		File defaultDir = analysisOptions.getFolder();
 		
-		JFileChooser fc = new JFileChooser(defaultDir);
+		JFileChooser fc = new JFileChooser(defaultDir); // if null, will be home dir
+
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
 
 		int returnVal = fc.showOpenDialog(fc);
 		if (returnVal != 0)	{
-			return false;
+			return false; // user cancelled
 		}
 		
 		File file = fc.getSelectedFile();
@@ -813,13 +822,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 			return false;
 		}
 		fine("Selected directory: "+file.getAbsolutePath());
-//		return file;
-		
 
-//		DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
-//		String folderName = localOpenDialog.getDirectory();
-//
-//		if(folderName==null) return false; // user cancelled
 		analysisOptions.setFolder( file);
 
 		if(analysisOptions.isReanalysis()){
