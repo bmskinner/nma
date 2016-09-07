@@ -501,12 +501,67 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				meshConsensus = meshConsensus.straighten();
 			}
 			
+
+			
+			List<Cell> cells = getCells(cellsWithSignals);
+
+			
+			int cellNumber = 0;
+			
+			
+			for(Cell cell : cells){
+				fine("Drawing signals for cell "+cell.getNucleus().getNameAndNumber());
+
+				NucleusMesh cellMesh;
+				try {
+					cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
+					
+					if(straighten){
+						cellMesh = cellMesh.straighten();
+					}
+					
+					// Get the image with the signal
+					ImageProcessor ip = cell.getNucleus().getSignalCollection().getImage(signalGroup);
+					finest("Image for "+cell.getNucleus().getNameAndNumber()+" is "+ip.getWidth()+"x"+ip.getHeight());
+					
+					// Create NucleusMeshImage from nucleus.
+					finer("Making nucleus mesh image");
+					NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
+					
+					// Draw NucleusMeshImage onto consensus mesh.
+					finer("Warping image onto consensus mesh");
+					ImageProcessor warped = im.meshToImage(meshConsensus);
+					finest("Warped image is "+ip.getWidth()+"x"+ip.getHeight());
+					warpedImages[cellNumber] = warped;
+					
+					
+				} catch(IllegalArgumentException e){
+					
+					fine("Error creating warping mesh");
+					warn(e.getMessage());
+					
+					// Make a blank image for the array
+					warpedImages[cellNumber] = createBlankProcessor();
+					
+					
+				} finally {
+					
+					mergedImage = combineImages();
+					mergedImage = rescaleImageIntensity();
+					
+					finer("Completed cell "+cellNumber);
+					publish(cellNumber++);
+				}
+				
+			}
+			
+		}
+		
+		private List<Cell> getCells(boolean withSignalsOnly){
+			
 			SignalManager m =  sourceDataset.getCollection().getSignalManager();
-			
-			
-			
 			List<Cell> cells;
-			if(cellsWithSignals){
+			if(withSignalsOnly){
 				finer("Only fetching cells with signals");
 				cells = m.getCellsWithNuclearSignals(signalGroup, true);
 			} else {
@@ -514,40 +569,21 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				cells = sourceDataset.getCollection().getCells();
 				
 			}
+			return cells;
+		}
+		
+		
+		private ImageProcessor createBlankProcessor(){
+			int w = warpedImages[0].getWidth();
+			int h = warpedImages[0].getHeight();
 			
-			int cellNumber = 0;
-			
-			
-			for(Cell cell : cells){
-				fine("Drawing signals for cell "+cell.getNucleus().getNameAndNumber());
-				// Get each nucleus. Make a mesh.
-				NucleusMesh cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
-				
-				if(straighten){
-					cellMesh = cellMesh.straighten();
-				}
-				
-				// Get the image with the signal
-				ImageProcessor ip = cell.getNucleus().getSignalCollection().getImage(signalGroup);
-				finest("Image for "+cell.getNucleus().getNameAndNumber()+" is "+ip.getWidth()+"x"+ip.getHeight());
-				
-				// Create NucleusMeshImage from nucleus.
-				finer("Making nucleus mesh image");
-				NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
-				
-				// Draw NucleusMeshImage onto consensus mesh.
-				finer("Warping image onto consensus mesh");
-				ImageProcessor warped = im.meshToImage(meshConsensus);
-				finest("Warped image is "+ip.getWidth()+"x"+ip.getHeight());
-				warpedImages[cellNumber] = warped;
-				mergedImage = combineImages();
-				mergedImage = rescaleImageIntensity();
-				finer("Completed cell "+cellNumber);
-				publish(cellNumber++);
-				
-				
+			// Create an empty white processor
+			ImageProcessor ip = new ByteProcessor(w, h);
+			for(int i=0; i<ip.getPixelCount(); i++){
+				ip.set(i, 255); // set all to white initially
 			}
 			
+			return ip;
 		}
 		
 		/**
@@ -559,10 +595,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			int h = warpedImages[0].getHeight();
 			
 			// Create an empty white processor
-			ImageProcessor mergeProcessor = new ByteProcessor(w, h);
-			for(int i=0; i<mergeProcessor.getPixelCount(); i++){
-				mergeProcessor.set(i, 255); // set all to white initially
-			}
+			ImageProcessor mergeProcessor = createBlankProcessor();
 			
 			int nonNull = 0;
 			

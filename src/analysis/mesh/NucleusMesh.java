@@ -117,13 +117,18 @@ public class NucleusMesh implements Loggable {
 	public NucleusMesh(Nucleus n, int vertexSpacing){
 		this.nucleus = n;
 		this.vertexSpacing = vertexSpacing;
-		
-		this.determineVertexProportions();
-		
-		this.createPeripheralVertices();
-		this.createInternalVertices();
-		
-		this.createEdgesAndFaces();
+
+		try {
+			this.determineVertexProportions();
+
+			this.createPeripheralVertices();
+
+			this.createInternalVertices();
+
+			this.createEdgesAndFaces();
+		} catch(IllegalArgumentException e){
+			throw new IllegalArgumentException("Unable to create mesh for nucleus "+n.getNameAndNumber()+": "+e.getMessage());
+		}
 	}
 	
 	
@@ -138,10 +143,16 @@ public class NucleusMesh implements Loggable {
 		this.vertexSpacing = template.vertexSpacing;
 		this.segmentCount = template.segmentCount;
 		
-		this.createPeripheralVertices();
-		this.createInternalVertices();
 		
-		this.createEdgesAndFaces();
+		
+		try {
+			this.createPeripheralVertices();
+			this.createInternalVertices();
+			this.createEdgesAndFaces();
+			
+		} catch(IllegalArgumentException up){
+			throw new IllegalArgumentException("Unable to create mesh for nucleus "+n.getNameAndNumber()+": "+up.getMessage());
+		}
 	}
 	
 	/**
@@ -585,7 +596,17 @@ public class NucleusMesh implements Loggable {
 			NucleusBorderSegment segment = list.get(segIndex);
 			finer("Segment "+segIndex+": "+segment.length());
 			
+			
+			
 			List<Double> proportions = segmentVertexProportions.get(segIndex);
+			
+			
+			if(segment.length()<=proportions.size()){
+				// The segment is too small for each vertex to have a separate XYPoint
+				// Usually caused when mapping a poorly segmented nucleus onto a template mesh.
+				throw new IllegalArgumentException("Segment "+segIndex+" is too small to fit mesh");
+			}
+			
 			for(Double d : proportions){
 				int index = segment.getProportionalIndex(d);
 				
