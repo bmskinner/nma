@@ -24,6 +24,11 @@ import gui.components.BorderTagEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -32,7 +37,10 @@ import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.entity.XYItemEntity;
 
+import analysis.AnalysisDataset;
+import components.Cell;
 import components.generic.BorderTagObject;
+import components.generic.ProfileType;
 
 @SuppressWarnings("serial")
 public class BorderTagDualChartPanel extends DualChartPanel{
@@ -44,7 +52,6 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 	public BorderTagDualChartPanel(){
 		super();
 		
-		createBorderTagPopup();
 		
 		chartPanel.addChartMouseListener(new ChartMouseListener() {
 
@@ -65,10 +72,35 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 		    	
 		});
 	}
+	
+	public void createBorderTagPopup(Cell cell){
+		Set<BorderTagObject> set = cell.getNucleus().getBorderTags().keySet();
+		List<BorderTagObject> list = new ArrayList<BorderTagObject>(set);
+		makePopup(list);
 		
-	private void createBorderTagPopup(){
+	}
+		
+	public void createBorderTagPopup(AnalysisDataset dataset){
 
-		for(BorderTagObject tag : BorderTagObject.values()){
+		List<BorderTagObject> list = dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getBorderTags();
+		makePopup(list);
+
+	}
+	
+	private void makePopup(List<BorderTagObject> list){
+		popupMenu = new JPopupMenu("Popup");
+		
+		Collections.sort(list);
+		
+		for(BorderTagObject tag : list){
+			
+			/*
+			 * The IP is determined solely by the OP
+			 */
+			if( tag.equals(BorderTagObject.INTERSECTION_POINT)){
+				continue;
+			}
+			
 			JMenuItem item = new JMenuItem(tag.toString());
 			
 			item.addActionListener(new ActionListener() {
@@ -81,14 +113,8 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 			});
 			popupMenu.add(item);
 
-			/*
-			 * The IP is determined solely by the OP
-			 */
-			if( tag.equals(BorderTagObject.INTERSECTION_POINT)){
-				item.setEnabled(false);
-			}
+			
 		}
-
 	}
 	
 }

@@ -154,6 +154,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 		JFreeChart rangeChart = getChart(rangeOptions);
 		
 		dualPanel.setCharts(chart, rangeChart);
+		dualPanel.createBorderTagPopup(activeDataset());
 
 	}
 	

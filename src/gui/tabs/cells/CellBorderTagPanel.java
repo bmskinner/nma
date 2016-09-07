@@ -149,6 +149,8 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 						.build();
 					
 					setChart(rangeOptions);
+					
+					dualPanel.createBorderTagPopup(this.getCellModel().getCell());
 
 					profileOptions.setEnabled(true);	
 					
