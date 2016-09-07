@@ -322,22 +322,30 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 	public boolean equals(CellularComponent c) {
 		return false;
 	}
+	
+	public synchronized boolean hasStatistic(PlottableStatistic stat){
+		return this.statistics.containsKey(stat);
+	}
 
 	@Override
-	public double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
+	public synchronized double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
 		if(this.statistics.containsKey(stat)){
-			double result = this.statistics.get(stat);
+			finest("Fetching stat "+stat);
+			double result = statistics.get(stat);
 			result = stat.convert(result, this.getScale(), scale);
 			return result;
 		} else {
+//			finest("Calculating stat "+stat);
 			double result = calculateStatistic(stat);
+//			finest("Setting stat "+stat+": "+result);
 			setStatistic(stat, result);
+//			finest("Set stat "+stat+"; returning");
 			return result;
 		}
 	}
 	
 	@Override
-	public double getSafeStatistic(PlottableStatistic stat, MeasurementScale scale){
+	public synchronized double getSafeStatistic(PlottableStatistic stat, MeasurementScale scale){
 		try {
 			return getStatistic(stat, scale);
 		} catch (Exception e) {
@@ -346,18 +354,19 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 	}
 	
 	// For subclasses to override
-	protected double calculateStatistic(PlottableStatistic stat){
+	protected synchronized double calculateStatistic(PlottableStatistic stat){
+//		finest("Abstract method for calculating stat: "+stat);
 		return 0;
 	}
 	
 	@Override
-	public double getStatistic(PlottableStatistic stat) {
+	public synchronized double getStatistic(PlottableStatistic stat) {
 		return this.getStatistic(stat, MeasurementScale.PIXELS);
 	}
 
 
 	@Override
-	public void setStatistic(PlottableStatistic stat, double d) {
+	public synchronized void setStatistic(PlottableStatistic stat, double d) {
 		this.statistics.put(stat, d);
 	}
 

@@ -176,7 +176,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("\tReading RulesetCollection");
+//		finest("\tReading RulesetCollection");
 		in.defaultReadObject();
 		
 		
@@ -204,13 +204,13 @@ public class RuleSetCollection implements Serializable, Loggable {
 			
 		}
 				
-		finest("\tRead RulesetCollection");
+//		finest("\tRead RulesetCollection");
 	}
 
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\tWriting RulesetCollection");
+//		finest("\tWriting RulesetCollection");
 		out.defaultWriteObject();
-		finest("\tWrote RulesetCollection");
+//		finest("\tWrote RulesetCollection");
 	}
 
 }

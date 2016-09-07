@@ -82,7 +82,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 	@Override
 	protected double calculateStatistic(NucleusStatistic stat){
 		double result = super.calculateStatistic(stat);
-		
+//		finest("Calculating stat in rodent sperm nucleus: "+stat);
 		switch(stat){
 			
 			case HOOK_LENGTH:
@@ -95,6 +95,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 				return result;
 		
 		}
+//		finest("Calculated stat in rodent sperm nucleus: "+stat);
 		return result;
 		
 	}
@@ -110,11 +111,6 @@ public class RodentSpermNucleus extends SpermNucleus {
 			if(tag.equals(BorderTagObject.TOP_VERTICAL) || tag.equals(BorderTagObject.BOTTOM_VERTICAL)){
 				
 				calculateHookAndBodyLength();
-				// Clear cached stats
-//				this.hookLength = -1;
-//				this.bodyWidth  = -1;
-//				setStatistic(NucleusStatistic.HOOK_LENGTH, -1);
-//				setStatistic(NucleusStatistic.BODY_WIDTH,  -1);
 			}
 		}
 		
@@ -122,15 +118,29 @@ public class RodentSpermNucleus extends SpermNucleus {
 	
 	private double getHookOrBodyLength(boolean useHook) {
 
-		if(getStatistic(NucleusStatistic.HOOK_LENGTH) == -1 || getStatistic(NucleusStatistic.BODY_WIDTH) ==-1){
+		// check stat is present before calling a getStatistic
+		if(hasStatistic(NucleusStatistic.HOOK_LENGTH) || hasStatistic(NucleusStatistic.BODY_WIDTH)){
+
+			if(getStatistic(NucleusStatistic.HOOK_LENGTH) == -1 || getStatistic(NucleusStatistic.BODY_WIDTH) ==-1){
+				calculateHookAndBodyLength();
+			}
+
+			
+
+		} else {
 			calculateHookAndBodyLength();
 		}
-		
-		if(useHook){
-			return getStatistic(NucleusStatistic.HOOK_LENGTH);
-		} else {
-			return getStatistic(NucleusStatistic.BODY_WIDTH);
-		}	
+			
+		double stat = useHook 
+				? getStatistic(NucleusStatistic.HOOK_LENGTH) 
+				: getStatistic(NucleusStatistic.BODY_WIDTH);
+
+		stat = stat == -2d ? 0 : stat; // -2 is the error code when TV and BV are not present. Using -1 will cause infinite loop.
+
+//		finest("Hook/body is "+stat);
+		return stat;
+
+			
 	}
 	
 	private void calculateHookAndBodyLength() {
@@ -217,20 +227,16 @@ public class RodentSpermNucleus extends SpermNucleus {
 			
 			setStatistic(NucleusStatistic.HOOK_LENGTH, distanceHook);
 			setStatistic(NucleusStatistic.BODY_WIDTH,  distanceHump);
-			
-//			this.hookLength = distanceHook;
-//			this.bodyWidth  = distanceHump;
-			
+						
 			finer("Hook length is "+ distanceHook);
 			finer("Body width is "+ distanceHump);
 			
 			finest("Hook length and body width calculated");
 		} else {
 			finest("Top and bottom vertical not assigned, skipping");
-//			this.hookLength = -1;
-//			this.bodyWidth 	= -1;
-			setStatistic(NucleusStatistic.HOOK_LENGTH, -1);
-			setStatistic(NucleusStatistic.BODY_WIDTH,  -1);
+
+			setStatistic(NucleusStatistic.HOOK_LENGTH, -2);
+			setStatistic(NucleusStatistic.BODY_WIDTH,  -2);
 		}
 		testNucleus = null;
 	}

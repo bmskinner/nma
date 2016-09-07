@@ -311,9 +311,10 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 		
 	}
-	
+
 	protected double calculateStatistic(NucleusStatistic stat) {
 		
+//		finest("Calculating stat in round nucleus: "+stat);
 		double result = 0;
 		switch(stat){
 		
@@ -350,6 +351,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			break;
 	
 		}
+//		finest("Calculated stat in round nucleus: "+stat);
 		return result;
 	}
 	
