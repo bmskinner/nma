@@ -457,6 +457,7 @@ public class NucleusMesh implements Loggable {
 		result.createEdgesAndFaces();
 		
 		finer("Straightened mesh");
+		finer(result.toString());
 		
 	
 		return result;

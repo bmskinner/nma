@@ -47,7 +47,6 @@ import gui.components.BorderTagEvent;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.panels.BorderTagDualChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import gui.dialogs.RulesetDialog;
 
 
 @SuppressWarnings("serial")

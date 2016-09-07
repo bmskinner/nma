@@ -20,7 +20,7 @@
 package analysis.signals;
 
 import gui.ImageType;
-import gui.dialogs.SignalDetectionImageProber.SignalImageType;
+import gui.tabs.signals.SignalDetectionImageProber.SignalImageType;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.process.FloatPolygon;
@@ -33,6 +33,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.table.TableModel;
 
 import stats.NucleusStatistic;

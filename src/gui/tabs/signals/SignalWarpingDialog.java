@@ -18,7 +18,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package gui.dialogs;
+package gui.tabs.signals;
 
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
@@ -53,15 +53,12 @@ import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import analysis.AnalysisDataset;
-import analysis.AnalysisWorker;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshImage;
 import analysis.signals.SignalManager;
-import analysis.signals.SignalWarper;
 import gui.LoadingIconDialog;
 import gui.components.panels.DatasetSelectionPanel;
 import gui.components.panels.SignalGroupSelectionPanel;
-import gui.tabs.cells.LabelInfo;
 
 @SuppressWarnings("serial")
 public class SignalWarpingDialog extends LoadingIconDialog implements PropertyChangeListener, ActionListener{
@@ -648,6 +645,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				int pixel = mergedImage.get(i);
 				maxIntensity = pixel > maxIntensity ? pixel : maxIntensity;
 				minIntensity = pixel < minIntensity ? pixel : minIntensity;
+			}
+			
+			if(maxIntensity==0){
+				return mergedImage;
 			}
 			
 			double range        = maxIntensity - minIntensity;

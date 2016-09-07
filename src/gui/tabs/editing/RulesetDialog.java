@@ -1,4 +1,4 @@
-package gui.dialogs;
+package gui.tabs.editing;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;

@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package gui.dialogs;
+package gui.tabs.signals;
 
 import java.awt.Dimension;
 import java.io.File;
@@ -27,6 +27,8 @@ import analysis.AnalysisOptions;
 import analysis.signals.NuclearSignalOptions;
 import analysis.signals.SignalProberWorker;
 import gui.ImageType;
+import gui.dialogs.ImageProber;
+import gui.dialogs.ImageProber.IconCellRenderer;
 
 
 @SuppressWarnings("serial")

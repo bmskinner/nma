@@ -1,4 +1,6 @@
-package gui.dialogs;
+package gui.tabs.editing;
+
+import gui.dialogs.SettingsDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Component;

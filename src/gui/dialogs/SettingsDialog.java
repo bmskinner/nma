@@ -63,7 +63,7 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 	protected boolean readyToRun = false;
 	private final List<Object> interfaceListeners 	= new ArrayList<Object>();
 		
-	String[] channelOptionStrings = {"Greyscale", "Red", "Green", "Blue"};
+	protected String[] channelOptionStrings = {"Greyscale", "Red", "Green", "Blue"};
 	
 	/**
 	 * Constructor for generic dialogs not attached to a frame 

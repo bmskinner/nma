@@ -92,7 +92,6 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
 		commandMap.put("unfuck", InterfaceMethod.RESEGMENT_SELECTED_DATASET);
 		commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
-		commandMap.put("clear", InterfaceMethod.CLEAR_LOG_WINDOW);
 		commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
 		commandMap.put("nucleus history", InterfaceMethod.DUMP_LOG_INFO);
 		commandMap.put("info", InterfaceMethod.INFO);
@@ -347,6 +346,10 @@ public class LogPanel extends DetailPanel implements ActionListener {
 					log(Level.INFO, "This version built at:");
 					log(Level.INFO, Constants.BUILD);
 					break;
+				}
+				
+				case "clear":{
+					clear();
 				}
 				
 				default: {

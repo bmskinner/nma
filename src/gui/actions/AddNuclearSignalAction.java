@@ -18,7 +18,7 @@
  *******************************************************************************/
 package gui.actions;
 
-import gui.dialogs.SignalDetectionSettingsDialog;
+import gui.tabs.signals.SignalDetectionSettingsDialog;
 import gui.DatasetEvent.DatasetMethod;
 import gui.MainWindow;
 import gui.ThreadManager;
@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
 import analysis.AnalysisDataset;
 import analysis.signals.SignalDetector;
 import analysis.signals.SignalManager;

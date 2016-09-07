@@ -1,4 +1,4 @@
-package gui.dialogs;
+package gui.tabs.editing;
 
 import gui.LoadingIconDialog;
 import gui.components.panels.ProfileTypeOptionsPanel;

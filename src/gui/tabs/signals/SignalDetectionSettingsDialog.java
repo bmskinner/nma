@@ -16,12 +16,15 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package gui.dialogs;
+package gui.tabs.signals;
 
 import gui.Labels;
 import gui.components.ColourSelecter;
+import gui.dialogs.ImageProber;
+import gui.dialogs.SettingsDialog;
 import ij.IJ;
 import ij.io.DirectoryChooser;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -33,6 +36,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.UUID;
 import java.util.logging.Level;
+
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;

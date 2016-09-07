@@ -43,7 +43,6 @@ import analysis.AnalysisDataset;
 import analysis.signals.SignalManager;
 import charting.charts.ConsensusNucleusChartPanel;
 import charting.charts.FixedAspectRatioChartPanel;
-
 import charting.charts.OutlineChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.SignalTableCell;
@@ -57,7 +56,6 @@ import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ExportableTable;
-import gui.dialogs.SignalWarpingDialog;
 import gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
