@@ -1393,7 +1393,7 @@ private static NucleusDatasetCreator instance = null;
 						xpoints[i] = p.getX();
 						ypoints[i] = p.getY();
 						
-						log(nucleus.getNameAndNumber()+": "+xpoints[i]+", "+ypoints[i]);
+//						log(nucleus.getNameAndNumber()+": "+xpoints[i]+", "+ypoints[i]);
 
 						i++;
 					}

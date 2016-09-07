@@ -359,15 +359,6 @@ public class LogPanel extends DetailPanel implements ActionListener {
 				}
 			}
 						
-//			if(command.equals("help")){
-//				log(Level.INFO, "Available commands: ");
-//				for(String key : commandMap.keySet()){
-//					log(Level.INFO, " "+key);
-//				}
-//				
-//			} else {
-//				log(Level.INFO, "Command not recognised");
-//			}
 		}		
 	}
 
