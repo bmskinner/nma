@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import analysis.detection.Detector;
 import components.CellularComponent;
 import components.generic.BooleanProfile;
@@ -40,6 +41,7 @@ import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 import logging.Loggable;
 import stats.NucleusStatistic;
+import stats.SignalStatistic;
 import utility.Constants;
 import utility.StatsMap;
 
@@ -150,25 +152,52 @@ public class SignalFinder implements Loggable {
 				ImageProcessor ip = stack.getProcessor(stackNumber);
 				StatsMap values = detector.measure(r, ip);
 				
-				// Offset the centre of mass of the signal to match the nucleus offset
+				
+				double xbase     = r.getXBase();
+				double ybase     = r.getYBase();
+				Rectangle bounds = r.getBounds();
+				double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
+				
 				NuclearSignal s = new NuclearSignal( r, 
-						values.get("Area"), 
-						values.get("Feret"), 
-						values.get("Perim"), 
-						new XYPoint(values.get("XM")-n.getPosition()[CellularComponent.X_BASE], 
-									values.get("YM")-n.getPosition()[CellularComponent.Y_BASE])
+						sourceFile, channel, originalPosition,
+						new XYPoint(values.get("XM"), 
+								values.get("YM"))
 						);
+				
+				s.setStatistic(SignalStatistic.AREA,      values.get("Area"));
+				s.setStatistic(SignalStatistic.MAX_FERET, values.get("Feret"));
+				s.setStatistic(SignalStatistic.PERIMETER, values.get("Perim"));
+				
+				/*
+			    Assuming the signal were a perfect circle of area equal
+			    to the measured area, get the radius for that circle
+				 */
+				s.setStatistic(SignalStatistic.RADIUS,  Math.sqrt(values.get("Area")/Math.PI));
+				
+				
+//				NuclearSignal s = new NuclearSignal( r, 
+//						values.get("Area"), 
+//						values.get("Feret"), 
+//						values.get("Perim"), 
+//						new XYPoint(values.get("XM"), 
+//								values.get("YM"))
+//						);
 
 				// only keep the signal if it is within the nucleus
-				if(n.containsPoint(s.getCentreOfMass())){
-					s.setSourceFile(sourceFile);
-					s.setChannel(channel);
+				if(n.containsOriginalPoint(s.getCentreOfMass())){
+//					s.setSourceFile(sourceFile);
+//					s.setChannel(channel);
 					
-					double xbase     = r.getXBase();
-					double ybase     = r.getYBase();
-					Rectangle bounds = r.getBounds();
-					double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
-					s.setPosition(originalPosition);
+//					double xbase     = r.getXBase();
+//					double ybase     = r.getYBase();
+//					Rectangle bounds = r.getBounds();
+//					double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
+//					s.setPosition(originalPosition);
+					
+					// Offset the centre of mass and border points of the signal to match the nucleus offset
+					s.offset(-n.getPosition()[CellularComponent.X_BASE], 
+							-n.getPosition()[CellularComponent.Y_BASE]);
+					
 					signals.add(s);
 					
 				}
@@ -180,42 +209,7 @@ public class SignalFinder implements Loggable {
 		return signals;
 	}
 	
-//	private List<NuclearSignal> findSignalsFromRois(List<Roi> roiList, Nucleus n){
-//		List<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
-//
-//		if(!roiList.isEmpty()){
-//			
-//			programLogger.log(Level.FINE, roiList.size()+" signals in stack "+stackNumber);
-//
-//			for( Roi r : roiList){
-//				
-//				StatsMap values = detector.measure(r, stack);
-//				
-//				// Offset the centre of mass of the signal to match the nucleus offset
-//				NuclearSignal s = new NuclearSignal( r, 
-//						values.get("Area"), 
-//						values.get("Feret"), 
-//						values.get("Perim"), 
-//						new XYPoint(values.get("XM")-n.getPosition()[CellularComponent.X_BASE], 
-//									values.get("YM")-n.getPosition()[CellularComponent.Y_BASE])
-//						);
-//
-//				// only keep the signal if it is within the nucleus
-//				if(n.containsPoint(s.getCentreOfMass())){
-//					s.setSourceFile(sourceFile);
-//					s.setChannel(channel);
-//					
-//					double xbase     = r.getXBase();
-//					double ybase     = r.getYBase();
-//					Rectangle bounds = r.getBounds();
-//					double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
-//					s.setPosition(originalPosition);
-//					signals.add(s);
-//				}
-//				
-//			}
-//			return signals;
-//	}
+
 	
 	/**
 	 * Detect a signal in a given stack by reverse thresholding

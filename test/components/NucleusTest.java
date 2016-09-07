@@ -46,9 +46,9 @@ public class NucleusTest {
 		int nucleusNumber = 0;
 		double[] position = {105.0, 34.0};
 
-		RodentSpermNucleus n = new RodentSpermNucleus(roi, nucleusImage, nucleusNumber , position);
+		RodentSpermNucleus n = new RodentSpermNucleus(roi, nucleusImage, nucleusNumber , position, new XYPoint(74, 46));
 
-		n.setCentreOfMass(new XYPoint(74, 46));
+//		n.setCentreOfMass(new XYPoint(74, 46));
 		n.setStatistic(NucleusStatistic.AREA,     4827.00);
 		n.setStatistic(NucleusStatistic.MAX_FERET, 134.27);
 		n.setStatistic(NucleusStatistic.PERIMETER, 347.02);

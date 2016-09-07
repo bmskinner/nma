@@ -383,11 +383,10 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 		this.centreOfMass = centreOfMass;
 	}
 
-	@Override
-	public void setCentreOfMass(XYPoint centreOfMass) {
-//		this.centreOfMass = centreOfMass;
-		moveCentreOfMass(centreOfMass);
-	}
+//	@Override
+//	public void setCentreOfMass(XYPoint centreOfMass) {
+//		moveCentreOfMass(centreOfMass);
+//	}
 	
 	/*
 	 * 
@@ -593,16 +592,28 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 	 * @param point the new centre of mass
 	 */
 	public void moveCentreOfMass(XYPoint point){
-
-		XYPoint centreOfMass = this.getCentreOfMass();
 		
 		// get the difference between the x and y positions 
 		// of the points as offsets to apply
 		double xOffset = point.getX() - centreOfMass.getX();
-		double yOffset = point.getY() - centreOfMass.getY();
+		double yOffset = point.getY() - centreOfMass.getY();		
 
-		// update the centre of mass
-		
+		offset(xOffset, yOffset);
+	}
+	
+	/**
+	 * Translate the XY coordinates of the object
+	 * @param xOffset the amount to move in the x-axis
+	 * @param yOffset the amount to move in the y-axis
+	 */
+	public void offset(double xOffset, double yOffset){
+
+		// find the position of the centre of mass after 
+		// adding the offsets
+		double newX =  centreOfMass.getX() + xOffset;
+		double newY =  centreOfMass.getY() + yOffset;
+//
+		XYPoint newCentreOfMass = new XYPoint(newX, newY);
 
 		/// update each border point
 		for(int i=0; i<this.getBorderLength(); i++){
@@ -613,32 +624,11 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 
 			this.updateBorderPoint(i, x, y );
 		}
-//		this.setCentreOfMass(point);
-		this.centreOfMass = point;
-		
+
+		this.centreOfMass = newCentreOfMass;
+
 		// Update the bounding rectangle
 		this.boundingRectangle = this.createPolygon().getBounds();
-	}
-	
-	/**
-	 * Translate the XY coordinates of each border point so that
-	 * the nuclear centre of mass is at the given point
-	 * @param point the new centre of mass
-	 */
-	public void offset(double xOffset, double yOffset){
-
-		// get the existing centre of mass
-		XYPoint centreOfMass = this.getCentreOfMass();
-
-		// find the position of the centre of mass after 
-		// adding the offsets
-		double newX =  centreOfMass.getX() + xOffset;
-		double newY =  centreOfMass.getY() + yOffset;
-
-		XYPoint newCentreOfMass = new XYPoint(newX, newY);
-
-		// update the positions
-		this.moveCentreOfMass(newCentreOfMass);
 	}
 	
 	/**

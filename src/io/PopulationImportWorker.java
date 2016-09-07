@@ -23,7 +23,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
@@ -110,10 +116,14 @@ public class PopulationImportWorker extends AnalysisWorker {
 				}
 				
 				// Correct signal border locations from older versions for all imported datasets
-				updateSignalPositions(dataset);
-				for(AnalysisDataset child : dataset.getAllChildDatasets()){
-					updateSignalPositions(child);
+				if(v.isOlderThan( new Version(1, 13, 2))){
+					log("Updating signal positions for old dataset");
+					updateSignalPositions(dataset);
+					for(AnalysisDataset child : dataset.getAllChildDatasets()){
+						updateSignalPositions(child);
+					}
 				}
+				
 				
 
 				// Generate vertically rotated nuclei for all imported datasets
@@ -278,6 +288,19 @@ public class PopulationImportWorker extends AnalysisWorker {
 	private void updateSavePath(File inputFile, AnalysisDataset dataset) {
 		
 		fine("File path has changed: attempting to relocate images");
+		
+		
+		/*
+		 * The expected folder structure for an analysis is as follows:
+		 * 
+		 *   -- ImageDir/
+		 *    | -- DateTimeDir/
+		 *    |  | -- dataset.nmd
+		 *    |  | -- dataset.log
+		 *    | -- Image1.tiff
+		 *    | -- ImageN.tiff
+		 * 
+		 */
 
 		dataset.setSavePath(inputFile);
 		
@@ -290,11 +313,13 @@ public class PopulationImportWorker extends AnalysisWorker {
 			File expectedImageDirectory = expectedAnalysisDirectory.getParentFile();
 			
 			try {
-			dataset.updateSourceImageDirectory(expectedImageDirectory);
+				dataset.updateSourceImageDirectory(expectedImageDirectory);
 			} catch (IllegalArgumentException e){
 				warn("Cannot update save path: "+e.getMessage());
 			}
-//			updateSourceImageDirectory(expectedImageDirectory, dataset);
+			
+			fine("Checking if signal folders need updating");
+			updateSignalFolders(dataset);
 
 		}else {
 			warn("Dataset is a merge");
@@ -302,95 +327,56 @@ public class PopulationImportWorker extends AnalysisWorker {
 		}
 	}
 	
-//	/**
-//	 * Update the source image paths in the dataset and its children
-//	 * to use the given directory 
-//	 * @param expectedImageDirectory
-//	 * @param dataset
-//	 * @throws Exception
-//	 */
-//	private void updateSourceImageDirectory(File expectedImageDirectory, AnalysisDataset dataset) throws Exception{
-//		log(Level.FINE, "Searching "+expectedImageDirectory.getAbsolutePath());
-//
-//		if(expectedImageDirectory.exists()){
-//
-//			// Is the name of the expectedImageDirectory the same as the dataset image directory?
-//			if(checkName(expectedImageDirectory, dataset)){
-//				log(Level.FINE, "Dataset name matches new folder");
-//
-//				// Does expectedImageDirectory contain image files?
-//				if(checkHasImages(expectedImageDirectory)){
-//					log(Level.FINE, "Target folder contains at least one image");
-//
-//					log(Level.FINE, "Updating dataset image paths");
-//					boolean ok = dataset.getCollection().updateSourceFolder(expectedImageDirectory);
-//					if(!ok){
-//						log(Level.WARNING, "Error updating dataset image paths; update cancelled");
-//					}
-//
-//					log(Level.FINE, "Updating child dataset image paths");
-//					for(AnalysisDataset child : dataset.getAllChildDatasets()){
-//						ok = child.getCollection().updateSourceFolder(expectedImageDirectory);
-//						if(!ok){
-//							log(Level.SEVERE, "Error updating child dataset image paths; update cancelled");
-//						}
-//					}
-//
-//					log(Level.INFO, "Updated image paths to new folder location");
-//				} else {
-//					log(Level.WARNING, "Target folder contains no images; unable to update paths");
-//				}
-//			} else {
-//				log(Level.WARNING, "Dataset name does not match new folder; unable to update paths");
-//			}
-//
-//		} else {
-//			log(Level.WARNING, "Unable to locate image directory and/or analysis directory; unable to update paths");
-//		}
-//	}
+	private void updateSignalFolders(AnalysisDataset dataset){
+		if(dataset.getCollection().getSignalManager().hasSignals()){
+			fine("Updating signal locations");
+			
+			Set<UUID> signalGroups = dataset.getCollection().getSignalGroupIDs();
+			
+			for(UUID signalID : signalGroups){
+				
+				// Get the new folder of images
+				File newsignalDir = getSignalDirectory(dataset, signalID);
+				
+				if(newsignalDir != null){
+
+					fine("Updating signal group to "+newsignalDir);
+
+					// Update the folder
+					dataset.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
+
+					for(AnalysisDataset child : dataset.getAllChildDatasets()){
+						child.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
+
+					}
+				} else {
+					warn("Cannot update signal folder for group");
+				}
+
+			}
+		}
+	}
 	
-//	/**
-//	 * Check that the new image directory has the same name as the old image directory.
-//	 * If the nmd has been copied to the wrong folder, don't update nuclei
-//	 * @param expectedImageDirectory
-//	 * @param dataset
-//	 * @return
-//	 */
-//	private boolean checkName(File expectedImageDirectory, AnalysisDataset dataset){
-//		if(dataset.getCollection().getFolder().getName().equals(expectedImageDirectory.getName())){
-//			return true;
-//		} else {
-//			return false;
-//		}
-//		
-//	}
-//	
-//	/**
-//	 * Check that the given directory contains >0 image files
-//	 * suitable for the morphology analysis
-//	 * @param expectedImageDirectory
-//	 * @return
-//	 */
-//	private boolean checkHasImages(File expectedImageDirectory){
-//
-//		File[] listOfFiles = expectedImageDirectory.listFiles();
-//
-//		int result = 0;
-//
-//		for (File file : listOfFiles) {
-//
-//			boolean ok = NucleusDetector.checkFile(file);
-//
-//			if(ok){
-//				result++;
-//			}
-//		} 
-//		
-//		if(result>0){
-//			return true;
-//		} else {
-//			return false;
-//		}
-//	}
+	private File getSignalDirectory(AnalysisDataset dataset, UUID signalID){
+		
+		String signalName = dataset.getCollection().getSignalGroup(signalID).getGroupName();
+		
+		JOptionPane.showMessageDialog(null, "Choose the folder with images for signal group "+signalName);
+		
+		JFileChooser fc = new JFileChooser(dataset.getSavePath().getParentFile());
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+		int returnVal = fc.showOpenDialog(fc);
+		if (returnVal != 0)	{
+			return null;
+		}
+		
+		File file = fc.getSelectedFile();
+
+		fine("Selected folder: "+file.getAbsolutePath());
+		return file;
+	}
+	
+
 
 }

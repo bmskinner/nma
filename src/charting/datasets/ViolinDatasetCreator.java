@@ -93,25 +93,28 @@ public class ViolinDatasetCreator implements Loggable {
 
         	for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
         		
-        		double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);
-        		
-        		String rowKey = "Group_"+signalGroup;
-        		String colKey = collection.getName();
-        		/*
-        		 * For charting, use offset angles, otherwise the boxplots will fail on wrapped signals
-        		 */
-        		if(stat.equals(SignalStatistic.ANGLE)){
-        			values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
-        		}
-        		
-        		List<Number> list = new ArrayList<Number>();
-    			for (double value : values) {
-    				list.add(new Double(value));
-    			}
-    			
-    			ds.add(list, rowKey, colKey);
+        		if(collection.getSignalManager().hasSignals(signalGroup)){
 
-    			addProbabilities(ds, list, rowKey, colKey);        		
+        			double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);
+
+        			String rowKey = "Group_"+signalGroup;
+        			String colKey = collection.getName();
+        			/*
+        			 * For charting, use offset angles, otherwise the boxplots will fail on wrapped signals
+        			 */
+        			if(stat.equals(SignalStatistic.ANGLE)){
+        				values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
+        			}
+
+        			List<Number> list = new ArrayList<Number>();
+        			for (double value : values) {
+        				list.add(new Double(value));
+        			}
+
+        			ds.add(list, rowKey, colKey);
+
+        			addProbabilities(ds, list, rowKey, colKey);     
+        		}
         	}
         }
 		return ds;
@@ -254,8 +257,14 @@ public class ViolinDatasetCreator implements Loggable {
 			Range r = new Range(min, max);
 			dataset.addProbabilityRange(r, rowKey, colKey);
 		} else {
-			Range r = new Range(list.get(0).doubleValue(), list.get(0).doubleValue());
-			dataset.addProbabilityRange(r, rowKey, colKey);
+			
+			if(list.isEmpty()){
+				Range r = new Range(0, 0);
+				dataset.addProbabilityRange(r, rowKey, colKey);
+			} else {
+				Range r = new Range(list.get(0).doubleValue(), list.get(0).doubleValue());
+				dataset.addProbabilityRange(r, rowKey, colKey);
+			}
 		}
 		dataset.addProbabilities(pdfValues, rowKey, colKey);
 		

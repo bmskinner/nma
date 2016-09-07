@@ -193,7 +193,7 @@ public interface CellularComponent {
 	public XYPoint getCentreOfMass();
 
 
-	public void setCentreOfMass(XYPoint centreOfMass);
+//	public void setCentreOfMass(XYPoint centreOfMass);
 	
 	/*
 	 * 

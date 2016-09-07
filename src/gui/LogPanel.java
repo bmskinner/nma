@@ -350,6 +350,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 				
 				case "clear":{
 					clear();
+					break;
 				}
 				
 				default: {

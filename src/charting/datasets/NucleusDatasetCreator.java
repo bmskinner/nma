@@ -1370,16 +1370,13 @@ private static NucleusDatasetCreator instance = null;
 		}
 		
 		Nucleus nucleus = cell.getNucleus();
-//		
-//		log(nucleus.getNameAndNumber()+": X_base: "+nucleus.getPosition()[CellularComponent.X_BASE]);
-//		log(nucleus.getNameAndNumber()+": Y_base: "+nucleus.getPosition()[CellularComponent.Y_BASE]);
-//		
+	
 		for(UUID signalGroup : nucleus.getSignalCollection().getSignalGroupIDs()){
 			
 			SignalGroup group = dataset.getCollection().getSignalGroup(signalGroup);
-			finer("Fetching signals from signal group "+group);
+			finer("Fetching signals from signal group "+group+" ID "+signalGroup);
 			
-            if(group.isVisible()){ // only add the groups that are set to visible
+            if(group !=null && group.isVisible()){ // only add the groups that are set to visible
 
 
 				DefaultXYDataset groupDataset = new DefaultXYDataset();
@@ -1396,7 +1393,7 @@ private static NucleusDatasetCreator instance = null;
 						xpoints[i] = p.getX();
 						ypoints[i] = p.getY();
 						
-//						log(nucleus.getNameAndNumber()+": "+xpoints[i]+", "+ypoints[i]);
+						log(nucleus.getNameAndNumber()+": "+xpoints[i]+", "+ypoints[i]);
 
 						i++;
 					}

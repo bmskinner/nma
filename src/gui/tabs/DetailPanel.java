@@ -258,17 +258,17 @@ public abstract class DetailPanel
 	public void update(final List<AnalysisDataset> list){
 		
 		if(this.isUpdating()){
-			finest("Panel is already updating");
+			finest(this.getClass().getName()+": Panel is already updating");
 		} else {
-			finest("Preparing to update");
+			finest(this.getClass().getName()+": Preparing to update");
 			if(list!=null){
 				this.list = list;
 			} else {
 				this.list = new ArrayList<AnalysisDataset>();
 			}
-			finest("Set dataset list");
+			finest(this.getClass().getName()+": Set dataset list of "+this.list.size()+" datasets");
 			setUpdating(true);
-			finest("Set updating state");
+			finest(this.getClass().getName()+": Set updating state");
 			updateDetail();
 		}
 
@@ -280,11 +280,11 @@ public abstract class DetailPanel
 	 */
 	private void updateDetail(){
 		
-		finest("Updating detail panel");
+		finest(this.getClass().getName()+": Updating detail panel");
 		try {
-			finest("Checking dataset list");
+			finest(this.getClass().getName()+": Checking dataset list");
 			if(hasDatasets()){
-				finest("Datasets present");
+				finest(this.getClass().getName()+": Datasets present");
 				if(isSingleDataset()){
 					finer( this.getClass().getName()+": Single dataset present");
 					updateSingle();
@@ -299,19 +299,19 @@ public abstract class DetailPanel
 			}
 			
 		} catch (Exception e) {
-			warn("Error updating panel: "+ this.getClass().getName());
+			warn(this.getClass().getName()+": Error updating panel");
 			log(Level.FINE, "Error updating panel: "+ this.getClass().getName(), e); // save detail for fine logging
 			setUpdating(false);
 			try {
 				updateNull();
 			} catch(Exception e1){
-				warn("Error recovering from error updating panel: "+ this.getClass().getName());
+				warn(this.getClass().getName()+": Error recovering from error updating panel");
 				log(Level.FINE, "Error recovering from error updating panel: "+ this.getClass().getName(), e1);
 				setUpdating(false);
 			}
 		} finally {
 			setUpdating(false);
-			finest("Finished update");
+			finest(this.getClass().getName()+": Finished update");
 		}
 	}
 			
@@ -320,7 +320,7 @@ public abstract class DetailPanel
 	 * to perform the actual update when a single dataset is selected
 	 */
 	protected void updateSingle(){
-		finest("Updating single dataset");
+		finest(this.getClass().getName()+": Updating single dataset");
 	}
 	
 	/**
@@ -328,7 +328,7 @@ public abstract class DetailPanel
 	 * to perform the actual update when a multiple datasets are selected
 	 */
 	protected void updateMultiple(){
-		finest("Updating multiple datasets");
+		finest(this.getClass().getName()+": Updating multiple datasets");
 	}
 	
 	/**
@@ -336,7 +336,7 @@ public abstract class DetailPanel
 	 * to perform the actual update when a no datasets are selected
 	 */
 	protected void updateNull(){
-		finest("Updating null dataset");
+		finest(this.getClass().getName()+": Updating null dataset");
 	}
 	
 	/**

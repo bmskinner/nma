@@ -252,16 +252,14 @@ public class CellDatasetCreator implements Loggable {
 
 			double value = s.getStatistic(stat, GlobalOptions.getInstance().getScale() );
 
-//			if(stat.isDimensionless()){
-				rowData.add(df.format(value) );
-//			} else {
-//				double micron = s.getStatistic(stat, MeasurementScale.MICRONS);
-//				rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
-//			}
+			rowData.add(df.format(value) );
 		}
 
 		fieldNames.add("Signal CoM");
 		rowData.add(s.getCentreOfMass().toString());
+		
+		fieldNames.add("First border point");
+		rowData.add(s.getBorderPoint(0).toString());
 		
 	}
 	

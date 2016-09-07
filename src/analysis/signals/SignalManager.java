@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import analysis.AnalysisDataset;
 import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTagObject;
@@ -172,15 +173,21 @@ public class SignalManager implements Loggable{
 	   * @param f
 	   */
 	  public void updateSignalSourceFolder(UUID signalGroup, File f){
-		  for(Nucleus n : collection.getNuclei()){
+		  
+		  if( ! collection.hasSignalGroup(signalGroup)){
+			  return;
+		  }
+		  
+		  collection.getNuclei().parallelStream().forEach( n-> {
 			  if(n.getSignalCollection().hasSignal(signalGroup)){
 				  String fileName = n.getSignalCollection().getSourceFile(signalGroup).getName();
 				  File newFile = new File(f.getAbsolutePath()+File.separator+fileName);
 				  n.getSignalCollection().updateSourceFile(signalGroup, newFile);
 			  }
-		  }
+		  });
+		  
           collection.getSignalGroup(signalGroup).setFolder(f);
-
+          
 	  }
 	  
 	  /**

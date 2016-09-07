@@ -20,6 +20,8 @@ package components.nuclear;
 
 import ij.gui.Roi;
 import stats.SignalStatistic;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -38,23 +40,12 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 
 	private int closestNuclearBorderPoint;
 	
-	public NuclearSignal(Roi roi, double area, double feret, double perimeter, XYPoint centreOfMass){
-		super(roi);
+	
+	public NuclearSignal(Roi roi, File f, int channel, double[] position, XYPoint centreOfMass){
+		super(roi, f, channel, position, centreOfMass);
 		
-		this.setStatistic(SignalStatistic.AREA, area);
-		this.setStatistic(SignalStatistic.MAX_FERET, feret);
-		this.setStatistic(SignalStatistic.PERIMETER, perimeter);
-		
-		/*
-	    Assuming the signal were a perfect circle of area equal
-	    to the measured area, get the radius for that circle
-		 */
-		this.setStatistic(SignalStatistic.RADIUS,  Math.sqrt(area/Math.PI));
-		
-		
-		this.setCentreOfMass(centreOfMass);
 	}
-
+	
 	/**
 	 * Create a copy of the given signal
 	 * @param n
