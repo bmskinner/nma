@@ -136,7 +136,8 @@ public class CellDatasetCreator implements Loggable {
 		NucleusType type = NucleusType.getNucleusType(n);
 
 		if(type!=null){
-			for(BorderTagObject tag : BorderTagObject.values()){
+						
+			for(BorderTagObject tag : n.getBorderTags().keySet()){
 				fieldNames.add(tag);
 				if(n.hasBorderTag(tag)){
 

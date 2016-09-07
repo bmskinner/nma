@@ -418,7 +418,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 	        for(Integer i : chunks){
 	        	
-	        	int percent = (int) ( (double) i / (double) sourceDataset.getCollection().cellCount() * 100);
+	        	int percent = (int) ( (double) i / (double) totalCells * 100);
 		        
 		        if(percent >= 0 && percent <=100){
 		        	setProgress(percent); // the integer representation of the percent
@@ -428,7 +428,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 						}
 						progressBar.setValue(percent);
 						int cellNumber = i+1;
-						progressBar.setString(cellNumber+" of "+sourceDataset.getCollection().cellCount());	
+						progressBar.setString(cellNumber+" of "+totalCells);	
 		        }
 		        
 	        	

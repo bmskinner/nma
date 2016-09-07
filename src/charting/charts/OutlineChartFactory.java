@@ -448,6 +448,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					if(name.equals(BorderTag.REFERENCE_POINT.toString())){
 						plot.getRenderer(key).setSeriesPaint(i, Color.ORANGE);
 					}
+					if(name.equals(BorderTag.INTERSECTION_POINT.toString())){
+						plot.getRenderer(key).setSeriesPaint(i, Color.CYAN);
+					}
+					if(name.equals(BorderTag.TOP_VERTICAL.toString())){
+						plot.getRenderer(key).setSeriesPaint(i, Color.GRAY);
+					}
+					if(name.equals(BorderTag.BOTTOM_VERTICAL.toString())){
+						plot.getRenderer(key).setSeriesPaint(i, Color.GRAY);
+					}
 						
 				}
 
