@@ -32,8 +32,6 @@ import ij.plugin.RoiEnlarger;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import io.ImageImporter;
-import logging.Loggable;
-
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,13 +43,15 @@ import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 
-public class ShellCreator implements Loggable {
+public class ShellDetector extends Detector {
 
-	int shellCount = 5;
+	public static final int DEFAULT_SHELL_COUNT = 5;
+	
+	final int shellCount;
 
-	ImageStack 	nucleusStack; 	// the stack to work on 
-	Roi 		nucleusRoi;		// the nuclear roi
-	Nucleus 	nucleus;		// the nucleus
+	private ImageStack 	nucleusStack; 	// the stack to work on 
+	private Roi 		nucleusRoi;		// the nuclear roi
+
 
 	double[] dapiDensities;
 	double[] signalProportions;
@@ -59,27 +59,28 @@ public class ShellCreator implements Loggable {
 	List<Roi> shells = new ArrayList<Roi>(0);
 
 	/**
-	*	Create an analyser on an image with a nucleus
-	* ROI.
-	*
+	* Create shells in the given nucleus, using the
+	* default shell count
 	* @param nucleus the nucleus to analyse
 	*/
-	public ShellCreator(Nucleus n){
+	public ShellDetector(Nucleus n){
 
-		this.nucleus = n;
-		
+		this(n, ShellDetector.DEFAULT_SHELL_COUNT);
+	}
+	
+	/**
+	 * Create shells in the given nucleus, using the
+	 * given shell count
+	 *
+	 * @param nucleus the nucleus to analyse
+	 */
+	public ShellDetector(Nucleus n, int shellCount){
+
+		this.shellCount = shellCount;
+
 		nucleusRoi = new PolygonRoi(n.createOriginalPolygon(), Roi.POLYGON);
 		this.nucleusStack = ImageImporter.getInstance().importImage(n.getSourceFile());
-		
-	}
 
-	/**
-	*	Set the number of shells
-	*
-	* @param i the number of shells
-	*/
-	public void setNumberOfShells(int i){
-		this.shellCount = i;
 	}
 
 	/**
@@ -128,11 +129,9 @@ public class ShellCreator implements Loggable {
 		log(Level.FINE, "Creating shells");
 		ImagePlus searchImage = new ImagePlus(null, nucleusStack.getProcessor(Constants.COUNTERSTAIN).duplicate()); // blue channel
 		ImageProcessor ip = searchImage.getProcessor();
-		
-		Detector detector = new Detector();
-		
+				
 		ImageProcessor nucleusIp = nucleusStack.getProcessor(Constants.COUNTERSTAIN);
-		StatsMap values = detector.measure(nucleusRoi, nucleusIp);
+		StatsMap values = measure(nucleusRoi, nucleusIp);
 
 		double initialArea = values.get("Area");
 		
@@ -170,7 +169,7 @@ public class ShellCreator implements Loggable {
 //				ImageStatistics imgStats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
 //				area = imgStats.area;
 				
-				StatsMap statsValues = detector.measure(shrinkingRoi, nucleusIp);
+				StatsMap statsValues = measure(shrinkingRoi, nucleusIp);
 				area =statsValues.get("Area");
 				
 //				shrinkingPolygon = newRoi.getFloatPolygon();
@@ -233,28 +232,10 @@ public class ShellCreator implements Loggable {
 	}
 
 	
-	/**
-	 * Draw the shells on the nucleus, and export the image to the Nucleus folder.
+	/*
+	 * PROTECTED AND PRIVATE METHODS
+	 * 
 	 */
-//	public void exportImage(){
-//	  ImagePlus shellImage = ImageExporter.getInstance().convertToRGB(nucleusStack);
-//      ImageProcessor ip = shellImage.getProcessor();
-//      List<Roi> shells = this.getShells();
-//      if(shells.size()>0){ // check we actually got shells out
-//        for(Roi r : shells){
-//          ip.setColor(Color.YELLOW);
-//          ip.setLineWidth(1);
-//          r.drawPixels(ip);
-//        }
-//
-//        String outPath = nucleus.getNucleusFolder().getAbsolutePath()+
-//                        File.separator+
-//                        RoundNucleus.IMAGE_PREFIX+
-//                        nucleus.getNucleusNumber()+
-//                        ".shells.tiff";
-//        IJ.saveAsTiff(shellImage, outPath);
-//      }
-//	}
 	
 	/**
 	*	Find the pixels within an roi. Create XYPoints

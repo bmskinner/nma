@@ -36,14 +36,14 @@ import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
 import components.nuclei.Nucleus;
 
-public class ShellAnalysis extends AnalysisWorker {
+public class ShellAnalysisWorker extends AnalysisWorker {
 	
 	private final int shells;
 	
 	private static Map<UUID, ShellCounter> counters = new HashMap<UUID, ShellCounter>(0);
 	
 	
-	public ShellAnalysis(AnalysisDataset dataset, int shells){
+	public ShellAnalysisWorker(AnalysisDataset dataset, int shells){
 		super(dataset);
 		this.shells = shells;
 		this.setProgressTotal(dataset.getCollection().getNucleusCount());
@@ -72,13 +72,11 @@ public class ShellAnalysis extends AnalysisWorker {
 			
 			int progress = 0;
 			for(Nucleus n : collection.getNuclei()){
-
-//				IJ.log("Nucleus "+n.getPathAndNumber());
 				
-				ShellCreator shellAnalyser = new ShellCreator(n);
-//				IJ.log("Making shells");
+				ShellDetector shellAnalyser = new ShellDetector(n, shells);
+
 				shellAnalyser.createShells();
-//				shellAnalyser.exportImage();
+
 
 				for(UUID signalGroup : n.getSignalCollection().getSignalGroupIDs()){
 					if(collection.getSignalManager().hasSignals(signalGroup)){
@@ -88,16 +86,13 @@ public class ShellAnalysis extends AnalysisWorker {
 //						ImageStack signalStack = ImageImporter.importImage(imageFile, (DebugFileHandler) getDataset().getLogHandler());
 						ImageStack signalStack = ImageImporter.getInstance().importImage(imageFile);
 						
-						
-//						IJ.log("Signal group "+signalGroup);
-//						IJ.log("Found "+signals.size()+" signals");
+
 
 						ShellCounter counter = counters.get(signalGroup);
 
 						for(NuclearSignal s : signals){
 							try {
-//								IJ.log("   Getting signal");
-//								int channel = n.getSignalCollection().getSourceChannel(signalGroup);
+
 								
 								double[] signalPerShell = shellAnalyser.findShell(s, signalStack);
 								counter.addValues(signalPerShell);
@@ -161,7 +156,7 @@ public class ShellAnalysis extends AnalysisWorker {
 			
 			for(Nucleus n : collection.getNuclei()){
 
-				ShellCreator shellAnalyser = new ShellCreator(n);
+				ShellDetector shellAnalyser = new ShellDetector(n);
 				shellAnalyser.createShells();
 //				shellAnalyser.exportImage();
 

@@ -22,7 +22,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 	private File[] files;
 	private static final int THRESHOLD = 5; // number of images to handle per fork
 	final int low, high;
-	private final NucleusFinder finder;
+	private final NucleusDetector finder;
 	private final String outputFolder;
 	private final AnalysisOptions analysisOptions;
 	private final File folder;
@@ -35,7 +35,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 		this.high            = high;
 		this.outputFolder    = outputFolder;
 		this.analysisOptions = analysisOptions;
-		this.finder          = new NucleusFinder( analysisOptions, outputFolder);
+		this.finder          = new NucleusDetector( analysisOptions, outputFolder);
 	}
 
 	public FileProcessingTask(File folder, File[] files, CellCollection collection, String outputFolder, AnalysisOptions analysisOptions) {

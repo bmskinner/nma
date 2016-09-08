@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import logging.Loggable;
 import skeleton_analysis.AnalyzeSkeleton_;
 import skeleton_analysis.Edge;
 import skeleton_analysis.Graph;
@@ -51,13 +50,13 @@ import analysis.AnalysisOptions.CannyOptions;
 import analysis.detection.Detector;
 import analysis.detection.ImageFilterer;
 
-public class TailFinder implements Loggable {
+public class TailDetector extends Detector {
 	
 	private CannyOptions options;
 	private  int channel;
 	
 	
-	public TailFinder(CannyOptions options,int channel){
+	public TailDetector(CannyOptions options,int channel){
 		this.options = options;
 		this.channel = channel;
 	}
@@ -98,7 +97,7 @@ public class TailFinder implements Loggable {
 			ImageStack edges = ImageFilterer.runEdgeDetector(stack, stackNumber, options);
 			
 			// get objects found by edge detector
-			List<Roi> borderRois = getROIs(edges, true, 1);
+			List<Roi> borderRois = getROIs(edges, Detector.CLOSED_OBJECTS, 1);
 			log(Level.INFO, "Found "+borderRois.size()+" potential tails in image");
 			
 			// create the skeletons of the detected objects
@@ -730,25 +729,29 @@ public class TailFinder implements Loggable {
 	 * @param channel the stack of the image to search
 	 * @return the Map linking an roi to its stats
 	 */
-	private List<Roi> getROIs(ImageStack image, boolean closed, int channel){
-		Detector detector = new Detector();
-		detector.setMaxSize(100000);
+	private List<Roi> getROIs(ImageStack image, int closed, int channel){
+
+		List<Roi> result = new ArrayList<Roi>();
 		
-		if(closed){
-			detector.setMinSize(1000); // get polygon rois
+		// Values are hard coded for debugging
+		
+		setMaxSize(100000);
+		
+		if(closed==Detector.CLOSED_OBJECTS){
+			setMinSize(1000); // get polygon rois
 		} else {
-			detector.setMinSize(0); // get line rois
+			setMinSize(0); // get line rois
 		}
-		detector.setMinCirc(0);
-		detector.setMaxCirc(0.5);
-		detector.setThreshold(30);
+		setMinCirc(0);
+		setMaxCirc(0.5);
+		setThreshold(30);
 		try{
 			ImageProcessor ip = image.getProcessor(channel);
-			detector.run(ip);
+			result = this.detectRois(ip);
 		} catch(Exception e){
 			log(Level.SEVERE, "Error in tail detection", e);
 		}
-		return detector.getRoiList();
+		return result;
 	}
 
 }

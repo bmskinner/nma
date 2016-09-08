@@ -33,7 +33,7 @@ import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
-import analysis.nucleus.NucleusDetector;
+import analysis.nucleus.NucleusDetectionWorker;
 
 /**
  * Run a new analysis
@@ -86,7 +86,7 @@ public class NewAnalysisAction extends ProgressableAction {
 
 //			mw.setStatus("New analysis in progress");
 			
-			worker = new NucleusDetector(this.outputFolderName, logFile, options);
+			worker = new NucleusDetectionWorker(this.outputFolderName, logFile, options);
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
 			log(Level.FINEST, "Worker has executed");
@@ -102,7 +102,7 @@ public class NewAnalysisAction extends ProgressableAction {
 	@Override
 	public void finished(){
 		
-		final List<AnalysisDataset> datasets = ((NucleusDetector) worker).getDatasets();
+		final List<AnalysisDataset> datasets = ((NucleusDetectionWorker) worker).getDatasets();
 		
 		if(datasets.size()==0 || datasets==null){
 			log(Level.INFO, "No datasets returned");

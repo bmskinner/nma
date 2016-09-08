@@ -27,14 +27,15 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import analysis.AnalysisDataset;
-import analysis.signals.ShellAnalysis;
+import analysis.signals.ShellAnalysisWorker;
+import analysis.signals.ShellDetector;
 
 public class ShellAnalysisAction extends ProgressableAction {
 
 	public ShellAnalysisAction(AnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Shell analysis", mw);
 
-		SpinnerNumberModel sModel = new SpinnerNumberModel(5, 2, 10, 1);
+		SpinnerNumberModel sModel = new SpinnerNumberModel(ShellDetector.DEFAULT_SHELL_COUNT, 2, 10, 1);
 		JSpinner spinner = new JSpinner(sModel);
 
 		int option = JOptionPane.showOptionDialog(null, 
@@ -50,7 +51,7 @@ public class ShellAnalysisAction extends ProgressableAction {
 		} else if (option == JOptionPane.OK_OPTION)	{
 
 			int shellCount = (Integer) spinner.getModel().getValue();
-			worker = new ShellAnalysis(dataset,shellCount);
+			worker = new ShellAnalysisWorker(dataset,shellCount);
 
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);

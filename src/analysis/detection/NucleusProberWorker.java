@@ -40,7 +40,7 @@ import components.CellularComponent;
 import components.nuclei.Nucleus;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
-import analysis.nucleus.NucleusFinder;
+import analysis.nucleus.NucleusDetector;
 
 public class NucleusProberWorker extends ImageProberWorker {
 
@@ -189,7 +189,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		
 		finer("Finding cells");
 		
-		 NucleusFinder finder = new NucleusFinder(options, null);
+		 NucleusDetector finder = new NucleusDetector(options, null);
 		
 		List<Cell> cells = finder.getCells(imageStack, imageFile);
 		

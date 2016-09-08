@@ -54,7 +54,7 @@ import javax.swing.table.TableModel;
 
 import analysis.AnalysisOptions;
 import analysis.detection.IconCell;
-import analysis.nucleus.NucleusDetector;
+import analysis.nucleus.NucleusDetectionWorker;
 
 @SuppressWarnings("serial")
 public abstract class ImageProber extends LoadingIconDialog implements PropertyChangeListener {
@@ -474,7 +474,7 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 
 		for (File file :  folder.listFiles()) {
 
-			boolean ok = NucleusDetector.checkFile(file); // check file extension
+			boolean ok = NucleusDetectionWorker.checkFile(file); // check file extension
 
 			if(ok){
 				files.add(file);

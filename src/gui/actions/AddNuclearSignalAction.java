@@ -30,7 +30,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import analysis.AnalysisDataset;
-import analysis.signals.SignalDetector;
+import analysis.signals.SignalDetectionWorker;
 import analysis.signals.SignalManager;
 import components.Cell;
 import components.CellCollection;
@@ -55,7 +55,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 
 
-                worker = new SignalDetector(dataset, 
+                worker = new SignalDetectionWorker(dataset, 
                         analysisSetup.getFolder(), 
                         analysisSetup.getChannel(), 
                         dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroup), 

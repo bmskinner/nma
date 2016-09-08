@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import analysis.nucleus.NucleusDetector;
+import analysis.nucleus.NucleusDetectionWorker;
 import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
 import logging.Loggable;
@@ -899,7 +899,7 @@ public class AnalysisDataset implements Serializable, Loggable {
 
 		for (File file : listOfFiles) {
 
-			boolean ok = NucleusDetector.checkFile(file);
+			boolean ok = NucleusDetectionWorker.checkFile(file);
 
 			if(ok){
 				result++;

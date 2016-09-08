@@ -46,7 +46,7 @@ import java.util.logging.Logger;
 import analysis.AnalysisOptions;
 import components.generic.XYPoint;
 
-public class NucleusRefinder  extends NucleusDetector
+public class NucleusRefinder  extends NucleusDetectionWorker
 {
 
   private File pathList; // the file of paths and coordinates

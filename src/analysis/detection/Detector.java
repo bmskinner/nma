@@ -35,49 +35,56 @@ import ij.process.ImageProcessor;
 import logging.Loggable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
 import utility.StatsMap;
 
 
-public class Detector implements Loggable {
+/**
+ * This abstract class is extended for detecting objects
+ * in images. This provides methods for setting size, circularity
+ * and thresholding criteria. It calls ImageJ's RoiManager to 
+ * find the ROIs in the image.
+ * @author bms41
+ *
+ */
+public abstract class Detector implements Loggable {
 
-  /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
-  private double minSize;
-  private double maxSize;
-  private double minCirc;
-  private double maxCirc;
+	public static final int CLOSED_OBJECTS = 0; // Flags to allow detection of open or closed objects
+	public static final int OPEN_OBJECTS   = 1;
+	
+	private double minSize;
+	private double maxSize;
+	private double minCirc;
+	private double maxCirc;
 
-  private int  threshold;
+	private int  threshold;
 
-  private Roi[] roiArray;
+	private List<Roi> roiList; // the detected ROIs
 
-  public Detector(){
+	public void setMinSize(double d){
+		this.minSize = d;
+	}
 
-  }
+	public void setMaxSize(double d){
+		this.maxSize = d;
+	}
 
-  public void setMinSize(double d){
-  	this.minSize = d;
-  }
+	public void setMinCirc(double d){
+		this.minCirc = d;
+	}
 
-  public void setMaxSize(double d){
-  	this.maxSize = d;
-  }
+	public void setMaxCirc(double d){
+		this.maxCirc = d;
+	}
 
-  public void setMinCirc(double d){
-  	this.minCirc = d;
-  }
-
-  public void setMaxCirc(double d){
-  	this.maxCirc = d;
-  }
-
-  public void setThreshold(int i){
-  	this.threshold = i;
-  }
+	public void setThreshold(int i){
+		this.threshold = i;
+	}
   
-  public void run(ImageProcessor image){
+  protected List<Roi> detectRois(ImageProcessor image){
 	  if(image==null){
 		  throw new IllegalArgumentException("No image to analyse");
 	  }
@@ -96,35 +103,58 @@ public class Detector implements Loggable {
 	  }
 
 	  findInImage(image);
+	  return roiList;
   }
+  
+  /**
+   * Get the stats for the region covered by the given roi. Uses the channel
+   * previously set.
+   * @param roi the region to measure
+   * @return
+   */
+  public StatsMap measure(Roi roi, ImageProcessor image ){
+	  
+	  if(image==null || roi==null){
+		  throw new IllegalArgumentException("Image or roi is null");
+	  }
 
-  public List<Roi> getRoiList(){
-  	List<Roi> result = new ArrayList<Roi>(0);
-  	for(Roi r : this.roiArray){
-  		result.add(r);
-  	}
-  	return result;
+	  ImageProcessor searchProcessor = image.duplicate();
+	  ImagePlus imp = new ImagePlus(null, searchProcessor);
+	  imp.setRoi(roi);
+	  ResultsTable rt = new ResultsTable();
+	  Analyzer analyser = new Analyzer(imp, Measurements.CENTER_OF_MASS | 
+			  								Measurements.AREA | 
+			  								Measurements.PERIMETER | 
+			  								Measurements.FERET, 
+			  							rt);
+	  analyser.measure();
+	  StatsMap values = new StatsMap();
+	  values.add("Area", rt.getValue("Area",0)); 
+	  values.add("Feret", rt.getValue("Feret",0)); 
+	  values.add("Perim", rt.getValue("Perim.",0)); 
+	  values.add("XM", rt.getValue("XM",0)); 
+	  values.add("YM", rt.getValue("YM",0)); 
+	  return values;
   }
+  
+  /*
+   *  PRIVATE METHODS
+   * 
+   * 
+   */
+
   
   private void findInImage(ImageProcessor image){
 
-	  // Note - the channels in an ImageStack are numbered from 1
-//	  if(this.stackNumber==0 || this.stackNumber > image.getSize()){
-//		  throw new IllegalArgumentException("Not a valid channel for this image in Detector.findInImage():"+this.stackNumber);
-//	  }
-//	  ImageProcessor searchProcessor = image.getProcessor(this.stackNumber).duplicate();
 	  ImageProcessor searchProcessor = image.duplicate();
+	  
 	  searchProcessor.threshold(this.threshold);
 
 	  this.runAnalyser(searchProcessor);
-	  if(this.getRoiCount()==0){
+	  if(roiList.size()==0){
 		  searchProcessor.invert(); // Work PC needs the inversion; MANETHEREN does not. Don't yet know why.
 		  this.runAnalyser(searchProcessor);
 	  }
-  }
-
-  private int getRoiCount() {
-	  return this.roiArray.length;
   }
 
   private void runAnalyser(ImageProcessor processor){
@@ -149,43 +179,9 @@ public class Detector implements Loggable {
 		  image.close();
 	  }
 
-	  this.roiArray = manager.getSelectedRoisAsArray();
+	  roiList =  new ArrayList<Roi>(Arrays.asList( manager.getSelectedRoisAsArray()));
   }
   
-  /**
-   * Get the stats for the region covered by the given roi. Uses the channel
-   * previously set.
-   * @param roi the region to measure
-   * @return
-   */
-  public StatsMap measure(Roi roi, ImageProcessor image ){
-	  if(image==null || roi==null){
-		  throw new IllegalArgumentException("Image or roi is null");
-	  }
-//	  if(image.getProcessor(this.stackNumber)==null){
-//		  throw new IllegalArgumentException("Not a valid channel for this image");
-//	  }
-//	  if(this.stackNumber==0 || this.stackNumber>image.getSize()){
-//		  throw new IllegalArgumentException("Channel out of range for this image");
-//	  }
-//	  ImageProcessor searchProcessor = image.getProcessor(this.stackNumber).duplicate();
-	  ImageProcessor searchProcessor = image.duplicate();
-	  ImagePlus imp = new ImagePlus(null, searchProcessor);
-	  imp.setRoi(roi);
-	  ResultsTable rt = new ResultsTable();
-	  Analyzer analyser = new Analyzer(imp, Measurements.CENTER_OF_MASS | 
-			  								Measurements.AREA | 
-			  								Measurements.PERIMETER | 
-			  								Measurements.FERET, 
-			  							rt);
-	  analyser.measure();
-	  StatsMap values = new StatsMap();
-	  values.add("Area", rt.getValue("Area",0)); 
-	  values.add("Feret", rt.getValue("Feret",0)); 
-	  values.add("Perim", rt.getValue("Perim.",0)); 
-	  values.add("XM", rt.getValue("XM",0)); 
-	  values.add("YM", rt.getValue("YM",0)); 
-	  return values;
-  }
+ 
 
 }

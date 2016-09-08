@@ -95,7 +95,7 @@ public class SignalProberWorker extends ImageProberWorker {
 		testOptions.setMaxFraction(1d);
 		
 		// Create the finder
-		SignalFinder finder = new SignalFinder(testOptions, channel);
+		SignalDetector finder = new SignalDetector(testOptions, channel);
 
 		Map<Nucleus, List<NuclearSignal>> map = new HashMap<Nucleus, List<NuclearSignal>>();
 

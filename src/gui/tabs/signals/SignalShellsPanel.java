@@ -113,21 +113,6 @@ public class SignalShellsPanel extends DetailPanel {
 		return panel;
 	}
 
-//	/**
-//	 * Create a panel to display when a shell analysis is not available
-//	 * @param showRunButton should there be an option to run a shell analysis on the dataset
-//	 * @param collection the nucleus collection from the dataset
-//	 * @param label the text to display on the panel
-//	 * @return a panel to put in the shell tab
-//	 */
-//	private void makeNoShellAnalysisAvailablePanel(boolean showRunButton, CellCollection collection, String label){
-//		chartPanel.setVisible(false);
-//		newAnalysis.setVisible(showRunButton);
-//
-//		this.revalidate();
-//		this.repaint();
-//
-//	}
 	
 	private void updateChartAndTable(){
 		ChartOptions options = new ChartOptionsBuilder()

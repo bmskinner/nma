@@ -16,336 +16,291 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-/*
-  -----------------------
-  NUCLEUS DETECTOR
-  -----------------------
-  Contains the variables for opening
-  folders and files and detecting nuclei
-  within them
-*/  
 package analysis.nucleus;
 
+import ij.ImageStack;
+import ij.gui.Roi;
+import ij.process.ImageProcessor;
+import stats.NucleusStatistic;
+
+import java.awt.Rectangle;
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-
 import utility.Constants;
-import analysis.AnalysisDataset;
+//import utility.Logger;
+
+
+import utility.StatsMap;
 import analysis.AnalysisOptions;
-import analysis.AnalysisWorker;
-import analysis.ProgressEvent;
-import analysis.ProgressListener;
-import components.CellCollection;
+import analysis.AnalysisOptions.CannyOptions;
+import analysis.detection.Detector;
+import analysis.detection.ImageFilterer;
+import components.Cell;
+import components.generic.XYPoint;
 import components.nuclear.NucleusType;
+import components.nuclei.Nucleus;
 
-public class NucleusDetector extends AnalysisWorker  implements ProgressListener {
-  
-  private static final String spacerString = "---------";
-  
-  private int progress = 0;
 
-  private final File inputFolder;
-  protected final String outputFolder;
-  protected final File debugFile;
-  
-  protected final AnalysisOptions analysisOptions;
-
-//  protected MainWindow mw;
-  private Map<File, CellCollection> collectionGroup = new HashMap<File, CellCollection>();
-  
-  List<AnalysisDataset> datasets;
-
-  /**
-   * Construct a detector on the given folder, and output the results to 
-   * the given output folder
-   * @param outputFolder the name of the folder for results
-   * @param programLogger the logger to the log panel
-   * @param debugFile the dataset log file
-   * @param options the options to detect with
-   */
-  public NucleusDetector(String outputFolder, File debugFile, AnalysisOptions options){
-	  super(null, debugFile);
-	  this.inputFolder 		= options.getFolder();
-	  this.outputFolder 	= outputFolder;
-	  this.debugFile 		= debugFile;
-	  this.analysisOptions 	= options;
-  }
-  
-  private void getTotalImagesToAnalyse(){
-	  log("Calculating number of images to analyse");
-	  int totalImages = countSuitableImages(analysisOptions.getFolder());
-	  this.setProgressTotal(totalImages);
-	  log("Analysing "+totalImages+" images");
-  }
+/**
+ * This is based on the Detector. It takes images, and runs the appropriate nucleus detection 
+ * filters on them
+ *
+ */
+public class NucleusDetector extends Detector {
 	
-	@Override
-	protected Boolean doInBackground() throws Exception {
-
-		boolean result = false;
+	private final AnalysisOptions options;
+	private final String outputFolderName;
+	
+	public NucleusDetector(final AnalysisOptions options, final String outputFolderName){
 		
+		if(options==null){
+			throw new IllegalArgumentException("Options is null");
+		}
+
+		this.options = options;
+		this.outputFolderName = outputFolderName;
+		
+		setMaxSize(  options.getMaxNucleusSize());
+		setMinCirc(  options.getMinNucleusCirc());
+		setMaxCirc(  options.getMaxNucleusCirc());
+		setThreshold(options.getNucleusThreshold());
+	}
+	
+	/**
+	 * Get a list of cells found in this image
+	 * @param image the image
+	 * @param sourceFile the file the nuclei were found in
+	 * @return
+	 * @throws Exception 
+	 */
+	public List<Cell> getCells(ImageStack image, File sourceFile) throws Exception{
+		return processImage(image, sourceFile);
+	}
+	
+		
+	/*
+	 * PROTECTED AND PRIVATE METHODS
+	 * 
+	 */
+
+	
+	/**
+	 * Detects nuclei within the given image.
+	 *
+	 * @param image the ImagePlus to be analysed
+	 * @param closed should the detector get only closed polygons, or open lines
+	 * @return the detected ROIs
+	 */
+	private List<Roi> getROIs(ImageStack image, int closed){
+		finer("Detecting ROIs");
+		
+		List<Roi> roiList = new ArrayList<Roi>();
+
+		if(closed==Detector.CLOSED_OBJECTS){
+			setMinSize(options.getMinNucleusSize()); // get polygon rois
+		} else {
+			setMinSize(0); // get line rois
+		}
+
 		try{
 			
-			getTotalImagesToAnalyse();
-			
-			log("Running nucleus detector");
-			processFolder(this.inputFolder);
-
-			fine("Folder processed");
-			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
-
-
-			fine( "Getting collections");
-
-			List<CellCollection> folderCollection = this.getNucleiCollections();
-
-			// Run the analysis pipeline
-
-			fine("Analysing collections");
-
-			datasets = analysePopulations(folderCollection);		
-
-			result = true;
-			fine( "Analysis complete; return collections");
-
-		} catch(Exception e){
-			result = false;
-			logError("Error in processing folder", e);
-		}
-		return result;
-	}
+			ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
+			roiList = detectRois(ip);
 		
-	public List<AnalysisDataset> getDatasets(){
-		return this.datasets;
+		} catch(Exception e){
+			error("Error in nucleus detection", e);
+		}
+		
+		finer("Detected ROIs");
+		return roiList;
 	}
-	
-	public List<AnalysisDataset> analysePopulations(List<CellCollection> folderCollection){
-//		programLogger.log("Beginning analysis");
-		log("Beginning analysis");
 
-		List<AnalysisDataset> result = new ArrayList<AnalysisDataset>();
+  /**
+  * Call the nucleus detector on the given image.
+  * For each nucleus, perform the analysis step
+  *
+  * @param image the ImagePlus to be analysed
+  * @param path the full path of the image
+ * @throws Exception 
+  */
+	private List<Cell> processImage(ImageStack image, File path) throws Exception{
 
-		for(CellCollection collection : folderCollection){
+		fine("File:  "+path.getName());
+		
+		List<Cell> result = new ArrayList<Cell>();
+						
+		ImageStack searchStack = preprocessImage(image);
+
+		// get polygon rois of correct size
+		
+		List<Roi> roiList = getROIs(searchStack, Detector.CLOSED_OBJECTS);
+						
+		if(roiList.isEmpty()){
+
+			fine("No usable nuclei in image");
 			
+			return result;
+		}
 
-			AnalysisDataset dataset = new AnalysisDataset(collection);
-			dataset.setAnalysisOptions(analysisOptions);
-			dataset.setRoot(true);
-//			File debugFile = dataset.getDebugFile();
+		int nucleusNumber = 0;
 
-			File folder = collection.getFolder();
-			log("Analysing: "+folder.getName());
+		for(Roi roi : roiList){
 
-			try{
+			finest( "Acquiring nucleus "+nucleusNumber);
 
-				CellCollection failedNuclei = new CellCollection(folder, 
-						collection.getOutputFolderName(), 
-						collection.getName()+" - failed", 
-						collection.getNucleusType());
-
-
-				log("Filtering collection...");
-				boolean ok = CollectionFilterer.run(collection, failedNuclei, fileLogger); // put fails into failedNuclei, remove from r
-				if(ok){
-					log("Filtered OK");
-				} else {
-					log("Filtering error");
-				}
-				
-				/*
-				 * Keep the failed nuclei - they can be manually assessed later
-				 */
-
-				if(analysisOptions.isKeepFailedCollections()){
-					log("Keeping failed nuclei as new collection");
-					AnalysisDataset failed = new AnalysisDataset(failedNuclei);
-					AnalysisOptions failedOptions = new AnalysisOptions(analysisOptions);
-					failedOptions.setNucleusType(NucleusType.ROUND);
-					failed.setAnalysisOptions(failedOptions);
-					failed.setRoot(true);
-					result.add(failed);
-				}
-				
-				log(spacerString);
-				
-				log("Population: "+collection.getName());
-				log("Passed: "+collection.getNucleusCount()+" nuclei");
-				log("Failed: "+failedNuclei.getNucleusCount()+" nuclei");
-				
-				log(spacerString);
-				
-				result.add(dataset);
-				
-				
+			Cell cell = null;
+			try{	
+				cell = makeCell(roi, image, nucleusNumber++, path); // get the profile data back for the nucleus
 			} catch(Exception e){
-				log(Level.WARNING, "Cannot create collection: "+e.getMessage());
+
+				error("Error acquiring nucleus", e);
+
 			}
 
-//			
-
-		}
+			if(cell!=null){
+				result.add(cell);
+				finer("Cell created");
+			}
+			
+		} 
 		return result;
 	}
+	
+	/**
+	 * Run the appropriate filters on the given image
+	 * @param image
+	 * @return
+	 * @throws Exception
+	 */
+	private ImageStack preprocessImage(ImageStack image) throws Exception{
+		
+		finer("Preprocessing image");
+		CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
 
-  /**
-  * Add a NucleusCollection to the group, using the source folder
-  * name as a key.
-  *
-  *  @param file a folder to be analysed
-  *  @param collection the collection of nuclei found
-  */
-  public void addNucleusCollection(File file, CellCollection collection){
-    this.collectionGroup.put(file, collection);
-  }
+		ImageStack searchStack = null;
 
+		if( nucleusCannyOptions.isUseCanny()) {
 
-  /**
-  * Get the Map of NucleusCollections to the folder from
-  * which they came. Any folders with no nuclei are removed
-  * before returning.
-  *
-  *  @return a Map of a folder to its nuclei
-  */
-  public List<CellCollection> getNucleiCollections(){
-	  // remove any empty collections before returning
+			// before passing to edge detection
+			// run a Kuwahara filter to enhance edges in the image
+			if(nucleusCannyOptions.isUseKuwahara()){
+				int kernel = nucleusCannyOptions.getKuwaharaKernel();
+				ImageProcessor ip = ImageFilterer.runKuwaharaFiltering(image, Constants.rgbToStack(options.getChannel())  , kernel);
+				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
+				finer("Run Kuwahara");
+			}
 
-	  fine( "Getting all collections");
+			// flatten chromocentres
+			if(nucleusCannyOptions.isUseFlattenImage()){
+				int threshold = nucleusCannyOptions.getFlattenThreshold();
+				ImageProcessor ip = ImageFilterer.squashChromocentres(image, Constants.rgbToStack(options.getChannel()), threshold);
+				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
+				finer("Run flattening");
+			}
+			searchStack = ImageFilterer.runEdgeDetector(image, Constants.rgbToStack(options.getChannel()), nucleusCannyOptions);
+			finer("Run edge detection");
+		} else {
+			searchStack = image;
+		}
+		return searchStack;
+	}
+	
 
-	  List<File> toRemove = new ArrayList<File>(0);
+	/**
+	  * Save the region of the input image containing the nucleus
+	  * Create a Nucleus and add it to the collection
+	  *
+	  * @param roi the ROI within the image
+	  * @param image the ImagePlus containing the nucleus
+	  * @param nucleusNumber the count of the nuclei in the image
+	  * @param path the full path to the image
+	  */
+	private Cell makeCell(Roi roi, ImageStack image, int nucleusNumber, File path){
 
-	  fine( "Testing nucleus counts");
+		Cell result = null;
+		
+		  // measure the area, density etc within the nucleus
+		ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
+		StatsMap values   = measure(roi, ip);
 
-	  Set<File> keys = collectionGroup.keySet();
-	  for (File key : keys) {
-		  CellCollection collection = collectionGroup.get(key);
-		  if(collection.cellCount()==0){
-			  fine( "Removing collection "+key.toString());
-			  toRemove.add(key);
-		  }    
-	  }
+		  // save the position of the roi, for later use
+		  double xbase = roi.getXBase();
+		  double ybase = roi.getYBase();
 
-	  fine( "Got collections to remove");
+		  Rectangle bounds = roi.getBounds();
 
-	  Iterator<File> iter = toRemove.iterator();
-	  while(iter.hasNext()){
-		  collectionGroup.remove(iter.next());
-	  }
+		  double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
 
-	  fine( "Removed collections");
-
-	  List<CellCollection> result = new ArrayList<CellCollection>();
-	  for(CellCollection c : collectionGroup.values()){
-		  result.add(c);
-	  }
-	  return result;
-
-  }
-
-  /**
-  *  Checks that the given file is suitable for analysis.
-  *  Is the file an image. Also check if it is in the 'banned list'.
-  *  These are prefixes that are attached to exported images
-  *  at later stages of analysis. This prevents exported images
-  *  from previous runs being analysed.
-  *
-  *  @param file the File to check
-  *  @return a true or false of whether the file passed checks
-  */
-  public static boolean checkFile(File file){
-    
-    if( ! file.isFile()){
-    	return false;
-    }
-    
-    String fileName = file.getName();
-    
-    for( String prefix : Constants.PREFIXES_TO_IGNORE){
-    	if(fileName.startsWith(prefix)){
-    		return false;
-    	}
-    }
-    
-    for( String fileType : Constants.IMPORTABLE_FILE_TYPES){
-    	if( fileName.endsWith(fileType) ){
-    		return true;
-    	}
-    }
-    return false;
-  }
-  
-  /**
-   * Count the number of images in the given folder
-   * that are suitable for analysis. Rcursive over 
-   * subfolders.
-   * @param folder the folder to count
-   * @return the number of analysable image files
-   */
-  public static int countSuitableImages(File folder){
-
-	  File[] listOfFiles = folder.listFiles();
-
-	  int result = 0;
-
-	  for (File file : listOfFiles) {
-
-		  boolean ok = checkFile(file);
-
-		  if(ok){
-			  result++;
-
-		  } else { 
-			  if(file.isDirectory()){ // recurse over any sub folders
-				  result += countSuitableImages(file);
-			  }
-		  } 
-	  } 
-	  return result;
-  }
-
-  /**
-  * Go through the input folder. Check if each file is
-  * suitable for analysis, and if so, call the analyser.
-  *
-  * @param folder the folder of images to be analysed
-  */
-  protected void processFolder(File folder){
-
-	  File[] listOfFiles = folder.listFiles();
-	  
-	  
-	  
-	  CellCollection folderCollection = new CellCollection(folder, 
-			  outputFolder, 
-			  folder.getName(), 
-			  analysisOptions.getNucleusType());
-	  
-	  this.collectionGroup.put(folder, folderCollection);
-
-
-	  FileProcessingTask task = new FileProcessingTask(folder, listOfFiles, folderCollection, outputFolder, analysisOptions);
-	  task.addProgressListener(this);
-	  mainPool.invoke(task);
-//	  task.invoke();
-	  
-	  for(File f : listOfFiles){
-		  if(f.isDirectory()){
-			  processFolder(f); // recurse over each folder
+		  try{
+		
+			  roi.setLocation(0,0); // translate the roi to the new image coordinates
+			  
+			  // create a Nucleus from the roi
+			  XYPoint centreOfMass = new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase);
+			  
+			  Nucleus currentNucleus = createNucleus(roi, path, nucleusNumber, originalPosition, options.getNucleusType(), centreOfMass);
+			  					  
+			  currentNucleus.setStatistic(NucleusStatistic.AREA,      values.get("Area"));
+			  currentNucleus.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
+			  currentNucleus.setStatistic(NucleusStatistic.PERIMETER, values.get("Perim"));
+			  currentNucleus.setChannel(options.getChannel());
+			  
+			  currentNucleus.setScale(options.getScale());
+		
+			  currentNucleus.setOutputFolder(outputFolderName);
+			  currentNucleus.intitialiseNucleus(options.getAngleWindowProportion());
+			  
+			  currentNucleus.findPointsAroundBorder();
+		
+			  // if everything checks out, add the measured parameters to the global pool
+			  result = new Cell();
+			  result.setNucleus(currentNucleus);		  
+			  
+		  }catch(Exception e){
+	
+			  error(" Error in nucleus assignment", e);
+			  
 		  }
+		  return result;
 	  }
+	
+	/**
+	 * Create a Nucleus from an ROI. Fetches the appropriate constructor based
+	 * on the nucleus type
+	 * @param roi the ROI
+	 * @param path the path to the image
+	 * @param nucleusNumber the number of the nucleus in the image
+	 * @param originalPosition the bounding box position of the nucleus
+	 * @param nucleusType the class of nucleus
+	 * @return a new nucleus of the appropriate class
+	 */
+	private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition, NucleusType nucleusType, XYPoint centreOfMass){
 
+		  Nucleus n = null;
+		  try {
+			  
+			  // The classes for the constructor
+			  Class<?>[] classes = {Roi.class, File.class, int.class, double[].class, XYPoint.class };
+			  
+			  Constructor<?> nucleusConstructor = nucleusType.getNucleusClass()
+					  .getConstructor(classes);
+			  
 
-  } // end function
+			  n = (Nucleus) nucleusConstructor.newInstance(roi, 
+					  path, 
+					  nucleusNumber, 
+					  originalPosition,
+					  centreOfMass);
+			  
+		  } catch(Exception e){
 
-  @Override
-  public void progressEventReceived(ProgressEvent event) {
-	  publish(++progress);
-
-  }
-  
-  
+			  error( "Error creating nucleus", e);
+			  
+		  }
+		  return n;
+	  }
+	  
+	  
 }

@@ -18,125 +18,336 @@
  *******************************************************************************/
 package analysis.signals;
 
-import ij.ImageStack;
-import io.ImageImporter;
-
+import java.awt.Rectangle;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
-import analysis.AnalysisDataset;
-import analysis.AnalysisWorker;
-import components.Cell;
-import components.generic.BorderTagObject;
+import analysis.detection.Detector;
+import components.CellularComponent;
+import components.generic.BooleanProfile;
+import components.generic.Profile;
+import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
-import components.nuclear.SignalCollection;
-import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
+import ij.ImageStack;
+import ij.gui.Roi;
+import ij.measure.Calibration;
+import ij.measure.Measurements;
+import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
+import ij.process.ImageStatistics;
+import stats.NucleusStatistic;
+import stats.SignalStatistic;
+import utility.Constants;
+import utility.StatsMap;
 
-
-/**
- * Methods for finding a FISH signal in a nucleus.
- * TODO: For a paint, assume one or two signals per nucleus. 
- * If more are detected, lower the threshold until the signals merge
- */
-public class SignalDetector extends AnalysisWorker {
+public class SignalDetector extends Detector {
 	
-	protected NuclearSignalOptions options = null;
-	protected File folder;
-	protected int channel;
-	protected UUID signalGroup;
-	protected String channelName;
-		
+	private NuclearSignalOptions options;
+	private  int channel;
+	private int minThreshold;
+	
 	/**
-	 * For use when running on an existing dataset
-	 * @param d the dataset to add signals to
-	 * @param folder the folder of images
-	 * @param channel the RGB channel to search
-	 * @param options the analysis options
-	 * @param group the signal group to add signals to
+	 * Create a detector with the desired options
+	 * @param options the size and circularity parameters
+	 * @param channel the RGB channel
 	 */
-
-	public SignalDetector(AnalysisDataset d, File folder, int channel, NuclearSignalOptions options, UUID group, String channelName){
-		super(d);
-		
-		this.options	 = options;
-		this.folder		 = folder;
-		this.channel	 = channel;
-		this.signalGroup = group;
-		this.channelName = channelName;
-		
-		this.setProgressTotal(d.getCollection().getNucleusCount());
+	public SignalDetector(NuclearSignalOptions options, int channel){
+		this.options = options;
+		this.channel = channel;
+		this.minThreshold = options.getThreshold();
 	}
 	
-	@Override
-	protected Boolean doInBackground() throws Exception {
-		boolean result = true;
-		fine("Beginning signal detection in channel "+channel);
+	/**
+	 * Call the appropriate signal detection method based on the analysis options
+	 * @param sourceFile the file the image came from
+	 * @param stack the imagestack
+	 * @param n the nucleus
+	 * @throws Exception 
+	 */
+	public List<NuclearSignal> detectSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
+		
+		options.setThreshold(minThreshold); // reset to default;
+		
+		if(options==null || options.getDetectionMode()==NuclearSignalOptions.FORWARD){
+			finest("Running forward detection");
+			return detectForwardThresholdSignal(sourceFile, stack, n);
+		}
+		
+		if(options.getDetectionMode()==NuclearSignalOptions.REVERSE){
+			finest( "Running reverse detection");
+			return detectReverseThresholdSignal(sourceFile, stack, n);
+		}
+		
+		if(options.getDetectionMode()==NuclearSignalOptions.HISTOGRAM){
+			finest( "Running adaptive detection");
+			return detectHistogramThresholdSignal(sourceFile, stack, n);
+		}
+		finest( "No mode specified");
+		return null;
+	}
+	
+	
+	/*
+	 * PROTECTED AND PRIVATE METHODS
+	 * 
+	 */
+	
+	/**
+	 * Given a new threshold value, update the options
+	 * if the value is not below the previously defined
+	 * minimum
+	 * @param newThreshold
+	 */
+	private void updateThreshold(int newThreshold){
+		// only use the calculated threshold if it is larger than
+		// the given minimum
+		if(newThreshold > minThreshold){
+			fine( "Threshold set at: "+newThreshold);
+			options.setThreshold(newThreshold);
+		} else {
+			fine( "Threshold kept at minimum: "+minThreshold);
+			options.setThreshold(minThreshold);
+		}
+	}
+	
+	/**
+	 * Detect a signal in a given stack by standard forward thresholding
+	 * and add to the given nucleus
+	 * @param sourceFile the file the image came from
+	 * @param stack the imagestack
+	 * @param n the nucleus
+	 * @throws Exception 
+	 */
+	private List<NuclearSignal> detectForwardThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
+//		SignalCollection signalCollection = n.getSignalCollection();
+		
+		// choose the right stack number for the channel
+		int stackNumber = Constants.rgbToStack(channel);
+		
+		setMaxSize(n.getStatistic(NucleusStatistic.AREA) * options.getMaxFraction());
+		setMinSize(options.getMinSize());
+		setMinCirc(options.getMinCirc());
+		setMaxCirc(options.getMaxCirc());
+		setThreshold(options.getThreshold());
 
+		List<Roi> roiList = new ArrayList<Roi>();
+		
 		try{
-			int progress = 0;
 			
-			int originalMinThreshold = options.getThreshold();
+			ImageProcessor ip = stack.getProcessor(stackNumber);
+			roiList = detectRois(ip);
 			
-			SignalFinder finder = new SignalFinder(options, channel);
-			
-			for(Cell c : getDataset().getCollection().getCells()){
-				
-				// reset the  min threshold for each cell
-				options.setThreshold(originalMinThreshold);
-
-				Nucleus n = c.getNucleus();
-				finer("Looking for signals associated with nucleus "+n.getSourceFileName()+"-"+n.getNucleusNumber());
-				
-				// get the image in the folder with the same name as the
-				// nucleus source image
-				File imageFile = new File(folder + File.separator + n.getSourceFileName());
-				finer("Source file: "+imageFile.getAbsolutePath());
-
-				try{
-					
-					ImageStack stack = ImageImporter.getInstance().importImage(imageFile);
-
-					List<NuclearSignal> signals = finder.detectSignal(imageFile, stack, n);
-					
-					finer("Creating signal collection");
-					
-					SignalCollection signalCollection = n.getSignalCollection();
-					signalCollection.addSignalGroup(signals, signalGroup, imageFile, channel);
-					
-					SignalAnalyser s = new SignalAnalyser();
-					s.calculateSignalDistancesFromCoM(n);
-					s.calculateFractionalSignalDistancesFromCoM(n);
-
-					fine("Calculating signal angles");
-					if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
-						finer("Nucleus type is asymmetric: "+n.getClass().getSimpleName());
-						
-						if(n.hasBorderTag(BorderTagObject.ORIENTATION_POINT)){
-							finest("Calculating angle from orientation point");
-							n.calculateSignalAnglesFromPoint(n.getBorderPoint(BorderTagObject.ORIENTATION_POINT));
-						} else {
-							finest("No orientation point in nucleus");
-						}
-					} else {
-						finer("Nucleus type is round: "+n.getClass().getSimpleName());
-					}
-					
-					
-				} catch(Exception e){
-					logError("Error detecting signal", e);
-				}
-				
-				publish(progress++);
-			}		
-			
-		} catch (Exception e){
-			logError("Error in signal detection", e);
-			return false;
+		} catch(Exception e){
+			error("Error in signal detection", e);
 		}
 
-		return result;
+
+		List<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
+
+		if(!roiList.isEmpty()){
+			
+			fine( roiList.size()+" signals in stack "+stackNumber);
+
+			for( Roi r : roiList){
+				ImageProcessor ip = stack.getProcessor(stackNumber);
+				StatsMap values = measure(r, ip);
+				
+				
+				double xbase     = r.getXBase();
+				double ybase     = r.getYBase();
+				Rectangle bounds = r.getBounds();
+				double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
+				
+				NuclearSignal s = new NuclearSignal( r, 
+						sourceFile, channel, originalPosition,
+						new XYPoint(values.get("XM"), 
+								values.get("YM"))
+						);
+				
+				s.setStatistic(SignalStatistic.AREA,      values.get("Area"));
+				s.setStatistic(SignalStatistic.MAX_FERET, values.get("Feret"));
+				s.setStatistic(SignalStatistic.PERIMETER, values.get("Perim"));
+				
+				/*
+			    Assuming the signal were a perfect circle of area equal
+			    to the measured area, get the radius for that circle
+				 */
+				s.setStatistic(SignalStatistic.RADIUS,  Math.sqrt(values.get("Area")/Math.PI));
+				
+
+
+				// only keep the signal if it is within the nucleus
+				if(n.containsOriginalPoint(s.getCentreOfMass())){
+					
+					// Offset the centre of mass and border points of the signal to match the nucleus offset
+					s.offset(-n.getPosition()[CellularComponent.X_BASE], 
+							-n.getPosition()[CellularComponent.Y_BASE]);
+					
+					signals.add(s);
+					
+				}
+				
+			}
+		} else {
+			fine( "No signal in stack "+stackNumber);
+		}
+		return signals;
 	}
 	
+
+	
+	/**
+	 * Detect a signal in a given stack by reverse thresholding
+	 * and add to the given nucleus. Find the brightest pixels in
+	 * the nuclear roi. If < maxSignalFraction, get dimmer pixels and
+	 * remeasure. Continue until signal size is met. Works best with 
+	 * maxSignalFraction of ~0.1 for a chromosome paint
+	 * TODO: assumes there is only one signal. Check that the detector picks
+	 * up an object of MIN_SIGNAL_SIZE before setting the threshold.
+	 * @param sourceFile the file the image came from
+	 * @param stack the imagestack
+	 * @param n the nucleus
+	 * @throws Exception 
+	 */
+	private List<NuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
+		
+//		SignalCollection signalCollection = n.getSignalCollection();
+		finest( "Beginning reverse detection for nucleus");
+		// choose the right stack number for the channel
+		int stackNumber = Constants.rgbToStack(channel);
+		
+		ImageProcessor ip = stack.getProcessor(stackNumber);
+		FloatPolygon polygon = n.createOriginalPolygon();
+		
+		// map brightness to count
+		Map<Integer, Integer> counts = new HashMap<Integer, Integer>(0);
+		for(int i=0;i<256;i++){
+			counts.put(i, 0);
+		}
+		
+		
+//		get the region bounded by the nuclear roi
+//		for max intensity (255) , downwards, count pixels with that intensity
+//		if count / area < fraction, continue
+		
+		//sort the pixels in the roi to bins
+		for(int width = 0; width<ip.getWidth();width++){
+			for(int height = 0; height<ip.getHeight();height++){
+				
+				if(polygon.contains( (float) width, (float) height)){
+					int brightness = ip.getPixel(width, height);
+					int oldCount = counts.get(brightness);
+					counts.put(brightness, oldCount+1);
+				}
+				
+			}
+		}
+		
+//		logger.log("Counts created", Logger.DEBUG);
+//		for(int i=0;i<256;i++){
+//			logger.log("Level "+i+": "+counts.get(i), Logger.DEBUG);
+//		}
+		
+		// find the threshold from the bins
+		int area = (int) ( n.getStatistic(NucleusStatistic.AREA) * options.getMaxFraction());
+		int total = 0;
+		int threshold = 0; // the value to threshold at
+		
+		for(int brightness = 255; brightness>0; brightness--){
+			
+			total += counts.get(brightness); 
+			
+			if(total>area){
+				threshold = brightness+1;
+				break;
+			}
+		}
+		
+		
+		updateThreshold(threshold);
+		
+		// now we have the reverse threshold value, do the thresholding 
+		// and find signal rois
+		return detectForwardThresholdSignal(sourceFile, stack, n);
+
+	}
+	
+	
+	
+	/**
+	 * This method uses the histogram of pixel intensities in the signal
+	 * channel within the bounding box of the nucleus. The histogram shows a drop
+	 * at the point where background transitions to real signal. We detect this drop, 
+	 * and set it as the appropriate forward threshold for the nucleus.  
+	 * @throws Exception 
+	 */
+	private List<NuclearSignal> detectHistogramThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
+		fine( "Beginning histogram detection for nucleus");
+
+		// choose the right stack number for the channel
+		int stackNumber = Constants.rgbToStack(channel);
+		
+		ImageProcessor ip = stack.getProcessor(stackNumber);
+		double[] positions = n.getPosition();
+		Rectangle boundingBox = new Rectangle( (int) positions[CellularComponent.X_BASE],
+				(int) positions[CellularComponent.Y_BASE],
+				(int) positions[CellularComponent.WIDTH],
+				(int) positions[CellularComponent.HEIGHT]);
+		
+		ip.setRoi(boundingBox);
+		ImageStatistics statistics = ImageStatistics.getStatistics(ip, Measurements.AREA, new Calibration());
+		long[] histogram = statistics.getHistogram();
+		
+		double[] d = new double[histogram.length];
+
+		for(int i =0; i<histogram.length; i++){
+			d[i] = histogram[i];
+
+		}
+		
+		/* trim the histogram to the minimum signal intensity.
+		 * No point looking lower, and the black pixels increase the
+		 * total range making it harder to carry out the range based minima
+		 * detection below
+		 */
+		finest( "Initial histo threshold: "+minThreshold);
+//		int trimValue = minThreshold;
+		Profile histogramProfile = new Profile(d);
+		Profile trimmedHisto = histogramProfile.getSubregion(minThreshold, 255);
+		
+		// smooth the arrays,  get the deltas, and double smooth them
+		Profile trimDS = trimmedHisto.smooth(3).calculateDeltas(3).smooth(3).smooth(3);
+		
+		/* find minima and maxima above or below zero, with a total 
+		 * displacement more than 0.1 of the range of values in the delta
+		 * profile
+		 */		
+		BooleanProfile minimaD = trimDS.getLocalMinima(3, 0, 0.1);
+
+		/* Set the threshold for this nucleus to the drop-off
+		* This is the highest local minimum detected in the 
+		* delta profile (if no minima were detected, we use the
+		* original signal threshold). 
+		*/ 
+		int maxIndex = minThreshold;
+		for(int i =0; i<minimaD.size(); i++){
+			if(minimaD.get(i)==true){
+				maxIndex = i+minThreshold;
+			}
+		}
+		/*
+		 * Add a bit more to the new threshold. This is because the minimum
+		 * of the delta profile is in middle of the background drop off;
+		 * we actually want to ignore the remainder of this background and just
+		 * keep the signal. Arbitrary at present. TODO: Find the best point. 
+		 */
+		maxIndex+=10;
+		
+		updateThreshold(maxIndex);
+		return detectForwardThresholdSignal(sourceFile, stack, n);
+	}
 }
