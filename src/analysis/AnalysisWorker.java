@@ -193,7 +193,12 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
         	error("Interruption error in worker", e);
         	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
         } catch (ExecutionException e) {
-        	error("Execution error in worker", e);
+        	if(e.getCause() instanceof java.lang.OutOfMemoryError){
+        		warn("Error: Not enough memory!");
+        	} else {
+        		error("Execution error in worker", e);
+        	}
+        	
         	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
        }
 

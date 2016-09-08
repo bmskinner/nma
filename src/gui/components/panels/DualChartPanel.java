@@ -137,7 +137,9 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 		double min = ob.getMinValue();
 		double max = ob.getMaxValue();
 		
-		chartPanel.getChart().getXYPlot().getDomainAxis().setRange(min, max);
+		if(min < max){ // must have a positive range
+			chartPanel.getChart().getXYPlot().getDomainAxis().setRange(min, max);
+		}
 	}
 	
 	

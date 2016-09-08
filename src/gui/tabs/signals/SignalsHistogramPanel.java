@@ -62,11 +62,17 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			log(Level.SEVERE, "Error creating histogram panel", e);
 		}
 		
+		// Keep disabled until CPU use is fixed
+		useDensityPanel.setEnabled(false);
+		
 	}
 	
 	@Override
 	protected void updateSingle() {
 		this.setEnabled(true);
+		
+		// Keep disabled until CPU use is fixed
+		useDensityPanel.setEnabled(false);
 		
 		boolean useDensity = useDensityPanel.isSelected();
 		

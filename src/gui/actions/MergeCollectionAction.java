@@ -37,52 +37,81 @@ public class MergeCollectionAction extends ProgressableAction {
 
 	public MergeCollectionAction(List<AnalysisDataset> datasets, MainWindow mw) {
 		super("Merging", mw);
-
-		SaveDialog saveDialog = new SaveDialog("Save merged dataset as...", "Merge_of_datasets", Constants.SAVE_FILE_EXTENSION);
-
-		String fileName   = saveDialog.getFileName();
-		String folderName = saveDialog.getDirectory();
 		
-		if(fileName!=null && folderName!=null){
-			File saveFile = new File(folderName+File.separator+fileName);
+		if( ! checkDatasets(datasets)){
+			this.cancel();
 			
-			// Check for signals in >1 dataset
-			int signals=0;
-			for(AnalysisDataset d : datasets){
-				if(d.getCollection().getSignalManager().hasSignals()){
-					signals++;
+		} else {
+
+			SaveDialog saveDialog = new SaveDialog("Save merged dataset as...", "Merge_of_datasets", Constants.SAVE_FILE_EXTENSION);
+
+			String fileName   = saveDialog.getFileName();
+			String folderName = saveDialog.getDirectory();
+
+			if(fileName!=null && folderName!=null){
+				File saveFile = new File(folderName+File.separator+fileName);
+
+				// Check for signals in >1 dataset
+				int signals=0;
+				for(AnalysisDataset d : datasets){
+					if(d.getCollection().getSignalManager().hasSignals()){
+						signals++;
+					}
 				}
-			}
-			
-			if(signals>1){
-			
-				DatasetMergingDialog dialog = new DatasetMergingDialog(datasets);
-				
-				Map<UUID, Set<UUID>> pairs = dialog.getPairedSignalGroups();
-				
-				
-				
-				if(pairs.keySet().size()!=0){
-					finest("Found paired signal groups");
-					// User decided to merge signals
-					worker = new DatasetMerger(datasets, saveFile, pairs);
+
+				if(signals>1){
+
+					DatasetMergingDialog dialog = new DatasetMergingDialog(datasets);
+
+					Map<UUID, Set<UUID>> pairs = dialog.getPairedSignalGroups();
+
+
+
+					if(pairs.keySet().size()!=0){
+						finest("Found paired signal groups");
+						// User decided to merge signals
+						worker = new DatasetMerger(datasets, saveFile, pairs);
+					} else {
+						finest("No paired signal groups");
+						worker = new DatasetMerger(datasets, saveFile);
+					}
 				} else {
-					finest("No paired signal groups");
+					finest("No signal groups to merge");
+					// no signals to merge
 					worker = new DatasetMerger(datasets, saveFile);
 				}
+
+
+				worker.addPropertyChangeListener(this);
+				ThreadManager.getInstance().submit(worker);
 			} else {
-				finest("No signal groups to merge");
-				// no signals to merge
-				worker = new DatasetMerger(datasets, saveFile);
+				this.cancel();
 			}
-			
-			
-			worker.addPropertyChangeListener(this);
-			ThreadManager.getInstance().submit(worker);
-		} else {
-			this.cancel();
 		}
 
+	}
+	
+	
+	/**
+	 * Check datasets are valid to be merged
+	 * @param datasets
+	 * @return
+	 */
+	private boolean checkDatasets(List<AnalysisDataset> datasets){
+		
+		if(datasets.size()==2){
+			
+			if(datasets.get(0).hasChild(datasets.get(1)) ||
+				datasets.get(1).hasChild(datasets.get(0))
+					
+					){
+				warn("No. Merging parent and child is silly.");
+				return false;
+			}
+			
+		}
+		return true;
+		
 	}
 
 	@Override

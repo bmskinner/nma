@@ -68,18 +68,18 @@ public class ClusterAnalysisAction extends ProgressableAction {
 	public void finished() {
 
 		this.setProgressBarVisible(false);
-		log(Level.INFO, "Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
+		log("Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
 
 		String tree = (((NucleusClusterer) worker).getNewickTree());
 
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		ClusteringOptions options =  ((NucleusClusterer) worker).getOptions();
 		//int clusterNumber = dataset.getClusterGroups().size();
-		log(Level.FINEST, "Getting group number");
+		finest("Getting group number");
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-		log(Level.FINEST, "Cluster group number chosen: "+clusterNumber);
+		finest("Cluster group number chosen: "+clusterNumber);
 
-		ClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, tree);
+		ClusterGroup group = new ClusterGroup("Group_"+clusterNumber, options, tree);
 
 		for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
 
@@ -92,7 +92,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 					fine("Copying profiles to cluster");
 					dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
 				} catch (Exception e) {
-					logError("Error copying segments to cluster "+c.getName(), e);
+					error("Error copying segments to cluster "+c.getName(), e);
 				}
 				
 				//Copy signal groups
@@ -108,13 +108,13 @@ public class ClusterAnalysisAction extends ProgressableAction {
 				
 				
 				group.addDataset(c);
-//				c.setName(group.getName()+"_"+c.getName());
+				c.setName(group.getName()+"_"+c.getName());
 //				log(Level.FINEST, "Renamed cluster: "+c.getName());
 				dataset.addChildCollection(c);
 				
 				
 				// attach the clusters to their parent collection
-				log(Level.INFO, "Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
+				log("Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
 				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
 				clusterDataset.setRoot(false);
 				list.add(clusterDataset);
@@ -122,7 +122,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 
 
 		}
-		log(Level.FINE, "Profiles copied to all clusters");
+		fine("Profiles copied to all clusters");
 		dataset.addClusterGroup(group);
 		fireDatasetEvent(DatasetMethod.SAVE, dataset);
 		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
