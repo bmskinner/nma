@@ -152,7 +152,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 		straightenMeshBox = new JCheckBox("Straighten meshes", false);
 		straightenMeshBox.addActionListener(this);
-		upperPanel.add(straightenMeshBox);
+//		upperPanel.add(straightenMeshBox);
 		
 		
 		lowerPanel.add(new JLabel("Target dataset"));
