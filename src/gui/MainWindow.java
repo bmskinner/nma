@@ -174,7 +174,7 @@ public class MainWindow
 							null, options, options[0]);
 
 					if(save==0){
-						saveRootDatasets();
+						saveAndClose();
 
 					} 
 					
@@ -192,12 +192,7 @@ public class MainWindow
 				}
 			}
 			
-			public void close(){
-				datasetManager.clear();
-				globalOptions.setDefaults();
-				dispose();
-			}
-			
+						
 			  public void windowClosed(WindowEvent e) {
 				  close();
 			  }
@@ -466,6 +461,12 @@ public class MainWindow
 		}
 		
 	}
+	
+	public void close(){
+		datasetManager.clear();
+		globalOptions.setDefaults();
+		dispose();
+	}
 			
 	public PopulationsPanel getPopulationsPanel(){
 		return this.populationsPanel;
@@ -646,7 +647,7 @@ public class MainWindow
 		
 		if(event.type().equals("RunShellAnalysis")){
 			Runnable task = () -> {
-				log(Level.FINER, "Shell analysis selected");
+				finer("Shell analysis selected");
 				new ShellAnalysisAction(selectedDataset, MainWindow.this);
 			};
 			threadManager.execute(task);
@@ -988,6 +989,28 @@ public class MainWindow
 				}
 			}
 			log("All root datasets saved");
+		};
+			
+		threadManager.execute(r);
+	}
+	
+	/**
+	 * Save the root datasets, then dispose the frame
+	 */
+	private void saveAndClose(){
+		Runnable r = () -> {
+			for(AnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
+				final CountDownLatch latch = new CountDownLatch(1);
+
+				new SaveDatasetAction(root, MainWindow.this, latch, false);
+				try {
+					latch.await();
+				} catch (InterruptedException e) {
+					error("Interruption to thread", e);
+				}
+			}
+			log("All root datasets saved");
+			close();
 		};
 			
 		threadManager.execute(r);

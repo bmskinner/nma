@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -1112,7 +1113,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + angleProfileWindowSize;
 		long temp;
 		temp = Double.doubleToLongBits(angleWindowProportion);
@@ -1124,8 +1125,20 @@ public class RoundNucleus extends AbstractCellularComponent
 				+ ((outputFolder == null) ? 0 : outputFolder.hashCode());
 		temp = Double.doubleToLongBits(pathLength);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
+		
+		
 		result = prime * result
 				+ ((profileMap == null) ? 0 : profileMap.hashCode());
+		
+		
+		// Check the segmented profiles
+		for(Map.Entry<ProfileType, SegmentedProfile> entry : profileMap.entrySet()){
+
+			result = prime * result
+					+ ((entry == null) ? 0 : entry.getValue().hashCode());
+		}
+		
+		
 		result = prime * result
 				+ ((segmentList == null) ? 0 : segmentList.hashCode());
 		result = prime * result

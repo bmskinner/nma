@@ -904,6 +904,35 @@ public class SegmentedProfile extends Profile implements Serializable {
 		return super.toString();
 	}
 	
+	
+	
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((segments == null) ? 0 : segments.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SegmentedProfile other = (SegmentedProfile) obj;
+		if (segments == null) {
+			if (other.segments != null)
+				return false;
+		} else if (!segments.equals(other.segments))
+			return false;
+		return true;
+	}
+
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 //		finest("\tWriting segmented profile");
 		out.defaultWriteObject();

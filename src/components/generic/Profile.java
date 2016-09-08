@@ -108,13 +108,13 @@ public class Profile implements Serializable, Loggable {
 	}
 	
 
-//	@Override
-//	public int hashCode() {
-//		final int prime = 31;
-//		int result = 1;
-//		result = prime * result + Arrays.hashCode(array);
-//		return result;
-//	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(array);
+		return result;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -1321,6 +1321,8 @@ public Profile calculateDeltas(int windowSize){
 	  result = new Profile(combinedArray);
 	  return result;
   }
+  
+  
   
   private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 //		finest("\tWriting profile");

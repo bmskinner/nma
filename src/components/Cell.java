@@ -172,11 +172,66 @@ public class Cell implements Serializable, Loggable {
 		return true;
 	}
 	
+	
+	
+	
+	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 //		finest("\tWriting cell");
 		out.defaultWriteObject();
 //		finest("\tWrote cell");
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((acrosomes == null) ? 0 : acrosomes.hashCode());
+		result = prime * result
+				+ ((mitochondria == null) ? 0 : mitochondria.hashCode());
+		result = prime * result + ((nucleus == null) ? 0 : nucleus.hashCode());
+		result = prime * result + ((tails == null) ? 0 : tails.hashCode());
+		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+		return result;
+	}
+
+//	@Override
+//	public boolean equals(Object obj) {
+//		if (this == obj)
+//			return true;
+//		if (obj == null)
+//			return false;
+//		if (getClass() != obj.getClass())
+//			return false;
+//		Cell other = (Cell) obj;
+//		if (acrosomes == null) {
+//			if (other.acrosomes != null)
+//				return false;
+//		} else if (!acrosomes.equals(other.acrosomes))
+//			return false;
+//		if (mitochondria == null) {
+//			if (other.mitochondria != null)
+//				return false;
+//		} else if (!mitochondria.equals(other.mitochondria))
+//			return false;
+//		if (nucleus == null) {
+//			if (other.nucleus != null)
+//				return false;
+//		} else if (!nucleus.equals(other.nucleus))
+//			return false;
+//		if (tails == null) {
+//			if (other.tails != null)
+//				return false;
+//		} else if (!tails.equals(other.tails))
+//			return false;
+//		if (uuid == null) {
+//			if (other.uuid != null)
+//				return false;
+//		} else if (!uuid.equals(other.uuid))
+//			return false;
+//		return true;
+//	}
 
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 //		finest("Reading cell");
