@@ -24,11 +24,31 @@ import java.util.List;
 import analysis.AnalysisDataset;
 
 public class DatasetEvent extends EventObject {
+	
+	public static final String PROFILING_ACTION    = "Profiling action";
+	public static final String NEW_MORPHOLOGY      = "New morphology";
+	public static final String COPY_MORPHOLOGY     = "Copy morphology";
+	public static final String REFRESH_MORPHOLOGY  = "Refresh morphology";
+	public static final String REFOLD_CONSENSUS    = "Refold consensus";
+	public static final String SELECT_DATASETS     = "Select multiple datasets";
+	public static final String SELECT_ONE_DATASET  = "Select single dataset";
+	public static final String EXTRACT_SOURCE      = "Extract source";
+	public static final String CLUSTER             =  "Cluster";
+	public static final String BUILD_TREE          = "Build tree";
+	public static final String TRAIN_CLASSIFIER    = "Train classifier";
+	public static final String REFRESH_CACHE       = "Refresh caches";
+	public static final String CLEAR_CACHE         = "Clear caches";
+	public static final String SAVE	               = "Save selected";
+	public static final String SAVE_AS             = "Save as new file";
+	public static final String ADD_DATASET         = "Add dataset";
+	public static final String RESEGMENT           = "Resegment dataset";
+	public static final String RECALCULATE_MEDIAN  = "Recalculate median profiles";
+	
 
 	private static final long serialVersionUID = 1L;
 	private String sourceName;
 	private List<AnalysisDataset> list;
-	private DatasetMethod method;
+	private String method;
 	private AnalysisDataset secondaryDataset = null; // for use in e.g. morphology copying. Optional
 
 	/**
@@ -38,7 +58,7 @@ public class DatasetEvent extends EventObject {
 	 * @param sourceName the name of the object or component generating the datasets
 	 * @param list the datasets to carry
 	 */
-	public DatasetEvent( Object source, DatasetMethod method, String sourceName, List<AnalysisDataset> list ) {
+	public DatasetEvent( Object source, String method, String sourceName, List<AnalysisDataset> list ) {
 		super( source );
 		this.method = method;
 		this.sourceName = sourceName;
@@ -53,7 +73,7 @@ public class DatasetEvent extends EventObject {
 	 * @param sourceDataset a secondary dataset to use when handling the list
 	 * @param list the datasets to carry
 	 */
-	public DatasetEvent( Object source, DatasetMethod method, String sourceName, List<AnalysisDataset> list, AnalysisDataset sourceDataset) {
+	public DatasetEvent( Object source, String method, String sourceName, List<AnalysisDataset> list, AnalysisDataset sourceDataset) {
 		this(source, method, sourceName, list);
 		this.secondaryDataset = sourceDataset;
 	}
@@ -74,7 +94,7 @@ public class DatasetEvent extends EventObject {
 	 * The message to carry
 	 * @return
 	 */
-	public DatasetMethod method() {
+	public String method() {
 		return method;
 	}
 	
@@ -130,38 +150,38 @@ public class DatasetEvent extends EventObject {
 		return secondaryDataset;
 	}
 	
-	public enum DatasetMethod {
-		
-		PROFILING_ACTION    ("Profiling action"),
-		NEW_MORPHOLOGY 		("New morphology"),
-		COPY_MORPHOLOGY		("Copy morphology"),
-		REFRESH_MORPHOLOGY	("Refresh morphology"),
-		REFOLD_CONSENSUS	("Refold consensus"),
-		SELECT_DATASETS		("Select multiple datasets"),
-		SELECT_ONE_DATASET	("Select single dataset"),
-		EXTRACT_SOURCE		("Extract source"),
-		CLUSTER 			("Cluster"),
-		BUILD_TREE			("Build tree"),
-		TRAIN_CLASSIFIER	("Train classifier"),
-		REFRESH_CACHE	    ("Refresh caches"),
-		CLEAR_CACHE	        ("Clear caches"),
-		SAVE				("Save selected"),
-		SAVE_AS				("Save as new file"),
-		ADD_DATASET			("Add dataset"),
-		RESEGMENT			("Resegment dataset"),
-		RECALCULATE_MEDIAN  ("Recalculate median profiles");
-		
-		private final String name;
-		
-		DatasetMethod(String name){
-			this.name = name;
-		}
-		
-		public String toString(){
-			return this.name;
-		}
-		
-		
-	}
+//	public enum DatasetMethod {
+//		
+//		PROFILING_ACTION    ("Profiling action"),
+//		NEW_MORPHOLOGY 		("New morphology"),
+//		COPY_MORPHOLOGY		("Copy morphology"),
+//		REFRESH_MORPHOLOGY	("Refresh morphology"),
+//		REFOLD_CONSENSUS	("Refold consensus"),
+//		SELECT_DATASETS		("Select multiple datasets"),
+//		SELECT_ONE_DATASET	("Select single dataset"),
+//		EXTRACT_SOURCE		("Extract source"),
+//		CLUSTER 			("Cluster"),
+//		BUILD_TREE			("Build tree"),
+//		TRAIN_CLASSIFIER	("Train classifier"),
+//		REFRESH_CACHE	    ("Refresh caches"),
+//		CLEAR_CACHE	        ("Clear caches"),
+//		SAVE				("Save selected"),
+//		SAVE_AS				("Save as new file"),
+//		ADD_DATASET			("Add dataset"),
+//		RESEGMENT			("Resegment dataset"),
+//		RECALCULATE_MEDIAN  ("Recalculate median profiles");
+//		
+//		private final String name;
+//		
+//		DatasetMethod(String name){
+//			this.name = name;
+//		}
+//		
+//		public String toString(){
+//			return this.name;
+//		}
+//		
+//		
+//	}
 
 }

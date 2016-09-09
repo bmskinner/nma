@@ -18,7 +18,6 @@
  *******************************************************************************/
 package gui;
 
-import gui.DatasetEvent.DatasetMethod;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
@@ -37,15 +36,12 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.TableModel;
-
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.ConsensusNucleusChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.TableOptions;
 import components.CellCollection;
 import components.generic.BorderTagObject;
 import components.generic.XYPoint;
@@ -88,7 +84,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		runRefoldingButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				fireDatasetEvent(DatasetMethod.REFOLD_CONSENSUS, getDatasets());
+				fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, getDatasets());
 				runRefoldingButton.setVisible(false);
 			}
 		});
@@ -340,7 +336,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				
-				fireDatasetEvent(DatasetMethod.REFOLD_CONSENSUS, activeDatasetToList());
+				fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, activeDatasetToList());
 			}
 		});
 		

@@ -21,7 +21,6 @@ package gui.tabs;
 import gui.ChartOptionsRenderedEvent;
 import gui.ChartOptionsRenderedEventListener;
 import gui.DatasetEvent;
-import gui.DatasetEvent.DatasetMethod;
 import gui.DatasetEventListener;
 import gui.InterfaceEvent;
 import gui.InterfaceEvent.InterfaceMethod;
@@ -618,7 +617,7 @@ public abstract class DetailPanel
     	}
     }
     
-    protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list) {
+    protected synchronized void fireDatasetEvent(String method, List<AnalysisDataset> list) {
     	
         DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);
         Iterator<Object> iterator = datasetListeners.iterator();
@@ -627,7 +626,7 @@ public abstract class DetailPanel
         }
     }
     
-    protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list, AnalysisDataset template) {
+    protected synchronized void fireDatasetEvent(String method, List<AnalysisDataset> list, AnalysisDataset template) {
 
     	DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, template);
     	Iterator<Object> iterator = datasetListeners.iterator();

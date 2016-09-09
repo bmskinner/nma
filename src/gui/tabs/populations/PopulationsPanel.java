@@ -19,10 +19,10 @@
 package gui.tabs.populations;
 
 
+import gui.DatasetEvent;
 import gui.DatasetListManager;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter;
 import gui.tabs.DetailPanel;
@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
+
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -370,7 +371,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			finest("Firing clearing chart cache signals from population colour change");
 			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 			list.add(dataset);
-			fireDatasetEvent(DatasetMethod.REFRESH_CACHE, list);
+			fireDatasetEvent(DatasetEvent.REFRESH_CACHE, list);
 		}
 		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 	}
@@ -544,7 +545,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 				list.add(dataset);
-				fireDatasetEvent(DatasetMethod.SAVE, list);
+				fireDatasetEvent(DatasetEvent.SAVE, list);
 
 				update(list);
 //			}

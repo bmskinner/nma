@@ -18,7 +18,6 @@ import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
 import gui.DatasetEvent;
 import gui.GlobalOptions;
-import gui.DatasetEvent.DatasetMethod;
 import gui.SegmentEvent;
 import gui.dialogs.CellResegmentationDialog;
 import gui.components.panels.ProfileTypeOptionsPanel;
@@ -215,7 +214,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 
 				// Recache necessary charts
 				refreshChartCache();
-				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+				fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
 			} catch(Exception e){
 				error("Error updating segment", e);
 			}

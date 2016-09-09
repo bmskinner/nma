@@ -27,7 +27,7 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import analysis.AnalysisDataset;
-import gui.DatasetEvent.DatasetMethod;
+import gui.DatasetEvent;
 import gui.MainWindow;
 import gui.ThreadManager;
 import io.PopulationImportWorker;
@@ -95,7 +95,7 @@ public class PopulationImportAction extends ProgressableAction {
 		if(file.isDirectory()){
 			return null;
 		}
-		log(Level.FINE, "Selected file: "+file.getAbsolutePath());
+		fine("Selected file: "+file.getAbsolutePath());
 		return file;
 	}
 		
@@ -104,14 +104,14 @@ public class PopulationImportAction extends ProgressableAction {
 	public void finished(){
 		setProgressBarVisible(false);
 		AnalysisDataset dataset = ((PopulationImportWorker) worker).getLoadedDataset();
-		log(Level.FINE, "Opened dataset");
+		fine("Opened dataset");
 
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
 		list.add(dataset);
-		log(Level.FINE, "Firing add signal");
-		fireDatasetEvent(DatasetMethod.ADD_DATASET, list);
+		fine("Firing add signal");
+		fireDatasetEvent(DatasetEvent.ADD_DATASET, list);
 		
-		log(Level.FINE, "Finishing action");
+		fine("Finishing action");
 		/*
 		 * Code after this point is never reached - check thread 16
 		 */

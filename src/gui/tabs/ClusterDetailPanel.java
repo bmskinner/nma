@@ -19,10 +19,11 @@
 package gui.tabs;
 
 
-import gui.DatasetEvent.DatasetMethod;
+import gui.DatasetEvent;
 import gui.DatasetEventListener;
 import gui.components.ExportableTable;
 import gui.dialogs.ClusterTreeDialog;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -235,7 +236,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			clusterButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
-					fireDatasetEvent(DatasetMethod.CLUSTER, getDatasets());
+					fireDatasetEvent(DatasetEvent.CLUSTER, getDatasets());
 					
 
 				}
@@ -245,7 +246,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			buildTreeButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
-					fireDatasetEvent(DatasetMethod.BUILD_TREE, getDatasets());
+					fireDatasetEvent(DatasetEvent.BUILD_TREE, getDatasets());
 					
 
 				}
@@ -255,7 +256,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			saveClassifierButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
-					fireDatasetEvent(DatasetMethod.TRAIN_CLASSIFIER, getDatasets());
+					fireDatasetEvent(DatasetEvent.TRAIN_CLASSIFIER, getDatasets());
 					
 
 				}

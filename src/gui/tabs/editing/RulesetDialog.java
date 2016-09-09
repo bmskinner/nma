@@ -42,8 +42,8 @@ import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.Rule;
 import analysis.profiles.RuleSet;
 import analysis.profiles.RuleSetCollection;
+import gui.DatasetEvent;
 import gui.LoadingIconDialog;
-import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 
 @SuppressWarnings("serial")
@@ -291,7 +291,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 					
 					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 					list.add(dataset);
-					fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, list);
+					fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, list);
 				} else {					
 					fine("Firing refresh cache request for loaded datasets");
 					fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);

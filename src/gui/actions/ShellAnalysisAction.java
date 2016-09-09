@@ -18,7 +18,7 @@
  *******************************************************************************/
 package gui.actions;
 
-import gui.DatasetEvent.DatasetMethod;
+import gui.DatasetEvent;
 import gui.MainWindow;
 import gui.ThreadManager;
 
@@ -60,7 +60,7 @@ public class ShellAnalysisAction extends ProgressableAction {
 	
 	@Override
 	public void finished() {
-		fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
+		fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
 		super.finished();
 	}
 }

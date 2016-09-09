@@ -19,7 +19,7 @@
 package gui.actions;
 
 import gui.tabs.signals.SignalDetectionSettingsDialog;
-import gui.DatasetEvent.DatasetMethod;
+import gui.DatasetEvent;
 import gui.MainWindow;
 import gui.ThreadManager;
 
@@ -103,7 +103,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		int flag = 0; // set the downstream analyses to run
 		flag |= MainWindow.ADD_POPULATION;
 		fine("Firing cache refresh request");
-		fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
+		fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
 		fine("Running new segmentation on sub-populations");
 		new RunSegmentationAction(list, dataset, flag, mw);
 

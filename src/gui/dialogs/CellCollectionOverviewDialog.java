@@ -27,8 +27,8 @@ import javax.swing.table.TableModel;
 import analysis.AnalysisDataset;
 import components.Cell;
 import components.CellCollection;
+import gui.DatasetEvent;
 import gui.LoadingIconDialog;
-import gui.DatasetEvent.DatasetMethod;
 import gui.tabs.cells.LabelInfo;
 import io.ImageImportWorker;
 
@@ -207,7 +207,7 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
 			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 			list.add(dataset.getChildDataset(newCollection.getID()));
 			log("Firing dataset events");
-			fireDatasetEvent(DatasetMethod.PROFILING_ACTION, list);
+			fireDatasetEvent(DatasetEvent.PROFILING_ACTION, list);
 		}
 	}
 	

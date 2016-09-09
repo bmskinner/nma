@@ -18,7 +18,6 @@
  *******************************************************************************/
 package gui;
 
-import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.actions.AddNuclearSignalAction;
 import gui.actions.AddTailStainAction;
@@ -764,7 +763,7 @@ public class MainWindow
 		final List<AnalysisDataset> list = event.getDatasets();
 		if(!list.isEmpty()){
 			
-			if(event.method().equals(DatasetMethod.PROFILING_ACTION)){
+			if(event.method().equals(DatasetEvent.PROFILING_ACTION)){
 				fine("Running new profiling and segmentation");
 				
 				Runnable task = () -> { 
@@ -784,7 +783,7 @@ public class MainWindow
 				threadManager.execute(task);
 			}
 						
-			if(event.method().equals(DatasetMethod.NEW_MORPHOLOGY)){
+			if(event.method().equals(DatasetEvent.NEW_MORPHOLOGY)){
 				log("Running new morphology analysis");
 				final int flag = ADD_POPULATION;
 				
@@ -794,7 +793,7 @@ public class MainWindow
 				threadManager.execute(task);
 			}
 			
-			if(event.method().equals(DatasetMethod.REFRESH_MORPHOLOGY)){
+			if(event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)){
 				finer("Updating segmentation across nuclei");
 				Runnable task = () -> { 
 					new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
@@ -802,7 +801,7 @@ public class MainWindow
 				threadManager.execute(task);
 			}
 			
-			if(event.method().equals(DatasetMethod.COPY_MORPHOLOGY)){
+			if(event.method().equals(DatasetEvent.COPY_MORPHOLOGY)){
 				
 				final AnalysisDataset source = event.secondaryDataset();
 				Runnable task = () -> { 
@@ -812,7 +811,7 @@ public class MainWindow
 			}
 			
 						
-			if(event.method().equals(DatasetMethod.CLUSTER)){
+			if(event.method().equals(DatasetEvent.CLUSTER)){
 				
 				Runnable task = () -> { 
 					log(Level.INFO, "Clustering dataset");
@@ -822,7 +821,7 @@ public class MainWindow
 			
 			}
 			
-			if(event.method().equals(DatasetMethod.BUILD_TREE)){
+			if(event.method().equals(DatasetEvent.BUILD_TREE)){
 				Runnable task = () -> { 
 					log(Level.INFO, "Building a tree from dataset");
 					new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
@@ -830,24 +829,24 @@ public class MainWindow
 				threadManager.execute(task);
 			}
 			
-			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
+			if(event.method().equals(DatasetEvent.REFOLD_CONSENSUS)){
 				log("Refolding consensus nucleus");
 				refoldConsensus(event.firstDataset());		
 			}
 			
-			if(event.method().equals(DatasetMethod.SELECT_DATASETS)){
+			if(event.method().equals(DatasetEvent.SELECT_DATASETS)){
 				populationsPanel.selectDatasets(event.getDatasets());
 			}
 			
-			if(event.method().equals(DatasetMethod.SELECT_ONE_DATASET)){
+			if(event.method().equals(DatasetEvent.SELECT_ONE_DATASET)){
 				populationsPanel.selectDataset(event.firstDataset());				
 			}
 			
-			if(event.method().equals(DatasetMethod.SAVE)){
+			if(event.method().equals(DatasetEvent.SAVE)){
 				saveDataset(event.firstDataset(), false);
 			}
 			
-			if(event.method().equals(DatasetMethod.EXTRACT_SOURCE)){
+			if(event.method().equals(DatasetEvent.EXTRACT_SOURCE)){
 				Runnable task = () -> { 
 					log("Recovering source dataset");
 					for(AnalysisDataset d : list){
@@ -859,21 +858,21 @@ public class MainWindow
 				threadManager.execute(task);			
 			}
 			
-			if(event.method().equals(DatasetMethod.REFRESH_CACHE)){
+			if(event.method().equals(DatasetEvent.REFRESH_CACHE)){
 				recacheCharts(list);				
 			}
 			
-			if(event.method().equals(DatasetMethod.CLEAR_CACHE)){
+			if(event.method().equals(DatasetEvent.CLEAR_CACHE)){
 				
 				clearChartCache(list);
 				
 			}
 			
-			if(event.method().equals(DatasetMethod.ADD_DATASET)){
+			if(event.method().equals(DatasetEvent.ADD_DATASET)){
 				addDataset(event.firstDataset());
 			}
 			
-			if(event.method().equals(DatasetMethod.RECALCULATE_MEDIAN)){
+			if(event.method().equals(DatasetEvent.RECALCULATE_MEDIAN)){
 				fine("Recalculating the median for the given datasets");
 				
 				Runnable task = () -> { 

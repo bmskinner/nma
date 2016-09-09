@@ -24,7 +24,6 @@ import gui.InterfaceEvent;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.InterfaceEventListener;
 import gui.LogPanel;
-import gui.DatasetEvent.DatasetMethod;
 import gui.MainWindow;
 
 import java.awt.event.MouseEvent;
@@ -276,14 +275,14 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
         }
     }	
 	
-	protected synchronized void fireDatasetEvent(DatasetMethod method, AnalysisDataset dataset) {
+	protected synchronized void fireDatasetEvent(String method, AnalysisDataset dataset) {
 
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		list.add(dataset);
 		fireDatasetEvent(method, list);
 	}
 
-	protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list) {
+	protected synchronized void fireDatasetEvent(String method, List<AnalysisDataset> list) {
     	
         DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);
         Iterator<Object> iterator = datasetListeners.iterator();
@@ -292,7 +291,7 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
         }
     }
 	
-	protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list, AnalysisDataset secondary) {
+	protected synchronized void fireDatasetEvent(String method, List<AnalysisDataset> list, AnalysisDataset secondary) {
     	
         DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, secondary);
         Iterator<Object> iterator = datasetListeners.iterator();

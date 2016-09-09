@@ -27,9 +27,9 @@ import javax.swing.SwingUtilities;
 import analysis.AnalysisDataset;
 import analysis.profiles.DatasetSegmenter;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
+import gui.DatasetEvent;
 import gui.MainWindow;
 import gui.ThreadManager;
-import gui.DatasetEvent.DatasetMethod;
 import gui.DatasetListManager;
 
 public class RunSegmentationAction extends ProgressableAction {
@@ -168,7 +168,7 @@ public class RunSegmentationAction extends ProgressableAction {
 				 * Recache charts if the dataset exists
 				 */
 				finer("Firing clear cache event");
-				fireDatasetEvent(DatasetMethod.CLEAR_CACHE, dataset);
+				fireDatasetEvent(DatasetEvent.CLEAR_CACHE, dataset);
 				
 				/* 
 				 * Ideally, wait for the charts to clear before firing the selection
@@ -180,7 +180,7 @@ public class RunSegmentationAction extends ProgressableAction {
 				 * Save the dataset, regardless of flags
 				 */
 				finer("Saving the dataset");
-				fireDatasetEvent(DatasetMethod.SAVE, dataset);
+				fireDatasetEvent(DatasetEvent.SAVE, dataset);
 				
 				
 				
@@ -189,7 +189,7 @@ public class RunSegmentationAction extends ProgressableAction {
 					finest("Adding dataset to list manager");
 					DatasetListManager.getInstance().addDataset(dataset);
 					finest("Firing add dataset signal");
-					fireDatasetEvent(DatasetMethod.ADD_DATASET, dataset);
+					fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
 					
 					
 				} 
@@ -206,7 +206,7 @@ public class RunSegmentationAction extends ProgressableAction {
 //					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
 
 					finer("Firing select dataset event");
-					fireDatasetEvent(DatasetMethod.SELECT_ONE_DATASET, dataset);
+					fireDatasetEvent(DatasetEvent.SELECT_ONE_DATASET, dataset);
 
 					RunSegmentationAction.super.finished();
 					

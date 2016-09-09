@@ -19,7 +19,7 @@
 
 package gui.dialogs;
 
-import gui.DatasetEvent.DatasetMethod;
+import gui.DatasetEvent;
 import gui.GlobalOptions;
 import gui.RotationMode;
 import gui.ThreadManager;
@@ -181,7 +181,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 			cellModel.swapCell(workingCell);
 
 			
-			fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
+			fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
 		} 
 	}
 	

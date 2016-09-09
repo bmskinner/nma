@@ -18,17 +18,15 @@
  *******************************************************************************/
 package gui.actions;
 
+import gui.DatasetEvent;
 import gui.MainWindow;
 import gui.ThreadManager;
-import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.dialogs.ClusteringSetupDialog;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
-
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
@@ -125,7 +123,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 		}
 		fine("Profiles copied to all clusters");
 		dataset.addClusterGroup(group);
-		fireDatasetEvent(DatasetMethod.SAVE, dataset);
+		fireDatasetEvent(DatasetEvent.SAVE, dataset);
 		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 		super.finished();
 		

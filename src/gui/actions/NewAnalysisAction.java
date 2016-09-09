@@ -18,10 +18,10 @@
  *******************************************************************************/
 package gui.actions;
 
+import gui.DatasetEvent;
 import gui.DatasetListManager;
 import gui.MainWindow;
 import gui.ThreadManager;
-import gui.DatasetEvent.DatasetMethod;
 import gui.dialogs.AnalysisSetupDialog;
 
 import java.io.File;
@@ -107,7 +107,7 @@ public class NewAnalysisAction extends ProgressableAction {
 		if(datasets.size()==0 || datasets==null){
 			log(Level.INFO, "No datasets returned");
 		} else {
-			fireDatasetEvent(DatasetMethod.PROFILING_ACTION, datasets);
+			fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
 			
 		}
 		super.finished();

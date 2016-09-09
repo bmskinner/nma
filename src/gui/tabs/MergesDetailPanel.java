@@ -18,9 +18,10 @@
  *******************************************************************************/
 package gui.tabs;
 
-import gui.DatasetEvent.DatasetMethod;
+import gui.DatasetEvent;
 import gui.components.AnalysisTableCellRenderer;
 import gui.components.ExportableTable;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -30,6 +31,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -156,7 +158,7 @@ public class MergesDetailPanel extends DetailPanel {
 							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 							list.add(source);
 
-							fireDatasetEvent(DatasetMethod.EXTRACT_SOURCE, list);
+							fireDatasetEvent(DatasetEvent.EXTRACT_SOURCE, list);
 						}};
 						thr.start();
 				}

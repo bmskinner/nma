@@ -18,7 +18,7 @@
  *******************************************************************************/
 package gui.tabs.signals;
 
-import gui.DatasetEvent.DatasetMethod;
+import gui.DatasetEvent;
 import gui.components.ExportableTable;
 import gui.tabs.DetailPanel;
 import ij.io.DirectoryChooser;
@@ -130,7 +130,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
             if(newColor != null){
                 activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);// .setSignalGroupColour(signalGroup.getID(), newColor);
                 refreshTableCache();
-                fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+                fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
             }
         }
     }
@@ -190,7 +190,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
                 .setGroupName(newName);
 
             refreshTableCache();
-            fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+            fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
             finest("Updated name of signal group "+oldName+" to "+newName );
         }
     }

@@ -18,13 +18,14 @@
  *******************************************************************************/
 package gui.tabs.editing;
 
+import gui.DatasetEvent;
 import gui.SegmentEvent;
 import gui.SegmentEventListener;
-import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.components.panels.SegmentationDualChartPanel;
 import gui.dialogs.AngleWindowSizeExplorer;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
@@ -40,6 +41,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+
 import org.jfree.chart.JFreeChart;
 
 import analysis.profiles.SegmentFitter;
@@ -350,31 +352,31 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				
 				
 				if(e.getSource().equals(mergeButton)){
-					fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
+					fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
 					mergeAction(medianProfile);
 					
 				}
 
 				if(e.getSource().equals(unmergeButton)){
-					fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
+					fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
 					unmergeAction(medianProfile);
 				}
 				
 				if(e.getSource().equals(splitButton)){
-					fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
+					fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
 					splitAction(medianProfile);
 					
 				}
 				
 				if(e.getSource()==updatewindowButton){
-					fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
+					fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
 					updateCollectionWindowSize();
 				}
 				
 				if(e.getSource()==reprofileButton){
 					
 					activeDataset().getCollection().getProfileManager().recalculateProfileAggregates();
-					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+					fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
 				}
 				
 			} catch (Exception e1) {
@@ -422,7 +424,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 					finest("Refreshing chart cache for editing panel");
 					this.refreshChartCache();
 					finest("Firing general refresh cache request for loaded datasets");
-					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+					fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
 				} else {
 					JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
 				}
@@ -494,7 +496,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 					finest("Refreshing chart cache for editing panel");
 					this.refreshChartCache();
 					finest("Firing general refresh cache request for loaded datasets");
-					fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+					fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
 				}
 				this.setAnalysing(false);
 			}
@@ -543,7 +545,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				finest("Refreshing chart cache for editing panel");
 				this.refreshChartCache();
 				finest("Firing general refresh cache request for loaded datasets");
-				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+				fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
 			}
 		}
 //	}

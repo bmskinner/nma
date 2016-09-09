@@ -24,7 +24,6 @@ import gui.InterfaceEvent;
 import gui.InterfaceEventListener;
 import gui.MainWindow;
 import gui.ThreadManager;
-import gui.DatasetEvent.DatasetMethod;
 import gui.dialogs.ClusterTreeDialog;
 import gui.dialogs.HierarchicalTreeSetupDialog;
 import java.util.logging.Level;
@@ -88,8 +87,8 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 	@Override
 	public void datasetEventReceived(DatasetEvent event) {
 		log(Level.FINEST, "BuildHierarchicalTreeAction heard dataset event");
-		if(event.method().equals(DatasetMethod.COPY_MORPHOLOGY)){
-			fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, event.getDatasets(), event.secondaryDataset());
+		if(event.method().equals(DatasetEvent.COPY_MORPHOLOGY)){
+			fireDatasetEvent(DatasetEvent.COPY_MORPHOLOGY, event.getDatasets(), event.secondaryDataset());
 		}
 		
 	}

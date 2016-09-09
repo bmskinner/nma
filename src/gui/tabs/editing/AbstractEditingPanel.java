@@ -22,9 +22,9 @@ package gui.tabs.editing;
 import java.util.UUID;
 
 import gui.BorderTagEventListener;
+import gui.DatasetEvent;
 import gui.SegmentEvent;
 import gui.SegmentEventListener;
-import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.BorderTagEvent;
 import gui.tabs.DetailPanel;
@@ -90,7 +90,7 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Segmen
 
 		if(tag.type().equals(BorderTagType.CORE)){
 			log("Resegmenting dataset");
-			fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
+			fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
 		} else {					
 			fine("Firing refresh cache request for loaded datasets");
 			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
@@ -128,12 +128,12 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Segmen
 		 * This will force the morphology refresh to create a new chart
 		 */
 		finest("Clearing chart cache for editing panel");
-		fireDatasetEvent(DatasetMethod.CLEAR_CACHE, getDatasets());
+		fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
 		
 		
 		//  Update each nucleus profile
 		finest("Firing refresh morphology action");
-		fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
+		fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
 
 		
 	}

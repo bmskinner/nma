@@ -23,8 +23,8 @@ import charting.datasets.SignalTableCell;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import components.nuclei.Nucleus;
+import gui.DatasetEvent;
 import gui.GlobalOptions;
-import gui.DatasetEvent.DatasetMethod;
 import gui.components.ExportableTable;
 import gui.dialogs.CellImageDialog;
 
@@ -187,7 +187,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 				}
 				finest("Refreshing cache");
 				this.refreshTableCache();
-				fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+				fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
 
 				
 			} else {

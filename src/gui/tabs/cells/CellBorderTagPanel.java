@@ -26,6 +26,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
@@ -33,7 +34,7 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
-import gui.DatasetEvent.DatasetMethod;
+import gui.DatasetEvent;
 import gui.components.BorderTagEvent;
 import gui.components.panels.BorderTagDualChartPanel;
 import gui.components.panels.ProfileTypeOptionsPanel;
@@ -194,7 +195,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 			}
 			this.setAnalysing(false);
 			this.refreshChartCache();
-			this.fireDatasetEvent(DatasetMethod.REFRESH_CACHE, getDatasets());
+			this.fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
 
 
 		}
