@@ -18,8 +18,6 @@
  *******************************************************************************/
 package utility;
 
-import java.util.Calendar;
-
 public class Constants {
 	
 	/**
@@ -39,8 +37,10 @@ public class Constants {
 	
 	public static final String SEGMENT_PREFIX = "Seg_";
 	
-	// The date and time that this was compiled
-	public static final String BUILD = Calendar.getInstance().getTime().toString();
+	
+	public static final String CLUSTER_GROUP_PREFIX = "Group";
+	
+	
 	
 	
 	

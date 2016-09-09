@@ -59,6 +59,7 @@ import javax.swing.SwingConstants;
 
 import org.virion.jam.controlpanels.BasicControlPalette;
 
+import utility.Constants;
 import components.Cell;
 import components.CellCollection;
 import components.ClusterGroup;
@@ -88,7 +89,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	private JComboBox<AnalysisDataset> selectedClusterBox;
 	private JComboBox<ClusterGroup> selectedClusterGroupBox;
 	
-	private List<Object> datasetListeners = new ArrayList<Object>();
+//	private List<Object> datasetListeners = new ArrayList<Object>();
 	
 	private List<CellCollection> clusterList = new ArrayList<CellCollection>(0);
 	
@@ -522,9 +523,9 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		if(clusterCollection.hasCells()){
 			colourTreeNodesByCluster(clusterCollection);
 			clusterList.add(clusterCollection);
-			log(Level.INFO, "Extracted "+clusterCollection.cellCount()+" cells");
+			log("Extracted "+clusterCollection.cellCount()+" cells");
 		} else {
-			log(Level.WARNING, "No cells found. Check taxon labels are correct");
+			warn("No cells found. Check taxon labels are correct");
 		}
 	}
 	
@@ -538,7 +539,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 				try {
 					dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
 				} catch (Exception e1) {
-					log(Level.SEVERE, "Error applying segments", e1);
+					error("Error applying segments", e1);
 				}
 
 				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
@@ -591,7 +592,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		newOptions.setClusterNumber(list.size());		
 		
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-		ClusterGroup newGroup = new ClusterGroup("ClusterGroup_"+clusterNumber, newOptions, group.getTree());
+		ClusterGroup newGroup = new ClusterGroup(Constants.CLUSTER_GROUP_PREFIX+"_"+clusterNumber, newOptions, group.getTree());
 		return newGroup;
 	}
 	
@@ -681,7 +682,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 					if (option == JOptionPane.CANCEL_OPTION) {
 						// Cancelled
-						log(Level.INFO, "Adding as standard manual clusters");
+						log("Adding as standard manual clusters");
 					} else if (option == JOptionPane.OK_OPTION)	{
 						// Make the group
 
@@ -689,8 +690,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 						int i=0;
 						for(AnalysisDataset d : list){
-//							d.setName(newGroup.getName()+"_"+d.getName());
-							d.setName("Cluster_"+i);
+							d.setName(newGroup.getName()+"_Cluster_"+i);
 							newGroup.addDataset(d);
 							i++;
 						}
@@ -698,52 +698,52 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 					}
 				} else {
-					log(Level.INFO, "Cannot make cluster group");
-					log(Level.INFO, "Not all cells are assigned clusters");
-					log(Level.INFO, "Adding as standard manual clusters");
+					log("Cannot make cluster group");
+					log("Not all cells are assigned clusters");
+					log("Adding as standard manual clusters");
 				}
 			} else {
-				log(Level.INFO, "Cannot make cluster group");
-				log(Level.INFO, "Cells present in more than one cluster");
-				log(Level.INFO, "Adding as standard manual clusters");
+				log("Cannot make cluster group");
+				log("Cells present in more than one cluster");
+				log("Adding as standard manual clusters");
 			}
 			
 		}
 	}
 	
-	protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list, AnalysisDataset template) {
-
-		DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, template);
-		Iterator<Object> iterator = datasetListeners.iterator();
-		while( iterator.hasNext() ) {
-			( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
-		}
-	}
+//	protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list, AnalysisDataset template) {
+//
+//		DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, template);
+//		Iterator<Object> iterator = datasetListeners.iterator();
+//		while( iterator.hasNext() ) {
+//			( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
+//		}
+//	}
+//	
+//	protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
+//
+//		InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());
+//		Iterator<Object> iterator = datasetListeners.iterator();
+//		while( iterator.hasNext() ) {
+//			( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
+//		}
+//	}
 	
-	protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
-
-		InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());
-		Iterator<Object> iterator = datasetListeners.iterator();
-		while( iterator.hasNext() ) {
-			( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
-		}
-	}
-	
-	public synchronized void addInterfaceEventListener( InterfaceEventListener l ) {
-		datasetListeners.add( l );
-	}
-
-	public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
-		datasetListeners.remove( l );
-	}
-
-	public synchronized void addDatasetEventListener( DatasetEventListener l ) {
-		datasetListeners.add( l );
-	}
-
-	public synchronized void removeDatasetEventListener( DatasetEventListener l ) {
-		datasetListeners.remove( l );
-	}
+//	public synchronized void addInterfaceEventListener( InterfaceEventListener l ) {
+//		datasetListeners.add( l );
+//	}
+//
+//	public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
+//		datasetListeners.remove( l );
+//	}
+//
+//	public synchronized void addDatasetEventListener( DatasetEventListener l ) {
+//		datasetListeners.add( l );
+//	}
+//
+//	public synchronized void removeDatasetEventListener( DatasetEventListener l ) {
+//		datasetListeners.remove( l );
+//	}
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {

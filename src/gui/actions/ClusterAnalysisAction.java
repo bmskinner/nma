@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 import analysis.nucleus.NucleusClusterer;
@@ -79,7 +80,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 		finest("Cluster group number chosen: "+clusterNumber);
 
-		ClusterGroup group = new ClusterGroup("Group_"+clusterNumber, options, tree);
+		ClusterGroup group = new ClusterGroup(Constants.CLUSTER_GROUP_PREFIX+"_"+clusterNumber, options, tree);
 
 		for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
 

@@ -590,13 +590,13 @@ public class AnalysisDataset implements Serializable, Loggable {
 			for (ClusterGroup g :  this.getClusterGroups()){
 
 				String name = g.getName();
-//				"ClusterGroup_"+clusterNumber
-				Pattern p = Pattern.compile("^ClusterGroup_(\\d+)$");
-//				IJ.log("Matching "+p.pattern()+" againt "+name);
+
+				Pattern p = Pattern.compile("^"+Constants.CLUSTER_GROUP_PREFIX+"_(\\d+)$");
+
 				Matcher m = p.matcher(name);
 				if(m.find()){
 					String s = m.group(1);
-//					IJ.log("  Match found: "+s);
+
 					int n = Integer.valueOf(s);
 					if(n>number){
 						number=n;

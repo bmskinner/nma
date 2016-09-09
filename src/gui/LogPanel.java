@@ -341,13 +341,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 					log(Level.INFO, " build - show the version info ");
 					break;
 				}
-				
-				case "build":{
-					log(Level.INFO, "This version built at:");
-					log(Level.INFO, Constants.BUILD);
-					break;
-				}
-				
+								
 				case "clear":{
 					clear();
 					break;
