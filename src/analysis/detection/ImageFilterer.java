@@ -27,7 +27,11 @@ import stats.Stats;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.Prefs;
+import ij.plugin.filter.Binary;
+import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
+import ij.process.FloodFiller;
 import ij.process.ImageProcessor;
 import io.ImageExporter;
 import utility.Constants;
@@ -266,23 +270,51 @@ public class ImageFilterer {
 		 * Dilate, fill, then erode
 		 */
 		mp.dilate(result);
+				
+		// fill holes
+		fill(result);
+
+		mp.erode(result);
+
 		
-		ImagePlus imp = new ImagePlus(null, result);
-
-		IJ.run(imp, "Make Binary", "");
-		IJ.run(imp, "Fill Holes", "");
-
-		mp.erode(imp.getProcessor());
 		
-		/*
-		 * The original way of closing - run the fclose
-		 * This is just a dilate then erode, which can miss small holes
-		 */
-//		mp.fclose(result);
-
 		return result;
 
 	}
+	
+	// 
+    /**
+     * Based on the ImageJ Fill holes command:
+     * Binary fill by Gabriel Landini, G.Landini at bham.ac.uk
+     * 21/May/2008
+     * @param ip
+     */
+    private static void fill(ImageProcessor ip) {
+
+    	int foreground = 255;
+        int background = 0;
+    	
+    	int width = ip.getWidth();
+        int height = ip.getHeight();
+        FloodFiller ff = new FloodFiller(ip);
+        ip.setColor(127);
+        for (int y=0; y<height; y++) {
+            if (ip.getPixel(0,y)==background) ff.fill(0, y);
+            if (ip.getPixel(width-1,y)==background) ff.fill(width-1, y);
+        }
+        for (int x=0; x<width; x++){
+            if (ip.getPixel(x,0)==background) ff.fill(x, 0);
+            if (ip.getPixel(x,height-1)==background) ff.fill(x, height-1);
+        }
+        byte[] pixels = (byte[])ip.getPixels();
+        int n = width*height;
+        for (int i=0; i<n; i++) {
+        if (pixels[i]==127)
+            pixels[i] = (byte)background;
+        else
+            pixels[i] = (byte)foreground;
+        }
+    }
 	
 	/**
 	 * Use Canny edge detection to produce an image with potential edges highlighted
