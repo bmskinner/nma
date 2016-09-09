@@ -47,9 +47,15 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     		AnalysisWorker.fileLogger = Logger.getLogger(this.getClass().getName());
     		fileLogger.setLevel(FILE_DEBUG_LEVEL);
     		try {
-    			fileLogger.addHandler(dataset.getLogHandler());
+    			
+    			Handler h = dataset.getLogHandler();
+    			
+    			if(h!=null){
+    				fileLogger.addHandler(h);
+    			}
+    			
     		} catch(Exception e){
-    			log(Level.SEVERE, "Error getting log file handler", e);
+    			error("Error getting log file handler", e);
     			fileLogger = null;
     		}
     	} else {
@@ -70,7 +76,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     public AnalysisWorker(final AnalysisDataset dataset, final File debugFile){
     	this(dataset);
 
-    	log(Level.FINEST, "Creating log file handler");
+    	finest("Creating log file handler");
 		DebugFileHandler handler = null;
 		try {
 			

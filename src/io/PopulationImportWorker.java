@@ -116,12 +116,8 @@ public class PopulationImportWorker extends AnalysisWorker {
 				}
 				
 				// Correct signal border locations from older versions for all imported datasets
-				if(v.isOlderThan( new Version(1, 13, 2))){
-					log("Updating signal positions for old dataset");
-					updateSignalPositions(dataset);
-					for(AnalysisDataset child : dataset.getAllChildDatasets()){
-						updateSignalPositions(child);
-					}
+				if(v.isOlderThan( new Version(1, 13, 2))){	
+					updateSignals();
 				}
 				
 				
@@ -147,6 +143,20 @@ public class PopulationImportWorker extends AnalysisWorker {
 		} catch(Exception e){
 			error("Unable to open file", e);
 			return false;
+		}
+	}
+	
+	private void updateSignals(){
+		log("Updating signal positions for old dataset");
+		updateSignalPositions(dataset);
+		for(AnalysisDataset child : dataset.getAllChildDatasets()){
+			updateSignalPositions(child);
+		}
+		
+		if(dataset.hasMergeSources()){
+			for(AnalysisDataset source : dataset.getAllMergeSources()){
+				updateSignalPositions(source);
+			}
 		}
 	}
 	

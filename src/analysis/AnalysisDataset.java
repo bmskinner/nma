@@ -149,6 +149,10 @@ public class AnalysisDataset implements Serializable, Loggable {
 	 */
 	public Handler getLogHandler() throws Exception {
 
+		if(debugFile == null || !debugFile.exists()){
+			return null;
+		}
+		
 		Handler fileHandler = new DebugFileHandler(this.getDebugFile());
 		fileHandler.setFormatter(new DebugFileFormatter());
 
@@ -286,8 +290,7 @@ public class AnalysisDataset implements Serializable, Loggable {
 	}
 	
 	/**
-	 * Get the debug file for the dataset. Passes
-	 * through to cell collection for now
+	 * Get the log file for the dataset.
 	 * @return
 	 * @see CellCollection
 	 */
