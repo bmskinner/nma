@@ -814,7 +814,7 @@ public class MainWindow
 			if(event.method().equals(DatasetEvent.CLUSTER)){
 				
 				Runnable task = () -> { 
-					log(Level.INFO, "Clustering dataset");
+					log("Clustering dataset");
 					new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
 				};
 				threadManager.execute(task);
@@ -823,7 +823,7 @@ public class MainWindow
 			
 			if(event.method().equals(DatasetEvent.BUILD_TREE)){
 				Runnable task = () -> { 
-					log(Level.INFO, "Building a tree from dataset");
+					log("Building a tree from dataset");
 					new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
 				};
 				threadManager.execute(task);
@@ -953,13 +953,8 @@ public class MainWindow
 				} else {
 					fine("Dataset has no analysis options, cannot set refold state");
 				}
-				
 
-
-//				fine("Preparing to select refolded dataset");
 				populationsPanel.selectDataset(dataset);
-				//					log(Level.FINE, "Clearing consensus chart cache for refolded dataset");
-				//					consensusNucleusPanel.refreshChartCache();
 
 			} catch (InterruptedException e) {
 				error("Interruption to thread", e);

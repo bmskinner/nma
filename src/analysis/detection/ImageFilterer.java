@@ -97,18 +97,14 @@ public class ImageFilterer {
 	public static ImageProcessor squashChromocentres(ImageProcessor ip, int threshold){	
 				
 		ImageProcessor result = ip.duplicate();
-		int[][] array = result.getIntArray();
 		
-		// threshold
-		for(int x = 0; x<ip.getWidth(); x++){
-			for( int y=0; y<ip.getHeight(); y++){
-				if(array[x][y] > threshold ){
-					array[x][y] = threshold;
-				}
+		for(int i=0; i<result.getPixelCount(); i++){
+			
+			if(result.get(i)> threshold){
+				result.set(i, threshold);
 			}
 		}
-		
-		result.setIntArray(array);
+
 		return result;
 	}
 	
@@ -304,11 +300,7 @@ public class ImageFilterer {
 		
 		ByteProcessor closed = ImageFilterer.morphologyClose( searchImage  , options.getClosingObjectRadius()) ;
 				
-//		ByteProcessor bridged = ImageFilterer.bridgePixelGaps( closed  , 3) ;
-		
-//		ImagePlus imagePlus = new ImagePlus("", bridged);
-//		imagePlus.show();
-		
+	
 		
 		searchStack = ImageStack.create(image.getWidth(), image.getHeight(), 0, 8);
 		searchStack.addSlice("closed", closed, 0);

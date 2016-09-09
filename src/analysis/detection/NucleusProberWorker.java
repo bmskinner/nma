@@ -191,7 +191,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		
 		 NucleusDetector finder = new NucleusDetector(options, null);
 		
-		List<Cell> cells = finder.getCells(imageStack, imageFile);
+		List<Cell> cells = finder.getDummyCells(imageStack, imageFile);
 		
 		finer("Resetting detetion parameters");
 		

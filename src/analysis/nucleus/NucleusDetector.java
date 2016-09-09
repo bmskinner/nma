@@ -76,7 +76,20 @@ public class NucleusDetector extends Detector {
 	 * @throws Exception 
 	 */
 	public List<Cell> getCells(ImageStack image, File sourceFile) throws Exception{
-		return processImage(image, sourceFile);
+		return createCellsFromImage(image, sourceFile, false);
+	}
+	
+	/**
+	 * Create cells with dummy components. The nucleus has a border list and
+	 * stats, but profiling is not run, and the cell cannot be used for analysis. 
+	 * This is designed to speed up the image prober.
+	 * @param image
+	 * @param sourceFile
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Cell> getDummyCells(ImageStack image, File sourceFile) throws Exception{
+		return createCellsFromImage(image, sourceFile, true);
 	}
 	
 		
@@ -125,7 +138,7 @@ public class NucleusDetector extends Detector {
   * @param path the full path of the image
  * @throws Exception 
   */
-	private List<Cell> processImage(ImageStack image, File path) throws Exception{
+	private List<Cell> createCellsFromImage(ImageStack image, File path, boolean makeDummy) throws Exception{
 
 		fine("File:  "+path.getName());
 		
@@ -152,7 +165,15 @@ public class NucleusDetector extends Detector {
 
 			Cell cell = null;
 			try{	
-				cell = makeCell(roi, image, nucleusNumber++, path); // get the profile data back for the nucleus
+				
+				if(makeDummy){
+					
+				}
+				
+				cell = makeCell(roi, image, nucleusNumber++, path, makeDummy); // get the profile data back for the nucleus
+				
+				
+				
 			} catch(Exception e){
 
 				error("Error acquiring nucleus", e);
@@ -208,16 +229,19 @@ public class NucleusDetector extends Detector {
 	}
 	
 
+	
+	
 	/**
 	  * Save the region of the input image containing the nucleus
-	  * Create a Nucleus and add it to the collection
+	  * Create a Nucleus from the Roi and add it to a new Cell 
 	  *
 	  * @param roi the ROI within the image
 	  * @param image the ImagePlus containing the nucleus
 	  * @param nucleusNumber the count of the nuclei in the image
 	  * @param path the full path to the image
+	  * @param makeDummyCell should the cell be profiled, or a placeholder
 	  */
-	private Cell makeCell(Roi roi, ImageStack image, int nucleusNumber, File path){
+	private Cell makeCell(Roi roi, ImageStack image, int nucleusNumber, File path, boolean makeDummyCell){
 
 		Cell result = null;
 		
@@ -239,20 +263,23 @@ public class NucleusDetector extends Detector {
 			  
 			  // create a Nucleus from the roi
 			  XYPoint centreOfMass = new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase);
-			  
+
 			  Nucleus currentNucleus = createNucleus(roi, path, nucleusNumber, originalPosition, options.getNucleusType(), centreOfMass);
-			  					  
+
 			  currentNucleus.setStatistic(NucleusStatistic.AREA,      values.get("Area"));
 			  currentNucleus.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
 			  currentNucleus.setStatistic(NucleusStatistic.PERIMETER, values.get("Perim"));
 			  currentNucleus.setChannel(options.getChannel());
-			  
+
 			  currentNucleus.setScale(options.getScale());
-		
-			  currentNucleus.setOutputFolder(outputFolderName);
-			  currentNucleus.intitialiseNucleus(options.getAngleWindowProportion());
-			  
-			  currentNucleus.findPointsAroundBorder();
+
+			  if ( !makeDummyCell) {
+
+				  currentNucleus.setOutputFolder(outputFolderName);
+				  currentNucleus.intitialiseNucleus(options.getAngleWindowProportion());
+
+				  currentNucleus.findPointsAroundBorder();
+			  }
 		
 			  // if everything checks out, add the measured parameters to the global pool
 			  result = new Cell();
