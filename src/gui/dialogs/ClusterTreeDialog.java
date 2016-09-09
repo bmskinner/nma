@@ -18,13 +18,8 @@
  *******************************************************************************/
 package gui.dialogs;
 
-import gui.DatasetEvent;
-import gui.DatasetEventListener;
-import gui.InterfaceEvent;
 import gui.InterfaceEvent.InterfaceMethod;
-import gui.InterfaceEventListener;
 import gui.LoadingIconDialog;
-import gui.DatasetEvent.DatasetMethod;
 import gui.components.ColourSelecter;
 import gui.components.DraggableTreeViewer;
 import gui.components.VariableNodePainter;
@@ -43,7 +38,6 @@ import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -88,9 +82,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		
 	private JComboBox<AnalysisDataset> selectedClusterBox;
 	private JComboBox<ClusterGroup> selectedClusterGroupBox;
-	
-//	private List<Object> datasetListeners = new ArrayList<Object>();
-	
+		
 	private List<CellCollection> clusterList = new ArrayList<CellCollection>(0);
 	
 	private boolean hasMergeSources; // cache this to speed comparisons
@@ -103,38 +95,43 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		
 		try{
 
-			log(Level.FINEST, "Building tree view");
+			finest("Building tree view");
 			this.setLayout(new BorderLayout());
 			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 			this.viewer = new DraggableTreeViewer(new BasicControlPalette(0, BasicControlPalette.DisplayMode.INITIALLY_CLOSED, true), SwingConstants.LEFT);
-//			this.viewer = new DraggableTreeViewer();
-//			log(Level.FINEST, "Created draggable viewer");
+
 			
 			viewer.getTreePane().addMouseListener(new MouseClusterSelectionAdapter());
-//			log(Level.FINEST, "Added listener");
 
 
 			this.add(viewer, BorderLayout.CENTER);
-//			log(Level.FINEST, "Added viewer");
+
 
 			this.buttonPanel = createButtonPanel();
-//			log(Level.FINEST, "Made button panel");
+
 			this.add(buttonPanel, BorderLayout.NORTH);
 
-//			log(Level.FINEST, "Importing tree");
 			RootedTree r = importTree();
-			displayTree(r);
-//			log(Level.FINEST, "Imported tree");
-
-			this.setModal(false);
-			this.setMinimumSize(new Dimension(500, 500));
-			this.pack();
-			this.setLocationRelativeTo(null);
-//			log(Level.FINEST, "Displaying dialog");
-			this.setVisible(true);
-		} catch(Exception e){
-				error( "Error creating tree view", e);
+			
+			if(r==null){
+				warn("Unable to import tree");
 				this.dispose();
+				
+			} else {
+				displayTree(r);
+				this.setModal(false);
+				this.setMinimumSize(new Dimension(500, 500));
+				this.pack();
+				this.setLocationRelativeTo(null);
+
+				this.setVisible(true);
+			}
+	
+		} catch(Exception e){
+			
+			warn("Error creating tree view");
+			log(Level.FINE, "Error creating tree view", e);
+			this.dispose();
 		}
 	}
 	
@@ -144,7 +141,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	 */
 	private RootedTree importTree(){
 		RootedTree topTree = null;
-		log(Level.FINE, "Reading tree");
+		fine("Reading tree");
 		StringReader reader = new StringReader(group.getTree());
 
 		boolean readUnquotedLabels = true;
@@ -167,11 +164,14 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 				}
 			}
 		} catch (IOException e) {
-			log(Level.SEVERE, "Error reading tree", e);
+			warn("Unable to display tree: Error reading data");
+			log(Level.FINE, "Error reading tree", e);
 		} catch (DuplicateTaxaException e){
-			log(Level.WARNING, "Unable to display tree: duplicate taxon names");
+			warn("Unable to display tree: duplicate taxon names");
+			log(Level.FINE, "Duplicate taxon names", e);
 		} catch (ImportException e) {
-			log(Level.SEVERE, "Error in tree IO", e);
+			warn("Unable to display tree: error importing newick tree");
+			log(Level.FINE, "Error in tree IO", e);
 		}
 		return topTree;
 	}
@@ -182,7 +182,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	private void displayTree(RootedTree tree){
 
 		int numTaxa = tree.getTaxa().size(); 
-		log(Level.FINE, "Tree has "+numTaxa+" taxa");
+		fine("Tree has "+numTaxa+" taxa");
 
 		viewer.setTree( tree );
 
@@ -318,44 +318,37 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	private void colourTreeNodesByClusterGroup(final ClusterGroup group){
 
 		if(group!=null){
-			log(Level.FINER, "Colouring nodes by cluster group: "+group.getName());	
+			finer("Colouring nodes by cluster group: "+group.getName());	
+				
+			setStatusLoading();
 
-//			Thread thr = new Thread(){
-//				
-//				public void run(){
-								
-					setStatusLoading();
-					
-					int clusterNumber = 0;
-					for(UUID id : group.getUUIDs()){
-						
-						// Find the appropriate dataset
-						AnalysisDataset cluster = null;
-												
-						if(dataset.hasChild(id)){
-							
-							cluster = dataset.getChildDataset(id);
-							
-						} else if(dataset.hasMergeSource(id)){
-							
-							cluster = dataset.getMergeSource(id);
-						} else {
-							// If the cluster was not found, stop
-							log(Level.WARNING, "Child dataset not found, cancelling");
-							return;
-						}
-						
-						Color colour = ColourSelecter.getColor(clusterNumber++);
-						setNodeColour(cluster.getCollection(), colour);
+			int clusterNumber = 0;
+			for(UUID id : group.getUUIDs()){
 
-						log(Level.FINER, "Node colours assigned");	
-		
-					}
-					updateNodePainter();
+				// Find the appropriate dataset
+				AnalysisDataset cluster = null;
+
+				if(dataset.hasChild(id)){
+
+					cluster = dataset.getChildDataset(id);
+
+				} else if(dataset.hasMergeSource(id)){
+
+					cluster = dataset.getMergeSource(id);
+				} else {
+					// If the cluster was not found, stop
+					warn("Child dataset not found, cancelling");
+					return;
+				}
+
+				Color colour = ColourSelecter.getColor(clusterNumber++);
+				setNodeColour(cluster.getCollection(), colour);
+
+				finer("Node colours assigned");	
+
+			}
+			updateNodePainter();
 					
-//				}
-//			};
-//			thr.start();
 		} else { // no cluster group, colour everything black
 			setNodeColour(dataset.getCollection(), Color.BLACK);
 		}
@@ -504,18 +497,10 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 			if(tree.isExternal(n)){
 
 				Taxon t = tree.getTaxon(n);
-				
-//				String name = t.getName();
-				
+								
 				Cell c = (Cell) t.getAttribute("Cell");
 				clusterCollection.addCell(new Cell (c));
-				
-//				for(Cell c : dataset.getCollection().getCells()){
-//
-//					if(taxonNamesMatch(name, c.getNucleus())){
-//						clusterCollection.addCell(new Cell (c));
-//					}
-//				}
+
 			}
 
 		}
@@ -711,40 +696,6 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		}
 	}
 	
-//	protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list, AnalysisDataset template) {
-//
-//		DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, template);
-//		Iterator<Object> iterator = datasetListeners.iterator();
-//		while( iterator.hasNext() ) {
-//			( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
-//		}
-//	}
-//	
-//	protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
-//
-//		InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());
-//		Iterator<Object> iterator = datasetListeners.iterator();
-//		while( iterator.hasNext() ) {
-//			( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
-//		}
-//	}
-	
-//	public synchronized void addInterfaceEventListener( InterfaceEventListener l ) {
-//		datasetListeners.add( l );
-//	}
-//
-//	public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
-//		datasetListeners.remove( l );
-//	}
-//
-//	public synchronized void addDatasetEventListener( DatasetEventListener l ) {
-//		datasetListeners.add( l );
-//	}
-//
-//	public synchronized void removeDatasetEventListener( DatasetEventListener l ) {
-//		datasetListeners.remove( l );
-//	}
-
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 
