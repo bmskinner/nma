@@ -46,8 +46,6 @@ import io.ImageExporter;
 import io.ImageImporter;
 
 import java.io.File;
-import java.util.logging.Level;
-
 import javax.swing.table.TableModel;
 
 import analysis.detection.IconCell;
@@ -77,7 +75,7 @@ public class FishRemappingWorker extends ImageProberWorker {
 			// Import the image as a stack
 			String imageName = file.getName();
 
-			log(Level.FINEST, "Converting image");
+			finest("Converting image");
 			ImageProcessor openProcessor = ImageExporter.getInstance().makeGreyRGBImage(stack).getProcessor();
 			openProcessor.invert();
 			
@@ -86,20 +84,20 @@ public class FishRemappingWorker extends ImageProberWorker {
 			
 
 			File fishImageFile = new File(postFISHImageDirectory+File.separator+imageName);
-			ImageStack fishStack = ImageImporter.getInstance().importImage(fishImageFile);
-
-			ImageProcessor fishProcessor = ImageExporter.getInstance().convertToRGB(fishStack).getProcessor();
-
 			
+			if( ! fishImageFile.exists()){
+				warn("File does not exist: "+fishImageFile.getAbsolutePath());
+				
+			} else {
+			
+				ImageStack fishStack = ImageImporter.getInstance().importImage(fishImageFile);
 
-//			// Get the cells matching the imageFile
-//			for(Cell c : dataset.getCollection().getCells(file)){
-//				drawNucleus(c, openProcessor);
-//			}
+				ImageProcessor fishProcessor = ImageExporter.getInstance().convertToRGB(fishStack).getProcessor();
 
-			IconCell iconCell2 = makeIconCell(fishProcessor, FishMappingImageType.FISH_IMAGE);
-			publish(iconCell2);
+				IconCell iconCell2 = makeIconCell(fishProcessor, FishMappingImageType.FISH_IMAGE);
+				publish(iconCell2);
 
+			}
 	}
 	
 

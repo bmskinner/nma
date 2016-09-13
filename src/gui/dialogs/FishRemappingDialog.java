@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 
 import analysis.AnalysisDataset;
@@ -50,6 +51,10 @@ import components.Cell;
 import components.CellCollection;
 import components.generic.XYPoint;
 
+/**
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class FishRemappingDialog extends ImageProber {
 
@@ -386,15 +391,56 @@ public class FishRemappingDialog extends ImageProber {
 	    File folder =  new File(folderName);
 	    
 	    if(!folder.isDirectory() ){
+	    	JOptionPane.showMessageDialog(null, "The selected item is not a folder", "Cannot use folder", JOptionPane.ERROR_MESSAGE); 
 	    	return false;
 	    }
 	    if(!folder.exists()){
+	    	JOptionPane.showMessageDialog(null, "The folder does not exist", "Cannot use folder", JOptionPane.ERROR_MESSAGE); 
 	    	return false; // check folder is ok
 	    }
-	   
+	    
+	    if(!containsFiles(folder)){
+	    	
+	    	JOptionPane.showMessageDialog(null, "The folder contains no files", "Cannot use folder", JOptionPane.ERROR_MESSAGE); 
+	    	return false; // check folder has something in it
+	    }
+	    
+
 	    this.postFISHImageDirectory = folder;
 	    finer("Selected "+postFISHImageDirectory.getAbsolutePath()+" as post-FISH image directory");
 	    return true;
+	}
+	
+	
+	/**
+	 * Check if the given folder has files (not just directories)
+	 * @param folder
+	 * @return
+	 */
+	private boolean containsFiles(File folder){
+				
+		File[] files = folder.listFiles();
+		
+		// There must be items in the folder
+		if(files.length==0){
+			return false;
+		}
+		
+		int countFiles=0;
+		
+		// Some of the items must be files
+		for(File f : files){
+			if(f.isFile()){
+				countFiles++;
+			}
+		}
+		
+		if(countFiles==0){
+			return false;
+		}
+		
+		return true;
+		
 	}
 
 }
