@@ -104,29 +104,15 @@ implements PlugIn, Loggable
 	 * Load the program as standalone
 	 */
 	private void runStandalone(){
-		
-		/*
-		 * Add a splash screen for long load times
-		 */
-		final JWindow splash = createSplash();
-		
+				
 		try {
 			loadMainWindow();
 		} catch(Exception e){
+			System.err.println("Error loading main window");
+			e.printStackTrace();
+		} 
+		
 			
-		} finally {
-			splash.dispose();
-		}
-		
-		
-//		try {
-//			File jarDir = new File(Nuclear_Morphology_Analysis.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-//			System.out.println(jarDir.getAbsolutePath());
-//		} catch (URISyntaxException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
 		
 	}
 	
