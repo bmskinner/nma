@@ -17,29 +17,39 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-import gui.MainWindow;
 import ij.IJ;
 import ij.plugin.PlugIn;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JWindow;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+
+import gui.MainWindow;
 import logging.Loggable;
 
+/**
+ * This is designed to work as a plugin for ImageJ - this
+ * means this launching class must be in the default package.
+ * This also launches the program when run as standalone.
+ * @author bms41
+ *
+ */
 public class Nuclear_Morphology_Analysis
 implements PlugIn, Loggable
 
 {
 	
-//	private static Nuclear_Morphology_Analysis instance; // for launching without ImageJ
+	private static Nuclear_Morphology_Analysis instance; // for launching without ImageJ
 	
 	// Store which plugins have been found
 	private HashMap<String, Boolean>  requiredFiles = new HashMap<String, Boolean>();
@@ -58,10 +68,10 @@ implements PlugIn, Loggable
 			"Gray_Morphology"
 	};
 	
-//	public static void main(String[] args){
-//		instance = new Nuclear_Morphology_Analysis();
-//		instance.run(null);
-//	}
+	public static void main(String[] args){
+		instance = new Nuclear_Morphology_Analysis();
+		instance.runStandalone();
+	}
 	
 	/**
 	 * Reset all found files to false
@@ -90,6 +100,56 @@ implements PlugIn, Loggable
 		}
 	}
 	
+	/**
+	 * Load the program as standalone
+	 */
+	private void runStandalone(){
+		
+		/*
+		 * Add a splash screen for long load times
+		 */
+		final JWindow splash = createSplash();
+		
+		try {
+			loadMainWindow();
+		} catch(Exception e){
+			
+		} finally {
+			splash.dispose();
+		}
+		
+		
+//		try {
+//			File jarDir = new File(Nuclear_Morphology_Analysis.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+//			System.out.println(jarDir.getAbsolutePath());
+//		} catch (URISyntaxException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+		
+	}
+	
+	private void loadMainWindow(){
+		java.awt.EventQueue.invokeLater(new Runnable() {
+			public void run() {
+
+				IJ.setBackgroundColor(0, 0, 0);	 // default background is black
+
+				try {
+					UIManager.setLookAndFeel(
+							UIManager.getSystemLookAndFeelClassName());
+				} catch (Exception e) {
+
+					logToImageJ("Error initialising", e);
+				}
+
+				MainWindow frame = new MainWindow();
+				frame.setVisible(true);
+			}
+		});
+	}
+	
 	/*
 	 * Check all dependencies are present, the
 	 * Java version is correct and load the main window
@@ -106,28 +166,10 @@ implements PlugIn, Loggable
 				IJ.log("http://rsb.info.nih.gov/ij/download.html");
 				return;
 			}
-			
-			
 
 			if(checkPlugins()){ 
 
-				java.awt.EventQueue.invokeLater(new Runnable() {
-					public void run() {
-
-						IJ.setBackgroundColor(0, 0, 0);	 // default background is black
-
-						try {
-							UIManager.setLookAndFeel(
-									UIManager.getSystemLookAndFeelClassName());
-						} catch (Exception e) {
-
-							logToImageJ("Error initialising", e);
-						}
-
-						MainWindow frame = new MainWindow();
-						frame.setVisible(true);
-					}
-				});
+				loadMainWindow();
 
 			} else {
 
@@ -139,8 +181,8 @@ implements PlugIn, Loggable
 				IJ.log("https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Installation");
 
 			}
-			
-			
+
+
 		} catch (Exception e) {
 			logToImageJ("Error initialising", e);
 		} 
