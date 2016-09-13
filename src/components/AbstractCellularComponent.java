@@ -23,6 +23,7 @@ package components;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -501,24 +502,46 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 	 * @return
 	 */
 	public boolean containsPoint(XYPoint p){
+		
+		// Fast check - is the point within the bounding rectangle?
+		if( ! this.getBounds().contains(p.asPoint())){
+			return false;			
+		} 
+		
+		// Check detailed position
 		if(this.createPolygon().contains( (float)p.getX(), (float)p.getY() ) ){
 			return true;
 		} else { 
 			return false;
 		}
+		
+		
 	}
 	
 	/**
-	 * Check if a given point lies within the nucleus
+	 * Check if a given point in the original source image lies within the nucleus
 	 * @param p
 	 * @return
 	 */
 	public boolean containsOriginalPoint(XYPoint p){
+		
+		// Fast check - is the point within the bounding rectangle moved to the original position?
+		Rectangle2D r = new Rectangle2D.Double(position[X_BASE], position[Y_BASE], position[WIDTH], position[HEIGHT]);
+		
+		if( ! r.contains(p.asPoint())){
+			return false;			
+		} 
+		
+		// Check detailed position
 		if(this.createOriginalPolygon().contains( (float)p.getX(), (float)p.getY() ) ){
 			return true;
 		} else { 
 			return false;
 		}
+
+
+
+
 	}
 	
 	

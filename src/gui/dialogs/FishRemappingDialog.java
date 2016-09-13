@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 
@@ -65,6 +66,8 @@ public class FishRemappingDialog extends ImageProber {
 		
 	private List<UUID> selectedNucleiLeft  = new ArrayList<UUID>(0); // Nuclei selected with the left button
 	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(0); // Nuclei selected with the right button
+	
+	private List<Cell> openCells = new ArrayList<Cell>();
 		
 	
 	/**
@@ -171,8 +174,8 @@ public class FishRemappingDialog extends ImageProber {
 		
 		// Get the data model for this table
 		TableModel model = (TableModel)table.getModel();
-		
-		int row = table.rowAtPoint(pnt);
+				
+		int row = table.rowAtPoint(   pnt);
 		int col = table.columnAtPoint(pnt);
 		
 		// The coordinates are relative to the cell of the table.
@@ -183,28 +186,64 @@ public class FishRemappingDialog extends ImageProber {
 		
 		finer("Clicked "+x+" : "+y);
 		
+		
+		/*
+		 * The coordinates within the cell must be converted
+		 * to coordinates within the small image in the IconCell.
+		 * 
+		 * The x coordinates are not always correct. The IconCell is aligned
+		 * horizontally, so the difference in width between the IconCell and the
+		 * table cell can be used as an offset
+		 * 
+		 * The imageprober has vertical alignment to the top of the cell,
+		 * so y coordinates should also be correct
+		 * 
+		 * 
+		 */
+		
+		// Get the rectangle covering the cell of the table
 		Rectangle cellRectangle = table.getCellRect(row, col, false);
 
+		// Get the icon cell at the clicked row and column
 		IconCell selectedData = (IconCell) model.getValueAt( row, col );
-		        			
-		int iconHeight = selectedData.getSmallIcon().getIconHeight() + 20; // add padding for text
+
+		// Get the width of the icon in the icon cell
+		int iconWidth = selectedData.getSmallIcon().getIconWidth();
+
+//		// Get the width of the column of interest
+		int columnWidth = cellRectangle.width;
 		
-		int offset = (cellRectangle.height - iconHeight) >>1;
+		finer("Column width is "+columnWidth);
+		finer("IconCell width is "+iconWidth);
+
+//		Split the difference
+		int offset = (columnWidth - iconWidth) >>1;
+
+		x = x-offset;
 		
-		int offsetY = (int) (y-offset);
+		finer("Clicked in small image "+x+" : "+y);
 		
-		finer("Offset to "+x+" : "+offsetY);
+		if(x < 0 || x > iconWidth){
+			return; // out of bounds of icon
+		}
+		
+		if(y > selectedData.getSmallIcon().getIconHeight()){
+			return; // out of image bounds in cell
+		}
 
 		// Translate coordinates back to large image
 		double factor = selectedData.getFactor();
 		
 		double largeX = x * factor;
-		double largeY = offsetY * factor;
+		double largeY = y * factor;
+		
+		XYPoint p = new XYPoint(largeX, largeY);
+		finer("Clicked in large image "+p.toString());
 		
 		// See if the selected position in the large icon is in a nucleus
 		
-		for(Cell c : dataset.getCollection().getCells(openImage)){
-			if(c.getNucleus().containsOriginalPoint(new XYPoint(largeX, largeY))){
+		for(Cell c : openCells){
+			if(c.getNucleus().containsOriginalPoint( p )){
 				
 				respondToMouseEvent(e, c);
 				fine("Click is in nucleus");
@@ -212,6 +251,7 @@ public class FishRemappingDialog extends ImageProber {
 				// Update the small icon
 				selectedData.setSmallIcon( new ImageIcon(scaleImage( selectedData.getLargeIcon() )) );
 				table.repaint(cellRectangle);
+				return; // don't keep searching
 
 			}
 			
@@ -270,6 +310,9 @@ public class FishRemappingDialog extends ImageProber {
 			worker.addPropertyChangeListener(this);
 			progressBar.setVisible(true);
 			worker.execute();
+			
+			// Get the relevant cells to speed mouse responses
+			openCells = dataset.getCollection().getCells(openImage);
 
 
 		} catch (Exception e) { // end try
@@ -383,7 +426,9 @@ public class FishRemappingDialog extends ImageProber {
 	 * @return true if the directory is valid, false otherwise
 	 */
 	private boolean getPostFISHDirectory(){
+		DirectoryChooser.setDefaultDirectory(dataset.getAnalysisOptions().getFolder().getAbsolutePath());
 		DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of post-FISH images...");
+				
 	    String folderName = localOpenDialog.getDirectory();
 
 	    if(folderName==null) return false; // user cancelled

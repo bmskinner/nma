@@ -542,6 +542,7 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 	        setHorizontalAlignment(JLabel.CENTER);
 	        setHorizontalTextPosition(JLabel.CENTER);
 	        setVerticalTextPosition(JLabel.BOTTOM);
+	        setVerticalAlignment(JLabel.TOP); // image has no offset
 	        setBackground(Color.WHITE);
 	        
 	        if(info==null){
@@ -563,6 +564,8 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 
 	        return this;
 	    }
+	    
+	    
 	}
 	
 	/**
