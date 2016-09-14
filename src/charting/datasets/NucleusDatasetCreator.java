@@ -1373,6 +1373,10 @@ private static NucleusDatasetCreator instance = null;
 	
 		for(UUID signalGroup : nucleus.getSignalCollection().getSignalGroupIDs()){
 			
+			if( ! nucleus.getSignalCollection().hasSignal(signalGroup)){
+				continue;
+			}
+			
 			SignalGroup group = dataset.getCollection().getSignalGroup(signalGroup);
 			finer("Fetching signals from signal group "+group+" ID "+signalGroup);
 			

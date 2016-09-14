@@ -20,15 +20,12 @@ package gui.tabs.signals;
 
 import java.awt.Dimension;
 import java.io.File;
-import java.util.logging.Level;
-
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.signals.NuclearSignalOptions;
 import analysis.signals.SignalProberWorker;
 import gui.ImageType;
 import gui.dialogs.ImageProber;
-import gui.dialogs.ImageProber.IconCellRenderer;
 
 
 @SuppressWarnings("serial")
@@ -109,7 +106,7 @@ public class SignalDetectionImageProber extends ImageProber {
 			worker.execute();
 
 		} catch(Exception e){
-				log(Level.SEVERE, "Error in signal probing", e);
+				error("Error in signal probing", e);
 			}
 		}
 	

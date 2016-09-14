@@ -24,6 +24,7 @@ import gui.GlobalOptions;
 import gui.RotationMode;
 import gui.ThreadManager;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.tabs.cells.AbstractCellEditingDialog;
 import gui.tabs.cells.CellViewModel;
 
 import java.awt.BorderLayout;
@@ -76,13 +77,10 @@ import components.nuclei.Nucleus;
  *
  */
 @SuppressWarnings("serial")
-public class CellResegmentationDialog extends MessagingDialog implements BorderPointEventListener{
+public class CellResegmentationDialog extends AbstractCellEditingDialog implements BorderPointEventListener{
 	
 	private CoupledProfileOutlineChartPanel panel;
-	private Cell cell = null;
-	
-	private Cell workingCell;
-	private AnalysisDataset dataset = null;
+
 	
 	private boolean isRunning = false;
 	private boolean isSelectRP = false;
@@ -98,94 +96,25 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 	
 	private JTable table;
 	private static final int COLUMN_STATE = 1;
-	
-	private boolean hasChanged = false;
-	
-	private CellViewModel cellModel; // allow changes to be propagated back to the other panels
+
 	
 	public CellResegmentationDialog(CellViewModel model){
-		super( null );
-		
-		createUI();
-		this.cellModel = model;
-		
-		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-
-		this.pack();
-		
-		panel.getOutlinePanel().restoreAutoBounds(); // fixed aspect must be set after components are packed
-		
-		this.addWindowListener(new WindowAdapter() {
-			
-			public void windowClosing(WindowEvent e) {
-				
-				if(cellHasChanged()){
-					requestSaveOption();
-				} 
-				setVisible(false);
-			}
-		});
-		
-		finer("Displaying resegmentation dialog");
-
-		this.setLocationRelativeTo(null);
-		this.setModal(false);
-		
+		super( model );		
+		panel.getOutlinePanel().restoreAutoBounds(); // fixed aspect must be set after components are packed		
 	}
 	
+	@Override
 	public void load(final Cell cell, final AnalysisDataset dataset){
-		
-		if(cell==null || dataset==null){
-			throw new IllegalArgumentException("Cell or dataset is null");
-		}
-		
-		this.cell = cell;
-		this.dataset = dataset;
-		this.workingCell = new Cell(cell);
-		workingCell.getNucleus().setLocked(false);
-		
-		this.setTitle("Resegmenting "+cell.getNucleus().getNameAndNumber());
-		panel.setCell(workingCell);
-		
+
+		super.load(cell, dataset);
 		table.setModel(createTableModel(""));
-		
-		
-		updateCharts(workingCell);
-		this.setVisible(true);
+		this.setTitle("Resegmenting "+cell.getNucleus().getNameAndNumber());
+		updateCharts(cell);
+		setVisible(true);
 	}
-	
-	private boolean cellHasChanged(){
-		return hasChanged;
-		// Hashcodes are not working
-//		return cell.hashCode() != workingCell.hashCode();
-	}
-	
-	private void requestSaveOption(){
 		
-		Object[] options = { "Save changes" , "Discard changes" };
-		int save = JOptionPane.showOptionDialog(CellResegmentationDialog.this,
-				"Save changes to cell segmentation?", 
-				"Save cell?",
-				JOptionPane.DEFAULT_OPTION, 
-				JOptionPane.QUESTION_MESSAGE,
-				null, options, options[0]);
-
-		// Replace the input cell with the working cell
-		if(save==0){
-			
-			workingCell.getNucleus().setLocked(true); // Prevent further changes without unlocking
-			dataset.getCollection().replaceCell(workingCell);
-
-			// Trigger a dataset update and reprofiling
-			dataset.getCollection().getProfileManager().createProfileCollections(true);
-			cellModel.swapCell(workingCell);
-
-			
-			fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
-		} 
-	}
-	
-	private void createUI(){
+	@Override
+	protected void createUI(){
 
 		try{
 			finer("Creating resegmentation dialog");
@@ -270,7 +199,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		
 		reverseProfileBtn = new JButton("Flip profile");
 		reverseProfileBtn.addActionListener( e -> {
-			hasChanged = true;
+			setCellChanged(true);
 			workingCell.getNucleus().reverse();
 			updateCharts(workingCell);
 		});
@@ -388,7 +317,8 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		}
 	}
 	
-	private void updateCharts(Cell cell){
+	@Override
+	protected void updateCharts(Cell cell){
 		
 		Runnable r = () ->{
 					
@@ -412,6 +342,7 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 				.setRotationMode(RotationMode.ACTUAL)
 				.setShowAnnotations(false)
 				.setInvertYAxis( true ) // only invert for actual
+				.setShowPoints(false)
 				.setCellularComponent(cell.getNucleus())
 				.build();
 	
@@ -433,13 +364,13 @@ public class CellResegmentationDialog extends MessagingDialog implements BorderP
 		Nucleus n = workingCell.getNucleus();
 		
 		if(isSelectRP){
-			hasChanged = true;
+			setCellChanged(true);
 			newTags.put(BorderTagObject.REFERENCE_POINT, n.getBorderIndex(p));
 			moveRPComplete();
 		}
 		
 		if(isRunning){
-			hasChanged = true;
+			setCellChanged(true);
 			UUID id = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegments().get(segCount).getID();
 
 			segStop = n.getBorderIndex(p);

@@ -288,6 +288,10 @@ public class ChartOptions extends AbstractOptions {
 	public void setCell(Cell cell) {
 		this.cell = cell;
 	}
+	
+	public boolean hasCell(){
+		return this.cell!=null;
+	}
 
 	public CellularComponent getComponent() {
 		return component;

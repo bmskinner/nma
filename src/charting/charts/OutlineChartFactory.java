@@ -302,11 +302,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				}
 			}
 			
-			return makeCellOutlineChart(options.getCell(), 
-					options.firstDataset(), 
-					options.getRotateMode(), 
-					false, 
-					options.getComponent());
+			return makeStandardCellOutlineChart(options);
 		} catch(Exception e){
 			warn("Error creating cell outline chart");
 			log(Level.FINE, "Error creating cell outline chart", e);
@@ -323,17 +319,20 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset, RotationMode rotateMode, boolean showhookHump, CellularComponent componentToHighlight) throws Exception{
+	private JFreeChart makeStandardCellOutlineChart(ChartOptions options) throws Exception{
 		
-		if(cell==null){
+		if(! options.hasCell()){
 			finest("No cell to draw");
 			return ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
 		}
 		
-		if(dataset==null){
+		if(! options.hasDatasets()){
 			finest("No dataset to draw");
 			return ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
 		}
+		
+		Cell cell = options.getCell();
+		AnalysisDataset dataset = options.firstDataset();
 		
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
@@ -345,7 +344,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		Map<Integer, String>    hash        = new HashMap<Integer, String>(0); 
 		Map<Integer, XYDataset> datasetHash = new HashMap<Integer, XYDataset>(0); 
 		
-		if(rotateMode.equals(RotationMode.VERTICAL)){
+		if(options.getRotateMode().equals(RotationMode.VERTICAL)){
 			finest("Rotation mode is vertical");
 			// duplicate the cell
 			Cell newCell = new Cell();
@@ -412,7 +411,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		for(int key : hash.keySet()){
 
 			plot.setDataset(key, datasetHash.get(key));
-			plot.setRenderer(key, new XYLineAndShapeRenderer(true, false));
+			
+			plot.setRenderer(key, new XYLineAndShapeRenderer(options.isShowLines(), options.isShowPoints()));
 
 			int seriesCount = plot.getDataset(key).getSeriesCount();
 			// go through each series in the dataset
@@ -429,7 +429,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					String name = (String) plot.getDataset(key).getSeriesKey(i);
 					int colourIndex = getIndexFromLabel(name);
 					Color colour = ColourSelecter.getColor(colourIndex);
-					plot.getRenderer().setSeriesPaint(i, colour);
+					plot.getRenderer(key).setSeriesPaint(i, colour);					
 				}
 								
 				/*
@@ -494,8 +494,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			// Add a background image to the plot
 			clearShapeAnnotations(plot);
 			
-			if(rotateMode.equals(RotationMode.ACTUAL)){
-				drawImageAsAnnotation(plot, cell, componentToHighlight);
+			if(options.getRotateMode().equals(RotationMode.ACTUAL)){
+				drawImageAsAnnotation(plot, cell, options.getComponent());
 			}
 			
 

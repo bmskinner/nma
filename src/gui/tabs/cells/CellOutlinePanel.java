@@ -5,7 +5,9 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
+
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.ConsensusNucleusChartFactory;
@@ -32,6 +34,10 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 	
 	private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus");
 	private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp to consensus");
+	
+	private JButton redrawBorderBtn = new JButton("Redraw outline");
+	
+	private CellBorderAdjustmentDialog cellBorderAdjustmentDialog;
 			
 	public CellOutlinePanel(CellViewModel model) {
 		super(model);
@@ -55,6 +61,14 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		settingsPanel.add(rotationPanel);
 		settingsPanel.add(makeMeshPanel);
 		settingsPanel.add(warpMeshPanel);
+		
+		cellBorderAdjustmentDialog = new CellBorderAdjustmentDialog(model);
+		
+		redrawBorderBtn.addActionListener( e ->{
+			cellBorderAdjustmentDialog.load(model.getCell(), activeDataset());
+		});
+		settingsPanel.add(redrawBorderBtn);
+		
 		
 		
 		this.add(settingsPanel, BorderLayout.NORTH);

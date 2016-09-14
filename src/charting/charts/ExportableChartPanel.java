@@ -43,6 +43,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import charting.charts.CoupledProfileOutlineChartPanel.BorderPointEventListener;
 import utility.Constants;
 import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
@@ -358,6 +359,14 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
     }
     
     public synchronized void removeChartSetEventListener( ChartSetEventListener l ) {
+    	listeners.remove( l );
+    }
+
+	public void addBorderPointEventListener( BorderPointEventListener l) {
+		listeners.add( l );
+	}
+	
+	public synchronized void removeBorderPointEventListener( BorderPointEventListener l ) {
     	listeners.remove( l );
     }
 
