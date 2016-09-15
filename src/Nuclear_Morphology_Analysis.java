@@ -106,7 +106,7 @@ implements PlugIn, Loggable
 	private void runStandalone(){
 				
 		try {
-			loadMainWindow();
+			loadMainWindow(true);
 		} catch(Exception e){
 			System.err.println("Error loading main window");
 			e.printStackTrace();
@@ -116,7 +116,7 @@ implements PlugIn, Loggable
 		
 	}
 	
-	private void loadMainWindow(){
+	private void loadMainWindow(boolean standalone){
 		java.awt.EventQueue.invokeLater(new Runnable() {
 			public void run() {
 
@@ -130,7 +130,7 @@ implements PlugIn, Loggable
 					logToImageJ("Error initialising", e);
 				}
 
-				MainWindow frame = new MainWindow();
+				MainWindow frame = new MainWindow(standalone);
 				frame.setVisible(true);
 			}
 		});
@@ -155,7 +155,7 @@ implements PlugIn, Loggable
 
 			if(checkPlugins()){ 
 
-				loadMainWindow();
+				loadMainWindow(false);
 
 			} else {
 

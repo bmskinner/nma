@@ -134,6 +134,8 @@ public class MainWindow
 	public static final int SAVE_DATASET		 = 32;
 	public static final int ASSIGN_SEGMENTS		 = 64;
 	
+	private boolean standalone = false;
+	
 	/*
 	 * Keep a strong reference to the program logger so it can be accessed
 	 * by all other classes implementing the Loggable interface
@@ -153,8 +155,10 @@ public class MainWindow
 	/**
 	 * Create the frame.
 	 */
-	public MainWindow() {
+	public MainWindow(boolean standalone) {
 				
+		this.standalone = standalone;
+
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		
 		this.addWindowListener(new WindowAdapter() {
@@ -465,6 +469,9 @@ public class MainWindow
 		datasetManager.clear();
 		globalOptions.setDefaults();
 		dispose();
+		if(standalone){
+			System.exit(0);
+		}
 	}
 			
 	public PopulationsPanel getPopulationsPanel(){
