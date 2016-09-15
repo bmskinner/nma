@@ -19,16 +19,43 @@
 
 package gui.tabs.cells;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import org.jfree.chart.ChartMouseEvent;
+import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.entity.ChartEntity;
+import org.jfree.chart.entity.XYItemEntity;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.Range;
+import org.jfree.ui.RectangleEdge;
 
 import analysis.AnalysisDataset;
 import components.Cell;
+import components.generic.BorderTagObject;
+import components.generic.XYPoint;
+import components.nuclear.BorderPoint;
+import gui.ChartSetEvent;
+import gui.ChartSetEventListener;
 import gui.RotationMode;
 import gui.ThreadManager;
 import charting.charts.ConsensusNucleusChartFactory;
@@ -48,7 +75,7 @@ import charting.options.ChartOptionsBuilder;
  *
  */
 @SuppressWarnings("serial")
-public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implements BorderPointEventListener {
+public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implements BorderPointEventListener, ChartSetEventListener, ChartMouseListener {
 	
 	private FixedAspectRatioChartPanel panel;
 	
@@ -103,11 +130,12 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 
 			panel = new FixedAspectRatioChartPanel(chart);
 			panel.addBorderPointEventListener(this);
+			panel.addChartMouseListener(this);
 
 
 			this.add(panel, BorderLayout.CENTER);
 		} catch (Exception e){
-			error("Error making UI", e);
+			fine("Error making UI", e);
 		}
 	}
 	
@@ -139,7 +167,7 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 	@Override
 	protected void updateCharts(Cell cell){
 		
-		Runnable r = () ->{
+//		Runnable r = () ->{
 	
 			finer("Making outline chart options");
 			ChartOptions outlineOptions = new ChartOptionsBuilder()
@@ -157,14 +185,137 @@ public class CellBorderAdjustmentDialog extends AbstractCellEditingDialog implem
 			finer("Updating chart");
 			panel.setChart(outlineChart);
 			panel.restoreAutoBounds();
-		};
-		
-		ThreadManager.getInstance().submit(r);
+//		};
+//		
+//		ThreadManager.getInstance().submit(r);
 	}
 
 	@Override
 	public void borderPointEventReceived(BorderPointEvent event) {
 		log("Border point event received");
+		
+	}
+
+	@Override
+	public void chartMouseClicked(ChartMouseEvent event) {
+		ChartEntity entity = event.getEntity();
+		
+		// Only charted items, not annotations
+		if(XYItemEntity.class.isAssignableFrom(entity.getClass())){
+			
+			XYItemEntity e = (XYItemEntity) entity;
+			Number x = e.getDataset().getX(e.getSeriesIndex(), e.getItem());
+			Number y = e.getDataset().getY(e.getSeriesIndex(), e.getItem());
+			
+//			int offsetIndex = cell.getNucleus().getOffsetBorderIndex(BorderTagObject.REFERENCE_POINT, e.getItem());
+			BorderPoint b = null;
+			
+//			int pointIndex = -1; // track where to break the array
+			
+			XYPoint clickedPoint = new XYPoint(x.doubleValue(), y.doubleValue());
+			
+			for(BorderPoint point : workingCell.getNucleus().getBorderList()){
+				
+				if(point.overlapsPerfectly( clickedPoint )){
+					log(point.toString());
+					b = point;
+//					pointIndex = cell.getNucleus().getBorderIndex(point);
+					break;
+				}
+			}
+			
+			// Remove the selected point from the border list copy
+			List<BorderPoint> borderList = workingCell.getNucleus().getBorderList();
+			Iterator<BorderPoint> it = borderList.iterator();
+			while(it.hasNext()){
+				if(it.next().equals(b)){
+					it.remove();
+					break;
+				}
+			}
+			
+
+			
+			// Make a interpolated FloatPolygon from the new array
+			float[] xPoints = new float[borderList.size()];
+			float[] yPoints = new float[borderList.size()];
+			int nPoints     = borderList.size();
+			int type = Roi.POLYGON;
+			
+			for(int i=0; i<nPoints; i++){
+				xPoints[i] = (float) borderList.get(i).getX();
+				yPoints[i] = (float) borderList.get(i).getY();
+			}
+
+			PolygonRoi roi = new PolygonRoi(xPoints, yPoints, nPoints, type);
+			FloatPolygon fp = roi.getInterpolatedPolygon();
+			
+			// Make new border list and assign to the working cell
+			
+			List<BorderPoint> newList = new ArrayList<BorderPoint>();
+			for(int i=0; i<fp.npoints; i++){
+				BorderPoint point = new BorderPoint( fp.xpoints[i], fp.ypoints[i]);
+
+				if(i>0){
+					point.setPrevPoint(newList.get(i-1));
+					point.prevPoint().setNextPoint(point);
+				}
+				newList.add(point);
+			}
+			// link endpoints
+			newList.get(newList.size()-1).setNextPoint(newList.get(0));
+			newList.get(0).setPrevPoint(newList.get(newList.size()-1));
+			
+			Rectangle boundingRectangle = new Rectangle(fp.getBounds());
+			
+			workingCell.getNucleus().setBorderList(newList);
+			workingCell.getNucleus().setBoundingRectangle(boundingRectangle);
+			
+			Range domainRange = panel.getChart().getXYPlot().getDomainAxis().getRange();
+			Range  rangeRange = panel.getChart().getXYPlot().getRangeAxis().getRange();
+			updateCharts(workingCell);
+			
+			panel.getChart().getXYPlot().getDomainAxis().setRange(domainRange);
+			panel.getChart().getXYPlot().getRangeAxis().setRange(rangeRange);
+		}
+		
+	}
+
+	@Override
+	public void chartMouseMoved(ChartMouseEvent event) {
+//		int mouseX = event.getTrigger().getX();
+//		int mouseY = event.getTrigger().getY();
+		
+		
+		
+		
+
+
+//		Point2D p = panel.translateScreenToJava2D(
+//		new Point(mouseX, mouseY));
+//		XYPlot plot = (XYPlot) panel.getChart().getPlot();
+//		Rectangle2D plotArea = panel.getScreenDataArea();
+//		ValueAxis domainAxis = plot.getDomainAxis();
+//		RectangleEdge domainAxisEdge = plot.getDomainAxisEdge();
+//		ValueAxis rangeAxis = plot.getRangeAxis();
+//		RectangleEdge rangeAxisEdge = plot.getRangeAxisEdge();
+//		double chartX = domainAxis.java2DToValue(p.getX(), plotArea,
+//		domainAxisEdge);
+//		double chartY = rangeAxis.java2DToValue(p.getY(), plotArea,
+//		rangeAxisEdge);
+//		DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+//		dfs.setDecimalSeparator('.');
+//		NumberFormat f = new DecimalFormat("#00.00", dfs);
+//
+//
+////		log("mouseX:"+f.format(new Double(chartX)));
+////		log("mouseY:"+f.format(new Double(chartY)));
+//		
+	}
+
+	@Override
+	public void chartSetEventReceived(ChartSetEvent e) {
+		// TODO Auto-generated method stub
 		
 	}
 

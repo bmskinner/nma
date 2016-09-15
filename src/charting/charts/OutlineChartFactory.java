@@ -238,7 +238,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			return makeEmptyChart();
 		}
 		
+		
+		
 		try {
+			
+			if( ! options.isShowAnnotations()){
+				
+				return makeBareCellOutlineChart(options);
+			}
+			
 			if(options.isShowMesh()){
 				
 				if(options.firstDataset().getCollection().hasConsensusNucleus()){
@@ -308,6 +316,44 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			log(Level.FINE, "Error creating cell outline chart", e);
 			return makeErrorChart();
 		}
+		
+	}
+	
+	private JFreeChart makeBareCellOutlineChart(ChartOptions options) throws Exception{
+		
+		if(! options.hasCell()){
+			finest("No cell to draw");
+			return ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
+		}
+		
+		
+		JFreeChart chart = createBaseXYChart();
+		XYDataset ds = NucleusDatasetCreator.getInstance().createBareNucleusOutline(options.getCell().getNucleus());
+
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setDataset(ds);
+
+		plot.getRangeAxis().setInverted(options.isInvertYAxis());
+		plot.getDomainAxis().setInverted(options.isInvertXAxis());
+		plot.setRenderer(new XYLineAndShapeRenderer(options.isShowLines(), options.isShowPoints()));
+
+		int seriesCount = plot.getSeriesCount();
+
+		for (int i = 0; i < seriesCount; i++) {
+			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+			plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
+			plot.getRenderer().setSeriesPaint(i, Color.BLACK);
+		}	
+		
+		// Add a background image to the plot
+		clearShapeAnnotations(plot);
+
+		if(options.hasComponent()){
+			drawImageAsAnnotation(plot, options.getCell(), options.getComponent());
+		}
+		
+		return chart;
 		
 	}
 	
@@ -654,7 +700,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					//				Color col = new Color(pixel, pixel, pixel, 255);
 
 					// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
-					Rectangle2D r = new Rectangle2D.Double(x-padding-0.1, y-padding-0.1, 1.2, 1.2);
+					Rectangle2D r = new Rectangle2D.Double(x-padding-0.6, y-padding-0.6, 1.2, 1.2);
 					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
 
 					rend.addAnnotation(a, Layer.BACKGROUND);

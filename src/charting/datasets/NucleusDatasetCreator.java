@@ -999,9 +999,8 @@ private static NucleusDatasetCreator instance = null;
 	 * @param dataset
 	 * @return
 	 */
-	public XYDataset createBareNucleusOutline(AnalysisDataset dataset){
+	public XYDataset createBareNucleusOutline(Nucleus n){
 		DefaultXYDataset ds = new DefaultXYDataset();
-		Nucleus n = dataset.getCollection().getConsensusNucleus();
 		
 		double[] xpoints = new double[n.getBorderLength()+1];
 		double[] ypoints = new double[n.getBorderLength()+1];
@@ -1018,6 +1017,17 @@ private static NucleusDatasetCreator instance = null;
 		double[][] data = { xpoints, ypoints };
 		ds.addSeries("Outline", data);
 		return ds;
+	}
+	
+	/**
+	 * Get the outline of the consensus nucleus. No segmentation, no IQR
+	 * @param dataset
+	 * @return
+	 */
+	public XYDataset createBareNucleusOutline(AnalysisDataset dataset){
+
+		return createBareNucleusOutline(dataset.getCollection().getConsensusNucleus());
+
 	}
 	
 	

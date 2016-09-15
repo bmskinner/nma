@@ -301,6 +301,10 @@ public class ChartOptions extends AbstractOptions {
 		this.component = component;
 	}
 	
+	public boolean hasComponent(){
+		return this.component!=null;
+	}
+	
 	
 	public boolean isShowWarp() {
 		return showWarp;
