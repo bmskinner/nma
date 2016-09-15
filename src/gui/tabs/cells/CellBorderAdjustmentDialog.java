@@ -269,7 +269,7 @@ public class CellBorderAdjustmentDialog
 				} else {
 
 
-					Ellipse2D r = new Ellipse2D.Double(point.getX()-0.2,point.getY()-0.2, 0.4, 0.4);
+					Ellipse2D r = new Ellipse2D.Double(point.getX()-0.3,point.getY()-0.3, 0.6, 0.6);
 					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, Color.BLUE);
 					selectedPoints.put(point, a);		
 					panel.getChart().getXYPlot().addAnnotation(a);
@@ -546,7 +546,7 @@ public class CellBorderAdjustmentDialog
 	public void mouseReleased(MouseEvent e) {
 		// stop dragging on mouse released
 		
-		if( (e.getModifiers() & InputEvent.BUTTON1_MASK) ==InputEvent.BUTTON1_MASK){
+		if( canMove && (e.getModifiers() & InputEvent.BUTTON1_MASK) ==InputEvent.BUTTON1_MASK){
 			canMove = false;
 
 
