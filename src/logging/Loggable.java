@@ -48,12 +48,22 @@ public interface Loggable {
 	}
 	
 	/**
-     * Log an error to the program log window with Level.FINE
+     * Log a message to the program log window with Level.FINE
      * @param message the error messsage
      * @param t the exception
      */
 	default void fine(String message){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINE, message);
+	}
+	
+	/**
+	 * Log an error to the program log window with Level.FINE
+	 * Use to show stack traces only when debugging
+	 * @param message
+	 * @param t
+	 */
+	default void fine(String message, Throwable t){
+		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINE, message, t);
 	}
 	
 	/**

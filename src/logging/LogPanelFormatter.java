@@ -70,7 +70,8 @@ public class LogPanelFormatter extends Formatter {
 	private String formatFinest(LogRecord record){
 		
 		String sourceMethod = record.getSourceMethodName();
-		if(sourceMethod.equals("log")){
+		if(sourceMethod.equals("log") || sourceMethod.startsWith("fine")  ){
+			// work back to the actual calling method
 			StackTraceElement[] array = Thread.currentThread().getStackTrace();
 			sourceMethod = array[8].getMethodName();
 		}
