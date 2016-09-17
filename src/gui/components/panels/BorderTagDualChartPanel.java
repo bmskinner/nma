@@ -21,6 +21,7 @@ package gui.components.panels;
 
 import gui.components.BorderTagEvent;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -56,14 +57,17 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 		chartPanel.addChartMouseListener(new ChartMouseListener() {
 
 		    public void chartMouseClicked(ChartMouseEvent e) {
-		    	XYItemEntity ent = (XYItemEntity) e.getEntity();
-		    	int series = ent.getSeriesIndex();
-		    	int item   = ent.getItem();
-		    	double x   = ent.getDataset().getXValue(series, item);
 		    	
-		    	activeProfileIndex = (int) x;
-		    	MouseEvent ev = e.getTrigger();
-		    	popupMenu.show(ev.getComponent(), ev.getX(), ev.getY());
+		    	if(e.getEntity() instanceof XYItemEntity){
+		    		XYItemEntity ent = (XYItemEntity) e.getEntity();
+		    		int series = ent.getSeriesIndex();
+		    		int item   = ent.getItem();
+		    		double x   = ent.getDataset().getXValue(series, item);
+
+		    		activeProfileIndex = (int) x;
+		    		MouseEvent ev = e.getTrigger();
+		    		popupMenu.show(ev.getComponent(), ev.getX(), ev.getY());
+		    	}
 
 		    }
 
@@ -103,16 +107,40 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 			
 			JMenuItem item = new JMenuItem(tag.toString());
 			
-			item.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-
-					fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));
-
-					
-				}
+			item.addActionListener( e ->{
+					fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));				
 			});
-			popupMenu.add(item);
+			popupMenu.add(item);			
+		}
+		
+		// Find border tags with rulesets that have not been assigned in the median
+		List<BorderTagObject> unassignedTags = new ArrayList<BorderTagObject>();
+		for(BorderTagObject tag : BorderTagObject.values()){
+			if( tag.equals(BorderTagObject.INTERSECTION_POINT)){
+				continue;
+			}
+			
+			if( ! list.contains(tag)){
+				unassignedTags.add(tag);
+				
+			}
+		}
+		
+		if( ! unassignedTags.isEmpty()){
+			Collections.sort(unassignedTags);
+			
+			popupMenu.addSeparator();
 
+			for(BorderTagObject tag : unassignedTags){
+				JMenuItem item = new JMenuItem(tag.toString());
+				item.setForeground(Color.DARK_GRAY);
+				
+				item.addActionListener( e ->{
+						fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));				
+				});
+				popupMenu.add(item);	
+			}
+			
 			
 		}
 	}
