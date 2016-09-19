@@ -35,46 +35,32 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import org.jfree.chart.ChartMouseEvent;
-import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYShapeAnnotation;
-import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.entity.ChartEntity;
 import org.jfree.chart.entity.EntityCollection;
 import org.jfree.chart.entity.XYItemEntity;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.Range;
-import org.jfree.ui.RectangleEdge;
-
 import analysis.AnalysisDataset;
 import components.Cell;
-import components.generic.BorderTagObject;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
 import gui.RotationMode;
-import gui.ThreadManager;
 import gui.components.panels.DualChartPanel;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.ExportableChartPanel;
@@ -96,14 +82,12 @@ import charting.options.ChartOptionsBuilder;
 public class CellBorderAdjustmentDialog 
     extends    AbstractCellEditingDialog 
 	implements BorderPointEventListener, 
-	           ChartSetEventListener, 
-	           ChartMouseListener,
+	           ChartSetEventListener,
 	           MouseListener,
 	           MouseMotionListener{
 	
 	
 	private DualChartPanel dualPanel;
-//	private FixedAspectRatioChartPanel panel;
 	
 	private JButton deletePointsBtn;
 	
@@ -164,25 +148,22 @@ public class CellBorderAdjustmentDialog
 			this.add(header, BorderLayout.NORTH);
 			
 	
-			JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
-			JFreeChart chart2 = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
+			JFreeChart empty1 = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
+			JFreeChart empty2 = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
 			
 			dualPanel = new CellBorderDualPanel();
 			
-			dualPanel.setCharts(chart, chart2);
+			dualPanel.setCharts(empty1, empty2);
 			
 			ExportableChartPanel mainPanel = dualPanel.getMainPanel();
 			mainPanel.setFixedAspectRatio(true);
 
 			mainPanel.addBorderPointEventListener(this);
-			mainPanel.addChartMouseListener(this);
 			mainPanel.addMouseMotionListener(this);
 			mainPanel.addMouseListener(this);
-			mainPanel.setPopupMenu(null);
-			mainPanel.setMouseZoomable(false);
-			mainPanel.setMouseZoomable(false);
-			mainPanel.setRangeZoomable(false);
-			mainPanel.setDomainZoomable(false);	
+//			mainPanel.setPopupMenu(null);
+//			mainPanel.setRangeZoomable(false);
+//			mainPanel.setDomainZoomable(false);	
 			
 			JPanel chartPanel = new JPanel();
 			chartPanel.setLayout(new GridBagLayout());
@@ -194,14 +175,17 @@ public class CellBorderAdjustmentDialog
 			c.gridwidth  = 1; 
 			c.gridheight = 1;
 			c.fill = GridBagConstraints.BOTH;      //reset to default
-			c.weightx = 0.7; 
+			c.weightx = 0.6; 
 			c.weighty = 1.0;
 			
 			chartPanel.add(mainPanel, c);
-			c.weightx = 0.3;
+			c.weightx = 0.4;
 			c.gridx = 1;
 			c.gridy = 0;
-			chartPanel.add(dualPanel.getRangePanel(), c);
+			
+			ExportableChartPanel rangePanel = dualPanel.getRangePanel();
+			rangePanel.setFixedAspectRatio(true);
+			chartPanel.add(rangePanel, c);
 			
 			this.add(chartPanel, BorderLayout.CENTER);
 
@@ -265,30 +249,30 @@ public class CellBorderAdjustmentDialog
 		
 	}
 
-	@Override
-	public void chartMouseClicked(ChartMouseEvent event) {
-		
-		// Detect right click for select
-//		if(event.getTrigger().getButton()==MouseEvent.BUTTON3_DOWN_MASK){
-//			ChartEntity entity = event.getEntity();
-//			
-//			// Only charted items, not annotations
-//			if(XYItemEntity.class.isAssignableFrom(entity.getClass())){
-//				log("Item clicked");
-//				XYItemEntity e = (XYItemEntity) entity;
-//				Number x = e.getDataset().getX(e.getSeriesIndex(), e.getItem());
-//				Number y = e.getDataset().getY(e.getSeriesIndex(), e.getItem());
-//							
-//				XYPoint clickedPoint = new XYPoint(x.doubleValue(), y.doubleValue());
-//				
-//				selectClickedPoint(clickedPoint);
-//				
-//				
-//			}
-//		}
-		
-		
-	}
+//	@Override
+//	public void chartMouseClicked(ChartMouseEvent event) {
+//		
+//		// Detect right click for select
+////		if(event.getTrigger().getButton()==MouseEvent.BUTTON3_DOWN_MASK){
+////			ChartEntity entity = event.getEntity();
+////			
+////			// Only charted items, not annotations
+////			if(XYItemEntity.class.isAssignableFrom(entity.getClass())){
+////				log("Item clicked");
+////				XYItemEntity e = (XYItemEntity) entity;
+////				Number x = e.getDataset().getX(e.getSeriesIndex(), e.getItem());
+////				Number y = e.getDataset().getY(e.getSeriesIndex(), e.getItem());
+////							
+////				XYPoint clickedPoint = new XYPoint(x.doubleValue(), y.doubleValue());
+////				
+////				selectClickedPoint(clickedPoint);
+////				
+////				
+////			}
+////		}
+//		
+//		
+//	}
 	
 	private void selectClickedPoint(XYPoint clickedPoint){
 		for(BorderPoint point : workingCell.getNucleus().getBorderList()){
@@ -403,37 +387,37 @@ public class CellBorderAdjustmentDialog
 		
 	}
 
-	@Override
-	public void chartMouseMoved(ChartMouseEvent event) {
-//		int mouseX = event.getTrigger().getX();
-//		int mouseY = event.getTrigger().getY();
-		
-		
-		
-		
-
-
-//		Point2D p = panel.translateScreenToJava2D(
-//		new Point(mouseX, mouseY));
-//		XYPlot plot = (XYPlot) panel.getChart().getPlot();
-//		Rectangle2D plotArea = panel.getScreenDataArea();
-//		ValueAxis domainAxis = plot.getDomainAxis();
-//		RectangleEdge domainAxisEdge = plot.getDomainAxisEdge();
-//		ValueAxis rangeAxis = plot.getRangeAxis();
-//		RectangleEdge rangeAxisEdge = plot.getRangeAxisEdge();
-//		double chartX = domainAxis.java2DToValue(p.getX(), plotArea,
-//		domainAxisEdge);
-//		double chartY = rangeAxis.java2DToValue(p.getY(), plotArea,
-//		rangeAxisEdge);
-//		DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-//		dfs.setDecimalSeparator('.');
-//		NumberFormat f = new DecimalFormat("#00.00", dfs);
-//
-//
-////		log("mouseX:"+f.format(new Double(chartX)));
-////		log("mouseY:"+f.format(new Double(chartY)));
+//	@Override
+//	public void chartMouseMoved(ChartMouseEvent event) {
+////		int mouseX = event.getTrigger().getX();
+////		int mouseY = event.getTrigger().getY();
 //		
-	}
+//		
+//		
+//		
+//
+//
+////		Point2D p = panel.translateScreenToJava2D(
+////		new Point(mouseX, mouseY));
+////		XYPlot plot = (XYPlot) panel.getChart().getPlot();
+////		Rectangle2D plotArea = panel.getScreenDataArea();
+////		ValueAxis domainAxis = plot.getDomainAxis();
+////		RectangleEdge domainAxisEdge = plot.getDomainAxisEdge();
+////		ValueAxis rangeAxis = plot.getRangeAxis();
+////		RectangleEdge rangeAxisEdge = plot.getRangeAxisEdge();
+////		double chartX = domainAxis.java2DToValue(p.getX(), plotArea,
+////		domainAxisEdge);
+////		double chartY = rangeAxis.java2DToValue(p.getY(), plotArea,
+////		rangeAxisEdge);
+////		DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+////		dfs.setDecimalSeparator('.');
+////		NumberFormat f = new DecimalFormat("#00.00", dfs);
+////
+////
+//////		log("mouseX:"+f.format(new Double(chartX)));
+//////		log("mouseY:"+f.format(new Double(chartY)));
+////		
+//	}
 	
 	public void movePoint(MouseEvent me) {
 	    if (canMove) {

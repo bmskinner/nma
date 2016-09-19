@@ -66,9 +66,9 @@ public abstract class DualChartPanel
 
 		chartPanel.setMinimumDrawWidth(  0 );
 		chartPanel.setMinimumDrawHeight( 0 );
-//		chartPanel.addSignalChangeListener(this);
 		chartPanel.addChartSetEventListener(this);
-		
+		chartPanel.setDomainZoomable(false); // zoom is controlled only by the range panel
+		chartPanel.setRangeZoomable(false);
 		
 		/*
 		 * A second chart panel at the south
@@ -78,19 +78,28 @@ public abstract class DualChartPanel
 		 */
 		JFreeChart rangeChart = MorphologyChartFactory.getInstance().makeEmptyChart();
 		rangePanel = new PositionSelectionChartPanel(rangeChart);
-		rangePanel.setFixedAspectRatio(true);
 		rangePanel.addSignalChangeListener(this);
 		rangePanel.addChartSetEventListener(this);
+		rangePanel.setDomainZoomable(false); // zoom is controlled only by the range panel
+		rangePanel.setRangeZoomable(false);
 
 		updateChartPanelRange();
 
 	}
 	
 	
+	/**
+	 * Get the main display panel for this chart
+	 * @return
+	 */
 	public ExportableChartPanel getMainPanel(){
 		return chartPanel;
 	}
 	
+	/**
+	 * Get the range display panel for this chart
+	 * @return
+	 */
 	public ExportableChartPanel getRangePanel(){
 		return rangePanel;
 	}

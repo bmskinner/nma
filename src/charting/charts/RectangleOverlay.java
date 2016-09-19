@@ -26,8 +26,12 @@ import org.jfree.ui.RectangleEdge;
  *
  */
 @SuppressWarnings("serial")
-public class RectangleOverlay extends AbstractOverlay implements Overlay,
-        PropertyChangeListener, Serializable, Loggable {
+public class RectangleOverlay 
+	extends AbstractOverlay 
+	implements Overlay,
+               PropertyChangeListener, 
+               Serializable, 
+               Loggable {
 
 	private RectangleOverlayObject rectangle = null;
 
@@ -36,46 +40,49 @@ public class RectangleOverlay extends AbstractOverlay implements Overlay,
      */
     public RectangleOverlay() {
         super();
-
     }
+    
+    
+    /**
+     * Construct with a rectangle object
+     * @param rectangle
+     */
+    public RectangleOverlay(RectangleOverlayObject rectangle) {
+        super();
+        setRectangle(rectangle);
+    }
+    
 
     /**
-     * Adds a crosshair against the domain axis and sends an
+     * Adds a rectangle object to this overlay and fires a 
      * {@link OverlayChangeEvent} to all registered listeners.
      *
-     * @param crosshair  the crosshair (<code>null</code> not permitted).
+     * @param rectangle  the rectangle object (<code>null</code> not permitted).
      *
-     * @see #removeDomainCrosshair(org.jfree.chart.plot.Crosshair)
-     * @see #addRangeCrosshair(org.jfree.chart.plot.Crosshair)
+     * @see #removeRectangle(charting.charts.RectangleOverlayObject)
      */
-    public void setDomainRectangle(RectangleOverlayObject rectangle) {
+    public void setRectangle(RectangleOverlayObject rectangle) {
 
+    	if( rectangle==null	){
+    		throw new IllegalArgumentException("Rectangle object cannot be null in chart overlay");
+    	}
         this.rectangle = rectangle;
         this.rectangle.addPropertyChangeListener(this);
         fireOverlayChanged();
     }
     
     /**
-     * Adds a crosshair against the domain axis and sends an
-     * {@link OverlayChangeEvent} to all registered listeners.
-     *
-     * @param crosshair  the crosshair (<code>null</code> not permitted).
-     *
-     * @see #removeDomainCrosshair(org.jfree.chart.plot.Crosshair)
-     * @see #addRangeCrosshair(org.jfree.chart.plot.Crosshair)
+     * Get the current rectangle object in this overlay
      */
     public RectangleOverlayObject getRectangle() {
-
         return rectangle;
     }
 
     /**
-     * Removes a domain axis crosshair and sends an {@link OverlayChangeEvent}
+     * Removes the given rectangle and sends an {@link OverlayChangeEvent}
      * to all registered listeners.
      *
-     * @param crosshair  the crosshair (<code>null</code> not permitted).
-     *
-     * @see #addDomainCrosshair(org.jfree.chart.plot.Crosshair)
+     * @param rectangle the rectangle to remove
      */
     public void removeRectangle(RectangleOverlayObject rectangle) {
         rectangle=null;
