@@ -21,12 +21,19 @@ package charting.charts;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.logging.Level;
 
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.ui.RectangleEdge;
+
 
 @SuppressWarnings("serial")
 public class FixedAspectRatioChartPanel extends ExportableChartPanel implements ComponentListener {
@@ -41,6 +48,41 @@ public class FixedAspectRatioChartPanel extends ExportableChartPanel implements 
 				restoreAutoBounds();
 			}
 		});
+		
+//		this.setZoomAroundAnchor(false);
+//		
+//		this.addMouseWheelListener(new MouseWheelListener() {
+//	        public void mouseWheelMoved(MouseWheelEvent arg0) {
+//	        	
+//	        	XYPlot plot = (XYPlot) FixedAspectRatioChartPanel.this.getChart().getPlot();
+//	    		Rectangle2D plotArea = FixedAspectRatioChartPanel.this.getScreenDataArea();
+//	    		ValueAxis domainAxis = plot.getDomainAxis();
+//	    		RectangleEdge domainAxisEdge = plot.getDomainAxisEdge();
+//	    		ValueAxis rangeAxis = plot.getRangeAxis();
+//	    		RectangleEdge rangeAxisEdge = plot.getRangeAxisEdge();
+//	        	
+//	        	Point2D p = FixedAspectRatioChartPanel.this.translateScreenToJava2D(arg0.getPoint());
+//	        	double chartX = domainAxis.java2DToValue(p.getX(), plotArea,
+//	        			domainAxisEdge);
+//	        	double chartY = rangeAxis.java2DToValue(p.getY(), plotArea,
+//	        			rangeAxisEdge);
+//	        	
+//	        	log("Anchoring at chart location "+chartX+", "+chartY);
+//	        	FixedAspectRatioChartPanel.this.setZoomAroundAnchor(true);
+//	        	FixedAspectRatioChartPanel.this.setAnchor( new Point2D.Double(chartX, chartY));
+//	        	
+//	        	
+//	            if (arg0.getWheelRotation() > 0) {
+//	            	FixedAspectRatioChartPanel.this.zoomOutDomain(0.5, 0.5);
+//	            	FixedAspectRatioChartPanel.this.zoomOutRange(0.5, 0.5);
+//	            } else if (arg0.getWheelRotation() < 0) {
+//	            	FixedAspectRatioChartPanel.this.zoomInDomain(1.5, 1.5);
+//	            	FixedAspectRatioChartPanel.this.zoomInRange(1.5, 1.5);
+//	            }
+//	            FixedAspectRatioChartPanel.this.setZoomAroundAnchor(false);
+//	        }
+//	    });
+		
 		restoreAutoBounds();
 	}
 	

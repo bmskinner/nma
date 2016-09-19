@@ -29,8 +29,7 @@ import org.jfree.ui.RectangleEdge;
 public class RectangleOverlay extends AbstractOverlay implements Overlay,
         PropertyChangeListener, Serializable, Loggable {
 
-	private RectangleOverlayObject xRectangle = null;
-	private RectangleOverlayObject yRectangle = null;
+	private RectangleOverlayObject rectangle = null;
 
     /**
      * Default constructor.
@@ -51,9 +50,23 @@ public class RectangleOverlay extends AbstractOverlay implements Overlay,
      */
     public void setDomainRectangle(RectangleOverlayObject rectangle) {
 
-        this.xRectangle = rectangle;
-        xRectangle.addPropertyChangeListener(this);
+        this.rectangle = rectangle;
+        this.rectangle.addPropertyChangeListener(this);
         fireOverlayChanged();
+    }
+    
+    /**
+     * Adds a crosshair against the domain axis and sends an
+     * {@link OverlayChangeEvent} to all registered listeners.
+     *
+     * @param crosshair  the crosshair (<code>null</code> not permitted).
+     *
+     * @see #removeDomainCrosshair(org.jfree.chart.plot.Crosshair)
+     * @see #addRangeCrosshair(org.jfree.chart.plot.Crosshair)
+     */
+    public RectangleOverlayObject getRectangle() {
+
+        return rectangle;
     }
 
     /**
@@ -64,8 +77,8 @@ public class RectangleOverlay extends AbstractOverlay implements Overlay,
      *
      * @see #addDomainCrosshair(org.jfree.chart.plot.Crosshair)
      */
-    public void removeDomainRectangle(RectangleOverlayObject rectangle) {
-        xRectangle=null;
+    public void removeRectangle(RectangleOverlayObject rectangle) {
+        rectangle=null;
         fireOverlayChanged();
         
     }
@@ -89,63 +102,50 @@ public class RectangleOverlay extends AbstractOverlay implements Overlay,
      */
     @Override
     public void paintOverlay(Graphics2D g2, ChartPanel chartPanel) {
-    	
-//    	log("Painting rectangle overlay");
-    	
+    	    	
         Shape savedClip = g2.getClip();
         Rectangle2D dataArea = chartPanel.getScreenDataArea();
         g2.clip(dataArea);
         JFreeChart chart = chartPanel.getChart();
         XYPlot plot = (XYPlot) chart.getPlot();
         ValueAxis xAxis = plot.getDomainAxis();
+        ValueAxis yAxis = plot.getRangeAxis();
         RectangleEdge xAxisEdge = plot.getDomainAxisEdge();
+        RectangleEdge yAxisEdge = plot.getRangeAxisEdge();
         
         // x rectangle for domain axis
-        if(xRectangle!=null){
-            if (xRectangle.isVisible()) {
-                double min = xRectangle.getMinValue();
+        if(rectangle!=null){
+            if (rectangle.isVisible()) {
+            	
+            	// get the values for the x-axis
+                double min = rectangle.getXMinValue();
                 double minx = xAxis.valueToJava2D(min, dataArea, xAxisEdge);
                 
-                double max = xRectangle.getMaxValue();
+                double max = rectangle.getXMaxValue();
                 double maxx = xAxis.valueToJava2D(max, dataArea, xAxisEdge);
                 
-//                log("Java2D positions for min: "+min+" -> "+minx);
-//                log("Java2D positions for max: "+max+" -> "+maxx);
+                // Get the values for the y-axis
+                double miny  = rectangle.getYMinValue();
+                double minyy = yAxis.valueToJava2D(miny, dataArea, yAxisEdge);
+                
+                double maxy  = rectangle.getYMaxValue();
+                double maxyy = yAxis.valueToJava2D(maxy, dataArea, yAxisEdge);
+                
+                
                 
                 if (plot.getOrientation() == PlotOrientation.VERTICAL) {
-                    drawVerticalRectangle(g2, dataArea, minx, maxx, xRectangle);
+                    drawVerticalRectangle(g2, dataArea, minx, maxx, minyy, maxyy, rectangle);
                 }
                 else {
-                    drawHorizontalRectangle(g2, dataArea, minx, maxx, xRectangle);
+                    drawHorizontalRectangle(g2, dataArea, minx, maxx, minyy, maxyy, rectangle);
                 }
             }
         }
-        
-        ValueAxis yAxis = plot.getRangeAxis();
-        RectangleEdge yAxisEdge = plot.getRangeAxisEdge();
-
-        if(yRectangle!=null){
-        	if (yRectangle.isVisible()) {
-        		double min = yRectangle.getMinValue();
-        		double miny = yAxis.valueToJava2D(min, dataArea, yAxisEdge);
-        		
-        		double max = yRectangle.getMaxValue();
-                double maxy = yAxis.valueToJava2D(max, dataArea, yAxisEdge);
-        		
-        		if (plot.getOrientation() == PlotOrientation.VERTICAL) {
-        			drawHorizontalRectangle(g2, dataArea, miny, maxy, yRectangle);
-        		}
-        		else {
-        			drawVerticalRectangle(g2, dataArea, miny, maxy, yRectangle);
-        		}
-        	}
-        }
-
         g2.setClip(savedClip);
     }
 
     /**
-     * Draws a crosshair horizontally across the plot.
+     * Draws the rectangle horizontally across the plot.
      *
      * @param g2  the graphics target.
      * @param dataArea  the data area.
@@ -153,12 +153,13 @@ public class RectangleOverlay extends AbstractOverlay implements Overlay,
      * @param crosshair  the crosshair.
      */
     protected void drawHorizontalRectangle(Graphics2D g2, Rectangle2D dataArea,
-            double miny, double maxy, RectangleOverlayObject rectangle) {
+    		double minx, double maxx, double miny, double maxy, RectangleOverlayObject rectangle) {
 
 //    	log("Drawing horizontal rectangle");
     	
         if (miny >= dataArea.getMinY() && miny <= dataArea.getMaxY()) {
         	
+        	double w = maxx - minx;
         	double h = maxy - miny;
         	
         	Rectangle2D r = new Rectangle2D.Double(dataArea.getMinX(), miny,
@@ -177,7 +178,7 @@ public class RectangleOverlay extends AbstractOverlay implements Overlay,
     }
 
     /**
-     * Draws a crosshair vertically on the plot.
+     * Draw the rectangle vertically on the plot.
      *
      * @param g2  the graphics target.
      * @param dataArea  the data area.
@@ -185,25 +186,21 @@ public class RectangleOverlay extends AbstractOverlay implements Overlay,
      * @param crosshair  the crosshair.
      */
     protected void drawVerticalRectangle(Graphics2D g2, Rectangle2D dataArea,
-            double minx, double maxx, RectangleOverlayObject rectangle) {
-
-//    	log("Drawing vertical rectangle");
+            double minx, double maxx, double miny, double maxy, RectangleOverlayObject rectangle) {
     	
         if (minx >= dataArea.getMinX() && minx <= dataArea.getMaxX()) {
         	
         	double w = maxx - minx;
+        	double h = maxy - miny;
         	
-        	Rectangle2D r = new Rectangle2D.Double(minx, dataArea.getMinY(), w,
-          dataArea.getMaxY());
-        	
-//        	log(r.toString());
-        	
+        	Rectangle2D r = new Rectangle2D.Double(minx, miny, w, h);
+        	        	
         	Paint savedPaint = g2.getPaint();
             Stroke savedStroke = g2.getStroke();
+            
             g2.setPaint(rectangle.getFill());
             g2.setStroke(rectangle.getStroke());
-            g2.fill(r);
-//            g2.draw(r);
+            g2.fill(r);     
             
             g2.setPaint(savedPaint);
             g2.setStroke(savedStroke);
@@ -226,12 +223,12 @@ public class RectangleOverlay extends AbstractOverlay implements Overlay,
             return false;
         }
         RectangleOverlay that = (RectangleOverlay) obj;
-        if (!this.xRectangle.equals(that.xRectangle)) {
+        if (!this.rectangle.equals(that.rectangle)) {
             return false;
         }
-        if (!this.yRectangle.equals(that.yRectangle)) {
-            return false;
-        }
+//        if (!this.yRectangle.equals(that.yRectangle)) {
+//            return false;
+//        }
         return true;
     }
 

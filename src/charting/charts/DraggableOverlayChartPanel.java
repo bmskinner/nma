@@ -314,28 +314,30 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 		boolean isOverLine = false;
 
 		
-		
-		List<Crosshair> crosshairs = ((CrosshairOverlay) overlay).getDomainCrosshairs();
-		// only display a hand if the cursor is over the items
-		for(Crosshair c : crosshairs ){
+		if(overlay instanceof CrosshairOverlay){
+			List<Crosshair> crosshairs = ((CrosshairOverlay) overlay).getDomainCrosshairs();
+			// only display a hand if the cursor is over the items
+			for(Crosshair c : crosshairs ){
 
 
-			// Turn the chart coordinates into panel coordinates
-			double rectangleX = xAxis.valueToJava2D(c.getValue(), dataArea, 
-					RectangleEdge.BOTTOM);
+				// Turn the chart coordinates into panel coordinates
+				double rectangleX = xAxis.valueToJava2D(c.getValue(), dataArea, 
+						RectangleEdge.BOTTOM);
 
 
-			final Rectangle bounds = new Rectangle( (int)rectangleX-2, 
-					(int) dataArea.getMinY(), 
-					(int) 4,   
-					(int) dataArea.getHeight() );
+				final Rectangle bounds = new Rectangle( (int)rectangleX-2, 
+						(int) dataArea.getMinY(), 
+						(int) 4,   
+						(int) dataArea.getHeight() );
 
 
-			if (bounds != null && bounds.contains(x, y)) {
-				isOverLine = true;
-				xCrosshair = (SegmentCrosshair) c;
+				if (bounds != null && bounds.contains(x, y)) {
+					isOverLine = true;
+					xCrosshair = (SegmentCrosshair) c;
+				}
 			}
 		}
+		
 		return isOverLine;
 	}
 	

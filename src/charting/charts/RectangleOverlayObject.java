@@ -14,20 +14,24 @@ public class RectangleOverlayObject {
 	private Paint outline;
 	private boolean isVisible;
 	private PropertyChangeSupport pcs;
-	private double minValue;
-	private double maxValue;
+	private double xMinValue;
+	private double xMaxValue;
+	private double yMinValue;
+	private double yMaxValue;
 		
-	public RectangleOverlayObject(double min, double max){
-		this(min, max, new BasicStroke(1f),  Color.BLACK, new Color(128, 128, 128, 128));
+	public RectangleOverlayObject(double xMin, double xMax, double yMin, double yMax){
+		this(xMin, xMax, yMin, yMax, new BasicStroke(1f),  Color.BLACK, new Color(128, 128, 128, 128));
 	}
 	
-	public RectangleOverlayObject(double min, double max, Stroke stroke, Paint outline){
-		this(min, max, stroke, outline, new Color(100, 100, 100, 128));
+	public RectangleOverlayObject(double xMin, double xMax, double yMin, double yMax, Stroke stroke, Paint outline){
+		this(xMin, xMax, yMin, yMax, stroke, outline, new Color(100, 100, 100, 128));
 	}
 	
-	public RectangleOverlayObject(double min, double max, Stroke stroke, Paint outline, Paint fill){
-		this.minValue = min;
-		this.maxValue = max;
+	public RectangleOverlayObject(double xMin, double xMax, double yMin, double yMax, Stroke stroke, Paint outline, Paint fill){
+		this.xMinValue = xMin;
+		this.xMaxValue = xMax;
+		this.yMinValue = yMin;
+		this.yMaxValue = yMax;
 		this.stroke   = stroke;
 		this.outline  = outline;
 		this.fill     = fill;
@@ -36,29 +40,56 @@ public class RectangleOverlayObject {
 	}
 
 
-	public double getMinValue() {
-		return minValue;
+	public double getXMinValue() {
+		return xMinValue;
 	}
 
-	public void setMinValue(double minValue) {
-		double oldValue = this.minValue;
-		this.minValue = minValue;
-		this.pcs.firePropertyChange("minValue", oldValue, minValue);
+	public void setXMinValue(double minValue) {
+		double oldValue = this.xMinValue;
+		this.xMinValue = minValue;
+		this.pcs.firePropertyChange("minXValue", oldValue, minValue);
 	}
 
-	public double getMaxValue() {
-		return maxValue;
+	public double getXMaxValue() {
+		return xMaxValue;
 	}
 
-	public void setMaxValue(double maxValue) {
-		double oldValue = this.maxValue;
-		this.maxValue = maxValue;
-		this.pcs.firePropertyChange("maxValue", oldValue, maxValue);
+	public void setXMaxValue(double maxValue) {
+		double oldValue = this.xMaxValue;
+		this.xMaxValue = maxValue;
+		this.pcs.firePropertyChange("maxXValue", oldValue, maxValue);
 	}
 	
-	public double getMidValue(){
-		return ((maxValue - minValue) /2) +minValue;
+	public double getXMidValue(){
+		return ((xMaxValue - xMinValue) /2) +xMinValue;
 	}
+	
+	
+	public double getYMinValue() {
+		return yMinValue;
+	}
+
+	public void setYMinValue(double minValue) {
+		double oldValue = this.yMinValue;
+		this.yMinValue = minValue;
+		this.pcs.firePropertyChange("minYValue", oldValue, minValue);
+	}
+
+	public double getYMaxValue() {
+		return yMaxValue;
+	}
+
+	public void setYMaxValue(double maxValue) {
+		double oldValue = this.yMaxValue;
+		this.yMaxValue = maxValue;
+		this.pcs.firePropertyChange("maxYValue", oldValue, maxValue);
+	}
+	
+	public double getYMidValue(){
+		return ((yMaxValue - yMinValue) /2) +yMinValue;
+	}
+	
+	
 
 	public Stroke getStroke() {
 		return stroke;
