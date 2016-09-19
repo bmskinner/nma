@@ -118,11 +118,11 @@ public class RectangleOverlay extends AbstractOverlay implements Overlay,
             if (rectangle.isVisible()) {
             	
             	// get the values for the x-axis
-                double min = rectangle.getXMinValue();
-                double minx = xAxis.valueToJava2D(min, dataArea, xAxisEdge);
+                double minx = rectangle.getXMinValue();
+                double minxx = xAxis.valueToJava2D(minx, dataArea, xAxisEdge);
                 
-                double max = rectangle.getXMaxValue();
-                double maxx = xAxis.valueToJava2D(max, dataArea, xAxisEdge);
+                double maxx = rectangle.getXMaxValue();
+                double maxxx = xAxis.valueToJava2D(maxx, dataArea, xAxisEdge);
                 
                 // Get the values for the y-axis
                 double miny  = rectangle.getYMinValue();
@@ -131,13 +131,20 @@ public class RectangleOverlay extends AbstractOverlay implements Overlay,
                 double maxy  = rectangle.getYMaxValue();
                 double maxyy = yAxis.valueToJava2D(maxy, dataArea, yAxisEdge);
                 
+                double temp = minyy;
                 
+                minyy = minyy > maxyy ? maxyy : minyy;
+                maxyy = temp  > maxyy ? temp  : maxyy;
+                
+                
+                finest("Chart rectangle x: "+minx+" - "+maxx+"  y: "+miny+" - "+maxy);
+                finest("Java2D rectangle x: "+minxx+" - "+maxxx+"  y: "+minyy+" - "+maxyy);
                 
                 if (plot.getOrientation() == PlotOrientation.VERTICAL) {
-                    drawVerticalRectangle(g2, dataArea, minx, maxx, minyy, maxyy, rectangle);
+                    drawVerticalRectangle(g2, dataArea, minxx, maxxx, minyy, maxyy, rectangle);
                 }
                 else {
-                    drawHorizontalRectangle(g2, dataArea, minx, maxx, minyy, maxyy, rectangle);
+                    drawHorizontalRectangle(g2, dataArea, minxx, maxxx, minyy, maxyy, rectangle);
                 }
             }
         }
@@ -162,8 +169,10 @@ public class RectangleOverlay extends AbstractOverlay implements Overlay,
         	double w = maxx - minx;
         	double h = maxy - miny;
         	
-        	Rectangle2D r = new Rectangle2D.Double(dataArea.getMinX(), miny,
-                  dataArea.getMaxX(), h);
+//        	Rectangle2D r = new Rectangle2D.Double(dataArea.getMinX(), miny,
+//                  dataArea.getMaxX(), h);
+        	
+        	Rectangle2D r = new Rectangle2D.Double(minx, miny, w, h);
 
             Paint savedPaint = g2.getPaint();
             Stroke savedStroke = g2.getStroke();
@@ -189,6 +198,8 @@ public class RectangleOverlay extends AbstractOverlay implements Overlay,
             double minx, double maxx, double miny, double maxy, RectangleOverlayObject rectangle) {
     	
         if (minx >= dataArea.getMinX() && minx <= dataArea.getMaxX()) {
+        	
+        	finest("Drawing rectangle");
         	
         	double w = maxx - minx;
         	double h = maxy - miny;

@@ -50,7 +50,12 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	private double rangePct = DEFAULT_RANGE_PCT; // the width of the range box as a percent of the total
 	
 	private static final int DEFAULT_DOMAIN_PCT = 10; // 10% of x-range
-	private static final int DEFAULT_RANGE_PCT  = 100; // 100% of y-range		
+	private static final int DEFAULT_RANGE_PCT  = 100; // 100% of y-range	
+	
+	public static final int X_MIN_EDGE = 0;
+	public static final int X_MAX_EDGE = 1;
+	public static final int Y_MIN_EDGE = 2;
+	public static final int Y_MAX_EDGE = 3;
 
 	public PositionSelectionChartPanel(final JFreeChart chart){
 		super(chart);
@@ -188,25 +193,36 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 
 	    		mouseIsDown = true;
 
-	    		if(cursorIsOverXMinEdge(x, y)){
+	    		if(cursorIsOverRectangleEdge(x, y, X_MIN_EDGE)){
 	    			initMinXThread();
-	    		} else {
-	    			if(cursorIsOverXMaxEdge(x, y)){
-	    				initMaxXThread();
-	    			} else {
-
-	    				if (cursorIsOverRectangle(x, y)) {
-	    					//	    			log("Cursor is over rectangle");
-
-	    					initThread();
-	    				} else {
-
-	    					// Move the rectangle directly over the mouse
-	    					updateRectangleLocation(x, y);
-
-	    				}
-	    			}
+	    			return;
 	    		}
+	    		
+	    		
+	    		if(cursorIsOverRectangleEdge(x, y, X_MAX_EDGE)){
+	    			initMaxXThread();
+	    			return;
+	    		}
+	    				
+	    		if(cursorIsOverRectangleEdge(x, y, Y_MIN_EDGE)){
+//	    			log("Y min edge clicked");
+	    			initMinYThread();
+	    			return;
+	    		}
+	    		if(cursorIsOverRectangleEdge(x, y, Y_MAX_EDGE)){
+//	    			log("Y max edge clicked");
+	    			initMaxYThread();
+	    			return;
+	    		} 
+	
+	    		if (cursorIsOverRectangle(x, y)) {
+	    			initThread();
+	    			return;
+	    		} 
+		
+	    		// Move the rectangle directly over the mouse
+	    		updateRectangleLocation(x, y);
+
 	    	}
 	    }
 	}
@@ -235,23 +251,19 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 				
 		if( ! mouseIsDown){ // Mouse is up
 			
-			if(cursorIsOverXMinEdge(x, y)  || cursorIsOverXMaxEdge(x, y) ){
-				this.setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
-			} else {
-				
-				if(cursorIsOverYMinEdge(x, y)  || cursorIsOverYMaxEdge(x, y) ){
-					this.setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
-				} else {
-
-					if (cursorIsOverRectangle(x, y)) {
-	
-						this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-	
-					} else {
-						this.setCursor(Cursor.getDefaultCursor());
-					}
-				}
+			this.setCursor(Cursor.getDefaultCursor());
+			
+			if (cursorIsOverRectangle(x, y)) {	
+				this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			}
+			
+			// Override rectangle cursor at edges
+			if(cursorIsOverRectangleEdge(x, y, X_MIN_EDGE)  || cursorIsOverRectangleEdge(x, y, X_MAX_EDGE) ){
+				this.setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
+			} 
+			if(cursorIsOverRectangleEdge(x, y, Y_MIN_EDGE)  || cursorIsOverRectangleEdge(x, y, Y_MAX_EDGE) ){
+				this.setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
+			} 
 		}
 			
 	}
@@ -278,20 +290,20 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		
 		
 		// Find the chart values to use as the rectangle x range 
-		double moveMin = xValue - halfXRange;
-		moveMin = moveMin < 0 ? 0 : moveMin; // correct for zero end
+		double xMoveMin = xValue - halfXRange;
+		xMoveMin = xMoveMin < 0 ? 0 : xMoveMin; // correct for zero end
 		
-		moveMin = moveMin > xUpper - domainWidth
+		xMoveMin = xMoveMin > xUpper - domainWidth
 				? xUpper - domainWidth
-				: moveMin; // correct for upper end
+				: xMoveMin; // correct for upper end
 		
-		double moveMax = xValue + halfXRange;
-		moveMax = moveMax < domainWidth ? domainWidth : moveMax; // correct for zero end
-		moveMax = moveMax > xUpper ? xUpper	: moveMax; // correct for upper end
+		double xMoveMax = xValue + halfXRange;
+		xMoveMax = xMoveMax < domainWidth ? domainWidth : xMoveMax; // correct for zero end
+		xMoveMax = xMoveMax > xUpper ? xUpper	: xMoveMax; // correct for upper end
 						
 		// Set the values in chart units
-		xRectangle.setXMinValue(moveMin);
-		xRectangle.setXMaxValue(moveMax);
+		xRectangle.setXMinValue(xMoveMin);
+		xRectangle.setXMaxValue(xMoveMax);
 		
 		// Find the chart values to use as the rectangle y range 
 		double yMoveMin = yValue - halfYRange;
@@ -303,13 +315,13 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		
 		double yMoveMax = yValue + halfYRange;
 		yMoveMax = yMoveMax < rangeWidth ? rangeWidth : yMoveMax; // correct for zero end
-		yMoveMax = yMoveMax > xUpper ? xUpper	: yMoveMax; // correct for upper end
+		yMoveMax = yMoveMax > yUpper ? yUpper	: yMoveMax; // correct for upper end
 						
 		// Set the values in chart units
 		xRectangle.setYMinValue(yMoveMin);
 		xRectangle.setYMaxValue(yMoveMax);
 		
-//		finest("Set rectangle min and max: "+moveMin+" & "+moveMax);
+		finest("Set rectangle x :"+xMoveMin+" - "+xMoveMax+", y: "+yMoveMin+" - "+yMoveMax);
 		fireSignalChangeEvent("UpdatePosition");
 	}
 	
@@ -364,20 +376,23 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		
 
 		if(isMin){
+
 			yValue = yValue < 0 ? 0 : yValue; // correct for zero end
 
 			yValue = yValue >= xRectangle.getYMaxValue() ? xRectangle.getYMaxValue() - (yRange/100) : yValue; // correct for max end
 
 			// Set the values in chart units
-			xRectangle.setXMinValue(yValue);
+//			log("Updating min y: "+yValue);
+			xRectangle.setYMinValue(yValue);
 		} else {
-			
+
 			yValue = yValue >= yUpper ? yUpper : yValue; // correct for upper end
 
 			yValue = yValue <= xRectangle.getYMinValue() ? xRectangle.getYMinValue() + (yRange/100) : yValue; // correct for min end
 
 			// Set the values in chart units
-			xRectangle.setXMaxValue(yValue);
+//			log("Updating max y: "+yValue);
+			xRectangle.setYMaxValue(yValue);
 			
 			
 		}
@@ -449,13 +464,10 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	    if (checkAndMark()) {
 	        new Thread() {
 	            public void run() {
-//	            	IJ.log("Thread start : Running :"+checkRunning()); 
+
 	                do {
-	                	
-	                	/*
-	            		 * Make the overlay under the mouse follow the mouse
-	            		 */
-	                	
+
+	            		 // Make the overlay under the mouse follow the mouse
 	                	int x = MouseInfo.getPointerInfo().getLocation().x - getLocationOnScreen().x;
 	                    
 	                    // Move the box with the mouse
@@ -463,11 +475,8 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 
 	                } while (mouseIsDown);
 	                isRunning = false;
-//	                IJ.log("Thread end : Running :"+checkRunning()); 
 	            }
 	        }.start();
-	    } else {
-//	    	IJ.log("Not starting thread: Running is "+checkRunning());
 	    }
 	}
 	
@@ -496,6 +505,46 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	    }
 	}
 	
+	protected void initMinYThread( ) {
+	    if (checkAndMark()) {
+	        new Thread() {
+	            public void run() {
+
+	                do {
+
+	            		 // Make the overlay under the mouse follow the mouse
+	                	int y = MouseInfo.getPointerInfo().getLocation().y - getLocationOnScreen().y;
+	                    
+	                    // Move the box with the mouse
+	                    updateRangeRectangleSize(y, true);
+
+	                } while (mouseIsDown);
+	                isRunning = false;
+	            }
+	        }.start();
+	    }
+	}
+	
+	protected void initMaxYThread( ) {
+	    if (checkAndMark()) {
+	        new Thread() {
+	            public void run() {
+
+	                do {
+
+	            		 // Make the overlay under the mouse follow the mouse
+	                	int y = MouseInfo.getPointerInfo().getLocation().y - getLocationOnScreen().y;
+	                    
+	                    // Move the box with the mouse
+	                    updateRangeRectangleSize(y, false);
+
+	                } while (mouseIsDown);
+	                isRunning = false;
+	            }
+	        }.start();
+	    }
+	}
+	
 	/**
 	 * Checks if the given cursor position is over the
 	 * rectangle overlay
@@ -519,11 +568,14 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 
 		double rectangleW = rectangleMaxX - rectangleMinX;
 		
-		double rectangleMinY = yAxis.valueToJava2D(xRectangle.getYMinValue(), dataArea, 
+		// Chart coordinates are inverse compared to screen coordinates, so use max here
+		double rectangleMinY = yAxis.valueToJava2D(xRectangle.getYMaxValue(), dataArea, 
 				RectangleEdge.LEFT);
 
-		double rectangleMaxY = yAxis.valueToJava2D(xRectangle.getYMaxValue(), dataArea, 
+		// Chart coordinates are inverse compared to screen coordinates, so use min here
+		double rectangleMaxY = yAxis.valueToJava2D(xRectangle.getYMinValue(), dataArea, 
 				RectangleEdge.LEFT);
+		
 
 		double rectangleH = rectangleMaxY - rectangleMinY;
 
@@ -541,25 +593,68 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		return isOverLine;
 	}
 	
-	public boolean cursorIsOverXMinEdge(int x, int y){
+	public boolean cursorIsOverRectangleEdge(int x, int y, int type){
+		
 		Rectangle2D dataArea = this.getScreenDataArea(); 
 		ValueAxis xAxis = this.getChart().getXYPlot().getDomainAxis();
 		ValueAxis yAxis = this.getChart().getXYPlot().getRangeAxis();
 		boolean isOverEdge = false;
 		
 		// Turn the chart coordinates into screen coordinates
-		double rectangleMinX = xAxis.valueToJava2D(xRectangle.getXMinValue(), dataArea, 
-						RectangleEdge.BOTTOM)-2;
+		double rectangleMinX = 0;
+		double rectangleMaxX = 0;
+		double rectangleMinY = 0;
+		double rectangleMaxY = 0;
 		
-		double rectangleMaxX = xAxis.valueToJava2D(xRectangle.getXMinValue(), dataArea, 
-				RectangleEdge.BOTTOM)+2;
+		switch(type){
 		
-		double rectangleMinY = yAxis.valueToJava2D(xRectangle.getYMinValue(), dataArea, 
-				RectangleEdge.LEFT);
-
-		double rectangleMaxY = yAxis.valueToJava2D(xRectangle.getYMaxValue(), dataArea, 
-				RectangleEdge.LEFT);
-
+		// Remember that the chart y-coordinates are inverter wrt the the screen coordinates,
+		// so min and max y positions are flipped here
+		
+		case X_MIN_EDGE: {
+			rectangleMinX = xAxis.valueToJava2D(xRectangle.getXMinValue(), dataArea, RectangleEdge.BOTTOM);
+			rectangleMaxX = xAxis.valueToJava2D(xRectangle.getXMinValue(), dataArea, RectangleEdge.BOTTOM);
+			rectangleMinY = yAxis.valueToJava2D(xRectangle.getYMaxValue(), dataArea, RectangleEdge.LEFT);
+			rectangleMaxY = yAxis.valueToJava2D(xRectangle.getYMinValue(), dataArea, RectangleEdge.LEFT);
+			rectangleMinX -=2;
+			rectangleMaxX +=2;
+			break;
+		}
+		
+		case Y_MIN_EDGE:{
+			rectangleMinX = xAxis.valueToJava2D(xRectangle.getXMinValue(), dataArea, RectangleEdge.BOTTOM);
+			rectangleMaxX = xAxis.valueToJava2D(xRectangle.getXMaxValue(), dataArea, RectangleEdge.BOTTOM);
+			rectangleMinY = yAxis.valueToJava2D(xRectangle.getYMinValue(), dataArea, RectangleEdge.LEFT);
+			rectangleMaxY = yAxis.valueToJava2D(xRectangle.getYMinValue(), dataArea, RectangleEdge.LEFT);
+			rectangleMinY -=2;
+			rectangleMaxY +=2;
+			break;
+		}
+		
+		case X_MAX_EDGE:{
+			rectangleMinX = xAxis.valueToJava2D(xRectangle.getXMaxValue(), dataArea, RectangleEdge.BOTTOM);
+			rectangleMaxX = xAxis.valueToJava2D(xRectangle.getXMaxValue(), dataArea, RectangleEdge.BOTTOM);
+			rectangleMinY = yAxis.valueToJava2D(xRectangle.getYMaxValue(), dataArea, RectangleEdge.LEFT);
+			rectangleMaxY = yAxis.valueToJava2D(xRectangle.getYMinValue(), dataArea, RectangleEdge.LEFT);
+			rectangleMinX -=2;
+			rectangleMaxX +=2;
+			break;
+		}
+		
+		case Y_MAX_EDGE:{
+			rectangleMinX = xAxis.valueToJava2D(xRectangle.getXMinValue(), dataArea, RectangleEdge.BOTTOM);
+			rectangleMaxX = xAxis.valueToJava2D(xRectangle.getXMaxValue(), dataArea, RectangleEdge.BOTTOM);
+			rectangleMinY = yAxis.valueToJava2D(xRectangle.getYMaxValue(), dataArea, RectangleEdge.LEFT);
+			rectangleMaxY = yAxis.valueToJava2D(xRectangle.getYMaxValue(), dataArea, RectangleEdge.LEFT);
+			rectangleMinY -=2;
+			rectangleMaxY +=2;
+			break;
+		}
+			
+		default: break;
+		}
+		
+		
 		double rectangleW = rectangleMaxX - rectangleMinX;
 		double rectangleH = rectangleMaxY - rectangleMinY;
 		
@@ -572,110 +667,9 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 			isOverEdge = true;
 		}
 		return isOverEdge;
-		
 	}
 	
-	public boolean cursorIsOverYMinEdge(int x, int y){
-		Rectangle2D dataArea = this.getScreenDataArea(); 
-		ValueAxis xAxis = this.getChart().getXYPlot().getDomainAxis();
-		ValueAxis yAxis = this.getChart().getXYPlot().getRangeAxis();
-		boolean isOverEdge = false;
-		
-		// Turn the chart coordinates into screen coordinates
-		double rectangleMinX = xAxis.valueToJava2D(xRectangle.getXMinValue(), dataArea, 
-						RectangleEdge.BOTTOM);
-		
-		double rectangleMaxX = xAxis.valueToJava2D(xRectangle.getXMaxValue(), dataArea, 
-				RectangleEdge.BOTTOM);
-		
-		double rectangleMinY = yAxis.valueToJava2D(xRectangle.getYMinValue(), dataArea, 
-				RectangleEdge.LEFT)-2;
-
-		double rectangleMaxY = yAxis.valueToJava2D(xRectangle.getYMinValue(), dataArea, 
-				RectangleEdge.LEFT)+2;
-
-		double rectangleW = rectangleMaxX - rectangleMinX;
-		double rectangleH = rectangleMaxY - rectangleMinY;
-		
-		final Rectangle bounds = new Rectangle( (int)rectangleMinX, 
-				(int) rectangleMinY, 
-				(int) rectangleW,   
-				(int) rectangleH );
-
-		if (bounds != null && bounds.contains(x, y)) {
-			isOverEdge = true;
-		}
-		return isOverEdge;
-		
-	}
 	
-	public boolean cursorIsOverXMaxEdge(int x, int y){
-		Rectangle2D dataArea = this.getScreenDataArea(); 
-		ValueAxis xAxis = this.getChart().getXYPlot().getDomainAxis();
-		ValueAxis yAxis = this.getChart().getXYPlot().getRangeAxis();
-		boolean isOverEdge = false;
-		
-		// Turn the chart coordinates into screen coordinates
-		double rectangleMinX = xAxis.valueToJava2D(xRectangle.getXMaxValue(), dataArea, 
-						RectangleEdge.BOTTOM)-2;
-		
-		double rectangleMaxX = xAxis.valueToJava2D(xRectangle.getXMaxValue(), dataArea, 
-				RectangleEdge.BOTTOM)+2;
-		
-		double rectangleMinY = yAxis.valueToJava2D(xRectangle.getYMinValue(), dataArea, 
-				RectangleEdge.LEFT);
-
-		double rectangleMaxY = yAxis.valueToJava2D(xRectangle.getYMaxValue(), dataArea, 
-				RectangleEdge.LEFT);
-
-		double rectangleW = rectangleMaxX - rectangleMinX;
-		double rectangleH = rectangleMaxY - rectangleMinY;
-		
-		final Rectangle bounds = new Rectangle( (int)rectangleMinX, 
-				(int) rectangleMinY, 
-				(int) rectangleW,   
-				(int) rectangleH );
-
-		if (bounds != null && bounds.contains(x, y)) {
-			isOverEdge = true;
-		}
-		return isOverEdge;
-		
-	}
-	
-	public boolean cursorIsOverYMaxEdge(int x, int y){
-		Rectangle2D dataArea = this.getScreenDataArea(); 
-		ValueAxis xAxis = this.getChart().getXYPlot().getDomainAxis();
-		ValueAxis yAxis = this.getChart().getXYPlot().getRangeAxis();
-		boolean isOverEdge = false;
-		
-		// Turn the chart coordinates into screen coordinates
-		double rectangleMinX = xAxis.valueToJava2D(xRectangle.getXMaxValue(), dataArea, 
-						RectangleEdge.BOTTOM);
-		
-		double rectangleMaxX = xAxis.valueToJava2D(xRectangle.getXMaxValue(), dataArea, 
-				RectangleEdge.BOTTOM);
-		
-		double rectangleMinY = yAxis.valueToJava2D(xRectangle.getYMinValue(), dataArea, 
-				RectangleEdge.LEFT)-2;
-
-		double rectangleMaxY = yAxis.valueToJava2D(xRectangle.getYMaxValue(), dataArea, 
-				RectangleEdge.LEFT)+2;
-
-		double rectangleW = rectangleMaxX - rectangleMinX;
-		double rectangleH = rectangleMaxY - rectangleMinY;
-		
-		final Rectangle bounds = new Rectangle( (int)rectangleMinX, 
-				(int) rectangleMinY, 
-				(int) rectangleW,   
-				(int) rectangleH );
-
-		if (bounds != null && bounds.contains(x, y)) {
-			isOverEdge = true;
-		}
-		return isOverEdge;
-		
-	}
 	
     protected synchronized void fireSignalChangeEvent(String message) {
     	
