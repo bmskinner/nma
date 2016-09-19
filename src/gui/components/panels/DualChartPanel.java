@@ -50,12 +50,13 @@ import charting.charts.RectangleOverlayObject;
 /**
  * This holds two JFreeChart ChartPanels. One is an overview, with a draggable
  * overlay to choose the region to focus on in the second chart. Is able to fire 
- * BorderTagEvents to registered listeners
+ * BorderTagEvents to registered listeners. Note, this class does not handle layout of the
+ * panels.
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
-public abstract class DualChartPanel extends JPanel implements SignalChangeListener, SegmentEventListener, ChartSetEventListener {
+public abstract class DualChartPanel implements SignalChangeListener, SegmentEventListener, ChartSetEventListener {
 	
 	protected DraggableOverlayChartPanel chartPanel;
 	
@@ -68,17 +69,17 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 		
 		super();
 		
-		this.setLayout(new GridBagLayout());
-		
-		GridBagConstraints c = new GridBagConstraints();
-		c.anchor = GridBagConstraints.EAST;
-		c.gridx = 0;
-		c.gridy = 0;
-		c.gridwidth  = 1; 
-		c.gridheight = 1;
-		c.fill = GridBagConstraints.BOTH;      //reset to default
-		c.weightx = 1.0; 
-		c.weighty = 0.7;
+//		this.setLayout(new GridBagLayout());
+//		
+//		GridBagConstraints c = new GridBagConstraints();
+//		c.anchor = GridBagConstraints.EAST;
+//		c.gridx = 0;
+//		c.gridy = 0;
+//		c.gridwidth  = 1; 
+//		c.gridheight = 1;
+//		c.fill = GridBagConstraints.BOTH;      //reset to default
+//		c.weightx = 1.0; 
+//		c.weighty = 0.7;
 
 		
 		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart();
@@ -88,7 +89,7 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 		chartPanel.setMinimumDrawHeight( 0 );
 		chartPanel.addSignalChangeListener(this);
 		chartPanel.addChartSetEventListener(this);
-		this.add(chartPanel, c);
+//		this.add(chartPanel, c);
 		
 		
 		/*
@@ -102,10 +103,10 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 		rangePanel.addSignalChangeListener(this);
 		rangePanel.addChartSetEventListener(this);
 
-		c.weighty = 0.3;
-		c.gridx = 0;
-		c.gridy = 1;
-		this.add(rangePanel, c);
+//		c.weighty = 0.3;
+//		c.gridx = 0;
+//		c.gridy = 1;
+//		this.add(rangePanel, c);
 		updateChartPanelRange();
 		
 		
@@ -132,13 +133,20 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 	 */
 	protected void updateChartPanelRange(){
 		
-		RectangleOverlayObject ob = rangePanel.getDomainRectangleOverlay();
+		RectangleOverlayObject ob = rangePanel.getRectangleOverlay().getRectangle();
 		
-		double min = ob.getMinValue();
-		double max = ob.getMaxValue();
+		double xmin = ob.getXMinValue();
+		double xmax = ob.getXMaxValue();
 		
-		if(min < max){ // must have a positive range
-			chartPanel.getChart().getXYPlot().getDomainAxis().setRange(min, max);
+		if(xmin < xmax){ // must have a positive range
+			chartPanel.getChart().getXYPlot().getDomainAxis().setRange(xmin, xmax);
+		}
+		
+		double ymin = ob.getYMinValue();
+		double ymax = ob.getYMaxValue();
+		
+		if(ymin < ymax){ // must have a positive range
+			chartPanel.getChart().getXYPlot().getRangeAxis().setRange(ymin, ymax);
 		}
 	}
 	
@@ -150,18 +158,18 @@ public abstract class DualChartPanel extends JPanel implements SignalChangeListe
 	public void setAnalysing(boolean b){
 		if(b){
 			
-			for(Component c : this.getComponents()){
-				c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); //new Cursor(Cursor.WAIT_CURSOR));
-			}
-			
-			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+//			for(Component c : this.getComponents()){
+//				c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); //new Cursor(Cursor.WAIT_CURSOR));
+//			}
+//			
+//			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			
 		} else {
 			
-			for(Component c : this.getComponents()){
-				c.setCursor(Cursor.getDefaultCursor());
-			}
-			this.setCursor(Cursor.getDefaultCursor());
+//			for(Component c : this.getComponents()){
+//				c.setCursor(Cursor.getDefaultCursor());
+//			}
+//			this.setCursor(Cursor.getDefaultCursor());
 		}
 	}
 	

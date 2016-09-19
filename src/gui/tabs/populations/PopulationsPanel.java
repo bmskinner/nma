@@ -323,7 +323,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				
 				int row		= table.rowAtPoint((e.getPoint()));
 				int column 	= table.columnAtPoint(e.getPoint());
-				String populationName = table.getModel().getValueAt(row, 0).toString();
+				String populationName = table.getModel().getValueAt(row, 0)==null 
+						              ? "" 
+						              : table.getModel().getValueAt(row, 0).toString();
 				
 				if( ! populationName.startsWith("ClusterGroup")){ // Only allow datasets to change
 

@@ -23,6 +23,8 @@ package gui.tabs.editing;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -72,9 +74,27 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 		dualPanel = new BorderTagDualChartPanel();
 		dualPanel.addBorderTagEventListener(this);
 		
-		this.add(dualPanel, BorderLayout.CENTER);
-
+		JPanel chartPanel = new JPanel();
+		chartPanel.setLayout(new GridBagLayout());
 		
+		GridBagConstraints c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.EAST;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridwidth  = 1; 
+		c.gridheight = 1;
+		c.fill = GridBagConstraints.BOTH;      //reset to default
+		c.weightx = 1.0; 
+		c.weighty = 0.7;
+		
+		chartPanel.add(dualPanel.getMainPanel(), c);
+		c.weighty = 0.3;
+		c.gridx = 0;
+		c.gridy = 1;
+		chartPanel.add(dualPanel.getRangePanel(), c);
+		
+		this.add(chartPanel, BorderLayout.CENTER);
+			
 
 	}
 	

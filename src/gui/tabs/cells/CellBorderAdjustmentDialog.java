@@ -33,6 +33,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -71,6 +73,7 @@ import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
 import gui.RotationMode;
 import gui.ThreadManager;
+import gui.components.panels.DualChartPanel;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.charts.CoupledProfileOutlineChartPanel.BorderPointEvent;
@@ -96,6 +99,8 @@ public class CellBorderAdjustmentDialog
 	           MouseListener,
 	           MouseMotionListener{
 	
+	
+//	private DualChartPanel dualPanel;
 	private FixedAspectRatioChartPanel panel;
 	
 	private JButton deletePointsBtn;
@@ -165,6 +170,9 @@ public class CellBorderAdjustmentDialog
 			panel.addMouseMotionListener(this);
 			panel.addMouseListener(this);
 			panel.setPopupMenu(null);
+//			panel.setMouseZoomable(false);
+//			panel.setZoomTriggerDistance(Integer.MAX_VALUE);
+			
 
 
 			this.add(panel, BorderLayout.CENTER);
@@ -201,9 +209,7 @@ public class CellBorderAdjustmentDialog
 	
 	@Override
 	protected void updateCharts(Cell cell){
-		
-//		Runnable r = () ->{
-	
+			
 			finer("Making outline chart options");
 			ChartOptions outlineOptions = new ChartOptionsBuilder()
 				.setDatasets(dataset)
@@ -220,9 +226,6 @@ public class CellBorderAdjustmentDialog
 			finer("Updating chart");
 			panel.setChart(outlineChart);
 			panel.restoreAutoBounds();
-//		};
-//		
-//		ThreadManager.getInstance().submit(r);
 	}
 
 	@Override
