@@ -36,7 +36,7 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.charts.FixedAspectRatioChartPanel;
+import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
@@ -121,7 +121,8 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 				finest("Creating chart for segment "+seg.getName());
 				
 				JFreeChart chart = OutlineChartFactory.getInstance().makeEmptyChart();
-				FixedAspectRatioChartPanel chartPanel = new FixedAspectRatioChartPanel(chart);
+				ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
+				chartPanel.setFixedAspectRatio(true);
 				chartPanel.addChartSetEventListener(this);
 				chartPanel.setPreferredSize(preferredSize);
 				chartPanel.setSize(preferredSize);
@@ -180,6 +181,6 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 
 	@Override
 	public void chartSetEventReceived(ChartSetEvent e) {
-		((FixedAspectRatioChartPanel) e.getSource()).restoreAutoBounds();
+		((ExportableChartPanel) e.getSource()).restoreAutoBounds();
 	}
 }

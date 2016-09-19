@@ -28,17 +28,10 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.BorderTagEvent;
 
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.swing.JPanel;
-
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.DraggableOverlayChartPanel;
@@ -55,41 +48,26 @@ import charting.charts.RectangleOverlayObject;
  * @author bms41
  *
  */
-@SuppressWarnings("serial")
-public abstract class DualChartPanel implements SignalChangeListener, SegmentEventListener, ChartSetEventListener {
+public abstract class DualChartPanel 
+	implements SignalChangeListener, 
+			   SegmentEventListener, 
+			   ChartSetEventListener {
 	
-	protected DraggableOverlayChartPanel chartPanel;
+	protected ExportableChartPanel chartPanel;
 	
 	protected PositionSelectionChartPanel rangePanel;
 	
-	List<Object> listeners = new ArrayList<Object>();
+	protected List<Object> listeners = new ArrayList<Object>();
 	
 	public DualChartPanel(){
-		
-		
-		super();
-		
-//		this.setLayout(new GridBagLayout());
-//		
-//		GridBagConstraints c = new GridBagConstraints();
-//		c.anchor = GridBagConstraints.EAST;
-//		c.gridx = 0;
-//		c.gridy = 0;
-//		c.gridwidth  = 1; 
-//		c.gridheight = 1;
-//		c.fill = GridBagConstraints.BOTH;      //reset to default
-//		c.weightx = 1.0; 
-//		c.weighty = 0.7;
-
 		
 		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart();
 		chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
 
 		chartPanel.setMinimumDrawWidth(  0 );
 		chartPanel.setMinimumDrawHeight( 0 );
-		chartPanel.addSignalChangeListener(this);
+//		chartPanel.addSignalChangeListener(this);
 		chartPanel.addChartSetEventListener(this);
-//		this.add(chartPanel, c);
 		
 		
 		/*
@@ -100,16 +78,12 @@ public abstract class DualChartPanel implements SignalChangeListener, SegmentEve
 		 */
 		JFreeChart rangeChart = MorphologyChartFactory.getInstance().makeEmptyChart();
 		rangePanel = new PositionSelectionChartPanel(rangeChart);
+		rangePanel.setFixedAspectRatio(true);
 		rangePanel.addSignalChangeListener(this);
 		rangePanel.addChartSetEventListener(this);
 
-//		c.weighty = 0.3;
-//		c.gridx = 0;
-//		c.gridy = 1;
-//		this.add(rangePanel, c);
 		updateChartPanelRange();
-		
-		
+
 	}
 	
 	
@@ -121,7 +95,16 @@ public abstract class DualChartPanel implements SignalChangeListener, SegmentEve
 		return rangePanel;
 	}
 	
+	public void restoreAutoBounds(){
+		chartPanel.restoreAutoBounds();
+		rangePanel.restoreAutoBounds();
+	}
+	
 	public void setCharts(JFreeChart chart, JFreeChart rangeChart){
+		
+		if(chart == rangeChart){
+			throw new IllegalArgumentException("Charts cannot be the same object");
+		}
 		this.chartPanel.setChart(chart);
 		this.rangePanel.setChart(rangeChart);
 		this.updateChartPanelRange();
@@ -200,31 +183,7 @@ public abstract class DualChartPanel implements SignalChangeListener, SegmentEve
 			((BorderTagEventListener) l).borderTagEventReceived(e);
 		}
 	}
-	
-//	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
-//        listeners.add( l );
-//    }
-//    
-//    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
-//        listeners.remove( l );
-//    }
-//    
-//    protected synchronized void fireSignalChangeEvent(String message) {
-//    	
-//        SignalChangeEvent event = new SignalChangeEvent( this, message, this.getClass().getSimpleName());
-//        Iterator<Object> iterator = listeners.iterator();
-//        while( iterator.hasNext() ) {
-//            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-//        }
-//    }
-//    
-//    protected synchronized void fireSignalChangeEvent(SignalChangeEvent event) {
-//    	Iterator<Object> iterator = listeners.iterator();
-//    	while( iterator.hasNext() ) {
-//    		( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-//    	}
-//    }
-    
+	    
     public synchronized void addSegmentEventListener(SegmentEventListener l){
 		listeners.add(l);
 	}

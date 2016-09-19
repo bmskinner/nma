@@ -18,6 +18,12 @@ public class RectangleOverlayObject {
 	private double xMaxValue;
 	private double yMinValue;
 	private double yMaxValue;
+	
+	public static final int X_MIN_EDGE = 0;
+	public static final int X_MAX_EDGE = 1;
+	public static final int Y_MIN_EDGE = 2;
+	public static final int Y_MAX_EDGE = 3;
+	
 		
 	public RectangleOverlayObject(double xMin, double xMax, double yMin, double yMax){
 		this(xMin, xMax, yMin, yMax, new BasicStroke(1f),  Color.BLACK, new Color(128, 128, 128, 128));

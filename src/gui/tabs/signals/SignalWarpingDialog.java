@@ -48,7 +48,7 @@ import org.jfree.chart.JFreeChart;
 import utility.Constants;
 import components.Cell;
 import charting.charts.ConsensusNucleusChartFactory;
-import charting.charts.FixedAspectRatioChartPanel;
+import charting.charts.ExportableChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -64,7 +64,7 @@ import gui.components.panels.SignalGroupSelectionPanel;
 public class SignalWarpingDialog extends LoadingIconDialog implements PropertyChangeListener, ActionListener{
 	
 	private List<AnalysisDataset> datasets;
-	private FixedAspectRatioChartPanel chartPanel;
+	private ExportableChartPanel chartPanel;
 	
 	private DatasetSelectionPanel datasetBoxOne;
 	private DatasetSelectionPanel datasetBoxTwo;
@@ -105,8 +105,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		finest("Created header");
 		
 		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(datasets.get(0));
-		chartPanel = new FixedAspectRatioChartPanel(chart);
-		
+		chartPanel = new ExportableChartPanel(chart);
+		chartPanel.setFixedAspectRatio(true);
 
 		finest("Created empty chart");
 		this.add(chartPanel, BorderLayout.CENTER);

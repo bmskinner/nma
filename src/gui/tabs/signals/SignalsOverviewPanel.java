@@ -42,7 +42,7 @@ import org.jfree.chart.JFreeChart;
 import analysis.AnalysisDataset;
 import analysis.signals.SignalManager;
 import charting.charts.ConsensusNucleusChartPanel;
-import charting.charts.FixedAspectRatioChartPanel;
+import charting.charts.ExportableChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.SignalTableCell;
@@ -388,7 +388,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 
 	@Override
 	public void chartSetEventReceived(ChartSetEvent e) {
-		((FixedAspectRatioChartPanel) e.getSource()).restoreAutoBounds();
+		((ExportableChartPanel) e.getSource()).restoreAutoBounds();
 		
 	}
 }

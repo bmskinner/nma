@@ -13,7 +13,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
-import charting.charts.FixedAspectRatioChartPanel;
+import charting.charts.ExportableChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -32,7 +32,7 @@ import gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class NuclearOverlaysPanel extends DetailPanel {
 	
-	private FixedAspectRatioChartPanel 	chartPanel; 		// hold the nuclei
+	private ExportableChartPanel 	chartPanel; 		// hold the nuclei
 	private GenericCheckboxPanel checkBoxPanel; // use for aligning nuclei
 	private JButton compareConsensusButton;
 	private JButton makeOverlayChartButton;
@@ -52,17 +52,18 @@ public class NuclearOverlaysPanel extends DetailPanel {
 			
 			JFreeChart chart = getChart(options);
 			
-			chartPanel = new FixedAspectRatioChartPanel(chart);
+			chartPanel = new ExportableChartPanel(chart);
+			chartPanel.setFixedAspectRatio(true);
 			
-			chartPanel.addComponentListener( new ComponentAdapter(){
-
-				@Override
-				public void componentResized(ComponentEvent e) {
-					chartPanel.restoreAutoBounds();
-					
-				}
-				
-			});
+//			chartPanel.addComponentListener( new ComponentAdapter(){
+//
+//				@Override
+//				public void componentResized(ComponentEvent e) {
+//					chartPanel.restoreAutoBounds();
+//					
+//				}
+//				
+//			});
 			
 			this.add(chartPanel, BorderLayout.CENTER);
 			

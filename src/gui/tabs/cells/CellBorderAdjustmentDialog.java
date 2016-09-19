@@ -27,6 +27,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.InputEvent;
@@ -75,9 +77,9 @@ import gui.RotationMode;
 import gui.ThreadManager;
 import gui.components.panels.DualChartPanel;
 import charting.charts.ConsensusNucleusChartFactory;
+import charting.charts.ExportableChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.charts.CoupledProfileOutlineChartPanel.BorderPointEvent;
-import charting.charts.FixedAspectRatioChartPanel;
 import charting.charts.CoupledProfileOutlineChartPanel.BorderPointEventListener;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -100,8 +102,8 @@ public class CellBorderAdjustmentDialog
 	           MouseMotionListener{
 	
 	
-//	private DualChartPanel dualPanel;
-	private FixedAspectRatioChartPanel panel;
+	private DualChartPanel dualPanel;
+//	private FixedAspectRatioChartPanel panel;
 	
 	private JButton deletePointsBtn;
 	
@@ -140,7 +142,7 @@ public class CellBorderAdjustmentDialog
 	public CellBorderAdjustmentDialog(CellViewModel model){
 		super( model );
 		
-		panel.restoreAutoBounds(); // fixed aspect must be set after components are packed		
+//		dualPanel.restoreAutoBounds(); // fixed aspect must be set after components are packed		
 	}
 	
 	@Override
@@ -163,19 +165,47 @@ public class CellBorderAdjustmentDialog
 			
 	
 			JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
-
-			panel = new FixedAspectRatioChartPanel(chart);
-			panel.addBorderPointEventListener(this);
-			panel.addChartMouseListener(this);
-			panel.addMouseMotionListener(this);
-			panel.addMouseListener(this);
-			panel.setPopupMenu(null);
-//			panel.setMouseZoomable(false);
-//			panel.setZoomTriggerDistance(Integer.MAX_VALUE);
+			JFreeChart chart2 = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
 			
+			dualPanel = new CellBorderDualPanel();
+			
+			dualPanel.setCharts(chart, chart2);
+			
+			ExportableChartPanel mainPanel = dualPanel.getMainPanel();
+			mainPanel.setFixedAspectRatio(true);
 
+			mainPanel.addBorderPointEventListener(this);
+			mainPanel.addChartMouseListener(this);
+			mainPanel.addMouseMotionListener(this);
+			mainPanel.addMouseListener(this);
+			mainPanel.setPopupMenu(null);
+			mainPanel.setMouseZoomable(false);
+			mainPanel.setMouseZoomable(false);
+			mainPanel.setRangeZoomable(false);
+			mainPanel.setDomainZoomable(false);	
+			
+			JPanel chartPanel = new JPanel();
+			chartPanel.setLayout(new GridBagLayout());
+			
+			GridBagConstraints c = new GridBagConstraints();
+			c.anchor = GridBagConstraints.EAST;
+			c.gridx = 0;
+			c.gridy = 0;
+			c.gridwidth  = 1; 
+			c.gridheight = 1;
+			c.fill = GridBagConstraints.BOTH;      //reset to default
+			c.weightx = 0.7; 
+			c.weighty = 1.0;
+			
+			chartPanel.add(mainPanel, c);
+			c.weightx = 0.3;
+			c.gridx = 1;
+			c.gridy = 0;
+			chartPanel.add(dualPanel.getRangePanel(), c);
+			
+			this.add(chartPanel, BorderLayout.CENTER);
 
-			this.add(panel, BorderLayout.CENTER);
+//			this.add(panel, BorderLayout.CENTER);
 		} catch (Exception e){
 			fine("Error making UI", e);
 		}
@@ -221,11 +251,12 @@ public class CellBorderAdjustmentDialog
 				.setCellularComponent(cell.getNucleus())
 				.build();
 	
-			finer("Making chart");
+//			finer("Making chart");
 			JFreeChart outlineChart = OutlineChartFactory.getInstance().makeCellOutlineChart(outlineOptions);
-			finer("Updating chart");
-			panel.setChart(outlineChart);
-			panel.restoreAutoBounds();
+			JFreeChart outlineChart2 = OutlineChartFactory.getInstance().makeCellOutlineChart(outlineOptions);
+//			finer("Updating chart");
+			dualPanel.setCharts(outlineChart, outlineChart2);
+			dualPanel.restoreAutoBounds();
 	}
 
 	@Override
@@ -263,11 +294,12 @@ public class CellBorderAdjustmentDialog
 		for(BorderPoint point : workingCell.getNucleus().getBorderList()){
 			
 			if(point.overlapsPerfectly( clickedPoint )){
-				log("Selected point "+point.toString());
+//				log("Selected point "+point.toString());
 				
 				if(selectedPoints.containsKey(point)){
 					XYShapeAnnotation a = selectedPoints.get(point);
-					panel.getChart().getXYPlot().removeAnnotation(a);
+					
+					dualPanel.getMainPanel().getChart().getXYPlot().removeAnnotation(a);
 					selectedPoints.remove(point);		
 				} else {
 
@@ -275,7 +307,7 @@ public class CellBorderAdjustmentDialog
 					Ellipse2D r = new Ellipse2D.Double(point.getX()-0.3,point.getY()-0.3, 0.6, 0.6);
 					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, Color.BLUE);
 					selectedPoints.put(point, a);		
-					panel.getChart().getXYPlot().addAnnotation(a);
+					dualPanel.getMainPanel().getChart().getXYPlot().addAnnotation(a);
 				}
 				break;
 			}
@@ -285,7 +317,7 @@ public class CellBorderAdjustmentDialog
 	private void clearSelectedPoints(){
 
 		for (XYShapeAnnotation a : selectedPoints.values()){
-			panel.getChart().getXYPlot().removeAnnotation(a);
+			dualPanel.getMainPanel().getChart().getXYPlot().removeAnnotation(a);
 	
 		}
 		selectedPoints = new HashMap<BorderPoint, XYShapeAnnotation>();
@@ -302,7 +334,7 @@ public class CellBorderAdjustmentDialog
 				break;
 			}
 		}
-		log("Updating cell");
+//		log("Updating cell");
 		updateWorkingCell(workingCell.getNucleus().getBorderList());
 	}
 	
@@ -358,15 +390,15 @@ public class CellBorderAdjustmentDialog
 		workingCell.getNucleus().setBorderList(newList);
 		workingCell.getNucleus().setBoundingRectangle(boundingRectangle);
 
-		Range domainRange = panel.getChart().getXYPlot().getDomainAxis().getRange();
-		Range  rangeRange = panel.getChart().getXYPlot().getRangeAxis().getRange();
+		Range domainRange = dualPanel.getMainPanel().getChart().getXYPlot().getDomainAxis().getRange();
+		Range  rangeRange = dualPanel.getMainPanel().getChart().getXYPlot().getRangeAxis().getRange();
 		updateCharts(workingCell);
 		clearSelectedPoints();
 		
-		log("Restoring ranges");
+//		log("Restoring ranges");
 		
-		panel.getChart().getXYPlot().getDomainAxis().setRange(domainRange);
-		panel.getChart().getXYPlot().getRangeAxis().setRange(rangeRange);
+		dualPanel.getMainPanel().getChart().getXYPlot().getDomainAxis().setRange(domainRange);
+		dualPanel.getMainPanel().getChart().getXYPlot().getRangeAxis().setRange(rangeRange);
 
 		
 	}
@@ -407,10 +439,10 @@ public class CellBorderAdjustmentDialog
 	    if (canMove) {
 	        int itemIndex = xyItemEntity.getItem();
 	        Point pt = me.getPoint();
-	        XYPlot xy = panel.getChart().getXYPlot();
-	        Rectangle2D dataArea = panel.getChartRenderingInfo()
+	        XYPlot xy = dualPanel.getMainPanel().getChart().getXYPlot();
+	        Rectangle2D dataArea = dualPanel.getMainPanel().getChartRenderingInfo()
 	            .getPlotInfo().getDataArea();
-	        Point2D p = panel.translateScreenToJava2D(pt);
+	        Point2D p = dualPanel.getMainPanel().translateScreenToJava2D(pt);
 	        finalMovePointY = xy.getRangeAxis().java2DToValue(p.getY(),
 	            dataArea, xy.getRangeAxisEdge());
 	        
@@ -489,9 +521,9 @@ public class CellBorderAdjustmentDialog
 		
 		int x = e.getX(); // initialized point whenenver mouse is pressed
 	    int y = e.getY();
-	    EntityCollection entities = panel.getChartRenderingInfo().getEntityCollection();
+	    EntityCollection entities = dualPanel.getMainPanel().getChartRenderingInfo().getEntityCollection();
 	    
-	    ChartMouseEvent cme = new ChartMouseEvent(panel.getChart(), e, entities
+	    ChartMouseEvent cme = new ChartMouseEvent(dualPanel.getMainPanel().getChart(), e, entities
 	        .getEntity(x, y));
 	    
 	    ChartEntity entity = cme.getEntity();
@@ -518,10 +550,10 @@ public class CellBorderAdjustmentDialog
 				selectClickedPoint(clickedPoint);
 			    
 			    
-			    XYPlot xy = panel.getChart().getXYPlot();
-			    Rectangle2D dataArea = panel.getChartRenderingInfo()
+			    XYPlot xy = dualPanel.getMainPanel().getChart().getXYPlot();
+			    Rectangle2D dataArea = dualPanel.getMainPanel().getChartRenderingInfo()
 			        .getPlotInfo().getDataArea();
-			    Point2D p = panel.translateScreenToJava2D(pt);
+			    Point2D p = dualPanel.getMainPanel().translateScreenToJava2D(pt);
 			    
 			    initialMovePointY = xy.getRangeAxis().java2DToValue(p.getY(), dataArea,
 			        xy.getRangeAxisEdge());
@@ -533,7 +565,7 @@ public class CellBorderAdjustmentDialog
 			    finalMovePointX = initialMovePointX;
 			    canMove = true;
 			    
-			    panel.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+			    dualPanel.getMainPanel().setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
 		    
 		} 
 
@@ -562,7 +594,7 @@ public class CellBorderAdjustmentDialog
 
 			initialMovePointY = 0;
 			initialMovePointX = 0;
-			panel.setCursor(Cursor.getDefaultCursor());
+			dualPanel.getMainPanel().setCursor(Cursor.getDefaultCursor());
 		}
 		
 	}

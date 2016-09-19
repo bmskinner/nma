@@ -26,7 +26,6 @@ import analysis.AnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.ExportableChartPanel;
-import charting.charts.FixedAspectRatioChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -43,8 +42,8 @@ import gui.components.panels.DatasetSelectionPanel;
 public class ConsensusCompareDialog extends LoadingIconDialog implements ActionListener, ChangeListener, ItemListener {
 	
 	private List<AnalysisDataset> datasets;
-	private FixedAspectRatioChartPanel chartPanelOne;
-	private FixedAspectRatioChartPanel chartPanelTwo;
+	private ExportableChartPanel chartPanelOne;
+	private ExportableChartPanel chartPanelTwo;
 	
 	private ExportableChartPanel histoOne;
 	private ExportableChartPanel histoTwo;
@@ -97,8 +96,11 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		/*
 		 * Add empty charts
 		 */
-		chartPanelOne = new FixedAspectRatioChartPanel(chart);
-		chartPanelTwo = new FixedAspectRatioChartPanel(chart);
+		chartPanelOne = new ExportableChartPanel(chart);
+		chartPanelTwo = new ExportableChartPanel(chart);
+		chartPanelOne.setFixedAspectRatio(true);
+		chartPanelTwo.setFixedAspectRatio(true);
+		
 		meshPanel.add(chartPanelOne);
 		meshPanel.add(chartPanelTwo);
 		centrePanel.addComponentListener( new ComponentAdapter(){

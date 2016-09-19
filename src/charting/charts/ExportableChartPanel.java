@@ -21,6 +21,7 @@ package charting.charts;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -28,6 +29,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -36,6 +38,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
@@ -54,14 +57,23 @@ import logging.Loggable;
 /**
  * This panel should add a right click menu item for 'Export'
  * This will extract the chart data, and save it to a desired location.
- * It also redraws the chart as the panel is resized for better UX
+ * It also redraws the chart as the panel is resized for better UX.
+ * The flag setFixedAspectRatio can be used to give the chart a fixed aspect
+ * ratio. This replaces the dedicated FixedAspectRatioChartPanel class
  * @author ben
  *
  */
 @SuppressWarnings("serial")
 public class ExportableChartPanel extends ChartPanel implements Loggable {
 		
-	private final List<Object> listeners = new ArrayList<Object>();
+	protected final List<Object> listeners = new ArrayList<Object>();
+	
+	protected boolean isFixedAspectRatio = false;
+	
+	/**
+	 * The default bounds of the chart when empty: both axes run -DEFAULT_AUTO_RANGE to +DEFAULT_AUTO_RANGE
+	 */
+	protected static final double DEFAULT_AUTO_RANGE = 10;
 	
 	public ExportableChartPanel(JFreeChart chart){
 		super(chart);
@@ -93,6 +105,28 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 		
 	}
 	
+	public void setFixedAspectRatio(boolean b){
+		isFixedAspectRatio = b;
+		
+		if(b){
+			this.addComponentListener(new FixedAspectAdapter() 	);
+			
+			restoreAutoBounds();
+		} else {
+			
+			for(ComponentListener l : this.getComponentListeners()){
+				if(l instanceof FixedAspectAdapter){
+					this.removeComponentListener(l);
+				}
+			}
+
+		}
+	}
+	
+	public boolean getFixedAspectRatio(){
+		return isFixedAspectRatio;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.jfree.chart.ChartPanel#setChart(org.jfree.chart.JFreeChart)
 	 * 
@@ -108,6 +142,138 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 			// This occurs during init because setChart is called internally in ChartPanel
 			// Catch and ignore
 		}
+		
+		if(isFixedAspectRatio){
+			restoreAutoBounds();
+		}
+	}
+	
+	@Override
+	public void restoreAutoBounds() {
+		
+		// Only carry out if the flag is set
+		if( ! isFixedAspectRatio){
+			super.restoreAutoBounds();
+			return;
+		}
+		
+		try {
+			XYPlot plot = (XYPlot) this.getChart().getPlot();
+			if(plot.getDatasetCount()==0){
+				return;
+			}
+
+			// Find the aspect ratio of the chart
+			double chartWidth  = this.getWidth();
+			double chartHeight = this.getHeight();
+			
+			if(Double.valueOf(chartWidth)==null || Double.valueOf(chartHeight)==null){
+				plot.getRangeAxis().setRange(-DEFAULT_AUTO_RANGE, DEFAULT_AUTO_RANGE);
+				plot.getDomainAxis().setRange(-DEFAULT_AUTO_RANGE, DEFAULT_AUTO_RANGE);
+				return;
+			}
+			
+			
+			double aspectRatio = chartWidth / chartHeight;
+			
+			finest("Plot w: "+chartWidth+"; h: "+chartHeight+"; asp: "+aspectRatio);
+
+			// start with impossible values, before finding the real chart values
+			double xMin = Double.MAX_VALUE;
+			double yMin = Double.MAX_VALUE;
+			//		
+			double xMax = Double.MIN_VALUE;
+			double yMax = Double.MIN_VALUE;
+
+//			finest("Plot has "+plot.getDatasetCount()+" datasets");
+			
+			// get the max and min values of each dataset in the chart
+			for(int i = 0; i<plot.getDatasetCount();i++){
+				XYDataset dataset = plot.getDataset(i);
+
+				if(dataset==null){
+					finest("Null dataset "+i);
+					continue;
+				}
+				
+				// No values in the dataset, skip
+				if(DatasetUtilities.findMaximumDomainValue(dataset)==null){
+					continue;
+				}
+
+				xMax = DatasetUtilities.findMaximumDomainValue(dataset).doubleValue() > xMax
+						? DatasetUtilities.findMaximumDomainValue(dataset).doubleValue()
+								: xMax;
+
+				xMin = DatasetUtilities.findMinimumDomainValue(dataset).doubleValue() < xMin
+					 ? DatasetUtilities.findMinimumDomainValue(dataset).doubleValue()
+					 : xMin;
+
+				yMax = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue() > yMax
+					 ? DatasetUtilities.findMaximumRangeValue(dataset).doubleValue()
+					 : yMax;
+
+				yMin = DatasetUtilities.findMinimumRangeValue(dataset).doubleValue() < yMin
+					 ? DatasetUtilities.findMinimumRangeValue(dataset).doubleValue()
+					 : yMin;
+			}
+			
+			// If not datasets were found, set defaults
+			if(xMin == Double.MAX_VALUE || yMin == Double.MAX_VALUE){
+				xMin = -DEFAULT_AUTO_RANGE;
+				yMin = -DEFAULT_AUTO_RANGE;
+				xMax = DEFAULT_AUTO_RANGE;
+				yMax = DEFAULT_AUTO_RANGE;
+			}
+			
+
+			// find the ranges they cover
+			double xRange = xMax - xMin;
+			double yRange = yMax - yMin;
+
+			double newXRange = xRange;
+			double newYRange = yRange;
+
+			// test the aspect ratio
+			if( (xRange / yRange) > aspectRatio){
+				// width is not enough
+				newXRange = xRange * 1.1;
+				newYRange = newXRange / aspectRatio;
+			} else {
+				// height is not enough
+				newYRange = yRange * 1.1; // add some extra x space
+				newXRange = newYRange * aspectRatio; // get the new Y range
+			}
+
+
+			// with the new ranges, find the best min and max values to use
+			double xDiff = (newXRange - xRange)/2;
+			double yDiff = (newYRange - yRange)/2;
+
+			xMin -= xDiff;
+			xMax += xDiff;
+			yMin -= yDiff;
+			yMax += yDiff;
+			
+			if(yMin>=yMax){
+				finer("Min and max are equal");
+				xMin = -DEFAULT_AUTO_RANGE;
+				yMin = -DEFAULT_AUTO_RANGE;
+				xMax = DEFAULT_AUTO_RANGE;
+				yMax = DEFAULT_AUTO_RANGE;
+			} 
+			
+			plot.getRangeAxis().setRange(yMin, yMax);
+			plot.getDomainAxis().setRange(xMin, xMax);
+			
+		
+			
+
+		} catch (Exception e){
+			log(Level.FINER,"Error restoring auto bounds, falling back to default", e);
+			super.restoreAutoBounds();
+		}
+	
 	}
 		
 	private String getData(){
@@ -227,42 +393,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 		return builder.toString();
 		
 	}
-	
-	// Invoke when dealing  with an XY chart
-//	private String getXYCollectionData() throws ClassCastException {
-//		
-//		StringBuilder builder = new StringBuilder();
-//		
-//		DecimalFormat df = new DecimalFormat("#0.00");
-//
-//		XYPlot plot = this.getChart().getXYPlot();
-//		
-//		for(int dataset=0; dataset<plot.getDatasetCount();dataset++){
-//
-//			XYSeriesCollection ds = (XYSeriesCollection) plot.getDataset(dataset);
-//			
-//			for(int series=0; series<ds.getSeriesCount();series++){
-//
-//				String seriesName = ds.getSeriesKey(series).toString();
-//				builder.append(seriesName+":"+System.getProperty("line.separator"));
-//
-//				for(int i=0; i<ds.getItemCount(series); i++){
-//
-//
-//					double x= ds.getXValue(series, i);
-//					double y = ds.getYValue(series, i);
-//
-//					builder.append("\t"+ df.format(x) +"\t"+ df.format(y) +System.getProperty("line.separator"));
-//				}
-//			}
-//			builder.append(System.getProperty("line.separator"));
-//		}
-//		
-//		
-//		return builder.toString();
-//		
-//	}
-	
+		
 	private String getBoxplotData()throws ClassCastException {
 
 		CategoryPlot plot = this.getChart().getCategoryPlot();
@@ -369,5 +500,12 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 	public synchronized void removeBorderPointEventListener( BorderPointEventListener l ) {
     	listeners.remove( l );
     }
+	
+	public class FixedAspectAdapter extends ComponentAdapter {
+		@Override
+		public void componentResized(ComponentEvent e) {
+			restoreAutoBounds();
+		}
+	}
 
 }

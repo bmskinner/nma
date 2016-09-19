@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.ConsensusNucleusChartFactory;
-import charting.charts.FixedAspectRatioChartPanel;
+import charting.charts.ExportableChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -30,7 +30,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 	
 	private RotationSelectionSettingsPanel rotationPanel;
 
-	private FixedAspectRatioChartPanel panel;
+	private ExportableChartPanel panel;
 	
 	private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus");
 	private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp to consensus");
@@ -73,7 +73,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		
 		this.add(settingsPanel, BorderLayout.NORTH);
 		
-		panel = new FixedAspectRatioChartPanel(chart);
+		panel = new ExportableChartPanel(chart);
+		panel.setFixedAspectRatio(true);
 
 		panel.addChartSetEventListener(this);
 		

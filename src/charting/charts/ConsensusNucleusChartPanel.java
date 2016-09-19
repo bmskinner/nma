@@ -32,7 +32,7 @@ import javax.swing.JPopupMenu;
 import org.jfree.chart.JFreeChart;
 
 @SuppressWarnings("serial")
-public class ConsensusNucleusChartPanel extends FixedAspectRatioChartPanel {
+public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
 	public static final String SOURCE_COMPONENT = "ConsensusNucleusChartPanel"; 
 	private List<Object> listeners = new ArrayList<Object>();
@@ -43,6 +43,7 @@ public class ConsensusNucleusChartPanel extends FixedAspectRatioChartPanel {
 		JPopupMenu popup = createPopupMenu();
 		this.setPopupMenu(popup);
 		this.validate();
+		this.setFixedAspectRatio(true);
 
 	}
 		

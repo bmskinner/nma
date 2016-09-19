@@ -21,23 +21,29 @@ package gui.components.panels;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.charts.DraggableOverlayChartPanel;
+import charting.charts.MorphologyChartFactory;
+import charting.charts.PositionSelectionChartPanel;
 import components.generic.SegmentedProfile;
 
-@SuppressWarnings("serial")
 public class SegmentationDualChartPanel extends DualChartPanel{
 	
 	public SegmentationDualChartPanel(){
-		super();		
+		super();
+		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart();
+		chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
+		((PositionSelectionChartPanel) chartPanel).addSignalChangeListener(this);
 	}
 	
 	public void setProfile(SegmentedProfile profile, boolean normalised){
-		chartPanel.setProfile(profile, normalised);
+		
+		((DraggableOverlayChartPanel) chartPanel).setProfile(profile, normalised);
 		this.updateChartPanelRange();
 	}
 	
 	public void setCharts(JFreeChart chart, SegmentedProfile profile, boolean normalised, JFreeChart rangeChart){
 		
-		chartPanel.setChart(chart, profile, normalised);
+		((DraggableOverlayChartPanel) chartPanel).setChart(chart, profile, normalised);
 		rangePanel.setChart(rangeChart);
 		this.updateChartPanelRange();
 	}

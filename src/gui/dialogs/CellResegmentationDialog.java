@@ -57,7 +57,6 @@ import charting.charts.CoupledProfileOutlineChartPanel;
 import charting.charts.CoupledProfileOutlineChartPanel.BorderPointEvent;
 import charting.charts.CoupledProfileOutlineChartPanel.BorderPointEventListener;
 import charting.charts.ExportableChartPanel;
-import charting.charts.FixedAspectRatioChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
@@ -130,8 +129,9 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
 			JFreeChart outlineChart = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
 
-			ChartPanel profile = new ExportableChartPanel(MorphologyChartFactory.getInstance().makeEmptyChart(ProfileType.ANGLE));
-			ChartPanel outline = new FixedAspectRatioChartPanel(outlineChart);
+			ExportableChartPanel profile = new ExportableChartPanel(MorphologyChartFactory.getInstance().makeEmptyChart(ProfileType.ANGLE));
+			ExportableChartPanel outline = new ExportableChartPanel(outlineChart);
+			outline.setFixedAspectRatio(true);
 
 			panel = new CoupledProfileOutlineChartPanel(profile, outline, null);
 			panel.addBorderPointEventListener(this);
