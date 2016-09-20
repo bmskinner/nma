@@ -21,8 +21,18 @@ public final class DatasetListManager implements Loggable {
 	
 	private static DatasetListManager instance = null;
 	
+	/**
+	 * The list of root datasets currently loaded. The order of datasets
+	 * within the list can be used to determine the order of root datasets within the
+	 * populations panel.
+	 */
 	private final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	
+	/**
+	 * This map stores the UUID of a dataset as a key against the hashcode of the dataset.
+	 * This is used to compare actual and saved hashcodes, and detect whether a dataset has changed
+	 * since the last check.
+	 */
 	private final Map<UUID, Integer> map = new HashMap<UUID, Integer>(); // store the hash for a dataset id
 	
 	
@@ -39,8 +49,21 @@ public final class DatasetListManager implements Loggable {
 		return instance;
 	}
 	
-	public Set<AnalysisDataset> getRootDatasets(){
-		return new HashSet<AnalysisDataset>(list);
+	public List<AnalysisDataset> getRootDatasets(){
+		return new ArrayList<AnalysisDataset>(list);
+	}
+	
+	/**
+	 * Get the index of the given dataset in the list. Returns
+	 * -1 if the dataset is not root, not found, or null.
+	 * @param d
+	 * @return the index, or -1
+	 */
+	public int getPosition(AnalysisDataset d){
+		if(d.isRoot()){
+			return list.indexOf(d);
+		}
+		return -1;
 	}
 	
 	public boolean hasDatasets(){
@@ -141,15 +164,29 @@ public final class DatasetListManager implements Loggable {
 
 	}
 	
+	
+	/**
+	 * Get the number of datasets loaded
+	 * @return
+	 */
 	public int count(){
 		return map.size();
 	}
 	
+	/**
+	 * Close all datasets without saving and clear them from memory
+	 */
 	public void clear(){
 		list.clear();
 		map.clear();
 	}
 	
+	/**
+	 * Check if the stored hashcode for the given dataset is different
+	 * to the actual dataset hashcode
+	 * @param d
+	 * @return true if the hashcode is different to the stored value 
+	 */
 	public boolean hashCodeChanged(AnalysisDataset d){
 		if(d.isRoot()){
 			
@@ -178,12 +215,22 @@ public final class DatasetListManager implements Loggable {
 		return false;
 	}
 	
+	/**
+	 * Update the stored hashcode for the given dataset to its 
+	 * current actual value
+	 * @param d
+	 */
 	public void updateHashCode(AnalysisDataset d){
 		if(d.isRoot()){
 			map.put(d.getUUID(), d.hashCode());
 		}
 	}
 	
+	/**
+	 * Update the stored hashcode for all root datasets to their 
+	 * current actual values
+	 * @param d
+	 */
 	public void updateHashCodes(){
 		for(AnalysisDataset d : list){
 			updateHashCode(d);

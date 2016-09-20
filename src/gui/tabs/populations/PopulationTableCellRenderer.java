@@ -3,12 +3,18 @@ package gui.tabs.populations;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import analysis.AnalysisDataset;
 import gui.components.ColourSelecter;
 import logging.Loggable;
 
+/**
+ * @author ben
+ *
+ */
 @SuppressWarnings("serial")
 public /**
  * Allows for cell background to be coloured based on position in the population list
@@ -16,11 +22,16 @@ public /**
 */
 class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer implements Loggable {
 
-	List<Integer> indexList = new ArrayList<Integer>(0);
+	
+	/**
+	 * Stores the row index of a cell that was selected as a key, and the
+	 * order in which it was selected as a value
+	 */
+	Map<Integer, Integer> indexList = new HashMap<Integer, Integer>(0);
 	
 	
 	
-	public PopulationTableCellRenderer(List<Integer> list){
+	public PopulationTableCellRenderer(Map<Integer, Integer> list){
 		super();
 		this.indexList = list;
 	}
@@ -29,7 +40,7 @@ class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRend
 		super();
 	}
 	
-	public void update(List<Integer> list){
+	public void update(Map<Integer, Integer> list){
 		indexList = list;
 	}
 
@@ -39,7 +50,7 @@ class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRend
 
        l.setBackground(Color.WHITE); // only colour the selected rows
        
-       if (indexList.contains(row)) {
+       if (indexList.containsKey(row)) {
     	  
        	    	   
     	   // check if the row is a cluster group
@@ -52,7 +63,7 @@ class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRend
     		   // if a preferred colour is specified, use it, otherwise go for defaults
     		   Color colour = dataset.hasDatasetColour()
     				        ? dataset.getDatasetColour()
-    				        : ColourSelecter.getColor(indexList.indexOf(row));
+    				        : ColourSelecter.getColor(indexList.get(row));
     						
 
     		   l.setBackground(colour);
