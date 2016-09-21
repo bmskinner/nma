@@ -36,6 +36,7 @@ import javax.swing.JPopupMenu;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
@@ -68,7 +69,22 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 		
 	protected final List<Object> listeners = new ArrayList<Object>();
 	
+	/**
+	 * Control if the axis scales should be set to maintain aspect ratio
+	 */
 	protected boolean isFixedAspectRatio = false;
+	
+	
+	/**
+	 * Used for subclasses with mouse listeners
+	 */
+	protected volatile boolean mouseIsDown = false;
+	
+	/**
+	 * Used for subclasses with mouse listeners
+	 */
+	protected volatile boolean isRunning = false;
+	
 	
 	/**
 	 * The default bounds of the chart when empty: both axes run -DEFAULT_AUTO_RANGE to +DEFAULT_AUTO_RANGE

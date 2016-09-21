@@ -231,6 +231,8 @@ public class CellBorderAdjustmentDialog
 				.setRotationMode(RotationMode.ACTUAL)
 				.setShowAnnotations(false)
 				.setInvertYAxis( true ) // only invert for actual
+				.setShowXAxis(false)
+				.setShowYAxis(false)
 				.setShowPoints(true)
 				.setCellularComponent(cell.getNucleus())
 				.build();

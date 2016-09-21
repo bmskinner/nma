@@ -117,6 +117,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			plot.getRangeAxis().setRange(0,360);
 			plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
 		}
+		
 		return chart;
 	}
 	
@@ -242,7 +243,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			}
 		}
 		
-				
+		applyAxisOptions(chart, options);
 		return chart;
 	}
 		
@@ -318,6 +319,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		} else {
 			chart = makeProfileChart(null, 100, options.getType());
 		}
+		
+		applyAxisOptions(chart, options);
 		return chart;
 	}
 	
@@ -330,6 +333,14 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 */	
 	public JFreeChart makeMultiSegmentedProfileChart(ChartOptions options)  {
 		
+		JFreeChart chart = this.makeEmptyChart(options.getType());
+		
+		if( ! options.hasDatasets()){
+			
+			applyAxisOptions(chart, options);
+			return chart;
+		}
+		
 		// Set the length to 100 if normalised or multiple datasets.
 		// Otherwise use the median profile length
 		int length = options.isNormalised() || options.isMultipleDatasets()
@@ -341,22 +352,12 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				   		.size();
 				
 		
-		JFreeChart chart = this.makeEmptyChart(options.getType());
+		
 		XYPlot plot = chart.getXYPlot();
 		
-//		JFreeChart chart = ChartFactory.createXYLineChart(null,
-//				                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
-//				                false);
-////		JFreeChart chart = makeProfileChart(null, length, list.get(0).getSwatch());
-//		
-//		XYPlot plot = chart.getXYPlot();
 		
 		// the default is to use an x range of 100, for a normalised chart
 		plot.getDomainAxis().setRange(0,length);
-
-//		// always set the y range to 360 degrees
-//		plot.getRangeAxis().setRange(0,360);
-//		plot.setBackgroundPaint(Color.WHITE);
 
 		// the 180 degree line
 		plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
@@ -445,6 +446,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				}
 			}
 		}
+		
+		applyAxisOptions(chart, options);
 		return chart;
 	}
 	
@@ -502,7 +505,6 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			} 
 
 		}	
-
 		return chart;
 	}
 	
@@ -612,7 +614,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		}
 		
 		
-		
+		applyAxisOptions(chart, options);
 		return chart;
 	}
 	
@@ -689,7 +691,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				fine("Missing data in variability chart");
 			}
 		}
-		
+		applyAxisOptions(chart, options);
 		return chart;
 	}
 	
@@ -722,6 +724,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			
 			plot.getRenderer().setSeriesPaint(j, profileColour);
 		}	
+		applyAxisOptions(chart, options);
 		return chart;
 	}
 		
@@ -810,6 +813,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				plot.getRenderer(1).setSeriesPaint(j, profileColour);
 			}
 		}
+		applyAxisOptions(chart, options);
 		finest("Created segment position chart");
 		return chart;
 		
@@ -898,7 +902,6 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			iteration++;
 			
 		}
-
 		return chart;
 	}
 	
@@ -929,6 +932,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
 			plot.getRenderer().setSeriesVisibleInLegend(i, false);
 		}
+		applyAxisOptions(chart, options);
 		return chart;
 	}
 		
@@ -978,6 +982,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 					plot.addAnnotation(annotation);
 					index++;
 		}
+		applyAxisOptions(chart, options);
 		return chart;
 	}
 	
@@ -1049,7 +1054,6 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.getDomainAxis().setRange(0, 100);
 		plot.getRangeAxis().setRange(0, 1);
-		
 		return chart;
 	}
 	

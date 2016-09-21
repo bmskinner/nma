@@ -27,11 +27,14 @@ import logging.Loggable;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYTextAnnotation;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 
 import charting.ChartComponents;
+import charting.options.ChartOptions;
 import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 
@@ -136,6 +139,35 @@ public abstract class AbstractChartFactory implements Loggable {
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		return chart;
+	}
+	
+	/**
+	 * Set basic parameters such as: axes inverted, axes visible
+	 * @param chart
+	 * @param options
+	 */
+	protected void applyAxisOptions(JFreeChart chart, ChartOptions options){
+		
+		Plot plot = chart.getPlot();
+
+		if(plot instanceof XYPlot){
+			
+			XYPlot xy = chart.getXYPlot();
+			xy.getDomainAxis().setVisible(options.isShowXAxis());
+			xy.getRangeAxis().setVisible(options.isShowYAxis());
+			xy.getDomainAxis().setInverted(options.isInvertXAxis());
+			xy.getRangeAxis().setInverted(options.isInvertYAxis());
+
+			
+		}
+		
+		if(plot instanceof CategoryPlot){
+			CategoryPlot cat = chart.getCategoryPlot();
+			cat.getDomainAxis().setVisible(options.isShowXAxis());
+			cat.getRangeAxis().setVisible(options.isShowYAxis());
+			cat.getRangeAxis().setInverted(options.isInvertYAxis());
+			
+		}
 	}
 		
 }

@@ -44,6 +44,7 @@ import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import gui.BorderTagEventListener;
 import gui.DatasetEvent;
+import gui.GlobalOptions;
 import gui.InterfaceEvent;
 import gui.components.BorderTagEvent;
 import gui.components.ColourSelecter.ColourSwatch;
@@ -133,9 +134,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 	protected void updateSingle() {
 		
 		setButtonsEnabled(true);
-		
-		ColourSwatch swatch = activeDataset().getSwatch();
-		
+				
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setNormalised(false)
@@ -144,8 +143,10 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 			.setShowMarkers(true)
 			.setProfileType( ProfileType.ANGLE)
 			.setShowPoints(true)
-			.setSwatch(swatch)
+			.setSwatch(GlobalOptions.getInstance().getSwatch())
 			.setShowAnnotations(false)
+			.setShowXAxis(false)
+			.setShowYAxis(false)
 			.setTarget(dualPanel.getMainPanel())
 			.build();
 		
@@ -164,9 +165,11 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 			.setTag(BorderTagObject.REFERENCE_POINT)
 			.setShowMarkers(true)
 			.setProfileType( ProfileType.ANGLE)
-			.setSwatch(swatch)
+			.setSwatch(GlobalOptions.getInstance().getSwatch())
 			.setShowPoints(false)
 			.setShowAnnotations(false)
+			.setShowXAxis(false)
+			.setShowYAxis(false)
 			.setTarget(dualPanel.getRangePanel())
 			.build();
 		

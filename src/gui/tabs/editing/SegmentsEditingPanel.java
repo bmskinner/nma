@@ -19,6 +19,7 @@
 package gui.tabs.editing;
 
 import gui.DatasetEvent;
+import gui.GlobalOptions;
 import gui.SegmentEvent;
 import gui.SegmentEventListener;
 import gui.InterfaceEvent.InterfaceMethod;
@@ -108,8 +109,6 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			chartPanel.add(dualPanel.getRangePanel(), c);
 			
 			this.add(chartPanel, BorderLayout.CENTER);
-			
-//			this.add(dualPanel, BorderLayout.CENTER);
 
 			
 			buttonsPanel = makeButtonPanel();
@@ -179,8 +178,10 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				.setTag(BorderTagObject.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType( ProfileType.ANGLE)
-				.setSwatch(activeDataset().getSwatch())
+				.setSwatch(GlobalOptions.getInstance().getSwatch())
 				.setShowPoints(true)
+				.setShowXAxis(false)
+				.setShowYAxis(false)
 				.setTarget(dualPanel.getMainPanel())
 				.build();
 			
@@ -206,8 +207,10 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				.setTag(BorderTagObject.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType( ProfileType.ANGLE)
-				.setSwatch(activeDataset().getSwatch())
+				.setSwatch(GlobalOptions.getInstance().getSwatch())
 				.setShowPoints(false)
+				.setShowXAxis(false)
+				.setShowYAxis(false)
 				.setTarget(dualPanel.getRangePanel())
 				.build();
 			
@@ -223,8 +226,25 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		}
 		
 		@Override
-		protected void updateNull() {			
-			dualPanel.setCharts(MorphologyChartFactory.getInstance().makeEmptyChart(),MorphologyChartFactory.getInstance().makeEmptyChart());
+		protected void updateNull() {	
+			
+			ChartOptions options = new ChartOptionsBuilder()
+				.setProfileType(ProfileType.ANGLE)
+				.setShowXAxis(false)
+				.setShowYAxis(false)
+				.build();
+			
+			
+			JFreeChart mainChart = getChart(options);
+			
+			ChartOptions rangeOptions = new ChartOptionsBuilder()
+				.setShowXAxis(false)
+				.setShowYAxis(false)
+				.build();
+		
+			JFreeChart rangeChart = getChart(rangeOptions);
+			
+			dualPanel.setCharts(mainChart, rangeChart);
 			setButtonsEnabled(false);
 		}
 		

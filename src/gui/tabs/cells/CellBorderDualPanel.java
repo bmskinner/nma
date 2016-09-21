@@ -29,10 +29,6 @@ public class CellBorderDualPanel extends DualChartPanel {
 		super();
 
 		chartPanel.setFixedAspectRatio(true);
-
-//		chartPanel.setDomainZoomable(false); // zoom is controlled only by the range panel
-//		chartPanel.setRangeZoomable(false);	
-//		chartPanel.setMouseZoomable(false);
 				
 		rangePanel.setRangePct(DEFAULT_OVERLAY_PERCENT);
 		rangePanel.setDomainPct(DEFAULT_OVERLAY_PERCENT);

@@ -19,7 +19,11 @@
 package charting.charts;
 
 import gui.SegmentEvent;
+import gui.SegmentEventListener;
+import gui.SignalChangeEvent;
+import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
+
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.MouseInfo;
@@ -29,11 +33,14 @@ import java.awt.Stroke;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.panel.CrosshairOverlay;
+import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
@@ -45,12 +52,13 @@ import components.nuclear.NucleusBorderSegment;
 /**
  * This chart panel provides a list of draggable markers as
  * crosshair overlays, corresponding to the start positions of
- * segments in a segmented profile
+ * segments in a segmented profile. A dragged segment fires a 
+ * SegmentEvent to registered listeners
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
-public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
+public class DraggableOverlayChartPanel extends ExportableChartPanel {
 		
 	private SegmentedProfile profile = null;
 
@@ -59,6 +67,8 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 	protected Crosshair xCrosshair;
 	
 	private boolean isChartNormalised = false;
+	
+	Overlay overlay = null;
 		
 
 	public DraggableOverlayChartPanel(final JFreeChart chart, final SegmentedProfile profile, boolean normalised){
@@ -299,6 +309,34 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 	    }
 	}
 	
+	public synchronized void addSegmentEventListener(SegmentEventListener l){
+		listeners.add(l);
+	}
+
+	public synchronized void removeSegmentEventListener(SegmentEventListener l){
+		listeners.remove(l);
+	}
+
+	protected synchronized void fireSegmentEvent(SegmentEvent e){
+		for(Object l : listeners){
+			((SegmentEventListener) l).segmentEventReceived(e);
+		}
+	}
+	
+	/**
+	 * Fire a segment event
+	 * @param id the segment ID
+	 * @param index the new index
+	 * @param type the type of change to make
+	 */
+	protected synchronized void fireSegmentEvent(UUID id, int index, int type){
+		SegmentEvent e = new SegmentEvent(this, id, index, type);
+		
+		for(Object l : listeners){
+			((SegmentEventListener) l).segmentEventReceived(e);
+		}
+	}
+
 	/**
 	 * Checks if the given cursor position is over one of the 
 	 * crosshair overlays for the chart
@@ -352,6 +390,23 @@ public class DraggableOverlayChartPanel extends PositionSelectionChartPanel {
 		public NucleusBorderSegment getSegment() {
 			return segment;
 		}
+    }
+    
+    protected synchronized void fireSignalChangeEvent(String message) {
+    	
+        SignalChangeEvent event = new SignalChangeEvent( this, message, this.getClass().getSimpleName());
+        Iterator<Object> iterator = listeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
+        }
+    }
+
+    public synchronized void addSignalChangeListener( SignalChangeListener l ) {
+        listeners.add( l );
+    }
+    
+    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
+        listeners.remove( l );
     }
 
 }

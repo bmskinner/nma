@@ -1,7 +1,5 @@
 package charting.charts;
 
-import gui.SegmentEvent;
-import gui.SegmentEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 
@@ -11,18 +9,14 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
-import java.util.UUID;
-
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.event.OverlayChangeEvent;
-import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
 
 
 /**
- * This class takes a chart and adds a single draggable domain
+ * This class takes a chart and adds a single draggable
  * rectangle overlay. The overlay moves with the mouse when dragged,
  * and fires a SignalChangeEvent when the overlay is released requesting that
  * listeners update positions based on the new rectangle location.
@@ -31,15 +25,9 @@ import org.jfree.ui.RectangleEdge;
  */
 @SuppressWarnings("serial")
 public class PositionSelectionChartPanel extends ExportableChartPanel {
-		
-	protected Overlay overlay = null;
+	
 	protected RectangleOverlayObject overlayRectangle = null;
 
-	
-	protected volatile boolean mouseIsDown = false;
-	
-	protected volatile boolean isRunning = false;
-	
 	private double domainWidth;
 	private double domainPct = DEFAULT_DOMAIN_PCT;
 	
@@ -63,14 +51,12 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		updateRangeWidth();
 
 		
-		overlayRectangle = new RectangleOverlayObject(0, domainWidth, 0, rangeWidth);
-		overlay          = new RectangleOverlay(overlayRectangle);
-		
-		this.addOverlay(overlay);
+		overlayRectangle = new RectangleOverlayObject(0, domainWidth, 0, rangeWidth);		
+		this.addOverlay(new RectangleOverlay(overlayRectangle));
 	}
 		
-	public RectangleOverlay getRectangleOverlay(){
-		return (RectangleOverlay) overlay;
+	public RectangleOverlayObject getOverlayRectangle(){
+		return overlayRectangle;
 	}
 	
 	@Override
@@ -186,11 +172,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		
 		final int x = e.getX(); // These are pixel coordinates relative to the ChartPanel upper left
 		final int y = e.getY();
-		
-		
-//		log("Click at "+x+", "+y);
-		
-//		getRectangleOverlayPosition(x, y);
+
 		
 	    if (e.getButton() == MouseEvent.BUTTON1) {
 
@@ -199,25 +181,25 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	    		mouseIsDown = true;
 
 	    		if(rectangleOverlayEdgeContainsPoint(x, y, RectangleOverlayObject.X_MIN_EDGE)){
-	    			log("Left edge clicked");
+//	    			log("Left edge clicked");
 	    			initMinXThread();
 	    			return;
 	    		}
 	    		
 	    		
 	    		if(rectangleOverlayEdgeContainsPoint(x, y, RectangleOverlayObject.X_MAX_EDGE)){
-	    			log("Right edge clicked");
+//	    			log("Right edge clicked");
 	    			initMaxXThread();
 	    			return;
 	    		}
 	    				
 	    		if(rectangleOverlayEdgeContainsPoint(x, y, RectangleOverlayObject.Y_MIN_EDGE)){
-	    			log("Bottom edge clicked");
+//	    			log("Bottom edge clicked");
 	    			initMinYThread();
 	    			return;
 	    		}
 	    		if(rectangleOverlayEdgeContainsPoint(x, y, RectangleOverlayObject.Y_MAX_EDGE)){
-	    			log("Top edge clicked");
+//	    			log("Top edge clicked");
 	    			initMaxYThread();
 	    			return;
 	    		} 
@@ -787,33 +769,6 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
     public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
         listeners.remove( l );
     }
-    
-    public synchronized void addSegmentEventListener(SegmentEventListener l){
-		listeners.add(l);
-	}
-	
-	public synchronized void removeSegmentEventListener(SegmentEventListener l){
-		listeners.remove(l);
-	}
-	
-	protected synchronized void fireSegmentEvent(SegmentEvent e){
-		for(Object l : listeners){
-			((SegmentEventListener) l).segmentEventReceived(e);
-		}
-	}
-	
-	/**
-	 * Fire a segment event
-	 * @param id the segment ID
-	 * @param index the new index
-	 * @param type the type of change to make
-	 */
-	protected synchronized void fireSegmentEvent(UUID id, int index, int type){
-		SegmentEvent e = new SegmentEvent(this, id, index, type);
-		
-		for(Object l : listeners){
-			((SegmentEventListener) l).segmentEventReceived(e);
-		}
-	}
+
 
 }

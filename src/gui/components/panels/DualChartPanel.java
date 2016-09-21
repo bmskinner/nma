@@ -131,7 +131,7 @@ public abstract class DualChartPanel
 	 */
 	protected void updateChartPanelRange(){
 		
-		RectangleOverlayObject ob = rangePanel.getRectangleOverlay().getRectangle();
+		RectangleOverlayObject ob = rangePanel.getOverlayRectangle();
 		
 		double xmin = ob.getXMinValue();
 		double xmax = ob.getXMaxValue();

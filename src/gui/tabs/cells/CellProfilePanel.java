@@ -143,6 +143,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 					.setProfileType( type)
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setShowPoints(true)
+					.setShowXAxis(false)
+					.setShowYAxis(false)
 					.setTarget(dualPanel.getMainPanel())
 					.build();
 				
@@ -164,6 +166,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 					.setProfileType( type)
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setShowPoints(false)
+					.setShowXAxis(false)
+					.setShowYAxis(false)
 					.setTarget(dualPanel.getRangePanel())
 					.build();
 				

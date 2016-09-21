@@ -172,8 +172,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		plot.getRenderer(0).setBasePaint(Color.BLACK);
 		plot.getRenderer(0).setBaseSeriesVisible(true);
 		
-		plot.getDomainAxis().setVisible(options.isShowXAxis());
-		plot.getRangeAxis().setVisible(options.isShowYAxis());
+		applyAxisOptions(chart, options);
 				
 		return chart;	
 	}
@@ -227,7 +226,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		plot.setDataset(0, ds);
 		plot.getRenderer(0).setBasePaint(Color.BLACK);
 		plot.getRenderer(0).setBaseSeriesVisible(true);
-				
+		applyAxisOptions(chart, options);
 		return chart;	
 	}
 		
@@ -334,8 +333,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 		plot.setDataset(ds);
 
-		plot.getRangeAxis().setInverted(options.isInvertYAxis());
-		plot.getDomainAxis().setInverted(options.isInvertXAxis());
 		plot.setRenderer(new XYLineAndShapeRenderer(options.isShowLines(), options.isShowPoints()));
 
 		int seriesCount = plot.getSeriesCount();
@@ -352,7 +349,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		if(options.hasComponent()){
 			drawImageAsAnnotation(plot, options.getCell(), options.getComponent());
 		}
-		
+		applyAxisOptions(chart, options);
 		return chart;
 		
 	}
@@ -546,6 +543,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 
 		}
+		applyAxisOptions(chart, options);
 		return chart;
 	}
 		
@@ -719,16 +717,16 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	public JFreeChart createVerticalNucleiChart(ChartOptions options) throws Exception{
 		
 		if( ! options.hasDatasets()){
-			options.log(Level.FINEST, "No datasets - returning empty chart");
+			finest("No datasets - returning empty chart");
 			return makeEmptyChart();
 		}
 		
 		if(options.isMultipleDatasets()){
-			options.log(Level.FINEST, "Multiple datasets - creating vertical nuclei chart");
+			finest("Multiple datasets - creating vertical nuclei chart");
 			return createMultipleDatasetVerticalNucleiChart(options);
 		}
 		
-		options.log(Level.FINEST, "Single dataset - creating vertical nuclei chart");
+		finest("Single dataset - creating vertical nuclei chart");
 		return createSingleDatasetVerticalNucleiChart(options);
 		
 	}
@@ -805,7 +803,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			i++;
 		}
 		
-		options.log(Level.FINEST, "Creating charting datasets for vertically rotated nuclei");
+		finest( "Creating charting datasets for vertically rotated nuclei");
 		
 		for(Nucleus n : options.firstDataset().getCollection().getNuclei()){
 			
@@ -836,7 +834,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			i++;
 			
 		}
-		options.log(Level.FINEST, "Created vertical nuclei chart");
+		finest("Created vertical nuclei chart");
+		applyAxisOptions(chart, options);
 		return chart;
 	}
 	
@@ -883,6 +882,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 			}
 		}
+		applyAxisOptions(chart, options);
 		return chart;
 	}
 	
@@ -976,11 +976,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 		}
 		
-		chart.getXYPlot().getDomainAxis().setVisible(options.isShowXAxis());
-		chart.getXYPlot().getRangeAxis().setVisible(options.isShowYAxis());
-		
-		chart.getXYPlot().getDomainAxis().setInverted(options.isInvertXAxis());
-		chart.getXYPlot().getRangeAxis().setInverted(options.isInvertYAxis());
+		applyAxisOptions(chart, options);
 		
 		return chart;
 	}
@@ -1051,6 +1047,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.addDomainMarker(new ValueMarker(0, Color.BLACK, ChartComponents.PROFILE_STROKE));
+
 		return chart;
 	}
 

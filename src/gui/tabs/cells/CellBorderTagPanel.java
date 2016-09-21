@@ -149,6 +149,8 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 						.setSwatch(activeDataset().getSwatch())
 						.setShowAnnotations(false)
 						.setShowPoints(true)
+						.setShowXAxis(false)
+						.setShowYAxis(false)
 						.setTarget(dualPanel.getMainPanel())
 						.build();
 					
@@ -169,6 +171,8 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 						.setSwatch(activeDataset().getSwatch())
 						.setShowPoints(false)
 						.setShowAnnotations(false)
+						.setShowXAxis(false)
+						.setShowYAxis(false)
 						.setTarget(dualPanel.getRangePanel())
 						.build();
 					
