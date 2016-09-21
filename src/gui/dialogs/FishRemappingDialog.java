@@ -18,9 +18,11 @@
  *******************************************************************************/
 package gui.dialogs;
 
+import gui.GlobalOptions;
 import gui.ImageType;
 import gui.MainWindow;
 import gui.ThreadManager;
+import gui.components.ColourSelecter.ColourSwatch;
 import ij.io.DirectoryChooser;
 
 import java.awt.Color;
@@ -394,19 +396,27 @@ public class FishRemappingDialog extends ImageProber {
 	
 	private Color chooseNucleusOutlineColor(Cell c){
 		Color color = Color.BLUE;
+		ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
 		if(selectedNucleiLeft.contains(c.getId())){
-			color = Color.GREEN;
+
+			if(swatch.equals(ColourSwatch.ACCESSIBLE_SWATCH)){
+				color = Color.CYAN;
+			} else {
+				color = Color.GREEN;
+			}
 		}
 		if(selectedNucleiRight.contains(c.getId())){
-			color = Color.RED;
+			if(swatch.equals(ColourSwatch.ACCESSIBLE_SWATCH)){
+				color = Color.YELLOW;
+			} else {
+				color = Color.RED;
+			}
 		}
 		
 		return color;
 	}
 	
 	private void drawNucleus(Cell c, Image image){
-		
-//		int position = FishMappingImageType.ORIGINAL_IMAGE.getPosition();
 		
 		Graphics2D g2 = (Graphics2D) image.getGraphics();
 		
