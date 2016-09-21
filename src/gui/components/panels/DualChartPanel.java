@@ -62,7 +62,7 @@ public abstract class DualChartPanel
 	public DualChartPanel(){
 		
 		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart();
-		chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
+		chartPanel = new ExportableChartPanel(profileChart);
 
 		chartPanel.setMinimumDrawWidth(  0 );
 		chartPanel.setMinimumDrawHeight( 0 );
@@ -116,6 +116,12 @@ public abstract class DualChartPanel
 		}
 		this.chartPanel.setChart(chart);
 		this.rangePanel.setChart(rangeChart);
+		
+		chartPanel.setDomainZoomable(false); // zoom is controlled only by the range panel
+		chartPanel.setRangeZoomable(false);
+		rangePanel.setDomainZoomable(false); // zoom is controlled only by the range panel
+		rangePanel.setRangeZoomable(false);
+		
 		this.updateChartPanelRange();
 	}
 		

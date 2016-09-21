@@ -43,7 +43,6 @@ import components.Cell;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 
-@SuppressWarnings("serial")
 public class BorderTagDualChartPanel extends DualChartPanel{
 	
 	private int activeProfileIndex = 0;
@@ -75,6 +74,9 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 		    }
 		    	
 		});
+		
+		chartPanel.setRangeZoomable(false);
+		chartPanel.setDomainZoomable(false);
 	}
 	
 	public void createBorderTagPopup(Cell cell){

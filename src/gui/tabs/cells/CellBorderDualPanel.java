@@ -19,11 +19,6 @@
 
 package gui.tabs.cells;
 
-
-import org.jfree.chart.JFreeChart;
-
-import charting.charts.ExportableChartPanel;
-import charting.charts.MorphologyChartFactory;
 import gui.components.panels.DualChartPanel;
 
 public class CellBorderDualPanel extends DualChartPanel {
@@ -32,15 +27,12 @@ public class CellBorderDualPanel extends DualChartPanel {
 	
 	public CellBorderDualPanel(){
 		super();
-		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart();
-		chartPanel = new ExportableChartPanel(profileChart);
+
 		chartPanel.setFixedAspectRatio(true);
 
-		chartPanel.setMinimumDrawWidth(  0 );
-		chartPanel.setMinimumDrawHeight( 0 );
-		chartPanel.addChartSetEventListener(this);
-		chartPanel.setDomainZoomable(false); // zoom is controlled only by the range panel
-		chartPanel.setRangeZoomable(false);	
+//		chartPanel.setDomainZoomable(false); // zoom is controlled only by the range panel
+//		chartPanel.setRangeZoomable(false);	
+//		chartPanel.setMouseZoomable(false);
 				
 		rangePanel.setRangePct(DEFAULT_OVERLAY_PERCENT);
 		rangePanel.setDomainPct(DEFAULT_OVERLAY_PERCENT);
