@@ -291,6 +291,9 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		
 		double xUpper = xAxis.getUpperBound();
 		double yUpper = yAxis.getUpperBound();
+		
+		double xLower = xAxis.getLowerBound();
+		double yLower = yAxis.getLowerBound();
 				
 		double halfXRange = domainWidth / 2;
 		double halfYRange = rangeWidth / 2;
@@ -303,8 +306,8 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		
 		
 		// Find the chart values to use as the rectangle x range 
-		double xMoveMin = xValue - halfXRange;
-		xMoveMin = xMoveMin < 0 ? 0 : xMoveMin; // correct for zero end
+		double xMoveMin = xValue - halfXRange; // by default, half the box width from the x-midpoint
+		xMoveMin = xMoveMin < xLower ? xLower : xMoveMin; // correct for zero end
 		
 		xMoveMin = xMoveMin > xUpper - domainWidth
 				? xUpper - domainWidth
@@ -313,6 +316,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		double xMoveMax = xValue + halfXRange;
 		xMoveMax = xMoveMax < domainWidth ? domainWidth : xMoveMax; // correct for zero end
 		xMoveMax = xMoveMax > xUpper ? xUpper	: xMoveMax; // correct for upper end
+		xMoveMax = xMoveMax > xMoveMin + domainWidth ? xMoveMin + domainWidth : xMoveMax; // correct for increasing box width when xMoveMin becomes less than zero
 						
 		// Set the values in chart units
 		overlayRectangle.setXMinValue(xMoveMin);
@@ -320,7 +324,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		
 		// Find the chart values to use as the rectangle y range 
 		double yMoveMin = yValue - halfYRange;
-		yMoveMin =yMoveMin < 0 ? 0 : yMoveMin; // correct for zero end
+		yMoveMin =yMoveMin < yLower ? yLower : yMoveMin; // correct for zero end
 		
 		yMoveMin = yMoveMin > yUpper - rangeWidth
 				? yUpper - rangeWidth
@@ -329,6 +333,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		double yMoveMax = yValue + halfYRange;
 		yMoveMax = yMoveMax < rangeWidth ? rangeWidth : yMoveMax; // correct for zero end
 		yMoveMax = yMoveMax > yUpper ? yUpper	: yMoveMax; // correct for upper end
+		yMoveMax = yMoveMax > yMoveMin + rangeWidth ? yMoveMin + rangeWidth : yMoveMax;
 						
 		// Set the values in chart units
 		overlayRectangle.setYMinValue(yMoveMin);
@@ -353,7 +358,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 		
 
 		if(isLeft){
-			xValue = xValue < 0 ? 0 : xValue; // correct for zero end
+			xValue = xValue < xLower ? xLower : xValue; // correct for zero end
 
 			xValue = xValue >= overlayRectangle.getXMaxValue() ? overlayRectangle.getXMaxValue() - (xRange/100) : xValue; // correct for max end
 
@@ -391,120 +396,70 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 				
 		double yValue = yAxis.java2DToValue(y, dataArea, RectangleEdge.LEFT);
 		
-		
-		// Correct for ends of the chart
+
+		// This works correctly for normal y-axis orientation
+		// Set the values in chart units
 		if(isBottom){
-			yValue = correctLowerEdge(yValue, yRange, yLower, yUpper, yAxis.isInverted());
+			if(yAxis.isInverted()){
+				// Y values increase from top to bottom
+				// Bottom edge clicked, which is highest y values
+				
+				// Check that y does not go lower than minimum
+				yValue = yValue <= overlayRectangle.getYMinValue() 
+						   ? overlayRectangle.getYMinValue() + (yRange/100) 
+						   : yValue;
+						   
+				// Check that y does not go higher than chart maximum
+				yValue = yValue >= yUpper ? yUpper : yValue; 
+				
+
+				overlayRectangle.setYMaxValue(yValue);
+
+			} else {
+				
+				
+				yValue = yValue < yLower ? yLower : yValue; // correct for zero end
+
+				yValue = yValue >= overlayRectangle.getYMaxValue() 
+					   ? overlayRectangle.getYMaxValue() - (yRange/100) 
+					   : yValue; // correct for max end
+				
+				overlayRectangle.setYMinValue(yValue);
+
+			}
+			
 		} else {
-			yValue = correctUpperEdge(yValue, yRange, yLower, yUpper, yAxis.isInverted());
-		}
 
-//		if(yAxis.isInverted()){
-			overlayRectangle.setYMaxValue(yValue);
-//		} else {
-			overlayRectangle.setYMinValue(yValue);
-//		}
+			// Set the values in chart units
+			if(yAxis.isInverted()){
+				// Y values increase from top to bottom
+				// Top edge clicked, which is lowest y values
+				
+				// Check that y does not go higher than rectangle maximum
+				yValue = yValue >= overlayRectangle.getYMaxValue() 
+					   ? overlayRectangle.getYMaxValue() - (yRange/100) 
+					   : yValue; // correct for max end
+									
+				
+				// Check that y does not go lower than chart minimum
+				yValue = yValue < yLower ? yLower : yValue;
+				
+				overlayRectangle.setYMinValue(yValue);
 		
+			} else {
+				yValue = yValue >= yUpper ? yUpper : yValue; // correct for upper end
 
-//		if(isBottom){
-//
-//			yValue = yValue < 0 ? 0 : yValue; // correct for zero end
-//
-//			yValue = yValue >= overlayRectangle.getYMaxValue() 
-//				   ? overlayRectangle.getYMaxValue() - (yRange/100) 
-//				   : yValue; // correct for max end
-//
-//			// Set the values in chart units
-//
-//			if(yAxis.isInverted()){
-//				overlayRectangle.setYMaxValue(yValue);
-//			} else {
-//				overlayRectangle.setYMinValue(yValue);
-//			}
-//		} else {
-//
-//			yValue = yValue >= yUpper ? yUpper : yValue; // correct for upper end
-//
-//			yValue = yValue <= overlayRectangle.getYMinValue() ? overlayRectangle.getYMinValue() + (yRange/100) : yValue; // correct for min end
-//
-//			// Set the values in chart units
-//			if(yAxis.isInverted()){
-//				overlayRectangle.setYMinValue(yValue);
-//			} else {
-//				overlayRectangle.setYMaxValue(yValue);
-//			}
-//			
-//			
-//		}
+				yValue = yValue <= overlayRectangle.getYMinValue() ? overlayRectangle.getYMinValue() + (yRange/100) : yValue; // correct for min end
+
+				overlayRectangle.setYMaxValue(yValue);
+			}
+			
+			
+		}
 
 		fireSignalChangeEvent("UpdatePosition");
 	}
-	
-	private double correctUpperEdge(double yValue, double yRange, double yLower, double yUpper, boolean isInverted){
-		
-		if(isInverted){
 			
-			// Y values increase from top to bottom
-		// Upper edge is chart max
-			yValue = yValue >= yUpper 
-			       ? yUpper 
-			       : yValue; // correct for upper end
-			
-			yValue = yValue <= overlayRectangle.getYMinValue()      // if less than lower bound
-				   ? overlayRectangle.getYMinValue() + (yRange/100) // change to  1% of current range
-				   : yValue; // correct for lower end
-			
-		} else {
-			
-			// Y values increase from bottom to top
-
-			// Upper edge is chart zero
-			yValue = yValue < 0 ? 0 : yValue; // correct for zero end
-			
-			yValue = yValue >= overlayRectangle.getYMaxValue() 
-				   ? overlayRectangle.getYMaxValue() - (yRange/100) 
-				   : yValue; 
-			
-			
-		}
-				   
-		return yValue;
-	}
-	
-	private double correctLowerEdge(double yValue, double yRange, double yLower, double yUpper, boolean isInverted){
-		
-		if(isInverted){
-			
-			// WORKING
-			
-			// Lower edge is chart max
-			yValue = yValue <= overlayRectangle.getYMinValue() 
-				   ? overlayRectangle.getYMinValue() + (yRange/100) 
-				   : yValue; // correct for min end
-				   
-		   yValue = yValue >= yUpper 
-			       ? yUpper 
-			       : yValue; // correct for upper end
-			
-		
-		} else {
-			
-			// WORKING
-			
-			// Lower edge is chart zero
-			yValue = yValue < 0 ? 0 : yValue; // correct for zero end
-			
-			// correct for max end
-			yValue = yValue >= overlayRectangle.getYMaxValue() 
-					   ? overlayRectangle.getYMaxValue() - (yRange/100) 
-					   : yValue; 
-			
-
-		}
-				   
-		return yValue;
-	}
-	
 	private double getDomainCurrentPercent(){
 		double range = overlayRectangle.getXMaxValue() - overlayRectangle.getXMinValue();
 		JFreeChart  chart    = getChart();
