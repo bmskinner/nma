@@ -174,7 +174,16 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 		}
 		
 		try {
+			
+			// Only apply to XYPlots
+			if(  !(this.getChart().getPlot() instanceof XYPlot)){
+				super.restoreAutoBounds();
+				return;
+			}
+			
 			XYPlot plot = (XYPlot) this.getChart().getPlot();
+			
+			// Only apply to plots with datasets
 			if(plot.getDatasetCount()==0){
 				return;
 			}
@@ -183,12 +192,14 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 			double chartWidth  = this.getWidth();
 			double chartHeight = this.getHeight();
 			
+			// If we can't get useful values for width and height, use defaults
 			if(Double.valueOf(chartWidth)==null || Double.valueOf(chartHeight)==null){
 				plot.getRangeAxis().setRange(-DEFAULT_AUTO_RANGE, DEFAULT_AUTO_RANGE);
 				plot.getDomainAxis().setRange(-DEFAULT_AUTO_RANGE, DEFAULT_AUTO_RANGE);
 				return;
 			}
 			
+			// Calculate the panel aspect ratio
 			
 			double aspectRatio = chartWidth / chartHeight;
 			
@@ -200,14 +211,13 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 			//		
 			double xMax = Double.MIN_VALUE;
 			double yMax = Double.MIN_VALUE;
-
-//			finest("Plot has "+plot.getDatasetCount()+" datasets");
 			
-			// get the max and min values of each dataset in the chart
+			// get the max and min values on the chart by looking for
+			// the min and max values within each dataset in the chart
 			for(int i = 0; i<plot.getDatasetCount();i++){
 				XYDataset dataset = plot.getDataset(i);
 
-				if(dataset==null){
+				if(dataset==null){ // No dataset, skip
 					finest("Null dataset "+i);
 					continue;
 				}
@@ -218,8 +228,8 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 				}
 
 				xMax = DatasetUtilities.findMaximumDomainValue(dataset).doubleValue() > xMax
-						? DatasetUtilities.findMaximumDomainValue(dataset).doubleValue()
-								: xMax;
+					 ? DatasetUtilities.findMaximumDomainValue(dataset).doubleValue()
+				     : xMax;
 
 				xMin = DatasetUtilities.findMinimumDomainValue(dataset).doubleValue() < xMin
 					 ? DatasetUtilities.findMinimumDomainValue(dataset).doubleValue()
@@ -234,7 +244,8 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 					 : yMin;
 			}
 			
-			// If not datasets were found, set defaults
+			// If no useful datasets were found (e.g. all datasets were malformed)
+			// min and max 'impossible' values have not changed. In this case, set defaults
 			if(xMin == Double.MAX_VALUE || yMin == Double.MAX_VALUE){
 				xMin = -DEFAULT_AUTO_RANGE;
 				yMin = -DEFAULT_AUTO_RANGE;
@@ -243,7 +254,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 			}
 			
 
-			// find the ranges they cover
+			// find the ranges the min and max values cover
 			double xRange = xMax - xMin;
 			double yRange = yMax - yMin;
 

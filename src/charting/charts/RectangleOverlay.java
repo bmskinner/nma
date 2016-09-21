@@ -138,6 +138,7 @@ public class RectangleOverlay
                 double maxy  = rectangle.getYMaxValue();
                 double maxyy = yAxis.valueToJava2D(maxy, dataArea, yAxisEdge);
                 
+                // Swap y if inverted
                 double temp = minyy;
                 
                 minyy = minyy > maxyy ? maxyy : minyy;

@@ -116,6 +116,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
 			setButtonsEnabled(false);
 			
+			dualPanel.getMainPanel().getChart().getXYPlot().getDomainAxis().setVisible(false);
+			dualPanel.getMainPanel().getChart().getXYPlot().getRangeAxis().setVisible(false);
 			
 		}
 		
@@ -228,21 +230,16 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		@Override
 		protected void updateNull() {	
 			
+			
 			ChartOptions options = new ChartOptionsBuilder()
-				.setProfileType(ProfileType.ANGLE)
 				.setShowXAxis(false)
 				.setShowYAxis(false)
 				.build();
 			
 			
-			JFreeChart mainChart = getChart(options);
-			
-			ChartOptions rangeOptions = new ChartOptionsBuilder()
-				.setShowXAxis(false)
-				.setShowYAxis(false)
-				.build();
+			JFreeChart mainChart = MorphologyChartFactory.getInstance().makeEmptyChart(options);
 		
-			JFreeChart rangeChart = getChart(rangeOptions);
+			JFreeChart rangeChart = MorphologyChartFactory.getInstance().makeEmptyChart(options);
 			
 			dualPanel.setCharts(mainChart, rangeChart);
 			setButtonsEnabled(false);

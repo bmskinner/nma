@@ -92,6 +92,18 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	}
 	
 	/**
+	 * Create an empty chart with display options
+	 * @return
+	 */
+	public JFreeChart makeEmptyChart(ChartOptions options){
+		JFreeChart chart = makeEmptyProfileChart(options.getType());
+		
+		applyAxisOptions(chart, options);
+		
+		return chart;
+	}
+	
+	/**
 	 * Create an empty chart to display when no datasets are selected
 	 * @return
 	 */
@@ -333,13 +345,15 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 */	
 	public JFreeChart makeMultiSegmentedProfileChart(ChartOptions options)  {
 		
-		JFreeChart chart = this.makeEmptyChart(options.getType());
+		JFreeChart chart = this.makeEmptyChart(options);
 		
 		if( ! options.hasDatasets()){
-			
-			applyAxisOptions(chart, options);
 			return chart;
 		}
+		applyAxisOptions(chart, options);
+		
+		XYPlot plot = chart.getXYPlot();
+	
 		
 		// Set the length to 100 if normalised or multiple datasets.
 		// Otherwise use the median profile length
@@ -351,11 +365,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				   		.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN)
 				   		.size();
 				
-		
-		
-		XYPlot plot = chart.getXYPlot();
-		
-		
+
 		// the default is to use an x range of 100, for a normalised chart
 		plot.getDomainAxis().setRange(0,length);
 
@@ -447,7 +457,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			}
 		}
 		
-		applyAxisOptions(chart, options);
+		
 		return chart;
 	}
 	
