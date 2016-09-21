@@ -130,9 +130,10 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 				ProfileType type = profileOptions.getSelected();
 
 				if( ! this.getCellModel().hasCell()){
-					JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
+					JFreeChart chart1 = MorphologyChartFactory.getInstance().makeEmptyChart();
+					JFreeChart chart2 = MorphologyChartFactory.getInstance().makeEmptyChart();
 					
-					dualPanel.setCharts(chart, chart);
+					dualPanel.setCharts(chart1, chart2);
 					profileOptions.setEnabled(false);
 
 				} else {
@@ -182,8 +183,10 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 
 			} catch(Exception e){
 				error("Error updating cell panel", e);
-				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-				dualPanel.setCharts(chart, chart);
+				JFreeChart chart1 = MorphologyChartFactory.getInstance().makeEmptyChart();
+				JFreeChart chart2 = MorphologyChartFactory.getInstance().makeEmptyChart();
+				
+				dualPanel.setCharts(chart1, chart2);
 				profileOptions.setEnabled(false);
 			}
 

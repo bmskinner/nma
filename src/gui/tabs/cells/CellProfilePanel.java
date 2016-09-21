@@ -175,17 +175,19 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 
 
 			} else {
-				JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
+				JFreeChart chart1 = MorphologyChartFactory.getInstance().makeEmptyChart();
+				JFreeChart chart2 = MorphologyChartFactory.getInstance().makeEmptyChart();
 				
-				dualPanel.setCharts(chart, chart);
+				dualPanel.setCharts(chart1, chart2);
 				setEnabled(false);			
 					
 			}
 
 		} catch(Exception e){
 			error("Error updating cell panel", e);
-			JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart();
-			dualPanel.setCharts(chart, chart);
+			JFreeChart chart1 = MorphologyChartFactory.getInstance().makeEmptyChart();
+			JFreeChart chart2 = MorphologyChartFactory.getInstance().makeEmptyChart();
+			dualPanel.setCharts(chart1, chart2);
 			setEnabled(false);
 		}
 		
