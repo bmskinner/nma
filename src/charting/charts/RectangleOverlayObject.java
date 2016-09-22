@@ -4,6 +4,8 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeSupport;
 
 public class RectangleOverlayObject extends OverlayObject {
@@ -88,6 +90,18 @@ public class RectangleOverlayObject extends OverlayObject {
 	
 	public double getYMidValue(){
 		return ((yMaxValue - yMinValue) /2) +yMinValue;
+	}
+
+	@Override
+	public boolean contains(int x, int y) {
+		Rectangle2D e = new Rectangle2D.Double(xMinValue, yMinValue, xMaxValue-xMinValue , yMaxValue-yMinValue);
+		return e.contains(x, y);
+	}
+
+	@Override
+	public boolean contains(double x, double y) {
+		Rectangle2D e = new Rectangle2D.Double(xMinValue, yMinValue, xMaxValue-xMinValue , yMaxValue-yMinValue);
+		return e.contains(x, y);
 	}
 	
 	

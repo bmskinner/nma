@@ -23,6 +23,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
+import java.awt.geom.Ellipse2D;
 import java.beans.PropertyChangeSupport;
 
 public class EllipticalOverlayObject 
@@ -93,6 +94,21 @@ public class EllipticalOverlayObject
 		this.yRadius = value;
 		this.pcs.firePropertyChange("yRadius", oldValue, value);
 	}
+
+	@Override
+	public boolean contains(int x, int y) {
+
+		Ellipse2D e = new Ellipse2D.Double(xValue-xRadius, yValue-yRadius, xRadius*2, yRadius*2);
+		return e.contains(x, y);
+	}
+
+	@Override
+	public boolean contains(double x, double y) {
+		Ellipse2D e = new Ellipse2D.Double(xValue-xRadius, yValue-yRadius, xRadius*2, yRadius*2);
+		return e.contains(x, y);
+	}
+	
+
 	
 	
 	

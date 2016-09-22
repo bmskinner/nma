@@ -36,6 +36,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -51,11 +53,14 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYShapeAnnotation;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.entity.ChartEntity;
 import org.jfree.chart.entity.EntityCollection;
 import org.jfree.chart.entity.XYItemEntity;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.Range;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.ui.RectangleEdge;
 
 import analysis.AnalysisDataset;
 import components.Cell;
@@ -89,7 +94,8 @@ public class CellBorderAdjustmentDialog
 	implements BorderPointEventListener, 
 	           ChartSetEventListener,
 	           MouseListener,
-	           MouseMotionListener{
+	           MouseMotionListener, 
+	           MouseWheelListener{
 	
 	
 	private DualChartPanel dualPanel;
@@ -107,6 +113,8 @@ public class CellBorderAdjustmentDialog
 	private double  finalMovePointX = 0;
 	
 	private XYItemEntity xyItemEntity = null;
+	
+	EllipticalOverlayObject ellipse;
 	
 	/*
 	 * Notes:
@@ -167,8 +175,9 @@ public class CellBorderAdjustmentDialog
 			mainPanel.addBorderPointEventListener(this);
 			mainPanel.addMouseMotionListener(this);
 			mainPanel.addMouseListener(this);
+			mainPanel.addMouseWheelListener(this);
 			
-			EllipticalOverlayObject ellipse = new EllipticalOverlayObject(0, 3, 0, 3);
+			ellipse = new EllipticalOverlayObject(0, 3, 0, 3);
 			mainPanel.addOverlay( new EllipticalOverlay(ellipse));
 			
 			JPanel chartPanel = new JPanel();
@@ -260,45 +269,13 @@ public class CellBorderAdjustmentDialog
 		log("Border point event received");
 		
 	}
-
-//	@Override
-//	public void chartMouseClicked(ChartMouseEvent event) {
-//		
-//		// Detect right click for select
-////		if(event.getTrigger().getButton()==MouseEvent.BUTTON3_DOWN_MASK){
-////			ChartEntity entity = event.getEntity();
-////			
-////			// Only charted items, not annotations
-////			if(XYItemEntity.class.isAssignableFrom(entity.getClass())){
-////				log("Item clicked");
-////				XYItemEntity e = (XYItemEntity) entity;
-////				Number x = e.getDataset().getX(e.getSeriesIndex(), e.getItem());
-////				Number y = e.getDataset().getY(e.getSeriesIndex(), e.getItem());
-////							
-////				XYPoint clickedPoint = new XYPoint(x.doubleValue(), y.doubleValue());
-////				
-////				selectClickedPoint(clickedPoint);
-////				
-////				
-////			}
-////		}
-//		
-//		
-//	}
 	
 	private void selectClickedPoint(XYPoint clickedPoint){
 		for(BorderPoint point : workingCell.getNucleus().getBorderList()){
 			
 			if(point.overlapsPerfectly( clickedPoint )){
-//				log("Selected point "+point.toString());
 				
-				if(selectedPoints.containsKey(point)){
-					XYShapeAnnotation a = selectedPoints.get(point);
-					
-					dualPanel.getMainPanel().getChart().getXYPlot().removeAnnotation(a);
-					selectedPoints.remove(point);		
-				} else {
-
+				if(! selectedPoints.containsKey(point)){
 
 					Ellipse2D r = new Ellipse2D.Double(point.getX()-0.3,point.getY()-0.3, 0.6, 0.6);
 					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, Color.BLUE);
@@ -456,6 +433,26 @@ public class CellBorderAdjustmentDialog
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		
+		int x = e.getX();
+		int y = e.getY();
+		
+		// Update the overlay position on the main chart
+		
+		Rectangle2D dataArea = dualPanel.getMainPanel().getScreenDataArea();
+		JFreeChart  chart    = dualPanel.getMainPanel().getChart();
+		XYPlot      plot     = (XYPlot) chart.getPlot();
+		ValueAxis   xAxis    = plot.getDomainAxis();
+		ValueAxis   yAxis    = plot.getRangeAxis();
+								
+		double xValue = xAxis.java2DToValue(x, dataArea, 
+				RectangleEdge.BOTTOM);
+		
+		double yValue = yAxis.java2DToValue(y, dataArea, 
+				RectangleEdge.LEFT);
+		
+		
+		ellipse.setXValue(xValue);
+		ellipse.setYValue(yValue);
 		
 	}
 
@@ -480,64 +477,92 @@ public class CellBorderAdjustmentDialog
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		
-		
-		int x = e.getX(); // initialized point whenenver mouse is pressed
-	    int y = e.getY();
+
 	    EntityCollection entities = dualPanel.getMainPanel().getChartRenderingInfo().getEntityCollection();
 	    
-	    ChartMouseEvent cme = new ChartMouseEvent(dualPanel.getMainPanel().getChart(), e, entities
-	        .getEntity(x, y));
+
+	    if( (e.getModifiers() & InputEvent.BUTTON1_MASK) ==InputEvent.BUTTON1_MASK){
+	    	// Find the entities under the ellipse overlay
+
+	    	XYDataset ds = dualPanel.getMainPanel().getChart().getXYPlot().getDataset();
+	    	for(Object entity : entities.getEntities()){
+
+	    		if(entity instanceof XYItemEntity){
+
+	    			xyItemEntity = (XYItemEntity) entity;
+
+	    			int series = xyItemEntity.getSeriesIndex();
+	    			int item   = xyItemEntity.getItem();
+
+	    			double xVal = ds.getXValue(series, item);
+	    			double yVal = ds.getYValue(series, item);
+
+	    			if(ellipse.contains(xVal,  yVal)){
+	    				XYPoint clickedPoint = new XYPoint(xVal, yVal);
+	    				selectClickedPoint(clickedPoint);
+	    			}
+	    		}
+
+	    	}
+	    }
 	    
-	    ChartEntity entity = cme.getEntity();
-	    if ((entity != null) && (entity instanceof XYItemEntity)) {
-	        xyItemEntity = (XYItemEntity) entity;
-	    } else if (!(entity instanceof XYItemEntity)) {
-	        xyItemEntity = null;
-	        return;
+	    if( (e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){
+	    	clearSelectedPoints();
 	    }
-	    if (xyItemEntity == null) {
-	        return; // return if not pressed on any series point
-	    }
-	    Point pt = e.getPoint();
-	    log("Mouse pressed on entity");
-
-		Number xN = xyItemEntity.getDataset().getX(xyItemEntity.getSeriesIndex(), xyItemEntity.getItem());
-		Number yN = xyItemEntity.getDataset().getY(xyItemEntity.getSeriesIndex(), xyItemEntity.getItem());
-					
-		XYPoint clickedPoint = new XYPoint(xN.doubleValue(), yN.doubleValue());
-		
-		if( (e.getModifiers() & InputEvent.BUTTON1_MASK) ==InputEvent.BUTTON1_MASK){
-
-				clearSelectedPoints();
-				selectClickedPoint(clickedPoint);
-			    
-			    
-			    XYPlot xy = dualPanel.getMainPanel().getChart().getXYPlot();
-			    Rectangle2D dataArea = dualPanel.getMainPanel().getChartRenderingInfo()
-			        .getPlotInfo().getDataArea();
-			    Point2D p = dualPanel.getMainPanel().translateScreenToJava2D(pt);
-			    
-			    initialMovePointY = xy.getRangeAxis().java2DToValue(p.getY(), dataArea,
-			        xy.getRangeAxisEdge());
-			    
-			    initialMovePointX = xy.getDomainAxis().java2DToValue(p.getX(), dataArea,
-				        xy.getDomainAxisEdge());
-			    
-			    finalMovePointY = initialMovePointY;
-			    finalMovePointX = initialMovePointX;
-			    canMove = true;
-			    
-			    dualPanel.getMainPanel().setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-		    
-		} 
-
-		if( (e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){
-
-			selectClickedPoint(clickedPoint);
-
-		}
-		
+	    
+	    
+//	    ChartMouseEvent cme = new ChartMouseEvent(dualPanel.getMainPanel().getChart(), e, entities
+//	        .getEntity(x, y));
+//	    
+//	    ChartEntity entity = cme.getEntity();
+//	    if ((entity != null) && (entity instanceof XYItemEntity)) {
+//	        xyItemEntity = (XYItemEntity) entity;
+//	    } else if (!(entity instanceof XYItemEntity)) {
+//	        xyItemEntity = null;
+//	        return;
+//	    }
+//	    if (xyItemEntity == null) {
+//	        return; // return if not pressed on any series point
+//	    }
+//	    Point pt = e.getPoint();
+//	    log("Mouse pressed on entity");
+//
+//		Number xN = xyItemEntity.getDataset().getX(xyItemEntity.getSeriesIndex(), xyItemEntity.getItem());
+//		Number yN = xyItemEntity.getDataset().getY(xyItemEntity.getSeriesIndex(), xyItemEntity.getItem());
+//					
+//		XYPoint clickedPoint = new XYPoint(xN.doubleValue(), yN.doubleValue());
+//		
+//		if( (e.getModifiers() & InputEvent.BUTTON1_MASK) ==InputEvent.BUTTON1_MASK){
+//
+//				clearSelectedPoints();
+//				selectClickedPoint(clickedPoint);
+//			    
+//			    
+//			    XYPlot xy = dualPanel.getMainPanel().getChart().getXYPlot();
+//			    Rectangle2D dataArea = dualPanel.getMainPanel().getChartRenderingInfo()
+//			        .getPlotInfo().getDataArea();
+//			    Point2D p = dualPanel.getMainPanel().translateScreenToJava2D(pt);
+//			    
+//			    initialMovePointY = xy.getRangeAxis().java2DToValue(p.getY(), dataArea,
+//			        xy.getRangeAxisEdge());
+//			    
+//			    initialMovePointX = xy.getDomainAxis().java2DToValue(p.getX(), dataArea,
+//				        xy.getDomainAxisEdge());
+//			    
+//			    finalMovePointY = initialMovePointY;
+//			    finalMovePointX = initialMovePointX;
+//			    canMove = true;
+//			    
+//			    dualPanel.getMainPanel().setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+//		    
+//		} 
+//
+//		if( (e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){
+//
+//			selectClickedPoint(clickedPoint);
+//
+//		}
+//		
 	}
 
 	@Override
@@ -559,6 +584,24 @@ public class CellBorderAdjustmentDialog
 			initialMovePointX = 0;
 			dualPanel.getMainPanel().setCursor(Cursor.getDefaultCursor());
 		}
+		
+	}
+
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		int rotation  = e.getWheelRotation();
+		
+		// + = zoom in
+		
+		if(rotation>0){
+			ellipse.setXRadius(ellipse.getXRadius()/2);
+			ellipse.setYRadius(ellipse.getYRadius()/2);
+		}
+		if(rotation<0){
+			ellipse.setXRadius(ellipse.getXRadius()*2);
+			ellipse.setYRadius(ellipse.getYRadius()*2);
+		}
+		
 		
 	}
 

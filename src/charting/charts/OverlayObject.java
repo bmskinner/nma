@@ -82,5 +82,24 @@ public abstract class OverlayObject {
     public void removePropertyChangeListener(PropertyChangeListener l) {
         this.pcs.removePropertyChangeListener(l);
     }
+    
+    
+    /**
+     * Test if the given point (in chart coordinates) lies within this
+     * overlay
+     * @param x
+     * @param y
+     * @return
+     */
+    public abstract boolean contains(int x, int y);
+    
+    /**
+     * Test if the given point (in chart coordinates) lies within this
+     * overlay
+     * @param x
+     * @param y
+     * @return
+     */
+    public abstract boolean contains(double x, double y);
 
 }
