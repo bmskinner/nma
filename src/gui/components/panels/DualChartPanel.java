@@ -34,11 +34,15 @@ import java.util.UUID;
 
 import org.jfree.chart.JFreeChart;
 
+import components.generic.ProfileType;
+
 import charting.charts.DraggableOverlayChartPanel;
 import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.PositionSelectionChartPanel;
 import charting.charts.RectangleOverlayObject;
+import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
 
 /**
  * This holds two JFreeChart ChartPanels. One is an overview, with a draggable
@@ -61,7 +65,14 @@ public abstract class DualChartPanel
 	
 	public DualChartPanel(){
 		
-		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart();
+		ChartOptions options = new ChartOptionsBuilder()
+			.setProfileType(ProfileType.ANGLE)
+			.setShowXAxis(false)
+			.setShowYAxis(false)
+			.build();
+			
+		
+		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart(options);
 		chartPanel = new ExportableChartPanel(profileChart);
 
 		chartPanel.setMinimumDrawWidth(  0 );
@@ -76,7 +87,7 @@ public abstract class DualChartPanel
 		 * centre of the zoomed range on the 
 		 * centre chart panel 
 		 */
-		JFreeChart rangeChart = MorphologyChartFactory.getInstance().makeEmptyChart();
+		JFreeChart rangeChart = MorphologyChartFactory.getInstance().makeEmptyChart(options);
 		rangePanel = new PositionSelectionChartPanel(rangeChart);
 		rangePanel.addSignalChangeListener(this);
 		rangePanel.addChartSetEventListener(this);

@@ -26,6 +26,7 @@ import ij.process.FloatPolygon;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -43,6 +44,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -54,6 +56,7 @@ import org.jfree.chart.entity.EntityCollection;
 import org.jfree.chart.entity.XYItemEntity;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.Range;
+
 import analysis.AnalysisDataset;
 import components.Cell;
 import components.generic.XYPoint;
@@ -157,13 +160,11 @@ public class CellBorderAdjustmentDialog
 			
 			ExportableChartPanel mainPanel = dualPanel.getMainPanel();
 			mainPanel.setFixedAspectRatio(true);
+			mainPanel.setPopupMenu(null);
 
 			mainPanel.addBorderPointEventListener(this);
 			mainPanel.addMouseMotionListener(this);
 			mainPanel.addMouseListener(this);
-//			mainPanel.setPopupMenu(null);
-//			mainPanel.setRangeZoomable(false);
-//			mainPanel.setDomainZoomable(false);	
 			
 			JPanel chartPanel = new JPanel();
 			chartPanel.setLayout(new GridBagLayout());
@@ -189,7 +190,10 @@ public class CellBorderAdjustmentDialog
 			
 			this.add(chartPanel, BorderLayout.CENTER);
 
-//			this.add(panel, BorderLayout.CENTER);
+			Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+			this.setPreferredSize(new Dimension(  (int)(screenSize.width*0.9), (int)(screenSize.height*0.5)));
+			this.pack();
+			
 		} catch (Exception e){
 			fine("Error making UI", e);
 		}
@@ -242,7 +246,8 @@ public class CellBorderAdjustmentDialog
 			JFreeChart outlineChart2 = OutlineChartFactory.getInstance().makeCellOutlineChart(outlineOptions);
 //			finer("Updating chart");
 			dualPanel.setCharts(outlineChart, outlineChart2);
-			dualPanel.restoreAutoBounds();
+//			dualPanel.restoreAutoBounds();
+
 	}
 
 	@Override
@@ -386,7 +391,6 @@ public class CellBorderAdjustmentDialog
 		dualPanel.getMainPanel().getChart().getXYPlot().getDomainAxis().setRange(domainRange);
 		dualPanel.getMainPanel().getChart().getXYPlot().getRangeAxis().setRange(rangeRange);
 
-		
 	}
 
 //	@Override

@@ -41,8 +41,6 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 
 	public PositionSelectionChartPanel(final JFreeChart chart){
 		super(chart);
-		chart.getXYPlot().getDomainAxis().setVisible(false);
-		chart.getXYPlot().getRangeAxis().setVisible(false);
 		
 		this.setRangeZoomable(false);
 		this.setDomainZoomable(false);	
@@ -61,8 +59,6 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	
 	@Override
 	public void setChart(final JFreeChart chart){
-		chart.getXYPlot().getDomainAxis().setVisible(true);
-		chart.getXYPlot().getRangeAxis().setVisible(true);
 		finest("Setting new chart");
 		double oldXPct = 0;
 		double oldYPct = 0;

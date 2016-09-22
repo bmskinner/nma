@@ -24,13 +24,23 @@ import org.jfree.chart.JFreeChart;
 import charting.charts.DraggableOverlayChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.PositionSelectionChartPanel;
+import charting.options.ChartOptions;
+import charting.options.ChartOptionsBuilder;
+import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 
 public class SegmentationDualChartPanel extends DualChartPanel{
 	
 	public SegmentationDualChartPanel(){
 		super();
-		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart();
+		
+		ChartOptions options = new ChartOptionsBuilder()
+			.setProfileType(ProfileType.ANGLE)
+			.setShowXAxis(false)
+			.setShowYAxis(false)
+			.build();
+		
+		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart(options);
 		chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
 		((DraggableOverlayChartPanel) chartPanel).addSignalChangeListener(this);
 	}

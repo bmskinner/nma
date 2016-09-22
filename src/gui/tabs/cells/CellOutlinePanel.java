@@ -67,6 +67,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		redrawBorderBtn.addActionListener( e ->{
 			cellBorderAdjustmentDialog.load(model.getCell(), activeDataset());
 		});
+		redrawBorderBtn.setEnabled(false);
 		settingsPanel.add(redrawBorderBtn);
 		
 		
@@ -89,7 +90,11 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 				rotationPanel.setEnabled(false);
 				makeMeshPanel.setEnabled(false);
 				warpMeshPanel.setEnabled(false);
+				redrawBorderBtn.setEnabled(false);
 			} else {
+				
+				redrawBorderBtn.setEnabled(true);
+				
 				// Only allow one mesh activity to be active
 				rotationPanel.setEnabled(! warpMeshPanel.isSelected());
 				makeMeshPanel.setEnabled(  ! warpMeshPanel.isSelected() );
@@ -104,6 +109,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 			rotationPanel.setEnabled(false);
 			makeMeshPanel.setEnabled(false);
 			warpMeshPanel.setEnabled(false);
+			redrawBorderBtn.setEnabled(false);
 		}
 	}
 							
