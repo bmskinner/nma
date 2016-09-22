@@ -259,6 +259,7 @@ public class CellBorderAdjustmentDialog
 		undoBtn.addActionListener( e ->{
 			workingCell = new Cell(cell);
 			updateCharts(workingCell);
+			setCellChanged(false);
 			
 		});
 		panel.add(undoBtn);
@@ -366,7 +367,7 @@ public class CellBorderAdjustmentDialog
 		
 		
 		
-		log("Adding point at "+newX+", "+newY);
+		fine("Adding point at "+newX+", "+newY);
 		XYPoint newPoint = new XYPoint(newX, newY);
 		
 		// Get the border point that is closest to the clicked point
@@ -644,62 +645,10 @@ public class CellBorderAdjustmentDialog
 	    }
 	    
 	    if(addToggle.isSelected()){
-	    	log("Adding point");
+//	    	log("Adding point");
 	    	addPoint(e.getPoint());
 	    }
 	    
-//	    ChartMouseEvent cme = new ChartMouseEvent(dualPanel.getMainPanel().getChart(), e, entities
-//	        .getEntity(x, y));
-//	    
-//	    ChartEntity entity = cme.getEntity();
-//	    if ((entity != null) && (entity instanceof XYItemEntity)) {
-//	        xyItemEntity = (XYItemEntity) entity;
-//	    } else if (!(entity instanceof XYItemEntity)) {
-//	        xyItemEntity = null;
-//	        return;
-//	    }
-//	    if (xyItemEntity == null) {
-//	        return; // return if not pressed on any series point
-//	    }
-//	    Point pt = e.getPoint();
-//	    log("Mouse pressed on entity");
-//
-//		Number xN = xyItemEntity.getDataset().getX(xyItemEntity.getSeriesIndex(), xyItemEntity.getItem());
-//		Number yN = xyItemEntity.getDataset().getY(xyItemEntity.getSeriesIndex(), xyItemEntity.getItem());
-//					
-//		XYPoint clickedPoint = new XYPoint(xN.doubleValue(), yN.doubleValue());
-//		
-//		if( (e.getModifiers() & InputEvent.BUTTON1_MASK) ==InputEvent.BUTTON1_MASK){
-//
-//				clearSelectedPoints();
-//				selectClickedPoint(clickedPoint);
-//			    
-//			    
-//			    XYPlot xy = dualPanel.getMainPanel().getChart().getXYPlot();
-//			    Rectangle2D dataArea = dualPanel.getMainPanel().getChartRenderingInfo()
-//			        .getPlotInfo().getDataArea();
-//			    Point2D p = dualPanel.getMainPanel().translateScreenToJava2D(pt);
-//			    
-//			    initialMovePointY = xy.getRangeAxis().java2DToValue(p.getY(), dataArea,
-//			        xy.getRangeAxisEdge());
-//			    
-//			    initialMovePointX = xy.getDomainAxis().java2DToValue(p.getX(), dataArea,
-//				        xy.getDomainAxisEdge());
-//			    
-//			    finalMovePointY = initialMovePointY;
-//			    finalMovePointX = initialMovePointX;
-//			    canMove = true;
-//			    
-//			    dualPanel.getMainPanel().setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-//		    
-//		} 
-//
-//		if( (e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){
-//
-//			selectClickedPoint(clickedPoint);
-//
-//		}
-//		
 	}
 
 	@Override
