@@ -25,6 +25,7 @@ import ij.process.FloatPolygon;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -47,8 +48,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYShapeAnnotation;
@@ -100,9 +104,7 @@ public class CellBorderAdjustmentDialog
 	
 	
 	private DualChartPanel dualPanel;
-	
-	private JButton deletePointsBtn;
-	
+		
 	Map<BorderPoint, XYShapeAnnotation> selectedPoints = new HashMap<BorderPoint, XYShapeAnnotation>();
 	
 	private boolean canMove = false; // set if a point can be moved or not
@@ -115,32 +117,26 @@ public class CellBorderAdjustmentDialog
 	
 	private XYItemEntity xyItemEntity = null;
 	
-	EllipticalOverlayObject ellipse;
+	private EllipticalOverlayObject ellipse;
 	
-	/*
-	 * Notes:
-	 * 
-	 * Click a point to highlight / select it. 
-	 * 
-	 * Drag a window to select points in the border. These must become highlighted.
-	 * 
-	 * Option to delete highlighted points
-	 * 
-	 * Option to move highlighted points.
-	 * 
-	 * The border list must be updated to reflect changes and deletions
-	 * 
-	 * Show a minimap
-	 * 
-	 * Right mouse down - drag zoomed image
-	 * Left mouse down - select ponts
-	 * 
+	
+	private JToggleButton selectToggle;
+	private JToggleButton deleteToggle;
+	private JToggleButton addToggle;
+	
+	/**
+	 * The colour for the ellipse when selecting points
 	 */
+	private Color selectFill = new Color(0, 0, 255, 128);
+	
+	
+	/**
+	 * The colour for the ellipse when deleting points
+	 */
+	private Color deleteFill = new Color(255, 0, 0, 128);
 	
 	public CellBorderAdjustmentDialog(CellViewModel model){
-		super( model );
-		
-//		dualPanel.restoreAutoBounds(); // fixed aspect must be set after components are packed		
+		super( model );	
 	}
 	
 	@Override
@@ -149,6 +145,8 @@ public class CellBorderAdjustmentDialog
 		
 		this.setTitle("Adjusting border in "+cell.getNucleus().getNameAndNumber());
 		updateCharts(cell);
+		selectToggle.setSelected(true);
+		ellipse.setFill(selectFill);
 		setVisible(true);
 	}
 	
@@ -224,14 +222,38 @@ public class CellBorderAdjustmentDialog
 	private JPanel createHeader(){
 		JPanel panel = new JPanel(new FlowLayout());
 		
-		deletePointsBtn = new JButton("Delete selected point(s)");
-		deletePointsBtn.addActionListener( e -> {
-			
-			log("Clicked delete button");
-			deleteSelectedPoints();
+		
+		selectToggle = new JToggleButton("Select");
+		selectToggle.addActionListener( e -> {
+			ellipse.setVisible(true);
+			ellipse.setFill(selectFill);
 		});
-		panel.add(deletePointsBtn);
-			
+		
+		deleteToggle = new JToggleButton("Delete");
+		deleteToggle.addActionListener( e -> {
+			ellipse.setVisible(true);
+			ellipse.setFill(deleteFill);
+		});
+		
+		addToggle = new JToggleButton("Add point");
+		addToggle.addActionListener( e -> {
+			ellipse.setVisible(false);
+		});
+		
+		final ButtonGroup toggleGroup = new ButtonGroup();
+		toggleGroup.add(selectToggle);
+		toggleGroup.add(deleteToggle);
+		toggleGroup.add(addToggle);
+
+//		
+		panel.add(selectToggle);
+		panel.add(deleteToggle);
+		panel.add(addToggle);
+		
+		selectToggle.setSelected(true);
+		
+		Component box = Box.createHorizontalStrut(10);
+		panel.add(box);
 		
 		JButton undoBtn = new JButton("Undo");
 		undoBtn.addActionListener( e ->{
@@ -274,7 +296,7 @@ public class CellBorderAdjustmentDialog
 
 	@Override
 	public void borderPointEventReceived(BorderPointEvent event) {
-		log("Border point event received");
+		fine("Border point event received");
 		
 	}
 	
@@ -324,6 +346,49 @@ public class CellBorderAdjustmentDialog
 		}
 		setCellChanged(true);
 		updateWorkingCell(workingCell.getNucleus().getBorderList());
+	}
+	
+	// Add a point at the screen position in the main chart
+	private void addPoint(Point pt){
+		
+		// Convert the screen position to chart coordinates
+		XYPlot xy = dualPanel.getMainPanel().getChart().getXYPlot();
+	    Rectangle2D dataArea = dualPanel.getMainPanel().getChartRenderingInfo()
+	        .getPlotInfo().getDataArea();
+	    Point2D p = dualPanel.getMainPanel().translateScreenToJava2D(pt);
+	    
+	    double newY = xy.getRangeAxis().java2DToValue(p.getY(), dataArea,
+		        xy.getRangeAxisEdge());
+		    
+		double newX = xy.getDomainAxis().java2DToValue(p.getX(), dataArea,
+			        xy.getDomainAxisEdge());
+		
+		
+		
+		
+		log("Adding point at "+newX+", "+newY);
+		XYPoint newPoint = new XYPoint(newX, newY);
+		
+		// Get the border point that is closest to the clicked point
+		BorderPoint bp = workingCell.getNucleus().findClosestBorderPoint(newPoint);
+		
+		List<BorderPoint> newList = new ArrayList<BorderPoint>();
+		
+		// Insert the new point after the closest existing point to it
+		List<BorderPoint> borderList = workingCell.getNucleus().getBorderList();
+		Iterator<BorderPoint> it = borderList.iterator();
+		while(it.hasNext()){
+			BorderPoint point = it.next();
+			newList.add(point);
+			
+			if(point.equals(bp)){
+				newList.add(new BorderPoint(newPoint));
+			}
+		}
+		setCellChanged(true);
+		updateWorkingCell(newList);
+	    
+		
 	}
 	
 	private void deleteSelectedPoints(){
@@ -397,18 +462,30 @@ public class CellBorderAdjustmentDialog
 		
 		// Get the positions of segment boundaries
 		SegmentedProfile templateProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
-		Map<BorderTagObject, Integer> tagMap = workingCell.getNucleus().getBorderTags();
+		int oldLength = templateProfile.size();
 		
 		try {
 			workingCell.getNucleus().calculateProfiles();
 			
-			// Use the previous boundary positions as a template on the new profile
-//			SegmentedProfile updatedProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
-//			updatedProfile = updatedProfile.frankenNormaliseToProfile(templateProfile);
-//			workingCell.getNucleus().setProfile(ProfileType.ANGLE, updatedProfile);
+			int newLength = workingCell.getNucleus().getProfile(ProfileType.ANGLE).size();
 			
 			// Get the border tag positions, and set equivalent positions in the new profile
+			Map<BorderTagObject, Integer> tagMap = workingCell.getNucleus().getBorderTags();
 			
+			Map<BorderTagObject, Integer> newMap = new HashMap<BorderTagObject, Integer>();
+			
+			for(BorderTagObject tag : tagMap.keySet()){
+				int oldIndex = tagMap.get(tag);
+				
+				
+				double proportion = (double) oldIndex / (double) oldLength;
+				
+				int newIndex = (int) ( proportion * (double) newLength);
+				fine(tag.toString()+" From: "+oldIndex+" : To: "+newIndex);
+//				workingCell.getNucleus().setBorderTag(tag, newIndex);
+				newMap.put(tag, newIndex);
+			}
+			workingCell.getNucleus().replaceBorderTags(newMap);
 			
 		} catch (Exception e) {
 			error("Cannot calculate profiles for cell", e);
@@ -520,38 +597,56 @@ public class CellBorderAdjustmentDialog
 	@Override
 	public void mousePressed(MouseEvent e) {
 
-	    EntityCollection entities = dualPanel.getMainPanel().getChartRenderingInfo().getEntityCollection();
+		// For both delete and select, we want to get the points under the ellipse
+		if(selectToggle.isSelected() || deleteToggle.isSelected()){
+			EntityCollection entities = dualPanel.getMainPanel().getChartRenderingInfo().getEntityCollection();
+
+			if( (e.getModifiers() & InputEvent.BUTTON1_MASK) ==InputEvent.BUTTON1_MASK){
+				// Find the entities under the ellipse overlay
+
+				XYDataset ds = dualPanel.getMainPanel().getChart().getXYPlot().getDataset();
+				for(Object entity : entities.getEntities()){
+
+					if(entity instanceof XYItemEntity){
+
+						xyItemEntity = (XYItemEntity) entity;
+
+						int series = xyItemEntity.getSeriesIndex();
+						int item   = xyItemEntity.getItem();
+
+						double xVal = ds.getXValue(series, item);
+						double yVal = ds.getYValue(series, item);
+
+						if(ellipse.contains(xVal,  yVal)){
+							XYPoint clickedPoint = new XYPoint(xVal, yVal);
+							selectClickedPoint(clickedPoint);
+						}
+					}
+
+				}
+			}
+		}
 	    
+		// Detect right-click and clear
+	    if(selectToggle.isSelected()){
 
-	    if( (e.getModifiers() & InputEvent.BUTTON1_MASK) ==InputEvent.BUTTON1_MASK){
-	    	// Find the entities under the ellipse overlay
-
-	    	XYDataset ds = dualPanel.getMainPanel().getChart().getXYPlot().getDataset();
-	    	for(Object entity : entities.getEntities()){
-
-	    		if(entity instanceof XYItemEntity){
-
-	    			xyItemEntity = (XYItemEntity) entity;
-
-	    			int series = xyItemEntity.getSeriesIndex();
-	    			int item   = xyItemEntity.getItem();
-
-	    			double xVal = ds.getXValue(series, item);
-	    			double yVal = ds.getYValue(series, item);
-
-	    			if(ellipse.contains(xVal,  yVal)){
-	    				XYPoint clickedPoint = new XYPoint(xVal, yVal);
-	    				selectClickedPoint(clickedPoint);
-	    			}
-	    		}
-
+	    	if( (e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){
+	    		clearSelectedPoints();
 	    	}
 	    }
 	    
-	    if( (e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){
-	    	clearSelectedPoints();
+	    
+	    if(deleteToggle.isSelected()){
+	    	if( (e.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK){
+	    		deleteSelectedPoints();
+	    	}
+	    	
 	    }
 	    
+	    if(addToggle.isSelected()){
+	    	log("Adding point");
+	    	addPoint(e.getPoint());
+	    }
 	    
 //	    ChartMouseEvent cme = new ChartMouseEvent(dualPanel.getMainPanel().getChart(), e, entities
 //	        .getEntity(x, y));
@@ -618,7 +713,7 @@ public class CellBorderAdjustmentDialog
 			if(finalMovePointX != initialMovePointX && finalMovePointY != initialMovePointY){
 
 				// Point was moved, get the item to change in the dataset
-				log("Released at "+finalMovePointX+" , "+finalMovePointY);
+				fine("Released at "+finalMovePointX+" , "+finalMovePointY);
 				moveSelectedPoint();
 			}
 
@@ -636,12 +731,12 @@ public class CellBorderAdjustmentDialog
 		// + = zoom in
 		
 		if(rotation>0){
-			ellipse.setXRadius(ellipse.getXRadius()/2);
-			ellipse.setYRadius(ellipse.getYRadius()/2);
+			ellipse.setXRadius(ellipse.getXRadius()/1.5);
+			ellipse.setYRadius(ellipse.getYRadius()/1.5);
 		}
 		if(rotation<0){
-			ellipse.setXRadius(ellipse.getXRadius()*2);
-			ellipse.setYRadius(ellipse.getYRadius()*2);
+			ellipse.setXRadius(ellipse.getXRadius()*1.5);
+			ellipse.setYRadius(ellipse.getYRadius()*1.5);
 		}
 		
 		

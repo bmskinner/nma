@@ -676,6 +676,31 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	
+	public void replaceBorderTags(Map<BorderTagObject, Integer> tagMap){
+		
+		int oldRP = getBorderIndex(BorderTagObject.REFERENCE_POINT);
+		SegmentedProfile p = getProfile(ProfileType.ANGLE);
+		
+		this.borderTags = tagMap;
+		
+		
+		int newRP = getBorderIndex(BorderTagObject.REFERENCE_POINT);
+		int diff  = newRP-oldRP;
+		p.nudgeSegments(diff);
+		finest("Old RP at "+oldRP);
+		finest("New RP at "+newRP);
+		finest("Moving segments by"+diff);
+		setProfile(ProfileType.ANGLE, p);
+		
+		int newOP = getBorderIndex(BorderTagObject.ORIENTATION_POINT);
+		int intersectionIndex = this.getBorderIndex(this.findOppositeBorder( this.getBorderPoint(newOP) ));
+		this.borderTags.put(BorderTagObject.INTERSECTION_POINT, intersectionIndex);
+		
+		
+		updateVerticallyRotatedNucleus();		
+		
+	}
+	
 		
 	public boolean hasBorderTag(BorderTagObject tag){
 		return this.borderTags.containsKey(tag);

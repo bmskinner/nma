@@ -386,6 +386,15 @@ public interface CellularComponent {
     point. Defaults to input point if unable to find point.
 	 */
 	public BorderPoint findOrthogonalBorderPoint(BorderPoint a);
+	
+	
+	/**
+	 * Find the border point in this object that is closest to 
+	 * the given XYPoint
+	 * @param p
+	 * @return
+	 */
+	public BorderPoint findClosestBorderPoint(XYPoint p);
 
 		
 	

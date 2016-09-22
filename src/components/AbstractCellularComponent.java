@@ -878,6 +878,23 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 		return orthgonalPoint;
 	}
 	
+	
+	
+	public BorderPoint findClosestBorderPoint(XYPoint p){
+		
+		double minDist = Double.MAX_VALUE;
+		BorderPoint result = null;
+		
+		for(BorderPoint bp : this.borderList){
+			
+			if(bp.getLengthTo(p)< minDist){
+				minDist = bp.getLengthTo(p);
+				result = bp;
+			}
+		}
+		return result;
+	}
+	
 
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 //		finest("\tReading abstract cellular component");

@@ -149,5 +149,14 @@ public interface Taggable extends Profileable {
 	 * @return the offset index, or -1 if the reference tag is not present
 	 */
 	public int getOffsetBorderIndex(BorderTagObject reference, int index);
+	
+	
+	/**
+	 * This will completely replace the map of border tags with new
+	 * positions, without attempting vertical updating, or RP shifting
+	 * until after all new points are set. Used in the CellBorderAdjustmentDialog
+	 * @param tagMap
+	 */
+	public void replaceBorderTags(Map<BorderTagObject, Integer> tagMap);
 
 }
