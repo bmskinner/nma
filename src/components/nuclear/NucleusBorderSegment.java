@@ -962,6 +962,53 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 	}
 	
 	/**
+	 * Scale the segments in the list to a new total length, preserving segment fractional
+	 * lengths as best as possible
+	 * @param list the segments
+	 * @param newLength the new length
+	 * @return
+	 */
+	public static List<NucleusBorderSegment> scaleSegments(List<NucleusBorderSegment> list, int newLength) throws ProfileException{
+		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
+		
+		int segStart = list.get(0).getStartIndex();
+		for(NucleusBorderSegment segment : list){
+			
+			double proportion = (double) segment.length() / (double) segment.getTotalLength();
+			
+			int newSegLength =  (int) ( (double) newLength * proportion);
+			
+			int segEnd = AbstractCellularComponent.wrapIndex(segStart + newSegLength, newLength);
+			
+			
+			NucleusBorderSegment newSeg = new NucleusBorderSegment(segStart, 
+					segEnd, 
+					newLength,
+					segment.getID());
+			
+			segStart = segEnd;
+						
+			
+//			// adjust merge sources also and readd
+//			if(segment.hasMergeSources()){
+//				
+//
+//				List<NucleusBorderSegment> adjustedMergeSources = nudgeUnlinked(segment.getMergeSources(), value);
+//				for(NucleusBorderSegment newMergeSource : adjustedMergeSources){
+//					newSeg.addMergeSource(newMergeSource);
+//				}
+//				
+//
+//			}
+			
+			result.add( newSeg );
+		}
+		
+		linkSegments(result);
+		return result;
+	}
+	
+	/**
 	 * Make a copy of the given list of linked segments, and link the new segments
 	 * @param list the segments to copy
 	 * @return a new list

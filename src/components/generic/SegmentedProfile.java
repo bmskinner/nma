@@ -374,6 +374,23 @@ public class SegmentedProfile extends Profile implements Serializable {
 		}
 	}
 	
+//	/**
+//	 * Replace the segments in the profile with the given list. If the
+//	 * segments come from a different length of profile to the current
+//	 * profile, each segment is adjusted to an equivalent proportion
+//	 * of the profile.
+//	 * @param segments
+//	 */
+//	public void setNormalisedSegments(List<NucleusBorderSegment> segments){
+//		if(segments.get(0).getTotalLength()!=this.size()){
+//			finer("Profile lengths are the same, falling back to default method");
+//			setSegments(segments);
+//		}
+//		
+//		..
+//		
+//	}
+	
 	/**
 	 * Remove the segments from this profile
 	 */
@@ -609,14 +626,14 @@ public class SegmentedProfile extends Profile implements Serializable {
 	}
 	
 	
-	
+			
 	/**
 	 * Interpolate the segments of this profile to the proportional lengths of the
 	 * segments in the template. The template must have the same number of segments.
 	 * Both this and the template must be already offset to start at equivalent positions.
 	 * The two profiles must have the same segment ids
 	 * @param template the profile with segments to copy.
-	 * @return
+	 * @return a new profile with normalised segments
 	 * @throws Exception
 	 */
 	public SegmentedProfile frankenNormaliseToProfile(SegmentedProfile template) throws Exception {

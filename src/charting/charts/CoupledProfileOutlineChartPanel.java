@@ -112,7 +112,9 @@ public class CoupledProfileOutlineChartPanel implements Loggable{
 				
 				int xValue = getProfileIndexFromChart(e.getX());
 				
-				
+				if(xValue<0 || xValue >= cell.getNucleus().getBorderLength()){
+					return;
+				}
 				// Find the y-value in the chart at this point
 				// Take from the angle profile directly
 				double yValue = cell.getNucleus().getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).get(xValue);

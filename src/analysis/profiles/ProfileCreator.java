@@ -70,10 +70,13 @@ public class ProfileCreator {
 
 		List<NucleusBorderSegment> segments = null;
 				
+		SegmentedProfile templateProfile = null;
 		// store segments to reapply later
 		if(target.hasProfile(ProfileType.ANGLE)){
 			if(target.getProfile(ProfileType.ANGLE).hasSegments()){
-				segments = target.getProfile(ProfileType.ANGLE).getSegments();
+				templateProfile = target.getProfile(ProfileType.ANGLE);
+				segments = templateProfile.getSegments();
+				
 			}
 		}
 		
@@ -115,7 +118,23 @@ public class ProfileCreator {
 		// Reapply any segments that were present in the profile
 		SegmentedProfile newProfile = new SegmentedProfile(angles);
 		if(segments!=null){
-			newProfile.setSegments(segments);
+			
+			// If the border list has changed, the profile lengths will be different
+			// In this case, add and normalise the segment lengths
+			if(segments.get(0).getTotalLength() != target.getBorderLength() ){
+
+
+				
+				try {
+					segments = NucleusBorderSegment.scaleSegments(segments, target.getBorderLength());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			
+				newProfile.setSegments(segments);
+			}
+			
 		}
 		return newProfile;
 	}

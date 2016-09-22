@@ -64,6 +64,9 @@ import org.jfree.ui.RectangleEdge;
 
 import analysis.AnalysisDataset;
 import components.Cell;
+import components.generic.BorderTagObject;
+import components.generic.ProfileType;
+import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import gui.ChartSetEvent;
@@ -145,6 +148,7 @@ public class CellBorderAdjustmentDialog
 	@Override
 	public void load(final Cell cell, final AnalysisDataset dataset){
 		super.load(cell, dataset);
+		
 		this.setTitle("Adjusting border in "+cell.getNucleus().getNameAndNumber());
 		updateCharts(cell);
 		setVisible(true);
@@ -307,7 +311,7 @@ public class CellBorderAdjustmentDialog
 				break;
 			}
 		}
-//		log("Updating cell");
+		setCellChanged(true);
 		updateWorkingCell(workingCell.getNucleus().getBorderList());
 	}
 	
@@ -321,7 +325,7 @@ public class CellBorderAdjustmentDialog
 				it.remove();
 			}
 		}
-
+		setCellChanged(true);
 		updateWorkingCell(borderList);
 
 		
@@ -368,12 +372,39 @@ public class CellBorderAdjustmentDialog
 		updateCharts(workingCell);
 		clearSelectedPoints();
 		
-//		log("Restoring ranges");
+
+		// Recalculate profiles for the cell, and update segments to best fit positions
+		updateWorkingCellProfiles();
+		
 		
 		dualPanel.getMainPanel().getChart().getXYPlot().getDomainAxis().setRange(domainRange);
 		dualPanel.getMainPanel().getChart().getXYPlot().getRangeAxis().setRange(rangeRange);
 
 	}
+	
+	private void updateWorkingCellProfiles(){
+		
+		// Get the positions of segment boundaries
+		SegmentedProfile templateProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
+		Map<BorderTagObject, Integer> tagMap = workingCell.getNucleus().getBorderTags();
+		
+		try {
+			workingCell.getNucleus().calculateProfiles();
+			
+			// Use the previous boundary positions as a template on the new profile
+//			SegmentedProfile updatedProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
+//			updatedProfile = updatedProfile.frankenNormaliseToProfile(templateProfile);
+//			workingCell.getNucleus().setProfile(ProfileType.ANGLE, updatedProfile);
+			
+			// Get the border tag positions, and set equivalent positions in the new profile
+			
+			
+		} catch (Exception e) {
+			error("Cannot calculate profiles for cell", e);
+		}
+
+	}
+		
 	
 	public void movePoint(MouseEvent me) {
 	    if (canMove) {
@@ -420,7 +451,7 @@ public class CellBorderAdjustmentDialog
 
 	@Override
 	public void chartSetEventReceived(ChartSetEvent e) {
-		// TODO Auto-generated method stub
+		// This is required in the setup for ExportableChartPanel
 		
 	}
 

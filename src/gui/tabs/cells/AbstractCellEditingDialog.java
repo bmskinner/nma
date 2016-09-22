@@ -84,7 +84,7 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
 		if(cell==null || dataset==null){
 			throw new IllegalArgumentException("Cell or dataset is null");
 		}
-
+		setCellChanged(false);
 		this.cell = cell;
 		this.dataset = dataset;
 		this.workingCell = new Cell(cell);
