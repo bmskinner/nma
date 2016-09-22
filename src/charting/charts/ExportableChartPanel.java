@@ -139,8 +139,12 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 		}
 	}
 	
-	public boolean getFixedAspectRatio(){
+	public boolean isFixedAspectRatio(){
 		return isFixedAspectRatio;
+	}
+	
+	public double getAspectRatio(){
+		return (double) this.getWidth() / (double) this.getHeight();
 	}
 	
 	/* (non-Javadoc)

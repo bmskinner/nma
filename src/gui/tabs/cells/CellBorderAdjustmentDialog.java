@@ -50,11 +50,9 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.entity.ChartEntity;
 import org.jfree.chart.entity.EntityCollection;
 import org.jfree.chart.entity.XYItemEntity;
 import org.jfree.chart.plot.XYPlot;
@@ -180,10 +178,7 @@ public class CellBorderAdjustmentDialog
 			mainPanel.addMouseMotionListener(this);
 			mainPanel.addMouseListener(this);
 			mainPanel.addMouseWheelListener(this);
-			
-			ellipse = new EllipticalOverlayObject(0, 3, 0, 3);
-			mainPanel.addOverlay( new EllipticalOverlay(ellipse));
-			
+
 			JPanel chartPanel = new JPanel();
 			chartPanel.setLayout(new GridBagLayout());
 			
@@ -211,6 +206,15 @@ public class CellBorderAdjustmentDialog
 			Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 			this.setPreferredSize(new Dimension(  (int)(screenSize.width*0.9), (int)(screenSize.height*0.5)));
 			this.pack();
+			
+			// Create an ellipse overlay for the main panel with circular appearance
+			double aspect = mainPanel.getAspectRatio();
+			
+			double h = 3;
+			double w = h / aspect; 
+			
+			ellipse = new EllipticalOverlayObject(0, w, 0, h);
+			mainPanel.addOverlay( new EllipticalOverlay(ellipse));
 			
 		} catch (Exception e){
 			fine("Error making UI", e);
@@ -281,7 +285,14 @@ public class CellBorderAdjustmentDialog
 				
 				if(! selectedPoints.containsKey(point)){
 
-					Ellipse2D r = new Ellipse2D.Double(point.getX()-0.3,point.getY()-0.3, 0.6, 0.6);
+					double aspect = dualPanel.getMainPanel().getAspectRatio();
+					double radius = 0.6;
+					double h = radius*2;
+					double w = h / aspect; 
+					
+					Ellipse2D r = new Ellipse2D.Double(point.getX()-(w/2),
+							point.getY()-radius,
+							w, h);
 					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, Color.BLUE);
 					selectedPoints.put(point, a);		
 					dualPanel.getMainPanel().getChart().getXYPlot().addAnnotation(a);

@@ -62,6 +62,8 @@ public class ChartOptionsBuilder {
 	private boolean showPoints         = false;
 	private boolean showLines          = true;
 	private boolean showAnnotations    = true;
+	private boolean showBorderTags     = true; // used in cell outlines
+	private boolean showSignals        = true; // used in cell outlines
 	
 	// Options for nucleus mesh creation
 	private boolean showMesh           = false;
@@ -261,6 +263,16 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
+	public ChartOptionsBuilder setShowBorderTags(boolean b){
+		this.showBorderTags = b;
+		return this;
+	}
+	
+	public ChartOptionsBuilder setShowSignals(boolean b){
+		this.showSignals = b;
+		return this;
+	}
+	
 	
 	public ChartOptions build(){
 		ChartOptions result =  new ChartOptions(list);
@@ -298,6 +310,8 @@ public class ChartOptionsBuilder {
 		result.setCell(cell);
 		result.setComponent(component);
 		result.setShowWarp(showWarp);
+		result.setShowBorderTags(showBorderTags);
+		result.setShowSignals(showSignals);
 		
 		result.setTarget(target);
 		return result;

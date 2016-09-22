@@ -416,25 +416,31 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	
 		
 		// get the index tags
-		XYDataset tags = NucleusDatasetCreator.getInstance().createNucleusIndexTags(cell);
-		hash.put(hash.size(), "Tags"); // add to the first free entry
-		datasetHash.put(datasetHash.size(), tags);
-		finest("Created border index tags");
-		
+
+		if(options.isShowBorderTags()){
+			XYDataset tags = NucleusDatasetCreator.getInstance().createNucleusIndexTags(cell);
+			hash.put(hash.size(), "Tags"); // add to the first free entry
+			datasetHash.put(datasetHash.size(), tags);
+			finest("Created border index tags");
+		}
+
 		// get the signals datasets and add each group to the hash
-		finest("Rotation mode is actual, fetching signals");
-		if(cell.getNucleus().getSignalCollection().hasSignal()){
-			List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.getInstance().createSignalOutlines(cell, dataset);
+		
+		if(options.isShowSignals()){
+			finest("Rotation mode is actual, fetching signals");
+			if(cell.getNucleus().getSignalCollection().hasSignal()){
+				List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.getInstance().createSignalOutlines(cell, dataset);
 
-			for(XYDataset d : signalsDatasets){
+				for(XYDataset d : signalsDatasets){
 
-				String name = "default_0";
-				for (int i = 0; i < d.getSeriesCount(); i++) {
-					name = (String) d.getSeriesKey(i);	
+					String name = "default_0";
+					for (int i = 0; i < d.getSeriesCount(); i++) {
+						name = (String) d.getSeriesKey(i);	
+					}
+					UUID signalGroup = getSignalGroupFromLabel(name);
+					hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
+					datasetHash.put(datasetHash.size(), d);
 				}
-				UUID signalGroup = getSignalGroupFromLabel(name);
-				hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
-				datasetHash.put(datasetHash.size(), d);
 			}
 		}
 

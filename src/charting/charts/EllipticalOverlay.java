@@ -217,7 +217,7 @@ public class EllipticalOverlay
     protected void drawVerticalEllipse(Graphics2D g2, Rectangle2D dataArea,
     		double minx, double maxx, double miny, double maxy, EllipticalOverlayObject ellipse) {
     	        
-        if (minx >= dataArea.getMinX() && minx <= dataArea.getMaxX()) {
+//        if (minx >= dataArea.getMinX() && minx <= dataArea.getMaxX()) {
         	
         	double w = maxx - minx;
         	double h = maxy - miny;
@@ -233,7 +233,7 @@ public class EllipticalOverlay
 
             g2.setPaint(savedPaint);
             g2.setStroke(savedStroke);
-        }
+//        }
     }
  
     /**

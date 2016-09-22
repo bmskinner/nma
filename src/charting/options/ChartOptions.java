@@ -50,6 +50,8 @@ public class ChartOptions extends AbstractOptions {
 	private boolean showPoints         = false;
 	private boolean showLines          = true;
 	private boolean showAnnotations    = true;
+	private boolean showBorderTags     = true; // used in cell outlines
+	private boolean showSignals        = true; // used in cell outlines
 	
 	// Options for nucleus mesh creation
 	private boolean showMesh           = false;
@@ -314,6 +316,22 @@ public class ChartOptions extends AbstractOptions {
 		this.showWarp = showWarp;
 	}
 
+	public boolean isShowBorderTags() {
+		return showBorderTags;
+	}
+
+	public void setShowBorderTags(boolean showBorderTags) {
+		this.showBorderTags = showBorderTags;
+	}
+
+	public boolean isShowSignals() {
+		return showSignals;
+	}
+
+	public void setShowSignals(boolean showSignals) {
+		this.showSignals = showSignals;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -355,6 +373,9 @@ public class ChartOptions extends AbstractOptions {
 		result = prime * result
 				+ ((component == null) ? 0 : component.hashCode());
 		result = prime * result + (showWarp ? 1231 : 1237);
+		
+		result = prime * result + (showSignals    ? 1231 : 1237);
+		result = prime * result + (showBorderTags ? 1231 : 1237);
 		
 		return result;
 	}
@@ -472,6 +493,11 @@ public class ChartOptions extends AbstractOptions {
 		if (showWarp != other.showWarp)
 			return false;
 		
+		if (showSignals != other.showSignals)
+			return false;
+		
+		if (showBorderTags != other.showBorderTags)
+			return false;
 		
 		return true;
 	}

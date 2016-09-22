@@ -340,6 +340,8 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 				.setDatasets(dataset)
 				.setCell(cell)
 				.setRotationMode(RotationMode.ACTUAL)
+				.setShowSignals(false)
+				.setShowBorderTags(false)
 				.setShowAnnotations(true)
 				.setInvertYAxis( true ) // only invert for actual
 				.setShowPoints(false)
