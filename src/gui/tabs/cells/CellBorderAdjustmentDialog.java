@@ -66,6 +66,8 @@ import gui.ChartSetEventListener;
 import gui.RotationMode;
 import gui.components.panels.DualChartPanel;
 import charting.charts.ConsensusNucleusChartFactory;
+import charting.charts.EllipticalOverlay;
+import charting.charts.EllipticalOverlayObject;
 import charting.charts.ExportableChartPanel;
 import charting.charts.OutlineChartFactory;
 import charting.charts.CoupledProfileOutlineChartPanel.BorderPointEvent;
@@ -165,6 +167,9 @@ public class CellBorderAdjustmentDialog
 			mainPanel.addBorderPointEventListener(this);
 			mainPanel.addMouseMotionListener(this);
 			mainPanel.addMouseListener(this);
+			
+			EllipticalOverlayObject ellipse = new EllipticalOverlayObject(0, 3, 0, 3);
+			mainPanel.addOverlay( new EllipticalOverlay(ellipse));
 			
 			JPanel chartPanel = new JPanel();
 			chartPanel.setLayout(new GridBagLayout());
@@ -392,38 +397,6 @@ public class CellBorderAdjustmentDialog
 		dualPanel.getMainPanel().getChart().getXYPlot().getRangeAxis().setRange(rangeRange);
 
 	}
-
-//	@Override
-//	public void chartMouseMoved(ChartMouseEvent event) {
-////		int mouseX = event.getTrigger().getX();
-////		int mouseY = event.getTrigger().getY();
-//		
-//		
-//		
-//		
-//
-//
-////		Point2D p = panel.translateScreenToJava2D(
-////		new Point(mouseX, mouseY));
-////		XYPlot plot = (XYPlot) panel.getChart().getPlot();
-////		Rectangle2D plotArea = panel.getScreenDataArea();
-////		ValueAxis domainAxis = plot.getDomainAxis();
-////		RectangleEdge domainAxisEdge = plot.getDomainAxisEdge();
-////		ValueAxis rangeAxis = plot.getRangeAxis();
-////		RectangleEdge rangeAxisEdge = plot.getRangeAxisEdge();
-////		double chartX = domainAxis.java2DToValue(p.getX(), plotArea,
-////		domainAxisEdge);
-////		double chartY = rangeAxis.java2DToValue(p.getY(), plotArea,
-////		rangeAxisEdge);
-////		DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-////		dfs.setDecimalSeparator('.');
-////		NumberFormat f = new DecimalFormat("#00.00", dfs);
-////
-////
-//////		log("mouseX:"+f.format(new Double(chartX)));
-//////		log("mouseY:"+f.format(new Double(chartY)));
-////		
-//	}
 	
 	public void movePoint(MouseEvent me) {
 	    if (canMove) {
