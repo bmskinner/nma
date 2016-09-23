@@ -206,6 +206,7 @@ public abstract class AbstractCellularComponent
 			try {
 				this.setStatistic(stat, a.getStatistic(stat, MeasurementScale.PIXELS));
 			} catch (Exception e) {
+				fine("Error setting statistic: "+stat, e);
 				this.setStatistic(stat, 0);
 			}
 		}
@@ -218,6 +219,8 @@ public abstract class AbstractCellularComponent
 		this.borderList        = a.getBorderList();
 		this.centreOfMass      = new XYPoint(a.getCentreOfMass());
 	}
+	
+
 	
 	public UUID getID() {
 		return this.id;
@@ -756,6 +759,10 @@ public abstract class AbstractCellularComponent
 		ypoints[borderList.size()] = (float) borderList.get(0).getY() + yOffset;
 
 		return new FloatPolygon(xpoints, ypoints);
+	}
+	
+	public int wrapIndex(int i){
+		return AbstractCellularComponent.wrapIndex(i, this.getBorderLength());
 	}
 	
 	

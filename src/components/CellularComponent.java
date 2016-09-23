@@ -91,11 +91,11 @@ public interface CellularComponent {
 	/**
 	 * Get the position of the object in the 
 	 * original image. The indexes in the array are
-	 * 0 - X_BASE of the bounding box
-	 * 1 - Y_BASE of the bounding box
-	 * 2 - WIDTH of the bounding box
-	 * 3 - HEIGHT of the bounding box
-	 * @return
+	 * {@link #X_BASE} of the bounding box,
+	 * {@link #Y_BASE} of the bounding box,
+	 * {@link #WIDTH} of the bounding box and
+	 * {@link #HEIGHT} of the bounding box
+	 * @return the array with the position 
 	 */
 	public double[] getPosition();
 	
@@ -107,6 +107,13 @@ public interface CellularComponent {
 	 * @return true if the components have the same ID
 	 */
 	public boolean equals(CellularComponent c);
+	
+	
+	/**
+	 * Create a defensive copy of this object
+	 * @return
+	 */
+	public CellularComponent duplicate();
 	
 	/**
 	 * Get the image file the component was found in
@@ -120,6 +127,10 @@ public interface CellularComponent {
 	 */
 	public void setSourceFile(File sourceFile);
 		
+	/**
+	 * Get the RGB channel the object was detected in
+	 * @return
+	 */
 	public int getChannel();
 	
 	/**
@@ -392,6 +403,14 @@ public interface CellularComponent {
 	 * @param point the new centre of mass
 	 */
 	public void offset(double xOffset, double yOffset);
+	
+
+	/**
+	 * Wrap arrays. If an index falls of the end, it is returned to the start and vice versa
+	 * @param i the index
+	 * @return the index within the border list
+	 */
+	public int wrapIndex(int i);
 	
 	/**
 	 * Create a polygon with the same position as the component

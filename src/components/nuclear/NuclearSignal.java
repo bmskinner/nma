@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import components.AbstractCellularComponent;
+import components.CellularComponent;
 import components.generic.XYPoint;
 
 /**
@@ -91,5 +92,10 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 	public void alignVertically() {
 		return;
 		
+	}
+
+	@Override
+	public CellularComponent duplicate() {
+		return new NuclearSignal(this);
 	}
 }

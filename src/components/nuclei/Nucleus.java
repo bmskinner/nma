@@ -34,7 +34,13 @@ import components.nuclear.SignalCollection;
  * @author bms41
  *
  */
-public interface Nucleus extends CellularComponent, Indexable, Profileable, Taggable, Rotatable {
+public interface Nucleus 
+	extends CellularComponent, 
+	        Indexable, 
+	        Profileable, 
+	        Taggable,
+	        Rotatable { // Note that we use Rotatable here although it is provided to objects already through the AbstractCellularComponent
+	//so that it can be accessed by the Nucleus interface itself.
 	
 	// for debugging - use in calling dumpInfo()
 	public static final int ALL_POINTS = 0;

@@ -719,7 +719,9 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	public int getOffsetBorderIndex(BorderTagObject reference, int index){
 		if(this.getBorderIndex(reference)>-1){
-			int newIndex =  AbstractCellularComponent.wrapIndex( index+this.getBorderIndex(reference) , this.getBorderLength() );
+			int newIndex =  wrapIndex( index+this.getBorderIndex(reference) );
+			
+//			int newIndex =  AbstractCellularComponent.wrapIndex( index+this.getBorderIndex(reference) , this.getBorderLength() );
 			return newIndex;
 		}
 		return -1;

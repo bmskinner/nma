@@ -50,4 +50,9 @@ public class Acrosome extends  AbstractCellularComponent {
 		
 	}
 
+	@Override
+	public CellularComponent duplicate() {
+		return new Acrosome(this);
+	}
+
 }

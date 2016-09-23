@@ -52,4 +52,9 @@ public class Mitochondrion extends AbstractCellularComponent {
 		
 	}
 
+	@Override
+	public CellularComponent duplicate() {
+		return new Mitochondrion(this);
+	}
+
 }
