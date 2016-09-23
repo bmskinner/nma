@@ -365,8 +365,6 @@ public class CellBorderAdjustmentDialog
 			        xy.getDomainAxisEdge());
 		
 		
-		
-		
 		fine("Adding point at "+newX+", "+newY);
 		XYPoint newPoint = new XYPoint(newX, newY);
 		

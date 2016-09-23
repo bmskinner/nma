@@ -53,19 +53,33 @@ import stats.Stats;
 import utility.Constants;
 import utility.Utils;
 
-public abstract class AbstractCellularComponent implements CellularComponent, Serializable, Loggable, Rotatable {
+public abstract class AbstractCellularComponent 
+	implements CellularComponent,
+	           Serializable, 
+	           Loggable, 
+	           Rotatable {
 
 	private static final long serialVersionUID = 1L;
 	private final UUID id;
 	
 	/**
 	 * The original position in the source image of the component.
+	 * Values are stored at the indexes in {@link CellularComponent.X_BASE}, 
+	 * {@link CellularComponent.Y_BASE}, {@link CellularComponent.WIDTH} 
+	 * and {@link CellularComponent.HEIGHT}
+	 * @see AbstractCellularComponent#getPosition()
 	 */
-
 	private double[] position;
 	
+	/**
+	 * The centre of the object.
+	 */
 	private XYPoint centreOfMass = new XYPoint(0,0);
 	
+	/**
+	 * The statistical values stored for this object, which should
+	 * be an enum implementing {@link PlottableStatistic}
+	 */
 	private Map<PlottableStatistic, Double> statistics = new HashMap<PlottableStatistic, Double>();
 		
 	/**
@@ -79,20 +93,32 @@ public abstract class AbstractCellularComponent implements CellularComponent, Se
 	/**
 	 * The folder containing the sourceFile. This is detected
 	 * on dataset loading as a relative path from the .nmd
+	 * e.g. C:\MyImageFolder\
 	 */
 	private File sourceFolder;
 	
 
 	/**
 	 * The name of the image which the component was detected
+	 * e.g. MyImage.tiff
 	 */
 	private String sourceFileName;
 	
-	private int channel; // the RGB channel in which the signal was seen
+	/**
+	 * The RGB channel in which the signal was seen
+	 */
+	private int channel;
 	
-	private double scale = 1; // allow conversion between pixels and SI units. The length of a micron in pixels
+	/**
+	 * The length of a micron in pixels. Allows conversion between pixels and SI units. 
+	 * Set to 1 by default. 
+	 * @see AbstractCellularComponent#setScale()
+	 */
+	private double scale = 1; 
 	
-	// The points around the border of the object
+	/**
+	 * The points around the border of the object. 
+	 */
 	private List<BorderPoint> borderList    = new ArrayList<BorderPoint>(0);
 	
 	private transient SoftReference<ImageProcessor> imageRef = new SoftReference<ImageProcessor>(null); // allow caching of images while memory is available

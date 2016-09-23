@@ -33,26 +33,59 @@ import components.nuclear.BorderPoint;
 import stats.PlottableStatistic;
 
 /**
- * These methods are provided through the AbstractCellularComponent,
- * from which all other components should be derived
+ * This interface provides the basic methods for a component
+ * of a cell - an object with a border, a source image, and a
+ * size in microns. 
  * @author bms41
- *
- */
-/**
- * @author ben
  *
  */
 public interface CellularComponent {
 		
-	public UUID getID();
-
+	
+	/**
+	 * The array index of the left-most x coordinate of the object
+	 * in {@link #setPosition(double[])} and {@link #getPosition(double[])}
+	 */
 	public static final int X_BASE 	= 0;
+	
+	/**
+	 * The array index of the top-most (lowest) y coordinate of the object
+	 * in {@link #setPosition(double[])} and {@link #getPosition(double[])}
+	 */
 	public static final int Y_BASE 	= 1;
+	
+	/**
+	 * The array index of the width of the object
+	 * in {@link #setPosition(double[])} and {@link #getPosition(double[])}
+	 */
 	public static final int WIDTH 	= 2;
+	
+	/**
+	 * The array index of the height of the object
+	 * in {@link #setPosition(double[])} and {@link #getPosition(double[])}
+	 */
 	public static final int HEIGHT 	= 3;
 	
+	/**
+	 * Get the UUID of the object
+	 * @return
+	 */
+	public UUID getID();
+
+	/**
+	 * The pixel border added to the edges of the component
+	 * when fetching and cropping its source image. This prevents
+	 * the component nestling right up to the edges of the 
+	 * resulting cropped image
+	 */
 	public static final int COMPONENT_BUFFER = 10;
 	
+	/**
+	 * A string prepended to any exported image files, so that
+	 * they will be ignored by the program on subsequent analyses.
+	 * Not really used now, since image exports are not longer performed
+	 * by default
+	 */
 	public static final String IMAGE_PREFIX = "export.";
 	
 	/**
@@ -122,27 +155,36 @@ public interface CellularComponent {
 	public double getStatistic(PlottableStatistic stat, MeasurementScale scale);
 	
 	/**
-	 * Get the value of the given statistic for this nucleus.
-	 * Note that NucleusStatistic.VARIABILILTY returns zero, 
-	 * as this must be calculated at the collection level. This converts exceptions
-	 * from getStatistic() into RuntimeExceptions, so the method can be used in streams
+	 * Get the value of the given {@link PlottableStatistic} for this nucleus.
+	 * Note that {@link NucleusStatistic.VARIABILILTY} returns zero, 
+	 * as this must be calculated at the collection level, not the object level. 
+	 * This method converts exceptions from {@link CellularComponent#getStatistic()} into RuntimeExceptions,
+	 *  so the method can be used in streams
 	 * @param stat the statistic to fetch
 	 * @param scale the units to return values in
-	 * @return the value or zero if stat.equals(NucleusStatistic.VARIABILILTY)==true
+	 * @return the value or zero if stat.equals( {@link NucleusStatistic.VARIABILILTY})==true
 	 */
 	public double getSafeStatistic(PlottableStatistic stat, MeasurementScale scale);
 	
 	
 	/**
-	 * Get the statistic at the default scale (MeasurementScale.PIXELS)
+	 * Get the statistic at the default scale ({@link MeasurementScale.PIXELS})
 	 * @param stat
 	 * @return
-	 * @throws Exception
 	 */
 	public double getStatistic(PlottableStatistic stat);
 	
+	/**
+	 * Set the statistic at the default scale ({@link MeasurementScale.PIXELS})
+	 * @param stat
+	 * @param d
+	 */
 	public void setStatistic(PlottableStatistic stat, double d);
 	
+	/**
+	 * Get all the statistics in this object
+	 * @return
+	 */
 	public PlottableStatistic[] getStatistics();
 	
 	
@@ -168,22 +210,42 @@ public interface CellularComponent {
 	
 	/**
 	 * Set the position of the component in the original
-	 * image. See getPosition() for values to use.
-	 * @param d
-	 * @see getPosition()
+	 * image.
+	 * @param d the array of positions
+	 * @see CellularComponent#getPosition()
 	 */
 	public void setPosition(double[] position);
 
 
+	/**
+	 * Set the bounding rectangle for this object
+	 * @param boundingRectangle
+	 */
 	public void setBoundingRectangle(Rectangle boundingRectangle);
 
 
+	/**
+	 * Set the name of the image file this object was found in
+	 * @param name
+	 */
 	public void setSourceFileName(String name);
 	
+	/**
+	 * Set the folder the source image file belongs to
+	 * @param sourceFolder
+	 */
 	public void setSourceFolder(File sourceFolder);
 	
+	/**
+	 * Get the number of pixels per micron in the source image
+	 * @return
+	 */
 	public double getScale();
 	
+	/**
+	 * Set the number of pixels per micron in the source image
+	 * @param scale
+	 */
 	public void setScale(double scale);
 	
 	/**
@@ -193,7 +255,6 @@ public interface CellularComponent {
 	public XYPoint getCentreOfMass();
 
 
-//	public void setCentreOfMass(XYPoint centreOfMass);
 	
 	/*
 	 * 
