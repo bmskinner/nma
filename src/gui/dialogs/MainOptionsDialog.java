@@ -131,7 +131,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		labels.add(violinLabel);
 		fields.add(violinBox);
 		
-		JLabel fillConsensusLabel = new JLabel("Fill nuclei");
+		JLabel fillConsensusLabel = new JLabel("Fill consensus");
 		fillConsensusBox = new JCheckBox( (String) null, GlobalOptions.getInstance().isFillConsensus());
 		fillConsensusBox.addActionListener(this);
 		
