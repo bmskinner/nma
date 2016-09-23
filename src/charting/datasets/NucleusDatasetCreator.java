@@ -1000,7 +1000,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @return
 	 */
 	public XYDataset createBareNucleusOutline(Nucleus n){
-		DefaultXYDataset ds = new DefaultXYDataset();
+		NucleusOutlineDataset ds = new NucleusOutlineDataset();
 		
 		double[] xpoints = new double[n.getBorderLength()+1];
 		double[] ypoints = new double[n.getBorderLength()+1];
@@ -1016,6 +1016,7 @@ private static NucleusDatasetCreator instance = null;
 		
 		double[][] data = { xpoints, ypoints };
 		ds.addSeries("Outline", data);
+		ds.setNucleus(0, n);
 		return ds;
 	}
 	
@@ -1227,7 +1228,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @return
 	 */
 	public XYDataset createNucleusOutline(Nucleus nucleus, boolean segmented) {
-		DefaultXYDataset ds = new DefaultXYDataset();
+		NucleusOutlineDataset ds = new NucleusOutlineDataset();
 		finest("Creating nucleus outline");
 		if(segmented){
 			finest("Creating segmented nucleus outline");
@@ -1267,6 +1268,7 @@ private static NucleusDatasetCreator instance = null;
 					double[][] data = { xpoints, ypoints };
 
 					ds.addSeries("Seg_"+segmentPosition, data);
+					ds.setNucleus(0, nucleus);
 					finest("Added segment data to chart dataset");
 				}
 			} else {
@@ -1431,13 +1433,14 @@ private static NucleusDatasetCreator instance = null;
 	 */
 	public XYDataset createMultiNucleusOutline(List<AnalysisDataset> list, MeasurementScale scale){
 
-		DefaultXYDataset ds = new DefaultXYDataset();
+		NucleusOutlineDataset ds = new NucleusOutlineDataset();
 
 		int i=0;
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			if(collection.hasConsensusNucleus()){
 				Nucleus n = collection.getConsensusNucleus();
+				
 				
 				double[] xpoints = new double[n.getBorderLength()];
 				double[] ypoints = new double[n.getBorderLength()];
@@ -1460,6 +1463,7 @@ private static NucleusDatasetCreator instance = null;
 				}
 				double[][] data = { xpoints, ypoints };
 				ds.addSeries("Nucleus_"+i+"_"+collection.getName(), data);
+				ds.setNucleus(i, n);
 			} else {
 				double[][] data = { {0}, {0} }; // make an empty series if no consensus
 				ds.addSeries("Nucleus_"+i+"_"+collection.getName(), data);

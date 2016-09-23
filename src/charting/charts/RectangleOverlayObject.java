@@ -4,13 +4,10 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
-import java.beans.PropertyChangeSupport;
 
 public class RectangleOverlayObject extends OverlayObject {
 
-	
 	private double xMinValue;
 	private double xMaxValue;
 	private double yMinValue;
@@ -23,23 +20,19 @@ public class RectangleOverlayObject extends OverlayObject {
 	
 		
 	public RectangleOverlayObject(double xMin, double xMax, double yMin, double yMax){
-		this(xMin, xMax, yMin, yMax, new BasicStroke(1f),  Color.BLACK, new Color(128, 128, 128, 128));
+		this(xMin, xMax, yMin, yMax, new BasicStroke(1f),  Color.BLACK);
 	}
 	
 	public RectangleOverlayObject(double xMin, double xMax, double yMin, double yMax, Stroke stroke, Paint outline){
 		this(xMin, xMax, yMin, yMax, stroke, outline, new Color(100, 100, 100, 128));
 	}
 	
-	public RectangleOverlayObject(double xMin, double xMax, double yMin, double yMax, Stroke stroke, Paint outline, Paint fill){
+	public RectangleOverlayObject(double xMin, double xMax, double yMin, double yMax, Stroke stroke, Paint outline, Paint fill){	
+		super(stroke, outline, fill);
 		this.xMinValue = xMin;
 		this.xMaxValue = xMax;
 		this.yMinValue = yMin;
 		this.yMaxValue = yMax;
-		this.stroke   = stroke;
-		this.outline  = outline;
-		this.fill     = fill;
-		this.isVisible = true;
-		this.pcs      = new PropertyChangeSupport(this);
 	}
 
 

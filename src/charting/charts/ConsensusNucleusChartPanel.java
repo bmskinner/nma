@@ -20,22 +20,26 @@ package charting.charts;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
+import gui.components.ColourSelecter;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.XYPlot;
+
+import components.nuclei.Nucleus;
+import charting.datasets.NucleusOutlineDataset;
 
 @SuppressWarnings("serial")
 public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
 	public static final String SOURCE_COMPONENT = "ConsensusNucleusChartPanel"; 
-	private List<Object> listeners = new ArrayList<Object>();
+
+	private NucleusOverlay consensusOverlay = null;
 
 	public ConsensusNucleusChartPanel(JFreeChart chart) {
 		super(chart);
@@ -44,7 +48,47 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 		this.setPopupMenu(popup);
 		this.validate();
 		this.setFixedAspectRatio(true);
+		consensusOverlay = new NucleusOverlay();
+		this.addOverlay( consensusOverlay);
 
+	}
+	
+	@Override
+	public void setChart(JFreeChart chart){
+		
+		super.setChart(chart);
+		
+		// Clear the overlay
+		if(consensusOverlay !=null){
+			consensusOverlay.clearShapes();
+
+			// Get the nuclei in the chart
+			if(chart.getPlot() instanceof XYPlot){
+
+				if( chart.getXYPlot().getDataset() instanceof NucleusOutlineDataset){
+
+					NucleusOutlineDataset ds = (NucleusOutlineDataset) chart.getXYPlot().getDataset();
+
+					for(int series=0; series<ds.getSeriesCount(); series++){
+
+						Nucleus n = ds.getNucleus(series);
+						
+						if(n!=null){
+							Color c = ColourSelecter.getColor(series);
+							c = ColourSelecter.getTransparentColour(c, true, 128);
+							ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(), null, null, c);
+							consensusOverlay.addShape(o, n);
+						}
+					}
+
+				}
+			}
+		}
+		
+		
+		
+		
+		
 	}
 		
 	private JPopupMenu createPopupMenu(){
@@ -80,6 +124,8 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 		popup.add(resetOffsetItem);
 		return popup;
 	}
+	
+	
 	
 		
 	@Override

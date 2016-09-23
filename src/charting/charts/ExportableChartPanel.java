@@ -65,7 +65,7 @@ import logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public class ExportableChartPanel extends ChartPanel implements Loggable {
+public class ExportableChartPanel extends ChartPanel implements Loggable, ChartSetEventListener {
 		
 	protected final List<Object> listeners = new ArrayList<Object>();
 	
@@ -507,7 +507,12 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
     	ChartSetEvent e = new ChartSetEvent(this);
     	Iterator<Object> iterator = listeners.iterator();
         while( iterator.hasNext() ) {
-            ( (ChartSetEventListener) iterator.next() ).chartSetEventReceived( e );
+        	
+        	Object o = iterator.next();
+        	
+        	if(o instanceof ChartSetEventListener){
+        		( (ChartSetEventListener) o ).chartSetEventReceived( e );
+        	}
         }
     }
     
@@ -537,6 +542,12 @@ public class ExportableChartPanel extends ChartPanel implements Loggable {
 		public void componentResized(ComponentEvent e) {
 			restoreAutoBounds();
 		}
+	}
+
+	@Override
+	public void chartSetEventReceived(ChartSetEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

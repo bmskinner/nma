@@ -32,6 +32,14 @@ public abstract class OverlayObject {
 	protected boolean isVisible;
 	protected PropertyChangeSupport pcs;
 	
+	public OverlayObject(Stroke stroke, Paint outline, Paint fill){
+		this.stroke   = stroke;
+		this.outline  = outline;
+		this.fill     = fill;
+		this.isVisible = true;
+		this.pcs      = new PropertyChangeSupport(this);
+	}
+	
 	public Stroke getStroke() {
 		return stroke;
 	}

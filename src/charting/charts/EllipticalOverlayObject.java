@@ -24,7 +24,6 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
-import java.beans.PropertyChangeSupport;
 
 public class EllipticalOverlayObject 
 	extends OverlayObject {
@@ -36,7 +35,7 @@ public class EllipticalOverlayObject
 		
 		
 	public EllipticalOverlayObject(double xValue, double xRadius, double yValue, double yRadius){
-		this(xValue, xRadius, yValue, yRadius, new BasicStroke(1f),  Color.BLACK, new Color(128, 128, 128, 128));
+		this(xValue, xRadius, yValue, yRadius, new BasicStroke(1f),  Color.BLACK);
 	}
 	
 	public EllipticalOverlayObject(double xValue, double xRadius, double yValue, double yRadius, Stroke stroke, Paint outline){
@@ -44,15 +43,11 @@ public class EllipticalOverlayObject
 	}
 	
 	public EllipticalOverlayObject(double xValue, double xRadius, double yValue, double yRadius, Stroke stroke, Paint outline, Paint fill){
+		super(stroke, outline, fill);
 		this.xValue  = xValue;
 		this.xRadius = xRadius;
 		this.yValue  = yValue;
 		this.yRadius = yRadius;
-		this.stroke   = stroke;
-		this.outline  = outline;
-		this.fill     = fill;
-		this.isVisible = true;
-		this.pcs      = new PropertyChangeSupport(this);
 	}
 	
 	public double getXValue() {

@@ -16,47 +16,39 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package charting.charts;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Paint;
-import java.awt.Shape;
-import java.awt.Stroke;
+package charting.datasets;
 
-public class ShapeOverlayObject extends OverlayObject{
+import java.util.HashMap;
+import java.util.Map;
 
-	Shape shape = null;
+import org.jfree.data.xy.DefaultXYDataset;
+
+import components.nuclei.Nucleus;
+
+@SuppressWarnings("serial")
+public class NucleusOutlineDataset 
+	extends DefaultXYDataset {
 	
-	public ShapeOverlayObject(Shape shape){
-		this(shape, new BasicStroke(1f),  Color.BLACK, null);
+	Map<Integer, Nucleus> nuclei = new HashMap<Integer, Nucleus>();
+		
+	/**
+	 * Set the nucleus for the given series
+	 * @param i
+	 * @param n
+	 */
+	public void setNucleus(int i, Nucleus n){
+		nuclei.put(i, n);
 	}
 	
-	public ShapeOverlayObject(Shape shape, Stroke stroke, Paint outline){
-		this(shape, stroke, outline, null);
+	/**
+	 * Get the nucleus for the given series
+	 * @param i
+	 * @return
+	 */
+	public Nucleus getNucleus(int i){
+		return nuclei.get(i);
 	}
 	
-	public ShapeOverlayObject(Shape shape, Stroke stroke, Paint outline, Paint fill){
-		super(stroke, outline, fill);
-		this.shape = shape;
-	}
-
-	public Shape getShape() {
-		return shape;
-	}
-
-	public void setShape(Shape shape) {
-		this.shape = shape;
-	}
-
-	@Override
-	public boolean contains(int x, int y) {
-		return shape.contains(y, y);
-	}
-
-	@Override
-	public boolean contains(double x, double y) {
-		return shape.contains(y, y);
-	}	
 
 }

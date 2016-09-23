@@ -16,17 +16,14 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
+
 package charting.charts;
 
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,75 +31,69 @@ import java.util.List;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.panel.AbstractOverlay;
-import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
 
-public class ShapeOverlay 
-	extends AbstractOverlay 
-	implements Overlay,
-               PropertyChangeListener, 
-               Serializable {
+import components.nuclei.Nucleus;
+
+@SuppressWarnings("serial")
+public class NucleusOverlay
+	extends ShapeOverlay {
+
+	private List<Nucleus> nuclei;
 	
-	private static final long serialVersionUID = 1L;
-	protected List<ShapeOverlayObject> shapes;
 	
 	/**
      * Default constructor.
      */
-    public ShapeOverlay() {
+    public NucleusOverlay() {
         super();
-        this.shapes = new ArrayList<ShapeOverlayObject>();
+        this.nuclei = new ArrayList<Nucleus>();
     }
-    
+	
     /**
-     * Adds a shape
+     * Adds a shape and a nucleus
      *
      * @param shape  the shape.
      */
-    public void addShape(ShapeOverlayObject shape) {
-        if (shape == null) {
-            throw new IllegalArgumentException("Null 'shape' argument.");
+    public void addShape(ShapeOverlayObject shape, Nucleus n) {
+        if (shape == null || n==null) {
+            throw new IllegalArgumentException("Null shape or nucleus argument.");
         }
         this.shapes.add(shape);
         shape.addPropertyChangeListener(this);
+        this.nuclei.add(n);
         fireOverlayChanged();	
     }
 
+    @Override
     public void removeshape(ShapeOverlayObject shape) {
         if (shape == null) {
             throw new IllegalArgumentException("Null 'shape' argument.");
         }
-        if (this.shapes.remove(shape)) {
+        
+        int i = shapes.indexOf(shape);
+        if(i>-1){
+        	ShapeOverlayObject s = shapes.get(i);
+        	Nucleus n = nuclei.get(i);
+
+        	shapes.remove(i);
+        	nuclei.remove(i);
         	shape.removePropertyChangeListener(this);
-            fireOverlayChanged();
+        	fireOverlayChanged();
+        	
         }
     }
 
     public void clearShapes() {
-        if (this.shapes.isEmpty()) {
-            return;  // nothing to do
-        }
-        List<ShapeOverlayObject> shapes = getShapes();
-        for (int i = 0; i < shapes.size(); i++) {
-        	ShapeOverlayObject c = (ShapeOverlayObject) shapes.get(i);
-            this.shapes.remove(c);
-            c.removePropertyChangeListener(this);
-        }
+        super.clearShapes();
+        
+        nuclei.clear();
         fireOverlayChanged();
     }
+	
     
-    public List<ShapeOverlayObject> getShapes() {
-        return new ArrayList<ShapeOverlayObject>(this.shapes);
-    }
-
-	@Override
-	public void propertyChange(PropertyChangeEvent arg0) {
-	        fireOverlayChanged();		
-	}
-
-	/**
+    /**
      * Paints the crosshairs in the layer.
      *
      * @param g2  the graphics target.
@@ -122,22 +113,21 @@ public class ShapeOverlay
         RectangleEdge xAxisEdge = plot.getDomainAxisEdge();
         RectangleEdge yAxisEdge = plot.getRangeAxisEdge();
         
-        Iterator<ShapeOverlayObject> iterator = this.shapes.iterator();
-        
-        while (iterator.hasNext()) {
-        	ShapeOverlayObject object = (ShapeOverlayObject) iterator.next();
-            
+        for(int i=0; i<shapes.size(); i++){
+        	
+        	ShapeOverlayObject object = shapes.get(i);
+        	Nucleus n = nuclei.get(i);
         	if (object.isVisible()) {
         		
         		// Need to find the coordinates to draw the shape
         		
-
-                double x = object.getShape().getBounds2D().getX();
-                x += (object.getShape().getBounds2D().getWidth()/2); // get the x midpoint
+        		
+//                double x = object.getShape().getBounds2D().getX();
+                double x = n.getCentreOfMass().getX(); // get the x midpoint
                 double xx = xAxis.valueToJava2D(x, dataArea, xAxisEdge);
                 
-                double y = object.getShape().getBounds2D().getY();
-                y += (object.getShape().getBounds2D().getHeight()/2); // get the y midpoint
+//                double y = object.getShape().getBounds2D().getY();
+                double y = n.getCentreOfMass().getY(); // get the y midpoint
                 double yy = yAxis.valueToJava2D(y, dataArea, yAxisEdge);
                 
                 // Need to scale the shape as well
@@ -149,7 +139,10 @@ public class ShapeOverlay
 
                 drawShape(g2, dataArea, xx, yy, ww, hh, object);
             }
+        	
         }
+
+
         g2.setClip(savedClip);
     }
 	
@@ -188,24 +181,5 @@ public class ShapeOverlay
             g2.setStroke(savedStroke);
 //        }
     }
-    
-    protected Shape getJavaCoordinatesShape(double xCentre, double yCentre, double w, double h, ShapeOverlayObject shape){
-    	
-    	Shape s = shape.getShape();
-    	
-    	// transforms are performed 'last in, first out'
-    	AffineTransform aft = new AffineTransform();
-    	
-    	aft.concatenate(  AffineTransform.getTranslateInstance(xCentre,yCentre));
-    	aft.concatenate(  AffineTransform.getScaleInstance(w, h));
-    	
-    	aft.concatenate(  AffineTransform.getRotateInstance(Math.PI)); // 180 degree rotate
-    	aft.concatenate(  AffineTransform.getScaleInstance(-1, 1)); // flip hozizontal
-    	
-    	aft.concatenate(  AffineTransform.getTranslateInstance(0, 0)); // move to origin for rotation
-    	
-    	Shape newShape = aft.createTransformedShape(s);
-
-    	return newShape;
-    }
+	
 }
