@@ -18,13 +18,16 @@
  *******************************************************************************/
 package charting.charts;
 
+import gui.GlobalOptions;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
 
 import java.awt.Color;
+import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.util.Iterator;
+
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
@@ -62,25 +65,30 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 		if(consensusOverlay !=null){
 			consensusOverlay.clearShapes();
 
-			// Get the nuclei in the chart
-			if(chart.getPlot() instanceof XYPlot){
+			if(GlobalOptions.getInstance().isFillConsensus()){
 
-				if( chart.getXYPlot().getDataset() instanceof NucleusOutlineDataset){
+				// Get the nuclei in the chart
+				if(chart.getPlot() instanceof XYPlot){
 
-					NucleusOutlineDataset ds = (NucleusOutlineDataset) chart.getXYPlot().getDataset();
+					if( chart.getXYPlot().getDataset() instanceof NucleusOutlineDataset){
 
-					for(int series=0; series<ds.getSeriesCount(); series++){
+						NucleusOutlineDataset ds = (NucleusOutlineDataset) chart.getXYPlot().getDataset();
 
-						Nucleus n = ds.getNucleus(series);
-						
-						if(n!=null){
-							Color c = ColourSelecter.getColor(series);
-							c = ColourSelecter.getTransparentColour(c, true, 128);
-							ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(), null, null, c);
-							consensusOverlay.addShape(o, n);
+						for(int series=0; series<ds.getSeriesCount(); series++){
+
+							Nucleus n = ds.getNucleus(series);
+
+							Paint c = chart.getXYPlot().getRenderer().getSeriesPaint(series);
+
+							if(n!=null){
+								//							Color c = ColourSelecter.getColor(series);
+								c = ColourSelecter.getTransparentColour((Color) c, true, 128);
+								ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(), null, null, c);
+								consensusOverlay.addShape(o, n);
+							}
 						}
-					}
 
+					}
 				}
 			}
 		}

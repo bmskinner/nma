@@ -24,6 +24,11 @@ public class GlobalOptions {
 	
 	private boolean violinPlots; // show violin plots or just boxplots
 	
+	/**
+	 * Should the consensus nucleus plots be filled, or empty
+	 */
+	private boolean fillConsensus;
+	
 	public static GlobalOptions getInstance(){
 		if(instance==null){
 			instance = new GlobalOptions();
@@ -40,6 +45,7 @@ public class GlobalOptions {
 		this.scale       = MeasurementScale.PIXELS;
 		this.swatch      = ColourSwatch.REGULAR_SWATCH;
 		this.violinPlots = true;
+		this.fillConsensus = true;
 	}
 
 	public MeasurementScale getScale() {
@@ -74,6 +80,12 @@ public class GlobalOptions {
 		this.violinPlots = violinPlots;
 	}
 	
-	
+	public boolean isFillConsensus() {
+		return fillConsensus;
+	}
+
+	public void setFillConsensus(boolean fillConsensus) {
+		this.fillConsensus = fillConsensus;
+	}
 
 }

@@ -174,7 +174,7 @@ public class ColourSelecter {
 	}
 	
 	/**
-	 * Get a transparent version of a colour
+	 * Get a transparent version of a paint
 	 * @param c the input colour
 	 * @param transparent flag
 	 * @param defaultAlpha the alpha level

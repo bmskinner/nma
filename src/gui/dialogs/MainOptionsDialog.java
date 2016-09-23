@@ -52,6 +52,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 	private JComboBox<Level> levelBox;
 	private JComboBox<ColourSwatch> colourBox;
 	private JCheckBox violinBox;
+	private JCheckBox fillConsensusBox;
 	
 	public MainOptionsDialog(final MainWindow mw){
 		super( mw, false);
@@ -127,9 +128,15 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		violinBox = new JCheckBox( (String) null, GlobalOptions.getInstance().isViolinPlots());
 		violinBox.addActionListener(this);
 		
-		
 		labels.add(violinLabel);
 		fields.add(violinBox);
+		
+		JLabel fillConsensusLabel = new JLabel("Fill nuclei");
+		fillConsensusBox = new JCheckBox( (String) null, GlobalOptions.getInstance().isFillConsensus());
+		fillConsensusBox.addActionListener(this);
+		
+		labels.add(fillConsensusLabel);
+		fields.add(fillConsensusBox);
 		
 		this.addLabelTextRows(labels, fields, layout, panel);
 		return panel;
@@ -160,6 +167,12 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		boolean useViolins = violinBox.isSelected();
 		if(GlobalOptions.getInstance().isViolinPlots() != useViolins){
 			GlobalOptions.getInstance().setViolinPlots(useViolins);
+			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+		}
+		
+		boolean fillConsensus = fillConsensusBox.isSelected();
+		if(GlobalOptions.getInstance().isFillConsensus() != fillConsensus){
+			GlobalOptions.getInstance().setFillConsensus(fillConsensus);
 			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 		}
 		
