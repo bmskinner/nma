@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 
+import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
@@ -53,6 +54,7 @@ import charting.charts.CoupledProfileOutlineChartPanel.BorderPointEventListener;
 import utility.Constants;
 import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
+import ij.io.DirectoryChooser;
 import ij.io.SaveDialog;
 import logging.Loggable;
 
@@ -92,6 +94,8 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 	 * The default bounds of the chart when empty: both axes run -DEFAULT_AUTO_RANGE to +DEFAULT_AUTO_RANGE
 	 */
 	protected static final double DEFAULT_AUTO_RANGE = 10;
+	
+	public static final String NEWLINE = System.getProperty("line.separator");
 	
 	public ExportableChartPanel(JFreeChart chart){
 		super(chart);
@@ -347,10 +351,10 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 		} catch (ClassCastException e2){
 			
 			StringBuilder builder = new StringBuilder();
-			builder.append("Class cast error: "+e2.getMessage()+System.getProperty("line.separator"));
+			builder.append("Class cast error: "+e2.getMessage()+NEWLINE);
 
 			for(StackTraceElement el : e2.getStackTrace()){
-				builder.append(el.toString()+System.getProperty("line.separator"));
+				builder.append(el.toString()+NEWLINE);
 			}
 			result = builder.toString();
 		}
@@ -359,7 +363,26 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 	
 	private void export(){
 		
-		
+		//Create a file chooser
+//		final JFileChooser fc = new JFileChooser();
+//		
+//		int returnVal = fc.showSaveDialog(this);
+//		
+//		if(returnVal==JFileChooser.APPROVE_OPTION){
+//			File file = fc.getSelectedFile();
+//			String string = getData();
+//			PrintWriter out;
+//			try {
+//
+//				out = new PrintWriter(file);
+//				out.println(string);
+//				out.close();
+//			} catch (FileNotFoundException e) {
+//				error("Cannot find save file", e);
+//				
+//			}
+//		}
+						
 		// get a place to save to
 		SaveDialog saveDialog = new SaveDialog("Export data to...", "Chart data", Constants.TAB_FILE_EXTENSION);
 
@@ -408,7 +431,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 			for(int series=0; series<ds.getSeriesCount();series++){
 
 				String seriesName = ds.getSeriesKey(series).toString();
-				builder.append(seriesName+":"+System.getProperty("line.separator"));
+				builder.append(seriesName+":"+NEWLINE);
 
 				for(int i=0; i<ds.getItemCount(series); i++){
 
@@ -416,10 +439,10 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 					double x= ds.getXValue(series, i);
 					double y = ds.getYValue(series, i);
 
-					builder.append("\t"+ df.format(x) +"\t"+ df.format(y) +System.getProperty("line.separator"));
+					builder.append("\t"+ df.format(x) +"\t"+ df.format(y) +NEWLINE);
 				}
 			}
-			builder.append(System.getProperty("line.separator"));
+			builder.append(NEWLINE);
 		}
 		
 		
@@ -436,38 +459,38 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 		for(int dataset=0; dataset<plot.getDatasetCount();dataset++){
 
 			DefaultBoxAndWhiskerCategoryDataset ds = (DefaultBoxAndWhiskerCategoryDataset) plot.getDataset(dataset);
-			String newLine = System.getProperty("line.separator");
+			
 
 			for(int column=0; column<ds.getColumnCount();column++){
 				
 				String columnName = ds.getColumnKey(column).toString();
-				builder.append(columnName+":"+System.getProperty("line.separator"));
+				builder.append(columnName+":"+NEWLINE);
 				
 				for(int row=0; row<ds.getRowCount(); row++){
 					
 					String rowName = ds.getRowKey(row).toString();
-					builder.append("\t"+rowName+":"+System.getProperty("line.separator"));
+					builder.append("\t"+rowName+":"+NEWLINE);
 					
 
 					double value = ds.getValue(row, column).doubleValue();
 					
-					builder.append("\tMin   : "+  df.format(  ds.getMinOutlier(row, column)  )+newLine);
-					builder.append("\tLower : "+  df.format(  ds.getMinRegularValue(row, column)  )+newLine);
-					builder.append("\tQ1    : "+  df.format(  ds.getQ1Value(row, column))+newLine);
-					builder.append("\tMedian: "+  df.format(  value)+newLine);
-					builder.append("\tQ3    : "+  df.format(  ds.getQ3Value(row, column))+newLine);
-					builder.append("\tUpper : "+  df.format(  ds.getMaxRegularValue(row, column))+newLine);
-					builder.append("\tMax   : "+  df.format(  ds.getMaxOutlier(row, column)  )+newLine);
-					builder.append(newLine);
+					builder.append("\tMin   : "+  df.format(  ds.getMinOutlier(row, column)  )+NEWLINE);
+					builder.append("\tLower : "+  df.format(  ds.getMinRegularValue(row, column)  )+NEWLINE);
+					builder.append("\tQ1    : "+  df.format(  ds.getQ1Value(row, column))+NEWLINE);
+					builder.append("\tMedian: "+  df.format(  value)+NEWLINE);
+					builder.append("\tQ3    : "+  df.format(  ds.getQ3Value(row, column))+NEWLINE);
+					builder.append("\tUpper : "+  df.format(  ds.getMaxRegularValue(row, column))+NEWLINE);
+					builder.append("\tMax   : "+  df.format(  ds.getMaxOutlier(row, column)  )+NEWLINE);
+					builder.append(NEWLINE);
 					
 					if(ds instanceof ExportableBoxAndWhiskerCategoryDataset){
 						
 						List rawData =( (ExportableBoxAndWhiskerCategoryDataset)ds).getRawData(rowName, columnName);
 						Collections.sort(rawData);
 						for(Object o : rawData){
-							builder.append("\t\t"+  o.toString()+newLine);
+							builder.append("\t\t"+  o.toString()+NEWLINE);
 						}
-						builder.append(newLine);
+						builder.append(NEWLINE);
 					}
 					
 				}
@@ -489,15 +512,15 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 			for(int series =0; series<ds.getSeriesCount();series++){
 
 				String seriesName = ds.getSeriesKey(series).toString();
-				builder.append(seriesName+":"+System.getProperty("line.separator"));
+				builder.append(seriesName+":"+NEWLINE);
 				
 				for(int i=0; i<ds.getItemCount(series); i++){
 
 					double x = ds.getXValue(series, i);
 					double y = ds.getYValue(series, i);
-					builder.append("\t"+ df.format(x) +"\t"+ df.format(y) +System.getProperty("line.separator"));
+					builder.append("\t"+ df.format(x) +"\t"+ df.format(y) +NEWLINE);
 				}
-				builder.append(System.getProperty("line.separator"));
+				builder.append(NEWLINE);
 			}
 		}
 		return builder.toString();

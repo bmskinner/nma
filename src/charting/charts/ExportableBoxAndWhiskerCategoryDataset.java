@@ -6,9 +6,19 @@ import java.util.Map;
 
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
+/**
+ * This extension to the default box and whisker dataset stores the
+ * raw values, so data can be exported directly from the chart
+ * @author ben
+ *
+ */
+@SuppressWarnings("serial")
 public class ExportableBoxAndWhiskerCategoryDataset 
 extends DefaultBoxAndWhiskerCategoryDataset{
 
+	/**
+	 * The raw chart data, stored under the row and column keys
+	 */
 	private Map<Comparable, Map<Comparable, List>> rawData = new HashMap<Comparable, Map<Comparable, List>>();
 	
 	public ExportableBoxAndWhiskerCategoryDataset(){

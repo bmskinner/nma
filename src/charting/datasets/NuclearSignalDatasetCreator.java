@@ -41,6 +41,7 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import charting.charts.ExportableBoxAndWhiskerCategoryDataset;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import stats.SignalStatistic;
@@ -828,7 +829,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
     private BoxAndWhiskerCategoryDataset createMultiDatasetSignalStatisticBoxplotDataset(ChartOptions options) {
 
 
-		OutlierFreeBoxAndWhiskerCategoryDataset result = new OutlierFreeBoxAndWhiskerCategoryDataset();
+    	ExportableBoxAndWhiskerCategoryDataset result = new ExportableBoxAndWhiskerCategoryDataset();
 		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
  
