@@ -34,6 +34,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import analysis.AnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshEdge;
+import charting.charts.ExportableBoxAndWhiskerCategoryDataset;
 import charting.options.ChartOptions;
 import components.AbstractCellularComponent;
 import components.Cell;
@@ -828,7 +829,7 @@ private static NucleusDatasetCreator instance = null;
 		List<AnalysisDataset> datasets = options.getDatasets();
 		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 		MeasurementScale scale = options.getScale();
-		OutlierFreeBoxAndWhiskerCategoryDataset ds = new OutlierFreeBoxAndWhiskerCategoryDataset();
+		ExportableBoxAndWhiskerCategoryDataset ds = new ExportableBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < datasets.size(); i++) {
 			CellCollection c = datasets.get(i).getCollection();
@@ -877,7 +878,7 @@ private static NucleusDatasetCreator instance = null;
 	 */
 	public BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, int segPosition, MeasurementScale scale) {
 
-		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset();
+		ExportableBoxAndWhiskerCategoryDataset dataset = new ExportableBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
 
@@ -921,7 +922,7 @@ private static NucleusDatasetCreator instance = null;
 	 */
 	public BoxAndWhiskerCategoryDataset createSegmentDisplacementDataset(List<AnalysisDataset> collections, int segPosition) {
 
-		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset();
+		ExportableBoxAndWhiskerCategoryDataset dataset = new ExportableBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
 
@@ -961,7 +962,7 @@ private static NucleusDatasetCreator instance = null;
 		if(datasets==null || datasets.isEmpty()){
 			return null;
 		}
-		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset();
+		ExportableBoxAndWhiskerCategoryDataset dataset = new ExportableBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < datasets.size(); i++) {
 

@@ -19,7 +19,7 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
  *
  */
 @SuppressWarnings("serial")
-public class ViolinCategoryDataset extends DefaultBoxAndWhiskerCategoryDataset implements Loggable {
+public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDataset implements Loggable {
 	
 	private KeyedObjects2D pdfData;
 	private KeyedObjects2D ranges; // hold the min and max for each set of values for pdf step calculation

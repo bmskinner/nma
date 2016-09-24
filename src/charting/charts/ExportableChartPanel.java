@@ -27,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -41,6 +42,7 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.BoxAndWhiskerItem;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -434,6 +436,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 		for(int dataset=0; dataset<plot.getDatasetCount();dataset++){
 
 			DefaultBoxAndWhiskerCategoryDataset ds = (DefaultBoxAndWhiskerCategoryDataset) plot.getDataset(dataset);
+			String newLine = System.getProperty("line.separator");
 
 			for(int column=0; column<ds.getColumnCount();column++){
 				
@@ -448,12 +451,25 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 
 					double value = ds.getValue(row, column).doubleValue();
 					
-					builder.append("\tLower : "+  df.format(  ds.getMinRegularValue(row, column)  )+System.getProperty("line.separator"));
-					builder.append("\tQ1    : "+  df.format(   ds.getQ1Value(row, column))+System.getProperty("line.separator"));
-					builder.append("\tMedian: "+  df.format(   value)+System.getProperty("line.separator"));
-					builder.append("\tQ3    : "+  df.format(   ds.getQ3Value(row, column))+System.getProperty("line.separator"));
-					builder.append("\tUpper : "+  df.format(   ds.getMaxRegularValue(row, column))+System.getProperty("line.separator"));
-					builder.append(System.getProperty("line.separator"));
+					builder.append("\tMin   : "+  df.format(  ds.getMinOutlier(row, column)  )+newLine);
+					builder.append("\tLower : "+  df.format(  ds.getMinRegularValue(row, column)  )+newLine);
+					builder.append("\tQ1    : "+  df.format(  ds.getQ1Value(row, column))+newLine);
+					builder.append("\tMedian: "+  df.format(  value)+newLine);
+					builder.append("\tQ3    : "+  df.format(  ds.getQ3Value(row, column))+newLine);
+					builder.append("\tUpper : "+  df.format(  ds.getMaxRegularValue(row, column))+newLine);
+					builder.append("\tMax   : "+  df.format(  ds.getMaxOutlier(row, column)  )+newLine);
+					builder.append(newLine);
+					
+					if(ds instanceof ExportableBoxAndWhiskerCategoryDataset){
+						
+						List rawData =( (ExportableBoxAndWhiskerCategoryDataset)ds).getRawData(rowName, columnName);
+						Collections.sort(rawData);
+						for(Object o : rawData){
+							builder.append("\t\t"+  o.toString()+newLine);
+						}
+						builder.append(newLine);
+					}
+					
 				}
 			}
 		}
