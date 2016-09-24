@@ -37,6 +37,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -798,12 +799,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 					datasetSelectionOrder.clear();
 				}
-				
+								
+				// Track the datasets currently selected
 				List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
 
 				TreeSelectionModel lsm = (TreeSelectionModel)e.getSource();
-
-//				List<Integer> selectedIndexes = new ArrayList<Integer>(0);
 				
 				Map<Integer, Integer> selectedIndexes = new HashMap<Integer, Integer>(0);
 				
@@ -815,6 +815,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						if (lsm.isRowSelected(i)) {
 							
 							if(rowIsDataset(i)){
+								
 								AnalysisDataset d = getDatasetAtRow(i);
 								datasets.add(d);
 								
@@ -835,6 +836,23 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						}
 					}
 					
+					// Ctrl deselect happened - a dataset has been deselected and remains in the
+					// datasetSelectionOrder map
+					if(datasetSelectionOrder.size() > datasets.size()){
+						// Go through tree table and check for deselected dataset
+						Iterator<AnalysisDataset> it= datasetSelectionOrder.iterator();
+						
+						while(it.hasNext()){
+							AnalysisDataset d = it.next();
+							if(! datasets.contains(d)){
+								it.remove();
+							}	
+						}
+						
+						// Adjust the indexes of the remaining datasets
+						fixDiscontinuousPositions(selectedIndexes);
+						
+					}
 					
 					
 					PopulationTableCellRenderer rend = new PopulationTableCellRenderer(selectedIndexes);
@@ -861,6 +879,28 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			} catch(Exception ex){
 				error("Error in tree selection handler", ex);
 			}
+		}
+		
+		private Map<Integer, Integer> fixDiscontinuousPositions(Map<Integer, Integer> selectedIndexes){
+			// Find a discontinuity in the indexes - one value is missing
+			List<Integer> values = new ArrayList<Integer>(selectedIndexes.values());
+			Collections.sort(values);
+			
+			int prev = -1;
+			for(int i : values){
+				if ( i - prev > 1){
+					// a value was skipped
+					for(int k : selectedIndexes.keySet()){
+						int j = selectedIndexes.get(k);
+						if(j ==i){ // this is the entry that is too high
+							selectedIndexes.put(k, j-1); // Move index down by 1
+						}
+					}
+					fixDiscontinuousPositions(selectedIndexes); // there will now be a new discontinuity. Fix until end of list
+				}
+				prev = i;
+			}
+			return selectedIndexes;
 		}
 		
 		private boolean rowIsDataset(int i){
