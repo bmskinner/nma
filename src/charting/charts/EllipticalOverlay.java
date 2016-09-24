@@ -255,9 +255,7 @@ public class EllipticalOverlay
         if (!this.ellipse.equals(that.ellipse)) {
             return false;
         }
-//        if (!this.yRectangle.equals(that.yRectangle)) {
-//            return false;
-//        }
+
         return true;
     }
 	

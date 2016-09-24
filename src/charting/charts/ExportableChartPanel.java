@@ -149,8 +149,29 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 		return isFixedAspectRatio;
 	}
 	
-	public double getAspectRatio(){
+	/**
+	 * Get the ratio of the width / height of the panel
+	 * @return
+	 */
+	public double getPanelAspectRatio(){
 		return (double) this.getWidth() / (double) this.getHeight();
+	}
+	
+	/**
+	 * Get the ratio of the width / height of the plot (in chart units)
+	 * @return
+	 */
+	public double getPlotAspectRatio(){
+		// Only apply to XYPlots
+		if(  !(this.getChart().getPlot() instanceof XYPlot)){
+			return 1;
+		}
+
+		XYPlot plot = (XYPlot) this.getChart().getPlot();
+		
+		double w = plot.getDomainAxis().getRange().getLength();
+		double h = plot.getRangeAxis().getRange().getLength();
+		return w / h;
 	}
 	
 	/* (non-Javadoc)

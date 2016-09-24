@@ -202,14 +202,15 @@ public class CellBorderAdjustmentDialog
 			this.add(chartPanel, BorderLayout.CENTER);
 
 			Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-			this.setPreferredSize(new Dimension(  (int)(screenSize.width*0.9), (int)(screenSize.height*0.5)));
+			this.setPreferredSize(new Dimension(  (int)(screenSize.width*0.9), (int)(screenSize.height*0.6)));
 			this.pack();
 			
 			// Create an ellipse overlay for the main panel with circular appearance
-			double aspect = mainPanel.getAspectRatio();
+			double aspect = mainPanel.getPlotAspectRatio();
 			
 			double h = 3;
-			double w = h / aspect; 
+//			double w = h / aspect;
+			double w = 3;
 			
 			ellipse = new EllipticalOverlayObject(0, w, 0, h);
 			mainPanel.addOverlay( new EllipticalOverlay(ellipse));
@@ -308,13 +309,13 @@ public class CellBorderAdjustmentDialog
 				
 				if(! selectedPoints.containsKey(point)){
 
-					double aspect = dualPanel.getMainPanel().getAspectRatio();
-					double radius = 0.6;
+					double aspect = dualPanel.getMainPanel().getPanelAspectRatio();
+					double radius = 0.45;
 					double h = radius*2;
-					double w = h / aspect; 
-					
+//					double w = h / aspect; 
+					double w = h;
 					Ellipse2D r = new Ellipse2D.Double(point.getX()-(w/2),
-							point.getY()-radius,
+							point.getY()-(h/2),
 							w, h);
 					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, Color.BLUE);
 					selectedPoints.put(point, a);		
