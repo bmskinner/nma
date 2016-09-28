@@ -54,16 +54,12 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.table.TableModel;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
-import org.jfree.chart.JFreeChart;
-
-import charting.options.ChartOptions;
-import charting.options.TableOptions;
 import utility.TreeOrderHashMap;
 import analysis.AnalysisDataset;
 import components.CellCollection;
@@ -72,8 +68,20 @@ import components.ClusterGroup;
 @SuppressWarnings("serial")
 public class PopulationsPanel extends DetailPanel implements SignalChangeListener {
 	
+	/**
+	 * The column index for the dataset name 
+	 */
 	public static final int COLUMN_NAME       = 0;
+	
+	
+	/**
+	 * The column index for the dataset cell count 
+	 */
 	public static final int COLUMN_CELL_COUNT = 1;
+	
+	/**
+	 * The column index for the dataset chart colour
+	 */
 	public static final int COLUMN_COLOUR     = 2;
 
 	final private JXTreeTable treeTable;
@@ -108,7 +116,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		this.setMinimumSize(new Dimension(100, 100));
 		
 		populationPopup = new PopulationListPopupMenu();
-		populationPopup.disableAll();
+		populationPopup.setEnabled(false);
 		populationPopup.addSignalChangeListener(this);
 		
 		treeTable = createTreeTable();
@@ -151,6 +159,12 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		finest("Preparing to select datasets");
 		selectDatasets(list);
 		treeTable.repaint();
+	}
+	
+	public void update(final AnalysisDataset dataset){
+		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		list.add(dataset);
+		update(list);
 	}
 		
 	/**
@@ -436,40 +450,25 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	public synchronized List<AnalysisDataset> getSelectedDatasets(){
 
 		return new ArrayList<AnalysisDataset>(datasetSelectionOrder);
-		
-//		List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
-//
-//		TreeSelectionModel lsm = treeTable.getTreeSelectionModel();
-//
-//		List<Integer> selectedIndexes = new ArrayList<Integer>(0);
-//
-//		if (!lsm.isSelectionEmpty()) {
-//			// Find out which indexes are selected.
-//			int minIndex = lsm.getMinSelectionRow();
-//			int maxIndex = lsm.getMaxSelectionRow();
-//			for (int i = minIndex; i <= maxIndex; i++) {
-//				if (lsm.isRowSelected(i)) {
-//
-//					
-//					Object columnOneObject = treeTable.getModel().getValueAt(i, COLUMN_NAME);
-//					
-//					if(columnOneObject instanceof ClusterGroup){
-//						continue;
-//					}
-//
-//					if(columnOneObject instanceof AnalysisDataset){
-//						AnalysisDataset d = (AnalysisDataset) treeTable.getModel().getValueAt(i, COLUMN_NAME); // row i, column 0
-//						datasets.add(d);
-//						selectedIndexes.add(i);
-//					}
-//
-//				}
-//			}
-//		}
-//		return datasets;
 	}
 	
 	
+	/**
+	 * Get the nodes for all selected datasets
+	 * @return
+	 */
+	private List<PopulationTreeTableNode> getSelectedNodes(){
+
+		List<PopulationTreeTableNode> result = new ArrayList<PopulationTreeTableNode>();
+		TreePath[] paths = treeTable.getTreeSelectionModel().getSelectionPaths();
+		for(TreePath p : paths){
+			PopulationTreeTableNode n = (PopulationTreeTableNode) p.getLastPathComponent();
+			result.add(n);
+		}
+		return result;
+	}
+	
+
 	private List<Integer> getSelectedDatasetIndexes(){
 		List<Integer> result = new ArrayList<Integer>();
 		List<AnalysisDataset> datasets = getSelectedDatasets();
@@ -514,6 +513,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	public void selectDatasets(List<AnalysisDataset> list){
 		finer("Selecting list of "+list.size()+" datasets in populations panel");
 		
+		// TODO: this will not work - the tree selection is cleared for each dataset in list
+		
 		Map<Integer, Integer> selectedIndexes = new HashMap<Integer, Integer>(0);
 		int selectedIndexOrder = 0;
 		for(AnalysisDataset dataset : list){
@@ -521,8 +522,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			
 			selectedIndexes.put(index, selectedIndexOrder++);
 
-			ListSelectionModel selectionModel = 
-					treeTable.getSelectionModel();
+			ListSelectionModel selectionModel = treeTable.getSelectionModel();
 			
 			TreeSelectionModel treeSelectionModel = treeTable.getTreeSelectionModel();
 			
@@ -538,12 +538,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			
 
 		}
-		
-		// Update the table colours
-//		List<Integer> selectedIndexes = getSelectedDatasetIndexes();
-		
-		
-		
+				
 		PopulationTableCellRenderer rend = (PopulationTableCellRenderer) treeTable.getColumnModel().getColumn(COLUMN_COLOUR).getCellRenderer();
 		rend.update(selectedIndexes);
 	}
@@ -573,6 +568,19 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		}
 		return index;
 	}
+	
+	/**
+	 * Get the names of all open datasets in the table
+	 * @return
+	 */
+	private List<String> getDatasetNames(){
+		List<String> result = new ArrayList<String>();
+		for(int i=0; i<treeTable.getRowCount(); i++){
+			String s = treeTable.getValueAt(i, COLUMN_NAME).toString();
+			result.add(s);
+		}
+		return result;
+	}
 		
 	/**
 	 * Rename an existing dataset and update the population list.
@@ -587,31 +595,42 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				null, 
 				null,
 				collection.getName());
-		// validate
-		if(!newName.isEmpty() && newName!=null){
 		
-//			if(this.populationNames.containsKey(newName)){
-//				log(Level.SEVERE, "Name exists, aborting");
-//			} else {
-//				String oldName = collection.getName();
-				collection.setName(newName);
-//				this.populationNames.put(newName, collection.getID());
-//				this.populationNames.remove(oldName);
-				log(Level.INFO, "Collection renamed: "+newName);
-				
-				
-				File saveFile = dataset.getSavePath();
-				if(saveFile.exists()){
-					saveFile.delete();
-				}
-
-				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-				list.add(dataset);
-				fireDatasetEvent(DatasetEvent.SAVE, list);
-
-				update(list);
-//			}
+		// validate
+		if(newName.isEmpty() || newName==null){
+			fine("New name null or empty");
+			return;
 		}
+		
+
+		// Get the existing names and check duplicates
+		List<String> currentNames = getDatasetNames();
+
+		if(currentNames.contains(newName)){
+			fine("Checking duplicate name is OK");
+			int result = JOptionPane.showConfirmDialog(this, 
+					"Chosen name exists. Use anyway?");
+
+			if(result!= JOptionPane.OK_OPTION){
+				log("User cancelled name change");
+				return;
+			}
+		}
+		
+		collection.setName(newName);
+
+		log("Collection renamed: "+newName);
+
+
+		File saveFile = dataset.getSavePath();
+		if(saveFile.exists()){
+			saveFile.delete();
+		}
+
+		fireDatasetEvent(DatasetEvent.SAVE, dataset);
+
+		update(dataset);
+		
 	}
 	
 	
@@ -619,26 +638,57 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * Move the selected dataset down in the list
 	 */
 	private void moveDatasetDown() {
-		
+		finer("Move dataset down heard");
 		List<AnalysisDataset> datasets = getSelectedDatasets();
-
-		if(datasets.size()==1){
-
-			AnalysisDataset dataToMove = datasets.get(0);
-			
-			int oldValue = treeOrderMap.get(dataToMove.getUUID());
-			int newValue = oldValue;
-			if(oldValue<treeOrderMap.size()-1){ // do not change if already at the bottom
-				
-				newValue = oldValue+1;
-				UUID replacedID = treeOrderMap.get(newValue); // find the dataset currently holding the spot
-				treeOrderMap.put(dataToMove.getUUID(), newValue ); // move the dataset up
-				treeOrderMap.put(replacedID, oldValue); // move the dataset in place down
-				update();
-				
-			}
-			selectDataset(dataToMove);
+		List<PopulationTreeTableNode> nodes = this.getSelectedNodes();
+		
+		if(nodes.isEmpty() || nodes.size()>1){
+			return;
 		}
+
+		// May be a dataset or cluster group selected
+		AnalysisDataset datasetToMove = datasets.isEmpty() ? null : datasets.get(0);
+
+		// Get the node containing the dataset
+		DefaultTreeTableModel model = (DefaultTreeTableModel) treeTable.getTreeTableModel();
+
+
+
+		finer("Selected "+nodes.size()+" nodes");
+
+		for(PopulationTreeTableNode n : nodes){
+			PopulationTreeTableNode parent = (PopulationTreeTableNode) n.getParent();
+
+			//get the index of the child in the parent node
+			int oldIndex = model.getIndexOfChild(parent, n);
+
+			finest("Old index "+oldIndex);
+
+//			 if the index is last, do nothing
+			if(oldIndex == parent.getChildCount()-1){
+				return;
+			}
+
+			int sibIndex = oldIndex+1;
+			finest("Sib index "+sibIndex);
+
+			// Get the next node up
+			PopulationTreeTableNode sib = (PopulationTreeTableNode) parent.getChildAt(sibIndex);
+			model.removeNodeFromParent(n);
+			model.removeNodeFromParent(sib);
+
+			finest("Old node:  "+n.toString());
+			finest("Sib node:  "+sib.toString());
+
+			model.insertNodeInto(sib, parent, oldIndex);
+			model.insertNodeInto(n,   parent, sibIndex);
+
+		}
+
+		if(datasets!=null){
+			selectDataset(datasetToMove);
+		}
+
 	}
 	
 	
@@ -646,24 +696,56 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * Move the selected dataset down in the list
 	 */
 	private void moveDatasetUp() {
-		
+		finer("Move dataset up heard");
 		List<AnalysisDataset> datasets = getSelectedDatasets();
+		List<PopulationTreeTableNode> nodes = this.getSelectedNodes();
+		
+		if(nodes.isEmpty() || nodes.size()>1){
+			return;
+		}
 
-		if(datasets.size()==1){
+		// May be a dataset or cluster group selected
+		AnalysisDataset datasetToMove = datasets.isEmpty() ? null : datasets.get(0);
 
-			AnalysisDataset dataToMove = datasets.get(0);
+		// Get the node containing the dataset
+		DefaultTreeTableModel model = (DefaultTreeTableModel) treeTable.getTreeTableModel();
 
-			int oldValue = treeOrderMap.get(dataToMove.getUUID());
-			int newValue = oldValue;
-			if(oldValue>0){ // do not change if already at the top
-				newValue = oldValue-1;
 
-				UUID replacedID = treeOrderMap.get(newValue); // find the dataset currently holding the spot
-				treeOrderMap.put(dataToMove.getUUID(), newValue ); // move the dataset up
-				treeOrderMap.put(replacedID, oldValue); // move the dataset in place down
-				update();
+
+		finer("Selected "+nodes.size()+" nodes");
+
+		for(PopulationTreeTableNode n : nodes){
+			PopulationTreeTableNode parent = (PopulationTreeTableNode) n.getParent();
+
+			//get the index of the child in the parent node
+			int oldIndex = model.getIndexOfChild(parent, n);
+
+			finest("Old index "+oldIndex);
+
+			// if the index is first, do nothing
+			if(oldIndex == 0){
+				return;
 			}
-			selectDataset(dataToMove);
+
+			int sibIndex = oldIndex-1;
+			finest("Sib index "+sibIndex);
+
+			// Get the next node up
+			PopulationTreeTableNode sib = (PopulationTreeTableNode) parent.getChildAt(sibIndex);
+			model.removeNodeFromParent(n);
+			model.removeNodeFromParent(sib);
+
+			finest("Old node:  "+n.toString());
+			finest("Sib node:  "+sib.toString());
+
+			model.insertNodeInto(n,   parent, sibIndex);
+			model.insertNodeInto(sib, parent, oldIndex);
+
+
+		}
+
+		if(datasets!=null){
+			selectDataset(datasetToMove);
 		}
 	}
 	
@@ -788,7 +870,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * Establish the rows in the population tree that are currently selected.
 	 * Set the possible menu options accordingly, and call the panel updates
 	 */
-	class TreeSelectionHandler implements TreeSelectionListener {
+	public class TreeSelectionHandler implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
 			
 			try {
@@ -804,7 +886,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
 
 				TreeSelectionModel lsm = (TreeSelectionModel)e.getSource();
-				
+				int totalSelectionCount = lsm.getSelectionCount();
 				Map<Integer, Integer> selectedIndexes = new HashMap<Integer, Integer>(0);
 				
 				if (!lsm.isSelectionEmpty()) {
@@ -858,19 +940,28 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 					PopulationTableCellRenderer rend = new PopulationTableCellRenderer(selectedIndexes);
 					treeTable.getColumnModel().getColumn(COLUMN_COLOUR).setCellRenderer(rend);
 
-					if(datasets.isEmpty()){
-						populationPopup.disableAll();
+					if(datasets.isEmpty() && totalSelectionCount==0){
+						populationPopup.setEnabled(false);
 					} else {
 
-						if(datasets.size()>1){ // multiple populations
-							populationPopup.disableAll();
-							populationPopup.enableMerge();
-							populationPopup.enableDelete();
-							populationPopup.enableBoolean();
+						if(totalSelectionCount>1){ // multiple of datasets or clusters
+							// single dataset
+								populationPopup.setEnabled(false);
+								populationPopup.enableMerge();
+								populationPopup.enableDelete();
+								populationPopup.enableBoolean();
+							
 
 						} else { // single population
-							AnalysisDataset d = datasets.get(0);
-							setMenuForSingleDataset(d);
+							
+							if(datasets.size()==1){ // single datasets
+								AnalysisDataset d = datasets.get(0);
+								setMenuForSingleDataset(d);
+							} else {
+								// single clustergoup
+								populationPopup.enableMenuUp();
+								populationPopup.enableMenuDown();
+							}
 						}
 						finer("Firing update panel event due to tree selection");
 						fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
@@ -933,81 +1024,78 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		populationPopup.enableSaveCells();
 		populationPopup.enableAddNuclearSignal();
 		
+		populationPopup.enableMenuUp();
+		populationPopup.enableMenuDown();
 		// check if we can move the dataset
-		if(d.isRoot()){
-
-			if(DatasetListManager.getInstance().count()>1){
-
-				// check if the selected dataset is at the top of the list
-				if(DatasetListManager.getInstance().getRootDatasets().get(0).getUUID().equals(d.getUUID())){
-					populationPopup.disableMenuUp();
-				} else {
-					populationPopup.enableMenuUp();
-				}
-
-				// check if the selected dataset is at the bottom of the list
-				if(DatasetListManager.getInstance().getRootDatasets().get(DatasetListManager.getInstance().getRootDatasets().size()-1).getUUID().equals(d.getUUID())){
-					populationPopup.disableMenuDown();
-				} else {
-					populationPopup.enableMenuDown();
-				}
-
-			} else { // only one or zero datasets in the pogram 
-				populationPopup.disableMenuUp();
-				populationPopup.disableMenuDown();
-			}
-
-			// only root datasets can replace folder mappings
-			populationPopup.enableReplaceFolder();
-
-		} else { // not root
-						
-			populationPopup.disableReplaceFolder();
-			populationPopup.disableMenuUp();
-			populationPopup.disableMenuDown();
-		}
+//		if(d.isRoot()){
+//
+//			if(DatasetListManager.getInstance().count()>1){
+//
+//				// check if the selected dataset is at the top of the list
+//				if(DatasetListManager.getInstance().getRootDatasets().get(0).getUUID().equals(d.getUUID())){
+//					populationPopup.disableMenuUp();
+//				} else {
+//					populationPopup.enableMenuUp();
+//				}
+//
+//				// check if the selected dataset is at the bottom of the list
+//				if(DatasetListManager.getInstance().getRootDatasets().get(DatasetListManager.getInstance().getRootDatasets().size()-1).getUUID().equals(d.getUUID())){
+//					populationPopup.disableMenuDown();
+//				} else {
+//					populationPopup.enableMenuDown();
+//				}
+//
+//			} else { // only one or zero datasets in the pogram 
+//				populationPopup.disableMenuUp();
+//				populationPopup.disableMenuDown();
+//			}
+//
+//			// only root datasets can replace folder mappings
+//			populationPopup.enableReplaceFolder();
+//
+//		} else { // not root
+//						
+//			populationPopup.disableReplaceFolder();
+//			populationPopup.disableMenuUp();
+//			populationPopup.disableMenuDown();
+//		}
 
 	}
 		
 
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
-
-		// Pass on events from the popup menu
-		if(event.sourceName().equals(PopulationListPopupMenu.SOURCE_COMPONENT)){
-				fireSignalChangeEvent(event.type());
-				finest("Firing signal change event: "+event.type());
+							
+		switch(event.type()){
+			
+			// catch any signals that affect the datasets directly
+		
+			case "MoveDatasetDownAction":{
+				moveDatasetDown();
+				break;
 			}
-					
-		// catch any signals that affect the datasets directly
-		if(event.type().equals("MoveDatasetDownAction")){
-			moveDatasetDown();
+			
+			case "MoveDatasetUpAction":{
+				moveDatasetUp();
+				break;
+			}
+			
+			case "DeleteCollectionAction":{
+				deleteSelectedDatasets();
+				break;
+			}
+			
+			default: {
+				// Pass on events from the popup menu
+				if(event.sourceName().equals(PopulationListPopupMenu.SOURCE_COMPONENT)){
+					fireSignalChangeEvent(event.type());
+					finest("Firing signal change event: "+event.type());
+				}
+				break;
+			}
+			
 		}
-		
-		if(event.type().equals("MoveDatasetUpAction")){
-			moveDatasetUp();
-		}
-		
-		if(event.type().equals("RenameDatasetUpAction")){
-			moveDatasetUp();
-		}
-		
-		if(event.type().equals("DeleteCollectionAction")){
-			finest("Deleting dataset action received");
-			deleteSelectedDatasets();
-		}
-		
-		
+	
 	}
 	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return null;
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return null;
-	}
-
 }

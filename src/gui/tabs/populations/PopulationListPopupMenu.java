@@ -30,43 +30,20 @@ import javax.swing.JPopupMenu;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
+import gui.components.BorderTagEvent;
 
+@SuppressWarnings("serial")
 public class PopulationListPopupMenu extends JPopupMenu {
 	
 	public static final String SOURCE_COMPONENT = "PopupMenu"; 
 
-	private static final long serialVersionUID = 1L;
-	JMenuItem mergeMenuItem = new JMenuItem( new AbstractAction("Merge"){
-		private static final long serialVersionUID = 1L;
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			fireSignalChangeEvent("MergeCollectionAction");				
-		}
-	});
+	JMenuItem mergeMenuItem;
+	JMenuItem curateMenuItem;
 	
-	JMenuItem curateMenuItem = new JMenuItem( new AbstractAction("Curate"){
-		private static final long serialVersionUID = 1L;
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			fireSignalChangeEvent("CurateCollectionAction");				
-		}
-	});
+	JMenuItem deleteMenuItem;
 	
-	JMenuItem deleteMenuItem = new JMenuItem( new AbstractAction("Delete"){
-		private static final long serialVersionUID = 1L;
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			fireSignalChangeEvent("DeleteCollectionAction");				
-		}
-	});
+	JMenuItem booleanMenuItem;
 	
-	JMenuItem booleanMenuItem = new JMenuItem( new AbstractAction("Boolean operation"){
-		private static final long serialVersionUID = 1L;
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			fireSignalChangeEvent("DatasetArithmeticAction");				
-		}
-	});
 	JMenuItem saveMenuItem = new JMenuItem( new AbstractAction("Save nmd as..."){
 		private static final long serialVersionUID = 1L;
 		@Override
@@ -75,13 +52,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		}
 	});
 	
-//	JMenuItem extractMenuItem = new JMenuItem( new AbstractAction("Extract nuclei"){
-//		private static final long serialVersionUID = 1L;
-//		@Override
-//		public void actionPerformed(ActionEvent arg0) {
-//			fireSignalChangeEvent("ExtractNucleiAction");				
-//		}
-//	});
+
 	
 	@SuppressWarnings("serial")
 	JMenuItem saveCellsMenuItem = new JMenuItem( new AbstractAction("Save cell locations"){
@@ -101,21 +72,9 @@ public class PopulationListPopupMenu extends JPopupMenu {
 	
 	
 	
-	JMenuItem moveUpMenuItem = new JMenuItem( new AbstractAction("Move up"){
-		private static final long serialVersionUID = 1L;
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			fireSignalChangeEvent("MoveDatasetUpAction");				
-		}
-	});
+	JMenuItem moveUpMenuItem;
 	
-	JMenuItem moveDownMenuItem = new JMenuItem( new AbstractAction("Move down"){
-		private static final long serialVersionUID = 1L;
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			fireSignalChangeEvent("MoveDatasetDownAction");				
-		}
-	});
+	JMenuItem moveDownMenuItem;
 	
 	JMenuItem replaceFolderMenuItem = new JMenuItem( new AbstractAction("Change folder"){
 		private static final long serialVersionUID = 1L;
@@ -124,31 +83,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 			fireSignalChangeEvent("ChangeNucleusFolderAction");				
 		}
 	});
-	
-//	JMenuItem exportStatsMenuItem = new JMenuItem( new AbstractAction("Export stats"){
-//		private static final long serialVersionUID = 1L;
-//		@Override
-//		public void actionPerformed(ActionEvent arg0) {
-//			fireSignalChangeEvent("ExportDatasetStatsAction");				
-//		}
-//	});
-	
-//	JMenuItem applySegmentationMenuItem = new JMenuItem( new AbstractAction("Reapply profile"){
-//		private static final long serialVersionUID = 1L;
-//		@Override
-//		public void actionPerformed(ActionEvent arg0) {
-//			fireSignalChangeEvent("ReapplySegmentProfileAction");				
-//		}
-//	});
-	
-//	JMenuItem addTailStainMenuItem = new JMenuItem( new AbstractAction("Add tail stain"){
-//		private static final long serialVersionUID = 1L;
-//		@Override
-//		public void actionPerformed(ActionEvent arg0) {
-//			fireSignalChangeEvent("AddTailStainAction");			
-//		}
-//	});
-	
+		
 	JMenuItem addNuclearSignalMenuItem = new JMenuItem( new AbstractAction("Add nuclear signal"){
 		private static final long serialVersionUID = 1L;
 		@Override
@@ -156,60 +91,85 @@ public class PopulationListPopupMenu extends JPopupMenu {
 			fireSignalChangeEvent("AddNuclearSignalAction");	
 		}
 	});
-	
-	
-//	JMenuItem performShellAnalysisMenuItem = new JMenuItem( new AbstractAction("Run shell analysis"){
-//		private static final long serialVersionUID = 1L;
-//		@Override
-//		public void actionPerformed(ActionEvent arg0) {
-//			fireSignalChangeEvent("NewShellAnalysisAction");	
-//		}
-//	});
-	
+		
 	private List<Object> listeners = new ArrayList<Object>();
 			
 			
 	public PopulationListPopupMenu() {
 		
 		super("Popup");
+		createButtons();
 		
 		this.add(moveUpMenuItem);
 		this.add(moveDownMenuItem);
+		
 		this.addSeparator();
+		
 		this.add(mergeMenuItem);
 		this.add(deleteMenuItem);
 		this.add(booleanMenuItem);
 		this.add(curateMenuItem);
+		
 		this.addSeparator();
+		
 		this.add(saveMenuItem);
-//		this.add(extractMenuItem);
 		this.add(saveCellsMenuItem);
 		this.add(relocateMenuItem);
-//		this.add(exportStatsMenuItem);
+
 		this.addSeparator();
+		
 		this.add(replaceFolderMenuItem);
-//		this.add(applySegmentationMenuItem);
+
 		this.addSeparator();
-//		this.add(addTailStainMenuItem); // do not enable until ready
+
 		this.add(addNuclearSignalMenuItem);
-//		this.add(performShellAnalysisMenuItem);
+
     }
 	
-	public void enableAll(){
+	public void createButtons(){
+		
+		moveUpMenuItem = new JMenuItem("Move up");
+		moveUpMenuItem.addActionListener( e -> {
+			fireSignalChangeEvent("MoveDatasetUpAction");	
+		});
+		
+		moveDownMenuItem = new JMenuItem("Move down");
+		moveDownMenuItem.addActionListener( e -> {
+			
+			fireSignalChangeEvent("MoveDatasetDownAction");	
+		});
 		
 		
-		for(Component c : this.getComponents()){
-			c.setEnabled(true);
-		}		
+		mergeMenuItem = new JMenuItem("Merge");
+		mergeMenuItem.addActionListener( e -> {
+			fireSignalChangeEvent("MergeCollectionAction");	
+		});
+		
+		curateMenuItem = new JMenuItem("Curate");
+		curateMenuItem.addActionListener( e -> {
+			fireSignalChangeEvent("CurateCollectionAction");	
+		});
+				
+		deleteMenuItem = new JMenuItem("Delete");
+		deleteMenuItem.addActionListener( e -> {
+			fireSignalChangeEvent("DeleteCollectionAction");	
+		});
+		
+		booleanMenuItem = new JMenuItem("Boolean");
+		booleanMenuItem.addActionListener( e -> {
+			fireSignalChangeEvent("DatasetArithmeticAction");	
+		});
+		
+		
+		
 	}
 	
-	public void disableAll(){
-		
+	public void setEnabled(boolean b){
 		for(Component c : this.getComponents()){
-			c.setEnabled(false);
-		}
+			c.setEnabled(b);
+		}	
 	}
-	
+		
 	public void enableMerge(){
 		mergeMenuItem.setEnabled(true);
 	}
@@ -258,13 +218,6 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		saveCellsMenuItem.setEnabled(false);
 	}
 	
-//	public void enableExtract(){
-//		extractMenuItem.setEnabled(true);
-//	}
-//	
-//	public void disableExtract(){
-//		extractMenuItem.setEnabled(false);
-//	}
 	
 	public void enableMenuUp(){
 		moveUpMenuItem.setEnabled(true);
@@ -329,14 +282,6 @@ public class PopulationListPopupMenu extends JPopupMenu {
 	public void disableAddNuclearSignal(){
 		addNuclearSignalMenuItem.setEnabled(false);
 	}
-	
-//	public void enableRunShellAnalysis(){
-//		performShellAnalysisMenuItem.setEnabled(true);
-//	}
-//	
-//	public void disableRunShellAnalysis(){
-//		performShellAnalysisMenuItem.setEnabled(false);
-//	}
 	
 	
 	

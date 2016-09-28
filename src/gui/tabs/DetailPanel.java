@@ -626,6 +626,18 @@ public abstract class DetailPanel
         }
     }
     
+    /**
+     * Fire an event on a single dataset.
+     * @param method
+     * @param dataset
+     */
+    protected synchronized void fireDatasetEvent(String method, AnalysisDataset dataset) {
+    	
+    	List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		list.add(dataset);
+		fireDatasetEvent(method, list);
+    }
+    
     protected synchronized void fireDatasetEvent(String method, List<AnalysisDataset> list, AnalysisDataset template) {
 
     	DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, template);

@@ -6,11 +6,12 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
+import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
 import analysis.AnalysisDataset;
 import components.ClusterGroup;
 
-public class PopulationTreeTableNode extends AbstractMutableTreeTableNode {
+public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
 	
 	Object[] columnData = new Object[3];
 
