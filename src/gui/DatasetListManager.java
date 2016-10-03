@@ -70,6 +70,31 @@ public final class DatasetListManager implements Loggable {
 		return map.size()>0;
 	}
 	
+	/**
+	 * Update the cluster groups for each root dataset and its children.
+	 * This will remove any cluster groups with no member datasets. 
+	 */
+	public void refreshClusters(){
+		try {
+		finest("Refreshing clusters...");
+		if(this.hasDatasets()){
+			
+			for(AnalysisDataset rootDataset : this.getRootDatasets()){
+
+				finest("  Root dataset "+rootDataset.getName());
+				rootDataset.refreshClusterGroups();
+				for(AnalysisDataset child : rootDataset.getAllChildDatasets()){
+					finest("    Child dataset "+child.getName());
+					child.refreshClusterGroups();
+				}
+				
+			}
+		}
+		} catch (Exception e){
+			error("Error refreshing clusters", e);
+		}
+	}
+	
 	
 	public Set<AnalysisDataset> getAllDatasets(){
 		

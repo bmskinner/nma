@@ -1,0 +1,244 @@
+package gui.tabs.populations;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.swing.ListSelectionModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
+
+import org.jdesktop.swingx.JXTreeTable;
+import org.jdesktop.swingx.treetable.TreeTableModel;
+
+import analysis.AnalysisDataset;
+import components.ClusterGroup;
+import gui.DatasetListManager;
+import gui.tabs.populations.PopulationsPanel.TreeSelectionHandler;
+import logging.Loggable;
+
+public class PopulationTreeTable extends JXTreeTable implements Loggable {
+	
+	/**
+	 * The column index for the dataset name 
+	 */
+	public static final int COLUMN_NAME       = 0;
+	
+	/**
+	 * The column index for the dataset cell count 
+	 */
+	public static final int COLUMN_CELL_COUNT = 1;
+	
+	
+	/**
+	 * The column index for the dataset chart colour
+	 */
+	public static final int COLUMN_COLOUR     = 2;
+	
+	private TreeSelectionHandler treeListener;
+	
+	public PopulationTreeTable(){
+		super();
+	}
+	
+	public PopulationTreeTable(TreeTableModel model){
+		super(model);
+	}
+	
+	public void setTreeSelectionListener(TreeSelectionHandler t){
+		treeListener = t;
+	}
+	
+	/**
+	 * Get the index of the given dataset in the table model
+	 * @return the index
+	 */
+	public int getRowIndex(AnalysisDataset dataset){
+		
+		int index = 0;
+
+		for(int row = 0; row<this.getRowCount(); row++){
+
+			String populationName = this.getValueAt(row, COLUMN_NAME).toString();
+
+			if(dataset.getName().equals(populationName)){
+				index = row;
+			}
+		}
+		return index;
+
+	}
+	
+	/**
+	 * Select the given datasets in the tree table
+	 * @param dataset the dataset to select
+	 */
+	public void selectDatasets(List<AnalysisDataset> list){
+		finer("Selecting list of "+list.size()+" datasets in populations panel");
+
+		PopulationTreeTableModel model = (PopulationTreeTableModel) getTreeTableModel();
+		
+		Map<Integer, Integer> selectedIndexes = new HashMap<Integer, Integer>(0);
+		int selectedIndexOrder = 0;
+		for(AnalysisDataset dataset : list){
+			int index = getRowIndex(dataset);
+			
+			selectedIndexes.put(index, selectedIndexOrder++);
+
+			ListSelectionModel selectionModel = getSelectionModel();
+			
+			TreeSelectionModel treeSelectionModel = getTreeSelectionModel();
+			
+			finest("Removing tree selection listener");
+			treeSelectionModel.removeTreeSelectionListener(treeListener); // if we don't remove the listener, the clearing will trigger an update
+			finest("Clearing tree selection");
+			selectionModel.clearSelection(); // if the new selection is the same as the old, the charts will not recache
+			finest("Restoring tree selection listener");
+			treeSelectionModel.addTreeSelectionListener(treeListener);
+			
+			finest("Adding index at "+index);
+			selectionModel.addSelectionInterval(index, index); // this will trigger a chart update
+		
+		}
+				
+		PopulationTableCellRenderer rend = (PopulationTableCellRenderer) getColumnModel().getColumn(COLUMN_COLOUR).getCellRenderer();
+		rend.update(selectedIndexes);
+	}
+	
+	/**
+	 * Get the names of the datasets in this table
+	 * @return
+	 */
+	public List<String> getDatasetNames(){
+		List<String> result = new ArrayList<String>();
+		for(int i=0; i<getRowCount(); i++){
+			String s = getValueAt(i, PopulationTreeTable.COLUMN_NAME).toString();
+			result.add(s);
+		}
+		return result;
+	}
+	
+	/**
+	 * Get the nodes for all selected datasets
+	 * @return
+	 */
+	public List<PopulationTreeTableNode> getSelectedNodes(){
+
+		List<PopulationTreeTableNode> result = new ArrayList<PopulationTreeTableNode>();
+		TreePath[] paths = getTreeSelectionModel().getSelectionPaths();
+		for(TreePath p : paths){
+			PopulationTreeTableNode n = (PopulationTreeTableNode) p.getLastPathComponent();
+			result.add(n);
+		}
+		return result;
+	}
+	
+	private List<Integer> getSelectedDatasetIndexes(){
+		List<Integer> result = new ArrayList<Integer>();
+		List<AnalysisDataset> datasets = getSelectedDatasets();
+		PopulationTreeTableModel model = (PopulationTreeTableModel) getTreeTableModel();
+
+		for(AnalysisDataset d : datasets){
+			//			result.add( model.getRowIndex(d));
+			result.add( getRowIndex(d));
+		}
+		return result;
+
+	}
+	
+	private List<AnalysisDataset> getSelectedDatasets(){
+		List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>();
+		
+		for (int row = 0; row < getRowCount(); row++) {
+			
+			Object ob = getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
+			if(ob instanceof AnalysisDataset){
+				datasets.add( (AnalysisDataset)ob);
+			}
+
+		}
+		return datasets;
+	}
+	
+	
+	/**
+	 * Find the datasets which are collapsed in the tree
+	 * @return
+	 */
+	public List<Object> getCollapsedRows(){
+		List<Object> collapsedRows = new ArrayList<Object>();		
+		for (int row = 0; row < getRowCount(); row++) {
+			if(!isExpanded(row)){
+				
+				Object columnOneObject = getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
+				collapsedRows.add(columnOneObject);
+			}
+		}
+		finest("Got all collapsed rows");
+		return collapsedRows;
+	}
+	
+	/**
+	 * Set the dataset rows with the given IDs to be collapsed
+	 * @param collapsedRows
+	 */
+	public void setCollapsedRows(List<Object> collapsedRows){
+		if(DatasetListManager.getInstance().hasDatasets()){
+
+			finest("Expanding rows");
+			for (int row = 0; row < getRowCount(); row++) {
+				
+				Object columnOneObject = getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
+				
+				if(collapsedRows.contains(columnOneObject)){
+					collapseRow(row);	
+				} else {
+					expandRow(row);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Test if the given row of the table has a dataset
+	 * @param rowIndex
+	 * @return
+	 */
+	public boolean isDataset(int rowIndex){
+		Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+		if(columnOneObject instanceof AnalysisDataset){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Get the dataset at the given row, or null if no dataset is present
+	 * @param rowIndex
+	 * @return
+	 */
+	public AnalysisDataset getDatasetAtRow(int rowIndex){
+		Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+
+		if(columnOneObject instanceof AnalysisDataset){
+			return (AnalysisDataset) columnOneObject; // row i, column 0
+		}
+		return null;
+	}
+	
+	/**
+	 * Get the ClusterGroup at the given row, or null if no group is present
+	 * @param rowIndex
+	 * @return
+	 */
+	public ClusterGroup getClusterGroupAtRow(int rowIndex){
+		Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+
+		if(columnOneObject instanceof ClusterGroup){
+			return (ClusterGroup) columnOneObject; // row i, column 0
+		}
+		return null;
+	}
+
+}

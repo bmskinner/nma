@@ -54,7 +54,7 @@ class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRend
     	  
        	    	   
     	   // check if the row is a cluster group
-    	   Object columnOneObject = table.getModel().getValueAt(row, PopulationsPanel.COLUMN_NAME);
+    	   Object columnOneObject = table.getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
 
     	   if(columnOneObject instanceof AnalysisDataset){
     		   
