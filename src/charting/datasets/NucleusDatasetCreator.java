@@ -1081,15 +1081,6 @@ private static NucleusDatasetCreator instance = null;
 		// At this point, the angle profile and the iqr profile should be in sync
 		// The following set of checks confirms this.
 		int pointIndex = n.getBorderIndex(pointType);
-//		n.dumpInfo(Nucleus.ALL_POINTS);
-		
-//		IJ.log("Nucleus tail index: "+n.getBorderIndex(pointType));
-//		IJ.log("");
-//		IJ.log("IQR range");
-//		iqrRange.print();
-//		IJ.log("");
-//		IJ.log("Angle profile");
-//		angleProfile.print();
 		
 		if(angleProfile.hasSegments()){ // only draw if there are segments
 			
@@ -1097,7 +1088,7 @@ private static NucleusDatasetCreator instance = null;
 			for(NucleusBorderSegment seg :  angleProfile.getOrderedSegments()){
 								
 				// check the indexes that the segment covers
-//				IJ.log(seg.toString());
+//				log(seg.toString());
 				
 				// add the segment, taking the indexes from the segment, and drawing the values 
 				// in the scaled IQR profile at these positions
@@ -1105,6 +1096,7 @@ private static NucleusDatasetCreator instance = null;
 				// The segment start and end indexes should be in correspondence with the offsets
 				// That is, the zero index in a segment start / end is the pointType
 				
+//				log("Adding IQR for segment "+seg.getName());
 				addSegmentIQRToConsensus(seg, ds, n, scaledRange, pointType);
 
 				// draw the segment itself
@@ -1157,6 +1149,8 @@ private static NucleusDatasetCreator instance = null;
 		// Hence a segment start index of zero is at the pointType
 		
 		for(int i=0; i<=segment.length(); i++){
+			
+			
 			
 			// get the index of this point of the segment in the nucleus border list.
 			// The nucleus border list has an arbitrary zero location, and the 

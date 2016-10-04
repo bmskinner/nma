@@ -18,12 +18,14 @@
  *******************************************************************************/
 package charting.charts;
 
+import gui.GlobalOptions;
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.List;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -186,7 +188,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	}
 	
 	/**
-	 * Get the maximum absolute range of the axes of the chart
+	 * Get the maximum absolute range of the axes of the chart. The minimum
+	 * returned value will be 1
 	 * @param list the datasets to test
 	 * @return
 	 */
@@ -224,10 +227,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		plot.setDataset(0, ds);
 		plot.getDomainAxis().setRange(-max,max);
 		plot.getRangeAxis().setRange(-max,max);
-		
-		ColourSwatch swatch = dataset.getSwatch() == null 
-				? ColourSwatch.REGULAR_SWATCH
-				: dataset.getSwatch();
+				
+		ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
 		
 		formatConsensusChartSeries(plot, true, swatch);
 		
@@ -261,9 +262,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 				// The dataset series name is Q25_Seg_1 etc
 				String segmentName = name.replaceAll("Q[2|7]5_", "");
 				int segIndex = MorphologyChartFactory.getIndexFromLabel(segmentName);
-				
-//				IJ.log("Drawing IQR for seg "+segmentName + " in "+name);
-				
+								
 				if(showIQR){
 					plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
 					Color colour = ColourSelecter.getColor(segIndex);

@@ -19,11 +19,13 @@
 
 package analysis.profiles;
 
-import ij.process.FloatPolygon;
-
+import java.awt.Shape;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import logging.Loggable;
+import utility.ProfileException;
 import utility.Utils;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
@@ -36,7 +38,7 @@ import components.nuclear.NucleusBorderSegment;
  * @author bms41
  *
  */
-public class ProfileCreator {
+public class ProfileCreator implements Loggable {
 	
 	Profileable target;
 	
@@ -45,6 +47,7 @@ public class ProfileCreator {
 	}
 	
 	public SegmentedProfile createProfile(ProfileType type){
+		
 		
 		switch(type){
 			case ANGLE: { 
@@ -66,10 +69,13 @@ public class ProfileCreator {
 		}
 	}
 	
-	private SegmentedProfile calculateAngleProfile() {
-
-		List<NucleusBorderSegment> segments = null;
-				
+	/**
+	 * Get the existing segments from the template angle profile
+	 * @return
+	 */
+	private List<NucleusBorderSegment> getExistingSegments(){
+		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
+		
 		SegmentedProfile templateProfile = null;
 		// store segments to reapply later
 		if(target.hasProfile(ProfileType.ANGLE)){
@@ -79,10 +85,17 @@ public class ProfileCreator {
 				
 			}
 		}
+		return segments;
+	}
+	
+	private SegmentedProfile calculateAngleProfile() {
+
+		List<NucleusBorderSegment> segments = getExistingSegments();
 		
 		double[] angles = new double[target.getBorderLength()];
 		
-		FloatPolygon polygon = target.createPolygon();
+//		FloatPolygon polygon = target.createPolygon();
+		Shape s = target.toShape();
 
 		
 		int index = 0;
@@ -106,7 +119,7 @@ public class ProfileCreator {
 			double midY = (pointBefore.getY()+pointAfter.getY())/2;
 			
 			// Check if the polygon contains the point
-			if(polygon.contains((float) midX, (float) midY)){
+			if(s.contains( midX,  midY)){
 			
 				angles[index] = angle;
 			} else {
@@ -115,28 +128,33 @@ public class ProfileCreator {
 			index++;
 		}
 		
-		// Reapply any segments that were present in the profile
+		// Make a new profile. This will have two segments by default
 		SegmentedProfile newProfile = new SegmentedProfile(angles);
-		if(segments!=null){
+		
+		// Reapply any segments that were present in the original profile
+		if( ! segments.isEmpty()){
 			
-			// If the border list has changed, the profile lengths will be different
-			// In this case, add and normalise the segment lengths
-			if(segments.get(0).getTotalLength() != target.getBorderLength() ){
-
-
-				
-				try {
-					segments = NucleusBorderSegment.scaleSegments(segments, target.getBorderLength());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			
-				newProfile.setSegments(segments);
-			}
-			
+			reapplySegments(segments, newProfile);
 		}
+
 		return newProfile;
+	}
+	
+	private void reapplySegments(List<NucleusBorderSegment> segments, SegmentedProfile profile){
+		// If the border list has changed, the profile lengths will be different
+		// In this case, add and normalise the segment lengths
+		if(segments.get(0).getTotalLength() != target.getBorderLength() ){
+
+			try {
+				segments = NucleusBorderSegment.scaleSegments(segments, target.getBorderLength());
+			} catch (ProfileException e) {
+				error("Error scaling segments when profiling", e);
+			}
+
+
+		}
+
+		profile.setSegments(segments);
 	}
 
 	private SegmentedProfile calculateDiameterProfile() {

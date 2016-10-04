@@ -57,6 +57,7 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 		ProfileCreator creator = new ProfileCreator(this);
 
 		SegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
+				
 		profileMap.put(ProfileType.ANGLE, profile);
 
 	}

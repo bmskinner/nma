@@ -116,7 +116,8 @@ public class CurveRefolder extends AnalysisWorker {
 		if(q25==null || q75==null){
 			throw new Exception("Null reference to q25 or q75 profile");
 		}
-
+		
+		
 
 		this.targetCurve 	= targetProfile;
 		this.setMode(refoldMode);
@@ -127,11 +128,9 @@ public class CurveRefolder extends AnalysisWorker {
 		
 
 		try{ 
-			
 
 			refoldNucleus.moveCentreOfMass(new XYPoint(0, 0));
 
-			
 			if(collection.getNucleusCount()>1){
 				
 				smoothCurve(); // smooth the candidate nucleus to remove jagged edges
@@ -142,9 +141,8 @@ public class CurveRefolder extends AnalysisWorker {
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
 			// orient refolded nucleus to put tail at the bottom
-			
 			refoldNucleus.alignVertically();
-					
+								
 			
 			// if rodent sperm, put tip on left if needed
 			if(collection.getNucleusType().equals(NucleusType.RODENT_SPERM)){
@@ -180,22 +178,20 @@ public class CurveRefolder extends AnalysisWorker {
 		all other functions will hang off this
 	*/
 	public void refoldCurve() throws Exception {
-
+		
 		try{
-			double score = refoldNucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
+			double score = refoldNucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT)
+					.absoluteSquareDifference(targetCurve);
 			
-//			fileLogger.log(Level.INFO, "Refolding curve: initial score: "+(int)score);
+
 			fine("Refolding curve: initial score: "+(int)score);
 
-//			double originalScore = score;
-			double prevScore = score*2;
+//			double prevScore = score*2;
 			int i=0;
 			
-//			(prevScore - score)/prevScore > 0.001 ||
-			
-//			if(this.mode.equals(CurveRefoldingMode.FAST)){
+
 				while(  i<mode.maxIterations()){ // iterate until converging
-					prevScore = score;
+//					prevScore = score;
 					score = this.iterateOverNucleus();
 					publish(++i);
 					fine("Iteration "+i+": "+(int)score);
@@ -314,13 +310,14 @@ public class CurveRefolder extends AnalysisWorker {
 		
 		// make all changes to a fresh nucleus before buggering up the real one
 		ConsensusNucleus testNucleus = new ConsensusNucleus( refoldNucleus, NucleusType.ROUND);
+		
 		for(int i=0; i<refoldNucleus.getBorderLength(); i++){
 			similarityScore = improveBorderPoint(i, minDistance, maxDistance, similarityScore, testNucleus);
 		}
 		testNucleus = null;
 		return similarityScore;
-		
 	}
+	
 	
 	/**
 	 * Try a random modification to the given border point position, and measure the effect
@@ -337,6 +334,8 @@ public class CurveRefolder extends AnalysisWorker {
 
 		double score = testNucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
 
+//		log("3bi testNucleus has "+ testNucleus.getProfile(ProfileType.ANGLE).getSegmentCount());
+		
 		// Get a copy of the point at this index
 		BorderPoint p = testNucleus.getBorderPoint(index);
 
@@ -366,7 +365,6 @@ public class CurveRefolder extends AnalysisWorker {
 			finer("Testing profiles");
 			testNucleus.calculateProfiles();
 
-
 			// Get the new score
 			score = testNucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
 
@@ -384,6 +382,7 @@ public class CurveRefolder extends AnalysisWorker {
 		return similarityScore;
 		
 	}
+	
 	
 	/**
 	 * // Do not apply a change if the distance from the surrounding points changes too much
