@@ -18,6 +18,7 @@ import gui.DatasetListManager;
 import gui.tabs.populations.PopulationsPanel.TreeSelectionHandler;
 import logging.Loggable;
 
+@SuppressWarnings("serial")
 public class PopulationTreeTable extends JXTreeTable implements Loggable {
 	
 	/**
@@ -36,14 +37,43 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
 	 */
 	public static final int COLUMN_COLOUR     = 2;
 	
+	/**
+	 * The default width for the name column
+	 */
+	public static final int DEFAULT_NAME_COLUMN_WIDTH     = 120;
+	
+	/**
+	 * The default width for the colour column
+	 */
+	public static final int DEFAULT_COLOUR_COLUMN_WIDTH   = 5;
+	
 	private TreeSelectionHandler treeListener;
 	
 	public PopulationTreeTable(){
 		super();
+		setDefaults();
 	}
 	
 	public PopulationTreeTable(TreeTableModel model){
 		super(model);
+		setDefaults();
+	}
+	
+	@Override
+	public boolean isCellEditable(int row, int column){  
+        return false;  
+    }	
+	
+	private void setDefaults(){
+		setEnabled(true);
+		setCellSelectionEnabled(false);
+		setColumnSelectionAllowed(false);
+		getTableHeader().setReorderingAllowed(false);
+		setRowSelectionAllowed(true);
+		setAutoCreateColumnsFromModel(false);
+		getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).setCellRenderer(new PopulationTableCellRenderer());
+		getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setPreferredWidth(DEFAULT_NAME_COLUMN_WIDTH);
+		getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).setPreferredWidth(DEFAULT_COLOUR_COLUMN_WIDTH);
 	}
 	
 	public void setTreeSelectionListener(TreeSelectionHandler t){

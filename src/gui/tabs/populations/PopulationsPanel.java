@@ -60,6 +60,8 @@ import javax.swing.tree.TreeSelectionModel;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
+
+import utility.Constants;
 import utility.TreeOrderHashMap;
 import analysis.AnalysisDataset;
 import components.CellCollection;
@@ -175,7 +177,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		PopulationTreeTableModel oldModel = (PopulationTreeTableModel) treeTable.getTreeTableModel();
 		
 		// Need to modify the model, not replace it to keep ordering
-		PopulationTreeTableModel newModel = createTableModel();
+//		PopulationTreeTableModel newModel = createTableModel();
+		PopulationTreeTableModel newModel = new PopulationTreeTableModel();
 		treeTable.setTreeTableModel(newModel);
 
 		finer("Set the tree table model");
@@ -193,154 +196,62 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 		finer("Update complete");
 	}
-	
-	private PopulationTreeTableModel createTableModel(){
-		
-		finest("Creating columns");
-		List<String> columns = new ArrayList<String>();
-		columns.add("Population");
-		columns.add("Nuclei");
-		columns.add("");
 
-		finest("Creating tree table model");
-		
-		PopulationTreeTableModel treeTableModel = new PopulationTreeTableModel();
-		PopulationTreeTableNode  root = new PopulationTreeTableNode();
-		treeTableModel.setRoot(root);
-		treeTableModel.setColumnIdentifiers(columns);
-		finer("Created tree table model");
-		
-		try {
-
-			if(DatasetListManager.getInstance().hasDatasets()){
-				
-				finer("List manager has "+DatasetListManager.getInstance().count()+" datasets");
-
-				for(AnalysisDataset rootDataset : DatasetListManager.getInstance().getRootDatasets()){
-					finer("Adding "+rootDataset.getName()+" as node");
-					root.add( addTreeTableChildNodes(    rootDataset    )     );
-				}
-				
-				finer("Added datasets to nodes");
-
-			} else {
-				finer("No datasets loaded");
-			}
-		} catch(Exception e){
-			error("Error adding nodes to table model", e);
-		}
-		return treeTableModel;
-	}
-
-	
-	/**
-	 * Create a node in the tree table, recursively adding all
-	 * the children of the given dataset id. If the child of a
-	 * dataset is not already in the names list, add it
-	 * @param dataset the dataset to add
-	 * @return
-	 */
-	private PopulationTreeTableNode addTreeTableChildNodes(AnalysisDataset dataset){
-		
-		if(dataset==null){
-			throw new IllegalArgumentException("Dataset is null when generating population table nodes");
-		}
-		
-		UUID id = dataset.getUUID();
-		if( ! DatasetListManager.getInstance().hasDataset(id)){
-			finer("Adding missing dataset to list manager");
-			this.addDataset(dataset);
-		}
-
-		PopulationTreeTableNode category = new PopulationTreeTableNode(dataset);
-				
-		// Add cluster groups separately
-		Set<UUID> clusterIDs = new HashSet<UUID>(); // track the child datasets in clusters, so they are not added twice
-		
-		for(ClusterGroup group : dataset.getClusterGroups()){
-			fine("Making node for cluster group "+group.getName());
-			PopulationTreeTableNode clusterGroupNode = new PopulationTreeTableNode(group);
-			category.add(clusterGroupNode);
-			
-			for(UUID clusterID : group.getUUIDs()){
-				AnalysisDataset clusterDataset = DatasetListManager.getInstance().getDataset(clusterID);
-				PopulationTreeTableNode childNode = addTreeTableChildNodes(clusterDataset);
-				clusterGroupNode.add(childNode);
-				clusterIDs.add(clusterID);
-			}
-		
-		}
-		
-		// Add remaining child datasets not in clusters
-		
-		for(AnalysisDataset childDataset : dataset.getChildDatasets()){
-			if( ! clusterIDs.contains(childDataset.getUUID())){
-				PopulationTreeTableNode childNode = addTreeTableChildNodes(childDataset);
-				category.add(childNode);
-			}
-		}
-		finer("Added all child nodes for dataset "+dataset.toString());
-		
-//		category.sortNode(COLUMN_NAME, true, false);
-		return category;
-	}
-	
 	
 	private PopulationTreeTable createTreeTable(){
-		
-		// tree table approach
-		List<String> columns = new ArrayList<String>();
-		columns.add("Population");
-		columns.add("Nuclei");
-		columns.add("");
-		
+
 		PopulationTreeTableModel treeTableModel = new PopulationTreeTableModel();
-		DefaultMutableTreeTableNode  root = new DefaultMutableTreeTableNode ("root node");
-		treeTableModel.setRoot(root);
-		treeTableModel.setColumnIdentifiers(columns);
-		
+
 		PopulationTreeTable table = new PopulationTreeTable(treeTableModel);
-		table.setEnabled(true);
-		table.setCellSelectionEnabled(false);
-		table.setColumnSelectionAllowed(false);
-		table.getTableHeader().setReorderingAllowed(false);
-		table.setRowSelectionAllowed(true);
-		table.setAutoCreateColumnsFromModel(false);
-		table.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).setCellRenderer(new PopulationTableCellRenderer());
-		table.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setPreferredWidth(120);
-		table.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).setPreferredWidth(5);
 				
 		table.setComponentPopupMenu(populationPopup);
 		
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				
+
 				PopulationTreeTable table = (PopulationTreeTable) e.getSource();
 				
 				int row		= table.rowAtPoint((e.getPoint()));
 				int column 	= table.columnAtPoint(e.getPoint());
-				String populationName = table.getModel().getValueAt(row, 0)==null 
-						              ? "" 
-						              : table.getModel().getValueAt(row, 0).toString();
 				
-				if( ! populationName.startsWith("ClusterGroup")){ // Only allow datasets to change
+				// double click
+				if (e.getClickCount() == 2) {
 
-					// double click
-					if (e.getClickCount() == 2) {
-
-						AnalysisDataset dataset = (AnalysisDataset) treeTable.getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME); // row i, column 0
-
-						if (row >= 0 && column == 0) { // first (names) column						
-							renameCollection(dataset);
-						}
-
-						if(row >= 0 && column == 2){ // third (colours) column
-							changeDatasetColour(dataset, row);
-
-						}
+					Object o = table.getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
+					
+					if(o instanceof ClusterGroup){
+						clusterGroupClicked((ClusterGroup) o);
 					}
+					
+					if(o instanceof AnalysisDataset){
+						datasetClicked((AnalysisDataset) o, row, column);
+					}					
 				}
+			}
+			
+			private void clusterGroupClicked(ClusterGroup g){
+
+			}
+			
+			private void datasetClicked(AnalysisDataset d, int row, int column){
+
+				switch(column){
+				
+					case PopulationTreeTable.COLUMN_NAME:{
+						renameCollection(d);
+						break;
+					}
+					
+					case PopulationTreeTable.COLUMN_COLOUR:{
+						changeDatasetColour(d, row);
+						break;
+					}
+					
+					default:
+						break;
+					
+				}				
 			}
 		});
 		
@@ -369,9 +280,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			
 			// Force the chart caches to clear, but don't trigger a panel update
 			finest("Firing clearing chart cache signals from population colour change");
-			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-			list.add(dataset);
-			fireDatasetEvent(DatasetEvent.REFRESH_CACHE, list);
+			fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
 		}
 		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 	}
@@ -394,16 +303,18 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * Check that the name is valid, and update if needed
 	 * @param dataset the dataset to add
 	 */
-	
-	
 	public void addDataset(AnalysisDataset dataset){
-		
+				
 		if(dataset.isRoot()){ // add to the list of datasets that can be ordered
 //			treeOrderMap.put(dataset.getUUID(), treeOrderMap.size()); // add to the end of the list
 			fine("Adding root dataset "+dataset.getName()+" to list manager");
 			DatasetListManager.getInstance().addDataset(dataset);
+			
+			
+			
 		}
-		
+//		PopulationTreeTableModel model = (PopulationTreeTableModel) treeTable.getTreeTableModel();
+//		model.addDataset(dataset);
 	}
 	
 	
@@ -436,26 +347,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	public void selectDataset(UUID id){
 		this.selectDataset(DatasetListManager.getInstance().getDataset(id));
 	}
-	
-//	/**
-//	 * Get the index of the given dataset in the tree table.
-//	 * @return the index
-//	 */
-//	private int getIndexOfDataset(AnalysisDataset dataset){
-//		int index = 0;
-//		
-//		for(int row = 0; row< treeTable.getRowCount(); row++){
-//			
-//			String populationName = treeTable.getModel().getValueAt(row, COLUMN_NAME).toString();
-//			
-//			if(dataset.getName().equals(populationName)){
-//				index = row;
-//			}
-//		}
-//		return index;
-//	}
-	
-			
+				
 	/**
 	 * Rename an existing dataset and update the population list.
 	 * @param dataset the dataset to rename
@@ -472,7 +364,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				collection.getName());
 		
 		// validate
-		if(newName.isEmpty() || newName==null){
+		if( newName==null || newName.isEmpty()){
 			fine("New name null or empty");
 			return;
 		}

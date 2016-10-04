@@ -96,6 +96,40 @@ public final class DatasetListManager implements Loggable {
 	}
 	
 	
+	/**
+	 * Get the parent dataset to the given dataset. If the 
+	 * given dataset is root, returns itself
+	 * @param d
+	 * @return
+	 */
+	public AnalysisDataset getParent(AnalysisDataset d){
+		
+		if(d.isRoot()){
+			return d;
+		}
+		
+		AnalysisDataset result = null;
+		
+		
+		for(AnalysisDataset root : this.getRootDatasets()){
+			
+			if(root.hasRecursiveChild(d)){
+				
+				// Get the child of the root dataset which is a parent
+				// to the input dataset
+				
+				for(AnalysisDataset parent : root.getAllChildDatasets()){
+					if(parent.hasChild(d)){
+						return parent;
+					}
+				}
+				
+			}
+		}
+		return result;
+	}
+	
+	
 	public Set<AnalysisDataset> getAllDatasets(){
 		
 		Set<AnalysisDataset> result = new HashSet<AnalysisDataset>();

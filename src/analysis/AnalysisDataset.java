@@ -754,11 +754,22 @@ public class AnalysisDataset implements Serializable, Loggable {
 	 * @return
 	 */
 	public boolean hasChild(AnalysisDataset child){
-		if(this.childCollections.containsKey(child.getUUID())){
-			return true;
-		} else {
-			return false;
+		return this.childCollections.containsKey(child.getUUID());
+	}
+	
+	/**
+	 * Test if the given dataset is a child of this dataset or
+	 * of one of its children
+	 * @param child
+	 * @return
+	 */
+	public boolean hasRecursiveChild(AnalysisDataset child){
+		for(AnalysisDataset d : this.getAllChildDatasets()){
+			if(d.hasChild(child)){
+				return true;
+			}
 		}
+		return false;
 	}
 
 	/**

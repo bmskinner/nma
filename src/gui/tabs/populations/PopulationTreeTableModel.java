@@ -1,7 +1,13 @@
 package gui.tabs.populations;
 
+import gui.DatasetListManager;
+
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
@@ -13,32 +19,144 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 		
 	public PopulationTreeTableModel(){
 		super();
-	}
+		
+		// Populations columns
+		List<String> columns = new ArrayList<String>();
+		columns.add("Population");
+		columns.add("Nuclei");
+		columns.add("");
 
+		PopulationTreeTableNode  root = new PopulationTreeTableNode ();
+		this.setRoot(root);
+		this.setColumnIdentifiers(columns);
+		
+		addExistingRootDatasets();
+		
+	}
 	
-//	
+	private void addExistingRootDatasets(){
+		// Add the current root datasets
+		try {
+
+			if(DatasetListManager.getInstance().hasDatasets()){
+
+				finer("List manager has "+DatasetListManager.getInstance().count()+" datasets");
+
+				for(AnalysisDataset rootDataset : DatasetListManager.getInstance().getRootDatasets()){
+					finer("Adding "+rootDataset.getName()+" as node");
+
+					this.addRootDataset(rootDataset);
+				}
+
+				finer("Added datasets to nodes");
+
+			} else {
+				finer("No datasets loaded");
+			}
+		} catch(Exception e){
+			error("Error adding nodes to table model", e);
+		}
+	}
 	
-//	/**
-//	 * Get the index of the given cluster group in the model
-//	 * @return the index
-//	 */
-//	public int getRowIndex(ClusterGroup g){
-//		int index = 0;
-//		
-//		PopulationTreeTableNode n = this.getNode(g);
-//		n.g
-//		
-//		for(int row = 0; row< this.getChildCount(this.getRoot()); row++){
-//			
-////			PopulationTreeTableNode p = this.getValueAt(row, COLUMN_NAME);
-//			String populationName = this.getValueAt(row, COLUMN_NAME).toString();
-//			
-//			if(g.getName().equals(populationName)){
-//				index = row;
-//			}
-//		}
-//		return index;
-//	}
+	/**
+	 * Add a dataset to the model. If root, this will be a child
+	 * of the model root node. Otherwise, the dataset will be added
+	 * to the appropriate parent dataset node
+	 * @param dataset
+	 */
+	public void addDataset(AnalysisDataset dataset){
+		
+		if(this.getNode(dataset)!=null){
+			return; // ignore datasets already present
+		}
+		
+		if(dataset.isRoot()){
+			addRootDataset(dataset);
+		} else {
+			addChildDataset(dataset);
+		}
+	}
+	
+	/**
+	 * Add a dataset to the model. If root, this will be a child
+	 * of the model root node. Otherwise, the dataset will be added
+	 * to the appropriate parent dataset node
+	 * @param dataset
+	 */
+	public void addRootDataset(AnalysisDataset dataset){
+		
+		if(this.getNode(dataset)!=null){
+			return; // ignore datasets already present
+		}
+		
+		PopulationTreeTableNode datasetNode = createNodes(    dataset    );
+		
+		PopulationTreeTableNode root = (PopulationTreeTableNode) this.getRoot();
+		
+		root.add(   datasetNode   );
+	}
+	
+	public void addChildDataset(AnalysisDataset dataset){
+		
+		if(this.getNode(dataset)!=null){
+			return; // ignore datasets already present
+		}
+		
+		AnalysisDataset parent = DatasetListManager.getInstance().getParent(dataset);
+		
+		PopulationTreeTableNode parentNode = this.getNode(parent);
+
+		PopulationTreeTableNode newNode = createNodes(dataset);
+		
+		parentNode.add(newNode);
+	}
+	
+	/**
+	 * Create a node in the tree table, recursively adding all
+	 * the children of the given dataset id. If the child of a
+	 * dataset is not already in the names list, add it
+	 * @param dataset the dataset to add
+	 * @return
+	 */
+	private PopulationTreeTableNode createNodes(AnalysisDataset dataset){
+		
+		if(dataset==null){
+			throw new IllegalArgumentException("Dataset is null when generating population table nodes");
+		}
+		
+
+		PopulationTreeTableNode category = new PopulationTreeTableNode(dataset);
+				
+		// Add cluster groups separately
+		Set<UUID> clusterIDs = new HashSet<UUID>(); // track the child datasets in clusters, so they are not added twice
+		
+		for(ClusterGroup group : dataset.getClusterGroups()){
+			fine("Making node for cluster group "+group.getName());
+			PopulationTreeTableNode clusterGroupNode = new PopulationTreeTableNode(group);
+			category.add(clusterGroupNode);
+			
+			for(UUID clusterID : group.getUUIDs()){
+				AnalysisDataset clusterDataset = DatasetListManager.getInstance().getDataset(clusterID);
+				PopulationTreeTableNode childNode = createNodes(clusterDataset);
+				clusterGroupNode.add(childNode);
+				clusterIDs.add(clusterID);
+			}
+		
+		}
+		
+		// Add remaining child datasets not in clusters
+		
+		for(AnalysisDataset childDataset : dataset.getChildDatasets()){
+			if( ! clusterIDs.contains(childDataset.getUUID())){
+				PopulationTreeTableNode childNode = createNodes(childDataset);
+				category.add(childNode);
+			}
+		}
+		finer("Added all child nodes for dataset "+dataset.toString());
+		
+//		category.sortNode(COLUMN_NAME, true, false);
+		return category;
+	}
 	
 	/**
 	 * Move the given nodes one position up in the model. If the node
