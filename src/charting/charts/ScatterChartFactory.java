@@ -161,11 +161,17 @@ public class ScatterChartFactory extends AbstractChartFactory {
 		String xLabel = options.getStat(0).label(options.getScale());
 		String yLabel = options.getStat(1).label(options.getScale());
 		
-		JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel,
-				yLabel,  ds);  
+		JFreeChart chart = this.createBaseXYChart();
+		chart.getXYPlot().getDomainAxis().setLabel(xLabel);
+		chart.getXYPlot().getRangeAxis().setLabel(yLabel);
+	
+		
+//		JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel,
+//				yLabel,  ds);  
 		
 		XYPlot plot = chart.getXYPlot();
-		plot.setBackgroundPaint(Color.WHITE);
+		plot.setDataset(ds);
+//		plot.setBackgroundPaint(Color.WHITE);
 		
 		NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
 		yAxis.setAutoRangeIncludesZero(false);
@@ -192,9 +198,12 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			
 			for(AnalysisDataset d : options.getDatasets()){
 				if(d.getName().equals(datasetName)){
-					colour = d.getCollection().getSignalGroup(id).hasColour()
-							? d.getCollection().getSignalGroup(id).getGroupColour()
-							: colour;
+					
+					if(d.getCollection().hasSignalGroup(id)){
+						colour = d.getCollection().getSignalGroup(id).hasColour()
+								? d.getCollection().getSignalGroup(id).getGroupColour()
+								: colour;
+					}
 				}
 			}				
 			renderer.setSeriesPaint(i, colour);
