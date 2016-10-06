@@ -32,6 +32,14 @@ public class Max extends Number {
 	private Number value;
 	
 	/**
+	 * Calculate the maximum value of the two integers
+	 * @param list
+	 */
+	public Max(int a, int b){
+		value = a > b ? a : b;
+	}
+	
+	/**
 	 * Calculate the maximum value in the given list
 	 * @param list
 	 */
@@ -58,8 +66,6 @@ public class Max extends Number {
 		if(firstEntry instanceof Long){
 			value = compareLong(list);
 		}
-		
-
 	}
 
 	@Override
