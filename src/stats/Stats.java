@@ -269,7 +269,7 @@ import utility.Utils;
    * @param values
    * @return
    */
-  public static Number min(List<Number> values){
+  public static Number min(List<? extends Number> values){
 	  Number result = Double.MAX_VALUE; 
 	  for(Number n : values){
 		  if(n.doubleValue()<result.doubleValue()){
@@ -279,12 +279,27 @@ import utility.Utils;
 	  return result;
   }
   
+//  /**
+//   * Get the minimum Number in the list
+//   * @param values
+//   * @return
+//   */
+//  public static Double min(List<Double> values){
+//	  Double result = Double.MAX_VALUE; 
+//	  for(Double n : values){
+//		  if(n<result){
+//			  result=n;
+//		  }
+//	  }
+//	  return result;
+//  }
+  
   /**
    * Get the maximum Number in the list
    * @param values
    * @return
    */
-  public static Number max(List<Number> values){
+  public static Number max(List<? extends Number> values){
 
 	  Number result = Double.MIN_VALUE; 
 	  for(Number n : values){

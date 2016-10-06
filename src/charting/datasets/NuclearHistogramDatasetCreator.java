@@ -41,6 +41,7 @@ import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
+import stats.Stats;
 
 public class NuclearHistogramDatasetCreator implements Loggable {
 	
@@ -428,10 +429,11 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 		if(!list.isEmpty()){
 		
 			double[] values = Utils.getdoubleFromDouble(list.toArray(new Double[0]));
-
+			double min = Stats.min(list).doubleValue();
+			double max = Stats.max(list).doubleValue();
 			int bins = 100;
 
-			ds.addSeries("Sample", values, bins, 0.95, 1.00 );
+			ds.addSeries("Sample", values, bins, min, max );
 		}
 		return ds;
 	}
@@ -445,7 +447,10 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			List<Double> xValues = new ArrayList<Double>();
 			List<Double> yValues = new ArrayList<Double>();
 
-			for(double i=0.95; i<=1.00; i+=0.0001){
+			double min = Stats.min(list).doubleValue();
+			double max = Stats.max(list).doubleValue();
+			
+			for(double i=min; i<=max; i+=0.0001){
 				xValues.add(i);
 				yValues.add(est.getProbability(i));
 			}

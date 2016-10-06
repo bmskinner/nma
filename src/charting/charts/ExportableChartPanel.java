@@ -41,6 +41,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.Range;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerItem;
@@ -521,6 +522,16 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 						}
 						builder.append(NEWLINE);
 					}
+					
+//					if(ds instanceof ViolinCategoryDataset){
+//						
+//						List<Number> pdfValues = ( ( ViolinCategoryDataset) ds).getPdfValues(rowName, columnName);
+//						
+//						Range range = ( ( ViolinCategoryDataset) ds).getProbabiltyRange();
+//						
+//						
+//						
+//					}
 					
 				}
 			}

@@ -96,6 +96,24 @@ public class Profile implements Serializable, Loggable {
 //			array[i] = p.get(i);
 //		}
 	}
+	
+	/**
+	 * Constructor based on an fixed value and the profile
+	 * length
+	 * @param value the value for the profile to hold at each index
+	 * @param length the length of the profile 
+	 */
+	public Profile(final double value, final int length){
+		
+		if(length<1){
+			throw new IllegalArgumentException("Profile length cannot be less than 1");
+		}
+		
+		this.array = new double[length];
+		for(int i=0; i<this.array.length; i++){
+			array[i] = value;
+		}
+	}
 
 
 

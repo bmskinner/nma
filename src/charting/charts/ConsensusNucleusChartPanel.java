@@ -41,6 +41,8 @@ import charting.datasets.NucleusOutlineDataset;
 public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
 	public static final String SOURCE_COMPONENT = "ConsensusNucleusChartPanel"; 
+	
+	private boolean fillConsensus = true;
 
 	private NucleusOverlay consensusOverlay = null;
 
@@ -56,6 +58,26 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
 	}
 	
+	/**
+	 * Provide an override to the GlobalOptions for this panel.
+	 * If this is false, the consensus will never be filled. If this
+	 * is true, the consensus will be filled then the GlobalOptions
+	 * is also true
+	 * @return
+	 */
+	public void setFillConsensus(boolean b){
+		// 
+		fillConsensus = b;
+	}
+	
+	/**
+	 * Check if this panel is overriding the global options
+	 * @return
+	 */
+	public boolean isFillConsensus(){
+		return fillConsensus;
+	}
+	
 	@Override
 	public void setChart(JFreeChart chart){
 		
@@ -65,7 +87,7 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 		if(consensusOverlay !=null){
 			consensusOverlay.clearShapes();
 
-			if(GlobalOptions.getInstance().isFillConsensus()){
+			if(GlobalOptions.getInstance().isFillConsensus() && fillConsensus){
 
 				// Get the nuclei in the chart
 				if(chart.getPlot() instanceof XYPlot){

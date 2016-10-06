@@ -39,6 +39,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -75,6 +78,7 @@ import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
 import gui.RotationMode;
 import gui.components.panels.DualChartPanel;
+import gui.dialogs.CellResegmentationDialog;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.EllipticalOverlay;
 import charting.charts.EllipticalOverlayObject;
@@ -115,6 +119,12 @@ public class CellBorderAdjustmentDialog
 	private double initialMovePointX = 0;
 	private double  finalMovePointX = 0;
 	
+	/**
+	 * flag if the cell must be manually resegmented 
+	 * - e.g if profile creation fails due to segments becomming too small
+	 */
+	private boolean mustResegment = false; 
+	
 	private XYItemEntity xyItemEntity = null;
 	
 	private EllipticalOverlayObject ellipse;
@@ -147,6 +157,32 @@ public class CellBorderAdjustmentDialog
 		updateCharts(cell);
 		selectToggle.setSelected(true);
 		ellipse.setFill(selectFill);
+		
+		// Clear the default listener and replace,
+		// so we can listen for 'mustResegment'
+		for(WindowListener l : this.getWindowListeners()){
+			this.removeWindowListener(l);;
+		}
+	
+		this.addWindowListener(new WindowAdapter() {
+			
+			public void windowClosing(WindowEvent e) {
+				
+				if(cellHasChanged()){
+					requestSaveOption();
+				} 
+				
+				// If we have to resegment the cell manually, load the dialog
+				if(mustResegment){
+					CellResegmentationDialog c = new CellResegmentationDialog(cellModel);
+					c.load(cellModel.getCell(), dataset);
+					
+				}
+				setVisible(false);
+			}
+		});
+		
+		
 		setVisible(true);
 	}
 	
@@ -261,6 +297,7 @@ public class CellBorderAdjustmentDialog
 			workingCell = new Cell(cell);
 			updateCharts(workingCell);
 			setCellChanged(false);
+			mustResegment = false;
 			
 		});
 		panel.add(undoBtn);
@@ -420,7 +457,7 @@ public class CellBorderAdjustmentDialog
 		}
 
 		PolygonRoi roi = new PolygonRoi(xPoints, yPoints, nPoints, type);
-		FloatPolygon fp = roi.getInterpolatedPolygon();
+		FloatPolygon fp = roi.getInterpolatedPolygon(1, false); // one pixel spacing, do not smooth
 
 		// Make new border list and assign to the working cell
 
@@ -488,7 +525,8 @@ public class CellBorderAdjustmentDialog
 			workingCell.getNucleus().replaceBorderTags(newMap);
 			
 		} catch (Exception e) {
-			error("Cannot calculate profiles for cell", e);
+			warn("Cannot calculate profiles for cell");
+			mustResegment = true;
 		}
 
 	}

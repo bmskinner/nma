@@ -104,7 +104,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 		// this allows a checkbox panel to be added to the JPanel later
 		chartPanel = new ConsensusNucleusChartPanel(chart);// {
 		panel.add(chartPanel, BorderLayout.CENTER);
-				
+		chartPanel.setFillConsensus(false);
 		
 		checkboxPanel = createSignalCheckboxPanel();
 		

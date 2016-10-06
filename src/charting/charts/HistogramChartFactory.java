@@ -32,6 +32,7 @@ import java.util.logging.Level;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
@@ -146,7 +147,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	public JFreeChart createRandomSampleHistogram(List<Double> list) throws Exception{
 		HistogramDataset ds = NuclearHistogramDatasetCreator.getInstance().createHistogramDatasetFromList(list);
 		JFreeChart chart = createHistogram(ds, "Magnitude difference between populations", "Observed instances");
-		
+		chart.getXYPlot().addDomainMarker(new ValueMarker(1, Color.BLACK, ChartComponents.MARKER_STROKE));
 		return chart;
 	}
 	
@@ -170,6 +171,8 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		}
 		
 		plot.setBackgroundPaint(Color.WHITE);
+		chart.getXYPlot().addDomainMarker(new ValueMarker(1, Color.BLACK, ChartComponents.MARKER_STROKE));
+		
 		return chart;
 	}
 		

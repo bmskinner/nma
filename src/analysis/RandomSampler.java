@@ -22,8 +22,8 @@ public class RandomSampler extends AnalysisWorker {
 	private List<Double> magnitudes = new ArrayList<Double>();
 	private int iterations;
 	private NucleusStatistic stat;
-	private int first;
-	private int second;
+	private int first; // the number of cells in the first subset
+	private int second;// the number of cells in the second subset
 	
 	public RandomSampler(AnalysisDataset dataset, NucleusStatistic stat, int iterations, int first, int second){
 		super(dataset);
@@ -69,16 +69,16 @@ public class RandomSampler extends AnalysisWorker {
 			double value2 =  collections.get(1).getMedianStatistic(stat, MeasurementScale.PIXELS);
 			
 			// Always take the smaller as a proportion of the larger
-			double magnitude = value1 > value2 ? value2/value1 : value1/value2; 
+//			double magnitude = value1 > value2 ? value2/value1 : value1/value2; 
 			
-//			double magnitude = value2 / value1;
+			double magnitude = value2 / value1;
 			log(Level.FINEST, "Found value");
 			// add to a list
 			magnitudes.add(magnitude);
 			
 			if( i%10==0){
 				publish(i);
-				System.gc(); // Suggest a clean up
+//				System.gc(); // Suggest a clean up
 			}
 			
 			// Release memory for collection

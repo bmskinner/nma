@@ -60,14 +60,6 @@ import components.nuclei.Nucleus;
  * @author bms41
  *
  */
-/**
- * @author bms41
- *
- */
-/**
- * @author bms41
- *
- */
 public class NucleusMesh implements Loggable {
 	
 	public static final int DEFAULT_VERTEX_SPACING = 10;

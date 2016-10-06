@@ -55,6 +55,10 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 
 	}
 	
+	public boolean hasSelection(){
+		return box.getSelectedItem() != null;
+	}
+	
 	public SignalGroup getSelectedGroup(){
 		SignalIDToGroup temp = (SignalIDToGroup) box.getSelectedItem();
 		return temp.getGroup();

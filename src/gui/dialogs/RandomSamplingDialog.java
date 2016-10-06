@@ -55,7 +55,12 @@ import gui.LoadingIconDialog;
 import stats.NucleusStatistic;
 
 @SuppressWarnings("serial")
-public class RandomSamplingDialog extends LoadingIconDialog implements ActionListener, ChangeListener, PropertyChangeListener  {
+public class RandomSamplingDialog 
+    extends LoadingIconDialog 
+    implements ActionListener, 
+               ChangeListener, 
+               PropertyChangeListener  {
+	
 	private AnalysisDataset dataset;
 	private ExportableChartPanel chartPanel;
 	
@@ -337,15 +342,17 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 
-		int value = (Integer) evt.getNewValue(); // should be percent
-		log(Level.FINEST,"Property change: "+value);
-		
-		if(value >=0 && value <=100){
-			
-			if(this.progressBar.isIndeterminate()){
-				this.progressBar.setIndeterminate(false);
+		if(evt.getNewValue() instanceof Integer){
+			int value = (Integer) evt.getNewValue(); // should be percent
+			log(Level.FINEST,"Property change: "+value);
+
+			if(value >=0 && value <=100){
+
+				if(this.progressBar.isIndeterminate()){
+					this.progressBar.setIndeterminate(false);
+				}
+				this.progressBar.setValue(value);
 			}
-			this.progressBar.setValue(value);
 		}
 
 		if(evt.getPropertyName().equals("Finished")){

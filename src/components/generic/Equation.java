@@ -1,5 +1,7 @@
 package components.generic;
 
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.util.List;
 
 import components.nuclear.BorderPoint;
@@ -57,6 +59,18 @@ public class Equation{
 	* @return An Equation describing the line between the points
 	*/
 	public Equation (XYPoint a, XYPoint b){
+
+		this(a.asPoint(), b.asPoint());
+	}
+	
+	/**
+	*	Constructor using two Points. 
+	*
+	* @param a the first XYPoint
+	* @param b the second XYPoint
+	* @return An Equation describing the line between the points
+	*/
+	public Equation (Point2D a, Point2D b){
 
 		if(a==null || b==null){
 			throw new IllegalArgumentException("Point a or b is null");
@@ -194,6 +208,13 @@ public class Equation{
 		return new XYPoint(x, y);
 	}
 	
+	/**
+	 * Test if the two lines intersect. Effectively checks
+	 * if the lines are parallel, and if so, whether they share
+	 * and intercept.
+	 * @param eq
+	 * @return
+	 */
 	public boolean intersects(Equation eq){
 		if(m == eq.m){ // they are parallel
 			return c==eq.c; 
@@ -209,7 +230,7 @@ public class Equation{
 	 * @return
 	 */
 	public static XYPoint getProportionalDistance(XYPoint start, XYPoint end, double proportion){
-		
+				
 		Equation eq = new Equation(start, end);
 		double totalLength = start.getLengthTo(end);
 		double propLength  = totalLength * proportion;

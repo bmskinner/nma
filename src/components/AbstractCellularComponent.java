@@ -171,6 +171,7 @@ public abstract class AbstractCellularComponent
 	 */
 	public AbstractCellularComponent(Roi roi){
 		this();
+		
 		if(roi==null){
 			throw new IllegalArgumentException("Constructor argument is null");
 		}

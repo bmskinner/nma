@@ -136,10 +136,14 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		SignalManager m =  datasets.get(0).getCollection().getSignalManager();
 
 		signalBox = new SignalGroupSelectionPanel(datasetBoxOne.getSelectedDataset());
-		UUID id   = signalBox.getSelectedID();
-
-		totalCells = m.getNumberOfCellsWithNuclearSignals(id);
 		
+		if(signalBox.hasSelection()){
+			UUID id   = signalBox.getSelectedID();
+			totalCells = m.getNumberOfCellsWithNuclearSignals(id);
+		} else {
+			signalBox.setEnabled(false);
+		}
+
 		upperPanel.add(new JLabel("Signal group"));
 		upperPanel.add(signalBox);		
 		finest("Added signal group box");
@@ -152,7 +156,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 		straightenMeshBox = new JCheckBox("Straighten meshes", false);
 		straightenMeshBox.addActionListener(this);
-//		upperPanel.add(straightenMeshBox);
+		upperPanel.add(straightenMeshBox);
 		
 		
 		lowerPanel.add(new JLabel("Target dataset"));
@@ -172,6 +176,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		});	
 
 		lowerPanel.add(runButton);
+		
+		if(! signalBox.hasSelection()){
+			runButton.setEnabled(false);
+		}
 		
 		lowerPanel.add(progressBar);
 		progressBar.setVisible(false);
@@ -253,9 +261,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 
-		int value = (Integer) evt.getNewValue(); // should be percent
-		finest("Property change: "+value);
-		
+//		if(evt.getNewValue() instanceof Integer){
+//			int value = (Integer) evt.getNewValue(); // should be percent
+//			finest("Property change: "+value);
+//		}
 		
 
 		if(evt.getPropertyName().equals("Finished")){

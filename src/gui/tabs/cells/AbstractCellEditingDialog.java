@@ -115,7 +115,7 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
 	
 	protected abstract void updateCharts(Cell cell);
 	
-	private void requestSaveOption(){
+	protected void requestSaveOption(){
 		
 		Object[] options = { "Save changes" , "Discard changes" };
 		int save = JOptionPane.showOptionDialog(AbstractCellEditingDialog.this,

@@ -63,7 +63,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 		}
 		
 		// Keep disabled until CPU use is fixed
-		useDensityPanel.setEnabled(false);
+//		useDensityPanel.setEnabled(false);
 		
 	}
 	
@@ -72,7 +72,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 		this.setEnabled(true);
 		
 		// Keep disabled until CPU use is fixed
-		useDensityPanel.setEnabled(false);
+//		useDensityPanel.setEnabled(false);
 		
 		boolean useDensity = useDensityPanel.isSelected();
 		

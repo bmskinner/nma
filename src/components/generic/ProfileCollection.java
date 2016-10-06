@@ -491,15 +491,18 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param pointType the profile type to use
 	 * @return the profile
 	 */
-	public Profile getIQRProfile(BorderTagObject tag) throws Exception {
-		
-//		int offset = getOffset(tag);
-		
+	public Profile getIQRProfile(BorderTagObject tag) {
+				
 		Profile q25 = getProfile(tag, Constants.LOWER_QUARTILE);
 		Profile q75 = getProfile(tag, Constants.UPPER_QUARTILE);
 		
-//		Profile q25 = getAggregate().getQuartile(Constants.LOWER_QUARTILE).offset(offset);
-//		Profile q75 = getAggregate().getQuartile(Constants.UPPER_QUARTILE).offset(offset);
+		if(q25==null || q75==null){ // if something goes wrong, return a zero profile
+			
+			warn("Problem calculating the IQR - setting to zero");			
+			return new Profile(0, aggregate.length());
+		}
+		
+
 		return q75.subtract(q25);
 	}
 	
