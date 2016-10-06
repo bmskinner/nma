@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jfree.data.Range;
+
+import stats.Max;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
 import stats.SignalStatistic;
@@ -244,7 +246,7 @@ public class ViolinDatasetCreator implements Loggable {
 			
 			KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(  list , 0.001 );
 			double min = Stats.min(list).doubleValue();
-			double max = Stats.max(list).doubleValue();
+			double max = new Max(list).doubleValue();
 
 			double stepSize = ( max - min ) / 100;
 

@@ -25,6 +25,7 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.ui.RectangleEdge;
 
+import stats.Max;
 import stats.Stats;
 
 /**
@@ -182,7 +183,7 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
         leftShape.moveTo(xxmid, rangeAxis.valueToJava2D(yValPos, dataArea,
                   location)); // start with the lowest value
                 
-        double maxProbability = Stats.max(dataset.getPdfValues(row, column)).doubleValue();
+        double maxProbability = new Max(dataset.getPdfValues(row, column)).doubleValue(); //Stats.max().doubleValue();
         
         List<Number> values = dataset.getPdfValues(row, column);
         for(Number v : values){

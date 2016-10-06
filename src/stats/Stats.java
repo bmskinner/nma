@@ -299,16 +299,16 @@ import utility.Utils;
    * @param values
    * @return
    */
-  public static Number max(List<? extends Number> values){
-
-	  Number result = Double.MIN_VALUE; 
-	  for(Number n : values){
-		  if(n.doubleValue()>result.doubleValue()){
-			  result=n;
-		  }
-	  }
-	  return result;
-  }
+//  public static Number max(List<? extends Number> values){
+//
+//	  Number result = Double.MIN_VALUE; 
+//	  for(Number n : values){
+//		  if(n.doubleValue()>result.doubleValue()){
+//			  result=n;
+//		  }
+//	  }
+//	  return result;
+//  }
   
   public static Number quartile(List<Number> values, double lowerPercent) {
 	  

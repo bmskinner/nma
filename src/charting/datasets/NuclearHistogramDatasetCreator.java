@@ -39,6 +39,7 @@ import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
+import stats.Max;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
 import stats.Stats;
@@ -430,7 +431,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 		
 			double[] values = Utils.getdoubleFromDouble(list.toArray(new Double[0]));
 			double min = Stats.min(list).doubleValue();
-			double max = Stats.max(list).doubleValue();
+			double max = new Max(list).doubleValue();
 			int bins = 100;
 
 			ds.addSeries("Sample", values, bins, min, max );
@@ -448,7 +449,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			List<Double> yValues = new ArrayList<Double>();
 
 			double min = Stats.min(list).doubleValue();
-			double max = Stats.max(list).doubleValue();
+			double max = new Max(list).doubleValue();
 			
 			for(double i=min; i<=max; i+=0.0001){
 				xValues.add(i);
