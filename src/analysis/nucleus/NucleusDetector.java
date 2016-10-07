@@ -28,6 +28,7 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+
 import utility.Constants;
 //import utility.Logger;
 
@@ -36,7 +37,7 @@ import utility.StatsMap;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.detection.Detector;
-import analysis.detection.ImageFilterer;
+import analysis.image.ImageFilterer;
 import components.Cell;
 import components.generic.XYPoint;
 import components.nuclear.NucleusType;
@@ -208,7 +209,9 @@ public class NucleusDetector extends Detector {
 			// run a Kuwahara filter to enhance edges in the image
 			if(nucleusCannyOptions.isUseKuwahara()){
 				int kernel = nucleusCannyOptions.getKuwaharaKernel();
-				ImageProcessor ip = ImageFilterer.runKuwaharaFiltering(image, Constants.rgbToStack(options.getChannel())  , kernel);
+				ImageProcessor ip = new ImageFilterer(image)
+					.runKuwaharaFiltering( Constants.rgbToStack(options.getChannel())  , kernel)
+					.getProcessor();
 				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
 				finer("Run Kuwahara");
 			}
@@ -216,11 +219,13 @@ public class NucleusDetector extends Detector {
 			// flatten chromocentres
 			if(nucleusCannyOptions.isUseFlattenImage()){
 				int threshold = nucleusCannyOptions.getFlattenThreshold();
-				ImageProcessor ip = ImageFilterer.squashChromocentres(image, Constants.rgbToStack(options.getChannel()), threshold);
+				ImageProcessor ip = new ImageFilterer(image)
+					.squashChromocentres( Constants.rgbToStack(options.getChannel()), threshold)
+					.getProcessor();
 				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
 				finer("Run flattening");
 			}
-			searchStack = ImageFilterer.runEdgeDetector(image, Constants.rgbToStack(options.getChannel()), nucleusCannyOptions);
+			searchStack = new ImageFilterer(image).runEdgeDetector(Constants.rgbToStack(options.getChannel()), nucleusCannyOptions).getStack();
 			finer("Run edge detection");
 		} else {
 			searchStack = image;

@@ -31,7 +31,6 @@ import org.jfree.data.xy.DefaultXYDataset;
 import charting.options.ChartOptions;
 import utility.ArrayConverter;
 import utility.Constants;
-import utility.Utils;
 import utility.ArrayConverter.ArrayConversionException;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;

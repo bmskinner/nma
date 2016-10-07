@@ -16,51 +16,61 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package analysis.detection;
+package analysis.image;
 
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
+import components.CellularComponent;
 import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
 import analysis.AnalysisOptions.CannyOptions;
+import analysis.detection.CannyEdgeDetector;
+import analysis.detection.Kuwahara_Filter;
 import stats.Stats;
-import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.Prefs;
-import ij.plugin.filter.Binary;
-import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.FloodFiller;
 import ij.process.ImageProcessor;
-import io.ImageExporter;
 import utility.Constants;
 
-public class ImageFilterer {
+public class ImageFilterer extends AbstractImageFilterer {
+		
+	public ImageFilterer(ImageProcessor ip) {
+		super(ip);
+	}
 	
+	public ImageFilterer(ImageStack st) {
+		super(st);
+	}
+
 	/**
 	 * Run a Kuwahara filter to enhance edges in the image
 	 * @param stack the image
 	 * @param filterSize the radius of the kernel
 	 */
-	public static ImageProcessor runKuwaharaFiltering(ImageStack stack, int stackNumber, int filterSize){
+	public ImageFilterer runKuwaharaFiltering(int stackNumber, int filterSize){
 		
-		Kuwahara_Filter kw = new Kuwahara_Filter();
-		ImagePlus img = ImageExporter.getInstance().convertToRGB(stack);
-		kw.setup("", img);
-		
-		ImageProcessor result = stack.getProcessor(stackNumber).duplicate();
-		
-		kw.filter(result, filterSize);
-		return result;
+		ip = st.getProcessor(stackNumber).duplicate();
+				
+		return runKuwaharaFiltering(filterSize);
+//		Kuwahara_Filter kw = new Kuwahara_Filter();
+//		ImagePlus img = ImageExporter.getInstance().convertToRGB(st);
+//		kw.setup("", img);
+//		
+//		ImageProcessor result = st.getProcessor(stackNumber).duplicate();
+//		
+//		kw.filter(result, filterSize);
+//		return result;
 	}
 	
 	/**
 	 * Run a Kuwahara filter to enhance edges in the image
-	 * @param stack the image
 	 * @param filterSize the radius of the kernel
+	 * @return a new ImageFilterer with the processed image
 	 */
-	public static ImageProcessor runKuwaharaFiltering(ImageProcessor ip, int filterSize){
+	public ImageFilterer runKuwaharaFiltering( int filterSize){
 		
 		Kuwahara_Filter kw = new Kuwahara_Filter();
 		ImagePlus img = new ImagePlus("", ip);
@@ -69,7 +79,8 @@ public class ImageFilterer {
 		ImageProcessor result = ip.duplicate();
 		
 		kw.filter(result, filterSize);
-		return result;
+		
+		return new ImageFilterer(result);
 	}
 	
 	
@@ -82,12 +93,12 @@ public class ImageFilterer {
 	 * @param threshold the maximum intensity to allow
 	 * @return a copy of the image processor, with flattening applied
 	 */
-	public static ImageProcessor squashChromocentres(ImageStack stack, int stackNumber, int threshold){	
+	public ImageFilterer squashChromocentres( int stackNumber, int threshold){	
 		
 		// fetch a copy of the int array
-		ImageProcessor ip = stack.getProcessor(stackNumber);
-		ImageProcessor result = squashChromocentres(ip, threshold);
-		return result;
+		ip = st.getProcessor(stackNumber);
+		ImageProcessor result = squashChromocentres(threshold).ip;
+		return new ImageFilterer(result);
 	}
 	
 	/**
@@ -98,7 +109,7 @@ public class ImageFilterer {
 	 * @param threshold the maximum intensity to allow
 	 * @return a copy of the image processor, with flattening applied
 	 */
-	public static ImageProcessor squashChromocentres(ImageProcessor ip, int threshold){	
+	public ImageFilterer squashChromocentres( int threshold){	
 				
 		ImageProcessor result = ip.duplicate();
 		
@@ -109,7 +120,7 @@ public class ImageFilterer {
 			}
 		}
 
-		return result;
+		return new ImageFilterer(result);
 	}
 	
 	/**
@@ -124,7 +135,7 @@ public class ImageFilterer {
 	 * @param bridgeSize the distance to search
 	 * @return
 	 */
-	public static ByteProcessor bridgePixelGaps(ImageProcessor ip, int bridgeSize){
+	public ImageFilterer bridgePixelGaps(int bridgeSize){
 		
 		if(bridgeSize % 2 ==0 ){
 			throw new IllegalArgumentException("Kernel size must be odd");
@@ -147,8 +158,85 @@ public class ImageFilterer {
 		}
 		
 		result.setIntArray(array);
-		return result;
+		return new ImageFilterer(result);
 	}
+	
+	/**
+	 * Resize the image to fit on the screen with the given width.
+	 * @param fraction the fraction of the screen width to take up (0-1)
+	 * @return
+	 */
+	public ImageFilterer fitToScreen(double fraction){
+		
+		if(ip==null){
+			throw new IllegalArgumentException("Image processor is null");
+		}
+		
+		int originalWidth  = ip.getWidth();
+		int originalHeight = ip.getHeight();
+
+		// keep the image aspect ratio
+		double ratio = (double) originalWidth / (double) originalHeight;
+		
+		Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+
+		// set the new width
+		int newWidth = (int) ( screenSize.getWidth() * fraction);
+		int newHeight = (int) (   (double) newWidth / ratio);
+		
+		// Check height is OK. If not, recalculate sizes
+		if(newHeight >= screenSize.getHeight()){
+			newHeight = (int) ( screenSize.getHeight() * fraction);
+			newWidth = (int) (   (double) newHeight * ratio);
+		}
+
+		// Create the image
+		ImageProcessor result = ip.duplicate().resize(newWidth, newHeight );
+
+		return new ImageFilterer(result);
+	}
+	
+	/**
+	 * Resize the image to fit on the screen. By default the width will be 80%, 
+	 * unless this causes the height to become too great. In this case the height will
+	 * be set to 80%.
+	 * @return
+	 */
+	public ImageFilterer fitToScreen(){
+		
+		if(ip==null){
+			throw new IllegalArgumentException("Image processor is null");
+		}
+
+
+		return fitToScreen(0.8);
+	}
+	
+	/**
+	 * Crop the image to the region covered by the given nucleus
+	 * @return
+	 */
+	public ImageFilterer crop(CellularComponent c){
+
+		if(ip==null){
+			throw new IllegalArgumentException("Image processor is null");
+		}
+		// Choose a clip for the image (an enlargement of the original nucleus ROI
+		double[] positions = c.getPosition();
+		int wideW = (int) (positions[CellularComponent.WIDTH] +20);
+		int wideH = (int) (positions[CellularComponent.HEIGHT]+20);
+		int wideX = (int) (positions[CellularComponent.X_BASE]-10);
+		int wideY = (int) (positions[CellularComponent.Y_BASE]-10);
+
+		wideX = wideX<0 ? 0 : wideX;
+		wideY = wideY<0 ? 0 : wideY;
+
+		ip.setRoi(wideX, wideY, wideW, wideH);
+		ImageProcessor result = ip.crop();
+
+		return new ImageFilterer(result);
+	}
+	
 	
 	/**
 	 * Fetch a 3x3 image kernel from within an int image array
@@ -157,7 +245,7 @@ public class ImageFilterer {
 	 * @param y the central y point
 	 * @return
 	 */
-	public static int[][] getKernel(int[][] array, int x, int y){
+	public int[][] getKernel(int[][] array, int x, int y){
 		
 		/*
 		 * Create the kernel array, and zero it
@@ -198,7 +286,7 @@ public class ImageFilterer {
 	 * @param array the 3x3 array of pixels
 	 * @return
 	 */
-	public static boolean bridgePixel(int[][] array){
+	public boolean bridgePixel(int[][] array){
 		
 		/*
 		 * If the central pixel is filled, do nothing.
@@ -254,7 +342,7 @@ public class ImageFilterer {
 	 * @param closingRadius the radius of the circle
 	 * @return a new ByteProcessor containing the closed image
 	 */
-	public static ByteProcessor morphologyClose(ImageProcessor ip, int closingRadius) throws Exception {
+	public ImageFilterer morphologyClose(int closingRadius) {
 
 		ByteProcessor result = ip.convertToByteProcessor();
 
@@ -276,9 +364,7 @@ public class ImageFilterer {
 
 		mp.erode(result);
 
-		
-		
-		return result;
+		return new ImageFilterer(result);
 
 	}
 	
@@ -289,7 +375,7 @@ public class ImageFilterer {
      * 21/May/2008
      * @param ip
      */
-    private static void fill(ImageProcessor ip) {
+    private void fill(ImageProcessor ip) {
 
     	int foreground = 255;
         int background = 0;
@@ -323,25 +409,23 @@ public class ImageFilterer {
 	 * @return a stack with edges highlighted
 	 * @throws Exception 
 	 */
-	public static ImageStack runEdgeDetector(ImageStack image, int stackNumber, CannyOptions options) throws Exception{
+	public ImageFilterer runEdgeDetector(int stackNumber, CannyOptions options) throws Exception{
 
 		ImageStack searchStack = null;
 		// Run the edge detection
+		ip = st.getProcessor(stackNumber);
+//		ByteProcessor searchImage = runEdgeDetector( options);
+//		ip = runEdgeDetector( options).getProcessor();
 		
-		ByteProcessor searchImage = runEdgeDetector(image.getProcessor(stackNumber), options);
-		
-		ByteProcessor closed = ImageFilterer.morphologyClose( searchImage  , options.getClosingObjectRadius()) ;
+//		ByteProcessor closed = (ByteProcessor) morphologyClose( options.getClosingObjectRadius()).getProcessor() ;
 				
-	
+		int closingRadius = options.getClosingObjectRadius();
+		ImageProcessor closed = runEdgeDetector( options).morphologyClose(closingRadius).getProcessor();
 		
-		searchStack = ImageStack.create(image.getWidth(), image.getHeight(), 0, 8);
+		searchStack = ImageStack.create(st.getWidth(), st.getHeight(), 0, 8);
 		searchStack.addSlice("closed", closed, 0);
-		
-		
-		searchImage=null;
 
-
-		return searchStack;
+		return new ImageFilterer(searchStack);
 	}
 	
 	/**
@@ -350,7 +434,7 @@ public class ImageFilterer {
 	 * @param options
 	 * @return
 	 */
-	public static ByteProcessor runEdgeDetector(ImageProcessor ip, CannyOptions options) throws Exception { 
+	public ImageFilterer runEdgeDetector(CannyOptions options) throws Exception { 
 		ByteProcessor result = null;
 
 		
@@ -373,7 +457,7 @@ public class ImageFilterer {
 		
 		converted = null;
 
-		return result;
+		return new ImageFilterer(result);
 	}
 	
 	/**
@@ -383,7 +467,7 @@ public class ImageFilterer {
 	 * @param image the image to analyse
 	 * @throws Exception 
 	 */
-	private static void autoDetectCannyThresholds(CannyOptions options, ImageProcessor image) throws Exception{
+	private void autoDetectCannyThresholds(CannyOptions options, ImageProcessor image) throws Exception{
 		// calculation of auto threshold
 
 		// find the median intensity of the image
@@ -415,7 +499,7 @@ public class ImageFilterer {
 	 * @param image the image to process
 	 * @return the median pixel intensity
 	 */
-	private static double getMedianIntensity(ImageProcessor image) throws Exception {
+	private double getMedianIntensity(ImageProcessor image) throws Exception {
 
 		double[] values = new double[ image.getWidth()*image.getHeight() ];
 

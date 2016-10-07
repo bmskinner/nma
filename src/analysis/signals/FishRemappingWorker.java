@@ -42,14 +42,15 @@ import gui.ImageType;
 import gui.dialogs.FishRemappingDialog.FishMappingImageType;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
-import io.ImageExporter;
 import io.ImageImporter;
 
 import java.io.File;
+
 import javax.swing.table.TableModel;
 
 import analysis.detection.IconCell;
 import analysis.detection.ImageProberWorker;
+import analysis.image.ImageConverter;
 
 public class FishRemappingWorker extends ImageProberWorker {
 	
@@ -76,7 +77,7 @@ public class FishRemappingWorker extends ImageProberWorker {
 			String imageName = file.getName();
 
 			finest("Converting image");
-			ImageProcessor openProcessor = ImageExporter.getInstance().makeGreyRGBImage(stack).getProcessor();
+			ImageProcessor openProcessor = new ImageConverter(stack).convertToGreyscale().getProcessor();
 			openProcessor.invert();
 			
 			IconCell iconCell = makeIconCell(openProcessor, FishMappingImageType.ORIGINAL_IMAGE);
@@ -92,7 +93,7 @@ public class FishRemappingWorker extends ImageProberWorker {
 			
 				ImageStack fishStack = ImageImporter.getInstance().importImage(fishImageFile);
 
-				ImageProcessor fishProcessor = ImageExporter.getInstance().convertToRGB(fishStack).getProcessor();
+				ImageProcessor fishProcessor = new ImageConverter(fishStack).convertToRGB().getProcessor();
 
 				IconCell iconCell2 = makeIconCell(fishProcessor, FishMappingImageType.FISH_IMAGE);
 				publish(iconCell2);

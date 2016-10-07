@@ -1,7 +1,6 @@
 package stats;
 
 import components.generic.MeasurementScale;
-import utility.Utils;
 
 public enum SignalStatistic implements PlottableStatistic {
 	
@@ -74,12 +73,12 @@ public enum SignalStatistic implements PlottableStatistic {
 		  {
 			  switch(this.dimension){
 			  case AREA:
-				  result = Utils.micronArea(value, factor);
+				  result = PlottableStatistic.micronArea(value, factor);
 				  break;
 			  case DIMENSIONLESS:
 				  break;
 			  case LENGTH:
-				  result = Utils.micronLength(value, factor);
+				  result = PlottableStatistic.micronLength(value, factor);
 				  break;
 			  case ANGLE:
 				  break;

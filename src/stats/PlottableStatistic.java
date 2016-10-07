@@ -62,6 +62,30 @@ public interface PlottableStatistic {
 	 * @return
 	 */
 	public double convert(double value, double factor, MeasurementScale scale);
+	
+	/**
+	 * Convert the length in pixels into a length in microns.
+	 * Assumes that the scale is in pixels per micron
+	 * @param pixels the number of pixels
+	 * @param scale the size of a pixel in microns
+	 * @return
+	 */
+	public static double micronLength(double pixels, double scale){
+		double microns = pixels / scale;
+		return microns;
+	}
+
+	/**
+	 * Convert the area in pixels into an area in microns.
+	 * Assumes that the scale is in pixels per micron
+	 * @param pixels the number of pixels
+	 * @param scale the size of a pixel in microns
+	 * @return
+	 */
+	public static double micronArea(double pixels, double scale){
+		double microns = pixels / (scale*scale);
+		return microns;
+	}	
 
 	/**
 	 * Get the appropriate units label for the statistic, based on its dimension.

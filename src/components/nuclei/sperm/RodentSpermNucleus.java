@@ -40,7 +40,6 @@ import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
-import utility.Utils;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Equation;

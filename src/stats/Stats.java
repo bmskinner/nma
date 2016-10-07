@@ -37,7 +37,6 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import logging.Loggable;
 import utility.ArrayConverter;
-import utility.Utils;
 import utility.ArrayConverter.ArrayConversionException;
 
  public class Stats implements Loggable {

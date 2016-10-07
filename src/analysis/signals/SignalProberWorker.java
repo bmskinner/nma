@@ -25,7 +25,6 @@ import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
-import io.ImageExporter;
 import io.ImageImporter;
 
 import java.awt.Color;
@@ -46,6 +45,7 @@ import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.detection.IconCell;
 import analysis.detection.ImageProberWorker;
+import analysis.image.ImageConverter;
 
 public class SignalProberWorker extends ImageProberWorker {
 	
@@ -78,7 +78,7 @@ public class SignalProberWorker extends ImageProberWorker {
 		ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
 		
 		// Convert to an RGB processor for annotation
-		ImageProcessor openProcessor = ImageExporter.getInstance().convertTORGBGreyscale(greyProcessor);
+		ImageProcessor openProcessor = new ImageConverter(greyProcessor).convertToGreyscale().getProcessor();
 		
 		String imageName = file.getName();
 

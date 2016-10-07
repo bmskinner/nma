@@ -8,7 +8,7 @@ import ij.process.ImageProcessor;
 
 import org.junit.Test;
 
-import analysis.detection.ImageFilterer;
+import analysis.image.ImageFilterer;
 import components.generic.ProfileAggregate;
 
 public class ImageFiltererTest {
@@ -185,11 +185,11 @@ public class ImageFiltererTest {
 		printPixelArray(bp);
 		
 		System.out.println("\nKernel at 1, 1:");
-		int[][] kernel = ImageFilterer.getKernel(bp.getIntArray(), 1, 1);
+		int[][] kernel = new ImageFilterer(bp).getKernel(bp.getIntArray(), 1, 1);
 		printPixelArray(kernel);
 		
 		System.out.println("\nBridged image:");
-		ByteProcessor bridged = ImageFilterer.bridgePixelGaps(bp, 3);
+		ByteProcessor bridged = (ByteProcessor) new ImageFilterer(bp).bridgePixelGaps(3).getProcessor();
 		printPixelArray(bridged);
 
 		

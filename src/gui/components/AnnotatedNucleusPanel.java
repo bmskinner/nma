@@ -19,31 +19,21 @@
 package gui.components;
 
 import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
-import io.ImageExporter;
 import io.ImageImporter;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
 import java.io.File;
-import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import analysis.image.ImageConverter;
+import analysis.image.ImageFilterer;
+import analysis.image.NucleusAnnotator;
 import logging.Loggable;
-import charting.charts.AbstractChartFactory;
-import components.AbstractCellularComponent;
 import components.Cell;
-import components.CellularComponent;
-import components.generic.ProfileType;
-import components.nuclear.BorderPoint;
-import components.nuclear.NucleusBorderSegment;
-import components.nuclei.Nucleus;
 
 /**
  * Display the original image for a cell, with
@@ -80,19 +70,23 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 		ImageStack imageStack = ImageImporter.getInstance().importImage(imageFile);
 		
 		// Get the counterstain stack, make greyscale and invert
-		ImageProcessor openProcessor = ImageExporter.getInstance().makeGreyRGBImage(imageStack).getProcessor();
-		openProcessor.invert();
+		ImageProcessor openProcessor= new ImageConverter(imageStack)
+			.convertToGreyscale()
+			.invert()
+			.getProcessor();
+
 		
-		drawNucleus(openProcessor);
-		
-		
+		openProcessor = new NucleusAnnotator(openProcessor)
+				.annotateSegments(cell.getNucleus())
+				.getProcessor();
+
 		
 		ImageIcon icon = null;
 		if(imageLabel.getIcon()!=null){
 			icon = (ImageIcon) imageLabel.getIcon();
 			icon.getImage().flush();
 		}
-		icon = createViewableImage(openProcessor);
+		icon = makeIcon(openProcessor);
 		this.setSize(icon.getIconWidth(), icon.getIconHeight());
 		imageLabel.setIcon(icon);
 		imageLabel.revalidate();
@@ -100,117 +94,19 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 		
 		this.repaint();
 	}
-		
-	/**
-	 * Draw the outline of a nucleus on the given processor
-	 * @param cell
-	 * @param ip
-	 */
-	private void drawNucleus(ImageProcessor ip) throws Exception {
-		if(cell==null){
-			throw new IllegalArgumentException("Input cell is null");
-		}
-		
-		Nucleus n = cell.getNucleus();
-		double[] positions = n.getPosition();
-
-		
-		// annotate the image processor with the nucleus outline
-		List<NucleusBorderSegment> segmentList = n.getProfile(ProfileType.ANGLE).getSegments();
-		
-		ip.setLineWidth(2);
-		if(!segmentList.isEmpty()){ // only draw if there are segments
 			
-			for(NucleusBorderSegment seg  : segmentList){
-				
-				float[] x = new float[seg.length()+1];
-				float[] y = new float[seg.length()+1];
-				
-				
-				for(int j=0; j<=seg.length();j++){
-					int k = AbstractCellularComponent.wrapIndex(seg.getStartIndex()+j, n.getBorderLength());
-					BorderPoint p = n.getBorderPoint(k); // get the border points in the segment
-					x[j] = (float) p.getX();
-					y[j] = (float) p.getY();
-				}
-				
-				int segIndex = AbstractChartFactory.getIndexFromLabel (seg.getName());
-				ip.setColor(ColourSelecter.getColor(segIndex));
-				
-				PolygonRoi segRoi = new PolygonRoi(x, y, PolygonRoi.POLYLINE);
-				
-				segRoi.setLocation(segRoi.getBounds().getMinX()+positions[CellularComponent.X_BASE], segRoi.getBounds().getMinY()+positions[CellularComponent.Y_BASE]);
-				
-				ip.draw(segRoi);
-
-			}
-		} else {
-
-			ip.setColor(Color.ORANGE);
-			FloatPolygon polygon = n.createPolygon();
-			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-			roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
-			ip.draw(roi);
-		}
-
-	}
-	
-	/**
-	 * Rezize the given image processor to fit in the screen,
-	 * and make an icon
-	 * @param ip an image processor
-	 * @return an image icon with the resized image
-	 */
-	private ImageIcon createViewableImage(ImageProcessor ip){
-				
-		// Choose a clip for the image (an enlargement of the original nucleus ROI
-		double[] positions = cell.getNucleus().getPosition();
-		int wideW = (int) (positions[CellularComponent.WIDTH]+20);
-		int wideH = (int) (positions[CellularComponent.HEIGHT]+20);
-		int wideX = (int) (positions[CellularComponent.X_BASE]-10);
-		int wideY = (int) (positions[CellularComponent.Y_BASE]-10);
-
-		wideX = wideX<0 ? 0 : wideX;
-		wideY = wideY<0 ? 0 : wideY;
-
-		ip.setRoi(wideX, wideY, wideW, wideH);
-		ImageProcessor croppedProcessor = ip.crop();
-		
-
-		/*
-		 * Resize the image to half of the screen height 
-		 */
-		return resizeImage(croppedProcessor);
-		
-	}
 	
 	/*
 	 * Resize the image to half of the screen height 
 	 */
-	private ImageIcon resizeImage(ImageProcessor processor){
+	private ImageIcon makeIcon(ImageProcessor processor){
 
-		int originalWidth = processor.getWidth();
-		int originalHeight = processor.getHeight();
-		
-		Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-		// The panel dimension
-//		Dimension screenSize = new Dimension(processor.getWidth(), processor.getHeight());
-		// set the image width to be half the screen width
-		int newHeight = (int) (screenSize.getHeight() * 0.3 );
+		ImageProcessor resized = new ImageFilterer(processor)
+			.crop(cell.getNucleus())
+			.fitToScreen(0.3)
+			.getProcessor();
 
-		// keep the image aspect ratio
-		double ratio = (double) originalWidth / (double) originalHeight;
-
-		int newWidth = (int) (   (double) newHeight * ratio);
-
-		// Create the image
-
-
-
-
-		ImageIcon smallImageIcon;
-
-		smallImageIcon = new ImageIcon(processor.resize(newWidth, newHeight ).getBufferedImage());
+		ImageIcon smallImageIcon = new ImageIcon(resized.getBufferedImage());
 
 		return smallImageIcon;
 

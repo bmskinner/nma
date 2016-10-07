@@ -41,7 +41,6 @@ import skeleton_analysis.Graph;
 import skeleton_analysis.SkeletonResult;
 import utility.ArrayConverter;
 import utility.Constants;
-import utility.Utils;
 import utility.ArrayConverter.ArrayConversionException;
 import components.SpermTail;
 import components.generic.XYPoint;
@@ -50,7 +49,7 @@ import components.nuclei.Nucleus;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.detection.Detector;
-import analysis.detection.ImageFilterer;
+import analysis.image.ImageFilterer;
 
 public class TailDetector extends Detector {
 	
@@ -96,7 +95,7 @@ public class TailDetector extends Detector {
 		if( checkDimensions(stack, n)){
 			
 			// edge / threshold to find tubulin stain
-			ImageStack edges = ImageFilterer.runEdgeDetector(stack, stackNumber, options);
+			ImageStack edges = new ImageFilterer(stack).runEdgeDetector(stackNumber, options).getStack();
 			
 			// get objects found by edge detector
 			List<Roi> borderRois = getROIs(edges, Detector.CLOSED_OBJECTS, 1);
@@ -166,7 +165,7 @@ public class TailDetector extends Detector {
 		
 		AnalysisOptions options = new AnalysisOptions(); 
 		options.getCannyOptions("tail").setClosingObjectRadius(5);
-		ByteProcessor byteProcessor = (ByteProcessor) ImageFilterer.morphologyClose( bp, 5);
+		ByteProcessor byteProcessor = (ByteProcessor) new ImageFilterer(bp).morphologyClose(  5).getProcessor();
 //		morphologyClose(binaryProcessor, options.getCannyOptions("tail"));
 		BinaryProcessor binaryP = new BinaryProcessor((ByteProcessor) byteProcessor);
 		

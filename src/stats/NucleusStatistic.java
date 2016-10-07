@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import logging.Loggable;
-import utility.Utils;
 import components.generic.MeasurementScale;
 import components.nuclear.NucleusType;
 
@@ -122,10 +121,10 @@ public enum NucleusStatistic implements PlottableStatistic, Loggable {
 		  	case MICRONS: {
 				  switch(this.dimension){
 					  case AREA:
-						  result = micronArea(value, factor);
+						  result = PlottableStatistic.micronArea(value, factor);
 						  break;
 					  case LENGTH:
-						  result = micronLength(value, factor);
+						  result = PlottableStatistic.micronLength(value, factor);
 						  break;
 					  default:
 						  break;
@@ -161,30 +160,6 @@ public enum NucleusStatistic implements PlottableStatistic, Loggable {
 		  return result;
 	  }
 	  
-
-	  /**
-	   * Convert the length in pixels into a length in microns.
-	   * Assumes that the scale is in pixels per micron
-	   * @param pixels the number of pixels
-	   * @param scale the size of a pixel in microns
-	   * @return
-	   */
-	  public static double micronLength(double pixels, double scale){
-		  double microns = pixels / scale;
-		  return microns;
-	  }
-
-	  /**
-	   * Convert the area in pixels into an area in microns.
-	   * Assumes that the scale is in pixels per micron
-	   * @param pixels the number of pixels
-	   * @param scale the size of a pixel in microns
-	   * @return
-	   */
-	  public static double micronArea(double pixels, double scale){
-		  double microns = pixels / (scale*scale);
-		  return microns;
-	  }	
 	  
 	  public PlottableStatistic[] getValues(){
 		  return NucleusStatistic.values();

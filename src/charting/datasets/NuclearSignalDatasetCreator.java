@@ -47,7 +47,6 @@ import charting.options.TableOptions;
 import stats.SignalStatistic;
 import utility.AngleTools;
 import utility.ArrayConverter;
-import utility.Utils;
 import utility.ArrayConverter.ArrayConversionException;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;

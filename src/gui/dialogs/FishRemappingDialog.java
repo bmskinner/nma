@@ -420,12 +420,13 @@ public class FishRemappingDialog extends ImageProber {
 		
 		Graphics2D g2 = (Graphics2D) image.getGraphics();
 		
-		
+		Color oldColor = g2.getColor();
 		g2.setColor(chooseNucleusOutlineColor(c));
 		
 		Shape p = c.getNucleus().toOriginalShape();
 		
 		g2.fill(p);
+		g2.setColor(oldColor);
 		
 	}
 

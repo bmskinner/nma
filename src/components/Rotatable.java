@@ -20,10 +20,7 @@
 package components;
 
 import logging.Loggable;
-import utility.AngleTools;
-import utility.Utils;
 import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
 
 /**
  * Objects implementing this interface can be rotated

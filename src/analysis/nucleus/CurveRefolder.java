@@ -29,7 +29,6 @@ import java.awt.Rectangle;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import utility.Constants;
-import utility.Utils;
 import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.generic.BorderTagObject;

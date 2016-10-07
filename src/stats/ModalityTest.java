@@ -27,7 +27,6 @@ import components.generic.Profile;
 import stats.ModalityTest.BinnedData.Bin;
 import utility.ArrayConverter;
 import utility.ArrayConverter.ArrayConversionException;
-import utility.Utils;
 
 /**
  * Test a set of values for multimodality

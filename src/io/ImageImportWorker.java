@@ -29,7 +29,6 @@ import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import logging.Loggable;
 import utility.Constants;
-import utility.Utils;
 
 /**
  * Handles the import of all images within a given AnalysisDataset

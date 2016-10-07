@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import analysis.AnalysisDataset;
 import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTagObject;
@@ -39,7 +38,6 @@ import stats.StatisticDimension;
 import stats.Stats;
 import utility.ArrayConverter;
 import utility.Constants;
-import utility.Utils;
 import utility.ArrayConverter.ArrayConversionException;
 
 /**

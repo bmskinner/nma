@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import analysis.image.ImageConverter;
 import logging.Loggable;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
@@ -46,7 +47,6 @@ import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
-import io.ImageExporter;
 import io.ImageImporter;
 import stats.PlottableStatistic;
 import stats.Stats;
@@ -271,7 +271,7 @@ public abstract class AbstractCellularComponent
 			int stack = Constants.rgbToStack(getChannel());
 						
 			ImageStack imageStack = ImageImporter.getInstance().importImage(getSourceFile());
-			ip = ImageExporter.getInstance().makeGreyRGBImage(imageStack, stack).getProcessor();
+			ip = new ImageConverter(imageStack).convertToGreyscale(stack).getProcessor();
 			ip.invert();	
 			
 			imageRef = new SoftReference<ImageProcessor>(ip);

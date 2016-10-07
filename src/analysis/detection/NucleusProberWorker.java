@@ -25,12 +25,12 @@ import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
-import io.ImageExporter;
 import io.ImageImporter;
 
 import java.awt.Color;
 import java.io.File;
 import java.util.List;
+
 import javax.swing.table.TableModel;
 
 import stats.NucleusStatistic;
@@ -40,6 +40,8 @@ import components.CellularComponent;
 import components.nuclei.Nucleus;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
+import analysis.image.ImageConverter;
+import analysis.image.ImageFilterer;
 import analysis.nucleus.NucleusDetector;
 
 public class NucleusProberWorker extends ImageProberWorker {
@@ -68,8 +70,11 @@ public class NucleusProberWorker extends ImageProberWorker {
 		
 		CannyOptions cannyOptions = options.getCannyOptions("nucleus");
 
-		ImageProcessor openProcessor = ImageExporter.getInstance().makeGreyRGBImage(imageStack).getProcessor();
-		openProcessor.invert();
+		ImageProcessor openProcessor = new ImageConverter(imageStack)
+			.convertToGreyscale()
+			.invert()
+			.getProcessor();
+//		openProcessor.invert();
 					
 		if( cannyOptions.isUseCanny()) { //TODO: Turning off Canny causes error
 			
@@ -82,7 +87,9 @@ public class NucleusProberWorker extends ImageProberWorker {
 			
 			if(cannyOptions.isUseKuwahara()){
 				finer("Applying Kuwahara filter");
-				kuwaharaProcessor = ImageFilterer.runKuwaharaFiltering(processedImage, cannyOptions.getKuwaharaKernel());
+				kuwaharaProcessor = new ImageFilterer(processedImage)
+					.runKuwaharaFiltering( cannyOptions.getKuwaharaKernel())
+					.getProcessor();
 				processedImage = kuwaharaProcessor.duplicate(); 
 				
 			}
@@ -99,7 +106,10 @@ public class NucleusProberWorker extends ImageProberWorker {
 			if(cannyOptions.isUseFlattenImage()){
 				
 				finer("Applying flattening filter");
-				flattenProcessor = ImageFilterer.squashChromocentres(processedImage, cannyOptions.getFlattenThreshold());
+				flattenProcessor =  new ImageFilterer(processedImage)
+					.squashChromocentres( cannyOptions.getFlattenThreshold())
+					.getProcessor();
+				
 				processedImage = flattenProcessor.duplicate();
 			} 
 			flattenProcessor.invert();
@@ -112,7 +122,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			// Run the edge detection
 			
 			finer("Detecting edges");
-			processedImage = ImageFilterer.runEdgeDetector(processedImage, cannyOptions);
+			processedImage = new ImageFilterer(processedImage).runEdgeDetector( cannyOptions).getProcessor();
 			ImageProcessor invertedEdges = processedImage.duplicate(); // make a copy for display only
 			invertedEdges.invert();
 			
@@ -122,7 +132,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 
 			// Run morhological closing
 			
-			processedImage = ImageFilterer.morphologyClose(processedImage, cannyOptions.getClosingObjectRadius());
+			processedImage = new ImageFilterer(processedImage).morphologyClose(cannyOptions.getClosingObjectRadius()).getProcessor();
 			ImageProcessor closedIP = processedImage.duplicate(); // make a copy for display only
 			closedIP.invert();
 			IconCell iconCell3 = makeIconCell(closedIP, NucleusImageType.MORPHOLOGY_CLOSED);

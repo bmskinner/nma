@@ -62,10 +62,10 @@ import logging.Loggable;
 import stats.DipTester;
 import stats.KruskalTester;
 import stats.NucleusStatistic;
+import stats.PlottableStatistic;
 import stats.SegmentStatistic;
 import utility.ArrayConverter;
 import utility.Constants;
-import utility.Utils;
 import utility.ArrayConverter.ArrayConversionException;
 import weka.estimators.KernelEstimator;
 
@@ -1450,8 +1450,8 @@ private static NucleusDatasetCreator instance = null;
 					double y = p.getY();
 					
 					if(scale.equals(MeasurementScale.MICRONS)){
-						x = Utils.micronLength(x, n.getScale());
-						y = Utils.micronLength(y, n.getScale());
+						x = PlottableStatistic.micronLength(x, n.getScale());
+						y = PlottableStatistic.micronLength(y, n.getScale());
 					}
 					
 					xpoints[j] = x;
