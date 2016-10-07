@@ -37,8 +37,10 @@ import logging.Loggable;
 import stats.SignalStatistic;
 import stats.StatisticDimension;
 import stats.Stats;
+import utility.ArrayConverter;
 import utility.Constants;
 import utility.Utils;
+import utility.ArrayConverter.ArrayConversionException;
 
 /**
  * This class is designed to simplify operations on CellCollections
@@ -394,7 +396,16 @@ public class SignalManager implements Loggable{
               a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
 
           }
-          return Utils.getdoubleFromDouble(a.toArray(new Double[0]));
+          
+          double[] values;
+
+			try{
+				values = new ArrayConverter(a).toDoubleArray();
+
+			} catch (ArrayConversionException e) {
+				values = new double[0]; 
+			}
+          return values;
       }
       
       /**

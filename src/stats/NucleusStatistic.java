@@ -122,10 +122,10 @@ public enum NucleusStatistic implements PlottableStatistic, Loggable {
 		  	case MICRONS: {
 				  switch(this.dimension){
 					  case AREA:
-						  result = Utils.micronArea(value, factor);
+						  result = micronArea(value, factor);
 						  break;
 					  case LENGTH:
-						  result = Utils.micronLength(value, factor);
+						  result = micronLength(value, factor);
 						  break;
 					  default:
 						  break;
@@ -161,40 +161,30 @@ public enum NucleusStatistic implements PlottableStatistic, Loggable {
 		  return result;
 	  }
 	  
-	  
-//		/**
-//		 * Get the appropriate chart y-label for the
-//		 * given statistic 
-//		 * @param stat
-//		 * @return
-//		 */
-//		public String yLabel(MeasurementScale scale){
-//			String result = null;
-//
-//			switch(stat){
-//
-//			case AREA: 
-//				result = "Square "+name;
-//				break;
-//			case ASPECT: 
-//				result = "Aspect ratio (bounding height / width)";
-//				break;
-//			case CIRCULARITY: 
-//				result = "Circularity";
-//				break;
-//			case VARIABILITY: 
-//				result = "Degrees per perimeter unit";
-//				break;
-//			case OP_RP_ANGLE:
-//				result = "Degrees";
-//				break;
-//			default:
-//				result = name;
-//				break;
-//			}
-//
-//			return result;
-//		}
+
+	  /**
+	   * Convert the length in pixels into a length in microns.
+	   * Assumes that the scale is in pixels per micron
+	   * @param pixels the number of pixels
+	   * @param scale the size of a pixel in microns
+	   * @return
+	   */
+	  public static double micronLength(double pixels, double scale){
+		  double microns = pixels / scale;
+		  return microns;
+	  }
+
+	  /**
+	   * Convert the area in pixels into an area in microns.
+	   * Assumes that the scale is in pixels per micron
+	   * @param pixels the number of pixels
+	   * @param scale the size of a pixel in microns
+	   * @return
+	   */
+	  public static double micronArea(double pixels, double scale){
+		  double microns = pixels / (scale*scale);
+		  return microns;
+	  }	
 	  
 	  public PlottableStatistic[] getValues(){
 		  return NucleusStatistic.values();

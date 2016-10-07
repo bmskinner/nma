@@ -51,6 +51,8 @@ import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 import stats.DipTester;
+import stats.Mean;
+import stats.Min;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
 import stats.Stats;
@@ -205,7 +207,8 @@ private static NucleusTableDatasetCreator instance = null;
 							
 				double[] meanLengths = collection.getSegmentStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
 
-				double mean = Stats.mean( meanLengths);
+				double mean = new Mean(meanLengths).doubleValue(); 
+//				double mean = Stats.mean( meanLengths);
 				double sem  = Stats.stderr(meanLengths);
 				double[] ci = Stats.calculateMeanConfidenceInterval(meanLengths, 0.95);
 				
@@ -305,7 +308,7 @@ private static NucleusTableDatasetCreator instance = null;
 
 				double[] meanLengths = collection.getSegmentStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
 
-				double mean = Stats.mean(meanLengths); 
+				double mean = new Mean(meanLengths).doubleValue(); 
 
 				double ci = Stats.calculateConfidenceIntervalSize(meanLengths, 0.95);
 
@@ -646,7 +649,7 @@ private static NucleusTableDatasetCreator instance = null;
 		for(NucleusStatistic stat : NucleusStatistic.values()){
 			double[] stats 	= collection.getNuclearStatistics(stat, scale);
 			
-			double mean     = Stats.mean(stats);
+			double mean     = new Mean(stats).doubleValue(); 
 			double sem      = Stats.stderr(stats);
 			double median 	= Stats.quartile(stats, 50);
 			double[] ci 	= Stats.calculateMeanConfidenceInterval(stats, 0.95);

@@ -45,7 +45,10 @@ import charting.charts.ExportableBoxAndWhiskerCategoryDataset;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import stats.SignalStatistic;
+import utility.AngleTools;
+import utility.ArrayConverter;
 import utility.Utils;
+import utility.ArrayConverter.ArrayConversionException;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import analysis.nucleus.CurveRefolder;
@@ -380,8 +383,19 @@ public class NuclearSignalDatasetCreator implements Loggable {
 						yValues.add(est.getProbability(i));
 					}
 
-					double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
-							Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
+					double[] xData;
+					double[] yData;
+					
+					try{
+						
+						xData = new ArrayConverter(xValues).toDoubleArray();
+						yData = new ArrayConverter(yValues).toDoubleArray();
+						
+					} catch (ArrayConversionException e) {
+						xData = new double[0]; 
+						yData = new double[0]; 
+					}
+					double[][] data = { xData, yData} ;
 
 
 	                ds.addSeries( groupLabel, data);
@@ -456,8 +470,8 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		double signalDistance = distanceToBorder * fractionalDistance;
 
 		// adjust X and Y because we are now counting angles from the vertical axis
-		double signalX = Utils.getXComponentOfAngle(signalDistance, angle-90);
-		double signalY = Utils.getYComponentOfAngle(signalDistance, angle-90);
+		double signalX = new AngleTools().getXComponentOfAngle(signalDistance, angle-90);
+		double signalY = new AngleTools().getYComponentOfAngle(signalDistance, angle-90);
 		return new XYPoint(signalX, signalY);
 	}
 	

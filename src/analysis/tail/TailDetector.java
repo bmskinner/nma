@@ -39,8 +39,10 @@ import skeleton_analysis.AnalyzeSkeleton_;
 import skeleton_analysis.Edge;
 import skeleton_analysis.Graph;
 import skeleton_analysis.SkeletonResult;
+import utility.ArrayConverter;
 import utility.Constants;
 import utility.Utils;
+import utility.ArrayConverter.ArrayConversionException;
 import components.SpermTail;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
@@ -397,8 +399,21 @@ public class TailDetector extends Detector {
 
 					}
 					
-					Roi potentialSkeleton = new PolygonRoi(Utils.getFloatArrayFromIntegerList(xpoints), 
-							Utils.getFloatArrayFromIntegerList(ypoints),
+					float[] xData;
+					float[] yData;
+					
+					try{
+						
+						xData = new ArrayConverter(xpoints).toFloatArray();
+						yData = new ArrayConverter(ypoints).toFloatArray();
+						
+					} catch (ArrayConversionException e1) {
+						xData = new float[0]; 
+						yData = new float[0]; 
+					}
+					
+					Roi potentialSkeleton = new PolygonRoi(xData, 
+							yData,
 							PolygonRoi.POLYLINE);
 					
 					if(potentialSkeleton.getLength()>0){

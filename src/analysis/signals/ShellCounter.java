@@ -21,6 +21,7 @@ package analysis.signals;
 
 import ij.IJ;
 import logging.Loggable;
+import stats.Mean;
 import stats.Stats;
 
 import java.io.File;
@@ -78,7 +79,8 @@ public class ShellCounter implements Loggable {
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<numberOfShells;i++){
 			double[] values = getShell(i);
-			result.add(Stats.mean(values));
+			result.add( new Mean(values).doubleValue() ); //Stats.mean(values)
+			
 		}
 		return result;
 	}

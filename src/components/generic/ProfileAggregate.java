@@ -35,9 +35,11 @@ import java.util.logging.Level;
 
 import components.AbstractCellularComponent;
 import logging.Loggable;
+import utility.ArrayConverter;
 import utility.Constants;
 import utility.ProfileException;
 import utility.Utils;
+import utility.ArrayConverter.ArrayConversionException;
 
 /**
  * This class holds the aggregates of individual profiles, so that a 
@@ -336,19 +338,22 @@ public class ProfileAggregate implements Loggable, Serializable {
 			double diffL = Math.abs(array[lower] - position);
 			double diffU = Math.abs(array[upper] - position);
 			position = diffL < diffU ? array[lower] : array[upper]; // choose the key closest to the requested position
-//			IJ.log("Set lower: "+array[lower]);
-//			IJ.log("Set upper: "+array[upper]);
-
 		}
-		
-//		IJ.log("Selected position "+position);
 
 		// the desired position is chosen
 		Collection<Double> values = aggregate.get(position);
 		if (values==null){
 			throw new Exception("Cannot find values at position "+position);
 		}
-		return Utils.getdoubleFromDouble(   values.toArray(new Double[0])    );
+		
+		double[] temp;
+		  try {
+			  temp = new ArrayConverter(values).toDoubleArray();
+		  } catch (ArrayConversionException e) {
+			  temp = new double[0]; 
+		  }
+		  
+		return temp;
 	}
 	
 	public List<Double> getXKeyset(){

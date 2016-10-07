@@ -20,6 +20,7 @@
 package components;
 
 import logging.Loggable;
+import utility.AngleTools;
 import utility.Utils;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
@@ -75,7 +76,7 @@ public interface Rotatable extends Loggable {
 		 * 
 		 */
 		
-		double currentAngle = Utils.findAngle( upperPoint, lowerPoint, comp);
+		double currentAngle = lowerPoint.findAngle( upperPoint, comp);
 
 		
 		

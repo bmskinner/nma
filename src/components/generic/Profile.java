@@ -34,7 +34,9 @@ import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 
+import utility.ArrayConverter;
 import utility.Utils;
+import utility.ArrayConverter.ArrayConversionException;
 import components.AbstractCellularComponent;
 import components.nuclear.NucleusBorderSegment;
 
@@ -1291,17 +1293,23 @@ public Profile calculateDeltas(int windowSize){
   
   public void fastFourierTransform(){
 	  FastFourierTransformer f = new FastFourierTransformer(DftNormalization.STANDARD);
-	  
-//	  double[] listArray = new double[array.length];
+
 	  List<Double> list = new ArrayList<Double>();
-//	  int i=0;
+
 	  for(double d : array){
 		  list.add(d);
-//		  listArray[i++] = d;
+
 	  }
 	  list = padListWithZeros(list);
 	  	  
-	  double[] listArray = Utils.getdoubleFromDouble( list.toArray(new Double[0]) );
+	  
+	  double[] listArray;
+	  try {
+		  listArray = new ArrayConverter(list).toDoubleArray();
+	  } catch (ArrayConversionException e) {
+		  listArray = new double[0]; 
+	  }
+
 	  Complex[] transformed = f.transform(listArray, TransformType.FORWARD);
 	  
 	  for(Complex c : transformed){

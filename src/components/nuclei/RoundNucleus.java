@@ -51,7 +51,6 @@ import analysis.signals.SignalAnalyser;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import stats.SignalStatistic;
-import utility.Utils;
 import components.AbstractCellularComponent;
 import components.CellularComponent;
 import components.generic.BorderTag;
@@ -345,7 +344,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			result = this.getVerticallyRotatedNucleus().getBounds().getWidth();
 			break;
 		case OP_RP_ANGLE:
-			result = Utils.findAngle(this.getBorderTag(BorderTagObject.REFERENCE_POINT), this.getCentreOfMass(), this.getBorderTag(BorderTagObject.ORIENTATION_POINT));
+			result = this.getCentreOfMass().findAngle(this.getBorderTag(BorderTagObject.REFERENCE_POINT), this.getBorderTag(BorderTagObject.ORIENTATION_POINT));
 			break;
 		default:
 			break;
@@ -452,7 +451,7 @@ public class RoundNucleus extends AbstractCellularComponent
 
 				for(NuclearSignal s : signals){
 
-					double angle = Utils.findAngle(p, this.getCentreOfMass(), s.getCentreOfMass());
+					double angle = this.getCentreOfMass().findAngle(p, s.getCentreOfMass());
 					s.setStatistic(SignalStatistic.ANGLE, angle);
 
 				}

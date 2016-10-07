@@ -29,8 +29,10 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import charting.options.ChartOptions;
+import utility.ArrayConverter;
 import utility.Constants;
 import utility.Utils;
+import utility.ArrayConverter.ArrayConversionException;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import components.CellCollection;
@@ -40,6 +42,7 @@ import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import stats.Max;
+import stats.Min;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
 import stats.Stats;
@@ -192,8 +195,22 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 				yValues.add(est.getProbability(i));
 
 			}
-			double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
-					Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
+			
+			// Make into an array or arrays
+			
+			double[] xData;
+			double[] yData;
+			
+			try{
+				
+				xData = new ArrayConverter(xValues).toDoubleArray();
+				yData = new ArrayConverter(yValues).toDoubleArray();
+				
+			} catch (ArrayConversionException e) {
+				xData = new double[0]; 
+				yData = new double[0]; 
+			}
+			double[][] data = { xData, yData} ;
 
 
 			ds.addSeries(groupLabel+"_"+collection.getName(), data);
@@ -408,10 +425,21 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 				xValues.add(i);
 				yValues.add(est.getProbability(i));
 			}
-	
-			double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
-					Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
 			
+			double[] xData;
+			double[] yData;
+			
+			try{
+				
+				xData = new ArrayConverter(xValues).toDoubleArray();
+				yData = new ArrayConverter(yValues).toDoubleArray();
+				
+			} catch (ArrayConversionException e) {
+				xData = new double[0]; 
+				yData = new double[0]; 
+			}
+			double[][] data = { xData, yData} ;
+				
 			
 			ds.addSeries(Constants.SEGMENT_PREFIX+options.getSegPosition()+"_"+collection.getName(), data);
 		}
@@ -429,8 +457,16 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 		HistogramDataset ds = new HistogramDataset();
 		if(!list.isEmpty()){
 		
-			double[] values = Utils.getdoubleFromDouble(list.toArray(new Double[0]));
-			double min = Stats.min(list).doubleValue();
+			double[] values;
+
+			try{
+				values = new ArrayConverter(list).toDoubleArray();
+
+			} catch (ArrayConversionException e) {
+				values = new double[0]; 
+			}
+			
+			double min = new Min(list).doubleValue(); 
 			double max = new Max(list).doubleValue();
 			int bins = 100;
 
@@ -442,23 +478,43 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 	public DefaultXYDataset createDensityDatasetFromList(List<Double> list, double binWidth) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		if(!list.isEmpty()){
-			double[] values = Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+			
+
+			double[] values;
+
+			try{
+				values = new ArrayConverter(list).toDoubleArray();
+
+			} catch (ArrayConversionException e) {
+				values = new double[0]; 
+			}
+			
 			KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(values, binWidth);
 
 			List<Double> xValues = new ArrayList<Double>();
 			List<Double> yValues = new ArrayList<Double>();
 
-			double min = Stats.min(list).doubleValue();
+			double min = new Min(list).doubleValue(); 
 			double max = new Max(list).doubleValue();
 			
 			for(double i=min; i<=max; i+=0.0001){
 				xValues.add(i);
 				yValues.add(est.getProbability(i));
 			}
-
-			double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
-					Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
-
+			
+			double[] xData;
+			double[] yData;
+			
+			try{
+				
+				xData = new ArrayConverter(xValues).toDoubleArray();
+				yData = new ArrayConverter(yValues).toDoubleArray();
+				
+			} catch (ArrayConversionException e) {
+				xData = new double[0]; 
+				yData = new double[0]; 
+			}
+			double[][] data = { xData, yData} ;
 
 			ds.addSeries("Density", data);
 		}

@@ -26,7 +26,6 @@ import java.util.List;
 
 import logging.Loggable;
 import utility.ProfileException;
-import utility.Utils;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclear.BorderPoint;
@@ -107,7 +106,7 @@ public class ProfileCreator implements Loggable {
 			BorderPoint pointAfter  = point.nextPoint(target.getWindowSize(ProfileType.ANGLE));
 
 			// Get the smallest angle between the points
-			double angle = Utils.findAngle(pointBefore, point, pointAfter);
+			double angle = point.findAngle(pointBefore, pointAfter);
 
 			// Now discover if this measured angle is inside or outside the object
 			

@@ -26,6 +26,9 @@
 
 package components.generic;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 
@@ -216,6 +219,20 @@ public class XYPoint  implements Serializable, Loggable {
   
   public Point2D asPoint(){
 	  return new Point2D.Double(x, y);
+  }
+
+  /**
+   * Measure the smallest angle between the two lines a-this and this-b connecting
+   * the three points
+   * @param a the first line endpoint
+   * @param b the second line endpoint
+   * @return
+   */
+  public double findAngle(XYPoint a, XYPoint b){
+	  float[] xpoints = { (float) a.getX(), (float) getX(), (float) b.getX()};
+	  float[] ypoints = { (float) a.getY(), (float) getY(), (float) b.getY()};
+	  PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
+	  return roi.getAngle();
   }
 
   @Override

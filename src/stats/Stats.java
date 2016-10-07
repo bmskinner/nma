@@ -36,7 +36,9 @@ import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import logging.Loggable;
+import utility.ArrayConverter;
 import utility.Utils;
+import utility.ArrayConverter.ArrayConversionException;
 
  public class Stats implements Loggable {
 	 
@@ -48,7 +50,14 @@ import utility.Utils;
   */
   public static double quartile(double[] values, double lowerPercent) {
 
-	  return quartile(Utils.getDoubleFromdouble(values), lowerPercent).doubleValue();
+	  Double[] temp2;
+		try {
+			temp2 = new ArrayConverter(values).toDoubleObjectArray();
+		} catch (ArrayConversionException e) {
+			temp2 = new Double[0]; 
+		}
+		
+	  return quartile(temp2, lowerPercent).doubleValue();
 
   }
   
@@ -77,35 +86,6 @@ import utility.Utils;
 	  return v[n];
   }
 
-  /**
-   * Calculate the mean of an array of values
-   * @param m
-   * @return
-   */
-  public static double mean(double[] m) {
-	  return mean(Utils.getDoubleFromdouble(m)).doubleValue();
-  }
-  
-  /**
-   * Calculate the mean of an array of values
-   * @param m
-   * @return
-   */
-  public static Number mean(Number[] m) {
-    if (m == null || m.length == 0) {
-        throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-    }
-    
-    if(m.length==1){
-    	return m[0];
-    }
-    
-    double sum = 0;
-    for(Number d : m){
-    	sum += d.doubleValue();
-    }
-    return sum / m.length;
-  }
   
   /**
    * Calculate the standard error of an array of values
@@ -154,7 +134,8 @@ import utility.Utils;
 		  return 0;
 	  }
 
-	  double mean = mean(m);
+	  double mean = new Mean(m).doubleValue();
+//	  double mean = mean(m);
 	  double temp = 0;
 	  for(double d : m)
 		  temp += Math.pow(mean-d, 2);
@@ -173,7 +154,8 @@ import utility.Utils;
 
 	  // Calculate 95% confidence interval
 	  double ci = calculateConfidenceIntervalSize(data, level);
-	  double mean = Stats.mean(data);
+//	  double mean = Stats.mean(data);
+	  double mean = new Mean(data).doubleValue();
 
 	  double lower = mean - ci;
 	  double upper = mean + ci;
@@ -263,52 +245,7 @@ import utility.Utils;
 	  return t;
 
   }
-  
-  /**
-   * Get the minimum Number in the list
-   * @param values
-   * @return
-   */
-  public static Number min(List<? extends Number> values){
-	  Number result = Double.MAX_VALUE; 
-	  for(Number n : values){
-		  if(n.doubleValue()<result.doubleValue()){
-			  result=n;
-		  }
-	  }
-	  return result;
-  }
-  
-//  /**
-//   * Get the minimum Number in the list
-//   * @param values
-//   * @return
-//   */
-//  public static Double min(List<Double> values){
-//	  Double result = Double.MAX_VALUE; 
-//	  for(Double n : values){
-//		  if(n<result){
-//			  result=n;
-//		  }
-//	  }
-//	  return result;
-//  }
-  
-  /**
-   * Get the maximum Number in the list
-   * @param values
-   * @return
-   */
-//  public static Number max(List<? extends Number> values){
-//
-//	  Number result = Double.MIN_VALUE; 
-//	  for(Number n : values){
-//		  if(n.doubleValue()>result.doubleValue()){
-//			  result=n;
-//		  }
-//	  }
-//	  return result;
-//  }
+
   
   public static Number quartile(List<Number> values, double lowerPercent) {
 	  
@@ -317,12 +254,6 @@ import utility.Utils;
 	  return result;
   }
   
-  public static Number mean(List<Number> values) {
-	  
-	  Number[] array = values.toArray(new Number[0]);
-	  Number result = mean(array);
-	  return result;
-  }
   
   public static Number sum(List<Number> values){
 	  double result = 0; 

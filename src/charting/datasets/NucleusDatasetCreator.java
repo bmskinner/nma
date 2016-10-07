@@ -63,8 +63,10 @@ import stats.DipTester;
 import stats.KruskalTester;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
+import utility.ArrayConverter;
 import utility.Constants;
 import utility.Utils;
+import utility.ArrayConverter.ArrayConversionException;
 import weka.estimators.KernelEstimator;
 
 public class NucleusDatasetCreator implements Loggable {
@@ -1816,10 +1818,30 @@ private static NucleusDatasetCreator instance = null;
 			
 		}
 		
-		double[][] trueData = { Utils.getdoubleFromDouble(trueXValues.toArray(new Double[0])), Utils.getdoubleFromDouble(trueYValues.toArray(new Double[0])) };
+		double[] xTrueData;
+		double[] yTrueData;
+		double[] xFalseData;
+		double[] yFalseData;
+		
+		try{
+			
+			xTrueData  = new ArrayConverter(trueXValues).toDoubleArray();
+			yTrueData  = new ArrayConverter(trueYValues).toDoubleArray();
+			xFalseData = new ArrayConverter(falseXValues).toDoubleArray();
+			yFalseData = new ArrayConverter(falseYValues).toDoubleArray();
+			
+		} catch (ArrayConversionException e) {
+			error("Error converting arrays", e);
+			xTrueData  = new double[0]; 
+			yTrueData  = new double[0];
+			xFalseData = new double[0]; 
+			yFalseData = new double[0]; 
+		}
+		double[][] trueData  = { xTrueData,  yTrueData };
+		double[][] falseData = { xFalseData, yFalseData};
+		
 		result.addSeries("True", trueData);
 		
-		double[][] falseData = { Utils.getdoubleFromDouble(falseXValues.toArray(new Double[0])), Utils.getdoubleFromDouble(falseYValues.toArray(new Double[0])) };
 		result.addSeries("False", falseData);
 		return result;
 	}

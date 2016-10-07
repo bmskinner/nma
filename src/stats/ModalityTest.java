@@ -25,6 +25,8 @@ import java.util.List;
 import components.generic.BooleanProfile;
 import components.generic.Profile;
 import stats.ModalityTest.BinnedData.Bin;
+import utility.ArrayConverter;
+import utility.ArrayConverter.ArrayConversionException;
 import utility.Utils;
 
 /**
@@ -116,7 +118,15 @@ public class ModalityTest {
 				result.add(d);
 			}
 		}
-		return Utils.getdoubleFromDouble(result.toArray(new Double[0]));
+		
+		double[] temp;
+		try {
+			temp = new ArrayConverter(result).toDoubleArray();
+		} catch (ArrayConversionException e) {
+			temp = new double[0]; 
+		}
+		
+		return temp;
 		
 	}
 	
@@ -215,7 +225,14 @@ public class ModalityTest {
 				result.add(b.value);
 			}
 			
-			return  Utils.getintFromInteger(  result.toArray(new Integer[0])  );
+			int[] temp;
+			try {
+				temp = new ArrayConverter(result).toIntArray();
+			} catch (ArrayConversionException e) {
+				temp = new int[0]; 
+			}
+			
+			return  temp;
 		}
 		
 		public List<Bin> getBins(){
@@ -223,10 +240,18 @@ public class ModalityTest {
 		}
 		
 		public double[] getLocalMaxima(){
-			Profile profile = new Profile(     Utils.getdoubleFromInt( this.toArray()   )  );
+			
+			double[] temp;
+			try {
+				temp = new ArrayConverter(this.toArray()).toDoubleArray();
+			} catch (ArrayConversionException e) {
+				temp = new double[0]; 
+			}
+			
+
+			
+			Profile profile = new Profile(  temp  );
 			BooleanProfile maxima = profile.smooth(3).smooth(3).getLocalMaxima(3);
-//			profile.smooth(3).smooth(3).print();
-//			maxima.print();
 			
 			List<Double> result = new ArrayList<Double>();
 			
@@ -236,7 +261,14 @@ public class ModalityTest {
 				}
 			}
 			
-			return Utils.getdoubleFromDouble(   result.toArray(new Double[0]  ) );
+			double[] temp2;
+			try {
+				temp2 = new ArrayConverter(result).toDoubleArray();
+			} catch (ArrayConversionException e) {
+				temp2 = new double[0]; 
+			}
+			
+			return temp2;
 		}
 		
 		

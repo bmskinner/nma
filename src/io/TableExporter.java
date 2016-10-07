@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import utility.ArrayConverter;
 import utility.Utils;
 
 // this will take columns of data, and write them out to a specified folder
@@ -64,7 +65,9 @@ public class TableExporter {
 		if(s==null || array==null){
 			throw new IllegalArgumentException("Column or array is null");
 		}
-		String[] values = Utils.getStringFromDouble(array);
+		
+		String[] values = new ArrayConverter(array).toStringArray();
+		
 		this.addColumn(s, values);
 	}
 	
@@ -72,7 +75,7 @@ public class TableExporter {
 		if(s==null || array==null){
 			throw new IllegalArgumentException("Column or array is null");
 		}
-		String[] values = Utils.getStringFromInteger(array);
+		String[] values = new ArrayConverter(array).toStringArray();
 		this.addColumn(s, values);
 	}
 	
@@ -80,7 +83,7 @@ public class TableExporter {
 		if(s==null || array==null){
 			throw new IllegalArgumentException("Column or array is null");
 		}
-		String[] values = Utils.getStringFromInt(array);
+		String[] values = new ArrayConverter(array).toStringArray();
 		this.addColumn(s, values);
 	}
 	

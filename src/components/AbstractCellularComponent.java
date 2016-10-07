@@ -50,8 +50,8 @@ import io.ImageExporter;
 import io.ImageImporter;
 import stats.PlottableStatistic;
 import stats.Stats;
+import utility.AngleTools;
 import utility.Constants;
-import utility.Utils;
 
 public abstract class AbstractCellularComponent 
 	implements CellularComponent,
@@ -866,11 +866,8 @@ public abstract class AbstractCellularComponent
 		int difference2 = this.getBorderLength() - difference1;
 
 		// get the midpoint
-		int mid1 = AbstractCellularComponent.wrapIndex( (int)Math.floor( (difference1/2)+minIndex ),
-				this.getBorderLength() );
-
-		int mid2 = AbstractCellularComponent.wrapIndex( (int)Math.floor( (difference2/2)+maxIndex ), 
-				this.getBorderLength() );
+		int mid1 = this.wrapIndex( (int)Math.floor( (difference1/2)+minIndex ) );
+		int mid2 = this.wrapIndex( (int)Math.floor( (difference2/2)+maxIndex ));
 
 		return difference1 < difference2 ? mid1 : mid2;
 	}
@@ -881,7 +878,10 @@ public abstract class AbstractCellularComponent
 		double minAngle = 180;
 
 		for(int i = 0; i<this.getBorderLength();i++){
-			double angle = Utils.findAngle(p, this.getCentreOfMass(), this.getBorderPoint(i));
+			
+			double angle = this.getCentreOfMass().findAngle(p, this.getBorderPoint(i));
+//			double angle = new AngleTools().findAngle(p, this.getCentreOfMass(), this.getBorderPoint(i));
+
 			if(Math.abs(180 - angle) < minAngle){
 				minDeltaYIndex = i;
 				minAngle = 180 - angle;
@@ -903,7 +903,7 @@ public abstract class AbstractCellularComponent
 		for(int i=0;i<this.getBorderLength();i++){
 
 			BorderPoint p = this.getBorderPoint(i);
-			double angle = Utils.findAngle(a, this.getCentreOfMass(), p); 
+			double angle = this.getCentreOfMass().findAngle(a, p); 
 			if(Math.abs(90-angle)< Math.abs(90-bestAngle)){
 				bestAngle = angle;
 				orthgonalPoint = p;
@@ -1073,7 +1073,7 @@ public abstract class AbstractCellularComponent
 		XYPoint currentBottom = new XYPoint(getCentreOfMass().getX(), getMinY());
 //		String state = "";
 		
-		double currentAngle = Utils.findAngle(currentBottom, getCentreOfMass(), bottomPoint);
+		double currentAngle = getCentreOfMass().findAngle(currentBottom, bottomPoint);
 //		log(this.getNameAndNumber()+": Initial angle - "+currentAngle);
 //		log(this.getNameAndNumber()+": Cur - "+currentBottom.toString());
 //		log(this.getNameAndNumber()+": CoM - "+getCentreOfMass().toString());
@@ -1153,8 +1153,7 @@ public abstract class AbstractCellularComponent
 		 *      V P
 		 * 
 		 */
-		double oldAngle = Utils.findAngle( p, 
-				this.getCentreOfMass(), 
+		double oldAngle = this.getCentreOfMass().findAngle( p,
 				new XYPoint(this.getCentreOfMass().getX(),-10));
 
 
@@ -1163,8 +1162,8 @@ public abstract class AbstractCellularComponent
 		}
 
 		double newAngle = oldAngle + angle;
-		double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
-		double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
+		double newX = new AngleTools().getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
+		double newY = new AngleTools().getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
 		return new XYPoint(newX, newY);
 	}
 	

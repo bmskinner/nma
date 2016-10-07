@@ -553,7 +553,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     for(int i=0;i<this.getBorderLength();i++){
 
       BorderPoint p = this.getBorderPoint(i);
-      double angle = Utils.findAngle(reference, this.getCentreOfMass(), p);
+      double angle = this.getCentreOfMass().findAngle(reference, p);
       if(  Math.abs(90-angle)<difference && 
           p.getLengthTo(this.getBorderTag(BorderTagObject.REFERENCE_POINT)) > this.getCentreOfMass().getLengthTo( this.getBorderTag(BorderTagObject.REFERENCE_POINT) ) ){
         difference = 90-angle;

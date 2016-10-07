@@ -22,37 +22,30 @@ package stats;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * This is an OO replacement for the static  Stats.max(list) method
- * @author bms41
- *
- */
 @SuppressWarnings("serial")
-public class Max extends DescriptiveStatistic {
-	
-	
+public class Min extends DescriptiveStatistic {
 	
 	/**
 	 * Calculate the maximum value of the two integers
 	 * @param list
 	 */
-	public Max(int a, int b){
-		value = a > b ? a : b;
+	public Min(int a, int b){
+		value = a < b ? a : b;
 	}
 	
 	/**
 	 * Calculate the maximum value of the two integers
 	 * @param list
 	 */
-	public Max(double a, double b){
-		value = a > b ? a : b;
+	public Min(double a, double b){
+		value = a < b ? a : b;
 	}
 	
 	/**
 	 * Calculate the maximum value of the two integers
 	 * @param list
 	 */
-	public Max(Number[] array){
+	public Min(Number[] array){
 		if(array == null || array.length==0){
 			throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
 		}
@@ -66,7 +59,7 @@ public class Max extends DescriptiveStatistic {
 	 * Calculate the maximum value in the given list
 	 * @param list
 	 */
-	public Max(List<? extends Number> list){
+	public Min(List<? extends Number> list){
 		if(list == null || list.isEmpty()){
 			throw new IllegalArgumentException(NULL_OR_EMPTY_LIST_ERROR);
 		}
@@ -95,9 +88,9 @@ public class Max extends DescriptiveStatistic {
 	}
 	
 	private Number compareDouble(List<? extends Number> list){
-		Number result = Double.MIN_VALUE; 
+		Number result = Double.MAX_VALUE; 
 		for(Number n : list){
-			if(n.doubleValue()>result.doubleValue()){
+			if(n.doubleValue()<result.doubleValue()){
 				result=n;
 			}
 		}
@@ -105,9 +98,9 @@ public class Max extends DescriptiveStatistic {
 	}
 
 	private Number compareFloat(List<? extends Number> list){
-		Number result = Float.MIN_VALUE; 
+		Number result = Float.MAX_VALUE; 
 		for(Number n : list){
-			if(n.floatValue()>result.floatValue()){
+			if(n.floatValue()<result.floatValue()){
 				result=n;
 			}
 		}
@@ -115,9 +108,9 @@ public class Max extends DescriptiveStatistic {
 	}
 	
 	private Number compareInt(List<? extends Number> list){
-		Number result = Integer.MIN_VALUE; 
+		Number result = Integer.MAX_VALUE; 
 		for(Number n : list){
-			if(n.intValue()>result.intValue()){
+			if(n.intValue()<result.intValue()){
 				result=n;
 			}
 		}
@@ -125,12 +118,13 @@ public class Max extends DescriptiveStatistic {
 	}
 	
 	private Number compareLong(List<? extends Number> list){
-		Number result = Long.MIN_VALUE; 
+		Number result = Long.MAX_VALUE; 
 		for(Number n : list){
-			if(n.longValue()>result.longValue()){
+			if(n.longValue()<result.longValue()){
 				result=n;
 			}
 		}
 		return result;
 	}
+
 }
