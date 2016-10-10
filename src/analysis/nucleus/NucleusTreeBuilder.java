@@ -158,7 +158,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		int attributeCount        = 0;
 		int profileAttributeCount = 0;
 		
-		if(options.isIncludeProfile()){ // An attribute for each angle in the median profile
+		if(options.isIncludeProfile()){ // An attribute for each angle in the median profile, spaced <windowSize> apart
 			log(Level.FINEST, "Including profile");
 			profileAttributeCount = collection.getProfileCollection(options.getProfileType()).getProfile(BorderTagObject.REFERENCE_POINT, 50).size();
 			profileAttributeCount /= windowSize;

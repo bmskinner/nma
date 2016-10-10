@@ -614,7 +614,7 @@ public class SignalCollection implements Serializable, Loggable {
 		File f = this.sourceFiles.get(signalGroup);
 		int channel = this.sourceChannels.get(signalGroup);
 		
-		return ImageImporter.getInstance().importImage(f, channel);
+		return new ImageImporter(f).importImage(channel);
 	}
 		
 	public String toString(){

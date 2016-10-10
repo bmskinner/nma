@@ -71,13 +71,13 @@ public class FishRemappingWorker extends ImageProberWorker {
 	
 	protected void analyseImages() throws Exception {
 
-			ImageStack stack = ImageImporter.getInstance().importImage(file);
+			ImageStack stack = new ImageImporter(file).importImage();
 
 			// Import the image as a stack
 			String imageName = file.getName();
 
 			finest("Converting image");
-			ImageProcessor openProcessor = new ImageConverter(stack).convertToGreyscale().getProcessor();
+			ImageProcessor openProcessor = new ImageConverter(stack).convertToGreyscale().toProcessor();
 			openProcessor.invert();
 			
 			IconCell iconCell = makeIconCell(openProcessor, FishMappingImageType.ORIGINAL_IMAGE);
@@ -91,9 +91,9 @@ public class FishRemappingWorker extends ImageProberWorker {
 				
 			} else {
 			
-				ImageStack fishStack = ImageImporter.getInstance().importImage(fishImageFile);
+				ImageStack fishStack = new ImageImporter(fishImageFile).importImage();
 
-				ImageProcessor fishProcessor = new ImageConverter(fishStack).convertToRGB().getProcessor();
+				ImageProcessor fishProcessor = new ImageConverter(fishStack).convertToRGB().toProcessor();
 
 				IconCell iconCell2 = makeIconCell(fishProcessor, FishMappingImageType.FISH_IMAGE);
 				publish(iconCell2);

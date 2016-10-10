@@ -96,7 +96,7 @@ public class SignalDetectionWorker extends AnalysisWorker {
 
 				try{
 					
-					ImageStack stack = ImageImporter.getInstance().importImage(imageFile);
+					ImageStack stack = new ImageImporter(imageFile).importImage();
 
 					List<NuclearSignal> signals = finder.detectSignal(imageFile, stack, n);
 					

@@ -83,8 +83,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 						List<NuclearSignal> signals = n.getSignalCollection().getSignals(signalGroup); 
 						
 						File imageFile = n.getSignalCollection().getSourceFile(signalGroup);
-//						ImageStack signalStack = ImageImporter.importImage(imageFile, (DebugFileHandler) getDataset().getLogHandler());
-						ImageStack signalStack = ImageImporter.getInstance().importImage(imageFile);
+						ImageStack signalStack = new ImageImporter(imageFile).importImage();
 						
 
 
@@ -166,7 +165,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 						
 
 						File imageFile = n.getSignalCollection().getSourceFile(group);
-						ImageStack signalStack = ImageImporter.getInstance().importImage(imageFile, (DebugFileHandler) dataset.getLogHandler());
+						ImageStack signalStack = new ImageImporter(imageFile).importImage();
 
 						ShellCounter counter = counters.get(group);
 

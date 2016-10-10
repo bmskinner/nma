@@ -27,7 +27,6 @@ import ij.process.ImageProcessor;
 import java.io.File;
 import java.util.logging.Level;
 
-import logging.DebugFileHandler;
 import logging.Loggable;
 import utility.Constants;
 
@@ -41,46 +40,20 @@ import utility.Constants;
  */
 public class ImageImporter implements Loggable {
 	
-	private static ImageImporter imp = null;
+	private File f = null;
 	
-	private ImageImporter(){}
-	
-	public static ImageImporter getInstance(){
-		if(imp==null){
-			imp = new ImageImporter();
-		}
-		return imp;
+	public ImageImporter(File f){
+		this.f = f;
 	}
 	
 	private static final int[] IMAGE_TYPES_PROCESSED = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
 	
-	
+
 	/**
 	 * Import and convert the image in the given file to an ImageStack
-	 * @param f the file to import
-	 * @param handler the debug file handler to write to
 	 * @return the ImageStack
 	 */
-	public ImageStack importImage(File f, DebugFileHandler handler){
-		
-		ImageStack stack = null;
-		try{
-			if(f.isFile()){
-				log(Level.FINE, "Importing image: "+f.getAbsolutePath());
-				ImagePlus image = new ImagePlus(f.getAbsolutePath());
-				stack = convert(image);
-			} else {
-				log(Level.FINE, "Not a file: "+f.getAbsolutePath());
-			}
-		} catch (Exception e){
-			log(Level.SEVERE, "Error importing image", e);
-		} finally {
-
-		}
-		return stack;
-	}
-
-	public ImageStack importImage(File f){
+	public ImageStack importImage(){
 
 		ImageStack stack = null;
 
@@ -109,12 +82,11 @@ public class ImageImporter implements Loggable {
 	 * Import the image in the given file, and return an image processor
 	 * for the channel requested. Inverts the greyscale image so white==no signal
 	 * and black==full signal
-	 * @param f
 	 * @param channel
 	 * @return
 	 */
-	public ImageProcessor importImage(File f, int channel){
-		ImageStack s = importImage(f);
+	public ImageProcessor importImage(int channel){
+		ImageStack s = importImage();
 		int stack = Constants.rgbToStack(channel);
 		ImageProcessor ip = s.getProcessor(stack);
 		ip.invert();
@@ -126,7 +98,7 @@ public class ImageImporter implements Loggable {
 	 * @param image the image to be converted to a stack
 	 * @return the stack with countertain in index 0
 	 */
-	public ImageStack convert(ImagePlus image) throws Exception {
+	private ImageStack convert(ImagePlus image) throws Exception {
 		if(image==null){
 			log(Level.WARNING, "Input image is null");
 

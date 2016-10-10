@@ -270,8 +270,8 @@ public abstract class AbstractCellularComponent
 			// Get the stack, make greyscale and invert
 			int stack = Constants.rgbToStack(getChannel());
 						
-			ImageStack imageStack = ImageImporter.getInstance().importImage(getSourceFile());
-			ip = new ImageConverter(imageStack).convertToGreyscale(stack).getProcessor();
+			ImageStack imageStack = new ImageImporter(getSourceFile()).importImage();
+			ip = new ImageConverter(imageStack).convertToGreyscale(stack).toProcessor();
 			ip.invert();	
 			
 			imageRef = new SoftReference<ImageProcessor>(ip);

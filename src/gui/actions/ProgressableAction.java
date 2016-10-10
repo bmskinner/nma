@@ -197,18 +197,15 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 	public void propertyChange(PropertyChangeEvent evt) {
 
 	    int value = 0;
-	    try{
-	    	Object newValue = evt.getNewValue();
-	    	
-	    	if(newValue.getClass().isAssignableFrom(Integer.class)){
-	    		value = (int) newValue;
-	    		
-	    	}
-	    	
-	    } catch (Exception e){
-	    	error("Error getting value from property change", e);
+
+	    Object newValue = evt.getNewValue();
+
+	    if(newValue instanceof Integer){
+	    	value = (int) newValue;
 	    }
-	    	    
+
+
+
 
 		finest("Property change event heard: "+value);
 		

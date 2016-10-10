@@ -211,7 +211,7 @@ public class NucleusDetector extends Detector {
 				int kernel = nucleusCannyOptions.getKuwaharaKernel();
 				ImageProcessor ip = new ImageFilterer(image)
 					.runKuwaharaFiltering( Constants.rgbToStack(options.getChannel())  , kernel)
-					.getProcessor();
+					.toProcessor();
 				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
 				finer("Run Kuwahara");
 			}
@@ -221,11 +221,11 @@ public class NucleusDetector extends Detector {
 				int threshold = nucleusCannyOptions.getFlattenThreshold();
 				ImageProcessor ip = new ImageFilterer(image)
 					.squashChromocentres( Constants.rgbToStack(options.getChannel()), threshold)
-					.getProcessor();
+					.toProcessor();
 				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
 				finer("Run flattening");
 			}
-			searchStack = new ImageFilterer(image).runEdgeDetector(Constants.rgbToStack(options.getChannel()), nucleusCannyOptions).getStack();
+			searchStack = new ImageFilterer(image).runEdgeDetector(Constants.rgbToStack(options.getChannel()), nucleusCannyOptions).toStack();
 			finer("Run edge detection");
 		} else {
 			searchStack = image;

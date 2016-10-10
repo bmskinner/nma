@@ -35,6 +35,7 @@ import javax.swing.table.TableModel;
 
 import utility.Constants;
 import analysis.AnalysisOptions;
+import analysis.image.ImageFilterer;
 import logging.Loggable;
 
 /**
@@ -114,53 +115,16 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, IconCell> i
         }
     }
 	
-	/**
-	 * Create a copy of the given processor, and scale it fit the maximum
-	 * dimensions specified by setSmallIconSize(). The aspect ratio is preserved.
-	 * @param ip
-	 * @return
-	 */
-	protected ImageProcessor scaleImage(ImageProcessor ip){
-		
-//		log("Scaling image");
-		double aspect =  (double) ip.getWidth() / (double) ip.getHeight();
-		
-		double finalWidth = smallDimension.getHeight() * aspect; // fix height
-		finalWidth = finalWidth > smallDimension.getWidth() 
-				   ? smallDimension.getWidth() 
-				   : finalWidth; // but constrain width too
-		
-		ImageProcessor result = ip.duplicate().resize( (int) finalWidth); 
-//		log("Max size is "+smallDimension.toString());
-//		log("Scaled image to "+finalWidth+" x "+result.getHeight());
-//		
-//		ImagePlus imp = new ImagePlus("", result);
-//		imp.show();
-		return result;
-	}
-	
-	/**
-	 * Create a copy of the given processor, and scale it fit the maximum
-	 * dimensions specified by setSmallIconSize(). The aspect ratio is preserved.
-	 * @param ip
-	 * @return
-	 */
-	protected Image scaleImage(ImageIcon ic){
-				
-		double aspect =  (double) ic.getIconWidth() / (double) ic.getIconHeight();
-		
-		double finalWidth = smallDimension.getHeight() * aspect; // fix height
-		finalWidth = finalWidth > smallDimension.getWidth() 
-				   ? smallDimension.getWidth() 
-				   : finalWidth; // but constrain width too
-				   
-		return ic.getImage().getScaledInstance( (int) finalWidth, -1, Image.SCALE_SMOOTH);
-	}
-	
 	protected IconCell makeIconCell(ImageProcessor ip, ImageType type){
-		ImageIcon ic = new ImageIcon(ip.getBufferedImage());
+		
+		ImageFilterer filt = new ImageFilterer(ip);
+		ImageIcon ic = filt.toImageIcon();
 		IconCell iconCell = new IconCell(ic, type);
-		iconCell.setSmallIcon( new ImageIcon(scaleImage(ic)) );
+		
+		ImageIcon small = filt.resize( (int) smallDimension.getWidth(), (int) smallDimension.getHeight())
+				.toImageIcon();
+						
+		iconCell.setSmallIcon(small );
 		return iconCell;
 	}
 	

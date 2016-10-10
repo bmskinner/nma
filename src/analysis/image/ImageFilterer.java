@@ -197,6 +197,33 @@ public class ImageFilterer extends AbstractImageFilterer {
 	}
 	
 	/**
+	 * Resize the image to fit the given dimensions, preserving aspect ratio
+	 * @param newWidth the new width of the image
+	 * @return
+	 */
+	public ImageFilterer resize(int maxWidth, int maxHeight){
+		
+		if(ip==null){
+			throw new IllegalArgumentException("Image processor is null");
+		}
+		
+		int originalWidth  = ip.getWidth();
+		int originalHeight = ip.getHeight();
+
+		// keep the image aspect ratio
+		double ratio = (double) originalWidth / (double) originalHeight;
+		
+		double finalWidth = maxHeight * ratio; // fix height
+		finalWidth = finalWidth > maxWidth
+				   ? maxWidth 
+				   : finalWidth; // but constrain width too
+		
+		ImageProcessor result = ip.duplicate().resize( (int) finalWidth); 
+
+		return new ImageFilterer(result);
+	}
+	
+	/**
 	 * Resize the image to fit on the screen. By default the width will be 80%, 
 	 * unless this causes the height to become too great. In this case the height will
 	 * be set to 80%.
@@ -420,7 +447,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 //		ByteProcessor closed = (ByteProcessor) morphologyClose( options.getClosingObjectRadius()).getProcessor() ;
 				
 		int closingRadius = options.getClosingObjectRadius();
-		ImageProcessor closed = runEdgeDetector( options).morphologyClose(closingRadius).getProcessor();
+		ImageProcessor closed = runEdgeDetector( options).morphologyClose(closingRadius).toProcessor();
 		
 		searchStack = ImageStack.create(st.getWidth(), st.getHeight(), 0, 8);
 		searchStack.addSlice("closed", closed, 0);

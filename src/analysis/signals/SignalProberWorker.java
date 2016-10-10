@@ -68,7 +68,7 @@ public class SignalProberWorker extends ImageProberWorker {
 		finer("Importing image "+file.getAbsolutePath());
 		
 		// Import the image as a stack
-		ImageStack stack = ImageImporter.getInstance().importImage(file);
+		ImageStack stack = new ImageImporter(file).importImage();
 
 		// Find the processor number in the stack to use
 		int stackNumber = Constants.rgbToStack(channel);
@@ -78,7 +78,7 @@ public class SignalProberWorker extends ImageProberWorker {
 		ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
 		
 		// Convert to an RGB processor for annotation
-		ImageProcessor openProcessor = new ImageConverter(greyProcessor).convertToGreyscale().getProcessor();
+		ImageProcessor openProcessor = new ImageConverter(greyProcessor).convertToGreyscale().toProcessor();
 		
 		String imageName = file.getName();
 

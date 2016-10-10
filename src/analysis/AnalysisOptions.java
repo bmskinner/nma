@@ -28,7 +28,9 @@ import java.util.UUID;
 
 import analysis.signals.NuclearSignalOptions;
 import logging.Loggable;
+import stats.NucleusStatistic;
 import components.nuclear.NucleusType;
+import components.nuclei.Nucleus;
 
 public class AnalysisOptions implements Serializable, Loggable {
 
@@ -379,6 +381,31 @@ public class AnalysisOptions implements Serializable, Loggable {
 		this.keepFailedCollections = keepFailedCollections;
 	}
 
+	public boolean isValid(Nucleus c){
+		boolean result = true;
+		
+		if(c.getStatistic(NucleusStatistic.AREA) < getMinNucleusSize()){
+			
+			result = false;
+		}
+		
+		if(c.getStatistic(NucleusStatistic.AREA) > getMaxNucleusSize()){
+			
+			result = false;
+		}
+		
+		if(c.getStatistic(NucleusStatistic.CIRCULARITY) < getMinNucleusCirc()){
+			
+			result = false;
+		}
+		
+		if(c.getStatistic(NucleusStatistic.CIRCULARITY) > getMaxNucleusCirc()){
+			
+			result = false;
+		}
+		
+		return result;
+	}
 
 
 	

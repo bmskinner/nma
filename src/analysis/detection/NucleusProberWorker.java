@@ -42,6 +42,7 @@ import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.image.ImageConverter;
 import analysis.image.ImageFilterer;
+import analysis.image.NucleusAnnotator;
 import analysis.nucleus.NucleusDetector;
 
 public class NucleusProberWorker extends ImageProberWorker {
@@ -53,7 +54,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 	
 	
 	protected void analyseImages() throws Exception {
-		ImageStack imageStack = ImageImporter.getInstance().importImage(file);
+		ImageStack imageStack =  new ImageImporter(file).importImage();
 		finer("Imported image as stack");
 		
 		/*
@@ -73,8 +74,8 @@ public class NucleusProberWorker extends ImageProberWorker {
 		ImageProcessor openProcessor = new ImageConverter(imageStack)
 			.convertToGreyscale()
 			.invert()
-			.getProcessor();
-//		openProcessor.invert();
+			.toProcessor();
+
 					
 		if( cannyOptions.isUseCanny()) { //TODO: Turning off Canny causes error
 			
@@ -89,7 +90,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 				finer("Applying Kuwahara filter");
 				kuwaharaProcessor = new ImageFilterer(processedImage)
 					.runKuwaharaFiltering( cannyOptions.getKuwaharaKernel())
-					.getProcessor();
+					.toProcessor();
 				processedImage = kuwaharaProcessor.duplicate(); 
 				
 			}
@@ -108,7 +109,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 				finer("Applying flattening filter");
 				flattenProcessor =  new ImageFilterer(processedImage)
 					.squashChromocentres( cannyOptions.getFlattenThreshold())
-					.getProcessor();
+					.toProcessor();
 				
 				processedImage = flattenProcessor.duplicate();
 			} 
@@ -122,7 +123,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			// Run the edge detection
 			
 			finer("Detecting edges");
-			processedImage = new ImageFilterer(processedImage).runEdgeDetector( cannyOptions).getProcessor();
+			processedImage = new ImageFilterer(processedImage).runEdgeDetector( cannyOptions).toProcessor();
 			ImageProcessor invertedEdges = processedImage.duplicate(); // make a copy for display only
 			invertedEdges.invert();
 			
@@ -132,7 +133,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 
 			// Run morhological closing
 			
-			processedImage = new ImageFilterer(processedImage).morphologyClose(cannyOptions.getClosingObjectRadius()).getProcessor();
+			processedImage = new ImageFilterer(processedImage).morphologyClose(cannyOptions.getClosingObjectRadius()).toProcessor();
 			ImageProcessor closedIP = processedImage.duplicate(); // make a copy for display only
 			closedIP.invert();
 			IconCell iconCell3 = makeIconCell(closedIP, NucleusImageType.MORPHOLOGY_CLOSED);
@@ -225,51 +226,9 @@ public class NucleusProberWorker extends ImageProberWorker {
 		Nucleus n = cell.getNucleus();
 		// annotate the image processor with the nucleus outline
 		
-		if(checkNucleus(n)){
-			ip.setColor(Color.ORANGE);
-		} else {
-			ip.setColor(Color.RED);
-		}
-		
-		
-		double[] positions = n.getPosition();
-		FloatPolygon polygon = n.createPolygon();
-		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-		roi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
-		ip.setLineWidth(2);
-		ip.draw(roi);
-	}
-	
-	/**
-	 * Check the given nucleus size and circ parameters against options
-	 * @param n the nucleus to check
-	 * @return boolean ok
-	 * @throws Exception 
-	 */
-	private boolean checkNucleus(Nucleus n) throws Exception{
-		boolean result = true;
-		
-		if(n.getStatistic(NucleusStatistic.AREA) < options.getMinNucleusSize()){
-			
-			result = false;
-		}
-		
-		if(n.getStatistic(NucleusStatistic.AREA) > options.getMaxNucleusSize()){
-			
-			result = false;
-		}
-		
-		if(n.getStatistic(NucleusStatistic.CIRCULARITY) < options.getMinNucleusCirc()){
-			
-			result = false;
-		}
-		
-		if(n.getStatistic(NucleusStatistic.CIRCULARITY) > options.getMaxNucleusCirc()){
-			
-			result = false;
-		}
-		
-		return result;
-	}
-	
+		Color colour = options.isValid(n) ? Color.ORANGE : Color.RED;
+
+		ip = new NucleusAnnotator(ip).annotateBorder(n, colour).toProcessor();
+
+	}	
 }

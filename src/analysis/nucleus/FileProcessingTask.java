@@ -84,7 +84,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 		  if(ok){
 			  try {
 
-				  ImageStack imageStack = ImageImporter.getInstance().importImage(file);
+				  ImageStack imageStack = new ImageImporter(file).importImage();
 
 				  // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
 				  makeFolder(folder);

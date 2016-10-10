@@ -80,7 +80,7 @@ public class TailDetector extends Detector {
 		// import image with tubulin in  channel
 		ImageStack stack = null;
 		try{
-			stack = ImageImporter.getInstance().importImage(tubulinFile);
+			stack = new ImageImporter(tubulinFile).importImage();
 		} catch (Exception e){
 			
 			log(Level.SEVERE, "Error importing image as stack", e);
@@ -95,7 +95,7 @@ public class TailDetector extends Detector {
 		if( checkDimensions(stack, n)){
 			
 			// edge / threshold to find tubulin stain
-			ImageStack edges = new ImageFilterer(stack).runEdgeDetector(stackNumber, options).getStack();
+			ImageStack edges = new ImageFilterer(stack).runEdgeDetector(stackNumber, options).toStack();
 			
 			// get objects found by edge detector
 			List<Roi> borderRois = getROIs(edges, Detector.CLOSED_OBJECTS, 1);
@@ -165,7 +165,7 @@ public class TailDetector extends Detector {
 		
 		AnalysisOptions options = new AnalysisOptions(); 
 		options.getCannyOptions("tail").setClosingObjectRadius(5);
-		ByteProcessor byteProcessor = (ByteProcessor) new ImageFilterer(bp).morphologyClose(  5).getProcessor();
+		ByteProcessor byteProcessor = (ByteProcessor) new ImageFilterer(bp).morphologyClose(  5).toProcessor();
 //		morphologyClose(binaryProcessor, options.getCannyOptions("tail"));
 		BinaryProcessor binaryP = new BinaryProcessor((ByteProcessor) byteProcessor);
 		
@@ -721,7 +721,7 @@ public class TailDetector extends Detector {
 		
 		File baseFile = n.getSourceFile();
 		log(Level.FINE, "Nucleus in "+baseFile.getAbsolutePath());
-		ImageStack baseStack = ImageImporter.getInstance().importImage(baseFile);
+		ImageStack baseStack =  new ImageImporter(baseFile).importImage();
 		
 		boolean ok = true;
 		if(stack.getHeight() != baseStack.getHeight()){

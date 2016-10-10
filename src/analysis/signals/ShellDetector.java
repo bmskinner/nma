@@ -79,7 +79,7 @@ public class ShellDetector extends Detector {
 		this.shellCount = shellCount;
 
 		nucleusRoi = new PolygonRoi(n.createOriginalPolygon(), Roi.POLYGON);
-		this.nucleusStack = ImageImporter.getInstance().importImage(n.getSourceFile());
+		this.nucleusStack = new ImageImporter(n.getSourceFile()).importImage();
 
 	}
 

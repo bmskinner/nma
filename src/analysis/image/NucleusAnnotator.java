@@ -98,10 +98,17 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 		return annotatePoint(n.getCentreOfMass(), Color.MAGENTA);
 	}
 	
-	public NucleusAnnotator annotateBorder(CellularComponent n){
-		FloatPolygon p = n.createPolygon();
+	/**
+	 * Draw the outline of the component in the given colour
+	 * @param n the component
+	 * @param c the colour
+	 * @return
+	 */
+	public NucleusAnnotator annotateBorder(CellularComponent n, Color c){
+		FloatPolygon p = n.createOriginalPolygon();
 		PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
-		return annotatePolygon(roi, Color.MAGENTA);
+		
+		return annotatePolygon(roi, c);
 	}
 	
 

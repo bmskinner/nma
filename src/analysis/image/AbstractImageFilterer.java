@@ -20,6 +20,10 @@
 package analysis.image;
 
 import logging.Loggable;
+
+import javax.swing.ImageIcon;
+
+import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 
@@ -32,16 +36,31 @@ public abstract class AbstractImageFilterer implements Loggable {
 		this.ip = ip;
 	}
 	
+	public AbstractImageFilterer(ImagePlus img){
+		this.ip = img.getProcessor();
+	}
+	
 	public AbstractImageFilterer(ImageStack st){
 		this.st = st;
 	}
 	
-	public ImageProcessor getProcessor(){
+	public AbstractImageFilterer(AbstractImageFilterer f){
+		this.ip = f.ip;
+		this.st = f.st;
+	}
+	
+	public ImageProcessor toProcessor(){
 		return ip;
 	}
 	
-	public ImageStack getStack(){
+	public ImageStack toStack(){
 		return st;
 	}
+	
+	public ImageIcon toImageIcon(){
+		return new ImageIcon( ip.getBufferedImage() );
+	}
+	
+	
 	
 }
