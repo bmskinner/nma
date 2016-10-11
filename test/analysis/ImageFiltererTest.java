@@ -189,7 +189,7 @@ public class ImageFiltererTest {
 		printPixelArray(kernel);
 		
 		System.out.println("\nBridged image:");
-		ByteProcessor bridged = (ByteProcessor) new ImageFilterer(bp).bridgePixelGaps(3).getProcessor();
+		ByteProcessor bridged = (ByteProcessor) new ImageFilterer(bp).bridgePixelGaps(3).toProcessor();
 		printPixelArray(bridged);
 
 		

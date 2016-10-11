@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import analysis.image.ImageConverter;
 import logging.Loggable;
@@ -549,32 +550,53 @@ public abstract class AbstractCellularComponent
 	}
 	
 	/**
+	 * Check if a given point lies within the nucleus
+	 * @param p
+	 * @return
+	 */
+	public boolean containsPoint(int x, int y){
+//		
+//		// Fast check - is the point within the bounding rectangle?
+//		if( ! this.getBounds().contains(x, y)){
+//			return false;			
+//		} 
+//		
+		// Check detailed position
+		
+		return this.toShape().contains(x, y);
+
+		
+	}
+	
+	/**
 	 * Check if a given point in the original source image lies within the nucleus
 	 * @param p
 	 * @return
 	 */
 	public boolean containsOriginalPoint(XYPoint p){
-		
-		// Fast check - is the point within the bounding rectangle moved to the original position?
-		Rectangle2D r = new Rectangle2D.Double(position[X_BASE], position[Y_BASE], position[WIDTH], position[HEIGHT]);
-		
-		if( ! r.contains(p.asPoint())){
-			return false;			
-		} 
-		
+
 		// Check detailed position
-		if(this.createOriginalPolygon().contains( (float)p.getX(), (float)p.getY() ) ){
-			return true;
-		} else { 
-			return false;
-		}
-
-
-
-
+		return this.createOriginalPolygon().contains( (float)p.getX(), (float)p.getY() );
 	}
 	
-	
+	/**
+	 * Check if a given point lies within the nucleus
+	 * @param p
+	 * @return
+	 */
+	public boolean containsOriginalPoint(int x, int y){
+		
+		// Fast check - is the point within the bounding rectangle moved to the original position?
+				Rectangle2D r = new Rectangle2D.Double(position[X_BASE], position[Y_BASE], position[WIDTH], position[HEIGHT]);
+				
+				if( ! r.contains(x, y)){
+					return false;			
+				} 
+		
+		// Check detailed position
+		
+		return this.toOriginalShape().contains(x, y);		
+	}
 		
 	/*
 	 * 
@@ -725,6 +747,51 @@ public abstract class AbstractCellularComponent
 		double yOffset = position[CellularComponent.Y_BASE];
 
 		return toOffsetShape(xOffset, yOffset);
+	}
+	
+	public List<XYPoint> getPixelsAsPoints(){
+		
+		Rectangle roiBounds = this.getBounds();
+		
+		
+		// Get a list of all the points within the ROI
+		List<XYPoint> result = new ArrayList<XYPoint>(0);
+		
+		// get the bounding box of the roi
+		// make a list of all the pixels in the roi
+		int minX = (int) roiBounds.getX();
+		int maxX = minX + (int) roiBounds.getWidth();
+		
+		int minY = (int) roiBounds.getY();
+		int maxY = minY + (int) roiBounds.getHeight();
+		
+		
+//		IJ.log("    X base: "+minX
+//				+"  Y base: "+minY
+//				+"  X max: "+maxX
+//				+"  Y max: "+maxY);
+		
+		for(int x=minX; x<=maxX; x++){
+			for(int y=minY; y<=maxY; y++){
+				
+				if(this.containsPoint(x, y)){
+//					IJ.log(x+", "+y);
+					result.add(new XYPoint(x, y));
+				}
+			}
+		}
+		
+		if(result.isEmpty()){
+//			IJ.log("    Roi has no pixels");
+			log(Level.SEVERE, "No points found in roi");
+			log(Level.FINE, "X base: "+minX
+					+"  Y base: "+minY
+					+"  X max: "+maxX
+					+"  Y max: "+maxY);
+		} else {
+//			IJ.log("    Roi of area "+result.size());
+		}
+		return result;
 	}
 	
 	private Shape toOffsetShape(double xOffset, double yOffset){

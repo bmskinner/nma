@@ -52,6 +52,7 @@ import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import analysis.nucleus.CurveRefolder;
 import analysis.signals.NuclearSignalOptions;
+import analysis.signals.ShellRandomDistributionCreator;
 import components.CellCollection;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
@@ -885,7 +886,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 				
-				if(collection.getSignalManager().hasSignals(signalGroup)){
+				if(collection.getSignalManager().hasSignals(signalGroup)  || signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
 					
 					if(collection.getSignalGroup(signalGroup).hasShellResult()){
 						ShellResult r = collection.getSignalGroup(signalGroup).getShellResult();

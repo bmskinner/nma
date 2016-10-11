@@ -39,7 +39,7 @@ import org.apache.commons.math3.stat.inference.ChiSquareTest;
 public class ShellCounter implements Loggable {
 	
 	int numberOfShells;
-	Map<Integer, ArrayList<Double>> shellValues = new LinkedHashMap<Integer, ArrayList<Double>>(0); // store the values
+	Map<Integer, List<Double>> shellValues = new LinkedHashMap<Integer, List<Double>>(0); // store the values
 		
 	public ShellCounter(int numberOfShells){
 		
@@ -75,7 +75,7 @@ public class ShellCounter implements Loggable {
 		}
 	}
 	
-	public List<Double> getMeans() throws Exception{
+	public List<Double> getMeans() {
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<numberOfShells;i++){
 			double[] values = getShell(i);
@@ -85,7 +85,7 @@ public class ShellCounter implements Loggable {
 		return result;
 	}
 	
-	public List<Double> getStandardErrors() throws Exception{
+	public List<Double> getStandardErrors() {
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<numberOfShells;i++){
 			result.add(Stats.stderr(getShell(i)));
@@ -93,61 +93,61 @@ public class ShellCounter implements Loggable {
 		return result;
 	}
 	
-	public void export(File f){
-		
-		if(this.size()==0){ // don't make empty log files
-			return;
-		}
-		
-//		IJ.log("    Counter Size: "+this.size());
-		if(f.exists()){
-			f.delete();
-		}
-		NumberFormat formatter = new DecimalFormat("#0.000");     
-		StringBuilder log = new StringBuilder();
-		
-		// export the mean and SE for each shell
-	    try{
-	    	log.append("--------\r\nMEAN\r\n--------\r\n");
-		    List<Double> means = getMeans();
-		    for(Double d : means){
-		    	log.append(formatter.format(d)+"\t");
-		    }
-		    log.append("\r\n");
-		    log.append("--------\r\nSTANDARD ERROR OF THE MEAN\r\n--------\r\n");
-		    List<Double> se = getStandardErrors();
-		    for(Double d : se){
-		    	log.append(formatter.format(d)+"\t");
-		    }
-		    log.append("\r\n");
-	    } catch(Exception e){
-	    	IJ.log("Error exporting stats: "+e.getMessage());
-	    }
-	    
-	    // export chi square stats
-//	    log.append("--------\r\nCHI SQUARE\r\n--------\r\n");
-//	    log.append("Signals   :\t"+this.size()+"\r\n");
-//	    log.append("Chi square:\t"+getChiSquare()+"\r\n");
-//	    log.append("p-value   :\t"+getPValue()+"\r\n");
-	    
-	    
-	    log.append("--------\r\nOUTER <- SHELLS -> INNER\r\n--------\r\n");
-	    // Export the individual values
-	    for(int i=0; i<5; i++){
-	      log.append("SHELL_"+i+"\t");
-	    }
-
-	    log.append("\r\n");
-	    for(int i = 0; i< shellValues.get(0).size();i++){ // go through each signal
-	    	for(int j = 0; j<numberOfShells; j++){ // each shell for signal
-	    		List<Double> list = shellValues.get(j);
-	    		log.append(formatter.format(list.get(i))+"\t");
-	    	}
-	    	log.append("\r\n");
-	    }
-
-	    IJ.append(log.toString(), f.getAbsolutePath());
-	}
+//	public void export(File f){
+//		
+//		if(this.size()==0){ // don't make empty log files
+//			return;
+//		}
+//		
+////		IJ.log("    Counter Size: "+this.size());
+//		if(f.exists()){
+//			f.delete();
+//		}
+//		NumberFormat formatter = new DecimalFormat("#0.000");     
+//		StringBuilder log = new StringBuilder();
+//		
+//		// export the mean and SE for each shell
+//	    try{
+//	    	log.append("--------\r\nMEAN\r\n--------\r\n");
+//		    List<Double> means = getMeans();
+//		    for(Double d : means){
+//		    	log.append(formatter.format(d)+"\t");
+//		    }
+//		    log.append("\r\n");
+//		    log.append("--------\r\nSTANDARD ERROR OF THE MEAN\r\n--------\r\n");
+//		    List<Double> se = getStandardErrors();
+//		    for(Double d : se){
+//		    	log.append(formatter.format(d)+"\t");
+//		    }
+//		    log.append("\r\n");
+//	    } catch(Exception e){
+//	    	IJ.log("Error exporting stats: "+e.getMessage());
+//	    }
+//	    
+//	    // export chi square stats
+////	    log.append("--------\r\nCHI SQUARE\r\n--------\r\n");
+////	    log.append("Signals   :\t"+this.size()+"\r\n");
+////	    log.append("Chi square:\t"+getChiSquare()+"\r\n");
+////	    log.append("p-value   :\t"+getPValue()+"\r\n");
+//	    
+//	    
+//	    log.append("--------\r\nOUTER <- SHELLS -> INNER\r\n--------\r\n");
+//	    // Export the individual values
+//	    for(int i=0; i<5; i++){
+//	      log.append("SHELL_"+i+"\t");
+//	    }
+//
+//	    log.append("\r\n");
+//	    for(int i = 0; i< shellValues.get(0).size();i++){ // go through each signal
+//	    	for(int j = 0; j<numberOfShells; j++){ // each shell for signal
+//	    		List<Double> list = shellValues.get(j);
+//	    		log.append(formatter.format(list.get(i))+"\t");
+//	    	}
+//	    	log.append("\r\n");
+//	    }
+//
+//	    IJ.append(log.toString(), f.getAbsolutePath());
+//	}
 		
 	public double getPValue(){
 		double pvalue = 1;

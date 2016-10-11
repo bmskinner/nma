@@ -18,6 +18,8 @@
  *******************************************************************************/
 package components.nuclei;
 
+import ij.process.FloatPolygon;
+
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -62,16 +64,17 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 
 	}
 	
+	@Override
+	public FloatPolygon createOriginalPolygon(){
+		return this.createPolygon();
+	}
+	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-//		finest("\tReading consensus nucleus");
 		in.defaultReadObject();
-//		finest("\tRead consensus nucleus");
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-//		finest("\tWriting consensus nucleus");
 		out.defaultWriteObject();
-//		finest("\tWrote consensus nucleus");
 	}
 
 	@Override

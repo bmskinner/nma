@@ -19,11 +19,7 @@
 package components;
 
 import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-
-import java.awt.Rectangle;
 import java.awt.Shape;
-import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,33 +35,8 @@ import stats.PlottableStatistic;
  * @author bms41
  *
  */
-public interface CellularComponent {
-		
-	
-	/**
-	 * The array index of the left-most x coordinate of the object
-	 * in {@link #setPosition(double[])} and {@link #getPosition(double[])}
-	 */
-	public static final int X_BASE 	= 0;
-	
-	/**
-	 * The array index of the top-most (lowest) y coordinate of the object
-	 * in {@link #setPosition(double[])} and {@link #getPosition(double[])}
-	 */
-	public static final int Y_BASE 	= 1;
-	
-	/**
-	 * The array index of the width of the object
-	 * in {@link #setPosition(double[])} and {@link #getPosition(double[])}
-	 */
-	public static final int WIDTH 	= 2;
-	
-	/**
-	 * The array index of the height of the object
-	 * in {@link #setPosition(double[])} and {@link #getPosition(double[])}
-	 */
-	public static final int HEIGHT 	= 3;
-	
+public interface CellularComponent extends Imageable {
+			
 	/**
 	 * Get the UUID of the object
 	 * @return
@@ -87,18 +58,7 @@ public interface CellularComponent {
 	 * by default
 	 */
 	public static final String IMAGE_PREFIX = "export.";
-	
-	/**
-	 * Get the position of the object in the 
-	 * original image. The indexes in the array are
-	 * {@link #X_BASE} of the bounding box,
-	 * {@link #Y_BASE} of the bounding box,
-	 * {@link #WIDTH} of the bounding box and
-	 * {@link #HEIGHT} of the bounding box
-	 * @return the array with the position 
-	 */
-	public double[] getPosition();
-	
+		
 		
 	/**
 	 * An equality check that relies solely on the component
@@ -115,44 +75,7 @@ public interface CellularComponent {
 	 */
 	public CellularComponent duplicate();
 	
-	/**
-	 * Get the image file the component was found in
-	 * @return
-	 */
-	public File getSourceFile();
 	
-	/**
-	 * Set the image file the component was found in
-	 * @param sourceFile
-	 */
-	public void setSourceFile(File sourceFile);
-		
-	/**
-	 * Get the RGB channel the object was detected in
-	 * @return
-	 */
-	public int getChannel();
-	
-	/**
-	 * Get the image from which the component was detected. Opens
-	 * the image via the ImageImporter, fetches the appropriate
-	 * channel and inverts it
-	 * @return
-	 */
-	public ImageProcessor getImage();
-	
-	/**
-	 * Get the image from which the component was detected, and crops
-	 * it to only the region containing the component
-	 * @return
-	 */
-	public ImageProcessor getComponentImage();
-
-	/**
-	 * Set the RGB channel the component was detected in
-	 * @param channel
-	 */
-	public void setChannel(int channel);
 	
 	/**
 	 * Get the value of the given statistic for this nucleus.
@@ -198,54 +121,7 @@ public interface CellularComponent {
 	 */
 	public PlottableStatistic[] getStatistics();
 	
-	
-	/**
-	 * Get the bounding rectangle for the object.
-	 * @return
-	 */
-	public Rectangle getBounds();
-	
-	/**
-	 * Get the folder of the image the component was found in.
-	 *  e.g. C:\Folder\ImageFolder\1.tiff
-	 * will return ImageFolder
-	 * @return
-	 */
-	public File getSourceFolder();
 
-	/**
-	 * Get the name of the image the component was found in
-	 * @return
-	 */
-	public String getSourceFileName();
-	
-	/**
-	 * Set the position of the component in the original
-	 * image.
-	 * @param d the array of positions
-	 * @see CellularComponent#getPosition()
-	 */
-	public void setPosition(double[] position);
-
-
-	/**
-	 * Set the bounding rectangle for this object
-	 * @param boundingRectangle
-	 */
-	public void setBoundingRectangle(Rectangle boundingRectangle);
-
-
-	/**
-	 * Set the name of the image file this object was found in
-	 * @param name
-	 */
-	public void setSourceFileName(String name);
-	
-	/**
-	 * Set the folder the source image file belongs to
-	 * @param sourceFolder
-	 */
-	public void setSourceFolder(File sourceFolder);
 	
 	/**
 	 * Get the number of pixels per micron in the source image
@@ -348,6 +224,13 @@ public interface CellularComponent {
 	public boolean containsPoint(XYPoint p);
 	
 	/**
+	 * Test if the given point is within the offset nucleus
+	 * @param p
+	 * @return
+	 */
+	public boolean containsPoint(int x, int y);
+	
+	/**
 	 * Test if the given point is within the object. This uses
 	 * the original coordinates of the object within its source
 	 * image
@@ -440,6 +323,8 @@ public interface CellularComponent {
 	 * @return
 	 */
 	public FloatPolygon createPolygon();
+	
+
 	
 	/**
 	 * Create a boolean mask, in which 1 is within the nucleus and 0 is outside

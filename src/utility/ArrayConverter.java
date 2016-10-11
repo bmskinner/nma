@@ -223,6 +223,19 @@ public class ArrayConverter {
 			throw new ArrayConversionException("Data is not a number");
 		}
 	}
+	
+	public List<Double> toDoubleList() throws ArrayConversionException{
+		
+		List<Double> result = new ArrayList<Double>();
+		
+		Double[] arr = this.toDoubleObjectArray();
+		
+		for(Double d : arr){
+			result.add(d);
+		}
+		return result;
+		
+	}
 
 
 
