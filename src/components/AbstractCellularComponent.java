@@ -50,6 +50,7 @@ import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import io.ImageImporter;
 import stats.PlottableStatistic;
+import stats.Quartile;
 import stats.Stats;
 import utility.AngleTools;
 import utility.Constants;
@@ -666,7 +667,7 @@ public abstract class AbstractCellularComponent
 			BorderPoint next = this.getBorderPoint( wrapIndex(i+1, this.borderList.size()));
 			distances[i] = p.getLengthTo(next);
 		}
-		return Stats.quartile(distances, Constants.MEDIAN);
+		return new Quartile(distances, Quartile.MEDIAN).doubleValue();
 	}
 	
 	

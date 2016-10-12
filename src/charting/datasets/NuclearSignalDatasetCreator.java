@@ -876,14 +876,27 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 		for(AnalysisDataset dataset : options.getDatasets()){
 			
-			DefaultStatisticalCategoryDataset ds = new DefaultStatisticalCategoryDataset();
+			ShellResultDataset ds = new ShellResultDataset();
 			
 			CellCollection collection = dataset.getCollection();
 
 			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 				
 				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-            		continue;
+					if(collection.getSignalGroup(signalGroup).hasShellResult()){
+						ShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
+
+						for(int shell = 0; shell<r.getNumberOfShells();shell++){
+							Double d = options.isShowSignals() ? r.getCounts().get(shell) : r.getMeans().get(shell)*100;
+							Double std = options.isShowSignals() ? 0 : r.getStandardErrors().get(shell)*100;
+							ds.add(signalGroup, -d.doubleValue(), std.doubleValue(), "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
+							// we need the string value for shell otherwise we get error
+							// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
+							// ditto the doublevalue for std
+
+						}
+					}
+					continue;
             	}
 				
 				if(collection.getSignalManager().hasSignals(signalGroup)  || signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
@@ -894,7 +907,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 						for(int shell = 0; shell<r.getNumberOfShells();shell++){
 							Double d = options.isShowSignals() ? r.getCounts().get(shell) : r.getMeans().get(shell);
 							Double std = options.isShowSignals() ? 0 : r.getStandardErrors().get(shell);
-							ds.add(d*100, std.doubleValue()*100, "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
+							ds.add(signalGroup, d*100, std.doubleValue()*100, "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
 							// we need the string value for shell otherwise we get error
 							// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
 							// ditto the doublevalue for std

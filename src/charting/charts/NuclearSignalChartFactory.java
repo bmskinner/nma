@@ -13,14 +13,18 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.LayeredBarRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.category.StatisticalBarRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.Range;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.xy.XYDataset;
 
 import analysis.AnalysisDataset;
+import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
+import charting.datasets.ShellResultDataset;
 import charting.options.ChartOptions;
 
 public class NuclearSignalChartFactory  extends AbstractChartFactory {
@@ -57,35 +61,54 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 		
 		JFreeChart chart = ChartFactory.createBarChart(null, "Outer <--- Shell ---> Interior", "Percent", list.get(0));
 		chart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
-		chart.getCategoryPlot().getRangeAxis().setRange(0,100);
+		
+		chart.getCategoryPlot().addRangeMarker(ChartComponents.ZERO_MARKER);
+		
+		Range range = new Range(0, 1);
 		
 		int datasetCount = 0;
 		for(CategoryDataset ds : list){
+			
+			ShellResultDataset shellDataset = (ShellResultDataset) ds;
 			
 			chart.getCategoryPlot().setDataset(datasetCount, ds);
 			
 			AnalysisDataset d = options.getDatasets().get(datasetCount);
 			
-			StatisticalBarRenderer rend = new StatisticalBarRenderer();
+			LayeredBarRenderer rend = new LayeredBarRenderer();
 			rend.setBarPainter(new StandardBarPainter());
 			rend.setShadowVisible(false);
-			rend.setErrorIndicatorPaint(Color.black);
-			rend.setErrorIndicatorStroke(new BasicStroke(2));
-			chart.getCategoryPlot().setRenderer(datasetCount, rend);
 			
-			for (int j = 0; j < ds.getRowCount(); j++) {
-				
-				rend.setSeriesVisibleInLegend(j, false);
-				rend.setSeriesStroke(j, new BasicStroke(2));
-				UUID signalGroup = getSignalGroupFromLabel(  ds.getRowKey(j).toString()    );
-	            
-	            Color colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
-	                         ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
-	                         : ColourSelecter.getColor(j);
-	            
+			
+			
+//			rend.setErrorIndicatorPaint(Color.black);
+//			rend.setErrorIndicatorStroke(new BasicStroke(2));
+			chart.getCategoryPlot().setRenderer(datasetCount, rend);
 
-				rend.setSeriesPaint(j, colour);
-			}	
+			for( int i=0; i<ds.getColumnCount(); i++){
+				Comparable colKey = ds.getColumnKey(i);
+				
+				for (int j = 0; j < ds.getRowCount(); j++) {
+
+					Comparable rowKey = ds.getRowKey(j);
+					
+					// Get the visible range of the chart
+					range = Range.combine(range, shellDataset.getVisibleRange());
+					
+					UUID signalGroup = shellDataset.getSignalGroup(rowKey, colKey);
+					
+					rend.setSeriesVisibleInLegend(j, false);
+					rend.setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+
+					Color colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
+							? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
+									: ColourSelecter.getColor(j);
+
+
+							rend.setSeriesPaint(j, colour);
+							rend.setSeriesBarWidth(j, 0.6);
+				}	
+			}
 			
 			
 			datasetCount++;
@@ -93,7 +116,13 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 		
 		
 		
-		
+		if(options.isShowSignals()){
+			chart.getCategoryPlot().getRangeAxis().setAutoRange(true);
+			chart.getCategoryPlot().getRangeAxis().setLabel("Observed signals");
+		} else {
+			chart.getCategoryPlot().getRangeAxis().setRange(range);
+			chart.getCategoryPlot().getRangeAxis().setLabel("Percent");
+		}
 		
 		
 

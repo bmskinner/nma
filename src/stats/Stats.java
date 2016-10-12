@@ -27,63 +27,17 @@
 
  package stats;
 
- import java.util.Arrays;
-import java.util.List;
-
-import org.apache.commons.math3.distribution.TDistribution;
+ import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import logging.Loggable;
-import utility.ArrayConverter;
-import utility.ArrayConverter.ArrayConversionException;
 
  public class Stats implements Loggable {
 	 
 	 public static final double LOG2 = Math.log(2);
 	 public static final String NULL_OR_EMPTY_ARRAY_ERROR = "The data array either is null or does not contain any data.";
-
- /*
-    Calculate the <lowerPercent> quartile from a Double[] array
-  */
-  public static double quartile(double[] values, double lowerPercent) {
-
-	  Double[] temp2;
-		try {
-			temp2 = new ArrayConverter(values).toDoubleObjectArray();
-		} catch (ArrayConversionException e) {
-			temp2 = new Double[0]; 
-		}
-		
-	  return quartile(temp2, lowerPercent).doubleValue();
-
-  }
-  
-  /**
-   * Calculate the given quartile for an array of values
-   * @param values
-   * @param lowerPercent
-   * @return
-   */
-  public static Number quartile(Number[] values, double lowerPercent) {
-	  if (values == null || values.length == 0) {
-		  throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-	  }
-
-	  if(values.length==1){
-		  return values[0];
-	  }
-
-	  // Rank order the values
-	  Number[] v = new Number[values.length];
-	  System.arraycopy(values, 0, v, 0, values.length);
-	  Arrays.sort(v);
-
-	  int n = (int) Math.round(v.length * lowerPercent / 100);
-
-	  return v[n];
-  }
 
   
   /**
@@ -243,23 +197,6 @@ import utility.ArrayConverter.ArrayConversionException;
 	  
 	  return t;
 
-  }
-
-  
-  public static Number quartile(List<Number> values, double lowerPercent) {
-	  
-	  Number[] array = values.toArray(new Number[0]);
-	  Number result = quartile(array, lowerPercent);
-	  return result;
-  }
-  
-  
-  public static Number sum(List<Number> values){
-	  double result = 0; 
-	  for(Number n : values){
-		  result += n.doubleValue();
-	  }
-	  return result;
   }
 
   

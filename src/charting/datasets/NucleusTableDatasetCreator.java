@@ -54,6 +54,7 @@ import stats.DipTester;
 import stats.Mean;
 import stats.Min;
 import stats.NucleusStatistic;
+import stats.Quartile;
 import stats.SegmentStatistic;
 import stats.Stats;
 import utility.Constants;
@@ -651,7 +652,7 @@ private static NucleusTableDatasetCreator instance = null;
 			
 			double mean     = new Mean(stats).doubleValue(); 
 			double sem      = Stats.stderr(stats);
-			double median 	= Stats.quartile(stats, 50);
+			double median 	= new Quartile(stats, 50).doubleValue();
 			double[] ci 	= Stats.calculateMeanConfidenceInterval(stats, 0.95);
 			String ciString = df.format(ci[0]) + " - " + df.format(ci[1]);
 			double diptest 	= DipTester.getDipTestPValue(stats);
@@ -1083,8 +1084,10 @@ private static NucleusTableDatasetCreator instance = null;
 									
 		
 			
-			double value1 = Stats.quartile( dataset.getCollection()
-					.getSegmentStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, medianSeg1.getID()), Constants.MEDIAN);
+			double value1 =  new Quartile( dataset.getCollection()
+					.getSegmentStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, 
+							medianSeg1.getID()), 
+					Constants.MEDIAN).doubleValue();
 
 			Object[] popData = new Object[options.datasetCount()];
 
@@ -1102,8 +1105,11 @@ private static NucleusTableDatasetCreator instance = null;
 							.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
 							.getSegmentAt(options.getSegPosition());
 					
-					double value2 = Stats.quartile( dataset2.getCollection()
-							.getSegmentStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, medianSeg2.getID()), Constants.MEDIAN);
+					double value2 = new Quartile( dataset2.getCollection()
+							.getSegmentStatistics(SegmentStatistic.LENGTH,
+									MeasurementScale.PIXELS, 
+									medianSeg2.getID()),
+							Constants.MEDIAN).doubleValue();
 
 					double magnitude = value2 / value1;
 					popData[i] = df.format( magnitude );

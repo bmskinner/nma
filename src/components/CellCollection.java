@@ -29,6 +29,7 @@ package components;
 
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
+import stats.Quartile;
 import stats.SegmentStatistic;
 import stats.SignalStatistic;
 import stats.Stats;
@@ -559,7 +560,7 @@ public class CellCollection implements Serializable, Loggable {
 	  }
 
 	  double[] p = this.getPathLengths();
-	  double median = Stats.quartile(p, Constants.MEDIAN);
+	  double median = new Quartile(p, Constants.MEDIAN).doubleValue();
 	  return median;
   }
 
@@ -569,7 +570,7 @@ public class CellCollection implements Serializable, Loggable {
 	  }
 
 	  double[] p = this.getArrayLengths();
-	  double median = Stats.quartile(p, Constants.MEDIAN);
+	  double median = new Quartile(p, Constants.MEDIAN).doubleValue();
 	  return median;
   }
 
@@ -821,7 +822,7 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 		  double median = 0;
 		  if(this.getNucleusCount()>0){
 			  double[] values = this.getNuclearStatistics(stat, scale);
-			  median =  Stats.quartile(values, Constants.MEDIAN);
+			  median =  new Quartile(values, Constants.MEDIAN).doubleValue();
 		  }
 		  
 		  statsCache.setStatistic(stat, scale, median);
@@ -877,7 +878,7 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
 	  }
 	  
 	  double[] values = this.getSegmentStatistics(stat, scale, id);
-	  double median =  Stats.quartile(values, Constants.MEDIAN);
+	  double median =  new Quartile(values, Constants.MEDIAN).doubleValue();
 	  return median;
 
   }

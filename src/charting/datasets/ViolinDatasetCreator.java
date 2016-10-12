@@ -12,10 +12,10 @@ import stats.NucleusStatistic;
 import stats.SegmentStatistic;
 import stats.SignalStatistic;
 import stats.Stats;
+import stats.Sum;
 import utility.Constants;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
-import charting.charts.ViolinCategoryDataset;
 import charting.options.ChartOptions;
 import components.CellCollection;
 import components.generic.BorderTagObject;
@@ -241,7 +241,7 @@ public class ViolinDatasetCreator implements Loggable {
 		
 		List<Number> pdfValues = new ArrayList<Number>();
 		
-		Number total = Stats.sum(list);
+		Number total = new Sum(list); // Stats.sum(list);
 
 		if(list.size()>2 && total.doubleValue()>0){ // don't bother with a dataset of a single cell, or if the stat is not present
 			

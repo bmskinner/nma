@@ -34,11 +34,13 @@ import io.ImageImporter;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import stats.Area;
+
+//import stats.Area;
 import stats.NucleusStatistic;
 import utility.Constants;
 import analysis.detection.Detector;
@@ -84,10 +86,9 @@ public class ShellDetector extends Detector {
 	 */
 	public ShellDetector(CellularComponent n, int shellCount){
 
-//		this.shellCount = shellCount;
 
 		nucleusRoi = new PolygonRoi(n.createOriginalPolygon(), Roi.POLYGON);
-//		this.nucleusStack = new ImageImporter(n.getSourceFile()).importImage();
+
 		
 		this.createShells(n, shellCount);
 
@@ -99,7 +100,7 @@ public class ShellDetector extends Detector {
 	
 	/**
 	 * Find the shell in the template object that the given point
-	 * lies within
+	 * lies within, or -1 if the point is not found
 	 * @param p
 	 * @return
 	 */
@@ -119,9 +120,29 @@ public class ShellDetector extends Detector {
 	 * @param signal
 	 * @return
 	 */
-	public int[] findCountPerShell(NuclearSignal signal){
+	public int[] findPixelIntensityPerShell(NuclearSignal signal){
 		int[] signalDensities = getSignalIntensities(signal);
 		return signalDensities;
+	}
+	
+	/**
+	 * Find the number pixels of the signal within each shell
+	 * @param signal
+	 * @return
+	 */
+	public int[] findPixelCountPerShell(NuclearSignal signal){
+		int[] counts = makeZeroArray();
+		
+		for(int i=0; i<shells.size(); i++){
+
+			Shell shell = shells.get(i);
+			int count = shell.getCount(signal);
+			counts[i] = count;
+
+		}
+		
+		counts = correctNestedIntensities(counts);
+		return counts;
 	}
 
 	/**
@@ -138,7 +159,7 @@ public class ShellDetector extends Detector {
 		// Get the pixel intensities per shell for signal channel
 //		int[] signalDensities = getSignalIntensities(signal);
 		
-		int[] signalDensities   = getChannelIntensities(signal, signal.getChannel());
+		int[] signalDensities = getChannelIntensities(signal, signal.getChannel());
 				
 		// Get the pixel intensities per shell for the dapi channel
 		int[] dapiDensities   = getChannelIntensities(signal, Constants.RGB_BLUE);
@@ -260,7 +281,7 @@ public class ShellDetector extends Detector {
 //		double initialArea = c.getStatistic(NucleusStatistic.AREA); 
 		
 //		log("By stat: "+initialArea);
-		double initialArea = new Area(nucleusRoi).doubleValue();
+		double initialArea = new stats.Area(nucleusRoi).doubleValue();
 //		log("By calc: "+initialArea);
 		
 		// start with the entire nucleus, and shrink shell by shell
@@ -285,7 +306,7 @@ public class ShellDetector extends Detector {
 
 				shrinkingRoi = RoiEnlarger.enlarge(shrinkingRoi, -1);
 
-				area = new Area(shrinkingRoi).doubleValue();
+				area = new stats.Area(shrinkingRoi).doubleValue();
 
 			}
 
@@ -387,18 +408,47 @@ public class ShellDetector extends Detector {
 	
 	public class Shell {
 		
+		/**
+		 * The roi of the shell at the original position in the source image of the component
+		 */
 		private Roi r;
 		
 		public Shell(Roi r){
 			this.r = r;
 		}
 		
+		/**
+		 * Test if this shell contains the given pixel
+		 * @param x
+		 * @param y
+		 * @return
+		 */
 		public boolean contains(int x, int y){
 			return r.contains(x, y);
 		}
 		
 		/**
-		* Find the total intensity within this shell 
+		 * Count the number of pixels within the signal that are
+		 * also within this shell.
+		 * @param s
+		 * @param channel
+		 * @return
+		 */
+		public int getCount(NuclearSignal s){
+			
+			Area signalArea = new Area(s.toOriginalShape());
+			Area shellArea  = this.toArea();
+			
+			// Keep pixels that are in both shapes
+			signalArea.intersect(shellArea);
+
+			int count = new stats.Area(signalArea).intValue();
+
+			return count;
+		}
+		
+		/**
+		* Find the sum of all pixel intensities within this shell 
 		* from the given channel.
 		*
 		*@param s the signal with the image to measure
@@ -449,14 +499,15 @@ public class ShellDetector extends Detector {
 		}
 		
 		/**
-		* Find the total signal intensity within this shell from the given signal.
+		* Find the sum of pixel intensities in the signal channel
+		* within this shell which also lie within the given signal.
 		*
 		* @param s the signal
 		* @return the sum of signal intensities in the signal
 		*/
 		public int getSignalDensity(NuclearSignal s){
 
-			List<XYPoint> signalPoints = this.getPixelsAsPoints();
+			List<XYPoint> signalPoints = s.getPixelsAsPoints();
 
 			if(signalPoints.isEmpty()){
 				return 0;
@@ -476,17 +527,19 @@ public class ShellDetector extends Detector {
 
 				int density = 0;
 
+				// Go through every pixel in the signal
 				for(XYPoint p : signalPoints){
 
 					int x = p.getXAsInt();
 					int y = p.getYAsInt();
 
+					// Test if the point is within this shell
 					if(r.contains(x, y)){
 						
-						if(s.containsOriginalPoint(x, y)){
+//						if(s.containsOriginalPoint(x, y)){
 							// find the value of the signal
 							density += ip.getPixel(x, y);	
-						}
+//						}
 					}
 				}
 				
@@ -500,6 +553,10 @@ public class ShellDetector extends Detector {
 			return result;
 		}
 		
+		/**
+		 * Get the pixels within this shell as points
+		 * @return
+		 */
 		public List<XYPoint> getPixelsAsPoints(){
 
 
@@ -542,6 +599,11 @@ public class ShellDetector extends Detector {
 		}
 
 
+		/**
+		 * Get the position of the shell as described in the 
+		 * CellularComponent interface
+		 * @return
+		 */
 		public double[] getPosition() {
 			double[] result =  { r.getBounds().getX(), 
 					r.getBounds().getY(), 
@@ -551,12 +613,20 @@ public class ShellDetector extends Detector {
 			return result;
 		}
 
+		/**
+		 * Get the bounds of the shell
+		 * @return
+		 */
 		public Rectangle getBounds() {
 			return r.getBounds();
 		}
 		
 		public Shape toShape(){
 			return r.getPolygon();
+		}
+		
+		public Area toArea(){
+			return new Area(this.toShape());
 		}
 		
 		public String toString(){

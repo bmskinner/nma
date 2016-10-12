@@ -27,6 +27,7 @@ import mmorpho.StructureElement;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.detection.CannyEdgeDetector;
 import analysis.detection.Kuwahara_Filter;
+import stats.Quartile;
 import stats.Stats;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -539,6 +540,6 @@ public class ImageFilterer extends AbstractImageFilterer {
 			}
 		}
 
-		return Stats.quartile(values, Constants.MEDIAN);
+		return new Quartile(values, Constants.MEDIAN).doubleValue();
 	}
 }

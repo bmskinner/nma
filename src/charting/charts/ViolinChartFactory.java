@@ -9,7 +9,9 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
+
 import analysis.AnalysisDataset;
+import charting.datasets.ViolinCategoryDataset;
 import charting.datasets.ViolinDatasetCreator;
 import charting.options.ChartOptions;
 import logging.Loggable;

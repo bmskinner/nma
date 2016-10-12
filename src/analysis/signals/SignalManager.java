@@ -33,6 +33,7 @@ import components.nuclear.NuclearSignal;
 import components.nuclear.SignalGroup;
 import components.nuclei.Nucleus;
 import logging.Loggable;
+import stats.Quartile;
 import stats.SignalStatistic;
 import stats.StatisticDimension;
 import stats.Stats;
@@ -368,7 +369,7 @@ public class SignalManager implements Loggable{
             	  return 0;
               }
               
-              median = Stats.quartile(values, Constants.MEDIAN);
+              median = new Quartile(values, Constants.MEDIAN).doubleValue();
               median += getMeanSignalAngle(signalGroup);
           } else {
               values = this.getSignalStatistics(stat, scale, signalGroup);
@@ -378,7 +379,7 @@ public class SignalManager implements Loggable{
             	  return 0;
               }
               
-              median =  Stats.quartile(values, Constants.MEDIAN);
+              median =  new Quartile(values, Constants.MEDIAN).doubleValue();
           }
           
           return median;

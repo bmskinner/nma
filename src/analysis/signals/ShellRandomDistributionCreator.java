@@ -45,7 +45,7 @@ public class ShellRandomDistributionCreator implements Loggable {
 	public static final int DEFAULT_ITERATIONS = 10000;
 
 	
-	public ShellRandomDistributionCreator(CellularComponent template, int shellCount){
+	public ShellRandomDistributionCreator(CellularComponent template, int shellCount, int iterations){
 		
 		if(shellCount<=1){
 			throw new IllegalArgumentException("Shell count must be > 1");
@@ -53,17 +53,14 @@ public class ShellRandomDistributionCreator implements Loggable {
 		
 		// Make a list of random points
 		List<XYPoint> list = new ArrayList<XYPoint>();
-		for(int i=0; i<DEFAULT_ITERATIONS; i++){
+		for(int i=0; i<iterations; i++){
 			list.add(createRandomPoint(template));
 		}
 		
 		
 		// Find the shell for these points in the template
 		ShellDetector detector = new ShellDetector(template, shellCount);
-		
-		for(Shell s : detector.getShells()){
-			log(s.toString());
-		}
+
 		
 		// initialise the map
 		for(int i=-1; i<shellCount; i++){
@@ -159,8 +156,6 @@ public class ShellRandomDistributionCreator implements Loggable {
 	private XYPoint createRandomPoint(CellularComponent template){
 		
 		Rectangle r = template.getBounds();
-		
-		template.getPosition();
 		
 		
 		// Make a random position in the rectangle

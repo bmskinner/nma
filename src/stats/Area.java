@@ -19,6 +19,7 @@
 
 package stats;
 
+import java.awt.Rectangle;
 import java.awt.Shape;
 
 import ij.gui.Roi;
@@ -37,11 +38,41 @@ public class Area extends DescriptiveStatistic {
 		
 	}
 	
-//	public Area(Shape s){
-//
-//		
-//		
-//	}
+	public Area(Shape s){
+
+		value = calculateShapeIntArea(s);
+		
+	}
+	
+	/**
+	 * Calculate the integer area of the shape. Checks each pixel
+	 * for belonging to the shape.
+	 * @param s
+	 * @return
+	 */
+	private int calculateShapeIntArea(Shape s){
+		int count = 0;
+		Rectangle roiBounds = s.getBounds();
+		// get the bounding box of the intersection
+		// test each pixel for overlaps
+		int minX = (int) roiBounds.getX();
+		int maxX = minX + (int) roiBounds.getWidth();
+
+		int minY = (int) roiBounds.getY();
+		int maxY = minY + (int) roiBounds.getHeight();
+		
+		for(int x=minX; x<=maxX; x++){
+			for(int y=minY; y<=maxY; y++){
+
+				if(s.contains(x, y)){
+					count++;
+				}
+			}
+		}
+		
+		return count;		
+		
+	}
 	
 	private float calculatePolygonRoi(Roi r){
 		

@@ -105,8 +105,8 @@ public class ModalityTest {
 	private double[] trimOutliers(double data[]){
 		
 		
-		double q1 = Stats.quartile(data, 25);
-		double q3 = Stats.quartile(data, 75);
+		double q1 = new Quartile(data, Quartile.LOWER_QUARTILE).doubleValue();
+		double q3 = new Quartile(data, Quartile.UPPER_QUARTILE).doubleValue();
 		double iqr = q3 - q1;
 		double minValue = q1 - (1.5 * iqr);
 		double maxValue = q3 + (1.5 * iqr);

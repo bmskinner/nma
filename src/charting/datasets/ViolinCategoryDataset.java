@@ -1,4 +1,4 @@
-package charting.charts;
+package charting.datasets;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,8 @@ import logging.Loggable;
 import org.jfree.data.KeyedObjects2D;
 import org.jfree.data.Range;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+
+import charting.charts.ExportableBoxAndWhiskerCategoryDataset;
 
 /**
  * This provides dataset support for a violin plot, which has a box and whisker

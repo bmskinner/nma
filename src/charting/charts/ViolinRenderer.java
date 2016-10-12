@@ -25,6 +25,7 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.ui.RectangleEdge;
 
+import charting.datasets.ViolinCategoryDataset;
 import stats.Max;
 import stats.Stats;
 

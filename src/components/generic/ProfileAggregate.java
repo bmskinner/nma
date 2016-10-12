@@ -19,6 +19,7 @@
 
 package components.generic;
 
+import stats.Quartile;
 import stats.Stats;
 
 import java.io.IOException;
@@ -208,7 +209,7 @@ public class ProfileAggregate implements Loggable, Serializable {
 						d[j++] = val;
 					}
 
-					double median = Stats.quartile(d, quartile);
+					double median = new Quartile(d, quartile).doubleValue();
 
 					medians[i] = median;
 				} else {

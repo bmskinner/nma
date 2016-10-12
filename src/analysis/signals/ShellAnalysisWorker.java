@@ -19,12 +19,12 @@
 package analysis.signals;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import stats.Sum;
 import utility.ArrayConverter;
 import utility.ArrayConverter.ArrayConversionException;
 import utility.Constants;
@@ -39,6 +39,8 @@ import components.nuclei.Nucleus;
 public class ShellAnalysisWorker extends AnalysisWorker {
 	
 	private final int shells;
+	
+	private int totalPixels = 0;
 	
 	private static Map<UUID, ShellCounter> counters = new HashMap<UUID, ShellCounter>(0);
 		
@@ -86,7 +88,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			
 			log("Shell analysis complete");
 		} catch (Exception e) {
-			logError( "Error in shell analysis", e);	
+			error( "Error in shell analysis", e);	
 			return false;
 		}
 		return true;
@@ -99,6 +101,11 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 		ShellDetector shellAnalyser = new ShellDetector(n, shells);
 		
 		for(UUID signalGroup : n.getSignalCollection().getSignalGroupIDs()){
+			
+			if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+				continue;
+			}
+			
 			if(collection.getSignalManager().hasSignals(signalGroup)){
 				List<NuclearSignal> signals = n.getSignalCollection().getSignals(signalGroup); 
 
@@ -109,10 +116,13 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 
 						
 						double[] signalPerShell = shellAnalyser.findProportionPerShell(s);
-						int[]    countsPerShell = shellAnalyser.findCountPerShell(s);
+						int[]    countsPerShell = shellAnalyser.findPixelCountPerShell(s);
 						counter.addValues(signalPerShell, countsPerShell);
+						
+						totalPixels += new Sum(counter.getCounts()).intValue();
+
 					} catch (Exception e) {
-						logError( "Error in signal in shell analysis", e);
+						error( "Error in signal in shell analysis", e);
 					}
 				} // end for signals
 			} // end if signals
@@ -125,6 +135,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 		CellCollection collection = this.getDataset().getCollection();
 		
 		boolean addRandom = false;
+				
 		for(UUID group : counters.keySet()){
 			if(collection.getSignalManager().hasSignals(group)){
 				
@@ -133,10 +144,12 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 				
 				ShellResult result = new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors());
 				result.setCounts(channelCounter.getCounts());
-
+				
+				
+				
 				getDataset().getCollection()
-				.getSignalGroup(group)
-				.setShellResult(result);
+					.getSignalGroup(group)
+					.setShellResult(result);
 
 			}
 		}
@@ -160,7 +173,12 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			getDataset().getCollection()
 			.addSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID, random);
 			
-			ShellRandomDistributionCreator sr = new ShellRandomDistributionCreator(collection.getConsensusNucleus(), shells);
+			// Calculate random positions of pixels 
+			log("Creating random sample of "+totalPixels+" pixels");
+			
+			ShellRandomDistributionCreator sr = new ShellRandomDistributionCreator(collection.getConsensusNucleus(), 
+					shells,
+					totalPixels);
 
 			double[] c = sr.getProportions();
 			
@@ -173,8 +191,8 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 
 			try{
 
-				List<Double> list = new ArrayConverter(c).toDoubleList();
-				List<Double> errList = new ArrayConverter(err).toDoubleList();
+				List<Double> list       = new ArrayConverter(c).toDoubleList();
+				List<Double> errList    = new ArrayConverter(err).toDoubleList();
 				List<Integer> countList = new ArrayConverter(counts).toIntegerList();
 
 				ShellResult randomResult = new ShellResult(list,  errList);
