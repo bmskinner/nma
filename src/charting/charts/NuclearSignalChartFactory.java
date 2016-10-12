@@ -22,6 +22,7 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.xy.XYDataset;
 
 import analysis.AnalysisDataset;
+import analysis.signals.ShellRandomDistributionCreator;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.ShellResultDataset;
@@ -75,7 +76,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 			
 			AnalysisDataset d = options.getDatasets().get(datasetCount);
 			
-			LayeredBarRenderer rend = new LayeredBarRenderer();
+			ShellResultBarRenderer rend = new ShellResultBarRenderer();
 			rend.setBarPainter(new StandardBarPainter());
 			rend.setShadowVisible(false);
 			
@@ -103,10 +104,14 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 					Color colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
 							? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
 									: ColourSelecter.getColor(j);
+							
+					colour = signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID) 
+                           ? Color.LIGHT_GRAY 
+                           : colour;
 
 
-							rend.setSeriesPaint(j, colour);
-							rend.setSeriesBarWidth(j, 0.6);
+					rend.setSeriesPaint(j, colour);
+					rend.setSeriesBarWidth(j, 1);
 				}	
 			}
 			
