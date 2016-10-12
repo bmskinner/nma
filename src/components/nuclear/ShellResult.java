@@ -33,9 +33,10 @@ public class ShellResult implements Serializable, Loggable {
 	private double chisquare;
 	private double pvalue;
 	
+	private List<Integer> counts;
+	
 	public ShellResult(List<Double> means, List<Double> stderrs){
-		this.means = means;
-		this.stderrs = stderrs;
+		this(means, stderrs, 0, 0);
 	}
 	
 	public ShellResult(List<Double> means, List<Double> stderrs, double chi, double pvalue){
@@ -43,6 +44,7 @@ public class ShellResult implements Serializable, Loggable {
 		this.stderrs = stderrs;
 		this.chisquare = chi;
 		this.pvalue = pvalue;
+		this.counts = new ArrayList<Integer>();
 	}
 	
     public ShellResult(ShellResult s){
@@ -61,6 +63,19 @@ public class ShellResult implements Serializable, Loggable {
         
         this.chisquare = s.chisquare;
         this.pvalue    = s.pvalue;
+        
+        for(int d : s.counts){
+        	counts.add(d);
+        }
+
+    }
+    
+    public void setCounts(List<Integer> counts){
+    	this.counts = counts;
+    }
+    
+    public List<Integer> getCounts(){
+    	return counts;
     }
     
 
@@ -88,6 +103,10 @@ public class ShellResult implements Serializable, Loggable {
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 //		finest("\tReading shell result");
 		in.defaultReadObject();
+		
+		if(counts==null){
+			counts = new ArrayList<Integer>();
+		}
 //		finest("\tRead shell result");
 	}
 

@@ -139,7 +139,17 @@ public class ShellRandomDistributionCreator implements Loggable {
 		return result;
 	}
 	
-	
+	public int[] getCounts(){
+		
+		int shells = map.size()-1;
+		
+		int[] result = new int[shells];
+		
+		for(int i=0; i<shells; i++){
+			result[i] = getCount(i);
+		}
+		return result;
+	}
 	
 	/**
 	 * Create a random point that lies within the template

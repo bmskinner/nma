@@ -28,6 +28,7 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,16 +39,17 @@ import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
 public class ShellCounter implements Loggable {
 	
-	int numberOfShells;
-	Map<Integer, List<Double>> shellValues = new LinkedHashMap<Integer, List<Double>>(0); // store the values
+	private int numberOfShells;
+	private Map<Integer, List<Double>> shellValues = new HashMap<Integer, List<Double>>(0); // store the values
+	
+	private Map<Integer, Integer> counts = new HashMap<Integer, Integer>(0); // store the values
 		
 	public ShellCounter(int numberOfShells){
-		
-//		this.logger = new Logger(log, "ShellCounter");
 		
 		this.numberOfShells = numberOfShells;
 		for(int i=0;i<numberOfShells;i++){
 			shellValues.put(i, new ArrayList<Double>(0));
+			counts.put(i, 0);
 		}
 		
 	}
@@ -57,13 +59,13 @@ public class ShellCounter implements Loggable {
 	 * @param values
 	 * @throws IllegalArgumentException
 	 */
-	public void addValues(double[] values) throws IllegalArgumentException{
-		if(values.length!=this.numberOfShells){
+	public void addValues(double[] proportions, int[] counts) {
+		if(proportions.length!=numberOfShells || counts.length!=numberOfShells){
 			throw new IllegalArgumentException("Input array is wrong size");
 		}
 		
 		// check the first entry in the list is a value
-		Double firstShell = new Double(values[0]);
+		Double firstShell = new Double(proportions[0]);
         if(firstShell.isNaN()){
         	throw new IllegalArgumentException("Argument is not a number");
         }
@@ -71,7 +73,10 @@ public class ShellCounter implements Loggable {
         
 		for(int i=0;i<numberOfShells;i++){
 			List<Double> shell = shellValues.get(i);
-			shell.add(values[i]);
+			shell.add(proportions[i]);
+			
+			int shellTotal = this.counts.get(i);
+			this.counts.put(i, shellTotal+counts[i]);
 		}
 	}
 	
@@ -93,62 +98,14 @@ public class ShellCounter implements Loggable {
 		return result;
 	}
 	
-//	public void export(File f){
-//		
-//		if(this.size()==0){ // don't make empty log files
-//			return;
-//		}
-//		
-////		IJ.log("    Counter Size: "+this.size());
-//		if(f.exists()){
-//			f.delete();
-//		}
-//		NumberFormat formatter = new DecimalFormat("#0.000");     
-//		StringBuilder log = new StringBuilder();
-//		
-//		// export the mean and SE for each shell
-//	    try{
-//	    	log.append("--------\r\nMEAN\r\n--------\r\n");
-//		    List<Double> means = getMeans();
-//		    for(Double d : means){
-//		    	log.append(formatter.format(d)+"\t");
-//		    }
-//		    log.append("\r\n");
-//		    log.append("--------\r\nSTANDARD ERROR OF THE MEAN\r\n--------\r\n");
-//		    List<Double> se = getStandardErrors();
-//		    for(Double d : se){
-//		    	log.append(formatter.format(d)+"\t");
-//		    }
-//		    log.append("\r\n");
-//	    } catch(Exception e){
-//	    	IJ.log("Error exporting stats: "+e.getMessage());
-//	    }
-//	    
-//	    // export chi square stats
-////	    log.append("--------\r\nCHI SQUARE\r\n--------\r\n");
-////	    log.append("Signals   :\t"+this.size()+"\r\n");
-////	    log.append("Chi square:\t"+getChiSquare()+"\r\n");
-////	    log.append("p-value   :\t"+getPValue()+"\r\n");
-//	    
-//	    
-//	    log.append("--------\r\nOUTER <- SHELLS -> INNER\r\n--------\r\n");
-//	    // Export the individual values
-//	    for(int i=0; i<5; i++){
-//	      log.append("SHELL_"+i+"\t");
-//	    }
-//
-//	    log.append("\r\n");
-//	    for(int i = 0; i< shellValues.get(0).size();i++){ // go through each signal
-//	    	for(int j = 0; j<numberOfShells; j++){ // each shell for signal
-//	    		List<Double> list = shellValues.get(j);
-//	    		log.append(formatter.format(list.get(i))+"\t");
-//	    	}
-//	    	log.append("\r\n");
-//	    }
-//
-//	    IJ.append(log.toString(), f.getAbsolutePath());
-//	}
-		
+	public List<Integer> getCounts() {
+		List<Integer> result = new ArrayList<Integer>(0);
+		for(int i=0;i<numberOfShells;i++){
+			result.add(counts.get(i));
+		}
+		return result;
+	}
+			
 	public double getPValue(){
 		double pvalue = 1;
 		try{

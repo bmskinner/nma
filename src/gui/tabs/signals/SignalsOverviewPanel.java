@@ -40,6 +40,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
+import analysis.signals.ShellRandomDistributionCreator;
 import analysis.signals.SignalManager;
 import charting.charts.ConsensusNucleusChartPanel;
 import charting.charts.ExportableChartPanel;
@@ -139,13 +140,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 						SignalTableCell signalGroup = getSignalGroupFromTable(table, row+1, column);
 						updateSignalColour( signalGroup );
 					}
-					
-//					if(rowName.equals("Source")){
-//						
-//						SignalTableCell signalGroup = getSignalGroupFromTable(table, row-3, column);
-//						updateSignalSource( signalGroup );
-//					}
-						
+											
 				}
 
 			}
@@ -192,6 +187,10 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 			
 		
             for(UUID signalGroup : activeDataset().getCollection().getSignalGroupIDs()){
+            	
+            	if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+            		continue;
+            	}
 
             	// get the status within each dataset
                 boolean visible = activeDataset().getCollection().getSignalGroup(signalGroup).isVisible();

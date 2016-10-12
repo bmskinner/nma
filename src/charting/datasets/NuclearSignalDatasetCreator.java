@@ -106,6 +106,9 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			maxChannels = Math.max(collection.getSignalManager().getSignalGroupIDs().size(), maxChannels);
+			if(collection.hasSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+				maxChannels--;
+			}
 		}
 		
 		if(maxChannels>0){
@@ -168,7 +171,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
         CellCollection collection = dataset.getCollection();
         
         List<Object> rowData = new ArrayList<Object>(0);
-        rowData.add(collection.getSignalManager().getSignalGroupIDs().size());
+        rowData.add(signalGroupCount);
         
         /*
          * If the dataset is a merge, then the analysis options will be null.
@@ -196,6 +199,11 @@ public class NuclearSignalDatasetCreator implements Loggable {
         	
         	int j=0;
             for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+            	
+            	if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+            		continue;
+            	}
+            	
             	SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
                 
                 Color colour = collection.getSignalGroup(signalGroup).hasColour()
@@ -227,6 +235,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
             int j=0;
             for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+            	
+            	if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+            		continue;
+            	}
             
                 signalGroupNumber++;
             
@@ -309,6 +321,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			CellCollection collection = dataset.getCollection();
 			
 			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()){
+				
+				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+            		continue;
+            	}
 
                 if(collection.getSignalGroup(signalGroup).isVisible()){
 	
@@ -348,6 +364,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			CellCollection collection = dataset.getCollection();
 			
             for( UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+            	
+            	if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+            		continue;
+            	}
 
 								
                 String groupLabel = "Group_"+signalGroup+"_"+stat.toString();
@@ -423,6 +443,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		for(AnalysisDataset dataset : list){
 			
 			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()){
+				
+				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+            		continue;
+            	}
 
 				double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
 
@@ -490,6 +514,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			finer("Collection "+collection.getName()+" has signals");
 
 			for(UUID group : collection.getSignalManager().getSignalGroupIDs()){
+				
+				if(group.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+            		continue;
+            	}
 
 				finest("Signal group "+group.toString());
                 if(dataset.getCollection().getSignalGroup(group).isVisible()){
@@ -582,6 +610,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		CellCollection collection = dataset.getCollection();
 		if(collection.getSignalManager().hasSignals()){
 			maxSignalGroup = Math.max(collection.getSignalManager().getSignalGroupIDs().size(), maxSignalGroup);
+			
+			if(collection.hasSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+        		maxSignalGroup--;
+        	}
 		}
 		
 		finest("Selected collections have "+maxSignalGroup+" signal groups");
@@ -618,7 +650,12 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
             int k=0;
 
-			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){// : collection.getSignalGroups()){
+			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+				
+				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+            		continue;
+            	}
+				
 				if(collection.getSignalManager().hasSignals(signalGroup)){
 					
 					SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
@@ -716,7 +753,11 @@ public class NuclearSignalDatasetCreator implements Loggable {
 					List<Object> rowData = new ArrayList<Object>(0);
 					rowData.add(signalGroupCount);
 	
-					for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){// : collection.getSignalGroups()){
+					for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+						
+						if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+		            		continue;
+		            	}
 						
 						if(collection.getSignalManager().getSignalCount(signalGroup)==0){ // Signal group has no signals
 							for(int j = 0; j<numberOfRowsPerSignalGroup;j++){ // Make a blank block of cells
@@ -783,57 +824,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
      */
     public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) {
         
-    	return createMultiDatasetSignalStatisticBoxplotDataset(options);
-    	
-//        if(options.isSingleDataset()){
-//        	finest("Making single signal statistic dataset");
-//            return createMultiDatasetSignalStatisticBoxplotDataset(options);
-//        }
-//        
-//        if(options.isMultipleDatasets()){
-//        	finest("Making multiple signal statistic dataset");
-//        	return createMultiDatasetSignalStatisticBoxplotDataset(options);
-//        }
-//        
-//        return createSingleDatasetSignalStatisticBoxplotDataset(options);
-        
+    	return createMultiDatasetSignalStatisticBoxplotDataset(options);        
     }
     
-    /**
-     * Create a boxplot dataset for signal statistics for a single analysis dataset
-	 * @param dataset the AnalysisDataset to get signal info from
-	 * @return a boxplot dataset
-	 * @throws Exception 
-	 */
-//    private BoxAndWhiskerCategoryDataset createSingleDatasetSignalStatisticBoxplotDataset(ChartOptions options) {
-//
-//
-//		OutlierFreeBoxAndWhiskerCategoryDataset result = new OutlierFreeBoxAndWhiskerCategoryDataset();
-//		SignalStatistic stat = (SignalStatistic) options.getStat();
-//		
-//        CellCollection collection = options.firstDataset().getCollection();
-//
-//		
-//        for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
-//
-//            double[] values = collection.getSignalManager().getSignalStatistics(stat, options.getScale(), signalGroup);
-//            /*
-//             * For charting, use offset angles, otherwise the boxplots will fail on wrapped signals
-//             */
-//            if(stat.equals(SignalStatistic.ANGLE)){
-//                values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
-//            }
-//
-//            List<Double> list = new ArrayList<Double>();
-//            for(double value : values){
-//                list.add(value);
-//            }
-//
-//			result.add(list, "Group_"+signalGroup, stat.toString());
-//		}
-//		return result;
-//	}
-    
+      
     /**
      * Create a boxplot dataset for signal statistics for a single analysis dataset
 	 * @param dataset the AnalysisDataset to get signal info from
@@ -853,7 +847,9 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
         	for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
         		
-//        		String groupName = collection.getName()+"_"+collection.getSignalManager().getSignalGroupName(signalGroup);
+        		if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+            		continue;
+            	}
 
         		double[] values = collection.getSignalManager().getSignalStatistics(stat, options.getScale(), signalGroup);
         		/*
@@ -886,14 +882,18 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 				
+				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+            		continue;
+            	}
+				
 				if(collection.getSignalManager().hasSignals(signalGroup)  || signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
 					
 					if(collection.getSignalGroup(signalGroup).hasShellResult()){
 						ShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
 
 						for(int shell = 0; shell<r.getNumberOfShells();shell++){
-							Double d = r.getMeans().get(shell);
-							Double std = r.getStandardErrors().get(shell);
+							Double d = options.isShowSignals() ? r.getCounts().get(shell) : r.getMeans().get(shell);
+							Double std = options.isShowSignals() ? 0 : r.getStandardErrors().get(shell);
 							ds.add(d*100, std.doubleValue()*100, "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
 							// we need the string value for shell otherwise we get error
 							// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
@@ -934,6 +934,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		for(AnalysisDataset d : options.getDatasets()){
 			
 			for(UUID signalGroup : d.getCollection().getSignalManager().getSignalGroupIDs()){
+				
+				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+            		continue;
+            	}
 				
 				SignalGroup group = d.getCollection().getSignalGroup(signalGroup);
 				

@@ -13,6 +13,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import analysis.AnalysisDataset;
+import analysis.signals.ShellRandomDistributionCreator;
 import analysis.signals.SignalManager;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
@@ -276,6 +277,10 @@ private static ScatterChartDatasetCreator instance = null;
 			
 			for(UUID id : groups){
 				
+				if(id.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+            		continue;
+            	}
+				
 				int signalCount = m.getSignalCount(id);
 				
 				double[] xpoints = new double[signalCount];
@@ -292,15 +297,12 @@ private static ScatterChartDatasetCreator instance = null;
 				names.add(c.getName()+"_"+m.getSignalGroupName(id));
 				
 				double rhoValue = 0;
-//				double p        = 0;
 				
 				if(xpoints.length>0){ // If a collection has signal group, but not signals
 					rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
-//					p = Stats.getSpearmanPValue(rhoValue, list.size());
 				}
 				
 				rho.add( df.format( rhoValue ) );
-//				pValue.add( df.format( p ));
 			}
 
 			
@@ -308,7 +310,6 @@ private static ScatterChartDatasetCreator instance = null;
 
 		model.addColumn("Dataset", names);
 		model.addColumn("Spearman's Rho", rho);
-//		model.addColumn("p", pValue);
 		return model;
 
 	}

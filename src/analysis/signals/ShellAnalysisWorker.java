@@ -109,7 +109,8 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 
 						
 						double[] signalPerShell = shellAnalyser.findProportionPerShell(s);
-						counter.addValues(signalPerShell);
+						int[]    countsPerShell = shellAnalyser.findCountPerShell(s);
+						counter.addValues(signalPerShell, countsPerShell);
 					} catch (Exception e) {
 						logError( "Error in signal in shell analysis", e);
 					}
@@ -129,10 +130,13 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 				
 				addRandom = true;
 				ShellCounter channelCounter = counters.get(group);
+				
+				ShellResult result = new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors());
+				result.setCounts(channelCounter.getCounts());
 
 				getDataset().getCollection()
 				.getSignalGroup(group)
-				.setShellResult(new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
+				.setShellResult(result);
 
 			}
 		}
@@ -164,13 +168,17 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			for(int i=0; i<c.length; i++){
 				err[i] = 0;
 			}
+			
+			int[] counts = sr.getCounts();
 
 			try{
 
 				List<Double> list = new ArrayConverter(c).toDoubleList();
 				List<Double> errList = new ArrayConverter(err).toDoubleList();
+				List<Integer> countList = new ArrayConverter(counts).toIntegerList();
 
 				ShellResult randomResult = new ShellResult(list,  errList);
+				randomResult.setCounts(countList);
 
 				getDataset().getCollection()
 				.getSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)

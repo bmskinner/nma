@@ -23,11 +23,16 @@ import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
@@ -43,10 +48,14 @@ import charting.options.TableOptionsBuilder;
 
 
 @SuppressWarnings("serial")
-public class SignalShellsPanel extends DetailPanel {
+public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
 	private ExportableChartPanel 	chartPanel; 
-	private JLabel 		statusLabel  = new JLabel("Shell analysis results");
+
+	private JRadioButton proportionsBtn = new JRadioButton("Proportions");
+	private JRadioButton countsBtn      = new JRadioButton("Counts");
+	private ButtonGroup  buttonGroup    = new ButtonGroup();
+	
 	private JButton 	newAnalysis	 = new JButton("Run new shell analysis");
 	protected ExportableTable table;
 
@@ -67,7 +76,16 @@ public class SignalShellsPanel extends DetailPanel {
 	
 	private JPanel createHeader(){
 		JPanel panel = new JPanel();
-		panel.add(statusLabel);
+		
+		buttonGroup.add(proportionsBtn);
+		buttonGroup.add(countsBtn);
+		proportionsBtn.addActionListener(this);
+		countsBtn.addActionListener(this);
+		
+		proportionsBtn.setSelected(true);
+		
+		panel.add(countsBtn);
+		panel.add(proportionsBtn);
 		return panel;
 	}
 	
@@ -117,14 +135,12 @@ public class SignalShellsPanel extends DetailPanel {
 	private void updateChartAndTable(){
 		ChartOptions options = new ChartOptionsBuilder()
 		.setDatasets(getDatasets())
+		.setShowSignals(countsBtn.isSelected()) // if counts is selected, show signal counts, not proportions
 		.setTarget(chartPanel)
 		.build();
 
 		setChart(options);
-//		JFreeChart chart = getChart(options);
-//
-//
-//		chartPanel.setChart(chart);
+
 		chartPanel.setVisible(true);
 
 
@@ -171,5 +187,11 @@ public class SignalShellsPanel extends DetailPanel {
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return NuclearSignalDatasetCreator.getInstance().createShellChiSquareTable(options);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		updateChartAndTable();
+		
 	}
 }

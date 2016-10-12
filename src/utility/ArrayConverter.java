@@ -237,7 +237,18 @@ public class ArrayConverter {
 		
 	}
 
-
+	public List<Integer> toIntegerList() throws ArrayConversionException{
+		
+		List<Integer> result = new ArrayList<Integer>();
+		
+		Integer[] arr = this.toIntegerObjectArray();
+		
+		for(Integer d : arr){
+			result.add(d);
+		}
+		return result;
+		
+	}
 
 	 @SuppressWarnings("serial")
 	 public class ArrayConversionException extends Exception {
