@@ -39,6 +39,12 @@ import components.generic.ProfileType;
  */
 public class DipTester {
 	
+	private CellCollection collection;
+	
+	public DipTester(CellCollection collection){
+		this.collection = collection;
+	}
+	
 	/**
 	 * Test the given collection for non-unimodality at each point in the profile,
 	 * using Hartigan's Dip Test. Returns a profile with the dip test p-values
@@ -47,7 +53,7 @@ public class DipTester {
 	 * @param tag the border tag to offset from
 	 * @return a boolean profile of results
 	 */
-	public static Profile testCollectionGetPValues(CellCollection collection, BorderTagObject tag, ProfileType type){
+	public Profile testCollectionGetPValues(BorderTagObject tag, ProfileType type){
 		Profile resultProfile = null;
 		
 		double[] pvals = null;
@@ -96,7 +102,7 @@ public class DipTester {
 	 * @return
 	 * @throws Exception
 	 */
-	public static double getPValueForPositon(CellCollection collection, double xPosition, ProfileType type) throws Exception {
+	public double getPValueForPositon(double xPosition, ProfileType type) throws Exception {
 		
 		double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(xPosition);
 		return getDipTestPValue(values);
@@ -112,13 +118,13 @@ public class DipTester {
 	 * @param significance the p-value threshold
 	 * @return a boolean profile of results
 	 */
-	public static BooleanProfile testCollectionIsUniModal(CellCollection collection, BorderTagObject tag, double significance, ProfileType type){
+	public BooleanProfile testCollectionIsUniModal(BorderTagObject tag, double significance, ProfileType type){
 		
 		BooleanProfile resultProfile = null;
 		boolean[] modes = null;
 		try {
 			
-			Profile pvals = testCollectionGetPValues(collection, tag, type);
+			Profile pvals = testCollectionGetPValues(tag, type);
 			modes = new boolean[pvals.size()];
 			
 			for(int i=0; i<pvals.size(); i++ ){

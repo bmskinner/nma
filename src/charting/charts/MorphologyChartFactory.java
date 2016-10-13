@@ -674,7 +674,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			// dip test the profiles
 
 			double significance   = options.getModalityPosition();
-			BooleanProfile modes  = DipTester.testCollectionIsUniModal(collection, options.getTag(), significance, options.getType());
+			BooleanProfile modes  = new DipTester(collection).testCollectionIsUniModal(options.getTag(), significance, options.getType());
 
 
 			// add any regions with bimodal distribution to the chart
@@ -971,8 +971,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		for(AnalysisDataset dataset : options.getDatasets()){
 
 			// Do the stats testing
-			double pvalue = DipTester.getPValueForPositon(dataset.getCollection(),
-					options.getModalityPosition(), 
+			double pvalue = new DipTester(dataset.getCollection()).getPValueForPositon(	options.getModalityPosition(), 
 					options.getType()); 
 			
 			// Add the annotation

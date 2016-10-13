@@ -1531,7 +1531,7 @@ private static NucleusDatasetCreator instance = null;
 			
 			CellCollection collection = dataset.getCollection();
 			
-			Profile pvalues = DipTester.testCollectionGetPValues(collection, options.getTag(), options.getType());
+			Profile pvalues = new DipTester(collection).testCollectionGetPValues(options.getTag(), options.getType());
 			
 			double[] yvalues = pvalues.asArray();
 			double[] xvalues = pvalues.getPositions(100).asArray();

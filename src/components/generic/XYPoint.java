@@ -229,6 +229,20 @@ public class XYPoint  implements Serializable, Loggable {
    * @return
    */
   public double findAngle(XYPoint a, XYPoint b){
+	  
+	  // Use the cosine rule: a-b^2 = this-b^2 + this-a^2 - 2 * this-b * this-a * cos (theta)
+	  
+//	  double ab = a.getLengthTo(b);
+//	  double bc = getLengthTo(b);
+//	  double ac = getLengthTo(a);
+//	  
+//	  double ab2cosT = Math.pow(bc,2) + Math.pow(ac,2) - Math.pow(ab,2);
+//	  
+//	  double cosT = ab2cosT / (2 * ac * bc);
+//	  
+//	  double t = Math.acos(cosT);
+//	  return Math.toDegrees(t);
+	  
 	  float[] xpoints = { (float) a.getX(), (float) getX(), (float) b.getX()};
 	  float[] ypoints = { (float) a.getY(), (float) getY(), (float) b.getY()};
 	  PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);

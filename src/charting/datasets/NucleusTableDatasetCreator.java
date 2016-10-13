@@ -50,6 +50,7 @@ import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
+import stats.ConfidenceInterval;
 import stats.DipTester;
 import stats.Mean;
 import stats.Min;
@@ -211,10 +212,11 @@ private static NucleusTableDatasetCreator instance = null;
 				double mean = new Mean(meanLengths).doubleValue(); 
 //				double mean = Stats.mean( meanLengths);
 				double sem  = Stats.stderr(meanLengths);
-				double[] ci = Stats.calculateMeanConfidenceInterval(meanLengths, 0.95);
+				
+				ConfidenceInterval ci = new ConfidenceInterval(meanLengths, 0.95);
 				
 				rowData.add(  df.format(mean ) );
-				rowData.add(  df.format(ci[0])+" - "+ df.format(ci[1]));
+				rowData.add(  df.format(ci.getLower().doubleValue())+" - "+ df.format(ci.getUpper().doubleValue()));
 				rowData.add(  df.format(sem) );
 				
 				
@@ -311,9 +313,8 @@ private static NucleusTableDatasetCreator instance = null;
 
 				double mean = new Mean(meanLengths).doubleValue(); 
 
-				double ci = Stats.calculateConfidenceIntervalSize(meanLengths, 0.95);
-
-				rowData.add(df.format(mean)+" ± "+ df.format(ci));
+				ConfidenceInterval ci = new ConfidenceInterval(meanLengths, 0.95);
+				rowData.add(df.format(mean)+" ± "+ df.format(ci.getSize().doubleValue()));
 			}
 			model.addRow(rowData.toArray(new Object[0]));
 		}
@@ -652,9 +653,10 @@ private static NucleusTableDatasetCreator instance = null;
 			
 			double mean     = new Mean(stats).doubleValue(); 
 			double sem      = Stats.stderr(stats);
-			double median 	= new Quartile(stats, 50).doubleValue();
-			double[] ci 	= Stats.calculateMeanConfidenceInterval(stats, 0.95);
-			String ciString = df.format(ci[0]) + " - " + df.format(ci[1]);
+			double median 	= new Quartile(stats, Quartile.MEDIAN).doubleValue();
+			
+			ConfidenceInterval ci = new ConfidenceInterval(stats, 0.95);
+			String ciString = df.format(mean)+" ± "+ df.format(ci.getSize().doubleValue());
 			double diptest 	= DipTester.getDipTestPValue(stats);
 
 			datasetData.add(df.format(median));
