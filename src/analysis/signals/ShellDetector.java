@@ -37,16 +37,13 @@ import java.awt.Shape;
 import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
-
-//import stats.Area;
-import stats.NucleusStatistic;
+import stats.Sum;
+import utility.ArrayConverter;
 import utility.Constants;
 import analysis.detection.Detector;
 import components.CellularComponent;
 import components.generic.XYPoint;
-import components.nuclear.NuclearSignal;
 
 /**
  * @author bms41
@@ -55,9 +52,6 @@ import components.nuclear.NuclearSignal;
 public class ShellDetector extends Detector {
 
 	public static final int DEFAULT_SHELL_COUNT = 5;
-
-//	private ImageStack 	nucleusStack; 	// the stack to work on 
-	private Roi 		nucleusRoi;		// the nuclear roi
 
 	
 	/**
@@ -71,7 +65,7 @@ public class ShellDetector extends Detector {
 	/**
 	* Create shells in the given nucleus, using the
 	* default shell count
-	* @param nucleus the nucleus to analyse
+	* @param nucleus the component to analyse
 	*/
 	public ShellDetector(CellularComponent n){
 
@@ -85,12 +79,8 @@ public class ShellDetector extends Detector {
 	 * @param nucleus the nucleus to analyse
 	 */
 	public ShellDetector(CellularComponent n, int shellCount){
-
-
-		nucleusRoi = new PolygonRoi(n.createOriginalPolygon(), Roi.POLYGON);
-
 		
-		this.createShells(n, shellCount);
+		createShells(n, shellCount);
 
 	}
 	
@@ -116,11 +106,11 @@ public class ShellDetector extends Detector {
 	}
 	
 	/**
-	 * Find the number of pixels per shell within the signal
+	 * Find the total pixel intensity per shell within the signal
 	 * @param signal
 	 * @return
 	 */
-	public int[] findPixelIntensityPerShell(NuclearSignal signal){
+	public int[] findPixelIntensityPerShell(CellularComponent signal){
 		int[] signalDensities = getSignalIntensities(signal);
 		return signalDensities;
 	}
@@ -130,7 +120,7 @@ public class ShellDetector extends Detector {
 	 * @param signal
 	 * @return
 	 */
-	public int[] findPixelCountPerShell(NuclearSignal signal){
+	public int[] findPixelCountPerShell(CellularComponent signal){
 		int[] counts = makeZeroArray();
 		
 		for(int i=0; i<shells.size(); i++){
@@ -144,32 +134,144 @@ public class ShellDetector extends Detector {
 		counts = correctNestedIntensities(counts);
 		return counts;
 	}
-
+	
 	/**
-	 * Find the proportions of signal within each shell, normalised against
-	 * the DAPI density. Note that this will return values for the cell as a 
-	 * whole, not for the individual signal
+	 * Find the number of pixels within each shell
+	 * @param signal
+	 * @return
+	 */
+	public int[] findPixelCountPerShell(){
+		int[] counts = makeZeroArray();
+		
+		for(int i=0; i<shells.size(); i++){
+
+			Shell shell = shells.get(i);
+			int count = new stats.Area(shell.r).intValue();
+			counts[i] = count;
+
+		}
+		
+		counts = correctNestedIntensities(counts);
+		return counts;
+	}
+	
+	/**
+	 * Count the total pixel intesnsty in each shell for the given image
+	 * @param st
+	 * @param channel
+	 * @return
+	 */
+	public int[] findPixelIntensityPerShell(ImageStack st, int channel){
+		
+		int[] intensities = getChannelIntensities(st, channel);
+		return intensities;
+		
+	}
+	
+	
+	/**
+	 * Find the proportions of signal within each shell. 
+	 * Note that this will return values for the entire cell.
 	 *
 	 * @param signal the signal to analyse
 	 * @return an array of signal proportions in each shell
 	 * @throws Exception 
 	 */
-	public double[] findProportionPerShell(NuclearSignal signal) throws Exception{
+	public double[] findProportionPerShell(ImageStack st, int channel) {
 
 		// Get the pixel intensities per shell for signal channel
 //		int[] signalDensities = getSignalIntensities(signal);
 		
-		int[] signalDensities = getChannelIntensities(signal, signal.getChannel());
+		int[] signalDensities = getChannelIntensities(st, channel);
 				
 		// Get the pixel intensities per shell for the dapi channel
-		int[] dapiDensities   = getChannelIntensities(signal, Constants.RGB_BLUE);
+//		int[] dapiDensities   = getChannelIntensities(signal, Constants.RGB_BLUE);
 
 
 		// find the proportion of the total signal within each shell
 		double[] signalProportions = getProportions(signalDensities);
 
 		// normalise the signals to the dapi intensity
-		double[] result = normalise(signalProportions, dapiDensities);
+//		double[] result = normalise(signalProportions, dapiDensities);
+
+		return signalProportions;
+	}
+
+	/**
+	 * Find the proportions of signal pixels within each shell. Only consider pixels
+	 * within the given signal. Does not consider intensities, and does not DAPI normalise.
+	 *
+	 * @param signal the signal to analyse
+	 * @return an array of signal proportions in each shell
+	 * @throws Exception 
+	 */
+	public double[] findProportionPerShell(CellularComponent signal) throws Exception{
+
+		// Get the pixel intensities per shell for signal channel				
+		int[] signalDensities = getSignalIntensities(signal);
+				
+
+		// find the proportion of the total signal within each shell
+		double[] signalProportions = getProportions(signalDensities);
+
+		// normalise the signals to the dapi intensity
+//		double[] result = normalise(signalProportions, dapiDensities);
+
+		return signalProportions;
+	}
+	
+	/**
+	 *	Find the DAPI-normalised signal density per shell
+	 *
+	 * @param signals the proportion of signal per shell
+	 * @param counterstain the pixel intensity counts per shell
+	 * @return a double[] with the normalised signal density per shell, outer to inner
+	 */
+	public double[] normalise(double[] signals, int[] counterstain){
+
+		if(signals.length != counterstain.length){
+			throw new IllegalArgumentException("Array lengths are not equal");
+		}
+		
+		if(signals.length==0){
+			throw new IllegalArgumentException("Array length is zero");
+		}
+		
+		for(int i=0; i<signals.length; i++){
+
+			if(new Double(signals[i]).isNaN()){
+				warn("Signal is NaN: setting to zero");
+				signals[i] = 0;
+			}
+			if(new Double(counterstain[i]).isNaN()){
+				warn("DAPI is NaN: setting to zero");
+				counterstain[i] = 0;
+			}
+		}
+
+		double[] norm = makeZeroDoubleArray();
+		double total = 0;
+
+		// perform the dapi normalisation, and get the signal total
+		for(int i=0; i<signals.length; i++){
+			if(counterstain[i]==0){
+				norm[i]=0;
+			} else {
+				norm[i] = signals[i] / counterstain[i];
+			}
+			total += norm[i];
+		}
+
+		// re-express  the normalised signal as a fraction of the total
+
+		double[] result = new double[shells.size()];
+		for(int i=0; i<shells.size(); i++){
+
+
+			result[i] =  total==0 		 // if the total is 0
+                      ? 0 				 // don't try dividing by 0
+                      : norm[i] / total; // otherwise get the fraction of the total signal
+		}
 
 		return result;
 	}
@@ -187,14 +289,14 @@ public class ShellDetector extends Detector {
 	*
 	* @return Intensity per shell, outer to inner
 	*/
-	private int[] getChannelIntensities(NuclearSignal signal, int channel){
+	private int[] getChannelIntensities(ImageStack st, int channel){
 		int[] result = makeZeroArray();
 
 		// find the total signal in the signal channel
 		for(int i=0; i<shells.size(); i++){
 
 			Shell shell = shells.get(i);
-			int density = shell.getDensity(signal, channel);
+			int density = shell.getDensity(st, channel);
 			result[i] = density;
 
 		}
@@ -212,14 +314,14 @@ public class ShellDetector extends Detector {
 	*
 	* @return Intensity per shell, outer to inner
 	*/
-	private int[] getSignalIntensities(NuclearSignal signal){
+	private int[] getSignalIntensities(CellularComponent signal){
 		int[] result = makeZeroArray();
 
 		// find the total signal in the signal channel
 		for(int i=0; i<shells.size(); i++){
 
 			Shell shell = shells.get(i);
-			int density = shell.getSignalDensity(signal);
+			int density = shell.getDensity(signal);
 			result[i] = density;
 
 		}
@@ -274,57 +376,78 @@ public class ShellDetector extends Detector {
 	* shells is 5 by default. Use setNumberOfShells to change.
 	*/
 	private void createShells(CellularComponent c, int shellCount){
-				
+		
+		Roi nucleusRoi = new PolygonRoi(c.createOriginalPolygon(), Roi.POLYGON);
 		
 		fine("Creating shells");
 
-//		double initialArea = c.getStatistic(NucleusStatistic.AREA); 
-		
-//		log("By stat: "+initialArea);
 		double initialArea = new stats.Area(nucleusRoi).doubleValue();
-//		log("By calc: "+initialArea);
 		
-		// start with the entire nucleus, and shrink shell by shell
-		for(int i=shellCount; i>0; i--){
+		fine("Nucleus area: "+initialArea);
+		double target = initialArea / shellCount;
+		fine("Target area: "+target);
+
+		double[] areas = new double[shellCount];
+		
+		areas[0] = initialArea;
+		shells.add( new Shell(nucleusRoi) );
+		
+		// start with the next shell in nucleus, and shrink shell by shell
+		for(int i=1; i<shellCount; i++){
 
 			// take the original roi
 			Roi shrinkingRoi = (Roi) nucleusRoi.clone();
-			
-			
+	
 			
 			// get the maximum faction of the total area this
 			// shell should occupy
-			// i.e shell 5 of 5 is 1 (all area)
-			double maxFraction = (double)i/(double)shellCount;
+			// i.e shell 1 of 4 is 1 (all area)
+			double maxFraction = (double) (shellCount-i)/(double)shellCount;
 			
 			// the max area for this shell
 			double maxArea = initialArea * maxFraction;
+			
+			fine("Max area: "+maxArea +" at fraction "+maxFraction);
 
 			double area = initialArea;
+			
+			// TODO: this is not yet working to converge on the best shrinking
+			
+			// find the shrnking factor closest to the target area
+			double prevDiffToTarget = Double.MAX_VALUE;
+			double diffToTarget     = initialArea+1;
 						
-			while(area>maxArea){
+			while(diffToTarget>prevDiffToTarget){ // allow leeway - it won't be clean
 
 				shrinkingRoi = RoiEnlarger.enlarge(shrinkingRoi, -1);
 
 				area = new stats.Area(shrinkingRoi).doubleValue();
+				fine("\tShrunk by 1 pixel to "+area);
+				
+				prevDiffToTarget = diffToTarget;
+				diffToTarget = Math.abs(area - maxArea);
 
 			}
-
-			Polygon polygon = shrinkingRoi.getPolygon();
-			Roi r = new PolygonRoi(polygon, Roi.POLYGON);
 			
-			shells.add( new Shell(r) );
+			// Correct overspills
+			if(prevDiffToTarget<diffToTarget){
+				shrinkingRoi = RoiEnlarger.enlarge(shrinkingRoi, 1);
+				area = new stats.Area(shrinkingRoi).doubleValue();
+			}
+
+			areas[i] = area;
+			shells.add( new Shell((Roi) shrinkingRoi.clone()) );
 		}
+		fine("Shell areas: "+new ArrayConverter(areas).toString());
 
 	}
 
 	/**
 	*	Find the proportion of the total pixels within
-	* each shell. Has to subtract inner shells.
+	* each shell.
 	*
 	* @param counts the number of pixels for each shell inwards
-	* @param total the total number of pixels in the signal
-	* @return a double[] with the fractions of signal per shell, outer to inner
+	* @return an array with the fractions of signal per shell, outer to inner
 	*/
 	private double[] getProportions(int[] counts){
 		
@@ -332,11 +455,8 @@ public class ShellDetector extends Detector {
 			throw new IllegalArgumentException("Array length is zero");
 		}
 		
-		int total = 0; // the total number of pixels in the nucleus
-		for(int d : counts){
-			total+=d;
-		}
-		
+		int total = new Sum(counts).intValue();
+
 		double[] result = makeZeroDoubleArray();
 		
 		if(total==0){
@@ -352,59 +472,6 @@ public class ShellDetector extends Detector {
 		return result;
 	}
 
-	/**
-	 *	Find the DAPI-normalised signal density per shell
-	 *
-	 * @return a double[] with the normalised signal density per shell, outer to inner
-	 */
-	private double[] normalise(double[] signals, int[] dapi){
-
-		if(signals.length != dapi.length){
-			throw new IllegalArgumentException("Array lengths are not equal");
-		}
-		
-		if(signals.length==0){
-			throw new IllegalArgumentException("Array length is zero");
-		}
-		
-		for(int i=0; i<signals.length; i++){
-
-			if(new Double(signals[i]).isNaN()){
-				warn("Signal is NaN: setting to zero");
-				signals[i] = 0;
-			}
-			if(new Double(dapi[i]).isNaN()){
-				warn("DAPI is NaN: setting to zero");
-				dapi[i] = 0;
-			}
-		}
-
-		double[] norm = makeZeroDoubleArray();
-		double total = 0;
-
-		// perform the dapi normalisation, and get the signal total
-		for(int i=0; i<signals.length; i++){
-			if(dapi[i]==0){
-				norm[i]=0;
-			} else {
-				norm[i] = signals[i] / dapi[i];
-			}
-			total += norm[i];
-		}
-
-		// re-express  the normalised signal as a fraction of the total
-
-		double[] result = new double[shells.size()];
-		for(int i=0; i<shells.size(); i++){
-
-
-			result[i] =  total==0 		 // if the total is 0
-                      ? 0 				 // don't try dividing by 0
-                      : norm[i] / total; // otherwise get the fraction of the total signal
-		}
-
-		return result;
-	}
 	
 	public class Shell {
 		
@@ -434,7 +501,7 @@ public class ShellDetector extends Detector {
 		 * @param channel
 		 * @return
 		 */
-		public int getCount(NuclearSignal s){
+		public int getCount(CellularComponent s){
 			
 			Area signalArea = new Area(s.toOriginalShape());
 			Area shellArea  = this.toArea();
@@ -455,46 +522,14 @@ public class ShellDetector extends Detector {
 		* @param channel the channel to measure
 		* @return the sum of intensities in the shell
 		*/
-		public int getDensity(NuclearSignal s, int channel){
+		public int getDensity(ImageStack st, int channel){
 
-			List<XYPoint> signalPoints = this.getPixelsAsPoints();
-
-			if(signalPoints.isEmpty()){
-				return 0;
-			}
-
-			ImageStack st = new ImageImporter(s.getSourceFile()).importImage();
+						
 			int stackNumber = Constants.rgbToStack(channel);
 			ImageProcessor ip = st.getProcessor(stackNumber);
 
+			int result = getDensity(ip, this.toShape());
 
-
-
-			// create result array
-			int result = 0;
-
-			try {
-
-				int density = 0;
-
-				for(XYPoint p : signalPoints){
-
-					int x = p.getXAsInt();
-					int y = p.getYAsInt();
-
-					if(r.contains(x, y)){
-						// find the value of the signal
-						density += ip.getPixel(x, y);	 
-					}
-				}
-				
-				result = density;
-
-			} catch (Exception e) {
-				error( "Error getting signal densities", e);
-
-				return 0;
-			}
 			return result;
 		}
 		
@@ -505,69 +540,29 @@ public class ShellDetector extends Detector {
 		* @param s the signal
 		* @return the sum of signal intensities in the signal
 		*/
-		public int getSignalDensity(NuclearSignal s){
-
-			List<XYPoint> signalPoints = s.getPixelsAsPoints();
-
-			if(signalPoints.isEmpty()){
-				return 0;
-			}
+		public int getDensity(CellularComponent s){
 
 			ImageStack st = new ImageImporter(s.getSourceFile()).importImage();
 			int stackNumber = Constants.rgbToStack(s.getChannel());
 			ImageProcessor ip = st.getProcessor(stackNumber);
 
+			Area componentArea = new Area(s.toOriginalShape());
+			Area shellArea     = this.toArea();
+			
+			// Keep pixels that are in both shapes
+			componentArea.intersect(shellArea);
+			
+			int result = getDensity(ip, componentArea);
 
-
-
-			// create result array
-			int result = 0;
-
-			try {
-
-				int density = 0;
-
-				// Go through every pixel in the signal
-				for(XYPoint p : signalPoints){
-
-					int x = p.getXAsInt();
-					int y = p.getYAsInt();
-
-					// Test if the point is within this shell
-					if(r.contains(x, y)){
-						
-//						if(s.containsOriginalPoint(x, y)){
-							// find the value of the signal
-							density += ip.getPixel(x, y);	
-//						}
-					}
-				}
-				
-				result = density;
-
-			} catch (Exception e) {
-				error( "Error getting signal densities", e);
-
-				return 0;
-			}
 			return result;
 		}
 		
-		/**
-		 * Get the pixels within this shell as points
-		 * @return
-		 */
-		public List<XYPoint> getPixelsAsPoints(){
+		private int getDensity(ImageProcessor ip, Shape s){
+			
+			int result = 0;
 
-
-			Rectangle roiBounds = this.getBounds();
-
-
-			// Get a list of all the points within the ROI
-			List<XYPoint> result = new ArrayList<XYPoint>(0);
-
-			// get the bounding box of the roi
-			// make a list of all the pixels in the roi
+			Rectangle roiBounds = s.getBounds();
+			
 			int minX = (int) roiBounds.getX();
 			int maxX = minX + (int) roiBounds.getWidth();
 
@@ -578,27 +573,14 @@ public class ShellDetector extends Detector {
 				for(int y=minY; y<=maxY; y++){
 
 					if(r.contains(x, y)){
-						result.add(new XYPoint(x, y));
-					}
+						result += ip.getPixel(x, y);	
+					} 
 				}
 			}
-
-			if(result.isEmpty()){
-				//					IJ.log("    Roi has no pixels");
-				log(Level.SEVERE, "No points found in roi");
-				log(Level.FINE, "X base: "+minX
-						+"  Y base: "+minY
-						+"  X max: "+maxX
-						+"  Y max: "+maxY);
-			} else {
-				//					IJ.log("    Roi of area "+result.size());
-			}
+						
 			return result;
-
-
 		}
-
-
+		
 		/**
 		 * Get the position of the shell as described in the 
 		 * CellularComponent interface

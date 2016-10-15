@@ -16,6 +16,10 @@ public class Point3D extends XYPoint {
 		this.z = z;
 	}
 	
+	public Point3D(XYPoint p, double z) {
+		this(p.x, p.y, z);
+	}
+	
 	public Point3D(Point3D p) {
 		this(p.x, p.y, p.z);
 	}
@@ -28,6 +32,11 @@ public class Point3D extends XYPoint {
 		this.z = z;
 	}
 	
+	/**
+	 * Discard the z information and return the 2D point
+	 * defined by the x and y coordinates
+	 * @return
+	 */
 	public XYPoint to2D(){
 		return new XYPoint(x, y);
 	}

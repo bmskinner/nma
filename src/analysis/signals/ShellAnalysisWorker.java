@@ -67,6 +67,10 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			counters = new HashMap<UUID, ShellCounter>(0);
 
 			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+				
+				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+					continue;
+				}
 				counters.put(signalGroup, new ShellCounter(shells));
 			}
 
@@ -108,6 +112,11 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			
 			if(collection.getSignalManager().hasSignals(signalGroup)){
 				List<NuclearSignal> signals = n.getSignalCollection().getSignals(signalGroup); 
+				
+				log("Nucleus "+n.getNameAndNumber());
+				int[]    intensityPerShell = shellAnalyser.findPixelCountPerShell();
+				log("Pixels / shell:\t"+ new ArrayConverter(intensityPerShell).toString());
+				log("Signals:");
 
 				ShellCounter counter = counters.get(signalGroup);
 
@@ -117,6 +126,9 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 						
 						double[] signalPerShell = shellAnalyser.findProportionPerShell(s);
 						int[]    countsPerShell = shellAnalyser.findPixelCountPerShell(s);
+						log( "Pixel count\t"+new ArrayConverter(countsPerShell).toString());
+						log( "Pixel prop \t"+new ArrayConverter(signalPerShell).toString());
+						
 						counter.addValues(signalPerShell, countsPerShell);
 						
 						totalPixels += new Sum(counter.getCounts()).intValue();

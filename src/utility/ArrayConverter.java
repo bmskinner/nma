@@ -249,6 +249,18 @@ public class ArrayConverter {
 		return result;
 		
 	}
+	
+	/**
+	 * Convert the data in this converter to a tab delimited string
+	 * @return
+	 */
+	public String toString(){
+		StringBuilder b = new StringBuilder();
+		for(Object o : data){
+			b.append(o.toString()+"\t");
+		}
+		return b.toString();
+	}
 
 	 @SuppressWarnings("serial")
 	 public class ArrayConversionException extends Exception {
