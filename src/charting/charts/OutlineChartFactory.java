@@ -23,6 +23,7 @@ package charting.charts;
 import gui.RotationMode;
 import gui.components.ColourSelecter;
 import ij.process.ImageProcessor;
+import io.UnloadableImageException;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -669,47 +670,48 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 */
 	private static void drawImageAsAnnotation(XYPlot plot, Cell cell, CellularComponent component){
 		
-		if(component==null){
+		if(component==null || cell==null || plot==null){
 			return;
 		}
 		
-			ImageProcessor openProcessor = component.getImage();
+		ImageProcessor openProcessor;
+		try {
+			openProcessor = component.getImage();
+		} catch (UnloadableImageException e) {
+			return;
+		}
 
-			if(openProcessor==null){	
-				return;	
+		double[] positions = cell.getNucleus().getPosition();
+
+		XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
+
+		int padding = 10; // a border of pixels beyond the cell boundary
+		int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
+		int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
+		int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
+		int wideY = (int) (positions[CellularComponent.Y_BASE]-padding);
+
+		wideX = wideX<0 ? 0 : wideX;
+		wideY = wideY<0 ? 0 : wideY;
+
+		openProcessor.setRoi(wideX, wideY, wideW, wideH);
+		openProcessor = openProcessor.crop();
+
+		for(int x=0; x<openProcessor.getWidth(); x++){
+			for(int y=0; y<openProcessor.getHeight(); y++){
+
+				//				int pixel = im.getRGB(x, y);
+				int pixel = openProcessor.get(x, y);
+				Color col = new Color(pixel);
+				//				Color col = new Color(pixel, pixel, pixel, 255);
+
+				// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
+				Rectangle2D r = new Rectangle2D.Double(x-padding-0.6, y-padding-0.6, 1.2, 1.2);
+				XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+
+				rend.addAnnotation(a, Layer.BACKGROUND);
 			}
-
-			double[] positions = cell.getNucleus().getPosition();
-
-			XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
-
-			int padding = 10; // a border of pixels beyond the cell boundary
-			int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
-			int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
-			int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
-			int wideY = (int) (positions[CellularComponent.Y_BASE]-padding);
-
-			wideX = wideX<0 ? 0 : wideX;
-			wideY = wideY<0 ? 0 : wideY;
-
-			openProcessor.setRoi(wideX, wideY, wideW, wideH);
-			openProcessor = openProcessor.crop();
-
-			for(int x=0; x<openProcessor.getWidth(); x++){
-				for(int y=0; y<openProcessor.getHeight(); y++){
-
-					//				int pixel = im.getRGB(x, y);
-					int pixel = openProcessor.get(x, y);
-					Color col = new Color(pixel);
-					//				Color col = new Color(pixel, pixel, pixel, 255);
-
-					// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
-					Rectangle2D r = new Rectangle2D.Double(x-padding-0.6, y-padding-0.6, 1.2, 1.2);
-					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
-
-					rend.addAnnotation(a, Layer.BACKGROUND);
-				}
-			}
+		}
 	}
 	
 	

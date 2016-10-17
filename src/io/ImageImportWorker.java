@@ -99,7 +99,13 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 	
 	private ImageIcon importCellImage(Cell c){
 		Nucleus n = c.getNucleus();
-		ImageProcessor ip = n.getComponentImage();
+		ImageProcessor ip;
+		try {
+			ip = n.getComponentImage();
+		} catch (UnloadableImageException e) {
+			fine("Cannot load image for component");
+			return new ImageIcon();
+		}
 		drawNucleus(c, ip);
 
 		if(rotate){

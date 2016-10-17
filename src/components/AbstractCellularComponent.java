@@ -50,6 +50,7 @@ import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import io.ImageImporter;
 import io.ImageImporter.ImageImportException;
+import io.UnloadableImageException;
 import stats.PlottableStatistic;
 import stats.Quartile;
 import stats.Stats;
@@ -260,7 +261,7 @@ public abstract class AbstractCellularComponent
 		return this.sourceFileName;
 	}
 	
-	public ImageProcessor getImage(){
+	public ImageProcessor getImage() throws UnloadableImageException{
 		
 		ImageProcessor ip = imageRef.get();
 		if(ip !=null){
@@ -288,12 +289,13 @@ public abstract class AbstractCellularComponent
 			}
 			
 		} else {
-			return null;
+			throw new UnloadableImageException("Source image is not available");
+//			return null;
 		}
 	}
 	
 
-	public ImageProcessor getComponentImage(){
+	public ImageProcessor getComponentImage() throws UnloadableImageException{
 		ImageProcessor ip = getImage();
 
 		if(ip==null){	

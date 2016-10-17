@@ -20,6 +20,7 @@
 package components;
 
 import ij.process.ImageProcessor;
+import io.UnloadableImageException;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -93,15 +94,17 @@ public interface Imageable {
 	 * the image via the ImageImporter, fetches the appropriate
 	 * channel and inverts it
 	 * @return
+	 * @throws UnloadableImageException if the image can't be loaded
 	 */
-	public ImageProcessor getImage();
+	public ImageProcessor getImage() throws UnloadableImageException;
 	
 	/**
 	 * Get the image from which the component was detected, and crops
 	 * it to only the region containing the component
 	 * @return
+	 * @throws UnloadableImageException if the image can't be loaded
 	 */
-	public ImageProcessor getComponentImage();
+	public ImageProcessor getComponentImage() throws UnloadableImageException;
 
 	/**
 	 * Set the RGB channel the component was detected in
