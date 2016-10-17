@@ -49,6 +49,7 @@ import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import io.ImageImporter;
+import io.ImageImporter.ImageImportException;
 import stats.PlottableStatistic;
 import stats.Quartile;
 import stats.Stats;
@@ -271,14 +272,21 @@ public abstract class AbstractCellularComponent
 			
 			// Get the stack, make greyscale and invert
 			int stack = Constants.rgbToStack(getChannel());
-						
-			ImageStack imageStack = new ImageImporter(getSourceFile()).importImage();
-			ip = new ImageConverter(imageStack).convertToGreyscale(stack).toProcessor();
-			ip.invert();	
 			
-			imageRef = new SoftReference<ImageProcessor>(ip);
+			try {
+				ImageStack imageStack = new ImageImporter(getSourceFile()).importImage();
+				ip = new ImageConverter(imageStack).convertToGreyscale(stack).toProcessor();
+				ip.invert();	
+				
+				imageRef = new SoftReference<ImageProcessor>(ip);
+				
+				return ip;
+				
+			} catch (ImageImportException e) {
+				error("Error importing source image "+this.getSourceFile().getAbsolutePath(), e);
+				return null;
+			}
 			
-			return ip;
 		} else {
 			return null;
 		}

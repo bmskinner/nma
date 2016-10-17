@@ -20,6 +20,7 @@ package components.nuclear;
 
 import ij.process.ImageProcessor;
 import io.ImageImporter;
+import io.ImageImporter.ImageImportException;
 import stats.SignalStatistic;
 
 import java.io.File;
@@ -614,7 +615,12 @@ public class SignalCollection implements Serializable, Loggable {
 		File f = this.sourceFiles.get(signalGroup);
 		int channel = this.sourceChannels.get(signalGroup);
 		
-		return new ImageImporter(f).importImage(channel);
+		try {
+			return new ImageImporter(f).importImage(channel);
+		} catch (ImageImportException e) {
+			error("Error importing image source file "+f.getAbsolutePath(), e);
+			return null;
+		}
 	}
 		
 	public String toString(){

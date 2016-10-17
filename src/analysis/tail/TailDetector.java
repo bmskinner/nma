@@ -28,6 +28,7 @@ import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import io.ImageImporter;
+import io.ImageImporter.ImageImportException;
 
 import java.awt.Color;
 import java.io.File;
@@ -720,8 +721,15 @@ public class TailDetector extends Detector {
 	private boolean checkDimensions(ImageStack stack, Nucleus n ){
 		
 		File baseFile = n.getSourceFile();
-		log(Level.FINE, "Nucleus in "+baseFile.getAbsolutePath());
-		ImageStack baseStack =  new ImageImporter(baseFile).importImage();
+		fine("Nucleus in "+baseFile.getAbsolutePath());
+		
+		ImageStack baseStack;
+		try {
+			baseStack = new ImageImporter(baseFile).importImage();
+		} catch (ImageImportException e) {
+			error("Error importing image source file "+baseFile.getAbsolutePath(), e);
+			return false;
+		}
 		
 		boolean ok = true;
 		if(stack.getHeight() != baseStack.getHeight()){

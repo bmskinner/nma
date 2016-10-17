@@ -30,6 +30,7 @@ import ij.gui.Roi;
 import ij.plugin.RoiEnlarger;
 import ij.process.ImageProcessor;
 import io.ImageImporter;
+import io.ImageImporter.ImageImportException;
 
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -542,7 +543,13 @@ public class ShellDetector extends Detector {
 		*/
 		public int getDensity(CellularComponent s){
 
-			ImageStack st = new ImageImporter(s.getSourceFile()).importImage();
+			ImageStack st;
+			try {
+				st = new ImageImporter(s.getSourceFile()).importImage();
+			} catch (ImageImportException e) {
+				error("Error importing image source file "+s.getSourceFile().getAbsolutePath(), e);
+				return -1;
+			}
 			int stackNumber = Constants.rgbToStack(s.getChannel());
 			ImageProcessor ip = st.getProcessor(stackNumber);
 

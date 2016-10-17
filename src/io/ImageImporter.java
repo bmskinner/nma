@@ -41,40 +41,47 @@ import utility.Constants;
 public class ImageImporter implements Loggable {
 	
 	private File f = null;
-	
-	public ImageImporter(File f){
-		this.f = f;
-	}
-	
 	private static final int[] IMAGE_TYPES_PROCESSED = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
 	
+	/**
+	 * Construct from a file. Checks that the given File object is valid, and 
+	 * throws an IllegalArgumentException if not.
+	 * @param f the file to import
+	 */
+	public ImageImporter(File f){
+		if(f==null){
+			throw new IllegalArgumentException("File cannot be null");
+		}
+		
+		if( ! f.exists()){
+			throw new IllegalArgumentException("File does not exist");
+		}
+		
+		if( f.isDirectory()){
+			throw new IllegalArgumentException("File is a directory");
+		}
+		
+		if( ! f.isFile()){
+			throw new IllegalArgumentException("File has non-normal attributes or is not a file");
+		}
+		
+		this.f = f;
+	}
+
 
 	/**
 	 * Import and convert the image in the given file to an ImageStack
 	 * @return the ImageStack
 	 */
-	public ImageStack importImage(){
+	public ImageStack importImage() throws ImageImportException{
 
 		ImageStack stack = null;
 
-		try{
-			if(f.isFile()){
+		fine("Importing image: "+f.getAbsolutePath());
 
-				fine("Importing image: "+f.getAbsolutePath());
+		ImagePlus image = new ImagePlus(f.getAbsolutePath());
 
-				ImagePlus image = new ImagePlus(f.getAbsolutePath());
-				stack = convert(image);
-
-			} else {
-				warn("Not a file: "+f.getAbsolutePath());
-			}
-
-		} catch (Exception e){
-
-			error("Error importing image", e);
-
-		}
-
+		stack = convert(image);
 		return stack;
 	}
 	
@@ -85,7 +92,7 @@ public class ImageImporter implements Loggable {
 	 * @param channel
 	 * @return
 	 */
-	public ImageProcessor importImage(int channel){
+	public ImageProcessor importImage(int channel) throws ImageImportException {
 		ImageStack s = importImage();
 		int stack = Constants.rgbToStack(channel);
 		ImageProcessor ip = s.getProcessor(stack);
@@ -94,17 +101,11 @@ public class ImageImporter implements Loggable {
 	}
 	
 	/**
-	 * Create an ImageStack from the input image
-	 * @param image the image to be converted to a stack
-	 * @return the stack with countertain in index 0
+	 * Test if the given image can be read by this program
+	 * @param image
+	 * @return
 	 */
-	private ImageStack convert(ImagePlus image) throws Exception {
-		if(image==null){
-			log(Level.WARNING, "Input image is null");
-
-			throw new IllegalArgumentException("Input image is null");
-		}
-
+	private boolean canImport(ImagePlus image){
 		// check that we are able to handle this image type
 		boolean ok = false;
 		for(int i : IMAGE_TYPES_PROCESSED){
@@ -112,39 +113,50 @@ public class ImageImporter implements Loggable {
 				ok = true;
 			}
 		}
-		if(!ok ){
-
-			log(Level.WARNING, "Cannot handle image type: "+image.getType());
-
-			throw new IllegalArgumentException("Cannot handle image type: "+image.getType());
+		return  ok;
+	}
+	
+	/**
+	 * Create an ImageStack from the input image
+	 * @param image the image to be converted to a stack
+	 * @return the stack with countertain in index 0
+	 */
+	private ImageStack convert(ImagePlus image) throws ImageImportException {
+		if(image==null){
+			throw new ImageImportException("Input image is null");
 		}
-
-		log(Level.FINE, "Image is type: "+image.getType());
-
+		
+		if( ! canImport(image) ){
+			throw new ImageImportException("Cannot handle image type: "+image.getType());
+		}
 
 		// do the conversions
 		ImageStack result = null;
-		if(image.getType()==ImagePlus.GRAY8){
-
-			log(Level.FINE, "Converting 8 bit greyscale to stack");
-
-
-			result = convertGreyscale(image);
-		}
-
-		if(image.getType()==ImagePlus.COLOR_RGB){
-			log(Level.FINE, "Converting RGB to stack");
-
-
-			result = convertRGB(image);
-		}
-
-		if(image.getType()==ImagePlus.GRAY16){
-
-			log(Level.FINE, "Converting 16 bit greyscale to 8 bit stack");
-
-
-			result = convert16bitGrey(image);
+		
+		switch(image.getType()){
+		
+			case ImagePlus.GRAY8:{
+				fine("Converting 8 bit greyscale to stack");
+				result = convertGreyscale(image);
+				break;
+			}
+			
+			case ImagePlus.COLOR_RGB:{
+				fine("Converting RGB to stack");
+				result = convertRGB(image);
+				break;
+			}
+			
+			case ImagePlus.GRAY16:{
+				fine("Converting 16 bit greyscale to 8 bit stack");
+				result = convert16bitGrey(image);
+				break;
+			}
+			
+			default:{
+				// Should never occur given the test in canImport(), but shows the intent 
+				throw new ImageImportException("Unsupported image type: "+image.getType());
+			}
 		}
 
 		return result;
@@ -189,10 +201,18 @@ public class ImageImporter implements Loggable {
 	 * @param image the 16 bit image to convert
 	 * @return the stack
 	 */
-	private ImageStack convert16bitGrey(ImagePlus image) throws Exception {
+	private ImageStack convert16bitGrey(ImagePlus image) throws ImageImportException {
 		log(Level.FINE, "Converting image from 16 bit");
 		ImageConverter converter = new ImageConverter(image);
 		converter.convertToGray8();
 		return convertGreyscale(image);
+	}
+	
+	public class ImageImportException extends Exception {
+		private static final long serialVersionUID = 1L;
+		public ImageImportException() { super(); }
+		public ImageImportException(String message) { super(message); }
+		public ImageImportException(String message, Throwable cause) { super(message, cause); }
+		public ImageImportException(Throwable cause) { super(cause); }
 	}
 }

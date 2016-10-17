@@ -43,6 +43,7 @@ import gui.dialogs.FishRemappingDialog.FishMappingImageType;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 import io.ImageImporter;
+import io.ImageImporter.ImageImportException;
 
 import java.io.File;
 
@@ -63,15 +64,21 @@ public class FishRemappingWorker extends ImageProberWorker {
 
 		
 		if( ! fishDirectory.isDirectory()){
-			throw new IllegalArgumentException("Fish directory is not a folder");
+			throw new IllegalArgumentException("FISH directory is not a folder");
 		}
 		this.postFISHImageDirectory = fishDirectory;
 		
 	}
 	
-	protected void analyseImages() throws Exception {
+	protected void analyseImages() {
 
-			ImageStack stack = new ImageImporter(file).importImage();
+			ImageStack stack;
+			try {
+				stack = new ImageImporter(file).importImage();
+			} catch (ImageImportException e) {
+				error("Error importing file "+file.getAbsolutePath(), e);
+				return;
+			}
 
 			// Import the image as a stack
 			String imageName = file.getName();
@@ -91,7 +98,13 @@ public class FishRemappingWorker extends ImageProberWorker {
 				
 			} else {
 			
-				ImageStack fishStack = new ImageImporter(fishImageFile).importImage();
+				ImageStack fishStack;
+				try {
+					fishStack = new ImageImporter(fishImageFile).importImage();
+				} catch (ImageImportException e) {
+					error("Error importing FISH image file "+fishImageFile.getAbsolutePath(), e);
+					return;
+				}
 
 				ImageProcessor fishProcessor = new ImageConverter(fishStack).convertToRGB().toProcessor();
 
