@@ -1,4 +1,4 @@
-package charting.charts;
+package charting.datasets;
 
 import java.util.HashMap;
 import java.util.List;

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import analysis.profiles.ProfileSegmenter.UnsegmentableProfileException;
 import logging.Loggable;
 import utility.Constants;
 import components.AbstractCellularComponent;
@@ -499,7 +500,13 @@ public class ProfileManager implements Loggable {
 
 		ProfileSegmenter segmenter = new ProfileSegmenter(medianToSegment, map);		
 
-		List<NucleusBorderSegment> segments = segmenter.segment();
+		List<NucleusBorderSegment> segments;
+		try {
+			segments = segmenter.segment();
+		} catch (UnsegmentableProfileException e) {
+			warn("Cannot segment profile: "+e.getMessage());
+			return;
+		}
 
 		pc.addSegments(BorderTagObject.REFERENCE_POINT, segments);
 
@@ -516,25 +523,6 @@ public class ProfileManager implements Loggable {
 
 	}
 	
-
-	
-	
-//	/**
-//	 * Test if the regular median profiles of the given datasets have the same segment counts
-//	 * @param list
-//	 * @return
-//	 */
-//	public static boolean segmentCountsMatch(List<AnalysisDataset> list){
-//		
-//		int segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
-//		for(AnalysisDataset d : list){
-//			if( d.getCollection().getProfileManager().getSegmentCount() != segCount){
-//				return false;
-//			}
-//		}
-//		
-//		return true;
-//	}
 	
 	/**
 	 * Get the number of segments in the regular profile of the collection. On error

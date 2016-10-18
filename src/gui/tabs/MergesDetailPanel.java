@@ -42,7 +42,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.datasets.NucleusTableDatasetCreator;
+import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
@@ -255,9 +255,9 @@ public class MergesDetailPanel extends DetailPanel {
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		if(options.getType().equals(TableType.MERGE_SOURCES)){
-			return NucleusTableDatasetCreator.getInstance().createMergeSourcesTable(options);
+			return new AnalysisDatasetTableCreator(options).createMergeSourcesTable();
 		} else {
-			return NucleusTableDatasetCreator.getInstance().createAnalysisTable(options);
+			return new AnalysisDatasetTableCreator(options).createAnalysisTable();
 		}
 	}
 }

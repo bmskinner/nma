@@ -31,7 +31,7 @@ import javax.swing.JLabel;
 import javax.swing.table.TableModel;
 
 import stats.SegmentStatistic;
-import charting.datasets.NucleusTableDatasetCreator;
+import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import components.generic.BorderTagObject;
@@ -118,7 +118,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 	}
 	
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return NucleusTableDatasetCreator.getInstance().createWilcoxonStatisticTable(options);
+		return new AnalysisDatasetTableCreator(options).createWilcoxonStatisticTable();
 	}
 			
 }

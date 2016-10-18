@@ -31,6 +31,7 @@ import gui.DatasetEvent;
 import gui.MainWindow;
 import gui.ThreadManager;
 import io.PopulationImportWorker;
+import io.PopulationImportWorker.UnloadableDatasetException;
 
 /**
  * Call an open dialog to choose a saved .nbd dataset. The opened dataset
@@ -103,7 +104,13 @@ public class PopulationImportAction extends ProgressableAction {
 	@Override
 	public void finished(){
 		setProgressBarVisible(false);
-		AnalysisDataset dataset = ((PopulationImportWorker) worker).getLoadedDataset();
+		AnalysisDataset dataset;
+		try {
+			dataset = ((PopulationImportWorker) worker).getLoadedDataset();
+		} catch (UnloadableDatasetException e) {
+			warn("Unable to open dataset: "+e.getMessage());
+			return;
+		}
 		fine("Opened dataset");
 
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);

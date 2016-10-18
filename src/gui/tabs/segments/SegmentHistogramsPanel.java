@@ -3,6 +3,7 @@ package gui.tabs.segments;
 import gui.GlobalOptions;
 import gui.Labels;
 import gui.components.HistogramsTabPanel;
+
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.List;
@@ -16,7 +17,7 @@ import org.jfree.chart.JFreeChart;
 
 import stats.SegmentStatistic;
 import charting.charts.HistogramChartFactory;
-import charting.charts.SelectableChartPanel;
+import charting.charts.panels.SelectableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
@@ -32,7 +33,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 	public SegmentHistogramsPanel(){
 		super();
 		
-		JFreeChart chart = HistogramChartFactory.getInstance().createHistogram(null, "Segment", "Length");		
+		JFreeChart chart = HistogramChartFactory.createHistogram(null, "Segment", "Length");		
 		SelectableChartPanel panel = new SelectableChartPanel(chart, "null");
 		panel.setPreferredSize(preferredSize);
 		SegmentHistogramsPanel.this.chartPanels.put("null", panel);
@@ -69,7 +70,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 			// Get each segment as a boxplot
 			for(NucleusBorderSegment seg : segments){
 				
-				JFreeChart chart = HistogramChartFactory.getInstance().makeEmptyChart();
+				JFreeChart chart = HistogramChartFactory.makeEmptyChart();
 				SelectableChartPanel chartPanel = new SelectableChartPanel(chart, seg.getName());
 				chartPanel.setPreferredSize(preferredSize);
 				mainPanel.add(chartPanel);	
@@ -109,7 +110,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-		JFreeChart chart = HistogramChartFactory.getInstance().createHistogram(null, "Segment", "Length");		
+		JFreeChart chart = HistogramChartFactory.createHistogram(null, "Segment", "Length");		
 		SelectableChartPanel panel = new SelectableChartPanel(chart, "null");
 		panel.setPreferredSize(preferredSize);
 		SegmentHistogramsPanel.this.chartPanels.put("null", panel);

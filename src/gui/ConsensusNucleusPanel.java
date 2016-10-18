@@ -36,10 +36,11 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.ConsensusNucleusChartFactory;
-import charting.charts.ConsensusNucleusChartPanel;
+import charting.charts.panels.ConsensusNucleusChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
@@ -370,7 +371,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-			return ConsensusNucleusChartFactory.getInstance().makeConsensusChart(options);
+			return new ConsensusNucleusChartFactory(options).makeConsensusChart();
 	}
 
 		

@@ -42,45 +42,63 @@ import utility.Version;
 
 public class PopulationImportWorker extends AnalysisWorker {
 	
-	private File file;
-	private AnalysisDataset dataset = null;
+	private final File file;
+	private AnalysisDataset dataset = null; // the active dataset of an AnalysisWorker is private and immutable, so have a new field here
 	
 	public PopulationImportWorker(final File f){
 		super(null);
+		
+		if(f==null){
+			throw new IllegalArgumentException("File cannot be null");
+		}
+		
+		if( ! f.exists()){
+			throw new IllegalArgumentException("File does not exist");
+		}
+		
+		if( f.isDirectory()){
+			throw new IllegalArgumentException("File is a directory");
+		}
+		
+		if( ! f.isFile()){
+			throw new IllegalArgumentException("File has non-normal attributes or is not a file");
+		}
+		
+		if( ! f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
+			throw new IllegalArgumentException("File is not nmd format or has been renamed");
+		}
+
+		
 		this.file = f;
 		this.setProgressTotal(1);
-		finest("Created instance of "+this.getClass().getSimpleName());
 	}
 	
-	public AnalysisDataset getLoadedDataset(){
+	public AnalysisDataset getLoadedDataset() throws UnloadableDatasetException {
+		
+		if(this.dataset==null){
+			throw new UnloadableDatasetException("No dataset loaded");
+		}
 		return this.dataset;
 	}
 	
 	@Override
-	protected Boolean doInBackground() {
+	protected Boolean doInBackground() throws Exception {
 		finest("Beginning background work");
 		fireCooldown();
 		try {
-			dataset = readDataset(file);
-			
-			if(dataset == null){
-				warn("Unable to open dataset");
-				return false;
-			}
-			
-			fine("Read dataset");
-			
-			Version v = null;
-			
 			
 			try {
-				v = dataset.getVersion();
-			} catch (Exception e) {
-				error("Error getting version from dataset", e);
+				dataset = readDataset(file);
+			} catch (UnloadableDatasetException e){
+				warn(e.getMessage());
+				warn("Dataset version may be too old");
 				return false;
 			}
+						
+			fine("Read dataset");
 			
-			
+			Version v = dataset.getVersion();
+	
 			
 			if(checkVersion( v )){
 
@@ -139,9 +157,6 @@ public class PopulationImportWorker extends AnalysisWorker {
 			
 		} catch (IllegalArgumentException e){
 			warn("Unable to open file: "+e.getMessage());
-			return false;
-		} catch(Exception e){
-			error("Unable to open file", e);
 			return false;
 		}
 	}
@@ -224,17 +239,11 @@ public class PopulationImportWorker extends AnalysisWorker {
 		return true;
 	}
 	
-	private AnalysisDataset readDataset(File inputFile) {
+	private AnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException  {
 
+		
 		finest("Checking input file");
 		
-		if( ! inputFile.exists()){
-			throw new IllegalArgumentException("Requested file does not exist");
-		}
-		
-		if( ! inputFile.getName().endsWith(".nmd")){
-			throw new IllegalArgumentException("File is not nmd format");
-		}
 
 		AnalysisDataset dataset = null;
 		FileInputStream fis     = null;
@@ -260,21 +269,13 @@ public class PopulationImportWorker extends AnalysisWorker {
 				updateSavePath(inputFile, dataset);
 			}
 			
-		} catch (FileNotFoundException e1) {
-			error("File not found: "+inputFile.getAbsolutePath(), e1);
-			dataset = null;
-		} catch (IOException e1) {
-			error("File IO error: "+inputFile.getAbsolutePath(), e1);
-			dataset = null;
-		} catch (ClassNotFoundException e1) {
-			error("Class not found error: "+inputFile.getAbsolutePath(), e1);
-			dataset = null;
 		} catch(Exception e1){
-			error("Unexpected exception opening dataset: "+inputFile.getAbsolutePath(), e1);
-			dataset = null;
+
+			throw new UnloadableDatasetException("Cannot load dataset due to "+e1.getClass().getSimpleName(), e1);
 		} catch(StackOverflowError e){
-			error("StackOverflow opening dataset: "+inputFile.getAbsolutePath(), e);
-			dataset = null;
+			
+			throw new UnloadableDatasetException("Stack overflow loading dataset", e);
+			
 		} finally {
 			finest("Closing file stream");
 			try {
@@ -385,6 +386,14 @@ public class PopulationImportWorker extends AnalysisWorker {
 
 		fine("Selected folder: "+file.getAbsolutePath());
 		return file;
+	}
+	
+	public class UnloadableDatasetException extends Exception {
+		private static final long serialVersionUID = 1L;
+		public UnloadableDatasetException() { super(); }
+		public UnloadableDatasetException(String message) { super(message); }
+		public UnloadableDatasetException(String message, Throwable cause) { super(message, cause); }
+		public UnloadableDatasetException(Throwable cause) { super(cause); }
 	}
 	
 

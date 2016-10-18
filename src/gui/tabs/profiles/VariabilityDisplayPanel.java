@@ -24,6 +24,7 @@ import gui.components.panels.ProfileCollectionTypeSettingsPanel;
 import gui.components.panels.ProfileMarkersOptionsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.tabs.DetailPanel;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -39,10 +40,12 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import org.jfree.chart.JFreeChart;
+
 import utility.Constants;
-import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.BorderTagObject;
@@ -67,7 +70,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 			.setProfileType(ProfileType.ANGLE)
 			.build();
 		
-		JFreeChart chart = MorphologyChartFactory.getInstance().makeVariabilityChart(options);
+		JFreeChart chart = new MorphologyChartFactory(options).makeVariabilityChart();
 
 
 		chartPanel = new ExportableChartPanel(chart);
@@ -203,7 +206,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return MorphologyChartFactory.getInstance().makeVariabilityChart(options);
+		return new MorphologyChartFactory(options).makeVariabilityChart();
 	}
 	
 }

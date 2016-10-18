@@ -11,8 +11,8 @@ import javax.swing.JPanel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.ConsensusNucleusChartFactory;
-import charting.charts.ExportableChartPanel;
 import charting.charts.OutlineChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellularComponent;
@@ -43,7 +43,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		super(model);
 		// make the chart for each nucleus
 		this.setLayout(new BorderLayout());
-		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
+		JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyChart();
 
 		
 		JPanel settingsPanel = new JPanel(new FlowLayout());
@@ -171,7 +171,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return OutlineChartFactory.getInstance().makeCellOutlineChart(options);
+		return new OutlineChartFactory(options).makeCellOutlineChart();
 	}
 	
 	@Override

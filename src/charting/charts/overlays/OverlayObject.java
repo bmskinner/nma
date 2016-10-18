@@ -17,7 +17,7 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package charting.charts;
+package charting.charts.overlays;
 
 import java.awt.Paint;
 import java.awt.Stroke;

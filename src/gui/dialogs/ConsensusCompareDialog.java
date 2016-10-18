@@ -25,8 +25,8 @@ import org.jfree.chart.JFreeChart;
 import analysis.AnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import charting.charts.ConsensusNucleusChartFactory;
-import charting.charts.ExportableChartPanel;
 import charting.charts.OutlineChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.nuclei.Nucleus;
@@ -70,7 +70,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		finest("Created consensus compare header");
 		this.add(header, BorderLayout.NORTH);
 		
-		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
+		JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyChart();
 		finest("Created empty chart");
 		/*
 		 * Create a central panel for all charts
@@ -249,8 +249,8 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				 * Create log2 histograms for the entire pairwise mesh
 				 */
 				
-				histoChartOne = OutlineChartFactory.getInstance().createMeshHistogram(comparison1);
-				histoChartTwo = OutlineChartFactory.getInstance().createMeshHistogram(comparison2);
+				histoChartOne = OutlineChartFactory.createMeshHistogram(comparison1);
+				histoChartTwo = OutlineChartFactory.createMeshHistogram(comparison2);
 				
 				
 				ChartOptions options = new ChartOptionsBuilder()
@@ -259,17 +259,18 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 					.setShowMeshEdges(showEdges)
 					.build();
 	
-				chartOne = OutlineChartFactory.getInstance().createMeshChart(comparison1, logRatio, options);
-				chartTwo = OutlineChartFactory.getInstance().createMeshChart(comparison2, logRatio, options);
+				OutlineChartFactory ocf = new OutlineChartFactory(options);
+				chartOne = ocf.createMeshChart(comparison1, logRatio );
+				chartTwo = ocf.createMeshChart(comparison2, logRatio);
 	
 				
 			} catch (Exception e){
 				
-				chartOne = ConsensusNucleusChartFactory.getInstance().makeErrorChart();
-				chartTwo = ConsensusNucleusChartFactory.getInstance().makeErrorChart();
+				chartOne = ConsensusNucleusChartFactory.makeErrorChart();
+				chartTwo = ConsensusNucleusChartFactory.makeErrorChart();
 				
-				histoChartOne = ConsensusNucleusChartFactory.getInstance().makeErrorChart();
-				histoChartTwo = ConsensusNucleusChartFactory.getInstance().makeErrorChart();
+				histoChartOne = ConsensusNucleusChartFactory.makeErrorChart();
+				histoChartTwo = ConsensusNucleusChartFactory.makeErrorChart();
 
 				log(Level.FINE, "Error creating mesh chart", e);
 			}
@@ -278,11 +279,11 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 			
 		} else {
 			
-			chartOne = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
-			chartTwo = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
+			chartOne = ConsensusNucleusChartFactory.makeEmptyChart();
+			chartTwo = ConsensusNucleusChartFactory.makeEmptyChart();
 			
-			histoChartOne = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
-			histoChartTwo = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
+			histoChartOne = ConsensusNucleusChartFactory.makeEmptyChart();
+			histoChartTwo = ConsensusNucleusChartFactory.makeEmptyChart();
 			
 		}
 		

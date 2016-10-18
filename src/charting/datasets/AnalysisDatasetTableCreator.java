@@ -33,8 +33,6 @@ import java.util.logging.Level;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import logging.Loggable;
-
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 import charting.options.TableOptions;
@@ -53,31 +51,28 @@ import components.nuclear.NucleusBorderSegment;
 import stats.ConfidenceInterval;
 import stats.DipTester;
 import stats.Mean;
-import stats.Min;
 import stats.NucleusStatistic;
 import stats.Quartile;
 import stats.SegmentStatistic;
 import stats.Stats;
 import utility.Constants;
 
-public class NucleusTableDatasetCreator implements Loggable {
+public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	
-private static NucleusTableDatasetCreator instance = null;
-	
-	protected NucleusTableDatasetCreator(){}
-	
+	protected final TableOptions options;
+
 	/**
-	 * Fetch an instance of the factory
-	 * @return
+	 * Create with a set of table options
+	 * @param o
 	 */
-	public static NucleusTableDatasetCreator getInstance(){
-		if(instance==null){
-			instance = new NucleusTableDatasetCreator();
+	public AnalysisDatasetTableCreator(final TableOptions o){
+		if(o==null){
+			throw new IllegalArgumentException("Options cannot be null");
 		}
-		return instance;
+		options = o;
 	}
 		
-	public TableModel createMedianProfileStatisticTable(TableOptions options) throws Exception{
+	public TableModel createMedianProfileStatisticTable() throws Exception{
 		
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -88,19 +83,13 @@ private static NucleusTableDatasetCreator instance = null;
 		}
 		
 		if(options.isMultipleDatasets()){
-			return createMultiDatasetMedianProfileSegmentStatsTable(options);
+			return createMultiDatasetMedianProfileSegmentStatsTable();
 		}
 		
 		return createBlankTable();
 	}
 	
-	public TableModel createBlankTable(){
-		DefaultTableModel model = new DefaultTableModel();
-		model.addColumn(Labels.NO_DATA_LOADED);
-		return model;
-	}
-	
-	public TableModel createMergeSourcesTable(TableOptions options){
+	public TableModel createMergeSourcesTable(){
 		
 		if( ! options.hasDatasets()){
 			DefaultTableModel model = new DefaultTableModel();
@@ -146,7 +135,6 @@ private static NucleusTableDatasetCreator instance = null;
 
 		DefaultTableModel model = new DefaultTableModel();
 
-//		List<Object> fieldNames = new ArrayList<Object>(0);
 		if(dataset==null){
 			model.addColumn("No data loaded");
 
@@ -159,13 +147,6 @@ private static NucleusTableDatasetCreator instance = null;
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(point)
 					.getOrderedSegments();
-
-//			Map<String, String> map = new HashMap<String, String>();
-//			for(NucleusBorderSegment seg : segments){
-//				
-//				NucleusBorderSegment realSeg = collection.getProfileCollection(ProfileType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
-//				map.put(seg.getName(), realSeg.getName());
-//			}
 			
 			// create the row names
 			Object[] fieldNames = {
@@ -178,19 +159,8 @@ private static NucleusTableDatasetCreator instance = null;
 					"Length std err. ("+ scale+")",
 					"Length p(unimodal)"
 			};
-			
-//			fieldNames.add("Colour");
-//			fieldNames.add("Length");
-//			fieldNames.add("Start index");
-//			fieldNames.add("End index");
-//			fieldNames.add("Mean length ("+ scale+")");
-//			fieldNames.add("Mean length 95% CI ("+ scale+")");
-//			fieldNames.add("Length std err. ("+ scale+")");
-//			fieldNames.add("Length p(unimodal)");
 
 			model.addColumn("", fieldNames);
-			
-//			model.addColumn("", fieldNames.toArray(new Object[0]));
 						
 			DecimalFormat df = new DecimalFormat("#.##");
 			df.setMaximumFractionDigits(2);
@@ -210,7 +180,7 @@ private static NucleusTableDatasetCreator instance = null;
 				double[] meanLengths = collection.getSegmentStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
 
 				double mean = new Mean(meanLengths).doubleValue(); 
-//				double mean = Stats.mean( meanLengths);
+
 				double sem  = Stats.stderr(meanLengths);
 				
 				ConfidenceInterval ci = new ConfidenceInterval(meanLengths, 0.95);
@@ -235,7 +205,7 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	private TableModel createMultiDatasetMedianProfileSegmentStatsTable(TableOptions options) throws Exception {
+	private TableModel createMultiDatasetMedianProfileSegmentStatsTable() throws Exception {
 
 		List<AnalysisDataset> list = options.getDatasets();
 		MeasurementScale scale = options.getScale();
@@ -328,7 +298,7 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @param collection
 	 * @return
 	 */
-	public TableModel createAnalysisTable(TableOptions options) {
+	public TableModel createAnalysisTable() {
 
 		if( ! options.hasDatasets()){
 			finest("No datasets, creating blank table");
@@ -339,12 +309,12 @@ private static NucleusTableDatasetCreator instance = null;
 		
 		if(options.getType().equals(TableType.ANALYSIS_PARAMETERS)){
 			finest("Creating analysis parameters table model");
-			return createAnalysisParametersTable(options);
+			return createAnalysisParametersTable();
 		}
 		
 		if(options.getType().equals(TableType.ANALYSIS_STATS)){
 			finest("Creating analysis stats table model");
-			return createStatsTable(options);
+			return createStatsTable();
 		}
 		
 		return createBlankTable();
@@ -357,7 +327,7 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @param collection
 	 * @return
 	 */
-	private TableModel createAnalysisParametersTable(TableOptions options){
+	private TableModel createAnalysisParametersTable(){
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -595,7 +565,7 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @param collection
 	 * @return
 	 */
-	private TableModel createStatsTable(TableOptions options) {
+	private TableModel createStatsTable() {
 
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -670,7 +640,7 @@ private static NucleusTableDatasetCreator instance = null;
 		
 	}
 	
-	public TableModel createVennTable(TableOptions options){
+	public TableModel createVennTable(){
 		
 				
 		if( ! options.hasDatasets()){
@@ -735,7 +705,7 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @param list
 	 * @return
 	 */
-	public TableModel createPairwiseVennTable(TableOptions options) {
+	public TableModel createPairwiseVennTable() {
 				
 		if( ! options.hasDatasets()){
 			finest("No datasets, creating blank pairwise venn table");
@@ -879,18 +849,18 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @param options the table options
 	 * @return a tablemodel for display
 	 */	
-	public TableModel createWilcoxonStatisticTable(TableOptions options) throws Exception{
+	public TableModel createWilcoxonStatisticTable() throws Exception{
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
 		}
 		
 		if(options.getStat().getClass()==NucleusStatistic.class){
-			return createWilcoxonNuclearStatTable(options);
+			return createWilcoxonNuclearStatTable();
 		}
 		
 		if(options.getStat().getClass()==SegmentStatistic.class){
-			return createWilcoxonSegmentStatTable(options);
+			return createWilcoxonSegmentStatTable();
 		}
 		
 		return makeEmptyWilcoxonTable(null);
@@ -903,7 +873,7 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @param stat the statistic to measure
 	 * @return a tablemodel for display
 	 */	
-	private TableModel createWilcoxonNuclearStatTable(TableOptions options) throws Exception {
+	private TableModel createWilcoxonNuclearStatTable() throws Exception {
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
@@ -946,7 +916,7 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @param segName the segment to create the table for
 	 * @return a tablemodel for display
 	 */	
-	private TableModel createWilcoxonSegmentStatTable(TableOptions options) throws Exception {
+	private TableModel createWilcoxonSegmentStatTable() throws Exception {
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
 		}
@@ -997,18 +967,18 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @param options the table options
 	 * @return a tablemodel for display
 	 */	
-	public TableModel createMagnitudeStatisticTable(TableOptions options) throws Exception{
+	public TableModel createMagnitudeStatisticTable() throws Exception{
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
 		}
 		
-		if(options.getStat().getClass()==NucleusStatistic.class){
-			return createMagnitudeNuclearStatTable(options);
+		if(options.getStat() instanceof NucleusStatistic){
+			return createMagnitudeNuclearStatTable();
 		}
 		
-		if(options.getStat().getClass()==SegmentStatistic.class){
-			return createMagnitudeSegmentStatTable(options);
+		if(options.getStat() instanceof SegmentStatistic){
+			return createMagnitudeSegmentStatTable();
 		}
 		
 		return makeEmptyWilcoxonTable(null);
@@ -1022,7 +992,7 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @param stat the statistic to measure
 	 * @return a tablemodel for display
 	 */	
-	private TableModel createMagnitudeNuclearStatTable(TableOptions options) throws Exception {
+	private TableModel createMagnitudeNuclearStatTable() throws Exception {
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
 		}
@@ -1068,7 +1038,7 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @param segName the segment to create the table for
 	 * @return a tablemodel for display
 	 */	
-	private TableModel createMagnitudeSegmentStatTable(TableOptions options) throws Exception {
+	private TableModel createMagnitudeSegmentStatTable() throws Exception {
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
 		}
@@ -1129,7 +1099,12 @@ private static NucleusTableDatasetCreator instance = null;
 	 * @param list
 	 * @return
 	 */
-	public TableModel createClusterOptionsTable(List<AnalysisDataset> list){
+	public TableModel createClusterOptionsTable(){
+		
+		if( ! options.hasDatasets()){
+			return createBlankTable();
+		}
+		
 		DefaultTableModel model = new DefaultTableModel();
 
 		List<Object> columnList = new ArrayList<Object>();
@@ -1151,71 +1126,71 @@ private static NucleusTableDatasetCreator instance = null;
 		columnList.add("Tree");
 
 		model.addColumn("", columnList.toArray());
-		
-		if(list==null){
-			model.addColumn("No data loaded");
-		} else {
 
-			// format the numbers and make into a tablemodel
-//			DecimalFormat df = new DecimalFormat("#0.00"); 
+		List<AnalysisDataset> list = options.getDatasets();
 
-			for(AnalysisDataset dataset : list){
-				List<ClusterGroup> clusterGroups = dataset.getClusterGroups();
-				
-				for(ClusterGroup g : clusterGroups ){
-					ClusteringOptions op = g.getOptions();
-					
-					Object iterationString 	= op.getType().equals(ClusteringMethod.EM) 
-											? op.getIterations()
-											: "N/A";
-											
-					Object hierarchicalMethodString = op.getType().equals(ClusteringMethod.HIERARCHICAL) 
-							? op.getHierarchicalMethod().toString()
-							: "N/A";
-							
-					Object hierarchicalClusterString = op.getType().equals(ClusteringMethod.HIERARCHICAL) 
-							? op.getClusterNumber()
-							: "N/A";
-							
-					String tree = g.hasTree() ? g.getTree() : "N/A";
-									
-					List<Object> dataList = new ArrayList<Object>();
-					dataList.add(g.getName());
-					dataList.add(g.size());
-					dataList.add(op.getType().toString());
-					dataList.add(iterationString);
 
-					dataList.add(hierarchicalMethodString);
-					dataList.add(hierarchicalClusterString);
-					dataList.add(op.isIncludeProfile());
-					
-					String profileTypeString = op.isIncludeProfile() ? op.getProfileType().toString() : "N/A";
-					dataList.add(profileTypeString);
-					
-					dataList.add(op.isIncludeMesh());
-					
-					for(NucleusStatistic stat : NucleusStatistic.values()){
-						try{
-							dataList.add(op.isIncludeStatistic(stat));
-						} catch(NullPointerException e){
-							dataList.add("N/A");
-						}
-					}
-					
-					boolean seg = false;
-					for(UUID id : op.getSegments()){
-						if(op.isIncludeSegment(id)){
-							seg=true;
-						}
-					}
-					dataList.add(seg);
-					dataList.add(tree);
-					
-//					
-					model.addColumn(dataset.getName(), dataList.toArray());
-				}
+
+		// format the numbers and make into a tablemodel
+		//			DecimalFormat df = new DecimalFormat("#0.00"); 
+
+		for(AnalysisDataset dataset : list){
+			List<ClusterGroup> clusterGroups = dataset.getClusterGroups();
+
+			for(ClusterGroup g : clusterGroups ){
+				ClusteringOptions op = g.getOptions();
+
+				Object iterationString 	= op.getType().equals(ClusteringMethod.EM) 
+						? op.getIterations()
+								: "N/A";
+
+						Object hierarchicalMethodString = op.getType().equals(ClusteringMethod.HIERARCHICAL) 
+								? op.getHierarchicalMethod().toString()
+										: "N/A";
+
+								Object hierarchicalClusterString = op.getType().equals(ClusteringMethod.HIERARCHICAL) 
+										? op.getClusterNumber()
+												: "N/A";
+
+										String tree = g.hasTree() ? g.getTree() : "N/A";
+
+										List<Object> dataList = new ArrayList<Object>();
+										dataList.add(g.getName());
+										dataList.add(g.size());
+										dataList.add(op.getType().toString());
+										dataList.add(iterationString);
+
+										dataList.add(hierarchicalMethodString);
+										dataList.add(hierarchicalClusterString);
+										dataList.add(op.isIncludeProfile());
+
+										String profileTypeString = op.isIncludeProfile() ? op.getProfileType().toString() : "N/A";
+										dataList.add(profileTypeString);
+
+										dataList.add(op.isIncludeMesh());
+
+										for(NucleusStatistic stat : NucleusStatistic.values()){
+											try{
+												dataList.add(op.isIncludeStatistic(stat));
+											} catch(NullPointerException e){
+												dataList.add("N/A");
+											}
+										}
+
+										boolean seg = false;
+										for(UUID id : op.getSegments()){
+											if(op.isIncludeSegment(id)){
+												seg=true;
+											}
+										}
+										dataList.add(seg);
+										dataList.add(tree);
+
+										//					
+										model.addColumn(dataset.getName(), dataList.toArray());
 			}
 		}
+
 		return model;	
 	}
 

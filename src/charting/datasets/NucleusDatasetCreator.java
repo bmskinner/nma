@@ -20,7 +20,6 @@ package charting.datasets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,12 +33,10 @@ import org.jfree.data.xy.XYSeriesCollection;
 import analysis.AnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshEdge;
-import charting.charts.ExportableBoxAndWhiskerCategoryDataset;
 import charting.options.ChartOptions;
 import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellCollection;
-import components.CellularComponent;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
@@ -55,7 +52,6 @@ import components.nuclear.NucleusBorderSegment;
 import components.nuclear.SignalGroup;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
-import components.nuclei.sperm.RodentSpermNucleus;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.process.FloatPolygon;
 import logging.Loggable;
@@ -206,10 +202,9 @@ private static NucleusDatasetCreator instance = null;
             
             // add only the segment of interest
             for(NucleusBorderSegment seg : segments){
-//                if(seg.getName().equals(segName)){
                     segmentsToAdd.add(seg);
-//                }
             }
+            
             if(!segmentsToAdd.isEmpty()){
                 addSegmentsFromProfile(segmentsToAdd, profile, ds, 100, 0);
             }
@@ -225,7 +220,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @param list the datasets to check
 	 * @return the maximum length
 	 */
-	public double getMaximumMedianProfileLength(List<AnalysisDataset> list){
+	private double getMaximumMedianProfileLength(List<AnalysisDataset> list){
 		double length = 100;
 		for(AnalysisDataset dataset : list){
 			length = dataset.getCollection().getMedianArrayLength()>length ? dataset.getCollection().getMedianArrayLength() : length;
@@ -238,7 +233,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @param list
 	 * @return
 	 */
-	public double getMaximumNucleusProfileLength(CellCollection collection){
+	private double getMaximumNucleusProfileLength(CellCollection collection){
 		double length = 100;
 
 		for(Nucleus n : collection.getNuclei()){
@@ -1003,7 +998,7 @@ private static NucleusDatasetCreator instance = null;
 	 * @return
 	 */
 	public XYDataset createBareNucleusOutline(Nucleus n){
-		NucleusOutlineDataset ds = new NucleusOutlineDataset();
+		ComponentOutlineDataset ds = new ComponentOutlineDataset();
 		
 		double[] xpoints = new double[n.getBorderLength()+1];
 		double[] ypoints = new double[n.getBorderLength()+1];
@@ -1019,7 +1014,7 @@ private static NucleusDatasetCreator instance = null;
 		
 		double[][] data = { xpoints, ypoints };
 		ds.addSeries("Outline", data);
-		ds.setNucleus(0, n);
+		ds.setComponent(0, n);
 		return ds;
 	}
 	
@@ -1205,124 +1200,7 @@ private static NucleusDatasetCreator instance = null;
 		ds.addSeries("Q75_"+segment.getName(), outer);
 	}
 	
-	/**
-	 * Get the outline for a specific nucleus in a dataset. Sets the position
-	 * to the original coordinates in the image 
-	 * @param cell
-	 * @param segmented add the segments?
-	 * @return
-	 * @throws Exception 
-	 */
-	public XYDataset createNucleusOutline(Cell cell, boolean segmented) throws Exception{
-		return createNucleusOutline(cell.getNucleus(), segmented);
-	}
-	
-	/**
-	 * Get the outline for a specific nucleus in a dataset. Sets the position
-	 * to the original coordinates in the image 
-	 * @param cell
-	 * @param segmented true to include each segment separately, false for an unsegmented outline
-	 * @return
-	 */
-	public XYDataset createNucleusOutline(Nucleus nucleus, boolean segmented) {
-		NucleusOutlineDataset ds = new NucleusOutlineDataset();
-		finest("Creating nucleus outline");
-		if(segmented){
-			finest("Creating segmented nucleus outline");
 
-			List<NucleusBorderSegment> segmentList = nucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegments();
-
-			
-			if(!segmentList.isEmpty()){ // only draw if there are segments
-				finest("Nucleus has "+segmentList.size()+" segments");
-				
-				for(NucleusBorderSegment seg  : segmentList){
-					
-					finest("Drawing segment "+seg.getID());
-
-					
-					// If we make the array the length of the segment, 
-					// there will be a gap between the segment end and the
-					// next segment start. Include a position for the next
-					// segment start as well
-					double[] xpoints = new double[seg.length()+1];
-					double[] ypoints = new double[seg.length()+1];
-					
-
-					int segmentPosition = seg.getPosition();
-										
-					for(int j=0; j<=seg.length();j++){
-						
-						int index = seg.getStartIndex()+j;
-						int offsetIndex = nucleus.getOffsetBorderIndex(BorderTagObject.REFERENCE_POINT, index);
-						
-						BorderPoint p = nucleus.getBorderPoint(offsetIndex); // get the border points in the segment
-
-						xpoints[j] = p.getX();
-						ypoints[j] = p.getY();
-					}
-
-					double[][] data = { xpoints, ypoints };
-
-					ds.addSeries("Seg_"+segmentPosition, data);
-					ds.setNucleus(0, nucleus);
-					finest("Added segment data to chart dataset");
-				}
-			} else {
-				finest("Nucleus does not have segments");
-			}
-
-		} else {
-			finest("Creating bare nucleus outline");
-			double[] xpoints = new double[nucleus.getOriginalBorderList().size()];
-			double[] ypoints = new double[nucleus.getOriginalBorderList().size()];
-
-			int i =0;
-			for(XYPoint p : nucleus.getBorderList()){
-				xpoints[i] = p.getX();
-				ypoints[i] = p.getY();
-				i++;
-			}
-
-			double[][] data = { xpoints, ypoints };
-			ds.addSeries(nucleus.getNameAndNumber(), data);
-
-		}		
-		return ds;
-	}
-	
-	/**
-	 * Create a dataset with the hook and hump rois for a rodent sperm nucleus. If the
-	 * given cell does not contain a rodent sperm nucleus, the returned dataset is empty
-	 * @param cell
-	 * @return
-	 * @throws Exception
-	 */
-	public XYDataset createNucleusHookHumpOutline(Cell cell) throws Exception{
-		
-		DefaultXYDataset ds = new DefaultXYDataset();
-		
-		if(cell.getNucleus().getClass()==RodentSpermNucleus.class){
-			
-			RodentSpermNucleus nucleus = (RodentSpermNucleus) cell.getNucleus();
-//			double[] position = nucleus.getPosition();
-			
-			double[] xpoints = new double[nucleus.getHookRoi().size()];
-			double[] ypoints = new double[nucleus.getHookRoi().size()];
-
-			int i =0;
-			for(XYPoint p : nucleus.getHookRoi()){
-				xpoints[i] = p.getX();
-				ypoints[i] = p.getY();
-				i++;
-			}
-
-			double[][] data = { xpoints, ypoints };
-			ds.addSeries("Hook", data);
-						
-		} 
-		return ds;
-	}
 	
 	/**
 	 * Get the position of a segment in the nucleus angle profile
@@ -1392,28 +1270,19 @@ private static NucleusDatasetCreator instance = null;
             if(group !=null && group.isVisible()){ // only add the groups that are set to visible
 
 
-				DefaultXYDataset groupDataset = new DefaultXYDataset();
+            	ComponentOutlineDataset groupDataset = new ComponentOutlineDataset();
 				int signalNumber = 0;
 
 				for(NuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)){
-
-					double[] xpoints = new double[signal.getBorderLength()];
-					double[] ypoints = new double[signal.getBorderLength()];
-
-					int i =0;
-					for(XYPoint p : signal.getBorderList()){
-						
-						xpoints[i] = p.getX();
-						ypoints[i] = p.getY();
-						
-//						log(nucleus.getNameAndNumber()+": "+xpoints[i]+", "+ypoints[i]);
-
-						i++;
+					
+					String seriesKey = "Group_"+signalGroup+"_signal_"+signalNumber;
+					OutlineDatasetCreator dc = new OutlineDatasetCreator(signal);
+					try {
+						dc.createOutline(groupDataset, seriesKey, false);
+					} catch (ChartDatasetCreationException e) {
+						error("Unable to add signal "+seriesKey+" to dataset", e);
 					}
-					double[][] data = { xpoints, ypoints };
-					groupDataset.addSeries("Group_"+signalGroup+"_signal_"+signalNumber, data);
 
-					result.add(groupDataset);
 				}
 				signalNumber++;
 			}
@@ -1430,7 +1299,7 @@ private static NucleusDatasetCreator instance = null;
 	 */
 	public XYDataset createMultiNucleusOutline(List<AnalysisDataset> list, MeasurementScale scale){
 
-		NucleusOutlineDataset ds = new NucleusOutlineDataset();
+		ComponentOutlineDataset ds = new ComponentOutlineDataset();
 
 		int i=0;
 		for(AnalysisDataset dataset : list){
@@ -1460,7 +1329,7 @@ private static NucleusDatasetCreator instance = null;
 				}
 				double[][] data = { xpoints, ypoints };
 				ds.addSeries("Nucleus_"+i+"_"+collection.getName(), data);
-				ds.setNucleus(i, n);
+				ds.setComponent(i, n);
 			} else {
 				double[][] data = { {0}, {0} }; // make an empty series if no consensus
 				ds.addSeries("Nucleus_"+i+"_"+collection.getName(), data);

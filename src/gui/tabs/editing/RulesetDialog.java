@@ -30,8 +30,8 @@ import javax.swing.tree.TreeModel;
 import org.jfree.chart.JFreeChart;
 
 import utility.Constants;
-import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
@@ -395,7 +395,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 	private JPanel createChartPanel(){
 		JPanel panel = new JPanel(new BorderLayout());
 		
-		chartPanel = new ExportableChartPanel(MorphologyChartFactory.getInstance().makeEmptyChart(ProfileType.ANGLE));
+		chartPanel = new ExportableChartPanel(MorphologyChartFactory.makeEmptyChart(ProfileType.ANGLE));
 		
 		panel.add(chartPanel, BorderLayout.CENTER);
 		
@@ -412,7 +412,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		
 		ProfileIndexFinder finder = new ProfileIndexFinder();
 		
-		JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart(ProfileType.ANGLE);
+		JFreeChart chart = MorphologyChartFactory.makeEmptyChart(ProfileType.ANGLE);
 		
 		if(data.hasRule()){
 			
@@ -420,7 +420,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			
 			Profile p = dataset.getCollection().getProfileCollection(data.getType()).getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
 			BooleanProfile b = finder.getMatchingIndexes(p, r);
-			chart = MorphologyChartFactory.getInstance().createBooleanProfileChart(p, b);
+			chart = MorphologyChartFactory.createBooleanProfileChart(p, b);
 		}
 		
 		if(data.hasRuleSet()){
@@ -428,7 +428,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			RuleSet r = data.getRuleSet();
 			Profile p = dataset.getCollection().getProfileCollection(r.getType()).getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
 			BooleanProfile b = finder.getMatchingIndexes(p, r);
-			chart = MorphologyChartFactory.getInstance().createBooleanProfileChart(p, b);
+			chart = MorphologyChartFactory.createBooleanProfileChart(p, b);
 		}
 		
 		if(data.hasRuleSetCollection()){
@@ -438,7 +438,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			
 			BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(), c.getRuleSets(data.getTag()));
 			
-			chart = MorphologyChartFactory.getInstance().createBooleanProfileChart(p, limits);
+			chart = MorphologyChartFactory.createBooleanProfileChart(p, limits);
 			
 		}
 

@@ -23,8 +23,8 @@ import javax.swing.event.ListSelectionListener;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.BorderTagObject;
@@ -57,8 +57,8 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 			/*
 			 * Make the main chart panels
 			 */
-			chartPanel                = new ExportableChartPanel( MorphologyChartFactory.getInstance().makeEmptyChart());
-			modalityProfileChartPanel = new ExportableChartPanel( MorphologyChartFactory.getInstance().makeEmptyChart());
+			chartPanel                = new ExportableChartPanel( MorphologyChartFactory.createEmptyChart());
+			modalityProfileChartPanel = new ExportableChartPanel( MorphologyChartFactory.createEmptyChart());
 			
 			mainPanel.add(chartPanel, BorderLayout.WEST);
 			mainPanel.add(modalityProfileChartPanel, BorderLayout.CENTER);
@@ -161,9 +161,9 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 		@Override
 		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 			if(options.isNormalised()){
-				return MorphologyChartFactory.getInstance().createModalityProfileChart(options);
+				return new MorphologyChartFactory(options).createModalityProfileChart();
 			} else {
-				return MorphologyChartFactory.getInstance().createModalityPositionChart(options);
+				return new MorphologyChartFactory(options).createModalityPositionChart();
 			}
 		}
 

@@ -20,13 +20,15 @@ package gui.tabs.signals;
 
 import gui.GlobalOptions;
 import gui.components.HistogramsTabPanel;
+
 import java.awt.Dimension;
 import java.util.logging.Level;
 
 import org.jfree.chart.JFreeChart;
+
 import stats.SignalStatistic;
 import charting.charts.HistogramChartFactory;
-import charting.charts.SelectableChartPanel;
+import charting.charts.panels.SelectableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 
@@ -50,7 +52,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 					.setSignalGroup(null)
 					.build();
 				
-				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.getInstance().createStatisticHistogram(options), stat.toString());
+				SelectableChartPanel panel = new SelectableChartPanel(new HistogramChartFactory(options).createStatisticHistogram(), stat.toString());
 				panel.setPreferredSize(preferredSize);
 				panel.addSignalChangeListener(this);
 				chartPanels.put(stat.toString(), panel);

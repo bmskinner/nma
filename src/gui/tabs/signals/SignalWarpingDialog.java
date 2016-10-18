@@ -48,8 +48,8 @@ import org.jfree.chart.JFreeChart;
 import utility.Constants;
 import components.Cell;
 import charting.charts.ConsensusNucleusChartFactory;
-import charting.charts.ExportableChartPanel;
 import charting.charts.OutlineChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import analysis.AnalysisDataset;
@@ -104,7 +104,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		this.add(header, BorderLayout.NORTH);
 		finest("Created header");
 		
-		JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(datasets.get(0));
+		ChartOptions options = new ChartOptionsBuilder()
+			.setDatasets(datasets.get(0))
+			.build();
+		
+		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
 		chartPanel = new ExportableChartPanel(chart);
 		chartPanel.setFixedAspectRatio(true);
 
@@ -228,7 +232,13 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 		} catch (Exception e) {
 			error("Error running warping", e);
-			JFreeChart chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(targetDataset);
+			
+			ChartOptions options = new ChartOptionsBuilder()
+			.setDatasets(targetDataset)
+			.build();
+		
+			JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
+
 			chartPanel.setChart(chart);
 			setEnabled(true);
 		} 
@@ -289,15 +299,19 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 					.build();
 			
 			try{
-				chart = ConsensusNucleusChartFactory.getInstance().makeConsensusChart(options);
+				chart = new ConsensusNucleusChartFactory(options).makeConsensusChart();
 			} catch(Exception ex){
 				error("Error making straight mesh chart", ex);
-				chart = ConsensusNucleusChartFactory.getInstance().makeErrorChart();
+				chart = ConsensusNucleusChartFactory.makeErrorChart();
 			}
 			
 		} else {
+			
+			ChartOptions options = new ChartOptionsBuilder()
+			.setDatasets(datasetBoxTwo.getSelectedDataset())
+			.build();
 		
-			chart = ConsensusNucleusChartFactory.getInstance().makeNucleusOutlineChart(datasetBoxTwo.getSelectedDataset());
+			chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
 			
 		}
 		chartPanel.setChart(chart);
@@ -483,7 +497,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 					.setStraightenMesh(straighten)
 					.build();
 
-				final JFreeChart chart = OutlineChartFactory.getInstance().makeSignalWarpChart(options, mergedImage);
+				final JFreeChart chart = new OutlineChartFactory(options).makeSignalWarpChart(mergedImage);
 						
 				Runnable update = () -> { 
 					chartPanel.setChart(chart);

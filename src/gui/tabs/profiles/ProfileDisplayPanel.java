@@ -35,7 +35,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 		super(type);
 
 
-		JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart(type);
+		JFreeChart chart = MorphologyChartFactory.makeEmptyChart(type);
 		chartPanel.setChart(chart);
 
 		if(this.type==ProfileType.FRANKEN){
@@ -59,14 +59,14 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 		@Override
 		protected void updateNull() {
 			super.updateNull();
-			JFreeChart chart = MorphologyChartFactory.getInstance().makeEmptyChart(type);
+			JFreeChart chart = MorphologyChartFactory.makeEmptyChart(type);
 			chartPanel.setChart(chart);
 
 		}
 		
 		@Override
 		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-			return MorphologyChartFactory.getInstance().createProfileChart( options );
+			return new MorphologyChartFactory(options).createProfileChart(  );
 		}
 		
 		private void updateChart() {

@@ -42,9 +42,9 @@ import org.jfree.chart.JFreeChart;
 import analysis.AnalysisDataset;
 import analysis.signals.ShellRandomDistributionCreator;
 import analysis.signals.SignalManager;
-import charting.charts.ConsensusNucleusChartPanel;
-import charting.charts.ExportableChartPanel;
 import charting.charts.OutlineChartFactory;
+import charting.charts.panels.ConsensusNucleusChartPanel;
+import charting.charts.panels.ExportableChartPanel;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.SignalTableCell;
 import charting.options.ChartOptions;
@@ -377,7 +377,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return OutlineChartFactory.getInstance().makeSignalOutlineChart(options);
+		return new OutlineChartFactory(options).makeSignalOutlineChart();
 	}
 	
 	@Override

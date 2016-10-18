@@ -40,7 +40,7 @@ import utility.Constants;
  */
 public class ImageImporter implements Loggable {
 	
-	private File f = null;
+	private final File f;
 	private static final int[] IMAGE_TYPES_PROCESSED = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
 	
 	/**
@@ -48,7 +48,7 @@ public class ImageImporter implements Loggable {
 	 * throws an IllegalArgumentException if not.
 	 * @param f the file to import
 	 */
-	public ImageImporter(File f){
+	public ImageImporter(final File f){
 		if(f==null){
 			throw new IllegalArgumentException("File cannot be null");
 		}

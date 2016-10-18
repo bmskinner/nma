@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package charting.charts;
+package charting.charts.panels;
 
 import gui.GlobalOptions;
 import gui.SignalChangeEvent;
@@ -34,8 +34,11 @@ import javax.swing.JPopupMenu;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 
+import components.CellularComponent;
 import components.nuclei.Nucleus;
-import charting.datasets.NucleusOutlineDataset;
+import charting.charts.overlays.ComponentOverlay;
+import charting.charts.overlays.ShapeOverlayObject;
+import charting.datasets.ComponentOutlineDataset;
 
 @SuppressWarnings("serial")
 public class ConsensusNucleusChartPanel extends ExportableChartPanel {
@@ -44,7 +47,7 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 	
 	private boolean fillConsensus = true;
 
-	private NucleusOverlay consensusOverlay = null;
+	private ComponentOverlay consensusOverlay = null;
 
 	public ConsensusNucleusChartPanel(JFreeChart chart) {
 		super(chart);
@@ -53,7 +56,7 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 		this.setPopupMenu(popup);
 		this.validate();
 		this.setFixedAspectRatio(true);
-		consensusOverlay = new NucleusOverlay();
+		consensusOverlay = new ComponentOverlay();
 		this.addOverlay( consensusOverlay);
 
 	}
@@ -92,13 +95,15 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 				// Get the nuclei in the chart
 				if(chart.getPlot() instanceof XYPlot){
 
-					if( chart.getXYPlot().getDataset() instanceof NucleusOutlineDataset){
+					if( chart.getXYPlot().getDataset() instanceof ComponentOutlineDataset){
 
-						NucleusOutlineDataset ds = (NucleusOutlineDataset) chart.getXYPlot().getDataset();
+						ComponentOutlineDataset ds = (ComponentOutlineDataset) chart.getXYPlot().getDataset();
 
 						for(int series=0; series<ds.getSeriesCount(); series++){
 
-							Nucleus n = ds.getNucleus(series);
+							Comparable seriesKey = ds.getSeriesKey(series);
+							
+							CellularComponent n = ds.getComponent(seriesKey);
 
 							Paint c = chart.getXYPlot().getRenderer().getSeriesPaint(series);
 

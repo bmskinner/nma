@@ -49,8 +49,8 @@ import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
 import analysis.RandomSampler;
-import charting.charts.ExportableChartPanel;
 import charting.charts.HistogramChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import gui.LoadingIconDialog;
 import stats.NucleusStatistic;
 
@@ -164,7 +164,7 @@ public class RandomSamplingDialog
 		
 		
 		try {
-			chartPanel = new ExportableChartPanel(HistogramChartFactory.getInstance().createRandomSampleHistogram(resultList));
+			chartPanel = new ExportableChartPanel(HistogramChartFactory.createRandomSampleHistogram(resultList));
 			this.add(chartPanel, BorderLayout.CENTER);
 		} catch (Exception e) {
 			log(Level.SEVERE, "Error making chart", e);
@@ -243,9 +243,9 @@ public class RandomSamplingDialog
 
 			JFreeChart chart = null;
 			if(showDensity.isSelected()){
-				chart = HistogramChartFactory.getInstance().createRandomSampleDensity(resultList);
+				chart = HistogramChartFactory.createRandomSampleDensity(resultList);
 			} else {
-				chart = HistogramChartFactory.getInstance().createRandomSampleHistogram(resultList);
+				chart = HistogramChartFactory.createRandomSampleHistogram(resultList);
 			}
 			chartPanel.setChart(chart);
 			setStatusLoaded();
@@ -260,10 +260,10 @@ public class RandomSamplingDialog
 		try {
 			if(showDensity.isSelected()){
 
-				chart = HistogramChartFactory.getInstance().createRandomSampleDensity(resultList);
+				chart = HistogramChartFactory.createRandomSampleDensity(resultList);
 
 			} else {
-				chart = HistogramChartFactory.getInstance().createRandomSampleHistogram(resultList);
+				chart = HistogramChartFactory.createRandomSampleHistogram(resultList);
 			}
 		}catch (Exception e) {
 			log(Level.SEVERE, "Error running sampling", e);

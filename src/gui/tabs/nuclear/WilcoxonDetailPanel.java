@@ -21,7 +21,7 @@ package gui.tabs.nuclear;
 import javax.swing.JLabel;
 import javax.swing.table.TableModel;
 
-import charting.datasets.NucleusTableDatasetCreator;
+import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import gui.components.ExportableTable;
@@ -82,6 +82,6 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return NucleusTableDatasetCreator.getInstance().createWilcoxonStatisticTable(options);
+		return new AnalysisDatasetTableCreator(options).createWilcoxonStatisticTable();
 	}
 }

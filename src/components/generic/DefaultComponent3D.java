@@ -57,7 +57,8 @@ public class DefaultComponent3D  implements Component3D {
 		// Get the length of the hypotenuse of the triangle
 		double newY = origin.getLengthTo( new XYPoint(p.getY(), p.getZ()));
 		
-		Point3D rotateX = new Point3D( p.getX(), origin.getY()+newY, 0  ); // rotated the point about x so z=0
+		 // rotated the point about x so z=0
+		Point3D rotateX = new Point3D( p.getX(), origin.getY()+newY, 0  );
 		
 		return c.containsPoint(rotateX);
 		

@@ -47,7 +47,7 @@ public class DatasetMerger extends AnalysisWorker {
 	
 	
 	/**
-	 * Create the merger or splitter for the given datasets. Call the appropriate funciton
+	 * Create the merger for the given datasets.
 	 * @param datasets
 	 * @param function
 	 * @param saveFile the file to save the new dataset as

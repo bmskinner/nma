@@ -20,7 +20,7 @@ public class SegmentProfilePanel extends ProfileDisplayPanel {
 		options.setShowMarkers(false);
 		options.setShowAnnotations(false);
 		options.setShowLines(true);
-		return MorphologyChartFactory.getInstance().makeMultiSegmentedProfileChart(options);
+		return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
 	}
 
 }

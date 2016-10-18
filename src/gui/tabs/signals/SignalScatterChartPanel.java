@@ -1,6 +1,6 @@
 package gui.tabs.signals;
 
-import charting.charts.AbstractScatterChartPanel;
+import charting.charts.panels.AbstractScatterChartPanel;
 import stats.SignalStatistic;
 
 @SuppressWarnings("serial")

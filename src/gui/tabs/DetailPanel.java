@@ -49,9 +49,9 @@ import org.jfree.chart.JFreeChart;
 
 import charting.ChartCache;
 import charting.TableCache;
-import charting.charts.ExportableChartPanel;
 import charting.charts.ScatterChartFactory;
-import charting.datasets.NucleusTableDatasetCreator;
+import charting.charts.panels.ExportableChartPanel;
+import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
@@ -387,7 +387,7 @@ public abstract class DetailPanel
 				fine(this.getClass().getName()+": Error creating chart", e);
 				
 				// Draw an empty chart to fill the space
-				chart = ScatterChartFactory.getInstance().makeEmptyChart();
+				chart = ScatterChartFactory.makeEmptyChart();
 			}
 			getChartCache().addChart(options, chart);
 			finest("Added cached chart");
@@ -413,7 +413,7 @@ public abstract class DetailPanel
 			} catch (Exception e) {
 				warn("Error creating table: "+ this.getClass().getSimpleName());
 				fine( this.getClass().getName()+": Error creating table", e);
-				model = NucleusTableDatasetCreator.getInstance().createBlankTable();
+				model = AnalysisDatasetTableCreator.createBlankTable();
 			}
 			finest("Added cached table");
 			getTableCache().addTable(options, model);

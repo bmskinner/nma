@@ -1,4 +1,4 @@
-package charting.charts;
+package charting.charts.overlays;
 
 import java.awt.Graphics2D;
 import java.awt.Paint;
@@ -59,7 +59,7 @@ public class RectangleOverlay
      *
      * @param rectangle  the rectangle object (<code>null</code> not permitted).
      *
-     * @see #removeRectangle(charting.charts.RectangleOverlayObject)
+     * @see #removeRectangle(charting.charts.overlays.RectangleOverlayObject)
      */
     public void setRectangle(RectangleOverlayObject rectangle) {
 

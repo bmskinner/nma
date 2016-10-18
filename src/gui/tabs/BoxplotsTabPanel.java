@@ -37,8 +37,8 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.BoxplotChartFactory;
-import charting.charts.ExportableChartPanel;
 import charting.charts.ViolinChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 
@@ -85,9 +85,9 @@ import charting.options.TableOptions;
 		@Override
 		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
 			if(GlobalOptions.getInstance().isViolinPlots()){
-				return ViolinChartFactory.getInstance().createStatisticPlot(options);
+				return new ViolinChartFactory(options).createStatisticPlot();
 			} else {
-				return BoxplotChartFactory.getInstance().createStatisticBoxplot(options);
+				return new BoxplotChartFactory(options).createStatisticBoxplot();
 			}
 		}
 		

@@ -17,50 +17,38 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package analysis.image;
+package charting.datasets;
 
-import logging.Loggable;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.swing.ImageIcon;
+import org.jfree.data.xy.DefaultXYDataset;
 
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.process.ImageProcessor;
+import components.CellularComponent;
 
-public abstract class AbstractImageFilterer implements Loggable {
+@SuppressWarnings("serial")
+public class ComponentOutlineDataset 
+	extends DefaultXYDataset {
 	
-	protected ImageProcessor ip = null;
-	protected ImageStack     st = null;
-	
-	public AbstractImageFilterer(final ImageProcessor ip){
-		this.ip = ip;
+	Map<Comparable, CellularComponent> nuclei = new HashMap<Comparable, CellularComponent>();
+		
+	/**
+	 * Set the component for the given series
+	 * @param i
+	 * @param n
+	 */
+	public void setComponent(Comparable seriesKey, CellularComponent n){
+		nuclei.put(seriesKey, n);
 	}
 	
-	public AbstractImageFilterer(final ImagePlus img){
-		this.ip = img.getProcessor();
+	/**
+	 * Get the component for the given series
+	 * @param i
+	 * @return
+	 */
+	public CellularComponent getComponent(Comparable seriesKey){
+		return nuclei.get(seriesKey);
 	}
 	
-	public AbstractImageFilterer(final ImageStack st){
-		this.st = st;
-	}
-	
-	public AbstractImageFilterer(AbstractImageFilterer f){
-		this.ip = f.ip;
-		this.st = f.st;
-	}
-	
-	public ImageProcessor toProcessor(){
-		return ip;
-	}
-	
-	public ImageStack toStack(){
-		return st;
-	}
-	
-	public ImageIcon toImageIcon(){
-		return new ImageIcon( ip.getBufferedImage() );
-	}
-	
-	
-	
+
 }

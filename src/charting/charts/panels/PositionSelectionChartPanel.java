@@ -1,4 +1,4 @@
-package charting.charts;
+package charting.charts.panels;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
@@ -9,10 +9,14 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
+
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
+
+import charting.charts.overlays.RectangleOverlay;
+import charting.charts.overlays.RectangleOverlayObject;
 
 
 /**
@@ -641,7 +645,7 @@ public class PositionSelectionChartPanel extends ExportableChartPanel {
 	 * @param y the screen y position
 	 * @param type the edge type
 	 * @return if the position overlaps the overlay edge
-	 * @see charting.charts.RectangleOverlayObject
+	 * @see charting.charts.overlays.RectangleOverlayObject
 	 */
 	public boolean rectangleOverlayEdgeContainsPoint(int x, int y, int type){
 		

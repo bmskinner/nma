@@ -1026,15 +1026,20 @@ public abstract class AbstractCellularComponent
 			
 			
 		} catch (NoSuchFieldException e) {
-			error("No field", e);
+			fine("No field", e);
+			return;
 		} catch (SecurityException e) {
-			error("Security error", e);
+			fine("Security error", e);
+			return;
 		} catch (IllegalArgumentException e) {
-			error("Illegal argument", e);
+			fine("Illegal argument", e);
+			return;
 		} catch (IllegalAccessException e) {
-			error("Illegal access", e);
+			fine("Illegal access", e);
+			return;
 		} catch(Exception e){
-			error("Unexpected exception", e);
+			fine("Unexpected exception", e);
+			return;
 		}
 
 //		finest("\tSet final id field");
@@ -1244,5 +1249,5 @@ public abstract class AbstractCellularComponent
 		double newY = new AngleTools().getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
 		return new XYPoint(newX, newY);
 	}
-	
+		
 }

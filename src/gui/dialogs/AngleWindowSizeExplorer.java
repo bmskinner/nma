@@ -29,6 +29,7 @@ import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.logging.Level;
+
 import gui.LoadingIconDialog;
 import gui.components.ColourSelecter;
 
@@ -52,8 +53,8 @@ import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import charting.ChartComponents;
-import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import analysis.AnalysisDataset;
 
 @SuppressWarnings("serial")
@@ -89,7 +90,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		
 		this.add(createSettingsPanel(), BorderLayout.NORTH);
 		
-		chartPanel = new ExportableChartPanel(MorphologyChartFactory.getInstance().makeEmptyChart());
+		chartPanel = new ExportableChartPanel(MorphologyChartFactory.createEmptyChart());
 		this.add(chartPanel, BorderLayout.CENTER);
 
 		
@@ -215,7 +216,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		setAnalysing(true);
 		
 		// Clear the old chart
-		chartPanel.setChart(MorphologyChartFactory.getInstance().makeEmptyChart());
+		chartPanel.setChart(MorphologyChartFactory.createEmptyChart());
 		
 		log("Testing "+windowSizeMin+" - "+windowSizeMax);
 		

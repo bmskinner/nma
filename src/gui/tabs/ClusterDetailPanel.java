@@ -54,9 +54,10 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
-import charting.datasets.NucleusTableDatasetCreator;
+import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
+import charting.options.TableOptionsBuilder;
 import components.ClusterGroup;
 
 @SuppressWarnings("serial")
@@ -123,9 +124,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			tablesPanel = new JPanel();
 			tablesPanel.setLayout(new BoxLayout(tablesPanel, BoxLayout.Y_AXIS));
 					
-			
 			JPanel clusterDetailPanel = new JPanel(new BorderLayout());
-			TableModel optionsModel = NucleusTableDatasetCreator.getInstance().createClusterOptionsTable(null);
+			TableModel optionsModel = AnalysisDatasetTableCreator.createBlankTable();
 			clusterDetailsTable = new ExportableTable(optionsModel){
 				@Override
 				public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -302,7 +302,11 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			setButtonsVisible(true);
 			setButtonsEnabled(true);
 			
-			TableModel optionsModel = NucleusTableDatasetCreator.getInstance().createClusterOptionsTable(list);
+			TableOptions options = new TableOptionsBuilder()
+				.setDatasets(getDatasets())
+				.build();
+			
+			TableModel optionsModel = new AnalysisDatasetTableCreator(options).createClusterOptionsTable();
 			clusterDetailsTable.setModel(optionsModel);
 			setRenderer(clusterDetailsTable, new ClusterTableCellRenderer());
 

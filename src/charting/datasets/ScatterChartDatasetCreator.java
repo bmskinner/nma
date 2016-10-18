@@ -101,11 +101,11 @@ private static ScatterChartDatasetCreator instance = null;
 	public TableModel createSpearmanCorrlationTable(TableOptions options){
 		
 		if( ! options.hasDatasets()){
-			return NucleusTableDatasetCreator.getInstance().createBlankTable();
+			return AnalysisDatasetTableCreator.createBlankTable();
 		}
 		
 		if(options.getStats().size()!=2){
-			return NucleusTableDatasetCreator.getInstance().createBlankTable();
+			return AnalysisDatasetTableCreator.createBlankTable();
 		}
 		
 		PlottableStatistic firstStat = options.getStat();
@@ -113,7 +113,7 @@ private static ScatterChartDatasetCreator instance = null;
 		for(PlottableStatistic stat : options.getStats()){
 			if( ! stat.getClass().equals(firstStat.getClass())){
 				fine("Statistic classes are different");
-				NucleusTableDatasetCreator.getInstance().createBlankTable();
+				AnalysisDatasetTableCreator.createBlankTable();
 			}
 		}
 		
@@ -125,17 +125,17 @@ private static ScatterChartDatasetCreator instance = null;
 			return createSignalSpearmanCorrlationTable(options);
 		}
 		
-		return NucleusTableDatasetCreator.getInstance().createBlankTable();
+		return AnalysisDatasetTableCreator.createBlankTable();
 	}
 	
 	private TableModel createNucleusSpearmanCorrlationTable(TableOptions options){
 
 		if( ! options.hasDatasets()){
-			return NucleusTableDatasetCreator.getInstance().createBlankTable();
+			return AnalysisDatasetTableCreator.createBlankTable();
 		}
 		
 		if(options.getStats().size()!=2){
-			return NucleusTableDatasetCreator.getInstance().createBlankTable();
+			return AnalysisDatasetTableCreator.createBlankTable();
 		}
 		
 		DefaultTableModel model = new DefaultTableModel();

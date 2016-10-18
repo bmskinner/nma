@@ -29,11 +29,15 @@ import java.util.List;
 import components.generic.XYPoint;
 
 /**
- * This covers the things than can be found within an image
+ * This covers the things than can be found within an image.
  * @author bms41
  *
  */
 public interface Imageable {
+	
+	/*
+	 * GETTERS
+	 */
 	
 	/**
 	 * The array index of the left-most x coordinate of the object
@@ -77,11 +81,7 @@ public interface Imageable {
 	 */
 	public File getSourceFile();
 	
-	/**
-	 * Set the image file the component was found in
-	 * @param sourceFile
-	 */
-	public void setSourceFile(File sourceFile);
+	
 		
 	/**
 	 * Get the RGB channel the object was detected in
@@ -106,11 +106,7 @@ public interface Imageable {
 	 */
 	public ImageProcessor getComponentImage() throws UnloadableImageException;
 
-	/**
-	 * Set the RGB channel the component was detected in
-	 * @param channel
-	 */
-	public void setChannel(int channel);
+	
 	
 	/**
 	 * Get the pixels within this object as a list of points
@@ -138,6 +134,22 @@ public interface Imageable {
 	 */
 	public String getSourceFileName();
 	
+	/*
+	 * SETTERS
+	 */
+	
+	/**
+	 * Set the image file the component was found in
+	 * @param sourceFile
+	 */
+	public void setSourceFile(File sourceFile);
+	
+	/**
+	 * Set the RGB channel the component was detected in
+	 * @param channel
+	 */
+	public void setChannel(int channel);
+	
 	/**
 	 * Set the position of the component in the original
 	 * image.
@@ -164,5 +176,6 @@ public interface Imageable {
 	 * @param sourceFolder
 	 */
 	public void setSourceFolder(File sourceFolder);
+	
 
 }

@@ -47,26 +47,15 @@ import charting.options.ChartOptions;
  */
 public class BoxplotChartFactory extends AbstractChartFactory {
 
-	private static BoxplotChartFactory instance = null;
-	
-	protected BoxplotChartFactory(){}
-	
-	/**
-	 * Fetch an instance of the factory
-	 * @return
-	 */
-	public static BoxplotChartFactory getInstance(){
-		if(instance==null){
-			instance = new BoxplotChartFactory();
-		}
-		return instance;
+	public BoxplotChartFactory(ChartOptions o){
+		super(o);
 	}
 	
 	/**
 	 * Create an empty boxplot
 	 * @return
 	 */
-	public JFreeChart makeEmptyChart(){
+	public static JFreeChart makeEmptyChart(){
 		
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, 
 				null, 
@@ -78,7 +67,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 		return boxplot;
 	}
 	
-	public JFreeChart createStatisticBoxplot(ChartOptions options) {
+	public JFreeChart createStatisticBoxplot() {
 		
 		if(!options.hasDatasets()){
 			return makeEmptyChart();
@@ -89,15 +78,15 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 		finest("Creating boxplot for "+stat);
 		
 		if(stat.getClass()==NucleusStatistic.class){
-			return createNucleusStatisticBoxplot(options);
+			return createNucleusStatisticBoxplot();
 		}
 		
 		if(stat.getClass()==SignalStatistic.class){
-			return createSignalStatisticBoxplot(options);
+			return createSignalStatisticBoxplot();
 		}
 		
 		if(stat.getClass()==SegmentStatistic.class){
-			return createSegmentBoxplot(options);
+			return createSegmentBoxplot();
 		}
 		
 		return makeEmptyChart();
@@ -110,7 +99,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * 
 	 */
 
-	private JFreeChart createNucleusStatisticBoxplot(ChartOptions options) {
+	private JFreeChart createNucleusStatisticBoxplot() {
 		
 		BoxAndWhiskerCategoryDataset ds = null;
 		if(options.getDatasets()!=null){
@@ -132,7 +121,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * @param ds the dataset
 	 * @return
 	 */
-	private JFreeChart createSegmentBoxplot(ChartOptions options) {
+	private JFreeChart createSegmentBoxplot() {
 
 		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
@@ -174,7 +163,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	private JFreeChart createSignalStatisticBoxplot(ChartOptions options){
+	private JFreeChart createSignalStatisticBoxplot(){
 		
 		BoxAndWhiskerCategoryDataset ds = NuclearSignalDatasetCreator.getInstance().createSignalStatisticBoxplotDataset(options);
 
@@ -259,7 +248,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * Apply basic formatting to the charts, without any series added
 	 * @param boxplot
 	 */
-	private void formatBoxplot(JFreeChart boxplot){
+	private static void formatBoxplot(JFreeChart boxplot){
 		CategoryPlot plot = boxplot.getCategoryPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();

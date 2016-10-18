@@ -44,19 +44,8 @@ import components.CellCollection;
  */
 public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	
-	private static ConsensusNucleusChartFactory instance = null;
-	
-	protected ConsensusNucleusChartFactory(){}
-	
-	/**
-	 * Fetch an instance of the factory
-	 * @return
-	 */
-	public static ConsensusNucleusChartFactory getInstance(){
-		if(instance==null){
-			instance = new ConsensusNucleusChartFactory();
-		}
-		return instance;
+	public ConsensusNucleusChartFactory(ChartOptions o){
+		super(o);
 	}
 	
 	/**
@@ -64,7 +53,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * and consensus chart panels
 	 * @return
 	 */
-	public JFreeChart makeEmptyChart(){
+	public static JFreeChart makeEmptyChart(){
 		
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -88,8 +77,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param AnalysisDataset
 	 * @return
 	 */
-	public boolean hasConsensusNucleus(List<AnalysisDataset>  list){
-		for (AnalysisDataset dataset : list){
+	public boolean hasConsensusNucleus(){
+		for (AnalysisDataset dataset : options.getDatasets()){
 			if(dataset.getCollection().hasConsensusNucleus()){
 				return true;
 			}
@@ -142,7 +131,9 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param collection the NucleusCollection to draw the consensus from
 	 * @return the consensus chart
 	 */
-	public JFreeChart makeNucleusOutlineChart(AnalysisDataset dataset){
+	public JFreeChart makeNucleusOutlineChart(){
+		
+		AnalysisDataset dataset = options.firstDataset();
 		
 		if( ! dataset.getCollection().hasConsensusNucleus()){
 			return makeEmptyChart();
@@ -193,10 +184,10 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param list the datasets to test
 	 * @return
 	 */
-	public double getconsensusChartRange(List<AnalysisDataset> list){
+	public double getconsensusChartRange(){
 		
 		double max = 1;
-		for (AnalysisDataset dataset : list){
+		for (AnalysisDataset dataset : options.getDatasets()){
 			if(dataset.getCollection().hasConsensusNucleus()){
 				double datasetMax = getconsensusChartRange(dataset);
 				max = datasetMax > max ? datasetMax : max;
@@ -283,7 +274,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	private JFreeChart makeMultipleConsensusChart(ChartOptions options) throws Exception {
+	private JFreeChart makeMultipleConsensusChart() throws Exception {
 		// multiple nuclei
 		XYDataset ds = NucleusDatasetCreator.getInstance().createMultiNucleusOutline(options.getDatasets(), options.getScale());
 		JFreeChart chart = makeConsensusChart(ds);
@@ -292,7 +283,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		
 		XYPlot plot = chart.getXYPlot();
 		
-		double max = getconsensusChartRange(options.getDatasets());
+		double max = getconsensusChartRange();
 		
 		plot.getDomainAxis().setRange(-max,max);
 		plot.getRangeAxis().setRange(-max,max);
@@ -330,7 +321,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public JFreeChart makeConsensusChart(ChartOptions options) throws Exception {
+	public JFreeChart makeConsensusChart() throws Exception {
 		
 		if(! options.hasDatasets()){
 			finest("No datasets: creating empty consensus chart");
@@ -348,7 +339,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			
 			if(oneHasConsensus){
 				finest("Creating multiple consensus chart");
-				return makeMultipleConsensusChart(options);
+				return makeMultipleConsensusChart();
 			} else {
 				finest("No dataset with consensus: creating empty consensus chart");
 				return makeEmptyChart();
@@ -369,7 +360,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 					mesh = mesh.straighten();
 				}
 
-				return OutlineChartFactory.getInstance().createMeshChart(mesh, 0.5, options);
+				return new OutlineChartFactory(options).createMeshChart(mesh, 0.5 );
 				
 			} else {
 				return makeSegmentedConsensusChart(options.firstDataset());

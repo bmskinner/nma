@@ -237,9 +237,9 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				.build();
 			
 			
-			JFreeChart mainChart = MorphologyChartFactory.getInstance().makeEmptyChart(options);
+			JFreeChart mainChart = new MorphologyChartFactory(options).makeEmptyChart();
 		
-			JFreeChart rangeChart = MorphologyChartFactory.getInstance().makeEmptyChart(options);
+			JFreeChart rangeChart = new MorphologyChartFactory(options).makeEmptyChart();
 			
 			dualPanel.setCharts(mainChart, rangeChart);
 			setButtonsEnabled(false);
@@ -247,7 +247,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		
 		@Override
 		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-			return MorphologyChartFactory.getInstance().makeMultiSegmentedProfileChart(options);
+			return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
 		}
 				
 		/**

@@ -147,17 +147,17 @@ public abstract class Detector implements Loggable {
   private void findInImage(ImageProcessor image){
 
 	  ImageProcessor searchProcessor = image.duplicate();
-	  
+
 	  searchProcessor.threshold(this.threshold);
 
-	  this.runAnalyser(searchProcessor);
+	  roiList = this.runAnalyser(searchProcessor);
 	  if(roiList.size()==0){
 		  searchProcessor.invert(); // Work PC needs the inversion; MANETHEREN does not. Don't yet know why.
-		  this.runAnalyser(searchProcessor);
+		  roiList = this.runAnalyser(searchProcessor);
 	  }
   }
 
-  private void runAnalyser(ImageProcessor processor){
+  private List<Roi> runAnalyser(ImageProcessor processor){
 	  ImagePlus image    = new ImagePlus(null, processor);
 	  RoiManager manager = new RoiManager(true);
 	 
@@ -179,7 +179,7 @@ public abstract class Detector implements Loggable {
 		  image.close();
 	  }
 
-	  roiList =  new ArrayList<Roi>(Arrays.asList( manager.getSelectedRoisAsArray()));
+	  return new ArrayList<Roi>(Arrays.asList( manager.getSelectedRoisAsArray()));
   }
   
  

@@ -26,6 +26,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -36,8 +37,8 @@ import org.jfree.chart.JFreeChart;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.nuclear.NucleusBorderSegment;
-import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
@@ -136,7 +137,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return MorphologyChartFactory.makeKruskalWallisChart(options, false);
+		return new MorphologyChartFactory(options).makeKruskalWallisChart( false);
 	}
 	
 	@Override

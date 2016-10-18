@@ -41,26 +41,15 @@ import stats.SignalStatistic;
 
 public class ScatterChartFactory extends AbstractChartFactory {
 	
-	private static ScatterChartFactory instance = null;
-	
-	protected ScatterChartFactory(){}
-	
-	/**
-	 * Fetch an instance of the factory
-	 * @return
-	 */
-	public static ScatterChartFactory getInstance(){
-		if(instance==null){
-			instance = new ScatterChartFactory();
-		}
-		return instance;
+	public ScatterChartFactory(ChartOptions o){
+		super(o);
 	}
 	
 	/**
 	 * Create a blank scatter chart
 	 * @return
 	 */
-	public JFreeChart makeEmptyChart(){
+	public static JFreeChart makeEmptyChart(){
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				null, null, null); 
 		chart.getXYPlot().setBackgroundPaint(Color.WHITE);
@@ -72,7 +61,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @return
 	 */
-	public JFreeChart createScatterChart(ChartOptions options){
+	public JFreeChart createScatterChart(){
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyChart();
@@ -92,11 +81,11 @@ public class ScatterChartFactory extends AbstractChartFactory {
 		}
 		
 		if(firstStat.getClass().equals(NucleusStatistic.class)){
-			return createNucleusStatisticScatterChart(options);
+			return createNucleusStatisticScatterChart();
 		}
 		
 		if(firstStat.getClass().equals(SignalStatistic.class)){
-			return createSignalStatisticScatterChart(options);
+			return createSignalStatisticScatterChart();
 		}
 		
 		return makeEmptyChart();
@@ -108,7 +97,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @return
 	 */
-	private JFreeChart createNucleusStatisticScatterChart(ChartOptions options){
+	private JFreeChart createNucleusStatisticScatterChart(){
 				
 		XYDataset ds = ScatterChartDatasetCreator.getInstance().createNucleusScatterDataset(options);
 		
@@ -154,7 +143,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @return
 	 */
-	private JFreeChart createSignalStatisticScatterChart(ChartOptions options){
+	private JFreeChart createSignalStatisticScatterChart(){
 				
 		XYDataset ds = ScatterChartDatasetCreator.getInstance().createSignalScatterDataset(options);
 		

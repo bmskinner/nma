@@ -28,7 +28,6 @@ import analysis.AnalysisOptions.CannyOptions;
 import analysis.detection.CannyEdgeDetector;
 import analysis.detection.Kuwahara_Filter;
 import stats.Quartile;
-import stats.Stats;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ByteProcessor;
@@ -56,14 +55,6 @@ public class ImageFilterer extends AbstractImageFilterer {
 		ip = st.getProcessor(stackNumber).duplicate();
 				
 		return runKuwaharaFiltering(filterSize);
-//		Kuwahara_Filter kw = new Kuwahara_Filter();
-//		ImagePlus img = ImageExporter.getInstance().convertToRGB(st);
-//		kw.setup("", img);
-//		
-//		ImageProcessor result = st.getProcessor(stackNumber).duplicate();
-//		
-//		kw.filter(result, filterSize);
-//		return result;
 	}
 	
 	/**

@@ -21,26 +21,17 @@ import stats.SegmentStatistic;
 import stats.SignalStatistic;
 
 public class ViolinChartFactory extends AbstractChartFactory implements Loggable {
-	
-private static ViolinChartFactory instance = null;
-	
-	private ViolinChartFactory(){
-
-	}
-	
-	public static ViolinChartFactory getInstance(){
-		if(instance==null){
-			instance = new ViolinChartFactory();
-		}
-		return instance;
+		
+	public ViolinChartFactory(ChartOptions o){
+		super(o);
 	}
 	
 	public JFreeChart makeEmptyChart(){
 		
-		return BoxplotChartFactory.getInstance().makeEmptyChart(); 
+		return BoxplotChartFactory.makeEmptyChart(); 
 	}
 	
-	public JFreeChart createStatisticPlot(ChartOptions options) {
+	public JFreeChart createStatisticPlot() {
 		
 		if(!options.hasDatasets()){
 			return makeEmptyChart();
@@ -53,15 +44,15 @@ private static ViolinChartFactory instance = null;
 		try {
 		
 			if(stat.getClass()==NucleusStatistic.class){
-				return createNucleusStatisticPlot(options);
+				return createNucleusStatisticPlot();
 			}
 
 			if(stat.getClass()==SignalStatistic.class){
-				return createSignalStatisticPlot(options);
+				return createSignalStatisticPlot();
 			}
 
 			if(stat.getClass()==SegmentStatistic.class){
-				return createSegmentPlot(options);
+				return createSegmentPlot();
 			}
 		} catch(Exception e){
 			error("Error making violin chart", e);
@@ -94,7 +85,7 @@ private static ViolinChartFactory instance = null;
                 legend);
     } 
 
-	private JFreeChart createNucleusStatisticPlot(ChartOptions options) {
+	private JFreeChart createNucleusStatisticPlot() {
 		
 		ViolinCategoryDataset ds = null;
 		if(options.hasDatasets()){
@@ -139,7 +130,7 @@ private static ViolinChartFactory instance = null;
 	 * @return
 	 * @throws Exception
 	 */
-	private JFreeChart createSignalStatisticPlot(ChartOptions options){
+	private JFreeChart createSignalStatisticPlot(){
 		
 		ViolinCategoryDataset ds = null;
 		if(options.hasDatasets()){
@@ -212,7 +203,7 @@ private static ViolinChartFactory instance = null;
 	 * @param ds the dataset
 	 * @return
 	 */
-	private JFreeChart createSegmentPlot(ChartOptions options) {
+	private JFreeChart createSegmentPlot() {
 		
 		ViolinCategoryDataset ds = null;
 		if(options.hasDatasets()){

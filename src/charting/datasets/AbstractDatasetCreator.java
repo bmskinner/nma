@@ -17,50 +17,25 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package analysis.image;
+package charting.datasets;
+
+import gui.Labels;
+
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import logging.Loggable;
 
-import javax.swing.ImageIcon;
+public class AbstractDatasetCreator implements Loggable {	
+		
+	/**
+	 * Create an empty table declaring no data is loaded
+	 * @return
+	 */
+	public static TableModel createBlankTable(){
+		DefaultTableModel model = new DefaultTableModel();
+		model.addColumn(Labels.NO_DATA_LOADED);
+		return model;
+	}
 
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.process.ImageProcessor;
-
-public abstract class AbstractImageFilterer implements Loggable {
-	
-	protected ImageProcessor ip = null;
-	protected ImageStack     st = null;
-	
-	public AbstractImageFilterer(final ImageProcessor ip){
-		this.ip = ip;
-	}
-	
-	public AbstractImageFilterer(final ImagePlus img){
-		this.ip = img.getProcessor();
-	}
-	
-	public AbstractImageFilterer(final ImageStack st){
-		this.st = st;
-	}
-	
-	public AbstractImageFilterer(AbstractImageFilterer f){
-		this.ip = f.ip;
-		this.st = f.st;
-	}
-	
-	public ImageProcessor toProcessor(){
-		return ip;
-	}
-	
-	public ImageStack toStack(){
-		return st;
-	}
-	
-	public ImageIcon toImageIcon(){
-		return new ImageIcon( ip.getBufferedImage() );
-	}
-	
-	
-	
 }

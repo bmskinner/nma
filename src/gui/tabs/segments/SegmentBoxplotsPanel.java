@@ -42,8 +42,8 @@ import org.jfree.chart.JFreeChart;
 
 import stats.SegmentStatistic;
 import charting.charts.BoxplotChartFactory;
-import charting.charts.ExportableChartPanel;
-import charting.charts.ViolinChartPanel;
+import charting.charts.panels.ExportableChartPanel;
+import charting.charts.panels.ViolinChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
@@ -59,7 +59,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 	public SegmentBoxplotsPanel(){
 		super();
 
-		JFreeChart boxplot = BoxplotChartFactory.getInstance().makeEmptyChart();
+		JFreeChart boxplot = BoxplotChartFactory.makeEmptyChart();
 		
 
 		ExportableChartPanel chartPanel = new ExportableChartPanel(boxplot);
@@ -104,7 +104,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 			// Get each segment as a boxplot
 			for(NucleusBorderSegment seg : segments){
 				
-				JFreeChart chart = BoxplotChartFactory.getInstance().makeEmptyChart();
+				JFreeChart chart = BoxplotChartFactory.makeEmptyChart();
 				ViolinChartPanel chartPanel = new ViolinChartPanel(chart);
 				chartPanel.addChartSetEventListener(this);
 				chartPanel.setPreferredSize(preferredSize);
@@ -141,7 +141,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 		
-		ChartPanel chartPanel = new ChartPanel(BoxplotChartFactory.getInstance().makeEmptyChart());
+		ChartPanel chartPanel = new ChartPanel(BoxplotChartFactory.makeEmptyChart());
 		mainPanel.add(chartPanel);
 		mainPanel.revalidate();
 		mainPanel.repaint();

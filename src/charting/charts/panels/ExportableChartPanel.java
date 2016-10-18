@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package charting.charts;
+package charting.charts.panels;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
@@ -51,7 +51,8 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import charting.charts.CoupledProfileOutlineChartPanel.BorderPointEventListener;
+import charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventListener;
+import charting.datasets.ExportableBoxAndWhiskerCategoryDataset;
 import utility.Constants;
 import gui.ChartSetEvent;
 import gui.ChartSetEventListener;

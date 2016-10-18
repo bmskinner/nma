@@ -24,8 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-
+import utility.ProfileException;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
@@ -79,7 +78,7 @@ public class ProfileSegmenter implements Loggable {
 
 		this.initialise();
 		
-		log(Level.FINE, "Created profile segmenter");
+		fine("Created profile segmenter");
 	}
 	
 	/**
@@ -98,6 +97,68 @@ public class ProfileSegmenter implements Loggable {
 		validateBorderTagMap();
 		fine("Added map of BorderTagObject indexes to force segmentation");
 		
+	}
+	
+	/**
+	 * Get the deltas and find minima and maxima. These switch between segments
+	 * @param splitIndex an index point that must be segmented on
+	 * @return a list of segments
+	 */
+	public List<NucleusBorderSegment> segment() throws UnsegmentableProfileException {
+
+		/*
+		 * Prepare segment start index
+		 */
+		int segmentStart = 0;
+
+
+
+
+		/*
+		 * Iterate through the profile, looking for breakpoints
+		 * The reference point is at index 0, as defined by the 
+		 * calling method.
+		 * 
+		 *  Therefore, a segment should always be started at index 0
+		 */
+		for(int index=0; index<profile.size(); index++){
+
+			if(testSegmentEndFound(index, segmentStart)){
+
+				// we've hit a new segment
+				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, index, profile.size());
+
+				segments.add(seg);
+
+				fine("New segment found in profile: "+seg.toString());
+
+				segmentStart = index; // Prepare for the next segment
+			}
+
+		}
+
+		/*
+		 * Now, there is a list of segments which covers most but not all of 
+		 * the profile. The final segment has not been defined: is is the current segment
+		 * start, but has not had an endpoint added. Since segment ends cannot be
+		 * called within MIN_SIZE of the profile end, there is enough space to make a segment
+		 * running from the current segment start back to index 0
+		 */
+		NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, 0, profile.size());
+		segments.add(seg);
+
+		try {
+			NucleusBorderSegment.linkSegments(segments);
+		} catch (ProfileException e) {
+			warn("Cannot link segments in profile");
+			throw new UnsegmentableProfileException("Error making final profile", e);
+		}
+
+		fine("Segments linked");
+
+		fine(this.toString());
+
+		return segments;
 	}
 	
 	/**
@@ -172,68 +233,6 @@ public class ProfileSegmenter implements Loggable {
 		
 	}
 	
-	/**
-	 * Get the deltas and find minima and maxima. These switch between segments
-	 * @param splitIndex an index point that must be segmented on
-	 * @return a list of segments
-	 */
-	public List<NucleusBorderSegment> segment(){
-
-		/*
-		 * Prepare segment start index
-		 */
-		int segmentStart = 0;
-
-				
-		try{
-			
-			/*
-			 * Iterate through the profile, looking for breakpoints
-			 * The reference point is at index 0, as defined by the 
-			 * calling method.
-			 * 
-			 *  Therefore, a segment should always be started at index 0
-			 */
-			for(int index=0; index<profile.size(); index++){
-				
-				if(testSegmentEndFound(index, segmentStart)){
-					
-					// we've hit a new segment
-					NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, index, profile.size());
-
-					segments.add(seg);
-					
-					fine("New segment found in profile: "+seg.toString());
-					
-					segmentStart = index; // Prepare for the next segment
-				}
-				
-			}
-			
-			/*
-			 * Now, there is a list of segments which covers most but not all of 
-			 * the profile. The final segment has not been defined: is is the current segment
-			 * start, but has not had an endpoint added. Since segment ends cannot be
-			 * called within MIN_SIZE of the profile end, there is enough space to make a segment
-			 * running from the current segment start back to index 0
-			 */
-			NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, 0, profile.size());
-			segments.add(seg);
-							
-			NucleusBorderSegment.linkSegments(segments);
-			
-			log(Level.FINE, "Segments linked");
-			for(NucleusBorderSegment s : segments){
-				log(Level.FINE, s.toString());
-			}
-			
-
-		} catch (Exception e){
-			logError( "Error in segmentation", e);
-		}
-		
-		return segments;
-	}
 	
 
 	/**
@@ -242,7 +241,7 @@ public class ProfileSegmenter implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	private boolean testSegmentEndFound(int index, int segmentStart) throws Exception{
+	private boolean testSegmentEndFound(int index, int segmentStart) {
 
 		/*
 		 * The first segment must meet the length limit
@@ -317,12 +316,21 @@ public class ProfileSegmenter implements Loggable {
 	}
 
 	
-	/**
-	 * For debugging. Print the details of each segment found 
-	 */
-	public void print(){
+	@Override
+	public String toString(){
+		
+		StringBuilder b = new StringBuilder();
 		for(NucleusBorderSegment s : segments){
-			s.print();
+			b.append(s.toString()+"\n");
 		}
+		return b.toString();
+	}
+	
+	public class UnsegmentableProfileException extends Exception {
+		private static final long serialVersionUID = 1L;
+		public UnsegmentableProfileException() { super(); }
+		public UnsegmentableProfileException(String message) { super(message); }
+		public UnsegmentableProfileException(String message, Throwable cause) { super(message, cause); }
+		public UnsegmentableProfileException(Throwable cause) { super(cause); }
 	}
 }

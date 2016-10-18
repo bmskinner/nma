@@ -31,9 +31,9 @@ import javax.swing.JScrollPane;
 import org.jfree.chart.JFreeChart;
 
 import stats.SignalStatistic;
-import charting.charts.ExportableChartPanel;
 import charting.charts.ViolinChartFactory;
-import charting.charts.ViolinChartPanel;
+import charting.charts.panels.ExportableChartPanel;
+import charting.charts.panels.ViolinChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 
@@ -61,7 +61,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
 			JFreeChart chart = null;
 			try {
-				chart = ViolinChartFactory.getInstance().createStatisticPlot(options);
+				chart = new ViolinChartFactory(options).createStatisticPlot();
 			} catch (Exception e) {
 				log(Level.SEVERE, "Error creating boxplots panel", e);
 			}

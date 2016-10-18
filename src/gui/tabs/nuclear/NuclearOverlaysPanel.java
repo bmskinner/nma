@@ -13,8 +13,8 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
-import charting.charts.ExportableChartPanel;
 import charting.charts.OutlineChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
@@ -242,7 +242,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		finest("Creating nuclear overlay chart");
-		return OutlineChartFactory.getInstance().createVerticalNucleiChart(options);
+		return new OutlineChartFactory(options).createVerticalNucleiChart();
 	}
 	
 	

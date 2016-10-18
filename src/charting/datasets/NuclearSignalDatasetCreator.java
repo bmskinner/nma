@@ -41,7 +41,6 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import charting.charts.ExportableBoxAndWhiskerCategoryDataset;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import stats.SignalStatistic;
@@ -450,7 +449,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 				double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
 
-				NuclearHistogramDatasetCreator.getInstance().updateMinMaxRange(result, values);
+				NuclearHistogramDatasetCreator.updateMinMaxRange(result, values);
 			}
 		}
 		

@@ -23,10 +23,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
-import logging.Loggable;
-
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.XYDataset;
 
 import charting.options.ChartOptions;
 import utility.ArrayConverter;
@@ -44,26 +43,25 @@ import stats.Max;
 import stats.Min;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
-import stats.Stats;
 
-public class NuclearHistogramDatasetCreator implements Loggable {
-	
-	private static NuclearHistogramDatasetCreator instance = null;
-	
-	private NuclearHistogramDatasetCreator(){}
-	
-	public static NuclearHistogramDatasetCreator getInstance(){
-		if(instance==null){
-			instance = new NuclearHistogramDatasetCreator();
-		}
-		return instance;
-	}
+public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 	
 	public static final int MIN_ROUNDED = 0;
 	public static final int MAX_ROUNDED = 1;
 	public static final int STEP_SIZE   = 2;
 	
-	public HistogramDataset createNuclearStatsHistogramDataset(ChartOptions options) throws Exception {
+	protected final ChartOptions options;
+		
+	public NuclearHistogramDatasetCreator(ChartOptions o){
+		if(o==null){
+			throw new IllegalArgumentException("Options cannot be null");
+		}
+		options = o;
+		
+	}
+	
+
+	public HistogramDataset createNuclearStatsHistogramDataset() throws ChartDatasetCreationException {
 		HistogramDataset ds = new HistogramDataset();
 		
 			finest("Creating histogram dataset: "+options.getStat());
@@ -169,8 +167,11 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 	 * @return a charting dataset
 	 * @throws Exception
 	 */
-	public DefaultXYDataset createNuclearDensityHistogramDataset(List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale) throws Exception {
+	public XYDataset createNuclearDensityHistogramDataset() throws ChartDatasetCreationException {
 		DefaultXYDataset ds = new DefaultXYDataset();
+		List<AnalysisDataset> list = options.getDatasets();
+		NucleusStatistic stat      = (NucleusStatistic) options.getStat();
+		MeasurementScale scale     = options.getScale();
 		
 		int[] minMaxRange = calculateMinAndMaxRange(list, stat, scale);
 
@@ -179,9 +180,14 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			
 			String groupLabel = stat.toString();
 			double[] values = collection.getNuclearStatistics(stat, scale);
-			KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(values, 0.001);
-	
 			
+			KernelEstimator est;
+			try {
+				est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(values, 0.001);
+			} catch (Exception e1) {
+				throw new ChartDatasetCreationException("Cannot make probability kernel", e1);
+			}
+
 			double[] minMax = findMinAndMaxForHistogram(values);
 
 			List<Double> xValues = new ArrayList<Double>();
@@ -226,7 +232,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 	 * @return an array with the min and max of the range
 	 * @throws Exception
 	 */
-	private int[] calculateMinAndMaxRange(List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale) throws Exception {
+	private static int[] calculateMinAndMaxRange(List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale) throws ChartDatasetCreationException {
 		
 		int[] result = new int[2];
 		result[0] = Integer.MAX_VALUE; // holds min
@@ -249,7 +255,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 	 * @param values the new values
 	 * @return
 	 */
-	public int[] updateMinMaxRange(int[] range, double[] values){
+	public static int[] updateMinMaxRange(int[] range, double[] values){
 		
 		double min = Arrays.stream(values).min().orElse(0); //Stats.min(values);
 		double max = Arrays.stream(values).max().orElse(0); //Stats.max(values);
@@ -272,7 +278,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 		return range;
 	}
 	
-	public HistogramDataset createSegmentLengthHistogramDataset(ChartOptions options) throws Exception {
+	public HistogramDataset createSegmentLengthHistogramDataset() throws ChartDatasetCreationException {
 		HistogramDataset ds = new HistogramDataset();
 		
 
@@ -302,9 +308,14 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 			 * Use the segment id for this collection to fetch the individual nucleus segments
 			 */
 			
-			double[] values = collection.getSegmentStatistics(SegmentStatistic.LENGTH, 
-					options.getScale(), 
-					medianSeg.getID());
+			double[] values;
+			try {
+				values = collection.getSegmentStatistics(SegmentStatistic.LENGTH, 
+						options.getScale(), 
+						medianSeg.getID());
+			} catch (Exception e) {
+				throw new ChartDatasetCreationException("Cannot get segment statistics for "+dataset.getName(), e);
+			}
 			
 			double[] minMaxStep = findMinAndMaxForHistogram(values);
 			int minRounded = (int) minMaxStep[0];
@@ -326,7 +337,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public DefaultXYDataset createSegmentLengthDensityDataset(ChartOptions options) throws Exception {
+	public XYDataset createSegmentLengthDensityDataset() throws ChartDatasetCreationException {
 
 		int[] minMaxRange = {Integer.MAX_VALUE, 0}; // start with extremes, trim to fit data
 		for(AnalysisDataset dataset : options.getDatasets()){
@@ -393,8 +404,13 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 				lengths[count++] = length;
 			}
 			
-			KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(  lengths , 0.001 );
-	
+			KernelEstimator est;
+			try {
+				est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(lengths , 0.001);
+			} catch (Exception e1) {
+				throw new ChartDatasetCreationException("Cannot make probability kernel", e1);
+			}
+
 			double min = Arrays.stream(lengths).min().orElse(0); //Stats.min(values);
 			double max = Arrays.stream(lengths).max().orElse(0); //Stats.max(values);
 
@@ -452,7 +468,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public HistogramDataset createHistogramDatasetFromList(List<Double> list) throws Exception {
+	public static HistogramDataset createHistogramDatasetFromList(List<Double> list) throws ChartDatasetCreationException {
 		HistogramDataset ds = new HistogramDataset();
 		if(!list.isEmpty()){
 		
@@ -474,7 +490,7 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 		return ds;
 	}
 	
-	public DefaultXYDataset createDensityDatasetFromList(List<Double> list, double binWidth) throws Exception{
+	public static XYDataset createDensityDatasetFromList(List<Double> list, double binWidth) throws ChartDatasetCreationException{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		if(!list.isEmpty()){
 			
@@ -488,7 +504,12 @@ public class NuclearHistogramDatasetCreator implements Loggable {
 				values = new double[0]; 
 			}
 			
-			KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(values, binWidth);
+			KernelEstimator est;
+			try {
+				est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(values, binWidth);
+			} catch (Exception e1) {
+				throw new ChartDatasetCreationException("Cannot make probability kernel", e1);
+			}
 
 			List<Double> xValues = new ArrayList<Double>();
 			List<Double> yValues = new ArrayList<Double>();

@@ -988,19 +988,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 			
 			segStart = segEnd;
 						
-			
-//			// adjust merge sources also and readd
-//			if(segment.hasMergeSources()){
-//				
-//
-//				List<NucleusBorderSegment> adjustedMergeSources = nudgeUnlinked(segment.getMergeSources(), value);
-//				for(NucleusBorderSegment newMergeSource : adjustedMergeSources){
-//					newSeg.addMergeSource(newMergeSource);
-//				}
-//				
-//
-//			}
-			
+						
 			result.add( newSeg );
 		}
 		

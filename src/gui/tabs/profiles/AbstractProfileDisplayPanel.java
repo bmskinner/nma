@@ -38,8 +38,8 @@ import org.jfree.data.xy.XYDataset;
 
 import stats.StatisticDimension;
 import components.generic.ProfileType;
-import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 
 @SuppressWarnings("serial")
 public abstract class AbstractProfileDisplayPanel extends DetailPanel implements ActionListener {
@@ -61,7 +61,7 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 			this.type = type;
 			
 			this.setLayout(new BorderLayout());
-			JFreeChart rawChart = MorphologyChartFactory.getInstance().makeEmptyChart();
+			JFreeChart rawChart = MorphologyChartFactory.createEmptyChart();
 			chartPanel = makeProfileChartPanel(rawChart);
 			
 			

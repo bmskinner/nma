@@ -27,6 +27,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+
 import gui.LoadingIconDialog;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
@@ -38,8 +39,8 @@ import org.jfree.chart.JFreeChart;
 
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
-import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import analysis.AnalysisDataset;
@@ -71,7 +72,7 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 
 		this.add(createSettingsPanel(), BorderLayout.NORTH);
 
-		chartPanel = new ExportableChartPanel(MorphologyChartFactory.getInstance().makeEmptyChart());
+		chartPanel = new ExportableChartPanel(MorphologyChartFactory.createEmptyChart());
 		this.add(chartPanel, BorderLayout.CENTER);
 
 
@@ -140,7 +141,7 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 		setAnalysing(true);
 		log(Level.INFO, "Franken-normalising collections");
 		// Clear the old chart
-		chartPanel.setChart(MorphologyChartFactory.getInstance().makeEmptyChart());
+		chartPanel.setChart(MorphologyChartFactory.createEmptyChart());
 		
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		list.add(dataset1);
@@ -155,7 +156,7 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 			.setProfileType(ProfileType.FRANKEN)
 			.build();
 				
-		JFreeChart chart = MorphologyChartFactory.makeKruskalWallisChart(options, true);
+		JFreeChart chart = new MorphologyChartFactory(options).makeKruskalWallisChart(true);
 		chartPanel.setChart(chart);
 
 		setAnalysing(false);

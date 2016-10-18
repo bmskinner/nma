@@ -1,4 +1,4 @@
-package charting.charts;
+package charting.charts.overlays;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

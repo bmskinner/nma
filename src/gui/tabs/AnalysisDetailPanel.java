@@ -26,7 +26,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.datasets.NucleusTableDatasetCreator;
+import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptions.TableType;
@@ -62,7 +62,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return NucleusTableDatasetCreator.getInstance().createAnalysisTable(options);
+		return new AnalysisDatasetTableCreator(options).createAnalysisTable();
 	}
 	
 	@Override

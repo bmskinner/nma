@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package charting.charts;
+package charting.charts.overlays;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

@@ -179,8 +179,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 
 
 			} else {
-				JFreeChart chart1 = MorphologyChartFactory.getInstance().makeEmptyChart();
-				JFreeChart chart2 = MorphologyChartFactory.getInstance().makeEmptyChart();
+				JFreeChart chart1 = MorphologyChartFactory.createEmptyChart();
+				JFreeChart chart2 = MorphologyChartFactory.createEmptyChart();
 				
 				dualPanel.setCharts(chart1, chart2);
 				setEnabled(false);			
@@ -189,8 +189,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 
 		} catch(Exception e){
 			error("Error updating cell panel", e);
-			JFreeChart chart1 = MorphologyChartFactory.getInstance().makeEmptyChart();
-			JFreeChart chart2 = MorphologyChartFactory.getInstance().makeEmptyChart();
+			JFreeChart chart1 = MorphologyChartFactory.createEmptyChart();
+			JFreeChart chart2 = MorphologyChartFactory.createEmptyChart();
 			dualPanel.setCharts(chart1, chart2);
 			setEnabled(false);
 		}
@@ -207,7 +207,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return MorphologyChartFactory.getInstance().makeIndividualNucleusProfileChart( options);
+		return new MorphologyChartFactory(options).makeIndividualNucleusProfileChart( );
 	}
 	
 	@Override

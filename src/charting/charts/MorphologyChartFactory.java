@@ -67,19 +67,8 @@ import components.nuclei.Nucleus;
 
 public class MorphologyChartFactory extends AbstractChartFactory {
 	
-	private static MorphologyChartFactory instance = null;
-	
-	protected MorphologyChartFactory(){}
-	
-	/**
-	 * Fetch an instance of the factory
-	 * @return
-	 */
-	public static MorphologyChartFactory getInstance(){
-		if(instance==null){
-			instance = new MorphologyChartFactory();
-		}
-		return instance;
+	public MorphologyChartFactory(ChartOptions o){
+		super(o);
 	}
 	
 	
@@ -87,7 +76,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * Create an empty chart
 	 * @return
 	 */
-	public JFreeChart makeEmptyChart(){
+	public static JFreeChart createEmptyChart(){
 		return makeEmptyProfileChart(ProfileType.ANGLE);
 	}
 	
@@ -95,7 +84,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * Create an empty chart with display options
 	 * @return
 	 */
-	public JFreeChart makeEmptyChart(ChartOptions options){
+	public JFreeChart makeEmptyChart(){
 		JFreeChart chart = makeEmptyProfileChart(options.getType());
 		
 		applyAxisOptions(chart, options);
@@ -107,7 +96,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * Create an empty chart to display when no datasets are selected
 	 * @return
 	 */
-	public JFreeChart makeEmptyChart(ProfileType type){
+	public static JFreeChart makeEmptyChart(ProfileType type){
 		return makeEmptyProfileChart(type);
 	}
 	
@@ -115,7 +104,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * Create an empty chart to display when no datasets are selected
 	 * @return a chart
 	 */
-	private JFreeChart makeEmptyProfileChart(ProfileType type){
+	private static JFreeChart makeEmptyProfileChart(ProfileType type){
 		
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
@@ -140,18 +129,18 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public JFreeChart createProfileChart(ChartOptions options) throws Exception {
+	public JFreeChart createProfileChart() throws Exception {
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyProfileChart(options.getType());
 		}
 		
 		if(options.isSingleDataset() &&  !options.isHideProfiles() ){
-			return makeSingleProfileChart(options);
+			return makeSingleProfileChart();
 		}
 		
 		if(options.isMultipleDatasets() || options.isHideProfiles() ){
-			return makeMultiProfileChart(options);
+			return makeMultiProfileChart();
 		}
 		return makeEmptyProfileChart(options.getType());
 	}
@@ -161,7 +150,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @return
 	 */
-	public JFreeChart makeIndividualNucleusProfileChart(ChartOptions options) {
+	public JFreeChart makeIndividualNucleusProfileChart() {
 		
 		if(options.isMultipleDatasets()){
 			return makeEmptyChart();
@@ -267,7 +256,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	private JFreeChart makeSingleProfileChart(ChartOptions options) throws Exception {
+	private JFreeChart makeSingleProfileChart() throws Exception {
 		
 		XYDataset ds = null;
 		AnalysisDataset dataset = options.firstDataset();
@@ -343,9 +332,9 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @throws Exception
 	 */	
-	public JFreeChart makeMultiSegmentedProfileChart(ChartOptions options)  {
+	public JFreeChart makeMultiSegmentedProfileChart()  {
 		
-		JFreeChart chart = this.makeEmptyChart(options);
+		JFreeChart chart = makeEmptyChart();
 		
 		if( ! options.hasDatasets()){
 			return chart;
@@ -528,7 +517,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param xLength the length of the x axis
 	 * @return a chart
 	 */
-	private JFreeChart makeMultiProfileChart(ChartOptions options)  throws Exception{
+	private JFreeChart makeMultiProfileChart()  throws Exception{
 				
 		List<XYSeriesCollection> iqrProfiles = null;
 		XYDataset medianProfiles			 = null;
@@ -628,7 +617,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 	
-	public JFreeChart makeVariabilityChart(ChartOptions options) {
+	public JFreeChart makeVariabilityChart() {
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyProfileChart(options.getType());
@@ -637,11 +626,11 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		try {
 
 			if(options.isSingleDataset()){
-				return makeSingleVariabilityChart(options);
+				return makeSingleVariabilityChart();
 			}
 
 			if(options.isMultipleDatasets()){
-				return makeMultiVariabilityChart(options);
+				return makeMultiVariabilityChart();
 			}
 		} catch(Exception e){
 			warn("Error making variability chart");
@@ -659,7 +648,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	private JFreeChart makeSingleVariabilityChart(ChartOptions options) {
+	private JFreeChart makeSingleVariabilityChart() {
 		XYDataset ds = NucleusDatasetCreator.getInstance().createIQRVariabilityDataset(options);
 		
 		JFreeChart chart = makeProfileChart(ds, 100, options.getType());
@@ -711,7 +700,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	private JFreeChart makeMultiVariabilityChart(ChartOptions options) throws Exception {
+	private JFreeChart makeMultiVariabilityChart() throws Exception {
 		XYDataset ds = NucleusDatasetCreator.getInstance().createIQRVariabilityDataset(options);
 		
 		JFreeChart chart = this.createBaseXYChart();
@@ -757,7 +746,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		if(positionDataset == null || nuclearOutlines == null){
 			// a null dataset is returned if segment counts do not match
-			return ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
+			return ConsensusNucleusChartFactory.makeEmptyChart();
 		}
 		
 		
@@ -784,10 +773,10 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		pointRenderer.setBaseToolTipGenerator(tooltip);
 		plot.setRenderer(0, pointRenderer);
 		
-		boolean hasConsensus = ConsensusNucleusChartFactory.getInstance().hasConsensusNucleus(options.getDatasets());
+		boolean hasConsensus = new ConsensusNucleusChartFactory(options).hasConsensusNucleus();
 		if(hasConsensus){
 			// Find the bounds of the consensus nuclei in the options
-			double max = ConsensusNucleusChartFactory.getInstance().getconsensusChartRange(options.getDatasets());
+			double max = new ConsensusNucleusChartFactory(options).getconsensusChartRange();
 			plot.setDataset(1, nuclearOutlines);
 					
 			plot.getDomainAxis().setRange(-max,max);
@@ -835,12 +824,12 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param options the chart options. Should have a segID
 	 * @return a chart
 	 */
-	public JFreeChart makeSegmentStartPositionChart(ChartOptions options) throws Exception {
+	public JFreeChart makeSegmentStartPositionChart() throws Exception {
 		
 		if(  options.hasDatasets()){
 			return  makeMultiSegmentStartPositionChart(options);
 		}
-		return ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
+		return ConsensusNucleusChartFactory.makeEmptyChart();
 	}
 	
 		
@@ -915,7 +904,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 	
-	public JFreeChart createModalityProfileChart(ChartOptions options) throws Exception {
+	public JFreeChart createModalityProfileChart() throws Exception {
 		
 		XYDataset ds = NucleusDatasetCreator.getInstance().createModalityProfileDataset(options);
 		
@@ -946,7 +935,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 		
-	public JFreeChart createModalityPositionChart(ChartOptions options) throws Exception {
+	public JFreeChart createModalityPositionChart() throws Exception {
 
 		if( ! options.hasDatasets()){
 			return makeEmptyChart();
@@ -1072,7 +1061,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JFreeChart makeKruskalWallisChart(ChartOptions options, boolean frankenNormalise) throws Exception {
+	public JFreeChart makeKruskalWallisChart(boolean frankenNormalise) throws Exception {
 		
 		XYDataset kruskalDataset = null;
 		
@@ -1162,7 +1151,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param limits
 	 * @return
 	 */
-	public JFreeChart createBooleanProfileChart(Profile p, BooleanProfile limits){
+	public static JFreeChart createBooleanProfileChart(Profile p, BooleanProfile limits){
 		
 		XYDataset ds = NucleusDatasetCreator.getInstance().createBooleanProfileDataset(p, limits);
 		

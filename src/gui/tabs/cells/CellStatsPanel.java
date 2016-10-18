@@ -18,7 +18,9 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.TableModel;
 
+import charting.datasets.AnalysisDatasetTableCreator;
 import charting.datasets.CellDatasetCreator;
+import charting.datasets.CellTableDatasetCreator;
 import charting.datasets.SignalTableCell;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
@@ -44,20 +46,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 		this.setLayout(new BorderLayout());
 		
 		scrollPane = new JScrollPane();
-		
-		TableOptions options = new TableOptionsBuilder()
-				.setCell(null)
-				.build();
-		
-		TableModel tableModel;
-		try {
-			tableModel = getTable(options);
-		} catch (Exception e1) {
-			warn("Error creating cell stats table model");
-			log(Level.FINE, "Error creating cell stats table model", e1);
-			tableModel = null;
-		}
-					
+
+		TableModel tableModel = AnalysisDatasetTableCreator.createBlankTable();		
 		
 		table = new ExportableTable(tableModel);
 		table.setEnabled(false);
@@ -253,7 +243,12 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception {
-		return CellDatasetCreator.getInstance().createCellInfoTable(options);
+		
+		if(getCellModel().hasCell()){
+			return new CellTableDatasetCreator(getCellModel().getCell()).createCellInfoTable(options);
+		} else {
+			return CellTableDatasetCreator.createBlankTable();
+		}
 	}
 	
 	

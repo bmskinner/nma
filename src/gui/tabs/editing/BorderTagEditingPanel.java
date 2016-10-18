@@ -192,13 +192,13 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 	protected void updateNull() {
 		setButtonsEnabled(false);
 		
-		dualPanel.setCharts(MorphologyChartFactory.getInstance().makeEmptyChart(), 
-				MorphologyChartFactory.getInstance().makeEmptyChart());
+		dualPanel.setCharts(MorphologyChartFactory.createEmptyChart(), 
+				MorphologyChartFactory.createEmptyChart());
 	}
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return MorphologyChartFactory.getInstance().makeMultiSegmentedProfileChart(options);
+		return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
 	}
 	
 	@Override

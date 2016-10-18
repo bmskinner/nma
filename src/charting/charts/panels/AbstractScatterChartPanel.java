@@ -1,10 +1,11 @@
-package charting.charts;
+package charting.charts.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -19,7 +20,8 @@ import org.jfree.data.Range;
 import components.CellCollection;
 import components.generic.MeasurementScale;
 import analysis.AnalysisDataset;
-import charting.datasets.NucleusTableDatasetCreator;
+import charting.charts.ScatterChartFactory;
+import charting.datasets.AnalysisDatasetTableCreator;
 import charting.datasets.ScatterChartDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -56,12 +58,12 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 
 		JPanel tablePanel = new JPanel(new BorderLayout());
 				
-		TableModel model = NucleusTableDatasetCreator.getInstance().createBlankTable();
+		TableModel model = AnalysisDatasetTableCreator.createBlankTable();
 		rhoTable = new ExportableTable(model);
 		rhoTable.setEnabled(false);
 		tablePanel.add(rhoTable, BorderLayout.CENTER);
 		
-		JFreeChart chart = ScatterChartFactory.getInstance().makeEmptyChart();
+		JFreeChart chart = ScatterChartFactory.makeEmptyChart();
 		
 		chartPanel = new ExportableChartPanel(chart);
 		this.add(chartPanel, BorderLayout.CENTER);
@@ -164,7 +166,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return ScatterChartFactory.getInstance().createScatterChart(options);
+		return new ScatterChartFactory(options).createScatterChart();
 	}
 	
 	private void gateOnVisible(){

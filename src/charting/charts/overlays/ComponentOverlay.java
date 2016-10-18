@@ -17,7 +17,7 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package charting.charts;
+package charting.charts.overlays;
 
 import java.awt.Graphics2D;
 import java.awt.Paint;
@@ -25,7 +25,6 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.jfree.chart.ChartPanel;
@@ -34,21 +33,21 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
 
-import components.nuclei.Nucleus;
+import components.CellularComponent;
 
 @SuppressWarnings("serial")
-public class NucleusOverlay
+public class ComponentOverlay
 	extends ShapeOverlay {
 
-	private List<Nucleus> nuclei;
+	private List<CellularComponent> nuclei;
 	
 	
 	/**
      * Default constructor.
      */
-    public NucleusOverlay() {
+    public ComponentOverlay() {
         super();
-        this.nuclei = new ArrayList<Nucleus>();
+        this.nuclei = new ArrayList<CellularComponent>();
     }
 	
     /**
@@ -56,9 +55,9 @@ public class NucleusOverlay
      *
      * @param shape  the shape.
      */
-    public void addShape(ShapeOverlayObject shape, Nucleus n) {
+    public void addShape(ShapeOverlayObject shape, CellularComponent n) {
         if (shape == null || n==null) {
-            throw new IllegalArgumentException("Null shape or nucleus argument.");
+            throw new IllegalArgumentException("Null shape or component argument.");
         }
         this.shapes.add(shape);
         shape.addPropertyChangeListener(this);
@@ -75,7 +74,7 @@ public class NucleusOverlay
         int i = shapes.indexOf(shape);
         if(i>-1){
         	ShapeOverlayObject s = shapes.get(i);
-        	Nucleus n = nuclei.get(i);
+        	CellularComponent n = nuclei.get(i);
 
         	shapes.remove(i);
         	nuclei.remove(i);
@@ -116,7 +115,7 @@ public class NucleusOverlay
         for(int i=0; i<shapes.size(); i++){
         	
         	ShapeOverlayObject object = shapes.get(i);
-        	Nucleus n = nuclei.get(i);
+        	CellularComponent n = nuclei.get(i);
         	if (object.isVisible()) {
         		
         		// Need to find the coordinates to draw the shape

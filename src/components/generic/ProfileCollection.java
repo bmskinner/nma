@@ -33,6 +33,7 @@ import components.nuclei.Nucleus;
 //import ij.IJ;
 
 import utility.Constants;
+import utility.ProfileException;
 
 /**
  * Holds the ProfileAggregate with individual nucleus values,
@@ -308,7 +309,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @param tag the border tag
 	 * @return a copy of the segment with the tag index inside, or null
 	 */
-	public NucleusBorderSegment getSegmentContaining(BorderTagObject tag) throws Exception {
+	public NucleusBorderSegment getSegmentContaining(BorderTagObject tag) throws ProfileException {
 		List<NucleusBorderSegment> segments = this.getSegments(tag);
 
 		NucleusBorderSegment result = null;

@@ -22,6 +22,7 @@ package analysis.profiles;
 
 import java.util.UUID;
 
+import utility.ProfileException;
 import logging.Loggable;
 import components.CellCollection;
 import components.generic.BorderTagObject;
@@ -41,73 +42,20 @@ public class ProfileOffsetter implements Loggable {
 	final private CellCollection collection;
 	
 	public ProfileOffsetter(final CellCollection collection){
+		
+		if(collection==null){
+			throw new IllegalArgumentException("Collection cannot be null");
+		}
+				
 		this.collection = collection;
 	}
-	
-//	private void calculateOffsetsInRoundNuclei() throws Exception {
-//
-//		Profile medianToCompare = collection.getProfileCollection(ProfileType.REGULAR)
-//				.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN); // returns a median profile with head at 0
-//
-//		for(Nucleus n : collection.getNuclei()){
-//
-//			// returns the positive offset index of this profile which best matches the median profile
-//			int newHeadIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(medianToCompare);
-//			n.setBorderTag(BorderTagObject.REFERENCE_POINT, newHeadIndex);
-//
-//			// check if flipping the profile will help
-//
-//			double differenceToMedian1 = n.getProfile(ProfileType.REGULAR,BorderTagObject.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
-//			n.reverse();
-//			double differenceToMedian2 = n.getProfile(ProfileType.REGULAR,BorderTagObject.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
-//
-//			if(differenceToMedian1<differenceToMedian2){
-//				n.reverse(); // put it back if no better
-//			}
-//
-//			// also update the orientation position
-//			n.setBorderTag(BorderTagObject.ORIENTATION_POINT, n.getBorderIndex(BorderTagObject.REFERENCE_POINT));
-//			
-//		}
-//	}
-
-	
-//	private void calculateOffsetsInRodentSpermNuclei() throws Exception {
-//
-//		// Get the median profile starting from the orientation point
-//		Profile median = collection.getProfileCollection(ProfileType.REGULAR)
-//				.getProfile(BorderTagObject.ORIENTATION_POINT, Constants.MEDIAN); // returns a median profile
-//
-//		// go through each nucleus
-//		for(Nucleus n : collection.getNuclei()){
-//
-//			// ensure the correct class is chosen
-//			RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
-//
-//			// get the offset for the best fit to the median profile
-//			int newTailIndex = nucleus.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(median);
-//
-//			// add the offset of the tail to the nucleus
-//			nucleus.setBorderTag(BorderTagObject.ORIENTATION_POINT, newTailIndex);
-//
-//
-//			// also update the head position (same as round reference point)
-//			// - the point opposite the tail through the CoM
-//			int headIndex = nucleus.getBorderIndex(nucleus.findOppositeBorder( nucleus.getBorderPoint(newTailIndex) ));
-//			nucleus.setBorderTag(BorderTagObject.INTERSECTION_POINT, headIndex);
-////			nucleus.setBorderTag(BorderTagObject.REFERENCE_POINT, headIndex);
-//			nucleus.splitNucleusToHeadAndHump();
-//
-//		}			
-//
-//	}
-	
+		
 	
 	/**
 	 * This method requires the frankenprofiling to be completed
 	 * @throws Exception
 	 */
-	public void assignBorderTagToNucleiViaFrankenProfile(BorderTagObject tag) throws Exception{
+	public void assignBorderTagToNucleiViaFrankenProfile(BorderTagObject tag) throws ProfileOffsetException {
 
 		int index = collection.getProfileCollection(ProfileType.ANGLE)
 				.getIndex(tag); 
@@ -116,14 +64,17 @@ public class ProfileOffsetter implements Loggable {
 		 * Check that the points exist
 		 */
 		if( index == -1  ){
-			warn("Cannot find "+tag+" index in median");
-			return;
+			throw new ProfileOffsetException("Cannot find "+tag+" index in median");
 		}
 
-		UUID segID = collection.getProfileCollection(ProfileType.ANGLE)
-				.getSegmentContaining(tag).getID();
-//		String segName = collection.getProfileCollection(ProfileType.REGULAR)
-//				.getSegmentContaining(tag)..getName();
+		UUID segID;
+		try {
+			segID = collection.getProfileCollection(ProfileType.ANGLE)
+					.getSegmentContaining(tag).getID();
+		} catch (ProfileException e) {
+			throw new ProfileOffsetException("Cannot find segment with tag "+tag+" in median");
+		}
+
 
 
 
@@ -132,8 +83,6 @@ public class ProfileOffsetter implements Loggable {
 
 		
 		NucleusBorderSegment segFromRef    = profile.getSegment(segID);
-		
-//		NucleusBordersSegment segFromRef    = profile.getSegment(segName);
 
 
 		/*
@@ -182,10 +131,26 @@ public class ProfileOffsetter implements Loggable {
 	}
 	
 	/**
+	 * Use the proportional segment method to update top and bottom vertical positions
+	 * within the dataset
+	 * @throws Exception
+	 */
+	public void reCalculateVerticals() throws ProfileOffsetException {
+		assignTopAndBottomVerticalsViaFrankenProfile();
+	}
+	
+	
+	/*
+	 * 
+	 * PRIVATE METHODS
+	 * 
+	 */
+	
+	/**
 	 * This method requires the frankenprofiling to be completed
 	 * @throws Exception
 	 */
-	private void assignTopAndBottomVerticalsViaFrankenProfile() throws Exception{
+	private void assignTopAndBottomVerticalsViaFrankenProfile() throws ProfileOffsetException {
 				
 		
 		/*
@@ -202,137 +167,14 @@ public class ProfileOffsetter implements Loggable {
 		
 	}
 	
-//	private void assignTopAndBottomVerticalsToMouseViaOffsetting() throws Exception{
-//		
-//		/*
-//		 * Regular profile method: offsetting
-//		 */
-//		{
-//			Profile verticalTopMedian;
-//			Profile verticalBottomMedian;
-//			try{
-//				verticalTopMedian = collection.getProfileCollection(ProfileType.REGULAR)
-//						.getProfile(BorderTagObject.TOP_VERTICAL, Constants.MEDIAN); 
-//
-//				verticalBottomMedian = collection.getProfileCollection(ProfileType.REGULAR)
-//						.getProfile(BorderTagObject.BOTTOM_VERTICAL, Constants.MEDIAN); 
-//
-//
-//			} catch (IllegalArgumentException e){
-//				warn("Error assigning vertical in dataset "+collection.getName());
-//				warn("No vertical points detected");
-//				// This occurs when the median profile did not have detectable verticals. Return quietly.
-//				
-//				return;
-//			}
-//			for(Nucleus n : collection.getNuclei()){
-//
-//				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
-//
-//
-//				int newIndexOne = nucleus.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(verticalTopMedian);
-//				int newIndexTwo = nucleus.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(verticalBottomMedian);
-//
-//				XYPoint p0 = nucleus.getBorderPoint(newIndexOne);
-//				XYPoint p1 = nucleus.getBorderPoint(newIndexTwo);
-//				
-//
-//				if(p0.getLengthTo(nucleus.getBorderTag(BorderTagObject.REFERENCE_POINT))> p1.getLengthTo(nucleus.getBorderTag(BorderTagObject.REFERENCE_POINT)) ){
-//
-//					// P0 is further from the reference point than p1
-//
-//					nucleus.setBorderTag(BorderTagObject.TOP_VERTICAL, newIndexTwo);
-//					nucleus.setBorderTag(BorderTagObject.BOTTOM_VERTICAL, newIndexOne);
-//
-//				} else {
-//
-//					nucleus.setBorderTag(BorderTagObject.TOP_VERTICAL, newIndexOne);
-//					nucleus.setBorderTag(BorderTagObject.BOTTOM_VERTICAL, newIndexTwo);
-//
-//				}
-//			}
-//
-//
-//		}
-//	}
-	
-//	private void calculateOffsetsInPigSpermNuclei() throws Exception {
-//
-//		// get the median profile zeroed on the orientation point
-//		Profile medianToCompare = collection.getProfileCollection(ProfileType.REGULAR)
-//				.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN); 
-//
-//		for(Nucleus nucleus : collection.getNuclei()){
-//			PigSpermNucleus n = (PigSpermNucleus) nucleus;
-//
-//			// returns the positive offset index of this profile which best matches the median profile
-//			int tailIndex = n.getProfile(ProfileType.REGULAR).getSlidingWindowOffset(medianToCompare);
-//
-//			n.setBorderTag(BorderTagObject.ORIENTATION_POINT, tailIndex);
-//			n.setBorderTag(BorderTagObject.REFERENCE_POINT, tailIndex);
-//
-//			// also update the head position
-//			int headIndex = n.getBorderIndex(n.findOppositeBorder( n.getBorderPoint(tailIndex) ));
-//			n.setBorderTag(BorderTagObject.INTERSECTION_POINT, headIndex);
-//		}
-//
-//	}
 
-	/**
-	 * Offset the position of the tail in each nucleus based on the difference to the median.
-	 * Also updates the top and bottom verticals.
-	 * @param collection the nuclei
-	 * @param nucleusClass the class of nucleus
-	 */
-//	public void calculateOffsets() throws Exception {
-//
-////		calculateOPOffsets();
-//		calculateVerticals();
-//	}
 	
-	/**
-	 * Offset the position of the tail in each nucleus based on the difference to the median
-	 * @param collection the nuclei
-	 * @param nucleusClass the class of nucleus
-	 */
-//	public void calculateOPOffsets() throws Exception {
-//
-//		switch(collection.getNucleusType()){
-//
-//			case PIG_SPERM:
-////				calculateOffsetsInPigSpermNuclei();
-//				break;
-//			case RODENT_SPERM:
-////				calculateOffsetsInRodentSpermNuclei();
-//				break;
-//			default:
-////				calculateOffsetsInRoundNuclei();
-//				break;
-//		}
-//	}
-	
-	/**
-	 * Offset the position of top and bottom vertical points in each nucleus
-	 * @throws Exception
-	 */
-//	public void calculateVerticals()  throws Exception {
-//		switch(collection.getNucleusType()){
-//		case RODENT_SPERM:
-////			assignTopAndBottomVerticalsToMouseViaOffsetting();
-//			break;
-//		default:
-//			break;
-//		}
-//	}
-	
-	/**
-	 * Use the proportional segment method to update top and bottom vertical positions
-	 * within the dataset
-	 * @throws Exception
-	 */
-	public void reCalculateVerticals() throws Exception{
-		assignTopAndBottomVerticalsViaFrankenProfile();
+	public class ProfileOffsetException extends Exception {
+		private static final long serialVersionUID = 1L;
+		public ProfileOffsetException() { super(); }
+		public ProfileOffsetException(String message) { super(message); }
+		public ProfileOffsetException(String message, Throwable cause) { super(message, cause); }
+		public ProfileOffsetException(Throwable cause) { super(cause); }
 	}
-
 
 }

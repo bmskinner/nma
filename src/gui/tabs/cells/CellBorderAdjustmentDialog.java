@@ -69,6 +69,7 @@ import org.jfree.ui.RectangleEdge;
 
 import analysis.AnalysisDataset;
 import components.Cell;
+import components.CellularComponent;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
@@ -80,12 +81,12 @@ import gui.RotationMode;
 import gui.components.panels.DualChartPanel;
 import gui.dialogs.CellResegmentationDialog;
 import charting.charts.ConsensusNucleusChartFactory;
-import charting.charts.EllipticalOverlay;
-import charting.charts.EllipticalOverlayObject;
-import charting.charts.ExportableChartPanel;
 import charting.charts.OutlineChartFactory;
-import charting.charts.CoupledProfileOutlineChartPanel.BorderPointEvent;
-import charting.charts.CoupledProfileOutlineChartPanel.BorderPointEventListener;
+import charting.charts.overlays.EllipticalOverlay;
+import charting.charts.overlays.EllipticalOverlayObject;
+import charting.charts.panels.ExportableChartPanel;
+import charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEvent;
+import charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventListener;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 
@@ -197,8 +198,8 @@ public class CellBorderAdjustmentDialog
 			this.add(header, BorderLayout.NORTH);
 			
 	
-			JFreeChart empty1 = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
-			JFreeChart empty2 = ConsensusNucleusChartFactory.getInstance().makeEmptyChart();
+			JFreeChart empty1 = ConsensusNucleusChartFactory.makeEmptyChart();
+			JFreeChart empty2 = ConsensusNucleusChartFactory.makeEmptyChart();
 			
 			dualPanel = new CellBorderDualPanel();
 			
@@ -324,9 +325,11 @@ public class CellBorderAdjustmentDialog
 				.setCellularComponent(cell.getNucleus())
 				.build();
 	
-//			finer("Making chart");
-			JFreeChart outlineChart = OutlineChartFactory.getInstance().makeCellOutlineChart(outlineOptions);
-			JFreeChart outlineChart2 = OutlineChartFactory.getInstance().makeCellOutlineChart(outlineOptions);
+
+			OutlineChartFactory ocf = new OutlineChartFactory(outlineOptions);
+			
+			JFreeChart outlineChart  = ocf.makeCellOutlineChart();
+			JFreeChart outlineChart2 = ocf.makeCellOutlineChart();
 //			finer("Updating chart");
 			dualPanel.setCharts(outlineChart, outlineChart2);
 //			dualPanel.restoreAutoBounds();
@@ -476,9 +479,11 @@ public class CellBorderAdjustmentDialog
 		newList.get(0).setPrevPoint(newList.get(newList.size()-1));
 
 		Rectangle boundingRectangle = new Rectangle(fp.getBounds());
+		
+		CellularComponent c =  (CellularComponent) workingCell.getNucleus();
 
-		workingCell.getNucleus().setBorderList(newList);
-		workingCell.getNucleus().setBoundingRectangle(boundingRectangle);
+		c.setBorderList(newList);
+		c.setBoundingRectangle(boundingRectangle);
 
 		Range domainRange = dualPanel.getMainPanel().getChart().getXYPlot().getDomainAxis().getRange();
 		Range  rangeRange = dualPanel.getMainPanel().getChart().getXYPlot().getRangeAxis().getRange();

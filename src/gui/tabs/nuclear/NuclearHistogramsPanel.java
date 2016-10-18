@@ -25,6 +25,7 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.HistogramsTabPanel;
+
 import java.awt.Dimension;
 import java.text.DecimalFormat;
 import java.util.logging.Level;
@@ -33,7 +34,7 @@ import org.jfree.chart.JFreeChart;
 
 import stats.NucleusStatistic;
 import analysis.AnalysisDataset;
-import charting.charts.SelectableChartPanel;
+import charting.charts.panels.SelectableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;

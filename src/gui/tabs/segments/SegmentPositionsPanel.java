@@ -36,9 +36,9 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.charts.ExportableChartPanel;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
@@ -75,7 +75,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
-		return MorphologyChartFactory.getInstance().makeSegmentStartPositionChart(options);
+		return new MorphologyChartFactory(options).makeSegmentStartPositionChart();
 	}
 
 
@@ -120,7 +120,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 
 				finest("Creating chart for segment "+seg.getName());
 				
-				JFreeChart chart = OutlineChartFactory.getInstance().makeEmptyChart();
+				JFreeChart chart = OutlineChartFactory.makeEmptyChart();
 				ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
 				chartPanel.setFixedAspectRatio(true);
 				chartPanel.addChartSetEventListener(this);

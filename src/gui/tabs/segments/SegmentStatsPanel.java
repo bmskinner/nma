@@ -38,7 +38,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import utility.Constants;
-import charting.datasets.NucleusTableDatasetCreator;
+import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
@@ -60,13 +60,13 @@ public class SegmentStatsPanel extends DetailPanel {
 					
 		try {
 			
-			TableOptions options = new TableOptionsBuilder()
-			.setDatasets(null)
-			.setScale(GlobalOptions.getInstance().getScale())
-			.setSwatch(GlobalOptions.getInstance().getSwatch())
-			.build();
+//			TableOptions options = new TableOptionsBuilder()
+//			.setDatasets(null)
+//			.setScale(GlobalOptions.getInstance().getScale())
+//			.setSwatch(GlobalOptions.getInstance().getSwatch())
+//			.build();
 			
-			TableModel model = NucleusTableDatasetCreator.getInstance().createMedianProfileStatisticTable(options);
+			TableModel model = AnalysisDatasetTableCreator.createBlankTable();
 			table = new ExportableTable(model);
 
 		} catch (Exception e) {
@@ -129,7 +129,7 @@ public class SegmentStatsPanel extends DetailPanel {
 
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception {
-		return NucleusTableDatasetCreator.getInstance().createMedianProfileStatisticTable(options);
+		return new AnalysisDatasetTableCreator(options).createMedianProfileStatisticTable();
 	}
 
 	@Override

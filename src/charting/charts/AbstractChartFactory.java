@@ -45,6 +45,16 @@ public abstract class AbstractChartFactory implements Loggable {
 	
 	protected static final int DEFAULT_EMPTY_RANGE = 10;
 	
+	protected final ChartOptions options;
+	
+	public AbstractChartFactory(ChartOptions o){
+		if(o==null){
+			throw new IllegalArgumentException("Options cannot be null");
+		}
+		options = o;
+		
+	}
+	
 	
 	/**
 	 * Create an empty chart appropriate for the factory chart
@@ -52,7 +62,7 @@ public abstract class AbstractChartFactory implements Loggable {
 	 * an XY chart for a scatter factory
 	 * @return
 	 */
-	public abstract JFreeChart makeEmptyChart();
+//	public static JFreeChart makeEmptyChart();
 	
 	
 	/**
@@ -107,7 +117,7 @@ public abstract class AbstractChartFactory implements Loggable {
 		plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));	
 	}
 	
-	public JFreeChart makeErrorChart(){
+	public static JFreeChart makeErrorChart(){
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
 		
@@ -130,7 +140,7 @@ public abstract class AbstractChartFactory implements Loggable {
 	 * and set the background to white
 	 * @return
 	 */
-	protected JFreeChart createBaseXYChart(){
+	protected static JFreeChart createBaseXYChart(){
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,

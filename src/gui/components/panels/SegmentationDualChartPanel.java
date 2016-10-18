@@ -21,9 +21,9 @@ package gui.components.panels;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.charts.DraggableOverlayChartPanel;
 import charting.charts.MorphologyChartFactory;
-import charting.charts.PositionSelectionChartPanel;
+import charting.charts.panels.DraggableOverlayChartPanel;
+import charting.charts.panels.PositionSelectionChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.ProfileType;
@@ -40,7 +40,7 @@ public class SegmentationDualChartPanel extends DualChartPanel{
 			.setShowYAxis(false)
 			.build();
 		
-		JFreeChart profileChart = MorphologyChartFactory.getInstance().makeEmptyChart(options);
+		JFreeChart profileChart  = new MorphologyChartFactory(options).makeEmptyChart();
 		chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
 		((DraggableOverlayChartPanel) chartPanel).addSignalChangeListener(this);
 	}

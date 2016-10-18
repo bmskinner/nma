@@ -17,38 +17,12 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package charting.datasets;
+package charting.charts;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.jfree.data.xy.DefaultXYDataset;
-
-import components.nuclei.Nucleus;
-
-@SuppressWarnings("serial")
-public class NucleusOutlineDataset 
-	extends DefaultXYDataset {
-	
-	Map<Integer, Nucleus> nuclei = new HashMap<Integer, Nucleus>();
-		
-	/**
-	 * Set the nucleus for the given series
-	 * @param i
-	 * @param n
-	 */
-	public void setNucleus(int i, Nucleus n){
-		nuclei.put(i, n);
-	}
-	
-	/**
-	 * Get the nucleus for the given series
-	 * @param i
-	 * @return
-	 */
-	public Nucleus getNucleus(int i){
-		return nuclei.get(i);
-	}
-	
-
+public class ChartCreationException extends Exception {
+	private static final long serialVersionUID = 1L;
+	public ChartCreationException() { super(); }
+	public ChartCreationException(String message) { super(message); }
+	public ChartCreationException(String message, Throwable cause) { super(message, cause); }
+	public ChartCreationException(Throwable cause) { super(cause); }
 }

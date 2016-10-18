@@ -37,10 +37,11 @@ import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
-import charting.charts.ExportableChartPanel;
+
 import charting.charts.NuclearSignalChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import charting.datasets.NuclearSignalDatasetCreator;
-import charting.datasets.NucleusTableDatasetCreator;
+import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
@@ -92,7 +93,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	private JScrollPane createTablePanel(){
 		JPanel tablePanel = new JPanel(new BorderLayout());
 		
-		TableModel model = NucleusTableDatasetCreator.getInstance().createBlankTable();
+		TableModel model = AnalysisDatasetTableCreator.createBlankTable();
 		table = new ExportableTable(model);
 		table.setEnabled(false);
 		tablePanel.add(table, BorderLayout.CENTER);
@@ -181,7 +182,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
-		return NuclearSignalChartFactory.getInstance().createShellChart(options);
+		return new NuclearSignalChartFactory(options).createShellChart();
 	}
 	
 	@Override

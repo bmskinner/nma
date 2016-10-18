@@ -20,6 +20,7 @@ package gui.components;
 
 import gui.components.panels.GenericCheckboxPanel;
 import gui.tabs.DetailPanel;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -28,6 +29,7 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+
 import javax.swing.BoxLayout;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -37,7 +39,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.HistogramChartFactory;
-import charting.charts.SelectableChartPanel;
+import charting.charts.panels.SelectableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 
@@ -94,7 +96,7 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
-		return HistogramChartFactory.getInstance().createStatisticHistogram(options);
+		return new HistogramChartFactory(options).createStatisticHistogram();
 	}
 	
 	@Override
