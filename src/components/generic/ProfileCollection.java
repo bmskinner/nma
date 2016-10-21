@@ -417,12 +417,11 @@ public class ProfileCollection implements Serializable, Loggable {
 
 		for(Nucleus n : collection.getNuclei()){
 			
-			
-			// Franken profiles have a different length
-			
 			switch(type){
 				case FRANKEN:
+				
 					aggregate.addValues(n.getProfile(type));
+				
 					break;
 				default:
 					aggregate.addValues(n.getProfile(type, BorderTagObject.REFERENCE_POINT)); 
@@ -547,7 +546,7 @@ public class ProfileCollection implements Serializable, Loggable {
 				}
 			}
 		}
-		List<Integer> result = new ArrayList<Integer>(0);
+		List<Integer> result = new ArrayList<Integer>(values.size());
 		for(int i : values.keySet()){
 			result.add(values.get(i));
 //			IJ.log("    Variable index "+values.get(i));
@@ -558,7 +557,27 @@ public class ProfileCollection implements Serializable, Loggable {
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 //		finest("\tReading profile collection");
 		in.defaultReadObject();
-		
+
+//		Object obj = in.readObject();
+//
+//		if (Boolean.TRUE.equals(obj)) {
+//
+//			// this is using the BetterProfileAggregate
+//			BetterProfileAggregate a = (BetterProfileAggregate) in.readObject();
+//			aggregate = a;
+//		} else {
+//			// this is using the old ProfileAggregate
+//			ProfileAggregate a = (ProfileAggregate) obj; 
+//			aggregate = new BetterProfileAggregate(a.length(), 10);
+//			// Cannot convert because the information is not present
+//			
+//		}
+//
+//		indexes  = (Map<BorderTagObject, Integer>) in.readObject();
+//		segments    = (List<NucleusBorderSegment>) in.readObject();
+////		profileCache              =  (ProfileCache) in.readObject();
+
+
 		Map<BorderTagObject, Integer> newIndexes = new HashMap<BorderTagObject, Integer>();
 		
 		Iterator<?> it = indexes.keySet().iterator();
@@ -583,6 +602,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 //		finest("Writing profile collection");
+		out.writeObject(Boolean.TRUE); // marker for BetterProfileAggregate
 		out.defaultWriteObject();
 //		finest("Wrote profile collection");
 	}
@@ -685,6 +705,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		  
 		  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 //			  finest("\tReading profile cache");
+  
 			  in.defaultReadObject();
 			  
 			  Map<BorderTagObject, Map<Double, Profile>> newCache = new HashMap<BorderTagObject, Map<Double, Profile>>();

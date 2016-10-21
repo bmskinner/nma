@@ -34,11 +34,11 @@ public class ThreadManager {
 		return instance;
 	}
 	
-	public void submit(Runnable r){
+	public synchronized void submit(Runnable r){
 		executorService.submit(r);
 	}
 	
-	public void execute(Runnable r){
+	public synchronized void execute(Runnable r){
 		executorService.execute(r);
 	}
 }

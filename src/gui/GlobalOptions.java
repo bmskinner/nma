@@ -56,7 +56,7 @@ public class GlobalOptions {
 		this.scale = scale;
 	}
 
-	public Level getLogLevel() {
+	public synchronized Level getLogLevel() {
 		return logLevel;
 	}
 
@@ -64,7 +64,7 @@ public class GlobalOptions {
 		this.logLevel = logLevel;
 	}
 
-	public ColourSwatch getSwatch() {
+	public synchronized ColourSwatch getSwatch() {
 		return swatch;
 	}
 
@@ -72,7 +72,7 @@ public class GlobalOptions {
 		this.swatch = swatch;
 	}
 
-	public boolean isViolinPlots() {
+	public synchronized boolean isViolinPlots() {
 		return violinPlots;
 	}
 
@@ -80,11 +80,11 @@ public class GlobalOptions {
 		this.violinPlots = violinPlots;
 	}
 	
-	public boolean isFillConsensus() {
+	public synchronized boolean isFillConsensus() {
 		return fillConsensus;
 	}
 
-	public void setFillConsensus(boolean fillConsensus) {
+	public synchronized void setFillConsensus(boolean fillConsensus) {
 		this.fillConsensus = fillConsensus;
 	}
 

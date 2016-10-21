@@ -40,6 +40,8 @@ public class ModalityTest {
 	
 	private BinnedData binData;
 	
+	public static final int DEFAULT_SMOOTHING_WINDOW = 3;
+	
 	
 	/**
 	 * 
@@ -250,7 +252,7 @@ public class ModalityTest {
 
 			
 			Profile profile = new Profile(  temp  );
-			BooleanProfile maxima = profile.smooth(3).smooth(3).getLocalMaxima(3);
+			BooleanProfile maxima = profile.smooth(DEFAULT_SMOOTHING_WINDOW).smooth(DEFAULT_SMOOTHING_WINDOW).getLocalMaxima(3);
 			
 			List<Double> result = new ArrayList<Double>();
 			

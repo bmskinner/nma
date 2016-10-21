@@ -454,7 +454,7 @@ public class MainWindow
 			
 			contentPane.add(panelMain, BorderLayout.CENTER);
 			
-			checkUpdatingState();
+//			checkUpdatingState();
 			
 			this.pack();
 			consensusNucleusPanel.restoreAutoBounds();
@@ -565,6 +565,8 @@ public class MainWindow
 	 * @param list the datasets to display
 	 */
 	private void updatePanels(final List<AnalysisDataset> list){
+		
+		fine("Requesting update of panels");
 		if(list!=null){
 			fine("Updating tab panels for "+list.size()+" datasets");
 		} else {
@@ -592,12 +594,12 @@ public class MainWindow
 	
 	volatile private boolean isRunning = false;
 	
-	private synchronized boolean checkRunning(){
-		if (isRunning) 
-			return true;
-		else 
-			return false;
-	}
+//	private synchronized boolean checkRunning(){
+//		if (isRunning) 
+//			return true;
+//		else 
+//			return false;
+//	}
 	
 	
 	
@@ -606,38 +608,38 @@ public class MainWindow
 	 * of updating, and if so, set the busy cursor. Waits 500ms
 	 * between checks. 
 	 */
-	private synchronized void checkUpdatingState(){
-		Thread thr = new Thread() {
-			public void run() {
-				try {
-					while(true){
-						isRunning = false;
-
-						for(DetailPanel panel : MainWindow.this.detailPanels){
-							if(panel.isUpdating()){
-								isRunning = true;
-							}
-							
-						}
-
-						if(checkRunning()){
-							MainWindow.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-						} else {
-							MainWindow.this.setCursor(Cursor.getDefaultCursor());
-						}
-
-						Thread.sleep(500);
-					}
-				} catch (InterruptedException e) {
-
-					error("Error checking update state", e);
-
-				}
-			}
-
-		};
-		thr.start();
-	}
+//	private synchronized void checkUpdatingState(){
+//		Thread thr = new Thread() {
+//			public void run() {
+//				try {
+//					while(true){
+//						isRunning = false;
+//
+//						for(DetailPanel panel : MainWindow.this.detailPanels){
+//							if(panel.isUpdating()){
+//								isRunning = true;
+//							}
+//							
+//						}
+//
+//						if(checkRunning()){
+//							MainWindow.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+//						} else {
+//							MainWindow.this.setCursor(Cursor.getDefaultCursor());
+//						}
+//
+//						Thread.sleep(500);
+//					}
+//				} catch (InterruptedException e) {
+//
+//					error("Error checking update state", e);
+//
+//				}
+//			}
+//
+//		};
+//		thr.start();
+//	}
 	
 
 			

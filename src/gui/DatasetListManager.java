@@ -49,7 +49,7 @@ public final class DatasetListManager implements Loggable {
 		return instance;
 	}
 	
-	public List<AnalysisDataset> getRootDatasets(){
+	public synchronized List<AnalysisDataset> getRootDatasets(){
 		return new ArrayList<AnalysisDataset>(list);
 	}
 	
@@ -59,14 +59,14 @@ public final class DatasetListManager implements Loggable {
 	 * @param d
 	 * @return the index, or -1
 	 */
-	public int getPosition(AnalysisDataset d){
+	public synchronized int getPosition(AnalysisDataset d){
 		if(d.isRoot()){
 			return list.indexOf(d);
 		}
 		return -1;
 	}
 	
-	public boolean hasDatasets(){
+	public synchronized boolean hasDatasets(){
 		return map.size()>0;
 	}
 	
@@ -74,7 +74,7 @@ public final class DatasetListManager implements Loggable {
 	 * Update the cluster groups for each root dataset and its children.
 	 * This will remove any cluster groups with no member datasets. 
 	 */
-	public void refreshClusters(){
+	public synchronized void refreshClusters(){
 		try {
 		finest("Refreshing clusters...");
 		if(this.hasDatasets()){
@@ -102,7 +102,7 @@ public final class DatasetListManager implements Loggable {
 	 * @param d
 	 * @return
 	 */
-	public AnalysisDataset getParent(AnalysisDataset d){
+	public synchronized AnalysisDataset getParent(AnalysisDataset d){
 		
 		if(d.isRoot()){
 			return d;
@@ -130,7 +130,7 @@ public final class DatasetListManager implements Loggable {
 	}
 	
 	
-	public Set<AnalysisDataset> getAllDatasets(){
+	public synchronized Set<AnalysisDataset> getAllDatasets(){
 		
 		Set<AnalysisDataset> result = new HashSet<AnalysisDataset>();
 		for(AnalysisDataset d : list){
@@ -146,7 +146,7 @@ public final class DatasetListManager implements Loggable {
 	 * @param id
 	 * @return
 	 */
-	public boolean hasDataset(UUID id){
+	public synchronized boolean hasDataset(UUID id){
 		for(AnalysisDataset d : list){
 			if(d.getUUID().equals(id)){
 				return true;
@@ -166,7 +166,7 @@ public final class DatasetListManager implements Loggable {
 	 * @param id
 	 * @return
 	 */
-	public AnalysisDataset getDataset(UUID id){
+	public synchronized AnalysisDataset getDataset(UUID id){
 		for(AnalysisDataset d : list){
 			if(d.getUUID().equals(id)){
 				return d;
@@ -181,7 +181,7 @@ public final class DatasetListManager implements Loggable {
 		return null;
 	}
 	
-	public void addDataset(AnalysisDataset d){
+	public synchronized void addDataset(AnalysisDataset d){
 		if(d.isRoot()){
 			list.add(d);
 			fine("Adding hash code: "+d.getName()+" - "+d.hashCode());
@@ -191,7 +191,7 @@ public final class DatasetListManager implements Loggable {
 		}
 	}
 	
-	public void removeDataset(AnalysisDataset d){
+	public synchronized void removeDataset(AnalysisDataset d){
 		
 		if( ! d.isRoot()){
 			return;
@@ -228,7 +228,7 @@ public final class DatasetListManager implements Loggable {
 	 * Get the number of datasets loaded
 	 * @return
 	 */
-	public int count(){
+	public synchronized int count(){
 		return map.size();
 	}
 	

@@ -82,6 +82,7 @@ public class ImageImporter implements Loggable {
 		ImagePlus image = new ImagePlus(f.getAbsolutePath());
 
 		stack = convert(image);
+		image.close();
 		return stack;
 	}
 	

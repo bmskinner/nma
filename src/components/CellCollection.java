@@ -32,8 +32,6 @@ import stats.PlottableStatistic;
 import stats.Quartile;
 import stats.SegmentStatistic;
 import stats.SignalStatistic;
-import stats.Stats;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -189,16 +187,17 @@ public class CellCollection implements Serializable, Loggable {
    * Get the UUIDs of all the cells in the collection
    * @return
    */
-  public List<UUID> getCellIds(){
-	  List<UUID> result = new ArrayList<UUID>(0);
-
-	  for(UUID id : mappedCollection.keySet()){
-		  result.add(id);
-	  }
-	  return  result;
+  public Set<UUID> getCellIds(){
+	 return mappedCollection.keySet();
   }
 
   public void addCell(Cell r) {
+	  
+	  if(r == null){
+		  throw new IllegalArgumentException("Cell is null");
+	  }
+	  
+	  
 	  if(mappedCollection.containsKey(r.getId())){
 		  return;
 	  } else {
@@ -212,6 +211,10 @@ public class CellCollection implements Serializable, Loggable {
    * @param r
    */
   public void replaceCell(Cell r) {
+	  if(r == null){
+		  throw new IllegalArgumentException("Cell is null");
+	  }
+	  
 	  if( ! mappedCollection.containsKey(r.getId())){
 		  return;
 	  } else {
@@ -219,10 +222,20 @@ public class CellCollection implements Serializable, Loggable {
 	  }
   }
 
-  public void removeCell(Cell c) throws Exception{
+  /**
+   * Remove the given cell from the collection. If the cell is
+   * null, has no effect. If the cell is not in the collection, has
+   * no effect. 
+   * @param c the cell to remove
+   */
+  public void removeCell(Cell c) {
+
+	  if(c == null){
+		  return;
+	  }
 	  this.mappedCollection.remove(c.getId());
   }
-  
+
   public int cellCount(){
 	  return mappedCollection.size();
   }
@@ -516,8 +529,8 @@ public class CellCollection implements Serializable, Loggable {
    * Get the nuclei in this collection
    * @return
    */
-  public List<Nucleus> getNuclei(){
-	  List<Nucleus> result = new ArrayList<Nucleus>(0);
+  public Set<Nucleus> getNuclei(){
+	  Set<Nucleus> result = new HashSet<Nucleus>(mappedCollection.size());
 	  for(Cell c : this.getCells()){
 		  result.add(c.getNucleus());
 	  }
@@ -531,7 +544,7 @@ public class CellCollection implements Serializable, Loggable {
    * @return the list of nuclei
    */
   public List<Nucleus> getNuclei(File imageFile){
-	  List<Nucleus> result = new ArrayList<Nucleus>(0);
+	  List<Nucleus> result = new ArrayList<Nucleus>(mappedCollection.size());
 	  for(Nucleus n : this.getNuclei()){
 		  if(n.getSourceFile().equals(imageFile)){
 			  result.add(n);
@@ -674,7 +687,6 @@ public class CellCollection implements Serializable, Loggable {
 
 
   public int[] getPointIndexes(BorderTagObject pointType){
-//	  List<Integer> list = new ArrayList<Integer>();
 
 	  int count = this.getNucleusCount();
 	  int[] result = new int[count];
@@ -682,10 +694,8 @@ public class CellCollection implements Serializable, Loggable {
 	  
 	  for(Nucleus n : this.getNuclei()){
 		  result[i++] = n.getBorderIndex(pointType);
-//		  list.add(n.getBorderIndex(pointType));
 	  }
 	  return result;
-//	  return Utils.getintFromInteger(list.toArray(new Integer[0]));
   }
 
   /**
@@ -695,16 +705,13 @@ public class CellCollection implements Serializable, Loggable {
    * @return
    */
   public double[] getPointToPointDistances(BorderTagObject pointTypeA, BorderTagObject pointTypeB){
-//	  List<Double> list = new ArrayList<Double>();
 	  int count = this.getNucleusCount();
 	  double[] result = new double[count];
 	  int i=0;
 	  for(Nucleus n : this.getNuclei()){
 		  result[i++] = n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB));
-//		  list.add(n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB)));
 	  }
 	  return result;
-//	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
 
   /**
@@ -716,8 +723,8 @@ public class CellCollection implements Serializable, Loggable {
   public Nucleus getNucleusMostSimilarToMedian(BorderTagObject pointType) throws Exception {
 
 	  Profile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, 50); // the profile we compare the nucleus to
-	  Nucleus n = this.getNuclei().get(0); // default to the first nucleus
-
+//	  Nucleus n = this.getNuclei()..get(0); // default to the first nucleus
+	  Nucleus n=null;
 	  double difference = Arrays.stream(getDifferencesToMedianFromPoint(pointType)).max().orElse(0);
 	  for(Nucleus p : this.getNuclei()){
 		  Profile angleProfile = p.getProfile(ProfileType.ANGLE, pointType);
@@ -727,6 +734,11 @@ public class CellCollection implements Serializable, Loggable {
 			  n = p;
 		  }
 	  }
+	  
+	  if(n==null){
+		  throw new Exception("Error finding nucleus similar to median");
+	  }
+	  
 	  return n;
   }
 
@@ -873,14 +885,12 @@ public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale
    */
   private double getMedianSegmentStatistic(SegmentStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
  
-	  if(this.getNucleusCount()==0){
+	  if(mappedCollection.size()==0){
 		  return 0;
 	  }
 	  
 	  double[] values = this.getSegmentStatistics(stat, scale, id);
-	  double median =  new Quartile(values, Constants.MEDIAN).doubleValue();
-	  return median;
-
+	  return new Quartile(values, Quartile.MEDIAN).doubleValue();
   }
   
   /**
@@ -1450,31 +1460,6 @@ public boolean equals(Object obj) {
 		  }
 
 	  }
-	  
-//	  /**
-//	   * Empty the cache - all values must be recalculated
-//	   */
-//	  public void clear(){
-//		  cache = null;
-//		  cache = new HashMap<PlottableStatistic,  Map<MeasurementScale, Double>>();
-//
-//	  }
-	  
-//	  /**
-//	   * Recalculate the values in the cache based on the given collection
-//	   * @param collection
-//	   * @throws Exception
-//	   */
-//	  public void recalculate(CellCollection collection) throws Exception{
-//		  this.clear();
-//		  for(NucleusStatistic stat  : NucleusStatistic.values()){
-//
-//			  for(MeasurementScale scale : MeasurementScale.values()){
-//				  // This will automatically refill the cache
-//				  collection.getMedianNucleusStatistic(stat, scale);
-//			  }
-//		  }
-//	  }
   }
 
 }

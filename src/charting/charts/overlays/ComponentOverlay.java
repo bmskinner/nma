@@ -120,7 +120,6 @@ public class ComponentOverlay
         		
         		// Need to find the coordinates to draw the shape
         		
-        		
 //                double x = object.getShape().getBounds2D().getX();
                 double x = n.getCentreOfMass().getX(); // get the x midpoint
                 double xx = xAxis.valueToJava2D(x, dataArea, xAxisEdge);

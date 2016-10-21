@@ -86,12 +86,14 @@ public class PopulationImportWorker extends AnalysisWorker {
 		finest("Beginning background work");
 		fireCooldown();
 		try {
+		
 			
 			try {
 				dataset = readDataset(file);
 			} catch (UnloadableDatasetException e){
 				warn(e.getMessage());
 				warn("Dataset version may be too old");
+				fine("Error reading dataset", e);
 				return false;
 			}
 						

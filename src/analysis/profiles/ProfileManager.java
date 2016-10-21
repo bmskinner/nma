@@ -23,6 +23,7 @@ package analysis.profiles;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import analysis.profiles.ProfileSegmenter.UnsegmentableProfileException;
@@ -66,6 +67,23 @@ public class ProfileManager implements Loggable {
 			collection.removeProfileCollection(type);
 		}
 		
+	}
+	
+	/**
+	 * Get the average profile window size in the population.
+	 * @param type
+	 * @return
+	 */
+	public int getProfileWindowSize(ProfileType type){
+		
+		int total = 0;
+		Set<Nucleus> nuclei = collection.getNuclei();
+		
+		for(Nucleus n : nuclei){
+			total += n.getWindowSize(type); // use the first window size found for now
+		}
+		
+		return total / nuclei.size();
 	}
 	
 	/**

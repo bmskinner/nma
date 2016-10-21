@@ -237,7 +237,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	private Instances makeProfileInstances(CellCollection collection)throws Exception {
 		
 		int profileSize = collection.getProfileCollection(options.getProfileType()).getProfile(BorderTagObject.REFERENCE_POINT, 50).size();
-		int windowSize = collection.getNuclei().get(0).getWindowSize(ProfileType.ANGLE); // use the first window size found for now
+		int windowSize = collection.getProfileManager().getProfileWindowSize(ProfileType.ANGLE);
 		
 		
 		FastVector attributes = makeAttributes(collection, windowSize);
