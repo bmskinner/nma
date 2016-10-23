@@ -18,10 +18,9 @@
  *******************************************************************************/
 package stats;
 
-import java.util.logging.Level;
-
 import charting.options.ChartOptions;
 import jdistlib.disttest.DistributionTest;
+import logging.Loggable;
 import analysis.AnalysisDataset;
 import analysis.profiles.SegmentFitter;
 import components.generic.BorderTagObject;
@@ -31,9 +30,11 @@ import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclei.Nucleus;
 
-public class KruskalTester {
+public class KruskalTester implements Loggable {
 	
-	public static Profile testCollectionGetPValues(AnalysisDataset one, AnalysisDataset two, BorderTagObject tag, ProfileType type){
+	public KruskalTester(){}
+	
+	public Profile testCollectionGetPValues(AnalysisDataset one, AnalysisDataset two, BorderTagObject tag, ProfileType type){
 		
 		Profile resultProfile = null;
 		int sampleNumber = 200;
@@ -86,7 +87,7 @@ public class KruskalTester {
 	 * @param tag
 	 * @return
 	 */
-	public static Profile testCollectionGetFrankenPValues(ChartOptions options){
+	public Profile testCollectionGetFrankenPValues(ChartOptions options){
 		
 		AnalysisDataset one = options.getDatasets().get(0);
 		AnalysisDataset two = options.getDatasets().get(1);
@@ -142,7 +143,7 @@ public class KruskalTester {
 			resultProfile = testCollectionGetPValues(one, copyOfTwo, options.getTag(), ProfileType.FRANKEN);		
 			
 		} catch (Exception e) {
-			options.log(Level.SEVERE, "Error in franken profiling", e);
+			error("Error in franken profiling", e);
 			
 			pvals = new double[sampleNumber];
 			for(int i=0; i<sampleNumber; i++){
@@ -159,7 +160,7 @@ public class KruskalTester {
 	 * @param valuesTwo
 	 * @return
 	 */
-	private static double calculateKruskalPValue(double[] valuesOne, double[] valuesTwo){
+	private double calculateKruskalPValue(double[] valuesOne, double[] valuesTwo){
 
 		// The values must be combined to a group array
 		double[] valuesCombined = new double[valuesOne.length+valuesTwo.length];
