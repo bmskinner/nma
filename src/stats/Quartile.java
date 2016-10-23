@@ -70,15 +70,18 @@ public class Quartile extends DescriptiveStatistic {
 		  if(values.length==1){
 			  value =  values[0];
 		  }
+		  
+		  if(values.length>1){
 
-		  // Rank order the values
-		  Number[] v = new Number[values.length];
-		  System.arraycopy(values, 0, v, 0, values.length);
-		  Arrays.sort(v);
+			  // Rank order the values
+			  Number[] v = new Number[values.length];
+			  System.arraycopy(values, 0, v, 0, values.length);
+			  Arrays.sort(v);
 
-		  int n = (int) Math.round(v.length * lowerPercent / 100);
+			  int n = (int) Math.round(v.length * lowerPercent / 100);
 
-		  value =  v[n];
+			  value =  v[n];
+		  }
 	  }
 
 }
