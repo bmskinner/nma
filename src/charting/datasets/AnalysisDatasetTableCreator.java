@@ -379,14 +379,14 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				model.addColumn(dataset.getCollection().getName(), collectionData);
 
 			} else {
-				options.log(Level.FINE, "No analysis options in dataset "+dataset.getName());
+				fine("No analysis options in dataset "+dataset.getName());
 				Object[] collectionData =  new Object[columnData.length];
 				if(dataset.hasMergeSources()){
 
-					options.log(Level.FINE, "Dataset has merge sources");				
+					fine("Dataset has merge sources");				
 					if( testMergedDatasetOptionsAreSame(dataset)){
 						
-						options.log(Level.FINE, "Merge source options are the same");
+						fine("Merge source options are the same");
 
 						// The options are the same in all merge sources
 						// Show the first options from the first source
@@ -399,13 +399,13 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 					} else {
 						// Merge sources have different options
 						Arrays.fill(collectionData, "N/A - merged");
-						options.log(Level.FINE, "Merge source options are different");	
+						fine("Merge source options are different");	
 					}
 
 				} else {
 					// there are no options to use; fill blank
 					Arrays.fill(collectionData, "N/A");
-					options.log(Level.FINE, "No merge sources, and no options");	
+					fine("No merge sources, and no options");	
 				}
 
 				model.addColumn(dataset.getCollection().getName(), collectionData);

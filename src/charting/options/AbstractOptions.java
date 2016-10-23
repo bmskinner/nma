@@ -22,7 +22,7 @@ import analysis.AnalysisDataset;
  * @author ben
  *
  */
-public abstract class AbstractOptions implements Loggable {
+public abstract class AbstractOptions {
 	
 	private List<AnalysisDataset> list      = new ArrayList<AnalysisDataset>();
 	private List<PlottableStatistic> stats  = new ArrayList<PlottableStatistic>();;

@@ -37,12 +37,14 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.Range;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import charting.ChartComponents;
+import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NuclearHistogramDatasetCreator;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.ChartOptions;
@@ -328,7 +330,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @param xLabel the x axis label
 	 * @return
 	 */
-	private JFreeChart createNuclearStatsHistogram() throws Exception{
+	private JFreeChart createNuclearStatsHistogram() throws ChartCreationException {
 
 		if(options.isUseDensity()){
 			return createNuclearDensityStatsChart();
@@ -338,52 +340,56 @@ public class HistogramChartFactory extends AbstractChartFactory {
 			return makeEmptyChart();
 		}
 		
-		HistogramDataset ds = null;
+		HistogramDataset ds;
 				
-		if (options.hasDatasets()){
+
+		try {
 			ds = new NuclearHistogramDatasetCreator(options).createNuclearStatsHistogramDataset();
+		} catch (ChartDatasetCreationException e) {
+			throw new ChartCreationException("Cannot get data for nuclear stats", e);
 		}
+
 		
 		
-		options.log(Level.FINER, "Creating histogram for "+options.getStat());
+		finer("Creating histogram for "+options.getStat());
 		
 		
 		
 		String xLabel = options.getStat().label(options.getScale());
 		
 		JFreeChart chart = createHistogram(ds, xLabel, "Nuclei");
-		
-		if(ds!=null && options.hasDatasets()){
-						
-			XYPlot plot = chart.getXYPlot();
-			
-			setDomainRange(plot, ds);
-			
-			for (int j = 0; j < ds.getSeriesCount(); j++) {
-
-				plot.getRenderer().setSeriesVisibleInLegend(j, false);
-				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
-
-				String seriesKey = (String) ds.getSeriesKey(j);
-				String seriesName = seriesKey.replaceFirst(options.getStat().toString()+"_", "");
-				
-				for(AnalysisDataset dataset : options.getDatasets()){
-					
-					if(seriesName.equals(dataset.getName())){
-						Color colour = dataset.hasDatasetColour()
-								? dataset.getDatasetColour()
-										: ColourSelecter.getColor(j);
 
 
-								
-									options.log(Level.FINEST, "Setting histogram series colour: "+colour.toString());
-								
-						plot.getRenderer().setSeriesPaint(j, colour);
 
-					}
+		XYPlot plot = chart.getXYPlot();
+
+		setDomainRange(plot, ds);
+
+		for (int j = 0; j < ds.getSeriesCount(); j++) {
+
+			plot.getRenderer().setSeriesVisibleInLegend(j, false);
+			plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+
+			String seriesKey = (String) ds.getSeriesKey(j);
+			String seriesName = seriesKey.replaceFirst(options.getStat().toString()+"_", "");
+
+			for(AnalysisDataset dataset : options.getDatasets()){
+
+				if(seriesName.equals(dataset.getName())){
+					Color colour = dataset.hasDatasetColour()
+							? dataset.getDatasetColour()
+									: ColourSelecter.getColor(j);
+
+
+
+							finest("Setting histogram series colour: "+colour.toString());
+
+							plot.getRenderer().setSeriesPaint(j, colour);
+
 				}
-				
 			}
+
+
 		}
 		return chart;
 	}
@@ -397,15 +403,19 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private JFreeChart createNuclearDensityStatsChart() throws Exception{
-	
-		XYDataset ds = null;
+	private JFreeChart createNuclearDensityStatsChart() throws ChartCreationException {
 		
-		if (options.hasDatasets()){
-			ds = new NuclearHistogramDatasetCreator(options).createNuclearDensityHistogramDataset();
-		} else {
+		if( ! options.hasDatasets()){
 			return makeEmptyChart();
 		}
+		
+		XYDataset ds;
+		try {
+			ds = new NuclearHistogramDatasetCreator(options).createNuclearDensityHistogramDataset();
+		} catch (ChartDatasetCreationException e) {
+			throw new ChartCreationException("Cannot get data for nuclear stats density", e);
+		}
+
 
 		String xLabel = options.getStat().label(options.getScale());
 		JFreeChart chart = 
@@ -417,35 +427,32 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		
 		plot.setBackgroundPaint(Color.WHITE);
 		
-		if(ds!=null && options.hasDatasets()){
-						
-			setDomainRange(plot, ds);
-			
-			
-			for (int j = 0; j < ds.getSeriesCount(); j++) {
+		setDomainRange(plot, ds);
 
-				plot.getRenderer().setSeriesVisibleInLegend(j, false);
-				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+		for (int j = 0; j < ds.getSeriesCount(); j++) {
 
-				String seriesKey = (String) ds.getSeriesKey(j);
-				String seriesName = seriesKey.replaceFirst(options.getStat().toString()+"_", "");
+			plot.getRenderer().setSeriesVisibleInLegend(j, false);
+			plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
 
-				Color colour = ColourSelecter.getColor(j);
-				for(AnalysisDataset dataset : options.getDatasets()){
+			String seriesKey = (String) ds.getSeriesKey(j);
+			String seriesName = seriesKey.replaceFirst(options.getStat().toString()+"_", "");
 
-					if(seriesName.equals(dataset.getName())){
+			Color colour = ColourSelecter.getColor(j);
+			for(AnalysisDataset dataset : options.getDatasets()){
 
-						colour = dataset.hasDatasetColour()
-								? dataset.getDatasetColour()
-								: colour;
+				if(seriesName.equals(dataset.getName())){
+
+					colour = dataset.hasDatasetColour()
+							? dataset.getDatasetColour()
+									: colour;
 
 
-						plot.getRenderer().setSeriesPaint(j, colour);
+							plot.getRenderer().setSeriesPaint(j, colour);
 
-					}
 				}
-
 			}
+
+			
 
 		}
 		return chart;
@@ -457,18 +464,27 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @param segName the segment to plot
 	 * @return
 	 */
-	private JFreeChart createSegmentStatisticHistogram() throws Exception{
+	private JFreeChart createSegmentStatisticHistogram() throws ChartCreationException {
 
 		if(options.isUseDensity()){
 			return createSegmentLengthDensityChart();
 		}
 		
-		HistogramDataset ds = null;
-				
-		if (options.hasDatasets()){
-			ds = new NuclearHistogramDatasetCreator(options).createSegmentLengthHistogramDataset();
+		if( ! options.hasDatasets()){
+			return makeEmptyChart();
 		}
 		
+		
+		HistogramDataset ds;
+				
+
+		try {
+			ds = new NuclearHistogramDatasetCreator(options).createSegmentLengthHistogramDataset();
+		} catch (ChartDatasetCreationException e) {
+			throw new ChartCreationException("Cannot get data for segment lengths", e);
+		}
+
+
 		
 		finer("Creating histogram for Seg_"+options.getSegPosition());
 		
@@ -498,7 +514,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 
 
 								
-									options.log(Level.FINEST, "Setting histogram series colour: "+colour.toString());
+								finest("Setting histogram series colour: "+colour.toString());
 								
 						plot.getRenderer().setSeriesPaint(j, colour);
 
@@ -519,13 +535,24 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private JFreeChart createSegmentLengthDensityChart() throws Exception{
-		
-		XYDataset ds = null;
-		
-		if (options.hasDatasets()){
-			ds = new NuclearHistogramDatasetCreator(options).createSegmentLengthDensityDataset();
+	private JFreeChart createSegmentLengthDensityChart() throws ChartCreationException {
+				
+		if( ! options.hasDatasets()){
+			
+			return makeEmptyChart();
+			
 		}
+		
+		XYDataset ds;
+		
+
+		try {
+			ds = new NuclearHistogramDatasetCreator(options).createSegmentLengthDensityDataset();
+		} catch (ChartDatasetCreationException e) {
+
+			throw new ChartCreationException("Cannot get data for segment length density", e);
+		}
+		
 
 		String xLabel = "Seg_"+options.getSegPosition()+" length ("+options.getScale()+")";
 		JFreeChart chart = 
@@ -593,26 +620,21 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @param ds
 	 */
 	private void setDomainRange(XYPlot plot, List<DefaultXYDataset> list){
-		
-		Number min = Double.MAX_VALUE;
-		Number max = Double.MIN_VALUE;
+	
+		Range r = plot.getDomainAxis().getRange();
 		
 		for(XYDataset ds : list){
 			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
 			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
 			
-			if(maxX==null || minX==null){
-				continue;
-			}
+			Range sub = new Range(minX.doubleValue(), maxX.doubleValue());
 			
-			min = min.doubleValue() < minX.doubleValue() ? min : minX;
-			max = max.doubleValue() > maxX.doubleValue() ? max : maxX;
+			r = Range.combine(sub, r);
 			
 		}
 		
-		if(max.doubleValue()>min.doubleValue()){ // stop if 0 and 0 or no values found
-			plot.getDomainAxis().setRange(min.doubleValue(), max.doubleValue());
-		}
+		plot.getDomainAxis().setRange(r);
+
 	}
 
 }

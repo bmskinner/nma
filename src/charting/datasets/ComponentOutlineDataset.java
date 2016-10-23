@@ -50,5 +50,9 @@ public class ComponentOutlineDataset
 		return nuclei.get(seriesKey);
 	}
 	
+	public boolean hasComponent(Comparable seriesKey){
+		return nuclei.containsKey(seriesKey);
+	}
+	
 
 }

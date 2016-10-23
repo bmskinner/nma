@@ -1304,6 +1304,9 @@ private static NucleusDatasetCreator instance = null;
 		int i=0;
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
+			
+			String seriesKey = "Nucleus_"+i+"_"+collection.getName();
+			
 			if(collection.hasConsensusNucleus()){
 				Nucleus n = collection.getConsensusNucleus();
 				
@@ -1327,12 +1330,14 @@ private static NucleusDatasetCreator instance = null;
 					ypoints[j] = y;
 					j++;
 				}
+				
+				
 				double[][] data = { xpoints, ypoints };
-				ds.addSeries("Nucleus_"+i+"_"+collection.getName(), data);
-				ds.setComponent(i, n);
+				ds.addSeries(seriesKey, data);
+				ds.setComponent(seriesKey, n);
 			} else {
 				double[][] data = { {0}, {0} }; // make an empty series if no consensus
-				ds.addSeries("Nucleus_"+i+"_"+collection.getName(), data);
+				ds.addSeries(seriesKey, data);
 			}
 			i++;
 
@@ -1542,8 +1547,7 @@ private static NucleusDatasetCreator instance = null;
 		AnalysisDataset setOne = options.getDatasets().get(0);
 		AnalysisDataset setTwo = options.getDatasets().get(1);
 	
-		Profile pvalues = KruskalTester.testCollectionGetPValues(setOne, setTwo, options.getTag(), options.getType());
-//		Profile pvalues = KruskalTester.testCollectionGetFrankenPValues(setOne, setTwo, options.getTag(), options.getLogger());
+		Profile pvalues = new KruskalTester().testCollectionGetPValues(setOne, setTwo, options.getTag(), options.getType());
 		
 		double[] yvalues = pvalues.asArray();
 		double[] xvalues = pvalues.getPositions(100).asArray();
@@ -1563,7 +1567,7 @@ private static NucleusDatasetCreator instance = null;
 	public XYDataset createFrankenKruskalProfileDataset(ChartOptions options) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
-		Profile pvalues = KruskalTester.testCollectionGetFrankenPValues(options);
+		Profile pvalues = new KruskalTester().testCollectionGetFrankenPValues(options);
 		
 		double[] yvalues = pvalues.asArray();
 		double[] xvalues = pvalues.getPositions(100).asArray();

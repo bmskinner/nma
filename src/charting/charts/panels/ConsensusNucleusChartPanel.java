@@ -90,34 +90,60 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 		if(consensusOverlay !=null){
 			consensusOverlay.clearShapes();
 
-			if(GlobalOptions.getInstance().isFillConsensus() && fillConsensus){
+			fine("Cleared consensus overlays");
+			
+			if( ! GlobalOptions.getInstance().isFillConsensus()){
+				fine("Consenus not set in global options");
+				return;
+				
+			}
+			
+			if( ! fillConsensus){
+				fine("Consenus not set in panel options");
+				return;
+			}
+				
+			fine("Attempting to make overlay");
+			
+			if( ! (chart.getPlot() instanceof XYPlot)){
+				
+				fine("Not an XYPlot");
+				return;
+			}
 
-				// Get the nuclei in the chart
-				if(chart.getPlot() instanceof XYPlot){
 
-					if( chart.getXYPlot().getDataset() instanceof ComponentOutlineDataset){
+			if( ! (chart.getXYPlot().getDataset() instanceof ComponentOutlineDataset)){
+				fine("Not a component outline dataset");
+				return;
+			}
+				
 
-						ComponentOutlineDataset ds = (ComponentOutlineDataset) chart.getXYPlot().getDataset();
+			fine("Found outline dataset");
 
-						for(int series=0; series<ds.getSeriesCount(); series++){
+			ComponentOutlineDataset ds = (ComponentOutlineDataset) chart.getXYPlot().getDataset();
 
-							Comparable seriesKey = ds.getSeriesKey(series);
-							
-							CellularComponent n = ds.getComponent(seriesKey);
+			for(int series=0; series<ds.getSeriesCount(); series++){
 
-							Paint c = chart.getXYPlot().getRenderer().getSeriesPaint(series);
+				Comparable seriesKey = ds.getSeriesKey(series);
 
-							if(n!=null){
-								//							Color c = ColourSelecter.getColor(series);
-								c = ColourSelecter.getTransparentColour((Color) c, true, 128);
-								ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(), null, null, c);
-								consensusOverlay.addShape(o, n);
-							}
-						}
+				CellularComponent n = ds.getComponent(seriesKey);
 
-					}
+				Paint c = chart.getXYPlot().getRenderer().getSeriesPaint(series);
+
+				fine("Adding component overlay for "+seriesKey);
+
+				if(n!=null){
+
+					fine("Component is not null, making shape");
+					//							Color c = ColourSelecter.getColor(series);
+					c = ColourSelecter.getTransparentColour((Color) c, true, 128);
+					ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(), null, null, c);
+					consensusOverlay.addShape(o, n);
+				} else {
+					fine("Component is null for "+seriesKey);
 				}
 			}
+
 		}
 		
 		

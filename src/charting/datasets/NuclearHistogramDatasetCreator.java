@@ -282,7 +282,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 		HistogramDataset ds = new HistogramDataset();
 		
 
-		options.log(Level.FINEST, "Creating histogram dataset: "+options.getStat());
+		finest("Creating histogram dataset: "+options.getStat());
 
 		
 		if( ! options.hasDatasets() ){
@@ -326,7 +326,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			ds.addSeries(Constants.SEGMENT_PREFIX+options.getSegPosition()+"_"+collection.getName(), values, bins, minRounded, maxRounded );
 		}
 
-		options.log(Level.FINEST, "Completed histogram dataset");
+		finest("Completed histogram dataset");
 		return ds;
 	}
 	

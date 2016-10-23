@@ -156,7 +156,7 @@ public abstract class AbstractChartFactory implements Loggable {
 	 * @param chart
 	 * @param options
 	 */
-	protected void applyAxisOptions(JFreeChart chart, ChartOptions options){
+	protected void applyAxisOptions(JFreeChart chart){
 		
 		Plot plot = chart.getPlot();
 

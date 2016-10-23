@@ -695,7 +695,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 		} else {
 
-			options.log(Level.FINEST, "No signal groups to show");
+			finest("No signal groups to show");
 
 			model.addColumn("No data loaded");
 		}
@@ -808,7 +808,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 				}
 			} else {
 
-				options.log(Level.FINEST, "No signal groups to show");
+				finest("No signal groups to show");
 
 				model.addColumn("No signal groups in datasets");
 			}

@@ -87,7 +87,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	public JFreeChart makeEmptyChart(){
 		JFreeChart chart = makeEmptyProfileChart(options.getType());
 		
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		
 		return chart;
 	}
@@ -244,7 +244,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			}
 		}
 		
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		return chart;
 	}
 		
@@ -321,7 +321,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			chart = makeProfileChart(null, 100, options.getType());
 		}
 		
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		return chart;
 	}
 	
@@ -339,7 +339,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		if( ! options.hasDatasets()){
 			return chart;
 		}
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		
 		XYPlot plot = chart.getXYPlot();
 	
@@ -613,7 +613,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		}
 		
 		
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		return chart;
 	}
 	
@@ -690,7 +690,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				fine("Missing data in variability chart");
 			}
 		}
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		return chart;
 	}
 	
@@ -723,7 +723,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			
 			plot.getRenderer().setSeriesPaint(j, profileColour);
 		}	
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		return chart;
 	}
 		
@@ -812,7 +812,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				plot.getRenderer(1).setSeriesPaint(j, profileColour);
 			}
 		}
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		finest("Created segment position chart");
 		return chart;
 		
@@ -931,7 +931,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
 			plot.getRenderer().setSeriesVisibleInLegend(i, false);
 		}
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		return chart;
 	}
 		
@@ -980,7 +980,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 					plot.addAnnotation(annotation);
 					index++;
 		}
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		return chart;
 	}
 	

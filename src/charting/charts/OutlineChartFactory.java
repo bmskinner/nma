@@ -168,7 +168,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		plot.getRenderer(0).setBasePaint(Color.BLACK);
 		plot.getRenderer(0).setBaseSeriesVisible(true);
 		
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 				
 		return chart;	
 	}
@@ -222,7 +222,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		plot.setDataset(0, ds);
 		plot.getRenderer(0).setBasePaint(Color.BLACK);
 		plot.getRenderer(0).setBaseSeriesVisible(true);
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		return chart;	
 	}
 		
@@ -345,7 +345,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		if(options.hasComponent()){
 			drawImageAsAnnotation(plot, options.getCell(), options.getComponent());
 		}
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		return chart;
 		
 	}
@@ -557,7 +557,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 
 		}
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		return chart;
 	}
 		
@@ -729,7 +729,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public JFreeChart createVerticalNucleiChart() throws Exception{
+	public JFreeChart createVerticalNucleiChart() throws ChartCreationException {
 		
 		if( ! options.hasDatasets()){
 			finest("No datasets - returning empty chart");
@@ -752,7 +752,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private JFreeChart createSingleDatasetVerticalNucleiChart() throws Exception{
+	private JFreeChart createSingleDatasetVerticalNucleiChart() throws ChartCreationException {
 		
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
@@ -765,25 +765,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		r.setBaseStroke(ChartComponents.PROFILE_STROKE);
 		r.setSeriesPaint(0, Color.LIGHT_GRAY);
 		r.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
-		
-		/*
-		 * Get a boolean mask for the consensus nucleus
-		 */
-		
-//		if(options.isNormalised()){
-//			if(options.firstDataset().getCollection().hasConsensusNucleus()){
-//				log(Level.FINE, "Performing boolean alignment of nuclei");
-//				boolean[][] reference = options.firstDataset().getCollection().getConsensusNucleus().getBooleanMask(200, 200);
-////				BooleanAligner aligner = new BooleanAligner(reference);
-//				
-//				BooleanAlignmentTask task = new BooleanAlignmentTask(reference, 
-//						options.firstDataset().getCollection().getNuclei().toArray(new Nucleus[0]));
-////				task.addProgressListener(this);
-////				task.invoke();
-//				mainPool.invoke(task);
-//			}
-//		}
-		
+				
 		boolean hasConsensus = options.firstDataset().getCollection().hasConsensusNucleus();
 		boolean[][] reference = null;
 		BooleanAligner aligner = null;
@@ -802,20 +784,29 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 			if(hasConsensus){
 				
-				options.log(Level.FINEST, "Creating consensus nucleus dataset");
+				finest("Creating consensus nucleus dataset");
 				
 				Nucleus consensus = options.firstDataset().getCollection().getConsensusNucleus();
 				
 				OutlineDatasetCreator dc = new OutlineDatasetCreator(consensus);
-				XYDataset consensusDataset = dc.createOutline(false);
 
-				XYLineAndShapeRenderer c = new XYLineAndShapeRenderer(true, false);
-				c.setBaseSeriesVisibleInLegend(false);
-				c.setBaseStroke(ChartComponents.PROFILE_STROKE);
-				c.setSeriesPaint(0, Color.BLACK);
 				
-				plot.setDataset(i, consensusDataset);
-				plot.setRenderer(i, c);
+				try {
+					
+					XYDataset consensusDataset = dc.createOutline(false);
+					XYLineAndShapeRenderer c = new XYLineAndShapeRenderer(true, false);
+					c.setBaseSeriesVisibleInLegend(false);
+					c.setBaseStroke(ChartComponents.PROFILE_STROKE);
+					c.setSeriesPaint(0, Color.BLACK);
+					
+					plot.setDataset(i, consensusDataset);
+					plot.setRenderer(i, c);
+					
+				} catch (ChartDatasetCreationException e) {
+					warn("Cannot create data for dataset "+options.firstDataset().getName());
+					fine("Error getting chart data", e);
+				}
+
 			}
 			i++;
 		}
@@ -843,16 +834,23 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 
 			OutlineDatasetCreator dc = new OutlineDatasetCreator(verticalNucleus);
-			XYDataset nucleusDataset = dc.createOutline(false);
-
-			plot.setDataset(i, nucleusDataset);
-			plot.setRenderer(i, r);
-
-			i++;
+			
+			try {
+				
+				XYDataset nucleusDataset = dc.createOutline(false);
+				plot.setDataset(i, nucleusDataset);
+				plot.setRenderer(i, r);
+				
+			} catch (ChartDatasetCreationException e) {
+				warn("Cannot create data for dataset "+options.firstDataset().getName());
+				fine("Error getting chart data", e);
+			} finally {
+				i++;
+			}
 			
 		}
 		finest("Created vertical nuclei chart");
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		return chart;
 	}
 	
@@ -862,7 +860,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private JFreeChart createMultipleDatasetVerticalNucleiChart() throws Exception{
+	private JFreeChart createMultipleDatasetVerticalNucleiChart() throws ChartCreationException {
 		
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
@@ -891,16 +889,23 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				Nucleus verticalNucleus = n.getVerticallyRotatedNucleus();
 				
 				OutlineDatasetCreator dc = new OutlineDatasetCreator(verticalNucleus);
-				XYDataset nucleusDataset = dc.createOutline(false);
-
-				plot.setDataset(i, nucleusDataset);
-				plot.setRenderer(i, r);
-
-				i++;
+				
+				try {
+					
+					XYDataset nucleusDataset = dc.createOutline(false);
+					plot.setDataset(i, nucleusDataset);
+					plot.setRenderer(i, r);
+					
+				} catch (ChartDatasetCreationException e) {
+					warn("Cannot create data for dataset "+dataset.getName());
+					fine("Error getting chart data", e);
+				} finally {
+					i++;
+				}
 
 			}
 		}
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		return chart;
 	}
 	
@@ -999,7 +1004,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 		}
 		
-		applyAxisOptions(chart, options);
+		applyAxisOptions(chart);
 		
 		return chart;
 	}

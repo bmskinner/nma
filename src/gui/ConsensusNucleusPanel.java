@@ -80,16 +80,12 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		consensusChartPanel.addSignalChangeListener(this);
 
 		runRefoldingButton = new JButton("Refold");
-
 		
-		runRefoldingButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, getDatasets());
-				runRefoldingButton.setVisible(false);
-			}
+		runRefoldingButton.addActionListener( e -> {
+			fine("Heard refold button clicked");
+			fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, getDatasets());
+			runRefoldingButton.setVisible(false);
 		});
-		
 
 		runRefoldingButton.setVisible(false);
 		
