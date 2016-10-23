@@ -36,8 +36,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
@@ -134,11 +136,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
         doc.setParagraphAttributes(0, doc.getLength()+1, attrs, true);
         doc.setCharacterAttributes(0, doc.getLength()+1, attrs, true);
-        
-        // Only keep the last 2000 lines of log
-//        doc.addDocumentListener( new LimitLinesDocumentListener(500) );
-        
-        
+                
 		DefaultCaret caret = (DefaultCaret)textArea.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		
@@ -167,34 +165,44 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		console.addActionListener(this);
 		
 		// Need an extra drop target for file opening  as well as in the main window
-		textArea.setDropTarget(new DropTarget(){
-			
+		DropTarget dropTarget = makePanelDropTarget();
+		textArea.setDropTarget(dropTarget);
+
+		return panel;
+	}
+	
+	private DropTarget makePanelDropTarget(){
+		DropTarget d = new DropTarget(){
+
 			@Override
-            public synchronized void drop(DropTargetDropEvent dtde) {
-				
-				
+			public synchronized void drop(DropTargetDropEvent dtde) {
+
+
 				try {
-					
+					fine("Drop event heard");
 					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 					Transferable t = dtde.getTransferable();
-					
-					List<File> fileList = new ArrayList<File>();
-					
+
+					Set<File> fileList = new HashSet<File>();
+
 					// Check that what was provided is a list
 					if(t.getTransferData(DataFlavor.javaFileListFlavor) instanceof List<?>){
-						
+
 						// Check that what is in the list is files
 						List<?> tempList = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
 						for(Object o : tempList){
-							
+							fine("Checking dropped object");
+
 							if(o instanceof File){
+								fine("Object is a file");
 								fileList.add( (File) o);
 							}
 						}
-						
+
 						// Open the files - we open *.nmd files and analyse directories
 
 						for(File f : fileList){
+							fine("Checking dropped file");
 							if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
 								finer("Opening file "+f.getAbsolutePath());
 
@@ -204,28 +212,27 @@ public class LogPanel extends DetailPanel implements ActionListener {
 							} else {
 								finer("File is not nmd, ignoring");
 							}
-							
+
 							if(f.isDirectory()){
 								// Pass to new analysis
 								fireSignalChangeEvent("New|"+f.getAbsolutePath());
-								
+
 							}
 
 						}
 					}
 
-					
+
 				} catch (UnsupportedFlavorException e) {
 					error("Error in DnD", e);
 				} catch (IOException e) {
 					error("IO error in DnD", e);
 				}
-               
-            }
-			
-		});
 
-		return panel;
+			}
+
+		};
+		return d;
 	}
 	
 	/**

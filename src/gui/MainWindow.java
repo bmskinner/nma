@@ -646,7 +646,7 @@ public class MainWindow
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
-		finest("Heard signal change event: "+event.type());
+		finer("Heard signal change event: "+event.type());
 		
 		final AnalysisDataset selectedDataset = populationsPanel.getSelectedDatasets().isEmpty() 
 				? null 

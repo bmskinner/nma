@@ -74,7 +74,10 @@ public abstract class DetailPanel
 				Loggable, 
 				ChartOptionsRenderedEventListener {
 	
-	private final List<Object> listeners = new CopyOnWriteArrayList<Object>();
+	private final List<Object> listeners          = new CopyOnWriteArrayList<Object>();
+	private final List<Object> signalListeners    = new CopyOnWriteArrayList<Object>();
+	private final List<Object> datasetListeners   = new CopyOnWriteArrayList<Object>();
+	private final List<Object> interfaceListeners = new CopyOnWriteArrayList<Object>();
 	
 	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	
@@ -567,27 +570,27 @@ public abstract class DetailPanel
 	}
 	
 	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
-        listeners.add( l );
+		signalListeners.add( l );
     }
     
     public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
-        listeners.remove( l );
+    	signalListeners.remove( l );
     }
     
     public synchronized void addDatasetEventListener( DatasetEventListener l ) {
-    	listeners.add( l );
+    	datasetListeners.add( l );
     }
     
     public synchronized void removeDatasetEventListener( DatasetEventListener l ) {
-    	listeners.remove( l );
+    	datasetListeners.remove( l );
     }
     
     public synchronized void addInterfaceEventListener( InterfaceEventListener l ) {
-    	listeners.add( l );
+    	interfaceListeners.add( l );
     }
     
     public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
-    	listeners.remove( l );
+    	interfaceListeners.remove( l );
     }
     
     @Override
@@ -608,14 +611,14 @@ public abstract class DetailPanel
     protected synchronized void fireSignalChangeEvent(String message) {
     	
         SignalChangeEvent event = new SignalChangeEvent( this, message, this.getClass().getSimpleName());
-        Iterator<Object> iterator = listeners.iterator();
+        Iterator<Object> iterator = signalListeners.iterator();
         while( iterator.hasNext() ) {
             ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
         }
     }
     
     protected synchronized void fireSignalChangeEvent(SignalChangeEvent event) {
-    	Iterator<Object> iterator = listeners.iterator();
+    	Iterator<Object> iterator = signalListeners.iterator();
     	while( iterator.hasNext() ) {
     		( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
     	}
@@ -624,7 +627,7 @@ public abstract class DetailPanel
     protected synchronized void fireDatasetEvent(String method, List<AnalysisDataset> list) {
     	
         DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);
-        Iterator<Object> iterator = listeners.iterator();
+        Iterator<Object> iterator = datasetListeners.iterator();
         while( iterator.hasNext() ) {
             ( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
         }
@@ -645,14 +648,14 @@ public abstract class DetailPanel
     protected synchronized void fireDatasetEvent(String method, List<AnalysisDataset> list, AnalysisDataset template) {
 
     	DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, template);
-    	Iterator<Object> iterator = listeners.iterator();
+    	Iterator<Object> iterator = datasetListeners.iterator();
     	while( iterator.hasNext() ) {
     		( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
     	}
     }
     
     protected synchronized void fireDatasetEvent(DatasetEvent event) {
-    	Iterator<Object> iterator = listeners.iterator();
+    	Iterator<Object> iterator = datasetListeners.iterator();
     	while( iterator.hasNext() ) {
     		( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
     	}
@@ -661,7 +664,7 @@ public abstract class DetailPanel
     protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
     	
     	InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());
-        Iterator<Object> iterator = listeners.iterator();
+        Iterator<Object> iterator = interfaceListeners.iterator();
         while( iterator.hasNext() ) {
             ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
         }
@@ -669,7 +672,7 @@ public abstract class DetailPanel
     
     protected synchronized void fireInterfaceEvent(InterfaceEvent event) {
 
-        Iterator<Object> iterator = listeners.iterator();
+        Iterator<Object> iterator = interfaceListeners.iterator();
         while( iterator.hasNext() ) {
             ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
         }
