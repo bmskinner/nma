@@ -722,7 +722,13 @@ public class CellCollection implements Serializable, Loggable {
    */
   public Nucleus getNucleusMostSimilarToMedian(BorderTagObject pointType) throws Exception {
 
-	  Profile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, 50); // the profile we compare the nucleus to
+	  if(this.cellCount()==1){
+		  for(Cell c : this.mappedCollection.values()){
+			  return c.getNucleus();
+		  }
+	  }
+	  
+	  Profile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Quartile.MEDIAN); // the profile we compare the nucleus to
 //	  Nucleus n = this.getNuclei()..get(0); // default to the first nucleus
 	  Nucleus n=null;
 	  double difference = Arrays.stream(getDifferencesToMedianFromPoint(pointType)).max().orElse(0);

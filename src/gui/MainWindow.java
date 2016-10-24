@@ -71,6 +71,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -595,7 +596,7 @@ public class MainWindow
 
 	public class PanelUpdateTask implements CancellableRunnable {
 		final List<AnalysisDataset> list;
-		private Boolean bool = new Boolean(false);
+		private volatile AtomicBoolean bool = new AtomicBoolean();
 		
 		public PanelUpdateTask(final List<AnalysisDataset> list){
 			this.list = list;
@@ -604,18 +605,18 @@ public class MainWindow
 		@Override
 		public void run() {
 			try{
-				bool = true;
-				
-				
-				while (bool){
-					populationsPanel.repaintTreeTable();
-					for(DetailPanel panel : MainWindow.this.detailPanels){
+				bool.set(true);
+
+				populationsPanel.repaintTreeTable();
+				for(DetailPanel panel : MainWindow.this.detailPanels){
+
+					if(bool.get()){
 						panel.update(list);
 					}
-
-					fine("Updated tab panels");
-					bool= false;
 				}
+
+				fine("Updated tab panels");
+				bool.set(false);
 
 			} catch (Exception e) {
 				error("Error updating panels", e);
@@ -624,7 +625,7 @@ public class MainWindow
 		
 		@Override
 		public void cancel(){
-			bool = false;
+			bool.set(false);
 		}
 		
 	}

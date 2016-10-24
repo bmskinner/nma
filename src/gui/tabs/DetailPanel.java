@@ -79,7 +79,7 @@ public abstract class DetailPanel
 	private final List<Object> datasetListeners   = new CopyOnWriteArrayList<Object>();
 	private final List<Object> interfaceListeners = new CopyOnWriteArrayList<Object>();
 	
-	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+	private volatile List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	
 	private final List<DetailPanel> subPanels = new  ArrayList<DetailPanel>();
 	
@@ -261,7 +261,7 @@ public abstract class DetailPanel
 		}
 	}
 	
-	public void update(final List<AnalysisDataset> list){
+	public synchronized void update(final List<AnalysisDataset> list){
 		
 //		if(this.isUpdating()){
 			finest(this.getClass().getName()+": Panel is already updating");
