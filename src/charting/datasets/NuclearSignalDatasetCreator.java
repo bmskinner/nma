@@ -372,7 +372,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
                 String groupLabel = "Group_"+signalGroup+"_"+stat.toString();
 
                 double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
-                KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(values, 0.001);
+                KernelEstimator est = new NucleusDatasetCreator().createProbabililtyKernel(values, 0.001);
 
 
 					double min = Arrays.stream(values).min().orElse(0); //Stats.min(values);

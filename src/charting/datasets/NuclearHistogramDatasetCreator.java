@@ -64,31 +64,33 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 	public HistogramDataset createNuclearStatsHistogramDataset() throws ChartDatasetCreationException {
 		HistogramDataset ds = new HistogramDataset();
 		
-			finest("Creating histogram dataset: "+options.getStat());
-
-		
-		if(options.hasDatasets()){
-
-			for(AnalysisDataset dataset : options.getDatasets()){
-
-				CellCollection collection = dataset.getCollection();
-
-
-				NucleusStatistic stat = (NucleusStatistic) options.getStat();
-				double[] values = collection.getNuclearStatistics(stat, options.getScale());
-				
-				double[] minMaxStep = findMinAndMaxForHistogram(values);
-				int minRounded = (int) minMaxStep[0];
-				int maxRounded = (int) minMaxStep[1];
-
-				int bins = findBinSizeForHistogram(values, minMaxStep);
-
-				String groupLabel = options.getStat().toString();
-
-				ds.addSeries(groupLabel+"_"+collection.getName(), values, bins, minRounded, maxRounded );
-			}
+		finest("Creating histogram dataset: "+options.getStat());
+		if( ! options.hasDatasets()){
+			return ds;
 		}
-//		options.log(Level.FINEST, "Completed histogram dataset");
+		
+		for(AnalysisDataset dataset : options.getDatasets()){
+
+			CellCollection collection = dataset.getCollection();
+			
+			if( ! (options.getStat() instanceof NucleusStatistic)){
+				throw new ChartDatasetCreationException("Cannot cast stat to NucleusStatistic");
+			}
+
+			NucleusStatistic stat = (NucleusStatistic) options.getStat();
+			double[] values = collection.getNuclearStatistics(stat, options.getScale());
+
+			double[] minMaxStep = findMinAndMaxForHistogram(values);
+			int minRounded = (int) minMaxStep[0];
+			int maxRounded = (int) minMaxStep[1];
+
+			int bins = findBinSizeForHistogram(values, minMaxStep);
+
+			String groupLabel = stat.toString();
+
+			ds.addSeries(groupLabel+"_"+collection.getName(), values, bins, minRounded, maxRounded );
+		}
+		
 		return ds;
 	}
 		
@@ -162,13 +164,20 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 	
 	/**
 	 * Make an XY dataset corresponding to the probability density of a given nuclear statistic
-	 * @param list the datasets to draw
-	 * @param stat the statistic to measure
 	 * @return a charting dataset
-	 * @throws Exception
+	 * @throws ChartDatasetCreationException
 	 */
 	public XYDataset createNuclearDensityHistogramDataset() throws ChartDatasetCreationException {
 		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		if( ! options.hasDatasets()){
+			return ds;
+		}
+		
+		if( ! (options.getStat() instanceof NucleusStatistic)){
+			throw new ChartDatasetCreationException("Cannot cast stat to NucleusStatistic");
+		}
+		
 		List<AnalysisDataset> list = options.getDatasets();
 		NucleusStatistic stat      = (NucleusStatistic) options.getStat();
 		MeasurementScale scale     = options.getScale();
@@ -183,7 +192,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			
 			KernelEstimator est;
 			try {
-				est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(values, 0.001);
+				est = new NucleusDatasetCreator().createProbabililtyKernel(values, 0.001);
 			} catch (Exception e1) {
 				throw new ChartDatasetCreationException("Cannot make probability kernel", e1);
 			}
@@ -291,8 +300,6 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 		
 		for(AnalysisDataset dataset : options.getDatasets()){
 
-//			options.log(Level.FINEST, "  Dataset: "+dataset.getName());
-
 			CellCollection collection = dataset.getCollection();
 			
 			/*
@@ -332,10 +339,8 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 	
 	/**
 	 * Get the lengths of the given segment in the collections
-	 * @param collections
-	 * @param segName
 	 * @return
-	 * @throws Exception 
+	 * @throws ChartDatasetCreationException 
 	 */
 	public XYDataset createSegmentLengthDensityDataset() throws ChartDatasetCreationException {
 
@@ -406,7 +411,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			
 			KernelEstimator est;
 			try {
-				est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(lengths , 0.001);
+				est = new NucleusDatasetCreator().createProbabililtyKernel(lengths , 0.001);
 			} catch (Exception e1) {
 				throw new ChartDatasetCreationException("Cannot make probability kernel", e1);
 			}
@@ -506,7 +511,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			
 			KernelEstimator est;
 			try {
-				est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(values, binWidth);
+				est = new NucleusDatasetCreator().createProbabililtyKernel(values, binWidth);
 			} catch (Exception e1) {
 				throw new ChartDatasetCreationException("Cannot make probability kernel", e1);
 			}

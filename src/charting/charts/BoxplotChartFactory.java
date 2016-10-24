@@ -103,7 +103,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 		
 		BoxAndWhiskerCategoryDataset ds = null;
 		if(options.getDatasets()!=null){
-			 ds = NucleusDatasetCreator.getInstance().createBoxplotDataset(options);
+			 ds = new NucleusDatasetCreator().createBoxplotDataset(options);
 		}
 
 		
@@ -125,7 +125,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 
 		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
-		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.getInstance().createSegmentStatDataset(options);
+		BoxAndWhiskerCategoryDataset ds = new NucleusDatasetCreator().createSegmentStatDataset(options);
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, 
 				null, 
 				"Segment "+stat.label(options.getScale())

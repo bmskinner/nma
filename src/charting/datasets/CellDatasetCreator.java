@@ -35,18 +35,9 @@ import components.generic.XYPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
-public class CellDatasetCreator implements Loggable {
-	
-	private static CellDatasetCreator instance = null;
-	
-	private CellDatasetCreator(){}
-	
-	public static CellDatasetCreator getInstance(){
-		if(instance==null){
-			instance = new CellDatasetCreator();
-		}
-		return instance;
-	}
+public class CellDatasetCreator extends AbstractDatasetCreator {
+		
+	public CellDatasetCreator(){}
 	
 	
 	
@@ -55,7 +46,7 @@ public class CellDatasetCreator implements Loggable {
 	 * @param options the chart options
 	 * @return a chart
 	 */
-	public XYDataset createPositionFeatureDataset(ChartOptions options) throws Exception {
+	public XYDataset createPositionFeatureDataset(ChartOptions options) throws ChartDatasetCreationException {
 
 		XYDataset ds = null;
 		
@@ -88,7 +79,7 @@ public class CellDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	private XYDataset createSinglePositionFeatureDataset(ChartOptions options) throws Exception{
+	private XYDataset createSinglePositionFeatureDataset(ChartOptions options) throws ChartDatasetCreationException{
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
@@ -120,7 +111,7 @@ public class CellDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	private XYDataset createMultiPositionFeatureDataset(ChartOptions options) throws Exception{
+	private XYDataset createMultiPositionFeatureDataset(ChartOptions options) throws ChartDatasetCreationException{
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -162,7 +153,7 @@ public class CellDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<XYPoint> createAbsolutePositionFeatureList(AnalysisDataset dataset, UUID segmentID) throws Exception{
+	public List<XYPoint> createAbsolutePositionFeatureList(AnalysisDataset dataset, UUID segmentID) throws ChartDatasetCreationException{
 		
 		if(dataset==null){
 			throw new IllegalArgumentException("Dataset is null");
@@ -215,7 +206,7 @@ public class CellDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<XYPoint> createRelativePositionFeatureList(AnalysisDataset dataset, UUID segmentID) throws Exception{
+	public List<XYPoint> createRelativePositionFeatureList(AnalysisDataset dataset, UUID segmentID) throws ChartDatasetCreationException{
 		
 		List<XYPoint> result = createAbsolutePositionFeatureList( dataset, segmentID);
 		

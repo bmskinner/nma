@@ -245,7 +245,7 @@ public class ViolinDatasetCreator implements Loggable {
 
 		if(list.size()>2 && total.doubleValue()>0){ // don't bother with a dataset of a single cell, or if the stat is not present
 			
-			KernelEstimator est = NucleusDatasetCreator.getInstance().createProbabililtyKernel(  list , 0.001 );
+			KernelEstimator est = new NucleusDatasetCreator().createProbabililtyKernel(  list , 0.001 );
 //			double min = Stats.min(list).doubleValue();
 			double min = new Min(list).doubleValue();
 			double max = new Max(list).doubleValue();

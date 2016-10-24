@@ -144,7 +144,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			meshConsensus = meshConsensus.straighten();
 		}
 		
-		XYDataset ds = NucleusDatasetCreator.getInstance().createBareNucleusOutline(dataset);
+		XYDataset ds = new NucleusDatasetCreator().createBareNucleusOutline(dataset);
 		
 		double xMin = DatasetUtilities.findMinimumDomainValue(ds).doubleValue();
 		double yMin = DatasetUtilities.findMinimumRangeValue(ds).doubleValue();
@@ -218,7 +218,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 			drawImageAsAnnotation(warped, plot, 20, -xOffset, -yOffset, options.isShowBounds());
 		}
-		XYDataset ds = NucleusDatasetCreator.getInstance().createBareNucleusOutline(dataset);
+		XYDataset ds = new NucleusDatasetCreator().createBareNucleusOutline(dataset);
 		plot.setDataset(0, ds);
 		plot.getRenderer(0).setBasePaint(Color.BLACK);
 		plot.getRenderer(0).setBaseSeriesVisible(true);
@@ -323,7 +323,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		
 		JFreeChart chart = createBaseXYChart();
-		XYDataset ds = NucleusDatasetCreator.getInstance().createBareNucleusOutline(options.getCell().getNucleus());
+		XYDataset ds = new NucleusDatasetCreator().createBareNucleusOutline(options.getCell().getNucleus());
 
 
 		XYPlot plot = chart.getXYPlot();
@@ -423,7 +423,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		if(options.isShowBorderTags()){
 			XYDataset tags;
 			try {
-				tags = NucleusDatasetCreator.getInstance().createNucleusIndexTags(cell);
+				tags = new NucleusDatasetCreator().createNucleusIndexTags(cell);
 			} catch (Exception e) {
 				throw new ChartCreationException("Cannot get tags for nucleus", e);
 			}
@@ -437,7 +437,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		if(options.isShowSignals()){
 			finest("Rotation mode is actual, fetching signals");
 			if(cell.getNucleus().getSignalCollection().hasSignal()){
-				List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.getInstance().createSignalOutlines(cell, dataset);
+				List<DefaultXYDataset> signalsDatasets = new NucleusDatasetCreator().createSignalOutlines(cell, dataset);
 
 				for(XYDataset d : signalsDatasets){
 
@@ -588,7 +588,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		plot.getRangeAxis().setInverted(false);
 		
 		// Make a dataset to allow the autoscale to work
-		XYDataset bounds = NucleusDatasetCreator.getInstance().createAnnotationRectangleDataset(ip.getWidth(), ip.getHeight());
+		XYDataset bounds = new NucleusDatasetCreator().createAnnotationRectangleDataset(ip.getWidth(), ip.getHeight());
 		plot.setDataset(0, bounds);
 		
 		
@@ -921,7 +921,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		NucleusMeshXYDataset dataset;
 		try {
-			dataset = NucleusDatasetCreator.getInstance().createNucleusMeshEdgeDataset(mesh);
+			dataset = new NucleusDatasetCreator().createNucleusMeshEdgeDataset(mesh);
 		} catch (Exception e) {
 			throw new ChartCreationException("Cannot create mesh chart", e);
 		}
@@ -1072,7 +1072,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 		HistogramDataset ds;
 		try {
-			ds = NucleusDatasetCreator.getInstance().createNucleusMeshHistogramDataset(mesh);
+			ds = new NucleusDatasetCreator().createNucleusMeshHistogramDataset(mesh);
 		} catch (Exception e) {
 			throw new ChartCreationException("Cannot make mesh histogram", e);
 		}

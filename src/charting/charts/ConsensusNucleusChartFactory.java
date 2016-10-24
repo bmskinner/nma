@@ -139,7 +139,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			return makeEmptyChart();
 		}
 
-		XYDataset ds = NucleusDatasetCreator.getInstance().createBareNucleusOutline(dataset);
+		XYDataset ds = new NucleusDatasetCreator().createBareNucleusOutline(dataset);
 		JFreeChart chart = makeConsensusChart(ds);
 
 		double max = getconsensusChartRange(dataset);
@@ -209,7 +209,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		XYDataset ds = null;
 		
 		CellCollection collection = dataset.getCollection();
-		ds = NucleusDatasetCreator.getInstance().createSegmentedNucleusOutline(collection);
+		ds = new NucleusDatasetCreator().createSegmentedNucleusOutline(collection);
 			
 		JFreeChart chart = makeConsensusChart(ds);
 		double max = getconsensusChartRange(dataset);
@@ -276,7 +276,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart makeMultipleConsensusChart() throws Exception {
 		// multiple nuclei
-		XYDataset ds = NucleusDatasetCreator.getInstance().createMultiNucleusOutline(options.getDatasets(), options.getScale());
+		XYDataset ds = new NucleusDatasetCreator().createMultiNucleusOutline(options.getDatasets(), options.getScale());
 		JFreeChart chart = makeConsensusChart(ds);
 		
 		formatConsensusChart(chart);

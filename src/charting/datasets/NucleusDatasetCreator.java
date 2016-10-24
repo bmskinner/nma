@@ -67,16 +67,18 @@ import weka.estimators.KernelEstimator;
 
 public class NucleusDatasetCreator implements Loggable {
 	
-private static NucleusDatasetCreator instance = null;
+//private static NucleusDatasetCreator instance = null;
 	
-	private NucleusDatasetCreator(){}
-	
-	public static NucleusDatasetCreator getInstance(){
-		if(instance==null){
-			instance = new NucleusDatasetCreator();
-		}
-		return instance;
-	}
+//	private NucleusDatasetCreator(){}
+//	
+//	public static NucleusDatasetCreator getInstance(){
+//		if(instance==null){
+//			instance = new NucleusDatasetCreator();
+//		}
+//		return instance;
+//	}
+
+	public NucleusDatasetCreator(){}
 	
 	/**
 	 * Add individual segments from a profile to a dataset. Offset them to the given length
