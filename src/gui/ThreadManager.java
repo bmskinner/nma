@@ -1,11 +1,16 @@
 package gui;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class ThreadManager {
+import logging.Loggable;
+
+public class ThreadManager implements Loggable {
 	private static ThreadManager instance = null;
 	
 	/*
@@ -19,6 +24,9 @@ public class ThreadManager {
 	private final ExecutorService executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
 			keepAliveTime, TimeUnit.MILLISECONDS,
 			new LinkedBlockingQueue<Runnable>());
+	
+	Map<CancellableRunnable, Future<?>> cancellableFutures = new HashMap<>();
+	
 	
 
 	protected ThreadManager(){}
@@ -40,5 +48,31 @@ public class ThreadManager {
 	
 	public synchronized void execute(Runnable r){
 		executorService.execute(r);
+	}
+	
+	/**
+	 * Request an update of a cencellable process. If an update is 
+	 * already in progress, it will be cancelled.
+	 */
+	public void executeAndCancelUpdate(CancellableRunnable r){
+		
+
+		// Cancel previous updates
+		for( CancellableRunnable c : cancellableFutures.keySet() ){
+//			log("Removing future");
+			Future<?> future = cancellableFutures.get(c);
+			if( ! future.isDone()){
+//				log("Cancelling runnable");
+				c.cancel();
+				future.cancel(true);
+			}
+
+			cancellableFutures.remove(c);
+		}
+		
+		Future<?> future = executorService.submit(r);
+//		log("Submitting runnable");
+		cancellableFutures.put(r, future);
+		
 	}
 }

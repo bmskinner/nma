@@ -564,31 +564,69 @@ public class MainWindow
 	 * Update the display panels with information from the given datasets
 	 * @param list the datasets to display
 	 */
-	private void updatePanels(final List<AnalysisDataset> list){
+//	private void updatePanels(final List<AnalysisDataset> list){
+//		
+//		fine("Requesting update of panels");
+//		if(list!=null){
+//			fine("Updating tab panels for "+list.size()+" datasets");
+//		} else {
+//			fine("Updating tab panels with null datasets");
+//		}
+//		
+////		Runnable task = () -> {
+////			try {
+////
+////				populationsPanel.repaintTreeTable();
+////				for(DetailPanel panel : MainWindow.this.detailPanels){
+////					panel.update(list);
+////				}
+////
+////				fine("Updated tab panels");
+////
+////			} catch (Exception e) {
+////				error("Error updating panels", e);
+////			}
+////		};
+//		
+////		threadManager.execute(task);
+//		
+//		threadManager.executeAndCancelUpdate( new PanelUpdateTask(list) );
+//	}
+
+	public class PanelUpdateTask implements CancellableRunnable {
+		final List<AnalysisDataset> list;
+		private Boolean bool = new Boolean(false);
 		
-		fine("Requesting update of panels");
-		if(list!=null){
-			fine("Updating tab panels for "+list.size()+" datasets");
-		} else {
-			fine("Updating tab panels with null datasets");
+		public PanelUpdateTask(final List<AnalysisDataset> list){
+			this.list = list;
 		}
 		
-		Runnable task = () -> {
-			try {
+		@Override
+		public void run() {
+			try{
+				bool = true;
+				
+				
+				while (bool){
+					populationsPanel.repaintTreeTable();
+					for(DetailPanel panel : MainWindow.this.detailPanels){
+						panel.update(list);
+					}
 
-				populationsPanel.repaintTreeTable();
-				for(DetailPanel panel : MainWindow.this.detailPanels){
-					panel.update(list);
+					fine("Updated tab panels");
+					bool= false;
 				}
-
-				fine("Updated tab panels");
 
 			} catch (Exception e) {
 				error("Error updating panels", e);
 			}
-		};
+		}
 		
-		threadManager.execute(task);
+		@Override
+		public void cancel(){
+			bool = false;
+		}
+		
 	}
 	
 	
@@ -725,11 +763,13 @@ public class MainWindow
 		}
 		
 		if(event.type().equals("UpdatePanels")){
-			this.updatePanels(populationsPanel.getSelectedDatasets());
+			threadManager.executeAndCancelUpdate( new PanelUpdateTask(populationsPanel.getSelectedDatasets()) );
+//			this.updatePanels(populationsPanel.getSelectedDatasets());
 		}
 		
 		if(event.type().equals("UpdatePanelsNull")){
-			this.updatePanels(new ArrayList<AnalysisDataset>());
+			threadManager.executeAndCancelUpdate( new PanelUpdateTask(new ArrayList<AnalysisDataset>()) );
+//			this.updatePanels();
 		}
 		
 		if(event.type().equals("UpdatePopulationPanel")){
@@ -1190,7 +1230,8 @@ public class MainWindow
 		case UPDATE_PANELS:{
 			List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
 			finer("Updating tab panels with list of "+list.size()+" datasets");
-			this.updatePanels(list);
+			threadManager.executeAndCancelUpdate( new PanelUpdateTask(list) );
+//			this.updatePanels(list);
 			break;
 		}
 			
