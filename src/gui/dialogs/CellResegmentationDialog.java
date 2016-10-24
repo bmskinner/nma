@@ -50,8 +50,8 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
-import utility.ProfileException;
 import analysis.AnalysisDataset;
+import analysis.profiles.ProfileException;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.panels.CoupledProfileOutlineChartPanel;
 import charting.charts.panels.ExportableChartPanel;

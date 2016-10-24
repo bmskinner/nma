@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.UUID;
 
 import analysis.AnalysisDataset;
-import utility.ProfileException;
+import analysis.profiles.ProfileException;
 import logging.Loggable;
 import components.AbstractCellularComponent;
 

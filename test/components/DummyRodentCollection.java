@@ -1,0 +1,97 @@
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
+
+package components;
+
+import java.io.File;
+import java.util.concurrent.ExecutionException;
+
+import stats.NucleusStatistic;
+import analysis.AnalysisDataset;
+import analysis.profiles.DatasetProfiler;
+import components.generic.MeasurementScale;
+import components.generic.Profile;
+import components.nuclear.NucleusType;
+import components.nuclei.Nucleus;
+
+public class DummyRodentCollection extends CellCollection {
+	
+	public DummyRodentCollection(int nuclei){
+		
+		super( new File("C:\\"), "out", "test", NucleusType.RODENT_SPERM );
+
+		for(int i=0; i<nuclei; i++){
+			
+			Cell dummy = makeDummyCell(i);
+			this.addCell(dummy);
+		}
+		
+	}
+	
+	private Cell makeDummyCell(int i){
+		
+		Cell c = new Cell();
+		Nucleus n = new DummyRodentSpermNucleus("Nucleus "+i);
+		c.setNucleus(n);
+		return c;
+		
+	}
+	
+	public static void main(String[] args){
+		
+		System.out.println("Making collection");
+		
+		
+		DummyRodentCollection collection = new DummyRodentCollection(10000);
+		AnalysisDataset d = new AnalysisDataset(collection);
+//		System.out.println(collection.toString());
+		
+//		for(Nucleus n : collection.getNuclei()){
+//			System.out.println(n.toString());
+//		}
+		
+		DatasetProfiler profiler = new DatasetProfiler(d);
+		profiler.execute();
+		
+		System.out.println("Waiting for profiler...");
+		try {
+			profiler.get();
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("Profiling complete");
+		
+//		collection.getNuclearStatistics(NucleusStatistic.AREA, MeasurementScale.PIXELS);
+		
+		double area;
+		try {
+			System.out.println("Fetching areas");
+			area = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
+			System.out.println("Median area: "+area);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		
+	}
+
+}

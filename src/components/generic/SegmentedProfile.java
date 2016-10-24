@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import utility.ProfileException;
+import analysis.profiles.ProfileException;
 import components.AbstractCellularComponent;
 import components.nuclear.NucleusBorderSegment;
 

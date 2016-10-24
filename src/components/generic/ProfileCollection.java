@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import analysis.profiles.ProfileException;
 import logging.Loggable;
 import components.CellCollection;
 import components.nuclear.NucleusBorderSegment;
@@ -33,7 +34,6 @@ import components.nuclei.Nucleus;
 //import ij.IJ;
 
 import utility.Constants;
-import utility.ProfileException;
 
 /**
  * Holds the ProfileAggregate with individual nucleus values,
@@ -131,7 +131,13 @@ public class ProfileCollection implements Serializable, Loggable {
 		if( ! profileCache.hasProfile(tag, quartile)){
 
 			int indexOffset = indexes.get(tag);			
-			Profile profile = getAggregate().getQuartile(quartile).offset(indexOffset);
+			Profile profile;
+			try {
+				profile = getAggregate().getQuartile(quartile).offset(indexOffset);
+			} catch (ProfileException e) {
+				error("Unable to get profile for "+tag+" quartile "+quartile, e);
+				return null;
+			}
 			profileCache.setProfile(tag, quartile, profile );
 
 		}
@@ -406,8 +412,8 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * @throws Exception 
 	 */
 	public void createProfileAggregate(CellCollection collection, ProfileType type, int length) {
-		if(length<0){
-			throw new IllegalArgumentException("Requested length is negative");
+		if(length<=0){
+			throw new IllegalArgumentException("Requested profile aggregate length is zero or negative");
 		}
 		if(collection == null || type == null ){
 			throw new IllegalArgumentException("CellCollection or ProfileType is null");

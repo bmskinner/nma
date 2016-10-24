@@ -155,7 +155,7 @@ public class ProfileManager implements Loggable {
 			ProfileCollection pc = collection.getProfileCollection(type);
 			int length = pc.length();
 						
-			if(keepLength && length>0){ // failsafe in case some idiot tries to maintain length on an empty aggregate
+			if(keepLength && length>0){ // failsafe in case some idiot (me) tries to maintain length on an empty aggregate
 				
 			
 				finer(type+" length before update: "+pc.length());

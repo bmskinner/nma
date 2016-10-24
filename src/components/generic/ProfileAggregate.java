@@ -34,11 +34,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
+import analysis.profiles.ProfileException;
 import components.AbstractCellularComponent;
 import logging.Loggable;
 import utility.ArrayConverter;
 import utility.Constants;
-import utility.ProfileException;
 import utility.ArrayConverter.ArrayConversionException;
 
 /**
@@ -58,6 +58,10 @@ public class ProfileAggregate implements Loggable, Serializable {
 	private double[] xPositions;
 	
 	public ProfileAggregate(int length){
+		
+		if(length<=0){
+			throw new IllegalArgumentException("Aggregate cannot be created with length <=0");
+		}
 		
 		this.length = length;
 		this.profileIncrement = (double) 100 / (double) length;
@@ -165,21 +169,26 @@ public class ProfileAggregate implements Loggable, Serializable {
 //		return new Profile(result);
 //	}
 	
-	public Profile getMedian(){
+	public Profile getMedian() throws ProfileException {
 		Profile result = null;
 		try{
 			result = calculateQuartile(Constants.MEDIAN);
 		} catch(ProfileException e){
 			// if the profile >200, scale down to 200. Otherwise, reduce stepwise until we get a profile
 			int newLength = this.length <= 200 ? this.length-5 : 200;
-			log(Level.FINEST, "Error in getting profile aggregate median: rescaling to "+newLength);
+			
+			if(newLength<=0){
+				throw(e);
+			}
+			
+			finest("Error in getting profile aggregate median: rescaling to "+newLength);
 			this.rescaleProfile(newLength);
 			result = this.getMedian(); // recurse through this function until we get a profile
 		}
 		return result;
 	}
 
-	public Profile getQuartile(double quartile){
+	public Profile getQuartile(double quartile) throws ProfileException {
 		Profile result = null;
 		try{
 			
@@ -187,13 +196,19 @@ public class ProfileAggregate implements Loggable, Serializable {
 			
 		} catch(ProfileException e){
 			result = this.getMedian(); // median is the only method that rescales, so should have been called before this
-			log(Level.FINEST, "Cannot find quartile; falling back on median");
+			finest("Cannot find quartile; falling back on median");
 		}
 		return result;
 	}
 	
-	private Profile calculateQuartile(double quartile) throws ProfileException{
+	private Profile calculateQuartile(double quartile) throws ProfileException {
+
+		if(this.length==0){
+			throw new ProfileException("Cannot calculate median profile, aggregate length is zero");
+		}
+		
 		double[] medians = new double[this.length];
+		
 		int missing = 0;
 
 		for(int i=0;i<this.length;i++){

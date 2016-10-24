@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import logging.Loggable;
-import utility.ProfileException;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclear.BorderPoint;

@@ -23,8 +23,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import analysis.profiles.ProfileException;
 import stats.Quartile;
-import utility.ProfileException;
 import logging.Loggable;
 
 /**

@@ -22,7 +22,6 @@ package analysis.profiles;
 
 import java.util.UUID;
 
-import utility.ProfileException;
 import logging.Loggable;
 import components.CellCollection;
 import components.generic.BorderTagObject;

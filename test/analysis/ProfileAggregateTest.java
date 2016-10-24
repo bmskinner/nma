@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import analysis.profiles.ProfileException;
 import components.generic.Profile;
 import components.generic.ProfileAggregate;
 
@@ -70,11 +71,19 @@ public class ProfileAggregateTest {
 		}
 		
 		
-		Profile median = tester.getMedian();
-		
-		for( int i =0;i<10; i++){
-			assertEquals("Values should be identical", array[i], median.asArray()[i],0);
+		Profile median;
+		try {
+			median = tester.getMedian();
+			
+			for( int i =0;i<10; i++){
+				assertEquals("Values should be identical", array[i], median.asArray()[i],0);
+			}
+			
+		} catch (ProfileException e) {
+			e.printStackTrace();
 		}
+		
+		
 	}
 
 }

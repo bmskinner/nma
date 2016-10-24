@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import utility.ProfileException;
 import components.generic.BorderTagObject;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
