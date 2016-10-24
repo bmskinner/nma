@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Vector;
-import java.util.logging.Level;
-
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
@@ -162,10 +160,10 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 			model.addColumn("", fieldNames);
 						
-			DecimalFormat df = new DecimalFormat("#.##");
-			df.setMaximumFractionDigits(2);
-			df.setMinimumFractionDigits(2);
-			df.setMinimumIntegerDigits(1);
+//			DecimalFormat df = new DecimalFormat("#.##");
+//			df.setMaximumFractionDigits(2);
+//			df.setMinimumFractionDigits(2);
+//			df.setMinimumIntegerDigits(1);
 			DecimalFormat pf = new DecimalFormat("#.###");
 
 			for(NucleusBorderSegment segment : segments) {
@@ -185,9 +183,9 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				
 				ConfidenceInterval ci = new ConfidenceInterval(meanLengths, 0.95);
 				
-				rowData.add(  df.format(mean ) );
-				rowData.add(  df.format(ci.getLower().doubleValue())+" - "+ df.format(ci.getUpper().doubleValue()));
-				rowData.add(  df.format(sem) );
+				rowData.add(  DEFAULT_DECIMAL_FORMAT.format(mean ) );
+				rowData.add(  DEFAULT_DECIMAL_FORMAT.format(ci.getLower().doubleValue())+" - "+ DEFAULT_DECIMAL_FORMAT.format(ci.getUpper().doubleValue()));
+				rowData.add(  DEFAULT_DECIMAL_FORMAT.format(sem) );
 				
 				
 				double pval = DipTester.getDipTestPValue(meanLengths);
@@ -211,10 +209,10 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		MeasurementScale scale = options.getScale();
 		
 		DefaultTableModel model = new DefaultTableModel();
-		DecimalFormat df = new DecimalFormat("0.00");
-		df.setMinimumFractionDigits(2);
-		df.setMaximumFractionDigits(2);
-		df.setMinimumIntegerDigits(1);
+//		DecimalFormat df = new DecimalFormat("0.00");
+//		df.setMinimumFractionDigits(2);
+//		df.setMaximumFractionDigits(2);
+//		df.setMinimumIntegerDigits(1);
 		
 		// If the datasets have different segment counts, show error message
 		if( ! NucleusBorderSegment.segmentCountsMatch(list)){
@@ -284,7 +282,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				double mean = new Mean(meanLengths).doubleValue(); 
 
 				ConfidenceInterval ci = new ConfidenceInterval(meanLengths, 0.95);
-				rowData.add(df.format(mean)+" ± "+ df.format(ci.getSize().doubleValue()));
+				rowData.add(DEFAULT_DECIMAL_FORMAT.format(mean)+" ± "+ DEFAULT_DECIMAL_FORMAT.format(ci.getSize().doubleValue()));
 			}
 			model.addRow(rowData.toArray(new Object[0]));
 		}
@@ -489,7 +487,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	private Object[] formatAnalysisOptionsForTable(AnalysisDataset dataset, AnalysisOptions options){
 		options = options == null ? dataset.getAnalysisOptions() : options;
 		
-		DecimalFormat df = new DecimalFormat("#0.00"); 
+//		DecimalFormat df = new DecimalFormat("#0.00"); 
 		
 		// only display refold mode if nucleus was refolded
 		String refoldMode = options.refoldNucleus() 
@@ -545,8 +543,8 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				cannyClosingRadius,
 				options.getMinNucleusSize(),
 				options.getMaxNucleusSize(),
-				df.format(options.getMinNucleusCirc()),
-				df.format(options.getMaxNucleusCirc()),
+				DEFAULT_DECIMAL_FORMAT.format(options.getMinNucleusCirc()),
+				DEFAULT_DECIMAL_FORMAT.format(options.getMaxNucleusCirc()),
 				options.refoldNucleus(),
 				refoldMode,
 				date,
@@ -608,7 +606,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	private List<Object> createDatasetStatsTableColumn(AnalysisDataset dataset, MeasurementScale scale){
 		
 		// format the numbers and make into a tablemodel
-		DecimalFormat df = new DecimalFormat("#0.00"); 
+//		DecimalFormat df = new DecimalFormat("#0.00"); 
 		DecimalFormat pf = new DecimalFormat("#0.000"); 
 		
 		CellCollection collection = dataset.getCollection();
@@ -626,12 +624,12 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			double median 	= new Quartile(stats, Quartile.MEDIAN).doubleValue();
 			
 			ConfidenceInterval ci = new ConfidenceInterval(stats, 0.95);
-			String ciString = df.format(mean)+" ± "+ df.format(ci.getSize().doubleValue());
+			String ciString = DEFAULT_DECIMAL_FORMAT.format(mean)+" ± "+ DEFAULT_DECIMAL_FORMAT.format(ci.getSize().doubleValue());
 			double diptest 	= DipTester.getDipTestPValue(stats);
 
-			datasetData.add(df.format(median));
-			datasetData.add(df.format(mean));
-			datasetData.add(df.format(sem));
+			datasetData.add(DEFAULT_DECIMAL_FORMAT.format(median));
+			datasetData.add(DEFAULT_DECIMAL_FORMAT.format(mean));
+			datasetData.add(DEFAULT_DECIMAL_FORMAT.format(sem));
 			datasetData.add(ciString);
 			datasetData.add(pf.format(diptest));					
 		}
@@ -737,8 +735,6 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		// Track the pairwase comparisons performed to avoid duplicates
 		Map<UUID, ArrayList<UUID>> existingMatches = new HashMap<UUID, ArrayList<UUID>>();
 		
-		DecimalFormat df = new DecimalFormat("#0.00"); 
-
 		// add columns
 		for(AnalysisDataset dataset1 : list){
 			
@@ -778,15 +774,15 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 					double uniquePct1 = ((double) unique1 / (double) dataset1.getCollection().getNucleusCount())*100;
 					double uniquePct2 = ((double) unique2 / (double) dataset2.getCollection().getNucleusCount())*100;
 					
-					popData[1] = df.format(uniquePct1);
-					popData[7] = df.format(uniquePct2);
+					popData[1] = DEFAULT_DECIMAL_FORMAT.format(uniquePct1);
+					popData[7] = DEFAULT_DECIMAL_FORMAT.format(uniquePct2);
 					
 					
 					double sharedpct1 = ((double) shared / (double) dataset1.getCollection().getNucleusCount())*100;
 					double sharedpct2 = ((double) shared / (double) dataset2.getCollection().getNucleusCount())*100;
 					
-					popData[3] = df.format(sharedpct1);
-					popData[5] = df.format(sharedpct2);
+					popData[3] = DEFAULT_DECIMAL_FORMAT.format(sharedpct1);
+					popData[5] = DEFAULT_DECIMAL_FORMAT.format(sharedpct2);
 
 					model.addRow(popData);
 				}
@@ -1132,8 +1128,6 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 
 		// format the numbers and make into a tablemodel
-		//			DecimalFormat df = new DecimalFormat("#0.00"); 
-
 		for(AnalysisDataset dataset : list){
 			List<ClusterGroup> clusterGroups = dataset.getClusterGroups();
 

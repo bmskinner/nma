@@ -22,47 +22,46 @@ import components.CellCollection;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.nuclear.NuclearSignal;
-import logging.Loggable;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import stats.SignalStatistic;
 import stats.Stats;
 
-public class ScatterChartDatasetCreator implements Loggable {
-	
-private static ScatterChartDatasetCreator instance = null;
-	
-	protected ScatterChartDatasetCreator(){}
-	
-	/**
-	 * Fetch an instance of the factory
-	 * @return
-	 */
-	public static ScatterChartDatasetCreator getInstance(){
-		if(instance==null){
-			instance = new ScatterChartDatasetCreator();
-		}
-		return instance;
-	}
+public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
+
+	public ScatterChartDatasetCreator(){}
 
 
 	/**
 	 * Get a boxplot dataset for the given statistic for each collection
 	 * @param options the charting options
 	 * @return
-	 * @throws Exception
+	 * @throws ChartDatasetCreationException
 	 */
-	public XYDataset createNucleusScatterDataset(ChartOptions options) {
+	public XYDataset createNucleusScatterDataset(ChartOptions options) throws ChartDatasetCreationException {
+		
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		if( ! options.hasDatasets()){
+			return ds;
+		}
+		
+		if( ! (options.getStat(0) instanceof NucleusStatistic)){
+			throw new ChartDatasetCreationException("Stat 0 cannot be cast to NucleusStatistic");
+		}
+		
+		if( ! (options.getStat(1) instanceof NucleusStatistic)){
+			throw new ChartDatasetCreationException("Stat 1 cannot be cast to NucleusStatistic");
+		}
+		
 		List<AnalysisDataset> datasets = options.getDatasets();
-		
-		List<PlottableStatistic> stats =  options.getStats();
-		
+				
 		MeasurementScale scale = options.getScale();
 		
-		NucleusStatistic statA = (NucleusStatistic) stats.get(0);
-		NucleusStatistic statB = (NucleusStatistic) stats.get(1);
+		NucleusStatistic statA = (NucleusStatistic) options.getStat(0);
+		NucleusStatistic statB = (NucleusStatistic) options.getStat(1);
 
-		DefaultXYDataset ds = new DefaultXYDataset();
+		
 
 		for (int i=0; i < datasets.size(); i++) {
 			
@@ -113,29 +112,29 @@ private static ScatterChartDatasetCreator instance = null;
 		for(PlottableStatistic stat : options.getStats()){
 			if( ! stat.getClass().equals(firstStat.getClass())){
 				fine("Statistic classes are different");
-				AnalysisDatasetTableCreator.createBlankTable();
+				createBlankTable();
 			}
 		}
 		
-		if(firstStat.getClass().equals(NucleusStatistic.class)){
+		if(firstStat instanceof NucleusStatistic){
 			return createNucleusSpearmanCorrlationTable(options);
 		}
 		
-		if(firstStat.getClass().equals(SignalStatistic.class)){
+		if(firstStat instanceof SignalStatistic){
 			return createSignalSpearmanCorrlationTable(options);
 		}
 		
-		return AnalysisDatasetTableCreator.createBlankTable();
+		return createBlankTable();
 	}
 	
 	private TableModel createNucleusSpearmanCorrlationTable(TableOptions options){
 
 		if( ! options.hasDatasets()){
-			return AnalysisDatasetTableCreator.createBlankTable();
+			return createBlankTable();
 		}
 		
 		if(options.getStats().size()!=2){
-			return AnalysisDatasetTableCreator.createBlankTable();
+			return createBlankTable();
 		}
 		
 		DefaultTableModel model = new DefaultTableModel();
@@ -153,7 +152,7 @@ private static ScatterChartDatasetCreator instance = null;
 		NucleusStatistic statA = (NucleusStatistic) stats.get(0);
 		NucleusStatistic statB = (NucleusStatistic) stats.get(1);
 		
-		DecimalFormat df = new DecimalFormat("#0.00"); 
+//		DecimalFormat df = new DecimalFormat("#0.00"); 
 
 		for (int i=0; i < datasets.size(); i++) {
 
@@ -183,7 +182,7 @@ private static ScatterChartDatasetCreator instance = null;
 			names.add(c.getName());
 			
 			double rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
-			rho.add( df.format( rhoValue ));
+			rho.add( DEFAULT_DECIMAL_FORMAT.format( rhoValue ));
 			
 //			double p = Stats.getSpearmanPValue(rhoValue, cells.size());
 //			pValue.add( df.format( p ));
@@ -265,9 +264,7 @@ private static ScatterChartDatasetCreator instance = null;
 
 		SignalStatistic statA = (SignalStatistic) stats.get(0);
 		SignalStatistic statB = (SignalStatistic) stats.get(1);
-		
-		DecimalFormat df = new DecimalFormat("#0.00"); 
-		
+				
 		for (int i=0; i < datasets.size(); i++) {
 			
 			CellCollection c = datasets.get(i).getCollection();
@@ -302,7 +299,7 @@ private static ScatterChartDatasetCreator instance = null;
 					rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
 				}
 				
-				rho.add( df.format( rhoValue ) );
+				rho.add( DEFAULT_DECIMAL_FORMAT.format( rhoValue ) );
 			}
 
 			

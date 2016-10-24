@@ -32,6 +32,7 @@ import org.jfree.data.xy.XYDataset;
 
 import analysis.AnalysisDataset;
 import charting.ChartComponents;
+import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.ScatterChartDatasetCreator;
 import charting.options.ChartOptions;
 import gui.components.ColourSelecter;
@@ -99,7 +100,13 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart createNucleusStatisticScatterChart(){
 				
-		XYDataset ds = ScatterChartDatasetCreator.getInstance().createNucleusScatterDataset(options);
+		XYDataset ds;
+		try {
+			ds = new ScatterChartDatasetCreator().createNucleusScatterDataset(options);
+		} catch (ChartDatasetCreationException e) {
+			error("Error creating scatter dataset", e);
+			return makeEmptyChart();
+		}
 		
 		String xLabel = options.getStat(0).label(options.getScale());
 		String yLabel = options.getStat(1).label(options.getScale());
@@ -145,18 +152,15 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart createSignalStatisticScatterChart(){
 				
-		XYDataset ds = ScatterChartDatasetCreator.getInstance().createSignalScatterDataset(options);
+		XYDataset ds = new ScatterChartDatasetCreator().createSignalScatterDataset(options);
 		
 		String xLabel = options.getStat(0).label(options.getScale());
 		String yLabel = options.getStat(1).label(options.getScale());
 		
-		JFreeChart chart = this.createBaseXYChart();
+		JFreeChart chart = createBaseXYChart();
 		chart.getXYPlot().getDomainAxis().setLabel(xLabel);
 		chart.getXYPlot().getRangeAxis().setLabel(yLabel);
-	
-		
-//		JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel,
-//				yLabel,  ds);  
+
 		
 		XYPlot plot = chart.getXYPlot();
 		plot.setDataset(ds);

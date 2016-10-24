@@ -23,7 +23,6 @@ import gui.GlobalOptions;
 import gui.components.ColourSelecter;
 
 import java.awt.Color;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -152,7 +151,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 */
 	private void addNuclearStatisticsToTable(List<Object> fieldNames,  List<Object> rowData, Nucleus n){
 		
-		DecimalFormat df = new DecimalFormat("#0.00"); 
+//		DecimalFormat df = new DecimalFormat("#0.00"); 
 		
 		for(NucleusStatistic stat : NucleusStatistic.values()){
 
@@ -161,7 +160,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 				fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()  )  );
 
 				double value = n.getStatistic(stat, GlobalOptions.getInstance().getScale()  );
-					rowData.add(df.format(value) );
+					rowData.add(DEFAULT_DECIMAL_FORMAT.format(value) );
 			}
 
 		}
@@ -228,7 +227,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 */
 	private void addSignalStatisticsToTable(List<Object> fieldNames,  List<Object> rowData, NuclearSignal s){
 		
-		DecimalFormat df = new DecimalFormat("#0.00"); 
+//		DecimalFormat df = new DecimalFormat("#0.00"); 
 		
 		for(SignalStatistic stat : SignalStatistic.values()){
 
@@ -236,7 +235,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
 			double value = s.getStatistic(stat, GlobalOptions.getInstance().getScale() );
 
-			rowData.add(df.format(value) );
+			rowData.add(DEFAULT_DECIMAL_FORMAT.format(value) );
 		}
 
 		fieldNames.add("Signal CoM");

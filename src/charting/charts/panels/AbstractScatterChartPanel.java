@@ -161,7 +161,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception {
-		return ScatterChartDatasetCreator.getInstance().createSpearmanCorrlationTable(options);
+		return new ScatterChartDatasetCreator().createSpearmanCorrlationTable(options);
 	}
 
 	@Override

@@ -21,6 +21,8 @@ package charting.datasets;
 
 import gui.Labels;
 
+import java.text.DecimalFormat;
+
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
@@ -28,6 +30,17 @@ import logging.Loggable;
 
 public class AbstractDatasetCreator implements Loggable {	
 		
+	/**
+	 * The standard formatter for datasets. At least one integer, and 2 decimals: 0.00
+	 */
+	public static final DecimalFormat DEFAULT_DECIMAL_FORMAT = new DecimalFormat("#0.00"); 
+	
+	static {
+		
+		DEFAULT_DECIMAL_FORMAT.setMinimumFractionDigits(2);
+		DEFAULT_DECIMAL_FORMAT.setMinimumIntegerDigits(1);
+	}
+	
 	/**
 	 * Create an empty table declaring no data is loaded
 	 * @return
