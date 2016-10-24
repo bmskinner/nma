@@ -202,9 +202,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 		PopulationTreeTableModel treeTableModel = new PopulationTreeTableModel();
 
-		PopulationTreeTable table = new PopulationTreeTable(treeTableModel);
-				
-		table.setComponentPopupMenu(populationPopup);
+		PopulationTreeTable table = new PopulationTreeTable(treeTableModel);	
 		
 		table.addMouseListener(new MouseAdapter() {
 			@Override
@@ -215,11 +213,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				int row		= table.rowAtPoint((e.getPoint()));
 				int column 	= table.columnAtPoint(e.getPoint());
 				
+				Object o = table.getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
+				
 				// double click
 				if (e.getClickCount() == 2) {
 
-					Object o = table.getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
-					
 					if(o instanceof ClusterGroup){
 						clusterGroupClicked((ClusterGroup) o);
 					}
@@ -227,6 +225,22 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 					if(o instanceof AnalysisDataset){
 						datasetClicked((AnalysisDataset) o, row, column);
 					}					
+				}
+				
+				// right click  - show the popup, but change delete to close for root datasets
+				if(e.getButton() == MouseEvent.BUTTON3){
+										
+					if(o instanceof AnalysisDataset){
+						if(((AnalysisDataset) o).isRoot()){
+							populationPopup.setDeleteString("Close");
+						} else {
+							populationPopup.setDeleteString("Delete");
+						}
+					} else {
+						populationPopup.setDeleteString("Delete");
+					}				
+					
+					populationPopup.show(table, e.getX(), e.getY());
 				}
 			}
 			

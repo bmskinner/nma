@@ -126,6 +126,10 @@ public class PopulationListPopupMenu extends JPopupMenu {
 
     }
 	
+	public void setDeleteString(String s){
+		deleteMenuItem.setText(s);
+	}
+	
 	public void createButtons(){
 		
 		moveUpMenuItem = new JMenuItem("Move up");
