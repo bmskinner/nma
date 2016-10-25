@@ -70,17 +70,30 @@ public class LogPanelFormatter extends Formatter {
 	private String formatFinest(LogRecord record){
 		
 		String sourceMethod = record.getSourceMethodName();
+		String sourceClass  = record.getSourceClassName();
+		
 		if(sourceMethod.equals("log") || sourceMethod.startsWith("fine")  ){
 			// work back to the actual calling method
+			// this should be before the Loggable call
+
 			StackTraceElement[] array = Thread.currentThread().getStackTrace();
-			sourceMethod = array[8].getMethodName();
+			sourceMethod = array[9].getMethodName();
+			
+			for(int i=0; i< array.length; i++){
+				StackTraceElement e = array[i];
+				if(e.getClassName().equals("logging.Loggable")){
+					sourceMethod = array[++i].getMethodName();
+					sourceClass  = array[i].getClassName();
+					break;
+				}
+			}
 		}
 
 		StringBuffer buffer = new StringBuffer();
 
 		buffer.append(record.getMessage());
 		buffer.append(SEPARATOR);
-		buffer.append(record.getSourceClassName());
+		buffer.append(sourceClass);
 		buffer.append(SEPARATOR);
 		buffer.append(sourceMethod);
 		buffer.append(SEPARATOR);

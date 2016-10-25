@@ -608,7 +608,7 @@ public class ProfileCollection implements Serializable, Loggable {
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 //		finest("Writing profile collection");
-		out.writeObject(Boolean.TRUE); // marker for BetterProfileAggregate
+
 		out.defaultWriteObject();
 //		finest("Wrote profile collection");
 	}

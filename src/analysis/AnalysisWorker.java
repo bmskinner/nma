@@ -202,7 +202,10 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
         	if(e.getCause() instanceof java.lang.OutOfMemoryError){
         		warn("Error: Not enough memory!");
         	} else {
-        		error("Execution error in worker", e);
+        		warn("Unable to complete task due to an internal error");
+        		warn("Try restarting the program");
+        		fine("Execution error in worker", e);
+        		
         	}
         	
         	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());

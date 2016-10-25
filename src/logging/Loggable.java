@@ -81,7 +81,7 @@ public interface Loggable {
      * @param t the exception
      */
 	default void finest(String message){
-		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINEST, this.getClass().getName()+": "+message);
+		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINEST, message);
 	}
 	
 	/**
