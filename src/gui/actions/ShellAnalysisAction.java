@@ -32,7 +32,7 @@ import analysis.signals.ShellDetector;
 
 public class ShellAnalysisAction extends ProgressableAction {
 
-	public ShellAnalysisAction(AnalysisDataset dataset, MainWindow mw) {
+	public ShellAnalysisAction(AnalysisDataset dataset, MainWindow mw, boolean dapiNormalise) {
 		super(dataset, "Shell analysis", mw);
 
 		SpinnerNumberModel sModel = new SpinnerNumberModel(ShellDetector.DEFAULT_SHELL_COUNT, 2, 10, 1);
@@ -51,7 +51,7 @@ public class ShellAnalysisAction extends ProgressableAction {
 		} else if (option == JOptionPane.OK_OPTION)	{
 
 			int shellCount = (Integer) spinner.getModel().getValue();
-			worker = new ShellAnalysisWorker(dataset,shellCount);
+			worker = new ShellAnalysisWorker(dataset,shellCount, dapiNormalise);
 
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);

@@ -432,7 +432,13 @@ public abstract class AbstractCellularComponent
 	
 	public XYPoint getOriginalCentreOfMass() {
 		
-		XYPoint com = new XYPoint(centreOfMass.getX()+position[X_BASE], centreOfMass.getY()+position[Y_BASE]);
+		double minX = this.getBounds().getX();
+		double minY = this.getBounds().getY();
+		
+		double diffX = position[CellularComponent.X_BASE] - minX;
+		double diffY = position[CellularComponent.Y_BASE] - minY;
+		
+		XYPoint com = new XYPoint(centreOfMass.getX()+diffX, centreOfMass.getY()+diffY);
 		
 		return com;
 	}
@@ -740,9 +746,15 @@ public abstract class AbstractCellularComponent
 	 * @return
 	 */
 	public FloatPolygon createOriginalPolygon(){
+		
+		double minX = this.getBounds().getX();
+		double minY = this.getBounds().getY();
+		
+		double diffX = position[CellularComponent.X_BASE] - minX;
+		double diffY = position[CellularComponent.Y_BASE] - minY;
 
-		return createOffsetPolygon(  (float) position[CellularComponent.X_BASE],
-				                     (float) position[CellularComponent.Y_BASE]);
+		return createOffsetPolygon(  (float) diffX,
+				                     (float) diffY);
 	}
 
 	/**
@@ -755,16 +767,35 @@ public abstract class AbstractCellularComponent
 	
 	public Shape toShape(){
 		
+		// Converts whatever coordinates are in the border
+		// to a shape
 		return toOffsetShape(0, 0);
 		
 	}
 	
 	public Shape toOriginalShape(){
 		
-		double xOffset = position[CellularComponent.X_BASE];
-		double yOffset = position[CellularComponent.Y_BASE];
-
-		return toOffsetShape(xOffset, yOffset);
+		// The object is created, and the border points are
+		// against a x=0, y=0 boundary
+		
+		// Situation: the object has been moved since creation.
+		
+		// Now the borders cannot be guaranteed to be on the
+		// x=0,y=0 lines.
+		
+		// Moving by the X_BASE and Y_BASE offsets will not help.
+		
+		// Calculate the difference between the min x and min y of the 
+		// borders, and apply this offset
+		
+		
+		double minX = this.getBounds().getX();
+		double minY = this.getBounds().getY();
+		
+		double diffX = position[CellularComponent.X_BASE] - minX;
+		double diffY = position[CellularComponent.Y_BASE] - minY;
+		
+		return toOffsetShape(diffX, diffY);
 	}
 	
 	public List<XYPoint> getPixelsAsPoints(){

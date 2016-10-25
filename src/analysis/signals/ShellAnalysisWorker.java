@@ -18,6 +18,11 @@
  *******************************************************************************/
 package analysis.signals;
 
+import ij.ImageStack;
+import io.ImageImporter;
+import io.UnloadableImageException;
+import io.ImageImporter.ImageImportException;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -42,12 +47,14 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 	
 	private int totalPixels = 0;
 	
+	private boolean dapiNormalise;
+	
 	private static Map<UUID, ShellCounter> counters = new HashMap<UUID, ShellCounter>(0);
 		
-	
-	public ShellAnalysisWorker(AnalysisDataset dataset, int shells){
+	public ShellAnalysisWorker(AnalysisDataset dataset, int shells, boolean dapiNormalise){
 		super(dataset);
 		this.shells = shells;
+		this.dapiNormalise = dapiNormalise;
 		this.setProgressTotal(dataset.getCollection().getNucleusCount());
 	}
 		
@@ -102,7 +109,14 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 		
 		CellCollection collection = this.getDataset().getCollection();
 		
-		ShellDetector shellAnalyser = new ShellDetector(n, shells);
+		ShellDetector shellAnalyser;
+		try {
+			shellAnalyser = new ShellDetector(n, shells);
+		} catch (ShellAnalysisException e1) {
+			warn("Unable to make shells for "+n.getNameAndNumber());
+			fine("Error in shell detector", e1);
+			return;
+		}
 		
 		for(UUID signalGroup : n.getSignalCollection().getSignalGroupIDs()){
 			
@@ -112,11 +126,8 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			
 			if(collection.getSignalManager().hasSignals(signalGroup)){
 				List<NuclearSignal> signals = n.getSignalCollection().getSignals(signalGroup); 
-				
-				log("Nucleus "+n.getNameAndNumber());
+
 				int[]    intensityPerShell = shellAnalyser.findPixelCountPerShell();
-				log("Pixels / shell:\t"+ new ArrayConverter(intensityPerShell).toString());
-				log("Signals:");
 
 				ShellCounter counter = counters.get(signalGroup);
 
@@ -126,14 +137,32 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 						
 						double[] signalPerShell = shellAnalyser.findProportionPerShell(s);
 						int[]    countsPerShell = shellAnalyser.findPixelCountPerShell(s);
-						log( "Pixel count\t"+new ArrayConverter(countsPerShell).toString());
-						log( "Pixel prop \t"+new ArrayConverter(signalPerShell).toString());
+
+						if(dapiNormalise){
+
+							ImageStack st;
+							try {
+
+								st = new ImageImporter(s.getSourceFile()).importImage();
+
+								int[] dapiIntensities = shellAnalyser.findPixelIntensityPerShell(st, Constants.rgbToStack(Constants.COUNTERSTAIN));
+
+								signalPerShell = shellAnalyser.normalise(signalPerShell, dapiIntensities);
+
+
+							} catch (ImageImportException e) {
+
+								warn("Cannot import image source file "+n.getSourceFile().getAbsolutePath());
+								fine("Error importing file", e);
+							}
+						}
+						
 						
 						counter.addValues(signalPerShell, countsPerShell);
 						
 						totalPixels += new Sum(counter.getCounts()).intValue();
 
-					} catch (Exception e) {
+					} catch (ShellAnalysisException e) {
 						error( "Error in signal in shell analysis", e);
 					}
 				} // end for signals
@@ -216,6 +245,8 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			} catch(ArrayConversionException e){
 				error("Conversion error", e);
 			}
+		} else {
+			warn("Cannot create simulated dataset, no consensus");
 		}
 		
 		

@@ -30,6 +30,7 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -57,7 +58,9 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	private JRadioButton countsBtn      = new JRadioButton("Counts");
 	private ButtonGroup  buttonGroup    = new ButtonGroup();
 	
-	private JButton 	newAnalysis	 = new JButton("Run new shell analysis");
+	private JButton 	newAnalysis	 = new JButton("Run new");
+	
+	private JCheckBox dapiNormalise = new JCheckBox("DAPI normalise", true);
 	protected ExportableTable table;
 
 	public SignalShellsPanel(){
@@ -78,6 +81,14 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	private JPanel createHeader(){
 		JPanel panel = new JPanel();
 		
+		newAnalysis.addActionListener( e -> {
+			boolean normalise = dapiNormalise.isSelected();
+			fireSignalChangeEvent("RunShellAnalysis|"+normalise);
+		});
+		
+		newAnalysis.setEnabled(false);
+		panel.add(newAnalysis);
+		
 		buttonGroup.add(proportionsBtn);
 		buttonGroup.add(countsBtn);
 		proportionsBtn.addActionListener(this);
@@ -87,6 +98,10 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		
 		panel.add(countsBtn);
 		panel.add(proportionsBtn);
+		
+		dapiNormalise.addActionListener(this);
+		panel.add(dapiNormalise);
+		
 		return panel;
 	}
 	
@@ -119,26 +134,18 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		chartPanel = new ExportableChartPanel(chart);
 		
 		panel.add(chartPanel, BorderLayout.CENTER);
-		
-		newAnalysis.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				fireSignalChangeEvent("RunShellAnalysis");
-			}
-		});
-		newAnalysis.setVisible(false);
-		panel.add(newAnalysis, BorderLayout.SOUTH);
-		
+				
 		return panel;
 	}
 
 	
 	private void updateChartAndTable(){
+		
 		ChartOptions options = new ChartOptionsBuilder()
-		.setDatasets(getDatasets())
-		.setShowSignals(countsBtn.isSelected()) // if counts is selected, show signal counts, not proportions
-		.setTarget(chartPanel)
-		.build();
+			.setDatasets(getDatasets())
+			.setShowSignals(countsBtn.isSelected()) // if counts is selected, show signal counts, not proportions
+			.setTarget(chartPanel)
+			.build();
 
 		setChart(options);
 
@@ -158,11 +165,10 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
 		updateChartAndTable();
 
-		newAnalysis.setVisible(false);
+		newAnalysis.setEnabled(false);
 		
-		if(activeDataset().getCollection().getSignalManager().hasSignals() 
-				&& ! activeDataset().getCollection().getSignalManager().hasShellResult()){
-			newAnalysis.setVisible(true);
+		if(activeDataset().getCollection().getSignalManager().hasSignals()){
+			newAnalysis.setEnabled(true);
 		}
 		
 	}

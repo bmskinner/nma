@@ -692,10 +692,12 @@ public class MainWindow
 				: populationsPanel.getSelectedDatasets().get(0);
 		
 		
-		if(event.type().equals("RunShellAnalysis")){
+		if(event.type().startsWith("RunShellAnalysis|")){
 			Runnable task = () -> {
+				
+				boolean dapi = Boolean.parseBoolean(event.type().replace("RunShellAnalysis|", ""));
 				finer("Shell analysis selected");
-				new ShellAnalysisAction(selectedDataset, MainWindow.this);
+				new ShellAnalysisAction(selectedDataset, MainWindow.this, dapi);
 			};
 			threadManager.execute(task);
 		}
@@ -759,9 +761,10 @@ public class MainWindow
 			new AddNuclearSignalAction(selectedDataset, this);
 		}
 		
-		if(event.type().equals("NewShellAnalysisAction")){
-			new ShellAnalysisAction(selectedDataset, this);
-		}
+//		if(event.type().equals("NewShellAnalysisAction")){
+//			boolean dapi = Boolean.parseBoolean(event.type().replace("RunShellAnalysis|", ""));
+//			new ShellAnalysisAction(selectedDataset, this);
+//		}
 		
 		if(event.type().equals("UpdatePanels")){
 			threadManager.executeAndCancelUpdate( new PanelUpdateTask(populationsPanel.getSelectedDatasets()) );

@@ -59,24 +59,34 @@ public class ShellRandomDistributionCreator implements Loggable {
 		
 		
 		// Find the shell for these points in the template
-		ShellDetector detector = new ShellDetector(template, shellCount);
+		ShellDetector detector;
+		try {
+			detector = new ShellDetector(template, shellCount);
+			
+			// initialise the map
+			for(int i=-1; i<shellCount; i++){
+				map.put(i, 0);
+			}
+			
+			
+			for(XYPoint p : list){
+				int shell = detector.findShell(p);
+				
+				
+				int count = map.get(shell);
+				map.put(shell, ++count);
+			}
+			
+		} catch (ShellAnalysisException e) {
+			error("Simulation failed", e);
+		}
+		
+		int neg1 = -1;
+		
+		if(map.get(neg1) > 0){
+			warn("Unable to map "+map.get(neg1)+" points");
+		}
 
-		
-		// initialise the map
-		for(int i=-1; i<shellCount; i++){
-			map.put(i, 0);
-		}
-		
-		
-		for(XYPoint p : list){
-			int shell = detector.findShell(p);
-			
-			
-			int count = map.get(shell);
-			map.put(shell, ++count);
-		}
-		
-		
 	}
 	
 	/**

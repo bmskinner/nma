@@ -713,4 +713,15 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 		
 	}
 
+	@Override
+	public XYPoint getOriginalCentreOfMass() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int compareTo(Nucleus o) {
+		return 0;
+	}
+
 }
