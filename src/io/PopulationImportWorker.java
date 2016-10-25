@@ -272,8 +272,9 @@ public class PopulationImportWorker extends AnalysisWorker {
 			}
 			
 		} catch(Exception e1){
-
+			fine("Error reading dataset", e1);
 			throw new UnloadableDatasetException("Cannot load dataset due to "+e1.getClass().getSimpleName(), e1);
+			
 		} catch(StackOverflowError e){
 			
 			throw new UnloadableDatasetException("Stack overflow loading dataset", e);
@@ -284,7 +285,8 @@ public class PopulationImportWorker extends AnalysisWorker {
 				ois.close();
 				fis.close();
 			} catch(Exception e){
-				error("Error closing file stream", e);
+				fine("Error closing file stream", e);
+				throw new UnloadableDatasetException("Cannot load dataset due to "+e.getClass().getSimpleName(), e);
 			}
 		}
 		finest("Returning opened dataset");
