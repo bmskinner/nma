@@ -69,6 +69,7 @@ import analysis.mesh.NucleusMeshVertex;
 import analysis.signals.SignalManager;
 import charting.ChartComponents;
 import charting.datasets.ChartDatasetCreationException;
+import charting.datasets.ComponentOutlineDataset;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.NucleusMeshXYDataset;
 import charting.datasets.OutlineDatasetCreator;
@@ -226,6 +227,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		return chart;	
 	}
 		
+	/**
+	 * Create a chart with the outline of the given cell
+	 * @return
+	 */
 	public JFreeChart makeCellOutlineChart(){
 		
 		if(options.getCell()==null || !options.hasDatasets()){
@@ -238,12 +243,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		try {
 			
 			if( ! options.isShowAnnotations()){
-				
+				finest("Annotations not shown, creating bare outline chart");
 				return makeBareCellOutlineChart();
 			}
 			
 			if(options.isShowMesh()){
-				
+				finest("Making mesh chart");
 				if(options.firstDataset().getCollection().hasConsensusNucleus()){
 	
 					NucleusMesh mesh1 = options.getRotateMode().equals(RotationMode.ACTUAL) 
@@ -266,7 +271,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			}
 			
 			if(options.isShowWarp()){
-				
+				finest("Making warp chart");
 				if(options.firstDataset().getCollection().hasConsensusNucleus()){
 					
 					NucleusMesh mesh1 = new NucleusMesh(options.getCell().getNucleus());
@@ -288,27 +293,28 @@ public class OutlineChartFactory extends AbstractChartFactory {
 							+", "+bounds.getY());
 					
 					// Create a mesh image from the nucleus
-					NucleusMeshImage im = new NucleusMeshImage(mesh1, options.getCell().getNucleus().getImage());
+					NucleusMeshImage im;
+					try {
+						im = new NucleusMeshImage(mesh1, options.getCell().getNucleus().getImage());
+					} catch (UnloadableImageException e) {
+						warn("Cannot load nucleus image: "+options.getCell().getNucleus().getSourceFile().getAbsolutePath());
+						return makeErrorChart();
+					}
 	
 					// Apply the mesh image to the shape of the consensus image
 					ImageProcessor ip = im.meshToImage(mesh2);
-					
-					// For testing - does mapping to itself generate the correct image?
-//					ImageProcessor ip = im.meshToImage(mesh1);
-//					ImagePlus img = new ImagePlus("warped", ip);
-//					img.show();
-					
+										
 					return OutlineChartFactory.drawImageAsAnnotation(ip);
 	
 				} else {
 					return makeEmptyChart();
 				}
 			}
-			
+			finest("Making standart cell outline chart");
 			return makeStandardCellOutlineChart();
-		} catch(Exception e){
+		} catch(ChartCreationException e){
 			warn("Error creating cell outline chart");
-			log(Level.FINE, "Error creating cell outline chart", e);
+			fine("Error creating cell outline chart", e);
 			return makeErrorChart();
 		}
 		
@@ -402,29 +408,30 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		}
 
 		/*
-		 * Get the nucleus dataset
+		 * Get the nucleus outline dataset
 		 */
-		
-		OutlineDatasetCreator dc = new OutlineDatasetCreator(cell.getNucleus());
-		XYDataset nucleusDataset;
 		try {
-			nucleusDataset = dc.createOutline(true);
+			
+			OutlineDatasetCreator dc = new OutlineDatasetCreator(cell.getNucleus());
+			
+			XYDataset nucleusDataset = dc.createOutline(true);
+			hash.put(hash.size(), "Nucleus"); // add to the first free entry
+			datasetHash.put(datasetHash.size(), nucleusDataset);
+			finest("Created nucleus outline");
+			
 		} catch (ChartDatasetCreationException e) {
+			
 			throw new ChartCreationException("Unable to get nucleus outline", e);
+			
 		}
-		
-		hash.put(hash.size(), "Nucleus"); // add to the first free entry
-		datasetHash.put(datasetHash.size(), nucleusDataset);
-		finest("Created nucleus outline");
-	
-		
+				
 		// get the index tags
 
 		if(options.isShowBorderTags()){
 			XYDataset tags;
 			try {
 				tags = new NucleusDatasetCreator().createNucleusIndexTags(cell);
-			} catch (Exception e) {
+			} catch (ChartDatasetCreationException e) {
 				throw new ChartCreationException("Cannot get tags for nucleus", e);
 			}
 			hash.put(hash.size(), "Tags"); // add to the first free entry
@@ -435,33 +442,40 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		// get the signals datasets and add each group to the hash
 		
 		if(options.isShowSignals()){
-			finest("Rotation mode is actual, fetching signals");
+			finest("Displaying signals on chart");
 			if(cell.getNucleus().getSignalCollection().hasSignal()){
-				List<DefaultXYDataset> signalsDatasets = new NucleusDatasetCreator().createSignalOutlines(cell, dataset);
+				List<ComponentOutlineDataset> signalsDatasets = new NucleusDatasetCreator().createSignalOutlines(cell, dataset);
 
-				for(XYDataset d : signalsDatasets){
+				finest("Fetched signal outline datasets for "+cell.getNucleus().getNameAndNumber());
+				
+				if(signalsDatasets.size()==0){
+					finest("No signal datasets returned");
+				}
+				
+				for(ComponentOutlineDataset d : signalsDatasets){
 
-					String name = "default_0";
-					for (int i = 0; i < d.getSeriesCount(); i++) {
-						name = (String) d.getSeriesKey(i);	
+					for(int series=0; series<d.getSeriesCount(); series++){
+						String seriesKey = d.getSeriesKey(series).toString();
+						
+						finest("Adding outline for "+seriesKey+" to dataset hash");
+						d.getComponent(seriesKey);
+						hash.put(hash.size(), seriesKey); // add to the first free entry	
+						datasetHash.put(datasetHash.size(), d);
 					}
-					UUID signalGroup = getSignalGroupFromLabel(name);
-					hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
-					datasetHash.put(datasetHash.size(), d);
 				}
 			}
 		}
 
-		// get tail datasets if present
-		if(cell.hasTail()){
-
-			XYDataset tailBorder = TailDatasetCreator.createTailOutline(cell);
-			hash.put(hash.size(), "TailBorder");
-			datasetHash.put(datasetHash.size(), tailBorder);
-			XYDataset skeleton = TailDatasetCreator.createTailSkeleton(cell);
-			hash.put(hash.size(), "TailSkeleton");
-			datasetHash.put(datasetHash.size(), skeleton);
-		}
+//		// get tail datasets if present
+//		if(cell.hasTail()){
+//
+//			XYDataset tailBorder = TailDatasetCreator.createTailOutline(cell);
+//			hash.put(hash.size(), "TailBorder");
+//			datasetHash.put(datasetHash.size(), tailBorder);
+//			XYDataset skeleton = TailDatasetCreator.createTailSkeleton(cell);
+//			hash.put(hash.size(), "TailSkeleton");
+//			datasetHash.put(datasetHash.size(), skeleton);
+//		}
 
 		// set the rendering options for each dataset type
 		finest("Rendering chart");

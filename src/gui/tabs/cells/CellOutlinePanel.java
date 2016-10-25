@@ -124,6 +124,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 					.setCell(this.getCellModel().getCell())
 					.setRotationMode(rotationPanel.getSelected())
 					.setShowAnnotations(true)
+					.setShowSignals(true)
 					.setShowMesh(makeMeshPanel.isSelected())
 					.setShowWarp(warpMeshPanel.isSelected())
 					.setShowMeshEdges(false)

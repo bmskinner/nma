@@ -1228,7 +1228,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createNucleusIndexTags(Cell cell) throws Exception {
+	public XYDataset createNucleusIndexTags(Cell cell) throws ChartDatasetCreationException {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -1246,19 +1246,22 @@ public class NucleusDatasetCreator implements Loggable {
 		
 	/**
 	 * Create a dataset for the signal groups in the cell. Each signalGroup
-	 * is a new series
+	 * is a new dataset, and each signal in that group is a series
 	 * @param cell the cell to get signals from
 	 * @return a dataset for charting
 	 */
-	public List<DefaultXYDataset> createSignalOutlines(Cell cell, AnalysisDataset dataset){
+	public List<ComponentOutlineDataset> createSignalOutlines(Cell cell, AnalysisDataset dataset){
 		
-		List<DefaultXYDataset> result = new ArrayList<DefaultXYDataset>(0);
+		List<ComponentOutlineDataset> result = new ArrayList<ComponentOutlineDataset>(0);
 		
 		if(cell==null){
+			finest("Input cell is null, returning blank signal outline dataset list");
 			return result;
 		}
 		
 		Nucleus nucleus = cell.getNucleus();
+		
+		finest("Attempting to create signal outlines for "+nucleus.getNameAndNumber());
 	
 		for(UUID signalGroup : nucleus.getSignalCollection().getSignalGroupIDs()){
 			
@@ -1267,9 +1270,15 @@ public class NucleusDatasetCreator implements Loggable {
 			}
 			
 			SignalGroup group = dataset.getCollection().getSignalGroup(signalGroup);
-			finer("Fetching signals from signal group "+group+" ID "+signalGroup);
+			finer("Fetching signals from signal group "+group+": ID "+signalGroup);
 			
-            if(group !=null && group.isVisible()){ // only add the groups that are set to visible
+			if(group == null){
+				finest("Not adding signals from "+signalGroup+": null");
+				continue;
+			}
+			
+			
+            if(group.isVisible()){ // only add the groups that are set to visible
 
 
             	ComponentOutlineDataset groupDataset = new ComponentOutlineDataset();
@@ -1277,19 +1286,26 @@ public class NucleusDatasetCreator implements Loggable {
 
 				for(NuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)){
 					
-					String seriesKey = "Group_"+signalGroup+"_signal_"+signalNumber;
+					String seriesKey = "SignalGroup_"+signalGroup+"_signal_"+signalNumber;
+					finest("Adding signal to dataset: "+seriesKey);
 					OutlineDatasetCreator dc = new OutlineDatasetCreator(signal);
 					try {
 						dc.createOutline(groupDataset, seriesKey, false);
+						
 					} catch (ChartDatasetCreationException e) {
 						error("Unable to add signal "+seriesKey+" to dataset", e);
 					}
-
+					signalNumber++;
 				}
-				signalNumber++;
+				result.add(groupDataset);
+				
+			} else {
+				finest("Not adding "+group+": not set as visible");
 			}
 			
 		}
+		
+		finest("Made signal outlines for "+result.size()+" signal groups");
 		return result;
 	}
 

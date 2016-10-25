@@ -81,7 +81,8 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 		if(segmented){
 			return createSegmentedOutline(ds);
 		} else {
-			return createNonSegmentedOutline(ds, seriesKey);
+			ds = (ComponentOutlineDataset) createNonSegmentedOutline(ds, seriesKey);
+			return ds;
 		}
 //		
 //		
@@ -210,19 +211,26 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 */
 	private XYDataset createNonSegmentedOutline(ComponentOutlineDataset ds, Comparable seriesKey){
-		finest("Creating bare nucleus outline");
+		finest("Creating non-segmented outline from component");
+		
 		double[] xpoints = new double[component.getOriginalBorderList().size()];
 		double[] ypoints = new double[component.getOriginalBorderList().size()];
 
 		int i =0;
 		for(XYPoint p : component.getBorderList()){
+						
 			xpoints[i] = p.getX();
 			ypoints[i] = p.getY();
+			
+			if(i==0){
+				finest("First border point: "+p.toString());
+			}
 			i++;
 		}
 
 		double[][] data = { xpoints, ypoints };
 
+		finest("Adding series for component border centred on "+component.getCentreOfMass().toString());
 		ds.addSeries(seriesKey, data);
 		ds.setComponent(seriesKey, component);
 		return ds;
@@ -235,7 +243,6 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 			seriesKey = ((Nucleus) component).getNameAndNumber();
 		}
 		return seriesKey;
-//		groupDataset.addSeries("Group_"+signalGroup+"_signal_"+signalNumber, data);
 	}
 	
 	

@@ -37,7 +37,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -51,18 +50,10 @@ import java.util.logging.Level;
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import org.jdesktop.swingx.JXTreeTable;
-import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
-import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
-
-import utility.Constants;
-import utility.TreeOrderHashMap;
 import analysis.AnalysisDataset;
 import components.CellCollection;
 import components.ClusterGroup;
@@ -78,7 +69,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	/**
 	 * This tracks the ordering of the datasets within the panel
 	 */
-	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
+//	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
 	
 	/**
 	 * This tracks which datasets are currently selected, and the order in which they
@@ -473,7 +464,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			
 			if(d.isRoot()){
 				finer("Removing dataset from treeOrderMap and list manager");
-				treeOrderMap.remove(id);
+//				treeOrderMap.remove(id);
 				DatasetListManager.getInstance().removeDataset(d);
 			} else {
 				finer("Dataset is not root");
