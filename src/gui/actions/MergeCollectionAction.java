@@ -33,12 +33,17 @@ import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.nucleus.DatasetMerger;
 
+/**
+ * Carry out a merge of datasets
+ * @author ben
+ *
+ */
 public class MergeCollectionAction extends ProgressableAction {
 
 	public MergeCollectionAction(List<AnalysisDataset> datasets, MainWindow mw) {
 		super("Merging", mw);
 		
-		if( ! checkDatasets(datasets)){
+		if( ! checkDatasetsMergable(datasets)){
 			this.cancel();
 			
 		} else {
@@ -97,7 +102,7 @@ public class MergeCollectionAction extends ProgressableAction {
 	 * @param datasets
 	 * @return
 	 */
-	private boolean checkDatasets(List<AnalysisDataset> datasets){
+	private boolean checkDatasetsMergable(List<AnalysisDataset> datasets){
 		
 		if(datasets.size()==2){
 			
@@ -119,15 +124,21 @@ public class MergeCollectionAction extends ProgressableAction {
 
 		List<AnalysisDataset> datasets = ((DatasetMerger) worker).getResults();
 
-		if(datasets.size()==0 || datasets==null){
+		if(datasets==null){
 			this.cancel();
-		} else {
-
-			int flag = MainWindow.ADD_POPULATION;
-			flag |= MainWindow.ASSIGN_SEGMENTS;
-			flag |= MainWindow.SAVE_DATASET;
-			new RunProfilingAction(datasets, flag, mw);
-			this.cancel();
+			return;
 		}
+
+		if(datasets.size()==0){
+			this.cancel();
+			return;
+		}
+
+		int flag = MainWindow.ADD_POPULATION;
+		flag |= MainWindow.ASSIGN_SEGMENTS;
+		flag |= MainWindow.SAVE_DATASET;
+		new RunProfilingAction(datasets, flag, mw);
+
+		this.cancel();
 	}
 }

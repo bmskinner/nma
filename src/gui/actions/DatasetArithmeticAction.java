@@ -74,20 +74,8 @@ public class DatasetArithmeticAction extends ProgressableAction {
 					
 				}
 
-
-				if(newCollection !=null && newCollection.getNucleusCount()>0){
-					log("Found "+newCollection.getNucleusCount()+" cells");
-					log("Running morphology analysis...");
-					AnalysisDataset newDataset = new AnalysisDataset(newCollection);
-					newDataset.setRoot(true);
-					int flag = MainWindow.ADD_POPULATION;
-					flag |= MainWindow.SAVE_DATASET;
-					flag |= MainWindow.ASSIGN_SEGMENTS;
-					new RunProfilingAction(newDataset, flag, mw);
-										
-				} else {
-					log("No populations returned");
-				}
+				makeNewDataset(newCollection);
+				
 			} else {
 				fine("User cancelled operation");
 			}
@@ -101,4 +89,20 @@ public class DatasetArithmeticAction extends ProgressableAction {
 		}
 
 	} 
+	
+	private void makeNewDataset(CellCollection newCollection){
+		if(newCollection !=null && newCollection.getNucleusCount()>0){
+			log("Found "+newCollection.getNucleusCount()+" cells");
+			log("Running morphology analysis...");
+			AnalysisDataset newDataset = new AnalysisDataset(newCollection);
+			newDataset.setRoot(true);
+			int flag = MainWindow.ADD_POPULATION;
+			flag |= MainWindow.SAVE_DATASET;
+			flag |= MainWindow.ASSIGN_SEGMENTS;
+			new RunProfilingAction(newDataset, flag, mw);
+								
+		} else {
+			log("No populations returned");
+		}
+	}
 }

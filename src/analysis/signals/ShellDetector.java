@@ -122,6 +122,9 @@ public class ShellDetector extends Detector {
 	 * @return
 	 */
 	public int[] findPixelCountPerShell(CellularComponent signal){
+		
+		fine("Calculating the number of signal pixels per shell");
+		
 		int[] counts = makeZeroArray();
 		
 		for(int i=0; i<shells.size(); i++){
@@ -179,10 +182,10 @@ public class ShellDetector extends Detector {
 	 * @throws Exception 
 	 */
 	public double[] findProportionPerShell(ImageStack st, int channel) {
-
-		// Get the pixel intensities per shell for signal channel
-//		int[] signalDensities = getSignalIntensities(signal);
 		
+		fine("Calculating the proportion of image pixels per shell, weighted by intensity");
+		
+		// Get the pixel intensities per shell for signal channel
 		int[] signalDensities = getChannelIntensities(st, channel);
 				
 		// Get the pixel intensities per shell for the dapi channel
@@ -208,6 +211,9 @@ public class ShellDetector extends Detector {
 	 */
 	public double[] findProportionPerShell(CellularComponent signal) throws Exception{
 
+		fine("Calculating the proportion of total signal pixels per shell");
+		//TODO: how is this not the same as findPixelCountPerShell ?
+		
 		// Get the pixel intensities per shell for signal channel				
 		int[] signalDensities = getSignalIntensities(signal);
 				
@@ -230,6 +236,8 @@ public class ShellDetector extends Detector {
 	 */
 	public double[] normalise(double[] signals, int[] counterstain){
 
+		fine("DAPI normalising signals");
+		
 		if(signals.length != counterstain.length){
 			throw new IllegalArgumentException("Array lengths are not equal");
 		}
@@ -373,9 +381,13 @@ public class ShellDetector extends Detector {
 	
 	
 	/**
-	*	Divide the nucleus into shells of equal area. Number of
-	* shells is 5 by default. Use setNumberOfShells to change.
-	*/
+	 * Divide the nucleus into shells of equal area. Since this works by
+	 * eroding the component shape by 1 pixel, the areas created will not
+	 * be perfectly equal, but will be at the closest area above or below the
+	 * target.
+	 * @param c the component to divide
+	 * @param shellCount the number of shells to create
+	 */
 	private void createShells(CellularComponent c, int shellCount){
 		
 		Roi nucleusRoi = new PolygonRoi(c.createOriginalPolygon(), Roi.POLYGON);
@@ -412,30 +424,34 @@ public class ShellDetector extends Detector {
 
 			double area = initialArea;
 			
-			// TODO: this is not yet working to converge on the best shrinking
+			// Converge on the best shrinking factor
 			
 			// find the shrnking factor closest to the target area
-			double prevDiffToTarget = Double.MAX_VALUE;
-			double diffToTarget     = initialArea+1;
+			double prevDiffToTarget = initialArea - maxArea;
+			
+			double diffToTarget     = initialArea - maxArea;
 						
-			while(diffToTarget>prevDiffToTarget){ // allow leeway - it won't be clean
+			while(diffToTarget > 0 ){ // allow leeway - it won't be clean
 
 				shrinkingRoi = RoiEnlarger.enlarge(shrinkingRoi, -1);
 
 				area = new stats.Area(shrinkingRoi).doubleValue();
-				fine("\tShrunk by 1 pixel to "+area);
 				
 				prevDiffToTarget = diffToTarget;
-				diffToTarget = Math.abs(area - maxArea);
-
+				diffToTarget = area - maxArea;
+				
+				fine("\tShrunk by 1 pixel to "+area+ ": Diff to target: "+diffToTarget);
 			}
-			
-			// Correct overspills
-			if(prevDiffToTarget<diffToTarget){
+
+			// Correct overspills by enlarging the roi again
+			if( Math.abs(prevDiffToTarget)<Math.abs(diffToTarget)){
 				shrinkingRoi = RoiEnlarger.enlarge(shrinkingRoi, 1);
 				area = new stats.Area(shrinkingRoi).doubleValue();
+				fine("\tIncreasing area if shell by 1 pixel");
 			}
-
+			
+			// Make the shell
+			fine("\tFinal shell area: "+area);
 			areas[i] = area;
 			shells.add( new Shell((Roi) shrinkingRoi.clone()) );
 		}

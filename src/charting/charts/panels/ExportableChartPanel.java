@@ -119,10 +119,6 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 		this.addComponentListener(new ComponentAdapter() {
 	        @Override
 	        public void componentResized(ComponentEvent e) {
-//	            setMaximumDrawHeight(e.getComponent().getHeight());
-//	            setMaximumDrawWidth(e.getComponent().getWidth());
-//	            setMinimumDrawWidth(e.getComponent().getWidth());
-//	            setMinimumDrawHeight(e.getComponent().getHeight());
 	        	restoreComponentRatio();
 	        }
 	    });
