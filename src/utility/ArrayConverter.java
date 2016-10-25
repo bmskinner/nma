@@ -255,9 +255,18 @@ public class ArrayConverter {
 	 * @return
 	 */
 	public String toString(){
+		return toString("\t");
+	}
+	
+	/**
+	 * Convert the data in this converter to a delimited string
+	 * @param delimiter the separator between values
+	 * @return
+	 */
+	public String toString(String delimiter){
 		StringBuilder b = new StringBuilder();
 		for(Object o : data){
-			b.append(o.toString()+"\t");
+			b.append(o.toString()+delimiter);
 		}
 		return b.toString();
 	}

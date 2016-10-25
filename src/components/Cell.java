@@ -34,7 +34,10 @@ import components.nuclei.Nucleus;
  * @author bms41
  *
  */
-public class Cell implements Serializable, Loggable {
+public class Cell 
+	implements Serializable, 
+			   Loggable,
+			   Comparable<Cell> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -173,7 +176,15 @@ public class Cell implements Serializable, Loggable {
 	}
 	
 	
-	
+	@Override
+	public int compareTo(Cell o) {
+		
+		if( ! this.hasNucleus()){
+			return -1;
+		}
+		
+		return this.nucleus.compareTo(o.nucleus);
+	}
 	
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
@@ -238,4 +249,6 @@ public class Cell implements Serializable, Loggable {
 		in.defaultReadObject();
 //		finest("Read cell"); 
 	}
+
+
 }

@@ -39,7 +39,9 @@ public interface Nucleus
 	        Indexable, 
 	        Profileable, 
 	        Taggable,
-	        Rotatable { // Note that we use Rotatable here although it is provided to objects already through the AbstractCellularComponent
+	        Rotatable,
+	        Comparable<Nucleus> {
+	// Note that we use Rotatable here although it is provided to objects already through the AbstractCellularComponent
 	//so that it can be accessed by the Nucleus interface itself.
 	
 	// for debugging - use in calling dumpInfo()

@@ -1134,6 +1134,36 @@ public class RoundNucleus extends AbstractCellularComponent
 			
 		
 	}
+	
+	@Override
+	public int compareTo(Nucleus n) {
+
+		int number  = this.getNucleusNumber();
+		String name = this.getImageNameWithoutExtension();
+		
+		// Compare on image name.
+		// If that is equal, compare on nucleus number
+		
+
+		
+		int byName = name.compareTo(n.getNameAndNumber());
+		
+		if(byName==0){
+			
+			if(number == n.getNucleusNumber()){
+				return 0;
+			} else if(number > n.getNucleusNumber()){
+				return 1;
+			} else {
+				return -1;
+			}
+
+		} else {
+			return byName;
+		}
+
+	}
+		
 
 	@Override
 	public int hashCode() {
@@ -1258,10 +1288,6 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 				
 	    this.verticalNucleus    = null;
-//	    finest("\tRead nucleus");
 	}
-	
-	
-
 	
 }
