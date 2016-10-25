@@ -141,7 +141,12 @@ public interface CellularComponent extends Imageable {
 	 */
 	public XYPoint getCentreOfMass();
 
-
+	/**
+	 * Get the position of the centre of mass of the component
+	 * within the original source image
+	 * @return
+	 */
+	public XYPoint getOriginalCentreOfMass();
 	
 	/*
 	 * 

@@ -42,6 +42,7 @@ import logging.Loggable;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
+import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 import ij.IJ;
 import ij.ImageStack;
@@ -179,8 +180,14 @@ public abstract class AbstractCellularComponent
 		if(roi==null){
 			throw new IllegalArgumentException("Constructor argument is null");
 		}
+		
+		
+		boolean smooth = this instanceof NuclearSignal ? false : true;
+		
 		// convert the roi positions to a list of nucleus border points
-		FloatPolygon polygon = roi.getInterpolatedPolygon(1,true);
+		// Only smooth the points for large objects like nuclei
+		// Signals must be kept unsmoothed
+		FloatPolygon polygon = roi.getInterpolatedPolygon(1,smooth);
 
 		for(int i=0; i<polygon.npoints; i++){
 			BorderPoint point = new BorderPoint( polygon.xpoints[i], polygon.ypoints[i]);
@@ -422,6 +429,13 @@ public abstract class AbstractCellularComponent
 	public XYPoint getCentreOfMass() {
 		return centreOfMass;
 	}
+	
+	public XYPoint getOriginalCentreOfMass() {
+		
+		XYPoint com = new XYPoint(centreOfMass.getX()+position[X_BASE], centreOfMass.getY()+position[Y_BASE]);
+		
+		return com;
+	}
 
 	
 	
@@ -457,7 +471,6 @@ public abstract class AbstractCellularComponent
 	}
 	
 	public BorderPoint getOriginalBorderPoint(int i){
-//		return this.borderList.get(i);
 		BorderPoint p = getBorderPoint(i);
 		return new BorderPoint( p.getX() + getPosition()[X_BASE], p.getY() + getPosition()[Y_BASE]);
 	}
@@ -566,12 +579,6 @@ public abstract class AbstractCellularComponent
 	 * @return
 	 */
 	public boolean containsPoint(int x, int y){
-//		
-//		// Fast check - is the point within the bounding rectangle?
-//		if( ! this.getBounds().contains(x, y)){
-//			return false;			
-//		} 
-//		
 		// Check detailed position
 		
 		return this.toShape().contains(x, y);
@@ -820,7 +827,7 @@ public abstract class AbstractCellularComponent
 	}
 
 	/**
-	 * Make an offset polygon from 
+	 * Make an offset polygon from the border list of this object
 	 * @return
 	 */
 	private FloatPolygon createOffsetPolygon(float xOffset, float yOffset){
