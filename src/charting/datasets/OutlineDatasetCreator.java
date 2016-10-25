@@ -170,8 +170,8 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 
 					BorderPoint p = t.getBorderPoint(offsetIndex); // get the border points in the segment
 
-					xpoints[j] = p.getX();
-					ypoints[j] = p.getY();
+					xpoints[j] = p.getX()-0.5;
+					ypoints[j] = p.getY()-0.5;
 				}
 
 				double[][] data = { xpoints, ypoints };
@@ -219,12 +219,8 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 		int i =0;
 		for(XYPoint p : component.getBorderList()){
 						
-			xpoints[i] = p.getX();
-			ypoints[i] = p.getY();
-			
-			if(i==0){
-				finest("First border point: "+p.toString());
-			}
+			xpoints[i] = p.getX()-0.5;
+			ypoints[i] = p.getY()-0.5;
 			i++;
 		}
 
@@ -272,8 +268,8 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 
 		int i =0;
 		for(XYPoint p : nucleus.getHookRoi()){
-			xpoints[i] = p.getX();
-			ypoints[i] = p.getY();
+			xpoints[i] = p.getX()-0.5;
+			ypoints[i] = p.getY()-0.5;
 			i++;
 		}
 

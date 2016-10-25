@@ -1235,8 +1235,8 @@ public class NucleusDatasetCreator implements Loggable {
 		Nucleus nucleus = cell.getNucleus();// draw the index points on the nucleus border
 		for(BorderTagObject tag : nucleus.getBorderTags().keySet()){
 			BorderPoint tagPoint = nucleus.getBorderPoint(tag);
-			double[] xpoints = { tagPoint.getX(), nucleus.getCentreOfMass().getX() };
-			double[] ypoints = { tagPoint.getY(), nucleus.getCentreOfMass().getY() };
+			double[] xpoints = { tagPoint.getX()-0.5, nucleus.getCentreOfMass().getX()-0.5 };
+			double[] ypoints = { tagPoint.getY()-0.5, nucleus.getCentreOfMass().getY()-0.5 };
 			double[][] data = { xpoints, ypoints };
 			ds.addSeries("Tag_"+tag, data);
 		}
