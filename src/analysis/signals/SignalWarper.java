@@ -1,6 +1,7 @@
 package analysis.signals;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import components.Cell;
@@ -30,7 +31,7 @@ public class SignalWarper extends AnalysisWorker {
 		
 		// Count the number of cells to include
 
-		List<Cell> cells;
+		Set<Cell> cells;
 		if(cellsWithSignals){
 			SignalManager m =  getDataset().getCollection().getSignalManager();
 			cells = m.getCellsWithNuclearSignals(signalGroup, true);
@@ -94,7 +95,7 @@ public class SignalWarper extends AnalysisWorker {
 		
 		
 		
-		List<Cell> cells;
+		Set<Cell> cells;
 		if(cellsWithSignals){
 			finer("Only fetching cells with signals");
 			cells = m.getCellsWithNuclearSignals(signalGroup, true);

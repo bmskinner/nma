@@ -12,7 +12,7 @@ public class NeighbourJoiningTreeBuilder extends AnalysisWorker {
 
 	public NeighbourJoiningTreeBuilder(AnalysisDataset dataset) {
 		super(dataset);
-		this.setProgressTotal(dataset.getCollection().cellCount());
+		this.setProgressTotal(dataset.getCollection().size());
 		
 	}
 

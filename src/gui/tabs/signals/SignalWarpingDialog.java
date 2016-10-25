@@ -30,6 +30,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -391,7 +392,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 			// Count the number of cells to include
 
-			List<Cell> cells;
+			Set<Cell> cells;
 			if(cellsWithSignals){
 				SignalManager m =  sourceDataset.getCollection().getSignalManager();
 				cells = m.getCellsWithNuclearSignals(signalGroup, true);
@@ -523,7 +524,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 
 			
-			List<Cell> cells = getCells(cellsWithSignals);
+			Set<Cell> cells = getCells(cellsWithSignals);
 
 			
 			int cellNumber = 0;
@@ -577,10 +578,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 		}
 		
-		private List<Cell> getCells(boolean withSignalsOnly){
+		private Set<Cell> getCells(boolean withSignalsOnly){
 			
 			SignalManager m =  sourceDataset.getCollection().getSignalManager();
-			List<Cell> cells;
+			Set<Cell> cells;
 			if(withSignalsOnly){
 				finer("Only fetching cells with signals");
 				cells = m.getCellsWithNuclearSignals(signalGroup, true);

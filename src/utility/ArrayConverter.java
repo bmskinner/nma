@@ -41,6 +41,14 @@ public class ArrayConverter {
 		
 	}
 	
+	public ArrayConverter(float[] d){
+
+		for(float o : d){
+			data.add(o);
+		}
+
+	}
+	
 	public ArrayConverter(Integer[] d){
 
 		for(Object o : d){

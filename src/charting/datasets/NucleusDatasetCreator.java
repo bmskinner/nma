@@ -225,7 +225,9 @@ public class NucleusDatasetCreator implements Loggable {
 	private double getMaximumMedianProfileLength(List<AnalysisDataset> list){
 		double length = 100;
 		for(AnalysisDataset dataset : list){
-			length = dataset.getCollection().getMedianArrayLength()>length ? dataset.getCollection().getMedianArrayLength() : length;
+			length = dataset.getCollection().getMedianArrayLength()>length 
+					? dataset.getCollection().getMedianArrayLength() 
+					: length;
 		}
 		return length;
 	}

@@ -361,7 +361,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	 * @param cells
 	 * @param colour
 	 */
-	private void setNodeColour(final List<Cell> cells, final Color colour){
+	private void setNodeColour(final Set<Cell> cells, final Color colour){
 		
 		RootedTree tree = viewer.getTreePane().getTree();
 		
@@ -508,7 +508,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		if(clusterCollection.hasCells()){
 			colourTreeNodesByCluster(clusterCollection);
 			clusterList.add(clusterCollection);
-			log("Extracted "+clusterCollection.cellCount()+" cells");
+			log("Extracted "+clusterCollection.size()+" cells");
 		} else {
 			warn("No cells found. Check taxon labels are correct");
 		}

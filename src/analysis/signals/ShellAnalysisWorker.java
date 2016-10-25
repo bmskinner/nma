@@ -20,7 +20,6 @@ package analysis.signals;
 
 import ij.ImageStack;
 import io.ImageImporter;
-import io.UnloadableImageException;
 import io.ImageImporter.ImageImportException;
 
 import java.io.File;

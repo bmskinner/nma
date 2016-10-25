@@ -71,11 +71,6 @@ public class AnalysisDataset implements Serializable, Loggable {
 	
 	private AnalysisOptions analysisOptions;
 	
-//	private Map<UUID, ShellResult> shellResults 	   = new HashMap<UUID, ShellResult>(0); // store shell analysis for each channel
-//	private Map<UUID, String>      signalGroupsAdded   = new HashMap<UUID, String>(0);	// store the names of the groups added
-//	private Map<UUID, Boolean>     signalGroupsVisible = new HashMap<UUID, Boolean>(0); // is the given signal group shown in plots
-//	private Map<UUID, Color> 	   signalGroupColours  = new HashMap<UUID, Color>(0); // allow saving of colour choices
-//	
 	private Color datasetColour = null; // use for colouring the dataset in comparison with other datasets
 	
 	private List<ClusterGroup> clusterGroups = new ArrayList<ClusterGroup>(0); // hold groups of cluster results
@@ -88,7 +83,7 @@ public class AnalysisDataset implements Serializable, Loggable {
 
 	private final Version version;
 	
-	private transient ColourSwatch swatch = ColourSwatch.REGULAR_SWATCH;
+//	private transient ColourSwatch swatch = ColourSwatch.REGULAR_SWATCH;
 		
 	private boolean isRoot = false;	// is this a root dataset
 		
@@ -817,25 +812,25 @@ public class AnalysisDataset implements Serializable, Loggable {
 	 * Transient, not saved to nmd
 	 * @return
 	 */
-	public ColourSwatch getSwatch() {
-		return swatch;
-	}
+//	public ColourSwatch getSwatch() {
+//		return swatch;
+//	}
 	
 	public String toString(){
 		return this.getName();
 	}
 
-	/**
-	 * Set the swatch
-	 * @param swatch
-	 */
-	public void setSwatch(ColourSwatch swatch) {
-		this.swatch = swatch;
-	}
+//	/**
+//	 * Set the swatch
+//	 * @param swatch
+//	 */
+//	public void setSwatch(ColourSwatch swatch) {
+//		this.swatch = swatch;
+//	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		    in.defaultReadObject();
-		    this.swatch = ColourSwatch.REGULAR_SWATCH;
+//		    this.swatch = ColourSwatch.REGULAR_SWATCH;
 	}
 	
 	/**

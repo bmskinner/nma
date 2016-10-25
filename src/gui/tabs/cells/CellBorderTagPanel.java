@@ -37,6 +37,7 @@ import charting.options.ChartOptionsBuilder;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import gui.DatasetEvent;
+import gui.GlobalOptions;
 import gui.components.BorderTagEvent;
 import gui.components.panels.BorderTagDualChartPanel;
 import gui.components.panels.ProfileTypeOptionsPanel;
@@ -146,7 +147,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 						.setTag(BorderTagObject.REFERENCE_POINT)
 						.setShowMarkers(true)
 						.setProfileType( type)
-						.setSwatch(activeDataset().getSwatch())
+						.setSwatch(GlobalOptions.getInstance().getSwatch())
 						.setShowAnnotations(false)
 						.setShowPoints(true)
 						.setShowXAxis(false)
@@ -168,7 +169,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 						.setTag(BorderTagObject.REFERENCE_POINT)
 						.setShowMarkers(true)
 						.setProfileType( type)
-						.setSwatch(activeDataset().getSwatch())
+						.setSwatch(GlobalOptions.getInstance().getSwatch())
 						.setShowPoints(false)
 						.setShowAnnotations(false)
 						.setShowXAxis(false)

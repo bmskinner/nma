@@ -315,7 +315,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
     		loaded++;
         }
                 
-        int percent = (int) ( (double) loaded / (double) dataset.getCollection().cellCount() * 100);
+        int percent = (int) ( (double) loaded / (double) dataset.getCollection().size() * 100);
         
         if(percent >= 0 && percent <=100){
         	setProgress(percent); // the integer representation of the percent

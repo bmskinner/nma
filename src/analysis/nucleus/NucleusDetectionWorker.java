@@ -218,7 +218,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 	  Set<File> keys = collectionGroup.keySet();
 	  for (File key : keys) {
 		  CellCollection collection = collectionGroup.get(key);
-		  if(collection.cellCount()==0){
+		  if(collection.size()==0){
 			  fine( "Removing collection "+key.toString());
 			  toRemove.add(key);
 		  }    

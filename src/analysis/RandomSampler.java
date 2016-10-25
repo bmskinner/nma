@@ -95,7 +95,7 @@ public class RandomSampler extends AnalysisWorker {
 		CellCollection second = new CellCollection( this.getDataset(), "second");
 		log(Level.FINEST,"Created new collections");
 		
-		List<Cell> cells = this.getDataset().getCollection().getCells();
+		List<Cell> cells = new ArrayList(this.getDataset().getCollection().getCells());
 		Collections.shuffle(cells);
 		log(Level.FINEST,"Shuffled cells");
 		

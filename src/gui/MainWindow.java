@@ -722,14 +722,9 @@ public class MainWindow
 				CellCollectionOverviewDialog d = new CellCollectionOverviewDialog(populationsPanel.getSelectedDatasets().get(0));
 				d.addDatasetEventListener(this);
 
-//			Runnable task = () -> { 
-//				new CurateCollectionAction(selectedDataset, MainWindow.this); 
-//			}; 
-//			threadManager.execute(task);
 		}
 				
 
-		
 		if(event.type().equals("ChangeNucleusFolderAction")){
 			new ReplaceSourceImageDirectoryAction(selectedDataset, MainWindow.this);
 		}

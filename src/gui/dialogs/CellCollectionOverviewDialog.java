@@ -67,9 +67,9 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
 	private void createUI(){
 		
 		this.setLayout(new BorderLayout());
-		this.setTitle("Showing "+dataset.getCollection().cellCount()+" nuclei in "+dataset.getName());
+		this.setTitle("Showing "+dataset.getCollection().size()+" nuclei in "+dataset.getName());
 		
-		int cellCount = dataset.getCollection().cellCount();
+		int cellCount = dataset.getCollection().size();
 		
 		int remainder = cellCount % COLUMN_COUNT==0 ? 0 : 1;
 		

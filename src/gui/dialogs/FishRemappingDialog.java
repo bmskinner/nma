@@ -39,7 +39,9 @@ import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.ImageIcon;
@@ -66,10 +68,10 @@ public class FishRemappingDialog extends ImageProber {
 	private AnalysisDataset dataset;
 	private File postFISHImageDirectory;
 		
-	private List<UUID> selectedNucleiLeft  = new ArrayList<UUID>(0); // Nuclei selected with the left button
-	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(0); // Nuclei selected with the right button
+	private List<UUID> selectedNucleiLeft  = new ArrayList<UUID>(96); // Nuclei selected with the left button
+	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(96); // Nuclei selected with the right button
 	
-	private List<Cell> openCells = new ArrayList<Cell>();
+	private Set<Cell> openCells = new HashSet<Cell>();
 		
 	
 	/**

@@ -36,7 +36,7 @@ import logging.Loggable;
 public class BetterProfileAggregate implements Loggable, Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	private final double[][] aggregate; // the values samples per profile
+	private final float[][] aggregate; // the values samples per profile
 	private final int length; // the length of the aggregate (the median array length of a population usually)
 	private final int profileCount;
 	private transient int counter = 0; // track the number of profiles added to the aggregate
@@ -46,7 +46,7 @@ public class BetterProfileAggregate implements Loggable, Serializable {
 		this.length = length;
 		this.profileCount = profileCount;
 		
-		aggregate = new double[length][profileCount];
+		aggregate = new float[length][profileCount];
 
 	}
 	
@@ -64,7 +64,7 @@ public class BetterProfileAggregate implements Loggable, Serializable {
 		
 		Profile interpolated = profile.interpolate(length);
 		for(int i=0; i<length; i++){
-			double d = interpolated.get(i);
+			float d = (float) interpolated.get(i);
 			aggregate[i][counter] = d;
 			
 		}
@@ -81,7 +81,7 @@ public class BetterProfileAggregate implements Loggable, Serializable {
 		return calculateQuartile(Quartile.MEDIAN);
 	}
 
-	public Profile getQuartile(double quartile){
+	public Profile getQuartile(float quartile){
 		
 		return calculateQuartile(quartile);
 	}
@@ -91,7 +91,7 @@ public class BetterProfileAggregate implements Loggable, Serializable {
 	 * @param position the position to search. Must be between 0 and the length of the aggregate.
 	 * @return an unsorted array of the values at the given position
 	 */
-	public double[] getValuesAtPosition(int position) {
+	public float[] getValuesAtPosition(int position) {
 		if(position < 0 || position > length ){
 			throw new IllegalArgumentException("Desired position is out of range: "+position);
 		}
@@ -104,7 +104,7 @@ public class BetterProfileAggregate implements Loggable, Serializable {
 	 * @param position the position to search. Must be between 0 and the length of the aggregate.
 	 * @return an unsorted array of the values at the given position
 	 */
-	public double[] getValuesAtPosition(double position) {
+	public float[] getValuesAtPosition(double position) {
 		if(position < 0 || position > length ){
 			throw new IllegalArgumentException("Desired x-position is out of range: "+position);
 		}
@@ -156,9 +156,9 @@ public class BetterProfileAggregate implements Loggable, Serializable {
 	 * @param i
 	 * @return
 	 */
-	private double[] getValuesAtIndex(int i){
+	private float[] getValuesAtIndex(int i){
 
-		double[] values = new double[profileCount];
+		float[] values = new float[profileCount];
 
 		for(int n=0; n<profileCount; n++){
 			values[n] = aggregate[i][n];
@@ -167,12 +167,12 @@ public class BetterProfileAggregate implements Loggable, Serializable {
 		return values;
 	}
 	
-	private Profile calculateQuartile(double quartile) {
+	private Profile calculateQuartile(float quartile) {
 		double[] medians = new double[length];
 		
 		for(int i=0; i<length; i++){
 			
-			double[] values = getValuesAtIndex(i);
+			float[] values = getValuesAtIndex(i);
 			
 			double q = new Quartile(values, quartile).doubleValue();
 			

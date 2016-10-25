@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -111,7 +112,7 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 	 */
 	private void createNodes(DefaultMutableTreeNode root, AnalysisDataset dataset){
 	    
-		List<Cell> cells = dataset.getCollection().getCells();
+		List<Cell> cells = new ArrayList(dataset.getCollection().getCells());
 		Collections.sort(cells);
 		
 	    for(Cell cell : cells){	

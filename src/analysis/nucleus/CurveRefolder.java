@@ -161,7 +161,7 @@ public class CurveRefolder extends AnalysisWorker {
 			double[] newPosition = { newX, newY, newWidth, newHeight };
 			refoldNucleus.setPosition(newPosition);
 			
-			collection.addConsensusNucleus(refoldNucleus);
+			collection.setConsensusNucleus(refoldNucleus);
 
 		} catch(Exception e){
 			logError("Unable to refold nucleus", e);

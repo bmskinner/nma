@@ -33,8 +33,6 @@ import ij.IJ;
 public class BooleanProfile implements Serializable, Loggable {
 	
 	private static final long serialVersionUID = 1L;
-	
-	
 	final protected boolean[] array;
 	
 	/**

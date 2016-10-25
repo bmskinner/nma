@@ -1143,19 +1143,17 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		// Compare on image name.
 		// If that is equal, compare on nucleus number
-		
 
-		
-		int byName = name.compareTo(n.getNameAndNumber());
+		int byName = name.compareTo(n.getImageNameWithoutExtension());
 		
 		if(byName==0){
 			
-			if(number == n.getNucleusNumber()){
-				return 0;
+			if(number < n.getNucleusNumber()){
+				return -1;
 			} else if(number > n.getNucleusNumber()){
 				return 1;
 			} else {
-				return -1;
+				return 0;
 			}
 
 		} else {

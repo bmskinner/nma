@@ -21,6 +21,7 @@ package analysis.signals;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -61,8 +62,8 @@ public class SignalManager implements Loggable{
 	   * @param hasSignal
 	   * @return a list of cells
 	   */
-	  public List<Cell> getCellsWithNuclearSignals(UUID signalGroup, boolean hasSignal){
-		  List<Cell> result = new ArrayList<Cell>(0);
+	  public Set<Cell> getCellsWithNuclearSignals(UUID signalGroup, boolean hasSignal){
+		  Set<Cell> result = new HashSet<Cell>(collection.size());
 
 		  for(Cell c : collection.getCells()){
 			  Nucleus n = c.getNucleus();
@@ -388,7 +389,7 @@ public class SignalManager implements Loggable{
       
       public double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) {
 
-          List<Cell> cells = getCellsWithNuclearSignals(signalGroup, true);
+          Set<Cell> cells = getCellsWithNuclearSignals(signalGroup, true);
           List<Double> a = new ArrayList<Double>(0);
           for(Cell c : cells){
               Nucleus n = c.getNucleus();

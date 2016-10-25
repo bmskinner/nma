@@ -71,7 +71,7 @@ import components.nuclei.Nucleus;
  * @author bms41
  *
  */
-public class CellCollection implements Serializable, Loggable {
+public class CellCollection implements Serializable, Loggable, ICellCollection {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -187,7 +187,7 @@ public class CellCollection implements Serializable, Loggable {
    * Get the UUIDs of all the cells in the collection
    * @return
    */
-  public Set<UUID> getCellIds(){
+  public Set<UUID> getCellIDs(){
 	 return mappedCollection.keySet();
   }
 
@@ -236,7 +236,7 @@ public class CellCollection implements Serializable, Loggable {
 	  this.mappedCollection.remove(c.getId());
   }
 
-  public int cellCount(){
+  public int size(){
 	  return mappedCollection.size();
   }
     
@@ -275,7 +275,7 @@ public class CellCollection implements Serializable, Loggable {
 	  }
   }
 
-  public void addConsensusNucleus(ConsensusNucleus n){
+  public void setConsensusNucleus(ConsensusNucleus n){
 	  this.consensusNucleus = n;
   }
     
@@ -315,11 +315,6 @@ public class CellCollection implements Serializable, Loggable {
   
   public ConsensusNucleus getConsensusNucleus(){
 	  return this.consensusNucleus;
-  }
-  
-  public String getPoint(BorderTagObject tag){
-	  
-	  return this.nucleusType.getPoint(tag);
   }
     
   /**
@@ -371,10 +366,7 @@ public class CellCollection implements Serializable, Loggable {
 	  return result;
   }
 
-//  public String getType(){
-//    return this.collectionType;
-//  }
-  
+
   /**
    * Get the distinct source image file list for all nuclei in the collection 
    * @return
@@ -462,7 +454,7 @@ public class CellCollection implements Serializable, Loggable {
   }
   
   public double[][] getPositions(){
-	  double[][] s = new double[cellCount()][4];
+	  double[][] s = new double[size()][4];
 	  int i = 0;
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
@@ -473,7 +465,7 @@ public class CellCollection implements Serializable, Loggable {
   }
 
   public int getNucleusCount(){
-    return this.cellCount();
+    return this.size();
   }
   
   public Iterator<Cell> getCellIterator(){
@@ -485,8 +477,8 @@ public class CellCollection implements Serializable, Loggable {
    * Get the cells in this collection
    * @return
    */
-  public List<Cell> getCells(){
-	  List<Cell> result = new ArrayList<Cell>(0);
+  public Set<Cell> getCells(){
+	  Set<Cell> result = new HashSet<Cell>(mappedCollection.size());
 	  for(Cell cell : mappedCollection.values()){
 		  result.add(cell);
 	  }
@@ -497,8 +489,8 @@ public class CellCollection implements Serializable, Loggable {
    * Get the cells in this collection
    * @return
    */
-  public List<Cell> getCells(File imageFile){
-	  List<Cell> result = new ArrayList<Cell>(0);
+  public Set<Cell> getCells(File imageFile){
+	  Set<Cell> result = new HashSet<Cell>(mappedCollection.size());
 	  for(Cell cell : this.getCells()){
 		  if(cell.getNucleus().getSourceFile().equals(imageFile)){
 			  result.add(cell);
@@ -543,8 +535,8 @@ public class CellCollection implements Serializable, Loggable {
    * @param image the file to search
    * @return the list of nuclei
    */
-  public List<Nucleus> getNuclei(File imageFile){
-	  List<Nucleus> result = new ArrayList<Nucleus>(mappedCollection.size());
+  public Set<Nucleus> getNuclei(File imageFile){
+	  Set<Nucleus> result = new HashSet<Nucleus>(mappedCollection.size());
 	  for(Nucleus n : this.getNuclei()){
 		  if(n.getSourceFile().equals(imageFile)){
 			  result.add(n);
@@ -722,7 +714,7 @@ public class CellCollection implements Serializable, Loggable {
    */
   public Nucleus getNucleusMostSimilarToMedian(BorderTagObject pointType) throws Exception {
 
-	  if(this.cellCount()==1){
+	  if(this.size()==1){
 		  for(Cell c : this.mappedCollection.values()){
 			  return c.getNucleus();
 		  }
@@ -1436,6 +1428,7 @@ public boolean equals(Object obj) {
 
 		  if(this.hasStatistic(stat, scale)){
 
+			  finest("Fetching cached stat: "+stat);
 			  return cache.get(stat).get(scale);
 
 

@@ -42,7 +42,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	// the segments
-	protected List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
+	protected List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(5);
 		
 	/**
 	 * Construct using a regular profile and a list of border segments

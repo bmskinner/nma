@@ -33,6 +33,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -198,7 +199,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		int yOffset = h >>1;
 		
 		SignalManager m = dataset.getCollection().getSignalManager();
-		List<Cell> cells = m.getCellsWithNuclearSignals(options.getSignalGroup(), true);
+		Set<Cell> cells = m.getCellsWithNuclearSignals(options.getSignalGroup(), true);
 		
 		for(Cell cell : cells){
 			fine("Drawing signals for cell "+cell.getNucleus().getNameAndNumber());

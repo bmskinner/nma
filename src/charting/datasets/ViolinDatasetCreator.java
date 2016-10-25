@@ -18,6 +18,7 @@ import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import charting.options.ChartOptions;
 import components.CellCollection;
+import components.ICellCollection;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;

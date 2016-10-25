@@ -361,7 +361,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			 * Use the segment id for this collection to fetch the individual nucleus segments
 			 */
 			int count=0;
-			double[] lengths = new double[collection.cellCount()];
+			double[] lengths = new double[collection.size()];
 			for(Nucleus n : collection.getNuclei()){
 
 				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT)
@@ -397,7 +397,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			 * Use the segment id for this collection to fetch the individual nucleus segments
 			 */
 			int count=0;
-			double[] lengths = new double[collection.cellCount()];
+			double[] lengths = new double[collection.size()];
 			for(Nucleus n : collection.getNuclei()){
 
 				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT)

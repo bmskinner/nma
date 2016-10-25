@@ -1,6 +1,7 @@
 package charting.datasets;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -71,7 +72,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 			double[] xpoints = new double[c.getNucleusCount()];
 			double[] ypoints = new double[c.getNucleusCount()];
 			
-			List<Cell> cells = c.getCells();
+			List<Cell> cells = new ArrayList(c.getCells());
 			// go through each index in the segment.
 			for(int j=0; j<cells.size();j++){
 				
@@ -162,7 +163,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 			double[] xpoints = new double[c.getNucleusCount()];
 			double[] ypoints = new double[c.getNucleusCount()];
 
-			List<Cell> cells = c.getCells();
+			List<Cell> cells = new ArrayList(c.getCells());
 			// go through each index in the segment.
 			for(int j=0; j<cells.size();j++){
 

@@ -185,6 +185,9 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
 
     	finest("Closing log file handlers");
     	closeLogFileHandlers();
+    	
+    	finest("Shutting main thread pool");
+    	mainPool.shutdown();
 
     	 try {
             if(this.get()){

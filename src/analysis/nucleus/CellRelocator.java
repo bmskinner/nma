@@ -200,7 +200,7 @@ public class CellRelocator extends AnalysisWorker {
 	 */
 	private Cell copyCellFromRoot(File f, XYPoint com){
 		// find the nucleus
-		List<Cell> cells = this.getDataset().getCollection().getCells(f);
+		Set<Cell> cells = this.getDataset().getCollection().getCells(f);
 
 		for(Cell c : cells){
 

@@ -65,7 +65,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 	
 	private String lastFailReason = "No fail";
 	
-	private List<NucleusBorderSegment> mergeSources = new ArrayList<NucleusBorderSegment>();
+	private List<NucleusBorderSegment> mergeSources = new ArrayList<NucleusBorderSegment>(0);
 	
 	private int positionInProfile = 0; // for future refactor
 	
@@ -100,7 +100,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 		this.startIndex   = startIndex;
 		this.endIndex     = endIndex;
 		this.totalLength  = total;
-		this.mergeSources = new ArrayList<NucleusBorderSegment>();
+		this.mergeSources = new ArrayList<NucleusBorderSegment>(0);
 		this.uuid         = id;
 	}
 	
