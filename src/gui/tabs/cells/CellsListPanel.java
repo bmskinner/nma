@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -16,6 +18,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+
 import org.jfree.chart.JFreeChart;
 
 import charting.options.ChartOptions;
@@ -108,14 +111,16 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 	 */
 	private void createNodes(DefaultMutableTreeNode root, AnalysisDataset dataset){
 	    
-	    for(Cell cell : dataset.getCollection().getCells()){	
+		List<Cell> cells = dataset.getCollection().getCells();
+		Collections.sort(cells);
+		
+	    for(Cell cell : cells){	
 
 	    	String name = cell.getNucleus().getNameAndNumber();
 	    	UUID id = cell.getId();
 
 	    	root.add(new DefaultMutableTreeNode( new NodeData(name, id)));
 	    }
-	    sort(root);
 
 	}
 	
@@ -130,28 +135,6 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 			}
 		}
 		return null;
-	}
-	
-	private DefaultMutableTreeNode sort(DefaultMutableTreeNode node){
-		for(int i = 0; i < node.getChildCount() - 1; i++) {
-	        DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
-	        String nt = child.getUserObject().toString();
-	        
-	        for(int j = i + 1; j <= node.getChildCount() - 1; j++) {
-	            DefaultMutableTreeNode prevNode = (DefaultMutableTreeNode) node.getChildAt(j);
-	            String np = prevNode.getUserObject().toString();
-
-	            if(nt.compareToIgnoreCase(np) > 0) {
-	                node.insert(child, j);
-	                node.insert(prevNode, i);
-	            }
-	        }
-	        if(child.getChildCount() > 0) {
-	            sort(child);
-	        }
-		}
-		return node;
-		
 	}
 	
 	public class NodeData {
