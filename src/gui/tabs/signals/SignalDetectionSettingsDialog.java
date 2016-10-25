@@ -40,6 +40,7 @@ import java.util.logging.Level;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -387,23 +388,31 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 	
 	private boolean getImageDirectory(){
 		// get the folder of images
-		boolean ok = true;
-		DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
-		String folderName = openDialog.getDirectory();
+		
+		File defaultDir = options.getFolder();
+		
+		JFileChooser fc = new JFileChooser(defaultDir); // if null, will be home dir
 
-		if(folderName==null){
-			ok = false;
-		}
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-		File folder =  new File(folderName);
 
-		if(!folder.isDirectory() ){
-			ok = false;
+		int returnVal = fc.showOpenDialog(fc);
+		if (returnVal != 0)	{
+			return false; // user cancelled
 		}
-		if(!folder.exists()){
-			ok = false;
+		
+		File file = fc.getSelectedFile();
+
+		if( ! file.isDirectory()){
+			return false;
 		}
-		this.folder = folder;
-		return ok;
+		
+		if(! file.exists()){
+			return false;
+		}
+		
+		fine("Selected directory: "+file.getAbsolutePath());
+				this.folder = file;
+		return true;
 	}
 }
