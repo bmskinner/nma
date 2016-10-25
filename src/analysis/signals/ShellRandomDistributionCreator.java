@@ -84,7 +84,7 @@ public class ShellRandomDistributionCreator implements Loggable {
 		int neg1 = -1;
 		
 		if(map.get(neg1) > 0){
-			warn("Unable to map "+map.get(neg1)+" points");
+			fine("Unable to map "+map.get(neg1)+" points");
 		}
 
 	}

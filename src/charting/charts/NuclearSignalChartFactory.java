@@ -53,7 +53,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 		
 		List<CategoryDataset> list = NuclearSignalDatasetCreator.getInstance().createShellBarChartDataset(options);
 		
-		JFreeChart chart = ChartFactory.createBarChart(null, "Outer <--- Shell ---> Interior", "Percent", list.get(0));
+		JFreeChart chart = ChartFactory.createBarChart(null, "Outer <--- Shell ---> Interior", "Percent of signal", list.get(0));
 		chart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
 		
 		chart.getCategoryPlot().addRangeMarker(ChartComponents.ZERO_MARKER);
@@ -73,10 +73,6 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 			rend.setBarPainter(new StandardBarPainter());
 			rend.setShadowVisible(false);
 			
-			
-			
-//			rend.setErrorIndicatorPaint(Color.black);
-//			rend.setErrorIndicatorStroke(new BasicStroke(2));
 			chart.getCategoryPlot().setRenderer(datasetCount, rend);
 
 			for( int i=0; i<ds.getColumnCount(); i++){
@@ -116,10 +112,10 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 		
 		if(options.isShowSignals()){
 			chart.getCategoryPlot().getRangeAxis().setAutoRange(true);
-			chart.getCategoryPlot().getRangeAxis().setLabel("Observed signals");
+			chart.getCategoryPlot().getRangeAxis().setLabel("Observed pixel intensities");
 		} else {
 			chart.getCategoryPlot().getRangeAxis().setRange(range);
-			chart.getCategoryPlot().getRangeAxis().setLabel("Percent");
+			chart.getCategoryPlot().getRangeAxis().setLabel("Percent of signal");
 		}
 		
 		

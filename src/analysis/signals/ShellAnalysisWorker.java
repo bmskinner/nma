@@ -46,15 +46,12 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 	private final int shells;
 	
 	private int totalPixels = 0;
-	
-	private boolean dapiNormalise;
-	
+		
 	private static Map<UUID, ShellCounter> counters = new HashMap<UUID, ShellCounter>(0);
 		
-	public ShellAnalysisWorker(AnalysisDataset dataset, int shells, boolean dapiNormalise){
+	public ShellAnalysisWorker(AnalysisDataset dataset, int shells){
 		super(dataset);
 		this.shells = shells;
-		this.dapiNormalise = dapiNormalise;
 		this.setProgressTotal(dataset.getCollection().getNucleusCount());
 	}
 		
@@ -138,27 +135,27 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 						double[] signalPerShell = shellAnalyser.findProportionPerShell(s);
 						int[]    countsPerShell = shellAnalyser.findPixelCountPerShell(s);
 
-						if(dapiNormalise){
 
-							ImageStack st;
-							try {
+						ImageStack st;
+						try {
 
-								st = new ImageImporter(s.getSourceFile()).importImage();
+							st = new ImageImporter(s.getSourceFile()).importImage();
 
-								int[] dapiIntensities = shellAnalyser.findPixelIntensityPerShell(st, Constants.rgbToStack(Constants.COUNTERSTAIN));
+							int[] dapiIntensities = shellAnalyser.findPixelIntensityPerShell(st, Constants.rgbToStack(Constants.COUNTERSTAIN));
 
-								signalPerShell = shellAnalyser.normalise(signalPerShell, dapiIntensities);
+							double[] normalised = shellAnalyser.normalise(signalPerShell, dapiIntensities);
+							
+							counter.addValues(signalPerShell, countsPerShell);
+							counter.addNormalisedValues(normalised);
 
+						} catch (ImageImportException e) {
 
-							} catch (ImageImportException e) {
-
-								warn("Cannot import image source file "+n.getSourceFile().getAbsolutePath());
-								fine("Error importing file", e);
-							}
+							warn("Cannot import image source file "+n.getSourceFile().getAbsolutePath());
+							fine("Error importing file", e);
 						}
 						
 						
-						counter.addValues(signalPerShell, countsPerShell);
+						
 						
 						totalPixels += new Sum(counter.getCounts()).intValue();
 
@@ -185,6 +182,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 				
 				ShellResult result = new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors());
 				result.setCounts(channelCounter.getCounts());
+				result.setNormalisedMeans(channelCounter.getNormalisedMeans());
 				
 				
 				
@@ -215,7 +213,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			.addSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID, random);
 			
 			// Calculate random positions of pixels 
-			log("Creating random sample of "+totalPixels+" pixels");
+			fine("Creating random sample of "+totalPixels+" pixels");
 			
 			ShellRandomDistributionCreator sr = new ShellRandomDistributionCreator(collection.getConsensusNucleus(), 
 					shells,

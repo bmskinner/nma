@@ -82,11 +82,10 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		JPanel panel = new JPanel();
 		
 		newAnalysis.addActionListener( e -> {
-			boolean normalise = dapiNormalise.isSelected();
-			fireSignalChangeEvent("RunShellAnalysis|"+normalise);
+			fireSignalChangeEvent("RunShellAnalysis");
 		});
 		
-		newAnalysis.setEnabled(false);
+
 		panel.add(newAnalysis);
 		
 		buttonGroup.add(proportionsBtn);
@@ -102,7 +101,16 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		dapiNormalise.addActionListener(this);
 		panel.add(dapiNormalise);
 		
+		setEnabled(false);
+		
 		return panel;
+	}
+	
+	public void setEnabled(boolean b){
+		newAnalysis.setEnabled(b);
+		proportionsBtn.setEnabled(b);
+		countsBtn.setEnabled(b);
+		dapiNormalise.setEnabled(b);
 	}
 	
 	private JScrollPane createTablePanel(){
@@ -145,6 +153,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 			.setDatasets(getDatasets())
 			.setShowSignals(countsBtn.isSelected()) // if counts is selected, show signal counts, not proportions
 			.setTarget(chartPanel)
+			.setNormalised(dapiNormalise.isSelected())
 			.build();
 
 		setChart(options);
@@ -164,24 +173,24 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	protected void updateSingle() {
 
 		updateChartAndTable();
-
-		newAnalysis.setEnabled(false);
+		setEnabled(false);
 		
 		if(activeDataset().getCollection().getSignalManager().hasSignals()){
-			newAnalysis.setEnabled(true);
+			setEnabled(true);
 		}
 		
 	}
 
 	@Override
 	protected void updateMultiple() {
-		
+		setEnabled(false);
 		updateChartAndTable();
 		
 	}
 
 	@Override
 	protected void updateNull() {
+		setEnabled(false);
 		updateChartAndTable();
 		
 	}

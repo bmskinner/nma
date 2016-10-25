@@ -37,7 +37,7 @@ public class ShellCounter implements Loggable {
 	
 	private int numberOfShells;
 	private Map<Integer, List<Double>> shellValues = new HashMap<Integer, List<Double>>(0); // store the values
-	
+	private Map<Integer, List<Double>> normValues  = new HashMap<Integer, List<Double>>(0); // store the values
 	private Map<Integer, Integer> counts = new HashMap<Integer, Integer>(0); // store the values
 		
 	public ShellCounter(int numberOfShells){
@@ -45,6 +45,7 @@ public class ShellCounter implements Loggable {
 		this.numberOfShells = numberOfShells;
 		for(int i=0;i<numberOfShells;i++){
 			shellValues.put(i, new ArrayList<Double>(0));
+			normValues.put(i, new ArrayList<Double>(0));
 			counts.put(i, 0);
 		}
 		
@@ -76,6 +77,13 @@ public class ShellCounter implements Loggable {
 		}
 	}
 	
+	public void addNormalisedValues(double[] proportions){
+		for(int i=0;i<numberOfShells;i++){
+			List<Double> shell = normValues.get(i);
+			shell.add(proportions[i]);
+		}
+	}
+	
 	public List<Double> getMeans() {
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<numberOfShells;i++){
@@ -86,10 +94,28 @@ public class ShellCounter implements Loggable {
 		return result;
 	}
 	
+	public List<Double> getNormalisedMeans() {
+		List<Double> result = new ArrayList<Double>(0);
+		for(int i=0;i<numberOfShells;i++){
+			double[] values = getNormShell(i);
+			result.add( new Mean(values).doubleValue() ); //Stats.mean(values)
+			
+		}
+		return result;
+	}
+	
 	public List<Double> getStandardErrors() {
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<numberOfShells;i++){
 			result.add(Stats.stderr(getShell(i)));
+		}
+		return result;
+	}
+	
+	public List<Double> getNormalisedStandardErrors() {
+		List<Double> result = new ArrayList<Double>(0);
+		for(int i=0;i<numberOfShells;i++){
+			result.add(Stats.stderr(getNormShell(i)));
 		}
 		return result;
 	}
@@ -149,6 +175,31 @@ public class ShellCounter implements Loggable {
 				array[i] = values.get(i).isNaN() 
 						? 0
 								: values.get(i);
+			}
+		} catch(Exception e){
+			logError( "Error getting shell values", e);
+			this.print();
+		}
+		return array;
+	}
+	
+	/**
+	 * Get the values within the current shell. If a value
+	 * is NaN, return 0
+	 * @param shell the shell to return
+	 * @return
+	 */
+	private double[] getNormShell(int shell){
+		List<Double> values = normValues.get(shell);
+		double[] array = new double[values.size()];
+		
+		try{
+			for(int i=0;i<array.length;i++){
+
+				// if the value is not a number, put zero
+				array[i] = values.get(i).isNaN() 
+						? 0
+						: values.get(i);
 			}
 		} catch(Exception e){
 			logError( "Error getting shell values", e);

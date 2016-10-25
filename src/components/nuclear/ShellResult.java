@@ -28,12 +28,13 @@ import logging.Loggable;
 public class ShellResult implements Serializable, Loggable {
 
 	private static final long serialVersionUID = 1L;
-	private List<Double> means;
+	private List<Double> means; // percent signal pre-DAPI normalisation
 	private List<Double> stderrs;
 	private double chisquare;
 	private double pvalue;
 	
 	private List<Integer> counts;
+	private List<Double> normalisedMeans; // percent signal post-DAPI normalisation
 	
 	public ShellResult(List<Double> means, List<Double> stderrs){
 		this(means, stderrs, 0, 0);
@@ -45,6 +46,7 @@ public class ShellResult implements Serializable, Loggable {
 		this.chisquare = chi;
 		this.pvalue = pvalue;
 		this.counts = new ArrayList<Integer>();
+		this.normalisedMeans = new ArrayList<Double>();
 	}
 	
     public ShellResult(ShellResult s){
@@ -67,6 +69,10 @@ public class ShellResult implements Serializable, Loggable {
         for(int d : s.counts){
         	counts.add(d);
         }
+        
+        for(double d : s.normalisedMeans){
+        	normalisedMeans.add(d);
+        }
 
     }
     
@@ -74,14 +80,21 @@ public class ShellResult implements Serializable, Loggable {
     	this.counts = counts;
     }
     
+    public void setNormalisedMeans(List<Double> means){
+    	this.normalisedMeans = means;
+    }
+    
     public List<Integer> getCounts(){
     	return counts;
     }
     
-
 	
 	public List<Double> getMeans(){
 		return this.means;
+	}
+	
+	public List<Double> getNormalisedMeans(){
+		return this.normalisedMeans;
 	}
 	
 	public List<Double> getStandardErrors(){
@@ -107,6 +120,11 @@ public class ShellResult implements Serializable, Loggable {
 		if(counts==null){
 			counts = new ArrayList<Integer>();
 		}
+		
+		if(normalisedMeans==null){
+			normalisedMeans = new ArrayList<Double>();
+		}
+		
 //		finest("\tRead shell result");
 	}
 

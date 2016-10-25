@@ -692,12 +692,10 @@ public class MainWindow
 				: populationsPanel.getSelectedDatasets().get(0);
 		
 		
-		if(event.type().startsWith("RunShellAnalysis|")){
+		if(event.type().equals("RunShellAnalysis")){
 			Runnable task = () -> {
-				
-				boolean dapi = Boolean.parseBoolean(event.type().replace("RunShellAnalysis|", ""));
 				finer("Shell analysis selected");
-				new ShellAnalysisAction(selectedDataset, MainWindow.this, dapi);
+				new ShellAnalysisAction(selectedDataset, MainWindow.this);
 			};
 			threadManager.execute(task);
 		}
