@@ -23,17 +23,18 @@ package analysis.mesh;
 import java.util.HashSet;
 import java.util.Set;
 
+import components.generic.IPoint;
 import components.generic.XYPoint;
 
 public class NucleusMeshVertex {
 	
 	private String name; // the number in the mesh - use to compare vertexes between nuclei
-	private XYPoint position; // the posiiton of the vertex
+	private IPoint position; // the posiiton of the vertex
 	private boolean peripheral; // is the vertex on the border of the object
 	
 	Set<NucleusMeshEdge> edges = new HashSet<NucleusMeshEdge>(); // store the edges attached to the vertex
 	
-	public NucleusMeshVertex(XYPoint p, String name, boolean peripheral){
+	public NucleusMeshVertex(IPoint p, String name, boolean peripheral){
 		this.name = name;
 		this.position = p;
 		this.peripheral = peripheral;
@@ -57,11 +58,11 @@ public class NucleusMeshVertex {
 		return name;
 	}
 
-	public XYPoint getPosition() {
+	public IPoint getPosition() {
 		return position;
 	}
 	
-	public void setPosition(XYPoint p){
+	public void setPosition(IPoint p){
 		this.position = p;
 	}
 	

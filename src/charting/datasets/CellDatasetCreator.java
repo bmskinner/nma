@@ -29,6 +29,7 @@ import org.jfree.data.xy.XYDataset;
 
 import charting.options.ChartOptions;
 import analysis.IAnalysisDataset;
+import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.generic.XYPoint;
@@ -85,7 +86,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 		
 		finest("Fetching segment position list");
 		
-		List<XYPoint> offsetPoints = createAbsolutePositionFeatureList(options.firstDataset(), options.getSegID());
+		List<IPoint> offsetPoints = createAbsolutePositionFeatureList(options.firstDataset(), options.getSegID());
 
 		double[] xPoints = new double[offsetPoints.size()];
 		double[] yPoints = new double[offsetPoints.size()];
@@ -126,7 +127,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 					.getSegmentAt(  options.getSegPosition()   )
 					.getID();
 			
-			List<XYPoint> offsetPoints = createAbsolutePositionFeatureList(dataset, segID);
+			List<IPoint> offsetPoints = createAbsolutePositionFeatureList(dataset, segID);
 
 			double[] xPoints = new double[offsetPoints.size()];
 			double[] yPoints = new double[offsetPoints.size()];
@@ -153,7 +154,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<XYPoint> createAbsolutePositionFeatureList(IAnalysisDataset dataset, UUID segmentID) throws ChartDatasetCreationException{
+	public List<IPoint> createAbsolutePositionFeatureList(IAnalysisDataset dataset, UUID segmentID) throws ChartDatasetCreationException{
 		
 		if(dataset==null){
 			throw new IllegalArgumentException("Dataset is null");
@@ -163,7 +164,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 			throw new IllegalArgumentException("Segment id is null");
 		}
 		
-		List<XYPoint> result = new ArrayList<XYPoint>();
+		List<IPoint> result = new ArrayList<IPoint>();
 		
 		/*
 		 * Fetch the cells from the dataset, and rotate the nuclei appropriately
@@ -189,7 +190,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 
 			int start = segment.getStartIndex();
 			finest("Getting start point at index "+start);
-			XYPoint point = verticalNucleus.getBorderPoint(start);
+			IPoint point = verticalNucleus.getBorderPoint(start);
 			result.add(point);	
 		}	
 		finest("Fetched segment position for each nucleus");
@@ -206,9 +207,9 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<XYPoint> createRelativePositionFeatureList(IAnalysisDataset dataset, UUID segmentID) throws ChartDatasetCreationException{
+	public List<IPoint> createRelativePositionFeatureList(IAnalysisDataset dataset, UUID segmentID) throws ChartDatasetCreationException{
 		
-		List<XYPoint> result = createAbsolutePositionFeatureList( dataset, segmentID);
+		List<IPoint> result = createAbsolutePositionFeatureList( dataset, segmentID);
 		
 		/*
 		 * Don't worry about changing things if there is not consensus nucleus
@@ -229,7 +230,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 		NucleusBorderSegment segment = consensus.getProfile(ProfileType.ANGLE)
 											.getSegment(segmentID);
 		
-		XYPoint centrePoint = consensus.getBorderPoint(segment.getStartIndex());
+		IPoint centrePoint = consensus.getBorderPoint(segment.getStartIndex());
 		
 		/*
 		 * The list of XYPoints are the absolute positions in cartesian space.
@@ -240,7 +241,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 		 * Update the result positions to be offsets to the centre 
 		 */
 		
-		for(XYPoint p : result){
+		for(IPoint p : result){
 
 			double offsetX = p.getX() - centrePoint.getX();
 			double offsetY = p.getY() - centrePoint.getY();

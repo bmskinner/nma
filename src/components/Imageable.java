@@ -26,7 +26,7 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.util.List;
 
-import components.generic.XYPoint;
+import components.generic.IPoint;
 
 /**
  * This covers the things than can be found within an image.
@@ -112,7 +112,7 @@ public interface Imageable {
 	 * Get the pixels within this object as a list of points
 	 * @return
 	 */
-	public List<XYPoint> getPixelsAsPoints();
+	public List<IPoint> getPixelsAsPoints();
 	
 	/**
 	 * Get the bounding rectangle for the object.

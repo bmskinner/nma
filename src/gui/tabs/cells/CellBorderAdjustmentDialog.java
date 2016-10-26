@@ -71,11 +71,14 @@ import analysis.IAnalysisDataset;
 import components.Cell;
 import components.CellularComponent;
 import components.ICell;
+import components.active.generic.DefaultBorderPoint;
 import components.generic.BorderTagObject;
+import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
 import gui.RotationMode;
@@ -111,7 +114,7 @@ public class CellBorderAdjustmentDialog
 	
 	private DualChartPanel dualPanel;
 		
-	Map<BorderPoint, XYShapeAnnotation> selectedPoints = new HashMap<BorderPoint, XYShapeAnnotation>();
+	Map<IBorderPoint, XYShapeAnnotation> selectedPoints = new HashMap<IBorderPoint, XYShapeAnnotation>();
 	
 	private boolean canMove = false; // set if a point can be moved or not
 	
@@ -343,8 +346,8 @@ public class CellBorderAdjustmentDialog
 		
 	}
 	
-	private void selectClickedPoint(XYPoint clickedPoint){
-		for(BorderPoint point : workingCell.getNucleus().getBorderList()){
+	private void selectClickedPoint(IPoint clickedPoint){
+		for(IBorderPoint point : workingCell.getNucleus().getBorderList()){
 			
 			if(point.overlapsPerfectly( clickedPoint )){
 				
@@ -373,15 +376,15 @@ public class CellBorderAdjustmentDialog
 			dualPanel.getMainPanel().getChart().getXYPlot().removeAnnotation(a);
 	
 		}
-		selectedPoints = new HashMap<BorderPoint, XYShapeAnnotation>();
+		selectedPoints = new HashMap<IBorderPoint, XYShapeAnnotation>();
 	}
 	
 	private void moveSelectedPoint(){
 		// Move the selected point in the border list copy
-		List<BorderPoint> borderList = workingCell.getNucleus().getBorderList();
+		List<IBorderPoint> borderList = workingCell.getNucleus().getBorderList();
 		for(int i=0; i<borderList.size(); i++){
 		
-			BorderPoint point = borderList.get(i);
+			IBorderPoint point = borderList.get(i);
 			if(selectedPoints.containsKey(point)){
 				workingCell.getNucleus().updateBorderPoint(i, finalMovePointX, finalMovePointY);
 				break;
@@ -408,18 +411,18 @@ public class CellBorderAdjustmentDialog
 		
 		
 		fine("Adding point at "+newX+", "+newY);
-		XYPoint newPoint = new XYPoint(newX, newY);
+		IPoint newPoint = new XYPoint(newX, newY);
 		
 		// Get the border point that is closest to the clicked point
-		BorderPoint bp = workingCell.getNucleus().findClosestBorderPoint(newPoint);
+		IBorderPoint bp = workingCell.getNucleus().findClosestBorderPoint(newPoint);
 		
-		List<BorderPoint> newList = new ArrayList<BorderPoint>();
+		List<IBorderPoint> newList = new ArrayList<IBorderPoint>();
 		
 		// Insert the new point after the closest existing point to it
-		List<BorderPoint> borderList = workingCell.getNucleus().getBorderList();
-		Iterator<BorderPoint> it = borderList.iterator();
+		List<IBorderPoint> borderList = workingCell.getNucleus().getBorderList();
+		Iterator<IBorderPoint> it = borderList.iterator();
 		while(it.hasNext()){
-			BorderPoint point = it.next();
+			IBorderPoint point = it.next();
 			newList.add(point);
 			
 			if(point.equals(bp)){
@@ -434,10 +437,10 @@ public class CellBorderAdjustmentDialog
 	
 	private void deleteSelectedPoints(){
 		// Remove the selected points from the border list copy
-		List<BorderPoint> borderList = workingCell.getNucleus().getBorderList();
-		Iterator<BorderPoint> it = borderList.iterator();
+		List<IBorderPoint> borderList = workingCell.getNucleus().getBorderList();
+		Iterator<IBorderPoint> it = borderList.iterator();
 		while(it.hasNext()){
-			BorderPoint point = it.next();
+			IBorderPoint point = it.next();
 			if(selectedPoints.containsKey(point)){
 				it.remove();
 			}
@@ -448,7 +451,7 @@ public class CellBorderAdjustmentDialog
 		
 	}
 	
-	private void updateWorkingCell(List<BorderPoint> borderList){
+	private void updateWorkingCell(List<IBorderPoint> borderList){
 		// Make a interpolated FloatPolygon from the new array
 		float[] xPoints = new float[borderList.size()];
 		float[] yPoints = new float[borderList.size()];
@@ -465,9 +468,9 @@ public class CellBorderAdjustmentDialog
 
 		// Make new border list and assign to the working cell
 
-		List<BorderPoint> newList = new ArrayList<BorderPoint>();
+		List<IBorderPoint> newList = new ArrayList<IBorderPoint>();
 		for(int i=0; i<fp.npoints; i++){
-			BorderPoint point = new BorderPoint( fp.xpoints[i], fp.ypoints[i]);
+			IBorderPoint point = new DefaultBorderPoint( fp.xpoints[i], fp.ypoints[i]);
 
 			if(i>0){
 				point.setPrevPoint(newList.get(i-1));
@@ -662,7 +665,7 @@ public class CellBorderAdjustmentDialog
 						double yVal = ds.getYValue(series, item);
 
 						if(ellipse.contains(xVal,  yVal)){
-							XYPoint clickedPoint = new XYPoint(xVal, yVal);
+							IPoint clickedPoint = new XYPoint(xVal, yVal);
 							selectClickedPoint(clickedPoint);
 						}
 					}

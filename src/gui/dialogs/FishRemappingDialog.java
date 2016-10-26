@@ -57,6 +57,7 @@ import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
 import components.active.DefaultCellCollection;
+import components.generic.IPoint;
 import components.generic.XYPoint;
 
 /**
@@ -244,7 +245,7 @@ public class FishRemappingDialog extends ImageProber {
 		double largeX = x * factor;
 		double largeY = y * factor;
 		
-		XYPoint p = new XYPoint(largeX, largeY);
+		IPoint p = new XYPoint(largeX, largeY);
 		finer("Clicked in large image "+p.toString());
 		
 		// See if the selected position in the large icon is in a nucleus

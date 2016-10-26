@@ -9,6 +9,7 @@ import java.util.Map;
 
 import logging.Loggable;
 import analysis.mesh.NucleusMeshFace.NucleusMeshFaceCoordinate;
+import components.generic.IPoint;
 import components.generic.XYPoint;
 
 /**
@@ -120,7 +121,7 @@ public class NucleusMeshImage implements Loggable {
 			
 			int pixelValue = faceMap.get(c);
 			finest(c.toString()+" : Value: "+pixelValue);
-			XYPoint p = c.getPixelCoordinate(targetFace);
+			IPoint p = c.getPixelCoordinate(targetFace);
 
 			
 			int x = p.getXAsInt() + xOffset;
@@ -161,7 +162,7 @@ public class NucleusMeshImage implements Loggable {
 
 			for(NucleusMeshFaceCoordinate c : faceMap.keySet() ){
 
-				XYPoint p = c.getPixelCoordinate(mesh.getFace(f));
+				IPoint p = c.getPixelCoordinate(mesh.getFace(f));
 				
 				
 				maxX = p.getXAsInt() > maxX ? p.getXAsInt() : maxX;
@@ -318,7 +319,7 @@ public class NucleusMeshImage implements Loggable {
 		for(int x=0; x<ip.getWidth(); x++){
 			
 			for(int y=0; y<ip.getHeight(); y++){
-				XYPoint p = new XYPoint(x, y);
+				IPoint p = new XYPoint(x, y);
 
 				if(mesh.nucleus.containsOriginalPoint(p)){
 					

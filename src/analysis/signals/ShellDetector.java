@@ -44,7 +44,7 @@ import utility.ArrayConverter;
 import utility.Constants;
 import analysis.detection.Detector;
 import components.CellularComponent;
-import components.generic.XYPoint;
+import components.generic.IPoint;
 
 /**
  * @author bms41
@@ -102,7 +102,7 @@ public class ShellDetector extends Detector {
 	 * @param p
 	 * @return
 	 */
-	public int findShell(XYPoint p){
+	public int findShell(IPoint p){
 		
 		int shell = -1;
 		for(Shell r : shells){

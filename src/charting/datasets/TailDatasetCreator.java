@@ -25,7 +25,7 @@ import org.jfree.data.xy.XYDataset;
 
 import components.Flagellum;
 import components.ICell;
-import components.generic.XYPoint;
+import components.generic.IPoint;
 
 public class TailDatasetCreator implements Loggable {
 	
@@ -45,7 +45,7 @@ public class TailDatasetCreator implements Loggable {
 			double[] ypoints = new double[tail.getBorder().size()];
 
 			int i =0;
-			for(XYPoint p : tail.getBorder()){
+			for(IPoint p : tail.getBorder()){
 				xpoints[i] = p.getX();
 				ypoints[i] = p.getY();
 				i++;
@@ -76,7 +76,7 @@ public class TailDatasetCreator implements Loggable {
 			double[] ypoints = new double[tail.getSkeleton().size()];
 
 			int i =0;
-			for(XYPoint p : tail.getSkeleton()){
+			for(IPoint p : tail.getSkeleton()){
 				xpoints[i] = p.getX();
 				ypoints[i] = p.getY();
 				i++;

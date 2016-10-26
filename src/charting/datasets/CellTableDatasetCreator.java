@@ -38,6 +38,7 @@ import components.ICell;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusType;
@@ -124,7 +125,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 				fieldNames.add(tag);
 				if(n.hasBorderTag(tag)){
 
-					BorderPoint p = n.getBorderPoint(tag);
+					IBorderPoint p = n.getBorderPoint(tag);
 					
 					int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, n.getBorderIndex(tag));
 					

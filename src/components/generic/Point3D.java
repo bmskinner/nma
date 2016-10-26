@@ -37,7 +37,7 @@ public class Point3D extends XYPoint {
 	 * defined by the x and y coordinates
 	 * @return
 	 */
-	public XYPoint to2D(){
+	public IPoint to2D(){
 		return new XYPoint(x, y);
 	}
 

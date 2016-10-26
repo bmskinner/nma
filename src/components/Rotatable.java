@@ -20,6 +20,7 @@
 package components;
 
 import logging.Loggable;
+import components.generic.IPoint;
 import components.generic.XYPoint;
 
 /**
@@ -47,17 +48,17 @@ public interface Rotatable extends Loggable {
 	 * @param topPoint the point to have the higher Y value
 	 * @param bottomPoint the point to have the lower Y value
 	 */
-	public default void alignPointsOnVertical(XYPoint topPoint, XYPoint bottomPoint){
+	public default void alignPointsOnVertical(IPoint topPoint, IPoint bottomPoint){
 		
 		/*
 		 * If the points are already aligned vertically, the rotation should not have any effect
 		 */
 		double angleToRotate 	= 0;
 
-		XYPoint upperPoint = topPoint.getY()>bottomPoint.getY()? topPoint : bottomPoint;
-		XYPoint lowerPoint = upperPoint==topPoint ? bottomPoint : topPoint;
+		IPoint upperPoint = topPoint.getY()>bottomPoint.getY()? topPoint : bottomPoint;
+		IPoint lowerPoint = upperPoint==topPoint ? bottomPoint : topPoint;
 
-		XYPoint comp = new XYPoint(lowerPoint.getX(),upperPoint.getY());
+		IPoint comp = new XYPoint(lowerPoint.getX(),upperPoint.getY());
 
 		/*
 		 *      LA             RA        RB         LB         
@@ -111,7 +112,7 @@ public interface Rotatable extends Loggable {
 	 * below the centre of mass
 	 * @param bottomPoint
 	 */
-	public void rotatePointToBottom(XYPoint bottomPoint);
+	public void rotatePointToBottom(IPoint bottomPoint);
 	
 	/**
 	 * Rotate the object by the given amount around the centre of mass

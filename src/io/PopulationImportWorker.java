@@ -28,9 +28,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import components.active.DefaultAnalysisDataset;
+import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.generic.XYPoint;
 import components.nuclear.NucleusType;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
@@ -195,7 +195,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 						if( ! s.containsPoint(s.getCentreOfMass())){
 						
 							for(int i=0; i<s.getBorderLength();i++){
-								XYPoint offset = s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
+								IPoint offset = s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
 								s.updateBorderPoint(i, offset);
 							}
 						}

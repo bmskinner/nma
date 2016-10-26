@@ -26,6 +26,7 @@ import analysis.profiles.Taggable;
 import components.CellularComponent;
 import components.Rotatable;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.SignalCollection;
 
 /**
@@ -119,7 +120,7 @@ public interface Nucleus
 	 * @param p the border point to orient from (the zero angle)
 	 * @throws Exception
 	 */
-	public void calculateSignalAnglesFromPoint(BorderPoint p);
+	public void calculateSignalAnglesFromPoint(IBorderPoint p);
 	
 
 	public String dumpInfo(int type);

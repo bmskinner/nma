@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import components.generic.IPoint;
 import components.generic.XYPoint;
 
 /**
@@ -42,7 +44,7 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 
 		protected double length; // the length of the skeleton
 		
-		protected XYPoint nucleusIntersection; // the position where the tail intersects the nucleus
+		protected IPoint nucleusIntersection; // the position where the tail intersects the nucleus
 		
 		protected List<XYPoint> skeletonPoints = new ArrayList<XYPoint>(0); 
 		protected List<XYPoint> borderPoints   = new ArrayList<XYPoint>(0); 
@@ -92,7 +94,7 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 		 */
 		public List<XYPoint> getOffsetSkeleton(){
 			List<XYPoint> result = new ArrayList<XYPoint>(0);
-			for(XYPoint p : skeletonPoints){
+			for(IPoint p : skeletonPoints){
 				result.add(new XYPoint( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
 			}
 			return result;
@@ -105,7 +107,7 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 		// positions are offset by the bounding rectangle for easier plotting
 		public List<XYPoint> getOffsetBorder(){
 			List<XYPoint> result = new ArrayList<XYPoint>(0);
-			for(XYPoint p : borderPoints){
+			for(IPoint p : borderPoints){
 				result.add(new XYPoint( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
 			}
 			return result;

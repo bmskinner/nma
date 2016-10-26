@@ -24,7 +24,7 @@ import java.awt.geom.Line2D;
 
 import stats.Stats;
 import components.generic.Equation;
-import components.generic.XYPoint;
+import components.generic.IPoint;
 
 public class NucleusMeshEdge {
 	private NucleusMeshVertex v1;
@@ -83,7 +83,7 @@ public class NucleusMeshEdge {
 		return v1.getLengthTo(v2);
 	}
 	
-	public XYPoint getMidpoint(){
+	public IPoint getMidpoint(){
 		Equation eq = new Equation(v1.getPosition(), v2.getPosition());
 		if(v1.getPosition().getX()<v2.getPosition().getX()){
 			return eq.getPointOnLine(v1.getPosition(), getLength()/2);
@@ -108,8 +108,8 @@ public class NucleusMeshEdge {
 	
 	public boolean crosses(NucleusMeshEdge e){
 		
-		Line2D line1 = new Line2D.Double(v1.getPosition().asPoint(), v2.getPosition().asPoint());
-		Line2D line2 = new Line2D.Double(e.v1.getPosition().asPoint(), e.v2.getPosition().asPoint());
+		Line2D line1 = new Line2D.Double(v1.getPosition().toPoint2D(), v2.getPosition().toPoint2D());
+		Line2D line2 = new Line2D.Double(e.v1.getPosition().toPoint2D(), e.v2.getPosition().toPoint2D());
 
 		if(line1.intersectsLine(line2)){
 			
@@ -149,7 +149,7 @@ public class NucleusMeshEdge {
 	 * @param d
 	 * @return
 	 */
-	public XYPoint getProportionalPosition(double d){
+	public IPoint getProportionalPosition(double d){
 		
 		return Equation.getProportionalDistance(v1.getPosition(), v2.getPosition(), d);
 	}
@@ -160,7 +160,7 @@ public class NucleusMeshEdge {
 	 * @param p
 	 * @return
 	 */
-	public double getPositionProportion(XYPoint p ){
+	public double getPositionProportion(IPoint p ){
 		
 		Equation eq = new Equation(v1.getPosition(), v2.getPosition());
 		if(eq.isOnLine(p)){

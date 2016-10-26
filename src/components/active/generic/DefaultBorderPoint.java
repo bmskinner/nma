@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
+ *  	Copyright (C) 2016 Ben Skinner
  *   
  *     This file is part of Nuclear Morphology Analysis.
  *
@@ -17,80 +17,68 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-
-package components.nuclear;
+package components.active.generic;
 
 import components.generic.IPoint;
+import components.nuclear.IBorderPoint;
 
-/**
- *  This class contains border points around the periphery of a nucleus.
- *	Mostly the same as an XYPoint now, after creation of Profiles. It does
- * allow linkage of points.
- *
- */
-public class BorderPoint
-	extends components.generic.XYPoint implements IBorderPoint {
-
+public class DefaultBorderPoint extends FloatPoint implements IBorderPoint {
 	private static final long serialVersionUID = 1L;
 	
-	
-	private BorderPoint prevPoint = null;
-	private BorderPoint nextPoint = null;
+	private IBorderPoint prevPoint = null;
+	private IBorderPoint nextPoint = null;
 	
 	/**
 	 * Construct from x and y positions 
 	 * @param x
 	 * @param y
 	 */
-	public BorderPoint( double x, double y){
+	public DefaultBorderPoint( float x, float y){
 		super(x, y);
+	}
+	
+	/**
+	 * Construct from x and y positions 
+	 * @param x
+	 * @param y
+	 */
+	public DefaultBorderPoint( double x, double y){
+		super( (float) x, (float) y);
 	}
 
 	/**
 	 * Construct from an existing XY point
 	 * @param p
 	 */
-	public BorderPoint( IPoint p){
+	public DefaultBorderPoint( IPoint p){
 		super(p);
+	}
+		
+	/**
+	 * Set the next point in the border
+	 * @param next
+	 */
+	public void setNextPoint(IBorderPoint next){
+		this.nextPoint = next;
 	}
 	
 	/**
-	 * Construct from an existing border point
-	 * @param p
+	 * Set the previous point in the border
+	 * @param prev
 	 */
-	public BorderPoint( BorderPoint p){
-		super(p);
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderPoint#setNextPoint(components.nuclear.BorderPoint)
-	 */
-	@Override
-	public void setNextPoint(IBorderPoint next){
-		this.nextPoint = (BorderPoint) next;
-	}
-	
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderPoint#setPrevPoint(components.nuclear.BorderPoint)
-	 */
-	@Override
 	public void setPrevPoint(IBorderPoint prev){
-		this.prevPoint = (BorderPoint) prev;
+		this.prevPoint = prev;
 	}
 	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderPoint#nextPoint()
-	 */
-	@Override
 	public IBorderPoint nextPoint(){
 		return this.nextPoint;
 	}
 	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderPoint#nextPoint(int)
+	/**
+	 * Get the point n points ahead
+	 * @param points
+	 * @return
 	 */
-	@Override
 	public IBorderPoint nextPoint(int points){
 		if(points==1)
 			return this.nextPoint;
@@ -99,18 +87,15 @@ public class BorderPoint
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderPoint#prevPoint()
-	 */
-	@Override
 	public IBorderPoint prevPoint(){
 		return this.prevPoint;
 	}
 	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderPoint#prevPoint(int)
+	/**
+	 * Get the point n points behind
+	 * @param points
+	 * @return
 	 */
-	@Override
 	public IBorderPoint prevPoint(int points){
 		if(points==1)
 			return this.prevPoint;
@@ -119,20 +104,11 @@ public class BorderPoint
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderPoint#hasNextPoint()
-	 */
-	@Override
 	public boolean hasNextPoint(){
 		return nextPoint!=null;
 	}
 	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderPoint#hasPrevPoint()
-	 */
-	@Override
 	public boolean hasPrevPoint(){
 		return prevPoint!=null;
 	}
-	
 }

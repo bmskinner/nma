@@ -43,10 +43,12 @@ import stats.SignalStatistic;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
+import components.generic.IPoint;
 import components.generic.IProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.generic.XYPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
@@ -245,14 +247,14 @@ public class RodentSpermNucleus extends SpermNucleus {
 	 * Get a copy of the points in the hook roi
 	 * @return
 	 */
-	public List<BorderPoint> getHookRoi(){	
+	public List<IBorderPoint> getHookRoi(){	
 		
-		BorderPoint testPoint         = this.getBorderTag(Tag.REFERENCE_POINT);
-		BorderPoint referencePoint    = this.getBorderTag(Tag.REFERENCE_POINT);
-		BorderPoint interSectionPoint = this.getBorderTag(Tag.INTERSECTION_POINT);
-		BorderPoint orientationPoint  = this.getBorderTag(Tag.ORIENTATION_POINT);
+		IBorderPoint testPoint         = this.getBorderTag(Tag.REFERENCE_POINT);
+		IBorderPoint referencePoint    = this.getBorderTag(Tag.REFERENCE_POINT);
+		IBorderPoint interSectionPoint = this.getBorderTag(Tag.INTERSECTION_POINT);
+		IBorderPoint orientationPoint  = this.getBorderTag(Tag.ORIENTATION_POINT);
 		
-		List<BorderPoint> result = new ArrayList<BorderPoint>(0);
+		List<IBorderPoint> result = new ArrayList<IBorderPoint>(0);
 
 		
 		/*
@@ -263,7 +265,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		
 //		boolean hasHitPoint = false;
 		int i=0;
-		BorderPoint continuePoint = null;
+		IBorderPoint continuePoint = null;
 		
 		while(testPoint.hasNextPoint()){
 			result.add(testPoint);
@@ -358,7 +360,7 @@ public class RodentSpermNucleus extends SpermNucleus {
                 This is the corner furthest from the tip.
                 Can be confused as to which side of the sperm head is chosen
 		 */  
-		BorderPoint spermTail2 = findTailPointFromMinima();
+		IBorderPoint spermTail2 = findTailPointFromMinima();
 		this.addTailEstimatePosition(spermTail2);
 		// addBorderTag("spermTail2", this.getIndex(spermTail2));
 
@@ -376,7 +378,7 @@ public class RodentSpermNucleus extends SpermNucleus {
                 Draw a line orthogonal, and pick the intersecting border points
                 The border furthest from the tip is the tail
     */  
-    BorderPoint spermTail1 = this.findTailByNarrowestWidthMethod();
+    IBorderPoint spermTail1 = this.findTailByNarrowestWidthMethod();
     this.addTailEstimatePosition(spermTail1);
     // addBorderTag("spermTail1", this.getIndex(spermTail1));
 
@@ -386,7 +388,7 @@ public class RodentSpermNucleus extends SpermNucleus {
       take a position between them on roi
     */
     int consensusTailIndex = this.getPositionBetween(spermTail2, spermTail1);
-    BorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
+    IBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
     // consensusTailIndex = this.getPositionBetween(consensusTail, spermTail1);
 
     // this.setInitialConsensusTail(consensusTail);
@@ -399,12 +401,12 @@ public class RodentSpermNucleus extends SpermNucleus {
   }
 
 	
-	private FloatPolygon createRoiPolygon(List<BorderPoint> list){
+	private FloatPolygon createRoiPolygon(List<IBorderPoint> list){
 		float[] xpoints = new float[list.size()+1];
 		float[] ypoints = new float[list.size()+1];
 
 		for(int i=0;i<list.size();i++){
-			BorderPoint p = list.get(i);
+			IBorderPoint p = list.get(i);
 			xpoints[i] = (float) p.getX();
 			ypoints[i] = (float) p.getY();
 		}
@@ -421,7 +423,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 	 * @param p
 	 * @return
 	 */
-	public boolean isHookSide(XYPoint p){
+	public boolean isHookSide(IPoint p){
 		if(containsPoint(p)){
 
 			/*
@@ -485,7 +487,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     Detect the tail based on a list of local minima in an NucleusBorderPoint array.
     The putative tail is the point furthest from the sum of the distances from the CoM and the tip
   */
-  public BorderPoint findTailPointFromMinima() throws Exception{
+  public IBorderPoint findTailPointFromMinima() throws Exception{
   
     // we cannot be sure that the greatest distance between two points will be the endpoints
     // because the hook may begin to curve back on itself. We supplement this basic distance with
@@ -496,7 +498,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     BooleanProfile array = this.getProfile(ProfileType.ANGLE).getLocalMinima(5);
 
     double maxDistance = 0;
-    BorderPoint tail = this.getBorderTag(Tag.REFERENCE_POINT); // start at tip, move round
+    IBorderPoint tail = this.getBorderTag(Tag.REFERENCE_POINT); // start at tip, move round
 
     for(int i=0; i<array.size();i++){
       if(array.get(i)==true){
@@ -522,19 +524,19 @@ public class RodentSpermNucleus extends SpermNucleus {
       Draw a line orthogonal, and pick the intersecting border points
       The border furthest from the tip is the tail
   */
-  public BorderPoint findTailByNarrowestWidthMethod() throws Exception{
+  public IBorderPoint findTailByNarrowestWidthMethod() throws Exception{
 
     // Find the narrowest point around the CoM
     // For a position in teh roi, draw a line through the CoM to the intersection point
     // Measure the length; if < min length..., store equation and border(s)
 
     double minDistance = this.getStatistic(NucleusStatistic.MAX_FERET);
-    BorderPoint reference = this.getBorderTag(Tag.REFERENCE_POINT);
+    IBorderPoint reference = this.getBorderTag(Tag.REFERENCE_POINT);
 
     for(int i=0;i<this.getBorderLength();i++){
 
-      BorderPoint p = this.getBorderPoint(i);
-      BorderPoint opp = this.findOppositeBorder(p);
+      IBorderPoint p = this.getBorderPoint(i);
+      IBorderPoint opp = this.findOppositeBorder(p);
       double distance = p.getLengthTo(opp);
 
       if(distance<minDistance){
@@ -549,10 +551,10 @@ public class RodentSpermNucleus extends SpermNucleus {
     // if close to 90, and the distance to the tip > CoM-tip, keep the point
     // return the best point
     double difference = 90;
-    BorderPoint tail = new BorderPoint(0,0);
+    IBorderPoint tail = new BorderPoint(0,0);
     for(int i=0;i<this.getBorderLength();i++){
 
-      BorderPoint p = this.getBorderPoint(i);
+      IBorderPoint p = this.getBorderPoint(i);
       double angle = this.getCentreOfMass().findAngle(reference, p);
       if(  Math.abs(90-angle)<difference && 
           p.getLengthTo(this.getBorderTag(Tag.REFERENCE_POINT)) > this.getCentreOfMass().getLengthTo( this.getBorderTag(Tag.REFERENCE_POINT) ) ){
@@ -616,7 +618,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 
   // needs to override AsymmetricNucleus version because hook/hump
   @Override
-  public void calculateSignalAnglesFromPoint(BorderPoint p) {
+  public void calculateSignalAnglesFromPoint(IBorderPoint p) {
 
 
 	  super.calculateSignalAnglesFromPoint(p);
@@ -642,7 +644,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 
 					  try{
 						  // This com is offset, not original
-						  XYPoint com = n.getCentreOfMass();
+						  IPoint com = n.getCentreOfMass();
 
 						  // These rois are offset, not original
 						  if( this.isHookSide(com) ){ 

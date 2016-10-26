@@ -45,9 +45,11 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.ICellCollection;
+import components.generic.IPoint;
 import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 
@@ -257,7 +259,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 				if(activeDataset().getCollection().hasConsensusNucleus()){
 					double x = 0;
 					double y = 0;
-					XYPoint point = new XYPoint(x, y);
+					IPoint point = new XYPoint(x, y);
 					
 					activeDataset().getCollection().getConsensusNucleus().moveCentreOfMass(point);;
 					refreshChartCache(getDatasets());
@@ -319,10 +321,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				if(activeDataset().getCollection().hasConsensusNucleus()){
-					BorderPoint orientationPoint = activeDataset().getCollection().getConsensusNucleus().getBorderTag(Tag.ORIENTATION_POINT);
+					IBorderPoint orientationPoint = activeDataset().getCollection()
+							.getConsensusNucleus()
+							.getBorderTag(Tag.ORIENTATION_POINT);
 					activeDataset().getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
 					refreshChartCache(getDatasets());
-//					update(activeDatasetToList());
 				}
 			}
 		});
@@ -477,7 +480,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
 			if(activeDataset().getCollection().hasConsensusNucleus()){
 
-				BorderPoint orientationPoint = activeDataset()
+				IBorderPoint orientationPoint = activeDataset()
 						.getCollection()
 						.getConsensusNucleus()
 						.getBorderTag(Tag.ORIENTATION_POINT);
@@ -563,7 +566,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
 				double x = 0;
 				double y = 0;
-				XYPoint point = new XYPoint(x, y);
+				IPoint point = new XYPoint(x, y);
 				
 				activeDataset().getCollection().getConsensusNucleus().moveCentreOfMass(point);;
 				this.update(activeDatasetToList());

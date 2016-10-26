@@ -39,13 +39,14 @@ import java.util.List;
 
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 
 public class AsymmetricNucleus
   extends RoundNucleus
 {
 
 	private static final long serialVersionUID = 1L;
-	private transient List<BorderPoint> tailEstimatePoints = new ArrayList<BorderPoint>(0); // holds the points considered to be sperm tails before filtering
+	private transient List<IBorderPoint> tailEstimatePoints = new ArrayList<IBorderPoint>(0); // holds the points considered to be sperm tails before filtering
 	protected transient boolean clockwiseRP = false; // is the original orientation of the nucleus with RP clockwise to the CoM, or not
 
   public AsymmetricNucleus(Nucleus n) {
@@ -78,7 +79,7 @@ public class AsymmetricNucleus
     -----------------------
   */
   
-  public List<BorderPoint> getEstimatedTailPoints(){
+  public List<IBorderPoint> getEstimatedTailPoints(){
     return this.tailEstimatePoints;
   }
 
@@ -92,7 +93,7 @@ public class AsymmetricNucleus
 	  return this.clockwiseRP;
   }
 
-  protected void addTailEstimatePosition(BorderPoint p){
+  protected void addTailEstimatePosition(IBorderPoint p){
     this.tailEstimatePoints.add(p);
   }
   
@@ -100,7 +101,7 @@ public class AsymmetricNucleus
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 //	  finest("\tReading asymmetric nucleus");
 	  in.defaultReadObject();
-	  tailEstimatePoints = new ArrayList<BorderPoint>(0);
+	  tailEstimatePoints = new ArrayList<IBorderPoint>(0);
 	  clockwiseRP = false;
 //	  finest("\tRead asymmetric nucleus");
   }

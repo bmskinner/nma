@@ -32,13 +32,14 @@ import analysis.IAnalysisDataset;
 import utility.Constants;
 import components.AbstractCellularComponent;
 import components.ICellCollection;
+import components.active.generic.FloatPoint;
 import components.generic.Equation;
+import components.generic.IPoint;
 import components.generic.IProfile;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.NucleusType;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
@@ -128,7 +129,7 @@ public class CurveRefolder extends AnalysisWorker {
 
 		try{ 
 
-			refoldNucleus.moveCentreOfMass(new XYPoint(0, 0));
+			refoldNucleus.moveCentreOfMass(new FloatPoint(0, 0));
 
 			if(collection.size()>1){
 				
@@ -246,9 +247,9 @@ public class CurveRefolder extends AnalysisWorker {
 			int prevIndex = AbstractCellularComponent.wrapIndex(i-1, refoldNucleus.getBorderLength());
 			int nextIndex = AbstractCellularComponent.wrapIndex(i+1, refoldNucleus.getBorderLength());
 						
-			BorderPoint thisPoint = refoldNucleus.getBorderPoint(i);
-			BorderPoint prevPoint = refoldNucleus.getBorderPoint(prevIndex);
-			BorderPoint nextPoint = refoldNucleus.getBorderPoint(nextIndex);
+			IBorderPoint thisPoint = refoldNucleus.getBorderPoint(i);
+			IBorderPoint prevPoint = refoldNucleus.getBorderPoint(prevIndex);
+			IBorderPoint nextPoint = refoldNucleus.getBorderPoint(nextIndex);
 
 			/* get the point o,  half way between the previous point p and next point n:
 			 * 
@@ -260,7 +261,7 @@ public class CurveRefolder extends AnalysisWorker {
 
 			Equation eq = new Equation(prevPoint, nextPoint);
 			double distance = prevPoint.getLengthTo(nextPoint) / 2;
-			XYPoint newPoint = eq.getPointOnLine(prevPoint, distance);
+			IPoint newPoint = eq.getPointOnLine(prevPoint, distance);
 						
 			/* get the point r,  half way between o and this point x:
 			 * 
@@ -272,7 +273,7 @@ public class CurveRefolder extends AnalysisWorker {
 			 */
 			Equation eq2 = new Equation(newPoint, thisPoint);
 			double distance2 = newPoint.getLengthTo(thisPoint) / 2;
-			XYPoint replacementPoint = eq2.getPointOnLine(newPoint, distance2);
+			IPoint replacementPoint = eq2.getPointOnLine(newPoint, distance2);
 			
 			boolean ok = checkPositionIsOK(newPoint, refoldNucleus, i, minDistance, maxDistance);
 
@@ -336,7 +337,7 @@ public class CurveRefolder extends AnalysisWorker {
 //		log("3bi testNucleus has "+ testNucleus.getProfile(ProfileType.ANGLE).getSegmentCount());
 		
 		// Get a copy of the point at this index
-		BorderPoint p = testNucleus.getBorderPoint(index);
+		IBorderPoint p = testNucleus.getBorderPoint(index);
 
 		// Save the old position
 		double oldX = p.getX();
@@ -352,7 +353,7 @@ public class CurveRefolder extends AnalysisWorker {
 
 
 		// Check the new point is valid
-		XYPoint newPoint = new XYPoint(newX, newY);
+		IPoint newPoint = new FloatPoint(newX, newY);
 
 		boolean ok = checkPositionIsOK(newPoint, testNucleus, index, minDistance, maxDistance);
 
@@ -392,7 +393,7 @@ public class CurveRefolder extends AnalysisWorker {
 	 * @param max the max acceptable distance between points
 	 * @return
 	 */
-	private boolean checkPositionIsOK(XYPoint point,  Nucleus n, int index, double min, double max){
+	private boolean checkPositionIsOK(IPoint point,  Nucleus n, int index, double min, double max){
 		double distanceToPrev = point.getLengthTo( n.getBorderPoint( AbstractCellularComponent.wrapIndex(index-1, n.getBorderLength()) ) );
 		double distanceToNext = point.getLengthTo( n.getBorderPoint( AbstractCellularComponent.wrapIndex(index+1, n.getBorderLength()) ) );
 
@@ -430,9 +431,9 @@ public class CurveRefolder extends AnalysisWorker {
 		double bestDistance = 180;
 
 		for(int i=0;i<n.getBorderLength();i++){
-			XYPoint p = n.getBorderPoint(i);
+			IPoint p = n.getBorderPoint(i);
 			double distance = p.getLengthTo(n.getCentreOfMass());
-			double pAngle = n.getCentreOfMass().findAngle( p, new XYPoint(0,-10));
+			double pAngle = n.getCentreOfMass().findAngle( p, new FloatPoint(0,-10));
 			if(p.getX()<0){
 				pAngle = 360-pAngle;
 			}

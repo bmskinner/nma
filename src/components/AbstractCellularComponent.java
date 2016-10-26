@@ -39,9 +39,12 @@ import java.util.logging.Level;
 
 import analysis.image.ImageConverter;
 import logging.Loggable;
+import components.active.generic.DefaultBorderPoint;
+import components.active.generic.FloatPoint;
+import components.generic.IPoint;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 import ij.IJ;
@@ -79,7 +82,7 @@ public abstract class AbstractCellularComponent
 	/**
 	 * The centre of the object.
 	 */
-	private XYPoint centreOfMass = new XYPoint(0,0);
+	private IPoint centreOfMass = new FloatPoint(0,0);
 	
 	/**
 	 * The statistical values stored for this object, which should
@@ -124,7 +127,7 @@ public abstract class AbstractCellularComponent
 	/**
 	 * The points around the border of the object. 
 	 */
-	private List<BorderPoint> borderList    = new ArrayList<BorderPoint>(0);
+	private List<IBorderPoint> borderList    = new ArrayList<IBorderPoint>(0);
 	
 	private transient SoftReference<ImageProcessor> imageRef = new SoftReference<ImageProcessor>(null); // allow caching of images while memory is available
 	
@@ -165,7 +168,7 @@ public abstract class AbstractCellularComponent
 	 * @param position
 	 * @param centreOfMass
 	 */
-	public AbstractCellularComponent(Roi roi, File f, int channel, double[] position, XYPoint centreOfMass){
+	public AbstractCellularComponent(Roi roi, File f, int channel, double[] position, IPoint centreOfMass){
 		this(roi, f, channel, position);
 		this.centreOfMass = centreOfMass;
 	}
@@ -190,7 +193,7 @@ public abstract class AbstractCellularComponent
 		FloatPolygon polygon = roi.getInterpolatedPolygon(1,smooth);
 
 		for(int i=0; i<polygon.npoints; i++){
-			BorderPoint point = new BorderPoint( polygon.xpoints[i], polygon.ypoints[i]);
+			IBorderPoint point = new DefaultBorderPoint( polygon.xpoints[i], polygon.ypoints[i]);
 
 			if(i>0){
 				point.setPrevPoint(borderList.get(i-1));
@@ -229,7 +232,7 @@ public abstract class AbstractCellularComponent
 		this.channel           = a.getChannel();
 		this.scale 			   = a.getScale();
 		this.borderList        = a.getBorderList();
-		this.centreOfMass      = new XYPoint(a.getCentreOfMass());
+		this.centreOfMass      = new FloatPoint(a.getCentreOfMass());
 	}
 	
 
@@ -426,11 +429,11 @@ public abstract class AbstractCellularComponent
 		return this.statistics.keySet().toArray(new PlottableStatistic[0]);
 	}
 	
-	public XYPoint getCentreOfMass() {
+	public IPoint getCentreOfMass() {
 		return centreOfMass;
 	}
 	
-	public XYPoint getOriginalCentreOfMass() {
+	public IPoint getOriginalCentreOfMass() {
 		
 		double minX = this.getBounds().getX();
 		double minY = this.getBounds().getY();
@@ -438,7 +441,7 @@ public abstract class AbstractCellularComponent
 		double diffX = position[CellularComponent.X_BASE] - minX;
 		double diffY = position[CellularComponent.Y_BASE] - minY;
 		
-		XYPoint com = new XYPoint(centreOfMass.getX()+diffX, centreOfMass.getY()+diffY);
+		IPoint com = new FloatPoint(centreOfMass.getX()+diffX, centreOfMass.getY()+diffY);
 		
 		return com;
 	}
@@ -451,7 +454,7 @@ public abstract class AbstractCellularComponent
 	 * the border points
 	 * @param centreOfMass
 	 */
-	public void setCentreOfMassDirectly(XYPoint centreOfMass) {
+	public void setCentreOfMassDirectly(IPoint centreOfMass) {
 		this.centreOfMass = centreOfMass;
 	}
 
@@ -472,18 +475,18 @@ public abstract class AbstractCellularComponent
 	}
 
 
-	public BorderPoint getBorderPoint(int i){
+	public IBorderPoint getBorderPoint(int i){
 		return this.borderList.get(i);
 	}
 	
-	public BorderPoint getOriginalBorderPoint(int i){
-		BorderPoint p = getBorderPoint(i);
-		return new BorderPoint( p.getX() + getPosition()[X_BASE], p.getY() + getPosition()[Y_BASE]);
+	public IBorderPoint getOriginalBorderPoint(int i){
+		IBorderPoint p = getBorderPoint(i);
+		return new DefaultBorderPoint( p.getX() + getPosition()[X_BASE], p.getY() + getPosition()[Y_BASE]);
 	}
 	
-	public int getBorderIndex(BorderPoint p){
+	public int getBorderIndex(IBorderPoint p){
 		int i = 0;
-		for(BorderPoint n : borderList){
+		for(IBorderPoint n : borderList){
 			if( n.getX()==p.getX() && n.getY()==p.getY()){
 				return i;
 			}
@@ -498,23 +501,23 @@ public abstract class AbstractCellularComponent
 		this.borderList.get(i).setY(y);
 	}
 	
-	public void updateBorderPoint(int i, XYPoint p){
+	public void updateBorderPoint(int i, IPoint p){
 		this.updateBorderPoint(i, p.getX(), p.getY());
 	}
 
-	public List<BorderPoint> getBorderList(){
-		List<BorderPoint> result = new ArrayList<BorderPoint>(0);
+	public List<IBorderPoint> getBorderList(){
+		List<IBorderPoint> result = new ArrayList<IBorderPoint>(0);
 
-		for(BorderPoint n : borderList){
+		for(IBorderPoint n : borderList){
 			
-			BorderPoint point = new BorderPoint(n);			
+			IBorderPoint point = new DefaultBorderPoint(n);			
 			result.add(point);
 		}
 		
 		// Link points
 				
 		for(int i=0; i<result.size(); i++){
-			BorderPoint point = result.get(i);
+			IBorderPoint point = result.get(i);
 			
 			if(i>0 && i<result.size()-1){
 				point.setNextPoint(result.get(i+1));
@@ -523,30 +526,30 @@ public abstract class AbstractCellularComponent
 		}
 		
 		// Set first and last
-		BorderPoint first = result.get(0);
+		IBorderPoint first = result.get(0);
 		first.setNextPoint(result.get(1));
 		first.setPrevPoint(result.get(result.size()-1));
 		
-		BorderPoint last = result.get(result.size()-1);
+		IBorderPoint last = result.get(result.size()-1);
 		last.setNextPoint(result.get(0));
 		last.setPrevPoint(result.get(result.size()-2));
 		
 		return result;
 	}
 	
-	public List<BorderPoint> getOriginalBorderList(){
-		List<BorderPoint> result = new ArrayList<BorderPoint>(0);
-		for(BorderPoint p : borderList){
-			result.add(new BorderPoint( p.getX() + getPosition()[X_BASE], p.getY() + getPosition()[Y_BASE]));
+	public List<IBorderPoint> getOriginalBorderList(){
+		List<IBorderPoint> result = new ArrayList<IBorderPoint>(borderList.size());
+		for(IBorderPoint p : borderList){
+			result.add(new DefaultBorderPoint( p.getX() + getPosition()[X_BASE], p.getY() + getPosition()[Y_BASE]));
 		}
 		return result;
 	}
 	
-	public void setBorderList(List<BorderPoint> list){
+	public void setBorderList(List<IBorderPoint> list){
 		
 		// ensure the new border list is linked properly
 		for(int i=0; i<list.size(); i++){
-			BorderPoint p = list.get(i);
+			IBorderPoint p = list.get(i);
 			if(i>0){
 				p.setPrevPoint(list.get(i-1));
 				p.prevPoint().setNextPoint(p);
@@ -562,10 +565,10 @@ public abstract class AbstractCellularComponent
 	 * @param p
 	 * @return
 	 */
-	public boolean containsPoint(XYPoint p){
+	public boolean containsPoint(IPoint p){
 		
 		// Fast check - is the point within the bounding rectangle?
-		if( ! this.getBounds().contains(p.asPoint())){
+		if( ! this.getBounds().contains(p.toPoint2D())){
 			return false;			
 		} 
 		
@@ -597,7 +600,7 @@ public abstract class AbstractCellularComponent
 	 * @param p
 	 * @return
 	 */
-	public boolean containsOriginalPoint(XYPoint p){
+	public boolean containsOriginalPoint(IPoint p){
 
 		// Check detailed position
 		return this.createOriginalPolygon().contains( (float)p.getX(), (float)p.getY() );
@@ -671,11 +674,11 @@ public abstract class AbstractCellularComponent
 	/*
 	Flip the X positions of the border points around an X position
 	 */
-	public void flipXAroundPoint(XYPoint p){
+	public void flipXAroundPoint(IPoint p){
 
 		double xCentre = p.getX();
 
-		for(BorderPoint n : borderList){
+		for(IBorderPoint n : borderList){
 			double dx = xCentre - n.getX();
 			double xNew = xCentre + dx;
 			n.setX(xNew);
@@ -686,8 +689,8 @@ public abstract class AbstractCellularComponent
 	public double getMedianDistanceBetweenPoints(){
 		double[] distances = new double[this.borderList.size()];
 		for(int i=0;i<this.borderList.size();i++){
-			BorderPoint p = this.getBorderPoint(i);
-			BorderPoint next = this.getBorderPoint( wrapIndex(i+1, this.borderList.size()));
+			IBorderPoint p = this.getBorderPoint(i);
+			IBorderPoint next = this.getBorderPoint( wrapIndex(i+1, this.borderList.size()));
 			distances[i] = p.getLengthTo(next);
 		}
 		return new Quartile(distances, Quartile.MEDIAN).doubleValue();
@@ -699,7 +702,7 @@ public abstract class AbstractCellularComponent
 	 * the nuclear centre of mass is at the given point
 	 * @param point the new centre of mass
 	 */
-	public void moveCentreOfMass(XYPoint point){
+	public void moveCentreOfMass(IPoint point){
 		
 		// get the difference between the x and y positions 
 		// of the points as offsets to apply
@@ -721,11 +724,11 @@ public abstract class AbstractCellularComponent
 		double newX =  centreOfMass.getX() + xOffset;
 		double newY =  centreOfMass.getY() + yOffset;
 //
-		XYPoint newCentreOfMass = new XYPoint(newX, newY);
+		IPoint newCentreOfMass = new FloatPoint(newX, newY);
 
 		/// update each border point
 		for(int i=0; i<this.getBorderLength(); i++){
-			XYPoint p = this.getBorderPoint(i);
+			IPoint p = this.getBorderPoint(i);
 
 			double x = p.getX() + xOffset;
 			double y = p.getY() + yOffset;
@@ -798,13 +801,13 @@ public abstract class AbstractCellularComponent
 		return toOffsetShape(diffX, diffY);
 	}
 	
-	public List<XYPoint> getPixelsAsPoints(){
+	public List<IPoint> getPixelsAsPoints(){
 		
 		Rectangle roiBounds = this.getBounds();
 		
 		
 		// Get a list of all the points within the ROI
-		List<XYPoint> result = new ArrayList<XYPoint>(0);
+		List<IPoint> result = new ArrayList<IPoint>(0);
 		
 		// get the bounding box of the roi
 		// make a list of all the pixels in the roi
@@ -825,7 +828,7 @@ public abstract class AbstractCellularComponent
 				
 				if(this.containsPoint(x, y)){
 //					IJ.log(x+", "+y);
-					result.add(new XYPoint(x, y));
+					result.add(new FloatPoint(x, y));
 				}
 			}
 		}
@@ -846,10 +849,10 @@ public abstract class AbstractCellularComponent
 	private Shape toOffsetShape(double xOffset, double yOffset){
 		Path2D.Double path = new Path2D.Double();
 		
-		BorderPoint first = borderList.get(0);
+		IBorderPoint first = borderList.get(0);
 		path.moveTo(first.getX()+xOffset, first.getY()+yOffset);
 		
-		for(BorderPoint b : this.borderList){
+		for(IBorderPoint b : this.borderList){
 			path.lineTo(b.getX()+xOffset, b.getY()+yOffset);
 		}
 		path.closePath();
@@ -866,7 +869,7 @@ public abstract class AbstractCellularComponent
 		float[] ypoints = new float[borderList.size()+1];
 
 		for(int i=0;i<borderList.size();i++){
-			BorderPoint p = borderList.get(i);
+			IBorderPoint p = borderList.get(i);
 			xpoints[i] = (float) p.getX() + xOffset;
 			ypoints[i] = (float) p.getY() + yOffset;
 		}
@@ -942,7 +945,7 @@ public abstract class AbstractCellularComponent
 
 			for(int y=-halfY, aY=0; aY<height; y++, aY++ ){
 
-				result[aY][aX] = this.containsPoint( new XYPoint(x, y) );
+				result[aY][aX] = this.containsPoint( new FloatPoint(x, y) );
 
 			}
 			
@@ -957,7 +960,7 @@ public abstract class AbstractCellularComponent
 	Used for obtaining a consensus between potential tail positions. Ensure we choose the
 	smaller distance
 	 */
-	public int getPositionBetween(BorderPoint pointA, BorderPoint pointB){
+	public int getPositionBetween(IBorderPoint pointA, IBorderPoint pointB){
 
 		int a = 0;
 		int b = 0;
@@ -988,7 +991,7 @@ public abstract class AbstractCellularComponent
 		return difference1 < difference2 ? mid1 : mid2;
 	}
 
-	public BorderPoint findOppositeBorder(BorderPoint p){
+	public IBorderPoint findOppositeBorder(IBorderPoint p){
 
 		int minDeltaYIndex = 0;
 		double minAngle = 180;
@@ -1011,14 +1014,14 @@ public abstract class AbstractCellularComponent
 		other points. Pick the point closest to 90 degrees. Can then get opposite
 		point. Defaults to input point if unable to find point.
 	*/
-	public BorderPoint findOrthogonalBorderPoint(BorderPoint a){
+	public IBorderPoint findOrthogonalBorderPoint(IBorderPoint a){
 
-		BorderPoint orthgonalPoint = a;
+		IBorderPoint orthgonalPoint = a;
 		double bestAngle = 0;
 
 		for(int i=0;i<this.getBorderLength();i++){
 
-			BorderPoint p = this.getBorderPoint(i);
+			IBorderPoint p = this.getBorderPoint(i);
 			double angle = this.getCentreOfMass().findAngle(a, p); 
 			if(Math.abs(90-angle)< Math.abs(90-bestAngle)){
 				bestAngle = angle;
@@ -1030,12 +1033,12 @@ public abstract class AbstractCellularComponent
 	
 	
 	
-	public BorderPoint findClosestBorderPoint(XYPoint p){
+	public IBorderPoint findClosestBorderPoint(IPoint p){
 		
 		double minDist = Double.MAX_VALUE;
-		BorderPoint result = null;
+		IBorderPoint result = null;
 		
-		for(BorderPoint bp : this.borderList){
+		for(IBorderPoint bp : this.borderList){
 			
 			if(bp.getLengthTo(p)< minDist){
 				minDist = bp.getLengthTo(p);
@@ -1079,13 +1082,20 @@ public abstract class AbstractCellularComponent
 			fine("Unexpected exception", e);
 			return;
 		}
-
-//		finest("\tSet final id field");
-		
-		// Read the standard fields
-		
+				
 		position     = (double[]) in.readObject();
-		centreOfMass = (XYPoint) in.readObject();
+		
+		Object o = in.readObject();
+		
+		boolean newFormat = false;
+		
+		if(o instanceof FloatPoint){
+			centreOfMass = (IPoint) o;
+			newFormat = true;
+		} else {
+			centreOfMass = new FloatPoint( ((XYPoint) o));
+		}
+		
 		statistics   = (Map<PlottableStatistic, Double>) in.readObject();
 		boundingRectangle = (Rectangle) in.readObject();
 		sourceFolder      = (File) in.readObject();
@@ -1093,15 +1103,21 @@ public abstract class AbstractCellularComponent
 		channel           = in.readInt();
 		scale             = in.readDouble();
 		
-		List<BorderPoint> list  = new ArrayList<BorderPoint>();
+		List<IBorderPoint> list  = new ArrayList<IBorderPoint>();
 
 		boolean isNextAvailable = in.readBoolean();
-		
     	while (isNextAvailable) {
-    		BorderPoint next = new BorderPoint(0, 0);
+    		IBorderPoint next = new DefaultBorderPoint(0, 0);
     		
-    		next.setX(in.readDouble());
-    		next.setY(in.readDouble());
+    		if(newFormat){
+    			next.setX(in.readFloat());
+        		next.setY(in.readFloat());
+    			
+    		} else {
+    			next.setX(in.readDouble());
+        		next.setY(in.readDouble());
+    		}
+
     		isNextAvailable = in.readBoolean();
     		
     		list.add(next);
@@ -1165,10 +1181,10 @@ public abstract class AbstractCellularComponent
 		// Now ensure we don't recurse over the BorderList
 		
 				
-		for(BorderPoint p : borderList){
+		for(IBorderPoint p : borderList){
 			out.writeBoolean(true); // Another point awaits
-			out.writeDouble(p.getX());
-			out.writeDouble(p.getY());
+			out.writeFloat( (float) p.getX());
+			out.writeFloat( (float) p.getY());
 		}
 		out.writeBoolean(false);
 //		finest("\tWrote abstract cellular component");	
@@ -1185,13 +1201,13 @@ public abstract class AbstractCellularComponent
 	 * below the centre of mass
 	 * @param bottomPoint
 	 */
-	public void rotatePointToBottom(XYPoint bottomPoint){
+	public void rotatePointToBottom(IPoint bottomPoint){
 
 		double angleToRotate 	= 0;
 		
 		// Calculate the current angle between the point and a vertical line
 		
-		XYPoint currentBottom = new XYPoint(getCentreOfMass().getX(), getMinY());
+		IPoint currentBottom = new FloatPoint(getCentreOfMass().getX(), getMinY());
 //		String state = "";
 		
 		double currentAngle = getCentreOfMass().findAngle(currentBottom, bottomPoint);
@@ -1243,9 +1259,9 @@ public abstract class AbstractCellularComponent
 		if(angle!=0){
 
 			for(int i=0; i<getBorderLength(); i++){
-				XYPoint p = getBorderPoint(i);
+				IPoint p = getBorderPoint(i);
 
-				XYPoint newPoint = getPositionAfterRotation(p, angle);
+				IPoint newPoint = getPositionAfterRotation(p, angle);
 
 				updateBorderPoint(i, newPoint.getX(), newPoint.getY());
 			}
@@ -1260,7 +1276,7 @@ public abstract class AbstractCellularComponent
 	 * @param angle the angle in degrees
 	 * @return
 	 */
-	protected XYPoint getPositionAfterRotation(XYPoint p, double angle){
+	protected IPoint getPositionAfterRotation(IPoint p, double angle){
 		
 		// get the distance from the point to the centre of mass
 		double distance = p.getLengthTo(this.getCentreOfMass());
@@ -1275,7 +1291,7 @@ public abstract class AbstractCellularComponent
 		 * 
 		 */
 		double oldAngle = this.getCentreOfMass().findAngle( p,
-				new XYPoint(this.getCentreOfMass().getX(),-10));
+				new FloatPoint(this.getCentreOfMass().getX(),-10));
 
 
 		if(p.getX()<this.getCentreOfMass().getX()){
@@ -1285,7 +1301,7 @@ public abstract class AbstractCellularComponent
 		double newAngle = oldAngle + angle;
 		double newX = new AngleTools().getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
 		double newY = new AngleTools().getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
-		return new XYPoint(newX, newY);
+		return new FloatPoint(newX, newY);
 	}
 		
 }

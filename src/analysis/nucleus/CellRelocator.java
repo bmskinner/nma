@@ -15,6 +15,7 @@ import components.ICellCollection;
 import components.active.DefaultAnalysisDataset;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
+import components.generic.IPoint;
 import components.generic.XYPoint;
 
 /**
@@ -179,7 +180,7 @@ public class CellRelocator extends AnalysisWorker {
 		
 		
 		// get position
-		XYPoint com;
+		IPoint com;
 		
 		try {
 			com = getPosition(line);
@@ -201,7 +202,7 @@ public class CellRelocator extends AnalysisWorker {
 	 * @param com
 	 * @return
 	 */
-	private ICell copyCellFromRoot(File f, XYPoint com){
+	private ICell copyCellFromRoot(File f, IPoint com){
 		// find the nucleus
 		Set<ICell> cells = this.getDataset().getCollection().getCells(f);
 
@@ -220,7 +221,7 @@ public class CellRelocator extends AnalysisWorker {
 		return f;
 	}
 	
-	private XYPoint getPosition(String line) throws Exception {
+	private IPoint getPosition(String line) throws Exception {
 		String[] array = line.split("\\t");
 		String position = array[1];
 		

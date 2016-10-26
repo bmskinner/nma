@@ -7,6 +7,7 @@ import java.util.Set;
 import logging.Loggable;
 import stats.Stats;
 import components.generic.Equation;
+import components.generic.IPoint;
 import components.generic.XYPoint;
 
 public class NucleusMeshFace implements Loggable {
@@ -220,7 +221,7 @@ public class NucleusMeshFace implements Loggable {
 		return b.toString();
 	}
 	
-	public XYPoint getMidpoint(){
+	public IPoint getMidpoint(){
 		
 		double avgX = 0;
 		double avgY = 0;
@@ -251,9 +252,9 @@ public class NucleusMeshFace implements Loggable {
 	 * @param p
 	 * @return
 	 */
-	public boolean contains(XYPoint p){
+	public boolean contains(IPoint p){
 		
-		return this.toPath().contains(p.asPoint());
+		return this.toPath().contains(p.toPoint2D());
 
 	}
 	
@@ -393,7 +394,7 @@ public class NucleusMeshFace implements Loggable {
 	 * @param p the point within the face
 	 * @return
 	 */
-	private double getEdgeProportion(NucleusMeshVertex v, XYPoint p){
+	private double getEdgeProportion(NucleusMeshVertex v, IPoint p){
 		
 		// Line from vertex to point
 		Equation eq1 = new Equation(v.getPosition(), p);
@@ -409,7 +410,7 @@ public class NucleusMeshFace implements Loggable {
 		Equation eq2 = new Equation(o1.getPosition(), o2.getPosition());
 		
 		// Position on edge intercepting line from vertex through point p
-		XYPoint intercept = eq2.getIntercept(eq1);
+		IPoint intercept = eq2.getIntercept(eq1);
 		
 		// Proportion through edge
 		double proportion = oppEdge.getPositionProportion(intercept);
@@ -453,7 +454,7 @@ public class NucleusMeshFace implements Loggable {
 	 * @param p
 	 * @return
 	 */
-	public NucleusMeshFaceCoordinate getFaceCoordinate(XYPoint p){
+	public NucleusMeshFaceCoordinate getFaceCoordinate(IPoint p){
 		
 		if( ! contains(p)  ){
 			throw new IllegalArgumentException("Point is not within face: "+p.toString());
@@ -519,7 +520,7 @@ public class NucleusMeshFace implements Loggable {
 		 * @param face
 		 * @return
 		 */
-		public XYPoint getPixelCoordinate(NucleusMeshFace face){
+		public IPoint getPixelCoordinate(NucleusMeshFace face){
 			
 			// Identify the vertices
 			boolean usePeripheral = face.countVertices(true)==2;
@@ -548,17 +549,17 @@ public class NucleusMeshFace implements Loggable {
 //			finest(p1_p2.toString());
 			
 			// Draw lines
-			XYPoint i1_p1_prop = i1_p1.getProportionalPosition(this.p2);
+			IPoint i1_p1_prop = i1_p1.getProportionalPosition(this.p2);
 //			finest("Point along I1-P1: "+i1_p1_prop.toString());
 			
 			Equation eq1 = new Equation(p2.getPosition(), i1_p1_prop);
 			
-			XYPoint i1_p2_prop = i1_p2.getProportionalPosition(this.p1);
+			IPoint i1_p2_prop = i1_p2.getProportionalPosition(this.p1);
 //			finest("Point along I1-P2: "+i1_p2_prop.toString());
 			Equation eq2 = new Equation(p1.getPosition(), i1_p2_prop);
 						
 			// Find intersection
-			XYPoint position = eq1.getIntercept(eq2);
+			IPoint position = eq1.getIntercept(eq2);
 			
 			// Return at point
 //			finest("\tFound intercept: "+position.toString());

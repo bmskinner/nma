@@ -19,13 +19,14 @@
 package components;
 
 import ij.process.FloatPolygon;
+
 import java.awt.Shape;
 import java.util.List;
 import java.util.UUID;
 
+import components.generic.IPoint;
 import components.generic.MeasurementScale;
-import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import stats.PlottableStatistic;
 
 /**
@@ -139,14 +140,14 @@ public interface CellularComponent extends Imageable {
 	 * Get the position of the centre of mass of the component
 	 * @return
 	 */
-	public XYPoint getCentreOfMass();
+	public IPoint getCentreOfMass();
 
 	/**
 	 * Get the position of the centre of mass of the component
 	 * within the original source image
 	 * @return
 	 */
-	public XYPoint getOriginalCentreOfMass();
+	public IPoint getOriginalCentreOfMass();
 	
 	/*
 	 * 
@@ -160,21 +161,21 @@ public interface CellularComponent extends Imageable {
 	 * @param i
 	 * @return
 	 */
-	public BorderPoint getBorderPoint(int i);
+	public IBorderPoint getBorderPoint(int i);
 	
 	/**
 	 * Get a copy of the original (non-offset) border point at the given index
 	 * @param i
 	 * @return
 	 */
-	public BorderPoint getOriginalBorderPoint(int i);
+	public IBorderPoint getOriginalBorderPoint(int i);
 	
 	/**
 	 * Get the index of the given point in the border list
 	 * @param p
 	 * @return
 	 */
-	public int getBorderIndex(BorderPoint p);
+	public int getBorderIndex(IBorderPoint p);
 
 //	public double getDistance(int index);
 
@@ -193,7 +194,7 @@ public interface CellularComponent extends Imageable {
 	 * @param i the index
 	 * @param p the new postion
 	 */
-	public void updateBorderPoint(int i, XYPoint p);
+	public void updateBorderPoint(int i, IPoint p);
 	
 	/**
 	 * Get the length of the angle profile in index units
@@ -205,20 +206,20 @@ public interface CellularComponent extends Imageable {
 	 * Get a copy of the component border points in the border list
 	 * @return
 	 */
-	public List<BorderPoint> getBorderList();
+	public List<IBorderPoint> getBorderList();
 	
 	/**
 	 * Set the border points in the object border
 	 * @param list
 	 */
-	public void setBorderList(List<BorderPoint> list);
+	public void setBorderList(List<IBorderPoint> list);
 	
 	/**
 	 * Get a copy of the nucleus border points in the border list
 	 * offset to their original coordinates in the source image
 	 * @return
 	 */
-	public List<BorderPoint> getOriginalBorderList();
+	public List<IBorderPoint> getOriginalBorderList();
 
 	
 	/**
@@ -226,7 +227,7 @@ public interface CellularComponent extends Imageable {
 	 * @param p
 	 * @return
 	 */
-	public boolean containsPoint(XYPoint p);
+	public boolean containsPoint(IPoint p);
 	
 	/**
 	 * Test if the given point is within the offset nucleus
@@ -242,7 +243,7 @@ public interface CellularComponent extends Imageable {
 	 * @param p
 	 * @return
 	 */
-	public boolean containsOriginalPoint(XYPoint p);
+	public boolean containsOriginalPoint(IPoint p);
 	
 			
 	
@@ -274,7 +275,7 @@ public interface CellularComponent extends Imageable {
 	 * Flip the nucleus on the x-axis (horizontally) about the given point
 	 * @param p the point with the x coordinate to flip on
 	 */
-	public void flipXAroundPoint(XYPoint p);
+	public void flipXAroundPoint(IPoint p);
 
 	public double getMedianDistanceBetweenPoints();
 	
@@ -283,7 +284,7 @@ public interface CellularComponent extends Imageable {
 	 * the nuclear centre of mass is at the given point
 	 * @param point the new centre of mass
 	 */
-	public void moveCentreOfMass(XYPoint point);
+	public void moveCentreOfMass(IPoint point);
 	
 	/**
 	 * Translate the XY coordinates of each border point so that
@@ -345,17 +346,17 @@ public interface CellularComponent extends Imageable {
     For two NucleusBorderPoints in a Nucleus, find the point that lies halfway between them
     Used for obtaining a consensus between potential tail positions
 	 */
-	public int getPositionBetween(BorderPoint pointA, BorderPoint pointB);
+	public int getPositionBetween(IBorderPoint pointA, IBorderPoint pointB);
 
 	// For a position in the roi, draw a line through the CoM and get the intersection point
-	public BorderPoint findOppositeBorder(BorderPoint p);
+	public IBorderPoint findOppositeBorder(IBorderPoint p);
 
 	/*
     From the point given, create a line to the CoM. Measure angles from all 
     other points. Pick the point closest to 90 degrees. Can then get opposite
     point. Defaults to input point if unable to find point.
 	 */
-	public BorderPoint findOrthogonalBorderPoint(BorderPoint a);
+	public IBorderPoint findOrthogonalBorderPoint(IBorderPoint a);
 	
 	
 	/**
@@ -364,7 +365,7 @@ public interface CellularComponent extends Imageable {
 	 * @param p
 	 * @return
 	 */
-	public BorderPoint findClosestBorderPoint(XYPoint p);
+	public IBorderPoint findClosestBorderPoint(IPoint p);
 
 		
 	

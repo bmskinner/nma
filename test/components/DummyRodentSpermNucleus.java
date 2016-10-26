@@ -34,6 +34,8 @@ import java.util.UUID;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import components.generic.BorderTagObject;
+import components.generic.IPoint;
+import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileType;
@@ -41,6 +43,7 @@ import components.generic.SegmentedProfile;
 import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.SignalCollection;
 import components.nuclei.Nucleus;
 
@@ -54,14 +57,14 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	private static final double DEFAULT_AREA      = 2000;
 	private static final double DEFAULT_PERIMETER = 400;
 	
-	private Map<ProfileType, SegmentedProfile> profiles = new HashMap<ProfileType, SegmentedProfile>();
+	private Map<ProfileType, ISegmentedProfile> profiles = new HashMap<ProfileType, ISegmentedProfile>();
 	
 	private double area;
 	private double perimeter;
 	
 	private final String name;
 	
-	public DummyRodentSpermNucleus(String name, SegmentedProfile p){
+	public DummyRodentSpermNucleus(String name, ISegmentedProfile p){
 		this.name = name;
 		
 		try {
@@ -161,7 +164,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public void calculateSignalAnglesFromPoint(BorderPoint p) {
+	public void calculateSignalAnglesFromPoint(IBorderPoint p) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -284,13 +287,13 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public BorderPoint getOriginalBorderPoint(int i) {
+	public IBorderPoint getOriginalBorderPoint(int i) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public int getBorderIndex(BorderPoint p) {
+	public int getBorderIndex(IBorderPoint p) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -302,7 +305,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public void updateBorderPoint(int i, XYPoint p) {
+	public void updateBorderPoint(int i, IPoint p) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -313,25 +316,25 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public List<BorderPoint> getBorderList() {
+	public List<IBorderPoint> getBorderList() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void setBorderList(List<BorderPoint> list) {
+	public void setBorderList(List<IBorderPoint> list) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public List<BorderPoint> getOriginalBorderList() {
+	public List<IBorderPoint> getOriginalBorderList() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public boolean containsPoint(XYPoint p) {
+	public boolean containsPoint(IPoint p) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -343,7 +346,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public boolean containsOriginalPoint(XYPoint p) {
+	public boolean containsOriginalPoint(IPoint p) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -373,7 +376,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public void flipXAroundPoint(XYPoint p) {
+	public void flipXAroundPoint(IPoint p) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -385,7 +388,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public void moveCentreOfMass(XYPoint point) {
+	public void moveCentreOfMass(IPoint point) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -433,25 +436,25 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public int getPositionBetween(BorderPoint pointA, BorderPoint pointB) {
+	public int getPositionBetween(IBorderPoint pointA, IBorderPoint pointB) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public BorderPoint findOppositeBorder(BorderPoint p) {
+	public BorderPoint findOppositeBorder(IBorderPoint p) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public BorderPoint findOrthogonalBorderPoint(BorderPoint a) {
+	public IBorderPoint findOrthogonalBorderPoint(IBorderPoint a) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public BorderPoint findClosestBorderPoint(XYPoint p) {
+	public IBorderPoint findClosestBorderPoint(IPoint p) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -487,7 +490,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public List<XYPoint> getPixelsAsPoints() {
+	public List<IPoint> getPixelsAsPoints() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -552,12 +555,12 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public SegmentedProfile getProfile(ProfileType type) {
+	public ISegmentedProfile getProfile(ProfileType type) {
 		return profiles.get(type);
 	}
 
 	@Override
-	public void setProfile(ProfileType type, SegmentedProfile profile) {
+	public void setProfile(ProfileType type, ISegmentedProfile profile) {
 		profiles.put(type, profile);
 		
 	}
@@ -660,13 +663,13 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public SegmentedProfile getProfile(ProfileType type, Tag tag) {
+	public ISegmentedProfile getProfile(ProfileType type, Tag tag) {
 		return profiles.get(type);
 	}
 
 	@Override
 	public void setProfile(ProfileType type, Tag tag,
-			SegmentedProfile profile) throws Exception {
+			ISegmentedProfile profile) throws Exception {
 		setProfile(type, profile);
 		
 	}
@@ -702,7 +705,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public void rotatePointToBottom(XYPoint bottomPoint) {
+	public void rotatePointToBottom(IPoint bottomPoint) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -714,7 +717,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public XYPoint getOriginalCentreOfMass() {
+	public IPoint getOriginalCentreOfMass() {
 		// TODO Auto-generated method stub
 		return null;
 	}

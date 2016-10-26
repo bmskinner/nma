@@ -43,6 +43,7 @@ import components.ICell;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 
 /**
  * This is designed to coordinate crosshair positions between two chart panels,
@@ -120,7 +121,7 @@ public class CoupledProfileOutlineChartPanel implements Loggable{
 				double yValue = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).get(xValue);
 				
 				// Find the index of the border point with the current profile chart x value
-				BorderPoint p = getPointFromProfileIndex(xValue);
+				IBorderPoint p = getPointFromProfileIndex(xValue);
 				
 				// Update the crosshairs on both charts
 				xCrosshairProfile.setValue(xValue);
@@ -138,7 +139,7 @@ public class CoupledProfileOutlineChartPanel implements Loggable{
 					
 					int xValue = getProfileIndexFromChart(e.getX());
 					
-					BorderPoint p = getPointFromProfileIndex(xValue);
+					IBorderPoint p = getPointFromProfileIndex(xValue);
 					fireBorderPointEvent(p);
 				}
 			}
@@ -155,14 +156,13 @@ public class CoupledProfileOutlineChartPanel implements Loggable{
 		return xValue;
 	}
 	
-	private BorderPoint getPointFromProfileIndex(int index){
+	private IBorderPoint getPointFromProfileIndex(int index){
 		// Find the index of the border point with the current profile chart x value
 		int rpIndex = cell.getNucleus().getBorderIndex(Tag.REFERENCE_POINT);
 		int xIndex  = AbstractCellularComponent.wrapIndex(index+rpIndex, cell.getNucleus().getBorderLength()); 
 		
 		// Get that border point
-		BorderPoint p = cell.getNucleus().getBorderPoint(xIndex);
-		return p;
+		return cell.getNucleus().getBorderPoint(xIndex);
 	}
 	
 	public ChartPanel getProfilePanel(){
@@ -181,7 +181,7 @@ public class CoupledProfileOutlineChartPanel implements Loggable{
         listeners.remove( l );
     } 
     
-    protected synchronized void fireBorderPointEvent(BorderPoint p) {
+    protected synchronized void fireBorderPointEvent(IBorderPoint p) {
     	
     	BorderPointEvent event = new BorderPointEvent( this, p);
         Iterator<Object> iterator = listeners.iterator();
@@ -194,14 +194,14 @@ public class CoupledProfileOutlineChartPanel implements Loggable{
 	@SuppressWarnings("serial")
 	public class BorderPointEvent extends EventObject {
 
-		private BorderPoint p;
+		private IBorderPoint p;
 		
-		public BorderPointEvent(Object source, BorderPoint p) {
+		public BorderPointEvent(Object source, IBorderPoint p) {
 			super(source);
 			this.p = p;
 		}
 		
-		public BorderPoint getPoint(){
+		public IBorderPoint getPoint(){
 			return p;
 		}
 	}

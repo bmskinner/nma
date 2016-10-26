@@ -26,10 +26,11 @@ import org.jfree.data.xy.XYDataset;
 
 import analysis.profiles.Taggable;
 import components.CellularComponent;
+import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
@@ -168,7 +169,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 					int index = seg.getStartIndex()+j;
 					int offsetIndex = t.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
 
-					BorderPoint p = t.getBorderPoint(offsetIndex); // get the border points in the segment
+					IBorderPoint p = t.getBorderPoint(offsetIndex); // get the border points in the segment
 
 					xpoints[j] = p.getX()-0.5;
 					ypoints[j] = p.getY()-0.5;
@@ -217,7 +218,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 		double[] ypoints = new double[component.getOriginalBorderList().size()];
 
 		int i =0;
-		for(XYPoint p : component.getBorderList()){
+		for(IPoint p : component.getBorderList()){
 						
 			xpoints[i] = p.getX()-0.5;
 			ypoints[i] = p.getY()-0.5;
@@ -267,7 +268,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 		double[] ypoints = new double[nucleus.getHookRoi().size()];
 
 		int i =0;
-		for(XYPoint p : nucleus.getHookRoi()){
+		for(IPoint p : nucleus.getHookRoi()){
 			xpoints[i] = p.getX()-0.5;
 			ypoints[i] = p.getY()-0.5;
 			i++;

@@ -44,6 +44,7 @@ import utility.ArrayConverter;
 import utility.Constants;
 import utility.ArrayConverter.ArrayConversionException;
 import components.SpermTail;
+import components.generic.IPoint;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
 //import Skeletonize3D_.Skeletonize3D_;
@@ -467,7 +468,7 @@ public class TailDetector extends Detector {
 		for(SpermTail tail : tails){
 			
 			List<XYPoint> skeleton = tail.getSkeleton();
-			for(XYPoint p : skeleton){
+			for(IPoint p : skeleton){
 				if(nucleusOutline.contains( (float) p.getX(), (float) p.getY())){
 					result.add(tail);
 					log(Level.FINE, "Found tail matching nucleus");

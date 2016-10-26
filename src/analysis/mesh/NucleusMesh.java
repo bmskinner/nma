@@ -31,6 +31,7 @@ import java.util.logging.Level;
 
 import logging.Loggable;
 import components.AbstractCellularComponent;
+import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.generic.XYPoint;
@@ -185,7 +186,7 @@ public class NucleusMesh implements Loggable {
 	 * @param peripheral
 	 * @return
 	 */
-	private int addVertex(XYPoint p, boolean peripheral){
+	private int addVertex(IPoint p, boolean peripheral){
 		
 		if(peripheral){
 			int newIndex = peripheralVertices.size();
@@ -407,7 +408,7 @@ public class NucleusMesh implements Loggable {
 		double yStart = 0;
 		double yStep  = nucleusHeight / vertices;
 		
-		XYPoint pos = new XYPoint(xStart, yStart);
+		IPoint pos = new XYPoint(xStart, yStart);
 		
 		
 		// Straighten internal skeleton
@@ -621,7 +622,7 @@ public class NucleusMesh implements Loggable {
 	 * @param p
 	 * @return
 	 */
-	protected NucleusMeshFace getFaceContaining(XYPoint p){
+	protected NucleusMeshFace getFaceContaining(IPoint p){
 		if(nucleus.containsOriginalPoint(p)){
 			for(NucleusMeshFace f : faces){
 				if(f.contains(p)){
@@ -633,7 +634,7 @@ public class NucleusMesh implements Loggable {
 		return null;
 	}
 	
-	protected boolean hasFaceContaining(XYPoint p){
+	protected boolean hasFaceContaining(IPoint p){
 		
 		if(nucleus.containsOriginalPoint(p)){
 

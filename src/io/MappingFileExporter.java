@@ -29,7 +29,7 @@ import utility.Constants;
 import analysis.IAnalysisDataset;
 import components.CellularComponent;
 import components.ICell;
-import components.generic.XYPoint;
+import components.generic.IPoint;
 
 /**
  * Export the locations of the centre of mass of nuclei in a dataset
@@ -116,7 +116,7 @@ public class MappingFileExporter {
 			
 			double[] originalPosition = c.getNucleus().getPosition();
 
-			XYPoint com = c.getNucleus().getCentreOfMass();
+			IPoint com = c.getNucleus().getCentreOfMass();
 			
 			double x = com.getX()+originalPosition[CellularComponent.X_BASE];
 			double y = com.getY()+originalPosition[CellularComponent.Y_BASE];

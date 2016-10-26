@@ -42,6 +42,7 @@ import components.ICellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
+import components.generic.IPoint;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
 import components.generic.ISegmentedProfile;
@@ -49,8 +50,8 @@ import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.Tag;
-import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
@@ -1010,7 +1011,7 @@ public class NucleusDatasetCreator implements Loggable {
 		double[] ypoints = new double[n.getBorderLength()+1];
 		
 		for(int i=0; i<n.getBorderLength();i++){
-			BorderPoint p = n.getBorderPoint(i);
+			IBorderPoint p = n.getBorderPoint(i);
 			xpoints[i] = p.getX();
 			ypoints[i] = p.getY();
 		}
@@ -1113,7 +1114,7 @@ public class NucleusDatasetCreator implements Loggable {
 					// so the correct border point needs to be offset
 					int borderIndex = AbstractCellularComponent.wrapIndex(seg.getStartIndex()+j+pointIndex, n.getBorderLength());
 					
-					BorderPoint p = n.getBorderPoint(borderIndex); // get the border points in the segment
+					IBorderPoint p = n.getBorderPoint(borderIndex); // get the border points in the segment
 					xpoints[j] = p.getX();
 					ypoints[j] = p.getY();
 				}
@@ -1163,9 +1164,8 @@ public class NucleusDatasetCreator implements Loggable {
 			int index = AbstractCellularComponent.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getBorderLength());
 			
 			// get the border point at this index
-			BorderPoint p = n.getBorderPoint(index); // get the border points in the segment
-			
-//			IJ.log("Selecting border index: "+index+" from "+segment.getName()+" index "+segmentIndex);
+			IBorderPoint p = n.getBorderPoint(index); // get the border points in the segment
+
 
 			// Find points three indexes ahead and behind to make a triangle from
 			int prevIndex = AbstractCellularComponent.wrapIndex(index-3, n.getBorderLength());
@@ -1182,14 +1182,14 @@ public class NucleusDatasetCreator implements Loggable {
 			
 			// Select the index from the scaledRange corresponding to the position in the segment
 			// The scaledRange is aligned to the segment already
-			XYPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(AbstractCellularComponent.wrapIndex(segmentIndex, n.getBorderLength() )   )    )    );
-			XYPoint bPoint = perp.getPointOnLine(p, scaledRange.get(AbstractCellularComponent.wrapIndex(segmentIndex, n.getBorderLength() )));
+			IPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(AbstractCellularComponent.wrapIndex(segmentIndex, n.getBorderLength() )   )    )    );
+			IPoint bPoint = perp.getPointOnLine(p, scaledRange.get(AbstractCellularComponent.wrapIndex(segmentIndex, n.getBorderLength() )));
 
 			// determine which of the points is inside the nucleus and which is outside
 			
 			FloatPolygon nucleusRoi = n.createPolygon();
-			XYPoint innerPoint = nucleusRoi.contains(  (float) aPoint.getX(), (float) aPoint.getY() ) ? aPoint : bPoint;
-			XYPoint outerPoint = nucleusRoi.contains(  (float) bPoint.getX(), (float) bPoint.getY() ) ? aPoint : bPoint;
+			IPoint innerPoint = nucleusRoi.contains(  (float) aPoint.getX(), (float) aPoint.getY() ) ? aPoint : bPoint;
+			IPoint outerPoint = nucleusRoi.contains(  (float) bPoint.getX(), (float) bPoint.getY() ) ? aPoint : bPoint;
 
 			
 			// assign the points
@@ -1238,7 +1238,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 		Nucleus nucleus = cell.getNucleus();// draw the index points on the nucleus border
 		for(Tag tag : nucleus.getBorderTags().keySet()){
-			BorderPoint tagPoint = nucleus.getBorderPoint(tag);
+			IBorderPoint tagPoint = nucleus.getBorderPoint(tag);
 			double[] xpoints = { tagPoint.getX()-0.5, nucleus.getCentreOfMass().getX()-0.5 };
 			double[] ypoints = { tagPoint.getY()-0.5, nucleus.getCentreOfMass().getY()-0.5 };
 			double[][] data = { xpoints, ypoints };
@@ -1338,7 +1338,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 				int j =0;
 
-				for(BorderPoint p : n.getBorderList()){
+				for(IBorderPoint p : n.getBorderList()){
 					
 					double x = p.getX();
 					double y = p.getY();

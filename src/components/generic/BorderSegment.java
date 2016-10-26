@@ -90,7 +90,7 @@ public abstract class BorderSegment implements Serializable, Loggable {
 	 */
 	public double physicalLength(){
 		double result = 0;
-		for (XYPoint p : points){
+		for (IPoint p : points){
 			
 			if(!isLast(p)){
 				result += p.getLengthTo( points.get(points.indexOf(p)+1));
@@ -221,7 +221,7 @@ public abstract class BorderSegment implements Serializable, Loggable {
 	 * @param p the point to check
 	 * @return
 	 */
-	public boolean isLast(XYPoint p){
+	public boolean isLast(IPoint p){
 		if(p==null){
 			throw new IllegalArgumentException("Point is null");
 		}
@@ -237,7 +237,7 @@ public abstract class BorderSegment implements Serializable, Loggable {
 	 * @param p the point to check
 	 * @return
 	 */
-	public boolean isFirst(XYPoint p){
+	public boolean isFirst(IPoint p){
 		if(p==null){
 			throw new IllegalArgumentException("Point is null");
 		}
@@ -253,7 +253,7 @@ public abstract class BorderSegment implements Serializable, Loggable {
 	 * @param p
 	 * @return
 	 */
-	public boolean contains(XYPoint p){
+	public boolean contains(IPoint p){
 		if(p==null){
 			throw new IllegalArgumentException("Point is null");
 		}
@@ -268,7 +268,7 @@ public abstract class BorderSegment implements Serializable, Loggable {
 	 * Get the point at the centre of the segment
 	 * @return
 	 */
-	public XYPoint getMidpoint(){
+	public IPoint getMidpoint(){
 		int midpoint = (int) Math.floor(points.size()/2);
 		return points.get(midpoint);
 	}
@@ -278,7 +278,7 @@ public abstract class BorderSegment implements Serializable, Loggable {
 	 */
 	public void print(){
 		System.out.println("Segment: "+name+": Start: "+startIndex+" Length: "+length);
-		for(XYPoint p : points){
+		for(IPoint p : points){
 			System.out.println("\t"+p.toString());
 			
 		}

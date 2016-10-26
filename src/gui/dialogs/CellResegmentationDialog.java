@@ -63,6 +63,7 @@ import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
@@ -359,7 +360,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
 	@Override
 	public void borderPointEventReceived(BorderPointEvent event) {
-		BorderPoint p = event.getPoint();
+		IBorderPoint p = event.getPoint();
 		Nucleus n = workingCell.getNucleus();
 		
 		if(isSelectRP){

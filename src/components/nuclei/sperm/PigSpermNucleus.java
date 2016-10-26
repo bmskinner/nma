@@ -35,6 +35,7 @@ import components.generic.Profile;
 import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 
@@ -114,7 +115,7 @@ public class PigSpermNucleus
     	/*
     	 * The IP is opposite the OP
     	 */
-    	BorderPoint op = this.getBorderPoint(rpIndex);
+    	IBorderPoint op = this.getBorderPoint(rpIndex);
     	int ipIndex = getBorderIndex(this.findOppositeBorder(op));
     	setBorderTag(Tag.INTERSECTION_POINT, ipIndex);
     	

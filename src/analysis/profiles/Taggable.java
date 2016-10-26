@@ -27,6 +27,7 @@ import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.Tag;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 
 /**
  * Objects implementing this interface can have BorderTags assigned
@@ -70,7 +71,7 @@ public interface Taggable extends Profileable {
 	 * @param tag
 	 * @return
 	 */
-	public BorderPoint getBorderTag(Tag tag);
+	public IBorderPoint getBorderTag(Tag tag);
 	
 	/**
 	 * Check if the nucleus has the given border tag
@@ -141,7 +142,7 @@ public interface Taggable extends Profileable {
 	 * @param tag
 	 * @return
 	 */
-	public BorderPoint getBorderPoint(Tag tag); 
+	public IBorderPoint getBorderPoint(Tag tag); 
 	
 	/**
 	 * Get the border index of point in the border list, 

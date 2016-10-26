@@ -24,9 +24,10 @@ import java.util.List;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
 import components.generic.Equation;
+import components.generic.IPoint;
 import components.generic.MeasurementScale;
-import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.SignalCollection;
 import components.nuclei.Nucleus;
@@ -98,7 +99,7 @@ public class SignalAnalyser implements Loggable {
 							minDistanceToSignal = distanceToSignal;
 						}
 					}
-					BorderPoint borderPoint = n.getBorderPoint(minDeltaYIndex);
+					IBorderPoint borderPoint = n.getBorderPoint(minDeltaYIndex);
 					double nucleusCoMToBorder = borderPoint.getLengthTo(n.getCentreOfMass());
 					double signalCoMToNucleusCoM = n.getCentreOfMass().getLengthTo(signal.getCentreOfMass());
 					double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
@@ -124,7 +125,7 @@ public class SignalAnalyser implements Loggable {
 					double minDistance = n.getStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
 
 					for(int j = 0; j<n.getBorderLength();j++){
-						XYPoint p = n.getBorderPoint(j);
+						IPoint p = n.getBorderPoint(j);
 						double distance = p.getLengthTo(s.getCentreOfMass());
 
 						// find the point closest to the CoM

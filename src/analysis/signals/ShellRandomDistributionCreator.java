@@ -30,6 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import logging.Loggable;
 import analysis.signals.ShellDetector.Shell;
 import components.CellularComponent;
+import components.generic.IPoint;
 import components.generic.XYPoint;
 
 
@@ -69,7 +70,7 @@ public class ShellRandomDistributionCreator implements Loggable {
 			}
 			
 			
-			for(XYPoint p : list){
+			for(IPoint p : list){
 				int shell = detector.findShell(p);
 				
 				

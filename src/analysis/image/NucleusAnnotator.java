@@ -30,11 +30,11 @@ import java.util.UUID;
 
 import utility.Constants;
 import components.CellularComponent;
+import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.generic.XYPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.NuclearSignal;
-import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.SignalCollection;
 import components.nuclei.Nucleus;
@@ -64,14 +64,14 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 		return this;
 	}
 	
-	private NucleusAnnotator annotatePoint(XYPoint p, Color c){
+	private NucleusAnnotator annotatePoint(IPoint p, Color c){
 		ip.setColor(c);
 		ip.setLineWidth(3);
 		ip.drawDot( p.getXAsInt(), p.getYAsInt());
 		return this;
 	}
 	
-	private NucleusAnnotator annotateLine(XYPoint p1, XYPoint p2, Color c){
+	private NucleusAnnotator annotateLine(IPoint p1, IPoint p2, Color c){
 		ip.setColor(c);
 		ip.setLineWidth(1);
 		ip.drawLine(p1.getXAsInt(), p1.getYAsInt(), p2.getXAsInt(), p2.getYAsInt());
@@ -115,8 +115,8 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 
 	public NucleusAnnotator annotateMinFeret(Nucleus n){
 		int minIndex = n.getProfile(ProfileType.DIAMETER).getIndexOfMin();
-		BorderPoint narrow1 = n.getBorderPoint(minIndex);
-		BorderPoint narrow2 = n.findOppositeBorder(narrow1);
+		IBorderPoint narrow1 = n.getBorderPoint(minIndex);
+		IBorderPoint narrow2 = n.findOppositeBorder(narrow1);
 		return annotateLine(narrow1, narrow2, Color.MAGENTA);
 	}
 	
@@ -133,7 +133,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 					float[] ypoints = new float[seg.length()+1];
 					for(int j=0; j<=seg.length();j++){
 						int k = n.wrapIndex(seg.getStartIndex()+j);
-						BorderPoint p = n.getBorderPoint(k); // get the border points in the segment
+						IBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
 						xpoints[j] = (float) p.getX();
 						ypoints[j] = (float) p.getY();
 					}

@@ -14,10 +14,12 @@ import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellularComponent;
 import components.ICell;
+import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import gui.components.ColourSelecter;
@@ -124,8 +126,8 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		// Calculate angle for vertical rotation
 		Nucleus n = c.getNucleus();
 		
-		XYPoint topPoint;
-		XYPoint btmPoint;
+		IPoint topPoint;
+		IPoint btmPoint;
 		
 		if( ! n.hasBorderTag(Tag.TOP_VERTICAL) || ! n.hasBorderTag(Tag.BOTTOM_VERTICAL)){
 			topPoint = n.getCentreOfMass();
@@ -146,10 +148,10 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		
 
 		// Find which point is higher in the image
-		XYPoint upperPoint = topPoint.getY()>btmPoint.getY()? topPoint : btmPoint;
-		XYPoint lowerPoint = upperPoint==topPoint ? btmPoint : topPoint;
+		IPoint upperPoint = topPoint.getY()>btmPoint.getY()? topPoint : btmPoint;
+		IPoint lowerPoint = upperPoint==topPoint ? btmPoint : topPoint;
 
-		XYPoint comp = new XYPoint(lowerPoint.getX(),upperPoint.getY());
+		IPoint comp = new XYPoint(lowerPoint.getX(),upperPoint.getY());
 
 		/*
 		 *      LA             RA        RB         LB         
@@ -273,7 +275,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 				
 				for(int j=0; j<=seg.length();j++){
 					int k = AbstractCellularComponent.wrapIndex(seg.getStartIndex()+j, n.getBorderLength());
-					BorderPoint p = n.getBorderPoint(k); // get the border points in the segment
+					IBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
 					x[j] = (float) p.getX();
 					y[j] = (float) p.getY();
 				}

@@ -57,6 +57,7 @@ import components.active.generic.SegmentedFloatProfile;
 import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
+import components.generic.IPoint;
 import components.generic.IProfile;
 import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
@@ -64,6 +65,7 @@ import components.generic.ProfileType;
 import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
@@ -278,13 +280,13 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 
 
-	public BorderPoint getPoint(Tag tag){	
+	public IBorderPoint getPoint(Tag tag){	
 		int index = this.getBorderIndex(tag);
 		return this.getBorderPoint(index);
 	}
 	
 	@Override
-	public void moveCentreOfMass(XYPoint centreOfMass) {
+	public void moveCentreOfMass(IPoint centreOfMass) {
 		
 		double xOffset = centreOfMass.getX() - getCentreOfMass().getX();
 		double yOffset = centreOfMass.getY() - getCentreOfMass().getY();
@@ -370,7 +372,7 @@ public class RoundNucleus extends AbstractCellularComponent
 
 		if(this.hasBorderTag(Tag.TOP_VERTICAL) && this.hasBorderTag(Tag.BOTTOM_VERTICAL)){
 			
-			BorderPoint[] points = getBorderPointsForVerticalAlignment();
+			IBorderPoint[] points = getBorderPointsForVerticalAlignment();
 
 			testw.alignPointsOnVertical(points[0], points[1] );
 			
@@ -442,7 +444,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 
 	// do not move this into SignalCollection - it is overridden in RodentSpermNucleus
-	public void calculateSignalAnglesFromPoint(BorderPoint p) {
+	public void calculateSignalAnglesFromPoint(IBorderPoint p) {
 
 		for( UUID signalGroup : signalCollection.getSignalGroupIDs()){
 			
@@ -475,7 +477,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		if(type==ALL_POINTS || type==BORDER_POINTS){
 			result += "    Border:\n";
 			for(int i=0; i<this.getBorderLength(); i++){
-				BorderPoint p = this.getBorderPoint(i);
+				IBorderPoint p = this.getBorderPoint(i);
 				result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\t"+this.getBorderTag(i)+"\n";
 			}
 		}
@@ -484,7 +486,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			Map<BorderTagObject, Integer> pointHash = this.getBorderTags();
 
 			for(Tag s : pointHash.keySet()){
-			 BorderPoint p = getBorderPoint(pointHash.get(s));
+			 IBorderPoint p = getBorderPoint(pointHash.get(s));
 			 result += "    "+s+": "+p.getX()+"    "+p.getY()+" at index "+pointHash.get(s)+"\n";
 			}
 		}
@@ -600,8 +602,8 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 
 	
-	public BorderPoint getBorderTag(Tag tag){
-		BorderPoint result = new BorderPoint(0,0);
+	public IBorderPoint getBorderTag(Tag tag){
+		IBorderPoint result = new BorderPoint(0,0);
 		if(this.getBorderIndex(tag)>-1){
 			result = this.getBorderPoint((this.getBorderIndex(tag)));
 		} else {
@@ -610,7 +612,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		return result;
 	}
 	
-	public BorderPoint getBorderPoint(Tag tag){
+	public IBorderPoint getBorderPoint(Tag tag){
 		return getBorderTag(tag) ;
 	}
 		
@@ -907,14 +909,14 @@ public class RoundNucleus extends AbstractCellularComponent
 		IProfile profile = this.getProfile(type);
 		
 		// First previous point is the last point of the profile
-		XYPoint prevPoint = new XYPoint(0,profile.get(this.getBorderLength()-1));
+		IPoint prevPoint = new XYPoint(0,profile.get(this.getBorderLength()-1));
 		 
 		for (int i=0; i<this.getBorderLength();i++ ) {
 				double normalisedX = ((double)i/(double)this.getBorderLength())*100; // normalise to 100 length
 				
 				// We are measuring along the chart of angle vs position
 				// Each median angle value is treated as an XYPoint
-				XYPoint thisPoint = new XYPoint(normalisedX, profile.get(i));
+				IPoint thisPoint = new XYPoint(normalisedX, profile.get(i));
 				pathLength += thisPoint.getLengthTo(prevPoint);
 				prevPoint = thisPoint;
 		}
@@ -932,7 +934,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			profileMap.put(type, profile);
 		}
 		
-		List<BorderPoint> reversed = new ArrayList<BorderPoint>(0);
+		List<IBorderPoint> reversed = new ArrayList<IBorderPoint>(0);
 		for(int i=this.getBorderLength()-1; i>=0;i--){
 			reversed.add(this.getBorderPoint(i));
 		}
@@ -950,7 +952,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 
-	public BorderPoint getNarrowestDiameterPoint() {
+	public IBorderPoint getNarrowestDiameterPoint() {
 
 		int index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
 
@@ -1003,7 +1005,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		
 		if(useTVandBV){
-			BorderPoint[] points = getBorderPointsForVerticalAlignment();
+			IBorderPoint[] points = getBorderPointsForVerticalAlignment();
 			alignPointsOnVertical(points[0], points[1] );
 		} else {
 			
@@ -1021,15 +1023,15 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * point within the region covered by the line. 
 	 * @return
 	 */	
-	private BorderPoint[] getBorderPointsForVerticalAlignment(){
+	private IBorderPoint[] getBorderPointsForVerticalAlignment(){
 		
 		
-		BorderPoint topPoint    = this.getBorderTag(Tag.TOP_VERTICAL);
-		BorderPoint bottomPoint = this.getBorderTag(Tag.BOTTOM_VERTICAL);
+		IBorderPoint topPoint    = this.getBorderTag(Tag.TOP_VERTICAL);
+		IBorderPoint bottomPoint = this.getBorderTag(Tag.BOTTOM_VERTICAL);
 		
 		
 		// Find the border points between the top and bottom verticals
-		List<BorderPoint> pointsInRegion = new ArrayList<BorderPoint>();
+		List<IBorderPoint> pointsInRegion = new ArrayList<IBorderPoint>();
 		
 		int topIndex  = this.getBorderIndex(Tag.TOP_VERTICAL);
 		int btmIndex  = this.getBorderIndex(Tag.BOTTOM_VERTICAL);
@@ -1081,7 +1083,7 @@ public class RoundNucleus extends AbstractCellularComponent
 					s.rotate(angle);
 										
 					// get the new signal centre of mass based on the nucleus rotation
-					XYPoint p = getPositionAfterRotation(s.getCentreOfMass(), angle);
+					IPoint p = getPositionAfterRotation(s.getCentreOfMass(), angle);
 //					
 					s.moveCentreOfMass(p);					
 				});

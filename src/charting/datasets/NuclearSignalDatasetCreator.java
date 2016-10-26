@@ -55,6 +55,7 @@ import analysis.signals.NuclearSignalOptions;
 import analysis.signals.ShellRandomDistributionCreator;
 import components.CellCollection;
 import components.ICellCollection;
+import components.generic.IPoint;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
 import components.nuclear.ISignalGroup;
@@ -483,7 +484,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return the point of the signal centre of mass
 	 * @throws Exception 
 	 */
-	public XYPoint getXYCoordinatesForSignal(NuclearSignal n, Nucleus outline) throws Exception{
+	public IPoint getXYCoordinatesForSignal(NuclearSignal n, Nucleus outline) throws Exception{
 
 		double angle = n.getStatistic(SignalStatistic.ANGLE);
 
@@ -530,7 +531,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 					int signalCount = 0;
 					for(NuclearSignal n : collection.getSignalManager().getSignals(group)){
 
-						XYPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
+						IPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
 
 						xpoints[signalCount] = p.getX();
 						ypoints[signalCount] = p.getY();
@@ -556,7 +557,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			if(collection.getSignalManager().hasSignals(signalGroup)){
 
 				for(NuclearSignal n : collection.getSignalManager().getSignals(signalGroup)){
-					XYPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
+					IPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
 
 					// ellipses are drawn starting from x y at upper left. Provide an offset from the centre
 					double offset = n.getStatistic(SignalStatistic.RADIUS);

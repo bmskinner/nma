@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
+ *  	Copyright (C) 2016 Ben Skinner
  *   
  *     This file is part of Nuclear Morphology Analysis.
  *
@@ -16,69 +16,33 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-/*
-  -----------------------
-  XY POINT CLASS
-  -----------------------
-  This class contains the X and Y coordinates of a point as doubles.
-  Also contains methods for determining distance and overlap with other points
- */
 
-package components.generic;
+package components.active.generic;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 
 import java.awt.geom.Point2D;
-import java.io.Serializable;
 
-import logging.Loggable;
+import components.generic.IPoint;
+import components.generic.XYPoint;
 
-public class XYPoint  implements Serializable, Loggable, IPoint {
+public class FloatPoint 
+	extends Point2D.Float
+	implements IPoint {
 
 	private static final long serialVersionUID = 1L;
-	protected double x;
-	protected double y;
-
-	/**
-	 * Constructor using doubles. 
-	 *
-	 * @param x the x-coordinate
-	 * @param y the y-coordinate
-	 * @return An XYPoint at these coordinates
-	 */
-	public XYPoint (final double x, final double y){
-		this.x = x;
-		this.y = y;
+	
+	public FloatPoint(float x, float y){
+		super(x, y);
 	}
-
-	/**
-	 * Constructor using XYPoint. Copies
-	 * the x and y coordinates from the given
-	 * point
-	 *
-	 * @param p the XYPoint
-	 * @return An XYPoint at these coordinates
-	 */
-	public XYPoint(final IPoint p){
-		this.x = p.getX();
-		this.y = p.getY();
+	
+	public FloatPoint(double x, double y){
+		super( (float) x, (float) y);
 	}
-
-	/* (non-Javadoc)
-	 * @see components.generic.IPoint#getX()
-	 */
-	@Override
-	public double getX(){
-		return this.x;
-	}
-
-	/* (non-Javadoc)
-	 * @see components.generic.IPoint#getY()
-	 */
-	@Override
-	public double getY(){
-		return this.y;
+	
+	public FloatPoint(IPoint p){
+		super( (float) p.getX(), (float) p.getY());
 	}
 
 	/* (non-Javadoc)
@@ -102,7 +66,7 @@ public class XYPoint  implements Serializable, Loggable, IPoint {
 	 */
 	@Override
 	public void setX(double x){
-		this.x = x;
+		this.x = (float) x;
 	}
 
 	/* (non-Javadoc)
@@ -110,7 +74,7 @@ public class XYPoint  implements Serializable, Loggable, IPoint {
 	 */
 	@Override
 	public void setY(double y){
-		this.y = y;
+		this.y = (float) y;
 	}
 
 	/* (non-Javadoc)
@@ -118,8 +82,8 @@ public class XYPoint  implements Serializable, Loggable, IPoint {
 	 */
 	@Override
 	public void set(IPoint p){
-		this.x = p.getX();
-		this.y = p.getY();
+		this.x = (float) p.getX();
+		this.y = (float) p.getY();
 	}
 
 	/* (non-Javadoc)
@@ -223,15 +187,11 @@ public class XYPoint  implements Serializable, Loggable, IPoint {
 		return this.getXAsInt()+","+this.getYAsInt();
 	}
 
-
-	/* (non-Javadoc)
-	 * @see components.generic.IPoint#asPoint()
-	 */
 	@Override
-	public Point2D toPoint2D(){
-		return new Point2D.Double(x, y);
+	public Point2D toPoint2D() {
+		return this;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see components.generic.IPoint#findAngle(components.generic.IPoint, components.generic.IPoint)
 	 */
@@ -256,20 +216,13 @@ public class XYPoint  implements Serializable, Loggable, IPoint {
 		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
 		return roi.getAngle();
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see components.generic.IPoint#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		long temp;
-		temp = Double.doubleToLongBits(x);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(y);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		return result;
+		return super.hashCode();
 	}
 
 	/* (non-Javadoc)
@@ -283,10 +236,10 @@ public class XYPoint  implements Serializable, Loggable, IPoint {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		XYPoint other = (XYPoint) obj;
-		if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
+		FloatPoint other = (FloatPoint) obj;
+		if (x != other.x )
 			return false;
-		if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
+		if (y !=other.y)
 			return false;
 		return true;
 	}

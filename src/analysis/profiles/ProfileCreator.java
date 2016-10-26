@@ -28,7 +28,7 @@ import logging.Loggable;
 import components.active.generic.SegmentedFloatProfile;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 import components.nuclear.NucleusBorderSegment;
 
 /**
@@ -98,12 +98,12 @@ public class ProfileCreator implements Loggable {
 
 		
 		int index = 0;
-		Iterator<BorderPoint> it = target.getBorderList().iterator();
+		Iterator<IBorderPoint> it = target.getBorderList().iterator();
 		while(it.hasNext()){
 
-			BorderPoint point = it.next();
-			BorderPoint pointBefore = point.prevPoint(target.getWindowSize(ProfileType.ANGLE));
-			BorderPoint pointAfter  = point.nextPoint(target.getWindowSize(ProfileType.ANGLE));
+			IBorderPoint point = it.next();
+			IBorderPoint pointBefore = point.prevPoint(target.getWindowSize(ProfileType.ANGLE));
+			IBorderPoint pointAfter  = point.nextPoint(target.getWindowSize(ProfileType.ANGLE));
 
 			// Get the smallest angle between the points
 			float angle = (float) point.findAngle(pointBefore, pointAfter);
@@ -161,11 +161,11 @@ public class ProfileCreator implements Loggable {
 		float[] profile = new float[target.getBorderLength()];
 			
 		int index = 0;
-		Iterator<BorderPoint> it = target.getBorderList().iterator();
+		Iterator<IBorderPoint> it = target.getBorderList().iterator();
 		while(it.hasNext()){
 
-			BorderPoint point = it.next();
-			BorderPoint opp = target.findOppositeBorder(point);
+			IBorderPoint point = it.next();
+			IBorderPoint opp = target.findOppositeBorder(point);
 
 			profile[index++] = (float) point.getLengthTo(opp); 
 			
@@ -179,10 +179,10 @@ public class ProfileCreator implements Loggable {
 		float[] profile = new float[target.getBorderLength()];
 		
 		int index = 0;
-		Iterator<BorderPoint> it = target.getBorderList().iterator();
+		Iterator<IBorderPoint> it = target.getBorderList().iterator();
 		while(it.hasNext()){
 
-			BorderPoint point = it.next();
+			IBorderPoint point = it.next();
 			profile[index++] = (float) point.getLengthTo(target.getCentreOfMass()); 
 			
 		}

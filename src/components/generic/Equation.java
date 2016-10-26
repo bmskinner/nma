@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.util.List;
 
 import components.nuclear.BorderPoint;
+import components.nuclear.IBorderPoint;
 
 /*******************************************************************************
  *  	Copyright (C) 2015 Ben Skinner
@@ -58,9 +59,9 @@ public class Equation{
 	* @param b the second XYPoint
 	* @return An Equation describing the line between the points
 	*/
-	public Equation (XYPoint a, XYPoint b){
+	public Equation (IPoint a, IPoint b){
 
-		this(a.asPoint(), b.asPoint());
+		this(a.toPoint2D(), b.toPoint2D());
 	}
 	
 	/**
@@ -119,7 +120,7 @@ public class Equation{
 	 * @param p
 	 * @return
 	 */
-	public boolean isOnLine(XYPoint p){
+	public boolean isOnLine(IPoint p){
 		return p.getY() == (   (m * p.getX())    +c);
 	}
 
@@ -131,7 +132,7 @@ public class Equation{
 	* @param distance	the distance along the line from the point p
 	* @return The position <distance> away from <p>
 	*/
-	public XYPoint getPointOnLine(XYPoint p, double distance){
+	public IPoint getPointOnLine(IPoint p, double distance){
 
 		double xA = p.getX();
 
@@ -158,7 +159,7 @@ public class Equation{
 	* @param p	the XYPoint to measure from
 	* @return The Equation of the perpendicular line
 	*/
-	public Equation getPerpendicular(XYPoint p){
+	public Equation getPerpendicular(IPoint p){
 
 		if((int)p.getY()!=(int)this.getY(p.getX())){
 			return new Equation(0,0);
@@ -179,7 +180,7 @@ public class Equation{
 	* @param p	the XYPoint to intercept
 	* @return The Equation of the translated line
 	*/ 
-	public Equation translate(XYPoint p ){
+	public Equation translate(IPoint p ){
 
 		double oldY = this.getY(p.getX());
 		double desiredY = p.getY();
@@ -195,7 +196,7 @@ public class Equation{
 	 * @param eq
 	 * @return
 	 */
-	public XYPoint getIntercept(Equation eq){
+	public IPoint getIntercept(Equation eq){
 		// (this.m * x) + this.c = (eq.m * x) + eq.c
 		
 		// (this.m * x) - (eq.m * x) + this.c = eq.c
@@ -229,13 +230,13 @@ public class Equation{
 	 * @param proportion
 	 * @return
 	 */
-	public static XYPoint getProportionalDistance(XYPoint start, XYPoint end, double proportion){
+	public static IPoint getProportionalDistance(IPoint start, IPoint end, double proportion){
 				
 		Equation eq = new Equation(start, end);
 		double totalLength = start.getLengthTo(end);
 		double propLength  = totalLength * proportion;
 		
-		XYPoint p = eq.getPointOnLine(start, propLength);
+		IPoint p = eq.getPointOnLine(start, propLength);
 		
 		// check direction of the line
 		if(p.getLengthTo(end) > totalLength){
@@ -251,7 +252,7 @@ public class Equation{
 	 * @param p
 	 * @return
 	 */
-	public double getClosestDistanceToPoint(XYPoint p){
+	public double getClosestDistanceToPoint(IPoint p){
 		
 		// translate the equation to p
 		Equation tr = this.translate(p);
@@ -260,7 +261,7 @@ public class Equation{
 		Equation orth = tr.getPerpendicular(p);
 		
 		// find the point of intercept
-		XYPoint intercept = this.getIntercept(orth);
+		IPoint intercept = this.getIntercept(orth);
 //		IJ.log("Intercept: "+intercept.toString());
 		
 		// measure the distance between p and the intercept
@@ -275,13 +276,13 @@ public class Equation{
 	 * @param points
 	 * @return
 	 */
-	public static Equation calculateBestFitLine(List<BorderPoint> points){
+	public static Equation calculateBestFitLine(List<IBorderPoint> points){
 		
 		// Find the means of x and y
 		double xMean = 0;
 		double yMean = 0;
 		
-		for(BorderPoint p : points){
+		for(IBorderPoint p : points){
 			xMean += p.getX();
 			yMean += p.getY();
 		}
@@ -301,7 +302,7 @@ public class Equation{
 		double sumDiffs = 0;
 		double sumSquare = 0;
 		
-		for(BorderPoint p : points){
+		for(IBorderPoint p : points){
 			
 			double x = p.getX() - xMean;
 			double y = p.getY() - yMean;
