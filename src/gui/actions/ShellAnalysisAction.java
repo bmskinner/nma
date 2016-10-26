@@ -27,12 +27,13 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.signals.ShellAnalysisWorker;
 import analysis.signals.ShellDetector;
 
 public class ShellAnalysisAction extends ProgressableAction {
 
-	public ShellAnalysisAction(AnalysisDataset dataset, MainWindow mw) {
+	public ShellAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Shell analysis", mw);
 
 		SpinnerNumberModel sModel = new SpinnerNumberModel(ShellDetector.DEFAULT_SHELL_COUNT, 2, 10, 1);

@@ -56,6 +56,7 @@ import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 /**
  * The DetailPanels hold chart and table caches, and track other DetailPanels
@@ -67,8 +68,7 @@ import analysis.AnalysisDataset;
 @SuppressWarnings("serial")
 public abstract class DetailPanel 
 	extends JPanel 
-	implements  TabPanel, 
-				SignalChangeListener, 
+	implements  SignalChangeListener, 
 				DatasetEventListener, 
 				InterfaceEventListener, 
 				Loggable, 
@@ -79,7 +79,7 @@ public abstract class DetailPanel
 	private final List<Object> datasetListeners   = new CopyOnWriteArrayList<Object>();
 	private final List<Object> interfaceListeners = new CopyOnWriteArrayList<Object>();
 	
-	private volatile List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+	private volatile List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 	
 	private final List<DetailPanel> subPanels = new  ArrayList<DetailPanel>();
 	
@@ -122,7 +122,7 @@ public abstract class DetailPanel
 	 * this simply accesses the first dataset in the list provided
 	 * @return
 	 */
-	public AnalysisDataset activeDataset(){
+	public IAnalysisDataset activeDataset(){
 		return list.get(0);
 	}
 	
@@ -131,8 +131,8 @@ public abstract class DetailPanel
 	 * to pass the active dataset back to update()
 	 * @return
 	 */
-	public List<AnalysisDataset> activeDatasetToList(){
-		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+	public List<IAnalysisDataset> activeDatasetToList(){
+		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 		list.add(activeDataset());
 		return list;
 	}
@@ -157,7 +157,7 @@ public abstract class DetailPanel
 		return(this.list.size()>0);
 	}
 	
-	protected List<AnalysisDataset> getDatasets(){
+	protected List<IAnalysisDataset> getDatasets(){
 		return this.list;
 	}
 	
@@ -261,7 +261,8 @@ public abstract class DetailPanel
 		}
 	}
 	
-	public synchronized void update(final List<AnalysisDataset> list){
+
+	public synchronized void update(final List<IAnalysisDataset> list){
 		
 //		if(this.isUpdating()){
 			finest(this.getClass().getName()+": Panel is already updating");
@@ -270,7 +271,7 @@ public abstract class DetailPanel
 			if(list!=null){
 				this.list = list;
 			} else {
-				this.list = new ArrayList<AnalysisDataset>(0);
+				this.list = new ArrayList<IAnalysisDataset>(0);
 			}
 			finest(this.getClass().getName()+": Set dataset list of "+this.list.size()+" datasets");
 			setUpdating(true);
@@ -466,7 +467,7 @@ public abstract class DetailPanel
 	 * Remove all charts from the cache. Does not invoke an update 
 	 * @param list
 	 */
-	public synchronized void clearChartCache(final List<AnalysisDataset> list){
+	public synchronized void clearChartCache(final List<IAnalysisDataset> list){
 		finest("Clearing chart cache for specific datasets");
 		this.getChartCache().clear(list);
 		finest("Panel chart cache cleared");
@@ -495,7 +496,7 @@ public abstract class DetailPanel
 	 * some of the charts in the chache, without recalculating everything
 	 * @param list
 	 */
-	public synchronized void refreshChartCache(final List<AnalysisDataset> list){
+	public synchronized void refreshChartCache(final List<IAnalysisDataset> list){
 		finest("Refreshing chart cache for specific datasets");
 		clearChartCache(list);
 		finest("Updating panel for specific datasets");
@@ -524,7 +525,7 @@ public abstract class DetailPanel
 	 * the given list, so they will be recalculated
 	 * @param list
 	 */
-	public synchronized void clearTableCache(final List<AnalysisDataset> list){
+	public synchronized void clearTableCache(final List<IAnalysisDataset> list){
 		finest("Clearing table cache for specific datasets");
 		this.getTableCache().clear(list);
 		if(this.hasSubPanels()){
@@ -550,7 +551,7 @@ public abstract class DetailPanel
 	 * the given list, so they will be recalculated
 	 * @param list
 	 */
-	public synchronized void refreshTableCache(final List<AnalysisDataset> list){
+	public synchronized void refreshTableCache(final List<IAnalysisDataset> list){
 		clearTableCache(list);
 		this.update(getDatasets());
 	}
@@ -624,7 +625,7 @@ public abstract class DetailPanel
     	}
     }
     
-    protected synchronized void fireDatasetEvent(String method, List<AnalysisDataset> list) {
+    protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list) {
     	
         DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);
         Iterator<Object> iterator = datasetListeners.iterator();
@@ -638,14 +639,14 @@ public abstract class DetailPanel
      * @param method
      * @param dataset
      */
-    protected synchronized void fireDatasetEvent(String method, AnalysisDataset dataset) {
+    protected synchronized void fireDatasetEvent(String method, IAnalysisDataset dataset) {
     	
-    	List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+    	List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 		list.add(dataset);
 		fireDatasetEvent(method, list);
     }
     
-    protected synchronized void fireDatasetEvent(String method, List<AnalysisDataset> list, AnalysisDataset template) {
+    protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list, IAnalysisDataset template) {
 
     	DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, template);
     	Iterator<Object> iterator = datasetListeners.iterator();

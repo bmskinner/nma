@@ -36,6 +36,7 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import gui.DatasetEvent;
 import gui.GlobalOptions;
 import gui.components.BorderTagEvent;
@@ -144,7 +145,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 						.setCell(this.getCellModel().getCell())
 						.setNormalised(false)
 						.setAlignment(ProfileAlignment.LEFT)
-						.setTag(BorderTagObject.REFERENCE_POINT)
+						.setTag(Tag.REFERENCE_POINT)
 						.setShowMarkers(true)
 						.setProfileType( type)
 						.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -166,7 +167,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 						.setCell(this.getCellModel().getCell())
 						.setNormalised(false)
 						.setAlignment(ProfileAlignment.LEFT)
-						.setTag(BorderTagObject.REFERENCE_POINT)
+						.setTag(Tag.REFERENCE_POINT)
 						.setShowMarkers(true)
 						.setProfileType( type)
 						.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -202,8 +203,8 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 			return new MorphologyChartFactory(options).makeIndividualNucleusProfileChart( );
 		}
 		
-		@Override
-		protected void setBorderTagAction(BorderTagObject tag, int newTagIndex){
+
+		protected void setBorderTagAction(Tag tag, int newTagIndex){
 
 			if(tag==null){
 				fine("Tag is null");
@@ -215,11 +216,11 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 
 			boolean wasLocked = this.getCellModel().getCell().getNucleus().isLocked();
 			this.getCellModel().getCell().getNucleus().setLocked(false);
-			this.getCellModel().getCell().getNucleus().setBorderTag(BorderTagObject.REFERENCE_POINT, tag, newTagIndex);
+			this.getCellModel().getCell().getNucleus().setBorderTag(Tag.REFERENCE_POINT, tag, newTagIndex);
 			this.getCellModel().getCell().getNucleus().updateVerticallyRotatedNucleus();
 			this.getCellModel().getCell().getNucleus().setLocked(wasLocked);
 
-			if(tag.equals(BorderTagObject.REFERENCE_POINT)){
+			if(tag.equals(Tag.REFERENCE_POINT)){
 				// Update the profile aggregate to use the new RP
 				activeDataset().getCollection().getProfileManager().createProfileCollections(true);
 			}

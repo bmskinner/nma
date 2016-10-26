@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.logging.Level;
 
 import analysis.AbstractProgressAction;
-import components.generic.BorderTagObject;
+import components.generic.IProfileCollection;
 import components.generic.Profile;
-import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.generic.Tag;
 import components.nuclei.Nucleus;
 
 /**
@@ -45,9 +45,9 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 	private final int low, high;
 	private final Nucleus[] nuclei;
 	private static final int THRESHOLD = 30; // The number of nuclei to split the task on
-	private final ProfileCollection pc;
+	private final IProfileCollection pc;
 	
-	private SegmentRecombiningTask(SegmentedProfile medianProfile, ProfileCollection pc, Nucleus[] nuclei, int low, int high) throws Exception{
+	private SegmentRecombiningTask(SegmentedProfile medianProfile, IProfileCollection pc, Nucleus[] nuclei, int low, int high) throws Exception{
 		
 		this.fitter        = new SegmentFitter(medianProfile);
 		this.low           = low;
@@ -57,7 +57,7 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 		this.medianProfile = medianProfile;
 	}
 	
-	public SegmentRecombiningTask(SegmentedProfile medianProfile, ProfileCollection pc, Nucleus[] nuclei) throws Exception{
+	public SegmentRecombiningTask(SegmentedProfile medianProfile, IProfileCollection pc, Nucleus[] nuclei) throws Exception{
 		this(medianProfile, pc, nuclei, 0, nuclei.length);
 	}
 
@@ -123,7 +123,7 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 
 		// recombine the segments to the lengths of the median profile segments
 
-		Profile recombinedProfile = fitter.recombine(n, BorderTagObject.REFERENCE_POINT);
+		Profile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
 
 		SegmentedProfile segmented = new SegmentedProfile(recombinedProfile, medianProfile.getOrderedSegments());
 		n.setProfile(ProfileType.FRANKEN, segmented);

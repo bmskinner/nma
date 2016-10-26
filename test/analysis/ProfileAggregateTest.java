@@ -24,6 +24,8 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import analysis.profiles.ProfileException;
+import components.generic.IProfile;
+import components.generic.IProfileAggregate;
 import components.generic.Profile;
 import components.generic.ProfileAggregate;
 
@@ -34,7 +36,7 @@ public class ProfileAggregateTest {
 
 		Integer length = null;
 		try {
-			ProfileAggregate tester = new ProfileAggregate(length);
+			IProfileAggregate tester = new ProfileAggregate(length);
 			fail("ProfileAggregate should not be created with null input");
 		} catch (Exception e) {
 			// expected
@@ -49,9 +51,9 @@ public class ProfileAggregateTest {
 
 		Integer length = 10;
 
-		ProfileAggregate tester = new ProfileAggregate(length);
+		IProfileAggregate tester = new ProfileAggregate(length);
 		
-		Profile xPositions = tester.getXPositions();
+		IProfile xPositions = tester.getXPositions();
 		
 		for( int i =0;i<length; i++){
 			assertEquals("Values should be identical", xArray[i], xPositions.asArray()[i],0);
@@ -62,16 +64,21 @@ public class ProfileAggregateTest {
 	public void addAProfileToTheAggregate(){
 		
 		double[] array   = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
-		Profile values = new Profile(array);
+		IProfile values = new Profile(array);
 
-		ProfileAggregate tester = new ProfileAggregate(10);
+		IProfileAggregate tester = new ProfileAggregate(10);
 		
 		for( int i=0;i<50; i++){
-			tester.addValues(values);
+			try {
+				tester.addValues(values);
+			} catch (ProfileException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		
-		Profile median;
+		IProfile median;
 		try {
 			median = tester.getMedian();
 			

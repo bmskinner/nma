@@ -32,9 +32,10 @@ import stats.Sum;
 import utility.ArrayConverter;
 import utility.ArrayConverter.ArrayConversionException;
 import utility.Constants;
-import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import analysis.IAnalysisDataset;
 import components.CellCollection;
+import components.ICellCollection;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
 import components.nuclear.SignalGroup;
@@ -48,16 +49,16 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 		
 	private static Map<UUID, ShellCounter> counters = new HashMap<UUID, ShellCounter>(0);
 		
-	public ShellAnalysisWorker(AnalysisDataset dataset, int shells){
+	public ShellAnalysisWorker(IAnalysisDataset dataset, int shells){
 		super(dataset);
 		this.shells = shells;
-		this.setProgressTotal(dataset.getCollection().getNucleusCount());
+		this.setProgressTotal(dataset.getCollection().size());
 	}
 		
 	@Override
 	protected Boolean doInBackground() {
 		
-		CellCollection collection = this.getDataset().getCollection();
+		ICellCollection collection = this.getDataset().getCollection();
 		
 		if( ! collection.getSignalManager().hasSignals()){
 			fine("No signals in population");
@@ -103,7 +104,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 	
 	private void analyseNucleus(Nucleus n){
 		
-		CellCollection collection = this.getDataset().getCollection();
+		ICellCollection collection = this.getDataset().getCollection();
 		
 		ShellDetector shellAnalyser;
 		try {
@@ -169,7 +170,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 	
 	private void createResults(){
 		// get stats and export
-		CellCollection collection = this.getDataset().getCollection();
+		ICellCollection collection = this.getDataset().getCollection();
 		
 		boolean addRandom = false;
 				
@@ -199,7 +200,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 	
 	private void addRandomSignal(){
 		
-		CellCollection collection = this.getDataset().getCollection();
+		ICellCollection collection = this.getDataset().getCollection();
 		
 		// Create a random sample distibution
 		if(collection.hasConsensusNucleus()){

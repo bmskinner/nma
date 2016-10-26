@@ -37,6 +37,7 @@ import stats.NucleusStatistic;
 import utility.Constants;
 import components.Cell;
 import components.CellularComponent;
+import components.ICell;
 import components.nuclei.Nucleus;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
@@ -150,7 +151,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			 */
 			List<Cell> cells = getCells(imageStack, file);
 		
-			for(Cell cell : cells){
+			for(ICell cell : cells){
 
 				drawNucleus(cell, openProcessor);
 			}
@@ -164,7 +165,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			
 			List<Cell> cells = getCells(imageStack, file);
 			
-			for(Cell cell : cells){
+			for(ICell cell : cells){
 
 				drawNucleus(cell, openProcessor);
 			}
@@ -218,7 +219,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 	 * @param cell
 	 * @param ip
 	 */
-	private void drawNucleus(Cell cell, ImageProcessor ip) throws Exception {
+	private void drawNucleus(ICell cell, ImageProcessor ip) throws Exception {
 		if(cell==null){
 			throw new IllegalArgumentException("Input cell is null");
 		}

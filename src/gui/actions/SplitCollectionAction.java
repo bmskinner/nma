@@ -25,13 +25,15 @@ import javax.swing.JOptionPane;
 
 import components.Cell;
 import components.CellCollection;
-
+import components.ICell;
+import components.ICellCollection;
 import gui.MainWindow;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 public class SplitCollectionAction extends ProgressableAction {
 
-	public SplitCollectionAction(AnalysisDataset dataset, MainWindow mw) {
+	public SplitCollectionAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Splitting collection", mw);
 
         	try {
@@ -39,9 +41,9 @@ public class SplitCollectionAction extends ProgressableAction {
         		if(dataset.hasChildren()){
         			log(Level.INFO, "Splitting collection...");
 
-        			AnalysisDataset[] names =  dataset.getAllChildDatasets().toArray(new AnalysisDataset[0]);
+        			IAnalysisDataset[] names =  dataset.getAllChildDatasets().toArray(new AnalysisDataset[0]);
 
-        			AnalysisDataset negative = (AnalysisDataset) JOptionPane.showInputDialog(null,
+        			IAnalysisDataset negative = (IAnalysisDataset) JOptionPane.showInputDialog(null,
         					"Give me nuclei that are NOT present within the following population", "Split population",
         					JOptionPane.PLAIN_MESSAGE, null,
         					names, names[0]);
@@ -49,14 +51,14 @@ public class SplitCollectionAction extends ProgressableAction {
         			if(negative!=null){
 
         				// prepare a new collection
-        				CellCollection collection = dataset.getCollection();
+        				ICellCollection collection = dataset.getCollection();
 
-        				CellCollection newCollection = new CellCollection(dataset, "Subtraction");
+        				ICellCollection newCollection = new CellCollection(dataset, "Subtraction");
 
-        				for(Cell cell : collection.getCells()){
+        				for(ICell cell : collection.getCells()){
 
         					boolean ok = true;
-        					for(Cell negCell : negative.getCollection().getCells()){
+        					for(ICell negCell : negative.getCollection().getCells()){
         						if(negCell.getId().equals(cell.getId())){
         							ok = false;
         						}
@@ -71,12 +73,12 @@ public class SplitCollectionAction extends ProgressableAction {
 
         				dataset.addChildCollection(newCollection);
 
-        				if(newCollection.getNucleusCount()>0){
+        				if(newCollection.size()>0){
 
         					log(Level.INFO,"Reapplying morphology...");
 
         					int flag = 0;
-        					AnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
+        					IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
         					final CountDownLatch latch = new CountDownLatch(1);
         					new RunSegmentationAction(newDataset, dataset, flag, mw, latch);
         				}

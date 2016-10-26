@@ -39,9 +39,11 @@ import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisWorker;
+import analysis.IAnalysisDataset;
 import analysis.ProgressEvent;
 import analysis.ProgressListener;
 import components.CellCollection;
+import components.ICellCollection;
 import components.nuclear.NucleusType;
 
 public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressListener {
@@ -54,9 +56,9 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
   
   private final AnalysisOptions analysisOptions;
 
-  private Map<File, CellCollection> collectionGroup = new HashMap<File, CellCollection>();
+  private Map<File, ICellCollection> collectionGroup = new HashMap<File, ICellCollection>();
   
-  List<AnalysisDataset> datasets;
+  List<IAnalysisDataset> datasets;
 
   /**
    * Construct a detector on the given folder, and output the results to 
@@ -97,7 +99,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 
 			fine( "Creating cell collections");
 
-			List<CellCollection> folderCollection = this.getNucleiCollections();
+			List<ICellCollection> folderCollection = this.getNucleiCollections();
 
 			// Run the analysis pipeline
 
@@ -115,20 +117,20 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 		return result;
 	}
 		
-	public List<AnalysisDataset> getDatasets(){
+	public List<IAnalysisDataset> getDatasets(){
 		return this.datasets;
 	}
 	
-	public List<AnalysisDataset> analysePopulations(List<CellCollection> folderCollection){
+	public List<IAnalysisDataset> analysePopulations(List<ICellCollection> folderCollection){
 //		programLogger.log("Beginning analysis");
 		log("Beginning analysis");
 
-		List<AnalysisDataset> result = new ArrayList<AnalysisDataset>();
+		List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>();
 
-		for(CellCollection collection : folderCollection){
+		for(ICellCollection collection : folderCollection){
 			
 
-			AnalysisDataset dataset = new AnalysisDataset(collection);
+			IAnalysisDataset dataset = new AnalysisDataset(collection);
 			dataset.setAnalysisOptions(analysisOptions);
 			dataset.setRoot(true);
 //			File debugFile = dataset.getDebugFile();
@@ -138,7 +140,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 
 			try{
 
-				CellCollection failedNuclei = new CellCollection(folder, 
+				ICellCollection failedNuclei = new CellCollection(folder, 
 						collection.getOutputFolderName(), 
 						collection.getName()+" - failed", 
 						collection.getNucleusType());
@@ -169,8 +171,8 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 				log(spacerString);
 				
 				log("Population: "+collection.getName());
-				log("Passed: "+collection.getNucleusCount()+" nuclei");
-				log("Failed: "+failedNuclei.getNucleusCount()+" nuclei");
+				log("Passed: "+collection.size()+" nuclei");
+				log("Failed: "+failedNuclei.size()+" nuclei");
 				
 				log(spacerString);
 				
@@ -206,7 +208,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
   *
   *  @return a Map of a folder to its nuclei
   */
-  public List<CellCollection> getNucleiCollections(){
+  public List<ICellCollection> getNucleiCollections(){
 	  // remove any empty collections before returning
 
 	  fine( "Getting all collections");
@@ -217,7 +219,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 
 	  Set<File> keys = collectionGroup.keySet();
 	  for (File key : keys) {
-		  CellCollection collection = collectionGroup.get(key);
+		  ICellCollection collection = collectionGroup.get(key);
 		  if(collection.size()==0){
 			  fine( "Removing collection "+key.toString());
 			  toRemove.add(key);
@@ -233,8 +235,8 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 
 	  fine( "Removed collections");
 
-	  List<CellCollection> result = new ArrayList<CellCollection>();
-	  for(CellCollection c : collectionGroup.values()){
+	  List<ICellCollection> result = new ArrayList<ICellCollection>();
+	  for(ICellCollection c : collectionGroup.values()){
 		  result.add(c);
 	  }
 	  return result;

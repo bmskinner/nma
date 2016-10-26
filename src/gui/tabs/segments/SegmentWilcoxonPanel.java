@@ -34,8 +34,8 @@ import stats.SegmentStatistic;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
-import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
@@ -65,7 +65,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 			List<NucleusBorderSegment> segments = activeDataset()
 					.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getOrderedSegments();
 //					.getSegmentCount();
 

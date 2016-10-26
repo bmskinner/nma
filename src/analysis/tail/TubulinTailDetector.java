@@ -49,14 +49,14 @@ import skeleton_analysis.Graph;
 import skeleton_analysis.SkeletonResult;
 import utility.Constants;
 //import Skeletonize3D_.Skeletonize3D_;
-import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
+import analysis.IAnalysisDataset;
 import analysis.detection.CannyEdgeDetector;
 import analysis.detection.Detector;
 import analysis.image.ImageFilterer;
 import analysis.AnalysisWorker;
-import components.Cell;
+import components.ICell;
 import components.SpermTail;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
@@ -77,7 +77,7 @@ public class TubulinTailDetector extends AnalysisWorker {
 	
 	private static final int WHITE = 255;
 	
-	public TubulinTailDetector(AnalysisDataset dataset, File folder, int channel){
+	public TubulinTailDetector(IAnalysisDataset dataset, File folder, int channel){
 		super(dataset);
 		this.folder = folder;
 		this.channel = channel;
@@ -85,7 +85,7 @@ public class TubulinTailDetector extends AnalysisWorker {
 //		fileLogger = Logger.getLogger(TubulinTailDetector.class.getName());
 //		fileLogger.addHandler(dataset.getLogHandler());
 		
-		this.setProgressTotal(dataset.getCollection().getNucleusCount());
+		this.setProgressTotal(dataset.getCollection().size());
 	}
 	
 //	@Override
@@ -107,7 +107,7 @@ public class TubulinTailDetector extends AnalysisWorker {
 
 		try{
 			int progress = 0;
-			for(Cell c : getDataset().getCollection().getCells()){
+			for(ICell c : getDataset().getCollection().getCells()){
 
 				Nucleus n = c.getNucleus();
 				fileLogger.log(Level.INFO, "Looking for tails associated with nucleus "+n.getSourceFileName()+"-"+n.getNucleusNumber());
@@ -126,7 +126,7 @@ public class TubulinTailDetector extends AnalysisWorker {
 					List<SpermTail> tails = finder.detectTail(imageFile, n);
 					
 					for(SpermTail tail : tails){
-						c.addTail(tail);
+						c.addFlagellum(tail);
 					}
 					
 				} catch(Exception e){

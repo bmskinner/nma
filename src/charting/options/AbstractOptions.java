@@ -5,10 +5,12 @@ import gui.components.ColourSelecter.ColourSwatch;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 import logging.Loggable;
 import components.generic.MeasurementScale;
 import stats.PlottableStatistic;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 /**
  * @author bms41
@@ -24,25 +26,25 @@ import analysis.AnalysisDataset;
  */
 public abstract class AbstractOptions {
 	
-	private List<AnalysisDataset> list      = new ArrayList<AnalysisDataset>();
+	private List<IAnalysisDataset> list      = new ArrayList<IAnalysisDataset>();
 	private List<PlottableStatistic> stats  = new ArrayList<PlottableStatistic>();;
 	private UUID segID                      = null; // the id of the segment (not consistent between datasets)
 	private int segPosition                 = 0;    // the position of the segment in the profile (consistent between datasets)
 	private MeasurementScale scale          = MeasurementScale.PIXELS;
 	private ColourSwatch swatch             = ColourSwatch.REGULAR_SWATCH;
 			
-	public AbstractOptions(List<AnalysisDataset> list){
+	public AbstractOptions(List<IAnalysisDataset> list){
 		this.list = list;
 	}
 
-	protected void setDatasets(List<AnalysisDataset> list){
+	protected void setDatasets(List<IAnalysisDataset> list){
 		if(list==null){
 			return;
 		}
 		this.list = list;
 	}
 
-	public List<AnalysisDataset> getDatasets(){
+	public List<IAnalysisDataset> getDatasets(){
 		return this.list;
 	}
 	
@@ -91,7 +93,7 @@ public abstract class AbstractOptions {
 	 * Fetch the first dataset in the list
 	 * @return
 	 */
-	public AnalysisDataset firstDataset(){
+	public IAnalysisDataset firstDataset(){
 		return this.list.get(0);
 	}
 	

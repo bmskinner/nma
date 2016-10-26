@@ -30,7 +30,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.data.xy.XYDataset;
 
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.ScatterChartDatasetCreator;
@@ -189,7 +189,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			
 			Color colour = ColourSelecter.getColor(i);
 			
-			for(AnalysisDataset d : options.getDatasets()){
+			for(IAnalysisDataset d : options.getDatasets()){
 				if(d.getName().equals(datasetName)){
 					
 					if(d.getCollection().hasSignalGroup(id)){

@@ -26,15 +26,18 @@ import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 import org.jfree.chart.ChartPanel;
 
 import stats.PlottableStatistic;
-import components.Cell;
 import components.CellularComponent;
+import components.ICell;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 /**
  * Builder for a ChartOptions object. This simplifies the creation
@@ -44,11 +47,11 @@ import analysis.AnalysisDataset;
  *
  */
 public class ChartOptionsBuilder {
-	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+	private List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 	private ColourSwatch swatch        = GlobalOptions.getInstance().getSwatch();
 	private boolean normalised         = false;
 	private ProfileAlignment alignment = ProfileAlignment.LEFT;
-	private BorderTagObject tag              = BorderTagObject.REFERENCE_POINT;
+	private Tag tag              = Tag.REFERENCE_POINT;
 	private boolean showMarkers        = false;
 	private boolean hideProfiles       = false;
 	private ProfileType type           = ProfileType.ANGLE;
@@ -81,7 +84,7 @@ public class ChartOptionsBuilder {
 	
 	// Cells tab
 	private RotationMode rotateMode     = RotationMode.ACTUAL;
-	private Cell cell                   = null;
+	private ICell cell                   = null;
 	private CellularComponent component = null;
 	private boolean showWarp            = false;
 	
@@ -91,13 +94,13 @@ public class ChartOptionsBuilder {
 		
 	}
 	
-	public ChartOptionsBuilder setDatasets(List<AnalysisDataset> list){
+	public ChartOptionsBuilder setDatasets(List<IAnalysisDataset> list){
 		this.list = list;
 		return this;
 	}
 	
-	public ChartOptionsBuilder setDatasets(AnalysisDataset dataset){
-		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+	public ChartOptionsBuilder setDatasets(IAnalysisDataset dataset){
+		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 		list.add(dataset);
 		return this.setDatasets(list);
 	}
@@ -138,7 +141,7 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
-	public ChartOptionsBuilder setTag(BorderTagObject tag){
+	public ChartOptionsBuilder setTag(Tag tag){
 		this.tag = tag;
 		return this;
 	}
@@ -248,7 +251,7 @@ public class ChartOptionsBuilder {
 		return this;
 	}
 	
-	public ChartOptionsBuilder setCell(Cell c){
+	public ChartOptionsBuilder setCell(ICell c){
 		this.cell = c;
 		return this;
 	}

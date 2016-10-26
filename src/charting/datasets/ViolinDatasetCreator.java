@@ -16,13 +16,14 @@ import stats.Sum;
 import utility.Constants;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import charting.options.ChartOptions;
 import components.CellCollection;
 import components.ICellCollection;
-import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import logging.Loggable;
@@ -49,21 +50,21 @@ public class ViolinDatasetCreator implements Loggable {
 	 * @throws Exception
 	 */
 	public ViolinCategoryDataset createNucleusStatisticViolinDataset(ChartOptions options) {
-		List<AnalysisDataset> datasets = options.getDatasets();
+		List<IAnalysisDataset> datasets = options.getDatasets();
 		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 		MeasurementScale scale = options.getScale();
 		ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
 		
 		for (int i=0; i < datasets.size(); i++) {
-			CellCollection c = datasets.get(i).getCollection();
+			ICellCollection c = datasets.get(i).getCollection();
 			
 			String rowKey = c.getName()+"_"+i;
 			String colKey = stat.toString();
 
 			// Add the boxplot values
 
-			double[] stats = c.getNuclearStatistics(stat, scale);
+			double[] stats = c.getMedianStatistics(stat, scale);
 			List<Number> list = new ArrayList<Number>();
 			for (double d : stats) {
 				list.add(new Double(d));
@@ -85,15 +86,15 @@ public class ViolinDatasetCreator implements Loggable {
 	 */
     public ViolinCategoryDataset createSignalStatisticViolinDataset(ChartOptions options) {
 
-    	List<AnalysisDataset> datasets = options.getDatasets();
+    	List<IAnalysisDataset> datasets = options.getDatasets();
     	SignalStatistic stat = (SignalStatistic) options.getStat();
 		MeasurementScale scale = options.getScale();
 		ViolinCategoryDataset ds = new ViolinCategoryDataset();
 				
  
-        for(AnalysisDataset d : datasets){
+        for(IAnalysisDataset d : datasets){
         	
-        	CellCollection collection = d.getCollection();
+        	ICellCollection collection = d.getCollection();
 
         	for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
         		
@@ -154,17 +155,17 @@ public class ViolinDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	private ViolinCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, int segPosition, MeasurementScale scale) {
+	private ViolinCategoryDataset createSegmentLengthDataset(List<IAnalysisDataset> collections, int segPosition, MeasurementScale scale) {
 
 		ViolinCategoryDataset dataset = new ViolinCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
 
-			CellCollection collection = collections.get(i).getCollection();
+			ICellCollection collection = collections.get(i).getCollection();
 			
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
 
 
@@ -172,7 +173,7 @@ public class ViolinDatasetCreator implements Loggable {
 
 			for(Nucleus n : collection.getNuclei()){
 				
-				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT)
+				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());			
 
 				
@@ -203,24 +204,24 @@ public class ViolinDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	private ViolinCategoryDataset createSegmentDisplacementDataset(List<AnalysisDataset> collections, int segPosition) {
+	private ViolinCategoryDataset createSegmentDisplacementDataset(List<IAnalysisDataset> collections, int segPosition) {
 
 		ViolinCategoryDataset dataset = new ViolinCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
 
-			CellCollection collection = collections.get(i).getCollection();
+			ICellCollection collection = collections.get(i).getCollection();
 			
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
 
 
 			List<Number> list = new ArrayList<Number>(0);
 
 			for(Nucleus n : collection.getNuclei()){
-				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
+				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 				
 				NucleusBorderSegment seg = profile.getSegment(medianSeg.getID());
 				

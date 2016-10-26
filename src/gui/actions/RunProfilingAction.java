@@ -23,6 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.profiles.DatasetProfiler;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import gui.MainWindow;
@@ -30,20 +31,20 @@ import gui.ThreadManager;
 
 public class RunProfilingAction extends ProgressableAction {
 	
-	public RunProfilingAction(AnalysisDataset dataset, int downFlag, MainWindow mw){
+	public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw){
 		super(dataset, "Segmentation analysis", mw, downFlag);
 
 		log(Level.FINE, "Creating profiling analysis");
 		runNewAnalysis();
 	}
 	
-	public RunProfilingAction(List<AnalysisDataset> list, int downFlag, MainWindow mw){
+	public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw){
 		super(list, "Segmentation analysis", mw, downFlag);
 		log(Level.FINE, "Creating profiling analysis");
 		runNewAnalysis();
 	}
 	
-	public RunProfilingAction(AnalysisDataset dataset, int downFlag, MainWindow mw, CountDownLatch latch){
+	public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw, CountDownLatch latch){
 		super(dataset, "Segmentation analysis", mw, downFlag);
 		this.setLatch(latch);
 		log(Level.FINE, "Creating profiling analysis");
@@ -51,7 +52,7 @@ public class RunProfilingAction extends ProgressableAction {
 		
 	}
 	
-	public RunProfilingAction(List<AnalysisDataset> list, int downFlag, MainWindow mw, CountDownLatch latch){
+	public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw, CountDownLatch latch){
 		super(list, "Segmentation analysis", mw, downFlag);
 		this.setLatch(latch);
 		log(Level.FINE, "Creating profiling analysis");

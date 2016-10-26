@@ -32,6 +32,7 @@ import java.util.Set;
 import logging.Loggable;
 import components.generic.BorderTag;
 import components.generic.BorderTagObject;
+import components.generic.Tag;
 import components.nuclear.NucleusType;
 
 /**
@@ -55,7 +56,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 		for(BorderTagObject tag : BorderTagObject.values()){
 			clearRuleSets(tag);
 		}
-		clearRuleSets(BorderTagObject.CUSTOM_POINT);
+		clearRuleSets(Tag.CUSTOM_POINT);
 	}
 	
 	/**
@@ -71,7 +72,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 	 * @param tag
 	 * @param r
 	 */
-	public void addRuleSet(BorderTagObject tag, RuleSet r){
+	public void addRuleSet(Tag tag, RuleSet r){
 		map.get(tag).add(r);
 	}
 	
@@ -89,7 +90,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 	 * @param tag
 	 * @param r
 	 */
-	public List<RuleSet> getRuleSets(BorderTagObject tag){
+	public List<RuleSet> getRuleSets(Tag tag){
 		return map.get(tag);
 	}
 		
@@ -97,7 +98,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 		return map.keySet();
 	}
 	
-	public boolean hasRulesets(BorderTagObject tag){
+	public boolean hasRulesets(Tag tag){
 		return map.get(tag).size()>0;
 	}
 	
@@ -108,7 +109,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 	public String toString(){
 		StringBuilder b = new StringBuilder();
 		b.append("RuleSets:\n");
-		for(BorderTagObject tag : map.keySet()){
+		for(Tag tag : map.keySet()){
 			b.append("\t"+tag+":\n");
 			List<RuleSet> l = map.get(tag);
 			for(RuleSet r : l){
@@ -144,10 +145,10 @@ public class RuleSetCollection implements Serializable, Loggable {
 	private static RuleSetCollection createMouseSpermRuleSets(){
 		RuleSetCollection r = new RuleSetCollection();
 		
-		r.addRuleSet(BorderTagObject.REFERENCE_POINT,   RuleSet.mouseSpermRPRuleSet());
-		r.addRuleSet(BorderTagObject.ORIENTATION_POINT, RuleSet.mouseSpermOPRuleSet());
-		r.addRuleSet(BorderTagObject.TOP_VERTICAL,      RuleSet.mouseSpermTVRuleSet());
-		r.addRuleSet(BorderTagObject.BOTTOM_VERTICAL,   RuleSet.mouseSpermBVRuleSet());
+		r.addRuleSet(Tag.REFERENCE_POINT,   RuleSet.mouseSpermRPRuleSet());
+		r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.mouseSpermOPRuleSet());
+		r.addRuleSet(Tag.TOP_VERTICAL,      RuleSet.mouseSpermTVRuleSet());
+		r.addRuleSet(Tag.BOTTOM_VERTICAL,   RuleSet.mouseSpermBVRuleSet());
 		return r;
 	}
 	
@@ -158,8 +159,8 @@ public class RuleSetCollection implements Serializable, Loggable {
 	private static RuleSetCollection createPigSpermRuleSets(){
 		RuleSetCollection r = new RuleSetCollection();
 		
-		r.addRuleSet(BorderTagObject.REFERENCE_POINT,   RuleSet.pigSpermRPRuleSet());
-		r.addRuleSet(BorderTagObject.ORIENTATION_POINT, RuleSet.pigSpermRPRuleSet());
+		r.addRuleSet(Tag.REFERENCE_POINT,   RuleSet.pigSpermRPRuleSet());
+		r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.pigSpermRPRuleSet());
 		return r;
 	}
 	
@@ -170,8 +171,8 @@ public class RuleSetCollection implements Serializable, Loggable {
 	private static RuleSetCollection createRoundRuleSets(){
 		RuleSetCollection r = new RuleSetCollection();
 		
-		r.addRuleSet(BorderTagObject.REFERENCE_POINT,   RuleSet.roundRPRuleSet());
-		r.addRuleSet(BorderTagObject.ORIENTATION_POINT, RuleSet.roundOPRuleSet());
+		r.addRuleSet(Tag.REFERENCE_POINT,   RuleSet.roundRPRuleSet());
+		r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.roundOPRuleSet());
 		return r;
 	}
 	

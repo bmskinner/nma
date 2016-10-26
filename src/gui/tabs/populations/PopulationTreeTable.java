@@ -13,6 +13,7 @@ import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import components.ClusterGroup;
 import gui.DatasetListManager;
 import gui.tabs.populations.PopulationsPanel.TreeSelectionHandler;
@@ -84,7 +85,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
 	 * Get the index of the given dataset in the table model
 	 * @return the index
 	 */
-	public int getRowIndex(AnalysisDataset dataset){
+	public int getRowIndex(IAnalysisDataset dataset){
 		
 		int index = 0;
 
@@ -104,14 +105,14 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
 	 * Select the given datasets in the tree table
 	 * @param dataset the dataset to select
 	 */
-	public void selectDatasets(List<AnalysisDataset> list){
+	public void selectDatasets(List<IAnalysisDataset> list){
 		finer("Selecting list of "+list.size()+" datasets in populations panel");
 
 		PopulationTreeTableModel model = (PopulationTreeTableModel) getTreeTableModel();
 		
 		Map<Integer, Integer> selectedIndexes = new HashMap<Integer, Integer>(0);
 		int selectedIndexOrder = 0;
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			int index = getRowIndex(dataset);
 			
 			selectedIndexes.put(index, selectedIndexOrder++);
@@ -169,7 +170,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
 		List<AnalysisDataset> datasets = getSelectedDatasets();
 		PopulationTreeTableModel model = (PopulationTreeTableModel) getTreeTableModel();
 
-		for(AnalysisDataset d : datasets){
+		for(IAnalysisDataset d : datasets){
 			//			result.add( model.getRowIndex(d));
 			result.add( getRowIndex(d));
 		}

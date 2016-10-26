@@ -36,7 +36,7 @@ import org.jfree.chart.plot.XYPlot;
 import charting.ChartComponents;
 import charting.options.ChartOptions;
 import components.generic.BorderTag;
-import components.generic.BorderTagObject;
+import components.generic.Tag;
 
 public abstract class AbstractChartFactory implements Loggable {
 	//extends ChartFactoryWorker 
@@ -94,13 +94,13 @@ public abstract class AbstractChartFactory implements Loggable {
 	 * @param tag
 	 * @param value
 	 */
-	protected void addMarkerToXYPlot(XYPlot plot, BorderTagObject tag, double value){
+	protected void addMarkerToXYPlot(XYPlot plot, Tag tag, double value){
 		Color colour = Color.BLACK;
 		
-		if(tag.equals(BorderTagObject.ORIENTATION_POINT)){
+		if(tag.equals(Tag.ORIENTATION_POINT)){
 			colour = Color.BLUE;
 		}
-		if(tag.equals(BorderTagObject.REFERENCE_POINT)){
+		if(tag.equals(Tag.REFERENCE_POINT)){
 			colour = Color.ORANGE;
 		}
 		if(tag.getName().equals(BorderTag.INTERSECTION_POINT.toString())){

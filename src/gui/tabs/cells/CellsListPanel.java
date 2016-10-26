@@ -24,8 +24,9 @@ import org.jfree.chart.JFreeChart;
 
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import components.Cell;
+import components.ICell;
 
 @SuppressWarnings("serial")
 public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelectionListener {
@@ -110,12 +111,12 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 	 * @param root the root node
 	 * @param dataset the dataset to use
 	 */
-	private void createNodes(DefaultMutableTreeNode root, AnalysisDataset dataset){
+	private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset){
 	    
 		List<Cell> cells = new ArrayList(dataset.getCollection().getCells());
 		Collections.sort(cells);
 		
-	    for(Cell cell : cells){	
+	    for(ICell cell : cells){	
 
 	    	String name = cell.getNucleus().getNameAndNumber();
 	    	UUID id = cell.getId();
@@ -125,7 +126,7 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 
 	}
 	
-	private DefaultMutableTreeNode getNode(Cell cell){
+	private DefaultMutableTreeNode getNode(ICell cell){
 		DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getModel().getRoot();
 			
 		for(int i = 0; i < root.getChildCount() - 1; i++) {

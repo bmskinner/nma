@@ -38,10 +38,11 @@ import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.entity.XYItemEntity;
 
-import analysis.AnalysisDataset;
-import components.Cell;
+import analysis.IAnalysisDataset;
+import components.ICell;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.Tag;
 
 public class BorderTagDualChartPanel extends DualChartPanel{
 	
@@ -79,31 +80,31 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 		chartPanel.setDomainZoomable(false);
 	}
 	
-	public void createBorderTagPopup(Cell cell){
+	public void createBorderTagPopup(ICell cell){
 		Set<BorderTagObject> set = cell.getNucleus().getBorderTags().keySet();
-		List<BorderTagObject> list = new ArrayList<BorderTagObject>(set);
+		List<Tag> list = new ArrayList<Tag>(set);
 		makePopup(list);
 		
 	}
 		
-	public void createBorderTagPopup(AnalysisDataset dataset){
+	public void createBorderTagPopup(IAnalysisDataset dataset){
 
-		List<BorderTagObject> list = dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getBorderTags();
+		List<Tag> list = dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getBorderTags();
 		makePopup(list);
 
 	}
 	
-	private void makePopup(List<BorderTagObject> list){
+	private void makePopup(List<Tag> list){
 		popupMenu = new JPopupMenu("Popup");
 		
 		Collections.sort(list);
 		
-		for(BorderTagObject tag : list){
+		for(Tag tag : list){
 			
 			/*
 			 * The IP is determined solely by the OP
 			 */
-			if( tag.equals(BorderTagObject.INTERSECTION_POINT)){
+			if( tag.equals(Tag.INTERSECTION_POINT)){
 				continue;
 			}
 			
@@ -118,7 +119,7 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 		// Find border tags with rulesets that have not been assigned in the median
 		List<BorderTagObject> unassignedTags = new ArrayList<BorderTagObject>();
 		for(BorderTagObject tag : BorderTagObject.values()){
-			if( tag.equals(BorderTagObject.INTERSECTION_POINT)){
+			if( tag.equals(Tag.INTERSECTION_POINT)){
 				continue;
 			}
 			

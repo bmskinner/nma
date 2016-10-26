@@ -27,7 +27,8 @@ import java.util.Map;
 
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
-import components.generic.Profile;
+import components.generic.IProfile;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 import logging.Loggable;
 
@@ -52,11 +53,11 @@ public class ProfileSegmenter implements Loggable {
 	private static final double MIN_RATE_OF_CHANGE = 0.02; // a potential inflection cannot vary by more than this
 	
 	
-	private final Profile profile; // the profile to segment
+	private final IProfile profile; // the profile to segment
 	private final List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(0);
 	
 	private BooleanProfile inflectionPoints = null;
-	private Profile        deltaProfile     = null;
+	private IProfile        deltaProfile     = null;
 	private double         minRateOfChange  = 1;
 	
 	
@@ -64,13 +65,13 @@ public class ProfileSegmenter implements Loggable {
 	// Specifying indexes here will suppress automatic segmentation at points within
 	// MIN_SEGMENT_SIZE of the index. If two BorderTagObject indexes in this list are within
 	// MIN_SEGMENT_SIZE of each other, only the first will be assigned.
-	private Map<BorderTagObject, Integer> tagsToSplitOn = new HashMap<BorderTagObject, Integer>(); 
+	private Map<Tag, Integer> tagsToSplitOn = new HashMap<Tag, Integer>(); 
 		
 	/**
 	 * Constructed from a profile
 	 * @param p
 	 */
-	public ProfileSegmenter(final Profile p){
+	public ProfileSegmenter(final IProfile p){
 		if(p==null){
 			throw new IllegalArgumentException("Profile is null");
 		}
@@ -87,7 +88,7 @@ public class ProfileSegmenter implements Loggable {
 	 * @param p the profile
 	 * @param map the border tags to segment at (RP is automatic)
 	 */
-	public ProfileSegmenter(final Profile p, final Map<BorderTagObject, Integer> map){
+	public ProfileSegmenter(final IProfile p, final Map<Tag, Integer> map){
 		
 		this(p);
 		if(map==null){
@@ -168,13 +169,13 @@ public class ProfileSegmenter implements Loggable {
 	 */
 	private void validateBorderTagMap(){
 		
-		List<BorderTagObject> toRemove = new ArrayList<BorderTagObject>();
+		List<Tag> toRemove = new ArrayList<Tag>();
 		
-		for(BorderTagObject tag : tagsToSplitOn.keySet()){
+		for(Tag tag : tagsToSplitOn.keySet()){
 			
 			Integer index = tagsToSplitOn.get(tag);
 			
-			for(BorderTagObject test : tagsToSplitOn.keySet()){
+			for(Tag test : tagsToSplitOn.keySet()){
 				if(test.equals(tag)){
 					continue;
 				}
@@ -201,7 +202,7 @@ public class ProfileSegmenter implements Loggable {
 		}
 		
 		// Remove the unsuitable tags from the map
-		for(BorderTagObject tag : toRemove){
+		for(Tag tag : toRemove){
 			tagsToSplitOn.remove(tag);
 		}
 		
@@ -219,7 +220,7 @@ public class ProfileSegmenter implements Loggable {
 		/*
 		 * Find second derivative rates of change
 		 */
-		Profile deltas  = this.profile.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // minima and maxima should be near 0 
+		IProfile deltas  = this.profile.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // minima and maxima should be near 0 
 		deltaProfile =       deltas.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // second differential
 		
 		/*
@@ -254,7 +255,7 @@ public class ProfileSegmenter implements Loggable {
 		 * If the index is a forced BorderTagObject boundary, 
 		 * must segment
 		 */
-		for(BorderTagObject tag : tagsToSplitOn.keySet()){
+		for(Tag tag : tagsToSplitOn.keySet()){
 			
 			Integer test = tagsToSplitOn.get(tag);
 			if(test.intValue()==index){
@@ -268,7 +269,7 @@ public class ProfileSegmenter implements Loggable {
 		 * If the index is within MIN_SEGMENT_SIZE of a
 		 * forced BorderTagObject boundary, must not segment
 		 */
-		for(BorderTagObject tag : tagsToSplitOn.keySet()){
+		for(Tag tag : tagsToSplitOn.keySet()){
 			
 			Integer test = tagsToSplitOn.get(tag);
 			if(Math.abs(test.intValue()-index) < MIN_SEGMENT_SIZE){

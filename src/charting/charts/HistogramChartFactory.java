@@ -48,7 +48,7 @@ import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NuclearHistogramDatasetCreator;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.options.ChartOptions;
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 
 public class HistogramChartFactory extends AbstractChartFactory {
@@ -211,7 +211,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 			
 				plot.setDataset(datasetCount, ds);
 				
-				AnalysisDataset d = options.getDatasets().get(datasetCount);
+				IAnalysisDataset d = options.getDatasets().get(datasetCount);
 				
 				XYBarRenderer rend = new XYBarRenderer();
 				rend.setBarPainter(new StandardXYBarPainter());
@@ -299,7 +299,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	
 					Color colour = ColourSelecter.getColor(j);
 					
-					AnalysisDataset d = options.getDatasets().get(datasetCount);
+					IAnalysisDataset d = options.getDatasets().get(datasetCount);
 
                     colour  = d.getCollection().getSignalGroup(signalGroup).hasColour()
                             ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
@@ -373,7 +373,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 			String seriesKey = (String) ds.getSeriesKey(j);
 			String seriesName = seriesKey.replaceFirst(options.getStat().toString()+"_", "");
 
-			for(AnalysisDataset dataset : options.getDatasets()){
+			for(IAnalysisDataset dataset : options.getDatasets()){
 
 				if(seriesName.equals(dataset.getName())){
 					Color colour = dataset.hasDatasetColour()
@@ -438,7 +438,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 			String seriesName = seriesKey.replaceFirst(options.getStat().toString()+"_", "");
 
 			Color colour = ColourSelecter.getColor(j);
-			for(AnalysisDataset dataset : options.getDatasets()){
+			for(IAnalysisDataset dataset : options.getDatasets()){
 
 				if(seriesName.equals(dataset.getName())){
 
@@ -505,7 +505,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 				String seriesKey = (String) ds.getSeriesKey(j);
 				String seriesName = seriesKey.replaceFirst("Seg_"+options.getSegPosition()+"_", "");
 				
-				for(AnalysisDataset dataset : options.getDatasets()){
+				for(IAnalysisDataset dataset : options.getDatasets()){
 					
 					if(seriesName.equals(dataset.getName())){
 						Color colour = dataset.hasDatasetColour()
@@ -578,7 +578,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 				String seriesName = seriesKey.replaceFirst("Seg_"+options.getSegPosition()+"_", "");
 
 				Color colour = ColourSelecter.getColor(j);
-				for(AnalysisDataset dataset : options.getDatasets()){
+				for(IAnalysisDataset dataset : options.getDatasets()){
 
 					if(seriesName.equals(dataset.getName())){
 

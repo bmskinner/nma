@@ -54,6 +54,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
@@ -188,7 +189,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			List<JComponent> result = new  ArrayList<JComponent>(); 
 			Dimension fillerSize = new Dimension(10, 5);
 			
-			for(final AnalysisDataset d : getDatasets()){
+			for(final IAnalysisDataset d : getDatasets()){
 				
 				for(final ClusterGroup g : d.getClusterGroups()){
 					
@@ -298,7 +299,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			tablesPanel.setVisible(true);
 		}
 
-		public void update(List<AnalysisDataset> list){
+		public void update(List<IAnalysisDataset> list){
 			setButtonsVisible(true);
 			setButtonsEnabled(true);
 			
@@ -353,8 +354,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 					String tree = table.getModel().getValueAt(row, column).toString();
 					if(!tree.equals("N/A")){
 						
-						AnalysisDataset dataset = null;
-						for(AnalysisDataset d: getDatasets()){
+						IAnalysisDataset dataset = null;
+						for(IAnalysisDataset d: getDatasets()){
 							if(d.getName().equals(colName)){
 								dataset = d;
 							}

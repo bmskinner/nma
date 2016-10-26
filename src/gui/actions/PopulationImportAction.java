@@ -27,6 +27,7 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import gui.DatasetEvent;
 import gui.MainWindow;
 import gui.ThreadManager;
@@ -113,7 +114,7 @@ public class PopulationImportAction extends ProgressableAction {
 		}
 		fine("Opened dataset");
 
-		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>(0);
 		list.add(dataset);
 		fine("Firing add signal");
 		fireDatasetEvent(DatasetEvent.ADD_DATASET, list);

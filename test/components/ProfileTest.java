@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import components.generic.IProfile;
 import components.generic.Profile;
 import components.generic.SegmentedProfile;
 
@@ -34,7 +35,7 @@ public class ProfileTest {
 		double[] data = null;
 
 		try {
-			Profile tester = new Profile(data);
+			IProfile tester = new Profile(data);
 			fail("Profile should not be created with null input");
 		} catch (Exception e) {
 			// expected
@@ -48,7 +49,7 @@ public class ProfileTest {
 		double[] data   = {0, 1, 2, 3,  4,  5 };
 
 		Profile tester = new Profile(data);
-		Profile result = new Profile(tester);
+		IProfile result = new Profile(tester);
 		
 		for( int i =0;i<data.length; i++){
 			assertEquals("Values should be identical", data[i], result.asArray()[i],0);
@@ -60,7 +61,7 @@ public class ProfileTest {
 	public void profileShouldErrorOnOutOfBoundsRequest(){
 		
 		double[] data   = {0, 1, 2, 3,  4,  5 };
-		Profile tester = new Profile(data);
+		IProfile tester = new Profile(data);
 		
 		double d = tester.get(2);
 		assertEquals("Values should be 2", 2, d,0);
@@ -74,7 +75,7 @@ public class ProfileTest {
 	public void profileShouldGetMinAndMax(){
 		
 		double[] data   = {-1, 0, 2, 3,  4,  5 };
-		Profile tester = new Profile(data);
+		IProfile tester = new Profile(data);
 				
 		assertEquals("Min should hould be -1", -1, tester.getMin(),0);
 		assertEquals("Max should hould be 5" , 5 , tester.getMax(),0);
@@ -92,7 +93,7 @@ public class ProfileTest {
 	public void profileSizeShouldBeArrayLength(){
 		double[] data     = {1, 1, 1, 1, 1, 1};
 		
-		Profile tester = new Profile(data);
+		IProfile tester = new Profile(data);
 		
 		assertEquals("Profile length should be 6", data.length, tester.size(),0);
 	}
@@ -105,8 +106,8 @@ public class ProfileTest {
 		double   constant = 2;
 		double[] expected = {2 ,2, 2, 2, 2, 2};
 		
-		Profile tester = new Profile(data);
-		Profile result = tester.multiply(constant);
+		IProfile tester = new Profile(data);
+		IProfile result = tester.multiply(constant);
 
 		// assert statements
 		
@@ -125,9 +126,9 @@ public class ProfileTest {
 		double[] multiplier = {1, 2, 3, 4,  5,  6 };
 		double[] expected   = {0, 2, 6, 12, 20, 30};
 		
-		Profile tester = new Profile(data);
-		Profile multiply = new Profile(multiplier);
-		Profile result = tester.multiply(multiply);
+		IProfile tester = new Profile(data);
+		IProfile multiply = new Profile(multiplier);
+		IProfile result = tester.multiply(multiply);
 		
 		// there is no assertArrayEquals for double[]
 		for( int i =0;i<data.length; i++){
@@ -143,8 +144,8 @@ public class ProfileTest {
 		double   constant   = 2;
 		double[] expected   = {2, 3, 4, 5, 6, 7};
 		
-		Profile tester = new Profile(data);
-		Profile result = tester.add(constant);
+		IProfile tester = new Profile(data);
+		IProfile result = tester.add(constant);
 		
 		// there is no assertArrayEquals for double[]
 		for( int i =0;i<data.length; i++){
@@ -157,8 +158,8 @@ public class ProfileTest {
 		double[] data       = { 10, 11, 12, 13, 14, 15 };
 		double[] expected   = { 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 12.5 };
 		
-		Profile tester = new Profile(data);
-		Profile result = null;
+		IProfile tester = new Profile(data);
+		IProfile result = null;
 		try {
 			result = tester.interpolate(12);
 		} catch (Exception e) {
@@ -179,9 +180,9 @@ public class ProfileTest {
 		double[] data       = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 };
 		double[] expected   = { 10, 12, 14, 16, 18, 20 };
 		
-		Profile tester = new Profile(data);
+		IProfile tester = new Profile(data);
 		
-		Profile result = null;
+		IProfile result = null;
 		try{
 			result = tester.interpolate(6);
 		} catch(Exception e){
@@ -203,10 +204,10 @@ public class ProfileTest {
 		double[] data       = { 10, 5, 1, 2, 7, 19, 12, 3 };
 		double[] expected   = {  2, 3, 7, 1, 4,  0,  6, 5 };
 		
-		Profile tester = new Profile(data);
+		IProfile tester = new Profile(data);
 		System.out.println(tester.toString());
 		
-		Profile result = null;
+		IProfile result = null;
 		try{
 			result = tester.getSortedIndexes();
 		} catch(Exception e){

@@ -31,25 +31,28 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshEdge;
 import charting.options.ChartOptions;
 import components.AbstractCellularComponent;
-import components.Cell;
 import components.CellCollection;
+import components.ICell;
+import components.ICellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
+import components.generic.IProfile;
+import components.generic.IProfileCollection;
 import components.generic.MeasurementScale;
-import components.generic.Profile;
-import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
+import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclear.SignalGroup;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -90,9 +93,9 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param binSize the size of the ProfileAggregate bins, to adjust the offset of the median
 	 * @return the updated dataset
 	 */
-	private XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, Profile profile, DefaultXYDataset ds, int length, double offset) {
+	private XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, IProfile profile, DefaultXYDataset ds, int length, double offset) {
 		
-		Profile xpoints = profile.getPositions(length);
+		IProfile xpoints = profile.getPositions(length);
 		xpoints = xpoints.add(offset);
 		for(NucleusBorderSegment seg : segments){
 
@@ -100,8 +103,8 @@ public class NucleusDatasetCreator implements Loggable {
 				
 				if(seg.getEndIndex()==0){
 					// no need to make two sections
-					Profile subProfile = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
-					Profile subPoints  = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
+					IProfile subProfile = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
+					IProfile subPoints  = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
 					
 					double[][] data = { subPoints.asArray(), subProfile.asArray() };
 					
@@ -116,15 +119,15 @@ public class NucleusDatasetCreator implements Loggable {
 					int upperIndex = Math.max(seg.getEndIndex(), seg.getStartIndex());
 
 					// beginning of array
-					Profile subProfileA = profile.getSubregion(0, lowerIndex);
-					Profile subPointsA  = xpoints.getSubregion(0, lowerIndex);
+					IProfile subProfileA = profile.getSubregion(0, lowerIndex);
+					IProfile subPointsA  = xpoints.getSubregion(0, lowerIndex);
 
 					double[][] dataA = { subPointsA.asArray(), subProfileA.asArray() };
 					ds.addSeries(seg.getName()+"_A", dataA);
 
 					// end of array
-					Profile subProfileB = profile.getSubregion(upperIndex, profile.size()-1);
-					Profile subPointsB  = xpoints.getSubregion(upperIndex, profile.size()-1);
+					IProfile subProfileB = profile.getSubregion(upperIndex, profile.size()-1);
+					IProfile subPointsB  = xpoints.getSubregion(upperIndex, profile.size()-1);
 
 					double[][] dataB = { subPointsB.asArray(), subProfileB.asArray() };
 					ds.addSeries(seg.getName()+"_B", dataB);
@@ -134,8 +137,8 @@ public class NucleusDatasetCreator implements Loggable {
 					
 				
 			} 
-			Profile subProfile = profile.getSubregion(seg);
-			Profile subPoints  = xpoints.getSubregion(seg);
+			IProfile subProfile = profile.getSubregion(seg);
+			IProfile subPoints  = xpoints.getSubregion(seg);
 
 			double[][] data = { subPoints.asArray(), subProfile.asArray() };
 			
@@ -194,12 +197,12 @@ public class NucleusDatasetCreator implements Loggable {
 
             CellCollection collection = list.get(i).getCollection();
             
-            Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
-            Profile xpoints = profile.getPositions(100);
+            IProfile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
+            IProfile xpoints = profile.getPositions(100);
             double[][] data = { xpoints.asArray(), profile.asArray() };
             ds.addSeries("Profile_"+i, data);
             
-            List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(BorderTagObject.REFERENCE_POINT);
+            List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(Tag.REFERENCE_POINT);
             List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
             
             // add only the segment of interest
@@ -222,9 +225,9 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param list the datasets to check
 	 * @return the maximum length
 	 */
-	private double getMaximumMedianProfileLength(List<AnalysisDataset> list){
+	private double getMaximumMedianProfileLength(List<IAnalysisDataset> list){
 		double length = 100;
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			length = dataset.getCollection().getMedianArrayLength()>length 
 					? dataset.getCollection().getMedianArrayLength() 
 					: length;
@@ -237,7 +240,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param list
 	 * @return
 	 */
-	private double getMaximumNucleusProfileLength(CellCollection collection){
+	private double getMaximumNucleusProfileLength(ICellCollection collection){
 		double length = 100;
 
 		for(Nucleus n : collection.getNuclei()){
@@ -256,16 +259,16 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return a dataset to plot
 	 * @throws Exception 
 	 */
-	public DefaultXYDataset createRawMultiProfileSegmentDataset(List<AnalysisDataset> list, String segName, ProfileAlignment alignment) throws Exception{
+	public DefaultXYDataset createRawMultiProfileSegmentDataset(List<IAnalysisDataset> list, String segName, ProfileAlignment alignment) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		double length = getMaximumMedianProfileLength(list);
 
 		for (int i=0; i < list.size(); i++) {
-			CellCollection collection = list.get(i).getCollection();
+			ICellCollection collection = list.get(i).getCollection();
 
-			Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
-			Profile xpoints = profile.getPositions((int) collection.getMedianArrayLength());
+			IProfile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
+			IProfile xpoints = profile.getPositions((int) collection.getMedianArrayLength());
 			
 			double offset = 0;
 			if(alignment.equals(ProfileAlignment.RIGHT)){
@@ -276,7 +279,7 @@ public class NucleusDatasetCreator implements Loggable {
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
 			
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(BorderTagObject.REFERENCE_POINT);
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(Tag.REFERENCE_POINT);
 			List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
 			
 			// add only the segment of interest
@@ -306,16 +309,16 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @see createSegmentedMedianProfileDataset()
 	 * @throws Exception 
 	 */
-	public XYDataset createNonsegmentedMedianProfileDataset(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTagObject point) throws Exception{
-		CellCollection collection = dataset.getCollection();
+	public XYDataset createNonsegmentedMedianProfileDataset(IAnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, Tag point) throws Exception{
+		ICellCollection collection = dataset.getCollection();
 		DefaultXYDataset ds = new DefaultXYDataset();
 				
 		int maxLength = (int) getMaximumNucleusProfileLength(collection);
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 
 				
-		Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(point, 50);
-		Profile xpoints = null;
+		IProfile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(point, 50);
+		IProfile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);
 		} else {
@@ -347,7 +350,7 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		
 		
-		CellCollection collection = options.firstDataset().getCollection();
+		ICellCollection collection = options.firstDataset().getCollection();
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 
@@ -356,8 +359,8 @@ public class NucleusDatasetCreator implements Loggable {
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		Profile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(options.getTag(), Constants.MEDIAN);
-		Profile xpoints = null;
+		IProfile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(options.getTag(), Constants.MEDIAN);
+		IProfile xpoints = null;
 		if(options.isNormalised()){
 			xpoints = profile.getPositions(100);
 		} else {
@@ -395,10 +398,10 @@ public class NucleusDatasetCreator implements Loggable {
 	public XYDataset createSegmentedProfileDataset(ChartOptions options) throws Exception {
 		
 		finest("Creating segmented profile dataset");
-		CellCollection collection  = options.firstDataset().getCollection();
+		ICellCollection collection  = options.firstDataset().getCollection();
 		boolean normalised         = options.isNormalised();
 		ProfileAlignment alignment = options.getAlignment();
-		BorderTagObject borderTag  = options.getTag();
+		Tag borderTag              = options.getTag();
 		ProfileType type           = options.getType();
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
@@ -407,8 +410,8 @@ public class NucleusDatasetCreator implements Loggable {
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		Profile profile = collection.getProfileCollection(type).getProfile(borderTag, Constants.MEDIAN);
-		Profile xpoints = null;
+		IProfile profile = collection.getProfileCollection(type).getProfile(borderTag, Constants.MEDIAN);
+		IProfile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);
 		} else {
@@ -436,8 +439,8 @@ public class NucleusDatasetCreator implements Loggable {
 		}
 
 		// make the IQR
-		Profile profile25 = collection.getProfileCollection(type).getProfile(borderTag, Constants.LOWER_QUARTILE);
-		Profile profile75 = collection.getProfileCollection(type).getProfile(borderTag, Constants.UPPER_QUARTILE);
+		IProfile profile25 = collection.getProfileCollection(type).getProfile(borderTag, Constants.LOWER_QUARTILE);
+		IProfile profile75 = collection.getProfileCollection(type).getProfile(borderTag, Constants.UPPER_QUARTILE);
 		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
 		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
@@ -445,8 +448,8 @@ public class NucleusDatasetCreator implements Loggable {
 
 		// add the individual nuclei
 		for(Nucleus n : collection.getNuclei()){
-			Profile angles  = null;
-			Profile x		= null;
+			IProfile angles  = null;
+			IProfile x		= null;
 			if(normalised){
 				
 				int length = xpoints.size();
@@ -476,10 +479,10 @@ public class NucleusDatasetCreator implements Loggable {
 	 */	
 	public DefaultXYDataset createMultiProfileDataset(ChartOptions options) {
 		
-		List<AnalysisDataset> list = options.getDatasets();
+		List<IAnalysisDataset> list = options.getDatasets();
 		boolean normalised         = options.isNormalised();
 		ProfileAlignment alignment = options.getAlignment();
-		BorderTagObject borderTag  = options.getTag();
+		Tag borderTag              = options.getTag();
 		ProfileType type           = options.getType();
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
@@ -487,10 +490,10 @@ public class NucleusDatasetCreator implements Loggable {
 		double length = getMaximumMedianProfileLength(list);
 
 		for(int i=0; i<list.size(); i++){ //AnalysisDataset dataset : list){
-			AnalysisDataset dataset = list.get(i);
-			CellCollection collection = dataset.getCollection();
-			Profile profile = collection.getProfileCollection(type).getProfile(borderTag, 50);
-			Profile xpoints = null;
+			IAnalysisDataset dataset = list.get(i);
+			ICellCollection collection = dataset.getCollection();
+			IProfile profile = collection.getProfileCollection(type).getProfile(borderTag, 50);
+			IProfile xpoints = null;
 			
 			if(normalised){	
 				xpoints = profile.getPositions(100);
@@ -521,19 +524,17 @@ public class NucleusDatasetCreator implements Loggable {
 	public DefaultXYDataset createMultiProfileFrankenDataset(ChartOptions options) throws Exception{
 		
 		
-		List<AnalysisDataset> list = options.getDatasets();
-//		boolean normalised         = options.isNormalised();
-//		ProfileAlignment alignment = options.getAlignment();
-		BorderTagObject borderTag  = options.getTag();
-//		ProfileType type           = options.getType();
+		List<IAnalysisDataset> list = options.getDatasets();
+
+		Tag borderTag  = options.getTag();
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 		int i=0;
-		for(AnalysisDataset dataset : list){
-			CellCollection collection = dataset.getCollection();
-			Profile profile = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(borderTag, 50);
-			Profile xpoints = profile.getPositions(100);
+		for(IAnalysisDataset dataset : list){
+			ICellCollection collection = dataset.getCollection();
+			IProfile profile = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(borderTag, 50);
+			IProfile xpoints = profile.getPositions(100);
 
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
@@ -554,10 +555,10 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return a new series
 	 * @throws Exception 
 	 */
-	private XYSeriesCollection addMultiProfileIQRSeries(ProfileCollection pc, BorderTagObject point, int series, double length, double medianLength, boolean normalised, ProfileAlignment alignment) throws Exception{
-		Profile profile = pc.getProfile(point, 50);
+	private XYSeriesCollection addMultiProfileIQRSeries(IProfileCollection pc, Tag point, int series, double length, double medianLength, boolean normalised, ProfileAlignment alignment) throws Exception{
+		IProfile profile = pc.getProfile(point, 50);
 		
-		Profile xpoints = null;
+		IProfile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);
 			
@@ -573,8 +574,8 @@ public class NucleusDatasetCreator implements Loggable {
 		// rendering order will be first on top
 
 		// make the IQR
-		Profile profile25 = pc.getProfile(point, 25);
-		Profile profile75 = pc.getProfile(point, 75);
+		IProfile profile25 = pc.getProfile(point, 25);
+		IProfile profile75 = pc.getProfile(point, 75);
 		
 		XYSeries series25 = new XYSeries("Q25_"+series);
 		for(int j=0; j<profile25.size();j++){
@@ -610,15 +611,15 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return a dataset
 	 * @throws Exception 
 	 */
-	private List<XYSeriesCollection> createMultiProfileIQRDataset(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTagObject borderTag, ProfileType type) throws Exception{
+	private List<XYSeriesCollection> createMultiProfileIQRDataset(List<IAnalysisDataset> list, boolean normalised, ProfileAlignment alignment, Tag borderTag, ProfileType type) throws Exception{
 
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
 		
 		double length = getMaximumMedianProfileLength(list);
 
 		for(int i=0; i<list.size(); i++){ //AnalysisDataset dataset : list){
-			AnalysisDataset dataset = list.get(i);
-			CellCollection collection = dataset.getCollection();
+			IAnalysisDataset dataset = list.get(i);
+			ICellCollection collection = dataset.getCollection();
 			
 			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(type), 
 										borderTag,
@@ -639,13 +640,13 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<XYSeriesCollection> createMultiProfileIQRFrankenDataset(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment,  BorderTagObject borderTag) throws Exception{
+	public List<XYSeriesCollection> createMultiProfileIQRFrankenDataset(List<IAnalysisDataset> list, boolean normalised, ProfileAlignment alignment,  Tag borderTag) throws Exception{
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
 
 		int i=0;
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			
-			CellCollection collection = dataset.getCollection();
+			ICellCollection collection = dataset.getCollection();
 			
 			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(ProfileType.FRANKEN), 
 					borderTag,
@@ -686,9 +687,9 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		try {
 
-			CellCollection collection = options.firstDataset().getCollection();
+			ICellCollection collection = options.firstDataset().getCollection();
 
-			Profile profile = collection.getProfileCollection(options.getType()).getIQRProfile(options.getTag());
+			IProfile profile = collection.getProfileCollection(options.getType()).getIQRProfile(options.getTag());
 
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(options.getType())
 					.getSegmentedProfile(options.getTag())
@@ -707,11 +708,11 @@ public class NucleusDatasetCreator implements Loggable {
 
 		try {
 			int i = 0;
-			for(AnalysisDataset dataset : options.getDatasets()){
-				CellCollection collection = dataset.getCollection();
+			for(IAnalysisDataset dataset : options.getDatasets()){
+				ICellCollection collection = dataset.getCollection();
 
-				Profile profile = collection.getProfileCollection(options.getType()).getIQRProfile(options.getTag());
-				Profile xpoints = profile.getPositions(100);
+				IProfile profile = collection.getProfileCollection(options.getType()).getIQRProfile(options.getTag());
+				IProfile xpoints = profile.getPositions(100);
 				double[][] data = { xpoints.asArray(), profile.asArray() };
 				ds.addSeries("Profile_"+i+"_"+collection.getName(), data);
 				i++;
@@ -740,12 +741,12 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	private XYDataset createFrankenSegmentDataset(CellCollection collection, boolean normalised, ProfileAlignment alignment, BorderTagObject point) throws Exception{
+	private XYDataset createFrankenSegmentDataset(ICellCollection collection, boolean normalised, ProfileAlignment alignment, Tag point) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 //		String pointType = collection.getOrientationPoint();
-		Profile profile = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(point, Constants.MEDIAN);
-		Profile xpoints = profile.getPositions(100);
+		IProfile profile = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(point, Constants.MEDIAN);
+		IProfile xpoints = profile.getPositions(100);
 		
 		// rendering order will be first on top
 		
@@ -757,8 +758,8 @@ public class NucleusDatasetCreator implements Loggable {
 		addSegmentsFromProfile(segments, profile, ds, 100, 0);
 
 		// make the IQR
-		Profile profile25 = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(point, Constants.LOWER_QUARTILE);
-		Profile profile75 = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(point, Constants.UPPER_QUARTILE);
+		IProfile profile25 = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(point, Constants.LOWER_QUARTILE);
+		IProfile profile75 = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(point, Constants.UPPER_QUARTILE);
 		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
 		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
@@ -769,7 +770,7 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		for(Nucleus n : collection.getNuclei()){
 
-			Profile angles = n.getProfile(ProfileType.FRANKEN); // do not offset, the offsets for a nucleus do not match a frankenprofile
+			IProfile angles = n.getProfile(ProfileType.FRANKEN); // do not offset, the offsets for a nucleus do not match a frankenprofile
 			double[] xArray = xpoints.asArray();
 			double[] yArray = angles.asArray();
 			
@@ -807,11 +808,11 @@ public class NucleusDatasetCreator implements Loggable {
 			profile = nucleus.getProfile(type);
 		} else {
 			finest("Getting XY positions along profile from reference point");
-			profile = nucleus.getProfile(type, BorderTagObject.REFERENCE_POINT);
+			profile = nucleus.getProfile(type, Tag.REFERENCE_POINT);
 			
 			// add the segments
 			finest("Adding ordered segments from reference point");
-			List<NucleusBorderSegment> segments = nucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getOrderedSegments();
+			List<NucleusBorderSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 			addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0);
 		}
 
@@ -827,16 +828,16 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @throws Exception
 	 */
 	public BoxAndWhiskerCategoryDataset createBoxplotDataset(ChartOptions options) {
-		List<AnalysisDataset> datasets = options.getDatasets();
+		List<IAnalysisDataset> datasets = options.getDatasets();
 		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 		MeasurementScale scale = options.getScale();
 		ExportableBoxAndWhiskerCategoryDataset ds = new ExportableBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < datasets.size(); i++) {
-			CellCollection c = datasets.get(i).getCollection();
+			ICellCollection c = datasets.get(i).getCollection();
 
 			List<Double> list = new ArrayList<Double>();
-			double[] stats = c.getNuclearStatistics(stat, scale);
+			double[] stats = c.getMedianStatistics(stat, scale);
 
 			for (double d : stats) {
 				list.add(new Double(d));
@@ -877,17 +878,17 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, int segPosition, MeasurementScale scale) {
+	public BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<IAnalysisDataset> collections, int segPosition, MeasurementScale scale) {
 
 		ExportableBoxAndWhiskerCategoryDataset dataset = new ExportableBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
 
-			CellCollection collection = collections.get(i).getCollection();
+			ICellCollection collection = collections.get(i).getCollection();
 			
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
 
 
@@ -895,7 +896,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 			for(Nucleus n : collection.getNuclei()){
 				
-				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT)
+				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());			
 
 				
@@ -921,24 +922,24 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public BoxAndWhiskerCategoryDataset createSegmentDisplacementDataset(List<AnalysisDataset> collections, int segPosition) {
+	public BoxAndWhiskerCategoryDataset createSegmentDisplacementDataset(List<IAnalysisDataset> collections, int segPosition) {
 
 		ExportableBoxAndWhiskerCategoryDataset dataset = new ExportableBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
 
-			CellCollection collection = collections.get(i).getCollection();
+			ICellCollection collection = collections.get(i).getCollection();
 			
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
 
 
 			List<Double> list = new ArrayList<Double>(0);
 
 			for(Nucleus n : collection.getNuclei()){
-				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
+				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 				
 				NucleusBorderSegment seg = profile.getSegment(medianSeg.getID());
 				
@@ -969,7 +970,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 			CellCollection collection = datasets.get(i).getCollection();
 
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegmentedProfile(BorderTagObject.REFERENCE_POINT).getOrderedSegments();
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegmentedProfile(Tag.REFERENCE_POINT).getOrderedSegments();
 //			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(BorderTagObject.ORIENTATION_POINT);
 			
 			for(NucleusBorderSegment medianSeg : segments){
@@ -1027,7 +1028,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param dataset
 	 * @return
 	 */
-	public XYDataset createBareNucleusOutline(AnalysisDataset dataset){
+	public XYDataset createBareNucleusOutline(IAnalysisDataset dataset){
 
 		return createBareNucleusOutline(dataset.getCollection().getConsensusNucleus());
 
@@ -1054,25 +1055,25 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public XYDataset createSegmentedNucleusOutline(CellCollection collection) throws Exception {
+	public XYDataset createSegmentedNucleusOutline(ICellCollection collection) throws Exception {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		// get the consensus nucleus for the population
-		ConsensusNucleus n = collection.getConsensusNucleus();
+		Nucleus n = collection.getConsensusNucleus();
 		
-		BorderTagObject pointType = BorderTagObject.REFERENCE_POINT;
+		BorderTagObject pointType = Tag.REFERENCE_POINT;
 		
 		// get the quartile profiles, beginning from the orientation point
-		Profile q25 = collection.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.LOWER_QUARTILE).interpolate(n.getBorderLength());
-		Profile q75 = collection.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.UPPER_QUARTILE).interpolate(n.getBorderLength());
+		IProfile q25 = collection.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.LOWER_QUARTILE).interpolate(n.getBorderLength());
+		IProfile q75 = collection.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.UPPER_QUARTILE).interpolate(n.getBorderLength());
 		
 		// get the limits  for the plot  	
 		double scale = getScaleForIQRRange(n);
 		
 		// find the range of the iqr, and scale the values in the iqr profile to 1/10 of the total range of the plot
 		//The scaled IQR is a profile beginning from the orientation point
-		Profile iqrRange = q75.subtract(q25);
-		Profile scaledRange = iqrRange.divide(iqrRange.getMax()); // iqr as fraction of total variability
+		IProfile iqrRange = q75.subtract(q25);
+		IProfile scaledRange = iqrRange.divide(iqrRange.getMax()); // iqr as fraction of total variability
 		scaledRange = scaledRange.multiply(scale/10); // set to 10% min radius of the chart
 
 		
@@ -1132,7 +1133,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param n the consensus nucleus
 	 * @param scaledRange the IQR scale profile
 	 */
-	private void addSegmentIQRToConsensus(NucleusBorderSegment segment, DefaultXYDataset ds, Nucleus n, Profile scaledRange, BorderTagObject pointType){
+	private void addSegmentIQRToConsensus(NucleusBorderSegment segment, DefaultXYDataset ds, Nucleus n, IProfile scaledRange, Tag pointType){
 
 		// what we need to do is match the profile positions to the borderpoints
 		// Add lines to show the IQR of the angle profile at each point
@@ -1214,7 +1215,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 */
 	public int getSegmentPosition(Nucleus n, NucleusBorderSegment seg){
 		int result = 0;
-		if(seg.getStartIndex()==n.getBorderIndex(BorderTagObject.REFERENCE_POINT)){
+		if(seg.getStartIndex()==n.getBorderIndex(Tag.REFERENCE_POINT)){
 			return result;
 		} else {
 			result++;
@@ -1230,12 +1231,12 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createNucleusIndexTags(Cell cell) throws ChartDatasetCreationException {
+	public XYDataset createNucleusIndexTags(ICell cell) throws ChartDatasetCreationException {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 		Nucleus nucleus = cell.getNucleus();// draw the index points on the nucleus border
-		for(BorderTagObject tag : nucleus.getBorderTags().keySet()){
+		for(Tag tag : nucleus.getBorderTags().keySet()){
 			BorderPoint tagPoint = nucleus.getBorderPoint(tag);
 			double[] xpoints = { tagPoint.getX()-0.5, nucleus.getCentreOfMass().getX()-0.5 };
 			double[] ypoints = { tagPoint.getY()-0.5, nucleus.getCentreOfMass().getY()-0.5 };
@@ -1252,7 +1253,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param cell the cell to get signals from
 	 * @return a dataset for charting
 	 */
-	public List<ComponentOutlineDataset> createSignalOutlines(Cell cell, AnalysisDataset dataset){
+	public List<ComponentOutlineDataset> createSignalOutlines(ICell cell, IAnalysisDataset dataset){
 		
 		List<ComponentOutlineDataset> result = new ArrayList<ComponentOutlineDataset>(0);
 		
@@ -1271,7 +1272,7 @@ public class NucleusDatasetCreator implements Loggable {
 				continue;
 			}
 			
-			SignalGroup group = dataset.getCollection().getSignalGroup(signalGroup);
+			ISignalGroup group = dataset.getCollection().getSignalGroup(signalGroup);
 			finer("Fetching signals from signal group "+group+": ID "+signalGroup);
 			
 			if(group == null){
@@ -1317,13 +1318,13 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param list the analysis datasets
 	 * @return a chartable dataset
 	 */
-	public XYDataset createMultiNucleusOutline(List<AnalysisDataset> list, MeasurementScale scale){
+	public XYDataset createMultiNucleusOutline(List<IAnalysisDataset> list, MeasurementScale scale){
 
 		ComponentOutlineDataset ds = new ComponentOutlineDataset();
 
 		int i=0;
-		for(AnalysisDataset dataset : list){
-			CellCollection collection = dataset.getCollection();
+		for(IAnalysisDataset dataset : list){
+			ICellCollection collection = dataset.getCollection();
 			
 			String seriesKey = "Nucleus_"+i+"_"+collection.getName();
 			
@@ -1373,12 +1374,12 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createModalityProbabililtyDataset(double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
+	public XYDataset createModalityProbabililtyDataset(double xposition, IAnalysisDataset dataset, ProfileType type) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 
-		CellCollection collection = dataset.getCollection();
+		ICellCollection collection = dataset.getCollection();
 		KernelEstimator est = createProfileProbabililtyKernel(xposition, dataset, type);
 		
 //		List<Double> xValues = new ArrayList<Double>();
@@ -1421,11 +1422,11 @@ public class NucleusDatasetCreator implements Loggable {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 	
-		for(AnalysisDataset dataset : options.getDatasets()){
+		for(IAnalysisDataset dataset : options.getDatasets()){
 			
-			CellCollection collection = dataset.getCollection();
+			ICellCollection collection = dataset.getCollection();
 			
-			Profile pvalues = new DipTester(collection).testCollectionGetPValues(options.getTag(), options.getType());
+			IProfile pvalues = new DipTester(collection).testCollectionGetPValues(options.getTag(), options.getType());
 			
 			double[] yvalues = pvalues.asArray();
 			double[] xvalues = pvalues.getPositions(100).asArray();
@@ -1445,11 +1446,11 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createModalityValuesDataset(double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
+	public XYDataset createModalityValuesDataset(double xposition, IAnalysisDataset dataset, ProfileType type) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-		CellCollection collection = dataset.getCollection();
+		ICellCollection collection = dataset.getCollection();
 
 		double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(xposition);
 		double[] xvalues = new double[values.length];
@@ -1469,8 +1470,8 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public KernelEstimator createProfileProbabililtyKernel(double xposition, AnalysisDataset dataset, ProfileType type) throws Exception {
-		CellCollection collection = dataset.getCollection();
+	public KernelEstimator createProfileProbabililtyKernel(double xposition, IAnalysisDataset dataset, ProfileType type) throws Exception {
+		ICellCollection collection = dataset.getCollection();
 		KernelEstimator est = new KernelEstimator(0.001);
 		double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(xposition);
 		// add the values to a kernel estimator
@@ -1564,10 +1565,10 @@ public class NucleusDatasetCreator implements Loggable {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-		AnalysisDataset setOne = options.getDatasets().get(0);
-		AnalysisDataset setTwo = options.getDatasets().get(1);
+		IAnalysisDataset setOne = options.getDatasets().get(0);
+		IAnalysisDataset setTwo = options.getDatasets().get(1);
 	
-		Profile pvalues = new KruskalTester().testCollectionGetPValues(setOne, setTwo, options.getTag(), options.getType());
+		IProfile pvalues = new KruskalTester().testCollectionGetPValues(setOne, setTwo, options.getTag(), options.getType());
 		
 		double[] yvalues = pvalues.asArray();
 		double[] xvalues = pvalues.getPositions(100).asArray();
@@ -1587,7 +1588,7 @@ public class NucleusDatasetCreator implements Loggable {
 	public XYDataset createFrankenKruskalProfileDataset(ChartOptions options) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
-		Profile pvalues = new KruskalTester().testCollectionGetFrankenPValues(options);
+		IProfile pvalues = new KruskalTester().testCollectionGetFrankenPValues(options);
 		
 		double[] yvalues = pvalues.asArray();
 		double[] xvalues = pvalues.getPositions(100).asArray();
@@ -1686,7 +1687,7 @@ public class NucleusDatasetCreator implements Loggable {
 		return ds;
 	}
 	
-	public XYDataset createBooleanProfileDataset(Profile p, BooleanProfile limits){
+	public XYDataset createBooleanProfileDataset(IProfile p, BooleanProfile limits){
 		DefaultXYDataset result  = new DefaultXYDataset();
 		
 		List<Double> trueXValues  = new ArrayList<Double>();

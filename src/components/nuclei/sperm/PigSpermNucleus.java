@@ -30,8 +30,9 @@ import java.io.IOException;
 
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
-import components.generic.BorderTagObject;
+import components.generic.IProfile;
 import components.generic.Profile;
+import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
@@ -92,7 +93,7 @@ public class PigSpermNucleus
     public void findPointsAroundBorder() throws Exception{
     	
     	RuleSet rpSet = RuleSet.pigSpermRPRuleSet();
-		Profile p     = this.getProfile(rpSet.getType());
+		IProfile p     = this.getProfile(rpSet.getType());
 		ProfileIndexFinder f = new ProfileIndexFinder();
 		int rpIndex = f.identifyIndex(p, rpSet);
 		
@@ -101,12 +102,12 @@ public class PigSpermNucleus
 			rpIndex = 0;
 		}
 		
-    	setBorderTag(BorderTagObject.REFERENCE_POINT, rpIndex);
+    	setBorderTag(Tag.REFERENCE_POINT, rpIndex);
     	
     	/*
     	 * The OP is the same as the RP in pigs
     	 */
-    	setBorderTag(BorderTagObject.ORIENTATION_POINT, rpIndex);
+    	setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
     	
     	
     	
@@ -115,7 +116,7 @@ public class PigSpermNucleus
     	 */
     	BorderPoint op = this.getBorderPoint(rpIndex);
     	int ipIndex = getBorderIndex(this.findOppositeBorder(op));
-    	setBorderTag(BorderTagObject.INTERSECTION_POINT, ipIndex);
+    	setBorderTag(Tag.INTERSECTION_POINT, ipIndex);
     	
     	if(!this.isProfileOrientationOK()){
 			this.reverse();

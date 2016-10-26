@@ -26,16 +26,18 @@ import gui.MainWindow;
 import gui.ThreadManager;
 import gui.dialogs.ClusterTreeDialog;
 import gui.dialogs.HierarchicalTreeSetupDialog;
+
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
+import analysis.IAnalysisDataset;
 import analysis.nucleus.NucleusTreeBuilder;
 import components.ClusterGroup;
 
 public class BuildHierarchicalTreeAction extends ProgressableAction implements DatasetEventListener, InterfaceEventListener {
 
-	public BuildHierarchicalTreeAction(AnalysisDataset dataset, MainWindow mw) {
+	public BuildHierarchicalTreeAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Building tree", mw);
 
 		HierarchicalTreeSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(mw, dataset);

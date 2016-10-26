@@ -33,14 +33,14 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
 	
 	protected static final ForkJoinPool mainPool = new ForkJoinPool();
     
-    private final AnalysisDataset activeDataset;
+    private final IAnalysisDataset activeDataset;
     
     /**
      * Default constructor using a dataset. If possible, a file logger will be added
      * for the dataset's debug file
      * @param dataset
      */
-    public AnalysisWorker(final AnalysisDataset dataset){
+    public AnalysisWorker(final IAnalysisDataset dataset){
     	this.activeDataset = dataset;
 
     	if(dataset!=null){
@@ -73,7 +73,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
      * @param programLogger
      * @param debugFile
      */
-    public AnalysisWorker(final AnalysisDataset dataset, final File debugFile){
+    public AnalysisWorker(final IAnalysisDataset dataset, final File debugFile){
     	this(dataset);
 
     	finest("Creating log file handler");
@@ -160,7 +160,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     	return this.progressTotal;
     }
     
-    protected AnalysisDataset getDataset(){
+    protected IAnalysisDataset getDataset(){
     	return this.activeDataset;
     }
 	

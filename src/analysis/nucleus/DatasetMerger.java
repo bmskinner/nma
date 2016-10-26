@@ -25,21 +25,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import analysis.IAnalysisDataset;
 import components.Cell;
 import components.CellCollection;
+import components.ICell;
+import components.ICellCollection;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalGroup;
 
 public class DatasetMerger extends AnalysisWorker {
 
-	private List<AnalysisDataset> datasets;
+	private List<IAnalysisDataset> datasets;
 	
 	private File saveFile;
 	
-	private List<AnalysisDataset> resultDatasets = new ArrayList<AnalysisDataset>();
+	private List<IAnalysisDataset> resultDatasets = new ArrayList<IAnalysisDataset>();
 	
 	private Map<UUID, Set<UUID>> pairedSignalGroups = null;
 		
@@ -52,14 +56,14 @@ public class DatasetMerger extends AnalysisWorker {
 	 * @param function
 	 * @param saveFile the file to save the new dataset as
 	 */
-	public DatasetMerger(List<AnalysisDataset> datasets, File saveFile){
+	public DatasetMerger(List<IAnalysisDataset> datasets, File saveFile){
 		super(datasets.get(0));
 		this.setProgressTotal(MAX_PROGRESS);
 		this.datasets = datasets;
 		this.saveFile = saveFile;
 	}
 	
-	public DatasetMerger(List<AnalysisDataset> datasets, File saveFile, Map<UUID, Set<UUID>> pairedSignalGroups){
+	public DatasetMerger(List<IAnalysisDataset> datasets, File saveFile, Map<UUID, Set<UUID>> pairedSignalGroups){
 		this(datasets, saveFile);
 		this.pairedSignalGroups = pairedSignalGroups;
 	}
@@ -75,7 +79,7 @@ public class DatasetMerger extends AnalysisWorker {
 		}
 	}
 		
-	public List<AnalysisDataset> getResults(){
+	public List<IAnalysisDataset> getResults(){
 		return resultDatasets;
 	}
 	
@@ -87,7 +91,7 @@ public class DatasetMerger extends AnalysisWorker {
 	private boolean checkNucleusClass(){
 		boolean result = true;
 		NucleusType testClass = datasets.get(0).getCollection().getNucleusType();
-		for(AnalysisDataset d : datasets){
+		for(IAnalysisDataset d : datasets){
 
 			if(!d.getCollection().getNucleusType().equals(testClass)){
 				result =  false;
@@ -133,15 +137,15 @@ public class DatasetMerger extends AnalysisWorker {
 
 
 //			// make a new collection based on the first dataset
-			CellCollection templateCollection = datasets.get(0).getCollection();
+			ICellCollection templateCollection = datasets.get(0).getCollection();
 
-			CellCollection newCollection = new CellCollection(newDatasetFolder, 
+			ICellCollection newCollection = new CellCollection(newDatasetFolder, 
 					null, 
 					newDatasetName, 
 					templateCollection.getNucleusType()
 					);
 			
-			AnalysisDataset newDataset = performMerge(newCollection, datasets);
+			IAnalysisDataset newDataset = performMerge(newCollection, datasets);
 
 			resultDatasets.add(newDataset);
 
@@ -164,13 +168,13 @@ public class DatasetMerger extends AnalysisWorker {
 	 * @return
 	 * @throws Exception 
 	 */
-	private AnalysisDataset performMerge(CellCollection newCollection, List<AnalysisDataset> sources) throws Exception{
+	private IAnalysisDataset performMerge(ICellCollection newCollection, List<IAnalysisDataset> sources) throws Exception{
 
 		fine("Merging datasets");
 
-		for(AnalysisDataset d : datasets){
+		for(IAnalysisDataset d : datasets){
 
-			for(Cell cell : d.getCollection().getCells()){
+			for(ICell cell : d.getCollection().getCells()){
 				
 				if(!newCollection.getCells().contains(cell)){
 					
@@ -201,11 +205,11 @@ public class DatasetMerger extends AnalysisWorker {
 
 
 		// create the dataset; has no analysis options at present
-		AnalysisDataset newDataset = new AnalysisDataset(newCollection);
+		IAnalysisDataset newDataset = new AnalysisDataset(newCollection);
 		newDataset.setRoot(true);
 
 		// Add the original datasets as merge sources
-		for(AnalysisDataset d : datasets){
+		for(IAnalysisDataset d : datasets){
 			newDataset.addMergeSource(d);
 		}
 
@@ -217,7 +221,7 @@ public class DatasetMerger extends AnalysisWorker {
 		return newDataset;
 	}
 	
-	private void mergeSignalGroups(CellCollection newCollection){
+	private void mergeSignalGroups(ICellCollection newCollection){
 		if(pairedSignalGroups==null){
 			finer("No signal groups to merge");
 			return;

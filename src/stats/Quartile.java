@@ -42,6 +42,22 @@ public class Quartile extends DescriptiveStatistic {
 	/*
     Calculate the <lowerPercent> quartile from a float[] array
 	 */
+	public Quartile(int[] values, double lowerPercent) {
+
+		Integer[] temp2;
+		try {
+			temp2 = new ArrayConverter(values).toIntegerObjectArray();
+		} catch (ArrayConversionException e) {
+			temp2 = new Integer[0]; 
+		}
+
+		value = new Quartile(temp2, lowerPercent);
+
+	}
+	
+	/*
+    Calculate the <lowerPercent> quartile from a float[] array
+	 */
 	public Quartile(float[] values, float lowerPercent) {
 
 		Float[] temp2;

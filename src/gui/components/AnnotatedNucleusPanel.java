@@ -24,6 +24,7 @@ import io.ImageImporter;
 
 import java.awt.BorderLayout;
 import java.io.File;
+
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -33,7 +34,7 @@ import analysis.image.ImageConverter;
 import analysis.image.ImageFilterer;
 import analysis.image.NucleusAnnotator;
 import logging.Loggable;
-import components.Cell;
+import components.ICell;
 
 /**
  * Display the original image for a cell, with
@@ -44,7 +45,7 @@ import components.Cell;
 @SuppressWarnings("serial")
 public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 	
-	private Cell cell;
+	private ICell cell;
 	private JLabel imageLabel = new JLabel();
 	
 	public AnnotatedNucleusPanel(){
@@ -59,7 +60,7 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 
 	}
 	
-	public void updateCell(Cell c) throws Exception {
+	public void updateCell(ICell c) throws Exception {
 		this.cell = c;
 		importNucleusImage();
 		

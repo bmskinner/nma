@@ -35,11 +35,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
+
 import javax.swing.JProgressBar;
 
 import logging.Loggable;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import analysis.IAnalysisDataset;
 
 /**
  * Contains a progress bar and handling methods for when an action
@@ -48,7 +50,7 @@ import analysis.AnalysisWorker;
  */
 public abstract class ProgressableAction implements PropertyChangeListener, Loggable, MouseListener {
 
-	protected AnalysisDataset dataset = null; // the dataset being worked on
+	protected IAnalysisDataset dataset = null; // the dataset being worked on
 	private JProgressBar progressBar = null;
 	
 	protected AnalysisWorker worker = null;
@@ -57,7 +59,7 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 	protected MainWindow mw;
 	private CountDownLatch latch = null; // allow threads to wait for the analysis to complete
 	
-	private List<AnalysisDataset> processList = new ArrayList<AnalysisDataset>(0); // list of datasets that need processing after this
+	private List<IAnalysisDataset> processList = new ArrayList<IAnalysisDataset>(0); // list of datasets that need processing after this
 	
 	private List<Object> interfaceListeners = new ArrayList<Object>();
 	private List<Object> datasetListeners = new ArrayList<Object>();
@@ -71,7 +73,7 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 		this( (AnalysisDataset) null, barMessage, mw);
 	}
 	
-	public ProgressableAction(AnalysisDataset dataset, String barMessage, MainWindow mw){
+	public ProgressableAction(IAnalysisDataset dataset, String barMessage, MainWindow mw){
 		
 		this.dataset 		= dataset;
 		this.progressBar 	= new JProgressBar(0, 100);
@@ -99,7 +101,7 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 	 * @param barMessage
 	 * @param mw
 	 */
-	public ProgressableAction(List<AnalysisDataset> list, String barMessage, MainWindow mw){
+	public ProgressableAction(List<IAnalysisDataset> list, String barMessage, MainWindow mw){
 		this(list.get(0), barMessage, mw);
 		processList = list;
 		processList.remove(0); // remove the first entry
@@ -112,7 +114,7 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 	 * @param mw
 	 * @param flag
 	 */
-	public ProgressableAction(List<AnalysisDataset> list, String barMessage, MainWindow mw, int flag){
+	public ProgressableAction(List<IAnalysisDataset> list, String barMessage, MainWindow mw, int flag){
 		this(list, barMessage, mw);
 		this.downFlag = flag;
 	}
@@ -124,7 +126,7 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 	 * @param mw
 	 * @param flag
 	 */
-	public ProgressableAction(AnalysisDataset dataset, String barMessage, MainWindow mw, int flag){
+	public ProgressableAction(IAnalysisDataset dataset, String barMessage, MainWindow mw, int flag){
 		this(dataset, barMessage, mw);
 		this.downFlag = flag;
 	}
@@ -139,7 +141,7 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 		}
 	}
 	
-	protected List<AnalysisDataset> getRemainingDatasetsToProcess(){
+	protected List<IAnalysisDataset> getRemainingDatasetsToProcess(){
 		return this.processList;
 	}
 	
@@ -272,14 +274,14 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
         }
     }	
 	
-	protected synchronized void fireDatasetEvent(String method, AnalysisDataset dataset) {
+	protected synchronized void fireDatasetEvent(String method, IAnalysisDataset dataset) {
 
-		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 		list.add(dataset);
 		fireDatasetEvent(method, list);
 	}
 
-	protected synchronized void fireDatasetEvent(String method, List<AnalysisDataset> list) {
+	protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list) {
     	
         DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);
         Iterator<Object> iterator = datasetListeners.iterator();
@@ -288,7 +290,7 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
         }
     }
 	
-	protected synchronized void fireDatasetEvent(String method, List<AnalysisDataset> list, AnalysisDataset secondary) {
+	protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list, IAnalysisDataset secondary) {
     	
         DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, secondary);
         Iterator<Object> iterator = datasetListeners.iterator();

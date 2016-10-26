@@ -30,17 +30,21 @@ import java.util.Set;
 import java.util.UUID;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.signals.SignalDetectionWorker;
 import analysis.signals.SignalManager;
 import components.Cell;
 import components.CellCollection;
+import components.ICell;
+import components.ICellCollection;
+import components.nuclear.ISignalGroup;
 import components.nuclear.SignalGroup;
 
 public class AddNuclearSignalAction extends ProgressableAction {
 	
 	private UUID signalGroup = null;
 	
-	public AddNuclearSignalAction(AnalysisDataset dataset, MainWindow mw) {
+	public AddNuclearSignalAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Signal detection", mw);
 
 		try{
@@ -86,11 +90,11 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		
 		
 		// divide population into clusters with and without signals
-		List<CellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
+		List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
 
-		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 		
-		for(CellCollection collection : signalPopulations){
+		for(ICellCollection collection : signalPopulations){
 			finer("Processing "+collection.getName());
 			processSubPopulation(collection);
 			finer("Processed "+collection.getName());
@@ -116,14 +120,14 @@ public class AddNuclearSignalAction extends ProgressableAction {
 	 * and perform basic analyses
 	 * @param collection
 	 */
-	private void processSubPopulation(CellCollection collection){
+	private void processSubPopulation(ICellCollection collection){
 
 		try{
 		finer("Creating new analysis dataset for "+collection.getName());
 		AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
 		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
 
-		log("Sub-population "+collection.getName()+": "+collection.getNucleusCount()+" nuclei");
+		log("Sub-population "+collection.getName()+": "+collection.size()+" nuclei");
 		SignalManager m = collection.getSignalManager();
 		
 		// Remove any signal groups that have no signals in the population
@@ -166,16 +170,16 @@ public class AddNuclearSignalAction extends ProgressableAction {
 	 * @param signalGroup the signal group to split on
 	 * @return a list of new collections
 	 */
-	private List<CellCollection> dividePopulationBySignals(CellCollection r, UUID signalGroup){
+	private List<ICellCollection> dividePopulationBySignals(ICellCollection r, UUID signalGroup){
 
-		List<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
+		List<ICellCollection> signalPopulations = new ArrayList<ICellCollection>(0);
 		log("Dividing population by signals...");
 		try{
 
-            SignalGroup group = r.getSignalGroup(signalGroup);
+            ISignalGroup group = r.getSignalGroup(signalGroup);
             group.setVisible(true);
 
-			Set<Cell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
+			Set<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
 			if(!list.isEmpty()){
 				log("Signal group "+group.getGroupName()+": found nuclei with signals");
 				CellCollection listCollection = new CellCollection(r.getFolder(), 
@@ -183,7 +187,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
                         group.getGroupName()+"_with_signals", 
 						r.getNucleusType());
 
-				for(Cell c : list){
+				for(ICell c : list){
 
 					finer("  Added cell: "+c.getNucleus().getNameAndNumber());
 					Cell newCell = new Cell(c);
@@ -201,7 +205,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
                 // Only add a group of cells without signals if at least one cell does havea signal
 
-				Set<Cell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
+				Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
 				if(!notList.isEmpty()){
 					log("Signal group "+r.getSignalGroup(signalGroup).getGroupName()+": found nuclei without signals");
 					CellCollection notListCollection = new CellCollection(r.getFolder(), 
@@ -209,7 +213,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
                             group.getGroupName()+"_without_signals", 
 							r.getNucleusType());
 
-					for(Cell c : notList){
+					for(ICell c : notList){
 						notListCollection.addCell( new Cell(c) );
 						finer("  Added cell: "+c.getNucleus().getNameAndNumber());
 					}

@@ -26,6 +26,7 @@ import javax.swing.JRadioButton;
 
 import components.generic.BorderTagObject;
 import components.generic.BorderTag.BorderTagType;
+import components.generic.Tag;
 
 @SuppressWarnings("serial")
 public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {
@@ -46,12 +47,12 @@ public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {
 			map.put(type, button);
 		}
 		// Set the default
-		map.get(BorderTagObject.REFERENCE_POINT).setSelected(true);
+		map.get(Tag.REFERENCE_POINT).setSelected(true);
 		
 	}
 	
 	public void setEnabled(boolean b){
-		for(BorderTagObject type : BorderTagObject.values(BorderTagType.CORE)){
+		for(Tag type : BorderTagObject.values(BorderTagType.CORE)){
 			map.get(type).setEnabled(b);
 		}
 	}

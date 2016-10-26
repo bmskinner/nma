@@ -23,13 +23,16 @@ import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import java.util.List;
 import java.util.UUID;
+
 import org.jfree.chart.ChartPanel;
 
-import components.Cell;
 import components.CellularComponent;
+import components.ICell;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 /*
  * Hold the drawing options for a chart. Can store options for profile
@@ -40,7 +43,7 @@ public class ChartOptions extends AbstractOptions {
 	
 	private boolean normalised         = false;
 	private ProfileAlignment alignment = ProfileAlignment.LEFT;
-	private BorderTagObject tag              = BorderTagObject.REFERENCE_POINT;
+	private Tag tag              = Tag.REFERENCE_POINT;
 	private boolean showMarkers        = false;
 	private boolean hideProfiles       = false;
 	private ProfileType type           = ProfileType.ANGLE;
@@ -68,7 +71,7 @@ public class ChartOptions extends AbstractOptions {
 	private boolean invertYAxis         = false;
 	
 	private RotationMode rotateMode     = RotationMode.ACTUAL;
-	private Cell cell                   = null;
+	private ICell cell                   = null;
 	private CellularComponent component = null;
 	private boolean showWarp            = false;
 	
@@ -76,7 +79,7 @@ public class ChartOptions extends AbstractOptions {
 	
 
 	
-	public ChartOptions(List<AnalysisDataset> list){
+	public ChartOptions(List<IAnalysisDataset> list){
 		super(list);
 	}
 			
@@ -114,11 +117,11 @@ public class ChartOptions extends AbstractOptions {
 		this.modalityPosition = modalityPosition;
 	}
 
-	public BorderTagObject getTag() {
+	public Tag getTag() {
 		return tag;
 	}
 
-	public void setTag(BorderTagObject tag) {
+	public void setTag(Tag tag) {
 		this.tag = tag;
 	}
 
@@ -283,11 +286,11 @@ public class ChartOptions extends AbstractOptions {
 		this.rotateMode = rotateMode;
 	}
 	
-	public Cell getCell() {
+	public ICell getCell() {
 		return cell;
 	}
 
-	public void setCell(Cell cell) {
+	public void setCell(ICell cell) {
 		this.cell = cell;
 	}
 	

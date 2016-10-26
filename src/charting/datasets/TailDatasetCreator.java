@@ -23,8 +23,8 @@ import logging.Loggable;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import components.Cell;
 import components.Flagellum;
+import components.ICell;
 import components.generic.XYPoint;
 
 public class TailDatasetCreator implements Loggable {
@@ -35,11 +35,11 @@ public class TailDatasetCreator implements Loggable {
 	 * @param cell the cell
 	 * @return an XY dataset
 	 */
-	public static XYDataset createTailOutline(Cell cell){
+	public static XYDataset createTailOutline(ICell cell){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		int j = 0;
-		for(Flagellum tail : cell.getTails()){
+		for(Flagellum tail : cell.getFlagella()){
 
 			double[] xpoints = new double[tail.getBorder().size()];
 			double[] ypoints = new double[tail.getBorder().size()];
@@ -66,11 +66,11 @@ public class TailDatasetCreator implements Loggable {
 	 * @param cell the cell
 	 * @return an XY dataset
 	 */
-	public static XYDataset createTailSkeleton(Cell cell){
+	public static XYDataset createTailSkeleton(ICell cell){
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 		int j = 0;
-		for(Flagellum tail : cell.getTails()){
+		for(Flagellum tail : cell.getFlagella()){
 
 			double[] xpoints = new double[tail.getSkeleton().size()];
 			double[] ypoints = new double[tail.getSkeleton().size()];

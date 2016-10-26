@@ -9,6 +9,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import utility.Constants;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.nucleus.CellRelocator;
 import gui.MainWindow;
 import gui.ThreadManager;
@@ -16,7 +17,7 @@ import gui.InterfaceEvent.InterfaceMethod;
 
 public class RelocateFromFileAction extends ProgressableAction {
 
-	public RelocateFromFileAction(AnalysisDataset dataset, MainWindow mw, CountDownLatch latch) {
+	public RelocateFromFileAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch latch) {
 		super(dataset, "Relocating cells", mw);
 		this.setLatch(latch);
 		cooldown();

@@ -24,12 +24,14 @@ import gui.dialogs.TailDetectionSettingsDialog;
 import ij.io.DirectoryChooser;
 
 import java.io.File;
+
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.tail.TubulinTailDetector;
 
 public class AddTailStainAction extends ProgressableAction {
 
-	public AddTailStainAction(AnalysisDataset dataset, MainWindow mw) {
+	public AddTailStainAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Tail detection", mw);
 		try{
 			

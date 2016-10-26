@@ -31,15 +31,15 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
-import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import analysis.IAnalysisDataset;
 
 public class PopulationExporter extends AnalysisWorker {
 	
 	private File   saveFile = null;
 //	private boolean useHDF5 = false;
 	
-	public PopulationExporter(AnalysisDataset dataset, File saveFile) {
+	public PopulationExporter(IAnalysisDataset dataset, File saveFile) {
 		super(dataset);		
 		this.saveFile = saveFile;
 	}
@@ -74,7 +74,7 @@ public class PopulationExporter extends AnalysisWorker {
 	 * @param saveFile the file to save as
 	 * @return
 	 */
-	public boolean saveAnalysisDataset(AnalysisDataset dataset, File saveFile){
+	public boolean saveAnalysisDataset(IAnalysisDataset dataset, File saveFile){
 
 		boolean ok = true;
 		try{
@@ -129,7 +129,7 @@ public class PopulationExporter extends AnalysisWorker {
 	 * @param dataset the dataset
 	 * @return ok or not
 	 */
-	public boolean saveAnalysisDataset(AnalysisDataset dataset){
+	public boolean saveAnalysisDataset(IAnalysisDataset dataset){
 
 		File saveFile = dataset.getSavePath();
 		if(saveFile.exists()){
@@ -169,7 +169,7 @@ public class PopulationExporter extends AnalysisWorker {
 	    }
 	}
 	
-	public static void saveAnalysisDatasetToHDF5(AnalysisDataset dataset){
+	public static void saveAnalysisDatasetToHDF5(IAnalysisDataset dataset){
 
 		/* TODO: the basic approach show below does not work;
 		 * The HDF5 writer cannot handle the Maps within a Java object.

@@ -14,9 +14,9 @@ import org.jfree.chart.JFreeChart;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.generic.Tag;
 import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
 import gui.DatasetEvent;
@@ -130,7 +130,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 
 			if(this.getCellModel().hasCell()){
 				
-				SegmentedProfile profile = this.getCellModel().getCell().getNucleus().getProfile(type, BorderTagObject.REFERENCE_POINT);
+				SegmentedProfile profile = this.getCellModel().getCell().getNucleus().getProfile(type, Tag.REFERENCE_POINT);
 				
 				
 				ChartOptions options = new ChartOptionsBuilder()
@@ -138,7 +138,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 					.setCell(this.getCellModel().getCell())
 					.setNormalised(false)
 					.setAlignment(ProfileAlignment.LEFT)
-					.setTag(BorderTagObject.REFERENCE_POINT)
+					.setTag(Tag.REFERENCE_POINT)
 					.setShowMarkers(false)
 					.setProfileType( type)
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -161,7 +161,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 					.setCell(this.getCellModel().getCell())
 					.setNormalised(false)
 					.setAlignment(ProfileAlignment.LEFT)
-					.setTag(BorderTagObject.REFERENCE_POINT)
+					.setTag(Tag.REFERENCE_POINT)
 					.setShowMarkers(false)
 					.setProfileType( type)
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -199,7 +199,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 	
 	@Override
 	public void chartSetEventReceived(ChartSetEvent e) {
-		SegmentedProfile profile = this.getCellModel().getCell().getNucleus().getProfile(profileOptions.getSelected(), BorderTagObject.REFERENCE_POINT);
+		SegmentedProfile profile = this.getCellModel().getCell().getNucleus().getProfile(profileOptions.getSelected(), Tag.REFERENCE_POINT);
 		dualPanel.setProfile(profile, false);
 		
 	}

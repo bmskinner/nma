@@ -55,8 +55,10 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import components.CellCollection;
 import components.ClusterGroup;
+import components.ICellCollection;
 
 @SuppressWarnings("serial")
 public class PopulationsPanel extends DetailPanel implements SignalChangeListener {
@@ -134,7 +136,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	
 	
 	@Override
-	public void update(final List<AnalysisDataset> list){
+	public void update(final List<IAnalysisDataset> list){
 		this.update();
 		finest("Preparing to select datasets");
 		treeTable.selectDatasets(list);
@@ -142,8 +144,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		treeTable.repaint();
 	}
 	
-	public void update(final AnalysisDataset dataset){
-		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+	public void update(final IAnalysisDataset dataset){
+		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>(1);
 		list.add(dataset);
 		update(list);
 	}
@@ -222,7 +224,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				if(e.getButton() == MouseEvent.BUTTON3){
 										
 					if(o instanceof AnalysisDataset){
-						if(((AnalysisDataset) o).isRoot()){
+						if(((IAnalysisDataset) o).isRoot()){
 							populationPopup.setDeleteString("Close");
 						} else {
 							populationPopup.setDeleteString("Delete");
@@ -295,9 +297,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * Get the datasets currently selected
 	 * @return
 	 */
-	public synchronized List<AnalysisDataset> getSelectedDatasets(){
+	public synchronized List<IAnalysisDataset> getSelectedDatasets(){
 
-		return new ArrayList<AnalysisDataset>(datasetSelectionOrder);
+		return new ArrayList<IAnalysisDataset>(datasetSelectionOrder);
 	}
 
 
@@ -308,7 +310,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * Check that the name is valid, and update if needed
 	 * @param dataset the dataset to add
 	 */
-	public void addDataset(AnalysisDataset dataset){
+	public void addDataset(IAnalysisDataset dataset){
 				
 		if(dataset.isRoot()){ // add to the list of datasets that can be ordered
 //			treeOrderMap.put(dataset.getUUID(), treeOrderMap.size()); // add to the end of the list
@@ -327,9 +329,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * Select the given dataset in the tree table
 	 * @param dataset the dataset to select
 	 */
-	public void selectDataset(AnalysisDataset dataset){
+	public void selectDataset(IAnalysisDataset dataset){
 		if(dataset!=null){
-			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+			List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 			list.add(dataset);
 			treeTable.selectDatasets(list);
 //			selectDatasets(list);
@@ -341,7 +343,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * Select the given datasets in the tree table
 	 * @param dataset the dataset to select
 	 */
-	public void selectDatasets(List<AnalysisDataset> list){
+	public void selectDatasets(List<IAnalysisDataset> list){
 		treeTable.selectDatasets(list);
 	}
 	
@@ -358,8 +360,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * @param dataset the dataset to rename
 	 */
 
-	private void renameCollection(AnalysisDataset dataset){
-		CellCollection collection = dataset.getCollection();
+	private void renameCollection(IAnalysisDataset dataset){
+		ICellCollection collection = dataset.getCollection();
 		String newName = (String) JOptionPane.showInputDialog(this, 
 				"Choose a new name", 
 				"Rename collection", 
@@ -412,7 +414,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 */
 	private void moveDataset(boolean isDown) {
 		finer("Move dataset heard");
-		List<AnalysisDataset> datasets = getSelectedDatasets();
+		List<IAnalysisDataset> datasets = getSelectedDatasets();
 		List<PopulationTreeTableNode> nodes = treeTable.getSelectedNodes();
 		
 		if(nodes.isEmpty() || nodes.size()>1){
@@ -420,7 +422,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		}
 
 		// May be a dataset or cluster group selected
-		AnalysisDataset datasetToMove = datasets.isEmpty() ? null : datasets.get(0);
+		IAnalysisDataset datasetToMove = datasets.isEmpty() ? null : datasets.get(0);
 
 		// Get the node containing the dataset
 		PopulationTreeTableModel model = (PopulationTreeTableModel) treeTable.getTreeTableModel();
@@ -438,7 +440,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	}
 	
 		
-	private void deleteDataset(AnalysisDataset d){
+	private void deleteDataset(IAnalysisDataset d){
 		
 		try{
 
@@ -448,7 +450,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 			// remove the dataset from its parents
 			finer("Removing dataset from its parents");
-			for(AnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()){ //analysisDatasets.keySet()){
+			for(IAnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()){ //analysisDatasets.keySet()){
 //				AnalysisDataset parent = analysisDatasets.get(parentID);
 
 				finest("Parent dataset "+parent.getName());
@@ -494,7 +496,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		Iterator<UUID> it = ids.iterator();
 		while(it.hasNext()){
 			UUID id = it.next();
-			AnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
+			IAnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
 			
 			if( ! d.hasChildren()){
 				finest("Preparing to delete dataset: "+d.getName());
@@ -509,7 +511,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	}
 	
 	private void deleteSelectedDatasets(){
-		final List<AnalysisDataset>         datasets = getSelectedDatasets();
+		final List<IAnalysisDataset>         datasets = getSelectedDatasets();
 		final List<PopulationTreeTableNode> nodes    = treeTable.getSelectedNodes();
 		
 		// Check if cluster groups need removing
@@ -520,7 +522,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				if(n.hasClusterGroup()){
 					ClusterGroup g = n.getGroup();
 					for(UUID childID : g.getUUIDs()){
-						AnalysisDataset child = DatasetListManager.getInstance().getDataset(childID);
+						IAnalysisDataset child = DatasetListManager.getInstance().getDataset(childID);
 						datasets.add(child);
 					}
 					
@@ -591,9 +593,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 	}
 	
-	private Set<UUID> unique(List<AnalysisDataset> list){
+	private Set<UUID> unique(List<IAnalysisDataset> list){
 		Set<UUID> set = new HashSet<UUID>();
-		for(AnalysisDataset d : list){
+		for(IAnalysisDataset d : list){
 			finest("Selected dataset for deletion: "+d.getName());
 
 			set.add(d.getUUID());
@@ -650,7 +652,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 								datasetSelectionOrder.add(d);
 								
 								int selectionIndex = 0;
-								for(AnalysisDataset an : datasetSelectionOrder){
+								for(IAnalysisDataset an : datasetSelectionOrder){
 									
 									if(an==d){
 										selectedIndexes.put(i, selectionIndex);
@@ -671,7 +673,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						Iterator<AnalysisDataset> it= datasetSelectionOrder.iterator();
 						
 						while(it.hasNext()){
-							AnalysisDataset d = it.next();
+							IAnalysisDataset d = it.next();
 							if(! datasets.contains(d)){
 								it.remove();
 							}	
@@ -701,7 +703,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						} else { // single population
 							
 							if(datasets.size()==1){ // single datasets
-								AnalysisDataset d = datasets.get(0);
+								IAnalysisDataset d = datasets.get(0);
 								setMenuForSingleDataset(d);
 							} else {
 								// single clustergoup
@@ -759,7 +761,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 	}
 		
-	private void setMenuForSingleDataset(AnalysisDataset d){
+	private void setMenuForSingleDataset(IAnalysisDataset d){
 		
 		populationPopup.enableDelete();
 		populationPopup.disableMerge();

@@ -23,22 +23,24 @@ import java.util.List;
 
 import logging.Loggable;
 import components.Cell;
+import components.ICell;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 public class VennDatasetCreator implements Loggable {
 	
-	public VennDatasetCreator(List<AnalysisDataset> list){
+	public VennDatasetCreator(List<IAnalysisDataset> list){
 
 	}
 	
-	public void createVennClusters(List<AnalysisDataset> list){
+	public void createVennClusters(List<IAnalysisDataset> list){
 		
 		List<VennSet> venns = new ArrayList<VennSet>();
 		
 		VennSet first = new VennSet(list.get(0));
 		venns.add(first);
 		
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			
 			for(VennSet v : venns){
 				if(v.addDataset(dataset)){
@@ -96,10 +98,10 @@ public class VennDatasetCreator implements Loggable {
 	
 	public class VennSet {
 		
-		private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-		private List<Cell> cells = new ArrayList<Cell>();
+		private List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+		private List<ICell> cells = new ArrayList<ICell>();
 		
-		public VennSet(AnalysisDataset dataset){
+		public VennSet(IAnalysisDataset dataset){
 			this.list.add(dataset);
 			cells.addAll(dataset.getCollection().getCells());
 		}
@@ -109,9 +111,9 @@ public class VennDatasetCreator implements Loggable {
 		 * @param dataset
 		 * @return
 		 */
-		public boolean addDataset(AnalysisDataset dataset){
+		public boolean addDataset(IAnalysisDataset dataset){
 			boolean overlap = false;
-			for(Cell cell : dataset.getCollection().getCells()){
+			for(ICell cell : dataset.getCollection().getCells()){
 				
 				if(this.cells.contains(cell)){
 					overlap = true;
@@ -125,17 +127,17 @@ public class VennDatasetCreator implements Loggable {
 			return overlap;
 		}
 		
-		public List<Cell> getCells(){
+		public List<ICell> getCells(){
 			return this.cells;
 		}
 		
-		public List<AnalysisDataset> getDatasets(){
+		public List<IAnalysisDataset> getDatasets(){
 			return this.list;
 		}
 		
 		public boolean overlaps(VennSet v){
 			boolean overlap = false;
-			for(Cell cell : v.getCells()){
+			for(ICell cell : v.getCells()){
 				if(this.cells.contains(cell)){
 					overlap = true;
 				}
@@ -144,7 +146,7 @@ public class VennDatasetCreator implements Loggable {
 		}
 		
 		public void merge(VennSet v){
-			for(AnalysisDataset d : v.getDatasets()){
+			for(IAnalysisDataset d : v.getDatasets()){
 				this.addDataset(d);
 			}
 			

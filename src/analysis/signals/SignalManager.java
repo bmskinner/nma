@@ -28,8 +28,11 @@ import java.util.UUID;
 
 import components.Cell;
 import components.CellCollection;
-import components.generic.BorderTagObject;
+import components.ICell;
+import components.ICellCollection;
 import components.generic.MeasurementScale;
+import components.generic.Tag;
+import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.SignalGroup;
 import components.nuclei.Nucleus;
@@ -48,11 +51,11 @@ import utility.ArrayConverter.ArrayConversionException;
  * @author bms41
  *
  */
-public class SignalManager implements Loggable{
+public class SignalManager implements Loggable {
 	
-	private CellCollection collection;
+	private ICellCollection collection;
 	
-	public SignalManager(CellCollection collection){
+	public SignalManager(ICellCollection collection){
 		this.collection = collection;
 	}
 	
@@ -62,10 +65,10 @@ public class SignalManager implements Loggable{
 	   * @param hasSignal
 	   * @return a list of cells
 	   */
-	  public Set<Cell> getCellsWithNuclearSignals(UUID signalGroup, boolean hasSignal){
-		  Set<Cell> result = new HashSet<Cell>(collection.size());
+	  public Set<ICell> getCellsWithNuclearSignals(UUID signalGroup, boolean hasSignal){
+		  Set<ICell> result = new HashSet<ICell>(collection.size());
 
-		  for(Cell c : collection.getCells()){
+		  for(ICell c : collection.getCells()){
 			  Nucleus n = c.getNucleus();
 
 			  if(hasSignal){
@@ -88,23 +91,7 @@ public class SignalManager implements Loggable{
 	  public int getSignalGroupCount(){
 		  return getSignalGroupIDs().size();
 	  }
-	  
-	  /**
-	   * Find the signal groups present within the nuclei of the collection
-	   * @return the list of groups. Order is not guaranteed
-	   */
-//	  public Set<UUID> getSignalGroupIDs(){
-//		  Set<UUID> result = new HashSet<UUID>(0);
-//		  for(Nucleus n : collection.getNuclei()){
-//			  for( UUID group : n.getSignalCollection().getSignalGroupIDs()){
-//				  if(n.getSignalCollection().hasSignal(group)){ // signal groups can be copied over from split collections. Check signals exist
-//					  result.add(group);
-//				  }
-//			  }
-//		  }
-//		  return result;
-//	  }
-	  
+	  	  
 	  /**
 	   * Fetch the signal group ids in this collection
 	   * @param id
@@ -133,7 +120,7 @@ public class SignalManager implements Loggable{
 	   * @param id
 	   * @return
 	   */
-	  public Collection<SignalGroup> getSignalGroups(){
+	  public Collection<ISignalGroup> getSignalGroups(){
 	      return collection.getSignalGroups();
 	  }
 	  
@@ -207,7 +194,7 @@ public class SignalManager implements Loggable{
 		  finer("Updating signal group in cell collection");
 
 		  // the group the signals are currently in
-		  SignalGroup oldGroup = collection.getSignalGroup(oldID);
+		  ISignalGroup oldGroup = collection.getSignalGroup(oldID);
 		  
 		  finer("Old group: "+oldID+" | "+oldGroup.toString());
 		  
@@ -218,7 +205,7 @@ public class SignalManager implements Loggable{
 		  if(collection.hasSignalGroup(newID)){ // check if the group already exists
 			  
 			  finer("A signal group of id "+newID+" already exists");
-			  SignalGroup existingGroup = collection.getSignalGroup(newID);
+			  ISignalGroup existingGroup = collection.getSignalGroup(newID);
 			  
 			  if( ! oldGroup.getGroupName().equals(existingGroup.getGroupName())){
 				  finer("Setting signal group name to merge");
@@ -237,7 +224,7 @@ public class SignalManager implements Loggable{
 			  finer("A signal group of id "+newID+" does not exist");
 			  
 			  // the new group for the signals
-			  SignalGroup newGroup = new SignalGroup(oldGroup);
+			  ISignalGroup newGroup = new SignalGroup(oldGroup);
 			  
 			  finer("New group: "+newID+" | "+newGroup.toString());
 			  collection.addSignalGroup(newID, newGroup);
@@ -389,9 +376,9 @@ public class SignalManager implements Loggable{
       
       public double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) {
 
-          Set<Cell> cells = getCellsWithNuclearSignals(signalGroup, true);
+          Set<ICell> cells = getCellsWithNuclearSignals(signalGroup, true);
           List<Double> a = new ArrayList<Double>(0);
-          for(Cell c : cells){
+          for(ICell c : cells){
               Nucleus n = c.getNucleus();
               a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
 
@@ -490,7 +477,7 @@ public class SignalManager implements Loggable{
      * preserving the signal group IDs
      * @param target
      */
-    public void copySignalGroups(CellCollection target){
+    public void copySignalGroups(ICellCollection target){
     	 for(UUID id : collection.getSignalGroupIDs()){
     		 target.addSignalGroup(id, new SignalGroup(collection.getSignalGroup(id)));
    	  }
@@ -520,7 +507,7 @@ public class SignalManager implements Loggable{
     public void recalculateSignalAngles(){
     	finer("Recalcalculating signal angles");
     	for(Nucleus n : collection.getNuclei()){
-    		n.calculateSignalAnglesFromPoint(n.getBorderPoint(BorderTagObject.ORIENTATION_POINT));
+    		n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
     	}
     }
 	  

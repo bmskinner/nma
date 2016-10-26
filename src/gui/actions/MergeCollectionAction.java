@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import utility.Constants;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.nucleus.DatasetMerger;
 
 /**
@@ -40,7 +41,7 @@ import analysis.nucleus.DatasetMerger;
  */
 public class MergeCollectionAction extends ProgressableAction {
 
-	public MergeCollectionAction(List<AnalysisDataset> datasets, MainWindow mw) {
+	public MergeCollectionAction(List<IAnalysisDataset> datasets, MainWindow mw) {
 		super("Merging", mw);
 		
 		if( ! checkDatasetsMergable(datasets)){
@@ -58,7 +59,7 @@ public class MergeCollectionAction extends ProgressableAction {
 
 				// Check for signals in >1 dataset
 				int signals=0;
-				for(AnalysisDataset d : datasets){
+				for(IAnalysisDataset d : datasets){
 					if(d.getCollection().getSignalManager().hasSignals()){
 						signals++;
 					}
@@ -102,7 +103,7 @@ public class MergeCollectionAction extends ProgressableAction {
 	 * @param datasets
 	 * @return
 	 */
-	private boolean checkDatasetsMergable(List<AnalysisDataset> datasets){
+	private boolean checkDatasetsMergable(List<IAnalysisDataset> datasets){
 		
 		if(datasets.size()==2){
 			
@@ -122,7 +123,7 @@ public class MergeCollectionAction extends ProgressableAction {
 	@Override
 	public void finished(){
 
-		List<AnalysisDataset> datasets = ((DatasetMerger) worker).getResults();
+		List<IAnalysisDataset> datasets = ((DatasetMerger) worker).getResults();
 
 		if(datasets==null){
 			this.cancel();

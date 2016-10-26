@@ -17,14 +17,19 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package components.generic;
+package components.active.generic;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import components.generic.IProfile;
+import components.generic.IProfileAggregate;
+import components.generic.Profile;
+
 import analysis.profiles.ProfileException;
 import stats.Quartile;
+import utility.ArrayConverter;
+import utility.ArrayConverter.ArrayConversionException;
 import logging.Loggable;
 
 /**
@@ -33,15 +38,14 @@ import logging.Loggable;
  * @author bms41
  *
  */
-public class BetterProfileAggregate implements Loggable, Serializable {
-	
-	private static final long serialVersionUID = 1L;
+public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
+
 	private final float[][] aggregate; // the values samples per profile
 	private final int length; // the length of the aggregate (the median array length of a population usually)
 	private final int profileCount;
 	private transient int counter = 0; // track the number of profiles added to the aggregate
 
-	public BetterProfileAggregate(final int length, final int profileCount){
+	public DefaultProfileAggregate(final int length, final int profileCount){
 		
 		this.length = length;
 		this.profileCount = profileCount;
@@ -51,7 +55,7 @@ public class BetterProfileAggregate implements Loggable, Serializable {
 	}
 	
 		
-	public void addValues(final Profile profile) throws ProfileException {
+	public void addValues(final IProfile profile) throws ProfileException {
 		
 		if(counter>=profileCount){
 			throw new ProfileException("Aggregate is full");
@@ -62,7 +66,7 @@ public class BetterProfileAggregate implements Loggable, Serializable {
 		 * each point and add it to the aggregate
 		 */
 		
-		Profile interpolated = profile.interpolate(length);
+		IProfile interpolated = profile.interpolate(length);
 		for(int i=0; i<length; i++){
 			float d = (float) interpolated.get(i);
 			aggregate[i][counter] = d;
@@ -77,11 +81,11 @@ public class BetterProfileAggregate implements Loggable, Serializable {
 		return length;
 	}
 	
-	public Profile getMedian(){
+	public IProfile getMedian(){
 		return calculateQuartile(Quartile.MEDIAN);
 	}
 
-	public Profile getQuartile(float quartile){
+	public IProfile getQuartile(float quartile){
 		
 		return calculateQuartile(quartile);
 	}
@@ -104,21 +108,28 @@ public class BetterProfileAggregate implements Loggable, Serializable {
 	 * @param position the position to search. Must be between 0 and the length of the aggregate.
 	 * @return an unsorted array of the values at the given position
 	 */
-	public float[] getValuesAtPosition(double position) {
+	public double[] getValuesAtPosition(double position) {
 		if(position < 0 || position > length ){
 			throw new IllegalArgumentException("Desired x-position is out of range: "+position);
 		}
 		
 		// Choose the best position to return
 		int index = (int) Math.round(position);
-		return getValuesAtIndex(index);
+		
+		float[] result = getValuesAtIndex(index);
+		
+		try {
+			return new ArrayConverter(result).toDoubleArray();
+		} catch (ArrayConversionException e) {
+			return null;
+		}
 	}
 	
 	/**
 	 * Get the x-axis positions of the centre of each bin.
 	 * @return the Profile of positions
 	 */
-	public Profile getXPositions(){
+	public IProfile getXPositions(){
 		double[] result = new double[length];
 		
 		double profileIncrement = 100d / (double) length;
@@ -167,7 +178,7 @@ public class BetterProfileAggregate implements Loggable, Serializable {
 		return values;
 	}
 	
-	private Profile calculateQuartile(float quartile) {
+	private IProfile calculateQuartile(float quartile) {
 		double[] medians = new double[length];
 		
 		for(int i=0; i<length; i++){
@@ -182,6 +193,18 @@ public class BetterProfileAggregate implements Loggable, Serializable {
 		
 		return new Profile(medians);
 
+	}
+
+
+	@Override
+	public double getBinSize() {
+		return 0;
+	}
+
+
+	@Override
+	public IProfile getQuartile(double quartile) throws ProfileException {
+		return getQuartile( (float) quartile);
 	}
 
 }

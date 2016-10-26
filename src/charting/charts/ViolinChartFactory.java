@@ -10,7 +10,7 @@ import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import charting.datasets.ViolinCategoryDataset;
 import charting.datasets.ViolinDatasetCreator;
 import charting.options.ChartOptions;
@@ -165,7 +165,7 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 			// The column is the dataset
 //			String datasetName = ds.getColumnKey(column).toString();
 //			log("Looking at dataset "+datasetName);
-			AnalysisDataset d  = options.getDatasets().get(column);
+			IAnalysisDataset d  = options.getDatasets().get(column);
 						
 			for(int row=0; row<ds.getRowCount(); row++){
 												

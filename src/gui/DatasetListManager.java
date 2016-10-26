@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import logging.Loggable;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 /**
  * Track the open datasets in the program
@@ -26,7 +27,7 @@ public final class DatasetListManager implements Loggable {
 	 * within the list can be used to determine the order of root datasets within the
 	 * populations panel.
 	 */
-	private final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+	private final List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 	
 	/**
 	 * This map stores the UUID of a dataset as a key against the hashcode of the dataset.
@@ -49,8 +50,8 @@ public final class DatasetListManager implements Loggable {
 		return instance;
 	}
 	
-	public synchronized List<AnalysisDataset> getRootDatasets(){
-		return new ArrayList<AnalysisDataset>(list);
+	public synchronized List<IAnalysisDataset> getRootDatasets(){
+		return new ArrayList<IAnalysisDataset>(list);
 	}
 	
 	/**
@@ -59,7 +60,7 @@ public final class DatasetListManager implements Loggable {
 	 * @param d
 	 * @return the index, or -1
 	 */
-	public synchronized int getPosition(AnalysisDataset d){
+	public synchronized int getPosition(IAnalysisDataset d){
 		if(d.isRoot()){
 			return list.indexOf(d);
 		}
@@ -79,11 +80,11 @@ public final class DatasetListManager implements Loggable {
 		finest("Refreshing clusters...");
 		if(this.hasDatasets()){
 			
-			for(AnalysisDataset rootDataset : this.getRootDatasets()){
+			for(IAnalysisDataset rootDataset : this.getRootDatasets()){
 
 				finest("  Root dataset "+rootDataset.getName());
 				rootDataset.refreshClusterGroups();
-				for(AnalysisDataset child : rootDataset.getAllChildDatasets()){
+				for(IAnalysisDataset child : rootDataset.getAllChildDatasets()){
 					finest("    Child dataset "+child.getName());
 					child.refreshClusterGroups();
 				}
@@ -102,23 +103,23 @@ public final class DatasetListManager implements Loggable {
 	 * @param d
 	 * @return
 	 */
-	public synchronized AnalysisDataset getParent(AnalysisDataset d){
+	public synchronized IAnalysisDataset getParent(IAnalysisDataset d){
 		
 		if(d.isRoot()){
 			return d;
 		}
 		
-		AnalysisDataset result = null;
+		IAnalysisDataset result = null;
 		
 		
-		for(AnalysisDataset root : this.getRootDatasets()){
+		for(IAnalysisDataset root : this.getRootDatasets()){
 			
 			if(root.hasRecursiveChild(d)){
 				
 				// Get the child of the root dataset which is a parent
 				// to the input dataset
 				
-				for(AnalysisDataset parent : root.getAllChildDatasets()){
+				for(IAnalysisDataset parent : root.getAllChildDatasets()){
 					if(parent.hasChild(d)){
 						return parent;
 					}
@@ -130,10 +131,10 @@ public final class DatasetListManager implements Loggable {
 	}
 	
 	
-	public synchronized Set<AnalysisDataset> getAllDatasets(){
+	public synchronized Set<IAnalysisDataset> getAllDatasets(){
 		
-		Set<AnalysisDataset> result = new HashSet<AnalysisDataset>();
-		for(AnalysisDataset d : list){
+		Set<IAnalysisDataset> result = new HashSet<IAnalysisDataset>();
+		for(IAnalysisDataset d : list){
 			result.add(d);
 			result.addAll(d.getAllChildDatasets());
 		}
@@ -147,12 +148,12 @@ public final class DatasetListManager implements Loggable {
 	 * @return
 	 */
 	public synchronized boolean hasDataset(UUID id){
-		for(AnalysisDataset d : list){
+		for(IAnalysisDataset d : list){
 			if(d.getUUID().equals(id)){
 				return true;
 			}
 			
-			for(AnalysisDataset child : d.getAllChildDatasets()){
+			for(IAnalysisDataset child : d.getAllChildDatasets()){
 				if(child.getUUID().equals(id)){
 					return true;
 				}
@@ -166,13 +167,13 @@ public final class DatasetListManager implements Loggable {
 	 * @param id
 	 * @return
 	 */
-	public synchronized AnalysisDataset getDataset(UUID id){
-		for(AnalysisDataset d : list){
+	public synchronized IAnalysisDataset getDataset(UUID id){
+		for(IAnalysisDataset d : list){
 			if(d.getUUID().equals(id)){
 				return d;
 			}
 			
-			for(AnalysisDataset child : d.getAllChildDatasets()){
+			for(IAnalysisDataset child : d.getAllChildDatasets()){
 				if(child.getUUID().equals(id)){
 					return child;
 				}
@@ -181,7 +182,7 @@ public final class DatasetListManager implements Loggable {
 		return null;
 	}
 	
-	public synchronized void addDataset(AnalysisDataset d){
+	public synchronized void addDataset(IAnalysisDataset d){
 		if(d.isRoot()){
 			list.add(d);
 			fine("Adding hash code: "+d.getName()+" - "+d.hashCode());
@@ -191,7 +192,7 @@ public final class DatasetListManager implements Loggable {
 		}
 	}
 	
-	public synchronized void removeDataset(AnalysisDataset d){
+	public synchronized void removeDataset(IAnalysisDataset d){
 		
 		if( ! d.isRoot()){
 			return;
@@ -208,9 +209,9 @@ public final class DatasetListManager implements Loggable {
 		
 		finer("List manager has "+list.size()+" root datasets and "+map.size()+" hashcodes");
 
-		Iterator<AnalysisDataset> it = list.iterator();
+		Iterator<IAnalysisDataset> it = list.iterator();
 		while (it.hasNext()){
-			AnalysisDataset test = it.next();
+			IAnalysisDataset test = it.next();
 			
 			if(test.getUUID().equals(d.getUUID())){
 				finer("Found id matching dataset");
@@ -246,7 +247,7 @@ public final class DatasetListManager implements Loggable {
 	 * @param d
 	 * @return true if the hashcode is different to the stored value 
 	 */
-	public boolean hashCodeChanged(AnalysisDataset d){
+	public boolean hashCodeChanged(IAnalysisDataset d){
 		if(d.isRoot()){
 			
 			if(map.containsKey(d.getUUID())){
@@ -266,7 +267,7 @@ public final class DatasetListManager implements Loggable {
 	 */
 	public boolean hashCodeChanged(){
 
-		for(AnalysisDataset d : list){
+		for(IAnalysisDataset d : list){
 			if(hashCodeChanged(d)){
 				return true;
 			}
@@ -279,7 +280,7 @@ public final class DatasetListManager implements Loggable {
 	 * current actual value
 	 * @param d
 	 */
-	public void updateHashCode(AnalysisDataset d){
+	public void updateHashCode(IAnalysisDataset d){
 		if(d.isRoot()){
 			map.put(d.getUUID(), d.hashCode());
 		}
@@ -291,7 +292,7 @@ public final class DatasetListManager implements Loggable {
 	 * @param d
 	 */
 	public void updateHashCodes(){
-		for(AnalysisDataset d : list){
+		for(IAnalysisDataset d : list){
 			updateHashCode(d);
 		}
 	}

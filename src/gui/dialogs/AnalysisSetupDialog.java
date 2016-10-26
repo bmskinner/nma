@@ -62,6 +62,7 @@ import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
+import analysis.IAnalysisDataset;
 import components.nuclear.NucleusType;
 
 public class AnalysisSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
@@ -118,19 +119,19 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 
 	private JCheckBox keepFailedheckBox = new JCheckBox();
 	
-	private Collection<AnalysisDataset> openDatasets; // the other datasets open in the program, for copying options
+	private Collection<IAnalysisDataset> openDatasets; // the other datasets open in the program, for copying options
 
 	/**
 	 * Create the frame.
 	 */
-	public AnalysisSetupDialog(Collection<AnalysisDataset> datasets) {
+	public AnalysisSetupDialog(Collection<IAnalysisDataset> datasets) {
 		this(datasets, null);
 	}
 	
 	/**
 	 * Create the frame.
 	 */
-	public AnalysisSetupDialog(Collection<AnalysisDataset> datasets, File folder) {
+	public AnalysisSetupDialog(Collection<IAnalysisDataset> datasets, File folder) {
 		super();
 		
 		analysisOptions.setFolder(folder);
@@ -159,7 +160,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	 * Create the dialog with an existing set of options
 	 * Allows settings to be reloaded.
 	 */
-	public AnalysisSetupDialog(List<AnalysisDataset> datasets, AnalysisOptions options) {
+	public AnalysisSetupDialog(List<IAnalysisDataset> datasets, AnalysisOptions options) {
 		super();
 		openDatasets = datasets;
 		setModal(true); // ensure nothing happens until this window is closed
@@ -382,9 +383,9 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 				
 				// display panel of open datasets
 				
-				AnalysisDataset[] nameArray = openDatasets.toArray(new AnalysisDataset[0]);
+				IAnalysisDataset[] nameArray = openDatasets.toArray(new AnalysisDataset[0]);
 
-				AnalysisDataset sourceDataset = (AnalysisDataset) JOptionPane.showInputDialog(null, 
+				IAnalysisDataset sourceDataset = (IAnalysisDataset) JOptionPane.showInputDialog(null, 
 						"Choose source dataset",
 						"Source dataset",
 						JOptionPane.QUESTION_MESSAGE, 

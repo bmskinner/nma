@@ -21,6 +21,7 @@ package gui.tabs;
 import java.util.List;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 
 public interface TabPanel {
@@ -38,7 +39,7 @@ public interface TabPanel {
 	 * this simply accesses the first dataset in the list provided
 	 * @return
 	 */
-	public AnalysisDataset activeDataset();
+	public IAnalysisDataset activeDataset();
 	
 	
 	/**

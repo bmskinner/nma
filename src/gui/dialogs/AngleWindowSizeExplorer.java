@@ -48,19 +48,21 @@ import org.jfree.data.xy.DefaultXYDataset;
 import utility.Constants;
 import components.Cell;
 import components.CellCollection;
+import components.ICell;
 import components.generic.BorderTagObject;
-import components.generic.Profile;
-import components.generic.ProfileCollection;
+import components.generic.IProfile;
+import components.generic.IProfileCollection;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import charting.ChartComponents;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 @SuppressWarnings("serial")
 public class AngleWindowSizeExplorer  extends LoadingIconDialog implements ChangeListener {
 	
-	private AnalysisDataset dataset;
+	private IAnalysisDataset dataset;
 	private ExportableChartPanel chartPanel;
 	
 	private JSpinner windowSizeMinSpinner;
@@ -69,7 +71,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 	
 	private JButton  runButton;
 	
-	public AngleWindowSizeExplorer(final AnalysisDataset dataset){
+	public AngleWindowSizeExplorer(final IAnalysisDataset dataset){
 		super();
 		this.dataset = dataset;
 		finest("Creating angle window explorer UI");
@@ -228,7 +230,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 			CellCollection duplicateCollection = new CellCollection(dataset.getCollection(), "test");
 			
 			// put each cell into the new collection
-			for(Cell c : dataset.getCollection().getCells()){
+			for(ICell c : dataset.getCollection().getCells()){
 				
 				Cell newCell = new Cell(c);
 				newCell.getNucleus().setWindowProportion(ProfileType.ANGLE, i); // triggers recalc of profile
@@ -238,13 +240,13 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 //			log(Level.INFO, "\tMade collection");
 			// recalc the aggregate
 			
-			ProfileCollection pc = duplicateCollection.getProfileCollection(ProfileType.ANGLE);
+			IProfileCollection pc = duplicateCollection.getProfileCollection(ProfileType.ANGLE);
 			
 			pc.createProfileAggregate(duplicateCollection, ProfileType.ANGLE);
 			
 //			log(Level.INFO, "\tCalculated aggregate");
 			
-			for(BorderTagObject tag : dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getBorderTags()){
+			for(Tag tag : dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getBorderTags()){
 				pc.addIndex(tag, dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getIndex(tag));
 			}
 			
@@ -252,7 +254,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 			
 			// get the profile median
 			
-			Profile median = pc.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
+			IProfile median = pc.getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
 			
 //			log(Level.INFO, "\tMade median");
 			// add to the chart
@@ -265,14 +267,14 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		log("Profiling complete");
 	}
 	
-	private void updateChart(Profile profile, double windowSize){
+	private void updateChart(IProfile profile, double windowSize){
 		
 		XYPlot plot = chartPanel.getChart().getXYPlot();
 		int datasetCount = plot.getDatasetCount();
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-        Profile xpoints = profile.getPositions(100);
+        IProfile xpoints = profile.getPositions(100);
         double[][] data = { xpoints.asArray(), profile.asArray() };
         
         DecimalFormat df = new DecimalFormat("#0.000"); 

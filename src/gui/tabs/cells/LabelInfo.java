@@ -22,13 +22,14 @@ package gui.tabs.cells;
 import javax.swing.ImageIcon;
 
 import components.Cell;
+import components.ICell;
 
 public class LabelInfo {
 	private ImageIcon icon;
 	private boolean isSelected = false;
-	private Cell cell;
+	private ICell cell;
 	
-	public LabelInfo(ImageIcon icon, Cell cell){
+	public LabelInfo(ImageIcon icon, ICell cell){
 		this.icon = icon;
 		this.cell = cell;
 	}
@@ -37,7 +38,7 @@ public class LabelInfo {
 		return icon;
 	}
 	
-	public Cell getCell(){
+	public ICell getCell(){
 		return cell;
 	}
 	

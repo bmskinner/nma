@@ -19,8 +19,10 @@
 package charting.options;
 
 import java.util.List;
+
 import analysis.AnalysisDataset;
-import components.Cell;
+import analysis.IAnalysisDataset;
+import components.ICell;
 
 /*
  * Hold the drawing options for a table. 
@@ -31,9 +33,9 @@ public class TableOptions extends AbstractOptions {
 	
 	private TableType type = null;
 	
-	private Cell cell      = null;
+	private ICell cell      = null;
 	
-	public TableOptions(List<AnalysisDataset> list) {
+	public TableOptions(List<IAnalysisDataset> list) {
 		super(list);
 
 	}
@@ -49,11 +51,11 @@ public class TableOptions extends AbstractOptions {
 	
 	
 
-	public Cell getCell() {
+	public ICell getCell() {
 		return cell;
 	}
 
-	public void setCell(Cell cell) {
+	public void setCell(ICell cell) {
 		this.cell = cell;
 	}
 

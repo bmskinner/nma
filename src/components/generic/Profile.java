@@ -21,13 +21,10 @@ package components.generic;
 import ij.IJ;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
-
-import logging.Loggable;
 
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
@@ -48,7 +45,7 @@ import components.nuclear.NucleusBorderSegment;
  * @author bms41
  *
  */
-public class Profile implements Serializable, Loggable {
+public class Profile implements IProfile {
 
 	/**
 	 * 
@@ -56,12 +53,7 @@ public class Profile implements Serializable, Loggable {
 	private static final long serialVersionUID = 1L;
 	
 	protected final double[] array;
-	private static final int ARRAY_BEFORE = -1;
-	private static final int ARRAY_AFTER = 1;
-	protected static final int ZERO_INDEX = 0;
 
-
-	
 	/**
 	 * Constructor for a new Profile, based on an array of values.
 	 * @param values the array to use
@@ -82,20 +74,16 @@ public class Profile implements Serializable, Loggable {
 	 * of the existing Profile
 	 * @param p the profile to copy
 	 */
-	public Profile(final Profile p){
+	public Profile(final IProfile p){
 		if(p==null){
 			throw new IllegalArgumentException("Input profile is null in profile constructor");
 		}
 
 		this.array = new double[p.size()];
 		
-		int i=0;
-		for(double d : p.array){
-			array[i++] = d;
+		for(int i=0; i<p.size(); i++){
+			array[i] = p.get(i);
 		}
-//		for(int i=0; i<this.array.length; i++){
-//			array[i] = p.get(i);
-//		}
 	}
 	
 	/**
@@ -118,15 +106,18 @@ public class Profile implements Serializable, Loggable {
 
 
 
-	/**
-	 * Get the length of the array in the profile
-	 * @return the size of the profile
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#size()
 	 */
+	@Override
 	public int size(){
 		return array.length;
 	}
 	
 
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -135,6 +126,9 @@ public class Profile implements Serializable, Loggable {
 		return result;
 	}
 
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -149,12 +143,10 @@ public class Profile implements Serializable, Loggable {
 		return true;
 	}
 
-	/**
-	 * Get the value at the given index
-	 * @param index the index
-	 * @return the value at the index
-	 * @throws Exception 
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#get(int)
 	 */
+	@Override
 	public double get(int index) {
 		
 		if(index<0 || index >= array.length){
@@ -165,10 +157,10 @@ public class Profile implements Serializable, Loggable {
 	}
 
 	
-	/**
-	 * Get the maximum value in the profile
-	 * @return the maximum value
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getMax()
 	 */
+	@Override
 	public double getMax(){
 		double max = 0;
 		for(int i=0; i<array.length;i++){
@@ -179,13 +171,10 @@ public class Profile implements Serializable, Loggable {
 		return max;
 	}
 
-	/**
-	 * Get the index of the maximum value in the profile
-	 * If there are multiple values at maximum, this returns the
-	 * first only
-	 * @param limits indexes that should be included or excluded from the search
-	 * @return the index
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getIndexOfMax(components.generic.BooleanProfile)
 	 */
+	@Override
 	public int getIndexOfMax(BooleanProfile limits){
 		double max = 0;
 		int maxIndex = 0;
@@ -198,12 +187,10 @@ public class Profile implements Serializable, Loggable {
 		return maxIndex;
 	}
 	
-	/**
-	 * Get the index of the maximum value in the profile
-	 * If there are multiple values at maximum, this returns the
-	 * first only
-	 * @return the index
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getIndexOfMax()
 	 */
+	@Override
 	public int getIndexOfMax(){
 		
 		BooleanProfile b = new BooleanProfile(this, true);
@@ -219,11 +206,10 @@ public class Profile implements Serializable, Loggable {
 //		return maxIndex;
 	}
 
-	/**
-	 * Get the minimum value in the profile.If there are multiple values 
-	 * at minimum, this returns the first only
-	 * @return the minimum value
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getMin()
 	 */
+	@Override
 	public double getMin(){
 		double min = this.getMax();
 		for(int i=0; i<array.length;i++){
@@ -234,11 +220,10 @@ public class Profile implements Serializable, Loggable {
 		return min;
 	}
 
-	/**
-	 * Get the index of the minimum value in the profile
-	 * @param limits indexes that should be included or excluded from the search
-	 * @return the index
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getIndexOfMin(components.generic.BooleanProfile)
 	 */
+	@Override
 	public int getIndexOfMin(BooleanProfile limits){
 		double min = this.getMax();
 		
@@ -254,10 +239,10 @@ public class Profile implements Serializable, Loggable {
 		return minIndex;
 	}
 	
-	/**
-	 * Get the index of the minimum value in the profile
-	 * @return the index
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getIndexOfMin()
 	 */
+	@Override
 	public int getIndexOfMin(){
 		
 		BooleanProfile b = new BooleanProfile(this, true);
@@ -273,10 +258,10 @@ public class Profile implements Serializable, Loggable {
 //		return minIndex;
 	}
 
-	/**
-	 * Get the array from the profile
-	 * @return an array of values
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#asArray()
 	 */
+	@Override
 	public double[] asArray(){
 		double[] result = new double[this.size()];
 		for(int i=0;i<result.length; i++){
@@ -286,13 +271,11 @@ public class Profile implements Serializable, Loggable {
 	}
   
 	
-	/**
-	 * Get an X-axis; get a position
-	 * for each point on the scale 0-length
-	 * @param length the length to scale to
-	 * @return a profile with the positions as values
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getPositions(int)
 	 */
-	public Profile getPositions(int length){
+	@Override
+	public IProfile getPositions(int length){
 		double [] result = new double[array.length];
 		for(int i=0;i<array.length;i++){
 			result[i] = getRescaledIndex(i, length);
@@ -300,13 +283,10 @@ public class Profile implements Serializable, Loggable {
 		return new Profile(result);
 	}
 	
-	/**
-	 * Get the position of an index on an X-axis, rescaled to the 
-	 * new length 
-	 * @param index
-	 * @param newLength
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getRescaledIndex(int, int)
 	 */
+	@Override
 	public double getRescaledIndex(int index, int newLength){
 		return (double)index / (double) array.length * (double) newLength;
 	}
@@ -318,7 +298,7 @@ public class Profile implements Serializable, Loggable {
 	 * @param profile2 the profile to compare
 	 * @return a new profile with the length of the longest input profile
 	 */
-	private Profile equaliseLengths(Profile profile1, Profile profile2) {
+	private IProfile equaliseLengths(IProfile profile1, IProfile profile2) {
 		if(profile1==null || profile2==null){
 			throw new IllegalArgumentException("Input profile is null when equilising lengths");
 		}
@@ -334,23 +314,19 @@ public class Profile implements Serializable, Loggable {
 		return profile1;
 	}
 
-	/**
-	 * Calculate the square differences between this profile and
-	 * a given profile. The shorter profile is interpolated.
-	 * The testProfile must have been offset appropriately to avoid 
-	 * spurious differences.
-	 * @param testProfile the profile to compare to 
-	 * @return the sum-of-squares difference
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#absoluteSquareDifference(components.generic.IProfile)
 	 */
-	public double absoluteSquareDifference(Profile testProfile) {
+	@Override
+	public double absoluteSquareDifference(IProfile testProfile) {
 
 		if(testProfile==null){
 			throw new IllegalArgumentException("Test profile is null");
 		}
 		// the test profile needs to be matched to this profile
 		// whichever is smaller must be interpolated 
-		Profile profile1 = equaliseLengths(this.copy(), testProfile);
-		Profile profile2 = equaliseLengths(testProfile, this.copy());
+		IProfile profile1 = equaliseLengths(this.copy(), testProfile);
+		IProfile profile2 = equaliseLengths(testProfile, this.copy());
 
 		double difference = 0;
 
@@ -363,17 +339,11 @@ public class Profile implements Serializable, Loggable {
 		return difference;
 	}
 	
-	/**
-	 * Calculate the sum of squares difference between this profile and
-	 * a given profile. Unlike the absolute difference, this value is weighted
-	 * to the difference from 180 degrees. That is, a difference of 5 degrees at
-	 * 170 (to 175) will count less than a difference of 5 degrees at 30 (to 35).
-	 * This promotes differences at regions of profile maxima, and minimises them at
-	 * constant straight regions.
-	 * @param testProfile the profile to compare
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#weightedSquareDifference(components.generic.IProfile)
 	 */
-	public double weightedSquareDifference(Profile testProfile) throws Exception {
+	@Override
+	public double weightedSquareDifference(IProfile testProfile) throws Exception {
 		
 		if(testProfile==null){
 			throw new IllegalArgumentException("Test profile is null");
@@ -381,8 +351,8 @@ public class Profile implements Serializable, Loggable {
 		
 		// Ensure both profiles have the same length, to allow
 		// point by point comparisons. The shorter is interpolated.
-		Profile profile1 = equaliseLengths(this.copy(), testProfile);
-		Profile profile2 = equaliseLengths(testProfile, this.copy());
+		IProfile profile1 = equaliseLengths(this.copy(), testProfile);
+		IProfile profile2 = equaliseLengths(testProfile, this.copy());
 		
 		double result = 0;
 		
@@ -422,20 +392,18 @@ public class Profile implements Serializable, Loggable {
     --------------------
   */
 
-	/**
-	 * Alternative to the constructor from profile
-	 * @return a new profile with the same values as this
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#copy()
 	 */
-	public Profile copy(){
+	@Override
+	public IProfile copy(){
 		return new Profile(this.array);
 	}
 
-	/**
-	 * Copy the profile and offset it to start from the given index
-	 * @param j the index to start from
-	 * @return a new offset Profile
-	 * @throws Exception 
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#offset(int)
 	 */
+	@Override
 	public Profile offset(int j) {
 		double[] newArray = new double[this.size()];
 		for(int i=0;i<this.size();i++){
@@ -444,12 +412,11 @@ public class Profile implements Serializable, Loggable {
 		return new Profile(newArray);
 	}
   
-	/**
-	 * Perform a window-averaging smooth of the profile with the given window size
-	 * @param windowSize the size of the window
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#smooth(int)
 	 */
-	public Profile smooth(int windowSize){
+	@Override
+	public IProfile smooth(int windowSize){
 
 		double[] result = new double[this.size()];
 
@@ -487,10 +454,10 @@ public class Profile implements Serializable, Loggable {
 		return values;
 	}
 
-	/**
-	 * Reverse the profile. Does not copy.
-	 * @throws Exception 
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#reverse()
 	 */
+	@Override
 	public void reverse(){
 
 		double tmp;
@@ -501,13 +468,11 @@ public class Profile implements Serializable, Loggable {
 		}
 	}  
 
-  /**
-   * Make this profile the length specified.
-   * @param newLength the new array length
-   * @return an interpolated profile
- * @throws Exception 
-   */
-  public Profile interpolate(int newLength) {
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#interpolate(int)
+ */
+  @Override
+public Profile interpolate(int newLength) {
 
     if(newLength < this.size()){
 //    	finer("Interpolating to a smaller array!");
@@ -597,13 +562,17 @@ public class Profile implements Serializable, Loggable {
     along it one index at a time. Find the point of least difference, 
     and return this offset. Returns the positive offset to this profile
    */
-  public int getSlidingWindowOffset(Profile testProfile) {
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#getSlidingWindowOffset(components.generic.IProfile)
+ */
+@Override
+public int getSlidingWindowOffset(IProfile testProfile) {
 
 	  double lowestScore = this.absoluteSquareDifference(testProfile);
 	  int index = 0;
 	  for(int i=0;i<this.size();i++){
 
-		  Profile offsetProfile = this.offset(i);
+		  IProfile offsetProfile = this.offset(i);
 
 		  double score = offsetProfile.absoluteSquareDifference(testProfile);
 		  if(score<lowestScore){
@@ -615,14 +584,11 @@ public class Profile implements Serializable, Loggable {
 	  return index;
   }
 
-  /**
-   * Detect regions with a consistent value in a profile
-   * @param value the profile value that is to be maintained
-   * @param tolerance the variation allow plus or minus
-   * @points the number of points the value must be sustained over
-   * @return the first and last index in the profile covering the detected region
-   */
-  public int[] getConsistentRegionBounds(double value, double tolerance, int points){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#getConsistentRegionBounds(double, double, int)
+ */
+  @Override
+public int[] getConsistentRegionBounds(double value, double tolerance, int points){
 
 	  int counter = 0;
 	  int start = -1;
@@ -674,7 +640,11 @@ public class Profile implements Serializable, Loggable {
     Each should be greater than the value before.
     One exception is allowed, to account for noisy data. Returns the indexes of minima
   */
-  public BooleanProfile getLocalMinima(int windowSize){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#getLocalMinima(int)
+ */
+@Override
+public BooleanProfile getLocalMinima(int windowSize){
     // go through angle array (with tip at start)
     // look at 1-2-3-4-5 points ahead and behind.
     // if all greater, local minimum
@@ -736,14 +706,11 @@ public class Profile implements Serializable, Loggable {
     return minimaProfile;
   }
   
-  /**
-   * Get the local maxima that are above a threshold
-   * value
-   * @param windowSize the maxima window size
-   * @param threshold the threshold
-   * @return
-   */
-  public BooleanProfile getLocalMinima(int windowSize, double threshold){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#getLocalMinima(int, double)
+ */
+  @Override
+public BooleanProfile getLocalMinima(int windowSize, double threshold){
 	  BooleanProfile minima = getLocalMinima(windowSize);
 
 	  boolean[] values = new boolean[this.size()];
@@ -759,16 +726,11 @@ public class Profile implements Serializable, Loggable {
 	  return new BooleanProfile(values);
   }
   
-  /**
-   * Get the local minima that are above a threshold
-   * value and have an absolute value greater than the given 
-   * fraction of the total value range in the profile
-   * @param windowSize the maxima window size
-   * @param threshold the threshold
-   * @param fraction the fraction threshold
-   * @return
-   */
-  public BooleanProfile getLocalMinima(int windowSize, double threshold, double fraction){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#getLocalMinima(int, double, double)
+ */
+  @Override
+public BooleanProfile getLocalMinima(int windowSize, double threshold, double fraction){
 	  BooleanProfile minima = getLocalMinima(windowSize, threshold);
 
 	  boolean[] values = new boolean[this.size()];
@@ -786,13 +748,11 @@ public class Profile implements Serializable, Loggable {
 	  return new BooleanProfile(values);
   }
 
-  /**
-   * Get the points considered local maxima for the given window
-   * size as a Profile. Maxima are 1, other points are 0
-   * @param windowSize the window size to use
-   * @return
-   */
-  public BooleanProfile getLocalMaxima(int windowSize){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#getLocalMaxima(int)
+ */
+  @Override
+public BooleanProfile getLocalMaxima(int windowSize){
 	  // go through array
 	  // look at points ahead and behind.
 	  // if all lower, local maximum
@@ -829,14 +789,11 @@ public class Profile implements Serializable, Loggable {
 	  return new BooleanProfile(result);
   }
   
-  /**
-   * Get the local maxima that are above a threshold
-   * value
-   * @param windowSize the maxima window size
-   * @param threshold the threshold
-   * @return
-   */
-  public BooleanProfile getLocalMaxima(int windowSize, double threshold){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#getLocalMaxima(int, double)
+ */
+  @Override
+public BooleanProfile getLocalMaxima(int windowSize, double threshold){
 	  BooleanProfile maxima = getLocalMaxima(windowSize);
 
 	  boolean[] values = new boolean[this.size()];
@@ -852,16 +809,11 @@ public class Profile implements Serializable, Loggable {
 	  return new BooleanProfile(values);
   }
   
-  /**
-   * Get the local maxima that are above a threshold
-   * value and have an absolute value greater than the given 
-   * fraction of the total value range in the profile
-   * @param windowSize the maxima window size
-   * @param threshold the threshold
-   * @param fraction the fraction threshold
-   * @return
-   */
-  public BooleanProfile getLocalMaxima(int windowSize, double threshold, double fraction){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#getLocalMaxima(int, double, double)
+ */
+  @Override
+public BooleanProfile getLocalMaxima(int windowSize, double threshold, double fraction){
 	  BooleanProfile minima = getLocalMaxima(windowSize, threshold);
 
 	  boolean[] values = new boolean[this.size()];
@@ -879,13 +831,11 @@ public class Profile implements Serializable, Loggable {
 	  return new BooleanProfile(values);
   }
   
-  /**
-   * Get the windowSize points around a point of interest
-   * @param index the index position to centre on
-   * @param windowSize the number of points either side
-   * @return a profile with the window
-   */
-  public Profile getWindow(int index, int windowSize){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#getWindow(int, int)
+ */
+  @Override
+public IProfile getWindow(int index, int windowSize){
 
 	  double[] result = new double[windowSize*2 + 1];
 
@@ -904,13 +854,11 @@ public class Profile implements Serializable, Loggable {
 	  return new Profile(result);
   }
 
-  /**
-   * Fetch a sub-region of the profile as a new profile
-   * @param indexStart the index to begin
-   * @param indexEnd the index to end
-   * @return a Profile
-   */
-  public Profile getSubregion(int indexStart, int indexEnd) {
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#getSubregion(int, int)
+ */
+  @Override
+public IProfile getSubregion(int indexStart, int indexEnd) {
 
 	  if(indexStart < indexEnd ){
 		  
@@ -939,14 +887,11 @@ public class Profile implements Serializable, Loggable {
 	  }
   }
   
-  /**
-   * Fetch a sub-region of the profile defined by the given segment. The segment
-   * must originate from an equivalent profile (i.e. have the same totalLength
-   * as the profile)
-   * @param segment the segment to find
-   * @return a Profile
-   */
-  public Profile getSubregion(NucleusBorderSegment segment) {
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#getSubregion(components.nuclear.NucleusBorderSegment)
+ */
+  @Override
+public IProfile getSubregion(NucleusBorderSegment segment) {
 	  
 	  if(segment==null){
 		  throw new IllegalArgumentException("Segment is null");
@@ -958,13 +903,11 @@ public class Profile implements Serializable, Loggable {
 	  return getSubregion(segment.getStartIndex(), segment.getEndIndex());
   }
 
-  /**
-   * Calculate the differences between the previous and next indexes
-   * across a given window size around this point
- * @param windowSize
- * @return
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#calculateDeltas(int)
  */
-public Profile calculateDeltas(int windowSize){
+@Override
+public IProfile calculateDeltas(int windowSize){
 
     double[] deltas = new double[this.size()];
 
@@ -988,17 +931,15 @@ public Profile calculateDeltas(int windowSize){
 
       deltas[i] = delta;
     }
-    Profile result = new Profile(deltas);
+    IProfile result = new Profile(deltas);
     return result;
   }
 
-	/**
-	 * Calculate the difference between each value and the previous value, 
-	 * and the difference between each value and the next value, and returns the sums
-	 * as a newP rofile 
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#differentiate()
 	 */
-	public Profile differentiate(){
+	@Override
+	public IProfile differentiate(){
 	
 		double[] deltas = new double[this.size()];
 	
@@ -1014,16 +955,15 @@ public Profile calculateDeltas(int windowSize){
 	
 			deltas[i] = delta;
 		}
-		Profile result = new Profile(deltas);
+		IProfile result = new Profile(deltas);
 		return result;
 	}
   
-  /**
-   * Log transform the profile to the given base
-   * @param base
-   * @return
-   */
-  public Profile log(double base){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#log(double)
+ */
+  @Override
+public IProfile log(double base){
 	  double[] values = new double[this.size()];
 
 	  for (int i=0; i<array.length; i++) { 
@@ -1032,12 +972,11 @@ public Profile calculateDeltas(int windowSize){
 	  return new Profile(values);
   }
   
-  /**
-   * Raise the values in the profile to the given exponent
-   * @param base
-   * @return
-   */
-  public Profile power(double exponent){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#power(double)
+ */
+  @Override
+public IProfile power(double exponent){
 	  double[] values = new double[this.size()];
 
 	  for (int i=0; i<array.length; i++) { 
@@ -1046,11 +985,11 @@ public Profile calculateDeltas(int windowSize){
 	  return new Profile(values);
   }
   
-  /**
-   * Get the absolute values from a profile
-   * @return
-   */
-  public Profile absolute(){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#absolute()
+ */
+  @Override
+public IProfile absolute(){
 	  double[] values = new double[this.size()];
 
 	  for (int i=0; i<array.length; i++) { 
@@ -1059,12 +998,11 @@ public Profile calculateDeltas(int windowSize){
 	  return new Profile(values);
   }
   
-  /**
-   * Get the cumulative sum of the values in the
-   * profile
-   * @return
-   */
-  public Profile cumulativeSum(){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#cumulativeSum()
+ */
+  @Override
+public IProfile cumulativeSum(){
 	  double[] values = new double[this.size()];
 
 	  double total = 0;
@@ -1075,12 +1013,11 @@ public Profile calculateDeltas(int windowSize){
 	  return new Profile(values);
   }
 
-  /**
-   * Multiply all values within the profile by a given value
-   * @param multiplier the value to multiply by
-   * @return the new profile
-   */
-  public Profile multiply(double multiplier){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#multiply(double)
+ */
+  @Override
+public IProfile multiply(double multiplier){
 	  double[] result = new double[this.size()];
 
 	  for (int i=0; i<array.length; i++) { // for each position in sperm
@@ -1089,12 +1026,11 @@ public Profile calculateDeltas(int windowSize){
 	  return new Profile(result);
   }
 
-  /**
-   * Multiply all values within the profile by the value within the given Profile
-   * @param multiplier the profile to multiply by. Must be the same length as this profile
-   * @return the new profile
-   */
-  public Profile multiply(Profile multiplier){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#multiply(components.generic.IProfile)
+ */
+  @Override
+public IProfile multiply(IProfile multiplier){
 	  if(this.size()!=multiplier.size()){
 		  throw new IllegalArgumentException("Profile sizes do not match");
 	  }
@@ -1106,12 +1042,11 @@ public Profile calculateDeltas(int windowSize){
 	  return new Profile(result);
   }
 
-  /**
-   * Divide all values within the profile by a given value
-   * @param divider the value to divide by
-   * @return the new profile
-   */
-  public Profile divide(double divider){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#divide(double)
+ */
+  @Override
+public IProfile divide(double divider){
 	  double[] result = new double[this.size()];
 
 	  for (int i=0; i<array.length; i++) { // for each position in sperm
@@ -1120,12 +1055,11 @@ public Profile calculateDeltas(int windowSize){
 	  return new Profile(result);
   }
 
-  /**
-   * Divide all values within the profile by the values within the given Profile
-   * @param divider the profile to divide by. Must be the same length as this profile
-   * @return the new profile
-   */
-  public Profile divide(Profile divider){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#divide(components.generic.IProfile)
+ */
+  @Override
+public IProfile divide(IProfile divider){
 	  if(this.size()!=divider.size()){
 		  throw new IllegalArgumentException("Profile sizes do not match");
 	  }
@@ -1137,12 +1071,11 @@ public Profile calculateDeltas(int windowSize){
 	  return new Profile(result);
   }
 
-  /**
-   * Add all values within the profile by the value within the given Profile
-   * @param adder the profile to add. Must be the same length as this profile
-   * @return the new profile
-   */
-  public Profile add(Profile adder){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#add(components.generic.IProfile)
+ */
+  @Override
+public IProfile add(IProfile adder){
 	  if(this.size()!=adder.size()){
 		  throw new IllegalArgumentException("Profile sizes do not match");
 	  }
@@ -1154,12 +1087,11 @@ public Profile calculateDeltas(int windowSize){
 	  return new Profile(result);
   }
 
-  /**
-   * Add the given value to all points within the profile
-   * @param adder the value to add.
-   * @return the new profile
-   */
-  public Profile add(double value){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#add(double)
+ */
+  @Override
+public IProfile add(double value){
 
 	  double[] result = new double[this.size()];
 
@@ -1169,12 +1101,11 @@ public Profile calculateDeltas(int windowSize){
 	  return new Profile(result);
   }
 
-  /**
-   * Subtract all values within the profile by the value within the given Profile
-   * @param adder the profile to subtract. Must be the same length as this profile
-   * @return the new profile
-   */
-  public Profile subtract(Profile sub){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#subtract(components.generic.IProfile)
+ */
+  @Override
+public IProfile subtract(IProfile sub){
 	  if(this.size()!=sub.size()){
 		  throw new IllegalArgumentException("Profile sizes do not match");
 	  }
@@ -1186,12 +1117,11 @@ public Profile calculateDeltas(int windowSize){
 	  return new Profile(result);
   }
 
-  /**
-   * Get the rank of each value in the profile
-   * after sorting ascending
-   * @return a profile of rank values
-   */
-  public Profile getRanks(){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#getRanks()
+ */
+  @Override
+public IProfile getRanks(){
 	  
 	  int rank = 0;
 	  
@@ -1211,18 +1141,15 @@ public Profile calculateDeltas(int windowSize){
 		  }
 		  rank++; 
 	  }
-	  Profile result  = new Profile(ranks);
+	  IProfile result  = new Profile(ranks);
 	  return result;
   }
   
-  /**
-   * Get the indexes of sorted values in the profile.
-   * Example: A 4 element profile has the values { 10, 5, 1, 2 }
-   * This function will return the indexes { 3, 2, 0, 1 },
-   * corresponding to the order of the values after sorting.
-   * @return a profile containing index values
-   */
-  public Profile getSortedIndexes(){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#getSortedIndexes()
+ */
+  @Override
+public IProfile getSortedIndexes(){
 	  
 	  
 	  double[] sorted = this.asArray();
@@ -1248,21 +1175,25 @@ public Profile calculateDeltas(int windowSize){
 		  }
 
 	  }
-	  Profile result  = new Profile(indexes);
+	  IProfile result  = new Profile(indexes);
 	  return result;
   }
 
-  /**
-   * Print the value in the profile at each array index
-   * to the ImageJ log window.
-   */
-  public void print(){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#print()
+ */
+  @Override
+public void print(){
 	  for (int i=0; i<array.length; i++) {
 		  IJ.log("Point "+i+": "+array[i]);
 	  }
   }
   
-  public String toString(){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#toString()
+ */
+@Override
+public String toString(){
 	  StringBuilder builder = new StringBuilder();
 
 	  for (int i=0; i<array.length; i++) {
@@ -1290,7 +1221,11 @@ public Profile calculateDeltas(int windowSize){
 	  return list;
   }
   
-  public void fastFourierTransform(){
+  /* (non-Javadoc)
+ * @see components.generic.IProfile#fastFourierTransform()
+ */
+@Override
+public void fastFourierTransform(){
 	  FastFourierTransformer f = new FastFourierTransformer(DftNormalization.STANDARD);
 
 	  List<Double> list = new ArrayList<Double>();
@@ -1324,22 +1259,23 @@ public Profile calculateDeltas(int windowSize){
    * @param list the list of profiles to merge
    * @return the merged profile
    */
-  public static Profile merge(List<Profile> list){
+  public static Profile merge(List<IProfile> list){
 	  if(list==null || list.size()==0){
 		  throw new IllegalArgumentException("Profile list is null or empty");
 	  }
 	  Profile result;
 //	  List<Double> combinedList = new ArrayList<Double>(0);
 	  int totalLength = 0;
-	  for(Profile p : list){
-		  totalLength += p.array.length;
+	  for(IProfile p : list){
+		  totalLength += p.size();
 	  }
 	  
 	  double[] combinedArray = new double[totalLength];
 	  int i=0;
-	  for(Profile p : list){
-		  for(double d : p.array){
-			  combinedArray[i++] = d;
+	  for(IProfile p : list){
+		  
+		  for(int j=0; j<p.size(); j++){
+			  combinedArray[i++] = p.get(j);
 		  }
 	  }
 

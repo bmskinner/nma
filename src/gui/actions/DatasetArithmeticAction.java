@@ -20,15 +20,18 @@ package gui.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import components.CellCollection;
+import components.ICellCollection;
 import gui.MainWindow;
 import gui.dialogs.DatasetArithmeticSetupDialog;
 import gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 public class DatasetArithmeticAction extends ProgressableAction {
 
-	public DatasetArithmeticAction(List<AnalysisDataset> list, MainWindow mw) {
+	public DatasetArithmeticAction(List<IAnalysisDataset> list, MainWindow mw) {
 		super("Dataset arithmetic", mw);
 		this.cooldown();
 		try {
@@ -42,15 +45,15 @@ public class DatasetArithmeticAction extends ProgressableAction {
 
 			if(dialog.isReadyToRun()){
 
-				AnalysisDataset one = dialog.getDatasetOne();
-				AnalysisDataset two = dialog.getDatasetTwo();
+				IAnalysisDataset one = dialog.getDatasetOne();
+				IAnalysisDataset two = dialog.getDatasetTwo();
 				DatasetArithmeticOperation operation = dialog.getOperation();
 
 				
 				log("Performing "+operation+" on datasets");
 				// prepare a new collection
 
-				CellCollection newCollection = null; 
+				ICellCollection newCollection = null; 
 
 				switch(operation){
 					case AND: // present in both
@@ -61,7 +64,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 						break;
 					case OR: // present in either (merge)
 						
-						List<AnalysisDataset> toMerge = new ArrayList<AnalysisDataset>();
+						List<IAnalysisDataset> toMerge = new ArrayList<IAnalysisDataset>();
 						toMerge.add(one);
 						toMerge.add(two);
 						new MergeCollectionAction(toMerge, mw);
@@ -90,11 +93,11 @@ public class DatasetArithmeticAction extends ProgressableAction {
 
 	} 
 	
-	private void makeNewDataset(CellCollection newCollection){
-		if(newCollection !=null && newCollection.getNucleusCount()>0){
-			log("Found "+newCollection.getNucleusCount()+" cells");
+	private void makeNewDataset(ICellCollection newCollection){
+		if(newCollection !=null && newCollection.size()>0){
+			log("Found "+newCollection.size()+" cells");
 			log("Running morphology analysis...");
-			AnalysisDataset newDataset = new AnalysisDataset(newCollection);
+			IAnalysisDataset newDataset = new AnalysisDataset(newCollection);
 			newDataset.setRoot(true);
 			int flag = MainWindow.ADD_POPULATION;
 			flag |= MainWindow.SAVE_DATASET;

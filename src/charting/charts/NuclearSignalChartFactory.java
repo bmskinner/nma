@@ -21,7 +21,7 @@ import org.jfree.data.Range;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.xy.XYDataset;
 
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.signals.ShellRandomDistributionCreator;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
@@ -67,7 +67,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 			
 			chart.getCategoryPlot().setDataset(datasetCount, ds);
 			
-			AnalysisDataset d = options.getDatasets().get(datasetCount);
+			IAnalysisDataset d = options.getDatasets().get(datasetCount);
 			
 			ShellResultBarRenderer rend = new ShellResultBarRenderer();
 			rend.setBarPainter(new StandardBarPainter());

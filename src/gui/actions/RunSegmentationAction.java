@@ -25,6 +25,7 @@ import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.profiles.DatasetSegmenter;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import gui.DatasetEvent;
@@ -36,7 +37,7 @@ public class RunSegmentationAction extends ProgressableAction {
 	
 	private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
 	
-	private AnalysisDataset source = null;
+	private IAnalysisDataset source = null;
 	private CountDownLatch latch   = null;
 	
 	/**
@@ -45,7 +46,7 @@ public class RunSegmentationAction extends ProgressableAction {
 	 * @param mode the type of morphology analysis to carry out
 	 * @param downFlag the next analyses to perform
 	 */
-	public RunSegmentationAction(AnalysisDataset dataset, MorphologyAnalysisMode mode, int downFlag, MainWindow mw, CountDownLatch latch){
+	public RunSegmentationAction(IAnalysisDataset dataset, MorphologyAnalysisMode mode, int downFlag, MainWindow mw, CountDownLatch latch){
 		super(dataset, "Segmentation analysis", mw, downFlag);
 		this.mode = mode;
 		this.latch = latch;
@@ -53,7 +54,7 @@ public class RunSegmentationAction extends ProgressableAction {
 		runNewAnalysis();
 	}
 	
-	public RunSegmentationAction(List<AnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag, MainWindow mw){
+	public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag, MainWindow mw){
 		super(list, "Segmentation analysis", mw, downFlag);
 		this.mode = mode;
 		log(Level.FINE, "Creating segmentation analysis");
@@ -61,7 +62,7 @@ public class RunSegmentationAction extends ProgressableAction {
 	}
 	
 	
-	public RunSegmentationAction(AnalysisDataset dataset, AnalysisDataset source, Integer downFlag, MainWindow mw, CountDownLatch latch){
+	public RunSegmentationAction(IAnalysisDataset dataset, IAnalysisDataset source, Integer downFlag, MainWindow mw, CountDownLatch latch){
 		super(dataset, "Copying morphology to "+dataset.getName(), mw);
 		this.downFlag = downFlag;
 		this.latch = latch;
@@ -76,7 +77,7 @@ public class RunSegmentationAction extends ProgressableAction {
 	 * @param list
 	 * @param source
 	 */
-	public RunSegmentationAction(List<AnalysisDataset> list, AnalysisDataset source, Integer downFlag, MainWindow mw){
+	public RunSegmentationAction(List<IAnalysisDataset> list, IAnalysisDataset source, Integer downFlag, MainWindow mw){
 		super(list, "Segmentation analysis", mw);
 		this.downFlag = downFlag;
 		this.mode = MorphologyAnalysisMode.COPY;

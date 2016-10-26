@@ -32,8 +32,10 @@ import gui.tabs.DetailPanel;
 import javax.swing.JOptionPane;
 
 import components.CellCollection;
+import components.ICellCollection;
 import components.generic.BorderTagObject;
 import components.generic.BorderTag.BorderTagType;
+import components.generic.Tag;
 
 @SuppressWarnings("serial")
 public abstract class AbstractEditingPanel extends DetailPanel implements SegmentEventListener, BorderTagEventListener{
@@ -44,7 +46,7 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Segmen
 	 * or leave cells locked.
 	 */
 	protected void checkCellLock(){
-		CellCollection collection = activeDataset().getCollection();
+		ICellCollection collection = activeDataset().getCollection();
 		
 		if(collection.hasLockedCells()){
 			Object[] options = { "Keep manual values" , "Overwrite manual values" };
@@ -67,7 +69,7 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Segmen
 	 * @param tag
 	 * @param newTagIndex
 	 */
-	protected void setBorderTagAction(BorderTagObject tag, int newTagIndex){
+	protected void setBorderTagAction(Tag tag, int newTagIndex){
 
 		if(tag==null){
 			fine("Tag is null");

@@ -51,13 +51,14 @@ import analysis.profiles.SegmentFitter;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import components.Cell;
 import components.CellCollection;
-import components.generic.BorderTagObject;
+import components.ICell;
+import components.ICellCollection;
+import components.generic.IProfileCollection;
 import components.generic.Profile;
-import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
@@ -177,7 +178,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				.setDatasets(getDatasets())
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
-				.setTag(BorderTagObject.REFERENCE_POINT)
+				.setTag(Tag.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType( ProfileType.ANGLE)
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -194,7 +195,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			
 			profile = activeDataset().getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT);
+					.getSegmentedProfile(Tag.REFERENCE_POINT);
 			
 
 			
@@ -206,7 +207,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				.setDatasets(getDatasets())
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
-				.setTag(BorderTagObject.REFERENCE_POINT)
+				.setTag(Tag.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType( ProfileType.ANGLE)
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -259,9 +260,9 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			if(options.isSingleDataset()){
 				
 				setButtonsEnabled(true);
-				CellCollection collection = options.firstDataset().getCollection();
+				ICellCollection collection = options.firstDataset().getCollection();
 				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE)
-						.getSegmentedProfile(BorderTagObject.REFERENCE_POINT);
+						.getSegmentedProfile(Tag.REFERENCE_POINT);
 				
 				// Don't allow merging below 2 segments (causes errors)
 				if(medianProfile.getSegmentCount()<=2){
@@ -336,17 +337,17 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			
 			// Update cells
 			
-			for(Cell c : activeDataset().getCollection().getCells()){
+			for(ICell c : activeDataset().getCollection().getCells()){
 				c.getNucleus().setWindowProportion(ProfileType.ANGLE, windowSize);
 			}
 
 			// recalc the aggregate
 			
-			ProfileCollection pc = activeDataset().getCollection().getProfileCollection(ProfileType.ANGLE);			
+			IProfileCollection pc = activeDataset().getCollection().getProfileCollection(ProfileType.ANGLE);			
 			pc.createProfileAggregate(activeDataset().getCollection(), ProfileType.ANGLE);
 					
 			
-			SegmentedProfile medianProfile = pc.getSegmentedProfile(BorderTagObject.REFERENCE_POINT);	
+			SegmentedProfile medianProfile = pc.getSegmentedProfile(Tag.REFERENCE_POINT);	
 			
 			// Does nothing, but needed to access segment fitter
 //			DatasetSegmenter segmenter = new DatasetSegmenter(activeDataset(), MorphologyAnalysisMode.NEW, programLogger);
@@ -354,10 +355,10 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			// Make a fitter
 			SegmentFitter fitter = new SegmentFitter(medianProfile);
 
-			for(Cell c : activeDataset().getCollection().getCells()){
+			for(ICell c : activeDataset().getCollection().getCells()){
 
 				// recombine the segments at the lengths of the median profile segments
-				Profile frankenProfile = fitter.recombine(c.getNucleus(), BorderTagObject.REFERENCE_POINT);
+				Profile frankenProfile = fitter.recombine(c.getNucleus(), Tag.REFERENCE_POINT);
 
 				c.getNucleus().setProfile(ProfileType.FRANKEN, new SegmentedProfile(frankenProfile));
 
@@ -383,10 +384,10 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
 			
 			try {
-				CellCollection collection = activeDataset().getCollection();
+				ICellCollection collection = activeDataset().getCollection();
 				SegmentedProfile medianProfile = collection
 						.getProfileCollection(ProfileType.ANGLE)
-						.getSegmentedProfile(BorderTagObject.REFERENCE_POINT);
+						.getSegmentedProfile(Tag.REFERENCE_POINT);
 				
 
 				SegmentsEditingPanel.this.setAnalysing(true);

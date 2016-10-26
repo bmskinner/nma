@@ -24,6 +24,7 @@ import java.util.Map;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.generic.Tag;
 import components.nuclear.BorderPoint;
 
 /**
@@ -42,7 +43,7 @@ public interface Taggable extends Profileable {
 	 * @param s the tag
 	 * @return the index of the border in borderList
 	 */
-	public int getBorderIndex(BorderTagObject tag);
+	public int getBorderIndex(Tag tag);
 	
 	/**
 	 * Get the tag at a given index, given the zero index is
@@ -52,7 +53,7 @@ public interface Taggable extends Profileable {
 	 * @param index the index to fetch
 	 * @return the border tag at the index
 	 */
-	public BorderTagObject getBorderTag(BorderTagObject tag, int index);
+	public Tag getBorderTag(Tag tag, int index);
 	
 	/**
 	 * Get the tag at the given raw index in the border list
@@ -68,14 +69,14 @@ public interface Taggable extends Profileable {
 	 * @param tag
 	 * @return
 	 */
-	public BorderPoint getBorderTag(BorderTagObject tag);
+	public BorderPoint getBorderTag(Tag tag);
 	
 	/**
 	 * Check if the nucleus has the given border tag
 	 * @param tag
 	 * @return
 	 */
-	public boolean hasBorderTag(BorderTagObject tag);
+	public boolean hasBorderTag(Tag tag);
 	
 	/**
 	 * Check if the nucleus has any border tag at the given index
@@ -84,7 +85,7 @@ public interface Taggable extends Profileable {
 	 * @param i the index to be tested
 	 * @return true if a tag is present at the index
 	 */
-	public boolean hasBorderTag(BorderTagObject tag, int i);
+	public boolean hasBorderTag(Tag tag, int i);
 	
 	/**
 	 * Check if the nucleus has any border tag at the given index
@@ -100,7 +101,7 @@ public interface Taggable extends Profileable {
 	 * @param i the index of the border point
 	 */
 	
-	public void setBorderTag(BorderTagObject tag, int i);
+	public void setBorderTag(Tag tag, int i);
 	
 	/**
 	 * Set or update a border tag based on an index from a reference tag
@@ -108,7 +109,7 @@ public interface Taggable extends Profileable {
 	 * @param tag the new tag to use
 	 * @param i the index of the border point relative to the reference
 	 */
-	public void setBorderTag(BorderTagObject reference, BorderTagObject tag, int i);
+	public void setBorderTag(Tag reference, Tag tag, int i);
 	
 	/**
 	 * Get a copy of the angle profile offset to start at the given point
@@ -117,7 +118,7 @@ public interface Taggable extends Profileable {
 	 * @return a copy of the segmented profile
 	 * @throws Exception 
 	 */
-	public SegmentedProfile getProfile(ProfileType type, BorderTagObject tag);
+	public SegmentedProfile getProfile(ProfileType type, Tag tag);
 	
 		
 	/**
@@ -125,7 +126,7 @@ public interface Taggable extends Profileable {
 	 * @param type
 	 * @param profile
 	 */
-	public void setProfile(ProfileType type, BorderTagObject tag, SegmentedProfile profile) throws Exception;
+	public void setProfile(ProfileType type, Tag tag, SegmentedProfile profile) throws Exception;
 	
 	/**
 	 * Get a copy of the mapping of border tags to index positions within 
@@ -139,7 +140,7 @@ public interface Taggable extends Profileable {
 	 * @param tag
 	 * @return
 	 */
-	public BorderPoint getBorderPoint(BorderTagObject tag); 
+	public BorderPoint getBorderPoint(Tag tag); 
 	
 	/**
 	 * Get the border index of point in the border list, 
@@ -148,7 +149,7 @@ public interface Taggable extends Profileable {
 	 * @param index the index to offset. Should be counting from the reference tag
 	 * @return the offset index, or -1 if the reference tag is not present
 	 */
-	public int getOffsetBorderIndex(BorderTagObject reference, int index);
+	public int getOffsetBorderIndex(Tag reference, int index);
 	
 	
 	/**

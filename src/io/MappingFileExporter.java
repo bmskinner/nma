@@ -26,9 +26,9 @@ import java.io.PrintWriter;
 import java.util.UUID;
 
 import utility.Constants;
-import analysis.AnalysisDataset;
-import components.Cell;
+import analysis.IAnalysisDataset;
 import components.CellularComponent;
+import components.ICell;
 import components.generic.XYPoint;
 
 /**
@@ -41,7 +41,7 @@ public class MappingFileExporter {
 	
 	private static final String NEWLINE = System.getProperty("line.separator"); 
 	
-	public static boolean exportCellLocations(AnalysisDataset d){
+	public static boolean exportCellLocations(IAnalysisDataset d){
 		
 		File exportFile = new File(d.getCollection().getOutputFolder()
 				+File.separator
@@ -87,10 +87,10 @@ public class MappingFileExporter {
 	 * @param d
 	 * @return
 	 */
-	private static String makeChildString(AnalysisDataset d){
+	private static String makeChildString(IAnalysisDataset d){
 		StringBuilder builder = new StringBuilder();
 		
-		for(AnalysisDataset child : d.getChildDatasets()){
+		for(IAnalysisDataset child : d.getChildDatasets()){
 			builder.append( makeDatasetHeaderString(child, d.getUUID() ) );
 			builder.append( makeDatasetCellsString( child ) );
 			
@@ -107,10 +107,10 @@ public class MappingFileExporter {
 	 * @param d
 	 * @return
 	 */
-	private static String makeDatasetCellsString(AnalysisDataset d){
+	private static String makeDatasetCellsString(IAnalysisDataset d){
 		StringBuilder builder = new StringBuilder();
 		
-		for(Cell c : d.getCollection().getCells()){
+		for(ICell c : d.getCollection().getCells()){
 			
 //			IJ.log("Cell "+c.getNucleus().getNameAndNumber());
 			
@@ -160,7 +160,7 @@ public class MappingFileExporter {
 	 * @param parent
 	 * @return
 	 */
-	private static String makeDatasetHeaderString(AnalysisDataset child, UUID parent){
+	private static String makeDatasetHeaderString(IAnalysisDataset child, UUID parent){
 		StringBuilder builder = new StringBuilder();
 
 		builder.append("UUID\t");

@@ -23,6 +23,7 @@ import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import stats.SegmentStatistic;
 import stats.SignalStatistic;
+
 import java.awt.Color;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,7 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
@@ -195,7 +197,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 			// The column is the dataset
 //			String datasetName = ds.getColumnKey(column).toString();
 //			log("Looking at dataset "+datasetName);
-			AnalysisDataset d  = options.getDatasets().get(column);
+			IAnalysisDataset d  = options.getDatasets().get(column);
 						
 			for(int row=0; row<ds.getRowCount(); row++){
 												
@@ -227,14 +229,14 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 * Apply the default formatting to a boxplot with list
 	 * @param boxplot
 	 */
-	private void formatBoxplotChart(JFreeChart boxplot, List<AnalysisDataset> list){
+	private void formatBoxplotChart(JFreeChart boxplot, List<IAnalysisDataset> list){
 		formatBoxplot(boxplot);
 		CategoryPlot plot = boxplot.getCategoryPlot();
 		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
 		
 		for(int i=0;i<plot.getDataset().getRowCount();i++){
 			
-			AnalysisDataset d = list.get(i);
+			IAnalysisDataset d = list.get(i);
 
 			Color color = d.hasDatasetColour()
 						? d.getDatasetColour()

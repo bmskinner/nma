@@ -4,22 +4,22 @@ package gui.tabs.cells;
 import java.util.ArrayList;
 import java.util.List;
 
-import components.Cell;
 import components.CellularComponent;
+import components.ICell;
 
 public class CellViewModel {
 	
-	private Cell cell = null;
+	private ICell cell = null;
 	private CellularComponent component = null;
 	
 	List<AbstractCellDetailPanel> views = new ArrayList<AbstractCellDetailPanel>();
 	
-	public CellViewModel(Cell cell, CellularComponent component){
+	public CellViewModel(ICell cell, CellularComponent component){
 		this.cell = cell;
 		this.component = component;
 	}
 	
-	public void setCell(Cell c){
+	public void setCell(ICell c){
 		if(c==null || c!=cell){
 			this.cell = c;
 			component = null; // component cannot be carried over
@@ -33,7 +33,7 @@ public class CellViewModel {
 	 * triggering a view update before the dialog closes.
 	 * @param c the cell. Must have the same ID as the existing cell.
 	 */
-	public void swapCell(Cell c){
+	public void swapCell(ICell c){
 		if(c==null || c.getId().equals(cell.getId())){
 			this.cell = c;
 			component = null; // component cannot be carried over
@@ -41,7 +41,7 @@ public class CellViewModel {
 		}
 	}
 	
-	public Cell getCell(){
+	public ICell getCell(){
 		return cell;
 	}
 	

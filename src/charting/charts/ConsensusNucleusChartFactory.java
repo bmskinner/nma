@@ -32,12 +32,13 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import charting.ChartComponents;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 import components.CellCollection;
+import components.ICellCollection;
 
 /**
  * Methods to make charts with a consensus nucleus
@@ -78,7 +79,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @return
 	 */
 	public boolean hasConsensusNucleus(){
-		for (AnalysisDataset dataset : options.getDatasets()){
+		for (IAnalysisDataset dataset : options.getDatasets()){
 			if(dataset.getCollection().hasConsensusNucleus()){
 				return true;
 			}
@@ -133,7 +134,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 */
 	public JFreeChart makeNucleusOutlineChart(){
 		
-		AnalysisDataset dataset = options.firstDataset();
+		IAnalysisDataset dataset = options.firstDataset();
 		
 		if( ! dataset.getCollection().hasConsensusNucleus()){
 			return makeEmptyChart();
@@ -165,8 +166,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param dataset
 	 * @return
 	 */
-	private double getconsensusChartRange(AnalysisDataset dataset){
-		CellCollection collection = dataset.getCollection();
+	private double getconsensusChartRange(IAnalysisDataset dataset){
+		ICellCollection collection = dataset.getCollection();
 		double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
 		double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
 
@@ -187,7 +188,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	public double getconsensusChartRange(){
 		
 		double max = 1;
-		for (AnalysisDataset dataset : options.getDatasets()){
+		for (IAnalysisDataset dataset : options.getDatasets()){
 			if(dataset.getCollection().hasConsensusNucleus()){
 				double datasetMax = getconsensusChartRange(dataset);
 				max = datasetMax > max ? datasetMax : max;
@@ -201,14 +202,14 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param dataset the dataset to draw
 	 * @return
 	 */
-	private JFreeChart makeSegmentedConsensusChart(AnalysisDataset dataset) throws Exception {
+	private JFreeChart makeSegmentedConsensusChart(IAnalysisDataset dataset) throws Exception {
 		
 		if( ! dataset.getCollection().hasConsensusNucleus()){
 			return makeEmptyChart();
 		}
 		XYDataset ds = null;
 		
-		CellCollection collection = dataset.getCollection();
+		ICellCollection collection = dataset.getCollection();
 		ds = new NucleusDatasetCreator().createSegmentedNucleusOutline(collection);
 			
 		JFreeChart chart = makeConsensusChart(ds);
@@ -296,7 +297,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
 
 			int index = MorphologyChartFactory.getIndexFromLabel(name);
-			AnalysisDataset d = options.getDatasets().get(index);
+			IAnalysisDataset d = options.getDatasets().get(index);
 
 			// in this context, segment colour refers to the entire
 			// dataset colour (they use the same pallates in ColourSelecter)
@@ -331,7 +332,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		if(options.isMultipleDatasets()){
 			
 			boolean oneHasConsensus = false;
-			for(AnalysisDataset d : options.getDatasets()){
+			for(IAnalysisDataset d : options.getDatasets()){
 				if (d.getCollection().hasConsensusNucleus()){
 					oneHasConsensus= true;
 				}

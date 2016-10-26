@@ -25,7 +25,7 @@ public class RandomSampler extends AnalysisWorker {
 	private int first; // the number of cells in the first subset
 	private int second;// the number of cells in the second subset
 	
-	public RandomSampler(AnalysisDataset dataset, NucleusStatistic stat, int iterations, int first, int second){
+	public RandomSampler(IAnalysisDataset dataset, NucleusStatistic stat, int iterations, int first, int second){
 		super(dataset);
 		this.stat = stat;
 		this.iterations = iterations;

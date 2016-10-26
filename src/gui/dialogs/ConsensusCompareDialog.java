@@ -23,6 +23,7 @@ import javax.swing.event.ChangeListener;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.OutlineChartFactory;
@@ -41,7 +42,7 @@ import gui.components.panels.DatasetSelectionPanel;
 @SuppressWarnings("serial")
 public class ConsensusCompareDialog extends LoadingIconDialog implements ActionListener, ChangeListener, ItemListener {
 	
-	private List<AnalysisDataset> datasets;
+	private List<IAnalysisDataset> datasets;
 	private ExportableChartPanel chartPanelOne;
 	private ExportableChartPanel chartPanelTwo;
 	
@@ -58,7 +59,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 	private DatasetSelectionPanel boxOne;
 	private DatasetSelectionPanel boxTwo;
 	
-	public ConsensusCompareDialog(List<AnalysisDataset> datasets){
+	public ConsensusCompareDialog(List<IAnalysisDataset> datasets){
 		super();
 		finest("Creating consensus comparison dialog");
 		this.datasets = datasets;
@@ -214,8 +215,8 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 	private void runComparison(){
 		
 		setLoading(true);
-		AnalysisDataset one = boxOne.getSelectedDataset();
-		AnalysisDataset two = boxTwo.getSelectedDataset();
+		IAnalysisDataset one = boxOne.getSelectedDataset();
+		IAnalysisDataset two = boxTwo.getSelectedDataset();
 		
 		double logRatio = (double) maxRatioSpinner.getValue();
 		int    meshSize = (int)    meshSizeSpinner.getValue();

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
+
 import utility.Constants;
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
@@ -30,11 +31,13 @@ import weka.clusterers.HierarchicalClusterer;
 import weka.core.EuclideanDistance;
 import weka.core.Instance;
 import weka.core.Instances;
-import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
+import analysis.IAnalysisDataset;
 import components.Cell;
 import components.CellCollection;
+import components.ICellCollection;
+import components.active.DefaultCellCollection;
 
 
 public class NucleusClusterer extends NucleusTreeBuilder {
@@ -42,15 +45,10 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 	public static final int EM = 0; // expectation maximisation
 	public static final int HIERARCHICAL = 1;
 	
-//	private Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
-	private Map<Integer, CellCollection> clusterMap = new HashMap<Integer, CellCollection>();
-	
-//	private String newickTree;	
+	private Map<Integer, ICellCollection> clusterMap = new HashMap<Integer, ICellCollection>();
+
 		
-//	private CellCollection collection;
-//	private ClusteringOptions options;
-		
-	public NucleusClusterer(AnalysisDataset dataset, ClusteringOptions options){
+	public NucleusClusterer(IAnalysisDataset dataset, ClusteringOptions options){
 		super(dataset, options);		
 		log(Level.FINEST, "Total set to "+this.getProgressTotal());
 	}
@@ -67,7 +65,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 	 * @param cluster
 	 * @return
 	 */
-	public CellCollection getCluster(int cluster){
+	public ICellCollection getCluster(int cluster){
 		return this.clusterMap.get(cluster);
 	}
 	
@@ -102,7 +100,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 	 * @param collection
 	 * @return success or fail
 	 */
-	public boolean cluster(CellCollection collection){
+	public boolean cluster(ICellCollection collection){
 		
 //		this.logger = new Logger(collection.getDebugFile(), "NucleusClusterer");
 		
@@ -175,7 +173,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 	 * @param clusterer the clusterer to use
 	 * @param collection the collection with nuclei to cluster
 	 */
-	private void assignClusters(Clusterer clusterer, CellCollection collection){
+	private void assignClusters(Clusterer clusterer, ICellCollection collection){
 		try {
 			// construct new collections for each cluster
 			log(Level.FINE, "Assigning nuclei to clusters");
@@ -183,12 +181,10 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 
 			for(int i=0;i<clusterer.numberOfClusters();i++ ){
 				log(Level.FINE, "Cluster "+i+": " +	collection.getName()+"_Cluster_"+i);
-//				CellCollection clusterCollection = new CellCollection(collection, 
-//						collection.getName()+"_Cluster_"+i);
-				CellCollection clusterCollection = new CellCollection(collection, 
+
+				ICellCollection clusterCollection = new DefaultCellCollection(collection, 
 						"Cluster_"+i);
 				
-//				clusterCollection.setName(collection.getName()+"_Cluster_"+i);
 				clusterCollection.setName("Cluster_"+i);
 				clusterMap.put(i, clusterCollection);
 			}
@@ -204,7 +200,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 					int clusterNumber = clusterer.clusterInstance(inst); // #pass each instance through the model
 					
 					log(Level.FINEST, "\tTesting instance "+i+": "+clusterNumber);
-					CellCollection cluster = clusterMap.get(clusterNumber);
+					ICellCollection cluster = clusterMap.get(clusterNumber);
 
 					// should never be null
 					if(collection.getCell(id)!=null){

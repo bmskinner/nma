@@ -23,7 +23,9 @@ import java.util.List;
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import components.CellCollection;
+import components.ICellCollection;
 import gui.MainWindow;
 import gui.dialogs.FishRemappingDialog;
 
@@ -33,14 +35,14 @@ import gui.dialogs.FishRemappingDialog;
  */
 public class FishRemappingAction extends ProgressableAction {
 
-	public FishRemappingAction(final List<AnalysisDataset> datasets, final MainWindow mw) {
+	public FishRemappingAction(final List<IAnalysisDataset> datasets, final MainWindow mw) {
 		super("Remapping", mw);
 
 		try{
 
 			if(datasets.size()==1){
 				
-				final AnalysisDataset dataset = datasets.get(0);
+				final IAnalysisDataset dataset = datasets.get(0);
 				
 				if(dataset.hasMergeSources()){
 					log(Level.INFO, "Cannot remap merged datasets");
@@ -53,20 +55,20 @@ public class FishRemappingAction extends ProgressableAction {
 				if(fishMapper.getOK()){
 					
 					log(Level.INFO, "Fetching collections...");
-					List<CellCollection> subs = fishMapper.getSubCollections();
+					List<ICellCollection> subs = fishMapper.getSubCollections();
 					
 					if(!subs.isEmpty()){
 
-						final List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
-						for(CellCollection sub : subs){
+						final List<IAnalysisDataset> newList = new ArrayList<IAnalysisDataset>();
+						for(ICellCollection sub : subs){
 
 							if(sub.hasCells()){
 								
-								log(Level.INFO, sub.getName()+": "+sub.getNucleusCount()+" cells");
+								log(Level.INFO, sub.getName()+": "+sub.size()+" cells");
 
 								dataset.addChildCollection(sub);
 
-								final AnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
+								final IAnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
 								newList.add(subDataset);
 							}
 						}

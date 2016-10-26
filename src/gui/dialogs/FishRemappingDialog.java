@@ -49,11 +49,13 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.detection.IconCell;
 import analysis.signals.FishRemappingWorker;
 import components.Cell;
 import components.CellCollection;
+import components.ICell;
+import components.ICellCollection;
 import components.generic.XYPoint;
 
 /**
@@ -65,13 +67,13 @@ public class FishRemappingDialog extends ImageProber {
 
 	public static final int NUCLEUS_OUTLINE_WIDTH = 2;
 	
-	private AnalysisDataset dataset;
+	private IAnalysisDataset dataset;
 	private File postFISHImageDirectory;
 		
 	private List<UUID> selectedNucleiLeft  = new ArrayList<UUID>(96); // Nuclei selected with the left button
 	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(96); // Nuclei selected with the right button
 	
-	private Set<Cell> openCells = new HashSet<Cell>();
+	private Set<ICell> openCells = new HashSet<ICell>();
 		
 	
 	/**
@@ -105,7 +107,7 @@ public class FishRemappingDialog extends ImageProber {
 	/**
 	 * Create the dialog.
 	 */
-	public FishRemappingDialog(MainWindow mw, AnalysisDataset dataset) {
+	public FishRemappingDialog(MainWindow mw, IAnalysisDataset dataset) {
 		
 		super(dataset.getAnalysisOptions(), FishMappingImageType.ORIGINAL_IMAGE, dataset.getAnalysisOptions().getFolder());
 		
@@ -246,7 +248,7 @@ public class FishRemappingDialog extends ImageProber {
 		
 		// See if the selected position in the large icon is in a nucleus
 		
-		for(Cell c : openCells){
+		for(ICell c : openCells){
 			if(c.getNucleus().containsOriginalPoint( p )){
 				
 				respondToMouseEvent(e, c);
@@ -268,22 +270,22 @@ public class FishRemappingDialog extends ImageProber {
 	 * @return 
 	 * @throws Exception 
 	 */
-	public List<CellCollection> getSubCollections() throws Exception{
-		List<CellCollection> result = new ArrayList<CellCollection>(0);
+	public List<ICellCollection> getSubCollections() throws Exception{
+		List<ICellCollection> result = new ArrayList<ICellCollection>(0);
 		
 		if(!selectedNucleiLeft.isEmpty()){
-			CellCollection subCollectionLeft  = new CellCollection(dataset, "SubCollectionLeft");
+			ICellCollection subCollectionLeft  = new CellCollection(dataset, "SubCollectionLeft");
 			for(UUID id : selectedNucleiLeft){
-				Cell cell = dataset.getCollection().getCell(id);
+				ICell cell = dataset.getCollection().getCell(id);
 				subCollectionLeft.addCell(new Cell(cell));
 			}
 			result.add(subCollectionLeft);
 		}
 		
 		if(!selectedNucleiRight.isEmpty()){
-			CellCollection subCollectionRight  = new CellCollection(dataset, "SubCollectionRight");
+			ICellCollection subCollectionRight  = new CellCollection(dataset, "SubCollectionRight");
 			for(UUID id : selectedNucleiRight){
-				Cell cell = dataset.getCollection().getCell(id);
+				ICell cell = dataset.getCollection().getCell(id);
 				subCollectionRight.addCell(new Cell(cell));
 			}
 			result.add(subCollectionRight);
@@ -334,7 +336,7 @@ public class FishRemappingDialog extends ImageProber {
 		Image largeImage = infoCell.getLargeIcon().getImage();
 		
 		// Get the cells matching the imageFile
-		for(Cell c : dataset.getCollection().getCells(openImage)){
+		for(ICell c : dataset.getCollection().getCells(openImage)){
 			drawNucleus(c, largeImage);
 		}
 		
@@ -370,7 +372,7 @@ public class FishRemappingDialog extends ImageProber {
 	
 
 	
-	private synchronized void respondToMouseEvent(MouseEvent e, Cell c){
+	private synchronized void respondToMouseEvent(MouseEvent e, ICell c){
 		
 		
 		// if present in list, remove it, otherwise add it
@@ -396,7 +398,7 @@ public class FishRemappingDialog extends ImageProber {
 		
 	}
 	
-	private Color chooseNucleusOutlineColor(Cell c){
+	private Color chooseNucleusOutlineColor(ICell c){
 		Color color = Color.BLUE;
 		ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
 		if(selectedNucleiLeft.contains(c.getId())){
@@ -418,7 +420,7 @@ public class FishRemappingDialog extends ImageProber {
 		return color;
 	}
 	
-	private void drawNucleus(Cell c, Image image){
+	private void drawNucleus(ICell c, Image image){
 		
 		Graphics2D g2 = (Graphics2D) image.getGraphics();
 		

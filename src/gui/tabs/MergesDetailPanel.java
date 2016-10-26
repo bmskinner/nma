@@ -48,6 +48,7 @@ import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import charting.options.TableOptions.TableType;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 @SuppressWarnings("serial")
 public class MergesDetailPanel extends DetailPanel {
@@ -146,23 +147,13 @@ public class MergesDetailPanel extends DetailPanel {
 		
 		List<JComponent> result = new  ArrayList<JComponent>(); 
 
-		for(final AnalysisDataset source : activeDataset().getAllMergeSources()){
+		for(final IAnalysisDataset source : activeDataset().getAllMergeSources()){
 
 			JButton button = new JButton(RECOVER_BUTTON_TEXT);
-			button.addActionListener( new ActionListener() {
-
-				public void actionPerformed(ActionEvent e) {
-					Thread thr = new Thread(){
-						public void run(){
-
-							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-							list.add(source);
-
-							fireDatasetEvent(DatasetEvent.EXTRACT_SOURCE, list);
-						}};
-						thr.start();
-				}
-			});    
+			button.addActionListener( e -> {
+				fireDatasetEvent(DatasetEvent.EXTRACT_SOURCE, source);
+			});
+ 
 			result.add(button);
 
 		}

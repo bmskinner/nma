@@ -14,14 +14,16 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.signals.ShellRandomDistributionCreator;
 import analysis.signals.SignalManager;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import components.Cell;
 import components.CellCollection;
-import components.generic.BorderTagObject;
+import components.ICellCollection;
 import components.generic.MeasurementScale;
+import components.generic.Tag;
 import components.nuclear.NuclearSignal;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
@@ -55,7 +57,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 			throw new ChartDatasetCreationException("Stat 1 cannot be cast to NucleusStatistic");
 		}
 		
-		List<AnalysisDataset> datasets = options.getDatasets();
+		List<IAnalysisDataset> datasets = options.getDatasets();
 				
 		MeasurementScale scale = options.getScale();
 		
@@ -66,24 +68,24 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 
 		for (int i=0; i < datasets.size(); i++) {
 			
-			CellCollection c = datasets.get(i).getCollection();
+			ICellCollection c = datasets.get(i).getCollection();
 
 			// draw the segment itself
-			double[] xpoints = new double[c.getNucleusCount()];
-			double[] ypoints = new double[c.getNucleusCount()];
+			double[] xpoints = new double[c.size()];
+			double[] ypoints = new double[c.size()];
 			
 			List<Cell> cells = new ArrayList(c.getCells());
 			// go through each index in the segment.
 			for(int j=0; j<cells.size();j++){
 				
 				if(statA.equals(NucleusStatistic.VARIABILITY)){
-					xpoints[j] = c.getNormalisedDifferenceToMedian(BorderTagObject.REFERENCE_POINT, cells.get(j));
+					xpoints[j] = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
 				} else {
 					xpoints[j] = cells.get(j).getNucleus().getStatistic(statA, scale);
 				}
 				
 				if(statB.equals(NucleusStatistic.VARIABILITY)){
-					ypoints[j] = c.getNormalisedDifferenceToMedian(BorderTagObject.REFERENCE_POINT, cells.get(j));
+					ypoints[j] = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
 				} else {
 					ypoints[j] = cells.get(j).getNucleus().getStatistic(statB, scale);
 				}
@@ -144,7 +146,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 		Vector<Object> rho   	= new Vector<Object>();
 
 
-		List<AnalysisDataset> datasets = options.getDatasets();
+		List<IAnalysisDataset> datasets = options.getDatasets();
 
 		List<PlottableStatistic> stats =  options.getStats();
 
@@ -157,24 +159,24 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 
 		for (int i=0; i < datasets.size(); i++) {
 
-			CellCollection c = datasets.get(i).getCollection();
+			ICellCollection c = datasets.get(i).getCollection();
 
 			// draw the segment itself
-			double[] xpoints = new double[c.getNucleusCount()];
-			double[] ypoints = new double[c.getNucleusCount()];
+			double[] xpoints = new double[c.size()];
+			double[] ypoints = new double[c.size()];
 
 			List<Cell> cells = new ArrayList(c.getCells());
 			// go through each index in the segment.
 			for(int j=0; j<cells.size();j++){
 
 				if(statA.equals(NucleusStatistic.VARIABILITY)){
-					xpoints[j] = c.getNormalisedDifferenceToMedian(BorderTagObject.REFERENCE_POINT, cells.get(j));
+					xpoints[j] = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
 				} else {
 					xpoints[j] = cells.get(j).getNucleus().getStatistic(statA, scale);
 				}
 				
 				if(statB.equals(NucleusStatistic.VARIABILITY)){
-					ypoints[j] = c.getNormalisedDifferenceToMedian(BorderTagObject.REFERENCE_POINT, cells.get(j));
+					ypoints[j] = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
 				} else {
 					ypoints[j] = cells.get(j).getNucleus().getStatistic(statB, scale);
 				}
@@ -204,7 +206,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 	 * @throws Exception
 	 */
 	public XYDataset createSignalScatterDataset(ChartOptions options) {
-		List<AnalysisDataset> datasets = options.getDatasets();
+		List<IAnalysisDataset> datasets = options.getDatasets();
 		
 		List<PlottableStatistic> stats =  options.getStats();
 		
@@ -217,7 +219,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 
 		for (int i=0; i < datasets.size(); i++) {
 			
-			CellCollection c = datasets.get(i).getCollection();
+			ICellCollection c = datasets.get(i).getCollection();
 			SignalManager m = c.getSignalManager();
 			
 			Set<UUID> groups = m.getSignalGroupIDs();
@@ -257,7 +259,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 		Vector<Object> rho   	= new Vector<Object>();
 
 
-		List<AnalysisDataset> datasets = options.getDatasets();
+		List<IAnalysisDataset> datasets = options.getDatasets();
 
 		List<PlottableStatistic> stats =  options.getStats();
 
@@ -268,7 +270,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 				
 		for (int i=0; i < datasets.size(); i++) {
 			
-			CellCollection c = datasets.get(i).getCollection();
+			ICellCollection c = datasets.get(i).getCollection();
 			SignalManager m = c.getSignalManager();
 			
 			Set<UUID> groups = m.getSignalGroupIDs();

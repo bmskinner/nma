@@ -90,8 +90,9 @@ import logging.TextAreaHandler;
 import utility.Constants;
 import utility.Version;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
-import components.generic.BorderTagObject;
+import components.generic.Tag;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
@@ -595,10 +596,10 @@ public class MainWindow
 //	}
 
 	public class PanelUpdateTask implements CancellableRunnable {
-		final List<AnalysisDataset> list;
+		final List<IAnalysisDataset> list;
 		private volatile AtomicBoolean bool = new AtomicBoolean();
 		
-		public PanelUpdateTask(final List<AnalysisDataset> list){
+		public PanelUpdateTask(final List<IAnalysisDataset> list){
 			this.list = list;
 		}
 		
@@ -687,7 +688,7 @@ public class MainWindow
 		
 		finer("Heard signal change event: "+event.type());
 		
-		final AnalysisDataset selectedDataset = populationsPanel.getSelectedDatasets().isEmpty() 
+		final IAnalysisDataset selectedDataset = populationsPanel.getSelectedDatasets().isEmpty() 
 				? null 
 				: populationsPanel.getSelectedDatasets().get(0);
 		
@@ -765,7 +766,7 @@ public class MainWindow
 		}
 		
 		if(event.type().equals("UpdatePanelsNull")){
-			threadManager.executeAndCancelUpdate( new PanelUpdateTask(new ArrayList<AnalysisDataset>()) );
+			threadManager.executeAndCancelUpdate( new PanelUpdateTask(new ArrayList<IAnalysisDataset>()) );
 //			this.updatePanels();
 		}
 		
@@ -806,7 +807,7 @@ public class MainWindow
 	@Override
 	public void datasetEventReceived(final DatasetEvent event) {
 		finest("Heard dataset event: "+event.method().toString());
-		final List<AnalysisDataset> list = event.getDatasets();
+		final List<IAnalysisDataset> list = event.getDatasets();
 		if(!list.isEmpty()){
 			
 			if(event.method().equals(DatasetEvent.PROFILING_ACTION)){
@@ -849,7 +850,7 @@ public class MainWindow
 			
 			if(event.method().equals(DatasetEvent.COPY_MORPHOLOGY)){
 				
-				final AnalysisDataset source = event.secondaryDataset();
+				final IAnalysisDataset source = event.secondaryDataset();
 				Runnable task = () -> { 
 					new RunSegmentationAction(event.getDatasets(), source, null, MainWindow.this);
 				};
@@ -895,7 +896,7 @@ public class MainWindow
 			if(event.method().equals(DatasetEvent.EXTRACT_SOURCE)){
 				Runnable task = () -> { 
 					log("Recovering source dataset");
-					for(AnalysisDataset d : list){
+					for(IAnalysisDataset d : list){
 						d.setRoot(true);
 						populationsPanel.addDataset(d);
 					}
@@ -939,17 +940,17 @@ public class MainWindow
 	 * populations panel
 	 * @param dataset
 	 */
-	private void addDataset(final AnalysisDataset dataset){
+	private void addDataset(final IAnalysisDataset dataset){
 
 		fine("Adding dataset");
 
 		populationsPanel.addDataset(dataset);
-		for(AnalysisDataset child : dataset.getAllChildDatasets() ){
+		for(IAnalysisDataset child : dataset.getAllChildDatasets() ){
 			populationsPanel.addDataset(child);
 		}
 
 		finer("Ordering update of populations panel");
-		final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		final List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 		list.add(dataset);
 		populationsPanel.update(list);
 
@@ -963,7 +964,7 @@ public class MainWindow
 	 * given dataset
 	 * @param dataset
 	 */
-	private void refoldConsensus(final AnalysisDataset dataset){
+	private void refoldConsensus(final IAnalysisDataset dataset){
 		fine("Refolding consensus");
 		finest("Refold consensus dataset method is EDT: "+SwingUtilities.isEventDispatchThread());
 		
@@ -976,7 +977,7 @@ public class MainWindow
 			 */
 			fine("Clearing chart cache for consensus charts");
 			
-			final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+			final List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 			list.add(dataset);
 			segmentsDetailPanel.clearChartCache(list);  // segment positions charts need updating
 			nuclearBoxplotsPanel.clearChartCache(list); // overlaid nuclei need updating
@@ -1018,7 +1019,7 @@ public class MainWindow
 	private void saveRootDatasets(){
 		
 		Runnable r = () -> {
-			for(AnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
+			for(IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
 				final CountDownLatch latch = new CountDownLatch(1);
 
 				new SaveDatasetAction(root, MainWindow.this, latch, false);
@@ -1039,7 +1040,7 @@ public class MainWindow
 	 */
 	private void saveAndClose(){
 		Runnable r = () -> {
-			for(AnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
+			for(IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
 				final CountDownLatch latch = new CountDownLatch(1);
 
 				new SaveDatasetAction(root, MainWindow.this, latch, false);
@@ -1063,7 +1064,7 @@ public class MainWindow
 	 * @param d
 	 * @param saveAs should the action ask for a directory
 	 */	
-	public void saveDataset(final AnalysisDataset d, boolean saveAs){
+	public void saveDataset(final IAnalysisDataset d, boolean saveAs){
 		
 		if(d.isRoot()){
 			finer("Dataset is root");
@@ -1080,11 +1081,11 @@ public class MainWindow
 			fine("Root dataset saved");
 		} else {
 			finest("Not a root dataset, checking for parent");
-			AnalysisDataset target = null; 
-			for(AnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
+			IAnalysisDataset target = null; 
+			for(IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
 				//					for(AnalysisDataset root : populationsPanel.getRootDatasets()){
 
-				for(AnalysisDataset child : root.getAllChildDatasets()){
+				for(IAnalysisDataset child : root.getAllChildDatasets()){
 					if(child.getUUID().equals(d.getUUID())){
 						target = root;
 						break;
@@ -1122,17 +1123,8 @@ public class MainWindow
 		}	
 	}
 	
-//	private void clearChartCache(final CountDownLatch latch){
-//		
-//		for(DetailPanel panel : detailPanels){
-//			panel.clearChartCache();
-//			panel.clearTableCache();
-//		}
-//		latch.countDown();
-//		
-//	}
-	
-	private void clearChartCache(final List<AnalysisDataset> list){
+
+	private void clearChartCache(final List<IAnalysisDataset> list){
 		
 		if(list==null || list.isEmpty()){
 			warn("A cache clear was requested for a specific list, which was null or empty");
@@ -1151,7 +1143,7 @@ public class MainWindow
 //		recacheCharts(list);
 //	}
 	
-	private void recacheCharts(final List<AnalysisDataset> list){
+	private void recacheCharts(final List<IAnalysisDataset> list){
 		
 		Runnable task = () -> {
 			finer("Heard recache request for list of  "+list.size()+" datasets");
@@ -1180,7 +1172,7 @@ public class MainWindow
 						r.splitNucleusToHeadAndHump();
 						try {
 
-							r.calculateSignalAnglesFromPoint(r.getPoint(BorderTagObject.ORIENTATION_POINT));
+							r.calculateSignalAnglesFromPoint(r.getPoint(Tag.ORIENTATION_POINT));
 						} catch (Exception e) {
 							error("Error restoring signal angles", e);
 						}
@@ -1199,7 +1191,7 @@ public class MainWindow
 			}
 			
 			fine("Resegmenting datasets");
-			List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
+			List<IAnalysisDataset> list = populationsPanel.getSelectedDatasets();
 			new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
 		};
 		threadManager.execute(task);
@@ -1225,7 +1217,7 @@ public class MainWindow
 			break;
 			
 		case UPDATE_PANELS:{
-			List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
+			List<IAnalysisDataset> list = populationsPanel.getSelectedDatasets();
 			finer("Updating tab panels with list of "+list.size()+" datasets");
 			threadManager.executeAndCancelUpdate( new PanelUpdateTask(list) );
 //			this.updatePanels(list);
@@ -1238,7 +1230,7 @@ public class MainWindow
 			break;
 		case LIST_DATASETS:
 			int i=0;
-			for(AnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()){
+			for(IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()){
 				log(i+"\t"+d.getName());
 				i++;
 			}
@@ -1249,7 +1241,7 @@ public class MainWindow
 				
 		case LIST_SELECTED_DATASETS:
 			int count=0;
-			for(AnalysisDataset d : populationsPanel.getSelectedDatasets()){
+			for(IAnalysisDataset d : populationsPanel.getSelectedDatasets()){
 				log(count+"\t"+d.getName());
 				count++;
 			}
@@ -1275,7 +1267,7 @@ public class MainWindow
 			
 			
 		case DUMP_LOG_INFO:
-			for(AnalysisDataset d : populationsPanel.getSelectedDatasets()){
+			for(IAnalysisDataset d : populationsPanel.getSelectedDatasets()){
 				
 				for(Nucleus n : d.getCollection().getNuclei()){
 					log(n.toString());
@@ -1284,7 +1276,7 @@ public class MainWindow
 			break;
 			
 		case INFO:
-			for(AnalysisDataset d : populationsPanel.getSelectedDatasets()){
+			for(IAnalysisDataset d : populationsPanel.getSelectedDatasets()){
 				
 				log(d.getCollection().toString());
 			}

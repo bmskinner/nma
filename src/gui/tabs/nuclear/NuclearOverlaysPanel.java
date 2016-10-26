@@ -12,7 +12,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import charting.charts.OutlineChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
@@ -105,7 +105,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		boolean ok = true;
 		
 		int segCount = activeDataset().getCollection().getProfileManager().getSegmentCount();
-		for(AnalysisDataset d : getDatasets()){
+		for(IAnalysisDataset d : getDatasets()){
 			
 			if( ! d.getCollection().hasConsensusNucleus()){
 				ok = false;
@@ -202,7 +202,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		 * Check if all selected datasets have a consensus
 		 */
 		boolean setConsensusButton = true;
-		for(AnalysisDataset d : getDatasets()){
+		for(IAnalysisDataset d : getDatasets()){
 			if( ! d.getCollection().hasConsensusNucleus()){
 				setConsensusButton = false;
 			}

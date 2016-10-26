@@ -26,16 +26,18 @@
 package analysis.nucleus;
 
 import java.awt.Rectangle;
-import analysis.AnalysisDataset;
+
 import analysis.AnalysisWorker;
+import analysis.IAnalysisDataset;
 import utility.Constants;
 import components.AbstractCellularComponent;
 import components.CellCollection;
-import components.generic.BorderTagObject;
+import components.ICellCollection;
 import components.generic.Equation;
-import components.generic.Profile;
+import components.generic.IProfile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclear.NucleusType;
@@ -45,12 +47,11 @@ import components.nuclei.Nucleus;
 
 public class CurveRefolder extends AnalysisWorker {
 
-	private Profile targetCurve;
+	private IProfile targetCurve;
 
 	private ConsensusNucleus refoldNucleus;
 	
-	private CellCollection collection;
-//	private CountDownLatch doneSignal;
+	private ICellCollection collection;
 	
 	private CurveRefoldingMode mode = CurveRefoldingMode.FAST; 				 // the dafault mode
 	
@@ -83,7 +84,7 @@ public class CurveRefolder extends AnalysisWorker {
 	 * @param refoldMode
 	 * @throws Exception
 	 */
-	public CurveRefolder(AnalysisDataset dataset, CurveRefoldingMode refoldMode) throws Exception {
+	public CurveRefolder(IAnalysisDataset dataset, CurveRefoldingMode refoldMode) throws Exception {
 		super(dataset);
 
 		dataset.getCollection().setRefolding(true);
@@ -97,7 +98,7 @@ public class CurveRefolder extends AnalysisWorker {
 		// make an entirely new nucleus to play with
 		finest("Fetching best refold candiate");
 
-		Nucleus n = collection.getNucleusMostSimilarToMedian(BorderTagObject.REFERENCE_POINT);	
+		Nucleus n = collection.getNucleusMostSimilarToMedian(Tag.REFERENCE_POINT);	
 		
 		finest("Creating consensus nucleus template");
 		refoldNucleus = new ConsensusNucleus(n, collection.getNucleusType());
@@ -105,9 +106,9 @@ public class CurveRefolder extends AnalysisWorker {
 		finest("Refolding nucleus of class: "+collection.getNucleusType().toString());
 		finest("Subject: "+refoldNucleus.getSourceFileName()+"-"+refoldNucleus.getNucleusNumber());
 
-		Profile targetProfile 	= collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
-		Profile q25 			= collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.REFERENCE_POINT, Constants.LOWER_QUARTILE);
-		Profile q75 			= collection.getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.REFERENCE_POINT, Constants.UPPER_QUARTILE);
+		IProfile targetProfile 	= collection.getProfileCollection(ProfileType.ANGLE).getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
+		IProfile q25 			= collection.getProfileCollection(ProfileType.ANGLE).getProfile(Tag.REFERENCE_POINT, Constants.LOWER_QUARTILE);
+		IProfile q75 			= collection.getProfileCollection(ProfileType.ANGLE).getProfile(Tag.REFERENCE_POINT, Constants.UPPER_QUARTILE);
 
 		if(targetProfile==null){
 			throw new Exception("Null reference to target profile");
@@ -130,7 +131,7 @@ public class CurveRefolder extends AnalysisWorker {
 
 			refoldNucleus.moveCentreOfMass(new XYPoint(0, 0));
 
-			if(collection.getNucleusCount()>1){
+			if(collection.size()>1){
 				
 				smoothCurve(); // smooth the candidate nucleus to remove jagged edges
 				refoldCurve(); // carry out the refolding
@@ -145,7 +146,7 @@ public class CurveRefolder extends AnalysisWorker {
 			
 			// if rodent sperm, put tip on left if needed
 			if(collection.getNucleusType().equals(NucleusType.RODENT_SPERM)){
-				if(refoldNucleus.getBorderTag(BorderTagObject.REFERENCE_POINT).getX()>0){
+				if(refoldNucleus.getBorderTag(Tag.REFERENCE_POINT).getX()>0){
 					refoldNucleus.flipXAroundPoint(refoldNucleus.getCentreOfMass());
 				}
 			}
@@ -179,7 +180,7 @@ public class CurveRefolder extends AnalysisWorker {
 	public void refoldCurve() throws Exception {
 		
 		try{
-			double score = refoldNucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT)
+			double score = refoldNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 					.absoluteSquareDifference(targetCurve);
 			
 
@@ -294,7 +295,7 @@ public class CurveRefolder extends AnalysisWorker {
 	*/
 	private double iterateOverNucleus() throws Exception {
 
-		SegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT);
+		SegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
 		// Get the difference between the candidate nucleus profile and the median profile
 		double similarityScore = refoldProfile.absoluteSquareDifference(targetCurve);
@@ -331,7 +332,7 @@ public class CurveRefolder extends AnalysisWorker {
 	private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore, Nucleus testNucleus) throws Exception{
 //		// make all changes to a fresh nucleus before buggering up the real one
 
-		double score = testNucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
+		double score = testNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
 
 //		log("3bi testNucleus has "+ testNucleus.getProfile(ProfileType.ANGLE).getSegmentCount());
 		
@@ -365,7 +366,7 @@ public class CurveRefolder extends AnalysisWorker {
 			testNucleus.calculateProfiles();
 
 			// Get the new score
-			score = testNucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
+			score = testNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
 
 			// Apply the change if better fit
 			if(score < similarityScore) {

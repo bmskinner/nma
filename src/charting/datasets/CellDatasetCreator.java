@@ -28,9 +28,9 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import charting.options.ChartOptions;
-import analysis.AnalysisDataset;
-import components.generic.BorderTagObject;
+import analysis.IAnalysisDataset;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
@@ -115,14 +115,14 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 
-		for(AnalysisDataset dataset :options.getDatasets()){
+		for(IAnalysisDataset dataset :options.getDatasets()){
 			
 			/*
 			 * We need to convert the seg position into a seg id
 			 */
 			UUID segID = dataset.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(  options.getSegPosition()   )
 					.getID();
 			
@@ -153,7 +153,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<XYPoint> createAbsolutePositionFeatureList(AnalysisDataset dataset, UUID segmentID) throws ChartDatasetCreationException{
+	public List<XYPoint> createAbsolutePositionFeatureList(IAnalysisDataset dataset, UUID segmentID) throws ChartDatasetCreationException{
 		
 		if(dataset==null){
 			throw new IllegalArgumentException("Dataset is null");
@@ -206,7 +206,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<XYPoint> createRelativePositionFeatureList(AnalysisDataset dataset, UUID segmentID) throws ChartDatasetCreationException{
+	public List<XYPoint> createRelativePositionFeatureList(IAnalysisDataset dataset, UUID segmentID) throws ChartDatasetCreationException{
 		
 		List<XYPoint> result = createAbsolutePositionFeatureList( dataset, segmentID);
 		

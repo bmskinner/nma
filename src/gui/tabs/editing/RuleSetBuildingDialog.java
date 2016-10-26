@@ -29,7 +29,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.border.Border;
 
 import logging.Loggable;
-import components.generic.BorderTagObject;
+import components.generic.Tag;
 import analysis.profiles.Rule;
 import analysis.profiles.Rule.RuleType;
 import analysis.profiles.RuleSet;
@@ -40,7 +40,7 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 			
 	private boolean isOK = false;
 	
-	private BorderTagObject targetTag = BorderTagObject.CUSTOM_POINT;
+	private Tag targetTag = Tag.CUSTOM_POINT;
 	
 	private JPanel mainPanel;
 		
@@ -59,7 +59,7 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 	}
 	
 	
-	public RuleSetBuildingDialog(BorderTagObject target){
+	public RuleSetBuildingDialog(Tag target){
 		this();
 		targetTag = target;
 	}

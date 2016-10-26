@@ -19,7 +19,6 @@
 
 package components.generic;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,20 +31,12 @@ import components.generic.BorderTag.BorderTagType;
  * @author bms41
  *
  */
-public class BorderTagObject implements Serializable, Comparable<BorderTagObject> {
+public class BorderTagObject implements Tag {
 	
 	private static final long serialVersionUID = 1L;
 	
 	private final String name;
 	private final BorderTag tag;
-	
-	public static final BorderTagObject REFERENCE_POINT    = new BorderTagObject(BorderTag.REFERENCE_POINT);
-	public static final BorderTagObject ORIENTATION_POINT  = new BorderTagObject(BorderTag.ORIENTATION_POINT);
-	public static final BorderTagObject TOP_VERTICAL       = new BorderTagObject(BorderTag.TOP_VERTICAL);
-	public static final BorderTagObject BOTTOM_VERTICAL    = new BorderTagObject(BorderTag.BOTTOM_VERTICAL);
-	public static final BorderTagObject INTERSECTION_POINT = new BorderTagObject(BorderTag.INTERSECTION_POINT);
-	public static final BorderTagObject CUSTOM_POINT        = new BorderTagObject(BorderTag.CUSTOM);
-	
 	
 	public BorderTagObject(final BorderTag tag){
 		this.tag = tag;
@@ -57,18 +48,34 @@ public class BorderTagObject implements Serializable, Comparable<BorderTagObject
 		this.name = name;
 	}
 
+	/* (non-Javadoc)
+	 * @see components.generic.Tag#getName()
+	 */
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	/* (non-Javadoc)
+	 * @see components.generic.Tag#getTag()
+	 */
+	@Override
 	public BorderTag getTag() {
 		return tag;
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.generic.Tag#type()
+	 */
+	@Override
 	public BorderTagType type(){
 		return tag.type();
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.generic.Tag#toString()
+	 */
+	@Override
 	public String toString(){
 		return name;
 	}
@@ -97,6 +104,9 @@ public class BorderTagObject implements Serializable, Comparable<BorderTagObject
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see components.generic.Tag#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -106,6 +116,9 @@ public class BorderTagObject implements Serializable, Comparable<BorderTagObject
 		return result;
 	}
 
+	/* (non-Javadoc)
+	 * @see components.generic.Tag#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -126,9 +139,12 @@ public class BorderTagObject implements Serializable, Comparable<BorderTagObject
 	}
 
 
+	/* (non-Javadoc)
+	 * @see components.generic.Tag#compareTo(components.generic.BorderTagObject)
+	 */
 	@Override
-	public int compareTo(BorderTagObject arg0) {
-		return name.compareTo(arg0.toString());
+	public int compareTo(Tag tag) {
+		return name.compareTo(tag.getName());
 	}
 	
 	

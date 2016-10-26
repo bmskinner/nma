@@ -21,12 +21,14 @@
 package analysis.profiles;
 
 import utility.Constants;
-import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import analysis.IAnalysisDataset;
 import components.CellCollection;
+import components.ICellCollection;
 import components.generic.BorderTagObject;
-import components.generic.Profile;
+import components.generic.IProfile;
 import components.generic.ProfileType;
+import components.generic.Tag;
 
 /**
  * This class contains the methods for detecting the reference and orientation points in a median
@@ -36,11 +38,11 @@ import components.generic.ProfileType;
  */
 public class DatasetProfiler extends AnalysisWorker {
 	
-	private static final BorderTagObject DEFAULT_BORDER_TAG = BorderTagObject.REFERENCE_POINT;
+	private static final Tag DEFAULT_BORDER_TAG = Tag.REFERENCE_POINT;
 	
 	public static final int RECALCULATE_MEDIAN = 0;
 
-	public DatasetProfiler(AnalysisDataset dataset){
+	public DatasetProfiler(IAnalysisDataset dataset){
 		super(dataset);
 	}
 	 
@@ -74,7 +76,7 @@ public class DatasetProfiler extends AnalysisWorker {
 	 * @param collection
 	 * @param pointType
 	 */
-	private void runProfiler(BorderTagObject pointType){
+	private void runProfiler(Tag pointType){
 		
 		try{
 			fine("Profiling collection");
@@ -99,7 +101,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			 * 
 			 */
 			
-			CellCollection collection = getDataset().getCollection();
+			ICellCollection collection = getDataset().getCollection();
 
 			
 			// Build the ProfileCollections for each ProfileType
@@ -108,19 +110,19 @@ public class DatasetProfiler extends AnalysisWorker {
 					
 			
 			// Create a median from the current reference points in the nuclei
-			Profile median = collection.getProfileCollection(ProfileType.ANGLE)
-					.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
+			IProfile median = collection.getProfileCollection(ProfileType.ANGLE)
+					.getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
 			finest("Fetched median from initial RP");
 			
 			// RP index *should be* zero in the median profile at this point
 			// Check this before updating nuclei
 			ProfileIndexFinder finder = new ProfileIndexFinder();
-			int rpIndex = finder.identifyIndex(collection, BorderTagObject.REFERENCE_POINT);
+			int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
 			fine("RP in default median is located at index "+rpIndex);
 			
 			// Update the nucleus profiles to best fit the median
 			collection.getProfileManager()
-				.offsetNucleusProfiles(BorderTagObject.REFERENCE_POINT, ProfileType.ANGLE, median);
+				.offsetNucleusProfiles(Tag.REFERENCE_POINT, ProfileType.ANGLE, median);
 			
 //			fine("Current median profile:");
 //			fine(collection.getProfileCollection(ProfileType.ANGLE).getProfile(DEFAULT_BORDER_TAG, 50).toString());
@@ -156,7 +158,7 @@ public class DatasetProfiler extends AnalysisWorker {
 				
 				// Don't identify the RP again, it could cause off-by-one errors
 				// We do need to assign the RP in other ProfileTypes though
-				if(tag.equals(BorderTagObject.REFERENCE_POINT)){
+				if(tag.equals(Tag.REFERENCE_POINT)){
 					
 					fine("Checking location of RP in profile");
 					int index = finder.identifyIndex(collection, tag);
@@ -178,7 +180,7 @@ public class DatasetProfiler extends AnalysisWorker {
 						fine(tag+" in median is located at index "+index);
 
 						// Create a median from the current reference points in the nuclei
-						Profile tagMedian = collection.getProfileCollection(ProfileType.ANGLE)
+						IProfile tagMedian = collection.getProfileCollection(ProfileType.ANGLE)
 								.getProfile(tag, Constants.MEDIAN);
 
 						collection.getProfileManager()
@@ -212,12 +214,12 @@ public class DatasetProfiler extends AnalysisWorker {
 		}
 	}
 	
-	private int coerceRPToZero(CellCollection collection){
+	private int coerceRPToZero(ICellCollection collection){
 		
 		ProfileIndexFinder finder = new ProfileIndexFinder();
 		
 		// check the RP index in the median
-		int rpIndex = finder.identifyIndex(collection, BorderTagObject.REFERENCE_POINT);
+		int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
 		fine("RP in median is located at index "+rpIndex);
 
 		// If RP is not at zero, update
@@ -233,7 +235,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			// Find the effects of the offsets on the RP
 			// It should be found at zero
 			finer("Checking RP index again");
-			rpIndex = finder.identifyIndex(collection, BorderTagObject.REFERENCE_POINT);
+			rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
 			fine("RP in median is now located at index "+rpIndex);
 //			fine("Current median profile:");
 //			fine(collection.getProfileCollection(ProfileType.ANGLE).getProfile(DEFAULT_BORDER_TAG, Constants.MEDIAN).toString());

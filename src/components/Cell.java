@@ -20,12 +20,10 @@
 package components;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import logging.Loggable;
 import components.nuclei.Nucleus;
 
 /**
@@ -35,9 +33,7 @@ import components.nuclei.Nucleus;
  *
  */
 public class Cell 
-	implements Serializable, 
-			   Loggable,
-			   Comparable<Cell> {
+	implements ICell {
 
 	private static final long serialVersionUID = 1L;
 
@@ -59,7 +55,7 @@ public class Cell
 	 * Duplicate a cell. The ID is kept consistent
 	 * @param c the cell to duplicate
 	 */
-	public Cell(Cell c){
+	public Cell(ICell c){
 
 		this.uuid = c.getId();
 		nucleus   = c.getNucleus().duplicate();
@@ -70,7 +66,7 @@ public class Cell
 		}
 		
 		tails = new ArrayList<Flagellum>(0);
-		for(Flagellum f : c.getTails()){
+		for(Flagellum f : c.getFlagella()){
 			tails.add(new SpermTail((SpermTail) f));
 		}
 		
@@ -80,50 +76,91 @@ public class Cell
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.ICell#getId()
+	 */
+	@Override
 	public UUID getId() {
 		return uuid;
 	}
 
+	/* (non-Javadoc)
+	 * @see components.ICell#getNucleus()
+	 */
+	@Override
 	public Nucleus getNucleus() {
 		return nucleus;
 	}
 
+	/* (non-Javadoc)
+	 * @see components.ICell#setNucleus(components.nuclei.Nucleus)
+	 */
+	@Override
 	public void setNucleus(Nucleus nucleus) {
 		this.nucleus = nucleus;
 	}
 
+	/* (non-Javadoc)
+	 * @see components.ICell#getMitochondria()
+	 */
+	@Override
 	public List<Mitochondrion> getMitochondria() {
 		return mitochondria;
 	}
 
+	/* (non-Javadoc)
+	 * @see components.ICell#setMitochondria(java.util.List)
+	 */
+	@Override
 	public void setMitochondria(List<Mitochondrion> mitochondria) {
 		this.mitochondria = mitochondria;
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.ICell#addMitochondrion(components.Mitochondrion)
+	 */
+	@Override
 	public void addMitochondrion(Mitochondrion mitochondrion) {
 		this.mitochondria.add(mitochondrion);
 	}
 	
-	public List<Flagellum> getTails(){
+	/* (non-Javadoc)
+	 * @see components.ICell#getTails()
+	 */
+	@Override
+	public List<Flagellum> getFlagella(){
 		return this.tails;
 	}
 	
-	public Flagellum getTail(int i) {
-		return tails.get(i);
-	}
 
-	public void addTail(Flagellum tail) {
+	/* (non-Javadoc)
+	 * @see components.ICell#addTail(components.Flagellum)
+	 */
+	@Override
+	public void addFlagellum(Flagellum tail) {
 		this.tails.add(tail);
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.ICell#getAcrosomes()
+	 */
+	@Override
 	public List<Acrosome> getAcrosomes(){
 		return this.acrosomes;
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.ICell#addAcrosome(components.Acrosome)
+	 */
+	@Override
 	public void addAcrosome(Acrosome acrosome){
 		this.acrosomes.add(acrosome);
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.ICell#hasNucleus()
+	 */
+	@Override
 	public boolean hasNucleus(){
 		if(this.nucleus!=null){
 			return true;
@@ -132,7 +169,11 @@ public class Cell
 		}
 	}
 	
-	public boolean hasTail(){
+	/* (non-Javadoc)
+	 * @see components.ICell#hasTail()
+	 */
+	@Override
+	public boolean hasFlagellum(){
 		if(this.tails.size()>0){
 			return true;
 		} else {
@@ -140,6 +181,10 @@ public class Cell
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.ICell#hasMitochondria()
+	 */
+	@Override
 	public boolean hasMitochondria(){
 		if(this.mitochondria.isEmpty()){
 			return false;
@@ -148,11 +193,10 @@ public class Cell
 		}
 	}
 	
-	/**
-	 * Compare cells using the UUID only
-	 * @param c
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.ICell#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object o){
 		
 		if(this==o){
@@ -166,7 +210,7 @@ public class Cell
 		if (getClass() != o.getClass())
 			return false;
 		
-		Cell other = (Cell) o;
+		ICell other = (ICell) o;
 		
 		if(!other.getId().equals(this.getId())){
 			return false;
@@ -176,14 +220,17 @@ public class Cell
 	}
 	
 	
+	/* (non-Javadoc)
+	 * @see components.ICell#compareTo(components.Cell)
+	 */
 	@Override
-	public int compareTo(Cell o) {
+	public int compareTo(ICell o) {
 		
 		if( ! this.hasNucleus()){
 			return -1;
 		}
 		
-		return this.nucleus.compareTo(o.nucleus);
+		return this.nucleus.compareTo(o.getNucleus());
 	}
 	
 	
@@ -193,6 +240,9 @@ public class Cell
 //		finest("\tWrote cell");
 	}
 
+	/* (non-Javadoc)
+	 * @see components.ICell#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;

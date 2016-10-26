@@ -33,6 +33,7 @@ import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
+import analysis.IAnalysisDataset;
 import analysis.nucleus.NucleusDetectionWorker;
 
 /**
@@ -102,7 +103,7 @@ public class NewAnalysisAction extends ProgressableAction {
 	@Override
 	public void finished(){
 		
-		final List<AnalysisDataset> datasets = ((NucleusDetectionWorker) worker).getDatasets();
+		final List<IAnalysisDataset> datasets = ((NucleusDetectionWorker) worker).getDatasets();
 		
 		if(datasets.size()==0 || datasets==null){
 			log(Level.INFO, "No datasets returned");

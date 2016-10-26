@@ -18,8 +18,9 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.data.Range;
 
 import components.CellCollection;
+import components.ICellCollection;
 import components.generic.MeasurementScale;
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import charting.charts.ScatterChartFactory;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.datasets.ScatterChartDatasetCreator;
@@ -178,7 +179,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		}
 		finer("Gating datasets on "+statABox.getSelectedItem().toString()+" and "+statBBox.getSelectedItem().toString());
 		
-		for(AnalysisDataset d : getDatasets()){
+		for(IAnalysisDataset d : getDatasets()){
 			
 			finest("Filtering dataset "+d.getName());
 			
@@ -186,7 +187,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 			Range range  = getRangeBounds();
 			
 			finer("Filtering on "+statABox.getSelectedItem().toString());
-			CellCollection stat1 = d.getCollection()
+			ICellCollection stat1 = d.getCollection()
 					.filterCollection((PlottableStatistic) statABox.getSelectedItem(),
 							MeasurementScale.PIXELS, 
 							domain.getLowerBound(), domain.getUpperBound());
@@ -204,7 +205,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 			
 			
 			finer("Filtering on "+statBBox.getSelectedItem().toString());
-			CellCollection stat2 = stat1
+			ICellCollection stat2 = stat1
 					.filterCollection((PlottableStatistic) statBBox.getSelectedItem(),
 							GlobalOptions.getInstance().getScale(),
 							range.getLowerBound(), range.getUpperBound());
@@ -220,13 +221,13 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 				continue;
 			}
 			
-			if( stat2.getNucleusCount() ==  d.getCollection().getNucleusCount()){
+			if( stat2.size() ==  d.getCollection().size()){
 				finer("Filtered collection is same as starting collection");
 				continue;
 			}
 
 			stat2.setName("Filtered_"+statABox.getSelectedItem().toString()+"_"+statBBox.getSelectedItem().toString());
-			finer("Filtered "+stat2.getNucleusCount()+" cells");
+			finer("Filtered "+stat2.size()+" cells");
 			d.addChildCollection(stat2);
 			d.getCollection().getProfileManager().copyCollectionOffsets(stat2);
 

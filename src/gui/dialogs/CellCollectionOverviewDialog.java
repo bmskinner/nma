@@ -25,8 +25,11 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import components.Cell;
 import components.CellCollection;
+import components.ICell;
+import components.ICellCollection;
 import gui.DatasetEvent;
 import gui.LoadingIconDialog;
 import gui.tabs.cells.LabelInfo;
@@ -42,13 +45,13 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
 	
 	public static final int COLUMN_COUNT = 3;
 	
-	private AnalysisDataset dataset;
+	private IAnalysisDataset dataset;
 	private JTable table;
 	private JProgressBar progressBar;
 	
 	
 	
-	public CellCollectionOverviewDialog(AnalysisDataset dataset){
+	public CellCollectionOverviewDialog(IAnalysisDataset dataset){
 		super();
 		this.dataset = dataset;
 		
@@ -183,7 +186,7 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
 	}
 	
 	private void makeNewCollection(){
-		List<Cell> cells = new ArrayList<Cell>();
+		List<ICell> cells = new ArrayList<ICell>();
 		for(int r=0; r<table.getModel().getRowCount(); r++){
 
 			for(int c=0; c<table.getModel().getColumnCount(); c++){
@@ -195,8 +198,8 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
 			}
 		}
 		
-		CellCollection newCollection = new CellCollection(dataset, dataset.getName()+"_Curated");
-		for(Cell c : cells){
+		ICellCollection newCollection = new CellCollection(dataset, dataset.getName()+"_Curated");
+		for(ICell c : cells){
 			newCollection.addCell(new Cell(c));
 		}
 		log("Added "+cells.size()+" cells to new collection");
@@ -204,7 +207,7 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
 		if(cells.size()>0){
 			dataset.addChildCollection(newCollection);
 			
-			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+			List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 			list.add(dataset.getChildDataset(newCollection.getID()));
 			log("Firing dataset events");
 			fireDatasetEvent(DatasetEvent.PROFILING_ACTION, list);

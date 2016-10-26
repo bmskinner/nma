@@ -42,8 +42,9 @@ import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
-import components.generic.BorderTagObject;
+import components.ICellCollection;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 
 /**
@@ -107,9 +108,9 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 			
 			finest("Segment counts match");
 
-			CellCollection collection = activeDataset().getCollection();
+			ICellCollection collection = activeDataset().getCollection();
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getOrderedSegments();
 
 

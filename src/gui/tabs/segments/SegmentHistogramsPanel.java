@@ -21,8 +21,9 @@ import charting.charts.panels.SelectableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
-import components.generic.BorderTagObject;
+import components.ICellCollection;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
@@ -60,10 +61,10 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 		// Check that all the datasets have the same number of segments
 		if(NucleusBorderSegment.segmentCountsMatch(getDatasets())){ // make a histogram for each segment
 
-			CellCollection collection = activeDataset().getCollection();
+			ICellCollection collection = activeDataset().getCollection();
 			
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getOrderedSegments();
 			
 

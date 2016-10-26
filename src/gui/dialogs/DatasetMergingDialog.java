@@ -21,6 +21,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import gui.LoadingIconDialog;
 import gui.components.panels.DatasetSelectionPanel;
 import gui.components.panels.SignalGroupSelectionPanel;
@@ -34,7 +35,7 @@ import gui.components.panels.SignalGroupSelectionPanel;
 @SuppressWarnings("serial")
 public class DatasetMergingDialog extends LoadingIconDialog implements ActionListener{
 		
-	private List<AnalysisDataset> datasets;
+	private List<IAnalysisDataset> datasets;
 	
 	private DatasetSelectionPanel datasetBoxOne;
 	private DatasetSelectionPanel datasetBoxTwo;
@@ -52,7 +53,7 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 	
 	
 	
-	public DatasetMergingDialog(List<AnalysisDataset> datasets){
+	public DatasetMergingDialog(List<IAnalysisDataset> datasets){
 		this.datasets = datasets;
 		createUI();
 
@@ -155,7 +156,7 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 		
 		for(UUID id1 : pairedSignalGroups.keySet()){
 			String col1 = "";
-			for(AnalysisDataset d : datasets){
+			for(IAnalysisDataset d : datasets){
 				if(d.getCollection().getSignalManager().hasSignals(id1)){
 					col1 = d.getName()+" : "+d.getCollection().getSignalGroup(id1).getGroupName();
 				}
@@ -163,7 +164,7 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 			Set<UUID> idList = pairedSignalGroups.get(id1);
 			for( UUID id2 :idList){
 				String col2 =  "";
-				for(AnalysisDataset d : datasets){
+				for(IAnalysisDataset d : datasets){
 					if(d.getCollection().getSignalManager().hasSignals(id2)){
 						col2 = d.getName()+" : "+d.getCollection().getSignalGroup(id2).getGroupName();
 					}
@@ -185,8 +186,8 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		AnalysisDataset d1 = datasetBoxOne.getSelectedDataset();
-		AnalysisDataset d2 = datasetBoxTwo.getSelectedDataset();
+		IAnalysisDataset d1 = datasetBoxOne.getSelectedDataset();
+		IAnalysisDataset d2 = datasetBoxTwo.getSelectedDataset();
 		
 		UUID id1 = signalBoxOne.getSelectedID();
 		UUID id2 = signalBoxTwo.getSelectedID();

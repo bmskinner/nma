@@ -8,21 +8,21 @@ import java.util.UUID;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import components.ClusterGroup;
 
 public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
 	
 	Object[] columnData = new Object[3];
 
-	AnalysisDataset dataset = null; // the dataset in the node
+	IAnalysisDataset dataset = null; // the dataset in the node
 	ClusterGroup group      = null;
 
-	public PopulationTreeTableNode(AnalysisDataset dataset) {
+	public PopulationTreeTableNode(IAnalysisDataset dataset) {
 		super(dataset.getUUID().toString());
 		this.dataset = dataset;
 		columnData[0] = dataset;
-		columnData[1] = dataset.getCollection().getNucleusCount();
+		columnData[1] = dataset.getCollection().size();
 	}
 	
 	public PopulationTreeTableNode() {
@@ -45,7 +45,7 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
 		return group!=null;
 	}
 			
-	public AnalysisDataset getDataset() {
+	public IAnalysisDataset getDataset() {
 		return dataset;
 	}
 

@@ -27,17 +27,20 @@ import gui.dialogs.ClusteringSetupDialog;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
+import analysis.IAnalysisDataset;
 import analysis.nucleus.NucleusClusterer;
 import components.CellCollection;
 import components.ClusterGroup;
+import components.ICellCollection;
 import components.nuclear.SignalGroup;
 
 public class ClusterAnalysisAction extends ProgressableAction {
 
-	public ClusterAnalysisAction(AnalysisDataset dataset, MainWindow mw) {
+	public ClusterAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Cluster analysis", mw);
 
 		ClusteringSetupDialog clusterSetup = new ClusteringSetupDialog(mw, dataset);
@@ -71,7 +74,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 
 		String tree = (((NucleusClusterer) worker).getNewickTree());
 
-		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 		ClusteringOptions options =  ((NucleusClusterer) worker).getOptions();
 		//int clusterNumber = dataset.getClusterGroups().size();
 		finest("Getting group number");
@@ -82,7 +85,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 
 		for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
 
-			CellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
+			ICellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
 
 			if(c.hasCells()){
 				finest("Cluster "+cluster+": "+c.getName());
@@ -113,8 +116,8 @@ public class ClusterAnalysisAction extends ProgressableAction {
 				
 				
 				// attach the clusters to their parent collection
-				log("Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
-				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
+				log("Cluster "+cluster+": "+c.size()+" nuclei");
+				IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
 				clusterDataset.setRoot(false);
 				list.add(clusterDataset);
 			}

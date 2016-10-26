@@ -32,15 +32,15 @@ import javax.swing.table.TableModel;
 
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import charting.options.TableOptions;
-import components.Cell;
-import components.generic.BorderTagObject;
+import components.ICell;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.nuclear.BorderPoint;
+import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusType;
-import components.nuclear.SignalGroup;
 import components.nuclei.Nucleus;
 
 /**
@@ -50,7 +50,7 @@ import components.nuclei.Nucleus;
  */
 public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	
-	public CellTableDatasetCreator(Cell c){
+	public CellTableDatasetCreator(ICell c){
 		super(c);
 	}
 	
@@ -71,7 +71,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 			return createBlankTable();
 		}
 		
-		AnalysisDataset d = options.firstDataset();
+		IAnalysisDataset d = options.firstDataset();
 		DefaultTableModel model = new DefaultTableModel();
 		
 		List<Object> fieldNames = new ArrayList<Object>(0);
@@ -120,13 +120,13 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
 		if(type!=null){
 						
-			for(BorderTagObject tag : n.getBorderTags().keySet()){
+			for(Tag tag : n.getBorderTags().keySet()){
 				fieldNames.add(tag);
 				if(n.hasBorderTag(tag)){
 
 					BorderPoint p = n.getBorderPoint(tag);
 					
-					int index = n.getOffsetBorderIndex(BorderTagObject.REFERENCE_POINT, n.getBorderIndex(tag));
+					int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, n.getBorderIndex(tag));
 					
 					rowData.add(p.toString()+" at profile index "+index);
 				} else {
@@ -174,7 +174,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 * @param n the nucleus
 	 * @param d the source dataset for the nucleus
 	 */
-	private void addNuclearSignalsToTable(List<Object> fieldNames,  List<Object> rowData, Nucleus n, AnalysisDataset d){
+	private void addNuclearSignalsToTable(List<Object> fieldNames,  List<Object> rowData, Nucleus n, IAnalysisDataset d){
 		
 		int j=0;
 
@@ -186,7 +186,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 				continue;
 			}
 			
-			SignalGroup g = d.getCollection().getSignalGroup(signalGroup);
+			ISignalGroup g = d.getCollection().getSignalGroup(signalGroup);
 
 			fieldNames.add("");
 			rowData.add("");

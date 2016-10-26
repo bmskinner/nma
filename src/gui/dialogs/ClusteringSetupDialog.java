@@ -19,6 +19,7 @@
 package gui.dialogs;
 
 import gui.MainWindow;
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
@@ -43,9 +44,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import analysis.AnalysisDataset;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
+import analysis.IAnalysisDataset;
 
 @SuppressWarnings("serial")
 public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implements ActionListener, ChangeListener {
@@ -73,7 +74,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 	private JSpinner iterationsSpinner;
 
 	
-	public ClusteringSetupDialog(MainWindow mw, AnalysisDataset dataset) {
+	public ClusteringSetupDialog(MainWindow mw, IAnalysisDataset dataset) {
 
 		super(mw, dataset, "Clustering options");
 		this.initialise();

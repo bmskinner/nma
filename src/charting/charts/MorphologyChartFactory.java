@@ -52,16 +52,18 @@ import stats.DipTester;
 import stats.StatisticDimension;
 import utility.Constants;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 import components.AbstractCellularComponent;
 import components.CellCollection;
+import components.ICellCollection;
 import components.generic.BooleanProfile;
-import components.generic.BorderTagObject;
-import components.generic.Profile;
+import components.generic.IProfile;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
@@ -201,7 +203,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		if(options.isShowMarkers()){
 
 			finest("Adding segment markers");
-			for (BorderTagObject tag : n.getBorderTags().keySet()){
+			for (Tag tag : n.getBorderTags().keySet()){
 
 				// get the index of the tag
 
@@ -259,8 +261,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	private JFreeChart makeSingleProfileChart() throws Exception {
 		
 		XYDataset ds = null;
-		AnalysisDataset dataset = options.firstDataset();
-		CellCollection collection = dataset.getCollection();
+		IAnalysisDataset dataset = options.firstDataset();
+		ICellCollection collection = dataset.getCollection();
 		JFreeChart chart = null;
 				
 		if(options.hasDatasets()){
@@ -278,7 +280,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
 			// if we set raw values, get the maximum nucleus length
 			if(!options.isNormalised()){
-				length = (int) collection.getMaxProfileLength();
+				length = collection.getMaxProfileLength();
 			}
 
 			chart = makeProfileChart(ds, length, options.getType());
@@ -287,7 +289,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
 			XYPlot plot = chart.getXYPlot();
 
-			for (BorderTagObject tag : collection.getProfileCollection(options.getType()).getBorderTags()){
+			for (Tag tag : collection.getProfileCollection(options.getType()).getBorderTags()){
 
 				// get the index of the tag
 				int index = collection.getProfileCollection(options.getType()).getIndex(tag);
@@ -351,7 +353,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				   : options.firstDataset()
 				   		.getCollection()
 				   		.getProfileCollection(ProfileType.ANGLE)
-				   		.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN)
+				   		.getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN)
 				   		.size();
 				
 
@@ -362,7 +364,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
 				
 		int datasetIndex = 0;
-		for(AnalysisDataset dataset : options.getDatasets()){
+		for(IAnalysisDataset dataset : options.getDatasets()){
 
 			XYDataset ds = new NucleusDatasetCreator().createSegmentedMedianProfileDataset( options);
 
@@ -403,8 +405,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			// Add markers
 			if(options.isShowMarkers()){
 
-				CellCollection collection = options.firstDataset().getCollection();
-				for (BorderTagObject tag : collection.getProfileCollection(options.getType()).getBorderTags()){
+				ICellCollection collection = options.firstDataset().getCollection();
+				for (Tag tag : collection.getProfileCollection(options.getType()).getBorderTags()){
 
 					// get the index of the tag
 					int index = collection.getProfileCollection(options.getType()).getIndex(tag);
@@ -538,7 +540,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		int length = 100;
 
 		if( ! options.isNormalised()){
-			for(AnalysisDataset d : options.getDatasets()){
+			for(IAnalysisDataset d : options.getDatasets()){
 				length = (int) Math.max( d.getCollection().getMedianArrayLength(), length);
 			}
 		}
@@ -660,7 +662,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		
 		if(options.isShowMarkers()){ // add the bimodal regions
-			CellCollection collection = options.firstDataset().getCollection();
+			ICellCollection collection = options.firstDataset().getCollection();
 
 			// dip test the profiles
 
@@ -670,7 +672,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
 			// add any regions with bimodal distribution to the chart
 
-			Profile xPositions = modes.getPositions(100);
+			IProfile xPositions = modes.getPositions(100);
 
 			for(int i=0; i<modes.size(); i++){
 				double x = xPositions.get(i);
@@ -844,7 +846,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	private JFreeChart createModalityChart(Double position, List<AnalysisDataset> list, ProfileType type) throws Exception {
+	private JFreeChart createModalityChart(Double position, List<IAnalysisDataset> list, ProfileType type) throws Exception {
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
@@ -864,7 +866,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		int datasetCount = 0;
 		int iteration = 0;
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			
 			XYDataset ds 	 =  new NucleusDatasetCreator().createModalityProbabililtyDataset(position, dataset, type);
 			XYDataset values =  new NucleusDatasetCreator().createModalityValuesDataset(position, dataset, type);
@@ -923,7 +925,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		for(int i=0; i<options.getDatasets().size(); i++){
 			
-			AnalysisDataset dataset = options.getDatasets().get(i);
+			IAnalysisDataset dataset = options.getDatasets().get(i);
 			
 			Color colour = dataset.hasDatasetColour()
 					? dataset.getDatasetColour()
@@ -959,7 +961,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		}
 
 		int index = 0;
-		for(AnalysisDataset dataset : options.getDatasets()){
+		for(IAnalysisDataset dataset : options.getDatasets()){
 
 			// Do the stats testing
 			double pvalue = new DipTester(dataset.getCollection()).getPValueForPositon(	options.getModalityPosition(), 
@@ -1006,11 +1008,11 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		int datasetCount = 0;
 		int iteration = 0;
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			
 //			XYDataset ds 	 = NucleusDatasetCreator.getInstance().createModalityProbabililtyDataset(position, dataset, type);
 //			XYDataset values = NucleusDatasetCreator.getInstance().createModalityValuesDataset(position, dataset, type);
-			CellCollection collection = dataset.getCollection();
+			ICellCollection collection = dataset.getCollection();
 
 			double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(position);
 			XYDataset ds =  new NucleusDatasetCreator().createQQDataset(values);
@@ -1155,7 +1157,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param limits
 	 * @return
 	 */
-	public static JFreeChart createBooleanProfileChart(Profile p, BooleanProfile limits){
+	public static JFreeChart createBooleanProfileChart(IProfile p, BooleanProfile limits){
 		
 		XYDataset ds = new NucleusDatasetCreator().createBooleanProfileDataset(p, limits);
 		

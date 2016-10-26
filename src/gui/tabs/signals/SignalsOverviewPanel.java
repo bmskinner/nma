@@ -40,6 +40,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.signals.ShellRandomDistributionCreator;
 import analysis.signals.SignalManager;
 import charting.charts.OutlineChartFactory;
@@ -283,11 +284,11 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 		}
 		
 		if(isMultipleDatasets()){
-			if(AnalysisDataset.haveConsensusNuclei(getDatasets())){
+			if(IAnalysisDataset.haveConsensusNuclei(getDatasets())){
 				
 				// Check at least one of the selected datasets has signals
 				boolean hasSignals = false;
-				for(AnalysisDataset d : getDatasets()){
+				for(IAnalysisDataset d : getDatasets()){
 				
 					SignalManager m =  d.getCollection().getSignalManager();
 					if(m.hasSignals()){

@@ -33,10 +33,12 @@ import utility.Constants;
 import utility.ArrayConverter.ArrayConversionException;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import components.CellCollection;
-import components.generic.BorderTagObject;
+import components.ICellCollection;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import stats.Max;
@@ -69,16 +71,16 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			return ds;
 		}
 		
-		for(AnalysisDataset dataset : options.getDatasets()){
+		for(IAnalysisDataset dataset : options.getDatasets()){
 
-			CellCollection collection = dataset.getCollection();
+			ICellCollection collection = dataset.getCollection();
 			
 			if( ! (options.getStat() instanceof NucleusStatistic)){
 				throw new ChartDatasetCreationException("Cannot cast stat to NucleusStatistic");
 			}
 
 			NucleusStatistic stat = (NucleusStatistic) options.getStat();
-			double[] values = collection.getNuclearStatistics(stat, options.getScale());
+			double[] values = collection.getMedianStatistics(stat, options.getScale());
 
 			double[] minMaxStep = findMinAndMaxForHistogram(values);
 			int minRounded = (int) minMaxStep[0];
@@ -178,17 +180,17 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			throw new ChartDatasetCreationException("Cannot cast stat to NucleusStatistic");
 		}
 		
-		List<AnalysisDataset> list = options.getDatasets();
+		List<IAnalysisDataset> list = options.getDatasets();
 		NucleusStatistic stat      = (NucleusStatistic) options.getStat();
 		MeasurementScale scale     = options.getScale();
 		
 		int[] minMaxRange = calculateMinAndMaxRange(list, stat, scale);
 
-		for(AnalysisDataset dataset : list){
-			CellCollection collection = dataset.getCollection();
+		for(IAnalysisDataset dataset : list){
+			ICellCollection collection = dataset.getCollection();
 			
 			String groupLabel = stat.toString();
-			double[] values = collection.getNuclearStatistics(stat, scale);
+			double[] values = collection.getMedianStatistics(stat, scale);
 			
 			KernelEstimator est;
 			try {
@@ -241,15 +243,15 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 	 * @return an array with the min and max of the range
 	 * @throws Exception
 	 */
-	private static int[] calculateMinAndMaxRange(List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale) throws ChartDatasetCreationException {
+	private static int[] calculateMinAndMaxRange(List<IAnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale) throws ChartDatasetCreationException {
 		
 		int[] result = new int[2];
 		result[0] = Integer.MAX_VALUE; // holds min
 		result[1] = 0; // holds max
 
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			
-			double[] values = dataset.getCollection().getNuclearStatistics(stat, scale);
+			double[] values = dataset.getCollection().getMedianStatistics(stat, scale);
 			
 			updateMinMaxRange(result, values);
 		}
@@ -298,16 +300,16 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			return ds;
 		}
 		
-		for(AnalysisDataset dataset : options.getDatasets()){
+		for(IAnalysisDataset dataset : options.getDatasets()){
 
-			CellCollection collection = dataset.getCollection();
+			ICellCollection collection = dataset.getCollection();
 			
 			/*
 			 * Find the seg id for the median segment at the requested position
 			 */
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 
 			
@@ -317,7 +319,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			
 			double[] values;
 			try {
-				values = collection.getSegmentStatistics(SegmentStatistic.LENGTH, 
+				values = collection.getMedianStatistics(SegmentStatistic.LENGTH, 
 						options.getScale(), 
 						medianSeg.getID());
 			} catch (Exception e) {
@@ -345,15 +347,15 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 	public XYDataset createSegmentLengthDensityDataset() throws ChartDatasetCreationException {
 
 		int[] minMaxRange = {Integer.MAX_VALUE, 0}; // start with extremes, trim to fit data
-		for(AnalysisDataset dataset : options.getDatasets()){
-			CellCollection collection = dataset.getCollection();
+		for(IAnalysisDataset dataset : options.getDatasets()){
+			ICellCollection collection = dataset.getCollection();
 			
 			/*
 			 * Find the seg id for the median segment at the requested position
 			 */
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 
 			
@@ -364,7 +366,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			double[] lengths = new double[collection.size()];
 			for(Nucleus n : collection.getNuclei()){
 
-				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT)
+				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());
 
 				int indexLength = seg.length();
@@ -382,14 +384,14 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 		
 		
 
-		for(AnalysisDataset dataset : options.getDatasets()){
-			CellCollection collection = dataset.getCollection();
+		for(IAnalysisDataset dataset : options.getDatasets()){
+			ICellCollection collection = dataset.getCollection();
 			/*
 			 * Find the seg id for the median segment at the requested position
 			 */
 			NucleusBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 
 			
@@ -400,7 +402,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			double[] lengths = new double[collection.size()];
 			for(Nucleus n : collection.getNuclei()){
 
-				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT)
+				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());
 				
 				int indexLength = seg.length();

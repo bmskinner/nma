@@ -48,12 +48,14 @@ import org.jfree.chart.JFreeChart;
 
 import utility.Constants;
 import components.Cell;
+import components.ICell;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshImage;
 import analysis.signals.SignalManager;
@@ -64,7 +66,7 @@ import gui.components.panels.SignalGroupSelectionPanel;
 @SuppressWarnings("serial")
 public class SignalWarpingDialog extends LoadingIconDialog implements PropertyChangeListener, ActionListener{
 	
-	private List<AnalysisDataset> datasets;
+	private List<IAnalysisDataset> datasets;
 	private ExportableChartPanel chartPanel;
 	
 	private DatasetSelectionPanel datasetBoxOne;
@@ -84,7 +86,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private int cellsDone  = 0; // Progress through cells in the signal group
 
 	
-	public SignalWarpingDialog(List<AnalysisDataset> datasets){
+	public SignalWarpingDialog(List<IAnalysisDataset> datasets){
 		super();
 		finest("Creating signal warping dialog");
 		this.datasets = datasets;
@@ -203,7 +205,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		progressBar.setString("0 of "+totalCells);
 		progressBar.setValue(0);
 		
-		AnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
+		IAnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
 		AnalysisDataset targetDataset = datasetBoxTwo.getSelectedDataset();
 		
 //		SignalIDToGroup group    = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
@@ -212,7 +214,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 		totalCells = cellsWithSignals 
 				? sourceDataset.getCollection().getSignalManager().getNumberOfCellsWithNuclearSignals(signalBox.getSelectedID()) 
-				: sourceDataset.getCollection().getNucleusCount();
+				: sourceDataset.getCollection().size();
 				
 //		log("Found "+totalCells+" using signals only = "+cellsWithSignals);
 						
@@ -321,7 +323,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		AnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
+		IAnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
 		
 		SignalManager m =  sourceDataset.getCollection().getSignalManager();
 		if( ! m.hasSignals()){
@@ -363,7 +365,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 		totalCells = cellsWithSignals 
 				? m.getNumberOfCellsWithNuclearSignals(signalBox.getSelectedID()) 
-				: datasets.get(0).getCollection().getNucleusCount();
+				: datasets.get(0).getCollection().size();
 				
 		
 	}
@@ -371,8 +373,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	
 	private class SignalWarper extends SwingWorker<Boolean, Integer> {
 		
-		private AnalysisDataset sourceDataset;
-		private AnalysisDataset targetDataset;
+		private IAnalysisDataset sourceDataset;
+		private IAnalysisDataset targetDataset;
 		private UUID signalGroup;
 		private boolean cellsWithSignals; // Only warp the cell images with detected signals
 		private boolean straighten; // Straighten the meshes
@@ -392,7 +394,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 			// Count the number of cells to include
 
-			Set<Cell> cells;
+			Set<ICell> cells;
 			if(cellsWithSignals){
 				SignalManager m =  sourceDataset.getCollection().getSignalManager();
 				cells = m.getCellsWithNuclearSignals(signalGroup, true);
@@ -524,13 +526,13 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 
 			
-			Set<Cell> cells = getCells(cellsWithSignals);
+			Set<ICell> cells = getCells(cellsWithSignals);
 
 			
 			int cellNumber = 0;
 			
 			
-			for(Cell cell : cells){
+			for(ICell cell : cells){
 				fine("Drawing signals for cell "+cell.getNucleus().getNameAndNumber());
 
 				NucleusMesh cellMesh;
@@ -578,10 +580,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 		}
 		
-		private Set<Cell> getCells(boolean withSignalsOnly){
+		private Set<ICell> getCells(boolean withSignalsOnly){
 			
 			SignalManager m =  sourceDataset.getCollection().getSignalManager();
-			Set<Cell> cells;
+			Set<ICell> cells;
 			if(withSignalsOnly){
 				finer("Only fetching cells with signals");
 				cells = m.getCellsWithNuclearSignals(signalGroup, true);

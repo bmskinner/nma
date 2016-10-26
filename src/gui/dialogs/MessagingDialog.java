@@ -9,6 +9,7 @@ import javax.swing.JDialog;
 
 import logging.Loggable;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import gui.DatasetEvent;
 import gui.DatasetEventListener;
 import gui.InterfaceEvent;
@@ -59,7 +60,7 @@ public abstract class MessagingDialog extends JDialog implements Loggable {
     }
     
     
-    protected synchronized void fireDatasetEvent(String method, List<AnalysisDataset> list) {
+    protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list) {
     	
         DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);
         Iterator<Object> iterator = listeners.iterator();
@@ -68,14 +69,14 @@ public abstract class MessagingDialog extends JDialog implements Loggable {
         }
     }
     
-    protected synchronized void fireDatasetEvent(String method, AnalysisDataset dataset) {
+    protected synchronized void fireDatasetEvent(String method, IAnalysisDataset dataset) {
     	
-    	List<AnalysisDataset> list= new ArrayList<AnalysisDataset>();
+    	List<IAnalysisDataset> list= new ArrayList<IAnalysisDataset>();
     	list.add(dataset);
     	fireDatasetEvent(method, list);
     }
     
-    protected synchronized void fireDatasetEvent(String method, List<AnalysisDataset> list, AnalysisDataset template) {
+    protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list, IAnalysisDataset template) {
 
     	DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, template);
     	Iterator<Object> iterator = listeners.iterator();

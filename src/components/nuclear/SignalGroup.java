@@ -2,14 +2,13 @@ package components.nuclear;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.Serializable;
 
 /**
  * This contains information about signals for an AnalysisDataset.
  * @author bms41
  *
  */
-public class SignalGroup implements Serializable {
+public class SignalGroup implements ISignalGroup {
     
     private static final long serialVersionUID = 1L;
     private ShellResult shellResult = null;
@@ -25,82 +24,142 @@ public class SignalGroup implements Serializable {
      * Duplicate a group
      * @param s
      */
-    public SignalGroup(SignalGroup s){
-        if(s.shellResult==null){
+    public SignalGroup(ISignalGroup s){
+        if(! s.hasShellResult()){
             shellResult=null;
         } else {
-            shellResult = new ShellResult(s.shellResult);
+            shellResult = new ShellResult(s.getShellResult());
         }
-        groupName   = s.groupName;
-        isVisible   = s.isVisible;
-        groupColour = s.groupColour;
-        channel     = s.channel;
-        folder      = s.folder;
+        groupName   = s.getGroupName();
+        isVisible   = s.isVisible();
+        groupColour = s.getGroupColour();
+        channel     = s.getChannel();
+        folder      = s.getFolder();
     }
 
-    public ShellResult getShellResult() {
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#getShellResult()
+	 */
+    @Override
+	public ShellResult getShellResult() {
         return shellResult;
     }
 
-    public void setShellResult(ShellResult shellResult) {
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#setShellResult(components.nuclear.ShellResult)
+	 */
+    @Override
+	public void setShellResult(ShellResult shellResult) {
         this.shellResult = shellResult;
     }
     
-    public boolean hasShellResult(){
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#hasShellResult()
+	 */
+    @Override
+	public boolean hasShellResult(){
         if(shellResult==null){
             return false;
         }
         return true;
     }
 
-    public String getGroupName() {
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#getGroupName()
+	 */
+    @Override
+	public String getGroupName() {
         return groupName;
     }
 
-    public void setGroupName(String groupName) {
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#setGroupName(java.lang.String)
+	 */
+    @Override
+	public void setGroupName(String groupName) {
         this.groupName = groupName;
     }
 
-    public boolean isVisible() {
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#isVisible()
+	 */
+    @Override
+	public boolean isVisible() {
         return isVisible;
     }
 
-    public void setVisible(boolean isVisible) {
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#setVisible(boolean)
+	 */
+    @Override
+	public void setVisible(boolean isVisible) {
         this.isVisible = isVisible;
     }
     
-    public boolean hasColour(){
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#hasColour()
+	 */
+    @Override
+	public boolean hasColour(){
         if(this.groupColour==null){
             return false;
         }
         return true;
     }
 
-    public Color getGroupColour() {
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#getGroupColour()
+	 */
+    @Override
+	public Color getGroupColour() {
         return groupColour;
     }
 
-    public void setGroupColour(Color groupColour) {
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#setGroupColour(java.awt.Color)
+	 */
+    @Override
+	public void setGroupColour(Color groupColour) {
         this.groupColour = groupColour;
     }
 
-    public int getChannel() {
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#getChannel()
+	 */
+    @Override
+	public int getChannel() {
         return channel;
     }
 
-    public void setChannel(int channel) {
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#setChannel(int)
+	 */
+    @Override
+	public void setChannel(int channel) {
         this.channel = channel;
     }
 
-    public File getFolder() {
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#getFolder()
+	 */
+    @Override
+	public File getFolder() {
         return folder;
     }
 
-    public void setFolder(File folder) {
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#setFolder(java.io.File)
+	 */
+    @Override
+	public void setFolder(File folder) {
         this.folder = folder;
     }
     
-    public String toString(){
+    /* (non-Javadoc)
+	 * @see components.nuclear.ISignalGroup#toString()
+	 */
+    @Override
+	public String toString(){
     	StringBuilder b = new StringBuilder();
     	
     	String colour = this.groupColour==null ? "No colour" : this.groupColour.toString();

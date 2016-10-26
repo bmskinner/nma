@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 
 import stats.NucleusStatistic;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.profiles.DatasetProfiler;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
@@ -59,7 +60,7 @@ public class DummyRodentCollection extends CellCollection {
 		
 		
 		DummyRodentCollection collection = new DummyRodentCollection(10000);
-		AnalysisDataset d = new AnalysisDataset(collection);
+		IAnalysisDataset d = new AnalysisDataset(collection);
 //		System.out.println(collection.toString());
 		
 //		for(Nucleus n : collection.getNuclei()){

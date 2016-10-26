@@ -20,6 +20,7 @@ package gui.dialogs;
 
 import gui.Labels;
 import gui.MainWindow;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -50,12 +51,12 @@ import javax.swing.event.ChangeListener;
 import stats.DipTester;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
-import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
-import components.generic.BorderTagObject;
+import analysis.IAnalysisDataset;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
@@ -75,7 +76,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	
 	protected JComboBox<HierarchicalClusterMethod> hierarchicalClusterMethodCheckBox;
 	
-	protected AnalysisDataset dataset;
+	protected IAnalysisDataset dataset;
 	
 	protected JCheckBox includeProfilesCheckBox;
 	
@@ -87,7 +88,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	
 	protected ClusteringOptions options;
 	
-	public HierarchicalTreeSetupDialog(final MainWindow mw, final AnalysisDataset dataset) {
+	public HierarchicalTreeSetupDialog(final MainWindow mw, final IAnalysisDataset dataset) {
 		
 		// modal dialog
 		super( mw, true);
@@ -106,7 +107,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	 * @param mw
 	 * @param title
 	 */
-	protected HierarchicalTreeSetupDialog(final MainWindow mw, final AnalysisDataset dataset, final String title){
+	protected HierarchicalTreeSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title){
 		super( mw, true);
 		this.dataset = dataset;
 		this.setTitle(title);
@@ -280,7 +281,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			
 			String pval = "";
 			try {
-				double[] stats = dataset.getCollection().getNuclearStatistics(stat, MeasurementScale.PIXELS);
+				double[] stats = dataset.getCollection().getMedianStatistics(stat, MeasurementScale.PIXELS);
 				double diptest 	= DipTester.getDipTestPValue(stats);
 				pval = pf.format(diptest);		
 			} catch (Exception e) {
@@ -299,12 +300,12 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		
 		for(NucleusBorderSegment s : dataset.getCollection()
 				.getProfileCollection(ProfileType.ANGLE)
-				.getSegments(BorderTagObject.REFERENCE_POINT)){
+				.getSegments(Tag.REFERENCE_POINT)){
 			
 			
 			String pval = "";
 			try {
-				double[] stats = dataset.getCollection().getSegmentStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, s.getID());
+				double[] stats = dataset.getCollection().getMedianStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, s.getID());
 				double diptest 	= DipTester.getDipTestPValue(stats);
 				pval = pf.format(diptest);		
 			} catch (Exception e) {
@@ -382,7 +383,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			
 			for(NucleusBorderSegment s : dataset.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegments(BorderTagObject.REFERENCE_POINT)){
+					.getSegments(Tag.REFERENCE_POINT)){
 				
 				JCheckBox box = segmentBoxMap.get(s.getID());
 				

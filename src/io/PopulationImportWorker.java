@@ -31,12 +31,13 @@ import java.util.logging.Level;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.NucleusType;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import analysis.IAnalysisDataset;
 import utility.Constants;
 import utility.Version;
 
@@ -122,12 +123,12 @@ public class PopulationImportWorker extends AnalysisWorker {
 					
 					if(! dataset.getCollection()
 							.getProfileCollection(ProfileType.ANGLE)
-							.hasBorderTag(BorderTagObject.TOP_VERTICAL)  ){
+							.hasBorderTag(Tag.TOP_VERTICAL)  ){
 						
 						fine("TOP_ and BOTTOM_VERTICAL not assigned; calculating");
 						dataset.getCollection().getProfileManager().calculateTopAndBottomVerticals();
 						fine("Calculating TOP and BOTTOM for child datasets");
-						for(AnalysisDataset child : dataset.getAllChildDatasets()){
+						for(IAnalysisDataset child : dataset.getAllChildDatasets()){
 							child.getCollection().getProfileManager().calculateTopAndBottomVerticals();
 						}
 						
@@ -144,7 +145,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 
 				// Generate vertically rotated nuclei for all imported datasets
 				dataset.getCollection().updateVerticalNuclei();
-				for(AnalysisDataset child : dataset.getAllChildDatasets()){
+				for(IAnalysisDataset child : dataset.getAllChildDatasets()){
 					child.getCollection().updateVerticalNuclei();
 				}
 				
@@ -166,12 +167,12 @@ public class PopulationImportWorker extends AnalysisWorker {
 	private void updateSignals(){
 		log("Updating signal positions for old dataset");
 		updateSignalPositions(dataset);
-		for(AnalysisDataset child : dataset.getAllChildDatasets()){
+		for(IAnalysisDataset child : dataset.getAllChildDatasets()){
 			updateSignalPositions(child);
 		}
 		
 		if(dataset.hasMergeSources()){
-			for(AnalysisDataset source : dataset.getAllMergeSources()){
+			for(IAnalysisDataset source : dataset.getAllMergeSources()){
 				updateSignalPositions(source);
 			}
 		}
@@ -185,7 +186,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 	 * Adjust the border to bring it back in line with the CoM.
 	 * @param dataset
 	 */
-	private void updateSignalPositions(AnalysisDataset dataset){
+	private void updateSignalPositions(IAnalysisDataset dataset){
 		dataset.getCollection().getNuclei().parallelStream().forEach( n -> {
 			
 			if(n.getSignalCollection().hasSignal()){
@@ -300,7 +301,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 	 * @param inputFile the file being opened
 	 * @param dataset the dataset being opened
 	 */
-	private void updateSavePath(File inputFile, AnalysisDataset dataset) {
+	private void updateSavePath(File inputFile, IAnalysisDataset dataset) {
 		
 		fine("File path has changed: attempting to relocate images");
 		
@@ -342,7 +343,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 		}
 	}
 	
-	private void updateSignalFolders(AnalysisDataset dataset){
+	private void updateSignalFolders(IAnalysisDataset dataset){
 		if(dataset.getCollection().getSignalManager().hasSignals()){
 			fine("Updating signal locations");
 			
@@ -360,7 +361,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 					// Update the folder
 					dataset.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
 
-					for(AnalysisDataset child : dataset.getAllChildDatasets()){
+					for(IAnalysisDataset child : dataset.getAllChildDatasets()){
 						child.getCollection().getSignalManager().updateSignalSourceFolder(signalID, newsignalDir);
 
 					}
@@ -372,7 +373,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 		}
 	}
 	
-	private File getSignalDirectory(AnalysisDataset dataset, UUID signalID){
+	private File getSignalDirectory(IAnalysisDataset dataset, UUID signalID){
 		
 		String signalName = dataset.getCollection().getSignalGroup(signalID).getGroupName();
 		

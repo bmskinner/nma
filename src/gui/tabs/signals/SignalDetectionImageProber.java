@@ -20,8 +20,9 @@ package gui.tabs.signals;
 
 import java.awt.Dimension;
 import java.io.File;
-import analysis.AnalysisDataset;
+
 import analysis.AnalysisOptions;
+import analysis.IAnalysisDataset;
 import analysis.signals.NuclearSignalOptions;
 import analysis.signals.SignalProberWorker;
 import gui.ImageType;
@@ -31,7 +32,7 @@ import gui.dialogs.ImageProber;
 @SuppressWarnings("serial")
 public class SignalDetectionImageProber extends ImageProber {
 	
-	private AnalysisDataset dataset;
+	private IAnalysisDataset dataset;
 	private int channel;
 	private NuclearSignalOptions testOptions;
 
@@ -60,7 +61,7 @@ public class SignalDetectionImageProber extends ImageProber {
 		}
 	}
 	
-	public SignalDetectionImageProber(AnalysisOptions options, File folder, AnalysisDataset dataset, int channel, NuclearSignalOptions testOptions) {
+	public SignalDetectionImageProber(AnalysisOptions options, File folder, IAnalysisDataset dataset, int channel, NuclearSignalOptions testOptions) {
 		super(options, SignalImageType.DETECTED_OBJECTS, folder);
 
 		if(dataset==null){

@@ -37,25 +37,26 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.JFreeChart;
 
-import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 @SuppressWarnings("serial")
 public class KruskalTestDialog  extends LoadingIconDialog {
 
-	private AnalysisDataset dataset1;
-	private AnalysisDataset dataset2;
+	private IAnalysisDataset dataset1;
+	private IAnalysisDataset dataset2;
 	
 	private ExportableChartPanel chartPanel;
 
 	private JButton  runButton;
 
-	public KruskalTestDialog(final AnalysisDataset dataset1, final AnalysisDataset dataset2){
+	public KruskalTestDialog(final IAnalysisDataset dataset1, final IAnalysisDataset dataset2){
 		super();
 		this.dataset1 = dataset1;
 		this.dataset2 = dataset2;
@@ -143,7 +144,7 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 		// Clear the old chart
 		chartPanel.setChart(MorphologyChartFactory.createEmptyChart());
 		
-		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 		list.add(dataset1);
 		list.add(dataset2);
 		
@@ -151,7 +152,7 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 			.setDatasets(list)
 			.setNormalised(true)
 			.setAlignment(ProfileAlignment.LEFT)
-			.setTag(BorderTagObject.REFERENCE_POINT)
+			.setTag(Tag.REFERENCE_POINT)
 			.setShowMarkers(false)
 			.setProfileType(ProfileType.FRANKEN)
 			.build();

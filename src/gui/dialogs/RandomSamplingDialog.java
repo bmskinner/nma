@@ -47,7 +47,7 @@ import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.JFreeChart;
 
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.RandomSampler;
 import charting.charts.HistogramChartFactory;
 import charting.charts.panels.ExportableChartPanel;
@@ -61,7 +61,7 @@ public class RandomSamplingDialog
                ChangeListener, 
                PropertyChangeListener  {
 	
-	private AnalysisDataset dataset;
+	private IAnalysisDataset dataset;
 	private ExportableChartPanel chartPanel;
 	
 	private JSpinner set1SizeSpinner;
@@ -79,7 +79,7 @@ public class RandomSamplingDialog
 	
 	private List<Double> resultList = new ArrayList<Double>();
 	
-	public RandomSamplingDialog(final AnalysisDataset dataset){
+	public RandomSamplingDialog(final IAnalysisDataset dataset){
 		super();
 		this.dataset = dataset;
 		createUI();
@@ -92,7 +92,7 @@ public class RandomSamplingDialog
 		this.setTitle("Random sampling: "+dataset.getName());
 		this.setLayout(new BorderLayout());
 		
-		int cellCount = dataset.getCollection().getNucleusCount();
+		int cellCount = dataset.getCollection().size();
 		int halfCellCount = cellCount >>1;
 		
 		SpinnerNumberModel first = new SpinnerNumberModel(halfCellCount,
@@ -276,7 +276,7 @@ public class RandomSamplingDialog
 	public void stateChanged(ChangeEvent e) {
 
 		try {
-			int cellCount = dataset.getCollection().getNucleusCount();
+			int cellCount = dataset.getCollection().size();
 
 			if(e.getSource()==set1SizeSpinner){
 				JSpinner j = (JSpinner) e.getSource();

@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.UUID;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.profiles.ProfileException;
 import logging.Loggable;
 import components.AbstractCellularComponent;
@@ -1053,10 +1054,10 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>, L
 	 * @param list
 	 * @return
 	 */
-	public static boolean segmentCountsMatch(List<AnalysisDataset> list){
+	public static boolean segmentCountsMatch(List<IAnalysisDataset> list){
 		
 		int segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
-		for(AnalysisDataset d : list){
+		for(IAnalysisDataset d : list){
 			if( d.getCollection().getProfileManager().getSegmentCount() != segCount){
 				return false;
 			}

@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.UUID;
 
 import logging.Loggable;
-import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
+import analysis.IAnalysisDataset;
 
 /**
  * This holds the ids of datasets created by clustering,
@@ -100,7 +100,7 @@ public class ClusterGroup implements Serializable, Loggable {
 	 * Add a dataset as a cluster in the group
 	 * @param dataset
 	 */
-	public void addDataset(AnalysisDataset dataset){
+	public void addDataset(IAnalysisDataset dataset){
 		this.ids.add(dataset.getUUID());
 	}
 	
@@ -108,7 +108,7 @@ public class ClusterGroup implements Serializable, Loggable {
 	 * Add a cell collection as a cluster in the group
 	 * @param collection
 	 */
-	public void addDataset(CellCollection collection){
+	public void addDataset(ICellCollection collection){
 		this.ids.add(collection.getID());
 	}
 	
@@ -116,7 +116,7 @@ public class ClusterGroup implements Serializable, Loggable {
 	 * Remove the selected dataset from the cluster group
 	 * @param dataset
 	 */
-	public void removeDataset(AnalysisDataset dataset){
+	public void removeDataset(IAnalysisDataset dataset){
 		removeDataset(dataset.getUUID());
 	}
 	

@@ -28,6 +28,7 @@ import java.util.Map;
 import analysis.detection.Detector;
 import components.CellularComponent;
 import components.generic.BooleanProfile;
+import components.generic.IProfile;
 import components.generic.Profile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
@@ -316,11 +317,11 @@ public class SignalDetector extends Detector {
 		 */
 		finest( "Initial histo threshold: "+minThreshold);
 //		int trimValue = minThreshold;
-		Profile histogramProfile = new Profile(d);
-		Profile trimmedHisto = histogramProfile.getSubregion(minThreshold, 255);
+		IProfile histogramProfile = new Profile(d);
+		IProfile trimmedHisto = histogramProfile.getSubregion(minThreshold, 255);
 		
 		// smooth the arrays,  get the deltas, and double smooth them
-		Profile trimDS = trimmedHisto.smooth(3).calculateDeltas(3).smooth(3).smooth(3);
+		IProfile trimDS = trimmedHisto.smooth(3).calculateDeltas(3).smooth(3).smooth(3);
 		
 		/* find minima and maxima above or below zero, with a total 
 		 * displacement more than 0.1 of the range of values in the delta

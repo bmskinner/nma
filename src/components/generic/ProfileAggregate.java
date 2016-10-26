@@ -49,7 +49,7 @@ import utility.ArrayConverter.ArrayConversionException;
  * @author bms41
  *
  */
-public class ProfileAggregate implements Loggable, Serializable {
+public class ProfileAggregate implements Loggable, Serializable, IProfileAggregate {
 	
 	private static final long serialVersionUID = 1L;
 	private Map<Double, Collection<Double>> aggregate = new HashMap<Double, Collection<Double>>();
@@ -92,7 +92,11 @@ public class ProfileAggregate implements Loggable, Serializable {
     pooling too many entries.
   */
 
-	public void addValues(Profile yvalues){
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileAggregate#addValues(components.generic.IProfile)
+	 */
+	@Override
+	public void addValues(IProfile yvalues){
 		
 		// normalise the profile to the correct x positions
 		double[] xvalues = new double[yvalues.size()];
@@ -124,23 +128,27 @@ public class ProfileAggregate implements Loggable, Serializable {
 		}        
 	}
 	
-	/**
-	 * Get the size of the bins covering the range 0-100
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileAggregate#getBinSize()
 	 */
+	@Override
 	public double getBinSize(){
 		return this.profileIncrement;
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileAggregate#length()
+	 */
+	@Override
 	public int length(){
 		return this.length;
 	}
 
-	/**
-	 * Get the x-axis positions of the centre of each bin.
-	 * @return the Profile of positions
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileAggregate#getXPositions()
 	 */
-	public Profile getXPositions(){
+	@Override
+	public IProfile getXPositions(){
 		double[] result = new double[length];
 		
 		// start counting half a bin below zero
@@ -155,9 +163,8 @@ public class ProfileAggregate implements Loggable, Serializable {
 		return new Profile(result);
 	}
 
-	/**
-	 * Get the number of values within each bin as a profile
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileAggregate#getMedian()
 	 */
 //	public Profile getNumberOfPoints(){
 //		double[] result = new double[length];
@@ -169,8 +176,9 @@ public class ProfileAggregate implements Loggable, Serializable {
 //		return new Profile(result);
 //	}
 	
-	public Profile getMedian() throws ProfileException {
-		Profile result = null;
+	@Override
+	public IProfile getMedian() throws ProfileException {
+		IProfile result = null;
 		try{
 			result = calculateQuartile(Constants.MEDIAN);
 		} catch(ProfileException e){
@@ -188,8 +196,12 @@ public class ProfileAggregate implements Loggable, Serializable {
 		return result;
 	}
 
-	public Profile getQuartile(double quartile) throws ProfileException {
-		Profile result = null;
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileAggregate#getQuartile(double)
+	 */
+	@Override
+	public IProfile getQuartile(double quartile) throws ProfileException {
+		IProfile result = null;
 		try{
 			
 			result = calculateQuartile(quartile);
@@ -201,7 +213,7 @@ public class ProfileAggregate implements Loggable, Serializable {
 		return result;
 	}
 	
-	private Profile calculateQuartile(double quartile) throws ProfileException {
+	private IProfile calculateQuartile(double quartile) throws ProfileException {
 
 		if(this.length==0){
 			throw new ProfileException("Cannot calculate median profile, aggregate length is zero");
@@ -247,7 +259,7 @@ public class ProfileAggregate implements Loggable, Serializable {
 		}
 	}
 	
-	private Profile repairProfile(double[] array) throws ProfileException{
+	private IProfile repairProfile(double[] array) throws ProfileException{
 		
 		for(int i=0;i<array.length;i++){
 			
@@ -313,13 +325,10 @@ public class ProfileAggregate implements Loggable, Serializable {
 		}
 	}
 	
-	/**
-	 * Get the angle values at the given position in the aggragate
-	 * from all nuclei
-	 * @param position the position to search. Must be between 0 and the length of the aggregate.
-	 * @return an unsorted array of the values at the given position
-	 * @throws Exception 
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileAggregate#getValuesAtPosition(double)
 	 */
+	@Override
 	public double[] getValuesAtPosition(double position) throws Exception{
 		if(position < 0 || position > 100 ){
 			throw new IllegalArgumentException("Desired x-position is out of range: "+position);
@@ -371,6 +380,10 @@ public class ProfileAggregate implements Loggable, Serializable {
 		return temp;
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileAggregate#getXKeyset()
+	 */
+	@Override
 	public List<Double> getXKeyset(){
 		List<Double> result = new ArrayList<Double>();
 		for(Double d : aggregate.keySet()){
@@ -380,6 +393,10 @@ public class ProfileAggregate implements Loggable, Serializable {
 		return result;
 	}
 
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileAggregate#toString()
+	 */
+	@Override
 	public String toString(){
 		StringBuilder builder = new StringBuilder();
 		

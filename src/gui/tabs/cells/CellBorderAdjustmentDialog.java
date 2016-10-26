@@ -68,8 +68,10 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleEdge;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import components.Cell;
 import components.CellularComponent;
+import components.ICell;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
@@ -151,7 +153,7 @@ public class CellBorderAdjustmentDialog
 	}
 	
 	@Override
-	public void load(final Cell cell, final AnalysisDataset dataset){
+	public void load(final ICell cell, final IAnalysisDataset dataset){
 		super.load(cell, dataset);
 		
 		this.setTitle("Adjusting border in "+cell.getNucleus().getNameAndNumber());
@@ -310,7 +312,7 @@ public class CellBorderAdjustmentDialog
 	
 	
 	@Override
-	protected void updateCharts(Cell cell){
+	protected void updateCharts(ICell cell){
 			
 			finer("Making outline chart options");
 			ChartOptions outlineOptions = new ChartOptionsBuilder()

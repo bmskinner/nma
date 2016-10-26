@@ -33,11 +33,12 @@ import java.util.logging.Level;
 import org.jfree.chart.JFreeChart;
 
 import stats.NucleusStatistic;
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import charting.charts.panels.SelectableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
+import components.ICellCollection;
 import components.generic.MeasurementScale;
 
 @SuppressWarnings("serial")
@@ -155,8 +156,8 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 //					List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
 
 					// create a new sub-collection with the given parameters for each dataset
-					for(AnalysisDataset dataset : getDatasets()){
-						CellCollection collection = dataset.getCollection();
+					for(IAnalysisDataset dataset : getDatasets()){
+						ICellCollection collection = dataset.getCollection();
 						try {
 							
 							log(Level.INFO, "Filtering on "
@@ -165,11 +166,11 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 									+df.format(lower)
 									+" - "+df.format(upper));
 							
-							CellCollection subCollection = collection.filterCollection(stat, scale, lower, upper);
+							ICellCollection subCollection = collection.filterCollection(stat, scale, lower, upper);
 
 							if(subCollection.hasCells()){
 
-								log(Level.INFO, "Filtered "+subCollection.getNucleusCount()+" nuclei");
+								log(Level.INFO, "Filtered "+subCollection.size()+" nuclei");
 								dataset.addChildCollection(subCollection);
 								try {
 									dataset.getCollection().getProfileManager().copyCollectionOffsets(subCollection);

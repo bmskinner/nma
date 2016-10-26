@@ -9,9 +9,9 @@ import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.signals.SignalManager;
-import components.nuclear.SignalGroup;
+import components.nuclear.ISignalGroup;
 
 
 
@@ -22,7 +22,7 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 	JComboBox<SignalIDToGroup> box;
 	
 	
-	public SignalGroupSelectionPanel(AnalysisDataset d) {
+	public SignalGroupSelectionPanel(IAnalysisDataset d) {
 		
 		
 		List<SignalIDToGroup> list = getGroups(d);
@@ -38,7 +38,7 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 		this.add(box);
 	}
 	
-	public void setDataset(AnalysisDataset d){
+	public void setDataset(IAnalysisDataset d){
 		
 		SignalManager m =  d.getCollection().getSignalManager();
 		if( ! m.hasSignals()){
@@ -59,7 +59,7 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 		return box.getSelectedItem() != null;
 	}
 	
-	public SignalGroup getSelectedGroup(){
+	public ISignalGroup getSelectedGroup(){
 		SignalIDToGroup temp = (SignalIDToGroup) box.getSelectedItem();
 		return temp.getGroup();
 	}
@@ -87,7 +87,7 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 	}
 	
 	
-	private List<SignalIDToGroup> getGroups(AnalysisDataset d){
+	private List<SignalIDToGroup> getGroups(IAnalysisDataset d){
 		SignalManager m =  d.getCollection().getSignalManager();
 		Set<UUID> signalGroups = m.getSignalGroupIDs();
 		List<SignalIDToGroup> list = new ArrayList<SignalIDToGroup>();
@@ -100,9 +100,9 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 	private class SignalIDToGroup {
 		
 		final private UUID id;
-		final private SignalGroup group;
+		final private ISignalGroup group;
 		
-		public SignalIDToGroup(final UUID id, final SignalGroup group){
+		public SignalIDToGroup(final UUID id, final ISignalGroup group){
 			this.id = id;
 			this.group = group;
 		}
@@ -111,7 +111,7 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 			return id;
 		}
 
-		public SignalGroup getGroup() {
+		public ISignalGroup getGroup() {
 			return group;
 		}
 

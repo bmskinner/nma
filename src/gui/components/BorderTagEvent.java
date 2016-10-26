@@ -22,11 +22,12 @@ package gui.components;
 import java.util.EventObject;
 
 import components.generic.BorderTagObject;
+import components.generic.Tag;
 
 @SuppressWarnings("serial")
 public class BorderTagEvent extends EventObject {
 
-	private BorderTagObject tag;
+	private Tag tag;
 	private int index;
 
 	/**
@@ -36,13 +37,13 @@ public class BorderTagEvent extends EventObject {
 	 * @param sourceName the name of the object or component generating the datasets
 	 * @param list the datasets to carry
 	 */
-	public BorderTagEvent( Object source, BorderTagObject tag, int index ) {
+	public BorderTagEvent( Object source, Tag tag, int index ) {
 		super( source );
 		this.tag = tag;
 		this.index = index;
 	}
 
-	public BorderTagObject getTag() {
+	public Tag getTag() {
 		return tag;
 	}
 

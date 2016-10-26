@@ -34,10 +34,12 @@ import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
-import components.generic.Profile;
+import components.generic.IProfile;
 import components.generic.ProfileType;
 import components.generic.BorderTag.BorderTagType;
+import components.generic.Tag;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.Rule;
 import analysis.profiles.RuleSet;
@@ -49,7 +51,7 @@ import gui.InterfaceEvent.InterfaceMethod;
 @SuppressWarnings("serial")
 public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionListener  {
 	
-	private AnalysisDataset dataset;
+	private IAnalysisDataset dataset;
 	
 	private ExportableChartPanel chartPanel;
 	
@@ -57,7 +59,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 	
 	private Map<String, RuleSetCollection> customCollections = new HashMap<String, RuleSetCollection>();
 	
-	public RulesetDialog (AnalysisDataset dataset){
+	public RulesetDialog (IAnalysisDataset dataset){
 		super();
 		this.setLayout(new BorderLayout());
 		this.setTitle("RuleSets for "+dataset.getName());
@@ -288,10 +290,8 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 								
 				if(tag.type().equals(BorderTagType.CORE)){
 					log("Resegmenting dataset");
-					
-					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-					list.add(dataset);
-					fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, list);
+
+					fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, dataset);
 				} else {					
 					fine("Firing refresh cache request for loaded datasets");
 					fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
@@ -310,7 +310,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 	 * @param root the root node
 	 * @param dataset the dataset to use
 	 */
-	private void createNodes(DefaultMutableTreeNode root, AnalysisDataset dataset){
+	private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset){
 
 		RuleSetCollection c = dataset.getCollection().getRuleSetCollection();
 
@@ -364,13 +364,13 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 //			BorderTagObject tagObject = new BorderTagObject(s, BorderTag.CUSTOM);
 //			log("Adding node for "+tagObject);
 			
-			r.setTag(BorderTagObject.CUSTOM_POINT); 
+			r.setTag(Tag.CUSTOM_POINT); 
 			r.setCollection(collection);
 
 			DefaultMutableTreeNode node = new DefaultMutableTreeNode(r);
 			root.add( node );
 
-			for(RuleSet ruleSet : collection.getRuleSets(BorderTagObject.CUSTOM_POINT)){
+			for(RuleSet ruleSet : collection.getRuleSets(Tag.CUSTOM_POINT)){
 
 				RuleNodeData profileData = new RuleNodeData(ruleSet.getType().toString());
 				profileData.setRuleSet(ruleSet);
@@ -418,7 +418,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			
 			Rule r = data.getRule();
 			
-			Profile p = dataset.getCollection().getProfileCollection(data.getType()).getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
+			IProfile p = dataset.getCollection().getProfileCollection(data.getType()).getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
 			BooleanProfile b = finder.getMatchingIndexes(p, r);
 			chart = MorphologyChartFactory.createBooleanProfileChart(p, b);
 		}
@@ -426,7 +426,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		if(data.hasRuleSet()){
 			
 			RuleSet r = data.getRuleSet();
-			Profile p = dataset.getCollection().getProfileCollection(r.getType()).getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
+			IProfile p = dataset.getCollection().getProfileCollection(r.getType()).getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
 			BooleanProfile b = finder.getMatchingIndexes(p, r);
 			chart = MorphologyChartFactory.createBooleanProfileChart(p, b);
 		}
@@ -434,7 +434,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		if(data.hasRuleSetCollection()){
 			
 			RuleSetCollection c = data.getCollection();
-			Profile p = dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
+			IProfile p = dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
 			
 			BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(), c.getRuleSets(data.getTag()));
 			

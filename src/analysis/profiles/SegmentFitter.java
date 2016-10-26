@@ -25,11 +25,13 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import components.generic.BorderTagObject;
+import components.generic.IProfile;
+import components.generic.IProfileCollection;
 import components.generic.Profile;
-import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.BorderTag.BorderTagType;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import logging.Loggable;
@@ -73,7 +75,7 @@ public class SegmentFitter implements Loggable {
 	 * @param n the nucleus to fit to the current median profile
 	 * @param pc the ProfileCollection from the CellCollection the nucleus belongs to
 	 */
-	public void fit(final Nucleus n, final ProfileCollection pc) throws Exception {
+	public void fit(final Nucleus n, final IProfileCollection pc) throws Exception {
 		
 		// Input checks
 		if(n==null){
@@ -118,7 +120,7 @@ public class SegmentFitter implements Loggable {
 	 * @return a profile
 	 * @throws Exception  
 	 */
-	public Profile recombine(Nucleus n, BorderTagObject tag) throws Exception {
+	public Profile recombine(Nucleus n, Tag tag) throws Exception {
 		if(n==null){
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
@@ -167,7 +169,7 @@ public class SegmentFitter implements Loggable {
 	 * @param n the nucleus to fit
 	 * @param pc the profile collection from the CellCollection
 	 */
-	private void remapBorderPoints(Nucleus n, ProfileCollection pc) throws Exception {
+	private void remapBorderPoints(Nucleus n, IProfileCollection pc) throws Exception {
 		
 		if(pc==null){
 			log(Level.WARNING, "No profile collection found, skipping remapping");
@@ -412,8 +414,8 @@ public class SegmentFitter implements Loggable {
 		
 		try{
 			
-			Profile refProfile  = referenceProfile.getSubregion(reference);
-			Profile subjProfile =      testProfile.getSubregion(test);
+			IProfile refProfile  = referenceProfile.getSubregion(reference);
+			IProfile subjProfile =      testProfile.getSubregion(test);
 
 			result = refProfile.absoluteSquareDifference(subjProfile);
 			

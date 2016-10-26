@@ -24,13 +24,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import logging.Loggable;
 
 import org.jfree.chart.JFreeChart;
 
 import charting.options.ChartOptions;
-import components.Cell;
+import components.ICell;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 /*
  * Store rendered charts in a cache, to avoid slowdowns when reselecting datasets
@@ -91,7 +93,7 @@ public class ChartCache implements Cache, Loggable {
 	
 
 	@Override
-	public synchronized void clear(List<AnalysisDataset> list){
+	public synchronized void clear(List<IAnalysisDataset> list){
 		
 		// If the list is malformed, clear everything
 		if(list==null || list.isEmpty()){
@@ -104,7 +106,7 @@ public class ChartCache implements Cache, Loggable {
 		Set<ChartOptions> toRemove = new HashSet<ChartOptions>();
 		
 		// Find the options with the datasets
-		for(AnalysisDataset d : list){
+		for(IAnalysisDataset d : list){
 			for(ChartOptions op : this.chartMap.keySet()){
 				if(op.hasDatasets()){
 					if(op.getDatasets().contains(d)){
@@ -124,7 +126,7 @@ public class ChartCache implements Cache, Loggable {
 	}
 	
 
-	public synchronized void clear(Cell cell){
+	public synchronized void clear(ICell cell){
 		if(cell==null){
 			return;
 		}

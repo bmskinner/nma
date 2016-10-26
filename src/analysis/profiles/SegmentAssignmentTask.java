@@ -24,8 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
 import java.util.logging.Level;
+
 import analysis.AbstractProgressAction;
-import components.generic.Profile;
+import components.generic.IProfile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
@@ -129,8 +130,8 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 			// find the positions these correspond to in the offset profiles
 
 			// get the median profile, indexed to the start or end point
-			Profile startOffsetMedian 	= median.offset(startIndexInMedian);
-			Profile endOffsetMedian 	= median.offset(endIndexInMedian);
+			IProfile startOffsetMedian 	= median.offset(startIndexInMedian);
+			IProfile endOffsetMedian 	= median.offset(endIndexInMedian);
 
 			// find the index at the point of the best fit
 			int startIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(startOffsetMedian);

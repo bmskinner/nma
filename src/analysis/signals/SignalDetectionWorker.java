@@ -25,10 +25,10 @@ import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
-import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
-import components.Cell;
-import components.generic.BorderTagObject;
+import analysis.IAnalysisDataset;
+import components.ICell;
+import components.generic.Tag;
 import components.nuclear.NuclearSignal;
 import components.nuclear.SignalCollection;
 import components.nuclei.AsymmetricNucleus;
@@ -57,7 +57,7 @@ public class SignalDetectionWorker extends AnalysisWorker {
 	 * @param group the signal group to add signals to
 	 */
 
-	public SignalDetectionWorker(AnalysisDataset d, File folder, int channel, NuclearSignalOptions options, UUID group, String channelName){
+	public SignalDetectionWorker(IAnalysisDataset d, File folder, int channel, NuclearSignalOptions options, UUID group, String channelName){
 		super(d);
 		
 		this.options	 = options;
@@ -66,7 +66,7 @@ public class SignalDetectionWorker extends AnalysisWorker {
 		this.signalGroup = group;
 		this.channelName = channelName;
 		
-		this.setProgressTotal(d.getCollection().getNucleusCount());
+		this.setProgressTotal(d.getCollection().size());
 	}
 	
 	@Override
@@ -81,7 +81,7 @@ public class SignalDetectionWorker extends AnalysisWorker {
 			
 			SignalDetector finder = new SignalDetector(options, channel);
 			
-			for(Cell c : getDataset().getCollection().getCells()){
+			for(ICell c : getDataset().getCollection().getCells()){
 				
 				// reset the  min threshold for each cell
 				options.setThreshold(originalMinThreshold);
@@ -113,9 +113,9 @@ public class SignalDetectionWorker extends AnalysisWorker {
 					if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
 						finer("Nucleus type is asymmetric: "+n.getClass().getSimpleName());
 						
-						if(n.hasBorderTag(BorderTagObject.ORIENTATION_POINT)){
+						if(n.hasBorderTag(Tag.ORIENTATION_POINT)){
 							finest("Calculating angle from orientation point");
-							n.calculateSignalAnglesFromPoint(n.getBorderPoint(BorderTagObject.ORIENTATION_POINT));
+							n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
 						} else {
 							finest("No orientation point in nucleus");
 						}

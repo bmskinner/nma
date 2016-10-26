@@ -19,7 +19,7 @@
 
 package charting.datasets;
 
-import components.Cell;
+import components.ICell;
 
 /**
  * Overall dataset creator for datasets concerning a single cell
@@ -28,9 +28,9 @@ import components.Cell;
  */
 public class AbstractCellDatasetCreator extends AbstractDatasetCreator {
 	
-	protected final Cell cell;
+	protected final ICell cell;
 	
-	public AbstractCellDatasetCreator(final Cell c){
+	public AbstractCellDatasetCreator(final ICell c){
 		
 		if(c==null){
 			throw new IllegalArgumentException("Cell cannot be null");

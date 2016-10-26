@@ -24,6 +24,9 @@ import java.util.logging.Logger;
 import stats.NucleusStatistic;
 import components.Cell;
 import components.CellCollection;
+import components.ICell;
+import components.ICellCollection;
+import components.active.DefaultCell;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclei.Nucleus;
@@ -44,7 +47,7 @@ public class CollectionFilterer {
 	private static double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
 
 
-	public static boolean run(CellCollection collection, CellCollection failCollection, Logger fileLogger){
+	public static boolean run(ICellCollection collection, ICellCollection failCollection, Logger fileLogger){
 
 		logger = fileLogger;
 		
@@ -63,7 +66,7 @@ public class CollectionFilterer {
 		return true;
 	}
 	
-	private static void refilterNuclei(CellCollection collection, CellCollection failCollection) throws Exception{
+	private static void refilterNuclei(ICellCollection collection, ICellCollection failCollection) throws Exception{
 
 	    double medianArea = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
 	    double medianPerimeter = collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
@@ -71,7 +74,7 @@ public class CollectionFilterer {
 	    double medianArrayLength = collection.getMedianArrayLength();
 	    double medianFeretLength = collection.getMedianStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
 
-	    int beforeSize = collection.getNucleusCount();
+	    int beforeSize = collection.size();
 
 	    double maxPathLength = medianPathLength * CollectionFilterer.maxWibblinessFromMedian;
 	    double minArea = medianArea / CollectionFilterer.maxDifferenceFromMedian;
@@ -90,7 +93,7 @@ public class CollectionFilterer {
 
 	    logger.log(Level.FINE, "Prefiltered values found");
 
-	    for(Cell c : collection.getCells()){
+	    for(ICell c : collection.getCells()){
 
 	      Nucleus n = c.getNucleus();
 	      int failureCode = 0;
@@ -119,7 +122,7 @@ public class CollectionFilterer {
 
 	      if(failureCode > 0){
 	    	  Nucleus faiNucleus = n.duplicate();
-	    	  Cell failCell = new Cell();
+	    	  ICell failCell = new DefaultCell();
 	    	  failCell.setNucleus(faiNucleus);
 	    	  newFailCollection.addCell(c);
 	      
@@ -128,23 +131,23 @@ public class CollectionFilterer {
 	      }
 	    }
 
-	    for( Cell f : newFailCollection.getCells()){
+	    for( ICell f : newFailCollection.getCells()){
 	    	collection.removeCell(f);
 	    }
 	    
 	    newFailCollection = null; // clean up temp collection
 
 
-	    medianArea = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
-	    medianPerimeter = collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
-	    medianPathLength = collection.getMedianPathLength();
+	    medianArea        = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
+	    medianPerimeter   = collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
+	    medianPathLength  = collection.getMedianPathLength();
 	    medianArrayLength = collection.getMedianArrayLength();
 	    medianFeretLength = collection.getMedianStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
 
 //	    int afterSize = collection.getNucleusCount();
 //	    int removed = beforeSize - afterSize;
 
-	    logger.log(Level.INFO, "Remaining: "+collection.getNucleusCount()+" nuclei");
+	    logger.log(Level.INFO, "Remaining: "+collection.size()+" nuclei");
 	    
 	  }
 	

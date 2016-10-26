@@ -8,10 +8,13 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
+
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import analysis.IAnalysisDataset;
 import components.Cell;
 import components.CellCollection;
+import components.ICell;
 import components.generic.XYPoint;
 
 /**
@@ -25,7 +28,7 @@ public class CellRelocator extends AnalysisWorker {
 	
 	private File inputFile = null;
 	
-	public CellRelocator(final AnalysisDataset dataset, final File file){
+	public CellRelocator(final IAnalysisDataset dataset, final File file){
 		super(dataset);
 		this.inputFile = file;
 		this.setProgressTotal(1);
@@ -200,9 +203,9 @@ public class CellRelocator extends AnalysisWorker {
 	 */
 	private Cell copyCellFromRoot(File f, XYPoint com){
 		// find the nucleus
-		Set<Cell> cells = this.getDataset().getCollection().getCells(f);
+		Set<ICell> cells = this.getDataset().getCollection().getCells(f);
 
-		for(Cell c : cells){
+		for(ICell c : cells){
 
 			if(c.getNucleus().containsOriginalPoint(com)){
 				return new Cell(c);

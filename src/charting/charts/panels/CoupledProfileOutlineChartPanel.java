@@ -39,9 +39,9 @@ import org.jfree.chart.plot.Crosshair;
 import org.jfree.ui.RectangleEdge;
 
 import components.AbstractCellularComponent;
-import components.Cell;
-import components.generic.BorderTagObject;
+import components.ICell;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.nuclear.BorderPoint;
 
 /**
@@ -68,10 +68,10 @@ public class CoupledProfileOutlineChartPanel implements Loggable{
 	protected Crosshair xCrosshairOutline;
 	protected Crosshair yCrosshairOutline;
 	
-	private Cell cell;
+	private ICell cell;
 	
 	
-	public CoupledProfileOutlineChartPanel(ChartPanel profileChart, ChartPanel outlineChart, Cell cell){
+	public CoupledProfileOutlineChartPanel(ChartPanel profileChart, ChartPanel outlineChart, ICell cell){
 		this.profileChart = profileChart;
 		this.outlineChart = outlineChart;
 		this.cell = cell;
@@ -101,7 +101,7 @@ public class CoupledProfileOutlineChartPanel implements Loggable{
 		
 	}
 	
-	public void setCell(Cell cell){
+	public void setCell(ICell cell){
 		this.cell = cell;
 	}
 	
@@ -117,7 +117,7 @@ public class CoupledProfileOutlineChartPanel implements Loggable{
 				}
 				// Find the y-value in the chart at this point
 				// Take from the angle profile directly
-				double yValue = cell.getNucleus().getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).get(xValue);
+				double yValue = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).get(xValue);
 				
 				// Find the index of the border point with the current profile chart x value
 				BorderPoint p = getPointFromProfileIndex(xValue);
@@ -157,7 +157,7 @@ public class CoupledProfileOutlineChartPanel implements Loggable{
 	
 	private BorderPoint getPointFromProfileIndex(int index){
 		// Find the index of the border point with the current profile chart x value
-		int rpIndex = cell.getNucleus().getBorderIndex(BorderTagObject.REFERENCE_POINT);
+		int rpIndex = cell.getNucleus().getBorderIndex(Tag.REFERENCE_POINT);
 		int xIndex  = AbstractCellularComponent.wrapIndex(index+rpIndex, cell.getNucleus().getBorderLength()); 
 		
 		// Get that border point

@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Vector;
+
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
@@ -40,11 +41,14 @@ import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
+import analysis.IAnalysisDataset;
 import components.CellCollection;
 import components.ClusterGroup;
+import components.ICellCollection;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 import stats.ConfidenceInterval;
 import stats.DipTester;
@@ -111,10 +115,10 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			Vector<Object> names 	= new Vector<Object>();
 			Vector<Object> nuclei 	= new Vector<Object>();
 
-			for( AnalysisDataset mergeSource : options.firstDataset().getMergeSources()){
+			for( IAnalysisDataset mergeSource : options.firstDataset().getMergeSources()){
 //				AnalysisDataset mergeSource = options.firstDataset().getMergeSource(id);
 				names.add(mergeSource.getName());
-				nuclei.add(mergeSource.getCollection().getNucleusCount());
+				nuclei.add(mergeSource.getCollection().size());
 			}
 			model.addColumn("Merge source", names);
 			model.addColumn("Nuclei", nuclei);
@@ -129,7 +133,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	private TableModel createMedianProfileSegmentStatsTable(AnalysisDataset dataset, MeasurementScale scale) throws Exception {
+	private TableModel createMedianProfileSegmentStatsTable(IAnalysisDataset dataset, MeasurementScale scale) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -137,9 +141,9 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			model.addColumn("No data loaded");
 
 		} else {
-			CellCollection collection = dataset.getCollection();
+			ICellCollection collection = dataset.getCollection();
 			// check which reference point to use
-			BorderTagObject point = BorderTagObject.REFERENCE_POINT;
+			Tag point = Tag.REFERENCE_POINT;
 
 			// get mapping from ordered segments to segment names
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
@@ -175,7 +179,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				rowData.add(segment.getStartIndex());
 				rowData.add(segment.getEndIndex());
 							
-				double[] meanLengths = collection.getSegmentStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
+				double[] meanLengths = collection.getMedianStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
 
 				double mean = new Mean(meanLengths).doubleValue(); 
 
@@ -205,7 +209,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 */
 	private TableModel createMultiDatasetMedianProfileSegmentStatsTable() throws Exception {
 
-		List<AnalysisDataset> list = options.getDatasets();
+		List<IAnalysisDataset> list = options.getDatasets();
 		MeasurementScale scale = options.getScale();
 		
 		DefaultTableModel model = new DefaultTableModel();
@@ -231,7 +235,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		
 		List<Object> fieldNames = new ArrayList<Object>(0);
 		
-		BorderTagObject point = BorderTagObject.REFERENCE_POINT;//.ORIENTATION_POINT;
+		BorderTagObject point = Tag.REFERENCE_POINT;//.ORIENTATION_POINT;
 
 		// assumes all datasets have the same number of segments
 		List<NucleusBorderSegment> segments = list.get(0)
@@ -260,9 +264,9 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 		// Add the segment stats columns
 
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 
-			CellCollection collection = dataset.getCollection();		
+			ICellCollection collection = dataset.getCollection();		
 
 			// get the offset segments
 			//				List<NucleusBorderSegment> segs = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
@@ -277,7 +281,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 			for(NucleusBorderSegment segment : segs) {
 
-				double[] meanLengths = collection.getSegmentStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
+				double[] meanLengths = collection.getMedianStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
 
 				double mean = new Mean(meanLengths).doubleValue(); 
 
@@ -362,9 +366,9 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		} 
 
 
-		List<AnalysisDataset> list = options.getDatasets();
+		List<IAnalysisDataset> list = options.getDatasets();
 
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 
 			// only display if there are options available
 			// This may not be the case for a merged dataset or its children
@@ -419,13 +423,13 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param dataset
 	 * @return the common options, or null if an options is different
 	 */
-	private boolean testMergedDatasetOptionsAreSame(AnalysisDataset dataset){
+	private boolean testMergedDatasetOptionsAreSame(IAnalysisDataset dataset){
 		finest( "Testing merged dataset options for "+dataset.getName() );
-		List<AnalysisDataset> list = dataset.getMergeSources();
+		List<IAnalysisDataset> list = dataset.getMergeSources();
 		
 		boolean ok = true;
 
-		for(AnalysisDataset d1 : list){
+		for(IAnalysisDataset d1 : list){
 			
 			finest( "Testing merge source "+d1.getName() );
 			/*
@@ -439,7 +443,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				
 			} else {
 				
-				for(AnalysisDataset d2 : list){
+				for(IAnalysisDataset d2 : list){
 					finest( "Comparing to merge source "+d2.getName() );
 					if(d1==d2){
 						finest( "Skip self self comparison");
@@ -484,7 +488,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param dataset
 	 * @return
 	 */
-	private Object[] formatAnalysisOptionsForTable(AnalysisDataset dataset, AnalysisOptions options){
+	private Object[] formatAnalysisOptionsForTable(IAnalysisDataset dataset, AnalysisOptions options){
 		options = options == null ? dataset.getAnalysisOptions() : options;
 		
 //		DecimalFormat df = new DecimalFormat("#0.00"); 
@@ -571,7 +575,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		
 		DefaultTableModel model = new DefaultTableModel();
 		
-		List<AnalysisDataset> list = options.getDatasets();
+		List<IAnalysisDataset> list = options.getDatasets();
 		
 		List<Object> columnData = new ArrayList<Object>();	
 		columnData.add("Nuclei");
@@ -589,7 +593,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		finest("Created model row headers");
 
 		finest("Making column for each dataset");
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			
 			finest("Making column for "+dataset.getName());
 			
@@ -603,21 +607,21 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		return model;	
 	}
 	
-	private List<Object> createDatasetStatsTableColumn(AnalysisDataset dataset, MeasurementScale scale){
+	private List<Object> createDatasetStatsTableColumn(IAnalysisDataset dataset, MeasurementScale scale){
 		
 		// format the numbers and make into a tablemodel
 //		DecimalFormat df = new DecimalFormat("#0.00"); 
 		DecimalFormat pf = new DecimalFormat("#0.000"); 
 		
-		CellCollection collection = dataset.getCollection();
+		ICellCollection collection = dataset.getCollection();
 
 		List<Object> datasetData = new ArrayList<Object>();			
 //		double signalPerNucleus = (double) collection.getSignalManager().getSignalCount()/  (double) collection.getNucleusCount();
 
-		datasetData.add(collection.getNucleusCount());
+		datasetData.add(collection.size());
 
 		for(NucleusStatistic stat : NucleusStatistic.values()){
-			double[] stats 	= collection.getNuclearStatistics(stat, scale);
+			double[] stats 	= collection.getMedianStatistics(stat, scale);
 			
 			double mean     = new Mean(stats).doubleValue(); 
 			double sem      = Stats.stderr(stats);
@@ -654,12 +658,12 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		finer("Creating venn table model");
 		DefaultTableModel model = new DefaultTableModel();
 		
-		List<AnalysisDataset> list = options.getDatasets();
+		List<IAnalysisDataset> list = options.getDatasets();
 		
 		// set rows
 		Object[] columnData = new Object[list.size()];
 		int row = 0;
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			columnData[row] = dataset.getName();
 			row++;
 		}
@@ -668,22 +672,22 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		DecimalFormat df = new DecimalFormat("#0.00"); 
 		
 		// add columns
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			
 			finest("Fetching comparisons for "+dataset.getName());
 			
 			Object[] popData = new Object[list.size()];
 			
 			int i = 0;
-			for(AnalysisDataset dataset2 : list){
+			for(IAnalysisDataset dataset2 : list){
 								
 				String valueString = "";
 				
 				if( ! dataset2.getUUID().equals(dataset.getUUID())){	
 
-					int shared = dataset.getCollection().getSharedNucleusCount(dataset2);
+					int shared = dataset.getCollection().countShared(dataset2);
 
-					double pct = ((double) shared / (double) dataset2.getCollection().getNucleusCount())*100;
+					double pct = ((double) shared / (double) dataset2.getCollection().size())*100;
 					valueString = shared+" ("+df.format(pct)+"% of row)";
 				}
 				
@@ -731,17 +735,17 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		model.setColumnIdentifiers(columnNames);
 			
 		
-		List<AnalysisDataset> list = options.getDatasets();
+		List<IAnalysisDataset> list = options.getDatasets();
 		// Track the pairwase comparisons performed to avoid duplicates
 		Map<UUID, ArrayList<UUID>> existingMatches = new HashMap<UUID, ArrayList<UUID>>();
 		
 		// add columns
-		for(AnalysisDataset dataset1 : list){
+		for(IAnalysisDataset dataset1 : list){
 			
 			ArrayList<UUID> set1List = new ArrayList<UUID>();
 			existingMatches.put(dataset1.getUUID(), set1List);
 			
-			for(AnalysisDataset dataset2 : list){
+			for(IAnalysisDataset dataset2 : list){
 
 				// Ignore self-self matches
 				if( ! dataset2.getUUID().equals(dataset1.getUUID())){
@@ -762,24 +766,24 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 					popData[8] = dataset2.getName();
 
 					// compare the number of shared nucleus ids
-					int shared = dataset1.getCollection().getSharedNucleusCount(dataset2);
+					int shared = dataset1.getCollection().countShared(dataset2);
 
 					popData[4] = shared;
 
-					int unique1 = dataset1.getCollection().getNucleusCount() - shared;
-					int unique2 = dataset2.getCollection().getNucleusCount() - shared; 
+					int unique1 = dataset1.getCollection().size() - shared;
+					int unique2 = dataset2.getCollection().size() - shared; 
 					popData[2] = unique1;
 					popData[6] = unique2;
 					
-					double uniquePct1 = ((double) unique1 / (double) dataset1.getCollection().getNucleusCount())*100;
-					double uniquePct2 = ((double) unique2 / (double) dataset2.getCollection().getNucleusCount())*100;
+					double uniquePct1 = ((double) unique1 / (double) dataset1.getCollection().size())*100;
+					double uniquePct2 = ((double) unique2 / (double) dataset2.getCollection().size())*100;
 					
 					popData[1] = DEFAULT_DECIMAL_FORMAT.format(uniquePct1);
 					popData[7] = DEFAULT_DECIMAL_FORMAT.format(uniquePct2);
 					
 					
-					double sharedpct1 = ((double) shared / (double) dataset1.getCollection().getNucleusCount())*100;
-					double sharedpct2 = ((double) shared / (double) dataset2.getCollection().getNucleusCount())*100;
+					double sharedpct1 = ((double) shared / (double) dataset1.getCollection().size())*100;
+					double sharedpct2 = ((double) shared / (double) dataset2.getCollection().size())*100;
 					
 					popData[3] = DEFAULT_DECIMAL_FORMAT.format(sharedpct1);
 					popData[5] = DEFAULT_DECIMAL_FORMAT.format(sharedpct2);
@@ -797,7 +801,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param list
 	 * @return
 	 */
-	private DefaultTableModel makeEmptyWilcoxonTable(List<AnalysisDataset> list){
+	private DefaultTableModel makeEmptyWilcoxonTable(List<IAnalysisDataset> list){
 		DefaultTableModel model = new DefaultTableModel();
 
 		if(list==null){
@@ -809,7 +813,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			// set rows
 			Object[] columnData = new Object[list.size()];
 			int row = 0;
-			for(AnalysisDataset dataset : list){
+			for(IAnalysisDataset dataset : list){
 				columnData[row] = dataset.getName();
 				row++;
 			}
@@ -881,21 +885,21 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
-		for(AnalysisDataset dataset : options.getDatasets()){
+		for(IAnalysisDataset dataset : options.getDatasets()){
 
 			Object[] popData = new Object[options.datasetCount()];
 
 			int i = 0;
 			boolean getPValue = false;
-			for(AnalysisDataset dataset2 : options.getDatasets()){
+			for(IAnalysisDataset dataset2 : options.getDatasets()){
 
 				if(dataset2.getUUID().equals(dataset.getUUID())){
 					popData[i] = "";
 					getPValue = true;
 				} else {
 					popData[i] = df.format( runWilcoxonTest( 
-							dataset.getCollection().getNuclearStatistics(stat, MeasurementScale.PIXELS), 
-							dataset2.getCollection().getNuclearStatistics(stat, MeasurementScale.PIXELS), 
+							dataset.getCollection().getMedianStatistics(stat, MeasurementScale.PIXELS), 
+							dataset2.getCollection().getMedianStatistics(stat, MeasurementScale.PIXELS), 
 							getPValue) );
 				}
 				i++;
@@ -921,18 +925,18 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
-		for(AnalysisDataset dataset : options.getDatasets()){
+		for(IAnalysisDataset dataset : options.getDatasets()){
 			
 			Object[] popData = new Object[options.datasetCount()];
 			
 			NucleusBorderSegment medianSeg1 = dataset.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 
 			int i = 0;
 			boolean getPValue = false;
-			for(AnalysisDataset dataset2 : options.getDatasets()){
+			for(IAnalysisDataset dataset2 : options.getDatasets()){
 				
 				if(dataset2.getUUID().equals(dataset.getUUID())){
 					popData[i] = "";
@@ -941,13 +945,13 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 					
 					NucleusBorderSegment medianSeg2 = dataset2.getCollection()
 							.getProfileCollection(ProfileType.ANGLE)
-							.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+							.getSegmentedProfile(Tag.REFERENCE_POINT)
 							.getSegmentAt(options.getSegPosition());
 					
 					popData[i] = df.format( runWilcoxonTest( 
-							dataset.getCollection().getSegmentStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, medianSeg1.getID()),
+							dataset.getCollection().getMedianStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, medianSeg1.getID()),
 
-							dataset2.getCollection().getSegmentStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, medianSeg2.getID()),
+							dataset2.getCollection().getMedianStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, medianSeg2.getID()),
 							
 							getPValue) );
 				}
@@ -999,7 +1003,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
-		for(AnalysisDataset dataset : options.getDatasets()){
+		for(IAnalysisDataset dataset : options.getDatasets()){
 
 			double value1 =  dataset.getCollection().getMedianStatistic(stat, MeasurementScale.PIXELS);
 			
@@ -1007,7 +1011,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 			int i = 0;
 
-			for(AnalysisDataset dataset2 : options.getDatasets()){
+			for(IAnalysisDataset dataset2 : options.getDatasets()){
 
 				if(dataset2.getUUID().equals(dataset.getUUID())){
 					
@@ -1043,17 +1047,17 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
-		for(AnalysisDataset dataset : options.getDatasets()){
+		for(IAnalysisDataset dataset : options.getDatasets()){
 			
 			NucleusBorderSegment medianSeg1 = dataset.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
 									
 		
 			
 			double value1 =  new Quartile( dataset.getCollection()
-					.getSegmentStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, 
+					.getMedianStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, 
 							medianSeg1.getID()), 
 					Constants.MEDIAN).doubleValue();
 
@@ -1061,7 +1065,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 			int i = 0;
 
-			for(AnalysisDataset dataset2 : options.getDatasets()){
+			for(IAnalysisDataset dataset2 : options.getDatasets()){
 				
 				if(dataset2.getUUID().equals(dataset.getUUID())){
 					popData[i] = "";
@@ -1070,11 +1074,11 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 					
 					NucleusBorderSegment medianSeg2 = dataset2.getCollection()
 							.getProfileCollection(ProfileType.ANGLE)
-							.getSegmentedProfile(BorderTagObject.REFERENCE_POINT)
+							.getSegmentedProfile(Tag.REFERENCE_POINT)
 							.getSegmentAt(options.getSegPosition());
 					
 					double value2 = new Quartile( dataset2.getCollection()
-							.getSegmentStatistics(SegmentStatistic.LENGTH,
+							.getMedianStatistics(SegmentStatistic.LENGTH,
 									MeasurementScale.PIXELS, 
 									medianSeg2.getID()),
 							Constants.MEDIAN).doubleValue();
@@ -1123,12 +1127,12 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 		model.addColumn("", columnList.toArray());
 
-		List<AnalysisDataset> list = options.getDatasets();
+		List<IAnalysisDataset> list = options.getDatasets();
 
 
 
 		// format the numbers and make into a tablemodel
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			List<ClusterGroup> clusterGroups = dataset.getClusterGroups();
 
 			for(ClusterGroup g : clusterGroups ){

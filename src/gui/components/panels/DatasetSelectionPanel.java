@@ -5,6 +5,7 @@ import java.util.List;
 import javax.swing.JComboBox;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 /**
  * This creates a panel with a drop down list of datasets, specified in the constructor.
@@ -15,11 +16,11 @@ import analysis.AnalysisDataset;
 @SuppressWarnings("serial")
 public class DatasetSelectionPanel extends EnumeratedOptionsPanel {
 	
-	JComboBox<AnalysisDataset> box;
+	JComboBox<IAnalysisDataset> box;
 	
-	public DatasetSelectionPanel(List<AnalysisDataset> datasets){
-		box = new JComboBox<AnalysisDataset>();
-		for(AnalysisDataset d : datasets){
+	public DatasetSelectionPanel(List<IAnalysisDataset> datasets){
+		box = new JComboBox<IAnalysisDataset>();
+		for(IAnalysisDataset d : datasets){
 			box.addItem(d);
 		}
 		
@@ -51,7 +52,7 @@ public class DatasetSelectionPanel extends EnumeratedOptionsPanel {
 		box.setSelectedItem(i);
 	}
 	
-	public void setSelectedDataset(AnalysisDataset d){
+	public void setSelectedDataset(IAnalysisDataset d){
 		
 		box.setSelectedItem(d);
 	}

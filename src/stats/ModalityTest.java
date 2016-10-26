@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import components.generic.BooleanProfile;
+import components.generic.IProfile;
 import components.generic.Profile;
 import stats.ModalityTest.BinnedData.Bin;
 import utility.ArrayConverter;
@@ -36,7 +37,7 @@ import utility.ArrayConverter.ArrayConversionException;
  */
 public class ModalityTest {
 
-	private Profile profile;
+	private IProfile profile;
 	
 	private BinnedData binData;
 	
@@ -251,7 +252,7 @@ public class ModalityTest {
 			
 
 			
-			Profile profile = new Profile(  temp  );
+			IProfile profile = new Profile(  temp  );
 			BooleanProfile maxima = profile.smooth(DEFAULT_SMOOTHING_WINDOW).smooth(DEFAULT_SMOOTHING_WINDOW).getLocalMaxima(3);
 			
 			List<Double> result = new ArrayList<Double>();

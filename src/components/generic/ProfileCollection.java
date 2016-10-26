@@ -29,6 +29,7 @@ import java.util.Map;
 import analysis.profiles.ProfileException;
 import logging.Loggable;
 import components.CellCollection;
+import components.ICellCollection;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 //import ij.IJ;
@@ -50,13 +51,11 @@ import utility.Constants;
  * @author ben
  *
  */
-public class ProfileCollection implements Serializable, Loggable {
+public class ProfileCollection implements IProfileCollection {
 		
 	private static final long serialVersionUID = 1L;
-	
-	private static final int ZERO_INDEX = 0;
-	
-	private ProfileAggregate 	       aggregate = null;
+		
+	private IProfileAggregate 	       aggregate = null;
 	
 	private Map<BorderTagObject, Integer>    indexes  = new HashMap<BorderTagObject, Integer>();
 	private List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
@@ -69,16 +68,14 @@ public class ProfileCollection implements Serializable, Loggable {
 	 * Create an empty profile collection
 	 */
 	public ProfileCollection(){
-		indexes.put(BorderTagObject.REFERENCE_POINT, ZERO_INDEX);
+		indexes.put(Tag.REFERENCE_POINT, ZERO_INDEX);
 	}
 			
-	/**
-	 * Get the offset needed to transform a profile to start from the given 
-	 * point type. Returns -1 if the border tag is not found
-	 * @param pointType
-	 * @return the offset or -1
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#getIndex(components.generic.BorderTagObject)
 	 */
-	public int getIndex(BorderTagObject pointType){
+	@Override
+	public int getIndex(Tag pointType){
 		if(pointType==null){
 			throw new IllegalArgumentException("The requested offset key is null: "+pointType);
 		}
@@ -89,35 +86,31 @@ public class ProfileCollection implements Serializable, Loggable {
 		}
 	}
 	
-	/**
-	 * Get all the offset keys attached to this profile collection
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#getBorderTags()
 	 */
-	public List<BorderTagObject> getBorderTags(){
-		List<BorderTagObject> result = new ArrayList<BorderTagObject>();
-		for(BorderTagObject s: indexes.keySet()){
+	@Override
+	public List<Tag> getBorderTags(){
+		List<Tag> result = new ArrayList<Tag>();
+		for(Tag s: indexes.keySet()){
 			result.add(s);
 		}
 		return result;
 	}
 	
-	/**
-	 * Test if the given tag is present in the collection
-	 * @param tag
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#hasBorderTag(components.generic.BorderTagObject)
 	 */
-	public boolean hasBorderTag(BorderTagObject tag){
+	@Override
+	public boolean hasBorderTag(Tag tag){
 		return indexes.keySet().contains(tag);
 	}
 	
-	/**
-	 * Get the requested profile from the cached profiles, or
-	 * generate it from the ProfileAggregate if it is not cached.
-	 * @param tag the BorderTagObject to use as index zero
-	 * @param quartile the collection quartile to return (0-100) 
-	 * @return the quartile profile from the given tag
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#getProfile(components.generic.BorderTagObject, double)
 	 */
-	public Profile getProfile(BorderTagObject tag, double quartile) {
+	@Override
+	public Profile getProfile(Tag tag, double quartile) {
 		
 		if(tag==null){
 			throw new IllegalArgumentException("BorderTagObject is null");
@@ -131,7 +124,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		if( ! profileCache.hasProfile(tag, quartile)){
 
 			int indexOffset = indexes.get(tag);			
-			Profile profile;
+			IProfile profile;
 			try {
 				profile = getAggregate().getQuartile(quartile).offset(indexOffset);
 			} catch (ProfileException e) {
@@ -146,14 +139,11 @@ public class ProfileCollection implements Serializable, Loggable {
 	}
 	
 	
-	/**
-	 * Get the requested segmented profile. Generates it dynamically from the
-	 * appropriate ProfileAggregate. 
-	 * @param s the pointType of the profile to find
-	 * @return the profile
-	 * @throws Exception
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#getSegmentedProfile(components.generic.BorderTagObject)
 	 */
-	public SegmentedProfile getSegmentedProfile(BorderTagObject tag) {
+	@Override
+	public SegmentedProfile getSegmentedProfile(Tag tag) {
 		if(tag==null){
 			throw new IllegalArgumentException("A profile key is required");
 		}
@@ -162,18 +152,18 @@ public class ProfileCollection implements Serializable, Loggable {
 		return result;
 	}
 
-	/**
-	 * Get the profile aggregate for this collection
-	 * @return the aggregate
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#getAggregate()
 	 */
-	public ProfileAggregate getAggregate(){
+	@Override
+	public IProfileAggregate getAggregate(){
 		return aggregate;
 	}
 	
-	/**
-	 * Test if the profile aggregate has been created
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#hasAggregate()
 	 */
+	@Override
 	public boolean hasAggregate(){
 		if (aggregate==null){
 			return false;
@@ -182,11 +172,10 @@ public class ProfileCollection implements Serializable, Loggable {
 		}
 	}
 	
-	/**
-	 * Get the length of the profile aggregate (this is the
-	 * integer value of the median CellCollection array length)
-	 * @return Length, or zero if the aggregate is not yet created
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#length()
 	 */
+	@Override
 	public int length(){
 		if(this.hasAggregate()){
 			return aggregate.length();
@@ -195,12 +184,11 @@ public class ProfileCollection implements Serializable, Loggable {
 		}
 	}
 	
-	/**
-	 * Create a list of segments based on an offset of existing segments.
-	 * @param s the name of the tag
-	 * @return a copy of the segments in the profile, offset to start at the tag
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#getSegments(components.generic.BorderTagObject)
 	 */
-	public List<NucleusBorderSegment> getSegments(BorderTagObject tag) {
+	@Override
+	public List<NucleusBorderSegment> getSegments(Tag tag) {
 		if(tag==null){
 			throw new IllegalArgumentException("The requested segment key is null: "+tag);
 		}
@@ -215,13 +203,11 @@ public class ProfileCollection implements Serializable, Loggable {
 		return result;
 	}
 	
-	/**
-	 * Test if the collection contains a segment beginning at the given tag
-	 * @param tag
-	 * @return
-	 * @throws Exception
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#hasSegmentStartingWith(components.generic.BorderTagObject)
 	 */
-	public boolean hasSegmentStartingWith(BorderTagObject tag) throws Exception {
+	@Override
+	public boolean hasSegmentStartingWith(Tag tag) throws Exception {
 		
 		if(getSegmentStartingWith( tag) == null){
 			return false;
@@ -230,14 +216,11 @@ public class ProfileCollection implements Serializable, Loggable {
 		}
 	}
 	
-	/**
-	 * Fetch the segment from the profile beginning at the given tag;
-	 * i.e. the segment with a start index of zero, when the profile is offset 
-	 * to the tag. 
-	 * @param tag the border tag
-	 * @return a copy of the segment with the tag at its start index, or null
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#getSegmentStartingWith(components.generic.BorderTagObject)
 	 */
-	public NucleusBorderSegment getSegmentStartingWith(BorderTagObject tag) throws Exception {
+	@Override
+	public NucleusBorderSegment getSegmentStartingWith(Tag tag) throws Exception {
 		List<NucleusBorderSegment> segments = this.getSegments(tag);
 
 		NucleusBorderSegment result = null;
@@ -252,13 +235,11 @@ public class ProfileCollection implements Serializable, Loggable {
 		return result;
 	}
 	
-	/**
-	 * Test if the collection contains a segment beginning at the given tag
-	 * @param tag
-	 * @return
-	 * @throws Exception
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#hasSegmentEndingWith(components.generic.BorderTagObject)
 	 */
-	public boolean hasSegmentEndingWith(BorderTagObject tag) throws Exception {
+	@Override
+	public boolean hasSegmentEndingWith(Tag tag) throws Exception {
 		
 		if(getSegmentEndingWith( tag) == null){
 			return false;
@@ -267,14 +248,11 @@ public class ProfileCollection implements Serializable, Loggable {
 		}
 	}
 	
-	/**
-	 * Fetch the segment from the profile beginning at the given tag;
-	 * i.e. the segment with a start index of zero, when the profile is offset 
-	 * to the tag. 
-	 * @param tag the border tag
-	 * @return a copy of the segment with the tag at its start index, or null
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#getSegmentEndingWith(components.generic.BorderTagObject)
 	 */
-	public NucleusBorderSegment getSegmentEndingWith(BorderTagObject tag) throws Exception {
+	@Override
+	public NucleusBorderSegment getSegmentEndingWith(Tag tag) throws Exception {
 		List<NucleusBorderSegment> segments = this.getSegments(tag);
 
 		NucleusBorderSegment result = null;
@@ -289,14 +267,12 @@ public class ProfileCollection implements Serializable, Loggable {
 		return result;
 	}
 	
-	/**
-	 * Fetch the segment from the profile containing the given index.
-	 * The zero index is the reference point
-	 * @param index
-	 * @return a copy of the segment with the index inside, or null
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#getSegmentContaining(int)
 	 */
+	@Override
 	public NucleusBorderSegment getSegmentContaining(int index) throws Exception {
-		List<NucleusBorderSegment> segments = this.getSegments(BorderTagObject.REFERENCE_POINT);
+		List<NucleusBorderSegment> segments = this.getSegments(Tag.REFERENCE_POINT);
 
 		NucleusBorderSegment result = null;
 		// get the name of the segment with the tag at the start
@@ -310,12 +286,11 @@ public class ProfileCollection implements Serializable, Loggable {
 		return result;
 	}
 	
-	/**
-	 * Fetch the segment from the profile containing at the given tag;
-	 * @param tag the border tag
-	 * @return a copy of the segment with the tag index inside, or null
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#getSegmentContaining(components.generic.BorderTagObject)
 	 */
-	public NucleusBorderSegment getSegmentContaining(BorderTagObject tag) throws ProfileException {
+	@Override
+	public NucleusBorderSegment getSegmentContaining(Tag tag) throws ProfileException {
 		List<NucleusBorderSegment> segments = this.getSegments(tag);
 
 		NucleusBorderSegment result = null;
@@ -330,30 +305,31 @@ public class ProfileCollection implements Serializable, Loggable {
 		return result;
 	}
 			
-	/**
-	 * Add an offset for the given point type. The offset is used
-	 * to fetch profiles the begin at the point of interest.
-	 * @param pointType the point
-	 * @param offset the position of the point in the profile
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#addIndex(components.generic.BorderTagObject, int)
 	 */
-	public void addIndex(BorderTagObject tag, int offset){
+	@Override
+	public void addIndex(Tag tag, int offset){
 		if(tag==null){
 			throw new IllegalArgumentException("BorderTagObject is null");
 		}
 		
 		// Cannot move the RP from zero
-		if(tag.equals(BorderTagObject.REFERENCE_POINT)){
+		if(tag.equals(Tag.REFERENCE_POINT)){
 			return;
 		}
-		indexes.put(tag, offset);
+		
+		if(tag instanceof BorderTagObject){
+			indexes.put((BorderTagObject) tag, offset);
+		}
+				
 		profileCache.clear();
 	}
 	
-	/**
-	 * Add a list of segments for the profile. The segments must
-	 * have the correct offset to be added directly
-	 * @param n the segment list
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#addSegments(java.util.List)
 	 */
+	@Override
 	public void addSegments(List<NucleusBorderSegment> n){
 		if(n==null || n.isEmpty()){
 			throw new NullPointerException("String or segment list is null or empty");
@@ -370,14 +346,11 @@ public class ProfileCollection implements Serializable, Loggable {
 		this.segments = n;
 	}
 	
-	/**
-	 * Add a list of segments for the profile, where the segments are
-	 * zeroed to the given point type. The indexes will be corrected for
-	 * storage. I previously disabled this - unknown why.
-	 * @param pointType the point with the zero index in the segments
-	 * @param n the segment list
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#addSegments(components.generic.BorderTagObject, java.util.List)
 	 */
-	public void addSegments(BorderTagObject tag, List<NucleusBorderSegment> n) {
+	@Override
+	public void addSegments(Tag tag, List<NucleusBorderSegment> n) {
 		if(n==null || n.isEmpty()){
 			throw new NullPointerException("String or segment list is null or empty");
 		}
@@ -402,16 +375,11 @@ public class ProfileCollection implements Serializable, Loggable {
 		this.segments = result;
 	}
 			
-	/**
-	 * Create the profile aggregate from the given collection, with a set length, and
-	 * containing the given type of nucleus profile
-	 * By default, the profiles are zeroed on the reference point
-	 * @param collection the CellCollection
-	 * @param type the profile type to fetch from the nuclei
-	 * @param length the length of the aggregate
-	 * @throws Exception 
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#createProfileAggregate(components.CellCollection, components.generic.ProfileType, int)
 	 */
-	public void createProfileAggregate(CellCollection collection, ProfileType type, int length) {
+	@Override
+	public void createProfileAggregate(ICellCollection collection, ProfileType type, int length) {
 		if(length<=0){
 			throw new IllegalArgumentException("Requested profile aggregate length is zero or negative");
 		}
@@ -421,52 +389,62 @@ public class ProfileCollection implements Serializable, Loggable {
 		profileCache.clear();
 		aggregate = new ProfileAggregate(length);
 
-		for(Nucleus n : collection.getNuclei()){
-			
-			switch(type){
+		
+		try {
+			for(Nucleus n : collection.getNuclei()){
+
+				switch(type){
 				case FRANKEN:
-				
+
 					aggregate.addValues(n.getProfile(type));
-				
+
 					break;
 				default:
-					aggregate.addValues(n.getProfile(type, BorderTagObject.REFERENCE_POINT)); 
+					aggregate.addValues(n.getProfile(type, Tag.REFERENCE_POINT)); 
 					break;
-			
+
+				}
 			}
+		} catch (ProfileException e){
+			error("Error making profile aggregates", e);
 		}
 		
 	}
 	
 	
-	/**
-	 * Create the profile aggregate from the given collection, with using the 
-	 * collection median length to determine bin sizes
-	 * @param collection the Cellcollection
-	 * @throws Exception 
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#createProfileAggregate(components.CellCollection, components.generic.ProfileType)
 	 */
-	public void createProfileAggregate(CellCollection collection, ProfileType type) {
+	@Override
+	public void createProfileAggregate(ICellCollection collection, ProfileType type) {
 		
 		createProfileAggregate(collection, type, (int)collection.getMedianArrayLength());
 
 	}
 		
 	
-	/**
-	 * Get the points associated with offsets currently present
-	 * @return a string with the points
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#tagString()
 	 */
+	@Override
 	public String tagString(){
 		
 		StringBuilder builder = new StringBuilder();
 
 		builder.append("\tPoint types:");
-		for(BorderTagObject tag : this.indexes.keySet()){
-			builder.append("\t"+tag+": "+this.indexes.get(tag));
+		for(Tag tag : this.indexes.keySet()){
+			builder.append("\t");
+			builder.append(tag);
+			builder.append(": ");
+			builder.append(this.indexes.get(tag));
 		}
 		return builder.toString();
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#toString()
+	 */
+	@Override
 	public String toString(){
 		StringBuilder builder = new StringBuilder();
 		builder.append(this.tagString());
@@ -475,7 +453,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		} else {
 			try {
 
-				for(BorderTagObject tag : this.indexes.keySet()){
+				for(Tag tag : this.indexes.keySet()){
 					if(tag.type().equals(components.generic.BorderTag.BorderTagType.CORE)){
 						builder.append("\r\nSegments from "+tag+":\r\n");
 						for(NucleusBorderSegment s : this.getSegments(tag)){
@@ -492,15 +470,14 @@ public class ProfileCollection implements Serializable, Loggable {
 		
 	}
 	
-	/**
-	 * Turn the IQR (difference between Q25, Q75) of the median into a profile.
-	 * @param pointType the profile type to use
-	 * @return the profile
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#getIQRProfile(components.generic.BorderTagObject)
 	 */
-	public Profile getIQRProfile(BorderTagObject tag) {
+	@Override
+	public IProfile getIQRProfile(Tag tag) {
 				
-		Profile q25 = getProfile(tag, Constants.LOWER_QUARTILE);
-		Profile q75 = getProfile(tag, Constants.UPPER_QUARTILE);
+		IProfile q25 = getProfile(tag, Constants.LOWER_QUARTILE);
+		IProfile q75 = getProfile(tag, Constants.UPPER_QUARTILE);
 		
 		if(q25==null || q75==null){ // if something goes wrong, return a zero profile
 			
@@ -512,13 +489,14 @@ public class ProfileCollection implements Serializable, Loggable {
 		return q75.subtract(q25);
 	}
 	
-	/**
-	 * Find the points in the profile that are most variable
+	/* (non-Javadoc)
+	 * @see components.generic.IProfileCollection#findMostVariableRegions(components.generic.BorderTagObject)
 	 */
-	public List<Integer> findMostVariableRegions(BorderTagObject tag) throws Exception {
+	@Override
+	public List<Integer> findMostVariableRegions(Tag tag) throws Exception {
 		
 		// get the IQR and maxima
-		Profile iqrProfile = getIQRProfile(tag);
+		IProfile iqrProfile = getIQRProfile(tag);
 //		iqrProfile.print();
 //		iqrProfile.smooth(3).print();
 		BooleanProfile maxima = iqrProfile.smooth(3).getLocalMaxima(3);
@@ -632,7 +610,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		   * @param scale
 		   * @param d
 		   */
-		  public void setProfile(BorderTagObject tag, Double quartile, Profile profile){
+		  public void setProfile(Tag tag, Double quartile, IProfile profile){
 
 			  Map<Double, Profile> map;
 
@@ -643,12 +621,19 @@ public class ProfileCollection implements Serializable, Loggable {
 			  } else {
 
 				  map = new HashMap<Double, Profile>();
-				  cache.put(tag, map);
+				  
+				  if(tag instanceof BorderTagObject){
+					  cache.put((BorderTagObject) tag, map);
+				  }
 
 			  }
+			  
+			  if(profile instanceof Profile){
 
-			  map.put(quartile, profile);
-//			  IJ.log("Added "+tag+" - "+quartile+" to profile cache");
+				  map.put(quartile, (Profile) profile);
+			  } else {
+				  warn("Cannot cast IProfile to Profile in profile cache");
+			  }
 
 		  }
 
@@ -658,7 +643,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		 * @param quartile
 		 * @return
 		 */
-		  public Profile getProfile(BorderTagObject tag, Double quartile){
+		  public Profile getProfile(Tag tag, Double quartile){
 
 			  if(this.hasProfile(tag, quartile)){
 //				  IJ.log("Found "+tag+" - "+quartile+" in profile cache");
@@ -677,7 +662,7 @@ public class ProfileCollection implements Serializable, Loggable {
 		 * @param quartile
 		 * @return
 		 */
-		public boolean hasProfile(BorderTagObject tag, Double quartile){
+		public boolean hasProfile(Tag tag, Double quartile){
 			  Map<Double, Profile> map;
 
 			  if(cache.containsKey(tag)){

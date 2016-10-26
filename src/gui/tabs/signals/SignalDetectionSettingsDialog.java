@@ -53,8 +53,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import utility.Constants;
-import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
+import analysis.IAnalysisDataset;
 import analysis.signals.NuclearSignalOptions;
 import components.nuclear.SignalGroup;
 
@@ -69,7 +69,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 	private static final double DEFAULT_MAX_CIRC = 1.0;
 			
 	private AnalysisOptions options;
-	private AnalysisDataset dataset;
+	private IAnalysisDataset dataset;
 	
 	private JComboBox<String> channelSelection = new JComboBox<String>(channelOptionStrings);
 	private JTextField groupName;
@@ -95,7 +95,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 	/**
 	 * Create the dialog.
 	 */
-	public SignalDetectionSettingsDialog(AnalysisDataset d) {
+	public SignalDetectionSettingsDialog(IAnalysisDataset d) {
 		super();
 		this.dataset = d;
 		this.options = d.getAnalysisOptions();

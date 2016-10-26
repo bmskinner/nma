@@ -26,10 +26,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import gui.MainWindow;
 import gui.components.panels.DatasetSelectionPanel;
 
@@ -59,7 +62,7 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		}
 	}
 
-	public DatasetArithmeticSetupDialog(List<AnalysisDataset> list, MainWindow mw) {
+	public DatasetArithmeticSetupDialog(List<IAnalysisDataset> list, MainWindow mw) {
 		super( mw, true);
 
 		this.setTitle("Dataset arithmetic options");
@@ -70,11 +73,11 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		this.setVisible(true);
 	}
 	
-	public AnalysisDataset getDatasetOne(){
+	public IAnalysisDataset getDatasetOne(){
 		return boxOne.getSelectedDataset();
 	}
 	
-	public AnalysisDataset getDatasetTwo(){
+	public IAnalysisDataset getDatasetTwo(){
 		return boxTwo.getSelectedDataset();
 	}
 	
@@ -82,7 +85,7 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
 		return (DatasetArithmeticOperation) operatorBox.getSelectedItem();
 	}
 
-	private void createGUI(List<AnalysisDataset> list) {
+	private void createGUI(List<IAnalysisDataset> list) {
 		
 		setLayout(new BorderLayout());
 

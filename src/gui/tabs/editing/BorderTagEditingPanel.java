@@ -36,8 +36,8 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -139,7 +139,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 			.setDatasets(getDatasets())
 			.setNormalised(false)
 			.setAlignment(ProfileAlignment.LEFT)
-			.setTag(BorderTagObject.REFERENCE_POINT)
+			.setTag(Tag.REFERENCE_POINT)
 			.setShowMarkers(true)
 			.setProfileType( ProfileType.ANGLE)
 			.setShowPoints(true)
@@ -162,7 +162,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 			.setDatasets(getDatasets())
 			.setNormalised(false)
 			.setAlignment(ProfileAlignment.LEFT)
-			.setTag(BorderTagObject.REFERENCE_POINT)
+			.setTag(Tag.REFERENCE_POINT)
 			.setShowMarkers(true)
 			.setProfileType( ProfileType.ANGLE)
 			.setSwatch(GlobalOptions.getInstance().getSwatch())

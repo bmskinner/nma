@@ -20,7 +20,8 @@ package gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.util.logging.Level;
-import components.Cell;
+
+import components.ICell;
 import gui.LoadingIconDialog;
 import gui.components.AnnotatedNucleusPanel;
 
@@ -34,7 +35,7 @@ public class CellImageDialog extends LoadingIconDialog {
 	
 	private AnnotatedNucleusPanel panel;
 
-	public CellImageDialog(Cell cell) {
+	public CellImageDialog(ICell cell) {
 		super();
 		
 		if(!cell.getNucleus().getSourceFile().exists()){

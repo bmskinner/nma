@@ -57,9 +57,12 @@ import utility.Constants;
 import components.Cell;
 import components.CellCollection;
 import components.ClusterGroup;
+import components.ICell;
+import components.ICellCollection;
 import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
+import analysis.IAnalysisDataset;
 import jebl.evolution.graphs.Node;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.io.ImportException.DuplicateTaxaException;
@@ -77,17 +80,17 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 	private JPanel buttonPanel;
 	private DraggableTreeViewer viewer;
-	private AnalysisDataset dataset;
+	private IAnalysisDataset dataset;
 	private ClusterGroup group;
 		
-	private JComboBox<AnalysisDataset> selectedClusterBox;
+	private JComboBox<IAnalysisDataset> selectedClusterBox;
 	private JComboBox<ClusterGroup> selectedClusterGroupBox;
 		
-	private List<CellCollection> clusterList = new ArrayList<CellCollection>(0);
+	private List<ICellCollection> clusterList = new ArrayList<ICellCollection>(0);
 	
 	private boolean hasMergeSources; // cache this to speed comparisons
 	
-	public ClusterTreeDialog(final AnalysisDataset dataset, final ClusterGroup group) {
+	public ClusterTreeDialog(final IAnalysisDataset dataset, final ClusterGroup group) {
 		super();
 		this.dataset = dataset;
 		this.group = group;
@@ -158,7 +161,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 				if(topTree.isExternal(n)){ // choose the taxon nodes
 
 					Taxon t = topTree.getTaxon(n);					
-					Cell c  = getCell(t);
+					ICell c  = getCell(t);
 					t.setAttribute("Cell", c);
 					n.setAttribute("ShortName", c.getNucleus().getSourceFolder().getName()+"/"+c.getNucleus().getNameAndNumber());
 				}
@@ -204,7 +207,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	 * @param t
 	 * @return
 	 */
-	private Cell getCell(Taxon t){
+	private ICell getCell(Taxon t){
 		
 		// Check if the taxon name is a UUID, as the tree format is changing for 1.13.2
 		// 4ca18dcd-7f5c-4443-89bc-c705435c30f7
@@ -227,7 +230,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 			
 		} else {
 //			log("Found regular taxon name");
-			for(Cell c :dataset.getCollection().getCells()){
+			for(ICell c :dataset.getCollection().getCells()){
 
 				if(taxonNamesMatch(t.getName(), c.getNucleus())){
 					return c;
@@ -263,9 +266,9 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 			panel.add(mergeSourceButton);
 		}
 		
-		selectedClusterBox = new JComboBox<AnalysisDataset>();
+		selectedClusterBox = new JComboBox<IAnalysisDataset>();
 		selectedClusterBox.addItem(dataset);
-		for(AnalysisDataset d: dataset.getAllChildDatasets()){
+		for(IAnalysisDataset d: dataset.getAllChildDatasets()){
 			selectedClusterBox.addItem(d);
 		}
 		selectedClusterBox.setSelectedIndex(-1);
@@ -296,7 +299,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	 * Update the taxon colours to match their cluster
 	 * @param cluster the dataset of nuclei in the cluster
 	 */
-	private void colourTreeNodesByCluster(final CellCollection cluster){
+	private void colourTreeNodesByCluster(final ICellCollection cluster){
 		
 		setStatusLoading();
 		// Set everything  to grey
@@ -326,7 +329,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 			for(UUID id : group.getUUIDs()){
 
 				// Find the appropriate dataset
-				AnalysisDataset cluster = null;
+				IAnalysisDataset cluster = null;
 
 				if(dataset.hasChild(id)){
 
@@ -361,7 +364,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	 * @param cells
 	 * @param colour
 	 */
-	private void setNodeColour(final Set<Cell> cells, final Color colour){
+	private void setNodeColour(final Set<ICell> cells, final Color colour){
 		
 		RootedTree tree = viewer.getTreePane().getTree();
 		
@@ -371,9 +374,9 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 				Taxon t = tree.getTaxon(n);
 				
-				Cell c = (Cell) t.getAttribute("Cell");
+				ICell c = (ICell) t.getAttribute("Cell");
 				
-				for(Cell cell : cells){
+				for(ICell cell : cells){
 					if(cell.equals(c)){
 						n.setAttribute("Color", colour);
 					}
@@ -389,7 +392,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	 * @param clusterNumber
 	 * @return
 	 */
-	private void setNodeColour(CellCollection cluster, Color colour){
+	private void setNodeColour(ICellCollection cluster, Color colour){
 		
 		setNodeColour(cluster.getCells(), colour);
 	}
@@ -451,7 +454,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		int maxExisting = 0;
 		Pattern pattern = Pattern.compile(dataset.getName()+"_ManualCluster_(\\d+)$");
 		
-		for(AnalysisDataset d : dataset.getChildDatasets()){
+		for(IAnalysisDataset d : dataset.getChildDatasets()){
 
 			Matcher matcher = pattern.matcher(d.getName());
 
@@ -477,9 +480,9 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	}
 	
 	private void extractSelectedNodesToCluster() throws Exception{
-		CellCollection template = dataset.getCollection();
+		ICellCollection template = dataset.getCollection();
 		
-		CellCollection clusterCollection = new CellCollection(template.getFolder(), 
+		ICellCollection clusterCollection = new CellCollection(template.getFolder(), 
 				template.getOutputFolderName(), 
 				template.getName()+"_ManualCluster_"+clusterList.size(), 
 				template.getNucleusType());
@@ -498,7 +501,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 				Taxon t = tree.getTaxon(n);
 								
-				Cell c = (Cell) t.getAttribute("Cell");
+				ICell c = (ICell) t.getAttribute("Cell");
 				clusterCollection.addCell(new Cell (c));
 
 			}
@@ -515,9 +518,9 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	}
 	
 	private void analyseClusters(){
-		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 		
-		for(CellCollection c : clusterList){
+		for(ICellCollection c : clusterList){
 			if(c.hasCells()){
 
 				dataset.addChildCollection(c);
@@ -527,7 +530,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 					error("Error applying segments", e1);
 				}
 
-				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
+				IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
 				clusterDataset.setRoot(false);
 				list.add(clusterDataset);
 			}
@@ -552,14 +555,14 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		setClusterBoxNull();
 
 
-		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 		for(UUID id : dataset.getMergeSourceIDs()){
 			list.add(dataset.getMergeSource(id));
 		}
 
 		ClusterGroup mergeGroup = makeNewClusterGroup(list);
 
-		for(AnalysisDataset d : list){
+		for(IAnalysisDataset d : list){
 			mergeGroup.addDataset(d);
 		}
 
@@ -572,7 +575,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	 * @param list the datasets to include in the cluster group
 	 * @return
 	 */
-	private ClusterGroup makeNewClusterGroup(List<AnalysisDataset> list){
+	private ClusterGroup makeNewClusterGroup(List<IAnalysisDataset> list){
 		ClusteringOptions newOptions = new ClusteringOptions(group.getOptions());
 		newOptions.setClusterNumber(list.size());		
 		
@@ -609,12 +612,12 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	 * @param list
 	 * @return
 	 */
-	private boolean checkCellPresentOnlyOnce(List<AnalysisDataset> list){
+	private boolean checkCellPresentOnlyOnce(List<IAnalysisDataset> list){
 		boolean ok = true;
 		// Check that a cell is not present in more than one cluster
 		List<UUID> cellIDsFound = new ArrayList<UUID>();
-		for(AnalysisDataset d : list){
-			for(Cell c : d.getCollection().getCells()){
+		for(IAnalysisDataset d : list){
+			for(ICell c : d.getCollection().getCells()){
 				if(cellIDsFound.contains(c.getId())){
 					ok=false;
 				}
@@ -629,17 +632,17 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	 * @param list
 	 * @return
 	 */
-	private boolean checkAllCellsPresent(List<AnalysisDataset> list){
+	private boolean checkAllCellsPresent(List<IAnalysisDataset> list){
 		boolean ok = true;
 		
 		List<UUID> cellIDsFound = new ArrayList<UUID>();
-		for(AnalysisDataset d : list){
-			for(Cell c : d.getCollection().getCells()){
+		for(IAnalysisDataset d : list){
+			for(ICell c : d.getCollection().getCells()){
 				cellIDsFound.add(c.getId());
 			}
 		}
 		
-		for(Cell c : dataset.getCollection().getCells()){
+		for(ICell c : dataset.getCollection().getCells()){
 			if(!cellIDsFound.contains(c.getId())){
 				ok=false;
 			}
@@ -651,7 +654,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	/*
 	 * Offer to put the datasets into a cluster group if conditions are met
 	 */
-	private void testClusterGroupable(List<AnalysisDataset> list){
+	private void testClusterGroupable(List<IAnalysisDataset> list){
 		
 		if(!list.isEmpty()){
 			
@@ -674,7 +677,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 						ClusterGroup newGroup = makeNewClusterGroup(list);
 
 						int i=0;
-						for(AnalysisDataset d : list){
+						for(IAnalysisDataset d : list){
 							d.setName(newGroup.getName()+"_Cluster_"+i);
 							newGroup.addDataset(d);
 							i++;
@@ -703,7 +706,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		if(e.getSource().equals(selectedClusterBox)){
 			
 			setClusterGroupBoxNull();
-			AnalysisDataset selected = (AnalysisDataset) selectedClusterBox.getSelectedItem();
+			IAnalysisDataset selected = (IAnalysisDataset) selectedClusterBox.getSelectedItem();
 			colourTreeNodesByCluster(selected.getCollection());
 			
 		}

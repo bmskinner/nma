@@ -27,6 +27,7 @@ import components.CellCollection;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
@@ -78,7 +79,7 @@ public class ProfileOffsetter implements Loggable {
 
 
 		SegmentedProfile profile = collection.getProfileCollection(ProfileType.ANGLE)
-				.getSegmentedProfile(BorderTagObject.REFERENCE_POINT);
+				.getSegmentedProfile(Tag.REFERENCE_POINT);
 
 		
 		NucleusBorderSegment segFromRef    = profile.getSegment(segID);
@@ -156,8 +157,8 @@ public class ProfileOffsetter implements Loggable {
 		 * Franken profile method: segment proportionality
 		 */
 		
-		assignBorderTagToNucleiViaFrankenProfile(BorderTagObject.TOP_VERTICAL);
-		assignBorderTagToNucleiViaFrankenProfile(BorderTagObject.BOTTOM_VERTICAL);
+		assignBorderTagToNucleiViaFrankenProfile(Tag.TOP_VERTICAL);
+		assignBorderTagToNucleiViaFrankenProfile(Tag.BOTTOM_VERTICAL);
 		
 		
 		for(Nucleus nucleus : collection.getNuclei()){			

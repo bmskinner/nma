@@ -31,8 +31,8 @@ import java.util.logging.Level;
 
 import logging.Loggable;
 import components.AbstractCellularComponent;
-import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
@@ -529,7 +529,7 @@ public class NucleusMesh implements Loggable {
 		finer("Determining vertex proportions");
 		List<NucleusBorderSegment> list;
 		try {
-			list = nucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getOrderedSegments();
+			list = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 		} catch (Exception e) {
 			error("Error getting segments from nucleus", e);
 			return;
@@ -578,7 +578,7 @@ public class NucleusMesh implements Loggable {
 		finer("Creating peripheral vertices");
 		List<NucleusBorderSegment> list;
 		try {
-			list = nucleus.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getOrderedSegments();
+			list = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 		} catch (Exception e) {
 			error("Error getting segments from nucleus", e);
 			return;
@@ -607,7 +607,7 @@ public class NucleusMesh implements Loggable {
 				// Since the segments have been offset to the RP, correct back
 				// to the actual nucleus index
 				int correctedIndex = AbstractCellularComponent
-						.wrapIndex(index+nucleus.getBorderIndex(BorderTagObject.REFERENCE_POINT), segment.getTotalLength());
+						.wrapIndex(index+nucleus.getBorderIndex(Tag.REFERENCE_POINT), segment.getTotalLength());
 				
 				finest("Fetching point at index "+correctedIndex);
 				addVertex(nucleus.getOriginalBorderPoint(correctedIndex), true);

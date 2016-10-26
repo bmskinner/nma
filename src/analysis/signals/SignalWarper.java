@@ -5,16 +5,17 @@ import java.util.Set;
 import java.util.UUID;
 
 import components.Cell;
+import components.ICell;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshImage;
 
 public class SignalWarper extends AnalysisWorker {
 	
-	private AnalysisDataset targetDataset;
+	private IAnalysisDataset targetDataset;
 	private UUID signalGroup;
 	private boolean cellsWithSignals; // Only warp the cell images with detected signals
 	private boolean straighten; // Straighten the meshes
@@ -22,7 +23,7 @@ public class SignalWarper extends AnalysisWorker {
 	
 	ImageProcessor mergedImage = null;
 		
-	public SignalWarper(AnalysisDataset dataset, AnalysisDataset target, UUID signalGroup, boolean cellsWithSignals, boolean straighten){
+	public SignalWarper(IAnalysisDataset dataset, IAnalysisDataset target, UUID signalGroup, boolean cellsWithSignals, boolean straighten){
 		super(dataset);
 		this.targetDataset    = target;
 		this.signalGroup      = signalGroup;
@@ -31,7 +32,7 @@ public class SignalWarper extends AnalysisWorker {
 		
 		// Count the number of cells to include
 
-		Set<Cell> cells;
+		Set<ICell> cells;
 		if(cellsWithSignals){
 			SignalManager m =  getDataset().getCollection().getSignalManager();
 			cells = m.getCellsWithNuclearSignals(signalGroup, true);
@@ -95,7 +96,7 @@ public class SignalWarper extends AnalysisWorker {
 		
 		
 		
-		Set<Cell> cells;
+		Set<ICell> cells;
 		if(cellsWithSignals){
 			finer("Only fetching cells with signals");
 			cells = m.getCellsWithNuclearSignals(signalGroup, true);
@@ -108,7 +109,7 @@ public class SignalWarper extends AnalysisWorker {
 		int cellNumber = 0;
 		
 		
-		for(Cell cell : cells){
+		for(ICell cell : cells){
 			fine("Drawing signals for cell "+cell.getNucleus().getNameAndNumber());
 			// Get each nucleus. Make a mesh.
 			NucleusMesh cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);

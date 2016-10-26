@@ -44,10 +44,12 @@ import charting.charts.panels.ConsensusNucleusChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
-import components.generic.BorderTagObject;
+import components.ICellCollection;
+import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclei.ConsensusNucleus;
+import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
 public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener {
@@ -317,7 +319,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				if(activeDataset().getCollection().hasConsensusNucleus()){
-					BorderPoint orientationPoint = activeDataset().getCollection().getConsensusNucleus().getBorderTag(BorderTagObject.ORIENTATION_POINT);
+					BorderPoint orientationPoint = activeDataset().getCollection().getConsensusNucleus().getBorderTag(Tag.ORIENTATION_POINT);
 					activeDataset().getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
 					refreshChartCache(getDatasets());
 //					update(activeDatasetToList());
@@ -396,7 +398,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		
 
 
-		CellCollection collection = activeDataset().getCollection();
+		ICellCollection collection = activeDataset().getCollection();
 		if(collection.hasConsensusNucleus()){
 
 			// hide the refold button
@@ -478,7 +480,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 				BorderPoint orientationPoint = activeDataset()
 						.getCollection()
 						.getConsensusNucleus()
-						.getBorderTag(BorderTagObject.ORIENTATION_POINT);
+						.getBorderTag(Tag.ORIENTATION_POINT);
 				
 				activeDataset().getCollection()
 				.getConsensusNucleus()
@@ -497,11 +499,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
 			if(activeDataset().getCollection().hasConsensusNucleus()){
 				
-				ConsensusNucleus nucleus = activeDataset().getCollection().getConsensusNucleus();
+				Nucleus nucleus = activeDataset().getCollection().getConsensusNucleus();
 				
-				if(nucleus.hasBorderTag(BorderTagObject.TOP_VERTICAL) && nucleus.hasBorderTag(BorderTagObject.BOTTOM_VERTICAL)){
+				if(nucleus.hasBorderTag(Tag.TOP_VERTICAL) && nucleus.hasBorderTag(Tag.BOTTOM_VERTICAL)){
 					
-					nucleus.alignPointsOnVertical(nucleus.getBorderTag(BorderTagObject.TOP_VERTICAL), nucleus.getBorderTag(BorderTagObject.BOTTOM_VERTICAL));
+					nucleus.alignPointsOnVertical(nucleus.getBorderTag(Tag.TOP_VERTICAL), nucleus.getBorderTag(Tag.BOTTOM_VERTICAL));
 					
 					this.update(activeDatasetToList());
 					

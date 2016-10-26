@@ -26,8 +26,8 @@ import org.jfree.data.xy.XYDataset;
 
 import analysis.profiles.Taggable;
 import components.CellularComponent;
-import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
@@ -142,7 +142,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 		
 		Taggable t = (Taggable) component;
 
-		List<NucleusBorderSegment> segmentList = t.getProfile(ProfileType.ANGLE, BorderTagObject.REFERENCE_POINT).getSegments();
+		List<NucleusBorderSegment> segmentList = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
 
 
 		if(!segmentList.isEmpty()){ // only draw if there are segments
@@ -166,7 +166,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 				for(int j=0; j<=seg.length();j++){
 
 					int index = seg.getStartIndex()+j;
-					int offsetIndex = t.getOffsetBorderIndex(BorderTagObject.REFERENCE_POINT, index);
+					int offsetIndex = t.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
 
 					BorderPoint p = t.getBorderPoint(offsetIndex); // get the border points in the segment
 

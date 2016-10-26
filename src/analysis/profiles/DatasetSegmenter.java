@@ -25,16 +25,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import analysis.IAnalysisDataset;
 import analysis.ProgressEvent;
 import analysis.ProgressListener;
 import components.CellCollection;
+import components.ICellCollection;
 import components.generic.BorderTagObject;
+import components.generic.IProfile;
+import components.generic.IProfileCollection;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import utility.Constants;
@@ -47,7 +51,7 @@ import utility.Constants;
  */
 public class DatasetSegmenter extends AnalysisWorker implements ProgressListener {
 
-    private CellCollection sourceCollection = null; // a collection to take segments from
+    private ICellCollection sourceCollection = null; // a collection to take segments from
 
     private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
 
@@ -68,7 +72,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
      * @param mode
      * @param programLogger
      */
-    public DatasetSegmenter(AnalysisDataset dataset, MorphologyAnalysisMode mode){
+    public DatasetSegmenter(IAnalysisDataset dataset, MorphologyAnalysisMode mode){
     	super(dataset);
     	this.mode = mode;
     }
@@ -79,7 +83,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
      * @param source
      * @param programLogger
      */
-    public DatasetSegmenter(AnalysisDataset dataset, CellCollection source){
+    public DatasetSegmenter(IAnalysisDataset dataset, ICellCollection source){
     	this(dataset, MorphologyAnalysisMode.COPY);
     	this.sourceCollection = source;
     }
@@ -135,10 +139,10 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
     private boolean runNewAnalysis() throws Exception {
     	fine("Beginning core morphology analysis");
 
-		this.setProgressTotal(getDataset().getCollection().getNucleusCount()*2);
+		this.setProgressTotal(getDataset().getCollection().size()*2);
 
 
-		BorderTagObject pointType = BorderTagObject.REFERENCE_POINT;
+		BorderTagObject pointType = Tag.REFERENCE_POINT;
 
 		// segment the profiles from head
 		runSegmentation(getDataset().getCollection(), pointType);
@@ -152,7 +156,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			warn("Cannot copy: source collection is null");
 			return false;
 		} else {
-			this.setProgressTotal(getDataset().getCollection().getNucleusCount());
+			this.setProgressTotal(getDataset().getCollection().size());
 			fine( "Copying segmentation pattern");
 			reapplyProfiles(getDataset().getCollection(), sourceCollection);
 			fine("Copying complete");
@@ -162,7 +166,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
     
     private boolean runRefreshAnalysis() throws Exception{
     	fine("Refreshing segmentation");
-    	this.setProgressTotal(getDataset().getCollection().getNucleusCount()*3);
+    	this.setProgressTotal(getDataset().getCollection().size()*3);
 		refresh(getDataset().getCollection());
 		fine("Refresh complete");
 		return true;
@@ -181,7 +185,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	 * @param collection the collection of nuclei
 	 * @param sourceCollection the collection with segments to copy
 	 */
-	public boolean reapplyProfiles(CellCollection collection, CellCollection sourceCollection) throws Exception {
+	public boolean reapplyProfiles(ICellCollection collection, ICellCollection sourceCollection) throws Exception {
 		
 		fine("Applying existing segmentation profile to population");
 		
@@ -191,7 +195,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		// At this point the collection has only a regular profile collections.
 		// No Frankenprofile has been copied.
 
-		reviseSegments(collection, BorderTagObject.REFERENCE_POINT);	
+		reviseSegments(collection, Tag.REFERENCE_POINT);	
 
 
 		fine("Re-profiling complete");
@@ -205,9 +209,9 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	 * @param collection
 	 * @throws Exception 
 	 */
-	private ProfileCollection createFrankenMedian(CellCollection collection) throws Exception{
+	private ProfileCollection createFrankenMedian(ICellCollection collection) throws Exception{
 		
-		ProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
+		IProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
 		
 		// make a new profile collection to hold the frankendata
 		ProfileCollection frankenCollection = new ProfileCollection();
@@ -216,7 +220,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		// These are the same as the profile collection keys, and have
 		// the same positions (since a franken profile is based on the median)
 		// The reference point is at index 0
-		for(BorderTagObject key : pc.getBorderTags()){
+		for(Tag key : pc.getBorderTags()){
 			frankenCollection.addIndex(key, pc.getIndex(key));
 		}
 		finest("Added frankenCollection index offsets for border tags");
@@ -230,8 +234,8 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		// copy the segments from the profile collection
 		finer("Copying profile collection segments to frankenCollection");
 		
-		List<NucleusBorderSegment> segments = pc.getSegments(BorderTagObject.REFERENCE_POINT);
-		frankenCollection.addSegments( BorderTagObject.REFERENCE_POINT, segments);
+		List<NucleusBorderSegment> segments = pc.getSegments(Tag.REFERENCE_POINT);
+		frankenCollection.addSegments( Tag.REFERENCE_POINT, segments);
 		finer("Added segments to frankenmedian");
 		return frankenCollection;
 	}
@@ -243,14 +247,14 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	 * @param collection
 	 * @return
 	 */
-	public boolean refresh(CellCollection collection) throws Exception {
+	public boolean refresh(ICellCollection collection) throws Exception {
 
 		fine("Refreshing mophology");
 
-		BorderTagObject pointType = BorderTagObject.REFERENCE_POINT;
+		BorderTagObject pointType = Tag.REFERENCE_POINT;
 
 		// get the empty profile collection from the new CellCollection
-		ProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
+		IProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
 		int previousLength = pc.length();
 
 		// make an aggregate from the nuclei. A new median profile must necessarily result.
@@ -259,7 +263,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		// segments will not fit
 		pc.createProfileAggregate(collection, ProfileType.ANGLE,  previousLength);
 
-		List<NucleusBorderSegment> segments = pc.getSegments(BorderTagObject.REFERENCE_POINT);
+		List<NucleusBorderSegment> segments = pc.getSegments(Tag.REFERENCE_POINT);
 
 //		// make a new profile collection to hold the frankendata
 		ProfileCollection frankenCollection = createFrankenMedian(collection);
@@ -277,7 +281,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 
 		for(Nucleus n : collection.getNuclei()){ 
 			// recombine the segments at the lengths of the median profile segments
-			Profile recombinedProfile = fitter.recombine(n, BorderTagObject.REFERENCE_POINT);
+			Profile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
 			n.setProfile(ProfileType.FRANKEN, new SegmentedProfile(recombinedProfile));
 
 			publish(progressCount++);
@@ -303,7 +307,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 //		assignMedianSegmentsToNuclei(collection);
 
 		// find the corresponding point in each Nucleus
-		SegmentedProfile median = pc.getSegmentedProfile(BorderTagObject.REFERENCE_POINT);
+		SegmentedProfile median = pc.getSegmentedProfile(Tag.REFERENCE_POINT);
 		
 		finer("Creating segmnent assignment task");
 		SegmentAssignmentTask task = new SegmentAssignmentTask(median, collection.getNuclei().toArray(new Nucleus[0]));
@@ -325,7 +329,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	 * @param collection
 	 * @param pointType
 	 */
-	private void runSegmentation(CellCollection collection, BorderTagObject pointType) throws Exception {
+	private void runSegmentation(ICellCollection collection, Tag pointType) throws Exception {
 
 		fine("Beginning segmentation...");
 	
@@ -359,12 +363,12 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	 * @param collection
 	 * @throws Exception
 	 */
-	private void assignMedianSegmentsToNuclei(CellCollection collection) throws Exception{
+	private void assignMedianSegmentsToNuclei(ICellCollection collection) throws Exception{
 		fine("Assigning segments to nuclei");
-		ProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
+		IProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
 
 		// find the corresponding point in each Nucleus
-		SegmentedProfile median = pc.getSegmentedProfile(BorderTagObject.REFERENCE_POINT);
+		SegmentedProfile median = pc.getSegmentedProfile(Tag.REFERENCE_POINT);
 		//			assignSegments(collection);
 		SegmentAssignmentTask task = new SegmentAssignmentTask(median, collection.getNuclei().toArray(new Nucleus[0]));
 		task.addProgressListener(this);
@@ -378,18 +382,18 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	 * from the reference point 
 	 * @param collection
 	 */
-	private void createSegmentsInMedian(CellCollection collection) throws Exception {
+	private void createSegmentsInMedian(ICellCollection collection) throws Exception {
 
-		ProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
+		IProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
 	
 
 		// the reference point is always index 0, so the segments will match
 		// the profile
-		Profile median = pc.getProfile(BorderTagObject.REFERENCE_POINT, Constants.MEDIAN);
+		IProfile median = pc.getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
 		
-		Map<BorderTagObject, Integer> map = new HashMap<BorderTagObject, Integer>();
-		int opIndex = pc.getIndex(BorderTagObject.ORIENTATION_POINT);
-		map.put(BorderTagObject.ORIENTATION_POINT, opIndex);
+		Map<Tag, Integer> map = new HashMap<Tag, Integer>();
+		int opIndex = pc.getIndex(Tag.ORIENTATION_POINT);
+		map.put(Tag.ORIENTATION_POINT, opIndex);
 		
 
 		ProfileSegmenter segmenter = new ProfileSegmenter(median, map);		
@@ -398,7 +402,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 
 		finer("Found "+segments.size()+" segments in regular profile");
 		
-		pc.addSegments(BorderTagObject.REFERENCE_POINT, segments);
+		pc.addSegments(Tag.REFERENCE_POINT, segments);
 				
 	}
 
@@ -408,10 +412,10 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	 * @param collection
 	 * @param pointType
 	 */
-	private void reviseSegments(CellCollection collection, BorderTagObject pointType) throws Exception {
+	private void reviseSegments(ICellCollection collection, Tag pointType) throws Exception {
 		finer("Refining segment assignments...");
 
-			ProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
+			IProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
 //			fine("Median profile");
 			fine(pc.tagString());
 			List<NucleusBorderSegment> segments = pc.getSegments(pointType);
@@ -426,7 +430,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			   collection keys, and have the same positions (since a franken profile
 			   is based on the median). The reference point is at index 0. 
 			 */
-			for(BorderTagObject key : pc.getBorderTags()){
+			for(Tag key : pc.getBorderTags()){
 				
 				int offset = pc.getIndex(key);
 				finest("Adding franken collection offset "+offset+" for "+ key);
@@ -443,7 +447,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 
 			// Get the median profile for the population
 			SegmentedProfile medianProfile = pc.getSegmentedProfile(pointType);
-			finer("Median profile: angle at index 0 for "+BorderTagObject.REFERENCE_POINT+" is "+medianProfile.get(0));
+			finer("Median profile: angle at index 0 for "+Tag.REFERENCE_POINT+" is "+medianProfile.get(0));
 
 			
 			/*
@@ -475,8 +479,8 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			 */
 			frankenCollection.addSegments(pointType, segments);
 
-			double firstPoint = frankenCollection.getSegmentedProfile(BorderTagObject.REFERENCE_POINT).get(0);
-			finer("FrankenProfile generated: angle at index 0 for "+BorderTagObject.REFERENCE_POINT+" is "+firstPoint);
+			double firstPoint = frankenCollection.getSegmentedProfile(Tag.REFERENCE_POINT).get(0);
+			finer("FrankenProfile generated: angle at index 0 for "+Tag.REFERENCE_POINT+" is "+firstPoint);
 			
 			// attach the frankencollection to the cellcollection
 			collection.setProfileCollection(ProfileType.FRANKEN, frankenCollection);

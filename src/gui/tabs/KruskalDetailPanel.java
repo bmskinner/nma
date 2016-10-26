@@ -34,8 +34,8 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
@@ -122,7 +122,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 			.setDatasets(getDatasets())
 			.setNormalised(true)
 			.setAlignment(ProfileAlignment.LEFT)
-			.setTag(BorderTagObject.REFERENCE_POINT)
+			.setTag(Tag.REFERENCE_POINT)
 			.setShowMarkers(true)
 			.setProfileType(ProfileType.ANGLE)
 			.setTarget(chartPanel)

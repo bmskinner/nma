@@ -3,6 +3,7 @@ package charting;
 import java.util.List;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import logging.Loggable;
 
 public interface Cache extends Loggable {
@@ -22,6 +23,6 @@ public interface Cache extends Loggable {
 	 * These will be recalculated at next call
 	 * @param list
 	 */
-	void clear(List<AnalysisDataset> list);
+	void clear(List<IAnalysisDataset> list);
 
 }

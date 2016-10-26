@@ -21,9 +21,13 @@ package gui.tabs.cells;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 import javax.swing.JOptionPane;
+
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import components.Cell;
+import components.ICell;
 import gui.DatasetEvent;
 import gui.dialogs.MessagingDialog;
 
@@ -37,9 +41,9 @@ import gui.dialogs.MessagingDialog;
 @SuppressWarnings("serial")
 public abstract class AbstractCellEditingDialog extends MessagingDialog {
 	
-	protected Cell cell = null;
-	protected Cell workingCell;
-	protected AnalysisDataset dataset = null;
+	protected ICell cell = null;
+	protected ICell workingCell;
+	protected IAnalysisDataset dataset = null;
 			
 	private boolean hasChanged = false;
 	
@@ -79,7 +83,7 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
 	 * @param cell
 	 * @param dataset
 	 */
-	public void load(final Cell cell, final AnalysisDataset dataset){
+	public void load(final ICell cell, final IAnalysisDataset dataset){
 
 		if(cell==null || dataset==null){
 			throw new IllegalArgumentException("Cell or dataset is null");
@@ -113,7 +117,7 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
 	
 	protected abstract void createUI();
 	
-	protected abstract void updateCharts(Cell cell);
+	protected abstract void updateCharts(ICell cell);
 	
 	protected void requestSaveOption(){
 		

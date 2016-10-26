@@ -18,6 +18,7 @@ import javax.swing.border.EmptyBorder;
 import analysis.profiles.RuleSetCollection;
 import components.generic.BorderTag;
 import components.generic.BorderTagObject;
+import components.generic.Tag;
 
 @SuppressWarnings("serial")
 public class RulesetSaveDialog extends SettingsDialog {
@@ -77,7 +78,7 @@ public class RulesetSaveDialog extends SettingsDialog {
 					
 				BorderTagObject o = new BorderTagObject(((CollectionPanel) c).getText(), BorderTag.CUSTOM);
 
-				result.setRuleSets(o, r.getRuleSets(BorderTagObject.CUSTOM_POINT));
+				result.setRuleSets(o, r.getRuleSets(Tag.CUSTOM_POINT));
 //				log("Added custom point: "+o.toString());
 			}
 			

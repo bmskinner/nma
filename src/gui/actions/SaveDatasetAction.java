@@ -20,11 +20,13 @@ package gui.actions;
 
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
+
 import ij.io.SaveDialog;
 import io.PopulationExporter;
 import gui.MainWindow;
 import gui.ThreadManager;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 public class SaveDatasetAction extends ProgressableAction {
 	
@@ -37,7 +39,7 @@ public class SaveDatasetAction extends ProgressableAction {
 	 * @param mw the main window, to access program logger
 	 * @param doneSignal a latch to hold threads until the save is complete
 	 */
-	public SaveDatasetAction(AnalysisDataset dataset, File saveFile, MainWindow mw, CountDownLatch doneSignal) {
+	public SaveDatasetAction(IAnalysisDataset dataset, File saveFile, MainWindow mw, CountDownLatch doneSignal) {
 		super(dataset, "Saving dataset", mw);
 		setLatch(doneSignal);
 		finest("Save dataset action created by explicit file location");
@@ -57,7 +59,7 @@ public class SaveDatasetAction extends ProgressableAction {
 	 * @param doneSignal a latch to hold threads until the save is complete
 	 * @param chooseSaveLocation save to the default dataset save file, or choose another location
 	 */
-	public SaveDatasetAction(AnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal, boolean chooseSaveLocation) {
+	public SaveDatasetAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal, boolean chooseSaveLocation) {
 		super(dataset, "Saving dataset", mw);
 		setLatch(doneSignal);
 		finest("Save dataset action created by default or manual file location");

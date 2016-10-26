@@ -37,7 +37,7 @@ import components.nuclear.NucleusBorderSegment;
  * applied to profiles.
  *
  */
-public class SegmentedProfile extends Profile implements Serializable {
+public class SegmentedProfile extends Profile {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -49,7 +49,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @param p the profile
 	 * @param segments the list of segments to use
 	 */
-	public SegmentedProfile(Profile p, List<NucleusBorderSegment> segments) {		
+	public SegmentedProfile(IProfile p, List<NucleusBorderSegment> segments) {		
 		super(p);
 		
 		if(segments==null || segments.isEmpty()){
@@ -645,7 +645,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		/*
 		 * The final frankenprofile is made of stitched together profiles from each segment
 		 */
-		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
+		List<IProfile> finalSegmentProfiles = new ArrayList<IProfile>(this.getSegmentCount());
 				
 		
 		
@@ -663,7 +663,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 			}
 
 			// Interpolate the segment region to the new length
-			Profile revisedProfile = interpolateSegment(testSeg, templateSeg.length());
+			IProfile revisedProfile = interpolateSegment(testSeg, templateSeg.length());
 			finalSegmentProfiles.add(revisedProfile);
 		}
 				
@@ -684,17 +684,17 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @return the interpolated profile
 	 * @throws Exception 
 	 */
-	private Profile interpolateSegment(NucleusBorderSegment testSeg, int newLength) throws Exception{
+	private IProfile interpolateSegment(NucleusBorderSegment testSeg, int newLength) throws Exception{
 		
 		// get the region within the segment as a new profile
 		// Exclude the last index of each segment to avoid duplication
 		// the first index is kept, because the first index is used for border tags
 		int lastIndex = AbstractCellularComponent.wrapIndex( testSeg.getEndIndex()-1, testSeg.getTotalLength());
 		
-		Profile testSegProfile = this.getSubregion(testSeg.getStartIndex(), lastIndex);
+		IProfile testSegProfile = this.getSubregion(testSeg.getStartIndex(), lastIndex);
 
 		// interpolate the test segments to the length of the median segments
-		Profile revisedProfile = testSegProfile.interpolate(newLength);
+		IProfile revisedProfile = testSegProfile.interpolate(newLength);
 		return revisedProfile;
 	}
 

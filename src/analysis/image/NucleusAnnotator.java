@@ -30,8 +30,8 @@ import java.util.UUID;
 
 import utility.Constants;
 import components.CellularComponent;
-import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.BorderPoint;
@@ -87,11 +87,11 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 	
 
 	public NucleusAnnotator annotateOP(Nucleus n){		
-		return annotatePoint(n.getBorderPoint(BorderTagObject.ORIENTATION_POINT), Color.CYAN);
+		return annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT), Color.CYAN);
 	}
 
 	public NucleusAnnotator annotateRP(Nucleus n){
-		return annotatePoint(n.getBorderPoint(BorderTagObject.REFERENCE_POINT), Color.YELLOW);
+		return annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT), Color.YELLOW);
 	}
 	
 	public NucleusAnnotator annotateCoM(CellularComponent n){

@@ -20,10 +20,12 @@ package gui.actions;
 
 import gui.MainWindow;
 import gui.ThreadManager;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.nucleus.CurveRefolder;
 import analysis.nucleus.CurveRefolder.CurveRefoldingMode;
 
@@ -36,7 +38,7 @@ public class RefoldNucleusAction extends ProgressableAction {
 	 * Refold the given selected dataset
 	 */
 	
-	public RefoldNucleusAction(AnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal) {
+	public RefoldNucleusAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal) {
 		super(dataset, "Refolding", mw);
 		this.setLatch(doneSignal);
 		try{

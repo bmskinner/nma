@@ -43,8 +43,9 @@ import stats.SignalStatistic;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
-import components.generic.Profile;
+import components.generic.IProfile;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.BorderPoint;
@@ -100,14 +101,14 @@ public class RodentSpermNucleus extends SpermNucleus {
 	}
 	
 	@Override
-	public void setBorderTag(BorderTagObject tag, int i){
+	public void setBorderTag(Tag tag, int i){
 		super.setBorderTag(tag, i);
 		
 			
 		// If the flat region moved, update the cached lengths 
-		if( this.hasBorderTag(BorderTagObject.TOP_VERTICAL) && this.hasBorderTag(BorderTagObject.BOTTOM_VERTICAL)){
+		if( this.hasBorderTag(Tag.TOP_VERTICAL) && this.hasBorderTag(Tag.BOTTOM_VERTICAL)){
 
-			if(tag.equals(BorderTagObject.TOP_VERTICAL) || tag.equals(BorderTagObject.BOTTOM_VERTICAL)){
+			if(tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)){
 				
 				calculateHookAndBodyLength();
 			}
@@ -152,8 +153,8 @@ public class RodentSpermNucleus extends SpermNucleus {
 		Nucleus testNucleus = getVerticallyRotatedNucleus();
 
 		// Only proceed if the verticals have been set
-		if(testNucleus!=null && testNucleus.hasBorderTag(BorderTagObject.TOP_VERTICAL) 
-				&& testNucleus.hasBorderTag(BorderTagObject.BOTTOM_VERTICAL)){
+		if(testNucleus!=null && testNucleus.hasBorderTag(Tag.TOP_VERTICAL) 
+				&& testNucleus.hasBorderTag(Tag.BOTTOM_VERTICAL)){
 
 //			Nucleus testVertical = testNucleus.getVerticallyRotatedNucleus();
 			
@@ -171,7 +172,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 			
 
 			
-			double vertX = testNucleus.getBorderTag(BorderTagObject.TOP_VERTICAL).getX();
+			double vertX = testNucleus.getBorderTag(Tag.TOP_VERTICAL).getX();
 
 
 			/*
@@ -207,7 +208,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 			
 			double distanceHook = 0;
 			double distanceHump = 0;
-			double referenceX   = testNucleus.getBorderTag(BorderTagObject.REFERENCE_POINT).getX();
+			double referenceX   = testNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
 			
 			finer("TV is at "+vertX);
 			finer("Max bounding x is "+ maxBoundingX);
@@ -246,10 +247,10 @@ public class RodentSpermNucleus extends SpermNucleus {
 	 */
 	public List<BorderPoint> getHookRoi(){	
 		
-		BorderPoint testPoint         = this.getBorderTag(BorderTagObject.REFERENCE_POINT);
-		BorderPoint referencePoint    = this.getBorderTag(BorderTagObject.REFERENCE_POINT);
-		BorderPoint interSectionPoint = this.getBorderTag(BorderTagObject.INTERSECTION_POINT);
-		BorderPoint orientationPoint  = this.getBorderTag(BorderTagObject.ORIENTATION_POINT);
+		BorderPoint testPoint         = this.getBorderTag(Tag.REFERENCE_POINT);
+		BorderPoint referencePoint    = this.getBorderTag(Tag.REFERENCE_POINT);
+		BorderPoint interSectionPoint = this.getBorderTag(Tag.INTERSECTION_POINT);
+		BorderPoint orientationPoint  = this.getBorderTag(Tag.ORIENTATION_POINT);
 		
 		List<BorderPoint> result = new ArrayList<BorderPoint>(0);
 
@@ -334,14 +335,14 @@ public class RodentSpermNucleus extends SpermNucleus {
 
 		
 		RuleSet rpSet = RuleSet.mouseSpermRPRuleSet();
-		Profile p     = this.getProfile(rpSet.getType());
+		IProfile p     = this.getProfile(rpSet.getType());
 		ProfileIndexFinder f = new ProfileIndexFinder();
 		int tipIndex = f.identifyIndex(p, rpSet);
 		
 		
 		// find tip - use the least angle method
 //		int tipIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
-		setBorderTag(BorderTagObject.REFERENCE_POINT, tipIndex);
+		setBorderTag(Tag.REFERENCE_POINT, tipIndex);
 
 		// decide if the profile is right or left handed; flip if needed
 		if(!this.isProfileOrientationOK()){
@@ -392,9 +393,9 @@ public class RodentSpermNucleus extends SpermNucleus {
 
     // addBorderTag("initialConsensusTail", consensusTailIndex);
 
-    setBorderTag(BorderTagObject.ORIENTATION_POINT, consensusTailIndex);
+    setBorderTag(Tag.ORIENTATION_POINT, consensusTailIndex);
 
-    setBorderTag(BorderTagObject.INTERSECTION_POINT, this.getBorderIndex(this.findOppositeBorder(consensusTail)));
+    setBorderTag(Tag.INTERSECTION_POINT, this.getBorderIndex(this.findOppositeBorder(consensusTail)));
   }
 
 	
@@ -458,7 +459,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		/*
 		 * Get the X position of the reference point
 		 */
-		double vertX = verticalNucleus.getBorderTag(BorderTagObject.REFERENCE_POINT).getX();
+		double vertX = verticalNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
 
 		/*
 		 * If the reference point is left of the centre of mass, 
@@ -491,17 +492,17 @@ public class RodentSpermNucleus extends SpermNucleus {
     // the distances of each point from the centre of mass. The points with the combined greatest
     // distance are both far from each other and far from the centre, and are a more robust estimate
     // of the true ends of the signal
-    double tipToCoMDistance = this.getBorderTag(BorderTagObject.REFERENCE_POINT).getLengthTo(this.getCentreOfMass());
+    double tipToCoMDistance = this.getBorderTag(Tag.REFERENCE_POINT).getLengthTo(this.getCentreOfMass());
     BooleanProfile array = this.getProfile(ProfileType.ANGLE).getLocalMinima(5);
 
     double maxDistance = 0;
-    BorderPoint tail = this.getBorderTag(BorderTagObject.REFERENCE_POINT); // start at tip, move round
+    BorderPoint tail = this.getBorderTag(Tag.REFERENCE_POINT); // start at tip, move round
 
     for(int i=0; i<array.size();i++){
       if(array.get(i)==true){
             
         double distanceAcrossCoM = tipToCoMDistance + this.getCentreOfMass().getLengthTo(getBorderPoint(i));
-        double distanceBetweenEnds = this.getBorderTag(BorderTagObject.REFERENCE_POINT).getLengthTo(getBorderPoint(i));
+        double distanceBetweenEnds = this.getBorderTag(Tag.REFERENCE_POINT).getLengthTo(getBorderPoint(i));
         
         double totalDistance = distanceAcrossCoM + distanceBetweenEnds;
 
@@ -528,7 +529,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     // Measure the length; if < min length..., store equation and border(s)
 
     double minDistance = this.getStatistic(NucleusStatistic.MAX_FERET);
-    BorderPoint reference = this.getBorderTag(BorderTagObject.REFERENCE_POINT);
+    BorderPoint reference = this.getBorderTag(Tag.REFERENCE_POINT);
 
     for(int i=0;i<this.getBorderLength();i++){
 
@@ -554,7 +555,7 @@ public class RodentSpermNucleus extends SpermNucleus {
       BorderPoint p = this.getBorderPoint(i);
       double angle = this.getCentreOfMass().findAngle(reference, p);
       if(  Math.abs(90-angle)<difference && 
-          p.getLengthTo(this.getBorderTag(BorderTagObject.REFERENCE_POINT)) > this.getCentreOfMass().getLengthTo( this.getBorderTag(BorderTagObject.REFERENCE_POINT) ) ){
+          p.getLengthTo(this.getBorderTag(Tag.REFERENCE_POINT)) > this.getCentreOfMass().getLengthTo( this.getBorderTag(Tag.REFERENCE_POINT) ) ){
         difference = 90-angle;
         tail = p;
       }
@@ -579,7 +580,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     // determine the coordinates of the point intersected as int
     // for each xvalue of each point in array, get the line y value
     // at the point the yvalues are closest and not the tail point is the intersesction
-    Equation lineEquation = new Equation(this.getCentreOfMass(), this.getBorderTag(BorderTagObject.ORIENTATION_POINT));
+    Equation lineEquation = new Equation(this.getCentreOfMass(), this.getBorderTag(Tag.ORIENTATION_POINT));
     double minDeltaY = 100;
     int minDeltaYIndex = 0;
 
@@ -588,7 +589,7 @@ public class RodentSpermNucleus extends SpermNucleus {
         double y = this.getBorderPoint(i).getY();
         double yOnLine = lineEquation.getY(x);
 
-        double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getBorderTag(BorderTagObject.ORIENTATION_POINT));
+        double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getBorderTag(Tag.ORIENTATION_POINT));
 
         double deltaY = Math.abs(y - yOnLine);
         if(deltaY < minDeltaY && distanceToTail > this.getStatistic(NucleusStatistic.MAX_FERET)/2){ // exclude points too close to the tail
@@ -601,9 +602,9 @@ public class RodentSpermNucleus extends SpermNucleus {
 
   public void splitNucleusToHeadAndHump() {
 
-	  if(!this.hasBorderTag(BorderTagObject.INTERSECTION_POINT)){
+	  if(!this.hasBorderTag(Tag.INTERSECTION_POINT)){
 		  int index = findIntersectionPointForNuclearSplit();
-		  this.setBorderTag(BorderTagObject.INTERSECTION_POINT, index );
+		  this.setBorderTag(Tag.INTERSECTION_POINT, index );
 	  } 
   }
 

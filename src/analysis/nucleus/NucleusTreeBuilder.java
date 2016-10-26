@@ -19,10 +19,12 @@
 package analysis.nucleus;
 
 import stats.NucleusStatistic;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
+
 import utility.Constants;
 import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
@@ -31,18 +33,19 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
-import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
+import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshFace;
-import components.Cell;
 import components.CellCollection;
-import components.generic.BorderTagObject;
+import components.ICell;
+import components.ICellCollection;
+import components.generic.IProfile;
 import components.generic.MeasurementScale;
-import components.generic.Profile;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.nuclei.Nucleus;
 
 
@@ -52,10 +55,10 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	
 	protected String newickTree = null;	
 		
-	protected CellCollection collection;
+	protected ICellCollection collection;
 	protected ClusteringOptions options;
 		
-	public NucleusTreeBuilder(AnalysisDataset dataset, ClusteringOptions options){
+	public NucleusTreeBuilder(IAnalysisDataset dataset, ClusteringOptions options){
 		super(dataset);
 		this.options = options;
 		this.collection = dataset.getCollection();
@@ -101,7 +104,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	 * @param collection
 	 * @return success or fail
 	 */
-	public boolean makeTree(CellCollection collection){
+	public boolean makeTree(ICellCollection collection){
 		
 //		this.logger = new Logger(collection.getDebugFile(), "NucleusClusterer");
 		
@@ -151,7 +154,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		return true;
 	}
 					
-	private FastVector makeAttributes(CellCollection collection, int windowSize)throws Exception {
+	private FastVector makeAttributes(ICellCollection collection, int windowSize)throws Exception {
 		
 		// Determine the number of attributes required
 		
@@ -160,7 +163,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		
 		if(options.isIncludeProfile()){ // An attribute for each angle in the median profile, spaced <windowSize> apart
 			log(Level.FINEST, "Including profile");
-			profileAttributeCount = collection.getProfileCollection(options.getProfileType()).getProfile(BorderTagObject.REFERENCE_POINT, 50).size();
+			profileAttributeCount = collection.getProfileCollection(options.getProfileType()).getProfile(Tag.REFERENCE_POINT, 50).size();
 			profileAttributeCount /= windowSize;
 			attributeCount += profileAttributeCount;
 		}
@@ -234,15 +237,15 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	 * @param collection
 	 * @return
 	 */
-	private Instances makeProfileInstances(CellCollection collection)throws Exception {
+	private Instances makeProfileInstances(ICellCollection collection)throws Exception {
 		
-		int profileSize = collection.getProfileCollection(options.getProfileType()).getProfile(BorderTagObject.REFERENCE_POINT, 50).size();
+		int profileSize = collection.getProfileCollection(options.getProfileType()).getProfile(Tag.REFERENCE_POINT, 50).size();
 		int windowSize = collection.getProfileManager().getProfileWindowSize(ProfileType.ANGLE);
 		
 		
 		FastVector attributes = makeAttributes(collection, windowSize);
 		
-		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
+		Instances instances = new Instances(collection.getName(), attributes, collection.size());
 		
 		int profilePointsToCount = profileSize/windowSize;
 		
@@ -254,7 +257,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		try{
 			
 			int i=0;
-			for(Cell c : collection.getCells()){
+			for(ICell c : collection.getCells()){
 				Nucleus n1 = c.getNucleus();
 				Instance inst = new SparseInstance(attributes.size());
 
@@ -264,7 +267,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				
 				if(options.isIncludeProfile()){
 					// Interpolate the profile to the median length
-					Profile p = n1.getProfile(options.getProfileType(), BorderTagObject.REFERENCE_POINT).interpolate(profileSize);
+					IProfile p = n1.getProfile(options.getProfileType(), Tag.REFERENCE_POINT).interpolate(profileSize);
 					
 					for(attNumber=0; attNumber<profilePointsToCount; attNumber++){
 						Attribute att = (Attribute) attributes.elementAt(attNumber);

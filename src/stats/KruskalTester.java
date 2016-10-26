@@ -21,22 +21,23 @@ package stats;
 import charting.options.ChartOptions;
 import jdistlib.disttest.DistributionTest;
 import logging.Loggable;
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.profiles.SegmentFitter;
-import components.generic.BorderTagObject;
+import components.generic.IProfile;
+import components.generic.IProfileCollection;
 import components.generic.Profile;
-import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.generic.Tag;
 import components.nuclei.Nucleus;
 
 public class KruskalTester implements Loggable {
 	
 	public KruskalTester(){}
 	
-	public Profile testCollectionGetPValues(AnalysisDataset one, AnalysisDataset two, BorderTagObject tag, ProfileType type){
+	public IProfile testCollectionGetPValues(IAnalysisDataset one, IAnalysisDataset two, Tag tag, ProfileType type){
 		
-		Profile resultProfile = null;
+		IProfile resultProfile = null;
 		int sampleNumber = 200;
 		double[] pvals = null;
 		try {
@@ -87,12 +88,12 @@ public class KruskalTester implements Loggable {
 	 * @param tag
 	 * @return
 	 */
-	public Profile testCollectionGetFrankenPValues(ChartOptions options){
+	public IProfile testCollectionGetFrankenPValues(ChartOptions options){
 		
-		AnalysisDataset one = options.getDatasets().get(0);
-		AnalysisDataset two = options.getDatasets().get(1);
+		IAnalysisDataset one = options.getDatasets().get(0);
+		IAnalysisDataset two = options.getDatasets().get(1);
 		
-		Profile resultProfile = null;
+		IProfile resultProfile = null;
 		int sampleNumber = 200;
 		double[] pvals = null;
 		try {
@@ -100,7 +101,7 @@ public class KruskalTester implements Loggable {
 			/*
 			 * Make a copy of dataset two, so the nuclei segments are not overwritten
 			 */
-			AnalysisDataset copyOfTwo = two.duplicate();
+			IAnalysisDataset copyOfTwo = two.duplicate();
 			
 			/*
 			 * Ensure that the profile collections have the same lengths in each collection
@@ -112,7 +113,7 @@ public class KruskalTester implements Loggable {
 			 * 
 			 * Create a new ProfileCollection based on the segments from dataset one
 			 */
-			ProfileCollection pc = one.getCollection().getProfileCollection(ProfileType.ANGLE);
+			IProfileCollection pc = one.getCollection().getProfileCollection(ProfileType.ANGLE);
 //			List<NucleusBorderSegment> segments = pc.getSegments(tag);
 //			ProfileCollection frankenCollection = new ProfileCollection();
 			
@@ -129,11 +130,11 @@ public class KruskalTester implements Loggable {
 				fitter.fit(n, pc);
 
 				// recombine the segments at the lengths of the median profile segments
-				Profile recombinedProfile = fitter.recombine(n, BorderTagObject.REFERENCE_POINT);
+				Profile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
 				n.setProfile(ProfileType.FRANKEN, new SegmentedProfile(recombinedProfile));
 			}
 			
-			ProfileCollection frankenCollection = copyOfTwo.getCollection().getProfileCollection(ProfileType.FRANKEN);
+			IProfileCollection frankenCollection = copyOfTwo.getCollection().getProfileCollection(ProfileType.FRANKEN);
 			frankenCollection.createProfileAggregate(copyOfTwo.getCollection(), ProfileType.FRANKEN, (int) one.getCollection().getMedianArrayLength());
 						
 			/*

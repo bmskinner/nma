@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import components.ClusterGroup;
 import logging.Loggable;
 
@@ -42,7 +42,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 
 				finer("List manager has "+DatasetListManager.getInstance().count()+" datasets");
 
-				for(AnalysisDataset rootDataset : DatasetListManager.getInstance().getRootDatasets()){
+				for(IAnalysisDataset rootDataset : DatasetListManager.getInstance().getRootDatasets()){
 					finer("Adding "+rootDataset.getName()+" as node");
 
 					this.addRootDataset(rootDataset);
@@ -64,7 +64,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 	 * to the appropriate parent dataset node
 	 * @param dataset
 	 */
-	public void addDataset(AnalysisDataset dataset){
+	public void addDataset(IAnalysisDataset dataset){
 		
 		if(this.getNode(dataset)!=null){
 			return; // ignore datasets already present
@@ -83,7 +83,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 	 * to the appropriate parent dataset node
 	 * @param dataset
 	 */
-	public void addRootDataset(AnalysisDataset dataset){
+	public void addRootDataset(IAnalysisDataset dataset){
 		
 		if(this.getNode(dataset)!=null){
 			return; // ignore datasets already present
@@ -96,13 +96,13 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 		root.add(   datasetNode   );
 	}
 	
-	public void addChildDataset(AnalysisDataset dataset){
+	public void addChildDataset(IAnalysisDataset dataset){
 		
 		if(this.getNode(dataset)!=null){
 			return; // ignore datasets already present
 		}
 		
-		AnalysisDataset parent = DatasetListManager.getInstance().getParent(dataset);
+		IAnalysisDataset parent = DatasetListManager.getInstance().getParent(dataset);
 		
 		PopulationTreeTableNode parentNode = this.getNode(parent);
 
@@ -118,7 +118,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 	 * @param dataset the dataset to add
 	 * @return
 	 */
-	private PopulationTreeTableNode createNodes(AnalysisDataset dataset){
+	private PopulationTreeTableNode createNodes(IAnalysisDataset dataset){
 		
 		if(dataset==null){
 			throw new IllegalArgumentException("Dataset is null when generating population table nodes");
@@ -136,7 +136,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 			category.add(clusterGroupNode);
 			
 			for(UUID clusterID : group.getUUIDs()){
-				AnalysisDataset clusterDataset = DatasetListManager.getInstance().getDataset(clusterID);
+				IAnalysisDataset clusterDataset = DatasetListManager.getInstance().getDataset(clusterID);
 				PopulationTreeTableNode childNode = createNodes(clusterDataset);
 				clusterGroupNode.add(childNode);
 				clusterIDs.add(clusterID);
@@ -146,7 +146,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 		
 		// Add remaining child datasets not in clusters
 		
-		for(AnalysisDataset childDataset : dataset.getChildDatasets()){
+		for(IAnalysisDataset childDataset : dataset.getChildDatasets()){
 			if( ! clusterIDs.contains(childDataset.getUUID())){
 				PopulationTreeTableNode childNode = createNodes(childDataset);
 				category.add(childNode);
@@ -272,7 +272,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 	 * @param g
 	 * @return
 	 */
-	public PopulationTreeTableNode getNode(AnalysisDataset dataset){
+	public PopulationTreeTableNode getNode(IAnalysisDataset dataset){
 		
 		if(dataset==null){
 			throw new IllegalArgumentException("Dataset cannot be null"); 

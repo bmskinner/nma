@@ -26,10 +26,12 @@ import jdistlib.InvNormal;
 import jdistlib.disttest.DistributionTest;
 import jdistlib.disttest.NormalityTest;
 import components.CellCollection;
+import components.ICellCollection;
 import components.generic.BooleanProfile;
-import components.generic.BorderTagObject;
+import components.generic.IProfile;
 import components.generic.Profile;
 import components.generic.ProfileType;
+import components.generic.Tag;
 
 /**
  * The purpose is to test the difference at a particular point of a
@@ -39,9 +41,9 @@ import components.generic.ProfileType;
  */
 public class DipTester {
 	
-	private CellCollection collection;
+	private ICellCollection collection;
 	
-	public DipTester(CellCollection collection){
+	public DipTester(ICellCollection collection){
 		this.collection = collection;
 	}
 	
@@ -53,8 +55,8 @@ public class DipTester {
 	 * @param tag the border tag to offset from
 	 * @return a boolean profile of results
 	 */
-	public Profile testCollectionGetPValues(BorderTagObject tag, ProfileType type){
-		Profile resultProfile = null;
+	public IProfile testCollectionGetPValues(Tag tag, ProfileType type){
+		IProfile resultProfile = null;
 		
 		double[] pvals = null;
 		try {
@@ -118,13 +120,13 @@ public class DipTester {
 	 * @param significance the p-value threshold
 	 * @return a boolean profile of results
 	 */
-	public BooleanProfile testCollectionIsUniModal(BorderTagObject tag, double significance, ProfileType type){
+	public BooleanProfile testCollectionIsUniModal(Tag tag, double significance, ProfileType type){
 		
 		BooleanProfile resultProfile = null;
 		boolean[] modes = null;
 		try {
 			
-			Profile pvals = testCollectionGetPValues(tag, type);
+			IProfile pvals = testCollectionGetPValues(tag, type);
 			modes = new boolean[pvals.size()];
 			
 			for(int i=0; i<pvals.size(); i++ ){

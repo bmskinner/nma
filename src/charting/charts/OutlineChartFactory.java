@@ -56,11 +56,12 @@ import org.jfree.ui.Layer;
 
 import components.Cell;
 import components.CellularComponent;
+import components.ICell;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.detection.BooleanAligner;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshEdge;
@@ -135,7 +136,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 */
 	public JFreeChart makeSignalWarpChart(ImageProcessor image){
 		
-		AnalysisDataset dataset = options.firstDataset();
+		IAnalysisDataset dataset = options.firstDataset();
 		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
 
 		XYPlot plot = chart.getXYPlot();
@@ -178,7 +179,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	private JFreeChart makeSignalWarpChart(){
 
 		
-		AnalysisDataset dataset = options.firstDataset();
+		IAnalysisDataset dataset = options.firstDataset();
 		
 		// Create the outline of the consensus
 		
@@ -199,9 +200,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		int yOffset = h >>1;
 		
 		SignalManager m = dataset.getCollection().getSignalManager();
-		Set<Cell> cells = m.getCellsWithNuclearSignals(options.getSignalGroup(), true);
+		Set<ICell> cells = m.getCellsWithNuclearSignals(options.getSignalGroup(), true);
 		
-		for(Cell cell : cells){
+		for(ICell cell : cells){
 			fine("Drawing signals for cell "+cell.getNucleus().getNameAndNumber());
 			// Get each nucleus. Make a mesh.
 			NucleusMesh cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
@@ -377,8 +378,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			return ConsensusNucleusChartFactory.makeEmptyChart();
 		}
 		
-		Cell cell = options.getCell();
-		AnalysisDataset dataset = options.firstDataset();
+		ICell cell = options.getCell();
+		IAnalysisDataset dataset = options.firstDataset();
 		
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
@@ -393,7 +394,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		if(options.getRotateMode().equals(RotationMode.VERTICAL)){
 			finest("Rotation mode is vertical");
 			// duplicate the cell
-			Cell newCell = new Cell();
+			ICell newCell = new Cell();
 			finest("Cell segments    :"+ cell.getNucleus().getProfile(ProfileType.ANGLE).toString());
 
 			Nucleus verticalNucleus = cell.getNucleus().getVerticallyRotatedNucleus();
@@ -690,7 +691,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param imageFile
 	 * @param channel
 	 */
-	private static void drawImageAsAnnotation(XYPlot plot, Cell cell, CellularComponent component){
+	private static void drawImageAsAnnotation(XYPlot plot, ICell cell, CellularComponent component){
 		
 		if(component==null || cell==null || plot==null){
 			return;
@@ -887,7 +888,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		int i=0;
 		int datasetNumber = 0;
-		for(AnalysisDataset dataset : options.getDatasets()){
+		for(IAnalysisDataset dataset : options.getDatasets()){
 			
 			Color colour = dataset.hasDatasetColour()
 					? dataset.getDatasetColour()

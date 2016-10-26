@@ -38,6 +38,7 @@ import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclear.SignalCollection;
@@ -605,13 +606,13 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public int getBorderIndex(BorderTagObject tag) {
+	public int getBorderIndex(Tag tag) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public BorderTagObject getBorderTag(BorderTagObject tag, int index) {
+	public Tag getBorderTag(Tag tag, int index) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -623,19 +624,19 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public BorderPoint getBorderTag(BorderTagObject tag) {
+	public BorderPoint getBorderTag(Tag tag) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public boolean hasBorderTag(BorderTagObject tag) {
+	public boolean hasBorderTag(Tag tag) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean hasBorderTag(BorderTagObject tag, int i) {
+	public boolean hasBorderTag(Tag tag, int i) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -647,25 +648,25 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public void setBorderTag(BorderTagObject tag, int i) {
+	public void setBorderTag(Tag tag, int i) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void setBorderTag(BorderTagObject reference, BorderTagObject tag,
+	public void setBorderTag(Tag reference, Tag tag,
 			int i) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public SegmentedProfile getProfile(ProfileType type, BorderTagObject tag) {
+	public SegmentedProfile getProfile(ProfileType type, Tag tag) {
 		return profiles.get(type);
 	}
 
 	@Override
-	public void setProfile(ProfileType type, BorderTagObject tag,
+	public void setProfile(ProfileType type, Tag tag,
 			SegmentedProfile profile) throws Exception {
 		setProfile(type, profile);
 		
@@ -678,13 +679,13 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public BorderPoint getBorderPoint(BorderTagObject tag) {
+	public BorderPoint getBorderPoint(Tag tag) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public int getOffsetBorderIndex(BorderTagObject reference, int index) {
+	public int getOffsetBorderIndex(Tag reference, int index) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

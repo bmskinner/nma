@@ -27,8 +27,8 @@ import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import components.generic.BorderTagObject;
 import components.generic.ProfileType;
+import components.generic.Tag;
 
 @SuppressWarnings("serial")
 public class ModalityDisplayPanel extends DetailPanel implements ActionListener, ListSelectionListener {
@@ -176,7 +176,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 				.setDatasets(getDatasets())
 				.setNormalised(true) // here, the boolean is used to indicate the main chart
 				.setAlignment(ProfileAlignment.LEFT)
-				.setTag(BorderTagObject.REFERENCE_POINT)
+				.setTag(Tag.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType(type)
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -196,7 +196,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 				.setDatasets(getDatasets())
 				.setNormalised(false) // here, the boolean is used to indicate the position chart
 				.setAlignment(ProfileAlignment.RIGHT)
-				.setTag(BorderTagObject.REFERENCE_POINT)
+				.setTag(Tag.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType(type)
 				.setModalityPosition(xvalue)

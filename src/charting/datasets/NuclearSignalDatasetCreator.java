@@ -49,12 +49,15 @@ import utility.ArrayConverter;
 import utility.ArrayConverter.ArrayConversionException;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import analysis.nucleus.CurveRefolder;
 import analysis.signals.NuclearSignalOptions;
 import analysis.signals.ShellRandomDistributionCreator;
 import components.CellCollection;
+import components.ICellCollection;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
+import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
 import components.nuclear.SignalGroup;
@@ -93,7 +96,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			return createBlankTable();
 		}
 		
-		List<AnalysisDataset> list = options.getDatasets();
+		List<IAnalysisDataset> list = options.getDatasets();
 		DefaultTableModel model = new DefaultTableModel();
 		
 		List<Object> fieldNames = new ArrayList<Object>(0);
@@ -102,8 +105,8 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		// this defines  the number of rows
 			
 		int maxChannels = 0;
-		for(AnalysisDataset dataset : list){
-			CellCollection collection = dataset.getCollection();
+		for(IAnalysisDataset dataset : list){
+			ICellCollection collection = dataset.getCollection();
 			maxChannels = Math.max(collection.getSignalManager().getSignalGroupIDs().size(), maxChannels);
 			if(collection.hasSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
 				maxChannels--;
@@ -139,7 +142,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 			model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
 
 			// make a new column for each collection
-			for(AnalysisDataset dataset : list){
+			for(IAnalysisDataset dataset : list){
 
 				List<Object> columnData = makeDetectionSettingsColumn(dataset, maxChannels, numberOfRowsPerSignalGroup);
 				model.addColumn(dataset.getName(), columnData.toArray(new Object[0])); // separate row block for each channel
@@ -162,12 +165,12 @@ public class NuclearSignalDatasetCreator implements Loggable {
      * @param rowsPerSignalGroup the number of rows a signal group takes up
      * @return a list of rows for a table.
      */
-    private List<Object> makeDetectionSettingsColumn(AnalysisDataset dataset, int signalGroupCount, int rowsPerSignalGroup){
+    private List<Object> makeDetectionSettingsColumn(IAnalysisDataset dataset, int signalGroupCount, int rowsPerSignalGroup){
         
         // format the numbers and make into a tablemodel
         DecimalFormat df = new DecimalFormat("#0.00"); 
         
-        CellCollection collection = dataset.getCollection();
+        ICellCollection collection = dataset.getCollection();
         
         List<Object> rowData = new ArrayList<Object>(0);
         rowData.add(signalGroupCount);
@@ -194,7 +197,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
         if(isFromMerge){
         	
         	
-        	Collection<SignalGroup> signalGroups = collection.getSignalManager().getSignalGroups();
+        	Collection<ISignalGroup> signalGroups = collection.getSignalManager().getSignalGroups();
         	
         	int j=0;
             for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
@@ -311,13 +314,13 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a histogram of angles
 	 * @throws Exception 
 	 */
-	public List<HistogramDataset> createSignaStatisticHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception{
+	public List<HistogramDataset> createSignaStatisticHistogramDataset(List<IAnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception{
 		
 		List<HistogramDataset> result = new ArrayList<HistogramDataset>();
 		
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			HistogramDataset ds = new HistogramDataset();
-			CellCollection collection = dataset.getCollection();
+			ICellCollection collection = dataset.getCollection();
 			
 			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()){
 				
@@ -349,18 +352,18 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a charting dataset
 	 * @throws Exception
 	 */
-	public List<DefaultXYDataset> createSignalDensityHistogramDataset(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception {
+	public List<DefaultXYDataset> createSignalDensityHistogramDataset(List<IAnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception {
 		
 		List<DefaultXYDataset> result = new ArrayList<DefaultXYDataset>();
 		
 		
 		int[] minMaxRange = calculateMinAndMaxRange(list, stat, scale);
 		
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			
 			DefaultXYDataset ds = new DefaultXYDataset();
 			
-			CellCollection collection = dataset.getCollection();
+			ICellCollection collection = dataset.getCollection();
 			
             for( UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
             	
@@ -433,13 +436,13 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return an array with the min and max of the range
 	 * @throws Exception
 	 */
-	private int[] calculateMinAndMaxRange(List<AnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception {
+	private int[] calculateMinAndMaxRange(List<IAnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception {
 		
 		int[] result = new int[2];
 		result[0] = Integer.MAX_VALUE; // holds min
 		result[1] = 0; // holds max
 
-		for(AnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : list){
 			
 			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()){
 				
@@ -464,9 +467,9 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return the array of values
 	 * @throws Exception
 	 */
-	public double[] findSignalDatasetValues(AnalysisDataset dataset, SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception {
+	public double[] findSignalDatasetValues(IAnalysisDataset dataset, SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception {
 		
-		CellCollection collection = dataset.getCollection();			
+		ICellCollection collection = dataset.getCollection();			
         double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);             			
 		return values;
 	}
@@ -504,10 +507,10 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public XYDataset createSignalCoMDataset(AnalysisDataset dataset) throws Exception{
+	public XYDataset createSignalCoMDataset(IAnalysisDataset dataset) throws Exception{
 		finer("Making signal CoM dataset");
 		DefaultXYDataset ds = new DefaultXYDataset();
-		CellCollection collection = dataset.getCollection();
+		ICellCollection collection = dataset.getCollection();
 
 		if(collection.getSignalManager().hasSignals()){
 			finer("Collection "+collection.getName()+" has signals");
@@ -544,9 +547,9 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		return ds;
 	}
 	
-	public List<Shape> createSignalRadiusDataset(AnalysisDataset dataset, UUID signalGroup) throws Exception{
+	public List<Shape> createSignalRadiusDataset(IAnalysisDataset dataset, UUID signalGroup) throws Exception{
 
-		CellCollection collection = dataset.getCollection();
+		ICellCollection collection = dataset.getCollection();
 		List<Shape> result = new ArrayList<Shape>(0);
 		
         if(collection.getSignalGroup(signalGroup).isVisible()){
@@ -602,11 +605,11 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		
 		List<Object> fieldNames = new ArrayList<Object>(0);
 
-		AnalysisDataset dataset = options.firstDataset();
+		IAnalysisDataset dataset = options.firstDataset();
 		
 		int maxSignalGroup = 0;
 
-		CellCollection collection = dataset.getCollection();
+		ICellCollection collection = dataset.getCollection();
 		if(collection.getSignalManager().hasSignals()){
 			maxSignalGroup = Math.max(collection.getSignalManager().getSignalGroupIDs().size(), maxSignalGroup);
 			
@@ -710,8 +713,8 @@ public class NuclearSignalDatasetCreator implements Loggable {
 
 		
 		int maxSignalGroup = 0;
-		for(AnalysisDataset dataset : options.getDatasets()){
-			CellCollection collection = dataset.getCollection();
+		for(IAnalysisDataset dataset : options.getDatasets()){
+			ICellCollection collection = dataset.getCollection();
 			if(collection.getSignalManager().hasSignals()){
 				maxSignalGroup = Math.max(collection.getSignalManager().getSignalGroupIDs().size(), maxSignalGroup);
 			}
@@ -744,8 +747,8 @@ public class NuclearSignalDatasetCreator implements Loggable {
 				DecimalFormat df = new DecimalFormat("#0.00"); 
 	
 				// make a new column for each collection
-				for(AnalysisDataset dataset : options.getDatasets()){
-					CellCollection collection = dataset.getCollection();
+				for(IAnalysisDataset dataset : options.getDatasets()){
+					ICellCollection collection = dataset.getCollection();
 					
 					int signalGroupCount = collection.getSignalManager().getSignalGroupCount();
 					
@@ -840,9 +843,9 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
  
-        for(AnalysisDataset d : options.getDatasets()){
+        for(IAnalysisDataset d : options.getDatasets()){
         	
-        	CellCollection collection = d.getCollection();
+        	ICellCollection collection = d.getCollection();
 
         	for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
         		
@@ -873,11 +876,11 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		
 		List<CategoryDataset> result = new ArrayList<CategoryDataset>();
 
-		for(AnalysisDataset dataset : options.getDatasets()){
+		for(IAnalysisDataset dataset : options.getDatasets()){
 			
 			ShellResultDataset ds = new ShellResultDataset();
 			
-			CellCollection collection = dataset.getCollection();
+			ICellCollection collection = dataset.getCollection();
 
 			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 				
@@ -954,7 +957,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		
 		model.setColumnIdentifiers(columnNames);
 		
-		for(AnalysisDataset d : options.getDatasets()){
+		for(IAnalysisDataset d : options.getDatasets()){
 			
 			for(UUID signalGroup : d.getCollection().getSignalManager().getSignalGroupIDs()){
 				
@@ -962,7 +965,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
             		continue;
             	}
 				
-				SignalGroup group = d.getCollection().getSignalGroup(signalGroup);
+				ISignalGroup group = d.getCollection().getSignalGroup(signalGroup);
 				
 				if(group.hasShellResult()){
 				

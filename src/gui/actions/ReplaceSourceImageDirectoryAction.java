@@ -22,12 +22,13 @@ import java.io.File;
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import gui.MainWindow;
 import ij.io.DirectoryChooser;
 
 public class ReplaceSourceImageDirectoryAction extends ProgressableAction {
 
-	public ReplaceSourceImageDirectoryAction(AnalysisDataset dataset, MainWindow mw) {
+	public ReplaceSourceImageDirectoryAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Replacing images", mw);
 		this.cooldown();
 

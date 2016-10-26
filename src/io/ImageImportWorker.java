@@ -9,12 +9,13 @@ import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 
 import charting.charts.AbstractChartFactory;
-import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellularComponent;
-import components.generic.BorderTagObject;
+import components.ICell;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
@@ -39,13 +40,13 @@ import utility.Constants;
 public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implements Loggable{
 	
 	
-	private final AnalysisDataset dataset;
+	private final IAnalysisDataset dataset;
 	private final TableModel model;
 	private final static int COLUMN_COUNT = CellCollectionOverviewDialog.COLUMN_COUNT;
 	private int loaded = 0;
 	private boolean rotate;
 	
-	public ImageImportWorker(AnalysisDataset dataset, TableModel model, boolean rotate) {
+	public ImageImportWorker(IAnalysisDataset dataset, TableModel model, boolean rotate) {
 		super();
 		this.dataset = dataset;
 		this.model = model;
@@ -55,7 +56,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 	@Override
 	protected Boolean doInBackground() throws Exception {
 		
-		for(Cell c : dataset.getCollection().getCells()){
+		for(ICell c : dataset.getCollection().getCells()){
 			
 			try {
 
@@ -97,7 +98,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 
     } 
 	
-	private ImageIcon importCellImage(Cell c){
+	private ImageIcon importCellImage(ICell c){
 		Nucleus n = c.getNucleus();
 		ImageProcessor ip;
 		try {
@@ -119,26 +120,26 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		return ic;
 	}
 	
-	private ImageProcessor rotateToVertical(Cell c, ImageProcessor ip){
+	private ImageProcessor rotateToVertical(ICell c, ImageProcessor ip){
 		// Calculate angle for vertical rotation
 		Nucleus n = c.getNucleus();
 		
 		XYPoint topPoint;
 		XYPoint btmPoint;
 		
-		if( ! n.hasBorderTag(BorderTagObject.TOP_VERTICAL) || ! n.hasBorderTag(BorderTagObject.BOTTOM_VERTICAL)){
+		if( ! n.hasBorderTag(Tag.TOP_VERTICAL) || ! n.hasBorderTag(Tag.BOTTOM_VERTICAL)){
 			topPoint = n.getCentreOfMass();
-			btmPoint = n.getBorderPoint(BorderTagObject.ORIENTATION_POINT);
+			btmPoint = n.getBorderPoint(Tag.ORIENTATION_POINT);
 			
 		} else {
 			
-			topPoint = n.getBorderPoint(BorderTagObject.TOP_VERTICAL);
-			btmPoint = n.getBorderPoint(BorderTagObject.BOTTOM_VERTICAL);
+			topPoint = n.getBorderPoint(Tag.TOP_VERTICAL);
+			btmPoint = n.getBorderPoint(Tag.BOTTOM_VERTICAL);
 			
 			// Sometimes the points have been set to overlap in older datasets
 			if(topPoint.overlapsPerfectly(btmPoint)){
 				topPoint = n.getCentreOfMass();
-				btmPoint = n.getBorderPoint(BorderTagObject.ORIENTATION_POINT);
+				btmPoint = n.getBorderPoint(Tag.ORIENTATION_POINT);
 			}
 		}
 		
@@ -249,7 +250,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 	 * @param cell
 	 * @param ip
 	 */
-	private void drawNucleus(Cell cell, ImageProcessor ip) {
+	private void drawNucleus(ICell cell, ImageProcessor ip) {
 		if(cell==null){
 			throw new IllegalArgumentException("Input cell is null");
 		}

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import gui.components.ColourSelecter;
 import logging.Loggable;
 
@@ -58,7 +59,7 @@ class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRend
 
     	   if(columnOneObject instanceof AnalysisDataset){
     		   
-    		   AnalysisDataset dataset = (AnalysisDataset) columnOneObject;      	
+    		   IAnalysisDataset dataset = (IAnalysisDataset) columnOneObject;      	
 
     		   // if a preferred colour is specified, use it, otherwise go for defaults
     		   Color colour = dataset.hasDatasetColour()

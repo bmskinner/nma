@@ -22,6 +22,7 @@ import java.util.EventObject;
 import java.util.List;
 
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 public class DatasetEvent extends EventObject {
 	
@@ -47,9 +48,9 @@ public class DatasetEvent extends EventObject {
 
 	private static final long serialVersionUID = 1L;
 	private String sourceName;
-	private List<AnalysisDataset> list;
+	private List<IAnalysisDataset> list;
 	private String method;
-	private AnalysisDataset secondaryDataset = null; // for use in e.g. morphology copying. Optional
+	private IAnalysisDataset secondaryDataset = null; // for use in e.g. morphology copying. Optional
 
 	/**
 	 * Create an event from a source, with the given message
@@ -58,7 +59,7 @@ public class DatasetEvent extends EventObject {
 	 * @param sourceName the name of the object or component generating the datasets
 	 * @param list the datasets to carry
 	 */
-	public DatasetEvent( Object source, String method, String sourceName, List<AnalysisDataset> list ) {
+	public DatasetEvent( Object source, String method, String sourceName, List<IAnalysisDataset> list ) {
 		super( source );
 		this.method = method;
 		this.sourceName = sourceName;
@@ -73,7 +74,7 @@ public class DatasetEvent extends EventObject {
 	 * @param sourceDataset a secondary dataset to use when handling the list
 	 * @param list the datasets to carry
 	 */
-	public DatasetEvent( Object source, String method, String sourceName, List<AnalysisDataset> list, AnalysisDataset sourceDataset) {
+	public DatasetEvent( Object source, String method, String sourceName, List<IAnalysisDataset> list, IAnalysisDataset sourceDataset) {
 		this(source, method, sourceName, list);
 		this.secondaryDataset = sourceDataset;
 	}
@@ -102,7 +103,7 @@ public class DatasetEvent extends EventObject {
 	 * Get the datasets in the event
 	 * @return
 	 */
-	public List<AnalysisDataset> getDatasets(){
+	public List<IAnalysisDataset> getDatasets(){
 		return list;
 	}
 	
@@ -111,7 +112,7 @@ public class DatasetEvent extends EventObject {
 	 * one dataset is present.
 	 * @return
 	 */
-	public AnalysisDataset firstDataset(){
+	public IAnalysisDataset firstDataset(){
 		return list.get(0);
 	}
 	
@@ -146,7 +147,7 @@ public class DatasetEvent extends EventObject {
 	 * Get the secondary dataset, or null if not set
 	 * @return
 	 */
-	public AnalysisDataset secondaryDataset(){
+	public IAnalysisDataset secondaryDataset(){
 		return secondaryDataset;
 	}
 	

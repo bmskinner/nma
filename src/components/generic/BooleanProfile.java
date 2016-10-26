@@ -72,7 +72,7 @@ public class BooleanProfile implements Serializable, Loggable {
 	 * the same length as the input
 	 * @param p
 	 */
-	public BooleanProfile(final Profile p){
+	public BooleanProfile(final IProfile p){
 		this(p, false);
 	}
 	
@@ -82,7 +82,7 @@ public class BooleanProfile implements Serializable, Loggable {
 	 * @param p the template profile (for length)
 	 * @param b the default value
 	 */
-	public BooleanProfile(final Profile p, boolean b){
+	public BooleanProfile(final IProfile p, boolean b){
 		this.array = new boolean[p.size()];
 		for(int i=0; i<this.array.length; i++){
 			array[i] = b;
@@ -142,7 +142,7 @@ public class BooleanProfile implements Serializable, Loggable {
 	 * @param length the length to scale to
 	 * @return a profile with the positions as values
 	 */
-	public Profile getPositions(int length){
+	public IProfile getPositions(int length){
 		double [] result = new double[array.length];
 		for(int i=0;i<array.length;i++){
 			result[i] = (double) i / (double) array.length * (double) length;

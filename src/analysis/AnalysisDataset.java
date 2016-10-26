@@ -18,13 +18,11 @@
  *******************************************************************************/
 package analysis;
 
-import gui.components.ColourSelecter.ColourSwatch;
 import ij.IJ;
 
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,20 +33,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import analysis.nucleus.NucleusDetectionWorker;
 import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
-import logging.Loggable;
 import utility.Constants;
 import utility.Version;
 import components.Cell;
 import components.CellCollection;
 import components.ClusterGroup;
+import components.ICell;
+import components.ICellCollection;
 
 
 /**
@@ -57,7 +54,7 @@ import components.ClusterGroup;
  * colour and UI options
  *
  */
-public class AnalysisDataset implements Serializable, Loggable {
+public class AnalysisDataset implements IAnalysisDataset {
 	
 	private static final long serialVersionUID = 1L;
 	private Map<UUID, AnalysisDataset> childCollections  = new HashMap<UUID, AnalysisDataset>(); // hold the UUID of any child collections
@@ -92,7 +89,7 @@ public class AnalysisDataset implements Serializable, Loggable {
 	 * set as the output folder of the collection
 	 * @param collection
 	 */
-	public AnalysisDataset(CellCollection collection){
+	public AnalysisDataset(ICellCollection collection){
 		this(collection, new File(collection.getOutputFolder()
 				+File.separator
 				+collection.getName()
@@ -104,8 +101,8 @@ public class AnalysisDataset implements Serializable, Loggable {
 	 * save file
 	 * @param collection
 	 */
-	public AnalysisDataset(CellCollection collection, File saveFile){
-		this.thisCollection = collection;
+	public AnalysisDataset(ICellCollection collection, File saveFile){
+		this.thisCollection = (CellCollection) collection;
 		this.savePath       = saveFile;
 		
 		this.debugFile      = new File(saveFile.getParent()
@@ -116,19 +113,14 @@ public class AnalysisDataset implements Serializable, Loggable {
 	}
 	
 	
-	/**
-	 * Make a copy of the cells in this dataset. Does not yet include
-	 * child datasets, clusters or signal groups
-	 * @return
-	 * @throws Exception 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#duplicate()
 	 */
-	public AnalysisDataset duplicate() throws Exception{
-		AnalysisDataset result = new AnalysisDataset(this.getCollection());
-		Iterator<Cell> it = this.getCollection().getCellIterator();
-		
-		while(it.hasNext()){
-			Cell c = it.next();
-
+	@Override
+	public IAnalysisDataset duplicate() throws Exception{
+		IAnalysisDataset result = new AnalysisDataset(this.getCollection());
+		for(ICell c : thisCollection.getCells()){
+			
 			result.getCollection().addCell(new Cell(c));
 		}
 		
@@ -137,11 +129,10 @@ public class AnalysisDataset implements Serializable, Loggable {
 		return result;
 	}
 		
-	/**
-	 * Get the file handler for this dataset. Create a handler
-	 * if needed.
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getLogHandler()
 	 */
+	@Override
 	public Handler getLogHandler() throws Exception {
 
 		if(debugFile == null || !debugFile.exists()){
@@ -154,42 +145,41 @@ public class AnalysisDataset implements Serializable, Loggable {
 		return fileHandler;
 	}
 	
-	/**
-	 * Get the software version used to create the dataset
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getVersion()
 	 */
+	@Override
 	public Version getVersion(){
 		return this.version;
 	}
 	
-	/**
-	 * Add the given cell collection as a child to this dataset. A
-	 * new dataset is contructed to hold it.
-	 * @param collection the collection to add
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#addChildCollection(components.CellCollection)
 	 */
-	public void addChildCollection(CellCollection collection){
+	@Override
+	public void addChildCollection(ICellCollection collection){
 		if(collection==null){
 			throw new IllegalArgumentException("Nucleus collection is null");
 		}
 		UUID id = collection.getID();
-		AnalysisDataset childDataset = new AnalysisDataset(collection, this.savePath);
+		IAnalysisDataset childDataset = new AnalysisDataset(collection, this.savePath);
 		childDataset.setRoot(false);
 		childDataset.setAnalysisOptions(this.getAnalysisOptions());
-		this.childCollections.put(id, childDataset);
+		this.childCollections.put(id, (AnalysisDataset) childDataset);
 
 	}
 	
-	/**
-	 * Add the given dataset as a child of this dataset
-	 * @param dataset
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#addChildDataset(analysis.AnalysisDataset)
 	 */
-	public void addChildDataset(AnalysisDataset dataset){
+	@Override
+	public void addChildDataset(IAnalysisDataset dataset){
 		if(dataset==null){
 			throw new IllegalArgumentException("Nucleus collection is null");
 		}
 		dataset.setRoot(false);
 		UUID id = dataset.getUUID();
-		this.childCollections.put(id, dataset);
+		this.childCollections.put(id, (AnalysisDataset) dataset);
 	}
 	
 	/**
@@ -213,12 +203,12 @@ public class AnalysisDataset implements Serializable, Loggable {
 	 * the public functions calling this method
 	 * @param dataset the dataset to add
 	 */
-	private void addAssociatedDataset(AnalysisDataset dataset){
+	private void addAssociatedDataset(IAnalysisDataset dataset){
 		if(dataset==null){
 			throw new IllegalArgumentException("Dataset is null");
 		}
 		UUID id = dataset.getUUID();
-		this.otherCollections.put(id, dataset);
+		this.otherCollections.put(id, (AnalysisDataset) dataset);
 	}
 	
 	/**
@@ -229,7 +219,7 @@ public class AnalysisDataset implements Serializable, Loggable {
 	 * @param id the dataset to get
 	 * @return the dataset or null
 	 */
-	private AnalysisDataset getAssociatedDataset(UUID id){
+	private IAnalysisDataset getAssociatedDataset(UUID id){
 		return this.otherCollections.get(id);
 	}
 	
@@ -244,59 +234,58 @@ public class AnalysisDataset implements Serializable, Loggable {
 	}
 	
 	
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getUUID()
+	 */
+	@Override
 	public UUID getUUID(){
 		return this.thisCollection.getID();
 	}
 	
-	/**
-	 * Get the name of the dataset. Passes through to
-	 * CellCollection
-	 * @return
-	 * @see CellCollection
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getName()
 	 */
+	@Override
 	public String getName(){
 		return this.thisCollection.getName();
 	}
 	
-	/**
-	 * Set the name of the dataset. Passes through
-	 * to the CellCollection
-	 * @param s
-	 * @see CellCollection
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#setName(java.lang.String)
 	 */
+	@Override
 	public void setName(String s){
 		this.thisCollection.setName(s);
 	}
 	
-	/**
-	 * Get the save file location
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getSavePath()
 	 */
+	@Override
 	public File getSavePath(){
 		return this.savePath;
 	}
 	
-	/**
-	 * Set the path to save the dataset
-	 * @param file
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#setSavePath(java.io.File)
 	 */
+	@Override
 	public void setSavePath(File file){
 		this.savePath = file;
 	}
 	
-	/**
-	 * Get the log file for the dataset.
-	 * @return
-	 * @see CellCollection
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getDebugFile()
 	 */
+	@Override
 	public File getDebugFile(){
 		return this.debugFile;
 	}
 	
-	/**
-	 * Allow the collection to update the debug file location
-	 * @param f the new file
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#setDebugFile(java.io.File)
 	 */
+	@Override
 	public void setDebugFile(File f){
 		try {
 			if(!f.exists()){
@@ -310,27 +299,25 @@ public class AnalysisDataset implements Serializable, Loggable {
 		}
 	}
 	
-	/**
-	 * Get all the direct children of this dataset
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getChildUUIDs()
 	 */
+	@Override
 	public Set<UUID> getChildUUIDs(){
 		return this.childCollections.keySet();
 	}
 	
-	/**
-	 * Recursive version of getChildUUIDs.
-	 * Get the children of this dataset, and all
-	 * their children
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getAllChildUUIDs()
 	 */
+	@Override
 	public Set<UUID> getAllChildUUIDs(){
 		Set<UUID> idlist = this.getChildUUIDs();
 		Set<UUID> result = new HashSet<UUID>();
 		result.addAll(idlist);
 		
 		for(UUID id : idlist){
-			AnalysisDataset d = getChildDataset(id);
+			IAnalysisDataset d = getChildDataset(id);
 //			Set<UUID> childIdList = d.getAllChildUUIDs();
 //			for(UUID childId : childIdList){
 //				result.add(id);
@@ -341,16 +328,15 @@ public class AnalysisDataset implements Serializable, Loggable {
 		return result;
 	}
 	
-	/**
-	 * Get the specificed child
-	 * @param id the child UUID
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getChildDataset(java.util.UUID)
 	 */
-	public AnalysisDataset getChildDataset(UUID id){
+	@Override
+	public IAnalysisDataset getChildDataset(UUID id){
 		if(this.hasChild(id)){
 			return this.childCollections.get(id);
 		} else {
-			for(AnalysisDataset child : this.getAllChildDatasets()){
+			for(IAnalysisDataset child : this.getAllChildDatasets()){
 				if(child.getUUID().equals(id)){
 					return child;
 				}
@@ -359,13 +345,11 @@ public class AnalysisDataset implements Serializable, Loggable {
 		return null;
 	}
 	
-	/**
-	 * Get the AnalysisDataset with the given id
-	 * that is a merge source to this dataset. 
-	 * @param id the UUID of the dataset
-	 * @return the dataset or null
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getMergeSource(java.util.UUID)
 	 */
-	public AnalysisDataset getMergeSource(UUID id){
+	@Override
+	public IAnalysisDataset getMergeSource(UUID id){
 		if(this.mergeSources.contains(id)){
 		return this.getAssociatedDataset(id);
 		} else {
@@ -373,18 +357,17 @@ public class AnalysisDataset implements Serializable, Loggable {
 		}
 	}
 	
-	/**
-	 * Recursively fetch all the merge sources for this dataset.
-	 * Only includes the root sources (not intermediate merges)
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getAllMergeSources()
 	 */
-	public List<AnalysisDataset> getAllMergeSources(){
+	@Override
+	public List<IAnalysisDataset> getAllMergeSources(){
 		
-		List<AnalysisDataset>  result = new ArrayList<AnalysisDataset>();
+		List<IAnalysisDataset>  result = new ArrayList<IAnalysisDataset>();
 		
 		for(UUID id : getMergeSourceIDs()){
 			
-			AnalysisDataset source = this.getAssociatedDataset(id);
+			IAnalysisDataset source = this.getAssociatedDataset(id);
 			if(source.hasMergeSources()){
 				result.addAll(source.getAllMergeSources());
 			} else {
@@ -394,22 +377,21 @@ public class AnalysisDataset implements Serializable, Loggable {
 		return result;
 	}
 	
-	/**
-	 * Add the given dataset as a merge source
-	 * @param dataset
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#addMergeSource(analysis.AnalysisDataset)
 	 */
-	public void addMergeSource(AnalysisDataset dataset){
+	@Override
+	public void addMergeSource(IAnalysisDataset dataset){
 		this.mergeSources.add(dataset.getUUID());
 		this.addAssociatedDataset(dataset);
 	}
 	
-	/**
-	 * Get all datasets considered direct merge sources to this
-	 * dataset
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getMergeSources()
 	 */
-	public List<AnalysisDataset> getMergeSources(){
-		List<AnalysisDataset>  result = new ArrayList<AnalysisDataset>();
+	@Override
+	public List<IAnalysisDataset> getMergeSources(){
+		List<IAnalysisDataset>  result = new ArrayList<IAnalysisDataset>();
 		
 		for(UUID id : mergeSources){
 			result.add(this.getAssociatedDataset(id));	
@@ -417,21 +399,18 @@ public class AnalysisDataset implements Serializable, Loggable {
 		return result;
 	}
 	
-	/**
-	 * Get the ids of all datasets considered merge sources to this
-	 * dataset
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getMergeSourceIDs()
 	 */
+	@Override
 	public List<UUID> getMergeSourceIDs(){
 		return this.mergeSources;
 	}
 	
-	/**
-	 * Get the ids of all datasets considered merge sources to this
-	 * dataset, recursively (that is, if the merge source is a merge, get
-	 * the sources of that merge)
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getAllMergeSourceIDs()
 	 */
+	@Override
 	public List<UUID> getAllMergeSourceIDs(){
 		
 		List<UUID> result = new ArrayList<UUID>();
@@ -443,12 +422,10 @@ public class AnalysisDataset implements Serializable, Loggable {
 		return result;
 	}
 	
-	/**
-	 * Test if a dataset with the given id is present
-	 * as a merge source
-	 * @param id the UUID to test
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#hasMergeSource(java.util.UUID)
 	 */
+	@Override
 	public boolean hasMergeSource(UUID id){
 		if(this.mergeSources.contains(id)){
 			return true;
@@ -457,20 +434,18 @@ public class AnalysisDataset implements Serializable, Loggable {
 		}
 	}
 	
-	/**
-	 * Test if a dataset is present
-	 * as a merge source
-	 * @param dataset the dataset to test
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#hasMergeSource(analysis.IAnalysisDataset)
 	 */
-	public boolean hasMergeSource(AnalysisDataset dataset){
+	@Override
+	public boolean hasMergeSource(IAnalysisDataset dataset){
 		return this.hasMergeSource(dataset.getUUID());
 	}
 	
-	/**
-	 * Test if the dataset has merge sources
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#hasMergeSources()
 	 */
+	@Override
 	public boolean hasMergeSources(){
 		if(this.mergeSources.isEmpty()){
 			return false;
@@ -479,18 +454,18 @@ public class AnalysisDataset implements Serializable, Loggable {
 		}
 	}
 	
-	/**
-	 * Get the number of direct children of this dataset
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getChildCount()
 	 */
+	@Override
 	public int getChildCount(){
 		return this.childCollections.size();
 	}
 	
-	/**
-	 * Check if the dataset has children
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#hasChildren()
 	 */
+	@Override
 	public boolean hasChildren(){
 		if(this.childCollections.size()>0){
 			return true;
@@ -499,24 +474,29 @@ public class AnalysisDataset implements Serializable, Loggable {
 		}
 	}
 	
-	/**
-	 * Get all the direct children of this dataset
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getChildDatasets()
 	 */
-	public Collection<AnalysisDataset> getChildDatasets(){
-		return this.childCollections.values();
+	@Override
+	public Collection<IAnalysisDataset> getChildDatasets(){
+
+		List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>(childCollections.size());
+		
+		for(AnalysisDataset d : childCollections.values()){
+			result.add(d);
+		}
+		return result;
+			
 	}
 	
-	/**
-	 * Recursive version of get child datasets
-	 * Get all the direct children of this dataset, 
-	 * and all their children.
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getAllChildDatasets()
 	 */
-	public List<AnalysisDataset> getAllChildDatasets(){
+	@Override
+	public List<IAnalysisDataset> getAllChildDatasets(){
 
-		List<AnalysisDataset> result = new ArrayList<AnalysisDataset>(0);
-		for(AnalysisDataset d : this.getChildDatasets()){ // the direct descendents of this dataset
+		List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>(0);
+		for(IAnalysisDataset d : this.getChildDatasets()){ // the direct descendents of this dataset
 			result.add(d);
 			
 			if(this.hasChildren()){
@@ -526,27 +506,26 @@ public class AnalysisDataset implements Serializable, Loggable {
 		return result;
 	}
 	
-	/**
-	 * Get the collection in this dataset
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getCollection()
 	 */
+	@Override
 	public CellCollection getCollection(){
 		return this.thisCollection;
 	}
 
-	/**
-	 * Get the analysis options from this dataset
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getAnalysisOptions()
 	 */
+	@Override
 	public AnalysisOptions getAnalysisOptions() {
 		return analysisOptions;
 	}
 	
-	/**
-	 * Test if the dataset has analysis options set.
-	 * This is not the case for (for example) merge sources
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#hasAnalysisOptions()
 	 */
+	@Override
 	public boolean hasAnalysisOptions(){
 		if(this.analysisOptions==null){
 			return false;
@@ -555,28 +534,26 @@ public class AnalysisDataset implements Serializable, Loggable {
 		}
 	}
 
-	/**
-	 * Set the analysis options for the dataset
-	 * @param analysisOptions
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#setAnalysisOptions(analysis.AnalysisOptions)
 	 */
+	@Override
 	public void setAnalysisOptions(AnalysisOptions analysisOptions) {
 		this.analysisOptions = analysisOptions;
 	}
 	
-	/**
-	 * Add the given dataset as a cluster result.
-	 * This is a form of child dataset
-	 * @param dataset
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#addClusterGroup(components.ClusterGroup)
 	 */
+	@Override
 	public void addClusterGroup(ClusterGroup group){
 		this.clusterGroups.add(group);
 	}
 	
-	/**
-	 * Check the list of cluster groups, and return the highest
-	 * cluster group number present
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getMaxClusterGroupNumber()
 	 */
+	@Override
 	public int getMaxClusterGroupNumber(){
 		int number = 0;
 		
@@ -604,11 +581,10 @@ public class AnalysisDataset implements Serializable, Loggable {
 
 
 	
-	/**
-	 * Check if the dataset id is in a cluster
-	 * @param id
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#hasCluster(java.util.UUID)
 	 */
+	@Override
 	public boolean hasCluster(UUID id){
 		
 		boolean result = false;
@@ -621,14 +597,18 @@ public class AnalysisDataset implements Serializable, Loggable {
 		return result;
 	}
 	
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getClusterGroups()
+	 */
+	@Override
 	public List<ClusterGroup> getClusterGroups(){
 		return  this.clusterGroups;
 	}
 	
-	/**
-	 * Get the UUIDs of all datasets in clusters
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getClusterIDs()
 	 */
+	@Override
 	public List<UUID> getClusterIDs(){
 		List<UUID> result = new ArrayList<UUID>();
 		for(ClusterGroup g : this.clusterGroups){
@@ -637,10 +617,10 @@ public class AnalysisDataset implements Serializable, Loggable {
 		return result;
 	}
 	
-	/**
-	 * Check if the dataset has clusters
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#hasClusters()
 	 */
+	@Override
 	public boolean hasClusters(){
 		if(this.clusterGroups != null && this.clusterGroups.size()>0){
 			return true;
@@ -649,19 +629,18 @@ public class AnalysisDataset implements Serializable, Loggable {
 		}
 	}
 	
-	/**
-	 * Test if the given group is present in this dataset
-	 * @param group
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#hasClusterGroup(components.ClusterGroup)
 	 */
+	@Override
 	public boolean hasClusterGroup(ClusterGroup group){
 		return clusterGroups.contains(group);
 	}
 	
-	/**
-	 * Check that all cluster groups have child members present;
-	 * if cluster groups do not have children, remove the group
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#refreshClusterGroups()
 	 */
+	@Override
 	public void refreshClusterGroups(){
 
 		if(this.hasClusters()){
@@ -689,36 +668,36 @@ public class AnalysisDataset implements Serializable, Loggable {
 		}
 	}
 
-	/**
-	 * Check if the dataset is root
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#isRoot()
 	 */
+	@Override
 	public boolean isRoot(){
 		return this.isRoot;
 	}
 
-	/**
-	 * Set the dataset root status
-	 * @param b is the dataset root
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#setRoot(boolean)
 	 */
+	@Override
 	public void setRoot(boolean b){
 		this.isRoot = b;
 	}
 
-	/**
-	 * Delete the child AnalysisDataset specified
-	 * @param id the UUID of the child to delete
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#deleteChild(java.util.UUID)
 	 */
+	@Override
 	public void deleteChild(UUID id){
 		if(this.hasChild(id)){
 			this.removeChildCollection(id);
 		}
 	}
 		
-	/**
-	 * Delete the cluster with the given id
-	 * @param id
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#deleteClusterGroup(components.ClusterGroup)
 	 */
+	@Override
 	public void deleteClusterGroup(ClusterGroup group){
 		
 		if(hasClusterGroup(group)){
@@ -732,10 +711,10 @@ public class AnalysisDataset implements Serializable, Loggable {
 		}
 	}
 	
-	/**
-	 * Delete an associated dataset
-	 * @param id
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#deleteMergeSource(java.util.UUID)
 	 */
+	@Override
 	public void deleteMergeSource(UUID id){
 		if(this.mergeSources.contains(id)){
 			this.removeAssociatedDataset(id);
@@ -743,23 +722,20 @@ public class AnalysisDataset implements Serializable, Loggable {
 		}
 	}
 
-	/**
-	 * Check if the given dataset is a child dataset of this
-	 * @param child the dataset to test
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#hasChild(analysis.IAnalysisDataset)
 	 */
-	public boolean hasChild(AnalysisDataset child){
+	@Override
+	public boolean hasChild(IAnalysisDataset child){
 		return this.childCollections.containsKey(child.getUUID());
 	}
 	
-	/**
-	 * Test if the given dataset is a child of this dataset or
-	 * of one of its children
-	 * @param child
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#hasRecursiveChild(analysis.IAnalysisDataset)
 	 */
-	public boolean hasRecursiveChild(AnalysisDataset child){
-		for(AnalysisDataset d : this.getAllChildDatasets()){
+	@Override
+	public boolean hasRecursiveChild(IAnalysisDataset child){
+		for(IAnalysisDataset d : this.getAllChildDatasets()){
 			if(d.hasChild(child)){
 				return true;
 			}
@@ -767,11 +743,10 @@ public class AnalysisDataset implements Serializable, Loggable {
 		return false;
 	}
 
-	/**
-	 * Check if the given dataset is a child dataset of this
-	 * @param child
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#hasChild(java.util.UUID)
 	 */
+	@Override
 	public boolean hasChild(UUID child){
 		if(this.childCollections.containsKey(child)){
 			return true;
@@ -781,41 +756,40 @@ public class AnalysisDataset implements Serializable, Loggable {
 	}
 			
 	
-	/**
-	 * Set the dataset colour (used in comparisons between datasets)
-	 * @param colour the new colour
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#setDatasetColour(java.awt.Color)
 	 */
+	@Override
 	public void setDatasetColour(Color colour){
 		this.datasetColour = colour;
 	}
 	
 	
-	/**
-	 * Get the currently set dataset colour, or null if not set
-	 * @return colour or null
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#getDatasetColour()
 	 */
+	@Override
 	public Color getDatasetColour(){
 		return this.datasetColour;
 	}
 	
 	
-	/**
-	 * Test if the dataset colour is set or null
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#hasDatasetColour()
 	 */
+	@Override
 	public boolean hasDatasetColour(){
 		return this.getDatasetColour()!=null;
 	}
 
-	/**
-	 * Get the swatch, or null if the swatch is not set. 
-	 * Transient, not saved to nmd
-	 * @return
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#toString()
 	 */
 //	public ColourSwatch getSwatch() {
 //		return swatch;
 //	}
 	
+	@Override
 	public String toString(){
 		return this.getName();
 	}
@@ -833,13 +807,10 @@ public class AnalysisDataset implements Serializable, Loggable {
 //		    this.swatch = ColourSwatch.REGULAR_SWATCH;
 	}
 	
-	/**
-	 * Update the source image paths in the dataset and its children
-	 * to use the given directory 
-	 * @param expectedImageDirectory
-	 * @param dataset
-	 * @throws Exception
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#updateSourceImageDirectory(java.io.File)
 	 */
+	@Override
 	public void updateSourceImageDirectory(File expectedImageDirectory) {
 		
 		fine("Searching "+expectedImageDirectory.getAbsolutePath());
@@ -868,7 +839,7 @@ public class AnalysisDataset implements Serializable, Loggable {
 		}
 
 		fine("Updating child dataset image paths");
-		for(AnalysisDataset child : this.getAllChildDatasets()){
+		for(IAnalysisDataset child : this.getAllChildDatasets()){
 			ok = child.getCollection().updateSourceFolder(expectedImageDirectory);
 			if(!ok){
 				warn("Error updating child dataset image paths; update cancelled");
@@ -885,7 +856,7 @@ public class AnalysisDataset implements Serializable, Loggable {
 	 * @param dataset
 	 * @return
 	 */
-	private boolean checkName(File expectedImageDirectory, AnalysisDataset dataset){
+	private boolean checkName(File expectedImageDirectory, IAnalysisDataset dataset){
 		if(dataset.getCollection().getFolder().getName().equals(expectedImageDirectory.getName())){
 			return true;
 		} else {
@@ -923,20 +894,11 @@ public class AnalysisDataset implements Serializable, Loggable {
 	}
 	
 
-	  /**
-	   * Test if all the datasets in the list have a consensus nucleus
-	 * @param list
-	 * @return
-	 */
-	public static boolean haveConsensusNuclei(List<AnalysisDataset> list){
-		  for(AnalysisDataset d : list){
-			  if( ! d.getCollection().hasConsensusNucleus()){
-				  return false;
-			  }
-		  }
-		  return true;
-	  }
+	
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -966,6 +928,9 @@ public class AnalysisDataset implements Serializable, Loggable {
 		return result;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisDataset#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

@@ -70,6 +70,7 @@ import utility.Constants;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.actions.NewAnalysisAction;
 import gui.tabs.DetailPanel;
@@ -364,7 +365,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	}
 
 	@Override
-	public void update(List<AnalysisDataset> list) {
+	public void update(List<IAnalysisDataset> list) {
 		//Does nothing, no datasets are displayed. 
 		// Using DetailPanel only for signalling access
 		

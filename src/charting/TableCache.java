@@ -23,10 +23,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.swing.table.TableModel;
 
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
+import analysis.IAnalysisDataset;
 
 
 public class TableCache implements Cache {
@@ -71,7 +73,7 @@ public class TableCache implements Cache {
 	 * These will be recalculated at next call
 	 * @param list
 	 */
-	public void clear(List<AnalysisDataset> list){
+	public void clear(List<IAnalysisDataset> list){
 		
 		if(list==null || list.isEmpty()){
 			purge();
@@ -81,7 +83,7 @@ public class TableCache implements Cache {
 		Set<TableOptions> toRemove = new HashSet<TableOptions>();
 		
 		// Find the options with the datasets
-		for(AnalysisDataset d : list){
+		for(IAnalysisDataset d : list){
 			for(TableOptions op : tableMap.keySet()){
 				
 				if( ! op.hasDatasets()){
