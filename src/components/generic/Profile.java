@@ -51,7 +51,7 @@ public class Profile implements IProfile {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	protected final double[] array;
 
 	/**
@@ -80,12 +80,12 @@ public class Profile implements IProfile {
 		}
 
 		this.array = new double[p.size()];
-		
+
 		for(int i=0; i<p.size(); i++){
 			array[i] = p.get(i);
 		}
 	}
-	
+
 	/**
 	 * Constructor based on an fixed value and the profile
 	 * length
@@ -93,11 +93,11 @@ public class Profile implements IProfile {
 	 * @param length the length of the profile 
 	 */
 	public Profile(final double value, final int length){
-		
+
 		if(length<1){
 			throw new IllegalArgumentException("Profile length cannot be less than 1");
 		}
-		
+
 		this.array = new double[length];
 		for(int i=0; i<this.array.length; i++){
 			array[i] = value;
@@ -113,7 +113,7 @@ public class Profile implements IProfile {
 	public int size(){
 		return array.length;
 	}
-	
+
 
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#hashCode()
@@ -148,7 +148,7 @@ public class Profile implements IProfile {
 	 */
 	@Override
 	public double get(int index) {
-		
+
 		if(index<0 || index >= array.length){
 			throw new IllegalArgumentException("Requested value "+index+" is beyond profile end");
 		}
@@ -156,7 +156,7 @@ public class Profile implements IProfile {
 
 	}
 
-	
+
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#getMax()
 	 */
@@ -186,24 +186,24 @@ public class Profile implements IProfile {
 		}
 		return maxIndex;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#getIndexOfMax()
 	 */
 	@Override
 	public int getIndexOfMax(){
-		
+
 		BooleanProfile b = new BooleanProfile(this, true);
 		return getIndexOfMax(b);
-//		double max = 0;
-//		int maxIndex = 0;
-//		for(int i=0; i<array.length;i++){
-//			if(array[i]>max){
-//				max = array[i];
-//				maxIndex = i;
-//			}
-//		}
-//		return maxIndex;
+		//		double max = 0;
+		//		int maxIndex = 0;
+		//		for(int i=0; i<array.length;i++){
+		//			if(array[i]>max){
+		//				max = array[i];
+		//				maxIndex = i;
+		//			}
+		//		}
+		//		return maxIndex;
 	}
 
 	/* (non-Javadoc)
@@ -226,36 +226,36 @@ public class Profile implements IProfile {
 	@Override
 	public int getIndexOfMin(BooleanProfile limits){
 		double min = this.getMax();
-		
+
 		int minIndex = 0;
-		
+
 		for(int i=0; i<array.length;i++){
 			if( limits.get(i) && array[i]<min){
 				min = array[i];
 				minIndex = i;
 			}
 		}
-		
+
 		return minIndex;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#getIndexOfMin()
 	 */
 	@Override
 	public int getIndexOfMin(){
-		
+
 		BooleanProfile b = new BooleanProfile(this, true);
 		return getIndexOfMin(b);
-//		double min = this.getMax();
-//		int minIndex = 0;
-//		for(int i=0; i<array.length;i++){
-//			if(array[i]<min){
-//				min = array[i];
-//				minIndex = i;
-//			}
-//		}
-//		return minIndex;
+		//		double min = this.getMax();
+		//		int minIndex = 0;
+		//		for(int i=0; i<array.length;i++){
+		//			if(array[i]<min){
+		//				min = array[i];
+		//				minIndex = i;
+		//			}
+		//		}
+		//		return minIndex;
 	}
 
 	/* (non-Javadoc)
@@ -263,14 +263,14 @@ public class Profile implements IProfile {
 	 */
 	@Override
 	public double[] asArray(){
-		double[] result = new double[this.size()];
+		double[] result = new double[array.length];
 		for(int i=0;i<result.length; i++){
 			result[i] = this.array[i];
 		}
 		return result;
 	}
-  
-	
+
+
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#getPositions(int)
 	 */
@@ -282,7 +282,7 @@ public class Profile implements IProfile {
 		}
 		return new Profile(result);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#getRescaledIndex(int, int)
 	 */
@@ -290,7 +290,7 @@ public class Profile implements IProfile {
 	public double getRescaledIndex(int index, int newLength){
 		return (double)index / (double) array.length * (double) newLength;
 	}
-	
+
 	/**
 	 * Check the lengths of the two profiles. Return the first profile
 	 * interpolated to the length of the longer.
@@ -338,59 +338,59 @@ public class Profile implements IProfile {
 		}
 		return difference;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#weightedSquareDifference(components.generic.IProfile)
 	 */
 	@Override
 	public double weightedSquareDifference(IProfile testProfile) throws Exception {
-		
+
 		if(testProfile==null){
 			throw new IllegalArgumentException("Test profile is null");
 		}
-		
+
 		// Ensure both profiles have the same length, to allow
 		// point by point comparisons. The shorter is interpolated.
 		IProfile profile1 = equaliseLengths(this.copy(), testProfile);
 		IProfile profile2 = equaliseLengths(testProfile, this.copy());
-		
+
 		double result = 0;
-		
+
 		for(int j=0; j<profile1.size(); j++){ // for each point round the array
 
 			double value1 = profile1.get(j);
 			double value2 = profile2.get(j);
-						
+
 			// get the difference away from 180 degrees for the test profile
 			double normalised2 = Math.abs(  value2 - 180  );
-			
+
 			/*
 				Set the weighting to 1/180 multiplied by the difference	of the 
 				test profile to 180. Hence, a difference of 180 degrees from
 				the 180 degree baseline will get a weighting of 1, and a difference 
 				of 0 degrees from the 180 degree baseline will get a weighting of 0
 				(i.e. does not count if it is perfectly straight)
-			*/
+			 */
 			double weight = (double) ( 1.0/180.0) * normalised2;
-			
+
 			// the difference between the two profiles at this point
 			double difference = value1 - value2;
-			
+
 			// apply the weighting
 			double weightedDifference = difference * weight;
-			
+
 			// add the square difference - highlights extremes
 			result += Math.pow(weightedDifference, 2); 
 		}
-		
+
 		return result;
 	}
 
-  /*
+	/*
     --------------------
     Profile manipulation
     --------------------
-  */
+	 */
 
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#copy()
@@ -411,7 +411,7 @@ public class Profile implements IProfile {
 		}
 		return new Profile(newArray);
 	}
-  
+
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#smooth(int)
 	 */
@@ -434,7 +434,7 @@ public class Profile implements IProfile {
 		}
 		return new Profile(result);
 	}
-  
+
 	/**
 	 * Get an array of the values <windowSize> before or after the current point
 	 * @param position the position in the array
@@ -468,833 +468,833 @@ public class Profile implements IProfile {
 		}
 	}  
 
-  /* (non-Javadoc)
- * @see components.generic.IProfile#interpolate(int)
- */
-  @Override
-public Profile interpolate(int newLength) {
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#interpolate(int)
+	 */
+	@Override
+	public Profile interpolate(int newLength) {
 
-    if(newLength < this.size()){
-//    	finer("Interpolating to a smaller array!");
-    }
-    
-    double[] newArray = new double[newLength];
-    
-    // where in the old curve index is the new curve index?
-    for (int i=0; i<newLength; i++) {
-      // we have a point in the new curve.
-      // we want to know which points it lay between in the old curve
-      double oldIndex = ( (double)i / (double)newLength) * (double) array.length; // get the fractional index position needed
-      
-      // get the value in the old profile at the given fractional index position
-      newArray[i] = interpolateValue(oldIndex);
-    }
-    return new Profile(newArray);
-  }
+		if(newLength < this.size()){
+			//    	finer("Interpolating to a smaller array!");
+		}
 
-  /**
-   * Take an index position from a non-normalised profile. Normalise it
-   * Find the corresponding angle in the median curve.
-   * Interpolate as needed
-   * @param normIndex the fractional index position to find within this profile
-   * @return an interpolated value
-   */
-  private double interpolateValue(double normIndex){
+		double[] newArray = new double[newLength];
 
-	  // convert index to 1 window boundaries
-	  // This allows us to see the array indexes above and below the desired
-	  // fractional index. From these, we can interpolate the fractional component.
-	  // NOTE: this does not account for curves. Interpolation is linear.
-	  int index1 = (int) Math.round(normIndex);
-	  int index2 	= index1 > normIndex
-			  		? index1 - 1
-					: index1 + 1;
-	  
+		// where in the old curve index is the new curve index?
+		for (int i=0; i<newLength; i++) {
+			// we have a point in the new curve.
+			// we want to know which points it lay between in the old curve
+			double oldIndex = ( (double)i / (double)newLength) * (double) array.length; // get the fractional index position needed
 
-	  // Decide which of the two indexes is the higher, and which is the lower
-	  int indexLower 	= index1 < index2
-			  			? index1
-			  			: index2;
+			// get the value in the old profile at the given fractional index position
+			newArray[i] = interpolateValue(oldIndex);
+		}
+		return new Profile(newArray);
+	}
 
-	  int indexHigher 	= index2 > index1
-			  			? index2
-			  			: index1;
-	  
-//	  System.out.println("Set indexes "+normIndex+": "+indexLower+"-"+indexHigher);
+	/**
+	 * Take an index position from a non-normalised profile. Normalise it
+	 * Find the corresponding angle in the median curve.
+	 * Interpolate as needed
+	 * @param normIndex the fractional index position to find within this profile
+	 * @return an interpolated value
+	 */
+	private double interpolateValue(double normIndex){
 
-	  // wrap the arrays
-	  indexLower  = AbstractCellularComponent.wrapIndex(indexLower , array.length);
-	  indexHigher = AbstractCellularComponent.wrapIndex(indexHigher, array.length);
-//	  System.out.println("Wrapped indexes "+normIndex+": "+indexLower+"-"+indexHigher);
+		// convert index to 1 window boundaries
+		// This allows us to see the array indexes above and below the desired
+		// fractional index. From these, we can interpolate the fractional component.
+		// NOTE: this does not account for curves. Interpolation is linear.
+		int index1 = (int) Math.round(normIndex);
+		int index2 	= index1 > normIndex
+				? index1 - 1
+						: index1 + 1;
 
-	  // get the values at these indexes
-	  double valueHigher = array[ indexHigher ];
-	  double valueLower  = array[ indexLower  ];
-//	  System.out.println("Wrapped values "+normIndex+": "+valueLower+" and "+valueHigher);
 
-	  // calculate the difference between values
-	  // this can be negative
-	  double valueDifference = valueHigher - valueLower;
-//	  System.out.println("Difference "+normIndex+": "+valueDifference);
-	  
-	  // calculate the distance into the region to go
-	  double offset = normIndex - indexLower;
-//	  System.out.println("Offset "+normIndex+": "+offset);
-	  
+		// Decide which of the two indexes is the higher, and which is the lower
+		int indexLower 	= index1 < index2
+				? index1
+						: index2;
 
-	  // add the offset to the lower index
-	  double positionToFind = indexLower + offset;
-	  positionToFind = AbstractCellularComponent.wrapIndex(positionToFind , array.length);
-//	  System.out.println("Position to find "+normIndex+": "+positionToFind);
-	  
-	  // calculate the value to be added to the lower index value
-	  double newValue = valueDifference * offset; // 0 for 0, full difference for 1
-//	  System.out.println("New value "+normIndex+": "+newValue);
-	  
-	  double linearInterpolatedValue = newValue + valueLower;
-//	  System.out.println("Interpolated "+normIndex+": "+linearInterpolatedValue);
+		int indexHigher 	= index2 > index1
+				? index2
+						: index1;
 
-	  return linearInterpolatedValue;
-  }
+		//	  System.out.println("Set indexes "+normIndex+": "+indexLower+"-"+indexHigher);
 
-  /*
+		// wrap the arrays
+		indexLower  = AbstractCellularComponent.wrapIndex(indexLower , array.length);
+		indexHigher = AbstractCellularComponent.wrapIndex(indexHigher, array.length);
+		//	  System.out.println("Wrapped indexes "+normIndex+": "+indexLower+"-"+indexHigher);
+
+		// get the values at these indexes
+		double valueHigher = array[ indexHigher ];
+		double valueLower  = array[ indexLower  ];
+		//	  System.out.println("Wrapped values "+normIndex+": "+valueLower+" and "+valueHigher);
+
+		// calculate the difference between values
+		// this can be negative
+		double valueDifference = valueHigher - valueLower;
+		//	  System.out.println("Difference "+normIndex+": "+valueDifference);
+
+		// calculate the distance into the region to go
+		double offset = normIndex - indexLower;
+		//	  System.out.println("Offset "+normIndex+": "+offset);
+
+
+		// add the offset to the lower index
+		double positionToFind = indexLower + offset;
+		positionToFind = AbstractCellularComponent.wrapIndex(positionToFind , array.length);
+		//	  System.out.println("Position to find "+normIndex+": "+positionToFind);
+
+		// calculate the value to be added to the lower index value
+		double newValue = valueDifference * offset; // 0 for 0, full difference for 1
+		//	  System.out.println("New value "+normIndex+": "+newValue);
+
+		double linearInterpolatedValue = newValue + valueLower;
+		//	  System.out.println("Interpolated "+normIndex+": "+linearInterpolatedValue);
+
+		return linearInterpolatedValue;
+	}
+
+	/*
     Interpolate another profile to match this, and move this profile
     along it one index at a time. Find the point of least difference, 
     and return this offset. Returns the positive offset to this profile
-   */
-  /* (non-Javadoc)
- * @see components.generic.IProfile#getSlidingWindowOffset(components.generic.IProfile)
- */
-@Override
-public int getSlidingWindowOffset(IProfile testProfile) {
+	 */
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getSlidingWindowOffset(components.generic.IProfile)
+	 */
+	@Override
+	public int getSlidingWindowOffset(IProfile testProfile) {
 
-	  double lowestScore = this.absoluteSquareDifference(testProfile);
-	  int index = 0;
-	  for(int i=0;i<this.size();i++){
+		double lowestScore = this.absoluteSquareDifference(testProfile);
+		int index = 0;
+		for(int i=0;i<this.size();i++){
 
-		  IProfile offsetProfile = this.offset(i);
+			IProfile offsetProfile = this.offset(i);
 
-		  double score = offsetProfile.absoluteSquareDifference(testProfile);
-		  if(score<lowestScore){
-			  lowestScore=score;
-			  index=i;
-		  }
+			double score = offsetProfile.absoluteSquareDifference(testProfile);
+			if(score<lowestScore){
+				lowestScore=score;
+				index=i;
+			}
 
-	  }
-	  return index;
-  }
+		}
+		return index;
+	}
 
-  /* (non-Javadoc)
- * @see components.generic.IProfile#getConsistentRegionBounds(double, double, int)
- */
-  @Override
-public int[] getConsistentRegionBounds(double value, double tolerance, int points){
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getConsistentRegionBounds(double, double, int)
+	 */
+	@Override
+	public int[] getConsistentRegionBounds(double value, double tolerance, int points){
 
-	  int counter = 0;
-	  int start = -1;
-	  int end = -1;
-	  int[] result = {start, end};
-	  
-	  for(int index = 0; index<array.length; index++){ // go through each point TODO wrapping
-		  double d = array[index];
-		  if(d > value-tolerance && d < value+tolerance){ // if the point meets criteria
-			  
-			  if(start==-1){ // start a new region if needed
-				  counter = 0;
-				  start = index;
-			  }
-			  counter++; // start counting a new region or increase an existing region
-			  
-		  } else { // does not meet criteria
-			  
-			  end = index;
-			  
-			  if(counter>=points){ // if the region is large enough
-				  // return points
-				  result[0] = start; // use the saved start and end indexes
-				  result[1] = end;
-				  return result;
-				  
-			  } else { // otherwise, reset the counter 
-				  
-				  
-				  start=-1;
-				  end=-1;
-			  }
-			  
-			 
-		  }
-	  }
-	  return result;
-  }
+		int counter = 0;
+		int start = -1;
+		int end = -1;
+		int[] result = {start, end};
 
-  /*
+		for(int index = 0; index<array.length; index++){ // go through each point TODO wrapping
+			double d = array[index];
+			if(d > value-tolerance && d < value+tolerance){ // if the point meets criteria
+
+				if(start==-1){ // start a new region if needed
+					counter = 0;
+					start = index;
+				}
+				counter++; // start counting a new region or increase an existing region
+
+			} else { // does not meet criteria
+
+				end = index;
+
+				if(counter>=points){ // if the region is large enough
+					// return points
+					result[0] = start; // use the saved start and end indexes
+					result[1] = end;
+					return result;
+
+				} else { // otherwise, reset the counter 
+
+
+					start=-1;
+					end=-1;
+				}
+
+
+			}
+		}
+		return result;
+	}
+
+	/*
     --------------------
     Detect minima within the profiles
     --------------------
-  */
+	 */
 
-  /*
+	/*
     For each point in the array, test for a local minimum.
     The values of the points <minimaLookupDistance> ahead and behind are checked.
     Each should be greater than the value before.
     One exception is allowed, to account for noisy data. Returns the indexes of minima
-  */
-  /* (non-Javadoc)
- * @see components.generic.IProfile#getLocalMinima(int)
- */
-@Override
-public BooleanProfile getLocalMinima(int windowSize){
-    // go through angle array (with tip at start)
-    // look at 1-2-3-4-5 points ahead and behind.
-    // if all greater, local minimum
-    double[] prevValues = new double[windowSize]; // slots for previous angles
-    double[] nextValues = new double[windowSize]; // slots for next angles
+	 */
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getLocalMinima(int)
+	 */
+	@Override
+	public BooleanProfile getLocalMinima(int windowSize){
+		// go through angle array (with tip at start)
+		// look at 1-2-3-4-5 points ahead and behind.
+		// if all greater, local minimum
+		double[] prevValues = new double[windowSize]; // slots for previous angles
+		double[] nextValues = new double[windowSize]; // slots for next angles
 
-    // int count = 0;
-    // List<Integer> result = new ArrayList<Integer>(0);
+		// int count = 0;
+		// List<Integer> result = new ArrayList<Integer>(0);
 
-    boolean[] minima = new boolean[this.size()];
+		boolean[] minima = new boolean[this.size()];
 
-    for (int i=0; i<array.length; i++) { // for each position in sperm
+		for (int i=0; i<array.length; i++) { // for each position in sperm
 
-      // go through each lookup position and get the appropriate angles
-      for(int j=0;j<prevValues.length;j++){
+			// go through each lookup position and get the appropriate angles
+			for(int j=0;j<prevValues.length;j++){
 
-        int prev_i = AbstractCellularComponent.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
-        int next_i = AbstractCellularComponent.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
+				int prev_i = AbstractCellularComponent.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
+				int next_i = AbstractCellularComponent.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
 
-        // fill the lookup array
-        prevValues[j] = array[prev_i];
-        nextValues[j] = array[next_i];
-      }
-      
-      // with the lookup positions, see if minimum at i
-      // return a 1 if all higher than last, 0 if not
-      // prev_l = 0;
-      boolean ok = true;
-      for(int k=0;k<prevValues.length;k++){
+				// fill the lookup array
+				prevValues[j] = array[prev_i];
+				nextValues[j] = array[next_i];
+			}
 
-        // for the first position in prevValues, compare to the current index
-        if(k==0){
-          if( prevValues[k] <= array[i] || 
-              nextValues[k] <= array[i] ){
-            ok = false;
-          }
-        } else { // for the remainder of the positions in prevValues, compare to the prior prevAngle
-          
-          if( prevValues[k] <= prevValues[k-1] || 
-              nextValues[k] <= nextValues[k-1]){
-            ok = false;
-          }
-        }
-      }
+			// with the lookup positions, see if minimum at i
+			// return a 1 if all higher than last, 0 if not
+			// prev_l = 0;
+			boolean ok = true;
+			for(int k=0;k<prevValues.length;k++){
 
-      if(ok){
-        // count++;
-        minima[i] = true;
-      } else {
-        minima[i] = false;
-      }
+				// for the first position in prevValues, compare to the current index
+				if(k==0){
+					if( prevValues[k] <= array[i] || 
+							nextValues[k] <= array[i] ){
+						ok = false;
+					}
+				} else { // for the remainder of the positions in prevValues, compare to the prior prevAngle
 
-      // result.add(i);
+					if( prevValues[k] <= prevValues[k-1] || 
+							nextValues[k] <= nextValues[k-1]){
+						ok = false;
+					}
+				}
+			}
 
-    }
-    BooleanProfile minimaProfile = new BooleanProfile(minima);
-    // this.minimaCalculated = true;
-    // this.minimaCount =  count;
-    return minimaProfile;
-  }
-  
-  /* (non-Javadoc)
- * @see components.generic.IProfile#getLocalMinima(int, double)
- */
-  @Override
-public BooleanProfile getLocalMinima(int windowSize, double threshold){
-	  BooleanProfile minima = getLocalMinima(windowSize);
+			if(ok){
+				// count++;
+				minima[i] = true;
+			} else {
+				minima[i] = false;
+			}
 
-	  boolean[] values = new boolean[this.size()];
+			// result.add(i);
 
-	  for (int i=0; i<array.length; i++) { 
+		}
+		BooleanProfile minimaProfile = new BooleanProfile(minima);
+		// this.minimaCalculated = true;
+		// this.minimaCount =  count;
+		return minimaProfile;
+	}
 
-		  if(minima.get(i)==true && this.get(i)<threshold){
-			  values[i] = true;
-		  } else {
-			  values[i] = false;
-		  } 
-	  }
-	  return new BooleanProfile(values);
-  }
-  
-  /* (non-Javadoc)
- * @see components.generic.IProfile#getLocalMinima(int, double, double)
- */
-  @Override
-public BooleanProfile getLocalMinima(int windowSize, double threshold, double fraction){
-	  BooleanProfile minima = getLocalMinima(windowSize, threshold);
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getLocalMinima(int, double)
+	 */
+	@Override
+	public BooleanProfile getLocalMinima(int windowSize, double threshold){
+		BooleanProfile minima = getLocalMinima(windowSize);
 
-	  boolean[] values = new boolean[this.size()];
-	  
-	  double fractionThreshold = (this.getMax()-this.getMin()) * fraction;
+		boolean[] values = new boolean[this.size()];
 
-	  for (int i=0; i<array.length; i++) { 
+		for (int i=0; i<array.length; i++) { 
 
-		  if(minima.get(i)==true && ( this.get(i)>fractionThreshold || this.get(i)<-fractionThreshold   )  ){
-			  values[i] = true;
-		  } else {
-			  values[i] = false;
-		  } 
-	  }
-	  return new BooleanProfile(values);
-  }
+			if(minima.get(i)==true && this.get(i)<threshold){
+				values[i] = true;
+			} else {
+				values[i] = false;
+			} 
+		}
+		return new BooleanProfile(values);
+	}
 
-  /* (non-Javadoc)
- * @see components.generic.IProfile#getLocalMaxima(int)
- */
-  @Override
-public BooleanProfile getLocalMaxima(int windowSize){
-	  // go through array
-	  // look at points ahead and behind.
-	  // if all lower, local maximum
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getLocalMinima(int, double, double)
+	 */
+	@Override
+	public BooleanProfile getLocalMinima(int windowSize, double threshold, double fraction){
+		BooleanProfile minima = getLocalMinima(windowSize, threshold);
 
-	  boolean[] result = new boolean[this.size()];
+		boolean[] values = new boolean[this.size()];
 
-	  for (int i=0; i<array.length; i++) { // for each position
+		double fractionThreshold = (this.getMax()-this.getMin()) * fraction;
 
-		  double[] prevValues = getValues(i, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
-		  double[] nextValues = getValues(i, windowSize, Profile.ARRAY_AFTER);
+		for (int i=0; i<array.length; i++) { 
 
-		  // with the lookup positions, see if maximum at i
-		  // return a 1 if all lower than last, 0 if not
-		  boolean isMaximum = true;
-		  for(int k=0;k<prevValues.length;k++){
+			if(minima.get(i)==true && ( this.get(i)>fractionThreshold || this.get(i)<-fractionThreshold   )  ){
+				values[i] = true;
+			} else {
+				values[i] = false;
+			} 
+		}
+		return new BooleanProfile(values);
+	}
 
-			  // for the first position in prevValues, compare to the current index
-			  if(k==0){
-				  if( prevValues[k] >= array[i] || 
-						  nextValues[k] >= array[i] ){
-					  isMaximum = false;
-				  }
-			  } else { // for the remainder of the positions in prevValues, compare to the prior prevAngle
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getLocalMaxima(int)
+	 */
+	@Override
+	public BooleanProfile getLocalMaxima(int windowSize){
+		// go through array
+		// look at points ahead and behind.
+		// if all lower, local maximum
 
-				  if( prevValues[k] >= prevValues[k-1] || 
-						  nextValues[k] >= nextValues[k-1]){
-					  isMaximum = false;
-				  }
-			  }
-		  }
+		boolean[] result = new boolean[this.size()];
 
-		  result[i] = isMaximum;
-	  }
-	  return new BooleanProfile(result);
-  }
-  
-  /* (non-Javadoc)
- * @see components.generic.IProfile#getLocalMaxima(int, double)
- */
-  @Override
-public BooleanProfile getLocalMaxima(int windowSize, double threshold){
-	  BooleanProfile maxima = getLocalMaxima(windowSize);
+		for (int i=0; i<array.length; i++) { // for each position
 
-	  boolean[] values = new boolean[this.size()];
+			double[] prevValues = getValues(i, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
+			double[] nextValues = getValues(i, windowSize, Profile.ARRAY_AFTER);
 
-	  for (int i=0; i<array.length; i++) { 
+			// with the lookup positions, see if maximum at i
+			// return a 1 if all lower than last, 0 if not
+			boolean isMaximum = true;
+			for(int k=0;k<prevValues.length;k++){
 
-		  if(maxima.get(i)==true && this.get(i)>threshold){
-			  values[i] = true;
-		  } else {
-			  values[i] = false;
-		  } 
-	  }
-	  return new BooleanProfile(values);
-  }
-  
-  /* (non-Javadoc)
- * @see components.generic.IProfile#getLocalMaxima(int, double, double)
- */
-  @Override
-public BooleanProfile getLocalMaxima(int windowSize, double threshold, double fraction){
-	  BooleanProfile minima = getLocalMaxima(windowSize, threshold);
+				// for the first position in prevValues, compare to the current index
+				if(k==0){
+					if( prevValues[k] >= array[i] || 
+							nextValues[k] >= array[i] ){
+						isMaximum = false;
+					}
+				} else { // for the remainder of the positions in prevValues, compare to the prior prevAngle
 
-	  boolean[] values = new boolean[this.size()];
-	  
-	  double fractionThreshold = this.getMax()-this.getMin() * fraction;
+					if( prevValues[k] >= prevValues[k-1] || 
+							nextValues[k] >= nextValues[k-1]){
+						isMaximum = false;
+					}
+				}
+			}
 
-	  for (int i=0; i<array.length; i++) { 
+			result[i] = isMaximum;
+		}
+		return new BooleanProfile(result);
+	}
 
-		  if(minima.get(i)==true && ( this.get(i)>fractionThreshold || this.get(i)<-fractionThreshold   )  ){
-			  values[i] = true;
-		  } else {
-			  values[i] = false;
-		  } 
-	  }
-	  return new BooleanProfile(values);
-  }
-  
-  /* (non-Javadoc)
- * @see components.generic.IProfile#getWindow(int, int)
- */
-  @Override
-public IProfile getWindow(int index, int windowSize){
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getLocalMaxima(int, double)
+	 */
+	@Override
+	public BooleanProfile getLocalMaxima(int windowSize, double threshold){
+		BooleanProfile maxima = getLocalMaxima(windowSize);
 
-	  double[] result = new double[windowSize*2 + 1];
+		boolean[] values = new boolean[this.size()];
 
-	  double[] prevValues = getValues(index, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
-	  double[] nextValues = getValues(index, windowSize, Profile.ARRAY_AFTER);
+		for (int i=0; i<array.length; i++) { 
 
-	  // need to reverse the previous array
-	  for(int k=prevValues.length, i=0;k>0;k--, i++){ 
-		  result[i] = prevValues[k-1];        
-	  }
-	  result[windowSize] = array[index];
-	  for(int i=0; i<nextValues.length;i++){ 
-		  result[windowSize+i+1] = nextValues[i];        
-	  }
+			if(maxima.get(i)==true && this.get(i)>threshold){
+				values[i] = true;
+			} else {
+				values[i] = false;
+			} 
+		}
+		return new BooleanProfile(values);
+	}
 
-	  return new Profile(result);
-  }
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getLocalMaxima(int, double, double)
+	 */
+	@Override
+	public BooleanProfile getLocalMaxima(int windowSize, double threshold, double fraction){
+		BooleanProfile minima = getLocalMaxima(windowSize, threshold);
 
-  /* (non-Javadoc)
- * @see components.generic.IProfile#getSubregion(int, int)
- */
-  @Override
-public IProfile getSubregion(int indexStart, int indexEnd) {
+		boolean[] values = new boolean[this.size()];
 
-	  if(indexStart < indexEnd ){
-		  
-		  double[] result = Arrays.copyOfRange(array,indexStart, indexEnd);
-		  return new Profile(result);
-		  
-	  } else { // case when array wraps
+		double fractionThreshold = this.getMax()-this.getMin() * fraction;
 
-		  double[] resultA = Arrays.copyOfRange(array,indexStart, array.length-1);
-		  double[] resultB = Arrays.copyOfRange(array,0, indexEnd);
-		  double[] result = new double[resultA.length+resultB.length];
-		  int index = 0;
-		  for(double d : resultA){
-			  result[index] = d;
-			  index++;
-		  }
-		  for(double d : resultB){
-			  result[index] = d;
-			  index++;
-		  }
-		  
-		  if(result.length==0){
-			  log(Level.SEVERE, "Subregion length zero: "+indexStart+" - "+indexEnd);
-		  }
-		  return new Profile(result);
-	  }
-  }
-  
-  /* (non-Javadoc)
- * @see components.generic.IProfile#getSubregion(components.nuclear.NucleusBorderSegment)
- */
-  @Override
-public IProfile getSubregion(NucleusBorderSegment segment) {
-	  
-	  if(segment==null){
-		  throw new IllegalArgumentException("Segment is null");
-	  }
-	  
-	  if(segment.getTotalLength()!=this.size()){
-		  throw new IllegalArgumentException("Segment comes from a different length profile");
-	  }
-	  return getSubregion(segment.getStartIndex(), segment.getEndIndex());
-  }
+		for (int i=0; i<array.length; i++) { 
 
-  /* (non-Javadoc)
- * @see components.generic.IProfile#calculateDeltas(int)
- */
-@Override
-public IProfile calculateDeltas(int windowSize){
+			if(minima.get(i)==true && ( this.get(i)>fractionThreshold || this.get(i)<-fractionThreshold   )  ){
+				values[i] = true;
+			} else {
+				values[i] = false;
+			} 
+		}
+		return new BooleanProfile(values);
+	}
 
-    double[] deltas = new double[this.size()];
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getWindow(int, int)
+	 */
+	@Override
+	public IProfile getWindow(int index, int windowSize){
+
+		double[] result = new double[windowSize*2 + 1];
+
+		double[] prevValues = getValues(index, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
+		double[] nextValues = getValues(index, windowSize, Profile.ARRAY_AFTER);
+
+		// need to reverse the previous array
+		for(int k=prevValues.length, i=0;k>0;k--, i++){ 
+			result[i] = prevValues[k-1];        
+		}
+		result[windowSize] = array[index];
+		for(int i=0; i<nextValues.length;i++){ 
+			result[windowSize+i+1] = nextValues[i];        
+		}
+
+		return new Profile(result);
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getSubregion(int, int)
+	 */
+	@Override
+	public IProfile getSubregion(int indexStart, int indexEnd) {
+
+		if(indexStart < indexEnd ){
+
+			double[] result = Arrays.copyOfRange(array,indexStart, indexEnd);
+			return new Profile(result);
+
+		} else { // case when array wraps
+
+			double[] resultA = Arrays.copyOfRange(array,indexStart, array.length-1);
+			double[] resultB = Arrays.copyOfRange(array,0, indexEnd);
+			double[] result = new double[resultA.length+resultB.length];
+			int index = 0;
+			for(double d : resultA){
+				result[index] = d;
+				index++;
+			}
+			for(double d : resultB){
+				result[index] = d;
+				index++;
+			}
+
+			if(result.length==0){
+				log(Level.SEVERE, "Subregion length zero: "+indexStart+" - "+indexEnd);
+			}
+			return new Profile(result);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getSubregion(components.nuclear.NucleusBorderSegment)
+	 */
+	@Override
+	public IProfile getSubregion(NucleusBorderSegment segment) {
+
+		if(segment==null){
+			throw new IllegalArgumentException("Segment is null");
+		}
+
+		if(segment.getTotalLength()!=this.size()){
+			throw new IllegalArgumentException("Segment comes from a different length profile");
+		}
+		return getSubregion(segment.getStartIndex(), segment.getEndIndex());
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#calculateDeltas(int)
+	 */
+	@Override
+	public IProfile calculateDeltas(int windowSize){
+
+		double[] deltas = new double[this.size()];
 
 
-    for (int i=0; i<array.length; i++) { // for each position in sperm
-    	
-    	double[] prevValues = getValues(i, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
-    	double[] nextValues = getValues(i, windowSize, Profile.ARRAY_AFTER);
+		for (int i=0; i<array.length; i++) { // for each position in sperm
 
-      double delta = 0;
-      for(int k=0;k<prevValues.length;k++){
+			double[] prevValues = getValues(i, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
+			double[] nextValues = getValues(i, windowSize, Profile.ARRAY_AFTER);
 
-        if(k==0){
-          delta += (array[i] - prevValues[k]) + (nextValues[k] - array[i]);
-          
-        } else {
-          delta += ( prevValues[k] - prevValues[k-1]) + (nextValues[k] - nextValues[k-1]);
-        }
-        
-      }
+			double delta = 0;
+			for(int k=0;k<prevValues.length;k++){
 
-      deltas[i] = delta;
-    }
-    IProfile result = new Profile(deltas);
-    return result;
-  }
+				if(k==0){
+					delta += (array[i] - prevValues[k]) + (nextValues[k] - array[i]);
+
+				} else {
+					delta += ( prevValues[k] - prevValues[k-1]) + (nextValues[k] - nextValues[k-1]);
+				}
+
+			}
+
+			deltas[i] = delta;
+		}
+		IProfile result = new Profile(deltas);
+		return result;
+	}
 
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#differentiate()
 	 */
 	@Override
 	public IProfile differentiate(){
-	
+
 		double[] deltas = new double[this.size()];
-	
+
 		for (int i=0; i<array.length; i++) { // for each position in sperm
-	
+
 			int prev_i = AbstractCellularComponent.wrapIndex( i-1  , this.size() ); // the index before
 			int next_i = AbstractCellularComponent.wrapIndex( i+1  , this.size() ); // the index after
-	
-	
+
+
 			double delta = 	array[i]	-  array[prev_i] +
 					array[next_i]- array[i];
-	
-	
+
+
 			deltas[i] = delta;
 		}
 		IProfile result = new Profile(deltas);
 		return result;
 	}
-  
-  /* (non-Javadoc)
- * @see components.generic.IProfile#log(double)
- */
-  @Override
-public IProfile log(double base){
-	  double[] values = new double[this.size()];
 
-	  for (int i=0; i<array.length; i++) { 
-		  values[i] = Math.log(array[i]) / Math.log(base);
-	  }
-	  return new Profile(values);
-  }
-  
-  /* (non-Javadoc)
- * @see components.generic.IProfile#power(double)
- */
-  @Override
-public IProfile power(double exponent){
-	  double[] values = new double[this.size()];
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#log(double)
+	 */
+	@Override
+	public IProfile log(double base){
+		double[] values = new double[this.size()];
 
-	  for (int i=0; i<array.length; i++) { 
-		  values[i] = Math.pow(array[i],exponent);
-	  }
-	  return new Profile(values);
-  }
-  
-  /* (non-Javadoc)
- * @see components.generic.IProfile#absolute()
- */
-  @Override
-public IProfile absolute(){
-	  double[] values = new double[this.size()];
-
-	  for (int i=0; i<array.length; i++) { 
-		  values[i] = Math.abs(array[i]);
-	  }
-	  return new Profile(values);
-  }
-  
-  /* (non-Javadoc)
- * @see components.generic.IProfile#cumulativeSum()
- */
-  @Override
-public IProfile cumulativeSum(){
-	  double[] values = new double[this.size()];
-
-	  double total = 0;
-	  for (int i=0; i<array.length; i++) { 
-		  total += array[i];
-		  values[i] = total;
-	  }
-	  return new Profile(values);
-  }
-
-  /* (non-Javadoc)
- * @see components.generic.IProfile#multiply(double)
- */
-  @Override
-public IProfile multiply(double multiplier){
-	  double[] result = new double[this.size()];
-
-	  for (int i=0; i<array.length; i++) { // for each position in sperm
-		  result[i] = array[i] * multiplier;
-	  }
-	  return new Profile(result);
-  }
-
-  /* (non-Javadoc)
- * @see components.generic.IProfile#multiply(components.generic.IProfile)
- */
-  @Override
-public IProfile multiply(IProfile multiplier){
-	  if(this.size()!=multiplier.size()){
-		  throw new IllegalArgumentException("Profile sizes do not match");
-	  }
-	  double[] result = new double[this.size()];
-
-	  for (int i=0; i<array.length; i++) { // for each position in sperm
-		  result[i] = array[i] * multiplier.get(i);
-	  }
-	  return new Profile(result);
-  }
-
-  /* (non-Javadoc)
- * @see components.generic.IProfile#divide(double)
- */
-  @Override
-public IProfile divide(double divider){
-	  double[] result = new double[this.size()];
-
-	  for (int i=0; i<array.length; i++) { // for each position in sperm
-		  result[i] = array[i] / divider;
-	  }
-	  return new Profile(result);
-  }
-
-  /* (non-Javadoc)
- * @see components.generic.IProfile#divide(components.generic.IProfile)
- */
-  @Override
-public IProfile divide(IProfile divider){
-	  if(this.size()!=divider.size()){
-		  throw new IllegalArgumentException("Profile sizes do not match");
-	  }
-	  double[] result = new double[this.size()];
-
-	  for (int i=0; i<array.length; i++) { // for each position in sperm
-		  result[i] = array[i] / divider.get(i);
-	  }
-	  return new Profile(result);
-  }
-
-  /* (non-Javadoc)
- * @see components.generic.IProfile#add(components.generic.IProfile)
- */
-  @Override
-public IProfile add(IProfile adder){
-	  if(this.size()!=adder.size()){
-		  throw new IllegalArgumentException("Profile sizes do not match");
-	  }
-	  double[] result = new double[this.size()];
-
-	  for (int i=0; i<array.length; i++) { // for each position in sperm
-		  result[i] = array[i] + adder.get(i);
-	  }
-	  return new Profile(result);
-  }
-
-  /* (non-Javadoc)
- * @see components.generic.IProfile#add(double)
- */
-  @Override
-public IProfile add(double value){
-
-	  double[] result = new double[this.size()];
-
-	  for (int i=0; i<array.length; i++) { // for each position in sperm
-		  result[i] = array[i] + value;
-	  }
-	  return new Profile(result);
-  }
-
-  /* (non-Javadoc)
- * @see components.generic.IProfile#subtract(components.generic.IProfile)
- */
-  @Override
-public IProfile subtract(IProfile sub){
-	  if(this.size()!=sub.size()){
-		  throw new IllegalArgumentException("Profile sizes do not match");
-	  }
-	  double[] result = new double[this.size()];
-
-	  for (int i=0; i<array.length; i++) { // for each position in sperm
-		  result[i] = array[i] - sub.get(i);
-	  }
-	  return new Profile(result);
-  }
-
-  /* (non-Javadoc)
- * @see components.generic.IProfile#getRanks()
- */
-  @Override
-public IProfile getRanks(){
-	  
-	  int rank = 0;
-	  
-	  double[] sorted = this.asArray();
-	  Arrays.sort(sorted);
-	  
-	  double[]ranks = new double[this.size()];
-	  
-	  for(double sort :sorted ){
-		  
-		  for(int i=0; i<this.size(); i++){
-			  double value = array[i];
-			  if(value==sort){
-				  ranks[i] = rank;
-				  break;
-			  }
-		  }
-		  rank++; 
-	  }
-	  IProfile result  = new Profile(ranks);
-	  return result;
-  }
-  
-  /* (non-Javadoc)
- * @see components.generic.IProfile#getSortedIndexes()
- */
-  @Override
-public IProfile getSortedIndexes(){
-	  
-	  
-	  double[] sorted = this.asArray();
-	  Arrays.sort(sorted);
-	  
-	  double[]indexes = new double[sorted.length];
-	  
-	  // Go through each index in the sorted list
-	  for(int index=0; index<sorted.length; index++){
-		  
-		  double value = sorted[index];
-		  // Go through each index in the original array
-		  for(int originalIndex=0; originalIndex<sorted.length; originalIndex++){
-			  
-			  
-			  // If the value in the profile is the value at the original index,
-			  // save the original index
-			  if(value==this.get(originalIndex)){
-				  System.out.println("Found value "+value+" at original index "+originalIndex);
-				  indexes[index] = (double) originalIndex;
-				  break;
-			  }
-		  }
-
-	  }
-	  IProfile result  = new Profile(indexes);
-	  return result;
-  }
-
-  /* (non-Javadoc)
- * @see components.generic.IProfile#print()
- */
-  @Override
-public void print(){
-	  for (int i=0; i<array.length; i++) {
-		  IJ.log("Point "+i+": "+array[i]);
-	  }
-  }
-  
-  /* (non-Javadoc)
- * @see components.generic.IProfile#toString()
- */
-@Override
-public String toString(){
-	  StringBuilder builder = new StringBuilder();
-
-	  for (int i=0; i<array.length; i++) {
-		  builder.append("Index "+i+"\t"+array[i]+"\r\n");
-	  }
-	  return builder.toString();
-  }
-  
-  private boolean isPowerOfTwo(int x){
-	  return (x & (x - 1)) == 0;
-  }
-  
-  private List<Double> padListWithZeros(List<Double> list){
-	  
-	// Check length is power of 2
-	  int size = list.size();
-//	  IJ.log("Length: "+size);
-	  if( isPowerOfTwo(size) ){
-//		  IJ.log("    OK");
-	  } else {
-//		  IJ.log("    Padding");
-		  list.add(0d);
-		  list = padListWithZeros(list);
-	  }
-	  return list;
-  }
-  
-  /* (non-Javadoc)
- * @see components.generic.IProfile#fastFourierTransform()
- */
-@Override
-public void fastFourierTransform(){
-	  FastFourierTransformer f = new FastFourierTransformer(DftNormalization.STANDARD);
-
-	  List<Double> list = new ArrayList<Double>();
-
-	  for(double d : array){
-		  list.add(d);
-
-	  }
-	  list = padListWithZeros(list);
-	  	  
-	  
-	  double[] listArray;
-	  try {
-		  listArray = new ArrayConverter(list).toDoubleArray();
-	  } catch (ArrayConversionException e) {
-		  listArray = new double[0]; 
-	  }
-
-	  Complex[] transformed = f.transform(listArray, TransformType.FORWARD);
-	  
-	  for(Complex c : transformed){
-		  IJ.log(c.toString());
-	  }
-	  
-  }
-
-
-  /**
-   * Given a list of ordered profiles, merge them into one 
-   * contiguous profile
-   * @param list the list of profiles to merge
-   * @return the merged profile
-   */
-  public static Profile merge(List<IProfile> list){
-	  if(list==null || list.size()==0){
-		  throw new IllegalArgumentException("Profile list is null or empty");
-	  }
-	  Profile result;
-//	  List<Double> combinedList = new ArrayList<Double>(0);
-	  int totalLength = 0;
-	  for(IProfile p : list){
-		  totalLength += p.size();
-	  }
-	  
-	  double[] combinedArray = new double[totalLength];
-	  int i=0;
-	  for(IProfile p : list){
-		  
-		  for(int j=0; j<p.size(); j++){
-			  combinedArray[i++] = p.get(j);
-		  }
-	  }
-
-	  result = new Profile(combinedArray);
-	  return result;
-  }
-  
-  
-  
-  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-//		finest("\tWriting profile");
-		out.defaultWriteObject();
-//		finest("\tWrote profile");
+		for (int i=0; i<array.length; i++) { 
+			values[i] = Math.log(array[i]) / Math.log(base);
+		}
+		return new Profile(values);
 	}
-  
-  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-//		finest("\tReading profile");
-	    in.defaultReadObject();
-//	    finest("\tRead profile");
-  }
-  
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#power(double)
+	 */
+	@Override
+	public IProfile power(double exponent){
+		double[] values = new double[this.size()];
+
+		for (int i=0; i<array.length; i++) { 
+			values[i] = Math.pow(array[i],exponent);
+		}
+		return new Profile(values);
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#absolute()
+	 */
+	@Override
+	public IProfile absolute(){
+		double[] values = new double[this.size()];
+
+		for (int i=0; i<array.length; i++) { 
+			values[i] = Math.abs(array[i]);
+		}
+		return new Profile(values);
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#cumulativeSum()
+	 */
+	@Override
+	public IProfile cumulativeSum(){
+		double[] values = new double[this.size()];
+
+		double total = 0;
+		for (int i=0; i<array.length; i++) { 
+			total += array[i];
+			values[i] = total;
+		}
+		return new Profile(values);
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#multiply(double)
+	 */
+	@Override
+	public IProfile multiply(double multiplier){
+		double[] result = new double[this.size()];
+
+		for (int i=0; i<array.length; i++) { // for each position in sperm
+			result[i] = array[i] * multiplier;
+		}
+		return new Profile(result);
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#multiply(components.generic.IProfile)
+	 */
+	@Override
+	public IProfile multiply(IProfile multiplier){
+		if(this.size()!=multiplier.size()){
+			throw new IllegalArgumentException("Profile sizes do not match");
+		}
+		double[] result = new double[this.size()];
+
+		for (int i=0; i<array.length; i++) { // for each position in sperm
+			result[i] = array[i] * multiplier.get(i);
+		}
+		return new Profile(result);
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#divide(double)
+	 */
+	@Override
+	public IProfile divide(double divider){
+		double[] result = new double[this.size()];
+
+		for (int i=0; i<array.length; i++) { // for each position in sperm
+			result[i] = array[i] / divider;
+		}
+		return new Profile(result);
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#divide(components.generic.IProfile)
+	 */
+	@Override
+	public IProfile divide(IProfile divider){
+		if(this.size()!=divider.size()){
+			throw new IllegalArgumentException("Profile sizes do not match");
+		}
+		double[] result = new double[this.size()];
+
+		for (int i=0; i<array.length; i++) { // for each position in sperm
+			result[i] = array[i] / divider.get(i);
+		}
+		return new Profile(result);
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#add(components.generic.IProfile)
+	 */
+	@Override
+	public IProfile add(IProfile adder){
+		if(this.size()!=adder.size()){
+			throw new IllegalArgumentException("Profile sizes do not match");
+		}
+		double[] result = new double[this.size()];
+
+		for (int i=0; i<array.length; i++) { // for each position in sperm
+			result[i] = array[i] + adder.get(i);
+		}
+		return new Profile(result);
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#add(double)
+	 */
+	@Override
+	public IProfile add(double value){
+
+		double[] result = new double[this.size()];
+
+		for (int i=0; i<array.length; i++) { // for each position in sperm
+			result[i] = array[i] + value;
+		}
+		return new Profile(result);
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#subtract(components.generic.IProfile)
+	 */
+	@Override
+	public IProfile subtract(IProfile sub){
+		if(this.size()!=sub.size()){
+			throw new IllegalArgumentException("Profile sizes do not match");
+		}
+		double[] result = new double[this.size()];
+
+		for (int i=0; i<array.length; i++) { // for each position in sperm
+			result[i] = array[i] - sub.get(i);
+		}
+		return new Profile(result);
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getRanks()
+	 */
+	@Override
+	public IProfile getRanks(){
+
+		int rank = 0;
+
+		double[] sorted = this.asArray();
+		Arrays.sort(sorted);
+
+		double[]ranks = new double[this.size()];
+
+		for(double sort :sorted ){
+
+			for(int i=0; i<this.size(); i++){
+				double value = array[i];
+				if(value==sort){
+					ranks[i] = rank;
+					break;
+				}
+			}
+			rank++; 
+		}
+		IProfile result  = new Profile(ranks);
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getSortedIndexes()
+	 */
+	@Override
+	public IProfile getSortedIndexes(){
+
+
+		double[] sorted = this.asArray();
+		Arrays.sort(sorted);
+
+		double[]indexes = new double[sorted.length];
+
+		// Go through each index in the sorted list
+		for(int index=0; index<sorted.length; index++){
+
+			double value = sorted[index];
+			// Go through each index in the original array
+			for(int originalIndex=0; originalIndex<sorted.length; originalIndex++){
+
+
+				// If the value in the profile is the value at the original index,
+				// save the original index
+				if(value==this.get(originalIndex)){
+					System.out.println("Found value "+value+" at original index "+originalIndex);
+					indexes[index] = (double) originalIndex;
+					break;
+				}
+			}
+
+		}
+		IProfile result  = new Profile(indexes);
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#print()
+	 */
+	@Override
+	public void print(){
+		for (int i=0; i<array.length; i++) {
+			IJ.log("Point "+i+": "+array[i]);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#toString()
+	 */
+	@Override
+	public String toString(){
+		StringBuilder builder = new StringBuilder();
+
+		for (int i=0; i<array.length; i++) {
+			builder.append("Index "+i+"\t"+array[i]+"\r\n");
+		}
+		return builder.toString();
+	}
+
+	private boolean isPowerOfTwo(int x){
+		return (x & (x - 1)) == 0;
+	}
+
+	private List<Double> padListWithZeros(List<Double> list){
+
+		// Check length is power of 2
+		int size = list.size();
+		//	  IJ.log("Length: "+size);
+		if( isPowerOfTwo(size) ){
+			//		  IJ.log("    OK");
+		} else {
+			//		  IJ.log("    Padding");
+			list.add(0d);
+			list = padListWithZeros(list);
+		}
+		return list;
+	}
+
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#fastFourierTransform()
+	 */
+	@Override
+	public void fastFourierTransform(){
+		FastFourierTransformer f = new FastFourierTransformer(DftNormalization.STANDARD);
+
+		List<Double> list = new ArrayList<Double>();
+
+		for(double d : array){
+			list.add(d);
+
+		}
+		list = padListWithZeros(list);
+
+
+		double[] listArray;
+		try {
+			listArray = new ArrayConverter(list).toDoubleArray();
+		} catch (ArrayConversionException e) {
+			listArray = new double[0]; 
+		}
+
+		Complex[] transformed = f.transform(listArray, TransformType.FORWARD);
+
+		for(Complex c : transformed){
+			IJ.log(c.toString());
+		}
+
+	}
+
+
+	/**
+	 * Given a list of ordered profiles, merge them into one 
+	 * contiguous profile
+	 * @param list the list of profiles to merge
+	 * @return the merged profile
+	 */
+	public static Profile merge(List<IProfile> list){
+		if(list==null || list.size()==0){
+			throw new IllegalArgumentException("Profile list is null or empty");
+		}
+		Profile result;
+		//	  List<Double> combinedList = new ArrayList<Double>(0);
+		int totalLength = 0;
+		for(IProfile p : list){
+			totalLength += p.size();
+		}
+
+		double[] combinedArray = new double[totalLength];
+		int i=0;
+		for(IProfile p : list){
+
+			for(int j=0; j<p.size(); j++){
+				combinedArray[i++] = p.get(j);
+			}
+		}
+
+		result = new Profile(combinedArray);
+		return result;
+	}
+
+
+
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		//		finest("\tWriting profile");
+		out.defaultWriteObject();
+		//		finest("\tWrote profile");
+	}
+
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		//		finest("\tReading profile");
+		in.defaultReadObject();
+		//	    finest("\tRead profile");
+	}
+
 }

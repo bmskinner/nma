@@ -23,7 +23,6 @@ import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.DraggableOverlayChartPanel;
-import charting.charts.panels.PositionSelectionChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.ProfileType;

@@ -8,7 +8,6 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import utility.Constants;
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.nucleus.CellRelocator;
 import gui.MainWindow;

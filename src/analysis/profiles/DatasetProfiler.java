@@ -23,7 +23,6 @@ package analysis.profiles;
 import utility.Constants;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
-import components.CellCollection;
 import components.ICellCollection;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;

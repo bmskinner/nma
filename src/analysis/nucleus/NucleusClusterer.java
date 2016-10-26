@@ -34,9 +34,8 @@ import weka.core.Instances;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.IAnalysisDataset;
-import components.Cell;
-import components.CellCollection;
 import components.ICellCollection;
+import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
 
 
@@ -118,10 +117,10 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 			try {
 				
 
-				log(Level.FINER, "Clusterer is type "+options.getType());
+				finer("Clusterer is type "+options.getType());
 				for(String s : optionArray){
 //					fileLogger.log(Level.FINE, "Clusterer options: "+s);
-					log(Level.FINEST, "Clusterer options: "+s);
+					finest("Clusterer options: "+s);
 				}
 				
 				
@@ -176,11 +175,11 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 	private void assignClusters(Clusterer clusterer, ICellCollection collection){
 		try {
 			// construct new collections for each cluster
-			log(Level.FINE, "Assigning nuclei to clusters");
-			log(Level.FINE, "Clusters : "+clusterer.numberOfClusters());
+			fine("Assigning nuclei to clusters");
+			fine("Clusters : "+clusterer.numberOfClusters());
 
 			for(int i=0;i<clusterer.numberOfClusters();i++ ){
-				log(Level.FINE, "Cluster "+i+": " +	collection.getName()+"_Cluster_"+i);
+				fine("Cluster "+i+": " +	collection.getName()+"_Cluster_"+i);
 
 				ICellCollection clusterCollection = new DefaultCellCollection(collection, 
 						"Cluster_"+i);
@@ -199,25 +198,27 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 
 					int clusterNumber = clusterer.clusterInstance(inst); // #pass each instance through the model
 					
-					log(Level.FINEST, "\tTesting instance "+i+": "+clusterNumber);
+					finest("\tTesting instance "+i+": "+clusterNumber);
+					
 					ICellCollection cluster = clusterMap.get(clusterNumber);
 
 					// should never be null
 					if(collection.getCell(id)!=null){
-						cluster.addCell(new Cell (collection.getCell(id)));
+						cluster.addCell(new DefaultCell (collection.getCell(id)));
 					} else {
-						log(Level.WARNING, "Error: cell with ID "+id+" is not found");
+						warn("Error: cell with ID "+id+" is not found");
 					}
-					log(Level.FINEST, "\tInstance handled");
+					finest("\tInstance handled");
 					publish(i++);
 				} catch(Exception e){
 					logError("Error assigning instance to cluster", e);
 				}
 				 
 			}
-			log(Level.FINER, "Assignment of clusters complete");
+			finer("Assignment of clusters complete");
 		} catch (Exception e) {
-			logError("Error clustering", e);			
+			warn("Error making clusters");
+			fine("Error clustering", e);			
 		}
 	}
 

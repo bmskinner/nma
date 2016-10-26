@@ -23,8 +23,7 @@ package analysis.profiles;
 import java.util.UUID;
 
 import logging.Loggable;
-import components.CellCollection;
-import components.generic.BorderTagObject;
+import components.ICellCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.Tag;
@@ -39,9 +38,9 @@ import components.nuclei.Nucleus;
  */
 public class ProfileOffsetter implements Loggable {
 	
-	final private CellCollection collection;
+	final private ICellCollection collection;
 	
-	public ProfileOffsetter(final CellCollection collection){
+	public ProfileOffsetter(final ICellCollection collection){
 		
 		if(collection==null){
 			throw new IllegalArgumentException("Collection cannot be null");
@@ -55,7 +54,7 @@ public class ProfileOffsetter implements Loggable {
 	 * This method requires the frankenprofiling to be completed
 	 * @throws Exception
 	 */
-	public void assignBorderTagToNucleiViaFrankenProfile(BorderTagObject tag) throws ProfileOffsetException {
+	public void assignBorderTagToNucleiViaFrankenProfile(Tag tag) throws ProfileOffsetException {
 
 		int index = collection.getProfileCollection(ProfileType.ANGLE)
 				.getIndex(tag); 

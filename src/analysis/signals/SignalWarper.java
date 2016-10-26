@@ -1,10 +1,8 @@
 package analysis.signals;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import components.Cell;
 import components.ICell;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;

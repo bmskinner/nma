@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.logging.Level;
 
 import analysis.AbstractProgressAction;
+import components.generic.IProfile;
 import components.generic.IProfileCollection;
-import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.Tag;
@@ -123,7 +123,7 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 
 		// recombine the segments to the lengths of the median profile segments
 
-		Profile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
+		IProfile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
 
 		SegmentedProfile segmented = new SegmentedProfile(recombinedProfile, medianProfile.getOrderedSegments());
 		n.setProfile(ProfileType.FRANKEN, segmented);

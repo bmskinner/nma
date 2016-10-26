@@ -2,12 +2,10 @@ package gui.tabs.populations;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import analysis.AnalysisDataset;
+
 import analysis.IAnalysisDataset;
 import gui.components.ColourSelecter;
 import logging.Loggable;
@@ -57,7 +55,7 @@ class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRend
     	   // check if the row is a cluster group
     	   Object columnOneObject = table.getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
 
-    	   if(columnOneObject instanceof AnalysisDataset){
+    	   if(columnOneObject instanceof IAnalysisDataset){
     		   
     		   IAnalysisDataset dataset = (IAnalysisDataset) columnOneObject;      	
 

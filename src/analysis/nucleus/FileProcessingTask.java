@@ -4,11 +4,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+
 import analysis.AbstractProgressAction;
 import analysis.AnalysisOptions;
-import components.Cell;
-import components.CellCollection;
 import components.CellularComponent;
+import components.ICell;
+import components.ICellCollection;
 import components.nuclei.Nucleus;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
@@ -18,7 +19,7 @@ import utility.Constants;
 @SuppressWarnings("serial")
 public class FileProcessingTask  extends AbstractProgressAction  {
 	
-	private final CellCollection collection;
+	private final ICellCollection collection;
 	private File[] files;
 	private static final int THRESHOLD = 5; // number of images to handle per fork
 	final int low, high;
@@ -27,7 +28,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 	private final AnalysisOptions analysisOptions;
 	private final File folder;
 	
-	private FileProcessingTask(File folder, File[] files, CellCollection collection, int low, int high, String outputFolder, AnalysisOptions analysisOptions) {
+	private FileProcessingTask(File folder, File[] files, ICellCollection collection, int low, int high, String outputFolder, AnalysisOptions analysisOptions) {
 		this.collection      = collection;
 		this.files           = files;
 		this.folder          = folder;
@@ -38,7 +39,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 		this.finder          = new NucleusDetector( analysisOptions, outputFolder);
 	}
 
-	public FileProcessingTask(File folder, File[] files, CellCollection collection, String outputFolder, AnalysisOptions analysisOptions) {
+	public FileProcessingTask(File folder, File[] files, ICellCollection collection, String outputFolder, AnalysisOptions analysisOptions) {
 		this(folder, files, collection, 0, files.length, outputFolder, analysisOptions);
 
 	}
@@ -90,13 +91,13 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 				  makeFolder(folder);
 				  
 				  log(Level.INFO, "File:  "+file.getName());
-				  List<Cell> cells = finder.getCells(imageStack, file);
+				  List<ICell> cells = finder.getCells(imageStack, file);
 				  
 				  if(cells.isEmpty()){
 					  log(Level.INFO, "  No nuclei detected in image");
 				  } else {
 					  int nucleusNumber = 0;
-					  for(Cell cell : cells){
+					  for(ICell cell : cells){
 						  addAndProcessCell(cell, imageStack, nucleusNumber++);
 					  }
 				  }
@@ -111,7 +112,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 	   }
 
 
-	private void addAndProcessCell(Cell cell, ImageStack imageStack, int nucleusNumber ) throws Exception{
+	private void addAndProcessCell(ICell cell, ImageStack imageStack, int nucleusNumber ) throws Exception{
 		collection.addCell(cell);
 		log("  Added nucleus "+nucleusNumber);
 

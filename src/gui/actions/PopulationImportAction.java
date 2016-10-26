@@ -105,7 +105,7 @@ public class PopulationImportAction extends ProgressableAction {
 	@Override
 	public void finished(){
 		setProgressBarVisible(false);
-		AnalysisDataset dataset;
+		IAnalysisDataset dataset;
 		try {
 			dataset = ((PopulationImportWorker) worker).getLoadedDataset();
 		} catch (UnloadableDatasetException e) {
@@ -114,19 +114,10 @@ public class PopulationImportAction extends ProgressableAction {
 		}
 		fine("Opened dataset");
 
-		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>(0);
-		list.add(dataset);
-		fine("Firing add signal");
-		fireDatasetEvent(DatasetEvent.ADD_DATASET, list);
+		fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
 		
 		fine("Finishing action");
-		/*
-		 * Code after this point is never reached - check thread 16
-		 */
-//		
-//		fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
-//		fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);
-//		this.cancel();
+
 		super.finished();		
 	}
 

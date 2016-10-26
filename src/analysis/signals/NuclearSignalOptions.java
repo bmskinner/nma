@@ -17,15 +17,8 @@ public class NuclearSignalOptions implements Serializable {
 	public static final int REVERSE 	= 1;
 	public static final int HISTOGRAM 	= 2;
 
-//	private NuclearSignalOptions data = new NuclearSignalOptions(DEFAULT_SIGNAL_THRESHOLD,
-//			DEFAULT_MIN_CIRC, DEFAULT_MAX_CIRC, DEFAULT_MIN_SIGNAL_SIZE, DEFAULT_MAX_SIGNAL_FRACTION, NuclearSignalOptions.FORWARD);
-//
-//	
 	public int threshold;
-	public double minCirc;
-	public double maxCirc;
-	public double minSize;
-	public double maxFraction;
+	public double minCirc, maxCirc, minSize, maxFraction;
 	public int detectionMode;
 
 	public NuclearSignalOptions(){

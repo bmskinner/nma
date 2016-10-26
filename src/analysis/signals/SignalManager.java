@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import components.Cell;
-import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
 import components.generic.MeasurementScale;
@@ -40,7 +38,6 @@ import logging.Loggable;
 import stats.Quartile;
 import stats.SignalStatistic;
 import stats.StatisticDimension;
-import stats.Stats;
 import utility.ArrayConverter;
 import utility.Constants;
 import utility.ArrayConverter.ArrayConversionException;

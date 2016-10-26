@@ -19,19 +19,14 @@
 package components.active.generic;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import analysis.profiles.ProfileException;
-import logging.Loggable;
-import components.CellCollection;
 import components.ICellCollection;
 import components.generic.BooleanProfile;
-import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileAggregate;
 import components.generic.IProfileCollection;
@@ -70,7 +65,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	private List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
 	
 	
-	private transient final ProfileCache profileCache           = new ProfileCache();
+	private transient ProfileCache profileCache           = new ProfileCache();
 
 
 	/**
@@ -165,7 +160,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getAggregate()
 	 */
 	@Override
-	public DefaultProfileAggregate getAggregate(){
+	public IProfileAggregate getAggregate(){
 		return (DefaultProfileAggregate) aggregate;
 	}
 	
@@ -424,7 +419,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	@Override
 	public void createProfileAggregate(ICellCollection collection, ProfileType type) {
 		
-		createProfileAggregate(collection, type, (int)collection.getMedianArrayLength());
+		createProfileAggregate(collection, type, collection.getMedianArrayLength());
 
 	}
 		
@@ -543,6 +538,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
+		profileCache = new ProfileCache();
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {

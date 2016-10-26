@@ -64,7 +64,7 @@ public interface Profileable extends CellularComponent {
 	 * @param profile
 	 * @throws Exception
 	 */
-	void setProfile(ProfileType type, SegmentedProfile profile) throws Exception;
+	void setProfile(ProfileType type, SegmentedProfile profile) throws ProfileException;
 	
 	
 	/**
@@ -122,7 +122,7 @@ public interface Profileable extends CellularComponent {
 	 * It will replace the existing profiles.
 	 * @throws Exception 
 	 */
-	void calculateProfiles() throws Exception;
+	void calculateProfiles() throws ProfileException;
 	
 	/**
 	 * Calculate the distance from point to point around the 

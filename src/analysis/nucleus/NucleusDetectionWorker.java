@@ -36,14 +36,14 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import utility.Constants;
-import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
 import analysis.ProgressEvent;
 import analysis.ProgressListener;
-import components.CellCollection;
 import components.ICellCollection;
+import components.active.DefaultAnalysisDataset;
+import components.active.DefaultCellCollection;
 import components.nuclear.NucleusType;
 
 public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressListener {
@@ -130,7 +130,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 		for(ICellCollection collection : folderCollection){
 			
 
-			IAnalysisDataset dataset = new AnalysisDataset(collection);
+			IAnalysisDataset dataset = new DefaultAnalysisDataset(collection);
 			dataset.setAnalysisOptions(analysisOptions);
 			dataset.setRoot(true);
 //			File debugFile = dataset.getDebugFile();
@@ -140,7 +140,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 
 			try{
 
-				ICellCollection failedNuclei = new CellCollection(folder, 
+				ICellCollection failedNuclei = new DefaultCellCollection(folder, 
 						collection.getOutputFolderName(), 
 						collection.getName()+" - failed", 
 						collection.getNucleusType());
@@ -160,7 +160,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 
 				if(analysisOptions.isKeepFailedCollections()){
 					log("Keeping failed nuclei as new collection");
-					AnalysisDataset failed = new AnalysisDataset(failedNuclei);
+					IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
 					AnalysisOptions failedOptions = new AnalysisOptions(analysisOptions);
 					failedOptions.setNucleusType(NucleusType.ROUND);
 					failed.setAnalysisOptions(failedOptions);
@@ -196,7 +196,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
   *  @param file a folder to be analysed
   *  @param collection the collection of nuclei found
   */
-  public void addNucleusCollection(File file, CellCollection collection){
+  public void addNucleusCollection(File file, ICellCollection collection){
     this.collectionGroup.put(file, collection);
   }
 
@@ -313,10 +313,8 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
   protected void processFolder(File folder){
 
 	  File[] listOfFiles = folder.listFiles();
-	  
-	  
-	  
-	  CellCollection folderCollection = new CellCollection(folder, 
+
+	  ICellCollection folderCollection = new DefaultCellCollection(folder, 
 			  outputFolder, 
 			  folder.getName(), 
 			  analysisOptions.getNucleusType());
@@ -327,7 +325,6 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 	  FileProcessingTask task = new FileProcessingTask(folder, listOfFiles, folderCollection, outputFolder, analysisOptions);
 	  task.addProgressListener(this);
 	  mainPool.invoke(task);
-//	  task.invoke();
 	  
 	  for(File f : listOfFiles){
 		  if(f.isDirectory()){

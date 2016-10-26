@@ -29,7 +29,6 @@ import gui.dialogs.HierarchicalTreeSetupDialog;
 
 import java.util.logging.Level;
 
-import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 import analysis.IAnalysisDataset;
 import analysis.nucleus.NucleusTreeBuilder;

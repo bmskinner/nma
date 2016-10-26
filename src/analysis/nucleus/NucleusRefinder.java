@@ -26,18 +26,12 @@
 */  
 package analysis.nucleus;
 
-import ij.ImagePlus;
-import ij.gui.Roi;
-import ij.process.ByteProcessor;
-import ij.process.ColorProcessor;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

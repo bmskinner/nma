@@ -23,12 +23,11 @@ import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
-import components.Cell;
-import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
+import components.active.DefaultCell;
+import components.active.DefaultCellCollection;
 import gui.MainWindow;
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 
 public class SplitCollectionAction extends ProgressableAction {
@@ -39,9 +38,9 @@ public class SplitCollectionAction extends ProgressableAction {
         	try {
 
         		if(dataset.hasChildren()){
-        			log(Level.INFO, "Splitting collection...");
+        			log("Splitting collection...");
 
-        			IAnalysisDataset[] names =  dataset.getAllChildDatasets().toArray(new AnalysisDataset[0]);
+        			IAnalysisDataset[] names =  dataset.getAllChildDatasets().toArray(new IAnalysisDataset[0]);
 
         			IAnalysisDataset negative = (IAnalysisDataset) JOptionPane.showInputDialog(null,
         					"Give me nuclei that are NOT present within the following population", "Split population",
@@ -53,7 +52,7 @@ public class SplitCollectionAction extends ProgressableAction {
         				// prepare a new collection
         				ICellCollection collection = dataset.getCollection();
 
-        				ICellCollection newCollection = new CellCollection(dataset, "Subtraction");
+        				ICellCollection newCollection = new DefaultCellCollection(dataset, "Subtraction");
 
         				for(ICell cell : collection.getCells()){
 
@@ -65,7 +64,7 @@ public class SplitCollectionAction extends ProgressableAction {
         					}
 
         					if(ok){
-        						newCollection.addCell(new Cell(cell));
+        						newCollection.addCell(new DefaultCell(cell));
         					}
 
         				}
@@ -83,17 +82,17 @@ public class SplitCollectionAction extends ProgressableAction {
         					new RunSegmentationAction(newDataset, dataset, flag, mw, latch);
         				}
         			} else {
-        				log(Level.FINE,"User cancelled split");
+        				fine("User cancelled split");
         			}
 
         			
         		} else {
-        			log(Level.INFO,"Cannot split; no children in dataset");
+        			log("Cannot split; no children in dataset");
         		}
 
 
 			} catch (Exception e1) {
-				logError("Error splitting collection", e1);
+				error("Error splitting collection", e1);
 			} finally {
 				cancel();
 			}

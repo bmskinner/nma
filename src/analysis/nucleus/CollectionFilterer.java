@@ -22,11 +22,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import stats.NucleusStatistic;
-import components.Cell;
-import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
 import components.active.DefaultCell;
+import components.active.DefaultCellCollection;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclei.Nucleus;
@@ -89,7 +88,7 @@ public class CollectionFilterer {
 	    int arraylength = 0;
 	    int feretlength = 0;
 	    
-	    CellCollection newFailCollection = new CellCollection(collection, "failed");
+	    ICellCollection newFailCollection = new DefaultCellCollection(collection, "failed");
 
 	    logger.log(Level.FINE, "Prefiltered values found");
 

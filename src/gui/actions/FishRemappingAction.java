@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
-import components.CellCollection;
 import components.ICellCollection;
 import gui.MainWindow;
 import gui.dialogs.FishRemappingDialog;
@@ -64,7 +62,7 @@ public class FishRemappingAction extends ProgressableAction {
 
 							if(sub.hasCells()){
 								
-								log(Level.INFO, sub.getName()+": "+sub.size()+" cells");
+								log(sub.getName()+": "+sub.size()+" cells");
 
 								dataset.addChildCollection(sub);
 

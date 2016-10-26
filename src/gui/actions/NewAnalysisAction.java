@@ -31,7 +31,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 
-import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.IAnalysisDataset;
 import analysis.nucleus.NucleusDetectionWorker;

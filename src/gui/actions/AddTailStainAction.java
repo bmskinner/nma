@@ -25,7 +25,6 @@ import ij.io.DirectoryChooser;
 
 import java.io.File;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.tail.TubulinTailDetector;
 

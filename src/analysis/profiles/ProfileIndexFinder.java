@@ -24,7 +24,6 @@ import java.util.List;
 
 import utility.Constants;
 import analysis.profiles.Rule.RuleType;
-import components.CellCollection;
 import components.ICellCollection;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;

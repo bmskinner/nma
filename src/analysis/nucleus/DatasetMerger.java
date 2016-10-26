@@ -27,13 +27,13 @@ import java.util.Set;
 import java.util.UUID;
 
 import utility.Constants;
-import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
-import components.Cell;
-import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
+import components.active.DefaultAnalysisDataset;
+import components.active.DefaultCell;
+import components.active.DefaultCellCollection;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalGroup;
 
@@ -139,7 +139,7 @@ public class DatasetMerger extends AnalysisWorker {
 //			// make a new collection based on the first dataset
 			ICellCollection templateCollection = datasets.get(0).getCollection();
 
-			ICellCollection newCollection = new CellCollection(newDatasetFolder, 
+			ICellCollection newCollection = new DefaultCellCollection(newDatasetFolder, 
 					null, 
 					newDatasetName, 
 					templateCollection.getNucleusType()
@@ -178,11 +178,8 @@ public class DatasetMerger extends AnalysisWorker {
 				
 				if(!newCollection.getCells().contains(cell)){
 					
-					Cell newCell = new Cell(cell);
-					
-					// remove all signal information
-//					newCell.getNucleus().getSignalCollection().removeSignals();
-					
+					ICell newCell = new DefaultCell(cell);
+										
 					newCollection.addCell(newCell); // make a copy of the cell so segments can be merged
 					
 				}
@@ -205,7 +202,7 @@ public class DatasetMerger extends AnalysisWorker {
 
 
 		// create the dataset; has no analysis options at present
-		IAnalysisDataset newDataset = new AnalysisDataset(newCollection);
+		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
 		newDataset.setRoot(true);
 
 		// Add the original datasets as merge sources

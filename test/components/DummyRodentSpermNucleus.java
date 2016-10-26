@@ -557,8 +557,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public void setProfile(ProfileType type, SegmentedProfile profile)
-			throws Exception {
+	public void setProfile(ProfileType type, SegmentedProfile profile) {
 		profiles.put(type, profile);
 		
 	}
@@ -595,7 +594,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public void calculateProfiles() throws Exception {
+	public void calculateProfiles() {
 
 	}
 

@@ -22,9 +22,7 @@ import gui.MainWindow;
 import gui.ThreadManager;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Level;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.nucleus.CurveRefolder;
 import analysis.nucleus.CurveRefolder.CurveRefoldingMode;

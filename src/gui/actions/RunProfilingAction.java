@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.profiles.DatasetProfiler;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;

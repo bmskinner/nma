@@ -22,11 +22,8 @@ package gui.components.panels;
 import gui.components.BorderTagEvent;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -117,8 +114,8 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 		}
 		
 		// Find border tags with rulesets that have not been assigned in the median
-		List<BorderTagObject> unassignedTags = new ArrayList<BorderTagObject>();
-		for(BorderTagObject tag : BorderTagObject.values()){
+		List<Tag> unassignedTags = new ArrayList<Tag>();
+		for(Tag tag : BorderTagObject.values()){
 			if( tag.equals(Tag.INTERSECTION_POINT)){
 				continue;
 			}
@@ -134,7 +131,7 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 			
 			popupMenu.addSeparator();
 
-			for(BorderTagObject tag : unassignedTags){
+			for(Tag tag : unassignedTags){
 				JMenuItem item = new JMenuItem(tag.toString());
 				item.setForeground(Color.DARK_GRAY);
 				

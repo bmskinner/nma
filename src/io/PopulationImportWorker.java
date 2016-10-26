@@ -20,17 +20,14 @@ package io;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import components.active.DefaultAnalysisDataset;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.generic.XYPoint;
@@ -44,7 +41,7 @@ import utility.Version;
 public class PopulationImportWorker extends AnalysisWorker {
 	
 	private final File file;
-	private AnalysisDataset dataset = null; // the active dataset of an AnalysisWorker is private and immutable, so have a new field here
+	private IAnalysisDataset dataset = null; // the active dataset of an AnalysisWorker is private and immutable, so have a new field here
 	
 	public PopulationImportWorker(final File f){
 		super(null);
@@ -74,7 +71,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 		this.setProgressTotal(1);
 	}
 	
-	public AnalysisDataset getLoadedDataset() throws UnloadableDatasetException {
+	public IAnalysisDataset getLoadedDataset() throws UnloadableDatasetException {
 		
 		if(this.dataset==null){
 			throw new UnloadableDatasetException("No dataset loaded");
@@ -242,13 +239,13 @@ public class PopulationImportWorker extends AnalysisWorker {
 		return true;
 	}
 	
-	private AnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException  {
+	private IAnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException  {
 
 		
 		finest("Checking input file");
 		
 
-		AnalysisDataset dataset = null;
+		IAnalysisDataset dataset = null;
 		FileInputStream fis     = null;
 		ObjectInputStream ois   = null;
 				
@@ -263,8 +260,18 @@ public class PopulationImportWorker extends AnalysisWorker {
 			
 			
 			finest("Attempting to read object");
-			dataset = (AnalysisDataset) ois.readObject();
+			dataset = (IAnalysisDataset) ois.readObject();
 			finest("Read object as analysis dataset");	
+			
+			if(dataset instanceof AnalysisDataset){
+				
+				log("Old style dataset detected");
+			}
+			
+			if(dataset instanceof DefaultAnalysisDataset){
+				
+				log("New style dataset detected");
+			}
 			
 			// Replace existing save file path with the path to the file that has been opened
 			finest("Checking file path");

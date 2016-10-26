@@ -54,9 +54,8 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
-import components.CellCollection;
+
 import components.ClusterGroup;
 import components.ICellCollection;
 
@@ -77,7 +76,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * This tracks which datasets are currently selected, and the order in which they
 	 * were selected.  
 	 */
-	private final Set<AnalysisDataset> datasetSelectionOrder = new LinkedHashSet<AnalysisDataset>();
+	private final Set<IAnalysisDataset> datasetSelectionOrder = new LinkedHashSet<IAnalysisDataset>();
 	
 	final private TreeSelectionHandler treeListener = new TreeSelectionHandler();
 	
@@ -215,15 +214,15 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						clusterGroupClicked((ClusterGroup) o);
 					}
 					
-					if(o instanceof AnalysisDataset){
-						datasetClicked((AnalysisDataset) o, row, column);
+					if(o instanceof IAnalysisDataset){
+						datasetClicked((IAnalysisDataset) o, row, column);
 					}					
 				}
 				
 				// right click  - show the popup, but change delete to close for root datasets
 				if(e.getButton() == MouseEvent.BUTTON3){
 										
-					if(o instanceof AnalysisDataset){
+					if(o instanceof IAnalysisDataset){
 						if(((IAnalysisDataset) o).isRoot()){
 							populationPopup.setDeleteString("Close");
 						} else {
@@ -241,7 +240,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 			}
 			
-			private void datasetClicked(AnalysisDataset d, int row, int column){
+			private void datasetClicked(IAnalysisDataset d, int row, int column){
 
 				switch(column){
 				
@@ -274,7 +273,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * @param dataset
 	 * @param row
 	 */
-	private void changeDatasetColour(AnalysisDataset dataset, int row){
+	private void changeDatasetColour(IAnalysisDataset dataset, int row){
 		Color oldColour = ColourSelecter.getColor( row );
 		
 		Color newColor = JColorChooser.showDialog(
@@ -631,7 +630,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				}
 								
 				// Track the datasets currently selected
-				List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
+				List<IAnalysisDataset> datasets = new ArrayList<IAnalysisDataset>(5);
 
 				TreeSelectionModel lsm = (TreeSelectionModel)e.getSource();
 				int totalSelectionCount = lsm.getSelectionCount();
@@ -646,7 +645,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 							
 							if(treeTable.isDataset(i)){
 								
-								AnalysisDataset d = treeTable.getDatasetAtRow(i);
+								IAnalysisDataset d = treeTable.getDatasetAtRow(i);
 								datasets.add(d);
 								
 								datasetSelectionOrder.add(d);
@@ -670,7 +669,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 					// datasetSelectionOrder map
 					if(datasetSelectionOrder.size() > datasets.size()){
 						// Go through tree table and check for deselected dataset
-						Iterator<AnalysisDataset> it= datasetSelectionOrder.iterator();
+						Iterator<IAnalysisDataset> it= datasetSelectionOrder.iterator();
 						
 						while(it.hasNext()){
 							IAnalysisDataset d = it.next();

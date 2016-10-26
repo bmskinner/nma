@@ -346,8 +346,8 @@ public class CellCollection implements ICellCollection {
 		}
 	}
 
-	public void setProfileCollection(ProfileType type, ProfileCollection p){
-		this.profileCollections.put(type, p);
+	public void setProfileCollection(ProfileType type, IProfileCollection p){
+		this.profileCollections.put(type, (ProfileCollection) p);
 	}
 
 	/**

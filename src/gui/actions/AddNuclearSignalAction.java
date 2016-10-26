@@ -29,14 +29,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.signals.SignalDetectionWorker;
 import analysis.signals.SignalManager;
-import components.Cell;
-import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
+import components.active.DefaultAnalysisDataset;
+import components.active.DefaultCell;
+import components.active.DefaultCellCollection;
 import components.nuclear.ISignalGroup;
 import components.nuclear.SignalGroup;
 
@@ -55,7 +55,9 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 				this.signalGroup = analysisSetup.getSignalGroup();
 
-                String signalGroupName = dataset.getCollection().getSignalGroup(signalGroup).getGroupName();//.getSignalGroupName(signalGroup);
+                String signalGroupName = dataset.getCollection()
+                		.getSignalGroup(signalGroup)
+                		.getGroupName();
 
 
 
@@ -88,8 +90,6 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		finer("Finished signal detection");
 		this.cleanup(); // remove the property change listener
 		
-		
-		// divide population into clusters with and without signals
 		List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
 
 		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
@@ -124,7 +124,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 		try{
 		finer("Creating new analysis dataset for "+collection.getName());
-		AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
+		IAnalysisDataset subDataset = new DefaultAnalysisDataset(collection, dataset.getSavePath());
 		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
 
 		log("Sub-population "+collection.getName()+": "+collection.size()+" nuclei");
@@ -174,68 +174,65 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 		List<ICellCollection> signalPopulations = new ArrayList<ICellCollection>(0);
 		log("Dividing population by signals...");
-		try{
 
-            ISignalGroup group = r.getSignalGroup(signalGroup);
-            group.setVisible(true);
+		ISignalGroup group = r.getSignalGroup(signalGroup);
+		group.setVisible(true);
 
-			Set<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
-			if(!list.isEmpty()){
-				log("Signal group "+group.getGroupName()+": found nuclei with signals");
-				CellCollection listCollection = new CellCollection(r.getFolder(), 
+		Set<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
+		if(!list.isEmpty()){
+			log("Signal group "+group.getGroupName()+": found nuclei with signals");
+			ICellCollection listCollection = new DefaultCellCollection(r.getFolder(), 
+					r.getOutputFolderName(), 
+					group.getGroupName()+"_with_signals", 
+					r.getNucleusType());
+
+			for(ICell c : list){
+
+				finer("  Added cell: "+c.getNucleus().getNameAndNumber());
+				ICell newCell = new DefaultCell(c);
+				listCollection.addCell( newCell );
+			}
+			signalPopulations.add(listCollection);
+
+			// Copy over existing signal groups
+			finer("Adding existing signal groups to collection "+listCollection.getName());
+			for(UUID id  : r.getSignalGroupIDs()){
+				finer("Adding signal group "+r.getSignalGroup(id).getGroupName()+ " to "+listCollection.getName());
+				listCollection.addSignalGroup(id, new SignalGroup(r.getSignalGroup(id)));
+			}
+			listCollection.addSignalGroup(signalGroup, new SignalGroup(r.getSignalGroup(signalGroup)));
+
+			// Only add a group of cells without signals if at least one cell does havea signal
+
+			Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
+			if(!notList.isEmpty()){
+				log("Signal group "+r.getSignalGroup(signalGroup).getGroupName()+": found nuclei without signals");
+				ICellCollection notListCollection = new DefaultCellCollection(r.getFolder(), 
 						r.getOutputFolderName(), 
-                        group.getGroupName()+"_with_signals", 
+						group.getGroupName()+"_without_signals", 
 						r.getNucleusType());
 
-				for(ICell c : list){
-
+				for(ICell c : notList){
+					notListCollection.addCell( new DefaultCell(c) );
 					finer("  Added cell: "+c.getNucleus().getNameAndNumber());
-					Cell newCell = new Cell(c);
-					listCollection.addCell( newCell );
 				}
-				signalPopulations.add(listCollection);
-				
+
 				// Copy over existing signal groups
-				finer("Adding existing signal groups to collection "+listCollection.getName());
+				finer("Adding existing signal groups to collection "+notListCollection.getName());
 				for(UUID id  : r.getSignalGroupIDs()){
-					finer("Adding signal group "+r.getSignalGroup(id).getGroupName()+ " to "+listCollection.getName());
-					listCollection.addSignalGroup(id, new SignalGroup(r.getSignalGroup(id)));
-				}
-                listCollection.addSignalGroup(signalGroup, new SignalGroup(r.getSignalGroup(signalGroup)));
-
-                // Only add a group of cells without signals if at least one cell does havea signal
-
-				Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
-				if(!notList.isEmpty()){
-					log("Signal group "+r.getSignalGroup(signalGroup).getGroupName()+": found nuclei without signals");
-					CellCollection notListCollection = new CellCollection(r.getFolder(), 
-							r.getOutputFolderName(), 
-                            group.getGroupName()+"_without_signals", 
-							r.getNucleusType());
-
-					for(ICell c : notList){
-						notListCollection.addCell( new Cell(c) );
-						finer("  Added cell: "+c.getNucleus().getNameAndNumber());
+					if( ! id.equals(signalGroup)){ // don't bother adding the signals that aren't there
+						finer("Adding signal group "+r.getSignalGroup(signalGroup).getGroupName()+" to "+notListCollection.getName());
+						notListCollection.addSignalGroup(id, new SignalGroup(r.getSignalGroup(id)));
 					}
-					
-					// Copy over existing signal groups
-					finer("Adding existing signal groups to collection "+notListCollection.getName());
-					for(UUID id  : r.getSignalGroupIDs()){
-						if( ! id.equals(signalGroup)){ // don't bother adding the signals that aren't there
-							finer("Adding signal group "+r.getSignalGroup(signalGroup).getGroupName()+" to "+notListCollection.getName());
-							notListCollection.addSignalGroup(id, new SignalGroup(r.getSignalGroup(id)));
-						}
-					}
-					signalPopulations.add(notListCollection);
-				} else {
-					finest("No cells without signals");
 				}
-
+				signalPopulations.add(notListCollection);
+			} else {
+				finest("No cells without signals");
 			}
-			
-		} catch(Exception e){
-			error("Cannot create collection", e);
+
 		}
+			
+
 		fine("Finished dividing populations based on signals");
 		return signalPopulations;
 	}

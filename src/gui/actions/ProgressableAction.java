@@ -39,7 +39,6 @@ import java.util.logging.Level;
 import javax.swing.JProgressBar;
 
 import logging.Loggable;
-import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
 
@@ -70,7 +69,7 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 	 * @param mw
 	 */
 	protected ProgressableAction(String barMessage, MainWindow mw){
-		this( (AnalysisDataset) null, barMessage, mw);
+		this( (IAnalysisDataset) null, barMessage, mw);
 	}
 	
 	public ProgressableAction(IAnalysisDataset dataset, String barMessage, MainWindow mw){

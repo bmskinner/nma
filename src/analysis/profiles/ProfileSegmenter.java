@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import components.generic.BooleanProfile;
-import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
@@ -322,7 +321,8 @@ public class ProfileSegmenter implements Loggable {
 		
 		StringBuilder b = new StringBuilder();
 		for(NucleusBorderSegment s : segments){
-			b.append(s.toString()+"\n");
+			b.append(s.toString());
+			b.append("\n");
 		}
 		return b.toString();
 	}

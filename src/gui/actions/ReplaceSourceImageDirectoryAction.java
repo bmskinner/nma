@@ -19,9 +19,7 @@
 package gui.actions;
 
 import java.io.File;
-import java.util.logging.Level;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import gui.MainWindow;
 import ij.io.DirectoryChooser;
@@ -44,19 +42,18 @@ public class ReplaceSourceImageDirectoryAction extends ProgressableAction {
 
 					File newFolder = new File(folderName);
 
-					log(Level.INFO, "Updating folder to "+folderName );
+					log("Updating folder to "+folderName );
 					
 					dataset.updateSourceImageDirectory(newFolder);
 
-//					PopulationImporter.updateSourceImageDirectory(newFolder, dataset);
 					finished();
 
 				} else {
-					log(Level.INFO, "Update cancelled");
+					log("Update cancelled");
 					cancel();
 				}
 			}else {
-				log(Level.WARNING, "Dataset is a merge; cancelling");
+				warn("Dataset is a merge; cancelling");
 				cancel();
 			}
 
@@ -70,7 +67,7 @@ public class ReplaceSourceImageDirectoryAction extends ProgressableAction {
 	@Override
 	public void finished(){
 		// Do not use super.finished(), or it will trigger another save action
-		log(Level.FINE, "Folder update complete");
+		fine("Folder update complete");
 		cancel();		
 		this.removeInterfaceEventListener(mw);
 		this.removeDatasetEventListener(mw);		

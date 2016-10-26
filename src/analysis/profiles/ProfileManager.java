@@ -30,7 +30,6 @@ import analysis.profiles.ProfileSegmenter.UnsegmentableProfileException;
 import logging.Loggable;
 import utility.Constants;
 import components.AbstractCellularComponent;
-import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
 import components.generic.BorderTagObject;
@@ -41,7 +40,6 @@ import components.generic.SegmentedProfile;
 import components.generic.BorderTag.BorderTagType;
 import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 
 /**
@@ -111,24 +109,7 @@ public class ProfileManager implements Loggable {
 				}
 			}
 		});
-		
-//		for(Nucleus n : collection.getNuclei()){
-//			
-//			if(n.isLocked()){
-//				continue;
-//			}
-//			
-//			// returns the positive offset index of this profile which best matches the median profile
-//			int newIndex = n.getProfile(type).getSlidingWindowOffset(median);
-//			n.setBorderTag(tag, newIndex);		
-//			
-//			if(tag.equals(BorderTagObject.TOP_VERTICAL) || tag.equals(BorderTagObject.BOTTOM_VERTICAL)){
-//				
-//				n.updateVerticallyRotatedNucleus();
-//				
-//			}
-//		}
-		
+				
 	}
 	
 	/**
@@ -162,8 +143,6 @@ public class ProfileManager implements Loggable {
 			
 				finer(type+" length before update: "+pc.length());
 
-				
-
 				pc.createProfileAggregate(collection, type, length);
 
 				finer(type+" length after update: "+pc.length());
@@ -172,40 +151,7 @@ public class ProfileManager implements Loggable {
 			}
 		}
 	}
-	
-//	/**
-//	 * Create the profile collections to hold angles from nuclear
-//	 * profiles based on the current nucleus profiles. The ProfileAggregate
-//	 * for each ProfileType is recalculated. The resulting median profiles
-//	 * will have the same length after this update
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	public void createProfileCollections() {
-//
-//		/*
-//		 * Build a first set of profile aggregates
-//		 * Default is to make profile aggregate from reference point
-//		 * Do not build an aggregate for the non-existent frankenprofile
-//		 */
-//		for(ProfileType type : ProfileType.values()){
-//			
-//			if(type.equals(ProfileType.FRANKEN)){
-//				continue;
-//			}
-//			
-//			fine("Creating profile aggregate: "+type);
-//			
-//			finer(type+" length before update: "+collection.getProfileCollection(type).length());
-//			
-//			ProfileCollection pc = collection.getProfileCollection(type);
-//			int length = pc.length();
-//			
-//			pc.createProfileAggregate(collection, type, length);
-//			finer(type+" length after update: "+pc.length());
-//		}
-//	}
-	
+		
 	/**
 	 * Add the given offset to each of the profile types in the ProfileCollection
 	 * except for the frankencollection

@@ -207,7 +207,7 @@ public interface ICellCollection
 	 * @param type
 	 * @param p
 	 */
-	void setProfileCollection(ProfileType type, ProfileCollection p);
+	void setProfileCollection(ProfileType type, IProfileCollection p);
 
 	/**
 	 * Remove the given profile collection

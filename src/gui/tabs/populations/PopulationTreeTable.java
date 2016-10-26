@@ -12,7 +12,6 @@ import javax.swing.tree.TreeSelectionModel;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import components.ClusterGroup;
 import gui.DatasetListManager;
@@ -167,7 +166,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
 	
 	private List<Integer> getSelectedDatasetIndexes(){
 		List<Integer> result = new ArrayList<Integer>();
-		List<AnalysisDataset> datasets = getSelectedDatasets();
+		List<IAnalysisDataset> datasets = getSelectedDatasets();
 		PopulationTreeTableModel model = (PopulationTreeTableModel) getTreeTableModel();
 
 		for(IAnalysisDataset d : datasets){
@@ -178,14 +177,14 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
 
 	}
 	
-	private List<AnalysisDataset> getSelectedDatasets(){
-		List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>();
+	private List<IAnalysisDataset> getSelectedDatasets(){
+		List<IAnalysisDataset> datasets = new ArrayList<IAnalysisDataset>();
 		
 		for (int row = 0; row < getRowCount(); row++) {
 			
 			Object ob = getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
-			if(ob instanceof AnalysisDataset){
-				datasets.add( (AnalysisDataset)ob);
+			if(ob instanceof IAnalysisDataset){
+				datasets.add( (IAnalysisDataset)ob);
 			}
 
 		}
@@ -238,7 +237,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
 	 */
 	public boolean isDataset(int rowIndex){
 		Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
-		if(columnOneObject instanceof AnalysisDataset){
+		if(columnOneObject instanceof IAnalysisDataset){
 			return true;
 		}
 		return false;
@@ -249,11 +248,11 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
 	 * @param rowIndex
 	 * @return
 	 */
-	public AnalysisDataset getDatasetAtRow(int rowIndex){
+	public IAnalysisDataset getDatasetAtRow(int rowIndex){
 		Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
 
-		if(columnOneObject instanceof AnalysisDataset){
-			return (AnalysisDataset) columnOneObject; // row i, column 0
+		if(columnOneObject instanceof IAnalysisDataset){
+			return (IAnalysisDataset) columnOneObject; // row i, column 0
 		}
 		return null;
 	}

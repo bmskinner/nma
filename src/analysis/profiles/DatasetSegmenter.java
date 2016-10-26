@@ -23,19 +23,19 @@ package analysis.profiles;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.logging.Level;
 
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
 import analysis.ProgressEvent;
 import analysis.ProgressListener;
-import components.CellCollection;
 import components.ICellCollection;
+import components.active.generic.DefaultProfileCollection;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
 import components.generic.Profile;
-import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.Tag;
@@ -209,12 +209,12 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	 * @param collection
 	 * @throws Exception 
 	 */
-	private ProfileCollection createFrankenMedian(ICellCollection collection) throws Exception{
+	private IProfileCollection createFrankenMedian(ICellCollection collection) throws Exception{
 		
 		IProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
 		
 		// make a new profile collection to hold the frankendata
-		ProfileCollection frankenCollection = new ProfileCollection();
+		IProfileCollection frankenCollection = new DefaultProfileCollection();
 
 		// add the correct offset keys
 		// These are the same as the profile collection keys, and have
@@ -266,7 +266,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		List<NucleusBorderSegment> segments = pc.getSegments(Tag.REFERENCE_POINT);
 
 //		// make a new profile collection to hold the frankendata
-		ProfileCollection frankenCollection = createFrankenMedian(collection);
+		IProfileCollection frankenCollection = createFrankenMedian(collection);
 
 		// At this point, the FrankenCollection is identical to the ProfileCollection
 		// We need to add the individual recombined frankenProfiles
@@ -416,14 +416,14 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		finer("Refining segment assignments...");
 
 			IProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
-//			fine("Median profile");
+
 			fine(pc.tagString());
 			List<NucleusBorderSegment> segments = pc.getSegments(pointType);
 			fine("Fetched segments from profile collection");
 			fine(NucleusBorderSegment.toString(segments));
 
 			// make a new profile collection to hold the frankendata
-			ProfileCollection frankenCollection = new ProfileCollection();
+			IProfileCollection frankenCollection = new DefaultProfileCollection();
 
 			/*
 			   The border tags for the frankenCollection are the same as the profile 
@@ -456,8 +456,12 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			
 			SegmentRecombiningTask task = new SegmentRecombiningTask(medianProfile, pc, collection.getNuclei().toArray(new Nucleus[0]));
 			task.addProgressListener(this);
-//			task.invoke();
-			mainPool.invoke(task);
+
+			try {
+				mainPool.invoke(task);
+			} catch(RejectedExecutionException e){
+				error("Fork task rejected: "+e.getMessage(), e);
+			}
 
 			/*
 			 * Build a profile aggregate in the new frankencollection by taking the

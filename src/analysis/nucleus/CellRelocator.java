@@ -2,19 +2,19 @@ package analysis.nucleus;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
-import components.Cell;
-import components.CellCollection;
 import components.ICell;
+import components.ICellCollection;
+import components.active.DefaultAnalysisDataset;
+import components.active.DefaultCell;
+import components.active.DefaultCellCollection;
 import components.generic.XYPoint;
 
 /**
@@ -88,7 +88,7 @@ public class CellRelocator extends AnalysisWorker {
 	    UUID   activeID   = null;
 	    String activeName = null;
 	    
-	    Map<UUID, AnalysisDataset> map = new HashMap<UUID, AnalysisDataset>();
+	    Map<UUID, IAnalysisDataset> map = new HashMap<UUID, IAnalysisDataset>();
 //	    map.put(getDataset().getUUID(), getDataset());
 
 	    while (scanner.hasNextLine()){
@@ -117,12 +117,12 @@ public class CellRelocator extends AnalysisWorker {
 	    		 */
 	    		
 	    		activeName =  line.split("\\t")[1];
-	    		CellCollection c = new CellCollection(getDataset().getCollection().getFolder(), 
+	    		ICellCollection c = new DefaultCellCollection(getDataset().getCollection().getFolder(), 
 	    				getDataset().getCollection().getOutputFolderName(), 
 	    				  activeName, 
 	    				  getDataset().getCollection().getNucleusType(),
 	    				  activeID);
-	    		AnalysisDataset d = new AnalysisDataset(c);
+	    		IAnalysisDataset d = new DefaultAnalysisDataset(c);
 	    		d.setAnalysisOptions(getDataset().getAnalysisOptions());
 	    		map.put(activeID, d);
 	    		continue;
@@ -146,7 +146,7 @@ public class CellRelocator extends AnalysisWorker {
     		 * No header line, must be a cell for the current dataset
     		 */
 	    	  
-	        Cell cell = getCellFromLine(line);
+	        ICell cell = getCellFromLine(line);
 	        if(cell!=null){
 	        	map.get(activeID).getCollection().addCell(cell);
 //	        	cells.add(cell);
@@ -159,7 +159,7 @@ public class CellRelocator extends AnalysisWorker {
 	
 	
 	
-	private Cell getCellFromLine(String line){
+	private ICell getCellFromLine(String line){
 		log(Level.FINE, "Processing line: "+line);
 		
 		if(line.length()<5){
@@ -201,14 +201,14 @@ public class CellRelocator extends AnalysisWorker {
 	 * @param com
 	 * @return
 	 */
-	private Cell copyCellFromRoot(File f, XYPoint com){
+	private ICell copyCellFromRoot(File f, XYPoint com){
 		// find the nucleus
 		Set<ICell> cells = this.getDataset().getCollection().getCells(f);
 
 		for(ICell c : cells){
 
 			if(c.getNucleus().containsOriginalPoint(com)){
-				return new Cell(c);
+				return new DefaultCell(c);
 			}
 		}
 		return null;

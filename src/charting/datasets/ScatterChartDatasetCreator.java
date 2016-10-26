@@ -1,6 +1,5 @@
 package charting.datasets;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -13,14 +12,12 @@ import javax.swing.table.TableModel;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.signals.ShellRandomDistributionCreator;
 import analysis.signals.SignalManager;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
-import components.Cell;
-import components.CellCollection;
+import components.ICell;
 import components.ICellCollection;
 import components.generic.MeasurementScale;
 import components.generic.Tag;
@@ -74,7 +71,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 			double[] xpoints = new double[c.size()];
 			double[] ypoints = new double[c.size()];
 			
-			List<Cell> cells = new ArrayList(c.getCells());
+			List<ICell> cells = new ArrayList<ICell>(c.getCells());
 			// go through each index in the segment.
 			for(int j=0; j<cells.size();j++){
 				
@@ -165,7 +162,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 			double[] xpoints = new double[c.size()];
 			double[] ypoints = new double[c.size()];
 
-			List<Cell> cells = new ArrayList(c.getCells());
+			List<ICell> cells = new ArrayList<ICell>(c.getCells());
 			// go through each index in the segment.
 			for(int j=0; j<cells.size();j++){
 

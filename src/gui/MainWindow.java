@@ -600,6 +600,7 @@ public class MainWindow
 		private volatile AtomicBoolean bool = new AtomicBoolean();
 		
 		public PanelUpdateTask(final List<IAnalysisDataset> list){
+			fine("Creating new panel update task with "+list.size()+"datasets");
 			this.list = list;
 		}
 		

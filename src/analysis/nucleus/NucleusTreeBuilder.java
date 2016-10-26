@@ -39,7 +39,6 @@ import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshFace;
-import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
 import components.generic.IProfile;

@@ -56,6 +56,7 @@ import components.Cell;
 import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
+import components.active.DefaultCellCollection;
 import components.generic.XYPoint;
 
 /**
@@ -274,7 +275,7 @@ public class FishRemappingDialog extends ImageProber {
 		List<ICellCollection> result = new ArrayList<ICellCollection>(0);
 		
 		if(!selectedNucleiLeft.isEmpty()){
-			ICellCollection subCollectionLeft  = new CellCollection(dataset, "SubCollectionLeft");
+			ICellCollection subCollectionLeft  = new DefaultCellCollection(dataset, "SubCollectionLeft");
 			for(UUID id : selectedNucleiLeft){
 				ICell cell = dataset.getCollection().getCell(id);
 				subCollectionLeft.addCell(new Cell(cell));
@@ -283,7 +284,7 @@ public class FishRemappingDialog extends ImageProber {
 		}
 		
 		if(!selectedNucleiRight.isEmpty()){
-			ICellCollection subCollectionRight  = new CellCollection(dataset, "SubCollectionRight");
+			ICellCollection subCollectionRight  = new DefaultCellCollection(dataset, "SubCollectionRight");
 			for(UUID id : selectedNucleiRight){
 				ICell cell = dataset.getCollection().getCell(id);
 				subCollectionRight.addCell(new Cell(cell));

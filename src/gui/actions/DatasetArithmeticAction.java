@@ -21,12 +21,11 @@ package gui.actions;
 import java.util.ArrayList;
 import java.util.List;
 
-import components.CellCollection;
 import components.ICellCollection;
+import components.active.DefaultAnalysisDataset;
 import gui.MainWindow;
 import gui.dialogs.DatasetArithmeticSetupDialog;
 import gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 
 public class DatasetArithmeticAction extends ProgressableAction {
@@ -97,7 +96,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 		if(newCollection !=null && newCollection.size()>0){
 			log("Found "+newCollection.size()+" cells");
 			log("Running morphology analysis...");
-			IAnalysisDataset newDataset = new AnalysisDataset(newCollection);
+			IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
 			newDataset.setRoot(true);
 			int flag = MainWindow.ADD_POPULATION;
 			flag |= MainWindow.SAVE_DATASET;

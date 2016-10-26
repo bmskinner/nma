@@ -31,7 +31,6 @@ import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
 import utility.Constants;
 import components.AbstractCellularComponent;
-import components.CellCollection;
 import components.ICellCollection;
 import components.generic.Equation;
 import components.generic.IProfile;

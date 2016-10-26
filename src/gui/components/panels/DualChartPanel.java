@@ -37,7 +37,6 @@ import org.jfree.chart.JFreeChart;
 import components.generic.ProfileType;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.overlays.RectangleOverlayObject;
-import charting.charts.panels.DraggableOverlayChartPanel;
 import charting.charts.panels.ExportableChartPanel;
 import charting.charts.panels.PositionSelectionChartPanel;
 import charting.options.ChartOptions;

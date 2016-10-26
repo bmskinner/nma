@@ -26,7 +26,9 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.logging.Level;
 
 import analysis.AbstractProgressAction;
+import components.AbstractCellularComponent;
 import components.generic.IProfile;
+import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
@@ -40,7 +42,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 	final Nucleus[] nuclei;
 	private static final int THRESHOLD = 30;
 	
-	protected SegmentAssignmentTask(SegmentedProfile medianProfile, Nucleus[] nuclei, int low, int high) throws Exception{
+	protected SegmentAssignmentTask(SegmentedProfile medianProfile, Nucleus[] nuclei, int low, int high) throws ProfileException{
 	
 		this.low    = low;
 		this.high   = high;
@@ -48,7 +50,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 		this.median = medianProfile;
 	}
 	
-	public SegmentAssignmentTask(SegmentedProfile medianProfile, Nucleus[] nuclei) throws Exception{
+	public SegmentAssignmentTask(SegmentedProfile medianProfile, Nucleus[] nuclei) throws ProfileException {
 		this(medianProfile, nuclei, 0, nuclei.length);
 	}
 
@@ -56,9 +58,10 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 	     if (high - low < THRESHOLD)
 			try {
 				processNuclei();
-			} catch (Exception e) {
-				logError("Error processing nuclei", e);
-			}
+			} catch (ProfileException e) {
+	    		 warn("Error assigning segments to nuclei");
+	    		 fine("Error processing nuclei", e);
+	    	 }
 	     else {
 	    	 int mid = (low + high) >>> 1;
 
@@ -77,8 +80,9 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 	    		 tasks.add(task2);
 
 	    		 ForkJoinTask.invokeAll(tasks);
-	    	 } catch (Exception e) {
-	    		 logError("Error processing nuclei", e);
+	    	 } catch (ProfileException e) {
+	    		 warn("Error assigning segments to nucleus");
+	    		 fine("Error processing nuclei", e);
 	    	 }
 
 	     }
@@ -88,7 +92,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 	 * From the calculated median profile segments, assign segments to each nucleus
 	 * based on the best offset fit of the start and end indexes 
 	 */
-	private void processNuclei() throws Exception {
+	private void processNuclei() throws ProfileException {
 
 		for(int i=low; i<high; i++){
 			assignSegmentsToNucleus(nuclei[i]);
@@ -103,7 +107,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 	 * @param n the nucleus to segment
 	 * @param median the segmented median profile
 	 */
-	private void assignSegmentsToNucleus(Nucleus n) throws Exception {
+	private void assignSegmentsToNucleus(Nucleus n) throws ProfileException {
 
 		if(n.isLocked()){
 			finest(n.getNameAndNumber()+" is locked, skipping");
@@ -130,8 +134,8 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 			// find the positions these correspond to in the offset profiles
 
 			// get the median profile, indexed to the start or end point
-			IProfile startOffsetMedian 	= median.offset(startIndexInMedian);
-			IProfile endOffsetMedian 	= median.offset(endIndexInMedian);
+			Profile startOffsetMedian 	= median.offset(startIndexInMedian);
+			Profile endOffsetMedian 	= median.offset(endIndexInMedian);
 
 			// find the index at the point of the best fit
 			int startIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(startOffsetMedian);
@@ -139,15 +143,34 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 
 			// create a segment at these points
 			// ensure that the segment meets length requirements
-			NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex, n.getBorderLength(), segment.getID());
-			if(prevSeg != null){
-				seg.setPrevSegment(prevSeg);
-				prevSeg.setNextSegment(seg);
+			
+//			
+//			if( Math.abs(endIndex-startIndex) < NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH ){
+//				
+//				while(Math.abs(endIndex-startIndex)<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
+//					endIndex = n.wrapIndex(++endIndex);
+//					prevSeg.update(prevSeg.getStartIndex(), endIndex);
+//					fine("Segment too short. Lengthening to end index "+endIndex);
+//				}
+//			}
+			
+			try {
+				NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex, n.getBorderLength(), segment.getID());
+				if(prevSeg != null){
+					seg.setPrevSegment(prevSeg);
+					prevSeg.setNextSegment(seg);
+				}
+
+				nucleusSegments.add(seg);
+
+				prevSeg = seg;
+			
+			} catch(IllegalArgumentException e){
+				fine("Error making segment for nucleus "+n.getNameAndNumber(), e);
+				break;
+				
 			}
 
-			nucleusSegments.add(seg);
-
-			prevSeg = seg;
 		}
 
 		NucleusBorderSegment.linkSegments(nucleusSegments);

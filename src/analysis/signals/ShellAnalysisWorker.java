@@ -34,8 +34,8 @@ import utility.ArrayConverter.ArrayConversionException;
 import utility.Constants;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
-import components.CellCollection;
 import components.ICellCollection;
+import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
 import components.nuclear.SignalGroup;
@@ -205,7 +205,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 		// Create a random sample distibution
 		if(collection.hasConsensusNucleus()){
 			
-			SignalGroup random = new SignalGroup();
+			ISignalGroup random = new SignalGroup();
 			random.setGroupName("Random distribution");
 			random.setFolder( new File(""));
 			

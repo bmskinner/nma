@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import logging.Loggable;
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 
 /**

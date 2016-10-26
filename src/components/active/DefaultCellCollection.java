@@ -58,11 +58,11 @@ import analysis.profiles.SegmentStatisticFetchingTask;
 import analysis.signals.SignalManager;
 import components.ICell;
 import components.ICellCollection;
+import components.active.generic.DefaultProfileCollection;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
 import components.generic.MeasurementScale;
-import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.ISignalGroup;
@@ -153,7 +153,7 @@ implements ICellCollection {
 		this.nucleusType  = nucleusType;
 
 		for(ProfileType type : ProfileType.values()){
-			profileCollections.put(type, new ProfileCollection());
+			profileCollections.put(type, new DefaultProfileCollection());
 		}
 
 		ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType); 
@@ -363,7 +363,7 @@ implements ICellCollection {
 		}
 	}
 
-	public void setProfileCollection(ProfileType type, ProfileCollection p){
+	public void setProfileCollection(ProfileType type, IProfileCollection p){
 		this.profileCollections.put(type, p);
 	}
 
@@ -1327,6 +1327,13 @@ implements ICellCollection {
 			log("Creating default ruleset for collection");
 			ruleSets = RuleSetCollection.createDefaultRuleSet(nucleusType); 
 		}
+		
+		statsCache = new StatsCache();
+		
+		signalManager  = new SignalManager(this);
+		profileManager = new ProfileManager(this);
+		profileManager.createProfileCollections(false);
+		profileManager.recalculateProfileAggregates();
 
 	}
 

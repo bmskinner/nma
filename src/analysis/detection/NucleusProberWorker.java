@@ -149,7 +149,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			 * Restore size and circ options
 			 * Outline the objects that fail 
 			 */
-			List<Cell> cells = getCells(imageStack, file);
+			List<ICell> cells = getCells(imageStack, file);
 		
 			for(ICell cell : cells){
 
@@ -163,7 +163,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		} else {
 			// Threshold option selected - do not run edge detection
 			
-			List<Cell> cells = getCells(imageStack, file);
+			List<ICell> cells = getCells(imageStack, file);
 			
 			for(ICell cell : cells){
 
@@ -186,7 +186,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 	 * @return
 	 * @throws Exception 
 	 */
-	private List<Cell> getCells(ImageStack imageStack, File imageFile) throws Exception{
+	private List<ICell> getCells(ImageStack imageStack, File imageFile) throws Exception{
 		double minSize = options.getMinNucleusSize();
 		double maxSize = options.getMaxNucleusSize();
 		double minCirc = options.getMinNucleusCirc();
@@ -203,7 +203,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		
 		 NucleusDetector finder = new NucleusDetector(options, null);
 		
-		List<Cell> cells = finder.getDummyCells(imageStack, imageFile);
+		List<ICell> cells = finder.getDummyCells(imageStack, imageFile);
 		
 		finer("Resetting detetion parameters");
 		

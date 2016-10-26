@@ -29,14 +29,13 @@ import java.util.List;
 import java.util.UUID;
 
 import utility.Constants;
-import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 import analysis.IAnalysisDataset;
 import analysis.nucleus.NucleusClusterer;
-import components.CellCollection;
 import components.ClusterGroup;
 import components.ICellCollection;
 import components.nuclear.SignalGroup;
+
 
 public class ClusterAnalysisAction extends ProgressableAction {
 

@@ -39,6 +39,8 @@ import analysis.AnalysisOptions.CannyOptions;
 import analysis.detection.Detector;
 import analysis.image.ImageFilterer;
 import components.Cell;
+import components.ICell;
+import components.active.DefaultCell;
 import components.generic.XYPoint;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
@@ -76,7 +78,7 @@ public class NucleusDetector extends Detector {
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<Cell> getCells(ImageStack image, File sourceFile) throws Exception{
+	public List<ICell> getCells(ImageStack image, File sourceFile) throws Exception{
 		return createCellsFromImage(image, sourceFile, false);
 	}
 	
@@ -89,7 +91,7 @@ public class NucleusDetector extends Detector {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Cell> getDummyCells(ImageStack image, File sourceFile) throws Exception{
+	public List<ICell> getDummyCells(ImageStack image, File sourceFile) throws Exception{
 		return createCellsFromImage(image, sourceFile, true);
 	}
 	
@@ -139,11 +141,11 @@ public class NucleusDetector extends Detector {
   * @param path the full path of the image
  * @throws Exception 
   */
-	private List<Cell> createCellsFromImage(ImageStack image, File path, boolean makeDummy) throws Exception{
+	private List<ICell> createCellsFromImage(ImageStack image, File path, boolean makeDummy) throws Exception{
 
 		fine("File:  "+path.getName());
 		
-		List<Cell> result = new ArrayList<Cell>();
+		List<ICell> result = new ArrayList<ICell>();
 						
 		ImageStack searchStack = preprocessImage(image);
 
@@ -164,7 +166,7 @@ public class NucleusDetector extends Detector {
 
 			finest( "Acquiring nucleus "+nucleusNumber);
 
-			Cell cell = null;
+			ICell cell = null;
 			try{	
 				
 				if(makeDummy){
@@ -246,9 +248,9 @@ public class NucleusDetector extends Detector {
 	  * @param path the full path to the image
 	  * @param makeDummyCell should the cell be profiled, or a placeholder
 	  */
-	private Cell makeCell(Roi roi, ImageStack image, int nucleusNumber, File path, boolean makeDummyCell){
+	private ICell makeCell(Roi roi, ImageStack image, int nucleusNumber, File path, boolean makeDummyCell){
 
-		Cell result = null;
+		ICell result = null;
 		
 		  // measure the area, density etc within the nucleus
 		ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
@@ -269,7 +271,12 @@ public class NucleusDetector extends Detector {
 			  // create a Nucleus from the roi
 			  XYPoint centreOfMass = new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase);
 
-			  Nucleus currentNucleus = createNucleus(roi, path, nucleusNumber, originalPosition, options.getNucleusType(), centreOfMass);
+			  Nucleus currentNucleus = createNucleus(roi, 
+					  path, 
+					  nucleusNumber, 
+					  originalPosition, 
+					  options.getNucleusType(), 
+					  centreOfMass);
 
 			  currentNucleus.setStatistic(NucleusStatistic.AREA,      values.get("Area"));
 			  currentNucleus.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
@@ -287,7 +294,7 @@ public class NucleusDetector extends Detector {
 			  }
 		
 			  // if everything checks out, add the measured parameters to the global pool
-			  result = new Cell();
+			  result = new DefaultCell();
 			  result.setNucleus(currentNucleus);		  
 			  
 		  }catch(Exception e){

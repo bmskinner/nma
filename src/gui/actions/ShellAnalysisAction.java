@@ -26,7 +26,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.signals.ShellAnalysisWorker;
 import analysis.signals.ShellDetector;

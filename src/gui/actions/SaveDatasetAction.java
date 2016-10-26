@@ -25,7 +25,6 @@ import ij.io.SaveDialog;
 import io.PopulationExporter;
 import gui.MainWindow;
 import gui.ThreadManager;
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 
 public class SaveDatasetAction extends ProgressableAction {
