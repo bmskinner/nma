@@ -22,6 +22,7 @@ package analysis.profiles;
 import java.util.Map;
 
 import components.generic.BorderTagObject;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.Tag;
@@ -118,7 +119,7 @@ public interface Taggable extends Profileable {
 	 * @return a copy of the segmented profile
 	 * @throws Exception 
 	 */
-	public SegmentedProfile getProfile(ProfileType type, Tag tag);
+	public ISegmentedProfile getProfile(ProfileType type, Tag tag);
 	
 		
 	/**
@@ -126,7 +127,7 @@ public interface Taggable extends Profileable {
 	 * @param type
 	 * @param profile
 	 */
-	public void setProfile(ProfileType type, Tag tag, SegmentedProfile profile) throws Exception;
+	public void setProfile(ProfileType type, Tag tag, ISegmentedProfile profile) throws Exception;
 	
 	/**
 	 * Get a copy of the mapping of border tags to index positions within 

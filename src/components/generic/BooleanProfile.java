@@ -23,6 +23,7 @@ import java.io.Serializable;
 
 import logging.Loggable;
 import components.AbstractCellularComponent;
+import components.active.generic.FloatProfile;
 import ij.IJ;
 
 /**
@@ -143,11 +144,11 @@ public class BooleanProfile implements Serializable, Loggable {
 	 * @return a profile with the positions as values
 	 */
 	public IProfile getPositions(int length){
-		double [] result = new double[array.length];
+		float [] result = new float[array.length];
 		for(int i=0;i<array.length;i++){
-			result[i] = (double) i / (double) array.length * (double) length;
+			result[i] = (float) i / (float) array.length * (float) length;
 		}
-		return new Profile(result);
+		return new FloatProfile(result);
 	}
 	
 	/**

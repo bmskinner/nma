@@ -67,14 +67,13 @@ import org.jfree.data.Range;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleEdge;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import components.Cell;
 import components.CellularComponent;
 import components.ICell;
 import components.generic.BorderTagObject;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import gui.ChartSetEvent;
@@ -505,7 +504,7 @@ public class CellBorderAdjustmentDialog
 	private void updateWorkingCellProfiles(){
 		
 		// Get the positions of segment boundaries
-		SegmentedProfile templateProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
+		ISegmentedProfile templateProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
 		int oldLength = templateProfile.size();
 		
 		try {

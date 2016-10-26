@@ -24,8 +24,8 @@ import java.util.UUID;
 
 import logging.Loggable;
 import components.ICellCollection;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
@@ -77,7 +77,7 @@ public class ProfileOffsetter implements Loggable {
 
 
 
-		SegmentedProfile profile = collection.getProfileCollection(ProfileType.ANGLE)
+		ISegmentedProfile profile = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(Tag.REFERENCE_POINT);
 
 		

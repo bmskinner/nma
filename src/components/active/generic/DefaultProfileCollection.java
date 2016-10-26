@@ -30,6 +30,7 @@ import components.generic.BooleanProfile;
 import components.generic.IProfile;
 import components.generic.IProfileAggregate;
 import components.generic.IProfileCollection;
+import components.generic.ISegmentedProfile;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
@@ -147,12 +148,12 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentedProfile(components.generic.BorderTagObject)
 	 */
 	@Override
-	public SegmentedProfile getSegmentedProfile(Tag tag) {
+	public ISegmentedProfile getSegmentedProfile(Tag tag) {
 		if(tag==null){
 			throw new IllegalArgumentException("A profile key is required");
 		}
 
-		SegmentedProfile result = new SegmentedProfile(getProfile(tag, Constants.MEDIAN), getSegments(tag));
+		ISegmentedProfile result = new SegmentedFloatProfile(getProfile(tag, Constants.MEDIAN), getSegments(tag));
 		return result;
 	}
 
@@ -480,7 +481,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 		if(q25==null || q75==null){ // if something goes wrong, return a zero profile
 			
 			warn("Problem calculating the IQR - setting to zero");			
-			return new Profile(0, aggregate.length());
+			return new FloatProfile(0, aggregate.length());
 		}
 		
 

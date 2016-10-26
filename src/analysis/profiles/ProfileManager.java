@@ -35,8 +35,8 @@ import components.ICellCollection;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.generic.BorderTag.BorderTagType;
 import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
@@ -654,7 +654,7 @@ public class ProfileManager implements Loggable {
 	public void updateCellSegmentStartIndex(ICell cell, UUID id, int index) throws Exception {
 		
 		Nucleus n = cell.getNucleus();
-		SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 		
 		NucleusBorderSegment seg = profile.getSegment(id);
 		
@@ -715,7 +715,7 @@ public class ProfileManager implements Loggable {
 //		fine("Updating median profile segment: "+segName+" to index "+index);
 		// Get the median profile from the reference point
 		
-		SegmentedProfile oldProfile = collection
+		ISegmentedProfile oldProfile = collection
 				.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(Tag.REFERENCE_POINT);
 		
@@ -811,7 +811,7 @@ public class ProfileManager implements Loggable {
 	 */
 	public void mergeSegments(NucleusBorderSegment seg1, NucleusBorderSegment seg2) throws Exception {
 
-		SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE)
+		ISegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(Tag.REFERENCE_POINT);
 
 		/*
@@ -838,7 +838,7 @@ public class ProfileManager implements Loggable {
 				boolean wasLocked = n.isLocked();
 				n.setLocked(false); // Merging segments is not destructive
 
-				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+				ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 				NucleusBorderSegment nSeg1 = profile.getSegment(seg1.getID());
 				NucleusBorderSegment nSeg2 = profile.getSegment(seg2.getID());
 				profile.mergeSegments(nSeg1, nSeg2, newID);
@@ -851,7 +851,7 @@ public class ProfileManager implements Loggable {
 			 */
 			if(collection.hasConsensusNucleus()){
 				Nucleus n = collection.getConsensusNucleus();
-				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+				ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 				NucleusBorderSegment nSeg1 = profile.getSegment(seg1.getID());
 				NucleusBorderSegment nSeg2 = profile.getSegment(seg2.getID());
 				profile.mergeSegments(nSeg1, nSeg2, newID);
@@ -872,7 +872,7 @@ public class ProfileManager implements Loggable {
 	 */
 	public boolean splitSegment(NucleusBorderSegment seg, int index)  throws Exception {
 		
-		SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE).getSegmentedProfile(Tag.REFERENCE_POINT);
+		ISegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE).getSegmentedProfile(Tag.REFERENCE_POINT);
 		
 
 		// Do not try to split segments that are a merge of other segments
@@ -903,7 +903,7 @@ public class ProfileManager implements Loggable {
 					boolean wasLocked = n.isLocked();
 					n.setLocked(false); // Merging segments is not destructive
 
-					SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 					NucleusBorderSegment nSeg = profile.getSegment(seg.getID());
 
 					int targetIndex = nSeg.getProportionalIndex(proportion);
@@ -917,7 +917,7 @@ public class ProfileManager implements Loggable {
 				 */
 				if(collection.hasConsensusNucleus()){
 					Nucleus n = collection.getConsensusNucleus();
-					SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 					NucleusBorderSegment nSeg1 = profile.getSegment(seg.getID());
 					int targetIndex = nSeg1.getProportionalIndex(proportion);
 					profile.splitSegment(nSeg1, targetIndex, newID1, newID2);
@@ -950,7 +950,7 @@ public class ProfileManager implements Loggable {
 	
 	public void unmergeSegments(NucleusBorderSegment seg) throws Exception {
 		
-		SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE)
+		ISegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(Tag.REFERENCE_POINT);
 		
 		// Get the segments to merge
@@ -968,7 +968,7 @@ public class ProfileManager implements Loggable {
 		for(Nucleus n : collection.getNuclei()){
 			boolean wasLocked = n.isLocked();
 			n.setLocked(false); // Merging segments is not destructive
-			SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 			NucleusBorderSegment nSeg = profile.getSegment(seg.getID());
 			profile.unmergeSegment(nSeg);
 			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
@@ -980,7 +980,7 @@ public class ProfileManager implements Loggable {
 		 */
 		if(collection.hasConsensusNucleus()){
 			Nucleus n = collection.getConsensusNucleus();
-			SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 			NucleusBorderSegment nSeg1 = profile.getSegment(seg.getID());
 			profile.unmergeSegment(nSeg1);
 			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);

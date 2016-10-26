@@ -32,9 +32,11 @@ import analysis.ProgressEvent;
 import analysis.ProgressListener;
 import components.ICellCollection;
 import components.active.generic.DefaultProfileCollection;
+import components.active.generic.SegmentedFloatProfile;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
+import components.generic.ISegmentedProfile;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
@@ -281,8 +283,8 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 
 		for(Nucleus n : collection.getNuclei()){ 
 			// recombine the segments at the lengths of the median profile segments
-			Profile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
-			n.setProfile(ProfileType.FRANKEN, new SegmentedProfile(recombinedProfile));
+			IProfile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
+			n.setProfile(ProfileType.FRANKEN, new SegmentedFloatProfile(recombinedProfile));
 
 			publish(progressCount++);
 
@@ -307,7 +309,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 //		assignMedianSegmentsToNuclei(collection);
 
 		// find the corresponding point in each Nucleus
-		SegmentedProfile median = pc.getSegmentedProfile(Tag.REFERENCE_POINT);
+		ISegmentedProfile median = pc.getSegmentedProfile(Tag.REFERENCE_POINT);
 		
 		finer("Creating segmnent assignment task");
 		SegmentAssignmentTask task = new SegmentAssignmentTask(median, collection.getNuclei().toArray(new Nucleus[0]));
@@ -368,7 +370,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		IProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
 
 		// find the corresponding point in each Nucleus
-		SegmentedProfile median = pc.getSegmentedProfile(Tag.REFERENCE_POINT);
+		ISegmentedProfile median = pc.getSegmentedProfile(Tag.REFERENCE_POINT);
 		//			assignSegments(collection);
 		SegmentAssignmentTask task = new SegmentAssignmentTask(median, collection.getNuclei().toArray(new Nucleus[0]));
 		task.addProgressListener(this);
@@ -446,7 +448,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			 */
 
 			// Get the median profile for the population
-			SegmentedProfile medianProfile = pc.getSegmentedProfile(pointType);
+			ISegmentedProfile medianProfile = pc.getSegmentedProfile(pointType);
 			finer("Median profile: angle at index 0 for "+Tag.REFERENCE_POINT+" is "+medianProfile.get(0));
 
 			

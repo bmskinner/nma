@@ -22,8 +22,8 @@ package analysis.profiles;
 import java.util.UUID;
 
 import components.CellularComponent;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 
 /**
  * Object implementing this interface are able to be
@@ -53,7 +53,7 @@ public interface Profileable extends CellularComponent {
 	 * is needed, specify a pointType
 	 * @return
 	 */
-	SegmentedProfile getProfile(ProfileType type);
+	ISegmentedProfile getProfile(ProfileType type);
 	
 	/**
 	 * Update the profile of the given type. Since only franken profiles are 
@@ -64,7 +64,7 @@ public interface Profileable extends CellularComponent {
 	 * @param profile
 	 * @throws Exception
 	 */
-	void setProfile(ProfileType type, SegmentedProfile profile) throws ProfileException;
+	void setProfile(ProfileType type, ISegmentedProfile profile) throws ProfileException;
 	
 	
 	/**

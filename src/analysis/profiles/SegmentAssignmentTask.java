@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import analysis.AbstractProgressAction;
 import components.AbstractCellularComponent;
 import components.generic.IProfile;
+import components.generic.ISegmentedProfile;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
@@ -37,12 +38,12 @@ import components.nuclei.Nucleus;
 @SuppressWarnings("serial")
 public class SegmentAssignmentTask  extends AbstractProgressAction  {
 	
-	final SegmentedProfile median;
+	final ISegmentedProfile median;
 	final int low, high;
 	final Nucleus[] nuclei;
 	private static final int THRESHOLD = 30;
 	
-	protected SegmentAssignmentTask(SegmentedProfile medianProfile, Nucleus[] nuclei, int low, int high) throws ProfileException{
+	protected SegmentAssignmentTask(ISegmentedProfile medianProfile, Nucleus[] nuclei, int low, int high) throws ProfileException{
 	
 		this.low    = low;
 		this.high   = high;
@@ -50,7 +51,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 		this.median = medianProfile;
 	}
 	
-	public SegmentAssignmentTask(SegmentedProfile medianProfile, Nucleus[] nuclei) throws ProfileException {
+	public SegmentAssignmentTask(ISegmentedProfile medianProfile, Nucleus[] nuclei) throws ProfileException {
 		this(medianProfile, nuclei, 0, nuclei.length);
 	}
 
@@ -117,7 +118,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 		}
 		
 		// remove any existing segments in the nucleus
-		SegmentedProfile nucleusProfile = n.getProfile(ProfileType.ANGLE);
+		ISegmentedProfile nucleusProfile = n.getProfile(ProfileType.ANGLE);
 		nucleusProfile.clearSegments();
 
 		List<NucleusBorderSegment> nucleusSegments = new ArrayList<NucleusBorderSegment>();
@@ -134,8 +135,8 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 			// find the positions these correspond to in the offset profiles
 
 			// get the median profile, indexed to the start or end point
-			Profile startOffsetMedian 	= median.offset(startIndexInMedian);
-			Profile endOffsetMedian 	= median.offset(endIndexInMedian);
+			IProfile startOffsetMedian 	= median.offset(startIndexInMedian);
+			IProfile endOffsetMedian 	= median.offset(endIndexInMedian);
 
 			// find the index at the point of the best fit
 			int startIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(startOffsetMedian);

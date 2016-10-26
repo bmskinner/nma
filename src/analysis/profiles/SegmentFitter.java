@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import components.active.generic.SegmentedFloatProfile;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
-import components.generic.Profile;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.generic.BorderTag.BorderTagType;
 import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
@@ -50,7 +50,7 @@ public class SegmentFitter implements Loggable {
 	 */
 	static final double PENALTY_GROW   = 20;
 	
-	private final SegmentedProfile medianProfile; // the profile to align against
+	private final ISegmentedProfile medianProfile; // the profile to align against
 	
 
 	/**
@@ -59,13 +59,13 @@ public class SegmentFitter implements Loggable {
 	 * @param logFile the file for logging status
 	 * @throws Exception 
 	 */
-	public SegmentFitter(final SegmentedProfile medianProfile) throws Exception{
+	public SegmentFitter(final ISegmentedProfile medianProfile) throws Exception{
 		if(medianProfile==null){
 //			log(Level.SEVERE, "Segmented profile is null");
 			throw new IllegalArgumentException("Median profile is null");
 		}
 
-		this.medianProfile  = new SegmentedProfile(medianProfile);
+		this.medianProfile  = new SegmentedFloatProfile(medianProfile);
 	}
 	
 	/**
@@ -92,7 +92,7 @@ public class SegmentFitter implements Loggable {
 		
 		// Begin fitting the segments to the median
 		// get the best fit of segments to the median
-		SegmentedProfile newProfile = this.runFitter(n.getProfile(ProfileType.ANGLE));
+		ISegmentedProfile newProfile = this.runFitter(n.getProfile(ProfileType.ANGLE));
 		
 		log(Level.FINEST, "Fitted profile against median for nucleus "+n.getNameAndNumber());
 		log(Level.FINEST, newProfile.toString());
@@ -120,7 +120,7 @@ public class SegmentFitter implements Loggable {
 	 * @return a profile
 	 * @throws Exception  
 	 */
-	public Profile recombine(Nucleus n, Tag tag) throws Exception {
+	public ISegmentedProfile recombine(Nucleus n, Tag tag) throws Exception {
 		if(n==null){
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
@@ -139,13 +139,13 @@ public class SegmentFitter implements Loggable {
 		 * begins with seg 0 at the border tag.
 		 */
 
-		SegmentedProfile nucleusProfile = new SegmentedProfile(n.getProfile(ProfileType.ANGLE, tag));
+		ISegmentedProfile nucleusProfile = new SegmentedFloatProfile(n.getProfile(ProfileType.ANGLE, tag));
 		
 		finest("Initial profile starting at "+tag+":");
 		finest(nucleusProfile.toString());
 
 		// stretch or squeeze the segments to match the length of the median profile of the collection
-		SegmentedProfile frankenProfile = null;
+		ISegmentedProfile frankenProfile = null;
 		
 		try {
 			frankenProfile = nucleusProfile.frankenNormaliseToProfile(medianProfile);
@@ -236,7 +236,7 @@ public class SegmentFitter implements Loggable {
 	 * @return a profile with best-fit segmentation to the median
 	 * @throws Exception 
 	 */
-	private SegmentedProfile runFitter(SegmentedProfile profile) throws Exception {
+	private ISegmentedProfile runFitter(ISegmentedProfile profile) throws Exception {
 		// Input check
 		if(profile==null){
 //			log(Level.SEVERE, "Profile is null");
@@ -245,10 +245,10 @@ public class SegmentFitter implements Loggable {
 		
 		
 		// By default, return the input profile
-		SegmentedProfile result 	 = new SegmentedProfile(profile);
+		ISegmentedProfile result 	 = new SegmentedFloatProfile(profile);
 
 		// A new list to hold the fitted segments
-		SegmentedProfile tempProfile = new SegmentedProfile(profile);
+		ISegmentedProfile tempProfile = new SegmentedFloatProfile(profile);
 		
 		// fit each segment independently
 		List<UUID> idList = medianProfile.getSegmentIDs();
@@ -268,7 +268,7 @@ public class SegmentFitter implements Loggable {
 				tempProfile = testLength(tempProfile, id);
 
 				// copy the best fit profile to the result
-				result 	 = new SegmentedProfile(tempProfile);		
+				result 	 = new SegmentedFloatProfile(tempProfile);		
 			}
 		}
 
@@ -281,12 +281,12 @@ public class SegmentFitter implements Loggable {
 	 * @param segmnetNumber the segment to test
 	 * @return
 	 */
-	private SegmentedProfile testLength(SegmentedProfile profile, UUID id) throws Exception {
+	private ISegmentedProfile testLength(ISegmentedProfile profile, UUID id) throws Exception {
 		
 		
 		
 		// by default, return the same profile that came in
-		SegmentedProfile result = new SegmentedProfile(profile);
+		ISegmentedProfile result = new SegmentedFloatProfile(profile);
 				
 		
 		// the segment in the input profile to work on
@@ -317,7 +317,7 @@ public class SegmentFitter implements Loggable {
 
 			// find the changeWindow with the best fit, 
 			// apply all changes to a fresh copy of the profile
-			SegmentedProfile testProfile = new SegmentedProfile(profile);
+			ISegmentedProfile testProfile = new SegmentedFloatProfile(profile);
 
 			testProfile = testChange(profile, id, changeWindow);
 			double score = compareSegmentationPatterns(medianProfile, testProfile);
@@ -331,7 +331,7 @@ public class SegmentFitter implements Loggable {
 		int halfWindow = changeWindowSize / 2;
 		// now we have the best window,  drop down to a changeValue
 		for(int changeValue = bestChangeWindow - halfWindow; changeValue < bestChangeWindow+halfWindow; changeValue++){
-			SegmentedProfile testProfile = new SegmentedProfile(profile);
+			ISegmentedProfile testProfile = new SegmentedFloatProfile(profile);
 
 			testProfile = testChange(profile, id, changeValue);
 			double score = compareSegmentationPatterns(medianProfile, testProfile);
@@ -352,7 +352,7 @@ public class SegmentFitter implements Loggable {
 	 * @return the original profile, or a better fit to the median
 	 * @throws Exception
 	 */
-	private SegmentedProfile testChange(SegmentedProfile profile, UUID id, int changeValue) throws Exception {
+	private ISegmentedProfile testChange(ISegmentedProfile profile, UUID id, int changeValue) throws Exception {
 		
 		if(profile==null){
 			throw new IllegalArgumentException("Input profile is null for segment "+id.toString()+" change "+changeValue);
@@ -362,13 +362,13 @@ public class SegmentFitter implements Loggable {
 		double bestScore = compareSegmentationPatterns(medianProfile, profile);
 
 		// apply all changes to a fresh copy of the profile
-		SegmentedProfile testProfile = new SegmentedProfile(profile);
+		ISegmentedProfile testProfile = new SegmentedFloatProfile(profile);
 
 
 		// not permitted if it violates length constraint
 		if(testProfile.adjustSegmentStart(id, changeValue)){
 
-			SegmentedProfile result = testProfile;
+			ISegmentedProfile result = testProfile;
 
 
 
@@ -378,7 +378,7 @@ public class SegmentFitter implements Loggable {
 
 			if(score < bestScore){
 				bestScore 	= score;
-				result = new SegmentedProfile(testProfile);
+				result = new SegmentedFloatProfile(testProfile);
 
 			}
 
@@ -398,7 +398,7 @@ public class SegmentFitter implements Loggable {
 	 * @return the sum of square differences between the segments
 	 * @throws Exception 
 	 */
-	private double compareSegments(UUID id, SegmentedProfile referenceProfile, SegmentedProfile testProfile) throws Exception{
+	private double compareSegments(UUID id, ISegmentedProfile referenceProfile, ISegmentedProfile testProfile) throws Exception{
 		if(id == null){
 			throw new IllegalArgumentException("Segment id is null");
 		}
@@ -436,7 +436,7 @@ public class SegmentFitter implements Loggable {
 	 * @return the score
 	 * @throws Exception 
 	 */
-	private double  compareSegmentationPatterns(SegmentedProfile referenceProfile, SegmentedProfile testProfile) throws Exception{
+	private double  compareSegmentationPatterns(ISegmentedProfile referenceProfile, ISegmentedProfile testProfile) throws Exception{
 		
 		if(referenceProfile==null || testProfile==null){
 			throw new IllegalArgumentException("An input profile is null");

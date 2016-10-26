@@ -53,13 +53,14 @@ import stats.PlottableStatistic;
 import stats.SignalStatistic;
 import components.AbstractCellularComponent;
 import components.CellularComponent;
+import components.active.generic.SegmentedFloatProfile;
 import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
 import components.generic.IProfile;
+import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
@@ -85,7 +86,7 @@ public class RoundNucleus extends AbstractCellularComponent
 
 	protected double pathLength;  // the angle profile path length - measures wibbliness in border
 	
-	protected Map<ProfileType, SegmentedProfile> profileMap = new HashMap<ProfileType, SegmentedProfile>();
+	protected Map<ProfileType, ISegmentedProfile> profileMap = new HashMap<ProfileType, ISegmentedProfile>();
 	
 	protected List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
 
@@ -584,7 +585,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * @param pointType
 	 * @throws Exception
 	 */
-	public void setProfile(ProfileType type, Tag tag, SegmentedProfile p) throws Exception{
+	public void setProfile(ProfileType type, Tag tag, ISegmentedProfile p) throws Exception{
 		
 		if(segsLocked){
 			return;
@@ -594,7 +595,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		int pointIndex = this.borderTags.get(tag);
 		
 		// remove the offset from the profile, by setting the profile to start from the pointIndex
-		this.setProfile(type, new SegmentedProfile(p).offset(-pointIndex));
+		this.setProfile(type, new SegmentedFloatProfile(p).offset(-pointIndex));
 //		this.updateVerticallyRotatedNucleus();
 	}
 
@@ -643,14 +644,16 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 		// When moving the RP, move all segments to match
 		if(tag.equals(Tag.REFERENCE_POINT)){
-			SegmentedProfile p = getProfile(ProfileType.ANGLE);
+			ISegmentedProfile p = getProfile(ProfileType.ANGLE);
 			int oldRP = getBorderIndex(tag);
 			int diff  = i-oldRP;
 			p.nudgeSegments(diff);
 			finest("Old RP at "+oldRP);
 			finest("New RP at "+i);
 			finest("Moving segments by"+diff);
+			
 			setProfile(ProfileType.ANGLE, p);
+			
 		}
 
 		this.borderTags.put((BorderTagObject) tag, i);
@@ -679,7 +682,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	public void replaceBorderTags(Map<BorderTagObject, Integer> tagMap){
 		
 		int oldRP = getBorderIndex(Tag.REFERENCE_POINT);
-		SegmentedProfile p = getProfile(ProfileType.ANGLE);
+		ISegmentedProfile p = getProfile(ProfileType.ANGLE);
 		
 		this.borderTags = tagMap;
 		
@@ -691,6 +694,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		finest("New RP at "+newRP);
 		finest("Moving segments by"+diff);
 		setProfile(ProfileType.ANGLE, p);
+
 		
 		int newOP = getBorderIndex(Tag.ORIENTATION_POINT);
 		int intersectionIndex = this.getBorderIndex(this.findOppositeBorder( this.getBorderPoint(newOP) ));
@@ -809,7 +813,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			this.angleProfileWindowSize = (int) Math.round(angleWindow);
 			finest("Recalculating angle profile");
 			ProfileCreator creator = new ProfileCreator(this);
-			SegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
+			ISegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
 			
 			this.profileMap.put(ProfileType.ANGLE, profile);		
 			
@@ -817,9 +821,9 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	
-	public SegmentedProfile getProfile(ProfileType type) {
+	public ISegmentedProfile getProfile(ProfileType type) {
 		if(this.hasProfile(type)){
-			return new SegmentedProfile(this.profileMap.get(type));
+			return new SegmentedFloatProfile(this.profileMap.get(type));
 		} else {
 			throw new IllegalArgumentException("Profile type "+type+" is not found in this nucleus");
 		}
@@ -830,16 +834,16 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 
 
-	public SegmentedProfile getProfile(ProfileType type, Tag tag){
+	public ISegmentedProfile getProfile(ProfileType type, Tag tag){
 		
 		// fetch the index of the pointType (the new zero)
 		int pointIndex = this.borderTags.get(tag);
 		
-		SegmentedProfile profile = null;
+		ISegmentedProfile profile = null;
 		if(this.hasProfile(type)){
 			
 			// offset the angle profile to start at the pointIndex
-			profile =  new SegmentedProfile(this.getProfile(type).offset(pointIndex));
+			profile =  new SegmentedFloatProfile(this.getProfile(type).offset(pointIndex));
 			
 		}
 
@@ -847,7 +851,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 
-	public void setProfile(ProfileType type, SegmentedProfile profile) {
+	public void setProfile(ProfileType type, ISegmentedProfile profile) {
 		if(profile==null){
 			throw new IllegalArgumentException("Error setting nucleus profile: type "+type+" is null");
 		}
@@ -879,7 +883,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		for(ProfileType type : ProfileType.values()){
 			
-			SegmentedProfile profile = creator.createProfile(type);
+			ISegmentedProfile profile = creator.createProfile(type);
 			profileMap.put(type, profile);
 		}
 	}
@@ -888,7 +892,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		if(segID==null){
 			throw new IllegalArgumentException("Requested seg id is null");
 		}
-		for(SegmentedProfile p : this.profileMap.values()){
+		for(ISegmentedProfile p : this.profileMap.values()){
 			
 			if(p.hasSegment(segID)){
 				p.getSegment(segID).setStartPositionLocked(lock);
@@ -923,7 +927,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 		for(ProfileType type : profileMap.keySet()){
 
-			SegmentedProfile profile = profileMap.get(type);
+			ISegmentedProfile profile = profileMap.get(type);
 			profile.reverse();
 			profileMap.put(type, profile);
 		}
@@ -1186,7 +1190,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		
 		// Check the segmented profiles
-		for(Map.Entry<ProfileType, SegmentedProfile> entry : profileMap.entrySet()){
+		for(Map.Entry<ProfileType, ISegmentedProfile> entry : profileMap.entrySet()){
 
 			result = prime * result
 					+ ((entry == null) ? 0 : entry.getValue().hashCode());

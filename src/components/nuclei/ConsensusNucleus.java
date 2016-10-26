@@ -24,8 +24,8 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import analysis.profiles.ProfileCreator;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.nuclear.NucleusType;
 
 /**
@@ -58,7 +58,7 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 		 */
 		ProfileCreator creator = new ProfileCreator(this);
 
-		SegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
+		ISegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
 				
 		profileMap.put(ProfileType.ANGLE, profile);
 

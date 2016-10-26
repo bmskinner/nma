@@ -24,7 +24,6 @@ import java.util.List;
 
 import logging.Loggable;
 import analysis.profiles.ProfileException;
-import components.CellCollection;
 import components.ICellCollection;
 import components.nuclear.NucleusBorderSegment;
 
@@ -69,7 +68,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @return the profile
 	 * @throws Exception
 	 */
-	SegmentedProfile getSegmentedProfile(Tag tag);
+	ISegmentedProfile getSegmentedProfile(Tag tag);
 
 	/**
 	 * Get the profile aggregate for this collection

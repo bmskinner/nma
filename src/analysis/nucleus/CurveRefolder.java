@@ -34,8 +34,8 @@ import components.AbstractCellularComponent;
 import components.ICellCollection;
 import components.generic.Equation;
 import components.generic.IProfile;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
@@ -294,7 +294,7 @@ public class CurveRefolder extends AnalysisWorker {
 	*/
 	private double iterateOverNucleus() throws Exception {
 
-		SegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		ISegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
 		// Get the difference between the candidate nucleus profile and the median profile
 		double similarityScore = refoldProfile.absoluteSquareDifference(targetCurve);

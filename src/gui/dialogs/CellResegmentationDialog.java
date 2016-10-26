@@ -59,8 +59,8 @@ import charting.options.ChartOptionsBuilder;
 import components.Cell;
 import components.ICell;
 import components.generic.BorderTagObject;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.generic.Tag;
 import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
@@ -246,7 +246,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 			tempList.add(last);
 			NucleusBorderSegment.linkSegments(tempList);
 
-			SegmentedProfile newProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
+			ISegmentedProfile newProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
 			newProfile.setSegments(tempList);
 			finer("Segments added: ");
 			finer(NucleusBorderSegment.toString(tempList));

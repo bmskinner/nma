@@ -4,6 +4,7 @@ package Samples;
 import java.util.ArrayList;
 import java.util.List;
 
+import components.generic.ISegmentedProfile;
 import components.generic.Profile;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
@@ -42,7 +43,7 @@ public class IndividualNuclei {
 	 * @return
 	 * @throws Exception
 	 */
-	public static SegmentedProfile pigSpermSegmentedMedianProfile() throws Exception {
+	public static ISegmentedProfile pigSpermSegmentedMedianProfile() throws Exception {
 		
 		// Segment boundaries are chosen from prior segmentation
 		NucleusBorderSegment seg0 = new NucleusBorderSegment(0, 16, 327);
@@ -63,7 +64,7 @@ public class IndividualNuclei {
 		NucleusBorderSegment.linkSegments(list);
 		
 		// Add the segments to the sample data
-		SegmentedProfile p = new SegmentedProfile(pigSpermMedianProfile(), list);
+		ISegmentedProfile p = new SegmentedProfile(pigSpermMedianProfile(), list);
 		return p;
 
 		

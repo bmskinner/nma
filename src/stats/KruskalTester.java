@@ -23,8 +23,10 @@ import jdistlib.disttest.DistributionTest;
 import logging.Loggable;
 import analysis.IAnalysisDataset;
 import analysis.profiles.SegmentFitter;
+import components.active.generic.SegmentedFloatProfile;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
+import components.generic.ISegmentedProfile;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
@@ -114,24 +116,21 @@ public class KruskalTester implements Loggable {
 			 * Create a new ProfileCollection based on the segments from dataset one
 			 */
 			IProfileCollection pc = one.getCollection().getProfileCollection(ProfileType.ANGLE);
-//			List<NucleusBorderSegment> segments = pc.getSegments(tag);
-//			ProfileCollection frankenCollection = new ProfileCollection();
-			
-			
+
 			/*
 			 * Create a segmenter just to access the segmnet fitter. Do not execute the analysis function 
 			 * in the segmenter
 			 */
-			SegmentedProfile medianProfile = pc.getSegmentedProfile(options.getTag());
-//			DatasetSegmenter segmenter = new DatasetSegmenter(one, MorphologyAnalysisMode.NEW, options.getLogger());
+			ISegmentedProfile medianProfile = pc.getSegmentedProfile(options.getTag());
+
 			SegmentFitter fitter = new SegmentFitter(medianProfile);
 			
 			for(Nucleus n : copyOfTwo.getCollection().getNuclei()){ 
 				fitter.fit(n, pc);
 
 				// recombine the segments at the lengths of the median profile segments
-				Profile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
-				n.setProfile(ProfileType.FRANKEN, new SegmentedProfile(recombinedProfile));
+				IProfile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
+				n.setProfile(ProfileType.FRANKEN, new SegmentedFloatProfile(recombinedProfile));
 			}
 			
 			IProfileCollection frankenCollection = copyOfTwo.getCollection().getProfileCollection(ProfileType.FRANKEN);

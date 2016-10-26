@@ -46,6 +46,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
 
 import charting.ChartComponents;
+import components.generic.ISegmentedProfile;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 
@@ -60,7 +61,7 @@ import components.nuclear.NucleusBorderSegment;
 @SuppressWarnings("serial")
 public class DraggableOverlayChartPanel extends ExportableChartPanel {
 		
-	private SegmentedProfile profile = null;
+	private ISegmentedProfile profile = null;
 
 	private List<SegmentCrosshair> crosses = new ArrayList<SegmentCrosshair>(); // drawing lines on the chart
 
@@ -150,13 +151,13 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 		}
 	}
 	
-	public void setChart(JFreeChart chart, SegmentedProfile profile, boolean normalised){
+	public void setChart(JFreeChart chart, ISegmentedProfile profile, boolean normalised){
 		super.setChart(chart);
 
 		setProfile(profile, normalised);
 	}
 	
-	public void setProfile(SegmentedProfile profile, boolean normalised){
+	public void setProfile(ISegmentedProfile profile, boolean normalised){
 		
 		clearOverlays();
 		this.profile = profile;

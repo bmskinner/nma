@@ -25,8 +25,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import logging.Loggable;
+import components.active.generic.SegmentedFloatProfile;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.nuclear.BorderPoint;
 import components.nuclear.NucleusBorderSegment;
 
@@ -44,7 +45,7 @@ public class ProfileCreator implements Loggable {
 		this.target = target;
 	}
 	
-	public SegmentedProfile createProfile(ProfileType type){
+	public ISegmentedProfile createProfile(ProfileType type){
 		
 		
 		switch(type){
@@ -74,7 +75,7 @@ public class ProfileCreator implements Loggable {
 	private List<NucleusBorderSegment> getExistingSegments(){
 		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
 		
-		SegmentedProfile templateProfile = null;
+		ISegmentedProfile templateProfile = null;
 		// store segments to reapply later
 		if(target.hasProfile(ProfileType.ANGLE)){
 			if(target.getProfile(ProfileType.ANGLE).hasSegments()){
@@ -86,11 +87,11 @@ public class ProfileCreator implements Loggable {
 		return segments;
 	}
 	
-	private SegmentedProfile calculateAngleProfile() {
+	private ISegmentedProfile calculateAngleProfile() {
 
 		List<NucleusBorderSegment> segments = getExistingSegments();
 		
-		double[] angles = new double[target.getBorderLength()];
+		float[] angles = new float[target.getBorderLength()];
 		
 //		FloatPolygon polygon = target.createPolygon();
 		Shape s = target.toShape();
@@ -105,7 +106,7 @@ public class ProfileCreator implements Loggable {
 			BorderPoint pointAfter  = point.nextPoint(target.getWindowSize(ProfileType.ANGLE));
 
 			// Get the smallest angle between the points
-			double angle = point.findAngle(pointBefore, pointAfter);
+			float angle = (float) point.findAngle(pointBefore, pointAfter);
 
 			// Now discover if this measured angle is inside or outside the object
 			
@@ -113,8 +114,8 @@ public class ProfileCreator implements Loggable {
 				// is this within the roi?
 				// if yes, keep min angle as interior angle
 				// if no, 360-min is interior
-			double midX = (pointBefore.getX()+pointAfter.getX())/2;
-			double midY = (pointBefore.getY()+pointAfter.getY())/2;
+			float midX = (float) ((pointBefore.getX()+pointAfter.getX())/2);
+			float midY = (float) ((pointBefore.getY()+pointAfter.getY())/2);
 			
 			// Check if the polygon contains the point
 			if(s.contains( midX,  midY)){
@@ -127,7 +128,7 @@ public class ProfileCreator implements Loggable {
 		}
 		
 		// Make a new profile. This will have two segments by default
-		SegmentedProfile newProfile = new SegmentedProfile(angles);
+		ISegmentedProfile newProfile = new SegmentedFloatProfile(angles);
 		
 		// Reapply any segments that were present in the original profile
 		if( ! segments.isEmpty()){
@@ -138,7 +139,7 @@ public class ProfileCreator implements Loggable {
 		return newProfile;
 	}
 	
-	private void reapplySegments(List<NucleusBorderSegment> segments, SegmentedProfile profile){
+	private void reapplySegments(List<NucleusBorderSegment> segments, ISegmentedProfile profile){
 		// If the border list has changed, the profile lengths will be different
 		// In this case, add and normalise the segment lengths
 		if(segments.get(0).getTotalLength() != target.getBorderLength() ){
@@ -155,9 +156,9 @@ public class ProfileCreator implements Loggable {
 		profile.setSegments(segments);
 	}
 
-	private SegmentedProfile calculateDiameterProfile() {
+	private ISegmentedProfile calculateDiameterProfile() {
 
-		double[] profile = new double[target.getBorderLength()];
+		float[] profile = new float[target.getBorderLength()];
 			
 		int index = 0;
 		Iterator<BorderPoint> it = target.getBorderList().iterator();
@@ -166,27 +167,27 @@ public class ProfileCreator implements Loggable {
 			BorderPoint point = it.next();
 			BorderPoint opp = target.findOppositeBorder(point);
 
-			profile[index++] = point.getLengthTo(opp); 
+			profile[index++] = (float) point.getLengthTo(opp); 
 			
 		}
 
-		return new SegmentedProfile(profile);
+		return new SegmentedFloatProfile(profile);
 	}
 	
-	private SegmentedProfile calculateRadiusProfile() {
+	private ISegmentedProfile calculateRadiusProfile() {
 
-		double[] profile = new double[target.getBorderLength()];
+		float[] profile = new float[target.getBorderLength()];
 		
 		int index = 0;
 		Iterator<BorderPoint> it = target.getBorderList().iterator();
 		while(it.hasNext()){
 
 			BorderPoint point = it.next();
-			profile[index++] = point.getLengthTo(target.getCentreOfMass()); 
+			profile[index++] = (float) point.getLengthTo(target.getCentreOfMass()); 
 			
 		}
 
-		return new SegmentedProfile(profile);
+		return new SegmentedFloatProfile(profile);
 	}
 	
 }

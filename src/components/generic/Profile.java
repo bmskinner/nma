@@ -1180,16 +1180,6 @@ public class Profile implements IProfile {
 	}
 
 	/* (non-Javadoc)
-	 * @see components.generic.IProfile#print()
-	 */
-	@Override
-	public void print(){
-		for (int i=0; i<array.length; i++) {
-			IJ.log("Point "+i+": "+array[i]);
-		}
-	}
-
-	/* (non-Javadoc)
 	 * @see components.generic.IProfile#toString()
 	 */
 	@Override
@@ -1200,56 +1190,6 @@ public class Profile implements IProfile {
 			builder.append("Index "+i+"\t"+array[i]+"\r\n");
 		}
 		return builder.toString();
-	}
-
-	private boolean isPowerOfTwo(int x){
-		return (x & (x - 1)) == 0;
-	}
-
-	private List<Double> padListWithZeros(List<Double> list){
-
-		// Check length is power of 2
-		int size = list.size();
-		//	  IJ.log("Length: "+size);
-		if( isPowerOfTwo(size) ){
-			//		  IJ.log("    OK");
-		} else {
-			//		  IJ.log("    Padding");
-			list.add(0d);
-			list = padListWithZeros(list);
-		}
-		return list;
-	}
-
-	/* (non-Javadoc)
-	 * @see components.generic.IProfile#fastFourierTransform()
-	 */
-	@Override
-	public void fastFourierTransform(){
-		FastFourierTransformer f = new FastFourierTransformer(DftNormalization.STANDARD);
-
-		List<Double> list = new ArrayList<Double>();
-
-		for(double d : array){
-			list.add(d);
-
-		}
-		list = padListWithZeros(list);
-
-
-		double[] listArray;
-		try {
-			listArray = new ArrayConverter(list).toDoubleArray();
-		} catch (ArrayConversionException e) {
-			listArray = new double[0]; 
-		}
-
-		Complex[] transformed = f.transform(listArray, TransformType.FORWARD);
-
-		for(Complex c : transformed){
-			IJ.log(c.toString());
-		}
-
 	}
 
 

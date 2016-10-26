@@ -20,9 +20,9 @@ import analysis.IAnalysisDataset;
 import charting.options.ChartOptions;
 import components.CellCollection;
 import components.ICellCollection;
+import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
@@ -221,7 +221,7 @@ public class ViolinDatasetCreator implements Loggable {
 			List<Number> list = new ArrayList<Number>(0);
 
 			for(Nucleus n : collection.getNuclei()){
-				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+				ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 				
 				NucleusBorderSegment seg = profile.getSegment(medianSeg.getID());
 				

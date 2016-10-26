@@ -51,13 +51,13 @@ import analysis.profiles.SegmentFitter;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
+import components.active.generic.SegmentedFloatProfile;
+import components.generic.IProfile;
 import components.generic.IProfileCollection;
-import components.generic.Profile;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.generic.Tag;
 import components.nuclear.NucleusBorderSegment;
 
@@ -172,7 +172,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		@Override
 		protected void updateSingle() {
 			
-			SegmentedProfile profile = null;
+			ISegmentedProfile profile = null;
 			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
@@ -261,7 +261,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				
 				setButtonsEnabled(true);
 				ICellCollection collection = options.firstDataset().getCollection();
-				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE)
+				ISegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE)
 						.getSegmentedProfile(Tag.REFERENCE_POINT);
 				
 				// Don't allow merging below 2 segments (causes errors)
@@ -347,7 +347,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			pc.createProfileAggregate(activeDataset().getCollection(), ProfileType.ANGLE);
 					
 			
-			SegmentedProfile medianProfile = pc.getSegmentedProfile(Tag.REFERENCE_POINT);	
+			ISegmentedProfile medianProfile = pc.getSegmentedProfile(Tag.REFERENCE_POINT);	
 			
 			// Does nothing, but needed to access segment fitter
 //			DatasetSegmenter segmenter = new DatasetSegmenter(activeDataset(), MorphologyAnalysisMode.NEW, programLogger);
@@ -358,9 +358,9 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			for(ICell c : activeDataset().getCollection().getCells()){
 
 				// recombine the segments at the lengths of the median profile segments
-				Profile frankenProfile = fitter.recombine(c.getNucleus(), Tag.REFERENCE_POINT);
+				IProfile frankenProfile = fitter.recombine(c.getNucleus(), Tag.REFERENCE_POINT);
 
-				c.getNucleus().setProfile(ProfileType.FRANKEN, new SegmentedProfile(frankenProfile));
+				c.getNucleus().setProfile(ProfileType.FRANKEN, new SegmentedFloatProfile(frankenProfile));
 
 			}
 			
@@ -385,7 +385,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			
 			try {
 				ICellCollection collection = activeDataset().getCollection();
-				SegmentedProfile medianProfile = collection
+				ISegmentedProfile medianProfile = collection
 						.getProfileCollection(ProfileType.ANGLE)
 						.getSegmentedProfile(Tag.REFERENCE_POINT);
 				
@@ -430,7 +430,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		}
 		
 		
-		private void mergeAction(SegmentedProfile medianProfile) throws Exception{
+		private void mergeAction(ISegmentedProfile medianProfile) throws Exception{
 			
 			List<SegMergeItem> names = new ArrayList<SegMergeItem>();
 			
@@ -504,7 +504,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			}
 		}
 		
-		private void splitAction(SegmentedProfile medianProfile) throws Exception{
+		private void splitAction(ISegmentedProfile medianProfile) throws Exception{
 			
 			List<SegSplitItem> names = new ArrayList<SegSplitItem>();
 
@@ -544,7 +544,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			}
 		}
 		
-		private void unmergeAction(SegmentedProfile medianProfile) throws Exception{
+		private void unmergeAction(ISegmentedProfile medianProfile) throws Exception{
 						
 			List<SegSplitItem> names = new ArrayList<SegSplitItem>();
 

@@ -25,10 +25,11 @@ import java.util.List;
 import java.util.logging.Level;
 
 import analysis.AbstractProgressAction;
+import components.active.generic.SegmentedFloatProfile;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.generic.Tag;
 import components.nuclei.Nucleus;
 
@@ -41,13 +42,13 @@ import components.nuclei.Nucleus;
 public class SegmentRecombiningTask extends AbstractProgressAction  {
 	
 	private final SegmentFitter fitter;
-	private final SegmentedProfile medianProfile;
+	private final ISegmentedProfile medianProfile;
 	private final int low, high;
 	private final Nucleus[] nuclei;
 	private static final int THRESHOLD = 30; // The number of nuclei to split the task on
 	private final IProfileCollection pc;
 	
-	private SegmentRecombiningTask(SegmentedProfile medianProfile, IProfileCollection pc, Nucleus[] nuclei, int low, int high) throws Exception{
+	private SegmentRecombiningTask(ISegmentedProfile medianProfile, IProfileCollection pc, Nucleus[] nuclei, int low, int high) throws Exception{
 		
 		this.fitter        = new SegmentFitter(medianProfile);
 		this.low           = low;
@@ -57,7 +58,7 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 		this.medianProfile = medianProfile;
 	}
 	
-	public SegmentRecombiningTask(SegmentedProfile medianProfile, IProfileCollection pc, Nucleus[] nuclei) throws Exception{
+	public SegmentRecombiningTask(ISegmentedProfile medianProfile, IProfileCollection pc, Nucleus[] nuclei) throws Exception{
 		this(medianProfile, pc, nuclei, 0, nuclei.length);
 	}
 
@@ -125,7 +126,7 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 
 		IProfile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
 
-		SegmentedProfile segmented = new SegmentedProfile(recombinedProfile, medianProfile.getOrderedSegments());
+		ISegmentedProfile segmented = new SegmentedFloatProfile(recombinedProfile, medianProfile.getOrderedSegments());
 		n.setProfile(ProfileType.FRANKEN, segmented);
 		
 //		n.log("Recombined segments:");

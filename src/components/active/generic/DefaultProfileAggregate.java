@@ -24,8 +24,6 @@ import java.util.List;
 
 import components.generic.IProfile;
 import components.generic.IProfileAggregate;
-import components.generic.Profile;
-
 import analysis.profiles.ProfileException;
 import stats.Quartile;
 import utility.ArrayConverter;
@@ -130,19 +128,19 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 	 * @return the Profile of positions
 	 */
 	public IProfile getXPositions(){
-		double[] result = new double[length];
+		float[] result = new float[length];
 		
-		double profileIncrement = 100d / (double) length;
+		float profileIncrement = 100f / (float) length;
 		// start counting half a bin below zero
 		// this sets the value to the bin centre
-		double x = -profileIncrement/2;
+		float x = -profileIncrement/2;
 		
 		// add the bin size for each positions
 		for(int i=0;i<length;i++){
 			x += profileIncrement;
 			result[i] = x;
 		}
-		return new Profile(result);
+		return new FloatProfile(result);
 	}
 	
 	public List<Double> getXKeyset(){
@@ -179,19 +177,19 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 	}
 	
 	private IProfile calculateQuartile(float quartile) {
-		double[] medians = new double[length];
+		float[] medians = new float[length];
 		
 		for(int i=0; i<length; i++){
 			
 			float[] values = getValuesAtIndex(i);
 			
-			double q = new Quartile(values, quartile).doubleValue();
+			float q = new Quartile(values, quartile).floatValue();
 			
 			medians[i] = q;
 			
 		}
 		
-		return new Profile(medians);
+		return new FloatProfile(medians);
 
 	}
 

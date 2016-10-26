@@ -44,6 +44,7 @@ import components.generic.BorderTagObject;
 import components.generic.Equation;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
+import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
@@ -802,7 +803,7 @@ public class NucleusDatasetCreator implements Loggable {
 	public XYDataset createSegmentedProfileDataset(Nucleus nucleus, ProfileType type) {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-		SegmentedProfile profile;
+		ISegmentedProfile profile;
 		
 		if(type.equals(ProfileType.FRANKEN)){
 			profile = nucleus.getProfile(type);
@@ -939,7 +940,7 @@ public class NucleusDatasetCreator implements Loggable {
 			List<Double> list = new ArrayList<Double>(0);
 
 			for(Nucleus n : collection.getNuclei()){
-				SegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+				ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 				
 				NucleusBorderSegment seg = profile.getSegment(medianSeg.getID());
 				
@@ -1078,7 +1079,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 		
 		// Get the angle profile, starting from the tail point
-		SegmentedProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
+		ISegmentedProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
 		
 		// At this point, the angle profile and the iqr profile should be in sync
 		// The following set of checks confirms this.

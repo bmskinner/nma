@@ -379,14 +379,6 @@ public interface IProfile
 	 */
 	IProfile getSortedIndexes();
 
-	/**
-	 * Print the value in the profile at each array index
-	 * to the ImageJ log window.
-	 */
-	void print();
-
 	String toString();
-
-	void fastFourierTransform();
 
 }

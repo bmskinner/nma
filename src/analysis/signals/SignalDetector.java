@@ -27,6 +27,7 @@ import java.util.Map;
 
 import analysis.detection.Detector;
 import components.CellularComponent;
+import components.active.generic.FloatProfile;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
 import components.generic.Profile;
@@ -303,7 +304,7 @@ public class SignalDetector extends Detector {
 		ImageStatistics statistics = ImageStatistics.getStatistics(ip, Measurements.AREA, new Calibration());
 		long[] histogram = statistics.getHistogram();
 		
-		double[] d = new double[histogram.length];
+		float[] d = new float[histogram.length];
 
 		for(int i =0; i<histogram.length; i++){
 			d[i] = histogram[i];
@@ -317,7 +318,7 @@ public class SignalDetector extends Detector {
 		 */
 		finest( "Initial histo threshold: "+minThreshold);
 //		int trimValue = minThreshold;
-		IProfile histogramProfile = new Profile(d);
+		IProfile histogramProfile = new FloatProfile(d);
 		IProfile trimmedHisto = histogramProfile.getSubregion(minThreshold, 255);
 		
 		// smooth the arrays,  get the deltas, and double smooth them

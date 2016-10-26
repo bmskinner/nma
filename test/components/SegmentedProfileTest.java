@@ -23,8 +23,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import analysis.SegmentFitterTest;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
@@ -38,10 +38,10 @@ public class SegmentedProfileTest {
 //		return profile;
 //	}
 	
-	public static SegmentedProfile createNucleusProfile() throws Exception{
+	public static ISegmentedProfile createNucleusProfile() throws Exception{
 		
 		Nucleus n = NucleusTest.createTestRodentSpermNucleus();
-		SegmentedProfile profile = n.getProfile(ProfileType.ANGLE);	
+		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);	
 		return profile;
 	}
 	

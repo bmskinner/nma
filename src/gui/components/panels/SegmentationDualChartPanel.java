@@ -25,8 +25,8 @@ import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.DraggableOverlayChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
+import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 
 public class SegmentationDualChartPanel extends DualChartPanel{
 	
@@ -44,13 +44,13 @@ public class SegmentationDualChartPanel extends DualChartPanel{
 		((DraggableOverlayChartPanel) chartPanel).addSignalChangeListener(this);
 	}
 	
-	public void setProfile(SegmentedProfile profile, boolean normalised){
+	public void setProfile(ISegmentedProfile profile, boolean normalised){
 		
 		((DraggableOverlayChartPanel) chartPanel).setProfile(profile, normalised);
 		this.updateChartPanelRange();
 	}
 	
-	public void setCharts(JFreeChart chart, SegmentedProfile profile, boolean normalised, JFreeChart rangeChart){
+	public void setCharts(JFreeChart chart, ISegmentedProfile profile, boolean normalised, JFreeChart rangeChart){
 		
 		((DraggableOverlayChartPanel) chartPanel).setChart(chart, profile, normalised);
 		rangePanel.setChart(rangeChart);
