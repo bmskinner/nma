@@ -133,7 +133,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * @param position
 	 * @param centreOfMass
 	 */
-	public RoundNucleus(Roi roi, File f, int number, double[] position, XYPoint centreOfMass){
+	public RoundNucleus(Roi roi, File f, int number, double[] position, IPoint centreOfMass){
 		super(roi, f, 0, position, centreOfMass );
 		this.nucleusNumber   = number;
 

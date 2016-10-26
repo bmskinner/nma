@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import components.generic.IPoint;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
@@ -61,7 +62,7 @@ public class AsymmetricNucleus
 	  super(roi, file, number, position);
   }
   
-  public AsymmetricNucleus (Roi roi, File file, int number, double[] position, XYPoint centreOfMass) { // construct from an roi
+  public AsymmetricNucleus (Roi roi, File file, int number, double[] position, IPoint centreOfMass) { // construct from an roi
 	  super(roi, file, number, position, centreOfMass);
   }
   

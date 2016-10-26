@@ -38,11 +38,10 @@ import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.detection.Detector;
 import analysis.image.ImageFilterer;
-import components.Cell;
 import components.ICell;
 import components.active.DefaultCell;
+import components.active.generic.FloatPoint;
 import components.generic.IPoint;
-import components.generic.XYPoint;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
@@ -270,7 +269,7 @@ public class NucleusDetector extends Detector {
 			  roi.setLocation(0,0); // translate the roi to the new image coordinates
 			  
 			  // create a Nucleus from the roi
-			  IPoint centreOfMass = new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase);
+			  IPoint centreOfMass = new FloatPoint(values.get("XM")-xbase, values.get("YM")-ybase);
 
 			  Nucleus currentNucleus = createNucleus(roi, 
 					  path, 
@@ -322,7 +321,7 @@ public class NucleusDetector extends Detector {
 		  try {
 			  
 			  // The classes for the constructor
-			  Class<?>[] classes = {Roi.class, File.class, int.class, double[].class, XYPoint.class };
+			  Class<?>[] classes = {Roi.class, File.class, int.class, double[].class, IPoint.class };
 			  
 			  Constructor<?> nucleusConstructor = nucleusType.getNucleusClass()
 					  .getConstructor(classes);

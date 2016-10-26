@@ -1087,6 +1087,8 @@ public abstract class AbstractCellularComponent
 		
 		Object o = in.readObject();
 		
+//		log(o.getClass().getSimpleName());
+		
 		boolean newFormat = false;
 		
 		if(o instanceof FloatPoint){
@@ -1094,6 +1096,7 @@ public abstract class AbstractCellularComponent
 			newFormat = true;
 		} else {
 			centreOfMass = new FloatPoint( ((XYPoint) o));
+			newFormat = false;
 		}
 		
 		statistics   = (Map<PlottableStatistic, Double>) in.readObject();
@@ -1110,10 +1113,12 @@ public abstract class AbstractCellularComponent
     		IBorderPoint next = new DefaultBorderPoint(0, 0);
     		
     		if(newFormat){
+//    			log("Detected new format border list");
     			next.setX(in.readFloat());
         		next.setY(in.readFloat());
     			
     		} else {
+//    			log("Detected old format border list");
     			next.setX(in.readDouble());
         		next.setY(in.readDouble());
     		}

@@ -32,6 +32,7 @@ import ij.gui.Roi;
 import java.io.File;
 import java.io.IOException;
 
+import components.generic.IPoint;
 import components.generic.XYPoint;
 import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
@@ -53,7 +54,7 @@ public class SpermNucleus extends AsymmetricNucleus {
 		super(roi, file, number, position);
 	}
 	
-	public SpermNucleus (Roi roi, File file, int number, double[] position, XYPoint centreOfMass) { // construct from an roi
+	public SpermNucleus (Roi roi, File file, int number, double[] position, IPoint centreOfMass) { // construct from an roi
 		super(roi, file, number, position, centreOfMass);
 	}
 	

@@ -30,6 +30,7 @@ import java.io.IOException;
 
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
+import components.generic.IPoint;
 import components.generic.IProfile;
 import components.generic.Profile;
 import components.generic.Tag;
@@ -71,7 +72,7 @@ public class PigSpermNucleus
 		super(roi, file, number, position);
 	}
     
-    public PigSpermNucleus (Roi roi, File file, int number, double[] position, XYPoint centreOfMass) { // construct from an roi
+    public PigSpermNucleus (Roi roi, File file, int number, double[] position, IPoint centreOfMass) { // construct from an roi
 		super(roi, file, number, position, centreOfMass);
 	}
     

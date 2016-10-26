@@ -70,7 +70,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		super(roi, file, number, position);
 	}
 	
-	public RodentSpermNucleus (Roi roi, File file, int number, double[] position, XYPoint centreOfMass) { // construct from an roi
+	public RodentSpermNucleus (Roi roi, File file, int number, double[] position, IPoint centreOfMass) { // construct from an roi
 		super(roi, file, number, position, centreOfMass);
 	}
 	
