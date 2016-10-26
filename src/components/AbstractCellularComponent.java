@@ -49,6 +49,7 @@ import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 import ij.IJ;
 import ij.ImageStack;
+import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
@@ -506,8 +507,30 @@ public abstract class AbstractCellularComponent
 	}
 
 	public List<IBorderPoint> getBorderList(){
-		List<IBorderPoint> result = new ArrayList<IBorderPoint>(0);
-
+		
+		/*
+		 * If key points only are stored, the full border list must be constructed
+		 */
+//		float[] xpoints = new float[borderList.size()];
+//		float[] ypoints = new float[borderList.size()];
+//		
+//		for(int i=0; i<borderList.size();i++){
+//			IBorderPoint point = borderList.get(i);
+//			xpoints[i] = (float) point.getX();
+//			ypoints[i] = (float) point.getY();
+//		}
+//				
+//		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, Roi.POLYGON);
+//		
+//		FloatPolygon p = roi.getInterpolatedPolygon(1f, false);
+//		
+//		List<IBorderPoint> result = new ArrayList<IBorderPoint>(p.npoints);
+//		for(int i=0; i<p.npoints ;i++){
+//			IBorderPoint point = new DefaultBorderPoint(p.xpoints[i], p.ypoints[i]);	
+//			result.add(point);
+//		}
+		
+		List<IBorderPoint> result = new ArrayList<IBorderPoint>(borderList.size());
 		for(IBorderPoint n : borderList){
 			
 			IBorderPoint point = new DefaultBorderPoint(n);			
