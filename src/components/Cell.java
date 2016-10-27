@@ -55,7 +55,7 @@ public class Cell
 	 * Duplicate a cell. The ID is kept consistent
 	 * @param c the cell to duplicate
 	 */
-	public Cell(ICell c){
+	private Cell(ICell c){
 
 		this.uuid = c.getId();
 		nucleus   = c.getNucleus().duplicate();

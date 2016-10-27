@@ -36,8 +36,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
+
+
 //import utility.Logger;
 import analysis.AnalysisOptions;
+import components.active.generic.FloatPoint;
+import components.generic.IPoint;
 import components.generic.XYPoint;
 
 public class NucleusRefinder  extends NucleusDetectionWorker
@@ -52,10 +56,10 @@ public class NucleusRefinder  extends NucleusDetectionWorker
 
   private Map<File, File> fileMap =  new HashMap<File, File>(); // map from old file to new file
 
-  private Map<File, XYPoint> offsets = new HashMap<File, XYPoint>(); // hold the calculated offsets for each image
+  private Map<File, IPoint> offsets = new HashMap<File, IPoint>(); // hold the calculated offsets for each image
 
   // a structure to hold the image names, and the extracted nucleus coordinates
-  private ArrayList< HashMap<File, XYPoint> > nucleiToFind = new ArrayList< HashMap<File, XYPoint> >(0);
+  private ArrayList< HashMap<File, IPoint> > nucleiToFind = new ArrayList< HashMap<File, IPoint> >(0);
 
 
   /*
@@ -132,9 +136,9 @@ public class NucleusRefinder  extends NucleusDetectionWorker
     positionScanner.close();
 
     // IJ.log("Found image: "+name+" x:"+x+" y:"+y);
-    XYPoint point = new XYPoint(x, y);
+    IPoint point = new FloatPoint(x, y);
 
-    HashMap<File, XYPoint> map = new HashMap<File, XYPoint>();
+    HashMap<File, IPoint> map = new HashMap<File, IPoint>();
     map.put(imagePath, point);
     nucleiToFind.add(map);
     scanner.close();

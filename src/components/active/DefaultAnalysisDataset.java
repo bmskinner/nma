@@ -131,7 +131,7 @@ public class DefaultAnalysisDataset implements IAnalysisDataset {
 		
 		for(ICell c : thisCollection.getCells()){
 	
-			result.getCollection().addCell(new Cell(c));
+			result.getCollection().addCell(new DefaultCell(c));
 		}
 		
 //		TODO: Add child collections, clusters etc
@@ -171,10 +171,17 @@ public class DefaultAnalysisDataset implements IAnalysisDataset {
 		if(collection==null){
 			throw new IllegalArgumentException("Nucleus collection is null");
 		}
+		
+		IAnalysisDataset childDataset;
+		
+		if(collection instanceof VirtualCellCollection){
+			childDataset = new ChildAnalysisDataset(this, collection);
+		} else {
+			childDataset = new DefaultAnalysisDataset(collection, this.savePath);
+			childDataset.setRoot(false);
+			childDataset.setAnalysisOptions(this.getAnalysisOptions());
+		}
 
-		IAnalysisDataset childDataset = new DefaultAnalysisDataset(collection, this.savePath);
-		childDataset.setRoot(false);
-		childDataset.setAnalysisOptions(this.getAnalysisOptions());
 		this.childDatasets.add( childDataset);
 
 	}
@@ -373,7 +380,7 @@ public class DefaultAnalysisDataset implements IAnalysisDataset {
 	public IAnalysisDataset getChildDataset(UUID id){
 		if(this.hasChild(id)){
 			
-			for(IAnalysisDataset c : otherDatasets){
+			for(IAnalysisDataset c : childDatasets){
 				if(c.getUUID().equals(id)){
 					return c;
 				}

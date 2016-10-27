@@ -55,9 +55,9 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
 
 import analysis.IAnalysisDataset;
-
 import components.ClusterGroup;
 import components.ICellCollection;
+import components.active.ChildAnalysisDataset;
 
 @SuppressWarnings("serial")
 public class PopulationsPanel extends DetailPanel implements SignalChangeListener {
@@ -66,12 +66,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	final private PopulationTreeTable treeTable;
 	
 	private PopulationListPopupMenu populationPopup;
-		
-	/**
-	 * This tracks the ordering of the datasets within the panel
-	 */
-//	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
-	
+			
 	/**
 	 * This tracks which datasets are currently selected, and the order in which they
 	 * were selected.  
@@ -139,7 +134,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		this.update();
 		finest("Preparing to select datasets");
 		treeTable.selectDatasets(list);
-//		selectDatasets(list);
 		treeTable.repaint();
 	}
 	
@@ -230,7 +224,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						}
 					} else {
 						populationPopup.setDeleteString("Delete");
-					}				
+					}	
 					
 					populationPopup.show(table, e.getX(), e.getY());
 				}
@@ -769,7 +763,13 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		populationPopup.enableCurate();
 		populationPopup.enableRelocateCells();
 		populationPopup.enableSaveCells();
-		populationPopup.enableAddNuclearSignal();
+		
+		if( d instanceof ChildAnalysisDataset){
+			populationPopup.setAddNuclearSignalEnabled(false);
+		} else {
+			populationPopup.setAddNuclearSignalEnabled(true);
+		}
+		
 		
 		populationPopup.enableMenuUp();
 		populationPopup.enableMenuDown();

@@ -31,6 +31,7 @@ import java.util.logging.Level;
 
 import logging.Loggable;
 import components.AbstractCellularComponent;
+import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -400,22 +401,22 @@ public class NucleusMesh implements Loggable {
 		result.clearEdges();
 		result.clearFaces();
 		
-		double nucleusHeight = result.nucleus.getBounds().getHeight();
-		double nucleusWidth  = result.nucleus.getBounds().getWidth();
-		double vertices      = result.getInternalVertexCount();
+		float nucleusHeight = (float) result.nucleus.getBounds().getHeight();
+		float nucleusWidth  = (float) result.nucleus.getBounds().getWidth();
+		float vertices      = result.getInternalVertexCount();
 		
-		double xStep  = nucleusWidth/2;
-		double xStart = 0;
-		double yStart = 0;
-		double yStep  = nucleusHeight / vertices;
+		float xStep  = nucleusWidth/2;
+		float xStart = 0;
+		float yStart = 0;
+		float yStep  = nucleusHeight / vertices;
 		
-		IPoint pos = new XYPoint(xStart, yStart);
+		IPoint pos = new FloatPoint(xStart, yStart);
 		
 		
 		// Straighten internal skeleton
 		for(NucleusMeshVertex v : result.internalVertices){
 			v.setPosition(pos);
-			pos = new XYPoint( xStart,  pos.getY()+yStep);
+			pos = new FloatPoint( xStart,  pos.getY()+yStep);
 		}
 		finer("Set skeleton");
 		
@@ -423,7 +424,7 @@ public class NucleusMesh implements Loggable {
 		
 		// Positon the first vertex under the skeleton
 		NucleusMeshVertex v = result.peripheralVertices.get(0);
-		v.setPosition( new XYPoint(xStart, yStart-yStep)  );
+		v.setPosition( new FloatPoint(xStart, yStart-yStep)  );
 		
 		int halfArray = (int) Math.floor(( (double) result.peripheralVertices.size() / 2));
 		
@@ -433,8 +434,8 @@ public class NucleusMesh implements Loggable {
 			NucleusMeshVertex v1 = result.peripheralVertices.get(i);
 			NucleusMeshVertex v2 = result.peripheralVertices.get(j);
 			
-			v1.setPosition( new XYPoint(  xStart-xStep ,   (i*yStep)-(yStep/2) ));
-			v2.setPosition( new XYPoint(  xStart+xStep ,   (i*yStep)-(yStep/2) ));
+			v1.setPosition( new FloatPoint(  xStart-xStep ,   (i*yStep)-(yStep/2) ));
+			v2.setPosition( new FloatPoint(  xStart+xStep ,   (i*yStep)-(yStep/2) ));
 		}
 		
 		finer("Peripheral vertex count = "+result.getPeripheralVertexCount());
@@ -443,7 +444,7 @@ public class NucleusMesh implements Loggable {
 		if(result.peripheralVertices.size()%2==0){
 			finer("Setting final vertex");
 			NucleusMeshVertex p1 = result.peripheralVertices.get(halfArray);
-			p1.setPosition(new XYPoint(  xStart ,   (halfArray*yStep)-(yStep/2) ));
+			p1.setPosition(new FloatPoint(  xStart ,   (halfArray*yStep)-(yStep/2) ));
 		}
 		
 		finer("Set periphery");

@@ -1,22 +1,24 @@
 package components.generic;
 
+import components.active.generic.FloatPoint;
+
 /**
  * Define a coordinate in 3D space
  * @author ben
  *
  */
-public class Point3D extends XYPoint {
+public class Point3D extends FloatPoint {
 
 	private static final long serialVersionUID = 1L;
 	
-	protected double z;
+	protected float z;
 	
-	public Point3D(double x, double y, double z) {
+	public Point3D(float x, float y, float z) {
 		super(x, y);
 		this.z = z;
 	}
 	
-	public Point3D(XYPoint p, double z) {
+	public Point3D(FloatPoint p, float z) {
 		this(p.x, p.y, z);
 	}
 	
@@ -28,7 +30,7 @@ public class Point3D extends XYPoint {
 		return z;
 	}
 
-	public void setZ(double z) {
+	public void setZ(float z) {
 		this.z = z;
 	}
 	
@@ -38,7 +40,7 @@ public class Point3D extends XYPoint {
 	 * @return
 	 */
 	public IPoint to2D(){
-		return new XYPoint(x, y);
+		return new FloatPoint(x, y);
 	}
 
 	/**

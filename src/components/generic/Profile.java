@@ -18,21 +18,11 @@
  *******************************************************************************/
 package components.generic;
 
-import ij.IJ;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.apache.commons.math3.complex.Complex;
-import org.apache.commons.math3.transform.DftNormalization;
-import org.apache.commons.math3.transform.FastFourierTransformer;
-import org.apache.commons.math3.transform.TransformType;
-
-import utility.ArrayConverter;
-import utility.ArrayConverter.ArrayConversionException;
 import components.AbstractCellularComponent;
 import components.nuclear.IBorderSegment;
 

@@ -28,6 +28,7 @@ import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import components.Cell;
 import components.ICell;
+import components.active.DefaultCell;
 import gui.DatasetEvent;
 import gui.dialogs.MessagingDialog;
 
@@ -91,7 +92,7 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
 		setCellChanged(false);
 		this.cell = cell;
 		this.dataset = dataset;
-		this.workingCell = new Cell(cell);
+		this.workingCell = new DefaultCell(cell);
 		workingCell.getNucleus().setLocked(false);
 
 		this.setTitle("Editing "+cell.getNucleus().getNameAndNumber());

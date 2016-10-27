@@ -55,6 +55,7 @@ import analysis.signals.NuclearSignalOptions;
 import analysis.signals.ShellRandomDistributionCreator;
 import components.CellCollection;
 import components.ICellCollection;
+import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
@@ -499,7 +500,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		// adjust X and Y because we are now counting angles from the vertical axis
 		double signalX = new AngleTools().getXComponentOfAngle(signalDistance, angle-90);
 		double signalY = new AngleTools().getYComponentOfAngle(signalDistance, angle-90);
-		return new XYPoint(signalX, signalY);
+		return new FloatPoint(signalX, signalY);
 	}
 	
 	/**

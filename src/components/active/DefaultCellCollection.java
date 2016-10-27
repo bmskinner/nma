@@ -419,7 +419,7 @@ implements ICellCollection {
 	 * @return
 	 * @throws Exception 
 	 */
-	public double[] getPathLengths() {
+	private double[] getPathLengths() {
 
 		int count = this.getNucleusCount();
 		double[] result = new double[count];
@@ -642,7 +642,7 @@ implements ICellCollection {
 	 * @param pointType the point to fetch profiles from
 	 * @return an array of differences
 	 */
-	public double[] getDifferencesToMedianFromPoint(Tag pointType) {
+	private double[] getDifferencesToMedianFromPoint(Tag pointType) {
 
 		int count = this.getNucleusCount();
 		double[] result = new double[count];
@@ -1242,6 +1242,7 @@ implements ICellCollection {
 		return shared;
 
 	}
+	
 	/**
 	 * Count the number of nuclei from this dataset that are present in d2
 	 * @param d1

@@ -30,6 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import logging.Loggable;
 import analysis.signals.ShellDetector.Shell;
 import components.CellularComponent;
+import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.XYPoint;
 
@@ -53,7 +54,7 @@ public class ShellRandomDistributionCreator implements Loggable {
 		}
 		
 		// Make a list of random points
-		List<XYPoint> list = new ArrayList<XYPoint>();
+		List<IPoint> list = new ArrayList<IPoint>();
 		for(int i=0; i<iterations; i++){
 			list.add(createRandomPoint(template));
 		}
@@ -164,7 +165,7 @@ public class ShellRandomDistributionCreator implements Loggable {
 	 * @param template
 	 * @return
 	 */
-	private XYPoint createRandomPoint(CellularComponent template){
+	private IPoint createRandomPoint(CellularComponent template){
 		
 		Rectangle r = template.getBounds();
 		
@@ -175,7 +176,7 @@ public class ShellRandomDistributionCreator implements Loggable {
 		double rx = ThreadLocalRandom.current().nextDouble(r.x, r.width + 1);
 		double ry = ThreadLocalRandom.current().nextDouble(r.y, r.height + 1);
 		
-		XYPoint p = new XYPoint(rx, ry);
+		IPoint p = new FloatPoint(rx, ry);
 		
 		if(template.containsPoint(p)){
 			return p;

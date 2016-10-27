@@ -58,6 +58,7 @@ import analysis.profiles.ProfileManager;
 import analysis.profiles.RuleSetCollection;
 import analysis.profiles.SegmentStatisticFetchingTask;
 import analysis.signals.SignalManager;
+import components.active.DefaultCell;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -123,7 +124,7 @@ public class CellCollection implements ICellCollection {
 	 * @param name the name of the collection
 	 * @param nucleusClass the class of nucleus to be held
 	 */
-	public CellCollection(File folder, String outputFolder, String name, NucleusType nucleusType){
+	private CellCollection(File folder, String outputFolder, String name, NucleusType nucleusType){
 		this( folder,  outputFolder,  name,  nucleusType, java.util.UUID.randomUUID());		
 	}
 
@@ -135,7 +136,7 @@ public class CellCollection implements ICellCollection {
 	 * @param nucleusClass the class of nucleus to be held
 	 * @param id specify an id for the collection, rather than generating randomly.
 	 */
-	public CellCollection(File folder, String outputFolder, String name, NucleusType nucleusType, UUID id){
+	private CellCollection(File folder, String outputFolder, String name, NucleusType nucleusType, UUID id){
 
 		this.uuid         = id;
 		this.folder       = folder;
@@ -156,7 +157,7 @@ public class CellCollection implements ICellCollection {
 	 * @param template the dataset to base on for folders and type
 	 * @param name the collection name
 	 */
-	public CellCollection(IAnalysisDataset template, String name){
+	private CellCollection(IAnalysisDataset template, String name){
 
 		this(template.getCollection(), name );
 	}
@@ -166,7 +167,7 @@ public class CellCollection implements ICellCollection {
 	 * @param template
 	 * @param name
 	 */
-	public CellCollection(ICellCollection template, String name){
+	private CellCollection(ICellCollection template, String name){
 		this(template.getFolder(), 
 				template.getOutputFolderName(), 
 				name, 
@@ -989,7 +990,7 @@ public class CellCollection implements ICellCollection {
 		}
 
 		for(ICell cell : filteredCells){
-			subCollection.addCell(new Cell(cell));
+			subCollection.addCell(new DefaultCell(cell));
 		}
 
 		this.getProfileManager().copyCollectionOffsets(subCollection);
@@ -1013,7 +1014,7 @@ public class CellCollection implements ICellCollection {
 		for(ICell c : other.getCells()){
 
 			if(this.contains(c)){
-				newCollection.addCell(new Cell(c));
+				newCollection.addCell(new DefaultCell(c));
 			}
 		}
 
@@ -1033,7 +1034,7 @@ public class CellCollection implements ICellCollection {
 		for(ICell c : getCells()){
 
 			if( ! other.contains(c)){
-				newCollection.addCell(new Cell(c));
+				newCollection.addCell(new DefaultCell(c));
 			}
 		}
 
@@ -1053,14 +1054,14 @@ public class CellCollection implements ICellCollection {
 		for(ICell c : getCells()){
 
 			if( ! other.contains(c)){
-				newCollection.addCell(new Cell(c));
+				newCollection.addCell(new DefaultCell(c));
 			}
 		}
 
 		for(ICell c : other.getCells()){
 
 			if( ! this.contains(c)){
-				newCollection.addCell(new Cell(c));
+				newCollection.addCell(new DefaultCell(c));
 			}
 		}
 

@@ -59,6 +59,7 @@ import components.CellCollection;
 import components.ClusterGroup;
 import components.ICell;
 import components.ICellCollection;
+import components.active.VirtualCellCollection;
 import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
@@ -482,15 +483,16 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	private void extractSelectedNodesToCluster() throws Exception{
 		ICellCollection template = dataset.getCollection();
 		
-		ICellCollection clusterCollection = new CellCollection(template.getFolder(), 
-				template.getOutputFolderName(), 
-				template.getName()+"_ManualCluster_"+clusterList.size(), 
-				template.getNucleusType());
-		
 		String newName = template.getName()+"_ManualCluster_"+clusterList.size();
 		newName = checkName(clusterList.size());
+		ICellCollection clusterCollection = new VirtualCellCollection(dataset, newName);	
 		
-		clusterCollection.setName(newName);
+//		ICellCollection clusterCollection = new CellCollection(template.getFolder(), 
+//				template.getOutputFolderName(), 
+//				template.getName()+"_ManualCluster_"+clusterList.size(), 
+//				template.getNucleusType());
+		
+		
 
 		Tree tree = viewer.getTreePane().getTree();
 
@@ -502,7 +504,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 				Taxon t = tree.getTaxon(n);
 								
 				ICell c = (ICell) t.getAttribute("Cell");
-				clusterCollection.addCell(new Cell (c));
+				clusterCollection.addCell(c);
 
 			}
 
@@ -524,14 +526,15 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 			if(c.hasCells()){
 
 				dataset.addChildCollection(c);
-				try {
-					dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
-				} catch (Exception e1) {
-					error("Error applying segments", e1);
-				}
+//				try {
+				dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
+//				} catch (Exception e1) {
+//					error("Error applying segments", e1);
+//				}
+
 
 				IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
-				clusterDataset.setRoot(false);
+//				clusterDataset.setRoot(false);
 				list.add(clusterDataset);
 			}
 		}

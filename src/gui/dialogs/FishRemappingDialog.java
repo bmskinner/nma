@@ -45,18 +45,16 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 
 import analysis.IAnalysisDataset;
 import analysis.detection.IconCell;
 import analysis.signals.FishRemappingWorker;
-import components.Cell;
-import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
-import components.active.DefaultCellCollection;
+import components.active.VirtualCellCollection;
+import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.XYPoint;
 
@@ -245,7 +243,7 @@ public class FishRemappingDialog extends ImageProber {
 		double largeX = x * factor;
 		double largeY = y * factor;
 		
-		IPoint p = new XYPoint(largeX, largeY);
+		IPoint p = new FloatPoint(largeX, largeY);
 		finer("Clicked in large image "+p.toString());
 		
 		// See if the selected position in the large icon is in a nucleus
@@ -276,19 +274,19 @@ public class FishRemappingDialog extends ImageProber {
 		List<ICellCollection> result = new ArrayList<ICellCollection>(0);
 		
 		if(!selectedNucleiLeft.isEmpty()){
-			ICellCollection subCollectionLeft  = new DefaultCellCollection(dataset, "SubCollectionLeft");
+			ICellCollection subCollectionLeft  = new VirtualCellCollection(dataset, "SubCollectionLeft");
 			for(UUID id : selectedNucleiLeft){
 				ICell cell = dataset.getCollection().getCell(id);
-				subCollectionLeft.addCell(new Cell(cell));
+				subCollectionLeft.addCell(cell);
 			}
 			result.add(subCollectionLeft);
 		}
 		
 		if(!selectedNucleiRight.isEmpty()){
-			ICellCollection subCollectionRight  = new DefaultCellCollection(dataset, "SubCollectionRight");
+			ICellCollection subCollectionRight  = new VirtualCellCollection(dataset, "SubCollectionRight");
 			for(UUID id : selectedNucleiRight){
 				ICell cell = dataset.getCollection().getCell(id);
-				subCollectionRight.addCell(new Cell(cell));
+				subCollectionRight.addCell(cell);
 			}
 			result.add(subCollectionRight);
 		}

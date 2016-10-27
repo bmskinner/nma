@@ -58,12 +58,10 @@ public class DefaultProfileCollection implements IProfileCollection {
 		
 	private static final long serialVersionUID = 1L;
 		
-	private transient IProfileAggregate aggregate = null;
-	
 	private Map<Tag, Integer>    indexes  = new HashMap<Tag, Integer>();
 	private List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
 	
-	
+	private transient IProfileAggregate aggregate = null;
 	private transient ProfileCache profileCache           = new ProfileCache();
 
 
@@ -160,7 +158,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 */
 	@Override
 	public IProfileAggregate getAggregate(){
-		return (DefaultProfileAggregate) aggregate;
+		return aggregate;
 	}
 	
 	/* (non-Javadoc)
@@ -168,11 +166,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 */
 	@Override
 	public boolean hasAggregate(){
-		if (aggregate==null){
-			return false;
-		} else {
-			return true;
-		}
+		return aggregate!=null;
 	}
 	
 	/* (non-Javadoc)
@@ -183,7 +177,17 @@ public class DefaultProfileCollection implements IProfileCollection {
 		if(this.hasAggregate()){
 			return aggregate.length();
 		} else {
-			return 0;
+			
+			// fallback - check the segment total length
+			if(segments.isEmpty()){
+				return 0;
+			}
+			
+			if(segments.get(0)!=null){
+				return segments.get(0).getTotalLength();
+			} else{
+				return 0; // no data to be found
+			}
 		}
 	}
 	

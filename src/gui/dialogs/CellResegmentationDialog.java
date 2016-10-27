@@ -56,16 +56,13 @@ import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import components.Cell;
 import components.ICell;
-import components.generic.BorderTagObject;
+import components.active.DefaultCell;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
 import components.nuclear.IBorderSegment;
-import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
 /**
@@ -206,7 +203,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 		
 		JButton undoBtn = new JButton("Undo");
 		undoBtn.addActionListener( e ->{
-			workingCell = new Cell(cell);
+			workingCell = new DefaultCell(cell);
 			table.setModel(createTableModel(""));
 			updateCharts(workingCell);
 			

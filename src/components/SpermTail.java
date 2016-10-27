@@ -27,6 +27,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.XYPoint;
 
@@ -46,8 +47,8 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 		
 		protected IPoint nucleusIntersection; // the position where the tail intersects the nucleus
 		
-		protected List<XYPoint> skeletonPoints = new ArrayList<XYPoint>(0); 
-		protected List<XYPoint> borderPoints   = new ArrayList<XYPoint>(0); 
+		protected List<IPoint> skeletonPoints = new ArrayList<IPoint>(0); 
+		protected List<IPoint> borderPoints   = new ArrayList<IPoint>(0); 
 		
 		public SpermTail(File source, int channel, Roi skeleton, Roi border){
 			super();
@@ -64,12 +65,12 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 			
 			FloatPolygon skeletonPolygon = skeleton.getInterpolatedPolygon(1, true);
 			for(int i=0; i<skeletonPolygon.npoints; i++){
-				skeletonPoints.add(new XYPoint( skeletonPolygon.xpoints[i], skeletonPolygon.ypoints[i]));
+				skeletonPoints.add(new FloatPoint( skeletonPolygon.xpoints[i], skeletonPolygon.ypoints[i]));
 			}
 			
 			FloatPolygon borderPolygon = border.getInterpolatedPolygon(1, true);
 			for(int i=0; i<borderPolygon.npoints; i++){
-				borderPoints.add(new XYPoint( borderPolygon.xpoints[i], borderPolygon.ypoints[i]));
+				borderPoints.add(new FloatPoint( borderPolygon.xpoints[i], borderPolygon.ypoints[i]));
 			}
 						
 			this.length = skeleton.getLength();
@@ -84,7 +85,7 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 			this.length = t.getLength();
 		}
 				
-		public List<XYPoint> getSkeleton(){
+		public List<IPoint> getSkeleton(){
 			return this.skeletonPoints;
 		}
 		
@@ -92,23 +93,23 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 		 * Fetch the skeleton offset to zero
 		 * @return
 		 */
-		public List<XYPoint> getOffsetSkeleton(){
-			List<XYPoint> result = new ArrayList<XYPoint>(0);
+		public List<IPoint> getOffsetSkeleton(){
+			List<IPoint> result = new ArrayList<IPoint>(0);
 			for(IPoint p : skeletonPoints){
-				result.add(new XYPoint( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
+				result.add(new FloatPoint( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
 			}
 			return result;
 		}
 		
-		public List<XYPoint> getBorder(){
+		public List<IPoint> getBorder(){
 			return this.borderPoints;
 		}
 		
 		// positions are offset by the bounding rectangle for easier plotting
-		public List<XYPoint> getOffsetBorder(){
-			List<XYPoint> result = new ArrayList<XYPoint>(0);
+		public List<IPoint> getOffsetBorder(){
+			List<IPoint> result = new ArrayList<IPoint>(0);
 			for(IPoint p : borderPoints){
-				result.add(new XYPoint( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
+				result.add(new FloatPoint( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
 			}
 			return result;
 		}

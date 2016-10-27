@@ -20,7 +20,7 @@ package components;
 
 import java.util.List;
 
-import components.generic.XYPoint;
+import components.generic.IPoint;
 
 /**
  * There can be many types of flagellum; the type of interest mainly
@@ -31,18 +31,18 @@ import components.generic.XYPoint;
 public interface Flagellum extends CellularComponent {
 			
 	
-	public List<XYPoint> getSkeleton();
+	public List<IPoint> getSkeleton();
 	
 	/**
 	 * Fetch the skeleton offset to zero
 	 * @return
 	 */
-	public List<XYPoint> getOffsetSkeleton();
+	public List<IPoint> getOffsetSkeleton();
 	
-	public List<XYPoint> getBorder();
+	public List<IPoint> getBorder();
 	
 	// positions are offset by the bounding rectangle for easier plotting
-	public List<XYPoint> getOffsetBorder();
+	public List<IPoint> getOffsetBorder();
 	
 	public double getLength();
 

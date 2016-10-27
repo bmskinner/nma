@@ -25,7 +25,6 @@ import ij.gui.Roi;
 import java.awt.geom.Point2D;
 
 import components.generic.IPoint;
-import components.generic.XYPoint;
 
 public class FloatPoint 
 	extends Point2D.Float
@@ -159,7 +158,7 @@ public class FloatPoint
 	 */
 	@Override
 	public IPoint offset(double x, double y){
-		return new XYPoint(this.x+x, this.y+y);
+		return new FloatPoint(this.x+x, this.y+y);
 	}
 
 	/* (non-Javadoc)

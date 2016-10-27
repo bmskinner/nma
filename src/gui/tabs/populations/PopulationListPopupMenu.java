@@ -30,7 +30,6 @@ import javax.swing.JPopupMenu;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import gui.components.BorderTagEvent;
 
 @SuppressWarnings("serial")
 public class PopulationListPopupMenu extends JPopupMenu {
@@ -278,13 +277,9 @@ public class PopulationListPopupMenu extends JPopupMenu {
 //	public void disableAddTailStain(){
 //		addTailStainMenuItem.setEnabled(false);
 //	}
-	
-	public void enableAddNuclearSignal(){
-		addNuclearSignalMenuItem.setEnabled(true);
-	}
-	
-	public void disableAddNuclearSignal(){
-		addNuclearSignalMenuItem.setEnabled(false);
+		
+	public void setAddNuclearSignalEnabled(boolean b){
+		addNuclearSignalMenuItem.setEnabled(b);
 	}
 	
 	

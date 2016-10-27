@@ -30,6 +30,7 @@ import components.Cell;
 import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
+import components.active.VirtualCellCollection;
 import gui.DatasetEvent;
 import gui.LoadingIconDialog;
 import gui.tabs.cells.LabelInfo;
@@ -198,19 +199,16 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
 			}
 		}
 		
-		ICellCollection newCollection = new CellCollection(dataset, dataset.getName()+"_Curated");
+		ICellCollection newCollection = new VirtualCellCollection(dataset, dataset.getName()+"_Curated");
 		for(ICell c : cells){
-			newCollection.addCell(new Cell(c));
+			newCollection.addCell(c);
 		}
 		log("Added "+cells.size()+" cells to new collection");
 		
 		if(cells.size()>0){
 			dataset.addChildCollection(newCollection);
-			
-			List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-			list.add(dataset.getChildDataset(newCollection.getID()));
-			log("Firing dataset events");
-			fireDatasetEvent(DatasetEvent.PROFILING_ACTION, list);
+			fine("Firing dataset events");
+			fireDatasetEvent(DatasetEvent.PROFILING_ACTION, dataset.getChildDataset(newCollection.getID()));
 		}
 	}
 	

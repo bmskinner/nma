@@ -89,28 +89,33 @@ public class ClusterAnalysisAction extends ProgressableAction {
 			if(c.hasCells()){
 				finest("Cluster "+cluster+": "+c.getName());
 				
-				try {
-					fine("Copying profiles to cluster");
-					dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
-				} catch (Exception e) {
-					error("Error copying segments to cluster "+c.getName(), e);
-				}
 				
-				//Copy signal groups
-				for(UUID id  : dataset.getCollection().getSignalGroupIDs()){
-					c.addSignalGroup(id, new SignalGroup(dataset.getCollection().getSignalGroup(id)));
-					finest("Removing signal groups with no signals");
-					if(c.getSignalManager().getSignalCount(id)==0){ // Signal group has no signals
-						c.removeSignalGroup(id);
-						finest("Removed signal group "+id.toString());
-					}
-					
-				}
+				// Create profile aggregates and collections for child
+				c.getProfileManager().createProfileCollections(false);
+				c.getProfileManager().recalculateProfileAggregates();
+				
+//				try {
+//					fine("Copying profiles to cluster");
+				dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
+//				} catch (Exception e) {
+//					error("Error copying segments to cluster "+c.getName(), e);
+//				}
+				
+//				//Copy signal groups
+//				for(UUID id  : dataset.getCollection().getSignalGroupIDs()){
+//					c.addSignalGroup(id, new SignalGroup(dataset.getCollection().getSignalGroup(id)));
+//					finest("Removing signal groups with no signals");
+//					if(c.getSignalManager().getSignalCount(id)==0){ // Signal group has no signals
+//						c.removeSignalGroup(id);
+//						finest("Removed signal group "+id.toString());
+//					}
+//					
+//				}
 				
 				
 				group.addDataset(c);
 				c.setName(group.getName()+"_"+c.getName());
-//				log(Level.FINEST, "Renamed cluster: "+c.getName());
+
 				dataset.addChildCollection(c);
 				
 				

@@ -53,6 +53,7 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.ICell;
 import components.ICellCollection;
+import components.active.ChildAnalysisDataset;
 import components.active.generic.SegmentedFloatProfile;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -272,6 +273,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 					mergeButton.setEnabled(true);
 				}
 				
+				
 				// Check if there are any merged segments
 				boolean hasMerges = false;
 				for(IBorderSegment seg : medianProfile.getSegments()){
@@ -286,6 +288,15 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				} else {
 					unmergeButton.setEnabled(false);
 				}
+				
+				// set child dataset options
+				if(options.firstDataset() instanceof ChildAnalysisDataset){
+					mergeButton.setEnabled(false);
+					unmergeButton.setEnabled(false);
+					splitButton.setEnabled(false);
+					updatewindowButton.setEnabled(false);
+				}
+				
 				
 			} else { // multiple collections
 				setButtonsEnabled(false);

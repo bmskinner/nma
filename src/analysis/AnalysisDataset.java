@@ -46,6 +46,7 @@ import components.CellCollection;
 import components.ClusterGroup;
 import components.ICell;
 import components.ICellCollection;
+import components.active.DefaultCell;
 
 
 /**
@@ -121,7 +122,7 @@ public class AnalysisDataset implements IAnalysisDataset {
 		IAnalysisDataset result = new AnalysisDataset(this.getCollection());
 		for(ICell c : thisCollection.getCells()){
 			
-			result.getCollection().addCell(new Cell(c));
+			result.getCollection().addCell(new DefaultCell(c));
 		}
 		
 //		TODO: Add child collections, clusters etc

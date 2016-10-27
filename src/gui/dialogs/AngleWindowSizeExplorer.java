@@ -49,6 +49,9 @@ import utility.Constants;
 import components.Cell;
 import components.CellCollection;
 import components.ICell;
+import components.ICellCollection;
+import components.active.DefaultCell;
+import components.active.DefaultCellCollection;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -225,41 +228,33 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		for(double i=windowSizeMin; i<=windowSizeMax; i+=stepSize){
 			
 			// make a duplicate collection
-//			log(Level.INFO, "\t"+i);
 			
-			CellCollection duplicateCollection = new CellCollection(dataset.getCollection(), "test");
+			ICellCollection duplicateCollection = new DefaultCellCollection(dataset.getCollection(), "test");
 			
 			// put each cell into the new collection
 			for(ICell c : dataset.getCollection().getCells()){
 				
-				Cell newCell = new Cell(c);
+				ICell newCell = new DefaultCell(c);
 				newCell.getNucleus().setWindowProportion(ProfileType.ANGLE, i); // triggers recalc of profile
 				
 				duplicateCollection.addCell(newCell);
 			}
-//			log(Level.INFO, "\tMade collection");
+
 			// recalc the aggregate
-			
 			IProfileCollection pc = duplicateCollection.getProfileCollection(ProfileType.ANGLE);
 			
 			pc.createProfileAggregate(duplicateCollection, ProfileType.ANGLE);
-			
-//			log(Level.INFO, "\tCalculated aggregate");
-			
+						
 			for(Tag tag : dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getBorderTags()){
 				pc.addIndex(tag, dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getIndex(tag));
 			}
 			
-//			log(Level.INFO, "\tAdded offsets");
 			
 			// get the profile median
-			
 			IProfile median = pc.getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
-			
-//			log(Level.INFO, "\tMade median");
+
 			// add to the chart
 			updateChart(median, i);
-//			log(Level.INFO, "\tUpdated chart");
 			
 			duplicateCollection = null;
 		}

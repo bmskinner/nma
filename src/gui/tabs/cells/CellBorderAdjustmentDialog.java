@@ -68,16 +68,15 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleEdge;
 
 import analysis.IAnalysisDataset;
-import components.Cell;
 import components.CellularComponent;
 import components.ICell;
+import components.active.DefaultCell;
 import components.active.generic.DefaultBorderPoint;
+import components.active.generic.FloatPoint;
 import components.generic.BorderTagObject;
 import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
 import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
@@ -299,7 +298,7 @@ public class CellBorderAdjustmentDialog
 		
 		JButton undoBtn = new JButton("Undo");
 		undoBtn.addActionListener( e ->{
-			workingCell = new Cell(cell);
+			workingCell = new DefaultCell(cell);
 			updateCharts(workingCell);
 			setCellChanged(false);
 			mustResegment = false;
@@ -411,7 +410,7 @@ public class CellBorderAdjustmentDialog
 		
 		
 		fine("Adding point at "+newX+", "+newY);
-		IPoint newPoint = new XYPoint(newX, newY);
+		IPoint newPoint = new FloatPoint(newX, newY);
 		
 		// Get the border point that is closest to the clicked point
 		IBorderPoint bp = workingCell.getNucleus().findClosestBorderPoint(newPoint);
@@ -426,7 +425,7 @@ public class CellBorderAdjustmentDialog
 			newList.add(point);
 			
 			if(point.equals(bp)){
-				newList.add(new BorderPoint(newPoint));
+				newList.add(new DefaultBorderPoint(newPoint));
 			}
 		}
 		setCellChanged(true);
@@ -665,7 +664,7 @@ public class CellBorderAdjustmentDialog
 						double yVal = ds.getYValue(series, item);
 
 						if(ellipse.contains(xVal,  yVal)){
-							IPoint clickedPoint = new XYPoint(xVal, yVal);
+							IPoint clickedPoint = new FloatPoint(xVal, yVal);
 							selectClickedPoint(clickedPoint);
 						}
 					}

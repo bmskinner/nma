@@ -271,6 +271,11 @@ public class PopulationImportWorker extends AnalysisWorker {
 			if(dataset instanceof DefaultAnalysisDataset){
 				
 				log("New style dataset detected");
+				
+				for(IAnalysisDataset child : dataset.getAllChildDatasets()){
+					child.getCollection().getProfileManager().createProfileCollections(true);
+					child.getCollection().getProfileManager().recalculateProfileAggregates();
+				}
 			}
 			
 			// Replace existing save file path with the path to the file that has been opened
@@ -278,6 +283,10 @@ public class PopulationImportWorker extends AnalysisWorker {
 			if(!dataset.getSavePath().equals(inputFile)){
 				updateSavePath(inputFile, dataset);
 			}
+			
+		} catch(NullPointerException e1){
+			fine("NPE Error reading dataset", e1);
+			throw new UnloadableDatasetException("Cannot load dataset due to "+e1.getClass().getSimpleName(), e1);
 			
 		} catch(Exception e1){
 			fine("Error reading dataset", e1);

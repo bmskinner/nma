@@ -50,7 +50,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @param p the profile
 	 * @param segments the list of segments to use
 	 */
-	public SegmentedProfile(IProfile p, List<IBorderSegment> segments) {		
+	private SegmentedProfile(IProfile p, List<IBorderSegment> segments) {		
 		super(p);
 		
 		if(segments==null || segments.isEmpty()){
@@ -80,7 +80,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * and segments
 	 * @param profile the segmented profile to copy
 	 */
-	public SegmentedProfile(final SegmentedProfile profile) {
+	private SegmentedProfile(final SegmentedProfile profile) {
 		this(profile, profile.getSegments());
 	}
 	
@@ -89,7 +89,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * that span the entire profile, half each
 	 * @param profile
 	 */
-	public SegmentedProfile(Profile profile) {
+	private SegmentedProfile(Profile profile) {
 		super(profile);
 		int midpoint = profile.size()/2;
 		IBorderSegment segment1 = new NucleusBorderSegment(0, midpoint, profile.size());
@@ -117,7 +117,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @param values
 	 * @throws Exception 
 	 */
-	public SegmentedProfile(double[] values) {
+	private SegmentedProfile(double[] values) {
 		this( new Profile(values));
 	}
 	

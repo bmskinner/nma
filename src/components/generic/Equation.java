@@ -4,6 +4,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+import components.active.generic.FloatPoint;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
 
@@ -147,7 +148,7 @@ public class Equation{
 
 		double newX  = distance>0 ? xA + dx : xA - dx;
 		double newY = this.getY(newX);
-		return new XYPoint(newX, newY);	
+		return new FloatPoint(newX, newY);	
 	}
 
 	/**
@@ -206,7 +207,7 @@ public class Equation{
 		
 		double x = (eq.getC() - this.c) / (this.m - eq.getM());
 		double y = this.getY(x);
-		return new XYPoint(x, y);
+		return new FloatPoint(x, y);
 	}
 	
 	/**

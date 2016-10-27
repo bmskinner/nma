@@ -467,7 +467,7 @@ public class TailDetector extends Detector {
 		
 		for(SpermTail tail : tails){
 			
-			List<XYPoint> skeleton = tail.getSkeleton();
+			List<IPoint> skeleton = tail.getSkeleton();
 			for(IPoint p : skeleton){
 				if(nucleusOutline.contains( (float) p.getX(), (float) p.getY())){
 					result.add(tail);

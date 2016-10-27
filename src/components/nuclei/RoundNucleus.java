@@ -53,6 +53,8 @@ import stats.PlottableStatistic;
 import stats.SignalStatistic;
 import components.AbstractCellularComponent;
 import components.CellularComponent;
+import components.active.generic.DefaultBorderPoint;
+import components.active.generic.FloatPoint;
 import components.active.generic.SegmentedFloatProfile;
 import components.generic.BorderTag;
 import components.generic.BorderTagObject;
@@ -549,21 +551,15 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	public Nucleus getVerticallyRotatedNucleus(){
 		if(verticalNucleus==null){
-//			log(this.getNameAndNumber()+": Creating vertical nucleus");
-//			log(this.getNameAndNumber()+": Duplicating this nucleus");
+
 			verticalNucleus = this.duplicate();
 			//TODO - at this point the nucleus is at 0,0
-//			log(this.getNameAndNumber()+": This CoM - "+this.getCentreOfMass());
-//			log(this.getNameAndNumber()+": Vert CoM - "+verticalNucleus.getCentreOfMass());
-//			
-//			log(this.getNameAndNumber()+": This OP - "+this.getBorderPoint(BorderTagObject.ORIENTATION_POINT));
-//			log(this.getNameAndNumber()+": Vert OP - "+verticalNucleus.getBorderPoint(BorderTagObject.ORIENTATION_POINT));
-			
+
 			verticalNucleus.alignVertically();			
 			
 			// Ensure all vertical nuclei have overlapping centres of mass
 //			log(this.getNameAndNumber()+": Moving vertical nucleus CoM to 0,0");
-			verticalNucleus.moveCentreOfMass(new XYPoint(0,0));
+			verticalNucleus.moveCentreOfMass(new FloatPoint(0,0));
 			this.setStatistic(NucleusStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
 			this.setStatistic(NucleusStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
 			
@@ -604,7 +600,7 @@ public class RoundNucleus extends AbstractCellularComponent
 
 	
 	public IBorderPoint getBorderTag(Tag tag){
-		IBorderPoint result = new BorderPoint(0,0);
+		IBorderPoint result = new DefaultBorderPoint(0,0);
 		if(this.getBorderIndex(tag)>-1){
 			result = this.getBorderPoint((this.getBorderIndex(tag)));
 		} else {
@@ -910,14 +906,14 @@ public class RoundNucleus extends AbstractCellularComponent
 		IProfile profile = this.getProfile(type);
 		
 		// First previous point is the last point of the profile
-		IPoint prevPoint = new XYPoint(0,profile.get(this.getBorderLength()-1));
+		IPoint prevPoint = new FloatPoint(0,profile.get(this.getBorderLength()-1));
 		 
 		for (int i=0; i<this.getBorderLength();i++ ) {
 				double normalisedX = ((double)i/(double)this.getBorderLength())*100; // normalise to 100 length
 				
 				// We are measuring along the chart of angle vs position
 				// Each median angle value is treated as an XYPoint
-				IPoint thisPoint = new XYPoint(normalisedX, profile.get(i));
+				IPoint thisPoint = new FloatPoint(normalisedX, profile.get(i));
 				pathLength += thisPoint.getLengthTo(prevPoint);
 				prevPoint = thisPoint;
 		}
@@ -957,7 +953,7 @@ public class RoundNucleus extends AbstractCellularComponent
 
 		int index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
 
-		return new BorderPoint(this.getBorderPoint(index));
+		return new DefaultBorderPoint(this.getBorderPoint(index));
 	}
 	
 	public double getNarrowestDiameter() {
@@ -1059,10 +1055,10 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		// What about when the TV or BV are in the bibble? TODO
 		
-		BorderPoint top = new BorderPoint(topPoint.getX(), eq.getY(topPoint.getX()));
-		BorderPoint btm = new BorderPoint(eq.getX(bottomPoint.getY()), bottomPoint.getY());
+		IBorderPoint top = new DefaultBorderPoint(topPoint.getX(), eq.getY(topPoint.getX()));
+		IBorderPoint btm = new DefaultBorderPoint(eq.getX(bottomPoint.getY()), bottomPoint.getY());
 		
-		return new BorderPoint[] {top, btm};
+		return new IBorderPoint[] {top, btm};
 		
 	}
 	

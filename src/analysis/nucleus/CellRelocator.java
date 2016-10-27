@@ -15,6 +15,7 @@ import components.ICellCollection;
 import components.active.DefaultAnalysisDataset;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
+import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.XYPoint;
 
@@ -229,7 +230,7 @@ public class CellRelocator extends AnalysisWorker {
 		
 		double x = Double.parseDouble(posArray[0]);
 		double y = Double.parseDouble(posArray[1]);
-		return new XYPoint(x, y);
+		return new FloatPoint(x, y);
 	}
 
 }

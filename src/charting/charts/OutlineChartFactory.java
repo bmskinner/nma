@@ -57,6 +57,7 @@ import org.jfree.ui.Layer;
 import components.Cell;
 import components.CellularComponent;
 import components.ICell;
+import components.active.generic.FloatPoint;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
@@ -842,10 +843,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				if(hasConsensus){
 					boolean[][] test = verticalNucleus.getBooleanMask(200, 200);
 					int[] offsets = aligner.align(test);
-					verticalNucleus.moveCentreOfMass( new XYPoint(offsets[1], offsets[0]));
+					verticalNucleus.moveCentreOfMass( new FloatPoint(offsets[1], offsets[0]));
 				}
 			} else {
-				verticalNucleus.moveCentreOfMass( new XYPoint(0, 0));
+				verticalNucleus.moveCentreOfMass( new FloatPoint(0, 0));
 			}
 			
 

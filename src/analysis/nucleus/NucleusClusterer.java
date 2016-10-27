@@ -37,6 +37,7 @@ import analysis.IAnalysisDataset;
 import components.ICellCollection;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
+import components.active.VirtualCellCollection;
 
 
 public class NucleusClusterer extends NucleusTreeBuilder {
@@ -181,8 +182,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 			for(int i=0;i<clusterer.numberOfClusters();i++ ){
 				fine("Cluster "+i+": " +	collection.getName()+"_Cluster_"+i);
 
-				ICellCollection clusterCollection = new DefaultCellCollection(collection, 
-						"Cluster_"+i);
+				ICellCollection clusterCollection = new VirtualCellCollection(getDataset(), "Cluster_"+i);
 				
 				clusterCollection.setName("Cluster_"+i);
 				clusterMap.put(i, clusterCollection);
@@ -194,7 +194,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 				try{
 					
 					
-					UUID id = cellToInstanceMap.get(inst);
+					UUID cellID = cellToInstanceMap.get(inst);
 
 					int clusterNumber = clusterer.clusterInstance(inst); // #pass each instance through the model
 					
@@ -203,10 +203,10 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 					ICellCollection cluster = clusterMap.get(clusterNumber);
 
 					// should never be null
-					if(collection.getCell(id)!=null){
-						cluster.addCell(new DefaultCell (collection.getCell(id)));
+					if(collection.getCell(cellID)!=null){
+						cluster.addCell( collection.getCell(cellID) );
 					} else {
-						warn("Error: cell with ID "+id+" is not found");
+						warn("Error: cell with ID "+cellID+" is not found");
 					}
 					finest("\tInstance handled");
 					publish(i++);

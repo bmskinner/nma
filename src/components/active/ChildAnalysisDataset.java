@@ -9,11 +9,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import analysis.AnalysisOptions;
 import analysis.IAnalysisDataset;
 import components.ClusterGroup;
 import components.ICellCollection;
+import utility.Constants;
 import utility.Version;
 
 /**
@@ -42,12 +45,13 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	 public ChildAnalysisDataset(IAnalysisDataset parent, ICellCollection collection){
 		 this.parent = parent;
 		 this.version = Version.currentVersion();
+		 this.cellCollection = collection;
 	 }
 
 	@Override
 	public IAnalysisDataset duplicate() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		
+		throw new Exception("Not yet implemented");
 	}
 
 	@Override
@@ -111,19 +115,46 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public Set<UUID> getChildUUIDs() {
-		// TODO Auto-generated method stub
-		return null;
+		Set<UUID> result = new HashSet<UUID>(childDatasets.size());
+		for(IAnalysisDataset c : childDatasets){
+			result.add(c.getUUID());
+		}
+		
+		return result;
 	}
 
 	@Override
 	public Set<UUID> getAllChildUUIDs() {
-		// TODO Auto-generated method stub
-		return null;
+		Set<UUID> result = new HashSet<UUID>();
+		
+		Set<UUID> idlist = getChildUUIDs();
+		result.addAll(idlist);
+		
+		for(UUID id : idlist){
+			IAnalysisDataset d = getChildDataset(id);
+			
+			result.addAll(d.getAllChildUUIDs());
+		}
+		return result;
 	}
 
 	@Override
 	public IAnalysisDataset getChildDataset(UUID id) {
-		// TODO Auto-generated method stub
+		if(this.hasChild(id)){
+			
+			for(IAnalysisDataset c : childDatasets){
+				if(c.getUUID().equals(id)){
+					return c;
+				}
+			}
+			
+		} else {
+			for(IAnalysisDataset child : this.getAllChildDatasets()){
+				if(child.getUUID().equals(id)){
+					return child;
+				}
+			}
+		}
 		return null;
 	}
 
@@ -134,7 +165,7 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public List<IAnalysisDataset> getAllMergeSources() {
-		return null;
+		return new ArrayList<IAnalysisDataset>(0);
 	}
 
 	@Override
@@ -142,17 +173,17 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public List<IAnalysisDataset> getMergeSources() {
-		return null;
+		return new ArrayList<IAnalysisDataset>(0);
 	}
 
 	@Override
 	public List<UUID> getMergeSourceIDs() {
-		return null;
+		return new ArrayList<UUID>(0);
 	}
 
 	@Override
 	public List<UUID> getAllMergeSourceIDs() {
-		return null;
+		return new ArrayList<UUID>(0);
 	}
 
 	@Override
@@ -216,50 +247,97 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public void addClusterGroup(ClusterGroup group) {
-		// TODO Auto-generated method stub
-		
+		this.clusterGroups.add(group);
 	}
 
 	@Override
 	public int getMaxClusterGroupNumber() {
-		// TODO Auto-generated method stub
-		return 0;
+		int number = 0;
+		
+		if(this.hasClusters()){
+
+			for (ClusterGroup g :  this.getClusterGroups()){
+
+				String name = g.getName();
+
+				Pattern p = Pattern.compile("^"+Constants.CLUSTER_GROUP_PREFIX+"_(\\d+)$");
+
+				Matcher m = p.matcher(name);
+				if(m.find()){
+					String s = m.group(1);
+
+					int n = Integer.valueOf(s);
+					if(n>number){
+						number=n;
+					}
+				}
+			}
+		}
+		return number;
 	}
 
 	@Override
 	public boolean hasCluster(UUID id) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean result = false;
+		for(ClusterGroup g : this.clusterGroups){
+			if(g.hasDataset(id)){
+				result = true;
+				break;
+			}
+		}
+		return result;
 	}
 
 	@Override
 	public List<ClusterGroup> getClusterGroups() {
-		// TODO Auto-generated method stub
-		return null;
+		return  this.clusterGroups;
 	}
 
 	@Override
 	public List<UUID> getClusterIDs() {
-		// TODO Auto-generated method stub
-		return null;
+		List<UUID> result = new ArrayList<UUID>();
+		for(ClusterGroup g : this.clusterGroups){
+			result.addAll(g.getUUIDs());
+		}
+		return result;
 	}
 
 	@Override
 	public boolean hasClusters() {
-		// TODO Auto-generated method stub
-		return false;
+		return clusterGroups != null && clusterGroups.size()>0;
 	}
 
 	@Override
 	public boolean hasClusterGroup(ClusterGroup group) {
-		// TODO Auto-generated method stub
-		return false;
+		return clusterGroups.contains(group);
 	}
 
 	@Override
 	public void refreshClusterGroups() {
-		// TODO Auto-generated method stub
-		
+		if(this.hasClusters()){
+			// Find the groups that need removing
+			List<ClusterGroup> groupsToDelete = new ArrayList<ClusterGroup>();
+			for(ClusterGroup g : this.getClusterGroups()){
+				boolean clusterRemains = false;
+
+				for(UUID childID : g.getUUIDs()){
+					if(this.hasChild(childID)){
+						clusterRemains = true;
+					}
+				}
+				if(!clusterRemains){
+					groupsToDelete.add(g);
+				}
+			}
+
+			// Remove the groups
+			for(ClusterGroup g : groupsToDelete){
+				this.deleteClusterGroup(g);
+			}
+
+
+		}
+
 	}
 
 	@Override
@@ -272,13 +350,29 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public void deleteChild(UUID id) {
-		// TODO Auto-generated method stub
+		if(this.hasChild(id)){
+
+			this.childDatasets.remove(id);
+			for(ClusterGroup g : clusterGroups){
+				if(g.hasDataset(id)){
+					g.removeDataset(id);
+				}
+			}
+		}
 		
 	}
 
 	@Override
 	public void deleteClusterGroup(ClusterGroup group) {
-		// TODO Auto-generated method stub
+		if(hasClusterGroup(group)){
+
+			for(UUID id : group.getUUIDs()){
+				if(hasChild(id)){
+					this.deleteChild(id);
+				}
+			}
+			this.clusterGroups.remove(group);
+		}
 	}
 
 	@Override
@@ -302,8 +396,7 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public boolean hasChild(UUID child) {
-		// TODO Auto-generated method stub
-		return false;
+		return childDatasets.contains(child);
 	}
 
 	@Override
@@ -324,10 +417,12 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public void updateSourceImageDirectory(File expectedImageDirectory) {
-		// TODO Auto-generated method stub
+		parent.updateSourceImageDirectory(expectedImageDirectory);
 		
 	}
 	
-	
+	public String toString(){
+		return this.cellCollection.getName();
+	}
 
 }

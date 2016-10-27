@@ -40,6 +40,8 @@ import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
+import components.active.generic.DefaultBorderPoint;
+import components.active.generic.FloatPoint;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
@@ -471,7 +473,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		if(vertX > verticalNucleus.getCentreOfMass().getX() ){
 			clockwiseRP = true; // this is only set to true, as the default is false, and will become false after the nucleus is flipped
 			verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
-			verticalNucleus.moveCentreOfMass(new XYPoint(0,0));
+			verticalNucleus.moveCentreOfMass(new FloatPoint(0,0));
 		} 
 
 		return verticalNucleus;
@@ -551,7 +553,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     // if close to 90, and the distance to the tip > CoM-tip, keep the point
     // return the best point
     double difference = 90;
-    IBorderPoint tail = new BorderPoint(0,0);
+    IBorderPoint tail = new DefaultBorderPoint(0,0);
     for(int i=0;i<this.getBorderLength();i++){
 
       IBorderPoint p = this.getBorderPoint(i);

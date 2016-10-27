@@ -23,6 +23,7 @@ package analysis.mesh;
 import java.util.HashSet;
 import java.util.Set;
 
+import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.XYPoint;
 
@@ -46,7 +47,7 @@ public class NucleusMeshVertex {
 	 */
 	public NucleusMeshVertex(NucleusMeshVertex v){
 		this.name = v.name;
-		this.position = new XYPoint(v.position);
+		this.position = new FloatPoint(v.position);
 		this.peripheral = v.peripheral;
 	}
 	

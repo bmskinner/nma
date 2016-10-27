@@ -14,6 +14,7 @@ import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellularComponent;
 import components.ICell;
+import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -152,7 +153,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		IPoint upperPoint = topPoint.getY()>btmPoint.getY()? topPoint : btmPoint;
 		IPoint lowerPoint = upperPoint==topPoint ? btmPoint : topPoint;
 
-		IPoint comp = new XYPoint(lowerPoint.getX(),upperPoint.getY());
+		IPoint comp = new FloatPoint(lowerPoint.getX(),upperPoint.getY());
 
 		/*
 		 *      LA             RA        RB         LB         

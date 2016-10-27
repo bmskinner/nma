@@ -19,8 +19,8 @@
 
 package components.generic;
 
-import utility.AngleTools;
 import components.CellularComponent;
+import components.active.generic.FloatPoint;
 
 /**
  * Create a 3D version of a cellular component by rotating about
@@ -52,13 +52,13 @@ public class DefaultComponent3D  implements Component3D {
 		
 		// Create a point on the x axis through the CoM adjacent to p
 		
-		Point3D origin = new Point3D( p.getX(), c.getCentreOfMass().getY(), 0);
+		Point3D origin = new Point3D( (float) p.getX(), (float) c.getCentreOfMass().getY(), 0);
 		
 		// Get the length of the hypotenuse of the triangle
-		double newY = origin.getLengthTo( new XYPoint(p.getY(), p.getZ()));
+		double newY = origin.getLengthTo( new FloatPoint(p.getY(), p.getZ()));
 		
 		 // rotated the point about x so z=0
-		Point3D rotateX = new Point3D( p.getX(), origin.getY()+newY, 0  );
+		Point3D rotateX = new Point3D( (float) p.getX(), (float) (origin.getY()+newY), 0  );
 		
 		return c.containsPoint(rotateX);
 		

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import logging.Loggable;
 import analysis.mesh.NucleusMeshFace.NucleusMeshFaceCoordinate;
+import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.XYPoint;
 
@@ -319,7 +320,7 @@ public class NucleusMeshImage implements Loggable {
 		for(int x=0; x<ip.getWidth(); x++){
 			
 			for(int y=0; y<ip.getHeight(); y++){
-				IPoint p = new XYPoint(x, y);
+				IPoint p = new FloatPoint(x, y);
 
 				if(mesh.nucleus.containsOriginalPoint(p)){
 					

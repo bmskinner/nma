@@ -45,6 +45,7 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.ICellCollection;
+import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.Tag;
 import components.generic.XYPoint;
@@ -259,7 +260,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 				if(activeDataset().getCollection().hasConsensusNucleus()){
 					double x = 0;
 					double y = 0;
-					IPoint point = new XYPoint(x, y);
+					IPoint point = new FloatPoint(x, y);
 					
 					activeDataset().getCollection().getConsensusNucleus().moveCentreOfMass(point);;
 					refreshChartCache(getDatasets());
@@ -566,7 +567,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
 				double x = 0;
 				double y = 0;
-				IPoint point = new XYPoint(x, y);
+				IPoint point = new FloatPoint(x, y);
 				
 				activeDataset().getCollection().getConsensusNucleus().moveCentreOfMass(point);;
 				this.update(activeDatasetToList());

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import logging.Loggable;
 import stats.Stats;
+import components.active.generic.FloatPoint;
 import components.generic.Equation;
 import components.generic.IPoint;
 import components.generic.XYPoint;
@@ -233,7 +234,7 @@ public class NucleusMeshFace implements Loggable {
 		avgX /= 3;
 		avgY /= 3;
 		
-		return new XYPoint(avgX, avgY);
+		return new FloatPoint(avgX, avgY);
 	}
 	
 	

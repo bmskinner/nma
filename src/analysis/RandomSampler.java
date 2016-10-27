@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+
 import components.Cell;
 import components.CellCollection;
+import components.ICellCollection;
+import components.active.VirtualCellCollection;
 import components.generic.MeasurementScale;
 import stats.NucleusStatistic;
 
@@ -58,57 +61,50 @@ public class RandomSampler extends AnalysisWorker {
 	public void generateSamples() throws Exception{
 		
 		// for each iteration
-		log(Level.FINE,"Beginning sampling");
+		fine("Beginning sampling");
 		for(int i=0; i<iterations; i++){
-			log(Level.FINEST,"Sample "+i);
+			finest("Sample "+i);
 			// make a new collection randomly sampled to teh correct proportion
-			List<CellCollection> collections = makeRandomSampledCollection(first, second);
-			log(Level.FINEST,"Made collection");
+			ICellCollection[]  collections = makeRandomSampledCollection(first, second);
+			finest("Made collection");
+			
 			// get the stat magnitude
-			double value1 =  collections.get(0).getMedianStatistic(stat, MeasurementScale.PIXELS);
-			double value2 =  collections.get(1).getMedianStatistic(stat, MeasurementScale.PIXELS);
-			
-			// Always take the smaller as a proportion of the larger
-//			double magnitude = value1 > value2 ? value2/value1 : value1/value2; 
-			
+			double value1 =  collections[0].getMedianStatistic(stat, MeasurementScale.PIXELS);
+			double value2 =  collections[1].getMedianStatistic(stat, MeasurementScale.PIXELS);
+						
 			double magnitude = value2 / value1;
-			log(Level.FINEST, "Found value");
+			finest("Found value");
 			// add to a list
 			magnitudes.add(magnitude);
 			
 			if( i%10==0){
 				publish(i);
-//				System.gc(); // Suggest a clean up
-			}
-			
-			// Release memory for collection
-			collections = null;
-			
+			}			
 		}	
 		
 	}
 	
-	private List<CellCollection> makeRandomSampledCollection(int firstSize, int secondSize) throws Exception{
-		List<CellCollection> result = new ArrayList<CellCollection>();
+	private ICellCollection[] makeRandomSampledCollection(int firstSize, int secondSize) throws Exception{
+		ICellCollection[] result = new ICellCollection[2];
 		
-		CellCollection first  = new CellCollection( this.getDataset(), "first");
-		CellCollection second = new CellCollection( this.getDataset(), "second");
-		log(Level.FINEST,"Created new collections");
+		ICellCollection first  = new VirtualCellCollection( this.getDataset(), "first");
+		ICellCollection second = new VirtualCellCollection( this.getDataset(), "second");
+		finer("Created new collections");
 		
 		List<Cell> cells = new ArrayList(this.getDataset().getCollection().getCells());
 		Collections.shuffle(cells);
-		log(Level.FINEST,"Shuffled cells");
+		finer("Shuffled cells");
 		
 		for(int i=0; i<firstSize; i++){
-			first.addCell(new Cell(cells.get(i)));
+			first.addCell(cells.get(i));
 		}
-		log(Level.FINEST,"Added first set");
+		finer("Added first set");
 		for(int i=firstSize; i<firstSize+secondSize; i++){
-			second.addCell(new Cell(cells.get(i)));
+			second.addCell(cells.get(i));
 		}
-		log(Level.FINEST,"Added second set");
-		result.add(first);
-		result.add(second);
+		finer("Added second set");
+		result[0] = first;
+		result[1] = second;
 		
 		return result;
 		

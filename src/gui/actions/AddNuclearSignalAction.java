@@ -34,9 +34,11 @@ import analysis.signals.SignalDetectionWorker;
 import analysis.signals.SignalManager;
 import components.ICell;
 import components.ICellCollection;
+import components.active.ChildAnalysisDataset;
 import components.active.DefaultAnalysisDataset;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
+import components.active.VirtualCellCollection;
 import components.nuclear.ISignalGroup;
 import components.nuclear.SignalGroup;
 
@@ -124,39 +126,44 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 		try{
 		finer("Creating new analysis dataset for "+collection.getName());
-		IAnalysisDataset subDataset = new DefaultAnalysisDataset(collection, dataset.getSavePath());
-		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
+		
+		IAnalysisDataset subDataset = new ChildAnalysisDataset(dataset, collection );
+		
+//		IAnalysisDataset subDataset = new DefaultAnalysisDataset(collection, dataset.getSavePath());
+//		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
 
-		log("Sub-population "+collection.getName()+": "+collection.size()+" nuclei");
-		SignalManager m = collection.getSignalManager();
+//		log("Sub-population "+collection.getName()+": "+collection.size()+" nuclei");
+//		SignalManager m = collection.getSignalManager();
+//		
+//		// Remove any signal groups that have no signals in the population
+//		finer(collection.getName()+" has "+collection.getSignalGroupIDs().size()+" signal groups");
+//		
+//		Set<UUID> toRemove = new HashSet<UUID>();
+//		
+//		for(UUID signalGroup : collection.getSignalGroupIDs()){// : collection.getSignalGroups()){
+//			
+//			String groupName = m.getSignalGroupName(signalGroup);
+//			fine("Checking signal group "+groupName);
+//			
+//			if(collection.getSignalManager().getSignalCount(signalGroup)==0){ // Signal group has no signals
+//				finer("Signals not present in group "+groupName);
+//				
+//				// No need to keep the group
+//				toRemove.add(signalGroup);
+//				
+//			}
+//			finer("Checked signal group "+groupName);
+//		}
+//		finer("Removing empty signal groups");
+//		for(UUID id : toRemove){
+//			collection.removeSignalGroup(id);
+//			finer("Removed signal group");
+//		}
 		
-		// Remove any signal groups that have no signals in the population
-		finer(collection.getName()+" has "+collection.getSignalGroupIDs().size()+" signal groups");
-		
-		Set<UUID> toRemove = new HashSet<UUID>();
-		
-		for(UUID signalGroup : collection.getSignalGroupIDs()){// : collection.getSignalGroups()){
-			
-			String groupName = m.getSignalGroupName(signalGroup);
-			fine("Checking signal group "+groupName);
-			
-			if(collection.getSignalManager().getSignalCount(signalGroup)==0){ // Signal group has no signals
-				finer("Signals not present in group "+groupName);
-				
-				// No need to keep the group
-				toRemove.add(signalGroup);
-				
-			}
-			finer("Checked signal group "+groupName);
-		}
-		finer("Removing empty signal groups");
-		for(UUID id : toRemove){
-			collection.removeSignalGroup(id);
-			finer("Removed signal group");
-		}
-		
-		finer("Adding "+collection.getName()+" as child dataset");
+//		finer("Adding "+collection.getName()+" as child dataset");
 		dataset.addChildDataset(subDataset);
+		dataset.getCollection().getProfileManager().copyCollectionOffsets(collection);
+		
 		} catch(Exception e){
 			error("Error processing signal group", e);
 		}
@@ -181,50 +188,55 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		Set<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
 		if(!list.isEmpty()){
 			log("Signal group "+group.getGroupName()+": found nuclei with signals");
-			ICellCollection listCollection = new DefaultCellCollection(r.getFolder(), 
-					r.getOutputFolderName(), 
-					group.getGroupName()+"_with_signals", 
-					r.getNucleusType());
+			ICellCollection listCollection = new VirtualCellCollection(dataset, group.getGroupName()+"_with_signals");
+			
+//			ICellCollection listCollection = new DefaultCellCollection(r.getFolder(), 
+//					r.getOutputFolderName(), 
+//					group.getGroupName()+"_with_signals", 
+//					r.getNucleusType());
 
 			for(ICell c : list){
 
 				finer("  Added cell: "+c.getNucleus().getNameAndNumber());
-				ICell newCell = new DefaultCell(c);
-				listCollection.addCell( newCell );
+//				ICell newCell = new DefaultCell(c);
+				listCollection.addCell( c );
 			}
 			signalPopulations.add(listCollection);
 
 			// Copy over existing signal groups
-			finer("Adding existing signal groups to collection "+listCollection.getName());
-			for(UUID id  : r.getSignalGroupIDs()){
-				finer("Adding signal group "+r.getSignalGroup(id).getGroupName()+ " to "+listCollection.getName());
-				listCollection.addSignalGroup(id, new SignalGroup(r.getSignalGroup(id)));
-			}
-			listCollection.addSignalGroup(signalGroup, new SignalGroup(r.getSignalGroup(signalGroup)));
+//			finer("Adding existing signal groups to collection "+listCollection.getName());
+//			for(UUID id  : r.getSignalGroupIDs()){
+//				finer("Adding signal group "+r.getSignalGroup(id).getGroupName()+ " to "+listCollection.getName());
+//				listCollection.addSignalGroup(id, new SignalGroup(r.getSignalGroup(id)));
+//			}
+//			listCollection.addSignalGroup(signalGroup, new SignalGroup(r.getSignalGroup(signalGroup)));
 
 			// Only add a group of cells without signals if at least one cell does havea signal
 
 			Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
 			if(!notList.isEmpty()){
 				log("Signal group "+r.getSignalGroup(signalGroup).getGroupName()+": found nuclei without signals");
-				ICellCollection notListCollection = new DefaultCellCollection(r.getFolder(), 
-						r.getOutputFolderName(), 
-						group.getGroupName()+"_without_signals", 
-						r.getNucleusType());
+				
+				ICellCollection notListCollection = new VirtualCellCollection(dataset, group.getGroupName()+"_without_signals");
+				
+//				ICellCollection notListCollection = new DefaultCellCollection(r.getFolder(), 
+//						r.getOutputFolderName(), 
+//						group.getGroupName()+"_without_signals", 
+//						r.getNucleusType());
 
 				for(ICell c : notList){
-					notListCollection.addCell( new DefaultCell(c) );
-					finer("  Added cell: "+c.getNucleus().getNameAndNumber());
+					notListCollection.addCell( c);
+//					finer("  Added cell: "+c.getNucleus().getNameAndNumber());
 				}
 
 				// Copy over existing signal groups
-				finer("Adding existing signal groups to collection "+notListCollection.getName());
-				for(UUID id  : r.getSignalGroupIDs()){
-					if( ! id.equals(signalGroup)){ // don't bother adding the signals that aren't there
-						finer("Adding signal group "+r.getSignalGroup(signalGroup).getGroupName()+" to "+notListCollection.getName());
-						notListCollection.addSignalGroup(id, new SignalGroup(r.getSignalGroup(id)));
-					}
-				}
+//				finer("Adding existing signal groups to collection "+notListCollection.getName());
+//				for(UUID id  : r.getSignalGroupIDs()){
+//					if( ! id.equals(signalGroup)){ // don't bother adding the signals that aren't there
+//						finer("Adding signal group "+r.getSignalGroup(signalGroup).getGroupName()+" to "+notListCollection.getName());
+//						notListCollection.addSignalGroup(id, new SignalGroup(r.getSignalGroup(id)));
+//					}
+//				}
 				signalPopulations.add(notListCollection);
 			} else {
 				finest("No cells without signals");

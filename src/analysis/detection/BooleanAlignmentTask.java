@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ForkJoinTask;
 
 import analysis.AbstractProgressAction;
+import components.active.generic.FloatPoint;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
 
@@ -71,7 +72,7 @@ public class BooleanAlignmentTask extends AbstractProgressAction {
 			Nucleus verticalNucleus = nuclei[i].getVerticallyRotatedNucleus();
 			boolean[][] test = verticalNucleus.getBooleanMask(200, 200);
 			int[] offsets = aligner.align(test);
-			verticalNucleus.moveCentreOfMass( new XYPoint(offsets[1], offsets[0]));
+			verticalNucleus.moveCentreOfMass( new FloatPoint(offsets[1], offsets[0]));
 			fireProgressEvent();
 		}
 

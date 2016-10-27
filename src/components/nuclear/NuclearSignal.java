@@ -27,6 +27,7 @@ import java.io.Serializable;
 
 import components.AbstractCellularComponent;
 import components.CellularComponent;
+import components.generic.IPoint;
 import components.generic.XYPoint;
 
 /**
@@ -42,7 +43,7 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 	private int closestNuclearBorderPoint;
 	
 	
-	public NuclearSignal(Roi roi, File f, int channel, double[] position, XYPoint centreOfMass){
+	public NuclearSignal(Roi roi, File f, int channel, double[] position, IPoint centreOfMass){
 		super(roi, f, channel, position, centreOfMass);
 		
 	}

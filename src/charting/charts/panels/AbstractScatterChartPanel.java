@@ -18,7 +18,9 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.data.Range;
 
 import components.CellCollection;
+import components.ICell;
 import components.ICellCollection;
+import components.active.VirtualCellCollection;
 import components.generic.MeasurementScale;
 import analysis.IAnalysisDataset;
 import charting.charts.ScatterChartFactory;
@@ -226,10 +228,19 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 				continue;
 			}
 
-			stat2.setName("Filtered_"+statABox.getSelectedItem().toString()+"_"+statBBox.getSelectedItem().toString());
+//			stat2.setName("Filtered_"+statABox.getSelectedItem().toString()+"_"+statBBox.getSelectedItem().toString());
 			finer("Filtered "+stat2.size()+" cells");
-			d.addChildCollection(stat2);
-			d.getCollection().getProfileManager().copyCollectionOffsets(stat2);
+			
+			ICellCollection virt = new VirtualCellCollection(d, stat2.getName());	
+			for(ICell c : stat2.getCells()){
+				virt.addCell(c);
+			}
+			String name = "Filtered_"+statABox.getSelectedItem().toString()+"_"+statBBox.getSelectedItem().toString();
+			log("Setting name to "+name);
+			virt.setName(name);
+
+			d.addChildCollection(virt);
+			d.getCollection().getProfileManager().copyCollectionOffsets(virt);
 
 			
 		}

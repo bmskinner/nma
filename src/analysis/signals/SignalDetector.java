@@ -27,6 +27,7 @@ import java.util.Map;
 
 import analysis.detection.Detector;
 import components.CellularComponent;
+import components.active.generic.FloatPoint;
 import components.active.generic.FloatProfile;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
@@ -166,9 +167,8 @@ public class SignalDetector extends Detector {
 				
 				NuclearSignal s = new NuclearSignal( r, 
 						sourceFile, channel, originalPosition,
-						new XYPoint(values.get("XM"), 
-								values.get("YM"))
-						);
+						new FloatPoint(values.get("XM"), values.get("YM"))
+				);
 				
 				s.setStatistic(SignalStatistic.AREA,      values.get("Area"));
 				s.setStatistic(SignalStatistic.MAX_FERET, values.get("Feret"));

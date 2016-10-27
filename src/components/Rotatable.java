@@ -20,6 +20,7 @@
 package components;
 
 import logging.Loggable;
+import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.XYPoint;
 
@@ -58,7 +59,7 @@ public interface Rotatable extends Loggable {
 		IPoint upperPoint = topPoint.getY()>bottomPoint.getY()? topPoint : bottomPoint;
 		IPoint lowerPoint = upperPoint==topPoint ? bottomPoint : topPoint;
 
-		IPoint comp = new XYPoint(lowerPoint.getX(),upperPoint.getY());
+		IPoint comp = new FloatPoint(lowerPoint.getX(),upperPoint.getY());
 
 		/*
 		 *      LA             RA        RB         LB         
