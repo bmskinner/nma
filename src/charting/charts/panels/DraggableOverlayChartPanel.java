@@ -48,7 +48,7 @@ import org.jfree.ui.RectangleEdge;
 import charting.ChartComponents;
 import components.generic.ISegmentedProfile;
 import components.generic.SegmentedProfile;
-import components.nuclear.NucleusBorderSegment;
+import components.nuclear.IBorderSegment;
 
 /**
  * This chart panel provides a list of draggable markers as
@@ -121,10 +121,10 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
 				overlay = new CrosshairOverlay();
 				int i=0;
-				for(NucleusBorderSegment seg : profile.getOrderedSegments()){
+				for(IBorderSegment seg : profile.getOrderedSegments()){
 
 					Color colour = ColourSelecter.getColor(i++);
-					if(seg.isStartPositionLocked()){
+					if(seg.isLocked()){
 						colour = Color.DARK_GRAY;
 					}
 
@@ -178,7 +178,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	    if (e.getButton() == MouseEvent.BUTTON1) {
 
 	    	
-	    	if(xCrosshair!=null && ! ((SegmentCrosshair) xCrosshair).getSegment().isStartPositionLocked()){
+	    	if(xCrosshair!=null && ! ((SegmentCrosshair) xCrosshair).getSegment().isLocked()){
 //	    		IJ.log("Mouse down : Running :"+checkRunning()); 
 	    		mouseIsDown = true;
 	    		initThread();
@@ -227,7 +227,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	    		fine("Integer of domain value is "+intXValue);
 	    		
 	    		// Get the segment associated with the point
-	    		NucleusBorderSegment seg = ((SegmentCrosshair) xCrosshair).getSegment();
+	    		IBorderSegment seg = ((SegmentCrosshair) xCrosshair).getSegment();
 
 	    		    		
 	    		// Trigger the update
@@ -251,7 +251,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
 			if (checkCursorIsOverLine(x, y)) {
 				
-				if(((SegmentCrosshair) xCrosshair).getSegment().isStartPositionLocked()){
+				if(((SegmentCrosshair) xCrosshair).getSegment().isLocked()){
 					this.setCursor(Cursor.getDefaultCursor());
 				} else {
 					this.setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
@@ -379,13 +379,13 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	
     
     private class SegmentCrosshair extends Crosshair {
-    	private NucleusBorderSegment segment;
+    	private IBorderSegment segment;
 
-    	public SegmentCrosshair(double d, Paint paint, Stroke stroke, NucleusBorderSegment segment){
+    	public SegmentCrosshair(double d, Paint paint, Stroke stroke, IBorderSegment segment){
     		super(d, paint, stroke);
     		this.segment = segment;
     	}
-		public NucleusBorderSegment getSegment() {
+		public IBorderSegment getSegment() {
 			return segment;
 		}
     }

@@ -57,7 +57,7 @@ import analysis.IAnalysisDataset;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.nuclear.NucleusBorderSegment;
+import components.nuclear.IBorderSegment;
 
 @SuppressWarnings("serial")
 public class HierarchicalTreeSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
@@ -298,7 +298,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			statBoxMap.put(stat, box);
 		}
 		
-		for(NucleusBorderSegment s : dataset.getCollection()
+		for(IBorderSegment s : dataset.getCollection()
 				.getProfileCollection(ProfileType.ANGLE)
 				.getSegments(Tag.REFERENCE_POINT)){
 			
@@ -381,7 +381,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			
 			try{
 			
-			for(NucleusBorderSegment s : dataset.getCollection()
+			for(IBorderSegment s : dataset.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
 					.getSegments(Tag.REFERENCE_POINT)){
 				

@@ -24,6 +24,7 @@ import components.CellCollection;
 import components.ICellCollection;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
@@ -59,17 +60,17 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 		log(Level.FINEST, "Dataset list is not empty");
 
 		// Check that all the datasets have the same number of segments
-		if(NucleusBorderSegment.segmentCountsMatch(getDatasets())){ // make a histogram for each segment
+		if(IBorderSegment.segmentCountsMatch(getDatasets())){ // make a histogram for each segment
 
 			ICellCollection collection = activeDataset().getCollection();
 			
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
+			List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getOrderedSegments();
 			
 
 			// Get each segment as a boxplot
-			for(NucleusBorderSegment seg : segments){
+			for(IBorderSegment seg : segments){
 				
 				JFreeChart chart = HistogramChartFactory.makeEmptyChart();
 				SelectableChartPanel chartPanel = new SelectableChartPanel(chart, seg.getName());

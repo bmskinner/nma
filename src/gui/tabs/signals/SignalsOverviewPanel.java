@@ -53,6 +53,7 @@ import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import charting.options.TableOptions.TableType;
 import charting.options.TableOptionsBuilder;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
@@ -298,7 +299,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 				}
 				
 				// Segments need to match for mesh creation
-				boolean segmentsMatch = NucleusBorderSegment.segmentCountsMatch(getDatasets());		
+				boolean segmentsMatch = IBorderSegment.segmentCountsMatch(getDatasets());		
 				
 				if(hasSignals && segmentsMatch){
 					warpButton.setEnabled(true);

@@ -45,6 +45,7 @@ import components.CellCollection;
 import components.ICellCollection;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 
 /**
@@ -104,12 +105,12 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 		finest("Checking segment counts");
 				
 		// Check that all the datasets have the same number of segments
-		if(NucleusBorderSegment.segmentCountsMatch(getDatasets())){
+		if(IBorderSegment.segmentCountsMatch(getDatasets())){
 			
 			finest("Segment counts match");
 
 			ICellCollection collection = activeDataset().getCollection();
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
+			List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getOrderedSegments();
 
@@ -117,7 +118,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 			finest("Creating segment charts");
 			
 			// Get each segment as a boxplot
-			for(NucleusBorderSegment seg : segments){
+			for(IBorderSegment seg : segments){
 
 				finest("Creating chart for segment "+seg.getName());
 				

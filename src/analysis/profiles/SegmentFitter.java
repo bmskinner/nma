@@ -32,6 +32,7 @@ import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.BorderTag.BorderTagType;
 import components.generic.Tag;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import logging.Loggable;
@@ -198,12 +199,12 @@ public class SegmentFitter implements Loggable {
 			 * Find the name of this segment, and adjust it's start position in the
 			 * individual nucleus profile.
 			 */		
-			NucleusBorderSegment seg = pc.getSegmentStartingWith(tag);
-			List<NucleusBorderSegment> segments = pc.getSegments(tag);
+			IBorderSegment seg = pc.getSegmentStartingWith(tag);
+			List<IBorderSegment> segments = pc.getSegments(tag);
 						
 			if(seg!=null){
 				// Get the same segment in the nucleus, and move the tag to the segment start point
-				NucleusBorderSegment nSeg = n.getProfile(ProfileType.ANGLE).getSegment(seg.getName());
+				IBorderSegment nSeg = n.getProfile(ProfileType.ANGLE).getSegment(seg.getName());
 				n.setBorderTag(tag, nSeg.getStartIndex());
 				log(Level.FINEST, "Remapped border point '"+tag+"' to "+nSeg.getStartIndex()+" in "+n.getNameAndNumber());
 //				finest("Remapped border point '"+tag+"' to "+nSeg.getStartIndex());
@@ -215,7 +216,7 @@ public class SegmentFitter implements Loggable {
 				log(Level.WARNING, "Median profile:");
 				log(Level.WARNING, pc.toString());
 				log(Level.WARNING, "Median segment list:");
-				log(Level.WARNING, NucleusBorderSegment.toString(segments));
+				log(Level.WARNING, IBorderSegment.toString(segments));
 //				n.log("Could not remapped border point '"+tag+"'");
 				// Check to see if the segments are reversed
 				seg = pc.getSegmentEndingWith(tag);
@@ -256,9 +257,9 @@ public class SegmentFitter implements Loggable {
 		for(UUID id : idList){
 					
 			// get the current segment
-			NucleusBorderSegment segment = tempProfile.getSegment(id);
+			IBorderSegment segment = tempProfile.getSegment(id);
 			
-			if( ! segment.isStartPositionLocked()){ //only run the test if this segment is unlocked
+			if( ! segment.isLocked()){ //only run the test if this segment is unlocked
 			
 				// get the initial score for the segment and log it
 //				double score = compareSegmentationPatterns(medianProfile, tempProfile);
@@ -290,7 +291,7 @@ public class SegmentFitter implements Loggable {
 				
 		
 		// the segment in the input profile to work on
-		NucleusBorderSegment segment = profile.getSegment(id);
+		IBorderSegment segment = profile.getSegment(id);
 		
 		
 		// Get the initial score to beat
@@ -299,7 +300,7 @@ public class SegmentFitter implements Loggable {
 		
 		// the most extreme negative offset to apply to the end of this segment
 		// without making the length invalid
-		int minimumChange = 0 - (segment.length() - NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH);
+		int minimumChange = 0 - (segment.length() - IBorderSegment.MINIMUM_SEGMENT_LENGTH);
 		
 		// the maximum length offset to apply
 		// we can't go beyond the end of the next segment anyway, so use that as the cutoff
@@ -407,8 +408,8 @@ public class SegmentFitter implements Loggable {
 			throw new IllegalArgumentException("Test or reference profile is null");
 		}
 		
-		NucleusBorderSegment reference  = referenceProfile.getSegment(id);
-		NucleusBorderSegment test		=      testProfile.getSegment(id);
+		IBorderSegment reference  = referenceProfile.getSegment(id);
+		IBorderSegment test		=      testProfile.getSegment(id);
 		
 		double result = 0;
 		

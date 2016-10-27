@@ -41,6 +41,7 @@ import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
 import components.generic.Tag;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import utility.Constants;
@@ -236,7 +237,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		// copy the segments from the profile collection
 		finer("Copying profile collection segments to frankenCollection");
 		
-		List<NucleusBorderSegment> segments = pc.getSegments(Tag.REFERENCE_POINT);
+		List<IBorderSegment> segments = pc.getSegments(Tag.REFERENCE_POINT);
 		frankenCollection.addSegments( Tag.REFERENCE_POINT, segments);
 		finer("Added segments to frankenmedian");
 		return frankenCollection;
@@ -265,7 +266,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		// segments will not fit
 		pc.createProfileAggregate(collection, ProfileType.ANGLE,  previousLength);
 
-		List<NucleusBorderSegment> segments = pc.getSegments(Tag.REFERENCE_POINT);
+		List<IBorderSegment> segments = pc.getSegments(Tag.REFERENCE_POINT);
 
 //		// make a new profile collection to hold the frankendata
 		IProfileCollection frankenCollection = createFrankenMedian(collection);
@@ -400,7 +401,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 
 		ProfileSegmenter segmenter = new ProfileSegmenter(median, map);		
 
-		List<NucleusBorderSegment> segments = segmenter.segment();
+		List<IBorderSegment> segments = segmenter.segment();
 
 		finer("Found "+segments.size()+" segments in regular profile");
 		
@@ -420,9 +421,9 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			IProfileCollection pc = collection.getProfileCollection(ProfileType.ANGLE);
 
 			fine(pc.tagString());
-			List<NucleusBorderSegment> segments = pc.getSegments(pointType);
+			List<IBorderSegment> segments = pc.getSegments(pointType);
 			fine("Fetched segments from profile collection");
-			fine(NucleusBorderSegment.toString(segments));
+			fine(IBorderSegment.toString(segments));
 
 			// make a new profile collection to hold the frankendata
 			IProfileCollection frankenCollection = new DefaultProfileCollection();

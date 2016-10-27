@@ -34,7 +34,7 @@ import org.apache.commons.math3.transform.TransformType;
 import utility.ArrayConverter;
 import utility.ArrayConverter.ArrayConversionException;
 import components.AbstractCellularComponent;
-import components.nuclear.NucleusBorderSegment;
+import components.nuclear.IBorderSegment;
 
 /**
  * Holds arrays of values with wrapping and provides
@@ -891,7 +891,7 @@ public class Profile implements IProfile {
 	 * @see components.generic.IProfile#getSubregion(components.nuclear.NucleusBorderSegment)
 	 */
 	@Override
-	public IProfile getSubregion(NucleusBorderSegment segment) {
+	public IProfile getSubregion(IBorderSegment segment) {
 
 		if(segment==null){
 			throw new IllegalArgumentException("Segment is null");

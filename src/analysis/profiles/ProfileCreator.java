@@ -29,6 +29,7 @@ import components.active.generic.SegmentedFloatProfile;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.nuclear.IBorderPoint;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 
 /**
@@ -72,8 +73,8 @@ public class ProfileCreator implements Loggable {
 	 * Get the existing segments from the template angle profile
 	 * @return
 	 */
-	private List<NucleusBorderSegment> getExistingSegments(){
-		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
+	private List<IBorderSegment> getExistingSegments(){
+		List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
 		
 		ISegmentedProfile templateProfile = null;
 		// store segments to reapply later
@@ -89,7 +90,7 @@ public class ProfileCreator implements Loggable {
 	
 	private ISegmentedProfile calculateAngleProfile() {
 
-		List<NucleusBorderSegment> segments = getExistingSegments();
+		List<IBorderSegment> segments = getExistingSegments();
 		
 		float[] angles = new float[target.getBorderLength()];
 		
@@ -139,13 +140,13 @@ public class ProfileCreator implements Loggable {
 		return newProfile;
 	}
 	
-	private void reapplySegments(List<NucleusBorderSegment> segments, ISegmentedProfile profile){
+	private void reapplySegments(List<IBorderSegment> segments, ISegmentedProfile profile){
 		// If the border list has changed, the profile lengths will be different
 		// In this case, add and normalise the segment lengths
 		if(segments.get(0).getTotalLength() != target.getBorderLength() ){
 
 			try {
-				segments = NucleusBorderSegment.scaleSegments(segments, target.getBorderLength());
+				segments = IBorderSegment.scaleSegments(segments, target.getBorderLength());
 			} catch (ProfileException e) {
 				error("Error scaling segments when profiling", e);
 			}

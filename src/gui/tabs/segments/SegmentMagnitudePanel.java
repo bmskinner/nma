@@ -38,6 +38,7 @@ import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
@@ -75,9 +76,9 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel  {
 		tablePanel = createTablePanel();
 		scrollPane.setColumnHeaderView(null);
 		
-		if(NucleusBorderSegment.segmentCountsMatch(getDatasets())){
+		if(IBorderSegment.segmentCountsMatch(getDatasets())){
 
-			List<NucleusBorderSegment> segments = activeDataset()
+			List<IBorderSegment> segments = activeDataset()
 					.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(Tag.REFERENCE_POINT)
@@ -86,7 +87,7 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel  {
 			for(SegmentStatistic stat : SegmentStatistic.values()){
 
 				// Get each segment as a boxplot
-				for(NucleusBorderSegment seg : segments){
+				for(IBorderSegment seg : segments){
 					String segName = seg.getName();
 
 					

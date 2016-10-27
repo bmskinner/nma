@@ -31,7 +31,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
 	protected static final Level FILE_DEBUG_LEVEL = Level.ALL;
 	protected int progressCount = 0;
 	
-	protected static final ForkJoinPool mainPool = new ForkJoinPool();
+	protected final ForkJoinPool mainPool = new ForkJoinPool();
     
     private final IAnalysisDataset activeDataset;
     
@@ -187,7 +187,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     	closeLogFileHandlers();
     	
     	finest("Shutting main thread pool");
-//    	mainPool.shutdown();
+    	mainPool.shutdown();
 
     	 try {
             if(this.get()){

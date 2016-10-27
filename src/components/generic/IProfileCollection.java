@@ -25,6 +25,7 @@ import java.util.List;
 import logging.Loggable;
 import analysis.profiles.ProfileException;
 import components.ICellCollection;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 
 public interface IProfileCollection extends Serializable, Loggable{
@@ -94,7 +95,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @param s the name of the tag
 	 * @return a copy of the segments in the profile, offset to start at the tag
 	 */
-	List<NucleusBorderSegment> getSegments(Tag tag);
+	List<IBorderSegment> getSegments(Tag tag);
 
 	/**
 	 * Test if the collection contains a segment beginning at the given tag
@@ -111,7 +112,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @param tag the border tag
 	 * @return a copy of the segment with the tag at its start index, or null
 	 */
-	NucleusBorderSegment getSegmentStartingWith(Tag tag)
+	IBorderSegment getSegmentStartingWith(Tag tag)
 			throws Exception;
 
 	/**
@@ -129,7 +130,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @param tag the border tag
 	 * @return a copy of the segment with the tag at its start index, or null
 	 */
-	NucleusBorderSegment getSegmentEndingWith(Tag tag)
+	IBorderSegment getSegmentEndingWith(Tag tag)
 			throws Exception;
 
 	/**
@@ -138,14 +139,14 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @param index
 	 * @return a copy of the segment with the index inside, or null
 	 */
-	NucleusBorderSegment getSegmentContaining(int index) throws Exception;
+	IBorderSegment getSegmentContaining(int index) throws Exception;
 
 	/**
 	 * Fetch the segment from the profile containing at the given tag;
 	 * @param tag the border tag
 	 * @return a copy of the segment with the tag index inside, or null
 	 */
-	NucleusBorderSegment getSegmentContaining(Tag tag)
+	IBorderSegment getSegmentContaining(Tag tag)
 			throws ProfileException;
 
 	/**
@@ -161,7 +162,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * have the correct offset to be added directly
 	 * @param n the segment list
 	 */
-	void addSegments(List<NucleusBorderSegment> n);
+	void addSegments(List<IBorderSegment> n);
 
 	/**
 	 * Add a list of segments for the profile, where the segments are
@@ -170,7 +171,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @param pointType the point with the zero index in the segments
 	 * @param n the segment list
 	 */
-	void addSegments(Tag tag, List<NucleusBorderSegment> n);
+	void addSegments(Tag tag, List<IBorderSegment> n);
 
 	/**
 	 * Create the profile aggregate from the given collection, with a set length, and

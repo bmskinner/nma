@@ -42,6 +42,7 @@ import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 
 public class SegmentStatsPanel extends DetailPanel {
@@ -95,7 +96,7 @@ public class SegmentStatsPanel extends DetailPanel {
 		
 		table.setModel(model);
 
-		if(NucleusBorderSegment.segmentCountsMatch(getDatasets())){
+		if(IBorderSegment.segmentCountsMatch(getDatasets())){
 			table.setToolTipText("Mean and range for 95% confidence interval");
 			setRenderer(table, new SegmentTableCellRenderer());
 

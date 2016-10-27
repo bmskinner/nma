@@ -30,6 +30,8 @@ import analysis.profiles.ProfileException;
 import logging.Loggable;
 import components.CellCollection;
 import components.ICellCollection;
+import components.active.generic.SegmentedFloatProfile;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 //import ij.IJ;
@@ -58,7 +60,7 @@ public class ProfileCollection implements IProfileCollection {
 	private IProfileAggregate 	       aggregate = null;
 	
 	private Map<BorderTagObject, Integer>    indexes  = new HashMap<BorderTagObject, Integer>();
-	private List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
+	private List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
 	
 	
 	private final ProfileCache profileCache           = new ProfileCache();
@@ -143,12 +145,12 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentedProfile(components.generic.BorderTagObject)
 	 */
 	@Override
-	public SegmentedProfile getSegmentedProfile(Tag tag) {
+	public ISegmentedProfile getSegmentedProfile(Tag tag) {
 		if(tag==null){
 			throw new IllegalArgumentException("A profile key is required");
 		}
 
-		SegmentedProfile result = new SegmentedProfile(getProfile(tag, Constants.MEDIAN), getSegments(tag));
+		ISegmentedProfile result = new SegmentedFloatProfile(getProfile(tag, Constants.MEDIAN), getSegments(tag));
 		return result;
 	}
 
@@ -188,7 +190,7 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegments(components.generic.BorderTagObject)
 	 */
 	@Override
-	public List<NucleusBorderSegment> getSegments(Tag tag) {
+	public List<IBorderSegment> getSegments(Tag tag) {
 		if(tag==null){
 			throw new IllegalArgumentException("The requested segment key is null: "+tag);
 		}
@@ -198,7 +200,7 @@ public class ProfileCollection implements IProfileCollection {
 		// of the array
 		int offset = -getIndex(tag);
 
-		List<NucleusBorderSegment> result = NucleusBorderSegment.nudge(segments, offset);
+		List<IBorderSegment> result = IBorderSegment.nudge(segments, offset);
 
 		return result;
 	}
@@ -220,12 +222,12 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentStartingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public NucleusBorderSegment getSegmentStartingWith(Tag tag) throws Exception {
-		List<NucleusBorderSegment> segments = this.getSegments(tag);
+	public IBorderSegment getSegmentStartingWith(Tag tag) throws Exception {
+		List<IBorderSegment> segments = this.getSegments(tag);
 
-		NucleusBorderSegment result = null;
+		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
-		for(NucleusBorderSegment seg : segments){
+		for(IBorderSegment seg : segments){
 
 			if(  seg.getStartIndex()==ZERO_INDEX ){
 				result = seg;
@@ -252,12 +254,12 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentEndingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public NucleusBorderSegment getSegmentEndingWith(Tag tag) throws Exception {
-		List<NucleusBorderSegment> segments = this.getSegments(tag);
+	public IBorderSegment getSegmentEndingWith(Tag tag) throws Exception {
+		List<IBorderSegment> segments = this.getSegments(tag);
 
-		NucleusBorderSegment result = null;
+		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
-		for(NucleusBorderSegment seg : segments){
+		for(IBorderSegment seg : segments){
 
 			if(  seg.getEndIndex()==ZERO_INDEX ){
 				result = seg;
@@ -271,12 +273,12 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentContaining(int)
 	 */
 	@Override
-	public NucleusBorderSegment getSegmentContaining(int index) throws Exception {
-		List<NucleusBorderSegment> segments = this.getSegments(Tag.REFERENCE_POINT);
+	public IBorderSegment getSegmentContaining(int index) throws Exception {
+		List<IBorderSegment> segments = this.getSegments(Tag.REFERENCE_POINT);
 
-		NucleusBorderSegment result = null;
+		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
-		for(NucleusBorderSegment seg : segments){
+		for(IBorderSegment seg : segments){
 
 			if(  seg.contains(index) ){
 				result = seg;
@@ -290,12 +292,12 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentContaining(components.generic.BorderTagObject)
 	 */
 	@Override
-	public NucleusBorderSegment getSegmentContaining(Tag tag) throws ProfileException {
-		List<NucleusBorderSegment> segments = this.getSegments(tag);
+	public IBorderSegment getSegmentContaining(Tag tag) throws ProfileException {
+		List<IBorderSegment> segments = this.getSegments(tag);
 
-		NucleusBorderSegment result = null;
+		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
-		for(NucleusBorderSegment seg : segments){
+		for(IBorderSegment seg : segments){
 
 			if(  seg.contains(ZERO_INDEX) ){
 				result = seg;
@@ -330,7 +332,7 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#addSegments(java.util.List)
 	 */
 	@Override
-	public void addSegments(List<NucleusBorderSegment> n){
+	public void addSegments(List<IBorderSegment> n){
 		if(n==null || n.isEmpty()){
 			throw new NullPointerException("String or segment list is null or empty");
 		}
@@ -350,7 +352,7 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#addSegments(components.generic.BorderTagObject, java.util.List)
 	 */
 	@Override
-	public void addSegments(Tag tag, List<NucleusBorderSegment> n) {
+	public void addSegments(Tag tag, List<IBorderSegment> n) {
 		if(n==null || n.isEmpty()){
 			throw new NullPointerException("String or segment list is null or empty");
 		}
@@ -370,7 +372,7 @@ public class ProfileCollection implements IProfileCollection {
 		 */
 		int offset = getIndex(tag);
 
-		List<NucleusBorderSegment> result = NucleusBorderSegment.nudge(n, offset);
+		List<IBorderSegment> result = IBorderSegment.nudge(n, offset);
 
 		this.segments = result;
 	}
@@ -456,7 +458,7 @@ public class ProfileCollection implements IProfileCollection {
 				for(Tag tag : this.indexes.keySet()){
 					if(tag.type().equals(components.generic.BorderTag.BorderTagType.CORE)){
 						builder.append("\r\nSegments from "+tag+":\r\n");
-						for(NucleusBorderSegment s : this.getSegments(tag)){
+						for(IBorderSegment s : this.getSegments(tag)){
 							builder.append(s.toString()+"\r\n");
 						}
 					}

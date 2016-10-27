@@ -65,6 +65,7 @@ import components.generic.MeasurementScale;
 import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.nuclear.IBorderSegment;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
@@ -615,8 +616,8 @@ public class CellCollection implements ICellCollection {
 
 		List<String> result = new ArrayList<String>(0);
 		IProfileCollection pc = this.getProfileCollection(ProfileType.ANGLE);
-		List<NucleusBorderSegment> segs = pc.getSegments(Tag.ORIENTATION_POINT);
-		for(NucleusBorderSegment segment : segs){
+		List<IBorderSegment> segs = pc.getSegments(Tag.ORIENTATION_POINT);
+		for(IBorderSegment segment : segs){
 			result.add(segment.getName());
 		}
 		return result;

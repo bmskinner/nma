@@ -28,6 +28,7 @@ import java.util.Map;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
 import components.generic.Tag;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import logging.Loggable;
 
@@ -53,7 +54,7 @@ public class ProfileSegmenter implements Loggable {
 	
 	
 	private final IProfile profile; // the profile to segment
-	private final List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(0);
+	private final List<IBorderSegment> segments = new ArrayList<IBorderSegment>(0);
 	
 	private BooleanProfile inflectionPoints = null;
 	private IProfile        deltaProfile     = null;
@@ -104,7 +105,7 @@ public class ProfileSegmenter implements Loggable {
 	 * @param splitIndex an index point that must be segmented on
 	 * @return a list of segments
 	 */
-	public List<NucleusBorderSegment> segment() throws UnsegmentableProfileException {
+	public List<IBorderSegment> segment() throws UnsegmentableProfileException {
 
 		/*
 		 * Prepare segment start index
@@ -126,7 +127,7 @@ public class ProfileSegmenter implements Loggable {
 			if(testSegmentEndFound(index, segmentStart)){
 
 				// we've hit a new segment
-				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, index, profile.size());
+				IBorderSegment seg = IBorderSegment.newSegment(segmentStart, index, profile.size());
 
 				segments.add(seg);
 
@@ -144,11 +145,11 @@ public class ProfileSegmenter implements Loggable {
 		 * called within MIN_SIZE of the profile end, there is enough space to make a segment
 		 * running from the current segment start back to index 0
 		 */
-		NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, 0, profile.size());
+		IBorderSegment seg = IBorderSegment.newSegment(segmentStart, 0, profile.size());
 		segments.add(seg);
 
 		try {
-			NucleusBorderSegment.linkSegments(segments);
+			IBorderSegment.linkSegments(segments);
 		} catch (ProfileException e) {
 			warn("Cannot link segments in profile");
 			throw new UnsegmentableProfileException("Error making final profile", e);
@@ -320,7 +321,7 @@ public class ProfileSegmenter implements Loggable {
 	public String toString(){
 		
 		StringBuilder b = new StringBuilder();
-		for(NucleusBorderSegment s : segments){
+		for(IBorderSegment s : segments){
 			b.append(s.toString());
 			b.append("\n");
 		}

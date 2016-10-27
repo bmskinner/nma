@@ -32,7 +32,7 @@ import stats.PlottableStatistic;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.nuclear.NucleusBorderSegment;
+import components.nuclear.IBorderSegment;
 import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
@@ -106,7 +106,7 @@ public class SegmentStatisticFetchingTask extends AbstractStatisticFetchingTask 
 		for(int i=0, j=low; j<high; i++, j++){
 			
 			
-			NucleusBorderSegment segment = nuclei[j].getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
+			IBorderSegment segment = nuclei[j].getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
 
 			  double perimeterLength = 0;
 			  if(segment!=null){

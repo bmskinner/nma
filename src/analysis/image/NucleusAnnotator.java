@@ -34,8 +34,8 @@ import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderPoint;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NuclearSignal;
-import components.nuclear.NucleusBorderSegment;
 import components.nuclear.SignalCollection;
 import components.nuclei.Nucleus;
 
@@ -127,7 +127,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 			if(n.getProfile(ProfileType.ANGLE).getSegments().size()>0){ // only draw if there are segments
 				for(int i=0;i<n.getProfile(ProfileType.ANGLE).getSegments().size();i++){
 
-					NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_"+i);
+					IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_"+i);
 
 					float[] xpoints = new float[seg.length()+1];
 					float[] ypoints = new float[seg.length()+1];

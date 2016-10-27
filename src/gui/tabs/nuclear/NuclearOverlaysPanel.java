@@ -18,6 +18,7 @@ import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import gui.components.panels.GenericCheckboxPanel;
 import gui.dialogs.ConsensusCompareDialog;
@@ -208,7 +209,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 			}
 		}
 		
-		if( ! NucleusBorderSegment.segmentCountsMatch(getDatasets())){
+		if( ! IBorderSegment.segmentCountsMatch(getDatasets())){
 			setConsensusButton = false;
 		}
 		

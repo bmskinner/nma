@@ -27,7 +27,7 @@ import components.ICellCollection;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.nuclear.NucleusBorderSegment;
+import components.nuclear.IBorderSegment;
 import components.nuclei.Nucleus;
 
 /**
@@ -81,7 +81,7 @@ public class ProfileOffsetter implements Loggable {
 				.getSegmentedProfile(Tag.REFERENCE_POINT);
 
 		
-		NucleusBorderSegment segFromRef    = profile.getSegment(segID);
+		IBorderSegment segFromRef    = profile.getSegment(segID);
 
 
 		/*
@@ -106,7 +106,7 @@ public class ProfileOffsetter implements Loggable {
 			
 //			NucleusBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.REGULAR)
 //					.getSegment(segName);
-			NucleusBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.ANGLE)
+			IBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.ANGLE)
 					.getSegment(segID);
 			
 			if(nucleusSegment==null){

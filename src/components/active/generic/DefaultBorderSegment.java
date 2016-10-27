@@ -26,39 +26,39 @@
   the segment merely provides a way to interact with the points
   as a group.
 */  
-package components.nuclear;
+package components.active.generic;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 import components.AbstractCellularComponent;
+import components.nuclear.IBorderSegment;
 
-public class NucleusBorderSegment  implements IBorderSegment{
+public class DefaultBorderSegment implements IBorderSegment{
 
 	private static final long serialVersionUID = 1L;
 	
-	private int    startIndex;
-	private int    endIndex;
-//	private String name      = null;
-	
-	private int    totalLength; // the total length of the profile that this segment is a part of 
-	
-	private IBorderSegment prevSegment = null; // track the previous segment in the profile
-	private IBorderSegment nextSegment = null; // track the next segment in the profile
-	
-	private String lastFailReason = "No fail";
-	
-	private List<IBorderSegment> mergeSources = new ArrayList<IBorderSegment>(0);
-	
-	private int positionInProfile = 0; // for future refactor
-	
-	private boolean startPositionLocked = false; // allow the start index to be fixed
-	
 	private UUID uuid; // allows keeping a consistent track of segment IDs with a profile
+	
+	private int    startIndex,  endIndex, totalLength;
+	
+	private short positionInProfile = 0; // for future refactor
+	
+	private IBorderSegment[] mergeSources = new IBorderSegment[0];
+	
 
+
+	/*
+	 * TRANSIENT FIELDS
+	 */
+	
+	private transient IBorderSegment prevSegment = null; // track the previous segment in the profile
+	private transient IBorderSegment nextSegment = null; // track the next segment in the profile
+	private transient boolean isLocked           = false; // allow the start index to be fixed
 	/**
 	 * Construct with an existing UUID. This allows nucleus segments to directly
 	 * track median profile segments
@@ -67,7 +67,7 @@ public class NucleusBorderSegment  implements IBorderSegment{
 	 * @param total
 	 * @param id
 	 */
-	public NucleusBorderSegment(int startIndex, int endIndex, int total, UUID id){
+	public DefaultBorderSegment(int startIndex, int endIndex, int total, UUID id){
 		
 		// ensure that the segment meets minimum length requirements
 		int testLength = 0;
@@ -86,7 +86,7 @@ public class NucleusBorderSegment  implements IBorderSegment{
 		this.startIndex   = startIndex;
 		this.endIndex     = endIndex;
 		this.totalLength  = total;
-		this.mergeSources = new ArrayList<IBorderSegment>(0);
+		this.mergeSources = new IBorderSegment[0];
 		this.uuid         = id;
 	}
 	
@@ -97,24 +97,36 @@ public class NucleusBorderSegment  implements IBorderSegment{
 	 * @param endIndex
 	 * @param total
 	 */
-	public NucleusBorderSegment(int startIndex, int endIndex, int total){
-		this( startIndex, endIndex, total, java.util.UUID.randomUUID());
-		
+	public DefaultBorderSegment(int startIndex, int endIndex, int total){
+		this( startIndex, endIndex, total, java.util.UUID.randomUUID());	
 	}
 
 	/**
 	 * Make a copy of the given segment, including the ID
 	 * @param n
 	 */
-	public NucleusBorderSegment(IBorderSegment n){
+	public DefaultBorderSegment(IBorderSegment n){
 		this.uuid         = n.getID();
 		this.startIndex   = n.getStartIndex();
 		this.endIndex 	  = n.getEndIndex();
 		this.totalLength  = n.getTotalLength();
 		this.nextSegment  = n.nextSegment();
 		this.prevSegment  = n.prevSegment();
-		this.mergeSources = n.getMergeSources();
-		this.startPositionLocked = n.isLocked();
+		
+		if(n.hasMergeSources()){
+			List<IBorderSegment> otherSources = n.getMergeSources();
+			this.mergeSources = new IBorderSegment[otherSources.size()];
+			
+			for(int i=0; i<otherSources.size(); i++){
+				mergeSources[i] = otherSources.get(i);
+			}
+			
+		} else {
+			this.mergeSources = new IBorderSegment[0];
+		}
+		
+
+		this.isLocked     = n.isLocked();
 	}
 
 	/*
@@ -139,7 +151,7 @@ public class NucleusBorderSegment  implements IBorderSegment{
 	public List<IBorderSegment> getMergeSources(){
 		List<IBorderSegment> result = new ArrayList<IBorderSegment>();
 		for(IBorderSegment seg : this.mergeSources){
-			result.add( new NucleusBorderSegment(seg));
+			result.add( new DefaultBorderSegment(seg));
 		}
 		return result;
 	}
@@ -149,7 +161,9 @@ public class NucleusBorderSegment  implements IBorderSegment{
 	 */
 	@Override
 	public void addMergeSource(IBorderSegment seg){
-		this.mergeSources.add(seg);
+
+		mergeSources = Arrays.copyOf(mergeSources, mergeSources.length+1);
+		mergeSources[mergeSources.length-1] = seg;
 	}
 	
 	/* (non-Javadoc)
@@ -157,11 +171,7 @@ public class NucleusBorderSegment  implements IBorderSegment{
 	 */
 	@Override
 	public boolean hasMergeSources(){
-		if(this.mergeSources.isEmpty()){
-			return false;
-		} else {
-			return true;
-		}
+		return mergeSources.length>0;
 	}
 	
 	/* (non-Javadoc)
@@ -169,16 +179,14 @@ public class NucleusBorderSegment  implements IBorderSegment{
 	 */
 	@Override
 	public String getLastFailReason(){
-		return this.lastFailReason;
+		return "";
 	}
 	
 	/* (non-Javadoc)
 	 * @see components.nuclear.IBorderSegment#setLastFailReason(java.lang.String)
 	 */
 	@Override
-	public void setLastFailReason(String reason){
-		this.lastFailReason = reason;
-	}
+	public void setLastFailReason(String reason){}
 
 	/* (non-Javadoc)
 	 * @see components.nuclear.IBorderSegment#getStartIndex()
@@ -329,7 +337,7 @@ public class NucleusBorderSegment  implements IBorderSegment{
 	 */
 	@Override
 	public boolean isLocked() {
-		return startPositionLocked;
+		return isLocked;
 	}
 
 	/* (non-Javadoc)
@@ -337,7 +345,7 @@ public class NucleusBorderSegment  implements IBorderSegment{
 	 */
 	@Override
 	public void setLocked(boolean startPositionLocked) {
-		this.startPositionLocked = startPositionLocked;
+		this.isLocked = startPositionLocked;
 	}
 
 	/* (non-Javadoc)
@@ -435,7 +443,7 @@ public class NucleusBorderSegment  implements IBorderSegment{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		NucleusBorderSegment other = (NucleusBorderSegment) obj;
+		DefaultBorderSegment other = (DefaultBorderSegment) obj;
 		if (endIndex != other.endIndex)
 			return false;
 		if (startIndex != other.startIndex)
@@ -549,12 +557,10 @@ public class NucleusBorderSegment  implements IBorderSegment{
 	@Override
 	public boolean update(int startIndex, int endIndex){
 		
-		if(this.startPositionLocked){ // don't allow locked segments to update
-			this.lastFailReason = "Segment locked";
+		if(this.isLocked){ // don't allow locked segments to update
 			return false;
 		}
 		
-		this.lastFailReason = "No fail";
 //		 Check the incoming data
 		if(startIndex < 0 || startIndex > this.getTotalLength()){
 			throw new IllegalArgumentException("Start index is outside the profile range: "+startIndex);
@@ -571,7 +577,6 @@ public class NucleusBorderSegment  implements IBorderSegment{
 			// Check that the new positions will not make this segment too small
 			int testLength = testLength(startIndex, endIndex);
 			if(testLength < MINIMUM_SEGMENT_LENGTH){
-				this.lastFailReason = startIndex+"-"+endIndex+": segment length ("+testLength+") cannot be smaller than "+MINIMUM_SEGMENT_LENGTH;
 				return false;
 			}
 
@@ -583,28 +588,12 @@ public class NucleusBorderSegment  implements IBorderSegment{
 			if(this.hasPrevSegment()){
 				int prevTestLength = this.prevSegment().testLength(this.prevSegment().getStartIndex(), startIndex);
 				if( prevTestLength < MINIMUM_SEGMENT_LENGTH){
-					this.lastFailReason = startIndex
-							+"-"+endIndex
-							+": Previous segment length cannot be smaller than "
-							+MINIMUM_SEGMENT_LENGTH
-							+"; would be "
-							+this.prevSegment().getStartIndex()+"-"
-							+startIndex
-							+"("+prevTestLength+")";
 					return false;
 				}
 			}
 			if(this.hasNextSegment()){
 				int nextTestLength = this.nextSegment().testLength(endIndex, this.nextSegment().getEndIndex());
 				if( nextTestLength < MINIMUM_SEGMENT_LENGTH){
-					this.lastFailReason = startIndex
-							+"-"+endIndex
-							+": Next segment length cannot be smaller than "
-							+MINIMUM_SEGMENT_LENGTH
-							+"; would be "
-							+endIndex+"-"
-							+this.nextSegment().getEndIndex()
-							+"("+nextTestLength+")";
 					return false;
 				}
 			}
@@ -615,7 +604,6 @@ public class NucleusBorderSegment  implements IBorderSegment{
 			if(startIndex > endIndex){
 
 				if(!this.testContains(startIndex , endIndex, 0)){
-					this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause this segment to invert";
 					return false;
 				}
 
@@ -626,13 +614,11 @@ public class NucleusBorderSegment  implements IBorderSegment{
 				if(this.prevSegment().getStartIndex() > startIndex){
 
 					if(!this.prevSegment().wraps() && this.prevSegment().wraps(startIndex, endIndex)){
-						this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause prev segment to invert";
 						return false;
 					}
 
 					// another wrapping test - if the new positions induce a wrap, the segment should contain 0
 					if(this.prevSegment().wraps(startIndex, endIndex) && !this.prevSegment().testContains(startIndex, endIndex, 0)){
-						this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause prev segment to invert";
 						return false;
 					}
 				}
@@ -644,13 +630,11 @@ public class NucleusBorderSegment  implements IBorderSegment{
 					// if the next segment goes from not wrapping to wrapping when this segment is altered,
 					// an inversion must have occurred. Prevent.
 					if(!this.nextSegment().wraps() && this.nextSegment().wraps(startIndex, endIndex)){
-						this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause next segment to invert";
 						return false;
 					}
 
 					// another wrapping test - if the new positions induce a wrap, the segment should contain 0
 					if(this.nextSegment().wraps(startIndex, endIndex) && !this.nextSegment().testContains(startIndex, endIndex, 0)){
-						this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause next segment to invert";
 						return false;
 					}
 				}
@@ -747,7 +731,7 @@ public class NucleusBorderSegment  implements IBorderSegment{
 	 */
 	@Override
 	public void setPosition(int i){
-		this.positionInProfile = i;
+		this.positionInProfile = (short) i;
 	}
 	
 	/* (non-Javadoc)

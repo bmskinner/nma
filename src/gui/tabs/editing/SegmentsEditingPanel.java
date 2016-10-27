@@ -59,6 +59,7 @@ import components.generic.IProfileCollection;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
@@ -273,7 +274,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				
 				// Check if there are any merged segments
 				boolean hasMerges = false;
-				for(NucleusBorderSegment seg : medianProfile.getSegments()){
+				for(IBorderSegment seg : medianProfile.getSegments()){
 					if(seg.hasMergeSources()){
 						hasMerges = true;
 					}
@@ -436,7 +437,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			
 			
 			// Put the names of the mergable segments into a list
-			for(NucleusBorderSegment seg : medianProfile.getOrderedSegments()){
+			for(IBorderSegment seg : medianProfile.getOrderedSegments()){
 				SegMergeItem item = new SegMergeItem(seg, seg.nextSegment());
 				names.add(item);
 			}
@@ -475,31 +476,31 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		}
 		
 		private class SegMergeItem{
-			private NucleusBorderSegment one, two;
-			public SegMergeItem(NucleusBorderSegment one, NucleusBorderSegment two){
+			private IBorderSegment one, two;
+			public SegMergeItem(IBorderSegment one, IBorderSegment two){
 				this.one = one;
 				this.two = two;
 			}
 			public String toString(){
 				return one.getName()+" - "+two.getName();
 			}
-			public NucleusBorderSegment getOne(){
+			public IBorderSegment getOne(){
 				return one;
 			}
-			public NucleusBorderSegment getTwo(){
+			public IBorderSegment getTwo(){
 				return two;
 			}
 		}
 		
 		private class SegSplitItem{
-			private NucleusBorderSegment seg;
-			public SegSplitItem(NucleusBorderSegment seg){
+			private IBorderSegment seg;
+			public SegSplitItem(IBorderSegment seg){
 				this.seg = seg;
 			}
 			public String toString(){
 				return seg.getName();
 			}
-			public NucleusBorderSegment getSeg(){
+			public IBorderSegment getSeg(){
 				return seg;
 			}
 		}
@@ -509,7 +510,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			List<SegSplitItem> names = new ArrayList<SegSplitItem>();
 
 			// Put the names of the mergable segments into a list
-			for(NucleusBorderSegment seg : medianProfile.getSegments()){
+			for(IBorderSegment seg : medianProfile.getSegments()){
 					names.add(new SegSplitItem(seg));						
 			}
 			
@@ -527,7 +528,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				
 				this.setAnalysing(true);
 
-				NucleusBorderSegment seg = option.getSeg();
+				IBorderSegment seg = option.getSeg();
 
 				if(activeDataset()
 						.getCollection()
@@ -549,7 +550,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			List<SegSplitItem> names = new ArrayList<SegSplitItem>();
 
 			// Put the names of the mergable segments into a list
-			for(NucleusBorderSegment seg : medianProfile.getSegments()){
+			for(IBorderSegment seg : medianProfile.getSegments()){
 				if(seg.hasMergeSources()){
 					names.add(new SegSplitItem(seg));		
 				}	

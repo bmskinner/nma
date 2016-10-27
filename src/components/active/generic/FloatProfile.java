@@ -28,7 +28,7 @@ import components.AbstractCellularComponent;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
 import components.generic.Profile;
-import components.nuclear.NucleusBorderSegment;
+import components.nuclear.IBorderSegment;
 
 public class FloatProfile implements IProfile {
 
@@ -874,7 +874,7 @@ public class FloatProfile implements IProfile {
 	 * @see components.generic.IProfile#getSubregion(components.nuclear.NucleusBorderSegment)
 	 */
 	@Override
-	public IProfile getSubregion(NucleusBorderSegment segment) {
+	public IProfile getSubregion(IBorderSegment segment) {
 
 		if(segment==null){
 			throw new IllegalArgumentException("Segment is null");

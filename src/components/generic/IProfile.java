@@ -22,7 +22,7 @@ package components.generic;
 import java.io.Serializable;
 
 import logging.Loggable;
-import components.nuclear.NucleusBorderSegment;
+import components.nuclear.IBorderSegment;
 
 public interface IProfile 
 	extends Serializable, Loggable {
@@ -269,7 +269,7 @@ public interface IProfile
 	 * @param segment the segment to find
 	 * @return a Profile
 	 */
-	IProfile getSubregion(NucleusBorderSegment segment);
+	IProfile getSubregion(IBorderSegment segment);
 
 	/**
 	 * Calculate the differences between the previous and next indexes

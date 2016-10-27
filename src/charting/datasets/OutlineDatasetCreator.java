@@ -31,6 +31,7 @@ import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
@@ -143,13 +144,13 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 		
 		Taggable t = (Taggable) component;
 
-		List<NucleusBorderSegment> segmentList = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
+		List<IBorderSegment> segmentList = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
 
 
 		if(!segmentList.isEmpty()){ // only draw if there are segments
 			finest("Nucleus has "+segmentList.size()+" segments");
 
-			for(NucleusBorderSegment seg  : segmentList){
+			for(IBorderSegment seg  : segmentList){
 
 				finest("Drawing segment "+seg.getID());
 

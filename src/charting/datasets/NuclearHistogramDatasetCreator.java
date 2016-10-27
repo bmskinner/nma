@@ -39,7 +39,7 @@ import components.ICellCollection;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.nuclear.NucleusBorderSegment;
+import components.nuclear.IBorderSegment;
 import components.nuclei.Nucleus;
 import stats.Max;
 import stats.Min;
@@ -307,7 +307,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			/*
 			 * Find the seg id for the median segment at the requested position
 			 */
-			NucleusBorderSegment medianSeg = collection
+			IBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
@@ -353,7 +353,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			/*
 			 * Find the seg id for the median segment at the requested position
 			 */
-			NucleusBorderSegment medianSeg = collection
+			IBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
@@ -366,7 +366,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			double[] lengths = new double[collection.size()];
 			for(Nucleus n : collection.getNuclei()){
 
-				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+				IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());
 
 				int indexLength = seg.length();
@@ -389,7 +389,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			/*
 			 * Find the seg id for the median segment at the requested position
 			 */
-			NucleusBorderSegment medianSeg = collection
+			IBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
@@ -402,7 +402,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			double[] lengths = new double[collection.size()];
 			for(Nucleus n : collection.getNuclei()){
 
-				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+				IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());
 				
 				int indexLength = seg.length();

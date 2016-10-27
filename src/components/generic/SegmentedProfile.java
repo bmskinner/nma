@@ -30,6 +30,7 @@ import java.util.logging.Level;
 
 import analysis.profiles.ProfileException;
 import components.AbstractCellularComponent;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 
 /**
@@ -42,14 +43,14 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	private static final long serialVersionUID = 1L;
 	
 	// the segments
-	protected List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(5);
+	protected List<IBorderSegment> segments = new ArrayList<IBorderSegment>(5);
 		
 	/**
 	 * Construct using a regular profile and a list of border segments
 	 * @param p the profile
 	 * @param segments the list of segments to use
 	 */
-	public SegmentedProfile(IProfile p, List<NucleusBorderSegment> segments) {		
+	public SegmentedProfile(IProfile p, List<IBorderSegment> segments) {		
 		super(p);
 		
 		if(segments==null || segments.isEmpty()){
@@ -66,7 +67,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		
 		
 		try {
-			NucleusBorderSegment.linkSegments(segments);
+			IBorderSegment.linkSegments(segments);
 		} catch (ProfileException e) {
 			error("Profile error linking segments", e);
 		}
@@ -91,19 +92,19 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	public SegmentedProfile(Profile profile) {
 		super(profile);
 		int midpoint = profile.size()/2;
-		NucleusBorderSegment segment1 = new NucleusBorderSegment(0, midpoint, profile.size());
+		IBorderSegment segment1 = new NucleusBorderSegment(0, midpoint, profile.size());
 
 		segment1.setPosition(0);
-		NucleusBorderSegment segment2 = new NucleusBorderSegment(midpoint, 0, profile.size());
+		IBorderSegment segment2 = new NucleusBorderSegment(midpoint, 0, profile.size());
 
 		segment2.setPosition(1);
-		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
+		List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
 		segments.add(segment1);
 		segments.add(segment2);
 		
 		
 		try {
-			NucleusBorderSegment.linkSegments(segments);
+			IBorderSegment.linkSegments(segments);
 		} catch (ProfileException e) {
 			warn("Error linking segments");
 		}
@@ -136,10 +137,10 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#getSegments()
 	 */
 	@Override
-	public List<NucleusBorderSegment> getSegments() {
-		List<NucleusBorderSegment> result = null;
+	public List<IBorderSegment> getSegments() {
+		List<IBorderSegment> result = null;
 		try {
-			result = NucleusBorderSegment.copy(this.segments);
+			result = IBorderSegment.copy(this.segments);
 		} catch (ProfileException e) {
 			error("Error copying segments", e);
 		}
@@ -151,14 +152,14 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#segmentIterator()
 	 */
 	@Override
-	public Iterator<NucleusBorderSegment> segmentIterator() throws Exception {
+	public Iterator<IBorderSegment> segmentIterator() throws Exception {
 
-		List<NucleusBorderSegment> list = new ArrayList<NucleusBorderSegment>();
+		List<IBorderSegment> list = new ArrayList<IBorderSegment>();
 		
 		// find the first segment
-		NucleusBorderSegment first = null;
+		IBorderSegment first = null;
 		
-		for(NucleusBorderSegment seg : this.segments){
+		for(IBorderSegment seg : this.segments){
 			if(seg.getPosition()==ZERO_INDEX){
 				first = seg;
 			}
@@ -172,8 +173,8 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#getSegment(java.util.UUID)
 	 */
 	@Override
-	public NucleusBorderSegment getSegment(UUID id){
-		for(NucleusBorderSegment seg : this.segments){
+	public IBorderSegment getSegment(UUID id){
+		for(IBorderSegment seg : this.segments){
 			if(seg.getID().equals(id)){
 				return seg;
 			}
@@ -186,7 +187,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 */
 	@Override
 	public boolean hasSegment(UUID id){
-		for(NucleusBorderSegment seg : this.segments){
+		for(IBorderSegment seg : this.segments){
 			if(seg.getID().equals(id)){
 				return true;
 			}
@@ -198,7 +199,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#getSegmentsFrom(java.util.UUID)
 	 */
 	@Override
-	public List<NucleusBorderSegment> getSegmentsFrom(UUID id) throws Exception {
+	public List<IBorderSegment> getSegmentsFrom(UUID id) throws Exception {
 		return getSegmentsFrom(getSegment(id));
 	}
 	
@@ -208,14 +209,14 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @return
 	 * @throws Exception
 	 */
-	private List<NucleusBorderSegment> getSegmentsFrom(NucleusBorderSegment firstSeg) throws ProfileException{
+	private List<IBorderSegment> getSegmentsFrom(IBorderSegment firstSeg) throws ProfileException{
 		
 		if(firstSeg==null){
 			throw new IllegalArgumentException("Requested first segment is null");
 		}
 		
 		
-		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
+		List<IBorderSegment> result = new ArrayList<IBorderSegment>();
 		int i = segments.size()-1; // the number of segments 
 		result.add(firstSeg);
 		while(i>0){
@@ -228,7 +229,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 				throw new ProfileException(i+": No next segment in "+firstSeg.toString());
 			}
 		}
-		return NucleusBorderSegment.copy(result);
+		return IBorderSegment.copy(result);
 	}
 	
 	
@@ -236,15 +237,15 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#getOrderedSegments()
 	 */
 	@Override
-	public List<NucleusBorderSegment> getOrderedSegments() {
+	public List<IBorderSegment> getOrderedSegments() {
 		
-		NucleusBorderSegment firstSeg = null; // default to the first segment in the profile
+		IBorderSegment firstSeg = null; // default to the first segment in the profile
 		
 		/*
 		 * Choose the first segment of the profile to be the segment
 		 * starting at the zero index
 		 */
-		for(NucleusBorderSegment seg : segments){
+		for(IBorderSegment seg : segments){
 			
 			if(seg.getStartIndex()==ZERO_INDEX){
 				firstSeg = seg;
@@ -263,13 +264,13 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 			firstSeg = this.getSegments().get(0); // default to the first segment in the profile
 		}
 		
-		List<NucleusBorderSegment> result;
+		List<IBorderSegment> result;
 		try {
 			result = getSegmentsFrom(firstSeg);
 		} catch (ProfileException e) {
 			warn("Profile error getting segments");
 			log(Level.FINE, "Profile error getting segments", e);
-			result = new ArrayList<NucleusBorderSegment>();
+			result = new ArrayList<IBorderSegment>();
 		}
 		
 		return result;
@@ -281,12 +282,12 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#getSegment(java.lang.String)
 	 */
 	@Override
-	public NucleusBorderSegment getSegment(String name){
+	public IBorderSegment getSegment(String name){
 		if(name==null){
 			throw new IllegalArgumentException("Requested segment name is null");
 		}
 		
-		for(NucleusBorderSegment seg : this.segments){
+		for(IBorderSegment seg : this.segments){
 			if(seg.getName().equals(name)){
 				return seg;
 			}
@@ -298,13 +299,13 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#getSegment(components.nuclear.NucleusBorderSegment)
 	 */
 	@Override
-	public NucleusBorderSegment getSegment(NucleusBorderSegment segment){
+	public IBorderSegment getSegment(IBorderSegment segment){
 		if(! this.contains(segment)){
 			throw new IllegalArgumentException("Requested segment name is not present");
 		}
 		
-		NucleusBorderSegment result = null;
-		for(NucleusBorderSegment seg : this.segments){
+		IBorderSegment result = null;
+		for(IBorderSegment seg : this.segments){
 			if(seg.equals(segment)){
 				result = seg;
 			}
@@ -316,11 +317,11 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#getSegmentAt(int)
 	 */
 	@Override
-	public NucleusBorderSegment getSegmentAt(int position){
+	public IBorderSegment getSegmentAt(int position){
 		
 		
-		NucleusBorderSegment result = null;
-		for(NucleusBorderSegment seg : this.segments){
+		IBorderSegment result = null;
+		for(IBorderSegment seg : this.segments){
 			if(seg.getPosition()==position){
 				result = seg;
 			}
@@ -332,10 +333,10 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#getSegmentContaining(int)
 	 */
 	@Override
-	public NucleusBorderSegment getSegmentContaining(int index){
+	public IBorderSegment getSegmentContaining(int index){
 
-		NucleusBorderSegment result = null;
-		for(NucleusBorderSegment seg : this.segments){
+		IBorderSegment result = null;
+		for(IBorderSegment seg : this.segments){
 			if(seg.contains(index)){
 				result = seg;
 			}
@@ -347,7 +348,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#setSegments(java.util.List)
 	 */
 	@Override
-	public void setSegments(List<NucleusBorderSegment> segments) {
+	public void setSegments(List<IBorderSegment> segments) {
 		if(segments==null || segments.isEmpty()){
 			throw new IllegalArgumentException("Segment list is null or empty");
 		}
@@ -357,7 +358,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		}
 		
 		try {
-			this.segments = NucleusBorderSegment.copy(segments);
+			this.segments = IBorderSegment.copy(segments);
 		} catch (ProfileException e) {
 			warn("Cannot copy segments");
 		}
@@ -385,7 +386,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 */
 	@Override
 	public void clearSegments(){
-		this.segments = new ArrayList<NucleusBorderSegment>(0);
+		this.segments = new ArrayList<IBorderSegment>(0);
 //		this.firstSegment = null;
 	}
 	
@@ -395,7 +396,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	@Override
 	public List<String> getSegmentNames(){
 		List<String> result = new ArrayList<String>();
-		for(NucleusBorderSegment seg : this.segments){
+		for(IBorderSegment seg : this.segments){
 			result.add(seg.getName());
 		}
 		return result;
@@ -407,7 +408,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	@Override
 	public List<UUID> getSegmentIDs(){
 		List<UUID> result = new ArrayList<UUID>();
-		for(NucleusBorderSegment seg : this.segments){
+		for(IBorderSegment seg : this.segments){
 			result.add(seg.getID());
 		}
 		return result;
@@ -425,7 +426,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#getDisplacement(components.nuclear.NucleusBorderSegment)
 	 */
 	@Override
-	public double getDisplacement(NucleusBorderSegment segment){
+	public double getDisplacement(IBorderSegment segment){
 		if(this.contains(segment)){
 			
 			double start = this.get(segment.getStartIndex());
@@ -445,12 +446,12 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#contains(components.nuclear.NucleusBorderSegment)
 	 */
 	@Override
-	public boolean contains(NucleusBorderSegment segment){
+	public boolean contains(IBorderSegment segment){
 		if(segment==null){
 			return false;
 		}
 		boolean result = false;
-		for(NucleusBorderSegment seg : this.segments){
+		for(IBorderSegment seg : this.segments){
 			if(	seg.getStartIndex()==segment.getStartIndex()
 					&& seg.getEndIndex()==segment.getEndIndex()
 					&& seg.getTotalLength()==this.size()
@@ -466,7 +467,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#update(components.nuclear.NucleusBorderSegment, int, int)
 	 */
 	@Override
-	public boolean update(NucleusBorderSegment segment, int startIndex, int endIndex){
+	public boolean update(IBorderSegment segment, int startIndex, int endIndex){
 				
 		if(!this.contains(segment)){
 			throw new IllegalArgumentException("Segment is not part of this profile");
@@ -475,10 +476,10 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		// test effect on all segments in list: the update should
 		// not allow the endpoints to move within a segment other than
 		// next or prev
-		NucleusBorderSegment nextSegment = segment.nextSegment();
-		NucleusBorderSegment prevSegment = segment.prevSegment();
+		IBorderSegment nextSegment = segment.nextSegment();
+		IBorderSegment prevSegment = segment.prevSegment();
 		
-		for(NucleusBorderSegment testSeg : this.segments){
+		for(IBorderSegment testSeg : this.segments){
 			
 			// if the proposed start or end index is found in another segment
 			// that is not next or prev, do not proceed
@@ -517,7 +518,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 */
 	private boolean testLinked(){
 		boolean result = true;
-		for(NucleusBorderSegment seg : this.segments){
+		for(IBorderSegment seg : this.segments){
 			if(!seg.hasNextSegment()  || !seg.hasPrevSegment()){
 				result = false;
 			}
@@ -535,7 +536,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		}
 		
 		// get the segment within this profile, not a copy
-		NucleusBorderSegment segmentToUpdate = this.getSegment(id);
+		IBorderSegment segmentToUpdate = this.getSegment(id);
 		
 		int newValue = AbstractCellularComponent.wrapIndex( segmentToUpdate.getStartIndex()+amount, segmentToUpdate.getTotalLength());
 		return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
@@ -552,7 +553,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		}
 		
 		// get the segment within this profile, not a copy
-		NucleusBorderSegment segmentToUpdate = this.getSegment(id);
+		IBorderSegment segmentToUpdate = this.getSegment(id);
 				
 		int newValue = AbstractCellularComponent.wrapIndex( segmentToUpdate.getEndIndex()+amount, segmentToUpdate.getTotalLength());
 		return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
@@ -563,7 +564,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 */
 	@Override
 	public void nudgeSegments(int amount) {
-		this.segments = NucleusBorderSegment.nudge(getSegments(), amount);
+		this.segments = IBorderSegment.nudge(getSegments(), amount);
 	}
 	
 	/* (non-Javadoc)
@@ -601,7 +602,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 //		IJ.log("Offsetting segments to begin at "+newStartIndex );
 //		IJ.log(NucleusBorderSegment.toString(getSegments()));
 		
-		List<NucleusBorderSegment> segments = NucleusBorderSegment.nudge(getSegments(), -newStartIndex);
+		List<IBorderSegment> segments = IBorderSegment.nudge(getSegments(), -newStartIndex);
 		
 		/*
 		 * Ensure that the first segment in the list is at index zero
@@ -631,8 +632,8 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		
 		for(UUID segID : template.getSegmentIDs()){
 			// Get the corresponding segment in this profile, by segment position
-			NucleusBorderSegment testSeg     = this.getSegment(segID);
-			NucleusBorderSegment templateSeg = template.getSegment(segID);
+			IBorderSegment testSeg     = this.getSegment(segID);
+			IBorderSegment templateSeg = template.getSegment(segID);
 			
 			if(testSeg==null){
 				throw new ProfileException("Cannot find segment "+segID+" in test profile");
@@ -664,7 +665,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @return the interpolated profile
 	 * @throws Exception 
 	 */
-	private IProfile interpolateSegment(NucleusBorderSegment testSeg, int newLength) throws Exception{
+	private IProfile interpolateSegment(IBorderSegment testSeg, int newLength) throws Exception{
 		
 		// get the region within the segment as a new profile
 		// Exclude the last index of each segment to avoid duplication
@@ -708,19 +709,19 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		// if a segment began at 10 and ended at 20, it should begin at 80 and end at 90
 		
 		// if is begins at 90 and ends at 10, it should begin at 10 and end at 90
-		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
-		for(NucleusBorderSegment seg : this.getSegments()){
+		List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
+		for(IBorderSegment seg : this.getSegments()){
 			
 			// invert the segment by swapping start and end
 			int newStart = (this.size()-1) - seg.getEndIndex();
 			int newEnd   = AbstractCellularComponent.wrapIndex(newStart+seg.length(), this.size());
-			NucleusBorderSegment newSeg = new NucleusBorderSegment(newStart, newEnd, this.size(), seg.getID());
+			IBorderSegment newSeg = new NucleusBorderSegment(newStart, newEnd, this.size(), seg.getID());
 //			newSeg.setName(seg.getName());
 			// since the order is reversed, add them to the top of the new list
 			segments.add(0,newSeg);
 		}
 		try {
-			NucleusBorderSegment.linkSegments(segments);
+			IBorderSegment.linkSegments(segments);
 		} catch (ProfileException e) {
 			error("Cannot link segments in reversed profile", e);
 		}
@@ -732,7 +733,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#mergeSegments(components.nuclear.NucleusBorderSegment, components.nuclear.NucleusBorderSegment, java.util.UUID)
 	 */
 	@Override
-	public void mergeSegments(NucleusBorderSegment segment1, NucleusBorderSegment segment2, UUID id) throws Exception {
+	public void mergeSegments(IBorderSegment segment1, IBorderSegment segment2, UUID id) throws Exception {
 		
 		// Check the segments belong to the profile
 		if(!this.contains(segment1) || !this.contains(segment2)){
@@ -745,8 +746,8 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		}
 		
 		// Ensure we have the segments in the correct order
-		NucleusBorderSegment firstSegment  = segment1.nextSegment().equals(segment2) ? segment1 : segment2;
-		NucleusBorderSegment secondSegment = segment2.nextSegment().equals(segment1) ? segment1 : segment2;
+		IBorderSegment firstSegment  = segment1.nextSegment().equals(segment2) ? segment1 : segment2;
+		IBorderSegment secondSegment = segment2.nextSegment().equals(segment1) ? segment1 : segment2;
 		
 		// Create the new segment
 		int startIndex = firstSegment.getStartIndex();
@@ -758,11 +759,11 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		mergedSegment.addMergeSource(secondSegment);
 		
 		// Replace the two segments in this profile
-		List<NucleusBorderSegment> oldSegs = this.getSegments();
-		List<NucleusBorderSegment> newSegs = new ArrayList<NucleusBorderSegment>();
+		List<IBorderSegment> oldSegs = this.getSegments();
+		List<IBorderSegment> newSegs = new ArrayList<IBorderSegment>();
 		
 		int position = 0;
-		for(NucleusBorderSegment oldSegment : oldSegs){
+		for(IBorderSegment oldSegment : oldSegs){
 			
 			if(oldSegment.equals(firstSegment)){
 				// add the merge instead
@@ -778,7 +779,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 			position++;
 		}
 
-		NucleusBorderSegment.linkSegments(newSegs);
+		IBorderSegment.linkSegments(newSegs);
 
 		this.setSegments(newSegs);
 	}
@@ -787,7 +788,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#unmergeSegment(components.nuclear.NucleusBorderSegment)
 	 */
 	@Override
-	public void unmergeSegment(NucleusBorderSegment segment) throws Exception {
+	public void unmergeSegment(IBorderSegment segment) throws Exception {
 		// Check the segments belong to the profile
 		if(!this.contains(segment) ){
 			throw new IllegalArgumentException("Input segment is not part of this profile");
@@ -798,16 +799,16 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		}
 		
 		// Replace the two segments in this profile
-		List<NucleusBorderSegment> oldSegs = this.getSegments();
-		List<NucleusBorderSegment> newSegs = new ArrayList<NucleusBorderSegment>();
+		List<IBorderSegment> oldSegs = this.getSegments();
+		List<IBorderSegment> newSegs = new ArrayList<IBorderSegment>();
 		
 		int position = 0;
-		for(NucleusBorderSegment oldSegment : oldSegs){
+		for(IBorderSegment oldSegment : oldSegs){
 
 			if(oldSegment.equals(segment)){
 				
 				// add each of the old segments
-				for(NucleusBorderSegment mergedSegment : segment.getMergeSources()){
+				for(IBorderSegment mergedSegment : segment.getMergeSources()){
 					mergedSegment.setPosition(position);
 					newSegs.add(mergedSegment);
 					position++;
@@ -821,7 +822,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 			}
 			position++;
 		}
-		NucleusBorderSegment.linkSegments(newSegs);
+		IBorderSegment.linkSegments(newSegs);
 		this.setSegments(newSegs);
 
 	}
@@ -830,7 +831,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#splitSegment(components.nuclear.NucleusBorderSegment, int, java.util.UUID, java.util.UUID)
 	 */
 	@Override
-	public void splitSegment(NucleusBorderSegment segment, int splitIndex, UUID id1, UUID id2) throws Exception {
+	public void splitSegment(IBorderSegment segment, int splitIndex, UUID id1, UUID id2) throws Exception {
 		// Check the segments belong to the profile
 		if(!this.contains(segment) ){
 			throw new IllegalArgumentException("Input segment is not part of this profile");
@@ -841,11 +842,11 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		}
 		
 		// Replace the two segments in this profile
-		List<NucleusBorderSegment> oldSegs = this.getSegments();
-		List<NucleusBorderSegment> newSegs = new ArrayList<NucleusBorderSegment>();
+		List<IBorderSegment> oldSegs = this.getSegments();
+		List<IBorderSegment> newSegs = new ArrayList<IBorderSegment>();
 		
 		// Add the new segments to a list
-		List<NucleusBorderSegment> splitSegments = new ArrayList<NucleusBorderSegment>();
+		List<IBorderSegment> splitSegments = new ArrayList<IBorderSegment>();
 		splitSegments.add(new NucleusBorderSegment(segment.getStartIndex(), splitIndex, segment.getTotalLength(), id1));
 		splitSegments.add(new NucleusBorderSegment(splitIndex, segment.getEndIndex(), segment.getTotalLength(), id2));
 		
@@ -853,7 +854,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		segment.addMergeSource(splitSegments.get(1));
 
 		int position = 0;
-		for(NucleusBorderSegment oldSegment : oldSegs){
+		for(IBorderSegment oldSegment : oldSegs){
 
 			if(oldSegment.equals(segment)){
 				
@@ -872,7 +873,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 			}
 			position++;
 		}
-		NucleusBorderSegment.linkSegments(newSegs);
+		IBorderSegment.linkSegments(newSegs);
 		this.setSegments(newSegs);
 		this.unmergeSegment(segment);
 		
@@ -884,7 +885,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	@Override
 	public String toString(){
 		StringBuilder builder = new StringBuilder();
-		for(NucleusBorderSegment seg : this.segments){
+		for(IBorderSegment seg : this.segments){
 			builder.append(seg.toString()+System.getProperty("line.separator"));
 		}
 		return builder.toString();

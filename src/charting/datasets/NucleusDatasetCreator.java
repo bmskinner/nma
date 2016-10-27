@@ -52,6 +52,7 @@ import components.generic.SegmentedProfile;
 import components.generic.Tag;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
+import components.nuclear.IBorderSegment;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
@@ -95,11 +96,11 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param binSize the size of the ProfileAggregate bins, to adjust the offset of the median
 	 * @return the updated dataset
 	 */
-	private XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, IProfile profile, DefaultXYDataset ds, int length, double offset) {
+	private XYDataset addSegmentsFromProfile(List<IBorderSegment> segments, IProfile profile, DefaultXYDataset ds, int length, double offset) {
 		
 		IProfile xpoints = profile.getPositions(length);
 		xpoints = xpoints.add(offset);
-		for(NucleusBorderSegment seg : segments){
+		for(IBorderSegment seg : segments){
 
 			if(seg.wraps()){ // case when array wraps. We need to plot the two ends as separate series
 				
@@ -192,23 +193,23 @@ public class NucleusDatasetCreator implements Loggable {
      * @param segName the segment to add in each dataset
      * @return an XYDataset to plot
      */
-    public DefaultXYDataset createMultiProfileSegmentDataset(List<AnalysisDataset> list, String segName) throws Exception{
+    public DefaultXYDataset createMultiProfileSegmentDataset(List<IAnalysisDataset> list, String segName) throws Exception{
         
         DefaultXYDataset ds = new DefaultXYDataset();
         for (int i=0; i < list.size(); i++) {
 
-            CellCollection collection = list.get(i).getCollection();
+            ICellCollection collection = list.get(i).getCollection();
             
             IProfile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
             IProfile xpoints = profile.getPositions(100);
             double[][] data = { xpoints.asArray(), profile.asArray() };
             ds.addSeries("Profile_"+i, data);
             
-            List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(Tag.REFERENCE_POINT);
-            List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
+            List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(Tag.REFERENCE_POINT);
+            List<IBorderSegment> segmentsToAdd = new ArrayList<IBorderSegment>(0);
             
             // add only the segment of interest
-            for(NucleusBorderSegment seg : segments){
+            for(IBorderSegment seg : segments){
                     segmentsToAdd.add(seg);
             }
             
@@ -281,11 +282,11 @@ public class NucleusDatasetCreator implements Loggable {
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
 			
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(Tag.REFERENCE_POINT);
-			List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
+			List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(Tag.REFERENCE_POINT);
+			List<IBorderSegment> segmentsToAdd = new ArrayList<IBorderSegment>(0);
 			
 			// add only the segment of interest
-			for(NucleusBorderSegment seg : segments){
+			for(IBorderSegment seg : segments){
 //				if(seg.getName().equals(segName)){
 					segmentsToAdd.add(seg);
 //				}
@@ -378,7 +379,7 @@ public class NucleusDatasetCreator implements Loggable {
 		// rendering order will be first on top
 		
 		// add the segments
-		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
+		List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(options.getTag())
 				.getOrderedSegments();
 
@@ -429,7 +430,7 @@ public class NucleusDatasetCreator implements Loggable {
 		// rendering order will be first on top
 		
 		// add the segments
-		List<NucleusBorderSegment> segments = collection.getProfileCollection(type)
+		List<IBorderSegment> segments = collection.getProfileCollection(type)
 				.getSegmentedProfile(borderTag)
 				.getOrderedSegments();
 		
@@ -693,7 +694,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 			IProfile profile = collection.getProfileCollection(options.getType()).getIQRProfile(options.getTag());
 
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(options.getType())
+			List<IBorderSegment> segments = collection.getProfileCollection(options.getType())
 					.getSegmentedProfile(options.getTag())
 					.getOrderedSegments();
 
@@ -754,7 +755,7 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		// add the segments (these are the same as in the regular profile collection)
 //		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
-		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
+		List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(point)
 				.getOrderedSegments();
 		addSegmentsFromProfile(segments, profile, ds, 100, 0);
@@ -814,7 +815,7 @@ public class NucleusDatasetCreator implements Loggable {
 			
 			// add the segments
 			finest("Adding ordered segments from reference point");
-			List<NucleusBorderSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
+			List<IBorderSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 			addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0);
 		}
 
@@ -888,7 +889,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 			ICellCollection collection = collections.get(i).getCollection();
 			
-			NucleusBorderSegment medianSeg = collection
+			IBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
@@ -898,7 +899,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 			for(Nucleus n : collection.getNuclei()){
 				
-				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+				IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());			
 
 				
@@ -932,7 +933,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 			ICellCollection collection = collections.get(i).getCollection();
 			
-			NucleusBorderSegment medianSeg = collection
+			IBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
@@ -943,7 +944,7 @@ public class NucleusDatasetCreator implements Loggable {
 			for(Nucleus n : collection.getNuclei()){
 				ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 				
-				NucleusBorderSegment seg = profile.getSegment(medianSeg.getID());
+				IBorderSegment seg = profile.getSegment(medianSeg.getID());
 				
 				double displacement = profile.getDisplacement(seg);
 				list.add(displacement);
@@ -961,7 +962,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public BoxAndWhiskerCategoryDataset createSegmentVariabillityDataset(List<AnalysisDataset> datasets) throws Exception {
+	public BoxAndWhiskerCategoryDataset createSegmentVariabillityDataset(List<IAnalysisDataset> datasets) throws Exception {
 
 		if(datasets==null || datasets.isEmpty()){
 			return null;
@@ -970,19 +971,20 @@ public class NucleusDatasetCreator implements Loggable {
 
 		for (int i=0; i < datasets.size(); i++) {
 
-			CellCollection collection = datasets.get(i).getCollection();
+			ICellCollection collection = datasets.get(i).getCollection();
 
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegmentedProfile(Tag.REFERENCE_POINT).getOrderedSegments();
-//			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(BorderTagObject.ORIENTATION_POINT);
-			
-			for(NucleusBorderSegment medianSeg : segments){
+			List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
+					.getSegmentedProfile(Tag.REFERENCE_POINT)
+					.getOrderedSegments();
+
+			for(IBorderSegment medianSeg : segments){
 				
 				int medianSegmentLength = medianSeg.length();
 				
 				List<Integer> list = new ArrayList<Integer>(0);
 				
 				for(Nucleus n : collection.getNuclei()){
-					NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment(medianSeg.getName());
+					IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment(medianSeg.getName());
 					
 					int differenceToMedian = 0;
 					// if seg is null, catch before we throw an error
@@ -1089,7 +1091,7 @@ public class NucleusDatasetCreator implements Loggable {
 		if(angleProfile.hasSegments()){ // only draw if there are segments
 			
 			// go through each segment
-			for(NucleusBorderSegment seg :  angleProfile.getOrderedSegments()){
+			for(IBorderSegment seg :  angleProfile.getOrderedSegments()){
 								
 				// check the indexes that the segment covers
 //				log(seg.toString());
@@ -1135,7 +1137,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param n the consensus nucleus
 	 * @param scaledRange the IQR scale profile
 	 */
-	private void addSegmentIQRToConsensus(NucleusBorderSegment segment, DefaultXYDataset ds, Nucleus n, IProfile scaledRange, Tag pointType){
+	private void addSegmentIQRToConsensus(IBorderSegment segment, DefaultXYDataset ds, Nucleus n, IProfile scaledRange, Tag pointType){
 
 		// what we need to do is match the profile positions to the borderpoints
 		// Add lines to show the IQR of the angle profile at each point
@@ -1214,7 +1216,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param seg
 	 * @return
 	 */
-	public int getSegmentPosition(Nucleus n, NucleusBorderSegment seg){
+	public int getSegmentPosition(Nucleus n, IBorderSegment seg){
 		int result = 0;
 		if(seg.getStartIndex()==n.getBorderIndex(Tag.REFERENCE_POINT)){
 			return result;

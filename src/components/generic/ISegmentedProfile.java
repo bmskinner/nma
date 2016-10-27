@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 
 public interface ISegmentedProfile extends IProfile {
@@ -39,14 +40,14 @@ public interface ISegmentedProfile extends IProfile {
 	 * if you need to offset a profile, do it by a profile offset 
 	 * @return
 	 */
-	List<NucleusBorderSegment> getSegments();
+	List<IBorderSegment> getSegments();
 
 	/**
 	 * Get an iterator that begins with the segment at position zero in the profile
 	 * @return
 	 * @throws Exception
 	 */
-	Iterator<NucleusBorderSegment> segmentIterator() throws Exception;
+	Iterator<IBorderSegment> segmentIterator() throws Exception;
 
 	/**
 	 * Fetch the segment with the given id, or null if not present.
@@ -54,7 +55,7 @@ public interface ISegmentedProfile extends IProfile {
 	 * @param id
 	 * @return
 	 */
-	NucleusBorderSegment getSegment(UUID id);
+	IBorderSegment getSegment(UUID id);
 
 	boolean hasSegment(UUID id);
 
@@ -64,14 +65,14 @@ public interface ISegmentedProfile extends IProfile {
 	 * @return
 	 * @throws Exception
 	 */
-	List<NucleusBorderSegment> getSegmentsFrom(UUID id) throws Exception;
+	List<IBorderSegment> getSegmentsFrom(UUID id) throws Exception;
 
 	/**
 	 * Get a copy of the segments in this profile, ordered 
 	 * from the zero index of the profile
 	 * @return
 	 */
-	List<NucleusBorderSegment> getOrderedSegments();
+	List<IBorderSegment> getOrderedSegments();
 
 	/**
 	 * Get the segment with the given name. Returns null if no segment
@@ -79,7 +80,7 @@ public interface ISegmentedProfile extends IProfile {
 	 * @param name
 	 * @return
 	 */
-	NucleusBorderSegment getSegment(String name);
+	IBorderSegment getSegment(String name);
 
 	/**
 	 * Get the given segment. Returns null if no segment
@@ -87,7 +88,7 @@ public interface ISegmentedProfile extends IProfile {
 	 * @param name
 	 * @return
 	 */
-	NucleusBorderSegment getSegment(NucleusBorderSegment segment);
+	IBorderSegment getSegment(IBorderSegment segment);
 
 	/**
 	 * Get the segment at the given position in the profile.
@@ -95,20 +96,20 @@ public interface ISegmentedProfile extends IProfile {
 	 * @param name
 	 * @return
 	 */
-	NucleusBorderSegment getSegmentAt(int position);
+	IBorderSegment getSegmentAt(int position);
 
 	/**
 	 * Get the segment containing the given index
 	 * @param index
 	 * @return
 	 */
-	NucleusBorderSegment getSegmentContaining(int index);
+	IBorderSegment getSegmentContaining(int index);
 
 	/**
 	 * Replace the segments in the profile with the given list
 	 * @param segments
 	 */
-	void setSegments(List<NucleusBorderSegment> segments);
+	void setSegments(List<IBorderSegment> segments);
 
 	/**
 	 * Remove the segments from this profile
@@ -139,7 +140,7 @@ public interface ISegmentedProfile extends IProfile {
 	 * @param segment the segment to measure
 	 * @return the displacement, or 0 if the segment was not found
 	 */
-	double getDisplacement(NucleusBorderSegment segment);
+	double getDisplacement(IBorderSegment segment);
 
 	/**
 	 * Test if the profile contains the given segment. Copies are ok,
@@ -147,7 +148,7 @@ public interface ISegmentedProfile extends IProfile {
 	 * @param segment
 	 * @return
 	 */
-	boolean contains(NucleusBorderSegment segment);
+	boolean contains(IBorderSegment segment);
 
 	/**
 	 * Update the selected segment of the profile with the new start and end
@@ -158,7 +159,7 @@ public interface ISegmentedProfile extends IProfile {
 	 * @param endIndex the new end
 	 * @return did the update succeed
 	 */
-	boolean update(NucleusBorderSegment segment, int startIndex, int endIndex);
+	boolean update(IBorderSegment segment, int startIndex, int endIndex);
 
 	/**
 	 * Adjust the start position of the given segment by the given amount.
@@ -215,14 +216,14 @@ public interface ISegmentedProfile extends IProfile {
 	 * @param id the new id to give the segment
 	 * @return
 	 */
-	void mergeSegments(NucleusBorderSegment segment1,
-			NucleusBorderSegment segment2, UUID id) throws Exception;
+	void mergeSegments(IBorderSegment segment1,
+			IBorderSegment segment2, UUID id) throws Exception;
 
 	/**
 	 * Reverse a merge operation on a segment
 	 * @param segment
 	 */
-	void unmergeSegment(NucleusBorderSegment segment) throws Exception;
+	void unmergeSegment(IBorderSegment segment) throws Exception;
 
 	/**
 	 * Split a segment at the given index into two new segments. Splits the segmnets, 
@@ -231,7 +232,7 @@ public interface ISegmentedProfile extends IProfile {
 	 * @param splitIndex the index to split at
 	 * @throws Exception
 	 */
-	void splitSegment(NucleusBorderSegment segment, int splitIndex, UUID id1,
+	void splitSegment(IBorderSegment segment, int splitIndex, UUID id1,
 			UUID id2) throws Exception;
 
 	String toString();

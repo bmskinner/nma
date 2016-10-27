@@ -35,6 +35,7 @@ import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.generic.XYPoint;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
@@ -528,7 +529,7 @@ public class NucleusMesh implements Loggable {
 	private void determineVertexProportions(){
 		
 		finer("Determining vertex proportions");
-		List<NucleusBorderSegment> list;
+		List<IBorderSegment> list;
 		try {
 			list = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 		} catch (Exception e) {
@@ -538,7 +539,7 @@ public class NucleusMesh implements Loggable {
 		
 		int segNumber = 0;
 		
-		for(NucleusBorderSegment seg : list){
+		for(IBorderSegment seg : list){
 			
 			List<Double> proportions = new ArrayList<Double>();
 			
@@ -577,7 +578,7 @@ public class NucleusMesh implements Loggable {
 	 */
 	private void createPeripheralVertices(){
 		finer("Creating peripheral vertices");
-		List<NucleusBorderSegment> list;
+		List<IBorderSegment> list;
 		try {
 			list = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 		} catch (Exception e) {
@@ -588,7 +589,7 @@ public class NucleusMesh implements Loggable {
 		Set<Integer> segs = segmentVertexProportions.keySet();
 		for(int segIndex : segs){
 			
-			NucleusBorderSegment segment = list.get(segIndex);
+			IBorderSegment segment = list.get(segIndex);
 			finer("Segment "+segIndex+": "+segment.length());
 			
 			

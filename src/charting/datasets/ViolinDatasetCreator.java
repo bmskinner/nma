@@ -24,7 +24,7 @@ import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.nuclear.NucleusBorderSegment;
+import components.nuclear.IBorderSegment;
 import components.nuclei.Nucleus;
 import logging.Loggable;
 
@@ -163,7 +163,7 @@ public class ViolinDatasetCreator implements Loggable {
 
 			ICellCollection collection = collections.get(i).getCollection();
 			
-			NucleusBorderSegment medianSeg = collection
+			IBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
@@ -173,7 +173,7 @@ public class ViolinDatasetCreator implements Loggable {
 
 			for(Nucleus n : collection.getNuclei()){
 				
-				NucleusBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+				IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 						.getSegment(medianSeg.getID());			
 
 				
@@ -212,7 +212,7 @@ public class ViolinDatasetCreator implements Loggable {
 
 			ICellCollection collection = collections.get(i).getCollection();
 			
-			NucleusBorderSegment medianSeg = collection
+			IBorderSegment medianSeg = collection
 					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(segPosition);
@@ -223,7 +223,7 @@ public class ViolinDatasetCreator implements Loggable {
 			for(Nucleus n : collection.getNuclei()){
 				ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 				
-				NucleusBorderSegment seg = profile.getSegment(medianSeg.getID());
+				IBorderSegment seg = profile.getSegment(medianSeg.getID());
 				
 				double displacement = profile.getDisplacement(seg);
 				list.add(displacement);

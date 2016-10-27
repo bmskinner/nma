@@ -66,6 +66,7 @@ import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
@@ -897,7 +898,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		for(ISegmentedProfile p : this.profileMap.values()){
 			
 			if(p.hasSegment(segID)){
-				p.getSegment(segID).setStartPositionLocked(lock);
+				p.getSegment(segID).setLocked(lock);
 			}
 		}
 	}
@@ -1038,7 +1039,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		int totalSize = this.getProfile(ProfileType.ANGLE).size();
 		
 		// A segment has built in methods for iterating through just the points it contains
-		NucleusBorderSegment region = new NucleusBorderSegment(topIndex, btmIndex, totalSize );
+		IBorderSegment region = IBorderSegment.newSegment(topIndex, btmIndex, totalSize );
 
 		int index = topIndex;
 		

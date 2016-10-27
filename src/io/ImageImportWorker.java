@@ -20,6 +20,7 @@ import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import gui.components.ColourSelecter;
@@ -262,12 +263,12 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 
 		
 		// annotate the image processor with the nucleus outline
-		List<NucleusBorderSegment> segmentList = n.getProfile(ProfileType.ANGLE).getSegments();
+		List<IBorderSegment> segmentList = n.getProfile(ProfileType.ANGLE).getSegments();
 		
 		ip.setLineWidth(2);
 		if(!segmentList.isEmpty()){ // only draw if there are segments
 			
-			for(NucleusBorderSegment seg  : segmentList){
+			for(IBorderSegment seg  : segmentList){
 				
 				float[] x = new float[seg.length()+1];
 				float[] y = new float[seg.length()+1];

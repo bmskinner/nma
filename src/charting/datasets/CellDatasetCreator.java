@@ -33,6 +33,7 @@ import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.generic.XYPoint;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
@@ -62,7 +63,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 			
 			finest("Creating multiple dataset position dataset");
 			
-			if(NucleusBorderSegment.segmentCountsMatch(options.getDatasets())){
+			if(IBorderSegment.segmentCountsMatch(options.getDatasets())){
 			
 				ds = createMultiPositionFeatureDataset(options);
 			} else {
@@ -184,7 +185,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 				continue;
 
 			}
-			NucleusBorderSegment segment = verticalNucleus.getProfile(ProfileType.ANGLE)
+			IBorderSegment segment = verticalNucleus.getProfile(ProfileType.ANGLE)
 					.getSegment(segmentID);
 			finest("Fetched segment "+segmentID.toString());
 
@@ -227,7 +228,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 				.getVerticallyRotatedNucleus();
 		
 		// Get the segment start position XY coordinates
-		NucleusBorderSegment segment = consensus.getProfile(ProfileType.ANGLE)
+		IBorderSegment segment = consensus.getProfile(ProfileType.ANGLE)
 											.getSegment(segmentID);
 		
 		IPoint centrePoint = consensus.getBorderPoint(segment.getStartIndex());

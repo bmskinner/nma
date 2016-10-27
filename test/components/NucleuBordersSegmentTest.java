@@ -25,6 +25,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 
 public class NucleuBordersSegmentTest {
@@ -32,7 +33,7 @@ public class NucleuBordersSegmentTest {
 	@Test
 	public void testUpdatingASegmentWithInvalidPositions(){
 		
-		NucleusBorderSegment testSegment = new NucleusBorderSegment(0, 20, 100);
+		IBorderSegment testSegment = new NucleusBorderSegment(0, 20, 100);
 		try{
 			testSegment.update(-1, 21);
 			fail("Segment update should not allow out of range value");
@@ -54,7 +55,7 @@ public class NucleuBordersSegmentTest {
 		
 		// A single segment 
 		NucleusBorderSegment testSegment = new NucleusBorderSegment(0, 20, 100);
-		NucleusBorderSegment prevSegment = new NucleusBorderSegment(90, 0, 100);
+		IBorderSegment prevSegment = new NucleusBorderSegment(90, 0, 100);
 		NucleusBorderSegment nextSegment = new NucleusBorderSegment(20, 30, 100);
 		
 		
@@ -62,14 +63,14 @@ public class NucleuBordersSegmentTest {
 			testSegment.update(0, 3);
 			fail("Segment update should not allow too short length");
 		} catch (IllegalArgumentException e){
-			assertEquals("Error should be fail", e.getMessage(), "Segment length cannot be smaller than "+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH);
+			assertEquals("Error should be fail", e.getMessage(), "Segment length cannot be smaller than "+IBorderSegment.MINIMUM_SEGMENT_LENGTH);
 		}
 		
 		try{
 			testSegment.update(17, 20);
 			fail("Segment update should not allow too short length");
 		} catch (IllegalArgumentException e){
-			assertEquals("Error should be fail", e.getMessage(), "Segment length cannot be smaller than "+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH);
+			assertEquals("Error should be fail", e.getMessage(), "Segment length cannot be smaller than "+IBorderSegment.MINIMUM_SEGMENT_LENGTH);
 		}
 		
 		// Segment chain
@@ -95,7 +96,7 @@ public class NucleuBordersSegmentTest {
 	@Test
 	public void testUpdatingASegmentToInvert(){
 		
-		NucleusBorderSegment testSegment = new NucleusBorderSegment(1, 20, 100);
+		IBorderSegment testSegment = new NucleusBorderSegment(1, 20, 100);
 		try{
 			testSegment.update(26, 20);
 			fail("Segment update should not allow inversion");

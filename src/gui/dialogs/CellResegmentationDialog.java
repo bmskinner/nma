@@ -64,6 +64,7 @@ import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
@@ -81,8 +82,8 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 	
 	private boolean isRunning = false;
 	private boolean isSelectRP = false;
-	private List<NucleusBorderSegment> newSegments;
-	private Map<BorderTagObject, Integer> newTags;
+	private List<IBorderSegment> newSegments;
+	private Map<Tag, Integer> newTags;
 	int segCount = 0;
 	int segStart = 0;
 	int segStop  = 0;
@@ -174,7 +175,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 		reassignRpBtn.addActionListener( e -> {
 			
 			this.isSelectRP = true;
-			newTags     = new HashMap<BorderTagObject, Integer>();
+			newTags     = new HashMap<Tag, Integer>();
 			table.setModel(createTableModel(""));
 			log("Select RP");
 			setEnabled(false);
@@ -184,7 +185,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 		resegmentBtn = new JButton("Resegment");
 		resegmentBtn.addActionListener( e -> {
 			this.isRunning = true;
-			newSegments = new ArrayList<NucleusBorderSegment>();
+			newSegments = new ArrayList<IBorderSegment>();
 			table.setModel(createTableModel("Not set"));
 			table.getColumnModel().getColumn(COLUMN_STATE).setCellRenderer(new SegmentStateRenderer());
 			segCount    = 0;
@@ -233,24 +234,24 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 		finer("Assigned all segments");
 		try {
 
-			List<NucleusBorderSegment> tempList;
+			List<IBorderSegment> tempList;
 			if(segCount>0){
-				tempList = NucleusBorderSegment.copyWithoutLinking(newSegments);
+				tempList = IBorderSegment.copyWithoutLinking(newSegments);
 			} else {
-				tempList = new ArrayList<NucleusBorderSegment>(); // for clearing the profile on start of resegmentation
+				tempList = new ArrayList<IBorderSegment>(); // for clearing the profile on start of resegmentation
 			}
 			// Get the segment ID to make the new segment
 			UUID id = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
 
 			// Make a final segment after the last clicked position
-			NucleusBorderSegment last = new NucleusBorderSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT), n.getBorderLength(), id);
+			IBorderSegment last = IBorderSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT), n.getBorderLength(), id);
 			tempList.add(last);
-			NucleusBorderSegment.linkSegments(tempList);
+			IBorderSegment.linkSegments(tempList);
 
 			ISegmentedProfile newProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
 			newProfile.setSegments(tempList);
 			finer("Segments added: ");
-			finer(NucleusBorderSegment.toString(tempList));
+			finer(IBorderSegment.toString(tempList));
 			finer("New profile:");
 			finer(newProfile.toString());
 			
@@ -282,7 +283,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 			UUID id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
 
 
-			NucleusBorderSegment last = new NucleusBorderSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT), n.getBorderLength(), id);
+			IBorderSegment last = IBorderSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT), n.getBorderLength(), id);
 			newSegments.add(last);
 			finer("Added "+last.toString());
 
@@ -374,7 +375,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 			UUID id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
 
 			segStop = n.getBorderIndex(p);
-			NucleusBorderSegment seg = new NucleusBorderSegment(segStart, segStop, n.getBorderLength(), id);
+			IBorderSegment seg = IBorderSegment.newSegment(segStart, segStop, n.getBorderLength(), id);
 			newSegments.add(seg);
 			finer("Added "+seg.toString());
 			segStart = segStop;

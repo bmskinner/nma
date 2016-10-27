@@ -32,6 +32,7 @@ import components.generic.ISegmentedProfile;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
@@ -121,12 +122,12 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 		ISegmentedProfile nucleusProfile = n.getProfile(ProfileType.ANGLE);
 		nucleusProfile.clearSegments();
 
-		List<NucleusBorderSegment> nucleusSegments = new ArrayList<NucleusBorderSegment>();
+		List<IBorderSegment> nucleusSegments = new ArrayList<IBorderSegment>();
 
 		// go through each segment defined for the median curve
-		NucleusBorderSegment prevSeg = null;
+		IBorderSegment prevSeg = null;
 
-		for(NucleusBorderSegment segment : median.getSegments()){
+		for(IBorderSegment segment : median.getSegments()){
 
 			// get the positions the segment begins and ends in the median profile
 			int startIndexInMedian 	= segment.getStartIndex();
@@ -156,7 +157,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 //			}
 			
 			try {
-				NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex, n.getBorderLength(), segment.getID());
+				IBorderSegment seg = IBorderSegment.newSegment(startIndex, endIndex, n.getBorderLength(), segment.getID());
 				if(prevSeg != null){
 					seg.setPrevSegment(prevSeg);
 					prevSeg.setNextSegment(seg);
@@ -174,7 +175,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 
 		}
 
-		NucleusBorderSegment.linkSegments(nucleusSegments);
+		IBorderSegment.linkSegments(nucleusSegments);
 		
 		nucleusProfile.setSegments(nucleusSegments);
 

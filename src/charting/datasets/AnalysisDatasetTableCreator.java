@@ -49,6 +49,7 @@ import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import stats.ConfidenceInterval;
 import stats.DipTester;
@@ -146,7 +147,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			Tag point = Tag.REFERENCE_POINT;
 
 			// get mapping from ordered segments to segment names
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
+			List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(point)
 					.getOrderedSegments();
 			
@@ -170,7 +171,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 //			df.setMinimumIntegerDigits(1);
 			DecimalFormat pf = new DecimalFormat("#.###");
 
-			for(NucleusBorderSegment segment : segments) {
+			for(IBorderSegment segment : segments) {
 
 				List<Object> rowData = new ArrayList<Object>(0);
 				
@@ -219,7 +220,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 //		df.setMinimumIntegerDigits(1);
 		
 		// If the datasets have different segment counts, show error message
-		if( ! NucleusBorderSegment.segmentCountsMatch(list)){
+		if( ! IBorderSegment.segmentCountsMatch(list)){
 			model.addColumn(Labels.INCONSISTENT_SEGMENT_NUMBER);
 			return model;
 		}
@@ -238,7 +239,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		BorderTagObject point = Tag.REFERENCE_POINT;//.ORIENTATION_POINT;
 
 		// assumes all datasets have the same number of segments
-		List<NucleusBorderSegment> segments = list.get(0)
+		List<IBorderSegment> segments = list.get(0)
 				.getCollection()
 				.getProfileCollection(ProfileType.ANGLE)
 				.getSegmentedProfile(point)
@@ -247,7 +248,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 		// Add the dataset names column
 		fieldNames.add("Dataset");
-		for(NucleusBorderSegment segment : segments) {
+		for(IBorderSegment segment : segments) {
 			fieldNames.add(segment.getName());
 		}
 		model.setColumnIdentifiers(fieldNames.toArray());;
@@ -271,7 +272,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			// get the offset segments
 			//				List<NucleusBorderSegment> segs = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
 
-			List<NucleusBorderSegment> segs = collection
+			List<IBorderSegment> segs = collection
 					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(point)
 					.getOrderedSegments();
@@ -279,7 +280,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			List<Object> rowData = new ArrayList<Object>(0);
 			rowData.add(dataset.getName());
 
-			for(NucleusBorderSegment segment : segs) {
+			for(IBorderSegment segment : segs) {
 
 				double[] meanLengths = collection.getMedianStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
 
@@ -929,7 +930,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			
 			Object[] popData = new Object[options.datasetCount()];
 			
-			NucleusBorderSegment medianSeg1 = dataset.getCollection()
+			IBorderSegment medianSeg1 = dataset.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
@@ -943,7 +944,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 					getPValue = true;
 				} else {
 					
-					NucleusBorderSegment medianSeg2 = dataset2.getCollection()
+					IBorderSegment medianSeg2 = dataset2.getCollection()
 							.getProfileCollection(ProfileType.ANGLE)
 							.getSegmentedProfile(Tag.REFERENCE_POINT)
 							.getSegmentAt(options.getSegPosition());
@@ -1049,7 +1050,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
 		for(IAnalysisDataset dataset : options.getDatasets()){
 			
-			NucleusBorderSegment medianSeg1 = dataset.getCollection()
+			IBorderSegment medianSeg1 = dataset.getCollection()
 					.getProfileCollection(ProfileType.ANGLE)
 					.getSegmentedProfile(Tag.REFERENCE_POINT)
 					.getSegmentAt(options.getSegPosition());
@@ -1072,7 +1073,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 				} else {
 					
-					NucleusBorderSegment medianSeg2 = dataset2.getCollection()
+					IBorderSegment medianSeg2 = dataset2.getCollection()
 							.getProfileCollection(ProfileType.ANGLE)
 							.getSegmentedProfile(Tag.REFERENCE_POINT)
 							.getSegmentAt(options.getSegPosition());

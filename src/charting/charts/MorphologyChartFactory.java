@@ -64,7 +64,7 @@ import components.generic.BooleanProfile;
 import components.generic.IProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.nuclear.NucleusBorderSegment;
+import components.nuclear.IBorderSegment;
 import components.nuclei.Nucleus;
 
 public class MorphologyChartFactory extends AbstractChartFactory {
@@ -229,7 +229,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
 		if(options.isShowAnnotations()){
 			finest("Adding segment annotations");
-			for(NucleusBorderSegment seg : n.getProfile(options.getType(), options.getTag()).getOrderedSegments()){
+			for(IBorderSegment seg : n.getProfile(options.getType(), options.getTag()).getOrderedSegments()){
 
 				int midPoint = seg.getMidpointIndex();
 
@@ -431,7 +431,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			// Add segment name annotations
 			
 			if(options.isShowAnnotations()){
-				for(NucleusBorderSegment seg :  options.firstDataset().getCollection()
+				for(IBorderSegment seg :  options.firstDataset().getCollection()
 						.getProfileCollection(ProfileType.ANGLE)
 						.getSegmentedProfile(options.getTag())
 						.getOrderedSegments()){
