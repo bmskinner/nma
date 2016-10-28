@@ -43,7 +43,7 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 	private int closestNuclearBorderPoint;
 	
 	
-	public NuclearSignal(Roi roi, File f, int channel, double[] position, IPoint centreOfMass){
+	public NuclearSignal(Roi roi, File f, int channel, int[] position, IPoint centreOfMass){
 		super(roi, f, channel, position, centreOfMass);
 		
 	}

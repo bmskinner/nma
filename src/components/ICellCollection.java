@@ -200,20 +200,26 @@ public interface ICellCollection
 	 * @param type
 	 * @return
 	 */
-	IProfileCollection getProfileCollection(ProfileType type);
+	IProfileCollection getProfileCollection();
+	
+	/**
+	 * Generate the profile collection and aggregates
+	 * based on the profile length of the population.
+	 */
+	void createProfileCollection();
 
 	/**
 	 * Set the profile collection for the given profile type
 	 * @param type
 	 * @param p
 	 */
-	void setProfileCollection(ProfileType type, IProfileCollection p);
+//	void setProfileCollection(ProfileType type, IProfileCollection p);
 
 	/**
 	 * Remove the given profile collection
 	 * @param type
 	 */
-	public void removeProfileCollection(ProfileType type);
+//	public void removeProfileCollection(ProfileType type);
 
 	/**
 	 * Get the folder the nuclei in the collection were imaged from

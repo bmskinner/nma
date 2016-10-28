@@ -40,6 +40,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
+import stats.Quartile;
 import stats.SegmentStatistic;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.panels.ExportableChartPanel;
@@ -98,9 +99,10 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		if(IBorderSegment.segmentCountsMatch(getDatasets())){ // make a boxplot for each segment
 			
 			ICellCollection collection = activeDataset().getCollection();
-			List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
-					.getOrderedSegments();
+			List<IBorderSegment> segments = collection.getProfileCollection()
+					.getSegments(Tag.REFERENCE_POINT);
+//					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+//					.getOrderedSegments();
 			
 
 			// Get each segment as a boxplot

@@ -65,6 +65,7 @@ import stats.DipTester;
 import stats.KruskalTester;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
+import stats.Quartile;
 import stats.SegmentStatistic;
 import utility.ArrayConverter;
 import utility.Constants;
@@ -200,12 +201,14 @@ public class NucleusDatasetCreator implements Loggable {
 
             ICellCollection collection = list.get(i).getCollection();
             
-            IProfile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
+            IProfile profile = collection.getProfileCollection()
+            		.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
             IProfile xpoints = profile.getPositions(100);
             double[][] data = { xpoints.asArray(), profile.asArray() };
             ds.addSeries("Profile_"+i, data);
             
-            List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(Tag.REFERENCE_POINT);
+            List<IBorderSegment> segments = collection.getProfileCollection()
+            		.getSegments(Tag.REFERENCE_POINT);
             List<IBorderSegment> segmentsToAdd = new ArrayList<IBorderSegment>(0);
             
             // add only the segment of interest
@@ -270,7 +273,7 @@ public class NucleusDatasetCreator implements Loggable {
 		for (int i=0; i < list.size(); i++) {
 			ICellCollection collection = list.get(i).getCollection();
 
-			IProfile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
+			IProfile profile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 			IProfile xpoints = profile.getPositions((int) collection.getMedianArrayLength());
 			
 			double offset = 0;
@@ -282,7 +285,7 @@ public class NucleusDatasetCreator implements Loggable {
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
 			
-			List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE).getSegments(Tag.REFERENCE_POINT);
+			List<IBorderSegment> segments = collection.getProfileCollection().getSegments(Tag.REFERENCE_POINT);
 			List<IBorderSegment> segmentsToAdd = new ArrayList<IBorderSegment>(0);
 			
 			// add only the segment of interest
@@ -320,7 +323,7 @@ public class NucleusDatasetCreator implements Loggable {
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 
 				
-		IProfile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(point, 50);
+		IProfile profile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, point, Quartile.MEDIAN);
 		IProfile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);
@@ -362,7 +365,9 @@ public class NucleusDatasetCreator implements Loggable {
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		IProfile profile = collection.getProfileCollection(ProfileType.ANGLE).getProfile(options.getTag(), Constants.MEDIAN);
+		IProfile profile = collection.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN);
+		
 		IProfile xpoints = null;
 		if(options.isNormalised()){
 			xpoints = profile.getPositions(100);
@@ -379,14 +384,13 @@ public class NucleusDatasetCreator implements Loggable {
 		// rendering order will be first on top
 		
 		// add the segments
-		List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
-				.getSegmentedProfile(options.getTag())
-				.getOrderedSegments();
+		List<IBorderSegment> segments = collection.getProfileCollection()
+				.getSegments(options.getTag());
 
 		if(options.isNormalised()){
 			addSegmentsFromProfile(segments, profile, ds, 100, 0);
 		} else {
-			addSegmentsFromProfile(segments, profile, ds, (int) collection.getMedianArrayLength(), offset);
+			addSegmentsFromProfile(segments, profile, ds, collection.getMedianArrayLength(), offset);
 		}
 
 		return ds;
@@ -413,7 +417,8 @@ public class NucleusDatasetCreator implements Loggable {
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		IProfile profile = collection.getProfileCollection(type).getProfile(borderTag, Constants.MEDIAN);
+		IProfile profile = collection.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN);
 		IProfile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);
@@ -430,8 +435,8 @@ public class NucleusDatasetCreator implements Loggable {
 		// rendering order will be first on top
 		
 		// add the segments
-		List<IBorderSegment> segments = collection.getProfileCollection(type)
-				.getSegmentedProfile(borderTag)
+		List<IBorderSegment> segments = collection.getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN)
 				.getOrderedSegments();
 		
 
@@ -442,8 +447,8 @@ public class NucleusDatasetCreator implements Loggable {
 		}
 
 		// make the IQR
-		IProfile profile25 = collection.getProfileCollection(type).getProfile(borderTag, Constants.LOWER_QUARTILE);
-		IProfile profile75 = collection.getProfileCollection(type).getProfile(borderTag, Constants.UPPER_QUARTILE);
+		IProfile profile25 = collection.getProfileCollection().getProfile(type, borderTag, Quartile.LOWER_QUARTILE);
+		IProfile profile75 = collection.getProfileCollection().getProfile(type, borderTag, Quartile.UPPER_QUARTILE);
 		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
 		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
@@ -495,7 +500,7 @@ public class NucleusDatasetCreator implements Loggable {
 		for(int i=0; i<list.size(); i++){ //AnalysisDataset dataset : list){
 			IAnalysisDataset dataset = list.get(i);
 			ICellCollection collection = dataset.getCollection();
-			IProfile profile = collection.getProfileCollection(type).getProfile(borderTag, 50);
+			IProfile profile = collection.getProfileCollection().getProfile(type, borderTag, 50);
 			IProfile xpoints = null;
 			
 			if(normalised){	
@@ -536,7 +541,7 @@ public class NucleusDatasetCreator implements Loggable {
 		int i=0;
 		for(IAnalysisDataset dataset : list){
 			ICellCollection collection = dataset.getCollection();
-			IProfile profile = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(borderTag, 50);
+			IProfile profile = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, borderTag, 50);
 			IProfile xpoints = profile.getPositions(100);
 
 			double[][] data = { xpoints.asArray(), profile.asArray() };
@@ -558,8 +563,8 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return a new series
 	 * @throws Exception 
 	 */
-	private XYSeriesCollection addMultiProfileIQRSeries(IProfileCollection pc, Tag point, int series, double length, double medianLength, boolean normalised, ProfileAlignment alignment) throws Exception{
-		IProfile profile = pc.getProfile(point, 50);
+	private XYSeriesCollection addMultiProfileIQRSeries(IProfileCollection pc, ProfileType type, Tag point, int series, double length, double medianLength, boolean normalised, ProfileAlignment alignment) throws Exception{
+		IProfile profile = pc.getProfile(type, point, Quartile.MEDIAN);
 		
 		IProfile xpoints = null;
 		if(normalised){
@@ -577,8 +582,8 @@ public class NucleusDatasetCreator implements Loggable {
 		// rendering order will be first on top
 
 		// make the IQR
-		IProfile profile25 = pc.getProfile(point, 25);
-		IProfile profile75 = pc.getProfile(point, 75);
+		IProfile profile25 = pc.getProfile(type, point, Quartile.LOWER_QUARTILE);
+		IProfile profile75 = pc.getProfile(type, point, Quartile.UPPER_QUARTILE);
 		
 		XYSeries series25 = new XYSeries("Q25_"+series);
 		for(int j=0; j<profile25.size();j++){
@@ -624,7 +629,8 @@ public class NucleusDatasetCreator implements Loggable {
 			IAnalysisDataset dataset = list.get(i);
 			ICellCollection collection = dataset.getCollection();
 			
-			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(type), 
+			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(), 
+										type,
 										borderTag,
 										i,
 										length,
@@ -651,7 +657,8 @@ public class NucleusDatasetCreator implements Loggable {
 			
 			ICellCollection collection = dataset.getCollection();
 			
-			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(ProfileType.FRANKEN), 
+			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(), 
+					ProfileType.FRANKEN,
 					borderTag,
 					i,
 					100,
@@ -692,10 +699,10 @@ public class NucleusDatasetCreator implements Loggable {
 
 			ICellCollection collection = options.firstDataset().getCollection();
 
-			IProfile profile = collection.getProfileCollection(options.getType()).getIQRProfile(options.getTag());
+			IProfile profile = collection.getProfileCollection().getIQRProfile(options.getType(), options.getTag());
 
-			List<IBorderSegment> segments = collection.getProfileCollection(options.getType())
-					.getSegmentedProfile(options.getTag())
+			List<IBorderSegment> segments = collection.getProfileCollection()
+					.getSegmentedProfile(options.getType(), options.getTag(), Quartile.MEDIAN)
 					.getOrderedSegments();
 
 			ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0);	
@@ -714,7 +721,7 @@ public class NucleusDatasetCreator implements Loggable {
 			for(IAnalysisDataset dataset : options.getDatasets()){
 				ICellCollection collection = dataset.getCollection();
 
-				IProfile profile = collection.getProfileCollection(options.getType()).getIQRProfile(options.getTag());
+				IProfile profile = collection.getProfileCollection().getIQRProfile(options.getType(), options.getTag());
 				IProfile xpoints = profile.getPositions(100);
 				double[][] data = { xpoints.asArray(), profile.asArray() };
 				ds.addSeries("Profile_"+i+"_"+collection.getName(), data);
@@ -748,21 +755,21 @@ public class NucleusDatasetCreator implements Loggable {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 //		String pointType = collection.getOrientationPoint();
-		IProfile profile = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(point, Constants.MEDIAN);
+		IProfile profile = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, point, Quartile.MEDIAN);
 		IProfile xpoints = profile.getPositions(100);
 		
 		// rendering order will be first on top
 		
 		// add the segments (these are the same as in the regular profile collection)
 //		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
-		List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
-				.getSegmentedProfile(point)
+		List<IBorderSegment> segments = collection.getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, point, Quartile.MEDIAN)
 				.getOrderedSegments();
 		addSegmentsFromProfile(segments, profile, ds, 100, 0);
 
 		// make the IQR
-		IProfile profile25 = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(point, Constants.LOWER_QUARTILE);
-		IProfile profile75 = collection.getProfileCollection(ProfileType.FRANKEN).getProfile(point, Constants.UPPER_QUARTILE);
+		IProfile profile25 = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, point, Quartile.LOWER_QUARTILE);
+		IProfile profile75 = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, point, Quartile.UPPER_QUARTILE);
 		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
 		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
@@ -890,8 +897,8 @@ public class NucleusDatasetCreator implements Loggable {
 			ICellCollection collection = collections.get(i).getCollection();
 			
 			IBorderSegment medianSeg = collection
-					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
+					.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 					.getSegmentAt(segPosition);
 
 
@@ -934,8 +941,8 @@ public class NucleusDatasetCreator implements Loggable {
 			ICellCollection collection = collections.get(i).getCollection();
 			
 			IBorderSegment medianSeg = collection
-					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
+					.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 					.getSegmentAt(segPosition);
 
 
@@ -973,8 +980,8 @@ public class NucleusDatasetCreator implements Loggable {
 
 			ICellCollection collection = datasets.get(i).getCollection();
 
-			List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
+			List<IBorderSegment> segments = collection.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 					.getOrderedSegments();
 
 			for(IBorderSegment medianSeg : segments){
@@ -1068,8 +1075,12 @@ public class NucleusDatasetCreator implements Loggable {
 		BorderTagObject pointType = Tag.REFERENCE_POINT;
 		
 		// get the quartile profiles, beginning from the orientation point
-		IProfile q25 = collection.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.LOWER_QUARTILE).interpolate(n.getBorderLength());
-		IProfile q75 = collection.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.UPPER_QUARTILE).interpolate(n.getBorderLength());
+		IProfile q25 = collection.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, pointType, Quartile.LOWER_QUARTILE)
+				.interpolate(n.getBorderLength());
+		IProfile q75 = collection.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, pointType, Quartile.UPPER_QUARTILE)
+				.interpolate(n.getBorderLength());
 		
 		// get the limits  for the plot  	
 		double scale = getScaleForIQRRange(n);
@@ -1455,7 +1466,7 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		ICellCollection collection = dataset.getCollection();
 
-		double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(xposition);
+		double[] values = collection.getProfileCollection().getValuesAtPosition(type, xposition);
 		double[] xvalues = new double[values.length];
 		for(int i=0; i<values.length; i++){
 			xvalues[i] = 0;
@@ -1476,7 +1487,7 @@ public class NucleusDatasetCreator implements Loggable {
 	public KernelEstimator createProfileProbabililtyKernel(double xposition, IAnalysisDataset dataset, ProfileType type) throws Exception {
 		ICellCollection collection = dataset.getCollection();
 		KernelEstimator est = new KernelEstimator(0.001);
-		double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(xposition);
+		double[] values = collection.getProfileCollection().getValuesAtPosition(type, xposition);
 		// add the values to a kernel estimator
 		// give each value equal weighting
 		for(double d : values){

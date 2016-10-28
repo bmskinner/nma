@@ -22,6 +22,7 @@ package analysis.profiles;
 
 import java.util.UUID;
 
+import stats.Quartile;
 import logging.Loggable;
 import components.ICellCollection;
 import components.generic.ISegmentedProfile;
@@ -56,7 +57,7 @@ public class ProfileOffsetter implements Loggable {
 	 */
 	public void assignBorderTagToNucleiViaFrankenProfile(Tag tag) throws ProfileOffsetException {
 
-		int index = collection.getProfileCollection(ProfileType.ANGLE)
+		int index = collection.getProfileCollection()
 				.getIndex(tag); 
 
 		/*
@@ -68,7 +69,7 @@ public class ProfileOffsetter implements Loggable {
 
 		UUID segID;
 		try {
-			segID = collection.getProfileCollection(ProfileType.ANGLE)
+			segID = collection.getProfileCollection()
 					.getSegmentContaining(tag).getID();
 		} catch (ProfileException e) {
 			throw new ProfileOffsetException("Cannot find segment with tag "+tag+" in median");
@@ -77,8 +78,8 @@ public class ProfileOffsetter implements Loggable {
 
 
 
-		ISegmentedProfile profile = collection.getProfileCollection(ProfileType.ANGLE)
-				.getSegmentedProfile(Tag.REFERENCE_POINT);
+		ISegmentedProfile profile = collection.getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
 		
 		IBorderSegment segFromRef    = profile.getSegment(segID);

@@ -45,6 +45,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 
+import stats.Quartile;
 import utility.Constants;
 import components.Cell;
 import components.CellCollection;
@@ -241,17 +242,17 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 			}
 
 			// recalc the aggregate
-			IProfileCollection pc = duplicateCollection.getProfileCollection(ProfileType.ANGLE);
+			IProfileCollection pc = duplicateCollection.getProfileCollection();
 			
-			pc.createProfileAggregate(duplicateCollection, ProfileType.ANGLE);
+			pc.createProfileAggregate(duplicateCollection, pc.length());
 						
-			for(Tag tag : dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getBorderTags()){
-				pc.addIndex(tag, dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getIndex(tag));
+			for(Tag tag : dataset.getCollection().getProfileCollection().getBorderTags()){
+				pc.addIndex(tag, dataset.getCollection().getProfileCollection().getIndex(tag));
 			}
 			
 			
 			// get the profile median
-			IProfile median = pc.getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
+			IProfile median = pc.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
 			// add to the chart
 			updateChart(median, i);

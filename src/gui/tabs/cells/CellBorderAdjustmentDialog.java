@@ -481,12 +481,12 @@ public class CellBorderAdjustmentDialog
 		newList.get(newList.size()-1).setNextPoint(newList.get(0));
 		newList.get(0).setPrevPoint(newList.get(newList.size()-1));
 
-		Rectangle boundingRectangle = new Rectangle(fp.getBounds());
+//		Rectangle boundingRectangle = new Rectangle(fp.getBounds());
 		
 		CellularComponent c =  (CellularComponent) workingCell.getNucleus();
 
 		c.setBorderList(newList);
-		c.setBoundingRectangle(boundingRectangle);
+//		c.setBoundingRectangle(boundingRectangle);
 
 		Range domainRange = dualPanel.getMainPanel().getChart().getXYPlot().getDomainAxis().getRange();
 		Range  rangeRange = dualPanel.getMainPanel().getChart().getXYPlot().getRangeAxis().getRange();

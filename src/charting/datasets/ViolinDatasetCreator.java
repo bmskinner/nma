@@ -9,6 +9,7 @@ import org.jfree.data.Range;
 import stats.Max;
 import stats.Min;
 import stats.NucleusStatistic;
+import stats.Quartile;
 import stats.SegmentStatistic;
 import stats.SignalStatistic;
 import stats.Stats;
@@ -164,9 +165,8 @@ public class ViolinDatasetCreator implements Loggable {
 			ICellCollection collection = collections.get(i).getCollection();
 			
 			IBorderSegment medianSeg = collection
-					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
-					.getSegmentAt(segPosition);
+					.getProfileCollection()
+					.getSegmentAt(Tag.REFERENCE_POINT, segPosition);
 
 
 			List<Number> list = new ArrayList<Number>(0);
@@ -213,8 +213,8 @@ public class ViolinDatasetCreator implements Loggable {
 			ICellCollection collection = collections.get(i).getCollection();
 			
 			IBorderSegment medianSeg = collection
-					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
+					.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 					.getSegmentAt(segPosition);
 
 

@@ -705,7 +705,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			return;
 		}
 
-		double[] positions = cell.getNucleus().getPosition();
+		int[] positions = cell.getNucleus().getPosition();
 
 		XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
 

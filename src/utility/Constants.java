@@ -34,15 +34,12 @@ public class Constants {
 	public static final String LOG_FILE_EXTENSION = ".log";
 	public static final String TAB_FILE_EXTENSION = ".txt";
 	public static final String LOC_FILE_EXTENSION = "cell"; // locations of cells (in a tsv format)
+	public static final String BAK_FILE_EXTENSION = ".bak"; // backup files made in conversions
 	
 	public static final String SEGMENT_PREFIX = "Seg_";
 	
 	
 	public static final String CLUSTER_GROUP_PREFIX = "Group";
-	
-	
-	
-	
 	
 
 		// RGB colour channels
@@ -59,11 +56,7 @@ public class Constants {
 		public static final double TEN_PERCENT_SIGNIFICANCE_LEVEL = 0.1;
 		public static final double FIVE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
 		public static final double ONE_PERCENT_SIGNIFICANCE_LEVEL = 0.01;
-		
-		public static final double MEDIAN = 50;
-		public static final double LOWER_QUARTILE = 25;
-		public static final double UPPER_QUARTILE = 75;
-		
+				
 		// The prefix to use when exporting images
 		public static final String IMAGE_PREFIX = "export.";
 

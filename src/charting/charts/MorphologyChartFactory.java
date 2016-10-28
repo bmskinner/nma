@@ -49,6 +49,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
 
 import stats.DipTester;
+import stats.Quartile;
 import stats.StatisticDimension;
 import utility.Constants;
 import analysis.AnalysisDataset;
@@ -289,25 +290,25 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
 			XYPlot plot = chart.getXYPlot();
 
-			for (Tag tag : collection.getProfileCollection(options.getType()).getBorderTags()){
+			for (Tag tag : collection.getProfileCollection().getBorderTags()){
 
 				// get the index of the tag
-				int index = collection.getProfileCollection(options.getType()).getIndex(tag);
+				int index = collection.getProfileCollection().getIndex(tag);
 
 				// get the offset from to the current draw point
-				int offset = collection.getProfileCollection(options.getType()).getIndex(options.getTag());
+				int offset = collection.getProfileCollection().getIndex(options.getTag());
 
 				// adjust the index to the offset
-				index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection(options.getType()).getAggregate().length());
+				index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection().length());
 
 				double indexToDraw = index; // convert to a double to allow normalised positioning
 
 				if(options.isNormalised()){ // set to the proportion of the point along the profile
-					indexToDraw =  (( indexToDraw / collection.getProfileCollection(options.getType()).getAggregate().length() ) * 100);
+					indexToDraw =  (( indexToDraw / collection.getProfileCollection().length() ) * 100);
 				}
 				if(options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()){
 					int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
-					int amountToAdd = maxX - collection.getProfileCollection(options.getType()).getAggregate().length();
+					int amountToAdd = maxX - collection.getProfileCollection().length();
 					indexToDraw += amountToAdd;
 
 				}
@@ -352,8 +353,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				   ? 100 
 				   : options.firstDataset()
 				   		.getCollection()
-				   		.getProfileCollection(ProfileType.ANGLE)
-				   		.getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN)
+				   		.getProfileCollection()
+				   		.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 				   		.size();
 				
 
@@ -406,21 +407,21 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			if(options.isShowMarkers()){
 
 				ICellCollection collection = options.firstDataset().getCollection();
-				for (Tag tag : collection.getProfileCollection(options.getType()).getBorderTags()){
+				for (Tag tag : collection.getProfileCollection().getBorderTags()){
 
 					// get the index of the tag
-					int index = collection.getProfileCollection(options.getType()).getIndex(tag);
+					int index = collection.getProfileCollection().getIndex(tag);
 
 					// get the offset from to the current draw point
-					int offset = collection.getProfileCollection(options.getType()).getIndex(options.getTag());
+					int offset = collection.getProfileCollection().getIndex(options.getTag());
 
 					// adjust the index to the offset
-					index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection(options.getType()).getAggregate().length());
+					index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection().length());
 
 					double indexToDraw = index; // convert to a double to allow normalised positioning
 
 					if(options.isNormalised()){ // set to the proportion of the point along the profile
-						indexToDraw =  (( indexToDraw / collection.getProfileCollection(options.getType()).getAggregate().length() ) * 100);
+						indexToDraw =  (( indexToDraw / collection.getProfileCollection().length() ) * 100);
 					}
 
 					addMarkerToXYPlot(plot, tag, indexToDraw);
@@ -432,8 +433,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			
 			if(options.isShowAnnotations()){
 				for(IBorderSegment seg :  options.firstDataset().getCollection()
-						.getProfileCollection(ProfileType.ANGLE)
-						.getSegmentedProfile(options.getTag())
+						.getProfileCollection()
+						.getSegmentedProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN)
 						.getOrderedSegments()){
 
 					int midPoint = seg.getMidpointIndex();
@@ -997,48 +998,48 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JFreeChart createQQChart(Double position, List<AnalysisDataset> list, ProfileType type) throws Exception {
-
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-						"Angle", "Probability", null, PlotOrientation.VERTICAL, true, true,
-						false);
-
-		XYPlot plot = chart.getXYPlot();
-		
-		int datasetCount = 0;
-		int iteration = 0;
-		for(IAnalysisDataset dataset : list){
-			
-//			XYDataset ds 	 = NucleusDatasetCreator.getInstance().createModalityProbabililtyDataset(position, dataset, type);
-//			XYDataset values = NucleusDatasetCreator.getInstance().createModalityValuesDataset(position, dataset, type);
-			ICellCollection collection = dataset.getCollection();
-
-			double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(position);
-			XYDataset ds =  new NucleusDatasetCreator().createQQDataset(values);
-			
-			Color colour = dataset.getDatasetColour() == null 
-					? ColourSelecter.getColor(iteration)
-					: dataset.getDatasetColour();
-
-			plot.setDataset(datasetCount, ds);
-			
-			XYLineAndShapeRenderer lineRenderer =  new XYLineAndShapeRenderer(false, true);
-			plot.setRenderer(datasetCount,lineRenderer);
-			int seriesCount = plot.getDataset(datasetCount).getSeriesCount();
-			for(int i=0; i<seriesCount;i++){
-				
-				lineRenderer.setSeriesPaint(i, colour);
-				lineRenderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
-				lineRenderer.setSeriesVisibleInLegend(i, false);
-			}
-			
-			datasetCount++;
-			iteration++;
-			
-		}
-		return chart;
-	}
+//	public static JFreeChart createQQChart(Double position, List<AnalysisDataset> list, ProfileType type) throws Exception {
+//
+//		JFreeChart chart = 
+//				ChartFactory.createXYLineChart(null,
+//						"Angle", "Probability", null, PlotOrientation.VERTICAL, true, true,
+//						false);
+//
+//		XYPlot plot = chart.getXYPlot();
+//		
+//		int datasetCount = 0;
+//		int iteration = 0;
+//		for(IAnalysisDataset dataset : list){
+//			
+////			XYDataset ds 	 = NucleusDatasetCreator.getInstance().createModalityProbabililtyDataset(position, dataset, type);
+////			XYDataset values = NucleusDatasetCreator.getInstance().createModalityValuesDataset(position, dataset, type);
+//			ICellCollection collection = dataset.getCollection();
+//
+//			double[] values = collection.getProfileCollection().getValuesAtPosition(position);
+//			XYDataset ds =  new NucleusDatasetCreator().createQQDataset(values);
+//			
+//			Color colour = dataset.getDatasetColour() == null 
+//					? ColourSelecter.getColor(iteration)
+//					: dataset.getDatasetColour();
+//
+//			plot.setDataset(datasetCount, ds);
+//			
+//			XYLineAndShapeRenderer lineRenderer =  new XYLineAndShapeRenderer(false, true);
+//			plot.setRenderer(datasetCount,lineRenderer);
+//			int seriesCount = plot.getDataset(datasetCount).getSeriesCount();
+//			for(int i=0; i<seriesCount;i++){
+//				
+//				lineRenderer.setSeriesPaint(i, colour);
+//				lineRenderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
+//				lineRenderer.setSeriesVisibleInLegend(i, false);
+//			}
+//			
+//			datasetCount++;
+//			iteration++;
+//			
+//		}
+//		return chart;
+//	}
 	
 	/**
 	 * Create a blank chart with default formatting for probability values

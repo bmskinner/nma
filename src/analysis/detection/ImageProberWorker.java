@@ -118,7 +118,7 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, IconCell> i
 	protected IconCell makeIconCell(ImageProcessor ip, ImageType type){
 		
 		ImageFilterer filt = new ImageFilterer(ip);
-		ImageIcon ic = filt.toImageIcon();
+		ImageIcon ic = filt.fitToScreen().toImageIcon();
 		IconCell iconCell = new IconCell(ic, type);
 		
 		ImageIcon small = filt.resize( (int) smallDimension.getWidth(), (int) smallDimension.getHeight())

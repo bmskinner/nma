@@ -20,6 +20,7 @@
  *******************************************************************************/
 package analysis.profiles;
 
+import stats.Quartile;
 import utility.Constants;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
@@ -104,13 +105,14 @@ public class DatasetProfiler extends AnalysisWorker {
 
 			
 			// Build the ProfileCollections for each ProfileType
-			collection.getProfileManager().createProfileCollections(false);	
+			collection.createProfileCollection();
+//			collection.getProfileManager().createProfileCollections(false);	
 			finest("Created profile collections");
 					
 			
 			// Create a median from the current reference points in the nuclei
-			IProfile median = collection.getProfileCollection(ProfileType.ANGLE)
-					.getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
+			IProfile median = collection.getProfileCollection()
+					.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 			finest("Fetched median from initial RP");
 			
 			// RP index *should be* zero in the median profile at this point
@@ -145,7 +147,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			
 			fine("Identified best RP in nuclei and constructed median profiles");
 			
-			fine("Current state of profile collection:"+collection.getProfileCollection(ProfileType.ANGLE).tagString());
+			fine("Current state of profile collection:"+collection.getProfileCollection().tagString());
 			
 			
 			fine("Identifying OP and other BorderTags");
@@ -179,8 +181,8 @@ public class DatasetProfiler extends AnalysisWorker {
 						fine(tag+" in median is located at index "+index);
 
 						// Create a median from the current reference points in the nuclei
-						IProfile tagMedian = collection.getProfileCollection(ProfileType.ANGLE)
-								.getProfile(tag, Constants.MEDIAN);
+						IProfile tagMedian = collection.getProfileCollection()
+								.getProfile(ProfileType.ANGLE, tag, Quartile.MEDIAN);
 
 						collection.getProfileManager()
 							.offsetNucleusProfiles(tag, ProfileType.ANGLE, tagMedian);
@@ -196,7 +198,7 @@ public class DatasetProfiler extends AnalysisWorker {
 						}
 						
 					}
-					fine("Current state of profile collection:"+collection.getProfileCollection(ProfileType.ANGLE).tagString());
+					fine("Current state of profile collection:"+collection.getProfileCollection().tagString());
 									
 				} else {
 					fine("No ruleset for "+tag+"; skipping");
@@ -240,7 +242,7 @@ public class DatasetProfiler extends AnalysisWorker {
 //			fine(collection.getProfileCollection(ProfileType.ANGLE).getProfile(DEFAULT_BORDER_TAG, Constants.MEDIAN).toString());
 			
 			fine("Current state of profile collection:");
-			fine(collection.getProfileCollection(ProfileType.ANGLE).tagString());
+			fine(collection.getProfileCollection().tagString());
 			
 		}
 

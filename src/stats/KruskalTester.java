@@ -51,8 +51,8 @@ public class KruskalTester implements Loggable {
 //				
 				double position = ( (double) i / 2d);
 				try{ 
-					double[] valuesOne = one.getCollection().getProfileCollection(type).getAggregate().getValuesAtPosition(position);
-					double[] valuesTwo = two.getCollection().getProfileCollection(type).getAggregate().getValuesAtPosition(position);
+					double[] valuesOne = one.getCollection().getProfileCollection().getValuesAtPosition(type, position);
+					double[] valuesTwo = two.getCollection().getProfileCollection().getValuesAtPosition(type, position);
 					
 					
 					double pval = calculateKruskalPValue(valuesOne, valuesTwo);
@@ -115,13 +115,13 @@ public class KruskalTester implements Loggable {
 			 * 
 			 * Create a new ProfileCollection based on the segments from dataset one
 			 */
-			IProfileCollection pc = one.getCollection().getProfileCollection(ProfileType.ANGLE);
+			IProfileCollection pc = one.getCollection().getProfileCollection();
 
 			/*
 			 * Create a segmenter just to access the segmnet fitter. Do not execute the analysis function 
 			 * in the segmenter
 			 */
-			ISegmentedProfile medianProfile = pc.getSegmentedProfile(options.getTag());
+			ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN);
 
 			SegmentFitter fitter = new SegmentFitter(medianProfile);
 			
@@ -133,8 +133,9 @@ public class KruskalTester implements Loggable {
 				n.setProfile(ProfileType.FRANKEN, new SegmentedFloatProfile(recombinedProfile));
 			}
 			
-			IProfileCollection frankenCollection = copyOfTwo.getCollection().getProfileCollection(ProfileType.FRANKEN);
-			frankenCollection.createProfileAggregate(copyOfTwo.getCollection(), ProfileType.FRANKEN, (int) one.getCollection().getMedianArrayLength());
+			IProfileCollection frankenCollection = copyOfTwo.getCollection()
+					.getProfileCollection();
+			frankenCollection.createProfileAggregate(copyOfTwo.getCollection(), one.getCollection().getMedianArrayLength());
 						
 			/*
 			 * This returns to the Kruskal test above, but using the franken profiles 

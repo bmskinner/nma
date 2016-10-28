@@ -60,10 +60,10 @@ public class DipTester {
 		
 		double[] pvals = null;
 		try {
-			int offset = collection.getProfileCollection(type).getIndex(tag);
+			int offset = collection.getProfileCollection().getIndex(tag);
 			
 			// ensure the postions are starting from the right place
-			List<Double> keys = collection.getProfileCollection(type).getAggregate().getXKeyset();
+			List<Double> keys = collection.getProfileCollection().getXKeyset(type);
 
 			
 			pvals = new double[keys.size()];
@@ -72,7 +72,7 @@ public class DipTester {
 				
 				double position = keys.get(i);
 				try{ 
-					double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(position);
+					double[] values = collection.getProfileCollection().getValuesAtPosition(type, position);
 
 					double pval =  getDipTestPValue(values);
 					pvals[i] = pval;
@@ -106,7 +106,7 @@ public class DipTester {
 	 */
 	public double getPValueForPositon(double xPosition, ProfileType type) throws Exception {
 		
-		double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(xPosition);
+		double[] values = collection.getProfileCollection().getValuesAtPosition(type, xPosition);
 		return getDipTestPValue(values);
 	}
 	

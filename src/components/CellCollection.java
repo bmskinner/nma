@@ -351,6 +351,40 @@ public class CellCollection implements ICellCollection {
 	public void setProfileCollection(ProfileType type, IProfileCollection p){
 		this.profileCollections.put(type, (ProfileCollection) p);
 	}
+	
+	public void createProfileCollection(){
+		/*
+		 * Build a first set of profile aggregates
+		 * Default is to make profile aggregate from reference point
+		 * Do not build an aggregate for the non-existent frankenprofile
+		 */
+		IProfileCollection pc = getProfileCollection();
+//		pc.createProfileAggregate(this, pc.length());
+		
+		
+		for(ProfileType type : ProfileType.values()){
+			
+			if(type.equals(ProfileType.FRANKEN)){
+				continue;
+			}
+			
+			fine("Creating profile aggregate: "+type);
+			
+			int length = pc.length();
+						
+			if(length>0){ // failsafe in case some idiot (me) tries to maintain length on an empty aggregate
+				
+			
+				finer(type+" length before update: "+pc.length());
+
+				pc.createProfileAggregate(this, length);
+
+				finer(type+" length after update: "+pc.length());
+			} else {
+				pc.createProfileAggregate(this, this.getMedianArrayLength());
+			}
+		}
+	}
 
 	/**
 	 * Remove the given profile collection
@@ -471,16 +505,16 @@ public class CellCollection implements ICellCollection {
 		return result;
 	}
 
-	public double[][] getPositions(){
-		double[][] s = new double[size()][4];
-		int i = 0;
-		for(ICell cell : getCells() ){ 
-			Nucleus n = cell.getNucleus();
-			s[i] = n.getPosition();
-			i++;
-		}
-		return s;
-	}
+//	public int[][] getPositions(){
+//		int[][] s = new int[size()][4];
+//		int i = 0;
+//		for(ICell cell : getCells() ){ 
+//			Nucleus n = cell.getNucleus();
+//			s[i] = n.getPosition();
+//			i++;
+//		}
+//		return s;
+//	}
 
 	public int getNucleusCount(){
 		return this.size();
@@ -583,7 +617,7 @@ public class CellCollection implements ICellCollection {
 		}
 
 		double[] p = this.getPathLengths();
-		double median = new Quartile(p, Constants.MEDIAN).doubleValue();
+		double median = new Quartile(p, Quartile.MEDIAN).doubleValue();
 		return median;
 	}
 
@@ -593,7 +627,7 @@ public class CellCollection implements ICellCollection {
 		}
 
 		int[] p = this.getArrayLengths();
-		double median = new Quartile(p, Constants.MEDIAN).doubleValue();
+		double median = new Quartile(p, Quartile.MEDIAN).doubleValue();
 		return (int) median;
 	}
 
@@ -635,7 +669,7 @@ public class CellCollection implements ICellCollection {
 		double[] result = new double[count];
 		int i=0;
 
-		IProfile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.MEDIAN);
+		IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Quartile.MEDIAN);
 		for(Nucleus n : this.getNuclei()){
 			IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
 			result[i++] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
@@ -655,7 +689,7 @@ public class CellCollection implements ICellCollection {
 		int count = this.getNucleusCount();
 		double[] result = new double[count];
 		int i=0;
-		IProfile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.MEDIAN);
+		IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Quartile.MEDIAN);
 
 		for(Nucleus n : this.getNuclei()){
 
@@ -678,7 +712,7 @@ public class CellCollection implements ICellCollection {
 	 * @throws Exception
 	 */
 	public double getNormalisedDifferenceToMedian(Tag pointType, ICell c){
-		IProfile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Constants.MEDIAN);
+		IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Quartile.MEDIAN);
 		IProfile angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
 		double diff = angleProfile.absoluteSquareDifference(medianProfile);		
 		diff /= c.getNucleus().getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
@@ -738,7 +772,7 @@ public class CellCollection implements ICellCollection {
 			}
 		}
 
-		IProfile medianProfile = this.getProfileCollection(ProfileType.ANGLE).getProfile(pointType, Quartile.MEDIAN); // the profile we compare the nucleus to
+		IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Quartile.MEDIAN); // the profile we compare the nucleus to
 		//	  Nucleus n = this.getNuclei()..get(0); // default to the first nucleus
 		Nucleus n=null;
 		double difference = Arrays.stream(getDifferencesToMedianFromPoint(pointType)).max().orElse(0);
@@ -832,7 +866,7 @@ public class CellCollection implements ICellCollection {
 			double median = 0;
 			if(this.getNucleusCount()>0){
 				double[] values = this.getNuclearStatistics(stat, scale);
-				median =  new Quartile(values, Constants.MEDIAN).doubleValue();
+				median =  new Quartile(values, Quartile.MEDIAN).doubleValue();
 			}
 
 			statsCache.setStatistic(stat, scale, median);
@@ -1508,6 +1542,15 @@ public class CellCollection implements ICellCollection {
 			}
 
 		}
+	}
+
+
+
+
+	@Override
+	public IProfileCollection getProfileCollection() {
+		// TODO Auto-generated method stub
+		return profileCollections.get(ProfileType.ANGLE);
 	}
 
 }

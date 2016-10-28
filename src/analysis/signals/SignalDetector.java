@@ -160,10 +160,10 @@ public class SignalDetector extends Detector {
 				StatsMap values = measure(r, ip);
 				
 				
-				double xbase     = r.getXBase();
-				double ybase     = r.getYBase();
+				int xbase     = (int) r.getXBase();
+				int ybase     = (int) r.getYBase();
 				Rectangle bounds = r.getBounds();
-				double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
+				int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
 				
 				NuclearSignal s = new NuclearSignal( r, 
 						sourceFile, channel, originalPosition,
@@ -294,7 +294,7 @@ public class SignalDetector extends Detector {
 		int stackNumber = Constants.rgbToStack(channel);
 		
 		ImageProcessor ip = stack.getProcessor(stackNumber);
-		double[] positions = n.getPosition();
+		int[] positions = n.getPosition();
 		Rectangle boundingBox = new Rectangle( (int) positions[CellularComponent.X_BASE],
 				(int) positions[CellularComponent.Y_BASE],
 				(int) positions[CellularComponent.WIDTH],

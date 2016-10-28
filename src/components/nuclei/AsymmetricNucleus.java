@@ -58,11 +58,11 @@ public class AsymmetricNucleus
 	  super();
   }
 
-  public AsymmetricNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
+  public AsymmetricNucleus (Roi roi, File file, int number, int[] position) { // construct from an roi
 	  super(roi, file, number, position);
   }
   
-  public AsymmetricNucleus (Roi roi, File file, int number, double[] position, IPoint centreOfMass) { // construct from an roi
+  public AsymmetricNucleus (Roi roi, File file, int number, int[] position, IPoint centreOfMass) { // construct from an roi
 	  super(roi, file, number, position, centreOfMass);
   }
   

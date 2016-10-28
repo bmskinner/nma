@@ -122,9 +122,8 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 			
 			DefaultListModel<Double> model = new DefaultListModel<Double>();
 			List<Double> xvalues = activeDataset().getCollection()
-					.getProfileCollection(type)
-					.getAggregate()
-					.getXKeyset();
+					.getProfileCollection()
+					.getXKeyset(type);
 
 			for(Double d: xvalues){
 				model.addElement(d);

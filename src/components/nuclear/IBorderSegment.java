@@ -328,15 +328,20 @@ public interface IBorderSegment
 	 * @throws Exception 
 	 */
 	static void linkSegments(List<IBorderSegment> list) throws ProfileException {
-		if(list==null || list.isEmpty() ){ // || list.size()==1
-			throw new IllegalArgumentException("List of segments is null, empty or one");
+		if(list==null){
+			throw new IllegalArgumentException("List of segments is null");
 		}
-				
+		
+		if( list.isEmpty() ){
+			throw new IllegalArgumentException("List of segments is empty");
+		}
+		
+		if( list.size()==1 ){
+			throw new IllegalArgumentException("Only one segment in list");
+		}
+
 		IBorderSegment prevSeg = null;
 		
-//		IJ.log("Linking list:");
-//		IJ.log(NucleusBorderSegment.toString(list));
-
 		int position = 0;
 		for(IBorderSegment segment : list){
 

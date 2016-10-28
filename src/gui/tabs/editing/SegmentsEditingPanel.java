@@ -47,6 +47,7 @@ import javax.swing.SpinnerNumberModel;
 
 import org.jfree.chart.JFreeChart;
 
+import stats.Quartile;
 import analysis.profiles.SegmentFitter;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
@@ -196,8 +197,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			JFreeChart chart = getChart(options);
 			
 			profile = activeDataset().getCollection()
-					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT);
+					.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 			
 
 			
@@ -263,8 +264,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				
 				setButtonsEnabled(true);
 				ICellCollection collection = options.firstDataset().getCollection();
-				ISegmentedProfile medianProfile = collection.getProfileCollection(ProfileType.ANGLE)
-						.getSegmentedProfile(Tag.REFERENCE_POINT);
+				ISegmentedProfile medianProfile = collection.getProfileCollection()
+						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 				
 				// Don't allow merging below 2 segments (causes errors)
 				if(medianProfile.getSegmentCount()<=2){
@@ -355,11 +356,12 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
 			// recalc the aggregate
 			
-			IProfileCollection pc = activeDataset().getCollection().getProfileCollection(ProfileType.ANGLE);			
-			pc.createProfileAggregate(activeDataset().getCollection(), ProfileType.ANGLE);
+			IProfileCollection pc = activeDataset().getCollection().getProfileCollection();	
+			
+			pc.createProfileAggregate(activeDataset().getCollection(), pc.length());
 					
 			
-			ISegmentedProfile medianProfile = pc.getSegmentedProfile(Tag.REFERENCE_POINT);	
+			ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);	
 			
 			// Does nothing, but needed to access segment fitter
 //			DatasetSegmenter segmenter = new DatasetSegmenter(activeDataset(), MorphologyAnalysisMode.NEW, programLogger);
@@ -376,9 +378,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
 			}
 			
-			activeDataset().getCollection()
-				.getProfileCollection(ProfileType.FRANKEN)
-				.createProfileAggregate(activeDataset().getCollection(), ProfileType.FRANKEN);
+			pc.createProfileAggregate(activeDataset().getCollection(), pc.length());
 
 			fitter = null; // clean up
 			
@@ -398,8 +398,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			try {
 				ICellCollection collection = activeDataset().getCollection();
 				ISegmentedProfile medianProfile = collection
-						.getProfileCollection(ProfileType.ANGLE)
-						.getSegmentedProfile(Tag.REFERENCE_POINT);
+						.getProfileCollection()
+						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 				
 
 				SegmentsEditingPanel.this.setAnalysing(true);

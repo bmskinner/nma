@@ -73,7 +73,7 @@ public interface Imageable {
 	 * {@link #HEIGHT} of the bounding box
 	 * @return the array with the position 
 	 */
-	public double[] getPosition();
+	public int[] getPosition();
 	
 	/**
 	 * Get the image file the component was found in
@@ -156,14 +156,8 @@ public interface Imageable {
 	 * @param d the array of positions
 	 * @see CellularComponent#getPosition()
 	 */
-	public void setPosition(double[] position);
+	public void setPosition(int[] position);
 	
-	/**
-	 * Set the bounding rectangle for this object
-	 * @param boundingRectangle
-	 */
-	public void setBoundingRectangle(Rectangle boundingRectangle);
-
 
 	/**
 	 * Set the name of the image file this object was found in

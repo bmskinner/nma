@@ -639,7 +639,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		/*
 		 * The final frankenprofile is made of stitched together profiles from each segment
 		 */
-		List<IProfile> finalSegmentProfiles = new ArrayList<IProfile>(this.getSegmentCount());
+		List<IProfile> finalSegmentProfiles = new ArrayList<IProfile>(segments.length);
 
 
 

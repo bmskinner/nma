@@ -109,7 +109,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	private boolean segsLocked = false; // allow locking of segments and tags if manually assigned
 	
-	public RoundNucleus(Roi roi, File f, int channel, int number, double[] position){
+	public RoundNucleus(Roi roi, File f, int channel, int number, int[] position){
 		
 		super(roi, f, channel, position);
 		
@@ -117,7 +117,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 	}
 	
-	public RoundNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
+	public RoundNucleus (Roi roi, File file, int number, int[] position) { // construct from an roi
 		super(roi);
 		if(file==null || Integer.valueOf(number)==null || position==null){
 			throw new IllegalArgumentException("Nucleus constructor argument is null");
@@ -136,7 +136,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * @param position
 	 * @param centreOfMass
 	 */
-	public RoundNucleus(Roi roi, File f, int number, double[] position, IPoint centreOfMass){
+	public RoundNucleus(Roi roi, File f, int number, int[] position, IPoint centreOfMass){
 		super(roi, f, 0, position, centreOfMass );
 		this.nucleusNumber   = number;
 

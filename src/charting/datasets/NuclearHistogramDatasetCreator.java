@@ -44,6 +44,7 @@ import components.nuclei.Nucleus;
 import stats.Max;
 import stats.Min;
 import stats.NucleusStatistic;
+import stats.Quartile;
 import stats.SegmentStatistic;
 
 public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
@@ -308,9 +309,8 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			 * Find the seg id for the median segment at the requested position
 			 */
 			IBorderSegment medianSeg = collection
-					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
-					.getSegmentAt(options.getSegPosition());
+					.getProfileCollection()
+					.getSegmentAt(Tag.REFERENCE_POINT, options.getSegPosition());
 
 			
 			/*
@@ -354,8 +354,8 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			 * Find the seg id for the median segment at the requested position
 			 */
 			IBorderSegment medianSeg = collection
-					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
+					.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 					.getSegmentAt(options.getSegPosition());
 
 			
@@ -390,8 +390,8 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			 * Find the seg id for the median segment at the requested position
 			 */
 			IBorderSegment medianSeg = collection
-					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
+					.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 					.getSegmentAt(options.getSegPosition());
 
 			

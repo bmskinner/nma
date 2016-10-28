@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.JFreeChart;
 
+import stats.Quartile;
 import stats.SegmentStatistic;
 import charting.charts.HistogramChartFactory;
 import charting.charts.panels.SelectableChartPanel;
@@ -64,9 +65,10 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 
 			ICellCollection collection = activeDataset().getCollection();
 			
-			List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
-					.getOrderedSegments();
+			List<IBorderSegment> segments = collection.getProfileCollection()
+					.getSegments(Tag.REFERENCE_POINT);
+//					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+//					.getOrderedSegments();
 			
 
 			// Get each segment as a boxplot

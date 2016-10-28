@@ -27,6 +27,7 @@ import logging.Loggable;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import stats.Quartile;
 import charting.options.ChartOptions;
 import analysis.IAnalysisDataset;
 import components.generic.IPoint;
@@ -123,9 +124,8 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 			 * We need to convert the seg position into a seg id
 			 */
 			UUID segID = dataset.getCollection()
-					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
-					.getSegmentAt(  options.getSegPosition()   )
+					.getProfileCollection()
+					.getSegmentAt(Tag.REFERENCE_POINT,  options.getSegPosition()   )
 					.getID();
 			
 			List<IPoint> offsetPoints = createAbsolutePositionFeatureList(dataset, segID);

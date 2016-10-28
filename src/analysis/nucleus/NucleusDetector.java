@@ -257,12 +257,12 @@ public class NucleusDetector extends Detector {
 		StatsMap values   = measure(roi, ip);
 
 		  // save the position of the roi, for later use
-		  double xbase = roi.getXBase();
-		  double ybase = roi.getYBase();
+		int xbase = (int) roi.getXBase();
+		int ybase = (int) roi.getYBase();
 
 		  Rectangle bounds = roi.getBounds();
 
-		  double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
+		  int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
 
 		  try{
 		
@@ -315,13 +315,13 @@ public class NucleusDetector extends Detector {
 	 * @param nucleusType the class of nucleus
 	 * @return a new nucleus of the appropriate class
 	 */
-	private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition, NucleusType nucleusType, IPoint centreOfMass){
+	private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, int[] originalPosition, NucleusType nucleusType, IPoint centreOfMass){
 
 		  Nucleus n = null;
 		  try {
 			  
 			  // The classes for the constructor
-			  Class<?>[] classes = {Roi.class, File.class, int.class, double[].class, IPoint.class };
+			  Class<?>[] classes = {Roi.class, File.class, int.class, int[].class, IPoint.class };
 			  
 			  Constructor<?> nucleusConstructor = nucleusType.getNucleusClass()
 					  .getConstructor(classes);

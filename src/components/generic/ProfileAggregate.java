@@ -180,7 +180,7 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
 	public IProfile getMedian() throws ProfileException {
 		IProfile result = null;
 		try{
-			result = calculateQuartile(Constants.MEDIAN);
+			result = calculateQuartile(Quartile.MEDIAN);
 		} catch(ProfileException e){
 			// if the profile >200, scale down to 200. Otherwise, reduce stepwise until we get a profile
 			int newLength = this.length <= 200 ? this.length-5 : 200;

@@ -50,6 +50,7 @@ import javax.swing.event.ChangeListener;
 
 import stats.DipTester;
 import stats.NucleusStatistic;
+import stats.Quartile;
 import stats.SegmentStatistic;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
@@ -299,7 +300,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		}
 		
 		for(IBorderSegment s : dataset.getCollection()
-				.getProfileCollection(ProfileType.ANGLE)
+				.getProfileCollection()
 				.getSegments(Tag.REFERENCE_POINT)){
 			
 			
@@ -382,7 +383,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			try{
 			
 			for(IBorderSegment s : dataset.getCollection()
-					.getProfileCollection(ProfileType.ANGLE)
+					.getProfileCollection()
 					.getSegments(Tag.REFERENCE_POINT)){
 				
 				JCheckBox box = segmentBoxMap.get(s.getID());

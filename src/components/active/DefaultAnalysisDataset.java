@@ -1009,5 +1009,11 @@ public class DefaultAnalysisDataset implements IAnalysisDataset {
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
+	    
+	    int length = this.getCollection().getProfileCollection().length();
+	    // Update all children to have the same profile lengths and offsets
+	    for(IAnalysisDataset child: this.getAllChildDatasets()){
+	    	child.getCollection().getProfileCollection().createProfileAggregate(child.getCollection(), length);;			
+		}
 }
 }

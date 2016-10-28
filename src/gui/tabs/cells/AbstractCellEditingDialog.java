@@ -137,7 +137,7 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
 			dataset.getCollection().replaceCell(workingCell);
 
 			// Trigger a dataset update and reprofiling
-			dataset.getCollection().getProfileManager().createProfileCollections(true);
+			dataset.getCollection().createProfileCollection();
 			cellModel.swapCell(workingCell);
 
 			

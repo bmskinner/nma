@@ -147,8 +147,8 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			Tag point = Tag.REFERENCE_POINT;
 
 			// get mapping from ordered segments to segment names
-			List<IBorderSegment> segments = collection.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(point)
+			List<IBorderSegment> segments = collection.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, point, Quartile.MEDIAN)
 					.getOrderedSegments();
 			
 			// create the row names
@@ -241,9 +241,8 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		// assumes all datasets have the same number of segments
 		List<IBorderSegment> segments = list.get(0)
 				.getCollection()
-				.getProfileCollection(ProfileType.ANGLE)
-				.getSegmentedProfile(point)
-				.getOrderedSegments();
+				.getProfileCollection()
+				.getSegments(point);
 
 
 		// Add the dataset names column
@@ -273,8 +272,8 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			//				List<NucleusBorderSegment> segs = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
 
 			List<IBorderSegment> segs = collection
-					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(point)
+					.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, point, Quartile.MEDIAN)
 					.getOrderedSegments();
 
 			List<Object> rowData = new ArrayList<Object>(0);
@@ -931,8 +930,8 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			Object[] popData = new Object[options.datasetCount()];
 			
 			IBorderSegment medianSeg1 = dataset.getCollection()
-					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
+					.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 					.getSegmentAt(options.getSegPosition());
 
 			int i = 0;
@@ -945,8 +944,8 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				} else {
 					
 					IBorderSegment medianSeg2 = dataset2.getCollection()
-							.getProfileCollection(ProfileType.ANGLE)
-							.getSegmentedProfile(Tag.REFERENCE_POINT)
+							.getProfileCollection()
+							.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 							.getSegmentAt(options.getSegPosition());
 					
 					popData[i] = df.format( runWilcoxonTest( 
@@ -1051,8 +1050,8 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		for(IAnalysisDataset dataset : options.getDatasets()){
 			
 			IBorderSegment medianSeg1 = dataset.getCollection()
-					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
+					.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 					.getSegmentAt(options.getSegPosition());
 									
 		
@@ -1060,7 +1059,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			double value1 =  new Quartile( dataset.getCollection()
 					.getMedianStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, 
 							medianSeg1.getID()), 
-					Constants.MEDIAN).doubleValue();
+							Quartile.MEDIAN).doubleValue();
 
 			Object[] popData = new Object[options.datasetCount()];
 
@@ -1074,15 +1073,15 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				} else {
 					
 					IBorderSegment medianSeg2 = dataset2.getCollection()
-							.getProfileCollection(ProfileType.ANGLE)
-							.getSegmentedProfile(Tag.REFERENCE_POINT)
+							.getProfileCollection()
+							.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 							.getSegmentAt(options.getSegPosition());
 					
 					double value2 = new Quartile( dataset2.getCollection()
 							.getMedianStatistics(SegmentStatistic.LENGTH,
 									MeasurementScale.PIXELS, 
 									medianSeg2.getID()),
-							Constants.MEDIAN).doubleValue();
+									Quartile.MEDIAN).doubleValue();
 
 					double magnitude = value2 / value1;
 					popData[i] = df.format( magnitude );

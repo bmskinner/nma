@@ -114,7 +114,7 @@ public class MappingFileExporter {
 			
 //			IJ.log("Cell "+c.getNucleus().getNameAndNumber());
 			
-			double[] originalPosition = c.getNucleus().getPosition();
+			int[] originalPosition = c.getNucleus().getPosition();
 
 			IPoint com = c.getNucleus().getCentreOfMass();
 			

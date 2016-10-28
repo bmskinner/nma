@@ -21,6 +21,7 @@ package components.generic;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 
 import logging.Loggable;
 import analysis.profiles.ProfileException;
@@ -60,7 +61,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @param quartile the collection quartile to return (0-100) 
 	 * @return the quartile profile from the given tag
 	 */
-	IProfile getProfile(Tag tag, double quartile);
+	IProfile getProfile(ProfileType type, Tag tag, double quartile);
 
 	/**
 	 * Get the requested segmented profile. Generates it dynamically from the
@@ -69,19 +70,19 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @return the profile
 	 * @throws Exception
 	 */
-	ISegmentedProfile getSegmentedProfile(Tag tag);
+	ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile);
 
 	/**
 	 * Get the profile aggregate for this collection
 	 * @return the aggregate
 	 */
-	IProfileAggregate getAggregate();
+//	IProfileAggregate getAggregate();
 
 	/**
 	 * Test if the profile aggregate has been created
 	 * @return
 	 */
-	boolean hasAggregate();
+//	boolean hasAggregate();
 
 	/**
 	 * Get the length of the profile aggregate (this is the
@@ -96,6 +97,19 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @return a copy of the segments in the profile, offset to start at the tag
 	 */
 	List<IBorderSegment> getSegments(Tag tag);
+	
+	/**
+	 * Get the ids of the segments in this collection
+	 * @return
+	 */
+	List<UUID> getSegmentIDs();
+	
+	/**
+	 * Get the segment at the given position in the profile
+	 * @param position
+	 * @return
+	 */
+	IBorderSegment getSegmentAt(Tag tag, int position);
 
 	/**
 	 * Test if the collection contains a segment beginning at the given tag
@@ -174,24 +188,21 @@ public interface IProfileCollection extends Serializable, Loggable{
 	void addSegments(Tag tag, List<IBorderSegment> n);
 
 	/**
-	 * Create the profile aggregate from the given collection, with a set length, and
-	 * containing the given type of nucleus profile
+	 * Create profile aggregates from the given collection, with a set length.
 	 * By default, the profiles are zeroed on the reference point
 	 * @param collection the CellCollection
-	 * @param type the profile type to fetch from the nuclei
 	 * @param length the length of the aggregate
 	 * @throws Exception 
 	 */
-	void createProfileAggregate(ICellCollection collection, ProfileType type,
-			int length);
+	void createProfileAggregate(ICellCollection collection,	int length);
 
 	/**
-	 * Create the profile aggregate from the given collection, with using the 
+	 * Create the profile aggregate from the given collection, using the 
 	 * collection median length to determine bin sizes
 	 * @param collection the Cellcollection
 	 * @throws Exception 
 	 */
-	void createProfileAggregate(ICellCollection collection, ProfileType type);
+//	void createProfileAggregate(ICellCollection collection);
 
 	/**
 	 * Get the points associated with offsets currently present
@@ -206,11 +217,15 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @param pointType the profile type to use
 	 * @return the profile
 	 */
-	IProfile getIQRProfile(Tag tag);
+	IProfile getIQRProfile(ProfileType type, Tag tag);
 
 	/**
 	 * Find the points in the profile that are most variable
 	 */
-	List<Integer> findMostVariableRegions(Tag tag) throws Exception;
+	List<Integer> findMostVariableRegions(ProfileType type, Tag tag) throws Exception;
+	
+	double[] getValuesAtPosition(ProfileType type, double position);
+	
+	List<Double> getXKeyset(ProfileType type);
 
 }

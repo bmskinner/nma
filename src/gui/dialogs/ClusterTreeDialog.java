@@ -486,13 +486,6 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		String newName = template.getName()+"_ManualCluster_"+clusterList.size();
 		newName = checkName(clusterList.size());
 		ICellCollection clusterCollection = new VirtualCellCollection(dataset, newName);	
-		
-//		ICellCollection clusterCollection = new CellCollection(template.getFolder(), 
-//				template.getOutputFolderName(), 
-//				template.getName()+"_ManualCluster_"+clusterList.size(), 
-//				template.getNucleusType());
-		
-		
 
 		Tree tree = viewer.getTreePane().getTree();
 
@@ -526,15 +519,12 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 			if(c.hasCells()){
 
 				dataset.addChildCollection(c);
-//				try {
+
 				dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
-//				} catch (Exception e1) {
-//					error("Error applying segments", e1);
-//				}
 
 
 				IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
-//				clusterDataset.setRoot(false);
+
 				list.add(clusterDataset);
 			}
 		}

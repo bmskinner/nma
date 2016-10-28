@@ -241,7 +241,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 			throw new IllegalArgumentException("Image processor is null");
 		}
 		// Choose a clip for the image (an enlargement of the original nucleus ROI
-		double[] positions = c.getPosition();
+		int[] positions = c.getPosition();
 		int wideW = (int) (positions[CellularComponent.WIDTH] +20);
 		int wideH = (int) (positions[CellularComponent.HEIGHT]+20);
 		int wideX = (int) (positions[CellularComponent.X_BASE]-10);
@@ -531,6 +531,6 @@ public class ImageFilterer extends AbstractImageFilterer {
 			}
 		}
 
-		return new Quartile(values, Constants.MEDIAN).doubleValue();
+		return new Quartile(values, Quartile.MEDIAN).doubleValue();
 	}
 }

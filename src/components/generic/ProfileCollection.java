@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import analysis.profiles.ProfileException;
 import logging.Loggable;
@@ -36,6 +37,7 @@ import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 //import ij.IJ;
 
+import stats.Quartile;
 import utility.Constants;
 
 /**
@@ -64,6 +66,8 @@ public class ProfileCollection implements IProfileCollection {
 	
 	
 	private final ProfileCache profileCache           = new ProfileCache();
+	
+	private transient ProfileType type = null; // added in with 1.13.3 to allow conversion to new format
 
 
 	/**
@@ -111,7 +115,6 @@ public class ProfileCollection implements IProfileCollection {
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#getProfile(components.generic.BorderTagObject, double)
 	 */
-	@Override
 	public Profile getProfile(Tag tag, double quartile) {
 		
 		if(tag==null){
@@ -144,20 +147,18 @@ public class ProfileCollection implements IProfileCollection {
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#getSegmentedProfile(components.generic.BorderTagObject)
 	 */
-	@Override
 	public ISegmentedProfile getSegmentedProfile(Tag tag) {
 		if(tag==null){
 			throw new IllegalArgumentException("A profile key is required");
 		}
 
-		ISegmentedProfile result = new SegmentedFloatProfile(getProfile(tag, Constants.MEDIAN), getSegments(tag));
+		ISegmentedProfile result = new SegmentedFloatProfile(getProfile(tag, Quartile.MEDIAN), getSegments(tag));
 		return result;
 	}
 
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#getAggregate()
 	 */
-	@Override
 	public IProfileAggregate getAggregate(){
 		return aggregate;
 	}
@@ -165,7 +166,6 @@ public class ProfileCollection implements IProfileCollection {
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#hasAggregate()
 	 */
-	@Override
 	public boolean hasAggregate(){
 		if (aggregate==null){
 			return false;
@@ -380,7 +380,6 @@ public class ProfileCollection implements IProfileCollection {
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#createProfileAggregate(components.CellCollection, components.generic.ProfileType, int)
 	 */
-	@Override
 	public void createProfileAggregate(ICellCollection collection, ProfileType type, int length) {
 		if(length<=0){
 			throw new IllegalArgumentException("Requested profile aggregate length is zero or negative");
@@ -417,7 +416,6 @@ public class ProfileCollection implements IProfileCollection {
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#createProfileAggregate(components.CellCollection, components.generic.ProfileType)
 	 */
-	@Override
 	public void createProfileAggregate(ICellCollection collection, ProfileType type) {
 		
 		createProfileAggregate(collection, type, (int)collection.getMedianArrayLength());
@@ -475,11 +473,10 @@ public class ProfileCollection implements IProfileCollection {
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#getIQRProfile(components.generic.BorderTagObject)
 	 */
-	@Override
 	public IProfile getIQRProfile(Tag tag) {
 				
-		IProfile q25 = getProfile(tag, Constants.LOWER_QUARTILE);
-		IProfile q75 = getProfile(tag, Constants.UPPER_QUARTILE);
+		IProfile q25 = getProfile(tag, Quartile.LOWER_QUARTILE);
+		IProfile q75 = getProfile(tag, Quartile.UPPER_QUARTILE);
 		
 		if(q25==null || q75==null){ // if something goes wrong, return a zero profile
 			
@@ -494,7 +491,6 @@ public class ProfileCollection implements IProfileCollection {
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#findMostVariableRegions(components.generic.BorderTagObject)
 	 */
-	@Override
 	public List<Integer> findMostVariableRegions(Tag tag) throws Exception {
 		
 		// get the IQR and maxima
@@ -581,6 +577,8 @@ public class ProfileCollection implements IProfileCollection {
 		if( ! newIndexes.isEmpty()){
 			indexes = newIndexes;
 		}
+		
+		type = null;
 
 		
 //		finest("\tRead profile collection");
@@ -729,5 +727,97 @@ public class ProfileCollection implements IProfileCollection {
 //			  finest("\tWrote profile cache");
 		  }
 		 
+	}
+
+	@Override
+	public IProfile getProfile(ProfileType type, Tag tag, double quartile) {
+		if(this.type==null){
+			this.type = type;
+		}
+		return getProfile(tag, quartile);
+	}
+
+	@Override
+	public ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag,
+			double quartile) {
+		if(this.type==null){
+			this.type = type;
+		}
+		return getSegmentedProfile(tag);
+	}
+
+	@Override
+	public List<UUID> getSegmentIDs() {
+		List<UUID> result = new ArrayList<UUID>(segments.size());
+		for(IBorderSegment seg : segments){
+			result.add(seg.getID());
+		}
+		return result;
+	}
+
+	@Override
+	public IBorderSegment getSegmentAt(Tag tag, int position) {
+		return this.getSegments(tag).get(position);
+	}
+
+	@Override
+	public void createProfileAggregate(ICellCollection collection, int length) {
+		if(type!=null){
+//			for(ProfileType type : ProfileType.values()){
+				this.createProfileAggregate(collection, type, length);
+//			}
+			}
+		
+	}
+
+//	@Override
+	public void createProfileAggregate(ICellCollection collection) {
+		// TODO Auto-generated method stub
+		if(type!=null){
+//		for(ProfileType type : ProfileType.values()){
+			this.createProfileAggregate(collection, type);
+//		}
+		}
+		
+	}
+
+	@Override
+	public IProfile getIQRProfile(ProfileType type, Tag tag) {
+		if(this.type==null){
+			this.type = type;
+		}
+		return getIQRProfile(tag);
+	}
+
+	@Override
+	public List<Integer> findMostVariableRegions(ProfileType type, Tag tag)
+			throws Exception {
+		if(this.type==null){
+			this.type = type;
+		}
+		return findMostVariableRegions(tag);
+	}
+
+	@Override
+	public double[] getValuesAtPosition(ProfileType type, double position) {
+		if(this.type==null){
+			this.type = type;
+		}
+		double[] result = null;
+		try {
+			result = this.getAggregate().getValuesAtPosition(position);
+		} catch (Exception e) {
+			
+		}
+		
+		return result;
+	}
+
+	@Override
+	public List<Double> getXKeyset(ProfileType type) {
+		if(this.type==null){
+			this.type = type;
+		}
+		return this.getAggregate().getXKeyset();
 	}
 }

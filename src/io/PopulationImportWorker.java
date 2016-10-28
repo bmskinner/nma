@@ -119,7 +119,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 				if(dataset.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
 					
 					if(! dataset.getCollection()
-							.getProfileCollection(ProfileType.ANGLE)
+							.getProfileCollection()
 							.hasBorderTag(Tag.TOP_VERTICAL)  ){
 						
 						fine("TOP_ and BOTTOM_VERTICAL not assigned; calculating");
@@ -263,26 +263,6 @@ public class PopulationImportWorker extends AnalysisWorker {
 			dataset = (IAnalysisDataset) ois.readObject();
 			finest("Read object as analysis dataset");	
 			
-			if(dataset instanceof AnalysisDataset){
-				
-				log("Old style dataset detected");
-			}
-			
-			if(dataset instanceof DefaultAnalysisDataset){
-				
-				log("New style dataset detected");
-				
-				for(IAnalysisDataset child : dataset.getAllChildDatasets()){
-					child.getCollection().getProfileManager().createProfileCollections(true);
-					child.getCollection().getProfileManager().recalculateProfileAggregates();
-				}
-			}
-			
-			// Replace existing save file path with the path to the file that has been opened
-			finest("Checking file path");
-			if(!dataset.getSavePath().equals(inputFile)){
-				updateSavePath(inputFile, dataset);
-			}
 			
 		} catch(NullPointerException e1){
 			fine("NPE Error reading dataset", e1);
@@ -306,6 +286,38 @@ public class PopulationImportWorker extends AnalysisWorker {
 				throw new UnloadableDatasetException("Cannot load dataset due to "+e.getClass().getSimpleName(), e);
 			}
 		}
+		
+		// Replace existing save file path with the path to the file that has been opened
+		finest("Checking file path");
+		if(!dataset.getSavePath().equals(inputFile)){
+			updateSavePath(inputFile, dataset);
+		}
+		
+		// convert old files if needed
+		
+		if(dataset instanceof AnalysisDataset){
+			
+			log("Old style dataset detected");
+			
+			DatasetConverter conv = new DatasetConverter(dataset);
+			
+			dataset = conv.convert();
+			
+			log("Conversion successful");
+		}
+		
+//		if(dataset instanceof DefaultAnalysisDataset){
+//			
+//			log("New style dataset detected");
+//			
+//			for(IAnalysisDataset child : dataset.getAllChildDatasets()){
+//				child.getCollection().createProfileCollection();
+////				child.getCollection().getProfileManager().recalculateProfileAggregates();
+//			}
+//		}
+		
+		
+		
 		finest("Returning opened dataset");
 		return dataset;
 	}

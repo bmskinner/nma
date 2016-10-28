@@ -121,7 +121,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 		  Nucleus n 			 = cell.getNucleus();
 		  PolygonRoi nucleus 	 = new PolygonRoi(n.createPolygon(), PolygonRoi.POLYGON);
 		  
-		  double[] position = n.getPosition();
+		  int[] position = n.getPosition();
 		  nucleus.setLocation(position[CellularComponent.X_BASE],position[CellularComponent.Y_BASE]); // translate the roi to the image coordinates
 	}
 

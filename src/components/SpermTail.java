@@ -57,10 +57,10 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 			this.setSourceFileName(source.getName());
 			this.setChannel(channel);
 			
-			this.setPosition( new double[] { border.getPolygon().getBounds().getMinX(),
-					 border.getPolygon().getBounds().getMinY(),
-					 border.getPolygon().getBounds().getWidth(),
-					 border.getPolygon().getBounds().getHeight()});
+			this.setPosition( new int[] { (int) border.getPolygon().getBounds().getMinX(),
+					 (int) border.getPolygon().getBounds().getMinY(),
+					 (int) border.getPolygon().getBounds().getWidth(),
+					 (int) border.getPolygon().getBounds().getHeight()});
 			
 			
 			FloatPolygon skeletonPolygon = skeleton.getInterpolatedPolygon(1, true);

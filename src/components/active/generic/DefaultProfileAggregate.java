@@ -20,10 +20,14 @@
 package components.active.generic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import components.generic.IProfile;
 import components.generic.IProfileAggregate;
+import components.generic.ProfileType;
+import components.generic.Tag;
 import analysis.profiles.ProfileException;
 import stats.Quartile;
 import utility.ArrayConverter;
@@ -32,7 +36,7 @@ import logging.Loggable;
 
 /**
  * This is for testing a replacement of the profile aggregate
- * using arrays instead of collections
+ * using arrays instead of collections. Not serializable.
  * @author bms41
  *
  */
@@ -41,7 +45,10 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 	private final float[][] aggregate; // the values samples per profile
 	private final int length; // the length of the aggregate (the median array length of a population usually)
 	private final int profileCount;
-	private transient int counter = 0; // track the number of profiles added to the aggregate
+	
+	private int counter = 0; // track the number of profiles added to the aggregate
+	
+	private AggregateCache cache = new AggregateCache();
 
 	public DefaultProfileAggregate(final int length, final int profileCount){
 		
@@ -177,6 +184,11 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 	}
 	
 	private IProfile calculateQuartile(float quartile) {
+		
+		if(cache.hasProfile(quartile)){
+			return cache.getProfile(quartile);
+		}
+		
 		float[] medians = new float[length];
 		
 		for(int i=0; i<length; i++){
@@ -189,7 +201,9 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 			
 		}
 		
-		return new FloatProfile(medians);
+		IProfile profile = new FloatProfile(medians);
+		cache.setProfile(quartile, profile);
+		return profile;
 
 	}
 
@@ -203,6 +217,54 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 	@Override
 	public IProfile getQuartile(double quartile) throws ProfileException {
 		return getQuartile( (float) quartile);
+	}
+	
+	/**
+	 * Cache the profiles from an aggregate at various quartiles.
+	 * @author bms41
+	 *
+	 */
+	private class AggregateCache {
+
+		private Map<Float, IProfile> cache = new HashMap<Float, IProfile>(5);
+
+		public AggregateCache(){}
+
+		/**
+		 * Set the stored profile
+		 * @param tag
+		 * @param profile
+		 */
+		public void setProfile(Float tag, IProfile profile){			  
+			cache.put(tag, profile);
+		}
+
+		/**
+		 * Get the given profile from the cache, or null if not present
+		 * @param tag
+		 * @param quartile
+		 * @return
+		 */
+		public IProfile getProfile(Float tag){
+			return cache.get(tag);
+		}
+
+		/**
+		 * Check if the given profile is in the cache
+		 * @param tag
+		 * @param quartile
+		 * @return
+		 */
+		public boolean hasProfile(Float tag){
+			return cache.containsKey(tag);
+		}
+
+		/**
+		 * Empty the cache - all values must be recalculated
+		 */
+		public void clear(){
+			cache = new HashMap<Float, IProfile>(5);
+		}
 	}
 
 }

@@ -137,7 +137,7 @@ public class SignalProberWorker extends ImageProberWorker {
 		
 		ip.setLineWidth(2);
 		for(Nucleus n : map.keySet()){
-			double[] positions = n.getPosition();
+			int[] positions = n.getPosition();
 			List<NuclearSignal> list = map.get(n);
 			
 			// Draw the nucleus

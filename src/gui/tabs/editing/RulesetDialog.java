@@ -29,6 +29,7 @@ import javax.swing.tree.TreeModel;
 
 import org.jfree.chart.JFreeChart;
 
+import stats.Quartile;
 import utility.Constants;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
@@ -418,7 +419,8 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			
 			Rule r = data.getRule();
 			
-			IProfile p = dataset.getCollection().getProfileCollection(data.getType()).getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
+			IProfile p = dataset.getCollection().getProfileCollection()
+					.getProfile(data.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
 			BooleanProfile b = finder.getMatchingIndexes(p, r);
 			chart = MorphologyChartFactory.createBooleanProfileChart(p, b);
 		}
@@ -426,7 +428,8 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		if(data.hasRuleSet()){
 			
 			RuleSet r = data.getRuleSet();
-			IProfile p = dataset.getCollection().getProfileCollection(r.getType()).getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
+			IProfile p = dataset.getCollection().getProfileCollection()
+					.getProfile(data.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
 			BooleanProfile b = finder.getMatchingIndexes(p, r);
 			chart = MorphologyChartFactory.createBooleanProfileChart(p, b);
 		}
@@ -434,7 +437,8 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		if(data.hasRuleSetCollection()){
 			
 			RuleSetCollection c = data.getCollection();
-			IProfile p = dataset.getCollection().getProfileCollection(ProfileType.ANGLE).getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
+			IProfile p = dataset.getCollection().getProfileCollection()
+					.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 			
 			BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(), c.getRuleSets(data.getTag()));
 			

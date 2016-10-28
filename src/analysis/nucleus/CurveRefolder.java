@@ -29,6 +29,7 @@ import java.awt.Rectangle;
 
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
+import stats.Quartile;
 import utility.Constants;
 import components.AbstractCellularComponent;
 import components.ICellCollection;
@@ -106,9 +107,9 @@ public class CurveRefolder extends AnalysisWorker {
 		finest("Refolding nucleus of class: "+collection.getNucleusType().toString());
 		finest("Subject: "+refoldNucleus.getSourceFileName()+"-"+refoldNucleus.getNucleusNumber());
 
-		IProfile targetProfile 	= collection.getProfileCollection(ProfileType.ANGLE).getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
-		IProfile q25 			= collection.getProfileCollection(ProfileType.ANGLE).getProfile(Tag.REFERENCE_POINT, Constants.LOWER_QUARTILE);
-		IProfile q75 			= collection.getProfileCollection(ProfileType.ANGLE).getProfile(Tag.REFERENCE_POINT, Constants.UPPER_QUARTILE);
+		IProfile targetProfile 	= collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+		IProfile q25 			= collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.LOWER_QUARTILE);
+		IProfile q75 			= collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.UPPER_QUARTILE);
 
 		if(targetProfile==null){
 			throw new Exception("Null reference to target profile");
@@ -154,12 +155,12 @@ public class CurveRefolder extends AnalysisWorker {
 //			refoldNucleus.updateVerticallyRotatedNucleus();
 			// Update the bounding box to reflect the rotated nucleus position
 			Rectangle bounds = refoldNucleus.getVerticallyRotatedNucleus().createPolygon().getBounds();
-			double newWidth  = bounds.getWidth();
-			double newHeight = bounds.getHeight();
-			double newX      = bounds.getX();
-			double newY      = bounds.getY();
+			int newWidth  = (int) bounds.getWidth();
+			int newHeight = (int) bounds.getHeight();
+			int newX      = (int) bounds.getX();
+			int newY      = (int) bounds.getY();
 
-			double[] newPosition = { newX, newY, newWidth, newHeight };
+			int[] newPosition = { newX, newY, newWidth, newHeight };
 			refoldNucleus.setPosition(newPosition);
 			
 			collection.setConsensusNucleus(refoldNucleus);

@@ -91,8 +91,8 @@ public class ClusterAnalysisAction extends ProgressableAction {
 				
 				
 				// Create profile aggregates and collections for child
-				c.getProfileManager().createProfileCollections(false);
-				c.getProfileManager().recalculateProfileAggregates();
+//				c.getProfileManager().createProfileCollections(false);
+//				c.getProfileManager().recalculateProfileAggregates();
 				
 //				try {
 //					fine("Copying profiles to cluster");

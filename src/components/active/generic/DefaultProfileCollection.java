@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import analysis.profiles.ProfileException;
 import components.ICellCollection;
@@ -37,6 +38,7 @@ import components.nuclear.IBorderSegment;
 import components.nuclei.Nucleus;
 //import ij.IJ;
 
+import stats.Quartile;
 import utility.Constants;
 
 /**
@@ -61,8 +63,11 @@ public class DefaultProfileCollection implements IProfileCollection {
 	private Map<Tag, Integer>    indexes  = new HashMap<Tag, Integer>();
 	private List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
 	
-	private transient IProfileAggregate aggregate = null;
-	private transient ProfileCache profileCache           = new ProfileCache();
+	private transient int length;
+	private transient Map<ProfileType, IProfileAggregate> map = new HashMap<ProfileType, IProfileAggregate>();
+	
+//	private transient IProfileAggregate aggregate = null;
+//	private transient ProfileCache profileCache           = new ProfileCache();
 
 
 	/**
@@ -70,6 +75,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 */
 	public DefaultProfileCollection(){
 		indexes.put(Tag.REFERENCE_POINT, ZERO_INDEX);
+		
 	}
 			
 	/* (non-Javadoc)
@@ -111,31 +117,45 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getProfile(components.generic.BorderTagObject, double)
 	 */
 	@Override
-	public IProfile getProfile(Tag tag, double quartile) {
+	public IProfile getProfile(ProfileType type, Tag tag, double quartile) {
 		
 		if(tag==null){
-			throw new IllegalArgumentException("BorderTagObject is null");
+			throw new IllegalArgumentException("Tag cannot be null");
 		}
 		
 		if(  ! this.hasBorderTag(tag)){
-			throw new IllegalArgumentException("BorderTagObject is not present: "+tag.toString());
+			throw new IllegalArgumentException("Tag is not present: "+tag.toString());
 		}
-
-		// If the profile is not in the cache, make it and add to the cache
-		if( ! profileCache.hasProfile(tag, quartile)){
-
-			int indexOffset = indexes.get(tag);			
-			IProfile profile;
-			try {
-				profile = getAggregate().getQuartile(quartile).offset(indexOffset);
-			} catch (ProfileException e) {
-				error("Unable to get profile for "+tag+" quartile "+quartile, e);
-				return null;
-			}
-			profileCache.setProfile(tag, quartile, profile );
-
+		
+		IProfileAggregate agg = map.get(type);
+		IProfile p;
+		try {
+			p = agg.getQuartile(quartile);
+		} catch (ProfileException e) {
+			warn("Cannot get profile for "+quartile);
+			fine("Error fetching quartile", e);
+			return new FloatProfile(0, length);
 		}
-		return profileCache.getProfile(tag, quartile);	
+		
+		int offset = indexes.get(tag);
+		
+		return p.offset(offset);
+//
+//		// If the profile is not in the cache, make it and add to the cache
+//		if( ! profileCache.hasProfile(tag, quartile)){
+//
+//			int indexOffset = indexes.get(tag);			
+//			IProfile profile;
+//			try {
+//				profile = getAggregate().getQuartile(quartile).offset(indexOffset);
+//			} catch (ProfileException e) {
+//				error("Unable to get profile for "+tag+" quartile "+quartile, e);
+//				return null;
+//			}
+//			profileCache.setProfile(tag, quartile, profile );
+//
+//		}
+//		return profileCache.getProfile(tag, quartile);	
 		
 	}
 	
@@ -144,51 +164,73 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentedProfile(components.generic.BorderTagObject)
 	 */
 	@Override
-	public ISegmentedProfile getSegmentedProfile(Tag tag) {
+	public ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile) {
 		if(tag==null){
 			throw new IllegalArgumentException("A profile key is required");
 		}
+		
+		IProfile p = getProfile(type, tag, quartile);
 
-		ISegmentedProfile result = new SegmentedFloatProfile(getProfile(tag, Constants.MEDIAN), getSegments(tag));
+		ISegmentedProfile result = new SegmentedFloatProfile(p, getSegments(tag));
 		return result;
 	}
-
+	
+	
 	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#getAggregate()
+	 * @see components.generic.ISegmentedProfile#getSegmentIDs()
 	 */
 	@Override
-	public IProfileAggregate getAggregate(){
-		return aggregate;
+	public List<UUID> getSegmentIDs(){
+		List<UUID> result = new ArrayList<UUID>();
+		for(IBorderSegment seg : this.segments){
+			result.add(seg.getID());
+		}
+		return result;
 	}
+	
+	@Override
+	public IBorderSegment getSegmentAt(Tag tag, int position){
+		return this.getSegments(tag).get(position);
+	}
+
+//	/* (non-Javadoc)
+//	 * @see components.generic.IProfileCollection#getAggregate()
+//	 */
+//	@Override
+//	public IProfileAggregate getAggregate(){
+//		return aggregate;
+//	}
 	
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#hasAggregate()
 	 */
-	@Override
-	public boolean hasAggregate(){
-		return aggregate!=null;
-	}
+//	@Override
+//	public boolean hasAggregate(){
+//		return aggregate!=null;
+//	}
 	
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#length()
 	 */
 	@Override
 	public int length(){
-		if(this.hasAggregate()){
-			return aggregate.length();
-		} else {
-			
-			// fallback - check the segment total length
-			if(segments.isEmpty()){
-				return 0;
-			}
-			
-			if(segments.get(0)!=null){
-				return segments.get(0).getTotalLength();
-			} else{
-				return 0; // no data to be found
-			}
-		}
+		
+		return length;
+//		if(this.hasAggregate()){
+//			return aggregate.length();
+//		} else {
+//			
+//			// fallback - check the segment total length
+//			if(segments.isEmpty()){
+//				return 0;
+//			}
+//			
+//			if(segments.get(0)!=null){
+//				return segments.get(0).getTotalLength();
+//			} else{
+//				return 0; // no data to be found
+//			}
+//		}
 	}
 	
 	/* (non-Javadoc)
@@ -326,7 +368,6 @@ public class DefaultProfileCollection implements IProfileCollection {
 			return;
 		}
 		indexes.put(tag, offset);
-		profileCache.clear();
 	}
 	
 	/* (non-Javadoc)
@@ -377,41 +418,76 @@ public class DefaultProfileCollection implements IProfileCollection {
 
 		this.segments = result;
 	}
+	
+	@Override
+	public double[] getValuesAtPosition(ProfileType type, double position){
+		
+		double[] result;
+		try {
+			result = map.get(type).getValuesAtPosition(position);
+		} catch (Exception e) {
+			result = new double[length()];
+			for(int i=0; i<result.length; i++){
+				result[i] = 0;
+			}
+		}
+		
+		
+		
+		return result;
+	}
+	
+	@Override
+	public List<Double> getXKeyset(ProfileType type){
+		return map.get(type).getXKeyset();
+	}
 			
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#createProfileAggregate(components.CellCollection, components.generic.ProfileType, int)
 	 */
 	@Override
-	public void createProfileAggregate(ICellCollection collection, ProfileType type, int length) {
+	public void createProfileAggregate(ICellCollection collection, int length) {
 		if(length<=0){
 			throw new IllegalArgumentException("Requested profile aggregate length is zero or negative");
 		}
-		if(collection == null || type == null ){
+		if(collection == null){
 			throw new IllegalArgumentException("CellCollection or ProfileType is null");
 		}
-		profileCache.clear();
-		aggregate = new DefaultProfileAggregate(length, collection.size());
+		
+		this.length = length;
 
-		
-		try {
-		for(Nucleus n : collection.getNuclei()){
-			
-			switch(type){
-				case FRANKEN:
-				
-					aggregate.addValues(n.getProfile(type));
-				
-					break;
-				default:
-					aggregate.addValues(n.getProfile(type, Tag.REFERENCE_POINT)); 
-					break;
-			
+		for(ProfileType type : ProfileType.values()){
+
+			IProfileAggregate agg = new DefaultProfileAggregate(length, collection.size());
+
+			map.put(type, agg);
+			try {
+				for(Nucleus n : collection.getNuclei()){
+
+					switch(type){
+					case FRANKEN:
+
+						agg.addValues(n.getProfile(type));
+
+						break;
+					default:
+						agg.addValues(n.getProfile(type, Tag.REFERENCE_POINT)); 
+						break;
+
+					}
+				}
+
+			} catch(ProfileException e){
+				error("Error making aggregate", e);
 			}
+
 		}
-		
-		} catch(ProfileException e){
-			error("Error making aggregate", e);
-		}
+
+		//		profileCache.clear();
+		//		aggregate = new DefaultProfileAggregate(length, collection.size());
+
+
+
 		
 	}
 	
@@ -419,10 +495,10 @@ public class DefaultProfileCollection implements IProfileCollection {
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#createProfileAggregate(components.CellCollection, components.generic.ProfileType)
 	 */
-	@Override
-	public void createProfileAggregate(ICellCollection collection, ProfileType type) {
+//	@Override
+	public void createProfileAggregate(ICellCollection collection) {
 		
-		createProfileAggregate(collection, type, collection.getMedianArrayLength());
+		createProfileAggregate(collection, collection.getMedianArrayLength());
 
 	}
 		
@@ -475,15 +551,15 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getIQRProfile(components.generic.BorderTagObject)
 	 */
 	@Override
-	public IProfile getIQRProfile(Tag tag) {
+	public IProfile getIQRProfile(ProfileType type, Tag tag) {
 				
-		IProfile q25 = getProfile(tag, Constants.LOWER_QUARTILE);
-		IProfile q75 = getProfile(tag, Constants.UPPER_QUARTILE);
+		IProfile q25 = getProfile(type, tag, Quartile.LOWER_QUARTILE);
+		IProfile q75 = getProfile(type, tag, Quartile.UPPER_QUARTILE);
 		
 		if(q25==null || q75==null){ // if something goes wrong, return a zero profile
 			
 			warn("Problem calculating the IQR - setting to zero");			
-			return new FloatProfile(0, aggregate.length());
+			return new FloatProfile(0, length);
 		}
 		
 
@@ -494,10 +570,10 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#findMostVariableRegions(components.generic.BorderTagObject)
 	 */
 	@Override
-	public List<Integer> findMostVariableRegions(Tag tag) throws Exception {
+	public List<Integer> findMostVariableRegions(ProfileType type, Tag tag) throws Exception {
 		
 		// get the IQR and maxima
-		IProfile iqrProfile = getIQRProfile(tag);
+		IProfile iqrProfile = getIQRProfile(type, tag);
 //		iqrProfile.print();
 //		iqrProfile.smooth(3).print();
 		BooleanProfile maxima = iqrProfile.smooth(3).getLocalMaxima(3);
@@ -541,103 +617,11 @@ public class DefaultProfileCollection implements IProfileCollection {
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
-		profileCache = new ProfileCache();
+		map = new HashMap<ProfileType, IProfileAggregate>();
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 		out.defaultWriteObject();
 	}
-	
-	private class ProfileCache {
-				
-		/**
-		 * Store the median profiles from the profile aggregate to save calculation time with large datasets
-		 */
-		private Map<Tag, Map<Double, IProfile>> cache = new HashMap<Tag, Map<Double, IProfile>>();
-		
-		public ProfileCache(){
-			
-		}
-		
-		  /**
-		   * Store the given statistic
-		   * @param stat
-		   * @param scale
-		   * @param d
-		   */
-		  public void setProfile(Tag tag, Double quartile, IProfile profile){
 
-			  Map<Double, IProfile> map;
-
-			  if(cache.containsKey(tag)){
-
-				  map = cache.get(tag);
-
-			  } else {
-
-				  map = new HashMap<Double, IProfile>();
-				  cache.put(tag, map);
-
-			  }
-
-			  map.put(quartile, profile);
-//			  IJ.log("Added "+tag+" - "+quartile+" to profile cache");
-
-		  }
-
-		  /**
-		   * Get the given profile from the cache, or null if not present
-		 * @param tag
-		 * @param quartile
-		 * @return
-		 */
-		  public IProfile getProfile(Tag tag, Double quartile){
-
-			  if(this.hasProfile(tag, quartile)){
-//				  IJ.log("Found "+tag+" - "+quartile+" in profile cache");
-				  return cache.get(tag).get(quartile);
-
-			  } else  {
-				  
-				  return null;
-
-			  }
-		  }
-
-		  /**
-		   * Check if the given profile is in the cache
-		 * @param tag
-		 * @param quartile
-		 * @return
-		 */
-		public boolean hasProfile(Tag tag, Double quartile){
-			  Map<Double, IProfile> map;
-
-			  if(cache.containsKey(tag)){
-
-				  map = cache.get(tag);
-
-			  } else {
-
-				  return false;
-
-			  }
-
-			  if(map.containsKey(quartile)){
-
-				  return true;
-			  } else {
-				  return false;
-			  }
-
-		  }
-		  
-		  /**
-		   * Empty the cache - all values must be recalculated
-		   */
-		  public void clear(){
-			  cache = new HashMap<Tag, Map<Double, IProfile>>();
-		  }
-
-	}
 }

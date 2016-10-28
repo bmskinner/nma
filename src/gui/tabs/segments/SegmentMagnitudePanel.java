@@ -32,6 +32,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
+import stats.Quartile;
 import stats.SegmentStatistic;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.TableOptions;
@@ -80,9 +81,8 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel  {
 
 			List<IBorderSegment> segments = activeDataset()
 					.getCollection()
-					.getProfileCollection(ProfileType.ANGLE)
-					.getSegmentedProfile(Tag.REFERENCE_POINT)
-					.getOrderedSegments();
+					.getProfileCollection()
+					.getSegments(Tag.REFERENCE_POINT);
 
 			for(SegmentStatistic stat : SegmentStatistic.values()){
 

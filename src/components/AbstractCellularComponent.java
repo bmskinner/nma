@@ -47,9 +47,7 @@ import components.generic.XYPoint;
 import components.nuclear.IBorderPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
-import ij.IJ;
 import ij.ImageStack;
-import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
@@ -58,7 +56,6 @@ import io.ImageImporter.ImageImportException;
 import io.UnloadableImageException;
 import stats.PlottableStatistic;
 import stats.Quartile;
-import stats.Stats;
 import utility.AngleTools;
 import utility.Constants;
 
@@ -78,7 +75,7 @@ public abstract class AbstractCellularComponent
 	 * and {@link CellularComponent.HEIGHT}
 	 * @see AbstractCellularComponent#getPosition()
 	 */
-	private double[] position;
+	private int[] position;
 	
 	/**
 	 * The centre of the object.
@@ -90,14 +87,7 @@ public abstract class AbstractCellularComponent
 	 * be an enum implementing {@link PlottableStatistic}
 	 */
 	private Map<PlottableStatistic, Double> statistics = new HashMap<PlottableStatistic, Double>();
-		
-	/**
-	 * The bounding rectangle for an oriented component.
-	 * This is different to the original position bounds
-	 * for nuclei and any other components with an orientation point
-	 */
-	private Rectangle boundingRectangle;
-	
+			
 	
 	/**
 	 * The folder containing the sourceFile. This is detected
@@ -130,6 +120,10 @@ public abstract class AbstractCellularComponent
 	 */
 	private List<IBorderPoint> borderList    = new ArrayList<IBorderPoint>(0);
 	
+	/*
+	 * TRANSIENT FILEDS
+	 */
+	
 	private transient SoftReference<ImageProcessor> imageRef = new SoftReference<ImageProcessor>(null); // allow caching of images while memory is available
 	
 	
@@ -156,7 +150,7 @@ public abstract class AbstractCellularComponent
 	 * @param channel
 	 * @param position
 	 */
-	public AbstractCellularComponent(Roi roi, File f, int channel, double[] position){
+	public AbstractCellularComponent(Roi roi, File f, int channel, int[] position){
 		this(roi, f, channel);
 		this.position = position;
 	}
@@ -169,7 +163,7 @@ public abstract class AbstractCellularComponent
 	 * @param position
 	 * @param centreOfMass
 	 */
-	public AbstractCellularComponent(Roi roi, File f, int channel, double[] position, IPoint centreOfMass){
+	public AbstractCellularComponent(Roi roi, File f, int channel, int[] position, IPoint centreOfMass){
 		this(roi, f, channel, position);
 		this.centreOfMass = centreOfMass;
 	}
@@ -206,7 +200,7 @@ public abstract class AbstractCellularComponent
 		borderList.get(borderList.size()-1).setNextPoint(borderList.get(0));
 		borderList.get(0).setPrevPoint(borderList.get(borderList.size()-1));
 		
-		this.boundingRectangle = new Rectangle(polygon.getBounds());
+//		this.boundingRectangle = new Rectangle(polygon.getBounds());
 	}
 	
 	
@@ -227,7 +221,7 @@ public abstract class AbstractCellularComponent
 			}
 		}
 
-		this.boundingRectangle = a.getBounds();
+//		this.boundingRectangle = a.getBounds();
 		this.sourceFolder      = a.getSourceFolder();
 		this.sourceFileName    = a.getSourceFileName();
 		this.channel           = a.getChannel();
@@ -243,12 +237,12 @@ public abstract class AbstractCellularComponent
 	}
 	
 
-	public double[] getPosition() {
+	public int[] getPosition() {
 		return this.position;
 	}
 	
 	public Rectangle getBounds() {
-		return this.boundingRectangle;
+		return this.toShape().getBounds();
 	}
 	
 	/**
@@ -313,7 +307,7 @@ public abstract class AbstractCellularComponent
 			return null;	
 		}
 		
-		double[] positions = getPosition();
+		int[] positions = getPosition();
 		
 		int padding = CellularComponent.COMPONENT_BUFFER; // a border of pixels beyond the cell boundary
 		int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
@@ -330,13 +324,13 @@ public abstract class AbstractCellularComponent
 		return ip;
 	}
 
-	public void setPosition(double[] position) {
+	public void setPosition(int[] position) {
 		this.position = position;
 	}
 
-	public void setBoundingRectangle(Rectangle boundingRectangle) {
-		this.boundingRectangle = boundingRectangle;
-	}
+//	public void setBoundingRectangle(Rectangle boundingRectangle) {
+//		this.boundingRectangle = boundingRectangle;
+//	}
 
 
 	public void setSourceFileName(String name) {
@@ -459,10 +453,6 @@ public abstract class AbstractCellularComponent
 		this.centreOfMass = centreOfMass;
 	}
 
-//	@Override
-//	public void setCentreOfMass(XYPoint centreOfMass) {
-//		moveCentreOfMass(centreOfMass);
-//	}
 	
 	/*
 	 * 
@@ -493,7 +483,6 @@ public abstract class AbstractCellularComponent
 			}
 			i++;
 		}
-		IJ.log("Error: cannot find border point in Nucleus.getIndex()");
 		return -1; // default if no match found
 	}
 
@@ -507,6 +496,8 @@ public abstract class AbstractCellularComponent
 	}
 
 	public List<IBorderPoint> getBorderList(){
+		
+		return this.borderList;
 		
 		/*
 		 * If key points only are stored, the full border list must be constructed
@@ -530,34 +521,38 @@ public abstract class AbstractCellularComponent
 //			result.add(point);
 //		}
 		
-		List<IBorderPoint> result = new ArrayList<IBorderPoint>(borderList.size());
-		for(IBorderPoint n : borderList){
-			
-			IBorderPoint point = new DefaultBorderPoint(n);			
-			result.add(point);
-		}
+		/*
+		 * Old method
+		 */
 		
-		// Link points
-				
-		for(int i=0; i<result.size(); i++){
-			IBorderPoint point = result.get(i);
-			
-			if(i>0 && i<result.size()-1){
-				point.setNextPoint(result.get(i+1));
-				point.setPrevPoint(result.get(i-1));
-			}
-		}
-		
-		// Set first and last
-		IBorderPoint first = result.get(0);
-		first.setNextPoint(result.get(1));
-		first.setPrevPoint(result.get(result.size()-1));
-		
-		IBorderPoint last = result.get(result.size()-1);
-		last.setNextPoint(result.get(0));
-		last.setPrevPoint(result.get(result.size()-2));
-		
-		return result;
+//		List<IBorderPoint> result = new ArrayList<IBorderPoint>(borderList.size());
+//		for(IBorderPoint n : borderList){
+//			
+//			IBorderPoint point = new DefaultBorderPoint(n);			
+//			result.add(point);
+//		}
+//		
+//		// Link points
+//				
+//		for(int i=0; i<result.size(); i++){
+//			IBorderPoint point = result.get(i);
+//			
+//			if(i>0 && i<result.size()-1){
+//				point.setNextPoint(result.get(i+1));
+//				point.setPrevPoint(result.get(i-1));
+//			}
+//		}
+//		
+//		// Set first and last
+//		IBorderPoint first = result.get(0);
+//		first.setNextPoint(result.get(1));
+//		first.setPrevPoint(result.get(result.size()-1));
+//		
+//		IBorderPoint last = result.get(result.size()-1);
+//		last.setNextPoint(result.get(0));
+//		last.setPrevPoint(result.get(result.size()-2));
+//		
+//		return result;
 	}
 	
 	public List<IBorderPoint> getOriginalBorderList(){
@@ -655,43 +650,48 @@ public abstract class AbstractCellularComponent
 	 */
 	
 	public double getMaxX(){
-		double d = 0;
-		for(int i=0;i<getBorderLength();i++){
-			if(this.borderList.get(i).getX()>d){
-				d = this.borderList.get(i).getX();
-			}
-		}
-		return d;
+		
+		return this.toShape().getBounds().getMaxX();
+//		double d = 0;
+//		for(int i=0;i<getBorderLength();i++){
+//			if(this.borderList.get(i).getX()>d){
+//				d = this.borderList.get(i).getX();
+//			}
+//		}
+//		return d;
 	}
 
 	public double getMinX(){
-		double d = getMaxX();
-		for(int i=0;i<getBorderLength();i++){
-			if(this.borderList.get(i).getX()<d){
-				d = this.borderList.get(i).getX();
-			}
-		}
-		return d;
+		return this.toShape().getBounds().getMinX();
+//		double d = getMaxX();
+//		for(int i=0;i<getBorderLength();i++){
+//			if(this.borderList.get(i).getX()<d){
+//				d = this.borderList.get(i).getX();
+//			}
+//		}
+//		return d;
 	}
 
 	public double getMaxY(){
-		double d = 0;
-		for(int i=0;i<getBorderLength();i++){
-			if(this.borderList.get(i).getY()>d){
-				d = this.borderList.get(i).getY();
-			}
-		}
-		return d;
+		return this.toShape().getBounds().getMaxY();
+//		double d = 0;
+//		for(int i=0;i<getBorderLength();i++){
+//			if(this.borderList.get(i).getY()>d){
+//				d = this.borderList.get(i).getY();
+//			}
+//		}
+//		return d;
 	}
 
 	public double getMinY(){
-		double d = getMaxY();
-		for(int i=0;i<getBorderLength();i++){
-			if(this.borderList.get(i).getY()<d){
-				d = this.borderList.get(i).getY();
-			}
-		}
-		return d;
+		return this.toShape().getBounds().getMinY();
+//		double d = getMaxY();
+//		for(int i=0;i<getBorderLength();i++){
+//			if(this.borderList.get(i).getY()<d){
+//				d = this.borderList.get(i).getY();
+//			}
+//		}
+//		return d;
 	}
 	
 	/*
@@ -762,7 +762,7 @@ public abstract class AbstractCellularComponent
 		this.centreOfMass = newCentreOfMass;
 
 		// Update the bounding rectangle
-		this.boundingRectangle = this.createPolygon().getBounds();
+//		this.boundingRectangle = this.createPolygon().getBounds();
 	}
 	
 	/**
@@ -813,32 +813,27 @@ public abstract class AbstractCellularComponent
 		
 		// Calculate the difference between the min x and min y of the 
 		// borders, and apply this offset
-		
-		
-		double minX = this.getBounds().getX();
-		double minY = this.getBounds().getY();
-		
-		double diffX = position[CellularComponent.X_BASE] - minX;
-		double diffY = position[CellularComponent.Y_BASE] - minY;
+				
+		double diffX = position[CellularComponent.X_BASE] - getMinX();
+		double diffY = position[CellularComponent.Y_BASE] - getMinY();
 		
 		return toOffsetShape(diffX, diffY);
 	}
 	
 	public List<IPoint> getPixelsAsPoints(){
-		
-		Rectangle roiBounds = this.getBounds();
-		
-		
+			
 		// Get a list of all the points within the ROI
 		List<IPoint> result = new ArrayList<IPoint>(0);
 		
+		Rectangle b = this.toShape().getBounds();
+		
 		// get the bounding box of the roi
 		// make a list of all the pixels in the roi
-		int minX = (int) roiBounds.getX();
-		int maxX = minX + (int) roiBounds.getWidth();
+		int minX = (int) b.getMinX();
+		int maxX = (int) (minX + b.getWidth());
 		
-		int minY = (int) roiBounds.getY();
-		int maxY = minY + (int) roiBounds.getHeight();
+		int minY = (int) b.getMinY();
+		int maxY = minY + (int) b.getHeight();
 		
 		
 //		IJ.log("    X base: "+minX
@@ -1022,7 +1017,6 @@ public abstract class AbstractCellularComponent
 		for(int i = 0; i<this.getBorderLength();i++){
 			
 			double angle = this.getCentreOfMass().findAngle(p, this.getBorderPoint(i));
-//			double angle = new AngleTools().findAngle(p, this.getCentreOfMass(), this.getBorderPoint(i));
 
 			if(Math.abs(180 - angle) < minAngle){
 				minDeltaYIndex = i;
@@ -1105,15 +1099,30 @@ public abstract class AbstractCellularComponent
 			fine("Unexpected exception", e);
 			return;
 		}
-				
-		position     = (double[]) in.readObject();
 		
+		// The position has changed from double[] to int[]  since 1.13.3
+		Object posArray = in.readObject();
+		
+		position = new int[4];
+		
+		if(posArray instanceof double[]){
+			double[] array = (double[]) posArray;
+			for(int i=0; i<array.length; i++){
+				position[i] =  (int) array[i];
+			}
+			
+		} else {
+			int[] array = (int[]) posArray;
+			for(int i=0; i<array.length; i++){
+				position[i] = array[i];
+			}
+		}
+						
 		Object o = in.readObject();
-		
-//		log(o.getClass().getSimpleName());
-		
+				
 		boolean newFormat = false;
 		
+		// The border points are FloatPoints changed from XYPoints since 1.13.3
 		if(o instanceof FloatPoint){
 			centreOfMass = (IPoint) o;
 			newFormat = true;
@@ -1123,8 +1132,16 @@ public abstract class AbstractCellularComponent
 		}
 		
 		statistics   = (Map<PlottableStatistic, Double>) in.readObject();
-		boundingRectangle = (Rectangle) in.readObject();
-		sourceFolder      = (File) in.readObject();
+		
+		Object nextObject = in.readObject();
+		
+		// The bounding rectangle is no longer stored since 1.13.3
+		if(nextObject instanceof Rectangle){
+			sourceFolder      = (File) in.readObject();
+		} else {
+			sourceFolder      = (File) nextObject;
+		}
+
 		sourceFileName    = (String) in.readObject();
 		channel           = in.readInt();
 		scale             = in.readDouble();
@@ -1142,6 +1159,7 @@ public abstract class AbstractCellularComponent
     			
     		} else {
 //    			log("Detected old format border list");
+    			// The constructor will convert down to float
     			next.setX(in.readDouble());
         		next.setY(in.readDouble());
     		}
@@ -1200,7 +1218,7 @@ public abstract class AbstractCellularComponent
 		out.writeObject(position);
 		out.writeObject(centreOfMass);
 		out.writeObject(statistics);
-		out.writeObject(boundingRectangle);
+//		out.writeObject(boundingRectangle);
 		out.writeObject(sourceFolder);
 		out.writeObject(sourceFileName);
 		out.writeInt(channel);

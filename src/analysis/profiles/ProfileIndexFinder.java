@@ -22,6 +22,7 @@ package analysis.profiles;
 
 import java.util.List;
 
+import stats.Quartile;
 import utility.Constants;
 import analysis.profiles.Rule.RuleType;
 import components.ICellCollection;
@@ -206,16 +207,16 @@ public class ProfileIndexFinder implements Loggable {
 	public BooleanProfile getMatchingProfile(final ICellCollection collection, final List<RuleSet> list){
 		// Make a 'true' profile
 		BooleanProfile indexes = new BooleanProfile(collection
-				.getProfileCollection(ProfileType.ANGLE)
-				.getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN), true);
+				.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN), true);
 
 
 		for(RuleSet r : list){
 
 			// Get the correct profile for the RuleSet
 			IProfile p = collection
-					.getProfileCollection(r.getType())
-					.getProfile(Tag.REFERENCE_POINT, Constants.MEDIAN);
+					.getProfileCollection()
+					.getProfile(r.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
 			// Apply the rule, and update the result profile
 			BooleanProfile matchingIndexes = getMatchingIndexes(p, r);
