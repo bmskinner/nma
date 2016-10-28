@@ -28,8 +28,9 @@ import components.generic.IPoint;
 import components.generic.MeasurementScale;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
+import components.nuclear.INuclearSignal;
+import components.nuclear.ISignalCollection;
 import components.nuclear.NuclearSignal;
-import components.nuclear.SignalCollection;
 import components.nuclei.Nucleus;
 import logging.Loggable;
 
@@ -49,10 +50,10 @@ public class SignalAnalyser implements Loggable {
 	*/
 	public void calculateSignalDistancesFromCoM(Nucleus n){
 
-		for(List<NuclearSignal> signals : n.getSignalCollection().getSignals()){
+		for(List<INuclearSignal> signals : n.getSignalCollection().getSignals()){
 
 			if(!signals.isEmpty()){
-				for(NuclearSignal s : signals){
+				for(INuclearSignal s : signals){
 					double distance = n.getCentreOfMass().getLengthTo(s.getCentreOfMass());
 					s.setStatistic(SignalStatistic.DISTANCE_FROM_COM, distance);
 				}
@@ -67,14 +68,14 @@ public class SignalAnalyser implements Loggable {
 	 */
 	public void calculateFractionalSignalDistancesFromCoM(Nucleus n){
 
-		SignalCollection signalCollection = n.getSignalCollection();
+		ISignalCollection signalCollection = n.getSignalCollection();
 		this.calculateClosestBorderToSignals(n);
 
-		for(List<NuclearSignal> signals : signalCollection.getSignals()){
+		for(List<INuclearSignal> signals : signalCollection.getSignals()){
 
 			if(!signals.isEmpty()){
 
-				for(NuclearSignal signal : signals){
+				for(INuclearSignal signal : signals){
 
 					// get the line equation
 					Equation eq = new Equation(signal.getCentreOfMass(), n.getCentreOfMass());
@@ -114,12 +115,12 @@ public class SignalAnalyser implements Loggable {
 	the nuclear ROI that is closest to the signal centre of mass.
 	 */
 	private void calculateClosestBorderToSignals(Nucleus n) {
-		SignalCollection signalCollection = n.getSignalCollection();
-		for(List<NuclearSignal> signals : signalCollection.getSignals()){
+		ISignalCollection signalCollection = n.getSignalCollection();
+		for(List<INuclearSignal> signals : signalCollection.getSignals()){
 
 			if(!signals.isEmpty()){
 
-				for(NuclearSignal s : signals){
+				for(INuclearSignal s : signals){
 
 					int minIndex = 0;
 					double minDistance = n.getStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);

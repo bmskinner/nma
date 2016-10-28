@@ -33,12 +33,13 @@ import javax.swing.table.TableModel;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
 import analysis.IAnalysisDataset;
-import charting.options.TableOptions;
+import charting.options.DefaultTableOptions;
 import components.ICell;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
+import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusType;
@@ -62,7 +63,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public TableModel createCellInfoTable(TableOptions options) {
+	public TableModel createCellInfoTable(DefaultTableOptions options) {
 		
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -212,7 +213,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 			fieldNames.add("Number of signals");
 			rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
 
-			for(NuclearSignal s : n.getSignalCollection().getSignals(signalGroup)){
+			for(INuclearSignal s : n.getSignalCollection().getSignals(signalGroup)){
 				addSignalStatisticsToTable(fieldNames, rowData, s );
 			}			
 
@@ -226,7 +227,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 * @param rowData
 	 * @param s
 	 */
-	private void addSignalStatisticsToTable(List<Object> fieldNames,  List<Object> rowData, NuclearSignal s){
+	private void addSignalStatisticsToTable(List<Object> fieldNames,  List<Object> rowData, INuclearSignal s){
 		
 //		DecimalFormat df = new DecimalFormat("#0.00"); 
 		

@@ -39,7 +39,7 @@ import charting.charts.MorphologyChartFactory;
 import charting.charts.overlays.RectangleOverlayObject;
 import charting.charts.panels.ExportableChartPanel;
 import charting.charts.panels.PositionSelectionChartPanel;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 
 /**
@@ -63,7 +63,7 @@ public abstract class DualChartPanel
 	
 	public DualChartPanel(){
 		
-		ChartOptions options = new ChartOptionsBuilder()
+		DefaultChartOptions options = new ChartOptionsBuilder()
 			.setProfileType(ProfileType.ANGLE)
 			.setShowXAxis(false)
 			.setShowYAxis(false)

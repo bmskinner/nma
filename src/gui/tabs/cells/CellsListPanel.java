@@ -22,8 +22,8 @@ import javax.swing.tree.TreePath;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.options.ChartOptions;
-import charting.options.TableOptions;
+import charting.options.DefaultChartOptions;
+import charting.options.DefaultTableOptions;
 import analysis.IAnalysisDataset;
 import components.Cell;
 import components.ICell;
@@ -207,12 +207,12 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception {
+	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception {
 		return null;
 	}
 
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 		return null;
 	}
 

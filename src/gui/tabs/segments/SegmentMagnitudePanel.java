@@ -35,7 +35,7 @@ import javax.swing.table.TableModel;
 import stats.Quartile;
 import stats.SegmentStatistic;
 import charting.datasets.AnalysisDatasetTableCreator;
-import charting.options.TableOptions;
+import charting.options.DefaultTableOptions;
 import charting.options.TableOptionsBuilder;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -92,7 +92,7 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel  {
 
 					
 					
-					TableOptions options = new TableOptionsBuilder()
+					DefaultTableOptions options = new TableOptionsBuilder()
 					.setDatasets(getDatasets())
 					.addStatistic(stat)
 					.setSegPosition(seg.getPosition())
@@ -128,7 +128,7 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel  {
 		
 	}
 	
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
 		return new AnalysisDatasetTableCreator(options).createMagnitudeStatisticTable();
 	}
 			

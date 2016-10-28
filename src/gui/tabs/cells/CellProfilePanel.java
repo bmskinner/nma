@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
@@ -134,7 +134,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 				ISegmentedProfile profile = this.getCellModel().getCell().getNucleus().getProfile(type, Tag.REFERENCE_POINT);
 				
 				
-				ChartOptions options = new ChartOptionsBuilder()
+				DefaultChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.setCell(this.getCellModel().getCell())
 					.setNormalised(false)
@@ -157,7 +157,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 				 * Create the chart for the range panel
 				 */
 				
-				ChartOptions rangeOptions = new ChartOptionsBuilder()
+				DefaultChartOptions rangeOptions = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.setCell(this.getCellModel().getCell())
 					.setNormalised(false)
@@ -210,7 +210,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 
 
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 		return new MorphologyChartFactory(options).makeIndividualNucleusProfileChart( );
 	}
 	

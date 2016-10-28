@@ -3,7 +3,7 @@ package gui.tabs.segments;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import components.generic.ProfileType;
 import gui.tabs.profiles.ProfileDisplayPanel;
 
@@ -16,7 +16,7 @@ public class SegmentProfilePanel extends ProfileDisplayPanel {
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 		options.setShowMarkers(false);
 		options.setShowAnnotations(false);
 		options.setShowLines(true);

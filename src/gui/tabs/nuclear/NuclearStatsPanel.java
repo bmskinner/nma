@@ -13,10 +13,10 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.datasets.AnalysisDatasetTableCreator;
-import charting.options.ChartOptions;
-import charting.options.TableOptions;
+import charting.options.DefaultChartOptions;
+import charting.options.DefaultTableOptions;
 import charting.options.TableOptionsBuilder;
-import charting.options.TableOptions.TableType;
+import charting.options.DefaultTableOptions.TableType;
 import gui.GlobalOptions;
 import gui.components.ExportableTable;
 import gui.tabs.DetailPanel;
@@ -42,12 +42,12 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
 		
 		return new AnalysisDatasetTableCreator(options).createAnalysisTable();
 	}
@@ -89,7 +89,7 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 //			measurementUnitSettingsPanel.setEnabled(false);
 //		}
 		
-		TableOptions options = new TableOptionsBuilder()
+		DefaultTableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.ANALYSIS_STATS)
 			.setScale(GlobalOptions.getInstance().getScale())
@@ -122,7 +122,7 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 			scrollPane.setViewportView(panel);
 			scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
 			
-			TableOptions options = new TableOptionsBuilder()
+			DefaultTableOptions options = new TableOptionsBuilder()
 			.setDatasets(null)
 			.setType(TableType.ANALYSIS_STATS)
 			.build();

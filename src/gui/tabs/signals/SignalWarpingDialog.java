@@ -52,7 +52,7 @@ import components.ICell;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.charts.panels.ExportableChartPanel;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
@@ -107,7 +107,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		this.add(header, BorderLayout.NORTH);
 		finest("Created header");
 		
-		ChartOptions options = new ChartOptionsBuilder()
+		DefaultChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(datasets.get(0))
 			.build();
 		
@@ -206,7 +206,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		progressBar.setValue(0);
 		
 		IAnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
-		AnalysisDataset targetDataset = datasetBoxTwo.getSelectedDataset();
+		IAnalysisDataset targetDataset = datasetBoxTwo.getSelectedDataset();
 		
 //		SignalIDToGroup group    = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
 		boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
@@ -236,7 +236,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		} catch (Exception e) {
 			error("Error running warping", e);
 			
-			ChartOptions options = new ChartOptionsBuilder()
+			DefaultChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(targetDataset)
 			.build();
 		
@@ -294,7 +294,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		JFreeChart chart = null;
 		if(straightenMeshBox.isSelected()){
 			
-			ChartOptions options = new ChartOptionsBuilder()
+			DefaultChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(datasetBoxTwo.getSelectedDataset())
 					.setShowMesh(true)
 					.setStraightenMesh(true)
@@ -310,7 +310,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 		} else {
 			
-			ChartOptions options = new ChartOptionsBuilder()
+			DefaultChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(datasetBoxTwo.getSelectedDataset())
 			.build();
 		
@@ -492,7 +492,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 								
 				boolean straighten = straightenMeshBox.isSelected();
 				
-				ChartOptions options = new ChartOptionsBuilder()
+				DefaultChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(datasetBoxTwo.getSelectedDataset())
 					.setShowXAxis(false)
 					.setShowYAxis(false)

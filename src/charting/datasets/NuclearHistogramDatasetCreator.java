@@ -27,7 +27,7 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import utility.ArrayConverter;
 import utility.Constants;
 import utility.ArrayConverter.ArrayConversionException;
@@ -53,9 +53,9 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 	public static final int MAX_ROUNDED = 1;
 	public static final int STEP_SIZE   = 2;
 	
-	protected final ChartOptions options;
+	protected final DefaultChartOptions options;
 		
-	public NuclearHistogramDatasetCreator(ChartOptions o){
+	public NuclearHistogramDatasetCreator(DefaultChartOptions o){
 		if(o==null){
 			throw new IllegalArgumentException("Options cannot be null");
 		}

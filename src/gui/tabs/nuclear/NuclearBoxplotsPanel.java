@@ -37,7 +37,7 @@ import stats.NucleusStatistic;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.charts.panels.ViolinChartPanel;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 
 @SuppressWarnings("serial")
@@ -51,7 +51,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 			for(NucleusStatistic stat : NucleusStatistic.values()){
 				
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
-				ChartOptions options = builder.setDatasets(getDatasets())
+				DefaultChartOptions options = builder.setDatasets(getDatasets())
 					.addStatistic(stat)
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -114,7 +114,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 //				panel.revalidate();
 				
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
-				ChartOptions options = builder.setDatasets(getDatasets())
+				DefaultChartOptions options = builder.setDatasets(getDatasets())
 					.addStatistic(stat)
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())

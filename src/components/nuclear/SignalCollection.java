@@ -44,46 +44,39 @@ import components.generic.MeasurementScale;
  *  they came from and (c) the channel within the file they came from 
  * and links to the channel number in the ImageStack for the nucleus.
  */
-public class SignalCollection implements Serializable, Loggable {
+public class SignalCollection implements ISignalCollection {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Holds the signals
 	 */
-	private Map<UUID, List<NuclearSignal>> collection = new LinkedHashMap<UUID, List<NuclearSignal>>();
+	private Map<UUID, List<INuclearSignal>> collection = new LinkedHashMap<UUID, List<INuclearSignal>>();
 	
 	// the files that hold the image for the given channel
 	private Map<UUID, File> sourceFiles = new HashMap<UUID, File>(0);
 	
 	// the channel with the signal in the source image
 	private Map<UUID, Integer> sourceChannels = new HashMap<UUID, Integer>(0);
-	
-	/**
-	 * Holds the names of the channels for presentation purposes
-	 */
-//	private Map<UUID, String > names = new HashMap<UUID, String>();
-	
-	public SignalCollection(){
 		
-	}
+	public SignalCollection(){}
 	
 	/**
 	 * Duplicate a signal collection
 	 * @param s
 	 */
-	public SignalCollection(SignalCollection s){
+	public SignalCollection(ISignalCollection s){
 				
-		for(UUID group : s.collection.keySet() ){
+		for(UUID group : s.getSignalGroupIDs()){
 
 //			String groupName = s.names.get(group);
-			int channel      = s.sourceChannels.get(group);
-			File f           = new File(s.sourceFiles.get(group).getAbsolutePath());
+			int channel      = s.getSourceChannel(group);
+			File f           = new File(s.getSourceFile(group).getAbsolutePath());
 			
-			List<NuclearSignal> list = new ArrayList<NuclearSignal>();
+			List<INuclearSignal> list = new ArrayList<INuclearSignal>();
 			
-			for(NuclearSignal signal : s.getSignals(group)){
-				list.add(  new NuclearSignal(signal) );
+			for(INuclearSignal signal : s.getSignals(group)){
+				list.add(  signal.duplicate());
 			}
 			
 			collection.put(    group, list);
@@ -94,14 +87,11 @@ public class SignalCollection implements Serializable, Loggable {
 
 	}
 	
-	/**
-	 * Add a list of nuclear signals to the collection
-	 * @param list the signals
-	 * @param groupID the group id - this should be consistent across all nuclei in a dataset
-	 * @param sourceFile the file the signals originated from
-	 * @param sourceChannel the channel the signals originated from
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#addSignalGroup(java.util.List, java.util.UUID, java.io.File, int)
 	 */
-	public void addSignalGroup(List<NuclearSignal> list, UUID groupID, File sourceFile, int sourceChannel){
+	@Override
+	public void addSignalGroup(List<INuclearSignal> list, UUID groupID, File sourceFile, int sourceChannel){
 		if(list==null || Integer.valueOf(sourceChannel)==null || sourceFile==null || groupID==null){
 			throw new IllegalArgumentException("Signal list or channel is null");
 		}
@@ -111,15 +101,18 @@ public class SignalCollection implements Serializable, Loggable {
 		sourceChannels.put(groupID, sourceChannel);
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#getSignalGroupIDs()
+	 */
+	@Override
 	public Set<UUID> getSignalGroupIDs(){
 		return collection.keySet();
 	}
 	
-	/**
-	 * Change the id of the given signal group
-	 * @param signalGroup
-	 * @param newID
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#updateSignalGroupID(java.util.UUID, java.util.UUID)
 	 */
+	@Override
 	public void updateSignalGroupID(UUID oldID, UUID newID){
 		
 		if( ! collection.containsKey(oldID)){
@@ -127,7 +120,7 @@ public class SignalCollection implements Serializable, Loggable {
 			return;
 		}
 		
-		List<NuclearSignal> list = collection.get(oldID);
+		List<INuclearSignal> list = collection.get(oldID);
 		File sourceFile          = sourceFiles.get(oldID);
 		int sourceChannel        = sourceChannels.get(oldID);
 //		String name              = names.get(oldID);
@@ -147,11 +140,10 @@ public class SignalCollection implements Serializable, Loggable {
 		
 	}
 	
-	/**
-	 * Get the group number of a signal group in the collection.
-	 * @param signalGroup
-	 * @return the group number, or zero if not present
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#getSignalGroupNumber(java.util.UUID)
 	 */
+	@Override
 	public int getSignalGroupNumber(UUID signalGroup){
 		int i=0;
 		for(UUID id : collection.keySet()){
@@ -163,22 +155,20 @@ public class SignalCollection implements Serializable, Loggable {
 		return i;
 	}
 	
-	/**
-	 * Add a single signal to the given signal group
-	 * @param n the signal
-	 * @param signalGroup the signal group
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#addSignal(components.nuclear.NuclearSignal, java.util.UUID)
 	 */
-	public void addSignal(NuclearSignal n, UUID signalGroup){
+	@Override
+	public void addSignal(INuclearSignal n, UUID signalGroup){
 		checkSignalGroup(signalGroup);
 		collection.get(signalGroup).add(n);
 	}
 	
-	/**
-	 * Append a list of signals to the given signal group
-	 * @param list the signals
-	 * @param signalGroup the signal group
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#addSignals(java.util.List, java.util.UUID)
 	 */
-	public void addSignals(List<NuclearSignal> list, UUID signalGroup){
+	@Override
+	public void addSignals(List<INuclearSignal> list, UUID signalGroup){
 		if(list==null){
 			throw new IllegalArgumentException("Signal is null");
 		}
@@ -201,31 +191,28 @@ public class SignalCollection implements Serializable, Loggable {
 //	}
 	
 	
-	/**
-	 * Get all the signals in all signal groups, as a list of lists.
-	 * Fetches the actual signals, not a copy
-	 * @return the list of signal lists
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#getSignals()
 	 */
-	public List<List<NuclearSignal>> getSignals(){
-		ArrayList<List<NuclearSignal>> result = new ArrayList<List<NuclearSignal>>(0);
+	@Override
+	public List<List<INuclearSignal>> getSignals(){
+		ArrayList<List<INuclearSignal>> result = new ArrayList<List<INuclearSignal>>(0);
 		for(UUID signalGroup : this.getSignalGroupIDs()){
 			result.add(getSignals(signalGroup));
 		}
 		return result;
 	}
 	
-	/**
-	 * Get the signals in the given group. Fetches the actual signals, 
-	 * not a copy
-	 * @param signalGroup the signal group
-	 * @return a list of signals
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#getSignals(java.util.UUID)
 	 */
-	public List<NuclearSignal> getSignals(UUID signalGroup){
+	@Override
+	public List<INuclearSignal> getSignals(UUID signalGroup){
 //		checkSignalGroup(signalGroup);
 		if(this.hasSignal(signalGroup)){
 			return this.collection.get(signalGroup);
 		} else {
-			return new ArrayList<NuclearSignal>(0);
+			return new ArrayList<INuclearSignal>(0);
 		}
 	}
 	
@@ -243,29 +230,26 @@ public class SignalCollection implements Serializable, Loggable {
 //		}
 //	}
 	
-	/**
-	 * Get the file containing the signals in the given signal group
-	 * @param signalGroup the group id
-	 * @return the File with the signals
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#getSourceFile(java.util.UUID)
 	 */
+	@Override
 	public File getSourceFile(UUID signalGroup){
 		return this.sourceFiles.get(signalGroup);
 	}
 	
-	/**
-	 * Update the source file for the given signal group
-	 * @param signalGroup
-	 * @param f
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#updateSourceFile(java.util.UUID, java.io.File)
 	 */
+	@Override
 	public void updateSourceFile(UUID signalGroup, File f){
 		this.sourceFiles.put(signalGroup, f);
 	}
 	
-	/**
-	 * Get the channel containing the signals in the given signal group
-	 * @param signalGroup the group id
-	 * @return the RGB channel with the signals (0 if greyscale)
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#getSourceChannel(java.util.UUID)
 	 */
+	@Override
 	public int getSourceChannel(UUID signalGroup){
 		return this.sourceChannels.get(signalGroup);
 	}
@@ -314,18 +298,16 @@ public class SignalCollection implements Serializable, Loggable {
 //		return result;
 //	}
 	
-	/**
-	 * Get the channel of the source image containing the given signal
-	 * group
-	 * @param signalGroup the group
-	 * @return the RGB channel (0 if greyscale)
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#getSignalChannel(java.util.UUID)
 	 */
-	public int getSignalChannel(UUID signalGroup){
-		if(signalGroup==null){
-			throw new IllegalArgumentException("Channel is null");
-		}
-		return this.sourceChannels.get(signalGroup);
-	}
+//	@Override
+//	public int getSignalChannel(UUID signalGroup){
+//		if(signalGroup==null){
+//			throw new IllegalArgumentException("Channel is null");
+//		}
+//		return this.sourceChannels.get(signalGroup);
+//	}
 	
 //	/**
 //	 * Get the names of signal groups which have been named; ignores unnamed channels
@@ -343,18 +325,18 @@ public class SignalCollection implements Serializable, Loggable {
 //		return names.keySet();
 //	}
 	
-	/**
-	 * Get the number of signal groups
-	 * @return the number of signal groups
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#numberOfSignalGroups()
 	 */
-	public int numberOfSignalGroups(){
+	@Override
+	public int size(){
 		return collection.size();
 	}
 	
-	/**
-	 * Get the total number of signals in all groups
-	 * @return the count
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#numberOfSignals()
 	 */
+	@Override
 	public int numberOfSignals(){
 		int count=0;
 		for(UUID group : collection.keySet()){
@@ -363,11 +345,10 @@ public class SignalCollection implements Serializable, Loggable {
 		return count;
 	}
 	
-	/**
-	 * Check if the signal group contains signals in this collection
-	 * @param signalGroup the group id
-	 * @return yes or no
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#hasSignal(java.util.UUID)
 	 */
+	@Override
 	public boolean hasSignal(UUID signalGroup){
 		if(signalGroup==null){
 			throw new IllegalArgumentException("Signal group is null");
@@ -381,11 +362,10 @@ public class SignalCollection implements Serializable, Loggable {
 		return true;
 	}
 	
-	/**
-	 * Check if the signal group contains signals in this collection
-	 * @param signalGroup the group id
-	 * @return yes or no
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#hasSignal()
 	 */
+	@Override
 	public boolean hasSignal(){
 		
 		return  !collection.isEmpty();
@@ -410,11 +390,10 @@ public class SignalCollection implements Serializable, Loggable {
 //		}
 //	}
 	
-	/**
-	 * Get the total number of signals in a given channel
-	 * @param channel the channel
-	 * @return the count
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#numberOfSignals(java.util.UUID)
 	 */
+	@Override
 	public int numberOfSignals(UUID signalGroup){
 		if(signalGroup==null){
 			return 0;
@@ -437,19 +416,21 @@ public class SignalCollection implements Serializable, Loggable {
 //		return numberOfSignals(names.get(signalGroupName));
 //	}
 	
-	/**
-	 * Remove all signals from the collection
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#removeSignals()
 	 */
+	@Override
 	public void removeSignals(){
-		collection     = new LinkedHashMap<UUID, List<NuclearSignal>>();
+		collection     = new LinkedHashMap<UUID, List<INuclearSignal>>();
 		sourceFiles    = new HashMap<UUID, File>(0);
 		sourceChannels = new HashMap<UUID, Integer>(0);
 //		names          = new HashMap<UUID, String>();
 	}
 	
-	/**
-	 * Remove the given signal group from the collection
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#removeSignals(java.util.UUID)
 	 */
+	@Override
 	public void removeSignals(UUID signalGroup){
 		collection.remove(signalGroup);
 		sourceFiles.remove(signalGroup);
@@ -579,30 +560,13 @@ public class SignalCollection implements Serializable, Loggable {
 		}
 	}
 	
-//	private void checkSignalGroup(String signalGroupName){
-//		if(signalGroupName==null){
-//			throw new IllegalArgumentException("Group is null");
-//		}
-//		if(!names.containsKey(signalGroupName)){
-//			throw new IllegalArgumentException("Group name not present: "+signalGroupName);
-//		}
-//	}
 	
-	// the print function bypasses all input checks to show everything present
-	public void print(){
-		for(UUID signalGroup : this.collection.keySet()){
-			log("    Signal group "+signalGroup+": "+this.collection.get(signalGroup).size());
-		}
-	}
-	
-	/**
-	 * Get the areas of signals in a channel
-	 * @param channel the signal channel
-	 * @return the areas
-	 * @throws Exception 
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#getStatistics(stats.SignalStatistic, components.generic.MeasurementScale, java.util.UUID)
 	 */
+	@Override
 	public List<Double> getStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) {
-		List<NuclearSignal> list = getSignals(signalGroup);
+		List<INuclearSignal> list = getSignals(signalGroup);
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<list.size();i++){
 			result.add(list.get(i).getStatistic(stat, scale));
@@ -611,6 +575,10 @@ public class SignalCollection implements Serializable, Loggable {
 	}
 	
 	
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#getImage(java.util.UUID)
+	 */
+	@Override
 	public ImageProcessor getImage(UUID signalGroup){
 		File f = this.sourceFiles.get(signalGroup);
 		int channel = this.sourceChannels.get(signalGroup);
@@ -623,9 +591,13 @@ public class SignalCollection implements Serializable, Loggable {
 		}
 	}
 		
+	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#toString()
+	 */
+	@Override
 	public String toString(){
 		String s = "";
-		s += "Signal groups: "+this.numberOfSignalGroups()+"\n";
+		s += "Signal groups: "+this.size()+"\n";
 		for(UUID group : collection.keySet()){
 			s += "  "+group+": "
 					+" : Channel "

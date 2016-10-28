@@ -25,7 +25,7 @@ import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -158,7 +158,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 		}
 		
 		@Override
-		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 			if(options.isNormalised()){
 				return new MorphologyChartFactory(options).createModalityProfileChart();
 			} else {
@@ -171,7 +171,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 			
 			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 			
-			ChartOptions options = new ChartOptionsBuilder()
+			DefaultChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
 				.setNormalised(true) // here, the boolean is used to indicate the main chart
 				.setAlignment(ProfileAlignment.LEFT)
@@ -191,7 +191,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 			
 			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 			
-			ChartOptions options = new ChartOptionsBuilder()
+			DefaultChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
 				.setNormalised(false) // here, the boolean is used to indicate the position chart
 				.setAlignment(ProfileAlignment.RIGHT)

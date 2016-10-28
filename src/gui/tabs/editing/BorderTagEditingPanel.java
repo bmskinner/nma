@@ -39,9 +39,9 @@ import org.jfree.chart.JFreeChart;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import charting.charts.MorphologyChartFactory;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.TableOptions;
+import charting.options.DefaultTableOptions;
 import gui.BorderTagEventListener;
 import gui.DatasetEvent;
 import gui.GlobalOptions;
@@ -135,7 +135,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 		
 		setButtonsEnabled(true);
 				
-		ChartOptions options = new ChartOptionsBuilder()
+		DefaultChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setNormalised(false)
 			.setAlignment(ProfileAlignment.LEFT)
@@ -158,7 +158,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 		 * Create the chart for the range panel
 		 */
 		
-		ChartOptions rangeOptions = new ChartOptionsBuilder()
+		DefaultChartOptions rangeOptions = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setNormalised(false)
 			.setAlignment(ProfileAlignment.LEFT)
@@ -197,12 +197,12 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 		return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
 		return null;
 	}
 

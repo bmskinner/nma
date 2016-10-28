@@ -41,8 +41,8 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import charting.options.ChartOptions;
-import charting.options.TableOptions;
+import charting.options.DefaultChartOptions;
+import charting.options.DefaultTableOptions;
 import stats.SignalStatistic;
 import utility.AngleTools;
 import utility.ArrayConverter;
@@ -59,6 +59,7 @@ import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.MeasurementScale;
 import components.generic.XYPoint;
+import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
@@ -92,7 +93,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @param list the AnalysisDatasets to include
 	 * @return a table model
 	 */
-	public TableModel createSignalDetectionParametersTable(TableOptions options){
+	public TableModel createSignalDetectionParametersTable(DefaultTableOptions options){
 
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -485,7 +486,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return the point of the signal centre of mass
 	 * @throws Exception 
 	 */
-	public IPoint getXYCoordinatesForSignal(NuclearSignal n, Nucleus outline) throws Exception{
+	public IPoint getXYCoordinatesForSignal(INuclearSignal n, Nucleus outline) throws Exception{
 
 		double angle = n.getStatistic(SignalStatistic.ANGLE);
 
@@ -530,7 +531,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 					double[] ypoints = new double[collection.getSignalManager().getSignals(group).size()];
 
 					int signalCount = 0;
-					for(NuclearSignal n : collection.getSignalManager().getSignals(group)){
+					for(INuclearSignal n : collection.getSignalManager().getSignals(group)){
 
 						IPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
 
@@ -557,7 +558,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
         if(collection.getSignalGroup(signalGroup).isVisible()){
 			if(collection.getSignalManager().hasSignals(signalGroup)){
 
-				for(NuclearSignal n : collection.getSignalManager().getSignals(signalGroup)){
+				for(INuclearSignal n : collection.getSignalManager().getSignals(signalGroup)){
 					IPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
 
 					// ellipses are drawn starting from x y at upper left. Provide an offset from the centre
@@ -579,7 +580,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public TableModel createSignalStatsTable(TableOptions options) throws Exception{
+	public TableModel createSignalStatsTable(DefaultTableOptions options) throws Exception{
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -601,7 +602,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		return model;
 	}
 	
-	private TableModel createSingleDatasetSignalStatsTable(TableOptions options) throws Exception {
+	private TableModel createSingleDatasetSignalStatsTable(DefaultTableOptions options) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -707,7 +708,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		return model;	
 	}
 	
-	private TableModel createMultiDatasetSignalStatsTable(TableOptions options) throws Exception {
+	private TableModel createMultiDatasetSignalStatsTable(DefaultTableOptions options) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -826,7 +827,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
      * @return a boxplot dataset
      * @throws Exception 
      */
-    public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) {
+    public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(DefaultChartOptions options) {
         
     	return createMultiDatasetSignalStatisticBoxplotDataset(options);        
     }
@@ -838,7 +839,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a boxplot dataset
 	 * @throws Exception 
 	 */
-    private BoxAndWhiskerCategoryDataset createMultiDatasetSignalStatisticBoxplotDataset(ChartOptions options) {
+    private BoxAndWhiskerCategoryDataset createMultiDatasetSignalStatisticBoxplotDataset(DefaultChartOptions options) {
 
 
     	ExportableBoxAndWhiskerCategoryDataset result = new ExportableBoxAndWhiskerCategoryDataset();
@@ -874,7 +875,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		return result;
 	}
 		
-	public List<CategoryDataset> createShellBarChartDataset(ChartOptions options){
+	public List<CategoryDataset> createShellBarChartDataset(DefaultChartOptions options){
 		
 		List<CategoryDataset> result = new ArrayList<CategoryDataset>();
 
@@ -942,7 +943,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @param options
 	 * @return
 	 */
-	public TableModel createShellChiSquareTable(TableOptions options){
+	public TableModel createShellChiSquareTable(DefaultTableOptions options){
 		
 		if( ! options.hasDatasets()){
 			return this.createBlankTable();

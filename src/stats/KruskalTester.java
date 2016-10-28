@@ -18,7 +18,7 @@
  *******************************************************************************/
 package stats;
 
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import jdistlib.disttest.DistributionTest;
 import logging.Loggable;
 import analysis.IAnalysisDataset;
@@ -90,7 +90,7 @@ public class KruskalTester implements Loggable {
 	 * @param tag
 	 * @return
 	 */
-	public IProfile testCollectionGetFrankenPValues(ChartOptions options){
+	public IProfile testCollectionGetFrankenPValues(DefaultChartOptions options){
 		
 		IAnalysisDataset one = options.getDatasets().get(0);
 		IAnalysisDataset two = options.getDatasets().get(1);

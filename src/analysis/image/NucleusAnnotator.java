@@ -35,8 +35,9 @@ import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderPoint;
 import components.nuclear.IBorderSegment;
+import components.nuclear.INuclearSignal;
+import components.nuclear.ISignalCollection;
 import components.nuclear.NuclearSignal;
-import components.nuclear.SignalCollection;
 import components.nuclei.Nucleus;
 
 public class NucleusAnnotator  extends AbstractImageFilterer {
@@ -155,10 +156,10 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 	
 	public NucleusAnnotator annotateSignals(Nucleus n){
 
-		SignalCollection signalCollection = n.getSignalCollection();
+		ISignalCollection signalCollection = n.getSignalCollection();
 		for( UUID id : signalCollection.getSignalGroupIDs()){
 			int i = signalCollection.getSignalGroupNumber(id);
-			List<NuclearSignal> signals = signalCollection.getSignals(id);
+			List<INuclearSignal> signals = signalCollection.getSignals(id);
 			Color colour = i==Constants.FIRST_SIGNAL_CHANNEL 
 						 ? Color.RED 
 						 : i==Constants.FIRST_SIGNAL_CHANNEL+1 
@@ -169,7 +170,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 
 			if(!signals.isEmpty()){
 
-				for(NuclearSignal s : signals){
+				for(INuclearSignal s : signals){
 					
 					annotatePoint(s.getCentreOfMass(), colour);
 					

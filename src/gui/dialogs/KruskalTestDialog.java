@@ -41,7 +41,7 @@ import components.generic.ProfileType;
 import components.generic.Tag;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
@@ -148,7 +148,7 @@ public class KruskalTestDialog  extends LoadingIconDialog {
 		list.add(dataset1);
 		list.add(dataset2);
 		
-		ChartOptions options = new ChartOptionsBuilder()
+		DefaultChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(list)
 			.setNormalised(true)
 			.setAlignment(ProfileAlignment.LEFT)

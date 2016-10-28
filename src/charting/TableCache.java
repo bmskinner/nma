@@ -20,13 +20,20 @@ package charting;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.swing.table.TableModel;
 
+import org.jfree.chart.JFreeChart;
+
+import charting.options.DisplayOptions;
 import charting.options.TableOptions;
+import components.ICell;
+import charting.options.ChartOptions;
+import charting.options.DefaultTableOptions;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 
@@ -38,19 +45,18 @@ public class TableCache implements Cache {
 		
 	}
 	
-	public void addTable(TableOptions options, TableModel model){
+	public synchronized void add(TableOptions options, TableModel model){
 		tableMap.put(options, model);
 	}
 	
-	public TableModel getTable(TableOptions options){
-		
-		if(tableMap.containsKey(options)){
-			return tableMap.get(options);
-		}
-		return null;
+	public synchronized void add(ChartOptions options, JFreeChart chart){}
+	
+	
+	public TableModel get(TableOptions options){
+		return tableMap.get(options);
 	}
 	
-	public boolean hasTable(TableOptions options){
+	public boolean has(TableOptions options){
 		return tableMap.containsKey(options);
 	}
 	
@@ -80,11 +86,11 @@ public class TableCache implements Cache {
 			return;
 		}
 		
-		Set<TableOptions> toRemove = new HashSet<TableOptions>();
+		Set<DisplayOptions> toRemove = new HashSet<DisplayOptions>();
 		
 		// Find the options with the datasets
 		for(IAnalysisDataset d : list){
-			for(TableOptions op : tableMap.keySet()){
+			for(DisplayOptions op : tableMap.keySet()){
 				
 				if( ! op.hasDatasets()){
 					continue;
@@ -96,8 +102,40 @@ public class TableCache implements Cache {
 		}
 		
 		//Remove the options with the datasets
-		for(TableOptions op : toRemove){
+		for(DisplayOptions op : toRemove){
 			tableMap.remove(op);
 		}
+	}
+
+	@Override
+	public boolean has(ChartOptions options) {
+		return false;
+		
+	}
+
+	@Override
+	public JFreeChart get(ChartOptions options) {
+		return null;
+	}
+	
+	public synchronized void clear(ICell cell){
+		if(cell==null){
+			return;
+		}
+		
+		// Make a list of the options that need removed
+		// These are the options that contain the datasets in the list
+//		Set<ChartOptions> toRemove = new HashSet<ChartOptions>();
+
+		Iterator<TableOptions> it = tableMap.keySet().iterator();
+
+		while(it.hasNext()){
+			TableOptions op = it.next();
+			if(op.getCell()==cell){
+
+				tableMap.remove(op);
+			}
+		}
+		
 	}
 }

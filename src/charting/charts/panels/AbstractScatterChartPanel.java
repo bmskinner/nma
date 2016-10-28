@@ -26,9 +26,9 @@ import analysis.IAnalysisDataset;
 import charting.charts.ScatterChartFactory;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.datasets.ScatterChartDatasetCreator;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.TableOptions;
+import charting.options.DefaultTableOptions;
 import charting.options.TableOptionsBuilder;
 import gui.GlobalOptions;
 import gui.InterfaceEvent.InterfaceMethod;
@@ -114,7 +114,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		PlottableStatistic statA = (PlottableStatistic) statABox.getSelectedItem();
 		PlottableStatistic statB = (PlottableStatistic) statBBox.getSelectedItem();
 		
-		ChartOptions options = new ChartOptionsBuilder()
+		DefaultChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
 				.addStatistic(statA)
 				.addStatistic(statB)
@@ -127,7 +127,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		setChart(options);
 		
 		
-		TableOptions tableOptions = new TableOptionsBuilder()
+		DefaultTableOptions tableOptions = new TableOptionsBuilder()
 				.setDatasets(getDatasets())
 				.addStatistic(statA)
 				.addStatistic(statB)
@@ -146,13 +146,13 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 
 	@Override
 	protected void updateNull() {
-		ChartOptions options = new ChartOptionsBuilder()
+		DefaultChartOptions options = new ChartOptionsBuilder()
 			.build();
 		
 		setChart(options);
 
 		
-		TableOptions tableOptions = new TableOptionsBuilder()
+		DefaultTableOptions tableOptions = new TableOptionsBuilder()
 				.setDatasets(null)
 				.setScale(GlobalOptions.getInstance().getScale())
 				.build();
@@ -163,12 +163,12 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception {
+	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception {
 		return new ScatterChartDatasetCreator().createSpearmanCorrlationTable(options);
 	}
 
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 		return new ScatterChartFactory(options).createScatterChart();
 	}
 	

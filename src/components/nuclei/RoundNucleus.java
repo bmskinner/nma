@@ -69,6 +69,7 @@ import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
 import components.nuclear.IBorderSegment;
+import components.nuclear.INuclearSignal;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
@@ -454,9 +455,9 @@ public class RoundNucleus extends AbstractCellularComponent
 			if(signalCollection.hasSignal(signalGroup)){
 				
 			
-				List<NuclearSignal> signals = signalCollection.getSignals(signalGroup);
+				List<INuclearSignal> signals = signalCollection.getSignals(signalGroup);
 
-				for(NuclearSignal s : signals){
+				for(INuclearSignal s : signals){
 
 					double angle = this.getCentreOfMass().findAngle(p, s.getCentreOfMass());
 					s.setStatistic(SignalStatistic.ANGLE, angle);

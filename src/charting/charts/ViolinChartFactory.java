@@ -13,7 +13,7 @@ import org.jfree.chart.plot.CategoryPlot;
 import analysis.IAnalysisDataset;
 import charting.datasets.ViolinCategoryDataset;
 import charting.datasets.ViolinDatasetCreator;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import logging.Loggable;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
@@ -22,7 +22,7 @@ import stats.SignalStatistic;
 
 public class ViolinChartFactory extends AbstractChartFactory implements Loggable {
 		
-	public ViolinChartFactory(ChartOptions o){
+	public ViolinChartFactory(DefaultChartOptions o){
 		super(o);
 	}
 	

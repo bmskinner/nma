@@ -65,6 +65,9 @@ public class DatasetConverter implements Loggable {
 		
 		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, oldDataset.getSavePath());
 		
+		newDataset.setAnalysisOptions(oldDataset.getAnalysisOptions());
+		newDataset.setDatasetColour(oldDataset.getDatasetColour());
+		
 		// add the child datasets
 		makeVirtualCollections(oldDataset, newDataset);
 		

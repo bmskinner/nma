@@ -30,6 +30,7 @@ import components.ICell;
 import components.ICellCollection;
 import components.generic.MeasurementScale;
 import components.generic.Tag;
+import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.SignalGroup;
@@ -323,9 +324,9 @@ public class SignalManager implements Loggable {
 	   * @param channel the channel to search
 	   * @return a list of signals
 	   */
-	  public List<NuclearSignal> getSignals(UUID signalGroup){
+	  public List<INuclearSignal> getSignals(UUID signalGroup){
 
-		  List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
+		  List<INuclearSignal> result = new ArrayList<INuclearSignal>(0);
 		  for(Nucleus n : collection.getNuclei()){
 			  result.addAll(n.getSignalCollection().getSignals(signalGroup));
 		  }

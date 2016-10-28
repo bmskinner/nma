@@ -36,7 +36,7 @@ import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import charting.ChartComponents;
 import charting.datasets.NucleusDatasetCreator;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import components.CellCollection;
 import components.ICellCollection;
 
@@ -45,7 +45,7 @@ import components.ICellCollection;
  */
 public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	
-	public ConsensusNucleusChartFactory(ChartOptions o){
+	public ConsensusNucleusChartFactory(DefaultChartOptions o){
 		super(o);
 	}
 	

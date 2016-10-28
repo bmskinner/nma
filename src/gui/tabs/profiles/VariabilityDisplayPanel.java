@@ -46,7 +46,7 @@ import org.jfree.chart.JFreeChart;
 import utility.Constants;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
@@ -66,7 +66,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 		super();
 		this.setLayout(new BorderLayout());
 		
-		ChartOptions options =  new ChartOptionsBuilder()
+		DefaultChartOptions options =  new ChartOptionsBuilder()
 			.setProfileType(ProfileType.ANGLE)
 			.build();
 		
@@ -123,7 +123,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	 * @param normalised flag for raw or normalised lengths
 	 * @param rightAlign flag for left or right alignment (no effect if normalised is true)
 	 */	
-	private void updateProfiles(ChartOptions options){
+	private void updateProfiles(DefaultChartOptions options){
 
 		try {
 			
@@ -174,7 +174,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
 			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 
-			ChartOptions options =  new ChartOptionsBuilder()
+			DefaultChartOptions options =  new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
@@ -205,7 +205,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 		return new MorphologyChartFactory(options).makeVariabilityChart();
 	}
 	

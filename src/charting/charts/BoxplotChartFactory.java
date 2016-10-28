@@ -39,7 +39,7 @@ import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 
 /**
  * This factory creates boxplot charts. It uses a singleton pattern to allow the loggable
@@ -49,7 +49,7 @@ import charting.options.ChartOptions;
  */
 public class BoxplotChartFactory extends AbstractChartFactory {
 
-	public BoxplotChartFactory(ChartOptions o){
+	public BoxplotChartFactory(DefaultChartOptions o){
 		super(o);
 	}
 	

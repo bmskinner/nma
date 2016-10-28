@@ -26,11 +26,11 @@ import analysis.signals.ShellRandomDistributionCreator;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.ShellResultDataset;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 
 public class NuclearSignalChartFactory  extends AbstractChartFactory {
 	
-	public NuclearSignalChartFactory(ChartOptions o){
+	public NuclearSignalChartFactory(DefaultChartOptions o){
 		super(o);
 	}
 	

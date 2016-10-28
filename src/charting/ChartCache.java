@@ -25,11 +25,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.table.TableModel;
+
 import logging.Loggable;
 
 import org.jfree.chart.JFreeChart;
 
 import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
+import charting.options.TableOptions;
 import components.ICell;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
@@ -38,7 +42,7 @@ import analysis.IAnalysisDataset;
  * Store rendered charts in a cache, to avoid slowdowns when reselecting datasets
  * Internally uses a Map<ChartOptions, JFreeChart>.
  */
-public class ChartCache implements Cache, Loggable {
+public class ChartCache implements Cache {
 	
 	private Map<ChartOptions, JFreeChart> chartMap = new HashMap<ChartOptions, JFreeChart>();
 	
@@ -59,19 +63,18 @@ public class ChartCache implements Cache, Loggable {
 		return b.toString();
 	}
 	
-	public synchronized void addChart(ChartOptions options, JFreeChart chart){
+	public synchronized void add(ChartOptions options, JFreeChart chart){
 		chartMap.put(options, chart);		
 	}
 	
-	public synchronized JFreeChart getChart(ChartOptions options){
-		if(chartMap.containsKey(options)){
-			return chartMap.get(options);
-		}
-		
-		return null;
+	public synchronized void add(TableOptions options, TableModel model){}
+	
+	public synchronized JFreeChart get(ChartOptions options){
+		return chartMap.get(options);
+
 	}
 	
-	public synchronized boolean hasChart(ChartOptions options){
+	public synchronized boolean has(ChartOptions options){
 		return chartMap.containsKey(options);
 	}
 	
@@ -145,21 +148,15 @@ public class ChartCache implements Cache, Loggable {
 			}
 		}
 		
-//		// Find the options with the datasets
-//		for(ChartOptions op : this.chartMap.keySet()){
-//			if(op.getCell()==cell){
-//				
-//					toRemove.add(op);
-//				
-//			}
-//		}
-//		
-//		
-//
-//		//Remove the options with the datasets
-//		for(ChartOptions op : toRemove){
-//			finest("Clearing options");
-//			chartMap.remove(op);
-//		}
+	}
+
+	@Override
+	public boolean has(TableOptions options) {
+		return false;
+	}
+
+	@Override
+	public TableModel get(TableOptions options) {
+		return null;
 	}
 }

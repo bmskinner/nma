@@ -47,13 +47,13 @@ import charting.ChartComponents;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NuclearHistogramDatasetCreator;
 import charting.datasets.NuclearSignalDatasetCreator;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import analysis.IAnalysisDataset;
 
 
 public class HistogramChartFactory extends AbstractChartFactory {
 
-	public HistogramChartFactory(ChartOptions o){
+	public HistogramChartFactory(DefaultChartOptions o){
 		super(o);
 	}
 	

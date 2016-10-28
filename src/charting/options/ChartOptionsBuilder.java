@@ -277,8 +277,8 @@ public class ChartOptionsBuilder {
 	}
 	
 	
-	public ChartOptions build(){
-		ChartOptions result =  new ChartOptions(list);
+	public DefaultChartOptions build(){
+		DefaultChartOptions result =  new DefaultChartOptions(list);
 		result.setSwatch(swatch);
 		result.setAlignment(alignment);
 		result.setNormalised(normalised);

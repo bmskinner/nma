@@ -28,7 +28,7 @@ import analysis.mesh.NucleusMesh;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.charts.panels.ExportableChartPanel;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.nuclei.Nucleus;
 import gui.LoadingIconDialog;
@@ -254,7 +254,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				histoChartTwo = OutlineChartFactory.createMeshHistogram(comparison2);
 				
 				
-				ChartOptions options = new ChartOptionsBuilder()
+				DefaultChartOptions options = new ChartOptionsBuilder()
 					.setShowAnnotations(showAnnotations)
 					.setShowMeshFaces(showFaces)
 					.setShowMeshEdges(showEdges)

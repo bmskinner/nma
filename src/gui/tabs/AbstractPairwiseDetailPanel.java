@@ -28,7 +28,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import org.jfree.chart.JFreeChart;
 
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 
 @SuppressWarnings("serial")
 public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
@@ -48,7 +48,7 @@ public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
 			this.add(scrollPane, BorderLayout.CENTER);
 		}
 		
-		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 			return null;
 		}
 				

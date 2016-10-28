@@ -9,7 +9,7 @@ import java.util.UUID;
 import components.ICell;
 import components.generic.MeasurementScale;
 import stats.PlottableStatistic;
-import charting.options.TableOptions.TableType;
+import charting.options.DefaultTableOptions.TableType;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 
@@ -74,8 +74,8 @@ public class TableOptionsBuilder {
 		return this;
 	}
 
-	public TableOptions build(){
-		TableOptions options =  new TableOptions(list);
+	public DefaultTableOptions build(){
+		DefaultTableOptions options =  new DefaultTableOptions(list);
 		options.setType(type);
 		options.setStats(stats);
 		options.setSegID(segID);

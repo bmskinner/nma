@@ -39,6 +39,7 @@ import stats.NucleusStatistic;
 import stats.SignalStatistic;
 import utility.Constants;
 import components.CellularComponent;
+import components.nuclear.INuclearSignal;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 import analysis.AnalysisOptions;
@@ -97,7 +98,7 @@ public class SignalProberWorker extends ImageProberWorker {
 		// Create the finder
 		SignalDetector finder = new SignalDetector(testOptions, channel);
 
-		Map<Nucleus, List<NuclearSignal>> map = new HashMap<Nucleus, List<NuclearSignal>>();
+		Map<Nucleus, List<INuclearSignal>> map = new HashMap<Nucleus, List<INuclearSignal>>();
 
 		// Get the cells matching the desred imageFile, and find signals
 		finer("Detecting signals in image");
@@ -106,7 +107,7 @@ public class SignalProberWorker extends ImageProberWorker {
 //			log(Level.FINEST, "Testing nucleus "+n.getImageName()+" against "+imageName);
 			if(n.getSourceFileName().equals(imageName)){
 //				log(Level.FINEST, "  Nucleus is in image; finding signals");
-				List<NuclearSignal> list = finder.detectSignal(file, stack, n);
+				List<INuclearSignal> list = finder.detectSignal(file, stack, n);
 				finest("  Detected "+list.size()+" signals");
 				map.put(n, list);
 			}
@@ -130,7 +131,7 @@ public class SignalProberWorker extends ImageProberWorker {
 //		this.setStatusLoaded();
 	}
 	
-	protected void drawSignals(Map<Nucleus, List<NuclearSignal>> map, ImageProcessor ip) throws Exception{
+	protected void drawSignals(Map<Nucleus, List<INuclearSignal>> map, ImageProcessor ip) throws Exception{
 		if(map==null){
 			throw new IllegalArgumentException("Input cell is null");
 		}
@@ -138,7 +139,7 @@ public class SignalProberWorker extends ImageProberWorker {
 		ip.setLineWidth(2);
 		for(Nucleus n : map.keySet()){
 			int[] positions = n.getPosition();
-			List<NuclearSignal> list = map.get(n);
+			List<INuclearSignal> list = map.get(n);
 			
 			// Draw the nucleus
 			ip.setColor(Color.BLUE);
@@ -149,7 +150,7 @@ public class SignalProberWorker extends ImageProberWorker {
 			
 			
 		
-			for(NuclearSignal s : list){
+			for(INuclearSignal s : list){
 				if(checkSignal(s, n)){
 					ip.setColor(Color.YELLOW);
 				} else {
@@ -169,7 +170,7 @@ public class SignalProberWorker extends ImageProberWorker {
 		}
 	}
 	
-	private boolean checkSignal(NuclearSignal s, Nucleus n) throws Exception{
+	private boolean checkSignal(INuclearSignal s, Nucleus n) throws Exception{
 		boolean result = true;
 		
 		if(s.getStatistic(SignalStatistic.AREA) < testOptions.getMinSize()){

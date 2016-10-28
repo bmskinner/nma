@@ -36,7 +36,7 @@ import components.generic.XYPoint;
  * @author ben
  *
  */
-public class NuclearSignal extends AbstractCellularComponent implements Serializable {
+public class NuclearSignal extends AbstractCellularComponent implements INuclearSignal {
 
 	private static final long serialVersionUID = 1L;
 
@@ -59,20 +59,18 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 
 	}	
 
-	/**
-	 * Get the index of the closest point in the nuclear 
-	 * periphery to this signal
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.nuclear.INuclearSignal#getClosestBorderPoint()
 	 */
+	@Override
 	public int getClosestBorderPoint(){
 		return this.closestNuclearBorderPoint;
 	}
 
-	/**
-	 * Set the index of the closest point in the nuclear 
-	 * periphery to this signal
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.nuclear.INuclearSignal#setClosestBorderPoint(int)
 	 */
+	@Override
 	public void setClosestBorderPoint(int p){
 		this.closestNuclearBorderPoint = p;
 	}
@@ -89,14 +87,17 @@ public class NuclearSignal extends AbstractCellularComponent implements Serializ
 //		finest("\t\tWrote nuclear signal");
 	}
 
+	/* (non-Javadoc)
+	 * @see components.nuclear.INuclearSignal#duplicate()
+	 */
 	@Override
-	public void alignVertically() {
-		return;
-		
+	public INuclearSignal duplicate() {
+		return new NuclearSignal(this);
 	}
 
 	@Override
-	public CellularComponent duplicate() {
-		return new NuclearSignal(this);
+	public void alignVertically() {
+		// TODO Auto-generated method stub
+		
 	}
 }

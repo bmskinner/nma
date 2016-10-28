@@ -34,8 +34,8 @@ import javax.swing.table.TableModel;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
-import charting.options.TableOptions;
-import charting.options.TableOptions.TableType;
+import charting.options.DefaultTableOptions;
+import charting.options.DefaultTableOptions.TableType;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
@@ -63,13 +63,13 @@ import utility.Constants;
 
 public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	
-	protected final TableOptions options;
+	protected final DefaultTableOptions options;
 
 	/**
 	 * Create with a set of table options
 	 * @param o
 	 */
-	public AnalysisDatasetTableCreator(final TableOptions o){
+	public AnalysisDatasetTableCreator(final DefaultTableOptions o){
 		if(o==null){
 			throw new IllegalArgumentException("Options cannot be null");
 		}

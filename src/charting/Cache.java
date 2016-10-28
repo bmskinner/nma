@@ -2,8 +2,14 @@ package charting;
 
 import java.util.List;
 
-import analysis.AnalysisDataset;
+import javax.swing.table.TableModel;
+
+import org.jfree.chart.JFreeChart;
+
 import analysis.IAnalysisDataset;
+import charting.options.ChartOptions;
+import charting.options.TableOptions;
+import components.ICell;
 import logging.Loggable;
 
 public interface Cache extends Loggable {
@@ -24,5 +30,25 @@ public interface Cache extends Loggable {
 	 * @param list
 	 */
 	void clear(List<IAnalysisDataset> list);
+	
+	/**
+	 * Remove caches containing the given cell
+	 * @param cell
+	 */
+	void clear(ICell cell);
+	
+	boolean has(TableOptions options);
+	
+	TableModel get(TableOptions options);
+	
+	boolean has(ChartOptions options);
+	
+	JFreeChart get(ChartOptions options);
+	
+	void add(ChartOptions options, JFreeChart chart);
+	
+	void add(TableOptions options, TableModel model);
+	
+	
 
 }

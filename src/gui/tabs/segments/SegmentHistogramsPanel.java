@@ -19,7 +19,7 @@ import stats.Quartile;
 import stats.SegmentStatistic;
 import charting.charts.HistogramChartFactory;
 import charting.charts.panels.SelectableChartPanel;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.ICellCollection;
@@ -79,7 +79,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 				chartPanel.setPreferredSize(preferredSize);
 				mainPanel.add(chartPanel);	
 				
-				ChartOptions options = new ChartOptionsBuilder()
+				DefaultChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.addStatistic(SegmentStatistic.LENGTH)
 					.setScale(GlobalOptions.getInstance().getScale())

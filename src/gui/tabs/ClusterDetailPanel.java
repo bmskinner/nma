@@ -56,8 +56,8 @@ import org.jfree.chart.JFreeChart;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import charting.datasets.AnalysisDatasetTableCreator;
-import charting.options.ChartOptions;
-import charting.options.TableOptions;
+import charting.options.DefaultChartOptions;
+import charting.options.DefaultTableOptions;
 import charting.options.TableOptionsBuilder;
 import components.IClusterGroup;
 
@@ -95,12 +95,12 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
 		return null;
 	}
 				
@@ -303,7 +303,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			setButtonsVisible(true);
 			setButtonsEnabled(true);
 			
-			TableOptions options = new TableOptionsBuilder()
+			DefaultTableOptions options = new TableOptionsBuilder()
 				.setDatasets(getDatasets())
 				.build();
 			

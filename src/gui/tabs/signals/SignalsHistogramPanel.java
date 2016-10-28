@@ -29,7 +29,7 @@ import org.jfree.chart.JFreeChart;
 import stats.SignalStatistic;
 import charting.charts.HistogramChartFactory;
 import charting.charts.panels.SelectableChartPanel;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 
 @SuppressWarnings("serial")
@@ -44,7 +44,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			for(SignalStatistic stat : SignalStatistic.values()){
 
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
-				ChartOptions options = builder
+				DefaultChartOptions options = builder
 					.addStatistic(stat)
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -88,7 +88,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			JFreeChart chart = null;
 			
 			ChartOptionsBuilder builder = new ChartOptionsBuilder();
-			ChartOptions options = builder.setDatasets(getDatasets())
+			DefaultChartOptions options = builder.setDatasets(getDatasets())
 				.addStatistic(stat)
 				.setScale(GlobalOptions.getInstance().getScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())

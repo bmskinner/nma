@@ -39,8 +39,8 @@ import org.jfree.chart.JFreeChart;
 
 import utility.Constants;
 import charting.datasets.AnalysisDatasetTableCreator;
-import charting.options.ChartOptions;
-import charting.options.TableOptions;
+import charting.options.DefaultChartOptions;
+import charting.options.DefaultTableOptions;
 import charting.options.TableOptionsBuilder;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
@@ -118,9 +118,9 @@ public class SegmentStatsPanel extends DetailPanel {
 
 	}
 	
-	private TableOptions makeOptions(){
+	private DefaultTableOptions makeOptions(){
 		
-		TableOptions options = new TableOptionsBuilder()
+		DefaultTableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setScale(GlobalOptions.getInstance().getScale())
 			.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -129,12 +129,12 @@ public class SegmentStatsPanel extends DetailPanel {
 	}
 
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception {
+	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception {
 		return new AnalysisDatasetTableCreator(options).createMedianProfileStatisticTable();
 	}
 
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options)	throws Exception {
+	protected JFreeChart createPanelChartType(DefaultChartOptions options)	throws Exception {
 		return null;
 	}
 

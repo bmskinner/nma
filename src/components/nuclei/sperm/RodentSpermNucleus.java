@@ -51,6 +51,7 @@ import components.generic.ProfileType;
 import components.generic.Tag;
 import components.generic.XYPoint;
 import components.nuclear.IBorderPoint;
+import components.nuclear.INuclearSignal;
 import components.nuclear.NuclearSignal;
 import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
@@ -634,9 +635,9 @@ public class RodentSpermNucleus extends SpermNucleus {
 
 			  if(signalCollection.hasSignal(i)){
 
-				  List<NuclearSignal> signals = signalCollection.getSignals(i);
+				  List<INuclearSignal> signals = signalCollection.getSignals(i);
 
-				  for(NuclearSignal n : signals){
+				  for(INuclearSignal n : signals){
 
 					  /*
 					   * Angle begins from the orientation point 

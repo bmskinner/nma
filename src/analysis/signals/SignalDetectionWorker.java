@@ -29,8 +29,9 @@ import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
 import components.ICell;
 import components.generic.Tag;
+import components.nuclear.INuclearSignal;
+import components.nuclear.ISignalCollection;
 import components.nuclear.NuclearSignal;
-import components.nuclear.SignalCollection;
 import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
 
@@ -98,11 +99,11 @@ public class SignalDetectionWorker extends AnalysisWorker {
 					
 					ImageStack stack = new ImageImporter(imageFile).importImage();
 
-					List<NuclearSignal> signals = finder.detectSignal(imageFile, stack, n);
+					List<INuclearSignal> signals = finder.detectSignal(imageFile, stack, n);
 					
 					finer("Creating signal collection");
 					
-					SignalCollection signalCollection = n.getSignalCollection();
+					ISignalCollection signalCollection = n.getSignalCollection();
 					signalCollection.addSignalGroup(signals, signalGroup, imageFile, channel);
 					
 					SignalAnalyser s = new SignalAnalyser();

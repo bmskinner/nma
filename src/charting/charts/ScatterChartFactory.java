@@ -34,7 +34,7 @@ import analysis.IAnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.ScatterChartDatasetCreator;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import gui.components.ColourSelecter;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
@@ -42,7 +42,7 @@ import stats.SignalStatistic;
 
 public class ScatterChartFactory extends AbstractChartFactory {
 	
-	public ScatterChartFactory(ChartOptions o){
+	public ScatterChartFactory(DefaultChartOptions o){
 		super(o);
 	}
 	

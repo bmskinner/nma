@@ -13,7 +13,7 @@ import org.jfree.chart.JFreeChart;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.charts.panels.ExportableChartPanel;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellularComponent;
 import gui.ChartOptionsRenderedEvent;
@@ -119,7 +119,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 								
 			updateSettingsPanels();
 			
-			ChartOptions options = new ChartOptionsBuilder()
+			DefaultChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.setCell(this.getCellModel().getCell())
 					.setRotationMode(rotationPanel.getSelected())
@@ -162,7 +162,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		
 		updateSettingsPanels();
 		
-		ChartOptions options = new ChartOptionsBuilder()
+		DefaultChartOptions options = new ChartOptionsBuilder()
 				.build();
 		
 		setChart(options);
@@ -171,7 +171,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
 
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 		return new OutlineChartFactory(options).makeCellOutlineChart();
 	}
 	

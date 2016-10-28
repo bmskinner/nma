@@ -33,6 +33,7 @@ import components.generic.BooleanProfile;
 import components.generic.IProfile;
 import components.generic.Profile;
 import components.generic.XYPoint;
+import components.nuclear.INuclearSignal;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 import ij.ImageStack;
@@ -71,7 +72,7 @@ public class SignalDetector extends Detector {
 	 * @param n the nucleus
 	 * @throws Exception 
 	 */
-	public List<NuclearSignal> detectSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
+	public List<INuclearSignal> detectSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 		
 		options.setThreshold(minThreshold); // reset to default;
 		
@@ -125,7 +126,7 @@ public class SignalDetector extends Detector {
 	 * @param n the nucleus
 	 * @throws Exception 
 	 */
-	private List<NuclearSignal> detectForwardThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
+	private List<INuclearSignal> detectForwardThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 //		SignalCollection signalCollection = n.getSignalCollection();
 		
 		// choose the right stack number for the channel
@@ -149,7 +150,7 @@ public class SignalDetector extends Detector {
 		}
 
 
-		List<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
+		List<INuclearSignal> signals = new ArrayList<INuclearSignal>(0);
 
 		if(!roiList.isEmpty()){
 			
@@ -165,7 +166,7 @@ public class SignalDetector extends Detector {
 				Rectangle bounds = r.getBounds();
 				int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
 				
-				NuclearSignal s = new NuclearSignal( r, 
+				INuclearSignal s = new NuclearSignal( r, 
 						sourceFile, channel, originalPosition,
 						new FloatPoint(values.get("XM"), values.get("YM"))
 				);
@@ -215,7 +216,7 @@ public class SignalDetector extends Detector {
 	 * @param n the nucleus
 	 * @throws Exception 
 	 */
-	private List<NuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
+	private List<INuclearSignal> detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 		
 //		SignalCollection signalCollection = n.getSignalCollection();
 		finest( "Beginning reverse detection for nucleus");
@@ -287,7 +288,7 @@ public class SignalDetector extends Detector {
 	 * and set it as the appropriate forward threshold for the nucleus.  
 	 * @throws Exception 
 	 */
-	private List<NuclearSignal> detectHistogramThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
+	private List<INuclearSignal> detectHistogramThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 		fine( "Beginning histogram detection for nucleus");
 
 		// choose the right stack number for the channel

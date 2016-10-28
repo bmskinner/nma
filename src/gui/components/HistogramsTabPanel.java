@@ -40,8 +40,8 @@ import org.jfree.chart.JFreeChart;
 
 import charting.charts.HistogramChartFactory;
 import charting.charts.panels.SelectableChartPanel;
-import charting.options.ChartOptions;
-import charting.options.TableOptions;
+import charting.options.DefaultChartOptions;
+import charting.options.DefaultTableOptions;
 
 /**
  * This class is extended for making a panel with multiple stats histograms
@@ -90,12 +90,12 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
+	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception{
 		return new HistogramChartFactory(options).createStatisticHistogram();
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
 		return null;
 	}
 	

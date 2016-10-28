@@ -35,6 +35,7 @@ import utility.Constants;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
 import components.ICellCollection;
+import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
@@ -122,13 +123,13 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			}
 			
 			if(collection.getSignalManager().hasSignals(signalGroup)){
-				List<NuclearSignal> signals = n.getSignalCollection().getSignals(signalGroup); 
+				List<INuclearSignal> signals = n.getSignalCollection().getSignals(signalGroup); 
 
 				int[]    intensityPerShell = shellAnalyser.findPixelCountPerShell();
 
 				ShellCounter counter = counters.get(signalGroup);
 
-				for(NuclearSignal s : signals){
+				for(INuclearSignal s : signals){
 					try {
 
 						

@@ -24,7 +24,7 @@ import analysis.IAnalysisDataset;
  * @author ben
  *
  */
-public abstract class AbstractOptions {
+public abstract class AbstractOptions implements DisplayOptions {
 	
 	private List<IAnalysisDataset> list      = new ArrayList<IAnalysisDataset>();
 	private List<PlottableStatistic> stats  = new ArrayList<PlottableStatistic>();;

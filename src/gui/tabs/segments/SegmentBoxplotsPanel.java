@@ -45,7 +45,7 @@ import stats.SegmentStatistic;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.charts.panels.ViolinChartPanel;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.ICellCollection;
@@ -115,7 +115,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				chartPanels.put(seg.getName(), chartPanel);
 				mainPanel.add(chartPanel);	
 				
-				ChartOptions options = new ChartOptionsBuilder()
+				DefaultChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.addStatistic(SegmentStatistic.LENGTH)
 					.setScale(GlobalOptions.getInstance().getScale())

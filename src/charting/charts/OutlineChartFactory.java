@@ -77,11 +77,11 @@ import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.NucleusMeshXYDataset;
 import charting.datasets.OutlineDatasetCreator;
 import charting.datasets.TailDatasetCreator;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 
 public class OutlineChartFactory extends AbstractChartFactory {
 	
-	public OutlineChartFactory(ChartOptions o){
+	public OutlineChartFactory(DefaultChartOptions o){
 		super(o);
 	}
 	

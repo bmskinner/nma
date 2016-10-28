@@ -50,7 +50,7 @@ import org.jfree.chart.JFreeChart;
 import stats.Quartile;
 import analysis.profiles.SegmentFitter;
 import charting.charts.MorphologyChartFactory;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.ICell;
 import components.ICellCollection;
@@ -177,7 +177,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			
 			ISegmentedProfile profile = null;
 			
-			ChartOptions options = new ChartOptionsBuilder()
+			DefaultChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
@@ -206,7 +206,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			 * Create the chart for the range panel
 			 */
 			
-			ChartOptions rangeOptions = new ChartOptionsBuilder()
+			DefaultChartOptions rangeOptions = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
@@ -235,7 +235,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		protected void updateNull() {	
 			
 			
-			ChartOptions options = new ChartOptionsBuilder()
+			DefaultChartOptions options = new ChartOptionsBuilder()
 				.setShowXAxis(false)
 				.setShowYAxis(false)
 				.build();
@@ -250,7 +250,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		}
 		
 		@Override
-		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 			return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
 		}
 				
@@ -259,7 +259,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		 * @param options
 		 * @throws Exception
 		 */
-		private void configureButtons(ChartOptions options) {
+		private void configureButtons(DefaultChartOptions options) {
 			if(options.isSingleDataset()){
 				
 				setButtonsEnabled(true);

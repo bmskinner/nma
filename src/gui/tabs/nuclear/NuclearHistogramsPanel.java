@@ -35,7 +35,7 @@ import org.jfree.chart.JFreeChart;
 import stats.NucleusStatistic;
 import analysis.IAnalysisDataset;
 import charting.charts.panels.SelectableChartPanel;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.ICellCollection;
@@ -53,7 +53,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 				Dimension preferredSize = new Dimension(400, 150);
 				for(NucleusStatistic stat : NucleusStatistic.values()){
 					
-					ChartOptions options = new ChartOptionsBuilder()
+					DefaultChartOptions options = new ChartOptionsBuilder()
 						.addStatistic(stat)
 						.setScale(scale)
 						.setUseDensity(false)
@@ -89,7 +89,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 				SelectableChartPanel panel = chartPanels.get(stat.toString());
 
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
-				ChartOptions options = builder.setDatasets(getDatasets())
+				DefaultChartOptions options = builder.setDatasets(getDatasets())
 					.addStatistic(stat)
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())

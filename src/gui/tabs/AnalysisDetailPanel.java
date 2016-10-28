@@ -27,9 +27,9 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.datasets.AnalysisDatasetTableCreator;
-import charting.options.ChartOptions;
-import charting.options.TableOptions;
-import charting.options.TableOptions.TableType;
+import charting.options.DefaultChartOptions;
+import charting.options.DefaultTableOptions;
+import charting.options.DefaultTableOptions.TableType;
 import charting.options.TableOptionsBuilder;
 import gui.components.AnalysisTableCellRenderer;
 import gui.components.ExportableTable;
@@ -56,12 +56,12 @@ public class AnalysisDetailPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
 		return new AnalysisDatasetTableCreator(options).createAnalysisTable();
 	}
 	
@@ -91,7 +91,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 	private void updateAnalysisParametersPanel() {
 
 
-		TableOptions options = new TableOptionsBuilder()
+		DefaultTableOptions options = new TableOptionsBuilder()
 		.setDatasets(getDatasets())
 		.setType(TableType.ANALYSIS_PARAMETERS)
 		.build();
@@ -121,7 +121,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 			scrollPane.setViewportView(panel);
 			scrollPane.setColumnHeaderView(tableAnalysisParameters.getTableHeader());
 
-			TableOptions options = new TableOptionsBuilder()
+			DefaultTableOptions options = new TableOptionsBuilder()
 			.setDatasets(null)
 			.setType(TableType.ANALYSIS_PARAMETERS)
 			.build();

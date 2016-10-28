@@ -34,7 +34,7 @@ import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshEdge;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.ICell;
@@ -53,6 +53,7 @@ import components.generic.Tag;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
 import components.nuclear.IBorderSegment;
+import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
@@ -352,7 +353,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return a dataset
 	 * @throws Exception 
 	 */
-	public XYDataset createSegmentedMedianProfileDataset(ChartOptions options) {
+	public XYDataset createSegmentedMedianProfileDataset(DefaultChartOptions options) {
 		
 		
 		
@@ -402,7 +403,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createSegmentedProfileDataset(ChartOptions options) throws Exception {
+	public XYDataset createSegmentedProfileDataset(DefaultChartOptions options) throws Exception {
 		
 		finest("Creating segmented profile dataset");
 		ICellCollection collection  = options.firstDataset().getCollection();
@@ -485,7 +486,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */	
-	public DefaultXYDataset createMultiProfileDataset(ChartOptions options) {
+	public DefaultXYDataset createMultiProfileDataset(DefaultChartOptions options) {
 		
 		List<IAnalysisDataset> list = options.getDatasets();
 		boolean normalised         = options.isNormalised();
@@ -529,7 +530,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception 
 	 */
-	public DefaultXYDataset createMultiProfileFrankenDataset(ChartOptions options) throws Exception{
+	public DefaultXYDataset createMultiProfileFrankenDataset(DefaultChartOptions options) throws Exception{
 		
 		
 		List<IAnalysisDataset> list = options.getDatasets();
@@ -602,7 +603,7 @@ public class NucleusDatasetCreator implements Loggable {
 	}
 	
 	
-	public List<XYSeriesCollection> createMultiProfileIQRDataset(ChartOptions options) throws Exception{
+	public List<XYSeriesCollection> createMultiProfileIQRDataset(DefaultChartOptions options) throws Exception{
 		return createMultiProfileIQRDataset(options.getDatasets(),
 				options.isNormalised(),
 				options.getAlignment(),
@@ -679,7 +680,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createIQRVariabilityDataset(ChartOptions options) {
+	public XYDataset createIQRVariabilityDataset(DefaultChartOptions options) {
 		
 		if(options.isSingleDataset()){
 			
@@ -691,7 +692,7 @@ public class NucleusDatasetCreator implements Loggable {
 		}
 	}
 	
-	private XYDataset createSingleIQRVariabilityDataset(ChartOptions options) {
+	private XYDataset createSingleIQRVariabilityDataset(DefaultChartOptions options) {
 		
 		XYDataset ds = new DefaultXYDataset();
 		
@@ -712,7 +713,7 @@ public class NucleusDatasetCreator implements Loggable {
 		return ds;
 	}
 	
-	private XYDataset createMultiIQRVariabilityDataset(ChartOptions options) {
+	private XYDataset createMultiIQRVariabilityDataset(DefaultChartOptions options) {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -734,7 +735,7 @@ public class NucleusDatasetCreator implements Loggable {
 	}
 	
 	
-	public XYDataset createFrankenSegmentDataset(ChartOptions options) throws Exception{
+	public XYDataset createFrankenSegmentDataset(DefaultChartOptions options) throws Exception{
 		return createFrankenSegmentDataset(options.firstDataset().getCollection(),
 				options.isNormalised(),
 				options.getAlignment(),
@@ -837,7 +838,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public BoxAndWhiskerCategoryDataset createBoxplotDataset(ChartOptions options) {
+	public BoxAndWhiskerCategoryDataset createBoxplotDataset(DefaultChartOptions options) {
 		List<IAnalysisDataset> datasets = options.getDatasets();
 		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 		MeasurementScale scale = options.getScale();
@@ -867,7 +868,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public BoxAndWhiskerCategoryDataset createSegmentStatDataset(ChartOptions options) {
+	public BoxAndWhiskerCategoryDataset createSegmentStatDataset(DefaultChartOptions options) {
 		
 		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
@@ -1301,7 +1302,7 @@ public class NucleusDatasetCreator implements Loggable {
             	ComponentOutlineDataset groupDataset = new ComponentOutlineDataset();
 				int signalNumber = 0;
 
-				for(NuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)){
+				for(INuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)){
 					
 					String seriesKey = "SignalGroup_"+signalGroup+"_signal_"+signalNumber;
 					finest("Adding signal to dataset: "+seriesKey);
@@ -1432,7 +1433,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createModalityProfileDataset(ChartOptions options) throws Exception {
+	public XYDataset createModalityProfileDataset(DefaultChartOptions options) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 	
@@ -1575,7 +1576,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createKruskalProfileDataset(ChartOptions options) throws Exception {
+	public XYDataset createKruskalProfileDataset(DefaultChartOptions options) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
@@ -1599,7 +1600,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createFrankenKruskalProfileDataset(ChartOptions options) throws Exception {
+	public XYDataset createFrankenKruskalProfileDataset(DefaultChartOptions options) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		IProfile pvalues = new KruskalTester().testCollectionGetFrankenPValues(options);

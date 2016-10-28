@@ -15,12 +15,13 @@ import org.jfree.data.xy.XYDataset;
 import analysis.IAnalysisDataset;
 import analysis.signals.ShellRandomDistributionCreator;
 import analysis.signals.SignalManager;
-import charting.options.ChartOptions;
-import charting.options.TableOptions;
+import charting.options.DefaultChartOptions;
+import charting.options.DefaultTableOptions;
 import components.ICell;
 import components.ICellCollection;
 import components.generic.MeasurementScale;
 import components.generic.Tag;
+import components.nuclear.INuclearSignal;
 import components.nuclear.NuclearSignal;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
@@ -38,7 +39,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws ChartDatasetCreationException
 	 */
-	public XYDataset createNucleusScatterDataset(ChartOptions options) throws ChartDatasetCreationException {
+	public XYDataset createNucleusScatterDataset(DefaultChartOptions options) throws ChartDatasetCreationException {
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
@@ -97,7 +98,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 		return ds;
 	}
 	
-	public TableModel createSpearmanCorrlationTable(TableOptions options){
+	public TableModel createSpearmanCorrlationTable(DefaultTableOptions options){
 		
 		if( ! options.hasDatasets()){
 			return AnalysisDatasetTableCreator.createBlankTable();
@@ -127,7 +128,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 		return createBlankTable();
 	}
 	
-	private TableModel createNucleusSpearmanCorrlationTable(TableOptions options){
+	private TableModel createNucleusSpearmanCorrlationTable(DefaultTableOptions options){
 
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -202,7 +203,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createSignalScatterDataset(ChartOptions options) {
+	public XYDataset createSignalScatterDataset(DefaultChartOptions options) {
 		List<IAnalysisDataset> datasets = options.getDatasets();
 		
 		List<PlottableStatistic> stats =  options.getStats();
@@ -228,7 +229,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 				double[] xpoints = new double[signalCount];
 				double[] ypoints = new double[signalCount];
 				
-				List<NuclearSignal> list = m.getSignals(id);
+				List<INuclearSignal> list = m.getSignals(id);
 				
 				for(int j=0; j<signalCount;j++){
 					
@@ -248,7 +249,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 		return ds;
 	}
 	
-	private TableModel createSignalSpearmanCorrlationTable(TableOptions options){
+	private TableModel createSignalSpearmanCorrlationTable(DefaultTableOptions options){
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -283,7 +284,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 				double[] xpoints = new double[signalCount];
 				double[] ypoints = new double[signalCount];
 				
-				List<NuclearSignal> list = m.getSignals(id);
+				List<INuclearSignal> list = m.getSignals(id);
 				
 				for(int j=0; j<signalCount;j++){
 					

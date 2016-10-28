@@ -39,8 +39,8 @@ import org.jfree.chart.JFreeChart;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.ViolinChartFactory;
 import charting.charts.panels.ExportableChartPanel;
-import charting.options.ChartOptions;
-import charting.options.TableOptions;
+import charting.options.DefaultChartOptions;
+import charting.options.DefaultTableOptions;
 
 /**
  * This class is extended for making a panel with multiple stats histograms
@@ -83,7 +83,7 @@ import charting.options.TableOptions;
 		}
 		
 		@Override
-		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
+		protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception{
 			if(GlobalOptions.getInstance().isViolinPlots()){
 				return new ViolinChartFactory(options).createStatisticPlot();
 			} else {
@@ -92,7 +92,7 @@ import charting.options.TableOptions;
 		}
 		
 		@Override
-		protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
 			return null;
 		}
 

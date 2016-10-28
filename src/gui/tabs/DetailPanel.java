@@ -48,14 +48,15 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.Cache;
 import charting.ChartCache;
 import charting.TableCache;
 import charting.charts.ScatterChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
-import charting.options.TableOptions;
-import analysis.AnalysisDataset;
+import charting.options.DefaultChartOptions;
+import charting.options.DefaultTableOptions;
 import analysis.IAnalysisDataset;
 
 /**
@@ -85,8 +86,8 @@ public abstract class DetailPanel
 	
 	// The chart cache holds rendered charts for all selected options, until a change is made to a dataset
 	// The table cache does the same for table models
-	protected final ChartCache chartCache = new ChartCache();
-	protected final TableCache tableCache = new TableCache();
+	protected final Cache chartCache = new ChartCache();
+	protected final Cache tableCache = new TableCache();
 
 	
 	volatile private boolean isUpdating = false;
@@ -161,7 +162,7 @@ public abstract class DetailPanel
 		return this.list;
 	}
 	
-	public ChartCache getChartCache(){
+	public Cache getChartCache(){
 		return this.chartCache;
 	}
 	
@@ -354,10 +355,10 @@ public abstract class DetailPanel
 	 * with a setTarget() value.
 	 * @param options
 	 */
-	protected synchronized void setChart(ChartOptions options) {
-		if(chartCache.hasChart(options)){
+	protected synchronized void setChart(DefaultChartOptions options) {
+		if(chartCache.has(options)){
 			finest("Fetched cached chart with hashcode "+options.hashCode());
-			JFreeChart chart = getChartCache().getChart(options);
+			JFreeChart chart = getChartCache().get(options);
 			
 			if(options.getTarget()!=null){
 				options.getTarget().setChart(chart);
@@ -379,11 +380,11 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected synchronized JFreeChart getChart(ChartOptions options) {
+	protected synchronized JFreeChart getChart(DefaultChartOptions options) {
 		JFreeChart chart;
-		if(chartCache.hasChart(options)){
+		if(chartCache.has(options)){
 			finest("Fetched cached chart with hashcode "+options.hashCode());
-			chart = getChartCache().getChart(options);
+			chart = getChartCache().get(options);
 
 		} else { // No cached chart
 			finest("No cached chart available with hashcode "+options.hashCode());
@@ -397,7 +398,7 @@ public abstract class DetailPanel
 				// Draw an empty chart to fill the space
 				chart = ScatterChartFactory.makeEmptyChart();
 			}
-			getChartCache().addChart(options, chart);
+			getChartCache().add(options, chart);
 			finest("Added cached chart");
 		}
 		return chart;
@@ -409,12 +410,12 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected synchronized TableModel getTable(TableOptions options) {
+	protected synchronized TableModel getTable(DefaultTableOptions options) {
 		
 		TableModel model;
-		if(getTableCache().hasTable(options)){
+		if(getTableCache().has(options)){
 			finest("Fetched cached table");
-			model = getTableCache().getTable(options);
+			model = getTableCache().get(options);
 		} else {
 			try {
 				model = createPanelTableType(options);
@@ -424,7 +425,7 @@ public abstract class DetailPanel
 				model = AnalysisDatasetTableCreator.createBlankTable();
 			}
 			finest("Added cached table");
-			getTableCache().addTable(options, model);
+			getTableCache().add(options, model);
 		}
 		return model;
 	}
@@ -435,7 +436,7 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
 		return null;
 	}
 	
@@ -445,7 +446,7 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
+	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception{
 		return null;
 	}
 	
@@ -503,7 +504,7 @@ public abstract class DetailPanel
 		this.update(getDatasets());
 	}
 	
-	public synchronized TableCache getTableCache(){
+	public synchronized Cache getTableCache(){
 		return this.tableCache;
 	}
 	
@@ -719,9 +720,9 @@ public abstract class DetailPanel
      */
     protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void> {
     	
-    	private ChartOptions options;
+    	private DefaultChartOptions options;
     	
-    	public ChartFactoryWorker(ChartOptions options){
+    	public ChartFactoryWorker(DefaultChartOptions options){
     		this.options = options;
     	}
 
@@ -733,7 +734,7 @@ public abstract class DetailPanel
     			finest("Creating chart type");
     			JFreeChart chart = createPanelChartType(options);
     			finest("Adding chart type to cache");
-    			chartCache.addChart(options, chart);
+    			chartCache.add(options, chart);
 
     			
     			return chart;

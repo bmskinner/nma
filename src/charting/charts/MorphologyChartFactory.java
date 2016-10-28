@@ -57,7 +57,7 @@ import analysis.IAnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
-import charting.options.ChartOptions;
+import charting.options.DefaultChartOptions;
 import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.ICellCollection;
@@ -70,7 +70,7 @@ import components.nuclei.Nucleus;
 
 public class MorphologyChartFactory extends AbstractChartFactory {
 	
-	public MorphologyChartFactory(ChartOptions o){
+	public MorphologyChartFactory(DefaultChartOptions o){
 		super(o);
 	}
 	
@@ -738,7 +738,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	private JFreeChart makeMultiSegmentStartPositionChart(ChartOptions options) throws Exception {
+	private JFreeChart makeMultiSegmentStartPositionChart(DefaultChartOptions options) throws Exception {
 		
 		finest("Creating multi segment start position chart");
 		
