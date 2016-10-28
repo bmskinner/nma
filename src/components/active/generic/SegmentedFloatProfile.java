@@ -36,7 +36,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	private static final long serialVersionUID = 1L;
 
 	// the segments
-	protected List<IBorderSegment> segments = new ArrayList<IBorderSegment>(5);
+//	protected List<IBorderSegment> segments = new ArrayList<IBorderSegment>(5);
+	protected IBorderSegment[] segments = new IBorderSegment[0];
 
 	/**
 	 * Construct using a regular profile and a list of border segments
@@ -65,7 +66,13 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 			error("Profile error linking segments", e);
 		}
 
-		this.segments = segments;
+		
+		this.segments = new IBorderSegment[segments.size()];
+		for(int i=0; i<segments.size(); i++){
+			this.segments[i] =  segments.get(i);
+		}
+		
+//		this.segments = segments;
 	}
 
 	/**
@@ -102,7 +109,11 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 			warn("Error linking segments");
 		}
 
-		this.segments = segments;
+		this.segments = new IBorderSegment[segments.size()];
+		for(int i=0; i<segments.size(); i++){
+			this.segments[i] =  segments.get(i);
+		}
+//		this.segments = segments;
 	}
 
 	/**
@@ -119,7 +130,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 */
 	@Override
 	public boolean hasSegments(){
-		if(this.segments==null || this.segments.isEmpty()){
+		if(this.segments==null || this.segments.length==0){
 			return false;
 		} else {
 			return true;
@@ -132,8 +143,13 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	@Override
 	public List<IBorderSegment> getSegments() {
 		List<IBorderSegment> result = null;
+		List<IBorderSegment> temp = new ArrayList<IBorderSegment>();
+		for(IBorderSegment seg : segments){
+			temp.add(seg);
+		}
+		
 		try {
-			result = IBorderSegment.copy(this.segments);
+			result = IBorderSegment.copy(temp);
 		} catch (ProfileException e) {
 			error("Error copying segments", e);
 		}
@@ -210,7 +226,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
 
 		List<IBorderSegment> result = new ArrayList<IBorderSegment>();
-		int i = segments.size()-1; // the number of segments 
+		int i = segments.length-1; // the number of segments 
 		result.add(firstSeg);
 		while(i>0){
 
@@ -351,7 +367,13 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		}
 
 		try {
-			this.segments = IBorderSegment.copy(segments);
+			segments = IBorderSegment.copy(segments);
+			
+			this.segments = new IBorderSegment[segments.size()];
+			for(int i=0; i<segments.size(); i++){
+				this.segments[i] =  segments.get(i);
+			}
+			
 		} catch (ProfileException e) {
 			warn("Cannot copy segments");
 		}
@@ -379,8 +401,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 */
 	@Override
 	public void clearSegments(){
-		this.segments = new ArrayList<IBorderSegment>(0);
-		//		this.firstSegment = null;
+		this.segments = new IBorderSegment[0];
+
 	}
 
 	/* (non-Javadoc)
@@ -412,7 +434,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 */
 	@Override
 	public int getSegmentCount(){
-		return this.segments.size();
+		return this.segments.length;
 	}
 
 	/* (non-Javadoc)
@@ -549,7 +571,13 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 */
 	@Override
 	public void nudgeSegments(int amount) {
-		this.segments = IBorderSegment.nudge(getSegments(), amount);
+		
+		List<IBorderSegment> result = IBorderSegment.nudge(getSegments(), amount);
+		this.segments = new IBorderSegment[segments.length];
+		for(int i=0; i<segments.length; i++){
+			this.segments[i] =  result.get(i);
+		}
+		
 	}
 
 	/* (non-Javadoc)
