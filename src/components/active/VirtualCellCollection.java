@@ -92,6 +92,10 @@ public class VirtualCellCollection implements ICellCollection {
 //			profileCollections.put(type, new DefaultProfileCollection());
 //		}
 	}
+	
+	public IAnalysisDataset getParent(){
+		return parent;
+	}
 
 
 	@Override
@@ -407,10 +411,49 @@ public class VirtualCellCollection implements ICellCollection {
 	public ProfileManager getProfileManager() {
 		return profileManager;
 	}
+	
+	public IAnalysisDataset getRootParent(){
+		if(parent.isRoot()){
+			return  parent;
+		} else {
+			
+			if(parent.getCollection() instanceof VirtualCellCollection){
+				VirtualCellCollection v = (VirtualCellCollection) parent.getCollection();
+				
+				return v.getRootParent();
+			} else {
+				return null;
+			}
+			
+		}
+	}
+	
+	private ICellCollection chooseNewCollectionType(ICellCollection other, String name){
+		boolean makeVirtual = false;
+		if(other instanceof VirtualCellCollection){
+			// Decide if the other collectionis also a child of the root parent
+			IAnalysisDataset rootParent = this.getRootParent();
+			IAnalysisDataset rootOther  = ((VirtualCellCollection)other).getRootParent();
+			
+			if (rootParent==rootOther){
+				makeVirtual = true;
+			}
+		}
+		
+		ICellCollection newCollection;
+		if(makeVirtual){
+			newCollection = new VirtualCellCollection(this.getRootParent(), name);
+		} else {
+			newCollection = new DefaultCellCollection(this, name);
+		}
+		return newCollection;
+	}
 
 	@Override
 	public ICellCollection and(ICellCollection other) {
-		ICellCollection newCollection = new DefaultCellCollection(this, "AND operation");
+		
+		
+		ICellCollection newCollection = chooseNewCollectionType(other, "AND operation");
 
 		for(ICell c : other.getCells()){
 
@@ -424,7 +467,7 @@ public class VirtualCellCollection implements ICellCollection {
 
 	@Override
 	public ICellCollection not(ICellCollection other) {
-		ICellCollection newCollection = new DefaultCellCollection(this, "NOT operation");
+		ICellCollection newCollection = chooseNewCollectionType(other, "NOT operation");
 
 		for(ICell c : getCells()){
 
@@ -438,7 +481,7 @@ public class VirtualCellCollection implements ICellCollection {
 
 	@Override
 	public ICellCollection xor(ICellCollection other) {
-		ICellCollection newCollection = new DefaultCellCollection(this, "XOR operation");
+		ICellCollection newCollection = chooseNewCollectionType(other, "XOR operation");
 
 		for(ICell c : getCells()){
 
@@ -485,6 +528,7 @@ public class VirtualCellCollection implements ICellCollection {
 	 * @throws Exception 
 	 */
 	private ICellCollection filterCollection(NucleusStatistic stat, MeasurementScale scale, double lower, double upper) {
+				
 		DecimalFormat df = new DecimalFormat("#.##");
 		ICellCollection subCollection = new DefaultCellCollection(this, "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
 

@@ -31,8 +31,8 @@ public class DatasetSelectionPanel extends EnumeratedOptionsPanel {
 		this.add(box);
 	}
 	
-	public AnalysisDataset getSelectedDataset(){
-		return (AnalysisDataset) box.getSelectedItem();
+	public IAnalysisDataset getSelectedDataset(){
+		return (IAnalysisDataset) box.getSelectedItem();
 	}
 	
 	@Override
