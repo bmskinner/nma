@@ -37,14 +37,16 @@ public interface Flagellum extends CellularComponent {
 	 * Fetch the skeleton offset to zero
 	 * @return
 	 */
-	public List<IPoint> getOffsetSkeleton();
+	List<IPoint> getOffsetSkeleton();
 	
-	public List<IPoint> getBorder();
+	List<IPoint> getBorder();
 	
 	// positions are offset by the bounding rectangle for easier plotting
-	public List<IPoint> getOffsetBorder();
+	List<IPoint> getOffsetBorder();
 	
-	public double getLength();
+	double getLength();
+	
+	Flagellum duplicate();
 
 
 }

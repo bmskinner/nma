@@ -33,6 +33,7 @@ import analysis.ClusteringOptions;
 import analysis.IAnalysisDataset;
 import analysis.nucleus.NucleusTreeBuilder;
 import components.ClusterGroup;
+import components.IClusterGroup;
 
 public class BuildHierarchicalTreeAction extends ProgressableAction implements DatasetEventListener, InterfaceEventListener {
 
@@ -73,7 +74,7 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 
-		ClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, newick);
+		IClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, newick);
 //		group.addDataset(dataset);
 		
 		ClusterTreeDialog clusterPanel = new ClusterTreeDialog( dataset, group);

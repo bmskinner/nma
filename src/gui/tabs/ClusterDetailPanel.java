@@ -59,7 +59,7 @@ import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
-import components.ClusterGroup;
+import components.IClusterGroup;
 
 @SuppressWarnings("serial")
 public class ClusterDetailPanel extends DetailPanel implements DatasetEventListener {
@@ -191,7 +191,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			
 			for(final IAnalysisDataset d : getDatasets()){
 				
-				for(final ClusterGroup g : d.getClusterGroups()){
+				for(final IClusterGroup g : d.getClusterGroups()){
 					
 					if(g.hasTree()){
 						JButton button = new JButton("Show tree");
@@ -361,8 +361,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 							}
 						}
 						
-						ClusterGroup group = null;
-						for(ClusterGroup g : dataset.getClusterGroups()){
+						IClusterGroup group = null;
+						for(IClusterGroup g : dataset.getClusterGroups()){
 							if(g.getName().equals(groupName)){
 								group = g;
 							}

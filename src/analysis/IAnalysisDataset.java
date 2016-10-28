@@ -33,6 +33,7 @@ import utility.Version;
 import components.CellCollection;
 import components.ClusterGroup;
 import components.ICellCollection;
+import components.IClusterGroup;
 
 public interface IAnalysisDataset extends Serializable, Loggable  {
 
@@ -290,7 +291,7 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 * @param group
 	 * @return
 	 */
-	boolean hasClusterGroup(ClusterGroup group);
+	boolean hasClusterGroup(IClusterGroup group);
 
 	/**
 	 * Check that all cluster groups have child members present;
@@ -320,7 +321,7 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 * Delete the cluster with the given id
 	 * @param id
 	 */
-	void deleteClusterGroup(ClusterGroup group);
+	void deleteClusterGroup(IClusterGroup group);
 
 	/**
 	 * Delete an associated dataset

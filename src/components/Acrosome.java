@@ -20,7 +20,7 @@ package components;
 
 import java.io.IOException;
 
-public class Acrosome extends  AbstractCellularComponent {
+public class Acrosome extends  AbstractCellularComponent implements IAcrosome {
 
 	private static final long serialVersionUID = 1L;
 
@@ -28,7 +28,7 @@ public class Acrosome extends  AbstractCellularComponent {
 
 	}
 	
-	public Acrosome(Acrosome a){
+	public Acrosome(IAcrosome a){
 		super(a);
 	}
 	
@@ -44,14 +44,20 @@ public class Acrosome extends  AbstractCellularComponent {
 		finest("\tRead acrosome"); 
 	}
 
+	/* (non-Javadoc)
+	 * @see components.IAcrosome#alignVertically()
+	 */
 	@Override
 	public void alignVertically() {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see components.IAcrosome#duplicate()
+	 */
 	@Override
-	public CellularComponent duplicate() {
+	public IAcrosome duplicate() {
 		return new Acrosome(this);
 	}
 

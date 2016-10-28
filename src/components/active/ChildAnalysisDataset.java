@@ -16,6 +16,7 @@ import analysis.AnalysisOptions;
 import analysis.IAnalysisDataset;
 import components.ClusterGroup;
 import components.ICellCollection;
+import components.IClusterGroup;
 import utility.Constants;
 import utility.Version;
 
@@ -256,7 +257,7 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 		
 		if(this.hasClusters()){
 
-			for (ClusterGroup g :  this.getClusterGroups()){
+			for (IClusterGroup g :  this.getClusterGroups()){
 
 				String name = g.getName();
 
@@ -279,7 +280,7 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	@Override
 	public boolean hasCluster(UUID id) {
 		boolean result = false;
-		for(ClusterGroup g : this.clusterGroups){
+		for(IClusterGroup g : this.clusterGroups){
 			if(g.hasDataset(id)){
 				result = true;
 				break;
@@ -296,7 +297,7 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	@Override
 	public List<UUID> getClusterIDs() {
 		List<UUID> result = new ArrayList<UUID>();
-		for(ClusterGroup g : this.clusterGroups){
+		for(IClusterGroup g : this.clusterGroups){
 			result.addAll(g.getUUIDs());
 		}
 		return result;
@@ -308,7 +309,7 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	}
 
 	@Override
-	public boolean hasClusterGroup(ClusterGroup group) {
+	public boolean hasClusterGroup(IClusterGroup group) {
 		return clusterGroups.contains(group);
 	}
 
@@ -331,7 +332,7 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 			}
 
 			// Remove the groups
-			for(ClusterGroup g : groupsToDelete){
+			for(IClusterGroup g : groupsToDelete){
 				this.deleteClusterGroup(g);
 			}
 
@@ -353,7 +354,7 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 		if(this.hasChild(id)){
 
 			this.childDatasets.remove(id);
-			for(ClusterGroup g : clusterGroups){
+			for(IClusterGroup g : clusterGroups){
 				if(g.hasDataset(id)){
 					g.removeDataset(id);
 				}
@@ -363,7 +364,7 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	}
 
 	@Override
-	public void deleteClusterGroup(ClusterGroup group) {
+	public void deleteClusterGroup(IClusterGroup group) {
 		if(hasClusterGroup(group)){
 
 			for(UUID id : group.getUUIDs()){

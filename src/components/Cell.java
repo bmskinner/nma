@@ -40,15 +40,15 @@ public class Cell
 	protected UUID uuid;
 	
 	protected Nucleus nucleus;
-	protected List<Mitochondrion> mitochondria; // unknown staining patterns so far
+	protected List<IMitochondrion> mitochondria; // unknown staining patterns so far
 	protected List<Flagellum> tails;	
-	protected List<Acrosome> acrosomes;
+	protected List<IAcrosome> acrosomes;
 	
 	public Cell(){
 		this.uuid    = java.util.UUID.randomUUID();
-		mitochondria = new ArrayList<Mitochondrion>(0);
+		mitochondria = new ArrayList<IMitochondrion>(0);
 		tails        = new ArrayList<Flagellum>(0);
-		acrosomes    = new ArrayList<Acrosome>(0);
+		acrosomes    = new ArrayList<IAcrosome>(0);
 	}
 	
 	/**
@@ -60,8 +60,8 @@ public class Cell
 		this.uuid = c.getId();
 		nucleus   = c.getNucleus().duplicate();
 		
-		mitochondria = new ArrayList<Mitochondrion>(0);
-		for(Mitochondrion m : c.getMitochondria()){
+		mitochondria = new ArrayList<IMitochondrion>(0);
+		for(IMitochondrion m : c.getMitochondria()){
 			mitochondria.add(new Mitochondrion(m));
 		}
 		
@@ -70,8 +70,8 @@ public class Cell
 			tails.add(new SpermTail((SpermTail) f));
 		}
 		
-		acrosomes = new ArrayList<Acrosome>(0);
-		for(Acrosome a : c.getAcrosomes()){
+		acrosomes = new ArrayList<IAcrosome>(0);
+		for(IAcrosome a : c.getAcrosomes()){
 			acrosomes.add(new Acrosome(a));
 		}
 	}
@@ -104,7 +104,7 @@ public class Cell
 	 * @see components.ICell#getMitochondria()
 	 */
 	@Override
-	public List<Mitochondrion> getMitochondria() {
+	public List<IMitochondrion> getMitochondria() {
 		return mitochondria;
 	}
 
@@ -112,7 +112,7 @@ public class Cell
 	 * @see components.ICell#setMitochondria(java.util.List)
 	 */
 	@Override
-	public void setMitochondria(List<Mitochondrion> mitochondria) {
+	public void setMitochondria(List<IMitochondrion> mitochondria) {
 		this.mitochondria = mitochondria;
 	}
 	
@@ -120,7 +120,7 @@ public class Cell
 	 * @see components.ICell#addMitochondrion(components.Mitochondrion)
 	 */
 	@Override
-	public void addMitochondrion(Mitochondrion mitochondrion) {
+	public void addMitochondrion(IMitochondrion mitochondrion) {
 		this.mitochondria.add(mitochondrion);
 	}
 	
@@ -145,7 +145,7 @@ public class Cell
 	 * @see components.ICell#getAcrosomes()
 	 */
 	@Override
-	public List<Acrosome> getAcrosomes(){
+	public List<IAcrosome> getAcrosomes(){
 		return this.acrosomes;
 	}
 	
@@ -153,7 +153,7 @@ public class Cell
 	 * @see components.ICell#addAcrosome(components.Acrosome)
 	 */
 	@Override
-	public void addAcrosome(Acrosome acrosome){
+	public void addAcrosome(IAcrosome acrosome){
 		this.acrosomes.add(acrosome);
 	}
 	
@@ -161,12 +161,16 @@ public class Cell
 	 * @see components.ICell#hasNucleus()
 	 */
 	@Override
+	public boolean hasAcrosome(){
+		return !this.acrosomes.isEmpty();
+	}
+	
+	/* (non-Javadoc)
+	 * @see components.ICell#hasNucleus()
+	 */
+	@Override
 	public boolean hasNucleus(){
-		if(this.nucleus!=null){
-			return true;
-		} else {
-			return false;
-		}
+		return this.nucleus!=null;
 	}
 	
 	/* (non-Javadoc)
@@ -174,11 +178,7 @@ public class Cell
 	 */
 	@Override
 	public boolean hasFlagellum(){
-		if(this.tails.size()>0){
-			return true;
-		} else {
-			return false;
-		}
+		return !this.tails.isEmpty();
 	}
 	
 	/* (non-Javadoc)
@@ -186,11 +186,7 @@ public class Cell
 	 */
 	@Override
 	public boolean hasMitochondria(){
-		if(this.mitochondria.isEmpty()){
-			return false;
-		} else {
-			return true;
-		}
+		return !this.mitochondria.isEmpty();
 	}
 	
 	/* (non-Javadoc)
@@ -299,6 +295,4 @@ public class Cell
 		in.defaultReadObject();
 //		finest("Read cell"); 
 	}
-
-
 }

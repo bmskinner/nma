@@ -40,6 +40,7 @@ import components.Cell;
 import components.ClusterGroup;
 import components.ICell;
 import components.ICellCollection;
+import components.IClusterGroup;
 import analysis.AnalysisOptions;
 import analysis.IAnalysisDataset;
 import analysis.nucleus.NucleusDetectionWorker;
@@ -215,7 +216,7 @@ public class DefaultAnalysisDataset implements IAnalysisDataset {
 		
 		if(child != null){
 			this.childDatasets.remove(id);
-			for(ClusterGroup g : clusterGroups){
+			for(IClusterGroup g : clusterGroups){
 				if(g.hasDataset(id)){
 					g.removeDataset(id);
 				}
@@ -587,7 +588,7 @@ public class DefaultAnalysisDataset implements IAnalysisDataset {
 		
 		if(this.hasClusters()){
 
-			for (ClusterGroup g :  this.getClusterGroups()){
+			for (IClusterGroup g :  this.getClusterGroups()){
 
 				String name = g.getName();
 
@@ -616,7 +617,7 @@ public class DefaultAnalysisDataset implements IAnalysisDataset {
 	public boolean hasCluster(UUID id){
 		
 		boolean result = false;
-		for(ClusterGroup g : this.clusterGroups){
+		for(IClusterGroup g : this.clusterGroups){
 			if(g.hasDataset(id)){
 				result = true;
 				break;
@@ -639,7 +640,7 @@ public class DefaultAnalysisDataset implements IAnalysisDataset {
 	@Override
 	public List<UUID> getClusterIDs(){
 		List<UUID> result = new ArrayList<UUID>();
-		for(ClusterGroup g : this.clusterGroups){
+		for(IClusterGroup g : this.clusterGroups){
 			result.addAll(g.getUUIDs());
 		}
 		return result;
@@ -661,7 +662,7 @@ public class DefaultAnalysisDataset implements IAnalysisDataset {
 	 * @see analysis.IAnalysisDataset#hasClusterGroup(components.ClusterGroup)
 	 */
 	@Override
-	public boolean hasClusterGroup(ClusterGroup group){
+	public boolean hasClusterGroup(IClusterGroup group){
 		return clusterGroups.contains(group);
 	}
 	
@@ -688,7 +689,7 @@ public class DefaultAnalysisDataset implements IAnalysisDataset {
 			}
 			
 			// Remove the groups
-			for(ClusterGroup g : groupsToDelete){
+			for(IClusterGroup g : groupsToDelete){
 				this.deleteClusterGroup(g);
 			}
 			
@@ -726,7 +727,7 @@ public class DefaultAnalysisDataset implements IAnalysisDataset {
 	 * @see analysis.IAnalysisDataset#deleteClusterGroup(components.ClusterGroup)
 	 */
 	@Override
-	public void deleteClusterGroup(ClusterGroup group){
+	public void deleteClusterGroup(IClusterGroup group){
 		
 		if(hasClusterGroup(group)){
 

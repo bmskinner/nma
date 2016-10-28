@@ -59,6 +59,7 @@ import components.CellCollection;
 import components.ClusterGroup;
 import components.ICell;
 import components.ICellCollection;
+import components.IClusterGroup;
 import components.active.VirtualCellCollection;
 import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
@@ -82,7 +83,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	private JPanel buttonPanel;
 	private DraggableTreeViewer viewer;
 	private IAnalysisDataset dataset;
-	private ClusterGroup group;
+	private IClusterGroup group;
 		
 	private JComboBox<IAnalysisDataset> selectedClusterBox;
 	private JComboBox<ClusterGroup> selectedClusterGroupBox;
@@ -91,7 +92,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	
 	private boolean hasMergeSources; // cache this to speed comparisons
 	
-	public ClusterTreeDialog(final IAnalysisDataset dataset, final ClusterGroup group) {
+	public ClusterTreeDialog(final IAnalysisDataset dataset, final IClusterGroup group) {
 		super();
 		this.dataset = dataset;
 		this.group = group;
@@ -319,7 +320,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	
 
 		
-	private void colourTreeNodesByClusterGroup(final ClusterGroup group){
+	private void colourTreeNodesByClusterGroup(final IClusterGroup group){
 
 		if(group!=null){
 			finer("Colouring nodes by cluster group: "+group.getName());	
@@ -553,7 +554,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 			list.add(dataset.getMergeSource(id));
 		}
 
-		ClusterGroup mergeGroup = makeNewClusterGroup(list);
+		IClusterGroup mergeGroup = makeNewClusterGroup(list);
 
 		for(IAnalysisDataset d : list){
 			mergeGroup.addDataset(d);
@@ -707,7 +708,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		if(e.getSource().equals(selectedClusterGroupBox)){
 			
 			setClusterBoxNull();
-			colourTreeNodesByClusterGroup((ClusterGroup) selectedClusterGroupBox.getSelectedItem());
+			colourTreeNodesByClusterGroup((IClusterGroup) selectedClusterGroupBox.getSelectedItem());
 			
 		}
 		

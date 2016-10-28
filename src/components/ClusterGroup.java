@@ -35,7 +35,7 @@ import analysis.IAnalysisDataset;
  *
  */
 
-public class ClusterGroup implements Serializable, Loggable {
+public class ClusterGroup implements IClusterGroup {
 	
 	private static final long serialVersionUID = 1L;
 	private List<UUID> ids = new ArrayList<UUID>(0); // hold the ids of datasets in a cluster
@@ -64,84 +64,83 @@ public class ClusterGroup implements Serializable, Loggable {
 		this.newickTree = tree;
 	}
 	
-	/**
-	 * Get the public name of the cluster groups
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.IClusterGroup#getName()
 	 */
+	@Override
 	public String getName(){
 		return this.name;
 	}
 	
-	/**
-	 * Get the number of datasets in the group
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.IClusterGroup#size()
 	 */
+	@Override
 	public int size(){
 		return this.ids.size();
 	}
 	
-	/**
-	 * Get the Newick tree for the cluster if set, or null
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.IClusterGroup#getTree()
 	 */
+	@Override
 	public String getTree(){
 		return this.newickTree;
 	}
 	
-	/**
-	 * Get the IDs of the datasets in the group
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.IClusterGroup#getUUIDs()
 	 */
+	@Override
 	public List<UUID> getUUIDs(){
 		return this.ids;
 	}
 	
-	/**
-	 * Add a dataset as a cluster in the group
-	 * @param dataset
+	/* (non-Javadoc)
+	 * @see components.IClusterGroup#addDataset(analysis.IAnalysisDataset)
 	 */
+	@Override
 	public void addDataset(IAnalysisDataset dataset){
 		this.ids.add(dataset.getUUID());
 	}
 	
-	/**
-	 * Add a cell collection as a cluster in the group
-	 * @param collection
+	/* (non-Javadoc)
+	 * @see components.IClusterGroup#addDataset(components.ICellCollection)
 	 */
+	@Override
 	public void addDataset(ICellCollection collection){
 		this.ids.add(collection.getID());
 	}
 	
-	/**
-	 * Remove the selected dataset from the cluster group
-	 * @param dataset
+	/* (non-Javadoc)
+	 * @see components.IClusterGroup#removeDataset(analysis.IAnalysisDataset)
 	 */
+	@Override
 	public void removeDataset(IAnalysisDataset dataset){
 		removeDataset(dataset.getUUID());
 	}
 	
-	/**
-	 * Remove the selected dataset id from the cluster group
-	 * @param dataset
+	/* (non-Javadoc)
+	 * @see components.IClusterGroup#removeDataset(java.util.UUID)
 	 */
+	@Override
 	public void removeDataset(UUID id){
 		this.ids.remove(id);
 	}
 	
-	/**
-	 * Get the options used to make this cluster group
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.IClusterGroup#getOptions()
 	 */
+	@Override
 	public ClusteringOptions getOptions(){
 		return this.options;
 	}
 	
 
-	/** 
-	 * Test if this group contains the given dataset id
-	 * @param id
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.IClusterGroup#hasDataset(java.util.UUID)
 	 */
+	@Override
 	public boolean hasDataset(UUID id){
 		if(this.ids.contains(id)){
 			return true;
@@ -150,10 +149,10 @@ public class ClusterGroup implements Serializable, Loggable {
 		}
 	}
 	
-	/**
-	 * Check if there is a tree in this cluster group
-	 * @return
+	/* (non-Javadoc)
+	 * @see components.IClusterGroup#hasTree()
 	 */
+	@Override
 	public boolean hasTree(){
 		if(this.newickTree==null){
 			return false;
@@ -162,6 +161,10 @@ public class ClusterGroup implements Serializable, Loggable {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.IClusterGroup#toString()
+	 */
+	@Override
 	public String toString(){
 		return this.name;
 	}

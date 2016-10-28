@@ -57,6 +57,7 @@ import javax.swing.tree.TreeSelectionModel;
 import analysis.IAnalysisDataset;
 import components.ClusterGroup;
 import components.ICellCollection;
+import components.IClusterGroup;
 import components.active.ChildAnalysisDataset;
 
 @SuppressWarnings("serial")
@@ -205,7 +206,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				if (e.getClickCount() == 2) {
 
 					if(o instanceof ClusterGroup){
-						clusterGroupClicked((ClusterGroup) o);
+						clusterGroupClicked((IClusterGroup) o);
 					}
 					
 					if(o instanceof IAnalysisDataset){
@@ -230,7 +231,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				}
 			}
 			
-			private void clusterGroupClicked(ClusterGroup g){
+			private void clusterGroupClicked(IClusterGroup g){
 
 			}
 			
@@ -513,7 +514,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			for(PopulationTreeTableNode n : treeTable.getSelectedNodes()){
 
 				if(n.hasClusterGroup()){
-					ClusterGroup g = n.getGroup();
+					IClusterGroup g = n.getGroup();
 					for(UUID childID : g.getUUIDs()){
 						IAnalysisDataset child = DatasetListManager.getInstance().getDataset(childID);
 						datasets.add(child);

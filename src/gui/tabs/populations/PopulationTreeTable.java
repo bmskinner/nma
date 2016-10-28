@@ -14,6 +14,7 @@ import org.jdesktop.swingx.treetable.TreeTableModel;
 
 import analysis.IAnalysisDataset;
 import components.ClusterGroup;
+import components.IClusterGroup;
 import gui.DatasetListManager;
 import gui.tabs.populations.PopulationsPanel.TreeSelectionHandler;
 import logging.Loggable;
@@ -262,11 +263,11 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
 	 * @param rowIndex
 	 * @return
 	 */
-	public ClusterGroup getClusterGroupAtRow(int rowIndex){
+	public IClusterGroup getClusterGroupAtRow(int rowIndex){
 		Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
 
 		if(columnOneObject instanceof ClusterGroup){
-			return (ClusterGroup) columnOneObject; // row i, column 0
+			return (IClusterGroup) columnOneObject; // row i, column 0
 		}
 		return null;
 	}

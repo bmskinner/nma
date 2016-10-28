@@ -12,7 +12,7 @@ import java.util.UUID;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
 import analysis.IAnalysisDataset;
-import components.ClusterGroup;
+import components.IClusterGroup;
 import logging.Loggable;
 
 public class PopulationTreeTableModel extends DefaultTreeTableModel implements Loggable{
@@ -130,7 +130,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 		// Add cluster groups separately
 		Set<UUID> clusterIDs = new HashSet<UUID>(); // track the child datasets in clusters, so they are not added twice
 		
-		for(ClusterGroup group : dataset.getClusterGroups()){
+		for(IClusterGroup group : dataset.getClusterGroups()){
 			fine("Making node for cluster group "+group.getName());
 			PopulationTreeTableNode clusterGroupNode = new PopulationTreeTableNode(group);
 			category.add(clusterGroupNode);
@@ -244,7 +244,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 	 * @param g
 	 * @return
 	 */
-	public PopulationTreeTableNode getNode(ClusterGroup g){
+	public PopulationTreeTableNode getNode(IClusterGroup g){
 		
 		if(g==null){
 			throw new IllegalArgumentException("Cluster group cannot be null"); 

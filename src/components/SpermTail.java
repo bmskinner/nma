@@ -147,7 +147,7 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 		}
 
 		@Override
-		public CellularComponent duplicate() {
+		public Flagellum duplicate() {
 			return new SpermTail(this);
 		}
 

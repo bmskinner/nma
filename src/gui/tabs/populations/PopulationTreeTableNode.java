@@ -8,14 +8,14 @@ import java.util.UUID;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
 import analysis.IAnalysisDataset;
-import components.ClusterGroup;
+import components.IClusterGroup;
 
 public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
 	
 	Object[] columnData = new Object[3];
 
 	IAnalysisDataset dataset = null; // the dataset in the node
-	ClusterGroup group      = null;
+	IClusterGroup group      = null;
 
 	public PopulationTreeTableNode(IAnalysisDataset dataset) {
 		super(dataset.getUUID().toString());
@@ -28,7 +28,7 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
 		super();
 	}
 	
-	public PopulationTreeTableNode(ClusterGroup group) {
+	public PopulationTreeTableNode(IClusterGroup group) {
 		super(UUID.randomUUID().toString());
 		this.group = group; 
 		columnData[0] = group;
@@ -48,7 +48,7 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
 		return dataset;
 	}
 
-	public ClusterGroup getGroup() {
+	public IClusterGroup getGroup() {
 		return group;
 	}
 

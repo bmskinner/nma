@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import components.nuclear.BorderPoint;
 
-public class Mitochondrion extends AbstractCellularComponent {
+public class Mitochondrion extends AbstractCellularComponent implements IMitochondrion {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -30,7 +30,7 @@ public class Mitochondrion extends AbstractCellularComponent {
 		super();
 	}
 	
-	public Mitochondrion(final Mitochondrion m){
+	public Mitochondrion(final IMitochondrion m){
 		super(m);
 	} 
 	
@@ -46,14 +46,20 @@ public class Mitochondrion extends AbstractCellularComponent {
 		finest("Read mitochondrion"); 
 	}
 
+	/* (non-Javadoc)
+	 * @see components.I#alignVertically()
+	 */
 	@Override
 	public void alignVertically() {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see components.I#duplicate()
+	 */
 	@Override
-	public CellularComponent duplicate() {
+	public IMitochondrion duplicate() {
 		return new Mitochondrion(this);
 	}
 

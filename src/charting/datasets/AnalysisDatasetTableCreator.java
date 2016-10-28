@@ -45,6 +45,7 @@ import analysis.IAnalysisDataset;
 import components.CellCollection;
 import components.ClusterGroup;
 import components.ICellCollection;
+import components.IClusterGroup;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
@@ -1135,7 +1136,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		for(IAnalysisDataset dataset : list){
 			List<ClusterGroup> clusterGroups = dataset.getClusterGroups();
 
-			for(ClusterGroup g : clusterGroups ){
+			for(IClusterGroup g : clusterGroups ){
 				ClusteringOptions op = g.getOptions();
 
 				Object iterationString 	= op.getType().equals(ClusteringMethod.EM) 
