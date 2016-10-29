@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.swing.JTable;
+import javax.swing.table.TableCellRenderer;
 
 import components.ICell;
 import components.generic.MeasurementScale;
@@ -31,6 +32,7 @@ public class TableOptionsBuilder {
 	private int segPosition            = 0;    // the position of the segment in the profile (consistent between datasets)
 	private MeasurementScale scale     = MeasurementScale.PIXELS;
 	private JTable target              = null;
+	private TableCellRenderer renderer = null;
 
 	private ICell cell                  = null;
 
@@ -81,6 +83,12 @@ public class TableOptionsBuilder {
 		this.target = target;
 		return this;
 	}
+	
+	public TableOptionsBuilder setRenderer(TableCellRenderer r) {
+		this.renderer = r;
+		return this;
+	}
+
 
 	public DefaultTableOptions build(){
 		DefaultTableOptions options =  new DefaultTableOptions(list);
@@ -92,6 +100,7 @@ public class TableOptionsBuilder {
 		options.setCell(cell);
 		options.setSwatch(swatch);
 		options.setTarget(target);
+		options.setRenderer(renderer);
 		return options;
 
 	}

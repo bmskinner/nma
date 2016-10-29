@@ -837,9 +837,13 @@ public abstract class DetailPanel
    	
     		try {
     			if(options.getTarget()!=null){
-    			
-    				options.getTarget().setModel(get());
-    				finest("Set table to new model");
+    				TableModel model = get();
+    				if(model!=null){
+    					options.getTarget().setModel(model);
+    					finest("Set table to new model");
+    					setRenderer(options.getTarget(), options.getRenderer());
+    				}
+    				
     				options.getTarget().setCursor(Cursor.getDefaultCursor());
     			}
 			} catch (InterruptedException e) {

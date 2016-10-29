@@ -208,12 +208,10 @@ public class MergesDetailPanel extends DetailPanel {
 			.setDatasets(activeDataset().getAllMergeSources())
 			.setType(TableType.ANALYSIS_PARAMETERS)
 			.setTarget(sourceParametersTable)
+			.setRenderer(new AnalysisTableCellRenderer())
 			.build();
 		
 		setTable(options);
-		
-
-		setRenderer(sourceParametersTable, new AnalysisTableCellRenderer());
 		
 	}
 	

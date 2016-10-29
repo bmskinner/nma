@@ -119,10 +119,10 @@ implements ICellCollection {
 	/**
 	 * Cache statistics from the cells in the collection. This should be updated if a cell is added or lost 
 	 */
-	private transient StatsCache statsCache = new StatsCache();
+	private volatile transient StatsCache statsCache = new StatsCache();
 
 	// cache the number of shared cells with other datasets
-	protected transient Map<UUID, Integer> vennCache = new HashMap<UUID, Integer>();
+	protected volatile transient Map<UUID, Integer> vennCache = new HashMap<UUID, Integer>();
 
 	private transient SignalManager  signalManager  = new SignalManager(this);
 	private transient ProfileManager profileManager = new ProfileManager(this);
@@ -1281,26 +1281,26 @@ implements ICellCollection {
 		
 		finest("Beginning search for shared cells");
 
-		toSearch1.retainAll(toSearch2);
-		int shared = toSearch1.size();
+//		toSearch1.retainAll(toSearch2);
+//		int shared = toSearch1.size();
 		// choose the smaller to search within
 		
-//		int shared = 0;
-//		for(UUID id1 : toSearch1){
-//			
-//			Iterator<UUID> it = toSearch2.iterator();
-//			
-//			while(it.hasNext()){
-//				UUID id2 = it.next();
-//				
-//				if(id1.equals(id2)){
-//					it.remove();
-//					shared++;
-//					break;
-//				}
-//			}
-//			
-//		}	
+		int shared = 0;
+		for(UUID id1 : toSearch1){
+			
+			Iterator<UUID> it = toSearch2.iterator();
+			
+			while(it.hasNext()){
+				UUID id2 = it.next();
+				
+				if(id1.equals(id2)){
+					it.remove();
+					shared++;
+					break;
+				}
+			}
+			
+		}	
 		finest("Completed search for shared cells");
 		return shared;
 //		return toSearch1.size();

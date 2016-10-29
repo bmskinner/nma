@@ -208,6 +208,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
 //			TableModel model = getTable(options);
 //			table.setModel(model);
+			
+			//TODO: add chosen column set for renderer into options so we can add to the first column
 
 			if(this.getCellModel().hasCell()){
 				table.getColumnModel().getColumn(1).setCellRenderer(  new StatsTableCellRenderer() );

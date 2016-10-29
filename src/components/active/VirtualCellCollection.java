@@ -73,12 +73,12 @@ public class VirtualCellCollection implements ICellCollection {
 	
 	private transient boolean isRefolding = false;
 	
-	protected transient Map<UUID, Integer> vennCache = new HashMap<UUID, Integer>();
+	protected volatile transient Map<UUID, Integer> vennCache = new HashMap<UUID, Integer>();
 	
 	private transient ProfileManager profileManager = new ProfileManager(this);
 	private transient SignalManager  signalManager  = new SignalManager(this); //TODO: integrate
 	
-	private transient StatsCache statsCache = new StatsCache();
+	private volatile transient StatsCache statsCache = new StatsCache();
 	
 	public VirtualCellCollection(IAnalysisDataset parent, String name){
 		this(parent, name, java.util.UUID.randomUUID() );
@@ -147,8 +147,8 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public Set<UUID> getCellIDs() {
-		return cellIDs;
+	public synchronized Set<UUID> getCellIDs() {
+		return new HashSet<UUID>(cellIDs);
 	}
 
 	@Override
@@ -608,27 +608,27 @@ public class VirtualCellCollection implements ICellCollection {
 		Set<UUID> toSearch2 = d2.getCellIDs();
 		
 		finest("Beginning search for shared cells");
-		toSearch1.retainAll(toSearch2);
-		int shared = toSearch1.size();
+//		toSearch1.retainAll(toSearch2);
+//		int shared = toSearch1.size();
 		
 		// choose the smaller to search within
 		
-//		int shared = 0;
-//		for(UUID id1 : toSearch1){
-//			
-//			Iterator<UUID> it = toSearch2.iterator();
-//			
-//			while(it.hasNext()){
-//				UUID id2 = it.next();
-//				
-//				if(id1.equals(id2)){
-//					it.remove();
-//					shared++;
-//					break;
-//				}
-//			}
-//			
-//		}	
+		int shared = 0;
+		for(UUID id1 : toSearch1){
+			
+			Iterator<UUID> it = toSearch2.iterator();
+			
+			while(it.hasNext()){
+				UUID id2 = it.next();
+				
+				if(id1.equals(id2)){
+					it.remove();
+					shared++;
+					break;
+				}
+			}
+			
+		}	
 		finest("Completed search for shared cells");
 		return shared;
 	}

@@ -668,11 +668,24 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		DecimalFormat df = new DecimalFormat("#0.00"); 
 		
 		// add columns
+		// pre-cache data to ensure all values present when we get
+		synchronized(this){
+			for(IAnalysisDataset dataset : list){
+				for(IAnalysisDataset dataset2 : list){
+					if( ! dataset2.getUUID().equals(dataset.getUUID())){	
+						dataset.getCollection().countShared(dataset2);
+					}
+				}
+			}
+		}
+		
 		for(IAnalysisDataset dataset : list){
 			
 			finest("Fetching comparisons for "+dataset.getName());
 			
 			Object[] popData = new Object[list.size()];
+			
+			
 			
 			int i = 0;
 			for(IAnalysisDataset dataset2 : list){
@@ -683,7 +696,14 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 					int shared = dataset.getCollection().countShared(dataset2);
 
-					double pct = ((double) shared / (double) dataset2.getCollection().size())*100;
+					int d2size = dataset2.getCollection().size();
+					
+					double pct = (   (double) shared / (double) d2size   ) * 100;
+					if(d2size==0){
+						pct=0;
+					}
+					
+					
 					valueString = shared+" ("+df.format(pct)+"% of row)";
 				}
 				

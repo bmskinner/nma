@@ -21,6 +21,7 @@ package charting.options;
 import java.util.List;
 
 import javax.swing.JTable;
+import javax.swing.table.TableCellRenderer;
 
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
@@ -38,6 +39,8 @@ public class DefaultTableOptions extends AbstractOptions implements TableOptions
 	private ICell cell      = null;
 	
 	private JTable target   = null;
+	
+	private TableCellRenderer renderer = null;
 	
 	public DefaultTableOptions(List<IAnalysisDataset> list) {
 		super(list);
@@ -88,7 +91,16 @@ public class DefaultTableOptions extends AbstractOptions implements TableOptions
 		return this.target;
 	}
 
+	@Override
+	public void setRenderer(TableCellRenderer r) {
+		this.renderer = r;
+		
+	}
 
+	@Override
+	public TableCellRenderer getRenderer() {
+		return renderer;
+	}
 
 	public enum TableType {
 		ANALYSIS_PARAMETERS,
@@ -132,6 +144,8 @@ public class DefaultTableOptions extends AbstractOptions implements TableOptions
 			return false;
 		return true;
 	}
+
+
 	
 	
 }

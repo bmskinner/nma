@@ -94,13 +94,10 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 			.setDatasets(getDatasets())
 			.setType(TableType.PAIRWISE_VENN)
 			.setTarget(pairwiseVennTable)
+			.setRenderer(new PairwiseVennTableCellRenderer())
 			.build();
 		
 		setTable(options);
-
-//		TableModel model = getTable(options);
-//		pairwiseVennTable.setModel(model);
-		setRenderer(pairwiseVennTable, new PairwiseVennTableCellRenderer());
 		
 		finest("Updated pairwise venn panel");
 	}

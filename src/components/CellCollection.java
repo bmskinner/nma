@@ -1553,4 +1553,10 @@ public class CellCollection implements ICellCollection {
 		return profileCollections.get(ProfileType.ANGLE);
 	}
 
+	@Override
+	public void setSharedCount(ICellCollection d2, int i) {
+		vennCache.put(d2.getID(), i);
+		
+	}
+
 }

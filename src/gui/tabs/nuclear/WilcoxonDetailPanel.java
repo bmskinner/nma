@@ -52,16 +52,18 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 		tablePanel = createTablePanel();
 		for(NucleusStatistic stat : NucleusStatistic.values()){
 
+			ExportableTable table = new ExportableTable();
+			
 			TableOptions options = new TableOptionsBuilder()
-			.setDatasets(getDatasets())
-			.addStatistic(stat)
-			.build();
+				.setDatasets(getDatasets())
+				.addStatistic(stat)
+				.setTarget(table)
+				.setRenderer(new WilcoxonTableCellRenderer())
+				.build();
 
-			TableModel model = getTable(options);
-			ExportableTable table = new ExportableTable(model);
-			setRenderer(table, new WilcoxonTableCellRenderer());
 			addWilconxonTable(tablePanel, table, stat.toString());
 			scrollPane.setColumnHeaderView(table.getTableHeader());
+			setTable(options);
 
 
 		}

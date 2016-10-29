@@ -34,6 +34,7 @@ import stats.Quartile;
 import stats.SegmentStatistic;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.DefaultTableOptions;
+import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -73,24 +74,28 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 
 				// Get each segment as a boxplot
 				for(IBorderSegment seg : segments){
-//				for( int i=0; i<segmentCount; i++){
+
 					String segName = seg.getName();
 
 					
+					ExportableTable table = new ExportableTable();
 					
-					DefaultTableOptions options = new TableOptionsBuilder()
-					.setDatasets(getDatasets())
-					.addStatistic(stat)
-					.setSegPosition(seg.getPosition())
-					.build();
+					TableOptions options = new TableOptionsBuilder()
+						.setDatasets(getDatasets())
+						.addStatistic(stat)
+						.setSegPosition(seg.getPosition())
+						.setTarget(table)
+						.setRenderer(new WilcoxonTableCellRenderer())
+						.build();
 
 					
-					TableModel model = getTable(options);
+//					TableModel model = getTable(options);
 					
-					ExportableTable table = new ExportableTable(model);
-					setRenderer(table, new WilcoxonTableCellRenderer());
+//					ExportableTable table = new ExportableTable(model);
+//					setRenderer(table, new WilcoxonTableCellRenderer());
 					addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
 					scrollPane.setColumnHeaderView(table.getTableHeader());
+					setTable(options);
 				}
 
 			}

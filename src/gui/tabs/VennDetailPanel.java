@@ -90,14 +90,12 @@ public class VennDetailPanel extends DetailPanel {
 			.setDatasets(getDatasets())
 			.setType(TableType.VENN)
 			.setTarget(vennTable)
+			.setRenderer(new VennTableCellRenderer())
 			.build();
 		
 		setTable(options);
 
-//		TableModel model = getTable(options);
-//		
-//		vennTable.setModel(model);
-		setRenderer(vennTable, new VennTableCellRenderer());
+//		setRenderer(vennTable, new VennTableCellRenderer());
 
 		fine("Updated venn panel");
 		
@@ -112,14 +110,16 @@ public class VennDetailPanel extends DetailPanel {
 	protected void updateNull() {		
 		
 		TableOptions options = new TableOptionsBuilder()
+			.setDatasets(null)
 			.setType(TableType.VENN)
+			.setTarget(vennTable)
 			.build();
 		
 		setTable(options);
 		
 //		TableModel model = getTable(options);
 //		vennTable.setModel(model);
-		setRenderer(vennTable, new VennTableCellRenderer());
+//		setRenderer(vennTable, new VennTableCellRenderer());
 	}
 	
 	@Override

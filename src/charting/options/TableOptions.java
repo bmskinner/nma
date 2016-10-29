@@ -1,6 +1,7 @@
 package charting.options;
 
 import javax.swing.JTable;
+import javax.swing.table.TableCellRenderer;
 
 import charting.options.DefaultTableOptions.TableType;
 import components.ICell;
@@ -22,5 +23,13 @@ public interface TableOptions extends DisplayOptions {
 	JTable getTarget();
 	
 	void setTarget(JTable target);
+	
+	void setRenderer(TableCellRenderer r);
+	
+	/**
+	 * Get the renderer to apply to the final table model
+	 * @return
+	 */
+	TableCellRenderer getRenderer();
 
 }

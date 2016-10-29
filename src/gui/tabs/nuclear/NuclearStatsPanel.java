@@ -97,14 +97,6 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 			.build();
 		
 		setTable(options);
-
-//		finest("Built table options");
-//		TableModel model = getTable(options);
-//
-//		finest("Fetched table model");
-//
-//		tablePopulationStats.setModel(model);
-
 		finest("Set table model");
 		
 	}
