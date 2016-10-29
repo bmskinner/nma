@@ -20,6 +20,8 @@ package charting.options;
 
 import java.util.List;
 
+import javax.swing.JTable;
+
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import components.ICell;
@@ -34,6 +36,8 @@ public class DefaultTableOptions extends AbstractOptions implements TableOptions
 	private TableType type = null;
 	
 	private ICell cell      = null;
+	
+	private JTable target   = null;
 	
 	public DefaultTableOptions(List<IAnalysisDataset> list) {
 		super(list);
@@ -73,6 +77,15 @@ public class DefaultTableOptions extends AbstractOptions implements TableOptions
 	@Override
 	public void setCell(ICell cell) {
 		this.cell = cell;
+	}
+	
+	@Override
+	public void setTarget(JTable target){
+		this.target = target;
+	}
+	
+	public JTable getTarget(){
+		return this.target;
 	}
 
 

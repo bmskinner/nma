@@ -783,7 +783,7 @@ implements ICellCollection {
 	}
 
 
-	private double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
+	private synchronized double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
 
 		if(stat.getClass()==NucleusStatistic.class){
 			return getMedianNucleusStatistic((NucleusStatistic) stat, scale);
@@ -823,7 +823,7 @@ implements ICellCollection {
 	 * @return
 	 * @throws Exception
 	 */
-	public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
+	public synchronized double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
 
 		if(stat.getClass()==SignalStatistic.class){
 			return getMedianStatistic(stat, scale, id, null);
@@ -843,7 +843,7 @@ implements ICellCollection {
 	 * @return
 	 * @throws Exception
 	 */
-	private double getMedianNucleusStatistic(NucleusStatistic stat, MeasurementScale scale)  throws Exception {
+	private synchronized double getMedianNucleusStatistic(NucleusStatistic stat, MeasurementScale scale)  throws Exception {
 
 		if(this.statsCache.hasStatistic(stat, scale)){
 			return(this.statsCache.getStatistic(stat, scale));
@@ -862,7 +862,7 @@ implements ICellCollection {
 
 	}
 	
-	public double[] getMedianStatistics(PlottableStatistic stat, MeasurementScale scale) {
+	public synchronized double[] getMedianStatistics(PlottableStatistic stat, MeasurementScale scale) {
 		
 		
 		return getMedianStatistics(stat, scale, null);
@@ -871,7 +871,7 @@ implements ICellCollection {
 		
 	}
 	
-	public double[] getMedianStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id) {
+	public synchronized double[] getMedianStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id) {
 
 		try {
 			if(stat instanceof NucleusStatistic){
@@ -897,7 +897,7 @@ implements ICellCollection {
 	 * @return a list of values
 	 * @throws Exception
 	 */
-	private double[] getNuclearStatistics(NucleusStatistic stat, MeasurementScale scale) {
+	private synchronized double[] getNuclearStatistics(NucleusStatistic stat, MeasurementScale scale) {
 
 		double[] result = null;
 		switch (stat) {
@@ -928,7 +928,7 @@ implements ICellCollection {
 	 * @return
 	 * @throws Exception
 	 */
-	private double getMedianSegmentStatistic(SegmentStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
+	private synchronized double getMedianSegmentStatistic(SegmentStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
 
 		if(cells.isEmpty()){
 			return 0;
@@ -1248,10 +1248,16 @@ implements ICellCollection {
 			return vennCache.get(d2.getID());
 		}
 		int shared  = countSharedNuclei(d2);
+		d2.setSharedCount(this, shared);
 		vennCache.put(d2.getID(), shared);
-		d2.countShared(this);
+		
 		return shared;
 
+	}
+	
+	@Override
+	public void setSharedCount(ICellCollection d2, int i){
+		vennCache.put(d2.getID(), i);
 	}
 	
 	/**
@@ -1260,28 +1266,63 @@ implements ICellCollection {
 	 * @param d2
 	 * @return
 	 */
-	private int countSharedNuclei(ICellCollection d2){
+	private synchronized int countSharedNuclei(ICellCollection d2){
 
 		if(d2==this){
-			cells.size();
+			return cells.size();
 		}
 
 		if(d2.getNucleusType() != this.nucleusType){
 			return 0;
 		}
+				
+		Set<UUID> toSearch1 = this.getCellIDs();
+		Set<UUID> toSearch2 = d2.getCellIDs();
+		
+		finest("Beginning search for shared cells");
 
-
-		int shared = 0;
-		for(ICell c : cells){
-			UUID n1id = c.getNucleus().getID();
-
-			for(Nucleus n2 : d2.getNuclei()){
-				if( n2.getID().equals(n1id)){
-					shared++;
-				}
-			}
-		}
+		toSearch1.retainAll(toSearch2);
+		int shared = toSearch1.size();
+		// choose the smaller to search within
+		
+//		int shared = 0;
+//		for(UUID id1 : toSearch1){
+//			
+//			Iterator<UUID> it = toSearch2.iterator();
+//			
+//			while(it.hasNext()){
+//				UUID id2 = it.next();
+//				
+//				if(id1.equals(id2)){
+//					it.remove();
+//					shared++;
+//					break;
+//				}
+//			}
+//			
+//		}	
+		finest("Completed search for shared cells");
 		return shared;
+//		return toSearch1.size();
+		
+//		int shared = 0;
+//		
+//		Iterator<UUID> it1 = toSearch1.iterator();
+//		
+//		while(it1.hasNext()){
+//			UUID id1 = it1.next();
+//			Iterator<UUID> it2 = toSearch2.iterator();
+//			while(it2.hasNext()){
+//				UUID id2 = it2.next();
+//				if( id2.equals(id1)){
+//					shared++;
+//					it2.remove(); // don't search the list more than necessary
+//					it1.remove(); // don't search the list more than necessary
+//				}
+//				
+//			}
+//		}
+//		return shared;
 	}
 
 	public int countClockWiseRPNuclei(){

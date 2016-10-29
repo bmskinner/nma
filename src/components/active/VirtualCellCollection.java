@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -115,7 +116,7 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public Set<ICell> getCells() {
+	public synchronized Set<ICell> getCells() {
 		
 		Set<ICell> result = new HashSet<ICell>(cellIDs.size());
 		ICellCollection parentCollection = parent.getCollection();
@@ -132,7 +133,7 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public Set<ICell> getCells(File f) {
+	public synchronized Set<ICell> getCells(File f) {
 		Set<ICell> result = new HashSet<ICell>(cellIDs.size());
 		
 		for(ICell cell : parent.getCollection().getCells()){
@@ -151,7 +152,7 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public Set<Nucleus> getNuclei() {
+	public synchronized Set<Nucleus> getNuclei() {
 		Set<Nucleus> result = new HashSet<Nucleus>(cellIDs.size());
 		for(UUID id : cellIDs){
 			Nucleus n = parent.getCollection().getCell(id).getNucleus();
@@ -162,7 +163,7 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public Set<Nucleus> getNuclei(File imageFile) {
+	public synchronized Set<Nucleus> getNuclei(File imageFile) {
 		Set<Nucleus> result = new HashSet<Nucleus>(cellIDs.size());
 		for(UUID id : cellIDs){
 			Nucleus n = parent.getCollection().getCell(id).getNucleus();
@@ -578,8 +579,13 @@ public class VirtualCellCollection implements ICellCollection {
 		}
 		int shared  = countSharedNuclei(d2);
 		vennCache.put(d2.getID(), shared);
-		d2.countShared(this);
+		d2.setSharedCount(this, shared);
 		return shared;
+	}
+	
+	@Override
+	public void setSharedCount(ICellCollection d2, int i){
+		vennCache.put(d2.getID(), i);
 	}
 	
 	/**
@@ -588,27 +594,42 @@ public class VirtualCellCollection implements ICellCollection {
 	 * @param d2
 	 * @return
 	 */
-	private int countSharedNuclei(ICellCollection d2){
+	private synchronized int countSharedNuclei(ICellCollection d2){
 
 		if(d2==this){
-			return cellIDs.size();
+			return this.size();
 		}
 
-		if(d2.getNucleusType() != parent.getCollection().getNucleusType()){
+		if(d2.getNucleusType() != this.getNucleusType()){
 			return 0;
 		}
-
-
-		int shared = 0;
-		for(ICell c : this.getCells()){
-			UUID n1id = c.getNucleus().getID();
-
-			for(Nucleus n2 : d2.getNuclei()){
-				if( n2.getID().equals(n1id)){
-					shared++;
-				}
-			}
-		}
+				
+		Set<UUID> toSearch1 = this.getCellIDs();
+		Set<UUID> toSearch2 = d2.getCellIDs();
+		
+		finest("Beginning search for shared cells");
+		toSearch1.retainAll(toSearch2);
+		int shared = toSearch1.size();
+		
+		// choose the smaller to search within
+		
+//		int shared = 0;
+//		for(UUID id1 : toSearch1){
+//			
+//			Iterator<UUID> it = toSearch2.iterator();
+//			
+//			while(it.hasNext()){
+//				UUID id2 = it.next();
+//				
+//				if(id1.equals(id2)){
+//					it.remove();
+//					shared++;
+//					break;
+//				}
+//			}
+//			
+//		}	
+		finest("Completed search for shared cells");
 		return shared;
 	}
 
@@ -669,7 +690,7 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale) throws Exception {
+	public synchronized double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale) throws Exception {
 		if(this.size()==0){
 			return 0;
 		}
@@ -677,12 +698,12 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public double[] getMedianStatistics(PlottableStatistic stat, MeasurementScale scale) {
+	public synchronized double[] getMedianStatistics(PlottableStatistic stat, MeasurementScale scale) {
 		return getMedianStatistics(stat, scale, null);
 	}
 
 	@Override
-	public double[] getMedianStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id) {
+	public synchronized double[] getMedianStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id) {
 		try {
 			if(stat instanceof NucleusStatistic){
 				return getNuclearStatistics((NucleusStatistic) stat, scale);
@@ -707,7 +728,7 @@ public class VirtualCellCollection implements ICellCollection {
 	 * @return a list of segment lengths
 	 * @throws Exception
 	 */
-	private double[] getSegmentStatistics(SegmentStatistic stat, MeasurementScale scale, UUID id) throws Exception{
+	private synchronized double[] getSegmentStatistics(SegmentStatistic stat, MeasurementScale scale, UUID id) throws Exception{
 
 		SegmentStatisticFetchingTask task = new SegmentStatisticFetchingTask(getNucleusArray(),
 				stat,
@@ -723,7 +744,7 @@ public class VirtualCellCollection implements ICellCollection {
 	 * @return a list of values
 	 * @throws Exception
 	 */
-	private double[] getNuclearStatistics(NucleusStatistic stat, MeasurementScale scale) {
+	private synchronized double[] getNuclearStatistics(NucleusStatistic stat, MeasurementScale scale) {
 
 		double[] result = null;
 		switch (stat) {

@@ -1,5 +1,7 @@
 package charting.options;
 
+import javax.swing.JTable;
+
 import charting.options.DefaultTableOptions.TableType;
 import components.ICell;
 
@@ -16,5 +18,9 @@ public interface TableOptions extends DisplayOptions {
 	int hashCode();
 
 	boolean equals(Object obj);
+	
+	JTable getTarget();
+	
+	void setTarget(JTable target);
 
 }

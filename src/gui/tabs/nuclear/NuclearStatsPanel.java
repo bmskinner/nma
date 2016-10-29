@@ -93,14 +93,17 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 			.setDatasets(getDatasets())
 			.setType(TableType.ANALYSIS_STATS)
 			.setScale(GlobalOptions.getInstance().getScale())
+			.setTarget(tablePopulationStats)
 			.build();
+		
+		setTable(options);
 
-		finest("Built table options");
-		TableModel model = getTable(options);
-
-		finest("Fetched table model");
-
-		tablePopulationStats.setModel(model);
+//		finest("Built table options");
+//		TableModel model = getTable(options);
+//
+//		finest("Fetched table model");
+//
+//		tablePopulationStats.setModel(model);
 
 		finest("Set table model");
 		
@@ -127,7 +130,7 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 			.setType(TableType.ANALYSIS_STATS)
 			.build();
 
-			TableModel model = getTable(options);
+			TableModel model = new AnalysisDatasetTableCreator(options).createAnalysisTable();
 			
 			tablePopulationStats.setModel(model);
 			

@@ -61,10 +61,10 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(null)
-		.setType(TableType.VENN)
+		.setType(TableType.PAIRWISE_VENN)
 		.build();
 
-		TableModel model = getTable(options);
+		TableModel model = new AnalysisDatasetTableCreator(options).createPairwiseVennTable();
 
 		pairwiseVennTable = new ExportableTable(model);
 				
@@ -93,10 +93,13 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.PAIRWISE_VENN)
+			.setTarget(pairwiseVennTable)
 			.build();
+		
+		setTable(options);
 
-		TableModel model = getTable(options);
-		pairwiseVennTable.setModel(model);
+//		TableModel model = getTable(options);
+//		pairwiseVennTable.setModel(model);
 		setRenderer(pairwiseVennTable, new PairwiseVennTableCellRenderer());
 		
 		finest("Updated pairwise venn panel");
@@ -108,9 +111,11 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 			.setDatasets(null)
 			.setType(TableType.PAIRWISE_VENN)
 			.build();
-
-		TableModel model = getTable(options);
-		pairwiseVennTable.setModel(model);
+		
+		setTable(options);
+//
+//		TableModel model = getTable(options);
+//		pairwiseVennTable.setModel(model);
 	}
 	
 	@Override

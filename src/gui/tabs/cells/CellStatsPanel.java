@@ -199,12 +199,15 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 			.setDatasets(getDatasets())
 			.setCell(this.getCellModel().getCell())
 			.setScale(GlobalOptions.getInstance().getScale())
+			.setTarget(table)
 			.build();
 
 		try{
+			
+			setTable(options);
 
-			TableModel model = getTable(options);
-			table.setModel(model);
+//			TableModel model = getTable(options);
+//			table.setModel(model);
 
 			if(this.getCellModel().hasCell()){
 				table.getColumnModel().getColumn(1).setCellRenderer(  new StatsTableCellRenderer() );

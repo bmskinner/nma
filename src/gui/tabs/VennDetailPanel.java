@@ -63,7 +63,7 @@ public class VennDetailPanel extends DetailPanel {
 			.setType(TableType.VENN)
 			.build();
 
-			TableModel model = getTable(options);
+			TableModel model = new AnalysisDatasetTableCreator(options).createVennTable();
 
 			vennTable = new ExportableTable(model);
 			vennPanel.add(vennTable, BorderLayout.CENTER);
@@ -89,13 +89,14 @@ public class VennDetailPanel extends DetailPanel {
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.VENN)
+			.setTarget(vennTable)
 			.build();
-
-
-
-		TableModel model = getTable(options);
 		
-		vennTable.setModel(model);
+		setTable(options);
+
+//		TableModel model = getTable(options);
+//		
+//		vennTable.setModel(model);
 		setRenderer(vennTable, new VennTableCellRenderer());
 
 		fine("Updated venn panel");
@@ -114,8 +115,10 @@ public class VennDetailPanel extends DetailPanel {
 			.setType(TableType.VENN)
 			.build();
 		
-		TableModel model = getTable(options);
-		vennTable.setModel(model);
+		setTable(options);
+		
+//		TableModel model = getTable(options);
+//		vennTable.setModel(model);
 		setRenderer(vennTable, new VennTableCellRenderer());
 	}
 	
@@ -161,6 +164,9 @@ public class VennDetailPanel extends DetailPanel {
 		        }
 		        		        
 		        double colourIndex = 255 - ((pct/100) * 255);
+		        
+		        colourIndex = colourIndex > 255 ? 255 : colourIndex;
+		        colourIndex = colourIndex < 0   ? 0   : colourIndex;
 		        
 		        backColour = new Color((int) colourIndex,(int) colourIndex, 255);
 

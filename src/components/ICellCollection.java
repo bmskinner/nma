@@ -366,6 +366,8 @@ public interface ICellCollection
 	 * @return
 	 */
 	int countShared(ICellCollection d2);
+	
+	void setSharedCount(ICellCollection d2, int i);
 
 		
 	/*

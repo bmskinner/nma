@@ -373,6 +373,32 @@ public abstract class DetailPanel
 			ThreadManager.getInstance().submit(worker);//worker.execute();
 		}
 	}
+	
+	/**
+	 * Fetch the table model with the given options from the cache, and display
+	 * it in the target JTable. If the model is not in the cache, a 
+	 * SwingWorker will be created to render the model and display it once
+	 * complete. Note that this requires the options to have been created
+	 * with a setTarget() value.
+	 * @param options
+	 */
+	protected synchronized void setTable(TableOptions options) {
+		if(chartCache.has(options)){
+			finest("Fetched cached chart with hashcode "+options.hashCode());
+			TableModel model = getTableCache().get(options);
+			
+			if(options.getTarget()!=null){
+				options.getTarget().setModel(model);
+			}
+
+		} else { // No cached chart
+			finest("No cached table model available with hashcode "+options.hashCode());
+			// Make a background worker to generate the chart and
+			// update the target chart panel when done
+			TableFactoryWorker worker = new TableFactoryWorker(options);
+			ThreadManager.getInstance().submit(worker);//worker.execute();
+		}
+	}
 		
 	
 	/**
@@ -406,7 +432,7 @@ public abstract class DetailPanel
 	}
 	
 	/**
-	 * Fetch the desired chart, either from the cache, or by creating it
+	 * Fetch the desired table, either from the cache, or by creating it
 	 * @param options
 	 * @return
 	 * @throws Exception
@@ -731,7 +757,9 @@ public abstract class DetailPanel
     	protected JFreeChart doInBackground() throws Exception {
 
     		try {
-
+    			if(options.getTarget()!=null){
+    				options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    			}
     			finest("Creating chart type");
     			JFreeChart chart = createPanelChartType(options);
     			finest("Adding chart type to cache");
@@ -756,18 +784,71 @@ public abstract class DetailPanel
     			
     				options.getTarget().setChart(get());
     				finest("Set chart panel to new chart");
+    				options.getTarget().setCursor(Cursor.getDefaultCursor());
     			}
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-//    		fireChartOptionsRenderedEvent(options);
         } 
+ 
+    }
+    
+    /**
+     * Tables can also be an intensive process, especially with venn
+     * comparisons. This worker will keep the model generation off the EDT
+     * @author bms41
+     *
+     */
+    protected class TableFactoryWorker extends SwingWorker<TableModel, Void> {
     	
+    	private TableOptions options;
+    	
+    	public TableFactoryWorker(TableOptions options){
+    		this.options = options;
+    	}
 
+    	@Override
+    	protected TableModel doInBackground() throws Exception {
+
+    		try {
+    			if(options.getTarget()!=null){
+    				options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    			}
+    			finest("Creating table type");
+    			TableModel model = createPanelTableType(options);
+    			finest("Adding table type to cache");
+    			tableCache.add(options, model);
+
+    			
+    			return model;
+    		} catch(Exception e){
+    			error("Error creating model", e);
+    			return null;
+    		}
+
+    	}
+    	
+    	
+    	
+    	@Override
+        public void done() {
+   	
+    		try {
+    			if(options.getTarget()!=null){
+    			
+    				options.getTarget().setModel(get());
+    				finest("Set table to new model");
+    				options.getTarget().setCursor(Cursor.getDefaultCursor());
+    			}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+        } 
+ 
     }
     
     /**

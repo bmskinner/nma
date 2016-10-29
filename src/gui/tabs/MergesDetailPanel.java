@@ -165,9 +165,10 @@ public class MergesDetailPanel extends DetailPanel {
 		.setDatasets(null)
 		.setType(TableType.ANALYSIS_PARAMETERS)
 		.build();
+
 		
-		TableModel model = getTable(options);
-		
+		TableModel model = new AnalysisDatasetTableCreator(options).createAnalysisTable();
+//		
 		sourceParametersTable =  new ExportableTable(model);
 		panel.add(sourceParametersTable, BorderLayout.CENTER);
 		return panel;
@@ -203,14 +204,15 @@ public class MergesDetailPanel extends DetailPanel {
 		updateSourceButtonsPanel();
 		
 		
-		TableOptions parameterOptions = new TableOptionsBuilder()
+		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(activeDataset().getAllMergeSources())
 			.setType(TableType.ANALYSIS_PARAMETERS)
+			.setTarget(sourceParametersTable)
 			.build();
 		
-		TableModel parameterModel = getTable(parameterOptions);
+		setTable(options);
 		
-		sourceParametersTable.setModel(parameterModel);
+
 		setRenderer(sourceParametersTable, new AnalysisTableCellRenderer());
 		
 	}
@@ -225,14 +227,17 @@ public class MergesDetailPanel extends DetailPanel {
 		getSourceButtonPanel.setVisible(false);
 			
 		
-		TableOptions parameterOptions = new TableOptionsBuilder()
+		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(null)
 			.setType(TableType.ANALYSIS_PARAMETERS)
+			.setTarget(sourceParametersTable)
 			.build();
 		
-		TableModel parameterModel = getTable(parameterOptions);
+		setTable(options);
 		
-		sourceParametersTable.setModel(parameterModel);
+//		TableModel parameterModel = getTable(parameterOptions);
+//		
+//		sourceParametersTable.setModel(parameterModel);
 	}
 	
 	@Override

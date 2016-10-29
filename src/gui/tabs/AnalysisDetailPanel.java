@@ -94,11 +94,14 @@ public class AnalysisDetailPanel extends DetailPanel {
 		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(getDatasets())
 		.setType(TableType.ANALYSIS_PARAMETERS)
+		.setTarget(tableAnalysisParameters)
 		.build();
+		
+		setTable(options);
 
-		TableModel model = getTable(options);
+//		TableModel model = getTable(options);
 
-		tableAnalysisParameters.setModel(model);
+//		tableAnalysisParameters.setModel(model);
 	
 		if(options.hasDatasets()){
 			setRenderer(tableAnalysisParameters, new AnalysisTableCellRenderer());
@@ -126,7 +129,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 			.setType(TableType.ANALYSIS_PARAMETERS)
 			.build();
 			
-			TableModel model = getTable(options);
+			TableModel model = new AnalysisDatasetTableCreator(options).createAnalysisTable();
 			tableAnalysisParameters.setModel(model);
 
 		}catch(Exception e){

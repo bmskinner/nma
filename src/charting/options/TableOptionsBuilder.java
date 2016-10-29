@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.swing.JTable;
+
 import components.ICell;
 import components.generic.MeasurementScale;
 import stats.PlottableStatistic;
@@ -28,6 +30,7 @@ public class TableOptionsBuilder {
 	private UUID segID                 = null; // the id of the segment (not consistent between datasets)
 	private int segPosition            = 0;    // the position of the segment in the profile (consistent between datasets)
 	private MeasurementScale scale     = MeasurementScale.PIXELS;
+	private JTable target              = null;
 
 	private ICell cell                  = null;
 
@@ -73,6 +76,11 @@ public class TableOptionsBuilder {
 		this.swatch = swatch;
 		return this;
 	}
+	
+	public TableOptionsBuilder setTarget(JTable target){
+		this.target = target;
+		return this;
+	}
 
 	public DefaultTableOptions build(){
 		DefaultTableOptions options =  new DefaultTableOptions(list);
@@ -83,6 +91,7 @@ public class TableOptionsBuilder {
 		options.setScale(scale);
 		options.setCell(cell);
 		options.setSwatch(swatch);
+		options.setTarget(target);
 		return options;
 
 	}
