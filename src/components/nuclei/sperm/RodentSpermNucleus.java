@@ -60,29 +60,29 @@ public class RodentSpermNucleus extends SpermNucleus {
 
 	private static final long serialVersionUID = 1L;
 	
-	public RodentSpermNucleus(Nucleus n) {
-		super(n);
-		this.splitNucleusToHeadAndHump();
-	}
-	
-	protected RodentSpermNucleus(){
-		super();
-	}
-	
-	public RodentSpermNucleus (Roi roi, File file, int number, int[] position) { // construct from an roi
-		super(roi, file, number, position);
-	}
-	
-	public RodentSpermNucleus (Roi roi, File file, int number, int[] position, IPoint centreOfMass) { // construct from an roi
-		super(roi, file, number, position, centreOfMass);
-	}
-	
-	@Override
-	public Nucleus duplicate(){
-		RodentSpermNucleus duplicate = new RodentSpermNucleus(this);			
-		return duplicate;
-
-	}
+//	public RodentSpermNucleus(Nucleus n) {
+//		super(n);
+//		this.splitNucleusToHeadAndHump();
+//	}
+//	
+//	protected RodentSpermNucleus(){
+//		super();
+//	}
+//	
+////	public RodentSpermNucleus (Roi roi, File file, int number, int[] position) { // construct from an roi
+////		super(roi, file, number, position);
+////	}
+//	
+//	public RodentSpermNucleus (Roi roi, File file, int number, int[] position, IPoint centreOfMass) { // construct from an roi
+//		super(roi, file, number, position, centreOfMass);
+//	}
+//	
+//	@Override
+//	public Nucleus duplicate(){
+//		RodentSpermNucleus duplicate = new RodentSpermNucleus(this);			
+//		return duplicate;
+//
+//	}
 	
 	@Override
 	protected double calculateStatistic(NucleusStatistic stat){

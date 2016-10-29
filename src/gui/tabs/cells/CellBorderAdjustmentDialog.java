@@ -77,6 +77,7 @@ import components.generic.BorderTagObject;
 import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.nuclear.IBorderPoint;
 import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
@@ -385,7 +386,7 @@ public class CellBorderAdjustmentDialog
 		
 			IBorderPoint point = borderList.get(i);
 			if(selectedPoints.containsKey(point)){
-				workingCell.getNucleus().updateBorderPoint(i, finalMovePointX, finalMovePointY);
+//				workingCell.getNucleus().updateBorderPoint(i, finalMovePointX, finalMovePointY);
 				break;
 			}
 		}
@@ -485,7 +486,7 @@ public class CellBorderAdjustmentDialog
 		
 		CellularComponent c =  (CellularComponent) workingCell.getNucleus();
 
-		c.setBorderList(newList);
+//		c.setBorderList(newList);
 //		c.setBoundingRectangle(boundingRectangle);
 
 		Range domainRange = dualPanel.getMainPanel().getChart().getXYPlot().getDomainAxis().getRange();
@@ -515,11 +516,11 @@ public class CellBorderAdjustmentDialog
 			int newLength = workingCell.getNucleus().getProfile(ProfileType.ANGLE).size();
 			
 			// Get the border tag positions, and set equivalent positions in the new profile
-			Map<BorderTagObject, Integer> tagMap = workingCell.getNucleus().getBorderTags();
+			Map<Tag, Integer> tagMap = workingCell.getNucleus().getBorderTags();
 			
-			Map<BorderTagObject, Integer> newMap = new HashMap<BorderTagObject, Integer>();
+			Map<Tag, Integer> newMap = new HashMap<Tag, Integer>();
 			
-			for(BorderTagObject tag : tagMap.keySet()){
+			for(Tag tag : tagMap.keySet()){
 				int oldIndex = tagMap.get(tag);
 				
 				

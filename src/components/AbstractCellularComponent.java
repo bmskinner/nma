@@ -61,8 +61,6 @@ import utility.Constants;
 
 public abstract class AbstractCellularComponent 
 	implements CellularComponent,
-	           Serializable, 
-	           Loggable, 
 	           Rotatable {
 
 	private static final long serialVersionUID = 1L;
@@ -324,9 +322,9 @@ public abstract class AbstractCellularComponent
 		return ip;
 	}
 
-	public void setPosition(int[] position) {
-		this.position = position;
-	}
+//	public void setPosition(int[] position) {
+//		this.position = position;
+//	}
 
 //	public void setBoundingRectangle(Rectangle boundingRectangle) {
 //		this.boundingRectangle = boundingRectangle;
@@ -392,14 +390,14 @@ public abstract class AbstractCellularComponent
 		}
 	}
 	
-	@Override
-	public synchronized double getSafeStatistic(PlottableStatistic stat, MeasurementScale scale){
-		try {
-			return getStatistic(stat, scale);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+//	@Override
+//	public synchronized double getSafeStatistic(PlottableStatistic stat, MeasurementScale scale){
+//		try {
+//			return getStatistic(stat, scale);
+//		} catch (Exception e) {
+//			throw new RuntimeException(e);
+//		}
+//	}
 	
 	// For subclasses to override
 	protected synchronized double calculateStatistic(PlottableStatistic stat){

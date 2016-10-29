@@ -21,8 +21,41 @@ package components.generic;
 
 import java.awt.geom.Point2D;
 
+import components.active.generic.FloatPoint;
+
 public interface IPoint {
 
+	/**
+	 * Create a new point of the default type
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	static IPoint makeNew(float x, float y){
+		return new FloatPoint(x,y);
+	}
+	
+	/**
+	 * Create a new point of the default type
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	static IPoint makeNew(double x, double y){
+		return makeNew( (float) x, (float) y);
+	}
+	
+	/**
+	 * Create a new point of the default type
+	 * based on the given point
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	static IPoint makeNew(IPoint a){
+		return makeNew( a.getX(), a.getY());
+	}
+	
 	/**
 	 * Get the x-value 
 	 *

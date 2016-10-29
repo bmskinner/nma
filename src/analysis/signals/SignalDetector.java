@@ -27,6 +27,7 @@ import java.util.Map;
 
 import analysis.detection.Detector;
 import components.CellularComponent;
+import components.active.DefaultNuclearSignal;
 import components.active.generic.FloatPoint;
 import components.active.generic.FloatProfile;
 import components.generic.BooleanProfile;
@@ -166,7 +167,7 @@ public class SignalDetector extends Detector {
 				Rectangle bounds = r.getBounds();
 				int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
 				
-				INuclearSignal s = new NuclearSignal( r, 
+				INuclearSignal s = new DefaultNuclearSignal( r, 
 						sourceFile, channel, originalPosition,
 						new FloatPoint(values.get("XM"), values.get("YM"))
 				);

@@ -196,7 +196,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 						
 							for(int i=0; i<s.getBorderLength();i++){
 								IPoint offset = s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
-								s.updateBorderPoint(i, offset);
+//								s.updateBorderPoint(i, offset);
 							}
 						}
 						

@@ -178,7 +178,6 @@ public abstract class Detector implements Loggable {
 	  } finally {
 		  image.close();
 	  }
-
 	  return new ArrayList<Roi>(Arrays.asList( manager.getSelectedRoisAsArray()));
   }
   

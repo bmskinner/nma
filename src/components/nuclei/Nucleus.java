@@ -24,10 +24,8 @@ import analysis.nucleus.Indexable;
 import analysis.profiles.Profileable;
 import analysis.profiles.Taggable;
 import components.CellularComponent;
-import components.Rotatable;
-import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
-import components.nuclear.SignalCollection;
+import components.nuclear.ISignalCollection;
 
 /**
  * A Nucleus is the interface to all the possible types of nuclei that will be
@@ -40,7 +38,6 @@ public interface Nucleus
 	        Indexable, 
 	        Profileable, 
 	        Taggable,
-	        Rotatable,
 	        Comparable<Nucleus> {
 	// Note that we use Rotatable here although it is provided to objects already through the AbstractCellularComponent
 	//so that it can be accessed by the Nucleus interface itself.
@@ -59,10 +56,6 @@ public interface Nucleus
 	*/
 	public void findPointsAroundBorder() throws Exception;
 	
-	/**
-	 * Starts profile generation in a newly created nucleus
-	 */	
-	public void intitialiseNucleus(double angleWindowProportion) throws Exception;
 	
 	/**
 	 * @return a copy of the data in this nucleus
@@ -78,30 +71,6 @@ public interface Nucleus
 	 */
 	public String getNameAndNumber();
 
-
-	/**
-	 * Get the name of the image the nucleus was found in
-	 * without the file extension
-	 * @return
-	 */
-	public String getImageNameWithoutExtension();
-
-	/**
-	 * Get the top level path for the analysis being performed.
-	 * This is the folder with the analysis date and time.
-	 * TODO: Deprecate. This should be only a feature of the collection.
-	 * @return
-	 */
-	public File getOutputFolder();
-
-	/**
-	 * Get the absolute path to the image containing the nucleus
-	 * without the file extension. Used when making paths to the 
-	 * nucleus folder
-	 * @return
-	 */
-	public String getPathWithoutExtension();
-
 	/**
 	 * Get the number of the nucleus in the image
 	 * @return
@@ -110,9 +79,6 @@ public interface Nucleus
 
 	public String getPathAndNumber();
 	
-		
-	
-	public void setOutputFolder(String f);
 
 	/**
 	 * Calculate the angle signal centres of mass make with the nucleus centre of mass
@@ -129,7 +95,7 @@ public interface Nucleus
 	 * Get the signals in this nucleus
 	 * @return
 	 */
-	public SignalCollection getSignalCollection();
+	public ISignalCollection getSignalCollection();
 		
 		
 	
@@ -138,7 +104,7 @@ public interface Nucleus
 	 * This is the folder with the analysis date/time name.
 	 * @return
 	 */
-	public String getOutputFolderName();
+//	public String getOutputFolderName();
 	
 	
 	/**

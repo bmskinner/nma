@@ -81,7 +81,7 @@ import components.nuclear.SignalCollection;
  *
  */
 public class RoundNucleus extends AbstractCellularComponent
-	implements Nucleus, Serializable {
+	implements Nucleus {
 
 	private static final long serialVersionUID = 1L;
 		
@@ -96,7 +96,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	protected List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
 
-	protected Map<BorderTagObject, Integer>    borderTags  = new HashMap<BorderTagObject, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
+	protected Map<Tag, Integer>    borderTags  = new HashMap<Tag, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
 	
 	protected Map<String, Integer>       segmentTags = new HashMap<String, Integer>(0);
 
@@ -125,7 +125,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 		
 		this.setSourceFile(file);
-		this.setPosition(position);
+//		this.setPosition(position);
 		this.nucleusNumber   = number;
 	}
 	
@@ -150,7 +150,11 @@ public class RoundNucleus extends AbstractCellularComponent
 	public RoundNucleus(Nucleus n) {
 		super(n);
 
-		this.setOutputFolder(n.getOutputFolderName());
+		if(n instanceof RoundNucleus){
+			this.setOutputFolder( ((RoundNucleus)n).getOutputFolderName());
+		}
+		
+		
 				
 		this.setNucleusNumber(n.getNucleusNumber());
 				
@@ -209,7 +213,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 
-	public void intitialiseNucleus(double proportion) throws Exception {
+	public void initialise(double proportion) {
 
 		this.angleWindowProportion = proportion;
 		
@@ -236,8 +240,8 @@ public class RoundNucleus extends AbstractCellularComponent
 		-----------------------
 	*/
 	
-
-	public String getImageNameWithoutExtension(){
+	@Override
+	public String getSourceFileNameWithoutExtension(){
 
 		String trimmed = "";
 
@@ -487,7 +491,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 		if(type==ALL_POINTS || type==BORDER_TAGS){
 			result += "    Points of interest:\n";
-			Map<BorderTagObject, Integer> pointHash = this.getBorderTags();
+			Map<Tag, Integer> pointHash = this.getBorderTags();
 
 			for(Tag s : pointHash.keySet()){
 			 IBorderPoint p = getBorderPoint(pointHash.get(s));
@@ -614,15 +618,15 @@ public class RoundNucleus extends AbstractCellularComponent
 		return getBorderTag(tag) ;
 	}
 		
-	public Map<BorderTagObject, Integer> getBorderTags(){
-		Map<BorderTagObject, Integer> result = new HashMap<BorderTagObject, Integer>();
-		for(BorderTagObject b : borderTags.keySet()){
+	public Map<Tag, Integer> getBorderTags(){
+		Map<Tag, Integer> result = new HashMap<Tag, Integer>();
+		for(Tag b : borderTags.keySet()){
 			result.put(b,  borderTags.get(b));
 		}
 		return result;
 	}
 	
-	public void setBorderTags(Map<BorderTagObject, Integer> m){
+	public void setBorderTags(Map<Tag, Integer> m){
 		if(segsLocked){
 			return;
 		}
@@ -679,7 +683,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	
-	public void replaceBorderTags(Map<BorderTagObject, Integer> tagMap){
+	public void replaceBorderTags(Map<Tag, Integer> tagMap){
 		
 		int oldRP = getBorderIndex(Tag.REFERENCE_POINT);
 		ISegmentedProfile p = getProfile(ProfileType.ANGLE);
@@ -736,9 +740,9 @@ public class RoundNucleus extends AbstractCellularComponent
 		return this.getBorderTag(newIndex);
 	}
 	
-	public BorderTagObject getBorderTag(int index){
+	public Tag getBorderTag(int index){
 
-		for(BorderTagObject b : this.borderTags.keySet()){
+		for(Tag b : this.borderTags.keySet()){
 			if(this.borderTags.get(b)==index){
 				return b;
 			}
@@ -939,8 +943,8 @@ public class RoundNucleus extends AbstractCellularComponent
 		this.setBorderList(reversed);
 
 		// replace the tag positions also
-		Set<BorderTagObject> keys = borderTags.keySet();
-		for( BorderTagObject s : keys){
+		Set<Tag> keys = borderTags.keySet();
+		for( Tag s : keys){
 			int index = borderTags.get(s);
 			int newIndex = this.getBorderLength() - index - 1; // if was 0, will now be <length-1>; if was length-1, will be 0
 //			 update the bordertag map directly to avoid segmentation changes due to RP shift
@@ -1144,12 +1148,12 @@ public class RoundNucleus extends AbstractCellularComponent
 	public int compareTo(Nucleus n) {
 
 		int number  = this.getNucleusNumber();
-		String name = this.getImageNameWithoutExtension();
+		String name = this.getSourceFileNameWithoutExtension();
 		
 		// Compare on image name.
 		// If that is equal, compare on nucleus number
 
-		int byName = name.compareTo(n.getImageNameWithoutExtension());
+		int byName = name.compareTo(n.getSourceFileNameWithoutExtension());
 		
 		if(byName==0){
 			
@@ -1270,7 +1274,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		in.defaultReadObject();
 
-		Map<BorderTagObject, Integer> newCache = new HashMap<BorderTagObject, Integer>(0);
+		Map<Tag, Integer> newCache = new HashMap<Tag, Integer>(0);
 
 		Iterator<?> it = borderTags.keySet().iterator();
 
@@ -1291,6 +1295,11 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 				
 	    this.verticalNucleus    = null;
+	}
+
+	@Override
+	public boolean smoothByDefault() {
+		return true;
 	}
 	
 }

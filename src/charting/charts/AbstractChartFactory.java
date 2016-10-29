@@ -148,6 +148,9 @@ public abstract class AbstractChartFactory implements Loggable {
 
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
+		
+		plot.getRenderer().setBaseToolTipGenerator(null); 
+		
 		return chart;
 	}
 	

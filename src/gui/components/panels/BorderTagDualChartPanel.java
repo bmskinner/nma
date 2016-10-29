@@ -78,7 +78,7 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 	}
 	
 	public void createBorderTagPopup(ICell cell){
-		Set<BorderTagObject> set = cell.getNucleus().getBorderTags().keySet();
+		Set<Tag> set = cell.getNucleus().getBorderTags().keySet();
 		List<Tag> list = new ArrayList<Tag>(set);
 		makePopup(list);
 		

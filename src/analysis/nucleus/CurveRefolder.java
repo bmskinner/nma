@@ -130,7 +130,7 @@ public class CurveRefolder extends AnalysisWorker {
 
 		try{ 
 
-			refoldNucleus.moveCentreOfMass(new FloatPoint(0, 0));
+			refoldNucleus.moveCentreOfMass( IPoint.makeNew(0, 0));
 
 			if(collection.size()>1){
 				
@@ -153,17 +153,17 @@ public class CurveRefolder extends AnalysisWorker {
 			}
 
 //			refoldNucleus.updateVerticallyRotatedNucleus();
-			// Update the bounding box to reflect the rotated nucleus position
-			Rectangle bounds = refoldNucleus.getVerticallyRotatedNucleus().createPolygon().getBounds();
-			int newWidth  = (int) bounds.getWidth();
-			int newHeight = (int) bounds.getHeight();
-			int newX      = (int) bounds.getX();
-			int newY      = (int) bounds.getY();
-
-			int[] newPosition = { newX, newY, newWidth, newHeight };
-			refoldNucleus.setPosition(newPosition);
-			
-			collection.setConsensusNucleus(refoldNucleus);
+//			 Update the bounding box to reflect the rotated nucleus position
+//			Rectangle bounds = refoldNucleus.getVerticallyRotatedNucleus().createPolygon().getBounds();
+//			int newWidth  = (int) bounds.getWidth();
+//			int newHeight = (int) bounds.getHeight();
+//			int newX      = (int) bounds.getX();
+//			int newY      = (int) bounds.getY();
+//
+//			int[] newPosition = { newX, newY, newWidth, newHeight };
+//			refoldNucleus.setPosition(newPosition);
+//			
+//			collection.setConsensusNucleus(refoldNucleus);
 
 		} catch(Exception e){
 			logError("Unable to refold nucleus", e);

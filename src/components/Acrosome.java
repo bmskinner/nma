@@ -61,4 +61,16 @@ public class Acrosome extends  AbstractCellularComponent implements IAcrosome {
 		return new Acrosome(this);
 	}
 
+	@Override
+	public String getSourceFileNameWithoutExtension() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean smoothByDefault() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

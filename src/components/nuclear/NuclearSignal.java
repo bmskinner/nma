@@ -100,4 +100,16 @@ public class NuclearSignal extends AbstractCellularComponent implements INuclear
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public String getSourceFileNameWithoutExtension() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean smoothByDefault() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

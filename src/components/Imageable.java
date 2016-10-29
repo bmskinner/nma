@@ -134,6 +134,14 @@ public interface Imageable {
 	 */
 	public String getSourceFileName();
 	
+	
+	/**
+	 * Get the name of the source file with the '.ext' removed
+	 * @return
+	 */
+	public String getSourceFileNameWithoutExtension();
+	
+	
 	/*
 	 * SETTERS
 	 */
@@ -156,7 +164,7 @@ public interface Imageable {
 	 * @param d the array of positions
 	 * @see CellularComponent#getPosition()
 	 */
-	public void setPosition(int[] position);
+//	public void setPosition(int[] position);
 	
 
 	/**

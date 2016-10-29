@@ -100,7 +100,9 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 	public static final String NEWLINE = System.getProperty("line.separator");
 	
 	public ExportableChartPanel(JFreeChart chart){
-		super(chart);
+		super(chart, false);
+		
+		getChartRenderingInfo().setEntityCollection(null);
 		
 		JPopupMenu popup = this.getPopupMenu();
 		popup.addSeparator();

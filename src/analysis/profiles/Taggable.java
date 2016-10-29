@@ -62,7 +62,7 @@ public interface Taggable extends Profileable {
 	 * @param index
 	 * @return the tag at the index, or null if no tag present
 	 */
-	public BorderTagObject getBorderTag(int index);
+	public Tag getBorderTag(int index);
 
 	
 	/**
@@ -135,7 +135,7 @@ public interface Taggable extends Profileable {
 	 * the border list of the nucleus
 	 * @return
 	 */
-	public Map<BorderTagObject, Integer> getBorderTags();
+	public Map<Tag, Integer> getBorderTags();
 	
 	/**
 	 * Get a copy of the border point mapped to the given tag
@@ -160,6 +160,6 @@ public interface Taggable extends Profileable {
 	 * until after all new points are set. Used in the CellBorderAdjustmentDialog
 	 * @param tagMap
 	 */
-	public void replaceBorderTags(Map<BorderTagObject, Integer> tagMap);
+	public void replaceBorderTags(Map<Tag, Integer> tagMap);
 
 }

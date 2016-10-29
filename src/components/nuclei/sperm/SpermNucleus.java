@@ -50,9 +50,9 @@ public class SpermNucleus extends AsymmetricNucleus {
 		super();
 	}
 
-	public SpermNucleus (Roi roi, File file, int number, int[] position) { // construct from an roi
-		super(roi, file, number, position);
-	}
+//	public SpermNucleus (Roi roi, File file, int number, int[] position) { // construct from an roi
+//		super(roi, file, number, position);
+//	}
 	
 	public SpermNucleus (Roi roi, File file, int number, int[] position, IPoint centreOfMass) { // construct from an roi
 		super(roi, file, number, position, centreOfMass);

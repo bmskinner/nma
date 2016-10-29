@@ -1,11 +1,9 @@
 package components.nuclear;
 
 import components.CellularComponent;
-import components.Rotatable;
 
 public interface INuclearSignal 
-	extends CellularComponent,
-			Rotatable {
+	extends CellularComponent {
 
 	/**
 	 * Get the index of the closest point in the nuclear 

@@ -62,7 +62,7 @@ public class DefaultCell
 	public DefaultCell(ICell c){
 
 		this.uuid = c.getId();
-		nucleus   = c.getNucleus().duplicate();
+		nucleus   = new DefaultNucleus(c.getNucleus());
 		
 		mitochondria = new ArrayList<IMitochondrion>(0);
 		for(IMitochondrion m : c.getMitochondria()){

@@ -1018,8 +1018,8 @@ public class CellCollection implements ICellCollection {
 		} else {
 			filteredCells = getCells()
 					.parallelStream()
-					.filter(p -> p.getNucleus().getSafeStatistic(stat, scale) >= lower)
-					.filter(p -> p.getNucleus().getSafeStatistic(stat, scale) <= upper)
+					.filter(p -> p.getNucleus().getStatistic(stat, scale) >= lower)
+					.filter(p -> p.getNucleus().getStatistic(stat, scale) <= upper)
 					.collect(Collectors.toList());
 		}
 

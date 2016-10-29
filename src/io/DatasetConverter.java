@@ -122,7 +122,14 @@ public class DatasetConverter implements Loggable {
 				oldCollection.getNucleusType());
 		
 		for(ICell c : oldCollection.getCells()){
-			newCollection.addCell( new DefaultCell(c));
+			
+			ICell newCell = new DefaultCell();
+			
+			// make a new nucleus
+//			TODO:
+//			Nucleus n = new 
+			
+			newCollection.addCell( newCell );
 		}
 		
 		newCollection.createProfileCollection();

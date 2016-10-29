@@ -60,26 +60,26 @@ public class PigSpermNucleus
   * @param n the Nucleus to construct from
  * @throws Exception 
   */
-    public PigSpermNucleus(Nucleus n) {
-      super(n);
-    }
-
-    public PigSpermNucleus() {
-    	super();
-    }
-
-    public PigSpermNucleus (Roi roi, File file, int number, int[] position) { // construct from an roi
-		super(roi, file, number, position);
-	}
-    
-    public PigSpermNucleus (Roi roi, File file, int number, int[] position, IPoint centreOfMass) { // construct from an roi
-		super(roi, file, number, position, centreOfMass);
-	}
-    
-    public Nucleus duplicate(){
-    	PigSpermNucleus duplicate = new PigSpermNucleus(this);
-    	return duplicate;
-	}
+//    public PigSpermNucleus(Nucleus n) {
+//      super(n);
+//    }
+//
+//    public PigSpermNucleus() {
+//    	super();
+//    }
+//
+////    public PigSpermNucleus (Roi roi, File file, int number, int[] position) { // construct from an roi
+////		super(roi, file, number, position);
+////	}
+//    
+//    public PigSpermNucleus (Roi roi, File file, int number, int[] position, IPoint centreOfMass) { // construct from an roi
+//		super(roi, file, number, position, centreOfMass);
+//	}
+//    
+//    public Nucleus duplicate(){
+//    	PigSpermNucleus duplicate = new PigSpermNucleus(this);
+//    	return duplicate;
+//	}
     
 
     

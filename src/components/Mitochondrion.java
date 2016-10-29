@@ -63,4 +63,16 @@ public class Mitochondrion extends AbstractCellularComponent implements IMitocho
 		return new Mitochondrion(this);
 	}
 
+	@Override
+	public String getSourceFileNameWithoutExtension() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean smoothByDefault() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

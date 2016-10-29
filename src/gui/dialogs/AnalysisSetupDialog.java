@@ -659,13 +659,13 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 			NucleusType type = (NucleusType) nucleusSelectionBox.getSelectedItem();
 			this.analysisOptions.setNucleusType(type);
 			
-			if(type.equals(NucleusType.ASYMMETRIC)){
-				this.analysisOptions.setNucleusType(NucleusType.ROUND); // not set up for this yet
-				this.analysisOptions.setMinNucleusCirc(  0.0 );
-				this.analysisOptions.setMaxNucleusCirc(  1.0 );
-				minNuclearCircSpinner.setValue(0.0);
-				maxNuclearCircSpinner.setValue(1.0);
-			}
+//			if(type.equals(NucleusType.ASYMMETRIC)){
+//				this.analysisOptions.setNucleusType(NucleusType.ROUND); // not set up for this yet
+//				this.analysisOptions.setMinNucleusCirc(  0.0 );
+//				this.analysisOptions.setMaxNucleusCirc(  1.0 );
+//				minNuclearCircSpinner.setValue(0.0);
+//				maxNuclearCircSpinner.setValue(1.0);
+//			}
 
 			
 			if(type.equals(NucleusType.ROUND)){

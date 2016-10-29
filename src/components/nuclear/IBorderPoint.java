@@ -19,10 +19,42 @@
 
 package components.nuclear;
 
+import components.active.generic.DefaultBorderPoint;
 import components.generic.IPoint;
 
 public interface IBorderPoint extends IPoint {
 
+	/**
+	 * Create a new point of the default type
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	static IBorderPoint makeNew(float x, float y){
+		return new DefaultBorderPoint(x,y);
+	}
+	
+	/**
+	 * Create a new point of the default type
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	static IBorderPoint makeNew(double x, double y){
+		return makeNew( (float) x, (float) y);
+	}
+	
+	/**
+	 * Create a new point of the default type
+	 * based on the given point
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	static IBorderPoint makeNew(IBorderPoint a){
+		return makeNew( a.getX(), a.getY());
+	}
+	
 	/**
 	 * Set the next point in the border
 	 * @param next

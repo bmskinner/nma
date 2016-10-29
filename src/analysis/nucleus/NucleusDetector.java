@@ -269,10 +269,11 @@ public class NucleusDetector extends Detector {
 			  roi.setLocation(0,0); // translate the roi to the new image coordinates
 			  
 			  // create a Nucleus from the roi
-			  IPoint centreOfMass = new FloatPoint(values.get("XM")-xbase, values.get("YM")-ybase);
+			  IPoint centreOfMass = IPoint.makeNew(values.get("XM")-xbase, values.get("YM")-ybase);
 
 			  Nucleus currentNucleus = createNucleus(roi, 
 					  path, 
+					  options.getChannel(),
 					  nucleusNumber, 
 					  originalPosition, 
 					  options.getNucleusType(), 
@@ -281,14 +282,13 @@ public class NucleusDetector extends Detector {
 			  currentNucleus.setStatistic(NucleusStatistic.AREA,      values.get("Area"));
 			  currentNucleus.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
 			  currentNucleus.setStatistic(NucleusStatistic.PERIMETER, values.get("Perim"));
-			  currentNucleus.setChannel(options.getChannel());
 
 			  currentNucleus.setScale(options.getScale());
 
 			  if ( !makeDummyCell) {
 
-				  currentNucleus.setOutputFolder(outputFolderName);
-				  currentNucleus.intitialiseNucleus(options.getAngleWindowProportion());
+//				  currentNucleus.setOutputFolder(outputFolderName);
+				  currentNucleus.initialise(options.getAngleWindowProportion());
 
 				  currentNucleus.findPointsAroundBorder();
 			  }
@@ -315,13 +315,13 @@ public class NucleusDetector extends Detector {
 	 * @param nucleusType the class of nucleus
 	 * @return a new nucleus of the appropriate class
 	 */
-	private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, int[] originalPosition, NucleusType nucleusType, IPoint centreOfMass){
+	private Nucleus createNucleus(Roi roi, File path, int channel, int nucleusNumber, int[] originalPosition, NucleusType nucleusType, IPoint centreOfMass){
 
 		  Nucleus n = null;
 		  try {
-			  
+
 			  // The classes for the constructor
-			  Class<?>[] classes = {Roi.class, File.class, int.class, int[].class, IPoint.class };
+			  Class<?>[] classes = {Roi.class, File.class, int.class, int[].class, int.class, IPoint.class };
 			  
 			  Constructor<?> nucleusConstructor = nucleusType.getNucleusClass()
 					  .getConstructor(classes);
@@ -329,8 +329,9 @@ public class NucleusDetector extends Detector {
 
 			  n = (Nucleus) nucleusConstructor.newInstance(roi, 
 					  path, 
-					  nucleusNumber, 
+					  channel, 
 					  originalPosition,
+					  nucleusNumber,
 					  centreOfMass);
 			  
 		  } catch(Exception e){

@@ -20,6 +20,7 @@ package components.nuclei;
 
 import ij.process.FloatPolygon;
 
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -47,6 +48,18 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	
 	public NucleusType getType(){
 		return this.type;
+	}
+	
+	@Override
+	public int[] getPosition(){
+		Rectangle bounds = getVerticallyRotatedNucleus().createPolygon().getBounds();
+		int newWidth  = (int) bounds.getWidth();
+		int newHeight = (int) bounds.getHeight();
+		int newX      = (int) bounds.getX();
+		int newY      = (int) bounds.getY();
+
+		int[] newPosition = { newX, newY, newWidth, newHeight };
+		return  newPosition;
 	}
 	
 	@Override

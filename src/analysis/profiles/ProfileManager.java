@@ -666,7 +666,7 @@ public class ProfileManager implements Loggable {
 			finest("Raw new border point is index "+rawIndex);
 			
 			if(n.hasBorderTag(rawOldIndex)){						
-				BorderTagObject tagToUpdate = n.getBorderTag(rawOldIndex);
+				Tag tagToUpdate = n.getBorderTag(rawOldIndex);
 				fine("Updating tag "+tagToUpdate);
 				n.setBorderTag(tagToUpdate, rawIndex);	
 				

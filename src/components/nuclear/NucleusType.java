@@ -23,6 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import components.active.DefaultNucleus;
+import components.active.DefaultPigSpermNucleus;
+import components.active.DefaultRodentSpermNucleus;
 import components.generic.BorderTag;
 import components.generic.Tag;
 import components.nuclei.AsymmetricNucleus;
@@ -40,21 +43,20 @@ import components.nuclei.sperm.RodentSpermNucleus;
  *
  */
 public enum NucleusType {
-	ROUND 		 ("Round nucleus"		 , "Head", "Tail", RoundNucleus.class), 
-	ASYMMETRIC 	 ("Asymmetric nucleus"	 , "Head", "Tail", AsymmetricNucleus.class),
-	RODENT_SPERM ("Rodent sperm nucleus" , "Tip" , "Tail", RodentSpermNucleus.class), 
-	PIG_SPERM 	 ("Pig sperm nucleus"	 , "Tail", "Tail", PigSpermNucleus.class);
+	ROUND 		 ("Round nucleus"		 , "Head", "Tail", DefaultNucleus.class), 
+	RODENT_SPERM ("Rodent sperm nucleus" , "Tip" , "Tail", DefaultRodentSpermNucleus.class), 
+	PIG_SPERM 	 ("Pig sperm nucleus"	 , "Tail", "Tail", DefaultPigSpermNucleus.class);
 	
     private final String name;   
     private final Class<?> nucleusClass;
     
-    private final Map<BorderTag, String> map = new HashMap<BorderTag, String>();
+    private final Map<Tag, String> map = new HashMap<Tag, String>();
     
     NucleusType(String name, String referencePoint, String orientationPoint, Class<?> nucleusClass) {
         this.name = name;
         this.nucleusClass = nucleusClass;
-        this.map.put(BorderTag.REFERENCE_POINT, referencePoint);
-        this.map.put(BorderTag.ORIENTATION_POINT, orientationPoint);
+        this.map.put(Tag.REFERENCE_POINT, referencePoint);
+        this.map.put(Tag.ORIENTATION_POINT, orientationPoint);
 	}
     
     public String toString(){
@@ -83,7 +85,7 @@ public enum NucleusType {
      */
     public String[] pointNames(){
     	List<String> list = new ArrayList<String>();
-    	for(BorderTag tag : map.keySet()){
+    	for(Tag tag : map.keySet()){
     		list.add(map.get(tag));
     	}
     	return list.toArray(new String[0]);
@@ -95,8 +97,8 @@ public enum NucleusType {
      * @param name
      * @return
      */
-    public BorderTag getTagFromName(String name){
-    	for(BorderTag tag : map.keySet()){
+    public Tag getTagFromName(String name){
+    	for(Tag tag : map.keySet()){
     		if(map.get(tag).equals(name)){
     			return tag;
     		}

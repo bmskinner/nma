@@ -19,8 +19,10 @@
 package components;
 
 import ij.process.FloatPolygon;
+import logging.Loggable;
 
 import java.awt.Shape;
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,7 +38,11 @@ import stats.PlottableStatistic;
  * @author bms41
  *
  */
-public interface CellularComponent extends Imageable {
+public interface CellularComponent 
+		extends Imageable, 
+				Serializable, 
+				Loggable, 
+				Rotatable {
 			
 	/**
 	 * Get the UUID of the object
@@ -74,7 +80,9 @@ public interface CellularComponent extends Imageable {
 	 * Create a defensive copy of this object
 	 * @return
 	 */
-	public CellularComponent duplicate();
+	CellularComponent duplicate();
+	
+	boolean smoothByDefault();
 	
 	
 	
@@ -99,7 +107,7 @@ public interface CellularComponent extends Imageable {
 	 * @param scale the units to return values in
 	 * @return the value or zero if stat.equals( {@link NucleusStatistic.VARIABILILTY})==true
 	 */
-	public double getSafeStatistic(PlottableStatistic stat, MeasurementScale scale);
+//	public double getSafeStatistic(PlottableStatistic stat, MeasurementScale scale);
 	
 	
 	/**
