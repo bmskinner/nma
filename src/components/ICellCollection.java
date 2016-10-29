@@ -140,7 +140,7 @@ public interface ICellCollection
 	 * Set the consensus nucleus for the collection
 	 * @param n
 	 */
-	void setConsensusNucleus(ConsensusNucleus n);
+	void setConsensusNucleus(Nucleus n);
 	
 	/**
 	 * Get the consensus nucleus if set

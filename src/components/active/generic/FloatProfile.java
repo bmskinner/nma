@@ -133,7 +133,7 @@ public class FloatProfile implements IProfile {
 	public double get(int index) {
 
 		if(index<0 || index >= array.length){
-			throw new IllegalArgumentException("Requested value "+index+" is beyond profile end");
+			throw new IllegalArgumentException("Requested value "+index+" is beyond profile end ("+array.length+")");
 		}
 		return array[index];
 

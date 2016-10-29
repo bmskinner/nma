@@ -31,6 +31,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.Paint;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -269,12 +270,12 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * @param row
 	 */
 	private void changeDatasetColour(IAnalysisDataset dataset, int row){
-		Color oldColour = ColourSelecter.getColor( row );
+		Paint oldColour = ColourSelecter.getColor( row );
 		
 		Color newColor = JColorChooser.showDialog(
 				PopulationsPanel.this,
                  "Choose dataset Color",
-                 oldColour);
+                 (Color) oldColour);
 		
 		if(newColor != null){
 			dataset.setDatasetColour(newColor);

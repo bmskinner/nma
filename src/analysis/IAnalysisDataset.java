@@ -20,6 +20,7 @@
 package analysis;
 
 import java.awt.Color;
+import java.awt.Paint;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
@@ -236,7 +237,7 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 * Get the analysis options from this dataset
 	 * @return
 	 */
-	AnalysisOptions getAnalysisOptions();
+	IAnalysisOptions getAnalysisOptions();
 
 	/**
 	 * Test if the dataset has analysis options set.
@@ -249,14 +250,14 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 * Set the analysis options for the dataset
 	 * @param analysisOptions
 	 */
-	void setAnalysisOptions(AnalysisOptions analysisOptions);
+	void setAnalysisOptions(IAnalysisOptions analysisOptions);
 
 	/**
 	 * Add the given dataset as a cluster result.
 	 * This is a form of child dataset
 	 * @param dataset
 	 */
-	void addClusterGroup(ClusterGroup group);
+	void addClusterGroup(IClusterGroup group);
 
 	/**
 	 * Check the list of cluster groups, and return the highest
@@ -272,7 +273,7 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 */
 	boolean hasCluster(UUID id);
 
-	List<ClusterGroup> getClusterGroups();
+	List<IClusterGroup> getClusterGroups();
 
 	/**
 	 * Get the UUIDs of all datasets in clusters
@@ -355,13 +356,13 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 * Set the dataset colour (used in comparisons between datasets)
 	 * @param colour the new colour
 	 */
-	void setDatasetColour(Color colour);
+	void setDatasetColour(Paint colour);
 
 	/**
 	 * Get the currently set dataset colour, or null if not set
 	 * @return colour or null
 	 */
-	Color getDatasetColour();
+	Paint getDatasetColour();
 
 	/**
 	 * Test if the dataset colour is set or null

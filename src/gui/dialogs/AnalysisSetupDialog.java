@@ -61,13 +61,14 @@ import javax.swing.event.ChangeListener;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
-import analysis.AnalysisOptions.CannyOptions;
 import analysis.IAnalysisDataset;
+import analysis.IAnalysisOptions;
+import analysis.ICannyOptions;
 import components.nuclear.NucleusType;
 
 public class AnalysisSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
 
-	private AnalysisOptions analysisOptions = new AnalysisOptions();
+	private IAnalysisOptions analysisOptions = new AnalysisOptions();
 	
 	private static final int    DEFAULT_MIN_NUCLEUS_SIZE = 2000;
 	private static final int    DEFAULT_MAX_NUCLEUS_SIZE = 10000;
@@ -160,7 +161,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	 * Create the dialog with an existing set of options
 	 * Allows settings to be reloaded.
 	 */
-	public AnalysisSetupDialog(List<IAnalysisDataset> datasets, AnalysisOptions options) {
+	public AnalysisSetupDialog(List<IAnalysisDataset> datasets, IAnalysisOptions options) {
 		super();
 		openDatasets = datasets;
 		setModal(true); // ensure nothing happens until this window is closed
@@ -186,7 +187,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	 * Get the current options 
 	 * @return an AnalysisOptions
 	 */
-	public AnalysisOptions getOptions(){
+	public IAnalysisOptions getOptions(){
 		return this.analysisOptions;
 	}
 
@@ -238,36 +239,36 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		
 		analysisOptions.setChannel(DEFAULT_CHANNEL);
 		
-		CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
+		ICannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
 		
 		nucleusCannyOptions.setUseCanny(true);
 		nucleusCannyOptions.setCannyAutoThreshold(false);
-		nucleusCannyOptions.setLowThreshold( (float) CannyOptions.DEFAULT_CANNY_LOW_THRESHOLD);
-		nucleusCannyOptions.setHighThreshold((float) CannyOptions.DEFAULT_CANNY_HIGH_THRESHOLD);
-		nucleusCannyOptions.setKernelRadius((float) CannyOptions.DEFAULT_CANNY_KERNEL_RADIUS);
-		nucleusCannyOptions.setKernelWidth(CannyOptions.DEFAULT_CANNY_KERNEL_WIDTH);
-		nucleusCannyOptions.setClosingObjectRadius(CannyOptions.DEFAULT_CLOSING_OBJECT_RADIUS);
+		nucleusCannyOptions.setLowThreshold( (float) ICannyOptions.DEFAULT_CANNY_LOW_THRESHOLD);
+		nucleusCannyOptions.setHighThreshold((float) ICannyOptions.DEFAULT_CANNY_HIGH_THRESHOLD);
+		nucleusCannyOptions.setKernelRadius((float) ICannyOptions.DEFAULT_CANNY_KERNEL_RADIUS);
+		nucleusCannyOptions.setKernelWidth(ICannyOptions.DEFAULT_CANNY_KERNEL_WIDTH);
+		nucleusCannyOptions.setClosingObjectRadius(ICannyOptions.DEFAULT_CLOSING_OBJECT_RADIUS);
 		
-		nucleusCannyOptions.setUseKuwahara(CannyOptions.DEFAULT_USE_KUWAHARA);
-		nucleusCannyOptions.setKuwaharaKernel(CannyOptions.DEFAULT_KUWAHARA_KERNEL_RADIUS);
-		nucleusCannyOptions.setFlattenImage(CannyOptions.DEFAULT_FLATTEN_CHROMOCENTRES);
-		nucleusCannyOptions.setFlattenThreshold(CannyOptions.DEFAULT_FLATTEN_THRESHOLD);
+		nucleusCannyOptions.setUseKuwahara(ICannyOptions.DEFAULT_USE_KUWAHARA);
+		nucleusCannyOptions.setKuwaharaKernel(ICannyOptions.DEFAULT_KUWAHARA_KERNEL_RADIUS);
+		nucleusCannyOptions.setFlattenImage(ICannyOptions.DEFAULT_FLATTEN_CHROMOCENTRES);
+		nucleusCannyOptions.setFlattenThreshold(ICannyOptions.DEFAULT_FLATTEN_THRESHOLD);
 		
 		
-		CannyOptions tailCannyOptions = analysisOptions.getCannyOptions("tail");
+		ICannyOptions tailCannyOptions = analysisOptions.getCannyOptions("tail");
 		
 		tailCannyOptions.setUseCanny(true);
 		tailCannyOptions.setCannyAutoThreshold(false);
-		tailCannyOptions.setLowThreshold( (float) CannyOptions.DEFAULT_CANNY_TAIL_LOW_THRESHOLD);
-		tailCannyOptions.setHighThreshold((float) CannyOptions.DEFAULT_CANNY_TAIL_HIGH_THRESHOLD);
-		tailCannyOptions.setKernelRadius((float) CannyOptions.DEFAULT_CANNY_KERNEL_RADIUS);
-		tailCannyOptions.setKernelWidth( CannyOptions.DEFAULT_CANNY_KERNEL_WIDTH);
-		tailCannyOptions.setClosingObjectRadius( CannyOptions.DEFAULT_TAIL_CLOSING_OBJECT_RADIUS);
+		tailCannyOptions.setLowThreshold( (float) ICannyOptions.DEFAULT_CANNY_TAIL_LOW_THRESHOLD);
+		tailCannyOptions.setHighThreshold((float) ICannyOptions.DEFAULT_CANNY_TAIL_HIGH_THRESHOLD);
+		tailCannyOptions.setKernelRadius((float) ICannyOptions.DEFAULT_CANNY_KERNEL_RADIUS);
+		tailCannyOptions.setKernelWidth( ICannyOptions.DEFAULT_CANNY_KERNEL_WIDTH);
+		tailCannyOptions.setClosingObjectRadius( ICannyOptions.DEFAULT_TAIL_CLOSING_OBJECT_RADIUS);
 		
 		tailCannyOptions.setUseKuwahara(false);
-		tailCannyOptions.setKuwaharaKernel(CannyOptions.DEFAULT_KUWAHARA_KERNEL_RADIUS);
+		tailCannyOptions.setKuwaharaKernel(ICannyOptions.DEFAULT_KUWAHARA_KERNEL_RADIUS);
 		tailCannyOptions.setFlattenImage(false);
-		tailCannyOptions.setFlattenThreshold(CannyOptions.DEFAULT_FLATTEN_THRESHOLD);
+		tailCannyOptions.setFlattenThreshold(ICannyOptions.DEFAULT_FLATTEN_THRESHOLD);
 		
 	}
 	
@@ -275,7 +276,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	 * Set this options object to use the values in the given options
 	 * @param options
 	 */
-	private void setOptions(final AnalysisOptions options ){
+	private void setOptions(final IAnalysisOptions options ){
 		analysisOptions.setNucleusThreshold(options.getNucleusThreshold());
 
 		analysisOptions.setMinNucleusSize(options.getMinNucleusSize());
@@ -298,8 +299,8 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		
 		
 		analysisOptions.addCannyOptions("nucleus");
-		CannyOptions templateCannyOptions = options.getCannyOptions("nucleus");
-		CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
+		ICannyOptions templateCannyOptions = options.getCannyOptions("nucleus");
+		ICannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
 		
 		nucleusCannyOptions.setUseCanny(templateCannyOptions.isUseCanny());
 		nucleusCannyOptions.setCannyAutoThreshold(templateCannyOptions.isCannyAutoThreshold());

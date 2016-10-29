@@ -34,8 +34,8 @@ import utility.Constants;
 
 
 import utility.StatsMap;
-import analysis.AnalysisOptions;
-import analysis.AnalysisOptions.CannyOptions;
+import analysis.IAnalysisOptions;
+import analysis.ICannyOptions;
 import analysis.detection.Detector;
 import analysis.image.ImageFilterer;
 import components.ICell;
@@ -53,10 +53,10 @@ import components.nuclei.Nucleus;
  */
 public class NucleusDetector extends Detector {
 	
-	private final AnalysisOptions options;
+	private final IAnalysisOptions options;
 	private final String outputFolderName;
 	
-	public NucleusDetector(final AnalysisOptions options, final String outputFolderName){
+	public NucleusDetector(final IAnalysisOptions options, final String outputFolderName){
 		
 		if(options==null){
 			throw new IllegalArgumentException("Options is null");
@@ -201,7 +201,7 @@ public class NucleusDetector extends Detector {
 	private ImageStack preprocessImage(ImageStack image) throws Exception{
 		
 		finer("Preprocessing image");
-		CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
+		ICannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
 
 		ImageStack searchStack = null;
 

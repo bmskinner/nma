@@ -20,6 +20,8 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 		
 		super(n);
 		this.type = type;
+		
+		finest("Constructed consensus nucleus from "+n.getNameAndNumber());
 	}
 	
 	public NucleusType getType(){
@@ -28,7 +30,8 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 	
 	@Override
 	public int[] getPosition(){
-		Rectangle bounds = getVerticallyRotatedNucleus().createPolygon().getBounds();
+//		Rectangle bounds = getVerticallyRotatedNucleus().createPolygon().getBounds();
+		Rectangle bounds = createPolygon().getBounds();
 		int newWidth  = (int) bounds.getWidth();
 		int newHeight = (int) bounds.getHeight();
 		int newX      = (int) bounds.getX();

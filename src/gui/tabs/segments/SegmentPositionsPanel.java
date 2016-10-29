@@ -40,7 +40,7 @@ import stats.Quartile;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.charts.panels.ExportableChartPanel;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.ICellCollection;
@@ -77,7 +77,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception{
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
 		return new MorphologyChartFactory(options).makeSegmentStartPositionChart();
 	}
 
@@ -131,7 +131,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 				chartPanels.put(seg.getName(), chartPanel);
 				mainPanel.add(chartPanel);			
 				
-				DefaultChartOptions options = new ChartOptionsBuilder()
+				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.setSegPosition(seg.getPosition())
 					.setSegID(seg.getID())

@@ -52,7 +52,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import analysis.AnalysisOptions;
+import analysis.IAnalysisOptions;
 import analysis.detection.IconCell;
 import analysis.nucleus.NucleusDetectionWorker;
 
@@ -67,7 +67,7 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 	protected JProgressBar progressBar;
 	
 
-	protected AnalysisOptions options; // the options to detect with
+	protected IAnalysisOptions options; // the options to detect with
 	protected File            openImage;			// the image currently open
 
 	private ImageType imageType;
@@ -90,7 +90,7 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 	/**
 	 * Create the dialog.
 	 */
-	public ImageProber(AnalysisOptions options, ImageType type, File folder) {
+	public ImageProber(IAnalysisOptions options, ImageType type, File folder) {
 		super();
 		if(options==null){
 			throw new IllegalArgumentException("Options is null");

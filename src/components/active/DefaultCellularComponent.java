@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -209,6 +210,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		this.id = a.getID();
 		this.position = a.getPosition();
 		
+		finest("Set id and position");
+		
 		for(PlottableStatistic stat : a.getStatistics() ){
 			try {
 				this.setStatistic(stat, a.getStatistic(stat, MeasurementScale.PIXELS));
@@ -217,22 +220,23 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				this.setStatistic(stat, 0);
 			}
 		}
-
+		finest("Set stats");
 		this.sourceFolder      = a.getSourceFolder();
 		this.sourceFileName    = a.getSourceFileName();
 		this.channel           = a.getChannel();
 		this.scale 			   = a.getScale();
 		
+		finest("Set folders");
 		
 		if(a instanceof DefaultCellularComponent){
-			this.xpoints = ((DefaultCellularComponent)a).xpoints;
-			this.ypoints = ((DefaultCellularComponent)a).ypoints;
-			PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+			this.xpoints = Arrays.copyOf( ((DefaultCellularComponent)a).xpoints, ((DefaultCellularComponent)a).xpoints.length);
+			this.ypoints = Arrays.copyOf( ((DefaultCellularComponent)a).ypoints, ((DefaultCellularComponent)a).ypoints.length);
+			PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
 			makeBorderList(roi);
 		} else {
 			this.borderList        = a.getBorderList();
 		}
-		
+		finest("Created border list");
 		this.centreOfMass      = IPoint.makeNew(a.getCentreOfMass());
 	}
 	
@@ -645,6 +649,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		
 		/*
 		Flip the X positions of the border points around an X position
+		TODO - should this affect the roi points?
 		 */
 		public void flipXAroundPoint(IPoint p){
 
@@ -710,9 +715,22 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			}
 
 			this.centreOfMass = newCentreOfMass;
+		}
+		
+		public void reverse(){
 
-			// Update the bounding rectangle
-//			this.boundingRectangle = this.createPolygon().getBounds();
+			int[] newXpoints = new int[xpoints.length], newYpoints = new int[xpoints.length];
+			
+			for(int i=xpoints.length-1, j=0; j<xpoints.length; i--, j++){
+				newXpoints[j] = xpoints[i];
+				newYpoints[j] = ypoints[i];
+			}
+			xpoints = newXpoints;
+			ypoints = newYpoints;
+			
+			PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
+
+			makeBorderList(roi);			
 		}
 		
 		/**
@@ -1153,6 +1171,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			double newAngle = oldAngle + angle;
 			double newX = new AngleTools().getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
 			double newY = new AngleTools().getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
-			return new FloatPoint(newX, newY);
+			return IPoint.makeNew(newX, newY);
 		}
 }

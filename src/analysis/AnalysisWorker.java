@@ -198,6 +198,10 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
             	finest("Firing trigger for failed task");
                 firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
             }
+    	 } catch(StackOverflowError e){
+    		 warn("Stack overflow detected");
+    		 fine("Stack overflow in worker", e);
+    		 firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
         } catch (InterruptedException e) {
         	error("Interruption error in worker", e);
         	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
@@ -205,7 +209,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
         	if(e.getCause() instanceof java.lang.OutOfMemoryError){
         		warn("Error: Not enough memory!");
         	} else {
-        		warn("Unable to complete task due to an internal error");
+        		warn("Unable to complete task due to an internal error: "+e.getCause().getClass().getSimpleName());
         		warn("Try restarting the program");
         		fine("Execution error in worker", e);
         		

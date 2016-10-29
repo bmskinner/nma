@@ -39,8 +39,8 @@ import org.jfree.chart.JFreeChart;
 
 import utility.Constants;
 import charting.datasets.AnalysisDatasetTableCreator;
-import charting.options.DefaultChartOptions;
-import charting.options.DefaultTableOptions;
+import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
@@ -118,9 +118,9 @@ public class SegmentStatsPanel extends DetailPanel {
 
 	}
 	
-	private DefaultTableOptions makeOptions(){
+	private TableOptions makeOptions(){
 		
-		DefaultTableOptions options = new TableOptionsBuilder()
+		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setScale(GlobalOptions.getInstance().getScale())
 			.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -129,12 +129,12 @@ public class SegmentStatsPanel extends DetailPanel {
 	}
 
 	@Override
-	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception {
+	protected TableModel createPanelTableType(TableOptions options) throws Exception {
 		return new AnalysisDatasetTableCreator(options).createMedianProfileStatisticTable();
 	}
 
 	@Override
-	protected JFreeChart createPanelChartType(DefaultChartOptions options)	throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options)	throws Exception {
 		return null;
 	}
 
@@ -168,7 +168,7 @@ public class SegmentStatsPanel extends DetailPanel {
 					segment = 0;
 				}
 
-				colour = ColourSelecter.getColor(segment);
+				colour = (Color) ColourSelecter.getColor(segment);
 				log(Level.FINEST, "SegmentTableCellRenderer for segment "+segment+" uses color "+colour);
 
 			}

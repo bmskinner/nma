@@ -40,8 +40,10 @@ import components.generic.ProfileType;
 import components.generic.Tag;
 import charting.charts.MorphologyChartFactory;
 import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.DefaultTableOptions;
+import charting.options.TableOptions;
 import gui.BorderTagEventListener;
 import gui.DatasetEvent;
 import gui.GlobalOptions;
@@ -135,7 +137,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 		
 		setButtonsEnabled(true);
 				
-		DefaultChartOptions options = new ChartOptionsBuilder()
+		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setNormalised(false)
 			.setAlignment(ProfileAlignment.LEFT)
@@ -197,12 +199,12 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 

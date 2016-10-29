@@ -321,8 +321,15 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		setBorderTag(Tag.REFERENCE_POINT, tipIndex);
 
 		// decide if the profile is right or left handed; flip if needed
-		if(!this.isProfileOrientationOK()){
+		if(!this.isProfileOrientationOK() && canReverse){
 			this.reverse(); // reverses all profiles, border array and tagged points
+			
+			// the number of border points can change when reversing
+			// due to float interpolation from different starting positions
+			// so do the whole thing again
+			initialise(this.getWindowProportion(ProfileType.ANGLE));
+			canReverse = false;
+			findPointsAroundBorder();
 		}  
 
 

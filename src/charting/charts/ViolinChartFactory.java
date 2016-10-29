@@ -3,6 +3,7 @@ package charting.charts;
 import gui.components.ColourSelecter;
 
 import java.awt.Color;
+import java.awt.Paint;
 import java.util.UUID;
 
 import org.jfree.chart.JFreeChart;
@@ -13,7 +14,7 @@ import org.jfree.chart.plot.CategoryPlot;
 import analysis.IAnalysisDataset;
 import charting.datasets.ViolinCategoryDataset;
 import charting.datasets.ViolinDatasetCreator;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import logging.Loggable;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
@@ -22,7 +23,7 @@ import stats.SignalStatistic;
 
 public class ViolinChartFactory extends AbstractChartFactory implements Loggable {
 		
-	public ViolinChartFactory(DefaultChartOptions o){
+	public ViolinChartFactory(ChartOptions o){
 		super(o);
 	}
 	
@@ -107,7 +108,7 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
 
 				renderer.setSeriesVisibleInLegend(series, false);
-				Color color = options.getDatasets().get(series).getDatasetColour() == null 
+				Paint color = options.getDatasets().get(series).getDatasetColour() == null 
 						? ColourSelecter.getColor(series)
 								: options.getDatasets().get(series).getDatasetColour();
 
@@ -179,7 +180,7 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 				if(d.getCollection().hasSignalGroup(signalGroup)){
 
 
-					Color color = d.getCollection().getSignalGroup(signalGroup).hasColour()
+					Paint color = d.getCollection().getSignalGroup(signalGroup).hasColour()
 							    ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
 								: ColourSelecter.getColor(row);
 							    
@@ -224,7 +225,7 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 
 			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
 
-				Color color = options.getDatasets().get(series).getDatasetColour() == null 
+				Paint color = options.getDatasets().get(series).getDatasetColour() == null 
 						? ColourSelecter.getColor(series)
 								: options.getDatasets().get(series).getDatasetColour();
 

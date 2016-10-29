@@ -43,9 +43,9 @@ import charting.charts.NuclearSignalChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.DefaultTableOptions;
+import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 
 
@@ -134,7 +134,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	private JPanel createChartPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 		
-		DefaultChartOptions options = new ChartOptionsBuilder()
+		ChartOptions options = new ChartOptionsBuilder()
 			.build();
 	
 		JFreeChart chart = getChart(options);
@@ -149,7 +149,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	
 	private void updateChartAndTable(){
 		
-		DefaultChartOptions options = new ChartOptionsBuilder()
+		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setShowSignals(countsBtn.isSelected()) // if counts is selected, show signal counts, not proportions
 			.setTarget(chartPanel)
@@ -161,7 +161,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		chartPanel.setVisible(true);
 
 
-		DefaultTableOptions tableOptions = new TableOptionsBuilder()
+		TableOptions tableOptions = new TableOptionsBuilder()
 		.setDatasets(getDatasets())
 		.build();
 
@@ -196,12 +196,12 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return new NuclearSignalChartFactory(options).createShellChart();
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return NuclearSignalDatasetCreator.getInstance().createShellChiSquareTable(options);
 	}
 

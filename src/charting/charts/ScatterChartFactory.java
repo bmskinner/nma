@@ -21,6 +21,7 @@
 package charting.charts;
 
 import java.awt.Color;
+import java.awt.Paint;
 import java.util.UUID;
 
 import org.jfree.chart.ChartFactory;
@@ -34,7 +35,7 @@ import analysis.IAnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.ScatterChartDatasetCreator;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import gui.components.ColourSelecter;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
@@ -42,7 +43,7 @@ import stats.SignalStatistic;
 
 public class ScatterChartFactory extends AbstractChartFactory {
 	
-	public ScatterChartFactory(DefaultChartOptions o){
+	public ScatterChartFactory(ChartOptions o){
 		super(o);
 	}
 	
@@ -133,7 +134,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			renderer.setSeriesLinesVisible(i, false);
 			renderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
 			
-			Color colour = ColourSelecter.getColor(i);
+			Paint colour = ColourSelecter.getColor(i);
 			
 			if(options.getDatasets().get(i).hasDatasetColour()){
 				colour = options.getDatasets().get(i).getDatasetColour();
@@ -187,7 +188,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			String datasetName = split[0];
 			UUID id = UUID.fromString(split[1]);
 			
-			Color colour = ColourSelecter.getColor(i);
+			Paint colour = ColourSelecter.getColor(i);
 			
 			for(IAnalysisDataset d : options.getDatasets()){
 				if(d.getName().equals(datasetName)){

@@ -39,6 +39,7 @@ import utility.Constants;
 import analysis.AnalysisOptions;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
+import analysis.IAnalysisOptions;
 import analysis.ProgressEvent;
 import analysis.ProgressListener;
 import components.ICellCollection;
@@ -54,7 +55,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 
   private final String outputFolder;
   
-  private final AnalysisOptions analysisOptions;
+  private final IAnalysisOptions analysisOptions;
 
   private Map<File, ICellCollection> collectionGroup = new HashMap<File, ICellCollection>();
   
@@ -68,7 +69,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
    * @param debugFile the dataset log file
    * @param options the options to detect with
    */
-  public NucleusDetectionWorker(String outputFolder, File debugFile, AnalysisOptions options){
+  public NucleusDetectionWorker(String outputFolder, File debugFile, IAnalysisOptions options){
 	  super(null, debugFile);
 	  this.outputFolder 	= outputFolder;
 	  this.analysisOptions 	= options;
@@ -161,7 +162,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 				if(analysisOptions.isKeepFailedCollections()){
 					log("Keeping failed nuclei as new collection");
 					IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
-					AnalysisOptions failedOptions = new AnalysisOptions(analysisOptions);
+					IAnalysisOptions failedOptions = new AnalysisOptions(analysisOptions);
 					failedOptions.setNucleusType(NucleusType.ROUND);
 					failed.setAnalysisOptions(failedOptions);
 					failed.setRoot(true);

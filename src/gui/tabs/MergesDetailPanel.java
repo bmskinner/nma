@@ -26,8 +26,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,11 +41,10 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.datasets.AnalysisDatasetTableCreator;
-import charting.options.DefaultChartOptions;
-import charting.options.DefaultTableOptions;
+import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import charting.options.DefaultTableOptions.TableType;
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 
 @SuppressWarnings("serial")
@@ -164,7 +161,7 @@ public class MergesDetailPanel extends DetailPanel {
 	private JPanel createAnalysisParametersPanel() throws Exception{
 		JPanel panel = new JPanel(new BorderLayout());
 		
-		DefaultTableOptions options = new TableOptionsBuilder()
+		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(null)
 		.setType(TableType.ANALYSIS_PARAMETERS)
 		.build();
@@ -206,7 +203,7 @@ public class MergesDetailPanel extends DetailPanel {
 		updateSourceButtonsPanel();
 		
 		
-		DefaultTableOptions parameterOptions = new TableOptionsBuilder()
+		TableOptions parameterOptions = new TableOptionsBuilder()
 			.setDatasets(activeDataset().getAllMergeSources())
 			.setType(TableType.ANALYSIS_PARAMETERS)
 			.build();
@@ -228,7 +225,7 @@ public class MergesDetailPanel extends DetailPanel {
 		getSourceButtonPanel.setVisible(false);
 			
 		
-		DefaultTableOptions parameterOptions = new TableOptionsBuilder()
+		TableOptions parameterOptions = new TableOptionsBuilder()
 			.setDatasets(null)
 			.setType(TableType.ANALYSIS_PARAMETERS)
 			.build();
@@ -239,12 +236,12 @@ public class MergesDetailPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		if(options.getType().equals(TableType.MERGE_SOURCES)){
 			return new AnalysisDatasetTableCreator(options).createMergeSourcesTable();
 		} else {

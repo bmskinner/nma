@@ -42,8 +42,8 @@ import components.CellularComponent;
 import components.nuclear.INuclearSignal;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
-import analysis.AnalysisOptions;
 import analysis.IAnalysisDataset;
+import analysis.IAnalysisOptions;
 import analysis.detection.IconCell;
 import analysis.detection.ImageProberWorker;
 import analysis.image.ImageConverter;
@@ -54,7 +54,7 @@ public class SignalProberWorker extends ImageProberWorker {
 	private int channel;
 	private NuclearSignalOptions testOptions;
 
-	public SignalProberWorker(File f, AnalysisOptions options, ImageType type, TableModel model, IAnalysisDataset dataset, int channel, NuclearSignalOptions testOptions) {
+	public SignalProberWorker(File f, IAnalysisOptions options, ImageType type, TableModel model, IAnalysisDataset dataset, int channel, NuclearSignalOptions testOptions) {
 		super(f, options, type, model);
 		this.dataset = dataset;
 		this.channel = channel;

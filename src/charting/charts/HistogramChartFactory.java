@@ -25,6 +25,7 @@ import stats.SegmentStatistic;
 import stats.SignalStatistic;
 
 import java.awt.Color;
+import java.awt.Paint;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -47,13 +48,13 @@ import charting.ChartComponents;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NuclearHistogramDatasetCreator;
 import charting.datasets.NuclearSignalDatasetCreator;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import analysis.IAnalysisDataset;
 
 
 public class HistogramChartFactory extends AbstractChartFactory {
 
-	public HistogramChartFactory(DefaultChartOptions o){
+	public HistogramChartFactory(ChartOptions o){
 		super(o);
 	}
 	
@@ -232,7 +233,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 					rend.setSeriesVisibleInLegend(j, false);
 					rend.setSeriesStroke(j, ChartComponents.MARKER_STROKE);
 					
-					Color colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
+					Paint colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
 								 ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
 								 : ColourSelecter.getColor(j);
 
@@ -297,7 +298,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	
 //					String seriesName = seriesKey.replacseFirst(options.getStat().toString()+"_", "");
 	
-					Color colour = ColourSelecter.getColor(j);
+	                Paint colour = ColourSelecter.getColor(j);
 					
 					IAnalysisDataset d = options.getDatasets().get(datasetCount);
 
@@ -376,7 +377,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 			for(IAnalysisDataset dataset : options.getDatasets()){
 
 				if(seriesName.equals(dataset.getName())){
-					Color colour = dataset.hasDatasetColour()
+					Paint colour = dataset.hasDatasetColour()
 							? dataset.getDatasetColour()
 									: ColourSelecter.getColor(j);
 
@@ -437,7 +438,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 			String seriesKey = (String) ds.getSeriesKey(j);
 			String seriesName = seriesKey.replaceFirst(options.getStat().toString()+"_", "");
 
-			Color colour = ColourSelecter.getColor(j);
+			Paint colour = ColourSelecter.getColor(j);
 			for(IAnalysisDataset dataset : options.getDatasets()){
 
 				if(seriesName.equals(dataset.getName())){
@@ -508,7 +509,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 				for(IAnalysisDataset dataset : options.getDatasets()){
 					
 					if(seriesName.equals(dataset.getName())){
-						Color colour = dataset.hasDatasetColour()
+						Paint colour = dataset.hasDatasetColour()
 								? dataset.getDatasetColour()
 										: ColourSelecter.getColor(j);
 
@@ -577,7 +578,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 				String seriesKey = (String) ds.getSeriesKey(j);
 				String seriesName = seriesKey.replaceFirst("Seg_"+options.getSegPosition()+"_", "");
 
-				Color colour = ColourSelecter.getColor(j);
+				Paint colour = ColourSelecter.getColor(j);
 				for(IAnalysisDataset dataset : options.getDatasets()){
 
 					if(seriesName.equals(dataset.getName())){

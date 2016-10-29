@@ -23,7 +23,7 @@ import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
@@ -65,17 +65,17 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 		}
 		
 		@Override
-		protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
+		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 			return new MorphologyChartFactory(options).createProfileChart(  );
 		}
 		
 		private void updateChart() {
-			DefaultChartOptions options = makeOptions();
+			ChartOptions options = makeOptions();
 			setChart(options);		
 		}
 		
 		
-		private DefaultChartOptions makeOptions(){
+		private ChartOptions makeOptions(){
 
 			boolean normalised         = profileAlignmentOptionsPanel.isNormalised();
 			ProfileAlignment alignment = normalised ?  ProfileAlignment.LEFT : profileAlignmentOptionsPanel.getSelected();
@@ -83,7 +83,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 			boolean showMarkers        = profileMarkersOptionsPanel.showMarkers();
 			boolean hideProfiles       = profileMarkersOptionsPanel.isHideProfiles();
 			
-			DefaultChartOptions options = new ChartOptionsBuilder()
+			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
 				.setNormalised(normalised)
 				.setAlignment(alignment)

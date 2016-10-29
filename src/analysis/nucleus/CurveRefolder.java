@@ -25,14 +25,14 @@
  */
 package analysis.nucleus;
 
-import java.awt.Rectangle;
-
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
+import analysis.profiles.ProfileException;
 import stats.Quartile;
 import utility.Constants;
 import components.AbstractCellularComponent;
 import components.ICellCollection;
+import components.active.DefaultConsensusNucleus;
 import components.active.generic.FloatPoint;
 import components.generic.Equation;
 import components.generic.IPoint;
@@ -50,7 +50,7 @@ public class CurveRefolder extends AnalysisWorker {
 
 	private IProfile targetCurve;
 
-	private ConsensusNucleus refoldNucleus;
+	private Nucleus refoldNucleus;
 	
 	private ICellCollection collection;
 	
@@ -102,7 +102,7 @@ public class CurveRefolder extends AnalysisWorker {
 		Nucleus n = collection.getNucleusMostSimilarToMedian(Tag.REFERENCE_POINT);	
 		
 		finest("Creating consensus nucleus template");
-		refoldNucleus = new ConsensusNucleus(n, collection.getNucleusType());
+		refoldNucleus = new DefaultConsensusNucleus(n, collection.getNucleusType());
 
 		finest("Refolding nucleus of class: "+collection.getNucleusType().toString());
 		finest("Subject: "+refoldNucleus.getSourceFileName()+"-"+refoldNucleus.getNucleusNumber());
@@ -163,7 +163,7 @@ public class CurveRefolder extends AnalysisWorker {
 //			int[] newPosition = { newX, newY, newWidth, newHeight };
 //			refoldNucleus.setPosition(newPosition);
 //			
-//			collection.setConsensusNucleus(refoldNucleus);
+			collection.setConsensusNucleus(refoldNucleus);
 
 		} catch(Exception e){
 			logError("Unable to refold nucleus", e);
@@ -294,7 +294,7 @@ public class CurveRefolder extends AnalysisWorker {
 			Random mutation to the X and Y position. Must remain
 			within a certain range of neighbours
 	*/
-	private double iterateOverNucleus() throws Exception {
+	private double iterateOverNucleus() {
 
 		ISegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
@@ -310,11 +310,23 @@ public class CurveRefolder extends AnalysisWorker {
 
 		
 		// make all changes to a fresh nucleus before buggering up the real one
-		ConsensusNucleus testNucleus = new ConsensusNucleus( refoldNucleus, NucleusType.ROUND);
+		finest("Creating test nucleus based on refold candidate");
 		
-		for(int i=0; i<refoldNucleus.getBorderLength(); i++){
-			similarityScore = improveBorderPoint(i, minDistance, maxDistance, similarityScore, testNucleus);
+		Nucleus testNucleus;
+		try {
+			testNucleus = new DefaultConsensusNucleus( refoldNucleus, NucleusType.ROUND);
+			
+			finest("Beginning border tests");
+			for(int i=0; i<refoldNucleus.getBorderLength(); i++){
+				similarityScore = improveBorderPoint(i, minDistance, maxDistance, similarityScore, testNucleus);
+			}
+			
+		} catch(Error e){
+			warn("Error making new consensus");
+			fine("Error in construction", e);
 		}
+		
+		
 		testNucleus = null;
 		return similarityScore;
 	}
@@ -330,9 +342,9 @@ public class CurveRefolder extends AnalysisWorker {
 	 * @return
 	 * @throws Exception
 	 */
-	private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore, Nucleus testNucleus) throws Exception{
+	private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore, Nucleus testNucleus){
 //		// make all changes to a fresh nucleus before buggering up the real one
-
+		finest("Testing point "+index);
 		double score = testNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
 
 //		log("3bi testNucleus has "+ testNucleus.getProfile(ProfileType.ANGLE).getSegmentCount());
@@ -364,7 +376,12 @@ public class CurveRefolder extends AnalysisWorker {
 			testNucleus.updateBorderPoint(index, newPoint);
 
 			finer("Testing profiles");
-			testNucleus.calculateProfiles();
+			try {
+				testNucleus.calculateProfiles();
+			} catch (ProfileException e) {
+				warn("Cannot calculate profiles in test nucleus");
+				fine("Error calculating profiles", e);
+			}
 
 			// Get the new score
 			score = testNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
@@ -374,7 +391,12 @@ public class CurveRefolder extends AnalysisWorker {
 				refoldNucleus.updateBorderPoint(index, newPoint);
 				
 				finer("Re-calculating profiles");
-				refoldNucleus.calculateProfiles();
+				try {
+					refoldNucleus.calculateProfiles();
+				} catch (ProfileException e) {
+					warn("Cannot calculate profiles in consensus");
+					fine("Error calculating profiles", e);
+				}
 
 				similarityScore = score;
 			}

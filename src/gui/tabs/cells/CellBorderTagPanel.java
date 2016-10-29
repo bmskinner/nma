@@ -32,7 +32,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
@@ -140,7 +140,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 
 				} else {
 					
-					DefaultChartOptions options = new ChartOptionsBuilder()
+					ChartOptions options = new ChartOptionsBuilder()
 						.setDatasets(getDatasets())
 						.setCell(this.getCellModel().getCell())
 						.setNormalised(false)
@@ -162,7 +162,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 					 * Create the chart for the range panel
 					 */
 					
-					DefaultChartOptions rangeOptions = new ChartOptionsBuilder()
+					ChartOptions rangeOptions = new ChartOptionsBuilder()
 						.setDatasets(getDatasets())
 						.setCell(this.getCellModel().getCell())
 						.setNormalised(false)
@@ -199,7 +199,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 		}
 		
 		@Override
-		protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
+		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 			return new MorphologyChartFactory(options).makeIndividualNucleusProfileChart( );
 		}
 		

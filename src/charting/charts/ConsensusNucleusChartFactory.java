@@ -24,6 +24,7 @@ import gui.components.ColourSelecter.ColourSwatch;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Paint;
 import java.util.List;
 
 import org.jfree.chart.ChartFactory;
@@ -36,7 +37,7 @@ import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import charting.ChartComponents;
 import charting.datasets.NucleusDatasetCreator;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import components.CellCollection;
 import components.ICellCollection;
 
@@ -45,7 +46,7 @@ import components.ICellCollection;
  */
 public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	
-	public ConsensusNucleusChartFactory(DefaultChartOptions o){
+	public ConsensusNucleusChartFactory(ChartOptions o){
 		super(o);
 	}
 	
@@ -257,7 +258,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 								
 				if(showIQR){
 					plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
-					Color colour = ColourSelecter.getColor(segIndex);
+					Paint colour = ColourSelecter.getColor(segIndex);
 					plot.getRenderer().setSeriesPaint(i, colour);
 					
 				} else {
@@ -301,15 +302,16 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 			// in this context, segment colour refers to the entire
 			// dataset colour (they use the same pallates in ColourSelecter)
-			Color color = d.getDatasetColour() == null 
+			Paint color = d.getDatasetColour() == null 
 						? ColourSelecter.getColor(i)
 						: d.getDatasetColour();
 
 			// get the group id from the name, and make colour
 			plot.getRenderer().setSeriesPaint(i, color);
 			if(name.startsWith("Q")){
+				
 				// make the IQR distinct from the median
-				plot.getRenderer().setSeriesPaint(i, color.darker());
+				plot.getRenderer().setSeriesPaint(i, ((Color)color).darker());
 			}
 
 		}

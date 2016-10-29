@@ -64,7 +64,7 @@ public class VirtualCellCollection implements ICellCollection {
 	
 //	protected final Map<ProfileType, IProfileCollection> profileCollections = new HashMap<ProfileType, IProfileCollection>();
 
-	private ConsensusNucleus consensusNucleus; 	// the refolded consensus nucleus
+	private Nucleus consensusNucleus; 	// the refolded consensus nucleus
 	
 	/*
 	 * TRANSIENT FIELDS
@@ -214,7 +214,7 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public void setConsensusNucleus(ConsensusNucleus n) {
+	public void setConsensusNucleus(Nucleus n) {
 		consensusNucleus = n;
 	}
 

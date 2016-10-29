@@ -21,20 +21,16 @@ package charting.datasets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import utility.ArrayConverter;
 import utility.Constants;
 import utility.ArrayConverter.ArrayConversionException;
 import weka.estimators.KernelEstimator;
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
-import components.CellCollection;
 import components.ICellCollection;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
@@ -53,9 +49,9 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 	public static final int MAX_ROUNDED = 1;
 	public static final int STEP_SIZE   = 2;
 	
-	protected final DefaultChartOptions options;
+	protected final ChartOptions options;
 		
-	public NuclearHistogramDatasetCreator(DefaultChartOptions o){
+	public NuclearHistogramDatasetCreator(ChartOptions o){
 		if(o==null){
 			throw new IllegalArgumentException("Options cannot be null");
 		}

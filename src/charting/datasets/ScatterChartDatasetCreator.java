@@ -15,8 +15,8 @@ import org.jfree.data.xy.XYDataset;
 import analysis.IAnalysisDataset;
 import analysis.signals.ShellRandomDistributionCreator;
 import analysis.signals.SignalManager;
-import charting.options.DefaultChartOptions;
-import charting.options.DefaultTableOptions;
+import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import components.ICell;
 import components.ICellCollection;
 import components.generic.MeasurementScale;
@@ -39,7 +39,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws ChartDatasetCreationException
 	 */
-	public XYDataset createNucleusScatterDataset(DefaultChartOptions options) throws ChartDatasetCreationException {
+	public XYDataset createNucleusScatterDataset(ChartOptions options) throws ChartDatasetCreationException {
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
@@ -98,7 +98,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 		return ds;
 	}
 	
-	public TableModel createSpearmanCorrlationTable(DefaultTableOptions options){
+	public TableModel createSpearmanCorrlationTable(TableOptions options){
 		
 		if( ! options.hasDatasets()){
 			return AnalysisDatasetTableCreator.createBlankTable();
@@ -128,7 +128,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 		return createBlankTable();
 	}
 	
-	private TableModel createNucleusSpearmanCorrlationTable(DefaultTableOptions options){
+	private TableModel createNucleusSpearmanCorrlationTable(TableOptions options){
 
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -203,7 +203,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createSignalScatterDataset(DefaultChartOptions options) {
+	public XYDataset createSignalScatterDataset(ChartOptions options) {
 		List<IAnalysisDataset> datasets = options.getDatasets();
 		
 		List<PlottableStatistic> stats =  options.getStats();
@@ -249,7 +249,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 		return ds;
 	}
 	
-	private TableModel createSignalSpearmanCorrlationTable(DefaultTableOptions options){
+	private TableModel createSignalSpearmanCorrlationTable(TableOptions options){
 
 		DefaultTableModel model = new DefaultTableModel();
 

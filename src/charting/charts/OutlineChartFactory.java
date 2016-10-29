@@ -27,6 +27,7 @@ import io.UnloadableImageException;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
@@ -77,11 +78,11 @@ import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.NucleusMeshXYDataset;
 import charting.datasets.OutlineDatasetCreator;
 import charting.datasets.TailDatasetCreator;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 
 public class OutlineChartFactory extends AbstractChartFactory {
 	
-	public OutlineChartFactory(DefaultChartOptions o){
+	public OutlineChartFactory(ChartOptions o){
 		super(o);
 	}
 	
@@ -502,7 +503,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				if(hash.get(key).equals("Nucleus")){
 					String name = (String) plot.getDataset(key).getSeriesKey(i);
 					int colourIndex = getIndexFromLabel(name);
-					Color colour = ColourSelecter.getColor(colourIndex);
+					Paint colour = ColourSelecter.getColor(colourIndex);
 					plot.getRenderer(key).setSeriesPaint(i, colour);					
 				}
 								
@@ -540,7 +541,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				if(hash.get(key).startsWith("SignalGroup_")){
 
 					UUID seriesGroup = getSignalGroupFromLabel(hash.get(key));
-                    Color colour = dataset.getCollection().getSignalGroup(seriesGroup).hasColour()
+					Paint colour = dataset.getCollection().getSignalGroup(seriesGroup).hasColour()
                     		     ? dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour()
                     		     : ColourSelecter.getColor(i);
 
@@ -891,7 +892,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		int datasetNumber = 0;
 		for(IAnalysisDataset dataset : options.getDatasets()){
 			
-			Color colour = dataset.hasDatasetColour()
+			Paint colour = dataset.hasDatasetColour()
 					? dataset.getDatasetColour()
 					: ColourSelecter.getColor(datasetNumber++);
 			

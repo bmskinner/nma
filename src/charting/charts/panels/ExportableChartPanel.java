@@ -102,7 +102,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 	public ExportableChartPanel(JFreeChart chart){
 		super(chart, false);
 		
-		getChartRenderingInfo().setEntityCollection(null);
+//		getChartRenderingInfo().setEntityCollection(null);
 		
 		JPopupMenu popup = this.getPopupMenu();
 		popup.addSeparator();

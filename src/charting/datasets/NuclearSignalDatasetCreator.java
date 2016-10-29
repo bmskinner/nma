@@ -19,6 +19,7 @@
 package charting.datasets;
 
 import java.awt.Color;
+import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
@@ -41,8 +42,8 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import charting.options.DefaultChartOptions;
-import charting.options.DefaultTableOptions;
+import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import stats.SignalStatistic;
 import utility.AngleTools;
 import utility.ArrayConverter;
@@ -93,7 +94,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @param list the AnalysisDatasets to include
 	 * @return a table model
 	 */
-	public TableModel createSignalDetectionParametersTable(DefaultTableOptions options){
+	public TableModel createSignalDetectionParametersTable(TableOptions options){
 
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -211,11 +212,11 @@ public class NuclearSignalDatasetCreator implements Loggable {
             	
             	SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
                 
-                Color colour = collection.getSignalGroup(signalGroup).hasColour()
+            	Paint colour = collection.getSignalGroup(signalGroup).hasColour()
                         ? collection.getSignalGroup(signalGroup).getGroupColour()
                         : ColourSelecter.getColor(j++);
                 
-                cell.setColor(colour);
+                cell.setColor((Color) colour);
                 
                 rowData.add("");// empty row for colour
                 rowData.add(cell);  // group name
@@ -249,11 +250,11 @@ public class NuclearSignalDatasetCreator implements Loggable {
             
                 SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
                 
-                Color colour = collection.getSignalGroup(signalGroup).hasColour()
+                Paint colour = collection.getSignalGroup(signalGroup).hasColour()
                         ? collection.getSignalGroup(signalGroup).getGroupColour()
                         : ColourSelecter.getColor(j++);
                 
-                cell.setColor(colour);
+                cell.setColor((Color) colour);
                 
 
 
@@ -580,7 +581,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public TableModel createSignalStatsTable(DefaultTableOptions options) throws Exception{
+	public TableModel createSignalStatsTable(TableOptions options) throws Exception{
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -602,7 +603,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		return model;
 	}
 	
-	private TableModel createSingleDatasetSignalStatsTable(DefaultTableOptions options) throws Exception {
+	private TableModel createSingleDatasetSignalStatsTable(TableOptions options) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -665,11 +666,11 @@ public class NuclearSignalDatasetCreator implements Loggable {
 					
 					SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
                     
-                    Color colour = collection.getSignalGroup(signalGroup).hasColour()
+					Paint colour = collection.getSignalGroup(signalGroup).hasColour()
                             ? collection.getSignalGroup(signalGroup).getGroupColour()
                             : ColourSelecter.getColor(k++);
                     
-                    cell.setColor(colour);
+                    cell.setColor((Color) colour);
                     
 
 					
@@ -708,7 +709,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		return model;	
 	}
 	
-	private TableModel createMultiDatasetSignalStatsTable(DefaultTableOptions options) throws Exception {
+	private TableModel createMultiDatasetSignalStatsTable(TableOptions options) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -827,7 +828,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
      * @return a boxplot dataset
      * @throws Exception 
      */
-    public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(DefaultChartOptions options) {
+    public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) {
         
     	return createMultiDatasetSignalStatisticBoxplotDataset(options);        
     }
@@ -839,7 +840,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @return a boxplot dataset
 	 * @throws Exception 
 	 */
-    private BoxAndWhiskerCategoryDataset createMultiDatasetSignalStatisticBoxplotDataset(DefaultChartOptions options) {
+    private BoxAndWhiskerCategoryDataset createMultiDatasetSignalStatisticBoxplotDataset(ChartOptions options) {
 
 
     	ExportableBoxAndWhiskerCategoryDataset result = new ExportableBoxAndWhiskerCategoryDataset();
@@ -875,7 +876,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		return result;
 	}
 		
-	public List<CategoryDataset> createShellBarChartDataset(DefaultChartOptions options){
+	public List<CategoryDataset> createShellBarChartDataset(ChartOptions options){
 		
 		List<CategoryDataset> result = new ArrayList<CategoryDataset>();
 
@@ -943,7 +944,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 	 * @param options
 	 * @return
 	 */
-	public TableModel createShellChiSquareTable(DefaultTableOptions options){
+	public TableModel createShellChiSquareTable(TableOptions options){
 		
 		if( ! options.hasDatasets()){
 			return this.createBlankTable();

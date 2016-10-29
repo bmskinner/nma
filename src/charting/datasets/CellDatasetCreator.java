@@ -28,7 +28,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import stats.Quartile;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import analysis.IAnalysisDataset;
 import components.generic.IPoint;
 import components.generic.ProfileType;
@@ -49,7 +49,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 	 * @param options the chart options
 	 * @return a chart
 	 */
-	public XYDataset createPositionFeatureDataset(DefaultChartOptions options) throws ChartDatasetCreationException {
+	public XYDataset createPositionFeatureDataset(ChartOptions options) throws ChartDatasetCreationException {
 
 		XYDataset ds = null;
 		
@@ -82,7 +82,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	private XYDataset createSinglePositionFeatureDataset(DefaultChartOptions options) throws ChartDatasetCreationException{
+	private XYDataset createSinglePositionFeatureDataset(ChartOptions options) throws ChartDatasetCreationException{
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
@@ -114,7 +114,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	private XYDataset createMultiPositionFeatureDataset(DefaultChartOptions options) throws ChartDatasetCreationException{
+	private XYDataset createMultiPositionFeatureDataset(ChartOptions options) throws ChartDatasetCreationException{
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 

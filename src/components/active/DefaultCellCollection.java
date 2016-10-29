@@ -96,7 +96,7 @@ implements ICellCollection {
 	
 //	protected Map<ProfileType, IProfileCollection> profileCollections = new HashMap<ProfileType, IProfileCollection>();
 
-	private ConsensusNucleus consensusNucleus; 	// the refolded consensus nucleus
+	private Nucleus consensusNucleus; 	// the refolded consensus nucleus
 
 	private Set<ICell> cells  = new HashSet<ICell>(100);	// store all the cells analysed
 
@@ -304,7 +304,7 @@ implements ICellCollection {
 		}
 	}
 
-	public void setConsensusNucleus(ConsensusNucleus n){
+	public void setConsensusNucleus(Nucleus n){
 		this.consensusNucleus = n;
 	}
 
@@ -348,7 +348,7 @@ implements ICellCollection {
 		return null;
 	}
 
-	public ConsensusNucleus getConsensusNucleus(){
+	public Nucleus getConsensusNucleus(){
 		return this.consensusNucleus;
 	}
 

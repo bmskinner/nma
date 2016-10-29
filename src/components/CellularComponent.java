@@ -376,5 +376,11 @@ public interface CellularComponent
 	public IBorderPoint findClosestBorderPoint(IPoint p);
 
 		
+	/**
+	 * Reverse the border outline of this object, including the
+	 * roi points used to reconstruct it from file
+	 * 
+	 */
+	void reverse();
 	
 }

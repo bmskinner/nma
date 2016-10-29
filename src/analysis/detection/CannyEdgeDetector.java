@@ -3,7 +3,7 @@ package analysis.detection;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
-import analysis.AnalysisOptions.CannyOptions;
+import analysis.ICannyOptions;
 
 /**
  * <p><em>This software has been released into the public domain.
@@ -80,7 +80,7 @@ public class CannyEdgeDetector {
 		contrastNormalized = false;
 	}
 	
-	public CannyEdgeDetector(CannyOptions options) {
+	public CannyEdgeDetector(ICannyOptions options) {
 		this.setLowThreshold( options.getLowThreshold() );
 		this.setHighThreshold( options.getHighThreshold());
 		this.setGaussianKernelRadius(options.getKernelRadius());

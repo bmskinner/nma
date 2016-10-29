@@ -31,8 +31,8 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import charting.datasets.AnalysisDatasetTableCreator;
-import charting.options.DefaultChartOptions;
-import charting.options.DefaultTableOptions;
+import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import charting.options.DefaultTableOptions.TableType;
 import charting.options.TableOptionsBuilder;
 import gui.components.ExportableTable;
@@ -59,7 +59,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		
 		JPanel pairwisePanel = new JPanel(new BorderLayout());
 		
-		DefaultTableOptions options = new TableOptionsBuilder()
+		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(null)
 		.setType(TableType.VENN)
 		.build();
@@ -90,7 +90,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		fine("Updating pairwise venn table for multiple datasets");
 	
 		
-		DefaultTableOptions options = new TableOptionsBuilder()
+		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.PAIRWISE_VENN)
 			.build();
@@ -104,7 +104,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	
 	@Override
 	protected void updateNull() {
-		DefaultTableOptions options = new TableOptionsBuilder()
+		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(null)
 			.setType(TableType.PAIRWISE_VENN)
 			.build();
@@ -114,12 +114,12 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return new AnalysisDatasetTableCreator(options).createPairwiseVennTable();
 	}
 		

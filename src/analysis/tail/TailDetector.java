@@ -49,17 +49,18 @@ import components.generic.XYPoint;
 import components.nuclei.Nucleus;
 //import Skeletonize3D_.Skeletonize3D_;
 import analysis.AnalysisOptions;
-import analysis.AnalysisOptions.CannyOptions;
+import analysis.IAnalysisOptions;
+import analysis.ICannyOptions;
 import analysis.detection.Detector;
 import analysis.image.ImageFilterer;
 
 public class TailDetector extends Detector {
 	
-	private CannyOptions options;
+	private ICannyOptions options;
 	private  int channel;
 	
 	
-	public TailDetector(CannyOptions options,int channel){
+	public TailDetector(ICannyOptions options,int channel){
 		this.options = options;
 		this.channel = channel;
 	}
@@ -165,7 +166,7 @@ public class TailDetector extends Detector {
 		ImagePlus binaryImage = new ImagePlus("binary image", binaryProcessor);
 //		binaryImage.show();
 		
-		AnalysisOptions options = new AnalysisOptions(); 
+		IAnalysisOptions options = new AnalysisOptions(); 
 		options.getCannyOptions("tail").setClosingObjectRadius(5);
 		ByteProcessor byteProcessor = (ByteProcessor) new ImageFilterer(bp).morphologyClose(  5).toProcessor();
 //		morphologyClose(binaryProcessor, options.getCannyOptions("tail"));

@@ -39,8 +39,8 @@ import components.Cell;
 import components.CellularComponent;
 import components.ICell;
 import components.nuclei.Nucleus;
-import analysis.AnalysisOptions;
-import analysis.AnalysisOptions.CannyOptions;
+import analysis.IAnalysisOptions;
+import analysis.ICannyOptions;
 import analysis.image.ImageConverter;
 import analysis.image.ImageFilterer;
 import analysis.image.NucleusAnnotator;
@@ -48,7 +48,7 @@ import analysis.nucleus.NucleusDetector;
 
 public class NucleusProberWorker extends ImageProberWorker {
 
-	public NucleusProberWorker(File f, AnalysisOptions options, ImageType type, TableModel model) {
+	public NucleusProberWorker(File f, IAnalysisOptions options, ImageType type, TableModel model) {
 		super(f, options, type, model);
 		
 	}
@@ -70,7 +70,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		 */
 		finer("Creating processed images");
 		
-		CannyOptions cannyOptions = options.getCannyOptions("nucleus");
+		ICannyOptions cannyOptions = options.getCannyOptions("nucleus");
 
 		ImageProcessor openProcessor = new ImageConverter(imageStack)
 			.convertToGreyscale()

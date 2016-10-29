@@ -6,6 +6,7 @@ import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
 import components.generic.IPoint;
 import components.generic.IProfile;
+import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderPoint;
 import components.nuclei.Nucleus;
@@ -68,9 +69,17 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
     	int ipIndex = getBorderIndex(this.findOppositeBorder(op));
     	setBorderTag(Tag.INTERSECTION_POINT, ipIndex);
     	
-    	if(!this.isProfileOrientationOK()){
-			this.reverse();
-		}
+    	// decide if the profile is right or left handed; flip if needed
+    	if(!this.isProfileOrientationOK() && canReverse){
+    		this.reverse(); // reverses all profiles, border array and tagged points
+
+    		// the number of border points can change when reversing
+    		// due to float interpolation from different starting positions
+    		// so do the whole thing again
+    		initialise(this.getWindowProportion(ProfileType.ANGLE));
+    		canReverse = false;
+    		findPointsAroundBorder();
+    	} 
     	      
     }
 }

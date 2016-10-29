@@ -30,8 +30,8 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import analysis.IAnalysisOptions;
 import utility.Constants;
-import analysis.AnalysisOptions;
 
 public class TailDetectionSettingsDialog extends SettingsDialog implements ActionListener {
 
@@ -43,14 +43,14 @@ public class TailDetectionSettingsDialog extends SettingsDialog implements Actio
 	
 	private CannyPanel cannyPanel;
 	
-	private AnalysisOptions options;
+	private IAnalysisOptions options;
 	
 	private int channel;
 
 	/**
 	 * Create the dialog.
 	 */
-	public TailDetectionSettingsDialog(final AnalysisOptions a) {
+	public TailDetectionSettingsDialog(final IAnalysisOptions a) {
 		super();
 		setModal(true);
 		this.options = a;

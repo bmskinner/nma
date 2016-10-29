@@ -22,7 +22,7 @@ import charting.datasets.AnalysisDatasetTableCreator;
 import charting.datasets.CellDatasetCreator;
 import charting.datasets.CellTableDatasetCreator;
 import charting.datasets.SignalTableCell;
-import charting.options.DefaultTableOptions;
+import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import components.nuclei.Nucleus;
 import gui.DatasetEvent;
@@ -195,7 +195,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	}
 	
 	public void update(){
-		DefaultTableOptions options = new TableOptionsBuilder()
+		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setCell(this.getCellModel().getCell())
 			.setScale(GlobalOptions.getInstance().getScale())
@@ -242,7 +242,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
 
 	@Override
-	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception {
+	protected TableModel createPanelTableType(TableOptions options) throws Exception {
 		
 		if(getCellModel().hasCell()){
 			return new CellTableDatasetCreator(getCellModel().getCell()).createCellInfoTable(options);

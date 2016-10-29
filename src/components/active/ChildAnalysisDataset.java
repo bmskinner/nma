@@ -1,6 +1,6 @@
 package components.active;
 
-import java.awt.Color;
+import java.awt.Paint;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,9 +12,8 @@ import java.util.logging.Handler;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import analysis.AnalysisOptions;
 import analysis.IAnalysisDataset;
-import components.ClusterGroup;
+import analysis.IAnalysisOptions;
 import components.ICellCollection;
 import components.IClusterGroup;
 import utility.Constants;
@@ -39,9 +38,9 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	
 	private ICellCollection cellCollection; // VirtualCellCollection
 	
-	private Color datasetColour = null;
+	private Paint datasetColour = null;
 	
-	private List<ClusterGroup> clusterGroups = new ArrayList<ClusterGroup>(0); // hold groups of cluster results
+	private List<IClusterGroup> clusterGroups = new ArrayList<IClusterGroup>(0); // hold groups of cluster results
 	
 	 public ChildAnalysisDataset(IAnalysisDataset parent, ICellCollection collection){
 		 this.parent = parent;
@@ -234,7 +233,7 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	}
 
 	@Override
-	public AnalysisOptions getAnalysisOptions() {
+	public IAnalysisOptions getAnalysisOptions() {
 		return parent.getAnalysisOptions();
 	}
 
@@ -244,10 +243,10 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	}
 
 	@Override
-	public void setAnalysisOptions(AnalysisOptions analysisOptions) {}
+	public void setAnalysisOptions(IAnalysisOptions analysisOptions) {}
 
 	@Override
-	public void addClusterGroup(ClusterGroup group) {
+	public void addClusterGroup(IClusterGroup group) {
 		this.clusterGroups.add(group);
 	}
 
@@ -290,7 +289,7 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	}
 
 	@Override
-	public List<ClusterGroup> getClusterGroups() {
+	public List<IClusterGroup> getClusterGroups() {
 		return  this.clusterGroups;
 	}
 
@@ -317,8 +316,8 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	public void refreshClusterGroups() {
 		if(this.hasClusters()){
 			// Find the groups that need removing
-			List<ClusterGroup> groupsToDelete = new ArrayList<ClusterGroup>();
-			for(ClusterGroup g : this.getClusterGroups()){
+			List<IClusterGroup> groupsToDelete = new ArrayList<IClusterGroup>();
+			for(IClusterGroup g : this.getClusterGroups()){
 				boolean clusterRemains = false;
 
 				for(UUID childID : g.getUUIDs()){
@@ -401,13 +400,13 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	}
 
 	@Override
-	public void setDatasetColour(Color colour) {
+	public void setDatasetColour(Paint colour) {
 		datasetColour = colour;
 		
 	}
 
 	@Override
-	public Color getDatasetColour() {
+	public Paint getDatasetColour() {
 		return datasetColour;
 	}
 

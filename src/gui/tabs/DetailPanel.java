@@ -55,8 +55,9 @@ import charting.charts.ScatterChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
-import charting.options.DefaultChartOptions;
-import charting.options.DefaultTableOptions;
+import charting.options.ChartOptions;
+import charting.options.TableOptions;
+import charting.options.TableOptions;
 import analysis.IAnalysisDataset;
 
 /**
@@ -355,7 +356,7 @@ public abstract class DetailPanel
 	 * with a setTarget() value.
 	 * @param options
 	 */
-	protected synchronized void setChart(DefaultChartOptions options) {
+	protected synchronized void setChart(ChartOptions options) {
 		if(chartCache.has(options)){
 			finest("Fetched cached chart with hashcode "+options.hashCode());
 			JFreeChart chart = getChartCache().get(options);
@@ -380,7 +381,7 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected synchronized JFreeChart getChart(DefaultChartOptions options) {
+	protected synchronized JFreeChart getChart(ChartOptions options) {
 		JFreeChart chart;
 		if(chartCache.has(options)){
 			finest("Fetched cached chart with hashcode "+options.hashCode());
@@ -410,7 +411,7 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected synchronized TableModel getTable(DefaultTableOptions options) {
+	protected synchronized TableModel getTable(TableOptions options) {
 		
 		TableModel model;
 		if(getTableCache().has(options)){
@@ -436,7 +437,7 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 	
@@ -446,7 +447,7 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception{
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
 		return null;
 	}
 	
@@ -720,9 +721,9 @@ public abstract class DetailPanel
      */
     protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void> {
     	
-    	private DefaultChartOptions options;
+    	private ChartOptions options;
     	
-    	public ChartFactoryWorker(DefaultChartOptions options){
+    	public ChartFactoryWorker(ChartOptions options){
     		this.options = options;
     	}
 

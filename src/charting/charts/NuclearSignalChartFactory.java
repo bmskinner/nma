@@ -4,6 +4,7 @@ import gui.components.ColourSelecter;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.util.List;
@@ -26,11 +27,11 @@ import analysis.signals.ShellRandomDistributionCreator;
 import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.ShellResultDataset;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 
 public class NuclearSignalChartFactory  extends AbstractChartFactory {
 	
-	public NuclearSignalChartFactory(DefaultChartOptions o){
+	public NuclearSignalChartFactory(ChartOptions o){
 		super(o);
 	}
 	
@@ -90,7 +91,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 					rend.setSeriesVisibleInLegend(j, false);
 					rend.setSeriesStroke(j, ChartComponents.MARKER_STROKE);
 
-					Color colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
+					Paint colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
 							? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
 									: ColourSelecter.getColor(j);
 							
@@ -171,7 +172,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 				String name = (String) signalCoMs.getSeriesKey(series);
 //				int seriesGroup = getIndexFromLabel(name);
 				UUID seriesGroup = getSignalGroupFromLabel(name);
-                Color colour = options.firstDataset().getCollection().getSignalGroup(seriesGroup).hasColour()
+				Paint colour = options.firstDataset().getCollection().getSignalGroup(seriesGroup).hasColour()
                         ? options.firstDataset().getCollection().getSignalGroup(seriesGroup).getGroupColour()
                         : ColourSelecter.getColor(series);
 
@@ -191,14 +192,14 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 				int alpha = (int) Math.floor( 255 / ((double) signalCount) )+20;
 				alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
 
-                Color colour = options.firstDataset().getCollection().getSignalGroup(signalGroup).hasColour()
+				Paint colour = options.firstDataset().getCollection().getSignalGroup(signalGroup).hasColour()
                         ? options.firstDataset().getCollection().getSignalGroup(signalGroup).getGroupColour()
                         : ColourSelecter.getColor(j++);
 
 
 				for(Shape s : shapes){
 					XYShapeAnnotation an = new XYShapeAnnotation( s, null,
-							null, ColourSelecter.getTransparentColour(colour, true, alpha)); // layer transparent signals
+							null, ColourSelecter.getTransparentColour((Color) colour, true, alpha)); // layer transparent signals
 					plot.addAnnotation(an);
 				}
 			}

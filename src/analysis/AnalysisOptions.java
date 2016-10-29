@@ -20,19 +20,17 @@ package analysis;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import analysis.signals.NuclearSignalOptions;
-import logging.Loggable;
 import stats.NucleusStatistic;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
-public class AnalysisOptions implements Serializable, Loggable {
+public class AnalysisOptions implements IAnalysisOptions {
 
 	private static final long serialVersionUID = 1L;
 	private  int    nucleusThreshold;
@@ -41,7 +39,7 @@ public class AnalysisOptions implements Serializable, Loggable {
 	private  double minNucleusCirc;
 	private  double maxNucleusCirc;
 	
-	private Map<String, CannyOptions> edgeDetection = new HashMap<String, CannyOptions>(0);
+	private Map<String, ICannyOptions> edgeDetection = new HashMap<String, ICannyOptions>(0);
 	
 	private Map<UUID, NuclearSignalOptions> signalDetection = new HashMap<UUID, NuclearSignalOptions>(0);
 		
@@ -91,14 +89,14 @@ public class AnalysisOptions implements Serializable, Loggable {
 	 * Duplicate the data in the template options
 	 * @param template
 	 */
-	public AnalysisOptions(AnalysisOptions template){
+	public AnalysisOptions(IAnalysisOptions template){
 		nucleusThreshold = template.getNucleusThreshold();
 		minNucleusSize   = template.getMinNucleusSize();
 		maxNucleusSize   = template.getMaxNucleusSize();
 		minNucleusCirc   = template.getMinNucleusCirc();
 		maxNucleusCirc   = template.getMaxNucleusCirc();
 		
-		edgeDetection    = new HashMap<String, CannyOptions>(0);
+		edgeDetection    = new HashMap<String, ICannyOptions>(0);
 		for(String s : template.getCannyOptionTypes()){
 			edgeDetection.put(s, template.getCannyOptions(s));
 		}
@@ -132,195 +130,349 @@ public class AnalysisOptions implements Serializable, Loggable {
     -----------------------
 	 */
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getFolder()
+	 */
+	@Override
 	public File getFolder(){
 		return this.folder;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getMappingFile()
+	 */
+	@Override
 	public File getMappingFile(){
 		return this.mappingFile;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getNucleusThreshold()
+	 */
+	@Override
 	public int getNucleusThreshold(){
 		return this.nucleusThreshold;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getMinNucleusSize()
+	 */
+	@Override
 	public double getMinNucleusSize(){
 		return this.minNucleusSize;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getMaxNucleusSize()
+	 */
+	@Override
 	public double getMaxNucleusSize(){
 		return this.maxNucleusSize;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getMinNucleusCirc()
+	 */
+	@Override
 	public double getMinNucleusCirc(){
 		return this.minNucleusCirc;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getMaxNucleusCirc()
+	 */
+	@Override
 	public double getMaxNucleusCirc(){
 		return this.maxNucleusCirc;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getAngleWindowProportion()
+	 */
+	@Override
 	public double getAngleWindowProportion(){
 		return this.angleWindowProportion;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getNucleusType()
+	 */
+	@Override
 	public NucleusType getNucleusType(){
 		return this.nucleusType;
 	}
 	
 	
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getRefoldMode()
+	 */
+	@Override
 	public String getRefoldMode(){
 		return this.refoldMode;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#isReanalysis()
+	 */
+	@Override
 	public boolean isReanalysis(){
 		return this.performReanalysis;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#realignImages()
+	 */
+	@Override
 	public boolean realignImages(){
 		return this.realignMode;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#refoldNucleus()
+	 */
+	@Override
 	public boolean refoldNucleus(){
 		return this.refoldNucleus;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getXOffset()
+	 */
+	@Override
 	public int getXOffset(){
 		return  this.xoffset;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getYOffset()
+	 */
+	@Override
 	public int getYOffset(){
 		return  this.yoffset;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getScale()
+	 */
+	@Override
 	public double getScale() {
 		return scale;
 	}
 	
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getChannel()
+	 */
+	@Override
 	public int getChannel() {
 		return channel;
 	}
 
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setChannel(int)
+	 */
+	@Override
 	public void setChannel(int channel) {
 		this.channel = channel;
 	}
 
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setScale(double)
+	 */
+	@Override
 	public void setScale(double scale) {
 		this.scale = scale;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setNucleusThreshold(int)
+	 */
+	@Override
 	public void setNucleusThreshold(int nucleusThreshold) {
 		this.nucleusThreshold = nucleusThreshold;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setMinNucleusSize(double)
+	 */
+	@Override
 	public void setMinNucleusSize(double minNucleusSize) {
 		this.minNucleusSize = minNucleusSize;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setMaxNucleusSize(double)
+	 */
+	@Override
 	public void setMaxNucleusSize(double maxNucleusSize) {
 		this.maxNucleusSize = maxNucleusSize;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setMinNucleusCirc(double)
+	 */
+	@Override
 	public void setMinNucleusCirc(double minNucleusCirc) {
 		this.minNucleusCirc = minNucleusCirc;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setMaxNucleusCirc(double)
+	 */
+	@Override
 	public void setMaxNucleusCirc(double maxNucleusCirc) {
 		this.maxNucleusCirc = maxNucleusCirc;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setAngleWindowProportion(double)
+	 */
+	@Override
 	public void setAngleWindowProportion(double proportion) {
 		this.angleWindowProportion = proportion;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setNucleusType(components.nuclear.NucleusType)
+	 */
+	@Override
 	public void setNucleusType(NucleusType nucleusType) {
 		this.nucleusType = nucleusType;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setPerformReanalysis(boolean)
+	 */
+	@Override
 	public void setPerformReanalysis(boolean performReanalysis) {
 		this.performReanalysis = performReanalysis;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setRealignMode(boolean)
+	 */
+	@Override
 	public void setRealignMode(boolean realignMode) {
 		this.realignMode = realignMode;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setRefoldNucleus(boolean)
+	 */
+	@Override
 	public void setRefoldNucleus(boolean refoldNucleus) {
 		this.refoldNucleus = refoldNucleus;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setFolder(java.io.File)
+	 */
+	@Override
 	public void setFolder(File folder) {
 		this.folder = folder;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setMappingFile(java.io.File)
+	 */
+	@Override
 	public void setMappingFile(File mappingFile) {
 		this.mappingFile = mappingFile;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setRefoldMode(java.lang.String)
+	 */
+	@Override
 	public void setRefoldMode(String refoldMode) {
 		this.refoldMode = refoldMode;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setXoffset(int)
+	 */
+	@Override
 	public void setXoffset(int xoffset) {
 		this.xoffset = xoffset;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setYoffset(int)
+	 */
+	@Override
 	public void setYoffset(int yoffset) {
 		this.yoffset = yoffset;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#isNormaliseContrast()
+	 */
+	@Override
 	public boolean isNormaliseContrast() {
 		return normaliseContrast;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setNormaliseContrast(boolean)
+	 */
+	@Override
 	public void setNormaliseContrast(boolean normaliseContrast) {
 		this.normaliseContrast = normaliseContrast;
 	}
 	
-	/**
-	 * Get the canny options associated with the
-	 * given type, or null if not present
-	 * @param type the name to check
-	 * @return canny detection options
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getCannyOptions(java.lang.String)
 	 */
-	public CannyOptions getCannyOptions(String type){
+	@Override
+	public ICannyOptions getCannyOptions(String type){
 		return edgeDetection.get(type); 
 	}
 	
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#addCannyOptions(java.lang.String)
+	 */
+	@Override
 	public void addCannyOptions(String type){
 		edgeDetection.put(type, new CannyOptions()); 
 	}
 	
+	@Override
+	public void addCannyOptions(String type, ICannyOptions options){
+		edgeDetection.put(type, options); 
+	}
+	
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getCannyOptionTypes()
+	 */
+	@Override
 	public Set<String> getCannyOptionTypes(){
 		return edgeDetection.keySet();
 	}
 	
-	/**
-	 * Check if the given type name is already present
-	 * @param type the name to check
-	 * @return present or not
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#hasCannyOptions(java.lang.String)
 	 */
+	@Override
 	public boolean hasCannyOptions(String type){
 		if(this.edgeDetection.containsKey(type)){
 			return true;
@@ -329,17 +481,19 @@ public class AnalysisOptions implements Serializable, Loggable {
 		}
 	}
 	
-    public Set<UUID> getNuclearSignalGroups(){
+    /* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getNuclearSignalGroups()
+	 */
+    @Override
+	public Set<UUID> getNuclearSignalGroups(){
 		return signalDetection.keySet();
 	}
 	
-	/**
-	 * Get the nuclear signal options associated with the
-     * given signal group id. If not present, the group is created
-	 * @param type the name to check
-	 * @return nuclear detection options
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#getNuclearSignalOptions(java.util.UUID)
 	 */
-    public NuclearSignalOptions getNuclearSignalOptions(UUID signalGroup){
+    @Override
+	public NuclearSignalOptions getNuclearSignalOptions(UUID signalGroup){
         if(this.signalDetection.containsKey(signalGroup)){
             return this.signalDetection.get(signalGroup);
         } else {
@@ -349,22 +503,29 @@ public class AnalysisOptions implements Serializable, Loggable {
 
 	}
 	
-    public void addNuclearSignalOptions(UUID id){
+    /* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#addNuclearSignalOptions(java.util.UUID)
+	 */
+    @Override
+	public void addNuclearSignalOptions(UUID id){
         signalDetection.put(id, new NuclearSignalOptions());
     }
     
-    public void addNuclearSignalOptions(UUID id, NuclearSignalOptions options){
+    /* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#addNuclearSignalOptions(java.util.UUID, analysis.signals.NuclearSignalOptions)
+	 */
+    @Override
+	public void addNuclearSignalOptions(UUID id, NuclearSignalOptions options){
         signalDetection.put(id, options);
     }
 
 
 	
-	/**
-	 * Check if the given type name is already present
-	 * @param type the name to check
-	 * @return present or not
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#hasSignalDetectionOptions(java.util.UUID)
 	 */
-    public boolean hasSignalDetectionOptions(UUID signalGroup){
+    @Override
+	public boolean hasSignalDetectionOptions(UUID signalGroup){
         if(this.signalDetection.containsKey(signalGroup)){
 
 			return true;
@@ -373,14 +534,26 @@ public class AnalysisOptions implements Serializable, Loggable {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#isKeepFailedCollections()
+	 */
+	@Override
 	public boolean isKeepFailedCollections() {
 		return keepFailedCollections;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#setKeepFailedCollections(boolean)
+	 */
+	@Override
 	public void setKeepFailedCollections(boolean keepFailedCollections) {
 		this.keepFailedCollections = keepFailedCollections;
 	}
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#isValid(components.nuclei.Nucleus)
+	 */
+	@Override
 	public boolean isValid(Nucleus c){
 		boolean result = true;
 		
@@ -410,6 +583,9 @@ public class AnalysisOptions implements Serializable, Loggable {
 
 	
 	
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -446,6 +622,9 @@ public class AnalysisOptions implements Serializable, Loggable {
 
 
 
+	/* (non-Javadoc)
+	 * @see analysis.IAnalysisOptions#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj) {
 //		finest("Testing equality");
@@ -509,27 +688,10 @@ public class AnalysisOptions implements Serializable, Loggable {
 
 
 
-	public class CannyOptions implements Serializable {
+	public class CannyOptions implements ICannyOptions {
 
 		private static final long serialVersionUID = 1L;
 		
-		public static final double DEFAULT_CANNY_LOW_THRESHOLD 			= 0.5;
-		public static final double DEFAULT_CANNY_HIGH_THRESHOLD 		= 1.5;
-		
-		public static final double DEFAULT_CANNY_TAIL_LOW_THRESHOLD 	= 0.1;
-		public static final double DEFAULT_CANNY_TAIL_HIGH_THRESHOLD 	= 0.5;
-		
-		public static final double DEFAULT_CANNY_KERNEL_RADIUS 			= 3;
-		public static final int    DEFAULT_CANNY_KERNEL_WIDTH 			= 16;
-		public static final int    DEFAULT_CLOSING_OBJECT_RADIUS 		= 5;
-		public static final int    DEFAULT_TAIL_CLOSING_OBJECT_RADIUS 	= 3;
-		
-		public static final int	   DEFAULT_KUWAHARA_KERNEL_RADIUS 		= 3;
-		public static final boolean DEFAULT_USE_KUWAHARA 				= true;
-		
-		public static final boolean DEFAULT_FLATTEN_CHROMOCENTRES		= true;
-		public static final int		DEFAULT_FLATTEN_THRESHOLD			= 100;
-
 		// values for Canny edge deteection
 		private boolean useCanny; 
 		private boolean cannyAutoThreshold;
@@ -549,109 +711,200 @@ public class AnalysisOptions implements Serializable, Loggable {
 			
 		}
 		
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#isUseCanny()
+		 */
+		@Override
 		public boolean isUseCanny() {
 			return useCanny;
 		}
 
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#setUseCanny(boolean)
+		 */
+		@Override
 		public void setUseCanny(boolean useCanny) {
 			this.useCanny = useCanny;
 		}
 		
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#isUseFlattenImage()
+		 */
+		@Override
 		public boolean isUseFlattenImage() {
 			return flattenChromocentres;
 		}
 		
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#setFlattenImage(boolean)
+		 */
+		@Override
 		public void setFlattenImage(boolean flattenImage) {
 			this.flattenChromocentres = flattenImage;
 		}
 		
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#getFlattenThreshold()
+		 */
+		@Override
 		public int getFlattenThreshold() {
 			return flattenThreshold;
 		}
 
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#setFlattenThreshold(int)
+		 */
+		@Override
 		public void setFlattenThreshold(int flattenThreshold) {
 			this.flattenThreshold = flattenThreshold;
 		}
 		
 		
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#isUseKuwahara()
+		 */
+		@Override
 		public boolean isUseKuwahara() {
 			return useKuwahara;
 		}
 		
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#setUseKuwahara(boolean)
+		 */
+		@Override
 		public void setUseKuwahara(boolean b){
 			this.useKuwahara = b;
 		}
 		
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#getKuwaharaKernel()
+		 */
+		@Override
 		public int getKuwaharaKernel(){
 			return kuwaharaKernel;
 		}
 		
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#setKuwaharaKernel(int)
+		 */
+		@Override
 		public void setKuwaharaKernel(int radius){
 			kuwaharaKernel = radius;
 		}
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#getClosingObjectRadius()
+		 */
+		@Override
 		public int getClosingObjectRadius() {
 			return closingObjectRadius;
 		}
 
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#setClosingObjectRadius(int)
+		 */
+		@Override
 		public void setClosingObjectRadius(int closingObjectRadius) {
 			this.closingObjectRadius = closingObjectRadius;
 		}
 
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#isCannyAutoThreshold()
+		 */
+		@Override
 		public boolean isCannyAutoThreshold() {
 			return cannyAutoThreshold;
 		}
 
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#setCannyAutoThreshold(boolean)
+		 */
+		@Override
 		public void setCannyAutoThreshold(boolean cannyAutoThreshold) {
 			this.cannyAutoThreshold = cannyAutoThreshold;
 		}
 		
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#getLowThreshold()
+		 */
+		@Override
 		public float getLowThreshold() {
 			return lowThreshold;
 		}
 
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#setLowThreshold(float)
+		 */
+		@Override
 		public void setLowThreshold(float lowThreshold) {
 			this.lowThreshold = lowThreshold;
 		}
 
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#getHighThreshold()
+		 */
+		@Override
 		public float getHighThreshold() {
 			return highThreshold;
 		}
 
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#setHighThreshold(float)
+		 */
+		@Override
 		public void setHighThreshold(float highThreshold) {
 			this.highThreshold = highThreshold;
 		}
 
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#getKernelRadius()
+		 */
+		@Override
 		public float getKernelRadius() {
 			return kernelRadius;
 		}
 
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#setKernelRadius(float)
+		 */
+		@Override
 		public void setKernelRadius(float kernelRadius) {
 			this.kernelRadius = kernelRadius;
 		}
 
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#getKernelWidth()
+		 */
+		@Override
 		public int getKernelWidth() {
 			return kernelWidth;
 		}
 
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#setKernelWidth(int)
+		 */
+		@Override
 		public void setKernelWidth(int kernelWidth) {
 			this.kernelWidth = kernelWidth;
 		}
 		
 		
 		
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#hashCode()
+		 */
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -670,6 +923,9 @@ public class AnalysisOptions implements Serializable, Loggable {
 			return result;
 		}
 
+		/* (non-Javadoc)
+		 * @see analysis.ICannyOptions#equals(java.lang.Object)
+		 */
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -720,134 +976,4 @@ public class AnalysisOptions implements Serializable, Loggable {
 		    
 		}
 	}
-	
-	
-	
-//	/**
-//	 * Allow each signal group to have independent signal detection options
-//	 *
-//	 */
-//	public class NuclearSignalOptions implements Serializable {
-//		
-//		public static final int    DEFAULT_SIGNAL_THRESHOLD		 	= 70;
-//		public static final int    DEFAULT_MIN_SIGNAL_SIZE 			= 5;
-//		public static final double DEFAULT_MAX_SIGNAL_FRACTION 		= 0.1;
-//		public static final double DEFAULT_MIN_CIRC 				= 0.0;
-//		public static final double DEFAULT_MAX_CIRC 				= 1.0;
-//		
-//		// modes for detecting signals
-//		public static final int FORWARD 	= 0;
-//		public static final int REVERSE 	= 1;
-//		public static final int HISTOGRAM 	= 2;
-//
-//		private static final long serialVersionUID = 1L;
-//		private int threshold		= DEFAULT_SIGNAL_THRESHOLD;
-//		private double minCirc		= DEFAULT_MIN_CIRC;
-//		private double maxCirc		= DEFAULT_MAX_CIRC;
-//		
-//		private double minSize 		= DEFAULT_MIN_SIGNAL_SIZE;
-//		private double maxFraction	= DEFAULT_MAX_SIGNAL_FRACTION;
-//		
-//		private int detectionMode = NuclearSignalOptions.FORWARD;
-//		
-//		public NuclearSignalOptions(){
-////			
-//		}
-//		
-//		public int getSignalThreshold(){
-//			return this.threshold;
-//		}
-//
-//		public double getMinSize(){
-//			return this.minSize;
-//		}
-//
-//		public double getMaxFraction(){
-//			return this.maxFraction;
-//		}
-//
-//		public double getMinCirc(){
-//			return this.minCirc;
-//		}
-//
-//		public double getMaxCirc(){
-//			return this.maxCirc;
-//		}
-//
-//		public void setThreshold(int threshold) {
-//			this.threshold = threshold;
-//		}
-//
-//		public void setMinCirc(double minCirc) {
-//			this.minCirc = minCirc;
-//		}
-//
-//		public void setMaxCirc(double maxCirc) {
-//			this.maxCirc = maxCirc;
-//		}
-//
-//		public void setMinSize(double minSize) {
-//			this.minSize = minSize;
-//		}
-//
-//		public void setMaxFraction(double maxFraction) {
-//			this.maxFraction = maxFraction;
-//		}
-//		
-//		public int getMode(){
-//			return this.detectionMode;
-//		}
-//		
-//		public void setMode(int mode){
-//			this.detectionMode = mode;
-//		}
-//
-//		@Override
-//		public int hashCode() {
-//			final int prime = 31;
-//			int result = 1;
-//			result = prime * result + detectionMode;
-//			long temp;
-//			temp = Double.doubleToLongBits(maxCirc);
-//			result = prime * result + (int) (temp ^ (temp >>> 32));
-//			temp = Double.doubleToLongBits(maxFraction);
-//			result = prime * result + (int) (temp ^ (temp >>> 32));
-//			temp = Double.doubleToLongBits(minCirc);
-//			result = prime * result + (int) (temp ^ (temp >>> 32));
-//			temp = Double.doubleToLongBits(minSize);
-//			result = prime * result + (int) (temp ^ (temp >>> 32));
-//			result = prime * result + threshold;
-//			return result;
-//		}
-//
-//		@Override
-//		public boolean equals(Object obj) {
-//			if (this == obj)
-//				return true;
-//			if (obj == null)
-//				return false;
-//			if (getClass() != obj.getClass())
-//				return false;
-//			NuclearSignalOptions other = (NuclearSignalOptions) obj;
-//
-//			if (detectionMode != other.detectionMode)
-//				return false;
-//			if (Double.doubleToLongBits(maxCirc) != Double
-//					.doubleToLongBits(other.maxCirc))
-//				return false;
-//			if (Double.doubleToLongBits(maxFraction) != Double
-//					.doubleToLongBits(other.maxFraction))
-//				return false;
-//			if (Double.doubleToLongBits(minCirc) != Double
-//					.doubleToLongBits(other.minCirc))
-//				return false;
-//			if (Double.doubleToLongBits(minSize) != Double
-//					.doubleToLongBits(other.minSize))
-//				return false;
-//			if (threshold != other.threshold)
-//				return false;
-//			return true;
-//		}
-//
-//	}
 }

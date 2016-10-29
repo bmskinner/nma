@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import analysis.AbstractProgressAction;
-import analysis.AnalysisOptions;
+import analysis.IAnalysisOptions;
 import components.CellularComponent;
 import components.ICell;
 import components.ICellCollection;
@@ -25,10 +25,10 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 	final int low, high;
 	private final NucleusDetector finder;
 	private final String outputFolder;
-	private final AnalysisOptions analysisOptions;
+	private final IAnalysisOptions analysisOptions;
 	private final File folder;
 	
-	private FileProcessingTask(File folder, File[] files, ICellCollection collection, int low, int high, String outputFolder, AnalysisOptions analysisOptions) {
+	private FileProcessingTask(File folder, File[] files, ICellCollection collection, int low, int high, String outputFolder, IAnalysisOptions analysisOptions) {
 		this.collection      = collection;
 		this.files           = files;
 		this.folder          = folder;
@@ -39,7 +39,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 		this.finder          = new NucleusDetector( analysisOptions, outputFolder);
 	}
 
-	public FileProcessingTask(File folder, File[] files, ICellCollection collection, String outputFolder, AnalysisOptions analysisOptions) {
+	public FileProcessingTask(File folder, File[] files, ICellCollection collection, String outputFolder, IAnalysisOptions analysisOptions) {
 		this(folder, files, collection, 0, files.length, outputFolder, analysisOptions);
 
 	}

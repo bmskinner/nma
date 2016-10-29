@@ -34,7 +34,7 @@ import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 
 import utility.Constants;
-import analysis.AnalysisOptions;
+import analysis.IAnalysisOptions;
 import analysis.image.ImageFilterer;
 import logging.Loggable;
 
@@ -47,7 +47,7 @@ import logging.Loggable;
 public abstract class ImageProberWorker extends SwingWorker<Boolean, IconCell> implements Loggable{
 	
 	protected File file;
-	protected AnalysisOptions options;
+	protected IAnalysisOptions options;
 	
 	protected TableModel model; // model for a table with an IconCellRenderer
 	
@@ -59,7 +59,7 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, IconCell> i
 	
 	protected Dimension smallDimension; // the max size of the small icons
 	
-	public ImageProberWorker(File f, AnalysisOptions options, ImageType type, TableModel model){
+	public ImageProberWorker(File f, IAnalysisOptions options, ImageType type, TableModel model){
 		this.file = f;
 		this.options = options;
 		this.columnCount = model.getColumnCount();

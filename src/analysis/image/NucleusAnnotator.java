@@ -25,6 +25,7 @@ import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
 import java.awt.Color;
+import java.awt.Paint;
 import java.util.List;
 import java.util.UUID;
 
@@ -79,8 +80,8 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 		return this;
 	}
 	
-	private NucleusAnnotator annotatePolygon(PolygonRoi p, Color c){
-		ip.setColor(c);
+	private NucleusAnnotator annotatePolygon(PolygonRoi p, Paint c){
+		ip.setColor((Color) c);
 		ip.setLineWidth(2);
 		ip.draw(p);
 		return this;
@@ -142,7 +143,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
 
 
-					Color color = ColourSelecter.getColor(i);
+					Paint color = ColourSelecter.getColor(i);
 
 					annotatePolygon(segRoi, color);
 				}

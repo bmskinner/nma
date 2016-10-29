@@ -40,9 +40,9 @@ import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.DefaultTableOptions;
+import charting.options.TableOptions;
 
 @SuppressWarnings("serial")
 public class KruskalDetailPanel  extends DetailPanel {
@@ -119,7 +119,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 	private void updateChartPanel() {
 
 
-		DefaultChartOptions options = new ChartOptionsBuilder()
+		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setNormalised(true)
 			.setAlignment(ProfileAlignment.LEFT)
@@ -137,12 +137,12 @@ public class KruskalDetailPanel  extends DetailPanel {
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return new MorphologyChartFactory(options).makeKruskalWallisChart( false);
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 	

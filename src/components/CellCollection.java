@@ -100,7 +100,7 @@ public class CellCollection implements ICellCollection {
 	//this holds the mapping of tail indexes etc in the median profile arrays
 	protected Map<ProfileType, ProfileCollection> profileCollections = new HashMap<ProfileType, ProfileCollection>();
 
-	private ConsensusNucleus consensusNucleus; 	// the refolded consensus nucleus
+	private Nucleus consensusNucleus; 	// the refolded consensus nucleus
 
 	private Map<UUID, Cell> mappedCollection  = new HashMap<UUID, Cell>();	// store all the nuclei analysed
 
@@ -295,7 +295,7 @@ public class CellCollection implements ICellCollection {
 		}
 	}
 
-	public void setConsensusNucleus(ConsensusNucleus n){
+	public void setConsensusNucleus(Nucleus n){
 		this.consensusNucleus = n;
 	}
 
@@ -331,7 +331,7 @@ public class CellCollection implements ICellCollection {
 		return null;
 	}
 
-	public ConsensusNucleus getConsensusNucleus(){
+	public Nucleus getConsensusNucleus(){
 		return this.consensusNucleus;
 	}
 

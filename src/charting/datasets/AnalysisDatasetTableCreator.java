@@ -34,16 +34,13 @@ import javax.swing.table.TableModel;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
-import charting.options.DefaultTableOptions;
+import charting.options.TableOptions;
 import charting.options.DefaultTableOptions.TableType;
-import analysis.AnalysisDataset;
-import analysis.AnalysisOptions;
-import analysis.AnalysisOptions.CannyOptions;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.IAnalysisDataset;
-import components.CellCollection;
-import components.ClusterGroup;
+import analysis.IAnalysisOptions;
+import analysis.ICannyOptions;
 import components.ICellCollection;
 import components.IClusterGroup;
 import components.generic.BorderTagObject;
@@ -51,7 +48,6 @@ import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderSegment;
-import components.nuclear.NucleusBorderSegment;
 import stats.ConfidenceInterval;
 import stats.DipTester;
 import stats.Mean;
@@ -59,17 +55,16 @@ import stats.NucleusStatistic;
 import stats.Quartile;
 import stats.SegmentStatistic;
 import stats.Stats;
-import utility.Constants;
 
 public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	
-	protected final DefaultTableOptions options;
+	protected final TableOptions options;
 
 	/**
 	 * Create with a set of table options
 	 * @param o
 	 */
-	public AnalysisDatasetTableCreator(final DefaultTableOptions o){
+	public AnalysisDatasetTableCreator(final TableOptions o){
 		if(o==null){
 			throw new IllegalArgumentException("Options cannot be null");
 		}
@@ -394,7 +389,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 						// The options are the same in all merge sources
 						// Show the first options from the first source
 
-						AnalysisOptions op = dataset.getAllMergeSources().get(0).getAnalysisOptions();
+						IAnalysisOptions op = dataset.getAllMergeSources().get(0).getAnalysisOptions();
 
 						// Provide an options to be used
 						collectionData = formatAnalysisOptionsForTable(dataset, op);
@@ -459,8 +454,8 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 					finest( "Checking equality of options in "+d1.getName()+" vs "+d2.getName() );
 					
-					AnalysisOptions a1 = d1.getAnalysisOptions();
-					AnalysisOptions a2 = d2.getAnalysisOptions();
+					IAnalysisOptions a1 = d1.getAnalysisOptions();
+					IAnalysisOptions a2 = d2.getAnalysisOptions();
 					
 					if(a1==null || a2==null){
 						finest( "Found null analysis options; comparison is false" );
@@ -489,7 +484,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param dataset
 	 * @return
 	 */
-	private Object[] formatAnalysisOptionsForTable(IAnalysisDataset dataset, AnalysisOptions options){
+	private Object[] formatAnalysisOptionsForTable(IAnalysisDataset dataset, IAnalysisOptions options){
 		options = options == null ? dataset.getAnalysisOptions() : options;
 		
 //		DecimalFormat df = new DecimalFormat("#0.00"); 
@@ -518,7 +513,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			logFile = dataset.getDebugFile().getAbsolutePath();
 		}
 
-		CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
+		ICannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
 
 		String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
 		String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
@@ -1134,7 +1129,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 		// format the numbers and make into a tablemodel
 		for(IAnalysisDataset dataset : list){
-			List<ClusterGroup> clusterGroups = dataset.getClusterGroups();
+			List<IClusterGroup> clusterGroups = dataset.getClusterGroups();
 
 			for(IClusterGroup g : clusterGroups ){
 				ClusteringOptions op = g.getOptions();

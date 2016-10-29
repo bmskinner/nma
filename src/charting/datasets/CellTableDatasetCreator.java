@@ -23,6 +23,7 @@ import gui.GlobalOptions;
 import gui.components.ColourSelecter;
 
 import java.awt.Color;
+import java.awt.Paint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -33,7 +34,7 @@ import javax.swing.table.TableModel;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
 import analysis.IAnalysisDataset;
-import charting.options.DefaultTableOptions;
+import charting.options.TableOptions;
 import components.ICell;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -63,7 +64,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public TableModel createCellInfoTable(DefaultTableOptions options) {
+	public TableModel createCellInfoTable(TableOptions options) {
 		
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -195,11 +196,11 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
 			SignalTableCell tableCell = new SignalTableCell(signalGroup, g.getGroupName());
 
-			Color colour = g.hasColour()
+			Paint colour = g.hasColour()
 					     ? g.getGroupColour()
 						 : ColourSelecter.getColor(j++);
 
-			tableCell.setColor(colour);
+			tableCell.setColor((Color) colour);
 
 			fieldNames.add("Signal group");
 			rowData.add(tableCell);		

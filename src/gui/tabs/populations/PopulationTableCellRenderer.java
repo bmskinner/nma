@@ -2,6 +2,7 @@ package gui.tabs.populations;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Paint;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,12 +61,12 @@ class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRend
     		   IAnalysisDataset dataset = (IAnalysisDataset) columnOneObject;      	
 
     		   // if a preferred colour is specified, use it, otherwise go for defaults
-    		   Color colour = dataset.hasDatasetColour()
+    		   Paint colour = dataset.hasDatasetColour()
     				        ? dataset.getDatasetColour()
     				        : ColourSelecter.getColor(indexList.get(row));
     						
 
-    		   l.setBackground(colour);
+    		   l.setBackground((Color) colour);
     	   }
 
 

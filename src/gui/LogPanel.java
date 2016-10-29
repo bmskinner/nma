@@ -67,8 +67,8 @@ import javax.swing.text.StyledDocument;
 import org.jfree.chart.JFreeChart;
 
 import utility.Constants;
-import charting.options.DefaultChartOptions;
-import charting.options.DefaultTableOptions;
+import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import gui.InterfaceEvent.InterfaceMethod;
@@ -373,12 +373,12 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
 	
 	@Override
-	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return null;
 	}
 	

@@ -43,12 +43,11 @@ public class DefaultNucleus
 	protected ISignalCollection signalCollection = new DefaultSignalCollection();
 	
 	protected transient Nucleus verticalNucleus = null; // cache the vertically rotated nucleus
+	
+	protected transient boolean canReverse = true;
 
 	public DefaultNucleus(Roi roi, File f, int channel, int[] position, int number ){
-		
-		super(roi, f, channel, position);
-		this.nucleusNumber   = number;
-		
+		this(roi, f, channel, position, number, null);		
 	}
 	
 	
@@ -67,7 +66,7 @@ public class DefaultNucleus
 	
 	protected DefaultNucleus(Nucleus n) {
 		super((ProfileableCellularComponent) n);
-				
+		finest("Created profileable nucleus");		
 		nucleusNumber = n.getNucleusNumber();
 				
 		this.setSignals( new SignalCollection(n.getSignalCollection()));
@@ -96,8 +95,15 @@ public class DefaultNucleus
 		setBorderTag(Tag.REFERENCE_POINT, rpIndex);		
 		setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
 		
-		if(!this.isProfileOrientationOK()){
+		if(!this.isProfileOrientationOK() && canReverse){
 			this.reverse();
+			
+			// the number of border points can change when reversing
+			// due to float interpolation from different starting positions
+			// so do the whole thing again
+			initialise(this.getWindowProportion(ProfileType.ANGLE));
+			canReverse = false;
+			findPointsAroundBorder();
 		}  
 	}
 	
@@ -272,7 +278,7 @@ public class DefaultNucleus
 
 		IProfile profile = this.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
-		int midPoint = (int) (this.getBorderLength()/2) ;
+		int midPoint = this.getBorderLength()>>1 ;
 		for(int i=0; i<this.getBorderLength();i++){ // integrate points over 180
 
 			if(i<midPoint){

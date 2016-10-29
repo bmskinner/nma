@@ -283,7 +283,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 				}
 				
 				int segIndex = AbstractChartFactory.getIndexFromLabel (seg.getName());
-				ip.setColor(ColourSelecter.getColor(segIndex));
+				ip.setColor((Color) ColourSelecter.getColor(segIndex));
 				
 				PolygonRoi segRoi = new PolygonRoi(x, y, PolygonRoi.POLYLINE);
 				

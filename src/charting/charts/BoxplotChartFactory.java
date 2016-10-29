@@ -25,6 +25,7 @@ import stats.SegmentStatistic;
 import stats.SignalStatistic;
 
 import java.awt.Color;
+import java.awt.Paint;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,7 +40,7 @@ import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 
 /**
  * This factory creates boxplot charts. It uses a singleton pattern to allow the loggable
@@ -49,7 +50,7 @@ import charting.options.DefaultChartOptions;
  */
 public class BoxplotChartFactory extends AbstractChartFactory {
 
-	public BoxplotChartFactory(DefaultChartOptions o){
+	public BoxplotChartFactory(ChartOptions o){
 		super(o);
 	}
 	
@@ -143,7 +144,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 
 			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
 
-				Color color = options.getDatasets().get(series).getDatasetColour() == null 
+				Paint color = options.getDatasets().get(series).getDatasetColour() == null 
 						? ColourSelecter.getColor(series)
 								: options.getDatasets().get(series).getDatasetColour();
 
@@ -211,7 +212,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 				if(d.getCollection().hasSignalGroup(signalGroup)){
 
 
-					Color color = d.getCollection().getSignalGroup(signalGroup).hasColour()
+					Paint color = d.getCollection().getSignalGroup(signalGroup).hasColour()
 							    ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
 								: ColourSelecter.getColor(row);
 							    
@@ -238,7 +239,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 			
 			IAnalysisDataset d = list.get(i);
 
-			Color color = d.hasDatasetColour()
+			Paint color = d.hasDatasetColour()
 						? d.getDatasetColour()
 						: ColourSelecter.getColor(i);
 						

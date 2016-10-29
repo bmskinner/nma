@@ -52,7 +52,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import analysis.AnalysisOptions.CannyOptions;
+import analysis.ICannyOptions;
 
 /**
  * Contains methods for laying out panels in settings dialog options
@@ -208,9 +208,9 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 		private JSpinner 	flattenImageThresholdSpinner;
 		
 		
-		private CannyOptions options;
+		private ICannyOptions options;
 		
-		public CannyPanel(final CannyOptions options){
+		public CannyPanel(final ICannyOptions options){
 			this.options = options;
 			getDefaults();
 			createPanel();
@@ -237,7 +237,7 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 		 * Update the display to the given options 
 		 * @param options
 		 */
-		public void update(final CannyOptions options){
+		public void update(final ICannyOptions options){
 			
 			cannyLowThreshold.setValue( (double) options.getLowThreshold());
 			cannyHighThreshold.setValue( (double) options.getHighThreshold());

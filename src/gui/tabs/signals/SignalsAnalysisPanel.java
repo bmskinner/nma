@@ -40,8 +40,8 @@ import org.jfree.chart.JFreeChart;
 
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.SignalTableCell;
-import charting.options.DefaultChartOptions;
-import charting.options.DefaultTableOptions;
+import charting.options.ChartOptions;
+import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 
 
@@ -200,7 +200,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
 	@Override
 	protected void updateSingle() {
 		
-		DefaultTableOptions options = new TableOptionsBuilder()
+		TableOptions options = new TableOptionsBuilder()
 		.setDatasets(getDatasets())
 		.build();
 		
@@ -230,7 +230,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
 	@Override
 	protected void updateNull() {
 		
-		DefaultTableOptions options = new TableOptionsBuilder()
+		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(null)
 			.build();
 		
@@ -241,12 +241,12 @@ public class SignalsAnalysisPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return NuclearSignalDatasetCreator.getInstance().createSignalDetectionParametersTable(options);
 	}
 

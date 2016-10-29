@@ -21,8 +21,8 @@ package gui.tabs.signals;
 import java.awt.Dimension;
 import java.io.File;
 
-import analysis.AnalysisOptions;
 import analysis.IAnalysisDataset;
+import analysis.IAnalysisOptions;
 import analysis.signals.NuclearSignalOptions;
 import analysis.signals.SignalProberWorker;
 import gui.ImageType;
@@ -61,7 +61,7 @@ public class SignalDetectionImageProber extends ImageProber {
 		}
 	}
 	
-	public SignalDetectionImageProber(AnalysisOptions options, File folder, IAnalysisDataset dataset, int channel, NuclearSignalOptions testOptions) {
+	public SignalDetectionImageProber(IAnalysisOptions options, File folder, IAnalysisDataset dataset, int channel, NuclearSignalOptions testOptions) {
 		super(options, SignalImageType.DETECTED_OBJECTS, folder);
 
 		if(dataset==null){

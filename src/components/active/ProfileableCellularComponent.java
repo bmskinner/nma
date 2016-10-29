@@ -37,9 +37,7 @@ import stats.NucleusStatistic;
  */
 public abstract class ProfileableCellularComponent 
 	extends DefaultCellularComponent 
-	implements Profileable, 
-			   Taggable, 
-			   Indexable {
+	implements Taggable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -47,7 +45,7 @@ public abstract class ProfileableCellularComponent
 	
 	protected Map<ProfileType, ISegmentedProfile> profileMap = new HashMap<ProfileType, ISegmentedProfile>();
 
-	protected Map<Tag, Integer>    borderTags  = new HashMap<Tag, Integer>(0); // the indexes of tags in the profiles
+	protected Map<Tag, Integer>    borderTags  = new HashMap<Tag, Integer>(0); // the indexes of tags in the profiles and border list
 			
 	private boolean segsLocked = false; // allow locking of segments and tags if manually assigned
 	
@@ -78,7 +76,7 @@ public abstract class ProfileableCellularComponent
 		
 	public ProfileableCellularComponent(ProfileableCellularComponent c){
 		super(c);
-		
+		finest("Created cellular component");		
 		
 		this.angleWindowProportion  = c.getWindowProportion(ProfileType.ANGLE);
 		this.angleProfileWindowSize = c.getWindowSize(ProfileType.ANGLE);
@@ -490,6 +488,9 @@ public abstract class ProfileableCellularComponent
 	}
 
 	public void reverse(){
+		
+		super.reverse();
+		
 		if(segsLocked){
 			return;
 		}
@@ -500,11 +501,11 @@ public abstract class ProfileableCellularComponent
 			profileMap.put(type, profile);
 		}
 		
-		List<IBorderPoint> reversed = new ArrayList<IBorderPoint>(0);
-		for(int i=this.getBorderLength()-1; i>=0;i--){
-			reversed.add(this.getBorderPoint(i));
-		}
-		this.setBorderList(reversed);
+//		List<IBorderPoint> reversed = new ArrayList<IBorderPoint>(0);
+//		for(int i=this.getBorderLength()-1; i>=0;i--){
+//			reversed.add(this.getBorderPoint(i));
+//		}
+//		this.setBorderList(reversed);
 
 		// replace the tag positions also
 		Set<Tag> keys = borderTags.keySet();
@@ -513,7 +514,6 @@ public abstract class ProfileableCellularComponent
 			int newIndex = this.getBorderLength() - index - 1; // if was 0, will now be <length-1>; if was length-1, will be 0
 //			 update the bordertag map directly to avoid segmentation changes due to RP shift
 			borderTags.put(s, newIndex);
-//			setBorderTag(s, newIndex);
 		}
 	}
 	

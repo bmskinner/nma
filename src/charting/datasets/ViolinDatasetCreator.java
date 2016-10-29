@@ -18,7 +18,7 @@ import utility.Constants;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import components.CellCollection;
 import components.ICellCollection;
 import components.generic.ISegmentedProfile;
@@ -50,7 +50,7 @@ public class ViolinDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public ViolinCategoryDataset createNucleusStatisticViolinDataset(DefaultChartOptions options) {
+	public ViolinCategoryDataset createNucleusStatisticViolinDataset(ChartOptions options) {
 		List<IAnalysisDataset> datasets = options.getDatasets();
 		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 		MeasurementScale scale = options.getScale();
@@ -85,7 +85,7 @@ public class ViolinDatasetCreator implements Loggable {
 	 * @return a boxplot dataset
 	 * @throws Exception 
 	 */
-    public ViolinCategoryDataset createSignalStatisticViolinDataset(DefaultChartOptions options) {
+    public ViolinCategoryDataset createSignalStatisticViolinDataset(ChartOptions options) {
 
     	List<IAnalysisDataset> datasets = options.getDatasets();
     	SignalStatistic stat = (SignalStatistic) options.getStat();
@@ -135,7 +135,7 @@ public class ViolinDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public ViolinCategoryDataset createSegmentStatisticDataset(DefaultChartOptions options) {
+	public ViolinCategoryDataset createSegmentStatisticDataset(ChartOptions options) {
 		
 		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		

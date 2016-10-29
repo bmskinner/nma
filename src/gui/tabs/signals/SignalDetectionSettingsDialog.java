@@ -53,8 +53,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import utility.Constants;
-import analysis.AnalysisOptions;
 import analysis.IAnalysisDataset;
+import analysis.IAnalysisOptions;
 import analysis.signals.NuclearSignalOptions;
 import components.nuclear.SignalGroup;
 
@@ -68,7 +68,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 	private static final double DEFAULT_MIN_CIRC = 0.0;
 	private static final double DEFAULT_MAX_CIRC = 1.0;
 			
-	private AnalysisOptions options;
+	private IAnalysisOptions options;
 	private IAnalysisDataset dataset;
 	
 	private JComboBox<String> channelSelection = new JComboBox<String>(channelOptionStrings);
@@ -230,7 +230,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
                             
                             // Set the default colour for the signal group
                             int totalGroups = dataset.getCollection().getSignalGroups().size();
-                            Color colour = ColourSelecter.getColor(totalGroups);
+                            Color colour = (Color) ColourSelecter.getColor(totalGroups);
                             group.setGroupColour(colour);
                             
                             

@@ -171,8 +171,11 @@ public class DefaultSignalCollection implements ISignalCollection {
 	 */
 	@Override
 	public File getSourceFile(UUID signalGroup){
-		
-		return collection.get(signalGroup).get(0).getSourceFile();
+		if(collection.containsKey(signalGroup)){
+			return collection.get(signalGroup).get(0).getSourceFile();
+		} else {
+			return null;
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -191,7 +194,12 @@ public class DefaultSignalCollection implements ISignalCollection {
 	 */
 	@Override
 	public int getSourceChannel(UUID signalGroup){
-		return collection.get(signalGroup).get(0).getChannel();
+		if(collection.containsKey(signalGroup)){
+			return collection.get(signalGroup).get(0).getChannel();
+		} else {
+			return -1;
+		}
+		
 	}
 		
 	/* (non-Javadoc)

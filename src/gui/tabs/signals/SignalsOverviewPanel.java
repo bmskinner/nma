@@ -48,9 +48,9 @@ import charting.charts.panels.ConsensusNucleusChartPanel;
 import charting.charts.panels.ExportableChartPanel;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.SignalTableCell;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.DefaultTableOptions;
+import charting.options.TableOptions;
 import charting.options.DefaultTableOptions.TableType;
 import charting.options.TableOptionsBuilder;
 import components.nuclear.IBorderSegment;
@@ -92,7 +92,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 		
 		final JPanel panel = new JPanel(new BorderLayout());
 		
-		DefaultChartOptions options = new ChartOptionsBuilder()
+		ChartOptions options = new ChartOptionsBuilder()
 				.build();
 		
 		JFreeChart chart = null;
@@ -242,7 +242,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	 */
 	private void updateSignalStatsPanel() {
 		
-		DefaultTableOptions options = new TableOptionsBuilder()
+		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.SIGNAL_STATS_TABLE)
 			.build();
@@ -322,7 +322,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 			// so we must invalidate the cache whenever they change
 			this.clearChartCache(getDatasets());
 			
-			DefaultChartOptions options = new ChartOptionsBuilder()
+			ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.setShowWarp(false)
 					.setTarget(chartPanel)
@@ -378,12 +378,12 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		return new OutlineChartFactory(options).makeSignalOutlineChart();
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return NuclearSignalDatasetCreator.getInstance().createSignalStatsTable(options);
 	}
 

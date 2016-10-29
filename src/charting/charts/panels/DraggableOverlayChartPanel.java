@@ -123,7 +123,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 				int i=0;
 				for(IBorderSegment seg : profile.getOrderedSegments()){
 
-					Color colour = ColourSelecter.getColor(i++);
+					Paint colour = ColourSelecter.getColor(i++);
 					if(seg.isLocked()){
 						colour = Color.DARK_GRAY;
 					}

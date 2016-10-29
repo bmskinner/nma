@@ -34,6 +34,7 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 
 import charting.ChartComponents;
+import charting.options.ChartOptions;
 import charting.options.DefaultChartOptions;
 import components.generic.BorderTag;
 import components.generic.Tag;
@@ -45,9 +46,9 @@ public abstract class AbstractChartFactory implements Loggable {
 	
 	protected static final int DEFAULT_EMPTY_RANGE = 10;
 	
-	protected final DefaultChartOptions options;
+	protected final ChartOptions options;
 	
-	public AbstractChartFactory(DefaultChartOptions o){
+	public AbstractChartFactory(ChartOptions o){
 		if(o==null){
 			throw new IllegalArgumentException("Options cannot be null");
 		}
@@ -145,11 +146,13 @@ public abstract class AbstractChartFactory implements Loggable {
 				ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,
 						false);
-
+		
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.WHITE);
 		
 		plot.getRenderer().setBaseToolTipGenerator(null); 
+		plot.getRenderer().setURLGenerator(null);
+		chart.setAntiAlias(false);
 		
 		return chart;
 	}

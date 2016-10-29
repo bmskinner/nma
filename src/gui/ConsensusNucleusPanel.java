@@ -41,7 +41,7 @@ import org.jfree.chart.JFreeChart;
 
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.panels.ConsensusNucleusChartPanel;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.ICellCollection;
@@ -73,7 +73,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		super();
 		this.setLayout(new BorderLayout());
 		
-		DefaultChartOptions options = new ChartOptionsBuilder()
+		ChartOptions options = new ChartOptionsBuilder()
 			.setScale(GlobalOptions.getInstance().getScale())
 			.setSwatch(GlobalOptions.getInstance().getSwatch())
 			.setShowXAxis(false)
@@ -372,7 +372,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 			return new ConsensusNucleusChartFactory(options).makeConsensusChart();
 	}
 
@@ -384,7 +384,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		showMeshFacesBox.setEnabled(showMeshBox.isSelected());
 		straightenMeshBox.setEnabled(showMeshBox.isSelected());
 
-		DefaultChartOptions options = new ChartOptionsBuilder()
+		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setScale(GlobalOptions.getInstance().getScale())
 			.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -419,7 +419,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	
 	private void updateMultipleDatasets() {
 		
-		DefaultChartOptions options = new ChartOptionsBuilder()
+		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setScale(GlobalOptions.getInstance().getScale())
 			.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -434,7 +434,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	
 	private void updateBlankChart() {
 		
-		DefaultChartOptions options = new ChartOptionsBuilder()
+		ChartOptions options = new ChartOptionsBuilder()
 			.setTarget(consensusChartPanel)
 			.build();
 		

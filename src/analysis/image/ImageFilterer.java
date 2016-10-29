@@ -24,7 +24,7 @@ import java.awt.image.BufferedImage;
 import components.CellularComponent;
 import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
-import analysis.AnalysisOptions.CannyOptions;
+import analysis.ICannyOptions;
 import analysis.detection.CannyEdgeDetector;
 import analysis.detection.Kuwahara_Filter;
 import stats.Quartile;
@@ -428,7 +428,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 	 * @return a stack with edges highlighted
 	 * @throws Exception 
 	 */
-	public ImageFilterer runEdgeDetector(int stackNumber, CannyOptions options) throws Exception{
+	public ImageFilterer runEdgeDetector(int stackNumber, ICannyOptions options) throws Exception{
 
 		ImageStack searchStack = null;
 		// Run the edge detection
@@ -453,7 +453,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 	 * @param options
 	 * @return
 	 */
-	public ImageFilterer runEdgeDetector(CannyOptions options) throws Exception { 
+	public ImageFilterer runEdgeDetector(ICannyOptions options) throws Exception { 
 		ByteProcessor result = null;
 
 		
@@ -486,7 +486,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 	 * @param image the image to analyse
 	 * @throws Exception 
 	 */
-	private void autoDetectCannyThresholds(CannyOptions options, ImageProcessor image) throws Exception{
+	private void autoDetectCannyThresholds(ICannyOptions options, ImageProcessor image) throws Exception{
 		// calculation of auto threshold
 
 		// find the median intensity of the image

@@ -55,6 +55,7 @@ import charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventLi
 import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.ICell;
 import components.active.DefaultCell;
@@ -319,7 +320,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 		Runnable r = () ->{
 					
 			finer("Making profile chart options");
-			DefaultChartOptions profileOptions = new ChartOptionsBuilder()
+			ChartOptions profileOptions = new ChartOptionsBuilder()
 				.setDatasets(dataset)
 				.setCell(cell)
 				.setNormalised(false)
@@ -332,7 +333,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 				.build();
 	
 			finer("Making outline chart options");
-			DefaultChartOptions outlineOptions = new ChartOptionsBuilder()
+			ChartOptions outlineOptions = new ChartOptionsBuilder()
 				.setDatasets(dataset)
 				.setCell(cell)
 				.setRotationMode(RotationMode.ACTUAL)

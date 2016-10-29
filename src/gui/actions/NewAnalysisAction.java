@@ -31,8 +31,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 
-import analysis.AnalysisOptions;
 import analysis.IAnalysisDataset;
+import analysis.IAnalysisOptions;
 import analysis.nucleus.NucleusDetectionWorker;
 
 /**
@@ -40,7 +40,7 @@ import analysis.nucleus.NucleusDetectionWorker;
  */
 public class NewAnalysisAction extends ProgressableAction {
 			
-	private AnalysisOptions options;
+	private IAnalysisOptions options;
 	private Date startTime;
 	private String outputFolderName;
 	

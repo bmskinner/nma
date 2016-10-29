@@ -15,9 +15,9 @@ import org.jfree.chart.JFreeChart;
 import analysis.IAnalysisDataset;
 import charting.charts.OutlineChartFactory;
 import charting.charts.panels.ExportableChartPanel;
-import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.DefaultTableOptions;
+import charting.options.TableOptions;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import gui.components.panels.GenericCheckboxPanel;
@@ -47,7 +47,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		
 		try {
 			
-			DefaultChartOptions options = new ChartOptionsBuilder()
+			ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.build();
 			
@@ -132,7 +132,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	 * Get the chart options object for the selected datasets and parameters
 	 * @return
 	 */
-	private DefaultChartOptions getChartOptions(){
+	private ChartOptions getChartOptions(){
 		boolean alignNuclei = checkBoxPanel.isSelected();
 		
 		return new ChartOptionsBuilder()
@@ -152,7 +152,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		checkBoxPanel.setEnabled(hasConsensus);
 		
 		
-		DefaultChartOptions options = getChartOptions();
+		ChartOptions options = getChartOptions();
 		
 		/*
 		 * Insert a button to generate the chart if not present
@@ -179,7 +179,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	 * Create the overlay chart. Invoked by makeOverlayChartButton
 	 * @param options
 	 */
-	private void createSafeChart(DefaultChartOptions options){
+	private void createSafeChart(ChartOptions options){
 		makeOverlayChartButton.setVisible(false);
 		setAnalysing(true);
 		log(Level.FINE, "Creating overlay chart on button click");
@@ -224,7 +224,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		checkBoxPanel.setEnabled(false);
 		makeOverlayChartButton.setVisible(false);
 		
-		DefaultChartOptions options = new ChartOptionsBuilder()
+		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setNormalised(false)
 			.setTarget(chartPanel)
@@ -235,13 +235,13 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	}
 
 	@Override
-	protected TableModel createPanelTableType(DefaultTableOptions options)
+	protected TableModel createPanelTableType(TableOptions options)
 			throws Exception {
 		return null;
 	}
 
 	@Override
-	protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 		finest("Creating nuclear overlay chart");
 		return new OutlineChartFactory(options).createVerticalNucleiChart();
 	}

@@ -21,14 +21,14 @@ package gui.dialogs;
 import java.awt.Dimension;
 import java.io.File;
 
-import analysis.AnalysisOptions;
+import analysis.IAnalysisOptions;
 import analysis.detection.NucleusProberWorker;
 import gui.ImageType;
 
 @SuppressWarnings("serial")
 public class NucleusDetectionImageProber extends ImageProber {
 	
-	public NucleusDetectionImageProber(AnalysisOptions options, File folder) {
+	public NucleusDetectionImageProber(IAnalysisOptions options, File folder) {
 		super(options, NucleusImageType.DETECTED_OBJECTS, folder);
 		createFileList(folder);
 		this.setVisible(true);

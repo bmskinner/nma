@@ -1,8 +1,10 @@
 package charting.options;
 
 import java.util.List;
+import java.util.UUID;
 
 import analysis.IAnalysisDataset;
+import components.generic.MeasurementScale;
 import gui.components.ColourSelecter.ColourSwatch;
 import stats.PlottableStatistic;
 
@@ -68,4 +70,15 @@ public interface DisplayOptions {
 	
 	public PlottableStatistic getStat(int index);
 
+	public UUID getSegID();
+
+	public void setSegID(UUID segID);
+	
+	public int getSegPosition();
+
+	public void setSegPosition(int segPosition);
+	
+	public MeasurementScale getScale();
+
+	public void setScale(MeasurementScale scale);
 }

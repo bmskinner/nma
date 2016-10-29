@@ -29,6 +29,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Paint;
 import java.awt.Point;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -86,7 +87,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	private IClusterGroup group;
 		
 	private JComboBox<IAnalysisDataset> selectedClusterBox;
-	private JComboBox<ClusterGroup> selectedClusterGroupBox;
+	private JComboBox<IClusterGroup> selectedClusterGroupBox;
 		
 	private List<ICellCollection> clusterList = new ArrayList<ICellCollection>(0);
 	
@@ -277,8 +278,8 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		selectedClusterBox.addItemListener(this);
 		panel.add(selectedClusterBox);
 		
-		selectedClusterGroupBox = new JComboBox<ClusterGroup>();
-		for(ClusterGroup g: dataset.getClusterGroups()){
+		selectedClusterGroupBox = new JComboBox<IClusterGroup>();
+		for(IClusterGroup g: dataset.getClusterGroups()){
 			selectedClusterGroupBox.addItem(g);
 		}
 		selectedClusterGroupBox.setSelectedItem(group);
@@ -346,8 +347,8 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 					return;
 				}
 
-				Color colour = ColourSelecter.getColor(clusterNumber++);
-				setNodeColour(cluster.getCollection(), colour);
+				Paint colour = ColourSelecter.getColor(clusterNumber++);
+				setNodeColour(cluster.getCollection().getCells(), colour);
 
 				finer("Node colours assigned");	
 
@@ -366,7 +367,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 	 * @param cells
 	 * @param colour
 	 */
-	private void setNodeColour(final Set<ICell> cells, final Color colour){
+	private void setNodeColour(final Set<ICell> cells, final Paint colour){
 		
 		RootedTree tree = viewer.getTreePane().getTree();
 		

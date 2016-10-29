@@ -1023,6 +1023,10 @@ public abstract class AbstractCellularComponent
 		}
 		return this.getBorderPoint(minDeltaYIndex);
 	}
+	
+	public void reverse(){
+		
+	}
 
 	/*
 		From the point given, create a line to the CoM. Measure angles from all 
