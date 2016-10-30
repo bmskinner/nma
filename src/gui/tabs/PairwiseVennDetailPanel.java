@@ -90,6 +90,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	protected void updateMultiple() {
 		fine("Updating pairwise venn table for multiple datasets");
 	
+		pairwiseVennTable.setModel(AnalysisDatasetTableCreator.createLoadingTable());
 		
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())

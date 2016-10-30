@@ -50,5 +50,15 @@ public class AbstractDatasetCreator implements Loggable {
 		model.addColumn(Labels.NO_DATA_LOADED);
 		return model;
 	}
+	
+	/**
+	 * Create an empty table declaring no data is loaded
+	 * @return
+	 */
+	public static TableModel createLoadingTable(){
+		DefaultTableModel model = new DefaultTableModel();
+		model.addColumn(Labels.LOADING_DATA);
+		return model;
+	}
 
 }

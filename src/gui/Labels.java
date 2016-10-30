@@ -67,4 +67,5 @@ public class Labels {
 	 */
 	public static final String INCONSISTENT_SEGMENT_NUMBER = "Segment number is not consistent across datasets";
 	public static final String NO_DATA_LOADED = "No data loaded";
+	public static final String LOADING_DATA = "Loading data...";
 }

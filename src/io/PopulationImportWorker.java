@@ -32,6 +32,7 @@ import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.NucleusType;
+import io.DatasetConverter.DatasetConversionException;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
@@ -299,11 +300,20 @@ public class PopulationImportWorker extends AnalysisWorker {
 			
 			log("Old style dataset detected");
 			
-			DatasetConverter conv = new DatasetConverter(dataset);
-			
-			dataset = conv.convert();
-			
-			log("Conversion successful");
+			try {
+
+				DatasetConverter conv = new DatasetConverter(dataset);
+
+				IAnalysisDataset converted = conv.convert();
+				
+				dataset = converted;
+
+				log("Conversion successful");
+			} catch (DatasetConversionException e){
+				warn("Unable to convert to new format.");
+				warn("Displaying as old format.");
+				fine("Error in converter", e);
+			}
 		}
 		
 //		if(dataset instanceof DefaultAnalysisDataset){

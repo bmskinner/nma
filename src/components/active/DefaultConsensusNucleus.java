@@ -8,6 +8,7 @@ import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
 import analysis.profiles.ProfileCreator;
+import components.active.generic.UnprofilableObjectException;
 import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
@@ -28,7 +29,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 	private NucleusType type;
 	private IPoint originalCoM; // store to allow repositioning on load
 	
-	public DefaultConsensusNucleus(Nucleus n, NucleusType type) {
+	public DefaultConsensusNucleus(Nucleus n, NucleusType type) throws UnprofilableObjectException {
 		
 		super(n);
 		this.type = type;

@@ -174,6 +174,8 @@ public interface ICellCollection
 	 */
 	boolean contains(ICell cell);
 	
+	boolean contains(UUID cellID);
+	
 	/**
 	 * Test if the given cell object is present
 	 * (== test)
@@ -207,19 +209,6 @@ public interface ICellCollection
 	 * based on the profile length of the population.
 	 */
 	void createProfileCollection();
-
-	/**
-	 * Set the profile collection for the given profile type
-	 * @param type
-	 * @param p
-	 */
-//	void setProfileCollection(ProfileType type, IProfileCollection p);
-
-	/**
-	 * Remove the given profile collection
-	 * @param type
-	 */
-//	public void removeProfileCollection(ProfileType type);
 
 	/**
 	 * Get the folder the nuclei in the collection were imaged from

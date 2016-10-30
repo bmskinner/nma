@@ -366,17 +366,6 @@ implements ICellCollection {
 //		}
 	}
 
-//	public void setProfileCollection(ProfileType type, IProfileCollection p){
-//		this.profileCollections.put(type, p);
-//	}
-
-	/**
-	 * Remove the given profile collection
-	 * @param type
-	 */
-//	public void removeProfileCollection(ProfileType type){
-//		this.profileCollections.remove(type);
-//	}
 
 	public File getFolder(){
 		return this.folder;
@@ -1151,6 +1140,11 @@ implements ICellCollection {
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public boolean contains(UUID cellID) {
+		return this.getCellIDs().contains(cellID);
 	}
 
 	/**

@@ -28,6 +28,7 @@ import components.Flagellum;
 import components.IAcrosome;
 import components.ICell;
 import components.IMitochondrion;
+import components.active.generic.UnprofilableObjectException;
 import components.nuclei.Nucleus;
 
 /**
@@ -49,7 +50,11 @@ public class DefaultCell
 	protected List<IAcrosome> acrosomes;
 	
 	public DefaultCell(){
-		this.uuid    = java.util.UUID.randomUUID();
+		this(java.util.UUID.randomUUID());
+	}
+	
+	public DefaultCell(UUID id){
+		this.uuid    = id;
 		mitochondria = new ArrayList<IMitochondrion>(0);
 		tails        = new ArrayList<Flagellum>(0);
 		acrosomes    = new ArrayList<IAcrosome>(0);
@@ -62,7 +67,12 @@ public class DefaultCell
 	public DefaultCell(ICell c){
 
 		this.uuid = c.getId();
-		nucleus   = new DefaultNucleus(c.getNucleus());
+		try {
+			nucleus   = new DefaultNucleus(c.getNucleus());
+		} catch (UnprofilableObjectException e) {
+			warn("Unable to make cell from template");
+			fine("Cannot profile the nucleus", e);
+		}
 		
 		mitochondria = new ArrayList<IMitochondrion>(0);
 		for(IMitochondrion m : c.getMitochondria()){

@@ -21,21 +21,35 @@ package io;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 
 import static java.nio.file.StandardCopyOption.*;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.UUID;
 
 import logging.Loggable;
+import stats.PlottableStatistic;
 import utility.Constants;
+import components.AbstractCellularComponent;
 import components.ICell;
 import components.ICellCollection;
 import components.active.DefaultAnalysisDataset;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
+import components.active.DefaultCellularComponent;
+import components.active.DefaultNucleus;
+import components.active.DefaultPigSpermNucleus;
+import components.active.DefaultRodentSpermNucleus;
 import components.active.VirtualCellCollection;
+import components.generic.IPoint;
+import components.generic.MeasurementScale;
+import components.generic.ProfileType;
+import components.generic.Tag;
+import components.nuclear.NucleusType;
+import components.nuclei.Nucleus;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
 import analysis.IAnalysisDataset;
 
 /**
@@ -57,7 +71,7 @@ public class DatasetConverter implements Loggable {
 	 * and ChildAnalysisDatasets from children.
 	 * @return
 	 */
-	public IAnalysisDataset convert(){
+	public IAnalysisDataset convert() throws DatasetConversionException {
 		
 		backupOldDataset();
 		
@@ -67,6 +81,8 @@ public class DatasetConverter implements Loggable {
 		
 		newDataset.setAnalysisOptions(oldDataset.getAnalysisOptions());
 		newDataset.setDatasetColour(oldDataset.getDatasetColour());
+		
+		log("Creating child collections");
 		
 		// add the child datasets
 		makeVirtualCollections(oldDataset, newDataset);
@@ -79,12 +95,12 @@ public class DatasetConverter implements Loggable {
 	 * @param template
 	 * @param dest
 	 */
-	private void makeVirtualCollections(IAnalysisDataset template, IAnalysisDataset dest){
+	private void makeVirtualCollections(IAnalysisDataset template, IAnalysisDataset dest) throws DatasetConversionException{
 		
 		
 		for(IAnalysisDataset child : template.getChildDatasets()){
 			
-			log("Converting: "+child.getName());
+			fine("Converting: "+child.getName());
 			
 			ICellCollection oldCollection = child.getCollection();
 			// make a virtual collection for the cells 
@@ -111,9 +127,10 @@ public class DatasetConverter implements Loggable {
 	/**
 	 * Copy the cells and signal groups from the old collection
 	 * @return
+	 * @throws DatasetConversionException 
 	 */
-	private ICellCollection makeNewRootCollection(){
-		log("Converting root: "+oldDataset.getName());
+	private ICellCollection makeNewRootCollection() throws DatasetConversionException{
+		fine("Converting root: "+oldDataset.getName());
 		ICellCollection oldCollection = oldDataset.getCollection();
 
 		ICellCollection newCollection = new DefaultCellCollection(oldCollection.getFolder(),
@@ -123,18 +140,21 @@ public class DatasetConverter implements Loggable {
 		
 		for(ICell c : oldCollection.getCells()){
 			
-			ICell newCell = new DefaultCell();
-			
-			// make a new nucleus
-//			TODO:
-//			Nucleus n = new 
-			
+			ICell newCell = createNewCell(c);
+						
 			newCollection.addCell( newCell );
 		}
 		
-		newCollection.createProfileCollection();
-		// Copy segmentation patterns over
-		oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
+		try {
+
+			newCollection.createProfileCollection();
+			
+			// Copy segmentation patterns over
+			oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
+		} catch(Exception e){
+			fine("Error updating profiles across datasets", e);
+			throw new DatasetConversionException("Profiling error in root dataset");
+		}
 		
 		for(UUID id : oldCollection.getSignalGroupIDs()){
 			newCollection.addSignalGroup(id, oldCollection.getSignalGroup(id));
@@ -142,6 +162,221 @@ public class DatasetConverter implements Loggable {
 		
 		return newCollection;
 		
+	}
+	
+	private ICell createNewCell(ICell oldCell){
+		ICell newCell = new DefaultCell(oldCell.getId());
+		
+		// make a new nucleus
+		Nucleus newNucleus = createNewNucleus( oldCell.getNucleus()  );
+		
+		newCell.setNucleus(newNucleus);
+		
+		return newCell;
+		
+	}
+	
+	private Nucleus createNewNucleus(Nucleus n){
+		
+		NucleusType type = oldDataset.getCollection().getNucleusType();
+		
+		fine("\tCreating nucleus: "+n.getNameAndNumber()+"\t"+type);
+		
+		Nucleus newNucleus;
+		
+		switch(type){
+		case PIG_SPERM:
+			newNucleus = makePigNucleus(n);
+			break;
+		case RODENT_SPERM:
+			newNucleus = makeRodentNucleus(n);
+			break;
+		case ROUND:
+			newNucleus = makeRoundNucleus(n);
+			break;
+		default:
+			newNucleus = makeRoundNucleus(n);
+			break;
+	
+		
+		}
+		
+		
+		return newNucleus;
+		
+	}
+	
+	private Nucleus makeRoundNucleus(Nucleus n){
+				
+		// Easy stuff
+		File f      = n.getSourceFile(); // the source file
+		int channel = n.getChannel();// the detection channel
+		int number  = n.getNucleusNumber(); // copy over
+		IPoint com  = n.getCentreOfMass();
+		
+		// Position converted down internally
+		int[] position = n.getPosition();
+		
+		// Get the roi for the old nucleus
+		float[] xpoints = new float[n.getBorderLength()], ypoints = new float[n.getBorderLength()];
+		
+		for(int i=0; i<xpoints.length; i++){
+			xpoints[i] = (float) n.getBorderPoint(i).getX();
+			ypoints[i] = (float) n.getBorderPoint(i).getY();
+		}
+		
+		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
+		
+		
+		// Use the default constructor
+		Nucleus newNucleus = new DefaultNucleus(roi, f, channel, position, number, com);
+		
+		
+		
+		for(PlottableStatistic stat : n.getStatistics() ){
+			try {
+				newNucleus.setStatistic(stat, n.getStatistic(stat, MeasurementScale.PIXELS));
+			} catch (Exception e) {
+				fine("Error setting statistic: "+stat, e);
+				newNucleus.setStatistic(stat, 0);
+			}
+		}
+		
+		newNucleus.setScale(n.getScale());
+				
+		newNucleus.initialise(n.getWindowProportion(ProfileType.ANGLE));
+		
+		return  newNucleus;
+
+	}
+	
+	private Nucleus makeRodentNucleus(Nucleus n){
+		
+		// Easy stuff
+		File f      = n.getSourceFile(); // the source file
+		int channel = n.getChannel();// the detection channel
+		int number  = n.getNucleusNumber(); // copy over
+		IPoint com  = n.getCentreOfMass();
+		
+		// Position converted down internally
+		int[] position = n.getPosition();
+		
+		// Get the roi for the old nucleus
+		float[] xpoints = new float[n.getBorderLength()], ypoints = new float[n.getBorderLength()];
+		
+		for(int i=0; i<xpoints.length; i++){
+			xpoints[i] = (float) n.getBorderPoint(i).getX();
+			ypoints[i] = (float) n.getBorderPoint(i).getY();
+		}
+		
+		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
+		
+		finer("\tCreated roi");
+		// Use the default constructor
+		Nucleus newNucleus = new DefaultRodentSpermNucleus(roi, f, channel, position, number, com);
+		
+		// The cell ID is created with the cell
+		// Use reflection to get access and set the new cell id to the same as the 
+		// template
+		
+		try {
+			fine("Created nucleus id is "+newNucleus.getID());			
+			Class superClass = DefaultCellularComponent.class;
+			Field field = superClass.getDeclaredField("id");
+			field.setAccessible(true);
+			field.set(newNucleus, n.getID() );
+			field.setAccessible(false);
+			
+			
+		} catch (NoSuchFieldException e) {
+			fine("No field", e);
+		} catch (SecurityException e) {
+			fine("Security error", e);
+		} catch (IllegalArgumentException e) {
+			fine("Illegal argument", e);
+		} catch (IllegalAccessException e) {
+			fine("Illegal access", e);
+		} catch(Exception e){
+			fine("Unexpected exception", e);
+		}
+		
+		fine("New nucleus id is "+newNucleus.getID());
+		
+		finer("\tCreated nucleus object");
+		
+		for(PlottableStatistic stat : n.getStatistics() ){
+			try {
+				newNucleus.setStatistic(stat, n.getStatistic(stat, MeasurementScale.PIXELS));
+			} catch (Exception e) {
+				fine("Error setting statistic: "+stat, e);
+				newNucleus.setStatistic(stat, 0);
+			}
+		}
+		
+		newNucleus.setScale(n.getScale());
+		
+		
+		// Create the profiles within the nucleus
+		finer("\tInitialising");
+		
+		newNucleus.initialise(n.getWindowProportion(ProfileType.ANGLE));
+		
+		
+		finer("\tCopying tags");
+		//Copy the existing border tags
+		for(Tag t : n.getBorderTags().keySet()){
+			finer("\tSetting tag "+t);
+			newNucleus.setBorderTag(t, n.getBorderIndex(t));
+			finer("\tSetting tag "+t);
+		}
+		fine("Created nucleus");
+		
+		return  newNucleus;
+
+	}
+	
+	private Nucleus makePigNucleus(Nucleus n){
+		
+		// Easy stuff
+		File f      = n.getSourceFile(); // the source file
+		int channel = n.getChannel();// the detection channel
+		int number  = n.getNucleusNumber(); // copy over
+		IPoint com  = n.getCentreOfMass();
+		
+		// Position converted down internally
+		int[] position = n.getPosition();
+		
+		// Get the roi for the old nucleus
+		float[] xpoints = new float[n.getBorderLength()], ypoints = new float[n.getBorderLength()];
+		
+		for(int i=0; i<xpoints.length; i++){
+			xpoints[i] = (float) n.getBorderPoint(i).getX();
+			ypoints[i] = (float) n.getBorderPoint(i).getY();
+		}
+		
+		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
+		
+		
+		// Use the default constructor
+		Nucleus newNucleus = new DefaultPigSpermNucleus(roi, f, channel, position, number, com);
+		
+		
+		
+		for(PlottableStatistic stat : n.getStatistics() ){
+			try {
+				newNucleus.setStatistic(stat, n.getStatistic(stat, MeasurementScale.PIXELS));
+			} catch (Exception e) {
+				fine("Error setting statistic: "+stat, e);
+				newNucleus.setStatistic(stat, 0);
+			}
+		}
+		
+		newNucleus.setScale(n.getScale());
+				
+		newNucleus.initialise(n.getWindowProportion(ProfileType.ANGLE));
+		
+		return  newNucleus;
+
 	}
 	
 	/**
@@ -180,6 +415,14 @@ public class DatasetConverter implements Loggable {
 			
 		}
 		
+	}
+	
+	public class DatasetConversionException extends Exception {
+		private static final long serialVersionUID = 1L;
+		public DatasetConversionException() { super(); }
+		public DatasetConversionException(String message) { super(message); }
+		public DatasetConversionException(String message, Throwable cause) { super(message, cause); }
+		public DatasetConversionException(Throwable cause) { super(cause); }
 	}
 
 }

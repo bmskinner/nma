@@ -23,11 +23,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import components.active.generic.SegmentedFloatProfile;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 
 public interface ISegmentedProfile extends IProfile {
 
+	/**
+	 * Create a new profile of the default type
+	 * @param profile
+	 * @return
+	 */
+	static ISegmentedProfile makeNew(ISegmentedProfile profile){
+		return new SegmentedFloatProfile(profile);
+	}
+	
 	/**
 	 * Check if this profile contains segments
 	 * @return

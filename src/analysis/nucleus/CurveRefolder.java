@@ -34,6 +34,7 @@ import components.AbstractCellularComponent;
 import components.ICellCollection;
 import components.active.DefaultConsensusNucleus;
 import components.active.generic.FloatPoint;
+import components.active.generic.UnprofilableObjectException;
 import components.generic.Equation;
 import components.generic.IPoint;
 import components.generic.IProfile;
@@ -327,6 +328,9 @@ public class CurveRefolder extends AnalysisWorker {
 		} catch(Error e){
 			warn("Error making new consensus");
 			fine("Error in construction", e);
+		} catch (UnprofilableObjectException e) {
+			warn("Cannot create the test nucleus");
+			fine("Error in nucleus constructor", e);
 		}
 		
 		

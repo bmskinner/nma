@@ -178,6 +178,9 @@ public class VirtualCellCollection implements ICellCollection {
 
 	@Override
 	public void addCell(ICell c) {
+		if( ! parent.getCollection().contains(c.getId())){
+			throw new IllegalArgumentException("Parent does not contain cell");
+		}
 		cellIDs.add(c.getId());
 		
 	}
@@ -242,6 +245,11 @@ public class VirtualCellCollection implements ICellCollection {
 	@Override
 	public boolean contains(ICell cell) {
 		return cellIDs.contains(cell.getId());
+	}
+	
+	@Override
+	public boolean contains(UUID cellID) {
+		return cellIDs.contains(cellID);
 	}
 
 	@Override

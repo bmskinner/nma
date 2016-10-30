@@ -60,13 +60,7 @@ public class SegmentStatsPanel extends DetailPanel {
 		scrollPane = new JScrollPane();
 					
 		try {
-			
-//			TableOptions options = new TableOptionsBuilder()
-//			.setDatasets(null)
-//			.setScale(GlobalOptions.getInstance().getScale())
-//			.setSwatch(GlobalOptions.getInstance().getSwatch())
-//			.build();
-			
+						
 			TableModel model = AnalysisDatasetTableCreator.createBlankTable();
 			table = new ExportableTable(model);
 
@@ -83,22 +77,24 @@ public class SegmentStatsPanel extends DetailPanel {
 	
 	@Override
 	protected void updateSingle() {
-		TableModel model = getTable(makeOptions());
-		table.setModel(model);
 		
-		table.setToolTipText(null);
-		setRenderer(table, new SegmentTableCellRenderer());
+		table.setModel(AnalysisDatasetTableCreator.createLoadingTable());
+		
+		TableOptions options = makeOptions();
+		setTable(options);
 	}
 	
 	@Override
 	protected void updateMultiple() {
-		TableModel model = getTable(makeOptions());
 		
-		table.setModel(model);
-
+		table.setModel(AnalysisDatasetTableCreator.createLoadingTable());
+		
+		TableOptions options = makeOptions();
+		setTable(options);
+		
 		if(IBorderSegment.segmentCountsMatch(getDatasets())){
 			table.setToolTipText("Mean and range for 95% confidence interval");
-			setRenderer(table, new SegmentTableCellRenderer());
+//			setRenderer(table, new SegmentTableCellRenderer());s
 
 		} else {
 			log(Level.FINEST, "Segment counts don't match");
@@ -124,6 +120,8 @@ public class SegmentStatsPanel extends DetailPanel {
 			.setDatasets(getDatasets())
 			.setScale(GlobalOptions.getInstance().getScale())
 			.setSwatch(GlobalOptions.getInstance().getSwatch())
+			.setTarget(table)
+			.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SegmentTableCellRenderer())
 			.build();
 		return options;
 	}

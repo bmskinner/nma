@@ -4,6 +4,7 @@ import java.io.File;
 
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
+import components.active.generic.UnprofilableObjectException;
 import components.generic.IPoint;
 import components.generic.IProfile;
 import components.generic.ProfileType;
@@ -33,13 +34,19 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
 		super(roi, f, channel, position, number, centreOfMass );
 	}
 
-	protected DefaultPigSpermNucleus(Nucleus n) {
+	protected DefaultPigSpermNucleus(Nucleus n) throws UnprofilableObjectException {
 		super(n);
 	}
 
 	@Override
 	public Nucleus duplicate(){			
-		return new DefaultPigSpermNucleus(this);
+		try {
+			return new DefaultPigSpermNucleus(this);
+		} catch (UnprofilableObjectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	@Override

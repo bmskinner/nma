@@ -1559,4 +1559,9 @@ public class CellCollection implements ICellCollection {
 		
 	}
 
+	@Override
+	public boolean contains(UUID cellID) {
+		return this.getCellIDs().contains(cellID);
+	}
+
 }

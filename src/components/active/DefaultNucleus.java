@@ -14,6 +14,7 @@ import analysis.signals.SignalAnalyser;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.DefaultSignalCollection;
 import components.active.generic.FloatPoint;
+import components.active.generic.UnprofilableObjectException;
 import components.generic.Equation;
 import components.generic.IPoint;
 import components.generic.IProfile;
@@ -64,7 +65,7 @@ public class DefaultNucleus
 		this.nucleusNumber   = number;
 	}
 		
-	protected DefaultNucleus(Nucleus n) {
+	protected DefaultNucleus(Nucleus n) throws UnprofilableObjectException {
 		super((ProfileableCellularComponent) n);
 		finest("Created profileable nucleus");		
 		nucleusNumber = n.getNucleusNumber();
@@ -74,7 +75,13 @@ public class DefaultNucleus
 	
 	@Override
 	public Nucleus duplicate(){
-		return new DefaultNucleus(this);			
+		try {
+			return new DefaultNucleus(this);
+		} catch (UnprofilableObjectException e) {
+			warn("Duplication failed");
+			fine("Error duplicating nucleus", e);
+		}	
+		return null;
 	}
 	
 	/*

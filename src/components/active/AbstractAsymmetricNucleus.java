@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import components.active.generic.UnprofilableObjectException;
 import components.generic.IPoint;
 import components.nuclear.IBorderPoint;
 import components.nuclei.Nucleus;
@@ -34,7 +35,7 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
 		super(roi, f, channel, position, number, centreOfMass );
 	}
 
-	protected AbstractAsymmetricNucleus(Nucleus n) {
+	protected AbstractAsymmetricNucleus(Nucleus n) throws UnprofilableObjectException {
 		super(n);
 	}
 

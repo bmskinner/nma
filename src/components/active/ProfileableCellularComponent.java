@@ -2,31 +2,26 @@ package components.active;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import analysis.nucleus.Indexable;
 import analysis.profiles.ProfileCreator;
-import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.Profileable;
-import analysis.profiles.RuleSet;
 import analysis.profiles.Taggable;
 import components.CellularComponent;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.FloatPoint;
 import components.active.generic.SegmentedFloatProfile;
+import components.active.generic.UnprofilableObjectException;
 import components.generic.IPoint;
 import components.generic.IProfile;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderPoint;
-import components.nuclear.SignalCollection;
 import ij.gui.Roi;
 import stats.NucleusStatistic;
 
@@ -40,6 +35,8 @@ public abstract class ProfileableCellularComponent
 	implements Taggable {
 	
 	private static final long serialVersionUID = 1L;
+	public static final double ERROR_CALCULATING_STAT   = -1d;
+	public static final double BORDER_POINT_NOT_PRESENT = -2d;
 	
 	protected double angleWindowProportion; // The proportion of the perimeter to use for profiling
 	
@@ -74,24 +71,30 @@ public abstract class ProfileableCellularComponent
 		super(roi, f, channel, position, centreOfMass );
 	}
 		
-	public ProfileableCellularComponent(ProfileableCellularComponent c){
+	public ProfileableCellularComponent(CellularComponent c) throws UnprofilableObjectException {
 		super(c);
+		
+		if( ! (c instanceof ProfileableCellularComponent)){
+			throw new UnprofilableObjectException();
+		}
+		ProfileableCellularComponent comp = (ProfileableCellularComponent) c;
+		
 		finest("Created cellular component");		
 		
-		this.angleWindowProportion  = c.getWindowProportion(ProfileType.ANGLE);
-		this.angleProfileWindowSize = c.getWindowSize(ProfileType.ANGLE);
+		this.angleWindowProportion  = comp.getWindowProportion(ProfileType.ANGLE);
+		this.angleProfileWindowSize = comp.getWindowSize(ProfileType.ANGLE);
 		
 		
 		for(ProfileType type : ProfileType.values()){
-			if(c.hasProfile(type)){
-				this.profileMap.put(type, c.getProfile(type));
+			if(comp.hasProfile(type)){
+				this.profileMap.put(type, ISegmentedProfile.makeNew(comp.getProfile(type)));
 			}
 		}
 
 
-		this.setBorderTags(c.getBorderTags());
+		this.setBorderTags(comp.getBorderTags());
 		
-		this.segsLocked = c.isLocked();
+		this.segsLocked = comp.isLocked();
 	}
 		
 	/*

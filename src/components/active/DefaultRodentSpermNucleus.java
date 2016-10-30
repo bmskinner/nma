@@ -10,6 +10,7 @@ import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.FloatPoint;
+import components.active.generic.UnprofilableObjectException;
 import components.generic.BooleanProfile;
 import components.generic.Equation;
 import components.generic.IPoint;
@@ -19,7 +20,7 @@ import components.generic.Tag;
 import components.nuclear.IBorderPoint;
 import components.nuclear.INuclearSignal;
 import components.nuclei.Nucleus;
-import ij.IJ;
+
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import stats.NucleusStatistic;
@@ -46,13 +47,19 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		super(roi, f, channel, position, number, centreOfMass );
 	}
 
-	protected DefaultRodentSpermNucleus(Nucleus n) {
+	protected DefaultRodentSpermNucleus(Nucleus n) throws UnprofilableObjectException {
 		super(n);
 	}
 
 	@Override
 	public Nucleus duplicate(){			
-		return new DefaultRodentSpermNucleus(this);
+		try {
+			return new DefaultRodentSpermNucleus(this);
+		} catch (UnprofilableObjectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override
@@ -97,7 +104,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		// check stat is present before calling a getStatistic
 		if(hasStatistic(NucleusStatistic.HOOK_LENGTH) || hasStatistic(NucleusStatistic.BODY_WIDTH)){
 
-			if(getStatistic(NucleusStatistic.HOOK_LENGTH) == -1 || getStatistic(NucleusStatistic.BODY_WIDTH) ==-1){
+			if(getStatistic(NucleusStatistic.HOOK_LENGTH) == ERROR_CALCULATING_STAT 
+					|| getStatistic(NucleusStatistic.BODY_WIDTH) == ERROR_CALCULATING_STAT){
 				calculateHookAndBodyLength();
 			}
 
@@ -109,12 +117,11 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
 		double stat = useHook 
 				? getStatistic(NucleusStatistic.HOOK_LENGTH) 
-						: getStatistic(NucleusStatistic.BODY_WIDTH);
+				: getStatistic(NucleusStatistic.BODY_WIDTH);
 
-				stat = stat == -2d ? 0 : stat; // -2 is the error code when TV and BV are not present. Using -1 will cause infinite loop.
+		stat = stat == BORDER_POINT_NOT_PRESENT ? 0 : stat; // -2 is the error code when TV and BV are not present. Using -1 will cause infinite loop.
 
-				//		finest("Hook/body is "+stat);
-				return stat;
+		return stat;
 
 
 	}
@@ -132,22 +139,11 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		if(testNucleus!=null && testNucleus.hasBorderTag(Tag.TOP_VERTICAL) 
 				&& testNucleus.hasBorderTag(Tag.BOTTOM_VERTICAL)){
 
-			//			Nucleus testVertical = testNucleus.getVerticallyRotatedNucleus();
-
 			finer("Nucleus "+this.getNameAndNumber());
+			
 			/*
 			 * Get the X position of the top vertical
 			 */
-			//			double vertX = testNucleus.getBorderTag(BorderTag.TOP_VERTICAL).getX();
-
-			//			/*
-			//			 * Rotate the nucleus to put vertical
-			//			 */
-			//			BorderPoint[] points = getBorderPointsForVerticalAlignment();
-			//			testNucleus.alignPointsOnVertical(points[0], points[1] );
-
-
-
 			double vertX = testNucleus.getBorderTag(Tag.TOP_VERTICAL).getX();
 
 
@@ -160,8 +156,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
 			if(vertX < minBoundingX || vertX > maxBoundingX ){
 				finer("Error calculating hook and body: vertical is out of bounds" );
-				setStatistic(NucleusStatistic.HOOK_LENGTH, -1);
-				setStatistic(NucleusStatistic.BODY_WIDTH,  -1);
+				setStatistic(NucleusStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
+				setStatistic(NucleusStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
 				return;
 			}
 
@@ -211,8 +207,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		} else {
 			finest("Top and bottom vertical not assigned, skipping");
 
-			setStatistic(NucleusStatistic.HOOK_LENGTH, -2);
-			setStatistic(NucleusStatistic.BODY_WIDTH,  -2);
+			setStatistic(NucleusStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
+			setStatistic(NucleusStatistic.BODY_WIDTH,  BORDER_POINT_NOT_PRESENT);
 		}
 		testNucleus = null;
 	}
@@ -270,13 +266,13 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
 			i++;
 			if(i>1000){
-				IJ.log("Forced break");
+				warn("Forced break");
 				break;
 			}
 		}
 
 		if(continuePoint==null){
-			IJ.log("Error getting roi - IP and OP not found");
+			warn("Error getting roi - IP and OP not found");
 			return result;
 		}
 
@@ -293,7 +289,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 			continuePoint = continuePoint.nextPoint();
 			i++;
 			if(i>2000){
-				IJ.log("Forced break for continue point");
+				warn("Forced break for continue point");
 				break;
 			}
 		}
