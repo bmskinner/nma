@@ -549,13 +549,15 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		}
 		
 		
-		
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-				                "Position", options.getType().getLabel(), null, PlotOrientation.VERTICAL, true, true,
-				                false);
+		JFreeChart chart = createBaseXYChart();
+//		JFreeChart chart = 
+//				ChartFactory.createXYLineChart(null,
+//				                "Position", options.getType().getLabel(), null, PlotOrientation.VERTICAL, true, true,
+//				                false);
 		
 		XYPlot plot = chart.getXYPlot();
+		plot.getDomainAxis().setLabel("Position");
+		plot.getRangeAxis().setLabel(options.getType().getLabel());
 		plot.getDomainAxis().setRange(0,length);
 		
 		if(options.getType().getDimension().equals(StatisticDimension.ANGLE)){
@@ -710,7 +712,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	private JFreeChart makeMultiVariabilityChart() throws Exception {
 		XYDataset ds =  new NucleusDatasetCreator().createIQRVariabilityDataset(options);
 		
-		JFreeChart chart = this.createBaseXYChart();
+		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
 		plot.setDataset(ds);
 		
@@ -757,11 +759,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		}
 		
 		
-		
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-				                null, null, null, PlotOrientation.VERTICAL, true, true,
-				                false);
+		JFreeChart chart = createBaseXYChart();
 		
 		XYPlot plot = chart.getXYPlot();
 
@@ -851,14 +849,11 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart createModalityChart(Double position, List<IAnalysisDataset> list, ProfileType type) throws Exception {
 		
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-						type.getLabel(), "Probability", null, PlotOrientation.VERTICAL, true, true,
-						false);
+		JFreeChart chart = createBaseXYChart();
 		
 		XYPlot plot = chart.getXYPlot();
-		
-		plot.setBackgroundPaint(Color.WHITE);
+		plot.getDomainAxis().setLabel(type.getLabel());
+		plot.getRangeAxis().setLabel("Probability");
 		
 		if(type.getDimension().equals(StatisticDimension.ANGLE)){
 			plot.getDomainAxis().setRange(0, 360);

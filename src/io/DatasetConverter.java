@@ -31,7 +31,6 @@ import java.util.UUID;
 import logging.Loggable;
 import stats.PlottableStatistic;
 import utility.Constants;
-import components.AbstractCellularComponent;
 import components.ICell;
 import components.ICellCollection;
 import components.active.DefaultAnalysisDataset;
@@ -99,6 +98,8 @@ public class DatasetConverter implements Loggable {
 		
 		
 		for(IAnalysisDataset child : template.getChildDatasets()){
+			
+			//TODO: arrange cluster groups
 			
 			fine("Converting: "+child.getName());
 			
@@ -230,22 +231,8 @@ public class DatasetConverter implements Loggable {
 		
 		// Use the default constructor
 		Nucleus newNucleus = new DefaultNucleus(roi, f, channel, position, number, com);
-		
-		
-		
-		for(PlottableStatistic stat : n.getStatistics() ){
-			try {
-				newNucleus.setStatistic(stat, n.getStatistic(stat, MeasurementScale.PIXELS));
-			} catch (Exception e) {
-				fine("Error setting statistic: "+stat, e);
-				newNucleus.setStatistic(stat, 0);
-			}
-		}
-		
-		newNucleus.setScale(n.getScale());
-				
-		newNucleus.initialise(n.getWindowProportion(ProfileType.ANGLE));
-		
+
+		newNucleus = copyGenericData(n, newNucleus);
 		return  newNucleus;
 
 	}
@@ -275,64 +262,8 @@ public class DatasetConverter implements Loggable {
 		// Use the default constructor
 		Nucleus newNucleus = new DefaultRodentSpermNucleus(roi, f, channel, position, number, com);
 		
-		// The cell ID is created with the cell
-		// Use reflection to get access and set the new cell id to the same as the 
-		// template
-		
-		try {
-			fine("Created nucleus id is "+newNucleus.getID());			
-			Class superClass = DefaultCellularComponent.class;
-			Field field = superClass.getDeclaredField("id");
-			field.setAccessible(true);
-			field.set(newNucleus, n.getID() );
-			field.setAccessible(false);
-			
-			
-		} catch (NoSuchFieldException e) {
-			fine("No field", e);
-		} catch (SecurityException e) {
-			fine("Security error", e);
-		} catch (IllegalArgumentException e) {
-			fine("Illegal argument", e);
-		} catch (IllegalAccessException e) {
-			fine("Illegal access", e);
-		} catch(Exception e){
-			fine("Unexpected exception", e);
-		}
-		
-		fine("New nucleus id is "+newNucleus.getID());
-		
-		finer("\tCreated nucleus object");
-		
-		for(PlottableStatistic stat : n.getStatistics() ){
-			try {
-				newNucleus.setStatistic(stat, n.getStatistic(stat, MeasurementScale.PIXELS));
-			} catch (Exception e) {
-				fine("Error setting statistic: "+stat, e);
-				newNucleus.setStatistic(stat, 0);
-			}
-		}
-		
-		newNucleus.setScale(n.getScale());
-		
-		
-		// Create the profiles within the nucleus
-		finer("\tInitialising");
-		
-		newNucleus.initialise(n.getWindowProportion(ProfileType.ANGLE));
-		
-		
-		finer("\tCopying tags");
-		//Copy the existing border tags
-		for(Tag t : n.getBorderTags().keySet()){
-			finer("\tSetting tag "+t);
-			newNucleus.setBorderTag(t, n.getBorderIndex(t));
-			finer("\tSetting tag "+t);
-		}
-		fine("Created nucleus");
-		
-		return  newNucleus;
-
+		newNucleus = copyGenericData(n, newNucleus);
+		return newNucleus;
 	}
 	
 	private Nucleus makePigNucleus(Nucleus n){
@@ -360,23 +291,77 @@ public class DatasetConverter implements Loggable {
 		// Use the default constructor
 		Nucleus newNucleus = new DefaultPigSpermNucleus(roi, f, channel, position, number, com);
 		
+		newNucleus = copyGenericData(n, newNucleus);
 		
+		return  newNucleus;
+
+	}
+	
+	
+	private Nucleus copyGenericData(Nucleus template, Nucleus newNucleus){
 		
-		for(PlottableStatistic stat : n.getStatistics() ){
+		// The nucleus ID is created with the nucleus and is not accessible
+		// Use reflection to get access and set the new id to the same as the 
+		// template
+
+		try {
+//			fine("Created nucleus id is "+newNucleus.getID());			
+			Class<DefaultCellularComponent> superClass = DefaultCellularComponent.class;
+			Field field = superClass.getDeclaredField("id");
+			field.setAccessible(true);
+			field.set(newNucleus, template.getID() );
+			field.setAccessible(false);
+
+
+		} catch (NoSuchFieldException e) {
+			fine("No field", e);
+		} catch (SecurityException e) {
+			fine("Security error", e);
+		} catch (IllegalArgumentException e) {
+			fine("Illegal argument", e);
+		} catch (IllegalAccessException e) {
+			fine("Illegal access", e);
+		} catch(Exception e){
+			fine("Unexpected exception", e);
+		}
+
+//		fine("New nucleus id is "+newNucleus.getID());
+
+		finer("\tCreated nucleus object");
+
+		for(PlottableStatistic stat : template.getStatistics() ){
 			try {
-				newNucleus.setStatistic(stat, n.getStatistic(stat, MeasurementScale.PIXELS));
+				newNucleus.setStatistic(stat, template.getStatistic(stat, MeasurementScale.PIXELS));
 			} catch (Exception e) {
 				fine("Error setting statistic: "+stat, e);
 				newNucleus.setStatistic(stat, 0);
 			}
 		}
-		
-		newNucleus.setScale(n.getScale());
-				
-		newNucleus.initialise(n.getWindowProportion(ProfileType.ANGLE));
-		
-		return  newNucleus;
 
+		newNucleus.setScale(template.getScale());
+
+
+		// Create the profiles within the nucleus
+		finer("\tInitialising");
+
+		newNucleus.initialise(template.getWindowProportion(ProfileType.ANGLE));
+
+
+		finer("\tCopying tags");
+		//Copy the existing border tags
+		for(Tag t : template.getBorderTags().keySet()){
+			finer("\tSetting tag "+t);
+			newNucleus.setBorderTag(t, template.getBorderIndex(t));
+			finer("\tSetting tag "+t);
+		}
+
+		// TODO: Copy segments
+
+
+
+		fine("Created nucleus");
+
+		return  newNucleus;
 	}
 	
 	/**

@@ -144,7 +144,7 @@ public abstract class AbstractChartFactory implements Loggable {
 	protected static JFreeChart createBaseXYChart(){
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
-						null, null, null, PlotOrientation.VERTICAL, true, true,
+						null, null, null, PlotOrientation.VERTICAL, false, false,
 						false);
 		
 		XYPlot plot = chart.getXYPlot();
