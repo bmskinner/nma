@@ -63,7 +63,7 @@ public class DefaultNucleus
 		super(roi, f, channel, position, centreOfMass );
 		this.nucleusNumber   = number;
 	}
-	
+		
 	protected DefaultNucleus(Nucleus n) {
 		super((ProfileableCellularComponent) n);
 		finest("Created profileable nucleus");		

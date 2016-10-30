@@ -93,7 +93,7 @@ public abstract class ProfileableCellularComponent
 		
 		this.segsLocked = c.isLocked();
 	}
-	
+		
 	/*
 	* Finds the key points of interest around the border
 	* of the Nucleus. Can use several different methods, and 

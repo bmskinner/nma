@@ -2,13 +2,19 @@ package components.active;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.util.Arrays;
 
 import analysis.profiles.ProfileCreator;
+import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
+import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
 import ij.process.FloatPolygon;
+import stats.PlottableStatistic;
 
 public class DefaultConsensusNucleus extends DefaultNucleus {
 	
@@ -21,6 +27,38 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 		super(n);
 		this.type = type;
 		
+		// At this point the new consensus has created its border list
+		// based on the int points from  the template nucleus.
+		
+		// The border list is no longer at zero.
+		
+		
+		// Update the int points as well, so the nucleus does not 'snap back'
+		// from 0, 0 after loading from file. Then recreate the border list
+		
+		// The centre of mass will match the template nucleus, since this is copied directly.
+		
+		if(  n instanceof DefaultConsensusNucleus ){
+			
+			// If a consensus nucleus is used as the template, the CoM is already at zero, and 
+			// should not be moved again, otherwise the border list will be dragged out of position.
+			
+			// Calculate the difference between the template and the new nucleus
+			
+			double minX = n.getMinX();
+			double minY = n.getMinY();
+			
+			double  diffX = minX - this.getMinX();
+			double  diffY = minY - this.getMinY();
+			
+			// Apply the offset to the border list
+			this.offset(diffX, diffY);
+
+		} else {
+			
+			this.moveCentreOfMass(IPoint.makeNew(0,0));			
+		}
+
 		finest("Constructed consensus nucleus from "+n.getNameAndNumber());
 	}
 	

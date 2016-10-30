@@ -130,7 +130,7 @@ public class CurveRefolder extends AnalysisWorker {
 
 		try{ 
 
-			refoldNucleus.moveCentreOfMass( IPoint.makeNew(0, 0));
+//			refoldNucleus.moveCentreOfMass( IPoint.makeNew(0, 0));
 
 			if(collection.size()>1){
 				
@@ -245,12 +245,14 @@ public class CurveRefolder extends AnalysisWorker {
 			}
 			skip = !skip;
 			
-			int prevIndex = AbstractCellularComponent.wrapIndex(i-1, refoldNucleus.getBorderLength());
-			int nextIndex = AbstractCellularComponent.wrapIndex(i+1, refoldNucleus.getBorderLength());
-						
+//			int prevIndex = refoldNucleus.wrapIndex(i-1);
+//			int nextIndex = refoldNucleus.wrapIndex(i+1);
+//						
 			IBorderPoint thisPoint = refoldNucleus.getBorderPoint(i);
-			IBorderPoint prevPoint = refoldNucleus.getBorderPoint(prevIndex);
-			IBorderPoint nextPoint = refoldNucleus.getBorderPoint(nextIndex);
+//			IBorderPoint prevPoint = refoldNucleus.getBorderPoint(prevIndex);
+//			IBorderPoint nextPoint = refoldNucleus.getBorderPoint(nextIndex);
+			IBorderPoint prevPoint = thisPoint.prevPoint();
+			IBorderPoint nextPoint = thisPoint.nextPoint();
 
 			/* get the point o,  half way between the previous point p and next point n:
 			 * 
@@ -311,9 +313,10 @@ public class CurveRefolder extends AnalysisWorker {
 		
 		// make all changes to a fresh nucleus before buggering up the real one
 		finest("Creating test nucleus based on refold candidate");
-		
+				
 		Nucleus testNucleus;
 		try {
+			
 			testNucleus = new DefaultConsensusNucleus( refoldNucleus, NucleusType.ROUND);
 			
 			finest("Beginning border tests");
@@ -351,6 +354,8 @@ public class CurveRefolder extends AnalysisWorker {
 		
 		// Get a copy of the point at this index
 		IBorderPoint p = testNucleus.getBorderPoint(index);
+		
+//		log("Test point at index "+index+" at "+p.toString());
 
 		// Save the old position
 		double oldX = p.getX();
@@ -367,11 +372,12 @@ public class CurveRefolder extends AnalysisWorker {
 
 		// Check the new point is valid
 		IPoint newPoint = new FloatPoint(newX, newY);
-
+		
 		boolean ok = checkPositionIsOK(newPoint, testNucleus, index, minDistance, maxDistance);
 
 		if(	ok ){
 
+//			log("\tNew point accepted at index "+index+" at "+newPoint.toString());
 			// Update the test nucleus
 			testNucleus.updateBorderPoint(index, newPoint);
 
@@ -417,8 +423,8 @@ public class CurveRefolder extends AnalysisWorker {
 	 * @return
 	 */
 	private boolean checkPositionIsOK(IPoint point,  Nucleus n, int index, double min, double max){
-		double distanceToPrev = point.getLengthTo( n.getBorderPoint( AbstractCellularComponent.wrapIndex(index-1, n.getBorderLength()) ) );
-		double distanceToNext = point.getLengthTo( n.getBorderPoint( AbstractCellularComponent.wrapIndex(index+1, n.getBorderLength()) ) );
+		double distanceToPrev = point.getLengthTo( n.getBorderPoint( n.wrapIndex(index-1) ) );
+		double distanceToNext = point.getLengthTo( n.getBorderPoint( n.wrapIndex(index+1) ) );
 
 		boolean ok = true;
 		if(	distanceToNext > max ){

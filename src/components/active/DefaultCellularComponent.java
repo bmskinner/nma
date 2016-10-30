@@ -178,7 +178,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		makeBorderList(roi);		
 	}
 	
-	private void makeBorderList(Roi roi){
+	protected void makeBorderList(Roi roi){
 		
 		borderList    = new ArrayList<IBorderPoint>(0);
 		
@@ -612,11 +612,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		public boolean containsOriginalPoint(int x, int y){
 			
 			// Fast check - is the point within the bounding rectangle moved to the original position?
-					Rectangle2D r = new Rectangle2D.Double(position[X_BASE], position[Y_BASE], position[WIDTH], position[HEIGHT]);
-					
-					if( ! r.contains(x, y)){
-						return false;			
-					} 
+			Rectangle r = new Rectangle(position[X_BASE], position[Y_BASE], position[WIDTH], position[HEIGHT]);
+
+			if( ! r.contains(x, y)){
+				return false;			
+			} 
 			
 			// Check detailed position
 			
@@ -666,8 +666,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		public double getMedianDistanceBetweenPoints(){
 			double[] distances = new double[this.borderList.size()];
 			for(int i=0;i<this.borderList.size();i++){
-				IBorderPoint p = this.getBorderPoint(i);
-				IBorderPoint next = this.getBorderPoint( wrapIndex(i+1, this.borderList.size()));
+				IBorderPoint p = borderList.get(i);
+				IBorderPoint next = borderList.get( wrapIndex(i+1 ));
 				distances[i] = p.getLengthTo(next);
 			}
 			return new Quartile(distances, Quartile.MEDIAN).doubleValue();
@@ -704,8 +704,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			IPoint newCentreOfMass = IPoint.makeNew(newX, newY);
 
 			/// update each border point
-			for(int i=0; i<this.getBorderLength(); i++){
-				IPoint p = this.getBorderPoint(i);
+			for(int i=0; i<borderList.size(); i++){
+				IBorderPoint p = borderList.get(i);
 
 				double x = p.getX() + xOffset;
 				double y = p.getY() + yOffset;
@@ -1050,7 +1050,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			// needs to be traced to allow interpolation into the border list
 			PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
 						
-			makeBorderList(roi);			
+			makeBorderList(roi);
+			this.moveCentreOfMass(getCentreOfMass()); // update border to the  saved CoM
 		}
 
 		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
