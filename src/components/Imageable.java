@@ -74,15 +74,7 @@ public interface Imageable {
 	 * @return the array with the position 
 	 */
 	public int[] getPosition();
-	
-	/**
-	 * Get the image file the component was found in
-	 * @return
-	 */
-	public File getSourceFile();
-	
-	
-		
+			
 	/**
 	 * Get the RGB channel the object was detected in
 	 * @return
@@ -122,11 +114,19 @@ public interface Imageable {
 	
 	/**
 	 * Get the folder of the image the component was found in.
-	 *  e.g. C:\Folder\ImageFolder\1.tiff
+	 *  e.g. C:\Folder\ImageFolder\
 	 * will return ImageFolder
 	 * @return
 	 */
 	public File getSourceFolder();
+	
+	/**
+	 * Get the folder of the image the component was found in.
+	 *  e.g. C:\Folder\ImageFolder\1.tiff
+	 * will return ImageFolder
+	 * @return
+	 */
+	public File getSourceFile();
 
 	/**
 	 * Get the name of the image the component was found in
@@ -157,22 +157,7 @@ public interface Imageable {
 	 * @param channel
 	 */
 	public void setChannel(int channel);
-	
-	/**
-	 * Set the position of the component in the original
-	 * image.
-	 * @param d the array of positions
-	 * @see CellularComponent#getPosition()
-	 */
-//	public void setPosition(int[] position);
-	
-
-	/**
-	 * Set the name of the image file this object was found in
-	 * @param name
-	 */
-	public void setSourceFileName(String name);
-	
+		
 	/**
 	 * Set the folder the source image file belongs to
 	 * @param sourceFolder

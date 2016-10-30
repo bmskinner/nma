@@ -67,16 +67,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	/**
 	 * The folder containing the sourceFile. This is detected
 	 * on dataset loading as a relative path from the .nmd
-	 * e.g. C:\MyImageFolder\
+	 * e.g. C:\MyImageFolder\MyImage.tiff
 	 */
-	private File sourceFolder;
-	
-
-	/**
-	 * The name of the image which the component was detected
-	 * e.g. MyImage.tiff
-	 */
-	private String sourceFileName;
+	private File sourceFile;
 	
 	/**
 	 * The RGB channel in which this component was detected
@@ -91,7 +84,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	private double scale = 1; 
 	
 	/**
-	 * The points within the Roi from which the object was detected 
+	 * The points within the Roi from which the object was detected.
 	 */
 	private int[] xpoints, ypoints;
 	
@@ -221,8 +214,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			}
 		}
 		finest("Set stats");
-		this.sourceFolder      = a.getSourceFolder();
-		this.sourceFileName    = a.getSourceFileName();
+		this.sourceFile        = a.getSourceFile();
 		this.channel           = a.getChannel();
 		this.scale 			   = a.getScale();
 		
@@ -262,12 +254,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * @return
 	 */
 	public File getSourceFolder(){
-		return this.sourceFolder;
+		return this.sourceFile.getParentFile();
 	}
 	
 
 	public void updateSourceFolder(File newFolder) {
-		File oldFile = this.getSourceFile();
+		File oldFile = sourceFile;
 		String oldName = oldFile.getName();
 		File newFile = new File(newFolder+File.separator+oldName);
 		if(newFile.exists()){
@@ -285,12 +277,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 */
 	@Override
 	public File getSourceFile(){
-		return new File(sourceFolder.getAbsolutePath()+File.separator+sourceFileName);
+		return sourceFile;
 	}
 	
 	@Override
 	public String getSourceFileName(){
-		return this.sourceFileName;
+		return sourceFile.getName();
 	}
 	
 	@Override
@@ -298,9 +290,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 		String trimmed = "";
 
-		int i = this.sourceFileName.lastIndexOf('.');
+		int i = getSourceFileName().lastIndexOf('.');
 		if (i > 0) {
-				trimmed   = this.sourceFileName.substring(0,i);
+				trimmed   = getSourceFileName().substring(0,i);
 		}
 		return trimmed;
 	}
@@ -362,17 +354,19 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		return ip;
 	}
 	
-	public void setSourceFileName(String name) {
-		this.sourceFileName = name;
-	}
+//	public void setSourceFileName(String name) {
+//		this.sourceFileName = name;
+//	}
 	
 	public void setSourceFolder(File sourceFolder) {
-		this.sourceFolder = sourceFolder;
+		
+		File newFile = new File(sourceFolder+File.separator+sourceFile.getName());
+		
+		this.sourceFile = newFile;
 	}
 	
 	public void setSourceFile(File sourceFile){
-		setSourceFolder(  sourceFile.getParentFile());
-		setSourceFileName(sourceFile.getName()      );
+		this.sourceFile = sourceFile;
 	}
 	
 

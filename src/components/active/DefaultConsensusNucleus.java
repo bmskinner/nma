@@ -2,6 +2,9 @@ package components.active;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.lang.ref.SoftReference;
 import java.util.Arrays;
 
 import analysis.profiles.ProfileCreator;
@@ -9,11 +12,13 @@ import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
+import components.generic.Tag;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
 import stats.PlottableStatistic;
 
 public class DefaultConsensusNucleus extends DefaultNucleus {
@@ -21,11 +26,13 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 	private static final long serialVersionUID = 1L;
 	
 	private NucleusType type;
+	private IPoint originalCoM; // store to allow repositioning on load
 	
 	public DefaultConsensusNucleus(Nucleus n, NucleusType type) {
 		
 		super(n);
 		this.type = type;
+		this.originalCoM = n.getCentreOfMass();
 		
 		// At this point the new consensus has created its border list
 		// based on the int points from  the template nucleus.
@@ -106,6 +113,38 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 		
 		// There is no original position for a consensus
 		return this.toShape();
+	}
+	
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+
+		
+		in.defaultReadObject();
+		
+		// After loading, the border list has been constructed wrt to the
+		// int array, and so is offset from the 0,0 origin.
+		
+		// Reposition the border list so the CoM is at the origin,
+				
+		// Note - the CoM has been saved as 0,0. Use the original CoM for positioning
+				
+		double  diffX = getCentreOfMass().getX() - originalCoM.getX();
+		double  diffY = getCentreOfMass().getY() - originalCoM.getY();
+		
+		// Apply the offset to the border list
+		this.offset(diffX, diffY);
+		this.setCentreOfMassDirectly(IPoint.makeNew(0,0));
+		
+		this.alignVertically();
+		
+		// Check that the horizontal orientation is correct
+		if(type.equals(NucleusType.RODENT_SPERM)){
+			if(getBorderTag(Tag.REFERENCE_POINT).getX()>0){
+				flipXAroundPoint(getCentreOfMass());
+			}
+		}
+		
+		
+
 	}
 
 }
