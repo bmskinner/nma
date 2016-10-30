@@ -51,7 +51,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 	
 	protected final ChartOptions options;
 		
-	public NuclearHistogramDatasetCreator(ChartOptions o){
+	public NuclearHistogramDatasetCreator(final ChartOptions o){
 		if(o==null){
 			throw new IllegalArgumentException("Options cannot be null");
 		}

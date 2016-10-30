@@ -106,6 +106,11 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	public ChartPanel getTarget() {
 		return target;
 	}
+	
+	@Override
+	public boolean hasTarget(){
+		return target!=null;
+	}
 
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setTarget(org.jfree.chart.ChartPanel)

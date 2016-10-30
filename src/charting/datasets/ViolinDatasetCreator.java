@@ -12,14 +12,11 @@ import stats.NucleusStatistic;
 import stats.Quartile;
 import stats.SegmentStatistic;
 import stats.SignalStatistic;
-import stats.Stats;
 import stats.Sum;
 import utility.Constants;
 import weka.estimators.KernelEstimator;
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import charting.options.ChartOptions;
-import components.CellCollection;
 import components.ICellCollection;
 import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
@@ -30,18 +27,11 @@ import components.nuclei.Nucleus;
 import logging.Loggable;
 
 public class ViolinDatasetCreator implements Loggable {
+		
+	private ChartOptions options;
 	
-	private static ViolinDatasetCreator instance = null;
-	
-	private ViolinDatasetCreator(){
-
-	}
-	
-	public static ViolinDatasetCreator getInstance(){
-		if(instance==null){
-			instance = new ViolinDatasetCreator();
-		}
-		return instance;
+	public ViolinDatasetCreator(final ChartOptions options){
+		this.options = options;
 	}
 	
 	/**
@@ -50,7 +40,7 @@ public class ViolinDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public ViolinCategoryDataset createNucleusStatisticViolinDataset(ChartOptions options) {
+	public ViolinCategoryDataset createNucleusStatisticViolinDataset() {
 		List<IAnalysisDataset> datasets = options.getDatasets();
 		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 		MeasurementScale scale = options.getScale();
@@ -85,7 +75,7 @@ public class ViolinDatasetCreator implements Loggable {
 	 * @return a boxplot dataset
 	 * @throws Exception 
 	 */
-    public ViolinCategoryDataset createSignalStatisticViolinDataset(ChartOptions options) {
+    public ViolinCategoryDataset createSignalStatisticViolinDataset() {
 
     	List<IAnalysisDataset> datasets = options.getDatasets();
     	SignalStatistic stat = (SignalStatistic) options.getStat();
@@ -135,7 +125,7 @@ public class ViolinDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public ViolinCategoryDataset createSegmentStatisticDataset(ChartOptions options) {
+	public ViolinCategoryDataset createSegmentStatisticDataset() {
 		
 		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
@@ -148,6 +138,14 @@ public class ViolinDatasetCreator implements Loggable {
 			return null;
 		}
 	}
+	
+	
+	/*
+	 * 
+	 * PRIVATE METHODS
+	 * 
+	 * 
+	 */
 	
 	/**
 	 * Get the lengths of the given segment in the collections

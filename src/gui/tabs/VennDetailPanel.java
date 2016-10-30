@@ -21,6 +21,7 @@ package gui.tabs;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.logging.Level;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -152,17 +153,19 @@ public class VennDetailPanel extends DetailPanel {
 	        } else {
 	        
 	        	String columnName = table.getColumnName(column);
-	        	String[] array = cellContents.split("%");
-		        String[] array2 = array[0].split("\\(");
+	        	
+	        	String pctString = cellContents.replace("%", "");
+//	        	String[] array = cellContents.split("%");
+//		        String[] array2 = array[0].split("\\(");
 		        
 		        double pct = 0;
 		        try {
 		        	
 		        	NumberFormat nf = NumberFormat.getInstance();
-		        	pct = nf.parse(array2[1]).doubleValue();
+		        	pct = nf.parse(pctString).doubleValue();
 
-		        } catch (Exception e){
-		        	log(Level.FINER, "Error getting value: "+cellContents+" in column "+columnName, e);
+		        } catch (ParseException e){
+		        	fine("Error getting value: "+cellContents+" in column "+columnName, e);
 		        	pct = 0;
 		        }
 		        		        

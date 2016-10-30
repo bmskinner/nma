@@ -97,9 +97,10 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 					.setTarget(panel)
 					.build();
 				
-				JFreeChart chart = getChart(options);
-
-				panel.setChart(chart);
+				setChart(options);
+//				JFreeChart chart = getChart(options);
+//
+//				panel.setChart(chart);
 			}
 		}
 		

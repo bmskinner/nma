@@ -106,13 +106,6 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 
 				ExportableChartPanel panel = chartPanels.get(stat.toString());
 				
-//				if(this.getDatasets().size()>4){
-//					panel.setPreferredSize(new Dimension(400, 300)); // double width
-//				} else {
-//					panel.setPreferredSize(new Dimension(200, 300)); // double width
-//				}
-//				panel.revalidate();
-				
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
 				DefaultChartOptions options = builder.setDatasets(getDatasets())
 					.addStatistic(stat)
@@ -121,8 +114,10 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 					.setTarget(panel)
 					.build();
 				
-				JFreeChart chart = getChart(options);
-				panel.setChart(chart);
+				setChart(options);
+				
+//				JFreeChart chart = getChart(options);
+//				panel.setChart(chart);
 //				panel.restoreComponentRatio();
 			}
 //			mainPanel.revalidate();

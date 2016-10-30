@@ -18,7 +18,9 @@ public interface ChartOptions extends DisplayOptions {
 	void setNormalised(boolean normalised);
 
 	ChartPanel getTarget();
-
+	
+	boolean hasTarget();
+	
 	void setTarget(ChartPanel target);
 
 	ProfileAlignment getAlignment();

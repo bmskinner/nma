@@ -192,45 +192,13 @@ public class DefaultProfileCollection implements IProfileCollection {
 	public synchronized IBorderSegment getSegmentAt(Tag tag, int position){
 		return this.getSegments(tag).get(position);
 	}
-
-//	/* (non-Javadoc)
-//	 * @see components.generic.IProfileCollection#getAggregate()
-//	 */
-//	@Override
-//	public IProfileAggregate getAggregate(){
-//		return aggregate;
-//	}
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#hasAggregate()
-	 */
-//	@Override
-//	public boolean hasAggregate(){
-//		return aggregate!=null;
-//	}
 	
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#length()
 	 */
 	@Override
 	public int length(){
-		
 		return length;
-//		if(this.hasAggregate()){
-//			return aggregate.length();
-//		} else {
-//			
-//			// fallback - check the segment total length
-//			if(segments.isEmpty()){
-//				return 0;
-//			}
-//			
-//			if(segments.get(0)!=null){
-//				return segments.get(0).getTotalLength();
-//			} else{
-//				return 0; // no data to be found
-//			}
-//		}
 	}
 	
 	/* (non-Javadoc)

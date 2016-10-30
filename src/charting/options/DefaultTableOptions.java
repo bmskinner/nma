@@ -89,8 +89,14 @@ public class DefaultTableOptions extends AbstractOptions implements TableOptions
 		this.target = target;
 	}
 	
+	@Override
 	public JTable getTarget(){
 		return this.target;
+	}
+	
+	@Override
+	public boolean hasTarget(){
+		return this.target!=null;
 	}
 
 	@Override

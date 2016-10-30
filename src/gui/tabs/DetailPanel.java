@@ -53,8 +53,10 @@ import org.jfree.chart.JFreeChart;
 import charting.Cache;
 import charting.ChartCache;
 import charting.TableCache;
+import charting.charts.AbstractChartFactory;
 import charting.charts.ScatterChartFactory;
 import charting.charts.panels.ExportableChartPanel;
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptions;
@@ -379,6 +381,7 @@ public abstract class DetailPanel
 			// Make a background worker to generate the chart and
 			// update the target chart panel when done
 			ChartFactoryWorker worker = new ChartFactoryWorker(options);
+			
 			ThreadManager.getInstance().submit(worker);//worker.execute();
 		}
 	}
@@ -803,8 +806,9 @@ public abstract class DetailPanel
     	protected JFreeChart doInBackground() throws Exception {
 
     		try {
-    			if(options.getTarget()!=null){
+    			if(options.hasTarget()){
     				options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    				options.getTarget().setChart(AbstractChartFactory.createLoadingChart());
     			}
     			finest("Creating chart type");
     			JFreeChart chart = createPanelChartType(options);
@@ -826,16 +830,18 @@ public abstract class DetailPanel
         public void done() {
    	
     		try {
-    			if(options.getTarget()!=null){
+    			if(options.hasTarget()){
     			
     				options.getTarget().setChart(get());
     				finest("Set chart panel to new chart");
     				options.getTarget().setCursor(Cursor.getDefaultCursor());
     			}
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				warn("Interruption to charting");
+				fine("Error in chart worker", e);
 			} catch (ExecutionException e) {
-				e.printStackTrace();
+				warn("Interruption to charting");
+				fine("Error in chart worker", e);
 			}
         } 
  
@@ -853,13 +859,17 @@ public abstract class DetailPanel
     	
     	public TableFactoryWorker(TableOptions options){
     		this.options = options;
+    		
     	}
 
     	@Override
     	protected TableModel doInBackground() throws Exception {
 
     		try {
-    			if(options.getTarget()!=null){
+    			if(options.hasTarget()){
+    				
+    				options.getTarget().setModel( AbstractDatasetCreator.createLoadingTable());
+    				
     				options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     			}
     			finest("Creating table type");

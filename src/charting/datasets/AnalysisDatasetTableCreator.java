@@ -704,7 +704,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 					}
 					
 					
-					valueString = shared+" ("+df.format(pct)+"% of row)";
+					valueString = df.format(pct)+"%";
 				}
 				
 				popData[i++] = valueString;

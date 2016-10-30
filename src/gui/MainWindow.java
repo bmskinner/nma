@@ -1323,6 +1323,7 @@ public class MainWindow
 		String folderName = saveDialog.getDirectory();
 
 		if(fileName==null || folderName==null){
+			log("Worskspace save cancelled");
 			return;
 		}
 		File f = new File(folderName+File.separator+fileName);

@@ -132,9 +132,12 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 				.addStatistic(statA)
 				.addStatistic(statB)
 				.setScale(GlobalOptions.getInstance().getScale())
+				.setTarget(rhoTable)
 				.build();
 		
-		rhoTable.setModel(getTable(tableOptions));
+		setTable(tableOptions);
+		
+//		rhoTable.setModel(getTable(tableOptions));
 		
 		gateButton.setEnabled(true);
 	}
@@ -155,9 +158,10 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		TableOptions tableOptions = new TableOptionsBuilder()
 				.setDatasets(null)
 				.setScale(GlobalOptions.getInstance().getScale())
+				.setTarget(rhoTable)
 				.build();
-		
-		rhoTable.setModel(getTable(tableOptions));
+		setTable(tableOptions);
+//		rhoTable.setModel(getTable(tableOptions));
 		
 		gateButton.setEnabled(false);
 	}

@@ -29,6 +29,8 @@ public interface TableOptions extends DisplayOptions {
 	JTable getTarget();
 	
 	void setTarget(JTable target);
+	
+	boolean hasTarget();
 		
 	void setRenderer(int column, TableCellRenderer r);
 	

@@ -305,11 +305,15 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			
 			TableOptions options = new TableOptionsBuilder()
 				.setDatasets(getDatasets())
+				.setTarget(clusterDetailsTable)
+				.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new ClusterTableCellRenderer())
 				.build();
 			
-			TableModel optionsModel = new AnalysisDatasetTableCreator(options).createClusterOptionsTable();
-			clusterDetailsTable.setModel(optionsModel);
-			setRenderer(clusterDetailsTable, new ClusterTableCellRenderer());
+			setTable(options);
+			
+//			TableModel optionsModel = new AnalysisDatasetTableCreator(options).createClusterOptionsTable();
+//			clusterDetailsTable.setModel(optionsModel);
+//			setRenderer(clusterDetailsTable, new ClusterTableCellRenderer());
 
 			updateTreeButtonsPanel();
 			

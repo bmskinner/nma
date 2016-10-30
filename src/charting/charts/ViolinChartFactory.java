@@ -90,7 +90,7 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 		
 		ViolinCategoryDataset ds = null;
 		if(options.hasDatasets()){
-			 ds = ViolinDatasetCreator.getInstance().createNucleusStatisticViolinDataset(options);
+			 ds = new ViolinDatasetCreator(options).createNucleusStatisticViolinDataset();
 		}
 		
 		JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
@@ -135,7 +135,7 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 		
 		ViolinCategoryDataset ds = null;
 		if(options.hasDatasets()){
-			 ds = ViolinDatasetCreator.getInstance().createSignalStatisticViolinDataset(options);
+			 ds = new ViolinDatasetCreator(options).createSignalStatisticViolinDataset();
 		}
 		
 		JFreeChart chart = createViolinChart(null, 
@@ -208,7 +208,7 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 		
 		ViolinCategoryDataset ds = null;
 		if(options.hasDatasets()){
-			 ds = ViolinDatasetCreator.getInstance().createSegmentStatisticDataset(options);
+			 ds = new ViolinDatasetCreator(options).createSegmentStatisticDataset();
 		}
 		
 		JFreeChart chart = createViolinChart(null, 

@@ -37,6 +37,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.JFreeChart;
 
 import stats.Quartile;
+import charting.charts.AbstractChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.charts.panels.ExportableChartPanel;
@@ -122,7 +123,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 
 				finest("Creating chart for segment "+seg.getName());
 				
-				JFreeChart chart = OutlineChartFactory.makeEmptyChart();
+				JFreeChart chart = AbstractChartFactory.createLoadingChart();
 				ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
 				chartPanel.setFixedAspectRatio(true);
 				chartPanel.addChartSetEventListener(this);

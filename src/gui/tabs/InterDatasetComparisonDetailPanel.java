@@ -60,7 +60,7 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 		// Add to the tabbed panel
 		// Title, icon, component, tooltip
 		tabPanel.addTab("Venn"         , null, vennPanel        , null);
-		tabPanel.addTab("Pairwise Venn", null, pairwiseVennPanel, null);
+		tabPanel.addTab("Detailed Venn", null, pairwiseVennPanel, null);
 		tabPanel.addTab("Kruskal"      , null, kruskalPanel     , null);
 
 		this.add(tabPanel, BorderLayout.CENTER);
