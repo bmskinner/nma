@@ -38,6 +38,8 @@ import gui.actions.ShellAnalysisAction;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.dialogs.CellCollectionOverviewDialog;
 import gui.dialogs.MainOptionsDialog;
+import gui.main.MainDragAndDropTarget;
+import gui.main.MainHeaderPanel;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.ClusterDetailPanel;
 import gui.tabs.DetailPanel;
@@ -154,7 +156,7 @@ public class MainWindow
 	 * by all other classes implementing the Loggable interface
 	 */
 	private static final Logger programLogger =
-	        Logger.getLogger(Loggable.PROGRAM_LOGGER); // the program logger will report status and errors in the running of the program, not involving datasets 
+	        Logger.getLogger(Loggable.PROGRAM_LOGGER);
 	
 	
 	private static final DatasetListManager datasetManager = DatasetListManager.getInstance(); 
@@ -163,6 +165,8 @@ public class MainWindow
 	
 	
 	private static final ThreadManager threadManager = ThreadManager.getInstance();	
+	
+//	volatile private boolean isRunning = false;
 	
 	
 	/**
@@ -261,7 +265,7 @@ public class MainWindow
 			//---------------
 			// Create the header buttons
 			//---------------
-			contentPane.add(createHeaderButtons(), BorderLayout.NORTH);
+			contentPane.add(new MainHeaderPanel(this), BorderLayout.NORTH);
 		
 			
 			//---------------
@@ -436,214 +440,7 @@ public class MainWindow
 	public LogPanel getLogPanel(){
 		return this.logPanel;
 	}
-		
-	/**
-	 * Create the panel of primary buttons
-	 * @return a panel
-	 */
-	private JPanel createHeaderButtons(){
-
-		JPanel panelHeader = new JPanel();
-
-		JButton btnNewAnalysis = new JButton("New analysis");
-		btnNewAnalysis.addActionListener(
-				e ->new NewAnalysisAction(MainWindow.this)
-		);
-		panelHeader.add(btnNewAnalysis);
-
-		//---------------
-		// load saved dataset button
-		//---------------
-
-		JButton btnLoadSavedDataset = new JButton("Load analysis dataset");
-		
-		btnLoadSavedDataset.addActionListener(	
-			e -> {
-				finest("Creating import action");
-				new PopulationImportAction(MainWindow.this);
-			}
-		);
-			
-		panelHeader.add(btnLoadSavedDataset);
-
-		//---------------
-		// save button
-		//---------------
-
-		JButton btnSavePopulation = new JButton("Save all");
-		btnSavePopulation.addActionListener( e -> {
-					log("Saving root populations...");
-					saveRootDatasets();
-				}
-		);
-
-		panelHeader.add(btnSavePopulation);
-		
-		//---------------
-		// save workspace button
-		//---------------
-
-		JButton btnSaveWorkspace = new JButton("Save workspace");
-		btnSaveWorkspace.addActionListener( e -> {
-					saveWorkspace();
-			}
-		);
-
-		panelHeader.add(btnSaveWorkspace);
-
-		//---------------
-		// FISH mapping button
-		//---------------
-
-		JButton btnPostanalysisMapping = new JButton("Post-FISH mapping");
-		btnPostanalysisMapping.addActionListener(
-				e -> new FishRemappingAction(populationsPanel.getSelectedDatasets(), MainWindow.this)
-		);
-		panelHeader.add(btnPostanalysisMapping);
 				
-		JButton optionsButton = new JButton("Options");
-		optionsButton.addActionListener(
-				
-				e -> { 
-
-					MainOptionsDialog dialog = new MainOptionsDialog(MainWindow.this);
-					dialog.addInterfaceEventListener(this);
-			}
-		);		
-		panelHeader.add(optionsButton);
-		
-		MeasurementUnitSettingsPanel unitsPanel = new MeasurementUnitSettingsPanel();
-		unitsPanel.addInterfaceEventListener(this);
-		panelHeader.add(unitsPanel);
-		
-		return panelHeader;
-	}
-		
-			
-	/**
-	 * Update the display panels with information from the given datasets
-	 * @param list the datasets to display
-	 */
-//	private void updatePanels(final List<AnalysisDataset> list){
-//		
-//		fine("Requesting update of panels");
-//		if(list!=null){
-//			fine("Updating tab panels for "+list.size()+" datasets");
-//		} else {
-//			fine("Updating tab panels with null datasets");
-//		}
-//		
-////		Runnable task = () -> {
-////			try {
-////
-////				populationsPanel.repaintTreeTable();
-////				for(DetailPanel panel : MainWindow.this.detailPanels){
-////					panel.update(list);
-////				}
-////
-////				fine("Updated tab panels");
-////
-////			} catch (Exception e) {
-////				error("Error updating panels", e);
-////			}
-////		};
-//		
-////		threadManager.execute(task);
-//		
-//		threadManager.executeAndCancelUpdate( new PanelUpdateTask(list) );
-//	}
-//
-//	public class PanelUpdateTask implements CancellableRunnable {
-//		final List<IAnalysisDataset> list;
-//		private volatile AtomicBoolean bool = new AtomicBoolean();
-//		
-//		public PanelUpdateTask(final List<IAnalysisDataset> list){
-//			fine("Creating new panel update task with "+list.size()+"datasets");
-//			this.list = list;
-//		}
-//		
-//		@Override
-//		public void run() {
-//			try{
-//				bool.set(true);
-//
-//				populationsPanel.repaintTreeTable();
-//				fireDatasetUpdateEvent(list);
-//				
-////				for(DetailPanel panel : MainWindow.this.detailPanels){
-////
-////					if(bool.get()){
-////						panel.update(list);
-////					}
-////				}
-//
-//				fine("Updated tab panels");
-//				bool.set(false);
-//
-//			} catch (Exception e) {
-//				error("Error updating panels", e);
-//			}
-//		}
-//		
-//		@Override
-//		public void cancel(){
-//			bool.set(false);
-//		}
-//		
-//	}
-	
-	
-	volatile private boolean isRunning = false;
-	
-//	private synchronized boolean checkRunning(){
-//		if (isRunning) 
-//			return true;
-//		else 
-//			return false;
-//	}
-	
-	
-	
-	/**
-	 * Check if any of the detail panels are in the process
-	 * of updating, and if so, set the busy cursor. Waits 500ms
-	 * between checks. 
-	 */
-//	private synchronized void checkUpdatingState(){
-//		Thread thr = new Thread() {
-//			public void run() {
-//				try {
-//					while(true){
-//						isRunning = false;
-//
-//						for(DetailPanel panel : MainWindow.this.detailPanels){
-//							if(panel.isUpdating()){
-//								isRunning = true;
-//							}
-//							
-//						}
-//
-//						if(checkRunning()){
-//							MainWindow.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-//						} else {
-//							MainWindow.this.setCursor(Cursor.getDefaultCursor());
-//						}
-//
-//						Thread.sleep(500);
-//					}
-//				} catch (InterruptedException e) {
-//
-//					error("Error checking update state", e);
-//
-//				}
-//			}
-//
-//		};
-//		thr.start();
-//	}
-	
-
-			
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
@@ -898,6 +695,10 @@ public class MainWindow
 		
 	}
 	
+	public void addWorkspace(IWorkspace w){
+		this.workspaces.add(w);
+	}
+	
 	/**
 	 * Add the given dataset and all its children to the 
 	 * populations panel
@@ -979,7 +780,7 @@ public class MainWindow
 	/**
 	 * Save all the root datasets in the populations panel
 	 */
-	private void saveRootDatasets(){
+	public void saveRootDatasets(){
 		
 		Runnable r = () -> {
 			for(IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
@@ -1261,23 +1062,13 @@ public class MainWindow
 //		threadManager.shutdownNow();
 		super.dispose();
 	}
-	
-//	public List<AnalysisDataset> getOpenDatasets(){
-//		return DatasetListManager.getInstance().getAllDatasets();
-//	}
+
 	
 	public boolean hasOpenDatasets(){
 		return DatasetListManager.getInstance().getAllDatasets().size()>0;
 	}
 	
 	private void killAllTasks(){
-//		threadManager.shutdownNow();
-		
-//		warn("Found "+logPanel.getProgressBars().size()+" active bars");
-//		for(JProgressBar bar : logPanel.getProgressBars()){
-//			logPanel.remove(bar);
-//		}
-//		warn("Killed all running tasks");
 		
 		log("Threads running in the JVM:");
 		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
@@ -1310,7 +1101,7 @@ public class MainWindow
     	updateListeners.remove( l );
     }
     
-    private void saveWorkspace(){
+    public void saveWorkspace(){
     	
     	if(DatasetListManager.getInstance().getRootDatasets().size()==0){
     		return;
@@ -1340,92 +1131,5 @@ public class MainWindow
     	log("Exported workspace file to "+f.getAbsolutePath());
     	
     }
-    
-    public class MainDragAndDropTarget extends DropTarget {
-    	
-    	private MainWindow mw;
-    	public MainDragAndDropTarget(MainWindow target){
-    		super();
-    		mw = target;
-    	}
-    	
-    	@Override
-        public synchronized void drop(DropTargetDropEvent dtde) {
-			
-			try {
-				dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-				Transferable t = dtde.getTransferable();
-				
-				List<File> fileList = new ArrayList<File>();
-				
-				// Check that what was provided is a list
-				if(t.getTransferData(DataFlavor.javaFileListFlavor) instanceof List<?>){
-					
-					// Check that what is in the list is files
-					List<?> tempList = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
-					for(Object o : tempList){
-						
-						if(o instanceof File){
-							fileList.add( (File) o);
-						}
-					}
-					
-					// Open the files - we process only *.nmd and *.wrk files
-
-					for(File f : fileList){
-						if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
-							fine("File is nmd");
-							receiveDatasetFile(f);
-						} 
-						
-						if(f.getName().endsWith(Constants.WRK_FILE_EXTENSION)){	
-							fine("File is wrk");
-							receiveWorkspaceFile(f);
-						} 
-						
-						if(f.isDirectory()){	
-							receiveFolder(f);
-						}
-
-					}
-				}
-				
-			} catch (UnsupportedFlavorException e) {
-				error("Error in DnD", e);
-			} catch (IOException e) {
-				error("IO error in DnD", e);
-			}
-           
-        }
-    	
-    	private void receiveFolder(File f){
-    		// Pass to new analysis
-			Runnable task = () -> { 
-				new NewAnalysisAction(mw, f);
-			};
-			threadManager.execute(task);
-    	}
-    	
-    	private void receiveWorkspaceFile(File f){
-    		finer("Opening workgroup file "+f.getAbsolutePath());
-    		
-    		IWorkspace w = new WorkspaceImporter(f).importWorkspace();
-    		
-    		mw.workspaces.add(w);
-    		
-    		for(File dataFile : w.getFiles()){
-    			receiveDatasetFile(dataFile);
-    		}
-
-    	}
-    	
-    	private void receiveDatasetFile(File f){
-    		finer("Opening file "+f.getAbsolutePath());
-
-			Runnable task = () -> { 
-				new PopulationImportAction(mw, f);
-			};
-			threadManager.execute(task);
-    	}
-    }
+ 
 }
