@@ -180,7 +180,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.ISegmentedProfile#getSegmentIDs()
 	 */
 	@Override
-	public List<UUID> getSegmentIDs(){
+	public synchronized List<UUID> getSegmentIDs(){
 		List<UUID> result = new ArrayList<UUID>();
 		for(IBorderSegment seg : this.segments){
 			result.add(seg.getID());
@@ -189,7 +189,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	}
 	
 	@Override
-	public IBorderSegment getSegmentAt(Tag tag, int position){
+	public synchronized IBorderSegment getSegmentAt(Tag tag, int position){
 		return this.getSegments(tag).get(position);
 	}
 
@@ -237,7 +237,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegments(components.generic.BorderTagObject)
 	 */
 	@Override
-	public List<IBorderSegment> getSegments(Tag tag) {
+	public synchronized List<IBorderSegment> getSegments(Tag tag) {
 		if(tag==null){
 			throw new IllegalArgumentException("The requested segment key is null: "+tag);
 		}

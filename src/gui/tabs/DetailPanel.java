@@ -282,7 +282,13 @@ public abstract class DetailPanel
 		finest("Set dataset list of "+this.list.size()+" datasets");
 		setUpdating(true);
 		finest("Set updating state");
-		updateDetail();
+		
+		Runnable r = () -> {
+			updateDetail();
+		};
+		
+		ThreadManager.getInstance().submit(r);
+		
 
 	}
 	
