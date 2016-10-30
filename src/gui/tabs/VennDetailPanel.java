@@ -36,6 +36,7 @@ import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import charting.options.DefaultTableOptions.TableType;
 import gui.components.ExportableTable;
+import gui.tabs.PairwiseVennDetailPanel.PairwiseVennTableCellRenderer;
 
 @SuppressWarnings("serial")
 public class VennDetailPanel extends DetailPanel {
@@ -90,7 +91,7 @@ public class VennDetailPanel extends DetailPanel {
 			.setDatasets(getDatasets())
 			.setType(TableType.VENN)
 			.setTarget(vennTable)
-			.setRenderer(new VennTableCellRenderer())
+			.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new VennTableCellRenderer())
 			.build();
 		
 		setTable(options);

@@ -85,7 +85,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 						.addStatistic(stat)
 						.setSegPosition(seg.getPosition())
 						.setTarget(table)
-						.setRenderer(new WilcoxonTableCellRenderer())
+						.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer())
 						.build();
 
 					

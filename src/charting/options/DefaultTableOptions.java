@@ -18,12 +18,14 @@
  *******************************************************************************/
 package charting.options;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import components.ICell;
 
@@ -40,7 +42,7 @@ public class DefaultTableOptions extends AbstractOptions implements TableOptions
 	
 	private JTable target   = null;
 	
-	private TableCellRenderer renderer = null;
+	private Map<Integer, TableCellRenderer> renderer = new HashMap<Integer, TableCellRenderer>(1);
 	
 	public DefaultTableOptions(List<IAnalysisDataset> list) {
 		super(list);
@@ -92,14 +94,19 @@ public class DefaultTableOptions extends AbstractOptions implements TableOptions
 	}
 
 	@Override
-	public void setRenderer(TableCellRenderer r) {
-		this.renderer = r;
+	public void setRenderer(int column, TableCellRenderer r) {
+		renderer.put(column,  r);
 		
 	}
 
 	@Override
-	public TableCellRenderer getRenderer() {
-		return renderer;
+	public TableCellRenderer getRenderer(int i) {
+		return renderer.get(i);
+	}
+	
+	@Override
+	public Set<Integer> getRendererColumns(){
+		return renderer.keySet();
 	}
 
 	public enum TableType {

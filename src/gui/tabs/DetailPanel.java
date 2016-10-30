@@ -598,6 +598,43 @@ public abstract class DetailPanel
 		}
 	}
 	
+	private void setRenderers(TableOptions options){
+		JTable table = options.getTarget();
+		int columns  = table.getColumnModel().getColumnCount();
+		
+		for(int i : options.getRendererColumns()){
+			
+			TableCellRenderer renderer = options.getRenderer(i);
+			
+			if(i==TableOptions.FIRST_COLUMN){
+				
+				table.getColumnModel().getColumn(0).setCellRenderer(renderer);
+				continue;
+			}
+			
+			if(i==TableOptions.ALL_COLUMNS){
+				for(int j=0;j<columns;j++){
+					table.getColumnModel().getColumn(j).setCellRenderer(renderer);
+				}
+				continue;
+			}
+			
+			if(i==TableOptions.ALL_EXCEPT_FIRST_COLUMN){
+				for(int j=1;j<columns;j++){
+					table.getColumnModel().getColumn(j).setCellRenderer(renderer);
+				}
+				continue;
+			}
+			
+
+			table.getColumnModel().getColumn(i).setCellRenderer(renderer);
+
+			
+		}
+
+		
+	}
+	
 	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
 		signalListeners.add( l );
     }
@@ -841,7 +878,7 @@ public abstract class DetailPanel
     				if(model!=null){
     					options.getTarget().setModel(model);
     					finest("Set table to new model");
-    					setRenderer(options.getTarget(), options.getRenderer());
+    					setRenderers(options);
     				}
     				
     				options.getTarget().setCursor(Cursor.getDefaultCursor());

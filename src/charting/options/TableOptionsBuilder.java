@@ -3,7 +3,9 @@ package charting.options;
 import gui.components.ColourSelecter.ColourSwatch;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.swing.JTable;
@@ -32,7 +34,7 @@ public class TableOptionsBuilder {
 	private int segPosition            = 0;    // the position of the segment in the profile (consistent between datasets)
 	private MeasurementScale scale     = MeasurementScale.PIXELS;
 	private JTable target              = null;
-	private TableCellRenderer renderer = null;
+	private Map<Integer, TableCellRenderer> renderer = new HashMap<Integer, TableCellRenderer>(1);
 
 	private ICell cell                  = null;
 
@@ -84,8 +86,8 @@ public class TableOptionsBuilder {
 		return this;
 	}
 	
-	public TableOptionsBuilder setRenderer(TableCellRenderer r) {
-		this.renderer = r;
+	public TableOptionsBuilder setRenderer(int column, TableCellRenderer r) {
+		renderer.put(column, r);
 		return this;
 	}
 
@@ -100,7 +102,11 @@ public class TableOptionsBuilder {
 		options.setCell(cell);
 		options.setSwatch(swatch);
 		options.setTarget(target);
-		options.setRenderer(renderer);
+		
+		for(int i : renderer.keySet()){
+			options.setRenderer(i, renderer.get(i));
+		}
+
 		return options;
 
 	}

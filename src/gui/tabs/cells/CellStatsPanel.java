@@ -28,6 +28,7 @@ import components.nuclei.Nucleus;
 import gui.DatasetEvent;
 import gui.GlobalOptions;
 import gui.components.ExportableTable;
+import gui.components.WilcoxonTableCellRenderer;
 import gui.dialogs.CellImageDialog;
 
 @SuppressWarnings("serial")
@@ -200,6 +201,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 			.setCell(this.getCellModel().getCell())
 			.setScale(GlobalOptions.getInstance().getScale())
 			.setTarget(table)
+			.setRenderer(TableOptions.FIRST_COLUMN, new StatsTableCellRenderer())
 			.build();
 
 		try{
@@ -209,15 +211,15 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 //			TableModel model = getTable(options);
 //			table.setModel(model);
 			
-			//TODO: add chosen column set for renderer into options so we can add to the first column
 
-			if(this.getCellModel().hasCell()){
-				table.getColumnModel().getColumn(1).setCellRenderer(  new StatsTableCellRenderer() );
-				this.setEnabled(true);
-			} else {
 
-				this.setEnabled(false);
-			}
+//			if(this.getCellModel().hasCell()){
+//				table.getColumnModel().getColumn(1).setCellRenderer(  new StatsTableCellRenderer() );
+//				this.setEnabled(true);
+//			} else {
+//
+//				this.setEnabled(false);
+//			}
 		} catch(Exception e){
 			warn("Error updating cell stats table");
 			log(Level.FINE, "Error updating cell stats table", e);
