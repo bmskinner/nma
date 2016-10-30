@@ -17,6 +17,7 @@ import org.jfree.chart.JFreeChart;
 
 import stats.Quartile;
 import stats.SegmentStatistic;
+import charting.charts.AbstractChartFactory;
 import charting.charts.HistogramChartFactory;
 import charting.charts.panels.SelectableChartPanel;
 import charting.options.DefaultChartOptions;
@@ -74,7 +75,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 			// Get each segment as a boxplot
 			for(IBorderSegment seg : segments){
 				
-				JFreeChart chart = HistogramChartFactory.makeEmptyChart();
+				JFreeChart chart = AbstractChartFactory.createLoadingChart();
 				SelectableChartPanel chartPanel = new SelectableChartPanel(chart, seg.getName());
 				chartPanel.setPreferredSize(preferredSize);
 				mainPanel.add(chartPanel);	

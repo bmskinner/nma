@@ -9,8 +9,8 @@ import components.ICell;
 
 public class CellViewModel {
 	
-	private ICell cell = null;
-	private CellularComponent component = null;
+	private volatile ICell cell = null;
+	private volatile CellularComponent component = null;
 	
 	List<AbstractCellDetailPanel> views = new ArrayList<AbstractCellDetailPanel>();
 	
@@ -19,7 +19,7 @@ public class CellViewModel {
 		this.component = component;
 	}
 	
-	public void setCell(ICell c){
+	public synchronized void setCell(ICell c){
 		if(c==null || c!=cell){
 			this.cell = c;
 			component = null; // component cannot be carried over
@@ -33,7 +33,7 @@ public class CellViewModel {
 	 * triggering a view update before the dialog closes.
 	 * @param c the cell. Must have the same ID as the existing cell.
 	 */
-	public void swapCell(ICell c){
+	public synchronized void swapCell(ICell c){
 		if(c==null || c.getId().equals(cell.getId())){
 			this.cell = c;
 			component = null; // component cannot be carried over
@@ -41,11 +41,11 @@ public class CellViewModel {
 		}
 	}
 	
-	public ICell getCell(){
+	public synchronized ICell getCell(){
 		return cell;
 	}
 	
-	public boolean hasCell(){
+	public synchronized boolean hasCell(){
 		return cell!=null;
 	}
 	
@@ -53,7 +53,7 @@ public class CellViewModel {
 	 * Cause all charts with the current active cell
 	 * to be redrawn
 	 */
-	public void clearChartCache(){
+	public synchronized void clearChartCache(){
 		for(AbstractCellDetailPanel d : views){
 			d.clearCellCharts();
 		}
@@ -61,28 +61,28 @@ public class CellViewModel {
 		
 	}
 	
-	public void updateComponent(){
+	public synchronized void updateComponent(){
 		
 	}
 	
-	public void setComponent(CellularComponent component){
+	public synchronized void setComponent(CellularComponent component){
 		if(this.component!=component){
 			this.component = component;
 			updateViews();
 		}
 	}
 	
-	public CellularComponent getComponent(){
+	public synchronized CellularComponent getComponent(){
 		return this.component;
 	}
 	
-	public void updateViews(){
+	public synchronized void updateViews(){
 		for(AbstractCellDetailPanel d : views){
 			d.update();
 		}
 	}
 	
-	public void addView(AbstractCellDetailPanel d){
+	public synchronized void addView(AbstractCellDetailPanel d){
 		this.views.add(d);
 	}
 		

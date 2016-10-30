@@ -74,11 +74,11 @@ import analysis.IAnalysisDataset;
 @SuppressWarnings("serial")
 public abstract class DetailPanel 
 	extends JPanel 
-	implements  SignalChangeListener, 
+	implements  TabPanel,
+				SignalChangeListener, 
 				DatasetEventListener, 
 				InterfaceEventListener, 
 				Loggable, 
-				DatasetUpdateEventListener,
 				ChartOptionsRenderedEventListener {
 	
 	private final List<Object> listeners          = new CopyOnWriteArrayList<Object>();
@@ -89,7 +89,7 @@ public abstract class DetailPanel
 	
 	private volatile List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 	
-	private final List<DetailPanel> subPanels = new  ArrayList<DetailPanel>();
+	private final List<TabPanel> subPanels = new  ArrayList<TabPanel>();
 	
 	// The chart cache holds rendered charts for all selected options, until a change is made to a dataset
 	// The table cache does the same for table models
@@ -109,7 +109,7 @@ public abstract class DetailPanel
 	 * This will pass on refreshes and UI updates
 	 * @param panel
 	 */
-	public void addSubPanel(final DetailPanel panel){
+	public void addSubPanel(final TabPanel panel){
 		subPanels.add(panel);
 		panel.addSignalChangeListener(this);
 		panel.addDatasetEventListener(this);
@@ -119,7 +119,7 @@ public abstract class DetailPanel
 		this.addDatasetUpdateEventListener(panel);
 	}
 	
-	public List<DetailPanel> getSubPanels(){
+	public List<TabPanel> getSubPanels(){
 		return subPanels;
 	}
 	
@@ -182,7 +182,7 @@ public abstract class DetailPanel
 			return true;
 		}
 		
-		for(DetailPanel panel : this.subPanels){
+		for(TabPanel panel : this.subPanels){
 			if(panel.isUpdating()){
 				return true;
 			}
@@ -216,7 +216,7 @@ public abstract class DetailPanel
 			}
 			this.setCursor(Cursor.getDefaultCursor());
 		}
-		for(DetailPanel panel : this.subPanels){
+		for(TabPanel panel : this.subPanels){
 			panel.setAnalysing(b);
 		}
 	}
@@ -228,7 +228,7 @@ public abstract class DetailPanel
 			c.setEnabled(b);
 		}
 		
-		for(DetailPanel panel : this.subPanels){
+		for(TabPanel panel : this.subPanels){
 			panel.setEnabled(b);
 		}
 	}
@@ -242,7 +242,7 @@ public abstract class DetailPanel
 		
 		updateSize(this);
 				
-		for(DetailPanel panel : this.subPanels){
+		for(TabPanel panel : this.subPanels){
 			panel.updateSize();
 		}
 	}
@@ -272,7 +272,7 @@ public abstract class DetailPanel
 		}
 	}
 	
-
+	@Override
 	public synchronized void update(final List<IAnalysisDataset> list){
 
 		fine("Preparing to update");
@@ -497,7 +497,7 @@ public abstract class DetailPanel
 	public synchronized void clearChartCache(){
 		finest("Clearing chart cache");
 		this.getChartCache().clear();
-		for(DetailPanel panel : this.subPanels){
+		for(TabPanel panel : this.subPanels){
 			panel.clearChartCache();
 		}
 		finest("Chart cache cleared");
@@ -513,7 +513,7 @@ public abstract class DetailPanel
 		finest("Panel chart cache cleared");
 		if(this.hasSubPanels()){
 			finest("Clearing sub-panel chart caches");
-			for(DetailPanel panel : this.subPanels){
+			for(TabPanel panel : this.subPanels){
 				panel.clearChartCache(list);
 			}
 		}
@@ -554,7 +554,7 @@ public abstract class DetailPanel
 	public synchronized void clearTableCache(){
 		finest("Clearing table cache");
 		this.getTableCache().clear();
-		for(DetailPanel panel : this.subPanels){
+		for(TabPanel panel : this.subPanels){
 			panel.clearTableCache();
 		}
 		finest("Table cache cleared");
@@ -569,7 +569,7 @@ public abstract class DetailPanel
 		finest("Clearing table cache for specific datasets");
 		this.getTableCache().clear(list);
 		if(this.hasSubPanels()){
-			for(DetailPanel panel : this.subPanels){
+			for(TabPanel panel : this.subPanels){
 				panel.clearTableCache(list);
 			}
 		}
@@ -758,7 +758,7 @@ public abstract class DetailPanel
 
     public void interfaceEventReceived(InterfaceEvent event){
     	// Pass messages upwards
-    	for(DetailPanel panel : this.subPanels){
+    	for(TabPanel panel : this.subPanels){
 			if(event.getSource().equals(panel)){
 				finest("Passing interface event upwards");
 				fireInterfaceEvent(new InterfaceEvent(this, event));
@@ -769,7 +769,7 @@ public abstract class DetailPanel
     public void datasetEventReceived(DatasetEvent event){
     	
     	// Pass messages upwards
-    	for(DetailPanel panel : this.subPanels){
+    	for(TabPanel panel : this.subPanels){
 			if(event.getSource().equals(panel)){
 				finest("Passing dataset event upwards");
 				fireDatasetEvent(new DatasetEvent(this, event));
@@ -779,7 +779,7 @@ public abstract class DetailPanel
 
     public void signalChangeReceived(SignalChangeEvent event){
     	// Pass messages upwards
-    	for(DetailPanel panel : this.subPanels){
+    	for(TabPanel panel : this.subPanels){
 			if(event.getSource().equals(panel)){
 				finest("Passing signal change event upwards");
 				fireSignalChangeEvent(new SignalChangeEvent(this, event));

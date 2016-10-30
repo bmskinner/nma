@@ -20,18 +20,29 @@ package gui.tabs;
 
 import java.util.List;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
+import gui.DatasetEventListener;
+import gui.DatasetUpdateEventListener;
+import gui.InterfaceEventListener;
+import gui.SignalChangeListener;
 
 
-public interface TabPanel {
+public interface TabPanel 
+	extends DatasetUpdateEventListener {
 	
 	/**
 	 * Instruct the panel to update its display based on the
 	 * given datasets
 	 * @param list
 	 */
-	public void update(List<AnalysisDataset> list);
+	void update(List<IAnalysisDataset> list);
+	
+	
+	/**
+	 * Cause charts to redraw with new dimensions
+	 * preserving aspect ratio
+	 */
+	void updateSize();
 	
 	/**
 	 * Fetch the currently active dataset for the panel.
@@ -39,7 +50,7 @@ public interface TabPanel {
 	 * this simply accesses the first dataset in the list provided
 	 * @return
 	 */
-	public IAnalysisDataset activeDataset();
+	IAnalysisDataset activeDataset();
 	
 	
 	/**
@@ -47,6 +58,44 @@ public interface TabPanel {
 	 * its display
 	 * @return
 	 */
-	public boolean isUpdating();
+	boolean isUpdating();
+	
+	void addSubPanel(TabPanel panel);
 
+	
+	void addSignalChangeListener(SignalChangeListener l);
+	void removeSignalChangeListener(SignalChangeListener l);
+	
+	void addDatasetEventListener(DatasetEventListener l);
+	void removeDatasetEventListener(DatasetEventListener l);
+	
+	void addInterfaceEventListener(InterfaceEventListener l);
+	void removeInterfaceEventListener(InterfaceEventListener l);
+	
+	void addDatasetUpdateEventListener(DatasetUpdateEventListener l);
+	void removeDatasetUpdateEventListener(DatasetUpdateEventListener l);
+	
+	public List<TabPanel> getSubPanels();
+	
+	boolean hasSubPanels();
+	
+	void setAnalysing(boolean b);
+	
+	void setEnabled(boolean b);
+	
+	void clearChartCache();
+	
+	void clearChartCache(List<IAnalysisDataset> list);
+	
+	void clearTableCache();
+	
+	void clearTableCache(List<IAnalysisDataset> list);
+	
+	void refreshChartCache();
+	
+	void refreshChartCache(List<IAnalysisDataset> list);
+	
+	void refreshTableCache();
+	
+	void refreshTableCache(List<IAnalysisDataset> list);
 }

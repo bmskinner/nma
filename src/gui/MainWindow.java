@@ -50,6 +50,7 @@ import gui.tabs.NuclearStatisticsPanel;
 import gui.tabs.NucleusProfilesPanel;
 import gui.tabs.SegmentsDetailPanel;
 import gui.tabs.SignalsDetailPanel;
+import gui.tabs.TabPanel;
 import gui.tabs.populations.PopulationsPanel;
 import ij.io.SaveDialog;
 import io.MappingFileExporter;
@@ -133,7 +134,7 @@ public class MainWindow
 	private InterDatasetComparisonDetailPanel interdatasetDetailPanel;
 	private EditingDetailPanel		editingDetailPanel; 	// for altering data
 	
-	private List<DetailPanel> detailPanels = new ArrayList<DetailPanel>(); // store panels for iterating messsages
+	private List<TabPanel> detailPanels = new ArrayList<TabPanel>(); // store panels for iterating messsages
 	
 	private List<Object> updateListeners = new ArrayList<Object>();
 	
@@ -237,7 +238,7 @@ public class MainWindow
 						  
 					  }
 
-					  for(DetailPanel d : detailPanels){
+					  for(TabPanel d : detailPanels){
 						  d.updateSize();
 					  }
 				  };
@@ -394,7 +395,7 @@ public class MainWindow
 			// Register change listeners
 			//---------------
 			
-			for(DetailPanel d : detailPanels){
+			for(TabPanel d : detailPanels){
 				d.addDatasetEventListener(this);
 				d.addInterfaceEventListener(this);
 				d.addSignalChangeListener(this);
@@ -872,7 +873,7 @@ public class MainWindow
 	private void recacheCharts(){
 		
 		Runnable task = () -> {
-			for(DetailPanel panel : detailPanels){
+			for(TabPanel panel : detailPanels){
 				panel.refreshChartCache();
 				panel.refreshTableCache();
 			}
@@ -881,7 +882,7 @@ public class MainWindow
 	}
 	
 	private void clearChartCache(){
-		for(DetailPanel panel : detailPanels){
+		for(TabPanel panel : detailPanels){
 			panel.clearChartCache();
 			panel.clearTableCache();
 		}	
@@ -895,7 +896,7 @@ public class MainWindow
 			clearChartCache();
 			return;
 		}
-		for(DetailPanel panel : detailPanels){
+		for(TabPanel panel : detailPanels){
 			panel.clearChartCache(list);
 			panel.clearTableCache(list);
 		}		
@@ -911,7 +912,7 @@ public class MainWindow
 		
 		Runnable task = () -> {
 			finer("Heard recache request for list of  "+list.size()+" datasets");
-			for(DetailPanel panel : detailPanels){
+			for(TabPanel panel : detailPanels){
 				panel.refreshChartCache(list);
 				panel.refreshTableCache(list);
 			}
@@ -949,7 +950,7 @@ public class MainWindow
 			}
 			
 			fine("Regenerating charts");
-			for(DetailPanel panel : detailPanels){
+			for(TabPanel panel : detailPanels){
 				panel.refreshChartCache();
 				panel.refreshTableCache();
 			}
@@ -1017,14 +1018,14 @@ public class MainWindow
 			break;
 			
 		case UPDATE_IN_PROGRESS:
-			for(DetailPanel panel : this.detailPanels){
+			for(TabPanel panel : this.detailPanels){
 				panel.setAnalysing(true);
 			}
 			this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 			break;
 			
 		case UPDATE_COMPLETE:
-			for(DetailPanel panel : this.detailPanels){
+			for(TabPanel panel : this.detailPanels){
 				panel.setAnalysing(false);
 			}
 			this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));

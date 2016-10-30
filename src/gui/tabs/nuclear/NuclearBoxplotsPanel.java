@@ -34,10 +34,12 @@ import javax.swing.JScrollPane;
 import org.jfree.chart.JFreeChart;
 
 import stats.NucleusStatistic;
+import charting.charts.AbstractChartFactory;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.charts.panels.ViolinChartPanel;
 import charting.options.DefaultChartOptions;
+import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 
 @SuppressWarnings("serial")
@@ -50,35 +52,28 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 			
 			for(NucleusStatistic stat : NucleusStatistic.values()){
 				
-				ChartOptionsBuilder builder = new ChartOptionsBuilder();
-				DefaultChartOptions options = builder.setDatasets(getDatasets())
-					.addStatistic(stat)
-					.setScale(GlobalOptions.getInstance().getScale())
-					.setSwatch(GlobalOptions.getInstance().getSwatch())
-					.build();
-
-				JFreeChart chart = null;
-				try {
-					chart = new BoxplotChartFactory(options).createStatisticBoxplot();
-				} catch (Exception e) {
-					log(Level.SEVERE, "Error creating boxplots panel", e);
-				}
-				
+				JFreeChart chart = BoxplotChartFactory.makeEmptyChart();
 				ViolinChartPanel panel = new ViolinChartPanel(chart);
+				
 				panel.setPreferredSize(preferredSize);
 				chartPanels.put(stat.toString(), panel);
 				mainPanel.add(panel);
+//				
+//				ChartOptions options = new ChartOptionsBuilder()
+//					.setDatasets(getDatasets())
+//					.addStatistic(stat)
+//					.setScale(GlobalOptions.getInstance().getScale())
+//					.setSwatch(GlobalOptions.getInstance().getSwatch())
+//					.setTarget(panel)
+//					.build();
+//
+//				setChart(options);
 				
 			}
 			
 			// add the scroll pane to the tab
 			scrollPane  = new JScrollPane(mainPanel);
-			this.add(scrollPane, BorderLayout.CENTER);
-			
-//			measurementUnitSettingsPanel.addActionListener(this);
-//			measurementUnitSettingsPanel.setEnabled(false);
-//			this.add(measurementUnitSettingsPanel, BorderLayout.NORTH);
-			
+			this.add(scrollPane, BorderLayout.CENTER);			
 		}
 								
 		@Override
@@ -99,15 +94,13 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		@Override
 		protected void updateMultiple() {
 			super.updateMultiple();
-//			measurementUnitSettingsPanel.setEnabled(true);
-//			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
 
 			for(NucleusStatistic stat : NucleusStatistic.values()){
 
 				ExportableChartPanel panel = chartPanels.get(stat.toString());
 				
-				ChartOptionsBuilder builder = new ChartOptionsBuilder();
-				DefaultChartOptions options = builder.setDatasets(getDatasets())
+				ChartOptions options = new ChartOptionsBuilder()
+					.setDatasets(getDatasets())
 					.addStatistic(stat)
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -115,13 +108,8 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 					.build();
 				
 				setChart(options);
-				
-//				JFreeChart chart = getChart(options);
-//				panel.setChart(chart);
-//				panel.restoreComponentRatio();
 			}
-//			mainPanel.revalidate();
-//			mainPanel.repaint();
+
 			
 		}
 

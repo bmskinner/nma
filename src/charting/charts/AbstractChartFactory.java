@@ -35,7 +35,6 @@ import org.jfree.chart.plot.XYPlot;
 
 import charting.ChartComponents;
 import charting.options.ChartOptions;
-import charting.options.DefaultChartOptions;
 import components.generic.BorderTag;
 import components.generic.Tag;
 
@@ -63,6 +62,9 @@ public abstract class AbstractChartFactory implements Loggable {
 		
 		plot.getDomainAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
 		plot.getRangeAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
+		
+		plot.getDomainAxis().setVisible(false);
+		plot.getRangeAxis().setVisible(false);
 
 		XYTextAnnotation annotation = new XYTextAnnotation("Loading...", 0, 0);
 		annotation.setPaint(Color.BLACK);
