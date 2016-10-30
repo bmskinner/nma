@@ -22,6 +22,8 @@ import gui.ChartOptionsRenderedEvent;
 import gui.ChartOptionsRenderedEventListener;
 import gui.DatasetEvent;
 import gui.DatasetEventListener;
+import gui.DatasetUpdateEvent;
+import gui.DatasetUpdateEventListener;
 import gui.InterfaceEvent;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.InterfaceEventListener;
@@ -74,12 +76,14 @@ public abstract class DetailPanel
 				DatasetEventListener, 
 				InterfaceEventListener, 
 				Loggable, 
+				DatasetUpdateEventListener,
 				ChartOptionsRenderedEventListener {
 	
 	private final List<Object> listeners          = new CopyOnWriteArrayList<Object>();
 	private final List<Object> signalListeners    = new CopyOnWriteArrayList<Object>();
 	private final List<Object> datasetListeners   = new CopyOnWriteArrayList<Object>();
 	private final List<Object> interfaceListeners = new CopyOnWriteArrayList<Object>();
+	private final List<Object> updateListeners    = new CopyOnWriteArrayList<Object>();
 	
 	private volatile List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 	
@@ -108,6 +112,9 @@ public abstract class DetailPanel
 		panel.addSignalChangeListener(this);
 		panel.addDatasetEventListener(this);
 		panel.addInterfaceEventListener(this);
+		
+		// This will signal to sub panels to update
+		this.addDatasetUpdateEventListener(panel);
 	}
 	
 	public List<DetailPanel> getSubPanels(){
@@ -265,21 +272,17 @@ public abstract class DetailPanel
 	
 
 	public synchronized void update(final List<IAnalysisDataset> list){
-		
-//		if(this.isUpdating()){
-			finest(this.getClass().getName()+": Panel is already updating");
-//		} else {
-			finest(this.getClass().getName()+": Preparing to update");
-			if(list!=null){
-				this.list = list;
-			} else {
-				this.list = new ArrayList<IAnalysisDataset>(0);
-			}
-			finest(this.getClass().getName()+": Set dataset list of "+this.list.size()+" datasets");
-			setUpdating(true);
-			finest(this.getClass().getName()+": Set updating state");
-			updateDetail();
-//		}
+
+		fine("Preparing to update");
+		if(list!=null){
+			this.list = list;
+		} else {
+			this.list = new ArrayList<IAnalysisDataset>(0);
+		}
+		finest("Set dataset list of "+this.list.size()+" datasets");
+		setUpdating(true);
+		finest("Set updating state");
+		updateDetail();
 
 	}
 	
@@ -289,38 +292,38 @@ public abstract class DetailPanel
 	 */
 	private void updateDetail(){
 		
-		finest(this.getClass().getName()+": Updating detail panel");
+		finer("Updating detail panel");
 		try {
-			finest(this.getClass().getName()+": Checking dataset list");
+			finest("Checking dataset list");
 			if(hasDatasets()){
-				finest(this.getClass().getName()+": Datasets present");
+				finest("Datasets present");
 				if(isSingleDataset()){
-					finer( this.getClass().getName()+": Single dataset present");
+					finer("Single dataset present");
 					updateSingle();
 				} else {
-					finer(this.getClass().getName()+": Multiple datasets present");
+					finer("Multiple datasets present");
 					updateMultiple();
 				}
 				
 			} else {
-				finer(this.getClass().getName()+": No datasets present");
+				finer("No datasets present");
 				updateNull();
 			}
 			
 		} catch (Exception e) {
-			warn(this.getClass().getName()+": Error updating panel");
-			log(Level.FINE, "Error updating panel: "+ this.getClass().getName(), e); // save detail for fine logging
-			setUpdating(false);
+			warn("Error updating panel "+this.getClass().getName());
+			fine("Error updating panel", e); // save detail for fine logging
+			
 			try {
 				updateNull();
 			} catch(Exception e1){
 				warn(this.getClass().getName()+": Error recovering from error updating panel");
-				log(Level.FINE, "Error recovering from error updating panel: "+ this.getClass().getName(), e1);
+				fine("Error recovering from error updating panel", e1);
 				setUpdating(false);
 			}
 		} finally {
 			setUpdating(false);
-			finest(this.getClass().getName()+": Finished update");
+			fine("Finished update");
 		}
 	}
 			
@@ -916,6 +919,38 @@ public abstract class DetailPanel
     
     public synchronized void removeChartOptionsRenderedEventListener( ChartOptionsRenderedEventListener l ) {
     	listeners.remove( l );
+    }
+    
+    
+    /**
+     * Signal listeners that the given datasets should be displayed
+     * @param list
+     */
+    public void fireDatasetUpdateEvent(List<IAnalysisDataset> list){
+    	DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
+    	Iterator<Object> iterator = updateListeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (DatasetUpdateEventListener) iterator.next() ).datasetUpdateEventReceived( e );
+        }
+    }
+    
+    /**
+     * Add a listener for dataset update events.
+     * @param l
+     */
+    public synchronized void addDatasetUpdateEventListener( DatasetUpdateEventListener l ) {
+    	updateListeners.add( l );
+    }
+    
+    public synchronized void removeDatasetUpdateEventListener( DatasetUpdateEventListener l ) {
+    	updateListeners.remove( l );
+    }
+    
+    public void datasetUpdateEventReceived(DatasetUpdateEvent e){
+//		Signal sub panels to update
+    	fireDatasetUpdateEvent(list);
+    	this.update(e.getDatasets());
+
     }
         
 }

@@ -49,7 +49,10 @@ import gui.tabs.NucleusProfilesPanel;
 import gui.tabs.SegmentsDetailPanel;
 import gui.tabs.SignalsDetailPanel;
 import gui.tabs.populations.PopulationsPanel;
+import ij.io.SaveDialog;
 import io.MappingFileExporter;
+import io.WorkspaceExporter;
+import io.WorkspaceImporter;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -68,6 +71,7 @@ import java.awt.event.WindowStateListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -76,6 +80,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -92,6 +97,8 @@ import utility.Version;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
+import components.active.DefaultWorkspace;
+import components.active.IWorkspace;
 import components.generic.Tag;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
@@ -125,6 +132,10 @@ public class MainWindow
 	private EditingDetailPanel		editingDetailPanel; 	// for altering data
 	
 	private List<DetailPanel> detailPanels = new ArrayList<DetailPanel>(); // store panels for iterating messsages
+	
+	private List<Object> updateListeners = new ArrayList<Object>();
+	
+	private List<IWorkspace> workspaces = new ArrayList<IWorkspace>();
 	
 	// Flags to pass to ProgressableActions to determine the analyses
 	// to carry out in subsequently
@@ -232,67 +243,7 @@ public class MainWindow
 			});
 		
 		
-		this.setDropTarget(new DropTarget(){
-			
-			@Override
-            public synchronized void drop(DropTargetDropEvent dtde) {
-				
-				
-				try {
-					dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-					Transferable t = dtde.getTransferable();
-					
-					List<File> fileList = new ArrayList<File>();
-					
-					// Check that what was provided is a list
-					if(t.getTransferData(DataFlavor.javaFileListFlavor) instanceof List<?>){
-						
-						// Check that what is in the list is files
-						List<?> tempList = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
-						for(Object o : tempList){
-							
-							if(o instanceof File){
-								fileList.add( (File) o);
-							}
-						}
-						
-						// Open the files - we process only *.nmd files
-
-						for(File f : fileList){
-							if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
-								finer("Opening file "+f.getAbsolutePath());
-
-								Runnable task = () -> { 
-									new PopulationImportAction(MainWindow.this, f);
-								};
-								threadManager.execute(task);
-
-
-							} else {
-								finer("File is not nmd, ignoring");
-							}
-							
-							if(f.isDirectory()){
-								// Pass to new analysis
-								Runnable task = () -> { 
-									new NewAnalysisAction(MainWindow.this, f);
-								};
-								threadManager.execute(task);
-								
-							}
-
-						}
-					}
-					
-				} catch (UnsupportedFlavorException e) {
-					error("Error in DnD", e);
-				} catch (IOException e) {
-					error("IO error in DnD", e);
-				}
-               
-            }
-			
-		});
+		this.setDropTarget(  new MainDragAndDropTarget(this) );
 		
 		
 		try {
@@ -320,6 +271,7 @@ public class MainWindow
 			logPanel.addDatasetEventListener(this);
 			logPanel.addInterfaceEventListener(this);
 			logPanel.addSignalChangeListener(this);
+			this.addDatasetUpdateEventListener(logPanel);
 			TextAreaHandler textHandler = new TextAreaHandler(logPanel);
 			textHandler.setFormatter(new LogPanelFormatter());
 			programLogger.addHandler(textHandler);
@@ -332,7 +284,7 @@ public class MainWindow
 			populationsPanel.addSignalChangeListener(this);
 			populationsPanel.addDatasetEventListener(this);
 			populationsPanel.addInterfaceEventListener(this);
-			
+			this.addDatasetUpdateEventListener(logPanel);
 			consensusNucleusPanel = new ConsensusNucleusPanel();
 			detailPanels.add(consensusNucleusPanel);
 
@@ -442,6 +394,7 @@ public class MainWindow
 				d.addDatasetEventListener(this);
 				d.addInterfaceEventListener(this);
 				d.addSignalChangeListener(this);
+				this.addDatasetUpdateEventListener(d);
 			}
 			
 			
@@ -518,20 +471,25 @@ public class MainWindow
 		//---------------
 
 		JButton btnSavePopulation = new JButton("Save all");
-		btnSavePopulation.addActionListener(
-
-				e -> {
+		btnSavePopulation.addActionListener( e -> {
 					log("Saving root populations...");
-
-//					Thread thr = new Thread(){
-//						public void run(){
 					saveRootDatasets();
-//						}};
-//						thr.start();
 				}
 		);
 
 		panelHeader.add(btnSavePopulation);
+		
+		//---------------
+		// save workspace button
+		//---------------
+
+		JButton btnSaveWorkspace = new JButton("Save workspace");
+		btnSaveWorkspace.addActionListener( e -> {
+					saveWorkspace();
+			}
+		);
+
+		panelHeader.add(btnSaveWorkspace);
 
 		//---------------
 		// FISH mapping button
@@ -594,43 +552,45 @@ public class MainWindow
 //		
 //		threadManager.executeAndCancelUpdate( new PanelUpdateTask(list) );
 //	}
-
-	public class PanelUpdateTask implements CancellableRunnable {
-		final List<IAnalysisDataset> list;
-		private volatile AtomicBoolean bool = new AtomicBoolean();
-		
-		public PanelUpdateTask(final List<IAnalysisDataset> list){
-			fine("Creating new panel update task with "+list.size()+"datasets");
-			this.list = list;
-		}
-		
-		@Override
-		public void run() {
-			try{
-				bool.set(true);
-
-				populationsPanel.repaintTreeTable();
-				for(DetailPanel panel : MainWindow.this.detailPanels){
-
-					if(bool.get()){
-						panel.update(list);
-					}
-				}
-
-				fine("Updated tab panels");
-				bool.set(false);
-
-			} catch (Exception e) {
-				error("Error updating panels", e);
-			}
-		}
-		
-		@Override
-		public void cancel(){
-			bool.set(false);
-		}
-		
-	}
+//
+//	public class PanelUpdateTask implements CancellableRunnable {
+//		final List<IAnalysisDataset> list;
+//		private volatile AtomicBoolean bool = new AtomicBoolean();
+//		
+//		public PanelUpdateTask(final List<IAnalysisDataset> list){
+//			fine("Creating new panel update task with "+list.size()+"datasets");
+//			this.list = list;
+//		}
+//		
+//		@Override
+//		public void run() {
+//			try{
+//				bool.set(true);
+//
+//				populationsPanel.repaintTreeTable();
+//				fireDatasetUpdateEvent(list);
+//				
+////				for(DetailPanel panel : MainWindow.this.detailPanels){
+////
+////					if(bool.get()){
+////						panel.update(list);
+////					}
+////				}
+//
+//				fine("Updated tab panels");
+//				bool.set(false);
+//
+//			} catch (Exception e) {
+//				error("Error updating panels", e);
+//			}
+//		}
+//		
+//		@Override
+//		public void cancel(){
+//			bool.set(false);
+//		}
+//		
+//	}
 	
 	
 	volatile private boolean isRunning = false;
@@ -762,12 +722,14 @@ public class MainWindow
 //		}
 		
 		if(event.type().equals("UpdatePanels")){
-			threadManager.executeAndCancelUpdate( new PanelUpdateTask(populationsPanel.getSelectedDatasets()) );
+			fireDatasetUpdateEvent(populationsPanel.getSelectedDatasets());
+//			threadManager.executeAndCancelUpdate( new PanelUpdateTask(populationsPanel.getSelectedDatasets()) );
 //			this.updatePanels(populationsPanel.getSelectedDatasets());
 		}
 		
 		if(event.type().equals("UpdatePanelsNull")){
-			threadManager.executeAndCancelUpdate( new PanelUpdateTask(new ArrayList<IAnalysisDataset>()) );
+			fireDatasetUpdateEvent(new ArrayList<IAnalysisDataset>());
+//			threadManager.executeAndCancelUpdate( new PanelUpdateTask(new ArrayList<IAnalysisDataset>()) );
 //			this.updatePanels();
 		}
 		
@@ -1220,7 +1182,8 @@ public class MainWindow
 		case UPDATE_PANELS:{
 			List<IAnalysisDataset> list = populationsPanel.getSelectedDatasets();
 			finer("Updating tab panels with list of "+list.size()+" datasets");
-			threadManager.executeAndCancelUpdate( new PanelUpdateTask(list) );
+			fireDatasetUpdateEvent(list);
+//			threadManager.executeAndCancelUpdate( new PanelUpdateTask(list) );
 //			this.updatePanels(list);
 			break;
 		}
@@ -1323,5 +1286,145 @@ public class MainWindow
 		}
 		
 	}
+	
+	/**
+     * Signal listeners that the given datasets should be displayed
+     * @param list
+     */
+    public void fireDatasetUpdateEvent(List<IAnalysisDataset> list){
+    	DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
+    	Iterator<Object> iterator = updateListeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (DatasetUpdateEventListener) iterator.next() ).datasetUpdateEventReceived( e );
+        }
+    }
+    /**
+     * Add a listener for dataset update events.
+     * @param l
+     */
+    public synchronized void addDatasetUpdateEventListener( DatasetUpdateEventListener l ) {
+    	updateListeners.add( l );
+    }
+    
+    public synchronized void removeDatasetUpdateEventListener( DatasetUpdateEventListener l ) {
+    	updateListeners.remove( l );
+    }
+    
+    private void saveWorkspace(){
+    	
+    	if(DatasetListManager.getInstance().getRootDatasets().size()==0){
+    		return;
+    	}
+		log("Saving workspace...");
+    	// Choose save file
+    	SaveDialog saveDialog = new SaveDialog("Save workspace as...", "Workspace", Constants.WRK_FILE_EXTENSION);
 
+		String fileName   = saveDialog.getFileName();
+		String folderName = saveDialog.getDirectory();
+
+		if(fileName==null || folderName==null){
+			return;
+		}
+		File f = new File(folderName+File.separator+fileName);
+		
+    	// Get all datasets
+    	IWorkspace w = new DefaultWorkspace(f);
+    	
+    	for(IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()){
+    		w.add(d);
+    	}
+   
+    	WorkspaceExporter exp = new WorkspaceExporter(w);
+    	exp.export();
+    	log("Exported workspace file to "+f.getAbsolutePath());
+    	
+    }
+    
+    public class MainDragAndDropTarget extends DropTarget {
+    	
+    	private MainWindow mw;
+    	public MainDragAndDropTarget(MainWindow target){
+    		super();
+    		mw = target;
+    	}
+    	
+    	@Override
+        public synchronized void drop(DropTargetDropEvent dtde) {
+			
+			try {
+				dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+				Transferable t = dtde.getTransferable();
+				
+				List<File> fileList = new ArrayList<File>();
+				
+				// Check that what was provided is a list
+				if(t.getTransferData(DataFlavor.javaFileListFlavor) instanceof List<?>){
+					
+					// Check that what is in the list is files
+					List<?> tempList = (List<?>) t.getTransferData(DataFlavor.javaFileListFlavor);
+					for(Object o : tempList){
+						
+						if(o instanceof File){
+							fileList.add( (File) o);
+						}
+					}
+					
+					// Open the files - we process only *.nmd and *.wrk files
+
+					for(File f : fileList){
+						if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
+							fine("File is nmd");
+							receiveDatasetFile(f);
+						} 
+						
+						if(f.getName().endsWith(Constants.WRK_FILE_EXTENSION)){	
+							fine("File is wrk");
+							receiveWorkspaceFile(f);
+						} 
+						
+						if(f.isDirectory()){	
+							receiveFolder(f);
+						}
+
+					}
+				}
+				
+			} catch (UnsupportedFlavorException e) {
+				error("Error in DnD", e);
+			} catch (IOException e) {
+				error("IO error in DnD", e);
+			}
+           
+        }
+    	
+    	private void receiveFolder(File f){
+    		// Pass to new analysis
+			Runnable task = () -> { 
+				new NewAnalysisAction(mw, f);
+			};
+			threadManager.execute(task);
+    	}
+    	
+    	private void receiveWorkspaceFile(File f){
+    		finer("Opening workgroup file "+f.getAbsolutePath());
+    		
+    		IWorkspace w = new WorkspaceImporter(f).importWorkspace();
+    		
+    		mw.workspaces.add(w);
+    		
+    		for(File dataFile : w.getFiles()){
+    			receiveDatasetFile(dataFile);
+    		}
+
+    	}
+    	
+    	private void receiveDatasetFile(File f){
+    		finer("Opening file "+f.getAbsolutePath());
+
+			Runnable task = () -> { 
+				new PopulationImportAction(mw, f);
+			};
+			threadManager.execute(task);
+    	}
+    }
 }
