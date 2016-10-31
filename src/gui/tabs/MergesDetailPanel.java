@@ -27,7 +27,9 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 import javax.swing.Box;
@@ -205,9 +207,10 @@ public class MergesDetailPanel extends DetailPanel {
 
 		updateSourceButtonsPanel();
 		
+		List<IAnalysisDataset> mergeSources = new ArrayList<IAnalysisDataset>(activeDataset().getAllMergeSources());
 		
 		TableOptions options = new TableOptionsBuilder()
-			.setDatasets(activeDataset().getAllMergeSources())
+			.setDatasets(mergeSources)
 			.setType(TableType.ANALYSIS_PARAMETERS)
 			.setTarget(sourceParametersTable)
 			.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer())

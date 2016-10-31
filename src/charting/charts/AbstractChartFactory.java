@@ -18,6 +18,8 @@
  *******************************************************************************/
 package charting.charts;
 
+import gui.GlobalOptions;
+
 import java.awt.Color;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
@@ -185,7 +187,7 @@ public abstract class AbstractChartFactory implements Loggable {
 		
 		plot.getRenderer().setBaseToolTipGenerator(null); 
 		plot.getRenderer().setURLGenerator(null);
-		chart.setAntiAlias(false);
+		chart.setAntiAlias(GlobalOptions.getInstance().isAntiAlias());
 		
 		return chart;
 	}

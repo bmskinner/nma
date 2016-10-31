@@ -62,7 +62,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	 * The ids of datasets merged to create this dataset. 
 	 * The IDs must be present in otherCollections.
 	 */
-	private List<UUID> mergeSources	  = new ArrayList<UUID>(0);
+	private Set<UUID> mergeSources	  = new HashSet<UUID>(0);
 	
 	private File savePath; // the file to save this dataset to
 	
@@ -361,9 +361,9 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	 * @see analysis.IAnalysisDataset#getAllMergeSources()
 	 */
 	@Override
-	public List<IAnalysisDataset> getAllMergeSources(){
+	public Set<IAnalysisDataset> getAllMergeSources(){
 		
-		List<IAnalysisDataset>  result = new ArrayList<IAnalysisDataset>();
+		Set<IAnalysisDataset>  result = new HashSet<IAnalysisDataset>();
 		
 		for(UUID id : getMergeSourceIDs()){
 			
@@ -390,8 +390,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	 * @see analysis.IAnalysisDataset#getMergeSources()
 	 */
 	@Override
-	public List<IAnalysisDataset> getMergeSources(){
-		List<IAnalysisDataset>  result = new ArrayList<IAnalysisDataset>();
+	public Set<IAnalysisDataset> getMergeSources(){
+		Set<IAnalysisDataset>  result = new HashSet<IAnalysisDataset>();
 		
 		for(UUID id : mergeSources){
 			result.add(this.getAssociatedDataset(id));	
@@ -403,7 +403,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	 * @see analysis.IAnalysisDataset#getMergeSourceIDs()
 	 */
 	@Override
-	public List<UUID> getMergeSourceIDs(){
+	public Set<UUID> getMergeSourceIDs(){
 		return this.mergeSources;
 	}
 	
@@ -411,9 +411,9 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	 * @see analysis.IAnalysisDataset#getAllMergeSourceIDs()
 	 */
 	@Override
-	public List<UUID> getAllMergeSourceIDs(){
+	public Set<UUID> getAllMergeSourceIDs(){
 		
-		List<UUID> result = new ArrayList<UUID>();
+		Set<UUID> result = new HashSet<UUID>();
 		
 		for(UUID id : this.getMergeSourceIDs()){
 			result.addAll(getMergeSource(id).getAllMergeSourceIDs());

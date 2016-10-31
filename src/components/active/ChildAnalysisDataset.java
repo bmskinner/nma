@@ -126,26 +126,26 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 	}
 
 	@Override
-	public List<IAnalysisDataset> getAllMergeSources() {
-		return new ArrayList<IAnalysisDataset>(0);
+	public Set<IAnalysisDataset> getAllMergeSources() {
+		return new HashSet<IAnalysisDataset>(0);
 	}
 
 	@Override
 	public void addMergeSource(IAnalysisDataset dataset) {}
 
 	@Override
-	public List<IAnalysisDataset> getMergeSources() {
-		return new ArrayList<IAnalysisDataset>(0);
+	public Set<IAnalysisDataset> getMergeSources() {
+		return new HashSet<IAnalysisDataset>(0);
 	}
 
 	@Override
-	public List<UUID> getMergeSourceIDs() {
-		return new ArrayList<UUID>(0);
+	public Set<UUID> getMergeSourceIDs() {
+		return new HashSet<UUID>(0);
 	}
 
 	@Override
-	public List<UUID> getAllMergeSourceIDs() {
-		return new ArrayList<UUID>(0);
+	public Set<UUID> getAllMergeSourceIDs() {
+		return new HashSet<UUID>(0);
 	}
 
 	@Override
@@ -280,8 +280,14 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 	public void deleteMergeSource(UUID id) {}
 
 	@Override
-	public boolean hasChild(UUID child) {
-		return childDatasets.contains(child);
+	public boolean hasChild(UUID id) {
+		
+		for(IAnalysisDataset child : childDatasets){
+			if(child.getUUID().equals(id)){
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	@Override

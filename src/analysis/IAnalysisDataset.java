@@ -149,7 +149,7 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 * Only includes the root sources (not intermediate merges)
 	 * @return
 	 */
-	List<IAnalysisDataset> getAllMergeSources();
+	Set<IAnalysisDataset> getAllMergeSources();
 
 	/**
 	 * Add the given dataset as a merge source
@@ -162,14 +162,14 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 * dataset
 	 * @return
 	 */
-	List<IAnalysisDataset> getMergeSources();
+	Set<IAnalysisDataset> getMergeSources();
 
 	/**
 	 * Get the ids of all datasets considered merge sources to this
 	 * dataset
 	 * @return
 	 */
-	List<UUID> getMergeSourceIDs();
+	Set<UUID> getMergeSourceIDs();
 
 	/**
 	 * Get the ids of all datasets considered merge sources to this
@@ -177,7 +177,7 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 * the sources of that merge)
 	 * @return
 	 */
-	List<UUID> getAllMergeSourceIDs();
+	Set<UUID> getAllMergeSourceIDs();
 
 	/**
 	 * Test if a dataset with the given id is present

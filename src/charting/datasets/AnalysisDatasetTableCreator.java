@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 
@@ -389,7 +390,8 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 						// The options are the same in all merge sources
 						// Show the first options from the first source
 
-						IAnalysisOptions op = dataset.getAllMergeSources().get(0).getAnalysisOptions();
+						List<IAnalysisDataset> l = new ArrayList<IAnalysisDataset>(dataset.getAllMergeSources());
+						IAnalysisOptions op = l.get(0).getAnalysisOptions();
 
 						// Provide an options to be used
 						collectionData = formatAnalysisOptionsForTable(dataset, op);
@@ -421,7 +423,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 */
 	private boolean testMergedDatasetOptionsAreSame(IAnalysisDataset dataset){
 		finest( "Testing merged dataset options for "+dataset.getName() );
-		List<IAnalysisDataset> list = dataset.getMergeSources();
+		Set<IAnalysisDataset> list = dataset.getMergeSources();
 		
 		boolean ok = true;
 

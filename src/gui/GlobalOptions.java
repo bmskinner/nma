@@ -24,6 +24,8 @@ public class GlobalOptions {
 	
 	private boolean violinPlots; // show violin plots or just boxplots
 	
+	private boolean antiAliasing = false;
+	
 	/**
 	 * Should the consensus nucleus plots be filled, or empty
 	 */
@@ -46,6 +48,7 @@ public class GlobalOptions {
 		this.swatch      = ColourSwatch.REGULAR_SWATCH;
 		this.violinPlots = true;
 		this.fillConsensus = true;
+		this.antiAliasing  = false;
 	}
 
 	public MeasurementScale getScale() {
@@ -87,5 +90,14 @@ public class GlobalOptions {
 	public synchronized void setFillConsensus(boolean fillConsensus) {
 		this.fillConsensus = fillConsensus;
 	}
+	
+	public synchronized boolean isAntiAlias() {
+		return antiAliasing;
+	}
+
+	public synchronized void setAntiAlias(boolean antiAliasing) {
+		this.antiAliasing = antiAliasing;
+	}
+	
 
 }

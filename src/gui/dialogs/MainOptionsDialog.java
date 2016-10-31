@@ -53,6 +53,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 	private JComboBox<ColourSwatch> colourBox;
 	private JCheckBox violinBox;
 	private JCheckBox fillConsensusBox;
+	private JCheckBox antiAliasBox;
 	
 	public MainOptionsDialog(final MainWindow mw){
 		super( mw, false);
@@ -138,6 +139,14 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		labels.add(fillConsensusLabel);
 		fields.add(fillConsensusBox);
 		
+		JLabel antiAliasLabel = new JLabel("Antialiasing");
+		antiAliasBox = new JCheckBox( (String) null, GlobalOptions.getInstance().isAntiAlias());
+		antiAliasBox.addActionListener(this);
+		
+		labels.add(antiAliasLabel);
+		fields.add(antiAliasBox);
+
+		
 		this.addLabelTextRows(labels, fields, layout, panel);
 		return panel;
 	}
@@ -173,6 +182,12 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		boolean fillConsensus = fillConsensusBox.isSelected();
 		if(GlobalOptions.getInstance().isFillConsensus() != fillConsensus){
 			GlobalOptions.getInstance().setFillConsensus(fillConsensus);
+			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+		}
+		
+		boolean antiAlias = antiAliasBox.isSelected();
+		if(GlobalOptions.getInstance().isAntiAlias() != antiAlias){
+			GlobalOptions.getInstance().setAntiAlias(antiAlias);
 			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 		}
 		

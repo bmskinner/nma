@@ -364,9 +364,9 @@ public class AnalysisDataset implements IAnalysisDataset {
 	 * @see analysis.IAnalysisDataset#getAllMergeSources()
 	 */
 	@Override
-	public List<IAnalysisDataset> getAllMergeSources(){
+	public Set<IAnalysisDataset> getAllMergeSources(){
 		
-		List<IAnalysisDataset>  result = new ArrayList<IAnalysisDataset>();
+		Set<IAnalysisDataset>  result = new HashSet<IAnalysisDataset>();
 		
 		for(UUID id : getMergeSourceIDs()){
 			
@@ -393,8 +393,8 @@ public class AnalysisDataset implements IAnalysisDataset {
 	 * @see analysis.IAnalysisDataset#getMergeSources()
 	 */
 	@Override
-	public List<IAnalysisDataset> getMergeSources(){
-		List<IAnalysisDataset>  result = new ArrayList<IAnalysisDataset>();
+	public Set<IAnalysisDataset> getMergeSources(){
+		Set<IAnalysisDataset>  result = new HashSet<IAnalysisDataset>();
 		
 		for(UUID id : mergeSources){
 			result.add(this.getAssociatedDataset(id));	
@@ -406,17 +406,21 @@ public class AnalysisDataset implements IAnalysisDataset {
 	 * @see analysis.IAnalysisDataset#getMergeSourceIDs()
 	 */
 	@Override
-	public List<UUID> getMergeSourceIDs(){
-		return this.mergeSources;
+	public Set<UUID> getMergeSourceIDs(){
+		Set<UUID>  result = new HashSet<UUID>();
+		for(UUID id : mergeSources){
+			result.add(id);
+		}
+		return result;
 	}
 	
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisDataset#getAllMergeSourceIDs()
 	 */
 	@Override
-	public List<UUID> getAllMergeSourceIDs(){
+	public Set<UUID> getAllMergeSourceIDs(){
 		
-		List<UUID> result = new ArrayList<UUID>();
+		Set<UUID> result = new HashSet<UUID>();
 		
 		for(UUID id : this.getMergeSourceIDs()){
 			result.addAll(getMergeSource(id).getAllMergeSourceIDs());
