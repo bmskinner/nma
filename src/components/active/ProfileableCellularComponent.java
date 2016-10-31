@@ -171,17 +171,21 @@ public abstract class ProfileableCellularComponent
 	}
 
 	
-	public IBorderPoint getBorderTag(Tag tag){
+	public IBorderPoint getBorderTag(Tag tag) throws IndexOutOfBoundsException {
+		
 		IBorderPoint result = new DefaultBorderPoint(0,0);
-		if(this.getBorderIndex(tag)>-1){
-			result = this.getBorderPoint((this.getBorderIndex(tag)));
-		} else {
-			return null;
+		
+		int borderIndex = this.getBorderIndex(tag);
+			
+		if(borderIndex <0 || borderIndex>=this.getBorderLength()){
+			throw new IndexOutOfBoundsException("Tag is beyond border length");
 		}
+			
+		result = this.getBorderPoint((this.getBorderIndex(tag)));
 		return result;
 	}
 	
-	public IBorderPoint getBorderPoint(Tag tag){
+	public IBorderPoint getBorderPoint(Tag tag) throws IndexOutOfBoundsException{
 		return getBorderTag(tag) ;
 	}
 		
@@ -546,6 +550,22 @@ public abstract class ProfileableCellularComponent
 		double angleWindow = perimeter * angleWindowProportion;
 		this.angleProfileWindowSize = (int) Math.round(angleWindow);
 
+	}
+	
+	public class IndexOutOfBoundsException extends Exception {
+		private static final long serialVersionUID = 1L;
+		public IndexOutOfBoundsException() { super(); }
+		public IndexOutOfBoundsException(String message) { super(message); }
+		public IndexOutOfBoundsException(String message, Throwable cause) { super(message, cause); }
+		public IndexOutOfBoundsException(Throwable cause) { super(cause); }
+	}
+	
+	public class UnavailableBorderTagException extends Exception {
+		private static final long serialVersionUID = 1L;
+		public UnavailableBorderTagException() { super(); }
+		public UnavailableBorderTagException(String message) { super(message); }
+		public UnavailableBorderTagException(String message, Throwable cause) { super(message, cause); }
+		public UnavailableBorderTagException(Throwable cause) { super(cause); }
 	}
 
 }

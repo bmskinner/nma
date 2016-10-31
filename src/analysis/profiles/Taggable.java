@@ -21,6 +21,7 @@ package analysis.profiles;
 
 import java.util.Map;
 
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.BorderTagObject;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
@@ -62,7 +63,7 @@ public interface Taggable extends Profileable {
 	 * @param index
 	 * @return the tag at the index, or null if no tag present
 	 */
-	public Tag getBorderTag(int index);
+	public Tag getBorderTag(int index) throws IndexOutOfBoundsException;
 
 	
 	/**
@@ -70,8 +71,9 @@ public interface Taggable extends Profileable {
 	 * or null if the tag is not present
 	 * @param tag
 	 * @return
+	 * @throws IndexOutOfBoundsException 
 	 */
-	public IBorderPoint getBorderTag(Tag tag);
+	public IBorderPoint getBorderTag(Tag tag) throws IndexOutOfBoundsException;
 	
 	/**
 	 * Check if the nucleus has the given border tag
@@ -87,7 +89,7 @@ public interface Taggable extends Profileable {
 	 * @param i the index to be tested
 	 * @return true if a tag is present at the index
 	 */
-	public boolean hasBorderTag(Tag tag, int i);
+	public boolean hasBorderTag(Tag tag, int i) throws IndexOutOfBoundsException;
 	
 	/**
 	 * Check if the nucleus has any border tag at the given index
@@ -95,7 +97,7 @@ public interface Taggable extends Profileable {
 	 * @param i the index to be tested
 	 * @return true if a tag is present at the index
 	 */
-	public boolean hasBorderTag( int index);
+	public boolean hasBorderTag( int index) throws IndexOutOfBoundsException;
 	
 	/**
 	 * Set the name of the given NucleusBorderPoint
@@ -103,7 +105,7 @@ public interface Taggable extends Profileable {
 	 * @param i the index of the border point
 	 */
 	
-	public void setBorderTag(Tag tag, int i);
+	public void setBorderTag(Tag tag, int i) throws IndexOutOfBoundsException;
 	
 	/**
 	 * Set or update a border tag based on an index from a reference tag
@@ -111,7 +113,7 @@ public interface Taggable extends Profileable {
 	 * @param tag the new tag to use
 	 * @param i the index of the border point relative to the reference
 	 */
-	public void setBorderTag(Tag reference, Tag tag, int i);
+	public void setBorderTag(Tag reference, Tag tag, int i) throws IndexOutOfBoundsException;
 	
 	/**
 	 * Get a copy of the angle profile offset to start at the given point
@@ -141,8 +143,9 @@ public interface Taggable extends Profileable {
 	 * Get a copy of the border point mapped to the given tag
 	 * @param tag
 	 * @return
+	 * @throws IndexOutOfBoundsException 
 	 */
-	public IBorderPoint getBorderPoint(Tag tag); 
+	public IBorderPoint getBorderPoint(Tag tag) throws IndexOutOfBoundsException; 
 	
 	/**
 	 * Get the border index of point in the border list, 

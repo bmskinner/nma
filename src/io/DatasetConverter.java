@@ -43,6 +43,7 @@ import components.active.DefaultCellularComponent;
 import components.active.DefaultNucleus;
 import components.active.DefaultPigSpermNucleus;
 import components.active.DefaultRodentSpermNucleus;
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.VirtualCellCollection;
 import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
@@ -302,6 +303,9 @@ public class DatasetConverter implements Loggable {
 		// Use the default constructor
 		Nucleus newNucleus = new DefaultRodentSpermNucleus(roi, f, channel, position, number, com);
 		
+		newNucleus.offset(com.getX(), com.getY());
+		((DefaultNucleus)newNucleus).setCentreOfMassDirectly(com);
+		
 		newNucleus = copyGenericData(n, newNucleus);
 		return newNucleus;
 	}
@@ -391,7 +395,11 @@ public class DatasetConverter implements Loggable {
 		//Copy the existing border tags
 		for(Tag t : template.getBorderTags().keySet()){
 			finer("\tSetting tag "+t);
-			newNucleus.setBorderTag(t, template.getBorderIndex(t));
+			try {
+				newNucleus.setBorderTag(t, template.getBorderIndex(t));
+			} catch (IndexOutOfBoundsException e) {
+				fine("Cannot set border tag to requested index", e);
+			}
 			finer("\tSetting tag "+t);
 		}
 

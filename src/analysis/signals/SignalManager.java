@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import components.ICell;
 import components.ICellCollection;
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.MeasurementScale;
 import components.generic.Tag;
 import components.nuclear.INuclearSignal;
@@ -505,7 +506,11 @@ public class SignalManager implements Loggable {
     public void recalculateSignalAngles(){
     	finer("Recalcalculating signal angles");
     	for(Nucleus n : collection.getNuclei()){
-    		n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
+    		try {
+				n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
+			} catch (IndexOutOfBoundsException e) {
+				fine("Cannot get OP index");
+			}
     	}
     }
 	  

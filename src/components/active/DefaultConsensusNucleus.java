@@ -130,10 +130,16 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 		this.alignVertically();
 		
 		// Check that the horizontal orientation is correct
-		if(type.equals(NucleusType.RODENT_SPERM)){
-			if(getBorderTag(Tag.REFERENCE_POINT).getX()>0){
-				flipXAroundPoint(getCentreOfMass());
+		
+		try {
+		
+			if(type.equals(NucleusType.RODENT_SPERM)){
+				if(getBorderTag(Tag.REFERENCE_POINT).getX()>0){
+					flipXAroundPoint(getCentreOfMass());
+				}
 			}
+		} catch (IndexOutOfBoundsException e){
+			fine("Cannot get border tag", e);
 		}
 		
 		

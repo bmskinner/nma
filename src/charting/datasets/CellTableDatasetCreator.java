@@ -36,6 +36,7 @@ import stats.SignalStatistic;
 import analysis.IAnalysisDataset;
 import charting.options.TableOptions;
 import components.ICell;
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.BorderPoint;
@@ -62,9 +63,10 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 * Create a table of stats for the given cell.
 	 * @param cell the cell
 	 * @return a table model
+	 * @throws ChartDatasetCreationException 
 	 * @throws Exception 
 	 */
-	public TableModel createCellInfoTable(TableOptions options) {
+	public TableModel createCellInfoTable(TableOptions options) throws ChartDatasetCreationException {
 		
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -127,7 +129,13 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 				fieldNames.add(tag);
 				if(n.hasBorderTag(tag)){
 
-					IBorderPoint p = n.getBorderPoint(tag);
+					IBorderPoint p;
+					try {
+						p = n.getBorderPoint(tag);
+					} catch (IndexOutOfBoundsException e) {
+						fine("Tag is at wrong index: "+tag);
+						return createBlankTable();
+					}
 					
 					int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, n.getBorderIndex(tag));
 					

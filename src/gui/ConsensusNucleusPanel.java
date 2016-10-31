@@ -47,6 +47,7 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.ICellCollection;
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.Tag;
@@ -323,10 +324,16 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				if(activeDataset().getCollection().hasConsensusNucleus()){
-					IBorderPoint orientationPoint = activeDataset().getCollection()
-							.getConsensusNucleus()
-							.getBorderTag(Tag.ORIENTATION_POINT);
-					activeDataset().getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
+					IBorderPoint orientationPoint;
+					try {
+						orientationPoint = activeDataset().getCollection()
+								.getConsensusNucleus()
+								.getBorderTag(Tag.ORIENTATION_POINT);
+						activeDataset().getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
+					} catch (IndexOutOfBoundsException e) {
+						fine("Cannot get OP index in nucleus profile", e);
+					}
+					
 					refreshChartCache(getDatasets());
 				}
 			}
@@ -476,14 +483,22 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
 			if(activeDataset().getCollection().hasConsensusNucleus()){
 
-				IBorderPoint orientationPoint = activeDataset()
-						.getCollection()
-						.getConsensusNucleus()
-						.getBorderTag(Tag.ORIENTATION_POINT);
+				IBorderPoint orientationPoint;
+				try {
+					orientationPoint = activeDataset()
+							.getCollection()
+							.getConsensusNucleus()
+							.getBorderTag(Tag.ORIENTATION_POINT);
+					
+					activeDataset().getCollection()
+					.getConsensusNucleus()
+					.rotatePointToBottom(orientationPoint);
+					
+				} catch (IndexOutOfBoundsException e) {
+					fine("Cannot get OP index in nucleus profile", e);
+				}
 				
-				activeDataset().getCollection()
-				.getConsensusNucleus()
-				.rotatePointToBottom(orientationPoint);
+				
 				
 				this.update(activeDatasetToList());
 			}
@@ -502,7 +517,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 				
 				if(nucleus.hasBorderTag(Tag.TOP_VERTICAL) && nucleus.hasBorderTag(Tag.BOTTOM_VERTICAL)){
 					
-					nucleus.alignPointsOnVertical(nucleus.getBorderTag(Tag.TOP_VERTICAL), nucleus.getBorderTag(Tag.BOTTOM_VERTICAL));
+					try {
+						nucleus.alignPointsOnVertical(nucleus.getBorderTag(Tag.TOP_VERTICAL), nucleus.getBorderTag(Tag.BOTTOM_VERTICAL));
+					} catch (IndexOutOfBoundsException e) {
+						fine("Cannot align points on vertical", e);
+					}
 					
 					this.update(activeDatasetToList());
 					

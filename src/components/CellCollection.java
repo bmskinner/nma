@@ -59,6 +59,7 @@ import analysis.profiles.RuleSetCollection;
 import analysis.profiles.SegmentStatisticFetchingTask;
 import analysis.signals.SignalManager;
 import components.active.DefaultCell;
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -753,7 +754,11 @@ public class CellCollection implements ICellCollection {
 		double[] result = new double[count];
 		int i=0;
 		for(Nucleus n : this.getNuclei()){
-			result[i++] = n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB));
+			try {
+				result[i++] = n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB));
+			} catch (IndexOutOfBoundsException e) {
+				fine("Error getting border tag");
+			}
 		}
 		return result;
 	}

@@ -183,13 +183,17 @@ public class DefaultNucleus
 			result = this.getVerticallyRotatedNucleus().getBounds().getWidth();
 			break;
 		case OP_RP_ANGLE:
-			result = this.getCentreOfMass().findAngle(this.getBorderTag(Tag.REFERENCE_POINT), this.getBorderTag(Tag.ORIENTATION_POINT));
+			try {
+				result = this.getCentreOfMass().findAngle(this.getBorderTag(Tag.REFERENCE_POINT), this.getBorderTag(Tag.ORIENTATION_POINT));
+			} catch (IndexOutOfBoundsException e) {
+				fine("Cannot get border tag", e);
+				result = 0;
+			}
 			break;
 		default:
 			break;
 	
 		}
-//		finest("Calculated stat in round nucleus: "+stat);
 		return result;
 	}
 	
@@ -370,12 +374,30 @@ public class DefaultNucleus
 		
 		
 		if(useTVandBV){
-			IBorderPoint[] points = getBorderPointsForVerticalAlignment();
-			alignPointsOnVertical(points[0], points[1] );
+			
+			IBorderPoint[] points;
+			try {
+				
+				points = getBorderPointsForVerticalAlignment();
+				alignPointsOnVertical(points[0], points[1] );
+				
+			} catch (UnavailableBorderTagException e) {
+				fine("Cannot get border tag", e);
+				try {
+					rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
+				} catch (IndexOutOfBoundsException e1) {
+					fine("Cannot get border tag", e1);
+				}
+			}
+			
 		} else {
 			
 			// Default if top and bottom vertical points have not been specified
-			rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
+			try {
+				rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
+			} catch (IndexOutOfBoundsException e) {
+				fine("Cannot get border tag", e);
+			}
 		}
 		
 	}
@@ -387,12 +409,22 @@ public class DefaultNucleus
 	 * line drawn between the two border points, minimising the sum-of-squares to each border
 	 * point within the region covered by the line. 
 	 * @return
+	 * @throws UnavailableBorderTagException 
 	 */	
-	private IBorderPoint[] getBorderPointsForVerticalAlignment(){
+	private IBorderPoint[] getBorderPointsForVerticalAlignment() throws UnavailableBorderTagException{
 		
 		
-		IBorderPoint topPoint    = this.getBorderTag(Tag.TOP_VERTICAL);
-		IBorderPoint bottomPoint = this.getBorderTag(Tag.BOTTOM_VERTICAL);
+		IBorderPoint topPoint;
+		IBorderPoint bottomPoint;
+		try {
+			
+			topPoint    = this.getBorderTag(Tag.TOP_VERTICAL);
+			bottomPoint = this.getBorderTag(Tag.BOTTOM_VERTICAL);
+			
+		} catch (IndexOutOfBoundsException e) {
+			fine("Cannot get border tag", e);
+			throw new UnavailableBorderTagException("Border tags are not present", e);
+		}
 		
 		
 		// Find the border points between the top and bottom verticals

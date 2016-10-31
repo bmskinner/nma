@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import utility.Constants;
 import components.CellularComponent;
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -89,11 +90,21 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 	
 
 	public NucleusAnnotator annotateOP(Nucleus n){		
-		return annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT), Color.CYAN);
+		try {
+			return annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT), Color.CYAN);
+		} catch (IndexOutOfBoundsException e) {
+			fine("Cannot get OP index");
+			return this;
+		}
 	}
 
 	public NucleusAnnotator annotateRP(Nucleus n){
-		return annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT), Color.YELLOW);
+		try {
+			return annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT), Color.YELLOW);
+		} catch (IndexOutOfBoundsException e) {
+			fine("Cannot get RP index");
+			return this;
+		}
 	}
 	
 	public NucleusAnnotator annotateCoM(CellularComponent n){

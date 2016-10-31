@@ -14,6 +14,7 @@ import components.AbstractCellularComponent;
 import components.Cell;
 import components.CellularComponent;
 import components.ICell;
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.ProfileType;
@@ -114,7 +115,11 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		drawNucleus(c, ip);
 
 		if(rotate){
-			ip = rotateToVertical(c, ip);
+			try {
+				ip = rotateToVertical(c, ip);
+			} catch (IndexOutOfBoundsException e) {
+				fine("Unable to rotate", e);
+			}
 			ip.flipVertical(); // Y axis needs inverting
 		}
 		// Rescale the resulting image	
@@ -124,7 +129,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		return ic;
 	}
 	
-	private ImageProcessor rotateToVertical(ICell c, ImageProcessor ip){
+	private ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws IndexOutOfBoundsException{
 		// Calculate angle for vertical rotation
 		Nucleus n = c.getNucleus();
 		

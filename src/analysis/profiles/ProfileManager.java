@@ -33,6 +33,7 @@ import utility.Constants;
 import components.AbstractCellularComponent;
 import components.ICell;
 import components.ICellCollection;
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -102,7 +103,11 @@ public class ProfileManager implements Loggable {
 								
 				// returns the positive offset index of this profile which best matches the median profile
 				int newIndex = n.getProfile(type).getSlidingWindowOffset(median);
-				n.setBorderTag(tag, newIndex);		
+				try {
+					n.setBorderTag(tag, newIndex);
+				} catch (Exception e) {
+					fine("Cannot update nucleus tag");
+				}		
 				
 				if(tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)){
 					
@@ -263,8 +268,9 @@ public class ProfileManager implements Loggable {
 	 * Update the location of the given border tag within the profile
 	 * @param tag
 	 * @param index the new index within the median profile
+	 * @throws IndexOutOfBoundsException 
 	 */
-	public void updateBorderTag(Tag tag, int index){
+	public void updateBorderTag(Tag tag, int index) throws IndexOutOfBoundsException{
 		
 		finer("Updating border tag "+tag);
 		
@@ -288,8 +294,9 @@ public class ProfileManager implements Loggable {
 	 * Update the extended border tags that don't need resegmenting
 	 * @param tag
 	 * @param index
+	 * @throws IndexOutOfBoundsException 
 	 */
-	private void updateExtendedBorderTagIndex(Tag tag, int index){
+	private void updateExtendedBorderTagIndex(Tag tag, int index) throws IndexOutOfBoundsException{
 		
 		int oldIndex = collection.getProfileCollection().getIndex(tag);
 		

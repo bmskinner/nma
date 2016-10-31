@@ -40,6 +40,7 @@ import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.FloatPoint;
 import components.generic.BooleanProfile;
@@ -88,6 +89,10 @@ public class RodentSpermNucleus extends SpermNucleus {
 	protected double calculateStatistic(NucleusStatistic stat){
 		double result = super.calculateStatistic(stat);
 //		finest("Calculating stat in rodent sperm nucleus: "+stat);
+		
+		try {
+			
+		
 		switch(stat){
 			
 			case HOOK_LENGTH:
@@ -100,6 +105,11 @@ public class RodentSpermNucleus extends SpermNucleus {
 				return result;
 		
 		}
+		} catch (IndexOutOfBoundsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 //		finest("Calculated stat in rodent sperm nucleus: "+stat);
 		return result;
 		
@@ -115,13 +125,18 @@ public class RodentSpermNucleus extends SpermNucleus {
 
 			if(tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)){
 				
-				calculateHookAndBodyLength();
+				try {
+					calculateHookAndBodyLength();
+				} catch (IndexOutOfBoundsException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		
 	}
 	
-	private double getHookOrBodyLength(boolean useHook) {
+	private double getHookOrBodyLength(boolean useHook) throws IndexOutOfBoundsException {
 
 		// check stat is present before calling a getStatistic
 		if(hasStatistic(NucleusStatistic.HOOK_LENGTH) || hasStatistic(NucleusStatistic.BODY_WIDTH)){
@@ -148,7 +163,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 			
 	}
 	
-	private void calculateHookAndBodyLength() {
+	private void calculateHookAndBodyLength() throws IndexOutOfBoundsException {
 			
 		// Copy the nucleus
 		finest("Calculating hook and body length");
@@ -464,7 +479,12 @@ public class RodentSpermNucleus extends SpermNucleus {
 		/*
 		 * Get the X position of the reference point
 		 */
-		double vertX = verticalNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
+		double vertX;
+		try {
+			vertX = verticalNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
+		} catch (IndexOutOfBoundsException e) {
+			return verticalNucleus;
+		}
 
 		/*
 		 * If the reference point is left of the centre of mass, 
@@ -689,7 +709,12 @@ public class RodentSpermNucleus extends SpermNucleus {
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 //	  finest("\tReading rodent sperm nucleus");
 	  in.defaultReadObject();
-	  calculateHookAndBodyLength();
+	  try {
+		calculateHookAndBodyLength();
+	} catch (IndexOutOfBoundsException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 //	  finest("\tRead rodent sperm nucleus");
   }
 

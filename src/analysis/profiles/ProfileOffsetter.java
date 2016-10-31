@@ -25,6 +25,7 @@ import java.util.UUID;
 import stats.Quartile;
 import logging.Loggable;
 import components.ICellCollection;
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -124,7 +125,11 @@ public class ProfileOffsetter implements Loggable {
 			}
 
 
-			nucleus.setBorderTag(tag, newIndex);		
+			try {
+				nucleus.setBorderTag(tag, newIndex);
+			} catch (IndexOutOfBoundsException e) {
+				fine("Cannot set "+tag+" index in nucleus profile", e);
+			}		
 			finest("Set border tag in nucleus to "+newIndex+ " from "+oldNIndex);
 		}
 		

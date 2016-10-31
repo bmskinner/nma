@@ -40,6 +40,7 @@ import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
@@ -1263,7 +1264,13 @@ public class NucleusDatasetCreator implements Loggable {
 
 		Nucleus nucleus = cell.getNucleus();// draw the index points on the nucleus border
 		for(Tag tag : nucleus.getBorderTags().keySet()){
-			IBorderPoint tagPoint = nucleus.getBorderPoint(tag);
+			IBorderPoint tagPoint;
+			try {
+				tagPoint = nucleus.getBorderPoint(tag);
+			} catch (IndexOutOfBoundsException e) {
+				fine("Tag is at wrong index: "+tag);
+				throw new ChartDatasetCreationException("Cannot get border tag");
+			}
 			double[] xpoints = { tagPoint.getX()-0.5, nucleus.getCentreOfMass().getX()-0.5 };
 			double[] ypoints = { tagPoint.getY()-0.5, nucleus.getCentreOfMass().getY()-0.5 };
 			double[][] data = { xpoints, ypoints };
