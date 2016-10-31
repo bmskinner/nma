@@ -84,58 +84,66 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 		
 	}
 	
-	private void updateSettingsPanels(){
-		if(this.hasDatasets()){
+	private synchronized void updateSettingsPanels(){
 
-			if(this.getCellModel().getCell()==null){
-				rotationPanel.setEnabled(false);
-				makeMeshPanel.setEnabled(false);
-				warpMeshPanel.setEnabled(false);
-				redrawBorderBtn.setEnabled(false);
-			} else {
-				
-				redrawBorderBtn.setEnabled(true);
-				
-				// Only allow one mesh activity to be active
-				rotationPanel.setEnabled(! warpMeshPanel.isSelected());
-				makeMeshPanel.setEnabled(  ! warpMeshPanel.isSelected() );
-				warpMeshPanel.setEnabled(  ! makeMeshPanel.isSelected() );
-
-				if( ! activeDataset().getCollection().hasConsensusNucleus()){
-					makeMeshPanel.setEnabled(false);
-					warpMeshPanel.setEnabled(false);
-				}
-			}
-		} else {
+		if(this.isMultipleDatasets() || ! this.hasDatasets()){
 			rotationPanel.setEnabled(false);
 			makeMeshPanel.setEnabled(false);
 			warpMeshPanel.setEnabled(false);
 			redrawBorderBtn.setEnabled(false);
+			return;
+		}
+
+
+
+		if(this.getCellModel().hasCell()){
+			rotationPanel.setEnabled(false);
+			makeMeshPanel.setEnabled(false);
+			warpMeshPanel.setEnabled(false);
+			redrawBorderBtn.setEnabled(false);
+		} else {
+
+			redrawBorderBtn.setEnabled(true);
+
+			// Only allow one mesh activity to be active
+			rotationPanel.setEnabled(! warpMeshPanel.isSelected());
+			makeMeshPanel.setEnabled(  ! warpMeshPanel.isSelected() );
+			warpMeshPanel.setEnabled(  ! makeMeshPanel.isSelected() );
+
+			if( ! activeDataset().getCollection().hasConsensusNucleus()){
+				makeMeshPanel.setEnabled(false);
+				warpMeshPanel.setEnabled(false);
+			}
 		}
 	}
 							
-	public void update(){
+	public synchronized void update(){
+		
+		if(this.isMultipleDatasets() || ! this.hasDatasets()){
+			panel.setChart(MorphologyChartFactory.createEmptyChart());
+			return;
+		}
 
 		CellularComponent component = this.getCellModel().getComponent();
-								
-			updateSettingsPanels();
-			
-			ChartOptions options = new ChartOptionsBuilder()
-					.setDatasets(getDatasets())
-					.setCell(this.getCellModel().getCell())
-					.setRotationMode(rotationPanel.getSelected())
-					.setShowAnnotations(true)
-					.setShowSignals(true)
-					.setShowMesh(makeMeshPanel.isSelected())
-					.setShowWarp(warpMeshPanel.isSelected())
-					.setShowMeshEdges(false)
-					.setShowMeshFaces(true)
-					.setInvertYAxis( rotationPanel.getSelected().equals(RotationMode.ACTUAL) ) // only invert for actual
-					.setCellularComponent(component)
-					.setTarget(panel)
-					.build();
-			
-			setChart(options);			
+
+		updateSettingsPanels();
+
+		ChartOptions options = new ChartOptionsBuilder()
+				.setDatasets(getDatasets())
+				.setCell(this.getCellModel().getCell())
+				.setRotationMode(rotationPanel.getSelected())
+				.setShowAnnotations(true)
+				.setShowSignals(true)
+				.setShowMesh(makeMeshPanel.isSelected())
+				.setShowWarp(warpMeshPanel.isSelected())
+				.setShowMeshEdges(false)
+				.setShowMeshFaces(true)
+				.setInvertYAxis( rotationPanel.getSelected().equals(RotationMode.ACTUAL) ) // only invert for actual
+				.setCellularComponent(component)
+				.setTarget(panel)
+				.build();
+
+		setChart(options);			
 	}
 
 	
@@ -162,11 +170,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 	protected void updateNull() {
 		panel.setChart(MorphologyChartFactory.createEmptyChart());
 		updateSettingsPanels();
-		
-//		ChartOptions options = new ChartOptionsBuilder()
-//				.build();
-//		
-//		setChart(options);
+
 		
 	}
 	

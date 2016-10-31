@@ -5,7 +5,7 @@ import gui.tabs.editing.AbstractEditingPanel;
 @SuppressWarnings("serial")
 public abstract class AbstractCellDetailPanel extends AbstractEditingPanel {
 		
-	private final CellViewModel model;
+	private CellViewModel model;
 	
 	public AbstractCellDetailPanel(final CellViewModel model){
 		super();
@@ -23,15 +23,19 @@ public abstract class AbstractCellDetailPanel extends AbstractEditingPanel {
 	 * Get the current cell view 
 	 * @return
 	 */
-	public CellViewModel getCellModel(){
+	public synchronized CellViewModel getCellModel(){
 		return model;
+	}
+	
+	public synchronized void setCellModel(CellViewModel model){
+		this.model = model;
 	}
 	
 	/**
 	 * Remove any charts that contain the current active cell,
 	 * causing them to redraw on the next refresh
 	 */
-	public void clearCellCharts(){
+	public synchronized void clearCellCharts(){
 		this.getChartCache().clear(model.getCell());
 	}
 		

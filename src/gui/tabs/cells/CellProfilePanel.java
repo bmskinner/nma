@@ -123,7 +123,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 		resegmentButton.setEnabled(b);
 	}
 	
-	public void update(){
+	public synchronized void update(){
 		
 		try{
 			

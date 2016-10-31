@@ -19,10 +19,13 @@ public class CellViewModel {
 		this.component = component;
 	}
 	
-	public synchronized void setCell(ICell c){
+	public void setCell(ICell c){
+				
 		if(c==null || c!=cell){
-			this.cell = c;
-			component = null; // component cannot be carried over
+			synchronized(this){
+				this.cell = c;
+				component = null; // component cannot be carried over
+			}
 			updateViews();
 		}
 	}
@@ -33,15 +36,17 @@ public class CellViewModel {
 	 * triggering a view update before the dialog closes.
 	 * @param c the cell. Must have the same ID as the existing cell.
 	 */
-	public synchronized void swapCell(ICell c){
+	public void swapCell(ICell c){
 		if(c==null || c.getId().equals(cell.getId())){
-			this.cell = c;
-			component = null; // component cannot be carried over
+			synchronized(this){
+				this.cell = c;
+				component = null; // component cannot be carried over
+			}
 			clearChartCache();
 		}
 	}
 	
-	public synchronized ICell getCell(){
+	public ICell getCell(){
 		return cell;
 	}
 	
@@ -53,7 +58,7 @@ public class CellViewModel {
 	 * Cause all charts with the current active cell
 	 * to be redrawn
 	 */
-	public synchronized void clearChartCache(){
+	public void clearChartCache(){
 		for(AbstractCellDetailPanel d : views){
 			d.clearCellCharts();
 		}
@@ -61,28 +66,28 @@ public class CellViewModel {
 		
 	}
 	
-	public synchronized void updateComponent(){
+	public void updateComponent(){
 		
 	}
 	
-	public synchronized void setComponent(CellularComponent component){
+	public void setComponent(CellularComponent component){
 		if(this.component!=component){
 			this.component = component;
 			updateViews();
 		}
 	}
 	
-	public synchronized CellularComponent getComponent(){
+	public CellularComponent getComponent(){
 		return this.component;
 	}
 	
-	public synchronized void updateViews(){
+	public void updateViews(){
 		for(AbstractCellDetailPanel d : views){
 			d.update();
 		}
 	}
 	
-	public synchronized void addView(AbstractCellDetailPanel d){
+	public void addView(AbstractCellDetailPanel d){
 		this.views.add(d);
 	}
 		

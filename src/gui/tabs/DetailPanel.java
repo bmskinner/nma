@@ -162,7 +162,7 @@ public abstract class DetailPanel
 	}
 	
 	public synchronized boolean hasDatasets(){
-		return(this.list.size()>0);
+		return !list.isEmpty();
 	}
 	
 	protected synchronized List<IAnalysisDataset> getDatasets(){

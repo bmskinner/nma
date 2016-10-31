@@ -6,8 +6,6 @@ import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.UUID;
-import java.util.logging.Level;
-
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
@@ -18,10 +16,8 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.TableModel;
 
-import charting.charts.MorphologyChartFactory;
 import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
-import charting.datasets.CellDatasetCreator;
 import charting.datasets.CellTableDatasetCreator;
 import charting.datasets.SignalTableCell;
 import charting.options.TableOptions;
@@ -30,7 +26,6 @@ import components.nuclei.Nucleus;
 import gui.DatasetEvent;
 import gui.GlobalOptions;
 import gui.components.ExportableTable;
-import gui.components.WilcoxonTableCellRenderer;
 import gui.dialogs.CellImageDialog;
 
 @SuppressWarnings("serial")
@@ -190,14 +185,20 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	}
 	
 	@Override
-	public void refreshTableCache(){
+	public synchronized void refreshTableCache(){
 		finest("Preparing to refresh table cache");
 		clearTableCache();
 		finest("Updating tables after clear");
 		this.update();
 	}
 	
-	public void update(){
+	public synchronized void update(){
+		
+		if(this.isMultipleDatasets() || ! this.hasDatasets()){
+			table.setModel(AbstractDatasetCreator.createBlankTable());
+			return;
+		}
+		
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setCell(this.getCellModel().getCell())
