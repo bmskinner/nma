@@ -22,6 +22,7 @@ import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderPoint;
+import components.nuclei.Nucleus;
 import ij.gui.Roi;
 import stats.NucleusStatistic;
 
@@ -74,27 +75,31 @@ public abstract class ProfileableCellularComponent
 	public ProfileableCellularComponent(CellularComponent c) throws UnprofilableObjectException {
 		super(c);
 		
-		if( ! (c instanceof ProfileableCellularComponent)){
-			throw new UnprofilableObjectException();
-		}
-		ProfileableCellularComponent comp = (ProfileableCellularComponent) c;
-		
-		finest("Created cellular component");		
-		
-		this.angleWindowProportion  = comp.getWindowProportion(ProfileType.ANGLE);
-		this.angleProfileWindowSize = comp.getWindowSize(ProfileType.ANGLE);
-		
-		
-		for(ProfileType type : ProfileType.values()){
-			if(comp.hasProfile(type)){
-				this.profileMap.put(type, ISegmentedProfile.makeNew(comp.getProfile(type)));
+		if( c instanceof Taggable ){
+
+
+			Taggable comp = (Taggable) c;
+
+			finest("Created cellular component");		
+
+			this.angleWindowProportion  = comp.getWindowProportion(ProfileType.ANGLE);
+			this.angleProfileWindowSize = comp.getWindowSize(ProfileType.ANGLE);
+
+
+			for(ProfileType type : ProfileType.values()){
+				if(comp.hasProfile(type)){
+					this.profileMap.put(type, ISegmentedProfile.makeNew(comp.getProfile(type)));
+				}
 			}
+
+
+			this.setBorderTags(comp.getBorderTags());
+
+			this.segsLocked = comp.isLocked();
+		} else {
+			throw new UnprofilableObjectException("Object is not a profileable object");
 		}
 
-
-		this.setBorderTags(comp.getBorderTags());
-		
-		this.segsLocked = comp.isLocked();
 	}
 		
 	/*

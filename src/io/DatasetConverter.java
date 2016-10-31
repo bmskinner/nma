@@ -392,27 +392,27 @@ public class DatasetConverter implements Loggable {
 		}
 
 		// TODO: Copy segments
-		for(ProfileType type : ProfileType.values()){
-			ISegmentedProfile p = template.getProfile(type);
-			ISegmentedProfile target = newNucleus.getProfile(type);
-			
-			if(p.size() != target.size()){
-				fine("New nucleus profile length of "+target.size()+" : original nucleus was "+p.size());
-				
-				try {
-					target = target.frankenNormaliseToProfile(p);
-					newNucleus.setProfile(type, target);
-					
-				} catch (ProfileException e) {
-					error("Cannot interpolate segments", e);
-					throw new DatasetConversionException("Error creating segmented profile", e);
-				}
-				
-				
-			}
-			
-
-		}
+//		for(ProfileType type : ProfileType.values()){
+//			ISegmentedProfile p = template.getProfile(type);
+//			ISegmentedProfile target = newNucleus.getProfile(type);
+//			
+//			if(p.size() != target.size()){
+//				fine("New nucleus profile length of "+target.size()+" : original nucleus was "+p.size());
+//				
+//				try {
+//					target = target.frankenNormaliseToProfile(p);
+//					newNucleus.setProfile(type, target);
+//					
+//				} catch (ProfileException e) {
+//					fine("Cannot interpolate segments", e);
+//					throw new DatasetConversionException("Error creating segmented profile", e);
+//				}
+//				
+//				
+//			}
+//			
+//
+//		}
 		
 
 

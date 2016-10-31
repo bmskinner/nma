@@ -66,7 +66,7 @@ public class DefaultNucleus
 	}
 		
 	protected DefaultNucleus(Nucleus n) throws UnprofilableObjectException {
-		super((ProfileableCellularComponent) n);
+		super( n);
 		finest("Created profileable nucleus");		
 		nucleusNumber = n.getNucleusNumber();
 				
