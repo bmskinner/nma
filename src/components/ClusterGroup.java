@@ -64,6 +64,13 @@ public class ClusterGroup implements IClusterGroup {
 		this.newickTree = tree;
 	}
 	
+	public ClusterGroup(IClusterGroup template){
+		this.options    = new ClusteringOptions(template.getOptions());
+		this.name       = template.getName();
+		this.newickTree = template.getTree();
+		this.ids        = template.getUUIDs();
+	}
+	
 	/* (non-Javadoc)
 	 * @see components.IClusterGroup#getName()
 	 */

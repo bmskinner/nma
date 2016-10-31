@@ -4,23 +4,15 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.lang.ref.SoftReference;
-import java.util.Arrays;
-
 import analysis.profiles.ProfileCreator;
 import components.active.generic.UnprofilableObjectException;
 import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
-import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-import stats.PlottableStatistic;
 
 public class DefaultConsensusNucleus extends DefaultNucleus {
 	

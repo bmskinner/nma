@@ -31,8 +31,11 @@ import java.util.UUID;
 import logging.Loggable;
 import stats.PlottableStatistic;
 import utility.Constants;
+import utility.Version;
+import components.ClusterGroup;
 import components.ICell;
 import components.ICellCollection;
+import components.IClusterGroup;
 import components.active.DefaultAnalysisDataset;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
@@ -71,22 +74,39 @@ public class DatasetConverter implements Loggable {
 	 * @return
 	 */
 	public IAnalysisDataset convert() throws DatasetConversionException {
-		
-		backupOldDataset();
-		
-		ICellCollection newCollection = makeNewRootCollection();
-		
-		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, oldDataset.getSavePath());
-		
-		newDataset.setAnalysisOptions(oldDataset.getAnalysisOptions());
-		newDataset.setDatasetColour(oldDataset.getDatasetColour());
-		
-		log("Creating child collections");
-		
-		// add the child datasets
-		makeVirtualCollections(oldDataset, newDataset);
-		
-		return newDataset;
+
+		try{
+			log("Beginning conversion from "+oldDataset.getVersion()+" to "+Version.currentVersion());
+			backupOldDataset();
+
+			ICellCollection newCollection = makeNewRootCollection();
+
+			IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, oldDataset.getSavePath());
+
+			newDataset.setAnalysisOptions(oldDataset.getAnalysisOptions());
+			newDataset.setDatasetColour(oldDataset.getDatasetColour());
+
+			// arrange root cluster groups
+			log("Creating cluster groups");
+			for(IClusterGroup oldGroup : oldDataset.getClusterGroups()){
+
+				IClusterGroup newGroup = new ClusterGroup(oldGroup);
+
+				newDataset.addClusterGroup(newGroup);
+
+			}
+
+			log("Creating child collections");
+
+			// add the child datasets
+			makeVirtualCollections(oldDataset, newDataset);
+
+			return newDataset;
+
+		} catch(Exception e){
+			error("Error converting dataset",e);
+			throw new DatasetConversionException(e);
+		}
 	}
 	
 	/**
@@ -98,10 +118,8 @@ public class DatasetConverter implements Loggable {
 		
 		
 		for(IAnalysisDataset child : template.getChildDatasets()){
-			
-			//TODO: arrange cluster groups
-			
-			fine("Converting: "+child.getName());
+
+			log("\tConverting: "+child.getName());
 			
 			ICellCollection oldCollection = child.getCollection();
 			// make a virtual collection for the cells 
@@ -117,6 +135,17 @@ public class DatasetConverter implements Loggable {
 			oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
 			
 			dest.addChildCollection(newCollection);
+			
+			IAnalysisDataset destChild = dest.getChildDataset(newCollection.getID());
+			
+			log("\tMaking clusters: "+child.getName());
+			for(IClusterGroup oldGroup : child.getClusterGroups()){
+				
+				IClusterGroup newGroup = new ClusterGroup(oldGroup);
+				
+				destChild.addClusterGroup(newGroup);
+				
+			}
 			
 			// Recurse until complete
 			makeVirtualCollections(child, dest.getChildDataset(newCollection.getID()));
@@ -160,6 +189,7 @@ public class DatasetConverter implements Loggable {
 		for(UUID id : oldCollection.getSignalGroupIDs()){
 			newCollection.addSignalGroup(id, oldCollection.getSignalGroup(id));
 		}
+		
 		
 		return newCollection;
 		
