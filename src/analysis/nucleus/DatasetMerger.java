@@ -205,11 +205,20 @@ public class DatasetMerger extends AnalysisWorker {
 		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
 		newDataset.setRoot(true);
 
+//		log(newDataset.getName());
+//	    log("Has children: "+newDataset.hasChildren());
+//	    log("Child count : "+newDataset.getChildCount());
+		
 		// Add the original datasets as merge sources
 		for(IAnalysisDataset d : datasets){
 			newDataset.addMergeSource(d);
 		}
 
+		
+//		log(newDataset.getName());
+//	    log("Has children: "+newDataset.hasChildren());
+//	    log("Child count : "+newDataset.getChildCount());
+	    
 		// a merged dataset should not have analysis options
 		// of its own; it lets each merge source display options
 		// appropriately

@@ -34,6 +34,7 @@ import analysis.IAnalysisDataset;
 import analysis.nucleus.NucleusClusterer;
 import components.ClusterGroup;
 import components.ICellCollection;
+import components.IClusterGroup;
 import components.nuclear.SignalGroup;
 
 
@@ -75,12 +76,12 @@ public class ClusterAnalysisAction extends ProgressableAction {
 
 		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 		ClusteringOptions options =  ((NucleusClusterer) worker).getOptions();
-		//int clusterNumber = dataset.getClusterGroups().size();
+
 		finest("Getting group number");
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 		finest("Cluster group number chosen: "+clusterNumber);
 
-		ClusterGroup group = new ClusterGroup(Constants.CLUSTER_GROUP_PREFIX+"_"+clusterNumber, options, tree);
+		IClusterGroup group = new ClusterGroup(Constants.CLUSTER_GROUP_PREFIX+"_"+clusterNumber, options, tree);
 
 		for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
 
@@ -89,40 +90,25 @@ public class ClusterAnalysisAction extends ProgressableAction {
 			if(c.hasCells()){
 				finest("Cluster "+cluster+": "+c.getName());
 				
-				
-				// Create profile aggregates and collections for child
-//				c.getProfileManager().createProfileCollections(false);
-//				c.getProfileManager().recalculateProfileAggregates();
-				
-//				try {
-//					fine("Copying profiles to cluster");
 				dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
-//				} catch (Exception e) {
-//					error("Error copying segments to cluster "+c.getName(), e);
-//				}
-				
-//				//Copy signal groups
-//				for(UUID id  : dataset.getCollection().getSignalGroupIDs()){
-//					c.addSignalGroup(id, new SignalGroup(dataset.getCollection().getSignalGroup(id)));
-//					finest("Removing signal groups with no signals");
-//					if(c.getSignalManager().getSignalCount(id)==0){ // Signal group has no signals
-//						c.removeSignalGroup(id);
-//						finest("Removed signal group "+id.toString());
-//					}
-//					
-//				}
+
 				
 				
 				group.addDataset(c);
 				c.setName(group.getName()+"_"+c.getName());
 
 				dataset.addChildCollection(c);
-				
+								
 				
 				// attach the clusters to their parent collection
 				log("Cluster "+cluster+": "+c.size()+" nuclei");
 				IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
 				clusterDataset.setRoot(false);
+				
+				// set shared counts
+				c.setSharedCount(dataset.getCollection(), c.size());
+				dataset.getCollection().setSharedCount(c, c.size());
+				
 				list.add(clusterDataset);
 			}
 

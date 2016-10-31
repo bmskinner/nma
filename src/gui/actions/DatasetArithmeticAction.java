@@ -49,7 +49,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 			if(dialog.isReadyToRun()){
 
 				datasetOne = dialog.getDatasetOne();
-				IAnalysisDataset two = dialog.getDatasetTwo();
+				IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
 				DatasetArithmeticOperation operation = dialog.getOperation();
 
 				
@@ -60,20 +60,33 @@ public class DatasetArithmeticAction extends ProgressableAction {
 
 				switch(operation){
 					case AND: // present in both
-						newCollection = datasetOne.getCollection().and(two.getCollection());
+						newCollection = datasetOne.getCollection().and(datasetTwo.getCollection());
+						
+						newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
+						newCollection.setSharedCount(datasetTwo.getCollection(), newCollection.size());
+						
+						datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
+						datasetTwo.getCollection().setSharedCount(newCollection, newCollection.size());
 						break;
 					case NOT: // present in one, not present in two
-						newCollection = datasetOne.getCollection().not(two.getCollection());
+						newCollection = datasetOne.getCollection().not(datasetTwo.getCollection());
+						
+						newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
+						newCollection.setSharedCount(datasetTwo.getCollection(), 0);
+						
+						datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
+						datasetTwo.getCollection().setSharedCount(newCollection, 0);
+						
 						break;
 					case OR: // present in either (merge)
 						
 						List<IAnalysisDataset> toMerge = new ArrayList<IAnalysisDataset>();
 						toMerge.add(datasetOne);
-						toMerge.add(two);
+						toMerge.add(datasetTwo);
 						new MergeCollectionAction(toMerge, mw);
 						break;
 					case XOR: // present in either but not both
-						newCollection = datasetOne.getCollection().xor(two.getCollection());
+						newCollection = datasetOne.getCollection().xor(datasetTwo.getCollection());
 						break;
 					default:
 						break;
@@ -101,19 +114,22 @@ public class DatasetArithmeticAction extends ProgressableAction {
 			
 			log("Found "+newCollection.size()+" cells");
 			log("Running morphology analysis...");
-			
+						
 			IAnalysisDataset newDataset;
 			
 			if(newCollection instanceof VirtualCellCollection){
-//				newDataset = new ChildAnalysisDataset(dataset, newCollection);
+
 				IAnalysisDataset root = ((VirtualCellCollection) newCollection).getRootParent();
 				
 				root.addChildCollection(newCollection);
-				newDataset = root.getChildDataset(newCollection.getID());
+				newDataset = root.getChildDataset(newCollection.getID());				
+				
 			} else {
 				newDataset = new DefaultAnalysisDataset(newCollection);
 				newDataset.setRoot(true);
 			}
+			
+			
 
 			int flag = MainWindow.ADD_POPULATION;
 			flag |= MainWindow.SAVE_DATASET;

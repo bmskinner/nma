@@ -1,6 +1,5 @@
 package components.active;
 
-import java.awt.Paint;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,15 +8,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
 import components.ICellCollection;
 import components.IClusterGroup;
-import utility.Constants;
-import utility.Version;
 
 /**
  * This is the virtual child dataset, which retains only the pointer
@@ -26,27 +20,16 @@ import utility.Version;
  * @author ben
  *
  */
-public class ChildAnalysisDataset implements IAnalysisDataset {
+public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
 
 	private static final long serialVersionUID = 1L;
-
-	private final Version version;
 	
 	private IAnalysisDataset parent;
-	
-	private Set<IAnalysisDataset> childDatasets  = new HashSet<IAnalysisDataset>(); // direct child collections
-	
-	private ICellCollection cellCollection; // VirtualCellCollection
-	
-	private Paint datasetColour = null;
-	
-	private List<IClusterGroup> clusterGroups = new ArrayList<IClusterGroup>(0); // hold groups of cluster results
-	
-	 public ChildAnalysisDataset(IAnalysisDataset parent, ICellCollection collection){
-		 this.parent = parent;
-		 this.version = Version.currentVersion();
-		 this.cellCollection = collection;
-	 }
+
+	public ChildAnalysisDataset(IAnalysisDataset parent, ICellCollection collection){
+		super(collection);
+		this.parent = parent;
+	}
 
 	@Override
 	public IAnalysisDataset duplicate() throws Exception {
@@ -57,11 +40,6 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	@Override
 	public Handler getLogHandler() throws Exception {
 		return parent.getLogHandler();
-	}
-
-	@Override
-	public Version getVersion() {
-		return this.version;
 	}
 
 	@Override
@@ -78,22 +56,6 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	@Override
 	public void addChildDataset(IAnalysisDataset dataset) {
 		childDatasets.add(dataset);
-		
-	}
-
-	@Override
-	public UUID getUUID() {
-		return cellCollection.getID();
-	}
-
-	@Override
-	public String getName() {
-		return cellCollection.getName();
-	}
-
-	@Override
-	public void setName(String s) {
-		cellCollection.setName(s);
 		
 	}
 
@@ -219,11 +181,17 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	@Override
 	public List<IAnalysisDataset> getAllChildDatasets() {
 		List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>();
-		result.addAll(childDatasets);
-		for(IAnalysisDataset c : childDatasets){
-			result.addAll(c.getChildDatasets());
-		}
 		
+//		log(this.getName());
+//	    log("Has children: "+this.hasChildren());
+		
+		if( ! childDatasets.isEmpty()){
+			
+			for(IAnalysisDataset d : childDatasets){
+				result.add(d);
+				result.addAll(d.getAllChildDatasets());
+			}
+		}		
 		return result;
 	}
 
@@ -244,73 +212,6 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 
 	@Override
 	public void setAnalysisOptions(IAnalysisOptions analysisOptions) {}
-
-	@Override
-	public void addClusterGroup(IClusterGroup group) {
-		this.clusterGroups.add(group);
-	}
-
-	@Override
-	public int getMaxClusterGroupNumber() {
-		int number = 0;
-		
-		if(this.hasClusters()){
-
-			for (IClusterGroup g :  this.getClusterGroups()){
-
-				String name = g.getName();
-
-				Pattern p = Pattern.compile("^"+Constants.CLUSTER_GROUP_PREFIX+"_(\\d+)$");
-
-				Matcher m = p.matcher(name);
-				if(m.find()){
-					String s = m.group(1);
-
-					int n = Integer.valueOf(s);
-					if(n>number){
-						number=n;
-					}
-				}
-			}
-		}
-		return number;
-	}
-
-	@Override
-	public boolean hasCluster(UUID id) {
-		boolean result = false;
-		for(IClusterGroup g : this.clusterGroups){
-			if(g.hasDataset(id)){
-				result = true;
-				break;
-			}
-		}
-		return result;
-	}
-
-	@Override
-	public List<IClusterGroup> getClusterGroups() {
-		return  this.clusterGroups;
-	}
-
-	@Override
-	public List<UUID> getClusterIDs() {
-		List<UUID> result = new ArrayList<UUID>();
-		for(IClusterGroup g : this.clusterGroups){
-			result.addAll(g.getUUIDs());
-		}
-		return result;
-	}
-
-	@Override
-	public boolean hasClusters() {
-		return clusterGroups != null && clusterGroups.size()>0;
-	}
-
-	@Override
-	public boolean hasClusterGroup(IClusterGroup group) {
-		return clusterGroups.contains(group);
-	}
 
 	@Override
 	public void refreshClusterGroups() {
@@ -379,42 +280,10 @@ public class ChildAnalysisDataset implements IAnalysisDataset {
 	public void deleteMergeSource(UUID id) {}
 
 	@Override
-	public boolean hasChild(IAnalysisDataset child) {
-		return childDatasets.contains(child);
-	}
-
-	@Override
-	public boolean hasRecursiveChild(IAnalysisDataset child) {
-		
-		for(IAnalysisDataset c : childDatasets){
-			if(c.hasRecursiveChild(child)){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
 	public boolean hasChild(UUID child) {
 		return childDatasets.contains(child);
 	}
-
-	@Override
-	public void setDatasetColour(Paint colour) {
-		datasetColour = colour;
-		
-	}
-
-	@Override
-	public Paint getDatasetColour() {
-		return datasetColour;
-	}
-
-	@Override
-	public boolean hasDatasetColour() {
-		return datasetColour!=null;
-	}
-
+	
 	@Override
 	public void updateSourceImageDirectory(File expectedImageDirectory) {
 		parent.updateSourceImageDirectory(expectedImageDirectory);
