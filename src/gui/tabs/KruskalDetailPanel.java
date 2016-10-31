@@ -38,6 +38,7 @@ import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
+import charting.charts.AbstractChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
@@ -147,9 +148,16 @@ public class KruskalDetailPanel  extends DetailPanel {
 	}
 	
 	@Override
+	public void setChartsAndTablesLoading(){
+		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
+//		tableAnalysisParameters.setModel(AbstractDatasetCreator.createLoadingTable());
+	}
+	
+	@Override
 	protected void updateSingle() {
 		updateNull();
 	}
+
 	
 	@Override
 	protected void updateMultiple() {

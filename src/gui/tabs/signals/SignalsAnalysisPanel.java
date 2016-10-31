@@ -38,6 +38,8 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.charts.AbstractChartFactory;
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.SignalTableCell;
 import charting.options.ChartOptions;
@@ -237,6 +239,13 @@ public class SignalsAnalysisPanel extends DetailPanel {
 		TableModel model = getTable(options);
 		table.setModel(model);
 		table.createDefaultColumnsFromModel();
+		
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+//		chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
+		table.setModel(AbstractDatasetCreator.createLoadingTable());	
 		
 	}
 	

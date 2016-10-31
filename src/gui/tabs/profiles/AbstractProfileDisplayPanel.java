@@ -24,12 +24,14 @@ import gui.components.panels.ProfileMarkersOptionsPanel;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
+import javax.swing.JTable;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
@@ -38,8 +40,10 @@ import org.jfree.data.xy.XYDataset;
 
 import stats.StatisticDimension;
 import components.generic.ProfileType;
+import charting.charts.AbstractChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
+import charting.datasets.AbstractDatasetCreator;
 
 @SuppressWarnings("serial")
 public abstract class AbstractProfileDisplayPanel extends DetailPanel implements ActionListener {
@@ -138,6 +142,12 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 		@Override
 		protected void updateNull() {
 			this.setEnabled(false);		
+		}
+		
+		@Override
+		public void setChartsAndTablesLoading(){
+			chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
+			
 		}
 		
 		@Override

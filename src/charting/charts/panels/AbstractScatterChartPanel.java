@@ -23,7 +23,9 @@ import components.ICellCollection;
 import components.active.VirtualCellCollection;
 import components.generic.MeasurementScale;
 import analysis.IAnalysisDataset;
+import charting.charts.AbstractChartFactory;
 import charting.charts.ScatterChartFactory;
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.datasets.ScatterChartDatasetCreator;
 import charting.options.ChartOptions;
@@ -161,9 +163,14 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 				.setTarget(rhoTable)
 				.build();
 		setTable(tableOptions);
-//		rhoTable.setModel(getTable(tableOptions));
 		
 		gateButton.setEnabled(false);
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+		chartPanel.setChart(AbstractChartFactory.createLoadingChart());		
+		rhoTable.setModel(AbstractDatasetCreator.createLoadingTable());
 	}
 	
 	@Override

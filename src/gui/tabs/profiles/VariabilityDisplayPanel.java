@@ -44,6 +44,7 @@ import javax.swing.event.ChangeListener;
 import org.jfree.chart.JFreeChart;
 
 import utility.Constants;
+import charting.charts.AbstractChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
@@ -158,12 +159,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 
 	}
 	
-//	@Override
-//	public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e) {
-//
-//		JFreeChart chart = this.getChartCache().getChart(e.getOptions());
-//		chartPanel.setChart(chart);		
-//	}
+
 
 	@Override
 	protected void updateSingle() {
@@ -202,6 +198,11 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	protected void updateNull() {
 		updateSingle();
 		this.setEnabled(false);
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+		chartPanel.setChart(AbstractChartFactory.createLoadingChart());			
 	}
 	
 	@Override

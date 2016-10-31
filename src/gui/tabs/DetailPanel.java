@@ -40,8 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingWorker;
@@ -59,8 +58,6 @@ import charting.charts.panels.ExportableChartPanel;
 import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
-import charting.options.ChartOptions;
-import charting.options.TableOptions;
 import charting.options.TableOptions;
 import analysis.IAnalysisDataset;
 
@@ -97,7 +94,7 @@ public abstract class DetailPanel
 	protected final Cache tableCache = new TableCache();
 
 	
-	volatile private boolean isUpdating = false;
+	volatile private AtomicBoolean isUpdating = new AtomicBoolean(false);
 	
 	public DetailPanel( ){
 		this.addChartOptionsRenderedEventListener(this);
@@ -133,7 +130,7 @@ public abstract class DetailPanel
 	 * this simply accesses the first dataset in the list provided
 	 * @return
 	 */
-	public IAnalysisDataset activeDataset(){
+	public synchronized IAnalysisDataset activeDataset(){
 		return list.get(0);
 	}
 	
@@ -142,7 +139,7 @@ public abstract class DetailPanel
 	 * to pass the active dataset back to update()
 	 * @return
 	 */
-	public List<IAnalysisDataset> activeDatasetToList(){
+	public synchronized List<IAnalysisDataset> activeDatasetToList(){
 		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 		list.add(activeDataset());
 		return list;
@@ -152,7 +149,7 @@ public abstract class DetailPanel
 	 * Test if only a single dataset is selected
 	 * @return
 	 */
-	public boolean isSingleDataset(){
+	public synchronized boolean isSingleDataset(){
 		return(this.list.size()==1);
 	}
 	
@@ -160,25 +157,25 @@ public abstract class DetailPanel
 	 * Test if multiple datasets are selected
 	 * @return
 	 */
-	public boolean isMultipleDatasets(){
+	public synchronized boolean isMultipleDatasets(){
 		return(this.list.size()>1);
 	}
 	
-	public boolean hasDatasets(){
+	public synchronized boolean hasDatasets(){
 		return(this.list.size()>0);
 	}
 	
-	protected List<IAnalysisDataset> getDatasets(){
+	protected synchronized List<IAnalysisDataset> getDatasets(){
 		return this.list;
 	}
 	
-	public Cache getChartCache(){
+	public synchronized Cache getChartCache(){
 		return this.chartCache;
 	}
 	
-	public boolean isUpdating(){
+	public synchronized boolean isUpdating(){
 		
-		if(this.isUpdating){
+		if(this.isUpdating.get()){
 			return true;
 		}
 		
@@ -191,8 +188,8 @@ public abstract class DetailPanel
 		return false;
 	}
 	
-	protected void setUpdating(boolean b){
-		this.isUpdating = b;
+	protected synchronized void setUpdating(boolean b){
+		this.isUpdating.set(b);
 	}
 	
 	
@@ -200,7 +197,7 @@ public abstract class DetailPanel
 	 * Toggle wait cursor on element
 	 * @param b
 	 */
-	public void setAnalysing(boolean b){
+	public synchronized void setAnalysing(boolean b){
 		if(b){
 			
 			for(Component c : this.getComponents()){
@@ -221,24 +218,24 @@ public abstract class DetailPanel
 		}
 	}
 	
-	@Override
-	public void setEnabled(boolean b){
-		
-		for(Component c : this.getComponents()){
-			c.setEnabled(b);
-		}
-		
-		for(TabPanel panel : this.subPanels){
-			panel.setEnabled(b);
-		}
-	}
+//	@Override
+//	public synchronized void setEnabled(boolean b){
+//		
+//		for(Component c : this.getComponents()){
+//			c.setEnabled(b);
+//		}
+//		
+////		for(TabPanel panel : this.subPanels){
+////			panel.setEnabled(b);
+////		}
+//	}
 	
 	/**
 	 * Force any chart panels currently visible on screen
 	 * to redraw, allowing text to be rendered with the 
 	 * appropriate aspect ratio
 	 */
-	public void updateSize(){
+	public synchronized void updateSize(){
 		
 		updateSize(this);
 				
@@ -253,7 +250,7 @@ public abstract class DetailPanel
 	 * cache if any are found.
 	 * @param container
 	 */
-	private void updateSize(Container container){
+	private synchronized void updateSize(Container container){
 		for(Component c : container.getComponents()){
 			if(c instanceof ExportableChartPanel){
 				
@@ -298,7 +295,7 @@ public abstract class DetailPanel
 	 * This method sets which of the overriden handling methods
 	 * are run by extending classes.
 	 */
-	private void updateDetail(){
+	private synchronized void updateDetail(){
 		
 		finer("Updating detail panel");
 		try {
@@ -339,7 +336,7 @@ public abstract class DetailPanel
 	 * This method must be overridden by the extending class
 	 * to perform the actual update when a single dataset is selected
 	 */
-	protected void updateSingle(){
+	protected synchronized void updateSingle(){
 		finest(this.getClass().getName()+": Updating single dataset");
 	}
 	
@@ -347,7 +344,7 @@ public abstract class DetailPanel
 	 * This method must be overridden by the extending class
 	 * to perform the actual update when a multiple datasets are selected
 	 */
-	protected void updateMultiple(){
+	protected synchronized void updateMultiple(){
 		finest(this.getClass().getName()+": Updating multiple datasets");
 	}
 	
@@ -355,7 +352,7 @@ public abstract class DetailPanel
 	 * This method must be overridden by the extending class
 	 * to perform the actual update when a no datasets are selected
 	 */
-	protected void updateNull(){
+	protected synchronized void updateNull(){
 		finest(this.getClass().getName()+": Updating null dataset");
 	}
 	
@@ -867,9 +864,7 @@ public abstract class DetailPanel
 
     		try {
     			if(options.hasTarget()){
-    				
-    				options.getTarget().setModel( AbstractDatasetCreator.createLoadingTable());
-    				
+    				    				
     				options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     			}
     			finest("Creating table type");
@@ -962,8 +957,14 @@ public abstract class DetailPanel
     	updateListeners.remove( l );
     }
     
+    public abstract void setChartsAndTablesLoading();
+    
     public void datasetUpdateEventReceived(DatasetUpdateEvent e){
-//		Signal sub panels to update
+
+    	// Tell this panel to set all charts and tables to loading status
+    	setChartsAndTablesLoading();
+    	
+    	//		Signal sub panels to update
     	fireDatasetUpdateEvent(list);
     	this.update(e.getDatasets());
 

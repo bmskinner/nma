@@ -26,6 +26,7 @@ import gui.tabs.editing.BorderTagEditingPanel;
 import gui.tabs.editing.SegmentsEditingPanel;
 
 import java.awt.BorderLayout;
+
 import javax.swing.JTabbedPane;
 import javax.swing.table.TableModel;
 
@@ -114,6 +115,9 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 	protected void updateNull() {
 		updateMultiple();
 	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){}
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {

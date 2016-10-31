@@ -150,6 +150,11 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		mainPanel.repaint();
 		scrollPane.setViewportView(mainPanel);
 	}
+	
+//	@Override
+//	public void setChartsAndTablesLoading(){
+//		chartPanel.setChart(AbstractChartFactory.createLoadingChart());			
+//	}
 
 	@Override
 	public void chartSetEventReceived(ChartSetEvent e) {

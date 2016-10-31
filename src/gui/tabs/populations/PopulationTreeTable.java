@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.tree.TreePath;
@@ -86,18 +87,19 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
 	 * @return the index
 	 */
 	public int getRowIndex(IAnalysisDataset dataset){
-		
-		int index = 0;
 
 		for(int row = 0; row<this.getRowCount(); row++){
 
-			String populationName = this.getValueAt(row, COLUMN_NAME).toString();
-
-			if(dataset.getName().equals(populationName)){
-				index = row;
+			Object rowObject = this.getValueAt(row, COLUMN_NAME);
+			
+			if(rowObject instanceof IAnalysisDataset){
+				UUID targetID = ((IAnalysisDataset)rowObject).getUUID();
+				if(dataset.getUUID().equals(targetID)){
+					return row;
+				}
 			}
 		}
-		return index;
+		return -1; // no dataset found
 
 	}
 	

@@ -13,8 +13,10 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.IAnalysisDataset;
+import charting.charts.AbstractChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.charts.panels.ExportableChartPanel;
+import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
@@ -234,6 +236,11 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		chartPanel.setChart(chart);		
 	}
 
+	@Override
+	public void setChartsAndTablesLoading(){
+		chartPanel.setChart(AbstractChartFactory.createLoadingChart());		
+	}
+	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options)
 			throws Exception {

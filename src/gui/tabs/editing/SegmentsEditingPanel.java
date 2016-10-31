@@ -250,6 +250,13 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		}
 		
 		@Override
+		public void setChartsAndTablesLoading(){
+			
+			dualPanel.setCharts(MorphologyChartFactory.createLoadingChart(), 
+					MorphologyChartFactory.createLoadingChart());
+		}
+		
+		@Override
 		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
 			return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
 		}

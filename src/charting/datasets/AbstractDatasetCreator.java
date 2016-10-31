@@ -35,6 +35,9 @@ public class AbstractDatasetCreator implements Loggable {
 	 */
 	public static final DecimalFormat DEFAULT_DECIMAL_FORMAT = new DecimalFormat("#0.00"); 
 	
+//	public static final TableModel BLANK_TABLE_MODEL = new BlankTableModel();
+	
+	
 	static {
 		
 		DEFAULT_DECIMAL_FORMAT.setMinimumFractionDigits(2);
@@ -60,5 +63,12 @@ public class AbstractDatasetCreator implements Loggable {
 		model.addColumn(Labels.LOADING_DATA);
 		return model;
 	}
+	
+//	@SuppressWarnings("serial")
+//	private static class BlankTableModel extends DefaultTableModel {
+//		public BlankTableModel(){
+//			addColumn(Labels.NO_DATA_LOADED);
+//		}
+//	}
 
 }

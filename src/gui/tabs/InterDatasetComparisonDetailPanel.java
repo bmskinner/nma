@@ -20,6 +20,7 @@ package gui.tabs;
 
 import java.awt.BorderLayout;
 import java.util.logging.Level;
+
 import javax.swing.JTabbedPane;
 import javax.swing.table.TableModel;
 
@@ -96,6 +97,9 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 	protected void updateNull() {
 		updateMultiple();
 	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){}
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {

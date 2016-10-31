@@ -722,10 +722,10 @@ public class VirtualCellCollection implements ICellCollection {
 
 			}
 		} catch (Exception e){
-			return null;
+			return new double[0];
 		}
 			
-		return null;
+		return new double[0];
 	}
 	
 	/**

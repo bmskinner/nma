@@ -36,6 +36,7 @@ import org.jfree.chart.JFreeChart;
 import stats.NucleusStatistic;
 import charting.charts.AbstractChartFactory;
 import charting.charts.BoxplotChartFactory;
+import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.charts.panels.ViolinChartPanel;
 import charting.options.DefaultChartOptions;
@@ -119,6 +120,15 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 			finest("Passing to update multiple in "+this.getClass().getName());
 			updateMultiple();
 //			measurementUnitSettingsPanel.setEnabled(false);
+		}
+		
+		@Override
+		public void setChartsAndTablesLoading(){
+			for(NucleusStatistic stat : NucleusStatistic.values()){
+				ExportableChartPanel panel = chartPanels.get(stat.toString());
+				panel.setChart(MorphologyChartFactory.createLoadingChart());
+				
+			}
 		}
 		
 		

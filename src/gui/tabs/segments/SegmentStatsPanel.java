@@ -38,6 +38,9 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import utility.Constants;
+import charting.charts.AbstractChartFactory;
+import charting.charts.panels.ExportableChartPanel;
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
@@ -94,10 +97,9 @@ public class SegmentStatsPanel extends DetailPanel {
 		
 		if(IBorderSegment.segmentCountsMatch(getDatasets())){
 			table.setToolTipText("Mean and range for 95% confidence interval");
-//			setRenderer(table, new SegmentTableCellRenderer());s
 
 		} else {
-			log(Level.FINEST, "Segment counts don't match");
+			finest("Segment counts don't match");
 			table.setToolTipText(null);
 		}
 	}
@@ -112,6 +114,13 @@ public class SegmentStatsPanel extends DetailPanel {
 		table.setToolTipText(null);
 
 
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+		
+		table.setModel(AbstractDatasetCreator.createLoadingTable());
+		
 	}
 	
 	private TableOptions makeOptions(){

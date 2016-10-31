@@ -224,7 +224,7 @@ public abstract class ProgressableAction implements PropertyChangeListener, Logg
 		}
 
 		if(evt.getPropertyName().equals("Error")){
-			log(Level.WARNING, "Error in worker");
+			warn("Cancelling action due to error");
 			removeProgressBar();
 		}
 		

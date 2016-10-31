@@ -34,7 +34,10 @@ import org.jfree.chart.JFreeChart;
 
 import stats.NucleusStatistic;
 import analysis.IAnalysisDataset;
+import charting.charts.MorphologyChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import charting.charts.panels.SelectableChartPanel;
+import charting.options.ChartOptions;
 import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
@@ -59,6 +62,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 						.setUseDensity(false)
 						.build();
 					
+//					MorphologyChartFactory.createEmptyChart()
 					JFreeChart chart = getChart(options);
 					
 					SelectableChartPanel panel = new SelectableChartPanel(chart, stat.toString());
@@ -89,7 +93,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 				SelectableChartPanel panel = chartPanels.get(stat.toString());
 
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
-				DefaultChartOptions options = builder.setDatasets(getDatasets())
+				ChartOptions options = builder.setDatasets(getDatasets())
 					.addStatistic(stat)
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -98,9 +102,6 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 					.build();
 				
 				setChart(options);
-//				JFreeChart chart = getChart(options);
-//
-//				panel.setChart(chart);
 			}
 		}
 		
@@ -108,6 +109,15 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 			this.setEnabled(false);
 		}
 
+		
+		@Override
+		public void setChartsAndTablesLoading(){
+			for(NucleusStatistic stat : NucleusStatistic.values()){
+				ExportableChartPanel panel = chartPanels.get(stat.toString());
+				panel.setChart(MorphologyChartFactory.createLoadingChart());
+				
+			}
+		}
 
 		@Override
 		public void signalChangeReceived(SignalChangeEvent event) {

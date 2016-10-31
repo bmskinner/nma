@@ -74,6 +74,21 @@ public abstract class AbstractChartFactory implements Loggable {
 		
 	}
 	
+	public static JFreeChart createEmptyChart(){
+		
+		JFreeChart chart = createBaseXYChart();
+		XYPlot plot = chart.getXYPlot();
+		
+		plot.getDomainAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
+		plot.getRangeAxis().setRange(-DEFAULT_EMPTY_RANGE, DEFAULT_EMPTY_RANGE);
+		
+		plot.getDomainAxis().setVisible(false);
+		plot.getRangeAxis().setVisible(false);
+
+		return chart;
+		
+	}
+	
 	
 	/**
 	 * Create an empty chart appropriate for the factory chart

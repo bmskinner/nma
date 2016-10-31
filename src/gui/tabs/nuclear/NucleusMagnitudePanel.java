@@ -26,6 +26,7 @@ import gui.tabs.AbstractPairwiseDetailPanel;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -33,6 +34,7 @@ import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
 import stats.NucleusStatistic;
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
@@ -132,6 +134,8 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 		scrollPane.setViewportView(tablePanel);;
 		tablePanel.repaint();
 	}
+	
+
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{

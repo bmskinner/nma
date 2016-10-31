@@ -61,15 +61,15 @@ import components.nuclear.IBorderSegment;
 @SuppressWarnings("serial")
 public class DraggableOverlayChartPanel extends ExportableChartPanel {
 		
-	private ISegmentedProfile profile = null;
+	private volatile ISegmentedProfile profile = null;
 
-	private List<SegmentCrosshair> crosses = new ArrayList<SegmentCrosshair>(); // drawing lines on the chart
+	private volatile List<SegmentCrosshair> crosses = new ArrayList<SegmentCrosshair>(); // drawing lines on the chart
 
-	protected Crosshair xCrosshair;
+	protected volatile Crosshair xCrosshair;
 	
-	private boolean isChartNormalised = false;
+	private volatile boolean isChartNormalised = false;
 	
-	Overlay overlay = null;
+	protected volatile Overlay overlay = null;
 		
 
 	public DraggableOverlayChartPanel(final JFreeChart chart, final SegmentedProfile profile, boolean normalised){
@@ -85,7 +85,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	 * Toggle wait cursor on element
 	 * @param b
 	 */
-	public void setAnalysing(boolean b){
+	public synchronized void setAnalysing(boolean b){
 		if(b){
 			this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 		} else {
@@ -93,13 +93,13 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 		}
 	}
 	
-	private void clearOverlays(){
+	private synchronized void clearOverlays(){
 		if(overlay!=null){
 			this.removeOverlay(overlay);
 		}
 	}
 
-	public double getDomainCrosshairPosition(){
+	public synchronized double getDomainCrosshairPosition(){
 
 		if(xCrosshair!=null){
 			finest("Domain value is "+xCrosshair.getValue());
@@ -109,7 +109,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 
 	}
 	
-	private void updateOverlays(){
+	private synchronized void updateOverlays(){
 		/*
 		 * Create an x-axis overlay for each segment start
 		 */
@@ -151,13 +151,13 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 		}
 	}
 	
-	public void setChart(JFreeChart chart, ISegmentedProfile profile, boolean normalised){
+	public synchronized void setChart(JFreeChart chart, ISegmentedProfile profile, boolean normalised){
 		super.setChart(chart);
 
 		setProfile(profile, normalised);
 	}
 	
-	public void setProfile(ISegmentedProfile profile, boolean normalised){
+	public synchronized void setProfile(ISegmentedProfile profile, boolean normalised){
 		
 		clearOverlays();
 		this.profile = profile;
@@ -169,12 +169,12 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	}
 	
 	@Override
-	public void setChart(JFreeChart chart){
+	public synchronized void setChart(JFreeChart chart){
 		super.setChart(chart);
 	}
 	
 	@Override
-	public void mousePressed(MouseEvent e) {
+	public synchronized void mousePressed(MouseEvent e) {
 	    if (e.getButton() == MouseEvent.BUTTON1) {
 
 	    	
@@ -187,7 +187,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	}
 
 	@Override
-	public void mouseReleased(MouseEvent e) {
+	public synchronized void mouseReleased(MouseEvent e) {
 		
 	    if (e.getButton() == MouseEvent.BUTTON1) {
 	    	mouseIsDown = false;
@@ -239,7 +239,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	}
 	
 	@Override
-	public void mouseMoved(MouseEvent e){
+	public synchronized void mouseMoved(MouseEvent e){
 		
 		final int x = e.getX();
 		final int y = e.getY();
@@ -262,7 +262,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 		}
 	}
 	
-	private void updateActiveCrosshairLocation(int x, int y){
+	private synchronized void updateActiveCrosshairLocation(int x, int y){
 
 		if(xCrosshair!=null){
 

@@ -36,6 +36,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.charts.AbstractChartFactory;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.ViolinChartFactory;
 import charting.charts.panels.ExportableChartPanel;
@@ -51,7 +52,7 @@ import charting.options.TableOptions;
 	@SuppressWarnings("serial")
 	public abstract class BoxplotsTabPanel extends DetailPanel implements ActionListener {
 		
-		protected Map<String, ExportableChartPanel> chartPanels = new HashMap<String, ExportableChartPanel>();
+		protected volatile Map<String, ExportableChartPanel> chartPanels = new HashMap<String, ExportableChartPanel>();
 
 		protected JPanel 		mainPanel; // hold the charts
 		protected JPanel		headerPanel; // hold buttons
@@ -80,6 +81,15 @@ import charting.options.TableOptions;
 				log(Level.SEVERE, "Error creating panel", e);
 			}
 
+		}
+		
+		@Override
+		public synchronized void setChartsAndTablesLoading(){
+			
+			for(ExportableChartPanel p : chartPanels.values()){
+				p.setChart(AbstractChartFactory.createLoadingChart());			
+			}
+			
 		}
 		
 		@Override

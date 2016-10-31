@@ -60,22 +60,21 @@ public class VennDetailPanel extends DetailPanel {
 
 			this.add(scrollPane, BorderLayout.CENTER);
 
-			TableOptions options = new TableOptionsBuilder()
-			.setDatasets(null)
-			.setType(TableType.VENN)
-			.build();
-
-			TableModel model = new AnalysisDatasetTableCreator(options).createVennTable();
-
-			vennTable = new ExportableTable(model);
+			vennTable = new ExportableTable(AnalysisDatasetTableCreator.createBlankTable());
 			vennPanel.add(vennTable, BorderLayout.CENTER);
 			vennPanel.add(vennTable.getTableHeader(), BorderLayout.NORTH);
 			mainPanel.add(vennPanel);
 			vennTable.setEnabled(false);
+			
 		} catch(Exception e){
-			log(Level.SEVERE, "Error updating venn panel", e);
+			error("Error creating venn panel", e);
 		}
 		
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+		vennTable.setModel(AnalysisDatasetTableCreator.createLoadingTable());
 	}
 	
 	@Override
@@ -88,8 +87,6 @@ public class VennDetailPanel extends DetailPanel {
 	protected void updateMultiple() {
 		fine("Updating venn panel");
 		
-		vennTable.setModel(AnalysisDatasetTableCreator.createLoadingTable());
-
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.VENN)
@@ -120,10 +117,6 @@ public class VennDetailPanel extends DetailPanel {
 			.build();
 		
 		setTable(options);
-		
-//		TableModel model = getTable(options);
-//		vennTable.setModel(model);
-//		setRenderer(vennTable, new VennTableCellRenderer());
 	}
 	
 	@Override

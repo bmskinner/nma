@@ -39,6 +39,7 @@ import org.jfree.chart.JFreeChart;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import charting.charts.MorphologyChartFactory;
+import charting.datasets.AbstractDatasetCreator;
 import charting.options.DefaultChartOptions;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -196,6 +197,13 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 		
 		dualPanel.setCharts(MorphologyChartFactory.createEmptyChart(), 
 				MorphologyChartFactory.createEmptyChart());
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+		
+		dualPanel.setCharts(MorphologyChartFactory.createLoadingChart(), 
+				MorphologyChartFactory.createLoadingChart());
 	}
 	
 	@Override

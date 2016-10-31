@@ -14,6 +14,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import components.CellularComponent;
@@ -142,6 +143,9 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 		}
 				
 	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){}
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception {

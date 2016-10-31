@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.ConsensusNucleusChartFactory;
+import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
@@ -159,14 +160,21 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
 	@Override
 	protected void updateNull() {
-		
+		panel.setChart(MorphologyChartFactory.createEmptyChart());
 		updateSettingsPanels();
 		
-		ChartOptions options = new ChartOptionsBuilder()
-				.build();
+//		ChartOptions options = new ChartOptionsBuilder()
+//				.build();
+//		
+//		setChart(options);
 		
-		setChart(options);
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
 		
+		
+		panel.setChart(MorphologyChartFactory.createLoadingChart());
 	}
 
 

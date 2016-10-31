@@ -28,6 +28,7 @@ import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
@@ -51,10 +52,12 @@ import java.util.logging.Level;
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
 
+import charting.datasets.AbstractDatasetCreator;
 import analysis.IAnalysisDataset;
 import components.ClusterGroup;
 import components.ICellCollection;
@@ -185,6 +188,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		finer("Update complete");
 	}
 
+	
+	@Override
+	public void setChartsAndTablesLoading(){}
 	
 	private PopulationTreeTable createTreeTable(){
 

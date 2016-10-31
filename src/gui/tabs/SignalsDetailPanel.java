@@ -32,11 +32,13 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
+
 import javax.swing.JTabbedPane;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 
@@ -137,6 +139,9 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	protected void updateNull() {
 		updateMultiple();
 	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){}
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {

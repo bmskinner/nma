@@ -32,6 +32,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
+import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.BorderTagObject;
@@ -196,6 +197,14 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 				profileOptions.setEnabled(false);
 			}
 
+		}
+		
+		@Override
+		public void setChartsAndTablesLoading(){
+			JFreeChart chart1 = MorphologyChartFactory.createLoadingChart();
+			JFreeChart chart2 = MorphologyChartFactory.createLoadingChart();
+			
+			dualPanel.setCharts(chart1, chart2);
 		}
 		
 		@Override

@@ -31,12 +31,15 @@ import gui.tabs.cells.ComponentListPanel;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableModel;
+
 import org.jfree.chart.JFreeChart;
 
+import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 
@@ -94,6 +97,9 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		}
 
 	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){}
 	
 	private void createSubPanels(){
 		segmentProfilePanel = new CellProfilePanel(model); 		// the nucleus angle profile

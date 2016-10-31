@@ -27,11 +27,13 @@ import gui.tabs.nuclear.NucleusMagnitudePanel;
 import gui.tabs.nuclear.WilcoxonDetailPanel;
 
 import java.awt.BorderLayout;
+
 import javax.swing.JTabbedPane;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 
@@ -126,6 +128,10 @@ public class NuclearStatisticsPanel extends DetailPanel {
 	protected void updateNull() {
 		updateSingle();
 	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){}
+	
 	
 	
 	@Override

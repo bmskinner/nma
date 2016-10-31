@@ -22,6 +22,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.text.NumberFormat;
 import java.util.logging.Level;
+
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -30,6 +31,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
@@ -59,13 +61,8 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		
 		
 		JPanel pairwisePanel = new JPanel(new BorderLayout());
-		
-		TableOptions options = new TableOptionsBuilder()
-		.setDatasets(null)
-		.setType(TableType.PAIRWISE_VENN)
-		.build();
 
-		TableModel model = new AnalysisDatasetTableCreator(options).createPairwiseVennTable();
+		TableModel model = AbstractDatasetCreator.createBlankTable();
 
 		pairwiseVennTable = new ExportableTable(model);
 				
@@ -81,6 +78,11 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	}
 	
 	@Override
+	public void setChartsAndTablesLoading(){
+		pairwiseVennTable.setModel(AbstractDatasetCreator.createLoadingTable());
+	}
+	
+	@Override
 	protected void updateSingle() {
 		updateNull();
 	}
@@ -89,8 +91,6 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	@Override
 	protected void updateMultiple() {
 		fine("Updating pairwise venn table for multiple datasets");
-	
-		pairwiseVennTable.setModel(AnalysisDatasetTableCreator.createLoadingTable());
 		
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
@@ -106,15 +106,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	
 	@Override
 	protected void updateNull() {
-		TableOptions options = new TableOptionsBuilder()
-			.setDatasets(null)
-			.setType(TableType.PAIRWISE_VENN)
-			.build();
-		
-		setTable(options);
-//
-//		TableModel model = getTable(options);
-//		pairwiseVennTable.setModel(model);
+		pairwiseVennTable.setModel(AbstractDatasetCreator.createBlankTable());
 	}
 	
 	@Override

@@ -67,6 +67,7 @@ import javax.swing.text.StyledDocument;
 import org.jfree.chart.JFreeChart;
 
 import utility.Constants;
+import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.AnalysisDataset;
@@ -101,6 +102,9 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		commandMap.put("kill", InterfaceMethod.KILL_ALL_TASKS);
 		
 	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){}
 	
 	public LogPanel() {
 		super();

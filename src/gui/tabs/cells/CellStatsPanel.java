@@ -18,6 +18,8 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.TableModel;
 
+import charting.charts.MorphologyChartFactory;
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.datasets.CellDatasetCreator;
 import charting.datasets.CellTableDatasetCreator;
@@ -208,22 +210,16 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 			
 			setTable(options);
 
-//			TableModel model = getTable(options);
-//			table.setModel(model);
-			
-
-
-//			if(this.getCellModel().hasCell()){
-//				table.getColumnModel().getColumn(1).setCellRenderer(  new StatsTableCellRenderer() );
-//				this.setEnabled(true);
-//			} else {
-//
-//				this.setEnabled(false);
-//			}
 		} catch(Exception e){
 			warn("Error updating cell stats table");
-			log(Level.FINE, "Error updating cell stats table", e);
+			fine("Error updating cell stats table", e);
 		}
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+		
+		table.setModel(AbstractDatasetCreator.createLoadingTable());
 	}
 	
 	@Override
@@ -242,7 +238,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
 	@Override
 	protected void updateNull() {
-		update();
+		table.setModel(AbstractDatasetCreator.createBlankTable());
 		
 	}
 

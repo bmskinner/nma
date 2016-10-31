@@ -43,9 +43,11 @@ import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.signals.ShellRandomDistributionCreator;
 import analysis.signals.SignalManager;
+import charting.charts.AbstractChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.charts.panels.ConsensusNucleusChartPanel;
 import charting.charts.panels.ExportableChartPanel;
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.SignalTableCell;
 import charting.options.ChartOptions;
@@ -117,11 +119,10 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	}
 	
 	private JScrollPane createStatsPane(){
-		DefaultTableModel tableModel = new DefaultTableModel();
-		tableModel.addColumn("");
-		tableModel.addColumn("");
-		statsTable = new ExportableTable(); // table  for basic stats
-		statsTable.setModel(tableModel);
+		
+		
+		TableModel tableModel = AbstractDatasetCreator.createBlankTable();
+		statsTable = new ExportableTable(tableModel); // table  for basic stats
 		statsTable.setEnabled(false);
 		
 		statsTable.addMouseListener(new MouseAdapter() {
@@ -374,6 +375,13 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	@Override
 	protected void updateNull() {
 		updateMultiple();
+		
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+		chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
+		statsTable.setModel(AbstractDatasetCreator.createLoadingTable());	
 		
 	}
 	

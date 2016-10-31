@@ -28,6 +28,7 @@ import gui.tabs.AbstractPairwiseDetailPanel;
 import java.util.List;
 
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
 import stats.Quartile;
@@ -52,7 +53,11 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 	protected void updateSingle() {
 		tablePanel = createTablePanel();
 		scrollPane.setColumnHeaderView(null);
-		tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
+		
+		JPanel labelPanel = new JPanel();
+		labelPanel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
+		tablePanel.add(labelPanel);
+
 		scrollPane.setViewportView(tablePanel);;
 		tablePanel.repaint();
 		
@@ -102,7 +107,10 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 			tablePanel.revalidate();
 
 		} else {
-			tablePanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
+			JPanel labelPanel = new JPanel();
+			// Separate so we can use a flow layout for the label
+			labelPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
+			tablePanel.add(labelPanel);
 		} 
 		
 		
@@ -116,7 +124,10 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 	protected void updateNull() {
 		tablePanel = createTablePanel();
 		scrollPane.setColumnHeaderView(null);
-		tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
+		JPanel labelPanel = new JPanel();
+		// Separate so we can use a flow layout for the label
+		labelPanel.add(new JLabel(Labels.NO_DATA_LOADED, JLabel.CENTER));
+		tablePanel.add(labelPanel);
 		scrollPane.setViewportView(tablePanel);;
 		tablePanel.repaint();
 		

@@ -22,6 +22,7 @@ import javax.swing.tree.TreePath;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import analysis.IAnalysisDataset;
@@ -105,6 +106,9 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 		tree.setModel(model);
 		tree.addTreeSelectionListener(this);
 	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){}
 	
 	/**
 	 * Create the nodes in the tree

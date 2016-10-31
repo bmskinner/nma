@@ -12,6 +12,8 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.charts.AbstractChartFactory;
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
@@ -73,7 +75,13 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 		finest("Passing to update multiple");
 		updateMultiple();
 	}
-				
+		
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+//		chartPanel.setChart(AbstractChartFactory.createLoadingChart());		
+		tablePopulationStats.setModel(AbstractDatasetCreator.createLoadingTable());
+	}
 	
 	/**
 	 * Update the stats panel with data from the given datasets

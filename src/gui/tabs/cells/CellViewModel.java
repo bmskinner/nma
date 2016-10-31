@@ -45,7 +45,7 @@ public class CellViewModel {
 		return cell;
 	}
 	
-	public synchronized boolean hasCell(){
+	public boolean hasCell(){
 		return cell!=null;
 	}
 	

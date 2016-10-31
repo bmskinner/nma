@@ -17,14 +17,17 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.ListModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.charts.AbstractChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
+import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.ProfileType;
@@ -155,6 +158,13 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 			updateModalityProfileChart();
 			updatePositionChart(0);
 
+		}
+		
+		@Override
+		public void setChartsAndTablesLoading(){
+			chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
+			modalityProfileChartPanel.setChart(AbstractChartFactory.createLoadingChart());	
+			
 		}
 		
 		@Override

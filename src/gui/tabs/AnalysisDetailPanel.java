@@ -20,12 +20,14 @@ package gui.tabs;
 
 import java.awt.BorderLayout;
 import java.util.logging.Level;
+
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
@@ -61,6 +63,11 @@ public class AnalysisDetailPanel extends DetailPanel {
 	}
 	
 	@Override
+	public void setChartsAndTablesLoading(){
+		tableAnalysisParameters.setModel(AbstractDatasetCreator.createLoadingTable());
+	}
+	
+	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return new AnalysisDatasetTableCreator(options).createAnalysisTable();
 	}
@@ -74,12 +81,12 @@ public class AnalysisDetailPanel extends DetailPanel {
 	@Override
 	protected void updateMultiple() {
 		updateAnalysisParametersPanel();
-		log(Level.FINEST, "Updated analysis parameter panel");
+		finest("Updated analysis parameter panel");
 	}
 	
 	@Override
 	protected void updateNull() {
-		updateMultiple() ;
+		tableAnalysisParameters.setModel(AbstractDatasetCreator.createBlankTable());
 	}
 			
 	

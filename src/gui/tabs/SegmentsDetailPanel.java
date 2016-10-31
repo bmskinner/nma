@@ -30,6 +30,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
@@ -37,6 +38,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 
@@ -176,6 +178,9 @@ public class SegmentsDetailPanel extends DetailPanel {
 	protected void updateNull() {
 		updateMultiple() ;
 	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){}
 					
 
 	@Override

@@ -38,7 +38,9 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.charts.AbstractChartFactory;
 import charting.charts.HistogramChartFactory;
+import charting.charts.panels.ExportableChartPanel;
 import charting.charts.panels.SelectableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
@@ -87,6 +89,15 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 			log(Level.SEVERE, "Error creating panel", e);
 		}
 
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+		
+		for(ExportableChartPanel p : chartPanels.values()){
+			p.setChart(AbstractChartFactory.createLoadingChart());			
+		}
+		
 	}
 	
 	@Override

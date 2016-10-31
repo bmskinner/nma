@@ -39,8 +39,10 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.charts.AbstractChartFactory;
 import charting.charts.NuclearSignalChartFactory;
 import charting.charts.panels.ExportableChartPanel;
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
@@ -192,6 +194,13 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	protected void updateNull() {
 		setEnabled(false);
 		updateChartAndTable();
+		
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+		chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
+		table.setModel(AbstractDatasetCreator.createLoadingTable());	
 		
 	}
 	

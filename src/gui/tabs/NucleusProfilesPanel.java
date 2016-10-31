@@ -21,13 +21,18 @@ package gui.tabs;
 import gui.tabs.profiles.ModalityDisplayPanel;
 import gui.tabs.profiles.ProfileDisplayPanel;
 import gui.tabs.profiles.VariabilityDisplayPanel;
+
 import java.awt.BorderLayout;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.swing.JTabbedPane;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
+
+import charting.charts.AbstractChartFactory;
+import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import components.generic.ProfileType;
@@ -93,6 +98,10 @@ public class NucleusProfilesPanel extends DetailPanel {
 	protected void updateNull() {
 		updateMultiple();
 	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){}
+	
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {

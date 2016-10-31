@@ -55,6 +55,7 @@ import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
@@ -73,6 +74,12 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 		clusterPanel = new ClustersPanel();
 		this.add(clusterPanel);
 
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+		//TODO: move classes up to ClusterDetailPanel
+//		tableAnalysisParameters.setModel(AbstractDatasetCreator.createLoadingTable());
 	}
 	
 	@Override

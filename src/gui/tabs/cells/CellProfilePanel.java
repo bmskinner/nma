@@ -199,6 +199,14 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 	}
 	
 	@Override
+	public void setChartsAndTablesLoading(){
+		JFreeChart chart1 = MorphologyChartFactory.createLoadingChart();
+		JFreeChart chart2 = MorphologyChartFactory.createLoadingChart();
+		
+		dualPanel.setCharts(chart1, chart2);
+	}
+	
+	@Override
 	public void chartSetEventReceived(ChartSetEvent e) {
 		ISegmentedProfile profile = this.getCellModel()
 				.getCell()

@@ -30,7 +30,6 @@ import analysis.IAnalysisDataset;
 import analysis.profiles.ProfileException;
 import stats.Quartile;
 import utility.Constants;
-import components.AbstractCellularComponent;
 import components.ICellCollection;
 import components.active.DefaultConsensusNucleus;
 import components.active.generic.FloatPoint;
@@ -43,7 +42,6 @@ import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderPoint;
 import components.nuclear.NucleusType;
-import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 
 
@@ -56,6 +54,8 @@ public class CurveRefolder extends AnalysisWorker {
 	private ICellCollection collection;
 	
 	private CurveRefoldingMode mode = CurveRefoldingMode.FAST; 				 // the dafault mode
+	
+	private int pointUpdateCounter = 0;
 	
 	public enum CurveRefoldingMode {
 		
@@ -133,12 +133,12 @@ public class CurveRefolder extends AnalysisWorker {
 
 //			refoldNucleus.moveCentreOfMass( IPoint.makeNew(0, 0));
 
-			if(collection.size()>1){
-				
-				smoothCurve(); // smooth the candidate nucleus to remove jagged edges
-				refoldCurve(); // carry out the refolding
-				smoothCurve(); // smooth the refolded nucleus to remove jagged edges
-			}
+//			if(collection.size()>1){
+//				
+//				smoothCurve(); // smooth the candidate nucleus to remove jagged edges
+//				refoldCurve(); // carry out the refolding
+//				smoothCurve(); // smooth the refolded nucleus to remove jagged edges
+//			}
 						
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
@@ -165,6 +165,8 @@ public class CurveRefolder extends AnalysisWorker {
 //			refoldNucleus.setPosition(newPosition);
 //			
 			collection.setConsensusNucleus(refoldNucleus);
+			
+			fine("Updated "+pointUpdateCounter+" border points");
 
 		} catch(Exception e){
 			logError("Unable to refold nucleus", e);
@@ -211,8 +213,8 @@ public class CurveRefolder extends AnalysisWorker {
 	}
 	
 	private void smoothCurve() throws Exception {
-		this.smoothCurve(0); // smooth with no offset
-		this.smoothCurve(1); // smooth with intercalated offset
+//		this.smoothCurve(0); // smooth with no offset
+//		this.smoothCurve(1); // smooth with intercalated offset
 	}
 	
 	/**
@@ -234,24 +236,12 @@ public class CurveRefolder extends AnalysisWorker {
 		 * Move ahead two points
 		 * 
 		 */
-		boolean skip = false;
+//		boolean skip = false;
 
 //		int i=offset;
-		for (int i = offset; i<refoldNucleus.getBorderLength(); i++){
-//		for(NucleusBorderPoint p : refoldNucleus.getBorderList() ){
-			
-			if(skip){
-//				i++;
-				continue; // ensure we only carry out the smoothing every other point
-			}
-			skip = !skip;
-			
-//			int prevIndex = refoldNucleus.wrapIndex(i-1);
-//			int nextIndex = refoldNucleus.wrapIndex(i+1);
-//						
+		for (int i = offset; i<refoldNucleus.getBorderLength(); i+=2){
+						
 			IBorderPoint thisPoint = refoldNucleus.getBorderPoint(i);
-//			IBorderPoint prevPoint = refoldNucleus.getBorderPoint(prevIndex);
-//			IBorderPoint nextPoint = refoldNucleus.getBorderPoint(nextIndex);
 			IBorderPoint prevPoint = thisPoint.prevPoint();
 			IBorderPoint nextPoint = thisPoint.nextPoint();
 
@@ -399,6 +389,7 @@ public class CurveRefolder extends AnalysisWorker {
 			// Apply the change if better fit
 			if(score < similarityScore) {
 				refoldNucleus.updateBorderPoint(index, newPoint);
+				pointUpdateCounter++;
 				
 				finer("Re-calculating profiles");
 				try {

@@ -40,6 +40,8 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.charts.AbstractChartFactory;
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
@@ -158,17 +160,17 @@ public class MergesDetailPanel extends DetailPanel {
 		return result;
 	}
 	
+	@Override
+	public void setChartsAndTablesLoading(){
+		sourceParametersTable.setModel(AbstractDatasetCreator.createLoadingTable());
+	}
+	
 	private JPanel createAnalysisParametersPanel() throws Exception{
 		JPanel panel = new JPanel(new BorderLayout());
 		
-		TableOptions options = new TableOptionsBuilder()
-		.setDatasets(null)
-		.setType(TableType.ANALYSIS_PARAMETERS)
-		.build();
-
 		
-		TableModel model = new AnalysisDatasetTableCreator(options).createAnalysisTable();
-//		
+		TableModel model = AbstractDatasetCreator.createBlankTable();
+	
 		sourceParametersTable =  new ExportableTable(model);
 		panel.add(sourceParametersTable, BorderLayout.CENTER);
 		return panel;
@@ -232,10 +234,6 @@ public class MergesDetailPanel extends DetailPanel {
 			.build();
 		
 		setTable(options);
-		
-//		TableModel parameterModel = getTable(parameterOptions);
-//		
-//		sourceParametersTable.setModel(parameterModel);
 	}
 	
 	@Override

@@ -81,6 +81,8 @@ public interface TabPanel
 	
 	void setAnalysing(boolean b);
 	
+	void setChartsAndTablesLoading();
+	
 	void setEnabled(boolean b);
 	
 	void clearChartCache();

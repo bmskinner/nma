@@ -19,15 +19,19 @@
 package gui.tabs;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
+
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+
 import org.jfree.chart.JFreeChart;
 
+import charting.datasets.AbstractDatasetCreator;
 import charting.options.DefaultChartOptions;
 
 @SuppressWarnings("serial")
@@ -50,6 +54,18 @@ public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
 		
 		protected JFreeChart createPanelChartType(DefaultChartOptions options) throws Exception {
 			return null;
+		}
+		
+		@Override
+		public void setChartsAndTablesLoading(){
+//			chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
+			for(Component c : this.getComponents()){
+				if(c instanceof JTable){
+					
+					((JTable)c).setModel(AbstractDatasetCreator.createLoadingTable());
+				}
+			}
+			
 		}
 				
 		/**

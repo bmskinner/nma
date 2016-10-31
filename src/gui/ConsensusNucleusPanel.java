@@ -39,8 +39,10 @@ import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.charts.AbstractChartFactory;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.panels.ConsensusNucleusChartPanel;
+import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
@@ -95,18 +97,17 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		runRefoldingButton.setVisible(false);
 		
 		consensusChartPanel.add(runRefoldingButton);
-		
-		
-		
-		this.add(consensusChartPanel, BorderLayout.CENTER);
-//		
-//		JPanel headerPanel = createHeaderPanel();
-//		this.add(headerPanel, BorderLayout.NORTH);
-		
+
+		add(consensusChartPanel, BorderLayout.CENTER);
 
 		offsetsPanel = createOffsetsPanel();
-		this.add(offsetsPanel, BorderLayout.EAST);
+		add(offsetsPanel, BorderLayout.EAST);
 		offsetsPanel.setVisible(false);
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+		consensusChartPanel.setChart(AbstractChartFactory.createLoadingChart());
 	}
 	
 	/**
@@ -434,13 +435,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	
 	private void updateBlankChart() {
 		
-		ChartOptions options = new ChartOptionsBuilder()
-			.setTarget(consensusChartPanel)
-			.build();
-		
-		
-		setChart(options);
-
+		consensusChartPanel.setChart(ConsensusNucleusChartFactory.makeEmptyChart());
 		runRefoldingButton.setVisible(false);
 		offsetsPanel.setVisible(false);
 		consensusChartPanel.restoreAutoBounds();
