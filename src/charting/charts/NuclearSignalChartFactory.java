@@ -52,7 +52,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 			return createEmptyShellChart();
 		}
 		
-		List<CategoryDataset> list = NuclearSignalDatasetCreator.getInstance().createShellBarChartDataset(options);
+		List<CategoryDataset> list = new NuclearSignalDatasetCreator().createShellBarChartDataset(options);
 		
 		JFreeChart chart = ChartFactory.createBarChart(null, "Outer <--- Shell ---> Interior", "Percent of signal", list.get(0));
 		chart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
@@ -154,7 +154,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 		}
 		
 		
-		XYDataset signalCoMs = NuclearSignalDatasetCreator.getInstance().createSignalCoMDataset(options.firstDataset());
+		XYDataset signalCoMs = new NuclearSignalDatasetCreator().createSignalCoMDataset(options.firstDataset());
 		
 		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
 
@@ -185,7 +185,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 
 			int j=0;
 			for(UUID signalGroup : options.firstDataset().getCollection().getSignalManager().getSignalGroupIDs()){
-				List<Shape> shapes = NuclearSignalDatasetCreator.getInstance().createSignalRadiusDataset(options.firstDataset(), signalGroup);
+				List<Shape> shapes = new NuclearSignalDatasetCreator().createSignalRadiusDataset(options.firstDataset(), signalGroup);
 
 				int signalCount = shapes.size();
 

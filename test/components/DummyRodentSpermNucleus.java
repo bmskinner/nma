@@ -111,8 +111,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public void intitialiseNucleus(double angleWindowProportion)
-			throws Exception {
+	public void initialise(double angleWindowProportion) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -128,24 +127,6 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public String getImageNameWithoutExtension() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public File getOutputFolder() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getPathWithoutExtension() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public int getNucleusNumber() {
 		// TODO Auto-generated method stub
 		return 0;
@@ -157,11 +138,6 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 		return null;
 	}
 
-	@Override
-	public void setOutputFolder(String f) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void calculateSignalAnglesFromPoint(IBorderPoint p) {
@@ -181,11 +157,6 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 		return null;
 	}
 
-	@Override
-	public String getOutputFolderName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public void updateSourceFolder(File newFolder) {
@@ -239,13 +210,6 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 				return 0;
 		}
 
-	}
-
-	@Override
-	public double getSafeStatistic(PlottableStatistic stat,
-			MeasurementScale scale) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override
@@ -460,7 +424,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public double[] getPosition() {
+	public int[] getPosition() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -521,24 +485,6 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 
 	@Override
 	public void setChannel(int channel) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setPosition(double[] position) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setBoundingRectangle(Rectangle boundingRectangle) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setSourceFileName(String name) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -675,7 +621,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public Map<BorderTagObject, Integer> getBorderTags() {
+	public Map<Tag, Integer> getBorderTags() {
 
 		return null;
 	}
@@ -693,7 +639,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public void replaceBorderTags(Map<BorderTagObject, Integer> tagMap) {
+	public void replaceBorderTags(Map<Tag, Integer> tagMap) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -725,6 +671,18 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	@Override
 	public int compareTo(Nucleus o) {
 		return 0;
+	}
+
+	@Override
+	public boolean smoothByDefault() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public String getSourceFileNameWithoutExtension() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

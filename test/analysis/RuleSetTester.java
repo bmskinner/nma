@@ -5,6 +5,7 @@ import org.junit.Test;
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
 import Samples.IndividualNuclei;
+import components.generic.ISegmentedProfile;
 import components.generic.Profile;
 import components.generic.SegmentedProfile;
 
@@ -15,7 +16,7 @@ public class RuleSetTester {
 		
 		System.out.println("\nTesting mouse RP rules\n");
 		try {
-			SegmentedProfile median = IndividualNuclei.rodentSpermMedianProfile();
+			ISegmentedProfile median = IndividualNuclei.rodentSpermMedianProfile();
 
 
 			ProfileIndexFinder finder = new ProfileIndexFinder();
@@ -44,7 +45,7 @@ public class RuleSetTester {
 		System.out.println("\nTesting mouse OP rules\n");
 
 		try {
-			SegmentedProfile median = IndividualNuclei.rodentSpermMedianProfile();
+			ISegmentedProfile median = IndividualNuclei.rodentSpermMedianProfile();
 
 
 			ProfileIndexFinder finder = new ProfileIndexFinder();

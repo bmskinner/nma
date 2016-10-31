@@ -28,16 +28,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
-
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import logging.Loggable;
-
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
@@ -49,45 +44,23 @@ import utility.AngleTools;
 import utility.ArrayConverter;
 import utility.ArrayConverter.ArrayConversionException;
 import weka.estimators.KernelEstimator;
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.nucleus.CurveRefolder;
 import analysis.signals.NuclearSignalOptions;
 import analysis.signals.ShellRandomDistributionCreator;
-import components.CellCollection;
 import components.ICellCollection;
-import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.MeasurementScale;
-import components.generic.XYPoint;
 import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalGroup;
-import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
-import components.nuclear.SignalGroup;
 import components.nuclei.Nucleus;
-import gui.Labels;
 import gui.components.ColourSelecter;
 
-public class NuclearSignalDatasetCreator implements Loggable {
+public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	
-	private static NuclearSignalDatasetCreator instance = null;
-
-	private NuclearSignalDatasetCreator(){}
-
-	public static NuclearSignalDatasetCreator getInstance(){
-		if(instance==null){
-			instance = new NuclearSignalDatasetCreator();
-		}
-		return instance;
-	}
+	public NuclearSignalDatasetCreator(){}
 	
-	public TableModel createBlankTable(){
-		DefaultTableModel model = new DefaultTableModel();
-		model.addColumn(Labels.NO_DATA_LOADED);
-		return model;
-	}
-
 	/**
 	 * Create a table of signal stats for the given list of datasets. This table
 	 * covers analysis parameters for the signals
@@ -502,7 +475,7 @@ public class NuclearSignalDatasetCreator implements Loggable {
 		// adjust X and Y because we are now counting angles from the vertical axis
 		double signalX = new AngleTools().getXComponentOfAngle(signalDistance, angle-90);
 		double signalY = new AngleTools().getYComponentOfAngle(signalDistance, angle-90);
-		return new FloatPoint(signalX, signalY);
+		return IPoint.makeNew(signalX, signalY);
 	}
 	
 	/**

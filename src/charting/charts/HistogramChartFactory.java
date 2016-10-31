@@ -192,7 +192,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		
 		
 		List<HistogramDataset> list = options.hasDatasets() 
-									? NuclearSignalDatasetCreator.getInstance().createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
+									? new NuclearSignalDatasetCreator().createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
 									: null;
 									
 									
@@ -264,7 +264,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		
 		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
-		List<DefaultXYDataset> list = NuclearSignalDatasetCreator.getInstance().createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale());
+		List<DefaultXYDataset> list = new NuclearSignalDatasetCreator().createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale());
 
 
 		String xLabel = options.getStat().label(options.getScale());

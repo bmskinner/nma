@@ -26,12 +26,14 @@ import stats.NucleusStatistic;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.profiles.DatasetProfiler;
+import components.active.DefaultCell;
+import components.active.DefaultCellCollection;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
-public class DummyRodentCollection extends CellCollection {
+public class DummyRodentCollection extends DefaultCellCollection {
 	
 	public DummyRodentCollection(int nuclei){
 		
@@ -39,15 +41,15 @@ public class DummyRodentCollection extends CellCollection {
 
 		for(int i=0; i<nuclei; i++){
 			
-			Cell dummy = makeDummyCell(i);
+			ICell dummy = makeDummyCell(i);
 			this.addCell(dummy);
 		}
 		
 	}
 	
-	private Cell makeDummyCell(int i){
+	private ICell makeDummyCell(int i){
 		
-		Cell c = new Cell();
+		ICell c = new DefaultCell();
 		Nucleus n = new DummyRodentSpermNucleus("Nucleus "+i);
 		c.setNucleus(n);
 		return c;

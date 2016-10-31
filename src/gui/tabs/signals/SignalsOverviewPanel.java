@@ -392,7 +392,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return NuclearSignalDatasetCreator.getInstance().createSignalStatsTable(options);
+		return new NuclearSignalDatasetCreator().createSignalStatsTable(options);
 	}
 
 	@Override

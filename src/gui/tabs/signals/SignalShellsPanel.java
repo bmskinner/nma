@@ -211,7 +211,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) throws Exception{
-		return NuclearSignalDatasetCreator.getInstance().createShellChiSquareTable(options);
+		return new NuclearSignalDatasetCreator().createShellChiSquareTable(options);
 	}
 
 	@Override
