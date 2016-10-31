@@ -45,6 +45,7 @@ import components.active.DefaultPigSpermNucleus;
 import components.active.DefaultRodentSpermNucleus;
 import components.active.VirtualCellCollection;
 import components.generic.IPoint;
+import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -53,6 +54,7 @@ import components.nuclei.Nucleus;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import analysis.IAnalysisDataset;
+import analysis.profiles.ProfileException;
 
 /**
  * This class will take old format datasets
@@ -76,7 +78,11 @@ public class DatasetConverter implements Loggable {
 	public IAnalysisDataset convert() throws DatasetConversionException {
 
 		try{
-			log("Beginning conversion from "+oldDataset.getVersion()+" to "+Version.currentVersion());
+			log("Old dataset version : "+oldDataset.getVersion());
+			log("Shiny target version: "+Version.currentVersion());
+			log("Beginning conversion");
+			
+			
 			backupOldDataset();
 
 			ICellCollection newCollection = makeNewRootCollection();
@@ -87,7 +93,7 @@ public class DatasetConverter implements Loggable {
 			newDataset.setDatasetColour(oldDataset.getDatasetColour());
 
 			// arrange root cluster groups
-			log("Creating cluster groups");
+//			log("Creating cluster groups");
 			for(IClusterGroup oldGroup : oldDataset.getClusterGroups()){
 
 				IClusterGroup newGroup = new ClusterGroup(oldGroup);
@@ -96,7 +102,7 @@ public class DatasetConverter implements Loggable {
 
 			}
 
-			log("Creating child collections");
+//			log("Creating child collections");
 
 			// add the child datasets
 			makeVirtualCollections(oldDataset, newDataset);
@@ -104,7 +110,7 @@ public class DatasetConverter implements Loggable {
 			return newDataset;
 
 		} catch(Exception e){
-			error("Error converting dataset",e);
+			fine("Error converting dataset", e);
 			throw new DatasetConversionException(e);
 		}
 	}
@@ -119,7 +125,7 @@ public class DatasetConverter implements Loggable {
 		
 		for(IAnalysisDataset child : template.getChildDatasets()){
 
-			log("\tConverting: "+child.getName());
+//			log("\tConverting: "+child.getName());
 			
 			ICellCollection oldCollection = child.getCollection();
 			// make a virtual collection for the cells 
@@ -138,7 +144,7 @@ public class DatasetConverter implements Loggable {
 			
 			IAnalysisDataset destChild = dest.getChildDataset(newCollection.getID());
 			
-			log("\tMaking clusters: "+child.getName());
+//			log("\tMaking clusters: "+child.getName());
 			for(IClusterGroup oldGroup : child.getClusterGroups()){
 				
 				IClusterGroup newGroup = new ClusterGroup(oldGroup);
@@ -195,7 +201,7 @@ public class DatasetConverter implements Loggable {
 		
 	}
 	
-	private ICell createNewCell(ICell oldCell){
+	private ICell createNewCell(ICell oldCell) throws DatasetConversionException{
 		ICell newCell = new DefaultCell(oldCell.getId());
 		
 		// make a new nucleus
@@ -207,7 +213,7 @@ public class DatasetConverter implements Loggable {
 		
 	}
 	
-	private Nucleus createNewNucleus(Nucleus n){
+	private Nucleus createNewNucleus(Nucleus n) throws DatasetConversionException{
 		
 		NucleusType type = oldDataset.getCollection().getNucleusType();
 		
@@ -237,7 +243,7 @@ public class DatasetConverter implements Loggable {
 		
 	}
 	
-	private Nucleus makeRoundNucleus(Nucleus n){
+	private Nucleus makeRoundNucleus(Nucleus n) throws DatasetConversionException{
 				
 		// Easy stuff
 		File f      = n.getSourceFile(); // the source file
@@ -267,7 +273,7 @@ public class DatasetConverter implements Loggable {
 
 	}
 	
-	private Nucleus makeRodentNucleus(Nucleus n){
+	private Nucleus makeRodentNucleus(Nucleus n) throws DatasetConversionException{
 		
 		// Easy stuff
 		File f      = n.getSourceFile(); // the source file
@@ -296,7 +302,7 @@ public class DatasetConverter implements Loggable {
 		return newNucleus;
 	}
 	
-	private Nucleus makePigNucleus(Nucleus n){
+	private Nucleus makePigNucleus(Nucleus n) throws DatasetConversionException{
 		
 		// Easy stuff
 		File f      = n.getSourceFile(); // the source file
@@ -328,7 +334,7 @@ public class DatasetConverter implements Loggable {
 	}
 	
 	
-	private Nucleus copyGenericData(Nucleus template, Nucleus newNucleus){
+	private Nucleus copyGenericData(Nucleus template, Nucleus newNucleus) throws DatasetConversionException{
 		
 		// The nucleus ID is created with the nucleus and is not accessible
 		// Use reflection to get access and set the new id to the same as the 
@@ -386,7 +392,28 @@ public class DatasetConverter implements Loggable {
 		}
 
 		// TODO: Copy segments
+		for(ProfileType type : ProfileType.values()){
+			ISegmentedProfile p = template.getProfile(type);
+			ISegmentedProfile target = newNucleus.getProfile(type);
+			
+			if(p.size() != target.size()){
+				fine("New nucleus profile length of "+target.size()+" : original nucleus was "+p.size());
+				
+				try {
+					target = target.frankenNormaliseToProfile(p);
+					newNucleus.setProfile(type, target);
+					
+				} catch (ProfileException e) {
+					error("Cannot interpolate segments", e);
+					throw new DatasetConversionException("Error creating segmented profile", e);
+				}
+				
+				
+			}
+			
 
+		}
+		
 
 
 		fine("Created nucleus");

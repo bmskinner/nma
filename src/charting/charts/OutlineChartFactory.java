@@ -149,7 +149,13 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			meshConsensus = meshConsensus.straighten();
 		}
 		
-		XYDataset ds = new NucleusDatasetCreator().createBareNucleusOutline(dataset);
+		XYDataset ds;
+		try {
+			ds = new NucleusDatasetCreator().createBareNucleusOutline(dataset);
+		} catch (ChartDatasetCreationException e) {
+			fine("Error creating outline", e);
+			return makeErrorChart();
+		}
 		
 		double xMin = DatasetUtilities.findMinimumDomainValue(ds).doubleValue();
 		double yMin = DatasetUtilities.findMinimumRangeValue(ds).doubleValue();
@@ -223,7 +229,13 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 			drawImageAsAnnotation(warped, plot, 20, -xOffset, -yOffset, options.isShowBounds());
 		}
-		XYDataset ds = new NucleusDatasetCreator().createBareNucleusOutline(dataset);
+		XYDataset ds;
+		try {
+			ds = new NucleusDatasetCreator().createBareNucleusOutline(dataset);
+		} catch (ChartDatasetCreationException e) {
+			fine("Error creating outline", e);
+			return makeErrorChart();
+		}
 		plot.setDataset(0, ds);
 		plot.getRenderer(0).setBasePaint(Color.BLACK);
 		plot.getRenderer(0).setBaseSeriesVisible(true);
@@ -333,7 +345,13 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		
 		JFreeChart chart = createBaseXYChart();
-		XYDataset ds = new NucleusDatasetCreator().createBareNucleusOutline(options.getCell().getNucleus());
+		XYDataset ds;
+		try {
+			ds = new NucleusDatasetCreator().createBareNucleusOutline(options.getCell().getNucleus());
+		} catch (ChartDatasetCreationException e) {
+			fine("Error making outline", e);
+			return makeErrorChart();
+		}
 
 
 		XYPlot plot = chart.getXYPlot();

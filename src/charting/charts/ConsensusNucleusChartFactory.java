@@ -36,6 +36,7 @@ import org.jfree.data.xy.XYDataset;
 import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import charting.ChartComponents;
+import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 import components.CellCollection;
@@ -141,7 +142,13 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			return makeEmptyChart();
 		}
 
-		XYDataset ds = new NucleusDatasetCreator().createBareNucleusOutline(dataset);
+		XYDataset ds;
+		try {
+			ds = new NucleusDatasetCreator().createBareNucleusOutline(dataset);
+		} catch (ChartDatasetCreationException e) {
+			fine("Error creating boxplot", e);
+			return makeErrorChart();
+		}
 		JFreeChart chart = makeConsensusChart(ds);
 
 		double max = getconsensusChartRange(dataset);

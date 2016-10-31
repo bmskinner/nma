@@ -462,7 +462,7 @@ public class Profile implements IProfile {
 	 * @see components.generic.IProfile#interpolate(int)
 	 */
 	@Override
-	public Profile interpolate(int newLength) {
+	public IProfile interpolate(int newLength) {
 
 		if(newLength < this.size()){
 			//    	finer("Interpolating to a smaller array!");

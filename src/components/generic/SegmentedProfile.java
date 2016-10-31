@@ -617,7 +617,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#frankenNormaliseToProfile(components.generic.ISegmentedProfile)
 	 */
 	@Override
-	public ISegmentedProfile frankenNormaliseToProfile(ISegmentedProfile template) throws Exception {
+	public ISegmentedProfile frankenNormaliseToProfile(ISegmentedProfile template) throws ProfileException {
 		
 		if(this.getSegmentCount()!=template.getSegmentCount()){
 			throw new IllegalArgumentException("Segment counts are different in profile and template");
@@ -665,7 +665,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @return the interpolated profile
 	 * @throws Exception 
 	 */
-	private IProfile interpolateSegment(IBorderSegment testSeg, int newLength) throws Exception{
+	private IProfile interpolateSegment(IBorderSegment testSeg, int newLength) throws ProfileException{
 		
 		// get the region within the segment as a new profile
 		// Exclude the last index of each segment to avoid duplication
@@ -695,6 +695,13 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 			}
 		}
 		return true;
+	}
+	
+	public ISegmentedProfile interpolate(int length){
+
+		// get the target lengths of the new segments
+
+		return null;
 	}
 	
 	/* (non-Javadoc)
@@ -733,7 +740,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#mergeSegments(components.nuclear.NucleusBorderSegment, components.nuclear.NucleusBorderSegment, java.util.UUID)
 	 */
 	@Override
-	public void mergeSegments(IBorderSegment segment1, IBorderSegment segment2, UUID id) throws Exception {
+	public void mergeSegments(IBorderSegment segment1, IBorderSegment segment2, UUID id) throws ProfileException {
 		
 		// Check the segments belong to the profile
 		if(!this.contains(segment1) || !this.contains(segment2)){
@@ -788,7 +795,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#unmergeSegment(components.nuclear.NucleusBorderSegment)
 	 */
 	@Override
-	public void unmergeSegment(IBorderSegment segment) throws Exception {
+	public void unmergeSegment(IBorderSegment segment) throws ProfileException {
 		// Check the segments belong to the profile
 		if(!this.contains(segment) ){
 			throw new IllegalArgumentException("Input segment is not part of this profile");
@@ -831,7 +838,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#splitSegment(components.nuclear.NucleusBorderSegment, int, java.util.UUID, java.util.UUID)
 	 */
 	@Override
-	public void splitSegment(IBorderSegment segment, int splitIndex, UUID id1, UUID id2) throws Exception {
+	public void splitSegment(IBorderSegment segment, int splitIndex, UUID id1, UUID id2) throws ProfileException {
 		// Check the segments belong to the profile
 		if(!this.contains(segment) ){
 			throw new IllegalArgumentException("Input segment is not part of this profile");

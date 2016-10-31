@@ -38,6 +38,7 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
+import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
@@ -106,7 +107,12 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 		
 		BoxAndWhiskerCategoryDataset ds = null;
 		if(options.getDatasets()!=null){
-			 ds = new NucleusDatasetCreator().createBoxplotDataset(options);
+			 try {
+				ds = new NucleusDatasetCreator().createBoxplotDataset(options);
+			} catch (ChartDatasetCreationException e) {
+				fine("Error creating boxplot", e);
+				return makeErrorChart();
+			}
 		}
 
 		
@@ -128,7 +134,13 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 
 		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
-		BoxAndWhiskerCategoryDataset ds = new NucleusDatasetCreator().createSegmentStatDataset(options);
+		BoxAndWhiskerCategoryDataset ds;
+		try {
+			ds = new NucleusDatasetCreator().createSegmentStatDataset(options);
+		} catch (ChartDatasetCreationException e) {
+			fine("Error creating boxplot", e);
+			return makeErrorChart();
+		}
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, 
 				null, 
 				"Segment "+stat.label(options.getScale())

@@ -57,6 +57,7 @@ import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.CellDatasetCreator;
+import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.DefaultChartOptions;
@@ -169,7 +170,13 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				
 		Nucleus n = options.getCell().getNucleus();
 		
-		XYDataset  ds 	 = new NucleusDatasetCreator().createSegmentedProfileDataset(n, options.getType());
+		XYDataset ds;
+		try {
+			ds = new NucleusDatasetCreator().createSegmentedProfileDataset(n, options.getType());
+		} catch (ChartDatasetCreationException e) {
+			fine("Error creating profile chart", e);
+			return makeErrorChart();
+		}
 		JFreeChart chart = makeProfileChart(ds, n.getBorderLength(), options.getType());
 		
 		XYPlot plot = chart.getXYPlot();
@@ -261,7 +268,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	private JFreeChart makeSingleProfileChart() throws Exception {
+	private JFreeChart makeSingleProfileChart() throws ChartCreationException {
 		
 		XYDataset ds = null;
 		IAnalysisDataset dataset = options.firstDataset();
@@ -269,12 +276,18 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		JFreeChart chart = null;
 				
 		if(options.hasDatasets()){
+			
+			try {
 
-			if(options.getType().equals(ProfileType.FRANKEN)){
-				ds = new NucleusDatasetCreator().createFrankenSegmentDataset(options);
+				if(options.getType().equals(ProfileType.FRANKEN)){
+					ds = new NucleusDatasetCreator().createFrankenSegmentDataset(options);
 
-			} else {
-				ds = new NucleusDatasetCreator().createSegmentedProfileDataset(options);
+				} else {
+					ds = new NucleusDatasetCreator().createSegmentedProfileDataset(options);
+				}
+			} catch(ChartDatasetCreationException e){
+				fine("Error making profile dataset", e);
+				return makeErrorChart();
 			}
 			
 
@@ -658,7 +671,13 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return a chart
 	 */
 	private JFreeChart makeSingleVariabilityChart() {
-		XYDataset ds =  new NucleusDatasetCreator().createIQRVariabilityDataset(options);
+		XYDataset ds;
+		try {
+			ds = new NucleusDatasetCreator().createIQRVariabilityDataset(options);
+		} catch (ChartDatasetCreationException e) {
+			fine("Error creating variability chart", e);
+			return makeErrorChart();
+		}
 		
 		JFreeChart chart = makeProfileChart(ds, 100, options.getType());
 		XYPlot plot = chart.getXYPlot();

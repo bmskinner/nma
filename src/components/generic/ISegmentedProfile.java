@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import analysis.profiles.ProfileException;
 import components.active.generic.SegmentedFloatProfile;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
@@ -68,6 +69,15 @@ public interface ISegmentedProfile extends IProfile {
 	IBorderSegment getSegment(UUID id);
 
 	boolean hasSegment(UUID id);
+	
+	/**
+	 * Make this profile the length specified. Segments
+	 * will be adjusted to the closest proportional index
+	 * @param newLength the new array length
+	 * @return an interpolated profile
+	 * @throws Exception 
+	 */
+	ISegmentedProfile interpolate(int newLength);
 
 	/**
 	 * Fetch the segment list ordered to start from the segment with the given id
@@ -206,7 +216,7 @@ public interface ISegmentedProfile extends IProfile {
 	 * @throws Exception
 	 */
 	ISegmentedProfile frankenNormaliseToProfile(ISegmentedProfile template)
-			throws Exception;
+			throws ProfileException;
 
 	/**
 	 * Test if the given profile values are the same as in
@@ -227,13 +237,13 @@ public interface ISegmentedProfile extends IProfile {
 	 * @return
 	 */
 	void mergeSegments(IBorderSegment segment1,
-			IBorderSegment segment2, UUID id) throws Exception;
+			IBorderSegment segment2, UUID id) throws ProfileException;
 
 	/**
 	 * Reverse a merge operation on a segment
 	 * @param segment
 	 */
-	void unmergeSegment(IBorderSegment segment) throws Exception;
+	void unmergeSegment(IBorderSegment segment) throws ProfileException;
 
 	/**
 	 * Split a segment at the given index into two new segments. Splits the segmnets, 
@@ -243,7 +253,7 @@ public interface ISegmentedProfile extends IProfile {
 	 * @throws Exception
 	 */
 	void splitSegment(IBorderSegment segment, int splitIndex, UUID id1,
-			UUID id2) throws Exception;
+			UUID id2) throws ProfileException;
 
 	String toString();
 
