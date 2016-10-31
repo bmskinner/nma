@@ -567,7 +567,12 @@ public class VirtualCellCollection implements ICellCollection {
 			subCollection.addCell(new DefaultCell(cell));
 		}
 
-		this.getProfileManager().copyCollectionOffsets(subCollection);
+		try {
+			this.getProfileManager().copyCollectionOffsets(subCollection);
+		} catch (ProfileException e) {
+			warn("Error copying collection offsets");
+			fine("Error in offsetting", e);
+		}
 
 		this.getSignalManager().copySignalGroups(subCollection);
 

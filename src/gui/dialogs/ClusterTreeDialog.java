@@ -66,6 +66,7 @@ import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 import analysis.IAnalysisDataset;
+import analysis.profiles.ProfileException;
 import jebl.evolution.graphs.Node;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.io.ImportException.DuplicateTaxaException;
@@ -522,7 +523,12 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 				dataset.addChildCollection(c);
 
-				dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
+				try {
+					dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
+				} catch (ProfileException e) {
+					warn("Error copying collection offsets");
+					fine("Error in offsetting", e);
+				}
 
 
 				IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());

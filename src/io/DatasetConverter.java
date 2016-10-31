@@ -110,7 +110,7 @@ public class DatasetConverter implements Loggable {
 			return newDataset;
 
 		} catch(Exception e){
-			fine("Error converting dataset", e);
+			error("Error converting dataset", e);
 			throw new DatasetConversionException(e);
 		}
 	}
@@ -138,7 +138,11 @@ public class DatasetConverter implements Loggable {
 			newCollection.createProfileCollection();
 			
 			// Copy segmentation patterns over
-			oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
+			try {
+				oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
+			} catch (ProfileException e) {
+				error("Unable to copy collection offsets", e);
+			}
 			
 			dest.addChildCollection(newCollection);
 			
@@ -188,7 +192,7 @@ public class DatasetConverter implements Loggable {
 			// Copy segmentation patterns over
 			oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
 		} catch(Exception e){
-			fine("Error updating profiles across datasets", e);
+			error("Error updating profiles across datasets", e);
 			throw new DatasetConversionException("Profiling error in root dataset");
 		}
 		

@@ -32,6 +32,7 @@ import utility.Constants;
 import analysis.ClusteringOptions;
 import analysis.IAnalysisDataset;
 import analysis.nucleus.NucleusClusterer;
+import analysis.profiles.ProfileException;
 import components.ClusterGroup;
 import components.ICellCollection;
 import components.IClusterGroup;
@@ -90,7 +91,12 @@ public class ClusterAnalysisAction extends ProgressableAction {
 			if(c.hasCells()){
 				finest("Cluster "+cluster+": "+c.getName());
 				
-				dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
+				try {
+					dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
+				} catch (ProfileException e) {
+					warn("Error copying collection offsets");
+					fine("Error in offsetting", e);
+				}
 
 				
 				

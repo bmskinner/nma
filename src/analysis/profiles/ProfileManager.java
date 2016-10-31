@@ -538,7 +538,7 @@ public class ProfileManager implements Loggable {
 	 * @param destination the collection to update
 	 * @throws Exception 
 	 */
-	public void copyCollectionOffsets( final ICellCollection destination) {
+	public void copyCollectionOffsets( final ICellCollection destination) throws ProfileException {
 		
 		/*
 		 * Get the corresponding profile collection from the tempalte

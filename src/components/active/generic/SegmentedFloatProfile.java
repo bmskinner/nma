@@ -629,7 +629,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		
 		// get the target lengths of the new segments
 		
-		return null;
+		return new SegmentedFloatProfile(super.interpolate(length));
 	}
 
 	/* (non-Javadoc)

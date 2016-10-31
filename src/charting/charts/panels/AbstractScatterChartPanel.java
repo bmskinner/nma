@@ -23,6 +23,7 @@ import components.ICellCollection;
 import components.active.VirtualCellCollection;
 import components.generic.MeasurementScale;
 import analysis.IAnalysisDataset;
+import analysis.profiles.ProfileException;
 import charting.charts.AbstractChartFactory;
 import charting.charts.ScatterChartFactory;
 import charting.datasets.AbstractDatasetCreator;
@@ -251,7 +252,12 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 			virt.setName(name);
 
 			d.addChildCollection(virt);
-			d.getCollection().getProfileManager().copyCollectionOffsets(virt);
+			try {
+				d.getCollection().getProfileManager().copyCollectionOffsets(virt);
+			} catch (ProfileException e) {
+				warn("Error copying collection offsets");
+				fine("Error in offsetting", e);
+			}
 
 			
 		}
