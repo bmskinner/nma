@@ -25,6 +25,7 @@ import analysis.signals.SignalManager;
 import components.ICell;
 import components.ICellCollection;
 import components.active.generic.DefaultProfileCollection;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -370,7 +371,7 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public Nucleus getNucleusMostSimilarToMedian(Tag pointType) throws ProfileException {
+	public Nucleus getNucleusMostSimilarToMedian(Tag pointType) throws ProfileException, UnavailableBorderTagException {
 		if(size()==1){
 			for(ICell c : getCells()){
 				return c.getNucleus();
@@ -408,10 +409,26 @@ public class VirtualCellCollection implements ICellCollection {
 		double[] result = new double[count];
 		int i=0;
 
-		IProfile medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+		IProfile medianProfile;
+		try {
+			medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting median profile for collection", e);
+			for(int j=0; i<result.length; j++){
+				result[j] = 0;	
+			}
+			return result;
+		}
 		for(Nucleus n : this.getNuclei()){
 			IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
-			result[i++] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
+			try {
+				result[i] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
+			} catch (ProfileException e) {
+				fine("Error getting nucleus profile", e);
+				result[i] = 0;
+			} finally {
+				i++;
+			}
 		}
 		return result;
 	}

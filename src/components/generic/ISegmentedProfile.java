@@ -204,7 +204,7 @@ public interface ISegmentedProfile extends IProfile {
 	 * Offset the segment by the given amount. Returns a copy
 	 * of the profile.
 	 */
-	ISegmentedProfile offset(int newStartIndex);
+	ISegmentedProfile offset(int newStartIndex) throws ProfileException;
 
 	/**
 	 * Interpolate the segments of this profile to the proportional lengths of the

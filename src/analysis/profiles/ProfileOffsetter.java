@@ -26,6 +26,7 @@ import stats.Quartile;
 import logging.Loggable;
 import components.ICellCollection;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -79,8 +80,14 @@ public class ProfileOffsetter implements Loggable {
 
 
 
-		ISegmentedProfile profile = collection.getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+		ISegmentedProfile profile;
+		try {
+			profile = collection.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+		} catch (UnavailableBorderTagException | ProfileException e1) {
+			fine("Error getting median profile", e1);
+			throw new ProfileOffsetException("Cannot get median profile");
+		}
 
 		
 		IBorderSegment segFromRef    = profile.getSegment(segID);

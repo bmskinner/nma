@@ -55,6 +55,7 @@ import stats.StatisticDimension;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
+import analysis.profiles.ProfileException;
 import charting.ChartComponents;
 import charting.datasets.CellDatasetCreator;
 import charting.datasets.ChartDatasetCreationException;
@@ -64,6 +65,7 @@ import charting.options.DefaultChartOptions;
 import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.ICellCollection;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
 import components.generic.ProfileType;
@@ -364,13 +366,19 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		// Set the length to 100 if normalised or multiple datasets.
 		// Otherwise use the median profile length
-		int length = options.isNormalised() || options.isMultipleDatasets()
-				   ? 100 
-				   : options.firstDataset()
-				   		.getCollection()
-				   		.getProfileCollection()
-				   		.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-				   		.size();
+		int length;
+		try {
+			length = options.isNormalised() || options.isMultipleDatasets()
+					   ? 100 
+					   : options.firstDataset()
+					   		.getCollection()
+					   		.getProfileCollection()
+					   		.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+					   		.size();
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting median profile", e);
+			return makeErrorChart();
+		}
 				
 
 		// the default is to use an x range of 100, for a normalised chart
@@ -382,7 +390,13 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		int datasetIndex = 0;
 		for(IAnalysisDataset dataset : options.getDatasets()){
 
-			XYDataset ds = new NucleusDatasetCreator().createSegmentedMedianProfileDataset( options);
+			XYDataset ds;
+			try {
+				ds = new NucleusDatasetCreator().createSegmentedMedianProfileDataset( options);
+			} catch (ChartDatasetCreationException e) {
+				fine("Error creating median profile dataset", e);
+				return makeErrorChart();
+			}
 
 			plot.setDataset(datasetIndex, ds);
 			
@@ -447,19 +461,24 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			// Add segment name annotations
 			
 			if(options.isShowAnnotations()){
-				for(IBorderSegment seg :  options.firstDataset().getCollection()
-						.getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN)
-						.getOrderedSegments()){
+				try {
+					for(IBorderSegment seg :  options.firstDataset().getCollection()
+							.getProfileCollection()
+							.getSegmentedProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN)
+							.getOrderedSegments()){
 
-					int midPoint = seg.getMidpointIndex();
+						int midPoint = seg.getMidpointIndex();
 
-					double x = ((double) midPoint / (double) seg.getTotalLength() ) * 100;
-					XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
-					
-					Paint colour = ColourSelecter.getColor(seg.getPosition());
-					segmentAnnotation.setPaint(colour);
-					plot.addAnnotation(segmentAnnotation);
+						double x = ((double) midPoint / (double) seg.getTotalLength() ) * 100;
+						XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
+						
+						Paint colour = ColourSelecter.getColor(seg.getPosition());
+						segmentAnnotation.setPaint(colour);
+						plot.addAnnotation(segmentAnnotation);
+					}
+				} catch (UnavailableBorderTagException | ProfileException e) {
+					fine("Error creating median profile dataset", e);
+					return makeErrorChart();
 				}
 			}
 		}

@@ -555,7 +555,13 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	@Override
 	public void nudgeSegments(int amount) {
 		
-		List<IBorderSegment> result = IBorderSegment.nudge(getSegments(), amount);
+		List<IBorderSegment> result;
+		try {
+			result = IBorderSegment.nudge(getSegments(), amount);
+		} catch (ProfileException e) {
+			fine("Error offsetting segments", e);
+			return;
+		}
 		this.segments = new IBorderSegment[segments.length];
 		for(int i=0; i<segments.length; i++){
 			this.segments[i] =  result.get(i);
@@ -572,7 +578,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 * @see components.generic.ISegmentedProfile#offset(int)
 	 */
 	@Override
-	public ISegmentedProfile offset(int newStartIndex) {
+	public ISegmentedProfile offset(int newStartIndex) throws ProfileException {
 
 		// get the basic profile with the offset applied
 		IProfile offsetProfile = super.offset(newStartIndex);
@@ -595,7 +601,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		The nudge function in IBorderSegment moves endpoints by a specified amount
 
 		 */
-		//		IJ.log("Offsetting segments to begin at "+newStartIndex );
+		fine("Offsetting segments to begin at "+newStartIndex );
 		//		IJ.log(IBorderSegment.toString(getSegments()));
 
 		List<IBorderSegment> segments = IBorderSegment.nudge(getSegments(), -newStartIndex);

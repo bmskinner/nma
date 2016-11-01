@@ -44,8 +44,8 @@ import components.active.DefaultNucleus;
 import components.active.DefaultPigSpermNucleus;
 import components.active.DefaultRodentSpermNucleus;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
-import components.active.ProfileableCellularComponent.UnavailableBorderTagException;
 import components.active.VirtualCellCollection;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
@@ -406,8 +406,16 @@ public class DatasetConverter implements Loggable {
 
 		// Copy segments from RP
 		for(ProfileType type : ProfileType.values()){
-			ISegmentedProfile p = template.getProfile(type, Tag.REFERENCE_POINT);
-			ISegmentedProfile target = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
+			ISegmentedProfile p;
+			ISegmentedProfile target;
+			try {
+				p = template.getProfile(type, Tag.REFERENCE_POINT);
+				target = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
+			} catch (ProfileException e1) {
+				fine("Error getting profile from template or target nucleus", e1);
+				throw new DatasetConversionException("Cannot convert nucleus", e1);
+			}
+			
 			
 			if(p.size() != target.size()){
 				fine("New nucleus profile length of "+target.size()+" : original nucleus was "+p.size());

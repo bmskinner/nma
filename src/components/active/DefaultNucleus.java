@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import analysis.profiles.ProfileException;
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
 import analysis.signals.SignalAnalyser;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.DefaultSignalCollection;
 import components.active.generic.FloatPoint;
+import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnprofilableObjectException;
 import components.generic.Equation;
 import components.generic.IPoint;
@@ -287,7 +289,13 @@ public class DefaultNucleus
 		int frontPoints = 0;
 		int rearPoints = 0;
 
-		IProfile profile = this.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		IProfile profile;
+		try {
+			profile = this.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		} catch (ProfileException e) {
+			fine("Error getting profile",e);
+			return false;
+		}
 
 		int midPoint = this.getBorderLength()>>1 ;
 		for(int i=0; i<this.getBorderLength();i++){ // integrate points over 180

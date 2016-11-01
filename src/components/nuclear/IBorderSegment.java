@@ -30,6 +30,7 @@ import java.util.UUID;
 import analysis.IAnalysisDataset;
 import analysis.profiles.ProfileException;
 import components.AbstractCellularComponent;
+import components.active.DefaultCellularComponent;
 import components.active.generic.DefaultBorderSegment;
 import logging.Loggable;
 
@@ -435,19 +436,20 @@ public interface IBorderSegment
 	 * @param list the list of segments
 	 * @param value the amount to nudge
 	 * @return a new list of segments
+	 * @throws ProfileException 
 	 * @throws Exception 
 	 */
-	static List<IBorderSegment> nudge(List<IBorderSegment> list, int value)  {
+	static List<IBorderSegment> nudge(List<IBorderSegment> list, int value) throws ProfileException  {
 		List<IBorderSegment> result = new ArrayList<IBorderSegment>(list.size());
 		
 		for(IBorderSegment segment : list){
 			
 			IBorderSegment newSeg = IBorderSegment.newSegment(
 					
-					AbstractCellularComponent.wrapIndex(segment.getStartIndex()+value,
+					DefaultCellularComponent.wrapIndex(segment.getStartIndex()+value,
 									segment.getTotalLength()), 
 									
-					AbstractCellularComponent.wrapIndex(segment.getEndIndex()+value,
+					DefaultCellularComponent.wrapIndex(segment.getEndIndex()+value,
 									segment.getTotalLength()), 
 					
 					segment.getTotalLength() ,
@@ -472,11 +474,9 @@ public interface IBorderSegment
 			result.add( newSeg );
 		}
 		
-		try {
+
 			linkSegments(result);
-		} catch (ProfileException e) {
-			IJ.log("Error linking segments");
-		}
+
 		
 		return result;
 	}

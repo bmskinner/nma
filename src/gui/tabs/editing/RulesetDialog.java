@@ -34,6 +34,7 @@ import utility.Constants;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
@@ -42,6 +43,7 @@ import components.generic.BorderTag.BorderTagType;
 import components.generic.Tag;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
+import analysis.profiles.ProfileException;
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.Rule;
 import analysis.profiles.RuleSet;
@@ -422,35 +424,42 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		
 		JFreeChart chart = MorphologyChartFactory.makeEmptyChart(ProfileType.ANGLE);
 		
-		if(data.hasRule()){
-			
-			Rule r = data.getRule();
-			
-			IProfile p = dataset.getCollection().getProfileCollection()
-					.getProfile(data.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
-			BooleanProfile b = finder.getMatchingIndexes(p, r);
-			chart = MorphologyChartFactory.createBooleanProfileChart(p, b);
-		}
-		
-		if(data.hasRuleSet()){
-			
-			RuleSet r = data.getRuleSet();
-			IProfile p = dataset.getCollection().getProfileCollection()
-					.getProfile(data.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
-			BooleanProfile b = finder.getMatchingIndexes(p, r);
-			chart = MorphologyChartFactory.createBooleanProfileChart(p, b);
-		}
-		
-		if(data.hasRuleSetCollection()){
-			
-			RuleSetCollection c = data.getCollection();
-			IProfile p = dataset.getCollection().getProfileCollection()
-					.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-			
-			BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(), c.getRuleSets(data.getTag()));
-			
-			chart = MorphologyChartFactory.createBooleanProfileChart(p, limits);
-			
+		try {
+
+			if(data.hasRule()){
+
+				Rule r = data.getRule();
+
+				IProfile p = dataset.getCollection().getProfileCollection()
+						.getProfile(data.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
+				BooleanProfile b = finder.getMatchingIndexes(p, r);
+				chart = MorphologyChartFactory.createBooleanProfileChart(p, b);
+			}
+
+			if(data.hasRuleSet()){
+
+				RuleSet r = data.getRuleSet();
+				IProfile p = dataset.getCollection().getProfileCollection()
+						.getProfile(data.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
+				BooleanProfile b = finder.getMatchingIndexes(p, r);
+				chart = MorphologyChartFactory.createBooleanProfileChart(p, b);
+			}
+
+			if(data.hasRuleSetCollection()){
+
+				RuleSetCollection c = data.getCollection();
+				IProfile p = dataset.getCollection().getProfileCollection()
+						.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+
+				BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(), c.getRuleSets(data.getTag()));
+
+				chart = MorphologyChartFactory.createBooleanProfileChart(p, limits);
+
+			}
+
+		} catch(ProfileException | UnavailableBorderTagException e1){
+			fine("Error getting profile", e1);
+			chart = MorphologyChartFactory.makeErrorChart();
 		}
 
 		// Draw the rule on the chart

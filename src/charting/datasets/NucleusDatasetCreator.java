@@ -34,6 +34,7 @@ import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshEdge;
+import analysis.profiles.ProfileException;
 import charting.options.ChartOptions;
 import charting.options.ChartOptions;
 import components.AbstractCellularComponent;
@@ -41,6 +42,7 @@ import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
@@ -355,7 +357,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return a dataset
 	 * @throws Exception 
 	 */
-	public XYDataset createSegmentedMedianProfileDataset(ChartOptions options) {
+	public XYDataset createSegmentedMedianProfileDataset(ChartOptions options) throws ChartDatasetCreationException {
 		
 		
 		
@@ -368,8 +370,14 @@ public class NucleusDatasetCreator implements Loggable {
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		IProfile profile = collection.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN);
+		IProfile profile;
+		try {
+			profile = collection.getProfileCollection()
+					.getProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN);
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting profile from tag", e);
+			throw new ChartDatasetCreationException("Unable to get median profile", e);
+		}
 		
 		IProfile xpoints = null;
 		if(options.isNormalised()){
@@ -420,8 +428,14 @@ public class NucleusDatasetCreator implements Loggable {
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		IProfile profile = collection.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN);
+		IProfile profile;
+		try {
+			profile = collection.getProfileCollection()
+					.getProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN);
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting profile from tag", e);
+			throw new ChartDatasetCreationException("Unable to get median profile", e);
+		}
 		IProfile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);
@@ -438,9 +452,15 @@ public class NucleusDatasetCreator implements Loggable {
 		// rendering order will be first on top
 		
 		// add the segments
-		List<IBorderSegment> segments = collection.getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN)
-				.getOrderedSegments();
+		List<IBorderSegment> segments;
+		try {
+			segments = collection.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN)
+					.getOrderedSegments();
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting profile from tag", e);
+			throw new ChartDatasetCreationException("Unable to get median profile", e);
+		}
 		
 
 		if(normalised){
@@ -450,8 +470,16 @@ public class NucleusDatasetCreator implements Loggable {
 		}
 
 		// make the IQR
-		IProfile profile25 = collection.getProfileCollection().getProfile(type, borderTag, Quartile.LOWER_QUARTILE);
-		IProfile profile75 = collection.getProfileCollection().getProfile(type, borderTag, Quartile.UPPER_QUARTILE);
+		IProfile profile25;
+		IProfile profile75;
+		try {
+			profile25 = collection.getProfileCollection().getProfile(type, borderTag, Quartile.LOWER_QUARTILE);
+			profile75 = collection.getProfileCollection().getProfile(type, borderTag, Quartile.UPPER_QUARTILE);
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting upper or lower quartile profile from tag", e);
+			throw new ChartDatasetCreationException("Unable to get quartile profile", e);
+		}
+		
 		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
 		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
@@ -508,7 +536,13 @@ public class NucleusDatasetCreator implements Loggable {
 		for(int i=0; i<list.size(); i++){ //AnalysisDataset dataset : list){
 			IAnalysisDataset dataset = list.get(i);
 			ICellCollection collection = dataset.getCollection();
-			IProfile profile = collection.getProfileCollection().getProfile(type, borderTag, 50);
+			IProfile profile;
+			try {
+				profile = collection.getProfileCollection().getProfile(type, borderTag, Quartile.MEDIAN);
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				fine("Error getting profile from tag", e);
+				throw new ChartDatasetCreationException("Unable to get median profile", e);
+			}
 			IProfile xpoints = null;
 			
 			if(normalised){	
@@ -549,7 +583,13 @@ public class NucleusDatasetCreator implements Loggable {
 		int i=0;
 		for(IAnalysisDataset dataset : list){
 			ICellCollection collection = dataset.getCollection();
-			IProfile profile = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, borderTag, 50);
+			IProfile profile;
+			try {
+				profile = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, borderTag, Quartile.MEDIAN);
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				fine("Error getting profile from tag", e);
+				throw new ChartDatasetCreationException("Unable to get median profile", e);
+			}
 			IProfile xpoints = profile.getPositions(100);
 
 			double[][] data = { xpoints.asArray(), profile.asArray() };
@@ -577,7 +617,13 @@ public class NucleusDatasetCreator implements Loggable {
 			double medianLength, boolean normalised, 
 			ProfileAlignment alignment) throws ChartDatasetCreationException{
 		
-		IProfile profile = pc.getProfile(type, point, Quartile.MEDIAN);
+		IProfile profile;
+		try {
+			profile = pc.getProfile(type, point, Quartile.MEDIAN);
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting profile from tag", e);
+			throw new ChartDatasetCreationException("Unable to get median profile", e);
+		}
 		
 		IProfile xpoints = null;
 		if(normalised){
@@ -595,8 +641,15 @@ public class NucleusDatasetCreator implements Loggable {
 		// rendering order will be first on top
 
 		// make the IQR
-		IProfile profile25 = pc.getProfile(type, point, Quartile.LOWER_QUARTILE);
-		IProfile profile75 = pc.getProfile(type, point, Quartile.UPPER_QUARTILE);
+		IProfile profile25;
+		IProfile profile75;
+		try {
+			profile25 = pc.getProfile(type, point, Quartile.LOWER_QUARTILE);
+			profile75 = pc.getProfile(type, point, Quartile.UPPER_QUARTILE);
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting upper or lower quartile profile from tag", e);
+			throw new ChartDatasetCreationException("Unable to get quartile profile", e);
+		}
 		
 		XYSeries series25 = new XYSeries("Q25_"+series);
 		for(int j=0; j<profile25.size();j++){
@@ -729,20 +782,23 @@ public class NucleusDatasetCreator implements Loggable {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
-		try {
-			int i = 0;
-			for(IAnalysisDataset dataset : options.getDatasets()){
-				ICellCollection collection = dataset.getCollection();
+		int i = 0;
+		for(IAnalysisDataset dataset : options.getDatasets()){
+			ICellCollection collection = dataset.getCollection();
 
-				IProfile profile = collection.getProfileCollection().getIQRProfile(options.getType(), options.getTag());
-				IProfile xpoints = profile.getPositions(100);
-				double[][] data = { xpoints.asArray(), profile.asArray() };
-				ds.addSeries("Profile_"+i+"_"+collection.getName(), data);
-				i++;
+			IProfile profile;
+			try {
+				profile = collection.getProfileCollection().getIQRProfile(options.getType(), options.getTag());
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				fine("Error getting profile from tag", e);
+				throw new ChartDatasetCreationException("Unable to get median profile", e);
 			}
-		} catch(Exception e){
-			error("Error creating multi dataset variability data", e);
+			IProfile xpoints = profile.getPositions(100);
+			double[][] data = { xpoints.asArray(), profile.asArray() };
+			ds.addSeries("Profile_"+i+"_"+collection.getName(), data);
+			i++;
 		}
+
 		return ds;
 	}
 	
@@ -768,21 +824,40 @@ public class NucleusDatasetCreator implements Loggable {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 //		String pointType = collection.getOrientationPoint();
-		IProfile profile = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, point, Quartile.MEDIAN);
+		IProfile profile;
+		try {
+			profile = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, point, Quartile.MEDIAN);
+		} catch (UnavailableBorderTagException | ProfileException e1) {
+			fine("Error getting profile from tag", e1);
+			throw new ChartDatasetCreationException("Unable to get median profile", e1);
+		}
 		IProfile xpoints = profile.getPositions(100);
 		
 		// rendering order will be first on top
 		
 		// add the segments (these are the same as in the regular profile collection)
 //		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
-		List<IBorderSegment> segments = collection.getProfileCollection()
-				.getSegmentedProfile(ProfileType.ANGLE, point, Quartile.MEDIAN)
-				.getOrderedSegments();
+		List<IBorderSegment> segments;
+		try {
+			segments = collection.getProfileCollection()
+					.getSegmentedProfile(ProfileType.ANGLE, point, Quartile.MEDIAN)
+					.getOrderedSegments();
+		} catch (UnavailableBorderTagException | ProfileException e1) {
+			fine("Error getting profile from tag", e1);
+			throw new ChartDatasetCreationException("Unable to get median profile", e1);
+		}
 		addSegmentsFromProfile(segments, profile, ds, 100, 0);
 
 		// make the IQR
-		IProfile profile25 = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, point, Quartile.LOWER_QUARTILE);
-		IProfile profile75 = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, point, Quartile.UPPER_QUARTILE);
+		IProfile profile25;
+		IProfile profile75;
+		try {
+			profile25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, point, Quartile.LOWER_QUARTILE);
+			profile75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, point, Quartile.UPPER_QUARTILE);
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting upper or lower quartile profile from tag", e);
+			throw new ChartDatasetCreationException("Unable to get quartile profile", e);
+		}
 		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
 		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
@@ -909,10 +984,16 @@ public class NucleusDatasetCreator implements Loggable {
 
 			ICellCollection collection = collections.get(i).getCollection();
 			
-			IBorderSegment medianSeg = collection
-					.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-					.getSegmentAt(segPosition);
+			IBorderSegment medianSeg;
+			try {
+				medianSeg = collection
+						.getProfileCollection()
+						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+						.getSegmentAt(segPosition);
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				fine("Error getting profile from tag", e);
+				throw new ChartDatasetCreationException("Unable to get median profile", e);
+			}
 
 
 			List<Double> list = new ArrayList<Double>(0);
@@ -953,10 +1034,16 @@ public class NucleusDatasetCreator implements Loggable {
 
 			ICellCollection collection = collections.get(i).getCollection();
 			
-			IBorderSegment medianSeg = collection
-					.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-					.getSegmentAt(segPosition);
+			IBorderSegment medianSeg;
+			try {
+				medianSeg = collection
+						.getProfileCollection()
+						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+						.getSegmentAt(segPosition);
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				fine("Error getting profile from tag", e);
+				throw new ChartDatasetCreationException("Unable to get median profile", e);
+			}
 
 
 			List<Double> list = new ArrayList<Double>(0);
@@ -993,9 +1080,15 @@ public class NucleusDatasetCreator implements Loggable {
 
 			ICellCollection collection = datasets.get(i).getCollection();
 
-			List<IBorderSegment> segments = collection.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-					.getOrderedSegments();
+			List<IBorderSegment> segments;
+			try {
+				segments = collection.getProfileCollection()
+						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+						.getOrderedSegments();
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				fine("Error getting profile from tag", e);
+				throw new ChartDatasetCreationException("Unable to get median profile", e);
+			}
 
 			for(IBorderSegment medianSeg : segments){
 				
@@ -1085,15 +1178,18 @@ public class NucleusDatasetCreator implements Loggable {
 		// get the consensus nucleus for the population
 		Nucleus n = collection.getConsensusNucleus();
 		
-		BorderTagObject pointType = Tag.REFERENCE_POINT;
+		Tag pointType = Tag.REFERENCE_POINT;
 		
-		// get the quartile profiles, beginning from the orientation point
-		IProfile q25 = collection.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, pointType, Quartile.LOWER_QUARTILE)
-				.interpolate(n.getBorderLength());
-		IProfile q75 = collection.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, pointType, Quartile.UPPER_QUARTILE)
-				.interpolate(n.getBorderLength());
+		// make the IQR
+		IProfile q25;
+		IProfile q75;
+		try {
+			q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.LOWER_QUARTILE);
+			q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.UPPER_QUARTILE);
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting upper or lower quartile profile from tag", e);
+			throw new ChartDatasetCreationException("Unable to get quartile profile", e);
+		}
 		
 		// get the limits  for the plot  	
 		double scale = getScaleForIQRRange(n);

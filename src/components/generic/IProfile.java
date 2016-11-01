@@ -21,6 +21,7 @@ package components.generic;
 
 import java.io.Serializable;
 
+import analysis.profiles.ProfileException;
 import logging.Loggable;
 import components.nuclear.IBorderSegment;
 
@@ -164,9 +165,10 @@ public interface IProfile
 	 * Copy the profile and offset it to start from the given index
 	 * @param j the index to start from
 	 * @return a new offset Profile
+	 * @throws ProfileException 
 	 * @throws Exception 
 	 */
-	IProfile offset(int j);
+	IProfile offset(int j) throws ProfileException;
 
 	/**
 	 * Perform a window-averaging smooth of the profile with the given window size
@@ -194,7 +196,7 @@ public interface IProfile
 	    along it one index at a time. Find the point of least difference, 
 	    and return this offset. Returns the positive offset to this profile
 	 */
-	int getSlidingWindowOffset(IProfile testProfile);
+	int getSlidingWindowOffset(IProfile testProfile) throws ProfileException;
 
 	/**
 	 * Detect regions with a consistent value in a profile

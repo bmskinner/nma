@@ -31,7 +31,9 @@ import utility.Constants;
 import utility.ArrayConverter.ArrayConversionException;
 import weka.estimators.KernelEstimator;
 import analysis.IAnalysisDataset;
+import analysis.profiles.ProfileException;
 import components.ICellCollection;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -349,10 +351,18 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			/*
 			 * Find the seg id for the median segment at the requested position
 			 */
-			IBorderSegment medianSeg = collection
-					.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-					.getSegmentAt(options.getSegPosition());
+			IBorderSegment medianSeg;
+			
+				try {
+					medianSeg = collection
+							.getProfileCollection()
+							.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+							.getSegmentAt(options.getSegPosition());
+				} catch (UnavailableBorderTagException | ProfileException e) {
+					fine("Error getting profile from tag", e);
+					throw new ChartDatasetCreationException("Unable to get median profile", e);
+				}
+			
 
 			
 			/*
@@ -385,10 +395,16 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			/*
 			 * Find the seg id for the median segment at the requested position
 			 */
-			IBorderSegment medianSeg = collection
-					.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-					.getSegmentAt(options.getSegPosition());
+			IBorderSegment medianSeg;
+			try {
+				medianSeg = collection
+						.getProfileCollection()
+						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+						.getSegmentAt(options.getSegPosition());
+			} catch (UnavailableBorderTagException | ProfileException e2) {
+				fine("Error getting profile from tag", e2);
+				throw new ChartDatasetCreationException("Unable to get median profile", e2);
+			}
 
 			
 			/*

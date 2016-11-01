@@ -673,7 +673,14 @@ public class CellCollection implements ICellCollection {
 		IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Quartile.MEDIAN);
 		for(Nucleus n : this.getNuclei()){
 			IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
-			result[i++] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
+			try {
+				result[i] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
+			} catch (ProfileException e) {
+				fine("Error getting angle profile", e);
+				result[i] = 0;
+			} finally{
+				i++;
+			}
 		}
 		return result;
 	}

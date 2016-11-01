@@ -34,6 +34,7 @@ import components.AbstractCellularComponent;
 import components.ICell;
 import components.ICellCollection;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -102,11 +103,18 @@ public class ProfileManager implements Loggable {
 			if( ! n.isLocked()){
 								
 				// returns the positive offset index of this profile which best matches the median profile
-				int newIndex = n.getProfile(type).getSlidingWindowOffset(median);
+				int newIndex;
+				try {
+					newIndex = n.getProfile(type).getSlidingWindowOffset(median);
+				} catch (Exception e1) {
+					fine("Unable to get sliding window offset from nucleus profile", e1);
+					return;
+				}
 				try {
 					n.setBorderTag(tag, newIndex);
 				} catch (Exception e) {
 					fine("Cannot update nucleus tag");
+					return;
 				}		
 				
 				if(tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)){
@@ -199,8 +207,14 @@ public class ProfileManager implements Loggable {
 	public void updateRP(int index){
 		
 		// Get the existing median, and offset it to the new index
-		IProfile median = collection.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN).offset(index);
+		IProfile median;
+		try {
+			median = collection.getProfileCollection()
+					.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN).offset(index);
+		} catch (ProfileException | UnavailableBorderTagException e) {
+			fine("Error updating the RP", e);
+			return;
+		}
 		
 		finer("Fetched median from new offset of RP to "+index);
 		
@@ -240,13 +254,22 @@ public class ProfileManager implements Loggable {
 
 
 			fine("Updating nuclei");
-			IProfile topMedian = collection
-					.getProfileCollection()
-					.getProfile(ProfileType.ANGLE, Tag.TOP_VERTICAL, Quartile.MEDIAN);
+			
+			IProfile topMedian;
+			IProfile btmMedian;
+			
+			try {
+				topMedian = collection
+						.getProfileCollection()
+						.getProfile(ProfileType.ANGLE, Tag.TOP_VERTICAL, Quartile.MEDIAN);
 
-			IProfile btmMedian = collection
-					.getProfileCollection()
-					.getProfile(ProfileType.ANGLE, Tag.BOTTOM_VERTICAL, Quartile.MEDIAN);
+				btmMedian = collection
+						.getProfileCollection()
+						.getProfile(ProfileType.ANGLE, Tag.BOTTOM_VERTICAL, Quartile.MEDIAN);
+			} catch( ProfileException | UnavailableBorderTagException e){
+				fine("Error getting TV or BV profile", e);
+				return;
+			}
 
 			offsetNucleusProfiles(Tag.TOP_VERTICAL, ProfileType.ANGLE, topMedian);
 
@@ -269,8 +292,10 @@ public class ProfileManager implements Loggable {
 	 * @param tag
 	 * @param index the new index within the median profile
 	 * @throws IndexOutOfBoundsException 
+	 * @throws UnavailableBorderTagException 
+	 * @throws ProfileException 
 	 */
-	public void updateBorderTag(Tag tag, int index) throws IndexOutOfBoundsException{
+	public void updateBorderTag(Tag tag, int index) throws IndexOutOfBoundsException, ProfileException, UnavailableBorderTagException{
 		
 		finer("Updating border tag "+tag);
 		
@@ -295,8 +320,10 @@ public class ProfileManager implements Loggable {
 	 * @param tag
 	 * @param index
 	 * @throws IndexOutOfBoundsException 
+	 * @throws ProfileException 
+	 * @throws UnavailableBorderTagException 
 	 */
-	private void updateExtendedBorderTagIndex(Tag tag, int index) throws IndexOutOfBoundsException{
+	private void updateExtendedBorderTagIndex(Tag tag, int index) throws IndexOutOfBoundsException, ProfileException, UnavailableBorderTagException{
 		
 		int oldIndex = collection.getProfileCollection().getIndex(tag);
 		
@@ -349,8 +376,10 @@ public class ProfileManager implements Loggable {
 	 * If a core border tag is moved, the profile needs to be resegmented.
 	 * @param tag
 	 * @param index
+	 * @throws ProfileException 
+	 * @throws UnavailableBorderTagException 
 	 */
-	private void updateCoreBorderTagIndex(Tag tag, int index){
+	private void updateCoreBorderTagIndex(Tag tag, int index) throws UnavailableBorderTagException, ProfileException{
 		
 		
 		/*

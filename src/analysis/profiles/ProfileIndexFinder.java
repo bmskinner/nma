@@ -26,6 +26,7 @@ import stats.Quartile;
 import utility.Constants;
 import analysis.profiles.Rule.RuleType;
 import components.ICellCollection;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
 import components.generic.ProfileType;
@@ -206,17 +207,32 @@ public class ProfileIndexFinder implements Loggable {
 	
 	public BooleanProfile getMatchingProfile(final ICellCollection collection, final List<RuleSet> list){
 		// Make a 'true' profile
-		BooleanProfile indexes = new BooleanProfile(collection
-				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN), true);
+		BooleanProfile indexes;
+		try {
+			indexes = new BooleanProfile(collection
+					.getProfileCollection()
+					.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN), true);
+			
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Cannot get matching profile", e);
+			return new BooleanProfile(collection
+					.getProfileCollection().length(), false);
+		}
 
 
 		for(RuleSet r : list){
 
 			// Get the correct profile for the RuleSet
-			IProfile p = collection
-					.getProfileCollection()
-					.getProfile(r.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
+			IProfile p;
+			try {
+				p = collection
+						.getProfileCollection()
+						.getProfile(r.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				fine("Cannot get matching profile", e);
+				return new BooleanProfile(collection
+						.getProfileCollection().length(), false);
+			}
 
 			// Apply the rule, and update the result profile
 			BooleanProfile matchingIndexes = getMatchingIndexes(p, r);

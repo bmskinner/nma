@@ -16,8 +16,10 @@ import stats.Sum;
 import utility.Constants;
 import weka.estimators.KernelEstimator;
 import analysis.IAnalysisDataset;
+import analysis.profiles.ProfileException;
 import charting.options.ChartOptions;
 import components.ICellCollection;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
@@ -123,9 +125,10 @@ public class ViolinDatasetCreator implements Loggable {
 	 * @param scale the scale
 	 * @param stat the segment statistic to use
 	 * @return
+     * @throws ChartDatasetCreationException 
 	 * @throws Exception
 	 */
-	public ViolinCategoryDataset createSegmentStatisticDataset() {
+	public ViolinCategoryDataset createSegmentStatisticDataset() throws ChartDatasetCreationException {
 		
 		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
@@ -152,9 +155,10 @@ public class ViolinDatasetCreator implements Loggable {
 	 * @param collections
 	 * @param segName
 	 * @return
+	 * @throws ChartDatasetCreationException 
 	 * @throws Exception 
 	 */
-	private ViolinCategoryDataset createSegmentLengthDataset(List<IAnalysisDataset> collections, int segPosition, MeasurementScale scale) {
+	private ViolinCategoryDataset createSegmentLengthDataset(List<IAnalysisDataset> collections, int segPosition, MeasurementScale scale) throws ChartDatasetCreationException {
 
 		ViolinCategoryDataset dataset = new ViolinCategoryDataset();
 
@@ -171,8 +175,14 @@ public class ViolinDatasetCreator implements Loggable {
 
 			for(Nucleus n : collection.getNuclei()){
 				
-				IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
-						.getSegment(medianSeg.getID());			
+				IBorderSegment seg;
+				try {
+					seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+							.getSegment(medianSeg.getID());
+				} catch (ProfileException e) {
+					fine("Error getting segmented profile", e);
+					throw new ChartDatasetCreationException("Cannot get segmented profile", e);
+				}			
 
 				
 				double length = 0;
@@ -200,9 +210,10 @@ public class ViolinDatasetCreator implements Loggable {
 	 * @param collections
 	 * @param segName
 	 * @return
+	 * @throws ChartDatasetCreationException 
 	 * @throws Exception 
 	 */
-	private ViolinCategoryDataset createSegmentDisplacementDataset(List<IAnalysisDataset> collections, int segPosition) {
+	private ViolinCategoryDataset createSegmentDisplacementDataset(List<IAnalysisDataset> collections, int segPosition) throws ChartDatasetCreationException {
 
 		ViolinCategoryDataset dataset = new ViolinCategoryDataset();
 
@@ -210,16 +221,28 @@ public class ViolinDatasetCreator implements Loggable {
 
 			ICellCollection collection = collections.get(i).getCollection();
 			
-			IBorderSegment medianSeg = collection
-					.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-					.getSegmentAt(segPosition);
+			IBorderSegment medianSeg;
+			try {
+				medianSeg = collection
+						.getProfileCollection()
+						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+						.getSegmentAt(segPosition);
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				fine("Unable to get segmented median profile", e);
+				throw new ChartDatasetCreationException("Cannot get median profile");
+			}
 
 
 			List<Number> list = new ArrayList<Number>(0);
 
 			for(Nucleus n : collection.getNuclei()){
-				ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+				ISegmentedProfile profile;
+				try {
+					profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+				} catch (ProfileException e) {
+					fine("Error getting segmented profile", e);
+					throw new ChartDatasetCreationException("Cannot get segmented profile", e);
+				}
 				
 				IBorderSegment seg = profile.getSegment(medianSeg.getID());
 				

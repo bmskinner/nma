@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 
+import analysis.profiles.ProfileException;
 import components.AbstractCellularComponent;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
@@ -409,7 +410,7 @@ public class FloatProfile implements IProfile {
 	 * @see components.generic.IProfile#offset(int)
 	 */
 	@Override
-	public IProfile offset(int j) {
+	public IProfile offset(int j) throws ProfileException {
 		float[] newArray = new float[this.size()];
 		for(int i=0;i<this.size();i++){
 			newArray[i] = this.array[ AbstractCellularComponent.wrapIndex( i+j , this.size() ) ];
@@ -571,7 +572,7 @@ public class FloatProfile implements IProfile {
 	 * @see components.generic.IProfile#getSlidingWindowOffset(components.generic.IProfile)
 	 */
 	@Override
-	public int getSlidingWindowOffset(IProfile testProfile) {
+	public int getSlidingWindowOffset(IProfile testProfile) throws ProfileException {
 
 		double lowestScore = this.absoluteSquareDifference(testProfile);
 		int index = 0;

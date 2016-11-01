@@ -60,6 +60,7 @@ import components.ICell;
 import components.ICellCollection;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.DefaultProfileCollection;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -649,10 +650,29 @@ implements ICellCollection {
 		double[] result = new double[count];
 		int i=0;
 
-		IProfile medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+		IProfile medianProfile;
+		try {
+			medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting median profile for collection", e);
+			for(int j=0; i<result.length; j++){
+				result[j] = 0;	
+			}
+			return result;
+		}
+		
 		for(Nucleus n : this.getNuclei()){
+			
 			IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
-			result[i++] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
+			
+			try {
+				result[i] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
+			} catch (ProfileException e) {
+				fine("Error getting nucleus profile", e);
+				result[i] = 0;
+			} finally {
+				i++;
+			}
 		}
 		return result;
 	}
@@ -669,15 +689,33 @@ implements ICellCollection {
 		int count = this.getNucleusCount();
 		double[] result = new double[count];
 		int i=0;
-		IProfile medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+		IProfile medianProfile;
+		try {
+			medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting median profile for collection", e);
+			for(int j=0; i<result.length; j++){
+				result[j] = 0;	
+			}
+			return result;
+		}
 
 		for(Nucleus n : this.getNuclei()){
 
-			IProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
-			double diff = angleProfile.absoluteSquareDifference(medianProfile);		
-			diff /= n.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
-			double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
-			result[i++] = rootDiff;
+			IProfile angleProfile;
+			try {
+				angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
+				double diff = angleProfile.absoluteSquareDifference(medianProfile);		
+				diff /= n.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+				double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
+				result[i] = rootDiff;
+			} catch (ProfileException e) {
+				fine("Error getting nucleus profile", e);
+				result[i] = 0;
+			} finally {
+				i++;
+			}
+			
 
 		}
 		return result;
@@ -692,8 +730,20 @@ implements ICellCollection {
 	 * @throws Exception
 	 */
 	public double getNormalisedDifferenceToMedian(Tag pointType, ICell c){
-		IProfile medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
-		IProfile angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
+		IProfile medianProfile;
+		try {
+			medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting median profile for collection", e);
+			return 0;
+		}
+		IProfile angleProfile;
+		try {
+			angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
+		} catch (ProfileException e) {
+			fine("Error getting nucleus profile", e);
+			return 0;
+		}
 		double diff = angleProfile.absoluteSquareDifference(medianProfile);		
 		diff /= c.getNucleus().getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 		double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
@@ -750,9 +800,10 @@ implements ICellCollection {
 	 * Get the nucleus with the lowest difference score to the median profile
 	 * @param pointType the point to compare profiles from
 	 * @return the best nucleus
+	 * @throws UnavailableBorderTagException 
 	 * @throws Exception 
 	 */
-	public Nucleus getNucleusMostSimilarToMedian(Tag pointType) throws ProfileException {
+	public Nucleus getNucleusMostSimilarToMedian(Tag pointType) throws ProfileException, UnavailableBorderTagException {
 
 		if(cells.size()==1){
 			for(ICell c : cells){
@@ -760,7 +811,9 @@ implements ICellCollection {
 			}
 		}
 
-		IProfile medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN); // the profile we compare the nucleus to
+		IProfile medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+
+		 // the profile we compare the nucleus to
 		//	  Nucleus n = this.getNuclei()..get(0); // default to the first nucleus
 		Nucleus n=null;
 		double difference = Arrays.stream(getDifferencesToMedianFromPoint(pointType)).max().orElse(0);

@@ -117,14 +117,14 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getProfile(components.generic.BorderTagObject, double)
 	 */
 	@Override
-	public IProfile getProfile(ProfileType type, Tag tag, double quartile) {
+	public IProfile getProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException, ProfileException {
 		
 		if(tag==null){
 			throw new IllegalArgumentException("Tag cannot be null");
 		}
 		
 		if(  ! this.hasBorderTag(tag)){
-			throw new IllegalArgumentException("Tag is not present: "+tag.toString());
+			throw new UnavailableBorderTagException("Tag is not present: "+tag.toString());
 		}
 		
 		IProfileAggregate agg = map.get(type);
@@ -140,22 +140,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 		int offset = indexes.get(tag);
 		
 		return p.offset(offset);
-//
-//		// If the profile is not in the cache, make it and add to the cache
-//		if( ! profileCache.hasProfile(tag, quartile)){
-//
-//			int indexOffset = indexes.get(tag);			
-//			IProfile profile;
-//			try {
-//				profile = getAggregate().getQuartile(quartile).offset(indexOffset);
-//			} catch (ProfileException e) {
-//				error("Unable to get profile for "+tag+" quartile "+quartile, e);
-//				return null;
-//			}
-//			profileCache.setProfile(tag, quartile, profile );
-//
-//		}
-//		return profileCache.getProfile(tag, quartile);	
+	
 		
 	}
 	
@@ -164,7 +149,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentedProfile(components.generic.BorderTagObject)
 	 */
 	@Override
-	public ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile) {
+	public ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException, ProfileException {
 		if(tag==null){
 			throw new IllegalArgumentException("A profile key is required");
 		}
@@ -215,7 +200,13 @@ public class DefaultProfileCollection implements IProfileCollection {
 		// of the array
 		int offset = -getIndex(tag);
 
-		List<IBorderSegment> result = IBorderSegment.nudge(segments, offset);
+		List<IBorderSegment> result;
+		try {
+			result = IBorderSegment.nudge(segments, offset);
+		} catch (ProfileException e) {
+			fine("Error offsetting segments", e);
+			return new ArrayList<IBorderSegment>(0);
+		}
 
 		return result;
 	}
@@ -382,7 +373,13 @@ public class DefaultProfileCollection implements IProfileCollection {
 		 */
 		int offset = getIndex(tag);
 
-		List<IBorderSegment> result = IBorderSegment.nudge(n, offset);
+		List<IBorderSegment> result;
+		try {
+			result = IBorderSegment.nudge(n, offset);
+		} catch (ProfileException e) {
+			fine("Error offsetting segments", e);
+			return;
+		}
 
 		this.segments = result;
 	}
@@ -519,7 +516,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getIQRProfile(components.generic.BorderTagObject)
 	 */
 	@Override
-	public IProfile getIQRProfile(ProfileType type, Tag tag) {
+	public IProfile getIQRProfile(ProfileType type, Tag tag) throws UnavailableBorderTagException, ProfileException {
 				
 		IProfile q25 = getProfile(type, tag, Quartile.LOWER_QUARTILE);
 		IProfile q75 = getProfile(type, tag, Quartile.UPPER_QUARTILE);

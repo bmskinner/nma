@@ -12,6 +12,7 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 
 import analysis.IAnalysisDataset;
+import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.ViolinCategoryDataset;
 import charting.datasets.ViolinDatasetCreator;
 import charting.options.ChartOptions;
@@ -208,7 +209,12 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 		
 		ViolinCategoryDataset ds = null;
 		if(options.hasDatasets()){
-			 ds = new ViolinDatasetCreator(options).createSegmentStatisticDataset();
+			 try {
+				ds = new ViolinDatasetCreator(options).createSegmentStatisticDataset();
+			} catch (ChartDatasetCreationException e) {
+				fine("Error creating volin dataset", e);
+				return makeErrorChart();
+			}
 		}
 		
 		JFreeChart chart = createViolinChart(null, 

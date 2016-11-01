@@ -26,6 +26,7 @@ import java.util.UUID;
 import logging.Loggable;
 import analysis.profiles.ProfileException;
 import components.ICellCollection;
+import components.active.generic.UnavailableBorderTagException;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 
@@ -60,17 +61,21 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @param tag the BorderTagObject to use as index zero
 	 * @param quartile the collection quartile to return (0-100) 
 	 * @return the quartile profile from the given tag
+	 * @throws UnavailableBorderTagException 
+	 * @throws ProfileException 
 	 */
-	IProfile getProfile(ProfileType type, Tag tag, double quartile);
+	IProfile getProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException, ProfileException;
 
 	/**
 	 * Get the requested segmented profile. Generates it dynamically from the
 	 * appropriate ProfileAggregate. 
 	 * @param s the pointType of the profile to find
 	 * @return the profile
+	 * @throws ProfileException 
+	 * @throws UnavailableBorderTagException 
 	 * @throws Exception
 	 */
-	ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile);
+	ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException, ProfileException;
 
 	/**
 	 * Get the profile aggregate for this collection
@@ -216,8 +221,11 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * Turn the IQR (difference between Q25, Q75) of the median into a profile.
 	 * @param pointType the profile type to use
 	 * @return the profile
+	 * @throws ProfileException 
+	 * @throws UnavailableBorderTagException 
+	 * @throws  
 	 */
-	IProfile getIQRProfile(ProfileType type, Tag tag);
+	IProfile getIQRProfile(ProfileType type, Tag tag) throws UnavailableBorderTagException, ProfileException;
 
 	/**
 	 * Find the points in the profile that are most variable

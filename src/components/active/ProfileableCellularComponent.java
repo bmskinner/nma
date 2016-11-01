@@ -9,12 +9,14 @@ import java.util.Set;
 import java.util.UUID;
 
 import analysis.profiles.ProfileCreator;
+import analysis.profiles.ProfileException;
 import analysis.profiles.Profileable;
 import analysis.profiles.Taggable;
 import components.CellularComponent;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.FloatPoint;
 import components.active.generic.SegmentedFloatProfile;
+import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnprofilableObjectException;
 import components.generic.IPoint;
 import components.generic.IProfile;
@@ -170,8 +172,13 @@ public abstract class ProfileableCellularComponent
 		int pointIndex = this.borderTags.get(tag);
 		
 		// remove the offset from the profile, by setting the profile to start from the pointIndex
-		this.setProfile(type, new SegmentedFloatProfile(p).offset(-pointIndex));
-//		this.updateVerticallyRotatedNucleus();
+		try {
+			this.setProfile(type, new SegmentedFloatProfile(p).offset(-pointIndex));
+		} catch (ProfileException e) {
+			fine("Error setting profile", e);
+			return;
+		}
+
 	}
 
 	
@@ -416,7 +423,7 @@ public abstract class ProfileableCellularComponent
 	}
 
 
-	public ISegmentedProfile getProfile(ProfileType type, Tag tag){
+	public ISegmentedProfile getProfile(ProfileType type, Tag tag) throws ProfileException{
 		
 		// fetch the index of the pointType (the new zero)
 		int pointIndex = this.borderTags.get(tag);
@@ -564,12 +571,4 @@ public abstract class ProfileableCellularComponent
 		public IndexOutOfBoundsException(Throwable cause) { super(cause); }
 	}
 	
-	public class UnavailableBorderTagException extends Exception {
-		private static final long serialVersionUID = 1L;
-		public UnavailableBorderTagException() { super(); }
-		public UnavailableBorderTagException(String message) { super(message); }
-		public UnavailableBorderTagException(String message, Throwable cause) { super(message, cause); }
-		public UnavailableBorderTagException(Throwable cause) { super(cause); }
-	}
-
 }
