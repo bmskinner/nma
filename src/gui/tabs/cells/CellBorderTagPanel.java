@@ -35,6 +35,7 @@ import charting.charts.MorphologyChartFactory;
 import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -225,7 +226,14 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 
 			boolean wasLocked = this.getCellModel().getCell().getNucleus().isLocked();
 			this.getCellModel().getCell().getNucleus().setLocked(false);
-			this.getCellModel().getCell().getNucleus().setBorderTag(Tag.REFERENCE_POINT, tag, newTagIndex);
+			try {
+				this.getCellModel().getCell().getNucleus().setBorderTag(Tag.REFERENCE_POINT, tag, newTagIndex);
+			} catch (IndexOutOfBoundsException e) {
+				warn("Cannot update border point");
+				fine("Index not in profile", e);
+				this.getCellModel().getCell().getNucleus().setLocked(wasLocked);
+				return;
+			}
 			this.getCellModel().getCell().getNucleus().updateVerticallyRotatedNucleus();
 			this.getCellModel().getCell().getNucleus().setLocked(wasLocked);
 

@@ -21,6 +21,7 @@ package components.active.generic;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -178,15 +179,36 @@ public class FloatProfile implements IProfile {
 
 		BooleanProfile b = new BooleanProfile(this, true);
 		return getIndexOfMax(b);
-		//		double max = 0;
-		//		int maxIndex = 0;
-		//		for(int i=0; i<array.length;i++){
-		//			if(array[i]>max){
-		//				max = array[i];
-		//				maxIndex = i;
-		//			}
-		//		}
-		//		return maxIndex;
+	}
+	
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getProportionalIndex(double)
+	 */
+	@Override
+	public int getProportionalIndex(double d) {
+		if(d<0 || d > 1){
+			throw new IllegalArgumentException("Proportion must be between 0-1: "+d);
+		}
+		
+		double desiredDistanceFromStart = (double) array.length * d;
+		
+		int target = (int) desiredDistanceFromStart;
+		
+		return target;		
+	}
+	
+	/* (non-Javadoc)
+	 * @see components.generic.IProfile#getIndexProportion(int)
+	 */
+	@Override
+	public double getIndexProportion(int index){
+		if(index < 0 || index >= this.size()){
+			throw new IllegalArgumentException("Index out of bounds: "+index);
+		}
+		
+		double fractionalDistance =  (double) index / (double) array.length;
+		
+		return fractionalDistance;
 	}
 
 	/* (non-Javadoc)

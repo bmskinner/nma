@@ -156,7 +156,11 @@ public abstract class ProfileableCellularComponent
 	 * @param pointType
 	 * @throws Exception
 	 */
-	public void setProfile(ProfileType type, Tag tag, ISegmentedProfile p) throws Exception{
+	public void setProfile(ProfileType type, Tag tag, ISegmentedProfile p) throws UnavailableBorderTagException {
+		
+		if(! this.hasBorderTag(tag)){
+			throw new UnavailableBorderTagException("Tag "+tag+" is not present");
+		}
 		
 		if(segsLocked){
 			return;

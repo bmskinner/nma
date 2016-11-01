@@ -53,6 +53,7 @@ import stats.PlottableStatistic;
 import stats.SignalStatistic;
 import components.AbstractCellularComponent;
 import components.CellularComponent;
+import components.active.ProfileableCellularComponent.UnavailableBorderTagException;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.FloatPoint;
 import components.active.generic.SegmentedFloatProfile;
@@ -589,8 +590,11 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * @param pointType
 	 * @throws Exception
 	 */
-	public void setProfile(ProfileType type, Tag tag, ISegmentedProfile p) throws Exception{
+	public void setProfile(ProfileType type, Tag tag, ISegmentedProfile p) throws UnavailableBorderTagException {
 		
+//		if(! this.hasBorderTag(tag)){
+//			throw new UnavailableBorderTagException("Tag "+tag+" is not present");
+//		}
 		if(segsLocked){
 			return;
 		}

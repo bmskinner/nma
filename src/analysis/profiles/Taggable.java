@@ -22,6 +22,7 @@ package analysis.profiles;
 import java.util.Map;
 
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
+import components.active.ProfileableCellularComponent.UnavailableBorderTagException;
 import components.generic.BorderTagObject;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
@@ -116,11 +117,10 @@ public interface Taggable extends Profileable {
 	public void setBorderTag(Tag reference, Tag tag, int i) throws IndexOutOfBoundsException;
 	
 	/**
-	 * Get a copy of the angle profile offset to start at the given point
-	 * @param pointType the point to start at
+	 * Get a copy of the profile offset to start at the given point
+	 * @param type profile type to fetch
 	 * @param tag the tag to offset the profile to
 	 * @return a copy of the segmented profile
-	 * @throws Exception 
 	 */
 	public ISegmentedProfile getProfile(ProfileType type, Tag tag);
 	
@@ -130,7 +130,7 @@ public interface Taggable extends Profileable {
 	 * @param type
 	 * @param profile
 	 */
-	public void setProfile(ProfileType type, Tag tag, ISegmentedProfile profile) throws Exception;
+	public void setProfile(ProfileType type, Tag tag, ISegmentedProfile profile) throws UnavailableBorderTagException;
 	
 	/**
 	 * Get a copy of the mapping of border tags to index positions within 

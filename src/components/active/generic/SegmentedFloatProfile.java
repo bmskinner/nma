@@ -379,23 +379,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		}
 	}
 
-	//	/**
-	//	 * Replace the segments in the profile with the given list. If the
-	//	 * segments come from a different length of profile to the current
-	//	 * profile, each segment is adjusted to an equivalent proportion
-	//	 * of the profile.
-	//	 * @param segments
-	//	 */
-	//	public void setNormalisedSegments(List<IBorderSegment> segments){
-	//		if(segments.get(0).getTotalLength()!=this.size()){
-	//			finer("Profile lengths are the same, falling back to default method");
-	//			setSegments(segments);
-	//		}
-	//		
-	//		..
-	//		
-	//	}
-
 	/* (non-Javadoc)
 	 * @see components.generic.ISegmentedProfile#clearSegments()
 	 */
@@ -627,9 +610,60 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
 	public ISegmentedProfile interpolate(int length){
 		
-		// get the target lengths of the new segments
+		// get the proportions of the existing segments
 		
-		return new SegmentedFloatProfile(super.interpolate(length));
+		double[] props = new double[segments.length];
+		
+		for(int i=0; i<segments.length; i++){
+			props[i] = this.getIndexProportion(segments[i].getStartIndex());
+		}
+		
+		fine("Props:");
+		for(double d : props){
+			fine("\t"+d);
+		}
+		
+		// get the target start indexes of the new segments
+		
+		int[] newStarts = new int[segments.length];
+		
+		for(int i=0; i<segments.length; i++){
+			newStarts[i] =  (int) (props[i] * (double) length );
+		}
+		
+		fine("Starts:");
+		for(int d : newStarts){
+			fine("\t"+d);
+		}
+		
+		// Make the new segments
+		
+		
+		List<IBorderSegment> newSegs = new ArrayList<IBorderSegment>(segments.length);
+		for(int i=0; i<segments.length-1; i++){
+			
+			IBorderSegment seg = new DefaultBorderSegment(newStarts[i], newStarts[i+1], length, segments[i].getID());
+			newSegs.add(seg);
+		}
+		
+		// Add final segment
+		IBorderSegment lastSeg = new DefaultBorderSegment(newStarts[segments.length-1], newStarts[0], length, segments[segments.length-1].getID());
+		newSegs.add(lastSeg);
+		
+		try {
+			IBorderSegment.linkSegments(newSegs);
+		} catch (ProfileException e) {
+			error("Error linking segments", e);
+		}
+		
+		
+		// interpolate the IProfile
+		
+		IProfile newProfile = super.interpolate(length);
+		
+		// assign new segments
+		
+		return new SegmentedFloatProfile(newProfile, newSegs);
 	}
 
 	/* (non-Javadoc)

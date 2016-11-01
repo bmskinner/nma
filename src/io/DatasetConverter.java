@@ -44,6 +44,7 @@ import components.active.DefaultNucleus;
 import components.active.DefaultPigSpermNucleus;
 import components.active.DefaultRodentSpermNucleus;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
+import components.active.ProfileableCellularComponent.UnavailableBorderTagException;
 import components.active.VirtualCellCollection;
 import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
@@ -403,28 +404,27 @@ public class DatasetConverter implements Loggable {
 			finer("\tSetting tag "+t);
 		}
 
-		// TODO: Copy segments
-//		for(ProfileType type : ProfileType.values()){
-//			ISegmentedProfile p = template.getProfile(type);
-//			ISegmentedProfile target = newNucleus.getProfile(type);
-//			
-//			if(p.size() != target.size()){
-//				fine("New nucleus profile length of "+target.size()+" : original nucleus was "+p.size());
-//				
-//				try {
-//					target = target.frankenNormaliseToProfile(p);
-//					newNucleus.setProfile(type, target);
-//					
-//				} catch (ProfileException e) {
-//					fine("Cannot interpolate segments", e);
-//					throw new DatasetConversionException("Error creating segmented profile", e);
-//				}
-//				
-//				
-//			}
-//			
-//
-//		}
+		// Copy segments from RP
+		for(ProfileType type : ProfileType.values()){
+			ISegmentedProfile p = template.getProfile(type, Tag.REFERENCE_POINT);
+			ISegmentedProfile target = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
+			
+			if(p.size() != target.size()){
+				fine("New nucleus profile length of "+target.size()+" : original nucleus was "+p.size());
+				target = p.interpolate(target.size());
+				fine("Interpolated profile");
+			}
+
+
+			try {
+				fine("Setting RP profile");
+				newNucleus.setProfile(type, Tag.REFERENCE_POINT, target);
+			} catch (UnavailableBorderTagException e) {
+				fine("Cannot set profile at RP", e);
+			}
+
+
+		}
 		
 
 

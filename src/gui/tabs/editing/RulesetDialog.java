@@ -33,6 +33,7 @@ import stats.Quartile;
 import utility.Constants;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
+import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
@@ -284,10 +285,16 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 
 				log("Updating "+tag+" to index "+newTagIndex);
 
-				dataset
-					.getCollection()
-					.getProfileManager()
-					.updateBorderTag(tag, newTagIndex);
+				try {
+					dataset
+						.getCollection()
+						.getProfileManager()
+						.updateBorderTag(tag, newTagIndex);
+				} catch (IndexOutOfBoundsException e) {
+					warn("Unable to update border tag index");
+					fine("Index not in profile", e);
+					return;
+				}
 								
 				if(tag.type().equals(BorderTagType.CORE)){
 					log("Resegmenting dataset");
