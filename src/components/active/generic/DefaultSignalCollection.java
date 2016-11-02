@@ -172,7 +172,13 @@ public class DefaultSignalCollection implements ISignalCollection {
 	@Override
 	public File getSourceFile(UUID signalGroup){
 		if(collection.containsKey(signalGroup)){
-			return collection.get(signalGroup).get(0).getSourceFile();
+			
+			List<INuclearSignal> list = collection.get(signalGroup);
+			if(list!=null && ! list.isEmpty()){
+				return list.get(0).getSourceFile();
+			} else {
+				return null;
+			}
 		} else {
 			return null;
 		}
@@ -195,7 +201,13 @@ public class DefaultSignalCollection implements ISignalCollection {
 	@Override
 	public int getSourceChannel(UUID signalGroup){
 		if(collection.containsKey(signalGroup)){
-			return collection.get(signalGroup).get(0).getChannel();
+			
+			List<INuclearSignal> list = collection.get(signalGroup);
+			if(list!=null && ! list.isEmpty()){
+				return list.get(0).getChannel();
+			} else {
+				return -1;
+			}
 		} else {
 			return -1;
 		}

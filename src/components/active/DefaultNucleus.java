@@ -73,7 +73,7 @@ public class DefaultNucleus
 		finest("Created profileable nucleus");		
 		nucleusNumber = n.getNucleusNumber();
 				
-		this.setSignals( new SignalCollection(n.getSignalCollection()));
+		this.setSignals( new DefaultSignalCollection(n.getSignalCollection()));
 	}
 	
 	@Override
