@@ -78,6 +78,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1086,20 +1088,54 @@ public class MainWindow
     public void fireDatasetUpdateEvent(List<IAnalysisDataset> list){
     	
     	Runnable r = () -> {
-    		for(TabPanel p : detailPanels){
-        		p.setChartsAndTablesLoading();
-        	}
+    		
+    		// Create a new runnable
+    		Runnable r1 = () -> {
+    			// Update charts and panels to loading
+    			for(TabPanel p : detailPanels){
+    				p.setChartsAndTablesLoading();
+    		} };
+
+    		Future<?> f = threadManager.submit( r1 );
+
+    		// Wait for loading state to be set
+    		try {
+    			f.get();
+    		} catch (InterruptedException e1) {
+    			// TODO Auto-generated catch block
+    			e1.printStackTrace();
+    		} catch (ExecutionException e1) {
+    			// TODO Auto-generated catch block
+    			e1.printStackTrace();
+    		}
+
+    		// Now fire the update
+    		DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
+    		Iterator<Object> iterator = updateListeners.iterator();
+    		while( iterator.hasNext() ) {
+    			( (DatasetUpdateEventListener) iterator.next() ).datasetUpdateEventReceived( e );
+    		}
+
     	};
-    	
-    	threadManager.submit( r );
 
     	
+    	threadManager.execute( r );
+
+//    	try {
+//			f.get();
+//		} catch (InterruptedException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (ExecutionException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
     	
-    	DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
-    	Iterator<Object> iterator = updateListeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (DatasetUpdateEventListener) iterator.next() ).datasetUpdateEventReceived( e );
-        }
+//    	DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
+//    	Iterator<Object> iterator = updateListeners.iterator();
+//        while( iterator.hasNext() ) {
+//            ( (DatasetUpdateEventListener) iterator.next() ).datasetUpdateEventReceived( e );
+//        }
     }
     /**
      * Add a listener for dataset update events.

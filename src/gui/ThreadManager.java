@@ -44,16 +44,17 @@ public class ThreadManager implements Loggable {
 		return instance;
 	}
 	
-	public synchronized void submit(Runnable r){
+	public synchronized Future<?> submit(Runnable r){
 //		executorService.submit(r);
 		queueLength.incrementAndGet(); // Increment queue when submitting task.
-		executorService.submit(new Runnable() {
+		Future<?> f = executorService.submit(new Runnable() {
             public void run() {
                 r.run();
                 queueLength.decrementAndGet(); // Decrement queue when task done.
             }
         });
-		log("Submitted runnable. Queue is "+queueLength.get());
+		fine("Submitted runnable. Queue is "+queueLength.get());
+		return f;
 	}
 	
 	public synchronized void execute(Runnable r){
