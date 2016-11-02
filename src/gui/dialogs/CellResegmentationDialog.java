@@ -278,7 +278,14 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 			
 			
 			Nucleus n = workingCell.getNucleus();
-			UUID id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
+			UUID id;
+			try {
+				id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
+			} catch (ProfileException e) {
+				warn("Cannot get segmented profile");
+				fine("Error getting profile", e);
+				return;
+			}
 
 
 			IBorderSegment last = IBorderSegment.newSegment(segStart, n.getBorderIndex(Tag.REFERENCE_POINT), n.getBorderLength(), id);
@@ -369,31 +376,39 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 		}
 		
 		if(isRunning){
-			setCellChanged(true);
-			UUID id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
-
-			segStop = n.getBorderIndex(p);
-			IBorderSegment seg = IBorderSegment.newSegment(segStart, segStop, n.getBorderLength(), id);
-			newSegments.add(seg);
-			finer("Added "+seg.toString());
-			segStart = segStop;
 			
-			table.getModel().setValueAt("OK", segCount, COLUMN_STATE);
-			segCount++;
-			log("Select endpoint for segment "+segCount);
-			
-			drawCurrentSegments();
 
-			// Check against the original cell segment count
-			if(segCount==cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentCount()-1){
-				resegmentationComplete();
+			try {
+
+				setCellChanged(true);
+				UUID id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
+
+
+				segStop = n.getBorderIndex(p);
+				IBorderSegment seg = IBorderSegment.newSegment(segStart, segStop, n.getBorderLength(), id);
+				newSegments.add(seg);
+				finer("Added "+seg.toString());
+				segStart = segStop;
+
+				table.getModel().setValueAt("OK", segCount, COLUMN_STATE);
+				segCount++;
+				log("Select endpoint for segment "+segCount);
+
+				drawCurrentSegments();
+
+				// Check against the original cell segment count
+				if(segCount==cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentCount()-1){
+					resegmentationComplete();
+				}
+
+			} catch (ProfileException e) {
+				warn("Unable to update segments");
+				fine("Error getting profiles", e);
 			}
 
 
-
-			
 		}
-		
+
 	}
 	
 	public class SegmentStateRenderer extends DefaultTableCellRenderer	{

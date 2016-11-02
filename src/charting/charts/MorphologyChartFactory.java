@@ -241,20 +241,25 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
 		if(options.isShowAnnotations()){
 			finest("Adding segment annotations");
-			for(IBorderSegment seg : n.getProfile(options.getType(), options.getTag()).getOrderedSegments()){
+			try {
+				for(IBorderSegment seg : n.getProfile(options.getType(), options.getTag()).getOrderedSegments()){
 
-				int midPoint = seg.getMidpointIndex();
+					int midPoint = seg.getMidpointIndex();
 
-				double x = midPoint;
-				if(options.isNormalised()){
-					x = ((double) midPoint / (double) seg.getTotalLength() ) * 100;
+					double x = midPoint;
+					if(options.isNormalised()){
+						x = ((double) midPoint / (double) seg.getTotalLength() ) * 100;
+					}
+					XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
+					
+					Paint colour = ColourSelecter.getColor(seg.getPosition());
+					
+					segmentAnnotation.setPaint(colour);
+					plot.addAnnotation(segmentAnnotation);
 				}
-				XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
-				
-				Paint colour = ColourSelecter.getColor(seg.getPosition());
-				
-				segmentAnnotation.setPaint(colour);
-				plot.addAnnotation(segmentAnnotation);
+			} catch (ProfileException e) {
+				fine("Error adding segment annotations", e);
+				return makeErrorChart();
 			}
 		}
 		
@@ -310,30 +315,37 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			for (Tag tag : collection.getProfileCollection().getBorderTags()){
 
 				// get the index of the tag
-				int index = collection.getProfileCollection().getIndex(tag);
+				
+				try {
+				
+					int index = collection.getProfileCollection().getIndex(tag);
 
-				// get the offset from to the current draw point
-				int offset = collection.getProfileCollection().getIndex(options.getTag());
+					// get the offset from to the current draw point
+					int offset = collection.getProfileCollection().getIndex(options.getTag());
 
-				// adjust the index to the offset
-				index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection().length());
+					// adjust the index to the offset
+					index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection().length());
 
-				double indexToDraw = index; // convert to a double to allow normalised positioning
+					double indexToDraw = index; // convert to a double to allow normalised positioning
 
-				if(options.isNormalised()){ // set to the proportion of the point along the profile
-					indexToDraw =  (( indexToDraw / collection.getProfileCollection().length() ) * 100);
-				}
-				if(options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()){
-					int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
-					int amountToAdd = maxX - collection.getProfileCollection().length();
-					indexToDraw += amountToAdd;
+					if(options.isNormalised()){ // set to the proportion of the point along the profile
+						indexToDraw =  (( indexToDraw / collection.getProfileCollection().length() ) * 100);
+					}
+					if(options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()){
+						int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
+						int amountToAdd = maxX - collection.getProfileCollection().length();
+						indexToDraw += amountToAdd;
 
-				}
+					}
 
-				if(options.isShowMarkers()){
-					
-					addMarkerToXYPlot(plot, tag, indexToDraw);
-					
+					if(options.isShowMarkers()){
+
+						addMarkerToXYPlot(plot, tag, indexToDraw);
+
+					}
+				
+				} catch(UnavailableBorderTagException e){
+					fine("Tag not present in profile: "+tag);
 				}
 
 			}
@@ -438,22 +450,27 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				ICellCollection collection = options.firstDataset().getCollection();
 				for (Tag tag : collection.getProfileCollection().getBorderTags()){
 
-					// get the index of the tag
-					int index = collection.getProfileCollection().getIndex(tag);
+					try {
+						// get the index of the tag
+						int index = collection.getProfileCollection().getIndex(tag);
 
-					// get the offset from to the current draw point
-					int offset = collection.getProfileCollection().getIndex(options.getTag());
+						// get the offset from to the current draw point
+						int offset = collection.getProfileCollection().getIndex(options.getTag());
 
-					// adjust the index to the offset
-					index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection().length());
+						// adjust the index to the offset
+						index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection().length());
 
-					double indexToDraw = index; // convert to a double to allow normalised positioning
+						double indexToDraw = index; // convert to a double to allow normalised positioning
 
-					if(options.isNormalised()){ // set to the proportion of the point along the profile
-						indexToDraw =  (( indexToDraw / collection.getProfileCollection().length() ) * 100);
-					}
+						if(options.isNormalised()){ // set to the proportion of the point along the profile
+							indexToDraw =  (( indexToDraw / collection.getProfileCollection().length() ) * 100);
+						}
 
-					addMarkerToXYPlot(plot, tag, indexToDraw);
+						addMarkerToXYPlot(plot, tag, indexToDraw);
+					
+				} catch(UnavailableBorderTagException e){
+					fine("Tag not present in profile: "+tag);
+				}
 					
 				}
 			}
@@ -1195,7 +1212,12 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 */
 	public static JFreeChart createBooleanProfileChart(IProfile p, BooleanProfile limits){
 		
-		XYDataset ds = new NucleusDatasetCreator().createBooleanProfileDataset(p, limits);
+		XYDataset ds;
+		try {
+			ds = new NucleusDatasetCreator().createBooleanProfileDataset(p, limits);
+		} catch (ChartDatasetCreationException e) {
+			return makeErrorChart();
+		}
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,

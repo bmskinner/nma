@@ -369,8 +369,14 @@ public interface IBorderSegment
 
 			boolean lockState = firstSegment.isLocked();
 			firstSegment.setLocked(false);
-
-			boolean ok = firstSegment.update(lastSegment.getEndIndex(), firstSegment.getEndIndex());
+			
+			boolean ok = false;
+			try {
+				ok = firstSegment.update(lastSegment.getEndIndex(), firstSegment.getEndIndex());
+			} catch(IllegalArgumentException e){
+				throw new ProfileException("Error fitting final segment: "+firstSegment.getLastFailReason());
+			}
+			
 			if(!ok){
 				throw new ProfileException("Error fitting final segment: "+firstSegment.getLastFailReason());
 			}

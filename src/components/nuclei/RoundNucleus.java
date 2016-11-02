@@ -44,6 +44,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import analysis.profiles.ProfileCreator;
+import analysis.profiles.ProfileException;
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.Profileable;
 import analysis.profiles.RuleSet;
@@ -53,10 +54,10 @@ import stats.PlottableStatistic;
 import stats.SignalStatistic;
 import components.AbstractCellularComponent;
 import components.CellularComponent;
-import components.active.ProfileableCellularComponent.UnavailableBorderTagException;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.FloatPoint;
 import components.active.generic.SegmentedFloatProfile;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
@@ -588,7 +589,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * 
 	 * @param p
 	 * @param pointType
-	 * @throws Exception
+	 * @throws UnavailableBorderTagException
 	 */
 	public void setProfile(ProfileType type, Tag tag, ISegmentedProfile p) throws UnavailableBorderTagException {
 		
@@ -603,8 +604,12 @@ public class RoundNucleus extends AbstractCellularComponent
 		int pointIndex = this.borderTags.get(tag);
 		
 		// remove the offset from the profile, by setting the profile to start from the pointIndex
-		this.setProfile(type, new SegmentedFloatProfile(p).offset(-pointIndex));
-//		this.updateVerticallyRotatedNucleus();
+		try {
+			this.setProfile(type, new SegmentedFloatProfile(p).offset(-pointIndex));
+		} catch (ProfileException e) {
+			warn("Cannot set profile");
+			fine("Error setting profile", e);
+		}
 	}
 
 	
@@ -655,7 +660,12 @@ public class RoundNucleus extends AbstractCellularComponent
 			ISegmentedProfile p = getProfile(ProfileType.ANGLE);
 			int oldRP = getBorderIndex(tag);
 			int diff  = i-oldRP;
-			p.nudgeSegments(diff);
+			try {
+				p.nudgeSegments(diff);
+			} catch (ProfileException e) {
+				warn("Cannot adjust segments");
+				fine("Error moving segments", e);
+			}
 			finest("Old RP at "+oldRP);
 			finest("New RP at "+i);
 			finest("Moving segments by"+diff);
@@ -697,7 +707,12 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		int newRP = getBorderIndex(Tag.REFERENCE_POINT);
 		int diff  = newRP-oldRP;
-		p.nudgeSegments(diff);
+		try {
+			p.nudgeSegments(diff);
+		} catch (ProfileException e) {
+			warn("Cannot adjust segments");
+			fine("Error moving segments", e);
+		}
 		finest("Old RP at "+oldRP);
 		finest("New RP at "+newRP);
 		finest("Moving segments by"+diff);
@@ -851,7 +866,12 @@ public class RoundNucleus extends AbstractCellularComponent
 		if(this.hasProfile(type)){
 			
 			// offset the angle profile to start at the pointIndex
-			profile =  new SegmentedFloatProfile(this.getProfile(type).offset(pointIndex));
+			try {
+				profile =  new SegmentedFloatProfile(this.getProfile(type).offset(pointIndex));
+			} catch (ProfileException e) {
+				warn("Error making offset profile");
+				fine("Error making profile", e);
+			}
 			
 		}
 

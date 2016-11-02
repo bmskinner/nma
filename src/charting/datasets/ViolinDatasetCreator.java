@@ -165,43 +165,46 @@ public class ViolinDatasetCreator implements Loggable {
 		for (int i=0; i < collections.size(); i++) {
 
 			ICellCollection collection = collections.get(i).getCollection();
-			
-			IBorderSegment medianSeg = collection
-					.getProfileCollection()
-					.getSegmentAt(Tag.REFERENCE_POINT, segPosition);
+			try {
+				IBorderSegment medianSeg = collection
+						.getProfileCollection()
+						.getSegmentAt(Tag.REFERENCE_POINT, segPosition);
 
 
-			List<Number> list = new ArrayList<Number>(0);
+				List<Number> list = new ArrayList<Number>(0);
 
-			for(Nucleus n : collection.getNuclei()){
-				
-				IBorderSegment seg;
-				try {
+				for(Nucleus n : collection.getNuclei()){
+
+					IBorderSegment seg;
+
 					seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
 							.getSegment(medianSeg.getID());
-				} catch (ProfileException e) {
-					fine("Error getting segmented profile", e);
-					throw new ChartDatasetCreationException("Cannot get segmented profile", e);
-				}			
 
-				
-				double length = 0;
-				if(seg!=null){
-					int indexLength = seg.length();
-					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-					length = n.getStatistic(NucleusStatistic.PERIMETER, scale) * proportionPerimeter;
-					
+
+
+					double length = 0;
+					if(seg!=null){
+						int indexLength = seg.length();
+						double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+						length = n.getStatistic(NucleusStatistic.PERIMETER, scale) * proportionPerimeter;
+
+					}
+					list.add(length);
+
 				}
-				list.add(length);
-			}
 				
-			String rowKey = Constants.SEGMENT_PREFIX+segPosition+"_"+i;
-			String colKey = Constants.SEGMENT_PREFIX+segPosition;
-			dataset.add(list, rowKey, colKey);
+				String rowKey = Constants.SEGMENT_PREFIX+segPosition+"_"+i;
+				String colKey = Constants.SEGMENT_PREFIX+segPosition;
+				dataset.add(list, rowKey, colKey);
 
-			addProbabilities(dataset, list, rowKey, colKey);
-			
+				addProbabilities(dataset, list, rowKey, colKey);
+				
+			} catch (ProfileException | UnavailableBorderTagException e) {
+				fine("Error getting segmented profile", e);
+				throw new ChartDatasetCreationException("Cannot get segmented profile", e);
+			}		
 		}
+
 		return dataset;
 	}
 	

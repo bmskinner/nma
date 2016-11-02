@@ -36,6 +36,7 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.JFreeChart;
 
+import analysis.profiles.ProfileException;
 import stats.Quartile;
 import charting.charts.AbstractChartFactory;
 import charting.charts.MorphologyChartFactory;
@@ -45,6 +46,7 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.ICellCollection;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderSegment;
@@ -112,8 +114,15 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 			finest("Segment counts match");
 
 			ICellCollection collection = activeDataset().getCollection();
-			List<IBorderSegment> segments = collection.getProfileCollection()
-					.getSegments(Tag.REFERENCE_POINT);
+			List<IBorderSegment> segments;
+			try {
+				segments = collection.getProfileCollection()
+						.getSegments(Tag.REFERENCE_POINT);
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				warn("Cannot get segments");
+				fine("Cannot get segments", e);
+				return;
+			}
 
 
 			finest("Creating segment charts");

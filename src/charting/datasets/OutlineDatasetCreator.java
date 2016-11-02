@@ -24,6 +24,7 @@ import java.util.List;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import analysis.profiles.ProfileException;
 import analysis.profiles.Taggable;
 import components.CellularComponent;
 import components.generic.IPoint;
@@ -144,7 +145,13 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 		
 		Taggable t = (Taggable) component;
 
-		List<IBorderSegment> segmentList = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
+		List<IBorderSegment> segmentList;
+		try {
+			segmentList = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
+		} catch (ProfileException e) {
+			fine("Cannot get profile from RP", e);
+			throw new ChartDatasetCreationException("Cannot get profile", e);
+		}
 
 
 		if(!segmentList.isEmpty()){ // only draw if there are segments

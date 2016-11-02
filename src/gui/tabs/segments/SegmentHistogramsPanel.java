@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.JFreeChart;
 
+import analysis.profiles.ProfileException;
 import stats.Quartile;
 import stats.SegmentStatistic;
 import charting.charts.AbstractChartFactory;
@@ -24,6 +25,7 @@ import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.ICellCollection;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderSegment;
@@ -66,10 +68,15 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 
 			ICellCollection collection = activeDataset().getCollection();
 			
-			List<IBorderSegment> segments = collection.getProfileCollection()
-					.getSegments(Tag.REFERENCE_POINT);
-//					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-//					.getOrderedSegments();
+			List<IBorderSegment> segments;
+			try {
+				segments = collection.getProfileCollection()
+						.getSegments(Tag.REFERENCE_POINT);
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				warn("Cannot get segments");
+				fine("Cannot get segments", e);
+				return;
+			}
 			
 
 			// Get each segment as a boxplot

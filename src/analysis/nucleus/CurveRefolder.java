@@ -287,7 +287,7 @@ public class CurveRefolder extends AnalysisWorker {
 			Random mutation to the X and Y position. Must remain
 			within a certain range of neighbours
 	*/
-	private double iterateOverNucleus() {
+	private double iterateOverNucleus() throws ProfileException {
 
 		ISegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
@@ -337,9 +337,9 @@ public class CurveRefolder extends AnalysisWorker {
 	 * @param maxDistance
 	 * @param similarityScore
 	 * @return
-	 * @throws Exception
+	 * @throws ProfileException 
 	 */
-	private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore, Nucleus testNucleus){
+	private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore, Nucleus testNucleus) throws ProfileException{
 //		// make all changes to a fresh nucleus before buggering up the real one
 		finest("Testing point "+index);
 		double score = testNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);

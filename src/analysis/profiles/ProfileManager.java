@@ -581,7 +581,14 @@ public class ProfileManager implements Loggable {
 		 */
 		IProfileCollection sourcePC =    collection.getProfileCollection();
 		
-		List<IBorderSegment> segments = sourcePC.getSegments(Tag.REFERENCE_POINT);
+		List<IBorderSegment> segments;
+		try {
+			segments = sourcePC.getSegments(Tag.REFERENCE_POINT);
+		} catch (UnavailableBorderTagException e1) {
+			warn("RP not found in source collection");
+			fine("Error getting segments from RP", e1);
+			return;
+		}
 
 
 		// use the same array length as the source collection to avoid segment slippage
@@ -604,11 +611,17 @@ public class ProfileManager implements Loggable {
 		/*
 		 * Copy the offset keys from the source collection
 		 */
-
-		for(Tag key : sourcePC.getBorderTags()){
-			destPC.addIndex(key, sourcePC.getIndex(key));
+		try {
+			for(Tag key : sourcePC.getBorderTags()){
+				destPC.addIndex(key, sourcePC.getIndex(key));
+			}
+		
+			destPC.addSegments(Tag.REFERENCE_POINT, segments);
+			
+		} catch (UnavailableBorderTagException e) {
+			warn("Cannot add segments to RP");
+			fine("RP not present", e);
 		}
-		destPC.addSegments(Tag.REFERENCE_POINT, segments);
 
 		
 	}

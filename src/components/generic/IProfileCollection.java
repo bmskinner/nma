@@ -28,7 +28,6 @@ import analysis.profiles.ProfileException;
 import components.ICellCollection;
 import components.active.generic.UnavailableBorderTagException;
 import components.nuclear.IBorderSegment;
-import components.nuclear.NucleusBorderSegment;
 
 public interface IProfileCollection extends Serializable, Loggable{
 
@@ -40,7 +39,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @param pointType
 	 * @return the offset or -1
 	 */
-	int getIndex(Tag pointType);
+	int getIndex(Tag pointType) throws UnavailableBorderTagException;
 
 	/**
 	 * Get all the offset keys attached to this profile collection
@@ -100,8 +99,9 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * Create a list of segments based on an offset of existing segments.
 	 * @param s the name of the tag
 	 * @return a copy of the segments in the profile, offset to start at the tag
+	 * @throws ProfileException 
 	 */
-	List<IBorderSegment> getSegments(Tag tag);
+	List<IBorderSegment> getSegments(Tag tag) throws UnavailableBorderTagException, ProfileException;
 	
 	/**
 	 * Get the ids of the segments in this collection
@@ -113,8 +113,9 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * Get the segment at the given position in the profile
 	 * @param position
 	 * @return
+	 * @throws ProfileException 
 	 */
-	IBorderSegment getSegmentAt(Tag tag, int position);
+	IBorderSegment getSegmentAt(Tag tag, int position) throws UnavailableBorderTagException, ProfileException;
 
 	/**
 	 * Test if the collection contains a segment beginning at the given tag
@@ -122,7 +123,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @return
 	 * @throws Exception
 	 */
-	boolean hasSegmentStartingWith(Tag tag) throws Exception;
+	boolean hasSegmentStartingWith(Tag tag) throws UnavailableBorderTagException;
 
 	/**
 	 * Fetch the segment from the profile beginning at the given tag;
@@ -132,7 +133,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @return a copy of the segment with the tag at its start index, or null
 	 */
 	IBorderSegment getSegmentStartingWith(Tag tag)
-			throws Exception;
+			throws UnavailableBorderTagException;
 
 	/**
 	 * Test if the collection contains a segment beginning at the given tag
@@ -140,7 +141,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @return
 	 * @throws Exception
 	 */
-	boolean hasSegmentEndingWith(Tag tag) throws Exception;
+	boolean hasSegmentEndingWith(Tag tag) throws UnavailableBorderTagException;
 
 	/**
 	 * Fetch the segment from the profile beginning at the given tag;
@@ -150,7 +151,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @return a copy of the segment with the tag at its start index, or null
 	 */
 	IBorderSegment getSegmentEndingWith(Tag tag)
-			throws Exception;
+			throws UnavailableBorderTagException;
 
 	/**
 	 * Fetch the segment from the profile containing the given index.
@@ -158,7 +159,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @param index
 	 * @return a copy of the segment with the index inside, or null
 	 */
-	IBorderSegment getSegmentContaining(int index) throws Exception;
+	IBorderSegment getSegmentContaining(int index);
 
 	/**
 	 * Fetch the segment from the profile containing at the given tag;
@@ -189,8 +190,10 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * storage. I previously disabled this - unknown why.
 	 * @param pointType the point with the zero index in the segments
 	 * @param n the segment list
+	 * @throws ProfileException 
+	 * @throws UnavailableBorderTagException 
 	 */
-	void addSegments(Tag tag, List<IBorderSegment> n);
+	void addSegments(Tag tag, List<IBorderSegment> n) throws ProfileException, UnavailableBorderTagException;
 
 	/**
 	 * Create profile aggregates from the given collection, with a set length.
@@ -230,7 +233,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	/**
 	 * Find the points in the profile that are most variable
 	 */
-	List<Integer> findMostVariableRegions(ProfileType type, Tag tag) throws Exception;
+	List<Integer> findMostVariableRegions(ProfileType type, Tag tag) throws UnavailableBorderTagException;
 	
 	double[] getValuesAtPosition(ProfileType type, double position);
 	

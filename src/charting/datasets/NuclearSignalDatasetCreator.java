@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
@@ -67,7 +68,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @param list the AnalysisDatasets to include
 	 * @return a table model
 	 */
-	public TableModel createSignalDetectionParametersTable(TableOptions options){
+	public TableModel createSignalDetectionParametersTable(TableOptions options) throws ChartDatasetCreationException {
 
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -291,7 +292,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return a histogram of angles
 	 * @throws Exception 
 	 */
-	public List<HistogramDataset> createSignaStatisticHistogramDataset(List<IAnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception{
+	public List<HistogramDataset> createSignaStatisticHistogramDataset(List<IAnalysisDataset> list, 
+			SignalStatistic stat, MeasurementScale scale) throws ChartDatasetCreationException {
 		
 		List<HistogramDataset> result = new ArrayList<HistogramDataset>();
 		
@@ -329,7 +331,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return a charting dataset
 	 * @throws Exception
 	 */
-	public List<DefaultXYDataset> createSignalDensityHistogramDataset(List<IAnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception {
+	public List<DefaultXYDataset> createSignalDensityHistogramDataset(List<IAnalysisDataset> list, 
+			SignalStatistic stat, MeasurementScale scale) throws ChartDatasetCreationException {
 		
 		List<DefaultXYDataset> result = new ArrayList<DefaultXYDataset>();
 		
@@ -352,7 +355,13 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
                 String groupLabel = "Group_"+signalGroup+"_"+stat.toString();
 
                 double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
-                KernelEstimator est = new NucleusDatasetCreator().createProbabililtyKernel(values, 0.001);
+                KernelEstimator est;
+				try {
+					est = new NucleusDatasetCreator().createProbabililtyKernel(values, 0.001);
+				} catch (Exception e1) {
+					fine("Error creating probability kernel",e1);
+					throw new ChartDatasetCreationException("Cannot make probability dataset", e1);
+				}
 
 
 					double min = Arrays.stream(values).min().orElse(0); //Stats.min(values);
@@ -413,7 +422,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return an array with the min and max of the range
 	 * @throws Exception
 	 */
-	private int[] calculateMinAndMaxRange(List<IAnalysisDataset> list, SignalStatistic stat, MeasurementScale scale) throws Exception {
+	private int[] calculateMinAndMaxRange(List<IAnalysisDataset> list, SignalStatistic stat, 
+			MeasurementScale scale) throws ChartDatasetCreationException {
 		
 		int[] result = new int[2];
 		result[0] = Integer.MAX_VALUE; // holds min
@@ -444,7 +454,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return the array of values
 	 * @throws Exception
 	 */
-	public double[] findSignalDatasetValues(IAnalysisDataset dataset, SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception {
+	public double[] findSignalDatasetValues(IAnalysisDataset dataset, SignalStatistic stat, 
+			MeasurementScale scale, UUID signalGroup) throws ChartDatasetCreationException {
 		
 		ICellCollection collection = dataset.getCollection();			
         double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);             			
@@ -460,7 +471,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return the point of the signal centre of mass
 	 * @throws Exception 
 	 */
-	public IPoint getXYCoordinatesForSignal(INuclearSignal n, Nucleus outline) throws Exception{
+	public IPoint getXYCoordinatesForSignal(INuclearSignal n, Nucleus outline) throws ChartDatasetCreationException {
 
 		double angle = n.getStatistic(SignalStatistic.ANGLE);
 
@@ -484,7 +495,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return
 	 * @throws Exception 
 	 */
-	public XYDataset createSignalCoMDataset(IAnalysisDataset dataset) throws Exception{
+	public XYDataset createSignalCoMDataset(IAnalysisDataset dataset) throws ChartDatasetCreationException {
 		finer("Making signal CoM dataset");
 		DefaultXYDataset ds = new DefaultXYDataset();
 		ICellCollection collection = dataset.getCollection();
@@ -524,7 +535,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		return ds;
 	}
 	
-	public List<Shape> createSignalRadiusDataset(IAnalysisDataset dataset, UUID signalGroup) throws Exception{
+	public List<Shape> createSignalRadiusDataset(IAnalysisDataset dataset, UUID signalGroup) throws ChartDatasetCreationException {
 
 		ICellCollection collection = dataset.getCollection();
 		List<Shape> result = new ArrayList<Shape>(0);
@@ -554,7 +565,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public TableModel createSignalStatsTable(TableOptions options) throws Exception{
+	public TableModel createSignalStatsTable(TableOptions options) throws ChartDatasetCreationException {
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -576,7 +587,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		return model;
 	}
 	
-	private TableModel createSingleDatasetSignalStatsTable(TableOptions options) throws Exception {
+	private TableModel createSingleDatasetSignalStatsTable(TableOptions options) throws ChartDatasetCreationException {
 
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -621,8 +632,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
 
 			// format the numbers and make into a tablemodel
-			DecimalFormat df = new DecimalFormat("#0.00"); 
-
 
 			List<Object> rowData = new ArrayList<Object>(0);
 			rowData.add(collection.getSignalManager().getSignalGroupIDs().size());
@@ -651,16 +660,16 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 					rowData.add(cell);
 					rowData.add(collection.getSignalManager().getSignalCount(signalGroup));
 					double signalPerNucleus = (double) collection.getSignalManager().getSignalCount(signalGroup)/  (double) collection.getSignalManager().getNumberOfCellsWithNuclearSignals(signalGroup);
-					rowData.add(df.format(signalPerNucleus));
+					rowData.add(DEFAULT_DECIMAL_FORMAT.format(signalPerNucleus));
 
 					for(SignalStatistic stat : SignalStatistic.values()){
                         double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
 
                         if(stat.isDimensionless() || stat.isAngle()){
-							rowData.add(df.format(pixel) );
+							rowData.add(DEFAULT_DECIMAL_FORMAT.format(pixel) );
 						} else {
                             double micron = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
-							rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
+							rowData.add(DEFAULT_DECIMAL_FORMAT.format(pixel) +" ("+ DEFAULT_DECIMAL_FORMAT.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
 						}
 					}
 
@@ -682,7 +691,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		return model;	
 	}
 	
-	private TableModel createMultiDatasetSignalStatsTable(TableOptions options) throws Exception {
+	private TableModel createMultiDatasetSignalStatsTable(TableOptions options) throws ChartDatasetCreationException {
 
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -801,7 +810,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
      * @return a boxplot dataset
      * @throws Exception 
      */
-    public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) {
+    public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) throws ChartDatasetCreationException {
         
     	return createMultiDatasetSignalStatisticBoxplotDataset(options);        
     }
@@ -813,7 +822,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return a boxplot dataset
 	 * @throws Exception 
 	 */
-    private BoxAndWhiskerCategoryDataset createMultiDatasetSignalStatisticBoxplotDataset(ChartOptions options) {
+    private BoxAndWhiskerCategoryDataset createMultiDatasetSignalStatisticBoxplotDataset(ChartOptions options) throws ChartDatasetCreationException {
 
 
     	ExportableBoxAndWhiskerCategoryDataset result = new ExportableBoxAndWhiskerCategoryDataset();
@@ -849,7 +858,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		return result;
 	}
 		
-	public List<CategoryDataset> createShellBarChartDataset(ChartOptions options){
+	public List<CategoryDataset> createShellBarChartDataset(ChartOptions options) throws ChartDatasetCreationException {
 		
 		List<CategoryDataset> result = new ArrayList<CategoryDataset>();
 
@@ -917,7 +926,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @param options
 	 * @return
 	 */
-	public TableModel createShellChiSquareTable(TableOptions options){
+	public TableModel createShellChiSquareTable(TableOptions options) throws ChartDatasetCreationException {
 		
 		if( ! options.hasDatasets()){
 			return this.createBlankTable();

@@ -48,7 +48,7 @@ public interface IProfile
 	 * @return the value at the index
 	 * @throws Exception 
 	 */
-	double get(int index);
+	double get(int index) throws IndexOutOfBoundsException;
 
 	/**
 	 * Get the maximum value in the profile

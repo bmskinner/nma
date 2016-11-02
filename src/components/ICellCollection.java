@@ -392,8 +392,9 @@ public interface ICellCollection
 	 * @param pointType the tag to use as index 0
 	 * @param c the cell to test
 	 * @return the variabililty score of the nucleus
+	 * @throws UnavailableBorderTagException 
 	 */
-	double getNormalisedDifferenceToMedian(Tag pointType, ICell c);
+	double getNormalisedDifferenceToMedian(Tag pointType, ICell c) throws UnavailableBorderTagException;
 
 
 

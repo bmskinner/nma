@@ -210,7 +210,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @param dataset the dataset to draw
 	 * @return
 	 */
-	private JFreeChart makeSegmentedConsensusChart(IAnalysisDataset dataset) throws Exception {
+	private JFreeChart makeSegmentedConsensusChart(IAnalysisDataset dataset) {
 		
 		if( ! dataset.getCollection().hasConsensusNucleus()){
 			return makeEmptyChart();
@@ -218,7 +218,13 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		XYDataset ds = null;
 		
 		ICellCollection collection = dataset.getCollection();
-		ds = new NucleusDatasetCreator().createSegmentedNucleusOutline(collection);
+		try {
+			ds = new NucleusDatasetCreator().createSegmentedNucleusOutline(collection);
+		} catch (ChartDatasetCreationException e) {
+			warn("Cannot make consensus chart");
+			fine("Error making segmented outline", e);
+			return makeErrorChart();
+		}
 			
 		JFreeChart chart = makeConsensusChart(ds);
 		double max = getconsensusChartRange(dataset);

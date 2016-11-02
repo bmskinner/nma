@@ -228,12 +228,23 @@ public abstract class ProfileableCellularComponent
 		if(segsLocked){
 			return;
 		}
+		
+		if( i < 0 || i>= this.getBorderLength()){
+			throw new IllegalArgumentException("Index "+i+" is out of bounds : border length is "+this.getBorderLength());
+		}
+		
 		// When moving the RP, move all segments to match
 		if(tag.equals(Tag.REFERENCE_POINT)){
 			ISegmentedProfile p = getProfile(ProfileType.ANGLE);
 			int oldRP = getBorderIndex(tag);
 			int diff  = i-oldRP;
-			p.nudgeSegments(diff);
+			try {
+				p.nudgeSegments(diff);
+			} catch (ProfileException e) {
+				warn("Cannot offset profile to "+tag);
+				fine("Error moving segments", e);
+				return;
+			}
 			finest("Old RP at "+oldRP);
 			finest("New RP at "+i);
 			finest("Moving segments by"+diff);
@@ -276,7 +287,13 @@ public abstract class ProfileableCellularComponent
 		
 		int newRP = getBorderIndex(Tag.REFERENCE_POINT);
 		int diff  = newRP-oldRP;
-		p.nudgeSegments(diff);
+		try {
+			p.nudgeSegments(diff);
+		} catch (ProfileException e) {
+			warn("Cannot offset profile");
+			fine("Error moving segments", e);
+			return;
+		}
 		finest("Old RP at "+oldRP);
 		finest("New RP at "+newRP);
 		finest("Moving segments by"+diff);

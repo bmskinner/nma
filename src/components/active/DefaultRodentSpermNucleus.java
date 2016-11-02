@@ -10,6 +10,7 @@ import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.FloatPoint;
+import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnprofilableObjectException;
 import components.generic.BooleanProfile;
 import components.generic.Equation;
@@ -20,7 +21,6 @@ import components.generic.Tag;
 import components.nuclear.IBorderPoint;
 import components.nuclear.INuclearSignal;
 import components.nuclei.Nucleus;
-
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import stats.NucleusStatistic;
@@ -470,7 +470,10 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		try {
 			vertX = verticalNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
 		} catch (IndexOutOfBoundsException e) {
-			fine("Cannot get border tag", e);
+			fine("Cannot get border tag at index "
+					+verticalNucleus.getBorderIndex(Tag.REFERENCE_POINT)
+					+": border length of vertical is "
+					+verticalNucleus.getBorderLength(), e);
 			return verticalNucleus;
 		}
 

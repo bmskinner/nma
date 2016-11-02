@@ -615,7 +615,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 
 	@Override
 	public void setProfile(ProfileType type, Tag tag,
-			ISegmentedProfile profile) throws Exception {
+			ISegmentedProfile profile) {
 		setProfile(type, profile);
 		
 	}

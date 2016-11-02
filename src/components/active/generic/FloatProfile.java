@@ -21,7 +21,6 @@ package components.active.generic;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -132,10 +131,10 @@ public class FloatProfile implements IProfile {
 	 * @see components.generic.IProfile#get(int)
 	 */
 	@Override
-	public double get(int index) {
+	public double get(int index) throws IndexOutOfBoundsException {
 
 		if(index<0 || index >= array.length){
-			throw new IllegalArgumentException("Requested value "+index+" is beyond profile end ("+array.length+")");
+			throw new IndexOutOfBoundsException("Requested value "+index+" is beyond profile end ("+array.length+")");
 		}
 		return array[index];
 

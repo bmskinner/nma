@@ -32,11 +32,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
+import analysis.profiles.ProfileException;
 import stats.Quartile;
 import stats.SegmentStatistic;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.DefaultTableOptions;
 import charting.options.TableOptionsBuilder;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderSegment;
@@ -82,10 +84,17 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel  {
 		
 		if(IBorderSegment.segmentCountsMatch(getDatasets())){
 
-			List<IBorderSegment> segments = activeDataset()
-					.getCollection()
-					.getProfileCollection()
-					.getSegments(Tag.REFERENCE_POINT);
+			List<IBorderSegment> segments;
+			try {
+				segments = activeDataset()
+						.getCollection()
+						.getProfileCollection()
+						.getSegments(Tag.REFERENCE_POINT);
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				warn("Cannot get segments");
+				fine("Cannot get segments", e);
+				return;
+			}
 
 			for(SegmentStatistic stat : SegmentStatistic.values()){
 

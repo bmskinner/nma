@@ -30,6 +30,8 @@ import org.jfree.data.xy.XYDataset;
 import stats.Quartile;
 import charting.options.ChartOptions;
 import analysis.IAnalysisDataset;
+import analysis.profiles.ProfileException;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -123,26 +125,33 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 			/*
 			 * We need to convert the seg position into a seg id
 			 */
-			UUID segID = dataset.getCollection()
-					.getProfileCollection()
-					.getSegmentAt(Tag.REFERENCE_POINT,  options.getSegPosition()   )
-					.getID();
-			
-			List<IPoint> offsetPoints = createAbsolutePositionFeatureList(dataset, segID);
+			try {
+				UUID segID = dataset.getCollection()
+						.getProfileCollection()
+						.getSegmentAt(Tag.REFERENCE_POINT,  options.getSegPosition()   )
+						.getID();
+				
+				List<IPoint> offsetPoints = createAbsolutePositionFeatureList(dataset, segID);
 
-			double[] xPoints = new double[offsetPoints.size()];
-			double[] yPoints = new double[offsetPoints.size()];
+				double[] xPoints = new double[offsetPoints.size()];
+				double[] yPoints = new double[offsetPoints.size()];
 
-			for(int i=0; i<offsetPoints.size(); i++){
+				for(int i=0; i<offsetPoints.size(); i++){
 
-				xPoints[i] = offsetPoints.get(i).getX();
-				yPoints[i] = offsetPoints.get(i).getY();
+					xPoints[i] = offsetPoints.get(i).getX();
+					yPoints[i] = offsetPoints.get(i).getY();
 
+				}
+
+				double[][] data = { xPoints, yPoints };
+
+				ds.addSeries("Segment_"+segID+"_"+dataset.getName(), data);
+				
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				warn("Missing segment from "+dataset.getName());
 			}
-
-			double[][] data = { xPoints, yPoints };
-
-			ds.addSeries("Segment_"+segID+"_"+dataset.getName(), data);
+			
+			
 		}
 		
 		return ds;

@@ -554,11 +554,30 @@ public abstract class AbstractCellularComponent
 	}
 	
 	public List<IBorderPoint> getOriginalBorderList(){
+		
 		List<IBorderPoint> result = new ArrayList<IBorderPoint>(borderList.size());
+		
+		// Get the current position of the object
+		double minX = this.getBounds().getX();
+		double minY = this.getBounds().getY();
+
+		// Find the difference between the current position and the 
+		// original position
+		double diffX = position[CellularComponent.X_BASE] - minX;
+		double diffY = position[CellularComponent.Y_BASE] - minY;
+		
+		// Offset to the original position
 		for(IBorderPoint p : borderList){
-			result.add(new DefaultBorderPoint( p.getX() + getPosition()[X_BASE], p.getY() + getPosition()[Y_BASE]));
+			result.add( IBorderPoint.makeNew(p.getX()+diffX, p.getY()+diffY));
 		}
 		return result;
+		
+		
+//		List<IBorderPoint> result = new ArrayList<IBorderPoint>(borderList.size());
+//		for(IBorderPoint p : borderList){
+//			result.add(new DefaultBorderPoint( p.getX() + getPosition()[X_BASE], p.getY() + getPosition()[Y_BASE]));
+//		}
+//		return result;
 	}
 	
 	public void setBorderList(List<IBorderPoint> list){
@@ -745,7 +764,7 @@ public abstract class AbstractCellularComponent
 		double newX =  centreOfMass.getX() + xOffset;
 		double newY =  centreOfMass.getY() + yOffset;
 //
-		IPoint newCentreOfMass = new FloatPoint(newX, newY);
+		IPoint newCentreOfMass = IPoint.makeNew(newX, newY);
 
 		/// update each border point
 		for(int i=0; i<this.getBorderLength(); i++){

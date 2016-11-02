@@ -180,7 +180,12 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart createSignalStatisticBoxplot(){
 		
-		BoxAndWhiskerCategoryDataset ds = new NuclearSignalDatasetCreator().createSignalStatisticBoxplotDataset(options);
+		BoxAndWhiskerCategoryDataset ds;
+		try {
+			ds = new NuclearSignalDatasetCreator().createSignalStatisticBoxplotDataset(options);
+		} catch (ChartDatasetCreationException e) {
+			return makeErrorChart();
+		}
 
 		
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, 

@@ -116,10 +116,11 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		fieldNames.add("Nucleus CoM");
 		rowData.add(n.getCentreOfMass().toString());
 
-		fieldNames.add("Nucleus position");
-		rowData.add(n.getPosition()[0]+"-"+n.getPosition()[1]);
+		fieldNames.add("Original nucleus position");
+		rowData.add("x: "+n.getPosition()[0]+" : y: "+n.getPosition()[1]);
 
-
+		fieldNames.add("Current nucleus position");
+		rowData.add("x: "+n.getMinX()+" : y: "+n.getMinY());
 
 		NucleusType type = NucleusType.getNucleusType(n);
 
@@ -145,6 +146,13 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 				}
 			}
 		} 
+		
+		
+		for(int i=0; i<n.getBorderLength(); i++){
+			fieldNames.add("Border index "+i);
+			rowData.add("x: "+n.getBorderPoint(i).getX()+" : y: "+n.getBorderPoint(i).getY());
+		}
+		
 		addNuclearSignalsToTable(fieldNames, rowData, n, d);
 
 		model.addColumn("", fieldNames.toArray(new Object[0])); 

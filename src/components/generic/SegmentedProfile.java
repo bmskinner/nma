@@ -563,7 +563,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#nudgeSegments(int)
 	 */
 	@Override
-	public void nudgeSegments(int amount) {
+	public void nudgeSegments(int amount) throws ProfileException {
 		this.segments = IBorderSegment.nudge(getSegments(), amount);
 	}
 	
@@ -576,7 +576,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#offset(int)
 	 */
 	@Override
-	public SegmentedProfile offset(int newStartIndex) {
+	public SegmentedProfile offset(int newStartIndex) throws ProfileException {
 	
 		// get the basic profile with the offset applied
 		Profile offsetProfile = super.offset(newStartIndex);

@@ -215,7 +215,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#hasSegmentStartingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public boolean hasSegmentStartingWith(Tag tag) throws Exception {
+	public boolean hasSegmentStartingWith(Tag tag) {
 		
 		if(getSegmentStartingWith( tag) == null){
 			return false;
@@ -228,7 +228,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentStartingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public IBorderSegment getSegmentStartingWith(Tag tag) throws Exception {
+	public IBorderSegment getSegmentStartingWith(Tag tag) {
 		List<IBorderSegment> segments = this.getSegments(tag);
 
 		IBorderSegment result = null;
@@ -247,7 +247,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#hasSegmentEndingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public boolean hasSegmentEndingWith(Tag tag) throws Exception {
+	public boolean hasSegmentEndingWith(Tag tag) {
 		
 		if(getSegmentEndingWith( tag) == null){
 			return false;
@@ -260,7 +260,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentEndingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public IBorderSegment getSegmentEndingWith(Tag tag) throws Exception {
+	public IBorderSegment getSegmentEndingWith(Tag tag) {
 		List<IBorderSegment> segments = this.getSegments(tag);
 
 		IBorderSegment result = null;
@@ -279,7 +279,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentContaining(int)
 	 */
 	@Override
-	public IBorderSegment getSegmentContaining(int index) throws Exception {
+	public IBorderSegment getSegmentContaining(int index) {
 		List<IBorderSegment> segments = this.getSegments(Tag.REFERENCE_POINT);
 
 		IBorderSegment result = null;
@@ -535,15 +535,22 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#findMostVariableRegions(components.generic.BorderTagObject)
 	 */
 	@Override
-	public List<Integer> findMostVariableRegions(ProfileType type, Tag tag) throws Exception {
+	public List<Integer> findMostVariableRegions(ProfileType type, Tag tag) {
+		
+		List<Integer> result = new ArrayList<Integer>(0);
 		
 		// get the IQR and maxima
-		IProfile iqrProfile = getIQRProfile(type, tag);
-//		iqrProfile.print();
-//		iqrProfile.smooth(3).print();
+		
+		IProfile iqrProfile;
+		try {
+			iqrProfile = getIQRProfile(type, tag);
+		} catch (UnavailableBorderTagException | ProfileException e) {
+			fine("Error getting variable regions", e);
+			return result;
+		}
+
 		BooleanProfile maxima = iqrProfile.smooth(3).getLocalMaxima(3);
-//		maxima.print();
-//		Profile displayMaxima = maxima.multiply(50);
+
 		
 		// given the list of maxima, find the highest 3 regions
 		// store the rank (1-3) and the index of the position at this rank
@@ -572,7 +579,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 				}
 			}
 		}
-		List<Integer> result = new ArrayList<Integer>(values.size());
+
 		for(int i : values.keySet()){
 			result.add(values.get(i));
 //			IJ.log("    Variable index "+values.get(i));

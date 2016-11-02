@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
+import analysis.profiles.ProfileException;
 import components.AbstractCellularComponent;
 import components.nuclear.IBorderSegment;
 
@@ -137,10 +138,10 @@ public class Profile implements IProfile {
 	 * @see components.generic.IProfile#get(int)
 	 */
 	@Override
-	public double get(int index) {
+	public double get(int index) throws IndexOutOfBoundsException {
 
 		if(index<0 || index >= array.length){
-			throw new IllegalArgumentException("Requested value "+index+" is beyond profile end");
+			throw new IndexOutOfBoundsException("Requested value "+index+" is beyond profile end of "+array.length);
 		}
 		return array[index];
 
@@ -415,7 +416,7 @@ public class Profile implements IProfile {
 	 * @see components.generic.IProfile#offset(int)
 	 */
 	@Override
-	public Profile offset(int j) {
+	public Profile offset(int j) throws ProfileException {
 		double[] newArray = new double[this.size()];
 		for(int i=0;i<this.size();i++){
 			newArray[i] = this.array[ AbstractCellularComponent.wrapIndex( i+j , this.size() ) ];
@@ -583,13 +584,22 @@ public class Profile implements IProfile {
 		int index = 0;
 		for(int i=0;i<this.size();i++){
 
-			IProfile offsetProfile = this.offset(i);
-
-			double score = offsetProfile.absoluteSquareDifference(testProfile);
-			if(score<lowestScore){
-				lowestScore=score;
-				index=i;
+			IProfile offsetProfile;
+			try {
+				offsetProfile = this.offset(i);
+				
+				double score = offsetProfile.absoluteSquareDifference(testProfile);
+				if(score<lowestScore){
+					lowestScore=score;
+					index=i;
+				}
+				
+			} catch (ProfileException e) {
+				warn("Cannot offset profile");
+				fine("Error getting offset profile", e);
 			}
+
+			
 
 		}
 		return index;

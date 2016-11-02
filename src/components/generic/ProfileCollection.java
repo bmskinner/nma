@@ -32,6 +32,7 @@ import logging.Loggable;
 import components.CellCollection;
 import components.ICellCollection;
 import components.active.generic.SegmentedFloatProfile;
+import components.active.generic.UnavailableBorderTagException;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
@@ -115,14 +116,14 @@ public class ProfileCollection implements IProfileCollection {
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#getProfile(components.generic.BorderTagObject, double)
 	 */
-	public Profile getProfile(Tag tag, double quartile) {
+	public Profile getProfile(Tag tag, double quartile) throws UnavailableBorderTagException {
 		
 		if(tag==null){
-			throw new IllegalArgumentException("BorderTagObject is null");
+			throw new IllegalArgumentException("Tag is null");
 		}
 		
 		if(  ! this.hasBorderTag(tag)){
-			throw new IllegalArgumentException("BorderTagObject is not present: "+tag.toString());
+			throw new UnavailableBorderTagException("Tag is not present: "+tag.toString());
 		}
 
 		// If the profile is not in the cache, make it and add to the cache
@@ -147,9 +148,13 @@ public class ProfileCollection implements IProfileCollection {
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#getSegmentedProfile(components.generic.BorderTagObject)
 	 */
-	public ISegmentedProfile getSegmentedProfile(Tag tag) {
+	public ISegmentedProfile getSegmentedProfile(Tag tag) throws UnavailableBorderTagException, ProfileException {
 		if(tag==null){
 			throw new IllegalArgumentException("A profile key is required");
+		}
+		
+		if(  ! this.hasBorderTag(tag)){
+			throw new UnavailableBorderTagException("Tag is not present: "+tag.toString());
 		}
 
 		ISegmentedProfile result = new SegmentedFloatProfile(getProfile(tag, Quartile.MEDIAN), getSegments(tag));
@@ -190,7 +195,7 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegments(components.generic.BorderTagObject)
 	 */
 	@Override
-	public List<IBorderSegment> getSegments(Tag tag) {
+	public List<IBorderSegment> getSegments(Tag tag) throws ProfileException {
 		if(tag==null){
 			throw new IllegalArgumentException("The requested segment key is null: "+tag);
 		}
@@ -209,7 +214,7 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#hasSegmentStartingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public boolean hasSegmentStartingWith(Tag tag) throws Exception {
+	public boolean hasSegmentStartingWith(Tag tag) {
 		
 		if(getSegmentStartingWith( tag) == null){
 			return false;
@@ -222,8 +227,14 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentStartingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public IBorderSegment getSegmentStartingWith(Tag tag) throws Exception {
-		List<IBorderSegment> segments = this.getSegments(tag);
+	public IBorderSegment getSegmentStartingWith(Tag tag) {
+		List<IBorderSegment> segments;
+		try {
+			segments = this.getSegments(tag);
+		} catch (ProfileException e) {
+			error("Cannot get segments", e);
+			return null;
+		}
 
 		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
@@ -241,7 +252,7 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#hasSegmentEndingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public boolean hasSegmentEndingWith(Tag tag) throws Exception {
+	public boolean hasSegmentEndingWith(Tag tag) {
 		
 		if(getSegmentEndingWith( tag) == null){
 			return false;
@@ -254,8 +265,14 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentEndingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public IBorderSegment getSegmentEndingWith(Tag tag) throws Exception {
-		List<IBorderSegment> segments = this.getSegments(tag);
+	public IBorderSegment getSegmentEndingWith(Tag tag) {
+		List<IBorderSegment> segments;
+		try {
+			segments = this.getSegments(tag);
+		} catch (ProfileException e) {
+			error("Cannot get segments", e);
+			return null;
+		}
 
 		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
@@ -273,8 +290,14 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentContaining(int)
 	 */
 	@Override
-	public IBorderSegment getSegmentContaining(int index) throws Exception {
-		List<IBorderSegment> segments = this.getSegments(Tag.REFERENCE_POINT);
+	public IBorderSegment getSegmentContaining(int index) {
+		List<IBorderSegment> segments;
+		try {
+			segments = this.getSegments(Tag.REFERENCE_POINT);
+		} catch (ProfileException e) {
+			error("Cannot get segments", e);
+			return null;
+		}
 
 		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
@@ -352,9 +375,13 @@ public class ProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#addSegments(components.generic.BorderTagObject, java.util.List)
 	 */
 	@Override
-	public void addSegments(Tag tag, List<IBorderSegment> n) {
+	public void addSegments(Tag tag, List<IBorderSegment> n) throws ProfileException, UnavailableBorderTagException {
 		if(n==null || n.isEmpty()){
 			throw new NullPointerException("String or segment list is null or empty");
+		}
+		
+		if(!this.hasBorderTag(tag)){
+			throw new UnavailableBorderTagException("Tag "+tag+" not present");
 		}
 		
 		if(this.length() != n.get(0).getTotalLength() ){
@@ -473,8 +500,12 @@ public class ProfileCollection implements IProfileCollection {
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#getIQRProfile(components.generic.BorderTagObject)
 	 */
-	public IProfile getIQRProfile(Tag tag) {
-				
+	public IProfile getIQRProfile(Tag tag) throws UnavailableBorderTagException {
+		
+		if(!this.hasBorderTag(tag)){
+			throw new UnavailableBorderTagException("Tag "+tag+" not present");
+		}	
+		
 		IProfile q25 = getProfile(tag, Quartile.LOWER_QUARTILE);
 		IProfile q75 = getProfile(tag, Quartile.UPPER_QUARTILE);
 		
@@ -491,7 +522,7 @@ public class ProfileCollection implements IProfileCollection {
 	/* (non-Javadoc)
 	 * @see components.generic.IProfileCollection#findMostVariableRegions(components.generic.BorderTagObject)
 	 */
-	public List<Integer> findMostVariableRegions(Tag tag) throws Exception {
+	public List<Integer> findMostVariableRegions(Tag tag) throws UnavailableBorderTagException {
 		
 		// get the IQR and maxima
 		IProfile iqrProfile = getIQRProfile(tag);
@@ -730,7 +761,7 @@ public class ProfileCollection implements IProfileCollection {
 	}
 
 	@Override
-	public IProfile getProfile(ProfileType type, Tag tag, double quartile) {
+	public IProfile getProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException {
 		if(this.type==null){
 			this.type = type;
 		}
@@ -739,7 +770,7 @@ public class ProfileCollection implements IProfileCollection {
 
 	@Override
 	public ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag,
-			double quartile) {
+			double quartile) throws UnavailableBorderTagException, ProfileException {
 		if(this.type==null){
 			this.type = type;
 		}
@@ -756,7 +787,7 @@ public class ProfileCollection implements IProfileCollection {
 	}
 
 	@Override
-	public IBorderSegment getSegmentAt(Tag tag, int position) {
+	public IBorderSegment getSegmentAt(Tag tag, int position) throws ProfileException {
 		return this.getSegments(tag).get(position);
 	}
 
@@ -782,7 +813,7 @@ public class ProfileCollection implements IProfileCollection {
 	}
 
 	@Override
-	public IProfile getIQRProfile(ProfileType type, Tag tag) {
+	public IProfile getIQRProfile(ProfileType type, Tag tag) throws UnavailableBorderTagException {
 		if(this.type==null){
 			this.type = type;
 		}
@@ -790,8 +821,7 @@ public class ProfileCollection implements IProfileCollection {
 	}
 
 	@Override
-	public List<Integer> findMostVariableRegions(ProfileType type, Tag tag)
-			throws Exception {
+	public List<Integer> findMostVariableRegions(ProfileType type, Tag tag) throws UnavailableBorderTagException {
 		if(this.type==null){
 			this.type = type;
 		}

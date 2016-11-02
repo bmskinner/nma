@@ -25,6 +25,7 @@ import org.jfree.data.xy.XYDataset;
 import analysis.IAnalysisDataset;
 import analysis.signals.ShellRandomDistributionCreator;
 import charting.ChartComponents;
+import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.ShellResultDataset;
 import charting.options.ChartOptions;
@@ -52,7 +53,12 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 			return createEmptyShellChart();
 		}
 		
-		List<CategoryDataset> list = new NuclearSignalDatasetCreator().createShellBarChartDataset(options);
+		List<CategoryDataset> list;
+		try {
+			list = new NuclearSignalDatasetCreator().createShellBarChartDataset(options);
+		} catch (ChartDatasetCreationException e) {
+			return makeErrorChart();
+		}
 		
 		JFreeChart chart = ChartFactory.createBarChart(null, "Outer <--- Shell ---> Interior", "Percent of signal", list.get(0));
 		chart.getCategoryPlot().setBackgroundPaint(Color.WHITE);

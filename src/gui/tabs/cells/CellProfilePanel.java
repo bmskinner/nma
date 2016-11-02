@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.JFreeChart;
 
+import analysis.profiles.ProfileException;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -208,11 +209,20 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 	
 	@Override
 	public void chartSetEventReceived(ChartSetEvent e) {
-		ISegmentedProfile profile = this.getCellModel()
-				.getCell()
-				.getNucleus()
-				.getProfile(profileOptions.getSelected(), Tag.REFERENCE_POINT);
-		dualPanel.setProfile(profile, false);
+		ISegmentedProfile profile;
+		try {
+			profile = this.getCellModel()
+					.getCell()
+					.getNucleus()
+					.getProfile(profileOptions.getSelected(), Tag.REFERENCE_POINT);
+			dualPanel.setProfile(profile, false);
+		} catch (ProfileException e1) {
+			warn("Error getting profile");
+			JFreeChart chart1 = MorphologyChartFactory.makeErrorChart();
+			JFreeChart chart2 = MorphologyChartFactory.makeErrorChart();
+			dualPanel.setCharts(chart1, chart2);
+		}
+		
 		
 	}
 

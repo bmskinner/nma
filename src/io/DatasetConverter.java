@@ -397,7 +397,14 @@ public class DatasetConverter implements Loggable {
 		for(Tag t : template.getBorderTags().keySet()){
 			finer("\tSetting tag "+t);
 			try {
-				newNucleus.setBorderTag(t, template.getBorderIndex(t));
+				
+				// get the proporitonal index of the old tag
+				
+				double propIndex = (double) template.getBorderIndex(t) / (double) template.getBorderLength();
+				
+				int newIndex = (int) ((double) newNucleus.getBorderLength() * propIndex);
+				
+				newNucleus.setBorderTag(t, newIndex);
 			} catch (IndexOutOfBoundsException e) {
 				fine("Cannot set border tag to requested index", e);
 			}
@@ -406,14 +413,16 @@ public class DatasetConverter implements Loggable {
 
 		// Copy segments from RP
 		for(ProfileType type : ProfileType.values()){
-			ISegmentedProfile p;
-			ISegmentedProfile target;
+			ISegmentedProfile p = null;
+			ISegmentedProfile target = null;
 			try {
 				p = template.getProfile(type, Tag.REFERENCE_POINT);
 				target = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
 			} catch (ProfileException e1) {
 				fine("Error getting profile from template or target nucleus", e1);
 				throw new DatasetConversionException("Cannot convert nucleus", e1);
+			} catch(Exception e ){
+				throw new DatasetConversionException("Cannot convert nucleus", e);
 			}
 			
 			

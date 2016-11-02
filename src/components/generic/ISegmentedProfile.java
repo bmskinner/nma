@@ -197,7 +197,7 @@ public interface ISegmentedProfile extends IProfile {
 	 */
 	boolean adjustSegmentEnd(UUID id, int amount);
 
-	void nudgeSegments(int amount);
+	void nudgeSegments(int amount) throws ProfileException;
 
 	/* (non-Javadoc)
 	 * @see no.components.Profile#offset(int)

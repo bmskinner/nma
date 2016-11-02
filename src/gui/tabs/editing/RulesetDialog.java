@@ -292,9 +292,9 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 						.getCollection()
 						.getProfileManager()
 						.updateBorderTag(tag, newTagIndex);
-				} catch (IndexOutOfBoundsException e) {
+				} catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException e) {
 					warn("Unable to update border tag index");
-					fine("Index not in profile", e);
+					fine("Profile error", e);
 					return;
 				}
 								

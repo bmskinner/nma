@@ -341,7 +341,7 @@ public class SignalManager implements Loggable {
        * @return the median
      * @throws Exception 
        */
-      public double getMedianSignalStatistic(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) throws Exception{
+      public double getMedianSignalStatistic(SignalStatistic stat, MeasurementScale scale, UUID signalGroup){
           
           double[] values = null;
           double median;

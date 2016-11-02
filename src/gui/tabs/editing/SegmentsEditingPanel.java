@@ -48,6 +48,7 @@ import javax.swing.SpinnerNumberModel;
 import org.jfree.chart.JFreeChart;
 
 import stats.Quartile;
+import analysis.profiles.ProfileException;
 import analysis.profiles.SegmentFitter;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
@@ -56,6 +57,7 @@ import components.ICell;
 import components.ICellCollection;
 import components.active.ChildAnalysisDataset;
 import components.active.generic.SegmentedFloatProfile;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
 import components.generic.ISegmentedProfile;
@@ -195,13 +197,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			configureButtons(options);
 						
 			JFreeChart chart = getChart(options);
-			
-			profile = activeDataset().getCollection()
-					.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-			
 
-			
 			/*
 			 * Create the chart for the range panel
 			 */
@@ -221,6 +217,16 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				.build();
 			
 			JFreeChart rangeChart = getChart(rangeOptions);
+			
+			
+			try {
+				profile = activeDataset().getCollection()
+						.getProfileCollection()
+						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				warn("Error getting profile");
+				fine("Error getting profile");
+			}
 
 			dualPanel.setCharts(chart, profile, true, rangeChart);
 		}
@@ -271,8 +277,16 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				
 				setButtonsEnabled(true);
 				ICellCollection collection = options.firstDataset().getCollection();
-				ISegmentedProfile medianProfile = collection.getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+				ISegmentedProfile medianProfile;
+				try {
+					medianProfile = collection.getProfileCollection()
+							.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+				} catch (UnavailableBorderTagException | ProfileException e) {
+					warn("Error getting profile");
+					fine("Error getting profile");
+					setButtonsEnabled(false);
+					return;
+				}
 				
 				// Don't allow merging below 2 segments (causes errors)
 				if(medianProfile.getSegmentCount()<=2){

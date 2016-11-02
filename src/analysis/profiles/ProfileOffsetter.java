@@ -55,20 +55,18 @@ public class ProfileOffsetter implements Loggable {
 	
 	/**
 	 * This method requires the frankenprofiling to be completed
-	 * @throws Exception
+	 * @throws ProfileOffsetException
 	 */
 	public void assignBorderTagToNucleiViaFrankenProfile(Tag tag) throws ProfileOffsetException {
 
-		int index = collection.getProfileCollection()
-				.getIndex(tag); 
+		int index;
+		try {
+			index = collection.getProfileCollection().getIndex(tag);
+		} catch (UnavailableBorderTagException e2) {
+			throw new ProfileOffsetException("Cannot find "+tag+" index in median", e2);
+		} 
 
-		/*
-		 * Check that the points exist
-		 */
-		if( index == -1  ){
-			throw new ProfileOffsetException("Cannot find "+tag+" index in median");
-		}
-
+		
 		UUID segID;
 		try {
 			segID = collection.getProfileCollection()

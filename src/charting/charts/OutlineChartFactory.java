@@ -466,7 +466,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		if(options.isShowSignals()){
 			finest("Displaying signals on chart");
 			if(cell.getNucleus().getSignalCollection().hasSignal()){
-				List<ComponentOutlineDataset> signalsDatasets = new NucleusDatasetCreator().createSignalOutlines(cell, dataset);
+				List<ComponentOutlineDataset> signalsDatasets;
+				try {
+					signalsDatasets = new NucleusDatasetCreator().createSignalOutlines(cell, dataset);
+				} catch (ChartDatasetCreationException e) {
+					return makeErrorChart();
+				}
 
 				finest("Fetched signal outline datasets for "+cell.getNucleus().getNameAndNumber());
 				

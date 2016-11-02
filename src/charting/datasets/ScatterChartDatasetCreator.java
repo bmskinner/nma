@@ -19,6 +19,7 @@ import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import components.ICell;
 import components.ICellCollection;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.MeasurementScale;
 import components.generic.Tag;
 import components.nuclear.INuclearSignal;
@@ -76,17 +77,31 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 			// go through each index in the segment.
 			for(int j=0; j<cells.size();j++){
 				
-				if(statA.equals(NucleusStatistic.VARIABILITY)){
-					xpoints[j] = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
-				} else {
-					xpoints[j] = cells.get(j).getNucleus().getStatistic(statA, scale);
+				double statAValue;
+				double statBValue;
+				
+				try {
+					
+					if(statA.equals(NucleusStatistic.VARIABILITY)){
+						statAValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
+					} else {
+						statAValue = cells.get(j).getNucleus().getStatistic(statA, scale);
+					}
+					
+					if(statB.equals(NucleusStatistic.VARIABILITY)){
+						statBValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
+					} else {
+						statBValue = cells.get(j).getNucleus().getStatistic(statB, scale);
+					}
+				} catch(UnavailableBorderTagException e){
+					warn("Cannot get stats for cell");
+					fine("Tag not present in cell", e);
+					statAValue = 0;
+					statBValue = 0;
 				}
 				
-				if(statB.equals(NucleusStatistic.VARIABILITY)){
-					ypoints[j] = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
-				} else {
-					ypoints[j] = cells.get(j).getNucleus().getStatistic(statB, scale);
-				}
+				xpoints[j] = statAValue;
+				ypoints[j] = statBValue;
 
 
 			}
@@ -166,18 +181,32 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 			List<ICell> cells = new ArrayList<ICell>(c.getCells());
 			// go through each index in the segment.
 			for(int j=0; j<cells.size();j++){
-
-				if(statA.equals(NucleusStatistic.VARIABILITY)){
-					xpoints[j] = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
-				} else {
-					xpoints[j] = cells.get(j).getNucleus().getStatistic(statA, scale);
+				
+				double statAValue;
+				double statBValue;
+				
+				try {
+					
+					if(statA.equals(NucleusStatistic.VARIABILITY)){
+						statAValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
+					} else {
+						statAValue = cells.get(j).getNucleus().getStatistic(statA, scale);
+					}
+					
+					if(statB.equals(NucleusStatistic.VARIABILITY)){
+						statBValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
+					} else {
+						statBValue = cells.get(j).getNucleus().getStatistic(statB, scale);
+					}
+				} catch(UnavailableBorderTagException e){
+					warn("Cannot get stats for cell");
+					fine("Tag not present in cell", e);
+					statAValue = 0;
+					statBValue = 0;
 				}
 				
-				if(statB.equals(NucleusStatistic.VARIABILITY)){
-					ypoints[j] = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
-				} else {
-					ypoints[j] = cells.get(j).getNucleus().getStatistic(statB, scale);
-				}
+				xpoints[j] = statAValue;
+				ypoints[j] = statBValue;
 
 			}
 			names.add(c.getName());

@@ -27,6 +27,7 @@ import java.util.UUID;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import components.AbstractCellularComponent;
 import components.active.DefaultAnalysisDataset;
 import components.generic.IPoint;
 import components.generic.ProfileType;
@@ -139,6 +140,12 @@ public class PopulationImportWorker extends AnalysisWorker {
 					updateSignals();
 				}
 				
+				if(v.isOlderThan(new Version(1,13,3))){
+					
+					// Correct offsets of border lists
+					updateBorderListOffsets();
+				}
+				
 				
 
 				// Generate vertically rotated nuclei for all imported datasets
@@ -160,6 +167,48 @@ public class PopulationImportWorker extends AnalysisWorker {
 			warn("Unable to open file: "+e.getMessage());
 			return false;
 		}
+	}
+	
+	private void updateBorderListOffsets(){
+		log("Updating border positions for old dataset");
+		
+		updateSignalPositions(dataset);
+		for(IAnalysisDataset child : dataset.getAllChildDatasets()){
+			updateBorderPositions(child);
+		}
+		
+		if(dataset.hasMergeSources()){
+			for(IAnalysisDataset source : dataset.getAllMergeSources()){
+				updateBorderPositions(source);
+			}
+		}
+		
+		
+	}
+	
+	/**
+	 * In older versions of the program, the nucleus border lists are stored with
+	 * a different offset to the current version. Correct this on import.
+	 * @param dataset
+	 */
+	private void updateBorderPositions(IAnalysisDataset dataset){
+		dataset.getCollection().getNuclei().parallelStream().forEach( n -> {
+			
+			if( ! n.containsPoint(n.getCentreOfMass())){
+				log(n.getNameAndNumber()+": x0 = "+n.getBorderPoint(0).getX());
+			}
+			
+			
+//			AbstractCellularComponent c = (AbstractCellularComponent) n;
+//			
+//			IPoint oldCom = c.getCentreOfMass();
+//			
+//			c.offset(oldCom.getX(), oldCom.getY());
+//			
+////			c.setCentreOfMassDirectly(oldCom);
+//			log("\t"+n.getNameAndNumber()+": x0 = "+n.getBorderPoint(0).getX());
+			
+		});
 	}
 	
 	private void updateSignals(){
@@ -300,34 +349,22 @@ public class PopulationImportWorker extends AnalysisWorker {
 			
 			log("Old style dataset detected");
 			
-			try {
-
-				DatasetConverter conv = new DatasetConverter(dataset);
-
-				IAnalysisDataset converted = conv.convert();
-				
-				dataset = converted;
-
-				log("Conversion successful");
-			} catch (DatasetConversionException e){
-				warn("Unable to convert to new format.");
-				warn("Displaying as old format.");
-				fine("Error in converter", e);
-			}
-		}
-		
-//		if(dataset instanceof DefaultAnalysisDataset){
-//			
-//			log("New style dataset detected");
-//			
-//			for(IAnalysisDataset child : dataset.getAllChildDatasets()){
-//				child.getCollection().createProfileCollection();
-////				child.getCollection().getProfileManager().recalculateProfileAggregates();
+//			try {
+//
+//				DatasetConverter conv = new DatasetConverter(dataset);
+//
+//				IAnalysisDataset converted = conv.convert();
+//				
+//				dataset = converted;
+//
+//				log("Conversion successful");
+//			} catch (DatasetConversionException e){
+//				warn("Unable to convert to new format.");
+//				warn("Displaying as old format.");
+//				fine("Error in converter", e);
 //			}
-//		}
-		
-		
-		
+		}
+
 		finest("Returning opened dataset");
 		return dataset;
 	}

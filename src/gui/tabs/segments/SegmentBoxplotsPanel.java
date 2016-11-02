@@ -40,6 +40,7 @@ import javax.swing.JPanel;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
+import analysis.profiles.ProfileException;
 import stats.Quartile;
 import stats.SegmentStatistic;
 import charting.charts.AbstractChartFactory;
@@ -51,6 +52,7 @@ import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.ICellCollection;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderSegment;
@@ -101,8 +103,15 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		if(IBorderSegment.segmentCountsMatch(getDatasets())){ // make a boxplot for each segment
 			
 			ICellCollection collection = activeDataset().getCollection();
-			List<IBorderSegment> segments = collection.getProfileCollection()
-					.getSegments(Tag.REFERENCE_POINT);			
+			List<IBorderSegment> segments;
+			try {
+				segments = collection.getProfileCollection()
+						.getSegments(Tag.REFERENCE_POINT);
+			} catch (UnavailableBorderTagException | ProfileException e) {
+				warn("Cannot get segments");
+				fine("Cannot get segments", e);
+				return;
+			}			
 
 			// Get each segment as a boxplot
 			for(IBorderSegment seg : segments){

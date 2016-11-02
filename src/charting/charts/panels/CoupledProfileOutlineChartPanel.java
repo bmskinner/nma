@@ -38,6 +38,7 @@ import org.jfree.chart.panel.CrosshairOverlay;
 import org.jfree.chart.plot.Crosshair;
 import org.jfree.ui.RectangleEdge;
 
+import analysis.profiles.ProfileException;
 import components.AbstractCellularComponent;
 import components.ICell;
 import components.generic.ProfileType;
@@ -118,7 +119,14 @@ public class CoupledProfileOutlineChartPanel implements Loggable{
 				}
 				// Find the y-value in the chart at this point
 				// Take from the angle profile directly
-				double yValue = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).get(xValue);
+				double yValue;
+				try {
+					yValue = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).get(xValue);
+				} catch (ProfileException e1) {
+					warn("Error getting y-value");
+					fine("Error getting y-value", e1);
+					return;
+				}
 				
 				// Find the index of the border point with the current profile chart x value
 				IBorderPoint p = getPointFromProfileIndex(xValue);

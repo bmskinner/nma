@@ -306,6 +306,9 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			/*
 			 * Find the seg id for the median segment at the requested position
 			 */
+			
+			try {
+			
 			IBorderSegment medianSeg = collection
 					.getProfileCollection()
 					.getSegmentAt(Tag.REFERENCE_POINT, options.getSegPosition());
@@ -316,13 +319,11 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			 */
 			
 			double[] values;
-			try {
-				values = collection.getMedianStatistics(SegmentStatistic.LENGTH, 
-						options.getScale(), 
-						medianSeg.getID());
-			} catch (Exception e) {
-				throw new ChartDatasetCreationException("Cannot get segment statistics for "+dataset.getName(), e);
-			}
+
+			values = collection.getMedianStatistics(SegmentStatistic.LENGTH, 
+					options.getScale(), 
+					medianSeg.getID());
+	
 			
 			double[] minMaxStep = findMinAndMaxForHistogram(values);
 			int minRounded = (int) minMaxStep[0];
@@ -331,6 +332,9 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			int bins = findBinSizeForHistogram(values, minMaxStep);
 
 			ds.addSeries(Constants.SEGMENT_PREFIX+options.getSegPosition()+"_"+collection.getName(), values, bins, minRounded, maxRounded );
+			}catch(UnavailableBorderTagException | ProfileException e){
+				throw new ChartDatasetCreationException("Cannot get segments for "+dataset.getName(), e);
+			}
 		}
 
 		finest("Completed histogram dataset");
@@ -372,13 +376,21 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			double[] lengths = new double[collection.size()];
 			for(Nucleus n : collection.getNuclei()){
 
-				IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
-						.getSegment(medianSeg.getID());
+				IBorderSegment seg;
+				try {
+					seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+							.getSegment(medianSeg.getID());
+					int indexLength = seg.length();
+					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+					double length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
+					lengths[count] = length;
+				} catch (ProfileException e) {
+					fine("Error getting segment length");
+					lengths[count] = 0;
+				} finally {
+					count++;
+				}
 
-				int indexLength = seg.length();
-				double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-				double length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
-				lengths[count++] = length;
 			}
 			
 			minMaxRange = updateMinMaxRange(minMaxRange, lengths);
@@ -414,13 +426,23 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			double[] lengths = new double[collection.size()];
 			for(Nucleus n : collection.getNuclei()){
 
-				IBorderSegment seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
-						.getSegment(medianSeg.getID());
+				IBorderSegment seg;
+				try {
+					seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+							.getSegment(medianSeg.getID());
+					
+					int indexLength = seg.length();
+					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+					double length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
+					lengths[count] = length;
+				} catch (ProfileException e) {
+					fine("Error getting segment length");
+					lengths[count] = 0;
+				} finally {
+					count++;
+				}
 				
-				int indexLength = seg.length();
-				double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-				double length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
-				lengths[count++] = length;
+				
 			}
 			
 			KernelEstimator est;
