@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import logging.Loggable;
 
@@ -17,8 +18,8 @@ public class ThreadManager implements Loggable {
 	 * Handle threading
 	 */
 	
-	public static final int corePoolSize    = 8;
-	public static final int maximumPoolSize = 16;
+	public static final int corePoolSize    = 16;
+	public static final int maximumPoolSize = 32;
 	public static final int keepAliveTime = 10000;
 
 	private final ExecutorService executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
@@ -27,6 +28,7 @@ public class ThreadManager implements Loggable {
 	
 	Map<CancellableRunnable, Future<?>> cancellableFutures = new HashMap<>();
 	
+	AtomicInteger queueLength = new AtomicInteger();
 	
 
 	protected ThreadManager(){}
@@ -43,7 +45,15 @@ public class ThreadManager implements Loggable {
 	}
 	
 	public synchronized void submit(Runnable r){
-		executorService.submit(r);
+//		executorService.submit(r);
+		queueLength.incrementAndGet(); // Increment queue when submitting task.
+		executorService.submit(new Runnable() {
+            public void run() {
+                r.run();
+                queueLength.decrementAndGet(); // Decrement queue when task done.
+            }
+        });
+		log("Submitted runnable. Queue is "+queueLength.get());
 	}
 	
 	public synchronized void execute(Runnable r){

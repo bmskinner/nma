@@ -246,7 +246,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
 
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception {
+	protected TableModel createPanelTableType(TableOptions options){
 		
 		if(getCellModel().hasCell()){
 			return new CellTableDatasetCreator(getCellModel().getCell()).createCellInfoTable(options);

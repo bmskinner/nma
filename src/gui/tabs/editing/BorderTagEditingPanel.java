@@ -201,18 +201,18 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 	
 	@Override
 	public void setChartsAndTablesLoading(){
-		
+		super.setChartsAndTablesLoading();
 		dualPanel.setCharts(MorphologyChartFactory.createLoadingChart(), 
 				MorphologyChartFactory.createLoadingChart());
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options){
 		return null;
 	}
 

@@ -58,13 +58,15 @@ public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
 		
 		@Override
 		public void setChartsAndTablesLoading(){
-//			chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
+			super.setChartsAndTablesLoading();
 			for(Component c : this.getComponents()){
 				if(c instanceof JTable){
 					
 					((JTable)c).setModel(AbstractDatasetCreator.createLoadingTable());
 				}
 			}
+			
+			
 			
 		}
 				

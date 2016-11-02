@@ -1084,6 +1084,17 @@ public class MainWindow
      * @param list
      */
     public void fireDatasetUpdateEvent(List<IAnalysisDataset> list){
+    	
+    	Runnable r = () -> {
+    		for(TabPanel p : detailPanels){
+        		p.setChartsAndTablesLoading();
+        	}
+    	};
+    	
+    	threadManager.submit( r );
+
+    	
+    	
     	DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
     	Iterator<Object> iterator = updateListeners.iterator();
         while( iterator.hasNext() ) {

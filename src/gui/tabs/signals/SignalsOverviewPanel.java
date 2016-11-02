@@ -380,18 +380,19 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	
 	@Override
 	public void setChartsAndTablesLoading(){
+		super.setChartsAndTablesLoading();
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
 		statsTable.setModel(AbstractDatasetCreator.createLoadingTable());	
 		
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) {
 		return new OutlineChartFactory(options).makeSignalOutlineChart();
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options){
 		return new NuclearSignalDatasetCreator().createSignalStatsTable(options);
 	}
 

@@ -162,13 +162,14 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 		
 		@Override
 		public void setChartsAndTablesLoading(){
+			super.setChartsAndTablesLoading();
 			chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
 			modalityProfileChartPanel.setChart(AbstractChartFactory.createLoadingChart());	
 			
 		}
 		
 		@Override
-		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		protected JFreeChart createPanelChartType(ChartOptions options){
 			if(options.isNormalised()){
 				return new MorphologyChartFactory(options).createModalityProfileChart();
 			} else {

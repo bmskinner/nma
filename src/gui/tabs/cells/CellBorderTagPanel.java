@@ -202,6 +202,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 		
 		@Override
 		public void setChartsAndTablesLoading(){
+			super.setChartsAndTablesLoading();
 			JFreeChart chart1 = MorphologyChartFactory.createLoadingChart();
 			JFreeChart chart2 = MorphologyChartFactory.createLoadingChart();
 			
@@ -209,7 +210,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 		}
 		
 		@Override
-		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		protected JFreeChart createPanelChartType(ChartOptions options){
 			return new MorphologyChartFactory(options).makeIndividualNucleusProfileChart( );
 		}
 		

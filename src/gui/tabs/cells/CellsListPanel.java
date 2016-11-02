@@ -107,9 +107,6 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 		tree.addTreeSelectionListener(this);
 	}
 	
-	@Override
-	public void setChartsAndTablesLoading(){}
-	
 	/**
 	 * Create the nodes in the tree
 	 * @param root the root node
@@ -211,12 +208,12 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception {
+	protected TableModel createPanelTableType(TableOptions options){
 		return null;
 	}
 
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		return null;
 	}
 

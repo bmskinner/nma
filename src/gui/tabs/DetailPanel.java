@@ -472,7 +472,7 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options){
 		return null;
 	}
 	
@@ -482,7 +482,7 @@ public abstract class DetailPanel
 	 * @return
 	 * @throws Exception
 	 */
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		return null;
 	}
 	
@@ -957,12 +957,16 @@ public abstract class DetailPanel
     	updateListeners.remove( l );
     }
     
-    public abstract void setChartsAndTablesLoading();
+    public void setChartsAndTablesLoading(){
+    	for(TabPanel p : this.getSubPanels()){
+			p.setChartsAndTablesLoading();
+		}
+    };
     
     public void datasetUpdateEventReceived(DatasetUpdateEvent e){
 
     	// Tell this panel to set all charts and tables to loading status
-    	setChartsAndTablesLoading();
+//    	setChartsAndTablesLoading();
     	
     	//		Signal sub panels to update
     	fireDatasetUpdateEvent(list);

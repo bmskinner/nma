@@ -57,6 +57,10 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 		pairwiseVennPanel = new PairwiseVennDetailPanel();
 		kruskalPanel	  = new KruskalDetailPanel();
 		
+		this.addSubPanel(vennPanel);
+		this.addSubPanel(pairwiseVennPanel);
+		this.addSubPanel(kruskalPanel);
+		
 
 		// Add to the tabbed panel
 		// Title, icon, component, tooltip
@@ -97,17 +101,14 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 	protected void updateNull() {
 		updateMultiple();
 	}
-	
+		
 	@Override
-	public void setChartsAndTablesLoading(){}
-	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options){
 		return null;
 	}
 	

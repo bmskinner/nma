@@ -128,20 +128,14 @@ public class NuclearStatisticsPanel extends DetailPanel {
 	protected void updateNull() {
 		updateSingle();
 	}
-	
+		
 	@Override
-	public void setChartsAndTablesLoading(){}
-	
-	
-	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options)
-			throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options){
 		return null;
 	}
 

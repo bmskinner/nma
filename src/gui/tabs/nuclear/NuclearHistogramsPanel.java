@@ -112,6 +112,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 		
 		@Override
 		public void setChartsAndTablesLoading(){
+			super.setChartsAndTablesLoading();
 			for(NucleusStatistic stat : NucleusStatistic.values()){
 				ExportableChartPanel panel = chartPanels.get(stat.toString());
 				panel.setChart(MorphologyChartFactory.createLoadingChart());

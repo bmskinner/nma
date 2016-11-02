@@ -176,14 +176,14 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 	
 	@Override
 	public void setChartsAndTablesLoading(){
-		
+		super.setChartsAndTablesLoading();
 		
 		panel.setChart(MorphologyChartFactory.createLoadingChart());
 	}
 
 
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		return new OutlineChartFactory(options).makeCellOutlineChart();
 	}
 	

@@ -106,7 +106,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 	
-	public JFreeChart createStatisticHistogram() throws Exception{
+	public JFreeChart createStatisticHistogram(){
 		
 		if(!options.hasDatasets()){
 			return makeEmptyChart();
@@ -182,7 +182,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private JFreeChart createSignalStatisticHistogram() throws Exception{
+	private JFreeChart createSignalStatisticHistogram() {
 		
 		if(options.isUseDensity()){
 			return createSignalDensityStatsChart();
@@ -191,9 +191,14 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
 		
-		List<HistogramDataset> list = options.hasDatasets() 
-									? new NuclearSignalDatasetCreator().createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
-									: null;
+		List<HistogramDataset> list;
+		try {
+			list = options.hasDatasets() 
+										? new NuclearSignalDatasetCreator().createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
+										: null;
+		} catch (ChartDatasetCreationException e) {
+			return makeErrorChart();
+		}
 									
 									
 				
@@ -256,7 +261,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private JFreeChart createSignalDensityStatsChart() throws Exception{
+	private JFreeChart createSignalDensityStatsChart(){
 	
 		if( ! options.hasDatasets()){
 			return this.makeEmptyChart();
@@ -264,7 +269,12 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		
 		SignalStatistic stat = (SignalStatistic) options.getStat();
 		
-		List<DefaultXYDataset> list = new NuclearSignalDatasetCreator().createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale());
+		List<DefaultXYDataset> list;
+		try {
+			list = new NuclearSignalDatasetCreator().createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale());
+		} catch (ChartDatasetCreationException e) {
+			return makeErrorChart();
+		}
 
 
 		String xLabel = options.getStat().label(options.getScale());
@@ -331,7 +341,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @param xLabel the x axis label
 	 * @return
 	 */
-	private JFreeChart createNuclearStatsHistogram() throws ChartCreationException {
+	private JFreeChart createNuclearStatsHistogram() {
 
 		if(options.isUseDensity()){
 			return createNuclearDensityStatsChart();
@@ -347,7 +357,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		try {
 			ds = new NuclearHistogramDatasetCreator(options).createNuclearStatsHistogramDataset();
 		} catch (ChartDatasetCreationException e) {
-			throw new ChartCreationException("Cannot get data for nuclear stats", e);
+			return makeErrorChart();
 		}
 
 		
@@ -404,7 +414,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private JFreeChart createNuclearDensityStatsChart() throws ChartCreationException {
+	private JFreeChart createNuclearDensityStatsChart() {
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyChart();
@@ -414,7 +424,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		try {
 			ds = new NuclearHistogramDatasetCreator(options).createNuclearDensityHistogramDataset();
 		} catch (ChartDatasetCreationException e) {
-			throw new ChartCreationException("Cannot get data for nuclear stats density", e);
+			return makeErrorChart();
 		}
 
 
@@ -465,7 +475,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @param segName the segment to plot
 	 * @return
 	 */
-	private JFreeChart createSegmentStatisticHistogram() throws ChartCreationException {
+	private JFreeChart createSegmentStatisticHistogram() {
 
 		if(options.isUseDensity()){
 			return createSegmentLengthDensityChart();
@@ -482,7 +492,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		try {
 			ds = new NuclearHistogramDatasetCreator(options).createSegmentLengthHistogramDataset();
 		} catch (ChartDatasetCreationException e) {
-			throw new ChartCreationException("Cannot get data for segment lengths", e);
+			return makeErrorChart();
 		}
 
 
@@ -536,7 +546,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private JFreeChart createSegmentLengthDensityChart() throws ChartCreationException {
+	private JFreeChart createSegmentLengthDensityChart() {
 				
 		if( ! options.hasDatasets()){
 			
@@ -550,8 +560,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		try {
 			ds = new NuclearHistogramDatasetCreator(options).createSegmentLengthDensityDataset();
 		} catch (ChartDatasetCreationException e) {
-
-			throw new ChartCreationException("Cannot get data for segment length density", e);
+			return makeErrorChart();
 		}
 		
 

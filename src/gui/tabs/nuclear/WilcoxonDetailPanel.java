@@ -85,7 +85,7 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options){
 		return new AnalysisDatasetTableCreator(options).createWilcoxonStatisticTable();
 	}
 }

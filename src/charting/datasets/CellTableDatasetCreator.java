@@ -67,7 +67,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 * @throws ChartDatasetCreationException 
 	 * @throws Exception 
 	 */
-	public TableModel createCellInfoTable(TableOptions options) throws ChartDatasetCreationException {
+	public TableModel createCellInfoTable(TableOptions options){
 		
 		if( ! options.hasDatasets()){
 			return createBlankTable();

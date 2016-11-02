@@ -779,7 +779,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public JFreeChart createVerticalNucleiChart() throws ChartCreationException {
+	public JFreeChart createVerticalNucleiChart(){
 		
 		if( ! options.hasDatasets()){
 			finest("No datasets - returning empty chart");
@@ -802,7 +802,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private JFreeChart createSingleDatasetVerticalNucleiChart() throws ChartCreationException {
+	private JFreeChart createSingleDatasetVerticalNucleiChart(){
 		
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
@@ -910,7 +910,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	private JFreeChart createMultipleDatasetVerticalNucleiChart() throws ChartCreationException {
+	private JFreeChart createMultipleDatasetVerticalNucleiChart(){
 		
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();

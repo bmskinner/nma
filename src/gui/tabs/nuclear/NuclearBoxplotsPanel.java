@@ -59,16 +59,6 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				panel.setPreferredSize(preferredSize);
 				chartPanels.put(stat.toString(), panel);
 				mainPanel.add(panel);
-//				
-//				ChartOptions options = new ChartOptionsBuilder()
-//					.setDatasets(getDatasets())
-//					.addStatistic(stat)
-//					.setScale(GlobalOptions.getInstance().getScale())
-//					.setSwatch(GlobalOptions.getInstance().getSwatch())
-//					.setTarget(panel)
-//					.build();
-//
-//				setChart(options);
 				
 			}
 			
@@ -124,6 +114,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		
 		@Override
 		public void setChartsAndTablesLoading(){
+			super.setChartsAndTablesLoading();
 			for(NucleusStatistic stat : NucleusStatistic.values()){
 				ExportableChartPanel panel = chartPanels.get(stat.toString());
 				panel.setChart(MorphologyChartFactory.createLoadingChart());

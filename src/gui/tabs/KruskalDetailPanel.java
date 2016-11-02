@@ -138,19 +138,19 @@ public class KruskalDetailPanel  extends DetailPanel {
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		return new MorphologyChartFactory(options).makeKruskalWallisChart( false);
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options){
 		return null;
 	}
 	
 	@Override
 	public void setChartsAndTablesLoading(){
+		super.setChartsAndTablesLoading();
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
-//		tableAnalysisParameters.setModel(AbstractDatasetCreator.createLoadingTable());
 	}
 	
 	@Override

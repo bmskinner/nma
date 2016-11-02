@@ -381,7 +381,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) {
 			return new ConsensusNucleusChartFactory(options).makeConsensusChart();
 	}
 

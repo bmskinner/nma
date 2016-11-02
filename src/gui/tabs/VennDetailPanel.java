@@ -96,31 +96,22 @@ public class VennDetailPanel extends DetailPanel {
 		
 		setTable(options);
 
-//		setRenderer(vennTable, new VennTableCellRenderer());
-
 		fine("Updated venn panel");
 		
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) {
 		return null;
 	}
 	
 	@Override
 	protected void updateNull() {		
-		
-		TableOptions options = new TableOptionsBuilder()
-			.setDatasets(null)
-			.setType(TableType.VENN)
-			.setTarget(vennTable)
-			.build();
-		
-		setTable(options);
+		vennTable.setModel(AnalysisDatasetTableCreator.createBlankTable());
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options){
 		return new AnalysisDatasetTableCreator(options).createVennTable();
 	}
 		

@@ -16,7 +16,7 @@ public class SegmentProfilePanel extends ProfileDisplayPanel {
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		options.setShowMarkers(false);
 		options.setShowAnnotations(false);
 		options.setShowLines(true);

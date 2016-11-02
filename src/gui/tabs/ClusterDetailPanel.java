@@ -76,11 +76,6 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 
 	}
 	
-	@Override
-	public void setChartsAndTablesLoading(){
-		//TODO: move classes up to ClusterDetailPanel
-//		tableAnalysisParameters.setModel(AbstractDatasetCreator.createLoadingTable());
-	}
 	
 	@Override
 	protected void updateSingle() {
@@ -102,12 +97,12 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) {
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options) {
 		return null;
 	}
 				

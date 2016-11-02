@@ -289,9 +289,15 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	private JFreeChart makeMultipleConsensusChart() throws Exception {
+	private JFreeChart makeMultipleConsensusChart() {
 		// multiple nuclei
-		XYDataset ds = new NucleusDatasetCreator().createMultiNucleusOutline(options.getDatasets(), options.getScale());
+		XYDataset ds;
+		try {
+			ds = new NucleusDatasetCreator().createMultiNucleusOutline(options.getDatasets(), options.getScale());
+		} catch (ChartDatasetCreationException e) {
+			fine("Error making consensus dataset", e);
+			return makeErrorChart();
+		}
 		JFreeChart chart = makeConsensusChart(ds);
 		
 		formatConsensusChart(chart);
@@ -337,7 +343,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public JFreeChart makeConsensusChart() throws Exception {
+	public JFreeChart makeConsensusChart() {
 		
 		if(! options.hasDatasets()){
 			finest("No datasets: creating empty consensus chart");
@@ -376,7 +382,12 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 					mesh = mesh.straighten();
 				}
 
-				return new OutlineChartFactory(options).createMeshChart(mesh, 0.5 );
+				try {
+					return new OutlineChartFactory(options).createMeshChart(mesh, 0.5 );
+				} catch (ChartCreationException e) {
+					fine("Error making mesh chart", e);
+					return makeErrorChart();
+				}
 				
 			} else {
 				return makeSegmentedConsensusChart(options.firstDataset());

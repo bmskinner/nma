@@ -74,7 +74,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		options = o;
 	}
 		
-	public TableModel createMedianProfileStatisticTable()  throws ChartDatasetCreationException {
+	public TableModel createMedianProfileStatisticTable() {
 		
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -91,7 +91,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		return createBlankTable();
 	}
 	
-	public TableModel createMergeSourcesTable() throws ChartDatasetCreationException {
+	public TableModel createMergeSourcesTable(){
 		
 		if( ! options.hasDatasets()){
 			DefaultTableModel model = new DefaultTableModel();
@@ -134,7 +134,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @throws Exception 
 	 */
 	private TableModel createMedianProfileSegmentStatsTable(IAnalysisDataset dataset, 
-			MeasurementScale scale) throws ChartDatasetCreationException {
+			MeasurementScale scale){
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -155,7 +155,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			} catch (UnavailableBorderTagException | ProfileException e) {
 //				warn("Unable to create median profile stats table");
 				fine("Error getting median profile", e);
-				throw new ChartDatasetCreationException("Unable to create median profile stats table");
+				return createBlankTable();
 			}
 			
 			// create the row names
@@ -215,7 +215,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	private TableModel createMultiDatasetMedianProfileSegmentStatsTable() throws ChartDatasetCreationException {
+	private TableModel createMultiDatasetMedianProfileSegmentStatsTable() {
 
 		if( ! options.hasDatasets()){
 			return AbstractDatasetCreator.createBlankTable();
@@ -245,7 +245,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 					.getSegments(point);
 		} catch (UnavailableBorderTagException | ProfileException e1) {
 			fine("Error getting segments from profile collection", e1);
-			throw new ChartDatasetCreationException("Unable to create median profile stats table");
+			return createBlankTable();
 		}
 
 
@@ -280,7 +280,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 						.getOrderedSegments();
 			} catch (UnavailableBorderTagException | ProfileException e) {
 				fine("Error getting median profile", e);
-				throw new ChartDatasetCreationException("Unable to create median profile stats table");
+				return createBlankTable();
 			}
 
 			List<Object> rowData = new ArrayList<Object>(0);
@@ -307,7 +307,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param collection
 	 * @return
 	 */
-	public TableModel createAnalysisTable() throws ChartDatasetCreationException {
+	public TableModel createAnalysisTable(){
 
 		if( ! options.hasDatasets()){
 			finest("No datasets, creating blank table");
@@ -336,7 +336,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param collection
 	 * @return
 	 */
-	private TableModel createAnalysisParametersTable() throws ChartDatasetCreationException {
+	private TableModel createAnalysisParametersTable() {
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -575,7 +575,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param collection
 	 * @return
 	 */
-	private TableModel createStatsTable() throws ChartDatasetCreationException {
+	private TableModel createStatsTable(){
 
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -650,7 +650,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		
 	}
 	
-	public TableModel createVennTable() throws ChartDatasetCreationException {
+	public TableModel createVennTable() {
 		
 				
 		if( ! options.hasDatasets()){
@@ -676,8 +676,6 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			row++;
 		}
 		model.addColumn("Population", columnData);
-		
-		DecimalFormat df = new DecimalFormat("#0.00"); 
 		
 		// add columns
 		// pre-cache data to ensure all values present when we get
@@ -716,7 +714,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 					}
 					
 					
-					valueString = df.format(pct)+"%";
+					valueString = DEFAULT_DECIMAL_FORMAT.format(pct)+"%";
 				}
 				
 				popData[i++] = valueString;
@@ -735,7 +733,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param list
 	 * @return
 	 */
-	public TableModel createPairwiseVennTable() throws ChartDatasetCreationException {
+	public TableModel createPairwiseVennTable(){
 				
 		if( ! options.hasDatasets()){
 			finest("No datasets, creating blank pairwise venn table");
@@ -877,7 +875,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param options the table options
 	 * @return a tablemodel for display
 	 */	
-	public TableModel createWilcoxonStatisticTable() throws ChartDatasetCreationException {
+	public TableModel createWilcoxonStatisticTable(){
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
@@ -901,7 +899,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param stat the statistic to measure
 	 * @return a tablemodel for display
 	 */	
-	private TableModel createWilcoxonNuclearStatTable() throws ChartDatasetCreationException {
+	private TableModel createWilcoxonNuclearStatTable() {
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
@@ -944,7 +942,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param segName the segment to create the table for
 	 * @return a tablemodel for display
 	 */	
-	private TableModel createWilcoxonSegmentStatTable() throws ChartDatasetCreationException {
+	private TableModel createWilcoxonSegmentStatTable() {
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
 		}
@@ -965,7 +963,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 						.getSegmentAt(options.getSegPosition());
 			} catch (UnavailableBorderTagException | ProfileException e) {
 				fine("Error getting median profile", e);
-				throw new ChartDatasetCreationException("Unable to create median profile stats table");
+				return createBlankTable();
 			}
 
 			int i = 0;
@@ -985,7 +983,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 								.getSegmentAt(options.getSegPosition());
 					} catch (UnavailableBorderTagException | ProfileException e) {
 						fine("Error getting median profile", e);
-						throw new ChartDatasetCreationException("Unable to create median profile stats table");
+						return createBlankTable();
 					}
 					
 					popData[i] = df.format( runWilcoxonTest( 
@@ -1007,7 +1005,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param options the table options
 	 * @return a tablemodel for display
 	 */	
-	public TableModel createMagnitudeStatisticTable() throws ChartDatasetCreationException {
+	public TableModel createMagnitudeStatisticTable(){
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
@@ -1032,7 +1030,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param stat the statistic to measure
 	 * @return a tablemodel for display
 	 */	
-	private TableModel createMagnitudeNuclearStatTable() throws ChartDatasetCreationException {
+	private TableModel createMagnitudeNuclearStatTable(){
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
 		}
@@ -1050,7 +1048,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				value1 = dataset.getCollection().getMedianStatistic(stat, MeasurementScale.PIXELS);
 			} catch (Exception e) {
 				fine("Error getting median statistic", e);
-				throw new ChartDatasetCreationException("Unable to create smagnitude stats table");
+				return createBlankTable();
 			}
 			
 			Object[] popData = new Object[options.datasetCount()];
@@ -1070,7 +1068,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 						value2 = dataset2.getCollection().getMedianStatistic(stat, MeasurementScale.PIXELS);
 					} catch (Exception e) {
 						fine("Error getting median statistic", e);
-						throw new ChartDatasetCreationException("Unable to create smagnitude stats table");
+						return createBlankTable();
 					}
 					
 					double magnitude = value2 / value1;
@@ -1090,7 +1088,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param segName the segment to create the table for
 	 * @return a tablemodel for display
 	 */	
-	private TableModel createMagnitudeSegmentStatTable() throws ChartDatasetCreationException {
+	private TableModel createMagnitudeSegmentStatTable(){
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
 		}
@@ -1109,7 +1107,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 						.getSegmentAt(options.getSegPosition());
 			} catch (UnavailableBorderTagException | ProfileException e) {
 				fine("Error getting median profile", e);
-				throw new ChartDatasetCreationException("Unable to create magnitude stats table");
+				return createBlankTable();
 			}
 									
 		
@@ -1138,7 +1136,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 								.getSegmentAt(options.getSegPosition());
 					} catch (UnavailableBorderTagException | ProfileException e) {
 						fine("Error getting median profile", e);
-						throw new ChartDatasetCreationException("Unable to create magnitude stats table");
+						return createBlankTable();
 					}
 					
 					double value2 = new Quartile( dataset2.getCollection()

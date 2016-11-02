@@ -97,10 +97,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		}
 
 	}
-	
-	@Override
-	public void setChartsAndTablesLoading(){}
-	
+		
 	private void createSubPanels(){
 		segmentProfilePanel = new CellProfilePanel(model); 		// the nucleus angle profile
 		cellBorderTagPanel  = new CellBorderTagPanel(model);
@@ -181,12 +178,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	}
 		
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) {
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options){
 		return null;
 	}
 	

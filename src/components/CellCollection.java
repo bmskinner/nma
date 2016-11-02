@@ -202,7 +202,7 @@ public class CellCollection implements ICellCollection {
 	 * @return
 	 */
 	public Set<UUID> getCellIDs(){
-		return mappedCollection.keySet();
+		return new HashSet<UUID>( mappedCollection.keySet());
 	}
 
 	public void addCell(ICell r) {

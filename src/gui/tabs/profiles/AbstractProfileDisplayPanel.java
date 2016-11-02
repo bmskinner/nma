@@ -146,6 +146,7 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 		
 		@Override
 		public void setChartsAndTablesLoading(){
+			super.setChartsAndTablesLoading();
 			chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
 			
 		}

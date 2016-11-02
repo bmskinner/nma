@@ -203,6 +203,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 	
 	@Override
 	public void setChartsAndTablesLoading(){
+		super.setChartsAndTablesLoading();
 		JFreeChart chart1 = MorphologyChartFactory.createLoadingChart();
 		JFreeChart chart2 = MorphologyChartFactory.createLoadingChart();
 		
@@ -230,7 +231,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 
 
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		return new MorphologyChartFactory(options).makeIndividualNucleusProfileChart( );
 	}
 	

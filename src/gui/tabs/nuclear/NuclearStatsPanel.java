@@ -44,12 +44,12 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options){
 		
 		return new AnalysisDatasetTableCreator(options).createAnalysisTable();
 	}
@@ -79,7 +79,7 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 	
 	@Override
 	public void setChartsAndTablesLoading(){
-//		chartPanel.setChart(AbstractChartFactory.createLoadingChart());		
+		super.setChartsAndTablesLoading();
 		tablePopulationStats.setModel(AbstractDatasetCreator.createLoadingTable());
 	}
 	

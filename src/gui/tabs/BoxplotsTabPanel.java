@@ -85,7 +85,7 @@ import charting.options.TableOptions;
 		
 		@Override
 		public synchronized void setChartsAndTablesLoading(){
-			
+			super.setChartsAndTablesLoading();
 			for(ExportableChartPanel p : chartPanels.values()){
 				p.setChart(AbstractChartFactory.createLoadingChart());			
 			}
@@ -93,7 +93,7 @@ import charting.options.TableOptions;
 		}
 		
 		@Override
-		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
+		protected JFreeChart createPanelChartType(ChartOptions options){
 			if(GlobalOptions.getInstance().isViolinPlots()){
 				return new ViolinChartFactory(options).createStatisticPlot();
 			} else {
@@ -102,7 +102,7 @@ import charting.options.TableOptions;
 		}
 		
 		@Override
-		protected TableModel createPanelTableType(TableOptions options) throws Exception{
+		protected TableModel createPanelTableType(TableOptions options){
 			return null;
 		}
 

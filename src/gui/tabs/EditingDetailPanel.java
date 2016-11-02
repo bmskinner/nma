@@ -115,17 +115,14 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 	protected void updateNull() {
 		updateMultiple();
 	}
-	
+		
 	@Override
-	public void setChartsAndTablesLoading(){}
-	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) {
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options){
 		return null;
 	}
 	

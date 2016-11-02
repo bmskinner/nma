@@ -633,6 +633,13 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		List<IBorderSegment> newSegs = new ArrayList<IBorderSegment>(segments.length);
 		for(int i=0; i<segments.length-1; i++){
 			
+			int testStart = newStarts[i];
+			int testEnd   = newStarts[i+1];
+			
+			if(testEnd - testStart < IBorderSegment.MINIMUM_SEGMENT_LENGTH){
+				newStarts[i+1] = newStarts[i+1]+1;
+			}
+			
 			IBorderSegment seg = new DefaultBorderSegment(newStarts[i], newStarts[i+1], length, segments[i].getID());
 			newSegs.add(seg);
 		}

@@ -80,7 +80,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception{
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		return new MorphologyChartFactory(options).makeSegmentStartPositionChart();
 	}
 

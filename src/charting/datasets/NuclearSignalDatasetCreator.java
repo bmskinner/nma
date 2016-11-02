@@ -68,7 +68,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @param list the AnalysisDatasets to include
 	 * @return a table model
 	 */
-	public TableModel createSignalDetectionParametersTable(TableOptions options) throws ChartDatasetCreationException {
+	public TableModel createSignalDetectionParametersTable(TableOptions options) {
 
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -565,7 +565,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public TableModel createSignalStatsTable(TableOptions options) throws ChartDatasetCreationException {
+	public TableModel createSignalStatsTable(TableOptions options) {
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -587,7 +587,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		return model;
 	}
 	
-	private TableModel createSingleDatasetSignalStatsTable(TableOptions options) throws ChartDatasetCreationException {
+	private TableModel createSingleDatasetSignalStatsTable(TableOptions options) {
 
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -691,7 +691,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		return model;	
 	}
 	
-	private TableModel createMultiDatasetSignalStatsTable(TableOptions options) throws ChartDatasetCreationException {
+	private TableModel createMultiDatasetSignalStatsTable(TableOptions options) {
 
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -926,10 +926,10 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @param options
 	 * @return
 	 */
-	public TableModel createShellChiSquareTable(TableOptions options) throws ChartDatasetCreationException {
+	public TableModel createShellChiSquareTable(TableOptions options) {
 		
 		if( ! options.hasDatasets()){
-			return this.createBlankTable();
+			return createBlankTable();
 		}
 		
 		DefaultTableModel model = new DefaultTableModel();

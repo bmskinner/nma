@@ -164,6 +164,7 @@ public class MergesDetailPanel extends DetailPanel {
 	
 	@Override
 	public void setChartsAndTablesLoading(){
+		super.setChartsAndTablesLoading();
 		sourceParametersTable.setModel(AbstractDatasetCreator.createLoadingTable());
 	}
 	
@@ -240,12 +241,12 @@ public class MergesDetailPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		return null;
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options){
 		if(options.getType().equals(TableType.MERGE_SOURCES)){
 			return new AnalysisDatasetTableCreator(options).createMergeSourcesTable();
 		} else {

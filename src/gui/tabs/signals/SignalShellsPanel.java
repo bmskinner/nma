@@ -199,18 +199,19 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	
 	@Override
 	public void setChartsAndTablesLoading(){
+		super.setChartsAndTablesLoading();
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
 		table.setModel(AbstractDatasetCreator.createLoadingTable());	
 		
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options) {
 		return new NuclearSignalChartFactory(options).createShellChart();
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception{
+	protected TableModel createPanelTableType(TableOptions options){
 		return new NuclearSignalDatasetCreator().createShellChiSquareTable(options);
 	}
 

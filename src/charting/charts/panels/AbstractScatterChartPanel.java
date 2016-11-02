@@ -175,12 +175,12 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options) throws Exception {
+	protected TableModel createPanelTableType(TableOptions options) {
 		return new ScatterChartDatasetCreator().createSpearmanCorrlationTable(options);
 	}
 
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		return new ScatterChartFactory(options).createScatterChart();
 	}
 	

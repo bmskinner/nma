@@ -202,11 +202,12 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	
 	@Override
 	public void setChartsAndTablesLoading(){
+		super.setChartsAndTablesLoading();
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());			
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		return new MorphologyChartFactory(options).makeVariabilityChart();
 	}
 	

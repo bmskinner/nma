@@ -238,17 +238,17 @@ public class NuclearOverlaysPanel extends DetailPanel {
 
 	@Override
 	public void setChartsAndTablesLoading(){
+		super.setChartsAndTablesLoading();
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());		
 	}
 	
 	@Override
-	protected TableModel createPanelTableType(TableOptions options)
-			throws Exception {
+	protected TableModel createPanelTableType(TableOptions options){
 		return null;
 	}
 
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+	protected JFreeChart createPanelChartType(ChartOptions options){
 		finest("Creating nuclear overlay chart");
 		return new OutlineChartFactory(options).createVerticalNucleiChart();
 	}

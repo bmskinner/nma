@@ -65,7 +65,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 		}
 		
 		@Override
-		protected JFreeChart createPanelChartType(ChartOptions options) throws Exception {
+		protected JFreeChart createPanelChartType(ChartOptions options){
 			return new MorphologyChartFactory(options).createProfileChart(  );
 		}
 		
