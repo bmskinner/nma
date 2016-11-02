@@ -224,7 +224,36 @@ public abstract class AbstractCellularComponent
 		this.sourceFileName    = a.getSourceFileName();
 		this.channel           = a.getChannel();
 		this.scale 			   = a.getScale();
-		this.borderList        = a.getBorderList();
+		
+		// Duplicate the border points
+		this.borderList = new ArrayList<IBorderPoint>(a.getBorderLength());
+		
+		for(IBorderPoint p : a.getBorderList()){
+			borderList.add( IBorderPoint.makeNew(p));
+		}
+		
+		// Link points
+				
+		for(int i=0; i<borderList.size(); i++){
+			IBorderPoint point = borderList.get(i);
+			
+			if(i>0 && i<borderList.size()-1){
+				point.setNextPoint(borderList.get(i+1));
+				point.setPrevPoint(borderList.get(i-1));
+			}
+		}
+		
+		// Set first and last
+		IBorderPoint first = borderList.get(0);
+		first.setNextPoint(borderList.get(1));
+		first.setPrevPoint(borderList.get(borderList.size()-1));
+		
+		IBorderPoint last = borderList.get(borderList.size()-1);
+		last.setNextPoint(borderList.get(0));
+		last.setPrevPoint(borderList.get(borderList.size()-2));
+		
+		
+//		this.borderList        = a.getBorderList();
 		this.centreOfMass      = new FloatPoint(a.getCentreOfMass());
 	}
 	
@@ -555,6 +584,8 @@ public abstract class AbstractCellularComponent
 	
 	public List<IBorderPoint> getOriginalBorderList(){
 		
+		log("Getting original border list");
+		
 		List<IBorderPoint> result = new ArrayList<IBorderPoint>(borderList.size());
 		
 		// Get the current position of the object
@@ -582,6 +613,7 @@ public abstract class AbstractCellularComponent
 	
 	public void setBorderList(List<IBorderPoint> list){
 		
+		log("Setting border list");
 		// ensure the new border list is linked properly
 		for(int i=0; i<list.size(); i++){
 			IBorderPoint p = list.get(i);
@@ -715,7 +747,7 @@ public abstract class AbstractCellularComponent
 	Flip the X positions of the border points around an X position
 	 */
 	public void flipXAroundPoint(IPoint p){
-
+		log("Flipping about X");
 		double xCentre = p.getX();
 
 		for(IBorderPoint n : borderList){
@@ -743,7 +775,8 @@ public abstract class AbstractCellularComponent
 	 * @param point the new centre of mass
 	 */
 	public void moveCentreOfMass(IPoint point){
-		
+		log("Moving CoM");
+
 		// get the difference between the x and y positions 
 		// of the points as offsets to apply
 		double xOffset = point.getX() - centreOfMass.getX();
@@ -759,6 +792,7 @@ public abstract class AbstractCellularComponent
 	 */
 	public void offset(double xOffset, double yOffset){
 
+		log("Offsetting component by "+xOffset+", "+yOffset);
 		// find the position of the centre of mass after 
 		// adding the offsets
 		double newX =  centreOfMass.getX() + xOffset;

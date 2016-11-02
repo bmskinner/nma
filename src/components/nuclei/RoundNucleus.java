@@ -558,21 +558,18 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	public Nucleus getVerticallyRotatedNucleus(){
 		if(verticalNucleus==null){
-
 			verticalNucleus = this.duplicate();
-			//TODO - at this point the nucleus is at 0,0
 
-			verticalNucleus.alignVertically();			
+			verticalNucleus.alignVertically();	
 			
-			// Ensure all vertical nuclei have overlapping centres of mass
-//			log(this.getNameAndNumber()+": Moving vertical nucleus CoM to 0,0");
-			verticalNucleus.moveCentreOfMass(new FloatPoint(0,0));
+			// Ensure all vertical nuclei will share a common CoM
+			verticalNucleus.moveCentreOfMass(IPoint.makeNew(0,0));
 			this.setStatistic(NucleusStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
 			this.setStatistic(NucleusStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
 			
 			double aspect = verticalNucleus.getBounds().getHeight() / verticalNucleus.getBounds().getWidth();
-			this.setStatistic(NucleusStatistic.ASPECT,  aspect);
-//			log(this.getNameAndNumber()+": Vert CoM now - "+verticalNucleus.getCentreOfMass());
+			this.setStatistic(NucleusStatistic.ASPECT,  aspect);			
+			
 		}
 		return verticalNucleus;
 	}

@@ -198,6 +198,9 @@ public class PopulationImportWorker extends AnalysisWorker {
 				log(n.getNameAndNumber()+": x0 = "+n.getBorderPoint(0).getX());
 			}
 			
+			if( n.getBorderPoint(0).getX()<0){
+				log(n.getNameAndNumber()+": x0 = "+n.getBorderPoint(0).getX());
+			}
 			
 //			AbstractCellularComponent c = (AbstractCellularComponent) n;
 //			

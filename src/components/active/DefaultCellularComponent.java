@@ -226,10 +226,39 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
 			makeBorderList(roi);
 		} else {
-			this.borderList        = a.getBorderList();
+			duplicateBorderList(a);
 		}
 		finest("Created border list");
 		this.centreOfMass      = IPoint.makeNew(a.getCentreOfMass());
+	}
+	
+	private void duplicateBorderList(CellularComponent c){
+		// Duplicate the border points
+		this.borderList = new ArrayList<IBorderPoint>(c.getBorderLength());
+
+		for(IBorderPoint p : c.getBorderList()){
+			borderList.add( IBorderPoint.makeNew(p));
+		}
+
+		// Link points
+
+		for(int i=0; i<borderList.size(); i++){
+			IBorderPoint point = borderList.get(i);
+
+			if(i>0 && i<borderList.size()-1){
+				point.setNextPoint(borderList.get(i+1));
+				point.setPrevPoint(borderList.get(i-1));
+			}
+		}
+
+		// Set first and last
+		IBorderPoint first = borderList.get(0);
+		first.setNextPoint(borderList.get(1));
+		first.setPrevPoint(borderList.get(borderList.size()-1));
+
+		IBorderPoint last = borderList.get(borderList.size()-1);
+		last.setNextPoint(borderList.get(0));
+		last.setPrevPoint(borderList.get(borderList.size()-2));
 	}
 	
 	public boolean smoothByDefault(){

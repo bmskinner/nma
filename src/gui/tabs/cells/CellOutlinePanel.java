@@ -96,7 +96,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
 
 
-		if(this.getCellModel().hasCell()){
+		if( ! this.getCellModel().hasCell()){
 			rotationPanel.setEnabled(false);
 			makeMeshPanel.setEnabled(false);
 			warpMeshPanel.setEnabled(false);
