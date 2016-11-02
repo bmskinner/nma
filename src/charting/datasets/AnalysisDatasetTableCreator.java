@@ -883,11 +883,11 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			return makeEmptyWilcoxonTable(null);
 		}
 		
-		if(options.getStat().getClass()==NucleusStatistic.class){
+		if(options.getStat() instanceof NucleusStatistic){
 			return createWilcoxonNuclearStatTable();
 		}
 		
-		if(options.getStat().getClass()==SegmentStatistic.class){
+		if(options.getStat() instanceof SegmentStatistic){
 			return createWilcoxonSegmentStatTable();
 		}
 		
