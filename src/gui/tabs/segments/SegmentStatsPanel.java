@@ -144,12 +144,6 @@ public class SegmentStatsPanel extends DetailPanel {
 	protected JFreeChart createPanelChartType(ChartOptions options)	throws Exception {
 		return null;
 	}
-
-//	@Override
-//	public void actionPerformed(ActionEvent e) {
-//		update(getDatasets());
-//		
-//	}
 	
 	private class SegmentTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 

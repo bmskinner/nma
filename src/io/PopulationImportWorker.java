@@ -140,12 +140,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 					updateSignals();
 				}
 				
-				if(v.isOlderThan(new Version(1,13,3))){
-					
-					// Correct offsets of border lists
-					updateBorderListOffsets();
-				}
-				
+		
 				
 
 				// Generate vertically rotated nuclei for all imported datasets
@@ -168,52 +163,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 			return false;
 		}
 	}
-	
-	private void updateBorderListOffsets(){
-		log("Updating border positions for old dataset");
 		
-		updateSignalPositions(dataset);
-		for(IAnalysisDataset child : dataset.getAllChildDatasets()){
-			updateBorderPositions(child);
-		}
-		
-		if(dataset.hasMergeSources()){
-			for(IAnalysisDataset source : dataset.getAllMergeSources()){
-				updateBorderPositions(source);
-			}
-		}
-		
-		
-	}
-	
-	/**
-	 * In older versions of the program, the nucleus border lists are stored with
-	 * a different offset to the current version. Correct this on import.
-	 * @param dataset
-	 */
-	private void updateBorderPositions(IAnalysisDataset dataset){
-		dataset.getCollection().getNuclei().parallelStream().forEach( n -> {
-			
-			if( ! n.containsPoint(n.getCentreOfMass())){
-				log(n.getNameAndNumber()+": x0 = "+n.getBorderPoint(0).getX());
-			}
-			
-			if( n.getBorderPoint(0).getX()<0){
-				log(n.getNameAndNumber()+": x0 = "+n.getBorderPoint(0).getX());
-			}
-			
-//			AbstractCellularComponent c = (AbstractCellularComponent) n;
-//			
-//			IPoint oldCom = c.getCentreOfMass();
-//			
-//			c.offset(oldCom.getX(), oldCom.getY());
-//			
-////			c.setCentreOfMassDirectly(oldCom);
-//			log("\t"+n.getNameAndNumber()+": x0 = "+n.getBorderPoint(0).getX());
-			
-		});
-	}
-	
 	private void updateSignals(){
 		log("Updating signal positions for old dataset");
 		updateSignalPositions(dataset);

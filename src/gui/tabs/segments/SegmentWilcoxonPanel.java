@@ -34,6 +34,7 @@ import javax.swing.table.TableModel;
 import analysis.profiles.ProfileException;
 import stats.Quartile;
 import stats.SegmentStatistic;
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.DefaultTableOptions;
 import charting.options.TableOptions;
@@ -92,7 +93,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 					String segName = seg.getName();
 
 					
-					ExportableTable table = new ExportableTable();
+					ExportableTable table = new ExportableTable(AbstractDatasetCreator.createLoadingTable());
 					
 					TableOptions options = new TableOptionsBuilder()
 						.setDatasets(getDatasets())
@@ -102,14 +103,11 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 						.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer())
 						.build();
 
-					
-//					TableModel model = getTable(options);
-					
-//					ExportableTable table = new ExportableTable(model);
-//					setRenderer(table, new WilcoxonTableCellRenderer());
 					addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
-					scrollPane.setColumnHeaderView(table.getTableHeader());
 					setTable(options);
+
+//					scrollPane.setColumnHeaderView(table.getTableHeader());
+
 				}
 
 			}
@@ -142,7 +140,8 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 		
 	}
 	
-	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return new AnalysisDatasetTableCreator(options).createWilcoxonStatisticTable();
 	}
 			

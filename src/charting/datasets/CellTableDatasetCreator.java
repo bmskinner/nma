@@ -148,10 +148,10 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		} 
 		
 		
-		for(int i=0; i<n.getBorderLength(); i++){
-			fieldNames.add("Border index "+i);
-			rowData.add("x: "+n.getBorderPoint(i).getX()+" : y: "+n.getBorderPoint(i).getY());
-		}
+//		for(int i=0; i<n.getBorderLength(); i++){
+//			fieldNames.add("Border index "+i);
+//			rowData.add("x: "+n.getBorderPoint(i).getX()+" : y: "+n.getBorderPoint(i).getY());
+//		}
 		
 		addNuclearSignalsToTable(fieldNames, rowData, n, d);
 

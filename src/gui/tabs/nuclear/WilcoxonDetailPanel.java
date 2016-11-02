@@ -21,9 +21,11 @@ package gui.tabs.nuclear;
 import javax.swing.JLabel;
 import javax.swing.table.TableModel;
 
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
+import gui.Labels;
 import gui.components.ExportableTable;
 import gui.components.WilcoxonTableCellRenderer;
 import gui.tabs.AbstractPairwiseDetailPanel;
@@ -40,7 +42,7 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	protected void updateSingle() {
 		scrollPane.setColumnHeaderView(null);
 		tablePanel = createTablePanel();
-		tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
+		tablePanel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
 		scrollPane.setViewportView(tablePanel);;
 		tablePanel.repaint();
 	}
@@ -52,7 +54,7 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 		tablePanel = createTablePanel();
 		for(NucleusStatistic stat : NucleusStatistic.values()){
 
-			ExportableTable table = new ExportableTable();
+			ExportableTable table = new ExportableTable(AbstractDatasetCreator.createLoadingTable());
 			
 			TableOptions options = new TableOptionsBuilder()
 				.setDatasets(getDatasets())
@@ -77,7 +79,7 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	protected void updateNull() {		
 		scrollPane.setColumnHeaderView(null);
 		tablePanel = createTablePanel();
-		tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
+		tablePanel.add(new JLabel(Labels.NO_DATA_LOADED, JLabel.CENTER));
 		scrollPane.setViewportView(tablePanel);;
 		tablePanel.repaint();
 	}

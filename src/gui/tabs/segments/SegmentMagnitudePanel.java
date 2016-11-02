@@ -35,8 +35,10 @@ import javax.swing.table.TableModel;
 import analysis.profiles.ProfileException;
 import stats.Quartile;
 import stats.SegmentStatistic;
+import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.DefaultTableOptions;
+import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import components.active.generic.UnavailableBorderTagException;
 import components.generic.ProfileType;
@@ -102,20 +104,20 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel  {
 				for(IBorderSegment seg : segments){
 					String segName = seg.getName();
 
+					ExportableTable table = new ExportableTable(AbstractDatasetCreator.createLoadingTable());
 					
+					TableOptions options = new TableOptionsBuilder()
+						.setDatasets(getDatasets())
+						.addStatistic(stat)
+						.setSegPosition(seg.getPosition())
+						.setTarget(table)
+						.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new PairwiseTableCellRenderer())
+						.build();
 					
-					DefaultTableOptions options = new TableOptionsBuilder()
-					.setDatasets(getDatasets())
-					.addStatistic(stat)
-					.setSegPosition(seg.getPosition())
-					.build();
-					
-					TableModel model = getTable(options);
-					
-					ExportableTable table = new ExportableTable(model);
-					setRenderer(table, new PairwiseTableCellRenderer());
 					addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
 					scrollPane.setColumnHeaderView(table.getTableHeader());
+					setTable(options);
+
 				}
 
 			}
@@ -149,7 +151,8 @@ public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel  {
 		
 	}
 	
-	protected TableModel createPanelTableType(DefaultTableOptions options) throws Exception{
+	@Override
+	protected TableModel createPanelTableType(TableOptions options) throws Exception{
 		return new AnalysisDatasetTableCreator(options).createMagnitudeStatisticTable();
 	}
 			
