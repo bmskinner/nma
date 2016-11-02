@@ -1334,7 +1334,7 @@ public class CellCollection implements ICellCollection {
 		}
 		int shared  = countSharedNuclei(d2);
 		vennCache.put(d2.getID(), shared);
-		d2.countShared(this);
+//		d2.countShared(this);
 		return shared;
 
 	}
@@ -1354,18 +1354,31 @@ public class CellCollection implements ICellCollection {
 		if(d2.getNucleusType() != this.nucleusType){
 			return 0;
 		}
+				
+		Set<UUID> toSearch1 = this.getCellIDs();
+		Set<UUID> toSearch2 = d2.getCellIDs();
+		
+		finest("Beginning search for shared cells");
 
-
+		// choose the smaller to search within
+		
 		int shared = 0;
-		for(ICell c : this.mappedCollection.values()){
-			UUID n1id = c.getNucleus().getID();
-
-			for(Nucleus n2 : d2.getNuclei()){
-				if( n2.getID().equals(n1id)){
+		for(UUID id1 : toSearch1){
+			
+			Iterator<UUID> it = toSearch2.iterator();
+			
+			while(it.hasNext()){
+				UUID id2 = it.next();
+				
+				if(id1.equals(id2)){
+					it.remove();
 					shared++;
+					break;
 				}
 			}
-		}
+			
+		}	
+		finest("Completed search for shared cells");
 		return shared;
 	}
 

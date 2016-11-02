@@ -1348,8 +1348,6 @@ implements ICellCollection {
 		
 		finest("Beginning search for shared cells");
 
-//		toSearch1.retainAll(toSearch2);
-//		int shared = toSearch1.size();
 		// choose the smaller to search within
 		
 		int shared = 0;
@@ -1370,26 +1368,6 @@ implements ICellCollection {
 		}	
 		finest("Completed search for shared cells");
 		return shared;
-//		return toSearch1.size();
-		
-//		int shared = 0;
-//		
-//		Iterator<UUID> it1 = toSearch1.iterator();
-//		
-//		while(it1.hasNext()){
-//			UUID id1 = it1.next();
-//			Iterator<UUID> it2 = toSearch2.iterator();
-//			while(it2.hasNext()){
-//				UUID id2 = it2.next();
-//				if( id2.equals(id1)){
-//					shared++;
-//					it2.remove(); // don't search the list more than necessary
-//					it1.remove(); // don't search the list more than necessary
-//				}
-//				
-//			}
-//		}
-//		return shared;
 	}
 
 	public int countClockWiseRPNuclei(){
