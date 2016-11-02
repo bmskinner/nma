@@ -17,6 +17,7 @@ import components.active.generic.DefaultBorderPoint;
 import components.active.generic.FloatPoint;
 import components.active.generic.SegmentedFloatProfile;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.active.generic.UnprofilableObjectException;
 import components.generic.IPoint;
 import components.generic.IProfile;
@@ -24,7 +25,6 @@ import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderPoint;
-import components.nuclei.Nucleus;
 import ij.gui.Roi;
 import stats.NucleusStatistic;
 
@@ -89,9 +89,13 @@ public abstract class ProfileableCellularComponent
 
 
 			for(ProfileType type : ProfileType.values()){
-				if(comp.hasProfile(type)){
+
+				try {
 					this.profileMap.put(type, ISegmentedProfile.makeNew(comp.getProfile(type)));
+				} catch (UnavailableProfileTypeException e) {
+					fine("Cannot get profile type "+type+" from template");
 				}
+				
 			}
 
 
@@ -168,8 +172,14 @@ public abstract class ProfileableCellularComponent
 			return;
 		}
 		
+		if(this.getBorderLength()!= p.size()){
+			throw new IllegalArgumentException("Input profile does not match border length of object");
+		}
+				
 		// fetch the index of the pointType (the zero of the input profile)
 		int pointIndex = this.borderTags.get(tag);
+		
+		fine("Setting profile "+type+" at "+tag+" offsetting given profile by -"+pointIndex);
 		
 		// remove the offset from the profile, by setting the profile to start from the pointIndex
 		try {
@@ -182,21 +192,21 @@ public abstract class ProfileableCellularComponent
 	}
 
 	
-	public IBorderPoint getBorderTag(Tag tag) throws IndexOutOfBoundsException {
+	public IBorderPoint getBorderTag(Tag tag) throws UnavailableBorderTagException {
 		
 		IBorderPoint result = new DefaultBorderPoint(0,0);
 		
 		int borderIndex = this.getBorderIndex(tag);
 			
 		if(borderIndex <0 || borderIndex>=this.getBorderLength()){
-			throw new IndexOutOfBoundsException("Tag is beyond border length");
+			throw new UnavailableBorderTagException("Tag is registered as index -1");
 		}
 			
 		result = this.getBorderPoint((this.getBorderIndex(tag)));
 		return result;
 	}
 	
-	public IBorderPoint getBorderPoint(Tag tag) throws IndexOutOfBoundsException{
+	public IBorderPoint getBorderPoint(Tag tag) throws UnavailableBorderTagException{
 		return getBorderTag(tag) ;
 	}
 		
@@ -384,7 +394,7 @@ public abstract class ProfileableCellularComponent
 		}
 	}
 	
-	public double getWindowProportion(ProfileType type){
+	public double getWindowProportion(ProfileType type) {
 		
 		switch(type){
 			case ANGLE: { 
@@ -440,9 +450,18 @@ public abstract class ProfileableCellularComponent
 	}
 
 
-	public ISegmentedProfile getProfile(ProfileType type, Tag tag) throws ProfileException{
+	public ISegmentedProfile getProfile(ProfileType type, Tag tag)
+			throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException{
 		
 		// fetch the index of the pointType (the new zero)
+		if( ! this.hasBorderTag(tag)){
+			throw new UnavailableBorderTagException("Tag "+tag+" not present");
+		}
+		
+		if( ! this.hasProfile(type)){
+			throw new UnavailableProfileTypeException("Profile type "+type+" not present");
+		}
+		
 		int pointIndex = this.borderTags.get(tag);
 		
 		ISegmentedProfile profile = null;

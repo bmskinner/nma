@@ -27,6 +27,7 @@ import java.util.logging.Level;
 
 import analysis.AbstractProgressAction;
 import components.AbstractCellularComponent;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.IProfile;
 import components.generic.ISegmentedProfile;
 import components.generic.Profile;
@@ -119,7 +120,13 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 		}
 		
 		// remove any existing segments in the nucleus
-		ISegmentedProfile nucleusProfile = n.getProfile(ProfileType.ANGLE);
+		ISegmentedProfile nucleusProfile;
+		try {
+			nucleusProfile = n.getProfile(ProfileType.ANGLE);
+		} catch (UnavailableProfileTypeException e1) {
+			warn("Cannot get angle profile for nucleus");
+			return;
+		}
 		nucleusProfile.clearSegments();
 
 		List<IBorderSegment> nucleusSegments = new ArrayList<IBorderSegment>();
@@ -138,25 +145,15 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 			// get the median profile, indexed to the start or end point
 			IProfile startOffsetMedian 	= median.offset(startIndexInMedian);
 			IProfile endOffsetMedian 	= median.offset(endIndexInMedian);
-
+			
+			try {
+				
 			// find the index at the point of the best fit
 			int startIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(startOffsetMedian);
 			int endIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(endOffsetMedian);
 
-			// create a segment at these points
-			// ensure that the segment meets length requirements
 			
-//			
-//			if( Math.abs(endIndex-startIndex) < NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH ){
-//				
-//				while(Math.abs(endIndex-startIndex)<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
-//					endIndex = n.wrapIndex(++endIndex);
-//					prevSeg.update(prevSeg.getStartIndex(), endIndex);
-//					fine("Segment too short. Lengthening to end index "+endIndex);
-//				}
-//			}
 			
-			try {
 				IBorderSegment seg = IBorderSegment.newSegment(startIndex, endIndex, n.getBorderLength(), segment.getID());
 				if(prevSeg != null){
 					seg.setPrevSegment(prevSeg);
@@ -167,7 +164,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 
 				prevSeg = seg;
 			
-			} catch(IllegalArgumentException e){
+			} catch(IllegalArgumentException | UnavailableProfileTypeException e){
 				fine("Error making segment for nucleus "+n.getNameAndNumber(), e);
 				break;
 				

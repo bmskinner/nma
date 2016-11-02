@@ -370,17 +370,16 @@ public interface IBorderSegment
 			boolean lockState = firstSegment.isLocked();
 			firstSegment.setLocked(false);
 			
-			boolean ok = false;
+
 			try {
-				ok = firstSegment.update(lastSegment.getEndIndex(), firstSegment.getEndIndex());
-			} catch(IllegalArgumentException e){
-				throw new ProfileException("Error fitting final segment: "+firstSegment.getLastFailReason());
+				
+				
+				firstSegment.update(lastSegment.getEndIndex(), firstSegment.getEndIndex());
+				
+			} catch(IllegalArgumentException e){				
+				throw new ProfileException("Error fitting final segment: "+e.getMessage()+"\n"+IBorderSegment.toString(list));
 			}
 			
-			if(!ok){
-				throw new ProfileException("Error fitting final segment: "+firstSegment.getLastFailReason());
-			}
-
 			lastSegment.setNextSegment(firstSegment); // ensure they match up at the end
 			firstSegment.setPrevSegment(lastSegment);
 
@@ -446,24 +445,34 @@ public interface IBorderSegment
 	 * @throws Exception 
 	 */
 	static List<IBorderSegment> nudge(List<IBorderSegment> list, int value) throws ProfileException  {
+				
 		List<IBorderSegment> result = new ArrayList<IBorderSegment>(list.size());
 		
 		for(IBorderSegment segment : list){
 			
-			IBorderSegment newSeg = IBorderSegment.newSegment(
-					
-					DefaultCellularComponent.wrapIndex(segment.getStartIndex()+value,
-									segment.getTotalLength()), 
-									
-					DefaultCellularComponent.wrapIndex(segment.getEndIndex()+value,
-									segment.getTotalLength()), 
-					
-					segment.getTotalLength() ,
-					
-					segment.getID()
-			);
+			int toWrap = segment.getStartIndex()+value;
 			
-//			newSeg.setName(segment.getName());
+			int newStart = DefaultCellularComponent.wrapIndex(toWrap,
+					segment.getTotalLength());
+			
+			int newEnd = DefaultCellularComponent.wrapIndex(segment.getEndIndex()+value,
+					segment.getTotalLength());
+			
+			
+			if(newStart < 0 || newStart >=segment.getTotalLength()){
+				throw new ProfileException("Index wrapping failed for segment: Index "
+						+segment.getStartIndex()+" wrapped to "+newStart
+						+" given total length "+segment.getTotalLength()
+						+" an offset value of "+value
+						+" and the input index to wrap was "+toWrap
+						);
+			}
+			
+						
+			IBorderSegment newSeg = IBorderSegment.newSegment(					
+					newStart, newEnd, segment.getTotalLength(), segment.getID()	);
+			
+
 			newSeg.setPosition(segment.getPosition());
 			
 			

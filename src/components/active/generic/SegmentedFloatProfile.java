@@ -502,20 +502,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		}
 	}
 
-//	/**
-//	 * Test if the all the segments are currently linked
-//	 * @return
-//	 */
-//	private boolean testLinked(){
-//		boolean result = true;
-//		for(IBorderSegment seg : this.segments){
-//			if(!seg.hasNextSegment()  || !seg.hasPrevSegment()){
-//				result = false;
-//			}
-//		}
-//		return result;
-//	}
-
 	/* (non-Javadoc)
 	 * @see components.generic.ISegmentedProfile#adjustSegmentStart(java.util.UUID, int)
 	 */
@@ -569,19 +555,17 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		
 	}
 
-	/* (non-Javadoc)
-	 * @see no.components.Profile#offset(int)
-	 * Offset the segment by the given amount. Returns a copy
-	 * of the profile.
-	 */
+
 	/* (non-Javadoc)
 	 * @see components.generic.ISegmentedProfile#offset(int)
 	 */
 	@Override
-	public ISegmentedProfile offset(int newStartIndex) throws ProfileException {
-
+	public ISegmentedProfile offset(int offset) throws ProfileException {
+		
+		
+		
 		// get the basic profile with the offset applied
-		IProfile offsetProfile = super.offset(newStartIndex);
+		IProfile offsetProfile = super.offset(offset);
 
 		/*
 		The segmented profile starts like this:
@@ -589,22 +573,23 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		0     5          15                   35
 		|-----|----------|--------------------|
 
-		After applying newStartIndex=5, the profile looks like this:
+		After applying offset=5, the profile looks like this:
 
 		0          10                   30    35
 		|----------|--------------------|-----|
 
-		The new profile starts at index 'newStartIndex' in the original profile
-		This means that we must subtract 'newStartIndex' from the segment positions
+		The new profile starts at index 'offset' in the original profile
+		This means that we must subtract 'offset' from the segment positions
 		to make them line up.
 
 		The nudge function in IBorderSegment moves endpoints by a specified amount
 
 		 */
-		fine("Offsetting segments to begin at "+newStartIndex );
-		//		IJ.log(IBorderSegment.toString(getSegments()));
+//		fine("Offsetting segments in profile by "+offset );
+		
+//		fine("Profile length: "+size()+"; segment total: "+segments[0].getTotalLength());
 
-		List<IBorderSegment> segments = IBorderSegment.nudge(getSegments(), -newStartIndex);
+		List<IBorderSegment> segments = IBorderSegment.nudge(getSegments(), -offset);
 
 		/*
 		 * Ensure that the first segment in the list is at index zero
@@ -624,10 +609,10 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 			props[i] = this.getIndexProportion(segments[i].getStartIndex());
 		}
 		
-		fine("Props:");
-		for(double d : props){
-			fine("\t"+d);
-		}
+//		fine("Props:");
+//		for(double d : props){
+//			fine("\t"+d);
+//		}
 		
 		// get the target start indexes of the new segments
 		
@@ -637,10 +622,10 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 			newStarts[i] =  (int) (props[i] * (double) length );
 		}
 		
-		fine("Starts:");
-		for(int d : newStarts){
-			fine("\t"+d);
-		}
+//		fine("Starts:");
+//		for(int d : newStarts){
+//			fine("\t"+d);
+//		}
 		
 		// Make the new segments
 		

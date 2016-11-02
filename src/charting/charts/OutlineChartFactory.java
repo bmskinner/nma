@@ -58,7 +58,9 @@ import org.jfree.ui.Layer;
 import components.Cell;
 import components.CellularComponent;
 import components.ICell;
+import components.active.DefaultCell;
 import components.active.generic.FloatPoint;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
@@ -410,23 +412,30 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		// make a hash to track the contents of each dataset produced
 		Map<Integer, String>    hash        = new HashMap<Integer, String>(0); 
 		Map<Integer, XYDataset> datasetHash = new HashMap<Integer, XYDataset>(0); 
-		
+
 		if(options.getRotateMode().equals(RotationMode.VERTICAL)){
-			finest("Rotation mode is vertical");
-			// duplicate the cell
-			ICell newCell = new Cell();
-			finest("Cell segments    :"+ cell.getNucleus().getProfile(ProfileType.ANGLE).toString());
 
-			Nucleus verticalNucleus = cell.getNucleus().getVerticallyRotatedNucleus();
-			finest("Vertical nucleus is "+verticalNucleus.getNameAndNumber());
-			newCell.setNucleus(verticalNucleus);
-			finest("Vertical segments:"+verticalNucleus.getProfile(ProfileType.ANGLE).toString());
+			try {
+				finest("Rotation mode is vertical");
+				// duplicate the cell
+				ICell newCell = new DefaultCell();
+				finest("Cell segments    :"+ cell.getNucleus().getProfile(ProfileType.ANGLE).toString());
 
-			cell = newCell;
-			finest("Fetched vertical nucleus");
-			
-			// Need to have top point at the top of the image
-			plot.getRangeAxis().setInverted(false);
+				Nucleus verticalNucleus = cell.getNucleus().getVerticallyRotatedNucleus();
+				finest("Vertical nucleus is "+verticalNucleus.getNameAndNumber());
+				newCell.setNucleus(verticalNucleus);
+				finest("Vertical segments:"+verticalNucleus.getProfile(ProfileType.ANGLE).toString());
+
+				cell = newCell;
+				finest("Fetched vertical nucleus");
+
+				// Need to have top point at the top of the image
+				plot.getRangeAxis().setInverted(false);
+			} catch(UnavailableProfileTypeException e){
+				warn("Cannot create vertical nucleus");
+				fine("Cannot create vertical nucleus", e);
+				return makeErrorChart();
+			}
 		}
 
 		/*

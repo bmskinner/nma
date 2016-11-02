@@ -22,6 +22,7 @@ package analysis.profiles;
 import java.util.UUID;
 
 import components.CellularComponent;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 
@@ -55,7 +56,7 @@ public interface Profileable extends CellularComponent {
 	 * is needed, specify a pointType
 	 * @return
 	 */
-	ISegmentedProfile getProfile(ProfileType type);
+	ISegmentedProfile getProfile(ProfileType type) throws UnavailableProfileTypeException;
 	
 	/**
 	 * Update the profile of the given type. Since only franken profiles are 
@@ -66,7 +67,7 @@ public interface Profileable extends CellularComponent {
 	 * @param profile
 	 * @throws Exception
 	 */
-	void setProfile(ProfileType type, ISegmentedProfile profile) throws ProfileException;
+	void setProfile(ProfileType type, ISegmentedProfile profile);
 	
 	
 	/**
@@ -81,6 +82,7 @@ public interface Profileable extends CellularComponent {
 	 * Get the fraction of the perimeter to use for calculating the window size
 	 * in pixels
 	 * @return a fraction between 0 and 1
+	 * @throws UnavailableProfileTypeException 
 	 */
 	double getWindowProportion(ProfileType type);
 	
@@ -131,6 +133,6 @@ public interface Profileable extends CellularComponent {
 	 * periphery of the nucleus.
 	 * @return
 	 */
-	double getPathLength(ProfileType type);
+	double getPathLength(ProfileType type) throws UnavailableProfileTypeException;
 		
 }

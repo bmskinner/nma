@@ -302,20 +302,20 @@ public class PopulationImportWorker extends AnalysisWorker {
 			
 			log("Old style dataset detected");
 			
-//			try {
-//
-//				DatasetConverter conv = new DatasetConverter(dataset);
-//
-//				IAnalysisDataset converted = conv.convert();
-//				
-//				dataset = converted;
-//
-//				log("Conversion successful");
-//			} catch (DatasetConversionException e){
-//				warn("Unable to convert to new format.");
-//				warn("Displaying as old format.");
-//				fine("Error in converter", e);
-//			}
+			try {
+
+				DatasetConverter conv = new DatasetConverter(dataset);
+
+				IAnalysisDataset converted = conv.convert();
+				
+				dataset = converted;
+
+				log("Conversion successful");
+			} catch (DatasetConversionException e){
+				warn("Unable to convert to new format.");
+				warn("Displaying as old format.");
+				fine("Error in converter", e);
+			}
 		}
 
 		finest("Returning opened dataset");

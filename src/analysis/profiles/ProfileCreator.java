@@ -26,11 +26,11 @@ import java.util.List;
 
 import logging.Loggable;
 import components.active.generic.SegmentedFloatProfile;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.nuclear.IBorderPoint;
 import components.nuclear.IBorderSegment;
-import components.nuclear.NucleusBorderSegment;
 
 /**
  * Performs angle and distance profiling on Profileable
@@ -78,13 +78,20 @@ public class ProfileCreator implements Loggable {
 		
 		ISegmentedProfile templateProfile = null;
 		// store segments to reapply later
-		if(target.hasProfile(ProfileType.ANGLE)){
-			if(target.getProfile(ProfileType.ANGLE).hasSegments()){
-				templateProfile = target.getProfile(ProfileType.ANGLE);
-				segments = templateProfile.getSegments();
-				
+
+		try {
+			if(target.hasProfile(ProfileType.ANGLE)){
+
+				if(target.getProfile(ProfileType.ANGLE).hasSegments()){
+					templateProfile = target.getProfile(ProfileType.ANGLE);
+					segments = templateProfile.getSegments();
+
+				}
 			}
+		} catch (UnavailableProfileTypeException e) {
+			fine("Profile type angle not found", e);
 		}
+		
 		return segments;
 	}
 	

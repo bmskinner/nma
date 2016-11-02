@@ -41,6 +41,8 @@ import org.jfree.ui.RectangleEdge;
 import analysis.profiles.ProfileException;
 import components.AbstractCellularComponent;
 import components.ICell;
+import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.BorderPoint;
@@ -122,7 +124,7 @@ public class CoupledProfileOutlineChartPanel implements Loggable{
 				double yValue;
 				try {
 					yValue = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).get(xValue);
-				} catch (ProfileException e1) {
+				} catch (ProfileException | IndexOutOfBoundsException | UnavailableBorderTagException | UnavailableProfileTypeException e1) {
 					warn("Error getting y-value");
 					fine("Error getting y-value", e1);
 					return;

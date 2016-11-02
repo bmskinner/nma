@@ -54,11 +54,12 @@ import charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEvent;
 import charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventListener;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.OutlineChartFactory;
-import charting.options.DefaultChartOptions;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.ICell;
 import components.active.DefaultCell;
+import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -281,7 +282,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 			UUID id;
 			try {
 				id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount).getID();
-			} catch (ProfileException e) {
+			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 				warn("Cannot get segmented profile");
 				fine("Error getting profile", e);
 				return;
@@ -401,7 +402,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 					resegmentationComplete();
 				}
 
-			} catch (ProfileException e) {
+			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 				warn("Unable to update segments");
 				fine("Error getting profiles", e);
 			}

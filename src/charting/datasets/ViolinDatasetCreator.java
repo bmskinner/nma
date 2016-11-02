@@ -20,6 +20,7 @@ import analysis.profiles.ProfileException;
 import charting.options.ChartOptions;
 import components.ICellCollection;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
@@ -199,7 +200,7 @@ public class ViolinDatasetCreator implements Loggable {
 
 				addProbabilities(dataset, list, rowKey, colKey);
 				
-			} catch (ProfileException | UnavailableBorderTagException e) {
+			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 				fine("Error getting segmented profile", e);
 				throw new ChartDatasetCreationException("Cannot get segmented profile", e);
 			}		
@@ -242,7 +243,7 @@ public class ViolinDatasetCreator implements Loggable {
 				ISegmentedProfile profile;
 				try {
 					profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-				} catch (ProfileException e) {
+				} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 					fine("Error getting segmented profile", e);
 					throw new ChartDatasetCreationException("Cannot get segmented profile", e);
 				}

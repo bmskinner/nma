@@ -27,6 +27,8 @@ import org.jfree.data.xy.XYDataset;
 import analysis.profiles.ProfileException;
 import analysis.profiles.Taggable;
 import components.CellularComponent;
+import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -148,7 +150,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 		List<IBorderSegment> segmentList;
 		try {
 			segmentList = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments();
-		} catch (ProfileException e) {
+		} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 			fine("Cannot get profile from RP", e);
 			throw new ChartDatasetCreationException("Cannot get profile", e);
 		}

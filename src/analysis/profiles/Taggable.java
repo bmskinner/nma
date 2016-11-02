@@ -23,6 +23,7 @@ import java.util.Map;
 
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BorderTagObject;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
@@ -73,8 +74,9 @@ public interface Taggable extends Profileable {
 	 * @param tag
 	 * @return
 	 * @throws IndexOutOfBoundsException 
+	 * @throws UnavailableBorderTagException 
 	 */
-	public IBorderPoint getBorderTag(Tag tag) throws IndexOutOfBoundsException;
+	public IBorderPoint getBorderTag(Tag tag) throws UnavailableBorderTagException;
 	
 	/**
 	 * Check if the nucleus has the given border tag
@@ -122,8 +124,10 @@ public interface Taggable extends Profileable {
 	 * @param tag the tag to offset the profile to
 	 * @return a copy of the segmented profile
 	 * @throws ProfileException 
+	 * @throws UnavailableBorderTagException 
+	 * @throws UnavailableProfileTypeException 
 	 */
-	public ISegmentedProfile getProfile(ProfileType type, Tag tag) throws ProfileException;
+	public ISegmentedProfile getProfile(ProfileType type, Tag tag) throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException;
 	
 		
 	/**
@@ -132,7 +136,7 @@ public interface Taggable extends Profileable {
 	 * @param profile
 	 * @throws components.active.generic.UnavailableBorderTagException 
 	 */
-	public void setProfile(ProfileType type, Tag tag, ISegmentedProfile profile) throws UnavailableBorderTagException;
+	public void setProfile(ProfileType type, Tag tag, ISegmentedProfile profile) throws UnavailableBorderTagException, UnavailableProfileTypeException;
 	
 	/**
 	 * Get a copy of the mapping of border tags to index positions within 
@@ -146,8 +150,9 @@ public interface Taggable extends Profileable {
 	 * @param tag
 	 * @return
 	 * @throws IndexOutOfBoundsException 
+	 * @throws UnavailableBorderTagException 
 	 */
-	public IBorderPoint getBorderPoint(Tag tag) throws IndexOutOfBoundsException; 
+	public IBorderPoint getBorderPoint(Tag tag) throws UnavailableBorderTagException; 
 	
 	/**
 	 * Get the border index of point in the border list, 

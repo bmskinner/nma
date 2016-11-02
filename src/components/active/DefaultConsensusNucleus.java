@@ -4,7 +4,9 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+
 import analysis.profiles.ProfileCreator;
+import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnprofilableObjectException;
 import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
@@ -138,7 +140,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 					flipXAroundPoint(getCentreOfMass());
 				}
 			}
-		} catch (IndexOutOfBoundsException e){
+		} catch (UnavailableBorderTagException e){
 			fine("Cannot get border tag", e);
 		}
 		

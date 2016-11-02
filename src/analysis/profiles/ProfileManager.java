@@ -35,6 +35,7 @@ import components.ICell;
 import components.ICellCollection;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -294,8 +295,9 @@ public class ProfileManager implements Loggable {
 	 * @throws IndexOutOfBoundsException 
 	 * @throws UnavailableBorderTagException 
 	 * @throws ProfileException 
+	 * @throws UnavailableProfileTypeException 
 	 */
-	public void updateBorderTag(Tag tag, int index) throws IndexOutOfBoundsException, ProfileException, UnavailableBorderTagException{
+	public void updateBorderTag(Tag tag, int index) throws IndexOutOfBoundsException, ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException{
 		
 		finer("Updating border tag "+tag);
 		
@@ -322,8 +324,9 @@ public class ProfileManager implements Loggable {
 	 * @throws IndexOutOfBoundsException 
 	 * @throws ProfileException 
 	 * @throws UnavailableBorderTagException 
+	 * @throws UnavailableProfileTypeException 
 	 */
-	private void updateExtendedBorderTagIndex(Tag tag, int index) throws IndexOutOfBoundsException, ProfileException, UnavailableBorderTagException{
+	private void updateExtendedBorderTagIndex(Tag tag, int index) throws IndexOutOfBoundsException, ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException{
 		
 		int oldIndex = collection.getProfileCollection().getIndex(tag);
 		

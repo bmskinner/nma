@@ -58,6 +58,7 @@ import components.active.generic.DefaultBorderPoint;
 import components.active.generic.FloatPoint;
 import components.active.generic.SegmentedFloatProfile;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BorderTag;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
@@ -167,9 +168,13 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		
 		for(ProfileType type : ProfileType.values()){
-			if(n.hasProfile(type)){
+
+			try {
 				this.profileMap.put(type, n.getProfile(type));
+			} catch (UnavailableProfileTypeException e) {
+				fine("Profile type "+type+" not present");
 			}
+			
 		}
 
 
@@ -855,6 +860,7 @@ public class RoundNucleus extends AbstractCellularComponent
 
 
 	public ISegmentedProfile getProfile(ProfileType type, Tag tag){
+		
 		
 		// fetch the index of the pointType (the new zero)
 		int pointIndex = this.borderTags.get(tag);

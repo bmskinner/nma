@@ -43,6 +43,7 @@ import stats.SignalStatistic;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.FloatPoint;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
@@ -105,9 +106,8 @@ public class RodentSpermNucleus extends SpermNucleus {
 				return result;
 		
 		}
-		} catch (IndexOutOfBoundsException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (UnavailableBorderTagException e) {
+			return 0;
 		}
 		
 //		finest("Calculated stat in rodent sperm nucleus: "+stat);
@@ -127,7 +127,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 				
 				try {
 					calculateHookAndBodyLength();
-				} catch (IndexOutOfBoundsException e) {
+				} catch (UnavailableBorderTagException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -136,7 +136,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		
 	}
 	
-	private double getHookOrBodyLength(boolean useHook) throws IndexOutOfBoundsException {
+	private double getHookOrBodyLength(boolean useHook) throws UnavailableBorderTagException {
 
 		// check stat is present before calling a getStatistic
 		if(hasStatistic(NucleusStatistic.HOOK_LENGTH) || hasStatistic(NucleusStatistic.BODY_WIDTH)){
@@ -163,7 +163,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 			
 	}
 	
-	private void calculateHookAndBodyLength() throws IndexOutOfBoundsException {
+	private void calculateHookAndBodyLength() throws UnavailableBorderTagException {
 			
 		// Copy the nucleus
 		finest("Calculating hook and body length");
@@ -482,7 +482,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		double vertX;
 		try {
 			vertX = verticalNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
-		} catch (IndexOutOfBoundsException e) {
+		} catch (UnavailableBorderTagException e) {
 			return verticalNucleus;
 		}
 
@@ -711,9 +711,8 @@ public class RodentSpermNucleus extends SpermNucleus {
 	  in.defaultReadObject();
 	  try {
 		calculateHookAndBodyLength();
-	} catch (IndexOutOfBoundsException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+	} catch (UnavailableBorderTagException e) {
+		
 	}
 //	  finest("\tRead rodent sperm nucleus");
   }

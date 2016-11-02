@@ -61,6 +61,7 @@ import components.ICellCollection;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.DefaultProfileCollection;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -419,7 +420,12 @@ implements ICellCollection {
 		int i=0;
 		for(ICell cell : getCells() ){ 
 			Nucleus n = cell.getNucleus();
-			result[i] =  n.getPathLength(ProfileType.ANGLE);
+			try {
+				result[i] =  n.getPathLength(ProfileType.ANGLE);
+			} catch (UnavailableProfileTypeException e) {
+				fine("Error getting path length", e);
+				result[i] = 0;
+			}
 			i++;
 		}
 		return result;
@@ -662,14 +668,13 @@ implements ICellCollection {
 		}
 		
 		for(Nucleus n : this.getNuclei()){
-			
-			IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
-			
+
 			try {
+				IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
 				result[i] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
-			} catch (ProfileException e) {
+			} catch (ProfileException | UnavailableProfileTypeException e) {
 				fine("Error getting nucleus profile", e);
-				result[i] = 0;
+				result[i] = Double.MAX_VALUE;
 			} finally {
 				i++;
 			}
@@ -709,7 +714,7 @@ implements ICellCollection {
 				diff /= n.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 				double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 				result[i] = rootDiff;
-			} catch (ProfileException e) {
+			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 				fine("Error getting nucleus profile", e);
 				result[i] = 0;
 			} finally {
@@ -740,7 +745,7 @@ implements ICellCollection {
 		IProfile angleProfile;
 		try {
 			angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
-		} catch (ProfileException e) {
+		} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 			fine("Error getting nucleus profile", e);
 			return 0;
 		}
@@ -785,8 +790,8 @@ implements ICellCollection {
 		for(Nucleus n : this.getNuclei()){
 			try {
 				result[i] = n.getBorderPoint(pointTypeA).getLengthTo(n.getBorderPoint(pointTypeB));
-			} catch (IndexOutOfBoundsException e) {
-				fine("Cannot get border tag");
+			} catch (UnavailableBorderTagException e) {
+				fine("Tag not present: "+pointTypeA+" or "+pointTypeB);
 				result[i] = 0;
 			} finally {
 				i++;
@@ -801,9 +806,9 @@ implements ICellCollection {
 	 * @param pointType the point to compare profiles from
 	 * @return the best nucleus
 	 * @throws UnavailableBorderTagException 
-	 * @throws Exception 
+	 * @throws UnavailableProfileTypeException 
 	 */
-	public Nucleus getNucleusMostSimilarToMedian(Tag pointType) throws ProfileException, UnavailableBorderTagException {
+	public Nucleus getNucleusMostSimilarToMedian(Tag pointType) throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
 
 		if(cells.size()==1){
 			for(ICell c : cells){
@@ -816,6 +821,7 @@ implements ICellCollection {
 		 // the profile we compare the nucleus to
 		//	  Nucleus n = this.getNuclei()..get(0); // default to the first nucleus
 		Nucleus n=null;
+		
 		double difference = Arrays.stream(getDifferencesToMedianFromPoint(pointType)).max().orElse(0);
 		for(Nucleus p : this.getNuclei()){
 			IProfile angleProfile = p.getProfile(ProfileType.ANGLE, pointType);

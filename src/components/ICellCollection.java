@@ -18,6 +18,7 @@ import analysis.profiles.RuleSetCollection;
 import analysis.signals.SignalManager;
 import logging.Loggable;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BorderTagObject;
 import components.generic.IProfileCollection;
 import components.generic.MeasurementScale;
@@ -318,8 +319,9 @@ public interface ICellCollection
 	 * @return
 	 * @throws ProfileException 
 	 * @throws UnavailableBorderTagException 
+	 * @throws UnavailableProfileTypeException 
 	 */
-	Nucleus getNucleusMostSimilarToMedian(Tag referencePoint) throws ProfileException, UnavailableBorderTagException;
+	Nucleus getNucleusMostSimilarToMedian(Tag referencePoint) throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException;
 
 	/**
 	 * Get the profile manager for the collection

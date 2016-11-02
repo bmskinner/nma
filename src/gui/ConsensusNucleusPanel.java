@@ -49,6 +49,7 @@ import components.CellCollection;
 import components.ICellCollection;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.FloatPoint;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.IPoint;
 import components.generic.Tag;
 import components.generic.XYPoint;
@@ -330,7 +331,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 								.getConsensusNucleus()
 								.getBorderTag(Tag.ORIENTATION_POINT);
 						activeDataset().getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
-					} catch (IndexOutOfBoundsException e) {
+					} catch (UnavailableBorderTagException e) {
 						fine("Cannot get OP index in nucleus profile", e);
 					}
 					
@@ -494,7 +495,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 					.getConsensusNucleus()
 					.rotatePointToBottom(orientationPoint);
 					
-				} catch (IndexOutOfBoundsException e) {
+				} catch (UnavailableBorderTagException e) {
 					fine("Cannot get OP index in nucleus profile", e);
 				}
 				
@@ -519,7 +520,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 					
 					try {
 						nucleus.alignPointsOnVertical(nucleus.getBorderTag(Tag.TOP_VERTICAL), nucleus.getBorderTag(Tag.BOTTOM_VERTICAL));
-					} catch (IndexOutOfBoundsException e) {
+					} catch (UnavailableBorderTagException e) {
 						fine("Cannot align points on vertical", e);
 					}
 					

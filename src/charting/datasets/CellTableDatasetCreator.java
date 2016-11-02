@@ -37,6 +37,7 @@ import analysis.IAnalysisDataset;
 import charting.options.TableOptions;
 import components.ICell;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
+import components.active.generic.UnavailableBorderTagException;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.BorderPoint;
@@ -133,8 +134,8 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 					IBorderPoint p;
 					try {
 						p = n.getBorderPoint(tag);
-					} catch (IndexOutOfBoundsException e) {
-						fine("Tag is at wrong index: "+tag);
+					} catch (UnavailableBorderTagException e) {
+						fine("Tag not present: "+tag);
 						return createBlankTable();
 					}
 					

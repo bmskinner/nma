@@ -26,6 +26,7 @@ import components.ICell;
 import components.ICellCollection;
 import components.active.generic.DefaultProfileCollection;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -371,7 +372,7 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public Nucleus getNucleusMostSimilarToMedian(Tag pointType) throws ProfileException, UnavailableBorderTagException {
+	public Nucleus getNucleusMostSimilarToMedian(Tag pointType) throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
 		if(size()==1){
 			for(ICell c : getCells()){
 				return c.getNucleus();
@@ -420,12 +421,13 @@ public class VirtualCellCollection implements ICellCollection {
 			return result;
 		}
 		for(Nucleus n : this.getNuclei()){
-			IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
+			
 			try {
+				IProfile angleProfile = n.getProfile(ProfileType.ANGLE);
 				result[i] = angleProfile.offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
-			} catch (ProfileException e) {
+			} catch (ProfileException | UnavailableProfileTypeException e) {
 				fine("Error getting nucleus profile", e);
-				result[i] = 0;
+				result[i] = Double.MAX_VALUE;
 			} finally {
 				i++;
 			}
@@ -713,7 +715,11 @@ public class VirtualCellCollection implements ICellCollection {
 		int i=0;
 		for(ICell cell : getCells() ){ 
 			Nucleus n = cell.getNucleus();
-			result[i] =  n.getPathLength(ProfileType.ANGLE);
+			try {
+				result[i] =  n.getPathLength(ProfileType.ANGLE);
+			} catch (UnavailableProfileTypeException e) {
+				fine("Cannot get path lengths", e);
+			}
 			i++;
 		}
 		return result;
@@ -838,7 +844,7 @@ public class VirtualCellCollection implements ICellCollection {
 				double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 				result[i] = rootDiff;
 
-			} catch(ProfileException e){
+			} catch(ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e){
 				fine("Error getting nucleus profile", e);
 				result[i] = Double.MAX_VALUE;
 			} finally {
@@ -919,7 +925,7 @@ public class VirtualCellCollection implements ICellCollection {
 			diff /= c.getNucleus().getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 			double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 			return rootDiff;
-		} catch(ProfileException | UnavailableBorderTagException e){
+		} catch(ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e){
 			fine("Error getting difference to median profile for cell "+c.getNucleus().getNameAndNumber());
 			return Double.MAX_VALUE;
 		}

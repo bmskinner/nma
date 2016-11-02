@@ -442,7 +442,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 					}
 				}
 
-			} catch(ProfileException e){
+			} catch(ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e){
 				error("Error making aggregate", e);
 			}
 

@@ -32,6 +32,8 @@ import java.util.UUID;
 import utility.Constants;
 import components.CellularComponent;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
+import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -92,7 +94,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 	public NucleusAnnotator annotateOP(Nucleus n){		
 		try {
 			return annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT), Color.CYAN);
-		} catch (IndexOutOfBoundsException e) {
+		} catch (UnavailableBorderTagException e) {
 			fine("Cannot get OP index");
 			return this;
 		}
@@ -101,7 +103,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 	public NucleusAnnotator annotateRP(Nucleus n){
 		try {
 			return annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT), Color.YELLOW);
-		} catch (IndexOutOfBoundsException e) {
+		} catch (UnavailableBorderTagException e) {
 			fine("Cannot get RP index");
 			return this;
 		}
@@ -127,10 +129,18 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 
 
 	public NucleusAnnotator annotateMinFeret(Nucleus n){
-		int minIndex = n.getProfile(ProfileType.DIAMETER).getIndexOfMin();
-		IBorderPoint narrow1 = n.getBorderPoint(minIndex);
-		IBorderPoint narrow2 = n.findOppositeBorder(narrow1);
-		return annotateLine(narrow1, narrow2, Color.MAGENTA);
+		int minIndex;
+		try {
+			minIndex = n.getProfile(ProfileType.DIAMETER).getIndexOfMin();
+			IBorderPoint narrow1 = n.getBorderPoint(minIndex);
+			IBorderPoint narrow2 = n.findOppositeBorder(narrow1);
+			return annotateLine(narrow1, narrow2, Color.MAGENTA);
+		} catch (UnavailableProfileTypeException e) {
+			fine("Unable to get diameter profile", e);
+			return this;
+		}
+		
+		
 	}
 	
 	public NucleusAnnotator annotateSegments(Nucleus n){

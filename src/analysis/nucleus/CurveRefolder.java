@@ -33,6 +33,8 @@ import utility.Constants;
 import components.ICellCollection;
 import components.active.DefaultConsensusNucleus;
 import components.active.generic.FloatPoint;
+import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.active.generic.UnprofilableObjectException;
 import components.generic.Equation;
 import components.generic.IPoint;
@@ -287,7 +289,7 @@ public class CurveRefolder extends AnalysisWorker {
 			Random mutation to the X and Y position. Must remain
 			within a certain range of neighbours
 	*/
-	private double iterateOverNucleus() throws ProfileException {
+	private double iterateOverNucleus() throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
 
 		ISegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
@@ -338,8 +340,10 @@ public class CurveRefolder extends AnalysisWorker {
 	 * @param similarityScore
 	 * @return
 	 * @throws ProfileException 
+	 * @throws UnavailableBorderTagException 
+	 * @throws UnavailableProfileTypeException 
 	 */
-	private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore, Nucleus testNucleus) throws ProfileException{
+	private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore, Nucleus testNucleus) throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException{
 //		// make all changes to a fresh nucleus before buggering up the real one
 		finest("Testing point "+index);
 		double score = testNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);

@@ -44,6 +44,7 @@ import components.ICellCollection;
 import components.active.DefaultCellularComponent;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
@@ -545,7 +546,7 @@ public class NucleusDatasetCreator implements Loggable {
 				double[][] ndata = { x.asArray(), angles.asArray() };
 
 				ds.addSeries("Nucleus_"+n.getSourceFileName()+"-"+n.getNucleusNumber(), ndata);
-			} catch (ProfileException e) {
+			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 				warn("Missing profile for nucleus "+n.getNameAndNumber());
 				fine("Error getting nucleus profile", e);
 			}
@@ -910,7 +911,13 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		for(Nucleus n : collection.getNuclei()){
 
-			IProfile angles = n.getProfile(ProfileType.FRANKEN); // do not offset, the offsets for a nucleus do not match a frankenprofile
+			IProfile angles;
+			try {
+				angles = n.getProfile(ProfileType.FRANKEN);
+			} catch (UnavailableProfileTypeException e) {
+				fine("Error getting franken profile", e);
+				throw new ChartDatasetCreationException("Unable to get quartile profile", e);
+			} // do not offset, the offsets for a nucleus do not match a frankenprofile
 			double[] xArray = xpoints.asArray();
 			double[] yArray = angles.asArray();
 			
@@ -944,11 +951,13 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		ISegmentedProfile profile;
 		
-		if(type.equals(ProfileType.FRANKEN)){
-			profile = nucleus.getProfile(type);
-		} else {
-			
-			try {
+		try {
+
+			if(type.equals(ProfileType.FRANKEN)){
+				profile = nucleus.getProfile(type);
+			} else {
+
+
 				finest("Getting XY positions along profile from reference point");
 				profile = nucleus.getProfile(type, Tag.REFERENCE_POINT);
 
@@ -956,11 +965,12 @@ public class NucleusDatasetCreator implements Loggable {
 				finest("Adding ordered segments from reference point");
 				List<IBorderSegment> segments = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 				addSegmentsFromProfile(segments, profile, ds, nucleus.getBorderLength(), 0);
-			} catch(ProfileException e){
-				fine("Error getting profile", e);
-				throw new ChartDatasetCreationException("Cannot get segmented profile for "+nucleus.getNameAndNumber());
-			}
+			} 
+		}catch(ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e){
+			fine("Error getting profile", e);
+			throw new ChartDatasetCreationException("Cannot get segmented profile for "+nucleus.getNameAndNumber());
 		}
+
 
 		
 		return ds;
@@ -1063,7 +1073,7 @@ public class NucleusDatasetCreator implements Loggable {
 						
 					}
 					
-				} catch (ProfileException e) {
+				} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 					warn("Cannot get segment length for "+n.getNameAndNumber());
 					fine("Error getting profile", e);
 					
@@ -1116,7 +1126,7 @@ public class NucleusDatasetCreator implements Loggable {
 					double displacement = profile.getDisplacement(seg);
 					list.add(displacement);
 					
-				} catch (ProfileException e) {
+				} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 					warn("Cannot get segment displacement for "+n.getNameAndNumber());
 					fine("Error getting profile", e);
 				}		
@@ -1150,30 +1160,32 @@ public class NucleusDatasetCreator implements Loggable {
 				segments = collection.getProfileCollection()
 						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 						.getOrderedSegments();
-			} catch (UnavailableBorderTagException | ProfileException e) {
-				fine("Error getting profile from tag", e);
-				throw new ChartDatasetCreationException("Unable to get median profile", e);
-			}
 
-			for(IBorderSegment medianSeg : segments){
-				
-				int medianSegmentLength = medianSeg.length();
-				
-				List<Integer> list = new ArrayList<Integer>(0);
-				
-				for(Nucleus n : collection.getNuclei()){
-					IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment(medianSeg.getName());
-					
-					int differenceToMedian = 0;
-					// if seg is null, catch before we throw an error
-					if(seg!=null){
-						differenceToMedian = medianSegmentLength - seg.length();
+
+				for(IBorderSegment medianSeg : segments){
+
+					int medianSegmentLength = medianSeg.length();
+
+					List<Integer> list = new ArrayList<Integer>(0);
+
+					for(Nucleus n : collection.getNuclei()){
+						IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment(medianSeg.getName());
+
+						int differenceToMedian = 0;
+						// if seg is null, catch before we throw an error
+						if(seg!=null){
+							differenceToMedian = medianSegmentLength - seg.length();
+						}
+
+						list.add(differenceToMedian);
 					}
 
-					list.add(differenceToMedian);
+					dataset.add(list, medianSeg.getName(), collection.getName());
 				}
-				
-				dataset.add(list, medianSeg.getName(), collection.getName());
+			
+			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+				fine("Error getting profile from tag", e);
+				throw new ChartDatasetCreationException("Unable to get median profile", e);
 			}
 		}
 		return dataset;
@@ -1270,7 +1282,7 @@ public class NucleusDatasetCreator implements Loggable {
 		ISegmentedProfile angleProfile;
 		try {
 			angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
-		} catch (ProfileException e) {
+		} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 			fine("Error getting nucleus angle profile from "+pointType);
 			throw new ChartDatasetCreationException("Cannot make segmented nucleus outline", e);
 		}
@@ -1435,8 +1447,8 @@ public class NucleusDatasetCreator implements Loggable {
 			IBorderPoint tagPoint;
 			try {
 				tagPoint = nucleus.getBorderPoint(tag);
-			} catch (IndexOutOfBoundsException e) {
-				fine("Tag is at wrong index: "+tag);
+			} catch (UnavailableBorderTagException e) {
+				fine("Tag is not present: "+tag);
 				throw new ChartDatasetCreationException("Cannot get border tag");
 			}
 			double[] xpoints = { tagPoint.getX()-0.5, nucleus.getCentreOfMass().getX()-0.5 };

@@ -35,6 +35,7 @@ import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
@@ -292,7 +293,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 						.getCollection()
 						.getProfileManager()
 						.updateBorderTag(tag, newTagIndex);
-				} catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException e) {
+				} catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 					warn("Unable to update border tag index");
 					fine("Profile error", e);
 					return;

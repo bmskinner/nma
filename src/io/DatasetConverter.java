@@ -46,6 +46,7 @@ import components.active.DefaultRodentSpermNucleus;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.VirtualCellCollection;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
@@ -304,9 +305,6 @@ public class DatasetConverter implements Loggable {
 		// Use the default constructor
 		Nucleus newNucleus = new DefaultRodentSpermNucleus(roi, f, channel, position, number, com);
 		
-		newNucleus.offset(com.getX(), com.getY());
-		((DefaultNucleus)newNucleus).setCentreOfMassDirectly(com);
-		
 		newNucleus = copyGenericData(n, newNucleus);
 		return newNucleus;
 	}
@@ -392,11 +390,19 @@ public class DatasetConverter implements Loggable {
 		newNucleus.initialise(template.getWindowProportion(ProfileType.ANGLE));
 
 
-		finer("\tCopying tags");
+		fine("\tCopying tags");
 		//Copy the existing border tags
 		for(Tag t : template.getBorderTags().keySet()){
-			finer("\tSetting tag "+t);
+			
+			if(t.equals(Tag.INTERSECTION_POINT)){
+				continue;
+			}
+			
 			try {
+				
+				template.getBorderPoint(t);
+				
+				
 				
 				// get the proporitonal index of the old tag
 				
@@ -404,8 +410,9 @@ public class DatasetConverter implements Loggable {
 				
 				int newIndex = (int) ((double) newNucleus.getBorderLength() * propIndex);
 				
+				fine("\tChanging tag "+t+" to index "+newIndex+" : "+propIndex);
 				newNucleus.setBorderTag(t, newIndex);
-			} catch (IndexOutOfBoundsException e) {
+			} catch (UnavailableBorderTagException | IndexOutOfBoundsException e) {
 				fine("Cannot set border tag to requested index", e);
 			}
 			finer("\tSetting tag "+t);
@@ -413,39 +420,32 @@ public class DatasetConverter implements Loggable {
 
 		// Copy segments from RP
 		for(ProfileType type : ProfileType.values()){
-			ISegmentedProfile p = null;
-			ISegmentedProfile target = null;
+
+			fine("\nCopying profile type "+type);
 			try {
-				p = template.getProfile(type, Tag.REFERENCE_POINT);
-				target = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
-			} catch (ProfileException e1) {
+				ISegmentedProfile profile = template.getProfile(type, Tag.REFERENCE_POINT);
+				fine("\tGot the template profile for "+type);
+				ISegmentedProfile target = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
+				fine("\tGot the target profile for "+type);
+				
+				if(profile.size() != target.size()){
+					fine("\tNew nucleus profile length of "+target.size()+" : original nucleus was "+profile.size());
+					target = profile.interpolate(target.size());
+					fine("\tInterpolated profile");
+				}
+
+				fine("\tSetting the profile "+type+" in the new nucleus");
+				newNucleus.setProfile(type, Tag.REFERENCE_POINT, target);
+
+				
+			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1) {
 				fine("Error getting profile from template or target nucleus", e1);
 				throw new DatasetConversionException("Cannot convert nucleus", e1);
-			} catch(Exception e ){
-				throw new DatasetConversionException("Cannot convert nucleus", e);
-			}
-			
-			
-			if(p.size() != target.size()){
-				fine("New nucleus profile length of "+target.size()+" : original nucleus was "+p.size());
-				target = p.interpolate(target.size());
-				fine("Interpolated profile");
-			}
-
-
-			try {
-				fine("Setting RP profile");
-				newNucleus.setProfile(type, Tag.REFERENCE_POINT, target);
-			} catch (UnavailableBorderTagException e) {
-				fine("Cannot set profile at RP", e);
-			}
-
-
+			} 
+			fine("Complete profile type "+type);
 		}
-		
 
-
-		fine("Created nucleus");
+		fine("Created nucleus "+newNucleus.getNameAndNumber()+"\n");
 
 		return  newNucleus;
 	}

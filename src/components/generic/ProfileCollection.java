@@ -33,6 +33,7 @@ import components.CellCollection;
 import components.ICellCollection;
 import components.active.generic.SegmentedFloatProfile;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
@@ -433,7 +434,7 @@ public class ProfileCollection implements IProfileCollection {
 
 				}
 			}
-		} catch (ProfileException e){
+		} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e){
 			error("Error making profile aggregates", e);
 		}
 		

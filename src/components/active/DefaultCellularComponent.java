@@ -891,7 +891,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		}
 		
 		public int wrapIndex(int i){
-			return AbstractCellularComponent.wrapIndex(i, this.getBorderLength());
+			return wrapIndex(i, this.getBorderLength());
 		}
 		
 		
@@ -903,7 +903,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		 */
 		public static int wrapIndex(int i, int length){
 			 if(i<0){
-				 return length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
+				 // if the inputs are (-336, 330), this will return -6. Recurse until positive
+				 i = length+i;
+				 return wrapIndex(i, length);
+				
+				 
+//				 return length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
 			 }
 			 
 			 if(i<length){ // if not wrapping
@@ -922,7 +927,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		 */
 		public static double wrapIndex(double i, int length){
 			 if(i<0){
-				 return length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
+				 i = length+i;
+				 return wrapIndex(i, length);
+//				 return length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
 			 }
 			 
 			 if(i<length){ // if not wrapping

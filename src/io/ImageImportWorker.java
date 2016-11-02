@@ -16,6 +16,8 @@ import components.CellularComponent;
 import components.ICell;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.FloatPoint;
+import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -117,7 +119,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		if(rotate){
 			try {
 				ip = rotateToVertical(c, ip);
-			} catch (IndexOutOfBoundsException e) {
+			} catch (UnavailableBorderTagException e) {
 				fine("Unable to rotate", e);
 			}
 			ip.flipVertical(); // Y axis needs inverting
@@ -129,7 +131,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		return ic;
 	}
 	
-	private ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws IndexOutOfBoundsException{
+	private ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws UnavailableBorderTagException{
 		// Calculate angle for vertical rotation
 		Nucleus n = c.getNucleus();
 		
@@ -269,7 +271,13 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 
 		
 		// annotate the image processor with the nucleus outline
-		List<IBorderSegment> segmentList = n.getProfile(ProfileType.ANGLE).getSegments();
+		List<IBorderSegment> segmentList;
+		try {
+			segmentList = n.getProfile(ProfileType.ANGLE).getSegments();
+		} catch (UnavailableProfileTypeException e) {
+			warn("Angle profile not present");
+			return;
+		}
 		
 		ip.setLineWidth(2);
 		if(!segmentList.isEmpty()){ // only draw if there are segments

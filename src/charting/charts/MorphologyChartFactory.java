@@ -66,6 +66,7 @@ import components.AbstractCellularComponent;
 import components.CellCollection;
 import components.ICellCollection;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
 import components.generic.ProfileType;
@@ -257,7 +258,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 					segmentAnnotation.setPaint(colour);
 					plot.addAnnotation(segmentAnnotation);
 				}
-			} catch (ProfileException e) {
+			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 				fine("Error adding segment annotations", e);
 				return makeErrorChart();
 			}

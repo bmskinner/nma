@@ -21,6 +21,7 @@ package charting.datasets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
@@ -34,6 +35,7 @@ import analysis.IAnalysisDataset;
 import analysis.profiles.ProfileException;
 import components.ICellCollection;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -384,7 +386,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
 					double length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
 					lengths[count] = length;
-				} catch (ProfileException e) {
+				} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 					fine("Error getting segment length");
 					lengths[count] = 0;
 				} finally {
@@ -435,7 +437,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
 					double length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
 					lengths[count] = length;
-				} catch (ProfileException e) {
+				} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 					fine("Error getting segment length");
 					lengths[count] = 0;
 				} finally {

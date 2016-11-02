@@ -73,6 +73,7 @@ import components.ICell;
 import components.active.DefaultCell;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.FloatPoint;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BorderTagObject;
 import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
@@ -507,7 +508,13 @@ public class CellBorderAdjustmentDialog
 	private void updateWorkingCellProfiles(){
 		
 		// Get the positions of segment boundaries
-		ISegmentedProfile templateProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
+		ISegmentedProfile templateProfile;
+		try {
+			templateProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
+		} catch (UnavailableProfileTypeException e1) {
+			warn("Angle profile not present");
+			return;
+		}
 		int oldLength = templateProfile.size();
 		
 		try {

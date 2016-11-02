@@ -16,6 +16,7 @@ import components.active.generic.DefaultBorderPoint;
 import components.active.generic.DefaultSignalCollection;
 import components.active.generic.FloatPoint;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.active.generic.UnprofilableObjectException;
 import components.generic.Equation;
 import components.generic.IPoint;
@@ -187,7 +188,7 @@ public class DefaultNucleus
 		case OP_RP_ANGLE:
 			try {
 				result = this.getCentreOfMass().findAngle(this.getBorderTag(Tag.REFERENCE_POINT), this.getBorderTag(Tag.ORIENTATION_POINT));
-			} catch (IndexOutOfBoundsException e) {
+			} catch (UnavailableBorderTagException e) {
 				fine("Cannot get border tag", e);
 				result = 0;
 			}
@@ -292,7 +293,7 @@ public class DefaultNucleus
 		IProfile profile;
 		try {
 			profile = this.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-		} catch (ProfileException e) {
+		} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 			fine("Error getting profile",e);
 			return false;
 		}
@@ -393,7 +394,7 @@ public class DefaultNucleus
 				fine("Cannot get border tag", e);
 				try {
 					rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
-				} catch (IndexOutOfBoundsException e1) {
+				} catch (UnavailableBorderTagException e1) {
 					fine("Cannot get border tag", e1);
 				}
 			}
@@ -403,7 +404,7 @@ public class DefaultNucleus
 			// Default if top and bottom vertical points have not been specified
 			try {
 				rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
-			} catch (IndexOutOfBoundsException e) {
+			} catch (UnavailableBorderTagException e) {
 				fine("Cannot get border tag", e);
 			}
 		}
@@ -424,15 +425,10 @@ public class DefaultNucleus
 		
 		IBorderPoint topPoint;
 		IBorderPoint bottomPoint;
-		try {
 			
-			topPoint    = this.getBorderTag(Tag.TOP_VERTICAL);
-			bottomPoint = this.getBorderTag(Tag.BOTTOM_VERTICAL);
-			
-		} catch (IndexOutOfBoundsException e) {
-			fine("Cannot get border tag", e);
-			throw new UnavailableBorderTagException("Border tags are not present", e);
-		}
+		topPoint    = this.getBorderTag(Tag.TOP_VERTICAL);
+		bottomPoint = this.getBorderTag(Tag.BOTTOM_VERTICAL);
+
 		
 		
 		// Find the border points between the top and bottom verticals

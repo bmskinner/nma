@@ -563,11 +563,9 @@ public class DefaultBorderSegment implements IBorderSegment{
 		
 //		 Check the incoming data
 		if(startIndex < 0 || startIndex > this.getTotalLength()){
-			this.setLastFailReason("Start index is outside the profile range: "+startIndex);
 			throw new IllegalArgumentException("Start index is outside the profile range: "+startIndex);
 		}
 		if(endIndex < 0 || endIndex > this.getTotalLength()){
-			this.setLastFailReason("End index is outside the profile range: "+endIndex);
 			throw new IllegalArgumentException("End index is outside the profile range: "+endIndex);
 		}
 		

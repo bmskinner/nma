@@ -27,6 +27,7 @@ import logging.Loggable;
 import components.ICellCollection;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -111,31 +112,31 @@ public class ProfileOffsetter implements Loggable {
 				finer("Previous "+tag+" index at "+oldNIndex);
 			}
 			
-//			NucleusBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.REGULAR)
-//					.getSegment(segName);
-			IBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.ANGLE)
-					.getSegment(segID);
-			
-			if(nucleusSegment==null){
-				warn("Error updating nucleus, segment "+segID+" not found");
-			} else {
-				finest("Using nucleus segment "+nucleusSegment.getID());
-			}
-			
-			int newIndex = nucleusSegment.getProportionalIndex(proportion); // find the index in the segment closest to the proportion 
-			
-			if(newIndex==-1){
-				warn("Cannot find "+tag+" index in nucleus profile at proportion "+proportion);
-				continue;
-			}
-
-
 			try {
+				IBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.ANGLE)
+						.getSegment(segID);
+
+				if(nucleusSegment==null){
+					warn("Error updating nucleus, segment "+segID+" not found");
+				} else {
+					finest("Using nucleus segment "+nucleusSegment.getID());
+				}
+
+				int newIndex = nucleusSegment.getProportionalIndex(proportion); // find the index in the segment closest to the proportion 
+
+				if(newIndex==-1){
+					warn("Cannot find "+tag+" index in nucleus profile at proportion "+proportion);
+					continue;
+				}
+
+				
+
 				nucleus.setBorderTag(tag, newIndex);
-			} catch (IndexOutOfBoundsException e) {
+				finest("Set border tag in nucleus to "+newIndex+ " from "+oldNIndex);
+			} catch (IndexOutOfBoundsException | UnavailableProfileTypeException e) {
 				fine("Cannot set "+tag+" index in nucleus profile", e);
 			}		
-			finest("Set border tag in nucleus to "+newIndex+ " from "+oldNIndex);
+			
 		}
 		
 	}

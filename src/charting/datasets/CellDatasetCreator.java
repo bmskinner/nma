@@ -32,6 +32,7 @@ import charting.options.ChartOptions;
 import analysis.IAnalysisDataset;
 import analysis.profiles.ProfileException;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -187,21 +188,28 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 			finest("Fetched vertical nucleus");
 
 			// Get the segment start position XY coordinates
+			
+			try {
 
-			if( ! verticalNucleus.getProfile(ProfileType.ANGLE)
-					.hasSegment(segmentID)){
-				fine("Segment "+segmentID.toString()+" not found in vertical nucleus for "+nucleus.getNameAndNumber());
-				continue;
+				if( ! verticalNucleus.getProfile(ProfileType.ANGLE)
+						.hasSegment(segmentID)){
+					fine("Segment "+segmentID.toString()+" not found in vertical nucleus for "+nucleus.getNameAndNumber());
+					continue;
 
+				}
+				IBorderSegment segment = verticalNucleus.getProfile(ProfileType.ANGLE)
+						.getSegment(segmentID);
+				finest("Fetched segment "+segmentID.toString());
+
+				int start = segment.getStartIndex();
+				finest("Getting start point at index "+start);
+				IPoint point = verticalNucleus.getBorderPoint(start);
+				result.add(point);	
+			} catch(UnavailableProfileTypeException e){
+				warn("Cannot get angle profile for nucleus");
+				
 			}
-			IBorderSegment segment = verticalNucleus.getProfile(ProfileType.ANGLE)
-					.getSegment(segmentID);
-			finest("Fetched segment "+segmentID.toString());
-
-			int start = segment.getStartIndex();
-			finest("Getting start point at index "+start);
-			IPoint point = verticalNucleus.getBorderPoint(start);
-			result.add(point);	
+			
 		}	
 		finest("Fetched segment position for each nucleus");
 		return result;
@@ -237,30 +245,37 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 				.getVerticallyRotatedNucleus();
 		
 		// Get the segment start position XY coordinates
-		IBorderSegment segment = consensus.getProfile(ProfileType.ANGLE)
-											.getSegment(segmentID);
-		
-		IPoint centrePoint = consensus.getBorderPoint(segment.getStartIndex());
-		
-		/*
-		 * The list of XYPoints are the absolute positions in cartesian space.
-		 * This should be corrected to offsets from the geometric centre of the cluster
-		 */
-				
-		/*
-		 * Update the result positions to be offsets to the centre 
-		 */
-		
-		for(IPoint p : result){
-
-			double offsetX = p.getX() - centrePoint.getX();
-			double offsetY = p.getY() - centrePoint.getY();
+		IBorderSegment segment;
+		try {
+			segment = consensus.getProfile(ProfileType.ANGLE)
+												.getSegment(segmentID);
 			
-			p.setX(offsetX);
-			p.setY(offsetY);
+			IPoint centrePoint = consensus.getBorderPoint(segment.getStartIndex());
+			
+			/*
+			 * The list of XYPoints are the absolute positions in cartesian space.
+			 * This should be corrected to offsets from the geometric centre of the cluster
+			 */
+					
+			/*
+			 * Update the result positions to be offsets to the centre 
+			 */
+			
+			for(IPoint p : result){
 
+				double offsetX = p.getX() - centrePoint.getX();
+				double offsetY = p.getY() - centrePoint.getY();
+				
+				p.setX(offsetX);
+				p.setY(offsetY);
+
+			}
+			
+			
+		} catch(UnavailableProfileTypeException e){
+			warn("Cannot get angle profile for nucleus");	
 		}
-		
+
 		return result;
 	}
 
