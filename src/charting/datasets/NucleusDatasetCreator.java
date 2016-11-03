@@ -814,8 +814,9 @@ public class NucleusDatasetCreator implements Loggable {
 					.getOrderedSegments();
 
 			ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0);	
-		} catch(Exception e){
-			error("Error creating single dataset variability data", e);
+		} catch(ProfileException | UnavailableBorderTagException e){
+			fine("Error creating single dataset variability data", e);
+			throw new ChartDatasetCreationException("Error creating single dataset variability data", e);
 		}
 		return ds;
 	}

@@ -44,7 +44,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 * @param p the profile
 	 * @param segments the list of segments to use
 	 */
-	public SegmentedFloatProfile(IProfile p, List<IBorderSegment> segments) {		
+	public SegmentedFloatProfile(IProfile p, List<IBorderSegment> segments) throws IndexOutOfBoundsException {		
 		super(p);
 
 		if(segments==null || segments.isEmpty()){
@@ -52,7 +52,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		}
 
 		if(p.size() != segments.get(0).getTotalLength() ){
-			throw new IllegalArgumentException("Segments total length ("
+			throw new IndexOutOfBoundsException("Segments total length ("
 					+segments.get(0).getTotalLength()
 					+") does not fit profile ("+
 					+p.size()

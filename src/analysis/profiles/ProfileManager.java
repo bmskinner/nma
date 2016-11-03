@@ -237,54 +237,53 @@ public class ProfileManager implements Loggable {
 	 */
 	public void calculateTopAndBottomVerticals() {
 
-		fine("Detecting top and bottom verticals");
+		fine("Detecting top and bottom verticals in collection");
 
 		ProfileIndexFinder finder = new ProfileIndexFinder();
 
 		int topIndex = finder.identifyIndex(collection, Tag.TOP_VERTICAL);
 		int btmIndex = finder.identifyIndex(collection, Tag.BOTTOM_VERTICAL);
 
-		if(topIndex > -1 && btmIndex > -1){
-
-			fine("TV in median is located at index "+topIndex);
-			fine("BV in median is located at index "+btmIndex);
-
-			updateProfileCollectionOffsets(Tag.TOP_VERTICAL, topIndex);
-
-			updateProfileCollectionOffsets(Tag.BOTTOM_VERTICAL, btmIndex);
-
-
-			fine("Updating nuclei");
-			
-			IProfile topMedian;
-			IProfile btmMedian;
-			
-			try {
-				topMedian = collection
-						.getProfileCollection()
-						.getProfile(ProfileType.ANGLE, Tag.TOP_VERTICAL, Quartile.MEDIAN);
-
-				btmMedian = collection
-						.getProfileCollection()
-						.getProfile(ProfileType.ANGLE, Tag.BOTTOM_VERTICAL, Quartile.MEDIAN);
-			} catch( ProfileException | UnavailableBorderTagException e){
-				fine("Error getting TV or BV profile", e);
-				return;
-			}
-
-			offsetNucleusProfiles(Tag.TOP_VERTICAL, ProfileType.ANGLE, topMedian);
-
-			offsetNucleusProfiles(Tag.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
-
-			for(Nucleus n : collection.getNuclei()){
-				n.updateVerticallyRotatedNucleus();
-			}
-
-			fine("Updated nuclei");
-		} else {
+		if(topIndex == ProfileIndexFinder.NO_INDEX_FOUND || btmIndex == ProfileIndexFinder.NO_INDEX_FOUND){
 			fine("Cannot find TV or BV in median profile");
+			return;
 		}
 
+		fine("TV in median is located at index "+topIndex);
+		fine("BV in median is located at index "+btmIndex);
+
+		updateProfileCollectionOffsets(Tag.TOP_VERTICAL, topIndex);
+
+		updateProfileCollectionOffsets(Tag.BOTTOM_VERTICAL, btmIndex);
+
+
+		fine("Updating nuclei");
+
+		IProfile topMedian;
+		IProfile btmMedian;
+
+		try {
+			topMedian = collection
+					.getProfileCollection()
+					.getProfile(ProfileType.ANGLE, Tag.TOP_VERTICAL, Quartile.MEDIAN);
+
+			btmMedian = collection
+					.getProfileCollection()
+					.getProfile(ProfileType.ANGLE, Tag.BOTTOM_VERTICAL, Quartile.MEDIAN);
+		} catch( ProfileException | UnavailableBorderTagException e){
+			fine("Error getting TV or BV profile", e);
+			return;
+		}
+
+		offsetNucleusProfiles(Tag.TOP_VERTICAL, ProfileType.ANGLE, topMedian);
+
+		offsetNucleusProfiles(Tag.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
+
+		for(Nucleus n : collection.getNuclei()){
+			n.updateVerticallyRotatedNucleus();
+		}
+
+		fine("Updated nuclei");
 	}
 	
 	

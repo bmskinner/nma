@@ -155,8 +155,14 @@ public class DefaultProfileCollection implements IProfileCollection {
 		}
 		
 		IProfile p = getProfile(type, tag, quartile);
-
-		ISegmentedProfile result = new SegmentedFloatProfile(p, getSegments(tag));
+		
+		ISegmentedProfile result;
+		try {
+			result = new SegmentedFloatProfile(p, getSegments(tag));
+		} catch(IndexOutOfBoundsException e){
+			fine("Cannot create segmented profile due to segment/profile mismatch", e);
+			throw new ProfileException("Cannot create segmented profile; segment lengths do not match array", e);
+		}
 		return result;
 	}
 	

@@ -132,11 +132,14 @@ public class PopulationImportWorker extends AnalysisWorker {
 						}
 						
 					}
-					
+					fine("Finished calculating verticals");
 				}
+				
+				
 				
 				// Correct signal border locations from older versions for all imported datasets
 				if(v.isOlderThan( new Version(1, 13, 2))){	
+					fine("Updating signal locations for pre-1.13.2 dataset");
 					updateSignals();
 				}
 				
@@ -144,9 +147,16 @@ public class PopulationImportWorker extends AnalysisWorker {
 				
 
 				// Generate vertically rotated nuclei for all imported datasets
-				dataset.getCollection().updateVerticalNuclei();
-				for(IAnalysisDataset child : dataset.getAllChildDatasets()){
-					child.getCollection().updateVerticalNuclei();
+				
+				try {
+					fine("Updating vertical nuclei");
+					dataset.getCollection().updateVerticalNuclei();
+					for(IAnalysisDataset child : dataset.getAllChildDatasets()){
+						child.getCollection().updateVerticalNuclei();
+					}
+
+				} catch(Exception e){
+					error("Error updating vertical nuclei", e);
 				}
 				
 				
@@ -293,32 +303,39 @@ public class PopulationImportWorker extends AnalysisWorker {
 		// Replace existing save file path with the path to the file that has been opened
 		finest("Checking file path");
 		if(!dataset.getSavePath().equals(inputFile)){
+			log("Old save path: "+dataset.getSavePath().getAbsolutePath());
+			log("Input file   :"+inputFile.getAbsolutePath());
 			updateSavePath(inputFile, dataset);
 		}
 		
 		// convert old files if needed
 		
-//		if(dataset instanceof AnalysisDataset){
-//			
-//			log("Old style dataset detected");
-//			
-//			try {
-//
-//				DatasetConverter conv = new DatasetConverter(dataset);
-//
-//				IAnalysisDataset converted = conv.convert();
-//				
-//				dataset = converted;
-//
-//				log("Conversion successful");
-//			} catch (DatasetConversionException e){
-//				warn("Unable to convert to new format.");
-//				warn("Displaying as old format.");
-//				fine("Error in converter", e);
-//			}
-//		}
+		if(dataset instanceof AnalysisDataset){
+			dataset = upgradeDatasetVersion(dataset);
+
+		}
 
 		finest("Returning opened dataset");
+		return dataset;
+	}
+	
+	private IAnalysisDataset upgradeDatasetVersion(IAnalysisDataset dataset){
+		log("Old style dataset detected");
+		
+		try {
+
+			DatasetConverter conv = new DatasetConverter(dataset);
+
+			IAnalysisDataset converted = conv.convert();
+			
+			dataset = converted;
+
+			log("Conversion successful");
+		} catch (DatasetConversionException e){
+			warn("Unable to convert to new format.");
+			warn("Displaying as old format.");
+			fine("Error in converter", e);
+		}
 		return dataset;
 	}
 	
@@ -332,6 +349,9 @@ public class PopulationImportWorker extends AnalysisWorker {
 	private void updateSavePath(File inputFile, IAnalysisDataset dataset) {
 		
 		fine("File path has changed: attempting to relocate images");
+		
+		// Check if the original image paths are still correct/
+		// If not, proceed with the relocate below
 		
 		
 		/*

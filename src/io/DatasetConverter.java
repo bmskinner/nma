@@ -40,6 +40,7 @@ import components.active.DefaultAnalysisDataset;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
 import components.active.DefaultCellularComponent;
+import components.active.DefaultNuclearSignal;
 import components.active.DefaultNucleus;
 import components.active.DefaultPigSpermNucleus;
 import components.active.DefaultRodentSpermNucleus;
@@ -52,6 +53,7 @@ import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.nuclear.INuclearSignal;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import ij.gui.PolygonRoi;
@@ -444,6 +446,39 @@ public class DatasetConverter implements Loggable {
 			} 
 			fine("Complete profile type "+type);
 		}
+		
+		// Copy signals
+		
+		
+		for(UUID signalGroup : template.getSignalCollection().getSignalGroupIDs()){
+			
+			for(INuclearSignal s : template.getSignalCollection().getSignals(signalGroup)){
+				
+				// Get the roi for the old nucleus
+				float[] xpoints = new float[s.getBorderLength()], ypoints = new float[s.getBorderLength()];
+				
+				for(int i=0; i<xpoints.length; i++){
+					xpoints[i] = (float) s.getBorderPoint(i).getX();
+					ypoints[i] = (float) s.getBorderPoint(i).getY();
+				}
+				
+				PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
+				
+				INuclearSignal newSignal = new DefaultNuclearSignal(roi, 
+						s.getSourceFile(), 
+						s.getChannel(), s.getPosition(), s.getCentreOfMass());
+				
+				for(PlottableStatistic st : s.getStatistics()){
+					newSignal.setStatistic(st, s.getStatistic(st));;
+					
+				}
+				
+				newNucleus.getSignalCollection().addSignal(newSignal, signalGroup);
+				
+			}
+			
+		}
+		
 
 		fine("Created nucleus "+newNucleus.getNameAndNumber()+"\n");
 

@@ -43,6 +43,9 @@ import logging.Loggable;
 public class ProfileIndexFinder implements Loggable {
 	
 	
+	public static final int NO_RULESETS    = -2;
+	public static final int NO_INDEX_FOUND = -1;
+	
 	/**
 	 * Get the indexes in the profile that match the given RuleSet
 	 * @param p
@@ -104,7 +107,7 @@ public class ProfileIndexFinder implements Loggable {
 				return i;
 			}
 		}
-		return -1;
+		return NO_INDEX_FOUND;
 	}
 	
 	/**
@@ -121,7 +124,7 @@ public class ProfileIndexFinder implements Loggable {
 		
 		if(list==null || list.size()==0){
 			// no rule set
-			return -2;
+			return NO_RULESETS;
 		}
 		
 		BooleanProfile indexes = new BooleanProfile(p, true);
@@ -137,7 +140,7 @@ public class ProfileIndexFinder implements Loggable {
 				return i;
 			}
 		}
-		return -1;
+		return NO_INDEX_FOUND;
 	}
 		
 	/**
@@ -153,7 +156,7 @@ public class ProfileIndexFinder implements Loggable {
 		
 		if(list==null || list.size()==0){
 			// no rule set
-			return -2;
+			return NO_RULESETS;
 		}
 		return identifyIndex(collection, list);
 		
@@ -169,7 +172,7 @@ public class ProfileIndexFinder implements Loggable {
 	public int identifyIndex(final ICellCollection collection, final List<RuleSet> list){
 		
 		if(list==null || list.isEmpty()){
-			return -2; // no rule sets
+			return NO_RULESETS; // no rule sets
 		}
 		
 		
@@ -201,7 +204,7 @@ public class ProfileIndexFinder implements Loggable {
 				return i;
 			}
 		}
-		return -1;
+		return NO_INDEX_FOUND;
 		
 	}
 	
@@ -381,7 +384,7 @@ public class ProfileIndexFinder implements Loggable {
 		BooleanProfile result = new BooleanProfile(b.size(), false); 
 
 		
-		int maxTrueIndex = -1;
+		int maxTrueIndex = NO_INDEX_FOUND;
 		for(int i=0;i<b.size();i++){
 			if(b.get(i)){
 				maxTrueIndex=i;

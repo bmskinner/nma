@@ -109,6 +109,12 @@ public class DefaultSignalCollection implements ISignalCollection {
 		if(signalGroup==null){
 			throw new IllegalArgumentException("Group is null");
 		}
+		
+		if(collection.get(signalGroup)==null){
+			// add new list when not present
+			List<INuclearSignal> list = new ArrayList<INuclearSignal>();
+			collection.put(signalGroup, list);
+		}
 		collection.get(signalGroup).add(n);
 	}
 	
