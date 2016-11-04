@@ -85,10 +85,10 @@ public class DatasetConverter implements Loggable {
 		try{
 			log("Old dataset version : "+oldDataset.getVersion());
 			log("Shiny target version: "+Version.currentVersion());
-			log("Beginning conversion");
-			
-			
+
 			backupOldDataset();
+			
+			log("Beginning conversion...");
 
 			ICellCollection newCollection = makeNewRootCollection();
 

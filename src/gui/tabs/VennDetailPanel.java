@@ -74,6 +74,7 @@ public class VennDetailPanel extends DetailPanel {
 	
 	@Override
 	public void setChartsAndTablesLoading(){
+		log("Set venn to loading");
 		vennTable.setModel(AnalysisDatasetTableCreator.createLoadingTable());
 	}
 	
@@ -85,8 +86,8 @@ public class VennDetailPanel extends DetailPanel {
 
 	@Override
 	protected void updateMultiple() {
-		fine("Updating venn panel");
-		
+		log("Updating venn panel");
+		vennTable.setModel(AnalysisDatasetTableCreator.createLoadingTable());
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.VENN)
@@ -95,8 +96,6 @@ public class VennDetailPanel extends DetailPanel {
 			.build();
 		
 		setTable(options);
-
-		fine("Updated venn panel");
 		
 	}
 	
@@ -106,7 +105,8 @@ public class VennDetailPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected void updateNull() {		
+	protected void updateNull() {	
+		log("Set venn to blank");
 		vennTable.setModel(AnalysisDatasetTableCreator.createBlankTable());
 	}
 	
