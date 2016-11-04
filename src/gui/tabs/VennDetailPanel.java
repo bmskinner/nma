@@ -22,22 +22,17 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.logging.Level;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
-import org.jfree.chart.JFreeChart;
-
 import charting.datasets.AnalysisDatasetTableCreator;
-import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import charting.options.DefaultTableOptions.TableType;
 import gui.components.ExportableTable;
-import gui.tabs.PairwiseVennDetailPanel.PairwiseVennTableCellRenderer;
 
 @SuppressWarnings("serial")
 public class VennDetailPanel extends DetailPanel {
@@ -74,19 +69,20 @@ public class VennDetailPanel extends DetailPanel {
 	
 	@Override
 	public void setChartsAndTablesLoading(){
-		log("Set venn to loading");
+//		log("Set venn to loading");
 		vennTable.setModel(AnalysisDatasetTableCreator.createLoadingTable());
 	}
 	
 	@Override
 	protected void updateSingle() {
+//		log("Setting venn to blank via single");
 		updateNull();
 	}
 	
 
 	@Override
 	protected void updateMultiple() {
-		log("Updating venn panel");
+//		log("Updating venn panel with multiple");
 		vennTable.setModel(AnalysisDatasetTableCreator.createLoadingTable());
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
@@ -100,13 +96,11 @@ public class VennDetailPanel extends DetailPanel {
 	}
 	
 	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) {
-		return null;
-	}
-	
-	@Override
 	protected void updateNull() {	
-		log("Set venn to blank");
+//		log("Set venn to blank via null");
+		
+//		Exception e = new Exception("Null update of Venn");
+//		error("Venn: ",e);
 		vennTable.setModel(AnalysisDatasetTableCreator.createBlankTable());
 	}
 	

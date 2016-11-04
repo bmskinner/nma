@@ -21,6 +21,7 @@ package gui.tabs;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
@@ -31,6 +32,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import analysis.IAnalysisDataset;
 import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
@@ -38,6 +40,7 @@ import charting.options.TableOptions;
 import charting.options.DefaultTableOptions.TableType;
 import charting.options.TableOptionsBuilder;
 import gui.components.AnalysisTableCellRenderer;
+import gui.components.ColourSelecter;
 import gui.components.ExportableTable;
 
 @SuppressWarnings("serial")
@@ -92,12 +95,12 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	@Override
 	protected void updateMultiple() {
 		fine("Updating pairwise venn table for multiple datasets");
-		
+		pairwiseVennTable.setModel(AbstractDatasetCreator.createLoadingTable());
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.PAIRWISE_VENN)
 			.setTarget(pairwiseVennTable)
-			.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new PairwiseVennTableCellRenderer())
+			.setRenderer(TableOptions.ALL_COLUMNS, new PairwiseVennTableCellRenderer(getDatasets()))
 			.build();
 		
 		setTable(options);
@@ -125,6 +128,24 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	 * from the diagonal, which is made light grey
 	 */
 	class PairwiseVennTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+		
+		private List<IAnalysisDataset> list;
+		
+		public PairwiseVennTableCellRenderer(List<IAnalysisDataset> list){
+			super();
+			this.list = list;
+		}
+		
+		private int getIndex(IAnalysisDataset d){
+			if(list.contains(d)){
+				for(int i=0; i<list.size(); i++){
+					if(list.get(i)==d){
+						return i;
+					}
+				}
+			}
+			return -1;
+		}
 
 		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 	        
@@ -158,6 +179,24 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		        	
 		        }
 		       
+	        }
+	        
+	        if(columnName.equals("Population 1")){
+	        	IAnalysisDataset d1 = (IAnalysisDataset) value;
+	        	if(d1.hasDatasetColour()){
+	        		backColour = (Color) d1.getDatasetColour();
+	        	} else {
+	        		backColour = (Color) ColourSelecter.getColor(getIndex(d1));
+	        	}
+	        }
+	        
+	        if(columnName.equals("Population 2")){
+	        	IAnalysisDataset d1 = (IAnalysisDataset) value;
+	        	if(d1.hasDatasetColour()){
+	        		backColour = (Color) d1.getDatasetColour();
+	        	} else {
+	        		backColour = (Color) ColourSelecter.getColor(getIndex(d1));
+	        	}
 	        }
 	        
 	        l.setBackground(backColour);

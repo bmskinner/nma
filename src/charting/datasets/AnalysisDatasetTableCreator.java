@@ -788,8 +788,8 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 
 					Object[] popData = new Object[9];
 
-					popData[0] = dataset1.getName();
-					popData[8] = dataset2.getName();
+					popData[0] = dataset1;
+					popData[8] = dataset2;
 
 					// compare the number of shared nucleus ids
 					int shared = dataset1.getCollection().countShared(dataset2);

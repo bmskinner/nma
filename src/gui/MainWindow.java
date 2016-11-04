@@ -1065,7 +1065,6 @@ public class MainWindow
 //		threadManager.shutdownNow();
 		super.dispose();
 	}
-
 	
 	public boolean hasOpenDatasets(){
 		return DatasetListManager.getInstance().getAllDatasets().size()>0;
@@ -1091,6 +1090,7 @@ public class MainWindow
     		
     		// Create a new runnable
     		Runnable r1 = () -> {
+//    			log("Setting charts and tables loading");
     			// Update charts and panels to loading
     			for(TabPanel p : detailPanels){
     				p.setChartsAndTablesLoading();
@@ -1120,22 +1120,6 @@ public class MainWindow
 
     	
     	threadManager.execute( r );
-
-//    	try {
-//			f.get();
-//		} catch (InterruptedException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		} catch (ExecutionException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-    	
-//    	DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
-//    	Iterator<Object> iterator = updateListeners.iterator();
-//        while( iterator.hasNext() ) {
-//            ( (DatasetUpdateEventListener) iterator.next() ).datasetUpdateEventReceived( e );
-//        }
     }
     /**
      * Add a listener for dataset update events.
