@@ -804,13 +804,21 @@ public class ProfileCollection implements IProfileCollection {
 
 //	@Override
 	public void createProfileAggregate(ICellCollection collection) {
-		// TODO Auto-generated method stub
 		if(type!=null){
-//		for(ProfileType type : ProfileType.values()){
 			this.createProfileAggregate(collection, type);
-//		}
 		}
 		
+	}
+	
+	@Override
+	public void createAndRestoreProfileAggregate(ICellCollection collection) {
+
+		if(segments==null){
+			createProfileAggregate(collection, collection.getMedianArrayLength());
+		} else {
+			int length = segments.get(0).getTotalLength();
+			createProfileAggregate(collection, length);
+		}
 	}
 
 	@Override

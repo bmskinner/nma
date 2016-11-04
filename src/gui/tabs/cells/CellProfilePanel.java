@@ -220,10 +220,10 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 					.getProfile(profileOptions.getSelected(), Tag.REFERENCE_POINT);
 			dualPanel.setProfile(profile, false);
 		} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1) {
-			warn("Error getting profile");
-			JFreeChart chart1 = MorphologyChartFactory.makeErrorChart();
-			JFreeChart chart2 = MorphologyChartFactory.makeErrorChart();
-			dualPanel.setCharts(chart1, chart2);
+			fine("Error getting profile", e1);
+//			JFreeChart chart1 = MorphologyChartFactory.makeErrorChart();
+//			JFreeChart chart2 = MorphologyChartFactory.makeErrorChart();
+//			dualPanel.setCharts(chart1, chart2);
 		}
 		
 		

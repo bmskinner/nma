@@ -39,7 +39,6 @@ import components.nuclei.Nucleus;
 //import ij.IJ;
 
 import stats.Quartile;
-import utility.Constants;
 
 /**
  * Holds the ProfileAggregate with individual nucleus values,
@@ -61,14 +60,10 @@ public class DefaultProfileCollection implements IProfileCollection {
 	private static final long serialVersionUID = 1L;
 		
 	private Map<Tag, Integer>    indexes  = new HashMap<Tag, Integer>();
-	private List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
+	private IBorderSegment[]     segments = null;// = new ArrayList<IBorderSegment>();
 	
 	private transient int length;
 	private transient Map<ProfileType, IProfileAggregate> map = new HashMap<ProfileType, IProfileAggregate>();
-	
-//	private transient IProfileAggregate aggregate = null;
-//	private transient ProfileCache profileCache           = new ProfileCache();
-
 
 	/**
 	 * Create an empty profile collection
@@ -149,12 +144,18 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentedProfile(components.generic.BorderTagObject)
 	 */
 	@Override
-	public ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException, ProfileException {
-		if(tag==null){
-			throw new IllegalArgumentException("A profile key is required");
+	public ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile) 
+			throws UnavailableBorderTagException, ProfileException {
+		
+		if(tag==null || type==null){
+			throw new IllegalArgumentException("A profile type and tag is required");
 		}
 		
+		// get the profile array
 		IProfile p = getProfile(type, tag, quartile);
+		fine("Making segmented profile of type "+type+" from "+tag+" with q"+quartile);
+		fine("Array length is "+p.size()+" and segments total is "+this.segments[0].getTotalLength());
+		
 		
 		ISegmentedProfile result;
 		try {
@@ -173,6 +174,9 @@ public class DefaultProfileCollection implements IProfileCollection {
 	@Override
 	public synchronized List<UUID> getSegmentIDs(){
 		List<UUID> result = new ArrayList<UUID>();
+		if(segments==null){
+			return result;
+		}
 		for(IBorderSegment seg : this.segments){
 			result.add(seg.getID());
 		}
@@ -207,6 +211,10 @@ public class DefaultProfileCollection implements IProfileCollection {
 		int offset = -getIndex(tag);
 
 		List<IBorderSegment> result;
+		if(segments==null){
+			return new ArrayList<IBorderSegment>(0);
+		}
+		
 		try {
 			result = IBorderSegment.nudge(segments, offset);
 		} catch (ProfileException e) {
@@ -352,7 +360,11 @@ public class DefaultProfileCollection implements IProfileCollection {
 							+")");
 		}
 		
-		this.segments = n;
+		this.segments = new IBorderSegment[n.size()];
+		
+		for(int i=0; i<segments.length; i++){
+			segments[i] = n.get(i);
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -386,8 +398,12 @@ public class DefaultProfileCollection implements IProfileCollection {
 			fine("Error offsetting segments", e);
 			return;
 		}
+		
+		this.segments = new IBorderSegment[n.size()];
 
-		this.segments = result;
+		for(int i=0; i<segments.length; i++){
+			segments[i] = result.get(i);
+		}
 	}
 	
 	@Override
@@ -426,6 +442,11 @@ public class DefaultProfileCollection implements IProfileCollection {
 		}
 		
 		this.length = length;
+		
+		if(segments!=null && length != segments[0].getTotalLength()){
+			warn("Creating profile aggregate will invalidate segments");
+			segments = null;
+		}
 
 		for(ProfileType type : ProfileType.values()){
 
@@ -453,12 +474,6 @@ public class DefaultProfileCollection implements IProfileCollection {
 			}
 
 		}
-
-		//		profileCache.clear();
-		//		aggregate = new DefaultProfileAggregate(length, collection.size());
-
-
-
 		
 	}
 	
@@ -471,6 +486,16 @@ public class DefaultProfileCollection implements IProfileCollection {
 		
 		createProfileAggregate(collection, collection.getMedianArrayLength());
 
+	}
+	
+	public void createAndRestoreProfileAggregate(ICellCollection collection) {
+
+		if(segments==null){
+			createProfileAggregate(collection, collection.getMedianArrayLength());
+		} else {
+			int length = segments[0].getTotalLength();
+			createProfileAggregate(collection, length);
+		}
 	}
 		
 	
@@ -496,24 +521,22 @@ public class DefaultProfileCollection implements IProfileCollection {
 	public String toString(){
 		StringBuilder builder = new StringBuilder();
 		builder.append(this.tagString());
-		if(this.segments.isEmpty()){
-			builder.append("\r\nNo segments in profile collection");
-		} else {
-			try {
 
-				for(Tag tag : this.indexes.keySet()){
-					if(tag.type().equals(components.generic.BorderTag.BorderTagType.CORE)){
-						builder.append("\r\nSegments from "+tag+":\r\n");
-						for(IBorderSegment s : this.getSegments(tag)){
-							builder.append(s.toString()+"\r\n");
-						}
+		try {
+
+			for(Tag tag : this.indexes.keySet()){
+				if(tag.type().equals(components.generic.BorderTag.BorderTagType.CORE)){
+					builder.append("\r\nSegments from "+tag+":\r\n");
+					for(IBorderSegment s : this.getSegments(tag)){
+						builder.append(s.toString()+"\r\n");
 					}
 				}
-
-			} catch (Exception e) {
-				builder.append("\r\nError fetching segments");
 			}
+
+		} catch (Exception e) {
+			builder.append("\r\nError fetching segments");
 		}
+
 		return builder.toString();
 		
 	}
@@ -596,6 +619,10 @@ public class DefaultProfileCollection implements IProfileCollection {
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
 		map = new HashMap<ProfileType, IProfileAggregate>();
+		
+//		if(length != segments[0].getTotalLength()){
+//			log("Segment length "+segments[0].getTotalLength() );
+//		}
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {

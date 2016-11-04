@@ -103,9 +103,10 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param offset an offset to the x position. Used to align plots to the right
 	 * @param binSize the size of the ProfileAggregate bins, to adjust the offset of the median
 	 * @return the updated dataset
+	 * @throws ProfileException 
 	 */
 	private XYDataset addSegmentsFromProfile(List<IBorderSegment> segments, IProfile profile, 
-			DefaultXYDataset ds, int length, double offset) {
+			DefaultXYDataset ds, int length, double offset) throws ProfileException {
 		
 		IProfile xpoints = profile.getPositions(length);
 		xpoints = xpoints.add(offset);
@@ -431,8 +432,8 @@ public class NucleusDatasetCreator implements Loggable {
 				addSegmentsFromProfile(segments, profile, ds, collection.getMedianArrayLength(), offset);
 			}
 		} catch (UnavailableBorderTagException | ProfileException e) {
-			warn("Cannot add segments to chart");
 			fine("Error getting segments", e);
+			throw new ChartDatasetCreationException("Cannot add segments to chart", e);
 		}
 
 		
@@ -490,16 +491,18 @@ public class NucleusDatasetCreator implements Loggable {
 			segments = collection.getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN)
 					.getOrderedSegments();
+		
+		
+
+			if(normalised){
+				addSegmentsFromProfile(segments, profile, ds, 100, 0);
+			} else {
+				addSegmentsFromProfile(segments, profile, ds, (int) collection.getMedianArrayLength(), offset);
+			}
+		
 		} catch (UnavailableBorderTagException | ProfileException e) {
 			fine("Error getting profile from tag", e);
 			throw new ChartDatasetCreationException("Unable to get median profile", e);
-		}
-		
-
-		if(normalised){
-			addSegmentsFromProfile(segments, profile, ds, 100, 0);
-		} else {
-			addSegmentsFromProfile(segments, profile, ds, (int) collection.getMedianArrayLength(), offset);
 		}
 
 		// make the IQR
@@ -550,7 +553,7 @@ public class NucleusDatasetCreator implements Loggable {
 				warn("Missing profile for nucleus "+n.getNameAndNumber());
 				fine("Error getting nucleus profile", e);
 			}
-			
+
 		}
 		return ds;
 	}
@@ -878,7 +881,8 @@ public class NucleusDatasetCreator implements Loggable {
 		IProfile xpoints = profile.getPositions(100);
 		
 		// rendering order will be first on top
-		
+
+
 		// add the segments (these are the same as in the regular profile collection)
 //		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
 		List<IBorderSegment> segments;
@@ -886,11 +890,14 @@ public class NucleusDatasetCreator implements Loggable {
 			segments = collection.getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, point, Quartile.MEDIAN)
 					.getOrderedSegments();
+			
+			addSegmentsFromProfile(segments, profile, ds, 100, 0);
+			
 		} catch (UnavailableBorderTagException | ProfileException e1) {
 			fine("Error getting profile from tag", e1);
 			throw new ChartDatasetCreationException("Unable to get median profile", e1);
 		}
-		addSegmentsFromProfile(segments, profile, ds, 100, 0);
+		
 
 		// make the IQR
 		IProfile profile25;

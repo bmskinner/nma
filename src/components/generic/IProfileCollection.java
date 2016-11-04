@@ -200,9 +200,16 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * By default, the profiles are zeroed on the reference point
 	 * @param collection the CellCollection
 	 * @param length the length of the aggregate
-	 * @throws Exception 
 	 */
 	void createProfileAggregate(ICellCollection collection,	int length);
+	
+	/**
+	 * Create profile aggregates from the given collection, with a length
+	 * set by any segments the collection contains.
+	 * By default, the profiles are zeroed on the reference point
+	 * @param collection the CellCollection
+	 */
+	void createAndRestoreProfileAggregate(ICellCollection collection);
 
 	/**
 	 * Create the profile aggregate from the given collection, using the 

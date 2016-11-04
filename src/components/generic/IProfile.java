@@ -287,8 +287,9 @@ public interface IProfile
 	 * as the profile)
 	 * @param segment the segment to find
 	 * @return a Profile
+	 * @throws ProfileException 
 	 */
-	IProfile getSubregion(IBorderSegment segment);
+	IProfile getSubregion(IBorderSegment segment) throws ProfileException;
 
 	/**
 	 * Calculate the differences between the previous and next indexes

@@ -23,6 +23,7 @@ import ij.IJ;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -435,6 +436,10 @@ public interface IBorderSegment
 		}
 		return result;
 	}
+	static List<IBorderSegment> nudge(IBorderSegment[] list, int value) throws ProfileException  {
+		return nudge(Arrays.asList(list), value);		
+	}
+	
 	
 	/**
 	 * Move the segments by the given amount, without shrinking them.

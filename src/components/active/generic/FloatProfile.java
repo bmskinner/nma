@@ -896,14 +896,14 @@ public class FloatProfile implements IProfile {
 	 * @see components.generic.IProfile#getSubregion(components.nuclear.NucleusBorderSegment)
 	 */
 	@Override
-	public IProfile getSubregion(IBorderSegment segment) {
+	public IProfile getSubregion(IBorderSegment segment) throws ProfileException {
 
 		if(segment==null){
 			throw new IllegalArgumentException("Segment is null");
 		}
 
 		if(segment.getTotalLength()!=this.size()){
-			throw new IllegalArgumentException("Segment comes from a different length profile");
+			throw new ProfileException("Segment comes from a different length profile");
 		}
 		return getSubregion(segment.getStartIndex(), segment.getEndIndex());
 	}

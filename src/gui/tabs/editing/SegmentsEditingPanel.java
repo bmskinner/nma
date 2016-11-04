@@ -224,8 +224,11 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 						.getProfileCollection()
 						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 			} catch (UnavailableBorderTagException | ProfileException e) {
-				warn("Error getting profile");
-				fine("Error getting profile");
+				fine("Error getting profile", e);
+//				chart = MorphologyChartFactory.makeErrorChart();
+//				rangeChart = MorphologyChartFactory.makeErrorChart();
+//				profile  = null;
+
 			}
 
 			dualPanel.setCharts(chart, profile, true, rangeChart);

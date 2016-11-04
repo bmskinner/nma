@@ -627,7 +627,17 @@ implements ICellCollection {
 		 * Default is to make profile aggregate from reference point
 		 * 
 		 */
-		profileCollection.createProfileAggregate(this, this.getMedianArrayLength());
+		createProfileCollection(this.getMedianArrayLength());
+	}
+	
+	public void createProfileCollection(int length) {
+
+		/*
+		 * Build a set of profile aggregates
+		 * Default is to make profile aggregate from reference point
+		 * 
+		 */
+		profileCollection.createProfileAggregate(this, length);
 	}
 	
 	/**
@@ -1433,8 +1443,9 @@ implements ICellCollection {
 		
 		signalManager  = new SignalManager(this);
 		profileManager = new ProfileManager(this);
-		
-		this.profileCollection.createProfileAggregate(this, getMedianArrayLength());
+				
+		// Make sure any profile aggregates match the length of saved segments
+		this.profileCollection.createAndRestoreProfileAggregate(this);
 	
 	}
 

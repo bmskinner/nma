@@ -192,6 +192,7 @@ public class DatasetConverter implements Loggable {
 		
 		try {
 
+			// Make new profile aggregates
 			newCollection.createProfileCollection();
 			
 			// Copy segmentation patterns over
@@ -419,7 +420,18 @@ public class DatasetConverter implements Loggable {
 			}
 			finer("\tSetting tag "+t);
 		}
+		
+		// Copy segments from RP
+		convertNuclearSegments(template, newNucleus);
+		
+		convertNuclearSignals(template, newNucleus);
 
+		fine("Created nucleus "+newNucleus.getNameAndNumber()+"\n");
+
+		return  newNucleus;
+	}
+	
+	private void convertNuclearSegments(Nucleus template, Nucleus newNucleus) throws DatasetConversionException{
 		// Copy segments from RP
 		for(ProfileType type : ProfileType.values()){
 
@@ -429,60 +441,56 @@ public class DatasetConverter implements Loggable {
 				fine("\tGot the template profile for "+type);
 				ISegmentedProfile target = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
 				fine("\tGot the target profile for "+type);
-				
+
 				if(profile.size() != target.size()){
 					fine("\tNew nucleus profile length of "+target.size()+" : original nucleus was "+profile.size());
 					target = profile.interpolate(target.size());
-					fine("\tInterpolated profile");
+					fine("\tInterpolated profile has length "+target.size()+" with segment total length "+target.getSegments().get(0).getTotalLength());
 				}
 
 				fine("\tSetting the profile "+type+" in the new nucleus");
 				newNucleus.setProfile(type, Tag.REFERENCE_POINT, target);
 
-				
+
 			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1) {
 				fine("Error getting profile from template or target nucleus", e1);
 				throw new DatasetConversionException("Cannot convert nucleus", e1);
 			} 
 			fine("Complete profile type "+type);
 		}
+	}
+	
+	private void convertNuclearSignals(Nucleus template, Nucleus newNucleus){
 		
 		// Copy signals
-		
-		
 		for(UUID signalGroup : template.getSignalCollection().getSignalGroupIDs()){
-			
+
 			for(INuclearSignal s : template.getSignalCollection().getSignals(signalGroup)){
-				
+
 				// Get the roi for the old nucleus
 				float[] xpoints = new float[s.getBorderLength()], ypoints = new float[s.getBorderLength()];
-				
+
 				for(int i=0; i<xpoints.length; i++){
 					xpoints[i] = (float) s.getBorderPoint(i).getX();
 					ypoints[i] = (float) s.getBorderPoint(i).getY();
 				}
-				
+
 				PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
-				
+
 				INuclearSignal newSignal = new DefaultNuclearSignal(roi, 
 						s.getSourceFile(), 
 						s.getChannel(), s.getPosition(), s.getCentreOfMass());
-				
+
 				for(PlottableStatistic st : s.getStatistics()){
 					newSignal.setStatistic(st, s.getStatistic(st));;
-					
+
 				}
-				
+
 				newNucleus.getSignalCollection().addSignal(newSignal, signalGroup);
-				
+
 			}
-			
+
 		}
-		
-
-		fine("Created nucleus "+newNucleus.getNameAndNumber()+"\n");
-
-		return  newNucleus;
 	}
 	
 	/**

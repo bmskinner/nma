@@ -994,5 +994,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		//		finest("\tReading segmented profile");
 		in.defaultReadObject();
 		//		finest("\tRead segmented profile");
+		if(size() != segments[0].getTotalLength()){
+			log("Error reading segments: "+" segment length "+segments[0].getTotalLength()+" different to profile "+size() );
+		}
 	}
 }
