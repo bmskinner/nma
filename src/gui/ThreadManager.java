@@ -19,8 +19,8 @@ public class ThreadManager implements Loggable {
 	 * Handle threading
 	 */
 	
-	public static final int corePoolSize    = 16;
-	public static final int maximumPoolSize = 32;
+	public static final int corePoolSize    = 8;
+	public static final int maximumPoolSize = 100;
 	public static final int keepAliveTime = 10000;
 
 	private final ExecutorService executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,

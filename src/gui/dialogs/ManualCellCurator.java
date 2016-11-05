@@ -1,41 +1,41 @@
-///*******************************************************************************
-// *  	Copyright (C) 2016 Ben Skinner
-// *   
-// *     This file is part of Nuclear Morphology Analysis.
-// *
-// *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
-// *     it under the terms of the GNU General Public License as published by
-// *     the Free Software Foundation, either version 3 of the License, or
-// *     (at your option) any later version.
-// *
-// *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
-// *     but WITHOUT ANY WARRANTY; without even the implied warranty of
-// *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// *     GNU General Public License for more details.
-// *
-// *     You should have received a copy of the GNU General Public License
-// *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
-// *******************************************************************************/
-//package gui.dialogs;
-//
-//import java.awt.BorderLayout;
-//import java.awt.FlowLayout;
-//import java.awt.event.MouseAdapter;
-//import java.awt.event.MouseEvent;
-//import java.util.ArrayList;
-//import java.util.List;
-//import java.util.UUID;
-//import java.util.logging.Level;
-//import javax.swing.JButton;
-//import javax.swing.JPanel;
-//
-//import analysis.AnalysisDataset;
-//import components.Cell;
-//import gui.LoadingIconDialog;
-//import gui.components.AnnotatedNucleusPanel;
-//
-//@SuppressWarnings("serial")
-//public class ManualCellCurator extends LoadingIconDialog {
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
+package gui.dialogs;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.logging.Level;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+
+import analysis.AnalysisDataset;
+import components.Cell;
+import gui.LoadingIconDialog;
+import gui.components.AnnotatedNucleusPanel;
+
+@SuppressWarnings("serial")
+public class ManualCellCurator extends LoadingIconDialog {
 //	
 //	private JButton keepButton = new JButton("Keep");
 //	private JButton rejectButton = new JButton("Reject");
@@ -131,4 +131,4 @@
 //		return panel;
 //	}
 //
-//}
+}

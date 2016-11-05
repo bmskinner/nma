@@ -238,7 +238,7 @@ public class MainWindow
 		
 		
 		try {
-			setTitle("Nuclear Morphology Analysis v"+Version.currentVersion().toString());
+			setTitle("Nuclear Morphology Analysis v"+Version.currentVersion().toString()+"a2");
 			
 			Dimension preferredSize = new Dimension(1012, 804);
 			this.setPreferredSize(preferredSize);

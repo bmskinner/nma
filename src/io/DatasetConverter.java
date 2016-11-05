@@ -112,6 +112,7 @@ public class DatasetConverter implements Loggable {
 			// add the child datasets
 			makeVirtualCollections(oldDataset, newDataset);
 
+			oldDataset = null;
 			return newDataset;
 
 		} catch(Exception e){
@@ -506,13 +507,13 @@ public class DatasetConverter implements Loggable {
 			
 			String newFileName = saveFile.getAbsolutePath().replace(Constants.SAVE_FILE_EXTENSION, Constants.BAK_FILE_EXTENSION);
 			
-			log("Renaming to "+newFileName);
+			log("Copying to "+newFileName);
 			
 			File newFile = new File(newFileName);
 			
 			if(newFile.exists()){
 				
-				warn("Backup file exists, overwriting");
+				warn("Overwriting existing backup file");
 				
 			}
 
@@ -521,7 +522,7 @@ public class DatasetConverter implements Loggable {
 				
 				Files.copy(saveFile.toPath(), newFile.toPath(), REPLACE_EXISTING);
 				
-				log("Backup file created");
+				log("Backup file created OK");
 			} catch (IOException e) {
 				fine("Error copying file", e);
 				throw new DatasetConversionException("Unable to make backup file");
