@@ -77,6 +77,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -303,7 +304,7 @@ public class MainWindow
 					logPanel, populationsPanel);
 
 			//Provide minimum sizes for the two components in the split pane
-			Dimension minimumSize = new Dimension(200, 200);
+			Dimension minimumSize = new Dimension(300, 200);
 			logPanel.setMinimumSize(minimumSize);
 			populationsPanel.setMinimumSize(minimumSize);
 			
@@ -1084,32 +1085,32 @@ public class MainWindow
      * Signal listeners that the given datasets should be displayed
      * @param list
      */
-    public void fireDatasetUpdateEvent(List<IAnalysisDataset> list){
-    	
+    public void fireDatasetUpdateEvent(final List<IAnalysisDataset> list){
+		
     	Runnable r = () -> {
-    		
-    		// Create a new runnable
-    		Runnable r1 = () -> {
-//    			log("Setting charts and tables loading");
-    			// Update charts and panels to loading
-    			for(TabPanel p : detailPanels){
-    				p.setChartsAndTablesLoading();
-    		} };
 
-    		Future<?> f = threadManager.submit( r1 );
+    		PanelLoadingUpdater loader = new PanelLoadingUpdater();
 
-    		// Wait for loading state to be set
     		try {
-    			f.get();
+    			
+    			Future<?> f = threadManager.submit( loader );
+    			
+    			// Wait for loading state to be set
+    			while(!f.isDone()){
+    				fine("Waiting for chart loading set...");
+    				Thread.sleep(1);
+    			}
+    			Boolean ok = (Boolean) f.get();
+    			fine("Chart loading is set: "+ok );
+
     		} catch (InterruptedException e1) {
-    			// TODO Auto-generated catch block
-    			e1.printStackTrace();
+    			error("Error setting loading state", e1);
     		} catch (ExecutionException e1) {
-    			// TODO Auto-generated catch block
-    			e1.printStackTrace();
+    			error("Error setting loading state", e1);
     		}
 
     		// Now fire the update
+    		fine("Firing general update for "+list.size()+" datasets");
     		DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
     		Iterator<Object> iterator = updateListeners.iterator();
     		while( iterator.hasNext() ) {
@@ -1121,6 +1122,28 @@ public class MainWindow
     	
     	threadManager.execute( r );
     }
+    
+    public class PanelLoadingUpdater implements Callable {
+    	public PanelLoadingUpdater(){
+    		
+    	}
+    	
+    	@Override
+    	public Boolean call() {
+
+
+//    		log("Setting charts and tables loading");
+    		// Update charts and panels to loading
+
+    		for(TabPanel p : detailPanels){
+    			p.setChartsAndTablesLoading();
+    		}
+    		return true;
+
+    	}
+    	
+    }
+    
     /**
      * Add a listener for dataset update events.
      * @param l

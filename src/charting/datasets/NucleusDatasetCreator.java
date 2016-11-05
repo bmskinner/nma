@@ -248,7 +248,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param list the datasets to check
 	 * @return the maximum length
 	 */
-	private double getMaximumMedianProfileLength(List<IAnalysisDataset> list){
+	private double getMaximumMedianProfileLength(final List<IAnalysisDataset> list){
 		double length = 100;
 		for(IAnalysisDataset dataset : list){
 			length = dataset.getCollection().getMedianArrayLength()>length 
@@ -728,7 +728,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return a dataset
 	 * @throws Exception 
 	 */
-	private List<XYSeriesCollection> createMultiProfileIQRDataset(List<IAnalysisDataset> list,
+	private List<XYSeriesCollection> createMultiProfileIQRDataset(final List<IAnalysisDataset> list,
 			boolean normalised, ProfileAlignment alignment, Tag borderTag, ProfileType type) throws ChartDatasetCreationException{
 
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);

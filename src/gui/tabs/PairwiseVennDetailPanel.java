@@ -82,20 +82,23 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	
 	@Override
 	public void setChartsAndTablesLoading(){
-		super.setChartsAndTablesLoading();
+//		log("Updating venn detail panel with loading state");
 		pairwiseVennTable.setModel(AbstractDatasetCreator.createLoadingTable());
 	}
 	
 	@Override
 	protected void updateSingle() {
-		updateNull();
+//		log("Updating venn detail panel with single state");
+		pairwiseVennTable.setModel(AbstractDatasetCreator.createBlankTable());
 	}
 	
 
 	@Override
 	protected void updateMultiple() {
-		fine("Updating pairwise venn table for multiple datasets");
-		pairwiseVennTable.setModel(AbstractDatasetCreator.createLoadingTable());
+//		log("Updating pairwise venn table for multiple datasets");
+//		Exception e = new Exception("Updating venn detail panel with multiple state");
+//		error("Cause of multiple update", e);
+//		pairwiseVennTable.setModel(AbstractDatasetCreator.createLoadingTable());
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.PAIRWISE_VENN)
@@ -110,14 +113,12 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	
 	@Override
 	protected void updateNull() {
+//		log("Updating venn detail panel with null state");
+//		Exception e = new Exception("Updating venn detail panel with null state");
+//		error("Cause of null update", e);
 		pairwiseVennTable.setModel(AbstractDatasetCreator.createBlankTable());
 	}
-	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options){
-		return null;
-	}
-	
+		
 	@Override
 	protected TableModel createPanelTableType(TableOptions options){
 		return new AnalysisDatasetTableCreator(options).createPairwiseVennTable();
@@ -146,7 +147,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 			}
 			return -1;
 		}
-
+		
 		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 	        
 			Color backColour = Color.WHITE;
@@ -165,37 +166,31 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		        	NumberFormat nf = NumberFormat.getInstance();
 		        	pct = nf.parse(cellContents).doubleValue();
 		        } catch (Exception e){
-		        	log(Level.FINEST, "Error getting value: "+cellContents+" in column "+columnName, e);
+		        	fine("Error getting value: "+cellContents+" in column "+columnName, e);
 		        	pct = 0;
 		        }
 		        
 		        double colourIndex = 255 - ((pct/100) * 255);
 		        
-		        backColour = new Color((int) colourIndex,(int) colourIndex, 255);
+		        backColour = new Color((int) colourIndex,(int) colourIndex, (int) colourIndex);
 
 		        
-		        if(pct>60){
+		        if(pct>50){
 		        	foreColour = Color.WHITE;
 		        	
 		        }
 		       
 	        }
 	        
-	        if(columnName.equals("Population 1")){
+	        if(columnName.equals("Population 1") || columnName.equals("Population 2")){
 	        	IAnalysisDataset d1 = (IAnalysisDataset) value;
 	        	if(d1.hasDatasetColour()){
 	        		backColour = (Color) d1.getDatasetColour();
 	        	} else {
 	        		backColour = (Color) ColourSelecter.getColor(getIndex(d1));
-	        	}
-	        }
-	        
-	        if(columnName.equals("Population 2")){
-	        	IAnalysisDataset d1 = (IAnalysisDataset) value;
-	        	if(d1.hasDatasetColour()){
-	        		backColour = (Color) d1.getDatasetColour();
-	        	} else {
-	        		backColour = (Color) ColourSelecter.getColor(getIndex(d1));
+	        		if(backColour.getBlue()>60){
+	        			foreColour = Color.WHITE;
+	        		}
 	        	}
 	        }
 	        

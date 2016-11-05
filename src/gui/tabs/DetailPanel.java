@@ -273,20 +273,21 @@ public abstract class DetailPanel
 	public synchronized void update(final List<IAnalysisDataset> list){
 
 		fine("Preparing to update");
+		this.list.clear();
+		
 		if(list!=null){
-			this.list = list;
-		} else {
-			this.list = new ArrayList<IAnalysisDataset>(0);
+			
+			this.list.addAll(list);
 		}
-		finest("Set dataset list of "+this.list.size()+" datasets");
+		fine("Set dataset list of "+this.list.size()+" datasets");
 		setUpdating(true);
 		finest("Set updating state");
 		
-		Runnable r = () -> {
+//		Runnable r = () -> {
 			updateDetail();
-		};
+//		};
 		
-		ThreadManager.getInstance().submit(r);
+//		ThreadManager.getInstance().execute(r);
 		
 
 	}
@@ -300,20 +301,35 @@ public abstract class DetailPanel
 		finer("Updating detail panel");
 		try {
 			finest("Checking dataset list");
-			if(hasDatasets()){
-				finest("Datasets present");
-				if(isSingleDataset()){
-					finer("Single dataset present");
-					updateSingle();
-				} else {
-					finer("Multiple datasets present");
-					updateMultiple();
-				}
-				
-			} else {
+			if(list.isEmpty()){
 				finer("No datasets present");
 				updateNull();
+				return;
 			}
+			
+			if(list.size()>1){
+				finer("Multiple datasets present");
+				updateMultiple();
+				return;
+			}
+			
+			finer("Single dataset present");
+			updateSingle();
+			
+//			if(hasDatasets()){
+//				finest("Datasets present");
+//				if(isSingleDataset()){
+//					finer("Single dataset present");
+//					updateSingle();
+//				} else {
+//					finer("Multiple datasets present");
+//					updateMultiple();
+//				}
+//
+//			} else {
+//				finer("No datasets present");
+//				updateNull();
+//			}
 			
 		} catch (Exception e) {
 			warn("Error updating panel "+this.getClass().getName());
@@ -958,7 +974,7 @@ public abstract class DetailPanel
     }
     
     public void setChartsAndTablesLoading(){
-    	for(TabPanel p : this.getSubPanels()){
+    	for(TabPanel p : subPanels){
 			p.setChartsAndTablesLoading();
 		}
     };
@@ -968,8 +984,8 @@ public abstract class DetailPanel
     	// Tell this panel to set all charts and tables to loading status
 //    	setChartsAndTablesLoading();
     	
-    	//		Signal sub panels to update
-    	fireDatasetUpdateEvent(list);
+    	//		Signal sub panels to update    	
+    	fireDatasetUpdateEvent(e.getDatasets());
     	this.update(e.getDatasets());
 
     }

@@ -81,7 +81,7 @@ public class SegmentStatsPanel extends DetailPanel {
 	@Override
 	protected void updateSingle() {
 		
-		table.setModel(AnalysisDatasetTableCreator.createLoadingTable());
+//		table.setModel(AnalysisDatasetTableCreator.createLoadingTable());
 		
 		TableOptions options = makeOptions();
 		setTable(options);
@@ -90,7 +90,7 @@ public class SegmentStatsPanel extends DetailPanel {
 	@Override
 	protected void updateMultiple() {
 		
-		table.setModel(AnalysisDatasetTableCreator.createLoadingTable());
+//		table.setModel(AnalysisDatasetTableCreator.createLoadingTable());
 		
 		TableOptions options = makeOptions();
 		setTable(options);
@@ -106,10 +106,10 @@ public class SegmentStatsPanel extends DetailPanel {
 
 	@Override
 	protected void updateNull() {
-		
-		TableModel model = getTable(makeOptions());
-
-		table.setModel(model);
+		table.setModel(AbstractDatasetCreator.createBlankTable());
+//		TableModel model = getTable(makeOptions());
+//
+//		table.setModel(model);
 
 		table.setToolTipText(null);
 

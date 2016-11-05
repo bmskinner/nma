@@ -2,6 +2,7 @@ package gui;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -55,6 +56,12 @@ public class ThreadManager implements Loggable {
         });
 		fine("Submitted runnable. Queue is "+queueLength.get());
 		return f;
+	}
+	
+	public synchronized Future<?> submit(Callable r){
+		
+		
+		return executorService.submit(r);
 	}
 	
 	public synchronized void execute(Runnable r){

@@ -26,7 +26,7 @@ import analysis.IAnalysisDataset;
  */
 public abstract class AbstractOptions implements DisplayOptions {
 	
-	private List<IAnalysisDataset> list      = new ArrayList<IAnalysisDataset>();
+	private List<IAnalysisDataset> list     = new ArrayList<IAnalysisDataset>();
 	private List<PlottableStatistic> stats  = new ArrayList<PlottableStatistic>();;
 	private UUID segID                      = null; // the id of the segment (not consistent between datasets)
 	private int segPosition                 = 0;    // the position of the segment in the profile (consistent between datasets)
@@ -41,11 +41,11 @@ public abstract class AbstractOptions implements DisplayOptions {
 		if(list==null){
 			return;
 		}
-		this.list = list;
+		this.list = new ArrayList<IAnalysisDataset>(list);
 	}
 
 	public List<IAnalysisDataset> getDatasets(){
-		return this.list;
+		return new ArrayList<IAnalysisDataset>(list);
 	}
 	
 	public void setSwatch(ColourSwatch swatch) {
