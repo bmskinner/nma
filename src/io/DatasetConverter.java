@@ -496,8 +496,9 @@ public class DatasetConverter implements Loggable {
 	/**
 	 * Save a copy of the old dataset by renaming the nmd 
 	 * file to a backup file. 
+	 * @throws DatasetConversionException 
 	 */
-	private void backupOldDataset(){
+	private void backupOldDataset() throws DatasetConversionException{
 		
 		File saveFile = oldDataset.getSavePath();
 		
@@ -522,8 +523,8 @@ public class DatasetConverter implements Loggable {
 				
 				log("Backup file created");
 			} catch (IOException e) {
-				warn("Unable to make backup file");
 				fine("Error copying file", e);
+				throw new DatasetConversionException("Unable to make backup file");
 			}
 
 			

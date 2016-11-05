@@ -316,21 +316,6 @@ public abstract class DetailPanel
 			finer("Single dataset present");
 			updateSingle();
 			
-//			if(hasDatasets()){
-//				finest("Datasets present");
-//				if(isSingleDataset()){
-//					finer("Single dataset present");
-//					updateSingle();
-//				} else {
-//					finer("Multiple datasets present");
-//					updateMultiple();
-//				}
-//
-//			} else {
-//				finer("No datasets present");
-//				updateNull();
-//			}
-			
 		} catch (Exception e) {
 			warn("Error updating panel "+this.getClass().getName());
 			fine("Error updating panel", e); // save detail for fine logging
