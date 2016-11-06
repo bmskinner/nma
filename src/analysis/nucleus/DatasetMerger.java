@@ -34,6 +34,8 @@ import components.ICellCollection;
 import components.active.DefaultAnalysisDataset;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
+import components.active.MergeSourceAnalysisDataset;
+import components.active.VirtualCellCollection;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalGroup;
 
@@ -154,7 +156,7 @@ public class DatasetMerger extends AnalysisWorker {
 
 			return true;
 		} catch (Exception e){
-			logError("Error in merging", e);
+			error("Error in merging", e);
 			return false;
 		}
 
@@ -211,7 +213,17 @@ public class DatasetMerger extends AnalysisWorker {
 		
 		// Add the original datasets as merge sources
 		for(IAnalysisDataset d : datasets){
-			newDataset.addMergeSource(d);
+			
+			// Make a new virtual collection for the sources
+			ICellCollection c = new VirtualCellCollection(newDataset, d.getName(), d.getUUID());
+			for(ICell cell : d.getCollection().getCells()){
+				c.addCell(cell);
+			}
+			
+			IAnalysisDataset mergeSource = new MergeSourceAnalysisDataset(newDataset, d, c);
+//			mergeSource.setAnalysisOptions(d.getAnalysisOptions());
+//			
+			newDataset.addMergeSource(mergeSource);
 		}
 
 		
@@ -306,7 +318,7 @@ public class DatasetMerger extends AnalysisWorker {
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
-				logError("Thread interrupted", e);
+				error("Thread interrupted", e);
 			}
 		}
 	}

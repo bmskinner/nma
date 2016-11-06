@@ -82,7 +82,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 			
 		} catch (Exception e){
 			this.cancel();
-			logError("Error in signal analysis", e);
+			error("Error in signal analysis", e);
 		}
 		
 	}	

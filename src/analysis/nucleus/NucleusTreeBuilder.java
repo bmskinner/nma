@@ -143,11 +143,11 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				this.newickTree = clusterer.graph();
 
 			} catch (Exception e) {
-				logError("Error in clustering", e);
+				error("Error in clustering", e);
 				return false;
 			}
 		} catch (Exception e) {
-			logError("Error in assignments", e);
+			error("Error in assignments", e);
 			return false;
 		}
 		return true;
@@ -315,7 +315,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 			}
 
 		} catch(Exception e){
-			logError("Error making instances", e);
+			error("Error making instances", e);
 		}
 		return instances;
 		

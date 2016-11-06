@@ -59,6 +59,7 @@ import stats.Quartile;
 import utility.AngleTools;
 import utility.Constants;
 
+@Deprecated
 public abstract class AbstractCellularComponent 
 	implements CellularComponent,
 	           Rotatable {

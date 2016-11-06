@@ -126,14 +126,14 @@ public class SignalDetectionWorker extends AnalysisWorker {
 					
 					
 				} catch(Exception e){
-					logError("Error detecting signal", e);
+					error("Error detecting signal", e);
 				}
 				
 				publish(progress++);
 			}		
 			
 		} catch (Exception e){
-			logError("Error in signal detection", e);
+			error("Error in signal detection", e);
 			return false;
 		}
 

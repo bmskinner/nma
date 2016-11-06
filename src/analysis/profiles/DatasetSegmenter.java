@@ -352,7 +352,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		try{
 			reviseSegments(collection, pointType);
 		} catch (Exception e){
-			logError("Error revising segments", e);
+			error("Error revising segments", e);
 		}
 		
 		// update the aggregate in case any borders have changed

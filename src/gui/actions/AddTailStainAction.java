@@ -63,7 +63,7 @@ public class AddTailStainAction extends ProgressableAction {
 			ThreadManager.getInstance().submit(worker);
 		} catch(Exception e){
 			this.cancel();
-			logError("Error in tail analysis", e);
+			error("Error in tail analysis", e);
 
 		}
 	}

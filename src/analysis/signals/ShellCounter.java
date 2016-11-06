@@ -152,7 +152,7 @@ public class ShellCounter implements Loggable {
 			ChiSquareTest test = new ChiSquareTest();
 			chi = test.chiSquare(expected, observed);
 			} catch(Exception e){
-				logError( "Error getting chi square values", e);
+				error( "Error getting chi square values", e);
 				this.print();
 		}
 		return chi;
@@ -177,7 +177,7 @@ public class ShellCounter implements Loggable {
 								: values.get(i);
 			}
 		} catch(Exception e){
-			logError( "Error getting shell values", e);
+			error( "Error getting shell values", e);
 			this.print();
 		}
 		return array;
@@ -202,7 +202,7 @@ public class ShellCounter implements Loggable {
 						: values.get(i);
 			}
 		} catch(Exception e){
-			logError( "Error getting shell values", e);
+			error( "Error getting shell values", e);
 			this.print();
 		}
 		return array;

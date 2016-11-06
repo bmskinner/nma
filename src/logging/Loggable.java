@@ -28,15 +28,6 @@ public interface Loggable {
 		Logger.getLogger(PROGRAM_LOGGER).log(level, message );
 	}
     
-    /**
-     * Log an error to the program log window and to the dataset
-     * debug file. Logs with Level.SEVERE
-     * @param message the error messsage
-     * @param t the exception
-     */
-	default void logError(String message, Throwable t){
-		Logger.getLogger(PROGRAM_LOGGER).log(Level.SEVERE, message, t);
-	}
 	
 	/**
      * Log an error to the program log window with Level.SEVERE
@@ -49,8 +40,7 @@ public interface Loggable {
 	
 	/**
      * Log a message to the program log window with Level.FINE
-     * @param message the error messsage
-     * @param t the exception
+     * @param message the messsage
      */
 	default void fine(String message){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINE, message);
@@ -58,7 +48,7 @@ public interface Loggable {
 	
 	/**
 	 * Log an error to the program log window with Level.FINE
-	 * Use to show stack traces only when debugging
+	 * Use to show stack traces when debugging
 	 * @param message
 	 * @param t
 	 */
@@ -67,18 +57,16 @@ public interface Loggable {
 	}
 	
 	/**
-     * Log an error to the program log window with Level.FINER
+     * Log a message to the program log window with Level.FINER
      * @param message the error messsage
-     * @param t the exception
      */
 	default void finer(String message){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINER, message);
 	}
 	
 	/**
-     * Log an error to the program log window with Level.FINEST
+     * Log a message to the program log window with Level.FINEST
      * @param message the error messsage
-     * @param t the exception
      */
 	default void finest(String message){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINEST, message);
@@ -87,24 +75,23 @@ public interface Loggable {
 	/**
      * Log an error to the program log window with Level.WARNING
      * @param message the error messsage
-     * @param t the exception
      */
 	default void warn(String message){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.WARNING, message);
 	}
 	
 	/**
-     * Log an error to the program log window with Level.INFO
+     * Log a message to the program log window with Level.INFO
      * @param message the error messsage
-     * @param t the exception
      */
 	default void log(String message){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.INFO, message);
 	}
 	
 	/**
-     * Log an error to the program log window and to the dataset
-     * debug file. Logs with Level.SEVERE
+     * Log a message to the program log window and to the dataset
+     * debug file.
+     * @param level the logging level 
      * @param message the error messsage
      * @param t the exception
      */
@@ -112,6 +99,13 @@ public interface Loggable {
 		Logger.getLogger(PROGRAM_LOGGER).log(level, message, t);
 	}
 	
+	/**
+	 * Log the given message and srack trace from the given throwable
+	 * to the ImageJ log window. Only use if the program log panel is
+	 * not expected to be available.
+	 * @param message
+	 * @param t
+	 */
 	default void logToImageJ(String message, Throwable t){
 		IJ.log(message);
 		IJ.log(t.getMessage());
@@ -120,6 +114,12 @@ public interface Loggable {
 		}
 	}
 	
+	/**
+	 * Log the given message to the ImageJ log window. 
+	 * Only use if the program log panel is not expected 
+	 * to be available.
+	 * @param message
+	 */
 	default void logIJ(String message){
 		IJ.log(message);
 	}

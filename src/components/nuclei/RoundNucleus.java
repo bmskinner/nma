@@ -83,6 +83,7 @@ import components.nuclear.SignalCollection;
  * @author bms41
  *
  */
+@Deprecated
 public class RoundNucleus extends AbstractCellularComponent
 	implements Nucleus {
 

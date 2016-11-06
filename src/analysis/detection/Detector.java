@@ -174,7 +174,7 @@ public abstract class Detector implements Loggable {
 			  log(Level.FINEST, "Unable to perform particle analysis");
 		  }
 	  } catch(Exception e){
-		  logError("Error in particle analyser", e);
+		  error("Error in particle analyser", e);
 	  } finally {
 		  image.close();
 	  }

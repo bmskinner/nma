@@ -36,6 +36,7 @@ import components.nuclear.IBorderSegment;
  * @author bms41
  *
  */
+@Deprecated
 public class Profile implements IProfile {
 
 	/**

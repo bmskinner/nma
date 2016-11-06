@@ -58,7 +58,7 @@ public class ReplaceSourceImageDirectoryAction extends ProgressableAction {
 			}
 
 		} catch(Exception e){
-			logError("Error in folder update: "+e.getMessage(), e);
+			error("Error in folder update: "+e.getMessage(), e);
 		}
 
 

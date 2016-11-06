@@ -15,125 +15,125 @@ public interface ChartOptions extends DisplayOptions {
 
 	boolean isNormalised();
 
-	void setNormalised(boolean normalised);
+//	void setNormalised(boolean normalised);
 
 	ChartPanel getTarget();
 	
 	boolean hasTarget();
 	
-	void setTarget(ChartPanel target);
+//	void setTarget(ChartPanel target);
 
 	ProfileAlignment getAlignment();
 
-	void setAlignment(ProfileAlignment alignment);
+//	void setAlignment(ProfileAlignment alignment);
 
 	double getModalityPosition();
 
-	void setModalityPosition(double modalityPosition);
+//	void setModalityPosition(double modalityPosition);
 
 	Tag getTag();
 
-	void setTag(Tag tag);
+//	void setTag(Tag tag);
 
 	boolean isShowMarkers();
 
-	void setShowMarkers(boolean showMarkers);
+//	void setShowMarkers(boolean showMarkers);
 
 	boolean isHideProfiles();
 
-	void setHideProfiles(boolean hideProfiles);
+//	void setHideProfiles(boolean hideProfiles);
 
 	boolean isShowPoints();
 
-	void setShowPoints(boolean showPoints);
+//	void setShowPoints(boolean showPoints);
 
 	boolean isShowLines();
 
-	void setShowLines(boolean showLines);
+//	void setShowLines(boolean showLines);
 
 	boolean isShowAnnotations();
 
-	void setShowAnnotations(boolean showAnnotations);
+//	void setShowAnnotations(boolean showAnnotations);
 
 	ProfileType getType();
 
-	void setType(ProfileType type);
+//	void setType(ProfileType type);
 
 	UUID getSignalGroup();
 
-	void setSignalGroup(UUID signalGroup);
+//	void setSignalGroup(UUID signalGroup);
 
 	boolean isUseDensity();
 
-	void setUseDensity(boolean useDensity);
+//	void setUseDensity(boolean useDensity);
 
 	boolean isShowMesh();
 
-	void setShowMesh(boolean showMesh);
+//	void setShowMesh(boolean showMesh);
 
 	boolean isShowMeshEdges();
 
-	void setShowMeshEdges(boolean showMeshEdges);
+//	void setShowMeshEdges(boolean showMeshEdges);
 
 	boolean isShowMeshFaces();
 
-	void setShowMeshFaces(boolean showMeshFaces);
+//	void setShowMeshFaces(boolean showMeshFaces);
 
 	boolean isStraightenMesh();
 
-	void setStraightenMesh(boolean straightenMesh);
+//	void setStraightenMesh(boolean straightenMesh);
 
 	int getMeshSize();
 
-	void setMeshSize(int meshSize);
+//	void setMeshSize(int meshSize);
 
 	boolean isShowBounds();
 
-	void setShowBounds(boolean showBounds);
+//	void setShowBounds(boolean showBounds);
 
 	boolean isShowXAxis();
 
-	void setShowXAxis(boolean showXAxis);
+//	void setShowXAxis(boolean showXAxis);
 
 	boolean isShowYAxis();
 
-	void setShowYAxis(boolean showYAxis);
+//	void setShowYAxis(boolean showYAxis);
 
 	boolean isInvertXAxis();
 
-	void setInvertXAxis(boolean invertXAxis);
+//	void setInvertXAxis(boolean invertXAxis);
 
 	boolean isInvertYAxis();
 
-	void setInvertYAxis(boolean invertYAxis);
+//	void setInvertYAxis(boolean invertYAxis);
 
 	RotationMode getRotateMode();
 
-	void setRotateMode(RotationMode rotateMode);
+//	void setRotateMode(RotationMode rotateMode);
 
 	ICell getCell();
 
-	void setCell(ICell cell);
+//	void setCell(ICell cell);
 
 	boolean hasCell();
 
 	CellularComponent getComponent();
 
-	void setComponent(CellularComponent component);
+//	void setComponent(CellularComponent component);
 
 	boolean hasComponent();
 
 	boolean isShowWarp();
 
-	void setShowWarp(boolean showWarp);
+//	void setShowWarp(boolean showWarp);
 
 	boolean isShowBorderTags();
 
-	void setShowBorderTags(boolean showBorderTags);
+//	void setShowBorderTags(boolean showBorderTags);
 
 	boolean isShowSignals();
 
-	void setShowSignals(boolean showSignals);
+//	void setShowSignals(boolean showSignals);
 
 	int hashCode();
 

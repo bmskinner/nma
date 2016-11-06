@@ -18,6 +18,13 @@
  *******************************************************************************/
 package gui;
 
+/**
+ * The dataset event listeners are used to signal an activity
+ * should be performed on a dataset or datasets. They are sent by 
+ * a tab panel.
+ * @author ben
+ *
+ */
 public interface DatasetEventListener {
 	
 	public void datasetEventReceived(DatasetEvent event);

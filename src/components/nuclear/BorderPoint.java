@@ -28,6 +28,7 @@ import components.generic.IPoint;
  * allow linkage of points.
  *
  */
+@Deprecated
 public class BorderPoint
 	extends components.generic.XYPoint implements IBorderPoint {
 

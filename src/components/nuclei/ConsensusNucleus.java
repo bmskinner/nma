@@ -33,6 +33,7 @@ import components.nuclear.NucleusType;
  * This holds methods for manipulatiing a refolded consensus nucleus
  *
  */
+@Deprecated
 public class ConsensusNucleus extends RoundNucleus implements Serializable {
 
 	private static final long serialVersionUID = 1L;

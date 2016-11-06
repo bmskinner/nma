@@ -135,22 +135,12 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     
     @Override
     public void error(String message, Throwable t){
-    	logError(message, t);
-    }
-    
-    /**
-     * Log an error to the program log window and to the dataset
-     * debug file. Logs with Level.SEVERE
-     * @param message the error messsage
-     * @param t the exception
-     */
-    @Override
-    public void logError(String message, Throwable t){
     	if(fileLogger!=null){
     		fileLogger.log(Level.SEVERE, message, t);
     	}
-    	Loggable.super.logError( message, t);
+    	Loggable.super.error( message, t);
     }
+    
     
     protected void setProgressTotal(int i){
     	this.progressTotal = i;

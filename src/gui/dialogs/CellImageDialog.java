@@ -57,7 +57,7 @@ public class CellImageDialog extends LoadingIconDialog {
 			try{
 				panel.updateCell(cell);
 			} catch(Exception e){
-				logError("Error making dialog", e);
+				error("Error making dialog", e);
 			}
 			this.setModal(false);
 			this.pack();

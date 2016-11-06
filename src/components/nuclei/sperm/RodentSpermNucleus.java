@@ -58,6 +58,7 @@ import components.nuclear.NuclearSignal;
 import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
 
+@Deprecated
 public class RodentSpermNucleus extends SpermNucleus {
 
 	private static final long serialVersionUID = 1L;

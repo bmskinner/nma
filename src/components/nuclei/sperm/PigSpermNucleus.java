@@ -40,6 +40,7 @@ import components.nuclear.IBorderPoint;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 
+@Deprecated
 public class PigSpermNucleus 
     extends SpermNucleus  {
     /**

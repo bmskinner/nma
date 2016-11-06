@@ -47,7 +47,7 @@ public class CellRelocator extends AnalysisWorker {
 			publish(1);
 			result = true;
 		} catch (Exception e) {
-			logError("Error selecting cells", e);
+			error("Error selecting cells", e);
 		}
 		
 		return result;
@@ -188,7 +188,7 @@ public class CellRelocator extends AnalysisWorker {
 		} catch (Exception e) {
 			log(Level.SEVERE, line);
 			log(Level.SEVERE, file.getAbsolutePath());
-			logError("Cannot get position", e);
+			error("Cannot get position", e);
 			return null;
 		}
 		

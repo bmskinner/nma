@@ -38,6 +38,7 @@ import components.nuclear.NucleusBorderSegment;
  * applied to profiles.
  *
  */
+@Deprecated
 public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	
 	private static final long serialVersionUID = 1L;

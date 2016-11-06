@@ -23,7 +23,7 @@ public class NeighbourJoiningTreeBuilder extends AnalysisWorker {
 //			this.tree = makeTree();
 			return true;
 		} catch(Exception e){
-			logError("Error in neighbour joining", e);
+			error("Error in neighbour joining", e);
 			return false;
 		}
 	}

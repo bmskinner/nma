@@ -37,6 +37,7 @@ import components.generic.XYPoint;
 import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
 
+@Deprecated
 public class SpermNucleus extends AsymmetricNucleus {
 
 	private static final long serialVersionUID = 1L;

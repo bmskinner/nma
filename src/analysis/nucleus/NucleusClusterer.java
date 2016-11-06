@@ -157,11 +157,11 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 				}
 
 			} catch (Exception e) {
-				logError("Error in clustering", e);
+				error("Error in clustering", e);
 				return false;
 			}
 		} catch (Exception e) {
-			logError("Error in assignments", e);
+			error("Error in assignments", e);
 			return false;
 		}
 		log(Level.FINE, "Clustering complete");
@@ -211,7 +211,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 					finest("\tInstance handled");
 					publish(i++);
 				} catch(Exception e){
-					logError("Error assigning instance to cluster", e);
+					error("Error assigning instance to cluster", e);
 				}
 				 
 			}

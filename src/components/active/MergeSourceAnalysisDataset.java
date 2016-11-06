@@ -44,9 +44,19 @@ public class MergeSourceAnalysisDataset
 				
 	private IAnalysisOptions analysisOptions; // the setup for this analysis - the child does not have an options itself
 	
-	public MergeSourceAnalysisDataset(IAnalysisDataset merged, ICellCollection collection){
+	
+	/**
+	 * Create a merge source for the given merged dataset, providing a source template
+	 * and a cell collection
+	 * @param merged
+	 * @param mergeSource
+	 * @param collection
+	 */
+	public MergeSourceAnalysisDataset(IAnalysisDataset merged, IAnalysisDataset mergeSource, ICellCollection collection){
 		super(collection);
 		this.parent = merged;
+		this.setAnalysisOptions(mergeSource.getAnalysisOptions());
+		collection.createProfileCollection();
 	}
 
 	@Override

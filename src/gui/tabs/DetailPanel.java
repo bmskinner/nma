@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.CancellableRunnable;
 import gui.ChartOptionsRenderedEvent;
 import gui.ChartOptionsRenderedEventListener;
 import gui.DatasetEvent;
@@ -55,7 +56,6 @@ import charting.TableCache;
 import charting.charts.AbstractChartFactory;
 import charting.charts.ScatterChartFactory;
 import charting.charts.panels.ExportableChartPanel;
-import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
@@ -116,10 +116,13 @@ public abstract class DetailPanel
 		this.addDatasetUpdateEventListener(panel);
 	}
 	
+	@Override
 	public List<TabPanel> getSubPanels(){
 		return subPanels;
 	}
 	
+
+	@Override
 	public boolean hasSubPanels(){
 		return subPanels.size()>0;
 	}
@@ -379,7 +382,7 @@ public abstract class DetailPanel
 			// Make a background worker to generate the chart and
 			// update the target chart panel when done
 			ChartFactoryWorker worker = new ChartFactoryWorker(options);
-			
+//			ThreadManager.getInstance().submitAndCancelUpdate(worker);
 			ThreadManager.getInstance().submit(worker);//worker.execute();
 		}
 	}
@@ -406,6 +409,9 @@ public abstract class DetailPanel
 			// Make a background worker to generate the chart and
 			// update the target chart panel when done
 			TableFactoryWorker worker = new TableFactoryWorker(options);
+			
+			
+//			ThreadManager.getInstance().submitAndCancelUpdate(worker);
 			ThreadManager.getInstance().submit(worker);//worker.execute();
 		}
 	}
@@ -792,7 +798,7 @@ public abstract class DetailPanel
      * @author bms41
      *
      */
-    protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void> {
+    protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void> implements CancellableRunnable {
     	
     	private ChartOptions options;
     	
@@ -841,7 +847,12 @@ public abstract class DetailPanel
 				warn("Interruption to charting");
 				fine("Error in chart worker", e);
 			}
-        } 
+        }
+
+		@Override
+		public void cancel() {
+			this.cancel(true);
+		} 
  
     }
     
@@ -851,7 +862,7 @@ public abstract class DetailPanel
      * @author bms41
      *
      */
-    protected class TableFactoryWorker extends SwingWorker<TableModel, Void> {
+    protected class TableFactoryWorker extends SwingWorker<TableModel, Void> implements CancellableRunnable{
     	
     	private TableOptions options;
     	
@@ -904,6 +915,12 @@ public abstract class DetailPanel
 				e.printStackTrace();
 			}
         } 
+    	
+    	@Override
+		public void cancel() {
+    		log("Cancelling detail panel table update");
+			this.cancel(true);
+		} 
  
     }
     

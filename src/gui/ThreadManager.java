@@ -35,7 +35,7 @@ public class ThreadManager implements Loggable {
 	protected ThreadManager(){}
 
 	/**
-	 * Fetch an instance of the factory
+	 * Fetch an instance
 	 * @return
 	 */
 	public static ThreadManager getInstance(){
@@ -70,6 +70,38 @@ public class ThreadManager implements Loggable {
 	
 	/**
 	 * Request an update of a cencellable process. If an update is 
+	 * already in progress, it will be cancelled. Designed for dataset
+	 * updates - cancel an in progress update in favour of the new dataset
+	 * list
+	 */
+	public synchronized Future<?> submitAndCancelUpdate(CancellableRunnable r){
+		
+
+		// Cancel previous updates
+		for( CancellableRunnable c : cancellableFutures.keySet() ){
+			
+			c.cancel();
+			
+			log("Removing future");
+//			Future<?> future = cancellableFutures.get(c);
+//			if( ! future.isDone()){
+////				log("Cancelling runnable");
+//				c.cancel();
+//				future.cancel(true);
+//			}
+
+			cancellableFutures.remove(c);
+		}
+		
+		Future<?> future = executorService.submit(r);
+//		log("Submitting runnable");
+		cancellableFutures.put(r, future);
+		return future;
+		
+	}
+	
+	/**
+	 * Request an update of a cencellable process. If an update is 
 	 * already in progress, it will be cancelled.
 	 */
 	public void executeAndCancelUpdate(CancellableRunnable r){
@@ -77,13 +109,16 @@ public class ThreadManager implements Loggable {
 
 		// Cancel previous updates
 		for( CancellableRunnable c : cancellableFutures.keySet() ){
-//			log("Removing future");
-			Future<?> future = cancellableFutures.get(c);
-			if( ! future.isDone()){
-//				log("Cancelling runnable");
-				c.cancel();
-				future.cancel(true);
-			}
+			
+			c.cancel();
+			
+			log("Removing future");
+//			Future<?> future = cancellableFutures.get(c);
+//			if( ! future.isDone()){
+////				log("Cancelling runnable");
+//				c.cancel();
+//				future.cancel(true);
+//			}
 
 			cancellableFutures.remove(c);
 		}

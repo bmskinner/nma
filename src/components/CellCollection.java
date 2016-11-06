@@ -81,6 +81,7 @@ import components.nuclei.Nucleus;
  * @author bms41
  *
  */
+@Deprecated
 public class CellCollection implements ICellCollection {
 
 	private static final long serialVersionUID = 1L;

@@ -36,7 +36,7 @@ public class BooleanAlignmentTask extends AbstractProgressAction {
 			try {
 				processNuclei();
 			} catch (Exception e) {
-				logError("Error processing nuclei", e);
+				error("Error processing nuclei", e);
 			}
 	     else {
 	    	 int mid = (low + high) >>> 1;
@@ -56,7 +56,7 @@ public class BooleanAlignmentTask extends AbstractProgressAction {
 
 	    		 ForkJoinTask.invokeAll(tasks);
 	    	 } catch (Exception e) {
-	    		 logError("Error processing nuclei", e);
+	    		 error("Error processing nuclei", e);
 	    	 }
 
 	     }

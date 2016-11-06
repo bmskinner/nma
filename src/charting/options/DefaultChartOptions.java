@@ -94,7 +94,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setNormalised(boolean)
 	 */
-	@Override
 	public void setNormalised(boolean normalised) {
 		this.normalised = normalised;
 	}
@@ -112,10 +111,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 		return target!=null;
 	}
 
-	/* (non-Javadoc)
-	 * @see charting.options.ChartOptions#setTarget(org.jfree.chart.ChartPanel)
-	 */
-	@Override
+
 	public void setTarget(ChartPanel target) {
 		this.target = target;
 	}
@@ -131,7 +127,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setAlignment(gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment)
 	 */
-	@Override
 	public void setAlignment(ProfileAlignment alignment) {
 		this.alignment = alignment;
 	}
@@ -149,7 +144,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setModalityPosition(double)
 	 */
-	@Override
 	public void setModalityPosition(double modalityPosition) {
 		this.modalityPosition = modalityPosition;
 	}
@@ -165,7 +159,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setTag(components.generic.Tag)
 	 */
-	@Override
 	public void setTag(Tag tag) {
 		this.tag = tag;
 	}
@@ -181,7 +174,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setShowMarkers(boolean)
 	 */
-	@Override
 	public void setShowMarkers(boolean showMarkers) {
 		this.showMarkers = showMarkers;
 	}
@@ -197,7 +189,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setHideProfiles(boolean)
 	 */
-	@Override
 	public void setHideProfiles(boolean hideProfiles) {
 		this.hideProfiles = hideProfiles;
 	}
@@ -214,7 +205,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setShowPoints(boolean)
 	 */
-	@Override
 	public void setShowPoints(boolean showPoints) {
 		this.showPoints = showPoints;
 	}
@@ -230,7 +220,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setShowLines(boolean)
 	 */
-	@Override
 	public void setShowLines(boolean showLines) {
 		this.showLines = showLines;
 	}
@@ -248,7 +237,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setShowAnnotations(boolean)
 	 */
-	@Override
 	public void setShowAnnotations(boolean showAnnotations) {
 		this.showAnnotations = showAnnotations;
 	}
@@ -264,7 +252,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setType(components.generic.ProfileType)
 	 */
-	@Override
 	public void setType(ProfileType type) {
 		this.type = type;
 	}
@@ -280,7 +267,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setSignalGroup(java.util.UUID)
 	 */
-	@Override
 	public void setSignalGroup(UUID signalGroup) {
 		this.signalGroup = signalGroup;
 	}
@@ -296,7 +282,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setUseDensity(boolean)
 	 */
-	@Override
 	public void setUseDensity(boolean useDensity) {
 		this.useDensity = useDensity;
 	}
@@ -314,7 +299,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setShowMesh(boolean)
 	 */
-	@Override
 	public void setShowMesh(boolean showMesh) {
 		this.showMesh = showMesh;
 	}
@@ -330,7 +314,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setShowMeshEdges(boolean)
 	 */
-	@Override
 	public void setShowMeshEdges(boolean showMeshEdges) {
 		this.showMeshEdges = showMeshEdges;
 	}
@@ -346,7 +329,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setShowMeshFaces(boolean)
 	 */
-	@Override
 	public void setShowMeshFaces(boolean showMeshFaces) {
 		this.showMeshFaces = showMeshFaces;
 	}
@@ -362,7 +344,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setStraightenMesh(boolean)
 	 */
-	@Override
 	public void setStraightenMesh(boolean straightenMesh) {
 		this.straightenMesh = straightenMesh;
 	}
@@ -378,7 +359,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setMeshSize(int)
 	 */
-	@Override
 	public void setMeshSize(int meshSize) {
 		this.meshSize = meshSize;
 	}
@@ -395,7 +375,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setShowBounds(boolean)
 	 */
-	@Override
 	public void setShowBounds(boolean showBounds) {
 		this.showBounds = showBounds;
 	}
@@ -411,7 +390,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setShowXAxis(boolean)
 	 */
-	@Override
 	public void setShowXAxis(boolean showXAxis) {
 		this.showXAxis = showXAxis;
 	}
@@ -427,7 +405,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setShowYAxis(boolean)
 	 */
-	@Override
 	public void setShowYAxis(boolean showYAxis) {
 		this.showYAxis = showYAxis;
 	}
@@ -445,7 +422,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setInvertXAxis(boolean)
 	 */
-	@Override
 	public void setInvertXAxis(boolean invertXAxis) {
 		this.invertXAxis = invertXAxis;
 	}
@@ -461,7 +437,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setInvertYAxis(boolean)
 	 */
-	@Override
 	public void setInvertYAxis(boolean invertYAxis) {
 		this.invertYAxis = invertYAxis;
 	}
@@ -478,7 +453,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setRotateMode(gui.RotationMode)
 	 */
-	@Override
 	public void setRotateMode(RotationMode rotateMode) {
 		this.rotateMode = rotateMode;
 	}
@@ -494,7 +468,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setCell(components.ICell)
 	 */
-	@Override
 	public void setCell(ICell cell) {
 		this.cell = cell;
 	}
@@ -518,7 +491,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setComponent(components.CellularComponent)
 	 */
-	@Override
 	public void setComponent(CellularComponent component) {
 		this.component = component;
 	}
@@ -543,7 +515,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setShowWarp(boolean)
 	 */
-	@Override
 	public void setShowWarp(boolean showWarp) {
 		this.showWarp = showWarp;
 	}
@@ -559,7 +530,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setShowBorderTags(boolean)
 	 */
-	@Override
 	public void setShowBorderTags(boolean showBorderTags) {
 		this.showBorderTags = showBorderTags;
 	}
@@ -575,7 +545,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#setShowSignals(boolean)
 	 */
-	@Override
 	public void setShowSignals(boolean showSignals) {
 		this.showSignals = showSignals;
 	}

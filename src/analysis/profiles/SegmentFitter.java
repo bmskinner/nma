@@ -421,7 +421,7 @@ public class SegmentFitter implements Loggable {
 			result = refProfile.absoluteSquareDifference(subjProfile);
 			
 		} catch(Exception e){
-			logError("Error calculating absolute square difference between segments", e);
+			error("Error calculating absolute square difference between segments", e);
 			log(Level.SEVERE, "Ref  seg: "+ reference.toString());
 			log(Level.SEVERE, "Test seg: "+      test.toString());
 			log(Level.SEVERE, "Test profile: "+  testProfile.toString());

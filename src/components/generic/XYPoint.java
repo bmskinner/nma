@@ -34,6 +34,7 @@ import java.io.Serializable;
 
 import logging.Loggable;
 
+@Deprecated
 public class XYPoint  implements Serializable, Loggable, IPoint {
 
 	private static final long serialVersionUID = 1L;

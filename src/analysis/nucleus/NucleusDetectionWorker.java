@@ -113,7 +113,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 
 		} catch(Exception e){
 			result = false;
-			logError("Error in processing folder", e);
+			error("Error in processing folder", e);
 		}
 		return result;
 	}

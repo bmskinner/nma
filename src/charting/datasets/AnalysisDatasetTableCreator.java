@@ -518,9 +518,14 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			logFile = "N/A - merge";
 			
 		} else {
-			String[] times = dataset.getCollection().getOutputFolderName().split("_");
-			date = times[0];
-			time = times[1];
+			if(dataset.getCollection().getOutputFolderName()==null){
+				date = "N/A";
+				time = "N/A";
+			} else {
+				String[] times = dataset.getCollection().getOutputFolderName().split("_");
+				date = times[0];
+				time = times[1];
+			}
 			folder = dataset.getCollection().getFolder().getAbsolutePath();
 			logFile = dataset.getDebugFile().getAbsolutePath();
 		}

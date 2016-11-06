@@ -189,7 +189,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 			getChart(options);
 			update(getDatasets());
 		} catch (Exception e) {
-			logError("Error making chart", e);
+			error("Error making chart", e);
 			update(getDatasets());
 		} finally{
 			setAnalysing(false);

@@ -171,7 +171,7 @@ public class CurveRefolder extends AnalysisWorker {
 			fine("Updated "+pointUpdateCounter+" border points");
 
 		} catch(Exception e){
-			logError("Unable to refold nucleus", e);
+			error("Unable to refold nucleus", e);
 			return false;
 		} finally {
 			collection.setRefolding(false);

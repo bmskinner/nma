@@ -73,7 +73,7 @@ public class RunProfilingAction extends ProgressableAction {
 			ThreadManager.getInstance().submit(worker);
 		} catch(Exception e){
 			this.cancel();
-			logError("Error in morphology analysis", e);
+			error("Error in morphology analysis", e);
 		}
 	}
 	
@@ -96,7 +96,7 @@ public class RunProfilingAction extends ProgressableAction {
 					try {
 						latch.await();
 					} catch (InterruptedException e) {
-						logError("Interruption in segmentation thread", e);
+						error("Interruption in segmentation thread", e);
 					}
 				}
 

@@ -68,7 +68,7 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 			try {
 				processNuclei();
 			} catch (Exception e) {
-				logError("Error processing nuclei" , e);
+				error("Error processing nuclei" , e);
 			}
 			
 		} else {
@@ -89,7 +89,7 @@ public class SegmentRecombiningTask extends AbstractProgressAction  {
 				SegmentRecombiningTask.invokeAll(tasks);
 				
 			} catch (Exception e) {
-				logError("Error dividing task" , e);
+				error("Error dividing task" , e);
 			}
 
 		}

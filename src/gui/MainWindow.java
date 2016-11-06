@@ -86,6 +86,11 @@ import utility.Constants;
 import utility.Version;
 import analysis.IAnalysisDataset;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
+import components.ICell;
+import components.ICellCollection;
+import components.active.DefaultAnalysisDataset;
+import components.active.DefaultCell;
+import components.active.DefaultCellCollection;
 import components.active.DefaultWorkspace;
 import components.active.IWorkspace;
 import components.generic.Tag;
@@ -641,15 +646,7 @@ public class MainWindow
 			}
 			
 			if(event.method().equals(DatasetEvent.EXTRACT_SOURCE)){
-				Runnable task = () -> { 
-					log("Recovering source dataset");
-					for(IAnalysisDataset d : list){
-						d.setRoot(true);
-						populationsPanel.addDataset(d);
-					}
-					populationsPanel.update(list);
-				};
-				threadManager.execute(task);			
+				extractSourceDataset(list);			
 			}
 			
 			if(event.method().equals(DatasetEvent.REFRESH_CACHE)){
@@ -680,6 +677,36 @@ public class MainWindow
 			
 		}
 		
+	}
+	
+	private void extractSourceDataset(final List<IAnalysisDataset> list){
+		Runnable task = () -> { 
+			log("Recovering source dataset");
+			for(IAnalysisDataset d : list){
+				
+				ICellCollection templateCollection = d.getCollection();
+				// Make a new real cell collection from the virtual collection
+				ICellCollection newCollection = new DefaultCellCollection(templateCollection.getFolder(), 
+						null, 
+						templateCollection.getName(), 
+						templateCollection.getNucleusType()
+						);
+				
+				for(ICell c : templateCollection.getCells()){
+					newCollection.addCell(new DefaultCell(c));
+				}
+				
+				IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
+				newDataset.setRoot(true);
+				
+				// TODO: Run new profiling
+				this.addDataset(newDataset);
+				
+//				populationsPanel.addDataset(newDataset);
+			}
+			populationsPanel.update(list);
+		};
+		threadManager.execute(task);
 	}
 	
 	public void addWorkspace(IWorkspace w){
@@ -1070,24 +1097,76 @@ public class MainWindow
      */
     public void fireDatasetUpdateEvent(final List<IAnalysisDataset> list){
 		
-    	Runnable r = () -> {
+    	PanelUpdater r = new PanelUpdater(list);
+    	
+//    	Runnable r = () -> {
+//
+////    		PanelLoadingUpdater loader = new PanelLoadingUpdater();
+////
+////    		try {
+////    			
+////    			Future<?> f = threadManager.submit( loader );
+////    			
+////    			// Wait for loading state to be set
+////    			while(!f.isDone()){
+////    				fine("Waiting for chart loading set...");
+////    				Thread.sleep(1);
+////    			}
+////    			Boolean ok = (Boolean) f.get();
+////    			fine("Chart loading is set: "+ok );
+////
+////    		} catch (InterruptedException e1) {
+////    			error("Error setting loading state", e1);
+////    		} catch (ExecutionException e1) {
+////    			error("Error setting loading state", e1);
+////    		}
+////
+////    		// Now fire the update
+////    		fine("Firing general update for "+list.size()+" datasets");
+////    		DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
+////    		Iterator<Object> iterator = updateListeners.iterator();
+////    		while( iterator.hasNext() ) {
+////    			( (DatasetUpdateEventListener) iterator.next() ).datasetUpdateEventReceived( e );
+////    		}
+//
+//    	};
 
-    		PanelLoadingUpdater loader = new PanelLoadingUpdater();
+    	threadManager.executeAndCancelUpdate(r);
+//    	threadManager.execute( r );
+    }
+    
+    public class PanelUpdater implements CancellableRunnable {
+    	private final List<IAnalysisDataset> list;
+    	
+    	private boolean isCancelled = false;
+    	
+    	public PanelUpdater(final List<IAnalysisDataset> list){ 
+    		this.list = list;
+    	}
+
+		@Override
+		public void run() {
+			PanelLoadingUpdater loader = new PanelLoadingUpdater();
 
     		try {
     			
     			Future<?> f = threadManager.submit( loader );
     			
     			// Wait for loading state to be set
-    			while(!f.isDone()){
+    			while(!f.isDone() && !isCancelled){
     				fine("Waiting for chart loading set...");
     				Thread.sleep(1);
     			}
     			Boolean ok = (Boolean) f.get();
     			fine("Chart loading is set: "+ok );
+    			
+    			if(isCancelled){
+    				return;
+    			}
 
     		} catch (InterruptedException e1) {
-    			error("Error setting loading state", e1);
+    			warn("Interrupted update");
+    			fine("Error setting loading state", e1);
     		} catch (ExecutionException e1) {
     			error("Error setting loading state", e1);
     		}
@@ -1097,13 +1176,23 @@ public class MainWindow
     		DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
     		Iterator<Object> iterator = updateListeners.iterator();
     		while( iterator.hasNext() ) {
+    			if(isCancelled){
+    				return;
+    			}
     			( (DatasetUpdateEventListener) iterator.next() ).datasetUpdateEventReceived( e );
     		}
+			
+		}
 
-    	};
-
+		@Override
+		public void cancel() {
+			log("Cancelling thread");
+			isCancelled = true;
+//			Thread.currentThread().interrupt();
+			
+		}
     	
-    	threadManager.execute( r );
+    	
     }
     
     public class PanelLoadingUpdater implements Callable {

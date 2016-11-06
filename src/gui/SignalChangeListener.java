@@ -18,7 +18,13 @@
  *******************************************************************************/
 package gui;
 
+/**
+ * Signal change listeners allow signal colour changes to be 
+ * propagated between tab panels.
+ * @author ben
+ *
+ */
 public interface SignalChangeListener {
 
-	public void signalChangeReceived(SignalChangeEvent event);
+	void signalChangeReceived(SignalChangeEvent event);
 }

@@ -57,6 +57,7 @@ import utility.Constants;
  * @author ben
  *
  */
+@Deprecated
 public class ProfileCollection implements IProfileCollection {
 		
 	private static final long serialVersionUID = 1L;

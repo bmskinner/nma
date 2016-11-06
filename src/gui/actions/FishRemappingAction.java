@@ -92,7 +92,7 @@ public class FishRemappingAction extends ProgressableAction {
 			}
 
 		} catch(Exception e){
-			logError("Error in FISH remapping: "+e.getMessage(), e);
+			error("Error in FISH remapping: "+e.getMessage(), e);
 		}
 		
 

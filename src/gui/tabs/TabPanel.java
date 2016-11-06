@@ -33,7 +33,7 @@ public interface TabPanel
 	/**
 	 * Instruct the panel to update its display based on the
 	 * given datasets
-	 * @param list
+	 * @param list the datasets with which to update the panel
 	 */
 	void update(List<IAnalysisDataset> list);
 	
@@ -60,6 +60,12 @@ public interface TabPanel
 	 */
 	boolean isUpdating();
 	
+	/**
+	 * Add the given panel as a sub-panel of this. The sub panel 
+	 * will be notified of dataset updates, and interface and dataset 
+	 * events fired by the sub panel will be passed upwards by this panel. 
+	 * @param panel the panel to add
+	 */
 	void addSubPanel(TabPanel panel);
 
 	
@@ -75,29 +81,80 @@ public interface TabPanel
 	void addDatasetUpdateEventListener(DatasetUpdateEventListener l);
 	void removeDatasetUpdateEventListener(DatasetUpdateEventListener l);
 	
+	/**
+	 * Get the list of sub panels
+	 * @return
+	 */
 	public List<TabPanel> getSubPanels();
 	
+	/**
+	 * Check if this panel has sub panels
+	 * @return true if sub panels are present
+	 */
 	boolean hasSubPanels();
 	
+	/**
+	 * Set the analysing state. This sets the cursor over the panel
+	 * and its sub-panels
+	 * @param b
+	 */
 	void setAnalysing(boolean b);
 	
+	/**
+	 * Set the panel state to show loading charts and tables.
+	 */
 	void setChartsAndTablesLoading();
 	
+	/**
+	 * Set the controls in this panel to enabled or disabled
+	 * @param b
+	 */
 	void setEnabled(boolean b);
 	
+	/**
+	 * Remove all charts from the panel chart cache
+	 */
 	void clearChartCache();
 	
+	/**
+	 * Remove all charts containing the datasets in the list
+	 * from the panel chart cache
+	 */
 	void clearChartCache(List<IAnalysisDataset> list);
 	
+	/**
+	 * Remove all tables from the panel table cache
+	 */
 	void clearTableCache();
 	
+	/**
+	 * Remove all tables containing the datasets in the list
+	 * from the panel table cache
+	 */
 	void clearTableCache(List<IAnalysisDataset> list);
 	
+	
+	/**
+	 * Remove all charts from the chart cache, then redraw the
+	 * currently selected dataset charts
+	 */
 	void refreshChartCache();
 	
+	/**
+	 * Redraw redraw the charts for the given datasets
+	 * @param list the list of datasets to be redrawn
+	 */
 	void refreshChartCache(List<IAnalysisDataset> list);
 	
+	/**
+	 * Remove all tables from the table cache, then redraw the
+	 * currently selected dataset tables
+	 */
 	void refreshTableCache();
 	
+	/**
+	 * Redraw redraw the tables for the given datasets
+	 * @param list the list of datasets to be redrawn
+	 */
 	void refreshTableCache(List<IAnalysisDataset> list);
 }

@@ -36,6 +36,7 @@ import java.util.UUID;
 
 import components.AbstractCellularComponent;
 
+@Deprecated
 public class NucleusBorderSegment  implements IBorderSegment{
 
 	private static final long serialVersionUID = 1L;

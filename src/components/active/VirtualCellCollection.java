@@ -82,10 +82,21 @@ public class VirtualCellCollection implements ICellCollection {
 	
 	private volatile transient StatsCache statsCache = new StatsCache();
 	
+	/**
+	 * Create from a parent dataset, and provide a name
+	 * @param parent
+	 * @param name
+	 */
 	public VirtualCellCollection(IAnalysisDataset parent, String name){
 		this(parent, name, java.util.UUID.randomUUID() );
 	}
 	
+	/**
+	 * Create from a parent dataset, and provide a name and UUID
+	 * @param parent
+	 * @param name
+	 * @param id
+	 */
 	public VirtualCellCollection(IAnalysisDataset parent, String name, UUID id){
 		this.parent = parent;
 		this.name = name == null ? "Undefined dataset name" : name;

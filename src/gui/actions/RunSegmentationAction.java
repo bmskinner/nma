@@ -114,7 +114,7 @@ public class RunSegmentationAction extends ProgressableAction {
 			ThreadManager.getInstance().submit(worker);
 		} catch(Exception e){
 			this.cancel();
-			logError("Error in morphology analysis", e);
+			error("Error in morphology analysis", e);
 		}
 	}
 	

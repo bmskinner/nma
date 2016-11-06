@@ -44,6 +44,7 @@ import components.generic.MeasurementScale;
  *  they came from and (c) the channel within the file they came from 
  * and links to the channel number in the ImageStack for the nucleus.
  */
+@Deprecated
 public class SignalCollection implements ISignalCollection {
 
 	private static final long serialVersionUID = 1L;

@@ -42,6 +42,7 @@ import components.generic.XYPoint;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
 
+@Deprecated
 public class AsymmetricNucleus
   extends RoundNucleus
 {

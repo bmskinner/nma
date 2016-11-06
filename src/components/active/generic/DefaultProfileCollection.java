@@ -126,7 +126,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 		IProfile p;
 		try {
 			p = agg.getQuartile(quartile);
-		} catch (ProfileException e) {
+		} catch (ProfileException | NullPointerException e) {
 			warn("Cannot get profile for "+quartile);
 			fine("Error fetching quartile", e);
 			return new FloatProfile(0, length);

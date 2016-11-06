@@ -103,7 +103,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 				  }
 
 			  } catch (Exception e) { 
-				  logError("Error in image processing: "+e.getMessage(), e);
+				  error("Error in image processing: "+e.getMessage(), e);
 			  } 
 			  
 			  fireProgressEvent();
@@ -173,7 +173,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 	      try{
 	        output.mkdir();
 	      } catch(Exception e) {
-	    	  logError("Failed to create directory", e);
+	    	  error("Failed to create directory", e);
 	      }
 	    }
 	    return output;

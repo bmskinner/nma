@@ -19,12 +19,13 @@
 package gui;
 
 /**
- * Allows the implementing class to respond to interface events
+ * Allows the implementing class to respond to interface events. These
+ * control the look of the charts without relating to any specific datasets.
  * @author ben
  *
  */
 public interface InterfaceEventListener {
 	
-	public void interfaceEventReceived(InterfaceEvent event);
+	void interfaceEventReceived(InterfaceEvent event);
 		
 }
