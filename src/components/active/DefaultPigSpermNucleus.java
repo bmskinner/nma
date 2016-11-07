@@ -13,6 +13,12 @@ import components.nuclear.IBorderPoint;
 import components.nuclei.Nucleus;
 import ij.gui.Roi;
 
+/**
+ * The standard pig sperm nucleus
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
 
 	private static final long serialVersionUID = 1L;

@@ -31,6 +31,13 @@ import components.generic.IProfile;
 import components.generic.Profile;
 import components.nuclear.IBorderSegment;
 
+/**
+ * The default implementation of {@link IProfile}, which stores values
+ * in float precision.
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public class FloatProfile implements IProfile {
 
 	private static final long serialVersionUID = 1L;

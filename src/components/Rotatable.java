@@ -22,7 +22,6 @@ package components;
 import logging.Loggable;
 import components.active.generic.FloatPoint;
 import components.generic.IPoint;
-import components.generic.XYPoint;
 
 /**
  * Objects implementing this interface can be rotated

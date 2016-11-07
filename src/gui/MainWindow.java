@@ -94,14 +94,17 @@ import components.ICellCollection;
 import components.active.DefaultAnalysisDataset;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
+import components.active.DefaultRodentSpermNucleus;
 import components.active.DefaultWorkspace;
 import components.active.IWorkspace;
 import components.generic.Tag;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
-import components.nuclei.sperm.RodentSpermNucleus;
 
 /**
+ * This is the core of the program UI. All display panels are contained here. 
+ * Update requests are sent from here to display information, and requests to 
+ * perform analyses are relayed from sub-panels to here.
  * @author bms41
  *
  */
@@ -959,7 +962,7 @@ public class MainWindow
 					fine("Replacing nucleus roi patterns");
 					for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
 
-						RodentSpermNucleus r = (RodentSpermNucleus) n;  
+						DefaultRodentSpermNucleus r = (DefaultRodentSpermNucleus) n;  
 
 						r.splitNucleusToHeadAndHump();
 						try {

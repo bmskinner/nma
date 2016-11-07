@@ -218,18 +218,25 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			NucleusMesh cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
 			
 			// Get the image with the signal
-			ImageProcessor ip = cell.getNucleus().getSignalCollection().getImage(options.getSignalGroup());
+			ImageProcessor ip;
+			try {
+				ip = cell.getNucleus().getSignalCollection().getImage(options.getSignalGroup());
+				
+				// Create NucleusMeshImage from nucleus.
+				NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
+				
+				// Draw NucleusMeshImage onto consensus mesh.
+				ImageProcessor warped = im.meshToImage(meshConsensus);
+//				ImagePlus image = new ImagePlus(cell.getNucleus().getNameAndNumber(), warped);
+//				image.show();
+				drawImageAsAnnotation(warped, plot, 20, -xOffset, -yOffset, options.isShowBounds());
+				
+			} catch (UnloadableImageException e) {
+				warn("Unable to load signal image for signal group "+options.getSignalGroup()+" in cell "+cell.getNucleus().getNameAndNumber());
+				fine("Unable to load signal image for signal group "+options.getSignalGroup()+" in cell "+cell.getNucleus().getNameAndNumber(), e);
+			}
+	
 			
-			// Create NucleusMeshImage from nucleus.
-			NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
-			
-			// Draw NucleusMeshImage onto consensus mesh.
-			ImageProcessor warped = im.meshToImage(meshConsensus);
-//			ImagePlus image = new ImagePlus(cell.getNucleus().getNameAndNumber(), warped);
-//			image.show();
-			
-			
-			drawImageAsAnnotation(warped, plot, 20, -xOffset, -yOffset, options.isShowBounds());
 		}
 		XYDataset ds;
 		try {

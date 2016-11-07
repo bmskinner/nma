@@ -26,6 +26,12 @@ import ij.process.FloatPolygon;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
 
+/**
+ * The standard rodent sperm nucleus
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
 	private static final long serialVersionUID = 1L;

@@ -47,6 +47,7 @@ import stats.SignalStatistic;
  * This class provides access to child dataset ICell lists
  * and statistics
  * @author ben
+ * @since 1.13.3
  *
  */
 public class VirtualCellCollection implements ICellCollection {

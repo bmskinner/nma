@@ -2,14 +2,10 @@ package components;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import analysis.IAnalysisDataset;
 import analysis.profiles.ProfileException;
@@ -19,21 +15,18 @@ import analysis.signals.SignalManager;
 import logging.Loggable;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
-import components.generic.BorderTagObject;
 import components.generic.IProfileCollection;
 import components.generic.MeasurementScale;
-import components.generic.ProfileCollection;
-import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NucleusType;
-import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 
 /**
- * This interface will eventually replace the CellCollection as the
- * primary access to cell data in analysis classes.
+ * This interface will provides the primary access to cell data,
+ * as well as the aggregate statistics and profile collection.
  * @author ben
+ * @since 1.13.3
  *
  */
 public interface ICellCollection 

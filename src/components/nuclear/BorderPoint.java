@@ -26,7 +26,7 @@ import components.generic.IPoint;
  *  This class contains border points around the periphery of a nucleus.
  *	Mostly the same as an XYPoint now, after creation of Profiles. It does
  * allow linkage of points.
- *
+ * @deprecated since 1.13.3
  */
 @Deprecated
 public class BorderPoint

@@ -18,7 +18,7 @@ import components.IClusterGroup;
  * to its parent, a list of the ICell IDs it contains, and stats / profile
  * caches.
  * @author ben
- *
+ * @since 1.13.3
  */
 public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
 

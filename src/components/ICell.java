@@ -27,8 +27,10 @@ import logging.Loggable;
 import components.nuclei.Nucleus;
 
 /**
- * All cell types implement this interface
+ * All cell types implement this interface. A cell can have a nucleus,
+ * and zero, one or many acrosomes, flagella and mitochondria.
  * @author bms41
+ * @since 1.13.3
  *
  */
 public interface ICell 

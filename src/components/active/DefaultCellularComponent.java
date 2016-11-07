@@ -38,6 +38,14 @@ import stats.Quartile;
 import utility.AngleTools;
 import utility.Constants;
 
+/**
+ * An abstract implementation of {@link CellularComponent}, which is extended
+ * for concrete cellular components. This handles the border, centre of mass and
+ * statistics of a component. 
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public abstract class DefaultCellularComponent implements CellularComponent {
 	
 	private static final long serialVersionUID = 1L;

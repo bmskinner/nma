@@ -22,6 +22,12 @@ package components.active.generic;
 import components.generic.IPoint;
 import components.nuclear.IBorderPoint;
 
+/**
+ * The standard implementation of the {@link IBorderPoint} interface.
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public class DefaultBorderPoint extends FloatPoint implements IBorderPoint {
 	private static final long serialVersionUID = 1L;
 	

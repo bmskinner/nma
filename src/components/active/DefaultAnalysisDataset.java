@@ -43,7 +43,9 @@ import analysis.nucleus.NucleusDetectionWorker;
  * This is the replacement analysis dataset designed to use less memory from
  * versions 1.14.0 onwards. The first field in the object is the version, allowing
  * deserialisation to choose an appropriate path in the future.
+ * 
  * @author bms41
+ * @since 1.13.3
  *
  */
 public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {

@@ -28,6 +28,12 @@ import components.active.generic.SegmentedFloatProfile;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 
+/**
+ * This details a profile that can have segments applied to it.
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public interface ISegmentedProfile extends IProfile {
 
 	/**

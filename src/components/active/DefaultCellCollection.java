@@ -76,7 +76,9 @@ import components.nuclei.Nucleus;
 
 /**
  * This is a more efficient replacement for the <=1.13.2 cell collections 
+ * 
  * @author bms41
+ * @since 1.13.3
  *
  */
 public class DefaultCellCollection 

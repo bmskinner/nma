@@ -9,8 +9,9 @@ import analysis.IAnalysisDataset;
 /**
  * This is a grouping of open AnalysisDatasets,
  * which can act as a shortcut to opening a lot
- * of nmd files in one go
+ * of nmd files in one go. 
  * @author ben
+ * @since 1.13.3
  *
  */
 public class DefaultWorkspace implements IWorkspace {

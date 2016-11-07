@@ -18,6 +18,12 @@ import ij.process.ImageProcessor;
 import io.UnloadableImageException;
 import stats.PlottableStatistic;
 
+/**
+ * An implementation of {@link INuclearSignal}.
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public class DefaultNuclearSignal 
 	extends DefaultCellularComponent 
 	implements INuclearSignal {

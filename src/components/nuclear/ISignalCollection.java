@@ -8,9 +8,18 @@ import java.util.UUID;
 
 import components.generic.MeasurementScale;
 import ij.process.ImageProcessor;
+import io.UnloadableImageException;
 import logging.Loggable;
 import stats.SignalStatistic;
 
+/**
+ * The collection of nuclear signals that can be found within a single 
+ * nucleus. Implementing classes will track the signal group each signal 
+ * belongs to, plus the source image the signal was detected in.
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public interface ISignalCollection extends Serializable, Loggable {
 
 	/**
@@ -26,8 +35,8 @@ public interface ISignalCollection extends Serializable, Loggable {
 
 	/**
 	 * Change the id of the given signal group
-	 * @param signalGroup
-	 * @param newID
+	 * @param signalGroup the original signal group ID
+	 * @param newID the new ID
 	 */
 	void updateSignalGroupID(UUID oldID, UUID newID);
 
@@ -76,8 +85,8 @@ public interface ISignalCollection extends Serializable, Loggable {
 
 	/**
 	 * Update the source file for the given signal group
-	 * @param signalGroup
-	 * @param f
+	 * @param signalGroup the signal group id
+	 * @param f the new source file
 	 */
 	void updateSourceFile(UUID signalGroup, File f);
 
@@ -97,7 +106,7 @@ public interface ISignalCollection extends Serializable, Loggable {
 
 	/**
 	 * Get the total number of signals in all groups
-	 * @return the count
+	 * @return the total signal count of the nucleus
 	 */
 	int numberOfSignals();
 
@@ -116,9 +125,9 @@ public interface ISignalCollection extends Serializable, Loggable {
 	boolean hasSignal();
 
 	/**
-	 * Get the total number of signals in a given channel
-	 * @param channel the channel
-	 * @return the count
+	 * Get the total number of signals in a given group
+	 * @param signalGroup the group id
+	 * @return the number of signals in the given group
 	 */
 	int numberOfSignals(UUID signalGroup);
 
@@ -129,18 +138,26 @@ public interface ISignalCollection extends Serializable, Loggable {
 
 	/**
 	 * Remove the given signal group from the collection
+	 * @param signalGroup the signal group ID
 	 */
 	void removeSignals(UUID signalGroup);
 
 	/**
-	 * Get the areas of signals in a channel
-	 * @param channel the signal channel
-	 * @return the areas
-	 * @throws Exception 
+	 * Get the statistics of signals in a group
+	 * @param stat the statistic to fetch
+	 * @param scale the scale to fetch values at
+	 * @param signalGroup the signal group ID
+	 * @return the values from each signal in the group
 	 */
 	List<Double> getStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup);
 
-	ImageProcessor getImage(UUID signalGroup);
+	/**
+	 * Get the ImageJ image processor for the source image for signals in the given group 
+	 * @param signalGroup the signal group ID
+	 * @return an image processor
+	 * @throws UnloadableImageException if the image cannot be loaded from file
+	 */
+	ImageProcessor getImage(UUID signalGroup) throws UnloadableImageException;
 
 	String toString();
 

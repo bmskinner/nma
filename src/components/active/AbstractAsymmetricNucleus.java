@@ -11,6 +11,11 @@ import components.nuclear.IBorderPoint;
 import components.nuclei.Nucleus;
 import ij.gui.Roi;
 
+/**
+ * The class of non-round nuclei from which all other assymetric nuclei derive
+ * @author ben
+ * @since 1.13.3
+ */
 public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
 	
 	private static final long serialVersionUID = 1L;

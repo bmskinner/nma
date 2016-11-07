@@ -36,6 +36,7 @@ import stats.PlottableStatistic;
  * of a cell - an object with a border, a source image, and a
  * size in microns. 
  * @author bms41
+ * @since 1.11.0
  *
  */
 public interface CellularComponent 

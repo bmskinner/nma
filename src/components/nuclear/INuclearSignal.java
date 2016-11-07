@@ -2,6 +2,13 @@ package components.nuclear;
 
 import components.CellularComponent;
 
+/**
+ * The methods available to a nuclear signal, which is a type
+ * of cellular component
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public interface INuclearSignal 
 	extends CellularComponent {
 

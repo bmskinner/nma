@@ -53,6 +53,7 @@ import stats.Quartile;
  * 
  * An internal ProfileCache holds average profiles to save repeated calculation
  * @author ben
+ * @since 1.13.3
  *
  */
 public class DefaultProfileCollection implements IProfileCollection {

@@ -38,6 +38,12 @@ import java.util.UUID;
 import components.AbstractCellularComponent;
 import components.nuclear.IBorderSegment;
 
+/**
+ * The default implementation of the {@link IBorderSegment} interface.
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public class DefaultBorderSegment implements IBorderSegment{
 
 	private static final long serialVersionUID = 1L;

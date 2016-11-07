@@ -26,6 +26,14 @@ import java.awt.geom.Point2D;
 
 import components.generic.IPoint;
 
+/**
+ * An extension to the Point2D.Float providing methods for 
+ * calculating distances between points implementing the 
+ * {@link IPoint} interface.
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public class FloatPoint 
 	extends Point2D.Float
 	implements IPoint {

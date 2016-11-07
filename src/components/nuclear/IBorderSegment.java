@@ -19,8 +19,6 @@
 
 package components.nuclear;
 
-import ij.IJ;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,11 +28,19 @@ import java.util.UUID;
 
 import analysis.IAnalysisDataset;
 import analysis.profiles.ProfileException;
-import components.AbstractCellularComponent;
 import components.active.DefaultCellularComponent;
 import components.active.generic.DefaultBorderSegment;
 import logging.Loggable;
 
+/**
+ * Border segments mark a region with start and end positions within a
+ * component border, and provide iterative access through the {@link IBorderPoint}s 
+ * they contain. It is possible for the start position to be higher than the end position
+ * if the segment spans the end of the profile and wraps back to the beginning.  
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public interface IBorderSegment 
 	extends Serializable, 
 			Iterable<Integer>, 
@@ -49,11 +55,11 @@ public interface IBorderSegment
 	
 	/**
 	 * Create the preferred segment type for this interface
-	 * @param startIndex
-	 * @param endIndex
-	 * @param total
-	 * @param id
-	 * @return
+	 * @param startIndex the starting index of the segment in a profile, inclusive
+	 * @param endIndex the end index of the segment in a profile, inclusive
+	 * @param total the total length of the profile
+	 * @param id the id of the segment
+	 * @return a new segment of the default type
 	 */
 	static IBorderSegment newSegment(int startIndex, int endIndex, int total, UUID id){
 		return new DefaultBorderSegment(startIndex, endIndex, total, id);
@@ -414,8 +420,8 @@ public interface IBorderSegment
 		
 		for(IBorderSegment segment : list){
 			
-			IBorderSegment newSeg = IBorderSegment.newSegment(AbstractCellularComponent.wrapIndex(segment.getStartIndex()+value, segment.getTotalLength()), 
-					AbstractCellularComponent.wrapIndex(segment.getEndIndex()+value, segment.getTotalLength()), 
+			IBorderSegment newSeg = IBorderSegment.newSegment(DefaultCellularComponent.wrapIndex(segment.getStartIndex()+value, segment.getTotalLength()), 
+					DefaultCellularComponent.wrapIndex(segment.getEndIndex()+value, segment.getTotalLength()), 
 					segment.getTotalLength(),
 					segment.getID());
 						
@@ -518,7 +524,7 @@ public interface IBorderSegment
 			
 			int newSegLength =  (int) ( (double) newLength * proportion);
 			
-			int segEnd = AbstractCellularComponent.wrapIndex(segStart + newSegLength, newLength);
+			int segEnd = DefaultCellularComponent.wrapIndex(segStart + newSegLength, newLength);
 			
 			
 			IBorderSegment newSeg = IBorderSegment.newSegment(segStart, 

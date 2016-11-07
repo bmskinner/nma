@@ -6,6 +6,7 @@ import java.util.UUID;
 import components.ICell;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
+import io.UnloadableImageException;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
@@ -117,24 +118,33 @@ public class SignalWarper extends AnalysisWorker {
 			}
 			
 			// Get the image with the signal
-			ImageProcessor ip = cell.getNucleus().getSignalCollection().getImage(signalGroup);
-			finest("Image for "+cell.getNucleus().getNameAndNumber()+" is "+ip.getWidth()+"x"+ip.getHeight());
-			
-			// Create NucleusMeshImage from nucleus.
-			finer("Making nucleus mesh image");
-			NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
-			
-			// Draw NucleusMeshImage onto consensus mesh.
-			finer("Warping image onto consensus mesh");
-			ImageProcessor warped = im.meshToImage(meshConsensus);
-			finest("Warped image is "+ip.getWidth()+"x"+ip.getHeight());
-			warpedImages[cellNumber] = warped;
-			mergedImage = combineImages();
-			mergedImage = rescaleImageIntensity();
-			finer("Completed cell "+cellNumber);
+			ImageProcessor ip;
+			try {
+				ip = cell.getNucleus().getSignalCollection().getImage(signalGroup);
+
+				finest("Image for "+cell.getNucleus().getNameAndNumber()+" is "+ip.getWidth()+"x"+ip.getHeight());
+
+				// Create NucleusMeshImage from nucleus.
+				finer("Making nucleus mesh image");
+				NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
+
+				// Draw NucleusMeshImage onto consensus mesh.
+				finer("Warping image onto consensus mesh");
+				ImageProcessor warped = im.meshToImage(meshConsensus);
+				finest("Warped image is "+ip.getWidth()+"x"+ip.getHeight());
+				warpedImages[cellNumber] = warped;
+				mergedImage = combineImages();
+				mergedImage = rescaleImageIntensity();
+				finer("Completed cell "+cellNumber);
+			} catch (UnloadableImageException e) {
+				warn("Unable to load signal image for signal group "+signalGroup+" in cell "+cell.getNucleus().getNameAndNumber());
+				fine("Unable to load signal image for signal group "+signalGroup+" in cell "+cell.getNucleus().getNameAndNumber(), e);
+				
+			}
+
 			publish(cellNumber++);
-			
-			
+
+
 		}
 		
 	}

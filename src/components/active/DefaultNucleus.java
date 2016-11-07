@@ -35,6 +35,13 @@ import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import stats.SignalStatistic;
 
+/**
+ * The standard round nucleus, implementing {@link Nucleus}. All 
+ * non-round nuclei extend this.
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public class DefaultNucleus 
 	extends ProfileableCellularComponent
 	implements Nucleus {

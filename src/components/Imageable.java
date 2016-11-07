@@ -31,37 +31,34 @@ import components.generic.IPoint;
 /**
  * This covers the things than can be found within an image.
  * @author bms41
+ * @since 1.13.3
  *
  */
 public interface Imageable {
-	
-	/*
-	 * GETTERS
-	 */
-	
+
 	/**
 	 * The array index of the left-most x coordinate of the object
 	 * in {@link #setPosition(double[])} and {@link #getPosition(double[])}
 	 */
-	public static final int X_BASE 	= 0;
+	static final int X_BASE 	= 0;
 	
 	/**
 	 * The array index of the top-most (lowest) y coordinate of the object
 	 * in {@link #setPosition(double[])} and {@link #getPosition(double[])}
 	 */
-	public static final int Y_BASE 	= 1;
+	static final int Y_BASE 	= 1;
 	
 	/**
 	 * The array index of the width of the object
 	 * in {@link #setPosition(double[])} and {@link #getPosition(double[])}
 	 */
-	public static final int WIDTH 	= 2;
+	static final int WIDTH 	= 2;
 	
 	/**
 	 * The array index of the height of the object
 	 * in {@link #setPosition(double[])} and {@link #getPosition(double[])}
 	 */
-	public static final int HEIGHT 	= 3;
+	static final int HEIGHT 	= 3;
 	
 	
 	/**
@@ -73,96 +70,92 @@ public interface Imageable {
 	 * {@link #HEIGHT} of the bounding box
 	 * @return the array with the position 
 	 */
-	public int[] getPosition();
+	int[] getPosition();
 			
 	/**
 	 * Get the RGB channel the object was detected in
-	 * @return
+	 * @return the channel
 	 */
-	public int getChannel();
+	int getChannel();
 	
 	/**
 	 * Get the image from which the component was detected. Opens
-	 * the image via the ImageImporter, fetches the appropriate
+	 * the image via the {@link io.ImageImporter}, fetches the appropriate
 	 * channel and inverts it
-	 * @return
+	 * @return an ImageJ image processor
 	 * @throws UnloadableImageException if the image can't be loaded
 	 */
-	public ImageProcessor getImage() throws UnloadableImageException;
+	ImageProcessor getImage() throws UnloadableImageException;
 	
 	/**
 	 * Get the image from which the component was detected, and crops
 	 * it to only the region containing the component
-	 * @return
+	 * @return an ImageJ image processor cropped to size
 	 * @throws UnloadableImageException if the image can't be loaded
 	 */
-	public ImageProcessor getComponentImage() throws UnloadableImageException;
+	ImageProcessor getComponentImage() throws UnloadableImageException;
 
 	
 	
 	/**
 	 * Get the pixels within this object as a list of points
-	 * @return
+	 * @return a list of points
 	 */
-	public List<IPoint> getPixelsAsPoints();
+	List<IPoint> getPixelsAsPoints();
 	
 	/**
 	 * Get the bounding rectangle for the object.
-	 * @return
+	 * @return the bounding rectangle
 	 */
-	public Rectangle getBounds();
+	Rectangle getBounds();
 	
 	/**
 	 * Get the folder of the image the component was found in.
 	 *  e.g. C:\Folder\ImageFolder\
 	 * will return ImageFolder
-	 * @return
+	 * @return the image folder name
 	 */
-	public File getSourceFolder();
+	File getSourceFolder();
 	
 	/**
 	 * Get the folder of the image the component was found in.
 	 *  e.g. C:\Folder\ImageFolder\1.tiff
-	 * will return ImageFolder
-	 * @return
+	 * will return 1.tiff
+	 * @return the file name
 	 */
-	public File getSourceFile();
+	File getSourceFile();
 
 	/**
 	 * Get the name of the image the component was found in
-	 * @return
+	 * @return the file name
 	 */
-	public String getSourceFileName();
+	String getSourceFileName();
 	
 	
 	/**
 	 * Get the name of the source file with the '.ext' removed
-	 * @return
+	 * @return a file name without extension
 	 */
-	public String getSourceFileNameWithoutExtension();
+	String getSourceFileNameWithoutExtension();
 	
-	
-	/*
-	 * SETTERS
-	 */
 	
 	/**
 	 * Set the image file the component was found in
-	 * @param sourceFile
+	 * @param sourceFile the file
 	 */
-	public void setSourceFile(File sourceFile);
+	void setSourceFile(File sourceFile);
 	
 	/**
 	 * Set the RGB channel the component was detected in
-	 * @param channel
+	 * @param channel the channel
 	 */
-	public void setChannel(int channel);
+	void setChannel(int channel);
 		
 	/**
 	 * Set the folder the source image file belongs to
-	 * @param sourceFolder
+	 * @param sourceFolder the folder
 	 */
-	public void setSourceFolder(File sourceFolder);
+	void setSourceFolder(File sourceFolder);
 	
 
 }

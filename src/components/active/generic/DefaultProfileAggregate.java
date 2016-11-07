@@ -38,6 +38,7 @@ import logging.Loggable;
  * This is for testing a replacement of the profile aggregate
  * using arrays instead of collections. Not serializable.
  * @author bms41
+ * @since 1.13.3
  *
  */
 public class DefaultProfileAggregate implements Loggable, IProfileAggregate {

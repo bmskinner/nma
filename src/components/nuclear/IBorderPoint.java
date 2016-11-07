@@ -22,6 +22,13 @@ package components.nuclear;
 import components.active.generic.DefaultBorderPoint;
 import components.generic.IPoint;
 
+/**
+ * Border points are 2D points that also track the previous and next
+ * points in the border they are a part of
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public interface IBorderPoint extends IPoint {
 
 	/**

@@ -5,6 +5,14 @@ import java.util.Set;
 
 import analysis.IAnalysisDataset;
 
+/**
+ * A workspace is a collection of nmd files that can be
+ * reopened together. This interface mey be extended depending on
+ * how useful workspaces turn out to be. 
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public interface IWorkspace {
 	
 	void add(IAnalysisDataset d);

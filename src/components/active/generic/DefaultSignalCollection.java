@@ -14,9 +14,16 @@ import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalCollection;
 import ij.process.ImageProcessor;
 import io.ImageImporter;
+import io.UnloadableImageException;
 import io.ImageImporter.ImageImportException;
 import stats.SignalStatistic;
 
+/**
+ * The default implementation of the {@link ISignalCollection} interface
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public class DefaultSignalCollection implements ISignalCollection {
 	private static final long serialVersionUID = 1L;
 
@@ -316,15 +323,15 @@ public class DefaultSignalCollection implements ISignalCollection {
 	 * @see components.nuclear.ISignalCollection#getImage(java.util.UUID)
 	 */
 	@Override
-	public ImageProcessor getImage(UUID signalGroup){
+	public ImageProcessor getImage(UUID signalGroup) throws UnloadableImageException{
 		File f = this.getSourceFile(signalGroup);
 		int c  = this.getSourceChannel(signalGroup);
 		
 		try {
 			return new ImageImporter(f).importImage(c);
 		} catch (ImageImportException e) {
-			error("Error importing image source file "+f.getAbsolutePath(), e);
-			return null;
+			fine("Error importing image source file "+f.getAbsolutePath(), e);
+			throw new  UnloadableImageException("Unable to load signal image",e);
 		}
 	}
 		

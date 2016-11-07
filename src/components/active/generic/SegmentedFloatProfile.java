@@ -32,11 +32,16 @@ import components.generic.IProfile;
 import components.generic.ISegmentedProfile;
 import components.nuclear.IBorderSegment;
 
+/**
+ * The default implementation of a segmented profile.
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public class SegmentedFloatProfile extends FloatProfile implements ISegmentedProfile {
 	private static final long serialVersionUID = 1L;
 
 	// the segments
-//	protected List<IBorderSegment> segments = new ArrayList<IBorderSegment>(5);
 	protected IBorderSegment[] segments = new IBorderSegment[0];
 
 	/**

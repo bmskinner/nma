@@ -16,6 +16,12 @@ import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import ij.process.FloatPolygon;
 
+/**
+ * This describes a consensus shape for a population of cells.
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public class DefaultConsensusNucleus extends DefaultNucleus {
 	
 	private static final long serialVersionUID = 1L;

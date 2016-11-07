@@ -25,6 +25,14 @@ import analysis.profiles.ProfileException;
 import logging.Loggable;
 import components.nuclear.IBorderSegment;
 
+/**
+ * A profile contains an array of values, and this interface details
+ * both access to those values, and the transformations that can be applied
+ * to the profile.
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public interface IProfile 
 	extends Serializable, Loggable {
 

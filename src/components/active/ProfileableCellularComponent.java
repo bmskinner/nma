@@ -31,6 +31,7 @@ import stats.NucleusStatistic;
 /**
  * This is the class of objects that can have angle profiles applied to them.
  * @author ben
+ * @since 1.13.3
  *
  */
 public abstract class ProfileableCellularComponent 

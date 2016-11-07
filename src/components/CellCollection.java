@@ -49,8 +49,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import logging.Loggable;
-import utility.Constants;
 import analysis.IAnalysisDataset;
 import analysis.NucleusStatisticFetchingTask;
 import analysis.profiles.ProfileException;
@@ -59,7 +57,6 @@ import analysis.profiles.RuleSetCollection;
 import analysis.profiles.SegmentStatisticFetchingTask;
 import analysis.signals.SignalManager;
 import components.active.DefaultCell;
-import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BorderTagObject;
@@ -71,14 +68,13 @@ import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderSegment;
 import components.nuclear.ISignalGroup;
-import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalGroup;
-import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 
 /**
  * @author bms41
+ * @deprecated since 1.13.3
  *
  */
 @Deprecated

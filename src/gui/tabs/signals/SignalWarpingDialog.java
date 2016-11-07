@@ -22,6 +22,7 @@ package gui.tabs.signals;
 
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
+import io.UnloadableImageException;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -568,6 +569,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 					warpedImages[cellNumber] = createBlankProcessor();
 					
 					
+				} catch (UnloadableImageException e) {
+					warn("Unable to load signal image for signal group "+signalGroup+" in cell "+cell.getNucleus().getNameAndNumber());
+					fine("Unable to load signal image for signal group "+signalGroup+" in cell "+cell.getNucleus().getNameAndNumber(), e);
+					warpedImages[cellNumber] = createBlankProcessor();
 				} finally {
 					
 					mergedImage = combineImages();

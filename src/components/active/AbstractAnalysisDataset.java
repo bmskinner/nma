@@ -41,6 +41,7 @@ import utility.Version;
  * it is the responsibility of extending classes to add the remaining
  * fields and methods.
  * @author bms41
+ * @since 1.13.3
  *
  */
 public abstract class AbstractAnalysisDataset implements Serializable {

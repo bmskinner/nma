@@ -35,6 +35,12 @@ import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
 import analysis.profiles.ProfileException;
 
+/**
+ * This provides a virtual dataset view for merge sources. 
+ * @author ben
+ * @since 1.13.3
+ *
+ */
 public class MergeSourceAnalysisDataset 
 	extends AbstractAnalysisDataset
 	implements IAnalysisDataset {
