@@ -59,6 +59,13 @@ import stats.Quartile;
 import utility.AngleTools;
 import utility.Constants;
 
+
+/**
+ * @author bms41
+ * @deprecated from version 1.13.3. Only active components should be used to create new
+ *             objects. The class is retained to allow old format datasets to be read 
+ *             and converted. 
+ */
 @Deprecated
 public abstract class AbstractCellularComponent 
 	implements CellularComponent,

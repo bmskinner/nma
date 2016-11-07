@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
+
 import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
 import utility.Constants;
@@ -378,12 +379,17 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	}
 	
 	/* (non-Javadoc)
+	 * 
+	 * For default analysis datasets, attempting to add a merge source will create
+	 * a new virtual collection of cells from the source dataset.
 	 * @see analysis.IAnalysisDataset#addMergeSource(analysis.AnalysisDataset)
 	 */
 	@Override
 	public void addMergeSource(IAnalysisDataset dataset){
-		this.mergeSources.add(dataset.getUUID());
-		this.addAssociatedDataset(dataset);
+		
+		IAnalysisDataset mergeSource = new MergeSourceAnalysisDataset(this, dataset);
+		this.mergeSources.add(mergeSource.getUUID());
+		this.addAssociatedDataset(mergeSource);
 	}
 	
 	/* (non-Javadoc)
@@ -804,17 +810,17 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	    int length = cellCollection.getProfileCollection().length();
 	    // Update all children to have the same profile lengths and offsets
 	    
-//	    log(this.getName());
-//	    log("Has children: "+this.hasChildren());
-//	    log("Child count : "+childDatasets.size());
-	    
 	    if(! childDatasets.isEmpty()){
 	    	for(IAnalysisDataset child : getAllChildDatasets()){
 	    		child.getCollection().getProfileCollection().createProfileAggregate(child.getCollection(), length);			
 	    	}
 	    }
-
 	    
+	    if(! otherDatasets.isEmpty()){
+	    	for(IAnalysisDataset child : otherDatasets){
+	    		child.getCollection().getProfileCollection().createProfileAggregate(child.getCollection(), length);			
+	    	}
+	    }
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {

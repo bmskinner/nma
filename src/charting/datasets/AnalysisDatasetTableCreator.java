@@ -46,6 +46,8 @@ import analysis.profiles.ProfileException;
 import components.ICellCollection;
 import components.IClusterGroup;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
+import components.active.generic.UnsegmentedProfileException;
 import components.generic.BorderTagObject;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
@@ -152,7 +154,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				segments = collection.getProfileCollection()
 						.getSegmentedProfile(ProfileType.ANGLE, point, Quartile.MEDIAN)
 						.getOrderedSegments();
-			} catch (UnavailableBorderTagException | ProfileException e) {
+			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 //				warn("Unable to create median profile stats table");
 				fine("Error getting median profile", e);
 				return createBlankTable();
@@ -278,7 +280,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 						.getProfileCollection()
 						.getSegmentedProfile(ProfileType.ANGLE, point, Quartile.MEDIAN)
 						.getOrderedSegments();
-			} catch (UnavailableBorderTagException | ProfileException e) {
+			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 				fine("Error getting median profile", e);
 				return createBlankTable();
 			}
@@ -966,7 +968,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 						.getProfileCollection()
 						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 						.getSegmentAt(options.getSegPosition());
-			} catch (UnavailableBorderTagException | ProfileException e) {
+			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 				fine("Error getting median profile", e);
 				return createBlankTable();
 			}
@@ -986,7 +988,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 								.getProfileCollection()
 								.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 								.getSegmentAt(options.getSegPosition());
-					} catch (UnavailableBorderTagException | ProfileException e) {
+					} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 						fine("Error getting median profile", e);
 						return createBlankTable();
 					}
@@ -1110,7 +1112,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 						.getProfileCollection()
 						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 						.getSegmentAt(options.getSegPosition());
-			} catch (UnavailableBorderTagException | ProfileException e) {
+			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 				fine("Error getting median profile", e);
 				return createBlankTable();
 			}
@@ -1139,7 +1141,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 								.getProfileCollection()
 								.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 								.getSegmentAt(options.getSegPosition());
-					} catch (UnavailableBorderTagException | ProfileException e) {
+					} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 						fine("Error getting median profile", e);
 						return createBlankTable();
 					}

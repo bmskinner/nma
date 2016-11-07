@@ -58,6 +58,8 @@ import components.ICellCollection;
 import components.active.ChildAnalysisDataset;
 import components.active.generic.SegmentedFloatProfile;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
+import components.active.generic.UnsegmentedProfileException;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
 import components.generic.ISegmentedProfile;
@@ -223,7 +225,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				profile = activeDataset().getCollection()
 						.getProfileCollection()
 						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-			} catch (UnavailableBorderTagException | ProfileException e) {
+			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 				fine("Error getting profile", e);
 //				chart = MorphologyChartFactory.makeErrorChart();
 //				rangeChart = MorphologyChartFactory.makeErrorChart();
@@ -284,7 +286,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				try {
 					medianProfile = collection.getProfileCollection()
 							.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-				} catch (UnavailableBorderTagException | ProfileException e) {
+				} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 					warn("Error getting profile");
 					fine("Error getting profile");
 					setButtonsEnabled(false);

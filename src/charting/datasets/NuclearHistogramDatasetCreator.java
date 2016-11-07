@@ -36,6 +36,7 @@ import analysis.profiles.ProfileException;
 import components.ICellCollection;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
+import components.active.generic.UnsegmentedProfileException;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -364,7 +365,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 							.getProfileCollection()
 							.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 							.getSegmentAt(options.getSegPosition());
-				} catch (UnavailableBorderTagException | ProfileException e) {
+				} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 					fine("Error getting profile from tag", e);
 					throw new ChartDatasetCreationException("Unable to get median profile", e);
 				}
@@ -415,7 +416,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 						.getProfileCollection()
 						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 						.getSegmentAt(options.getSegPosition());
-			} catch (UnavailableBorderTagException | ProfileException e2) {
+			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e2) {
 				fine("Error getting profile from tag", e2);
 				throw new ChartDatasetCreationException("Unable to get median profile", e2);
 			}

@@ -51,6 +51,7 @@ import gui.tabs.populations.PopulationsPanel;
 import ij.io.SaveDialog;
 import io.MappingFileExporter;
 import io.WorkspaceExporter;
+
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -68,6 +69,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -85,6 +87,7 @@ import logging.TextAreaHandler;
 import utility.Constants;
 import utility.Version;
 import analysis.IAnalysisDataset;
+import analysis.profiles.ProfileException;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import components.ICell;
 import components.ICellCollection;
@@ -699,9 +702,20 @@ public class MainWindow
 				IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
 				newDataset.setRoot(true);
 				
+				newDataset.getCollection().createProfileCollection();
+				
+				try {
+					log("Copying profile offsets");
+					d.getCollection().getProfileManager().copyCollectionOffsets(newDataset.getCollection());
+				} catch (ProfileException e) {
+					error("Cannot copy profile offsets to recovered merge source", e);
+				}
+				
+//				newDataset.getCollection().getProfileCollection().createAndRestoreProfileAggregate(newDataset.getCollection());	
+				
 				// TODO: Run new profiling
-				new RunProfilingAction(newDataset, ADD_POPULATION, MainWindow.this);
-//				this.addDataset(newDataset);
+//				new RunProfilingAction(newDataset, ADD_POPULATION, MainWindow.this);
+				this.addDataset(newDataset);
 				
 				
 //				populationsPanel.addDataset(newDataset);
@@ -1140,7 +1154,7 @@ public class MainWindow
     public class PanelUpdater implements CancellableRunnable {
     	private final List<IAnalysisDataset> list;
     	
-    	private boolean isCancelled = false;
+    	private AtomicBoolean isCancelled = new AtomicBoolean(false);
     	
     	public PanelUpdater(final List<IAnalysisDataset> list){ 
     		this.list = list;
@@ -1155,22 +1169,25 @@ public class MainWindow
     			Future<?> f = threadManager.submit( loader );
     			
     			// Wait for loading state to be set
-    			while(!f.isDone() && !isCancelled){
+    			while(!f.isDone() && !isCancelled.get()){
     				fine("Waiting for chart loading set...");
     				Thread.sleep(1);
     			}
+    			
+    			if(isCancelled.get()){
+    				return;
+    			}
+    			
     			Boolean ok = (Boolean) f.get();
     			fine("Chart loading is set: "+ok );
     			
-    			if(isCancelled){
-    				return;
-    			}
-
     		} catch (InterruptedException e1) {
     			warn("Interrupted update");
-    			fine("Error setting loading state", e1);
+    			error("Error setting loading state", e1);
+    			return;
     		} catch (ExecutionException e1) {
     			error("Error setting loading state", e1);
+    			return;
     		}
 
     		// Now fire the update
@@ -1178,7 +1195,7 @@ public class MainWindow
     		DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
     		Iterator<Object> iterator = updateListeners.iterator();
     		while( iterator.hasNext() ) {
-    			if(isCancelled){
+    			if(isCancelled.get()){
     				return;
     			}
     			( (DatasetUpdateEventListener) iterator.next() ).datasetUpdateEventReceived( e );
@@ -1189,7 +1206,7 @@ public class MainWindow
 		@Override
 		public void cancel() {
 			log("Cancelling thread");
-			isCancelled = true;
+			isCancelled.set(true);
 //			Thread.currentThread().interrupt();
 			
 		}

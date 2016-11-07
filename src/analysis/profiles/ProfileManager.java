@@ -33,6 +33,7 @@ import utility.Constants;
 import components.AbstractCellularComponent;
 import components.ICell;
 import components.ICellCollection;
+import components.active.DefaultCellularComponent;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
@@ -212,7 +213,7 @@ public class ProfileManager implements Loggable {
 		try {
 			median = collection.getProfileCollection()
 					.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN).offset(index);
-		} catch (ProfileException | UnavailableBorderTagException e) {
+		} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 			fine("Error updating the RP", e);
 			return;
 		}
@@ -270,7 +271,7 @@ public class ProfileManager implements Loggable {
 			btmMedian = collection
 					.getProfileCollection()
 					.getProfile(ProfileType.ANGLE, Tag.BOTTOM_VERTICAL, Quartile.MEDIAN);
-		} catch( ProfileException | UnavailableBorderTagException e){
+		} catch( ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e){
 			fine("Error getting TV or BV profile", e);
 			return;
 		}
@@ -380,8 +381,9 @@ public class ProfileManager implements Loggable {
 	 * @param index
 	 * @throws ProfileException 
 	 * @throws UnavailableBorderTagException 
+	 * @throws UnavailableProfileTypeException 
 	 */
-	private void updateCoreBorderTagIndex(Tag tag, int index) throws UnavailableBorderTagException, ProfileException{
+	private void updateCoreBorderTagIndex(Tag tag, int index) throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException{
 		
 		
 		/*
@@ -478,7 +480,7 @@ public class ProfileManager implements Loggable {
 					int oldIndex = pc.getIndex(test);
 					if(oldIndex!=-1){ // Only bother if the tag exists
 						
-						int newIndex = AbstractCellularComponent.wrapIndex( (oldIndex - index)  , pc.length()); // offset by 1
+						int newIndex = DefaultCellularComponent.wrapIndex( (oldIndex - index)  , pc.length()); // offset by 1
 						pc.addIndex(test, newIndex);
 						finer("Explicit setting of "+test+" index to "+newIndex+" from "+oldIndex);
 						
@@ -591,7 +593,7 @@ public class ProfileManager implements Loggable {
 			fine("Error getting segments from RP", e1);
 			return;
 		}
-
+		fine("Got existing list of "+segments.size()+" segments");
 
 		// use the same array length as the source collection to avoid segment slippage
 		int profileLength = sourcePC.length();
@@ -609,22 +611,25 @@ public class ProfileManager implements Loggable {
 		 * This will have the length of the source collection.
 		 */
 		destPC.createProfileAggregate(destination, profileLength);
-
+		fine("Created new profile aggregates with length "+profileLength);
+		
 		/*
 		 * Copy the offset keys from the source collection
 		 */
 		try {
 			for(Tag key : sourcePC.getBorderTags()){
+
 				destPC.addIndex(key, sourcePC.getIndex(key));
+
 			}
-		
+
 			destPC.addSegments(Tag.REFERENCE_POINT, segments);
 			
-		} catch (UnavailableBorderTagException e) {
-			warn("Cannot add segments to RP");
-			fine("RP not present", e);
+		} catch (UnavailableBorderTagException | IllegalArgumentException e) {
+			warn("Cannot add segments to RP: "+e.getMessage());
+			fine("Cannot add segments to RP", e);
 		}
-
+		fine("Copied tags to new collection");
 		
 	}
 	

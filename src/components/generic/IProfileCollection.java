@@ -27,6 +27,8 @@ import logging.Loggable;
 import analysis.profiles.ProfileException;
 import components.ICellCollection;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
+import components.active.generic.UnsegmentedProfileException;
 import components.nuclear.IBorderSegment;
 
 public interface IProfileCollection extends Serializable, Loggable{
@@ -60,10 +62,11 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @param tag the BorderTagObject to use as index zero
 	 * @param quartile the collection quartile to return (0-100) 
 	 * @return the quartile profile from the given tag
-	 * @throws UnavailableBorderTagException 
+	 * @throws UnavailableBorderTagException  when the tag is not present as an offset
 	 * @throws ProfileException 
+	 * @throws UnavailableProfileTypeException when the profile type does not have an associated aggregate
 	 */
-	IProfile getProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException, ProfileException;
+	IProfile getProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException;
 
 	/**
 	 * Get the requested segmented profile. Generates it dynamically from the
@@ -71,10 +74,11 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @param s the pointType of the profile to find
 	 * @return the profile
 	 * @throws ProfileException 
-	 * @throws UnavailableBorderTagException 
-	 * @throws Exception
+	 * @throws UnavailableBorderTagException when the tag is not present as an offset
+	 * @throws UnavailableProfileTypeException when the profile type does not have an associated aggregate
+	 * @throws UnsegmentedProfileException when no segments are available for the profile
 	 */
-	ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException, ProfileException;
+	ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException, UnsegmentedProfileException;
 
 	/**
 	 * Get the profile aggregate for this collection
@@ -121,9 +125,10 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * Test if the collection contains a segment beginning at the given tag
 	 * @param tag
 	 * @return
-	 * @throws Exception
+	 * @throws UnsegmentedProfileException 
+	 * @throws UnavailableBorderTagException
 	 */
-	boolean hasSegmentStartingWith(Tag tag) throws UnavailableBorderTagException;
+	boolean hasSegmentStartingWith(Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
 
 	/**
 	 * Fetch the segment from the profile beginning at the given tag;
@@ -131,9 +136,10 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * to the tag. 
 	 * @param tag the border tag
 	 * @return a copy of the segment with the tag at its start index, or null
+	 * @throws UnsegmentedProfileException 
 	 */
 	IBorderSegment getSegmentStartingWith(Tag tag)
-			throws UnavailableBorderTagException;
+			throws UnavailableBorderTagException, UnsegmentedProfileException;
 
 	/**
 	 * Test if the collection contains a segment beginning at the given tag
@@ -141,7 +147,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @return
 	 * @throws Exception
 	 */
-	boolean hasSegmentEndingWith(Tag tag) throws UnavailableBorderTagException;
+	boolean hasSegmentEndingWith(Tag tag) throws UnavailableBorderTagException, UnsegmentedProfileException;
 
 	/**
 	 * Fetch the segment from the profile beginning at the given tag;
@@ -151,7 +157,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @return a copy of the segment with the tag at its start index, or null
 	 */
 	IBorderSegment getSegmentEndingWith(Tag tag)
-			throws UnavailableBorderTagException;
+			throws UnavailableBorderTagException, UnsegmentedProfileException;
 
 	/**
 	 * Fetch the segment from the profile containing the given index.
@@ -159,7 +165,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @param index
 	 * @return a copy of the segment with the index inside, or null
 	 */
-	IBorderSegment getSegmentContaining(int index);
+	IBorderSegment getSegmentContaining(int index) throws UnsegmentedProfileException;
 
 	/**
 	 * Fetch the segment from the profile containing at the given tag;
@@ -167,7 +173,7 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @return a copy of the segment with the tag index inside, or null
 	 */
 	IBorderSegment getSegmentContaining(Tag tag)
-			throws ProfileException;
+			throws ProfileException, UnsegmentedProfileException;
 
 	/**
 	 * Add an offset for the given point type. The offset is used
@@ -233,9 +239,10 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 * @return the profile
 	 * @throws ProfileException 
 	 * @throws UnavailableBorderTagException 
+	 * @throws UnavailableProfileTypeException 
 	 * @throws  
 	 */
-	IProfile getIQRProfile(ProfileType type, Tag tag) throws UnavailableBorderTagException, ProfileException;
+	IProfile getIQRProfile(ProfileType type, Tag tag) throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException;
 
 	/**
 	 * Find the points in the profile that are most variable

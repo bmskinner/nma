@@ -669,7 +669,7 @@ implements ICellCollection {
 		IProfile medianProfile;
 		try {
 			medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
-		} catch (UnavailableBorderTagException | ProfileException e) {
+		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
 			fine("Error getting median profile for collection", e);
 			for(int j=0; i<result.length; j++){
 				result[j] = 0;	
@@ -707,7 +707,7 @@ implements ICellCollection {
 		IProfile medianProfile;
 		try {
 			medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
-		} catch (UnavailableBorderTagException | ProfileException e) {
+		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
 			fine("Error getting median profile for collection", e);
 			for(int j=0; i<result.length; j++){
 				result[j] = 0;	
@@ -748,7 +748,7 @@ implements ICellCollection {
 		IProfile medianProfile;
 		try {
 			medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
-		} catch (UnavailableBorderTagException | ProfileException e) {
+		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
 			fine("Error getting median profile for collection", e);
 			return 0;
 		}

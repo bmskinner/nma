@@ -28,6 +28,7 @@ import components.ICellCollection;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
+import components.active.generic.UnsegmentedProfileException;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -72,7 +73,7 @@ public class ProfileOffsetter implements Loggable {
 		try {
 			segID = collection.getProfileCollection()
 					.getSegmentContaining(tag).getID();
-		} catch (ProfileException e) {
+		} catch (ProfileException | UnsegmentedProfileException e) {
 			throw new ProfileOffsetException("Cannot find segment with tag "+tag+" in median");
 		}
 
@@ -83,7 +84,7 @@ public class ProfileOffsetter implements Loggable {
 		try {
 			profile = collection.getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-		} catch (UnavailableBorderTagException | ProfileException e1) {
+		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e1) {
 			fine("Error getting median profile", e1);
 			throw new ProfileOffsetException("Cannot get median profile");
 		}

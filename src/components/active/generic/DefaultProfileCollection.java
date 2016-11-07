@@ -60,7 +60,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	private static final long serialVersionUID = 1L;
 		
 	private Map<Tag, Integer>    indexes  = new HashMap<Tag, Integer>();
-	private IBorderSegment[]     segments = null;// = new ArrayList<IBorderSegment>();
+	private IBorderSegment[]     segments = null;
 	
 	private transient int length;
 	private transient Map<ProfileType, IProfileAggregate> map = new HashMap<ProfileType, IProfileAggregate>();
@@ -112,7 +112,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getProfile(components.generic.BorderTagObject, double)
 	 */
 	@Override
-	public IProfile getProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException, ProfileException {
+	public IProfile getProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
 		
 		if(tag==null){
 			throw new IllegalArgumentException("Tag cannot be null");
@@ -122,14 +122,18 @@ public class DefaultProfileCollection implements IProfileCollection {
 			throw new UnavailableBorderTagException("Tag is not present: "+tag.toString());
 		}
 		
+		if( ! map.containsKey(type)){
+			throw new UnavailableProfileTypeException("Profile type is not present: "+type.toString());
+		}
+		
 		IProfileAggregate agg = map.get(type);
 		IProfile p;
 		try {
 			p = agg.getQuartile(quartile);
-		} catch (ProfileException | NullPointerException e) {
+		} catch (NullPointerException e) {
 			warn("Cannot get profile for "+quartile);
 			fine("Error fetching quartile", e);
-			return new FloatProfile(0, length);
+			throw new ProfileException("Null pointer exception getting quartile from aggregate");
 		}
 		
 		int offset = indexes.get(tag);
@@ -145,18 +149,32 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 */
 	@Override
 	public ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile) 
-			throws UnavailableBorderTagException, ProfileException {
+			throws UnavailableBorderTagException, 
+				   ProfileException, 
+			       UnavailableProfileTypeException, 
+			       UnsegmentedProfileException {
 		
 		if(tag==null || type==null){
 			throw new IllegalArgumentException("A profile type and tag is required");
 		}
 		
+		if(quartile < 0 || quartile > 100){
+			throw new IllegalArgumentException("Quartile must be between 0-100");
+		}
+		
 		// get the profile array
 		IProfile p = getProfile(type, tag, quartile);
 		fine("Making segmented profile of type "+type+" from "+tag+" with q"+quartile);
-		fine("Array length is "+p.size()+" and segments total is "+this.segments[0].getTotalLength());
-		
-		
+
+		try {
+			if(segments[0]==null){
+				throw new UnsegmentedProfileException("No segments assigned to profile collection");
+			}
+		} catch(NullPointerException e){
+			//			error("No segments assigned to profile collection", e);
+			throw new UnsegmentedProfileException("No segments assigned to profile collection", e);
+		}
+
 		ISegmentedProfile result;
 		try {
 			result = new SegmentedFloatProfile(p, getSegments(tag));
@@ -229,7 +247,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#hasSegmentStartingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public boolean hasSegmentStartingWith(Tag tag) {
+	public boolean hasSegmentStartingWith(Tag tag) throws UnsegmentedProfileException {
 		
 		if(getSegmentStartingWith( tag) == null){
 			return false;
@@ -242,8 +260,12 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentStartingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public IBorderSegment getSegmentStartingWith(Tag tag) {
+	public IBorderSegment getSegmentStartingWith(Tag tag) throws UnsegmentedProfileException {
 		List<IBorderSegment> segments = this.getSegments(tag);
+		
+		if(segments.size()==0){
+			throw new UnsegmentedProfileException("No segments assigned to profile collection");
+		}
 
 		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
@@ -261,7 +283,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#hasSegmentEndingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public boolean hasSegmentEndingWith(Tag tag) {
+	public boolean hasSegmentEndingWith(Tag tag) throws UnsegmentedProfileException {
 		
 		if(getSegmentEndingWith( tag) == null){
 			return false;
@@ -274,9 +296,13 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentEndingWith(components.generic.BorderTagObject)
 	 */
 	@Override
-	public IBorderSegment getSegmentEndingWith(Tag tag) {
+	public IBorderSegment getSegmentEndingWith(Tag tag) throws UnsegmentedProfileException {
 		List<IBorderSegment> segments = this.getSegments(tag);
 
+		if(segments.size()==0){
+			throw new UnsegmentedProfileException("No segments assigned to profile collection");
+		}
+		
 		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
 		for(IBorderSegment seg : segments){
@@ -293,9 +319,13 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getSegmentContaining(int)
 	 */
 	@Override
-	public IBorderSegment getSegmentContaining(int index) {
+	public IBorderSegment getSegmentContaining(int index) throws UnsegmentedProfileException {
 		List<IBorderSegment> segments = this.getSegments(Tag.REFERENCE_POINT);
-
+		
+		if(segments.size()==0){
+			throw new UnsegmentedProfileException("No segments assigned to profile collection");
+		}
+		
 		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
 		for(IBorderSegment seg : segments){
@@ -349,7 +379,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	@Override
 	public void addSegments(List<IBorderSegment> n){
 		if(n==null || n.isEmpty()){
-			throw new NullPointerException("String or segment list is null or empty");
+			throw new IllegalArgumentException("Segment list is null or empty");
 		}
 		
 		if(this.length() != n.get(0).getTotalLength() ){
@@ -373,7 +403,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	@Override
 	public void addSegments(Tag tag, List<IBorderSegment> n) {
 		if(n==null || n.isEmpty()){
-			throw new NullPointerException("String or segment list is null or empty");
+			throw new IllegalArgumentException("String or segment list is null or empty");
 		}
 		
 		if(this.length() != n.get(0).getTotalLength() ){
@@ -545,7 +575,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 	 * @see components.generic.IProfileCollection#getIQRProfile(components.generic.BorderTagObject)
 	 */
 	@Override
-	public IProfile getIQRProfile(ProfileType type, Tag tag) throws UnavailableBorderTagException, ProfileException {
+	public IProfile getIQRProfile(ProfileType type, Tag tag) throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
 				
 		IProfile q25 = getProfile(type, tag, Quartile.LOWER_QUARTILE);
 		IProfile q75 = getProfile(type, tag, Quartile.UPPER_QUARTILE);
@@ -573,7 +603,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 		IProfile iqrProfile;
 		try {
 			iqrProfile = getIQRProfile(type, tag);
-		} catch (UnavailableBorderTagException | ProfileException e) {
+		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
 			fine("Error getting variable regions", e);
 			return result;
 		}

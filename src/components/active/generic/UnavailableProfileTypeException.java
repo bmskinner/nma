@@ -19,6 +19,11 @@
 
 package components.active.generic;
 
+/**
+ * Thrown when a profile type is not available within a profile collection.
+ * @author bms41
+ *
+ */
 public class UnavailableProfileTypeException extends Exception {
 		private static final long serialVersionUID = 1L;
 		public UnavailableProfileTypeException() { super(); }

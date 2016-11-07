@@ -27,6 +27,7 @@ import utility.Constants;
 import analysis.profiles.Rule.RuleType;
 import components.ICellCollection;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
 import components.generic.ProfileType;
@@ -216,7 +217,7 @@ public class ProfileIndexFinder implements Loggable {
 					.getProfileCollection()
 					.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN), true);
 			
-		} catch (UnavailableBorderTagException | ProfileException e) {
+		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
 			fine("Cannot get matching profile", e);
 			return new BooleanProfile(collection
 					.getProfileCollection().length(), false);
@@ -231,7 +232,7 @@ public class ProfileIndexFinder implements Loggable {
 				p = collection
 						.getProfileCollection()
 						.getProfile(r.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
-			} catch (UnavailableBorderTagException | ProfileException e) {
+			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
 				fine("Cannot get matching profile", e);
 				return new BooleanProfile(collection
 						.getProfileCollection().length(), false);

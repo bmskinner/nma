@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
+ *  	Copyright (C) 2016 Ben Skinner
  *   
  *     This file is part of Nuclear Morphology Analysis.
  *
@@ -16,20 +16,20 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package analysis.profiles;
+
+package components.active.generic;
 
 /**
- * Thrown when something goes wrong in a profile that is not covered
- * by another exception.
+ * Thrown when a profile collection or segmented profile has no assigned
+ * segments
  * @author bms41
  *
  */
-public class ProfileException extends Exception {
-	private static final long serialVersionUID = 1L;
-	public ProfileException() { super(); }
-	public ProfileException(String message) { super(message); }
-	public ProfileException(String message, Throwable cause) { super(message, cause); }
-	public ProfileException(Throwable cause) { super(cause); }
-
-
+public class UnsegmentedProfileException extends Exception {
+		private static final long serialVersionUID = 1L;
+		public UnsegmentedProfileException() { super(); }
+		public UnsegmentedProfileException(String message) { super(message); }
+		public UnsegmentedProfileException(String message, Throwable cause) { super(message, cause); }
+		public UnsegmentedProfileException(Throwable cause) { super(cause); }
+	
 }

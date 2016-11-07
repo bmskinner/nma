@@ -63,6 +63,7 @@ import components.AbstractCellularComponent;
 import components.ICellCollection;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
+import components.active.generic.UnsegmentedProfileException;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
 import components.generic.ProfileType;
@@ -384,7 +385,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 					   		.getProfileCollection()
 					   		.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 					   		.size();
-		} catch (UnavailableBorderTagException | ProfileException e) {
+		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
 			fine("Error getting median profile", e);
 			return makeErrorChart();
 		}
@@ -490,7 +491,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 						segmentAnnotation.setPaint(colour);
 						plot.addAnnotation(segmentAnnotation);
 					}
-				} catch (UnavailableBorderTagException | ProfileException e) {
+				} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 					fine("Error creating median profile dataset", e);
 					return makeErrorChart();
 				}

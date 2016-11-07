@@ -435,7 +435,7 @@ public class VirtualCellCollection implements ICellCollection {
 		IProfile medianProfile;
 		try {
 			medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
-		} catch (UnavailableBorderTagException | ProfileException e) {
+		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
 			fine("Error getting median profile for collection", e);
 			for(int j=0; i<result.length; j++){
 				result[j] = 0;	
@@ -845,7 +845,7 @@ public class VirtualCellCollection implements ICellCollection {
 		IProfile medianProfile;
 		try {
 			medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
-		} catch (UnavailableBorderTagException | ProfileException e) {
+		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
 			warn("Cannot get median profile for collection");
 			fine("Error getting median profile", e);
 			for(int j=0; j<count; j++){

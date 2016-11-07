@@ -458,7 +458,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 
 			}
 
-		} catch(ProfileException | UnavailableBorderTagException e1){
+		} catch(ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1){
 			fine("Error getting profile", e1);
 			chart = MorphologyChartFactory.makeErrorChart();
 		}

@@ -29,6 +29,7 @@ import java.util.UUID;
 import utility.Constants;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
+import analysis.profiles.ProfileException;
 import components.ICell;
 import components.ICellCollection;
 import components.active.DefaultAnalysisDataset;
@@ -195,39 +196,26 @@ public class DatasetMerger extends AnalysisWorker {
 
 		}
 		
-		// Remove signal groups
+		// Replace signal groups
 		mergeSignalGroups(newCollection);
-//		newCollection.getSignalManager().removeSignalGroups();
-		
-		// Remove existing profiles
-//		newCollection.getProfileManager().removeProfiles();
-
 
 		// create the dataset; has no analysis options at present
 		IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
 		newDataset.setRoot(true);
-
-//		log(newDataset.getName());
-//	    log("Has children: "+newDataset.hasChildren());
-//	    log("Child count : "+newDataset.getChildCount());
 		
 		// Add the original datasets as merge sources
 		for(IAnalysisDataset d : datasets){
 			
-			// Make a new virtual collection for the sources
-			ICellCollection c = new VirtualCellCollection(newDataset, d.getName(), d.getUUID(), d.getCollection());
+			// Make a new virtual collection for the sources			
+			newDataset.addMergeSource(d);
 			
-			IAnalysisDataset mergeSource = new MergeSourceAnalysisDataset(newDataset, d, c);
-//			mergeSource.setAnalysisOptions(d.getAnalysisOptions());
-//			
-			newDataset.addMergeSource(mergeSource);
+			try {
+				d.getCollection().getProfileManager().copyCollectionOffsets(newDataset.getCollection());
+			} catch (ProfileException e) {
+				error("Cannot copy profile offsets to merge source", e);
+			}
 		}
 
-		
-//		log(newDataset.getName());
-//	    log("Has children: "+newDataset.hasChildren());
-//	    log("Child count : "+newDataset.getChildCount());
-	    
 		// a merged dataset should not have analysis options
 		// of its own; it lets each merge source display options
 		// appropriately

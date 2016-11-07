@@ -111,6 +111,9 @@ public class DatasetConverter implements Loggable {
 
 			// add the child datasets
 			makeVirtualCollections(oldDataset, newDataset);
+			
+			// Add merge sources
+			makeMergeSources(oldDataset, newDataset);
 
 			oldDataset = null;
 			return newDataset;
@@ -119,6 +122,18 @@ public class DatasetConverter implements Loggable {
 			error("Error converting dataset", e);
 			throw new DatasetConversionException(e);
 		}
+	}
+	
+	private void makeMergeSources(IAnalysisDataset template, IAnalysisDataset dest) throws DatasetConversionException{
+		
+		for(IAnalysisDataset d : template.getMergeSources()){
+			
+			dest.addMergeSource(d);
+			
+		}
+		
+		log("Added merge sources");
+		
 	}
 	
 	/**

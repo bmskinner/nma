@@ -21,6 +21,7 @@ import charting.options.ChartOptions;
 import components.ICellCollection;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
+import components.active.generic.UnsegmentedProfileException;
 import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
@@ -231,7 +232,7 @@ public class ViolinDatasetCreator implements Loggable {
 						.getProfileCollection()
 						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 						.getSegmentAt(segPosition);
-			} catch (UnavailableBorderTagException | ProfileException e) {
+			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 				fine("Unable to get segmented median profile", e);
 				throw new ChartDatasetCreationException("Cannot get median profile");
 			}

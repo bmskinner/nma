@@ -33,6 +33,7 @@ import components.ICellCollection;
 import components.IClusterGroup;
 import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
+import analysis.profiles.ProfileException;
 
 public class MergeSourceAnalysisDataset 
 	extends AbstractAnalysisDataset
@@ -42,22 +43,38 @@ public class MergeSourceAnalysisDataset
 
 	private IAnalysisDataset parent; // the 'parent to this dataset; the merged dataset with the real cells
 				
-	private IAnalysisOptions analysisOptions; // the setup for this analysis - the child does not have an options itself
+	private IAnalysisOptions analysisOptions; // the analysis options for the merge source 
 	
 	
 	/**
-	 * Create a merge source for the given merged dataset, providing a source template
-	 * and a cell collection
+	 * Create a merge source for the given merged dataset, providing a source template.
+	 * A new virtual cell collection will be created from the merge source dataset.
 	 * @param merged the dataset to which this dataset will belong
 	 * @param mergeSource the original dataset which was merged
-	 * @param collection the collection of cells in the merge source dataset
-	 */
-	public MergeSourceAnalysisDataset(IAnalysisDataset merged, IAnalysisDataset mergeSource, ICellCollection collection){
-		super(collection);
-		this.parent = merged;
-		this.setAnalysisOptions(mergeSource.getAnalysisOptions());
-		collection.createProfileCollection();
-	}
+	 */	
+	public MergeSourceAnalysisDataset(IAnalysisDataset merged, IAnalysisDataset mergeSource){
+		super(new VirtualCellCollection(merged,
+				mergeSource.getName(), 
+				mergeSource.getUUID(), 
+				mergeSource.getCollection())
+		
+		);
+
+		this.parent          = merged;
+		this.analysisOptions = mergeSource.getAnalysisOptions();
+		this.datasetColour   = mergeSource.getDatasetColour();
+		
+		this.getCollection().createProfileCollection();
+		try {
+			mergeSource.getCollection().getProfileManager().copyCollectionOffsets(this.getCollection());
+		} catch (ProfileException e) {
+			warn("Unable to create merge source dataset");
+			fine("Error copying offsets", e);
+		}
+		
+		
+			
+	}		
 
 	@Override
 	public IAnalysisDataset duplicate() throws Exception {
@@ -137,8 +154,7 @@ public class MergeSourceAnalysisDataset
 
 	@Override
 	public void addMergeSource(IAnalysisDataset dataset) {
-		childDatasets.add(dataset);
-		
+		childDatasets.add( new MergeSourceAnalysisDataset(this, dataset));
 	}
 
 	@Override
