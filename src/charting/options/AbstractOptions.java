@@ -6,22 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import logging.Loggable;
+import components.ICell;
 import components.generic.MeasurementScale;
 import stats.PlottableStatistic;
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 
 /**
+ * This implements the requirements of the DisplayOptions
+ * interface, providing access to options common to charts
+ * and tables.
  * @author bms41
- *
- */
-/**
- * @author ben
- *
- */
-/**
- * @author ben
  *
  */
 public abstract class AbstractOptions implements DisplayOptions {
@@ -32,9 +26,13 @@ public abstract class AbstractOptions implements DisplayOptions {
 	private int segPosition                 = 0;    // the position of the segment in the profile (consistent between datasets)
 	private MeasurementScale scale          = MeasurementScale.PIXELS;
 	private ColourSwatch swatch             = ColourSwatch.REGULAR_SWATCH;
+	private ICell cell                      = null;
 			
 	public AbstractOptions(List<IAnalysisDataset> list){
-		this.list = list;
+		if(list==null){
+			return;
+		}
+		this.list = new ArrayList<IAnalysisDataset>(list);
 	}
 
 	protected void setDatasets(List<IAnalysisDataset> list){
@@ -165,6 +163,29 @@ public abstract class AbstractOptions implements DisplayOptions {
 	public void setScale(MeasurementScale scale) {
 		this.scale = scale;
 	}
+	
+	/* (non-Javadoc)
+	 * @see charting.options.ChartOptions#getCell()
+	 */
+	@Override
+	public ICell getCell() {
+		return cell;
+	}
+
+	/* (non-Javadoc)
+	 * @see charting.options.ChartOptions#setCell(components.ICell)
+	 */
+	public void setCell(ICell cell) {
+		this.cell = cell;
+	}
+	
+	/* (non-Javadoc)
+	 * @see charting.options.ChartOptions#hasCell()
+	 */
+	@Override
+	public boolean hasCell(){
+		return this.cell!=null;
+	}
 
 	@Override
 	public int hashCode() {
@@ -176,6 +197,7 @@ public abstract class AbstractOptions implements DisplayOptions {
 		result = prime * result + segPosition;
 		result = prime * result + ((stats == null) ? 0 : stats.hashCode());
 		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
+		result = prime * result	+ ((cell == null) ? 0 : cell.hashCode());
 		return result;
 	}
 
@@ -210,6 +232,12 @@ public abstract class AbstractOptions implements DisplayOptions {
 		} else if (!stats.equals(other.stats))
 			return false;
 		if (swatch != other.swatch)
+			return false;
+		
+		if (cell == null) {
+			if (other.cell != null)
+				return false;
+		} else if (!cell.equals(other.cell))
 			return false;
 		
 		return true;

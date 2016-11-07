@@ -59,12 +59,8 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	}
 	
 	/**
-	 * Create a histogram from a histogram dataset and
-	 * apply basic formatting
-	 * @param ds the dataset to use
-	 * @param xLabel the label of the x axis
-	 * @param yLabel the label of the y axis
-	 * @return a chart
+	 * Create an empty histogram
+	 * @return a chart with no data
 	 */
 	public static JFreeChart makeEmptyChart(){
 		

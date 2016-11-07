@@ -707,18 +707,16 @@ public class MainWindow
 				try {
 					log("Copying profile offsets");
 					d.getCollection().getProfileManager().copyCollectionOffsets(newDataset.getCollection());
+					
+					//TODO update cells to the segment positions of the restored median profile
 				} catch (ProfileException e) {
 					error("Cannot copy profile offsets to recovered merge source", e);
 				}
 				
-//				newDataset.getCollection().getProfileCollection().createAndRestoreProfileAggregate(newDataset.getCollection());	
-				
-				// TODO: Run new profiling
-//				new RunProfilingAction(newDataset, ADD_POPULATION, MainWindow.this);
+				newDataset.setAnalysisOptions(d.getAnalysisOptions());
+
+
 				this.addDataset(newDataset);
-				
-				
-//				populationsPanel.addDataset(newDataset);
 			}
 			populationsPanel.update(list);
 		};

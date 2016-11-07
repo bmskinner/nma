@@ -29,6 +29,7 @@ import org.jfree.chart.JFreeChart;
 import stats.SignalStatistic;
 import charting.charts.HistogramChartFactory;
 import charting.charts.panels.SelectableChartPanel;
+import charting.options.ChartOptions;
 import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 
@@ -43,8 +44,7 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			Dimension preferredSize = new Dimension(400, 150);
 			for(SignalStatistic stat : SignalStatistic.values()){
 
-				ChartOptionsBuilder builder = new ChartOptionsBuilder();
-				DefaultChartOptions options = builder
+				ChartOptions options = new ChartOptionsBuilder()
 					.addStatistic(stat)
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -80,15 +80,10 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 		
 		for(SignalStatistic stat : SignalStatistic.values()){
 			SelectableChartPanel panel = chartPanels.get(stat.toString());
-			
-//			XYPlot plot = (XYPlot) chart.getPlot();
-//			plot.setDomainPannable(true);
-//			plot.setRangePannable(true);
 
 			JFreeChart chart = null;
-			
-			ChartOptionsBuilder builder = new ChartOptionsBuilder();
-			DefaultChartOptions options = builder.setDatasets(getDatasets())
+
+			ChartOptions options = new ChartOptionsBuilder()
 				.addStatistic(stat)
 				.setScale(GlobalOptions.getInstance().getScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -98,12 +93,6 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			
 			
 			setChart(options);
-			
-			chart = getChart(options);
-
-			
-
-			panel.setChart(chart);
 		}
 		
 		

@@ -346,7 +346,7 @@ public abstract class DetailPanel
 	
 	/**
 	 * This method must be overridden by the extending class
-	 * to perform the actual update when a multiple datasets are selected
+	 * to perform the actual update when multiple datasets are selected
 	 */
 	protected synchronized void updateMultiple(){
 		finest(this.getClass().getName()+": Updating multiple datasets");
@@ -354,7 +354,7 @@ public abstract class DetailPanel
 	
 	/**
 	 * This method must be overridden by the extending class
-	 * to perform the actual update when a no datasets are selected
+	 * to perform the actual update when no datasets are selected
 	 */
 	protected synchronized void updateNull(){
 		finest(this.getClass().getName()+": Updating null dataset");

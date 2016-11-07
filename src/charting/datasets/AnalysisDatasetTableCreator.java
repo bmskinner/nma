@@ -528,7 +528,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				date = times[0];
 				time = times[1];
 			}
-			folder = dataset.getCollection().getFolder().getAbsolutePath();
+			folder  = options.getFolder().getAbsolutePath();
 			logFile = dataset.getDebugFile().getAbsolutePath();
 		}
 

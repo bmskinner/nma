@@ -52,6 +52,7 @@ import components.ICell;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.OutlineChartFactory;
 import charting.charts.panels.ExportableChartPanel;
+import charting.options.ChartOptions;
 import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import analysis.AnalysisDataset;
@@ -107,7 +108,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		this.add(header, BorderLayout.NORTH);
 		finest("Created header");
 		
-		DefaultChartOptions options = new ChartOptionsBuilder()
+		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(datasets.get(0))
 			.build();
 		
@@ -236,7 +237,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		} catch (Exception e) {
 			error("Error running warping", e);
 			
-			DefaultChartOptions options = new ChartOptionsBuilder()
+			ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(targetDataset)
 			.build();
 		
@@ -294,7 +295,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		JFreeChart chart = null;
 		if(straightenMeshBox.isSelected()){
 			
-			DefaultChartOptions options = new ChartOptionsBuilder()
+			ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(datasetBoxTwo.getSelectedDataset())
 					.setShowMesh(true)
 					.setStraightenMesh(true)
@@ -310,7 +311,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 		} else {
 			
-			DefaultChartOptions options = new ChartOptionsBuilder()
+			ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(datasetBoxTwo.getSelectedDataset())
 			.build();
 		
@@ -492,7 +493,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 								
 				boolean straighten = straightenMeshBox.isSelected();
 				
-				DefaultChartOptions options = new ChartOptionsBuilder()
+				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(datasetBoxTwo.getSelectedDataset())
 					.setShowXAxis(false)
 					.setShowYAxis(false)

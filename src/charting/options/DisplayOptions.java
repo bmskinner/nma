@@ -4,14 +4,30 @@ import java.util.List;
 import java.util.UUID;
 
 import analysis.IAnalysisDataset;
+import components.ICell;
 import components.generic.MeasurementScale;
 import gui.components.ColourSelecter.ColourSwatch;
 import stats.PlottableStatistic;
 
+/**
+ * This interface describes the values that should be checkable
+ * by chart and table dataset creators. Implementing classes must 
+ * provide sensible defaults. 
+ * @author bms41
+ *
+ */
 public interface DisplayOptions {
 	
+	/**
+	 * Get the datasets to display data for
+	 * @return
+	 */
 	List<IAnalysisDataset> getDatasets();
 	
+	/**
+	 * Get the colour swatch to use when colouring datasets.
+	 * @return
+	 */
 	public ColourSwatch getSwatch();
 	
 	/**
@@ -20,6 +36,10 @@ public interface DisplayOptions {
 	 */
 	public boolean hasDatasets();
 	
+	/**
+	 * Get the number of datasets set.
+	 * @return the dataset count
+	 */
 	public int datasetCount();
 	
 	/**
@@ -29,6 +49,10 @@ public interface DisplayOptions {
 	 */
 	public boolean isSingleDataset();
 	
+	/**
+	 * Check if the dataset list has > 1 dataset
+	 * @return
+	 */
 	public boolean isMultipleDatasets();
 	
 	/**
@@ -43,42 +67,49 @@ public interface DisplayOptions {
 	 */
 	public PlottableStatistic getStat();
 
-	
-	/**
-	 * Set the first statistic in the list (for backwards compatibility)
-	 * @param stat
-	 */
-	public void setStat(PlottableStatistic stat);
-	
-	/**
-	 * Replace all internal stats with the given list
-	 * @param stats
-	 */
-	public void setStats(List<PlottableStatistic> stats);
-	
-	/**
-	 * Append the given stat to the end of the internal list
-	 * @param stat
-	 */
-	public void addStat(PlottableStatistic stat);
-	
+		
 	/**
 	 * Get the saved stats
 	 * @return
 	 */
 	public List<PlottableStatistic> getStats();
 	
+	/**
+	 * Get the statistic at the given index
+	 * @param index
+	 * @return
+	 */
 	public PlottableStatistic getStat(int index);
 
+	/**
+	 * Get the ID of the segment to display data for
+	 * @return
+	 */
 	public UUID getSegID();
 
-	public void setSegID(UUID segID);
-	
+	/**
+	 * Get the position of the segment to display data for
+	 * @return
+	 */
 	public int getSegPosition();
 
-	public void setSegPosition(int segPosition);
 	
+	/**
+	 * Get the scale of the data to use in charts or tables
+	 * @return
+	 */
 	public MeasurementScale getScale();
+	
+	/**
+	 * Get the cell data should be drawn for
+	 * @return
+	 */
+	ICell getCell();
+	
+	/**
+	 * Check if a cell is set to display in an outline chart
+	 * @return
+	 */
+	boolean hasCell();
 
-	public void setScale(MeasurementScale scale);
 }

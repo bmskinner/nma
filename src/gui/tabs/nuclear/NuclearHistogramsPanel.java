@@ -34,9 +34,12 @@ import org.jfree.chart.JFreeChart;
 
 import stats.NucleusStatistic;
 import analysis.IAnalysisDataset;
+import charting.charts.BoxplotChartFactory;
+import charting.charts.HistogramChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.charts.panels.SelectableChartPanel;
+import charting.charts.panels.ViolinChartPanel;
 import charting.options.ChartOptions;
 import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
@@ -52,18 +55,10 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 
 			try {
 
-				MeasurementScale scale  = GlobalOptions.getInstance().getScale();
 				Dimension preferredSize = new Dimension(400, 150);
 				for(NucleusStatistic stat : NucleusStatistic.values()){
 					
-					DefaultChartOptions options = new ChartOptionsBuilder()
-						.addStatistic(stat)
-						.setScale(scale)
-						.setUseDensity(false)
-						.build();
-					
-//					MorphologyChartFactory.createEmptyChart()
-					JFreeChart chart = getChart(options);
+					JFreeChart chart = HistogramChartFactory.makeEmptyChart();
 					
 					SelectableChartPanel panel = new SelectableChartPanel(chart, stat.toString());
 					panel.setPreferredSize(preferredSize);
@@ -74,7 +69,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 				}
 
 			} catch(Exception e){
-				log(Level.SEVERE, "Error creating histogram panel", e);
+				error("Error creating histogram panel", e);
 			}
 
 		}

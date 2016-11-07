@@ -71,7 +71,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	private boolean invertYAxis         = false;
 	
 	private RotationMode rotateMode     = RotationMode.ACTUAL;
-	private ICell cell                   = null;
 	private CellularComponent component = null;
 	private boolean showWarp            = false;
 	
@@ -457,28 +456,6 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 		this.rotateMode = rotateMode;
 	}
 	
-	/* (non-Javadoc)
-	 * @see charting.options.ChartOptions#getCell()
-	 */
-	@Override
-	public ICell getCell() {
-		return cell;
-	}
-
-	/* (non-Javadoc)
-	 * @see charting.options.ChartOptions#setCell(components.ICell)
-	 */
-	public void setCell(ICell cell) {
-		this.cell = cell;
-	}
-	
-	/* (non-Javadoc)
-	 * @see charting.options.ChartOptions#hasCell()
-	 */
-	@Override
-	public boolean hasCell(){
-		return this.cell!=null;
-	}
 
 	/* (non-Javadoc)
 	 * @see charting.options.ChartOptions#getComponent()
@@ -588,8 +565,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 		
 		result = prime * result
 				+ ((rotateMode == null) ? 0 : rotateMode.hashCode());
-		result = prime * result
-				+ ((cell == null) ? 0 : cell.hashCode());
+		
 		result = prime * result
 				+ ((component == null) ? 0 : component.hashCode());
 		result = prime * result + (showWarp ? 1231 : 1237);
@@ -696,11 +672,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 		
 //		log("Equals reached level 4");
 
-		if (cell == null) {
-			if (other.cell != null)
-				return false;
-		} else if (!cell.equals(other.cell))
-			return false;
+		
 		
 //		log("Equals reached level 5");
 

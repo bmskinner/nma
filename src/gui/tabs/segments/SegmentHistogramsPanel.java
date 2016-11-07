@@ -21,6 +21,7 @@ import stats.SegmentStatistic;
 import charting.charts.AbstractChartFactory;
 import charting.charts.HistogramChartFactory;
 import charting.charts.panels.SelectableChartPanel;
+import charting.options.ChartOptions;
 import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
@@ -87,7 +88,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 				chartPanel.setPreferredSize(preferredSize);
 				mainPanel.add(chartPanel);	
 				
-				DefaultChartOptions options = new ChartOptionsBuilder()
+				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
 					.addStatistic(SegmentStatistic.LENGTH)
 					.setScale(GlobalOptions.getInstance().getScale())

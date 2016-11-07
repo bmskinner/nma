@@ -52,7 +52,6 @@ public class DefaultTableOptions extends AbstractOptions implements TableOptions
 	/* (non-Javadoc)
 	 * @see charting.options.TableOptions#setType(charting.options.DefaultTableOptions.TableType)
 	 */
-	@Override
 	public void setType(TableType type){
 		this.type = type;
 	}
@@ -84,7 +83,7 @@ public class DefaultTableOptions extends AbstractOptions implements TableOptions
 		this.cell = cell;
 	}
 	
-	@Override
+	
 	public void setTarget(JTable target){
 		this.target = target;
 	}
@@ -99,7 +98,7 @@ public class DefaultTableOptions extends AbstractOptions implements TableOptions
 		return this.target!=null;
 	}
 
-	@Override
+
 	public void setRenderer(int column, TableCellRenderer r) {
 		renderer.put(column,  r);
 		

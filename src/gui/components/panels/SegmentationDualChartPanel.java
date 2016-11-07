@@ -23,6 +23,7 @@ import org.jfree.chart.JFreeChart;
 
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.DraggableOverlayChartPanel;
+import charting.options.ChartOptions;
 import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.ISegmentedProfile;
@@ -33,7 +34,7 @@ public class SegmentationDualChartPanel extends DualChartPanel{
 	public SegmentationDualChartPanel(){
 		super();
 		
-		DefaultChartOptions options = new ChartOptionsBuilder()
+		ChartOptions options = new ChartOptionsBuilder()
 			.setProfileType(ProfileType.ANGLE)
 			.setShowXAxis(false)
 			.setShowYAxis(false)

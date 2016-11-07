@@ -161,7 +161,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 		 * Create the chart for the range panel
 		 */
 		
-		DefaultChartOptions rangeOptions = new ChartOptionsBuilder()
+		ChartOptions rangeOptions = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setNormalised(false)
 			.setAlignment(ProfileAlignment.LEFT)

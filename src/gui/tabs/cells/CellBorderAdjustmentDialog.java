@@ -92,6 +92,7 @@ import charting.charts.overlays.EllipticalOverlayObject;
 import charting.charts.panels.ExportableChartPanel;
 import charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEvent;
 import charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventListener;
+import charting.options.ChartOptions;
 import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 
@@ -318,7 +319,7 @@ public class CellBorderAdjustmentDialog
 	protected void updateCharts(ICell cell){
 			
 			finer("Making outline chart options");
-			DefaultChartOptions outlineOptions = new ChartOptionsBuilder()
+			ChartOptions outlineOptions = new ChartOptionsBuilder()
 				.setDatasets(dataset)
 				.setCell(cell)
 				.setRotationMode(RotationMode.ACTUAL)

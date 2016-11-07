@@ -34,6 +34,7 @@ import stats.SignalStatistic;
 import charting.charts.ViolinChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.charts.panels.ViolinChartPanel;
+import charting.options.ChartOptions;
 import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 
@@ -52,8 +53,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
 		for(SignalStatistic stat : SignalStatistic.values()){
 
-			ChartOptionsBuilder builder = new ChartOptionsBuilder();
-			DefaultChartOptions options = builder
+			ChartOptions options = new ChartOptionsBuilder()
 					.addStatistic(stat)
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
@@ -98,8 +98,8 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
 			ExportableChartPanel panel = chartPanels.get(stat.toString());
 
-			ChartOptionsBuilder builder = new ChartOptionsBuilder();
-			DefaultChartOptions options = builder.setDatasets(getDatasets())
+			ChartOptions options = new ChartOptionsBuilder()
+					.setDatasets(getDatasets())
 					.addStatistic(stat)
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
