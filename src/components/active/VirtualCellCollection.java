@@ -24,6 +24,7 @@ import analysis.profiles.SegmentStatisticFetchingTask;
 import analysis.signals.SignalManager;
 import components.ICell;
 import components.ICellCollection;
+//import components.active.DefaultCellCollection.StatsCache;
 import components.active.generic.DefaultProfileCollection;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
@@ -35,14 +36,12 @@ import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NucleusType;
-import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import stats.Quartile;
 import stats.SegmentStatistic;
 import stats.SignalStatistic;
-import utility.Constants;
 
 /**
  * This class provides access to child dataset ICell lists
@@ -968,6 +967,12 @@ public class VirtualCellCollection implements ICellCollection {
 				
 		signalManager  = new SignalManager(this);
 		profileManager = new ProfileManager(this);
+		
+		isRefolding = false;
+		vennCache   = new HashMap<UUID, Integer>(); // cache the number of shared nuclei with other datasets
+
+		// Make sure any profile aggregates match the length of saved segments
+		this.profileCollection.createAndRestoreProfileAggregate(this);
 
 	}
 	

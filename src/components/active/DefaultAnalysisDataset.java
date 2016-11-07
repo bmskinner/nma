@@ -818,7 +818,9 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	    
 	    if(! otherDatasets.isEmpty()){
 	    	for(IAnalysisDataset child : otherDatasets){
-	    		child.getCollection().getProfileCollection().createProfileAggregate(child.getCollection(), length);			
+	    		child.getCollection()
+	    			.getProfileCollection()
+	    			.createAndRestoreProfileAggregate(child.getCollection());			
 	    	}
 	    }
 	}

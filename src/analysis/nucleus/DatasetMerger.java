@@ -192,7 +192,6 @@ public class DatasetMerger extends AnalysisWorker {
 			for(UUID signalGroupID : d.getCollection().getSignalGroupIDs()){
 				newCollection.addSignalGroup(signalGroupID, new SignalGroup(d.getCollection().getSignalGroup(signalGroupID)));
 			}
-			
 
 		}
 		
@@ -209,11 +208,11 @@ public class DatasetMerger extends AnalysisWorker {
 			// Make a new virtual collection for the sources			
 			newDataset.addMergeSource(d);
 			
-			try {
-				d.getCollection().getProfileManager().copyCollectionOffsets(newDataset.getCollection());
-			} catch (ProfileException e) {
-				error("Cannot copy profile offsets to merge source", e);
-			}
+//			try {
+//				d.getCollection().getProfileManager().copyCollectionOffsets(newDataset.getCollection());
+//			} catch (ProfileException e) {
+//				error("Cannot copy profile offsets to merge source", e);
+//			}
 		}
 
 		// a merged dataset should not have analysis options
