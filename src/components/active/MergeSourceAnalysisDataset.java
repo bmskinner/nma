@@ -48,9 +48,9 @@ public class MergeSourceAnalysisDataset
 	/**
 	 * Create a merge source for the given merged dataset, providing a source template
 	 * and a cell collection
-	 * @param merged
-	 * @param mergeSource
-	 * @param collection
+	 * @param merged the dataset to which this dataset will belong
+	 * @param mergeSource the original dataset which was merged
+	 * @param collection the collection of cells in the merge source dataset
 	 */
 	public MergeSourceAnalysisDataset(IAnalysisDataset merged, IAnalysisDataset mergeSource, ICellCollection collection){
 		super(collection);

@@ -101,10 +101,21 @@ public class VirtualCellCollection implements ICellCollection {
 		this.parent = parent;
 		this.name = name == null ? "Undefined dataset name" : name;
 		this.uuid = id;
-		
-//		for(ProfileType type : ProfileType.values()){
-//			profileCollections.put(type, new DefaultProfileCollection());
-//		}
+	}
+	
+	/**
+	 * Create from a parent dataset, spcifying the collection name and id, and providing a 
+	 * collection of cells to populate the new collection.
+	 * @param parent the dataset to which this will belong
+	 * @param name the name of the collection
+	 * @param id the id of the collection
+	 * @param cells the collection of cells to add to this collection
+	 */
+	public VirtualCellCollection(IAnalysisDataset parent, String name, UUID id, ICellCollection cells){
+		this(parent, name, id);
+		for(ICell cell : cells.getCells()){
+			this.addCell(cell);
+		}
 	}
 	
 	public IAnalysisDataset getParent(){

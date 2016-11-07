@@ -700,7 +700,9 @@ public class MainWindow
 				newDataset.setRoot(true);
 				
 				// TODO: Run new profiling
-				this.addDataset(newDataset);
+				new RunProfilingAction(newDataset, ADD_POPULATION, MainWindow.this);
+//				this.addDataset(newDataset);
+				
 				
 //				populationsPanel.addDataset(newDataset);
 			}

@@ -215,10 +215,7 @@ public class DatasetMerger extends AnalysisWorker {
 		for(IAnalysisDataset d : datasets){
 			
 			// Make a new virtual collection for the sources
-			ICellCollection c = new VirtualCellCollection(newDataset, d.getName(), d.getUUID());
-			for(ICell cell : d.getCollection().getCells()){
-				c.addCell(cell);
-			}
+			ICellCollection c = new VirtualCellCollection(newDataset, d.getName(), d.getUUID(), d.getCollection());
 			
 			IAnalysisDataset mergeSource = new MergeSourceAnalysisDataset(newDataset, d, c);
 //			mergeSource.setAnalysisOptions(d.getAnalysisOptions());
