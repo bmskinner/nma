@@ -30,8 +30,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import utility.Constants;
+import analysis.DatasetMerger;
 import analysis.IAnalysisDataset;
-import analysis.nucleus.DatasetMerger;
 
 /**
  * Carry out a merge of datasets

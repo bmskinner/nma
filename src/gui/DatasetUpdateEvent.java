@@ -33,4 +33,15 @@ public class DatasetUpdateEvent extends EventObject {
 		super(source);
 		this.list       = new ArrayList<IAnalysisDataset>(list);
 	}
+	
+	/**
+	 * Construct from a single dataset. Use to pass messages on.
+	 * @param event
+	 */
+	public DatasetUpdateEvent(Object source, final IAnalysisDataset dataset){
+		super(source);
+		
+		this.list       = new ArrayList<IAnalysisDataset>();
+		this.list.add(dataset);
+	}
 }

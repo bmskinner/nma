@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package analysis.nucleus;
+package analysis;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,16 +27,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import utility.Constants;
-import analysis.AnalysisWorker;
-import analysis.IAnalysisDataset;
-import analysis.profiles.ProfileException;
 import components.ICell;
 import components.ICellCollection;
 import components.active.DefaultAnalysisDataset;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
-import components.active.MergeSourceAnalysisDataset;
-import components.active.VirtualCellCollection;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalGroup;
 

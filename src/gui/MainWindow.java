@@ -87,6 +87,7 @@ import logging.TextAreaHandler;
 import utility.Constants;
 import utility.Version;
 import analysis.IAnalysisDataset;
+import analysis.MergeSourceExtractor;
 import analysis.profiles.ProfileException;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import components.ICell;
@@ -652,7 +653,10 @@ public class MainWindow
 			}
 			
 			if(event.method().equals(DatasetEvent.EXTRACT_SOURCE)){
-				extractSourceDataset(list);			
+				MergeSourceExtractor ext = new MergeSourceExtractor(list);
+				ext.addDatasetEventListener(this);
+				ext.extractSourceDataset();;
+				
 			}
 			
 			if(event.method().equals(DatasetEvent.REFRESH_CACHE)){
@@ -684,48 +688,7 @@ public class MainWindow
 		}
 		
 	}
-	
-	private void extractSourceDataset(final List<IAnalysisDataset> list){
-		Runnable task = () -> { 
-			log("Recovering source dataset");
-			for(IAnalysisDataset d : list){
-				
-				ICellCollection templateCollection = d.getCollection();
-				// Make a new real cell collection from the virtual collection
-				ICellCollection newCollection = new DefaultCellCollection(templateCollection.getFolder(), 
-						null, 
-						templateCollection.getName(), 
-						templateCollection.getNucleusType()
-						);
-				
-				for(ICell c : templateCollection.getCells()){
-					newCollection.addCell(new DefaultCell(c));
-				}
-				
-				IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
-				newDataset.setRoot(true);
-				
-				newDataset.getCollection().createProfileCollection();
-				
-				try {
-					log("Copying profile offsets");
-					d.getCollection().getProfileManager().copyCollectionOffsets(newDataset.getCollection());
-					
-					//TODO update cells to the segment positions of the restored median profile
-				} catch (ProfileException e) {
-					error("Cannot copy profile offsets to recovered merge source", e);
-				}
-				
-				newDataset.setAnalysisOptions(d.getAnalysisOptions());
-
-
-				this.addDataset(newDataset);
-			}
-			populationsPanel.update(list);
-		};
-		threadManager.execute(task);
-	}
-	
+		
 	public void addWorkspace(IWorkspace w){
 		this.workspaces.add(w);
 	}
@@ -751,7 +714,6 @@ public class MainWindow
 
 
 	}
-	
 	
 	
 	/**
