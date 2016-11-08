@@ -92,14 +92,33 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
 	
 	{
-		commandMap.put("list datasets", InterfaceMethod.LIST_DATASETS);
+//		commandMap.put("list datasets", InterfaceMethod.LIST_DATASETS);
 		commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
-		commandMap.put("unfuck", InterfaceMethod.RESEGMENT_SELECTED_DATASET);
+//		commandMap.put("unfuck", InterfaceMethod.RESEGMENT_SELECTED_DATASET);
 		commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
 		commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
 		commandMap.put("nucleus history", InterfaceMethod.DUMP_LOG_INFO);
 		commandMap.put("info", InterfaceMethod.INFO);
-		commandMap.put("kill", InterfaceMethod.KILL_ALL_TASKS);
+//		commandMap.put("kill", InterfaceMethod.KILL_ALL_TASKS);
+		
+	}
+	
+	private void listDatasets(){
+		int i=0;
+		for(IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()){
+			log(i+"\t"+d.getName());
+			i++;
+		}
+	}
+	
+	private void killAllTasks(){
+		
+		log("Threads running in the JVM:");
+		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+		for(Thread t : threadSet){
+			log("Thread "+t.getId()+": "+t.getState());
+			t.interrupt();
+		}
 		
 	}
 	
@@ -345,12 +364,12 @@ public class LogPanel extends DetailPanel implements ActionListener {
 			switch(command){
 			
 				case "help": {
-					log(Level.INFO, "Available commands: ");
+					log("Available commands: ");
 					for(String key : commandMap.keySet()){
 						InterfaceMethod im = commandMap.get(key);
-						log(Level.INFO, " "+key+" - "+im.toString());
+						log(" "+key+" - "+im.toString());
 					}
-					log(Level.INFO, " build - show the version info ");
+					log(" build - show the version info ");
 					break;
 				}
 								
@@ -359,8 +378,16 @@ public class LogPanel extends DetailPanel implements ActionListener {
 					break;
 				}
 				
+				case "list datasets":{
+					listDatasets();
+				}
+				
+				case "kill":{
+					killAllTasks();
+				}
+				
 				default: {
-					log(Level.INFO, "Command not recognised");
+					log("Command not recognised");
 					break;
 				}
 			}

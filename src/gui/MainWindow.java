@@ -37,6 +37,7 @@ import gui.actions.ShellAnalysisAction;
 import gui.dialogs.CellCollectionOverviewDialog;
 import gui.main.MainDragAndDropTarget;
 import gui.main.MainHeaderPanel;
+import gui.main.MainWindowCloseAdapter;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.ClusterDetailPanel;
 import gui.tabs.EditingDetailPanel;
@@ -57,7 +58,6 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.io.File;
@@ -74,7 +74,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -88,13 +87,7 @@ import utility.Constants;
 import utility.Version;
 import analysis.IAnalysisDataset;
 import analysis.MergeSourceExtractor;
-import analysis.profiles.ProfileException;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
-import components.ICell;
-import components.ICellCollection;
-import components.active.DefaultAnalysisDataset;
-import components.active.DefaultCell;
-import components.active.DefaultCellCollection;
 import components.active.DefaultRodentSpermNucleus;
 import components.active.DefaultWorkspace;
 import components.active.IWorkspace;
@@ -157,16 +150,7 @@ public class MainWindow
 	private static final Logger programLogger =
 	        Logger.getLogger(Loggable.PROGRAM_LOGGER);
 	
-	
-	private static final DatasetListManager datasetManager = DatasetListManager.getInstance(); 
-	
-	private static final GlobalOptions globalOptions = GlobalOptions.getInstance();
-	
-	
-	private static final ThreadManager threadManager = ThreadManager.getInstance();	
-	
-//	volatile private boolean isRunning = false;
-	
+	private static final ThreadManager threadManager = ThreadManager.getInstance();		
 	
 	/**
 	 * Create the frame.
@@ -177,51 +161,10 @@ public class MainWindow
 
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		
-		this.addWindowListener(new WindowAdapter() {
-			
-			public void windowClosing(WindowEvent e) {
-				fine("Checking dataset state");
-
-				if(datasetManager.hashCodeChanged()){
-					fine("Found changed hashcode");
-					Object[] options = { "Save datasets" , "Exit without saving", "Cancel exit" };
-					int save = JOptionPane.showOptionDialog(MainWindow.this,
-							"Datasets have changed since last save!", 
-							"Save datasets?",
-							JOptionPane.DEFAULT_OPTION, 
-							JOptionPane.QUESTION_MESSAGE,
-							null, options, options[0]);
-
-					if(save==0){
-						saveAndClose();
-
-					} 
-					
-					if(save==1){
-						fine("Exiting without save");
-						close();					
-					} 
-					
-					if(save==2){
-						fine("Ignoring close");
-					}
-				} else {
-					fine("No change found");
-					close();
-				}
-			}
-			
-						
-			  public void windowClosed(WindowEvent e) {
-				  close();
-			  }
-			  
-			  
-			  
-			  
-
-		});
+		this.addWindowListener(new MainWindowCloseAdapter(this));
 		
+		// Add a listener for panel size changes. This will cause
+		// charts to redraw at the new aspect ratio rather than stretch.
 		this.addWindowStateListener(new WindowStateListener() {
 			public void windowStateChanged(WindowEvent e){
 
@@ -423,13 +366,13 @@ public class MainWindow
 		
 	}
 	
-	public void close(){
-		datasetManager.clear();
-		globalOptions.setDefaults();
-		dispose();
-		if(standalone){
-			System.exit(0);
-		}
+	/**
+	 * Check if the program has been started as a plugin to ImageJ
+	 * or as standalone 
+	 * @return
+	 */
+	public boolean isStandalone(){
+		return this.standalone;
 	}
 			
 	public PopulationsPanel getPopulationsPanel(){
@@ -776,30 +719,7 @@ public class MainWindow
 			
 		threadManager.execute(r);
 	}
-	
-	/**
-	 * Save the root datasets, then dispose the frame
-	 */
-	private void saveAndClose(){
-		Runnable r = () -> {
-			for(IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
-				final CountDownLatch latch = new CountDownLatch(1);
 
-				Runnable task = new SaveDatasetAction(root, MainWindow.this, latch, false);
-				task.run();
-				try {
-					latch.await();
-				} catch (InterruptedException e) {
-					error("Interruption to thread", e);
-				}
-			}
-			log("All root datasets saved");
-			close();
-		};
-			
-		threadManager.execute(r);
-	}
-	
 	
 	/**
 	 * Save the given dataset. If it is root, save directly.
@@ -896,47 +816,47 @@ public class MainWindow
 
 	}
 	
-	private void resegmentDatasets(){
-		
-		Runnable task = () -> {
-			final int flag = CURVE_REFOLD; // ensure consensus is replaced
-			// Recalculate the head and hump positions for rodent sperm
-			if(populationsPanel.getSelectedDatasets().get(0).getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
-
-				try{
-					fine("Replacing nucleus roi patterns");
-					for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
-
-						DefaultRodentSpermNucleus r = (DefaultRodentSpermNucleus) n;  
-
-						r.splitNucleusToHeadAndHump();
-						try {
-
-							r.calculateSignalAnglesFromPoint(r.getPoint(Tag.ORIENTATION_POINT));
-						} catch (Exception e) {
-							error("Error restoring signal angles", e);
-						}
-
-					}
-
-				}catch(Exception e){
-					error("Error recalculating angles", e);
-				}
-			}
-			
-			fine("Regenerating charts");
-			for(TabPanel panel : detailPanels){
-				panel.refreshChartCache();
-				panel.refreshTableCache();
-			}
-			
-			fine("Resegmenting datasets");
-			List<IAnalysisDataset> list = populationsPanel.getSelectedDatasets();
-			Runnable r = new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
-			r.run();
-		};
-		threadManager.execute(task);
-	}
+//	private void resegmentDatasets(){
+//		
+//		Runnable task = () -> {
+//			final int flag = CURVE_REFOLD; // ensure consensus is replaced
+//			// Recalculate the head and hump positions for rodent sperm
+//			if(populationsPanel.getSelectedDatasets().get(0).getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
+//
+//				try{
+//					fine("Replacing nucleus roi patterns");
+//					for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
+//
+//						DefaultRodentSpermNucleus r = (DefaultRodentSpermNucleus) n;  
+//
+//						r.splitNucleusToHeadAndHump();
+//						try {
+//
+//							r.calculateSignalAnglesFromPoint(r.getPoint(Tag.ORIENTATION_POINT));
+//						} catch (Exception e) {
+//							error("Error restoring signal angles", e);
+//						}
+//
+//					}
+//
+//				}catch(Exception e){
+//					error("Error recalculating angles", e);
+//				}
+//			}
+//			
+//			fine("Regenerating charts");
+//			for(TabPanel panel : detailPanels){
+//				panel.refreshChartCache();
+//				panel.refreshTableCache();
+//			}
+//			
+//			fine("Resegmenting datasets");
+//			List<IAnalysisDataset> list = populationsPanel.getSelectedDatasets();
+//			Runnable r = new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
+//			r.run();
+//		};
+//		threadManager.execute(task);
+//	}
 
 	
 	
@@ -969,18 +889,7 @@ public class MainWindow
 			
 		case RECACHE_CHARTS:
 			recacheCharts();
-			break;
-		case LIST_DATASETS:
-			int i=0;
-			for(IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()){
-				log(i+"\t"+d.getName());
-				i++;
-			}
-			break;
-		case RESEGMENT_SELECTED_DATASET:
-			resegmentDatasets();
-			break;
-				
+			break;				
 		case LIST_SELECTED_DATASETS:
 			int count=0;
 			for(IAnalysisDataset d : populationsPanel.getSelectedDatasets()){
@@ -1023,11 +932,7 @@ public class MainWindow
 				log(d.getCollection().toString());
 			}
 			break;
-			
-		case KILL_ALL_TASKS:
-			killAllTasks();
-			break;
-			
+						
 		default:
 			break;
 
@@ -1042,16 +947,6 @@ public class MainWindow
 	
 	public boolean hasOpenDatasets(){
 		return DatasetListManager.getInstance().getAllDatasets().size()>0;
-	}
-	
-	private void killAllTasks(){
-		
-		log("Threads running in the JVM:");
-		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-		for(Thread t : threadSet){
-			log("Thread "+t.getId()+": "+t.getState());
-		}
-		
 	}
 	
 	/**
