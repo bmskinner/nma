@@ -10,22 +10,16 @@ import javax.swing.table.TableModel;
 
 import charting.charts.AbstractChartFactory;
 import analysis.IAnalysisDataset;
-import components.AbstractCellularComponent;
-import components.Cell;
 import components.CellularComponent;
 import components.ICell;
-import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.FloatPoint;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
 import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
 import components.nuclear.IBorderSegment;
-import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import gui.components.ColourSelecter;
 import gui.dialogs.CellCollectionOverviewDialog;
@@ -289,7 +283,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 				
 				
 				for(int j=0; j<=seg.length();j++){
-					int k = AbstractCellularComponent.wrapIndex(seg.getStartIndex()+j, n.getBorderLength());
+					int k = n.wrapIndex(seg.getStartIndex()+j);
 					IBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
 					x[j] = (float) p.getX();
 					y[j] = (float) p.getY();

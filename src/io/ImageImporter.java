@@ -34,8 +34,7 @@ import utility.Constants;
  * This class takes any given input image, and will convert it
  * to the ImageStack needed for the analyses. The DNA/DAPI will
  * always be set at index 0, with other signals appended .
- * 
- * Uses a singleton pattern
+ * @since 1.11.0
  *
  */
 public class ImageImporter implements Loggable {

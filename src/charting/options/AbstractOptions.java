@@ -16,6 +16,7 @@ import analysis.IAnalysisDataset;
  * interface, providing access to options common to charts
  * and tables.
  * @author bms41
+ * @since 1.12.0
  *
  */
 public abstract class AbstractOptions implements DisplayOptions {
@@ -28,6 +29,10 @@ public abstract class AbstractOptions implements DisplayOptions {
 	private ColourSwatch swatch             = ColourSwatch.REGULAR_SWATCH;
 	private ICell cell                      = null;
 			
+	/**
+	 * Create with a list of datasets.
+	 * @param list the datasets to display
+	 */
 	public AbstractOptions(List<IAnalysisDataset> list){
 		if(list==null){
 			return;
@@ -35,6 +40,10 @@ public abstract class AbstractOptions implements DisplayOptions {
 		this.list = new ArrayList<IAnalysisDataset>(list);
 	}
 
+	/**
+	 * Set the list of datasets.
+	 * @param list the datasets to display
+	 */
 	protected void setDatasets(List<IAnalysisDataset> list){
 		if(list==null){
 			return;
@@ -42,17 +51,26 @@ public abstract class AbstractOptions implements DisplayOptions {
 		this.list = new ArrayList<IAnalysisDataset>(list);
 	}
 
+	/**
+	 * Get the list of datasets.
+	 * @return the stored datasets
+	 */
 	public List<IAnalysisDataset> getDatasets(){
 		return new ArrayList<IAnalysisDataset>(list);
 	}
 	
+	
+	/**
+	 * Set the colour swatch to use in the chart or table
+	 * @param swatch the colour swatch
+	 */
 	public void setSwatch(ColourSwatch swatch) {
 		this.swatch = swatch;
 	}
 			
 	/**
-	 * Get the segmentation colour swatch
-	 * @return
+	 * Get the stored colour swatch
+	 * @return a swatch
 	 */
 	public ColourSwatch getSwatch(){
 		return this.swatch;
@@ -70,6 +88,7 @@ public abstract class AbstractOptions implements DisplayOptions {
 		}
 	}
 	
+	@Override
 	public int datasetCount(){
 		return list.size();
 	}
@@ -79,10 +98,15 @@ public abstract class AbstractOptions implements DisplayOptions {
 	 * datasets
 	 * @return
 	 */
+	@Override
 	public boolean isSingleDataset(){
 		return(list.size()==1);
 	}
 	
+	/* (non-Javadoc)
+	 * @see charting.options.DisplayOptions#isMultipleDatasets()
+	 */
+	@Override
 	public boolean isMultipleDatasets(){
 		return(list.size()>1);
 	}
@@ -91,6 +115,7 @@ public abstract class AbstractOptions implements DisplayOptions {
 	 * Fetch the first dataset in the list
 	 * @return
 	 */
+	@Override
 	public IAnalysisDataset firstDataset(){
 		return this.list.get(0);
 	}
@@ -99,6 +124,7 @@ public abstract class AbstractOptions implements DisplayOptions {
 	 * Get the first statistic in the list
 	 * @return
 	 */
+	@Override
 	public PlottableStatistic getStat() {
 		return stats.get(0);
 	}
@@ -132,34 +158,54 @@ public abstract class AbstractOptions implements DisplayOptions {
 	 * Get the saved stats
 	 * @return
 	 */
+	@Override
 	public List<PlottableStatistic> getStats(){
 		return stats;
 	}
 	
+	/* (non-Javadoc)
+	 * @see charting.options.DisplayOptions#getStat(int)
+	 */
+	@Override
 	public PlottableStatistic getStat(int index){
 		return stats.get(index);
 	}
 	
+	@Override
 	public UUID getSegID() {
 		return segID;
 	}
 
+	/**
+	 * Set the segment ID
+	 * @param segID the ID
+	 */
 	public void setSegID(UUID segID) {
 		this.segID = segID;
 	}
 	
+	@Override
 	public int getSegPosition() {
 		return segPosition;
 	}
 
+	/**
+	 * Set the segment position to display
+	 * @param segPosition the position, starting from 0
+	 */
 	public void setSegPosition(int segPosition) {
 		this.segPosition = segPosition;
 	}
 	
+	@Override
 	public MeasurementScale getScale() {
 		return scale;
 	}
 
+	/**
+	 * Set the scale to display at. Default is pixels.
+	 * @param scale the measurement scale
+	 */
 	public void setScale(MeasurementScale scale) {
 		this.scale = scale;
 	}
@@ -172,16 +218,16 @@ public abstract class AbstractOptions implements DisplayOptions {
 		return cell;
 	}
 
-	/* (non-Javadoc)
-	 * @see charting.options.ChartOptions#setCell(components.ICell)
+
+	/**
+	 * Set the cell to diaplay
+	 * @param cell the cell
 	 */
 	public void setCell(ICell cell) {
 		this.cell = cell;
 	}
 	
-	/* (non-Javadoc)
-	 * @see charting.options.ChartOptions#hasCell()
-	 */
+
 	@Override
 	public boolean hasCell(){
 		return this.cell!=null;

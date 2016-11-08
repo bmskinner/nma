@@ -7,7 +7,13 @@ import java.io.PrintWriter;
 import components.active.IWorkspace;
 import logging.Loggable;
 
-public class WorkspaceExporter implements Loggable{
+/**
+ * Saves a workspace to a *.wrk file 
+ * @author ben
+ * @since 1.13.3
+ *
+ */
+public class WorkspaceExporter implements Loggable {
 	
 	private static final String NEWLINE = System.getProperty("line.separator"); 
 	final IWorkspace w;

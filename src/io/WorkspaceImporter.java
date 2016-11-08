@@ -13,6 +13,7 @@ import logging.Loggable;
 /**
  * Load a workspace
  * @author ben
+ * @since 1.13.3
  *
  */
 public class WorkspaceImporter implements Loggable {
@@ -20,6 +21,11 @@ public class WorkspaceImporter implements Loggable {
 	private final File file;
 	public final String CHARSET = "ISO-8859-1";
 	
+	/**
+	 * Construct with a file to import. 
+	 * @param f the file
+	 * @throws IllegalArgumentException if the file is null, a folder, or otherwise not a valid file
+	 */
 	public WorkspaceImporter(final File f){
 		if(f==null){
 			throw new IllegalArgumentException("File cannot be null");
@@ -39,6 +45,10 @@ public class WorkspaceImporter implements Loggable {
 		file = f;
 	}
 	
+	/**
+	 * Import the workspace described by this importer.
+	 * @return a workspace
+	 */
 	public IWorkspace importWorkspace(){
 		
 		IWorkspace w = new DefaultWorkspace(file);

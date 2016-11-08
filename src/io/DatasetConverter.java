@@ -65,12 +65,17 @@ import analysis.profiles.ProfileException;
  * This class will take old format datasets
  * and convert them to use the newer objects.
  * @author bms41
+ * @since 1.13.3
  *
  */
 public class DatasetConverter implements Loggable {
 	
 	private IAnalysisDataset oldDataset;
 	
+	/**
+	 * Construct using the old dataset version
+	 * @param old the old format dataset
+	 */
 	public DatasetConverter(IAnalysisDataset old){
 		this.oldDataset = old;
 	}
