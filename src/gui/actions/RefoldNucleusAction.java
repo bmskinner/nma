@@ -39,6 +39,11 @@ public class RefoldNucleusAction extends ProgressableAction {
 	public RefoldNucleusAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal) {
 		super(dataset, "Refolding", mw);
 		this.setLatch(doneSignal);
+	}
+	
+	@Override
+	public void run(){
+		
 		try{
 
 			this.cooldown();

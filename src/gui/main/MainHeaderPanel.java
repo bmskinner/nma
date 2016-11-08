@@ -6,6 +6,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import gui.MainWindow;
+import gui.ThreadManager;
 import gui.actions.FishRemappingAction;
 import gui.actions.NewAnalysisAction;
 import gui.actions.PopulationImportAction;
@@ -34,7 +35,10 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
 		JButton btnNewAnalysis = new JButton("New analysis");
 		btnNewAnalysis.addActionListener(
-				e ->new NewAnalysisAction(mw)
+				e ->{
+					Runnable r = new NewAnalysisAction(mw);
+					r.run();
+				}
 		);
 		add(btnNewAnalysis);
 
@@ -47,7 +51,8 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 		btnLoadSavedDataset.addActionListener(	
 			e -> {
 				finest("Creating import action");
-				new PopulationImportAction(mw);
+				Runnable r = new PopulationImportAction(mw);
+				r.run();
 			}
 		);
 			
@@ -84,7 +89,10 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
 		JButton btnPostanalysisMapping = new JButton("Post-FISH mapping");
 		btnPostanalysisMapping.addActionListener(
-				e -> new FishRemappingAction(mw.getPopulationsPanel().getSelectedDatasets(), mw)
+				e ->{
+					Runnable r = new FishRemappingAction(mw.getPopulationsPanel().getSelectedDatasets(), mw);
+					r.run();
+				}
 		);
 		add(btnPostanalysisMapping);
 				

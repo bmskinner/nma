@@ -40,6 +40,7 @@ import components.active.DefaultCellCollection;
  * Extracts source datasets from merged datasets, and restores original 
  * segmentation patterns.
  * @author bms41
+ * @since 1.13.3
  *
  */
 public class MergeSourceExtractor implements Loggable {

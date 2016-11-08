@@ -35,6 +35,11 @@ public class ShellAnalysisAction extends ProgressableAction {
 	public ShellAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Shell analysis", mw);
 
+		
+	}
+	
+	@Override
+	public void run(){
 		SpinnerNumberModel sModel = new SpinnerNumberModel(ShellDetector.DEFAULT_SHELL_COUNT, 2, 10, 1);
 		JSpinner spinner = new JSpinner(sModel);
 

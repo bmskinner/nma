@@ -39,7 +39,10 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 
 	public BuildHierarchicalTreeAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Building tree", mw);
-
+	}
+	
+	@Override
+	public void run(){
 		HierarchicalTreeSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(mw, dataset);
 		ClusteringOptions options = clusterSetup.getOptions();
 //		Map<String, Object> options = clusterSetup.getOptions();

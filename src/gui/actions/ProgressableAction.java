@@ -34,8 +34,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Level;
-
 import javax.swing.JProgressBar;
 
 import logging.Loggable;
@@ -47,7 +45,11 @@ import analysis.IAnalysisDataset;
  * is triggered as a SwingWorker. Subclassed for each action type.
  *
  */
-public abstract class ProgressableAction implements PropertyChangeListener, Loggable, MouseListener {
+public abstract class ProgressableAction 
+	implements PropertyChangeListener, 
+	           Loggable, 
+	           MouseListener,
+	           Runnable {
 
 	protected IAnalysisDataset dataset = null; // the dataset being worked on
 	private JProgressBar progressBar = null;

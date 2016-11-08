@@ -19,14 +19,9 @@
 package gui.actions;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import gui.DatasetEvent;
 import gui.MainWindow;
@@ -40,38 +35,46 @@ import io.PopulationImportWorker.UnloadableDatasetException;
  */
 public class PopulationImportAction extends ProgressableAction {
 
-	/**
-	 * Refold the given selected dataset
-	 */
+	private final File file;
 	
+	/**
+	 * Create an import action for the given main window.
+	 * This will create a dialog asking for the file to open.
+	 * @param mw the main window to which a progress bar will be attached
+	 */
 	public PopulationImportAction(MainWindow mw) {
-		super("Opening file", mw);
-		cooldown();
-		
-		File file = selectFile();
-		processFile(file);		
+		super("Opening file", mw);		
+		file = selectFile();	
 	}
 	
+	/**
+	 * Create an import action for the given main window.
+	 * Specify the file to be opened.
+	 * @param mw the main window to which a progress bar will be attached
+	 * @param file the dataset file to open 
+	 */
 	public PopulationImportAction(MainWindow mw, File file) {
 		super("Opening file", mw);
-		cooldown();
-		processFile(file);
-		
+		this.file = file;
 	}
 	
-	private void processFile(File file){
+	@Override
+	public void run(){
+		cooldown();		
+		fine("Running dataset open action");
 		if(file!=null){
 			worker = new PopulationImportWorker(file);
 			worker.addPropertyChangeListener(this);
 			
 			this.setProgressMessage("Opening file...");
-			log(Level.FINE, "Opening dataset...");
+			fine("Opening dataset...");
 			ThreadManager.getInstance().submit(worker);
 		} else {
-			log(Level.FINE, "Open cancelled");
+			fine("Open cancelled");
 			cancel();
 		}
 	}
+
 	
 	/**
 	 * Get the file to be loaded

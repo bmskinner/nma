@@ -26,8 +26,6 @@ import gui.dialogs.ClusteringSetupDialog;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
 import utility.Constants;
 import analysis.ClusteringOptions;
 import analysis.IAnalysisDataset;
@@ -36,7 +34,6 @@ import analysis.profiles.ProfileException;
 import components.ClusterGroup;
 import components.ICellCollection;
 import components.IClusterGroup;
-import components.nuclear.SignalGroup;
 
 
 public class ClusterAnalysisAction extends ProgressableAction {
@@ -44,9 +41,13 @@ public class ClusterAnalysisAction extends ProgressableAction {
 	public ClusterAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Cluster analysis", mw);
 
+	}
+	
+	@Override
+	public void run(){
+
 		ClusteringSetupDialog clusterSetup = new ClusteringSetupDialog(mw, dataset);
 		ClusteringOptions options = clusterSetup.getOptions();
-		//Map<String, Object> options = clusterSetup.getOptions();
 
 		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
 

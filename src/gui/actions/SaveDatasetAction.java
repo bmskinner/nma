@@ -29,6 +29,8 @@ import analysis.IAnalysisDataset;
 
 public class SaveDatasetAction extends ProgressableAction {
 	
+	private File saveFile = null;
+	
 	/**
 	 * Constructor to save the current dataset. This gives programmatic
 	 * access to saving to non-default locations, without needing to use
@@ -44,10 +46,10 @@ public class SaveDatasetAction extends ProgressableAction {
 		finest("Save dataset action created by explicit file location");
 		
 		this.cooldown();
-		worker = new PopulationExporter(dataset, saveFile);
-		worker.addPropertyChangeListener(this);
-		
-		ThreadManager.getInstance().submit(worker);
+//		worker = new PopulationExporter(dataset, saveFile);
+//		worker.addPropertyChangeListener(this);
+//		
+//		ThreadManager.getInstance().submit(worker);
 //		worker.execute();	
 	}	
 	
@@ -63,7 +65,7 @@ public class SaveDatasetAction extends ProgressableAction {
 		setLatch(doneSignal);
 		finest("Save dataset action created by default or manual file location");
 		this.cooldown();
-		File saveFile = null;
+//		File saveFile = null;
 		if(chooseSaveLocation){
 			
 			SaveDialog saveDialog = new SaveDialog("Save as...", dataset.getName(), ".nmd");
@@ -80,15 +82,32 @@ public class SaveDatasetAction extends ProgressableAction {
 			saveFile = dataset.getSavePath();
 		}
 		
+//		if(saveFile!=null){
+//			log("Saving as "+saveFile.getAbsolutePath()+"...");
+//			worker = new PopulationExporter(dataset, saveFile);
+//			worker.addPropertyChangeListener(this);
+//			worker.execute();	
+//		} else {
+//			this.finished();
+//		}
+		
+	}
+	
+	@Override
+	public void run(){
+//		worker = new PopulationExporter(dataset, saveFile);
+//		worker.addPropertyChangeListener(this);
+//		
+//		ThreadManager.getInstance().submit(worker);
+		
 		if(saveFile!=null){
 			log("Saving as "+saveFile.getAbsolutePath()+"...");
 			worker = new PopulationExporter(dataset, saveFile);
 			worker.addPropertyChangeListener(this);
-			worker.execute();	
+			ThreadManager.getInstance().submit(worker);
 		} else {
 			this.finished();
 		}
-		
 	}
 	
 	

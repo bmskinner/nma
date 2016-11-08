@@ -32,10 +32,17 @@ import gui.dialogs.FishRemappingDialog;
  * sub-populations
  */
 public class FishRemappingAction extends ProgressableAction {
+	
+	final List<IAnalysisDataset> datasets;
 
 	public FishRemappingAction(final List<IAnalysisDataset> datasets, final MainWindow mw) {
 		super("Remapping", mw);
-
+		this.datasets = datasets;
+		
+	}
+	
+	@Override
+	public void run(){
 		try{
 
 			if(datasets.size()==1){
@@ -94,8 +101,6 @@ public class FishRemappingAction extends ProgressableAction {
 		} catch(Exception e){
 			error("Error in FISH remapping: "+e.getMessage(), e);
 		}
-		
-
 	}
 	
 	@Override

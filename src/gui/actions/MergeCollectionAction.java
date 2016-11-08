@@ -39,10 +39,18 @@ import analysis.IAnalysisDataset;
  *
  */
 public class MergeCollectionAction extends ProgressableAction {
+	
+	private final List<IAnalysisDataset> datasets;
 
-	public MergeCollectionAction(List<IAnalysisDataset> datasets, MainWindow mw) {
+	public MergeCollectionAction(final List<IAnalysisDataset> datasets, MainWindow mw) {
 		super("Merging", mw);
-		
+		this.datasets = datasets;
+
+	}
+	
+	@Override
+	public void run(){
+
 		if( ! checkDatasetsMergable(datasets)){
 			this.cancel();
 			
@@ -93,7 +101,6 @@ public class MergeCollectionAction extends ProgressableAction {
 				this.cancel();
 			}
 		}
-
 	}
 	
 	

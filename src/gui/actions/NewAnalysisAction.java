@@ -44,20 +44,31 @@ public class NewAnalysisAction extends ProgressableAction {
 	private Date startTime;
 	private String outputFolderName;
 	
+	private File folder;
+	
 	public static final int NEW_ANALYSIS = 0;
 	
+	/**
+	 * Create a new analysis. The folder of images to analyse will be
+	 * requested by a dialog.
+	 * @param mw the main window to which a progress bar will be attached
+	 */
 	public NewAnalysisAction(MainWindow mw) {
 		this(mw, null);
-		
 	}
 	
 	/**
 	 * Create a new analysis, specifying the initial directory of images
-	 * @param mw
-	 * @param folder
+	 * @param mw the main window to which a progress bar will be attached
+	 * @param folder the folder of images to analyse
 	 */
-	public NewAnalysisAction(MainWindow mw, File folder) {
+	public NewAnalysisAction(MainWindow mw, final File folder) {
 		super("Nucleus detection", mw);
+		this.folder = folder;
+	}
+	
+	@Override
+	public void run(){
 
 		this.cooldown();
 		

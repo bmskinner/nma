@@ -32,12 +32,17 @@ public class AddTailStainAction extends ProgressableAction {
 
 	public AddTailStainAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Tail detection", mw);
+		
+	}
+	
+	@Override
+	public void run(){
 		try{
-			
+
 			TailDetectionSettingsDialog analysisSetup = new TailDetectionSettingsDialog(dataset.getAnalysisOptions());
-			
+
 			final int channel = analysisSetup.getChannel();
-			
+
 			DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
 			String folderName = openDialog.getDirectory();
 

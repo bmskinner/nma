@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import components.ICellCollection;
-import components.active.ChildAnalysisDataset;
 import components.active.DefaultAnalysisDataset;
 import components.active.VirtualCellCollection;
 import gui.MainWindow;
@@ -34,9 +33,17 @@ public class DatasetArithmeticAction extends ProgressableAction {
 
 	private IAnalysisDataset datasetOne = null;
 	
+	private List<IAnalysisDataset> list;
+	
 	public DatasetArithmeticAction(List<IAnalysisDataset> list, MainWindow mw) {
 		super("Dataset arithmetic", mw);
 		this.cooldown();
+		this.list = list;
+
+	} 
+	
+	@Override
+	public void run(){
 		try {
 			fine("Performing arithmetic...");
 
@@ -52,49 +59,49 @@ public class DatasetArithmeticAction extends ProgressableAction {
 				IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
 				DatasetArithmeticOperation operation = dialog.getOperation();
 
-				
+
 				log("Performing "+operation+" on datasets");
 				// prepare a new collection
 
 				ICellCollection newCollection = null; 
 
 				switch(operation){
-					case AND: // present in both
-						newCollection = datasetOne.getCollection().and(datasetTwo.getCollection());
-						
-						newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
-						newCollection.setSharedCount(datasetTwo.getCollection(), newCollection.size());
-						
-						datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
-						datasetTwo.getCollection().setSharedCount(newCollection, newCollection.size());
-						break;
-					case NOT: // present in one, not present in two
-						newCollection = datasetOne.getCollection().not(datasetTwo.getCollection());
-						
-						newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
-						newCollection.setSharedCount(datasetTwo.getCollection(), 0);
-						
-						datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
-						datasetTwo.getCollection().setSharedCount(newCollection, 0);
-						
-						break;
-					case OR: // present in either (merge)
-						
-						List<IAnalysisDataset> toMerge = new ArrayList<IAnalysisDataset>();
-						toMerge.add(datasetOne);
-						toMerge.add(datasetTwo);
-						new MergeCollectionAction(toMerge, mw);
-						break;
-					case XOR: // present in either but not both
-						newCollection = datasetOne.getCollection().xor(datasetTwo.getCollection());
-						break;
-					default:
-						break;
-					
+				case AND: // present in both
+					newCollection = datasetOne.getCollection().and(datasetTwo.getCollection());
+
+					newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
+					newCollection.setSharedCount(datasetTwo.getCollection(), newCollection.size());
+
+					datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
+					datasetTwo.getCollection().setSharedCount(newCollection, newCollection.size());
+					break;
+				case NOT: // present in one, not present in two
+					newCollection = datasetOne.getCollection().not(datasetTwo.getCollection());
+
+					newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
+					newCollection.setSharedCount(datasetTwo.getCollection(), 0);
+
+					datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
+					datasetTwo.getCollection().setSharedCount(newCollection, 0);
+
+					break;
+				case OR: // present in either (merge)
+
+					List<IAnalysisDataset> toMerge = new ArrayList<IAnalysisDataset>();
+					toMerge.add(datasetOne);
+					toMerge.add(datasetTwo);
+					new MergeCollectionAction(toMerge, mw);
+					break;
+				case XOR: // present in either but not both
+					newCollection = datasetOne.getCollection().xor(datasetTwo.getCollection());
+					break;
+				default:
+					break;
+
 				}
 
 				makeNewDataset(newCollection);
-				
+
 			} else {
 				fine("User cancelled operation");
 			}
@@ -106,8 +113,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 		} finally {
 			cancel();
 		}
-
-	} 
+	}
 	
 	private void makeNewDataset(ICellCollection newCollection){
 		if(newCollection !=null && newCollection.size()>0){

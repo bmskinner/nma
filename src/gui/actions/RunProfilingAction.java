@@ -33,30 +33,34 @@ public class RunProfilingAction extends ProgressableAction {
 	public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw){
 		super(dataset, "Segmentation analysis", mw, downFlag);
 
-		log(Level.FINE, "Creating profiling analysis");
-		runNewAnalysis();
+//		log(Level.FINE, "Creating profiling analysis");
+//		runNewAnalysis();
 	}
 	
 	public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw){
 		super(list, "Segmentation analysis", mw, downFlag);
-		log(Level.FINE, "Creating profiling analysis");
-		runNewAnalysis();
+//		log(Level.FINE, "Creating profiling analysis");
+//		runNewAnalysis();
 	}
 	
 	public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw, CountDownLatch latch){
 		super(dataset, "Segmentation analysis", mw, downFlag);
 		this.setLatch(latch);
-		log(Level.FINE, "Creating profiling analysis");
-		runNewAnalysis();
+//		log(Level.FINE, "Creating profiling analysis");
+//		runNewAnalysis();
 		
 	}
 	
 	public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw, CountDownLatch latch){
 		super(list, "Segmentation analysis", mw, downFlag);
 		this.setLatch(latch);
-		log(Level.FINE, "Creating profiling analysis");
-		runNewAnalysis();
+//		log(Level.FINE, "Creating profiling analysis");
+//		runNewAnalysis();
 		
+	}
+	
+	public void run(){
+		runNewAnalysis();
 	}
 	
 	private void runNewAnalysis(){
@@ -92,7 +96,8 @@ public class RunProfilingAction extends ProgressableAction {
 				if(  (downFlag & MainWindow.ASSIGN_SEGMENTS) == MainWindow.ASSIGN_SEGMENTS){
 					
 					final CountDownLatch latch = new CountDownLatch(1);
-					new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, mw, latch);
+					Runnable r = new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, mw, latch);
+					r.run();
 					try {
 						latch.await();
 					} catch (InterruptedException e) {

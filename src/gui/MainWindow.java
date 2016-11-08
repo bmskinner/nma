@@ -451,27 +451,20 @@ public class MainWindow
 		
 		
 		if(event.type().equals("RunShellAnalysis")){
-			Runnable task = () -> {
-				finer("Shell analysis selected");
-				new ShellAnalysisAction(selectedDataset, MainWindow.this);
-			};
-			threadManager.execute(task);
+			Runnable task = new ShellAnalysisAction(selectedDataset, MainWindow.this);
+			task.run();
 		}
 
 		if(event.type().equals("MergeCollectionAction")){
 			
-			Runnable task = () -> { 
-				new MergeCollectionAction(populationsPanel.getSelectedDatasets(), MainWindow.this); 
-			}; 
+			Runnable task = new MergeCollectionAction(populationsPanel.getSelectedDatasets(), MainWindow.this); 
 			threadManager.execute(task);
 		}
 		
 		if(event.type().equals("DatasetArithmeticAction")){
 			
-			Runnable task = () -> { 
-				new DatasetArithmeticAction(populationsPanel.getSelectedDatasets(), MainWindow.this); 
-			}; 
-			threadManager.execute(task);
+			Runnable task = new DatasetArithmeticAction(populationsPanel.getSelectedDatasets(), MainWindow.this); 
+			task.run();
 		}
 
 		
@@ -484,7 +477,8 @@ public class MainWindow
 				
 
 		if(event.type().equals("ChangeNucleusFolderAction")){
-			new ReplaceSourceImageDirectoryAction(selectedDataset, MainWindow.this);
+			Runnable r = new ReplaceSourceImageDirectoryAction(selectedDataset, MainWindow.this);
+			r.run();
 		}
 				
 		if(event.type().equals("SaveCellLocations")){
@@ -500,7 +494,8 @@ public class MainWindow
 		if(event.type().equals("RelocateCellsAction")){
 			
 			CountDownLatch latch = new CountDownLatch(1);
-			new RelocateFromFileAction(selectedDataset, MainWindow.this, latch);			
+			Runnable r = new RelocateFromFileAction(selectedDataset, MainWindow.this, latch);
+			r.run();
 			
 		}
 		
@@ -509,24 +504,16 @@ public class MainWindow
 		}
 		
 		if(event.type().equals("AddNuclearSignalAction")){
-			new AddNuclearSignalAction(selectedDataset, this);
+			Runnable r = new AddNuclearSignalAction(selectedDataset, this);
+			r.run();
 		}
-		
-//		if(event.type().equals("NewShellAnalysisAction")){
-//			boolean dapi = Boolean.parseBoolean(event.type().replace("RunShellAnalysis|", ""));
-//			new ShellAnalysisAction(selectedDataset, this);
-//		}
 		
 		if(event.type().equals("UpdatePanels")){
 			fireDatasetUpdateEvent(populationsPanel.getSelectedDatasets());
-//			threadManager.executeAndCancelUpdate( new PanelUpdateTask(populationsPanel.getSelectedDatasets()) );
-//			this.updatePanels(populationsPanel.getSelectedDatasets());
 		}
 		
 		if(event.type().equals("UpdatePanelsNull")){
 			fireDatasetUpdateEvent(new ArrayList<IAnalysisDataset>());
-//			threadManager.executeAndCancelUpdate( new PanelUpdateTask(new ArrayList<IAnalysisDataset>()) );
-//			this.updatePanels();
 		}
 		
 		if(event.type().equals("UpdatePopulationPanel")){
@@ -543,10 +530,8 @@ public class MainWindow
 			String s = event.type().replace("Open|", "");
 			File f = new File(s);
 			
-			Runnable task = () -> { 
-				new PopulationImportAction(this, f);
-			};
-			threadManager.execute(task);
+			Runnable task = new PopulationImportAction(this, f);
+			task.run();
 		}
 		
 		
@@ -555,10 +540,8 @@ public class MainWindow
 			File f = new File(s);
 			
 			// Pass to new analysis
-			Runnable task = () -> { 
-				new NewAnalysisAction(this, f);
-			};
-			threadManager.execute(task);
+			Runnable task = new NewAnalysisAction(this, f);
+			task.run();
 		}
 				
 	}
@@ -572,7 +555,7 @@ public class MainWindow
 			if(event.method().equals(DatasetEvent.PROFILING_ACTION)){
 				fine("Running new profiling and segmentation");
 				
-				Runnable task = () -> { 
+//				Runnable task = () -> { 
 					int flag = 0; // set the downstream analyses to run
 					flag |= MainWindow.ADD_POPULATION;
 					flag |= MainWindow.STATS_EXPORT;
@@ -583,56 +566,56 @@ public class MainWindow
 						flag |= MainWindow.CURVE_REFOLD;
 					}
 					// begin a recursive morphology analysis
-					new RunProfilingAction(list, flag, MainWindow.this);
+					RunProfilingAction p = new RunProfilingAction(list, flag, MainWindow.this);
+					p.run();
 				
-				}; 
-				threadManager.execute(task);
+//				}; 
+//				threadManager.execute(task);
 			}
 						
 			if(event.method().equals(DatasetEvent.NEW_MORPHOLOGY)){
 				log("Running new morphology analysis");
 				final int flag = ADD_POPULATION;
 				
-				Runnable task = () -> { 
-					new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
-				};
-				threadManager.execute(task);
+				Runnable task = new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
+				task.run();
 			}
 			
 			if(event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)){
 				finer("Updating segmentation across nuclei");
-				Runnable task = () -> { 
-					new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
-				};
-				threadManager.execute(task);
+				Runnable task = new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
+				task.run();
 			}
 			
 			if(event.method().equals(DatasetEvent.COPY_MORPHOLOGY)){
 				
 				final IAnalysisDataset source = event.secondaryDataset();
-				Runnable task = () -> { 
-					new RunSegmentationAction(event.getDatasets(), source, null, MainWindow.this);
-				};
-				threadManager.execute(task);
+				Runnable task = new RunSegmentationAction(event.getDatasets(), source, null, MainWindow.this);
+				task.run();
 			}
 			
 						
 			if(event.method().equals(DatasetEvent.CLUSTER)){
-				
-				Runnable task = () -> { 
-					log("Clustering dataset");
-					new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
-				};
-				threadManager.execute(task);
+				log("Clustering dataset");
+				Runnable r = new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
+//				Runnable task = () -> { 
+//					log("Clustering dataset");
+//					
+//				};
+				r.run();
 			
 			}
 			
 			if(event.method().equals(DatasetEvent.BUILD_TREE)){
-				Runnable task = () -> { 
-					log("Building a tree from dataset");
-					new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
-				};
-				threadManager.execute(task);
+				log("Building a tree from dataset");
+				Runnable r = new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
+//				
+//				Runnable task = () -> { 
+//					log("Building a tree from dataset");
+//					Runnable r = new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
+//					r.run();
+//				};
+				r.run();
 			}
 			
 			if(event.method().equals(DatasetEvent.REFOLD_CONSENSUS)){
@@ -676,13 +659,14 @@ public class MainWindow
 			if(event.method().equals(DatasetEvent.RECALCULATE_MEDIAN)){
 				fine("Recalculating the median for the given datasets");
 				
-				Runnable task = () -> { 
-					int flag = 0; // set the downstream analyses to run
-					
-					new RunProfilingAction(list, flag, MainWindow.this);
-				
-				}; 
-				threadManager.execute(task);
+//				Runnable task = () -> { 
+//					int flag = 0; // set the downstream analyses to run
+//					
+				RunProfilingAction p = new RunProfilingAction(list, 0, MainWindow.this);
+				p.run();
+//				
+//				}; 
+//				threadManager.execute(task);
 			}
 			
 		}
@@ -743,8 +727,8 @@ public class MainWindow
 
 			final CountDownLatch latch = new CountDownLatch(1);
 			finest("Created latch: "+latch.getCount());
-			new RefoldNucleusAction(dataset, MainWindow.this, latch);
-
+			Runnable task = new RefoldNucleusAction(dataset, MainWindow.this, latch);
+			task.run();
 			finest("Running refolding");
 			try {
 				fine("Awaiting latch");
@@ -779,7 +763,8 @@ public class MainWindow
 			for(IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
 				final CountDownLatch latch = new CountDownLatch(1);
 
-				new SaveDatasetAction(root, MainWindow.this, latch, false);
+				Runnable task = new SaveDatasetAction(root, MainWindow.this, latch, false);
+				task.run();
 				try {
 					latch.await();
 				} catch (InterruptedException e) {
@@ -800,7 +785,8 @@ public class MainWindow
 			for(IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
 				final CountDownLatch latch = new CountDownLatch(1);
 
-				new SaveDatasetAction(root, MainWindow.this, latch, false);
+				Runnable task = new SaveDatasetAction(root, MainWindow.this, latch, false);
+				task.run();
 				try {
 					latch.await();
 				} catch (InterruptedException e) {
@@ -828,12 +814,9 @@ public class MainWindow
 			finest("Creating latch");
 			final CountDownLatch latch = new CountDownLatch(1);
 
-			Runnable r = () -> {
-				finest("Running save action");
-				new SaveDatasetAction(d, MainWindow.this, latch, saveAs);
-			};
+			Runnable r = new SaveDatasetAction(d, MainWindow.this, latch, saveAs);
 			finest("Passing save action to executor service");
-			threadManager.submit(r);
+			r.run();
 
 			fine("Root dataset saved");
 		} else {
@@ -949,7 +932,8 @@ public class MainWindow
 			
 			fine("Resegmenting datasets");
 			List<IAnalysisDataset> list = populationsPanel.getSelectedDatasets();
-			new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
+			Runnable r = new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
+			r.run();
 		};
 		threadManager.execute(task);
 	}

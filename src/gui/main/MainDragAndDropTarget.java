@@ -13,7 +13,6 @@ import java.util.List;
 
 import components.active.IWorkspace;
 import gui.MainWindow;
-import gui.ThreadManager;
 import gui.actions.NewAnalysisAction;
 import gui.actions.PopulationImportAction;
 import io.WorkspaceImporter;
@@ -78,15 +77,13 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
        
     }
 	
-	private void receiveFolder(File f){
+	private void receiveFolder(final File f){
 		// Pass to new analysis
-		Runnable task = () -> { 
-			new NewAnalysisAction(mw, f);
-		};
-		ThreadManager.getInstance().execute(task);
+		Runnable task = new NewAnalysisAction(mw, f);
+		task.run();
 	}
 	
-	private void receiveWorkspaceFile(File f){
+	private void receiveWorkspaceFile(final File f){
 		finer("Opening workgroup file "+f.getAbsolutePath());
 		
 		IWorkspace w = new WorkspaceImporter(f).importWorkspace();
@@ -99,12 +96,10 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
 
 	}
 	
-	private void receiveDatasetFile(File f){
-		finer("Opening file "+f.getAbsolutePath());
+	private void receiveDatasetFile(final File f){
+		fine("Opening file "+f.getAbsolutePath());
 
-		Runnable task = () -> { 
-			new PopulationImportAction(mw, f);
-		};
-		ThreadManager.getInstance().execute(task);
+		Runnable task = new PopulationImportAction(mw, f);
+		task.run();
 	}
 }

@@ -30,6 +30,13 @@ public class ReplaceSourceImageDirectoryAction extends ProgressableAction {
 		super(dataset, "Replacing images", mw);
 		this.cooldown();
 
+		
+
+
+	}
+	
+	@Override
+	public void run(){
 		try{
 
 			if(!dataset.hasMergeSources()){
@@ -60,8 +67,6 @@ public class ReplaceSourceImageDirectoryAction extends ProgressableAction {
 		} catch(Exception e){
 			error("Error in folder update: "+e.getMessage(), e);
 		}
-
-
 	}
 	
 	@Override

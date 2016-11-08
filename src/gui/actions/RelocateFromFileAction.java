@@ -21,6 +21,13 @@ public class RelocateFromFileAction extends ProgressableAction {
 		this.setLatch(latch);
 		cooldown();
 		
+		
+		
+		
+	}
+	
+	@Override
+	public void run(){
 		/*
 		 * Get the file to search
 		 */
@@ -36,14 +43,12 @@ public class RelocateFromFileAction extends ProgressableAction {
 			worker.addPropertyChangeListener(this);
 			
 			this.setProgressMessage("Locating cells...");
-			log(Level.INFO, "Locating cells...");
+			log("Locating cells...");
 			ThreadManager.getInstance().submit(worker);
 		} else {
 			log(Level.FINE, "Cancelled");
 			cancel();
 		}
-		
-		
 	}
 	
 	@Override
