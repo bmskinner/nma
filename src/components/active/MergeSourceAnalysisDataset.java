@@ -80,7 +80,15 @@ public class MergeSourceAnalysisDataset
 		
 		
 			
-	}		
+	}	
+	
+	/**
+	 * Get the parent dataset (in this case, the merged dataset)
+	 * @return the parent dataset
+	 */
+	public IAnalysisDataset getParent(){
+		return parent;
+	}
 
 	@Override
 	public IAnalysisDataset duplicate() throws Exception {

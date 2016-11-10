@@ -205,6 +205,10 @@ public class FloatPoint
 	@Override
 	public double findAngle(IPoint a, IPoint b){
 
+		if(a==null || b==null){
+			throw new IllegalArgumentException("An input point is null in angle finding");
+		}
+		
 		// Use the cosine rule: a-b^2 = this-b^2 + this-a^2 - 2 * this-b * this-a * cos (theta)
 
 		//	  double ab = a.getLengthTo(b);

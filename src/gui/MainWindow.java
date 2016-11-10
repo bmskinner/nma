@@ -230,7 +230,7 @@ public class MainWindow
 			populationsPanel.addSignalChangeListener(this);
 			populationsPanel.addDatasetEventListener(this);
 			populationsPanel.addInterfaceEventListener(this);
-			this.addDatasetUpdateEventListener(logPanel);
+//			this.addDatasetUpdateEventListener(populationsPanel);
 			consensusNucleusPanel = new ConsensusNucleusPanel();
 			detailPanels.add(consensusNucleusPanel);
 
@@ -635,11 +635,10 @@ public class MainWindow
 		}
 
 		finer("Ordering update of populations panel");
-		final List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-		list.add(dataset);
-		populationsPanel.update(list);
-
-
+		
+		// This will also trigger a dataset update event as the dataset
+		// is selected, so don't trigger another update here.
+		populationsPanel.update(dataset);
 	}
 	
 	
@@ -954,43 +953,9 @@ public class MainWindow
      * @param list
      */
     public void fireDatasetUpdateEvent(final List<IAnalysisDataset> list){
-		
+		log("Heard dataset update event fire");
     	PanelUpdater r = new PanelUpdater(list);
-    	
-//    	Runnable r = () -> {
-//
-////    		PanelLoadingUpdater loader = new PanelLoadingUpdater();
-////
-////    		try {
-////    			
-////    			Future<?> f = threadManager.submit( loader );
-////    			
-////    			// Wait for loading state to be set
-////    			while(!f.isDone()){
-////    				fine("Waiting for chart loading set...");
-////    				Thread.sleep(1);
-////    			}
-////    			Boolean ok = (Boolean) f.get();
-////    			fine("Chart loading is set: "+ok );
-////
-////    		} catch (InterruptedException e1) {
-////    			error("Error setting loading state", e1);
-////    		} catch (ExecutionException e1) {
-////    			error("Error setting loading state", e1);
-////    		}
-////
-////    		// Now fire the update
-////    		fine("Firing general update for "+list.size()+" datasets");
-////    		DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
-////    		Iterator<Object> iterator = updateListeners.iterator();
-////    		while( iterator.hasNext() ) {
-////    			( (DatasetUpdateEventListener) iterator.next() ).datasetUpdateEventReceived( e );
-////    		}
-//
-//    	};
-
     	threadManager.executeAndCancelUpdate(r);
-//    	threadManager.execute( r );
     }
     
     public class PanelUpdater implements CancellableRunnable {

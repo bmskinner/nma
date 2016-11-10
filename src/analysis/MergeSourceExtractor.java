@@ -35,6 +35,7 @@ import components.ICellCollection;
 import components.active.DefaultAnalysisDataset;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
+import components.active.MergeSourceAnalysisDataset;
 
 /**
  * Extracts source datasets from merged datasets, and restores original 
@@ -64,9 +65,9 @@ public class MergeSourceExtractor implements Loggable {
 	public void extractSourceDataset(){
 		Runnable task = () -> { 
 			log("Recovering source dataset");
-			for(IAnalysisDataset d : list){
+			for(IAnalysisDataset virtualMergeSource : list){
 				
-				ICellCollection templateCollection = d.getCollection();
+				ICellCollection templateCollection = virtualMergeSource.getCollection();
 				// Make a new real cell collection from the virtual collection
 				ICellCollection newCollection = new DefaultCellCollection(templateCollection.getFolder(), 
 						null, 
@@ -83,16 +84,27 @@ public class MergeSourceExtractor implements Loggable {
 				
 				newDataset.getCollection().createProfileCollection();
 				
-				try {
-					log("Copying profile offsets");
-					d.getCollection().getProfileManager().copyCollectionOffsets(newDataset.getCollection());
+				
+				// Copy the merged dataset segmentation into the new dataset.
+				// This wil match cell segmentations by default, since the cells 
+				// have been copied from the merged dataset.
+				if(virtualMergeSource instanceof MergeSourceAnalysisDataset){
+
+					MergeSourceAnalysisDataset d = (MergeSourceAnalysisDataset) virtualMergeSource;
 					
-					//TODO update cells to the segment positions of the restored median profile
-				} catch (ProfileException e) {
-					error("Cannot copy profile offsets to recovered merge source", e);
+					try {
+						log("Copying profile offsets");
+						d.getParent().getCollection().getProfileManager().copyCollectionOffsets(newDataset.getCollection());
+						
+						
+					} catch (ProfileException e) {
+						error("Cannot copy profile offsets to recovered merge source", e);
+					}
 				}
 				
-				newDataset.setAnalysisOptions(d.getAnalysisOptions());
+				
+				
+				newDataset.setAnalysisOptions(virtualMergeSource.getAnalysisOptions());
 
 
 				fireDatasetEvent(DatasetEvent.ADD_DATASET, newDataset);
