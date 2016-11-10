@@ -153,6 +153,8 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
+//			log("Event heard from "+e.getSource().getClass().getSimpleName());
+			
 			
 			update(getDatasets());
 		}

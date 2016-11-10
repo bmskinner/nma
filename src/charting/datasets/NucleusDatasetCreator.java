@@ -550,9 +550,8 @@ public class NucleusDatasetCreator implements Loggable {
 				double[][] ndata = { x.asArray(), angles.asArray() };
 
 				ds.addSeries("Nucleus_"+n.getSourceFileName()+"-"+n.getNucleusNumber(), ndata);
-			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-				warn("Missing profile for nucleus "+n.getNameAndNumber());
-				fine("Error getting nucleus profile", e);
+			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException | IllegalArgumentException e) {
+				throw new ChartDatasetCreationException("Error getting nucleus profile"+n.getNameAndNumber(), e);
 			}
 
 		}

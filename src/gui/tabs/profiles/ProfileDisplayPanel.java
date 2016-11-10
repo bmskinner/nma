@@ -83,6 +83,8 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 			boolean showMarkers        = profileMarkersOptionsPanel.showMarkers();
 			boolean hideProfiles       = profileMarkersOptionsPanel.isHideProfiles();
 			
+//			log("Creating options: normalised: "+normalised);
+			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
 				.setNormalised(normalised)

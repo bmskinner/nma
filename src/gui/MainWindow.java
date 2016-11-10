@@ -953,7 +953,7 @@ public class MainWindow
      * @param list
      */
     public void fireDatasetUpdateEvent(final List<IAnalysisDataset> list){
-		log("Heard dataset update event fire");
+		fine("Heard dataset update event fire");
     	PanelUpdater r = new PanelUpdater(list);
     	threadManager.executeAndCancelUpdate(r);
     }
@@ -1012,7 +1012,7 @@ public class MainWindow
 
 		@Override
 		public void cancel() {
-			log("Cancelling thread");
+			fine("Cancelling thread");
 			isCancelled.set(true);
 //			Thread.currentThread().interrupt();
 			

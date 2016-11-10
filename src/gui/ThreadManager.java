@@ -82,7 +82,7 @@ public class ThreadManager implements Loggable {
 			
 			c.cancel();
 			
-			log("Removing future");
+			fine("Removing future");
 //			Future<?> future = cancellableFutures.get(c);
 //			if( ! future.isDone()){
 ////				log("Cancelling runnable");
@@ -112,7 +112,7 @@ public class ThreadManager implements Loggable {
 			
 			c.cancel();
 			
-			log("Removing future");
+			fine("Removing future");
 //			Future<?> future = cancellableFutures.get(c);
 //			if( ! future.isDone()){
 ////				log("Cancelling runnable");

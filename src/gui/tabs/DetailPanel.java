@@ -169,7 +169,7 @@ public abstract class DetailPanel
 	}
 	
 	protected synchronized List<IAnalysisDataset> getDatasets(){
-		return this.list;
+		return new ArrayList<IAnalysisDataset>( this.list);
 	}
 	
 	public synchronized Cache getChartCache(){
@@ -285,13 +285,7 @@ public abstract class DetailPanel
 		fine("Set dataset list of "+this.list.size()+" datasets");
 		setUpdating(true);
 		finest("Set updating state");
-		
-//		Runnable r = () -> {
-			updateDetail();
-//		};
-		
-//		ThreadManager.getInstance().execute(r);
-		
+		updateDetail();
 
 	}
 	
@@ -370,7 +364,7 @@ public abstract class DetailPanel
 	 */
 	protected synchronized void setChart(ChartOptions options) {
 		if(chartCache.has(options)){
-			finest("Fetched cached chart with hashcode "+options.hashCode());
+			fine("Fetched cached chart with hashcode "+options.hashCode());
 			JFreeChart chart = getChartCache().get(options);
 			
 			if(options.getTarget()!=null){
@@ -378,7 +372,7 @@ public abstract class DetailPanel
 			}
 
 		} else { // No cached chart
-			finest("No cached chart available with hashcode "+options.hashCode());
+			fine("No cached chart available with hashcode "+options.hashCode());
 			// Make a background worker to generate the chart and
 			// update the target chart panel when done
 			ChartFactoryWorker worker = new ChartFactoryWorker(options);
