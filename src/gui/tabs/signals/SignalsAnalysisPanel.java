@@ -38,6 +38,8 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import components.active.generic.UnavailableSignalGroupException;
+
 import charting.charts.AbstractChartFactory;
 import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.NuclearSignalDatasetCreator;
@@ -121,20 +123,27 @@ public class SignalsAnalysisPanel extends DetailPanel {
      */
     private void updateSignalColour(SignalTableCell signalGroup){
         
-        if(isSingleDataset()){
-            Color oldColour = signalGroup.getColor();
+    	if(isSingleDataset()){
 
-            Color newColor = JColorChooser.showDialog(
-                    this,
-                    "Choose signal Color",
-                    oldColour);
+    		try {
+    			Color oldColour = signalGroup.getColor();
 
-            if(newColor != null){
-                activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);// .setSignalGroupColour(signalGroup.getID(), newColor);
-                refreshTableCache();
-                fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
-            }
-        }
+    			Color newColor = JColorChooser.showDialog(
+    					this,
+    					"Choose signal Color",
+    					oldColour);
+
+    			if(newColor != null){
+    				activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);// .setSignalGroupColour(signalGroup.getID(), newColor);
+    				refreshTableCache();
+    				fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
+    			}
+
+    		} catch(UnavailableSignalGroupException e){
+    			warn("Cannot change signal colour");
+    			fine("Error getting signal group", e);
+    		}
+    	}
     }
     
 
@@ -175,26 +184,33 @@ public class SignalsAnalysisPanel extends DetailPanel {
      * @param signalGroup
      */
     private void updateSignalName(SignalTableCell signalGroup){
-        if(isSingleDataset()){
-            
-            String oldName = signalGroup.toString();
-            finest("Updating signal name for signal group "+signalGroup);
+    	if(isSingleDataset()){
 
-            String newName = (String) JOptionPane.showInputDialog("Enter new signal group name");
+    		try {
 
-            if(newName==null){
-            	finest("New name is null - not changing");
-                return;
-            }
+    			String oldName = signalGroup.toString();
+    			finest("Updating signal name for signal group "+signalGroup);
 
-            activeDataset().getCollection()
-                .getSignalGroup(signalGroup.getID())
-                .setGroupName(newName);
+    			String newName = (String) JOptionPane.showInputDialog("Enter new signal group name");
 
-            refreshTableCache();
-            fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
-            finest("Updated name of signal group "+oldName+" to "+newName );
-        }
+    			if(newName==null){
+    				finest("New name is null - not changing");
+    				return;
+    			}
+
+    			activeDataset().getCollection()
+    			.getSignalGroup(signalGroup.getID())
+    			.setGroupName(newName);
+
+    			refreshTableCache();
+    			fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
+    			finest("Updated name of signal group "+oldName+" to "+newName );
+
+    		} catch(UnavailableSignalGroupException e){
+    			warn("Cannot change signal name");
+    			fine("Error getting signal group", e);
+    		}
+    	}
     }
     
 

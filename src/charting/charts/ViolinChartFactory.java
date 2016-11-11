@@ -11,6 +11,8 @@ import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 
+import components.active.generic.UnavailableSignalGroupException;
+
 import analysis.IAnalysisDataset;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.ViolinCategoryDataset;
@@ -179,14 +181,22 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 				
 				// Not every dataset will have every row.
 				if(d.getCollection().hasSignalGroup(signalGroup)){
+					Paint color =ColourSelecter.getColor(row);
+					try {
 
 
-					Paint color = d.getCollection().getSignalGroup(signalGroup).hasColour()
+						color = d.getCollection().getSignalGroup(signalGroup).hasColour()
 							    ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
-								: ColourSelecter.getColor(row);
+								: color;
 							    
-					    renderer.setSeriesPaint(series, color);
+					    
+						
+					} catch (UnavailableSignalGroupException e){
+	        			fine("Signal group "+signalGroup+" is not present in collection", e);
+	        		} finally {
+	        			renderer.setSeriesPaint(series, color);
 						series++;
+	        		}
 				}
 
 				

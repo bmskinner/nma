@@ -5,7 +5,7 @@ package components.active.generic;
  * @author bms41*
  *
  */
-public class UnavailableBorderTagException extends Exception {
+public class UnavailableBorderTagException extends UnavailableComponentException {
 	private static final long serialVersionUID = 1L;
 	public UnavailableBorderTagException() { super(); }
 	public UnavailableBorderTagException(String message) { super(message); }

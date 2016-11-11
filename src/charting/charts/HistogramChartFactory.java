@@ -44,6 +44,8 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import components.active.generic.UnavailableSignalGroupException;
+
 import charting.ChartComponents;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NuclearHistogramDatasetCreator;
@@ -190,7 +192,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		List<HistogramDataset> list;
 		try {
 			list = options.hasDatasets() 
-										? new NuclearSignalDatasetCreator().createSignaStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
+										? new NuclearSignalDatasetCreator().createSignalStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
 										: null;
 		} catch (ChartDatasetCreationException e) {
 			return makeErrorChart();
@@ -233,13 +235,21 @@ public class HistogramChartFactory extends AbstractChartFactory {
 					
 					rend.setSeriesVisibleInLegend(j, false);
 					rend.setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+					Paint colour = ColourSelecter.getColor(j);
+					try {
+
+						colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
+								? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
+								: colour;
+
+
+						rend.setSeriesPaint(j, colour);
 					
-					Paint colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
-								 ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
-								 : ColourSelecter.getColor(j);
-
-
-					rend.setSeriesPaint(j, colour);
+					} catch (UnavailableSignalGroupException e){
+	        			fine("Signal group "+signalGroup+" is not present in collection", e);
+	        		} finally {
+	        			rend.setSeriesPaint(j, colour);
+	        		}
 				}	
 				datasetCount++;
 			}
@@ -301,19 +311,24 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	
 					String seriesKey = ds.getSeriesKey(j).toString();
 	                UUID signalGroup = getSignalGroupFromLabel(seriesKey);
-	
-//					String seriesName = seriesKey.replacseFirst(options.getStat().toString()+"_", "");
+
 	
 	                Paint colour = ColourSelecter.getColor(j);
 					
 					IAnalysisDataset d = options.getDatasets().get(datasetCount);
+					
+					try {
 
                     colour  = d.getCollection().getSignalGroup(signalGroup).hasColour()
                             ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
-                            : ColourSelecter.getColor(j);
+                            : colour;
 
-
-                    rend.setSeriesPaint(j, colour);
+                    
+					} catch (UnavailableSignalGroupException e){
+	        			fine("Signal group "+signalGroup+" is not present in collection", e);
+	        		} finally {
+	        			rend.setSeriesPaint(j, colour);
+	        		}
 
 	
 				}

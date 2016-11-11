@@ -61,6 +61,7 @@ import components.ICell;
 import components.active.DefaultCell;
 import components.active.generic.FloatPoint;
 import components.active.generic.UnavailableProfileTypeException;
+import components.active.generic.UnavailableSignalGroupException;
 import components.generic.BorderTag;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
@@ -580,11 +581,20 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				if(hash.get(key).startsWith("SignalGroup_")){
 
 					UUID seriesGroup = getSignalGroupFromLabel(hash.get(key));
-					Paint colour = dataset.getCollection().getSignalGroup(seriesGroup).hasColour()
-                    		     ? dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour()
-                    		     : ColourSelecter.getColor(i);
+					
+					Paint colour = ColourSelecter.getColor(i);
+					try {
 
-					plot.getRenderer(key).setSeriesPaint(i, colour);
+						colour = dataset.getCollection().getSignalGroup(seriesGroup).hasColour()
+								? dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour()
+								: colour;
+
+					
+					} catch (UnavailableSignalGroupException e){
+	        			fine("Signal group "+seriesGroup+" is not present in collection", e);
+	        		} finally {
+	        			plot.getRenderer(key).setSeriesPaint(i, colour);
+	        		}
 				}
 
 				/*

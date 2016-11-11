@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.UUID;
+
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
@@ -22,6 +23,7 @@ import charting.datasets.CellTableDatasetCreator;
 import charting.datasets.SignalTableCell;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
+import components.active.generic.UnavailableSignalGroupException;
 import components.nuclei.Nucleus;
 import gui.DatasetEvent;
 import gui.GlobalOptions;
@@ -117,18 +119,24 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 		String groupString = table.getModel().getValueAt(row+1, 1).toString();
 		UUID signalGroup = UUID.fromString(groupString);
 		
-		Color oldColour = activeDataset().getCollection().getSignalGroup(signalGroup).getGroupColour();
-		
-		Color newColor = JColorChooser.showDialog(
-				CellStatsPanel.this,
-                 "Choose signal Color",
-                 oldColour);
-		
-		if(newColor != null){
-            activeDataset().getCollection().getSignalGroup(signalGroup).setGroupColour(newColor);//.setSignalGroupColour(signalGroup, newColor);
+		try {
 
-			update();
-			fireSignalChangeEvent("SignalColourUpdate");
+			Color oldColour = activeDataset().getCollection().getSignalGroup(signalGroup).getGroupColour();
+
+			Color newColor = JColorChooser.showDialog(
+					CellStatsPanel.this,
+					"Choose signal Color",
+					oldColour);
+
+			if(newColor != null){
+				activeDataset().getCollection().getSignalGroup(signalGroup).setGroupColour(newColor);//.setSignalGroupColour(signalGroup, newColor);
+
+				update();
+				fireSignalChangeEvent("SignalColourUpdate");
+			}
+		} catch(UnavailableSignalGroupException e){
+			warn("Cannot change signal colour");
+			fine("Error getting signal group", e);
 		}
 	}
 	

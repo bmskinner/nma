@@ -50,6 +50,7 @@ import analysis.nucleus.CurveRefolder;
 import analysis.signals.NuclearSignalOptions;
 import analysis.signals.ShellRandomDistributionCreator;
 import components.ICellCollection;
+import components.active.generic.UnavailableSignalGroupException;
 import components.generic.IPoint;
 import components.generic.MeasurementScale;
 import components.nuclear.INuclearSignal;
@@ -178,27 +179,35 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
         	Collection<ISignalGroup> signalGroups = collection.getSignalManager().getSignalGroups();
         	
         	int j=0;
-            for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
-            	
-            	if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-            		continue;
-            	}
-            	
-            	SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
-                
-            	Paint colour = collection.getSignalGroup(signalGroup).hasColour()
-                        ? collection.getSignalGroup(signalGroup).getGroupColour()
-                        : ColourSelecter.getColor(j++);
-                
-                cell.setColor((Color) colour);
-                
-                rowData.add("");// empty row for colour
-                rowData.add(cell);  // group name
-                
-                
-                for(int i=0; i<rowsPerSignalGroup-2;i++){ // rest are NA
-                    rowData.add("N/A - merge");
-                }
+        	for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+
+        		if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+        			continue;
+        		}
+
+        		try {
+
+        			SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
+
+        			Paint colour = collection.getSignalGroup(signalGroup).hasColour()
+        					? collection.getSignalGroup(signalGroup).getGroupColour()
+        							: ColourSelecter.getColor(j);
+
+        					cell.setColor((Color) colour);
+
+        					rowData.add("");// empty row for colour
+        					rowData.add(cell);  // group name
+
+
+					for(int i=0; i<rowsPerSignalGroup-2;i++){ // rest are NA
+						rowData.add("N/A - merge");
+					}
+
+        		} catch (UnavailableSignalGroupException e){
+        			fine("Signal group "+signalGroup+" is not present in collection", e);
+        		} finally {
+        			j++;
+        		}
             }
             
             // Add blank rows for any empty spaces in the table
@@ -219,51 +228,59 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
             	if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
             		continue;
             	}
-            
-                signalGroupNumber++;
-            
-                SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
-                
-                Paint colour = collection.getSignalGroup(signalGroup).hasColour()
-                        ? collection.getSignalGroup(signalGroup).getGroupColour()
-                        : ColourSelecter.getColor(j++);
-                
-                cell.setColor((Color) colour);
-                
+            	
+            	try{
+
+            		signalGroupNumber++;
+
+            		SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
+
+            		Paint colour = collection.getSignalGroup(signalGroup).hasColour()
+            				? collection.getSignalGroup(signalGroup).getGroupColour()
+            						: ColourSelecter.getColor(j);
+
+            				cell.setColor((Color) colour);
 
 
-                NuclearSignalOptions ns = dataset.getAnalysisOptions()
-                        .getNuclearSignalOptions(signalGroup);
-  
-                if(ns==null){ // occurs when no signals are present? Should never occur with the new SignalGroup system
-                    for(int i=0; i<rowsPerSignalGroup;i++){
-                        rowData.add("");
-                    }
-                   
 
-                } else {
-                    Object signalThreshold = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
-                            ? ns.getThreshold()
-                            : "Variable";
+            				NuclearSignalOptions ns = dataset.getAnalysisOptions()
+            						.getNuclearSignalOptions(signalGroup);
 
-                    Object signalMode = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
-                            ? "Forward"
-                            : ns.getDetectionMode()==NuclearSignalOptions.REVERSE
-                            ? "Reverse"
-                            : "Adaptive";                    
+            				if(ns==null){ // occurs when no signals are present? Should never occur with the new SignalGroup system
+            					for(int i=0; i<rowsPerSignalGroup;i++){
+            						rowData.add("");
+            					}
 
 
-                    rowData.add("");
-                    rowData.add(cell);
-                    rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
-                    rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
-                    rowData.add(  signalThreshold );
-                    rowData.add(ns.getMinSize());
-                    rowData.add(df.format(ns.getMaxFraction()));
-                    rowData.add(df.format(ns.getMinCirc()));
-                    rowData.add(df.format(ns.getMaxCirc()));
-                    rowData.add(signalMode);
-                }
+            				} else {
+            					Object signalThreshold = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
+            							? ns.getThreshold()
+            									: "Variable";
+
+            							Object signalMode = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
+            									? "Forward"
+            											: ns.getDetectionMode()==NuclearSignalOptions.REVERSE
+            											? "Reverse"
+            													: "Adaptive";                    
+
+
+            							rowData.add("");
+            							rowData.add(cell);
+            							rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
+            							rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
+            							rowData.add(  signalThreshold );
+            							rowData.add(ns.getMinSize());
+            							rowData.add(df.format(ns.getMaxFraction()));
+            							rowData.add(df.format(ns.getMinCirc()));
+            							rowData.add(df.format(ns.getMaxCirc()));
+            							rowData.add(signalMode);
+            				}
+
+            	} catch (UnavailableSignalGroupException e){
+            		fine("Signal group "+signalGroup+" is not present in collection", e);
+            	} finally {
+            		j++;
+            	}
             }
             
             /*
@@ -292,7 +309,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return a histogram of angles
 	 * @throws Exception 
 	 */
-	public List<HistogramDataset> createSignaStatisticHistogramDataset(List<IAnalysisDataset> list, 
+	public List<HistogramDataset> createSignalStatisticHistogramDataset(List<IAnalysisDataset> list, 
 			SignalStatistic stat, MeasurementScale scale) throws ChartDatasetCreationException {
 		
 		List<HistogramDataset> result = new ArrayList<HistogramDataset>();
@@ -304,17 +321,23 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()){
 				
 				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-            		continue;
-            	}
+					continue;
+				}
 
-                if(collection.getSignalGroup(signalGroup).isVisible()){
-	
-					if(collection.getSignalManager().hasSignals(signalGroup)){
-	
-                        double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);
+				try {
 
-						ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
+					if(collection.getSignalGroup(signalGroup).isVisible()){
+
+						if(collection.getSignalManager().hasSignals(signalGroup)){
+
+							double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);
+
+							ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
+						}
 					}
+
+				} catch (UnavailableSignalGroupException e){
+					fine("Signal group "+signalGroup+" is not present in collection", e);
 				}
 			}
 			result.add(ds);
@@ -510,24 +533,31 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
             	}
 
 				finest("Signal group "+group.toString());
-                if(dataset.getCollection().getSignalGroup(group).isVisible()){
-                	finest("Group "+group.toString()+" is visible");
-					double[] xpoints = new double[collection.getSignalManager().getSignals(group).size()];
-					double[] ypoints = new double[collection.getSignalManager().getSignals(group).size()];
 
-					int signalCount = 0;
-					for(INuclearSignal n : collection.getSignalManager().getSignals(group)){
+				try {
 
-						IPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
+					if(dataset.getCollection().getSignalGroup(group).isVisible()){
+						finest("Group "+group.toString()+" is visible");
+						double[] xpoints = new double[collection.getSignalManager().getSignals(group).size()];
+						double[] ypoints = new double[collection.getSignalManager().getSignals(group).size()];
 
-						xpoints[signalCount] = p.getX();
-						ypoints[signalCount] = p.getY();
-						signalCount++;
+						int signalCount = 0;
+						for(INuclearSignal n : collection.getSignalManager().getSignals(group)){
 
+							IPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
+
+							xpoints[signalCount] = p.getX();
+							ypoints[signalCount] = p.getY();
+							signalCount++;
+
+						}
+						double[][] data = { xpoints, ypoints };
+						ds.addSeries("Group_"+group, data);
+						finest("Group "+group.toString()+" added "+signalCount+" signals");
 					}
-					double[][] data = { xpoints, ypoints };
-					ds.addSeries("Group_"+group, data);
-					finest("Group "+group.toString()+" added "+signalCount+" signals");
+
+				} catch (UnavailableSignalGroupException e){
+					fine("Signal group "+group+" is not present in collection", e);
 				}
 			}
 		}
@@ -540,20 +570,25 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		ICellCollection collection = dataset.getCollection();
 		List<Shape> result = new ArrayList<Shape>(0);
 		
-        if(collection.getSignalGroup(signalGroup).isVisible()){
-			if(collection.getSignalManager().hasSignals(signalGroup)){
+		try {
+			if(collection.getSignalGroup(signalGroup).isVisible()){
+				if(collection.getSignalManager().hasSignals(signalGroup)){
 
-				for(INuclearSignal n : collection.getSignalManager().getSignals(signalGroup)){
-					IPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
+					for(INuclearSignal n : collection.getSignalManager().getSignals(signalGroup)){
+						IPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
 
-					// ellipses are drawn starting from x y at upper left. Provide an offset from the centre
-					double offset = n.getStatistic(SignalStatistic.RADIUS);
-					
+						// ellipses are drawn starting from x y at upper left. Provide an offset from the centre
+						double offset = n.getStatistic(SignalStatistic.RADIUS);
 
-					result.add(new Ellipse2D.Double(p.getX()-offset, p.getY()-offset, offset*2, offset*2));
+
+						result.add(new Ellipse2D.Double(p.getX()-offset, p.getY()-offset, offset*2, offset*2));
+					}
+
 				}
-
 			}
+
+		} catch (UnavailableSignalGroupException e){
+			fine("Signal group "+signalGroup+" is not present in collection", e);
 		}
 		return result;
 	}
@@ -645,32 +680,37 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
             	}
 				
 				if(collection.getSignalManager().hasSignals(signalGroup)){
-					
-					SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
-                    
-					Paint colour = collection.getSignalGroup(signalGroup).hasColour()
-                            ? collection.getSignalGroup(signalGroup).getGroupColour()
-                            : ColourSelecter.getColor(k++);
-                    
-                    cell.setColor((Color) colour);
-                    
 
-					
-					rowData.add("");
-					rowData.add(cell);
-					rowData.add(collection.getSignalManager().getSignalCount(signalGroup));
-					double signalPerNucleus = (double) collection.getSignalManager().getSignalCount(signalGroup)/  (double) collection.getSignalManager().getNumberOfCellsWithNuclearSignals(signalGroup);
-					rowData.add(DEFAULT_DECIMAL_FORMAT.format(signalPerNucleus));
+					try {
 
-					for(SignalStatistic stat : SignalStatistic.values()){
-                        double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
+						SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
 
-                        if(stat.isDimensionless() || stat.isAngle()){
-							rowData.add(DEFAULT_DECIMAL_FORMAT.format(pixel) );
-						} else {
-                            double micron = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
-							rowData.add(DEFAULT_DECIMAL_FORMAT.format(pixel) +" ("+ DEFAULT_DECIMAL_FORMAT.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
-						}
+						Paint colour = collection.getSignalGroup(signalGroup).hasColour()
+								? collection.getSignalGroup(signalGroup).getGroupColour()
+										: ColourSelecter.getColor(k++);
+
+								cell.setColor((Color) colour);
+
+
+
+								rowData.add("");
+								rowData.add(cell);
+								rowData.add(collection.getSignalManager().getSignalCount(signalGroup));
+								double signalPerNucleus = (double) collection.getSignalManager().getSignalCount(signalGroup)/  (double) collection.getSignalManager().getNumberOfCellsWithNuclearSignals(signalGroup);
+								rowData.add(DEFAULT_DECIMAL_FORMAT.format(signalPerNucleus));
+
+								for(SignalStatistic stat : SignalStatistic.values()){
+									double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
+
+									if(stat.isDimensionless() || stat.isAngle()){
+										rowData.add(DEFAULT_DECIMAL_FORMAT.format(pixel) );
+									} else {
+										double micron = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
+										rowData.add(DEFAULT_DECIMAL_FORMAT.format(pixel) +" ("+ DEFAULT_DECIMAL_FORMAT.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
+									}
+								}
+					} catch (UnavailableSignalGroupException e){
+						fine("Signal group "+signalGroup+" is not present", e);
 					}
 
 				} else {
@@ -753,34 +793,40 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 							}
 							continue;
 						}
-
-						SignalTableCell cell = new SignalTableCell(signalGroup, 
-								collection.getSignalManager().getSignalGroupName(signalGroup));
 						
-						Color colour = collection.getSignalGroup(signalGroup).hasColour()
-	                                 ? collection.getSignalGroup(signalGroup).getGroupColour()
-	                                 : Color.WHITE;
-	                    
-	                    cell.setColor(colour);
-						
-							rowData.add("");
-							rowData.add(cell);
-							rowData.add(collection.getSignalManager().getSignalCount(signalGroup));
-							double signalPerNucleus = collection.getSignalManager().getSignalCountPerNucleus(signalGroup);
-							rowData.add(df.format(signalPerNucleus));
-							
-							for(SignalStatistic stat : SignalStatistic.values()){
-		                        double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
+						try {
+
+							SignalTableCell cell = new SignalTableCell(signalGroup, 
+									collection.getSignalManager().getSignalGroupName(signalGroup));
+
+							Color colour = collection.getSignalGroup(signalGroup).hasColour()
+									? collection.getSignalGroup(signalGroup).getGroupColour()
+											: Color.WHITE;
+
+									cell.setColor(colour);
+
+									rowData.add("");
+									rowData.add(cell);
+									rowData.add(collection.getSignalManager().getSignalCount(signalGroup));
+									double signalPerNucleus = collection.getSignalManager().getSignalCountPerNucleus(signalGroup);
+									rowData.add(df.format(signalPerNucleus));
+
+									for(SignalStatistic stat : SignalStatistic.values()){
+										double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
 
 
-								if(stat.isDimensionless()){
-									rowData.add(df.format(pixel) );
-								} else {
-		                            double micron = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
-									rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
-								}
-							}
-							
+										if(stat.isDimensionless()){
+											rowData.add(df.format(pixel) );
+										} else {
+											double micron = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
+											rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
+										}
+									}
+
+						} catch (UnavailableSignalGroupException e){
+							fine("Signal group "+signalGroup+" is not present in collection", e);
+						}
+
 					}
 					
 					if(signalGroupCount < maxSignalGroup){
@@ -870,49 +916,55 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 
 			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 				
-				// Create the random distribution
-				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-					if(collection.getSignalGroup(signalGroup).hasShellResult()){
-						ShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
+				try {
 
-						for(int shell = 0; shell<r.getNumberOfShells();shell++){
-							Double d = options.isShowSignals() ? r.getCounts().get(shell) : r.getMeans().get(shell)*100;
-							Double std = options.isShowSignals() ? 0 : r.getStandardErrors().get(shell)*100;
-							ds.add(signalGroup, -d.doubleValue(), std.doubleValue(), "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
-							// we need the string value for shell otherwise we get error
-							// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
-							// ditto the doublevalue for std
+					// Create the random distribution
+					if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
 
+						if(collection.getSignalGroup(signalGroup).hasShellResult()){
+							ShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
+
+							for(int shell = 0; shell<r.getNumberOfShells();shell++){
+								Double d = options.isShowSignals() ? r.getCounts().get(shell) : r.getMeans().get(shell)*100;
+								Double std = options.isShowSignals() ? 0 : r.getStandardErrors().get(shell)*100;
+								ds.add(signalGroup, -d.doubleValue(), std.doubleValue(), "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
+								// we need the string value for shell otherwise we get error
+								// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
+								// ditto the doublevalue for std
+
+							}
+						}
+						continue;
+					}
+
+					if(collection.getSignalManager().hasSignals(signalGroup)){
+
+						if(collection.getSignalGroup(signalGroup).hasShellResult()){
+							ShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
+
+
+
+							for(int shell = 0; shell<r.getNumberOfShells();shell++){
+
+								Double d = options.isShowSignals() 
+										? r.getCounts().get(shell) 
+												: options.isNormalised()
+												? r.getNormalisedMeans().get(shell)
+														: r.getMeans().get(shell);
+
+												Double std = options.isShowSignals() 
+														? 0 
+																: r.getStandardErrors().get(shell);
+												ds.add(signalGroup, d*100, std.doubleValue()*100, "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
+												// we need the string value for shell otherwise we get error
+												// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
+												// ditto the doublevalue for std
+
+							}
 						}
 					}
-					continue;
-            	}
-				
-				if(collection.getSignalManager().hasSignals(signalGroup)){
-					
-					if(collection.getSignalGroup(signalGroup).hasShellResult()){
-						ShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
-						
-						
-
-						for(int shell = 0; shell<r.getNumberOfShells();shell++){
-														
-							Double d = options.isShowSignals() 
-									 ? r.getCounts().get(shell) 
-									 : options.isNormalised()
-									 	? r.getNormalisedMeans().get(shell)
-									 	: r.getMeans().get(shell);
-									 	
-							Double std = options.isShowSignals() 
-									   ? 0 
-									   : r.getStandardErrors().get(shell);
-							ds.add(signalGroup, d*100, std.doubleValue()*100, "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
-							// we need the string value for shell otherwise we get error
-							// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
-							// ditto the doublevalue for std
-
-						}
-					}
+				} catch (UnavailableSignalGroupException e){
+					fine("Signal group "+signalGroup+" is not present in collection", e);
 				}
 			}
 			result.add(ds);
@@ -946,31 +998,37 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		for(IAnalysisDataset d : options.getDatasets()){
 			
 			for(UUID signalGroup : d.getCollection().getSignalManager().getSignalGroupIDs()){
-				
+
 				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-            		continue;
-            	}
-				
-				ISignalGroup group = d.getCollection().getSignalGroup(signalGroup);
-				
-				if(group.hasShellResult()){
-				
-					String groupName = group.getGroupName();
+					continue;
+				}
 
-					ShellResult r    = group.getShellResult();
+				try {
 
-					Object[] rowData = {
+					ISignalGroup group = d.getCollection().getSignalGroup(signalGroup);
 
-							d.getName(),
-							groupName,
-							r.getChiSquare()
-					};
+					if(group.hasShellResult()){
+
+						String groupName = group.getGroupName();
+
+						ShellResult r    = group.getShellResult();
+
+						Object[] rowData = {
+
+								d.getName(),
+								groupName,
+								r.getChiSquare()
+						};
 
 
-					model.addRow(rowData);
+						model.addRow(rowData);
+					}
+
+				} catch (UnavailableSignalGroupException e){
+					fine("Signal group "+signalGroup+" is not present in collection", e);
 				}
 			}
-			
+
 		}
 
 		return model;

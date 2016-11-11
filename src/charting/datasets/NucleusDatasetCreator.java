@@ -45,6 +45,7 @@ import components.active.DefaultCellularComponent;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
+import components.active.generic.UnavailableSignalGroupException;
 import components.active.generic.UnsegmentedProfileException;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
@@ -1493,38 +1494,44 @@ public class NucleusDatasetCreator implements Loggable {
 				continue;
 			}
 			
-			ISignalGroup group = dataset.getCollection().getSignalGroup(signalGroup);
-			finer("Fetching signals from signal group "+group+": ID "+signalGroup);
-			
-			if(group == null){
-				finest("Not adding signals from "+signalGroup+": null");
-				continue;
-			}
-			
-			
-            if(group.isVisible()){ // only add the groups that are set to visible
+			try {
 
+				ISignalGroup group = dataset.getCollection().getSignalGroup(signalGroup);
+				finer("Fetching signals from signal group "+group+": ID "+signalGroup);
 
-            	ComponentOutlineDataset groupDataset = new ComponentOutlineDataset();
-				int signalNumber = 0;
-
-				for(INuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)){
-					
-					String seriesKey = "SignalGroup_"+signalGroup+"_signal_"+signalNumber;
-					finest("Adding signal to dataset: "+seriesKey);
-					OutlineDatasetCreator dc = new OutlineDatasetCreator(signal);
-					try {
-						dc.createOutline(groupDataset, seriesKey, false);
-						
-					} catch (ChartDatasetCreationException e) {
-						error("Unable to add signal "+seriesKey+" to dataset", e);
-					}
-					signalNumber++;
+				if(group == null){
+					finest("Not adding signals from "+signalGroup+": null");
+					continue;
 				}
-				result.add(groupDataset);
-				
-			} else {
-				finest("Not adding "+group+": not set as visible");
+
+
+				if(group.isVisible()){ // only add the groups that are set to visible
+
+
+					ComponentOutlineDataset groupDataset = new ComponentOutlineDataset();
+					int signalNumber = 0;
+
+					for(INuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)){
+
+						String seriesKey = "SignalGroup_"+signalGroup+"_signal_"+signalNumber;
+						finest("Adding signal to dataset: "+seriesKey);
+						OutlineDatasetCreator dc = new OutlineDatasetCreator(signal);
+						try {
+							dc.createOutline(groupDataset, seriesKey, false);
+
+						} catch (ChartDatasetCreationException e) {
+							error("Unable to add signal "+seriesKey+" to dataset", e);
+						}
+						signalNumber++;
+					}
+					result.add(groupDataset);
+
+				} else {
+					finest("Not adding "+group+": not set as visible");
+				}
+
+			} catch (UnavailableSignalGroupException e){
+				fine("Signal group "+signalGroup+" is not present in collection", e);
 			}
 			
 		}

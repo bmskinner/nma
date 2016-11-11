@@ -193,7 +193,7 @@ public class MainWindow
 		
 		
 		try {
-			setTitle("Nuclear Morphology Analysis v"+Version.currentVersion().toString()+"a2");
+			setTitle("Nuclear Morphology Analysis v"+Version.currentVersion().toString()+"a3");
 			
 			Dimension preferredSize = new Dimension(1012, 804);
 			this.setPreferredSize(preferredSize);
@@ -991,9 +991,11 @@ public class MainWindow
     		} catch (InterruptedException e1) {
     			warn("Interrupted update");
     			error("Error setting loading state", e1);
+    			error("Cause of loading state error", e1.getCause());
     			return;
     		} catch (ExecutionException e1) {
     			error("Error setting loading state", e1);
+    			error("Cause of loading state error", e1.getCause());
     			return;
     		}
 

@@ -11,6 +11,7 @@ import javax.swing.JComboBox;
 
 import analysis.IAnalysisDataset;
 import analysis.signals.SignalManager;
+import components.active.generic.UnavailableSignalGroupException;
 import components.nuclear.ISignalGroup;
 
 
@@ -92,7 +93,11 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 		Set<UUID> signalGroups = m.getSignalGroupIDs();
 		List<SignalIDToGroup> list = new ArrayList<SignalIDToGroup>();
 		for(UUID id : signalGroups){
-			list.add(new SignalIDToGroup(id, d.getCollection().getSignalGroup(id)));
+			try {
+				list.add(new SignalIDToGroup(id, d.getCollection().getSignalGroup(id)));
+			} catch (UnavailableSignalGroupException e) {
+				fine("Cannot add signal group to panel", e);
+			}
 		}
 		return list;
 	}

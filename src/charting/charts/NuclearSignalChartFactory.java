@@ -22,6 +22,8 @@ import org.jfree.data.Range;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.xy.XYDataset;
 
+import components.active.generic.UnavailableSignalGroupException;
+
 import analysis.IAnalysisDataset;
 import analysis.signals.ShellRandomDistributionCreator;
 import charting.ChartComponents;
@@ -96,18 +98,26 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 					
 					rend.setSeriesVisibleInLegend(j, false);
 					rend.setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+					Paint colour = ColourSelecter.getColor(j);
+					try {
 
-					Paint colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
-							? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
-									: ColourSelecter.getColor(j);
-							
-					colour = signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID) 
-                           ? Color.LIGHT_GRAY 
-                           : colour;
+						colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
+								? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
+										: colour;
+
+								colour = signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID) 
+										? Color.LIGHT_GRAY 
+												: colour;
 
 
-					rend.setSeriesPaint(j, colour);
-					rend.setSeriesBarWidth(j, 1);
+								rend.setSeriesPaint(j, colour);
+								rend.setSeriesBarWidth(j, 1);
+
+					} catch (UnavailableSignalGroupException e){
+	        			fine("Signal group "+signalGroup+" is not present in collection", e);
+	        		} finally {
+	        			rend.setSeriesPaint(j, colour);
+	        		}
 				}	
 			}
 			

@@ -20,14 +20,16 @@
 package components.active.generic;
 
 /**
- * Thrown when a profile type is not available within a profile collection.
+ * The exception class to be thrown when a component of a profile or 
+ * nuclear object is not present. This is subclassed for the various
+ * components.
  * @author bms41
  *
  */
-public class UnavailableProfileTypeException extends UnavailableComponentException {
+public class UnavailableComponentException extends Exception {
 		private static final long serialVersionUID = 1L;
-		public UnavailableProfileTypeException() { super(); }
-		public UnavailableProfileTypeException(String message) { super(message); }
-		public UnavailableProfileTypeException(String message, Throwable cause) { super(message, cause); }
-		public UnavailableProfileTypeException(Throwable cause) { super(cause); }
-	}
+		public UnavailableComponentException() { super(); }
+		public UnavailableComponentException(String message) { super(message); }
+		public UnavailableComponentException(String message, Throwable cause) { super(message, cause); }
+		public UnavailableComponentException(Throwable cause) { super(cause); }
+}

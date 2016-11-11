@@ -36,6 +36,8 @@ import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
+import components.active.generic.UnavailableSignalGroupException;
+
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import charting.datasets.ChartDatasetCreationException;
@@ -227,14 +229,21 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 				
 				// Not every dataset will have every row.
 				if(d.getCollection().hasSignalGroup(signalGroup)){
+					Paint color = ColourSelecter.getColor(row);
+					try {
 
 
-					Paint color = d.getCollection().getSignalGroup(signalGroup).hasColour()
+					color = d.getCollection().getSignalGroup(signalGroup).hasColour()
 							    ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
-								: ColourSelecter.getColor(row);
+								: color;
 							    
-					    renderer.setSeriesPaint(series, color);
-						series++;
+					   
+					} catch (UnavailableSignalGroupException e){
+	        			fine("Signal group "+signalGroup+" is not present in collection", e);
+	        		} finally {
+	        			renderer.setSeriesPaint(series, color);
+	        			series++;
+	        		}
 				}
 
 				

@@ -19,15 +19,10 @@
 
 package components.active.generic;
 
-/**
- * Thrown when a profile type is not available within a profile collection.
- * @author bms41
- *
- */
-public class UnavailableProfileTypeException extends UnavailableComponentException {
-		private static final long serialVersionUID = 1L;
-		public UnavailableProfileTypeException() { super(); }
-		public UnavailableProfileTypeException(String message) { super(message); }
-		public UnavailableProfileTypeException(String message, Throwable cause) { super(message, cause); }
-		public UnavailableProfileTypeException(Throwable cause) { super(cause); }
-	}
+public class UnavailableSignalGroupException extends UnavailableComponentException {
+	private static final long serialVersionUID = 1L;
+	public UnavailableSignalGroupException() { super(); }
+	public UnavailableSignalGroupException(String message) { super(message); }
+	public UnavailableSignalGroupException(String message, Throwable cause) { super(message, cause); }
+	public UnavailableSignalGroupException(Throwable cause) { super(cause); }
+}

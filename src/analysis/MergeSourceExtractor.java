@@ -26,6 +26,7 @@ import gui.ThreadManager;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import logging.Loggable;
@@ -36,6 +37,10 @@ import components.active.DefaultAnalysisDataset;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
 import components.active.MergeSourceAnalysisDataset;
+import components.active.generic.UnavailableSignalGroupException;
+import components.nuclear.ISignalGroup;
+import components.nuclear.SignalGroup;
+import components.nuclei.Nucleus;
 
 /**
  * Extracts source datasets from merged datasets, and restores original 
@@ -76,15 +81,16 @@ public class MergeSourceExtractor implements Loggable {
 						);
 				
 				for(ICell c : templateCollection.getCells()){
+					
 					newCollection.addCell(new DefaultCell(c));
 				}
 				
 				IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
 				newDataset.setRoot(true);
 				
+				// Copy over the profile collections
 				newDataset.getCollection().createProfileCollection();
-				
-				
+
 				// Copy the merged dataset segmentation into the new dataset.
 				// This wil match cell segmentations by default, since the cells 
 				// have been copied from the merged dataset.
@@ -101,6 +107,37 @@ public class MergeSourceExtractor implements Loggable {
 						error("Cannot copy profile offsets to recovered merge source", e);
 					}
 				}
+				
+				
+				
+				// Copy over the signal collections where appropriate
+				
+//				templateCollection.getSignalManager().copySignalGroups(newCollection);
+				for(UUID signalGroupId : templateCollection.getSignalGroupIDs()){
+					
+					ISignalGroup newGroup;
+					try {
+						
+						// We only want to make a signal group if a cell with the signal
+						// is present in the merge source.
+						boolean addSignalGroup = false;
+						 for(Nucleus n : newCollection.getNuclei()){
+							  addSignalGroup |=  n.getSignalCollection().hasSignal(signalGroupId);
+						  } 
+						 
+						if(addSignalGroup){
+							newGroup = new SignalGroup(templateCollection.getSignalGroup(signalGroupId));
+							newDataset.getCollection().addSignalGroup(signalGroupId, newGroup);
+						}
+
+						
+					} catch (UnavailableSignalGroupException e) {
+						warn("Unable to copy signal groups");
+						fine("Signal group not present", e);
+					}
+					
+				}
+				
 				
 				
 				

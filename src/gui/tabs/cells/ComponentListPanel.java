@@ -18,7 +18,9 @@ import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import components.CellularComponent;
+import components.active.generic.UnavailableSignalGroupException;
 import components.nuclear.INuclearSignal;
+import components.nuclear.ISignalCollection;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 
@@ -66,13 +68,28 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 			
 			model.addElement(nucleusCell);
 			
-			// Add signals present
-			for(UUID i : n.getSignalCollection().getSignalGroupIDs()){
+			ISignalCollection signalCollection = n.getSignalCollection();
+			
+			// Add signals groups present
+			for(UUID signalGroupId : signalCollection.getSignalGroupIDs()){
 				
-				if(n.getSignalCollection().hasSignal(i)){
+				if(signalCollection.hasSignal(signalGroupId)){
 
-					INuclearSignal signal = n.getSignalCollection().getSignals(i).get(0);
-					ComponentListCell signalCell = new ComponentListCell( activeDataset().getCollection().getSignalGroup(i).getGroupName(), signal);
+					// Since all we want is a single component within the collection, just take the first signal					
+					INuclearSignal signal = signalCollection.getSignals(signalGroupId).get(0);
+					String signalGroupName;
+					try {
+						
+						signalGroupName = activeDataset().getCollection()
+								.getSignalGroup(signalGroupId)
+								.getGroupName();
+						
+					} catch (UnavailableSignalGroupException e) {
+						fine("Signal group is not present in collection", e);
+						continue;
+					}
+					
+					ComponentListCell signalCell = new ComponentListCell( signalGroupName , signal);
 					model.addElement(signalCell);
 				}
 			}

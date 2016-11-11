@@ -35,9 +35,9 @@ import utility.Constants;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
 import components.ICellCollection;
+import components.active.generic.UnavailableSignalGroupException;
 import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalGroup;
-import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
 import components.nuclear.SignalGroup;
 import components.nuclei.Nucleus;
@@ -187,9 +187,14 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 				
 				
 				
-				getDataset().getCollection()
-					.getSignalGroup(group)
-					.setShellResult(result);
+				try {
+					getDataset().getCollection()
+						.getSignalGroup(group)
+						.setShellResult(result);
+				} catch (UnavailableSignalGroupException e) {
+					fine("Signal group is not present", e);
+					warn("Cannot save shell result");
+				}
 
 			}
 		}
@@ -239,10 +244,16 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 				randomResult.setCounts(countList);
 
 				getDataset().getCollection()
-				.getSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)
-				.setShellResult(randomResult);
+					.getSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)
+					.setShellResult(randomResult);
+
+
+
 			} catch(ArrayConversionException e){
 				error("Conversion error", e);
+			} catch (UnavailableSignalGroupException e) {
+				fine("Signal group is not present", e);
+				warn("Cannot add random shell result");
 			}
 		} else {
 			warn("Cannot create simulated dataset, no consensus");

@@ -12,7 +12,15 @@ public class ComponentListCell {
 	private String name;
 	private CellularComponent component;
 	
-	public ComponentListCell(String name, CellularComponent c){
+	public ComponentListCell(final String name, final CellularComponent c){
+		if(name == null){
+			throw new IllegalArgumentException("Name cannot be null in component list cell");
+		}
+		
+		if(c == null){
+			throw new IllegalArgumentException("Component cannot be null in component list cell");
+		}
+		
 		this.name = name;
 		this.component = c;
 	}

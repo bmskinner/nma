@@ -28,6 +28,7 @@ import components.ICellCollection;
 import components.active.generic.DefaultProfileCollection;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
+import components.active.generic.UnavailableSignalGroupException;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -354,7 +355,7 @@ public class VirtualCellCollection implements ICellCollection {
 	public void removeSignalGroup(UUID id) {}
 
 	@Override
-	public ISignalGroup getSignalGroup(UUID signalGroup) {
+	public ISignalGroup getSignalGroup(UUID signalGroup) throws UnavailableSignalGroupException {
 		return parent.getCollection().getSignalGroup(signalGroup);
 	}
 

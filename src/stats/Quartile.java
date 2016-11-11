@@ -103,7 +103,11 @@ public class Quartile extends DescriptiveStatistic {
 			  value =  values[0];
 		  }
 		  
-		  if(values.length>1){
+		  if(values.length==2){
+			  value = lowerPercent < MEDIAN ? values[0] : values[1];
+		  }
+		  
+		  if(values.length>2){
 
 			  // Rank order the values
 			  Number[] v = new Number[values.length];

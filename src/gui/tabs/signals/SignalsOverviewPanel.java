@@ -55,6 +55,7 @@ import charting.options.ChartOptionsBuilder;
 import charting.options.TableOptions;
 import charting.options.DefaultTableOptions.TableType;
 import charting.options.TableOptionsBuilder;
+import components.active.generic.UnavailableSignalGroupException;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import gui.ChartSetEvent;
@@ -163,17 +164,23 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	 * @param row the row selected (the colour bar, one above the group name)
 	 */
 	private void updateSignalColour(SignalTableCell signalGroup){
-        Color oldColour = signalGroup.getColor();
 		
-		Color newColor = JColorChooser.showDialog(
-                 this,
-                 "Choose signal Color",
-                 oldColour);
-		
-		if(newColor != null){
-            activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);
-			this.update(getDatasets());
-			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+		try {
+			Color oldColour = signalGroup.getColor();
+
+			Color newColor = JColorChooser.showDialog(
+					this,
+					"Choose signal Color",
+					oldColour);
+
+			if(newColor != null){
+				activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);
+				this.update(getDatasets());
+				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+			}
+		} catch(UnavailableSignalGroupException e){
+			warn("Cannot change signal colour");
+			fine("Error getting signal group", e);
 		}
 	}
 			
@@ -194,6 +201,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
             	if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
             		continue;
             	}
+            	
+            	try {
 
             	// get the status within each dataset
                 boolean visible = activeDataset().getCollection().getSignalGroup(signalGroup).isVisible();
@@ -215,6 +224,10 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 				box.setActionCommand("GroupVisble_"+signalGroup);
 				box.addActionListener(this);
 				panel.add(box);
+				
+            	} catch(UnavailableSignalGroupException e){
+        			fine("Error getting signal group", e);
+        		}
 
 			}
 
@@ -347,12 +360,17 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().startsWith("GroupVisble_")){
-			
-			UUID signalGroup = getSignalGroupFromLabel(e.getActionCommand());
-			JCheckBox box = (JCheckBox) e.getSource();
-            activeDataset().getCollection().getSignalGroup(signalGroup).setVisible( box.isSelected());
-			fireSignalChangeEvent("GroupVisble_");
-			this.refreshChartCache(getDatasets());
+
+			try {
+
+				UUID signalGroup = getSignalGroupFromLabel(e.getActionCommand());
+				JCheckBox box = (JCheckBox) e.getSource();
+				activeDataset().getCollection().getSignalGroup(signalGroup).setVisible( box.isSelected());
+				fireSignalChangeEvent("GroupVisble_");
+				this.refreshChartCache(getDatasets());
+			} catch(UnavailableSignalGroupException e1){
+				fine("Error getting signal group", e1);
+			}
 		}
 		updateSignalConsensusChart();
 		

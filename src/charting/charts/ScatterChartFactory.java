@@ -31,6 +31,8 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.data.xy.XYDataset;
 
+import components.active.generic.UnavailableSignalGroupException;
+
 import analysis.IAnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.ChartDatasetCreationException;
@@ -193,10 +195,15 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			for(IAnalysisDataset d : options.getDatasets()){
 				if(d.getName().equals(datasetName)){
 					
-					if(d.getCollection().hasSignalGroup(id)){
-						colour = d.getCollection().getSignalGroup(id).hasColour()
-								? d.getCollection().getSignalGroup(id).getGroupColour()
-								: colour;
+					try {
+					
+						if(d.getCollection().hasSignalGroup(id)){
+							colour = d.getCollection().getSignalGroup(id).hasColour()
+									? d.getCollection().getSignalGroup(id).getGroupColour()
+											: colour;
+						}
+					} catch (UnavailableSignalGroupException e){
+						fine("Signal group "+id+" is not present in collection", e);
 					}
 				}
 			}				

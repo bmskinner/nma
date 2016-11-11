@@ -29,6 +29,7 @@ import javax.swing.JOptionPane;
 
 import components.AbstractCellularComponent;
 import components.active.DefaultAnalysisDataset;
+import components.active.generic.UnavailableSignalGroupException;
 import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
@@ -423,7 +424,14 @@ public class PopulationImportWorker extends AnalysisWorker {
 	
 	private File getSignalDirectory(IAnalysisDataset dataset, UUID signalID){
 		
-		String signalName = dataset.getCollection().getSignalGroup(signalID).getGroupName();
+		String signalName;
+		try {
+			signalName = dataset.getCollection().getSignalGroup(signalID).getGroupName();
+		} catch (UnavailableSignalGroupException e) {
+			warn("Missing signal group, cannot continue");
+			fine("Error getting signal group", e);
+			return null;
+		}
 		
 		JOptionPane.showMessageDialog(null, "Choose the folder with images for signal group "+signalName);
 		

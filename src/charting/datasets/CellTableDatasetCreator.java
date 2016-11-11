@@ -38,6 +38,7 @@ import charting.options.TableOptions;
 import components.ICell;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableSignalGroupException;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.BorderPoint;
@@ -200,43 +201,44 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
 		for(UUID signalGroup : d.getCollection().getSignalGroupIDs()){
 			
+			try {
 
-			if( ! n.getSignalCollection().hasSignal(signalGroup)){
+				ISignalGroup g = d.getCollection().getSignalGroup(signalGroup);
+
+				fieldNames.add("");
+				rowData.add("");
+
+				SignalTableCell tableCell = new SignalTableCell(signalGroup, g.getGroupName());
+
+				Paint colour = g.hasColour()
+						? g.getGroupColour()
+						: ColourSelecter.getColor(j);
+
+				tableCell.setColor((Color) colour);
+
+				fieldNames.add("Signal group");
+				rowData.add(tableCell);		
+
+				fieldNames.add("Source image");
+				rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
+
+				fieldNames.add("Source channel");
+				rowData.add(g.getChannel());
+
+				fieldNames.add("Number of signals");
+				rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
+
+				for(INuclearSignal s : n.getSignalCollection().getSignals(signalGroup)){
+					addSignalStatisticsToTable(fieldNames, rowData, s );
+				}	
+			} catch (UnavailableSignalGroupException e){
+				fine("Signal group "+signalGroup+" is not present in collection", e);
+			} finally {
 				j++;
-				continue;
 			}
-			
-			ISignalGroup g = d.getCollection().getSignalGroup(signalGroup);
-
-			fieldNames.add("");
-			rowData.add("");
-
-			SignalTableCell tableCell = new SignalTableCell(signalGroup, g.getGroupName());
-
-			Paint colour = g.hasColour()
-					     ? g.getGroupColour()
-						 : ColourSelecter.getColor(j++);
-
-			tableCell.setColor((Color) colour);
-
-			fieldNames.add("Signal group");
-			rowData.add(tableCell);		
-
-			fieldNames.add("Source image");
-			rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
-
-			fieldNames.add("Source channel");
-			rowData.add(g.getChannel());
-
-			fieldNames.add("Number of signals");
-			rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
-
-			for(INuclearSignal s : n.getSignalCollection().getSignals(signalGroup)){
-				addSignalStatisticsToTable(fieldNames, rowData, s );
-			}			
 
 		}
-		
+
 	}
 	
 	/**

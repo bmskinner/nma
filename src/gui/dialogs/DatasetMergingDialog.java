@@ -20,6 +20,8 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import charting.datasets.AnalysisDatasetTableCreator;
+import components.active.generic.UnavailableSignalGroupException;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import gui.LoadingIconDialog;
@@ -147,38 +149,44 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 	}
 	
 	private void updateTable(){
-		
+
 		DefaultTableModel model = new DefaultTableModel();
-		
+
 		Object[] columns = { "Signal group", "Signal group" };
-		
+
 		model.setColumnIdentifiers(columns);
-		
-		for(UUID id1 : pairedSignalGroups.keySet()){
-			String col1 = "";
-			for(IAnalysisDataset d : datasets){
-				if(d.getCollection().getSignalManager().hasSignals(id1)){
-					col1 = d.getName()+" : "+d.getCollection().getSignalGroup(id1).getGroupName();
-				}
-			}
-			Set<UUID> idList = pairedSignalGroups.get(id1);
-			for( UUID id2 :idList){
-				String col2 =  "";
+
+		try {
+
+			for(UUID id1 : pairedSignalGroups.keySet()){
+				String col1 = "";
 				for(IAnalysisDataset d : datasets){
-					if(d.getCollection().getSignalManager().hasSignals(id2)){
-						col2 = d.getName()+" : "+d.getCollection().getSignalGroup(id2).getGroupName();
+					if(d.getCollection().getSignalManager().hasSignals(id1)){
+						col1 = d.getName()+" : "+d.getCollection().getSignalGroup(id1).getGroupName();
 					}
 				}
-				
-				Object[] row = { col1, col2};
-				model.addRow(row);
+				Set<UUID> idList = pairedSignalGroups.get(id1);
+				for( UUID id2 :idList){
+					String col2 =  "";
+					for(IAnalysisDataset d : datasets){
+						if(d.getCollection().getSignalManager().hasSignals(id2)){
+							col2 = d.getName()+" : "+d.getCollection().getSignalGroup(id2).getGroupName();
+						}
+					}
+
+					Object[] row = { col1, col2};
+					model.addRow(row);
+				}
+
+
 			}
-			
-			
+			matchTable.setModel(model);
+		} catch(UnavailableSignalGroupException e){
+			warn("Error making signal table");
+			fine("Error getting signals", e);
+			matchTable.setModel(AnalysisDatasetTableCreator.createBlankTable());
 		}
-		
-		
-		matchTable.setModel(model);
+
 	}
 
 

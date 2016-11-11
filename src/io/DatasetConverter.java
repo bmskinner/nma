@@ -48,6 +48,7 @@ import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.VirtualCellCollection;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
+import components.active.generic.UnavailableSignalGroupException;
 import components.generic.IPoint;
 import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
@@ -224,7 +225,13 @@ public class DatasetConverter implements Loggable {
 		}
 		
 		for(UUID id : oldCollection.getSignalGroupIDs()){
-			newCollection.addSignalGroup(id, oldCollection.getSignalGroup(id));
+			
+			try {
+				newCollection.addSignalGroup(id, oldCollection.getSignalGroup(id));
+			} catch (UnavailableSignalGroupException e) {
+				warn("Cannot convert signal group");
+				fine("Error getting signal group", e);
+			}
 		}
 		
 		

@@ -15,6 +15,7 @@ import analysis.signals.SignalManager;
 import logging.Loggable;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
+import components.active.generic.UnavailableSignalGroupException;
 import components.generic.IProfileCollection;
 import components.generic.MeasurementScale;
 import components.generic.Tag;
@@ -253,7 +254,7 @@ public interface ICellCollection
 	 * @param signalGroup
 	 * @return the signal group, or null if not present
 	 */
-	ISignalGroup getSignalGroup(UUID signalGroup);
+	ISignalGroup getSignalGroup(UUID signalGroup) throws UnavailableSignalGroupException;
 
 	/**
 	 * Test if the collection has a signal group with the given ID

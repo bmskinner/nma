@@ -20,6 +20,7 @@ import charting.options.TableOptions;
 import components.ICell;
 import components.ICellCollection;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableSignalGroupException;
 import components.generic.MeasurementScale;
 import components.generic.Tag;
 import components.nuclear.INuclearSignal;
@@ -303,33 +304,39 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 			Set<UUID> groups = m.getSignalGroupIDs();
 			
 			for(UUID id : groups){
-				
-				if(id.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-            		continue;
-            	}
-				
-				int signalCount = m.getSignalCount(id);
-				
-				double[] xpoints = new double[signalCount];
-				double[] ypoints = new double[signalCount];
-				
-				List<INuclearSignal> list = m.getSignals(id);
-				
-				for(int j=0; j<signalCount;j++){
-					
-					xpoints[j] = list.get(j).getStatistic(statA, scale);
-					ypoints[j] = list.get(j).getStatistic(statB, scale);
 
+				if(id.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+					continue;
 				}
-				names.add(c.getName()+"_"+m.getSignalGroupName(id));
-				
-				double rhoValue = 0;
-				
-				if(xpoints.length>0){ // If a collection has signal group, but not signals
-					rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
+
+				try {
+
+					int signalCount = m.getSignalCount(id);
+
+					double[] xpoints = new double[signalCount];
+					double[] ypoints = new double[signalCount];
+
+					List<INuclearSignal> list = m.getSignals(id);
+
+					for(int j=0; j<signalCount;j++){
+
+						xpoints[j] = list.get(j).getStatistic(statA, scale);
+						ypoints[j] = list.get(j).getStatistic(statB, scale);
+
+					}
+					names.add(c.getName()+"_"+m.getSignalGroupName(id));
+
+					double rhoValue = 0;
+
+					if(xpoints.length>0){ // If a collection has signal group, but not signals
+						rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
+					}
+
+					rho.add( DEFAULT_DECIMAL_FORMAT.format( rhoValue ) );
+
+				} catch (UnavailableSignalGroupException e){
+					fine("Signal group "+id+" is not present in collection", e);
 				}
-				
-				rho.add( DEFAULT_DECIMAL_FORMAT.format( rhoValue ) );
 			}
 
 			
