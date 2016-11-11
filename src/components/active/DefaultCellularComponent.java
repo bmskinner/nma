@@ -4,7 +4,6 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -18,7 +17,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import analysis.image.ImageConverter;
-import components.AbstractCellularComponent;
 import components.CellularComponent;
 import components.active.generic.FloatPoint;
 import components.generic.IPoint;
@@ -66,6 +64,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	private IPoint centreOfMass = IPoint.makeNew(0, 0);
 	
 	/**
+	 * The original centre of the object.
+	 */
+	private final IPoint originalCentreOfMass;
+	
+	/**
 	 * The statistical values stored for this object, which should
 	 * be an enum implementing {@link PlottableStatistic}
 	 */
@@ -108,56 +111,35 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	
 	private transient SoftReference<ImageProcessor> imageRef = new SoftReference<ImageProcessor>(null); // allow caching of images while memory is available
 	
-	private DefaultCellularComponent(){
+	/**
+	 * A private constructor which sets the immutable original centre of mass, 
+	 * and the mutable current centre of mass. It also assigns a random ID to
+	 * the component.
+	 * @param centreOfMass the original centre of mass of the component within its source image
+	 */
+	private DefaultCellularComponent(IPoint centreOfMass){
+		this.originalCentreOfMass = centreOfMass;
+		this.centreOfMass         = centreOfMass;
 		this.id = java.util.UUID.randomUUID();
 	}
 	
 	/**
-	 * Construct with an ROI, and a source image and channel
-	 * @param roi
-	 * @param f
-	 * @param channel
+	 * Construct using an roi and an original centre of mass
+	 * @param roi the roi of the object
+	 * @param centerOfMass the original centre of mass of the component
 	 */
-	public DefaultCellularComponent(Roi roi, File f, int channel){
-		this(roi);
-		this.setSourceFile(f);
-		this.setChannel(channel);
-	}
-	
-	/**
-	 * Construct with an ROI, a source image and channel, and the original position in the source image
-	 * @param roi
-	 * @param f
-	 * @param channel
-	 * @param position
-	 */
-	public DefaultCellularComponent(Roi roi, File f, int channel, int[] position){
-		this(roi, f, channel);
-		this.position = position;
-	}
-	
-	/**
-	 * Construct with an ROI, a source image and channel, and the original position in the source image
-	 * @param roi
-	 * @param f
-	 * @param channel
-	 * @param position
-	 * @param centreOfMass
-	 */
-	public DefaultCellularComponent(Roi roi, File f, int channel, int[] position, IPoint centreOfMass){
-		this(roi, f, channel, position);
-		this.centreOfMass = centreOfMass;
-	}
-	
-	/**
-	 * Construct using an roi
-	 * @param roi
-	 */
-	public DefaultCellularComponent(Roi roi){
-		this();
+	private DefaultCellularComponent(Roi roi, IPoint centreOfMass){
+		this(centreOfMass);
 		
 		if(roi==null){
-			throw new IllegalArgumentException("Constructor argument is null");
+			throw new IllegalArgumentException("Roi cannot be null");
+		}
+		
+		if( ! roi.contains(centreOfMass.getXAsInt(), centreOfMass.getYAsInt())){
+			throw new IllegalArgumentException("Cannot create object: the centre of mass ("
+					+centreOfMass.toString()
+					+") is not within the roi ("
+					+roi.getXBase()+", "+roi.getYBase()+")");
 		}
 		
 //		log(roi.getTypeAsString());
@@ -178,6 +160,34 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		// Only smooth the points for large objects like nuclei
 		makeBorderList(roi);		
 	}
+	
+	/**
+	 * Construct with an ROI, and a source image and channel
+	 * @param roi the roi of the object
+	 * @param centerOfMass the original centre of mass of the component
+	 * @param f the file the component was found in
+	 * @param channel the RGB channel the component was found in 
+	 */
+	private DefaultCellularComponent(Roi roi, IPoint centreOfMass, File f, int channel){
+		this(roi, centreOfMass);
+		this.setSourceFile(f);
+		this.setChannel(channel);
+	}
+	
+	/**
+	 * Construct with an ROI, a source image and channel, and the original position in the source image
+	 * @param roi the roi of the object
+	 * @param centerOfMass the original centre of mass of the component
+	 * @param f the file the component was found in
+	 * @param channel the RGB channel the component was found in 
+	 * @param position the bounding position of the component in the original image
+	 */
+	public DefaultCellularComponent(Roi roi, IPoint centreOfMass, File f, int channel, int[] position){
+		this(roi, centreOfMass, f, channel);
+		this.position = position;
+	}
+		
+
 	
 	protected void makeBorderList(Roi roi){
 		
@@ -208,8 +218,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * @param a
 	 */
 	public DefaultCellularComponent(CellularComponent a){
-		this.id = a.getID();
-		this.position = a.getPosition();
+		this.id                   = a.getID();
+		this.position             = a.getPosition();
+		this.originalCentreOfMass = a.getOriginalCentreOfMass();
 		
 		finest("Set id and position");
 		
@@ -478,20 +489,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		}
 		
 		public IPoint getOriginalCentreOfMass() {
-			
-			// Get the current position of the object
-			double minX = this.getBounds().getX();
-			double minY = this.getBounds().getY();
-			
-			// Find the difference between the current position and the 
-			// original position
-			double diffX = position[CellularComponent.X_BASE] - minX;
-			double diffY = position[CellularComponent.Y_BASE] - minY;
-			
-			// Offset to the original position
-			IPoint com = IPoint.makeNew(centreOfMass.getX()+diffX, centreOfMass.getY()+diffY);
-			
-			return com;
+			return IPoint.makeNew( originalCentreOfMass);
 		}
 				
 		/**
@@ -516,17 +514,20 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		public IBorderPoint getOriginalBorderPoint(int i){
 			IBorderPoint p = getBorderPoint(i);
 			
-			// Get the current position of the object
-			double minX = this.getBounds().getX();
-			double minY = this.getBounds().getY();
-
-			// Find the difference between the current position and the 
-			// original position
-			double diffX = position[CellularComponent.X_BASE] - minX;
-			double diffY = position[CellularComponent.Y_BASE] - minY;
+			double diffX = p.getX() - centreOfMass.getX();
+			double diffY = p.getY() - centreOfMass.getY();
+			
+//			// Get the current position of the object
+//			double minX = this.getBounds().getX();
+//			double minY = this.getBounds().getY();
+//
+//			// Find the difference between the current position and the 
+//			// original position
+//			double diffX = position[CellularComponent.X_BASE] - minX;
+//			double diffY = position[CellularComponent.Y_BASE] - minY;
 
 			// Offset to the original position
-			IBorderPoint ip = IBorderPoint.makeNew(p.getX()+diffX, p.getY()+diffY);
+			IBorderPoint ip = IBorderPoint.makeNew(originalCentreOfMass.getX()+diffX, originalCentreOfMass.getY()+diffY);
 
 			return ip;
 		}
@@ -558,14 +559,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		public List<IBorderPoint> getOriginalBorderList(){
 			List<IBorderPoint> result = new ArrayList<IBorderPoint>(borderList.size());
 			
-			// Get the current position of the object
-			double minX = this.getBounds().getX();
-			double minY = this.getBounds().getY();
+						
+			double diffX = originalCentreOfMass.getX() - centreOfMass.getX();
+			double diffY = originalCentreOfMass.getY() - centreOfMass.getY();
 
-			// Find the difference between the current position and the 
-			// original position
-			double diffX = position[CellularComponent.X_BASE] - minX;
-			double diffY = position[CellularComponent.Y_BASE] - minY;
 			
 			// Offset to the original position
 			for(IBorderPoint p : borderList){
@@ -799,22 +796,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		}
 		
 		public Shape toOriginalShape(){
-			
-			// The object is created, and the border points are
-			// against a x=0, y=0 boundary
-			
-			// Situation: the object has been moved since creation.
-			
-			// Now the borders cannot be guaranteed to be on the
-			// x=0,y=0 lines.
-			
-			// Moving by the X_BASE and Y_BASE offsets will not help.
-			
-			// Calculate the difference between the min x and min y of the 
-			// borders, and apply this offset
+						
+			// Calculate the difference between the original CoM and the new CoM
+			// and apply this offset
 					
-			double diffX = position[CellularComponent.X_BASE] - getMinX();
-			double diffY = position[CellularComponent.Y_BASE] - getMinY();
+			double diffX = originalCentreOfMass.getX() - centreOfMass.getX();
+			double diffY = originalCentreOfMass.getY() - centreOfMass.getY();
 			
 			return toOffsetShape(diffX, diffY);
 		}

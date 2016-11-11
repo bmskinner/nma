@@ -43,7 +43,7 @@ public class NuclearSignal extends AbstractCellularComponent implements INuclear
 	private int closestNuclearBorderPoint;
 	
 	
-	public NuclearSignal(Roi roi, File f, int channel, int[] position, IPoint centreOfMass){
+	private NuclearSignal(Roi roi, File f, int channel, int[] position, IPoint centreOfMass){
 		super(roi, f, channel, position, centreOfMass);
 		
 	}
@@ -52,7 +52,7 @@ public class NuclearSignal extends AbstractCellularComponent implements INuclear
 	 * Create a copy of the given signal
 	 * @param n
 	 */
-	public NuclearSignal(NuclearSignal n){
+	private NuclearSignal(NuclearSignal n){
 		super(n);
 
 		this.closestNuclearBorderPoint = n.closestNuclearBorderPoint;
@@ -112,4 +112,10 @@ public class NuclearSignal extends AbstractCellularComponent implements INuclear
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+//	@Override
+//	public void setPositionWithin(CellularComponent c) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 }

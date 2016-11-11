@@ -182,7 +182,7 @@ public final class DatasetListManager implements Loggable {
 	}
 	
 	public synchronized void addDataset(IAnalysisDataset d){
-		if(d.isRoot()){
+		if(d.isRoot() && !list.contains(d)){
 			list.add(d);
 			fine("Adding hash code: "+d.getName()+" - "+d.hashCode());
 			map.put(d.getUUID(), d.hashCode());

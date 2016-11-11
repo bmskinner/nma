@@ -103,12 +103,13 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		fine("Finished processing sub-populations");
 		// we have morphology analysis to carry out, so don't use the super finished
 		// use the same segmentation from the initial analysis
-		int flag = 0; // set the downstream analyses to run
-		flag |= MainWindow.ADD_POPULATION;
-		fine("Firing cache refresh request");
-		fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
-		fine("Running new segmentation on sub-populations");
-		new RunSegmentationAction(list, dataset, flag, mw);
+//		int flag = 0; // set the downstream analyses to run
+//		flag |= MainWindow.ADD_POPULATION;
+//		fine("Firing cache refresh request");
+		fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
+//		fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
+//		fine("Running new segmentation on sub-populations");
+//		new RunSegmentationAction(list, dataset, flag, mw);
 
 		cancel();
 		

@@ -296,9 +296,10 @@ public interface CellularComponent
 	public void moveCentreOfMass(IPoint point);
 	
 	/**
-	 * Translate the XY coordinates of each border point so that
-	 * the nuclear centre of mass is at the given point
-	 * @param point the new centre of mass
+	 * Translate the XY coordinates of each border point and the centre
+	 * of mass by the given amount in the x and y axes
+	 * @param xOffset the amount to move the border in the x-dimension
+	 * @param yOffset the amount to move the border in the y-dimension
 	 */
 	public void offset(double xOffset, double yOffset);
 	

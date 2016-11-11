@@ -75,6 +75,14 @@ public interface ISignalCollection extends Serializable, Loggable {
 	 * @return a list of signals
 	 */
 	List<INuclearSignal> getSignals(UUID signalGroup);
+	
+	/**
+	 * Get all the signals in the nucleus. Fetches the actual signals, 
+	 * not a copy. Unlike {@link ISignalCollection#getSignals()}, this
+	 * combines all signals into a single list.
+	 * @return a list of signals
+	 */
+	List<INuclearSignal> getAllSignals();
 
 	/**
 	 * Get the file containing the signals in the given signal group

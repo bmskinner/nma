@@ -321,18 +321,18 @@ public class NucleusDetector extends Detector {
 		  try {
 
 			  // The classes for the constructor
-			  Class<?>[] classes = {Roi.class, File.class, int.class, int[].class, int.class, IPoint.class };
+			  Class<?>[] classes = {Roi.class, IPoint.class, File.class, int.class, int[].class, int.class };
 			  
 			  Constructor<?> nucleusConstructor = nucleusType.getNucleusClass()
 					  .getConstructor(classes);
 			  
 
-			  n = (Nucleus) nucleusConstructor.newInstance(roi, 
+			  n = (Nucleus) nucleusConstructor.newInstance(roi,
+					  centreOfMass, 
 					  path, 
 					  channel, 
 					  originalPosition,
-					  nucleusNumber,
-					  centreOfMass);
+					  nucleusNumber);
 			  
 		  } catch(Exception e){
 

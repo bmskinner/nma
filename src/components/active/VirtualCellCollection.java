@@ -179,9 +179,17 @@ public class VirtualCellCollection implements ICellCollection {
 	@Override
 	public synchronized Set<Nucleus> getNuclei() {
 		Set<Nucleus> result = new HashSet<Nucleus>(cellIDs.size());
+		
+		ICellCollection parentCollection = parent.getCollection();
+		
+		if(parentCollection==null){
+			warn("Parent collection not restored!");
+		}
+		
 		for(UUID id : cellIDs){
-			Nucleus n = parent.getCollection().getCell(id).getNucleus();
-				result.add(n);
+			ICell c = parentCollection.getCell(id);
+			Nucleus n = c.getNucleus();
+			result.add(n);
 		}
 
 		return result;
@@ -973,8 +981,10 @@ public class VirtualCellCollection implements ICellCollection {
 		isRefolding = false;
 		vennCache   = new HashMap<UUID, Integer>(); // cache the number of shared nuclei with other datasets
 
-		// Make sure any profile aggregates match the length of saved segments
-		this.profileCollection.createAndRestoreProfileAggregate(this);
+		// Don't try to restore profile aggregates here - the parent collection has
+		// not finished loading, and will be null. Do the restore in the importing class
+		// after reading has finished.
+
 
 	}
 	

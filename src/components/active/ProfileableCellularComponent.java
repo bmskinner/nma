@@ -55,13 +55,12 @@ public abstract class ProfileableCellularComponent
 	 */
 
 	protected transient int    angleProfileWindowSize; // the chosen window size for the nucleus based on proportion
+
 	
-	
-	
-	public ProfileableCellularComponent(Roi roi, File f, int channel, int[] position){
-		super(roi, f, channel, position);
-		
-	}
+//	public ProfileableCellularComponent(Roi roi, File f, int channel, int[] position){
+//		super(roi, f, channel, position);
+//		
+//	}
 	
 	/**
 	 * Construct with an ROI, a source image and channel, and the original position in the source image
@@ -71,8 +70,8 @@ public abstract class ProfileableCellularComponent
 	 * @param position
 	 * @param centreOfMass
 	 */
-	public ProfileableCellularComponent(Roi roi, File f, int channel, int[] position, IPoint centreOfMass){
-		super(roi, f, channel, position, centreOfMass );
+	public ProfileableCellularComponent(Roi roi, IPoint centreOfMass, File f, int channel, int[] position){
+		super(roi, centreOfMass, f, channel, position );
 	}
 		
 	public ProfileableCellularComponent(CellularComponent c) throws UnprofilableObjectException {

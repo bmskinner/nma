@@ -1326,7 +1326,7 @@ public class NucleusDatasetCreator implements Loggable {
 					
 					// get the corresponding border index. The segments are zeroed at the tail point
 					// so the correct border point needs to be offset
-					int borderIndex = AbstractCellularComponent.wrapIndex(seg.getStartIndex()+j+pointIndex, n.getBorderLength());
+					int borderIndex = n.wrapIndex(seg.getStartIndex()+j+pointIndex);
 					
 					IBorderPoint p = n.getBorderPoint(borderIndex); // get the border points in the segment
 					xpoints[j] = p.getX();
@@ -1481,6 +1481,11 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		if(cell==null){
 			finest("Input cell is null, returning blank signal outline dataset list");
+			return result;
+		}
+		
+		if(dataset==null){
+			finest("Input dataset is null, returning blank signal outline dataset list");
 			return result;
 		}
 		

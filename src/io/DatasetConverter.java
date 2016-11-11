@@ -32,6 +32,7 @@ import logging.Loggable;
 import stats.PlottableStatistic;
 import utility.Constants;
 import utility.Version;
+import components.CellularComponent;
 import components.ClusterGroup;
 import components.ICell;
 import components.ICellCollection;
@@ -126,7 +127,7 @@ public class DatasetConverter implements Loggable {
 
 		} catch(Exception e){
 			error("Error converting dataset", e);
-			throw new DatasetConversionException(e);
+			throw new DatasetConversionException(e.getCause());
 		}
 	}
 	
@@ -287,7 +288,7 @@ public class DatasetConverter implements Loggable {
 		File f      = n.getSourceFile(); // the source file
 		int channel = n.getChannel();// the detection channel
 		int number  = n.getNucleusNumber(); // copy over
-		IPoint com  = n.getCentreOfMass();
+		IPoint com  = n.getOriginalCentreOfMass();
 		
 		// Position converted down internally
 		int[] position = n.getPosition();
@@ -296,28 +297,29 @@ public class DatasetConverter implements Loggable {
 		float[] xpoints = new float[n.getBorderLength()], ypoints = new float[n.getBorderLength()];
 		
 		for(int i=0; i<xpoints.length; i++){
-			xpoints[i] = (float) n.getBorderPoint(i).getX();
-			ypoints[i] = (float) n.getBorderPoint(i).getY();
+			xpoints[i] = (float) n.getOriginalBorderPoint(i).getX();
+			ypoints[i] = (float) n.getOriginalBorderPoint(i).getY();
 		}
 		
 		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
 		
 		
 		// Use the default constructor
-		Nucleus newNucleus = new DefaultNucleus(roi, f, channel, position, number, com);
+		Nucleus newNucleus = new DefaultNucleus(roi, com, f, channel, position, number);
 
 		newNucleus = copyGenericData(n, newNucleus);
+		newNucleus.moveCentreOfMass(n.getCentreOfMass());
 		return  newNucleus;
 
 	}
 	
-	private Nucleus makeRodentNucleus(Nucleus n) throws DatasetConversionException{
+	private Nucleus makeRodentNucleus(Nucleus n) throws DatasetConversionException {
 		
 		// Easy stuff
 		File f      = n.getSourceFile(); // the source file
 		int channel = n.getChannel();// the detection channel
 		int number  = n.getNucleusNumber(); // copy over
-		IPoint com  = n.getCentreOfMass();
+		IPoint com  = n.getOriginalCentreOfMass();
 		
 		// Position converted down internally
 		int[] position = n.getPosition();
@@ -326,18 +328,33 @@ public class DatasetConverter implements Loggable {
 		float[] xpoints = new float[n.getBorderLength()], ypoints = new float[n.getBorderLength()];
 		
 		for(int i=0; i<xpoints.length; i++){
-			xpoints[i] = (float) n.getBorderPoint(i).getX();
-			ypoints[i] = (float) n.getBorderPoint(i).getY();
+			xpoints[i] = (float) n.getOriginalBorderPoint(i).getX();
+			ypoints[i] = (float) n.getOriginalBorderPoint(i).getY();
 		}
 		
 		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
 		
+		if(! roi.contains(n.getOriginalCentreOfMass().getXAsInt(), n.getOriginalCentreOfMass().getYAsInt())){
+			warn("Updating roi location");
+			// Set the position of the top left corner of the ROI
+			roi.setLocation(n.getPosition()[CellularComponent.X_BASE], n.getPosition()[CellularComponent.Y_BASE]);
+		}
+		
+		
 		finer("\tCreated roi");
 		// Use the default constructor
-		Nucleus newNucleus = new DefaultRodentSpermNucleus(roi, f, channel, position, number, com);
+		
+		try {
+		
+		Nucleus newNucleus = new DefaultRodentSpermNucleus(roi, com, f, channel, position, number);
 		
 		newNucleus = copyGenericData(n, newNucleus);
+		newNucleus.moveCentreOfMass(n.getCentreOfMass());
 		return newNucleus;
+		} catch(IllegalArgumentException e){
+			error("Error making nucleus", e);
+			throw new DatasetConversionException("Cannot create nucleus from input data",e);
+		}
 	}
 	
 	private Nucleus makePigNucleus(Nucleus n) throws DatasetConversionException{
@@ -346,7 +363,7 @@ public class DatasetConverter implements Loggable {
 		File f      = n.getSourceFile(); // the source file
 		int channel = n.getChannel();// the detection channel
 		int number  = n.getNucleusNumber(); // copy over
-		IPoint com  = n.getCentreOfMass();
+		IPoint com  = n.getOriginalCentreOfMass();
 		
 		// Position converted down internally
 		int[] position = n.getPosition();
@@ -355,17 +372,19 @@ public class DatasetConverter implements Loggable {
 		float[] xpoints = new float[n.getBorderLength()], ypoints = new float[n.getBorderLength()];
 		
 		for(int i=0; i<xpoints.length; i++){
-			xpoints[i] = (float) n.getBorderPoint(i).getX();
-			ypoints[i] = (float) n.getBorderPoint(i).getY();
+			xpoints[i] = (float) n.getOriginalBorderPoint(i).getX();
+			ypoints[i] = (float) n.getOriginalBorderPoint(i).getY();
 		}
 		
 		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
 		
 		
 		// Use the default constructor
-		Nucleus newNucleus = new DefaultPigSpermNucleus(roi, f, channel, position, number, com);
+		Nucleus newNucleus = new DefaultPigSpermNucleus(roi, com, f, channel, position, number);
 		
 		newNucleus = copyGenericData(n, newNucleus);
+		
+		newNucleus.moveCentreOfMass(n.getCentreOfMass());
 		
 		return  newNucleus;
 
@@ -495,25 +514,39 @@ public class DatasetConverter implements Loggable {
 
 			for(INuclearSignal s : template.getSignalCollection().getSignals(signalGroup)){
 
-				// Get the roi for the old nucleus
+				// Get the roi for the old signal
 				float[] xpoints = new float[s.getBorderLength()], ypoints = new float[s.getBorderLength()];
 
 				for(int i=0; i<xpoints.length; i++){
-					xpoints[i] = (float) s.getBorderPoint(i).getX();
-					ypoints[i] = (float) s.getBorderPoint(i).getY();
+					xpoints[i] = (float) s.getOriginalBorderPoint(i).getX();
+					ypoints[i] = (float) s.getOriginalBorderPoint(i).getY();
 				}
+				
+			
 
 				PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
+				
+				// Move the roi over the original centre of mass if it is not already there
+				
+				if(! roi.contains(s.getOriginalCentreOfMass().getXAsInt(), s.getOriginalCentreOfMass().getYAsInt())){
+					warn("Updating signal location from "+roi.getXBase()+", "+roi.getYBase());
+					// Set the position of the top left corner of the ROI
+					roi.setLocation(s.getPosition()[CellularComponent.X_BASE], s.getPosition()[CellularComponent.Y_BASE]);
+					warn("Updated signal location now   "+roi.getXBase()+", "+roi.getYBase());
+				}
+				
 
 				INuclearSignal newSignal = new DefaultNuclearSignal(roi, 
+						s.getOriginalCentreOfMass(),
 						s.getSourceFile(), 
-						s.getChannel(), s.getPosition(), s.getCentreOfMass());
+						s.getChannel(), 
+						s.getPosition());
 
 				for(PlottableStatistic st : s.getStatistics()){
 					newSignal.setStatistic(st, s.getStatistic(st));;
 
 				}
-
+				
 				newNucleus.getSignalCollection().addSignal(newSignal, signalGroup);
 
 			}

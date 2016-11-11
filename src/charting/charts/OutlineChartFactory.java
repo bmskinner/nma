@@ -29,6 +29,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Rectangle;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
@@ -63,6 +64,7 @@ import components.active.generic.FloatPoint;
 import components.active.generic.UnavailableProfileTypeException;
 import components.active.generic.UnavailableSignalGroupException;
 import components.generic.BorderTag;
+import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
@@ -502,24 +504,19 @@ public class OutlineChartFactory extends AbstractChartFactory {
 						String seriesKey = d.getSeriesKey(series).toString();
 						
 						finest("Adding outline for "+seriesKey+" to dataset hash");
-						d.getComponent(seriesKey);
+						
+
+//						IPoint com = d.getComponent(seriesKey).getCentreOfMass();
+//						
+//						Ellipse2D.Double e = new Ellipse2D.Double(com.getX(), com.getY(), 1, 1);
+//						XYShapeAnnotation a = new XYShapeAnnotation(e, null, null, Color.BLUE);
+//						plot.getRenderer(0).addAnnotation(a, Layer.FOREGROUND);
 						hash.put(hash.size(), seriesKey); // add to the first free entry	
 						datasetHash.put(datasetHash.size(), d);
 					}
 				}
 			}
 		}
-
-//		// get tail datasets if present
-//		if(cell.hasTail()){
-//
-//			XYDataset tailBorder = TailDatasetCreator.createTailOutline(cell);
-//			hash.put(hash.size(), "TailBorder");
-//			datasetHash.put(datasetHash.size(), tailBorder);
-//			XYDataset skeleton = TailDatasetCreator.createTailSkeleton(cell);
-//			hash.put(hash.size(), "TailSkeleton");
-//			datasetHash.put(datasetHash.size(), skeleton);
-//		}
 
 		// set the rendering options for each dataset type
 		finest("Rendering chart");

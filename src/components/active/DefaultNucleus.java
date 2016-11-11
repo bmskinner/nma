@@ -57,9 +57,9 @@ public class DefaultNucleus
 	
 	protected transient boolean canReverse = true;
 
-	public DefaultNucleus(Roi roi, File f, int channel, int[] position, int number ){
-		this(roi, f, channel, position, number, null);		
-	}
+//	public DefaultNucleus(Roi roi, File f, int channel, int[] position, int number ){
+//		this(roi, f, channel, position, number, null);		
+//	}
 	
 	
 	/**
@@ -70,8 +70,8 @@ public class DefaultNucleus
 	 * @param position
 	 * @param centreOfMass
 	 */
-	public DefaultNucleus(Roi roi, File f, int channel, int[] position, int number, IPoint centreOfMass){
-		super(roi, f, channel, position, centreOfMass );
+	public DefaultNucleus(Roi roi, IPoint centreOfMass, File f, int channel, int[] position, int number){
+		super(roi, centreOfMass, f, channel, position  );
 		this.nucleusNumber   = number;
 	}
 		
@@ -351,6 +351,31 @@ public class DefaultNucleus
 		return verticalNucleus;
 	}
 	
+	@Override
+	public void moveCentreOfMass(IPoint point){
+		
+		double diffX = point.getX() - this.getCentreOfMass().getX();
+		double diffY = point.getY() - this.getCentreOfMass().getY();
+		
+		super.offset(diffX, diffY);
+		
+		// Move signals within the nucleus
+		for(INuclearSignal s : this.signalCollection.getAllSignals()){
+			s.offset(diffX, diffY);
+		}
+	}
+	
+	@Override
+	public void offset(double xOffset, double yOffset){
+		
+		super.offset(xOffset, yOffset);
+		
+		// Move signals within the nucleus
+		for(INuclearSignal s : this.signalCollection.getAllSignals()){
+			s.offset(xOffset, yOffset);
+		}
+	}
+	
 	/*
 	 * #############################################
 	 * Methods implementing the Rotatable interface
@@ -588,6 +613,16 @@ public class DefaultNucleus
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		
 		in.defaultReadObject();
+		
+//		// Ensure that any signals have been offset to lie within the nucleus
+//		for(UUID signalGroupId : signalCollection.getSignalGroupIDs()){
+//			for(INuclearSignal s : signalCollection.getSignals(signalGroupId)){
+//				s.setPositionWithin(this);
+//			}
+//		}
+		
+		
+		
 	    this.verticalNucleus    = null;
 	}
 }

@@ -1,22 +1,11 @@
 package components.active;
 
-import java.awt.Rectangle;
-import java.awt.Shape;
 import java.io.File;
-import java.util.List;
-import java.util.UUID;
-
+import java.io.IOException;
 import components.CellularComponent;
 import components.generic.IPoint;
-import components.generic.MeasurementScale;
-import components.nuclear.IBorderPoint;
 import components.nuclear.INuclearSignal;
-import components.nuclear.NuclearSignal;
 import ij.gui.Roi;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-import io.UnloadableImageException;
-import stats.PlottableStatistic;
 
 /**
  * An implementation of {@link INuclearSignal}.
@@ -32,9 +21,8 @@ public class DefaultNuclearSignal
 
 	private int closestNuclearBorderPoint;
 		
-	public DefaultNuclearSignal(Roi roi, File f, int channel, int[] position, IPoint centreOfMass){
-		super(roi, f, channel, position, centreOfMass);
-		
+	public DefaultNuclearSignal(Roi roi, IPoint centreOfMass, File f, int channel, int[] position ){
+		super(roi, centreOfMass, f, channel, position);
 	}
 	
 	/**
@@ -75,6 +63,67 @@ public class DefaultNuclearSignal
 	@Override
 	public void alignVertically() {
 		// TODO Auto-generated method stub
+	}
+
+//	@Override
+//	public void setPositionWithin(CellularComponent c) {
+//		
+////		 If the signal was never within the component, ignore
+//		if( ! c.containsOriginalPoint(this.getOriginalCentreOfMass())){
+//			return;
+//		}
+//		
+////		// Check that the centre of mass is in sync with the border list
+////		if( ! this.containsPoint(getCentreOfMass())){
+////
+////			IPoint origCoM = this.getOriginalCentreOfMass();
+////			IPoint thisCoM = this.getCentreOfMass();
+////
+////			// Out of sync. Move the border list back over the centre of mass
+////			// Use the difference between the original and current centres of mass
+////			// as a template
+////			double diffX = thisCoM.getX() - origCoM.getX();
+////			double diffY = thisCoM.getY() - origCoM.getY();
+////
+////			this.offset(diffX, diffY);
+////			this.setCentreOfMassDirectly(thisCoM);
+////
+////			// Now the centre of mass is within the border list
+////		}
+//		
+//		// Get the difference between the original positions of the components
+//		IPoint compOrigCoM = this.getOriginalCentreOfMass();
+//		IPoint origCoM     = c.getOriginalCentreOfMass();
+//		
+//		// This is the difference that should exist between the signal CoM and
+//		// the nucleus CoM.
+//		double targetDiffX = compOrigCoM.getX() - origCoM.getX();
+//		double targetDiffY = compOrigCoM.getY() - origCoM.getY();
+//		
+//		IPoint thisCoM = this.getCentreOfMass();
+//		IPoint compCoM = c.getCentreOfMass();
+//		
+//		// This is the difference that does exist between the signal CoM and
+//		// the nucleus CoM.
+//		double actualDiffX = compCoM.getX() - thisCoM.getX();
+//		double actualDiffY = compCoM.getY() - thisCoM.getY();
+//		
+//		double offsetX = actualDiffX - targetDiffX;
+//		double offsetY = actualDiffY - targetDiffY;
+//		
+//		
+//		
+//		// Move the border of this signal by the required amount from 
+//		// the original border position of the signal
+//		
+//		this.offset(offsetX, offsetY);
+////		this.setCentreOfMassDirectly(thisCoM);
+//		
+//	}
+	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+
+		in.defaultReadObject();
 		
 	}
 

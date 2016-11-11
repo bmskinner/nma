@@ -31,6 +31,7 @@ import components.active.DefaultNuclearSignal;
 import components.active.generic.FloatPoint;
 import components.active.generic.FloatProfile;
 import components.generic.BooleanProfile;
+import components.generic.IPoint;
 import components.generic.IProfile;
 import components.generic.Profile;
 import components.generic.XYPoint;
@@ -167,10 +168,11 @@ public class SignalDetector extends Detector {
 				Rectangle bounds = r.getBounds();
 				int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
 				
-				INuclearSignal s = new DefaultNuclearSignal( r, 
-						sourceFile, channel, originalPosition,
-						new FloatPoint(values.get("XM"), values.get("YM"))
-				);
+				INuclearSignal s = new DefaultNuclearSignal( r,
+						IPoint.makeNew(values.get("XM").floatValue(), values.get("YM").floatValue()), 
+						sourceFile, 
+						channel, 
+						originalPosition);
 				
 				s.setStatistic(SignalStatistic.AREA,      values.get("Area"));
 				s.setStatistic(SignalStatistic.MAX_FERET, values.get("Feret"));

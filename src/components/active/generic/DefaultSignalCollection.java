@@ -167,6 +167,18 @@ public class DefaultSignalCollection implements ISignalCollection {
 	}
 	
 	/* (non-Javadoc)
+	 * @see components.nuclear.ISignalCollection#getAllSignals()
+	 */
+	@Override
+	public List<INuclearSignal> getAllSignals(){
+		List<INuclearSignal> result = new ArrayList<INuclearSignal>(0);
+		for(UUID signalGroup : this.getSignalGroupIDs()){
+			result.addAll(getSignals(signalGroup));
+		}
+		return result;
+	}
+	
+	/* (non-Javadoc)
 	 * @see components.nuclear.ISignalCollection#getSignals(java.util.UUID)
 	 */
 	@Override

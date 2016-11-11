@@ -36,10 +36,10 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
 	private static final long serialVersionUID = 1L;
 
-	public DefaultRodentSpermNucleus(Roi roi, File f, int channel, int[] position, int number) {
-		super(roi, f, channel, position, number);
-
-	}
+//	public DefaultRodentSpermNucleus(Roi roi, File f, int channel, int[] position, int number) {
+//		super(roi, f, channel, position, number);
+//
+//	}
 
 	/**
 	 * Construct with an ROI, a source image and channel, and the original position in the source image
@@ -49,7 +49,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 	 * @param position
 	 * @param centreOfMass
 	 */
-	public DefaultRodentSpermNucleus(Roi roi, File f, int channel, int[] position, int number, IPoint centreOfMass){
+	public DefaultRodentSpermNucleus(Roi roi, IPoint centreOfMass, File f, int channel, int[] position, int number){
 		super(roi, f, channel, position, number, centreOfMass );
 	}
 

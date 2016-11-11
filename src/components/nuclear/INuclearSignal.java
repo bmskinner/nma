@@ -27,5 +27,13 @@ public interface INuclearSignal
 	void setClosestBorderPoint(int p);
 
 	INuclearSignal duplicate();
+	
+	/**
+	 * Translate the border and centre of mass of the signal
+	 * to lie within the specified component. The signal must originate
+	 * from an image with the same dimensions as the component.
+	 * @param c the component to place the signal within
+	 */
+//	void setPositionWithin(CellularComponent c);
 
 }

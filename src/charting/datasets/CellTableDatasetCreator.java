@@ -117,6 +117,9 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
 		fieldNames.add("Nucleus CoM");
 		rowData.add(n.getCentreOfMass().toString());
+		
+		fieldNames.add("Original CoM");
+		rowData.add(n.getOriginalCentreOfMass().toString());
 
 		fieldNames.add("Original nucleus position");
 		rowData.add("x: "+n.getPosition()[0]+" : y: "+n.getPosition()[1]);
@@ -262,6 +265,9 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
 		fieldNames.add("Signal CoM");
 		rowData.add(s.getCentreOfMass().toString());
+		
+		fieldNames.add("Original CoM");
+		rowData.add(s.getOriginalCentreOfMass().toString());
 		
 		fieldNames.add("First border point");
 		rowData.add(s.getBorderPoint(0).toString());
