@@ -18,9 +18,6 @@
  *******************************************************************************/
 package analysis.nucleus;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import stats.NucleusStatistic;
 import components.ICell;
 import components.ICellCollection;
@@ -29,10 +26,9 @@ import components.active.DefaultCellCollection;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclei.Nucleus;
+import logging.Loggable;
 
-public class CollectionFilterer {
-
-	private static Logger logger;
+public class CollectionFilterer implements Loggable {
 	
 	public static final int FAILURE_THRESHOLD = 1;
 	public static final int FAILURE_FERET     = 2;
@@ -46,26 +42,22 @@ public class CollectionFilterer {
 	private static double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
 
 
-	public static boolean run(ICellCollection collection, ICellCollection failCollection, Logger fileLogger){
-
-		logger = fileLogger;
+	public boolean run(ICellCollection collection, ICellCollection failCollection){
 		
 		try{
 
-			logger.log(Level.FINE, "Filtering collection...");
+			fine("Filtering collection...");
 			refilterNuclei(collection, failCollection);
-			logger.log(Level.FINE, "Filtering complete");
+			fine("Filtering complete");
 		} catch(Exception e){
 
-			logger.log(Level.SEVERE, "Error filtering", e);
+			error("Error filtering collection "+collection.getName(), e);
 			return false;
-		}  finally {
-//			handler.close();
 		}
 		return true;
 	}
 	
-	private static void refilterNuclei(ICellCollection collection, ICellCollection failCollection) throws Exception{
+	private void refilterNuclei(ICellCollection collection, ICellCollection failCollection) throws Exception{
 
 	    double medianArea = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
 	    double medianPerimeter = collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
@@ -90,7 +82,7 @@ public class CollectionFilterer {
 	    
 	    ICellCollection newFailCollection = new DefaultCellCollection(collection, "failed");
 
-	    logger.log(Level.FINE, "Prefiltered values found");
+	    fine("Prefiltered values found");
 
 	    for(ICell c : collection.getCells()){
 
@@ -146,7 +138,7 @@ public class CollectionFilterer {
 //	    int afterSize = collection.getNucleusCount();
 //	    int removed = beforeSize - afterSize;
 
-	    logger.log(Level.INFO, "Remaining: "+collection.size()+" nuclei");
+	    log("Remaining: "+collection.size()+" nuclei");
 	    
 	  }
 	

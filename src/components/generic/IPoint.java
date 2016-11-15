@@ -27,9 +27,9 @@ public interface IPoint {
 
 	/**
 	 * Create a new point of the default type
-	 * @param x
-	 * @param y
-	 * @return
+	 * @param x the x position
+	 * @param y the y position
+	 * @return a point at the specified position
 	 */
 	static IPoint makeNew(float x, float y){
 		return new FloatPoint(x,y);
@@ -37,9 +37,9 @@ public interface IPoint {
 	
 	/**
 	 * Create a new point of the default type
-	 * @param x
-	 * @param y
-	 * @return
+	 * @param x the x position
+	 * @param y the y position
+	 * @return a point at the specified position
 	 */
 	static IPoint makeNew(double x, double y){
 		return makeNew( (float) x, (float) y);
@@ -48,9 +48,9 @@ public interface IPoint {
 	/**
 	 * Create a new point of the default type
 	 * based on the given point
-	 * @param x
-	 * @param y
-	 * @return
+	 * @param x the x position
+	 * @param y the y position
+	 * @return a point at the specified position
 	 */
 	static IPoint makeNew(IPoint a){
 		return makeNew( a.getX(), a.getY());
@@ -84,21 +84,7 @@ public interface IPoint {
 	 */
 	int getYAsInt();
 
-	/**
-	 * Set the x-value
-	 *
-	 * @param x the new x-value
-	 */
-	void setX(double x);
-
-	/**
-	 * Set the y-value
-	 *
-	 * @param y the new x-value
-	 */
-	void setY(double y);
-
-	void set(IPoint p);
+	
 
 	/**
 	 * Find the distance between this point and
@@ -126,7 +112,7 @@ public interface IPoint {
 
 	boolean isRightOf(IPoint p);
 
-	IPoint offset(double x, double y);
+	
 
 	/**
 	 * Tests if the two points overlap with
@@ -145,6 +131,10 @@ public interface IPoint {
 	 */
 	String toString();
 
+	/**
+	 * Fetch the point as Point2D
+	 * @return
+	 */
 	Point2D toPoint2D();
 
 	/**

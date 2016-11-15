@@ -22,11 +22,6 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
 	
 	private transient List<IBorderPoint> tailEstimatePoints = new ArrayList<IBorderPoint>(3); // holds the points considered to be sperm tails before filtering
 	protected transient boolean clockwiseRP = false; // is the original orientation of the nucleus with RP clockwise to the CoM, or not
-
-//	public AbstractAsymmetricNucleus(Roi roi, File f, int channel, int[] position, int number) {
-//		super(roi, f, channel, position, number);
-//
-//	}
 	
 	/**
 	 * Construct with an ROI, a source image and channel, and the original position in the source image
@@ -36,7 +31,7 @@ public abstract class AbstractAsymmetricNucleus extends DefaultNucleus {
 	 * @param position
 	 * @param centreOfMass
 	 */
-	public AbstractAsymmetricNucleus(Roi roi, File f, int channel, int[] position, int number, IPoint centreOfMass){
+	public AbstractAsymmetricNucleus(Roi roi, IPoint centreOfMass, File f, int channel, int[] position, int number){
 		super(roi, centreOfMass, f, channel, position, number );
 	}
 

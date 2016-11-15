@@ -37,7 +37,7 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
 	 * @param centreOfMass
 	 */
 	public DefaultPigSpermNucleus(Roi roi, IPoint centreOfMass, File f, int channel, int[] position, int number){
-		super(roi, f, channel, position, number, centreOfMass );
+		super(roi, centreOfMass , f, channel, position, number);
 	}
 
 	protected DefaultPigSpermNucleus(Nucleus n) throws UnprofilableObjectException {

@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import analysis.image.ImageConverter;
 import components.CellularComponent;
 import components.active.generic.FloatPoint;
+import components.generic.IMutablePoint;
 import components.generic.IPoint;
 import components.generic.MeasurementScale;
 import components.nuclear.IBorderPoint;
@@ -61,7 +62,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	/**
 	 * The centre of the object.
 	 */
-	private IPoint centreOfMass = IPoint.makeNew(0, 0);
+	private IMutablePoint centreOfMass;
 	
 	/**
 	 * The original centre of the object.
@@ -118,9 +119,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * @param centreOfMass the original centre of mass of the component within its source image
 	 */
 	private DefaultCellularComponent(IPoint centreOfMass){
+		
+		if(centreOfMass==null){
+			throw new IllegalArgumentException("Centre of mass cannot be null");
+		}
+		
 		this.originalCentreOfMass = centreOfMass;
-		this.centreOfMass         = centreOfMass;
-		this.id = java.util.UUID.randomUUID();
+		this.centreOfMass         = IMutablePoint.makeNew(centreOfMass);
+		this.id                   = java.util.UUID.randomUUID();
 	}
 	
 	/**
@@ -136,10 +142,19 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		}
 		
 		if( ! roi.contains(centreOfMass.getXAsInt(), centreOfMass.getYAsInt())){
+			
+			int minX = (int) roi.getXBase();
+			int maxX = (int) (minX + roi.getBounds().getWidth());
+			int minY = (int) roi.getYBase();
+			int maxY = (int) (minY + roi.getBounds().getHeight());
+			
 			throw new IllegalArgumentException("Cannot create object: the centre of mass ("
 					+centreOfMass.toString()
-					+") is not within the roi ("
-					+roi.getXBase()+", "+roi.getYBase()+")");
+					+") is not within the roi (x = "
+					+minX+"-"+maxX+
+					"), (y = "
+					+minY+"-"+maxY+")");
+
 		}
 		
 //		log(roi.getTypeAsString());
@@ -178,7 +193,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * Construct with an ROI, a source image and channel, and the original position in the source image
 	 * @param roi the roi of the object
 	 * @param centerOfMass the original centre of mass of the component
-	 * @param f the file the component was found in
+	 * @param f the image file the component was found in
 	 * @param channel the RGB channel the component was found in 
 	 * @param position the bounding position of the component in the original image
 	 */
@@ -190,6 +205,15 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 	
 	protected void makeBorderList(Roi roi){
+		
+		log("CoM pre: "+centreOfMass.toString());
+		log("F0 pre : "+xpoints[0]+", "+ypoints[0]);
+		log("Position: "+position[0]+", "+position[1]);
+		
+		// Creating the border list will set everything to the original image position.
+		// Move the border list back over the CoM if needed.
+		IPoint oldCoM = IPoint.makeNew(centreOfMass);
+		centreOfMass = IMutablePoint.makeNew(originalCentreOfMass);
 		
 		borderList    = new ArrayList<IBorderPoint>(0);
 		
@@ -210,6 +234,15 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		// link endpoints
 		borderList.get(borderList.size()-1).setNextPoint(borderList.get(0));
 		borderList.get(0).setPrevPoint(borderList.get(borderList.size()-1));
+
+		moveCentreOfMass(oldCoM);
+		
+
+		log("CoM post: "+centreOfMass.toString());
+		log("B0 post : "+borderList.get(0));
+		log("F0 post : "+xpoints[0]+", "+ypoints[0]);
+		log("Position: "+position[0]+", "+position[1]);
+		
 	}
 	
 	
@@ -221,6 +254,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		this.id                   = a.getID();
 		this.position             = a.getPosition();
 		this.originalCentreOfMass = a.getOriginalCentreOfMass();
+		this.centreOfMass         = IMutablePoint.makeNew(a.getCentreOfMass());
 		
 		finest("Set id and position");
 		
@@ -248,7 +282,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			duplicateBorderList(a);
 		}
 		finest("Created border list");
-		this.centreOfMass      = IPoint.makeNew(a.getCentreOfMass());
+		
 	}
 	
 	private void duplicateBorderList(CellularComponent c){
@@ -491,16 +525,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		public IPoint getOriginalCentreOfMass() {
 			return IPoint.makeNew( originalCentreOfMass);
 		}
-				
-		/**
-		 * This is used only when creating nuclei in the NucleusFinder, since we can't
-		 * disrupt border positions. It sets the centre of mass without moving any of
-		 * the border points
-		 * @param centreOfMass
-		 */
-		public void setCentreOfMassDirectly(IPoint centreOfMass) {
-			this.centreOfMass = centreOfMass;
-		}
 		
 		public int getBorderLength(){
 			return this.borderList.size();
@@ -516,15 +540,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			
 			double diffX = p.getX() - centreOfMass.getX();
 			double diffY = p.getY() - centreOfMass.getY();
-			
-//			// Get the current position of the object
-//			double minX = this.getBounds().getX();
-//			double minY = this.getBounds().getY();
-//
-//			// Find the difference between the current position and the 
-//			// original position
-//			double diffX = position[CellularComponent.X_BASE] - minX;
-//			double diffY = position[CellularComponent.Y_BASE] - minY;
 
 			// Offset to the original position
 			IBorderPoint ip = IBorderPoint.makeNew(originalCentreOfMass.getX()+diffX, originalCentreOfMass.getY()+diffY);
@@ -571,20 +586,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			return result;
 		}
 		
-		public void setBorderList(List<IBorderPoint> list){
-			
-			// ensure the new border list is linked properly
-			for(int i=0; i<list.size(); i++){
-				IBorderPoint p = list.get(i);
-				if(i>0){
-					p.setPrevPoint(list.get(i-1));
-					p.prevPoint().setNextPoint(p);
-				}
-			}
-			list.get(list.size()-1).setNextPoint(list.get(0));
-			list.get(0).setPrevPoint(list.get(list.size()-1));
-			this.borderList = list;
-		}
 		
 		/**
 		 * Check if a given point lies within the nucleus
@@ -724,25 +725,37 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		 */
 		public void offset(double xOffset, double yOffset){
 
-			// find the position of the centre of mass after 
-			// adding the offsets
-			double newX =  centreOfMass.getX() + xOffset;
-			double newY =  centreOfMass.getY() + yOffset;
-	//
-			IPoint newCentreOfMass = IPoint.makeNew(newX, newY);
-
 			/// update each border point
 			for(int i=0; i<borderList.size(); i++){
 				IBorderPoint p = borderList.get(i);
-
-				double x = p.getX() + xOffset;
-				double y = p.getY() + yOffset;
-
-				p.setX(x);
-				p.setY(y);
+				p.offset(xOffset, yOffset);
 			}
 
-			this.centreOfMass = newCentreOfMass;
+			this.centreOfMass.offset(xOffset,  yOffset);// = newCentreOfMass;
+			
+//			Shape s  = this.toShape();
+//			if( ! s.contains(centreOfMass.getX(), centreOfMass.getY())){
+//				
+//				int minX = (int) s.getBounds().x;
+//				int maxX = (int) (minX + s.getBounds().getWidth());
+//				int minY = (int) s.getBounds().y;
+//				int maxY = (int) (minY + s.getBounds().getHeight());
+//				
+//				warn("Border contains "+borderList.size()+" points");
+//				warn("Shape: "+s.getBounds().toString());
+//
+//				warn("CoM ("
+//					+centreOfMass.toString()
+//					+") is not within the shape (x = "
+//					+minX+"-"+maxX+
+//					"), (y = "
+//					+minY+"-"+maxY+")");
+//				
+//			}
+//			
+//			if( ! this.containsPoint(centreOfMass)){
+//				throw new IllegalArgumentException("CoM has fallen out of nucleus");
+//			}
 		}
 		
 		public void reverse(){
@@ -758,7 +771,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			
 			PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
 
-			makeBorderList(roi);			
+			makeBorderList(roi);	// Recreate the border list from the new key points
 		}
 		
 		/**
@@ -853,10 +866,15 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		private Shape toOffsetShape(double xOffset, double yOffset){
 			Path2D.Double path = new Path2D.Double();
 			
+			if(borderList.size()==0 || borderList.size()==1){
+				throw new IllegalArgumentException("Border list is empty or single entry");
+			}
+			
 			IBorderPoint first = borderList.get(0);
 			path.moveTo(first.getX()+xOffset, first.getY()+yOffset);
 			
 			for(IBorderPoint b : this.borderList){
+//				log("\tDrawing line to "+b.toString());
 				path.lineTo(b.getX()+xOffset, b.getY()+yOffset);
 			}
 			path.closePath();
@@ -1069,19 +1087,25 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			
 			in.defaultReadObject();
 			
+			
+			
 			// Fill the transient fields
 			imageRef = new SoftReference<ImageProcessor>(null);
 			
 			// needs to be traced to allow interpolation into the border list
 			PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
 						
-			makeBorderList(roi);
-			this.moveCentreOfMass(getCentreOfMass()); // update border to the  saved CoM
+			makeBorderList(roi); // This will update the border to the original CoM saved
+//			this.moveCentreOfMass(getCentreOfMass()); // update border to the  saved CoM
+			
 		}
 
 		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 
 			out.defaultWriteObject();
+			log("CoM : "+this.getCentreOfMass().toString());
+			log("B0  : "+xpoints[0]+", "+ypoints[0]);
+			log("Pos : "+this.getPosition()[0]+", "+this.getPosition()[1]);
 		}
 		
 		
@@ -1154,12 +1178,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			if(angle!=0){
 
 				for(int i=0; i<getBorderLength(); i++){
-					IPoint p = getBorderPoint(i);
+					IMutablePoint p = getBorderPoint(i);
 
 					IPoint newPoint = getPositionAfterRotation(p, angle);
 
-					p.setX(newPoint.getX());
-					p.setY(newPoint.getY());
+					p.set(newPoint);
+					//.setX(newPoint.getX());
+					//p.setY(newPoint.getY());
 				}
 			}
 					

@@ -209,7 +209,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 						if( ! s.containsPoint(s.getCentreOfMass())){
 						
 							for(int i=0; i<s.getBorderLength();i++){
-								IPoint offset = s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
+								s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
 //								s.updateBorderPoint(i, offset);
 							}
 						}

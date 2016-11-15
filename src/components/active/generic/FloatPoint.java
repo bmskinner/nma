@@ -24,6 +24,7 @@ import ij.gui.Roi;
 
 import java.awt.geom.Point2D;
 
+import components.generic.IMutablePoint;
 import components.generic.IPoint;
 
 /**
@@ -36,7 +37,7 @@ import components.generic.IPoint;
  */
 public class FloatPoint 
 	extends Point2D.Float
-	implements IPoint {
+	implements IMutablePoint {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -165,8 +166,9 @@ public class FloatPoint
 	 * @see components.generic.IPoint#offset(double, double)
 	 */
 	@Override
-	public IPoint offset(double x, double y){
-		return new FloatPoint(this.x+x, this.y+y);
+	public void offset(double x, double y){
+		this.setX(this.getX()+x);
+		this.setY(this.getY()+y);
 	}
 
 	/* (non-Javadoc)

@@ -149,6 +149,10 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, IconCell> i
         } catch (ExecutionException e) {
         	error("Execution error in worker", e);
         	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+       } catch(Error e){
+    	   
+    	   error("Something went really wrong in the image prober", e);
+    	   firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
        }
 
     } 

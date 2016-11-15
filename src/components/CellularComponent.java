@@ -221,7 +221,7 @@ public interface CellularComponent
 	 * Set the border points in the object border
 	 * @param list
 	 */
-	public void setBorderList(List<IBorderPoint> list);
+//	public void setBorderList(List<IBorderPoint> list);
 	
 	/**
 	 * Get a copy of the nucleus border points in the border list

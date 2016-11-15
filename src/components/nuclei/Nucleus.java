@@ -54,7 +54,7 @@ public interface Nucleus
 	* nucleus is to get the longest diameter and set this as
 	*  the head/tail axis.
 	*/
-	public void findPointsAroundBorder() throws Exception;
+	public void findPointsAroundBorder();
 	
 	
 	/**

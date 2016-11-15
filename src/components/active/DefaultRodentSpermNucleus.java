@@ -50,7 +50,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 	 * @param centreOfMass
 	 */
 	public DefaultRodentSpermNucleus(Roi roi, IPoint centreOfMass, File f, int channel, int[] position, int number){
-		super(roi, f, channel, position, number, centreOfMass );
+		super(roi, centreOfMass, f, channel, position, number );
 	}
 
 	protected DefaultRodentSpermNucleus(Nucleus n) throws UnprofilableObjectException {
@@ -412,9 +412,14 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 	}
 
 
+	/**
+	 * @param list
+	 * @return
+	 */
 	private FloatPolygon createRoiPolygon(List<IBorderPoint> list){
 		float[] xpoints = new float[list.size()+1];
 		float[] ypoints = new float[list.size()+1];
+		
 
 		for(int i=0;i<list.size();i++){
 			IBorderPoint p = list.get(i);
@@ -488,7 +493,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		if(vertX > verticalNucleus.getCentreOfMass().getX() ){
 			clockwiseRP = true; // this is only set to true, as the default is false, and will become false after the nucleus is flipped
 			verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
-			verticalNucleus.moveCentreOfMass(new FloatPoint(0,0));
+			verticalNucleus.moveCentreOfMass( IPoint.makeNew(0,0));
 		} 
 
 		return verticalNucleus;

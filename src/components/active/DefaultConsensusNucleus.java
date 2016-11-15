@@ -27,13 +27,13 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 	private static final long serialVersionUID = 1L;
 	
 	private NucleusType type;
-	private IPoint originalCoM; // store to allow repositioning on load
+//	private IPoint originalCoM; // store to allow repositioning on load
 	
 	public DefaultConsensusNucleus(Nucleus n, NucleusType type) throws UnprofilableObjectException {
 		
 		super(n);
 		this.type = type;
-		this.originalCoM = n.getCentreOfMass();
+//		this.originalCoM = n.getCentreOfMass();
 		
 		// At this point the new consensus has created its border list
 		// based on the int points from  the template nucleus.
@@ -128,12 +128,12 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 				
 		// Note - the CoM has been saved as 0,0. Use the original CoM for positioning
 				
-		double  diffX = getCentreOfMass().getX() - originalCoM.getX();
-		double  diffY = getCentreOfMass().getY() - originalCoM.getY();
-		
-		// Apply the offset to the border list
-		this.offset(diffX, diffY);
-		this.setCentreOfMassDirectly(IPoint.makeNew(0,0));
+//		double  diffX = getCentreOfMass().getX() - getOriginalCentreOfMass().getX();
+//		double  diffY = getCentreOfMass().getY() - getOriginalCentreOfMass().getY();
+//		
+//		// Apply the offset to the border list
+//		this.offset(diffX, diffY);
+////		this.setCentreOfMassDirectly(IPoint.makeNew(0,0));
 		
 		this.alignVertically();
 		

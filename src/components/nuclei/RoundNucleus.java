@@ -202,7 +202,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	* nucleus is to get the longest diameter and set this as
 	*  the head/tail axis.
 	*/
-	public void findPointsAroundBorder() throws Exception{
+	public void findPointsAroundBorder(){
 		
 		RuleSet rpSet = RuleSet.roundRPRuleSet();
 		IProfile p = this.getProfile(rpSet.getType());

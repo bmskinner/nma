@@ -35,7 +35,7 @@ import java.io.Serializable;
 import logging.Loggable;
 
 @Deprecated
-public class XYPoint  implements Serializable, Loggable, IPoint {
+public class XYPoint  implements Serializable, Loggable, IMutablePoint {
 
 	private static final long serialVersionUID = 1L;
 	protected double x;
@@ -195,8 +195,10 @@ public class XYPoint  implements Serializable, Loggable, IPoint {
 	 * @see components.generic.IPoint#offset(double, double)
 	 */
 	@Override
-	public IPoint offset(double x, double y){
-		return new XYPoint(this.x+x, this.y+y);
+	public void offset(double x, double y){
+		this.setX(this.getX()+x);
+		this.setY(this.getY()+y);
+//		return new XYPoint(this.x+x, this.y+y);
 	}
 
 	/* (non-Javadoc)

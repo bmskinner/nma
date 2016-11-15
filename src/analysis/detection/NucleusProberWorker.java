@@ -186,7 +186,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 	 * @return
 	 * @throws Exception 
 	 */
-	private List<ICell> getCells(ImageStack imageStack, File imageFile) throws Exception{
+	private List<ICell> getCells(ImageStack imageStack, File imageFile) {
 		double minSize = options.getMinNucleusSize();
 		double maxSize = options.getMaxNucleusSize();
 		double minCirc = options.getMinNucleusCirc();
@@ -201,7 +201,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		
 		finer("Finding cells");
 		
-		 NucleusDetector finder = new NucleusDetector(options, null);
+		NucleusDetector finder = new NucleusDetector(options, null);
 		
 		List<ICell> cells = finder.getDummyCells(imageStack, imageFile);
 		
@@ -219,7 +219,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 	 * @param cell
 	 * @param ip
 	 */
-	private void drawNucleus(ICell cell, ImageProcessor ip) throws Exception {
+	private void drawNucleus(ICell cell, ImageProcessor ip) {
 		if(cell==null){
 			throw new IllegalArgumentException("Input cell is null");
 		}

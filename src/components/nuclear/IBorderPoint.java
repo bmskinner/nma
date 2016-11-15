@@ -20,6 +20,7 @@
 package components.nuclear;
 
 import components.active.generic.DefaultBorderPoint;
+import components.generic.IMutablePoint;
 import components.generic.IPoint;
 
 /**
@@ -29,7 +30,7 @@ import components.generic.IPoint;
  * @since 1.13.3
  *
  */
-public interface IBorderPoint extends IPoint {
+public interface IBorderPoint extends IMutablePoint {
 
 	/**
 	 * Create a new point of the default type

@@ -80,7 +80,7 @@ public class DefaultNucleus
 		finest("Created profileable nucleus");		
 		nucleusNumber = n.getNucleusNumber();
 				
-		this.setSignals( new DefaultSignalCollection(n.getSignalCollection()));
+		signalCollection = new DefaultSignalCollection(n.getSignalCollection());
 	}
 	
 	@Override
@@ -295,7 +295,7 @@ public class DefaultNucleus
 	@Override
 	public boolean isProfileOrientationOK(){
 		int frontPoints = 0;
-		int rearPoints = 0;
+		int rearPoints  = 0;
 
 		IProfile profile;
 		try {
@@ -340,7 +340,7 @@ public class DefaultNucleus
 			
 			// Ensure all vertical nuclei have overlapping centres of mass
 //			log(this.getNameAndNumber()+": Moving vertical nucleus CoM to 0,0");
-			verticalNucleus.moveCentreOfMass(new FloatPoint(0,0));
+			verticalNucleus.moveCentreOfMass(IPoint.makeNew(0,0));
 			this.setStatistic(NucleusStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
 			this.setStatistic(NucleusStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
 			
@@ -360,8 +360,12 @@ public class DefaultNucleus
 		super.offset(diffX, diffY);
 		
 		// Move signals within the nucleus
-		for(INuclearSignal s : this.signalCollection.getAllSignals()){
-			s.offset(diffX, diffY);
+		
+		if(signalCollection!=null){
+			for(INuclearSignal s : this.signalCollection.getAllSignals()){
+				s.offset(diffX, diffY);
+
+			}
 		}
 	}
 	
@@ -613,14 +617,6 @@ public class DefaultNucleus
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		
 		in.defaultReadObject();
-		
-//		// Ensure that any signals have been offset to lie within the nucleus
-//		for(UUID signalGroupId : signalCollection.getSignalGroupIDs()){
-//			for(INuclearSignal s : signalCollection.getSignals(signalGroupId)){
-//				s.setPositionWithin(this);
-//			}
-//		}
-		
 		
 		
 	    this.verticalNucleus    = null;

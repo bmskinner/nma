@@ -223,9 +223,10 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 	 * @param dataset
 	 * @param segment
 	 * @return
-	 * @throws Exception 
+	 * @throws ChartDatasetCreationException if data is not available 
 	 */
-	public List<IPoint> createRelativePositionFeatureList(IAnalysisDataset dataset, UUID segmentID) throws ChartDatasetCreationException{
+	public List<IPoint> createRelativePositionFeatureList(IAnalysisDataset dataset, UUID segmentID)
+			throws ChartDatasetCreationException{
 		
 		List<IPoint> result = createAbsolutePositionFeatureList( dataset, segmentID);
 		
@@ -266,8 +267,8 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 				double offsetX = p.getX() - centrePoint.getX();
 				double offsetY = p.getY() - centrePoint.getY();
 				
-				p.setX(offsetX);
-				p.setY(offsetY);
+//				p.setX(offsetX);
+//				p.setY(offsetY);
 
 			}
 			

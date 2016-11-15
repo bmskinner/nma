@@ -352,7 +352,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     Identify key points: tip, estimated tail position
 	 */
 	@Override
-	public void findPointsAroundBorder() throws Exception{
+	public void findPointsAroundBorder(){
 
 		
 		RuleSet rpSet = RuleSet.mouseSpermRPRuleSet();
@@ -511,7 +511,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     Detect the tail based on a list of local minima in an NucleusBorderPoint array.
     The putative tail is the point furthest from the sum of the distances from the CoM and the tip
   */
-  public IBorderPoint findTailPointFromMinima() throws Exception{
+  public IBorderPoint findTailPointFromMinima() {
   
     // we cannot be sure that the greatest distance between two points will be the endpoints
     // because the hook may begin to curve back on itself. We supplement this basic distance with
@@ -548,7 +548,7 @@ public class RodentSpermNucleus extends SpermNucleus {
       Draw a line orthogonal, and pick the intersecting border points
       The border furthest from the tip is the tail
   */
-  public IBorderPoint findTailByNarrowestWidthMethod() throws Exception{
+  public IBorderPoint findTailByNarrowestWidthMethod(){
 
     // Find the narrowest point around the CoM
     // For a position in teh roi, draw a line through the CoM to the intersection point

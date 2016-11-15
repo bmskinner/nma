@@ -148,7 +148,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 
 
 				log("Filtering collection...");
-				boolean ok = CollectionFilterer.run(collection, failedNuclei, fileLogger); // put fails into failedNuclei, remove from r
+				boolean ok = new CollectionFilterer().run(collection, failedNuclei); // put fails into failedNuclei, remove from r
 				if(ok){
 					log("Filtered OK");
 				} else {

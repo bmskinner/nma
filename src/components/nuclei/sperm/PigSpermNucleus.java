@@ -93,7 +93,7 @@ public class PigSpermNucleus
  * @throws Exception 
   */
     @Override
-    public void findPointsAroundBorder() throws Exception{
+    public void findPointsAroundBorder() {
     	
     	RuleSet rpSet = RuleSet.pigSpermRPRuleSet();
 		IProfile p     = this.getProfile(rpSet.getType());

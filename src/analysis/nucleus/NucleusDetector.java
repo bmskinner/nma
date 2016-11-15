@@ -26,6 +26,7 @@ import stats.NucleusStatistic;
 import java.awt.Rectangle;
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,8 @@ import analysis.detection.Detector;
 import analysis.image.ImageFilterer;
 import components.ICell;
 import components.active.DefaultCell;
+import components.active.NucleusFactory;
+import components.active.NucleusFactory.NucleusCreationException;
 import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.nuclear.NucleusType;
@@ -78,7 +81,7 @@ public class NucleusDetector extends Detector {
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<ICell> getCells(ImageStack image, File sourceFile) throws Exception{
+	public List<ICell> getCells(ImageStack image, File sourceFile) {
 		return createCellsFromImage(image, sourceFile, false);
 	}
 	
@@ -88,10 +91,9 @@ public class NucleusDetector extends Detector {
 	 * This is designed to speed up the image prober.
 	 * @param image
 	 * @param sourceFile
-	 * @return
-	 * @throws Exception
+	 * @return a list of cells detected. Can be empty.
 	 */
-	public List<ICell> getDummyCells(ImageStack image, File sourceFile) throws Exception{
+	public List<ICell> getDummyCells(ImageStack image, File sourceFile) {
 		return createCellsFromImage(image, sourceFile, true);
 	}
 	
@@ -141,13 +143,20 @@ public class NucleusDetector extends Detector {
   * @param path the full path of the image
  * @throws Exception 
   */
-	private List<ICell> createCellsFromImage(ImageStack image, File path, boolean makeDummy) throws Exception{
+	private List<ICell> createCellsFromImage(ImageStack image, File path, boolean makeDummy) {
 
 		fine("File:  "+path.getName());
 		
-		List<ICell> result = new ArrayList<ICell>();
+		List<ICell> result = new ArrayList<ICell>(0);
 						
-		ImageStack searchStack = preprocessImage(image);
+		ImageStack searchStack;
+		try {
+			searchStack = preprocessImage(image);
+		} catch (Exception e1) {
+			fine("Error processing image", e1);
+			warn("Unable to process image "+path.getAbsolutePath());
+			return result;
+		}
 
 		// get polygon rois of correct size
 		
@@ -155,40 +164,30 @@ public class NucleusDetector extends Detector {
 						
 		if(roiList.isEmpty()){
 
-			fine("No usable nuclei in image");
+			fine("No usable nuclei in image "+path.getAbsolutePath());
 			
 			return result;
 		}
 
-		int nucleusNumber = 0;
-
-		for(Roi roi : roiList){
-
-			finest( "Acquiring nucleus "+nucleusNumber);
-
-			ICell cell = null;
-			try{	
-				
-				if(makeDummy){
-					
-				}
-				
-				cell = makeCell(roi, image, nucleusNumber++, path, makeDummy); // get the profile data back for the nucleus
-				
-				
-				
-			} catch(Exception e){
-
-				error("Error acquiring nucleus", e);
-
-			}
-
-			if(cell!=null){
-				result.add(cell);
-				finer("Cell created");
-			}
+		finer("Image has "+roiList.size()+" ROIs");
+		for(int i=0; i<roiList.size(); i++){
 			
+			Roi roi = roiList.get(i);
+
+			finest( "Acquiring nucleus "+i+" in "+path.getAbsolutePath());
+
+			ICell cell;
+			try {
+				cell = makeCell(roi, image, i, path, makeDummy); // get the profile data back for the nucleus
+			}catch(NucleusCreationException e){
+				fine("Cannot create nucleus from ROI"+i);
+				continue;
+			}
+			result.add(cell);
+			finer("Cell created");
+
 		} 
+		fine("Returning list of "+result.size()+" cells");
 		return result;
 	}
 	
@@ -247,8 +246,10 @@ public class NucleusDetector extends Detector {
 	  * @param nucleusNumber the count of the nuclei in the image
 	  * @param path the full path to the image
 	  * @param makeDummyCell should the cell be profiled, or a placeholder
+	 * @throws NucleusCreationException 
 	  */
-	private ICell makeCell(Roi roi, ImageStack image, int nucleusNumber, File path, boolean makeDummyCell){
+	private ICell makeCell(Roi roi, ImageStack image, int nucleusNumber, File path, boolean makeDummyCell) 
+			throws NucleusCreationException{
 
 		ICell result = null;
 		
@@ -260,87 +261,49 @@ public class NucleusDetector extends Detector {
 		int xbase = (int) roi.getXBase();
 		int ybase = (int) roi.getYBase();
 
-		  Rectangle bounds = roi.getBounds();
+		Rectangle bounds = roi.getBounds();
 
-		  int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
+		int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
 
-		  try{
-		
-			  roi.setLocation(0,0); // translate the roi to the new image coordinates
-			  
-			  // create a Nucleus from the roi
-			  IPoint centreOfMass = IPoint.makeNew(values.get("XM")-xbase, values.get("YM")-ybase);
+		// create a Nucleus from the roi
+		IPoint centreOfMass = IPoint.makeNew(values.get("XM"), values.get("YM"));
 
-			  Nucleus currentNucleus = createNucleus(roi, 
-					  path, 
-					  options.getChannel(),
-					  nucleusNumber, 
-					  originalPosition, 
-					  options.getNucleusType(), 
-					  centreOfMass);
+		fine("CoM is at "+centreOfMass.toString());
 
-			  currentNucleus.setStatistic(NucleusStatistic.AREA,      values.get("Area"));
-			  currentNucleus.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
-			  currentNucleus.setStatistic(NucleusStatistic.PERIMETER, values.get("Perim"));
+		Nucleus currentNucleus = NucleusFactory.createNucleus(roi, 
+				path, 
+				options.getChannel(),
+				nucleusNumber, 
+				originalPosition, 
+				options.getNucleusType(), 
+				centreOfMass);
 
-			  currentNucleus.setScale(options.getScale());
+		// Move the nucleus xbase and ybase to 0,0 coordinates for charting
+		IPoint offsetCoM = IPoint.makeNew( centreOfMass.getX() - xbase, centreOfMass.getY()- ybase  );
 
-			  if ( !makeDummyCell) {
+		fine("Offsetting CoM to point "+offsetCoM.toString());
 
-//				  currentNucleus.setOutputFolder(outputFolderName);
-				  currentNucleus.initialise(options.getAngleWindowProportion());
+		currentNucleus.moveCentreOfMass(offsetCoM);
 
-				  currentNucleus.findPointsAroundBorder();
-			  }
-		
-			  // if everything checks out, add the measured parameters to the global pool
-			  result = new DefaultCell();
-			  result.setNucleus(currentNucleus);		  
-			  
-		  }catch(Exception e){
-	
-			  error(" Error in nucleus assignment", e);
-			  
-		  }
-		  return result;
-	  }
-	
-	/**
-	 * Create a Nucleus from an ROI. Fetches the appropriate constructor based
-	 * on the nucleus type
-	 * @param roi the ROI
-	 * @param path the path to the image
-	 * @param nucleusNumber the number of the nucleus in the image
-	 * @param originalPosition the bounding box position of the nucleus
-	 * @param nucleusType the class of nucleus
-	 * @return a new nucleus of the appropriate class
-	 */
-	private Nucleus createNucleus(Roi roi, File path, int channel, int nucleusNumber, int[] originalPosition, NucleusType nucleusType, IPoint centreOfMass){
+		currentNucleus.setStatistic(NucleusStatistic.AREA,      values.get("Area"));
+		currentNucleus.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
+		currentNucleus.setStatistic(NucleusStatistic.PERIMETER, values.get("Perim"));
 
-		  Nucleus n = null;
-		  try {
+		currentNucleus.setScale(options.getScale());
 
-			  // The classes for the constructor
-			  Class<?>[] classes = {Roi.class, IPoint.class, File.class, int.class, int[].class, int.class };
-			  
-			  Constructor<?> nucleusConstructor = nucleusType.getNucleusClass()
-					  .getConstructor(classes);
-			  
+		if ( !makeDummyCell) {
 
-			  n = (Nucleus) nucleusConstructor.newInstance(roi,
-					  centreOfMass, 
-					  path, 
-					  channel, 
-					  originalPosition,
-					  nucleusNumber);
-			  
-		  } catch(Exception e){
+			currentNucleus.initialise(options.getAngleWindowProportion());
 
-			  error( "Error creating nucleus", e);
-			  
-		  }
-		  return n;
-	  }
-	  
+			currentNucleus.findPointsAroundBorder();
+		}
+
+		// if everything checks out, add the measured parameters to the global pool
+		result = new DefaultCell();
+		result.setNucleus(currentNucleus);		  
+
+
+		return result;
+	}  
 	  
 }
