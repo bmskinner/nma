@@ -674,7 +674,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public boolean smoothByDefault() {
+	public boolean isSmoothByDefault() {
 		// TODO Auto-generated method stub
 		return false;
 	}

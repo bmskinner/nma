@@ -98,26 +98,32 @@ public class DefaultNucleus
 	*/
 	@Override
 	public void findPointsAroundBorder(){
-		
-		RuleSet rpSet = RuleSet.roundRPRuleSet();
-		IProfile p = this.getProfile(rpSet.getType());
-		ProfileIndexFinder f = new ProfileIndexFinder();
-		int rpIndex = f.identifyIndex(p, rpSet);
-		
-		setBorderTag(Tag.REFERENCE_POINT, rpIndex);		
-		setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
-		
-		if(!this.isProfileOrientationOK() && canReverse){
-			fine("Reversing profile");
-			this.reverse();
-			
-			// the number of border points can change when reversing
-			// due to float interpolation from different starting positions
-			// so do the whole thing again
-			initialise(this.getWindowProportion(ProfileType.ANGLE));
-			canReverse = false;
-			findPointsAroundBorder();
-		}  
+
+		try {
+
+			RuleSet rpSet = RuleSet.roundRPRuleSet();
+			IProfile p = this.getProfile(rpSet.getType());
+			ProfileIndexFinder f = new ProfileIndexFinder();
+			int rpIndex = f.identifyIndex(p, rpSet);
+
+			setBorderTag(Tag.REFERENCE_POINT, rpIndex);		
+			setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
+
+			if(!this.isProfileOrientationOK() && canReverse){
+				fine("Reversing profile");
+				this.reverse();
+
+				// the number of border points can change when reversing
+				// due to float interpolation from different starting positions
+				// so do the whole thing again
+				initialise(this.getWindowProportion(ProfileType.ANGLE));
+				canReverse = false;
+				findPointsAroundBorder();
+			}  
+
+		} catch(UnavailableProfileTypeException e){
+			stack("Error getting profile type", e);
+		}
 	}
 	
 	@Override
@@ -329,20 +335,21 @@ public class DefaultNucleus
 	public Nucleus getVerticallyRotatedNucleus(){
 		if(verticalNucleus==null){
 
+			// Make an exact copy of the nucleus
 			verticalNucleus = this.duplicate();
-			//TODO - at this point the nucleus is at 0,0
 
 			verticalNucleus.alignVertically();			
 			
 			// Ensure all vertical nuclei have overlapping centres of mass
-//			log(this.getNameAndNumber()+": Moving vertical nucleus CoM to 0,0");
 			verticalNucleus.moveCentreOfMass(IPoint.makeNew(0,0));
+			verticalNucleus.moveCentreOfMass(IPoint.makeNew(0,0));
+
 			this.setStatistic(NucleusStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
 			this.setStatistic(NucleusStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
 			
 			double aspect = verticalNucleus.getBounds().getHeight() / verticalNucleus.getBounds().getWidth();
 			this.setStatistic(NucleusStatistic.ASPECT,  aspect);
-//			log(this.getNameAndNumber()+": Vert CoM now - "+verticalNucleus.getCentreOfMass());
+
 		}
 		return verticalNucleus;
 	}
@@ -353,16 +360,7 @@ public class DefaultNucleus
 		double diffX = point.getX() - this.getCentreOfMass().getX();
 		double diffY = point.getY() - this.getCentreOfMass().getY();
 		
-		super.offset(diffX, diffY);
-		
-		// Move signals within the nucleus
-		
-		if(signalCollection!=null){
-			for(INuclearSignal s : this.signalCollection.getAllSignals()){
-				s.offset(diffX, diffY);
-
-			}
-		}
+		offset(diffX, diffY);
 	}
 	
 	@Override
@@ -371,8 +369,10 @@ public class DefaultNucleus
 		super.offset(xOffset, yOffset);
 		
 		// Move signals within the nucleus
-		for(INuclearSignal s : this.signalCollection.getAllSignals()){
-			s.offset(xOffset, yOffset);
+		if(signalCollection!=null){
+			for(INuclearSignal s : this.signalCollection.getAllSignals()){
+				s.offset(xOffset, yOffset);
+			}
 		}
 	}
 	
@@ -422,8 +422,8 @@ public class DefaultNucleus
 				points = getBorderPointsForVerticalAlignment();
 				alignPointsOnVertical(points[0], points[1] );
 				
-			} catch (UnavailableBorderTagException e) {
-				stack("Cannot get border tag", e);
+			} catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
+				stack("Cannot get border tag or profile", e);
 				try {
 					rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
 				} catch (UnavailableBorderTagException e1) {
@@ -451,8 +451,9 @@ public class DefaultNucleus
 	 * point within the region covered by the line. 
 	 * @return
 	 * @throws UnavailableBorderTagException 
+	 * @throws UnavailableProfileTypeException 
 	 */	
-	private IBorderPoint[] getBorderPointsForVerticalAlignment() throws UnavailableBorderTagException{
+	private IBorderPoint[] getBorderPointsForVerticalAlignment() throws UnavailableBorderTagException, UnavailableProfileTypeException{
 		
 		
 		IBorderPoint topPoint;

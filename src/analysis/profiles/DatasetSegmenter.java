@@ -31,21 +31,16 @@ import analysis.IAnalysisDataset;
 import analysis.ProgressEvent;
 import analysis.ProgressListener;
 import components.ICellCollection;
-import components.active.generic.DefaultProfileCollection;
 import components.active.generic.SegmentedFloatProfile;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
 import components.generic.ISegmentedProfile;
-import components.generic.Profile;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.generic.Tag;
 import components.nuclear.IBorderSegment;
-import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import stats.Quartile;
-import utility.Constants;
 
 /**
  * This is the core of the morphology analysis pipeline.
@@ -119,13 +114,15 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 					break;
 			}
 			
-			// Ensure that all hook-hump assignments are correct, and
-			// top and bottom border points are set for rodent sperm
-//			giveAFinalPolish();
+
+			// Ensure segments are copied appropriately to verticals
+			for(Nucleus n : this.getDataset().getCollection().getNuclei()){
+				n.updateVerticallyRotatedNucleus();
+			}
 			
 		} catch(Exception e){
 			result = false;
-			error("Error in segmentation analysis", e);
+			stack("Error in segmentation analysis", e);
 			return false;
 		}
 

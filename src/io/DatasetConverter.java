@@ -221,8 +221,8 @@ public class DatasetConverter implements Loggable {
 			
 			// Copy segmentation patterns over
 			oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
-		} catch(Exception e){
-			error("Error updating profiles across datasets", e);
+		} catch(ProfileException e){
+			stack("Error updating profiles across datasets", e);
 			throw new DatasetConversionException("Profiling error in root dataset");
 		}
 		
@@ -317,12 +317,10 @@ public class DatasetConverter implements Loggable {
 	private Nucleus makeRodentNucleus(Nucleus n) throws DatasetConversionException {
 		
 		// Easy stuff
-		File f      = n.getSourceFile(); // the source file
-		int channel = n.getChannel();// the detection channel
-		int number  = n.getNucleusNumber(); // copy over
-		IPoint com  = n.getOriginalCentreOfMass();
-		
-		// Position converted down internally
+		File f         = n.getSourceFile(); // the source file
+		int channel    = n.getChannel();// the detection channel
+		int number     = n.getNucleusNumber(); // copy over
+		IPoint com     = n.getOriginalCentreOfMass();
 		int[] position = n.getPosition();
 		
 		// Get the roi for the old nucleus
@@ -342,16 +340,17 @@ public class DatasetConverter implements Loggable {
 		}
 		
 		
-		finer("\tCreated roi");
+//		log(n.getNameAndNumber()+": Created roi at "+roi.getBounds());
 		// Use the default constructor
 		
 		try {
-		
-		Nucleus newNucleus = new DefaultRodentSpermNucleus(roi, com, f, channel, position, number);
-		
-		newNucleus = copyGenericData(n, newNucleus);
-		newNucleus.moveCentreOfMass(n.getCentreOfMass());
-		return newNucleus;
+
+//			log(n.getNameAndNumber()+": Creating nucleus at original position "+xpoints[0]+", "+ypoints[0]);
+			Nucleus newNucleus = new DefaultRodentSpermNucleus(roi, com, f, channel, position, number);
+
+			newNucleus = copyGenericData(n, newNucleus);
+			newNucleus.moveCentreOfMass(n.getCentreOfMass());
+			return newNucleus;
 		} catch(IllegalArgumentException e){
 			stack("Error making nucleus", e);
 			throw new DatasetConversionException("Cannot create nucleus from input data",e);

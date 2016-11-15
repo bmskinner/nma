@@ -1,6 +1,8 @@
 package components.active;
 
-public interface ComponentFactory<CellularComponent> {
+import logging.Loggable;
+
+public interface ComponentFactory<CellularComponent> extends Loggable {
 	
 	CellularComponent buildInstance();
 

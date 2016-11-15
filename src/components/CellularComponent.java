@@ -83,7 +83,7 @@ public interface CellularComponent
 	 */
 	CellularComponent duplicate();
 	
-	boolean smoothByDefault();
+	boolean isSmoothByDefault();
 	
 	
 	

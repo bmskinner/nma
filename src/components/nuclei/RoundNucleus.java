@@ -204,19 +204,24 @@ public class RoundNucleus extends AbstractCellularComponent
 	*/
 	public void findPointsAroundBorder(){
 		
-		RuleSet rpSet = RuleSet.roundRPRuleSet();
-		IProfile p = this.getProfile(rpSet.getType());
-		ProfileIndexFinder f = new ProfileIndexFinder();
-		int rpIndex = f.identifyIndex(p, rpSet);
-		
-		
-		
-		setBorderTag(Tag.REFERENCE_POINT, rpIndex);		
-		setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
-		
-		if(!this.isProfileOrientationOK()){
-			this.reverse();
-		}  
+		try {
+			RuleSet rpSet = RuleSet.roundRPRuleSet();
+			IProfile p = this.getProfile(rpSet.getType());
+			ProfileIndexFinder f = new ProfileIndexFinder();
+			int rpIndex = f.identifyIndex(p, rpSet);
+
+
+
+			setBorderTag(Tag.REFERENCE_POINT, rpIndex);		
+			setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
+
+			if(!this.isProfileOrientationOK()){
+				this.reverse();
+			}  
+
+		} catch(UnavailableProfileTypeException e){
+			stack("Error getting profile type", e);
+		}
 		
 	}
 	
@@ -388,9 +393,17 @@ public class RoundNucleus extends AbstractCellularComponent
 
 		if(this.hasBorderTag(Tag.TOP_VERTICAL) && this.hasBorderTag(Tag.BOTTOM_VERTICAL)){
 			
-			IBorderPoint[] points = getBorderPointsForVerticalAlignment();
+			IBorderPoint[] points;
+			try {
+				points = getBorderPointsForVerticalAlignment();
+				testw.alignPointsOnVertical(points[0], points[1] );
+				
+			} catch (UnavailableProfileTypeException e) {
+				stack("Error getting vertical points", e);
+				testw.rotatePointToBottom(testw.getBorderTag(point));
+			}
 
-			testw.alignPointsOnVertical(points[0], points[1] );
+			
 			
 		} else {
 			testw.rotatePointToBottom(testw.getBorderTag(point));
@@ -522,7 +535,12 @@ public class RoundNucleus extends AbstractCellularComponent
 		int frontPoints = 0;
 		int rearPoints = 0;
 
-		IProfile profile = this.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		IProfile profile;
+		try {
+			profile = this.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		} catch (UnavailableProfileTypeException e) {
+			return false;
+		}
 
 		int midPoint = (int) (this.getBorderLength()/2) ;
 		for(int i=0; i<this.getBorderLength();i++){ // integrate points over 180
@@ -660,20 +678,23 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 		// When moving the RP, move all segments to match
 		if(tag.equals(Tag.REFERENCE_POINT)){
-			ISegmentedProfile p = getProfile(ProfileType.ANGLE);
-			int oldRP = getBorderIndex(tag);
-			int diff  = i-oldRP;
-			try {
-				p.nudgeSegments(diff);
-			} catch (ProfileException e) {
-				warn("Cannot adjust segments");
-				fine("Error moving segments", e);
-			}
-			finest("Old RP at "+oldRP);
-			finest("New RP at "+i);
-			finest("Moving segments by"+diff);
 			
-			setProfile(ProfileType.ANGLE, p);
+			try {
+				ISegmentedProfile p = getProfile(ProfileType.ANGLE);
+				int oldRP = getBorderIndex(tag);
+				int diff  = i-oldRP;
+
+				p.nudgeSegments(diff);
+				finest("Old RP at "+oldRP);
+				finest("New RP at "+i);
+				finest("Moving segments by"+diff);
+
+				setProfile(ProfileType.ANGLE, p);
+			} catch (ProfileException | UnavailableProfileTypeException e) {
+				warn("Cannot adjust segments");
+				stack("Error moving segments", e);
+			}
+			
 			
 		}
 
@@ -703,7 +724,13 @@ public class RoundNucleus extends AbstractCellularComponent
 	public void replaceBorderTags(Map<Tag, Integer> tagMap){
 		
 		int oldRP = getBorderIndex(Tag.REFERENCE_POINT);
-		ISegmentedProfile p = getProfile(ProfileType.ANGLE);
+		ISegmentedProfile p;
+		try {
+			p = getProfile(ProfileType.ANGLE);
+		} catch (UnavailableProfileTypeException e1) {
+			stack("Error getting angle profile", e1);
+			return;
+		}
 		
 		this.borderTags = tagMap;
 		
@@ -847,9 +874,14 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 	
-	public ISegmentedProfile getProfile(ProfileType type) {
+	public ISegmentedProfile getProfile(ProfileType type) throws UnavailableProfileTypeException {
 		if(this.hasProfile(type)){
-			return new SegmentedFloatProfile(this.profileMap.get(type));
+			try {
+				return new SegmentedFloatProfile(this.profileMap.get(type));
+			} catch (IndexOutOfBoundsException | ProfileException e) {
+				stack("Error getting profile "+type, e);
+				throw new UnavailableProfileTypeException("Error getting profile "+type);
+			}
 		} else {
 			throw new IllegalArgumentException("Profile type "+type+" is not found in this nucleus");
 		}
@@ -860,7 +892,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 
 
-	public ISegmentedProfile getProfile(ProfileType type, Tag tag){
+	public ISegmentedProfile getProfile(ProfileType type, Tag tag) throws UnavailableProfileTypeException{
 		
 		
 		// fetch the index of the pointType (the new zero)
@@ -936,7 +968,12 @@ public class RoundNucleus extends AbstractCellularComponent
 	public double getPathLength(ProfileType type) {
 		double pathLength = 0;
 
-		IProfile profile = this.getProfile(type);
+		IProfile profile;
+		try {
+			profile = this.getProfile(type);
+		} catch (UnavailableProfileTypeException e) {
+			return 0;
+		}
 		
 		// First previous point is the last point of the profile
 		IPoint prevPoint = new FloatPoint(0,profile.get(this.getBorderLength()-1));
@@ -984,13 +1021,24 @@ public class RoundNucleus extends AbstractCellularComponent
 
 	public IBorderPoint getNarrowestDiameterPoint() {
 
-		int index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
+		int index = 0;
+		try {
+			index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
+		} catch (UnavailableProfileTypeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		return new DefaultBorderPoint(this.getBorderPoint(index));
 	}
 	
 	public double getNarrowestDiameter() {
-		return Arrays.stream(this.getProfile(ProfileType.DIAMETER).asArray()).min().orElse(0);
+		try {
+			return Arrays.stream(this.getProfile(ProfileType.DIAMETER).asArray()).min().orElse(0);
+		} catch (UnavailableProfileTypeException e) {
+			return 0;
+		}
+
 	}
 
 	
@@ -1035,8 +1083,14 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		
 		if(useTVandBV){
-			IBorderPoint[] points = getBorderPointsForVerticalAlignment();
-			alignPointsOnVertical(points[0], points[1] );
+			IBorderPoint[] points;
+			try {
+				points = getBorderPointsForVerticalAlignment();
+				alignPointsOnVertical(points[0], points[1] );
+			} catch (UnavailableProfileTypeException e) {
+				rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
+			}
+			
 		} else {
 			
 			// Default if top and bottom vertical points have not been specified
@@ -1052,8 +1106,9 @@ public class RoundNucleus extends AbstractCellularComponent
 	 * line drawn between the two border points, minimising the sum-of-squares to each border
 	 * point within the region covered by the line. 
 	 * @return
+	 * @throws UnavailableProfileTypeException 
 	 */	
-	private IBorderPoint[] getBorderPointsForVerticalAlignment(){
+	private IBorderPoint[] getBorderPointsForVerticalAlignment() throws UnavailableProfileTypeException{
 		
 		
 		IBorderPoint topPoint    = this.getBorderTag(Tag.TOP_VERTICAL);
@@ -1326,7 +1381,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 
 	@Override
-	public boolean smoothByDefault() {
+	public boolean isSmoothByDefault() {
 		return true;
 	}
 	

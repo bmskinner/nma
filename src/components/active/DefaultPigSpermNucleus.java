@@ -4,6 +4,7 @@ import java.io.File;
 
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
+import components.active.generic.UnavailableProfileTypeException;
 import components.active.generic.UnprofilableObjectException;
 import components.generic.IPoint;
 import components.generic.IProfile;
@@ -58,41 +59,47 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
 	@Override
     public void findPointsAroundBorder() {
     	
-    	RuleSet rpSet = RuleSet.pigSpermRPRuleSet();
-		IProfile p     = this.getProfile(rpSet.getType());
-		ProfileIndexFinder f = new ProfileIndexFinder();
-		int rpIndex = f.identifyIndex(p, rpSet);
-		
-		if( rpIndex== -1 ){
-			finest("RP index was not found in nucleus, setting to zero in profile");
-			rpIndex = 0;
-		}
-		
-    	setBorderTag(Tag.REFERENCE_POINT, rpIndex);
-    	
-    	/*
-    	 * The OP is the same as the RP in pigs
-    	 */
-    	setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
-    	    	
-    	/*
-    	 * The IP is opposite the OP
-    	 */
-    	IBorderPoint op = this.getBorderPoint(rpIndex);
-    	int ipIndex = getBorderIndex(this.findOppositeBorder(op));
-    	setBorderTag(Tag.INTERSECTION_POINT, ipIndex);
-    	
-    	// decide if the profile is right or left handed; flip if needed
-    	if(!this.isProfileOrientationOK() && canReverse){
-    		this.reverse(); // reverses all profiles, border array and tagged points
 
-    		// the number of border points can change when reversing
-    		// due to float interpolation from different starting positions
-    		// so do the whole thing again
-    		initialise(this.getWindowProportion(ProfileType.ANGLE));
-    		canReverse = false;
-    		findPointsAroundBorder();
-    	} 
-    	      
-    }
+		try {
+			RuleSet rpSet = RuleSet.pigSpermRPRuleSet();
+			IProfile p     = this.getProfile(rpSet.getType());
+			ProfileIndexFinder f = new ProfileIndexFinder();
+			int rpIndex = f.identifyIndex(p, rpSet);
+
+			if( rpIndex== -1 ){
+				finest("RP index was not found in nucleus, setting to zero in profile");
+				rpIndex = 0;
+			}
+
+			setBorderTag(Tag.REFERENCE_POINT, rpIndex);
+
+			/*
+			 * The OP is the same as the RP in pigs
+			 */
+			setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
+
+			/*
+			 * The IP is opposite the OP
+			 */
+			IBorderPoint op = this.getBorderPoint(rpIndex);
+			int ipIndex = getBorderIndex(this.findOppositeBorder(op));
+			setBorderTag(Tag.INTERSECTION_POINT, ipIndex);
+
+			// decide if the profile is right or left handed; flip if needed
+			if(!this.isProfileOrientationOK() && canReverse){
+				this.reverse(); // reverses all profiles, border array and tagged points
+
+				// the number of border points can change when reversing
+				// due to float interpolation from different starting positions
+				// so do the whole thing again
+				initialise(this.getWindowProportion(ProfileType.ANGLE));
+				canReverse = false;
+				findPointsAroundBorder();
+			} 
+
+		} catch(UnavailableProfileTypeException e){
+			stack("Error getting profile type", e);
+		}
+
+	}
 }

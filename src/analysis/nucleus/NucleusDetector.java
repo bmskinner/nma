@@ -59,6 +59,8 @@ public class NucleusDetector extends Detector {
 	private final IAnalysisOptions options;
 	private final String outputFolderName;
 	
+	private final NucleusFactory factory = new NucleusFactory();
+	
 	public NucleusDetector(final IAnalysisOptions options, final String outputFolderName){
 		
 		if(options==null){
@@ -152,7 +154,7 @@ public class NucleusDetector extends Detector {
 		try {
 			searchStack = preprocessImage(image);
 		} catch (Exception e1) {
-			fine("Error processing image", e1);
+			stack("Error processing image", e1);
 			warn("Unable to process image "+path.getAbsolutePath());
 			return result;
 		}
@@ -179,7 +181,7 @@ public class NucleusDetector extends Detector {
 			try {
 				cell = makeCell(roi, image, i, path, makeDummy); // get the profile data back for the nucleus
 			}catch(NucleusCreationException e){
-				fine("Cannot create nucleus from ROI"+i);
+				stack("Cannot create nucleus from ROI"+i, e);
 				continue;
 			}
 			result.add(cell);
@@ -266,10 +268,11 @@ public class NucleusDetector extends Detector {
 
 		// create a Nucleus from the roi
 		IPoint centreOfMass = IPoint.makeNew(values.get("XM"), values.get("YM"));
+//
+//		log("CoM is at "+centreOfMass.toString());
+//		log("Roi: "+bounds.toString());
 
-		fine("CoM is at "+centreOfMass.toString());
-
-		Nucleus currentNucleus = NucleusFactory.createNucleus(roi, 
+		Nucleus currentNucleus = factory.createNucleus(roi, 
 				path, 
 				options.getChannel(),
 				nucleusNumber, 
@@ -278,7 +281,7 @@ public class NucleusDetector extends Detector {
 				centreOfMass);
 
 		// Move the nucleus xbase and ybase to 0,0 coordinates for charting
-		IPoint offsetCoM = IPoint.makeNew( centreOfMass.getX() - xbase, centreOfMass.getY()- ybase  );
+		IPoint offsetCoM = IPoint.makeNew( centreOfMass.getX() - xbase, centreOfMass.getY() - ybase  );
 
 		fine("Offsetting CoM to point "+offsetCoM.toString());
 
@@ -290,7 +293,7 @@ public class NucleusDetector extends Detector {
 
 		currentNucleus.setScale(options.getScale());
 
-		if ( !makeDummyCell) {
+		if ( ! makeDummyCell) {
 
 			currentNucleus.initialise(options.getAngleWindowProportion());
 

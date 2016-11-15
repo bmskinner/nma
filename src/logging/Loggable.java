@@ -11,13 +11,25 @@ import ij.IJ;
  * @author bms41
  *
  */
+/**
+ * @author bms41
+ *
+ */
 public interface Loggable {
 	
 	public static final String ROOT_LOGGER = "";
 	public static final String PROGRAM_LOGGER = "ProgramLogger";
 	
 	public static final Level TRACE = new ErrorLevel();
-	
+
+	/**
+	 * The TRACE error level has a level value of 600, so will display
+     * ahead of FINE. It is used for reporting errors whilst hiding
+     * uninformative messages from users generally.
+	 * @author bms41
+	 * @since 1.13.3
+	 *
+	 */
 	@SuppressWarnings("serial")
 	public class ErrorLevel extends Level {
 		public ErrorLevel(){
@@ -48,7 +60,9 @@ public interface Loggable {
 	}
 	
 	/**
-     * Log an error to the program log window with Level.SEVERE
+     * Log an error to the program log window with a stack trace. The
+     * TRACE error level has a level value of 600, so will display
+     * ahead of FINE.
      * @param message the error messsage
      * @param t the exception
      */

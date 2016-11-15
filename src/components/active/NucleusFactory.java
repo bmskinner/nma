@@ -12,6 +12,8 @@ import ij.gui.Roi;
 
 public class NucleusFactory implements ComponentFactory<CellularComponent> {
 
+	public NucleusFactory(){}
+	
 	@Override
 	public Nucleus buildInstance(){
 		return null;
@@ -29,7 +31,7 @@ public class NucleusFactory implements ComponentFactory<CellularComponent> {
 	 * @return
 	 * @throws NucleusCreationException 
 	 */
-	public static Nucleus createNucleus(Roi roi, File path, 
+	public Nucleus createNucleus(Roi roi, File path, 
 			int channel, int nucleusNumber, 
 			int[] originalPosition, NucleusType nucleusType, 
 			IPoint centreOfMass) throws NucleusCreationException {
@@ -37,16 +39,6 @@ public class NucleusFactory implements ComponentFactory<CellularComponent> {
 		if(roi==null || path==null || nucleusType==null || centreOfMass==null){
 			throw new IllegalArgumentException("Argument cannot be null in nucleus factory");
 		}
-
-		
-//		if(nucleusType.equals(NucleusType.RODENT_SPERM)){
-//			return createRodentSpermNucleus(roi,
-//						  centreOfMass, 
-//						  path, 
-//						  channel, 
-//						  originalPosition,
-//						  nucleusNumber);
-//		}
 		
 		Nucleus n = null;
 		
@@ -65,9 +57,15 @@ public class NucleusFactory implements ComponentFactory<CellularComponent> {
 						  originalPosition,
 						  nucleusNumber);
 
-		} catch (Exception e) {
+		} catch (InvocationTargetException e) {
+			stack("Invokation error creating nucleus", e.getCause());
 			throw new NucleusCreationException("Error making nucleus:" +e.getMessage(), e);
 		} catch(Error e){
+			stack("Error creating nucleus", e);
+			throw new NucleusCreationException("Error making nucleus:" +e.getMessage(), e);
+		} catch (InstantiationException | IllegalAccessException |
+				IllegalArgumentException | NoSuchMethodException | SecurityException e) {
+			stack("Error creating nucleus", e);
 			throw new NucleusCreationException("Error making nucleus:" +e.getMessage(), e);
 		}
 			  
@@ -78,17 +76,17 @@ public class NucleusFactory implements ComponentFactory<CellularComponent> {
 		  return n;
 	  }
 	
-	private static Nucleus createRodentSpermNucleus(Roi roi, IPoint centreOfMass, File path, 
-			int channel, int[] originalPosition, int nucleusNumber	) throws NucleusCreationException{
-	
-		
-		return new DefaultRodentSpermNucleus(roi,
-						  centreOfMass, 
-						  path, 
-						  channel, 
-						  originalPosition,
-						  nucleusNumber);
-	}
+//	private static Nucleus createRodentSpermNucleus(Roi roi, IPoint centreOfMass, File path, 
+//			int channel, int[] originalPosition, int nucleusNumber	) throws NucleusCreationException{
+//	
+//		
+//		return new DefaultRodentSpermNucleus(roi,
+//						  centreOfMass, 
+//						  path, 
+//						  channel, 
+//						  originalPosition,
+//						  nucleusNumber);
+//	}
 	
 	/**
 	 * Thrown when a profile collection or segmented profile has no assigned

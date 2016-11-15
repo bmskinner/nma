@@ -9,8 +9,8 @@ import java.util.UUID;
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
 import components.active.generic.DefaultBorderPoint;
-import components.active.generic.FloatPoint;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.active.generic.UnprofilableObjectException;
 import components.generic.BooleanProfile;
 import components.generic.Equation;
@@ -62,8 +62,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		try {
 			return new DefaultRodentSpermNucleus(this);
 		} catch (UnprofilableObjectException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			stack("Cannot duplicate nucleus", e);
+			warn("Error duplicating nucleus");
 		}
 		return null;
 	}
@@ -341,40 +341,41 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 	@Override
 	public void findPointsAroundBorder() {
 
+		try {
 
-		RuleSet rpSet = RuleSet.mouseSpermRPRuleSet();
-		IProfile p     = this.getProfile(rpSet.getType());
-		ProfileIndexFinder f = new ProfileIndexFinder();
-		int tipIndex = f.identifyIndex(p, rpSet);
-
-
-		// find tip - use the least angle method
-		//		int tipIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
-		setBorderTag(Tag.REFERENCE_POINT, tipIndex);
-
-		// decide if the profile is right or left handed; flip if needed
-		if(!this.isProfileOrientationOK() && canReverse){
-			this.reverse(); // reverses all profiles, border array and tagged points
-			
-			// the number of border points can change when reversing
-			// due to float interpolation from different starting positions
-			// so do the whole thing again
-			initialise(this.getWindowProportion(ProfileType.ANGLE));
-			canReverse = false;
-			findPointsAroundBorder();
-		}  
+			RuleSet rpSet = RuleSet.mouseSpermRPRuleSet();
+			IProfile p     = this.getProfile(rpSet.getType());
+			ProfileIndexFinder f = new ProfileIndexFinder();
+			int tipIndex = f.identifyIndex(p, rpSet);
 
 
-		/*
+			// find tip - use the least angle method
+			//		int tipIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
+			setBorderTag(Tag.REFERENCE_POINT, tipIndex);
+
+			// decide if the profile is right or left handed; flip if needed
+			if(!this.isProfileOrientationOK() && canReverse){
+				this.reverse(); // reverses all profiles, border array and tagged points
+
+				// the number of border points can change when reversing
+				// due to float interpolation from different starting positions
+				// so do the whole thing again
+				initialise(this.getWindowProportion(ProfileType.ANGLE));
+				canReverse = false;
+				findPointsAroundBorder();
+			}  
+
+
+			/*
       Find the tail point using multiple independent methods. 
       Find a consensus point
 
       Method 1: Use the list of local minima to detect the tail corner
                 This is the corner furthest from the tip.
                 Can be confused as to which side of the sperm head is chosen
-		 */  
-		IBorderPoint spermTail2;
-		try {
+			 */  
+			IBorderPoint spermTail2;
+
 			spermTail2 = findTailPointFromMinima();
 			this.addTailEstimatePosition(spermTail2);
 
@@ -384,28 +385,28 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		                The border furthest from the tip is the tail
 			 */  
 			IBorderPoint spermTail1;
-			try {
-				spermTail1 = this.findTailByNarrowestWidthMethod();
-				this.addTailEstimatePosition(spermTail1);
 
-				/*
+			spermTail1 = this.findTailByNarrowestWidthMethod();
+			this.addTailEstimatePosition(spermTail1);
+
+			/*
 				      Given distinct methods for finding a tail,
 				      take a position between them on roi
-				 */
-				int consensusTailIndex = this.getPositionBetween(spermTail2, spermTail1);
-				IBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
+			 */
+			int consensusTailIndex = this.getPositionBetween(spermTail2, spermTail1);
+			IBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
 
 
-				setBorderTag(Tag.ORIENTATION_POINT, consensusTailIndex);
+			setBorderTag(Tag.ORIENTATION_POINT, consensusTailIndex);
 
-				setBorderTag(Tag.INTERSECTION_POINT, this.getBorderIndex(this.findOppositeBorder(consensusTail)));
+			setBorderTag(Tag.INTERSECTION_POINT, this.getBorderIndex(this.findOppositeBorder(consensusTail)));
 
-			} catch (UnavailableBorderTagException e) {
-				fine("Cannot get border tag", e);
-			}
+
 
 		} catch (UnavailableBorderTagException e) {
-			fine("Error gettting tail position",e);
+			stack("Error gettting tail position",e);
+		} catch (UnavailableProfileTypeException e1) {
+			stack("Cannot get profile type",e1);
 		}
 
 	
@@ -472,6 +473,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		finest("Fetched vertical nucleus from round nucleus");
 		if(verticalNucleus==null){
 			warn("Unknown error creating vertical nucleus");
+			return null;
 		}
 
 		/*
@@ -481,7 +483,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		try {
 			vertX = verticalNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
 		} catch (UnavailableBorderTagException e) {
-			fine("Cannot get RP from vertical nucleus. Not checking horizontal orientation");
+			stack("Cannot get RP from vertical nucleus. Not checking horizontal orientation", e);
 			return verticalNucleus;
 		}
 
@@ -492,8 +494,12 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
 		if(vertX > verticalNucleus.getCentreOfMass().getX() ){
 			clockwiseRP = true; // this is only set to true, as the default is false, and will become false after the nucleus is flipped
+			
+//			log(this.getNameAndNumber()+": Pre flipping CoM is "+verticalNucleus.getCentreOfMass());
 			verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
+//			log(this.getNameAndNumber()+": Post flipping CoM is "+verticalNucleus.getCentreOfMass());
 			verticalNucleus.moveCentreOfMass( IPoint.makeNew(0,0));
+//			log(this.getNameAndNumber()+": Moved CoM is "+verticalNucleus.getCentreOfMass());
 		} 
 
 		return verticalNucleus;
@@ -509,7 +515,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     Detect the tail based on a list of local minima in an NucleusBorderPoint array.
     The putative tail is the point furthest from the sum of the distances from the CoM and the tip
 	 */
-	public IBorderPoint findTailPointFromMinima() throws UnavailableBorderTagException{
+	public IBorderPoint findTailPointFromMinima() throws UnavailableBorderTagException, UnavailableProfileTypeException{
 
 		// we cannot be sure that the greatest distance between two points will be the endpoints
 		// because the hook may begin to curve back on itself. We supplement this basic distance with

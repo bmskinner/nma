@@ -108,7 +108,7 @@ public class NuclearSignal extends AbstractCellularComponent implements INuclear
 	}
 
 	@Override
-	public boolean smoothByDefault() {
+	public boolean isSmoothByDefault() {
 		// TODO Auto-generated method stub
 		return false;
 	}

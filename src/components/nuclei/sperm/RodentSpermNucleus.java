@@ -44,6 +44,7 @@ import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.FloatPoint;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BooleanProfile;
 import components.generic.BorderTagObject;
 import components.generic.Equation;
@@ -354,70 +355,74 @@ public class RodentSpermNucleus extends SpermNucleus {
 	@Override
 	public void findPointsAroundBorder(){
 
-		
-		RuleSet rpSet = RuleSet.mouseSpermRPRuleSet();
-		IProfile p     = this.getProfile(rpSet.getType());
-		ProfileIndexFinder f = new ProfileIndexFinder();
-		int tipIndex = f.identifyIndex(p, rpSet);
-		
-		
-		// find tip - use the least angle method
-//		int tipIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
-		setBorderTag(Tag.REFERENCE_POINT, tipIndex);
-
-		// decide if the profile is right or left handed; flip if needed
-		if(!this.isProfileOrientationOK()){
-			this.reverse(); // reverses all profiles, border array and tagged points
-		}  
+		try {
+			RuleSet rpSet = RuleSet.mouseSpermRPRuleSet();
+			IProfile p     = this.getProfile(rpSet.getType());
+			ProfileIndexFinder f = new ProfileIndexFinder();
+			int tipIndex = f.identifyIndex(p, rpSet);
 
 
-		/*
+			// find tip - use the least angle method
+			//		int tipIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
+			setBorderTag(Tag.REFERENCE_POINT, tipIndex);
+
+			// decide if the profile is right or left handed; flip if needed
+			if(!this.isProfileOrientationOK()){
+				this.reverse(); // reverses all profiles, border array and tagged points
+			}  
+
+
+			/*
       Find the tail point using multiple independent methods. 
       Find a consensus point
 
       Method 1: Use the list of local minima to detect the tail corner
                 This is the corner furthest from the tip.
                 Can be confused as to which side of the sperm head is chosen
-		 */  
-		IBorderPoint spermTail2 = findTailPointFromMinima();
-		this.addTailEstimatePosition(spermTail2);
-		// addBorderTag("spermTail2", this.getIndex(spermTail2));
+			 */  
+			IBorderPoint spermTail2 = findTailPointFromMinima();
+			this.addTailEstimatePosition(spermTail2);
+			// addBorderTag("spermTail2", this.getIndex(spermTail2));
 
-    /*
+			/*
       Method 2: Look at the 2nd derivative - rate of change of angles
                 Perform a 5win average smoothing of the deltas
                 Count the number of consecutive >1 degree blocks
                 Wide block far from tip = tail
-    */  
-    // NucleusBorderPoint spermTail3 = this.findTailFromDeltas();
-    // this.addTailEstimatePosition(spermTail3);
+			 */  
+			// NucleusBorderPoint spermTail3 = this.findTailFromDeltas();
+			// this.addTailEstimatePosition(spermTail3);
 
-    /*    
+			/*    
       Method 3: Find the narrowest diameter around the nuclear CoM
                 Draw a line orthogonal, and pick the intersecting border points
                 The border furthest from the tip is the tail
-    */  
-    IBorderPoint spermTail1 = this.findTailByNarrowestWidthMethod();
-    this.addTailEstimatePosition(spermTail1);
-    // addBorderTag("spermTail1", this.getIndex(spermTail1));
+			 */  
+			IBorderPoint spermTail1 = this.findTailByNarrowestWidthMethod();
+			this.addTailEstimatePosition(spermTail1);
+			// addBorderTag("spermTail1", this.getIndex(spermTail1));
 
 
-    /*
+			/*
       Given distinct methods for finding a tail,
       take a position between them on roi
-    */
-    int consensusTailIndex = this.getPositionBetween(spermTail2, spermTail1);
-    IBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
-    // consensusTailIndex = this.getPositionBetween(consensusTail, spermTail1);
+			 */
+			int consensusTailIndex = this.getPositionBetween(spermTail2, spermTail1);
+			IBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
+			// consensusTailIndex = this.getPositionBetween(consensusTail, spermTail1);
 
-    // this.setInitialConsensusTail(consensusTail);
+			// this.setInitialConsensusTail(consensusTail);
 
-    // addBorderTag("initialConsensusTail", consensusTailIndex);
+			// addBorderTag("initialConsensusTail", consensusTailIndex);
 
-    setBorderTag(Tag.ORIENTATION_POINT, consensusTailIndex);
+			setBorderTag(Tag.ORIENTATION_POINT, consensusTailIndex);
 
-    setBorderTag(Tag.INTERSECTION_POINT, this.getBorderIndex(this.findOppositeBorder(consensusTail)));
-  }
+			setBorderTag(Tag.INTERSECTION_POINT, this.getBorderIndex(this.findOppositeBorder(consensusTail)));
+
+		} catch(UnavailableProfileTypeException e){
+			stack("Error getting profile type", e);
+		}
+	}
 
 	
 	private FloatPolygon createRoiPolygon(List<IBorderPoint> list){
@@ -511,7 +516,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     Detect the tail based on a list of local minima in an NucleusBorderPoint array.
     The putative tail is the point furthest from the sum of the distances from the CoM and the tip
   */
-  public IBorderPoint findTailPointFromMinima() {
+  public IBorderPoint findTailPointFromMinima() throws UnavailableProfileTypeException {
   
     // we cannot be sure that the greatest distance between two points will be the endpoints
     // because the hook may begin to curve back on itself. We supplement this basic distance with
@@ -519,6 +524,8 @@ public class RodentSpermNucleus extends SpermNucleus {
     // distance are both far from each other and far from the centre, and are a more robust estimate
     // of the true ends of the signal
     double tipToCoMDistance = this.getBorderTag(Tag.REFERENCE_POINT).getLengthTo(this.getCentreOfMass());
+    
+    
     BooleanProfile array = this.getProfile(ProfileType.ANGLE).getLocalMinima(5);
 
     double maxDistance = 0;

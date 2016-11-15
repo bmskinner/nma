@@ -55,6 +55,7 @@ public interface Profileable extends CellularComponent {
 	 * consistency to the order of values across multiple nuclei. If consistency
 	 * is needed, specify a pointType
 	 * @return
+	 * @throws  
 	 */
 	ISegmentedProfile getProfile(ProfileType type) throws UnavailableProfileTypeException;
 	

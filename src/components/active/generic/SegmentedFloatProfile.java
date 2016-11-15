@@ -48,8 +48,9 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 * Construct using a regular profile and a list of border segments
 	 * @param p the profile
 	 * @param segments the list of segments to use
+	 * @throws ProfileException 
 	 */
-	public SegmentedFloatProfile(final IProfile p, final List<IBorderSegment> segments) throws IndexOutOfBoundsException {		
+	public SegmentedFloatProfile(final IProfile p, final List<IBorderSegment> segments) throws IndexOutOfBoundsException, ProfileException {		
 		super(p);
 
 		if(segments==null || segments.isEmpty()){
@@ -64,17 +65,15 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 					+")");
 		}
 		
-//		log("Template has "+segments.size()+" segments");
 
 
-		try {
+//		try {
 			IBorderSegment.linkSegments(segments);
-		} catch (ProfileException e) {
-			warn("Error linking segments in profile constructor");
-			stack("Profile error linking segments", e);
-		}
+//		} catch (ProfileException e) {
+//			warn("Error linking segments in profile constructor");
+//			stack("Profile error linking segments", e);
+//		}
 
-//		log("Constructing "+segments.size()+" segments");
 		this.segments = new IBorderSegment[segments.size()];
 		for(int i=0; i<segments.size(); i++){
 			this.segments[i] =  segments.get(i);
@@ -86,8 +85,10 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 * Construct using an existing profile. Copies the data
 	 * and segments
 	 * @param profile the segmented profile to copy
+	 * @throws ProfileException 
+	 * @throws IndexOutOfBoundsException 
 	 */
-	public SegmentedFloatProfile(final ISegmentedProfile profile) {
+	public SegmentedFloatProfile(final ISegmentedProfile profile) throws IndexOutOfBoundsException, ProfileException {
 		this(profile, profile.getSegments());
 	}
 
@@ -611,7 +612,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	public ISegmentedProfile interpolateSegments(int length) throws ProfileException{
 		
 		// get the proportions of the existing segments
-		log("Segment interpolation begun: "+segments.length);
+//		log("Segment interpolation begun: "+segments.length);
 		
 		double[] props = new double[segments.length];
 		
@@ -658,7 +659,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		// assign new segments
 		IBorderSegment.linkSegments(newSegs);	
 		
-		log("Segment interpolation complete "+newSegs.size());
+//		log("Segment interpolation complete "+newSegs.size());
 		
 		return new SegmentedFloatProfile(newProfile, newSegs);
 	}

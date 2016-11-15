@@ -79,10 +79,10 @@ public abstract class ProfileableCellularComponent
 		
 		if( c instanceof Taggable ){
 
-
 			Taggable comp = (Taggable) c;
 
-			finest("Created cellular component");		
+			finest("Created cellular component");
+//			log("Duplicating "+this.getClass().getSimpleName());
 
 			this.angleWindowProportion  = comp.getWindowProportion(ProfileType.ANGLE);
 			this.angleProfileWindowSize = comp.getWindowSize(ProfileType.ANGLE);
@@ -91,9 +91,18 @@ public abstract class ProfileableCellularComponent
 			for(ProfileType type : ProfileType.values()){
 
 				try {
-					this.profileMap.put(type, ISegmentedProfile.makeNew(comp.getProfile(type)));
+					
+					ISegmentedProfile oldProfile = comp.getProfile(type);
+					ISegmentedProfile newProfile = ISegmentedProfile.makeNew(oldProfile);
+					
+					this.profileMap.put(type, newProfile);
+					
 				} catch (UnavailableProfileTypeException e) {
-					fine("Cannot get profile type "+type+" from template");
+					stack("Cannot get profile type "+type+" from template", e);
+					warn("Error copying profile");
+				} catch (ProfileException e) {
+					stack("Cannot make new profile type "+type+" from template", e);
+					warn("Error copying profile");
 				}
 				
 			}
@@ -185,7 +194,7 @@ public abstract class ProfileableCellularComponent
 		try {
 			this.setProfile(type, new SegmentedFloatProfile(p).offset(-pointIndex));
 		} catch (ProfileException e) {
-			fine("Error setting profile", e);
+			stack("Error setting profile "+type+" at "+tag, e);
 			return;
 		}
 
@@ -243,38 +252,44 @@ public abstract class ProfileableCellularComponent
 			throw new IllegalArgumentException("Index "+i+" is out of bounds : border length is "+this.getBorderLength());
 		}
 		
-		// When moving the RP, move all segments to match
-		if(tag.equals(Tag.REFERENCE_POINT)){
-			ISegmentedProfile p = getProfile(ProfileType.ANGLE);
-			int oldRP = getBorderIndex(tag);
-			int diff  = i-oldRP;
-			try {
-				p.nudgeSegments(diff);
-			} catch (ProfileException e) {
-				warn("Cannot offset profile to "+tag);
-				fine("Error moving segments", e);
-				return;
-			}
-			finest("Old RP at "+oldRP);
-			finest("New RP at "+i);
-			finest("Moving segments by"+diff);
-			
-			setProfile(ProfileType.ANGLE, p);
-
-			
-		}
-
-		this.borderTags.put( tag, i);
-
-		// The intersection point should always be opposite the orientation point
-		if(tag.equals(Tag.ORIENTATION_POINT)){
-			int intersectionIndex = this.getBorderIndex(this.findOppositeBorder( this.getBorderPoint(i) ));
-			this.setBorderTag(Tag.INTERSECTION_POINT, intersectionIndex);
-//			updateVerticallyRotatedNucleus(); // force an update
-		}
+		try {
 		
-		if(tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)){
-//			updateVerticallyRotatedNucleus();
+			// When moving the RP, move all segments to match
+			if(tag.equals(Tag.REFERENCE_POINT)){
+				ISegmentedProfile p = getProfile(ProfileType.ANGLE);
+				int oldRP = getBorderIndex(tag);
+				int diff  = i-oldRP;
+				try {
+					p.nudgeSegments(diff);
+				} catch (ProfileException e) {
+					warn("Cannot offset profile to "+tag);
+					fine("Error moving segments", e);
+					return;
+				}
+				finest("Old RP at "+oldRP);
+				finest("New RP at "+i);
+				finest("Moving segments by"+diff);
+
+				setProfile(ProfileType.ANGLE, p);
+
+
+			}
+
+			this.borderTags.put( tag, i);
+
+			// The intersection point should always be opposite the orientation point
+			if(tag.equals(Tag.ORIENTATION_POINT)){
+				int intersectionIndex = this.getBorderIndex(this.findOppositeBorder( this.getBorderPoint(i) ));
+				this.setBorderTag(Tag.INTERSECTION_POINT, intersectionIndex);
+				//			updateVerticallyRotatedNucleus(); // force an update
+			}
+
+			if(tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)){
+				//			updateVerticallyRotatedNucleus();
+			}
+
+		} catch (UnavailableProfileTypeException e) {
+			stack("Error getting angle profile ", e);
 		}
 	}
 	
@@ -289,36 +304,39 @@ public abstract class ProfileableCellularComponent
 	
 	public void replaceBorderTags(Map<Tag, Integer> tagMap){
 		
-		int oldRP = getBorderIndex(Tag.REFERENCE_POINT);
-		ISegmentedProfile p = getProfile(ProfileType.ANGLE);
-		
-		this.borderTags = tagMap;
-		
-		
-		int newRP = getBorderIndex(Tag.REFERENCE_POINT);
-		int diff  = newRP-oldRP;
 		try {
-			p.nudgeSegments(diff);
-		} catch (ProfileException e) {
-			warn("Cannot offset profile");
-			fine("Error moving segments", e);
-			return;
+
+			int oldRP = getBorderIndex(Tag.REFERENCE_POINT);
+			ISegmentedProfile p = getProfile(ProfileType.ANGLE);
+
+			this.borderTags = tagMap;
+
+
+			int newRP = getBorderIndex(Tag.REFERENCE_POINT);
+			int diff  = newRP-oldRP;
+			try {
+				p.nudgeSegments(diff);
+			} catch (ProfileException e) {
+				warn("Cannot offset profile");
+				fine("Error moving segments", e);
+				return;
+			}
+			finest("Old RP at "+oldRP);
+			finest("New RP at "+newRP);
+			finest("Moving segments by"+diff);
+
+			setProfile(ProfileType.ANGLE, p);
+
+
+
+			int newOP = getBorderIndex(Tag.ORIENTATION_POINT);
+			int intersectionIndex = this.getBorderIndex(this.findOppositeBorder( this.getBorderPoint(newOP) ));
+			this.borderTags.put(Tag.INTERSECTION_POINT, intersectionIndex);
+
+		} catch (UnavailableProfileTypeException e) {
+			stack("Error getting angle profile ", e);
 		}
-		finest("Old RP at "+oldRP);
-		finest("New RP at "+newRP);
-		finest("Moving segments by"+diff);
 
-		setProfile(ProfileType.ANGLE, p);
-
-
-		
-		int newOP = getBorderIndex(Tag.ORIENTATION_POINT);
-		int intersectionIndex = this.getBorderIndex(this.findOppositeBorder( this.getBorderPoint(newOP) ));
-		this.borderTags.put(Tag.INTERSECTION_POINT, intersectionIndex);
-		
-		
-//		updateVerticallyRotatedNucleus();		
-		
 	}
 	
 		
@@ -437,9 +455,15 @@ public abstract class ProfileableCellularComponent
 	}
 	
 	
-	public ISegmentedProfile getProfile(ProfileType type) {
+	public ISegmentedProfile getProfile(ProfileType type) throws UnavailableProfileTypeException {
 		if(this.hasProfile(type)){
-			return new SegmentedFloatProfile(this.profileMap.get(type));
+				try {
+					return new SegmentedFloatProfile(this.profileMap.get(type));
+				} catch (java.lang.IndexOutOfBoundsException | ProfileException e) {
+					stack("Error getting profile "+type, e);
+					throw new UnavailableProfileTypeException("Cannot get profile type "+type);
+				}
+
 		} else {
 			throw new IllegalArgumentException("Profile type "+type+" is not found in this nucleus");
 		}
@@ -529,19 +553,24 @@ public abstract class ProfileableCellularComponent
 	public double getPathLength(ProfileType type) {
 		double pathLength = 0;
 
-		IProfile profile = this.getProfile(type);
-		
-		// First previous point is the last point of the profile
-		IPoint prevPoint = new FloatPoint(0,profile.get(this.getBorderLength()-1));
-		 
-		for (int i=0; i<this.getBorderLength();i++ ) {
+		try {
+
+			IProfile profile = this.getProfile(type);
+
+			// First previous point is the last point of the profile
+			IPoint prevPoint = new FloatPoint(0,profile.get(this.getBorderLength()-1));
+
+			for (int i=0; i<this.getBorderLength();i++ ) {
 				double normalisedX = ((double)i/(double)this.getBorderLength())*100; // normalise to 100 length
-				
+
 				// We are measuring along the chart of angle vs position
 				// Each median angle value is treated as an XYPoint
 				IPoint thisPoint = new FloatPoint(normalisedX, profile.get(i));
 				pathLength += thisPoint.getLengthTo(prevPoint);
 				prevPoint = thisPoint;
+			}
+		}catch (UnavailableProfileTypeException e) {
+			stack("Error getting angle profile ", e);
 		}
 		return pathLength;
 	}
@@ -560,11 +589,6 @@ public abstract class ProfileableCellularComponent
 			profileMap.put(type, profile);
 		}
 		
-//		List<IBorderPoint> reversed = new ArrayList<IBorderPoint>(0);
-//		for(int i=this.getBorderLength()-1; i>=0;i--){
-//			reversed.add(this.getBorderPoint(i));
-//		}
-//		this.setBorderList(reversed);
 
 		// replace the tag positions also
 		Set<Tag> keys = borderTags.keySet();
@@ -578,14 +602,27 @@ public abstract class ProfileableCellularComponent
 	
 
 	public IBorderPoint getNarrowestDiameterPoint() {
+		
+		int index = 0;
+		
+		try {
 
-		int index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
+			index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
 
+		} catch (UnavailableProfileTypeException e) {
+			stack("Error getting diameter profile", e);
+		}
+		
 		return IBorderPoint.makeNew(this.getBorderPoint(index));
 	}
 	
 	public double getNarrowestDiameter() {
-		return Arrays.stream(this.getProfile(ProfileType.DIAMETER).asArray()).min().orElse(0);
+		try {
+			return Arrays.stream(this.getProfile(ProfileType.DIAMETER).asArray()).min().orElse(0);
+		} catch (UnavailableProfileTypeException e) {
+			stack("Error getting diameter profile", e);
+			return 0;
+		}
 	}
 
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {

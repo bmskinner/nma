@@ -58,7 +58,7 @@ public interface Rotatable extends Loggable {
 		IPoint upperPoint = topPoint.getY()>bottomPoint.getY()? topPoint : bottomPoint;
 		IPoint lowerPoint = upperPoint==topPoint ? bottomPoint : topPoint;
 
-		IPoint comp = new FloatPoint(lowerPoint.getX(),upperPoint.getY());
+		IPoint comp = IPoint.makeNew(lowerPoint.getX(),upperPoint.getY());
 
 		/*
 		 *      LA             RA        RB         LB         

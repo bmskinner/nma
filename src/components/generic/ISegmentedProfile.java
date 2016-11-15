@@ -40,8 +40,9 @@ public interface ISegmentedProfile extends IProfile {
 	 * Create a new profile of the default type
 	 * @param profile
 	 * @return
+	 * @throws ProfileException 
 	 */
-	static ISegmentedProfile makeNew(ISegmentedProfile profile){
+	static ISegmentedProfile makeNew(ISegmentedProfile profile) throws ProfileException{
 		return new SegmentedFloatProfile(profile);
 	}
 	

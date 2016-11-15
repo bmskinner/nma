@@ -68,7 +68,7 @@ public class Acrosome extends  AbstractCellularComponent implements IAcrosome {
 	}
 
 	@Override
-	public boolean smoothByDefault() {
+	public boolean isSmoothByDefault() {
 		// TODO Auto-generated method stub
 		return false;
 	}
