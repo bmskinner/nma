@@ -408,14 +408,19 @@ public class DatasetConverter implements Loggable {
 
 		} catch (NoSuchFieldException e) {
 			stack("No field", e);
+			throw new DatasetConversionException("Cannot set ID", e);
 		} catch (SecurityException e) {
 			stack("Security error", e);
+			throw new DatasetConversionException("Cannot set ID", e);
 		} catch (IllegalArgumentException e) {
 			stack("Illegal argument", e);
+			throw new DatasetConversionException("Cannot set ID", e);
 		} catch (IllegalAccessException e) {
 			stack("Illegal access", e);
+			throw new DatasetConversionException("Cannot set ID", e);
 		} catch(Exception e){
 			stack("Unexpected exception", e);
+			throw new DatasetConversionException("Cannot set ID", e);
 		}
 
 //		fine("New nucleus id is "+newNucleus.getID());
@@ -441,10 +446,28 @@ public class DatasetConverter implements Loggable {
 
 
 		fine("\tCopying tags");
-		//Copy the existing border tags
+
+		try {
+			// The keyset of the map will not have a defined order, so do the RP first now
+			// and skip it in the loop below
+			template.getBorderPoint(Tag.REFERENCE_POINT);
+
+			// get the proporitonal index of the old tag
+			double propIndex = (double) template.getBorderIndex(Tag.REFERENCE_POINT) / (double) template.getBorderLength();
+
+			int newIndex = (int) ((double) newNucleus.getBorderLength() * propIndex);
+
+			fine("\tChanging tag "+Tag.REFERENCE_POINT+" to index "+newIndex+" : "+propIndex);
+			newNucleus.setBorderTag(Tag.REFERENCE_POINT, newIndex);
+		} catch (UnavailableBorderTagException | IndexOutOfBoundsException e) {
+			stack("Cannot set border tag to requested index", e);
+			throw new DatasetConversionException("Cannot set reference point", e);
+		}
+		
+		//Copy the other existing border tags
 		for(Tag t : template.getBorderTags().keySet()){
 			
-			if(t.equals(Tag.INTERSECTION_POINT)){
+			if(t.equals(Tag.INTERSECTION_POINT) || t.equals(Tag.REFERENCE_POINT)){
 				continue;
 			}
 			
@@ -463,7 +486,7 @@ public class DatasetConverter implements Loggable {
 				fine("\tChanging tag "+t+" to index "+newIndex+" : "+propIndex);
 				newNucleus.setBorderTag(t, newIndex);
 			} catch (UnavailableBorderTagException | IndexOutOfBoundsException e) {
-				fine("Cannot set border tag to requested index", e);
+				stack("Cannot set border tag to requested index", e);
 			}
 			finer("\tSetting tag "+t);
 		}

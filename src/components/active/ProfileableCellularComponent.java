@@ -208,7 +208,7 @@ public abstract class ProfileableCellularComponent
 		int borderIndex = this.getBorderIndex(tag);
 			
 		if(borderIndex <0 || borderIndex>=this.getBorderLength()){
-			throw new UnavailableBorderTagException("Tag is registered as index -1");
+			throw new UnavailableBorderTagException("Tag "+tag+" is registered as index "+borderIndex);
 		}
 			
 		result = this.getBorderPoint((this.getBorderIndex(tag)));

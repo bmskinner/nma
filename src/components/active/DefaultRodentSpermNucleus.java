@@ -136,7 +136,6 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
 		// Copy the nucleus
 		finest("Calculating hook and body length");
-		//		RodentSpermNucleus testNucleus = new RodentSpermNucleus( this); //.duplicate();
 
 		// Start with the vertically rotated nucleus
 		Nucleus testNucleus = getVerticallyRotatedNucleus();
@@ -154,7 +153,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 			try {
 				vertX = testNucleus.getBorderTag(Tag.TOP_VERTICAL).getX();
 			} catch (UnavailableBorderTagException e) {
-				fine("Cannot get border tag", e);
+				stack("Cannot get border tag", e);
 				setStatistic(NucleusStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
 				setStatistic(NucleusStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
 				return;
@@ -199,7 +198,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 			try {
 				referenceX = testNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
 			} catch (UnavailableBorderTagException e) {
-				fine("Cannot get border tag", e);
+				stack("Cannot get border tag", e);
 				setStatistic(NucleusStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
 				setStatistic(NucleusStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
 				return;
@@ -655,7 +654,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 			try {
 				index = findIntersectionPointForNuclearSplit();
 			} catch (UnavailableBorderTagException e) {
-				fine("Cannot get border tag", e);
+				stack("Cannot get border tag", e);
 				return;
 			}
 			this.setBorderTag(Tag.INTERSECTION_POINT, index );
@@ -739,12 +738,12 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		//	  finest("\tReading rodent sperm nucleus");
 		in.defaultReadObject();
 		calculateHookAndBodyLength();
-		//	  finest("\tRead rodent sperm nucleus");
+
 	}
 
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 		//	  finest("\tWriting rodent sperm nucleus");
 		out.defaultWriteObject();
-		//	  finest("\tWrote rodent sperm nucleus");
+
 	}
 }

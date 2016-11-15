@@ -64,7 +64,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -88,11 +87,8 @@ import utility.Version;
 import analysis.IAnalysisDataset;
 import analysis.MergeSourceExtractor;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
-import components.active.DefaultRodentSpermNucleus;
 import components.active.DefaultWorkspace;
 import components.active.IWorkspace;
-import components.generic.Tag;
-import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
 /**
