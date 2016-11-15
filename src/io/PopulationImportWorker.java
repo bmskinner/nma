@@ -27,13 +27,10 @@ import java.util.UUID;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import components.AbstractCellularComponent;
-import components.active.DefaultAnalysisDataset;
 import components.active.generic.UnavailableSignalGroupException;
-import components.generic.IPoint;
-import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.NucleusType;
+import gui.GlobalOptions;
 import io.DatasetConverter.DatasetConversionException;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
@@ -171,6 +168,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 			
 		} catch (IllegalArgumentException e){
 			warn("Unable to open file: "+e.getMessage());
+			stack("Error opening file", e);
 			return false;
 		}
 	}
@@ -210,7 +208,6 @@ public class PopulationImportWorker extends AnalysisWorker {
 						
 							for(int i=0; i<s.getBorderLength();i++){
 								s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
-//								s.updateBorderPoint(i, offset);
 							}
 						}
 						
@@ -279,11 +276,11 @@ public class PopulationImportWorker extends AnalysisWorker {
 			
 			
 		} catch(NullPointerException e1){
-			fine("NPE Error reading dataset", e1);
+			stack("NPE Error reading dataset", e1);
 			throw new UnloadableDatasetException("Cannot load dataset due to "+e1.getClass().getSimpleName(), e1);
 			
 		} catch(Exception e1){
-			fine("Error reading dataset", e1);
+			stack("Error reading dataset", e1);
 			throw new UnloadableDatasetException("Cannot load dataset due to "+e1.getClass().getSimpleName(), e1);
 			
 		} catch(StackOverflowError e){
@@ -296,7 +293,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 				ois.close();
 				fis.close();
 			} catch(Exception e){
-				fine("Error closing file stream", e);
+				stack("Error closing file stream", e);
 				throw new UnloadableDatasetException("Cannot load dataset due to "+e.getClass().getSimpleName(), e);
 			}
 		}
@@ -311,9 +308,12 @@ public class PopulationImportWorker extends AnalysisWorker {
 		
 		// convert old files if needed
 		
-		if(dataset instanceof AnalysisDataset){
-			dataset = upgradeDatasetVersion(dataset);
+		
+		if(GlobalOptions.getInstance().isConvertDatasets()){
+			if(dataset instanceof AnalysisDataset){
+				dataset = upgradeDatasetVersion(dataset);
 
+			}
 		}
 
 		finest("Returning opened dataset");
@@ -335,7 +335,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 		} catch (DatasetConversionException e){
 			warn("Unable to convert to new format.");
 			warn("Displaying as old format.");
-			fine("Error in converter", e);
+			stack("Error in converter", e);
 		}
 		return dataset;
 	}

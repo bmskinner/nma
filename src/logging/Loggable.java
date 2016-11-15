@@ -15,6 +15,15 @@ public interface Loggable {
 	
 	public static final String ROOT_LOGGER = "";
 	public static final String PROGRAM_LOGGER = "ProgramLogger";
+	
+	public static final Level TRACE = new ErrorLevel();
+	
+	@SuppressWarnings("serial")
+	public class ErrorLevel extends Level {
+		public ErrorLevel(){
+			super("ERROR", 600);
+		}
+	}
 
     /**
      * Log the given message to the program log window
@@ -39,6 +48,16 @@ public interface Loggable {
 	}
 	
 	/**
+     * Log an error to the program log window with Level.SEVERE
+     * @param message the error messsage
+     * @param t the exception
+     */
+	default void stack(String message, Throwable t){
+		Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
+	}
+	
+	
+	/**
      * Log a message to the program log window with Level.FINE
      * @param message the messsage
      */
@@ -53,7 +72,7 @@ public interface Loggable {
 	 * @param t
 	 */
 	default void fine(String message, Throwable t){
-		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINE, message, t);
+		Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
 	}
 	
 	/**

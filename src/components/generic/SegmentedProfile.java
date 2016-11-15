@@ -698,7 +698,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		return true;
 	}
 	
-	public ISegmentedProfile interpolate(int length){
+	public ISegmentedProfile interpolateSegments(int length){
 
 		// get the target lengths of the new segments
 

@@ -39,6 +39,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import logging.Loggable;
 import gui.GlobalOptions;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.MainWindow;
@@ -54,6 +55,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 	private JCheckBox violinBox;
 	private JCheckBox fillConsensusBox;
 	private JCheckBox antiAliasBox;
+	private JCheckBox convertDatasetsBox; // should opened datasets be converted to the latest version
 	
 	public MainOptionsDialog(final MainWindow mw){
 		super( mw, false);
@@ -109,7 +111,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		List<Component> fields = new ArrayList<Component>();
 
 		JLabel logLabel = new JLabel("Logging level");
-		Level[] levelArray = { Level.INFO, Level.FINE, Level.FINER, Level.FINEST };
+		Level[] levelArray = { Level.INFO, Loggable.TRACE, Level.FINE, Level.FINER, Level.FINEST };
 		levelBox = new JComboBox<Level>(levelArray);
 		levelBox.setSelectedItem(Logger.getLogger(PROGRAM_LOGGER).getLevel());
 		levelBox.addActionListener(this);
@@ -146,6 +148,16 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		labels.add(antiAliasLabel);
 		fields.add(antiAliasBox);
 
+		
+		JLabel convertDatasetsLabel = new JLabel("Convert datasets");
+		convertDatasetsBox = new JCheckBox( (String) null, GlobalOptions.getInstance().isConvertDatasets());
+		convertDatasetsBox.addActionListener(this);
+		
+		labels.add(convertDatasetsLabel);
+		fields.add(convertDatasetsBox);
+
+		
+		
 		
 		this.addLabelTextRows(labels, fields, layout, panel);
 		return panel;
@@ -189,6 +201,11 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		if(GlobalOptions.getInstance().isAntiAlias() != antiAlias){
 			GlobalOptions.getInstance().setAntiAlias(antiAlias);
 			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+		}
+		
+		boolean convertDatasets = convertDatasetsBox.isSelected();
+		if(GlobalOptions.getInstance().isConvertDatasets() != convertDatasets){
+			GlobalOptions.getInstance().setConvertDatasets(convertDatasets);
 		}
 		
 		

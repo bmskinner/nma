@@ -144,8 +144,9 @@ public interface IProfile
 	 * spurious differences.
 	 * @param testProfile the profile to compare to 
 	 * @return the sum-of-squares difference
+	 * @throws ProfileException 
 	 */
-	double absoluteSquareDifference(IProfile testProfile);
+	double absoluteSquareDifference(IProfile testProfile) throws ProfileException;
 
 	/**
 	 * Calculate the sum of squares difference between this profile and
@@ -191,9 +192,9 @@ public interface IProfile
 	 * Make this profile the length specified.
 	 * @param newLength the new array length
 	 * @return an interpolated profile
-	 * @throws Exception 
+	 * @throws ProfileException 
 	 */
-	IProfile interpolate(int newLength);
+	IProfile interpolate(int newLength) throws ProfileException;
 
 	/*
 	    Interpolate another profile to match this, and move this profile

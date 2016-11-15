@@ -428,7 +428,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 	 * @return a stack with edges highlighted
 	 * @throws Exception 
 	 */
-	public ImageFilterer runEdgeDetector(int stackNumber, ICannyOptions options) throws Exception{
+	public ImageFilterer runEdgeDetector(int stackNumber, ICannyOptions options) {
 
 		ImageStack searchStack = null;
 		// Run the edge detection
@@ -453,7 +453,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 	 * @param options
 	 * @return
 	 */
-	public ImageFilterer runEdgeDetector(ICannyOptions options) throws Exception { 
+	public ImageFilterer runEdgeDetector(ICannyOptions options) { 
 		ByteProcessor result = null;
 
 		
@@ -486,7 +486,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 	 * @param image the image to analyse
 	 * @throws Exception 
 	 */
-	private void autoDetectCannyThresholds(ICannyOptions options, ImageProcessor image) throws Exception{
+	private void autoDetectCannyThresholds(ICannyOptions options, ImageProcessor image) {
 		// calculation of auto threshold
 
 		// find the median intensity of the image
@@ -518,7 +518,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 	 * @param image the image to process
 	 * @return the median pixel intensity
 	 */
-	private double getMedianIntensity(ImageProcessor image) throws Exception {
+	private double getMedianIntensity(ImageProcessor image) {
 
 		double[] values = new double[ image.getWidth()*image.getHeight() ];
 

@@ -50,8 +50,7 @@ public class CollectionFilterer implements Loggable {
 			refilterNuclei(collection, failCollection);
 			fine("Filtering complete");
 		} catch(Exception e){
-
-			error("Error filtering collection "+collection.getName(), e);
+			stack("Error filtering collection "+collection.getName(), e);
 			return false;
 		}
 		return true;

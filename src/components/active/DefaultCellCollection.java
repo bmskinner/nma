@@ -48,7 +48,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import utility.Constants;
 import analysis.IAnalysisDataset;
 import analysis.NucleusStatisticFetchingTask;
 import analysis.profiles.ProfileException;
@@ -58,10 +57,10 @@ import analysis.profiles.SegmentStatisticFetchingTask;
 import analysis.signals.SignalManager;
 import components.ICell;
 import components.ICellCollection;
-import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.DefaultProfileCollection;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
+import components.active.generic.UnavailableComponentException;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -71,7 +70,6 @@ import components.generic.Tag;
 import components.nuclear.IBorderSegment;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NucleusType;
-import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 
 /**
@@ -757,14 +755,15 @@ implements ICellCollection {
 		IProfile angleProfile;
 		try {
 			angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
-		} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+
+			double diff = angleProfile.absoluteSquareDifference(medianProfile);		
+			diff /= c.getNucleus().getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+			double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
+			return rootDiff;
+		} catch (ProfileException | UnavailableComponentException e) {
 			fine("Error getting nucleus profile", e);
 			return 0;
 		}
-		double diff = angleProfile.absoluteSquareDifference(medianProfile);		
-		diff /= c.getNucleus().getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
-		double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
-		return rootDiff;
 	}
 
 	public double compareProfilesToMedian(BorderTagObject pointType) throws Exception{

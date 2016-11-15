@@ -169,7 +169,8 @@ public class DatasetConverter implements Loggable {
 			try {
 				oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
 			} catch (ProfileException e) {
-				error("Unable to copy collection offsets", e);
+				warn("Unable to copy profile offsets");
+				stack("Unable to copy collection offsets", e);
 			}
 			
 			dest.addChildCollection(newCollection);
@@ -352,7 +353,7 @@ public class DatasetConverter implements Loggable {
 		newNucleus.moveCentreOfMass(n.getCentreOfMass());
 		return newNucleus;
 		} catch(IllegalArgumentException e){
-			error("Error making nucleus", e);
+			stack("Error making nucleus", e);
 			throw new DatasetConversionException("Cannot create nucleus from input data",e);
 		}
 	}
@@ -407,15 +408,15 @@ public class DatasetConverter implements Loggable {
 
 
 		} catch (NoSuchFieldException e) {
-			fine("No field", e);
+			stack("No field", e);
 		} catch (SecurityException e) {
-			fine("Security error", e);
+			stack("Security error", e);
 		} catch (IllegalArgumentException e) {
-			fine("Illegal argument", e);
+			stack("Illegal argument", e);
 		} catch (IllegalAccessException e) {
-			fine("Illegal access", e);
+			stack("Illegal access", e);
 		} catch(Exception e){
-			fine("Unexpected exception", e);
+			stack("Unexpected exception", e);
 		}
 
 //		fine("New nucleus id is "+newNucleus.getID());
@@ -471,7 +472,7 @@ public class DatasetConverter implements Loggable {
 		// Copy segments from RP
 		convertNuclearSegments(template, newNucleus);
 		
-		convertNuclearSignals(template, newNucleus);
+		convertNuclearSignals( template, newNucleus);
 
 		fine("Created nucleus "+newNucleus.getNameAndNumber()+"\n");
 
@@ -485,24 +486,36 @@ public class DatasetConverter implements Loggable {
 			fine("\nCopying profile type "+type);
 			try {
 				ISegmentedProfile profile = template.getProfile(type, Tag.REFERENCE_POINT);
-				fine("\tGot the template profile for "+type);
-				ISegmentedProfile target = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
-				fine("\tGot the target profile for "+type);
+				ISegmentedProfile target  = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
 
+				ISegmentedProfile newProfile;
+				
 				if(profile.size() != target.size()){
-					fine("\tNew nucleus profile length of "+target.size()+" : original nucleus was "+profile.size());
-					target = profile.interpolate(target.size());
-					fine("\tInterpolated profile has length "+target.size()+" with segment total length "+target.getSegments().get(0).getTotalLength());
+//					log("Interpolating profile");
+//					fine("\tNew nucleus profile length of "+target.size()+" : original nucleus was "+profile.size());
+					newProfile = profile.interpolateSegments(target.size());
+//					fine("\tInterpolated profile has length "+target.size()+" with segment total length "+target.getSegments().get(0).getTotalLength());
+				} else {
+//					log("Not interpolating profile");
+					newProfile = ISegmentedProfile.makeNew(profile);
+				}
+				
+				if(newProfile.getSegmentCount() != profile.getSegmentCount()){
+					warn("Segment count mismatch: new has "+newProfile.getSegmentCount()+", target has "+profile.getSegmentCount() );
+					throw new DatasetConversionException("Error copying segments for nucleus "+template.getNameAndNumber());
 				}
 
 				fine("\tSetting the profile "+type+" in the new nucleus");
-				newNucleus.setProfile(type, Tag.REFERENCE_POINT, target);
+				newNucleus.setProfile(type, Tag.REFERENCE_POINT, newProfile);
 
+				
+				
 
 			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1) {
-				fine("Error getting profile from template or target nucleus", e1);
+				stack("Error getting profile from template or target nucleus", e1);
 				throw new DatasetConversionException("Cannot convert nucleus", e1);
 			} 
+			
 			fine("Complete profile type "+type);
 		}
 	}
@@ -584,7 +597,7 @@ public class DatasetConverter implements Loggable {
 				
 				log("Backup file created OK");
 			} catch (IOException e) {
-				fine("Error copying file", e);
+				stack("Error copying file", e);
 				throw new DatasetConversionException("Unable to make backup file");
 			}
 

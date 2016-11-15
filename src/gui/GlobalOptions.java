@@ -26,6 +26,8 @@ public class GlobalOptions {
 	
 	private boolean antiAliasing = false;
 	
+	private boolean convertDatasets = true;
+	
 	/**
 	 * Should the consensus nucleus plots be filled, or empty
 	 */
@@ -98,6 +100,16 @@ public class GlobalOptions {
 	public synchronized void setAntiAlias(boolean antiAliasing) {
 		this.antiAliasing = antiAliasing;
 	}
+
+	public synchronized boolean isConvertDatasets() {
+		return convertDatasets;
+	}
+
+	public synchronized void setConvertDatasets(boolean convertDatasets) {
+		this.convertDatasets = convertDatasets;
+	}
+	
+	
 	
 
 }

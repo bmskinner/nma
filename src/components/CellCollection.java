@@ -58,6 +58,7 @@ import analysis.profiles.SegmentStatisticFetchingTask;
 import analysis.signals.SignalManager;
 import components.active.DefaultCell;
 import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableComponentException;
 import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
@@ -742,14 +743,15 @@ public class CellCollection implements ICellCollection {
 		
 		try {
 			angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
-		} catch (ProfileException | UnavailableProfileTypeException e) {
-			fine("Cannot get angle profile", e);
+
+			double diff = angleProfile.absoluteSquareDifference(medianProfile);		
+			diff /= c.getNucleus().getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+			double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
+			return rootDiff;
+		} catch (ProfileException | UnavailableComponentException e) {
+			stack("Cannot get angle profile", e);
 			return Double.MAX_VALUE;
 		}
-		double diff = angleProfile.absoluteSquareDifference(medianProfile);		
-		diff /= c.getNucleus().getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
-		double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
-		return rootDiff;
 	}
 
 	public double compareProfilesToMedian(BorderTagObject pointType) throws Exception{

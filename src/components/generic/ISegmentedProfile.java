@@ -45,6 +45,7 @@ public interface ISegmentedProfile extends IProfile {
 		return new SegmentedFloatProfile(profile);
 	}
 	
+	
 	/**
 	 * Check if this profile contains segments
 	 * @return
@@ -81,9 +82,9 @@ public interface ISegmentedProfile extends IProfile {
 	 * will be adjusted to the closest proportional index
 	 * @param newLength the new array length
 	 * @return an interpolated profile
-	 * @throws Exception 
+	 * @throws ProfileException 
 	 */
-	ISegmentedProfile interpolate(int newLength);
+	ISegmentedProfile interpolateSegments(int newLength) throws ProfileException;
 
 	/**
 	 * Fetch the segment list ordered to start from the segment with the given id

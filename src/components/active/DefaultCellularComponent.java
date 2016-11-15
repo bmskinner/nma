@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
-
 import analysis.image.ImageConverter;
 import components.CellularComponent;
 import components.active.generic.FloatPoint;
@@ -77,7 +75,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			
 	
 	/**
-	 * The folder containing the sourceFile. This is detected
+	 * The source file the component was detected in. This is detected
 	 * on dataset loading as a relative path from the .nmd
 	 * e.g. C:\MyImageFolder\MyImage.tiff
 	 */
@@ -128,14 +126,21 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		this.centreOfMass         = IMutablePoint.makeNew(centreOfMass);
 		this.id                   = java.util.UUID.randomUUID();
 	}
+		
 	
 	/**
-	 * Construct using an roi and an original centre of mass
+	 * Construct with an ROI, a source image and channel, and the original position in the source image
 	 * @param roi the roi of the object
 	 * @param centerOfMass the original centre of mass of the component
+	 * @param f the image file the component was found in
+	 * @param channel the RGB channel the component was found in 
+	 * @param position the bounding position of the component in the original image
 	 */
-	private DefaultCellularComponent(Roi roi, IPoint centreOfMass){
+	public DefaultCellularComponent(Roi roi, IPoint centreOfMass, File f, int channel, int[] position){
 		this(centreOfMass);
+		this.sourceFile = f;
+		this.channel    = channel;
+		this.position   = position;
 		
 		if(roi==null){
 			throw new IllegalArgumentException("Roi cannot be null");
@@ -157,7 +162,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 		}
 		
-//		log(roi.getTypeAsString());
 		
 		// Store the original points. From these, the smooth polygon can be reconstructed.
 		Polygon polygon = roi.getPolygon();
@@ -174,32 +178,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		// convert the roi positions to a list of nucleus border points
 		// Only smooth the points for large objects like nuclei
 		makeBorderList(roi);		
-	}
-	
-	/**
-	 * Construct with an ROI, and a source image and channel
-	 * @param roi the roi of the object
-	 * @param centerOfMass the original centre of mass of the component
-	 * @param f the file the component was found in
-	 * @param channel the RGB channel the component was found in 
-	 */
-	private DefaultCellularComponent(Roi roi, IPoint centreOfMass, File f, int channel){
-		this(roi, centreOfMass);
-		this.setSourceFile(f);
-		this.setChannel(channel);
-	}
-	
-	/**
-	 * Construct with an ROI, a source image and channel, and the original position in the source image
-	 * @param roi the roi of the object
-	 * @param centerOfMass the original centre of mass of the component
-	 * @param f the image file the component was found in
-	 * @param channel the RGB channel the component was found in 
-	 * @param position the bounding position of the component in the original image
-	 */
-	public DefaultCellularComponent(Roi roi, IPoint centreOfMass, File f, int channel, int[] position){
-		this(roi, centreOfMass, f, channel);
-		this.position = position;
+		
 	}
 		
 
@@ -402,8 +381,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				return ip;
 				
 			} catch (ImageImportException e) {
-				error("Error importing source image "+this.getSourceFile().getAbsolutePath(), e);
-				return null;
+				stack("Error importing source image "+this.getSourceFile().getAbsolutePath(), e);
+				throw new UnloadableImageException("Source image is not available");
 			}
 			
 		} else {
@@ -731,35 +710,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				p.offset(xOffset, yOffset);
 			}
 
-			this.centreOfMass.offset(xOffset,  yOffset);// = newCentreOfMass;
-			
-//			Shape s  = this.toShape();
-//			if( ! s.contains(centreOfMass.getX(), centreOfMass.getY())){
-//				
-//				int minX = (int) s.getBounds().x;
-//				int maxX = (int) (minX + s.getBounds().getWidth());
-//				int minY = (int) s.getBounds().y;
-//				int maxY = (int) (minY + s.getBounds().getHeight());
-//				
-//				warn("Border contains "+borderList.size()+" points");
-//				warn("Shape: "+s.getBounds().toString());
-//
-//				warn("CoM ("
-//					+centreOfMass.toString()
-//					+") is not within the shape (x = "
-//					+minX+"-"+maxX+
-//					"), (y = "
-//					+minY+"-"+maxY+")");
-//				
-//			}
-//			
-//			if( ! this.containsPoint(centreOfMass)){
-//				throw new IllegalArgumentException("CoM has fallen out of nucleus");
-//			}
+			this.centreOfMass.offset(xOffset,  yOffset);
+
 		}
 		
 		public void reverse(){
-
+			log("Reversing object border");
+			log("F0 pre : "+xpoints[0]+", "+ypoints[0]);
+			
 			int[] newXpoints = new int[xpoints.length], newYpoints = new int[xpoints.length];
 			
 			for(int i=xpoints.length-1, j=0; j<xpoints.length; i--, j++){
@@ -770,7 +728,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			ypoints = newYpoints;
 			
 			PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
-
+			log("Reversed object border, making border list");
+			
 			makeBorderList(roi);	// Recreate the border list from the new key points
 		}
 		
@@ -834,32 +793,25 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			int minY = (int) b.getMinY();
 			int maxY = minY + (int) b.getHeight();
 			
-			
-//			IJ.log("    X base: "+minX
-//					+"  Y base: "+minY
-//					+"  X max: "+maxX
-//					+"  Y max: "+maxY);
-			
 			for(int x=minX; x<=maxX; x++){
 				for(int y=minY; y<=maxY; y++){
 					
 					if(this.containsPoint(x, y)){
-//						IJ.log(x+", "+y);
-						result.add(new FloatPoint(x, y));
+
+						result.add( IPoint.makeNew(x, y));
 					}
 				}
 			}
 			
 			if(result.isEmpty()){
 //				IJ.log("    Roi has no pixels");
-				log(Level.SEVERE, "No points found in roi");
-				log(Level.FINE, "X base: "+minX
+				warn("No points found in roi");
+				fine("X base: "+minX
 						+"  Y base: "+minY
 						+"  X max: "+maxX
 						+"  Y max: "+maxY);
-			} else {
-//				IJ.log("    Roi of area "+result.size());
 			}
+			
 			return result;
 		}
 		
@@ -874,7 +826,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			path.moveTo(first.getX()+xOffset, first.getY()+yOffset);
 			
 			for(IBorderPoint b : this.borderList){
-//				log("\tDrawing line to "+b.toString());
 				path.lineTo(b.getX()+xOffset, b.getY()+yOffset);
 			}
 			path.closePath();
@@ -919,9 +870,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				 // if the inputs are (-336, 330), this will return -6. Recurse until positive
 				 i = length+i;
 				 return wrapIndex(i, length);
-				
-				 
-//				 return length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
 			 }
 			 
 			 if(i<length){ // if not wrapping
@@ -941,8 +889,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		public static double wrapIndex(double i, int length){
 			 if(i<0){
 				 i = length+i;
-				 return wrapIndex(i, length);
-//				 return length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
+				 return wrapIndex(i, length); // correct for values multiple profile lengths below zero
 			 }
 			 
 			 if(i<length){ // if not wrapping
@@ -1183,8 +1130,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 					IPoint newPoint = getPositionAfterRotation(p, angle);
 
 					p.set(newPoint);
-					//.setX(newPoint.getX());
-					//p.setY(newPoint.getY());
 				}
 			}
 					
@@ -1212,7 +1157,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			 * 
 			 */
 			double oldAngle = this.getCentreOfMass().findAngle( p,
-					new FloatPoint(this.getCentreOfMass().getX(),-10));
+					IPoint.makeNew(this.getCentreOfMass().getX(),-10));
 
 
 			if(p.getX()<this.getCentreOfMass().getX()){

@@ -309,8 +309,9 @@ public class FloatProfile implements IProfile {
 	 * @param profile1 the profile to return interpolated
 	 * @param profile2 the profile to compare
 	 * @return a new profile with the length of the longest input profile
+	 * @throws ProfileException 
 	 */
-	private IProfile equaliseLengths(IProfile profile1, IProfile profile2) {
+	private IProfile equaliseLengths(IProfile profile1, IProfile profile2) throws ProfileException {
 		if(profile1==null || profile2==null){
 			throw new IllegalArgumentException("Input profile is null when equilising lengths");
 		}
@@ -330,7 +331,7 @@ public class FloatProfile implements IProfile {
 	 * @see components.generic.IProfile#absoluteSquareDifference(components.generic.IProfile)
 	 */
 	@Override
-	public double absoluteSquareDifference(IProfile testProfile) {
+	public double absoluteSquareDifference(IProfile testProfile) throws ProfileException {
 
 		if(testProfile==null){
 			throw new IllegalArgumentException("Test profile is null");
@@ -484,7 +485,7 @@ public class FloatProfile implements IProfile {
 	 * @see components.generic.IProfile#interpolate(int)
 	 */
 	@Override
-	public IProfile interpolate(int newLength) {
+	public IProfile interpolate(int newLength) throws ProfileException {
 
 		if(newLength < this.size()){
 			//    	finer("Interpolating to a smaller array!");

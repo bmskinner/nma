@@ -56,11 +56,6 @@ public class DefaultNucleus
 	protected transient Nucleus verticalNucleus = null; // cache the vertically rotated nucleus
 	
 	protected transient boolean canReverse = true;
-
-//	public DefaultNucleus(Roi roi, File f, int channel, int[] position, int number ){
-//		this(roi, f, channel, position, number, null);		
-//	}
-	
 	
 	/**
 	 * Construct with an ROI, a source image and channel, and the original position in the source image
@@ -89,7 +84,7 @@ public class DefaultNucleus
 			return new DefaultNucleus(this);
 		} catch (UnprofilableObjectException e) {
 			warn("Duplication failed");
-			fine("Error duplicating nucleus", e);
+			stack("Error duplicating nucleus", e);
 		}	
 		return null;
 	}
@@ -113,6 +108,7 @@ public class DefaultNucleus
 		setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
 		
 		if(!this.isProfileOrientationOK() && canReverse){
+			fine("Reversing profile");
 			this.reverse();
 			
 			// the number of border points can change when reversing
@@ -196,7 +192,7 @@ public class DefaultNucleus
 			try {
 				result = this.getCentreOfMass().findAngle(this.getBorderTag(Tag.REFERENCE_POINT), this.getBorderTag(Tag.ORIENTATION_POINT));
 			} catch (UnavailableBorderTagException e) {
-				fine("Cannot get border tag", e);
+				stack("Cannot get border tag", e);
 				result = 0;
 			}
 			break;
@@ -427,11 +423,11 @@ public class DefaultNucleus
 				alignPointsOnVertical(points[0], points[1] );
 				
 			} catch (UnavailableBorderTagException e) {
-				fine("Cannot get border tag", e);
+				stack("Cannot get border tag", e);
 				try {
 					rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
 				} catch (UnavailableBorderTagException e1) {
-					fine("Cannot get border tag", e1);
+					stack("Cannot get border tag", e1);
 				}
 			}
 			
@@ -441,7 +437,7 @@ public class DefaultNucleus
 			try {
 				rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
 			} catch (UnavailableBorderTagException e) {
-				fine("Cannot get border tag", e);
+				stack("Cannot get border tag", e);
 			}
 		}
 		

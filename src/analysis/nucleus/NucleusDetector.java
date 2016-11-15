@@ -78,8 +78,7 @@ public class NucleusDetector extends Detector {
 	 * Get a list of cells found in this image
 	 * @param image the image
 	 * @param sourceFile the file the nuclei were found in
-	 * @return
-	 * @throws Exception 
+	 * @return a list of cells detected in the image. Can be empty
 	 */
 	public List<ICell> getCells(ImageStack image, File sourceFile) {
 		return createCellsFromImage(image, sourceFile, false);
@@ -128,7 +127,7 @@ public class NucleusDetector extends Detector {
 			roiList = detectRois(ip);
 		
 		} catch(Exception e){
-			error("Error in nucleus detection", e);
+			stack("Error in nucleus detection", e);
 		}
 		
 		finer("Detected ROIs");
@@ -197,7 +196,7 @@ public class NucleusDetector extends Detector {
 	 * @return
 	 * @throws Exception
 	 */
-	private ImageStack preprocessImage(ImageStack image) throws Exception{
+	private ImageStack preprocessImage(ImageStack image) {
 		
 		finer("Preprocessing image");
 		ICannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");

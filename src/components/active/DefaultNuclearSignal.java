@@ -2,7 +2,6 @@ package components.active;
 
 import java.io.File;
 import java.io.IOException;
-import components.CellularComponent;
 import components.generic.IPoint;
 import components.nuclear.INuclearSignal;
 import ij.gui.Roi;

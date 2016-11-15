@@ -27,7 +27,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import analysis.profiles.ProfileException;
-import components.AbstractCellularComponent;
+import components.active.DefaultCellularComponent;
 import components.generic.IProfile;
 import components.generic.ISegmentedProfile;
 import components.nuclear.IBorderSegment;
@@ -49,7 +49,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 * @param p the profile
 	 * @param segments the list of segments to use
 	 */
-	public SegmentedFloatProfile(IProfile p, List<IBorderSegment> segments) throws IndexOutOfBoundsException {		
+	public SegmentedFloatProfile(final IProfile p, final List<IBorderSegment> segments) throws IndexOutOfBoundsException {		
 		super(p);
 
 		if(segments==null || segments.isEmpty()){
@@ -63,21 +63,23 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 					+p.size()
 					+")");
 		}
+		
+//		log("Template has "+segments.size()+" segments");
 
 
 		try {
 			IBorderSegment.linkSegments(segments);
 		} catch (ProfileException e) {
-			error("Profile error linking segments", e);
+			warn("Error linking segments in profile constructor");
+			stack("Profile error linking segments", e);
 		}
 
-		
+//		log("Constructing "+segments.size()+" segments");
 		this.segments = new IBorderSegment[segments.size()];
 		for(int i=0; i<segments.size(); i++){
 			this.segments[i] =  segments.get(i);
 		}
 		
-//		this.segments = segments;
 	}
 
 	/**
@@ -96,6 +98,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 */
 	public SegmentedFloatProfile(IProfile profile) {
 		super(profile);
+		
 		int midpoint = profile.size()/2;
 		IBorderSegment segment1 = IBorderSegment.newSegment(0, midpoint, profile.size());
 
@@ -519,7 +522,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		// get the segment within this profile, not a copy
 		IBorderSegment segmentToUpdate = this.getSegment(id);
 
-		int newValue = AbstractCellularComponent.wrapIndex( segmentToUpdate.getStartIndex()+amount, segmentToUpdate.getTotalLength());
+		int newValue = DefaultCellularComponent.wrapIndex( segmentToUpdate.getStartIndex()+amount, segmentToUpdate.getTotalLength());
 		return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
 	}
 
@@ -536,7 +539,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		// get the segment within this profile, not a copy
 		IBorderSegment segmentToUpdate = this.getSegment(id);
 
-		int newValue = AbstractCellularComponent.wrapIndex( segmentToUpdate.getEndIndex()+amount, segmentToUpdate.getTotalLength());
+		int newValue = DefaultCellularComponent.wrapIndex( segmentToUpdate.getEndIndex()+amount, segmentToUpdate.getTotalLength());
 		return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
 	}
 
@@ -604,20 +607,17 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	}
 
 
-	public ISegmentedProfile interpolate(int length){
+	@Override
+	public ISegmentedProfile interpolateSegments(int length) throws ProfileException{
 		
 		// get the proportions of the existing segments
+		log("Segment interpolation begun: "+segments.length);
 		
 		double[] props = new double[segments.length];
 		
 		for(int i=0; i<segments.length; i++){
 			props[i] = this.getIndexProportion(segments[i].getStartIndex());
 		}
-		
-//		fine("Props:");
-//		for(double d : props){
-//			fine("\t"+d);
-//		}
 		
 		// get the target start indexes of the new segments
 		
@@ -627,14 +627,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 			newStarts[i] =  (int) (props[i] * (double) length );
 		}
 		
-//		fine("Starts:");
-//		for(int d : newStarts){
-//			fine("\t"+d);
-//		}
-		
 		// Make the new segments
-		
-		
 		List<IBorderSegment> newSegs = new ArrayList<IBorderSegment>(segments.length);
 		for(int i=0; i<segments.length-1; i++){
 			
@@ -653,18 +646,19 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		IBorderSegment lastSeg = new DefaultBorderSegment(newStarts[segments.length-1], newStarts[0], length, segments[segments.length-1].getID());
 		newSegs.add(lastSeg);
 		
-		try {
-			IBorderSegment.linkSegments(newSegs);
-		} catch (ProfileException e) {
-			error("Error linking segments", e);
+
+		if(newSegs.size() != segments.length){
+			throw new ProfileException("Error interpolating segments");
 		}
-		
 		
 		// interpolate the IProfile
 		
 		IProfile newProfile = super.interpolate(length);
 		
 		// assign new segments
+		IBorderSegment.linkSegments(newSegs);	
+		
+		log("Segment interpolation complete "+newSegs.size());
 		
 		return new SegmentedFloatProfile(newProfile, newSegs);
 	}
@@ -726,7 +720,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		// get the region within the segment as a new profile
 		// Exclude the last index of each segment to avoid duplication
 		// the first index is kept, because the first index is used for border tags
-		int lastIndex = AbstractCellularComponent.wrapIndex( testSeg.getEndIndex()-1, testSeg.getTotalLength());
+		int lastIndex = DefaultCellularComponent.wrapIndex( testSeg.getEndIndex()-1, testSeg.getTotalLength());
 
 		IProfile testSegProfile = this.getSubregion(testSeg.getStartIndex(), lastIndex);
 
@@ -770,7 +764,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
 			// invert the segment by swapping start and end
 			int newStart = (this.size()-1) - seg.getEndIndex();
-			int newEnd   = AbstractCellularComponent.wrapIndex(newStart+seg.length(), this.size());
+			int newEnd   = DefaultCellularComponent.wrapIndex(newStart+seg.length(), this.size());
 			IBorderSegment newSeg = IBorderSegment.newSegment(newStart, newEnd, this.size(), seg.getID());
 			//			newSeg.setName(seg.getName());
 			// since the order is reversed, add them to the top of the new list
@@ -779,7 +773,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		try {
 			IBorderSegment.linkSegments(segments);
 		} catch (ProfileException e) {
-			error("Cannot link segments in reversed profile", e);
+			warn("Error linking segments");
+			stack("Cannot link segments in reversed profile", e);
 		}
 		this.setSegments(segments);
 

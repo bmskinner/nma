@@ -33,8 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-
 import utility.Constants;
 import analysis.AnalysisOptions;
 import analysis.AnalysisWorker;
@@ -113,7 +111,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 
 		} catch(Exception e){
 			result = false;
-			error("Error in processing folder", e);
+			stack("Error in processing folder", e);
 		}
 		return result;
 	}
@@ -123,18 +121,16 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 	}
 	
 	public List<IAnalysisDataset> analysePopulations(List<ICellCollection> folderCollection){
-//		programLogger.log("Beginning analysis");
-		log("Beginning analysis");
+
+		log("Creating cell collections");
 
 		List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>();
 
 		for(ICellCollection collection : folderCollection){
 			
-
 			IAnalysisDataset dataset = new DefaultAnalysisDataset(collection);
 			dataset.setAnalysisOptions(analysisOptions);
 			dataset.setRoot(true);
-//			File debugFile = dataset.getDebugFile();
 
 			File folder = collection.getFolder();
 			log("Analysing: "+folder.getName());
@@ -181,7 +177,8 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 				
 				
 			} catch(Exception e){
-				log(Level.WARNING, "Cannot create collection: "+e.getMessage());
+				warn("Cannot create collection: "+e.getMessage());
+				stack("Error in nucleus detection", e);
 			}
 
 //			

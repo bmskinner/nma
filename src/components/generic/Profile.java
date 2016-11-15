@@ -310,8 +310,9 @@ public class Profile implements IProfile {
 	 * @param profile1 the profile to return interpolated
 	 * @param profile2 the profile to compare
 	 * @return a new profile with the length of the longest input profile
+	 * @throws ProfileException 
 	 */
-	private IProfile equaliseLengths(IProfile profile1, IProfile profile2) {
+	private IProfile equaliseLengths(IProfile profile1, IProfile profile2) throws ProfileException {
 		if(profile1==null || profile2==null){
 			throw new IllegalArgumentException("Input profile is null when equilising lengths");
 		}
@@ -331,7 +332,7 @@ public class Profile implements IProfile {
 	 * @see components.generic.IProfile#absoluteSquareDifference(components.generic.IProfile)
 	 */
 	@Override
-	public double absoluteSquareDifference(IProfile testProfile) {
+	public double absoluteSquareDifference(IProfile testProfile) throws ProfileException {
 
 		if(testProfile==null){
 			throw new IllegalArgumentException("Test profile is null");
@@ -580,29 +581,32 @@ public class Profile implements IProfile {
 	 */
 	@Override
 	public int getSlidingWindowOffset(IProfile testProfile) {
-
-		double lowestScore = this.absoluteSquareDifference(testProfile);
+		
 		int index = 0;
-		for(int i=0;i<this.size();i++){
+		try {
+			double lowestScore = this.absoluteSquareDifference(testProfile);
 
-			IProfile offsetProfile;
-			try {
+			for(int i=0;i<this.size();i++){
+
+				IProfile offsetProfile;
+
 				offsetProfile = this.offset(i);
-				
+
 				double score = offsetProfile.absoluteSquareDifference(testProfile);
 				if(score<lowestScore){
 					lowestScore=score;
 					index=i;
 				}
-				
-			} catch (ProfileException e) {
-				warn("Cannot offset profile");
-				fine("Error getting offset profile", e);
 			}
 
-			
-
+		} catch (ProfileException e) {
+			warn("Cannot offset profile");
+			stack("Error getting offset profile", e);
 		}
+
+
+
+
 		return index;
 	}
 
