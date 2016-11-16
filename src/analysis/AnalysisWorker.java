@@ -43,24 +43,24 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     public AnalysisWorker(final IAnalysisDataset dataset){
     	this.activeDataset = dataset;
 
-    	if(dataset!=null){
-    		AnalysisWorker.fileLogger = Logger.getLogger(this.getClass().getName());
-    		fileLogger.setLevel(FILE_DEBUG_LEVEL);
-    		try {
-    			
-    			Handler h = dataset.getLogHandler();
-    			
-    			if(h!=null){
-    				fileLogger.addHandler(h);
-    			}
-    			
-    		} catch(Exception e){
-    			error("Error getting log file handler", e);
-    			fileLogger = null;
-    		}
-    	} else {
-    		fileLogger = null;
-    	}
+//    	if(dataset!=null){
+////    		AnalysisWorker.fileLogger = Logger.getLogger(this.getClass().getName());
+////    		fileLogger.setLevel(FILE_DEBUG_LEVEL);
+////    		try {
+////    			
+//////    			Handler h = dataset.getLogHandler();
+//////    			
+//////    			if(h!=null){
+//////    				fileLogger.addHandler(h);
+//////    			}
+////    			
+////    		} catch(Exception e){
+////    			error("Error getting log file handler", e);
+////    			fileLogger = null;
+////    		}
+//    	} else {
+//    		fileLogger = null;
+//    	}
 
     	finest("Created worker");
     	
@@ -76,25 +76,25 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     public AnalysisWorker(final IAnalysisDataset dataset, final File debugFile){
     	this(dataset);
 
-    	finest("Creating log file handler");
-		DebugFileHandler handler = null;
-		try {
-			
-			AnalysisWorker.fileLogger = Logger.getLogger(this.getClass().getName());
-			handler = new DebugFileHandler(debugFile);
-			handler.setFormatter(new DebugFileFormatter());
-			fileLogger.addHandler(handler);
-			fileLogger.setLevel(FILE_DEBUG_LEVEL);
-
-		} catch (SecurityException e1) {
-			log(Level.SEVERE, "Could not create the log file handler", e1);
-			fileLogger = null;
-
-		} catch (IOException e1) {
-			log(Level.SEVERE, "Could not create the log file handler", e1);
-			fileLogger = null;
-		}
-		log(Level.FINEST, "Created worker");
+//    	finest("Creating log file handler");
+//		DebugFileHandler handler = null;
+//		try {
+//			
+//			AnalysisWorker.fileLogger = Logger.getLogger(this.getClass().getName());
+//			handler = new DebugFileHandler(debugFile);
+//			handler.setFormatter(new DebugFileFormatter());
+//			fileLogger.addHandler(handler);
+//			fileLogger.setLevel(FILE_DEBUG_LEVEL);
+//
+//		} catch (SecurityException e1) {
+//			log(Level.SEVERE, "Could not create the log file handler", e1);
+//			fileLogger = null;
+//
+//		} catch (IOException e1) {
+//			log(Level.SEVERE, "Could not create the log file handler", e1);
+//			fileLogger = null;
+//		}
+		finest("Created worker");
     }
     
     /**
@@ -103,43 +103,43 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
      * @param level the log level
      * @param message the message to log
      */
-    @Override
-    public void log(Level level, String message){
-    	if(fileLogger!=null){
-    		fileLogger.log(level, message);
-    	}
-		Loggable.super.log(level, message);
-    }
+//    @Override
+//    public void log(Level level, String message){
+//    	if(fileLogger!=null){
+//    		fileLogger.log(level, message);
+//    	}
+//		Loggable.super.log(level, message);
+//    }
     
     
+//    
+//    @Override
+//    public void fine(String message){
+//    	log(Level.FINE, message);
+//    }
+//    
+//    @Override
+//    public void finer(String message){
+//    	log(Level.FINER, message);
+//    }
+//    
+//    @Override
+//    public void finest(String message){
+//    	log(Level.FINEST, message);
+//    }
+//    
+//    @Override
+//    public void warn(String message){
+//    	log(Level.WARNING, message);
+//    }
     
-    @Override
-    public void fine(String message){
-    	log(Level.FINE, message);
-    }
-    
-    @Override
-    public void finer(String message){
-    	log(Level.FINER, message);
-    }
-    
-    @Override
-    public void finest(String message){
-    	log(Level.FINEST, message);
-    }
-    
-    @Override
-    public void warn(String message){
-    	log(Level.WARNING, message);
-    }
-    
-    @Override
-    public void error(String message, Throwable t){
-    	if(fileLogger!=null){
-    		fileLogger.log(Level.SEVERE, message, t);
-    	}
-    	Loggable.super.error( message, t);
-    }
+//    @Override
+//    public void error(String message, Throwable t){
+//    	if(fileLogger!=null){
+//    		fileLogger.log(Level.SEVERE, message, t);
+//    	}
+//    	Loggable.super.error( message, t);
+//    }
     
     
     protected void setProgressTotal(int i){

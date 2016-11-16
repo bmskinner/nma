@@ -233,7 +233,7 @@ public abstract class ProfileableCellularComponent
 	}
 	
 	public int getBorderIndex(Tag tag){
-		int result = -1;
+		int result = BORDER_INDEX_NOT_FOUND;
 		if(this.borderTags.containsKey(tag)){
 			result = this.borderTags.get(tag);
 		}
@@ -354,13 +354,13 @@ public abstract class ProfileableCellularComponent
 	}
 	
 	public int getOffsetBorderIndex(Tag reference, int index){
-		if(this.getBorderIndex(reference)>-1){
+		if(this.getBorderIndex(reference)>BORDER_INDEX_NOT_FOUND){
 			int newIndex =  wrapIndex( index+this.getBorderIndex(reference) );
 			
 //			int newIndex =  AbstractCellularComponent.wrapIndex( index+this.getBorderIndex(reference) , this.getBorderLength() );
 			return newIndex;
 		}
-		return -1;
+		return BORDER_INDEX_NOT_FOUND;
 	}
 	
 	public Tag getBorderTag(Tag tag, int index){

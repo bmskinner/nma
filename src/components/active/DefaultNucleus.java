@@ -324,7 +324,7 @@ public class DefaultNucleus
 	
 	@Override
 	public void updateVerticallyRotatedNucleus(){
-		fine("Updating vertically rotated nucleus");
+
 		verticalNucleus = null;
 		verticalNucleus = this.getVerticallyRotatedNucleus();
 	}
@@ -332,30 +332,42 @@ public class DefaultNucleus
 	@Override
 	public Nucleus getVerticallyRotatedNucleus(){
 		fine("Getting vertically rotated nucleus");
-		if(verticalNucleus==null){
-			
-			
-			// Make an exact copy of the nucleus
-			verticalNucleus = this.duplicate();
-			fine("Creating new vertical nucleus: "+verticalNucleus.getClass().getSimpleName());
 
-			verticalNucleus.alignVertically();			
-			
-			// Ensure all vertical nuclei have overlapping centres of mass
-			verticalNucleus.moveCentreOfMass(IPoint.makeNew(0,0));
-
-			this.setStatistic(NucleusStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
-			this.setStatistic(NucleusStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
-			
-			double aspect = verticalNucleus.getBounds().getHeight() / verticalNucleus.getBounds().getWidth();
-			this.setStatistic(NucleusStatistic.ASPECT,  aspect);
-			
-			this.setStatistic(NucleusStatistic.BODY_WIDTH, STAT_NOT_CALCULATED);
-			this.setStatistic(NucleusStatistic.HOOK_LENGTH, STAT_NOT_CALCULATED);
-
-		} else {
+		if(verticalNucleus!=null){
 			fine("Vertical nucleus not null, not creating");
+//			int opIndex = verticalNucleus.getBorderIndex(Tag.ORIENTATION_POINT);
+//			log(this.getNameAndNumber()+": stored: "+verticalNucleus.getBorderPoint(opIndex).toString());
+			return verticalNucleus;
 		}
+//		log(this.getNameAndNumber()+": Creating vertically rotated nucleus");
+
+		// Make an exact copy of the nucleus
+		verticalNucleus = this.duplicate();
+		
+		// At this point the new nucleus was created at the original image coordinates 
+		// of the template nucleus, then moved to the current CoM.
+		// Now align the nucleus on vertical.
+		
+		fine("Creating new vertical nucleus: "+verticalNucleus.getClass().getSimpleName());
+
+//		log("Aligning vertically:");
+//		log(this.getNameAndNumber()+": new: "+verticalNucleus.getBorderPoint(opIndex).toString());
+		verticalNucleus.alignVertically();	
+//		log(this.getNameAndNumber()+": rot: "+verticalNucleus.getBorderPoint(opIndex).toString());
+
+//		// Ensure all vertical nuclei have overlapping centres of mass
+//		verticalNucleus.moveCentreOfMass(IPoint.makeNew(0,0));
+//		log(this.getNameAndNumber()+": move: "+verticalNucleus.getBorderPoint(opIndex).toString());
+
+		this.setStatistic(NucleusStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
+		this.setStatistic(NucleusStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
+
+		double aspect = verticalNucleus.getBounds().getHeight() / verticalNucleus.getBounds().getWidth();
+		this.setStatistic(NucleusStatistic.ASPECT,  aspect);
+
+		this.setStatistic(NucleusStatistic.BODY_WIDTH, STAT_NOT_CALCULATED);
+		this.setStatistic(NucleusStatistic.HOOK_LENGTH, STAT_NOT_CALCULATED);
+
 		return verticalNucleus;
 	}
 	
@@ -395,23 +407,28 @@ public class DefaultNucleus
 		
 		if(this.hasBorderTag(Tag.TOP_VERTICAL) && this.hasBorderTag(Tag.BOTTOM_VERTICAL)){
 			
+			fine(this.getNameAndNumber()+": TV and BV are present");
 			int topPoint    = getBorderIndex(Tag.TOP_VERTICAL);
 			int bottomPoint = getBorderIndex(Tag.BOTTOM_VERTICAL);
 			
-			if( topPoint == -1){ // check if the point was set but not found
+			if( topPoint == BORDER_INDEX_NOT_FOUND){ // check if the point was set but not found
+				fine(this.getNameAndNumber()+": TV index not found");
 				useTVandBV = false;
 			}
 			
-			if( bottomPoint == -1){
+			if( bottomPoint == BORDER_INDEX_NOT_FOUND){
+				fine(this.getNameAndNumber()+": BV index not found");
 				useTVandBV = false;
 			}
 			
 			if(topPoint==bottomPoint){ // Situation when something went very wrong
+				fine(this.getNameAndNumber()+": TV index == BV index");
 				useTVandBV = false;
 			}
 
 		} else {
 			
+			fine(this.getNameAndNumber()+": TV and BV are not present");
 			useTVandBV = false;
 
 		}
@@ -439,6 +456,8 @@ public class DefaultNucleus
 		} else {
 			
 			// Default if top and bottom vertical points have not been specified
+			
+			fine(this.getNameAndNumber()+": Rotating OP to bottom");
 			try {
 				rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
 			} catch (UnavailableBorderTagException e) {

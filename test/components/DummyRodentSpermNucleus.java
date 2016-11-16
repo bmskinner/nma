@@ -685,4 +685,10 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 		return null;
 	}
 
+	@Override
+	public void updateDependentStats() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

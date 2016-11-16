@@ -490,17 +490,15 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		fine("Checking hook position");
 		/*
 		 * If the reference point is left of the centre of mass, 
-		 * the nucleus is pointing left. If not, flip thw nucleus
+		 * the nucleus is pointing left. If not, flip the nucleus
 		 */
 
 		if(vertX > verticalNucleus.getCentreOfMass().getX() ){
 			clockwiseRP = true; // this is only set to true, as the default is false, and will become false after the nucleus is flipped
-			
-//			log(this.getNameAndNumber()+": Pre flipping CoM is "+verticalNucleus.getCentreOfMass());
+//			int opIndex = verticalNucleus.getBorderIndex(Tag.ORIENTATION_POINT);
 			verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
-//			log(this.getNameAndNumber()+": Post flipping CoM is "+verticalNucleus.getCentreOfMass());
-			verticalNucleus.moveCentreOfMass( IPoint.makeNew(0,0));
-//			log(this.getNameAndNumber()+": Moved CoM is "+verticalNucleus.getCentreOfMass());
+//			log(this.getNameAndNumber()+": flip: "+verticalNucleus.getBorderPoint(opIndex).toString());
+
 		} 	
 
 		return verticalNucleus;

@@ -432,12 +432,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				finest("Cell segments    :"+ cell.getNucleus().getProfile(ProfileType.ANGLE).toString());
 
 				Nucleus verticalNucleus = cell.getNucleus().getVerticallyRotatedNucleus();
-				finest("Vertical nucleus is "+verticalNucleus.getNameAndNumber());
-				ICell newCell = new DefaultCell(verticalNucleus);
-//				newCell.setNucleus(verticalNucleus);
+
 				finest("Vertical segments:"+verticalNucleus.getProfile(ProfileType.ANGLE).toString());
 
-				cell = newCell;
+				cell = new DefaultCell(verticalNucleus);
 				finest("Fetched vertical nucleus");
 
 				// Need to have top point at the top of the image

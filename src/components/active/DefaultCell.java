@@ -72,12 +72,12 @@ public class DefaultCell
 	
 	/**
 	 * Create a new cell based on the given nucleus. The 
-	 * nucleus is copied.
+	 * nucleus is NOT copied.
 	 * @param n the template nucleus for the cell
 	 */
 	public DefaultCell(Nucleus n){
 		this(java.util.UUID.randomUUID());
-		nucleus = n.duplicate();
+		nucleus = n;
 	}
 	
 	/**

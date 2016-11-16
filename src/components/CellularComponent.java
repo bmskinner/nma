@@ -152,26 +152,26 @@ public interface CellularComponent
 	 * Get the number of pixels per micron in the source image
 	 * @return
 	 */
-	public double getScale();
+	double getScale();
 	
 	/**
 	 * Set the number of pixels per micron in the source image
 	 * @param scale
 	 */
-	public void setScale(double scale);
+	void setScale(double scale);
 	
 	/**
 	 * Get the position of the centre of mass of the component
 	 * @return
 	 */
-	public IPoint getCentreOfMass();
+	IPoint getCentreOfMass();
 
 	/**
 	 * Get the position of the centre of mass of the component
 	 * within the original source image
 	 * @return
 	 */
-	public IPoint getOriginalCentreOfMass();
+	IPoint getOriginalCentreOfMass();
 	
 	/*
 	 * 
@@ -181,25 +181,25 @@ public interface CellularComponent
 
 	
 	/**
-	 * Get a copy of the border point at the given index
+	 * Get the border point at the given index (not a copy)
 	 * @param i
 	 * @return
 	 */
-	public IBorderPoint getBorderPoint(int i);
+	IBorderPoint getBorderPoint(int i);
 	
 	/**
 	 * Get a copy of the original (non-offset) border point at the given index
 	 * @param i
 	 * @return
 	 */
-	public IBorderPoint getOriginalBorderPoint(int i);
+	IBorderPoint getOriginalBorderPoint(int i);
 	
 	/**
 	 * Get the index of the given point in the border list
 	 * @param p
 	 * @return
 	 */
-	public int getBorderIndex(IBorderPoint p);
+	int getBorderIndex(IBorderPoint p);
 
 //	public double getDistance(int index);
 
@@ -210,7 +210,7 @@ public interface CellularComponent
 	 * @param x
 	 * @param y
 	 */
-	public void updateBorderPoint(int i, double x, double y);
+	void updateBorderPoint(int i, double x, double y);
 	
 	/**
 	 * Update the border point at the given index to the 
@@ -218,13 +218,13 @@ public interface CellularComponent
 	 * @param i the index
 	 * @param p the new postion
 	 */
-	public void updateBorderPoint(int i, IPoint p);
+	void updateBorderPoint(int i, IPoint p);
 	
 	/**
 	 * Get the length of the angle profile in index units
 	 * @return
 	 */
-	public int getBorderLength();
+	int getBorderLength();
 	
 	/**
 	 * Get a copy of the component border points in the border list
@@ -243,7 +243,7 @@ public interface CellularComponent
 	 * offset to their original coordinates in the source image
 	 * @return
 	 */
-	public List<IBorderPoint> getOriginalBorderList();
+	List<IBorderPoint> getOriginalBorderList();
 
 	
 	/**
@@ -251,14 +251,14 @@ public interface CellularComponent
 	 * @param p
 	 * @return
 	 */
-	public boolean containsPoint(IPoint p);
+	boolean containsPoint(IPoint p);
 	
 	/**
 	 * Test if the given point is within the offset nucleus
 	 * @param p
 	 * @return
 	 */
-	public boolean containsPoint(int x, int y);
+	boolean containsPoint(int x, int y);
 	
 	/**
 	 * Test if the given point is within the object. This uses
@@ -267,7 +267,7 @@ public interface CellularComponent
 	 * @param p
 	 * @return
 	 */
-	public boolean containsOriginalPoint(IPoint p);
+	boolean containsOriginalPoint(IPoint p);
 	
 			
 	
@@ -275,40 +275,45 @@ public interface CellularComponent
 	 * Get the maximum x value from the positions of border points
 	 * @return
 	 */
-	public double getMaxX();
+	double getMaxX();
 
 	/**
 	 * Get the minimum x value from the positions of border points
 	 * @return
 	 */
-	public double getMinX();
+	double getMinX();
 
 	/**
 	 * Get the maximum y value from the positions of border points
 	 * @return
 	 */
-	public double getMaxY();
+	double getMaxY();
 
 	/**
 	 * Get the minimum y value from the positions of border points
 	 * @return
 	 */
-	public double getMinY();
+	double getMinY();
 	
 	/**
 	 * Flip the nucleus on the x-axis (horizontally) about the given point
 	 * @param p the point with the x coordinate to flip on
 	 */
-	public void flipXAroundPoint(IPoint p);
+	void flipXAroundPoint(IPoint p);
 
-	public double getMedianDistanceBetweenPoints();
+	
+	/**
+	 * Get the median distance between each pair of border points
+	 * @return
+	 */
+	double getMedianDistanceBetweenPoints();
 	
 	/**
 	 * Translate the XY coordinates of each border point so that
 	 * the nuclear centre of mass is at the given point
 	 * @param point the new centre of mass
 	 */
-	public void moveCentreOfMass(IPoint point);
+	void moveCentreOfMass(IPoint point);
 	
 	/**
 	 * Translate the XY coordinates of each border point and the centre
@@ -316,7 +321,7 @@ public interface CellularComponent
 	 * @param xOffset the amount to move the border in the x-dimension
 	 * @param yOffset the amount to move the border in the y-dimension
 	 */
-	public void offset(double xOffset, double yOffset);
+	void offset(double xOffset, double yOffset);
 	
 
 	/**
@@ -324,21 +329,21 @@ public interface CellularComponent
 	 * @param i the index
 	 * @return the index within the border list
 	 */
-	public int wrapIndex(int i);
+	int wrapIndex(int i);
 	
 	/**
 	 * Create a polygon with the same position as the component
 	 * in its source image.
 	 * @return
 	 */
-	public FloatPolygon createOriginalPolygon();
+	FloatPolygon createOriginalPolygon();
 	
 	/**
 	 * Create a shape (in this case a Path2D encompassing 
 	 * the border points of the component)
 	 * @return
 	 */
-	public Shape toShape();
+	Shape toShape();
 	
 	/**
 	 * Create a shape (in this case a Path2D encompassing 
@@ -346,14 +351,14 @@ public interface CellularComponent
 	 * of the shape in its source image
 	 * @return
 	 */
-	public Shape toOriginalShape();
+	Shape toOriginalShape();
 	
 	 /**
 	 * Turn a list of border points into a polygon. 
 	 * @param list the list of border points
 	 * @return
 	 */
-	public FloatPolygon createPolygon();
+	FloatPolygon createPolygon();
 	
 
 	
@@ -365,23 +370,23 @@ public interface CellularComponent
 	 * @param width
 	 * @return
 	 */
-	public boolean[][] getBooleanMask(int height, int width);
+	boolean[][] getBooleanMask(int height, int width);
 	
 	/*
     For two NucleusBorderPoints in a Nucleus, find the point that lies halfway between them
     Used for obtaining a consensus between potential tail positions
 	 */
-	public int getPositionBetween(IBorderPoint pointA, IBorderPoint pointB);
+	int getPositionBetween(IBorderPoint pointA, IBorderPoint pointB);
 
 	// For a position in the roi, draw a line through the CoM and get the intersection point
-	public IBorderPoint findOppositeBorder(IBorderPoint p);
+	IBorderPoint findOppositeBorder(IBorderPoint p);
 
 	/*
     From the point given, create a line to the CoM. Measure angles from all 
     other points. Pick the point closest to 90 degrees. Can then get opposite
     point. Defaults to input point if unable to find point.
 	 */
-	public IBorderPoint findOrthogonalBorderPoint(IBorderPoint a);
+	IBorderPoint findOrthogonalBorderPoint(IBorderPoint a);
 	
 	
 	/**
@@ -390,7 +395,7 @@ public interface CellularComponent
 	 * @param p
 	 * @return
 	 */
-	public IBorderPoint findClosestBorderPoint(IPoint p);
+	IBorderPoint findClosestBorderPoint(IPoint p);
 
 		
 	/**

@@ -188,22 +188,14 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * @param roi
 	 */
 	private void makeBorderList(){
-		
-//		log("Int array in make border A : "+this.xpoints[0]+", "+this.ypoints[0]);
-			
-		
+
 		// Make a copy of the int[] points otherwise creating a polygon roi
 		// will reset them to 0,0 coordinates
 		int[] xcopy = Arrays.copyOf( xpoints, xpoints.length);
 		int[] ycopy = Arrays.copyOf( ypoints, ypoints.length);
 		PolygonRoi roi = new PolygonRoi(xcopy, ycopy, xpoints.length, Roi.TRACED_ROI);
 		
-//		log("Reconstructed roi at "+roi.getBounds());
-//		log("Reconstructed pol at "+polygon.getBounds());
-//		log("Int array in make border B: "+this.xpoints[0]+", "+this.ypoints[0]);
-//		log("Int copy  in make border B: "+xcopy[0]+", "+ycopy[0]);
-//		log("Current CoM : "+centreOfMass);
-		
+
 		// Creating the border list will set everything to the original image position.
 		// Move the border list back over the CoM if needed.
 		IPoint oldCoM = IPoint.makeNew(centreOfMass);
@@ -229,10 +221,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		borderList.get(borderList.size()-1).setNextPoint(borderList.get(0));
 		borderList.get(0).setPrevPoint(borderList.get(borderList.size()-1));
 		
-//		log("B0 pre move: "+borderList.get(0));
 		moveCentreOfMass(oldCoM);
-//		log("B0 post move: "+borderList.get(0));
-//		log("Int array in make border : "+this.xpoints[0]+", "+this.ypoints[0]);
 		
 	}
 	
@@ -267,11 +256,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			
 			this.xpoints = Arrays.copyOf( comp.xpoints, comp.xpoints.length);
 			this.ypoints = Arrays.copyOf( comp.ypoints, comp.ypoints.length);
-//			PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
-//			log("Duplicating border list");
-//			log("F0: "+xpoints[0]+", "+ypoints[0]);
 			makeBorderList();
-//			log("B0: "+borderList.get(0));
+
 		} else {
 			duplicateBorderList(a);
 		}
@@ -686,9 +672,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			return this.toShape().getBounds().getMinY();
 		}
 		
-		/*
-		Flip the X positions of the border points around an X position
-		TODO - should this affect the roi points?
+
+		/* (non-Javadoc)
+		 * @see components.CellularComponent#flipXAroundPoint(components.generic.IPoint)
 		 */
 		public void flipXAroundPoint(IPoint p){
 
@@ -1101,46 +1087,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		 * @param bottomPoint
 		 */
 		public void rotatePointToBottom(IPoint bottomPoint){
-
-			double angleToRotate 	= 0;
-			
-			// Calculate the current angle between the point and a vertical line
-			
-			IPoint currentBottom = new FloatPoint(getCentreOfMass().getX(), getMinY());
-			
-			double currentAngle = getCentreOfMass().findAngle(currentBottom, bottomPoint);
-
-			/*
-			 * 
-			 * The nucleus is currently rotated such that the desired bottom point (D) makes
-			 * an angle <currentAngle> against the line between the centre of mass (M) and 
-			 * the current bottom point (C). The possible configurations are shown below:
-			 * 
-			 *    D            D
-			 *     \          /
-			 *      M        M               M       M
-			 *      |        |             / |       | \
-			 *      C        C            D  C       C  D
-			 *      
-			 *      
-			 *   Clockwise   Clock        Clock     Clock
-			 *   360 - a     a            360-a      a
-			 */
-			
-			// These calculations are perfectly wrong. They result in the bottomPoint anywhere
-			// except the bottom. The working values from trial and error are below
-					
-			if(bottomPoint.isLeftOf(currentBottom)){
-		
-				angleToRotate = currentAngle - 90; // Tested working
-			}
-			
-			if(bottomPoint.isRightOf(currentBottom)){
-				
-				angleToRotate = 360 - currentAngle - 90; // Tested working
-			}
-
-			this.rotate(angleToRotate);
+			this.alignPointsOnVertical(centreOfMass, bottomPoint);
 		}
 		
 		public abstract void alignVertically();
@@ -1149,12 +1096,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		public void rotate(double angle) {
 			if(angle!=0){
 
-				for(int i=0; i<getBorderLength(); i++){
-					IMutablePoint p = getBorderPoint(i);
-
+				for(IMutablePoint p : borderList){
+//					log(p.toString());
 					IPoint newPoint = getPositionAfterRotation(p, angle);
-
 					p.set(newPoint);
+//					log(p.toString());
 				}
 			}
 					
@@ -1170,7 +1116,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		protected IPoint getPositionAfterRotation(IPoint p, double angle){
 			
 			// get the distance from the point to the centre of mass
-			double distance = p.getLengthTo(this.getCentreOfMass());
+			double distance = p.getLengthTo(centreOfMass);
 
 			// get the angle between the centre of mass (C), the point (P) and a
 			// point directly under the centre of mass (V)
@@ -1181,17 +1127,17 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			 *      V P
 			 * 
 			 */
-			double oldAngle = this.getCentreOfMass().findAngle( p,
-					IPoint.makeNew(this.getCentreOfMass().getX(),-10));
+			double oldAngle = centreOfMass.findAngle( p,
+					IPoint.makeNew(centreOfMass.getX(),-10));
 
 
-			if(p.getX()<this.getCentreOfMass().getX()){
+			if(p.getX()<centreOfMass.getX()){
 				oldAngle = 360-oldAngle;
 			}
 
 			double newAngle = oldAngle + angle;
-			double newX = new AngleTools().getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
-			double newY = new AngleTools().getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
+			double newX = new AngleTools().getXComponentOfAngle(distance, newAngle) + centreOfMass.getX();
+			double newY = new AngleTools().getYComponentOfAngle(distance, newAngle) + centreOfMass.getY();
 			return IPoint.makeNew(newX, newY);
 		}
 }

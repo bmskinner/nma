@@ -24,11 +24,6 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
 
 	private static final long serialVersionUID = 1L;
 
-//	public DefaultPigSpermNucleus(Roi roi, File f, int channel, int[] position, int number) {
-//		super(roi, f, channel, position, number);
-//
-//	}
-
 	/**
 	 * Construct with an ROI, a source image and channel, and the original position in the source image
 	 * @param roi
@@ -50,8 +45,7 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
 		try {
 			return new DefaultPigSpermNucleus(this);
 		} catch (UnprofilableObjectException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			stack("Error duplicating nucleus", e);
 		}
 		return null;
 	}
