@@ -17,12 +17,12 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.Range;
 
-import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
 import components.active.VirtualCellCollection;
-import components.generic.MeasurementScale;
 import analysis.IAnalysisDataset;
+import analysis.nucleus.CollectionFilterer;
+import analysis.nucleus.CollectionFilterer.CollectionFilteringException;
 import analysis.profiles.ProfileException;
 import charting.charts.AbstractChartFactory;
 import charting.charts.ScatterChartFactory;
@@ -139,9 +139,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 				.build();
 		
 		setTable(tableOptions);
-		
-//		rhoTable.setModel(getTable(tableOptions));
-		
+
 		gateButton.setEnabled(true);
 	}
 
@@ -193,72 +191,51 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		}
 		finer("Gating datasets on "+statABox.getSelectedItem().toString()+" and "+statBBox.getSelectedItem().toString());
 		
+		CollectionFilterer f = new CollectionFilterer();
+		
 		for(IAnalysisDataset d : getDatasets()){
-			
-			finest("Filtering dataset "+d.getName());
 			
 			Range domain = getDomainBounds();
 			Range range  = getRangeBounds();
 			
-			finer("Filtering on "+statABox.getSelectedItem().toString());
-			ICellCollection stat1 = d.getCollection()
-					.filterCollection((PlottableStatistic) statABox.getSelectedItem(),
-							MeasurementScale.PIXELS, 
-							domain.getLowerBound(), domain.getUpperBound());
+			PlottableStatistic statA = (PlottableStatistic) statABox.getSelectedItem();
+			PlottableStatistic statB = (PlottableStatistic) statBBox.getSelectedItem();
 			
-			if(stat1 == null){
-				finest("No collection returned");
-				// filtering on given PlottableStatistic is not yet implemented
-				continue;
-			}
-			
-			if( ! stat1.hasCells()){
-				finest("No cells returned for "+statABox.getSelectedItem().toString());
-				continue;
-			}
-			
-			
-			finer("Filtering on "+statBBox.getSelectedItem().toString());
-			ICellCollection stat2 = stat1
-					.filterCollection((PlottableStatistic) statBBox.getSelectedItem(),
-							GlobalOptions.getInstance().getScale(),
-							range.getLowerBound(), range.getUpperBound());
-			
-			if(stat2 == null){
-				finer("No collection returned");
-				// filtering on given PlottableStatistic is not yet implemented
-				continue;
-			}
-			
-			if( ! stat2.hasCells()){
-				finer("No cells returned for "+statBBox.getSelectedItem().toString());
-				continue;
-			}
-			
-			if( stat2.size() ==  d.getCollection().size()){
-				finer("Filtered collection is same as starting collection");
-				continue;
-			}
-
-//			stat2.setName("Filtered_"+statABox.getSelectedItem().toString()+"_"+statBBox.getSelectedItem().toString());
-			finer("Filtered "+stat2.size()+" cells");
-			
-			ICellCollection virt = new VirtualCellCollection(d, stat2.getName());	
-			for(ICell c : stat2.getCells()){
-				virt.addCell(c);
-			}
-			String name = "Filtered_"+statABox.getSelectedItem().toString()+"_"+statBBox.getSelectedItem().toString();
-			log("Setting name to "+name);
-			virt.setName(name);
-
-			d.addChildCollection(virt);
 			try {
-				d.getCollection().getProfileManager().copyCollectionOffsets(virt);
-			} catch (ProfileException e) {
-				warn("Error copying collection offsets");
-				fine("Error in offsetting", e);
-			}
+				
+				ICellCollection stat1 = f.filter(d.getCollection(), 
+						statA, 
+						domain.getLowerBound(), 
+						domain.getUpperBound());
+				
+				
+				ICellCollection stat2 = f.filter( stat1,
+						statB,
+						range.getLowerBound(),
+						range.getUpperBound());
 
+				ICellCollection virt = new VirtualCellCollection(d, stat2.getName());	
+				for(ICell c : stat2.getCells()){
+					virt.addCell(c);
+				}
+
+				virt.setName("Filtered_"+statA+"_"+statB);
+
+				d.addChildCollection(virt);
+				try {
+					
+					d.getCollection().getProfileManager().copyCollectionOffsets(virt);
+				} catch (ProfileException e) {
+					warn("Error copying collection offsets for "+d.getName());
+					stack("Error in offsetting", e);
+					continue;
+				}
+				
+				
+			} catch (CollectionFilteringException e1) {
+				stack("Unable to filter collection for "+d.getName(), e1);
+				continue;
+			}
 			
 		}
 		log("Filtered datasets");

@@ -73,4 +73,10 @@ public class Acrosome extends  AbstractCellularComponent implements IAcrosome {
 		return false;
 	}
 
+	@Override
+	public int compareTo(IAcrosome o) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

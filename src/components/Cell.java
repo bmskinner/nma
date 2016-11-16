@@ -35,7 +35,7 @@ import components.nuclei.Nucleus;
  */
 @Deprecated
 public class Cell 
-	implements ICell {
+	implements IMutableCell {
 
 	private static final long serialVersionUID = 1L;
 
@@ -296,5 +296,19 @@ public class Cell
 //		finest("Reading cell");
 		in.defaultReadObject();
 //		finest("Read cell"); 
+	}
+
+	@Override
+	public ICytoplasm getCytoplasm() {
+		return null;
+	}
+
+	@Override
+	public boolean hasCytoplasm() {
+		return false;
+	}
+
+	@Override
+	public void setCytoplasm(ICytoplasm cytoplasm) {
 	}
 }

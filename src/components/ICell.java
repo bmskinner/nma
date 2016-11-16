@@ -50,11 +50,7 @@ public interface ICell
 	 */
 	Nucleus getNucleus();
 
-	/**
-	 * Set the nucleus of the cell
-	 * @param nucleus
-	 */
-	void setNucleus(Nucleus nucleus);
+	
 
 	/**
 	 * Get the mitochondria of the cell
@@ -68,11 +64,7 @@ public interface ICell
 	 */
 	void setMitochondria(List<IMitochondrion> mitochondria);
 
-	/**
-	 * Add a new mitochondrion to the cell
-	 * @param mitochondrion
-	 */
-	void addMitochondrion(IMitochondrion mitochondrion);
+	
 
 	/**
 	 * Get the flagella in the cell
@@ -80,12 +72,6 @@ public interface ICell
 	 */
 	List<Flagellum> getFlagella();
 
-
-	/**
-	 * Add a flagellum to the cell
-	 * @param tail
-	 */
-	void addFlagellum(Flagellum tail);
 
 	/**
 	 * Get the acrosomes for the cell
@@ -98,6 +84,12 @@ public interface ICell
 	 * @param acrosome
 	 */
 	void addAcrosome(IAcrosome acrosome);
+	
+	/**
+	 * Get the cytoplasm of the cell
+	 * @return the cytoplasm, or null if not present
+	 */
+	ICytoplasm getCytoplasm();
 
 	/**
 	 * Test if the cell has a nucleus
@@ -117,17 +109,19 @@ public interface ICell
 	 */
 	boolean hasMitochondria();
 	
-	boolean hasAcrosome();
-
 	/**
-	 * Compare cells using the UUID only
-	 * @param c
+	 * Test if the cell has an acrosome
 	 * @return
 	 */
-	boolean equals(Object o);
+	boolean hasAcrosome();
+	
+	/**
+	 * Test if the cell has a cytoplasm
+	 * @return
+	 */
+	boolean hasCytoplasm();
 
 	int compareTo(ICell o);
 
-	int hashCode();
 
 }

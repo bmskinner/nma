@@ -37,6 +37,7 @@ import components.ClusterGroup;
 import components.ICell;
 import components.ICellCollection;
 import components.IClusterGroup;
+import components.IMutableCell;
 import components.active.DefaultAnalysisDataset;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
@@ -242,7 +243,7 @@ public class DatasetConverter implements Loggable {
 	}
 	
 	private ICell createNewCell(ICell oldCell) throws DatasetConversionException{
-		ICell newCell = new DefaultCell(oldCell.getId());
+		IMutableCell newCell = new DefaultCell(oldCell.getId());
 		
 		// make a new nucleus
 		Nucleus newNucleus = createNewNucleus( oldCell.getNucleus()  );

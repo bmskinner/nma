@@ -27,37 +27,57 @@ import java.util.UUID;
 import components.Flagellum;
 import components.IAcrosome;
 import components.ICell;
+import components.ICytoplasm;
 import components.IMitochondrion;
+import components.IMutableCell;
 import components.active.generic.UnprofilableObjectException;
 import components.nuclei.Nucleus;
 
 /**
  * The cell is the highest level of analysis here. Cells we can analyse
- * have a nucleus, mitochondria, and maybe a flagellum.
+ * have a nucleus, mitochondria, cytoplasm, and maybe a flagellum and acrosome.
  * @author bms41
  * @since 1.13.3
  */
 public class DefaultCell 
-	implements ICell {
+	implements IMutableCell {
 
 	private static final long serialVersionUID = 1L;
 
 	protected UUID uuid;
 	
-	protected Nucleus nucleus;
+	protected Nucleus nucleus = null;
 	protected List<IMitochondrion> mitochondria; // unknown staining patterns so far
 	protected List<Flagellum> tails;	
 	protected List<IAcrosome> acrosomes;
+	protected ICytoplasm cytoplasm = null;
 	
-	public DefaultCell(){
+	/**
+	 * Create a new cell with a random ID
+	 */
+	protected DefaultCell(){
 		this(java.util.UUID.randomUUID());
 	}
 	
+	/**
+	 * Create a new cell with the given ID.
+	 * @param id the id for the new cell
+	 */
 	public DefaultCell(UUID id){
 		this.uuid    = id;
 		mitochondria = new ArrayList<IMitochondrion>(0);
 		tails        = new ArrayList<Flagellum>(0);
 		acrosomes    = new ArrayList<IAcrosome>(0);
+	}
+	
+	/**
+	 * Create a new cell based on the given nucleus. The 
+	 * nucleus is copied.
+	 * @param n the template nucleus for the cell
+	 */
+	public DefaultCell(Nucleus n){
+		this(java.util.UUID.randomUUID());
+		nucleus = n.duplicate();
 	}
 	
 	/**
@@ -71,7 +91,7 @@ public class DefaultCell
 			nucleus   = new DefaultNucleus(c.getNucleus());
 		} catch (UnprofilableObjectException e) {
 			warn("Unable to make cell from template");
-			fine("Cannot profile the nucleus", e);
+			stack("Cannot profile the nucleus", e);
 		}
 		
 		mitochondria = new ArrayList<IMitochondrion>(0);
@@ -87,6 +107,10 @@ public class DefaultCell
 		acrosomes = new ArrayList<IAcrosome>(0);
 		for(IAcrosome a : c.getAcrosomes()){
 			acrosomes.add(a.duplicate());
+		}
+		
+		if(c.hasCytoplasm()){
+			this.cytoplasm = c.getCytoplasm().duplicate();
 		}
 	}
 	
@@ -203,6 +227,21 @@ public class DefaultCell
 		return !this.mitochondria.isEmpty();
 	}
 	
+	@Override
+	public ICytoplasm getCytoplasm() {
+		return this.cytoplasm;
+	}
+
+	@Override
+	public boolean hasCytoplasm() {
+		return cytoplasm!=null;
+	}
+
+	@Override
+	public void setCytoplasm(ICytoplasm cytoplasm) {
+		this.cytoplasm = cytoplasm;
+	}
+	
 	/* (non-Javadoc)
 	 * @see components.ICell#equals(java.lang.Object)
 	 */
@@ -309,6 +348,8 @@ public class DefaultCell
 		in.defaultReadObject();
 //		finest("Read cell"); 
 	}
+
+
 
 
 }

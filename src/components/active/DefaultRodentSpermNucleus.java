@@ -55,6 +55,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
 	protected DefaultRodentSpermNucleus(Nucleus n) throws UnprofilableObjectException {
 		super(n);
+		finer("Created rodent sperm nucleus");
 	}
 
 	@Override

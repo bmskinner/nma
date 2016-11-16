@@ -49,9 +49,9 @@ public class DummyRodentCollection extends DefaultCellCollection {
 	
 	private ICell makeDummyCell(int i){
 		
-		ICell c = new DefaultCell();
+		
 		Nucleus n = new DummyRodentSpermNucleus("Nucleus "+i);
-		c.setNucleus(n);
+		ICell c = new DefaultCell(n);
 		return c;
 		
 	}

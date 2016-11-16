@@ -14,7 +14,6 @@ import analysis.profiles.RuleSet;
 import analysis.signals.SignalAnalyser;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.DefaultSignalCollection;
-import components.active.generic.FloatPoint;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
 import components.active.generic.UnprofilableObjectException;
@@ -28,7 +27,6 @@ import components.nuclear.IBorderPoint;
 import components.nuclear.IBorderSegment;
 import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalCollection;
-import components.nuclear.SignalCollection;
 import components.nuclei.Nucleus;
 import ij.gui.Roi;
 import stats.NucleusStatistic;
@@ -72,10 +70,9 @@ public class DefaultNucleus
 		
 	protected DefaultNucleus(Nucleus n) throws UnprofilableObjectException {
 		super( n);
-		finest("Created profileable nucleus");		
 		nucleusNumber = n.getNucleusNumber();
-				
 		signalCollection = new DefaultSignalCollection(n.getSignalCollection());
+		finest("Created new nucleus");	
 	}
 	
 	@Override

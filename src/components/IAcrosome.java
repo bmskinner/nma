@@ -1,6 +1,6 @@
 package components;
 
-public interface IAcrosome extends CellularComponent {
+public interface IAcrosome extends CellularComponent, Comparable<IAcrosome> {
 
 	void alignVertically();
 

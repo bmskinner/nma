@@ -58,12 +58,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	private final int[] position;
 	
 	/**
-	 * The centre of the object.
+	 * The current centre of the object.
 	 */
 	private IMutablePoint centreOfMass;
 	
 	/**
-	 * The original centre of the object.
+	 * The original centre of the object in its source image.
 	 */
 	private final IPoint originalCentreOfMass;
 	

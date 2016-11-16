@@ -1057,11 +1057,13 @@ implements ICellCollection {
 		ICellCollection subCollection = new DefaultCellCollection(this, "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
 
 		List<ICell> filteredCells;
+		
+		finest("Filtering collection on "+stat);
 
 		if(stat.equals(NucleusStatistic.VARIABILITY)){
 			filteredCells = new ArrayList<ICell>();
 			for(ICell c : this.getCells()){
-				//			  Nucleus n = c.getNucleus();
+
 
 				double value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, c);
 
@@ -1071,6 +1073,8 @@ implements ICellCollection {
 			}
 
 		} else {
+			
+			finest("Running cell filter stream");
 			filteredCells = getCells()
 					.parallelStream()
 					.filter(p -> p.getNucleus().getStatistic(stat, scale) >= lower)
@@ -1078,18 +1082,22 @@ implements ICellCollection {
 					.collect(Collectors.toList());
 		}
 
+		finest("Adding cells to new collection");
 		for(ICell cell : filteredCells){
 			subCollection.addCell(new DefaultCell(cell));
 		}
 
 		try {
+			
 			this.getProfileManager().copyCollectionOffsets(subCollection);
+			this.getSignalManager().copySignalGroups(subCollection);
+			
 		} catch (ProfileException e) {
 			warn("Error copying collection offsets");
-			fine("Error in offsetting", e);
+			stack("Error in offsetting", e);
 		}
 
-		this.getSignalManager().copySignalGroups(subCollection);
+		
 
 		return subCollection;
 	}

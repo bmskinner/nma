@@ -105,7 +105,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public void findPointsAroundBorder() throws Exception {
+	public void findPointsAroundBorder() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -285,11 +285,11 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 		return null;
 	}
 
-	@Override
-	public void setBorderList(List<IBorderPoint> list) {
-		// TODO Auto-generated method stub
-		
-	}
+//	@Override
+//	public void setBorderList(List<IBorderPoint> list) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
 	@Override
 	public List<IBorderPoint> getOriginalBorderList() {

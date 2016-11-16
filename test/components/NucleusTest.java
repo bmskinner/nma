@@ -48,7 +48,8 @@ public class NucleusTest {
 		int nucleusNumber = 0;
 		int[] position = {105, 34};
 
-		Nucleus n = new DefaultRodentSpermNucleus(roi, nucleusImage, 0,  position , nucleusNumber, IPoint.makeNew(74, 46));
+		Nucleus n = new DefaultRodentSpermNucleus(roi, IPoint.makeNew(74, 46), nucleusImage, 0,  
+				position , nucleusNumber);
 
 //		n.setCentreOfMass(new XYPoint(74, 46));
 		n.setStatistic(NucleusStatistic.AREA,     4827.00);

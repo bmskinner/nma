@@ -57,6 +57,7 @@ import analysis.detection.Detector;
 import analysis.image.ImageFilterer;
 import analysis.AnalysisWorker;
 import components.ICell;
+import components.IMutableCell;
 import components.SpermTail;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
@@ -109,6 +110,8 @@ public class TubulinTailDetector extends AnalysisWorker {
 			int progress = 0;
 			for(ICell c : getDataset().getCollection().getCells()){
 
+				IMutableCell cell = (IMutableCell) c;
+				
 				Nucleus n = c.getNucleus();
 				fileLogger.log(Level.INFO, "Looking for tails associated with nucleus "+n.getSourceFileName()+"-"+n.getNucleusNumber());
 				
@@ -126,7 +129,7 @@ public class TubulinTailDetector extends AnalysisWorker {
 					List<SpermTail> tails = finder.detectTail(imageFile, n);
 					
 					for(SpermTail tail : tails){
-						c.addFlagellum(tail);
+						cell.addFlagellum(tail);
 					}
 					
 				} catch(Exception e){

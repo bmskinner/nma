@@ -40,6 +40,7 @@ import analysis.ICannyOptions;
 import analysis.detection.Detector;
 import analysis.image.ImageFilterer;
 import components.ICell;
+import components.IMutableCell;
 import components.active.DefaultCell;
 import components.active.NucleusFactory;
 import components.active.NucleusFactory.NucleusCreationException;
@@ -301,8 +302,8 @@ public class NucleusDetector extends Detector {
 		}
 
 		// if everything checks out, add the measured parameters to the global pool
-		result = new DefaultCell();
-		result.setNucleus(currentNucleus);		  
+		result = new DefaultCell(currentNucleus);
+//		result.setNucleus(currentNucleus);		  
 
 
 		return result;

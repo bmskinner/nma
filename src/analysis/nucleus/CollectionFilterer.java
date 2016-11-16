@@ -18,9 +18,13 @@
  *******************************************************************************/
 package analysis.nucleus;
 
+import org.jfree.data.Range;
+
 import stats.NucleusStatistic;
+import stats.PlottableStatistic;
 import components.ICell;
 import components.ICellCollection;
+import components.IMutableCell;
 import components.active.DefaultCell;
 import components.active.DefaultCellCollection;
 import components.generic.MeasurementScale;
@@ -111,9 +115,9 @@ public class CollectionFilterer implements Loggable {
 	      }
 
 	      if(failureCode > 0){
-	    	  Nucleus faiNucleus = n.duplicate();
-	    	  ICell failCell = new DefaultCell();
-	    	  failCell.setNucleus(faiNucleus);
+//	    	  Nucleus faiNucleus = n.duplicate();
+	    	  ICell failCell = new DefaultCell(n);
+//	    	  failCell.setNucleus(faiNucleus);
 	    	  newFailCollection.addCell(c);
 	      
 	    	  failCollection.addCell(failCell);
@@ -140,5 +144,53 @@ public class CollectionFilterer implements Loggable {
 	    log("Remaining: "+collection.size()+" nuclei");
 	    
 	  }
+	
+	
+	/**
+	 * Filter the given collection to retain cells in which the given statistic is within the lower and
+	 * upper bounds inclusive.
+	 * @param collection the collection to filter
+	 * @param stat the statistic to filter on
+	 * @param lower the lower bound
+	 * @param upper the upper bound
+	 * @return a new cell collection with copies of the original cells
+	 * @throws CollectionFilteringException
+	 */
+	public ICellCollection filter(ICellCollection collection, PlottableStatistic stat, double lower, double upper)
+			throws CollectionFilteringException {
+		
+		finest("Filtering collection "+collection.getName());
+		
+		finer("Filtering on "+stat);
+		ICellCollection filtered = collection.filterCollection(stat,
+						MeasurementScale.PIXELS, 
+						lower, upper);
+		
+		if(filtered == null){
+			throw new CollectionFilteringException("No collection returned");
+		}
+		
+		if( ! filtered.hasCells()){
+			throw new CollectionFilteringException("No cells returned for "+stat);
+		}
+		
+		finer("Filter on "+stat+" gave "+filtered.size()+" cells");
+		return filtered;
+	}
+	
+	/**
+	 * Thrown when a cell collection cannot be filtered
+	 * @author bms41
+	 * @since 1.13.3
+	 *
+	 */
+	public class CollectionFilteringException extends Exception {
+			private static final long serialVersionUID = 1L;
+			public CollectionFilteringException() { super(); }
+			public CollectionFilteringException(String message) { super(message); }
+			public CollectionFilteringException(String message, Throwable cause) { super(message, cause); }
+			public CollectionFilteringException(Throwable cause) { super(cause); }
+		
+	}
 	
 }
