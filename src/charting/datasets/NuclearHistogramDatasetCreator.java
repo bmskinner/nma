@@ -91,6 +91,10 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			int bins = findBinSizeForHistogram(values, minMaxStep);
 
 			String groupLabel = stat.toString();
+			
+			if(minRounded>=maxRounded){
+				throw new ChartDatasetCreationException("Histogram lower bound equal to or grater than upper bound");
+			}
 
 			ds.addSeries(groupLabel+"_"+collection.getName(), values, bins, minRounded, maxRounded );
 		}

@@ -324,21 +324,24 @@ public class DefaultNucleus
 	
 	@Override
 	public void updateVerticallyRotatedNucleus(){
-		this.verticalNucleus = null;
-		this.getVerticallyRotatedNucleus();
+		fine("Updating vertically rotated nucleus");
+		verticalNucleus = null;
+		verticalNucleus = this.getVerticallyRotatedNucleus();
 	}
 	
 	@Override
 	public Nucleus getVerticallyRotatedNucleus(){
+		fine("Getting vertically rotated nucleus");
 		if(verticalNucleus==null){
-
+			
+			
 			// Make an exact copy of the nucleus
 			verticalNucleus = this.duplicate();
+			fine("Creating new vertical nucleus: "+verticalNucleus.getClass().getSimpleName());
 
 			verticalNucleus.alignVertically();			
 			
 			// Ensure all vertical nuclei have overlapping centres of mass
-			verticalNucleus.moveCentreOfMass(IPoint.makeNew(0,0));
 			verticalNucleus.moveCentreOfMass(IPoint.makeNew(0,0));
 
 			this.setStatistic(NucleusStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
@@ -346,7 +349,12 @@ public class DefaultNucleus
 			
 			double aspect = verticalNucleus.getBounds().getHeight() / verticalNucleus.getBounds().getWidth();
 			this.setStatistic(NucleusStatistic.ASPECT,  aspect);
+			
+			this.setStatistic(NucleusStatistic.BODY_WIDTH, STAT_NOT_CALCULATED);
+			this.setStatistic(NucleusStatistic.HOOK_LENGTH, STAT_NOT_CALCULATED);
 
+		} else {
+			fine("Vertical nucleus not null, not creating");
 		}
 		return verticalNucleus;
 	}

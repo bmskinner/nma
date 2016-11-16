@@ -150,24 +150,14 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 
 	@Override
 	protected void updateNull() {
-		ChartOptions options = new ChartOptionsBuilder()
-			.build();
-		
-		setChart(options);
 
-		
-		TableOptions tableOptions = new TableOptionsBuilder()
-				.setDatasets(null)
-				.setScale(GlobalOptions.getInstance().getScale())
-				.setTarget(rhoTable)
-				.build();
-		setTable(tableOptions);
-		
+		chartPanel.setChart(AbstractChartFactory.createEmptyChart());
+		rhoTable.setModel(AbstractDatasetCreator.createBlankTable());
 		gateButton.setEnabled(false);
 	}
 	
 	@Override
-	public void setChartsAndTablesLoading(){
+	public synchronized void setChartsAndTablesLoading(){
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());		
 		rhoTable.setModel(AbstractDatasetCreator.createLoadingTable());
 	}

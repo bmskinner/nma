@@ -116,9 +116,15 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			
 
 			// Ensure segments are copied appropriately to verticals
+			// Ensure hook statistics are generated appropriately
+//			log("Updating verticals");
 			for(Nucleus n : this.getDataset().getCollection().getNuclei()){
+//				log("Updating "+n.getNameAndNumber());
 				n.updateVerticallyRotatedNucleus();
+				n.updateDependentStats();
+				
 			}
+			fine("Updated verticals and stats");
 			
 		} catch(Exception e){
 			result = false;

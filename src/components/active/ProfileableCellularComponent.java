@@ -39,8 +39,6 @@ public abstract class ProfileableCellularComponent
 	implements Taggable {
 	
 	private static final long serialVersionUID = 1L;
-	public static final double ERROR_CALCULATING_STAT   = -1d;
-	public static final double BORDER_POINT_NOT_PRESENT = -2d;
 	
 	protected double angleWindowProportion; // The proportion of the perimeter to use for profiling
 	
@@ -461,11 +459,11 @@ public abstract class ProfileableCellularComponent
 					return new SegmentedFloatProfile(this.profileMap.get(type));
 				} catch (java.lang.IndexOutOfBoundsException | ProfileException e) {
 					stack("Error getting profile "+type, e);
-					throw new UnavailableProfileTypeException("Cannot get profile type "+type);
+					throw new UnavailableProfileTypeException("Cannot get profile type "+type, e);
 				}
 
 		} else {
-			throw new IllegalArgumentException("Profile type "+type+" is not found in this nucleus");
+			throw new IllegalArgumentException("Profile type "+type+" is not found in this component");
 		}
 	}
 	

@@ -44,6 +44,10 @@ public interface CellularComponent
 				Serializable, 
 				Loggable, 
 				Rotatable {
+	
+	
+	public static final double ERROR_CALCULATING_STAT   = -1d;
+	public static final double STAT_NOT_CALCULATED      = -3d;
 			
 	/**
 	 * Get the UUID of the object
@@ -74,7 +78,7 @@ public interface CellularComponent
 	 * @param c
 	 * @return true if the components have the same ID
 	 */
-	public boolean equals(CellularComponent c);
+	boolean equals(CellularComponent c);
 	
 	
 	/**
@@ -83,6 +87,12 @@ public interface CellularComponent
 	 */
 	CellularComponent duplicate();
 	
+	
+	/**
+	 * Should the border be smoothed when calculating the interpolated
+	 * border list
+	 * @return
+	 */
 	boolean isSmoothByDefault();
 	
 	
@@ -96,7 +106,7 @@ public interface CellularComponent
 	 * @return the value or zero if stat.equals(NucleusStatistic.VARIABILILTY)==true
 	 * @throws Exception 
 	 */
-	public double getStatistic(PlottableStatistic stat, MeasurementScale scale);
+	double getStatistic(PlottableStatistic stat, MeasurementScale scale);
 	
 	/**
 	 * Get the value of the given {@link PlottableStatistic} for this nucleus.
@@ -116,20 +126,25 @@ public interface CellularComponent
 	 * @param stat
 	 * @return
 	 */
-	public double getStatistic(PlottableStatistic stat);
+	double getStatistic(PlottableStatistic stat);
 	
 	/**
 	 * Set the statistic at the default scale ({@link MeasurementScale.PIXELS})
 	 * @param stat
 	 * @param d
 	 */
-	public void setStatistic(PlottableStatistic stat, double d);
+	void setStatistic(PlottableStatistic stat, double d);
 	
 	/**
 	 * Get all the statistics in this object
 	 * @return
 	 */
-	public PlottableStatistic[] getStatistics();
+	PlottableStatistic[] getStatistics();
+	
+	/**
+	 * If any stats are listed as uncalcualted, attempt to calculate them
+	 */
+	void updateDependentStats();
 	
 
 	

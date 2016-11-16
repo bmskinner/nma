@@ -42,6 +42,8 @@ import components.nuclear.IBorderPoint;
  */
 public interface Taggable extends Profileable {
 	
+	public static final double BORDER_POINT_NOT_PRESENT = -2d;
+	
 	/**
 	 * Get the index of the border point with the given tag.
 	 * If the point does not exist, returns -1

@@ -24,6 +24,7 @@ import components.nuclei.Nucleus;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import stats.NucleusStatistic;
+import stats.PlottableStatistic;
 import stats.SignalStatistic;
 
 /**
@@ -72,7 +73,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 	@Override
 	protected double calculateStatistic(NucleusStatistic stat){
 		double result = super.calculateStatistic(stat);
-		//		finest("Calculating stat in rodent sperm nucleus: "+stat);
+		
 		switch(stat){
 
 		case HOOK_LENGTH:
@@ -89,7 +90,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		return result;
 
 	}
-
+	
 	@Override
 	public void setBorderTag(Tag tag, int i){
 		super.setBorderTag(tag, i);
@@ -111,12 +112,10 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		// check stat is present before calling a getStatistic
 		if(hasStatistic(NucleusStatistic.HOOK_LENGTH) || hasStatistic(NucleusStatistic.BODY_WIDTH)){
 
-			if(getStatistic(NucleusStatistic.HOOK_LENGTH) == ERROR_CALCULATING_STAT 
-					|| getStatistic(NucleusStatistic.BODY_WIDTH) == ERROR_CALCULATING_STAT){
+			if(    getStatistic(NucleusStatistic.HOOK_LENGTH) == STAT_NOT_CALCULATED 
+			    || getStatistic(NucleusStatistic.BODY_WIDTH)  == STAT_NOT_CALCULATED){
 				calculateHookAndBodyLength();
 			}
-
-
 
 		} else {
 			calculateHookAndBodyLength();
@@ -136,104 +135,113 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 	private void calculateHookAndBodyLength() {
 
 		// Copy the nucleus
-		finest("Calculating hook and body length");
+		fine("Calculating hook and body length");
 
 		// Start with the vertically rotated nucleus
 		Nucleus testNucleus = getVerticallyRotatedNucleus();
-
+		
+		fine("Nucleus "+this.getNameAndNumber());
 		// Only proceed if the verticals have been set
-		if(testNucleus!=null && testNucleus.hasBorderTag(Tag.TOP_VERTICAL) 
-				&& testNucleus.hasBorderTag(Tag.BOTTOM_VERTICAL)){
-
-			finer("Nucleus "+this.getNameAndNumber());
+		
+		if(testNucleus==null){
 			
-			/*
-			 * Get the X position of the top vertical
-			 */
-			double vertX;
-			try {
-				vertX = testNucleus.getBorderTag(Tag.TOP_VERTICAL).getX();
-			} catch (UnavailableBorderTagException e) {
-				stack("Cannot get border tag", e);
-				setStatistic(NucleusStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
-				setStatistic(NucleusStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
-				return;
-				
-			}
-
-
-			/*
-			 * Find the x values in the bounding box of the 
-			 * vertical nucleus.
-			 */
-			double maxBoundingX = testNucleus.createPolygon().getBounds().getMaxX();
-			double minBoundingX = testNucleus.createPolygon().getBounds().getMinX();
-
-			if(vertX < minBoundingX || vertX > maxBoundingX ){
-				finer("Error calculating hook and body: vertical is out of bounds" );
-				setStatistic(NucleusStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
-				setStatistic(NucleusStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
-				return;
-			}
-
-
-
-			/*
-			 * Find the distance from the vertical X position to the min and max points of the 
-			 * bounding box. VertX must lie between these points.
-			 */
-
-
-			double distanceLower  = vertX - minBoundingX;
-			double distanceHigher = maxBoundingX - vertX;
-
-			/*
-			 * To determine if the point is hook or hump, take
-			 * the X position of the tip. This must lie on the
-			 * hook side of the vertX
-			 */
-
-			double distanceHook = 0;
-			double distanceHump = 0;
-			double referenceX;
-			try {
-				referenceX = testNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
-			} catch (UnavailableBorderTagException e) {
-				stack("Cannot get border tag", e);
-				setStatistic(NucleusStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
-				setStatistic(NucleusStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
-				return;
-			}
-
-			finer("TV is at "+vertX);
-			finer("Max bounding x is "+ maxBoundingX);
-			finer("Min bounding x is "+ minBoundingX);
-			finer("RP x is "+ referenceX);
-			finer("Distance lower is "+ distanceLower);
-			finer("Distance higher is "+ distanceHigher);
-
-			if(referenceX < vertX){
-				distanceHook = distanceLower;
-				distanceHump = distanceHigher;
-			} else {
-				distanceHook = distanceHigher;
-				distanceHump = distanceLower;
-			}
-
-			setStatistic(NucleusStatistic.HOOK_LENGTH, distanceHook);
-			setStatistic(NucleusStatistic.BODY_WIDTH,  distanceHump);
-
-			finer("Hook length is "+ distanceHook);
-			finer("Body width is "+ distanceHump);
-
-			finest("Hook length and body width calculated");
-		} else {
-			finest("Top and bottom vertical not assigned, skipping");
-
+			fine("Vertical nucleus is not present");
+			setStatistic(NucleusStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
+			setStatistic(NucleusStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
+			return;
+		}
+		
+		if( !testNucleus.hasBorderTag(Tag.TOP_VERTICAL) 
+				|| !testNucleus.hasBorderTag(Tag.BOTTOM_VERTICAL)){
+			fine("TV or BV is not present in vertical nucleus");
 			setStatistic(NucleusStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
 			setStatistic(NucleusStatistic.BODY_WIDTH,  BORDER_POINT_NOT_PRESENT);
+			return;
 		}
-		testNucleus = null;
+
+
+		/*
+		 * Get the X position of the top vertical
+		 */
+		double vertX;
+		try {
+			vertX = testNucleus.getBorderTag(Tag.TOP_VERTICAL).getX();
+		} catch (UnavailableBorderTagException e) {
+			stack("Cannot get border tag", e);
+			setStatistic(NucleusStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
+			setStatistic(NucleusStatistic.BODY_WIDTH,  BORDER_POINT_NOT_PRESENT);
+			return;
+
+		}
+
+
+		/*
+		 * Find the x values in the bounding box of the 
+		 * vertical nucleus.
+		 */
+		double maxBoundingX = testNucleus.createPolygon().getBounds().getMaxX();
+		double minBoundingX = testNucleus.createPolygon().getBounds().getMinX();
+
+		if(vertX < minBoundingX || vertX > maxBoundingX ){
+
+			IndexOutOfBoundsException e = new IndexOutOfBoundsException("Vertical is out of bounds");
+			stack("Vertical "+vertX+" is out of bounds "+minBoundingX+" - "+maxBoundingX, e );
+			setStatistic(NucleusStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
+			setStatistic(NucleusStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
+			return;
+		}
+
+
+
+		/*
+		 * Find the distance from the vertical X position to the min and max points of the 
+		 * bounding box. VertX must lie between these points.
+		 */
+
+
+		double distanceLower  = vertX - minBoundingX;
+		double distanceHigher = maxBoundingX - vertX;
+
+		/*
+		 * To determine if the point is hook or hump, take
+		 * the X position of the tip. This must lie on the
+		 * hook side of the vertX
+		 */
+
+		double distanceHook = 0;
+		double distanceHump = 0;
+		double referenceX;
+		try {
+			referenceX = testNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
+		} catch (UnavailableBorderTagException e) {
+			stack("Cannot get border tag", e);
+			setStatistic(NucleusStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
+			setStatistic(NucleusStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
+			return;
+		}
+
+		finer("TV is at "+vertX);
+		finer("Max bounding x is "+ maxBoundingX);
+		finer("Min bounding x is "+ minBoundingX);
+		finer("RP x is "+ referenceX);
+		finer("Distance lower is "+ distanceLower);
+		finer("Distance higher is "+ distanceHigher);
+
+		if(referenceX < vertX){
+			distanceHook = distanceLower;
+			distanceHump = distanceHigher;
+		} else {
+			distanceHook = distanceHigher;
+			distanceHump = distanceLower;
+		}
+
+		setStatistic(NucleusStatistic.HOOK_LENGTH, distanceHook);
+		setStatistic(NucleusStatistic.BODY_WIDTH,  distanceHump);
+
+		fine("Hook length is "+ distanceHook);
+		fine("Body width is "+ distanceHump);
+
+		finest("Hook length and body width calculated");
 	}
 
 	/**
@@ -276,16 +284,13 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		while(testPoint.hasNextPoint()){
 			result.add(testPoint);
 
-			//			IJ.log("Test point :"+testPoint.toString());
 			if( testPoint.overlapsPerfectly(interSectionPoint) ){
 				continuePoint = orientationPoint;
-				//				IJ.log("Hit IP :"+testPoint.toString());
 				break;
 			}
 
 			if( testPoint.overlapsPerfectly(orientationPoint) ){
 				continuePoint = interSectionPoint;
-				//				IJ.log("Hit OP :"+testPoint.toString());
 				break;
 			}
 
@@ -295,7 +300,6 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 			 * Only allow the loop to go around the nucleus once
 			 */
 			if( testPoint.overlapsPerfectly(referencePoint) ){
-				//				IJ.log("Hit RP :"+testPoint.toString());
 				break;
 			}
 
@@ -414,8 +418,9 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
 
 	/**
-	 * @param list
-	 * @return
+	 * Create a polygon from the given list of border points
+	 * @param list the list of points
+	 * @return a polygon enclosing the points
 	 */
 	private FloatPolygon createRoiPolygon(List<IBorderPoint> list){
 		float[] xpoints = new float[list.size()+1];
@@ -437,29 +442,24 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
 	/**
 	 * Check if the given point is in the hook side of the nucleus
-	 * @param p
+	 * @param p the point to test, which must lie within the nucleus
 	 * @return
 	 */
 	public boolean isHookSide(IPoint p){
-		if(containsPoint(p)){
-
-			/*
-			 * Find out which side has been captured. The hook side
-			 * has the reference point
-			 */
-
-			FloatPolygon poly = createRoiPolygon(getHookRoi());
-
-			if(poly.contains((float)p.getX(), (float)p.getY() )){
-				return true;
-
-			} else {
-				return false;
-			}
-
-		} else {
+		
+		if( ! containsPoint(p) ){
 			throw new IllegalArgumentException("Requested point is not in the nucleus: "+p.toString());
 		}
+		
+		/*
+		 * Find out which side has been captured. The hook side
+		 * has the reference point
+		 */
+
+		FloatPolygon poly = createRoiPolygon(getHookRoi());
+		
+		return poly.contains(  (float)p.getX(), (float)p.getY() );
+		
 	}
 
 
@@ -470,7 +470,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		 * Ensure the nucleus is cached
 		 */
 		super.getVerticallyRotatedNucleus();
-		finest("Fetched vertical nucleus from round nucleus");
+				
+		fine("Fetched vertical nucleus from round nucleus");
 		if(verticalNucleus==null){
 			warn("Unknown error creating vertical nucleus");
 			return null;
@@ -486,7 +487,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 			stack("Cannot get RP from vertical nucleus. Not checking horizontal orientation", e);
 			return verticalNucleus;
 		}
-
+		fine("Checking hook position");
 		/*
 		 * If the reference point is left of the centre of mass, 
 		 * the nucleus is pointing left. If not, flip thw nucleus
@@ -500,7 +501,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 //			log(this.getNameAndNumber()+": Post flipping CoM is "+verticalNucleus.getCentreOfMass());
 			verticalNucleus.moveCentreOfMass( IPoint.makeNew(0,0));
 //			log(this.getNameAndNumber()+": Moved CoM is "+verticalNucleus.getCentreOfMass());
-		} 
+		} 	
 
 		return verticalNucleus;
 	}

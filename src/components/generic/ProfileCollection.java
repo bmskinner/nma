@@ -450,6 +450,24 @@ public class ProfileCollection implements IProfileCollection {
 		createProfileAggregate(collection, type, (int)collection.getMedianArrayLength());
 
 	}
+	
+	@Override
+	public void createProfileAggregate(ICellCollection collection, int length) {
+		if(type!=null){
+//			for(ProfileType type : ProfileType.values()){
+				this.createProfileAggregate(collection, type, length);
+//			}
+			}
+		
+	}
+
+//	@Override
+	public void createProfileAggregate(ICellCollection collection) {
+		if(type!=null){
+			this.createProfileAggregate(collection, type);
+		}
+		
+	}
 		
 	
 	/* (non-Javadoc)
@@ -791,24 +809,6 @@ public class ProfileCollection implements IProfileCollection {
 	@Override
 	public IBorderSegment getSegmentAt(Tag tag, int position) throws ProfileException {
 		return this.getSegments(tag).get(position);
-	}
-
-	@Override
-	public void createProfileAggregate(ICellCollection collection, int length) {
-		if(type!=null){
-//			for(ProfileType type : ProfileType.values()){
-				this.createProfileAggregate(collection, type, length);
-//			}
-			}
-		
-	}
-
-//	@Override
-	public void createProfileAggregate(ICellCollection collection) {
-		if(type!=null){
-			this.createProfileAggregate(collection, type);
-		}
-		
 	}
 	
 	@Override

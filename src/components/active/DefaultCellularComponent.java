@@ -14,7 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import analysis.image.ImageConverter;
+import analysis.profiles.Taggable;
 import components.CellularComponent;
 import components.active.generic.FloatPoint;
 import components.generic.IMutablePoint;
@@ -475,8 +477,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	@Override
 	public synchronized double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
 		if(this.statistics.containsKey(stat)){
-			finest("Fetching stat "+stat);
-			double result = statistics.get(stat);
+			
+			double result = statistics.get(stat);	
+		
 			result = stat.convert(result, this.scale, scale);
 			return result;
 		} else {
@@ -487,6 +490,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			return result;
 		}
 	}
+
 	
 	// For subclasses to override
 		protected double calculateStatistic(PlottableStatistic stat){
@@ -508,6 +512,20 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		@Override
 		public PlottableStatistic[] getStatistics() {
 			return this.statistics.keySet().toArray(new PlottableStatistic[0]);
+		}
+		
+		/**
+		 * If any stats are listed as uncalcualted, attempt to calculate them
+		 */
+		public void updateDependentStats(){
+			
+			for(PlottableStatistic stat : this.getStatistics()){
+				
+				if(this.getStatistic(stat)==STAT_NOT_CALCULATED){
+					this.setStatistic(stat, calculateStatistic(stat));
+				}
+			}
+			
 		}
 		
 		public IPoint getCentreOfMass() {

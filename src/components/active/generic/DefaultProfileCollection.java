@@ -477,7 +477,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 		if(segments!=null && length != segments[0].getTotalLength()){
 			
 			Exception e = new Exception("Creating profile aggregate will invalidate segments");
-			error("Segments exist at different length to created aggregate", e);
+			stack("Segments exist at different length to created aggregate", e);
 			segments = null;
 		}
 

@@ -122,6 +122,7 @@ public class ProfileManager implements Loggable {
 				if(tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)){
 					
 					n.updateVerticallyRotatedNucleus();
+					n.updateDependentStats();
 					
 				}
 			}
@@ -280,9 +281,8 @@ public class ProfileManager implements Loggable {
 
 		offsetNucleusProfiles(Tag.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
 
-		for(Nucleus n : collection.getNuclei()){
-			n.updateVerticallyRotatedNucleus();
-		}
+		
+		collection.updateVerticalNuclei();
 
 		fine("Updated nuclei");
 	}
@@ -737,6 +737,7 @@ public class ProfileManager implements Loggable {
 			
 			
 			n.updateVerticallyRotatedNucleus();
+			n.updateDependentStats();
 			
 		} else {
 			log("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());

@@ -26,12 +26,14 @@ import java.lang.reflect.Field;
 import static java.nio.file.StandardCopyOption.*;
 
 import java.nio.file.Files;
+import java.util.List;
 import java.util.UUID;
 
 import logging.Loggable;
 import stats.PlottableStatistic;
 import utility.Constants;
 import utility.Version;
+import components.CellCollection;
 import components.CellularComponent;
 import components.ClusterGroup;
 import components.ICell;
@@ -52,10 +54,13 @@ import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
 import components.active.generic.UnavailableSignalGroupException;
 import components.generic.IPoint;
+import components.generic.IProfileCollection;
 import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
+import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.nuclear.IBorderSegment;
 import components.nuclear.INuclearSignal;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
@@ -222,6 +227,8 @@ public class DatasetConverter implements Loggable {
 			
 			// Copy segmentation patterns over
 			oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
+			
+//			copyCollectionOffsets(oldCollection, newCollection);
 		} catch(ProfileException e){
 			stack("Error updating profiles across datasets", e);
 			throw new DatasetConversionException("Profiling error in root dataset");
@@ -241,6 +248,77 @@ public class DatasetConverter implements Loggable {
 		return newCollection;
 		
 	}
+	
+//	/**
+//	 * Copy profile offsets from the this collection, to the
+//	 * destination and  build the median profiles for all profile types. 
+//	 * Also copy the segments from the regular angle profile onto
+//	 * all other profile types
+//	 * @param destination the collection to update
+//	 * @throws Exception 
+//	 */
+//	public void copyCollectionOffsets(final ICellCollection source, final ICellCollection destination) throws ProfileException {
+//		
+//		if(source instanceof CellCollection){
+//			
+//			CellCollection sourceCollection = (CellCollection) source;
+//			
+//			/*
+//			 * Get the corresponding profile collection from the tempalte
+//			 */
+//			ProfileCollection sourcePC =    (ProfileCollection) sourceCollection.getProfileCollection(type);
+//			
+//			List<IBorderSegment> segments;
+//			
+//				segments = sourcePC.getSegments(Tag.REFERENCE_POINT);
+//			
+//			fine("Got existing list of "+segments.size()+" segments");
+//
+//			// use the same array length as the source collection to avoid segment slippage
+//			int profileLength = sourcePC.length();
+//
+//
+//			/*
+//			 * Get the empty profile collection from the new ICellCollection
+//			 * This has a ProfileCollection containing a map of aggregates for each profile type
+//			 */
+//			IProfileCollection destPC = destination.getProfileCollection();
+//
+//			
+//
+//			/*
+//			 * Create an aggregate from the nuclei in the collection. 
+//			 * This will have the length of the source collection.
+//			 */
+//			destPC.createProfileAggregate(destination, profileLength);
+//			fine("Created new profile aggregates with length "+profileLength);
+//			
+//			/*
+//			 * Copy the offset keys from the source collection
+//			 */
+//			try {
+//				for(Tag key : sourcePC.getBorderTags()){
+//
+//					destPC.addIndex(key, sourcePC.getIndex(key));
+//
+//				}
+//
+//				destPC.addSegments(Tag.REFERENCE_POINT, segments);
+//				
+//			} catch (UnavailableBorderTagException | IllegalArgumentException e) {
+//				warn("Cannot add segments to RP: "+e.getMessage());
+//				fine("Cannot add segments to RP", e);
+//			}
+//			fine("Copied tags to new collection");
+//			
+//			
+//		} else {
+//			source.getProfileManager().copyCollectionOffsets(destination);
+//		}
+//		
+//		
+//		
+//	}
 	
 	private ICell createNewCell(ICell oldCell) throws DatasetConversionException{
 		IMutableCell newCell = new DefaultCell(oldCell.getId());

@@ -459,6 +459,17 @@ public abstract class AbstractCellularComponent
 		
 		return com;
 	}
+	
+	public void updateDependentStats(){
+		
+		for(PlottableStatistic stat : this.getStatistics()){
+			
+			if(this.getStatistic(stat)==STAT_NOT_CALCULATED){
+				this.setStatistic(stat, calculateStatistic(stat));
+			}
+		}
+		
+	}
 
 	
 	

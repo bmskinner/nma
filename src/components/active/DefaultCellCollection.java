@@ -1178,6 +1178,7 @@ implements ICellCollection {
 
 		getNuclei().parallelStream().forEach( n -> {
 			n.updateVerticallyRotatedNucleus();
+			n.updateDependentStats();
 		});
 
 	}

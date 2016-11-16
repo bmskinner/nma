@@ -182,7 +182,7 @@ public class NucleusDetector extends Detector {
 			try {
 				cell = makeCell(roi, image, i, path, makeDummy); // get the profile data back for the nucleus
 			}catch(NucleusCreationException e){
-				stack("Cannot create nucleus from ROI"+i, e);
+				stack("Cannot create nucleus from ROI "+i, e);
 				continue;
 			}
 			result.add(cell);
@@ -294,12 +294,12 @@ public class NucleusDetector extends Detector {
 
 		currentNucleus.setScale(options.getScale());
 
-		if ( ! makeDummyCell) {
+//		if ( ! makeDummyCell) {
 
 			currentNucleus.initialise(options.getAngleWindowProportion());
 
 			currentNucleus.findPointsAroundBorder();
-		}
+//		}
 
 		// if everything checks out, add the measured parameters to the global pool
 		result = new DefaultCell(currentNucleus);

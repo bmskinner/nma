@@ -150,7 +150,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 				} else {
 					log("Filtering error");
 				}
-				
+								
 				/*
 				 * Keep the failed nuclei - they can be manually assessed later
 				 */
@@ -172,6 +172,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 				log("Failed: "+failedNuclei.size()+" nuclei");
 				
 				log(spacerString);
+				
 				
 				result.add(dataset);
 				
