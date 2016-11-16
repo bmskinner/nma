@@ -902,8 +902,15 @@ public class ProfileManager implements Loggable {
 			
 			// Ensure the vertical nuclei have the same segment pattern
 			collection.updateVerticalNuclei();
+			
+			
+			// Now apply the same update to any virtual child datasets
+			// to keep them in sync
+			
 
 		}
+		
+		
 	}
 	
 	/**

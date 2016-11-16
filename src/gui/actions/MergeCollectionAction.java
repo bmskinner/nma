@@ -144,7 +144,8 @@ public class MergeCollectionAction extends ProgressableAction {
 		int flag = MainWindow.ADD_POPULATION;
 		flag |= MainWindow.ASSIGN_SEGMENTS;
 		flag |= MainWindow.SAVE_DATASET;
-		new RunProfilingAction(datasets, flag, mw);
+		RunProfilingAction pr = new RunProfilingAction(datasets, flag, mw);
+		ThreadManager.getInstance().execute(pr);
 
 		this.cancel();
 	}

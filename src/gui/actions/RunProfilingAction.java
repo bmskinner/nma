@@ -32,34 +32,26 @@ public class RunProfilingAction extends ProgressableAction {
 	
 	public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw){
 		super(dataset, "Segmentation analysis", mw, downFlag);
-
-//		log(Level.FINE, "Creating profiling analysis");
-//		runNewAnalysis();
 	}
 	
 	public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw){
 		super(list, "Segmentation analysis", mw, downFlag);
-//		log(Level.FINE, "Creating profiling analysis");
-//		runNewAnalysis();
 	}
 	
 	public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw, CountDownLatch latch){
 		super(dataset, "Segmentation analysis", mw, downFlag);
 		this.setLatch(latch);
-//		log(Level.FINE, "Creating profiling analysis");
-//		runNewAnalysis();
 		
 	}
 	
 	public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw, CountDownLatch latch){
 		super(list, "Segmentation analysis", mw, downFlag);
 		this.setLatch(latch);
-//		log(Level.FINE, "Creating profiling analysis");
-//		runNewAnalysis();
 		
 	}
 	
 	public void run(){
+		fine("Running new profiling analysis");
 		runNewAnalysis();
 	}
 	
@@ -73,7 +65,7 @@ public class RunProfilingAction extends ProgressableAction {
 
 			worker = new DatasetProfiler(this.dataset);
 			worker.addPropertyChangeListener(this);
-			log(Level.FINE, "Running morphology analysis");
+			fine("Running morphology analysis");
 			ThreadManager.getInstance().submit(worker);
 		} catch(Exception e){
 			this.cancel();
@@ -89,9 +81,9 @@ public class RunProfilingAction extends ProgressableAction {
 //		cleanup();
 		// The analysis takes place in a new thread to accomodate refolding.
 		// See specific comment in RunSegmentationAction
-		Thread thr = new Thread(){
+		Runnable task = () -> {
 
-			public void run(){
+//			public void run(){
 
 				if(  (downFlag & MainWindow.ASSIGN_SEGMENTS) == MainWindow.ASSIGN_SEGMENTS){
 					
@@ -123,9 +115,11 @@ public class RunProfilingAction extends ProgressableAction {
 					new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, mw);
 
 				}			
-			}
+//			}
 		};
-		thr.start();
+//		thr.start();
+//		task.run();
+		ThreadManager.getInstance().execute(task);
 
 	}
 

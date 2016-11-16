@@ -25,6 +25,7 @@ import components.ICellCollection;
 import components.active.DefaultAnalysisDataset;
 import components.active.VirtualCellCollection;
 import gui.MainWindow;
+import gui.ThreadManager;
 import gui.dialogs.DatasetArithmeticSetupDialog;
 import gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
 import analysis.IAnalysisDataset;
@@ -110,7 +111,8 @@ public class DatasetArithmeticAction extends ProgressableAction {
 
 		} catch (Exception e1) {
 			error("Error in dataset arithmetic", e1);
-		} finally {
+			
+		} finally{ 
 			cancel();
 		}
 	}
@@ -135,12 +137,17 @@ public class DatasetArithmeticAction extends ProgressableAction {
 				newDataset.setRoot(true);
 			}
 			
-			
+//			Runnable task = () -> {
 
-			int flag = MainWindow.ADD_POPULATION;
-			flag |= MainWindow.SAVE_DATASET;
-			flag |= MainWindow.ASSIGN_SEGMENTS;
-			new RunProfilingAction(newDataset, flag, mw);
+				int flag = MainWindow.ADD_POPULATION;
+				flag |= MainWindow.SAVE_DATASET;
+				flag |= MainWindow.ASSIGN_SEGMENTS;
+				RunProfilingAction pr = new RunProfilingAction(newDataset, flag, mw);
+//				pr.run();
+//			};
+//			task.run();
+			
+			ThreadManager.getInstance().execute(pr);
 								
 		} else {
 			log("No populations returned");

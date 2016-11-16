@@ -335,11 +335,8 @@ public class DefaultNucleus
 
 		if(verticalNucleus!=null){
 			fine("Vertical nucleus not null, not creating");
-//			int opIndex = verticalNucleus.getBorderIndex(Tag.ORIENTATION_POINT);
-//			log(this.getNameAndNumber()+": stored: "+verticalNucleus.getBorderPoint(opIndex).toString());
 			return verticalNucleus;
 		}
-//		log(this.getNameAndNumber()+": Creating vertically rotated nucleus");
 
 		// Make an exact copy of the nucleus
 		verticalNucleus = this.duplicate();
@@ -350,14 +347,8 @@ public class DefaultNucleus
 		
 		fine("Creating new vertical nucleus: "+verticalNucleus.getClass().getSimpleName());
 
-//		log("Aligning vertically:");
-//		log(this.getNameAndNumber()+": new: "+verticalNucleus.getBorderPoint(opIndex).toString());
 		verticalNucleus.alignVertically();	
-//		log(this.getNameAndNumber()+": rot: "+verticalNucleus.getBorderPoint(opIndex).toString());
 
-//		// Ensure all vertical nuclei have overlapping centres of mass
-//		verticalNucleus.moveCentreOfMass(IPoint.makeNew(0,0));
-//		log(this.getNameAndNumber()+": move: "+verticalNucleus.getBorderPoint(opIndex).toString());
 
 		this.setStatistic(NucleusStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
 		this.setStatistic(NucleusStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
