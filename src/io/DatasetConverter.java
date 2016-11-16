@@ -127,7 +127,7 @@ public class DatasetConverter implements Loggable {
 			return newDataset;
 
 		} catch(Exception e){
-			error("Error converting dataset", e);
+			stack("Error converting dataset", e);
 			throw new DatasetConversionException(e.getCause());
 		}
 	}
@@ -546,48 +546,49 @@ public class DatasetConverter implements Loggable {
 	private void convertNuclearSignals(Nucleus template, Nucleus newNucleus){
 		
 		// Copy signals
+		
+		fine("Copying signals for "+template.getNameAndNumber());
+		
 		for(UUID signalGroup : template.getSignalCollection().getSignalGroupIDs()){
 
 			for(INuclearSignal s : template.getSignalCollection().getSignals(signalGroup)){
 
-				// Get the roi for the old signal
-				float[] xpoints = new float[s.getBorderLength()], ypoints = new float[s.getBorderLength()];
-
-				for(int i=0; i<xpoints.length; i++){
-					xpoints[i] = (float) s.getOriginalBorderPoint(i).getX();
-					ypoints[i] = (float) s.getOriginalBorderPoint(i).getY();
-				}
-				
-			
-
-				PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
-				
-				// Move the roi over the original centre of mass if it is not already there
-				
-				if(! roi.contains(s.getOriginalCentreOfMass().getXAsInt(), s.getOriginalCentreOfMass().getYAsInt())){
-					warn("Updating signal location from "+roi.getXBase()+", "+roi.getYBase());
-					// Set the position of the top left corner of the ROI
-					roi.setLocation(s.getPosition()[CellularComponent.X_BASE], s.getPosition()[CellularComponent.Y_BASE]);
-					warn("Updated signal location now   "+roi.getXBase()+", "+roi.getYBase());
-				}
-				
-
-				INuclearSignal newSignal = new DefaultNuclearSignal(roi, 
-						s.getOriginalCentreOfMass(),
-						s.getSourceFile(), 
-						s.getChannel(), 
-						s.getPosition());
-
-				for(PlottableStatistic st : s.getStatistics()){
-					newSignal.setStatistic(st, s.getStatistic(st));;
-
-				}
+				INuclearSignal newSignal = convertSignal(s);
 				
 				newNucleus.getSignalCollection().addSignal(newSignal, signalGroup);
 
 			}
 
 		}
+	}
+	
+	private INuclearSignal convertSignal(INuclearSignal oldSignal){
+		// Get the roi for the old signal
+		float[] xpoints = new float[oldSignal.getBorderLength()], ypoints = new float[oldSignal.getBorderLength()];
+
+		for(int i=0; i<xpoints.length; i++){
+			xpoints[i] = (float) oldSignal.getOriginalBorderPoint(i).getX();
+			ypoints[i] = (float) oldSignal.getOriginalBorderPoint(i).getY();
+		}
+		
+		// Create an roi from the old signal
+
+		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
+		
+		// Move the roi over the original centre of mass in case it is not already there
+		roi.setLocation(oldSignal.getPosition()[CellularComponent.X_BASE], oldSignal.getPosition()[CellularComponent.Y_BASE]);
+						
+
+		INuclearSignal newSignal = new DefaultNuclearSignal(roi, 
+				oldSignal.getOriginalCentreOfMass(),
+				oldSignal.getSourceFile(), 
+				oldSignal.getChannel(), 
+				oldSignal.getPosition());
+
+		for(PlottableStatistic st : oldSignal.getStatistics()){
+			newSignal.setStatistic(st, oldSignal.getStatistic(st));;
+		}
+		return newSignal;
 	}
 	
 	/**
