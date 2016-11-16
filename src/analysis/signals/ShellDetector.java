@@ -47,7 +47,11 @@ import components.CellularComponent;
 import components.generic.IPoint;
 
 /**
+ * The shell detector carries out the task of dividing components into
+ * shells of equal area, and calculating the proportion of signal 
+ * intensity within each shell
  * @author bms41
+ * @since 1.13.1
  *
  */
 public class ShellDetector extends Detector {
@@ -173,8 +177,8 @@ public class ShellDetector extends Detector {
 	
 	
 	/**
-	 * Find the total pixel intensity per shell within the signal
-	 * @param signal
+	 * Find the total pixel intensity per shell contained within the component
+	 * @param signal the component to measure.
 	 * @return
 	 */
 	public int[] findPixelIntensityPerShell(CellularComponent signal){

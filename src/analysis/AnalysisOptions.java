@@ -30,6 +30,13 @@ import stats.NucleusStatistic;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
+/**
+ * The default implementation of the IAnalysisOptions interface. 
+ * This stores details of an analysis setup for an IAnalysisDataset.
+ * @author bms41
+ * @since 1.7.0
+ *
+ */
 public class AnalysisOptions implements IAnalysisOptions {
 
 	private static final long serialVersionUID = 1L;

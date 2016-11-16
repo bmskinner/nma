@@ -38,7 +38,7 @@ public class ShellCounter implements Loggable {
 	private int numberOfShells;
 	private Map<Integer, List<Double>> shellValues = new HashMap<Integer, List<Double>>(0); // store the values
 	private Map<Integer, List<Double>> normValues  = new HashMap<Integer, List<Double>>(0); // store the values
-	private Map<Integer, Integer> counts = new HashMap<Integer, Integer>(0); // store the values
+	private Map<Integer, Integer> counts = new HashMap<Integer, Integer>(0); // store the pixel counts
 		
 	public ShellCounter(int numberOfShells){
 		

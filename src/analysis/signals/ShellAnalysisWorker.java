@@ -97,7 +97,8 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			
 			log("Shell analysis complete");
 		} catch (Exception e) {
-			error( "Error in shell analysis", e);	
+			warn("Error in shell analysis");
+			stack( "Error in shell analysis", e);	
 			return false;
 		}
 		return true;
@@ -112,7 +113,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			shellAnalyser = new ShellDetector(n, shells);
 		} catch (ShellAnalysisException e1) {
 			warn("Unable to make shells for "+n.getNameAndNumber());
-			fine("Error in shell detector", e1);
+			stack("Error in shell detector", e1);
 			return;
 		}
 		
@@ -161,7 +162,8 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 						totalPixels += new Sum(counter.getCounts()).intValue();
 
 					} catch (ShellAnalysisException e) {
-						error( "Error in signal in shell analysis", e);
+						warn("Error in shell analysis");
+						stack( "Error in signal in shell analysis", e);
 					}
 				} // end for signals
 			} // end if signals
@@ -192,7 +194,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 						.getSignalGroup(group)
 						.setShellResult(result);
 				} catch (UnavailableSignalGroupException e) {
-					fine("Signal group is not present", e);
+					stack("Signal group is not present", e);
 					warn("Cannot save shell result");
 				}
 
@@ -250,9 +252,9 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 
 
 			} catch(ArrayConversionException e){
-				error("Conversion error", e);
+				stack("Conversion error", e);
 			} catch (UnavailableSignalGroupException e) {
-				fine("Signal group is not present", e);
+				stack("Signal group is not present", e);
 				warn("Cannot add random shell result");
 			}
 		} else {

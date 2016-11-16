@@ -10,6 +10,12 @@ import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import logging.Loggable;
 
+/**
+ * This stores details of an analysis setup for an IAnalysisDataset.
+ * @author bms41
+ * @since 1.13.3
+ *
+ */
 public interface IAnalysisOptions extends Serializable, Loggable {
 
 	File getFolder();

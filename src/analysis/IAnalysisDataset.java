@@ -19,7 +19,6 @@
 
 package analysis;
 
-import java.awt.Color;
 import java.awt.Paint;
 import java.io.File;
 import java.io.Serializable;
@@ -31,11 +30,17 @@ import java.util.logging.Handler;
 
 import logging.Loggable;
 import utility.Version;
-import components.CellCollection;
-import components.ClusterGroup;
 import components.ICellCollection;
 import components.IClusterGroup;
 
+/**
+ * This describes an analysis dataset, which packages a collection
+ * of cells with clusters, merge sources, and the options used for
+ * the detection of the cells.
+ * @author bms41
+ * @since 1.13.3
+ *
+ */
 public interface IAnalysisDataset extends Serializable, Loggable  {
 
 	/**
@@ -389,10 +394,6 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 * @throws Exception
 	 */
 	void updateSourceImageDirectory(File expectedImageDirectory);
-
-	int hashCode();
-
-	boolean equals(Object obj);
 
 	/**
 	 * Test if all the datasets in the list have a consensus nucleus

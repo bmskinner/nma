@@ -1,7 +1,6 @@
 package analysis;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
@@ -11,8 +10,6 @@ import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
-import logging.DebugFileFormatter;
-import logging.DebugFileHandler;
 import logging.Loggable;
 import utility.Constants;
 
@@ -21,6 +18,7 @@ import utility.Constants;
  * It provides a consistent process() and done() methods, allowing doInBackground() to 
  * be overridden as needed for each worker
  * @author bms41
+ * @since 1.11.4
  *
  */
 public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> implements Loggable {

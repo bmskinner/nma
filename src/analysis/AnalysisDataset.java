@@ -55,6 +55,7 @@ import components.active.DefaultCell;
  * This holds a CellCollection, the analyses that have been run on it
  * and the relationships it holds with other CellCollections. It also provides
  * colour and UI options
+ * @since 1.7.0
  *
  */
 public class AnalysisDataset implements IAnalysisDataset {

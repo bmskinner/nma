@@ -24,6 +24,13 @@ import java.util.List;
 import java.util.concurrent.RecursiveAction;
 import logging.Loggable;
 
+/**
+ * The abstract class for actions that can be split into fork-join tasks. Progress
+ * through a task can be signalled to listeners via ProgressEvents.
+ * @author bms41
+ * @since 1.12.0
+ *
+ */
 @SuppressWarnings("serial")
 public abstract class AbstractProgressAction extends RecursiveAction implements ProgressListener, Loggable {
 

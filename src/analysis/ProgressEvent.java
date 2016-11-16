@@ -25,6 +25,7 @@ import java.util.EventObject;
  * They are used in RecursiveActions and ForkJoinTasks, where a direct signal
  * to an encompassing ProgressableAction is not possible.
  * @author bms41
+ * @since 1.12.0
  *
  */
 @SuppressWarnings("serial")

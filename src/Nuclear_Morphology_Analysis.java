@@ -21,7 +21,6 @@ import ij.IJ;
 import ij.plugin.PlugIn;
 
 import java.io.File;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,6 +41,7 @@ import logging.Loggable;
  * means this launching class must be in the default package.
  * This also launches the program when run as standalone.
  * @author bms41
+ * @since 1.6.1
  *
  */
 public class Nuclear_Morphology_Analysis

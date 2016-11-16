@@ -22,6 +22,7 @@ package analysis;
  * This interface allows AnalysisWorkers to detect progress through
  * a multithreaded task run in an AbstractProgressAction
  * @author ben
+ * @since 1.12.0
  *
  */
 public interface ProgressListener {
