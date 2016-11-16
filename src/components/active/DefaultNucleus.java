@@ -199,7 +199,7 @@ public class DefaultNucleus
 				result = 0;
 			}
 			break;
-		default:
+		default: // result stays zero
 			break;
 	
 		}

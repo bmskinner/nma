@@ -467,7 +467,7 @@ public class NucleusDatasetCreator implements Loggable {
 		IProfile profile;
 		try {
 			profile = collection.getProfileCollection()
-					.getProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN);
+					.getProfile(type, options.getTag(), Quartile.MEDIAN);
 		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
 			fine("Error getting profile from tag", e);
 			throw new ChartDatasetCreationException("Unable to get median profile", e);
@@ -491,7 +491,7 @@ public class NucleusDatasetCreator implements Loggable {
 		List<IBorderSegment> segments;
 		try {
 			segments = collection.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN)
+					.getSegmentedProfile(type, options.getTag(), Quartile.MEDIAN)
 					.getOrderedSegments();
 		
 		
