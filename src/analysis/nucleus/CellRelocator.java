@@ -6,18 +6,14 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
-
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
 import components.ICell;
 import components.ICellCollection;
-import components.active.DefaultAnalysisDataset;
-import components.active.DefaultCell;
-import components.active.DefaultCellCollection;
+import components.active.ChildAnalysisDataset;
+import components.active.VirtualCellCollection;
 import components.active.generic.FloatPoint;
 import components.generic.IPoint;
-import components.generic.XYPoint;
 
 /**
  * This class is used to parse an input file of original positions and 
@@ -43,11 +39,12 @@ public class CellRelocator extends AnalysisWorker {
 		
 		try {
 			findCells();
-			log(Level.FINE, "Completed remapping");
+			fine("Completed remapping");
 			publish(1);
 			result = true;
 		} catch (Exception e) {
-			error("Error selecting cells", e);
+			warn("Error selecting cells");
+			stack("Error selecting cells", e);
 		}
 		
 		return result;
@@ -56,9 +53,9 @@ public class CellRelocator extends AnalysisWorker {
 	private void findCells() throws Exception {
 		Set<UUID> newDatasets = parsePathList();
 		
-		log(Level.FINE, "Parsing complete");
+		fine("Parsing complete");
 		int newSize = newDatasets.size();
-		log(Level.FINE, "Found "+newSize+" datasets in file");
+		fine( "Found "+newSize+" datasets in file");
 		
 		if( newDatasets.size()>0){
 			
@@ -81,7 +78,7 @@ public class CellRelocator extends AnalysisWorker {
 	
 	
 	private Set<UUID> parsePathList() throws Exception {
-		log(Level.FINE, "Input file: "+inputFile.toString());
+		fine("Input file: "+inputFile.toString());
 		
 //		List<Cell> cells = new ArrayList<Cell>();
 		
@@ -119,12 +116,17 @@ public class CellRelocator extends AnalysisWorker {
 	    		 */
 	    		
 	    		activeName =  line.split("\\t")[1];
-	    		ICellCollection c = new DefaultCellCollection(getDataset().getCollection().getFolder(), 
-	    				getDataset().getCollection().getOutputFolderName(), 
+	    		
+	    		ICellCollection c = new VirtualCellCollection(getDataset(), 
 	    				  activeName, 
-	    				  getDataset().getCollection().getNucleusType(),
 	    				  activeID);
-	    		IAnalysisDataset d = new DefaultAnalysisDataset(c);
+	    		
+//	    		ICellCollection c = new DefaultCellCollection(getDataset().getCollection().getFolder(), 
+//	    				getDataset().getCollection().getOutputFolderName(), 
+//	    				  activeName, 
+//	    				  getDataset().getCollection().getNucleusType(),
+//	    				  activeID);
+	    		IAnalysisDataset d = new ChildAnalysisDataset(getDataset(), c);
 	    		d.setAnalysisOptions(getDataset().getAnalysisOptions());
 	    		map.put(activeID, d);
 	    		continue;
@@ -154,7 +156,7 @@ public class CellRelocator extends AnalysisWorker {
 //	        	cells.add(cell);
 	        }
 	    }
-	    log(Level.FINE, "All cells found");
+	    fine("All cells found");
 	    scanner.close();
 	    return map.keySet();
 	  }
@@ -162,7 +164,7 @@ public class CellRelocator extends AnalysisWorker {
 	
 	
 	private ICell getCellFromLine(String line){
-		log(Level.FINE, "Processing line: "+line);
+		fine("Processing line: "+line);
 		
 		if(line.length()<5){
 			// not enough room for a path and number, skip
@@ -175,7 +177,7 @@ public class CellRelocator extends AnalysisWorker {
 		
 		File file = getFile(line);
 		if(! file.isFile() || ! file.exists()){
-			log(Level.FINE, "File does not exist or is malformed: "+file.toString());
+			fine("File does not exist or is malformed: "+file.toString());
 			return null;
 		}
 		
@@ -186,9 +188,9 @@ public class CellRelocator extends AnalysisWorker {
 		try {
 			com = getPosition(line);
 		} catch (Exception e) {
-			log(Level.SEVERE, line);
-			log(Level.SEVERE, file.getAbsolutePath());
-			error("Cannot get position", e);
+			warn(line);
+			warn(file.getAbsolutePath());
+			stack("Cannot get position", e);
 			return null;
 		}
 		
@@ -210,7 +212,8 @@ public class CellRelocator extends AnalysisWorker {
 		for(ICell c : cells){
 
 			if(c.getNucleus().containsOriginalPoint(com)){
-				return new DefaultCell(c);
+//				return new DefaultCell(c);
+				return c;
 			}
 		}
 		return null;

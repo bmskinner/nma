@@ -39,18 +39,14 @@ import org.jfree.chart.JFreeChart;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import charting.charts.MorphologyChartFactory;
-import charting.datasets.AbstractDatasetCreator;
-import charting.options.DefaultChartOptions;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import charting.options.DefaultTableOptions;
 import charting.options.TableOptions;
 import gui.BorderTagEventListener;
 import gui.DatasetEvent;
 import gui.GlobalOptions;
 import gui.InterfaceEvent;
 import gui.components.BorderTagEvent;
-import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.panels.BorderTagDualChartPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 

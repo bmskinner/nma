@@ -32,12 +32,10 @@ import gui.tabs.DetailPanel;
 import javax.swing.JOptionPane;
 
 import analysis.profiles.ProfileException;
-import components.CellCollection;
 import components.ICellCollection;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
-import components.generic.BorderTagObject;
 import components.generic.BorderTag.BorderTagType;
 import components.generic.Tag;
 
@@ -95,7 +93,7 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Segmen
 			
 		} catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 			warn("Unable to update border tag index");
-			fine("Profiling error", e);
+			stack("Profiling error", e);
 			return;
 		}
 

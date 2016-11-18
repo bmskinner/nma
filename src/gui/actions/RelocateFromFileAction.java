@@ -2,8 +2,6 @@ package gui.actions;
 
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Level;
-
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -46,17 +44,17 @@ public class RelocateFromFileAction extends ProgressableAction {
 			log("Locating cells...");
 			ThreadManager.getInstance().submit(worker);
 		} else {
-			log(Level.FINE, "Cancelled");
+			fine( "Cancelled");
 			cancel();
 		}
 	}
 	
 	@Override
 	public void finished(){
-		log(Level.FINE, "Firing refresh of populations");
+		fine("Firing refresh of populations");
 		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 		this.countdownLatch();
-		log(Level.INFO, "Cells added as new child dataset");
+		log("Cells added as new child dataset");
 		super.finished();		
 	}
 	

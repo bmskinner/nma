@@ -37,8 +37,6 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
-
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -66,7 +64,6 @@ import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderSegment;
-import components.nuclear.NucleusBorderSegment;
 
 @SuppressWarnings("serial")
 public class SegmentsEditingPanel extends AbstractEditingPanel implements ActionListener, SegmentEventListener {
@@ -226,10 +223,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 						.getProfileCollection()
 						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
-				fine("Error getting profile", e);
-//				chart = MorphologyChartFactory.makeErrorChart();
-//				rangeChart = MorphologyChartFactory.makeErrorChart();
-//				profile  = null;
+				stack("Error getting profile", e);
 
 			}
 
@@ -288,7 +282,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 							.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 				} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
 					warn("Error getting profile");
-					fine("Error getting profile");
+					stack("Error getting profile", e);
 					setButtonsEnabled(false);
 					return;
 				}
@@ -460,8 +454,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				}
 				
 			} catch (Exception e1) {
-				
-				log(Level.SEVERE, "Error in action", e1);
+				warn("Error in action");
+				stack("Error in action", e1);
 			} finally {
 				SegmentsEditingPanel.this.setAnalysing(false);
 			}

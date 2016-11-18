@@ -49,15 +49,11 @@ public class RunSegmentationAction extends ProgressableAction {
 		super(dataset, "Segmentation analysis", mw, downFlag);
 		this.mode = mode;
 		this.latch = latch;
-//		log(Level.FINE, "Creating segmentation analysis");
-//		runNewAnalysis();
 	}
 	
 	public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag, MainWindow mw){
 		super(list, "Segmentation analysis", mw, downFlag);
 		this.mode = mode;
-//		log(Level.FINE, "Creating segmentation analysis");
-//		runNewAnalysis();
 	}
 	
 	
@@ -67,8 +63,6 @@ public class RunSegmentationAction extends ProgressableAction {
 		this.latch = latch;
 		this.mode = MorphologyAnalysisMode.COPY;
 		this.source = source;
-//		log(Level.FINE, "Creating segmentation copying analysis");
-//		runCopyAnalysis();
 	}
 	
 	/**
@@ -81,8 +75,6 @@ public class RunSegmentationAction extends ProgressableAction {
 		this.downFlag = downFlag;
 		this.mode = MorphologyAnalysisMode.COPY;
 		this.source = source;
-//		log(Level.FINE, "Creating segmentation copying analysis");
-//		runCopyAnalysis();
 	}
 	
 	@Override
@@ -122,11 +114,12 @@ public class RunSegmentationAction extends ProgressableAction {
 
 			worker = new DatasetSegmenter(this.dataset, mode);
 			worker.addPropertyChangeListener(this);
-			log(Level.FINE, "Running morphology analysis");
+			fine( "Running morphology analysis");
 			ThreadManager.getInstance().submit(worker);
 		} catch(Exception e){
 			this.cancel();
-			error("Error in morphology analysis", e);
+			warn("Error in morphology analysis");
+			stack("Error in morphology analysis", e);
 		}
 	}
 	
@@ -165,7 +158,7 @@ public class RunSegmentationAction extends ProgressableAction {
 				 * until the refolding is complete.
 				 */
 				if(  (downFlag & MainWindow.CURVE_REFOLD) == MainWindow.CURVE_REFOLD){
-					log(Level.FINEST, "Preparing to hold thread while refolding datast");
+					finest( "Preparing to hold thread while refolding datast");
 					final CountDownLatch latch = new CountDownLatch(1);
 					Runnable r = new RefoldNucleusAction(dataset, mw, latch);
 					r.run();

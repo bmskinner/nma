@@ -26,6 +26,11 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 	
 	private IAnalysisDataset parent;
 
+	/**
+	 * Construct from a parent dataset (of which this will be a child) and a cell collection
+	 * @param parent
+	 * @param collection
+	 */
 	public ChildAnalysisDataset(IAnalysisDataset parent, ICellCollection collection){
 		super(collection);
 		this.parent = parent;

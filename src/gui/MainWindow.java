@@ -493,23 +493,20 @@ public class MainWindow
 			
 			if(event.method().equals(DatasetEvent.PROFILING_ACTION)){
 				fine("Running new profiling and segmentation");
-				
-//				Runnable task = () -> { 
-					int flag = 0; // set the downstream analyses to run
-					flag |= MainWindow.ADD_POPULATION;
-					flag |= MainWindow.STATS_EXPORT;
-					flag |= MainWindow.NUCLEUS_ANNOTATE;
-					flag |= MainWindow.ASSIGN_SEGMENTS;
-					
-					if(event.firstDataset().getAnalysisOptions().refoldNucleus()){
-						flag |= MainWindow.CURVE_REFOLD;
-					}
-					// begin a recursive morphology analysis
-					RunProfilingAction p = new RunProfilingAction(list, flag, MainWindow.this);
-					p.run();
-				
-//				}; 
-//				threadManager.execute(task);
+
+				int flag = 0; // set the downstream analyses to run
+				flag |= MainWindow.ADD_POPULATION;
+				flag |= MainWindow.STATS_EXPORT;
+				flag |= MainWindow.NUCLEUS_ANNOTATE;
+				flag |= MainWindow.ASSIGN_SEGMENTS;
+
+				if(event.firstDataset().getAnalysisOptions().refoldNucleus()){
+					flag |= MainWindow.CURVE_REFOLD;
+				}
+				// begin a recursive morphology analysis
+				RunProfilingAction p = new RunProfilingAction(list, flag, MainWindow.this);
+				p.run();
+
 			}
 						
 			if(event.method().equals(DatasetEvent.NEW_MORPHOLOGY)){
@@ -521,9 +518,11 @@ public class MainWindow
 			}
 			
 			if(event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)){
-				finer("Updating segmentation across nuclei");
-				Runnable task = new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
-				task.run();
+				finer("Refreshing profiling and segmentation across nuclei");
+				int flag = MainWindow.ASSIGN_SEGMENTS;
+				Runnable p = new RunProfilingAction(list, flag, MainWindow.this);
+//				Runnable task = new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, 0, MainWindow.this);
+				p.run();
 			}
 			
 			if(event.method().equals(DatasetEvent.COPY_MORPHOLOGY)){
