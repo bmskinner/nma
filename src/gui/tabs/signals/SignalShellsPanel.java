@@ -60,6 +60,10 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	private JRadioButton countsBtn      = new JRadioButton("Counts");
 	private ButtonGroup  buttonGroup    = new ButtonGroup();
 	
+	private JRadioButton withinSignalsBtn = new JRadioButton("Within signals");
+	private JRadioButton withinNucleiBtn  = new JRadioButton("Within nuclei");
+	private ButtonGroup  coverageGroup    = new ButtonGroup();
+	
 	private JButton 	newAnalysis	 = new JButton("Run new");
 	
 	private JCheckBox dapiNormalise = new JCheckBox("DAPI normalise", true);
@@ -94,13 +98,33 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		buttonGroup.add(countsBtn);
 		proportionsBtn.addActionListener(this);
 		countsBtn.addActionListener(this);
+		proportionsBtn.setToolTipText("Show the proportion of signal in each shell");
+		countsBtn.setToolTipText("Show the total pixel intensities in each shell");
 		
 		proportionsBtn.setSelected(true);
 		
-		panel.add(countsBtn);
 		panel.add(proportionsBtn);
+		panel.add(countsBtn);
+		
+		
+		// Add the coverage options
+		
+		coverageGroup.add(withinSignalsBtn);
+		coverageGroup.add(withinNucleiBtn);
+		withinSignalsBtn.addActionListener(this);
+		withinNucleiBtn.addActionListener(this);
+		withinSignalsBtn.setToolTipText("Analyse only pixels that are within defined signals");
+		withinNucleiBtn.setToolTipText("Analyse any pixels that are within the nucleus");
+		
+		withinSignalsBtn.setSelected(true);
+		
+		panel.add(withinSignalsBtn);
+		panel.add(withinNucleiBtn);
+		
+		// Add the DAPI normalisation box
 		
 		dapiNormalise.addActionListener(this);
+		dapiNormalise.setToolTipText("Apply a correction for nuclear flattening based on the DNA counterstain");
 		panel.add(dapiNormalise);
 		
 		setEnabled(false);
@@ -112,6 +136,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		newAnalysis.setEnabled(b);
 		proportionsBtn.setEnabled(b);
 		countsBtn.setEnabled(b);
+		withinNucleiBtn.setEnabled(b);
+		withinSignalsBtn.setEnabled(b);
 		dapiNormalise.setEnabled(b);
 	}
 	
@@ -156,6 +182,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 			.setShowSignals(countsBtn.isSelected()) // if counts is selected, show signal counts, not proportions
 			.setTarget(chartPanel)
 			.setNormalised(dapiNormalise.isSelected())
+			.setShowBounds(withinNucleiBtn.isSelected()) // use as a proxy for whole cell bounds or just within defined signal regions
 			.build();
 
 		setChart(options);
