@@ -8,5 +8,11 @@ package gui;
  */
 public interface DatasetUpdateEventListener {
 	
+	/**
+	 * Signal that the implementing class should respond to the
+	 * given dataset update request, and redraw all charts and tables
+	 * appropriately 
+	 * @param event the event to respond to
+	 */
 	void datasetUpdateEventReceived(DatasetUpdateEvent event);
 }

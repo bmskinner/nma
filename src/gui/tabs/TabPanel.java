@@ -69,16 +69,54 @@ public interface TabPanel
 	void addSubPanel(TabPanel panel);
 
 	
+	/**
+	 * Add a listener for signal change events from this panel
+	 * @param l the listener
+	 */
 	void addSignalChangeListener(SignalChangeListener l);
+	
+	
+	/**
+	 * Remove a listener for signal change events from this panel
+	 * @param l the  listener
+	 */
 	void removeSignalChangeListener(SignalChangeListener l);
 	
+	/**
+	 * Add a listener for dataset events from this panel
+	 * @param l the listener
+	 */
 	void addDatasetEventListener(DatasetEventListener l);
+	
+	
+	/**
+	 * Remove a listener for dataset events from this panel
+	 * @param l the  listener
+	 */
 	void removeDatasetEventListener(DatasetEventListener l);
 	
+	/**
+	 * Add a listener for interface events from this panel
+	 * @param l the listener
+	 */
 	void addInterfaceEventListener(InterfaceEventListener l);
+	
+	/**
+	 * Remove a listener for interface events from this panel
+	 * @param l the  listener
+	 */
 	void removeInterfaceEventListener(InterfaceEventListener l);
 	
+	/**
+	 * Add a listener for dataset update events from this panel
+	 * @param l the listener
+	 */
 	void addDatasetUpdateEventListener(DatasetUpdateEventListener l);
+	
+	/**
+	 * Remove a listener for dataset update events from this panel
+	 * @param l the  listener
+	 */
 	void removeDatasetUpdateEventListener(DatasetUpdateEventListener l);
 	
 	/**

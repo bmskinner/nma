@@ -816,7 +816,8 @@ public abstract class DetailPanel
     			
     			return chart;
     		} catch(Exception e){
-    			error("Error creating chart", e);
+    			warn("Error creating chart");
+    			stack("Error creating chart", e);
     			return null;
     		}
 
@@ -836,10 +837,10 @@ public abstract class DetailPanel
     			}
 			} catch (InterruptedException e) {
 				warn("Interruption to charting");
-				fine("Error in chart worker", e);
+				stack("Error in chart worker", e);
 			} catch (ExecutionException e) {
 				warn("Interruption to charting");
-				fine("Error in chart worker", e);
+				stack("Error in chart worker", e);
 			}
         }
 
@@ -881,7 +882,8 @@ public abstract class DetailPanel
     			
     			return model;
     		} catch(Exception e){
-    			error("Error creating model", e);
+    			warn("Error creating table model");
+    			stack("Error creating table model", e);
     			return null;
     		}
 
@@ -904,9 +906,11 @@ public abstract class DetailPanel
     				options.getTarget().setCursor(Cursor.getDefaultCursor());
     			}
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				warn("Interruption to table creation");
+				stack("Error in table worker", e);
 			} catch (ExecutionException e) {
-				e.printStackTrace();
+				warn("Interruption to table creation");
+				stack("Error in table worker", e);
 			}
         } 
     	
@@ -969,12 +973,21 @@ public abstract class DetailPanel
     	updateListeners.remove( l );
     }
     
+    /* (non-Javadoc)
+     * @see gui.tabs.TabPanel#setChartsAndTablesLoading()
+     * This sets all sub panels to invoke the loading state. Any
+     * implementing class must still override this method to provide
+     * the expected behaviour for the panel and call super.setChartsAndTablesLoading()
+     */
     public void setChartsAndTablesLoading(){
     	for(TabPanel p : subPanels){
 			p.setChartsAndTablesLoading();
 		}
     };
     
+    /* (non-Javadoc)
+     * @see gui.DatasetUpdateEventListener#datasetUpdateEventReceived(gui.DatasetUpdateEvent)
+     */
     public void datasetUpdateEventReceived(DatasetUpdateEvent e){
 
     	// Tell this panel to set all charts and tables to loading status
