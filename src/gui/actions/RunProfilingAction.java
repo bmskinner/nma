@@ -112,7 +112,8 @@ public class RunProfilingAction extends ProgressableAction {
 					// otherwise analyse the next item in the list
 					cancel(); // remove progress bar
 
-					new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, mw);
+					Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, mw);
+					p.run();
 
 				}			
 //			}

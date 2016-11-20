@@ -63,7 +63,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 	}
 	
 	@Override
-	public void setChartsAndTablesLoading(){
+	public synchronized void setChartsAndTablesLoading(){
 		super.setChartsAndTablesLoading();
 		tableAnalysisParameters.setModel(AbstractDatasetCreator.createLoadingTable());
 	}

@@ -216,27 +216,32 @@ public class RunSegmentationAction extends ProgressableAction {
 
 					RunSegmentationAction.super.finished();
 					
-					
-					
-					
-					
+
 				} else {
 					
 					// otherwise analyse the next item in the list
 					cancel(); // remove progress bar
+					
+					Runnable task = mode.equals(MorphologyAnalysisMode.COPY)
+								  ? new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag, mw)
+								  : new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag, mw);
+					
+					task.run();
+//					 ThreadManager.getInstance().execute(task);	
+//					 RunSegmentationAction.super.finished();
 
-					SwingUtilities.invokeLater(new Runnable(){
-						public void run(){
-
-							if(mode.equals(MorphologyAnalysisMode.COPY)){
-
-								new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag, mw);
-								
-							} else {
-								
-								new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag, mw);
-							}
-						}});
+//					SwingUtilities.invokeLater(new Runnable(){
+//						public void run(){
+//
+//							if(mode.equals(MorphologyAnalysisMode.COPY)){
+//
+//								new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag, mw);
+//								
+//							} else {
+//								
+//								new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag, mw);
+//							}
+//						}});
 
 				}			
 			}
