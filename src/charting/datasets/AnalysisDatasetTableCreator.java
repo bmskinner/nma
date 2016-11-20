@@ -495,13 +495,12 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	
 	/**
 	 * Get an array of formatted info from a dataset analysis options
-	 * @param dataset
+	 * @param dataset the dataset to format options for
+	 * @param options an options to use instead of the dataset's own options. Can be null.
 	 * @return
 	 */
 	private Object[] formatAnalysisOptionsForTable(IAnalysisDataset dataset, IAnalysisOptions options){
 		options = options == null ? dataset.getAnalysisOptions() : options;
-		
-//		DecimalFormat df = new DecimalFormat("#0.00"); 
 		
 		// only display refold mode if nucleus was refolded
 		String refoldMode = options.refoldNucleus() 

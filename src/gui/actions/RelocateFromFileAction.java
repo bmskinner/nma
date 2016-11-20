@@ -65,11 +65,13 @@ public class RelocateFromFileAction extends ProgressableAction {
 	private File selectFile(){
 
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Remapping file", Constants.LOC_FILE_EXTENSION);
-		
-		File defaultDir = new File("J:\\Protocols\\Scripts and macros\\");
+		File defaultDir = dataset.getAnalysisOptions().getFolder();
+//		File defaultDir = new File("J:\\Protocols\\Scripts and macros\\");
 		JFileChooser fc = new JFileChooser("Select a file...");
 		if(defaultDir.exists()){
 			fc = new JFileChooser(defaultDir);
+		} else {
+			fc = new JFileChooser( (File) null);
 		}
 		fc.setFileFilter(filter);
 

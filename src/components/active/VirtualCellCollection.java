@@ -307,10 +307,8 @@ public class VirtualCellCollection implements ICellCollection {
 	 * Create the profile collections to hold angles from nuclear
 	 * profiles based on the current nucleus profiles. The ProfileAggregate
 	 * for each ProfileType is recalculated. The resulting median profiles
-	 * will have the same length after this update
-	 * @param keepLength when recalculating the profile aggregate, should the previous length be kept
+	 * will have the same length at the parent collection after this update
 	 * @return
-	 * @throws Exception
 	 */
 	public void createProfileCollection() {
 		profileCollection.createProfileAggregate(this, parent.getCollection().getMedianArrayLength());

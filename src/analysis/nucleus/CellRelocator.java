@@ -12,7 +12,6 @@ import components.ICell;
 import components.ICellCollection;
 import components.active.ChildAnalysisDataset;
 import components.active.VirtualCellCollection;
-import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 
 /**
@@ -120,6 +119,7 @@ public class CellRelocator extends AnalysisWorker {
 	    		ICellCollection c = new VirtualCellCollection(getDataset(), 
 	    				  activeName, 
 	    				  activeID);
+	    		c.createProfileCollection();
 	    		
 //	    		ICellCollection c = new DefaultCellCollection(getDataset().getCollection().getFolder(), 
 //	    				getDataset().getCollection().getOutputFolderName(), 
@@ -177,8 +177,19 @@ public class CellRelocator extends AnalysisWorker {
 		
 		File file = getFile(line);
 		if(! file.isFile() || ! file.exists()){
-			fine("File does not exist or is malformed: "+file.toString());
-			return null;
+			
+			// Get the image name and substitute the parent dataset path.
+			File newFolder = getDataset().getCollection().getFolder();
+			if(newFolder.exists()){
+				fine("Updating folder to "+newFolder.getAbsolutePath());
+				file = new File(newFolder+File.separator+file.getName());
+				fine("Updating path to "+file);
+			} else {
+				fine("File does not exist or is malformed: "+file.toString());
+				return null;
+			}
+			
+//			
 		}
 		
 		
@@ -233,7 +244,7 @@ public class CellRelocator extends AnalysisWorker {
 		
 		double x = Double.parseDouble(posArray[0]);
 		double y = Double.parseDouble(posArray[1]);
-		return new FloatPoint(x, y);
+		return IPoint.makeNew(x, y);
 	}
 
 }

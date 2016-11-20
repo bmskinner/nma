@@ -644,6 +644,20 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		}
 		
 		// Add final segment
+		//TODO Error here when the final segment is less than MINIMUM_SEGMENT_LENGTH
+		// We need to correct start and end positions appropriately.
+		// Since the start position may already have been set, we need to adjust the end,
+		// i.e the start position of the first segment.
+		if(segments[0].wraps(newStarts[segments.length-1], newStarts[0])){
+			// wrapping final segment
+		} else {
+			// non-wrapping final segment
+		}
+		
+		if( newStarts[segments.length-1] < newStarts[0]){
+			// index wraps
+			
+		}
 		IBorderSegment lastSeg = new DefaultBorderSegment(newStarts[segments.length-1], newStarts[0], length, segments[segments.length-1].getID());
 		newSegs.add(lastSeg);
 		

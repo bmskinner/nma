@@ -85,6 +85,10 @@ public class ArrayConverter {
 	 */
 	public Double[] toDoubleObjectArray() throws ArrayConversionException {
 		
+		if(data.isEmpty()){
+			throw new ArrayConversionException("Cannot convert empty list");
+		}
+		
 		Object first = data.get(0);
 		
 		if(first instanceof Number){
@@ -108,6 +112,11 @@ public class ArrayConverter {
 	 * @throws ArrayConversionException if the data are not Numbers
 	 */
 	public double[] toDoubleArray() throws ArrayConversionException {
+		
+		if(data.isEmpty()){
+			throw new ArrayConversionException("Cannot convert empty list");
+		}
+		
 		Object first = data.get(0);
 		
 		if(first instanceof Number){
@@ -147,6 +156,10 @@ public class ArrayConverter {
 	 */
 	public Integer[] toIntegerObjectArray() throws ArrayConversionException {
 		
+		if(data.isEmpty()){
+			throw new ArrayConversionException("Cannot convert empty list");
+		}
+		
 		Object first = data.get(0);
 		
 		if(first instanceof Number){
@@ -170,6 +183,11 @@ public class ArrayConverter {
 	 * @throws ArrayConversionException if the data are not Numbers
 	 */
 	public int[] toIntArray() throws ArrayConversionException {
+		
+		if(data.isEmpty()){
+			throw new ArrayConversionException("Cannot convert empty list");
+		}
+		
 		Object first = data.get(0);
 		
 		if(first instanceof Number){
@@ -192,6 +210,10 @@ public class ArrayConverter {
 	 * @throws ArrayConversionException if the data are not Numbers
 	 */
 	public Float[] toFloatObjectArray() throws ArrayConversionException {
+		
+		if(data.isEmpty()){
+			throw new ArrayConversionException("Cannot convert empty list");
+		}
 		
 		Object first = data.get(0);
 		
@@ -216,6 +238,10 @@ public class ArrayConverter {
 	 * @throws ArrayConversionException if the data are not Numbers
 	 */
 	public float[] toFloatArray() throws ArrayConversionException {
+		if(data.isEmpty()){
+			throw new ArrayConversionException("Cannot convert empty list");
+		}
+		
 		Object first = data.get(0);
 		
 		if(first instanceof Number){

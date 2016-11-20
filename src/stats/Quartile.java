@@ -48,6 +48,7 @@ public class Quartile extends DescriptiveStatistic {
 		try {
 			temp2 = new ArrayConverter(values).toIntegerObjectArray();
 		} catch (ArrayConversionException e) {
+			stack("Error converting values", e);
 			temp2 = new Integer[0]; 
 		}
 
@@ -64,6 +65,7 @@ public class Quartile extends DescriptiveStatistic {
 		try {
 			temp2 = new ArrayConverter(values).toFloatObjectArray();
 		} catch (ArrayConversionException e) {
+			stack("Error converting values", e);
 			temp2 = new Float[0]; 
 		}
 
@@ -81,6 +83,7 @@ public class Quartile extends DescriptiveStatistic {
 			try {
 				temp2 = new ArrayConverter(values).toDoubleObjectArray();
 			} catch (ArrayConversionException e) {
+				stack("Error converting values", e);
 				temp2 = new Double[0]; 
 			}
 			

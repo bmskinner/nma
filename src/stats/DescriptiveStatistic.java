@@ -19,8 +19,10 @@
 
 package stats;
 
+import logging.Loggable;
+
 @SuppressWarnings("serial")
-public abstract class DescriptiveStatistic extends Number {
+public abstract class DescriptiveStatistic extends Number implements Loggable {
 	
 	public static final String NULL_OR_EMPTY_ARRAY_ERROR = "The data array either is null or does not contain any data.";
 	public static final String NULL_OR_EMPTY_LIST_ERROR  = "The data list either is null or does not contain any data.";
