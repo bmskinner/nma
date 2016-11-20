@@ -22,6 +22,7 @@ package components.active.generic;
 /**
  * Thrown when a profile type is not available within a profile collection.
  * @author bms41
+ * @since 1.13.3
  *
  */
 public class UnavailableProfileTypeException extends UnavailableComponentException {

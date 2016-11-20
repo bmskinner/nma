@@ -25,10 +25,9 @@ import java.util.List;
 import java.util.logging.Level;
 
 import analysis.profiles.ProfileException;
-import components.AbstractCellularComponent;
+import components.active.DefaultCellularComponent;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
-import components.generic.Profile;
 import components.nuclear.IBorderSegment;
 
 /**
@@ -420,7 +419,7 @@ public class FloatProfile implements IProfile {
 	public IProfile offset(int j) throws ProfileException {
 		float[] newArray = new float[this.size()];
 		for(int i=0;i<this.size();i++){
-			newArray[i] = this.array[ AbstractCellularComponent.wrapIndex( i+j , this.size() ) ];
+			newArray[i] = this.array[ DefaultCellularComponent.wrapIndex( i+j , this.size() ) ];
 		}
 		return new FloatProfile(newArray);
 	}
@@ -435,8 +434,8 @@ public class FloatProfile implements IProfile {
 
 		for (int i=0; i<array.length; i++) { // for each position
 
-			float[] prevValues = getValues(i, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
-			float[] nextValues = getValues(i, windowSize, Profile.ARRAY_AFTER);
+			float[] prevValues = getValues(i, windowSize, IProfile.ARRAY_BEFORE); // slots for previous angles
+			float[] nextValues = getValues(i, windowSize, IProfile.ARRAY_AFTER);
 
 			float average = array[i];
 			for(int k=0;k<prevValues.length;k++){ 
@@ -461,7 +460,7 @@ public class FloatProfile implements IProfile {
 		for(int j=0;j<values.length;j++){
 
 			// If type was before, multiply by -1; if after, multiply by 1
-			int index = AbstractCellularComponent.wrapIndex( position + ((j+1)*type)  , this.size() );
+			int index = DefaultCellularComponent.wrapIndex( position + ((j+1)*type)  , this.size() );
 			values[j] = array[index];
 		}
 		return values;
@@ -536,8 +535,8 @@ public class FloatProfile implements IProfile {
 		//	  System.out.println("Set indexes "+normIndex+": "+indexLower+"-"+indexHigher);
 
 		// wrap the arrays
-		indexLower  = AbstractCellularComponent.wrapIndex(indexLower , array.length);
-		indexHigher = AbstractCellularComponent.wrapIndex(indexHigher, array.length);
+		indexLower  = DefaultCellularComponent.wrapIndex(indexLower , array.length);
+		indexHigher = DefaultCellularComponent.wrapIndex(indexHigher, array.length);
 		//	  System.out.println("Wrapped indexes "+normIndex+": "+indexLower+"-"+indexHigher);
 
 		// get the values at these indexes
@@ -557,7 +556,7 @@ public class FloatProfile implements IProfile {
 
 		// add the offset to the lower index
 		float positionToFind = indexLower + offset;
-		positionToFind = (float) AbstractCellularComponent.wrapIndex(positionToFind , array.length);
+		positionToFind = (float) DefaultCellularComponent.wrapIndex(positionToFind , array.length);
 		//	  System.out.println("Position to find "+normIndex+": "+positionToFind);
 
 		// calculate the value to be added to the lower index value
@@ -674,8 +673,8 @@ public class FloatProfile implements IProfile {
 			// go through each lookup position and get the appropriate angles
 			for(int j=0;j<prevValues.length;j++){
 
-				int prev_i = AbstractCellularComponent.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
-				int next_i = AbstractCellularComponent.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
+				int prev_i = DefaultCellularComponent.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
+				int next_i = DefaultCellularComponent.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
 
 				// fill the lookup array
 				prevValues[j] = array[prev_i];
@@ -774,8 +773,8 @@ public class FloatProfile implements IProfile {
 
 		for (int i=0; i<array.length; i++) { // for each position
 
-			float[] prevValues = getValues(i, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
-			float[] nextValues = getValues(i, windowSize, Profile.ARRAY_AFTER);
+			float[] prevValues = getValues(i, windowSize, IProfile.ARRAY_BEFORE); // slots for previous angles
+			float[] nextValues = getValues(i, windowSize, IProfile.ARRAY_AFTER);
 
 			// with the lookup positions, see if maximum at i
 			// return a 1 if all lower than last, 0 if not
@@ -852,8 +851,8 @@ public class FloatProfile implements IProfile {
 
 		float[] result = new float[windowSize*2 + 1];
 
-		float[] prevValues = getValues(index, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
-		float[] nextValues = getValues(index, windowSize, Profile.ARRAY_AFTER);
+		float[] prevValues = getValues(index, windowSize, IProfile.ARRAY_BEFORE); // slots for previous angles
+		float[] nextValues = getValues(index, windowSize, IProfile.ARRAY_AFTER);
 
 		// need to reverse the previous array
 		for(int k=prevValues.length, i=0;k>0;k--, i++){ 
@@ -927,8 +926,8 @@ public class FloatProfile implements IProfile {
 
 		for (int i=0; i<array.length; i++) { // for each position in sperm
 
-			float[] prevValues = getValues(i, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
-			float[] nextValues = getValues(i, windowSize, Profile.ARRAY_AFTER);
+			float[] prevValues = getValues(i, windowSize, IProfile.ARRAY_BEFORE); // slots for previous angles
+			float[] nextValues = getValues(i, windowSize, IProfile.ARRAY_AFTER);
 
 			float delta = 0;
 			for(int k=0;k<prevValues.length;k++){
@@ -957,8 +956,8 @@ public class FloatProfile implements IProfile {
 
 		for (int i=0; i<array.length; i++) { // for each position in sperm
 
-			int prev_i = AbstractCellularComponent.wrapIndex( i-1  , this.size() ); // the index before
-			int next_i = AbstractCellularComponent.wrapIndex( i+1  , this.size() ); // the index after
+			int prev_i = DefaultCellularComponent.wrapIndex( i-1  , this.size() ); // the index before
+			int next_i = DefaultCellularComponent.wrapIndex( i+1  , this.size() ); // the index after
 
 
 			float delta = 	array[i]	-  array[prev_i] +

@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import components.AbstractCellularComponent;
+import components.active.DefaultCellularComponent;
 import components.nuclear.IBorderSegment;
 
 /**
@@ -383,7 +383,7 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 */
 	@Override
 	public boolean shortenStart(int value){
-		int newValue = AbstractCellularComponent.wrapIndex(this.getStartIndex()+value, this.getTotalLength());
+		int newValue = DefaultCellularComponent.wrapIndex(this.getStartIndex()+value, this.getTotalLength());
 		return this.update(newValue, this.getEndIndex());
 	}
 	
@@ -392,7 +392,7 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 */
 	@Override
 	public boolean shortenEnd(int value){
-		int newValue = AbstractCellularComponent.wrapIndex(this.getEndIndex()-value, this.getTotalLength());
+		int newValue = DefaultCellularComponent.wrapIndex(this.getEndIndex()-value, this.getTotalLength());
 		return this.update(this.getStartIndex(), newValue);
 
 	}
@@ -402,7 +402,7 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 */
 	@Override
 	public boolean lengthenStart(int value){
-		int newValue = AbstractCellularComponent.wrapIndex( this.getStartIndex()-value, this.getTotalLength());
+		int newValue = DefaultCellularComponent.wrapIndex( this.getStartIndex()-value, this.getTotalLength());
 		return this.update(newValue, this.getEndIndex());
 	}
 	
@@ -411,7 +411,7 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 */
 	@Override
 	public boolean lengthenEnd(int value){
-		int newValue = AbstractCellularComponent.wrapIndex( this.getEndIndex()+value, this.getTotalLength());
+		int newValue = DefaultCellularComponent.wrapIndex( this.getEndIndex()+value, this.getTotalLength());
 		return this.update(this.getStartIndex(), newValue);
 	}
 		

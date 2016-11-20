@@ -36,6 +36,7 @@ import components.nuclear.IBorderSegment;
  * Performs angle and distance profiling on Profileable
  * objects
  * @author bms41
+ * @since 1.13.2
  *
  */
 public class ProfileCreator implements Loggable {
@@ -46,6 +47,11 @@ public class ProfileCreator implements Loggable {
 		this.target = target;
 	}
 	
+	/**
+	 * Create a profile for the desired profile type on the template object
+	 * @param type the profile type
+	 * @return a segmented profile of the requested type.
+	 */
 	public ISegmentedProfile createProfile(ProfileType type){
 		
 		
@@ -89,7 +95,7 @@ public class ProfileCreator implements Loggable {
 				}
 			}
 		} catch (UnavailableProfileTypeException e) {
-			fine("Profile type angle not found", e);
+			stack("Profile type angle not found", e);
 		}
 		
 		return segments;
@@ -155,7 +161,8 @@ public class ProfileCreator implements Loggable {
 			try {
 				segments = IBorderSegment.scaleSegments(segments, target.getBorderLength());
 			} catch (ProfileException e) {
-				error("Error scaling segments when profiling", e);
+				warn("Error scaling segments");
+				stack("Error scaling segments when profiling", e);
 			}
 
 

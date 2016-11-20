@@ -21,9 +21,15 @@ package gui.components;
 
 import java.util.EventObject;
 
-import components.generic.BorderTagObject;
 import components.generic.Tag;
 
+/**
+ * Border tag events indicate a change to the position of a border
+ * tag in a profile. They are sent from detail panels.
+ * @author ben
+ * @since 1.13.2
+ *
+ */
 @SuppressWarnings("serial")
 public class BorderTagEvent extends EventObject {
 

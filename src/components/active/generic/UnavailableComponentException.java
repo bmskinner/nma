@@ -24,6 +24,7 @@ package components.active.generic;
  * nuclear object is not present. This is subclassed for the various
  * components.
  * @author bms41
+ * @since 1.13.3
  *
  */
 public class UnavailableComponentException extends Exception {

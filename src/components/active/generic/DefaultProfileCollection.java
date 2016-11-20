@@ -133,7 +133,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 			p = agg.getQuartile(quartile);
 		} catch (NullPointerException e) {
 			warn("Cannot get profile for "+quartile);
-			fine("Error fetching quartile", e);
+			stack("Error fetching quartile", e);
 			throw new ProfileException("Null pointer exception getting quartile from aggregate");
 		}
 		
@@ -180,7 +180,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 		try {
 			result = new SegmentedFloatProfile(p, getSegments(tag));
 		} catch(IndexOutOfBoundsException e){
-			fine("Cannot create segmented profile due to segment/profile mismatch", e);
+			stack("Cannot create segmented profile due to segment/profile mismatch", e);
 			throw new ProfileException("Cannot create segmented profile; segment lengths do not match array", e);
 		}
 		return result;
@@ -237,7 +237,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 		try {
 			result = IBorderSegment.nudge(segments, offset);
 		} catch (ProfileException e) {
-			fine("Error offsetting segments", e);
+			stack("Error offsetting segments", e);
 			return new ArrayList<IBorderSegment>(0);
 		}
 
@@ -426,7 +426,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 		try {
 			result = IBorderSegment.nudge(n, offset);
 		} catch (ProfileException e) {
-			fine("Error offsetting segments", e);
+			stack("Error offsetting segments", e);
 			return;
 		}
 		
@@ -503,7 +503,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 				}
 
 			} catch(ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e){
-				error("Error making aggregate", e);
+				stack("Error making aggregate", e);
 			}
 
 		}
@@ -607,7 +607,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 		try {
 			iqrProfile = getIQRProfile(type, tag);
 		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-			fine("Error getting variable regions", e);
+			stack("Error getting variable regions", e);
 			return result;
 		}
 

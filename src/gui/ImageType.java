@@ -20,7 +20,7 @@ package gui;
 
 /**
  * This is to allow different enums to be used in the 
- * setup of an ImageProber
+ * setup of an ImageProber. 
  * @author bms41
  *
  */

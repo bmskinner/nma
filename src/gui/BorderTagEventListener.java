@@ -21,8 +21,17 @@ package gui;
 
 import gui.components.BorderTagEvent;
 
+/**
+ * Listen for BorderTag events
+ * @author ben
+ *
+ */
 public interface BorderTagEventListener {
 
+	/**
+	 * Send an event to be handled.
+	 * @param event
+	 */
 	public void borderTagEventReceived(BorderTagEvent event);
 		
 }

@@ -40,8 +40,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
@@ -67,18 +65,20 @@ import javax.swing.text.StyledDocument;
 import org.jfree.chart.JFreeChart;
 
 import utility.Constants;
-import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import gui.InterfaceEvent.InterfaceMethod;
-import gui.actions.NewAnalysisAction;
 import gui.tabs.DetailPanel;
 
+/**
+ * The log panel is where logging messages are displayed. It also holds
+ * progress bars from actions,
+ * @author ben
+ *
+ */
+@SuppressWarnings("serial")
 public class LogPanel extends DetailPanel implements ActionListener {
-
-	private static final long serialVersionUID = 1L;
 	
 	private JTextPane  textArea = new JTextPane();
 	

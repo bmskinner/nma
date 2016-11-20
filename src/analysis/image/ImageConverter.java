@@ -204,20 +204,22 @@ public class ImageConverter extends AbstractImageFilterer {
 	 * @return the image
 	 */
 	private ImageConverter makeGreyScaleIamge(){
-		int w = st.getWidth();
-		int h = st.getHeight();
+		return makeGreyRGBImage(Constants.COUNTERSTAIN);
 		
-		byte[] blank = new byte[ w * h ];
-
-		ImagePlus[] images = new ImagePlus[3];
-		images[Constants.RGB_RED]   = new ImagePlus("red",   new ByteProcessor(w, h, blank));  
-		images[Constants.RGB_GREEN] = new ImagePlus("green", new ByteProcessor(w, h, blank));
-		images[Constants.RGB_BLUE]  = new ImagePlus("blue", st.getProcessor(Constants.COUNTERSTAIN));      
-
-		ImagePlus result = RGBStackMerge.mergeChannels(images, false); 
-
-		result = result.flatten();
-		return new ImageConverter(result.getProcessor());
+//		int w = st.getWidth();
+//		int h = st.getHeight();
+//		
+//		byte[] blank = new byte[ w * h ];
+//
+//		ImagePlus[] images = new ImagePlus[3];
+//		images[Constants.RGB_RED]   = new ImagePlus("red",   st.getProcessor(Constants.COUNTERSTAIN));  
+//		images[Constants.RGB_GREEN] = new ImagePlus("green", st.getProcessor(Constants.COUNTERSTAIN));
+//		images[Constants.RGB_BLUE]  = new ImagePlus("blue",  st.getProcessor(Constants.COUNTERSTAIN));      
+//
+//		ImagePlus result = RGBStackMerge.mergeChannels(images, false); 
+//
+//		result = result.flatten();
+//		return new ImageConverter(result.getProcessor());
 	}
 
 	

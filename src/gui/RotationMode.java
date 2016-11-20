@@ -18,6 +18,13 @@
  *******************************************************************************/
 package gui;
 
+/**
+ * This details the rotations that can be applied to nuclei
+ * for display purposes.
+ * @author ben
+ * @since 1.11.5
+ *
+ */
 public enum RotationMode {
 	
 	ACTUAL ("Actual"), VERTICAL("Vertical");

@@ -23,6 +23,7 @@ package components.active.generic;
  * Thrown when a profile collection or segmented profile has no assigned
  * segments
  * @author bms41
+ * @since 1.13.3
  *
  */
 public class UnsegmentedProfileException extends Exception {
