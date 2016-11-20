@@ -28,62 +28,98 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
 
 public class ShellCounter implements Loggable {
 	
 	private int numberOfShells;
-	private Map<Integer, List<Double>> shellValues = new HashMap<Integer, List<Double>>(0); // store the values
-	private Map<Integer, List<Double>> normValues  = new HashMap<Integer, List<Double>>(0); // store the values
-	private Map<Integer, Integer> counts = new HashMap<Integer, Integer>(0); // store the pixel counts
-		
+	private Map<Integer, List<Double>> signalProportionValues = new HashMap<Integer, List<Double>>(0); // raw values
+	private Map<Integer, List<Double>> signalNormalisedValues = new HashMap<Integer, List<Double>>(0); // values after DAPI normalisation
+	private Map<Integer, Integer>      signalPixelCounts      = new HashMap<Integer, Integer>(0); // store the pixel counts for signals
+	
+	private Map<Integer, List<Double>> nucleusProportionValues = new HashMap<Integer, List<Double>>(0); // raw the values
+	private Map<Integer, List<Double>> nucleusNormalisedValues = new HashMap<Integer, List<Double>>(0); // values after DAPI normalisation
+	private Map<Integer, Integer>      nucleusPixelCounts      = new HashMap<Integer, Integer>(0); // store the pixel counts for nuclei
+	
 	public ShellCounter(int numberOfShells){
 		
 		this.numberOfShells = numberOfShells;
 		for(int i=0;i<numberOfShells;i++){
-			shellValues.put(i, new ArrayList<Double>(0));
-			normValues.put(i, new ArrayList<Double>(0));
-			counts.put(i, 0);
+			signalProportionValues.put(i, new ArrayList<Double>(0));
+			signalNormalisedValues.put(i, new ArrayList<Double>(0));
+			signalPixelCounts.put(i, 0);
+			
+			nucleusProportionValues.put(i, new ArrayList<Double>(0));
+			nucleusNormalisedValues.put(i, new ArrayList<Double>(0));
+			nucleusPixelCounts.put(i, 0);
+			
 		}
 		
 	}
 	
+
 	/**
-	 * Add an array of values to the current shell
-	 * @param values
-	 * @throws IllegalArgumentException
+	 * Add an array of signal specific values
+	 * @param rawProportions the proportion of signal per shell (0-1)
+	 * @param normalisedProportions the DAPI normalised proportion of signal per shell
+	 * @param counts the total pixel intensity counts per shell
 	 */
-	public void addValues(double[] proportions, int[] counts) {
-		if(proportions.length!=numberOfShells || counts.length!=numberOfShells){
+	public void addSignalValues(double[] rawProportions, double[] normalisedProportions, int[] counts) {
+		if(rawProportions.length!=numberOfShells || counts.length!=numberOfShells){
 			throw new IllegalArgumentException("Input array is wrong size");
 		}
 		
 		// check the first entry in the list is a value
-		Double firstShell = new Double(proportions[0]);
+		Double firstShell = new Double(rawProportions[0]);
         if(firstShell.isNaN()){
         	throw new IllegalArgumentException("Argument is not a number");
         }
         
         
 		for(int i=0;i<numberOfShells;i++){
-			List<Double> shell = shellValues.get(i);
-			shell.add(proportions[i]);
+			List<Double> raw = signalProportionValues.get(i);
+			raw.add(rawProportions[i]);
 			
-			int shellTotal = this.counts.get(i);
-			this.counts.put(i, shellTotal+counts[i]);
+			List<Double> norm = signalNormalisedValues.get(i);
+			norm.add(normalisedProportions[i]);
+			
+			int shellTotal = this.signalPixelCounts.get(i);
+			this.signalPixelCounts.put(i, shellTotal+counts[i]);
 		}
 	}
 	
-	public void addNormalisedValues(double[] proportions){
+	/**
+	 * Add an array of signal specific values
+	 * @param rawProportions the proportion of signal per shell (0-1)
+	 * @param normalisedProportions the DAPI normalised proportion of signal per shell
+	 * @param counts the total pixel intensity counts per shell
+	 */
+	public void addNucleusValues(double[] rawProportions, double[] normalisedProportions, int[] counts) {
+		if(rawProportions.length!=numberOfShells || counts.length!=numberOfShells){
+			throw new IllegalArgumentException("Input array is wrong size");
+		}
+		
+		// check the first entry in the list is a value
+		Double firstShell = new Double(rawProportions[0]);
+        if(firstShell.isNaN()){
+        	throw new IllegalArgumentException("Argument is not a number");
+        }
+        
+        
 		for(int i=0;i<numberOfShells;i++){
-			List<Double> shell = normValues.get(i);
-			shell.add(proportions[i]);
+			
+			List<Double> raw = nucleusProportionValues.get(i);
+			raw.add(rawProportions[i]);
+			
+			List<Double> norm = nucleusNormalisedValues.get(i);
+			norm.add(normalisedProportions[i]);
+			
+			int shellTotal = this.signalPixelCounts.get(i);
+			this.nucleusPixelCounts.put(i, shellTotal+counts[i]);
 		}
 	}
-	
+		
 	public List<Double> getMeans() {
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<numberOfShells;i++){
@@ -123,7 +159,7 @@ public class ShellCounter implements Loggable {
 	public List<Integer> getCounts() {
 		List<Integer> result = new ArrayList<Integer>(0);
 		for(int i=0;i<numberOfShells;i++){
-			result.add(counts.get(i));
+			result.add(signalPixelCounts.get(i));
 		}
 		return result;
 	}
@@ -165,7 +201,7 @@ public class ShellCounter implements Loggable {
 	 * @return
 	 */
 	private double[] getShell(int shell){
-		List<Double> values = shellValues.get(shell);
+		List<Double> values = signalProportionValues.get(shell);
 		double[] array = new double[values.size()];
 		
 		try{
@@ -190,7 +226,7 @@ public class ShellCounter implements Loggable {
 	 * @return
 	 */
 	private double[] getNormShell(int shell){
-		List<Double> values = normValues.get(shell);
+		List<Double> values = signalNormalisedValues.get(shell);
 		double[] array = new double[values.size()];
 		
 		try{
@@ -216,7 +252,7 @@ public class ShellCounter implements Loggable {
 	 */
 	private long[] getObserved() throws Exception{
 		long[] observed = new long[numberOfShells];
-		int count = shellValues.get(0).size();
+		int count = signalProportionValues.get(0).size();
 		List<Double> means = getMeans();
 		for(int i=0;i<numberOfShells; i++){
 			double mean = means.get(i);
@@ -232,7 +268,7 @@ public class ShellCounter implements Loggable {
  	 */
  	private double[] getExpected(){
 		double[] expected = new double[numberOfShells];
-		double count = shellValues.get(0).size();
+		double count = signalProportionValues.get(0).size();
 		for(int i=0;i<numberOfShells; i++){
 			expected[i] = ((double)1/(double)numberOfShells) * count;
 		}
@@ -244,7 +280,7 @@ public class ShellCounter implements Loggable {
  	 * @return
  	 */
  	public int size(){
- 		return shellValues.get(0).size();
+ 		return signalProportionValues.get(0).size();
  	}
  	
  	
@@ -255,15 +291,15 @@ public class ShellCounter implements Loggable {
 		if(this.size()==0){ // don't make empty log files
 			return;
 		}
-		for(int i = 0; i< shellValues.get(0).size();i++){ // go through each signal
+		for(int i = 0; i< signalProportionValues.get(0).size();i++){ // go through each signal
 			String line = "";
 	    	for(int j = 0; j<numberOfShells; j++){ // each shell for signal
-	    		List<Double> list = shellValues.get(j);
+	    		List<Double> list = signalProportionValues.get(j);
 	    		line += list.get(i)+"\t";
 	    	}
-	    	log(Level.INFO, line);
+	    	log(line);
 	    }
-		log(Level.INFO, "");
+		log("");
 	}
 	
 }

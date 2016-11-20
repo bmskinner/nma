@@ -117,48 +117,45 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			return;
 		}
 		
+		try {
+		
+		ImageStack nucleusStack = new ImageImporter(n.getSourceFile()).importImage();
+
 		for(UUID signalGroup : n.getSignalCollection().getSignalGroupIDs()){
-			
+
 			if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
 				continue;
 			}
-			
+
 			if(collection.getSignalManager().hasSignals(signalGroup)){
 				List<INuclearSignal> signals = n.getSignalCollection().getSignals(signalGroup); 
-
-				int[]    intensityPerShell = shellAnalyser.findPixelCountPerShell();
 
 				ShellCounter counter = counters.get(signalGroup);
 
 				for(INuclearSignal s : signals){
+
+
 					try {
 
-						
-						double[] signalPerShell = shellAnalyser.findProportionPerShell(s);
-						int[]    countsPerShell = shellAnalyser.findPixelCountPerShell(s);
+						double[] signalInSignals = shellAnalyser.findProportionPerShell(s);
+						int[]    countsInSignals = shellAnalyser.findPixelCountPerShell(s);
+
+						ImageStack signalStack = new ImageImporter(s.getSourceFile()).importImage();
+
+						int[]    countsInNucleus = shellAnalyser.findPixelIntensityPerShell(signalStack, s.getChannel());
+						double[] signalInNucleus = shellAnalyser.findProportionPerShell(signalStack, s.getChannel());
 
 
-						ImageStack st;
-						try {
 
-							st = new ImageImporter(s.getSourceFile()).importImage();
+						int[] dapiIntensities = shellAnalyser.findPixelIntensityPerShell(nucleusStack, n.getChannel());
 
-							int[] dapiIntensities = shellAnalyser.findPixelIntensityPerShell(st, Constants.rgbToStack(Constants.COUNTERSTAIN));
+						double[] normalisedSignals = shellAnalyser.normalise(signalInSignals, dapiIntensities);
+						double[] normalisedNucleus = shellAnalyser.normalise(signalInNucleus, dapiIntensities);
 
-							double[] normalised = shellAnalyser.normalise(signalPerShell, dapiIntensities);
-							
-							counter.addValues(signalPerShell, countsPerShell);
-							counter.addNormalisedValues(normalised);
+						counter.addSignalValues(signalInSignals, normalisedSignals, countsInSignals);
+						counter.addNucleusValues(signalInNucleus, normalisedNucleus, countsInNucleus);
 
-						} catch (ImageImportException e) {
 
-							warn("Cannot import image source file "+n.getSourceFile().getAbsolutePath());
-							fine("Error importing file", e);
-						}
-						
-						
-						
-						
 						totalPixels += new Sum(counter.getCounts()).intValue();
 
 					} catch (ShellAnalysisException e) {
@@ -168,7 +165,12 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 				} // end for signals
 			} // end if signals
 		}
-		
+		} catch (ImageImportException e) {
+
+			warn("Cannot import image source file");
+			stack("Error importing file", e);
+		}
+
 	}
 	
 	private void createResults(){
@@ -182,6 +184,8 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 				
 				addRandom = true;
 				ShellCounter channelCounter = counters.get(group);
+				
+				//TODO - implement the new signal versus nucleus division 
 				
 				ShellResult result = new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors());
 				result.setCounts(channelCounter.getCounts());
