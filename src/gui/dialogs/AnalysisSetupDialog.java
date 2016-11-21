@@ -102,8 +102,8 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	
 	// other detection parameters
 
-	private JSpinner txtMinNuclearSize = new JSpinner(new SpinnerNumberModel(DEFAULT_MIN_NUCLEUS_SIZE,	100, 50000, 1));
-	private JSpinner txtMaxNuclearSize = new JSpinner(new SpinnerNumberModel(DEFAULT_MAX_NUCLEUS_SIZE,	100, 50000, 1));
+	private JSpinner txtMinNuclearSize = new JSpinner(new SpinnerNumberModel( new Integer(DEFAULT_MIN_NUCLEUS_SIZE), new Integer(100), null, new Integer(1)));
+	private JSpinner txtMaxNuclearSize = new JSpinner(new SpinnerNumberModel( new Integer(DEFAULT_MAX_NUCLEUS_SIZE), new Integer(100), null, new Integer(1)));
 
 	private JSpinner txtProfileWindowSize = new JSpinner(new SpinnerNumberModel(DEFAULT_PROFILE_WINDOW_SIZE,	0, 1, 0.01));
 
