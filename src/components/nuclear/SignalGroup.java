@@ -3,6 +3,8 @@ package components.nuclear;
 import java.awt.Color;
 import java.io.File;
 
+import components.active.generic.DefaultShellResult;
+
 /**
  * This contains information about signals for an AnalysisDataset.
  * @author bms41
@@ -11,7 +13,7 @@ import java.io.File;
 public class SignalGroup implements ISignalGroup {
     
     private static final long serialVersionUID = 1L;
-    private ShellResult shellResult = null;
+    private IShellResult shellResult = null;
     private String      groupName   = "";
     private boolean     isVisible   = true;
     private Color       groupColour = null;
@@ -28,7 +30,7 @@ public class SignalGroup implements ISignalGroup {
         if(! s.hasShellResult()){
             shellResult=null;
         } else {
-            shellResult = new ShellResult(s.getShellResult());
+            shellResult = new DefaultShellResult(s.getShellResult());
         }
         groupName   = s.getGroupName();
         isVisible   = s.isVisible();
@@ -41,7 +43,7 @@ public class SignalGroup implements ISignalGroup {
 	 * @see components.nuclear.ISignalGroup#getShellResult()
 	 */
     @Override
-	public ShellResult getShellResult() {
+	public IShellResult getShellResult() {
         return shellResult;
     }
 
@@ -49,7 +51,7 @@ public class SignalGroup implements ISignalGroup {
 	 * @see components.nuclear.ISignalGroup#setShellResult(components.nuclear.ShellResult)
 	 */
     @Override
-	public void setShellResult(ShellResult shellResult) {
+	public void setShellResult(IShellResult shellResult) {
         this.shellResult = shellResult;
     }
     

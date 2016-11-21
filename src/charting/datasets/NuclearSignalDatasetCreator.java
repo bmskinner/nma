@@ -49,13 +49,14 @@ import analysis.IAnalysisDataset;
 import analysis.nucleus.CurveRefolder;
 import analysis.signals.NuclearSignalOptions;
 import analysis.signals.ShellRandomDistributionCreator;
+import analysis.signals.ShellCounter.CountType;
 import components.ICellCollection;
 import components.active.generic.UnavailableSignalGroupException;
 import components.generic.IPoint;
 import components.generic.MeasurementScale;
 import components.nuclear.INuclearSignal;
+import components.nuclear.IShellResult;
 import components.nuclear.ISignalGroup;
-import components.nuclear.ShellResult;
 import components.nuclei.Nucleus;
 import gui.components.ColourSelecter;
 
@@ -915,61 +916,111 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			ICellCollection collection = dataset.getCollection();
 
 			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
-				
-				try {
 
-					// Create the random distribution
-					if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-
-						if(collection.getSignalGroup(signalGroup).hasShellResult()){
-							ShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
-
-							for(int shell = 0; shell<r.getNumberOfShells();shell++){
-								Double d = options.isShowSignals() ? r.getCounts().get(shell) : r.getMeans().get(shell)*100;
-								Double std = options.isShowSignals() ? 0 : r.getStandardErrors().get(shell)*100;
-								ds.add(signalGroup, -d.doubleValue(), std.doubleValue(), "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
-								// we need the string value for shell otherwise we get error
-								// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
-								// ditto the doublevalue for std
-
-							}
-						}
-						continue;
-					}
-
-					if(collection.getSignalManager().hasSignals(signalGroup)){
-
-						if(collection.getSignalGroup(signalGroup).hasShellResult()){
-							ShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
-
-
-
-							for(int shell = 0; shell<r.getNumberOfShells();shell++){
-
-								Double d = options.isShowSignals() 
-										? r.getCounts().get(shell) 
-												: options.isNormalised()
-												? r.getNormalisedMeans().get(shell)
-														: r.getMeans().get(shell);
-
-												Double std = options.isShowSignals() 
-														? 0 
-																: r.getStandardErrors().get(shell);
-												ds.add(signalGroup, d*100, std.doubleValue()*100, "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
-												// we need the string value for shell otherwise we get error
-												// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
-												// ditto the doublevalue for std
-
-							}
-						}
-					}
-				} catch (UnavailableSignalGroupException e){
-					fine("Signal group "+signalGroup+" is not present in collection", e);
+				// Create the random distribution
+				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+					addRandomShellData(ds, collection, options);
+				} else {
+					addRealShellData(ds, collection, options, signalGroup);
 				}
+				
 			}
 			result.add(ds);
 		}
 		return result;
+	}
+	
+	
+	/**
+	 * Add the simulated random data from the given collection to the result dataset
+	 * @param ds the dataset to add values to
+	 * @param collection the cell collection to take random shell data from
+	 * @param options the chart options
+	 */
+	private void addRandomShellData(ShellResultDataset ds, ICellCollection collection, ChartOptions options){
+		// Create the random distribution
+
+		try {
+
+			UUID signalGroup = ShellRandomDistributionCreator.RANDOM_SIGNAL_ID;
+
+			// Choose between signal or nucleus level analysis
+			CountType type = options.isShowBounds() ? CountType.NUCLEUS : CountType.SIGNAL;
+
+			// Choose whether to display signals or pixel counts
+			boolean showSignals = options.isShowSignals();
+
+			if(collection.getSignalGroup(signalGroup).hasShellResult()){
+				IShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
+
+				for(int shell = 0; shell<r.getNumberOfShells();shell++){
+					Double d = showSignals
+							? r.getPixelCounts(type).get(shell) 
+									: r.getRawMeans(type).get(shell)*100;
+							Double std = showSignals
+									? 0 
+											: r.getRawStandardErrors(type).get(shell)*100;
+
+							ds.add(signalGroup, -d.doubleValue(), std.doubleValue(), "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
+							// we need the string value for shell otherwise we get error
+							// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
+							// ditto the doublevalue for std
+
+				}
+			}
+		}catch(UnavailableSignalGroupException e){
+			stack("Error getting random signal group", e);
+		}
+	}
+	
+	/**
+	 * Add the real shell data from the given collection to the result dataset
+	 * @param ds the dataset to add values to
+	 * @param collection the cell collection to take shell data from
+	 * @param options the chart options
+	 */
+	private void addRealShellData(ShellResultDataset ds, ICellCollection collection, ChartOptions options, UUID signalGroup){
+		// Create the random distribution
+
+		try {
+			
+			// Choose between signal or nucleus level analysis
+			CountType type = options.isShowBounds() ? CountType.NUCLEUS : CountType.SIGNAL;
+
+			// Choose whether to display signals or pixel counts
+			boolean showSignals = options.isShowSignals();
+			
+			boolean isNormalised = options.isNormalised();
+
+			if(collection.getSignalManager().hasSignals(signalGroup)){
+
+				if(collection.getSignalGroup(signalGroup).hasShellResult()){
+					IShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
+
+					for(int shell = 0; shell<r.getNumberOfShells();shell++){
+
+						Double d = showSignals
+								? r.getPixelCounts(type).get(shell)
+										: isNormalised
+										? r.getNormalisedMeans(type).get(shell)
+										: r.getRawMeans(type).get(shell);
+
+						Double std = showSignals
+								? 0
+								: isNormalised
+									? r.getNormalisedStandardErrors(type).get(shell)
+									: r.getRawStandardErrors(type).get(shell);
+						ds.add(signalGroup, d*100, std.doubleValue()*100, "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
+						// we need the string value for shell otherwise we get error
+						// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
+						// ditto the doublevalue for std
+
+					}
+				}
+			}
+		}catch(UnavailableSignalGroupException e){
+			stack("Error getting random signal group", e);
+		}
 	}
 	
 	/**
@@ -983,6 +1034,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		if( ! options.hasDatasets()){
 			return createBlankTable();
 		}
+		
+//		CountType type = options.
 		
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -1011,13 +1064,13 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 
 						String groupName = group.getGroupName();
 
-						ShellResult r    = group.getShellResult();
+						IShellResult r    = group.getShellResult();
 
 						Object[] rowData = {
 
 								d.getName(),
 								groupName,
-								r.getChiSquare()
+								r.getRawChiSquare(CountType.SIGNAL)
 						};
 
 
@@ -1025,7 +1078,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 					}
 
 				} catch (UnavailableSignalGroupException e){
-					fine("Signal group "+signalGroup+" is not present in collection", e);
+					stack("Signal group "+signalGroup+" is not present in collection", e);
 				}
 			}
 

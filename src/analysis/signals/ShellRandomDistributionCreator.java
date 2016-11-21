@@ -28,11 +28,9 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import logging.Loggable;
-import analysis.signals.ShellDetector.Shell;
 import components.CellularComponent;
 import components.active.generic.FloatPoint;
 import components.generic.IPoint;
-import components.generic.XYPoint;
 
 
 public class ShellRandomDistributionCreator implements Loggable {

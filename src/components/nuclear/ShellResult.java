@@ -23,9 +23,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import analysis.signals.ShellCounter.CountType;
 import logging.Loggable;
 
-public class ShellResult implements Serializable, Loggable {
+public class ShellResult implements Serializable, Loggable, IShellResult {
 
 	private static final long serialVersionUID = 1L;
 	private List<Double> means; // percent signal pre-DAPI normalisation
@@ -76,39 +77,68 @@ public class ShellResult implements Serializable, Loggable {
 
     }
     
-    public void setCounts(List<Integer> counts){
+	public void setCounts(List<Integer> counts){
     	this.counts = counts;
     }
     
-    public void setNormalisedMeans(List<Double> means){
+
+	public void setNormalisedMeans(List<Double> means){
     	this.normalisedMeans = means;
     }
     
-    public List<Integer> getCounts(){
+    /* (non-Javadoc)
+	 * @see components.nuclear.IShellResult#getCounts()
+	 */
+    @Override
+	public List<Integer> getPixelCounts(CountType type){
     	return counts;
     }
     
 	
-	public List<Double> getMeans(){
+	/* (non-Javadoc)
+	 * @see components.nuclear.IShellResult#getMeans()
+	 */
+	@Override
+	public List<Double> getRawMeans(CountType type){
 		return this.means;
 	}
 	
-	public List<Double> getNormalisedMeans(){
+	/* (non-Javadoc)
+	 * @see components.nuclear.IShellResult#getNormalisedMeans()
+	 */
+	@Override
+	public List<Double> getNormalisedMeans(CountType type){
 		return this.normalisedMeans;
 	}
 	
-	public List<Double> getStandardErrors(){
+	/* (non-Javadoc)
+	 * @see components.nuclear.IShellResult#getStandardErrors()
+	 */
+	@Override
+	public List<Double> getRawStandardErrors(CountType type){
 		return this.stderrs;
 	}
 	
-	public double getChiSquare(){
+	/* (non-Javadoc)
+	 * @see components.nuclear.IShellResult#getChiSquare()
+	 */
+	@Override
+	public double getRawChiSquare(CountType type){
 		return this.chisquare;
 	}
 	
-	public double getPValue(){
+	/* (non-Javadoc)
+	 * @see components.nuclear.IShellResult#getPValue()
+	 */
+	@Override
+	public double getRawPValue(CountType type){
 		return this.pvalue;
 	}
 	
+	/* (non-Javadoc)
+	 * @see components.nuclear.IShellResult#getNumberOfShells()
+	 */
+	@Override
 	public int getNumberOfShells(){
 		return this.means.size();
 	}
@@ -132,5 +162,23 @@ public class ShellResult implements Serializable, Loggable {
 //		finest("\tWriting shell result");
 		out.defaultWriteObject();
 //		finest("\tWrote shell result");
+	}
+
+	@Override
+	public List<Double> getNormalisedStandardErrors(CountType type) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double getNormalisedChiSquare(CountType type) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double getNormalisedPValue(CountType type) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

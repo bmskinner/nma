@@ -29,13 +29,13 @@ public interface ISignalGroup extends Serializable {
 	 * Get the shell result for the group, if present
 	 * @return
 	 */
-	ShellResult getShellResult();
+	IShellResult getShellResult();
 
 	/**
 	 * Set the group shell result
-	 * @param shellResult
+	 * @param result
 	 */
-	void setShellResult(ShellResult shellResult);
+	void setShellResult(IShellResult result);
 
 	/**
 	 * Test if a shell result is available

@@ -34,9 +34,12 @@ import utility.ArrayConverter.ArrayConversionException;
 import utility.Constants;
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
+import analysis.signals.ShellCounter.CountType;
 import components.ICellCollection;
+import components.active.generic.DefaultShellResult;
 import components.active.generic.UnavailableSignalGroupException;
 import components.nuclear.INuclearSignal;
+import components.nuclear.IShellResult;
 import components.nuclear.ISignalGroup;
 import components.nuclear.ShellResult;
 import components.nuclear.SignalGroup;
@@ -156,7 +159,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 						counter.addNucleusValues(signalInNucleus, normalisedNucleus, countsInNucleus);
 
 
-						totalPixels += new Sum(counter.getCounts()).intValue();
+						totalPixels += new Sum(counter.getPixelCounts(CountType.SIGNAL)).intValue();
 
 					} catch (ShellAnalysisException e) {
 						warn("Error in shell analysis");
@@ -184,15 +187,23 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 				
 				addRandom = true;
 				ShellCounter channelCounter = counters.get(group);
-				
-				//TODO - implement the new signal versus nucleus division 
-				
-				ShellResult result = new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors());
-				result.setCounts(channelCounter.getCounts());
-				result.setNormalisedMeans(channelCounter.getNormalisedMeans());
-				
-				
-				
+								
+				IShellResult result = new DefaultShellResult(shells)
+				.setRawMeans(       CountType.SIGNAL,  channelCounter.getRawMeans(CountType.SIGNAL))
+	        	.setRawMeans(       CountType.NUCLEUS, channelCounter.getRawMeans(CountType.NUCLEUS))
+	        	.setNormalisedMeans(CountType.SIGNAL,  channelCounter.getNormalisedMeans(CountType.SIGNAL))
+	        	.setNormalisedMeans(CountType.NUCLEUS, channelCounter.getNormalisedMeans(CountType.NUCLEUS))
+	        	.setRawStandardErrors( CountType.SIGNAL,  channelCounter.getRawStandardErrors(CountType.SIGNAL))
+	        	.setRawStandardErrors( CountType.NUCLEUS, channelCounter.getRawStandardErrors(CountType.NUCLEUS))
+	        	.setNormalisedStandardErrors( CountType.SIGNAL,  channelCounter.getNormalisedStandardErrors(CountType.SIGNAL))
+	        	.setNormalisedStandardErrors( CountType.NUCLEUS, channelCounter.getNormalisedStandardErrors(CountType.NUCLEUS))
+	        	.setPixelCounts(    CountType.SIGNAL,  channelCounter.getPixelCounts(CountType.SIGNAL))
+	        	.setPixelCounts(    CountType.NUCLEUS, channelCounter.getPixelCounts(CountType.NUCLEUS))
+	        	.setRawChiResult(      CountType.SIGNAL,  channelCounter.getRawChiSquare(CountType.SIGNAL), channelCounter.getRawPValue(CountType.SIGNAL))
+	        	.setRawChiResult(      CountType.NUCLEUS, channelCounter.getRawChiSquare(CountType.NUCLEUS), channelCounter.getRawPValue(CountType.NUCLEUS))
+				.setNormalisedChiResult(CountType.SIGNAL, channelCounter.getNormalisedChiSquare(CountType.SIGNAL), channelCounter.getNormalisedPValue(CountType.SIGNAL))
+	        	.setNormalisedChiResult(CountType.NUCLEUS,channelCounter.getNormalisedChiSquare(CountType.NUCLEUS), channelCounter.getNormalisedPValue(CountType.NUCLEUS));
+					
 				try {
 					getDataset().getCollection()
 						.getSignalGroup(group)
@@ -245,9 +256,18 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 				List<Double> list       = new ArrayConverter(c).toDoubleList();
 				List<Double> errList    = new ArrayConverter(err).toDoubleList();
 				List<Integer> countList = new ArrayConverter(counts).toIntegerList();
-
-				ShellResult randomResult = new ShellResult(list,  errList);
-				randomResult.setCounts(countList);
+				
+				IShellResult randomResult = new DefaultShellResult(shells)
+					.setPixelCounts(CountType.SIGNAL, countList)
+					.setPixelCounts(CountType.NUCLEUS, countList)
+					.setRawMeans(CountType.SIGNAL, list)
+					.setRawMeans(CountType.NUCLEUS, list)
+					.setNormalisedMeans(CountType.SIGNAL, list)
+					.setNormalisedMeans(CountType.NUCLEUS, list)
+					.setRawStandardErrors(CountType.SIGNAL, errList)
+					.setRawStandardErrors(CountType.NUCLEUS, errList)
+					.setNormalisedStandardErrors(CountType.SIGNAL, errList)
+					.setNormalisedStandardErrors(CountType.NUCLEUS, errList);
 
 				getDataset().getCollection()
 					.getSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)
