@@ -41,7 +41,6 @@ import components.active.generic.UnavailableSignalGroupException;
 import components.nuclear.INuclearSignal;
 import components.nuclear.IShellResult;
 import components.nuclear.ISignalGroup;
-import components.nuclear.ShellResult;
 import components.nuclear.SignalGroup;
 import components.nuclei.Nucleus;
 
@@ -160,6 +159,8 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 
 
 						totalPixels += new Sum(counter.getPixelCounts(CountType.SIGNAL)).intValue();
+						
+						
 
 					} catch (ShellAnalysisException e) {
 						warn("Error in shell analysis");

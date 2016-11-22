@@ -25,13 +25,9 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -56,9 +52,9 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
 	private ExportableChartPanel 	chartPanel; 
 
-	private JRadioButton proportionsBtn = new JRadioButton("Proportions");
-	private JRadioButton countsBtn      = new JRadioButton("Counts");
-	private ButtonGroup  buttonGroup    = new ButtonGroup();
+//	private JRadioButton proportionsBtn = new JRadioButton("Proportions");
+//	private JRadioButton countsBtn      = new JRadioButton("Counts");
+//	private ButtonGroup  buttonGroup    = new ButtonGroup();
 	
 	private JRadioButton withinSignalsBtn = new JRadioButton("Within signals");
 	private JRadioButton withinNucleiBtn  = new JRadioButton("Within nuclei");
@@ -94,17 +90,17 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
 		panel.add(newAnalysis);
 		
-		buttonGroup.add(proportionsBtn);
-		buttonGroup.add(countsBtn);
-		proportionsBtn.addActionListener(this);
-		countsBtn.addActionListener(this);
-		proportionsBtn.setToolTipText("Show the proportion of signal in each shell");
-		countsBtn.setToolTipText("Show the total pixel intensities in each shell");
-		
-		proportionsBtn.setSelected(true);
-		
-		panel.add(proportionsBtn);
-		panel.add(countsBtn);
+//		buttonGroup.add(proportionsBtn);
+//		buttonGroup.add(countsBtn);
+//		proportionsBtn.addActionListener(this);
+//		countsBtn.addActionListener(this);
+//		proportionsBtn.setToolTipText("Show the proportion of signal in each shell");
+//		countsBtn.setToolTipText("Show the total pixel intensities in each shell");
+//		
+//		proportionsBtn.setSelected(true);
+//		
+//		panel.add(proportionsBtn);
+//		panel.add(countsBtn);
 		
 		
 		// Add the coverage options
@@ -134,8 +130,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	
 	public void setEnabled(boolean b){
 		newAnalysis.setEnabled(b);
-		proportionsBtn.setEnabled(b);
-		countsBtn.setEnabled(b);
+//		proportionsBtn.setEnabled(b);
+//		countsBtn.setEnabled(b);
 		withinNucleiBtn.setEnabled(b);
 		withinSignalsBtn.setEnabled(b);
 		dapiNormalise.setEnabled(b);
@@ -179,7 +175,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setShowSignals(countsBtn.isSelected()) // if counts is selected, show signal counts, not proportions
+//			.setShowSignals(countsBtn.isSelected()) // if counts is selected, show signal counts, not proportions
 			.setTarget(chartPanel)
 			.setNormalised(dapiNormalise.isSelected())
 			.setShowBounds(withinNucleiBtn.isSelected()) // use as a proxy for whole cell bounds or just within defined signal regions

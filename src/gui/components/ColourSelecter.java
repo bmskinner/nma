@@ -94,7 +94,7 @@ public class ColourSelecter {
 	 * @param i the number of the colour to return
 	 * @return a colour
 	 */
-	public static Paint getColor(int i){	
+	public static Color getColor(int i){	
 		
 		Color color = null;
 		ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
@@ -181,8 +181,8 @@ public class ColourSelecter {
 	 * @param defaultAlpha the alpha level
 	 * @return the new colour
 	 */
-	public static Paint getTransparentColour(Color c, boolean transparent, int defaultAlpha){
-		Paint result = transparent ? new Color(c.getRed(),c.getGreen(),c.getBlue(),defaultAlpha) : c;
+	public static Color getTransparentColour(Color c, boolean transparent, int defaultAlpha){
+		Color result = transparent ? new Color(c.getRed(),c.getGreen(),c.getBlue(),defaultAlpha) : c;
 		return result;
 	}
 	
@@ -192,7 +192,7 @@ public class ColourSelecter {
 	 * @param transparent flag
 	 * @return  a colour with the default transparency
 	 */
-	public static Paint getTransparentColour(Color c, boolean transparent){
+	public static Color getTransparentColour(Color c, boolean transparent){
 		return getTransparentColour(c, transparent, 10);
 	}
 }

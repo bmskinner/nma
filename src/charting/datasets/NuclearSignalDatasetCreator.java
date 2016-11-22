@@ -946,22 +946,22 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 
 			// Choose between signal or nucleus level analysis
 			CountType type = options.isShowBounds() ? CountType.NUCLEUS : CountType.SIGNAL;
-
-			// Choose whether to display signals or pixel counts
-			boolean showSignals = options.isShowSignals();
-
+			
+			boolean isNormalised = options.isNormalised();
+			
 			if(collection.getSignalGroup(signalGroup).hasShellResult()){
 				IShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
 
 				for(int shell = 0; shell<r.getNumberOfShells();shell++){
-					Double d = showSignals
-							? r.getPixelCounts(type).get(shell) 
-									: r.getRawMeans(type).get(shell)*100;
-							Double std = showSignals
-									? 0 
-											: r.getRawStandardErrors(type).get(shell)*100;
+					Double d = isNormalised
+							 ? r.getNormalisedMeans(type).get(shell)*100
+							 : r.getRawMeans(type).get(shell)*100;
+					
+					Double std = isNormalised
+							 ? r.getNormalisedStandardErrors(type).get(shell)*100
+							 : r.getRawStandardErrors(type).get(shell)*100;
 
-							ds.add(signalGroup, -d.doubleValue(), std.doubleValue(), "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
+					ds.add(signalGroup, -d.doubleValue(), std.doubleValue(), "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
 							// we need the string value for shell otherwise we get error
 							// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
 							// ditto the doublevalue for std
@@ -988,7 +988,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			CountType type = options.isShowBounds() ? CountType.NUCLEUS : CountType.SIGNAL;
 
 			// Choose whether to display signals or pixel counts
-			boolean showSignals = options.isShowSignals();
+//			boolean showSignals = options.isShowSignals();
 			
 			boolean isNormalised = options.isNormalised();
 
@@ -999,17 +999,13 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 
 					for(int shell = 0; shell<r.getNumberOfShells();shell++){
 
-						Double d = showSignals
-								? r.getPixelCounts(type).get(shell)
-										: isNormalised
-										? r.getNormalisedMeans(type).get(shell)
-										: r.getRawMeans(type).get(shell);
+						Double d = isNormalised
+								 ? r.getNormalisedMeans(type).get(shell)
+							     : r.getRawMeans(type).get(shell);
 
-						Double std = showSignals
-								? 0
-								: isNormalised
-									? r.getNormalisedStandardErrors(type).get(shell)
-									: r.getRawStandardErrors(type).get(shell);
+						Double std = isNormalised
+								   ? r.getNormalisedStandardErrors(type).get(shell)
+								   : r.getRawStandardErrors(type).get(shell);
 						ds.add(signalGroup, d*100, std.doubleValue()*100, "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
 						// we need the string value for shell otherwise we get error
 						// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"

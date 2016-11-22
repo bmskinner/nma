@@ -98,25 +98,25 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 					
 					rend.setSeriesVisibleInLegend(j, false);
 					rend.setSeriesStroke(j, ChartComponents.MARKER_STROKE);
-					Paint colour = ColourSelecter.getColor(j);
+					Color colour = ColourSelecter.getColor(j);
+					colour = ColourSelecter.getTransparentColour(colour, true, 128); // bars must be see through
+					
 					try {
 
 						colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
-								? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
-										: colour;
+	                           ? ColourSelecter.getTransparentColour(d.getCollection().getSignalGroup(signalGroup).getGroupColour(), true, 128)
+                               : colour;
 
-								colour = signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID) 
-										? Color.LIGHT_GRAY 
-												: colour;
+                        colour = signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID) 
+                               ? Color.LIGHT_GRAY 
+                               : colour;
 
-
-								rend.setSeriesPaint(j, colour);
-								rend.setSeriesBarWidth(j, 1);
 
 					} catch (UnavailableSignalGroupException e){
 	        			fine("Signal group "+signalGroup+" is not present in collection", e);
 	        		} finally {
 	        			rend.setSeriesPaint(j, colour);
+	        			rend.setSeriesBarWidth(j, 1);
 	        		}
 				}	
 			}
@@ -126,18 +126,14 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 		}
 		
 		
+		chart.getCategoryPlot().getRangeAxis().setRange(range);
 		
-		if(options.isShowSignals()){
-			chart.getCategoryPlot().getRangeAxis().setAutoRange(true);
-			chart.getCategoryPlot().getRangeAxis().setLabel("Observed pixel intensities");
-		} else {
-			chart.getCategoryPlot().getRangeAxis().setRange(range);
-			chart.getCategoryPlot().getRangeAxis().setLabel("Percent of signal");
-		}
-		
+		String percentLabel = options.isNormalised() ? "Normalised percent" : "Percent";
+		String locationLabel = options.isShowBounds() ? " within nuclei" : "within signals";
 		
 
-		
+		chart.getCategoryPlot().getRangeAxis().setLabel(percentLabel+" of signal "+locationLabel);
+
 
 		return chart;
 	}
