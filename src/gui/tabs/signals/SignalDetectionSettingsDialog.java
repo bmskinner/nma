@@ -55,6 +55,11 @@ import javax.swing.event.ChangeListener;
 import utility.Constants;
 import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
+import analysis.IMutableAnalysisOptions;
+import analysis.signals.DefaultNuclearSignalOptions;
+import analysis.signals.IMutableNuclearSignalOptions;
+import analysis.signals.INuclearSignalOptions;
+import analysis.signals.INuclearSignalOptions.SignalDetectionMode;
 import analysis.signals.NuclearSignalOptions;
 import components.nuclear.SignalGroup;
 
@@ -68,7 +73,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 	private static final double DEFAULT_MIN_CIRC = 0.0;
 	private static final double DEFAULT_MAX_CIRC = 1.0;
 			
-	private IAnalysisOptions options;
+	private IMutableAnalysisOptions options;
 	private IAnalysisDataset dataset;
 	
 	private JComboBox<String> channelSelection = new JComboBox<String>(channelOptionStrings);
@@ -207,7 +212,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 					if(getImageDirectory()){
 
 						// Use the default options to store settings without creating a new signal group yet
-                        NuclearSignalOptions testOptions = new NuclearSignalOptions();
+                        IMutableNuclearSignalOptions testOptions = new DefaultNuclearSignalOptions(folder);
 
 						assignSettings(testOptions);
 
@@ -234,7 +239,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
                             group.setGroupColour(colour);
                             
                             
-                            options.addNuclearSignalOptions( signalGroup, testOptions);
+                            options.setDetectionOptions(signalGroup.toString(), testOptions);//.addNuclearSignalOptions( signalGroup, testOptions);
 
 							readyToRun = true;
 							SignalDetectionSettingsDialog.this.setVisible(false);
@@ -299,7 +304,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 	 * Assign the current settings to the nuclear signal analysis options
 	 * @param ns the options to assign to 
 	 */
-	private void assignSettings(NuclearSignalOptions ns){
+	private void assignSettings(IMutableNuclearSignalOptions ns){
 
 		ns.setThreshold(  (Integer) thresholdSpinner.getValue());
 		ns.setMinSize(  (Integer) minSizeSpinner.getValue());
@@ -309,14 +314,14 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 		
 		
 		if(forwardThresholding.isSelected()){
-            ns.setDetectionMode(NuclearSignalOptions.FORWARD);
+            ns.setDetectionMode(SignalDetectionMode.FORWARD);
 		} 
 		if(reverseThresholding.isSelected()){
-            ns.setDetectionMode(NuclearSignalOptions.REVERSE);
+            ns.setDetectionMode(SignalDetectionMode.REVERSE);
 		} 
 		
 		if(histogramThresholding.isSelected()){
-            ns.setDetectionMode(NuclearSignalOptions.HISTOGRAM);
+            ns.setDetectionMode(SignalDetectionMode.ADAPTIVE);
 		} 
 		
 		this.channel = channelSelection.getSelectedItem().equals("Red") 
@@ -389,7 +394,7 @@ public class SignalDetectionSettingsDialog extends SettingsDialog implements Cha
 	private boolean getImageDirectory(){
 		// get the folder of images
 		
-		File defaultDir = options.getFolder();
+		File defaultDir = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
 		
 		JFileChooser fc = new JFileChooser(defaultDir); // if null, will be home dir
 

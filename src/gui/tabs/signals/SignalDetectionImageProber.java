@@ -23,7 +23,8 @@ import java.io.File;
 
 import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
-import analysis.signals.NuclearSignalOptions;
+import analysis.signals.IMutableNuclearSignalOptions;
+import analysis.signals.INuclearSignalOptions;
 import analysis.signals.SignalProberWorker;
 import gui.ImageType;
 import gui.dialogs.ImageProber;
@@ -34,7 +35,7 @@ public class SignalDetectionImageProber extends ImageProber {
 	
 	private IAnalysisDataset dataset;
 	private int channel;
-	private NuclearSignalOptions testOptions;
+	private INuclearSignalOptions testOptions;
 
 
 	
@@ -61,7 +62,7 @@ public class SignalDetectionImageProber extends ImageProber {
 		}
 	}
 	
-	public SignalDetectionImageProber(IAnalysisOptions options, File folder, IAnalysisDataset dataset, int channel, NuclearSignalOptions testOptions) {
+	public SignalDetectionImageProber(IAnalysisOptions options, File folder, IAnalysisDataset dataset, int channel, INuclearSignalOptions testOptions) {
 		super(options, SignalImageType.DETECTED_OBJECTS, folder);
 
 		if(dataset==null){
@@ -96,7 +97,7 @@ public class SignalDetectionImageProber extends ImageProber {
 					table.getModel(),
 					dataset,
 					channel,
-					testOptions);
+					(IMutableNuclearSignalOptions) testOptions);
 			
 			worker.setSmallIconSize(new Dimension(500, table.getRowHeight()-30));
 			

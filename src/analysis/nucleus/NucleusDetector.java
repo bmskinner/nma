@@ -25,29 +25,23 @@ import stats.NucleusStatistic;
 
 import java.awt.Rectangle;
 import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
 import utility.Constants;
-//import utility.Logger;
-
 
 import utility.StatsMap;
 import analysis.IAnalysisOptions;
 import analysis.ICannyOptions;
+import analysis.IDetectionOptions;
 import analysis.detection.Detector;
 import analysis.image.ImageConverter;
 import analysis.image.ImageFilterer;
 import components.ICell;
-import components.IMutableCell;
 import components.active.DefaultCell;
 import components.active.NucleusFactory;
 import components.active.NucleusFactory.NucleusCreationException;
-import components.active.generic.FloatPoint;
 import components.generic.IPoint;
-import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
 
@@ -72,10 +66,12 @@ public class NucleusDetector extends Detector {
 		this.options = options;
 		this.outputFolderName = outputFolderName;
 		
-		setMaxSize(  options.getMaxNucleusSize());
-		setMinCirc(  options.getMinNucleusCirc());
-		setMaxCirc(  options.getMaxNucleusCirc());
-		setThreshold(options.getNucleusThreshold());
+		IDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+		
+		setMaxSize(  nucleusOptions.getMaxSize());
+		setMinCirc(  nucleusOptions.getMinCirc());
+		setMaxCirc(  nucleusOptions.getMaxCirc());
+		setThreshold(nucleusOptions.getThreshold());
 	}
 	
 	/**
@@ -118,16 +114,18 @@ public class NucleusDetector extends Detector {
 		finer("Detecting ROIs");
 		
 		List<Roi> roiList = new ArrayList<Roi>();
+		
+		IDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 
 		if(closed==Detector.CLOSED_OBJECTS){
-			setMinSize(options.getMinNucleusSize()); // get polygon rois
+			setMinSize(nucleusOptions.getMinSize()); // get polygon rois
 		} else {
 			setMinSize(0); // get line rois
 		}
 
 		try{
 			
-			ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
+			ImageProcessor ip = image.getProcessor(Constants.rgbToStack(nucleusOptions.getChannel()));
 			roiList = detectRois(ip);
 		
 		} catch(Exception e){
@@ -202,8 +200,10 @@ public class NucleusDetector extends Detector {
 	 */
 	private ImageStack preprocessImage(ImageStack image) {
 		
+		IDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+		
 		finer("Preprocessing image");
-		ICannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
+		ICannyOptions nucleusCannyOptions = nucleusOptions.getCannyOptions();
 
 		ImageStack searchStack = null;
 		
@@ -224,9 +224,9 @@ public class NucleusDetector extends Detector {
 			if(nucleusCannyOptions.isUseKuwahara()){
 				int kernel = nucleusCannyOptions.getKuwaharaKernel();
 				ImageProcessor ip = new ImageFilterer(image)
-					.runKuwaharaFiltering( Constants.rgbToStack(options.getChannel())  , kernel)
+					.runKuwaharaFiltering( Constants.rgbToStack(nucleusOptions.getChannel())  , kernel)
 					.toProcessor();
-				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
+				image.setProcessor(ip, Constants.rgbToStack(nucleusOptions.getChannel()));
 				finer("Run Kuwahara");
 			}
 
@@ -234,13 +234,13 @@ public class NucleusDetector extends Detector {
 			if(nucleusCannyOptions.isUseFlattenImage()){
 				int threshold = nucleusCannyOptions.getFlattenThreshold();
 				ImageProcessor ip = new ImageFilterer(image)
-					.squashChromocentres( Constants.rgbToStack(options.getChannel()), threshold)
+					.squashChromocentres( Constants.rgbToStack(nucleusOptions.getChannel()), threshold)
 					.toProcessor();
-				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
+				image.setProcessor(ip, Constants.rgbToStack(nucleusOptions.getChannel()));
 				finer("Run flattening");
 			}
 			searchStack = new ImageFilterer(image)
-				.runEdgeDetector(Constants.rgbToStack(options.getChannel()), nucleusCannyOptions).toStack();
+				.runEdgeDetector(Constants.rgbToStack(nucleusOptions.getChannel()), nucleusCannyOptions).toStack();
 			finer("Run edge detection");
 		} else {
 			searchStack = image;
@@ -265,10 +265,12 @@ public class NucleusDetector extends Detector {
 	private ICell makeCell(Roi roi, ImageStack image, int nucleusNumber, File path, boolean makeDummyCell) 
 			throws NucleusCreationException{
 
+		IDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+		
 		ICell result = null;
 		
 		  // measure the area, density etc within the nucleus
-		ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
+		ImageProcessor ip = image.getProcessor(Constants.rgbToStack(nucleusOptions.getChannel()));
 		StatsMap values   = measure(roi, ip);
 
 		  // save the position of the roi, for later use
@@ -287,7 +289,7 @@ public class NucleusDetector extends Detector {
 
 		Nucleus currentNucleus = factory.createNucleus(roi, 
 				path, 
-				options.getChannel(),
+				nucleusOptions.getChannel(),
 				nucleusNumber, 
 				originalPosition, 
 				options.getNucleusType(), 
@@ -304,11 +306,11 @@ public class NucleusDetector extends Detector {
 		currentNucleus.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
 		currentNucleus.setStatistic(NucleusStatistic.PERIMETER, values.get("Perim"));
 
-		currentNucleus.setScale(options.getScale());
+		currentNucleus.setScale(nucleusOptions.getScale());
 
 //		if ( ! makeDummyCell) {
 
-			currentNucleus.initialise(options.getAngleWindowProportion());
+			currentNucleus.initialise(options.getProfileWindowProportion());
 
 			currentNucleus.findPointsAroundBorder();
 //		}

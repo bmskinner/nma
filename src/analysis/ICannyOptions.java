@@ -20,6 +20,9 @@ public interface ICannyOptions extends Serializable, Loggable{
 	int DEFAULT_FLATTEN_THRESHOLD = 100;
 	boolean DEFAULT_ADD_BORDER = false;
 
+	
+	ICannyOptions duplicate();
+	
 	boolean isUseCanny();
 
 	void setUseCanny(boolean useCanny);

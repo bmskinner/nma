@@ -33,11 +33,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import utility.Constants;
 import analysis.AnalysisOptions;
 import analysis.AnalysisWorker;
+import analysis.DefaultAnalysisOptions;
 import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
+import analysis.IMutableAnalysisOptions;
 import analysis.ProgressEvent;
 import analysis.ProgressListener;
 import components.ICellCollection;
@@ -53,7 +56,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 
   private final String outputFolder;
   
-  private final IAnalysisOptions analysisOptions;
+  private final IMutableAnalysisOptions analysisOptions;
 
   private Map<File, ICellCollection> collectionGroup = new HashMap<File, ICellCollection>();
   
@@ -67,7 +70,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
    * @param debugFile the dataset log file
    * @param options the options to detect with
    */
-  public NucleusDetectionWorker(String outputFolder, File debugFile, IAnalysisOptions options){
+  public NucleusDetectionWorker(String outputFolder, File debugFile, IMutableAnalysisOptions options){
 	  super(null, debugFile);
 	  this.outputFolder 	= outputFolder;
 	  this.analysisOptions 	= options;
@@ -75,7 +78,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
   
   private void getTotalImagesToAnalyse(){
 	  log("Calculating number of images to analyse");
-	  int totalImages = countSuitableImages(analysisOptions.getFolder());
+	  int totalImages = countSuitableImages(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder());
 	  this.setProgressTotal(totalImages);
 	  log("Analysing "+totalImages+" images");
   }
@@ -90,9 +93,9 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 			getTotalImagesToAnalyse();
 			
 			log("Running nucleus detector");
-			processFolder(analysisOptions.getFolder());
+			processFolder(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder());
 
-			fine("Detected nuclei in "+analysisOptions.getFolder().getAbsolutePath());
+			fine("Detected nuclei in "+analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath());
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
 
@@ -158,7 +161,7 @@ public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressL
 				if(analysisOptions.isKeepFailedCollections()){
 					log("Keeping failed nuclei as new collection");
 					IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
-					IAnalysisOptions failedOptions = new AnalysisOptions(analysisOptions);
+					IMutableAnalysisOptions failedOptions = new DefaultAnalysisOptions(analysisOptions);
 					failedOptions.setNucleusType(NucleusType.ROUND);
 					failed.setAnalysisOptions(failedOptions);
 					failed.setRoot(true);

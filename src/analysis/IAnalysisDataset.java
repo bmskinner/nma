@@ -242,7 +242,7 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 * Get the analysis options from this dataset
 	 * @return
 	 */
-	IAnalysisOptions getAnalysisOptions();
+	IMutableAnalysisOptions getAnalysisOptions();
 
 	/**
 	 * Test if the dataset has analysis options set.
@@ -255,7 +255,7 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 * Set the analysis options for the dataset
 	 * @param analysisOptions
 	 */
-	void setAnalysisOptions(IAnalysisOptions analysisOptions);
+	void setAnalysisOptions(IMutableAnalysisOptions analysisOptions);
 
 	/**
 	 * Add the given dataset as a cluster result.

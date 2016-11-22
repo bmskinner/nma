@@ -110,7 +110,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		
 		double windowSizeActual = 0.05d; // default if analysis options are not present - e.g. a merge
 		if(dataset.hasAnalysisOptions()){
-			windowSizeActual = dataset.getAnalysisOptions().getAngleWindowProportion();
+			windowSizeActual = dataset.getAnalysisOptions().getProfileWindowProportion();
 		}
 		
 		Dimension dim = new Dimension(80, 20);

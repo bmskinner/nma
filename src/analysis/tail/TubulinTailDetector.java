@@ -52,6 +52,7 @@ import utility.Constants;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.IAnalysisDataset;
+import analysis.IAnalysisOptions;
 import analysis.detection.CannyEdgeDetector;
 import analysis.detection.Detector;
 import analysis.image.ImageFilterer;
@@ -121,7 +122,7 @@ public class TubulinTailDetector extends AnalysisWorker {
 				fileLogger.log(Level.FINE, "Tail in: "+imageFile.getAbsolutePath());
 //				SpermTail tail = null;
 				
-				TailDetector finder = new TailDetector(getDataset().getAnalysisOptions().getCannyOptions("tail"), 
+				TailDetector finder = new TailDetector(getDataset().getAnalysisOptions().getDetectionOptions(IAnalysisOptions.SPERM_TAIL).getCannyOptions(), 
 						channel);
 				
 				// attempt to detect the tails in the image

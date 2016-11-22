@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
+
 import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
+import analysis.IMutableAnalysisOptions;
 import components.ICellCollection;
 import components.IClusterGroup;
 
@@ -206,7 +208,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 	}
 
 	@Override
-	public IAnalysisOptions getAnalysisOptions() {
+	public IMutableAnalysisOptions getAnalysisOptions() {
 		return parent.getAnalysisOptions();
 	}
 
@@ -216,7 +218,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 	}
 
 	@Override
-	public void setAnalysisOptions(IAnalysisOptions analysisOptions) {}
+	public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {}
 
 	@Override
 	public void refreshClusterGroups() {

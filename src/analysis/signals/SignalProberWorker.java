@@ -40,7 +40,6 @@ import stats.SignalStatistic;
 import utility.Constants;
 import components.CellularComponent;
 import components.nuclear.INuclearSignal;
-import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
@@ -52,9 +51,9 @@ public class SignalProberWorker extends ImageProberWorker {
 	
 	private IAnalysisDataset dataset;
 	private int channel;
-	private NuclearSignalOptions testOptions;
+	private IMutableNuclearSignalOptions testOptions;
 
-	public SignalProberWorker(File f, IAnalysisOptions options, ImageType type, TableModel model, IAnalysisDataset dataset, int channel, NuclearSignalOptions testOptions) {
+	public SignalProberWorker(File f, IAnalysisOptions options, ImageType type, TableModel model, IAnalysisDataset dataset, int channel, IMutableNuclearSignalOptions testOptions) {
 		super(f, options, type, model);
 		this.dataset = dataset;
 		this.channel = channel;
@@ -71,8 +70,9 @@ public class SignalProberWorker extends ImageProberWorker {
 		// Import the image as a stack
 		ImageStack stack = new ImageImporter(file).importImage();
 		
-		if(options.hasCannyOptions("nucleus")){
-			if(options.getCannyOptions("nucleus").isAddBorder()){
+		if(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).hasCannyOptions()){
+			
+			if(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions().isAddBorder()){
 				ImageConverter conv = new ImageConverter(stack);
 				stack = conv.addBorder(10).toStack();
 			}

@@ -503,9 +503,10 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		options = options == null ? dataset.getAnalysisOptions() : options;
 		
 		// only display refold mode if nucleus was refolded
-		String refoldMode = options.refoldNucleus() 
-				? options.getRefoldMode()
-						: "N/A";
+//		String refoldMode = options.refoldNucleus() 
+//				? options.getRefoldMode()
+//						: "N/A";
+		String refoldMode = "Fast";
 
 		String date;
 		String time;
@@ -527,14 +528,14 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				date = times[0];
 				time = times[1];
 			}
-			folder  = options.getFolder().getAbsolutePath();
+			folder  = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath();
 			logFile = dataset.getDebugFile().getAbsolutePath();
 		}
 
-		ICannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
+		ICannyOptions nucleusCannyOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions();
 
 		String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
-		String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
+		String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getThreshold());
 		
 		String kuwaharaRadius = nucleusCannyOptions.isUseKuwahara() ? String.valueOf(nucleusCannyOptions.getKuwaharaKernel()) : "N/A";
 		
@@ -548,7 +549,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 		String cannyClosingRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : "N/A";
 
 		Object[] collectionData = {
-				options.getAngleWindowProportion(),
+				options.getProfileWindowProportion(),
 				detectionMethod,
 				nucleusThreshold,
 				kuwaharaRadius,
@@ -559,10 +560,10 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 				cannyKernelRadius,
 				cannyKernelWidth,
 				cannyClosingRadius,
-				options.getMinNucleusSize(),
-				options.getMaxNucleusSize(),
-				DEFAULT_DECIMAL_FORMAT.format(options.getMinNucleusCirc()),
-				DEFAULT_DECIMAL_FORMAT.format(options.getMaxNucleusCirc()),
+				options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMinSize(),
+				options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMaxSize(),
+				DEFAULT_DECIMAL_FORMAT.format(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMinCirc()),
+				DEFAULT_DECIMAL_FORMAT.format(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMaxCirc()),
 				options.refoldNucleus(),
 				refoldMode,
 				date,

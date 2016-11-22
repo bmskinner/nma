@@ -47,7 +47,8 @@ import utility.ArrayConverter.ArrayConversionException;
 import weka.estimators.KernelEstimator;
 import analysis.IAnalysisDataset;
 import analysis.nucleus.CurveRefolder;
-import analysis.signals.NuclearSignalOptions;
+import analysis.signals.INuclearSignalOptions;
+import analysis.signals.INuclearSignalOptions.SignalDetectionMode;
 import analysis.signals.ShellRandomDistributionCreator;
 import analysis.signals.ShellCounter.CountType;
 import components.ICellCollection;
@@ -244,7 +245,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 
 
 
-            				NuclearSignalOptions ns = dataset.getAnalysisOptions()
+            				INuclearSignalOptions ns = dataset.getAnalysisOptions()
             						.getNuclearSignalOptions(signalGroup);
 
             				if(ns==null){ // occurs when no signals are present? Should never occur with the new SignalGroup system
@@ -254,13 +255,13 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 
 
             				} else {
-            					Object signalThreshold = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
+            					Object signalThreshold = ns.getDetectionMode().equals(SignalDetectionMode.FORWARD)
             							? ns.getThreshold()
             									: "Variable";
 
-            							Object signalMode = ns.getDetectionMode()==NuclearSignalOptions.FORWARD
+            							Object signalMode = ns.getDetectionMode().equals(SignalDetectionMode.FORWARD)
             									? "Forward"
-            											: ns.getDetectionMode()==NuclearSignalOptions.REVERSE
+            											: ns.getDetectionMode().equals(SignalDetectionMode.REVERSE)
             											? "Reverse"
             													: "Adaptive";                    
 

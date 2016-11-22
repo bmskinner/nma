@@ -2,11 +2,13 @@ package gui.actions;
 
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
+
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import utility.Constants;
 import analysis.IAnalysisDataset;
+import analysis.IAnalysisOptions;
 import analysis.nucleus.CellRelocator;
 import gui.MainWindow;
 import gui.ThreadManager;
@@ -65,7 +67,7 @@ public class RelocateFromFileAction extends ProgressableAction {
 	private File selectFile(){
 
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Remapping file", Constants.LOC_FILE_EXTENSION);
-		File defaultDir = dataset.getAnalysisOptions().getFolder();
+		File defaultDir = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
 //		File defaultDir = new File("J:\\Protocols\\Scripts and macros\\");
 		JFileChooser fc = new JFileChooser("Select a file...");
 		if(defaultDir.exists()){

@@ -43,7 +43,7 @@ import components.nuclei.Nucleus;
  */
 public class SignalDetectionWorker extends AnalysisWorker {
 	
-	protected NuclearSignalOptions options = null;
+	protected IMutableNuclearSignalOptions options = null;
 	protected File folder;
 	protected int channel;
 	protected UUID signalGroup;
@@ -58,7 +58,7 @@ public class SignalDetectionWorker extends AnalysisWorker {
 	 * @param group the signal group to add signals to
 	 */
 
-	public SignalDetectionWorker(IAnalysisDataset d, File folder, int channel, NuclearSignalOptions options, UUID group, String channelName){
+	public SignalDetectionWorker(IAnalysisDataset d, File folder, int channel, IMutableNuclearSignalOptions options, UUID group, String channelName){
 		super(d);
 		
 		this.options	 = options;

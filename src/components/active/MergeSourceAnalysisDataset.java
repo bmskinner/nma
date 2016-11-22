@@ -33,6 +33,7 @@ import components.ICellCollection;
 import components.IClusterGroup;
 import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
+import analysis.IMutableAnalysisOptions;
 import analysis.profiles.ProfileException;
 
 /**
@@ -49,7 +50,7 @@ public class MergeSourceAnalysisDataset
 
 	private IAnalysisDataset parent; // the 'parent to this dataset; the merged dataset with the real cells
 				
-	private IAnalysisOptions analysisOptions; // the analysis options for the merge source 
+	private IMutableAnalysisOptions analysisOptions; // the analysis options for the merge source 
 	
 	
 	/**
@@ -247,7 +248,7 @@ public class MergeSourceAnalysisDataset
 	}
 
 	@Override
-	public IAnalysisOptions getAnalysisOptions() {
+	public IMutableAnalysisOptions getAnalysisOptions() {
 		return analysisOptions;
 	}
 
@@ -257,7 +258,7 @@ public class MergeSourceAnalysisDataset
 	}
 
 	@Override
-	public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
+	public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
 		this.analysisOptions = analysisOptions;
 		
 	}

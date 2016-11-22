@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import analysis.detection.Detector;
+import analysis.signals.INuclearSignalOptions.SignalDetectionMode;
 import components.CellularComponent;
 import components.active.DefaultNuclearSignal;
 import components.active.generic.FloatPoint;
@@ -52,7 +53,7 @@ import utility.StatsMap;
 
 public class SignalDetector extends Detector {
 	
-	private NuclearSignalOptions options;
+	private IMutableNuclearSignalOptions options;
 	private  int channel;
 	private int minThreshold;
 	
@@ -61,7 +62,7 @@ public class SignalDetector extends Detector {
 	 * @param options the size and circularity parameters
 	 * @param channel the RGB channel
 	 */
-	public SignalDetector(NuclearSignalOptions options, int channel){
+	public SignalDetector(IMutableNuclearSignalOptions options, int channel){
 		this.options = options;
 		this.channel = channel;
 		this.minThreshold = options.getThreshold();
@@ -78,17 +79,17 @@ public class SignalDetector extends Detector {
 		
 		options.setThreshold(minThreshold); // reset to default;
 		
-		if(options==null || options.getDetectionMode()==NuclearSignalOptions.FORWARD){
+		if(options==null || options.getDetectionMode().equals(SignalDetectionMode.FORWARD)){
 			finest("Running forward detection");
 			return detectForwardThresholdSignal(sourceFile, stack, n);
 		}
 		
-		if(options.getDetectionMode()==NuclearSignalOptions.REVERSE){
+		if(options.getDetectionMode().equals(SignalDetectionMode.REVERSE)){
 			finest( "Running reverse detection");
 			return detectReverseThresholdSignal(sourceFile, stack, n);
 		}
 		
-		if(options.getDetectionMode()==NuclearSignalOptions.HISTOGRAM){
+		if(options.getDetectionMode().equals(SignalDetectionMode.ADAPTIVE)){
 			finest( "Running adaptive detection");
 			return detectHistogramThresholdSignal(sourceFile, stack, n);
 		}
@@ -168,33 +169,39 @@ public class SignalDetector extends Detector {
 				Rectangle bounds = r.getBounds();
 				int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
 				
-				INuclearSignal s = new DefaultNuclearSignal( r,
-						IPoint.makeNew(values.get("XM").floatValue(), values.get("YM").floatValue()), 
-						sourceFile, 
-						channel, 
-						originalPosition);
-				
-				s.setStatistic(SignalStatistic.AREA,      values.get("Area"));
-				s.setStatistic(SignalStatistic.MAX_FERET, values.get("Feret"));
-				s.setStatistic(SignalStatistic.PERIMETER, values.get("Perim"));
-				
-				/*
+				try {
+					INuclearSignal s = new DefaultNuclearSignal( r,
+							IPoint.makeNew(values.get("XM").floatValue(), values.get("YM").floatValue()), 
+							sourceFile, 
+							channel, 
+							originalPosition);
+
+					s.setStatistic(SignalStatistic.AREA,      values.get("Area"));
+					s.setStatistic(SignalStatistic.MAX_FERET, values.get("Feret"));
+					s.setStatistic(SignalStatistic.PERIMETER, values.get("Perim"));
+
+					/*
 			    Assuming the signal were a perfect circle of area equal
 			    to the measured area, get the radius for that circle
-				 */
-				s.setStatistic(SignalStatistic.RADIUS,  Math.sqrt(values.get("Area")/Math.PI));
-				
+					 */
+					s.setStatistic(SignalStatistic.RADIUS,  Math.sqrt(values.get("Area")/Math.PI));
 
 
-				// only keep the signal if it is within the nucleus
-				if(n.containsOriginalPoint(s.getCentreOfMass())){
-					
-					// Offset the centre of mass and border points of the signal to match the nucleus offset
-					s.offset(-n.getPosition()[CellularComponent.X_BASE], 
-							-n.getPosition()[CellularComponent.Y_BASE]);
-					
-					signals.add(s);
-					
+
+					// only keep the signal if it is within the nucleus
+					if(n.containsOriginalPoint(s.getCentreOfMass())){
+
+						// Offset the centre of mass and border points of the signal to match the nucleus offset
+						s.offset(-n.getPosition()[CellularComponent.X_BASE], 
+								-n.getPosition()[CellularComponent.Y_BASE]);
+
+						signals.add(s);
+
+
+					}
+				} catch(IllegalArgumentException e){
+					stack("Cannot make signal", e);
+					continue;
 				}
 				
 			}

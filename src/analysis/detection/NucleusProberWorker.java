@@ -35,12 +35,13 @@ import javax.swing.table.TableModel;
 
 import stats.NucleusStatistic;
 import utility.Constants;
-import components.Cell;
 import components.CellularComponent;
 import components.ICell;
 import components.nuclei.Nucleus;
 import analysis.IAnalysisOptions;
 import analysis.ICannyOptions;
+import analysis.IMutableAnalysisOptions;
+import analysis.IMutableDetectionOptions;
 import analysis.image.ImageConverter;
 import analysis.image.ImageFilterer;
 import analysis.image.NucleusAnnotator;
@@ -70,7 +71,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		 */
 		finer("Creating processed images");
 		
-		ICannyOptions cannyOptions = options.getCannyOptions("nucleus");
+		ICannyOptions cannyOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions();
 
 		ImageConverter conv = new ImageConverter(imageStack);
 		
@@ -202,19 +203,22 @@ public class NucleusProberWorker extends ImageProberWorker {
 	 * @throws Exception 
 	 */
 	private List<ICell> getCells(ImageStack imageStack, File imageFile) {
-		double minSize = options.getMinNucleusSize();
-		double maxSize = options.getMaxNucleusSize();
-		double minCirc = options.getMinNucleusCirc();
-		double maxCirc = options.getMaxNucleusCirc();
-		boolean addBorder = options.getCannyOptions("nucleus").isAddBorder();
+		
+		IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+		
+		double minSize = nucleusOptions.getMinSize();
+		double maxSize = nucleusOptions.getMaxSize();
+		double minCirc = nucleusOptions.getMinCirc();
+		double maxCirc = nucleusOptions.getMaxCirc();
+		boolean addBorder = nucleusOptions.getCannyOptions().isAddBorder();
 		
 		finer("Widening detection parameters");
 
-		options.setMinNucleusSize(50);
-		options.setMaxNucleusSize(imageStack.getWidth()*imageStack.getHeight());
-		options.setMinNucleusCirc(0);
-		options.setMaxNucleusCirc(1);
-		options.getCannyOptions("nucleus").setAddBorder(false);
+		nucleusOptions.setMinSize(50);
+		nucleusOptions.setMaxSize(imageStack.getWidth()*imageStack.getHeight());
+		nucleusOptions.setMinCirc(0);
+		nucleusOptions.setMaxCirc(1);
+		nucleusOptions.getCannyOptions().setAddBorder(false);
 		
 		finer("Finding cells");
 		
@@ -224,11 +228,11 @@ public class NucleusProberWorker extends ImageProberWorker {
 		
 		finer("Resetting detetion parameters");
 		
-		options.setMinNucleusSize(minSize);
-		options.setMaxNucleusSize(maxSize);
-		options.setMinNucleusCirc(minCirc);
-		options.setMaxNucleusCirc(maxCirc);
-		options.getCannyOptions("nucleus").setAddBorder(addBorder);
+		nucleusOptions.setMinSize(minSize);
+		nucleusOptions.setMaxSize(maxSize);
+		nucleusOptions.setMinCirc(minCirc);
+		nucleusOptions.setMaxCirc(maxCirc);
+		nucleusOptions.getCannyOptions().setAddBorder(addBorder);
 		return cells;
 	}
 	
@@ -242,10 +246,12 @@ public class NucleusProberWorker extends ImageProberWorker {
 			throw new IllegalArgumentException("Input cell is null");
 		}
 		
+		IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+		
 		Nucleus n = cell.getNucleus();
 		// annotate the image processor with the nucleus outline
 		
-		Color colour = options.isValid(n) ? Color.ORANGE : Color.RED;
+		Color colour = nucleusOptions.isValid(n) ? Color.ORANGE : Color.RED;
 
 		ip = new NucleusAnnotator(ip).annotateBorder(n, colour).toProcessor();
 

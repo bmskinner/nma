@@ -36,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import analysis.IAnalysisOptions;
+import analysis.IMutableAnalysisOptions;
 import components.active.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.XYPoint;
@@ -61,7 +62,7 @@ public class NucleusRefinder  extends NucleusDetectionWorker
   /*
     Constructors
   */
-  public NucleusRefinder(String outputFolder, File pathList, File debugFile, IAnalysisOptions options){
+  public NucleusRefinder(String outputFolder, File pathList, File debugFile, IMutableAnalysisOptions options){
 	  super( outputFolder,  debugFile, options);
 	  this.pathList = pathList;
 	  fileLogger = Logger.getLogger(NucleusRefinder.class.getName());

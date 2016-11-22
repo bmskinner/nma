@@ -85,6 +85,7 @@ import logging.TextAreaHandler;
 import utility.Constants;
 import utility.Version;
 import analysis.IAnalysisDataset;
+import analysis.IMutableAnalysisOptions;
 import analysis.MergeSourceExtractor;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import components.active.DefaultWorkspace;
@@ -672,8 +673,9 @@ public class MainWindow
 				latch.await();
 				fine("Latch has released from refolding");
 				if(dataset.hasAnalysisOptions()){
-					dataset.getAnalysisOptions().setRefoldNucleus(true);
-					dataset.getAnalysisOptions().setRefoldMode("Fast");
+					
+					IMutableAnalysisOptions op = (IMutableAnalysisOptions) dataset.getAnalysisOptions();
+					op.setRefoldNucleus(true);
 					fine("Set refold status in options");
 				} else {
 					fine("Dataset has no analysis options, cannot set refold state");

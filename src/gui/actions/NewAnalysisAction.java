@@ -33,6 +33,8 @@ import java.util.logging.Level;
 
 import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
+import analysis.IMutableAnalysisOptions;
+import analysis.IMutableDetectionOptions;
 import analysis.nucleus.NucleusDetectionWorker;
 
 /**
@@ -40,7 +42,7 @@ import analysis.nucleus.NucleusDetectionWorker;
  */
 public class NewAnalysisAction extends ProgressableAction {
 			
-	private IAnalysisOptions options;
+	private IMutableAnalysisOptions options;
 	private Date startTime;
 	private String outputFolderName;
 	
@@ -78,22 +80,23 @@ public class NewAnalysisAction extends ProgressableAction {
 		if( analysisSetup.getOptions()!=null){
 
 			options = analysisSetup.getOptions();
+			IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 
-			log("Directory: "+options.getFolder().getName());
+			log("Directory: "+nucleusOptions.getFolder().getName());
 
 			this.startTime = Calendar.getInstance().getTime();
 			this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
 
 			// craete the analysis folder early. Did not before in case folder had no images
-			File analysisFolder = new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName);
+			File analysisFolder = new File(nucleusOptions.getFolder().getAbsolutePath()+File.separator+outputFolderName);
 			if(!analysisFolder.exists()){
 				analysisFolder.mkdir();
 			}
 //			
-			File logFile = new File(options.getFolder().getAbsolutePath()
+			File logFile = new File(nucleusOptions.getFolder().getAbsolutePath()
 					+ File.separator
 					+ outputFolderName
-					+ File.separator+options.getFolder().getName()+".log");
+					+ File.separator+nucleusOptions.getFolder().getName()+".log");
 
 //			mw.setStatus("New analysis in progress");
 			

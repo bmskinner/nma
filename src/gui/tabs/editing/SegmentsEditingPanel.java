@@ -37,6 +37,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -46,6 +47,7 @@ import javax.swing.SpinnerNumberModel;
 import org.jfree.chart.JFreeChart;
 
 import stats.Quartile;
+import analysis.IMutableAnalysisOptions;
 import analysis.profiles.ProfileException;
 import analysis.profiles.SegmentFitter;
 import charting.charts.MorphologyChartFactory;
@@ -338,7 +340,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		private void updateCollectionWindowSize() throws Exception{
 			double windowSizeMin = 0.01;
 			double windowSizeMax = 0.1;
-			double windowSizeActual = activeDataset().getAnalysisOptions().getAngleWindowProportion();
+			double windowSizeActual = activeDataset().getAnalysisOptions().getProfileWindowProportion();
 			
 			SpinnerNumberModel spinnerModel = new SpinnerNumberModel(windowSizeActual,
 					windowSizeMin,
@@ -402,7 +404,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
 			fitter = null; // clean up
 			
-			activeDataset().getAnalysisOptions().setAngleWindowProportion(windowSize);
+			IMutableAnalysisOptions options = activeDataset().getAnalysisOptions();
+			options.setAngleWindowProportion(windowSize);
 
 		}
 		

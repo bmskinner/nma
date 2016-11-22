@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import analysis.signals.INuclearSignalOptions;
 import analysis.signals.NuclearSignalOptions;
 import stats.NucleusStatistic;
 import components.nuclear.NucleusType;
@@ -35,9 +36,11 @@ import components.nuclei.Nucleus;
  * This stores details of an analysis setup for an IAnalysisDataset.
  * @author bms41
  * @since 1.7.0
+ * @deprecated since 1.13.3
  *
  */
-public class AnalysisOptions implements IAnalysisOptions {
+@Deprecated
+public class AnalysisOptions implements IMutableAnalysisOptions {
 
 	private static final long serialVersionUID = 1L;
 	private  int    nucleusThreshold;
@@ -48,7 +51,7 @@ public class AnalysisOptions implements IAnalysisOptions {
 	
 	private Map<String, ICannyOptions> edgeDetection = new HashMap<String, ICannyOptions>(0);
 	
-	private Map<UUID, NuclearSignalOptions> signalDetection = new HashMap<UUID, NuclearSignalOptions>(0);
+	private Map<UUID, INuclearSignalOptions> signalDetection = new HashMap<UUID, INuclearSignalOptions>(0);
 		
 	private boolean normaliseContrast = false; 
 
@@ -97,37 +100,32 @@ public class AnalysisOptions implements IAnalysisOptions {
 	 * @param template
 	 */
 	public AnalysisOptions(IAnalysisOptions template){
-		nucleusThreshold = template.getNucleusThreshold();
-		minNucleusSize   = template.getMinNucleusSize();
-		maxNucleusSize   = template.getMaxNucleusSize();
-		minNucleusCirc   = template.getMinNucleusCirc();
-		maxNucleusCirc   = template.getMaxNucleusCirc();
+		nucleusThreshold = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getThreshold();
+		minNucleusSize   = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMinSize();
+		maxNucleusSize   = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMaxSize();
+		minNucleusCirc   = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMinCirc();
+		maxNucleusCirc   = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMaxCirc();
 		
 		edgeDetection    = new HashMap<String, ICannyOptions>(0);
-		for(String s : template.getCannyOptionTypes()){
-			edgeDetection.put(s, template.getCannyOptions(s));
-		}
+		edgeDetection.put(IAnalysisOptions.NUCLEUS, template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions());
 
-        signalDetection = new HashMap<UUID, NuclearSignalOptions>(0);
+
+        signalDetection = new HashMap<UUID, INuclearSignalOptions>(0);
         
         for(UUID s : template.getNuclearSignalGroups()){
 			signalDetection.put(s, template.getNuclearSignalOptions(s));
 		}
 		
-		normaliseContrast      = template.isNormaliseContrast(); 
-		angleWindowProportion  = template.getAngleWindowProportion();
-		scale                  = template.getScale(); 
+		normaliseContrast      = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).isNormaliseContrast(); 
+		angleWindowProportion  = template.getProfileWindowProportion();
+		scale                  = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getScale(); 
 		nucleusType            = template.getNucleusType();
-		performReanalysis      = template.isReanalysis() ;
-		realignMode            = template.realignImages();
+
 		refoldNucleus          = template.refoldNucleus();
-		folder                 = template.getFolder();
-		mappingFile            = template.getMappingFile();
-		refoldMode             = template.getRefoldMode();
-		xoffset                = template.getXOffset();
-		yoffset                = template.getYOffset();
+		folder                 = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+
 		keepFailedCollections  = template.isKeepFailedCollections();
-		channel                = template.getChannel();
+		channel                = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getChannel();
 	}
 
 
@@ -140,7 +138,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getFolder()
 	 */
-	@Override
 	public File getFolder(){
 		return this.folder;
 	}
@@ -148,7 +145,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getMappingFile()
 	 */
-	@Override
 	public File getMappingFile(){
 		return this.mappingFile;
 	}
@@ -156,7 +152,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getNucleusThreshold()
 	 */
-	@Override
 	public int getNucleusThreshold(){
 		return this.nucleusThreshold;
 	}
@@ -164,7 +159,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getMinNucleusSize()
 	 */
-	@Override
 	public double getMinNucleusSize(){
 		return this.minNucleusSize;
 	}
@@ -172,7 +166,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getMaxNucleusSize()
 	 */
-	@Override
 	public double getMaxNucleusSize(){
 		return this.maxNucleusSize;
 	}
@@ -180,7 +173,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getMinNucleusCirc()
 	 */
-	@Override
 	public double getMinNucleusCirc(){
 		return this.minNucleusCirc;
 	}
@@ -188,7 +180,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getMaxNucleusCirc()
 	 */
-	@Override
 	public double getMaxNucleusCirc(){
 		return this.maxNucleusCirc;
 	}
@@ -196,15 +187,14 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getAngleWindowProportion()
 	 */
-	@Override
-	public double getAngleWindowProportion(){
+	public double getProfileWindowProportion(){
 		return this.angleWindowProportion;
 	}
 
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getNucleusType()
 	 */
-	@Override
+
 	public NucleusType getNucleusType(){
 		return this.nucleusType;
 	}
@@ -214,7 +204,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getRefoldMode()
 	 */
-	@Override
 	public String getRefoldMode(){
 		return this.refoldMode;
 	}
@@ -222,7 +211,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#isReanalysis()
 	 */
-	@Override
 	public boolean isReanalysis(){
 		return this.performReanalysis;
 	}
@@ -230,7 +218,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#realignImages()
 	 */
-	@Override
 	public boolean realignImages(){
 		return this.realignMode;
 	}
@@ -246,7 +233,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getXOffset()
 	 */
-	@Override
 	public int getXOffset(){
 		return  this.xoffset;
 	}
@@ -254,7 +240,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getYOffset()
 	 */
-	@Override
 	public int getYOffset(){
 		return  this.yoffset;
 	}
@@ -262,7 +247,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getScale()
 	 */
-	@Override
 	public double getScale() {
 		return scale;
 	}
@@ -271,7 +255,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getChannel()
 	 */
-	@Override
 	public int getChannel() {
 		return channel;
 	}
@@ -281,7 +264,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setChannel(int)
 	 */
-	@Override
 	public void setChannel(int channel) {
 		this.channel = channel;
 	}
@@ -291,7 +273,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setScale(double)
 	 */
-	@Override
 	public void setScale(double scale) {
 		this.scale = scale;
 	}
@@ -300,7 +281,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setNucleusThreshold(int)
 	 */
-	@Override
 	public void setNucleusThreshold(int nucleusThreshold) {
 		this.nucleusThreshold = nucleusThreshold;
 	}
@@ -308,7 +288,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setMinNucleusSize(double)
 	 */
-	@Override
 	public void setMinNucleusSize(double minNucleusSize) {
 		this.minNucleusSize = minNucleusSize;
 	}
@@ -317,7 +296,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setMaxNucleusSize(double)
 	 */
-	@Override
 	public void setMaxNucleusSize(double maxNucleusSize) {
 		this.maxNucleusSize = maxNucleusSize;
 	}
@@ -326,7 +304,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setMinNucleusCirc(double)
 	 */
-	@Override
 	public void setMinNucleusCirc(double minNucleusCirc) {
 		this.minNucleusCirc = minNucleusCirc;
 	}
@@ -335,7 +312,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setMaxNucleusCirc(double)
 	 */
-	@Override
 	public void setMaxNucleusCirc(double maxNucleusCirc) {
 		this.maxNucleusCirc = maxNucleusCirc;
 	}
@@ -362,7 +338,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setPerformReanalysis(boolean)
 	 */
-	@Override
 	public void setPerformReanalysis(boolean performReanalysis) {
 		this.performReanalysis = performReanalysis;
 	}
@@ -371,7 +346,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setRealignMode(boolean)
 	 */
-	@Override
 	public void setRealignMode(boolean realignMode) {
 		this.realignMode = realignMode;
 	}
@@ -380,7 +354,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setRefoldNucleus(boolean)
 	 */
-	@Override
 	public void setRefoldNucleus(boolean refoldNucleus) {
 		this.refoldNucleus = refoldNucleus;
 	}
@@ -389,7 +362,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setFolder(java.io.File)
 	 */
-	@Override
 	public void setFolder(File folder) {
 		this.folder = folder;
 	}
@@ -398,7 +370,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setMappingFile(java.io.File)
 	 */
-	@Override
 	public void setMappingFile(File mappingFile) {
 		this.mappingFile = mappingFile;
 	}
@@ -407,7 +378,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setRefoldMode(java.lang.String)
 	 */
-	@Override
 	public void setRefoldMode(String refoldMode) {
 		this.refoldMode = refoldMode;
 	}
@@ -416,7 +386,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setXoffset(int)
 	 */
-	@Override
 	public void setXoffset(int xoffset) {
 		this.xoffset = xoffset;
 	}
@@ -425,7 +394,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setYoffset(int)
 	 */
-	@Override
 	public void setYoffset(int yoffset) {
 		this.yoffset = yoffset;
 	}
@@ -433,7 +401,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#isNormaliseContrast()
 	 */
-	@Override
 	public boolean isNormaliseContrast() {
 		return normaliseContrast;
 	}
@@ -442,7 +409,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#setNormaliseContrast(boolean)
 	 */
-	@Override
 	public void setNormaliseContrast(boolean normaliseContrast) {
 		this.normaliseContrast = normaliseContrast;
 	}
@@ -450,7 +416,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getCannyOptions(java.lang.String)
 	 */
-	@Override
 	public ICannyOptions getCannyOptions(String type){
 		return edgeDetection.get(type); 
 	}
@@ -458,12 +423,10 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#addCannyOptions(java.lang.String)
 	 */
-	@Override
 	public void addCannyOptions(String type){
 		edgeDetection.put(type, new CannyOptions()); 
 	}
 	
-	@Override
 	public void addCannyOptions(String type, ICannyOptions options){
 		edgeDetection.put(type, options); 
 	}
@@ -471,7 +434,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#getCannyOptionTypes()
 	 */
-	@Override
 	public Set<String> getCannyOptionTypes(){
 		return edgeDetection.keySet();
 	}
@@ -479,7 +441,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#hasCannyOptions(java.lang.String)
 	 */
-	@Override
 	public boolean hasCannyOptions(String type){
 		if(this.edgeDetection.containsKey(type)){
 			return true;
@@ -500,7 +461,7 @@ public class AnalysisOptions implements IAnalysisOptions {
 	 * @see analysis.IAnalysisOptions#getNuclearSignalOptions(java.util.UUID)
 	 */
     @Override
-	public NuclearSignalOptions getNuclearSignalOptions(UUID signalGroup){
+	public INuclearSignalOptions getNuclearSignalOptions(UUID signalGroup){
         if(this.signalDetection.containsKey(signalGroup)){
             return this.signalDetection.get(signalGroup);
         } else {
@@ -513,7 +474,6 @@ public class AnalysisOptions implements IAnalysisOptions {
     /* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#addNuclearSignalOptions(java.util.UUID)
 	 */
-    @Override
 	public void addNuclearSignalOptions(UUID id){
         signalDetection.put(id, new NuclearSignalOptions());
     }
@@ -521,7 +481,6 @@ public class AnalysisOptions implements IAnalysisOptions {
     /* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#addNuclearSignalOptions(java.util.UUID, analysis.signals.NuclearSignalOptions)
 	 */
-    @Override
 	public void addNuclearSignalOptions(UUID id, NuclearSignalOptions options){
         signalDetection.put(id, options);
     }
@@ -560,7 +519,6 @@ public class AnalysisOptions implements IAnalysisOptions {
 	/* (non-Javadoc)
 	 * @see analysis.IAnalysisOptions#isValid(components.nuclei.Nucleus)
 	 */
-	@Override
 	public boolean isValid(Nucleus c){
 		boolean result = true;
 		
@@ -717,7 +675,23 @@ public class AnalysisOptions implements IAnalysisOptions {
 		
 		public CannyOptions(){}
 		
-		
+		protected CannyOptions(ICannyOptions template){
+			
+			useCanny             = template.isUseCanny();
+			cannyAutoThreshold   = template.isAddBorder();
+			flattenChromocentres = template.isUseFlattenImage();
+			flattenThreshold     = template.getFlattenThreshold();
+			
+			useKuwahara          = template.isUseKuwahara();
+			kuwaharaKernel       = template.getKuwaharaKernel();
+			
+			lowThreshold         = template.getLowThreshold();
+			highThreshold        = template.getHighThreshold();
+			kernelRadius         = template.getKernelRadius();
+			kernelWidth          = template.getKernelWidth();
+			closingObjectRadius  = template.getClosingObjectRadius();
+			isAddBorder          = template.isAddBorder();
+		}
 		
 		
 		/* (non-Javadoc)
@@ -1001,5 +975,47 @@ public class AnalysisOptions implements IAnalysisOptions {
 			isAddBorder = b;
 			
 		}
+
+
+
+
+		@Override
+		public ICannyOptions duplicate() {
+			return new CannyOptions(this);
+		}
+	}
+
+
+
+
+
+	@Override
+	public IMutableDetectionOptions getDetectionOptions(String key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	public Set<String> getDetectionOptionTypes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	public boolean hasDetectionOptions(String type) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+
+	@Override
+	public void setDetectionOptions(String key, IMutableDetectionOptions options) {
+		// TODO Auto-generated method stub
+		
 	}
 }

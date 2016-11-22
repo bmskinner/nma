@@ -70,7 +70,7 @@ public class AnalysisDataset implements IAnalysisDataset {
 	private CellCollection thisCollection;
 	private File savePath; // the file to save the analysis to
 	
-	private IAnalysisOptions analysisOptions;
+	private IMutableAnalysisOptions analysisOptions;
 	
 	private Paint datasetColour = null; // use for colouring the dataset in comparison with other datasets
 	
@@ -526,7 +526,7 @@ public class AnalysisDataset implements IAnalysisDataset {
 	 * @see analysis.IAnalysisDataset#getAnalysisOptions()
 	 */
 	@Override
-	public IAnalysisOptions getAnalysisOptions() {
+	public IMutableAnalysisOptions getAnalysisOptions() {
 		return analysisOptions;
 	}
 	
@@ -546,7 +546,7 @@ public class AnalysisDataset implements IAnalysisDataset {
 	 * @see analysis.IAnalysisDataset#setAnalysisOptions(analysis.AnalysisOptions)
 	 */
 	@Override
-	public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
+	public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
 		this.analysisOptions = analysisOptions;
 	}
 	

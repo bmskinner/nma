@@ -18,9 +18,6 @@
  *******************************************************************************/
 package gui.dialogs;
 
-import ij.IJ;
-import ij.io.OpenDialog;
-
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
@@ -38,6 +35,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -57,15 +55,19 @@ import javax.swing.event.ChangeListener;
 
 import utility.Constants;
 import analysis.AnalysisDataset;
-import analysis.AnalysisOptions;
+import analysis.DefaultAnalysisOptions;
+import analysis.DefaultCannyOptions;
 import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
 import analysis.ICannyOptions;
+import analysis.IMutableAnalysisOptions;
+import analysis.IMutableDetectionOptions;
+import analysis.nucleus.DefaultNucleusDetectionOptions;
 import components.nuclear.NucleusType;
 
 public class AnalysisSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
 
-	private IAnalysisOptions analysisOptions = new AnalysisOptions();
+	private IMutableAnalysisOptions analysisOptions = new DefaultAnalysisOptions();
 	
 	private static final int    DEFAULT_MIN_NUCLEUS_SIZE = 2000;
 	private static final int    DEFAULT_MAX_NUCLEUS_SIZE = 10000;
@@ -132,7 +134,9 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	public AnalysisSetupDialog(Collection<IAnalysisDataset> datasets, File folder) {
 		super();
 		
-		analysisOptions.setFolder(folder);
+		IMutableDetectionOptions nucleusOptions = new DefaultNucleusDetectionOptions(folder);
+		analysisOptions.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
+
 		openDatasets = datasets;
 		setModal(true); // ensure nothing happens until this window is closed
 		
@@ -158,37 +162,44 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	 * Create the dialog with an existing set of options
 	 * Allows settings to be reloaded.
 	 */
-	public AnalysisSetupDialog(List<IAnalysisDataset> datasets, IAnalysisOptions options) {
+	public AnalysisSetupDialog(List<IAnalysisDataset> datasets, IMutableAnalysisOptions options) {
 		super();
-		openDatasets = datasets;
-		setModal(true); // ensure nothing happens until this window is closed
-		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		
-		this.addWindowListener(new WindowAdapter() {
+		try {
 			
-			public void windowClosing(WindowEvent e) {
-				analysisOptions = null;
-				AnalysisSetupDialog.this.setVisible(false);
-			}
+			openDatasets = datasets;
+			setModal(true); // ensure nothing happens until this window is closed
+			this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
+			this.addWindowListener(new WindowAdapter() {
+
+				public void windowClosing(WindowEvent e) {
+					analysisOptions = null;
+					AnalysisSetupDialog.this.setVisible(false);
+				}
 
 
-		});
+			});
 
-		analysisOptions = options;
-		createAndShowGUI();
-		pack();
-		setVisible(true);
+			analysisOptions = options;
+			createAndShowGUI();
+			pack();
+			setVisible(true);
+		} catch(Exception e){
+			warn("Cannot make dialog");
+			stack("Error making analysis setup", e);
+		}
 	}
 
 	/**
 	 * Get the current options 
 	 * @return an AnalysisOptions
 	 */
-	public IAnalysisOptions getOptions(){
+	public IMutableAnalysisOptions getOptions(){
 		return this.analysisOptions;
 	}
 
 	public void createAndShowGUI(){
+		finer("Creating UI");
 		setTitle("Create new analysis");
 		setBounds(200, 100, 450, 626);
 		this.setLocationRelativeTo(null);
@@ -204,6 +215,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		contentPane.add(makeLowerButtonPanel(), BorderLayout.SOUTH);
 		
 		contentPane.add(makeSettingsPanel(), BorderLayout.CENTER);	
+		finer("Created UI");
 
 	}
 
@@ -211,32 +223,29 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	 * Populate the analysis options with the defaults specified above
 	 */
 	public void setDefaultOptions(){
-		analysisOptions.setNucleusThreshold(DEFAULT_NUCLEUS_THRESHOLD);
 
-		analysisOptions.setMinNucleusSize(DEFAULT_MIN_NUCLEUS_SIZE);
-		analysisOptions.setMaxNucleusSize(DEFAULT_MAX_NUCLEUS_SIZE);
-
-		analysisOptions.setMinNucleusCirc(DEFAULT_MIN_NUCLEUS_CIRC);
-		analysisOptions.setMaxNucleusCirc(DEFAULT_MAX_NUCLEUS_CIRC);
-
-		analysisOptions.setAngleWindowProportion(DEFAULT_PROFILE_WINDOW_SIZE);
-
-		analysisOptions.setPerformReanalysis(false);
-		analysisOptions.setRealignMode(true);
-
-		analysisOptions.setRefoldNucleus(false);
-		analysisOptions.setRefoldMode(DEFAULT_REFOLD_MODE);
-
-		analysisOptions.setXoffset(0);
-		analysisOptions.setYoffset(0);
+		finer("Setting default options");
+		IMutableDetectionOptions nucleusOptions  = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 		
-		analysisOptions.setScale(DEFAULT_SCALE);
-				
+		if(nucleusOptions==null){
+			warn("Options is null");
+		}
+		
+		analysisOptions.setAngleWindowProportion(DEFAULT_PROFILE_WINDOW_SIZE);
+		analysisOptions.setRefoldNucleus(false);
 		analysisOptions.setNucleusType(NucleusType.RODENT_SPERM);
 		
-		analysisOptions.setChannel(DEFAULT_CHANNEL);
+		nucleusOptions.setThreshold(DEFAULT_NUCLEUS_THRESHOLD);
+
+		nucleusOptions.setMinSize(DEFAULT_MIN_NUCLEUS_SIZE);
+		nucleusOptions.setMaxSize(DEFAULT_MAX_NUCLEUS_SIZE);
+
+		nucleusOptions.setMinCirc(DEFAULT_MIN_NUCLEUS_CIRC);
+		nucleusOptions.setMaxCirc(DEFAULT_MAX_NUCLEUS_CIRC);
+		nucleusOptions.setChannel(DEFAULT_CHANNEL);
+		nucleusOptions.setScale(DEFAULT_SCALE);
 		
-		ICannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
+		ICannyOptions nucleusCannyOptions = new DefaultCannyOptions();
 		
 		nucleusCannyOptions.setUseCanny(true);
 		nucleusCannyOptions.setCannyAutoThreshold(false);
@@ -251,23 +260,8 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		nucleusCannyOptions.setFlattenImage(ICannyOptions.DEFAULT_FLATTEN_CHROMOCENTRES);
 		nucleusCannyOptions.setFlattenThreshold(ICannyOptions.DEFAULT_FLATTEN_THRESHOLD);
 		nucleusCannyOptions.setAddBorder(ICannyOptions.DEFAULT_ADD_BORDER);
-		
-		ICannyOptions tailCannyOptions = analysisOptions.getCannyOptions("tail");
-		
-		tailCannyOptions.setUseCanny(true);
-		tailCannyOptions.setCannyAutoThreshold(false);
-		tailCannyOptions.setLowThreshold( (float) ICannyOptions.DEFAULT_CANNY_TAIL_LOW_THRESHOLD);
-		tailCannyOptions.setHighThreshold((float) ICannyOptions.DEFAULT_CANNY_TAIL_HIGH_THRESHOLD);
-		tailCannyOptions.setKernelRadius((float) ICannyOptions.DEFAULT_CANNY_KERNEL_RADIUS);
-		tailCannyOptions.setKernelWidth( ICannyOptions.DEFAULT_CANNY_KERNEL_WIDTH);
-		tailCannyOptions.setClosingObjectRadius( ICannyOptions.DEFAULT_TAIL_CLOSING_OBJECT_RADIUS);
-		
-		tailCannyOptions.setUseKuwahara(false);
-		tailCannyOptions.setKuwaharaKernel(ICannyOptions.DEFAULT_KUWAHARA_KERNEL_RADIUS);
-		tailCannyOptions.setFlattenImage(false);
-		tailCannyOptions.setFlattenThreshold(ICannyOptions.DEFAULT_FLATTEN_THRESHOLD);
-		tailCannyOptions.setAddBorder(ICannyOptions.DEFAULT_ADD_BORDER);
-		
+		nucleusOptions.setCannyOptions(nucleusCannyOptions);
+		finer("Set default options");
 	}
 	
 	/**
@@ -275,65 +269,47 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	 * @param options
 	 */
 	private void setOptions(final IAnalysisOptions options ){
-		analysisOptions.setNucleusThreshold(options.getNucleusThreshold());
+		
+		IMutableDetectionOptions templateNucleusOptions  = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+		IMutableDetectionOptions nucleusOptions  = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+		
+		nucleusOptions.setThreshold(templateNucleusOptions.getThreshold());
 
-		analysisOptions.setMinNucleusSize(options.getMinNucleusSize());
-		analysisOptions.setMaxNucleusSize(options.getMaxNucleusSize());
+		nucleusOptions.setMinSize(templateNucleusOptions.getMinSize());
+		nucleusOptions.setMaxSize(templateNucleusOptions.getMaxSize());
 
-		analysisOptions.setMinNucleusCirc(options.getMinNucleusCirc());
-		analysisOptions.setMaxNucleusCirc(options.getMinNucleusCirc());
+		nucleusOptions.setMinCirc(templateNucleusOptions.getMinCirc());
+		nucleusOptions.setMaxCirc(templateNucleusOptions.getMaxCirc());
 
-		analysisOptions.setAngleWindowProportion(options.getAngleWindowProportion());
-
-		analysisOptions.setPerformReanalysis(options.isReanalysis());
-		analysisOptions.setRealignMode(options.realignImages());
-
+		nucleusOptions.setScale(templateNucleusOptions.getScale());	
+		nucleusOptions.setChannel(templateNucleusOptions.getChannel());
+		nucleusOptions.setCannyOptions(templateNucleusOptions.getCannyOptions());
+		
+		
+		analysisOptions.setAngleWindowProportion(options.getProfileWindowProportion());
 		analysisOptions.setRefoldNucleus(options.refoldNucleus());
-		analysisOptions.setRefoldMode(options.getRefoldMode());
-
-		analysisOptions.setScale(options.getScale());	
 		analysisOptions.setNucleusType(options.getNucleusType());
-		analysisOptions.setChannel(options.getChannel());
-		
-		
-		analysisOptions.addCannyOptions("nucleus");
-		ICannyOptions templateCannyOptions = options.getCannyOptions("nucleus");
-		ICannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
-		
-		nucleusCannyOptions.setUseCanny(templateCannyOptions.isUseCanny());
-		nucleusCannyOptions.setCannyAutoThreshold(templateCannyOptions.isCannyAutoThreshold());
-		nucleusCannyOptions.setLowThreshold( templateCannyOptions.getLowThreshold());
-		nucleusCannyOptions.setHighThreshold( templateCannyOptions.getHighThreshold());
-		nucleusCannyOptions.setKernelRadius( templateCannyOptions.getKernelRadius());
-		nucleusCannyOptions.setKernelWidth(templateCannyOptions.getKernelWidth());
-		nucleusCannyOptions.setClosingObjectRadius(templateCannyOptions.getClosingObjectRadius());
-		
-		nucleusCannyOptions.setUseKuwahara(templateCannyOptions.isUseKuwahara());
-		nucleusCannyOptions.setKuwaharaKernel(templateCannyOptions.getKuwaharaKernel());
-		nucleusCannyOptions.setFlattenImage(templateCannyOptions.isUseFlattenImage());
-		nucleusCannyOptions.setFlattenThreshold(templateCannyOptions.getFlattenThreshold());
-		nucleusCannyOptions.setAddBorder(templateCannyOptions.isAddBorder());
 		
 		// Update the gui
 		fine("Updated options object");
 		
 		try{
 			
-			channelSelection.setSelectedItem(Constants.channelIntToName(options.getChannel()));
+			channelSelection.setSelectedItem(Constants.channelIntToName(nucleusOptions.getChannel()));
 			
-			nucleusThresholdSpinner.setValue(options.getNucleusThreshold());
+			nucleusThresholdSpinner.setValue(nucleusOptions.getThreshold());
 		
-			txtMinNuclearSize.setValue( (int) options.getMinNucleusSize());
+			txtMinNuclearSize.setValue( (int) nucleusOptions.getMinSize());
 
 
-			txtMaxNuclearSize.setValue( (int) options.getMaxNucleusSize());
+			txtMaxNuclearSize.setValue( (int) nucleusOptions.getMaxSize());
 
-			minNuclearCircSpinner.setValue(options.getMinNucleusCirc());
+			minNuclearCircSpinner.setValue(nucleusOptions.getMinCirc());
 
-			maxNuclearCircSpinner.setValue(options.getMaxNucleusCirc());
+			maxNuclearCircSpinner.setValue(nucleusOptions.getMaxCirc());
 
-			scaleSpinner.setValue(options.getScale());
-			txtProfileWindowSize.setValue(options.getAngleWindowProportion());
+			scaleSpinner.setValue(nucleusOptions.getScale());
+			txtProfileWindowSize.setValue(options.getProfileWindowProportion());
 			finest("Updated spinners");
 
 
@@ -341,13 +317,13 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 			refoldCheckBox.setSelected(options.refoldNucleus());
 			finest("Updated checkboxes");
 
-			nucleusCannyPanel.update(templateCannyOptions);
+			nucleusCannyPanel.update(nucleusOptions.getCannyOptions());
 			finest("Updated canny panel");
 			
 			fine("Updated gui");
 			
 		} catch(Exception e){
-			error("Error updating gui", e);
+			stack("Error updating gui", e);
 		}
 
 	}
@@ -422,7 +398,8 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 					
 					// probe the first image
 					// show the results of the current settings
-					ImageProber p = new NucleusDetectionImageProber(analysisOptions,  analysisOptions.getFolder());
+					ImageProber p = new NucleusDetectionImageProber(analysisOptions,  
+							analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder());
 					if(p.getOK()==false){
 					
 						// Do nothing, revise options
@@ -488,7 +465,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		JPanel detectionSwitchPanel = makeNucleusDetectionSwitchPanel();
 		panel.add(detectionSwitchPanel);
 		
-		nucleusCannyPanel = new CannyPanel(analysisOptions.getCannyOptions("nucleus"));
+		nucleusCannyPanel = new CannyPanel(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions());
 		
 		nucleusThresholdPanel = makeNucleusThresholdPanel();
 		
@@ -628,8 +605,10 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
+		IMutableDetectionOptions nucleusOptions  = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+		
 		if(e.getSource()==channelSelection){
-			this.analysisOptions.setChannel(channelSelection.getSelectedItem().equals("Red") 
+			nucleusOptions.setChannel(channelSelection.getSelectedItem().equals("Red") 
 					? Constants.RGB_RED
 							: channelSelection.getSelectedItem().equals("Green") 
 							? Constants.RGB_GREEN
@@ -638,7 +617,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		}
 
 		if(e.getActionCommand().equals("NucleusDetectionThreshold")){
-			this.analysisOptions.getCannyOptions("nucleus").setUseCanny(false);
+			nucleusOptions.getCannyOptions().setUseCanny(false);
 			
 			CardLayout cl = (CardLayout)(cardPanel.getLayout());
 		    cl.show(cardPanel, "ThresholdPanel");
@@ -646,7 +625,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		}
 		
 		if(e.getActionCommand().equals("NucleusDetectionEdge")){
-			this.analysisOptions.getCannyOptions("nucleus").setUseCanny(true);
+			nucleusOptions.getCannyOptions().setUseCanny(true);
 			CardLayout cl = (CardLayout)(cardPanel.getLayout());
 		    cl.show(cardPanel, "CannyPanel");
 		}
@@ -659,31 +638,23 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 			NucleusType type = (NucleusType) nucleusSelectionBox.getSelectedItem();
 			this.analysisOptions.setNucleusType(type);
 			
-//			if(type.equals(NucleusType.ASYMMETRIC)){
-//				this.analysisOptions.setNucleusType(NucleusType.ROUND); // not set up for this yet
-//				this.analysisOptions.setMinNucleusCirc(  0.0 );
-//				this.analysisOptions.setMaxNucleusCirc(  1.0 );
-//				minNuclearCircSpinner.setValue(0.0);
-//				maxNuclearCircSpinner.setValue(1.0);
-//			}
-
 			
 			if(type.equals(NucleusType.ROUND)){
-				this.analysisOptions.setMinNucleusCirc(  0.0 );
-				this.analysisOptions.setMaxNucleusCirc(  1.0 );
+				nucleusOptions.setMinCirc(  0.0 );
+				nucleusOptions.setMaxCirc(  1.0 );
 				minNuclearCircSpinner.setValue(0.0);
 				maxNuclearCircSpinner.setValue(1.0);
 				
 			}
 			if(type.equals(NucleusType.RODENT_SPERM)){
-				this.analysisOptions.setMinNucleusCirc(  0.2 );
-				this.analysisOptions.setMaxNucleusCirc(  0.8 );
+				nucleusOptions.setMinCirc(  0.2 );
+				nucleusOptions.setMaxCirc(  0.8 );
 				minNuclearCircSpinner.setValue(0.2);
 				maxNuclearCircSpinner.setValue(0.8);
 			}
 			if(type.equals(NucleusType.PIG_SPERM)){
-				this.analysisOptions.setMinNucleusCirc(  0.2 );
-				this.analysisOptions.setMaxNucleusCirc(  0.8 );
+				nucleusOptions.setMinCirc(  0.2 );
+				nucleusOptions.setMaxCirc(  0.8 );
 				minNuclearCircSpinner.setValue(0.2);
 				maxNuclearCircSpinner.setValue(0.8);
 			}
@@ -692,47 +663,30 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 
 		if(e.getActionCommand().equals("Refold nucleus")){
 			if(refoldCheckBox.isSelected()){
-				// toggle radios on
-//				refoldFastButton.setEnabled(true);
-//				refoldIntensiveButton.setEnabled(true);
-//				refoldBrutalButton.setEnabled(true);
+
 				this.analysisOptions.setRefoldNucleus(true);
-//				this.analysisOptions.setRefoldMode( refoldModeGroup.getSelection().getActionCommand()  );
-				this.analysisOptions.setRefoldMode( DEFAULT_REFOLD_MODE  );
 				
 			} else {
-				// toggle radios off
-//				refoldFastButton.setEnabled(false);
-//				refoldIntensiveButton.setEnabled(false);
-//				refoldBrutalButton.setEnabled(false);
+
 				this.analysisOptions.setRefoldNucleus(false);
 			}
 
 		}
 		
-//		if(e.getActionCommand().equals("Fast")){
-//			this.analysisOptions.setRefoldMode( "Fast"  );
-//		}
-//		
-//		if(e.getActionCommand().equals("Intensive")){
-//			this.analysisOptions.setRefoldMode( "Intensive"  );
-//		}
-//		
-//		if(e.getActionCommand().equals("Brutal")){
-//			this.analysisOptions.setRefoldMode( "Brutal"  );
-//		}
-
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
 
+		IMutableDetectionOptions nucleusOptions  = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+		
+		
 		try{
 
 			if(e.getSource()==nucleusThresholdSpinner){
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();	
-				this.analysisOptions.setNucleusThreshold(  (Integer) j.getValue());
+				nucleusOptions.setThreshold(  (Integer) j.getValue());
 			}
 
 			if(e.getSource()==txtMinNuclearSize){
@@ -744,7 +698,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 					j.setValue( txtMaxNuclearSize.getValue() );
 				}
 				
-				this.analysisOptions.setMinNucleusSize(  (Integer) j.getValue());
+				nucleusOptions.setMinSize(  (Integer) j.getValue());
 			}
 			
 			if(e.getSource()==txtMaxNuclearSize){
@@ -756,7 +710,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 					j.setValue( txtMinNuclearSize.getValue() );
 				}
 				
-				this.analysisOptions.setMaxNucleusSize(  (Integer) j.getValue());
+				nucleusOptions.setMaxSize(  (Integer) j.getValue());
 			}
 			
 			if(e.getSource()==minNuclearCircSpinner){
@@ -768,7 +722,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 					j.setValue( maxNuclearCircSpinner.getValue() );
 				}
 				
-				this.analysisOptions.setMinNucleusCirc(  (Double) j.getValue());
+				nucleusOptions.setMinCirc(  (Double) j.getValue());
 			}
 			
 			if(e.getSource()==maxNuclearCircSpinner){
@@ -780,7 +734,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 					j.setValue( minNuclearCircSpinner.getValue() );
 				}
 				
-				this.analysisOptions.setMaxNucleusCirc(  (Double) j.getValue());
+				nucleusOptions.setMaxCirc(  (Double) j.getValue());
 			}
 						
 			if(e.getSource()==txtProfileWindowSize){
@@ -792,11 +746,11 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 			if(e.getSource()==scaleSpinner){
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
-				this.analysisOptions.setScale(  (Double) j.getValue());
+				nucleusOptions.setScale(  (Double) j.getValue());
 			}	
 			
 		} catch (ParseException e1) {
-			IJ.log("Parsing error in JSpinner");
+			stack("Parsing error in JSpinner", e1);
 		}
 
 
@@ -805,7 +759,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	
 	private boolean getImageDirectory(){
 				
-		File defaultDir = analysisOptions.getFolder();
+		File defaultDir = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
 		
 		JFileChooser fc = new JFileChooser(defaultDir); // if null, will be home dir
 
@@ -824,14 +778,14 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		}
 		fine("Selected directory: "+file.getAbsolutePath());
 
-		analysisOptions.setFolder( file);
+		analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).setFolder( file);
 
-		if(analysisOptions.isReanalysis()){
-			OpenDialog fileDialog = new OpenDialog("Select a mapping file...");
-			String fileName = fileDialog.getPath();
-			if(fileName==null) return false;
-			analysisOptions.setMappingFile(new File(fileName));
-		}
+//		if(analysisOptions.isReanalysis()){
+//			OpenDialog fileDialog = new OpenDialog("Select a mapping file...");
+//			String fileName = fileDialog.getPath();
+//			if(fileName==null) return false;
+//			analysisOptions.setMappingFile(new File(fileName));
+//		}
 		return true;
 	}
 }

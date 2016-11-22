@@ -74,7 +74,7 @@ public class TailDetectionSettingsDialog extends SettingsDialog implements Actio
 		channelSelection.addActionListener(this);
 		contentPanel.add(channelSelection);
 		
-		cannyPanel = new CannyPanel(options.getCannyOptions("tail"));
+		cannyPanel = new CannyPanel(options.getDetectionOptions(IAnalysisOptions.SPERM_TAIL).getCannyOptions());
 		contentPanel.add(cannyPanel);
 		
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

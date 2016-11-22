@@ -1,13 +1,11 @@
 package analysis;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.UUID;
 
-import analysis.signals.NuclearSignalOptions;
+import analysis.signals.INuclearSignalOptions;
 import components.nuclear.NucleusType;
-import components.nuclei.Nucleus;
 import logging.Loggable;
 
 /**
@@ -17,99 +15,50 @@ import logging.Loggable;
  *
  */
 public interface IAnalysisOptions extends Serializable, Loggable {
-
-	File getFolder();
-
-	File getMappingFile();
-
-	int getNucleusThreshold();
-
-	double getMinNucleusSize();
-
-	double getMaxNucleusSize();
-
-	double getMinNucleusCirc();
-
-	double getMaxNucleusCirc();
-
-	double getAngleWindowProportion();
-
-	NucleusType getNucleusType();
-
-	String getRefoldMode();
-
-	boolean isReanalysis();
-
-	boolean realignImages();
-
-	boolean refoldNucleus();
-
-	int getXOffset();
-
-	int getYOffset();
-
-	double getScale();
-
-	int getChannel();
-
-	void setChannel(int channel);
-
-	void setScale(double scale);
-
-	void setNucleusThreshold(int nucleusThreshold);
-
-	void setMinNucleusSize(double minNucleusSize);
-
-	void setMaxNucleusSize(double maxNucleusSize);
-
-	void setMinNucleusCirc(double minNucleusCirc);
-
-	void setMaxNucleusCirc(double maxNucleusCirc);
-
-	void setAngleWindowProportion(double proportion);
-
-	void setNucleusType(NucleusType nucleusType);
-
-	void setPerformReanalysis(boolean performReanalysis);
-
-	void setRealignMode(boolean realignMode);
-
-	void setRefoldNucleus(boolean refoldNucleus);
-
-	void setFolder(File folder);
-
-	void setMappingFile(File mappingFile);
-
-	void setRefoldMode(String refoldMode);
-
-	void setXoffset(int xoffset);
-
-	void setYoffset(int yoffset);
-
-	boolean isNormaliseContrast();
-
-	void setNormaliseContrast(boolean normaliseContrast);
-
-	/**
-	 * Get the canny options associated with the
-	 * given type, or null if not present
-	 * @param type the name to check
-	 * @return canny detection options
-	 */
-	ICannyOptions getCannyOptions(String type);
 	
-	void addCannyOptions(String key, ICannyOptions options);
+	// Standard detection keys
+	static final String NUCLEUS     = "Nucleus";
+	static final String SPERM_TAIL  = "SpermTail";
 
-	void addCannyOptions(String type);
-
-	Set<String> getCannyOptionTypes();
-
+	
+	/**
+	 * Get the detection options for the given component
+	 * @param key the component to detect
+	 * @return the detection options for the component
+	 */
+	IMutableDetectionOptions getDetectionOptions(String key);
+	
+	/**
+	 * Get the type of detection options stored
+	 * @return
+	 */
+	Set<String> getDetectionOptionTypes();
+	
 	/**
 	 * Check if the given type name is already present
 	 * @param type the name to check
 	 * @return present or not
 	 */
-	boolean hasCannyOptions(String type);
+	boolean hasDetectionOptions(String type);
+	
+	/**
+	 * Get the proportion of the nucleus perimeter to use for shape profiling 
+	 * @return the profile proportion
+	 */
+	double getProfileWindowProportion();
+
+	/**
+	 * Get the type of nucleus being analysed
+	 * @return the type of nucleus
+	 */
+	NucleusType getNucleusType();
+
+	/**
+	 * Should the consensus nucleus be automatically refolded?
+	 * @return the refold option: true to refold, false to not refold
+	 */
+	boolean refoldNucleus();
+
 
 	Set<UUID> getNuclearSignalGroups();
 
@@ -119,11 +68,8 @@ public interface IAnalysisOptions extends Serializable, Loggable {
 	 * @param type the name to check
 	 * @return nuclear detection options
 	 */
-	NuclearSignalOptions getNuclearSignalOptions(UUID signalGroup);
+	INuclearSignalOptions getNuclearSignalOptions(UUID signalGroup);
 
-	void addNuclearSignalOptions(UUID id);
-
-	void addNuclearSignalOptions(UUID id, NuclearSignalOptions options);
 
 	/**
 	 * Check if the given type name is already present
@@ -134,12 +80,6 @@ public interface IAnalysisOptions extends Serializable, Loggable {
 
 	boolean isKeepFailedCollections();
 
-	void setKeepFailedCollections(boolean keepFailedCollections);
 
-	boolean isValid(Nucleus c);
-
-	int hashCode();
-
-	boolean equals(Object obj);
 
 }

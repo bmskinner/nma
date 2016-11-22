@@ -37,6 +37,7 @@ import components.ICellCollection;
 import components.IClusterGroup;
 import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
+import analysis.IMutableAnalysisOptions;
 import analysis.nucleus.NucleusDetectionWorker;
 
 /**
@@ -69,7 +70,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	
 	private File savePath; // the file to save this dataset to
 	
-	private IAnalysisOptions analysisOptions; // the setup for this analysis
+	private IMutableAnalysisOptions analysisOptions; // the setup for this analysis
 
 	/*
 	 * TRANSIENT FIELDS
@@ -508,7 +509,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	 * @see analysis.IAnalysisDataset#getAnalysisOptions()
 	 */
 	@Override
-	public IAnalysisOptions getAnalysisOptions() {
+	public IMutableAnalysisOptions getAnalysisOptions() {
 		return analysisOptions;
 	}
 	
@@ -524,7 +525,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	 * @see analysis.IAnalysisDataset#setAnalysisOptions(analysis.AnalysisOptions)
 	 */
 	@Override
-	public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
+	public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
 		this.analysisOptions = analysisOptions;
 	}
 		

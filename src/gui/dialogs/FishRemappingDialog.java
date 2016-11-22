@@ -49,6 +49,7 @@ import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 
 import analysis.IAnalysisDataset;
+import analysis.IAnalysisOptions;
 import analysis.detection.IconCell;
 import analysis.signals.FishRemappingWorker;
 import components.ICell;
@@ -109,7 +110,9 @@ public class FishRemappingDialog extends ImageProber {
 	 */
 	public FishRemappingDialog(MainWindow mw, IAnalysisDataset dataset) {
 		
-		super(dataset.getAnalysisOptions(), FishMappingImageType.ORIGINAL_IMAGE, dataset.getAnalysisOptions().getFolder());
+		super(dataset.getAnalysisOptions(), 
+				FishMappingImageType.ORIGINAL_IMAGE, 
+				dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder());
 		
 		this.setTitle("FISH remapping");
 		
@@ -441,7 +444,8 @@ public class FishRemappingDialog extends ImageProber {
 	 * @return true if the directory is valid, false otherwise
 	 */
 	private boolean getPostFISHDirectory(){
-		DirectoryChooser.setDefaultDirectory(dataset.getAnalysisOptions().getFolder().getAbsolutePath());
+		DirectoryChooser.setDefaultDirectory(dataset.getAnalysisOptions()
+				.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath());
 		DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of post-FISH images...");
 				
 	    String folderName = localOpenDialog.getDirectory();
