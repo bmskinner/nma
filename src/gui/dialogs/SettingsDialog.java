@@ -207,6 +207,7 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 		private JCheckBox 	flattenImageCheckBox;
 		private JSpinner 	flattenImageThresholdSpinner;
 		
+		private JCheckBox 	addBorderCheckBox;
 		
 		private ICannyOptions options;
 		
@@ -227,7 +228,7 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 			cannyKernelRadius = new JSpinner(new SpinnerNumberModel(options.getKernelRadius(),	0, 20, 0.05));
 			cannyKernelWidth = new JSpinner(new SpinnerNumberModel(options.getKernelWidth(),	1, 50, 1));
 			closingObjectRadiusSpinner = new JSpinner(new SpinnerNumberModel(options.getClosingObjectRadius(), 1,100 , 1));
-			
+						
 			kuwaharaRadiusSpinner = new JSpinner(new SpinnerNumberModel(options.getKuwaharaKernel(), 1,11 , 2));
 			flattenImageThresholdSpinner = new JSpinner(new SpinnerNumberModel(options.getFlattenThreshold(), 0,255 , 1));
 			
@@ -336,7 +337,7 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 			flattenImageCheckBox.addActionListener(this);
 			this.add(flattenImageCheckBox);
 			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
-			
+						
 			// add the flattening threshold spinner
 			labels = new JLabel[1];
 			fields = new JSpinner[1];
@@ -345,8 +346,19 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 			fields[0] = flattenImageThresholdSpinner;
 			
 			flattenImageThresholdSpinner.addChangeListener(this);
-
+			
 			addLabelTextRows(labels, fields, new GridBagLayout(), this );
+			
+			
+			// Add the border adding box
+			addBorderCheckBox = new JCheckBox("Add border to images");
+			addBorderCheckBox.setSelected(options.isAddBorder());
+			addBorderCheckBox.setActionCommand("AddBorder");
+			addBorderCheckBox.addActionListener(this);
+//			this.add(addBorderCheckBox); // Do not enable until signal detector gets IAnalysisOptions
+//			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
+
+			
 			
 			
 			
@@ -459,6 +471,11 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 					options.setFlattenImage(false);
 					flattenImageThresholdSpinner.setEnabled(false);
 				}
+			}
+			
+			if(e.getActionCommand().equals("AddBorder")){
+
+				options.setAddBorder(addBorderCheckBox.isSelected());
 			}
 			
 		}

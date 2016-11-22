@@ -38,6 +38,7 @@ import utility.StatsMap;
 import analysis.IAnalysisOptions;
 import analysis.ICannyOptions;
 import analysis.detection.Detector;
+import analysis.image.ImageConverter;
 import analysis.image.ImageFilterer;
 import components.ICell;
 import components.IMutableCell;
@@ -205,8 +206,18 @@ public class NucleusDetector extends Detector {
 		ICannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
 
 		ImageStack searchStack = null;
+		
+		
 
 		if( nucleusCannyOptions.isUseCanny()) {
+			
+			if(nucleusCannyOptions.isAddBorder()){
+				image = new ImageConverter(image)
+					.addBorder(10)
+					.toStack();
+
+				finer("Added border");
+			}
 
 			// before passing to edge detection
 			// run a Kuwahara filter to enhance edges in the image
@@ -228,7 +239,8 @@ public class NucleusDetector extends Detector {
 				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
 				finer("Run flattening");
 			}
-			searchStack = new ImageFilterer(image).runEdgeDetector(Constants.rgbToStack(options.getChannel()), nucleusCannyOptions).toStack();
+			searchStack = new ImageFilterer(image)
+				.runEdgeDetector(Constants.rgbToStack(options.getChannel()), nucleusCannyOptions).toStack();
 			finer("Run edge detection");
 		} else {
 			searchStack = image;

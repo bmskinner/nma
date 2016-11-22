@@ -18,6 +18,7 @@ public interface ICannyOptions extends Serializable, Loggable{
 	boolean DEFAULT_USE_KUWAHARA = true;
 	boolean DEFAULT_FLATTEN_CHROMOCENTRES = true;
 	int DEFAULT_FLATTEN_THRESHOLD = 100;
+	boolean DEFAULT_ADD_BORDER = false;
 
 	boolean isUseCanny();
 
@@ -62,9 +63,9 @@ public interface ICannyOptions extends Serializable, Loggable{
 	int getKernelWidth();
 
 	void setKernelWidth(int kernelWidth);
-
-	int hashCode();
-
-	boolean equals(Object obj);
+	
+	boolean isAddBorder();
+	
+	void setAddBorder(boolean b);
 
 }

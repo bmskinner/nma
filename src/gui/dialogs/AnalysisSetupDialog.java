@@ -253,7 +253,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		nucleusCannyOptions.setKuwaharaKernel(ICannyOptions.DEFAULT_KUWAHARA_KERNEL_RADIUS);
 		nucleusCannyOptions.setFlattenImage(ICannyOptions.DEFAULT_FLATTEN_CHROMOCENTRES);
 		nucleusCannyOptions.setFlattenThreshold(ICannyOptions.DEFAULT_FLATTEN_THRESHOLD);
-		
+		nucleusCannyOptions.setAddBorder(ICannyOptions.DEFAULT_ADD_BORDER);
 		
 		ICannyOptions tailCannyOptions = analysisOptions.getCannyOptions("tail");
 		
@@ -269,6 +269,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		tailCannyOptions.setKuwaharaKernel(ICannyOptions.DEFAULT_KUWAHARA_KERNEL_RADIUS);
 		tailCannyOptions.setFlattenImage(false);
 		tailCannyOptions.setFlattenThreshold(ICannyOptions.DEFAULT_FLATTEN_THRESHOLD);
+		tailCannyOptions.setAddBorder(ICannyOptions.DEFAULT_ADD_BORDER);
 		
 	}
 	
@@ -314,6 +315,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		nucleusCannyOptions.setKuwaharaKernel(templateCannyOptions.getKuwaharaKernel());
 		nucleusCannyOptions.setFlattenImage(templateCannyOptions.isUseFlattenImage());
 		nucleusCannyOptions.setFlattenThreshold(templateCannyOptions.getFlattenThreshold());
+		nucleusCannyOptions.setAddBorder(templateCannyOptions.isAddBorder());
 		
 		// Update the gui
 		fine("Updated options object");

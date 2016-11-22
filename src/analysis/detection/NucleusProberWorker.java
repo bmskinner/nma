@@ -72,13 +72,27 @@ public class NucleusProberWorker extends ImageProberWorker {
 		
 		ICannyOptions cannyOptions = options.getCannyOptions("nucleus");
 
-		ImageProcessor openProcessor = new ImageConverter(imageStack)
-			.convertToGreyscale()
-			.invert()
-			.toProcessor();
+		ImageConverter conv = new ImageConverter(imageStack);
+		
+		conv = conv.convertToGreyscale();
+		
+		if(cannyOptions.isAddBorder()){	
+			conv = conv.addBorder(10);
+		}
+		
+		ImageProcessor openProcessor = conv.invert()
+				.toProcessor();
 
 					
 		if( cannyOptions.isUseCanny()) { //TODO: Turning off Canny causes error
+			
+			if(cannyOptions.isAddBorder()){
+				imageStack = new ImageConverter(imageStack)
+					.addBorder(10)
+					.toStack();
+
+				finer("Added border");
+			}
 			
 			// Make a copy of the counterstain to use at each processing step
 			ImageProcessor processedImage = imageStack.getProcessor(Constants.COUNTERSTAIN).duplicate();
@@ -134,7 +148,8 @@ public class NucleusProberWorker extends ImageProberWorker {
 
 			// Run morhological closing
 			
-			processedImage = new ImageFilterer(processedImage).morphologyClose(cannyOptions.getClosingObjectRadius()).toProcessor();
+			processedImage = new ImageFilterer(processedImage)
+				.morphologyClose(cannyOptions.getClosingObjectRadius()).toProcessor();
 			ImageProcessor closedIP = processedImage.duplicate(); // make a copy for display only
 			closedIP.invert();
 			IconCell iconCell3 = makeIconCell(closedIP, NucleusImageType.MORPHOLOGY_CLOSED);
@@ -191,6 +206,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		double maxSize = options.getMaxNucleusSize();
 		double minCirc = options.getMinNucleusCirc();
 		double maxCirc = options.getMaxNucleusCirc();
+		boolean addBorder = options.getCannyOptions("nucleus").isAddBorder();
 		
 		finer("Widening detection parameters");
 
@@ -198,6 +214,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		options.setMaxNucleusSize(imageStack.getWidth()*imageStack.getHeight());
 		options.setMinNucleusCirc(0);
 		options.setMaxNucleusCirc(1);
+		options.getCannyOptions("nucleus").setAddBorder(false);
 		
 		finer("Finding cells");
 		
@@ -211,6 +228,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		options.setMaxNucleusSize(maxSize);
 		options.setMinNucleusCirc(minCirc);
 		options.setMaxNucleusCirc(maxCirc);
+		options.getCannyOptions("nucleus").setAddBorder(addBorder);
 		return cells;
 	}
 	

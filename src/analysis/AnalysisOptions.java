@@ -83,7 +83,7 @@ public class AnalysisOptions implements IAnalysisOptions {
 	private boolean keepFailedCollections = false;// allow failed collection to be retained for manual analysis
 	
 	private int channel = 0;
-
+	
 	public AnalysisOptions(){
 		
 		this.addCannyOptions("nucleus");
@@ -713,10 +713,12 @@ public class AnalysisOptions implements IAnalysisOptions {
 		private float kernelRadius;		// the kernel radius
 		private int   kernelWidth;		// the kernel width
 		private int   closingObjectRadius; // the circle radius for morphological closing
+		private transient boolean isAddBorder = false;
 		
-		public CannyOptions(){
-			
-		}
+		public CannyOptions(){}
+		
+		
+		
 		
 		/* (non-Javadoc)
 		 * @see analysis.ICannyOptions#isUseCanny()
@@ -980,7 +982,24 @@ public class AnalysisOptions implements IAnalysisOptions {
 			 * check if they were filled, and override if needed.
 			 */
 			in.defaultReadObject();
-		    
+		    isAddBorder = false;
+		}
+
+
+
+
+		@Override
+		public boolean isAddBorder() {
+			return isAddBorder;
+		}
+
+
+
+
+		@Override
+		public void setAddBorder(boolean b) {
+			isAddBorder = b;
+			
 		}
 	}
 }

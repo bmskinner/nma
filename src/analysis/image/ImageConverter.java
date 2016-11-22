@@ -18,9 +18,12 @@
  *******************************************************************************/
 package analysis.image;
 
+import java.awt.Color;
+
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.RGBStackMerge;
+import ij.process.Blitter;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import utility.Constants;
@@ -135,6 +138,62 @@ public class ImageConverter extends AbstractImageFilterer {
 		}
 
 		return this;
+	}
+	
+	/**
+	 * Add a border of pixels to the image. The image will be centred
+	 * in the new image. The border will be filled with the background 
+	 * fill of the original image
+	 * @param borderWidth the number of pixels to add to each side of the image
+	 * @return the converter
+	 */
+	public ImageConverter addBorder(int borderWidth){
+		
+		if(st==null){
+			ip = addBorder(ip, borderWidth);
+		} else {
+			
+			int newW = st.getWidth() + (2*borderWidth);
+			int newH = st.getHeight() + (2*borderWidth);
+			
+			ImageStack newSt = new ImageStack(newW, newH);
+			for(int i=1; i<=st.getSize(); i++){
+				ImageProcessor p = st.getProcessor(i);
+				
+				p =  addBorder(p, borderWidth);
+				newSt.addSlice(p);
+			}
+			st = newSt;
+			
+		}
+
+		
+		return this;
+	}
+	
+	/**
+	 * Add a border of pixels to the image. The image will be centred
+	 * in the new image. The border will be filled with the background 
+	 * fill of the original image
+	 * @param ip the image processor to add the border to
+	 * @param borderWidth the number of pixels to add to each side of the image
+	 * @return the converter
+	 */
+	private ImageProcessor addBorder(ImageProcessor ip, int borderWidth){
+
+		int w = ip.getWidth();
+		int h = ip.getHeight();
+
+		int newW = w + (2*borderWidth);
+		int newH = h + (2*borderWidth);
+
+		ImageProcessor newIp = ip.createProcessor(newW, newH);
+		newIp.setColor(Color.BLACK);
+		newIp.fill();
+
+		newIp.copyBits(ip, borderWidth, borderWidth, Blitter.COPY);
+
+		return newIp;
 	}
 	
 	

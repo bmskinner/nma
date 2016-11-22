@@ -70,6 +70,13 @@ public class SignalProberWorker extends ImageProberWorker {
 		
 		// Import the image as a stack
 		ImageStack stack = new ImageImporter(file).importImage();
+		
+		if(options.hasCannyOptions("nucleus")){
+			if(options.getCannyOptions("nucleus").isAddBorder()){
+				ImageConverter conv = new ImageConverter(stack);
+				stack = conv.addBorder(10).toStack();
+			}
+		}
 
 		// Find the processor number in the stack to use
 		int stackNumber = Constants.rgbToStack(channel);
@@ -79,12 +86,12 @@ public class SignalProberWorker extends ImageProberWorker {
 		ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
 		
 		// Convert to an RGB processor for annotation
-		ImageProcessor openProcessor = new ImageConverter(greyProcessor).convertToGreyscale().toProcessor();
+		ImageProcessor openProcessor = new ImageConverter(greyProcessor)
+			.convertToGreyscale()
+			.invert()
+			.toProcessor();
 		
 		String imageName = file.getName();
-
-
-		openProcessor.invert();
 
 
 		// Store the options
