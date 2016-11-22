@@ -31,7 +31,7 @@ import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
 /**
- * The default implementation of the IAnalysisOptions interface. 
+ * The old implementation of the IAnalysisOptions interface. 
  * This stores details of an analysis setup for an IAnalysisDataset.
  * @author bms41
  * @since 1.7.0

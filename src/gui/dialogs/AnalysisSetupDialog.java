@@ -19,7 +19,6 @@
 package gui.dialogs;
 
 import ij.IJ;
-import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 
 import java.awt.BorderLayout;
@@ -39,8 +38,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;

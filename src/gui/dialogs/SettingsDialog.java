@@ -191,8 +191,6 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 	 * attached CannyOptions to store the settings
 	 */
 	public class CannyPanel extends JPanel implements ChangeListener, ActionListener{
-
-		private static final long serialVersionUID = 1L;
 				
 		private JSpinner cannyLowThreshold;
 		private JSpinner cannyHighThreshold;
